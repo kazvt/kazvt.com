@@ -1,0 +1,3 @@
+twitch: live
+youtube: offline
+kick: live
