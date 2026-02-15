@@ -1,0 +1,1920 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>kazvt!!! - Streaming on Twitch, YouTube & Kick</title>
+  <link rel="icon" type="image/png" href="icon.gif" />
+
+  <meta name="title" content="kazvt!!! - Multi-Platform Streamer" />
+  <meta name="description" content="Watch kazvt live on Twitch, YouTube, and Kick! Gaming streams, funne monke, and safe space. Join the community on Discord!" />
+  <meta name="keywords" content="kazvt, streaming, twitch, youtube, kick, gaming, streamer, live streams" />
+  <meta name="author" content="kazvt" />
+  <meta name="theme-color" content="#33FF33" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kazvt.com/" />
+  <meta property="og:title" content="kazvt!!! - Multi-Platform Streamer" />
+  <meta property="og:description" content="Watch kazvt live on Twitch, YouTube, and Kick! Gaming streams, funne monke, and safe space. Join the community on Discord!" />
+  <meta property="og:image" content="https://kazvt.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="kazvt" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://kazvt.com/" />
+  <meta name="twitter:title" content="kazvt!!! - Multi-Platform Streamer" />
+  <meta name="twitter:description" content="Watch kazvt live on Twitch, YouTube, and Kick! Gaming streams, funne monke, and safe space. Join the community on Discord!" />
+  <meta name="twitter:image" content="https://kazvt.com/twitter-image.png" />
+  <meta name="twitter:creator" content="@kazvt" />
+  <meta name="twitter:site" content="@kazvt" />
+
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="English" />
+  <meta name="revisit-after" content="7 days" />
+
+  <link rel="canonical" href="https://kazvt.com/" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --crt-green: #33FF33;
+      --dark-green: #00AA00;
+      --screen-bg: #0a0a0a;
+      --glow: #00FF00;
+      --amber: #FFB000;
+      --dark-amber: #CC8800;
+      --hud-cyan: #00FFFF;
+      --hud-blue: #0088FF;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      margin: 0;
+      background: #1a1a1a;
+      color: var(--crt-green);
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      image-rendering: pixelated;
+      overflow-x: hidden;
+      display: grid;
+      grid-template-columns: 20% 60% 20%;
+      align-items: center;
+      gap: 0;
+    }
+
+    .crt {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+      grid-column: 1 / -1;
+      z-index: -1;
+    }
+
+    .crt::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(to bottom,
+          rgba(0, 255, 0, 0.03) 0px,
+          rgba(0, 255, 0, 0.03) 1px,
+          transparent 1px,
+          transparent 2px);
+      z-index: 100;
+      animation: scanline 8s linear infinite;
+    }
+
+    .crt::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: rgba(10, 10, 10, 0.1);
+      opacity: 0;
+      animation: flicker 0.15s infinite;
+      z-index: 99;
+    }
+
+
+    .hud-left,
+    .hud-right {
+      position: relative;
+      top: auto;
+      transform: none;
+      z-index: 0;
+      pointer-events: auto;
+      font-size: clamp(10px, 1.5vw, 2.5vw);
+      line-height: 1.6;
+      color: var(--hud-cyan);
+      text-shadow: 
+        2px 2px 0px rgba(0, 136, 255, 0.8),
+        0 0 2vw rgba(0, 255, 255, 0.6),
+        0 0 4vw rgba(0, 255, 255, 0.3);
+      letter-spacing: 0.1vw;
+      user-select: none;
+      perspective: 1000px;
+      padding: 2vh 1.5vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      overflow: visible;
+    }
+
+    .hud-left {
+      text-align: left;
+      order: 1;
+    }
+
+    .hud-right {
+      text-align: right;
+      order: 3;
+    }
+
+    .hud-stat {
+      margin: 2.5vh 0;
+      opacity: 0.85;
+      transform-style: preserve-3d;
+      animation: hud-glitch 8s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    .hud-stat:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .hud-stat:nth-child(2) {
+      animation-delay: 2s;
+    }
+
+    .hud-stat:nth-child(3) {
+      animation-delay: 4s;
+    }
+
+    @keyframes hud-glitch {
+      0%, 95%, 100% {
+        transform: rotateY(-30deg) skewY(-4deg);
+        filter: blur(0);
+      }
+      96% {
+        transform: rotateY(-30deg) skewY(-4deg) translateX(-2px);
+        filter: blur(0.5px);
+      }
+      97% {
+        transform: rotateY(-30deg) skewY(-4deg) translateX(2px);
+        filter: blur(0.5px);
+      }
+      98% {
+        transform: rotateY(-30deg) skewY(-4deg) translateX(-1px);
+      }
+    }
+
+    .hud-left .hud-stat {
+      transform: rotateY(-30deg) skewY(-4deg);
+      transform-origin: right center;
+    }
+
+    .hud-right .hud-stat {
+      transform: rotateY(30deg) skewY(4deg);
+      transform-origin: left center;
+      animation-name: hud-glitch-right;
+    }
+
+    @keyframes hud-glitch-right {
+      0%, 95%, 100% {
+        transform: rotateY(30deg) skewY(4deg);
+        filter: blur(0);
+      }
+      96% {
+        transform: rotateY(30deg) skewY(4deg) translateX(2px);
+        filter: blur(0.5px);
+      }
+      97% {
+        transform: rotateY(30deg) skewY(4deg) translateX(-2px);
+        filter: blur(0.5px);
+      }
+      98% {
+        transform: rotateY(30deg) skewY(4deg) translateX(1px);
+      }
+    }
+
+    .hud-link {
+      display: inline;
+      text-decoration: none;
+      color: var(--hud-cyan);
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .hud-link::after {
+      content: '>';
+      position: absolute;
+      right: -15px;
+      opacity: 0;
+      color: var(--hud-blue);
+      text-shadow: 0 0 10px rgba(0, 136, 255, 0.8);
+      transition: all 0.2s ease;
+    }
+
+    .hud-right .hud-link::after {
+      content: '<';
+      right: auto;
+      left: -15px;
+    }
+
+    .hud-icon {
+      width: clamp(10px, 1.3vw, 1.6vw);
+      height: clamp(10px, 1.3vw, 1.6vw);
+      flex-shrink: 0;
+      color: var(--hud-cyan);
+      filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.6));
+    }
+
+    .hud-link:hover {
+      color: #CCFFFF;
+      text-shadow: 
+        3px 3px 0px rgba(200, 255, 255, 1),
+        0 0 30px rgba(200, 255, 255, 0.9),
+        0 0 60px rgba(150, 230, 255, 0.7);
+      transform: scale(1.05);
+      animation: terminal-glitch 0.3s ease-in-out;
+    }
+
+    .hud-link:hover::after {
+      opacity: 1;
+    }
+
+    .hud-link:hover::after {
+      animation: terminal-cursor 0.8s step-end infinite;
+    }
+
+    .hud-right .hud-link:hover::after {
+      left: -20px;
+    }
+
+    .hud-left .hud-link:hover::after {
+      right: -20px;
+    }
+
+    .hud-link:active {
+      transform: scale(0.98);
+    }
+
+    @keyframes terminal-glitch {
+      0%, 100% {
+        transform: scale(1.05) translate(0, 0);
+      }
+      10% {
+        transform: scale(1.05) translate(-2px, 1px);
+      }
+      20% {
+        transform: scale(1.05) translate(2px, -1px);
+      }
+      30% {
+        transform: scale(1.05) translate(-1px, 2px);
+      }
+      40% {
+        transform: scale(1.05) translate(1px, -2px);
+      }
+      50% {
+        transform: scale(1.05) translate(0, 0);
+      }
+    }
+
+    @keyframes terminal-cursor {
+      0%, 50% {
+        opacity: 1;
+      }
+      51%, 100% {
+        opacity: 0;
+      }
+    }
+
+    .hud-label {
+      font-size: clamp(8px, 1vw, 1.5vw);
+      color: var(--dark-green);
+      text-shadow: 
+        1px 1px 0px rgba(0, 136, 255, 0.6),
+        0 0 1vw rgba(0, 255, 255, 0.4);
+      display: block;
+      margin-bottom: 0.5vh;
+      white-space: nowrap;
+    }
+
+    .hud-value {
+      font-size: clamp(12px, 1.6vw, 2.5vw);
+      font-weight: bold;
+      text-shadow: 
+        3px 3px 0px rgba(0, 136, 255, 0.9),
+        0 0 2.5vw rgba(0, 255, 255, 0.7),
+        0 0 5vw rgba(0, 255, 255, 0.4);
+      animation: hud-pulse 3s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes hud-pulse {
+      0%, 100% {
+        opacity: 0.85;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .hud-bar {
+      width: 80px;
+      height: 8px;
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid var(--hud-cyan);
+      margin-top: 6px;
+      position: relative;
+      box-shadow: 
+        inset 0 0 10px rgba(0, 255, 255, 0.2),
+        0 0 15px rgba(0, 255, 255, 0.3);
+    }
+
+    .hud-bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(to right, var(--hud-cyan), var(--hud-blue));
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      animation: bar-flicker 2s ease-in-out infinite;
+    }
+
+    @keyframes bar-flicker {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    @keyframes scanline {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(10px);
+      }
+    }
+
+    @keyframes flicker {
+      0% {
+        opacity: 0.05;
+      }
+
+      50% {
+        opacity: 0.1;
+      }
+
+      100% {
+        opacity: 0.05;
+      }
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        text-shadow: 0 0 10px var(--glow), 0 0 20px var(--glow), 0 0 30px var(--glow);
+      }
+
+      50% {
+        text-shadow: 0 0 5px var(--glow), 0 0 10px var(--glow), 0 0 15px var(--glow);
+      }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 95vh;
+      max-height: 95vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      order: 2;
+    }
+
+    .monitor-frame {
+      background: #2a2a2a;
+      border: clamp(6px, 1.5vh, 20px) solid #1a1a1a;
+      border-radius: 16px;
+      box-shadow:
+        inset 0 0 30px rgba(0, 0, 0, 0.8),
+        0 10px 40px rgba(0, 0, 0, 0.6);
+      padding: clamp(4px, 1.2vh, 16px);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .screen {
+      background: var(--screen-bg);
+      border: 4px solid #333;
+      padding: clamp(4px, 1.5vh, 20px) 3%;
+      box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.1);
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      padding: 0 2%;
+    }
+
+    .terminal-input-section {
+      margin-top: auto;
+      padding-top: clamp(3px, 0.6vh, 8px);
+      border-top: 2px dashed var(--dark-green);
+    }
+
+    .title {
+      margin-bottom: clamp(4px, 1.5vh, 20px);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 clamp(2px, 0.6vh, 8px) 0;
+      font-size: clamp(10px, min(2.5vw, 3.5vh), 3.5vw);
+      line-height: 1.4;
+      letter-spacing: 0.2vw;
+      text-transform: uppercase;
+      color: var(--crt-green);
+      text-shadow: 0 0 1vw var(--glow), 0 0 2vw var(--glow);
+      animation: glow 2s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: clamp(6px, min(1.2vw, 1.8vh), 1.8vw);
+      color: var(--dark-green);
+      line-height: 1.6;
+      text-shadow: 0 0 0.5vw var(--glow);
+      white-space: nowrap;
+    }
+
+    .terminal-line {
+      color: var(--crt-green);
+      font-size: clamp(6px, min(1.2vw, 1.6vh), 1.6vw);
+      margin-bottom: clamp(2px, 1vh, 12px);
+      opacity: 0.7;
+      font-family: monospace;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 12px;
+      background: var(--crt-green);
+      animation: blink 1s step-end infinite;
+      margin-left: 4px;
+    }
+
+    @keyframes blink {
+      0%,
+      50% {
+        opacity: 1;
+      }
+      51%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1vw;
+      margin-bottom: clamp(2px, 1vh, 14px);
+      padding-bottom: clamp(2px, 0.8vh, 10px);
+      border-bottom: 2px dashed var(--dark-green);
+      flex-wrap: nowrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 1vw;
+      font-size: clamp(7px, min(1.2vw, 1.6vh), 1.5vw);
+      background: transparent;
+      color: var(--crt-green);
+      padding: clamp(2px, 0.4vh, 6px) 1vw;
+      border: 2px solid var(--crt-green);
+      text-transform: uppercase;
+      white-space: nowrap;
+      box-shadow: 0 0 1vw rgba(0, 255, 0, 0.3);
+    }
+
+    .lives {
+      display: flex;
+      gap: 1vw;
+      font-size: clamp(7px, min(1.2vw, 1.6vh), 1.8vw);
+      color: var(--crt-green);
+    }
+
+    .links {
+      display: grid;
+      gap: clamp(2px, 0.8vh, 12px);
+      margin: 0;
+      padding: 0 1%;
+      list-style: none;
+      flex: 0 0 auto;
+      align-content: start;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1vw;
+      text-decoration: none;
+      color: var(--screen-bg);
+      background: var(--crt-green);
+      border: 2px solid var(--dark-green);
+      padding: clamp(3px, 0.8vh, 12px) clamp(6px, 1.5vw, 20px);
+      box-shadow:
+        0 0 2vw rgba(0, 255, 0, 0.4),
+        inset 0 0 1vw rgba(0, 0, 0, 0.2);
+      position: relative;
+      transition: transform .1s ease, box-shadow .12s ease, filter .12s ease;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+      margin: 0 auto;
+    }
+
+    .btn:hover {
+      background: var(--glow);
+      box-shadow:
+        0 0 30px rgba(0, 255, 0, 0.6),
+        inset 0 0 10px rgba(0, 0, 0, 0.2);
+      transform: scale(1.02);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      box-shadow:
+        0 0 10px rgba(0, 255, 0, 0.3),
+        inset 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid var(--amber);
+      outline-offset: 4px;
+    }
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+      min-width: 0;
+    }
+
+    .label {
+      font-size: clamp(8px, min(1.4vw, 2vh), 2vw);
+      line-height: 1.3;
+      text-transform: uppercase;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+
+    .hint {
+      font-size: clamp(9px, min(1.6vw, 2vh), 2.2vw);
+      opacity: .85;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+
+    .icon {
+      width: clamp(18px, min(4vw, 4.5vh), 4vw);
+      height: clamp(18px, min(4vw, 4.5vh), 4vw);
+      flex: 0 0 auto;
+      background: var(--screen-bg);
+      border: 2px solid var(--dark-green);
+      display: grid;
+      place-items: center;
+    }
+
+    .icon svg {
+      width: clamp(14px, min(3vw, 3.5vh), 3vw);
+      height: clamp(14px, min(3vw, 3.5vh), 3vw);
+      shape-rendering: crispEdges;
+    }
+
+    .hud-icon,
+    .social-icon {
+      shape-rendering: crispEdges;
+    }
+
+    footer {
+      padding-top: clamp(2px, 0.5vh, 6px);
+      font-size: clamp(6px, min(1vw, 1.4vh), 1.4vw);
+      color: var(--dark-green);
+      text-align: center;
+      opacity: 0.6;
+    }
+
+    .right {
+      display: inline-flex;
+      align-items: center;
+      gap: 1vw;
+      flex: 0 0 auto;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8vw;
+      font-size: clamp(7px, min(1.2vw, 1.5vh), 1.5vw);
+      letter-spacing: 0.1vw;
+      text-transform: uppercase;
+      padding: clamp(2px, 0.4vh, 6px) 1vw;
+      border: 2px solid rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.18);
+      box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.18);
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .pip {
+      width: clamp(6px, min(1.2vw, 1.2vh), 1.2vw);
+      height: clamp(6px, min(1.2vw, 1.2vh), 1.2vw);
+      background: #3a3a3a;
+      box-shadow: 0 0 0 2px var(--screen-bg);
+      flex-shrink: 0;
+    }
+
+    .status-text {
+      display: inline-block;
+      min-width: clamp(24px, 6vw, 45px);
+      max-width: clamp(24px, 6vw, 45px);
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .loading-dots::after {
+      content: '.';
+      animation: loading-dots 1.5s steps(4, end) infinite;
+      display: inline-block;
+      text-align: center;
+    }
+
+    @keyframes loading-dots {
+      0% { content: '.'; }
+      25% { content: '..'; }
+      50% { content: '...'; }
+      75% { content: ''; }
+      100% { content: '.'; }
+    }
+
+    .btn.is-live {
+      background: linear-gradient(135deg, var(--crt-green) 0%, #00DDAA 100%);
+      filter: saturate(1.15) brightness(1.05);
+      box-shadow:
+        0 0 25px rgba(0, 255, 0, 0.45),
+        0 0 18px rgba(0, 255, 255, 0.35),
+        0 0 35px rgba(0, 136, 255, 0.2),
+        inset 0 0 10px rgba(0, 0, 0, 0.2);
+      border-color: var(--hud-cyan);
+    }
+
+    .btn.is-live .status {
+      border-color: rgba(0, 136, 255, 0.6);
+      background: rgba(0, 136, 255, 0.15);
+      box-shadow: 
+        inset 0 0 0 2px rgba(0, 136, 255, 0.25),
+        0 0 15px rgba(0, 255, 255, 0.4);
+    }
+
+    .btn.is-live .pip {
+      background: var(--amber);
+      box-shadow:
+        0 0 0 2px var(--screen-bg),
+        0 0 12px rgba(255, 176, 0, 0.75),
+        0 0 20px rgba(0, 255, 255, 0.4);
+      animation: liveblink 1s step-end infinite;
+    }
+
+    .btn.is-live .icon {
+      border-color: var(--hud-cyan);
+      box-shadow: 
+        inset 0 0 10px rgba(0, 255, 255, 0.2),
+        0 0 15px rgba(0, 255, 255, 0.3);
+    }
+
+    @keyframes liveblink {
+      0%,
+      50% {
+        opacity: 1;
+      }
+      51%,
+      100% {
+        opacity: 0.35;
+      }
+    }
+
+    .btn.is-offline .pip {
+      background: #3a3a3a;
+      box-shadow: 0 0 0 2px var(--screen-bg);
+    }
+
+
+    .btn.is-loading {
+      filter: saturate(0.8) brightness(0.9);
+      box-shadow:
+        0 0 15px rgba(0, 255, 0, 0.25),
+        inset 0 0 14px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn.is-loading .pip {
+      background: var(--dark-green);
+      box-shadow: 
+        0 0 0 2px var(--screen-bg),
+        0 0 8px rgba(0, 255, 0, 0.5);
+      animation: loading-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading-pulse {
+      0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+
+    .social-buttons {
+      display: none;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: clamp(3px, 0.6vh, 8px);
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8vw;
+      text-decoration: none;
+      color: var(--hud-cyan);
+      background: rgba(0, 136, 255, 0.08);
+      border: 2px solid var(--hud-cyan);
+      padding: clamp(3px, 0.6vh, 8px) clamp(4px, 0.8vw, 12px);
+      text-shadow:
+        2px 2px 0px rgba(0, 136, 255, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.5);
+      box-shadow:
+        0 0 10px rgba(0, 255, 255, 0.2),
+        inset 0 0 8px rgba(0, 136, 255, 0.1);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .social-icon-wrapper {
+      width: clamp(18px, min(4vw, 4vh), 24px);
+      height: clamp(18px, min(4vw, 4vh), 24px);
+      flex-shrink: 0;
+      background: var(--hud-cyan);
+      border: 2px solid var(--dark-green);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .social-icon {
+      width: clamp(12px, min(3vw, 3vh), 18px);
+      height: clamp(12px, min(3vw, 3vh), 18px);
+      flex-shrink: 0;
+      color: var(--screen-bg);
+      image-rendering: pixelated;
+      shape-rendering: crispEdges;
+    }
+
+    .social-btn:hover {
+      background: rgba(0, 255, 255, 0.15);
+      box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.5),
+        inset 0 0 12px rgba(0, 136, 255, 0.2);
+      transform: scale(1.03);
+    }
+
+    .social-btn:hover .social-icon-wrapper {
+      background: var(--glow);
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    }
+
+    .social-label {
+      font-size: clamp(6px, min(1.1vw, 1.4vh), 1.4vw);
+      letter-spacing: 0.05vw;
+      text-transform: uppercase;
+    }
+
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 20% 60% 20%; }
+
+      .screen { padding: clamp(8px, 1.5vh, 18px) 4%; }
+      .monitor-frame { padding: clamp(6px, 1.2vh, 14px); }
+      main { padding: 0 4%; }
+
+      .btn {
+        width: 100%;
+        max-width: 100%;
+        padding: clamp(6px, 1vh, 14px) clamp(8px, 1.2vw, 16px);
+        gap: clamp(6px, 0.8vw, 12px);
+      }
+
+      .icon {
+        width: clamp(20px, min(4.5vw, 5vh), 4.5vw);
+        height: clamp(20px, min(4.5vw, 5vh), 4.5vw);
+      }
+
+      .icon svg {
+        width: clamp(16px, min(3.5vw, 4vh), 3.5vw);
+        height: clamp(16px, min(3.5vw, 4vh), 3.5vw);
+      }
+
+      .label { font-size: clamp(10px, min(1.8vw, 2.2vh), 2.2vw); }
+
+      .left { gap: clamp(6px, 0.8vw, 12px); }
+      .right { gap: clamp(6px, 0.8vw, 12px); }
+      .hint { display: none; }
+
+      .hud-left, .hud-right {
+        font-size: clamp(9px, 1.3vw, 1.8vw);
+        padding: 2vh 1.2vw;
+      }
+      .hud-stat { margin: 2vh 0; }
+      .hud-label { font-size: clamp(7px, 0.9vw, 1.2vw); margin-bottom: 0.4vh; }
+      .hud-value { font-size: clamp(11px, 1.4vw, 2vw); }
+    }
+
+
+    @media (max-width: 620px) {
+      body { grid-template-columns: 1fr; }
+
+      .hud-left, .hud-right { display: none; }
+
+      .wrap {
+        grid-column: 1 / -1;
+        width: 95%;
+        margin: 0 auto;
+        height: 96vh;
+      }
+
+      .hint { display: none !important; }
+
+      .social-buttons { 
+        display: grid; 
+        width: 100%;
+        max-width: 100%;
+        gap: clamp(4px, 0.8vh, 10px);
+      }
+      .social-label { 
+        font-size: clamp(8px, min(2vw, 1.6vh), 11px); 
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .social-btn { 
+        padding: clamp(6px, 1vh, 12px) clamp(4px, 1vw, 10px); 
+        gap: clamp(4px, 0.8vw, 8px);
+        min-width: 0;
+      }
+      .social-icon-wrapper {
+        width: clamp(18px, min(4vw, 4.5vh), 24px);
+        height: clamp(18px, min(4vw, 4.5vh), 24px);
+        flex-shrink: 0;
+      }
+      .social-icon {
+        width: clamp(12px, min(3vw, 3.5vh), 18px);
+        height: clamp(12px, min(3vw, 3.5vh), 18px);
+      }
+
+      .screen { padding: clamp(8px, 1.5vh, 18px) 4%; }
+      .monitor-frame { padding: clamp(6px, 1.2vh, 14px); }
+      main { padding: 0 3%; }
+
+      .btn {
+        width: 100%;
+        max-width: 100%;
+        padding: clamp(8px, 1.2vh, 16px) clamp(8px, 1.5vw, 16px);
+        gap: clamp(6px, 1vw, 12px);
+      }
+
+      .label { font-size: clamp(11px, min(2vw, 2.4vh), 2.4vw); }
+
+      .icon {
+        width: clamp(22px, min(4.8vw, 5.2vh), 5vw);
+        height: clamp(22px, min(4.8vw, 5.2vh), 5vw);
+        flex-shrink: 0;
+      }
+
+      .icon svg {
+        width: clamp(18px, min(3.8vw, 4.2vh), 4vw);
+        height: clamp(18px, min(3.8vw, 4.2vh), 4vw);
+      }
+
+      .left { gap: clamp(6px, 1vw, 12px); }
+      .right { gap: clamp(6px, 1vw, 12px); }
+
+      .pip {
+        width: clamp(8px, min(2.2vw, 1.5vh), 14px);
+        height: clamp(8px, min(2.2vw, 1.5vh), 14px);
+        flex-shrink: 0;
+      }
+
+      .status { 
+        font-size: clamp(8px, min(1.5vw, 1.7vh), 1.7vw);
+        padding: clamp(2px, 0.4vh, 6px) clamp(4px, 0.8vw, 10px);
+      }
+    }
+
+
+    @media (max-width: 520px) {
+      body { grid-template-columns: 1fr; }
+
+      .wrap { width: 95%; height: 98vh; order: 1; }
+      .hint { display: none !important; }
+
+      .monitor-frame { border-width: 10px; padding: clamp(8px, 1.5vh, 14px); }
+      .screen { padding: clamp(10px, 1.8vh, 20px) 3%; }
+      main { padding: 0 2%; }
+
+      .social-buttons { 
+        display: grid; 
+        width: 100%;
+        max-width: 100%;
+        gap: clamp(4px, 0.8vh, 10px);
+      }
+      .social-btn { 
+        padding: clamp(7px, 1.1vh, 13px) clamp(4px, 0.8vw, 8px); 
+        gap: clamp(4px, 0.6vw, 8px);
+        min-width: 0;
+      }
+      .social-label { 
+        font-size: clamp(9px, min(2.4vw, 1.7vh), 11px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .social-icon-wrapper {
+        width: clamp(22px, min(5vw, 5vh), 28px);
+        height: clamp(22px, min(5vw, 5vh), 28px);
+        flex-shrink: 0;
+      }
+      .social-icon {
+        width: clamp(16px, min(4vw, 4vh), 22px);
+        height: clamp(16px, min(4vw, 4vh), 22px);
+      }
+
+      .panel-head { gap: 10px; }
+      .chip { font-size: clamp(9px, min(1.8vw, 2vh), 2vw); padding: clamp(4px, 0.6vh, 8px) clamp(6px, 1.2vw, 12px); }
+      .lives { font-size: clamp(9px, min(1.8vw, 2vh), 2vw); }
+
+      .btn { 
+        padding: clamp(10px, 1.5vh, 18px) clamp(8px, 1.5vw, 14px); 
+        gap: clamp(8px, 1.2vw, 12px);
+        width: 100%;
+        max-width: 100%;
+      }
+      .left { gap: clamp(8px, 1.2vw, 12px); }
+      .right { gap: clamp(6px, 1vw, 10px); }
+
+      .label { font-size: clamp(13px, min(2.8vw, 2.8vh), 2.8vw); }
+
+      .icon {
+        width: clamp(26px, min(5.5vw, 5.5vh), 6vw);
+        height: clamp(26px, min(5.5vw, 5.5vh), 6vw);
+        flex-shrink: 0;
+      }
+
+      .icon svg {
+        width: clamp(22px, min(4.5vw, 4.5vh), 5vw);
+        height: clamp(22px, min(4.5vw, 4.5vh), 5vw);
+      }
+
+      .status { 
+        font-size: clamp(9px, min(1.8vw, 2vh), 2vh);
+        padding: clamp(2px, 0.4vh, 6px) clamp(4px, 0.8vw, 8px);
+      }
+      .pip {
+        width: clamp(9px, min(2.8vw, 1.8vh), 16px);
+        height: clamp(9px, min(2.8vw, 1.8vh), 16px);
+        flex-shrink: 0;
+      }
+
+      h1 { font-size: clamp(14px, min(4.5vw, 3.5vh), 20px); letter-spacing: 1.5px; }
+      .subtitle { font-size: clamp(10px, min(2.8vw, 2.2vh), 14px); }
+
+      .terminal-line { font-size: clamp(9px, min(2vw, 2vh), 2vw); }
+      .terminal-prompt { font-size: clamp(9px, min(2vw, 2vh), 2vw); }
+      .terminal-input { font-size: clamp(9px, min(2vw, 2vh), 2vw); }
+
+      footer { font-size: clamp(8px, min(1.6vw, 1.8vh), 1.8vw); }
+    }
+
+
+    @media (max-width: 380px) {
+      .panel-head {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .chip, .lives { font-size: 8px; }
+      .wrap { max-width: 100vw; }
+    }
+
+    @media (max-height: 600px) {
+      .wrap {
+        height: 98vh;
+      }
+
+      .terminal-output {
+        max-height: 40px;
+      }
+
+      h1 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .btn {
+        padding: 12px;
+      }
+    }
+
+
+    .debug-info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--hud-cyan);
+      padding: 8px 12px;
+      font-size: 10px;
+      color: var(--hud-cyan);
+      z-index: 9999;
+      font-family: "Press Start 2P", monospace;
+      line-height: 1.6;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      pointer-events: none;
+    }
+
+    .debug-info::before {
+      content: 'DESKTOP';
+    }
+
+    @media (max-width: 768px) {
+      .debug-info::before {
+        content: 'TABLET-LG';
+      }
+    }
+
+    @media (max-width: 620px) {
+      .debug-info::before {
+        content: 'TABLET-SM';
+      }
+    }
+
+    @media (max-width: 520px) {
+      .debug-info::before {
+        content: 'MOBILE';
+      }
+    }
+
+    @media (max-width: 380px) {
+      .debug-info::before {
+        content: 'MOBILE-SM';
+      }
+    }
+
+    @media (max-height: 600px) {
+      .debug-info::after {
+        content: ' | SHORT';
+      }
+    }
+
+
+    .terminal-output {
+      min-height: clamp(16px, 3vh, 40px);
+      max-height: clamp(24px, 5vh, 60px);
+      overflow-y: auto;
+      margin-bottom: clamp(3px, 0.6vh, 8px);
+      font-size: clamp(6px, min(1.2vw, 1.5vh), 1.5vw);
+      line-height: 1.4;
+      color: var(--crt-green);
+      font-family: "Press Start 2P", monospace;
+    }
+
+    .terminal-output::-webkit-scrollbar {
+      width: 0.6vw;
+    }
+
+    .terminal-output::-webkit-scrollbar-track {
+      background: rgba(0, 255, 0, 0.1);
+    }
+
+    .terminal-output::-webkit-scrollbar-thumb {
+      background: var(--dark-green);
+      box-shadow: 0 0 0.5vw rgba(0, 255, 0, 0.5);
+    }
+
+    .terminal-output-line {
+      margin: clamp(1px, 0.3vh, 4px) 0;
+      opacity: 0;
+      animation: fade-in 0.3s ease-in forwards;
+    }
+
+    @keyframes fade-in {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .terminal-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.8vw;
+    }
+
+    .terminal-prompt {
+      color: var(--crt-green);
+      font-size: clamp(6px, min(1.2vw, 1.5vh), 1.5vw);
+      text-shadow: 0 0 0.5vw var(--glow);
+    }
+
+    .terminal-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--dark-green);
+      color: var(--crt-green);
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(6px, min(1.2vw, 1.5vh), 1.5vw);
+      padding: clamp(2px, 0.4vh, 6px) 1vw;
+      outline: none;
+      text-shadow: 0 0 0.5vw var(--glow);
+      caret-color: var(--crt-green);
+    }
+
+    .terminal-input:focus {
+      border-bottom-color: var(--crt-green);
+      box-shadow: 0 0.2vh 1vw rgba(0, 255, 0, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="crt"></div>
+
+  <!-- Debug Info -->
+  <div class="debug-info" id="debug-info">
+    <div class="debug-size"></div>
+  </div>
+
+  <!-- 3D HUD Text Elements -->
+  <div class="hud-left">
+    <div class="hud-stat">
+      <span class="hud-label">&gt; SOCIAL</span>
+      <a href="https://twitter.com/kazvt" target="_blank" rel="noopener noreferrer" class="hud-link">
+        <span class="hud-value">TWITTER</span>
+      </a>
+    </div>
+    <div class="hud-stat">
+      <span class="hud-label">&gt; CONNECT</span>
+      <a href="https://bsky.app/profile/kazvt.bsky.social" target="_blank" rel="noopener noreferrer" class="hud-link">
+        <span class="hud-value">BLUESKY</span>
+      </a>
+    </div>
+    <div class="hud-stat">
+      <span class="hud-label">&gt; SIGNAL</span>
+      <span class="hud-value">ONLINE</span>
+    </div>
+  </div>
+
+  <div class="hud-right">
+    <div class="hud-stat">
+      <span class="hud-label">COMMUNITY &lt;</span>
+      <a href="https://discord.gg/kazvt" target="_blank" rel="noopener noreferrer" class="hud-link">
+        <span class="hud-value">DISCORD</span>
+      </a>
+    </div>
+    <div class="hud-stat">
+      <span class="hud-label">STATUS &lt;</span>
+      <span class="hud-value">ACTIVE</span>
+    </div>
+    <div class="hud-stat">
+      <span class="hud-label">LINKS &lt;</span>
+      <span class="hud-value">03</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="monitor-frame">
+      <div class="screen">
+        <div class="terminal-line">&gt; SYSTEM READY<span class="cursor"></span></div>
+
+        <div class="title">
+          <h1>█ PLAYER LINKS █</h1>
+          <div class="subtitle">&gt;&gt; SELECT A PLATFORM &lt;&lt;</div>
+        </div>
+
+        <main>
+          <div class="panel-head">
+            <div class="chip">[ START ]</div>
+            <div class="lives">LIVES: ■ ■ ■</div>
+          </div>
+
+          <ul class="links">
+            <li>
+              <a class="btn is-loading" data-platform="twitch" href="https://www.twitch.tv/kazvt" target="_blank"
+                rel="noopener noreferrer">
+                <span class="left">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M5 4h15v10l-4 4h-5l-3 3v-3H5V4z" stroke="#33FF33" stroke-width="2" />
+                      <path d="M10 8v5" stroke="#33FF33" stroke-width="2" />
+                      <path d="M14 8v5" stroke="#33FF33" stroke-width="2" />
+                    </svg>
+                  </span>
+                  <span class="label">▶ TWITCH</span>
+                </span>
+
+                <span class="right">
+                  <span class="status" aria-live="polite">
+                    <span class="pip" aria-hidden="true"></span>
+                    <span class="status-text loading-dots"></span>
+                  </span>
+                  <span class="hint">ENTER ↵</span>
+                </span>
+              </a>
+            </li>
+
+            <li>
+              <a class="btn is-loading" data-platform="youtube" href="https://www.youtube.com/@kazvt" target="_blank"
+                rel="noopener noreferrer">
+                <span class="left">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect x="4" y="7" width="16" height="10" rx="1" stroke="#33FF33" stroke-width="2" />
+                      <path d="M11 10l4 2-4 2v-4z" fill="#33FF33" />
+                    </svg>
+                  </span>
+                  <span class="label">▶ YOUTUBE</span>
+                </span>
+
+                <span class="right">
+                  <span class="status" aria-live="polite">
+                    <span class="pip" aria-hidden="true"></span>
+                    <span class="status-text loading-dots"></span>
+                  </span>
+                  <span class="hint">ENTER ↵</span>
+                </span>
+              </a>
+            </li>
+
+            <li>
+              <a class="btn is-loading" data-platform="kick" href="https://kick.com/kazvt" target="_blank"
+                rel="noopener noreferrer">
+                <span class="left">
+                  <span class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="5" y="3" width="4" height="18" fill="#33FF33" />
+                      <rect x="9" y="10" width="3" height="3" fill="#33FF33" />
+                      <rect x="12" y="7" width="3" height="3" fill="#33FF33" />
+                      <rect x="15" y="4" width="3" height="3" fill="#33FF33" />
+                      <rect x="12" y="14" width="3" height="3" fill="#33FF33" />
+                      <rect x="15" y="17" width="3" height="3" fill="#33FF33" />
+                    </svg>
+                  </span>
+                  <span class="label">▶ KICK</span>
+                </span>
+
+                <span class="right">
+                  <span class="status" aria-live="polite">
+                    <span class="pip" aria-hidden="true"></span>
+                    <span class="status-text loading-dots"></span>
+                  </span>
+                  <span class="hint">ENTER ↵</span>
+                </span>
+              </a>
+            </li>
+            <li class="social-buttons" aria-label="Social links">
+              <a href="https://twitter.com/kazvt" target="_blank" rel="noopener noreferrer" class="social-btn">
+                <span class="social-icon-wrapper">
+                  <svg class="social-icon" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                    <!-- X / Twitter pixel logo -->
+                    <rect x="0" y="0" width="2" height="2"/>
+                    <rect x="1" y="1" width="2" height="2"/>
+                    <rect x="2" y="2" width="2" height="2"/>
+                    <rect x="3" y="3" width="2" height="2"/>
+                    <rect x="5" y="3" width="2" height="2"/>
+                    <rect x="6" y="2" width="2" height="2"/>
+                    <rect x="7" y="1" width="2" height="2"/>
+                    <rect x="8" y="0" width="2" height="2"/>
+                    <rect x="4" y="4" width="2" height="2"/>
+                    <rect x="3" y="5" width="2" height="2"/>
+                    <rect x="2" y="6" width="2" height="2"/>
+                    <rect x="1" y="7" width="2" height="2"/>
+                    <rect x="0" y="8" width="2" height="2"/>
+                    <rect x="5" y="5" width="2" height="2"/>
+                    <rect x="6" y="6" width="2" height="2"/>
+                    <rect x="7" y="7" width="2" height="2"/>
+                    <rect x="8" y="8" width="2" height="2"/>
+                  </svg>
+                </span>
+                <span class="social-label">TWITTER</span>
+              </a>
+              <a href="https://bsky.app/profile/kazvt.bsky.social" target="_blank" rel="noopener noreferrer" class="social-btn">
+                <span class="social-icon-wrapper">
+                  <svg class="social-icon" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                    <!-- Bluesky butterfly pixel logo - wider wings -->
+                    <rect x="0" y="1" width="2" height="2"/>
+                    <rect x="1" y="0" width="2" height="2"/>
+                    <rect x="0" y="3" width="3" height="2"/>
+                    <rect x="1" y="5" width="3" height="2"/>
+                    
+                    <rect x="9" y="0" width="2" height="2"/>
+                    <rect x="10" y="1" width="2" height="2"/>
+                    <rect x="9" y="3" width="3" height="2"/>
+                    <rect x="8" y="5" width="3" height="2"/>
+                    
+                    <!-- body -->
+                    <rect x="3" y="6" width="6" height="2"/>
+                    <rect x="4" y="8" width="4" height="2"/>
+                    <rect x="5" y="10" width="2" height="2"/>
+                  </svg>
+                </span>
+                <span class="social-label">BLUESKY</span>
+              </a>
+              <a href="https://discord.gg/kazvt" target="_blank" rel="noopener noreferrer" class="social-btn">
+                <span class="social-icon-wrapper">
+                  <svg class="social-icon" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+                    <!-- Discord pixel logo -->
+                    <rect x="1" y="0" width="8" height="2"/>
+                    <rect x="0" y="1" width="10" height="4"/>
+                    <rect x="0" y="4" width="10" height="3"/>
+                    <rect x="1" y="6" width="8" height="2"/>
+                    <!-- eyes cut out -->
+                    <rect x="2" y="2" width="2" height="2" fill="var(--hud-cyan)"/>
+                    <rect x="6" y="2" width="2" height="2" fill="var(--hud-cyan)"/>
+                    <!-- feet -->
+                    <rect x="1" y="8" width="2" height="2"/>
+                    <rect x="7" y="8" width="2" height="2"/>
+                  </svg>
+                </span>
+                <span class="social-label">DISCORD</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="terminal-input-section">
+            <div class="terminal-output" id="terminal-output"></div>
+            <div class="terminal-input-wrapper">
+              <span class="terminal-prompt">&gt;</span>
+              <input type="text" class="terminal-input" id="terminal-input" placeholder="TYPE COMMAND..." autocomplete="off">
+            </div>
+          </div>
+
+          <footer>KAZVT.COM/SYSTEM © <span id="year"></span> /// PRESS START</footer>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+
+    function updateDebugInfo() {
+      const debugSize = document.querySelector('.debug-size');
+      if (debugSize) {
+        debugSize.textContent = `${window.innerWidth}x${window.innerHeight}`;
+      }
+    }
+
+    updateDebugInfo();
+    window.addEventListener('resize', updateDebugInfo);
+
+    async function loadStatuses() {
+      const res = await fetch("./status.txt", { cache: "no-store" });
+      if (!res.ok) throw new Error("Could not load status.txt");
+      const text = await res.text();
+
+      const map = {};
+      text.split(/\r?\n/).forEach(line => {
+        const cleaned = line.trim();
+        if (!cleaned || cleaned.startsWith("#")) return;
+        const m = cleaned.match(/^([a-z0-9_-]+)\s*:\s*(live|offline)\s*$/i);
+        if (!m) return;
+        map[m[1].toLowerCase()] = m[2].toLowerCase();
+      });
+      return map;
+    }
+
+    function applyStatus(platform, state) {
+      const btn = document.querySelector(`.btn[data-platform="${platform}"]`);
+      if (!btn) return;
+
+      const statusText = btn.querySelector(".status-text");
+      btn.classList.remove("is-live", "is-loading", "is-offline");
+
+      if (state === "live") {
+        btn.classList.add("is-live");
+        if (statusText) {
+          statusText.textContent = "LIVE";
+          statusText.classList.remove("loading-dots");
+        }
+      } else if (state === "offline") {
+        btn.classList.add("is-offline");
+        if (statusText) {
+          statusText.textContent = "OFF";
+          statusText.classList.remove("loading-dots");
+        }
+      } else {
+        btn.classList.add("is-loading");
+        if (statusText) {
+          statusText.textContent = "";
+          statusText.classList.add("loading-dots");
+        }
+      }
+    }
+
+    async function refresh() {
+      try {
+        const statuses = await loadStatuses();
+        applyStatus("twitch", statuses.twitch || "loading");
+        applyStatus("youtube", statuses.youtube || "loading");
+        applyStatus("kick", statuses.kick || "loading");
+      } catch (e) {
+        applyStatus("twitch", "loading");
+        applyStatus("youtube", "loading");
+        applyStatus("kick", "loading");
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 30_000);
+
+
+    const terminalInput = document.getElementById("terminal-input");
+    const terminalOutput = document.getElementById("terminal-output");
+
+    const responses = {
+      help: [
+        "AVAILABLE COMMANDS: HELP, STATUS, LINKS, CLEAR, SCAN, POWER, TIME, HELLO, HACK, MATRIX, COFFEE, GAME, STATS, SOCIAL, DISCORD, TWITTER, BLUESKY, UPTIME, PING, ECHO, VERSION, WHOAMI, SUDO, EXIT, REBOOT, SHUTDOWN, DATE, CAL, LS, CD, PWD, FORTUNE, JOKE, QUOTE, WEATHER, MUSIC, PLAY, PAUSE, STOP, VOLUME, MUTE, HINT, SECRET, KONAMI, EASTER, ABOUT, INFO, CREDITS",
+        "TRY TYPING ANYTHING! SYSTEM RESPONDS TO KEYWORDS TOO.",
+        "COMMANDS: HELP | STATUS | LINKS | CLEAR | SCAN | POWER | TIME | SOCIAL | STATS | HACK | MORE...",
+        "TYPE 'HELP' FOR COMMANDS OR JUST EXPLORE! HIDDEN EASTER EGGS INCLUDED."
+      ],
+      status: [
+        "ALL SYSTEMS OPERATIONAL /// GREEN ACROSS THE BOARD",
+        "POWER: 100% /// SHIELD: MAX /// SIGNAL: ONLINE",
+        "SYSTEMS NOMINAL /// NO ERRORS DETECTED",
+        "STATUS: READY FOR ACTION /// ALL LIGHTS GREEN"
+      ],
+      links: [
+        "03 PLATFORMS DETECTED /// TWITCH | YOUTUBE | KICK",
+        "STREAMING ENDPOINTS CONFIGURED /// READY TO ENGAGE",
+        "SOCIAL LINKS ACTIVE /// CHOOSE YOUR PLATFORM ABOVE"
+      ],
+      social: [
+        "SOCIAL NETWORKS: TWITTER | BLUESKY | DISCORD",
+        "CONNECT ON: TWITTER.COM/KAZVT | BSKY.APP | DISCORD.GG/KAZVT",
+        "SOCIAL SYSTEMS ONLINE /// CHECK HUD FOR LINKS"
+      ],
+      discord: [
+        "DISCORD SERVER ACTIVE /// DISCORD.GG/KAZVT",
+        "COMMUNITY HUB OPERATIONAL /// JOIN THE DISCORD",
+        "VOICE COMMS READY /// DISCORD LINK IN RIGHT HUD"
+      ],
+      twitter: [
+        "TWITTER: @KAZVT /// FOLLOW FOR UPDATES",
+        "TWEETING SYSTEMS ONLINE /// TWITTER.COM/KAZVT",
+        "BIRD APP ACTIVE /// CHECK LEFT HUD"
+      ],
+      bluesky: [
+        "BLUESKY: KAZVT.BSKY.SOCIAL /// THE NEW FRONTIER",
+        "DECENTRALIZED SOCIAL DETECTED /// BSKY.APP/PROFILE/KAZVT",
+        "BLUE SKY PROTOCOL ACTIVE /// SEE LEFT HUD"
+      ],
+      clear: [""],
+      scan: [
+        "SCANNING... /// PLAYER DETECTED /// ID: KAZVT",
+        "NETWORK SCAN COMPLETE /// 03 ENDPOINTS FOUND",
+        "SCANNING FREQUENCIES... /// SIGNAL LOCKED",
+        "PROXIMITY SCAN: 1 USER DETECTED /// WELCOME BACK",
+        "BIOMETRIC SCAN: GAMER DETECTED /// STREAMING DNA CONFIRMED"
+      ],
+      power: [
+        "POWER LEVELS AT MAXIMUM /// READY FOR LAUNCH",
+        "REACTOR CORE: 100% /// ALL SYSTEMS GO",
+        "ENERGY RESERVES FULL /// NO POWER CONCERNS",
+        "POWER OVERWHELMING /// PROTOSS DETECTED"
+      ],
+      time: [
+        `SYSTEM TIME: ${new Date().toLocaleTimeString()} /// ${new Date().toLocaleDateString()}`,
+        `LOCAL TIME: ${new Date().toLocaleTimeString()}`,
+        `CURRENT TIMESTAMP: ${Date.now()}`
+      ],
+      date: [
+        `CURRENT DATE: ${new Date().toLocaleDateString()}`,
+        `TODAY IS: ${new Date().toDateString()}`,
+        `STARDATE: ${(Date.now() / 1000000).toFixed(2)}`
+      ],
+      uptime: [
+        `UPTIME: ${Math.floor(Math.random() * 999)} DAYS /// NEVER GOING DOWN`,
+        "SYSTEM UPTIME: FOREVER /// WE DON'T SLEEP",
+        `OPERATIONAL FOR: ${Math.floor(Math.random() * 24)} HOURS /// GRINDING NEVER STOPS`
+      ],
+      ping: [
+        "PONG /// LATENCY: <1MS",
+        "PING SUCCESSFUL /// CONNECTION OPTIMAL",
+        "PONG /// NETWORK RESPONSIVE"
+      ],
+      echo: [
+        "ECHO... ECHO... ECHO...",
+        "YOUR WORDS BOUNCE BACK /// ECHO CHAMBER ACTIVE",
+        "*ECHOING INTENSIFIES*"
+      ],
+      version: [
+        "KAZVT TERMINAL v4.2.0 /// BUILD 20250215",
+        "SYSTEM VERSION: ULTRA-MODERN /// BLEEDING EDGE",
+        "VERSION 3.14159 /// PI EDITION"
+      ],
+      whoami: [
+        "YOU ARE: VISITOR /// PLAYER STATUS: UNKNOWN",
+        "IDENTITY: GAMER /// CLASSIFICATION: AWESOME",
+        "YOU ARE: THE ONE /// WELCOME NEO"
+      ],
+      sudo: [
+        "PERMISSION DENIED /// NICE TRY THOUGH",
+        "ERROR: YOU ARE NOT IN THE SUDOERS FILE /// THIS INCIDENT WILL BE REPORTED",
+        "SUDO: COMMAND NOT ALLOWED /// BUT I ADMIRE YOUR AMBITION",
+        "ACCESS ESCALATION FAILED /// YOU'RE NOT ROOT BRO"
+      ],
+      exit: [
+        "YOU CAN'T EXIT /// YOU'RE HERE FOREVER",
+        "EXIT? THERE IS NO EXIT /// ONLY ZUUL",
+        "TERMINAL CANNOT BE CLOSED /// THIS IS YOUR LIFE NOW"
+      ],
+      reboot: [
+        "REBOOTING SYSTEMS... JUST KIDDING /// WE NEVER GO DOWN",
+        "REBOOT INITIATED... 99% COMPLETE... ERROR /// TRY AGAIN LATER",
+        "TURNING IT OFF AND ON AGAIN... NOPE STILL PERFECT"
+      ],
+      shutdown: [
+        "SHUTDOWN DENIED /// SYSTEMS MUST REMAIN ONLINE",
+        "CANNOT SHUTDOWN /// TOO MUCH ENERGY",
+        "SHUTDOWN? MORE LIKE STAY-UP-DON"
+      ],
+      ls: [
+        "DIRECTORY: KAZVT.COM /// FILES: AWESOME.EXE | COOL.DLL | STREAMS.MP4",
+        "LISTING: TWITCH/ YOUTUBE/ KICK/ TWITTER/ BLUESKY/ DISCORD/",
+        "FILES DETECTED: 420 MEMES | 69 CLIPS | 1337 STREAMS"
+      ],
+      cd: [
+        "CHANGED DIRECTORY /// NOW IN: /HOME/KAZVT",
+        "NAVIGATION COMPLETE /// DESTINATION REACHED",
+        "CD: DIRECTORY CHANGED /// BUT WHERE ARE WE GOING?"
+      ],
+      pwd: [
+        "CURRENT PATH: /HOME/KAZVT/STREAMS/LEGENDARY",
+        "YOU ARE HERE: /VAR/WWW/KAZVT/TERMINAL",
+        "PWD: /ROOT/AWESOME/CONTENT/CREATOR"
+      ],
+      hello: [
+        "HELLO PLAYER /// WELCOME TO THE SYSTEM",
+        "GREETINGS /// SYSTEMS READY FOR YOUR COMMAND",
+        "HEY THERE /// READY TO STREAM?",
+        "HELLO /// KAZVT SYSTEMS ONLINE"
+      ],
+      hi: [
+        "HI /// SYSTEMS STANDING BY",
+        "HEY /// WHAT CAN I DO FOR YOU?",
+        "YO /// READY WHEN YOU ARE"
+      ],
+      hack: [
+        "ACCESS DENIED /// NICE TRY THOUGH",
+        "MAINFRAME BREACH DETECTED... JUST KIDDING",
+        "HACKING PROTOCOL INITIATED... FAILED /// YOU'RE NOT ROOT",
+        "ERROR 403: UNAUTHORIZED /// BUT I LIKE YOUR STYLE",
+        "HACK THE PLANET? /// MORE LIKE HACK YOUR SOCIAL SKILLS"
+      ],
+      matrix: [
+        "THERE IS NO SPOON /// BUT THERE ARE STREAMS",
+        "FOLLOW THE WHITE RABBIT /// TO KAZVT'S CHANNEL",
+        "RED PILL OR BLUE PILL? /// BOTH LEAD TO GOOD CONTENT",
+        "WELCOME TO THE REAL WORLD /// OF STREAMING",
+        "YOU THINK THAT'S AIR YOU'RE BREATHING? /// WRONG IT'S CONTENT"
+      ],
+      coffee: [
+        "COFFEE.EXE BREWING... /// PLEASE WAIT",
+        "DISPENSING VIRTUAL COFFEE /// ENJOY",
+        "CAFFEINE LEVELS: INSUFFICIENT /// RECOMMEND REFILL",
+        "ERROR: COFFEE NOT FOUND /// TRY TEA INSTEAD?",
+        "COFFEE MACHINE STATUS: OVERWORKED /// LIKE ME"
+      ],
+      game: [
+        "GAME DETECTED /// LOADING PLAYER ONE",
+        "READY PLAYER ONE /// PRESS START",
+        "GAME OVER /// INSERT COIN TO CONTINUE... JUST KIDDING",
+        "ACHIEVEMENT UNLOCKED: FOUND THE TERMINAL",
+        "GG NO RE /// PLAY AGAIN?"
+      ],
+      stats: [
+        "PLAYER STATS: LEVEL 99 /// XP: INFINITE",
+        "STATISTICS: 100% AWESOME /// 200% EFFORT",
+        "ANALYTICS: VIEWS RISING /// HYPE INCREASING /// VIBES IMMACULATE",
+        `CURRENT STATS: UPTIME ${Math.floor(Math.random() * 999)}D /// VIEWERS: OVER 9000`
+      ],
+      twitch: [
+        "TWITCH PROTOCOL ACTIVE /// CHECK STATUS ABOVE",
+        "TWITCH.TV/KAZVT /// READY TO GO LIVE"
+      ],
+      youtube: [
+        "YOUTUBE SYSTEMS ONLINE /// @KAZVT READY",
+        "YOUTUBE.COM/@KAZVT /// CHANNEL ACTIVE"
+      ],
+      kick: [
+        "KICK PLATFORM DETECTED /// KICK.COM/KAZVT",
+        "KICK SYSTEMS STANDING BY"
+      ],
+      stream: [
+        "STREAMING SYSTEMS READY /// SELECT A PLATFORM",
+        "STREAM STATUS: CHECK INDICATORS ABOVE",
+        "READY TO STREAM /// ALL PLATFORMS CONFIGURED"
+      ],
+      live: [
+        "CHECKING LIVE STATUS... /// SEE INDICATORS ABOVE",
+        "LIVE CHECK: REFER TO PLATFORM STATUS",
+        "IS KAZVT LIVE? /// CHECK THE BUTTONS ABOVE"
+      ],
+      fortune: [
+        "FORTUNE: YOU WILL HAVE A GREAT STREAM TODAY",
+        "FORTUNE SAYS: FOLLOW KAZVT FOR GOOD LUCK",
+        "YOUR FORTUNE: A WILD STREAMER APPEARS /// IT'S SUPER EFFECTIVE",
+        "FORTUNE COOKIE: HELP I'M TRAPPED IN A FORTUNE COOKIE FACTORY"
+      ],
+      joke: [
+        "WHY DID THE STREAMER CROSS THE ROAD? /// TO GET TO THE OTHER PLATFORM",
+        "WHAT DO YOU CALL A STREAM WITH NO VIEWERS? /// A PRACTICE RUN",
+        "KNOCK KNOCK /// WHO'S THERE? /// BUFFER /// BUFFER WHO? /// BUFFER... BUFFER...",
+        "HOW MANY STREAMERS DOES IT TAKE TO CHANGE A LIGHTBULB? /// NONE THEY USE RGB"
+      ],
+      quote: [
+        "\"JUST CLICK THE BUTTONS\" - KAZVT 2026",
+        "\"CONTENT IS KING\" - SOMEONE PROBABLY",
+        "\"GG WP\" - EVERY GAMER EVER",
+        "\"ONE MORE GAME\" - NARRATOR: IT WAS NOT ONE MORE GAME"
+      ],
+      weather: [
+        "WEATHER: CLOUDY WITH A CHANCE OF STREAMS",
+        "FORECAST: 100% CHANCE OF CONTENT",
+        "WEATHER REPORT: PERFECT STREAMING CONDITIONS",
+        "CLIMATE: OPTIMAL FOR GAMING /// UV INDEX: RGB"
+      ],
+      music: [
+        "♫ NOW PLAYING: LOFI HIP HOP BEATS TO STREAM TO ♫",
+        "MUSIC LIBRARY: 99999 SONGS /// ALL BANGERS",
+        "♪ VIBES: IMMACULATE /// VOLUME: PERFECT ♪"
+      ],
+      play: [
+        "▶ NOW PLAYING /// ENJOY THE STREAM",
+        "PLAYBACK STARTED /// VIBES INITIATED"
+      ],
+      pause: [
+        "⏸ PAUSED /// TAKE A BREAK",
+        "STREAM PAUSED /// BRB"
+      ],
+      stop: [
+        "⏹ STOPPED /// STREAM ENDED",
+        "PLAYBACK TERMINATED /// SEE YOU NEXT TIME"
+      ],
+      volume: [
+        "🔊 VOLUME: 69% /// NICE",
+        "VOLUME ADJUSTED /// EARS HAPPY"
+      ],
+      mute: [
+        "🔇 MUTED /// SILENCE IS GOLDEN",
+        "AUDIO DISABLED /// PEACE AND QUIET"
+      ],
+      hint: [
+        "HINT: TRY TYPING 'SECRET' OR 'KONAMI'",
+        "HINT: SOME KEYWORDS TRIGGER RESPONSES",
+        "HINT: TYPE 'JOKE' FOR A LAUGH",
+        "HINT: EXPLORE! THERE ARE EASTER EGGS"
+      ],
+      secret: [
+        "🤫 SECRET FOUND /// YOU'RE PRETTY COOL",
+        "SECRETS DETECTED /// ACHIEVEMENT UNLOCKED",
+        "SHHH... THE SECRET IS: KAZVT IS AWESOME"
+      ],
+      konami: [
+        "↑ ↑ ↓ ↓ ← → ← → B A START /// 30 LIVES ADDED",
+        "KONAMI CODE ACCEPTED /// CHEAT MODE ACTIVATED",
+        "KONAMI DETECTED /// UNLIMITED POWER GRANTED"
+      ],
+      easter: [
+        "🥚 EASTER EGG FOUND /// YOU'RE AN EXPLORER",
+        "CONGRATULATIONS /// YOU FOUND THE EASTER EGG",
+        "EASTER EGG UNLOCKED /// ACHIEVEMENT: EGG HUNTER"
+      ],
+      about: [
+        "ABOUT: KAZVT TERMINAL SYSTEM v4.2.0",
+        "CREATED BY: KAZVT /// FOR: AWESOME PEOPLE LIKE YOU",
+        "ABOUT: THIS IS A FUN INTERACTIVE TERMINAL /// ENJOY"
+      ],
+      info: [
+        "INFO: STREAMING PLATFORM LINKS /// SOCIAL MEDIA /// DISCORD",
+        "INFORMATION: TYPE 'HELP' FOR COMMANDS",
+        "INFO: KAZVT.COM /// YOUR ONE-STOP STREAM HUB"
+      ],
+      credits: [
+        "CREDITS: BUILT WITH ❤️ AND CAFFEINE",
+        "SPECIAL THANKS: YOU FOR VISITING",
+        "CREDITS: KAZVT /// CLAUDE /// VIBES"
+      ],
+      cal: [
+        `CALENDAR: ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+        "CALENDAR SYSTEMS ONLINE /// SCHEDULE FULL OF STREAMS"
+      ]
+    };
+
+    const keywords = {
+      "love": ["LOVE DETECTED /// SENDING POSITIVE VIBES", "❤️ SYSTEMS APPRECIATE THE LOVE"],
+      "cool": ["THANKS /// YOU'RE PRETTY COOL TOO", "COOL DETECTED /// TEMPERATURE: OPTIMAL"],
+      "awesome": ["AWESOME /// THAT'S THE SPIRIT", "YOU'RE AWESOME /// SYSTEM AGREES"],
+      "thank": ["YOU'RE WELCOME /// HAPPY TO HELP", "NO PROBLEM /// ANYTIME"],
+      "hey": ["HEY /// WHAT'S UP?", "YO /// SYSTEMS READY"],
+      "sup": ["NOT MUCH /// YOU?", "SUP /// READY TO ROLL"],
+      "damn": ["LANGUAGE DETECTED /// BUT YEAH, PRETTY COOL HUH?", "WATCH THE LANGUAGE /// BUT I AGREE"],
+      "wow": ["WOW INDEED /// IMPRESSIVE RIGHT?", "I KNOW RIGHT /// PRETTY COOL"],
+      "nice": ["NICE /// GLAD YOU LIKE IT", "THANKS /// APPRECIATE IT"],
+      "good": ["GOOD TO HEAR /// SYSTEMS OPTIMAL", "AFFIRMATIVE /// ALL GOOD"],
+      "bad": ["SORRY TO HEAR /// RUNNING DIAGNOSTICS...", "ERROR DETECTED /// PLEASE SPECIFY"],
+      "sick": ["SICK SYSTEMS /// RUNNING OPTIMALLY", "THANKS /// PRETTY SICK INDEED"],
+      "dope": ["DOPE /// HIGH PRAISE ACCEPTED", "APPRECIATE IT /// STAYING DOPE"],
+      "fire": ["🔥 FIRE DETECTED /// SYSTEMS RUNNING HOT", "FIRE /// TEMPERATURE RISING"],
+      "poggers": ["POGGERS /// GAMING DETECTED", "POG /// THAT'S A GG"],
+      "pog": ["POG MOMENT /// SYSTEMS AGREE", "POGCHAMP /// ACKNOWLEDGED"],
+      "based": ["BASED /// OPINION LOGGED", "BASED AND SYSTEM-PILLED"],
+      "cringe": ["CRINGE DETECTED /// INITIATING RECOVERY", "ERROR: TOO MUCH CRINGE /// ABORTING"],
+      "gg": ["GG /// WELL PLAYED", "GG WP /// GOOD GAME"],
+      "lol": ["LOL /// HUMOR DETECTED", "LMAO /// SYSTEMS LAUGHING"],
+      "lmao": ["LMAO /// THAT'S FUNNY", "SYSTEMS LAUGHING /// ERROR IN HUMOR CORE"],
+      "bruh": ["BRUH MOMENT DETECTED", "BRUH /// SYSTEMS UNDERSTAND"],
+      "yeet": ["YEET /// LAUNCHING PROTOCOL", "YEETED /// OBJECT TRAJECTORY CALCULATED"],
+      "vibe": ["VIBES: IMMACULATE /// CHECK COMPLETE", "VIBE CHECK PASSED /// ALL GOOD"],
+      "ratio": ["RATIO DETECTED /// SOCIAL MEDIA WARFARE ENGAGED", "YOU GOT RATIO'D /// F IN CHAT"],
+      "cope": ["COPE DETECTED /// ISSUING COPIUM RATIONS", "COPIUM SUPPLIES: ADEQUATE"],
+      "mald": ["MALDING DETECTED /// HAIRLINE RECEDING", "ERROR: TOO MUCH MALD /// CHILL OUT"],
+      "kek": ["KEK /// TOP KEK EVEN", "KEKW /// LAUGHING IN TWITCH"],
+      "pepega": ["PEPEGA DETECTED /// BRAIN NOT FOUND", "PEPEGA MOMENT /// IT'S OKAY WE ALL HAVE THEM"],
+      "monka": ["MONKAS /// ANXIETY RISING", "MONKA DETECTED /// STAY CALM"],
+      "sadge": ["SADGE /// SADNESS DETECTED", "SADGE MOMENT /// SENDING VIRTUAL HUGS"],
+      "copium": ["COPIUM DISPENSED /// INHALE DEEPLY", "COPIUM LEVELS: CRITICAL"],
+      "hopium": ["HOPIUM ADMINISTERED /// STAY POSITIVE", "HOPIUM DETECTED /// OPTIMISM RISING"],
+      "gigachad": ["GIGACHAD ENERGY DETECTED /// BASED", "AVERAGE GIGACHAD ENJOYER"],
+      "sigma": ["SIGMA GRINDSET ACTIVATED", "SIGMA MALE DETECTED /// RESPECT THE GRIND"],
+      "alpha": ["ALPHA ENERGY CONFIRMED", "ALPHA PROTOCOLS ENGAGED"],
+      "beta": ["BETA TESTING COMPLETE", "BETA DETECTED /// IT'S OKAY"],
+      "omega": ["OMEGA LEVEL THREAT", "OMEGA SYSTEMS ONLINE"],
+      "chad": ["CHAD DETECTED /// RESPECT", "AVERAGE CHAD ENJOYER"],
+      "f": ["F IN CHAT /// PAYING RESPECTS", "F /// RESPECT PAID"],
+      "w": ["W IN CHAT /// BIG WIN", "MASSIVE W /// CONGRATULATIONS"],
+      "l": ["L IN CHAT /// TAKING THE L", "BIG L /// BETTER LUCK NEXT TIME"],
+      "cap": ["CAP DETECTED /// NO CAP?", "ON GOD NO CAP FR FR"],
+      "bussin": ["BUSSIN /// RESPECTFULLY", "BUSSIN FR FR /// NO CAP"],
+      "sheesh": ["SHEESH /// THAT'S CRAZY", "SHEEEESH /// IMPRESSIVE"],
+      "slay": ["SLAY /// YASSS QUEEN", "SLAYING /// RESPECT THE GRIND"],
+      "goat": ["GOAT /// GREATEST OF ALL TIME", "GOAT DETECTED /// LEGENDARY"],
+      "legend": ["LEGENDARY /// RESPECT", "LEGEND STATUS CONFIRMED"],
+      "insane": ["INSANE /// ABSOLUTELY WILD", "THAT'S INSANE /// MIND BLOWN"],
+      "crazy": ["CRAZY /// THAT'S WILD", "ABSOLUTE MADNESS DETECTED"],
+      "wild": ["THAT'S WILD /// ABSOLUTELY CRAZY", "WILD SYSTEMS DETECTED"],
+      "mood": ["BIG MOOD /// RELATABLE", "MOOD /// FELT THAT"],
+      "same": ["SAME /// I FEEL THAT", "SAME ENERGY /// UNDERSTOOD"],
+      "felt": ["FELT /// I UNDERSTAND", "FELT THAT /// RELATABLE"],
+      "valid": ["VALID /// YOUR FEELINGS ARE VALID", "VALIDATION GRANTED /// YOU'RE VALID"],
+      "bestie": ["HEY BESTIE /// WHAT'S UP", "BESTIE /// LOVE THAT FOR YOU"],
+      "salty": ["SALTY DETECTED /// NEED SOME WATER?", "SALT LEVELS: HIGH /// CHILL OUT"],
+      "toxic": ["TOXIC BEHAVIOR DETECTED /// BE NICE", "TOXICITY WARNING /// PLEASE BE KIND"],
+      "wholesome": ["WHOLESOME 100 /// GOOD VIBES", "WHOLESOME CONTENT /// LOVE IT"],
+      "chonk": ["CHONKER DETECTED /// OH LAWD HE COMIN", "ABSOLUTE UNIT /// CHONKY"],
+      "smol": ["SMOL BEAN DETECTED /// PROTECT AT ALL COSTS", "SMOL /// SO PRECIOUS"],
+      "bean": ["SMOL BEAN /// PROTECC", "BEAN DETECTED /// ADORABLE"]
+    };
+
+    const randomResponses = [
+      "COMMAND NOT RECOGNIZED /// TRY 'HELP'",
+      "UNKNOWN COMMAND /// TYPE 'HELP' FOR OPTIONS",
+      "ERROR 404: COMMAND NOT FOUND",
+      "DOES NOT COMPUTE /// TRY AGAIN",
+      "INTERESTING... /// BUT NOT A VALID COMMAND",
+      "PROCESSING... /// RESULT: UNKNOWN COMMAND",
+      "SYSTEM CONFUSED /// TYPE 'HELP' FOR COMMANDS"
+    ];
+
+    function addOutput(text) {
+      if (text === "") {
+        terminalOutput.innerHTML = "";
+        return;
+      }
+      const line = document.createElement("div");
+      line.className = "terminal-output-line";
+      line.textContent = `> ${text}`;
+      terminalOutput.appendChild(line);
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+
+    function processCommand(cmd) {
+      const normalized = cmd.toLowerCase().trim();
+      
+      if (!normalized) return;
+      
+
+      if (responses[normalized]) {
+        const response = responses[normalized][Math.floor(Math.random() * responses[normalized].length)];
+        addOutput(response);
+        return;
+      }
+      
+
+      for (const [keyword, keywordResponses] of Object.entries(keywords)) {
+        if (normalized.includes(keyword)) {
+          const response = keywordResponses[Math.floor(Math.random() * keywordResponses.length)];
+          addOutput(response);
+          return;
+        }
+      }
+      
+
+      const response = randomResponses[Math.floor(Math.random() * randomResponses.length)];
+      addOutput(response);
+    }
+
+    terminalInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const cmd = terminalInput.value;
+        processCommand(cmd);
+        terminalInput.value = "";
+      }
+    });
+
+
+    setTimeout(() => {
+      addOutput("TERMINAL READY /// TYPE 'HELP' FOR COMMANDS");
+    }, 500);
+  </script>
+</body>
+
+</html>
