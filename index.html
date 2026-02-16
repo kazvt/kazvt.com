@@ -150,7 +150,25 @@
 
     .pip-live {
       box-shadow: 0 0 0 2px #0a0a0a, 0 0 12px rgba(255, 176, 0, 0.75);
-      animation: liveblink 1s step-end infinite;
+      animation: liveblink 1s step-end infinite, liveGlow 2s ease-in-out infinite, livePulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes liveGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 2px #0a0a0a, 0 0 12px rgba(255, 176, 0, 0.75), 0 0 18px rgba(255, 176, 0, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 2px #0a0a0a, 0 0 20px rgba(255, 176, 0, 1), 0 0 28px rgba(255, 176, 0, 0.6);
+      }
+    }
+
+    @keyframes livePulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.15);
+      }
     }
 
     .pip-offline {
@@ -164,7 +182,16 @@
     }
 
     .status-text-live {
-      animation: terminal-flicker 0.8s steps(2) infinite;
+      animation: terminal-flicker 0.8s steps(2) infinite, statusGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes statusGlow {
+      0%, 100% {
+        text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
+      }
+      50% {
+        text-shadow: 0 0 8px rgba(255, 176, 0, 1), 0 0 12px rgba(255, 176, 0, 0.5);
+      }
     }
 
     @keyframes terminal-flicker {
