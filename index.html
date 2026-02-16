@@ -7,13 +7,14 @@
   <title>kazvt!!</title>
   <link rel="icon" type="image/png" href="icon.gif">
 
+
   <meta property="og:title" content="kazvt" id="og-title">
   <meta property="og:description" content="i am a monke called kaz, she/her, i play retro games :)
 
 🟣 twitch: https://www.twitch.tv/kazvt
 🔴 yt: https://www.youtube.com/@kazvt
 🟢 kick: https://kick.com/kazvt" id="og-description">
-  <meta property="og:image" content="https://kazvt.com/icon.png" id="og-image">
+  <meta property="og:image" content="https://kazvt.com/icon.gif" id="og-image">
   <meta property="og:url" content="https://kazvt.com">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="kazvt">
@@ -25,7 +26,7 @@
 🟣 twitch: https://www.twitch.tv/kazvt
 🔴 yt: https://www.youtube.com/@kazvt
 🟢 kick: https://kick.com/kazvt" id="twitter-description">
-  <meta name="twitter:image" content="https://kazvt.com/icon.png" id="twitter-image">
+  <meta name="twitter:image" content="https://kazvt.com/icon.gif" id="twitter-image">
 
   <meta name="theme-color" content="#0a0a0a" id="theme-color">
 
@@ -154,11 +155,25 @@
 
     .pip-offline {
       box-shadow: 0 0 0 2px #0a0a0a;
+      background-color: #ff3333 !important;
     }
 
     .pip-loading {
       box-shadow: 0 0 0 2px #0a0a0a;
       animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .status-text-live {
+      animation: terminal-flicker 0.8s steps(2) infinite;
+    }
+
+    @keyframes terminal-flicker {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
     }
 
     @keyframes pulse {
@@ -456,10 +471,10 @@
           <a href="https://twitter.com/monkevt" target="_blank" rel="noopener noreferrer"
             class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
 
-            <span class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-crt-green opacity-40"></span>
-            <span class="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-crt-green opacity-40"></span>
-            <span class="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-crt-green opacity-40"></span>
-            <span class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-crt-green opacity-40"></span>
+            <span class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
 
             <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -476,10 +491,10 @@
           <a href="https://bsky.app/profile/kazvt.bsky.social" target="_blank" rel="noopener noreferrer"
             class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
 
-            <span class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-crt-green opacity-40"></span>
-            <span class="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-crt-green opacity-40"></span>
-            <span class="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-crt-green opacity-40"></span>
-            <span class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-crt-green opacity-40"></span>
+            <span class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
 
             <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -511,10 +526,10 @@
           <a href="https://discord.gg/huzMpfJZ4J" target="_blank" rel="noopener noreferrer"
             class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
 
-            <span class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-crt-green opacity-40"></span>
-            <span class="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-crt-green opacity-40"></span>
-            <span class="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-crt-green opacity-40"></span>
-            <span class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-crt-green opacity-40"></span>
+            <span class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
 
             <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -595,7 +610,7 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
       const themeColor = isAnyLive ? '#33FF33' : '#0a0a0a';
       document.getElementById('theme-color').setAttribute('content', themeColor);
 
-      const imageUrl = isAnyLive ? 'https://kazvt.com/icon.gif' : 'https://kazvt.com/icon.png';
+      const imageUrl = isAnyLive ? 'https://kazvt.com/icon.gif' : 'https://kazvt.com/icon.gif';
       document.getElementById('og-image').setAttribute('content', imageUrl);
       document.getElementById('twitter-image').setAttribute('content', imageUrl);
     }
@@ -640,13 +655,14 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
         if (statusText) {
           statusText.textContent = 'LIVE';
           statusText.classList.remove('loading-dots');
+          statusText.classList.add('status-text-live');
         }
       } else {
         btn.classList.add('is-offline');
-        pip.classList.add('pip-offline', 'bg-screen-bg');
+        pip.classList.add('pip-offline');
         if (statusText) {
           statusText.textContent = 'OFFLINE';
-          statusText.classList.remove('loading-dots');
+          statusText.classList.remove('loading-dots', 'status-text-live');
         }
       }
     }
