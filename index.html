@@ -7,30 +7,27 @@
   <title>kazvt!!</title>
   <link rel="icon" type="image/png" href="icon.gif">
 
-
-  <meta property="og:title" content="kazvt">
+  <meta property="og:title" content="kazvt" id="og-title">
   <meta property="og:description" content="i am a monke called kaz, she/her, i play retro games :)
 
 🟣 twitch: https://www.twitch.tv/kazvt
 🔴 yt: https://www.youtube.com/@kazvt
-🟢 kick: https://kick.com/kazvt">
-  <meta property="og:image" content="https://kazvt.com/icon.gif">
+🟢 kick: https://kick.com/kazvt" id="og-description">
+  <meta property="og:image" content="https://kazvt.com/icon.png" id="og-image">
   <meta property="og:url" content="https://kazvt.com">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="kazvt">
 
-
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="kazvt">
+  <meta name="twitter:title" content="kazvt" id="twitter-title">
   <meta name="twitter:description" content="i am a monke called kaz, she/her, i play retro games :)
 
 🟣 twitch: https://www.twitch.tv/kazvt
 🔴 yt: https://www.youtube.com/@kazvt
-🟢 kick: https://kick.com/kazvt">
-  <meta name="twitter:image" content="https://kazvt.com/icon.gif">
+🟢 kick: https://kick.com/kazvt" id="twitter-description">
+  <meta name="twitter:image" content="https://kazvt.com/icon.png" id="twitter-image">
 
-
-  <meta name="theme-color" content="#33FF33">
+  <meta name="theme-color" content="#0a0a0a" id="theme-color">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -566,6 +563,43 @@
 
     const baseTitle = 'kazvt!!';
 
+    function updateMetadata(statuses) {
+      const twitchLive = statuses.twitch === 'live';
+      const youtubeLive = statuses.youtube === 'live';
+      const kickLive = statuses.kick === 'live';
+      const isAnyLive = twitchLive || youtubeLive || kickLive;
+
+      const platformStatuses = [];
+      if (twitchLive) platformStatuses.push('🟣 twitch (live)');
+      else platformStatuses.push('🟣 twitch');
+      
+      if (youtubeLive) platformStatuses.push('🔴 yt (live)');
+      else platformStatuses.push('🔴 yt');
+      
+      if (kickLive) platformStatuses.push('🟢 kick (live)');
+      else platformStatuses.push('🟢 kick');
+
+      const titleText = isAnyLive ? 'kazvt (live rn!)' : 'kazvt';
+      document.getElementById('og-title').setAttribute('content', titleText);
+      document.getElementById('twitter-title').setAttribute('content', titleText);
+
+      const descriptionText = `i am a monke called kaz, she/her, i play retro games :)
+
+${platformStatuses[0]}: https://www.twitch.tv/kazvt
+${platformStatuses[1]}: https://www.youtube.com/@kazvt
+${platformStatuses[2]}: https://kick.com/kazvt`;
+      
+      document.getElementById('og-description').setAttribute('content', descriptionText);
+      document.getElementById('twitter-description').setAttribute('content', descriptionText);
+
+      const themeColor = isAnyLive ? '#33FF33' : '#0a0a0a';
+      document.getElementById('theme-color').setAttribute('content', themeColor);
+
+      const imageUrl = isAnyLive ? 'https://kazvt.com/icon.gif' : 'https://kazvt.com/icon.png';
+      document.getElementById('og-image').setAttribute('content', imageUrl);
+      document.getElementById('twitter-image').setAttribute('content', imageUrl);
+    }
+
     function updateTitle(isAnyLive) {
       document.title = isAnyLive ? '🔴 ' + baseTitle : baseTitle;
     }
@@ -629,6 +663,8 @@
 
       const isAnyLive = twitchStatus === 'live' || youtubeStatus === 'live' || kickStatus === 'live';
       updateTitle(isAnyLive);
+      
+      updateMetadata(statuses);
     }
 
     refresh();
