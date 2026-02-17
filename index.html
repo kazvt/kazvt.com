@@ -154,9 +154,12 @@
     }
 
     @keyframes livePulse {
-      0%, 100% {
+
+      0%,
+      100% {
         transform: scale(1);
       }
+
       50% {
         transform: scale(1.15);
       }
@@ -177,18 +180,24 @@
     }
 
     @keyframes statusGlow {
-      0%, 100% {
+
+      0%,
+      100% {
         text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
       }
+
       50% {
         text-shadow: 0 0 8px rgba(255, 176, 0, 1), 0 0 12px rgba(255, 176, 0, 0.5);
       }
     }
 
     @keyframes terminal-flicker {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 1;
       }
+
       50% {
         opacity: 0.6;
       }
@@ -331,10 +340,11 @@
 
             <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div class="w-8 h-8 flex-shrink-0 bg-screen-bg border border-dark-green flex items-center justify-center">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 4h15v10l-4 4h-5l-3 3v-3H5V4z" stroke="#33FF33" stroke-width="2" />
-                  <path d="M10 8v5" stroke="#33FF33" stroke-width="2" />
-                  <path d="M14 8v5" stroke="#33FF33" stroke-width="2" />
+                <svg width="24" height="24" viewBox="50 -30 400 550" fill="#33FF33"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path d="M80,32,48,112V416h96v64h64l64-64h80L464,304V32ZM416,288l-64,64H256l-64,64V352H112V80H416Z" />
+                  <rect x="320" y="143" width="48" height="129" />
+                  <rect x="208" y="143" width="48" height="129" />
                 </svg>
               </div>
               <span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold truncate">▶
@@ -361,21 +371,19 @@
 
 
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="2.5" mask="url(#yt-corners)" />
+                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="3.5"
+                    mask="url(#yt-corners)" />
                   <path d="M9.5 9l7 3-7 3v-6z" fill="#33FF33" mask="url(#yt-play)" />
                   <mask id="yt-corners">
-  <rect x="0" y="0" width="24" height="24" fill="white" />
-  <rect x="0.7" y="3.7" width="1.8" height="2" fill="black" />
-  <rect x="21.5" y="3.7" width="1.8" height="2" fill="black" />
-
-    <rect x="0.7" y="18.3" width="1.8" height="2" fill="black" />
-  <rect x="21.5" y="18.3" width="1.8" height="2" fill="black" />
-</mask>
-
-
+                    <rect x="0" y="0" width="24" height="24" fill="white" />
+                    <rect x="0.2" y="3.2" width="2.5" height="2.5" fill="black" />
+                    <rect x="21.3" y="3.2" width="2.5" height="2.5" fill="black" />
+                    <rect x="0.2" y="18.3" width="2.5" height="2.5" fill="black" />
+                    <rect x="21.3" y="18.3" width="2.5" height="2.5" fill="black" />
+                  </mask>
                   <mask id="yt-play">
-  <rect x="0" y="0" width="24" height="24" fill="white" />
-</mask>
+                    <rect x="0" y="0" width="24" height="24" fill="white" />
+                  </mask>
                 </svg>
               </div>
               <span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold truncate">▶
@@ -399,15 +407,11 @@
 
             <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div class="w-8 h-8 flex-shrink-0 bg-screen-bg border border-dark-green flex items-center justify-center">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="5" y="2" width="4" height="20" fill="#33FF33" />
-                  <rect x="9" y="10" width="3" height="4" fill="#33FF33" />
-
-                  <rect x="12" y="6" width="4" height="4" fill="#33FF33" />
-                  <rect x="16" y="2" width="4" height="4" fill="#33FF33" />
-
-                  <rect x="12" y="14" width="4" height="4" fill="#33FF33" />
-                  <rect x="16" y="18" width="4" height="4" fill="#33FF33" />
+                <svg width="24" height="24" viewBox="-100 -100 700 700" xmlns="http://www.w3.org/2000/svg"
+                  fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2">
+                  <path
+                    d="M37 .036h164.448v113.621h54.71v-56.82h54.731V.036h164.448v170.777h-54.73v56.82h-54.711v56.8h54.71v56.82h54.73V512.03H310.89v-56.82h-54.73v-56.8h-54.711v113.62H37V.036z"
+                    fill="#53fc18" />
                 </svg>
               </div>
               <span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold truncate">▶
@@ -489,10 +493,14 @@
           <a href="https://twitter.com/monkevt" target="_blank" rel="noopener noreferrer"
             class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
 
-            <span class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
 
             <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -509,31 +517,20 @@
           <a href="https://bsky.app/profile/kazvt.bsky.social" target="_blank" rel="noopener noreferrer"
             class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
 
-            <span class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
 
             <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-
-                <rect x="11" y="7" width="2" height="10" rx="1" fill="#33FF33" />
-
-                <circle cx="12" cy="6" r="1.8" fill="#33FF33" />
-
-                <line x1="11.3" y1="5" x2="9.5" y2="2.5" stroke="#33FF33" stroke-width="1.2" stroke-linecap="round" />
-                <line x1="12.7" y1="5" x2="14.5" y2="2.5" stroke="#33FF33" stroke-width="1.2" stroke-linecap="round" />
-
-                <ellipse cx="7" cy="10" rx="4.5" ry="4" fill="#33FF33" transform="rotate(-25 7 10)" />
-
-                <ellipse cx="17" cy="10" rx="4.5" ry="4" fill="#33FF33" transform="rotate(25 17 10)" />
-
-                <ellipse cx="8" cy="16" rx="3.5" ry="3" fill="#33FF33" transform="rotate(-15 8 16)" />
-
-                <ellipse cx="16" cy="16" rx="3.5" ry="3" fill="#33FF33" transform="rotate(15 16 16)" />
-
-                <circle cx="10" cy="11" r="2" fill="#33FF33" />
-                <circle cx="14" cy="11" r="2" fill="#33FF33" />
+              <svg width="24" height="24" viewBox="-100 -150 800 800">
+                <path
+                  d="m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z"
+                  fill="#33FF33" />
               </svg>
             </div>
             <span
@@ -544,13 +541,17 @@
           <a href="https://discord.gg/huzMpfJZ4J" target="_blank" rel="noopener noreferrer"
             class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
 
-            <span class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
+            <span
+              class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
 
             <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <svg class="w-4 h-4" width="24" height="24" viewBox="1 0 22 22" fill="none">
                 <path
                   d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"
                   fill="#33FF33" />
@@ -605,10 +606,10 @@
       const platformStatuses = [];
       if (twitchLive) platformStatuses.push('🟣 twitch (live)');
       else platformStatuses.push('🟣 twitch');
-      
+
       if (youtubeLive) platformStatuses.push('🔴 yt (live)');
       else platformStatuses.push('🔴 yt');
-      
+
       if (kickLive) platformStatuses.push('🟢 kick (live)');
       else platformStatuses.push('🟢 kick');
 
@@ -621,7 +622,7 @@
 ${platformStatuses[0]}: https://www.twitch.tv/kazvt
 ${platformStatuses[1]}: https://www.youtube.com/@kazvt
 ${platformStatuses[2]}: https://kick.com/kazvt`;
-      
+
       document.getElementById('og-description').setAttribute('content', descriptionText);
       document.getElementById('twitter-description').setAttribute('content', descriptionText);
 
@@ -697,7 +698,7 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
 
       const isAnyLive = twitchStatus === 'live' || youtubeStatus === 'live' || kickStatus === 'live';
       updateTitle(isAnyLive);
-      
+
       updateMetadata(statuses);
     }
 
