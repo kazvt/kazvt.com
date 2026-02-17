@@ -1,575 +1,708 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>404 - kazvt</title><link rel="icon" type="image/png" href="icon.gif"><meta name="theme-color" content="#33FF33"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><script>tailwind.config= {
-  theme: {
-    extend: {
-      screens: {
-        'xs': '375px'
-      }
+<!DOCTYPE html>
+<html lang="en">
 
-      ,
-      fontFamily: {
-        pixel: ['"Press Start 2P"', 'monospace']
-      }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - kazvt</title>
+    <link rel="icon" type="image/png" href="icon.gif">
+    <meta name="theme-color" content="#33FF33">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = {
+            theme: {
+                extend: {
+                    screens: {
+                        'xs': '375px'
+                    }
 
-      ,
-      colors: {
-        'crt-green': '#33FF33',
-          'dark-green': '#00AA00',
-          'screen-bg': '#0a0a0a',
-          'glow': '#00FF00',
-          'amber': '#FFB000',
-      }
+                    ,
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'monospace']
+                    }
 
-      ,
-      animation: {
-        'scanline': 'scanline 8s linear infinite',
-          'flicker': 'flicker 0.15s infinite',
-          'glow': 'glow 2s ease-in-out infinite',
-          'blink': 'blink 1s step-end infinite',
-      }
+                    ,
+                    colors: {
+                        'crt-green': '#33FF33',
+                        'dark-green': '#00AA00',
+                        'screen-bg': '#0a0a0a',
+                        'glow': '#00FF00',
+                        'amber': '#FFB000',
+                    }
 
-      ,
-      keyframes: {
-        scanline: {
-          '0%': {
-            transform: 'translateY(0)'
-          }
+                    ,
+                    animation: {
+                        'scanline': 'scanline 8s linear infinite',
+                        'flicker': 'flicker 0.15s infinite',
+                        'glow': 'glow 2s ease-in-out infinite',
+                        'blink': 'blink 1s step-end infinite',
+                    }
 
-          ,
-          '100%': {
-            transform: 'translateY(10px)'
-          }
+                    ,
+                    keyframes: {
+                        scanline: {
+                            '0%': {
+                                transform: 'translateY(0)'
+                            }
+
+                            ,
+                            '100%': {
+                                transform: 'translateY(10px)'
+                            }
+                        }
+
+                        ,
+                        flicker: {
+                            '0%, 100%': {
+                                opacity: '0.05'
+                            }
+
+                            ,
+                            '50%': {
+                                opacity: '0.1'
+                            }
+                        }
+
+                        ,
+                        glow: {
+                            '0%, 100%': {
+                                textShadow: '0 0 5px #00FF00, 0 0 10px #00FF00, 0 0 15px #00FF00'
+                            }
+
+                            ,
+                            '50%': {
+                                textShadow: '0 0 2px #00FF00, 0 0 4px #00FF00, 0 0 6px #00FF00'
+                            }
+
+                            ,
+                        }
+
+                        ,
+                        blink: {
+                            '0%, 50%': {
+                                opacity: '1'
+                            }
+
+                            ,
+                            '51%, 100%': {
+                                opacity: '0'
+                            }
+                        }
+
+                        ,
+                    }
+
+                    ,
+                }
+
+                ,
+            }
+
+            ,
         }
 
-        ,
-        flicker: {
-          '0%, 100%': {
-            opacity: '0.05'
-          }
-
-          ,
-          '50%': {
-            opacity: '0.1'
-          }
+    </script>
+    <style>
+        body {
+            font-family: 'Press Start 2P', monospace;
+            image-rendering: pixelated;
         }
 
-        ,
-        glow: {
-          '0%, 100%': {
-            textShadow: '0 0 5px #00FF00, 0 0 10px #00FF00, 0 0 15px #00FF00'
-          }
-
-          ,
-          '50%': {
-            textShadow: '0 0 2px #00FF00, 0 0 4px #00FF00, 0 0 6px #00FF00'
-          }
-
-          ,
+        .crt-overlay {
+            background: repeating-linear-gradient(to bottom,
+                    rgba(0, 255, 0, 0.03) 0px,
+                    rgba(0, 255, 0, 0.03) 1px,
+                    transparent 1px,
+                    transparent 2px);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
         }
 
-        ,
-        blink: {
-          '0%, 50%': {
-            opacity: '1'
-          }
-
-          ,
-          '51%, 100%': {
-            opacity: '0'
-          }
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
         }
 
-        ,
-      }
-
-      ,
-    }
-
-    ,
-  }
-
-  ,
-}
-
-</script><style>body {
-  font-family: 'Press Start 2P', monospace;
-  image-rendering: pixelated;
-}
-
-.crt-overlay {
-  background: repeating-linear-gradient(to bottom,
-      rgba(0, 255, 0, 0.03) 0px,
-      rgba(0, 255, 0, 0.03) 1px,
-      transparent 1px,
-      transparent 2px);
-  animation: scanline 8s linear infinite;
-  pointer-events: none;
-}
-
-.crt-flicker {
-  animation: flicker 0.15s infinite;
-  pointer-events: none;
-}
-
-.text-glow {
-  text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
-  animation: glow 2s ease-in-out infinite;
-}
-
-.text-glow-sm {
-  text-shadow: 0 0 5px #00FF00;
-}
-
-@keyframes scanline {
-  0% {
-    transform: translateY(0);
-  }
-
-  100% {
-    transform: translateY(10px);
-  }
-}
-
-@keyframes flicker {
-
-  0%,
-  100% {
-    opacity: 0.05;
-  }
-
-  50% {
-    opacity: 0.1;
-  }
-}
-
-@keyframes glow {
-
-  0%,
-  100% {
-    text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
-  }
-
-  50% {
-    text-shadow: 0 0 2px #00FF00, 0 0 4px #00FF00;
-  }
-}
-
-@keyframes blink {
-
-  0%,
-  50% {
-    opacity: 1;
-  }
-
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-
-
-.four-o-four {
-  font-size: clamp(48px, 15vw, 120px);
-  color: #33FF33;
-  text-shadow: 0 0 20px #00FF00, 0 0 40px #00FF00;
-  position: relative;
-  display: inline-block;
-  animation: glitch404 3s infinite;
-}
-
-@keyframes glitch404 {
-
-  0%,
-  90%,
-  100% {
-    transform: translate(0);
-    filter: none;
-  }
-
-  91% {
-    transform: translate(-4px, 0);
-    filter: hue-rotate(90deg);
-    text-shadow: 4px 0 #FF0000, -4px 0 #00FFFF, 0 0 20px #00FF00;
-  }
-
-  92% {
-    transform: translate(4px, 0);
-    filter: none;
-  }
-
-  93% {
-    transform: translate(0, -2px);
-    filter: hue-rotate(180deg);
-    text-shadow: -4px 0 #FF0000, 4px 0 #00FFFF, 0 0 20px #00FF00;
-  }
-
-  94% {
-    transform: translate(0);
-    filter: none;
-  }
-
-  96% {
-    transform: translate(2px, 2px);
-    clip-path: inset(30% 0 40% 0);
-    text-shadow: -2px 0 #FF0000, 2px 0 #00FFFF;
-  }
-
-  97% {
-    transform: translate(0);
-    clip-path: none;
-    filter: none;
-  }
-}
-
-
-.four-o-four::before,
-.four-o-four::after {
-  content: '404';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.four-o-four::before {
-  color: #FF0055;
-  animation: glitchTop 3s infinite;
-  clip-path: inset(0 0 60% 0);
-  opacity: 0;
-}
-
-.four-o-four::after {
-  color: #00FFFF;
-  animation: glitchBottom 3s infinite;
-  clip-path: inset(60% 0 0 0);
-  opacity: 0;
-}
-
-@keyframes glitchTop {
-
-  0%,
-  89%,
-  100% {
-    opacity: 0;
-    transform: translate(0);
-  }
-
-  90% {
-    opacity: 0.8;
-    transform: translate(-6px, -2px);
-  }
-
-  91% {
-    opacity: 0;
-  }
-
-  95% {
-    opacity: 0.6;
-    transform: translate(4px, 0);
-  }
-
-  96% {
-    opacity: 0;
-  }
-}
-
-@keyframes glitchBottom {
-
-  0%,
-  89%,
-  100% {
-    opacity: 0;
-    transform: translate(0);
-  }
-
-  90% {
-    opacity: 0.7;
-    transform: translate(6px, 2px);
-  }
-
-  91% {
-    opacity: 0;
-  }
-
-  95% {
-    opacity: 0.5;
-    transform: translate(-3px, 0);
-  }
-
-  96% {
-    opacity: 0;
-  }
-}
-
-
-.terminal-line {
-  overflow: hidden;
-  white-space: nowrap;
-  opacity: 0;
-  border-right: 2px solid transparent;
-}
-
-.terminal-line.typing {
-  animation: typeIn var(--duration, 1.2s) steps(var(--chars, 30)) forwards,
-    fadeInLine 0.05s forwards;
-}
-
-.terminal-line.done {
-  opacity: 1;
-}
-
-.terminal-line.cursor-active {
-  border-right-color: #33FF33;
-  animation: typeIn var(--duration, 1.2s) steps(var(--chars, 30)) forwards,
-    fadeInLine 0.05s forwards,
-    cursorBlink 0.7s step-end infinite var(--duration, 1.2s);
-}
-
-@keyframes fadeInLine {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes typeIn {
-  from {
-    width: 0;
-  }
-
-  to {
-    width: 100%;
-  }
-}
-
-@keyframes cursorBlink {
-
-  0%,
-  50% {
-    border-right-color: #33FF33;
-  }
-
-  51%,
-  100% {
-    border-right-color: transparent;
-  }
-}
-
-
-.progress-fill {
-  width: 0%;
-  height: 100%;
-  background: #33FF33;
-  box-shadow: 0 0 8px #00FF00;
-  animation: progressFill 2s ease-out forwards;
-  animation-delay: 3.5s;
-}
-
-@keyframes progressFill {
-  0% {
-    width: 0%;
-  }
-
-  40% {
-    width: 65%;
-  }
-
-  60% {
-    width: 65%;
-  }
-
-  75% {
-    width: 82%;
-  }
-
-  85% {
-    width: 82%;
-  }
-
-  100% {
-    width: 100%;
-  }
-}
-
-
-@keyframes screenShake {
-
-  0%,
-  100% {
-    transform: translate(0);
-  }
-
-  10% {
-    transform: translate(-3px, 1px);
-  }
-
-  20% {
-    transform: translate(3px, -1px);
-  }
-
-  30% {
-    transform: translate(-2px, 2px);
-  }
-
-  40% {
-    transform: translate(2px, -2px);
-  }
-
-  50% {
-    transform: translate(-1px, 1px);
-  }
-
-  60% {
-    transform: translate(1px, 0px);
-  }
-
-  70% {
-    transform: translate(0px, -1px);
-  }
-}
-
-.screen-shake {
-  animation: screenShake 0.5s ease-out;
-}
-
-
-.glitch-scan {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
-  animation: glitchScan 4s linear infinite;
-  pointer-events: none;
-  top: 0;
-}
-
-@keyframes glitchScan {
-  0% {
-    top: 0%;
-    opacity: 0;
-  }
-
-  5% {
-    opacity: 1;
-  }
-
-  95% {
-    opacity: 1;
-  }
-
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
-}
-
-
-.skull-pixel {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 2px;
-  width: fit-content;
-}
-
-.px {
-  width: 8px;
-  height: 8px;
-  background: transparent;
-}
-
-.px.g {
-  background: #33FF33;
-  box-shadow: 0 0 4px #00FF00;
-}
-
-.px.d {
-  background: #0a0a0a;
-}
-
-
-.noise-bar {
-  height: 3px;
-  background: repeating-linear-gradient(90deg, #33FF33 0px, #33FF33 3px, transparent 3px, transparent 7px);
-  animation: noiseFade 0.5s steps(4) infinite;
-  opacity: 0.4;
-}
-
-@keyframes noiseFade {
-  0% {
-    background-position: 0px;
-    opacity: 0.4;
-  }
-
-  25% {
-    background-position: -7px;
-    opacity: 0.6;
-  }
-
-  50% {
-    background-position: 14px;
-    opacity: 0.3;
-  }
-
-  75% {
-    background-position: -3px;
-    opacity: 0.5;
-  }
-
-  100% {
-    background-position: 0px;
-    opacity: 0.4;
-  }
-}
-
-
-.btn-glow {
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.btn-glow:hover {
-  box-shadow: 0 0 30px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-
-.raster-line {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg,
-      transparent, transparent 2px,
-      rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 4px);
-  pointer-events: none;
-  z-index: 5;
-}
-
-</style></head><body class="bg-[#1a1a1a] text-crt-green overflow-x-hidden min-h-screen pb-8"><div class="fixed inset-0 bg-gradient-radial from-[#0a0a0a] to-black"></div><div class="crt-overlay fixed inset-0 z-[100]"></div><div class="crt-flicker fixed inset-0 bg-[rgba(10,10,10,0.1)] z-[99]"></div><div class="relative z-10 w-full max-w-[680px] mx-auto px-1 sm:px-5 py-1 sm:py-10"><div id="mainCard"
-class="bg-[#2a2a2a] border-[12px] sm:border-[16px] border-[#1a1a1a] rounded-lg sm:rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_10px_40px_rgba(0,0,0,0.6)] p-2.5 sm:p-5"><div class="bg-screen-bg border-2 sm:border-[3px] border-[#333] p-5 sm:p-6 shadow-[inset_0_0_50px_rgba(0,255,0,0.1)] relative overflow-hidden"><div class="raster-line"></div><div class="glitch-scan"></div><div class="text-crt-green text-[7px] xs:text-[8px] sm:text-[9px] mb-5 opacity-70 font-mono flex items-center justify-between"><span>&gt;
-ERROR: 404<span class="inline-block w-2 h-3 bg-crt-green animate-blink ml-1"></span></span><span class="opacity-50">PAGE NOT FOUND</span></div><div class="noise-bar mb-4"></div><div class="text-center mb-6 relative"><div class="four-o-four">404</div></div><div class="noise-bar mb-5"></div><div class="text-center mb-6"><h1 class="text-[10px] xs:text-[12px] sm:text-[14px] leading-tight tracking-wider uppercase text-crt-green text-glow">PAGE NOT FOUND </h1><div class="text-[7px] xs:text-[8px] sm:text-[9px] text-dark-green mt-2 text-glow-sm opacity-80">&gt;
-&gt;
-FATAL READ ERROR &lt;
-&lt;
-</div></div><div class="flex justify-center mb-6"><div class="skull-pixel" aria-hidden="true"><div class="px"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px d"></div><div class="px d"></div><div class="px g"></div><div class="px d"></div><div class="px d"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px d"></div><div class="px d"></div><div class="px g"></div><div class="px d"></div><div class="px d"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px d"></div><div class="px g"></div><div class="px d"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px"></div><div class="px g"></div><div class="px d"></div><div class="px g"></div><div class="px d"></div><div class="px g"></div><div class="px d"></div><div class="px g"></div><div class="px"></div><div class="px"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px g"></div><div class="px"></div></div></div><a href="/"
-class="btn-glow flex items-center justify-between gap-3 no-underline text-screen-bg bg-crt-green border-2 sm:border-[3px] border-dark-green p-4 sm:p-4 transition-all duration-100 hover:bg-glow hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 focus:ring-offset-screen-bg"><div class="flex items-center gap-3"><span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold">▶ RETURN TO BASE</span></div><span class="hidden sm:inline text-[14px] opacity-85">ENTER ↵</span></a><div class="mt-6 pt-5 border-t-2 border-dashed border-dark-green"><div class="noise-bar mb-3"></div><div class="text-[7px] xs:text-[9px] sm:text-[8px] text-dark-green text-center opacity-60">KAZVT.COM © <span id="year"></span> /// PAGE DELETED BY MONKE
-</div></div></div></div></div><script>document.getElementById('year').textContent=new Date().getFullYear();
-
-// Trigger screen shake on load
-const card=document.getElementById('mainCard');
-card.classList.add('screen-shake');
-
-// Random glitch flashes
-function randomGlitch() {
-  const el=document.querySelector('.four-o-four');
-
-  el.style.filter=`hue-rotate($ {
+        .text-glow {
+            text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .text-glow-sm {
+            text-shadow: 0 0 5px #00FF00;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(10px);
+            }
+        }
+
+        @keyframes flicker {
+
+            0%,
+            100% {
+                opacity: 0.05;
+            }
+
+            50% {
+                opacity: 0.1;
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
+            }
+
+            50% {
+                text-shadow: 0 0 2px #00FF00, 0 0 4px #00FF00;
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+
+        .four-o-four {
+            font-size: clamp(48px, 15vw, 120px);
+            color: #33FF33;
+            text-shadow: 0 0 20px #00FF00, 0 0 40px #00FF00;
+            position: relative;
+            display: inline-block;
+            animation: glitch404 3s infinite;
+        }
+
+        @keyframes glitch404 {
+
+            0%,
+            90%,
+            100% {
+                transform: translate(0);
+                filter: none;
+            }
+
+            91% {
+                transform: translate(-4px, 0);
+                filter: hue-rotate(90deg);
+                text-shadow: 4px 0 #FF0000, -4px 0 #00FFFF, 0 0 20px #00FF00;
+            }
+
+            92% {
+                transform: translate(4px, 0);
+                filter: none;
+            }
+
+            93% {
+                transform: translate(0, -2px);
+                filter: hue-rotate(180deg);
+                text-shadow: -4px 0 #FF0000, 4px 0 #00FFFF, 0 0 20px #00FF00;
+            }
+
+            94% {
+                transform: translate(0);
+                filter: none;
+            }
+
+            96% {
+                transform: translate(2px, 2px);
+                clip-path: inset(30% 0 40% 0);
+                text-shadow: -2px 0 #FF0000, 2px 0 #00FFFF;
+            }
+
+            97% {
+                transform: translate(0);
+                clip-path: none;
+                filter: none;
+            }
+        }
+
+
+        .four-o-four::before,
+        .four-o-four::after {
+            content: '404';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .four-o-four::before {
+            color: #FF0055;
+            animation: glitchTop 3s infinite;
+            clip-path: inset(0 0 60% 0);
+            opacity: 0;
+        }
+
+        .four-o-four::after {
+            color: #00FFFF;
+            animation: glitchBottom 3s infinite;
+            clip-path: inset(60% 0 0 0);
+            opacity: 0;
+        }
+
+        @keyframes glitchTop {
+
+            0%,
+            89%,
+            100% {
+                opacity: 0;
+                transform: translate(0);
+            }
+
+            90% {
+                opacity: 0.8;
+                transform: translate(-6px, -2px);
+            }
+
+            91% {
+                opacity: 0;
+            }
+
+            95% {
+                opacity: 0.6;
+                transform: translate(4px, 0);
+            }
+
+            96% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes glitchBottom {
+
+            0%,
+            89%,
+            100% {
+                opacity: 0;
+                transform: translate(0);
+            }
+
+            90% {
+                opacity: 0.7;
+                transform: translate(6px, 2px);
+            }
+
+            91% {
+                opacity: 0;
+            }
+
+            95% {
+                opacity: 0.5;
+                transform: translate(-3px, 0);
+            }
+
+            96% {
+                opacity: 0;
+            }
+        }
+
+
+        .terminal-line {
+            overflow: hidden;
+            white-space: nowrap;
+            opacity: 0;
+            border-right: 2px solid transparent;
+        }
+
+        .terminal-line.typing {
+            animation: typeIn var(--duration, 1.2s) steps(var(--chars, 30)) forwards,
+                fadeInLine 0.05s forwards;
+        }
+
+        .terminal-line.done {
+            opacity: 1;
+        }
+
+        .terminal-line.cursor-active {
+            border-right-color: #33FF33;
+            animation: typeIn var(--duration, 1.2s) steps(var(--chars, 30)) forwards,
+                fadeInLine 0.05s forwards,
+                cursorBlink 0.7s step-end infinite var(--duration, 1.2s);
+        }
+
+        @keyframes fadeInLine {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes typeIn {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes cursorBlink {
+
+            0%,
+            50% {
+                border-right-color: #33FF33;
+            }
+
+            51%,
+            100% {
+                border-right-color: transparent;
+            }
+        }
+
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #33FF33;
+            box-shadow: 0 0 8px #00FF00;
+            animation: progressFill 2s ease-out forwards;
+            animation-delay: 3.5s;
+        }
+
+        @keyframes progressFill {
+            0% {
+                width: 0%;
+            }
+
+            40% {
+                width: 65%;
+            }
+
+            60% {
+                width: 65%;
+            }
+
+            75% {
+                width: 82%;
+            }
+
+            85% {
+                width: 82%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+
+        @keyframes screenShake {
+
+            0%,
+            100% {
+                transform: translate(0);
+            }
+
+            10% {
+                transform: translate(-3px, 1px);
+            }
+
+            20% {
+                transform: translate(3px, -1px);
+            }
+
+            30% {
+                transform: translate(-2px, 2px);
+            }
+
+            40% {
+                transform: translate(2px, -2px);
+            }
+
+            50% {
+                transform: translate(-1px, 1px);
+            }
+
+            60% {
+                transform: translate(1px, 0px);
+            }
+
+            70% {
+                transform: translate(0px, -1px);
+            }
+        }
+
+        .screen-shake {
+            animation: screenShake 0.5s ease-out;
+        }
+
+
+        .glitch-scan {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+            animation: glitchScan 4s linear infinite;
+            pointer-events: none;
+            top: 0;
+        }
+
+        @keyframes glitchScan {
+            0% {
+                top: 0%;
+                opacity: 0;
+            }
+
+            5% {
+                opacity: 1;
+            }
+
+            95% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+
+        .skull-pixel {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 2px;
+            width: fit-content;
+        }
+
+        .px {
+            width: 8px;
+            height: 8px;
+            background: transparent;
+        }
+
+        .px.g {
+            background: #33FF33;
+            box-shadow: 0 0 4px #00FF00;
+        }
+
+        .px.d {
+            background: #0a0a0a;
+        }
+
+
+        .noise-bar {
+            height: 3px;
+            background: repeating-linear-gradient(90deg, #33FF33 0px, #33FF33 3px, transparent 3px, transparent 7px);
+            animation: noiseFade 0.5s steps(4) infinite;
+            opacity: 0.4;
+        }
+
+        @keyframes noiseFade {
+            0% {
+                background-position: 0px;
+                opacity: 0.4;
+            }
+
+            25% {
+                background-position: -7px;
+                opacity: 0.6;
+            }
+
+            50% {
+                background-position: 14px;
+                opacity: 0.3;
+            }
+
+            75% {
+                background-position: -3px;
+                opacity: 0.5;
+            }
+
+            100% {
+                background-position: 0px;
+                opacity: 0.4;
+            }
+        }
+
+
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .raster-line {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                    transparent, transparent 2px,
+                    rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 4px);
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+
+<body class="bg-[#1a1a1a] text-crt-green overflow-x-hidden min-h-screen pb-8">
+    <div class="fixed inset-0 bg-gradient-radial from-[#0a0a0a] to-black"></div>
+    <div class="crt-overlay fixed inset-0 z-[100]"></div>
+    <div class="crt-flicker fixed inset-0 bg-[rgba(10,10,10,0.1)] z-[99]"></div>
+    <div class="relative z-10 w-full max-w-[680px] mx-auto px-1 sm:px-5 py-1 sm:py-10">
+        <div id="mainCard"
+            class="bg-[#2a2a2a] border-[12px] sm:border-[16px] border-[#1a1a1a] rounded-lg sm:rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_10px_40px_rgba(0,0,0,0.6)] p-2.5 sm:p-5">
+            <div
+                class="bg-screen-bg border-2 sm:border-[3px] border-[#333] p-5 sm:p-6 shadow-[inset_0_0_50px_rgba(0,255,0,0.1)] relative overflow-hidden">
+                <div class="raster-line"></div>
+                <div class="glitch-scan"></div>
+                <div
+                    class="text-crt-green text-[7px] xs:text-[8px] sm:text-[9px] mb-5 opacity-70 font-mono flex items-center justify-between">
+                    <span>&gt;
+                        ERROR: 404<span class="inline-block w-2 h-3 bg-crt-green animate-blink ml-1"></span></span><span
+                        class="opacity-50">PAGE NOT FOUND</span>
+                </div>
+                <div class="noise-bar mb-4"></div>
+                <div class="text-center mb-6 relative">
+                    <div class="four-o-four">404</div>
+                </div>
+                <div class="noise-bar mb-5"></div>
+                <div class="text-center mb-6">
+                    <h1
+                        class="text-[10px] xs:text-[12px] sm:text-[14px] leading-tight tracking-wider uppercase text-crt-green text-glow">
+                        PAGE NOT FOUND </h1>
+                    <div class="text-[7px] xs:text-[8px] sm:text-[9px] text-dark-green mt-2 text-glow-sm opacity-80">
+                        &gt;
+                        &gt;
+                        FATAL READ ERROR &lt;
+                        &lt;
+                    </div>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <div class="skull-pixel" aria-hidden="true">
+                        <div class="px"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px d"></div>
+                        <div class="px g"></div>
+                        <div class="px"></div>
+                        <div class="px"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px g"></div>
+                        <div class="px"></div>
+                    </div>
+                </div>
+                <a href="/"
+                    class="btn-glow flex items-center justify-between gap-3 no-underline text-screen-bg bg-crt-green border-2 sm:border-[3px] border-dark-green p-4 sm:p-4 transition-all duration-100 hover:bg-glow hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 focus:ring-offset-screen-bg">
+                    <div class="flex items-center gap-3"><span
+                            class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold">▶ RETURN
+                            TO BASE</span></div><span class="hidden sm:inline text-[14px] opacity-85">ENTER ↵</span>
+                </a>
+                <div class="mt-5">
+                    <div class="noise-bar mb-3"></div>
+                    <div class="text-[7px] xs:text-[9px] sm:text-[8px] text-dark-green text-center opacity-60">KAZVT.COM
+                        © <span id="year"></span> /// PAGE DELETED BY MONKE
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Trigger screen shake on load
+        const card = document.getElementById('mainCard');
+        card.classList.add('screen-shake');
+
+        // Random glitch flashes
+        function randomGlitch() {
+            const el = document.querySelector('.four-o-four');
+
+            el.style.filter = `hue-rotate($ {
       Math.random()*360
     }
 
     deg) brightness(1.5)`;
 
-  el.style.transform=`translate($ {
+            el.style.transform = `translate($ {
       (Math.random()-0.5)*8
     }
 
@@ -579,14 +712,17 @@ function randomGlitch() {
 
     px)`;
 
-  setTimeout(()=> {
-      el.style.filter='';
-      el.style.transform='';
-    }
+            setTimeout(() => {
+                el.style.filter = '';
+                el.style.transform = '';
+            }
 
-    , 80);
-  setTimeout(randomGlitch, 2000 + Math.random() * 5000);
-}
+                , 80);
+            setTimeout(randomGlitch, 2000 + Math.random() * 5000);
+        }
 
-setTimeout(randomGlitch, 3000);
-</script></body></html>
+        setTimeout(randomGlitch, 3000);
+    </script>
+</body>
+
+</html>
