@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kazvt!! // setup</title>
+  <link rel="icon" type="image/png" href="icon.gif">
+
+  <meta property="og:title" content="kazvt // multistream setup">
+  <meta property="og:description" content="kaz's personal multistreaming setup: cloud relay, title updater, multichat & music">
+  <meta property="og:image" content="https://kazvt.com/icon.gif">
+  <meta property="og:url" content="https://kazvt.com/setup">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#33FF33">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          screens: { 'xs': '375px' },
+          fontFamily: { pixel: ['"Press Start 2P"', 'monospace'] },
+          colors: {
+            'crt-green': '#33FF33',
+            'dark-green': '#00AA00',
+            'screen-bg': '#0a0a0a',
+            'glow': '#00FF00',
+            'amber': '#FFB000',
+          },
+          animation: {
+            'scanline': 'scanline 8s linear infinite',
+            'flicker': 'flicker 0.15s infinite',
+            'glow': 'glow 2s ease-in-out infinite',
+            'blink': 'blink 1s step-end infinite',
+          },
+          keyframes: {
+            scanline: { '0%': { transform: 'translateY(0)' }, '100%': { transform: 'translateY(10px)' } },
+            flicker: { '0%, 100%': { opacity: '0.05' }, '50%': { opacity: '0.1' } },
+            glow: {
+              '0%, 100%': { textShadow: '0 0 5px #00FF00, 0 0 10px #00FF00, 0 0 15px #00FF00' },
+              '50%': { textShadow: '0 0 2px #00FF00, 0 0 4px #00FF00, 0 0 6px #00FF00' },
+            },
+            blink: { '0%, 50%': { opacity: '1' }, '51%, 100%': { opacity: '0' } },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Press Start 2P', monospace; image-rendering: pixelated; }
+    .body-text { font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.8; }
+
+    .crt-overlay {
+      background: repeating-linear-gradient(to bottom,
+        rgba(0,255,0,0.03) 0px, rgba(0,255,0,0.03) 1px,
+        transparent 1px, transparent 2px);
+      animation: scanline 8s linear infinite;
+      pointer-events: none;
+    }
+    .crt-flicker { animation: flicker 0.15s infinite; pointer-events: none; }
+
+    .text-glow {
+      text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
+      animation: glow 2s ease-in-out infinite;
+    }
+    .text-glow-sm { text-shadow: 0 0 5px #00FF00; }
+
+    @keyframes scanline { 0% { transform: translateY(0); } 100% { transform: translateY(10px); } }
+    @keyframes flicker { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.1; } }
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 5px #00FF00, 0 0 10px #00FF00, 0 0 15px #00FF00; }
+      50%       { text-shadow: 0 0 2px #00FF00, 0 0 4px #00FF00, 0 0 6px #00FF00; }
+    }
+    @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+    @keyframes slideIn {
+      0%   { opacity: 0; transform: translateX(-10px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .step-card {
+      border: 2px solid #00AA00;
+      background: rgba(0,255,0,0.03);
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .step-card:hover {
+      border-color: #33FF33;
+      background: rgba(0,255,0,0.07);
+    }
+
+    .corner-tl { position: absolute; top: 0;    left: 0;  width: 10px; height: 10px; border-top:    3px solid #33FF33; border-left:   3px solid #33FF33; opacity: 0.8; }
+    .corner-tr { position: absolute; top: 0;    right: 0; width: 10px; height: 10px; border-top:    3px solid #33FF33; border-right:  3px solid #33FF33; opacity: 0.8; }
+    .corner-bl { position: absolute; bottom: 0; left: 0;  width: 10px; height: 10px; border-bottom: 3px solid #33FF33; border-left:   3px solid #33FF33; opacity: 0.8; }
+    .corner-br { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 3px solid #33FF33; border-right:  3px solid #33FF33; opacity: 0.8; }
+
+    .wip-badge {
+      background: #1a1a00;
+      border: 2px solid #FFB000;
+      color: #FFB000;
+      text-shadow: 0 0 6px #FFB000;
+      animation: wip-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes wip-pulse {
+      0%, 100% { box-shadow: 0 0 4px rgba(255,176,0,0.4); }
+      50%       { box-shadow: 0 0 10px rgba(255,176,0,0.7); }
+    }
+
+    .link-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid #00AA00;
+      padding: 6px 12px;
+      color: #33FF33;
+      text-decoration: none;
+      font-size: 8px;
+      text-transform: uppercase;
+      transition: border-color 0.1s, background 0.1s;
+      white-space: nowrap;
+    }
+    .link-chip:hover {
+      border-color: #33FF33;
+      background: rgba(0,255,0,0.1);
+      box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    }
+
+    .step-num {
+      font-size: 10px;
+      color: #0a0a0a;
+      background: #33FF33;
+      min-width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(0,255,0,0.5);
+    }
+
+    .note-box {
+      border-left: 3px solid #33FF33;
+      background: rgba(0,255,0,0.05);
+      padding: 10px 14px;
+      font-size: 8px;
+      line-height: 2;
+      color: #33FF33;
+      opacity: 0.85;
+    }
+
+    .note-box.amber-note {
+      border-left-color: #FFB000;
+      background: rgba(255,176,0,0.05);
+      color: #FFB000;
+    }
+
+    @media (max-width: 374px) {
+      .link-chip { font-size: 7px; padding: 5px 8px; }
+    }
+  </style>
+</head>
+
+<body class="bg-[#1a1a1a] text-crt-green overflow-x-hidden min-h-screen pb-8">
+
+  <div class="fixed inset-0 bg-gradient-radial from-[#0a0a0a] to-black"></div>
+  <div class="crt-overlay fixed inset-0 z-[100]"></div>
+  <div class="crt-flicker fixed inset-0 bg-[rgba(10,10,10,0.1)] z-[99]"></div>
+
+  <div class="relative z-10 w-full max-w-[680px] mx-auto px-1 sm:px-5 py-1 sm:py-10">
+
+    <div class="bg-[#2a2a2a] border-[12px] sm:border-[16px] border-[#1a1a1a] rounded-lg sm:rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_10px_40px_rgba(0,0,0,0.6)] p-2.5 sm:p-5">
+
+      <div class="bg-screen-bg border-2 sm:border-[3px] border-[#333] p-7 sm:p-6 shadow-[inset_0_0_50px_rgba(0,255,0,0.1)]">
+
+
+        <div class="text-crt-green text-[7px] xs:text-[8px] sm:text-[9px] mb-6 sm:mb-5 opacity-70 font-mono">
+          &gt; LOADING SETUP.DAT<span class="inline-block w-2 h-3 bg-crt-green animate-blink ml-1"></span>
+        </div>
+
+
+        <div class="mb-10 sm:mb-6 text-center">
+          <h1 class="text-sm xs:text-base sm:text-base md:text-xl leading-tight tracking-wider uppercase text-crt-green text-glow mb-4">
+            █ MULTISTREAM SETUP █
+          </h1>
+          <div class="text-[8px] xs:text-[9px] sm:text-[10px] text-dark-green leading-relaxed text-glow-sm mb-4">
+            &gt;&gt; KAZ'S PERSONAL RIG &lt;&lt;
+          </div>
+          <div class="note-box body-text text-center mx-auto max-w-[480px]">
+            ⚠ the discord guide is still the recommended starting point, easiest setup for most people. this page covers what i personally run.
+          </div>
+        </div>
+
+
+        <div class="flex items-center justify-between gap-2 sm:gap-3 mb-7 sm:mb-5 pb-6 sm:pb-4 border-b-2 border-dashed border-dark-green">
+          <a href="index.html" class="flex items-center gap-2 sm:gap-2.5 text-[7px] xs:text-[8px] sm:text-[9px] bg-transparent text-crt-green px-3.5 sm:px-2.5 py-2 sm:py-1.5 border-2 border-crt-green uppercase whitespace-nowrap no-underline transition-all duration-100 hover:bg-crt-green/10"
+            style="box-shadow: 0 0 10px rgba(0,255,0,0.3)">
+            ◀ BACK
+          </a>
+          <div class="text-[7px] xs:text-[8px] sm:text-[10px] text-dark-green opacity-60 uppercase">
+            LAST UPDATED: 2025
+          </div>
+        </div>
+
+
+        <div class="space-y-6 sm:space-y-5">
+
+
+          <div class="step-card p-5 sm:p-4" style="animation: slideIn 0.3s ease-out;">
+            <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+            <div class="flex items-start gap-3 sm:gap-4 mb-4">
+              <div class="step-num">01</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-[9px] xs:text-[10px] sm:text-[11px] uppercase leading-relaxed mb-1">
+                  CLOUD MULTISTREAMING
+                </div>
+                <div class="text-[7px] xs:text-[8px] opacity-60 uppercase text-dark-green">// no extra local resources</div>
+              </div>
+            </div>
+            <div class="body-text opacity-85 mb-4">
+              instead of running a local relay, i push my stream to a cloud service which then fans it out to all platforms simultaneously. this means zero extra CPU/GPU cost on my end. the big free options are:
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <a href="https://app.restream.io/" target="_blank" rel="noopener noreferrer" class="link-chip">▶ RESTREAM</a>
+              <a href="https://multi.meldstudio.co/" target="_blank" rel="noopener noreferrer" class="link-chip">▶ MELD MULTI</a>
+            </div>
+            <div class="note-box body-text">
+              personally i self-host my own linux server as the relay, but functionally it's the same idea: stream goes in once, comes out on every platform.
+            </div>
+          </div>
+
+
+          <div class="step-card p-5 sm:p-4" style="animation: slideIn 0.4s ease-out;">
+            <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+            <div class="flex items-start gap-3 sm:gap-4 mb-4">
+              <div class="step-num">02</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-[9px] xs:text-[10px] sm:text-[11px] uppercase leading-relaxed mb-1">
+                  MULTISTREAM TITLE UPDATER
+                </div>
+                <div class="text-[7px] xs:text-[8px] opacity-60 uppercase text-dark-green">// update all platforms at once from OBS</div>
+              </div>
+            </div>
+            <div class="body-text opacity-85 mb-4">
+              an OBS widget that pushes your stream title and category to every platform in one go. requires streamer.bot running in the background, but that's actually a bonus for me, because i can customise the underlying code for my own needs.
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <a href="https://nutty.gg/products/multistream-title-updater" target="_blank" rel="noopener noreferrer" class="link-chip">▶ NUTTY.GG TITLE UPDATER</a>
+            </div>
+            <div class="note-box body-text">
+              for example: i hardcode a palestine command into my title via streamer.bot so it always gets appended. kick category is permanently locked to "Vtuber", while twitch and youtube pull from whatever i typed into the widget. nutty also makes a multichat widget, i don't use it personally but i've seen it out in the wild.
+            </div>
+          </div>
+
+
+          <div class="step-card p-5 sm:p-4" style="animation: slideIn 0.5s ease-out;">
+            <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+            <div class="flex items-start gap-3 sm:gap-4 mb-4">
+              <div class="step-num">03</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-[9px] xs:text-[10px] sm:text-[11px] uppercase leading-relaxed mb-1">
+                  COMBINED CHAT
+                </div>
+                <div class="text-[7px] xs:text-[8px] opacity-60 uppercase text-dark-green">// all chats merged into one OBS widget</div>
+              </div>
+            </div>
+            <div class="body-text opacity-85 mb-4">
+              i use Social Stream Ninja, it merges chat from all your platforms into a single OBS browser source. a small companion app runs in the background with a very low footprint, it doesn't do anything except handle chat.
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <a href="https://socialstream.ninja/" target="_blank" rel="noopener noreferrer" class="link-chip">▶ SOCIAL STREAM NINJA</a>
+            </div>
+            <div class="note-box body-text">
+              the feature set is genuinely impressive, twitch pronouns, donation pinning, raid/redeem events baked into the chat overlay, on-screen chat widgets (which i'm still rolling out), and a ridiculous amount of customisation options. highly recommend.
+            </div>
+          </div>
+
+
+          <div class="step-card p-5 sm:p-4" style="animation: slideIn 0.6s ease-out;">
+            <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+            <div class="flex items-start gap-3 sm:gap-4 mb-4">
+              <div class="step-num" style="background:#FFB000; box-shadow: 0 0 8px rgba(255,176,0,0.5);">04</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <div class="text-[9px] xs:text-[10px] sm:text-[11px] uppercase leading-relaxed">
+                    STREAM MUSIC
+                  </div>
+                  <span class="wip-badge text-[6px] xs:text-[7px] px-2 py-1 uppercase">⚙ WIP</span>
+                </div>
+                <div class="text-[7px] xs:text-[8px] opacity-60 uppercase text-dark-green">// still compiling the full list</div>
+              </div>
+            </div>
+            <div class="body-text opacity-85 mb-4">
+              currently running StreamBeats as my main source, it's royalty-free music on youtube/spotify built specifically for streamers so you don't have to worry about VOD muting or copyright claims. i'm also mixing in other sources which i'll document here once i've settled on the full setup.
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <a href="https://www.streambeats.com/" target="_blank" rel="noopener noreferrer" class="link-chip">▶ STREAMBEATS</a>
+            </div>
+            <div class="note-box amber-note body-text">
+              ⚙ more sources coming soon, check back later!
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="mt-8 sm:mt-6 pt-6 sm:pt-5 border-t-2 border-dashed border-dark-green">
+          <div class="step-card p-5 sm:p-4 text-center">
+            <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+            <div class="text-[9px] xs:text-[10px] sm:text-[11px] uppercase mb-3 text-glow-sm">
+              ▶ WANT THE EASIER ROUTE?
+            </div>
+            <div class="body-text opacity-85 mb-4">
+              the discord server has a full walkthrough guide for multistreaming that's designed to be as painless as possible. if you're just getting started, that's where to go first.
+            </div>
+            <a href="https://discord.gg/huzMpfJZ4J" target="_blank" rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 no-underline text-screen-bg bg-crt-green border-2 border-dark-green px-5 py-3 text-[9px] xs:text-[10px] uppercase transition-all duration-100 hover:bg-glow hover:scale-[1.02] active:scale-[0.98]"
+              style="box-shadow: 0 0 20px rgba(0,255,0,0.4)">
+              JOIN DISCORD ↵
+            </a>
+          </div>
+        </div>
+
+
+        <footer class="mt-6 pt-6 border-t-2 border-dashed border-dark-green">
+          <div class="text-[7px] xs:text-[9px] sm:text-[8px] text-dark-green text-center opacity-60">
+            KAZVT.COM © <span id="year"></span> /// SETUP.DAT
+          </div>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
