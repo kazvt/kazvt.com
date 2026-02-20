@@ -288,13 +288,9 @@
       50% { transform: translateY(-3px); opacity: 1; }
     }
 
-    .stream-info-float {
+    .stream-label-float {
       display: inline-block;
-      animation: floatText 3s ease-in-out infinite;
-    }
-
-    #streamCategory .stream-info-float {
-      animation-delay: 0.4s;
+      animation: floatText 2.5s ease-in-out infinite;
     }
   </style>
 </head>
@@ -447,9 +443,9 @@
 
 
         <div id="streamInfoBlock" class="hidden mt-6 sm:mt-4 relative border-2 border-amber px-4 pt-5 pb-3 text-[7px] xs:text-[8px] sm:text-[9px] text-amber leading-loose" style="box-shadow: 0 0 18px rgba(255,176,0,0.18), inset 0 0 12px rgba(255,176,0,0.06);">
-          <div class="absolute left-1/2 -translate-x-1/2 -top-[0.6em] bg-screen-bg px-2 uppercase tracking-widest text-[7px] xs:text-[8px] sm:text-[9px] text-amber font-bold whitespace-nowrap" style="text-shadow: 0 0 8px rgba(255,176,0,0.8);">◄ NOW_STREAMING ►</div>
-          <div class="mt-1"><span class="opacity-60">▶ TITLE:</span> <span id="streamTitle"><span class="stream-info-float"></span></span></div>
-          <div><span class="opacity-60">▶ CATEGORY:</span> <span id="streamCategory"><span class="stream-info-float"></span></span></div>
+          <div class="absolute left-1/2 -translate-x-1/2 -top-[0.6em] bg-screen-bg px-2 uppercase tracking-widest text-[7px] xs:text-[8px] sm:text-[9px] text-amber whitespace-nowrap stream-label-float" style="text-shadow: 0 0 8px rgba(255,176,0,0.8);">▲ NOW_STREAMING ▲</div>
+          <div class="mt-1"><span class="opacity-60">▶ TITLE:</span> <span id="streamTitle"></span></div>
+          <div><span class="opacity-60">▶ CATEGORY:</span> <span id="streamCategory"></span></div>
         </div>
 
         <div class="mt-8 sm:mt-6 pt-6 sm:pt-5 border-t-2 border-dashed border-dark-green">
@@ -704,8 +700,8 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
         block.classList.add('hidden');
         return;
       }
-      document.querySelector('#streamTitle .stream-info-float').textContent = (info.title || '???').toUpperCase();
-      document.querySelector('#streamCategory .stream-info-float').textContent = (info.category || '???').toUpperCase();
+      document.getElementById('streamTitle').textContent = (info.title || '???').toUpperCase();
+      document.getElementById('streamCategory').textContent = (info.category || '???').toUpperCase();
       block.classList.remove('hidden');
     }
 
