@@ -332,6 +332,13 @@
         </div>
 
 
+        <div id="streamInfoBlock" class="hidden mb-6 sm:mb-4 border-2 border-dashed border-amber px-4 py-3 text-[7px] xs:text-[8px] sm:text-[9px] text-amber leading-loose">
+          <div class="opacity-60 mb-1 uppercase tracking-wider">[ NOW_PLAYING ]</div>
+          <div><span class="opacity-60">▶ TITLE:</span> <span id="streamTitle"></span></div>
+          <div><span class="opacity-60">▶ CATEGORY:</span> <span id="streamCategory"></span></div>
+        </div>
+
+
         <div class="space-y-6 sm:space-y-4">
 
 
@@ -658,6 +665,37 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
       }
     }
 
+    async function loadStreamInfo() {
+      try {
+        const res = await fetch('./last_stream_info.txt', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Could not load last_stream_info.txt');
+        const text = await res.text();
+
+        const info = {};
+        text.split(/\r?\n/).forEach(line => {
+          const cleaned = line.trim();
+          if (!cleaned || cleaned.startsWith('#')) return;
+          const m = cleaned.match(/^([a-z0-9_-]+)\s*:\s*(.+)$/i);
+          if (!m) return;
+          info[m[1].toLowerCase()] = m[2].trim();
+        });
+        return info;
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function applyStreamInfo(isAnyLive, info) {
+      const block = document.getElementById('streamInfoBlock');
+      if (!isAnyLive || (!info.title && !info.category)) {
+        block.classList.add('hidden');
+        return;
+      }
+      document.getElementById('streamTitle').textContent = info.title || '???';
+      document.getElementById('streamCategory').textContent = info.category || '???';
+      block.classList.remove('hidden');
+    }
+
     function applyStatus(platform, state) {
       const btn = document.querySelector(`[data-platform="${platform}"]`);
       if (!btn) return;
@@ -687,7 +725,7 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
     }
 
     async function refresh() {
-      const statuses = await loadStatuses();
+      const [statuses, streamInfo] = await Promise.all([loadStatuses(), loadStreamInfo()]);
       const twitchStatus = statuses.twitch || 'offline';
       const youtubeStatus = statuses.youtube || 'offline';
       const kickStatus = statuses.kick || 'offline';
@@ -700,6 +738,7 @@ ${platformStatuses[2]}: https://kick.com/kazvt`;
       updateTitle(isAnyLive);
 
       updateMetadata(statuses);
+      applyStreamInfo(isAnyLive, streamInfo);
     }
 
     refresh();
