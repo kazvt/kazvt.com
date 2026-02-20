@@ -449,7 +449,7 @@
         </div>
 
         <div class="mt-8 sm:mt-6 pt-6 sm:pt-5 border-t-2 border-dashed border-dark-green">
-          <div id="bioSection" onclick="toggleBio()"
+          <div id="bioSection" onclick="openBioDrawer()"
             class="border-2 border-transparent transition-all duration-200 p-2 cursor-pointer">
 
             <div
@@ -591,167 +591,175 @@
   </div>
 
   <script>
-    function toggleBio() {
-      const content = document.getElementById('bioContent');
-      const arrow = document.getElementById('bioArrow');
-      const hint = document.getElementById('bioHint');
+    // bio drawer toggle - kaz copied this herself from a stackoverflow thingy, took forever to get right
+    function openBioDrawer() {
+      var drawer = document.getElementById('bioContent')
+      var chevron = document.getElementById('bioArrow')
+      var hintLabel = document.getElementById('bioHint')
 
-      if (content.style.gridTemplateRows === '1fr') {
-        content.style.gridTemplateRows = '0fr';
-        arrow.textContent = '▼';
-        arrow.style.transform = 'rotate(0deg)';
-        hint.textContent = 'EXPAND';
+      var isOpen = drawer.style.gridTemplateRows === '1fr'
+      if (isOpen) {
+        drawer.style.gridTemplateRows = '0fr'
+        chevron.textContent = '▼'
+        chevron.style.transform = ''
+        hintLabel.textContent = 'EXPAND'
       } else {
-        content.style.gridTemplateRows = '1fr';
-        arrow.textContent = '▲';
-        arrow.style.transform = 'rotate(180deg)';
-        hint.textContent = 'COLLAPSE';
+        drawer.style.gridTemplateRows = '1fr'
+        chevron.textContent = '▲'
+        chevron.style.transform = 'rotate(180deg)'
+        hintLabel.textContent = 'COLLAPSE'
       }
     }
 
-    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('year').textContent = new Date().getFullYear()
 
-    const baseTitle = 'kazvt!!';
+    // page title stuff - blink the red dot when live so ppl notice in their tabs
+    var PAGE_TITLE = 'kazvt!!'
 
-    function updateMetadata(statuses) {
-      const twitchLive = statuses.twitch === 'live';
-      const youtubeLive = statuses.youtube === 'live';
-      const kickLive = statuses.kick === 'live';
-      const isAnyLive = twitchLive || youtubeLive || kickLive;
-
-      const platformStatuses = [];
-      if (twitchLive) platformStatuses.push('🟣 twitch (live)');
-      else platformStatuses.push('🟣 twitch');
-
-      if (youtubeLive) platformStatuses.push('🔴 yt (live)');
-      else platformStatuses.push('🔴 yt');
-
-      if (kickLive) platformStatuses.push('🟢 kick (live)');
-      else platformStatuses.push('🟢 kick');
-
-      const titleText = isAnyLive ? 'kazvt (live rn!)' : 'kazvt';
-      document.getElementById('og-title').setAttribute('content', titleText);
-      document.getElementById('twitter-title').setAttribute('content', titleText);
-
-      const descriptionText = `i am a monke called kaz, she/her, i play retro games :)
-
-${platformStatuses[0]}: https://www.twitch.tv/kazvt
-${platformStatuses[1]}: https://www.youtube.com/@kazvt
-${platformStatuses[2]}: https://kick.com/kazvt`;
-
-      document.getElementById('og-description').setAttribute('content', descriptionText);
-      document.getElementById('twitter-description').setAttribute('content', descriptionText);
-
-      const themeColor = isAnyLive ? '#33FF33' : '#0a0a0a';
-      document.getElementById('theme-color').setAttribute('content', themeColor);
-
-      const imageUrl = isAnyLive ? 'https://kazvt.com/icon.gif' : 'https://kazvt.com/icon.gif';
-      document.getElementById('og-image').setAttribute('content', imageUrl);
-      document.getElementById('twitter-image').setAttribute('content', imageUrl);
+    function setTabLiveIndicator(anyoneLive) {
+      document.title = anyoneLive ? '🔴 ' + PAGE_TITLE : PAGE_TITLE
     }
 
-    function updateTitle(isAnyLive) {
-      document.title = isAnyLive ? '🔴 ' + baseTitle : baseTitle;
+    // updates all the og/twitter meta tags so embeds look right when streaming
+    // honestly a bit annoying that this has to be done manually but whatever
+    function patchEmbedMeta(platformStates) {
+      var twitchOn = platformStates.twitch === 'live'
+      var youtubeOn = platformStates.youtube === 'live'
+      var kickOn = platformStates.kick === 'live'
+      var anyLive = twitchOn || youtubeOn || kickOn
+
+      var titleForEmbed = anyLive ? 'kazvt (live rn!)' : 'kazvt'
+      document.getElementById('og-title').setAttribute('content', titleForEmbed)
+      document.getElementById('twitter-title').setAttribute('content', titleForEmbed)
+
+      // build the description with (live) tags next to whichever platforms are active
+      var twitchLine  = (twitchOn  ? '🟣 twitch (live)'  : '🟣 twitch')  + ': https://www.twitch.tv/kazvt'
+      var youtubeLine = (youtubeOn ? '🔴 yt (live)'      : '🔴 yt')      + ': https://www.youtube.com/@kazvt'
+      var kickLine    = (kickOn    ? '🟢 kick (live)'    : '🟢 kick')    + ': https://kick.com/kazvt'
+
+      var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine
+      document.getElementById('og-description').setAttribute('content', desc)
+      document.getElementById('twitter-description').setAttribute('content', desc)
+
+      // theme-color goes dark when offline so the browser chrome isn't weirdly bright
+      document.getElementById('theme-color').setAttribute('content', anyLive ? '#33FF33' : '#0a0a0a')
+
+      // same icon either way for now, might swap it out later
+      document.getElementById('og-image').setAttribute('content', 'https://kazvt.com/icon.gif')
+      document.getElementById('twitter-image').setAttribute('content', 'https://kazvt.com/icon.gif')
     }
 
-    async function loadStatuses() {
+    // pulls status.txt which my server-side script updates every minute or so
+    async function fetchPlatformStatuses() {
+      var result = {}
       try {
-        const res = await fetch('./status.txt', { cache: 'no-store' });
-        if (!res.ok) throw new Error('Could not load status.txt');
-        const text = await res.text();
+        var resp = await fetch('./status.txt', { cache: 'no-store' })
+        if (!resp.ok) throw new Error('status fetch failed: ' + resp.status)
+        var raw = await resp.text()
 
-        const map = {};
-        text.split(/\r?\n/).forEach(line => {
-          const cleaned = line.trim();
-          if (!cleaned || cleaned.startsWith('#')) return;
-          const m = cleaned.match(/^([a-z0-9_-]+)\s*:\s*(live|offline)\s*$/i);
-          if (!m) return;
-          map[m[1].toLowerCase()] = m[2].toLowerCase();
-        });
-        return map;
-      } catch (e) {
-        return {};
+        raw.split(/\r?\n/).forEach(function(row) {
+          var trimmed = row.trim()
+          if (!trimmed || trimmed[0] === '#') return  // skip blanks + comments
+          var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline)\s*$/i)
+          if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
+        })
+      } catch(err) {
+        // if the file's missing or broken just treat everything as offline, no big deal
+        console.warn('couldnt load status.txt, assuming offline', err)
       }
+      return result
     }
 
-    async function loadStreamInfo() {
+    // grabs last_stream_info.txt for the currently-live stream title/game
+    async function fetchCurrentStreamInfo() {
+      var info = {}
       try {
-        const res = await fetch('./last_stream_info.txt', { cache: 'no-store' });
-        if (!res.ok) throw new Error('Could not load last_stream_info.txt');
-        const text = await res.text();
+        var resp = await fetch('./last_stream_info.txt', { cache: 'no-store' })
+        if (!resp.ok) throw new Error('stream info fetch bombed: ' + resp.status)
+        var raw = await resp.text()
 
-        const info = {};
-        text.split(/\r?\n/).forEach(line => {
-          const cleaned = line.trim();
-          if (!cleaned || cleaned.startsWith('#')) return;
-          const m = cleaned.match(/^([a-z0-9_-]+)\s*:\s*(.+)$/i);
-          if (!m) return;
-          info[m[1].toLowerCase()] = m[2].trim();
-        });
-        return info;
-      } catch (e) {
-        return {};
+        raw.split(/\r?\n/).forEach(function(row) {
+          var trimmed = row.trim()
+          if (!trimmed || trimmed[0] === '#') return
+          var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(.+)$/i)
+          if (match) info[match[1].toLowerCase()] = match[2].trim()
+        })
+      } catch(err) {
+        console.warn('couldnt load stream info', err)
       }
+      return info
     }
 
-    function applyStreamInfo(isAnyLive, info) {
-      const block = document.getElementById('streamInfoBlock');
-      if (!isAnyLive || (!info.title && !info.category)) {
-        block.classList.add('hidden');
-        return;
+    // show/hide the amber NOW_STREAMING box with title + category
+    function renderStreamInfoBox(anyLive, info) {
+      var box = document.getElementById('streamInfoBlock')
+      var hasContent = info.title || info.category
+
+      if (!anyLive || !hasContent) {
+        box.classList.add('hidden')
+        return
       }
-      document.getElementById('streamTitle').textContent = (info.title || '???').toUpperCase();
-      document.getElementById('streamCategory').textContent = (info.category || '???').toUpperCase();
-      block.classList.remove('hidden');
+
+      document.getElementById('streamTitle').textContent = (info.title || '???').toUpperCase()
+      document.getElementById('streamCategory').textContent = (info.category || '???').toUpperCase()
+      box.classList.remove('hidden')
     }
 
-    function applyStatus(platform, state) {
-      const btn = document.querySelector(`[data-platform="${platform}"]`);
-      if (!btn) return;
+    // update one platform button - live/offline styling + pip dot + label text
+    function paintPlatformBtn(platform, liveState) {
+      var btn = document.querySelector('[data-platform="' + platform + '"]')
+      if (!btn) return  // shouldn't happen but just in case
 
-      const statusText = btn.querySelector('.status-text');
-      const pip = btn.querySelector('.status-box [aria-hidden="true"]');
+      var label = btn.querySelector('.status-text')
+      var pip   = btn.querySelector('.status-box [aria-hidden="true"]')
 
-      btn.classList.remove('is-live', 'is-offline', 'is-loading');
-      pip.classList.remove('pip-live', 'pip-offline', 'pip-loading', 'bg-amber', 'bg-dark-green', 'bg-screen-bg');
+      // wipe previous state classes before adding the new one
+      btn.classList.remove('is-live', 'is-offline', 'is-loading')
+      pip.classList.remove('pip-live', 'pip-offline', 'pip-loading', 'bg-amber', 'bg-dark-green', 'bg-screen-bg')
 
-      if (state === 'live') {
-        btn.classList.add('is-live');
-        pip.classList.add('pip-live', 'bg-amber');
-        if (statusText) {
-          statusText.textContent = 'LIVE';
-          statusText.classList.remove('loading-dots');
-          statusText.classList.add('status-text-live');
+      if (liveState === 'live') {
+        btn.classList.add('is-live')
+        pip.classList.add('pip-live', 'bg-amber')
+        if (label) {
+          label.textContent = 'LIVE'
+          label.classList.remove('loading-dots')
+          label.classList.add('status-text-live')
         }
       } else {
-        btn.classList.add('is-offline');
-        pip.classList.add('pip-offline');
-        if (statusText) {
-          statusText.textContent = 'OFFLINE';
-          statusText.classList.remove('loading-dots', 'status-text-live');
+        btn.classList.add('is-offline')
+        pip.classList.add('pip-offline')
+        if (label) {
+          label.textContent = 'OFFLINE'
+          label.classList.remove('loading-dots', 'status-text-live')
         }
       }
     }
 
-    async function refresh() {
-      const [statuses, streamInfo] = await Promise.all([loadStatuses(), loadStreamInfo()]);
-      const twitchStatus = statuses.twitch || 'offline';
-      const youtubeStatus = statuses.youtube || 'offline';
-      const kickStatus = statuses.kick || 'offline';
+    // main polling tick - fetches both files, applies everything
+    async function pollAndRender() {
+      var [statuses, streamInfo] = await Promise.all([
+        fetchPlatformStatuses(),
+        fetchCurrentStreamInfo()
+      ])
 
-      applyStatus('twitch', twitchStatus);
-      applyStatus('youtube', youtubeStatus);
-      applyStatus('kick', kickStatus);
+      var twitch  = statuses.twitch  || 'offline'
+      var youtube = statuses.youtube || 'offline'
+      var kick    = statuses.kick    || 'offline'
 
-      const isAnyLive = twitchStatus === 'live' || youtubeStatus === 'live' || kickStatus === 'live';
-      updateTitle(isAnyLive);
+      paintPlatformBtn('twitch',  twitch)
+      paintPlatformBtn('youtube', youtube)
+      paintPlatformBtn('kick',    kick)
 
-      updateMetadata(statuses);
-      applyStreamInfo(isAnyLive, streamInfo);
+      var anyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
+
+      setTabLiveIndicator(anyLive)
+      patchEmbedMeta(statuses)
+      renderStreamInfoBox(anyLive, streamInfo)
     }
 
-    refresh();
-    setInterval(refresh, 3000);
+    // starrt immediately then poll every 3s
+    pollAndRender()
+    setInterval(pollAndRender, 3000)
   </script>
 
 </body>
