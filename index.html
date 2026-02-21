@@ -135,7 +135,7 @@
       box-shadow: 0 0 10px rgba(0, 255, 0, 0.18), inset 0 0 14px rgba(0, 0, 0, 0.35);
     }
 
-    /* so the testing class is slightly brighter than offline but no amber, still we wanna hint its doing something */
+    /* testing: slightly brighter than offline, no amber, just a hint it's doing something */
     .btn-glow.is-testing {
       filter: saturate(0.75) brightness(0.9);
       box-shadow: 0 0 12px rgba(0, 255, 0, 0.22), inset 0 0 12px rgba(0, 0, 0, 0.3);
@@ -176,7 +176,7 @@
       background-color: rgb(80, 80, 80) !important;
     }
 
-    /* the testing pip is dim green with slow idle pulse, and no no amber glow so its not like live */
+    /* testing pip: dim green, slow idle pulse, no amber glow */
     .pip-testing {
       box-shadow: 0 0 0 2px #0a0a0a, 0 0 4px rgba(0, 255, 0, 0.2);
       background-color: rgb(0, 100, 0) !important;
@@ -197,7 +197,7 @@
       animation: terminal-flicker 0.8s steps(2) infinite, statusGlow 2s ease-in-out infinite;
     }
 
-    /* for the testing label we use muted greenwithout any glow animation */
+    /* testing label: muted green, no glow animation */
     .status-text-testing {
       opacity: 0.55;
     }
@@ -315,6 +315,54 @@
       display: inline-block;
       animation: floatText 2.5s ease-in-out infinite;
     }
+
+    /* ── colour knob panel ── */
+    #palettePanel {
+      transition: grid-template-rows 0.3s ease;
+    }
+
+    #paletteKnob {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 0;
+      background: linear-gradient(
+        to right,
+        hsl(120,100%,35%),
+        hsl(180,100%,35%),
+        hsl(240,100%,35%),
+        hsl(300,100%,35%),
+        hsl(360,100%,35%),
+        hsl(60,100%,35%),
+        hsl(120,100%,35%)
+      );
+      outline: none;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    #paletteKnob::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 20px;
+      background: currentColor;
+      border: 2px solid #0a0a0a;
+      cursor: pointer;
+    }
+    #paletteKnob::-moz-range-thumb {
+      width: 12px;
+      height: 20px;
+      background: currentColor;
+      border: 2px solid #0a0a0a;
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    /* the actual hue filter lives here — only touches the CRT screen content */
+    #crtScreen {
+      transition: filter 0.15s ease;
+    }
   </style>
 </head>
 
@@ -333,7 +381,7 @@
       class="bg-[#2a2a2a] border-[12px] sm:border-[16px] border-[#1a1a1a] rounded-lg sm:rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_10px_40px_rgba(0,0,0,0.6)] p-2.5 sm:p-5">
 
 
-      <div
+      <div id="crtScreen"
         class="bg-screen-bg border-2 sm:border-[3px] border-[#333] p-7 sm:p-6 shadow-[inset_0_0_50px_rgba(0,255,0,0.1)]">
 
 
@@ -604,6 +652,13 @@
 
 
         <footer class="mt-6 pt-6 border-t-2 border-dashed border-dark-green">
+
+          <!-- palette toggle trigger -->
+          <div id="paletteTrigger" onclick="togglePalette()" class="flex items-center justify-center gap-2 cursor-pointer opacity-30 hover:opacity-60 transition-opacity duration-200 mb-3 select-none">
+            <span class="text-[6px] xs:text-[7px] uppercase tracking-widest text-crt-green">[ SYS_DISPLAY ]</span>
+            <span id="paletteArrow" class="text-[10px] text-crt-green transition-transform duration-300">▼</span>
+          </div>
+
           <div class="text-[7px] xs:text-[9px] sm:text-[8px] text-dark-green text-center opacity-60">
             KAZVT.COM © <span id="year"></span> /// PRESS START
           </div>
@@ -611,6 +666,59 @@
 
       </div>
     </div>
+
+    <!-- palette drawer — fixed to bottom of screen, outside #crtScreen so hue-rotate never touches it -->
+    <div id="palettePanel"
+      style="
+        font-family: 'Press Start 2P', monospace;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 200;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #0a0a0a;
+        border-top: 2px solid #00AA00;
+        box-shadow: 0 -4px 30px rgba(0,255,0,0.12), inset 0 0 40px rgba(0,0,0,0.6);
+      ">
+      <div style="max-width: 680px; margin: 0 auto; padding: 14px 16px 18px;">
+
+        <!-- header row: label + readout + close button -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <span style="font-size:7px; color:#33FF33; opacity:0.6; text-transform:uppercase; letter-spacing:0.15em;">▶ SYS_DISPLAY // HUE_ROTATE</span>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span id="hueReadout" style="font-size:8px; color:#33FF33; opacity:0.7;">000°</span>
+            <button onclick="togglePalette()"
+              style="font-family:'Press Start 2P',monospace; font-size:8px; color:#33FF33; background:transparent; border:1px solid rgba(0,170,0,0.4); padding:4px 8px; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em; opacity:0.55;"
+              onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.55'">
+              ✕ CLOSE
+            </button>
+          </div>
+        </div>
+
+        <!-- the slider itself -->
+        <input id="paletteKnob" type="range" min="0" max="359" value="0" step="1"
+          style="width:100%; margin-bottom:6px;" oninput="applyHue(this.value)" />
+
+        <!-- range labels -->
+        <div style="display:flex; justify-content:space-between; font-size:6px; color:#33FF33; opacity:0.3; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
+          <span>green</span>
+          <span>cyan</span>
+          <span>blue</span>
+          <span>pink</span>
+          <span>red</span>
+          <span>amber</span>
+        </div>
+
+        <!-- reset -->
+        <button onclick="resetHue()"
+          style="width:100%; font-family:'Press Start 2P',monospace; font-size:6px; color:#33FF33; opacity:0.35; border:1px solid rgba(0,170,0,0.25); padding:5px 0; background:transparent; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em;"
+          onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='0.35'">
+          [ RESET TO GREEN ]
+        </button>
+
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -636,7 +744,7 @@
 
     document.getElementById('year').textContent = new Date().getFullYear()
 
-    // page title stuff, blink the red dot when live so ppl notice in their tabs
+    // page title stuff - blink the red dot when live so ppl notice in their tabs
     // testing does NOT trigger this, we act as if offline for the tab
     var PAGE_TITLE = 'kazvt!!'
 
@@ -665,7 +773,7 @@
       document.getElementById('og-description').setAttribute('content', desc)
       document.getElementById('twitter-description').setAttribute('content', desc)
 
-      // theme color turbs dark when offline/testing so the browser chrome isnt weirdly bright
+      // theme-color goes dark when offline/testing so the browser chrome isn't weirdly bright
       document.getElementById('theme-color').setAttribute('content', anyLive ? '#33FF33' : '#0a0a0a')
 
       document.getElementById('og-image').setAttribute('content', 'https://kazvt.com/icon.gif')
@@ -682,12 +790,12 @@
 
         raw.split(/\r?\n/).forEach(function(row) {
           var trimmed = row.trim()
-          if (!trimmed || trimmed[0] === '#') return  // we should skip blanks and weird comments
+          if (!trimmed || trimmed[0] === '#') return  // skip blanks + comments
           var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline|testing)\s*$/i)
           if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
         })
       } catch(err) {
-        // if the file is missing or broken just treat everything as offline and dont throw errors mayb just a warning for future reference
+        // if the file's missing or broken just treat everything as offline, no big deal
         console.warn('couldnt load status.txt, assuming offline', err)
       }
       return result
@@ -729,7 +837,7 @@
       box.classList.remove('hidden')
     }
 
-    // update one platform button, live/testing/offline styling + pip dot + label text
+    // update one platform button - live/testing/offline styling + pip dot + label text
     function paintPlatformBtn(platform, liveState) {
       var btn = document.querySelector('[data-platform="' + platform + '"]')
       if (!btn) return
@@ -789,6 +897,56 @@
       patchEmbedMeta(statuses)
       renderStreamInfoBox(anyActuallyLive, streamInfo)
     }
+
+    // for palette/hue knob that opens and closes like a drawer
+    var paletteOpen = false
+
+    function togglePalette() {
+      var panel   = document.getElementById('palettePanel')
+      var arrow   = document.getElementById('paletteArrow')
+      var trigger = document.getElementById('paletteTrigger')
+      paletteOpen = !paletteOpen
+      panel.style.transform = paletteOpen ? 'translateY(0)' : 'translateY(100%)'
+      arrow.style.transform  = paletteOpen ? 'rotate(180deg)' : ''
+      trigger.style.opacity  = paletteOpen ? '0.65' : ''
+    }
+
+    function applyHue(deg) {
+      deg = parseInt(deg, 10)
+
+      // baked in saturation curve, pulls back the oversaturated pink/magenta band which is around 160deg-280deg
+      // smoothly ramps down to ~0.65 at the centre (220deg) and back up either side
+      var sat = 1.0
+      if (deg >= 160 && deg <= 280) {
+        var centre = 220
+        var halfWidth = 60  // distance from centre to edge of the dip zone
+        var dist = Math.abs(deg - centre)
+        var t = Math.max(0, 1 - dist / halfWidth)  // 0 at edges, 1 at dead centre
+        // TODO: simple ease curve
+        t = t * t * (3 - 2 * t)
+        sat = 1.0 - (0.35 * t)  // dips to 0.65 at centre, stays 1.0 outside zone
+      }
+
+      var satStr = 'saturate(' + sat.toFixed(3) + ')'
+      document.getElementById('crtScreen').style.filter = deg === 0
+        ? ''
+        : 'hue-rotate(' + deg + 'deg) ' + satStr
+
+      document.getElementById('hueReadout').textContent = String(deg).padStart(3, '0') + '°'
+      document.getElementById('paletteKnob').value = deg
+      try { localStorage.setItem('kazvt_hue', deg) } catch(e) {}
+    }
+
+    function resetHue() {
+      applyHue(0)
+    }
+
+    // restore saved hue on load
+    ;(function() {
+      var saved = 0
+      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch(e) {}
+      if (saved && saved !== 0) applyHue(saved)
+    })()
 
     // start immediately then poll every 3s
     pollAndRender()
