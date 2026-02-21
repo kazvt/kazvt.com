@@ -1,3 +1,3 @@
 twitch: offline
-youtube: live
+youtube: offline
 kick: offline
