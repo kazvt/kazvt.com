@@ -346,20 +346,20 @@
       appearance: none;
       width: 12px;
       height: 20px;
-      background: currentColor;
+      background: #ffffff;
       border: 2px solid #0a0a0a;
       cursor: pointer;
     }
     #paletteKnob::-moz-range-thumb {
       width: 12px;
       height: 20px;
-      background: currentColor;
+      background: #ffffff;
       border: 2px solid #0a0a0a;
       border-radius: 0;
       cursor: pointer;
     }
 
-    /* the actual hue filter lives here — only touches the CRT screen content */
+    /* the actual hue filter lives here , only touches the CRT screen content */
     #crtScreen {
       transition: filter 0.15s ease;
     }
@@ -667,7 +667,7 @@
       </div>
     </div>
 
-    <!-- palette drawer — fixed to bottom of screen, outside #crtScreen so hue-rotate never touches it -->
+    <!-- palette drawer , fixed to bottom of screen, outside #crtScreen so hue-rotate never touches it -->
     <div id="palettePanel"
       style="
         font-family: 'Press Start 2P', monospace;
@@ -677,19 +677,19 @@
         transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: #0a0a0a;
-        border-top: 2px solid #00AA00;
-        box-shadow: 0 -4px 30px rgba(0,255,0,0.12), inset 0 0 40px rgba(0,0,0,0.6);
+        border-top: 2px solid #333333;
+        box-shadow: 0 -4px 30px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.6);
       ">
       <div style="max-width: 680px; margin: 0 auto; padding: 14px 16px 18px;">
 
         <!-- header row: label + readout + close button -->
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-          <span style="font-size:7px; color:#33FF33; opacity:0.6; text-transform:uppercase; letter-spacing:0.15em;">▶ SYS_DISPLAY // HUE_ROTATE</span>
+          <span style="font-size:7px; color:#dddddd; opacity:0.7; text-transform:uppercase; letter-spacing:0.15em;">▶ SYS_DISPLAY // HUE_ROTATE</span>
           <div style="display:flex; align-items:center; gap:12px;">
-            <span id="hueReadout" style="font-size:8px; color:#33FF33; opacity:0.7;">000°</span>
+            <span id="hueReadout" style="font-size:8px; color:#ffffff; opacity:0.85;">000°</span>
             <button onclick="togglePalette()"
-              style="font-family:'Press Start 2P',monospace; font-size:8px; color:#33FF33; background:transparent; border:1px solid rgba(0,170,0,0.4); padding:4px 8px; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em; opacity:0.55;"
-              onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.55'">
+              style="font-family:'Press Start 2P',monospace; font-size:8px; color:#ffffff; background:transparent; border:1px solid rgba(255,255,255,0.3); padding:4px 8px; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em; opacity:0.7;"
+              onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
               ✕ CLOSE
             </button>
           </div>
@@ -700,7 +700,7 @@
           style="width:100%; margin-bottom:6px;" oninput="applyHue(this.value)" />
 
         <!-- range labels -->
-        <div style="display:flex; justify-content:space-between; font-size:6px; color:#33FF33; opacity:0.3; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; font-size:6px; color:#bbbbbb; opacity:0.85; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
           <span>green</span>
           <span>cyan</span>
           <span>blue</span>
@@ -711,8 +711,8 @@
 
         <!-- reset -->
         <button onclick="resetHue()"
-          style="width:100%; font-family:'Press Start 2P',monospace; font-size:6px; color:#33FF33; opacity:0.35; border:1px solid rgba(0,170,0,0.25); padding:5px 0; background:transparent; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em;"
-          onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='0.35'">
+          style="width:100%; font-family:'Press Start 2P',monospace; font-size:6px; color:#cccccc; opacity:0.55; border:1px solid rgba(255,255,255,0.2); padding:5px 0; background:transparent; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em;"
+          onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.55'">
           [ RESET TO GREEN ]
         </button>
 
@@ -795,7 +795,7 @@
           if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
         })
       } catch(err) {
-        // if the file's missing or broken just treat everything as offline, no big deal
+        // if the file's missing or broken just treat everything as offline, its fine, dont throw errors
         console.warn('couldnt load status.txt, assuming offline', err)
       }
       return result
@@ -898,7 +898,8 @@
       renderStreamInfoBox(anyActuallyLive, streamInfo)
     }
 
-    // for palette/hue knob that opens and closes like a drawer
+    // ── palette / hue knob ──────────────────────────────────────────────────
+
     var paletteOpen = false
 
     function togglePalette() {
@@ -914,15 +915,16 @@
     function applyHue(deg) {
       deg = parseInt(deg, 10)
 
-      // baked in saturation curve, pulls back the oversaturated pink/magenta band which is around 160deg-280deg
+      // this is a kinda baked in saturation curve it pulls back the oversaturated pink/magenta band (160-280deg) cuz its too bright
       // smoothly ramps down to ~0.65 at the centre (220deg) and back up either side
       var sat = 1.0
       if (deg >= 160 && deg <= 280) {
         var centre = 220
-        var halfWidth = 60  // distance from centre to edge of the dip zone
+        //how far away from the dip zone in either direction(halfWidth)
+        var halfWidth = 70
         var dist = Math.abs(deg - centre)
         var t = Math.max(0, 1 - dist / halfWidth)  // 0 at edges, 1 at dead centre
-        // TODO: simple ease curve
+        // smooth it with a simple ease curve
         t = t * t * (3 - 2 * t)
         sat = 1.0 - (0.35 * t)  // dips to 0.65 at centre, stays 1.0 outside zone
       }
