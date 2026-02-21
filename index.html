@@ -135,6 +135,12 @@
       box-shadow: 0 0 10px rgba(0, 255, 0, 0.18), inset 0 0 14px rgba(0, 0, 0, 0.35);
     }
 
+    /* so the testing class is slightly brighter than offline but no amber, still we wanna hint its doing something */
+    .btn-glow.is-testing {
+      filter: saturate(0.75) brightness(0.9);
+      box-shadow: 0 0 12px rgba(0, 255, 0, 0.22), inset 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+
     .btn-glow.is-loading {
       filter: saturate(0.5) brightness(0.75);
       box-shadow: 0 0 8px rgba(0, 255, 0, 0.15), inset 0 0 14px rgba(0, 0, 0, 0.4);
@@ -170,6 +176,18 @@
       background-color: rgb(80, 80, 80) !important;
     }
 
+    /* the testing pip is dim green with slow idle pulse, and no no amber glow so its not like live */
+    .pip-testing {
+      box-shadow: 0 0 0 2px #0a0a0a, 0 0 4px rgba(0, 255, 0, 0.2);
+      background-color: rgb(0, 100, 0) !important;
+      animation: testingPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes testingPulse {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 0.85; }
+    }
+
     .pip-loading {
       box-shadow: 0 0 0 2px #0a0a0a;
       animation: pulse 1.5s ease-in-out infinite;
@@ -177,6 +195,11 @@
 
     .status-text-live {
       animation: terminal-flicker 0.8s steps(2) infinite, statusGlow 2s ease-in-out infinite;
+    }
+
+    /* for the testing label we use muted greenwithout any glow animation */
+    .status-text-testing {
+      opacity: 0.55;
     }
 
     @keyframes statusGlow {
@@ -613,7 +636,8 @@
 
     document.getElementById('year').textContent = new Date().getFullYear()
 
-    // page title stuff - blink the red dot when live so ppl notice in their tabs
+    // page title stuff, blink the red dot when live so ppl notice in their tabs
+    // testing does NOT trigger this, we act as if offline for the tab
     var PAGE_TITLE = 'kazvt!!'
 
     function setTabLiveIndicator(anyoneLive) {
@@ -621,7 +645,7 @@
     }
 
     // updates all the og/twitter meta tags so embeds look right when streaming
-    // honestly a bit annoying that this has to be done manually but whatever
+    // testing does NOT count as live for embed purposes either
     function patchEmbedMeta(platformStates) {
       var twitchOn = platformStates.twitch === 'live'
       var youtubeOn = platformStates.youtube === 'live'
@@ -632,7 +656,7 @@
       document.getElementById('og-title').setAttribute('content', titleForEmbed)
       document.getElementById('twitter-title').setAttribute('content', titleForEmbed)
 
-      // build the description with (live) tags next to whichever platforms are active
+      // build the description with (live) tags next to whichever platforms are actually live
       var twitchLine  = (twitchOn  ? '🟣 twitch (live)'  : '🟣 twitch')  + ': https://www.twitch.tv/kazvt'
       var youtubeLine = (youtubeOn ? '🔴 yt (live)'      : '🔴 yt')      + ': https://www.youtube.com/@kazvt'
       var kickLine    = (kickOn    ? '🟢 kick (live)'    : '🟢 kick')    + ': https://kick.com/kazvt'
@@ -641,10 +665,9 @@
       document.getElementById('og-description').setAttribute('content', desc)
       document.getElementById('twitter-description').setAttribute('content', desc)
 
-      // theme-color goes dark when offline so the browser chrome isn't weirdly bright
+      // theme color turbs dark when offline/testing so the browser chrome isnt weirdly bright
       document.getElementById('theme-color').setAttribute('content', anyLive ? '#33FF33' : '#0a0a0a')
 
-      // same icon either way for now, might swap it out later
       document.getElementById('og-image').setAttribute('content', 'https://kazvt.com/icon.gif')
       document.getElementById('twitter-image').setAttribute('content', 'https://kazvt.com/icon.gif')
     }
@@ -659,12 +682,12 @@
 
         raw.split(/\r?\n/).forEach(function(row) {
           var trimmed = row.trim()
-          if (!trimmed || trimmed[0] === '#') return  // skip blanks + comments
-          var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline)\s*$/i)
+          if (!trimmed || trimmed[0] === '#') return  // we should skip blanks and weird comments
+          var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline|testing)\s*$/i)
           if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
         })
       } catch(err) {
-        // if the file's missing or broken just treat everything as offline, no big deal
+        // if the file is missing or broken just treat everything as offline and dont throw errors mayb just a warning for future reference
         console.warn('couldnt load status.txt, assuming offline', err)
       }
       return result
@@ -691,11 +714,12 @@
     }
 
     // show/hide the amber NOW_STREAMING box with title + category
-    function renderStreamInfoBox(anyLive, info) {
+    // only shows for properly live streams, not testing
+    function renderStreamInfoBox(anyActuallyLive, info) {
       var box = document.getElementById('streamInfoBlock')
       var hasContent = info.title || info.category
 
-      if (!anyLive || !hasContent) {
+      if (!anyActuallyLive || !hasContent) {
         box.classList.add('hidden')
         return
       }
@@ -705,32 +729,40 @@
       box.classList.remove('hidden')
     }
 
-    // update one platform button - live/offline styling + pip dot + label text
+    // update one platform button, live/testing/offline styling + pip dot + label text
     function paintPlatformBtn(platform, liveState) {
       var btn = document.querySelector('[data-platform="' + platform + '"]')
-      if (!btn) return  // shouldn't happen but just in case
+      if (!btn) return
 
       var label = btn.querySelector('.status-text')
       var pip   = btn.querySelector('.status-box [aria-hidden="true"]')
 
       // wipe previous state classes before adding the new one
-      btn.classList.remove('is-live', 'is-offline', 'is-loading')
-      pip.classList.remove('pip-live', 'pip-offline', 'pip-loading', 'bg-amber', 'bg-dark-green', 'bg-screen-bg')
+      btn.classList.remove('is-live', 'is-offline', 'is-testing', 'is-loading')
+      pip.classList.remove('pip-live', 'pip-offline', 'pip-testing', 'pip-loading', 'bg-amber', 'bg-dark-green', 'bg-screen-bg')
 
       if (liveState === 'live') {
         btn.classList.add('is-live')
         pip.classList.add('pip-live', 'bg-amber')
         if (label) {
           label.textContent = 'LIVE'
-          label.classList.remove('loading-dots')
+          label.classList.remove('loading-dots', 'status-text-testing')
           label.classList.add('status-text-live')
+        }
+      } else if (liveState === 'testing') {
+        btn.classList.add('is-testing')
+        pip.classList.add('pip-testing')
+        if (label) {
+          label.textContent = 'TESTING'
+          label.classList.remove('loading-dots', 'status-text-live')
+          label.classList.add('status-text-testing')
         }
       } else {
         btn.classList.add('is-offline')
         pip.classList.add('pip-offline')
         if (label) {
           label.textContent = 'OFFLINE'
-          label.classList.remove('loading-dots', 'status-text-live')
+          label.classList.remove('loading-dots', 'status-text-live', 'status-text-testing')
         }
       }
     }
@@ -750,14 +782,15 @@
       paintPlatformBtn('youtube', youtube)
       paintPlatformBtn('kick',    kick)
 
-      var anyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
+      // testing does not count as live for tab title, embeds, or stream info box
+      var anyActuallyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
 
-      setTabLiveIndicator(anyLive)
+      setTabLiveIndicator(anyActuallyLive)
       patchEmbedMeta(statuses)
-      renderStreamInfoBox(anyLive, streamInfo)
+      renderStreamInfoBox(anyActuallyLive, streamInfo)
     }
 
-    // starrt immediately then poll every 3s
+    // start immediately then poll every 3s
     pollAndRender()
     setInterval(pollAndRender, 3000)
   </script>
