@@ -7,10 +7,10 @@
   <title>kazvt!!</title>
 
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="manifest" href="/site.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
 
   <meta property="og:title" content="kazvt" id="og-title">
@@ -189,8 +189,15 @@
     }
 
     @keyframes testingPulse {
-      0%, 100% { opacity: 0.5; }
-      50%       { opacity: 0.85; }
+
+      0%,
+      100% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 0.85;
+      }
     }
 
     .pip-loading {
@@ -312,8 +319,17 @@
     }
 
     @keyframes floatText {
-      0%, 100% { transform: translateY(0px); opacity: 0.9; }
-      50% { transform: translateY(-3px); opacity: 1; }
+
+      0%,
+      100% {
+        transform: translateY(0px);
+        opacity: 0.9;
+      }
+
+      50% {
+        transform: translateY(-3px);
+        opacity: 1;
+      }
     }
 
     .stream-label-float {
@@ -321,7 +337,7 @@
       animation: floatText 2.5s ease-in-out infinite;
     }
 
-    /* ── colour knob panel ── */
+    /*  colour knob panel  */
     #palettePanel {
       transition: grid-template-rows 0.3s ease;
     }
@@ -332,20 +348,19 @@
       width: 100%;
       height: 6px;
       border-radius: 0;
-      background: linear-gradient(
-        to right,
-        hsl(120,100%,35%),
-        hsl(180,100%,35%),
-        hsl(240,100%,35%),
-        hsl(300,100%,35%),
-        hsl(360,100%,35%),
-        hsl(60,100%,35%),
-        hsl(120,100%,35%)
-      );
+      background: linear-gradient(to right,
+          hsl(120, 100%, 35%),
+          hsl(180, 100%, 35%),
+          hsl(240, 100%, 35%),
+          hsl(300, 100%, 35%),
+          hsl(360, 100%, 35%),
+          hsl(60, 100%, 35%),
+          hsl(120, 100%, 35%));
       outline: none;
       cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.15);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
+
     #paletteKnob::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
@@ -355,6 +370,7 @@
       border: 2px solid #0a0a0a;
       cursor: pointer;
     }
+
     #paletteKnob::-moz-range-thumb {
       width: 12px;
       height: 20px;
@@ -426,8 +442,7 @@
 
             <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div class="w-8 h-8 flex-shrink-0 bg-screen-bg border border-dark-green flex items-center justify-center">
-                <svg width="24" height="24" viewBox="50 -30 400 550" fill="#33FF33"
-                  xmlns="http://www.w3.org/2000/svg">
+                <svg width="24" height="24" viewBox="50 -30 400 550" fill="#33FF33" xmlns="http://www.w3.org/2000/svg">
                   <path d="M80,32,48,112V416h96v64h64l64-64h80L464,304V32ZM416,288l-64,64H256l-64,64V352H112V80H416Z" />
                   <rect x="320" y="143" width="48" height="129" />
                   <rect x="208" y="143" width="48" height="129" />
@@ -518,16 +533,20 @@
         </div>
 
 
-        <div id="streamInfoBlock" class="hidden mt-6 sm:mt-4 relative border-2 border-amber px-4 pt-5 pb-3 text-[7px] xs:text-[8px] sm:text-[9px] text-amber leading-loose" style="box-shadow: 0 0 18px rgba(255,176,0,0.18), inset 0 0 12px rgba(255,176,0,0.06);">
-          <div class="absolute left-1/2 -translate-x-1/2 -top-[0.6em] bg-screen-bg px-2 uppercase tracking-widest text-[7px] xs:text-[8px] sm:text-[9px] text-amber whitespace-nowrap" style="text-shadow: 0 0 8px rgba(255,176,0,0.8);">▲ NOW_STREAMING ▲</div>
+        <div id="streamInfoBlock"
+          class="hidden mt-6 sm:mt-4 relative border-2 border-amber px-4 pt-5 pb-3 text-[7px] xs:text-[8px] sm:text-[9px] text-amber leading-loose"
+          style="box-shadow: 0 0 18px rgba(255,176,0,0.18), inset 0 0 12px rgba(255,176,0,0.06);">
+          <div
+            class="absolute left-1/2 -translate-x-1/2 -top-[0.6em] bg-screen-bg px-2 uppercase tracking-widest text-[7px] xs:text-[8px] sm:text-[9px] text-amber whitespace-nowrap"
+            style="text-shadow: 0 0 8px rgba(255,176,0,0.8);">▲ NOW_STREAMING ▲</div>
           <div class="mt-1"><span class="opacity-60">▶ TITLE:</span> <span id="streamTitle"></span></div>
           <div><span class="opacity-60">▶ CATEGORY:</span> <span id="streamCategory"></span></div>
         </div>
 
+
         <div class="mt-8 sm:mt-6 pt-6 sm:pt-5 border-t-2 border-dashed border-dark-green">
           <div id="bioSection" onclick="openBioDrawer()"
             class="border-2 border-transparent transition-all duration-200 p-2 cursor-pointer">
-
             <div
               class="flex items-center justify-between w-full gap-2 mb-2 text-[6px] xs:text-[7px] sm:text-[9px] text-crt-green">
               <div class="flex items-center gap-2">
@@ -544,23 +563,46 @@
                   class="text-[12px] xs:text-[14px] opacity-70 transition-transform duration-300">▼</span>
               </div>
             </div>
-
             <div id="bioContent"
               class="text-crt-green text-[8px] xs:text-[10px] sm:text-[11px] font-mono leading-loose space-y-1.5 opacity-90 grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out">
               <div class="overflow-hidden">
-                <div class="pb-2">
-                  <div class="flex items-start gap-2" style="animation: slideIn 0.4s ease-out;">
-                    <span class="flex-shrink-0 opacity-60">▶</span>
-                    <span><span class="font-bold opacity-80">USER:</span> kazvt</span>
+                <div class="pb-2 relative">
+
+                  <div class="absolute top-0 right-0" style="animation: slideIn 0.4s ease-out;">
+                    <div class="relative" style="border: 1px solid currentColor; padding: 2px; opacity: 0.85;">
+                      <div class="absolute inset-0 pointer-events-none z-10"
+                        style="background: repeating-linear-gradient(to bottom, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px);">
+                      </div>
+                      <span
+                        class="absolute -top-px -left-px w-1.5 h-1.5 border-t border-l border-current opacity-70"></span>
+                      <span
+                        class="absolute -top-px -right-px w-1.5 h-1.5 border-t border-r border-current opacity-70"></span>
+                      <span
+                        class="absolute -bottom-px -left-px w-1.5 h-1.5 border-b border-l border-current opacity-70"></span>
+                      <span
+                        class="absolute -bottom-px -right-px w-1.5 h-1.5 border-b border-r border-current opacity-70"></span>
+                      <img src="favicon.svg" alt="kazvt avatar" class="block object-cover"
+                        style="width: 56px; height: 56px; image-rendering: pixelated; filter: sepia(0.15) brightness(0.95) contrast(1.05);" />
+                      <div class="text-center uppercase tracking-widest opacity-50 mt-0.5"
+                        style="font-size: 5px; letter-spacing: 0.12em;">PROFILE.IMG</div>
+                    </div>
                   </div>
-                  <div class="flex items-start gap-2" style="animation: slideIn 0.5s ease-out;">
-                    <span class="flex-shrink-0 opacity-60">▶</span>
-                    <span><span class="font-bold opacity-80">PRONOUNS:</span> she/her</span>
+
+                  <div style="padding-right: 68px;">
+                    <div class="flex items-start gap-2" style="animation: slideIn 0.4s ease-out;">
+                      <span class="flex-shrink-0 opacity-60">▶</span>
+                      <span><span class="font-bold opacity-80">USER:</span> kazvt</span>
+                    </div>
+                    <div class="flex items-start gap-2" style="animation: slideIn 0.5s ease-out;">
+                      <span class="flex-shrink-0 opacity-60">▶</span>
+                      <span><span class="font-bold opacity-80">PRONOUNS:</span> she/her</span>
+                    </div>
+                    <div class="flex items-start gap-2" style="animation: slideIn 0.6s ease-out;">
+                      <span class="flex-shrink-0 opacity-60">▶</span>
+                      <span><span class="font-bold opacity-80">ACTIVITY:</span> playing retro games</span>
+                    </div>
                   </div>
-                  <div class="flex items-start gap-2" style="animation: slideIn 0.6s ease-out;">
-                    <span class="flex-shrink-0 opacity-60">▶</span>
-                    <span><span class="font-bold opacity-80">ACTIVITY:</span> playing retro games</span>
-                  </div>
+
                   <div class="flex items-start gap-2 mt-2" style="animation: slideIn 0.7s ease-out;">
                     <span class="flex-shrink-0 opacity-60">▶</span>
                     <div class="flex-1">
@@ -572,6 +614,7 @@
                       </div>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -659,7 +702,8 @@
         <footer class="mt-6 pt-6 border-t-2 border-dashed border-dark-green">
 
           <!-- palette toggle trigger -->
-          <div id="paletteTrigger" onclick="togglePalette()" class="flex items-center justify-center gap-2 cursor-pointer opacity-30 hover:opacity-60 transition-opacity duration-200 mb-3 select-none">
+          <div id="paletteTrigger" onclick="togglePalette()"
+            class="flex items-center justify-center gap-2 cursor-pointer opacity-30 hover:opacity-60 transition-opacity duration-200 mb-3 select-none">
             <span class="text-[6px] xs:text-[7px] uppercase tracking-widest text-crt-green">[ SYS_DISPLAY ]</span>
             <span id="paletteArrow" class="text-[10px] text-crt-green transition-transform duration-300">▼</span>
           </div>
@@ -673,8 +717,7 @@
     </div>
 
     <!-- palette drawer , fixed to bottom of screen, outside #crtScreen so hue-rotate never touches it -->
-    <div id="palettePanel"
-      style="
+    <div id="palettePanel" style="
         font-family: 'Press Start 2P', monospace;
         position: fixed;
         bottom: 0; left: 0; right: 0;
@@ -689,7 +732,8 @@
 
         <!-- header row: label + readout + close button -->
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-          <span style="font-size:7px; color:#dddddd; opacity:0.7; text-transform:uppercase; letter-spacing:0.15em;">▶ SYS_DISPLAY // HUE_ROTATE</span>
+          <span style="font-size:7px; color:#dddddd; opacity:0.7; text-transform:uppercase; letter-spacing:0.15em;">▶
+            SYS_DISPLAY // HUE_ROTATE</span>
           <div style="display:flex; align-items:center; gap:12px;">
             <span id="hueReadout" style="font-size:8px; color:#ffffff; opacity:0.85;">000°</span>
             <button onclick="togglePalette()"
@@ -701,11 +745,12 @@
         </div>
 
         <!-- the slider itself -->
-        <input id="paletteKnob" type="range" min="0" max="359" value="0" step="1"
-          style="width:100%; margin-bottom:6px;" oninput="applyHue(this.value)" />
+        <input id="paletteKnob" type="range" min="0" max="359" value="0" step="1" style="width:100%; margin-bottom:6px;"
+          oninput="applyHue(this.value)" />
 
         <!-- range labels -->
-        <div style="display:flex; justify-content:space-between; font-size:6px; color:#bbbbbb; opacity:0.85; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
+        <div
+          style="display:flex; justify-content:space-between; font-size:6px; color:#bbbbbb; opacity:0.85; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
           <span>green</span>
           <span>cyan</span>
           <span>blue</span>
@@ -770,9 +815,9 @@
       document.getElementById('twitter-title').setAttribute('content', titleForEmbed)
 
       // build the description with (live) tags next to whichever platforms are actually live
-      var twitchLine  = (twitchOn  ? '🟣 twitch (live)'  : '🟣 twitch')  + ': https://www.twitch.tv/kazvt'
-      var youtubeLine = (youtubeOn ? '🔴 yt (live)'      : '🔴 yt')      + ': https://www.youtube.com/@kazvt'
-      var kickLine    = (kickOn    ? '🟢 kick (live)'    : '🟢 kick')    + ': https://kick.com/kazvt'
+      var twitchLine = (twitchOn ? '🟣 twitch (live)' : '🟣 twitch') + ': https://www.twitch.tv/kazvt'
+      var youtubeLine = (youtubeOn ? '🔴 yt (live)' : '🔴 yt') + ': https://www.youtube.com/@kazvt'
+      var kickLine = (kickOn ? '🟢 kick (live)' : '🟢 kick') + ': https://kick.com/kazvt'
 
       var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine
       document.getElementById('og-description').setAttribute('content', desc)
@@ -793,13 +838,13 @@
         if (!resp.ok) throw new Error('status fetch failed: ' + resp.status)
         var raw = await resp.text()
 
-        raw.split(/\r?\n/).forEach(function(row) {
+        raw.split(/\r?\n/).forEach(function (row) {
           var trimmed = row.trim()
           if (!trimmed || trimmed[0] === '#') return  // skip blanks + comments
           var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline|testing)\s*$/i)
           if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
         })
-      } catch(err) {
+      } catch (err) {
         // if the file's missing or broken just treat everything as offline, its fine, dont throw errors
         console.warn('couldnt load status.txt, assuming offline', err)
       }
@@ -814,13 +859,13 @@
         if (!resp.ok) throw new Error('stream info fetch bombed: ' + resp.status)
         var raw = await resp.text()
 
-        raw.split(/\r?\n/).forEach(function(row) {
+        raw.split(/\r?\n/).forEach(function (row) {
           var trimmed = row.trim()
           if (!trimmed || trimmed[0] === '#') return
           var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(.+)$/i)
           if (match) info[match[1].toLowerCase()] = match[2].trim()
         })
-      } catch(err) {
+      } catch (err) {
         console.warn('couldnt load stream info', err)
       }
       return info
@@ -848,7 +893,7 @@
       if (!btn) return
 
       var label = btn.querySelector('.status-text')
-      var pip   = btn.querySelector('.status-box [aria-hidden="true"]')
+      var pip = btn.querySelector('.status-box [aria-hidden="true"]')
 
       // wipe previous state classes before adding the new one
       btn.classList.remove('is-live', 'is-offline', 'is-testing', 'is-loading')
@@ -887,13 +932,13 @@
         fetchCurrentStreamInfo()
       ])
 
-      var twitch  = statuses.twitch  || 'offline'
+      var twitch = statuses.twitch || 'offline'
       var youtube = statuses.youtube || 'offline'
-      var kick    = statuses.kick    || 'offline'
+      var kick = statuses.kick || 'offline'
 
-      paintPlatformBtn('twitch',  twitch)
+      paintPlatformBtn('twitch', twitch)
       paintPlatformBtn('youtube', youtube)
-      paintPlatformBtn('kick',    kick)
+      paintPlatformBtn('kick', kick)
 
       // testing does not count as live for tab title, embeds, or stream info box
       var anyActuallyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
@@ -903,18 +948,18 @@
       renderStreamInfoBox(anyActuallyLive, streamInfo)
     }
 
-    // ── palette / hue knob ──────────────────────────────────────────────────
+    // palette/hue knob
 
     var paletteOpen = false
 
     function togglePalette() {
-      var panel   = document.getElementById('palettePanel')
-      var arrow   = document.getElementById('paletteArrow')
+      var panel = document.getElementById('palettePanel')
+      var arrow = document.getElementById('paletteArrow')
       var trigger = document.getElementById('paletteTrigger')
       paletteOpen = !paletteOpen
       panel.style.transform = paletteOpen ? 'translateY(0)' : 'translateY(100%)'
-      arrow.style.transform  = paletteOpen ? 'rotate(180deg)' : ''
-      trigger.style.opacity  = paletteOpen ? '0.65' : ''
+      arrow.style.transform = paletteOpen ? 'rotate(180deg)' : ''
+      trigger.style.opacity = paletteOpen ? '0.65' : ''
     }
 
     function applyHue(deg) {
@@ -943,7 +988,7 @@
 
       document.getElementById('hueReadout').textContent = String(deg).padStart(3, '0') + '°'
       document.getElementById('paletteKnob').value = deg
-      try { localStorage.setItem('kazvt_hue', deg) } catch(e) {}
+      try { localStorage.setItem('kazvt_hue', deg) } catch (e) { }
     }
 
     function resetHue() {
@@ -951,9 +996,9 @@
     }
 
     // restore saved hue on load
-    ;(function() {
+    ; (function () {
       var saved = 0
-      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch(e) {}
+      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch (e) { }
       if (saved && saved !== 0) applyHue(saved)
     })()
 
