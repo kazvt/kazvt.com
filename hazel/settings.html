@@ -663,6 +663,16 @@
 
       sessionInput.addEventListener("input", () => {
         if (busy) return;
+
+        const raw = sessionInput.value.trim();
+        const m = raw.match(/(?:^|[?&])session=([^?&]+)/i);
+
+        if (m) {
+          sessionInput.value = decodeURIComponent(m[1]);
+        } else if (/^session=/i.test(raw)) {
+          sessionInput.value = raw.replace(/^session=/i, "");
+        }
+
         syncUrlInputFromState();
       });
 
