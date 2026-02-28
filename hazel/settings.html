@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,81 +8,93 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="dark light" />
   <style>
-    :root{
-      --bg:#0b0b0e;
-      --panel:#121217;
-      --panel2:#16161d;
-      --stroke:rgba(255,255,255,.10);
-      --stroke2:rgba(255,255,255,.18);
-      --text:#f4f4f5;
-      --muted:#a1a1aa;
-      --accent:#fbbf24;
-      --accent2:#f59e0b;
-      --good:#34d399;
-      --bad:#fb7185;
+    :root {
+      --bg: #0b0b0e;
+      --panel: #121217;
+      --panel2: #16161d;
+      --stroke: rgba(255, 255, 255, .10);
+      --stroke2: rgba(255, 255, 255, .18);
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --accent: #fbbf24;
+      --accent2: #f59e0b;
+      --good: #34d399;
+      --bad: #fb7185;
+      --selection-bg: rgba(251, 191, 36, .28);
+      --selection-text: #0b0b0e;
+    }
+
+    ::selection {
+      background: var(--selection-bg);
+      color: var(--selection-text);
+    }
+
+    ::-moz-selection {
+      background: var(--selection-bg);
+      color: var(--selection-text);
     }
   </style>
 </head>
 
-<body class="min-h-screen selection:text-zinc-950" style="background:var(--bg); color:var(--text);">
-  <header class="sticky top-0 z-50 backdrop-blur-xl" style="background:rgba(11,11,14,.78); border-bottom:1px solid var(--stroke);">
+<body class="min-h-screen" style="background:var(--bg); color:var(--text);">
+  <header class="sticky top-0 z-50 backdrop-blur-xl"
+    style="background:rgba(11,11,14,.78); border-bottom:1px solid var(--stroke);">
     <div class="mx-auto max-w-6xl px-3 py-3">
       <div class="flex flex-col gap-2">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center gap-3">
-            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl" style="background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.25);">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" style="color:var(--accent);">
-                <path d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                <path d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl"
+              style="background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.25);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"
+                style="color:var(--accent);">
+                <path
+                  d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                <path
+                  d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
               </svg>
             </span>
             <div class="leading-tight">
-              <div class="text-sm font-semibold tracking-tight">Overlay Settings</div>
-              <div class="text-[11px]" style="color:var(--muted);">Paste a URL to restore controls</div>
+              <div class="text-sm font-semibold tracking-tight">hazelberry settings</div>
+              <div class="text-[11px]" style="color:var(--muted);">paste your previous url here if u wanna recall
+                settings</div>
             </div>
 
-            <div id="meta" class="rounded-full px-2.5 py-1 text-[11px]" style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
-              Loading…
+            <div id="meta" class="rounded-full px-2.5 py-1 text-[11px]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
+              loadingberry...
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <div class="flex overflow-hidden rounded-xl p-0.5" style="border:1px solid var(--stroke); background:rgba(255,255,255,.04);">
+            <div class="flex overflow-hidden rounded-xl p-0.5"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04);">
               <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Overlay</button>
               <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Dock</button>
             </div>
 
             <button id="applyBtn" class="rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
               style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
-              Apply URL
+              apply url
             </button>
+          </div>
+        </div>
 
-            <button id="copyBtn" class="rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex w-full items-center gap-2">
+            <input id="urlIn" type="text" class="w-full rounded-xl px-3 py-2 font-mono text-xs outline-none transition"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
+              placeholder="Paste/edit URL here (cards update this; Apply reads from it) …" />
+
+            <button id="copyBtn"
+              class="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
               style="border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.12); color:var(--text);">
               Copy
             </button>
           </div>
-        </div>
 
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
-          <div class="relative">
-            <input id="urlIn" type="text"
-              class="w-full rounded-xl px-3 py-2 font-mono text-xs outline-none transition"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
-              placeholder="Paste a full URL here to restore settings (or edit then Copy)…" />
-          </div>
-
-          <button id="urlBar" class="rounded-xl px-3 py-2 text-left font-mono text-xs transition"
-            style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);" title="Click to copy output URL">
-            <span id="urlOut" class="block truncate">Loading…</span>
-          </button>
-        </div>
-
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex w-full items-center gap-2 sm:w-[560px]">
             <div class="relative w-full">
-              <input id="search" type="text"
-                class="w-full rounded-xl px-3 py-2 pr-9 text-sm outline-none transition"
+              <input id="search" type="text" class="w-full rounded-xl px-3 py-2 pr-9 text-sm outline-none transition"
                 style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
                 placeholder="Filter params…" />
               <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
@@ -95,19 +108,19 @@
 
             <button id="clearBtn" class="shrink-0 rounded-xl px-3 py-2 text-sm transition active:scale-[0.99]"
               style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
-              Clear
+              clearberry
             </button>
-          </div>
 
-          <div class="flex items-center gap-2">
-            <button id="reloadBtn" class="rounded-xl px-3 py-2 text-xs transition active:scale-[0.99]"
+            <button id="reloadBtn" class="shrink-0 rounded-xl px-3 py-2 text-sm transition active:scale-[0.99]"
               style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
-              Reload
+              reloadberry
             </button>
           </div>
         </div>
 
-        <div id="err" class="hidden rounded-xl px-3 py-2 text-xs" style="border:1px solid rgba(251,113,133,.30); background:rgba(251,113,133,.10); color:rgba(255,228,230,.95);"></div>
+        <div id="err" class="hidden rounded-xl px-3 py-2 text-xs"
+          style="border:1px solid rgba(251,113,133,.30); background:rgba(251,113,133,.10); color:rgba(255,228,230,.95);">
+        </div>
       </div>
     </div>
   </header>
@@ -133,8 +146,6 @@
       const state = new Map();
       let busy = false;
 
-      const urlOut = document.getElementById("urlOut");
-      const urlBar = document.getElementById("urlBar");
       const urlIn = document.getElementById("urlIn");
       const applyBtn = document.getElementById("applyBtn");
       const copyBtn = document.getElementById("copyBtn");
@@ -168,7 +179,7 @@
 
       function setBusy(v) {
         busy = v;
-        const dis = v ? true : false;
+        const dis = !!v;
         modeOverlay.disabled = dis;
         modeDock.disabled = dis;
         applyBtn.disabled = dis;
@@ -184,12 +195,6 @@
 
         modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "overlay" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
         modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "dock" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
-
-        const lock = dis ? " opacity-60 cursor-not-allowed" : " hover:bg-white/10";
-        urlBar.className = "rounded-xl px-3 py-2 text-left font-mono text-xs transition" + lock;
-        urlBar.style.border = "1px solid var(--stroke)";
-        urlBar.style.background = "rgba(255,255,255,.04)";
-        urlBar.style.color = "var(--text)";
 
         list.classList.toggle("opacity-50", dis);
         list.classList.toggle("pointer-events-none", dis);
@@ -207,7 +212,6 @@
             return await fallbackRes.text();
           }
         }
-
         throw new Error(`Failed to load ${primary} (HTTP ${primaryRes.status})`);
       }
 
@@ -242,16 +246,13 @@
           if (!s) continue;
           if (p.name in OVERLAY_DEFAULTS) {
             const dv = OVERLAY_DEFAULTS[p.name];
-            if (p.type === "flag") {
-              s.enabled = !!dv;
-            } else {
-              s.value = String(dv);
-            }
+            if (p.type === "flag") s.enabled = !!dv;
+            else s.value = String(dv);
           }
         }
       }
 
-      function buildUrl() {
+      function serializeUrlFromState() {
         const base = new URL(getTargetPath(), location.href);
         const sp = new URLSearchParams();
 
@@ -270,8 +271,11 @@
         let qs = sp.toString();
         if (qs) qs = qs.replace(/=(&|$)/g, "$1");
 
-        const out = qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
-        urlOut.textContent = out;
+        return qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
+      }
+
+      function syncUrlInputFromState() {
+        const out = serializeUrlFromState();
         if (!urlIn.matches(":focus")) urlIn.value = out;
       }
 
@@ -313,6 +317,7 @@
           const cb = label.querySelector("input");
           const track = label.querySelector("span");
           const knob = track.querySelector("span");
+
           function paint() {
             if (cb.checked) {
               track.style.background = "rgba(52,211,153,.25)";
@@ -324,11 +329,13 @@
               knob.style.transform = "translateX(0)";
             }
           }
+
           cb.addEventListener("change", () => {
             s.enabled = cb.checked;
             paint();
-            buildUrl();
+            syncUrlInputFromState();
           });
+
           paint();
           ctrl.appendChild(label);
         }
@@ -350,7 +357,7 @@
           inp.style.color = "var(--text)";
           inp.addEventListener("input", () => {
             s.value = inp.value;
-            buildUrl();
+            syncUrlInputFromState();
           });
           body.appendChild(inp);
         } else {
@@ -373,7 +380,7 @@
           if (q && !p.name.toLowerCase().includes(q)) continue;
           list.appendChild(makeCard(p));
         }
-        buildUrl();
+        syncUrlInputFromState();
       }
 
       function applyFromUrl(raw) {
@@ -441,7 +448,7 @@
       }
 
       async function copyUrl() {
-        const text = urlOut.textContent;
+        const text = urlIn.value || "";
         try {
           await navigator.clipboard.writeText(text);
           const old = copyBtn.textContent;
@@ -489,7 +496,6 @@
         render();
       });
 
-      urlBar.addEventListener("click", () => { if (!busy) copyUrl(); });
       copyBtn.addEventListener("click", () => { if (!busy) copyUrl(); });
 
       applyBtn.addEventListener("click", () => { if (!busy) applyFromUrl(urlIn.value); });
@@ -506,4 +512,5 @@
     })();
   </script>
 </body>
+
 </html>
