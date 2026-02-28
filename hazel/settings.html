@@ -1,88 +1,90 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Overlay/Dock Settings</title>
-
-  <!-- Keep Tailwind CDN (as requested) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="dark light" />
+  <style>
+    :root{
+      --bg:#0b0b0e;
+      --panel:#121217;
+      --panel2:#16161d;
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.18);
+      --text:#f4f4f5;
+      --muted:#a1a1aa;
+      --accent:#fbbf24;
+      --accent2:#f59e0b;
+      --good:#34d399;
+      --bad:#fb7185;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen text-zinc-100 bg-zinc-950 selection:bg-fuchsia-500/30 selection:text-zinc-50">
-  <!-- background glow -->
-  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
-    <div class="absolute -top-24 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-fuchsia-500/20 blur-3xl">
-    </div>
-    <div class="absolute top-40 left-[-8rem] h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
-    <div class="absolute bottom-[-10rem] right-[-10rem] h-[28rem] w-[28rem] rounded-full bg-emerald-500/15 blur-3xl">
-    </div>
-  </div>
-
-  <!-- Top bar -->
-  <header class="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/70 backdrop-blur-xl">
+<body class="min-h-screen selection:text-zinc-950" style="background:var(--bg); color:var(--text);">
+  <header class="sticky top-0 z-50 backdrop-blur-xl" style="background:rgba(11,11,14,.78); border-bottom:1px solid var(--stroke);">
     <div class="mx-auto max-w-6xl px-3 py-3">
       <div class="flex flex-col gap-2">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-              <span
-                class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500/30 to-cyan-500/20 ring-1 ring-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-100" viewBox="0 0 20 20"
-                  fill="currentColor">
-                  <path
-                    d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                  <path
-                    d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
-                </svg>
-              </span>
-              <div class="leading-tight">
-                <div class="text-sm font-semibold tracking-tight">Overlay Settings</div>
-                <div class="text-[11px] text-zinc-400">Build & copy your URL params</div>
-              </div>
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl" style="background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.25);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" style="color:var(--accent);">
+                <path d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                <path d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+              </svg>
+            </span>
+            <div class="leading-tight">
+              <div class="text-sm font-semibold tracking-tight">Overlay Settings</div>
+              <div class="text-[11px]" style="color:var(--muted);">Paste a URL to restore controls</div>
             </div>
 
-            <div id="meta"
-              class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-200/90">
+            <div id="meta" class="rounded-full px-2.5 py-1 text-[11px]" style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
               Loading…
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <!-- segmented toggle -->
-            <div class="flex overflow-hidden rounded-xl border border-white/10 bg-white/5 p-0.5">
+            <div class="flex overflow-hidden rounded-xl p-0.5" style="border:1px solid var(--stroke); background:rgba(255,255,255,.04);">
               <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Overlay</button>
               <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Dock</button>
             </div>
 
-            <button id="copyBtn"
-              class="rounded-xl border border-white/10 bg-gradient-to-r from-fuchsia-500/15 to-cyan-500/10 px-3 py-2 text-xs font-semibold text-zinc-100 transition hover:from-fuchsia-500/25 hover:to-cyan-500/20 active:scale-[0.99]">
+            <button id="applyBtn" class="rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
+              Apply URL
+            </button>
+
+            <button id="copyBtn" class="rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
+              style="border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.12); color:var(--text);">
               Copy
             </button>
           </div>
         </div>
 
-        <!-- URL output -->
-        <button id="urlBar"
-          class="group w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left font-mono text-xs text-zinc-100 transition hover:bg-white/10"
-          title="Click to copy URL">
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/5 ring-1 ring-white/10 text-[10px] text-zinc-300 group-hover:text-zinc-200">URL</span>
-            <span id="urlOut" class="block truncate">Loading…</span>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+          <div class="relative">
+            <input id="urlIn" type="text"
+              class="w-full rounded-xl px-3 py-2 font-mono text-xs outline-none transition"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
+              placeholder="Paste a full URL here to restore settings (or edit then Copy)…" />
           </div>
-        </button>
 
-        <!-- Controls row -->
+          <button id="urlBar" class="rounded-xl px-3 py-2 text-left font-mono text-xs transition"
+            style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);" title="Click to copy output URL">
+            <span id="urlOut" class="block truncate">Loading…</span>
+          </button>
+        </div>
+
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex w-full items-center gap-2 sm:w-[560px]">
             <div class="relative w-full">
               <input id="search" type="text"
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 pr-9 text-sm text-zinc-100 placeholder:text-zinc-400 outline-none transition focus:border-fuchsia-400/30 focus:bg-white/10 focus:ring-2 focus:ring-fuchsia-500/10"
+                class="w-full rounded-xl px-3 py-2 pr-9 text-sm outline-none transition"
+                style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
                 placeholder="Filter params…" />
-              <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">
+              <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd"
                     d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
@@ -91,46 +93,50 @@
               </div>
             </div>
 
-            <button id="clearBtn"
-              class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]">
+            <button id="clearBtn" class="shrink-0 rounded-xl px-3 py-2 text-sm transition active:scale-[0.99]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
               Clear
             </button>
           </div>
 
           <div class="flex items-center gap-2">
-            <button id="reloadBtn"
-              class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]">
+            <button id="reloadBtn" class="rounded-xl px-3 py-2 text-xs transition active:scale-[0.99]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
               Reload
             </button>
           </div>
         </div>
 
-        <!-- Error line -->
-        <div id="err"
-          class="hidden rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-100"></div>
+        <div id="err" class="hidden rounded-xl px-3 py-2 text-xs" style="border:1px solid rgba(251,113,133,.30); background:rgba(251,113,133,.10); color:rgba(255,228,230,.95);"></div>
       </div>
     </div>
   </header>
 
   <main class="mx-auto max-w-6xl px-3 py-4">
-    <!-- Compact responsive grid -->
     <div id="list" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
-
   </main>
 
   <script>
     (() => {
-      const PATHS = {
-        overlay: "./overlay.html",
-        dock: "./dock.html" // optional
+      const PATHS = { overlay: "./overlay.html", dock: "./dock.html" };
+      const OVERLAY_DEFAULTS = {
+        scale: "0.75",
+        horizontal: true,
+        notime: true,
+        smooth: "true",
+        compact: true,
+        chatonly: true
       };
 
       let currentMode = "overlay";
       let params = [];
       const state = new Map();
+      let busy = false;
 
       const urlOut = document.getElementById("urlOut");
       const urlBar = document.getElementById("urlBar");
+      const urlIn = document.getElementById("urlIn");
+      const applyBtn = document.getElementById("applyBtn");
       const copyBtn = document.getElementById("copyBtn");
       const list = document.getElementById("list");
       const search = document.getElementById("search");
@@ -158,6 +164,35 @@
 
       function getTargetPath() {
         return PATHS[currentMode] || PATHS.overlay;
+      }
+
+      function setBusy(v) {
+        busy = v;
+        const dis = v ? true : false;
+        modeOverlay.disabled = dis;
+        modeDock.disabled = dis;
+        applyBtn.disabled = dis;
+        copyBtn.disabled = dis;
+        reloadBtn.disabled = dis;
+        clearBtn.disabled = dis;
+        search.disabled = dis;
+        urlIn.disabled = dis;
+
+        const btnOn = "bg-white/10 text-white";
+        const btnOff = "text-zinc-300 hover:bg-white/10";
+        const btnDis = "opacity-50 cursor-not-allowed";
+
+        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "overlay" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
+        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "dock" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
+
+        const lock = dis ? " opacity-60 cursor-not-allowed" : " hover:bg-white/10";
+        urlBar.className = "rounded-xl px-3 py-2 text-left font-mono text-xs transition" + lock;
+        urlBar.style.border = "1px solid var(--stroke)";
+        urlBar.style.background = "rgba(255,255,255,.04)";
+        urlBar.style.color = "var(--text)";
+
+        list.classList.toggle("opacity-50", dis);
+        list.classList.toggle("pointer-events-none", dis);
       }
 
       async function getScanText() {
@@ -198,9 +233,21 @@
           const old = prev.get(p.name);
           state.set(p.name, old ? old : { enabled: false, value: "" });
         }
+      }
 
-        if (!meta.textContent.includes("scanned overlay.html")) {
-          meta.textContent = `Detected ${params.length} params`;
+      function applyOverlayDefaults() {
+        if (currentMode !== "overlay") return;
+        for (const p of params) {
+          const s = state.get(p.name);
+          if (!s) continue;
+          if (p.name in OVERLAY_DEFAULTS) {
+            const dv = OVERLAY_DEFAULTS[p.name];
+            if (p.type === "flag") {
+              s.enabled = !!dv;
+            } else {
+              s.value = String(dv);
+            }
+          }
         }
       }
 
@@ -223,37 +270,30 @@
         let qs = sp.toString();
         if (qs) qs = qs.replace(/=(&|$)/g, "$1");
 
-        urlOut.textContent = qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
-      }
-
-      function setMode(mode) {
-        currentMode = mode;
-
-        const on = "bg-gradient-to-r from-fuchsia-500/25 to-cyan-500/20 text-white ring-1 ring-white/10";
-        const off = "text-zinc-300 hover:bg-white/10";
-        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (mode === "overlay" ? on : off);
-        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (mode === "dock" ? on : off);
-
-        buildUrl();
+        const out = qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
+        urlOut.textContent = out;
+        if (!urlIn.matches(":focus")) urlIn.value = out;
       }
 
       function makeCard(p) {
         const s = state.get(p.name);
 
         const card = document.createElement("div");
-        card.className = "rounded-xl border border-white/10 bg-white/5 p-3 shadow-sm transition hover:bg-white/10 hover:border-white/20";
+        card.className = "rounded-xl p-3 shadow-sm transition";
+        card.style.border = "1px solid var(--stroke)";
+        card.style.background = "rgba(255,255,255,.04)";
 
         const header = document.createElement("div");
         header.className = "flex items-center justify-between gap-2";
 
         const name = document.createElement("div");
         name.className = "min-w-0";
-        const pill = p.type === "flag"
-          ? "bg-cyan-500/10 text-cyan-200 border-cyan-400/20"
-          : "bg-fuchsia-500/10 text-fuchsia-200 border-fuchsia-400/20";
+        const pillStyle = p.type === "flag"
+          ? "border:1px solid rgba(56,189,248,.25); background:rgba(56,189,248,.10); color:rgba(224,242,254,.95);"
+          : "border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.10); color:rgba(254,243,199,.95);";
         name.innerHTML = `
           <div class="truncate text-sm font-semibold">${escapeHtml(p.name)}</div>
-          <div class="mt-1 inline-flex items-center gap-1 rounded-full border ${pill} px-2 py-0.5 text-[10px]">
+          <div class="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]" style="${pillStyle}">
             ${p.type === "flag" ? "toggle" : "value"}
           </div>
         `;
@@ -266,15 +306,30 @@
           label.className = "inline-flex cursor-pointer items-center";
           label.innerHTML = `
             <input type="checkbox" class="peer sr-only" ${s.enabled ? "checked" : ""} />
-            <span class="relative h-5 w-9 rounded-full bg-white/10 ring-1 ring-white/10 transition peer-checked:bg-emerald-500/30 peer-checked:ring-emerald-500/40">
-              <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white/85 transition peer-checked:translate-x-4"></span>
+            <span class="relative h-5 w-9 rounded-full transition" style="background:rgba(255,255,255,.10); border:1px solid var(--stroke);">
+              <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full transition" style="background:rgba(255,255,255,.85);"></span>
             </span>
           `;
           const cb = label.querySelector("input");
+          const track = label.querySelector("span");
+          const knob = track.querySelector("span");
+          function paint() {
+            if (cb.checked) {
+              track.style.background = "rgba(52,211,153,.25)";
+              track.style.borderColor = "rgba(52,211,153,.35)";
+              knob.style.transform = "translateX(1rem)";
+            } else {
+              track.style.background = "rgba(255,255,255,.10)";
+              track.style.borderColor = "var(--stroke)";
+              knob.style.transform = "translateX(0)";
+            }
+          }
           cb.addEventListener("change", () => {
             s.enabled = cb.checked;
+            paint();
             buildUrl();
           });
+          paint();
           ctrl.appendChild(label);
         }
 
@@ -289,8 +344,10 @@
           inp.type = "text";
           inp.value = s.value;
           inp.placeholder = "…";
-          inp.className =
-            "w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-cyan-400/30 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/10";
+          inp.className = "w-full rounded-lg px-2.5 py-2 text-sm outline-none transition";
+          inp.style.border = "1px solid var(--stroke)";
+          inp.style.background = "rgba(255,255,255,.04)";
+          inp.style.color = "var(--text)";
           inp.addEventListener("input", () => {
             s.value = inp.value;
             buildUrl();
@@ -298,7 +355,8 @@
           body.appendChild(inp);
         } else {
           const hint = document.createElement("div");
-          hint.className = "text-[11px] text-zinc-400";
+          hint.className = "text-[11px]";
+          hint.style.color = "var(--muted)";
           hint.textContent = `Adds ?${p.name}`;
           body.appendChild(hint);
         }
@@ -311,7 +369,6 @@
       function render() {
         const q = search.value.trim().toLowerCase();
         list.innerHTML = "";
-
         for (const p of params) {
           if (q && !p.name.toLowerCase().includes(q)) continue;
           list.appendChild(makeCard(p));
@@ -319,19 +376,67 @@
         buildUrl();
       }
 
+      function applyFromUrl(raw) {
+        clearErr();
+        let u;
+        try {
+          const trimmed = (raw || "").trim();
+          if (!trimmed) throw new Error("Paste a URL first.");
+          if (trimmed.startsWith("?")) u = new URL(location.origin + location.pathname + trimmed);
+          else if (trimmed.startsWith("/")) u = new URL(trimmed, location.origin);
+          else u = new URL(trimmed);
+        } catch (e) {
+          showErr("Invalid URL: " + (e && e.message ? e.message : e));
+          return;
+        }
+
+        const path = (u.pathname || "").toLowerCase();
+        if (path.endsWith("/overlay.html") || path.endsWith("overlay.html")) currentMode = "overlay";
+        if (path.endsWith("/dock.html") || path.endsWith("dock.html")) currentMode = "dock";
+
+        const sp = u.searchParams;
+
+        for (const p of params) {
+          const s = state.get(p.name);
+          if (!s) continue;
+          if (p.type === "flag") s.enabled = sp.has(p.name);
+          else s.value = sp.get(p.name) ?? "";
+        }
+
+        if (currentMode === "overlay") applyOverlayDefaults();
+        setModeUI();
+        render();
+        meta.textContent = `Applied from URL`;
+      }
+
+      function setModeUI() {
+        const on = "bg-white/10 text-white";
+        const off = "text-zinc-300 hover:bg-white/10";
+        const dis = busy ? " opacity-50 cursor-not-allowed" : "";
+        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "overlay" ? on : off) + dis;
+        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "dock" ? on : off) + dis;
+      }
+
       async function rescanAndRender() {
         clearErr();
-        meta.textContent = "Scanning…";
+        setBusy(true);
+        meta.textContent = "Retrieving…";
         try {
           const text = await getScanText();
-          if (!meta.textContent.includes("scanned overlay.html")) meta.textContent = "Parsing…";
+          meta.textContent = "Parsing…";
           parseParamsFromText(text);
+          if (currentMode === "overlay") applyOverlayDefaults();
+          meta.textContent = `Detected ${params.length} params`;
           render();
         } catch (e) {
           params = [];
-          render();
+          state.clear();
+          list.innerHTML = "";
           meta.textContent = "No params detected";
           showErr(String(e && e.message ? e.message : e));
+        } finally {
+          setBusy(false);
+          setModeUI();
         }
       }
 
@@ -341,12 +446,12 @@
           await navigator.clipboard.writeText(text);
           const old = copyBtn.textContent;
           copyBtn.textContent = "Copied!";
-          copyBtn.className =
-            "rounded-xl border border-emerald-400/30 bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-100 transition";
+          copyBtn.style.borderColor = "rgba(52,211,153,.35)";
+          copyBtn.style.background = "rgba(52,211,153,.20)";
           setTimeout(() => {
             copyBtn.textContent = old;
-            copyBtn.className =
-              "rounded-xl border border-white/10 bg-gradient-to-r from-fuchsia-500/15 to-cyan-500/10 px-3 py-2 text-xs font-semibold text-zinc-100 transition hover:from-fuchsia-500/25 hover:to-cyan-500/20 active:scale-[0.99]";
+            copyBtn.style.borderColor = "rgba(251,191,36,.25)";
+            copyBtn.style.background = "rgba(251,191,36,.12)";
           }, 850);
         } catch {
           prompt("Copy URL:", text);
@@ -354,18 +459,25 @@
       }
 
       modeOverlay.addEventListener("click", async () => {
-        setMode("overlay");
-        await rescanAndRender();
-      });
-      modeDock.addEventListener("click", async () => {
-        setMode("dock");
+        if (busy) return;
+        currentMode = "overlay";
+        setModeUI();
         await rescanAndRender();
       });
 
-      reloadBtn.addEventListener("click", rescanAndRender);
-      search.addEventListener("input", render);
+      modeDock.addEventListener("click", async () => {
+        if (busy) return;
+        currentMode = "dock";
+        setModeUI();
+        await rescanAndRender();
+      });
+
+      reloadBtn.addEventListener("click", () => { if (!busy) rescanAndRender(); });
+
+      search.addEventListener("input", () => { if (!busy) render(); });
 
       clearBtn.addEventListener("click", () => {
+        if (busy) return;
         search.value = "";
         for (const p of params) {
           const s = state.get(p.name);
@@ -373,16 +485,25 @@
           s.enabled = false;
           s.value = "";
         }
+        if (currentMode === "overlay") applyOverlayDefaults();
         render();
       });
 
-      urlBar.addEventListener("click", copyUrl);
-      copyBtn.addEventListener("click", copyUrl);
+      urlBar.addEventListener("click", () => { if (!busy) copyUrl(); });
+      copyBtn.addEventListener("click", () => { if (!busy) copyUrl(); });
 
-      setMode("overlay");
-      rescanAndRender();
+      applyBtn.addEventListener("click", () => { if (!busy) applyFromUrl(urlIn.value); });
+      urlIn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !busy) applyFromUrl(urlIn.value);
+      });
+
+      setModeUI();
+      rescanAndRender().then(() => {
+        if (location.search && location.search !== "?") {
+          applyFromUrl(location.origin + location.pathname + location.search);
+        }
+      });
     })();
   </script>
 </body>
-
 </html>
