@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dock URL Controller</title>
+  <style>
+    :root { --pad: 10px; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    #copyBar {
+      position: sticky; top: 0; z-index: 10;
+      padding: 12px var(--pad);
+      background: #111; color: #fff;
+      cursor: pointer; user-select: none;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #copyHint { opacity: .75; margin-left: 10px; font-size: 12px; }
+    #wrap { padding: var(--pad); display: grid; gap: 10px; }
+    .row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+    .name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+    .ctrl { display: flex; gap: 8px; align-items: center; }
+    input[type="text"] { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+    input[type="checkbox"] { transform: scale(1.2); }
+    #search { padding: 10px; border-radius: 10px; border: 1px solid #ccc; width: 100%; }
+    .meta { font-size: 12px; opacity: .7; }
+  </style>
+</head>
+<body>
+  <div id="copyBar" title="Click to copy URL">
+    <span id="urlOut">Loading…</span>
+    <span id="copyHint">(click to copy)</span>
+  </div>
+
+  <div id="wrap">
+    <input id="search" type="text" placeholder="Filter params… (e.g. horizontal, blur, css)" />
+    <div class="meta" id="meta"></div>
+    <div id="list"></div>
+  </div>
+
+<script>
+(async function () {
+  const dockPath = "./dock.html";
+
+  const urlOut = document.getElementById("urlOut");
+  const list = document.getElementById("list");
+  const search = document.getElementById("search");
+  const meta = document.getElementById("meta");
+
+  // Extract params from dock.html
+  const dockText = await fetch(dockPath, { cache: "no-store" }).then(r => r.text());
+
+  const hasRe = /urlParams\.has\(\s*['"]([^'"]+)['"]\s*\)/g;
+  const getRe = /urlParams\.get\(\s*['"]([^'"]+)['"]\s*\)/g;
+
+  const hasSet = new Set();
+  const getSet = new Set();
+
+  for (const m of dockText.matchAll(hasRe)) hasSet.add(m[1]);
+  for (const m of dockText.matchAll(getRe)) getSet.add(m[1]);
+
+  // Build param schema
+  // If param appears in get(), treat as value input.
+  // Else if only has(), treat as checkbox boolean.
+  const params = Array.from(new Set([...hasSet, ...getSet]))
+    .sort((a,b) => a.localeCompare(b))
+    .map(name => ({
+      name,
+      type: getSet.has(name) ? "value" : "flag",
+    }));
+
+  meta.textContent = `Detected ${params.length} params from dock.html (${Array.from(hasSet).length} flags, ${Array.from(getSet).length} value params).`;
+
+  // State
+  const state = new Map(); // name -> {enabled:boolean, value:string}
+  for (const p of params) state.set(p.name, { enabled: false, value: "" });
+
+  function buildUrl() {
+    const base = new URL(dockPath, location.href);
+    const sp = new URLSearchParams();
+
+    for (const p of params) {
+      const s = state.get(p.name);
+      if (!s) continue;
+
+      if (p.type === "flag") {
+        if (s.enabled) sp.set(p.name, ""); // ?flag
+      } else {
+        // value param: only include if non-empty
+        const v = (s.value ?? "").trim();
+        if (v !== "") sp.set(p.name, v);
+      }
+    }
+
+    // Render compactly: flags as ?flag (no =)
+    // URLSearchParams always outputs "=" for empty values, so we post-process:
+    let qs = sp.toString();
+    if (qs) {
+      qs = qs.replace(/=(&|$)/g, "$1"); // turns "flag=&x=1" into "flag&x=1"
+      urlOut.textContent = base.origin + base.pathname + "?" + qs;
+    } else {
+      urlOut.textContent = base.origin + base.pathname;
+    }
+  }
+
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    list.innerHTML = "";
+
+    for (const p of params) {
+      if (q && !p.name.toLowerCase().includes(q)) continue;
+
+      const s = state.get(p.name);
+
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = p.name;
+
+      const ctrl = document.createElement("div");
+      ctrl.className = "ctrl";
+
+      if (p.type === "flag") {
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = s.enabled;
+        cb.addEventListener("change", () => {
+          s.enabled = cb.checked;
+          buildUrl();
+        });
+        ctrl.appendChild(cb);
+
+        const label = document.createElement("div");
+        label.className = "meta";
+        label.textContent = "flag";
+        ctrl.appendChild(label);
+      } else {
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.placeholder = "value…";
+        inp.value = s.value;
+        inp.addEventListener("input", () => {
+          s.value = inp.value;
+          buildUrl();
+        });
+        ctrl.appendChild(inp);
+
+        const label = document.createElement("div");
+        label.className = "meta";
+        label.textContent = "value";
+        ctrl.appendChild(label);
+      }
+
+      row.appendChild(name);
+      row.appendChild(ctrl);
+      list.appendChild(row);
+    }
+
+    buildUrl();
+  }
+
+  // Copy bar
+  document.getElementById("copyBar").addEventListener("click", async () => {
+    const text = urlOut.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const hint = document.getElementById("copyHint");
+      const old = hint.textContent;
+      hint.textContent = "copied!";
+      setTimeout(() => hint.textContent = old, 900);
+    } catch (e) {
+      // fallback
+      prompt("Copy URL:", text);
+    }
+  });
+
+  search.addEventListener("input", render);
+
+  render();
+})();
+</script>
+</body>
+</html>
