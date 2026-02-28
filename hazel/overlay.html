@@ -754,6 +754,22 @@
 			white-space: normal;
 		}
 
+		.nowrapmsg .hl-message {
+			max-width: var(--msg-max-width, 70vw);
+			overflow: hidden;
+			white-space: nowrap;
+			overflow-wrap: normal;
+			word-break: normal;
+		}
+
+		.nowrapmsg .hl-message .hl-content {
+			display: block;
+			max-width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
 
 		.twoLines.alignright .hl-firstline {
 			display: flex;
@@ -3366,6 +3382,30 @@
 
 		var urlParams = new URLSearchParams(window.location.search);
 		var treatTikTokFansAsMembers = urlParams.has("tiktokfans");
+		var maxMsgChars = null;
+		if (urlParams.get("maxmsgchars")) {
+			const n = parseInt(urlParams.get("maxmsgchars"), 10);
+			if (Number.isFinite(n) && n > 0) maxMsgChars = n;
+		}
+
+		var maxMsgWidthCss = null;
+		if (urlParams.get("maxmsgwidth")) {
+			const raw = (urlParams.get("maxmsgwidth") || "").trim();
+			if (/^\d+(\.\d+)?(px|vw|vh|%|rem|em)$/.test(raw)) {
+				maxMsgWidthCss = raw;
+			} else {
+				const num = parseFloat(raw);
+				if (Number.isFinite(num)) {
+					if (num > 0 && num <= 1) maxMsgWidthCss = (num * 100) + "vw";
+					else if (num > 1) maxMsgWidthCss = num + "px";
+				}
+			}
+		}
+
+		if (maxMsgChars || maxMsgWidthCss) {
+			document.body.classList.add("nowrapmsg");
+			if (maxMsgWidthCss) document.documentElement.style.setProperty("--msg-max-width", maxMsgWidthCss);
+		}
 		var channel = null;
 		var iframes = [];
 		var queue = [];
@@ -3429,6 +3469,8 @@
 		var textGlowEnabled = urlParams.has("textglow");
 		var textGlowWidthParam = null;
 		var textGlowColorParam = null;
+
+
 
 		var fontColorParam = normalizeColor(urlParams.get("fontcolor"));
 		if (hasValue(fontColorParam)) {
@@ -10247,6 +10289,10 @@
 
 				if (NormalizeText && chatmessage) {
 					chatmessage = normalizeText(data.chatmessage, data.textonly || false);
+				}
+
+				if (maxMsgChars && chatmessage) {
+					chatmessage = truncateHTMLContent(chatmessage, maxMsgChars);
 				}
 
 				if (largeavatar) {
