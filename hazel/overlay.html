@@ -3383,29 +3383,29 @@
 
 		var urlParams = new URLSearchParams(window.location.search);
 		var treatTikTokFansAsMembers = urlParams.has("tiktokfans");
-		var maxMsgChars = null;
-		if (urlParams.get("maxmsgchars")) {
-			const n = parseInt(urlParams.get("maxmsgchars"), 10);
-			if (Number.isFinite(n) && n > 0) maxMsgChars = n;
+		var msgMaxChars = null;
+		if (urlParams.get("msgmaxchars")) {
+			const n = parseInt(urlParams.get("msgmaxchars"), 10);
+			if (Number.isFinite(n) && n > 0) msgMaxChars = n;
 		}
 
-		var maxMsgWidthCss = null;
-		if (urlParams.get("maxmsgwidth")) {
-			const raw = (urlParams.get("maxmsgwidth") || "").trim();
+		var msgMaxCharsCss = null;
+		if (urlParams.get("msgmaxwidth")) {
+			const raw = (urlParams.get("msgmaxwidth") || "").trim();
 			if (/^\d+(\.\d+)?(px|vw|vh|%|rem|em)$/.test(raw)) {
-				maxMsgWidthCss = raw;
+				msgMaxCharsCss = raw;
 			} else {
 				const num = parseFloat(raw);
 				if (Number.isFinite(num)) {
-					if (num > 0 && num <= 1) maxMsgWidthCss = (num * 100) + "vw";
-					else if (num > 1) maxMsgWidthCss = num + "px";
+					if (num > 0 && num <= 1) msgMaxCharsCss = (num * 100) + "vw";
+					else if (num > 1) msgMaxCharsCss = num + "px";
 				}
 			}
 		}
 
-		if (maxMsgChars || maxMsgWidthCss) {
+		if (msgMaxChars || msgMaxCharsCss) {
 			document.body.classList.add("nowrapmsg");
-			if (maxMsgWidthCss) document.documentElement.style.setProperty("--msg-max-width", maxMsgWidthCss);
+			if (msgMaxCharsCss) document.documentElement.style.setProperty("--msg-max-width", msgMaxCharsCss);
 		}
 		var channel = null;
 		var iframes = [];
@@ -10292,8 +10292,8 @@
 					chatmessage = normalizeText(data.chatmessage, data.textonly || false);
 				}
 
-				if (maxMsgChars && chatmessage) {
-					chatmessage = truncateHTMLContent(chatmessage, maxMsgChars);
+				if (msgMaxChars && chatmessage) {
+					chatmessage = truncateHTMLContent(chatmessage, msgMaxChars);
 				}
 
 				if (largeavatar) {
