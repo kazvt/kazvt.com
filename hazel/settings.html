@@ -164,15 +164,6 @@
               </svg>
             </div>
           </div>
-
-          <button id="clearBtn" class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
-            clearberry
-          </button>
-
-          <button id="reloadBtn"
-            class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
-            reloadberry
-          </button>
         </div>
       </div>
 
@@ -209,10 +200,8 @@
       const list = document.getElementById("list");
       const search = document.getElementById("search");
       const meta = document.getElementById("meta");
-      const clearBtn = document.getElementById("clearBtn");
       const modeOverlay = document.getElementById("modeOverlay");
       const modeDock = document.getElementById("modeDock");
-      const reloadBtn = document.getElementById("reloadBtn");
       const errBox = document.getElementById("err");
       const sessionInput = document.getElementById("sessionCode");
       let urlEditTimer = null;
@@ -251,7 +240,7 @@
         urlEditTimer = setTimeout(() => {
           setUserEditing(false);
           applyFromUrl(urlIn.value);
-        }, 3000);
+        }, 2000);
       }
 
       function setBusy(v) {
@@ -260,8 +249,6 @@
         modeOverlay.disabled = dis;
         modeDock.disabled = dis;
         copyBtn.disabled = dis;
-        reloadBtn.disabled = dis;
-        clearBtn.disabled = dis;
         search.disabled = dis;
         urlIn.disabled = dis;
 
@@ -552,8 +539,21 @@
         syncUrlInputFromState();
       }
 
+      function extractSessionFromLooseInput(str) {
+        if (!str) return null;
+
+        const m = str.match(/session=([^?&]+)/i);
+        if (!m) return null;
+
+        return decodeURIComponent(m[1]);
+      }
+
       function applyFromUrl(raw) {
         clearErr();
+        const looseSession = extractSessionFromLooseInput(raw);
+        if (looseSession) {
+          sessionInput.value = looseSession;
+        }
         let u;
         try {
           const trimmed = (raw || "").trim();
@@ -571,7 +571,10 @@
         if (path.endsWith("/dock.html") || path.endsWith("dock.html")) currentMode = "dock";
 
         const sp = u.searchParams;
-        sessionInput.value = sp.get("session") || "";
+        const strictSession = sp.get("session");
+        if (strictSession !== null) {
+          sessionInput.value = strictSession;
+        }
 
         for (const p of params) {
           const s = state.get(p.name);
@@ -649,22 +652,8 @@
         await rescanAndRender();
       });
 
-      reloadBtn.addEventListener("click", () => { if (!busy) rescanAndRender(); });
 
       search.addEventListener("input", () => { if (!busy) render(); });
-
-      clearBtn.addEventListener("click", () => {
-        if (busy) return;
-        search.value = "";
-        for (const p of params) {
-          const s = state.get(p.name);
-          if (!s) continue;
-          s.enabled = false;
-          s.value = "";
-        }
-        if (currentMode === "overlay") applyOverlayDefaults();
-        render();
-      });
 
       copyBtn.addEventListener("click", () => { if (!busy) copyUrl(); });
 
