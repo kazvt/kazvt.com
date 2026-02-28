@@ -192,6 +192,19 @@
         overlaymode: true
       };
 
+      const COOKIE_KEY = "hazelberry_session_v1";
+      const LS_KEY     = "hazelberry_settings_v1";
+
+      function setCookie(name, value, days = 365) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+      }
+
+      function getCookie(name) {
+        const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+
       let currentMode = "overlay";
       let params = [];
       const state = new Map();
@@ -199,17 +212,15 @@
       let docs = new Map();
       let restoring = false;
 
-      const urlIn = document.getElementById("urlIn");
-      const copyBtn = document.getElementById("copyBtn");
-      const list = document.getElementById("list");
-      const search = document.getElementById("search");
-      const meta = document.getElementById("meta");
+      const urlIn       = document.getElementById("urlIn");
+      const copyBtn     = document.getElementById("copyBtn");
+      const list        = document.getElementById("list");
+      const search      = document.getElementById("search");
+      const meta        = document.getElementById("meta");
       const modeOverlay = document.getElementById("modeOverlay");
-      const modeDock = document.getElementById("modeDock");
-      const errBox = document.getElementById("err");
+      const modeDock    = document.getElementById("modeDock");
+      const errBox      = document.getElementById("err");
       const sessionInput = document.getElementById("sessionCode");
-
-      const LS_KEY = "hazelberry_settings_v1";
 
       function savePrefs() {
         const snapshot = {
@@ -220,6 +231,8 @@
           ts: Date.now()
         };
         localStorage.setItem(LS_KEY, JSON.stringify(snapshot));
+        
+        setCookie(COOKIE_KEY, sessionInput.value || "");
       }
 
       let urlEditTimer = null;
@@ -257,7 +270,7 @@
         if (urlEditTimer) clearTimeout(urlEditTimer);
         urlEditTimer = setTimeout(() => {
           setUserEditing(false);
-          applyFromUrl(urlIn.value);
+          applyFromUrl(urlIn.value,  true);
         }, 2000);
       }
 
@@ -265,19 +278,19 @@
         busy = v;
         const dis = !!v;
         modeOverlay.disabled = dis;
-        modeDock.disabled = dis;
-        copyBtn.disabled = dis;
-        search.disabled = dis;
-        urlIn.disabled = dis;
+        modeDock.disabled    = dis;
+        copyBtn.disabled     = dis;
+        search.disabled      = dis;
+        urlIn.disabled       = dis;
 
-        const btnOn = "bg-white/10 text-white";
+        const btnOn  = "bg-white/10 text-white";
         const btnOff = "text-zinc-300 hover:bg-white/10";
         const btnDis = "opacity-50 cursor-not-allowed";
 
         modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "overlay" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
-        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "dock" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
+        modeDock.className    = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "dock"    ? btnOn : btnOff) + (dis ? " " + btnDis : "");
 
-        list.classList.toggle("opacity-50", dis);
+        list.classList.toggle("opacity-50",          dis);
         list.classList.toggle("pointer-events-none", dis);
       }
 
@@ -391,6 +404,8 @@
 
         const detected = Array.from(new Set([...hasSet, ...getSet]))
           .sort((a, b) => a.localeCompare(b))
+          
+          .filter(name => name !== "session")
           .map(name => ({ name, type: getSet.has(name) ? "value" : "flag" }));
 
         const prev = new Map(state);
@@ -417,10 +432,15 @@
 
       const saved = loadPrefs();
 
-      let pendingRestoreUrl = saved?.url || "";
-      let pendingRestoreMode = saved?.mode || "";
+      let pendingRestoreUrl     = saved?.url    || "";
+      let pendingRestoreMode    = saved?.mode   || "";
       let pendingRestoreSession = saved?.session || "";
-      let pendingRestoreState = saved?.state || null;
+      let pendingRestoreState   = saved?.state  || null;
+
+      const cookieSession = getCookie(COOKIE_KEY);
+      if (cookieSession !== null && cookieSession !== "") {
+        pendingRestoreSession = cookieSession;
+      }
 
       function applyOverlayDefaults() {
         if (currentMode !== "overlay") return;
@@ -439,7 +459,6 @@
         const base = new URL(getTargetPath(), location.href);
         const sp = new URLSearchParams();
 
-        sp.delete("session");
         const sessionVal = sessionInput.value.trim();
         if (sessionVal) {
           sp.append("session", sessionVal);
@@ -448,6 +467,8 @@
         for (const p of params) {
           const s = state.get(p.name);
           if (!s) continue;
+          
+          if (p.name === "session") continue;
 
           if (p.type === "flag") {
             if (s.enabled) sp.append(p.name, "");
@@ -464,6 +485,7 @@
           ? (base.origin + base.pathname + "?" + qs)
           : (base.origin + base.pathname);
       }
+
       function flashUrl() {
         urlIn.classList.remove("url-flash");
         void urlIn.offsetWidth;
@@ -520,19 +542,19 @@
               <span class="absolute left-0.5 top-0.5 h-4 w-4 transition surface"></span>
             </span>
           `;
-          const cb = label.querySelector("input");
+          const cb    = label.querySelector("input");
           const track = label.querySelector("span");
-          const knob = track.querySelector("span");
+          const knob  = track.querySelector("span");
 
           function paint() {
             if (cb.checked) {
-              track.style.background = "rgba(52,211,153,.20)";
-              track.style.borderColor = "rgba(52,211,153,.30)";
-              knob.style.transform = "translateX(1rem)";
+              track.style.background   = "rgba(52,211,153,.20)";
+              track.style.borderColor  = "rgba(52,211,153,.30)";
+              knob.style.transform     = "translateX(1rem)";
             } else {
-              track.style.background = "rgba(255,255,255,.08)";
-              track.style.borderColor = "var(--border)";
-              knob.style.transform = "translateX(0)";
+              track.style.background   = "rgba(255,255,255,.08)";
+              track.style.borderColor  = "var(--border)";
+              knob.style.transform     = "translateX(0)";
             }
           }
 
@@ -555,25 +577,23 @@
 
         if (p.type === "value") {
           const ta = document.createElement("textarea");
-          ta.value = s.value;
+          ta.value       = s.value;
           ta.placeholder = "...";
-          ta.rows = 1;
-          ta.className = "w-full px-2.5 py-2 text-sm outline-none transition surface resize-none whitespace-pre-wrap";
+          ta.rows        = 1;
+          ta.className   = "w-full px-2.5 py-2 text-sm outline-none transition surface resize-none whitespace-pre-wrap";
           ta.style.overflowY = "hidden";
           ta.style.maxHeight = "50vh";
           ta.style.minHeight = "2.2rem";
 
           function autoGrow() {
             ta.style.height = "auto";
-
-            const max = window.innerHeight * 0.5;
+            const max    = window.innerHeight * 0.5;
             const needed = ta.scrollHeight;
-
             if (needed > max) {
-              ta.style.height = max + "px";
+              ta.style.height    = max + "px";
               ta.style.overflowY = "auto";
             } else {
-              ta.style.height = needed + "px";
+              ta.style.height    = needed + "px";
               ta.style.overflowY = "hidden";
             }
           }
@@ -596,7 +616,7 @@
           body.appendChild(ta);
         } else {
           const hint = document.createElement("div");
-          hint.className = "text-[11px]";
+          hint.className   = "text-[11px]";
           hint.style.color = "var(--muted)";
           hint.textContent = `Adds ?${p.name}`;
           body.appendChild(hint);
@@ -618,21 +638,9 @@
         savePrefs();
       }
 
-      function extractSessionFromLooseInput(str) {
-        if (!str) return null;
-
-        const m = str.match(/session=([^?&]+)/i);
-        if (!m) return null;
-
-        return decodeURIComponent(m[1]);
-      }
-
-      function applyFromUrl(raw) {
+      function applyFromUrl(raw, preserveSession = false) {
         clearErr();
-        const looseSession = extractSessionFromLooseInput(raw);
-        if (looseSession) {
-          sessionInput.value = looseSession;
-        }
+
         let u;
         try {
           const trimmed = (raw || "").trim();
@@ -647,12 +655,16 @@
 
         const path = (u.pathname || "").toLowerCase();
         if (path.endsWith("/overlay.html") || path.endsWith("overlay.html")) currentMode = "overlay";
-        if (path.endsWith("/dock.html") || path.endsWith("dock.html")) currentMode = "dock";
+        if (path.endsWith("/dock.html")    || path.endsWith("dock.html"))    currentMode = "dock";
 
         const sp = u.searchParams;
-        const strictSession = sp.get("session");
-        if (strictSession !== null) {
-          sessionInput.value = strictSession;
+
+        if (!preserveSession) {
+          const strictSession = sp.get("session");
+          if (strictSession !== null) {
+            sessionInput.value = strictSession;
+            setCookie(COOKIE_KEY, strictSession);
+          }
         }
 
         for (const p of params) {
@@ -671,11 +683,11 @@
       }
 
       function setModeUI() {
-        const on = "bg-white/10 text-white";
+        const on  = "bg-white/10 text-white";
         const off = "text-zinc-300 hover:bg-white/10";
         const dis = busy ? " opacity-50 cursor-not-allowed" : "";
         modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "overlay" ? on : off) + dis;
-        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "dock" ? on : off) + dis;
+        modeDock.className    = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "dock"    ? on : off) + dis;
       }
 
       async function rescanAndRender() {
@@ -706,13 +718,13 @@
         try {
           await navigator.clipboard.writeText(text);
           const old = copyBtn.textContent;
-          copyBtn.textContent = "copied";
-          copyBtn.style.borderColor = "rgba(52,211,153,.30)";
-          copyBtn.style.background = "rgba(52,211,153,.15)";
+          copyBtn.textContent            = "copied";
+          copyBtn.style.borderColor      = "rgba(52,211,153,.30)";
+          copyBtn.style.background       = "rgba(52,211,153,.15)";
           setTimeout(() => {
-            copyBtn.textContent = old;
+            copyBtn.textContent       = old;
             copyBtn.style.borderColor = "rgba(251,191,36,.22)";
-            copyBtn.style.background = "rgba(251,191,36,.10)";
+            copyBtn.style.background  = "rgba(251,191,36,.10)";
           }, 700);
         } catch {
           prompt("Copy URL:", text);
@@ -735,7 +747,6 @@
         await rescanAndRender();
       });
 
-
       search.addEventListener("input", () => { if (!busy) render(); });
 
       copyBtn.addEventListener("click", () => { if (!busy) copyUrl(); });
@@ -749,14 +760,14 @@
         if (busy) return;
 
         const raw = sessionInput.value.trim();
-        const m = raw.match(/(?:^|[?&])session=([^?&]+)/i);
-
+        const m   = raw.match(/(?:^|[?&])session=([^?&]+)/i);
         if (m) {
           sessionInput.value = decodeURIComponent(m[1]);
         } else if (/^session=/i.test(raw)) {
           sessionInput.value = raw.replace(/^session=/i, "");
         }
 
+        setCookie(COOKIE_KEY, sessionInput.value);
         syncUrlInputFromState();
         savePrefs();
       });
@@ -766,7 +777,8 @@
       if (!location.search && saved) {
         restoring = true;
         if (pendingRestoreMode === "dock" || pendingRestoreMode === "overlay") currentMode = pendingRestoreMode;
-        if (typeof pendingRestoreSession === "string") sessionInput.value = pendingRestoreSession;
+        
+        sessionInput.value = pendingRestoreSession || "";
         if (typeof pendingRestoreUrl === "string" && pendingRestoreUrl.trim()) urlIn.value = pendingRestoreUrl.trim();
         restoring = false;
       }
@@ -777,13 +789,16 @@
         if (location.search && location.search !== "?") {
           applyFromUrl(location.origin + location.pathname + location.search);
         } else if (pendingRestoreUrl && pendingRestoreUrl.trim()) {
-          applyFromUrl(pendingRestoreUrl.trim());
+          
+          applyFromUrl(pendingRestoreUrl.trim(),  true);
+          
+          sessionInput.value = pendingRestoreSession || "";
         } else if (pendingRestoreState) {
           for (const [k, v] of Object.entries(pendingRestoreState)) {
             const s = state.get(k);
             if (!s) continue;
             s.enabled = !!v.enabled;
-            s.value = String(v.value ?? "");
+            s.value   = String(v.value ?? "");
           }
           render();
         } else {
@@ -797,17 +812,19 @@
 
       if (saved && !location.search) {
         if (saved.mode === "dock" || saved.mode === "overlay") currentMode = saved.mode;
-        sessionInput.value = saved.session || "";
+        
+        sessionInput.value = pendingRestoreSession || "";
 
         if (saved.url) {
           urlIn.value = saved.url;
-          applyFromUrl(saved.url);
+          applyFromUrl(saved.url,  true);
+          sessionInput.value = pendingRestoreSession || "";
         } else if (saved.state) {
           for (const [k, v] of Object.entries(saved.state)) {
             const s = state.get(k);
             if (!s) continue;
             s.enabled = !!v.enabled;
-            s.value = String(v.value ?? "");
+            s.value   = String(v.value ?? "");
           }
           render();
         }
