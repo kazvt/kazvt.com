@@ -33,6 +33,26 @@
       background: var(--selection-bg);
       color: var(--selection-text);
     }
+
+    body * {
+      border-radius: 0 !important;
+    }
+
+    button,
+    input {
+      box-shadow: none !important;
+    }
+
+    button:disabled,
+    input:disabled {
+      opacity: .55 !important;
+      cursor: not-allowed !important;
+    }
+
+    input:focus {
+      outline: 1px solid var(--stroke2) !important;
+      outline-offset: 0px !important;
+    }
   </style>
 </head>
 
@@ -43,8 +63,8 @@
       <div class="flex flex-col gap-2">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center gap-3">
-            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl"
-              style="background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.25);">
+            <span class="inline-flex h-9 w-9 items-center justify-center"
+              style="background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.22);">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"
                 style="color:var(--accent);">
                 <path
@@ -59,21 +79,21 @@
                 settings</div>
             </div>
 
-            <div id="meta" class="rounded-full px-2.5 py-1 text-[11px]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
+            <div id="meta" class="px-2.5 py-1 text-[11px]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
               loadingberry...
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <div class="flex overflow-hidden rounded-xl p-0.5"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04);">
-              <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Overlay</button>
-              <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Dock</button>
+            <div class="flex overflow-hidden p-0.5"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03);">
+              <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition">Overlay</button>
+              <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition">Dock</button>
             </div>
 
-            <button id="applyBtn" class="rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
+            <button id="applyBtn" class="px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
               apply url
             </button>
           </div>
@@ -81,21 +101,21 @@
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex w-full items-center gap-2">
-            <input id="urlIn" type="text" class="w-full rounded-xl px-3 py-2 font-mono text-xs outline-none transition"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
+            <input id="urlIn" type="text" class="w-full px-3 py-2 font-mono text-xs outline-none transition"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:var(--text);"
               placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
 
             <button id="copyBtn"
-              class="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
-              style="border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.12); color:var(--text);">
+              class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
+              style="border:1px solid rgba(251,191,36,.22); background:rgba(251,191,36,.10); color:var(--text);">
               copy
             </button>
           </div>
 
           <div class="flex w-full items-center gap-2 sm:w-[560px]">
             <div class="relative w-full">
-              <input id="search" type="text" class="w-full rounded-xl px-3 py-2 pr-9 text-sm outline-none transition"
-                style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
+              <input id="search" type="text" class="w-full px-3 py-2 pr-9 text-sm outline-none transition"
+                style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:var(--text);"
                 placeholder="filter params..." />
               <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -106,20 +126,20 @@
               </div>
             </div>
 
-            <button id="clearBtn" class="shrink-0 rounded-xl px-3 py-2 text-sm transition active:scale-[0.99]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
+            <button id="clearBtn" class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
               clearberry
             </button>
 
-            <button id="reloadBtn" class="shrink-0 rounded-xl px-3 py-2 text-sm transition active:scale-[0.99]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:rgba(244,244,245,.9);">
+            <button id="reloadBtn" class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99]"
+              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
               reloadberry
             </button>
           </div>
         </div>
 
-        <div id="err" class="hidden rounded-xl px-3 py-2 text-xs"
-          style="border:1px solid rgba(251,113,133,.30); background:rgba(251,113,133,.10); color:rgba(255,228,230,.95);">
+        <div id="err" class="hidden px-3 py-2 text-xs"
+          style="border:1px solid rgba(251,113,133,.30); background:rgba(251,113,133,.08); color:rgba(255,228,230,.95);">
         </div>
       </div>
     </div>
@@ -193,8 +213,8 @@
         const btnOff = "text-zinc-300 hover:bg-white/10";
         const btnDis = "opacity-50 cursor-not-allowed";
 
-        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "overlay" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
-        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "dock" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
+        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "overlay" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
+        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "dock" ? btnOn : btnOff) + (dis ? " " + btnDis : "");
 
         list.classList.toggle("opacity-50", dis);
         list.classList.toggle("pointer-events-none", dis);
@@ -283,9 +303,9 @@
         const s = state.get(p.name);
 
         const card = document.createElement("div");
-        card.className = "rounded-xl p-3 shadow-sm transition";
+        card.className = "p-3 transition";
         card.style.border = "1px solid var(--stroke)";
-        card.style.background = "rgba(255,255,255,.04)";
+        card.style.background = "rgba(255,255,255,.03)";
 
         const header = document.createElement("div");
         header.className = "flex items-center justify-between gap-2";
@@ -293,11 +313,11 @@
         const name = document.createElement("div");
         name.className = "min-w-0";
         const pillStyle = p.type === "flag"
-          ? "border:1px solid rgba(56,189,248,.25); background:rgba(56,189,248,.10); color:rgba(224,242,254,.95);"
-          : "border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.10); color:rgba(254,243,199,.95);";
+          ? "border:1px solid rgba(56,189,248,.25); background:rgba(56,189,248,.08); color:rgba(224,242,254,.95);"
+          : "border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.08); color:rgba(254,243,199,.95);";
         name.innerHTML = `
           <div class="truncate text-sm font-semibold">${escapeHtml(p.name)}</div>
-          <div class="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]" style="${pillStyle}">
+          <div class="mt-1 inline-flex items-center gap-1 px-2 py-0.5 text-[10px]" style="${pillStyle}">
             ${p.type === "flag" ? "toggle" : "value"}
           </div>
         `;
@@ -310,8 +330,8 @@
           label.className = "inline-flex cursor-pointer items-center";
           label.innerHTML = `
             <input type="checkbox" class="peer sr-only" ${s.enabled ? "checked" : ""} />
-            <span class="relative h-5 w-9 rounded-full transition" style="background:rgba(255,255,255,.10); border:1px solid var(--stroke);">
-              <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full transition" style="background:rgba(255,255,255,.85);"></span>
+            <span class="relative h-5 w-9 transition" style="background:rgba(255,255,255,.08); border:1px solid var(--stroke);">
+              <span class="absolute left-0.5 top-0.5 h-4 w-4 transition" style="background:rgba(255,255,255,.85);"></span>
             </span>
           `;
           const cb = label.querySelector("input");
@@ -320,11 +340,11 @@
 
           function paint() {
             if (cb.checked) {
-              track.style.background = "rgba(52,211,153,.25)";
-              track.style.borderColor = "rgba(52,211,153,.35)";
+              track.style.background = "rgba(52,211,153,.20)";
+              track.style.borderColor = "rgba(52,211,153,.30)";
               knob.style.transform = "translateX(1rem)";
             } else {
-              track.style.background = "rgba(255,255,255,.10)";
+              track.style.background = "rgba(255,255,255,.08)";
               track.style.borderColor = "var(--stroke)";
               knob.style.transform = "translateX(0)";
             }
@@ -351,9 +371,9 @@
           inp.type = "text";
           inp.value = s.value;
           inp.placeholder = "...";
-          inp.className = "w-full rounded-lg px-2.5 py-2 text-sm outline-none transition";
+          inp.className = "w-full px-2.5 py-2 text-sm outline-none transition";
           inp.style.border = "1px solid var(--stroke)";
-          inp.style.background = "rgba(255,255,255,.04)";
+          inp.style.background = "rgba(255,255,255,.03)";
           inp.style.color = "var(--text)";
           inp.addEventListener("input", () => {
             s.value = inp.value;
@@ -420,8 +440,8 @@
         const on = "bg-white/10 text-white";
         const off = "text-zinc-300 hover:bg-white/10";
         const dis = busy ? " opacity-50 cursor-not-allowed" : "";
-        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "overlay" ? on : off) + dis;
-        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (currentMode === "dock" ? on : off) + dis;
+        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "overlay" ? on : off) + dis;
+        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition " + (currentMode === "dock" ? on : off) + dis;
       }
 
       async function rescanAndRender() {
@@ -452,14 +472,14 @@
         try {
           await navigator.clipboard.writeText(text);
           const old = copyBtn.textContent;
-          copyBtn.textContent = "Copied!";
-          copyBtn.style.borderColor = "rgba(52,211,153,.35)";
-          copyBtn.style.background = "rgba(52,211,153,.20)";
+          copyBtn.textContent = "copied";
+          copyBtn.style.borderColor = "rgba(52,211,153,.30)";
+          copyBtn.style.background = "rgba(52,211,153,.15)";
           setTimeout(() => {
             copyBtn.textContent = old;
-            copyBtn.style.borderColor = "rgba(251,191,36,.25)";
-            copyBtn.style.background = "rgba(251,191,36,.12)";
-          }, 850);
+            copyBtn.style.borderColor = "rgba(251,191,36,.22)";
+            copyBtn.style.background = "rgba(251,191,36,.10)";
+          }, 700);
         } catch {
           prompt("Copy URL:", text);
         }
