@@ -282,11 +282,9 @@
       function parseParamsFromText(text) {
         const lines = String(text).replace(/\r\n/g, "\n").split("\n");
 
-        function getAllStringArgs(line) {
-          const out = [];
-          const re = /urlParams\.(?:has|get)\(\s*['"]([^'"]+)['"]\s*\)/g;
-          for (const m of line.matchAll(re)) out.push(m[1]);
-          return out;
+        function getStringArg(line) {
+          const m = line.match(/urlParams\.(?:has|get)\(\s*['"]([^'"]+)['"]\s*\)/);
+          return m ? m[1] : null;
         }
 
         function isCommentLine(line) {
@@ -350,21 +348,13 @@
           const line = lines[i];
           if (!/urlParams\.(has|get)\(/.test(line)) continue;
 
-          const names = getAllStringArgs(line);
-          if (!names.length) continue;
+          const name = getStringArg(line);
+          if (!name) continue;
+
+          if (line.includes("urlParams.has(")) hasSet.add(name);
+          if (line.includes("urlParams.get(")) getSet.add(name);
 
           const desc = collectNearbyComments(i);
-
-          for (const name of names) {
-            if (line.includes(`urlParams.has("${name}")`) || line.includes(`urlParams.has('${name}')`)) hasSet.add(name);
-            if (line.includes(`urlParams.get("${name}")`) || line.includes(`urlParams.get('${name}')`)) getSet.add(name);
-
-            if (desc) {
-              const prev = docMap.get(name);
-              if (!prev) docMap.set(name, desc);
-              else if (!prev.includes(desc)) docMap.set(name, (prev + " " + desc).replace(/\s+/g, " ").trim());
-            }
-          }
           if (desc) {
             const prev = docMap.get(name);
             if (!prev) docMap.set(name, desc);
