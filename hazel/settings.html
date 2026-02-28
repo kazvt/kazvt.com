@@ -207,6 +207,20 @@
       const modeDock = document.getElementById("modeDock");
       const errBox = document.getElementById("err");
       const sessionInput = document.getElementById("sessionCode");
+
+      const LS_KEY = "hazelberry_settings_v1";
+
+      function savePrefs() {
+        const snapshot = {
+          mode: currentMode,
+          session: sessionInput.value || "",
+          url: urlIn.value || "",
+          state: Object.fromEntries([...state.entries()].map(([k, v]) => [k, { enabled: !!v.enabled, value: String(v.value ?? "") }])),
+          ts: Date.now()
+        };
+        localStorage.setItem(LS_KEY, JSON.stringify(snapshot));
+      }
+
       let urlEditTimer = null;
       let userEditingUrl = false;
 
@@ -390,6 +404,16 @@
         docs = docMap;
       }
 
+      function loadPrefs() {
+        try {
+          const raw = localStorage.getItem(LS_KEY);
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      }
+
       function applyOverlayDefaults() {
         if (currentMode !== "overlay") return;
         for (const p of params) {
@@ -506,6 +530,7 @@
             s.enabled = cb.checked;
             paint();
             syncUrlInputFromState();
+            savePrefs();
           });
 
           paint();
@@ -547,6 +572,7 @@
             s.value = ta.value;
             autoGrow();
             syncUrlInputFromState();
+            savePrefs();
           });
 
           ta.addEventListener("keydown", (e) => {
@@ -579,6 +605,7 @@
           list.appendChild(makeCard(p));
         }
         syncUrlInputFromState();
+        savePrefs();
       }
 
       function extractSessionFromLooseInput(str) {
@@ -628,6 +655,7 @@
         if (currentMode === "overlay") applyOverlayDefaults();
         setModeUI();
         render();
+        savePrefs();
         meta.textContent = `Applied from URL`;
       }
 
@@ -683,6 +711,7 @@
       modeOverlay.addEventListener("click", async () => {
         if (busy) return;
         currentMode = "overlay";
+        savePrefs();
         setModeUI();
         await rescanAndRender();
       });
@@ -690,6 +719,7 @@
       modeDock.addEventListener("click", async () => {
         if (busy) return;
         currentMode = "dock";
+        savePrefs();
         setModeUI();
         await rescanAndRender();
       });
@@ -701,6 +731,7 @@
 
       urlIn.addEventListener("input", () => {
         scheduleApplyFromUrl();
+        savePrefs();
       });
 
       sessionInput.addEventListener("input", () => {
@@ -716,6 +747,7 @@
         }
 
         syncUrlInputFromState();
+        savePrefs();
       });
 
       setModeUI();
@@ -724,6 +756,25 @@
           applyFromUrl(location.origin + location.pathname + location.search);
         }
       });
+
+      const saved = loadPrefs();
+      if (saved && !location.search) {
+        if (saved.mode === "dock" || saved.mode === "overlay") currentMode = saved.mode;
+        sessionInput.value = saved.session || "";
+
+        if (saved.url) {
+          urlIn.value = saved.url;
+          applyFromUrl(saved.url);
+        } else if (saved.state) {
+          for (const [k, v] of Object.entries(saved.state)) {
+            const s = state.get(k);
+            if (!s) continue;
+            s.enabled = !!v.enabled;
+            s.value = String(v.value ?? "");
+          }
+          render();
+        }
+      }
     })();
   </script>
 </body>
