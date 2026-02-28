@@ -83,12 +83,12 @@
           <div class="flex w-full items-center gap-2">
             <input id="urlIn" type="text" class="w-full rounded-xl px-3 py-2 font-mono text-xs outline-none transition"
               style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
-              placeholder="Paste/edit URL here (cards update this; Apply reads from it) …" />
+              placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
 
             <button id="copyBtn"
               class="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
               style="border:1px solid rgba(251,191,36,.25); background:rgba(251,191,36,.12); color:var(--text);">
-              Copy
+              copy
             </button>
           </div>
 
@@ -96,7 +96,7 @@
             <div class="relative w-full">
               <input id="search" type="text" class="w-full rounded-xl px-3 py-2 pr-9 text-sm outline-none transition"
                 style="border:1px solid var(--stroke); background:rgba(255,255,255,.04); color:var(--text);"
-                placeholder="Filter params…" />
+                placeholder="filter params..." />
               <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd"
@@ -350,7 +350,7 @@
           const inp = document.createElement("input");
           inp.type = "text";
           inp.value = s.value;
-          inp.placeholder = "…";
+          inp.placeholder = "...";
           inp.className = "w-full rounded-lg px-2.5 py-2 text-sm outline-none transition";
           inp.style.border = "1px solid var(--stroke)";
           inp.style.background = "rgba(255,255,255,.04)";
@@ -427,10 +427,10 @@
       async function rescanAndRender() {
         clearErr();
         setBusy(true);
-        meta.textContent = "Retrieving…";
+        meta.textContent = "retrieving...";
         try {
           const text = await getScanText();
-          meta.textContent = "Parsing…";
+          meta.textContent = "parsing...";
           parseParamsFromText(text);
           if (currentMode === "overlay") applyOverlayDefaults();
           meta.textContent = `Detected ${params.length} params`;
