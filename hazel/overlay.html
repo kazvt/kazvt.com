@@ -477,6 +477,15 @@
 			display: inline-block;
 			width: auto;
 			object-fit: contain;
+			-webkit-filter: drop-shadow(2px 2px 0 black)
+			drop-shadow(-2px 2px 0 black)
+			drop-shadow(2px -2px 0 black)
+			drop-shadow(-2px -2px 0 black);
+
+    		filter: drop-shadow(2px 2px 0 black)
+            drop-shadow(-2px 2px 0 black)
+            drop-shadow(2px -2px 0 black)
+            drop-shadow(-2px -2px 0 black);
 		}
 
 		.hl-badge:last-child {
