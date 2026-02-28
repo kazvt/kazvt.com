@@ -130,56 +130,57 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <div class="flex overflow-hidden p-0.5 surface surface-hover">
-              <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition">Overlay</button>
-              <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition">Dock</button>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs" style="color:var(--muted);">session</span>
+              <input id="sessionCode" type="text" class="px-2 py-1 text-xs font-mono outline-none surface"
+                placeholder="code" />
             </div>
           </div>
-        </div>
 
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex w-full items-center gap-2">
-            <input id="urlIn" type="text"
-              class="w-full px-3 py-2 font-mono text-xs outline-none transition surface surface-hover"
-              placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex w-full items-center gap-2">
+              <input id="urlIn" type="text"
+                class="w-full px-3 py-2 font-mono text-xs outline-none transition surface surface-hover"
+                placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
 
-            <button id="copyBtn"
-              class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99] accent-btn">
-              copy
-            </button>
-          </div>
+              <button id="copyBtn"
+                class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99] accent-btn">
+                copy
+              </button>
+            </div>
 
-          <div class="flex w-full items-center gap-2 sm:w-[560px]">
-            <div class="relative w-full">
-              <input id="search" type="text"
-                class="w-full px-3 py-2 pr-9 text-sm outline-none transition surface surface-hover"
-                placeholder="filter params..." />
-              <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd"
-                    d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
-                    clip-rule="evenodd" />
-                </svg>
+            <div class="flex w-full items-center gap-2 sm:w-[560px]">
+              <div class="relative w-full">
+                <input id="search" type="text"
+                  class="w-full px-3 py-2 pr-9 text-sm outline-none transition surface surface-hover"
+                  placeholder="filter params..." />
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center"
+                  style="color:var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </div>
               </div>
+
+              <button id="clearBtn"
+                class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
+                clearberry
+              </button>
+
+              <button id="reloadBtn"
+                class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
+                reloadberry
+              </button>
             </div>
-
-            <button id="clearBtn"
-              class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
-              clearberry
-            </button>
-
-            <button id="reloadBtn"
-              class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
-              reloadberry
-            </button>
           </div>
-        </div>
 
-        <div id="err" class="hidden px-3 py-2 text-xs surface surface-hover">
+          <div id="err" class="hidden px-3 py-2 text-xs surface surface-hover">
+          </div>
         </div>
       </div>
-    </div>
   </header>
 
   <main class="mx-auto max-w-6xl px-3 py-4">
@@ -215,6 +216,7 @@
       const modeDock = document.getElementById("modeDock");
       const reloadBtn = document.getElementById("reloadBtn");
       const errBox = document.getElementById("err");
+      const sessionInput = document.getElementById("sessionCode");
       let urlEditTimer = null;
       let userEditingUrl = false;
 
@@ -407,24 +409,30 @@
         const base = new URL(getTargetPath(), location.href);
         const sp = new URLSearchParams();
 
+        const sessionVal = sessionInput.value.trim();
+        if (sessionVal) {
+          sp.append("session", sessionVal);
+        }
+
         for (const p of params) {
           const s = state.get(p.name);
           if (!s) continue;
 
           if (p.type === "flag") {
-            if (s.enabled) sp.set(p.name, "");
+            if (s.enabled) sp.append(p.name, "");
           } else {
             const v = (s.value ?? "").trim();
-            if (v !== "") sp.set(p.name, v);
+            if (v !== "") sp.append(p.name, v);
           }
         }
 
         let qs = sp.toString();
         if (qs) qs = qs.replace(/=(&|$)/g, "$1");
 
-        return qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
+        return qs
+          ? (base.origin + base.pathname + "?" + qs)
+          : (base.origin + base.pathname);
       }
-
       function flashUrl() {
         urlIn.classList.remove("url-flash");
         void urlIn.offsetWidth;
@@ -566,6 +574,7 @@
         if (path.endsWith("/dock.html") || path.endsWith("dock.html")) currentMode = "dock";
 
         const sp = u.searchParams;
+        sessionInput.value = sp.get("session") || "";
 
         for (const p of params) {
           const s = state.get(p.name);
@@ -664,6 +673,11 @@
 
       urlIn.addEventListener("input", () => {
         scheduleApplyFromUrl();
+      });
+
+      sessionInput.addEventListener("input", () => {
+        if (busy) return;
+        syncUrlInputFromState();
       });
 
       setModeUI();
