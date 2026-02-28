@@ -443,8 +443,7 @@
 
         const card = document.createElement("div");
         card.className = "p-3 transition";
-        card.style.border = "1px solid var(--stroke)";
-        card.style.background = "rgba(255,255,255,.03)";
+        card.className = "p-3 transition surface";
 
         const header = document.createElement("div");
         header.className = "flex items-center justify-between gap-2";
@@ -519,10 +518,7 @@
           inp.type = "text";
           inp.value = s.value;
           inp.placeholder = "...";
-          inp.className = "w-full px-2.5 py-2 text-sm outline-none transition";
-          inp.style.border = "1px solid var(--stroke)";
-          inp.style.background = "rgba(255,255,255,.03)";
-          inp.style.color = "var(--text)";
+          inp.className = "w-full px-2.5 py-2 text-sm outline-none transition surface";
           inp.addEventListener("input", () => {
             s.value = inp.value;
             syncUrlInputFromState();
