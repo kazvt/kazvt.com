@@ -197,6 +197,7 @@
       const state = new Map();
       let busy = false;
       let docs = new Map();
+      let restoring = false;
 
       const urlIn = document.getElementById("urlIn");
       const copyBtn = document.getElementById("copyBtn");
@@ -414,6 +415,13 @@
         }
       }
 
+      const saved = loadPrefs();
+
+      let pendingRestoreUrl = saved?.url || "";
+      let pendingRestoreMode = saved?.mode || "";
+      let pendingRestoreSession = saved?.session || "";
+      let pendingRestoreState = saved?.state || null;
+
       function applyOverlayDefaults() {
         if (currentMode !== "overlay") return;
         for (const p of params) {
@@ -464,6 +472,7 @@
       }
 
       function syncUrlInputFromState() {
+        if (restoring) return;
         const out = serializeUrlFromState();
         if (!urlIn.matches(":focus")) urlIn.value = out;
         if (!userEditingUrl) flashUrl();
@@ -753,13 +762,39 @@
       });
 
       setModeUI();
+
+      if (!location.search && saved) {
+        restoring = true;
+        if (pendingRestoreMode === "dock" || pendingRestoreMode === "overlay") currentMode = pendingRestoreMode;
+        if (typeof pendingRestoreSession === "string") sessionInput.value = pendingRestoreSession;
+        if (typeof pendingRestoreUrl === "string" && pendingRestoreUrl.trim()) urlIn.value = pendingRestoreUrl.trim();
+        restoring = false;
+      }
+
       rescanAndRender().then(() => {
+        restoring = true;
+
         if (location.search && location.search !== "?") {
           applyFromUrl(location.origin + location.pathname + location.search);
+        } else if (pendingRestoreUrl && pendingRestoreUrl.trim()) {
+          applyFromUrl(pendingRestoreUrl.trim());
+        } else if (pendingRestoreState) {
+          for (const [k, v] of Object.entries(pendingRestoreState)) {
+            const s = state.get(k);
+            if (!s) continue;
+            s.enabled = !!v.enabled;
+            s.value = String(v.value ?? "");
+          }
+          render();
+        } else {
+          render();
         }
+
+        restoring = false;
+        syncUrlInputFromState();
+        savePrefs();
       });
 
-      const saved = loadPrefs();
       if (saved && !location.search) {
         if (saved.mode === "dock" || saved.mode === "overlay") currentMode = saved.mode;
         sessionInput.value = saved.session || "";
