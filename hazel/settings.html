@@ -431,6 +431,7 @@
         const base = new URL(getTargetPath(), location.href);
         const sp = new URLSearchParams();
 
+        sp.delete("session");
         const sessionVal = sessionInput.value.trim();
         if (sessionVal) {
           sp.append("session", sessionVal);
@@ -655,6 +656,7 @@
         if (currentMode === "overlay") applyOverlayDefaults();
         setModeUI();
         render();
+        syncUrlInputFromState();
         savePrefs();
         meta.textContent = `Applied from URL`;
       }
