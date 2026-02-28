@@ -517,16 +517,44 @@
         body.className = "mt-2";
 
         if (p.type === "value") {
-          const inp = document.createElement("input");
-          inp.type = "text";
-          inp.value = s.value;
-          inp.placeholder = "...";
-          inp.className = "w-full px-2.5 py-2 text-sm outline-none transition surface";
-          inp.addEventListener("input", () => {
-            s.value = inp.value;
+          const ta = document.createElement("textarea");
+          ta.value = s.value;
+          ta.placeholder = "...";
+          ta.rows = 1;
+          ta.className = "w-full px-2.5 py-2 text-sm outline-none transition surface resize-none whitespace-pre-wrap";
+          ta.style.overflowY = "hidden";
+          ta.style.maxHeight = "50vh";
+
+          function autoGrow() {
+            ta.style.height = "0px";
+
+            const max = window.innerHeight * 0.5;
+            const needed = ta.scrollHeight;
+
+            if (needed > max) {
+              ta.style.height = max + "px";
+              ta.style.overflowY = "auto";
+            } else {
+              ta.style.height = needed + "px";
+              ta.style.overflowY = "hidden";
+            }
+          }
+
+          ta.addEventListener("input", () => {
+            s.value = ta.value;
+            autoGrow();
             syncUrlInputFromState();
           });
-          body.appendChild(inp);
+
+          ta.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              ta.blur();
+            }
+          });
+
+          autoGrow();
+          body.appendChild(ta);
         } else {
           const hint = document.createElement("div");
           hint.className = "text-[11px]";
