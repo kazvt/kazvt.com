@@ -4,54 +4,83 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Overlay/Dock URL Builder</title>
+  <title>Overlay/Dock Settings</title>
+
+  <!-- Keep Tailwind CDN (as requested) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="dark light" />
 </head>
 
-<body class="min-h-screen bg-zinc-950 text-zinc-100">
+<body class="min-h-screen text-zinc-100 bg-zinc-950 selection:bg-fuchsia-500/30 selection:text-zinc-50">
+  <!-- background glow -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
+    <div class="absolute -top-24 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-fuchsia-500/20 blur-3xl">
+    </div>
+    <div class="absolute top-40 left-[-8rem] h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
+    <div class="absolute bottom-[-10rem] right-[-10rem] h-[28rem] w-[28rem] rounded-full bg-emerald-500/15 blur-3xl">
+    </div>
+  </div>
+
   <!-- Top bar -->
-  <header class="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur">
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/70 backdrop-blur-xl">
     <div class="mx-auto max-w-6xl px-3 py-3">
       <div class="flex flex-col gap-2">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-2">
-            <div class="text-base font-semibold tracking-tight">URL Builder</div>
-            <div id="meta" class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-300">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <span
+                class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500/30 to-cyan-500/20 ring-1 ring-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-100" viewBox="0 0 20 20"
+                  fill="currentColor">
+                  <path
+                    d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                  <path
+                    d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+                </svg>
+              </span>
+              <div class="leading-tight">
+                <div class="text-sm font-semibold tracking-tight">Overlay Settings</div>
+                <div class="text-[11px] text-zinc-400">Build & copy your URL params</div>
+              </div>
+            </div>
+
+            <div id="meta"
+              class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-200/90">
               Loading…
             </div>
           </div>
 
           <div class="flex items-center gap-2">
             <!-- segmented toggle -->
-            <div class="flex overflow-hidden rounded-xl border border-white/10 bg-white/5">
-              <button id="modeOverlay" class="px-3 py-1.5 text-xs font-medium transition">
-                Overlay
-              </button>
-              <button id="modeDock" class="px-3 py-1.5 text-xs font-medium transition">
-                Dock
-              </button>
+            <div class="flex overflow-hidden rounded-xl border border-white/10 bg-white/5 p-0.5">
+              <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Overlay</button>
+              <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition rounded-lg">Dock</button>
             </div>
 
             <button id="copyBtn"
-              class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]">
+              class="rounded-xl border border-white/10 bg-gradient-to-r from-fuchsia-500/15 to-cyan-500/10 px-3 py-2 text-xs font-semibold text-zinc-100 transition hover:from-fuchsia-500/25 hover:to-cyan-500/20 active:scale-[0.99]">
               Copy
             </button>
           </div>
         </div>
 
-        <!-- URL output (clickable) -->
+        <!-- URL output -->
         <button id="urlBar"
-          class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left font-mono text-xs text-zinc-100 transition hover:bg-white/10">
-          <span id="urlOut" class="block truncate">Loading…</span>
+          class="group w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left font-mono text-xs text-zinc-100 transition hover:bg-white/10"
+          title="Click to copy URL">
+          <div class="flex items-center gap-2">
+            <span
+              class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-white/5 ring-1 ring-white/10 text-[10px] text-zinc-300 group-hover:text-zinc-200">URL</span>
+            <span id="urlOut" class="block truncate">Loading…</span>
+          </div>
         </button>
 
-        <!-- controls row -->
+        <!-- Controls row -->
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex w-full items-center gap-2 sm:w-[420px]">
+          <div class="flex w-full items-center gap-2 sm:w-[560px]">
             <div class="relative w-full">
               <input id="search" type="text"
-                class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 pr-9 text-sm text-zinc-100 placeholder:text-zinc-400 outline-none transition focus:border-white/20 focus:bg-white/10"
+                class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 pr-9 text-sm text-zinc-100 placeholder:text-zinc-400 outline-none transition focus:border-fuchsia-400/30 focus:bg-white/10 focus:ring-2 focus:ring-fuchsia-500/10"
                 placeholder="Filter params…" />
               <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -63,40 +92,47 @@
             </div>
 
             <button id="clearBtn"
-              class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition hover:bg-white/10">
+              class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]">
               Clear
             </button>
           </div>
 
           <div class="flex items-center gap-2">
-            <!-- fallback loader -->
-            <input id="dockFile" type="file" accept=".html,text/html" class="hidden" />
-            <button id="loadDockBtn"
-              class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-200 transition hover:bg-white/10">
-              Load dock.html
+            <button id="reloadBtn"
+              class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]">
+              Reload
             </button>
           </div>
         </div>
+
+        <!-- Error line -->
+        <div id="err"
+          class="hidden rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-100"></div>
       </div>
     </div>
   </header>
 
   <main class="mx-auto max-w-6xl px-3 py-4">
-    <!-- compact responsive grid -->
+    <!-- Compact responsive grid -->
     <div id="list" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+
     <div class="mt-4 text-[11px] text-zinc-400">
-      If the list is empty, click <span class="font-semibold text-zinc-200">Load dock.html</span> (your browser likely
-      blocked fetching local files).
+      If “Dock” doesn’t exist on your site, the toggle still changes the output URL,
+      but param scanning will fall back to <span class="font-semibold text-zinc-200">overlay.html</span>.
     </div>
   </main>
 
   <script>
     (() => {
-      // Defaults
-      let currentMode = "overlay"; // default should be overlay.html
-      const PATHS = { overlay: "/overlay.html", dock: "/dock.html" };
+      const PATHS = {
+        overlay: "./overlay.html",
+        dock: "./dock.html" // optional
+      };
 
-      // DOM
+      let currentMode = "overlay";
+      let params = [];
+      const state = new Map();
+
       const urlOut = document.getElementById("urlOut");
       const urlBar = document.getElementById("urlBar");
       const copyBtn = document.getElementById("copyBtn");
@@ -106,24 +142,16 @@
       const clearBtn = document.getElementById("clearBtn");
       const modeOverlay = document.getElementById("modeOverlay");
       const modeDock = document.getElementById("modeDock");
-      const loadDockBtn = document.getElementById("loadDockBtn");
-      const dockFile = document.getElementById("dockFile");
+      const reloadBtn = document.getElementById("reloadBtn");
+      const errBox = document.getElementById("err");
 
-      // Data
-      let params = [];
-      const state = new Map(); // name -> {enabled:boolean, value:string}
-
-      function setMode(mode) {
-        currentMode = mode;
-        const on = "bg-white/15 text-white";
-        const off = "text-zinc-300 hover:bg-white/10";
-        modeOverlay.className = "px-3 py-1.5 text-xs font-medium transition " + (mode === "overlay" ? on : off);
-        modeDock.className = "px-3 py-1.5 text-xs font-medium transition " + (mode === "dock" ? on : off);
-        buildUrl();
+      function showErr(msg) {
+        errBox.textContent = msg;
+        errBox.classList.remove("hidden");
       }
-
-      function getTargetPath() {
-        return PATHS[currentMode] || "/overlay.html";
+      function clearErr() {
+        errBox.classList.add("hidden");
+        errBox.textContent = "";
       }
 
       function escapeHtml(str) {
@@ -132,31 +160,52 @@
         );
       }
 
-      function parseParamsFromDockText(dockText) {
+      function getTargetPath() {
+        return PATHS[currentMode] || PATHS.overlay;
+      }
+
+      async function getScanText() {
+        const primary = getTargetPath();
+        const primaryRes = await fetch(primary, { cache: "no-store" });
+        if (primaryRes.ok) return await primaryRes.text();
+
+        if (currentMode !== "overlay") {
+          const fallbackRes = await fetch(PATHS.overlay, { cache: "no-store" });
+          if (fallbackRes.ok) {
+            meta.textContent = `Dock missing (${primaryRes.status}); scanned overlay.html`;
+            return await fallbackRes.text();
+          }
+        }
+
+        throw new Error(`Failed to load ${primary} (HTTP ${primaryRes.status})`);
+      }
+
+      function parseParamsFromText(text) {
         const hasRe = /urlParams\.has\(\s*['"]([^'"]+)['"]\s*\)/g;
         const getRe = /urlParams\.get\(\s*['"]([^'"]+)['"]\s*\)/g;
 
         const hasSet = new Set();
         const getSet = new Set();
 
-        for (const m of dockText.matchAll(hasRe)) hasSet.add(m[1]);
-        for (const m of dockText.matchAll(getRe)) getSet.add(m[1]);
+        for (const m of text.matchAll(hasRe)) hasSet.add(m[1]);
+        for (const m of text.matchAll(getRe)) getSet.add(m[1]);
 
-        const all = Array.from(new Set([...hasSet, ...getSet]))
+        const detected = Array.from(new Set([...hasSet, ...getSet]))
           .sort((a, b) => a.localeCompare(b))
           .map(name => ({ name, type: getSet.has(name) ? "value" : "flag" }));
 
-        // preserve existing values when reloading
         const prev = new Map(state);
-
-        params = all;
         state.clear();
+        params = detected;
+
         for (const p of params) {
           const old = prev.get(p.name);
           state.set(p.name, old ? old : { enabled: false, value: "" });
         }
 
-        meta.textContent = `Detected ${params.length} params`;
+        if (!meta.textContent.includes("scanned overlay.html")) {
+          meta.textContent = `Detected ${params.length} params`;
+        }
       }
 
       function buildUrl() {
@@ -176,28 +225,42 @@
         }
 
         let qs = sp.toString();
-        if (qs) qs = qs.replace(/=(&|$)/g, "$1"); // compact flags
+        if (qs) qs = qs.replace(/=(&|$)/g, "$1");
 
         urlOut.textContent = qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
+      }
+
+      function setMode(mode) {
+        currentMode = mode;
+
+        const on = "bg-gradient-to-r from-fuchsia-500/25 to-cyan-500/20 text-white ring-1 ring-white/10";
+        const off = "text-zinc-300 hover:bg-white/10";
+        modeOverlay.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (mode === "overlay" ? on : off);
+        modeDock.className = "px-3 py-1.5 text-xs font-semibold transition rounded-lg " + (mode === "dock" ? on : off);
+
+        buildUrl();
       }
 
       function makeCard(p) {
         const s = state.get(p.name);
 
         const card = document.createElement("div");
-        card.className =
-          "rounded-xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10";
+        card.className = "rounded-xl border border-white/10 bg-white/5 p-3 shadow-sm transition hover:bg-white/10 hover:border-white/20";
 
-        // header row: name + control
         const header = document.createElement("div");
         header.className = "flex items-center justify-between gap-2";
 
         const name = document.createElement("div");
         name.className = "min-w-0";
+        const pill = p.type === "flag"
+          ? "bg-cyan-500/10 text-cyan-200 border-cyan-400/20"
+          : "bg-fuchsia-500/10 text-fuchsia-200 border-fuchsia-400/20";
         name.innerHTML = `
-      <div class="truncate text-sm font-semibold">${escapeHtml(p.name)}</div>
-      <div class="mt-0.5 text-[10px] text-zinc-400">${p.type === "flag" ? "toggle" : "value"}</div>
-    `;
+          <div class="truncate text-sm font-semibold">${escapeHtml(p.name)}</div>
+          <div class="mt-1 inline-flex items-center gap-1 rounded-full border ${pill} px-2 py-0.5 text-[10px]">
+            ${p.type === "flag" ? "toggle" : "value"}
+          </div>
+        `;
 
         const ctrl = document.createElement("div");
         ctrl.className = "shrink-0";
@@ -206,11 +269,11 @@
           const label = document.createElement("label");
           label.className = "inline-flex cursor-pointer items-center";
           label.innerHTML = `
-        <input type="checkbox" class="peer sr-only" ${s.enabled ? "checked" : ""} />
-        <span class="relative h-5 w-9 rounded-full bg-white/10 ring-1 ring-white/10 transition peer-checked:bg-emerald-500/30 peer-checked:ring-emerald-500/40">
-          <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white/80 transition peer-checked:translate-x-4"></span>
-        </span>
-      `;
+            <input type="checkbox" class="peer sr-only" ${s.enabled ? "checked" : ""} />
+            <span class="relative h-5 w-9 rounded-full bg-white/10 ring-1 ring-white/10 transition peer-checked:bg-emerald-500/30 peer-checked:ring-emerald-500/40">
+              <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white/85 transition peer-checked:translate-x-4"></span>
+            </span>
+          `;
           const cb = label.querySelector("input");
           cb.addEventListener("change", () => {
             s.enabled = cb.checked;
@@ -222,7 +285,6 @@
         header.appendChild(name);
         header.appendChild(ctrl);
 
-        // body: input for value params (compact)
         const body = document.createElement("div");
         body.className = "mt-2";
 
@@ -232,7 +294,7 @@
           inp.value = s.value;
           inp.placeholder = "…";
           inp.className =
-            "w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-white/20 focus:bg-white/10";
+            "w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-cyan-400/30 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/10";
           inp.addEventListener("input", () => {
             s.value = inp.value;
             buildUrl();
@@ -261,12 +323,21 @@
         buildUrl();
       }
 
-      // Events
-      modeOverlay.addEventListener("click", () => setMode("overlay"));
-      modeDock.addEventListener("click", () => setMode("dock"));
-
-      urlBar.addEventListener("click", () => copyUrl());
-      copyBtn.addEventListener("click", () => copyUrl());
+      async function rescanAndRender() {
+        clearErr();
+        meta.textContent = "Scanning…";
+        try {
+          const text = await getScanText();
+          if (!meta.textContent.includes("scanned overlay.html")) meta.textContent = "Parsing…";
+          parseParamsFromText(text);
+          render();
+        } catch (e) {
+          params = [];
+          render();
+          meta.textContent = "No params detected";
+          showErr(String(e && e.message ? e.message : e));
+        }
+      }
 
       async function copyUrl() {
         const text = urlOut.textContent;
@@ -279,13 +350,23 @@
           setTimeout(() => {
             copyBtn.textContent = old;
             copyBtn.className =
-              "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]";
+              "rounded-xl border border-white/10 bg-gradient-to-r from-fuchsia-500/15 to-cyan-500/10 px-3 py-2 text-xs font-semibold text-zinc-100 transition hover:from-fuchsia-500/25 hover:to-cyan-500/20 active:scale-[0.99]";
           }, 850);
         } catch {
           prompt("Copy URL:", text);
         }
       }
 
+      modeOverlay.addEventListener("click", async () => {
+        setMode("overlay");
+        await rescanAndRender();
+      });
+      modeDock.addEventListener("click", async () => {
+        setMode("dock");
+        await rescanAndRender();
+      });
+
+      reloadBtn.addEventListener("click", rescanAndRender);
       search.addEventListener("input", render);
 
       clearBtn.addEventListener("click", () => {
@@ -299,32 +380,11 @@
         render();
       });
 
-      loadDockBtn.addEventListener("click", () => dockFile.click());
-      dockFile.addEventListener("change", async () => {
-        const file = dockFile.files && dockFile.files[0];
-        if (!file) return;
-        const text = await file.text();
-        parseParamsFromDockText(text);
-        render();
-      });
+      urlBar.addEventListener("click", copyUrl);
+      copyBtn.addEventListener("click", copyUrl);
 
-      // Initial load: try fetch dock.html (works when served over http/https)
-      async function init() {
-        setMode("overlay");
-
-        try {
-          const dockText = await fetch("/dock.html", { cache: "no-store" }).then(r => r.text());
-          parseParamsFromDockText(dockText);
-          render();
-        } catch (e) {
-          // Likely file:// restriction; user can use Load dock.html
-          meta.textContent = "Couldn’t fetch dock.html — use “Load dock.html”";
-          params = [];
-          render();
-        }
-      }
-
-      init();
+      setMode("overlay");
+      rescanAndRender();
     })();
   </script>
 </body>
