@@ -9,19 +9,29 @@
   <meta name="color-scheme" content="dark light" />
   <style>
     :root {
-      --bg: #0b0b0e;
-      --panel: #121217;
-      --panel2: #16161d;
-      --stroke: rgba(255, 255, 255, .10);
-      --stroke2: rgba(255, 255, 255, .18);
-      --text: #f4f4f5;
-      --muted: #a1a1aa;
-      --accent: #fbbf24;
-      --accent2: #f59e0b;
+      --bg: #050507;
+
+      --panel-1: #0c0c10;
+      --panel-2: #101018;
+
+      --surface: rgba(255, 255, 255, .06);
+      --surface-hover: rgba(255, 255, 255, .10);
+
+      --border: rgba(255, 255, 255, .18);
+      --border-strong: rgba(255, 255, 255, .35);
+
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, .70);
+
+      --accent: #ffd34a;
+      --accent-soft: rgba(255, 211, 74, .12);
+      --accent-border: rgba(255, 211, 74, .35);
+
       --good: #34d399;
       --bad: #fb7185;
-      --selection-bg: rgba(251, 191, 36, .28);
-      --selection-text: #0b0b0e;
+
+      --selection-bg: rgba(255, 211, 74, .35);
+      --selection-text: #050507;
     }
 
     ::selection {
@@ -53,6 +63,42 @@
       outline: 1px solid var(--stroke2) !important;
       outline-offset: 0px !important;
     }
+
+    @keyframes urlflash {
+      0% {
+        outline: 2px solid rgba(255, 211, 74, .85);
+        box-shadow: 0 0 0 2px rgba(255, 211, 74, .25), 0 0 18px rgba(255, 211, 74, .18);
+      }
+
+      100% {
+        outline: 0px solid transparent;
+        box-shadow: none;
+      }
+    }
+
+    .url-flash {
+      animation: urlflash 220ms ease-out;
+    }
+
+    .surface {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .surface-hover:hover {
+      background: var(--surface-hover);
+    }
+
+    .panel {
+      background: var(--panel-1);
+      border: 1px solid var(--border);
+    }
+
+    .accent-btn {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--text);
+    }
   </style>
 </head>
 
@@ -79,43 +125,35 @@
                 settings</div>
             </div>
 
-            <div id="meta" class="px-2.5 py-1 text-[11px]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
+            <div id="meta" class="px-2.5 py-1 text-[11px] surface surface-hover">
               loadingberry...
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <div class="flex overflow-hidden p-0.5"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03);">
+            <div class="flex overflow-hidden p-0.5 surface surface-hover">
               <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition">Overlay</button>
               <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition">Dock</button>
             </div>
-
-            <button id="applyBtn" class="px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
-              apply url
-            </button>
           </div>
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex w-full items-center gap-2">
-            <input id="urlIn" type="text" class="w-full px-3 py-2 font-mono text-xs outline-none transition"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:var(--text);"
+            <input id="urlIn" type="text"
+              class="w-full px-3 py-2 font-mono text-xs outline-none transition surface surface-hover"
               placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
 
             <button id="copyBtn"
-              class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99]"
-              style="border:1px solid rgba(251,191,36,.22); background:rgba(251,191,36,.10); color:var(--text);">
+              class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99] accent-btn">
               copy
             </button>
           </div>
 
           <div class="flex w-full items-center gap-2 sm:w-[560px]">
             <div class="relative w-full">
-              <input id="search" type="text" class="w-full px-3 py-2 pr-9 text-sm outline-none transition"
-                style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:var(--text);"
+              <input id="search" type="text"
+                class="w-full px-3 py-2 pr-9 text-sm outline-none transition surface surface-hover"
                 placeholder="filter params..." />
               <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -126,20 +164,19 @@
               </div>
             </div>
 
-            <button id="clearBtn" class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
+            <button id="clearBtn"
+              class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
               clearberry
             </button>
 
-            <button id="reloadBtn" class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99]"
-              style="border:1px solid var(--stroke); background:rgba(255,255,255,.03); color:rgba(244,244,245,.9);">
+            <button id="reloadBtn"
+              class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
               reloadberry
             </button>
           </div>
         </div>
 
-        <div id="err" class="hidden px-3 py-2 text-xs"
-          style="border:1px solid rgba(251,113,133,.30); background:rgba(251,113,133,.08); color:rgba(255,228,230,.95);">
+        <div id="err" class="hidden px-3 py-2 text-xs surface surface-hover">
         </div>
       </div>
     </div>
@@ -158,16 +195,17 @@
         notime: true,
         smooth: "true",
         compact: true,
-        chatonly: true
+        chatonly: true,
+        font: "Consolas"
       };
 
       let currentMode = "overlay";
       let params = [];
       const state = new Map();
       let busy = false;
+      let docs = new Map();
 
       const urlIn = document.getElementById("urlIn");
-      const applyBtn = document.getElementById("applyBtn");
       const copyBtn = document.getElementById("copyBtn");
       const list = document.getElementById("list");
       const search = document.getElementById("search");
@@ -177,6 +215,8 @@
       const modeDock = document.getElementById("modeDock");
       const reloadBtn = document.getElementById("reloadBtn");
       const errBox = document.getElementById("err");
+      let urlEditTimer = null;
+      let userEditingUrl = false;
 
       function showErr(msg) {
         errBox.textContent = msg;
@@ -197,12 +237,28 @@
         return PATHS[currentMode] || PATHS.overlay;
       }
 
+      function setUserEditing(v) {
+        userEditingUrl = v;
+        list.classList.toggle("opacity-50", v);
+        list.classList.toggle("pointer-events-none", v);
+        if (v) meta.textContent = "editing url...";
+      }
+
+      function scheduleApplyFromUrl() {
+        if (busy) return;
+        setUserEditing(true);
+        if (urlEditTimer) clearTimeout(urlEditTimer);
+        urlEditTimer = setTimeout(() => {
+          setUserEditing(false);
+          applyFromUrl(urlIn.value);
+        }, 3000);
+      }
+
       function setBusy(v) {
         busy = v;
         const dis = !!v;
         modeOverlay.disabled = dis;
         modeDock.disabled = dis;
-        applyBtn.disabled = dis;
         copyBtn.disabled = dis;
         reloadBtn.disabled = dis;
         clearBtn.disabled = dis;
@@ -236,14 +292,87 @@
       }
 
       function parseParamsFromText(text) {
-        const hasRe = /urlParams\.has\(\s*['"]([^'"]+)['"]\s*\)/g;
-        const getRe = /urlParams\.get\(\s*['"]([^'"]+)['"]\s*\)/g;
+        const lines = String(text).replace(/\r\n/g, "\n").split("\n");
+
+        function getStringArg(line) {
+          const m = line.match(/urlParams\.(?:has|get)\(\s*['"]([^'"]+)['"]\s*\)/);
+          return m ? m[1] : null;
+        }
+
+        function isCommentLine(line) {
+          return /^\s*\/\/(.*)$/.test(line);
+        }
+
+        function stripComment(line) {
+          const m = line.match(/^\s*\/\/(.*)$/);
+          return (m ? m[1] : "").trim();
+        }
+
+        function collectNearbyComments(idx) {
+          const out = [];
+          const seen = new Set();
+
+          let up = idx - 1;
+          while (up >= 0) {
+            const t = lines[up].trim();
+            if (t === "") { up--; continue; }
+            if (!isCommentLine(lines[up])) break;
+            out.unshift(stripComment(lines[up]));
+            up--;
+            break;
+          }
+
+          let up2 = idx - 2;
+          while (up2 >= 0 && isCommentLine(lines[up2])) {
+            out.unshift(stripComment(lines[up2]));
+            up2--;
+          }
+
+          let down = idx + 1;
+          let downCount = 0;
+          while (down < lines.length && downCount < 2) {
+            const t = lines[down].trim();
+            if (t === "") { down++; continue; }
+            if (isCommentLine(lines[down])) {
+              out.push(stripComment(lines[down]));
+              down++;
+              downCount++;
+              continue;
+            }
+            break;
+          }
+
+          const joined = out.map(s => s.trim()).filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+          if (!joined) return "";
+
+          if (!seen.has(joined)) {
+            seen.add(joined);
+            return joined;
+          }
+          return "";
+        }
 
         const hasSet = new Set();
         const getSet = new Set();
+        const docMap = new Map();
 
-        for (const m of text.matchAll(hasRe)) hasSet.add(m[1]);
-        for (const m of text.matchAll(getRe)) getSet.add(m[1]);
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (!/urlParams\.(has|get)\(/.test(line)) continue;
+
+          const name = getStringArg(line);
+          if (!name) continue;
+
+          if (line.includes("urlParams.has(")) hasSet.add(name);
+          if (line.includes("urlParams.get(")) getSet.add(name);
+
+          const desc = collectNearbyComments(i);
+          if (desc) {
+            const prev = docMap.get(name);
+            if (!prev) docMap.set(name, desc);
+            else if (!prev.includes(desc)) docMap.set(name, (prev + " " + desc).replace(/\s+/g, " ").trim());
+          }
+        }
 
         const detected = Array.from(new Set([...hasSet, ...getSet]))
           .sort((a, b) => a.localeCompare(b))
@@ -257,6 +386,8 @@
           const old = prev.get(p.name);
           state.set(p.name, old ? old : { enabled: false, value: "" });
         }
+
+        docs = docMap;
       }
 
       function applyOverlayDefaults() {
@@ -294,9 +425,17 @@
         return qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
       }
 
+      function flashUrl() {
+        urlIn.classList.remove("url-flash");
+        void urlIn.offsetWidth;
+        urlIn.classList.add("url-flash");
+        setTimeout(() => urlIn.classList.remove("url-flash"), 260);
+      }
+
       function syncUrlInputFromState() {
         const out = serializeUrlFromState();
         if (!urlIn.matches(":focus")) urlIn.value = out;
+        if (!userEditingUrl) flashUrl();
       }
 
       function makeCard(p) {
@@ -322,6 +461,15 @@
           </div>
         `;
 
+        const d = docs.get(p.name);
+        if (d) {
+          const dEl = document.createElement("div");
+          dEl.className = "mt-1 text-[11px] leading-snug";
+          dEl.style.color = "var(--muted)";
+          dEl.textContent = d;
+          name.appendChild(dEl);
+        }
+
         const ctrl = document.createElement("div");
         ctrl.className = "shrink-0";
 
@@ -330,8 +478,8 @@
           label.className = "inline-flex cursor-pointer items-center";
           label.innerHTML = `
             <input type="checkbox" class="peer sr-only" ${s.enabled ? "checked" : ""} />
-            <span class="relative h-5 w-9 transition" style="background:rgba(255,255,255,.08); border:1px solid var(--stroke);">
-              <span class="absolute left-0.5 top-0.5 h-4 w-4 transition" style="background:rgba(255,255,255,.85);"></span>
+            <span class="relative h-5 w-9 transition surface">
+              <span class="absolute left-0.5 top-0.5 h-4 w-4 transition surface"></span>
             </span>
           `;
           const cb = label.querySelector("input");
@@ -518,9 +666,8 @@
 
       copyBtn.addEventListener("click", () => { if (!busy) copyUrl(); });
 
-      applyBtn.addEventListener("click", () => { if (!busy) applyFromUrl(urlIn.value); });
-      urlIn.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !busy) applyFromUrl(urlIn.value);
+      urlIn.addEventListener("input", () => {
+        scheduleApplyFromUrl();
       });
 
       setModeUI();
