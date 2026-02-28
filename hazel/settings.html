@@ -524,9 +524,10 @@
           ta.className = "w-full px-2.5 py-2 text-sm outline-none transition surface resize-none whitespace-pre-wrap";
           ta.style.overflowY = "hidden";
           ta.style.maxHeight = "50vh";
+          ta.style.minHeight = "2.5rem";
 
           function autoGrow() {
-            ta.style.height = "0px";
+            ta.style.height = "auto";
 
             const max = window.innerHeight * 0.5;
             const needed = ta.scrollHeight;
