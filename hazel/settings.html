@@ -60,7 +60,7 @@
     }
 
     input:focus {
-      outline: 1px solid var(--stroke2) !important;
+      outline: 1px solid var(--border-strong) !important;
       outline-offset: 0px !important;
     }
 
@@ -104,83 +104,81 @@
 
 <body class="min-h-screen" style="background:var(--bg); color:var(--text);">
   <header class="sticky top-0 z-50 backdrop-blur-xl"
-    style="background:rgba(11,11,14,.78); border-bottom:1px solid var(--stroke);">
+    style="background:rgba(11,11,14,.78); border-bottom:1px solid var(--border);">
     <div class="mx-auto max-w-6xl px-3 py-3">
-      <div class="flex flex-col gap-2">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex items-center gap-3">
-            <span class="inline-flex h-9 w-9 items-center justify-center"
-              style="background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.22);">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"
-                style="color:var(--accent);">
-                <path
-                  d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                <path
-                  d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
-              </svg>
-            </span>
-            <div class="leading-tight">
-              <div class="text-sm font-semibold tracking-tight">hazelberry settings</div>
-              <div class="text-[11px]" style="color:var(--muted);">paste your previous url here if u wanna recall
-                settings</div>
-            </div>
-
-            <div id="meta" class="px-2.5 py-1 text-[11px] surface surface-hover">
-              loadingberry...
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-9 w-9 items-center justify-center accent-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"
+              style="color:var(--accent);">
+              <path
+                d="M4 4a2 2 0 012-2h3a1 1 0 010 2H6v12h8V4h-3a1 1 0 110-2h3a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+              <path d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zM7 12a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+            </svg>
+          </span>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold tracking-tight">hazelberry settings</div>
+            <div class="text-[11px]" style="color:var(--muted);">paste your previous url here if u wanna recall settings
             </div>
           </div>
+          <div id="meta" class="px-2.5 py-1 text-[11px] surface">
+            loadingberry...
+          </div>
+        </div>
 
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-              <span class="text-xs" style="color:var(--muted);">session</span>
-              <input id="sessionCode" type="text" class="px-2 py-1 text-xs font-mono outline-none surface"
-                placeholder="code" />
-            </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs" style="color:var(--muted);">session</span>
+            <input id="sessionCode" type="text" class="px-2 py-1 text-xs font-mono outline-none surface"
+              placeholder="code" />
           </div>
 
-          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex w-full items-center gap-2">
-              <input id="urlIn" type="text"
-                class="w-full px-3 py-2 font-mono text-xs outline-none transition surface surface-hover"
-                placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
-
-              <button id="copyBtn"
-                class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99] accent-btn">
-                copy
-              </button>
-            </div>
-
-            <div class="flex w-full items-center gap-2 sm:w-[560px]">
-              <div class="relative w-full">
-                <input id="search" type="text"
-                  class="w-full px-3 py-2 pr-9 text-sm outline-none transition surface surface-hover"
-                  placeholder="filter params..." />
-                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center"
-                  style="color:var(--muted);">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                      d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
-                      clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-
-              <button id="clearBtn"
-                class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
-                clearberry
-              </button>
-
-              <button id="reloadBtn"
-                class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
-                reloadberry
-              </button>
-            </div>
-          </div>
-
-          <div id="err" class="hidden px-3 py-2 text-xs surface surface-hover">
+          <div class="flex overflow-hidden surface">
+            <button id="modeOverlay" class="px-3 py-1.5 text-xs font-semibold transition">Overlay</button>
+            <button id="modeDock" class="px-3 py-1.5 text-xs font-semibold transition">Dock</button>
           </div>
         </div>
       </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex w-full items-center gap-2">
+          <input id="urlIn" type="text"
+            class="w-full px-3 py-2 font-mono text-xs outline-none transition surface surface-hover"
+            placeholder="paste/edit URLberry here (cards update this, apply reads from it)" />
+          <button id="copyBtn"
+            class="shrink-0 px-3 py-2 text-xs font-semibold transition active:scale-[0.99] accent-btn">
+            copy
+          </button>
+        </div>
+
+        <div class="flex w-full items-center gap-2 sm:w-[560px]">
+          <div class="relative w-full">
+            <input id="search" type="text"
+              class="w-full px-3 py-2 pr-9 text-sm outline-none transition surface surface-hover"
+              placeholder="filter params..." />
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center" style="color:var(--muted);">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+
+          <button id="clearBtn" class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
+            clearberry
+          </button>
+
+          <button id="reloadBtn"
+            class="shrink-0 px-3 py-2 text-sm transition active:scale-[0.99] surface surface-hover">
+            reloadberry
+          </button>
+        </div>
+      </div>
+
+      <div id="err" class="hidden px-3 py-2 text-xs surface surface-hover">
+      </div>
+    </div>
   </header>
 
   <main class="mx-auto max-w-6xl px-3 py-4">
@@ -450,7 +448,6 @@
         const s = state.get(p.name);
 
         const card = document.createElement("div");
-        card.className = "p-3 transition";
         card.className = "p-3 transition surface";
 
         const header = document.createElement("div");
@@ -500,7 +497,7 @@
               knob.style.transform = "translateX(1rem)";
             } else {
               track.style.background = "rgba(255,255,255,.08)";
-              track.style.borderColor = "var(--stroke)";
+              track.style.borderColor = "var(--border)";
               knob.style.transform = "translateX(0)";
             }
           }
