@@ -1,293 +1,331 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dock URL Controller</title>
-
-  <!-- Tailwind (CDN) -->
+  <title>Overlay/Dock URL Builder</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
   <meta name="color-scheme" content="dark light" />
 </head>
 
 <body class="min-h-screen bg-zinc-950 text-zinc-100">
-  <!-- Top copy bar -->
-  <div class="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur">
-    <div class="mx-auto max-w-6xl px-4 py-3">
-      <button id="copyBar"
-        class="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left shadow-sm transition hover:bg-white/10 active:scale-[0.995]"
-        title="Click to copy URL">
-        <div class="flex-1 min-w-0">
-          <div class="text-xs font-semibold tracking-wide text-zinc-300">Output URL (click to copy)</div>
-          <div id="urlOut" class="truncate font-mono text-sm text-zinc-100">Loading…</div>
-        </div>
-        <div class="flex items-center gap-2">
-          <!-- Mode toggle -->
-          <button id="modeToggle"
-            class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-200 transition hover:bg-white/10">
-            Mode: dock
-          </button>
-
-          <!-- Copy pill -->
-          <div id="copyPill"
-            class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-200 transition group-hover:bg-white/10">
-            Copy
-          </div>
-        </div>
-      </button>
-
-      <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-2">
-          <div class="text-lg font-semibold">Dock Controls</div>
-          <div id="meta" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-            Detecting params…
-          </div>
-        </div>
-
-        <div class="flex w-full sm:w-[380px] items-center gap-2">
-          <div class="relative w-full">
-            <input id="search" type="text"
-              class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 pr-10 text-sm text-zinc-100 placeholder:text-zinc-400 outline-none ring-0 transition focus:border-white/20 focus:bg-white/10"
-              placeholder="Filter settings… (e.g. horizontal, blur, badges)" />
-            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">
-              <!-- magnifier -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                  d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
-                  clip-rule="evenodd" />
-              </svg>
+  <!-- Top bar -->
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur">
+    <div class="mx-auto max-w-6xl px-3 py-3">
+      <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-2">
+            <div class="text-base font-semibold tracking-tight">URL Builder</div>
+            <div id="meta" class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-300">
+              Loading…
             </div>
           </div>
-          <button id="clearBtn"
-            class="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-zinc-200 transition hover:bg-white/10">
-            Clear
-          </button>
+
+          <div class="flex items-center gap-2">
+            <!-- segmented toggle -->
+            <div class="flex overflow-hidden rounded-xl border border-white/10 bg-white/5">
+              <button id="modeOverlay"
+                class="px-3 py-1.5 text-xs font-medium transition">
+                Overlay
+              </button>
+              <button id="modeDock"
+                class="px-3 py-1.5 text-xs font-medium transition">
+                Dock
+              </button>
+            </div>
+
+            <button id="copyBtn"
+              class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]">
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <!-- URL output (clickable) -->
+        <button id="urlBar"
+          class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left font-mono text-xs text-zinc-100 transition hover:bg-white/10">
+          <span id="urlOut" class="block truncate">Loading…</span>
+        </button>
+
+        <!-- controls row -->
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex w-full items-center gap-2 sm:w-[420px]">
+            <div class="relative w-full">
+              <input id="search" type="text"
+                class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 pr-9 text-sm text-zinc-100 placeholder:text-zinc-400 outline-none transition focus:border-white/20 focus:bg-white/10"
+                placeholder="Filter params…" />
+              <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M9 3a6 6 0 104.472 10.03l2.249 2.249a1 1 0 001.414-1.414l-2.249-2.249A6 6 0 009 3zm-4 6a4 4 0 118 0 4 4 0 01-8 0z"
+                    clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+
+            <button id="clearBtn"
+              class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 transition hover:bg-white/10">
+              Clear
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- fallback loader -->
+            <input id="dockFile" type="file" accept=".html,text/html" class="hidden" />
+            <button id="loadDockBtn"
+              class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-200 transition hover:bg-white/10">
+              Load dock.html
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Content -->
-  <main class="mx-auto max-w-6xl px-4 py-6">
-    <!-- Grid of settings -->
-    <div id="list" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- cards injected here -->
-    </div>
-
-    <div class="mt-6 text-xs text-zinc-400">
-      Tip: value params appear as text boxes; flag params appear as toggles.
+  <main class="mx-auto max-w-6xl px-3 py-4">
+    <!-- compact responsive grid -->
+    <div id="list" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    <div class="mt-4 text-[11px] text-zinc-400">
+      If the list is empty, click <span class="font-semibold text-zinc-200">Load dock.html</span> (your browser likely blocked fetching local files).
     </div>
   </main>
 
-  <script>
-    (async function () {
-      let currentMode = "overlay"; // "dock" or "overlay"
+<script>
+(() => {
+  // Defaults
+  let currentMode = "overlay"; // default should be overlay.html
+  const PATHS = { overlay: "./overlay.html", dock: "./dock.html" };
 
-      function getTargetPath() {
-        return currentMode === "overlay"
-          ? "./overlay.html"
-          : "./dock.html";
+  // DOM
+  const urlOut = document.getElementById("urlOut");
+  const urlBar = document.getElementById("urlBar");
+  const copyBtn = document.getElementById("copyBtn");
+  const list = document.getElementById("list");
+  const search = document.getElementById("search");
+  const meta = document.getElementById("meta");
+  const clearBtn = document.getElementById("clearBtn");
+  const modeOverlay = document.getElementById("modeOverlay");
+  const modeDock = document.getElementById("modeDock");
+  const loadDockBtn = document.getElementById("loadDockBtn");
+  const dockFile = document.getElementById("dockFile");
+
+  // Data
+  let params = [];
+  const state = new Map(); // name -> {enabled:boolean, value:string}
+
+  function setMode(mode) {
+    currentMode = mode;
+    const on = "bg-white/15 text-white";
+    const off = "text-zinc-300 hover:bg-white/10";
+    modeOverlay.className = "px-3 py-1.5 text-xs font-medium transition " + (mode === "overlay" ? on : off);
+    modeDock.className = "px-3 py-1.5 text-xs font-medium transition " + (mode === "dock" ? on : off);
+    buildUrl();
+  }
+
+  function getTargetPath() {
+    return PATHS[currentMode] || "./overlay.html";
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[s])
+    );
+  }
+
+  function parseParamsFromDockText(dockText) {
+    const hasRe = /urlParams\.has\(\s*['"]([^'"]+)['"]\s*\)/g;
+    const getRe = /urlParams\.get\(\s*['"]([^'"]+)['"]\s*\)/g;
+
+    const hasSet = new Set();
+    const getSet = new Set();
+
+    for (const m of dockText.matchAll(hasRe)) hasSet.add(m[1]);
+    for (const m of dockText.matchAll(getRe)) getSet.add(m[1]);
+
+    const all = Array.from(new Set([...hasSet, ...getSet]))
+      .sort((a,b) => a.localeCompare(b))
+      .map(name => ({ name, type: getSet.has(name) ? "value" : "flag" }));
+
+    // preserve existing values when reloading
+    const prev = new Map(state);
+
+    params = all;
+    state.clear();
+    for (const p of params) {
+      const old = prev.get(p.name);
+      state.set(p.name, old ? old : { enabled: false, value: "" });
+    }
+
+    meta.textContent = `Detected ${params.length} params`;
+  }
+
+  function buildUrl() {
+    const base = new URL(getTargetPath(), location.href);
+    const sp = new URLSearchParams();
+
+    for (const p of params) {
+      const s = state.get(p.name);
+      if (!s) continue;
+
+      if (p.type === "flag") {
+        if (s.enabled) sp.set(p.name, "");
+      } else {
+        const v = (s.value ?? "").trim();
+        if (v !== "") sp.set(p.name, v);
       }
+    }
 
-      const urlOut = document.getElementById("urlOut");
-      const list = document.getElementById("list");
-      const search = document.getElementById("search");
-      const meta = document.getElementById("meta");
-      const copyPill = document.getElementById("copyPill");
-      const clearBtn = document.getElementById("clearBtn");
-      const copyBar = document.getElementById("copyBar");
+    let qs = sp.toString();
+    if (qs) qs = qs.replace(/=(&|$)/g, "$1"); // compact flags
 
-      // Extract params from dock.html
-      let dockText = "";
-      try {
-        dockText = await fetch("./dock.html", { cache: "no-store" }).then(r => r.text());
-      } catch (e) {
-        meta.textContent = "Failed to load dock.html (try serving via http/https)";
-        urlOut.textContent = "Could not fetch dock.html";
-        return;
-      }
+    urlOut.textContent = qs ? (base.origin + base.pathname + "?" + qs) : (base.origin + base.pathname);
+  }
 
-      const hasRe = /urlParams\.has\(\s*['"]([^'"]+)['"]\s*\)/g;
-      const getRe = /urlParams\.get\(\s*['"]([^'"]+)['"]\s*\)/g;
+  function makeCard(p) {
+    const s = state.get(p.name);
 
-      const hasSet = new Set();
-      const getSet = new Set();
-      for (const m of dockText.matchAll(hasRe)) hasSet.add(m[1]);
-      for (const m of dockText.matchAll(getRe)) getSet.add(m[1]);
+    const card = document.createElement("div");
+    card.className =
+      "rounded-xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10";
 
-      const params = Array.from(new Set([...hasSet, ...getSet]))
-        .sort((a, b) => a.localeCompare(b))
-        .map(name => ({ name, type: getSet.has(name) ? "value" : "flag" }));
+    // header row: name + control
+    const header = document.createElement("div");
+    header.className = "flex items-center justify-between gap-2";
 
-      meta.textContent = `Detected ${params.length} params`;
-
-      // State: name -> {enabled:boolean, value:string}
-      const state = new Map();
-      for (const p of params) state.set(p.name, { enabled: false, value: "" });
-
-      function buildUrl() {
-        const base = new URL(getTargetPath(), location.href);
-        const sp = new URLSearchParams();
-
-        for (const p of params) {
-          const s = state.get(p.name);
-          if (!s) continue;
-
-          if (p.type === "flag") {
-            if (s.enabled) sp.set(p.name, "");
-          } else {
-            const v = (s.value ?? "").trim();
-            if (v !== "") sp.set(p.name, v);
-          }
-        }
-
-        // Compact flags as ?flag (no "=")
-        let qs = sp.toString();
-        if (qs) {
-          qs = qs.replace(/=(&|$)/g, "$1");
-          urlOut.textContent = base.origin + base.pathname + "?" + qs;
-        } else {
-          urlOut.textContent = base.origin + base.pathname;
-        }
-      }
-
-      function settingCard(p) {
-        const s = state.get(p.name);
-
-        const card = document.createElement("div");
-        card.className =
-          "rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm transition hover:bg-white/10";
-
-        const top = document.createElement("div");
-        top.className = "flex items-start justify-between gap-3";
-
-        const title = document.createElement("div");
-        title.className = "min-w-0";
-        title.innerHTML = `
+    const name = document.createElement("div");
+    name.className = "min-w-0";
+    name.innerHTML = `
       <div class="truncate text-sm font-semibold">${escapeHtml(p.name)}</div>
-      <div class="mt-1 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-zinc-300">
-        ${p.type === "flag" ? "toggle" : "value"}
-      </div>
+      <div class="mt-0.5 text-[10px] text-zinc-400">${p.type === "flag" ? "toggle" : "value"}</div>
     `;
 
-        const right = document.createElement("div");
-        right.className = "shrink-0";
+    const ctrl = document.createElement("div");
+    ctrl.className = "shrink-0";
 
-        if (p.type === "flag") {
-          const label = document.createElement("label");
-          label.className = "inline-flex cursor-pointer items-center";
-          label.innerHTML = `
+    if (p.type === "flag") {
+      const label = document.createElement("label");
+      label.className = "inline-flex cursor-pointer items-center";
+      label.innerHTML = `
         <input type="checkbox" class="peer sr-only" ${s.enabled ? "checked" : ""} />
-        <span class="relative h-6 w-11 rounded-full bg-white/10 ring-1 ring-white/10 transition peer-checked:bg-emerald-500/30 peer-checked:ring-emerald-500/40">
-          <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white/80 transition peer-checked:translate-x-5"></span>
+        <span class="relative h-5 w-9 rounded-full bg-white/10 ring-1 ring-white/10 transition peer-checked:bg-emerald-500/30 peer-checked:ring-emerald-500/40">
+          <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white/80 transition peer-checked:translate-x-4"></span>
         </span>
       `;
-          const cb = label.querySelector("input");
-          cb.addEventListener("change", () => {
-            s.enabled = cb.checked;
-            buildUrl();
-          });
-          right.appendChild(label);
-        }
-
-        top.appendChild(title);
-        top.appendChild(right);
-
-        const body = document.createElement("div");
-        body.className = "mt-3";
-
-        if (p.type === "value") {
-          const inp = document.createElement("input");
-          inp.type = "text";
-          inp.value = s.value;
-          inp.placeholder = "Enter value…";
-          inp.className =
-            "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-400 outline-none transition focus:border-white/20 focus:bg-white/10";
-          inp.addEventListener("input", () => {
-            s.value = inp.value;
-            buildUrl();
-          });
-          body.appendChild(inp);
-
-          const hint = document.createElement("div");
-          hint.className = "mt-2 text-[11px] text-zinc-400";
-          hint.textContent = `Adds ?${p.name}=… when non-empty`;
-          body.appendChild(hint);
-        } else {
-          const hint = document.createElement("div");
-          hint.className = "text-[11px] text-zinc-400";
-          hint.textContent = `Adds ?${p.name} when enabled`;
-          body.appendChild(hint);
-        }
-
-        card.appendChild(top);
-        card.appendChild(body);
-        return card;
-      }
-
-      function render() {
-        const q = search.value.trim().toLowerCase();
-        list.innerHTML = "";
-
-        for (const p of params) {
-          if (q && !p.name.toLowerCase().includes(q)) continue;
-          list.appendChild(settingCard(p));
-        }
-        buildUrl();
-      }
-
-      // Copy bar
-      copyBar.addEventListener("click", async () => {
-        const text = urlOut.textContent;
-        try {
-          await navigator.clipboard.writeText(text);
-          copyPill.textContent = "Copied!";
-          copyPill.className =
-            "shrink-0 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-3 py-1 text-xs text-emerald-100 transition";
-          setTimeout(() => {
-            copyPill.textContent = "Copy";
-            copyPill.className =
-              "shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-200 transition group-hover:bg-white/10";
-          }, 900);
-        } catch (e) {
-          // fallback
-          prompt("Copy URL:", text);
-        }
-      });
-
-      clearBtn.addEventListener("click", () => {
-        search.value = "";
-        // reset all params
-        for (const p of params) {
-          const s = state.get(p.name);
-          if (!s) continue;
-          s.enabled = false;
-          s.value = "";
-        }
-        render();
-      });
-
-      search.addEventListener("input", render);
-
-      function escapeHtml(str) {
-        return String(str).replace(/[&<>"']/g, s =>
-          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[s])
-        );
-      }
-
-      const modeToggle = document.getElementById("modeToggle");
-
-      modeToggle.addEventListener("click", () => {
-        currentMode = currentMode === "dock" ? "overlay" : "dock";
-        modeToggle.textContent = "Mode: " + currentMode;
+      const cb = label.querySelector("input");
+      cb.addEventListener("change", () => {
+        s.enabled = cb.checked;
         buildUrl();
       });
+      ctrl.appendChild(label);
+    }
 
+    header.appendChild(name);
+    header.appendChild(ctrl);
+
+    // body: input for value params (compact)
+    const body = document.createElement("div");
+    body.className = "mt-2";
+
+    if (p.type === "value") {
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.value = s.value;
+      inp.placeholder = "…";
+      inp.className =
+        "w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-white/20 focus:bg-white/10";
+      inp.addEventListener("input", () => {
+        s.value = inp.value;
+        buildUrl();
+      });
+      body.appendChild(inp);
+    } else {
+      const hint = document.createElement("div");
+      hint.className = "text-[11px] text-zinc-400";
+      hint.textContent = `Adds ?${p.name}`;
+      body.appendChild(hint);
+    }
+
+    card.appendChild(header);
+    card.appendChild(body);
+    return card;
+  }
+
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    list.innerHTML = "";
+
+    for (const p of params) {
+      if (q && !p.name.toLowerCase().includes(q)) continue;
+      list.appendChild(makeCard(p));
+    }
+    buildUrl();
+  }
+
+  // Events
+  modeOverlay.addEventListener("click", () => setMode("overlay"));
+  modeDock.addEventListener("click", () => setMode("dock"));
+
+  urlBar.addEventListener("click", () => copyUrl());
+  copyBtn.addEventListener("click", () => copyUrl());
+
+  async function copyUrl() {
+    const text = urlOut.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const old = copyBtn.textContent;
+      copyBtn.textContent = "Copied!";
+      copyBtn.className =
+        "rounded-xl border border-emerald-400/30 bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-100 transition";
+      setTimeout(() => {
+        copyBtn.textContent = old;
+        copyBtn.className =
+          "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-zinc-200 transition hover:bg-white/10 active:scale-[0.99]";
+      }, 850);
+    } catch {
+      prompt("Copy URL:", text);
+    }
+  }
+
+  search.addEventListener("input", render);
+
+  clearBtn.addEventListener("click", () => {
+    search.value = "";
+    for (const p of params) {
+      const s = state.get(p.name);
+      if (!s) continue;
+      s.enabled = false;
+      s.value = "";
+    }
+    render();
+  });
+
+  loadDockBtn.addEventListener("click", () => dockFile.click());
+  dockFile.addEventListener("change", async () => {
+    const file = dockFile.files && dockFile.files[0];
+    if (!file) return;
+    const text = await file.text();
+    parseParamsFromDockText(text);
+    render();
+  });
+
+  // Initial load: try fetch dock.html (works when served over http/https)
+  async function init() {
+    setMode("overlay");
+
+    try {
+      const dockText = await fetch("./dock.html", { cache: "no-store" }).then(r => r.text());
+      parseParamsFromDockText(dockText);
       render();
-    })();
-  </script>
-</body>
+    } catch (e) {
+      // Likely file:// restriction; user can use Load dock.html
+      meta.textContent = "Couldn’t fetch dock.html — use “Load dock.html”";
+      params = [];
+      render();
+    }
+  }
 
+  init();
+})();
+</script>
+</body>
 </html>
