@@ -170,7 +170,7 @@ body {
 .highlight-chat.donation .hl-badge.textbadge { color: var(--accent-dono) !important; border-color: var(--accent-dono) !important; }
 
 .highlight-chat::after {
-  content: '✦';
+  /* content: '✦'; */
   position: absolute !important;
   right: 10px !important;
   top: 50% !important;
@@ -181,10 +181,10 @@ body {
   pointer-events: none !important;
 }
 
-.highlight-chat.mod::after    { color: var(--accent-mod)  !important; content: '⬡' !important; }
+/* .highlight-chat.mod::after    { color: var(--accent-mod)  !important; content: '⬡' !important; }
 .highlight-chat.vip::after    { color: var(--accent-vip)  !important; content: '◆' !important; }
 .highlight-chat.member::after { color: var(--accent-sub)  !important; content: '★' !important; }
-.highlight-chat.donation::after { color: var(--accent-dono) !important; content: '♦' !important; }
+.highlight-chat.donation::after { color: var(--accent-dono) !important; content: '♦' !important; } */
 
 .donationAmount {
   /* font-family: var(--font-name) !important; */
