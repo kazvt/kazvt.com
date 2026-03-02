@@ -57,6 +57,12 @@ body {
   background: rgba(12, 15, 30, 0.78) !important;
 }
 
+.highlight-chat.merged.odd,
+.highlight-chat.odd:has(+ .highlight-chat.merged),
+.highlight-chat:has(+ .highlight-chat.merged) {
+  background: var(--card-bg) !important;
+}
+
 .highlight-chat.mod    { border-left-color: var(--accent-mod)  !important; }
 .highlight-chat.vip    { border-left-color: var(--accent-vip)  !important; }
 .highlight-chat.member { border-left-color: var(--accent-sub)  !important; }
