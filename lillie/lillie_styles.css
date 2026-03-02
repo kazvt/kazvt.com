@@ -1,3 +1,7 @@
+/* ============================================================
+   TILTED NEON CHAT OVERLAY
+   Inject via &css= URL parameter or paste into OBS Custom CSS
+   ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
 
@@ -15,7 +19,6 @@
   --font-main: 'Barlow Condensed', sans-serif;
   --font-name: 'Rajdhani', sans-serif;
 }
-
 
 /* ── Reset body & output ── */
 body {
@@ -294,4 +297,70 @@ span.emoji {
 .highlight-chat.firsttime {
   border-left-color: #ff9100 !important;
   background: rgba(255, 145, 0, 0.05) !important;
+}
+
+/* ── Merged messages (simpleSequence continuation) ──
+   Visually attaches to the card above: no top margin,
+   squared top corners, slightly dimmer, no slide-in tilt reset.
+   The left border is thinner to read as "continuation". ── */
+.highlight-chat.merged {
+  margin-top: -3px !important;
+  border-top: none !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-left-width: 2px !important;
+  border-left-style: dashed !important;
+  padding-top: 4px !important;
+  padding-bottom: 6px !important;
+  background: rgba(8, 10, 22, 0.65) !important;
+  /* Slightly less tilt so stacked messages have a subtle cascade */
+  transform: rotate(calc(var(--tilt) * 1.4)) !important;
+  animation: slideInMerged 0.18s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
+  /* No decorative corner icon on continuation lines */
+}
+
+.highlight-chat.merged::after {
+  display: none !important;
+}
+
+/* Connector pip — tiny dot that bridges the gap between cards */
+.highlight-chat.merged::before {
+  content: '' !important;
+  position: absolute !important;
+  left: -5px !important;
+  top: -4px !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+}
+
+.highlight-chat.merged .hl-message,
+.highlight-chat.merged .hl-content {
+  color: rgba(190, 200, 235, 0.75) !important;
+  font-size: 14px !important;
+}
+
+/* The card directly ABOVE a merged card should have squared bottom corners.
+   CSS can't look-ahead, so we use the adjacent sibling selector in reverse:
+   target .merged and style its own top, and let the browser handle the rest. */
+.highlight-chat:has(+ .highlight-chat.merged) {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 5px !important;
+}
+
+@keyframes slideInMerged {
+  from {
+    opacity: 0;
+    transform: rotate(calc(var(--tilt) * 1.4)) translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(calc(var(--tilt) * 1.4));
+  }
 }
