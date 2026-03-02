@@ -6,7 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
 
 :root {
-  --tilt: -1.8deg;
+  --tilt: 0deg;
   --card-bg: rgba(8, 10, 22, 0.82);
   --card-border: rgba(255,255,255,0.07);
   --accent-default: #00e5ff;
@@ -45,8 +45,6 @@ body {
   border-radius: 4px 8px 8px 4px !important;
   margin: 5px 2px 5px 6px !important;
   padding: 7px 44px 7px 10px !important;
-  transform: rotate(var(--tilt)) !important;
-  transform-origin: left center !important;
   backdrop-filter: blur(6px) !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
   box-shadow:
@@ -59,7 +57,7 @@ body {
 }
 
 .highlight-chat:hover {
-  transform: rotate(calc(var(--tilt) * 0.5)) translateX(3px) !important;
+  transform: translateX(3px) !important;
   box-shadow:
     0 4px 24px rgba(0,229,255,0.15),
     0 2px 16px rgba(0,0,0,0.5) !important;
@@ -68,7 +66,6 @@ body {
 /* ── Odd rows ── */
 .highlight-chat.odd {
   background: rgba(12, 15, 30, 0.78) !important;
-  transform: rotate(calc(var(--tilt) * 1.2)) !important;
 }
 
 /* ── Role-specific left border colors ── */
@@ -217,7 +214,7 @@ body {
   border-left-color: #ff9800 !important;
   background: rgba(255, 152, 0, 0.08) !important;
   box-shadow: 0 0 20px rgba(255, 152, 0, 0.2) !important;
-  transform: rotate(0deg) translateX(4px) !important;
+  transform: translateX(4px) !important;
 }
 
 /* ── Queued ── */
@@ -229,7 +226,6 @@ body {
 /* ── Pinned ── */
 #pinned .highlight-chat {
   border-left-color: #ff4081 !important;
-  transform: rotate(0deg) !important;
   background: rgba(255, 64, 129, 0.06) !important;
 }
 
@@ -238,7 +234,6 @@ body {
   border-left-color: rgba(255,255,255,0.3) !important;
   background: rgba(20,22,40,0.7) !important;
   font-style: italic !important;
-  transform: rotate(0deg) !important;
 }
 
 /* ── Bottom menu ── */
@@ -258,11 +253,11 @@ span.emoji {
 @keyframes slideInTilted {
   from {
     opacity: 0;
-    transform: rotate(var(--tilt)) translateX(-30px);
+    transform: translateX(-30px);
   }
   to {
     opacity: 1;
-    transform: rotate(var(--tilt));
+    transform: translateX(0);
   }
 }
 
@@ -313,10 +308,7 @@ span.emoji {
   padding-top: 4px !important;
   padding-bottom: 6px !important;
   background: rgba(8, 10, 22, 0.65) !important;
-  /* Slightly less tilt so stacked messages have a subtle cascade */
-  transform: rotate(calc(var(--tilt) * 1.4)) !important;
   animation: slideInMerged 0.18s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
-  /* No decorative corner icon on continuation lines */
 }
 
 .highlight-chat.merged::after {
@@ -357,10 +349,10 @@ span.emoji {
 @keyframes slideInMerged {
   from {
     opacity: 0;
-    transform: rotate(calc(var(--tilt) * 1.4)) translateX(-16px);
+    transform: translateX(-16px);
   }
   to {
     opacity: 1;
-    transform: rotate(calc(var(--tilt) * 1.4));
+    transform: translateX(0);
   }
 }
