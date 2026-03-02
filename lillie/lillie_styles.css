@@ -1,8 +1,3 @@
-/* ============================================================
-   TILTED NEON CHAT OVERLAY
-   Inject via &css= URL parameter or paste into OBS Custom CSS
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -20,7 +15,6 @@
   --font-name: 'Rajdhani', sans-serif;
 }
 
-/* ── Reset body & output ── */
 body {
   background: transparent !important;
   font-family: var(--font-main) !important;
@@ -33,7 +27,6 @@ body {
 
 #pinned { border-bottom: 1px solid rgba(255,255,255,0.12) !important; }
 
-/* ── Base card ── */
 .highlight-chat {
   position: relative !important;
   display: flex !important;
@@ -47,36 +40,30 @@ body {
   padding: 7px 44px 7px 10px !important;
   backdrop-filter: blur(6px) !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-  box-shadow:
-    0 2px 16px rgba(0,0,0,0.5),
-    inset 0 0 0 0 transparent !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.5) !important;
   overflow: visible !important;
   min-height: 0 !important;
   width: calc(100% - 12px) !important;
   contain: layout !important;
+  animation: slideIn 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
 }
 
 .highlight-chat:hover {
   transform: translateX(3px) !important;
-  box-shadow:
-    0 4px 24px rgba(0,229,255,0.15),
-    0 2px 16px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 4px 24px rgba(0,229,255,0.15), 0 2px 16px rgba(0,0,0,0.5) !important;
 }
 
-/* ── Odd rows ── */
 .highlight-chat.odd {
   background: rgba(12, 15, 30, 0.78) !important;
 }
 
-/* ── Role-specific left border colors ── */
-.highlight-chat.mod   { border-left-color: var(--accent-mod)  !important; }
-.highlight-chat.vip   { border-left-color: var(--accent-vip)  !important; }
-.highlight-chat.member{ border-left-color: var(--accent-sub)  !important; }
+.highlight-chat.mod    { border-left-color: var(--accent-mod)  !important; }
+.highlight-chat.vip    { border-left-color: var(--accent-vip)  !important; }
+.highlight-chat.member { border-left-color: var(--accent-sub)  !important; }
 .highlight-chat.donation { border-left-color: var(--accent-dono) !important; }
-.highlight-chat.host  { border-left-color: var(--accent-host) !important; }
-.highlight-chat.bot   { border-left-color: rgba(150,150,150,0.5) !important; opacity: 0.6 !important; }
+.highlight-chat.host   { border-left-color: var(--accent-host) !important; }
+.highlight-chat.bot    { border-left-color: rgba(150,150,150,0.5) !important; opacity: 0.6 !important; }
 
-/* ── Source icon (platform logo) ── */
 .icon.hl-source-type {
   width: 14px !important;
   height: 14px !important;
@@ -86,7 +73,6 @@ body {
   opacity: 0.7;
 }
 
-/* ── Profile picture ── */
 .hl-profile-pic {
   width: 26px !important;
   height: 26px !important;
@@ -98,7 +84,6 @@ body {
   flex-shrink: 0 !important;
 }
 
-/* ── Name ── */
 .hl-name {
   font-family: var(--font-name) !important;
   font-weight: 700 !important;
@@ -118,7 +103,6 @@ body {
 .highlight-chat.donation .hl-name { color: var(--accent-dono) !important; }
 .highlight-chat.host   .hl-name { color: var(--accent-host) !important; }
 
-/* ── Time stamp ── */
 .time-arrived {
   font-size: 10px !important;
   color: rgba(255,255,255,0.35) !important;
@@ -128,7 +112,6 @@ body {
   letter-spacing: 0.04em !important;
 }
 
-/* ── Message text ── */
 .hl-message,
 .hl-content {
   font-family: var(--font-main) !important;
@@ -140,7 +123,6 @@ body {
   letter-spacing: 0.01em !important;
 }
 
-/* ── Badges ── */
 .hl-badge {
   display: inline-block !important;
   font-family: var(--font-name) !important;
@@ -157,7 +139,6 @@ body {
   border: 1px solid currentColor !important;
 }
 
-/* Image badges (platform icons, sub badges, etc.) */
 .hl-badge:not(.textbadge) {
   height: 16px !important;
   max-height: 16px !important;
@@ -168,18 +149,13 @@ body {
   vertical-align: middle !important;
 }
 
-/* Text badges with role colors */
-.hl-badge.textbadge {
-  background: transparent !important;
-}
+.hl-badge.textbadge { background: transparent !important; }
 
-/* Role-specific badge colors */
 .highlight-chat.mod    .hl-badge.textbadge { color: var(--accent-mod)  !important; border-color: var(--accent-mod)  !important; }
 .highlight-chat.vip    .hl-badge.textbadge { color: var(--accent-vip)  !important; border-color: var(--accent-vip)  !important; }
 .highlight-chat.member .hl-badge.textbadge { color: var(--accent-sub)  !important; border-color: var(--accent-sub)  !important; }
 .highlight-chat.donation .hl-badge.textbadge { color: var(--accent-dono) !important; border-color: var(--accent-dono) !important; }
 
-/* ── Right-side icon (the decorative symbol on right edge) ── */
 .highlight-chat::after {
   content: '✦';
   position: absolute !important;
@@ -197,7 +173,6 @@ body {
 .highlight-chat.member::after { color: var(--accent-sub)  !important; content: '★' !important; }
 .highlight-chat.donation::after { color: var(--accent-dono) !important; content: '♦' !important; }
 
-/* ── Donation amount ── */
 .donationAmount {
   font-family: var(--font-name) !important;
   font-size: 13px !important;
@@ -208,7 +183,6 @@ body {
   white-space: nowrap !important;
 }
 
-/* ── Selected / featured message ── */
 .highlight-chat.pressed,
 .highlight-chat.last-message {
   border-left-color: #ff9800 !important;
@@ -217,59 +191,22 @@ body {
   transform: translateX(4px) !important;
 }
 
-/* ── Queued ── */
 .highlight-chat.queued {
   border-left-color: #7c4dff !important;
   background: rgba(124, 77, 255, 0.07) !important;
 }
 
-/* ── Pinned ── */
 #pinned .highlight-chat {
   border-left-color: #ff4081 !important;
   background: rgba(255, 64, 129, 0.06) !important;
 }
 
-/* ── Event notifications (follows, subs etc.) ── */
 .highlight-chat[data-event] {
   border-left-color: rgba(255,255,255,0.3) !important;
   background: rgba(20,22,40,0.7) !important;
   font-style: italic !important;
 }
 
-/* ── Bottom menu ── */
-#menu {
-  background: rgba(5, 8, 18, 0.92) !important;
-  border-top: 1px solid rgba(0,229,255,0.2) !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 -2px 20px rgba(0,0,0,0.6) !important;
-}
-
-/* ── Emoji ── */
-span.emoji {
-  font-size: 120% !important;
-}
-
-/* ── Slide-in animation for new messages ── */
-@keyframes slideInTilted {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.highlight-chat {
-  animation: slideInTilted 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
-}
-
-.highlight-chat.odd {
-  animation: slideInTilted 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
-}
-
-/* ── Bottom event ticker / notification bar ── */
 .dissolve,
 .highlight-chat[data-event="resubscription"],
 .highlight-chat[data-event="subscription"],
@@ -277,45 +214,46 @@ span.emoji {
   background: rgba(0, 229, 255, 0.07) !important;
   border-left-color: var(--accent-default) !important;
   font-style: normal !important;
-  transform: rotate(0deg) !important;
 }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px !important; }
-::-webkit-scrollbar-track { background: transparent !important; }
-::-webkit-scrollbar-thumb {
-  background: rgba(0,229,255,0.25) !important;
-  border-radius: 2px !important;
+#menu {
+  background: rgba(5, 8, 18, 0.92) !important;
+  border-top: 1px solid rgba(0,229,255,0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.6) !important;
 }
 
-/* ── First-time chatter highlight ── */
+span.emoji { font-size: 120% !important; }
+
 .highlight-chat.firsttime {
   border-left-color: #ff9100 !important;
   background: rgba(255, 145, 0, 0.05) !important;
 }
 
-/* ── Merged messages (simpleSequence continuation) ──
-   Visually attaches to the card above: no top margin,
-   squared top corners, slightly dimmer, no slide-in tilt reset.
-   The left border is thinner to read as "continuation". ── */
 .highlight-chat.merged {
   margin-top: 1px !important;
   border-top: 1px solid rgba(255,255,255,0.04) !important;
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
-  border-left-width: 2px !important;
   border-left-style: dashed !important;
+  border-left-width: 2px !important;
   padding-top: 4px !important;
   padding-bottom: 6px !important;
   background: rgba(8, 10, 22, 0.65) !important;
   animation: slideInMerged 0.18s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
 }
 
-.highlight-chat.merged::after {
+.highlight-chat.merged::after,
+.highlight-chat.merged.mod::after,
+.highlight-chat.merged.vip::after,
+.highlight-chat.merged.member::after,
+.highlight-chat.merged.donation::after {
+  content: none !important;
   display: none !important;
 }
 
 .highlight-chat.merged::before {
+  content: none !important;
   display: none !important;
 }
 
@@ -325,9 +263,6 @@ span.emoji {
   font-size: 14px !important;
 }
 
-/* The card directly ABOVE a merged card should have squared bottom corners.
-   CSS can't look-ahead, so we use the adjacent sibling selector in reverse:
-   target .merged and style its own top, and let the browser handle the rest. */
 .highlight-chat:has(+ .highlight-chat.merged) {
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
@@ -336,13 +271,19 @@ span.emoji {
   padding-bottom: 5px !important;
 }
 
+::-webkit-scrollbar { width: 4px !important; }
+::-webkit-scrollbar-track { background: transparent !important; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,229,255,0.25) !important;
+  border-radius: 2px !important;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 @keyframes slideInMerged {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
