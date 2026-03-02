@@ -335,3 +335,48 @@ span.emoji { font-size: 120% !important; }
   contain: none !important; /* test this; keep it off if it fixes the cut-off */
   box-sizing: border-box !important;
 }
+
+
+/* 0) Make width math predictable everywhere */
+*, *::before, *::after {
+  box-sizing: border-box !important;
+}
+
+/* 1) Stop any clipping/masking on the entire message subtree */
+.highlight-chat,
+.highlight-chat * {
+  overflow: visible !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* 2) Ensure flex children can actually shrink (prevents right-edge cutoffs) */
+.highlight-chat .hl-body,
+.highlight-chat .hl-content-wrapper,
+.highlight-chat .hl-text {
+  min-width: 0 !important;
+}
+
+/* 3) Robust wrap rules (works for normal words + aaaaaaaa…) */
+.highlight-chat .hl-message,
+.highlight-chat .hl-content {
+  white-space: normal !important;
+  word-break: break-word !important;   /* fallback */
+  overflow-wrap: anywhere !important;  /* breaks long continuous strings */
+  max-width: 100% !important;
+
+  padding-right: 6px !important;       /* prevents last-glyph/subpixel clipping */
+}
+
+/* 4) Remove layout containment (can cause clipping/rounding issues) */
+.highlight-chat {
+  contain: none !important;
+}
+
+/* 5) Fix a common cause: your width calc + margins can create fractional overflow */
+.highlight-chat {
+  width: auto !important;
+  margin: 5px 6px !important;          /* keep your spacing without calc(...) */
+}
