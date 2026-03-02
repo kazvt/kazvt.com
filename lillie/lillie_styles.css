@@ -231,15 +231,15 @@ span.emoji { font-size: 120% !important; }
 }
 
 .highlight-chat.merged {
-  margin-top: 1px !important;
-  border-top: 1px solid rgba(255,255,255,0.04) !important;
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-  border-left-style: dashed !important;
-  border-left-width: 2px !important;
-  padding-top: 4px !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+  border-radius: 0 !important;
+  border-left-style: solid !important;
+  border-left-width: 3px !important;
+  padding-top: 3px !important;
   padding-bottom: 6px !important;
   background: rgba(8, 10, 22, 0.65) !important;
+  box-shadow: none !important;
   animation: slideInMerged 0.18s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
 }
 
@@ -269,6 +269,7 @@ span.emoji { font-size: 120% !important; }
   border-bottom: none !important;
   margin-bottom: 0 !important;
   padding-bottom: 5px !important;
+  box-shadow: none !important;
 }
 
 ::-webkit-scrollbar { width: 4px !important; }
