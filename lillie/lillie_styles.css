@@ -326,7 +326,7 @@ span.emoji { font-size: 120% !important; }
   white-space: normal !important;
   word-break: normal !important;
   overflow-wrap: anywhere !important; /* <-- key for aaaaaaaaa... */
-  padding-right: 3px !important;      /* avoids last-glyph/subpixel clipping */
+  /* padding-right: 3px !important;      avoids last-glyph/subpixel clipping */
   max-width: 100% !important;
 }
 
@@ -340,16 +340,6 @@ span.emoji { font-size: 120% !important; }
 /* 0) Make width math predictable everywhere */
 *, *::before, *::after {
   box-sizing: border-box !important;
-}
-
-/* 1) Stop any clipping/masking on the entire message subtree */
-.highlight-chat,
-.highlight-chat * {
-  overflow: visible !important;
-  clip-path: none !important;
-  -webkit-clip-path: none !important;
-  mask-image: none !important;
-  -webkit-mask-image: none !important;
 }
 
 /* 2) Ensure flex children can actually shrink (prevents right-edge cutoffs) */
