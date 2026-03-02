@@ -1,0 +1,300 @@
+/* ============================================================
+   TILTED NEON CHAT OVERLAY
+   Inject via &css= URL parameter or paste into OBS Custom CSS
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+:root {
+  --tilt: -1.8deg;
+  --card-bg: rgba(8, 10, 22, 0.82);
+  --card-border: rgba(255,255,255,0.07);
+  --accent-default: #00e5ff;
+  --accent-mod:     #00ff88;
+  --accent-vip:     #c850ff;
+  --accent-sub:     #3399ff;
+  --accent-dono:    #ffd700;
+  --accent-host:    #ff4466;
+  --glow-blur: 8px;
+  --font-main: 'Barlow Condensed', sans-serif;
+  --font-name: 'Rajdhani', sans-serif;
+}
+
+/* ── Reset body & output ── */
+body {
+  background: transparent !important;
+  font-family: var(--font-main) !important;
+  overflow: hidden;
+}
+
+#output {
+  padding: 4px 10px 52px 10px;
+}
+
+#pinned { border-bottom: 1px solid rgba(255,255,255,0.12) !important; }
+
+/* ── Base card ── */
+.highlight-chat {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-left: 3px solid var(--accent-default) !important;
+  border-radius: 4px 8px 8px 4px !important;
+  margin: 5px 2px 5px 6px !important;
+  padding: 7px 44px 7px 10px !important;
+  transform: rotate(var(--tilt)) !important;
+  transform-origin: left center !important;
+  backdrop-filter: blur(6px) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  box-shadow:
+    0 2px 16px rgba(0,0,0,0.5),
+    inset 0 0 0 0 transparent !important;
+  overflow: visible !important;
+  min-height: 0 !important;
+  width: calc(100% - 12px) !important;
+  contain: layout !important;
+}
+
+.highlight-chat:hover {
+  transform: rotate(calc(var(--tilt) * 0.5)) translateX(3px) !important;
+  box-shadow:
+    0 4px 24px rgba(0,229,255,0.15),
+    0 2px 16px rgba(0,0,0,0.5) !important;
+}
+
+/* ── Odd rows ── */
+.highlight-chat.odd {
+  background: rgba(12, 15, 30, 0.78) !important;
+  transform: rotate(calc(var(--tilt) * 1.2)) !important;
+}
+
+/* ── Role-specific left border colors ── */
+.highlight-chat.mod   { border-left-color: var(--accent-mod)  !important; }
+.highlight-chat.vip   { border-left-color: var(--accent-vip)  !important; }
+.highlight-chat.member{ border-left-color: var(--accent-sub)  !important; }
+.highlight-chat.donation { border-left-color: var(--accent-dono) !important; }
+.highlight-chat.host  { border-left-color: var(--accent-host) !important; }
+.highlight-chat.bot   { border-left-color: rgba(150,150,150,0.5) !important; opacity: 0.6 !important; }
+
+/* ── Source icon (platform logo) ── */
+.icon.hl-source-type {
+  width: 14px !important;
+  height: 14px !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  margin: 2px 4px 0 0 !important;
+  opacity: 0.7;
+}
+
+/* ── Profile picture ── */
+.hl-profile-pic {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  border-radius: 50% !important;
+  margin: 1px 6px 0 0 !important;
+  border: 1.5px solid rgba(255,255,255,0.15) !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Name ── */
+.hl-name {
+  font-family: var(--font-name) !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #e8eaf6 !important;
+  margin: 0 6px 0 0 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  text-shadow: 0 0 var(--glow-blur) currentColor !important;
+}
+
+.highlight-chat.mod    .hl-name { color: var(--accent-mod)  !important; }
+.highlight-chat.vip    .hl-name { color: var(--accent-vip)  !important; }
+.highlight-chat.member .hl-name { color: var(--accent-sub)  !important; }
+.highlight-chat.donation .hl-name { color: var(--accent-dono) !important; }
+.highlight-chat.host   .hl-name { color: var(--accent-host) !important; }
+
+/* ── Time stamp ── */
+.time-arrived {
+  font-size: 10px !important;
+  color: rgba(255,255,255,0.35) !important;
+  font-family: var(--font-main) !important;
+  margin: 2px 0 0 4px !important;
+  white-space: nowrap !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* ── Message text ── */
+.hl-message,
+.hl-content {
+  font-family: var(--font-main) !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  color: rgba(220, 228, 255, 0.88) !important;
+  line-height: 1.35 !important;
+  margin: 2px 0 0 0 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* ── Badges ── */
+.hl-badge {
+  display: inline-block !important;
+  font-family: var(--font-name) !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  padding: 1px 5px !important;
+  border-radius: 3px !important;
+  margin: 0 3px 0 0 !important;
+  vertical-align: middle !important;
+  max-height: none !important;
+  height: auto !important;
+  border: 1px solid currentColor !important;
+}
+
+/* Image badges (platform icons, sub badges, etc.) */
+.hl-badge:not(.textbadge) {
+  height: 16px !important;
+  max-height: 16px !important;
+  width: auto !important;
+  border: none !important;
+  padding: 0 !important;
+  background: none !important;
+  vertical-align: middle !important;
+}
+
+/* Text badges with role colors */
+.hl-badge.textbadge {
+  background: transparent !important;
+}
+
+/* Role-specific badge colors */
+.highlight-chat.mod    .hl-badge.textbadge { color: var(--accent-mod)  !important; border-color: var(--accent-mod)  !important; }
+.highlight-chat.vip    .hl-badge.textbadge { color: var(--accent-vip)  !important; border-color: var(--accent-vip)  !important; }
+.highlight-chat.member .hl-badge.textbadge { color: var(--accent-sub)  !important; border-color: var(--accent-sub)  !important; }
+.highlight-chat.donation .hl-badge.textbadge { color: var(--accent-dono) !important; border-color: var(--accent-dono) !important; }
+
+/* ── Right-side icon (the decorative symbol on right edge) ── */
+.highlight-chat::after {
+  content: '✦';
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 13px !important;
+  color: var(--accent-default) !important;
+  opacity: 0.45 !important;
+  pointer-events: none !important;
+}
+
+.highlight-chat.mod::after    { color: var(--accent-mod)  !important; content: '⬡' !important; }
+.highlight-chat.vip::after    { color: var(--accent-vip)  !important; content: '◆' !important; }
+.highlight-chat.member::after { color: var(--accent-sub)  !important; content: '★' !important; }
+.highlight-chat.donation::after { color: var(--accent-dono) !important; content: '♦' !important; }
+
+/* ── Donation amount ── */
+.donationAmount {
+  font-family: var(--font-name) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--accent-dono) !important;
+  text-shadow: 0 0 10px var(--accent-dono) !important;
+  letter-spacing: 0.05em !important;
+  white-space: nowrap !important;
+}
+
+/* ── Selected / featured message ── */
+.highlight-chat.pressed,
+.highlight-chat.last-message {
+  border-left-color: #ff9800 !important;
+  background: rgba(255, 152, 0, 0.08) !important;
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.2) !important;
+  transform: rotate(0deg) translateX(4px) !important;
+}
+
+/* ── Queued ── */
+.highlight-chat.queued {
+  border-left-color: #7c4dff !important;
+  background: rgba(124, 77, 255, 0.07) !important;
+}
+
+/* ── Pinned ── */
+#pinned .highlight-chat {
+  border-left-color: #ff4081 !important;
+  transform: rotate(0deg) !important;
+  background: rgba(255, 64, 129, 0.06) !important;
+}
+
+/* ── Event notifications (follows, subs etc.) ── */
+.highlight-chat[data-event] {
+  border-left-color: rgba(255,255,255,0.3) !important;
+  background: rgba(20,22,40,0.7) !important;
+  font-style: italic !important;
+  transform: rotate(0deg) !important;
+}
+
+/* ── Bottom menu ── */
+#menu {
+  background: rgba(5, 8, 18, 0.92) !important;
+  border-top: 1px solid rgba(0,229,255,0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.6) !important;
+}
+
+/* ── Emoji ── */
+span.emoji {
+  font-size: 120% !important;
+}
+
+/* ── Slide-in animation for new messages ── */
+@keyframes slideInTilted {
+  from {
+    opacity: 0;
+    transform: rotate(var(--tilt)) translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tilt));
+  }
+}
+
+.highlight-chat {
+  animation: slideInTilted 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
+}
+
+.highlight-chat.odd {
+  animation: slideInTilted 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
+}
+
+/* ── Bottom event ticker / notification bar ── */
+.dissolve,
+.highlight-chat[data-event="resubscription"],
+.highlight-chat[data-event="subscription"],
+.highlight-chat[data-event="follow"] {
+  background: rgba(0, 229, 255, 0.07) !important;
+  border-left-color: var(--accent-default) !important;
+  font-style: normal !important;
+  transform: rotate(0deg) !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px !important; }
+::-webkit-scrollbar-track { background: transparent !important; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,229,255,0.25) !important;
+  border-radius: 2px !important;
+}
+
+/* ── First-time chatter highlight ── */
+.highlight-chat.firsttime {
+  border-left-color: #ff9100 !important;
+  background: rgba(255, 145, 0, 0.05) !important;
+}
