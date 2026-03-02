@@ -2822,6 +2822,9 @@
 		}
 
 
+/*  */
+
+
 
         
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
@@ -10513,20 +10516,22 @@ span.emoji {
 
 				var chatname = data.chatname;
 
-				if (simpleSequence && (chatname == lastChatName) && (data.type == lastType)) {
-					chatname = "";
-					//timeArrived = "";
-					chatImg = "";
-					showType = "";
-					chatbadges = "";
-					//if (datestamp) {
-					//	timeArrived = "<div class='time-arrived'></div>";
-					//}
+var isMerged = false;
+if (simpleSequence && (chatname == lastChatName) && (data.type == lastType)) {
+    chatname = "";
+    //timeArrived = "";
+    chatImg = "";
+    showType = "";
+    chatbadges = "";
+    isMerged = true;
+    //if (datestamp) {
+    //	timeArrived = "<div class='time-arrived'></div>";
+    //}
 
-				} else if (simpleSequence) {
-					lastChatName = chatname;
-					lastType = data.type;
-				}
+} else if (simpleSequence) {
+    lastChatName = chatname;
+    lastType = data.type;
+}
 
 				var afterName = ":";
 				if (twoLines) {
@@ -10616,6 +10621,10 @@ span.emoji {
 					var node = createElementFromHTML('<div id="msg_' + data.id + '" ' + mid + ' data-menu="context-menu" class="highlight-chat' + larger + expand + '" data-source-type="' + data.type + '">' + "<div class='queueid'></div>" + showType + chatImg + timeArrived + chatname + '<div class="hl-message hl-content" dir="' + textDirection + '" id="content_' + data.id + '">' + chatmessage + donationHTML + "</div>" + addImage + "</div>");
 				} else {
 					var node = createElementFromHTML('<div id="msg_' + data.id + '" ' + mid + ' data-menu="context-menu" class="highlight-chat' + larger + expand + '" data-source-type="' + data.type + '">' + "<div class='queueid'></div>" + showType + chatImg + timeArrived + chatname + '<div class="hl-message hl-content" dir="' + textDirection + '" id="content_' + data.id + '">' + chatmessage + "</div>" + addImage + donationHTML + "</div>");
+				}
+
+			if (isMerged) {
+					node.classList.add("merged");
 				}
 
 				if (filtering) {
