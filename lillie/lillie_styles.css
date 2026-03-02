@@ -311,3 +311,27 @@ span.emoji { font-size: 120% !important; }
   word-break: normal !important;
   overflow-wrap: anywhere !important;
 }
+
+/* 1) Make sure every flex text container can shrink properly */
+.hl-body,
+.hl-content-wrapper,
+.hl-text {
+  min-width: 0 !important;
+  overflow: visible !important;  /* do not clip wrapping text */
+}
+
+/* 2) Robust wrapping rules (handles normal text + long unbroken strings) */
+.hl-message,
+.hl-content {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important; /* <-- key for aaaaaaaaa... */
+  padding-right: 3px !important;      /* avoids last-glyph/subpixel clipping */
+  max-width: 100% !important;
+}
+
+/* 3) Common hidden culprit: layout containment can cause wrap/clipping weirdness */
+.highlight-chat {
+  contain: none !important; /* test this; keep it off if it fixes the cut-off */
+  box-sizing: border-box !important;
+}
