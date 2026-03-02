@@ -17,7 +17,7 @@
 
 body {
   background: transparent !important;
-  font-family: var(--font-main) !important;
+  /* font-family: var(--font-main) !important; */
   overflow: hidden;
 }
 
@@ -91,7 +91,7 @@ body {
 }
 
 .hl-name {
-  font-family: var(--font-name) !important;
+  /* font-family: var(--font-name) !important; */
   font-weight: 700 !important;
   font-size: 14px !important;
   letter-spacing: 0.08em !important;
@@ -112,7 +112,7 @@ body {
 .time-arrived {
   font-size: 10px !important;
   color: rgba(255,255,255,0.35) !important;
-  font-family: var(--font-main) !important;
+  /* font-family: var(--font-main) !important; */
   margin: 2px 0 0 4px !important;
   white-space: nowrap !important;
   letter-spacing: 0.04em !important;
@@ -120,7 +120,7 @@ body {
 
 .hl-message,
 .hl-content {
-  font-family: var(--font-main) !important;
+  /* font-family: var(--font-main) !important; */
   font-size: 15px !important;
   font-weight: 400 !important;
   color: rgba(220, 228, 255, 0.88) !important;
@@ -131,7 +131,7 @@ body {
 
 .hl-badge {
   display: inline-block !important;
-  font-family: var(--font-name) !important;
+  /* font-family: var(--font-name) !important; */
   font-size: 9px !important;
   font-weight: 700 !important;
   letter-spacing: 0.1em !important;
@@ -180,7 +180,7 @@ body {
 .highlight-chat.donation::after { color: var(--accent-dono) !important; content: '♦' !important; }
 
 .donationAmount {
-  font-family: var(--font-name) !important;
+  /* font-family: var(--font-name) !important; */
   font-size: 13px !important;
   font-weight: 700 !important;
   color: var(--accent-dono) !important;
