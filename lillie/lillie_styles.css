@@ -299,8 +299,8 @@ span.emoji {
    squared top corners, slightly dimmer, no slide-in tilt reset.
    The left border is thinner to read as "continuation". ── */
 .highlight-chat.merged {
-  margin-top: -3px !important;
-  border-top: none !important;
+  margin-top: 1px !important;
+  border-top: 1px solid rgba(255,255,255,0.04) !important;
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
   border-left-width: 2px !important;
@@ -315,18 +315,8 @@ span.emoji {
   display: none !important;
 }
 
-/* Connector pip — tiny dot that bridges the gap between cards */
 .highlight-chat.merged::before {
-  content: '' !important;
-  position: absolute !important;
-  left: -5px !important;
-  top: -4px !important;
-  width: 6px !important;
-  height: 6px !important;
-  border-radius: 50% !important;
-  background: currentColor !important;
-  opacity: 0.5 !important;
-  pointer-events: none !important;
+  display: none !important;
 }
 
 .highlight-chat.merged .hl-message,
