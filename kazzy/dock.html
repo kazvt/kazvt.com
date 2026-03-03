@@ -3393,6 +3393,16 @@
 				limitbadges = parseInt(limitbadges);
 			}
 
+					// only limits non-text badges (keeps text badges)
+		var plimitbadges = false;
+		if (urlParams.has("plimitbadges")) {
+			plimitbadges = 2;
+			if (urlParams.get("plimitbadges")) {
+				plimitbadges = urlParams.get("plimitbadges");
+			}
+			plimitbadges = parseInt(plimitbadges);
+		}
+
 			var blockMessageSelecting = false;
 			
 			
@@ -9321,6 +9331,10 @@
 						}
 					}
 
+					if (data.event) {
+						node.classList.add("eventhighlight");
+					}
+
 					if (data.chatmessage && data.chatmessage.startsWith("!")) {
 						if (filtercommands){
 							return;
@@ -9772,6 +9786,37 @@
 						}
 						data.chatbadges.push("./icons/vip.png");
 					}
+
+									if (Array.isArray(data.chatbadges)) {
+					// plimitbadges: limit ONLY non-text badges so keep all text badges
+					if (plimitbadges !== false) {
+						try {
+							let kept = [];
+							let nonTextCount = 0;
+
+							for (const badge of data.chatbadges) {
+								const isTextBadge =
+									(typeof badge === "object" && badge && badge.type === "text" && badge.text);
+
+								if (isTextBadge) {
+									kept.push(badge); // never limited
+								} else {
+									if (nonTextCount < plimitbadges) {
+										kept.push(badge);
+									}
+									nonTextCount++;
+								}
+							}
+
+							data.chatbadges = kept;
+						} catch (e) { }
+					} else if (limitbadges !== false) {
+						// original behavior
+						try {
+							data.chatbadges = data.chatbadges.slice(0, limitbadges);
+						} catch (e) { }
+					}
+				}
 
 					if (data.chatbadges && limitbadges !== false) {
 						try {
