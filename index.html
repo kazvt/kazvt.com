@@ -12,7 +12,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
 
-
   <meta property="og:title" content="kazvt" id="og-title">
   <meta property="og:description" content="i am a monke called kaz, she/her, i play retro games :)
 
@@ -39,441 +38,78 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
+  <!-- Tailwind: kept only for a handful of responsive utilities (sm:, xs:) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          screens: {
-            'xs': '375px',
-          },
-          fontFamily: {
-            pixel: ['"Press Start 2P"', 'monospace'],
-          },
-          colors: {
-            'crt-green': '#33FF33',
-            'dark-green': '#00AA00',
-            'screen-bg': '#0a0a0a',
-            'glow': '#00FF00',
-            'amber': '#FFB000',
-            'dark-amber': '#CC8800',
-          },
-          animation: {
-            'scanline': 'scanline 8s linear infinite',
-            'flicker': 'flicker 0.15s infinite',
-            'glow': 'glow 2s ease-in-out infinite',
-            'blink': 'blink 1s step-end infinite',
-            'liveblink': 'liveblink 1s step-end infinite',
-          },
-          keyframes: {
-            scanline: {
-              '0%': { transform: 'translateY(0)' },
-              '100%': { transform: 'translateY(10px)' },
-            },
-            flicker: {
-              '0%, 100%': { opacity: '0.05' },
-              '50%': { opacity: '0.1' },
-            },
-            glow: {
-              '0%, 100%': { textShadow: '0 0 5px #00FF00, 0 0 10px #00FF00, 0 0 15px #00FF00' },
-              '50%': { textShadow: '0 0 2px #00FF00, 0 0 4px #00FF00, 0 0 6px #00FF00' },
-            },
-            blink: {
-              '0%, 50%': { opacity: '1' },
-              '51%, 100%': { opacity: '0' },
-            },
-            liveblink: {
-              '0%, 50%': { opacity: '1' },
-              '51%, 100%': { opacity: '0.35' },
-            },
-          },
+          screens: { 'xs': '375px' },
         },
       },
     }
   </script>
 
-  <style>
-    body {
-      font-family: 'Press Start 2P', monospace;
-      image-rendering: pixelated;
-    }
-
-    .crt-overlay {
-      background: repeating-linear-gradient(to bottom,
-          rgba(0, 255, 0, 0.03) 0px,
-          rgba(0, 255, 0, 0.03) 1px,
-          transparent 1px,
-          transparent 2px);
-      animation: scanline 8s linear infinite;
-      pointer-events: none;
-    }
-
-    .crt-flicker {
-      animation: flicker 0.15s infinite;
-      pointer-events: none;
-    }
-
-    .text-glow {
-      text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
-      animation: glow 2s ease-in-out infinite;
-    }
-
-    .text-glow-sm {
-      text-shadow: 0 0 5px #00FF00;
-    }
-
-    .btn-glow {
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-glow:hover {
-      box-shadow: 0 0 30px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-glow.is-live {
-      filter: saturate(1.08) brightness(1.03);
-      box-shadow: 0 0 22px rgba(0, 255, 0, 0.42), 0 0 14px rgba(255, 176, 0, 0.18), inset 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-glow.is-offline {
-      filter: saturate(0.7) brightness(0.85);
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.18), inset 0 0 14px rgba(0, 0, 0, 0.35);
-    }
-
-    /* testing: slightly brighter than offline, no amber, just a hint it's doing something */
-    .btn-glow.is-testing {
-      filter: saturate(0.75) brightness(0.9);
-      box-shadow: 0 0 12px rgba(0, 255, 0, 0.22), inset 0 0 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .btn-glow.is-loading {
-      filter: saturate(0.5) brightness(0.75);
-      box-shadow: 0 0 8px rgba(0, 255, 0, 0.15), inset 0 0 14px rgba(0, 0, 0, 0.4);
-    }
-
-    .icon-box {
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-    }
-
-    .status-box {
-      box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.18);
-    }
-
-    .pip-live {
-      box-shadow: 0 0 0 2px #0a0a0a, 0 0 12px rgba(255, 176, 0, 0.75);
-      animation: liveblink 1s step-end infinite, livePulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes livePulse {
-
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.15);
-      }
-    }
-
-    .pip-offline {
-      box-shadow: 0 0 0 2px #0a0a0a;
-      background-color: rgb(80, 80, 80) !important;
-    }
-
-    /* testing pip: dim green, slow idle pulse, no amber glow */
-    .pip-testing {
-      box-shadow: 0 0 0 2px #0a0a0a, 0 0 4px rgba(0, 255, 0, 0.2);
-      background-color: rgb(0, 100, 0) !important;
-      animation: testingPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes testingPulse {
-
-      0%,
-      100% {
-        opacity: 0.5;
-      }
-
-      50% {
-        opacity: 0.85;
-      }
-    }
-
-    .pip-loading {
-      box-shadow: 0 0 0 2px #0a0a0a;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    .status-text-live {
-      animation: terminal-flicker 0.8s steps(2) infinite, statusGlow 2s ease-in-out infinite;
-    }
-
-    /* testing label: muted green, no glow animation */
-    .status-text-testing {
-      opacity: 0.55;
-    }
-
-    @keyframes statusGlow {
-
-      0%,
-      100% {
-        text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
-      }
-
-      50% {
-        text-shadow: 0 0 8px rgba(255, 176, 0, 1), 0 0 12px rgba(255, 176, 0, 0.5);
-      }
-    }
-
-    @keyframes terminal-flicker {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.6;
-      }
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 0.3;
-      }
-
-      50% {
-        opacity: 1;
-      }
-    }
-
-    @keyframes scanline {
-      0% {
-        transform: translateY(0);
-      }
-
-      100% {
-        transform: translateY(10px);
-      }
-    }
-
-    @keyframes flicker {
-
-      0%,
-      100% {
-        opacity: 0.05;
-      }
-
-      50% {
-        opacity: 0.1;
-      }
-    }
-
-    @keyframes slideIn {
-      0% {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-
-      100% {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes dotAnimation {
-
-      0%,
-      20% {
-        content: '.';
-      }
-
-      40%,
-      60% {
-        content: '..';
-      }
-
-      80%,
-      100% {
-        content: '...';
-      }
-    }
-
-    .loading-dots {
-      display: inline-block;
-      min-width: 1.5em;
-      text-align: center;
-    }
-
-    .loading-dots::after {
-      content: '.';
-      animation: dotAnimation 1.5s steps(1, end) infinite;
-    }
-
-    #bioSection:hover {
-      border-color: #33FF33;
-      background: rgba(0, 255, 0, 0.1);
-    }
-
-    @keyframes floatText {
-
-      0%,
-      100% {
-        transform: translateY(0px);
-        opacity: 0.9;
-      }
-
-      50% {
-        transform: translateY(-3px);
-        opacity: 1;
-      }
-    }
-
-    .stream-label-float {
-      display: inline-block;
-      animation: floatText 2.5s ease-in-out infinite;
-    }
-
-    /*  colour knob panel  */
-    #palettePanel {
-      transition: grid-template-rows 0.3s ease;
-    }
-
-    #paletteKnob {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 0;
-      background: linear-gradient(to right,
-          hsl(120, 100%, 35%),
-          hsl(180, 100%, 35%),
-          hsl(240, 100%, 35%),
-          hsl(300, 100%, 35%),
-          hsl(360, 100%, 35%),
-          hsl(60, 100%, 35%),
-          hsl(120, 100%, 35%));
-      outline: none;
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    #paletteKnob::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 20px;
-      background: #ffffff;
-      border: 2px solid #0a0a0a;
-      cursor: pointer;
-    }
-
-    #paletteKnob::-moz-range-thumb {
-      width: 12px;
-      height: 20px;
-      background: #ffffff;
-      border: 2px solid #0a0a0a;
-      border-radius: 0;
-      cursor: pointer;
-    }
-
-    /* the actual hue filter lives here , only touches the CRT screen content */
-    #crtScreen {
-      transition: filter 0.15s ease;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="bg-[#1a1a1a] text-crt-green overflow-x-hidden min-h-screen pb-8">
+<body>
 
-
-  <div class="fixed inset-0 bg-gradient-radial from-[#0a0a0a] to-black"></div>
+  <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
-  <div class="crt-flicker fixed inset-0 bg-[rgba(10,10,10,0.1)] z-[99]"></div>
-
+  <!-- crt-flicker: kept in markup, animation removed in CSS for accessibility -->
+  <div class="crt-flicker fixed inset-0 z-[99]"></div>
 
   <div class="relative z-10 w-full max-w-[680px] mx-auto px-1 sm:px-5 py-1 sm:py-10">
 
+    <div class="crt-bezel">
+      <div id="crtScreen" class="crt-screen">
 
-    <div
-      class="bg-[#2a2a2a] border-[12px] sm:border-[16px] border-[#1a1a1a] rounded-lg sm:rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_10px_40px_rgba(0,0,0,0.6)] p-2.5 sm:p-5">
-
-
-      <div id="crtScreen"
-        class="bg-screen-bg border-2 sm:border-[3px] border-[#333] p-7 sm:p-6 shadow-[inset_0_0_50px_rgba(0,255,0,0.1)]">
-
-
-        <div class="text-crt-green text-[7px] xs:text-[8px] sm:text-[9px] mb-6 sm:mb-5 opacity-70 font-mono">
-          &gt; SYSTEM READY<span class="inline-block w-2 h-3 bg-crt-green animate-blink ml-1"></span>
+        <div class="sys-ready">
+          &gt; SYSTEM READY<span class="inline-block w-2 h-3 bg-[#33FF33] animate-blink ml-1"></span>
         </div>
 
-
-        <div class="mb-10 sm:mb-6 text-center">
-          <h1
-            class="text-sm xs:text-base sm:text-base md:text-xl leading-tight tracking-wider uppercase text-crt-green text-glow mb-6 sm:mb-4">
-            █ MONKE LINKS █
-          </h1>
-          <div class="text-[8px] xs:text-[9px] sm:text-[10px] text-dark-green leading-relaxed text-glow-sm">
-            &gt;&gt; SELECT A PLATFORM &lt;&lt;
-          </div>
+        <div class="page-header">
+          <h1 class="page-title text-glow">█ MONKE LINKS █</h1>
+          <div class="page-subtitle text-glow-sm">&gt;&gt; SELECT A PLATFORM &lt;&lt;</div>
         </div>
 
-
-        <div
-          class="flex items-center justify-between gap-2 sm:gap-3 mb-7 sm:mb-5 pb-6 sm:pb-4 border-b-2 border-dashed border-dark-green">
-          <a target="_blank" href="https://lillie.garden/imgs/smeemy.jpg"
-            class="flex items-center gap-2 sm:gap-2.5 text-[7px] xs:text-[8px] sm:text-[9px] bg-transparent text-crt-green px-3.5 sm:px-2.5 py-2 sm:py-1.5 border-2 border-crt-green uppercase whitespace-nowrap icon-box no-underline transition-all duration-100 hover:bg-crt-green/10 hover:border-glow">
-            [ START ]
-          </a>
-          <div class="flex gap-1.5 sm:gap-2.5 text-[7px] xs:text-[8px] sm:text-[10px] text-crt-green">
-            LIVES: ■ ■ ■
-          </div>
+        <!-- game bar -->
+        <div class="game-bar">
+          <a target="_blank" href="https://lillie.garden/imgs/smeemy.jpg" class="game-bar-start">[ START ]</a>
+          <div class="game-bar-lives">LIVES: ■ ■ ■</div>
         </div>
 
+        <!-- platform links -->
+        <div class="platform-links">
 
-        <div class="space-y-6 sm:space-y-4">
-
-
-          <a href="https://www.twitch.tv/kazvt" target="_blank" rel="noopener noreferrer" data-platform="twitch"
-            class="btn-glow is-loading flex items-center justify-between gap-2 sm:gap-3 no-underline text-screen-bg bg-crt-green border-2 sm:border-[3px] border-dark-green p-5 sm:p-4 transition-all duration-100 hover:bg-glow hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 focus:ring-offset-screen-bg">
-
-            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <div class="w-8 h-8 flex-shrink-0 bg-screen-bg border border-dark-green flex items-center justify-center">
+          <a href="https://www.twitch.tv/kazvt" target="_blank" rel="noopener noreferrer"
+            data-platform="twitch" class="btn-platform is-loading">
+            <div class="btn-platform-left">
+              <div class="btn-platform-icon">
                 <svg width="24" height="24" viewBox="50 -30 400 550" fill="#33FF33" xmlns="http://www.w3.org/2000/svg">
                   <path d="M80,32,48,112V416h96v64h64l64-64h80L464,304V32ZM416,288l-64,64H256l-64,64V352H112V80H416Z" />
                   <rect x="320" y="143" width="48" height="129" />
                   <rect x="208" y="143" width="48" height="129" />
                 </svg>
               </div>
-              <span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold truncate">▶
-                TWITCH</span>
+              <span class="btn-platform-label">▶ TWITCH</span>
             </div>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <div
-                class="status-box flex items-center gap-1 sm:gap-2 text-[7px] sm:text-[9px] tracking-tight sm:tracking-wide uppercase px-2 sm:px-2.5 py-1.5 sm:py-1.5 border-2 border-black/55 bg-black/20">
-                <span class="pip-loading w-2 h-2 sm:w-2.5 sm:h-2.5 bg-dark-green" aria-hidden="true"></span>
-                <span class="status-text hidden xs:inline loading-dots"></span>
+            <div class="btn-platform-right">
+              <div class="status-box">
+                <span class="pip pip-loading" aria-hidden="true"></span>
+                <span class="status-text loading-dots"></span>
               </div>
-              <span class="hidden sm:inline text-[14px] opacity-85">ENTER ↵</span>
+              <span class="enter-hint">ENTER ↵</span>
             </div>
-
           </a>
 
-
-          <a href="https://www.youtube.com/@kazvt" target="_blank" rel="noopener noreferrer" data-platform="youtube"
-            class="btn-glow is-loading flex items-center justify-between gap-2 sm:gap-3 no-underline text-screen-bg bg-crt-green border-2 sm:border-[3px] border-dark-green p-5 sm:p-4 transition-all duration-100 hover:bg-glow hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 focus:ring-offset-screen-bg">
-
-            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <div class="w-8 h-8 flex-shrink-0 bg-screen-bg border border-dark-green flex items-center justify-center">
-
-
+          <a href="https://www.youtube.com/@kazvt" target="_blank" rel="noopener noreferrer"
+            data-platform="youtube" class="btn-platform is-loading">
+            <div class="btn-platform-left">
+              <div class="btn-platform-icon">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="3.5"
-                    mask="url(#yt-corners)" />
+                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="3.5" mask="url(#yt-corners)" />
                   <path d="M9.5 9l7 3-7 3v-6z" fill="#33FF33" mask="url(#yt-play)" />
                   <mask id="yt-corners">
                     <rect x="0" y="0" width="24" height="24" fill="white" />
@@ -487,126 +123,102 @@
                   </mask>
                 </svg>
               </div>
-              <span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold truncate">▶
-                YOUTUBE</span>
+              <span class="btn-platform-label">▶ YOUTUBE</span>
             </div>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <div
-                class="status-box flex items-center gap-1 sm:gap-2 text-[7px] sm:text-[9px] tracking-tight sm:tracking-wide uppercase px-2 sm:px-2.5 py-1.5 sm:py-1.5 border-2 border-black/55 bg-black/20">
-                <span class="pip-loading w-2 h-2 sm:w-2.5 sm:h-2.5 bg-dark-green" aria-hidden="true"></span>
-                <span class="status-text hidden xs:inline loading-dots"></span>
+            <div class="btn-platform-right">
+              <div class="status-box">
+                <span class="pip pip-loading" aria-hidden="true"></span>
+                <span class="status-text loading-dots"></span>
               </div>
-              <span class="hidden sm:inline text-[14px] opacity-85">ENTER ↵</span>
+              <span class="enter-hint">ENTER ↵</span>
             </div>
-
           </a>
 
-
-          <a href="https://kick.com/kazvt" target="_blank" rel="noopener noreferrer" data-platform="kick"
-            class="btn-glow is-loading flex items-center justify-between gap-2 sm:gap-3 no-underline text-screen-bg bg-crt-green border-2 sm:border-[3px] border-dark-green p-5 sm:p-4 transition-all duration-100 hover:bg-glow hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 focus:ring-offset-screen-bg">
-
-            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <div class="w-8 h-8 flex-shrink-0 bg-screen-bg border border-dark-green flex items-center justify-center">
+          <a href="https://kick.com/kazvt" target="_blank" rel="noopener noreferrer"
+            data-platform="kick" class="btn-platform is-loading">
+            <div class="btn-platform-left">
+              <div class="btn-platform-icon">
                 <svg width="24" height="24" viewBox="-100 -100 700 700" xmlns="http://www.w3.org/2000/svg"
                   fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2">
-                  <path
-                    d="M37 .036h164.448v113.621h54.71v-56.82h54.731V.036h164.448v170.777h-54.73v56.82h-54.711v56.8h54.71v56.82h54.73V512.03H310.89v-56.82h-54.73v-56.8h-54.711v113.62H37V.036z"
-                    fill="#53fc18" />
+                  <path d="M37 .036h164.448v113.621h54.71v-56.82h54.731V.036h164.448v170.777h-54.73v56.82h-54.711v56.8h54.71v56.82h54.73V512.03H310.89v-56.82h-54.73v-56.8h-54.711v113.62H37V.036z" fill="#53fc18" />
                 </svg>
               </div>
-              <span class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase font-bold truncate">▶
-                KICK</span>
+              <span class="btn-platform-label">▶ KICK</span>
             </div>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <div
-                class="status-box flex items-center gap-1 sm:gap-2 text-[7px] sm:text-[9px] tracking-tight sm:tracking-wide uppercase px-2 sm:px-2.5 py-1.5 sm:py-1.5 border-2 border-black/55 bg-black/20">
-                <span class="pip-loading w-2 h-2 sm:w-2.5 sm:h-2.5 bg-dark-green" aria-hidden="true"></span>
-                <span class="status-text hidden xs:inline loading-dots"></span>
+            <div class="btn-platform-right">
+              <div class="status-box">
+                <span class="pip pip-loading" aria-hidden="true"></span>
+                <span class="status-text loading-dots"></span>
               </div>
-              <span class="hidden sm:inline text-[14px] opacity-85">ENTER ↵</span>
+              <span class="enter-hint">ENTER ↵</span>
             </div>
-
           </a>
 
         </div>
 
-
-        <div id="streamInfoBlock"
-          class="hidden mt-6 sm:mt-4 relative border-2 border-amber px-4 pt-5 pb-3 text-[7px] xs:text-[8px] sm:text-[9px] text-amber leading-loose"
-          style="box-shadow: 0 0 18px rgba(255,176,0,0.18), inset 0 0 12px rgba(255,176,0,0.06);">
-          <div
-            class="absolute left-1/2 -translate-x-1/2 -top-[0.6em] bg-screen-bg px-2 uppercase tracking-widest text-[7px] xs:text-[8px] sm:text-[9px] text-amber whitespace-nowrap"
-            style="text-shadow: 0 0 8px rgba(255,176,0,0.8);">▲ NOW_STREAMING ▲</div>
+        <!-- now-streaming info block (shown by JS when live) -->
+        <div id="streamInfoBlock" class="stream-info-block">
+          <div class="stream-info-label">▲ NOW_STREAMING ▲</div>
           <div class="mt-1"><span class="opacity-60">▶ TITLE:</span> <span id="streamTitle"></span></div>
           <div><span class="opacity-60">▶ CATEGORY:</span> <span id="streamCategory"></span></div>
         </div>
 
+        <!-- bio / user-info drawer -->
+        <div class="bio-section-wrap">
+          <div id="bioSection" onclick="openBioDrawer()">
 
-        <div class="mt-8 sm:mt-6 pt-6 sm:pt-5 border-t-2 border-dashed border-dark-green">
-          <div id="bioSection" onclick="openBioDrawer()"
-            class="border-2 border-transparent transition-all duration-200 p-2 cursor-pointer">
-            <div
-              class="flex items-center justify-between w-full gap-2 mb-2 text-[6px] xs:text-[7px] sm:text-[9px] text-crt-green">
-              <div class="flex items-center gap-2">
-                <div class="flex gap-1">
-                  <span class="w-2 h-2 bg-crt-green opacity-60"></span>
-                  <span class="w-2 h-2 bg-crt-green opacity-60"></span>
-                  <span class="w-2 h-2 bg-crt-green opacity-60"></span>
+            <div class="bio-header">
+              <div class="bio-header-left">
+                <div class="bio-dots">
+                  <span class="bio-dot"></span>
+                  <span class="bio-dot"></span>
+                  <span class="bio-dot"></span>
                 </div>
-                <span class="uppercase tracking-wider opacity-70">[ USER_INFO.DAT ]</span>
+                <span class="bio-title">[ USER_INFO.DAT ]</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <span id="bioHint" class="text-[6px] xs:text-[7px] sm:text-[8px] opacity-50 uppercase">EXPAND</span>
-                <span id="bioArrow"
-                  class="text-[12px] xs:text-[14px] opacity-70 transition-transform duration-300">▼</span>
+              <div class="flex items-center gap-[6px]">
+                <span id="bioHint" class="bio-toggle-hint">EXPAND</span>
+                <span id="bioArrow">▼</span>
               </div>
             </div>
-            <div id="bioContent"
-              class="text-crt-green text-[8px] xs:text-[10px] sm:text-[11px] font-mono leading-loose space-y-1.5 opacity-90 grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out">
-              <div class="overflow-hidden">
+
+            <div id="bioContent">
+              <div>
                 <div class="pb-2 relative">
 
+                  <!-- profile image -->
                   <div class="absolute top-0 right-0" style="animation: slideIn 0.4s ease-out;">
-                    <div class="relative" style="border: 1px solid currentColor; padding: 2px; opacity: 0.85;">
-                      <div class="absolute inset-0 pointer-events-none z-10"
-                        style="background: repeating-linear-gradient(to bottom, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px);">
-                      </div>
-                      <span
-                        class="absolute -top-px -left-px w-1.5 h-1.5 border-t border-l border-current opacity-70"></span>
-                      <span
-                        class="absolute -top-px -right-px w-1.5 h-1.5 border-t border-r border-current opacity-70"></span>
-                      <span
-                        class="absolute -bottom-px -left-px w-1.5 h-1.5 border-b border-l border-current opacity-70"></span>
-                      <span
-                        class="absolute -bottom-px -right-px w-1.5 h-1.5 border-b border-r border-current opacity-70"></span>
-                      <img src="favicon.svg" alt="kazvt avatar" class="block object-cover"
-                        style="width: 56px; height: 56px; image-rendering: pixelated; filter: sepia(0.15) brightness(0.95) contrast(1.05);" />
-                      <div class="text-center uppercase tracking-widest opacity-50 mt-0.5"
-                        style="font-size: 5px; letter-spacing: 0.12em;">PROFILE.IMG</div>
+                    <div class="bio-avatar-frame">
+                      <div class="bio-avatar-scanlines"></div>
+                      <span class="absolute -top-px -left-px  w-1.5 h-1.5 border-t border-l border-current opacity-70"></span>
+                      <span class="absolute -top-px -right-px w-1.5 h-1.5 border-t border-r border-current opacity-70"></span>
+                      <span class="absolute -bottom-px -left-px  w-1.5 h-1.5 border-b border-l border-current opacity-70"></span>
+                      <span class="absolute -bottom-px -right-px w-1.5 h-1.5 border-b border-r border-current opacity-70"></span>
+                      <img src="favicon.svg" alt="kazvt avatar" class="bio-avatar-img" />
+                      <div class="bio-avatar-caption">PROFILE.IMG</div>
                     </div>
                   </div>
 
+                  <!-- bio rows -->
                   <div style="padding-right: 68px;">
-                    <div class="flex items-start gap-2" style="animation: slideIn 0.4s ease-out;">
-                      <span class="flex-shrink-0 opacity-60">▶</span>
-                      <span><span class="font-bold opacity-80">USER:</span> kazvt</span>
+                    <div class="bio-row" style="animation: slideIn 0.4s ease-out;">
+                      <span class="bio-row-arrow">▶</span>
+                      <span><span class="bio-key">USER:</span> kazvt</span>
                     </div>
-                    <div class="flex items-start gap-2" style="animation: slideIn 0.5s ease-out;">
-                      <span class="flex-shrink-0 opacity-60">▶</span>
-                      <span><span class="font-bold opacity-80">PRONOUNS:</span> she/her</span>
+                    <div class="bio-row" style="animation: slideIn 0.5s ease-out;">
+                      <span class="bio-row-arrow">▶</span>
+                      <span><span class="bio-key">PRONOUNS:</span> she/her</span>
                     </div>
-                    <div class="flex items-start gap-2" style="animation: slideIn 0.6s ease-out;">
-                      <span class="flex-shrink-0 opacity-60">▶</span>
-                      <span><span class="font-bold opacity-80">ACTIVITY:</span> playing retro games</span>
+                    <div class="bio-row" style="animation: slideIn 0.6s ease-out;">
+                      <span class="bio-row-arrow">▶</span>
+                      <span><span class="bio-key">ACTIVITY:</span> playing retro games</span>
                     </div>
                   </div>
 
-                  <div class="flex items-start gap-2 mt-2" style="animation: slideIn 0.7s ease-out;">
-                    <span class="flex-shrink-0 opacity-60">▶</span>
+                  <div class="bio-row mt-2" style="animation: slideIn 0.7s ease-out;">
+                    <span class="bio-row-arrow">▶</span>
                     <div class="flex-1">
-                      <div class="font-bold opacity-80 mb-1">BIO:</div>
+                      <div class="bio-key mb-1">BIO:</div>
                       <div class="text-justify leading-relaxed opacity-85">
                         hey! i'm kaz, a monke girl who loves retro gaming and streaming. i play classic games from the
                         1980s to the late 2000s, i love classic shooters, platformers, and i yap quite a bit. i also
@@ -618,97 +230,55 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
+        <!-- social links grid -->
+        <div class="social-grid">
 
-        <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-6 sm:mt-5">
-
-
-          <a href="https://twitter.com/monkevt" target="_blank" rel="noopener noreferrer"
-            class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
-
-            <span
-              class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-
-            <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
+          <a href="https://twitter.com/monkevt" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"
-                  fill="#33FF33" />
+                <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z" fill="#33FF33" />
               </svg>
             </div>
-            <span
-              class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase truncate flex-1 text-center opacity-80 group-hover:opacity-100 hidden xs:block">TWITTER</span>
+            <span class="btn-social-label">TWITTER</span>
           </a>
 
-
-          <a href="https://bsky.app/profile/kazvt.com" target="_blank" rel="noopener noreferrer"
-            class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
-
-            <span
-              class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-
-            <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
+          <a href="https://bsky.app/profile/kazvt.com" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
               <svg width="24" height="24" viewBox="-100 -150 800 800">
-                <path
-                  d="m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z"
-                  fill="#33FF33" />
+                <path d="m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z" fill="#33FF33" />
               </svg>
             </div>
-            <span
-              class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase truncate flex-1 text-center opacity-80 group-hover:opacity-100 hidden xs:block">BSKY</span>
+            <span class="btn-social-label">BSKY</span>
           </a>
 
-
-          <a href="https://discord.com/invite/huzMpfJZ4J" target="_blank" rel="noopener noreferrer"
-            class="group flex items-center justify-center gap-2 no-underline text-crt-green bg-transparent border border-dark-green p-3 sm:p-3.5 transition-all duration-100 hover:bg-dark-green/20 hover:border-crt-green active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-crt-green min-w-0 relative overflow-hidden">
-
-            <span
-              class="absolute top-0 left-0 w-3 h-3 border-t-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute top-0 right-0 w-3 h-3 border-t-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute bottom-0 left-0 w-3 h-3 border-b-[3px] border-l-[3px] border-crt-green opacity-80"></span>
-            <span
-              class="absolute bottom-0 right-0 w-3 h-3 border-b-[3px] border-r-[3px] border-crt-green opacity-80"></span>
-
-            <div class="w-6 h-6 flex-shrink-0 border border-dark-green flex items-center justify-center bg-black/40">
+          <a href="https://discord.com/invite/huzMpfJZ4J" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
               <svg class="w-4 h-4" width="24" height="24" viewBox="1 0 22 22" fill="none">
-                <path
-                  d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"
-                  fill="#33FF33" />
+                <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" fill="#33FF33" />
               </svg>
             </div>
-            <span
-              class="text-[9px] xs:text-[11px] sm:text-[11px] leading-tight uppercase truncate flex-1 text-center opacity-80 group-hover:opacity-100 hidden xs:block">DISCORD</span>
+            <span class="btn-social-label">DISCORD</span>
           </a>
 
         </div>
 
-
-        <footer class="mt-6 pt-6 border-t-2 border-dashed border-dark-green">
-
-          <!-- palette toggle trigger -->
-          <div id="paletteTrigger" onclick="togglePalette()"
-            class="flex items-center justify-center gap-2 cursor-pointer opacity-30 hover:opacity-60 transition-opacity duration-200 mb-3 select-none">
-            <span class="text-[6px] xs:text-[7px] uppercase tracking-widest text-crt-green">[ SYS_DISPLAY ]</span>
-            <span id="paletteArrow" class="text-[10px] text-crt-green transition-transform duration-300">▼</span>
+        <!-- footer -->
+        <footer class="site-footer">
+          <div id="paletteTrigger" onclick="togglePalette()">
+            <span class="palette-trigger-label">[ SYS_DISPLAY ]</span>
+            <span id="paletteArrow">▼</span>
           </div>
-
-          <div class="text-[7px] xs:text-[9px] sm:text-[8px] text-dark-green text-center opacity-60">
+          <div class="footer-copy">
             KAZVT.COM © <span id="year"></span> /// PRESS START
           </div>
         </footer>
@@ -716,56 +286,21 @@
       </div>
     </div>
 
-    <!-- palette drawer , fixed to bottom of screen, outside #crtScreen so hue-rotate never touches it -->
-    <div id="palettePanel" style="
-        font-family: 'Press Start 2P', monospace;
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        z-index: 200;
-        transform: translateY(100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background: #0a0a0a;
-        border-top: 2px solid #333333;
-        box-shadow: 0 -4px 30px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.6);
-      ">
-      <div style="max-width: 680px; margin: 0 auto; padding: 14px 16px 18px;">
-
-        <!-- header row: label + readout + close button -->
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-          <span style="font-size:7px; color:#dddddd; opacity:0.7; text-transform:uppercase; letter-spacing:0.15em;">▶
-            SYS_DISPLAY // HUE_ROTATE</span>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span id="hueReadout" style="font-size:8px; color:#ffffff; opacity:0.85;">000°</span>
-            <button onclick="togglePalette()"
-              style="font-family:'Press Start 2P',monospace; font-size:8px; color:#ffffff; background:transparent; border:1px solid rgba(255,255,255,0.3); padding:4px 8px; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em; opacity:0.7;"
-              onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
-              ✕ CLOSE
-            </button>
+    <!-- palette drawer: outside #crtScreen so hue-rotate never touches it -->
+    <div id="palettePanel">
+      <div class="palette-inner">
+        <div class="palette-header">
+          <span class="palette-header-label">▶ SYS_DISPLAY // HUE_ROTATE</span>
+          <div class="palette-header-right">
+            <span id="hueReadout">000°</span>
+            <button onclick="togglePalette()" class="palette-close-btn">✕ CLOSE</button>
           </div>
         </div>
-
-        <!-- the slider itself -->
-        <input id="paletteKnob" type="range" min="0" max="359" value="0" step="1" style="width:100%; margin-bottom:6px;"
-          oninput="applyHue(this.value)" />
-
-        <!-- range labels -->
-        <div
-          style="display:flex; justify-content:space-between; font-size:6px; color:#bbbbbb; opacity:0.85; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
-          <span>green</span>
-          <span>cyan</span>
-          <span>magenta</span>
-          <span>red</span>
-          <span>orange</span>
-          <span>green</span>
+        <input id="paletteKnob" type="range" min="0" max="359" value="0" step="1" oninput="applyHue(this.value)" />
+        <div class="palette-range-labels">
+          <span>green</span><span>cyan</span><span>magenta</span><span>red</span><span>orange</span><span>green</span>
         </div>
-
-        <!-- reset -->
-        <button onclick="resetHue()"
-          style="width:100%; font-family:'Press Start 2P',monospace; font-size:6px; color:#cccccc; opacity:0.55; border:1px solid rgba(255,255,255,0.2); padding:5px 0; background:transparent; cursor:pointer; text-transform:uppercase; letter-spacing:0.1em;"
-          onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.55'">
-          [ RESET TO GREEN ]
-        </button>
-
+        <button onclick="resetHue()" class="palette-reset-btn">[ RESET TO GREEN ]</button>
       </div>
     </div>
 
@@ -774,50 +309,48 @@
   <script>
     // bio drawer toggle - kaz copied this herself from a stackoverflow thingy, took forever to get right
     function openBioDrawer() {
-      var drawer = document.getElementById('bioContent')
-      var chevron = document.getElementById('bioArrow')
+      var drawer    = document.getElementById('bioContent')
+      var chevron   = document.getElementById('bioArrow')
       var hintLabel = document.getElementById('bioHint')
-
-      var isOpen = drawer.style.gridTemplateRows === '1fr'
+      var isOpen    = drawer.style.gridTemplateRows === '1fr'
       if (isOpen) {
-        drawer.style.gridTemplateRows = '0fr'
-        chevron.textContent = '▼'
-        chevron.style.transform = ''
-        hintLabel.textContent = 'EXPAND'
+        drawer.style.gridTemplateRows  = '0fr'
+        chevron.textContent            = '▼'
+        chevron.style.transform        = ''
+        hintLabel.textContent          = 'EXPAND'
       } else {
-        drawer.style.gridTemplateRows = '1fr'
-        chevron.textContent = '▲'
-        chevron.style.transform = 'rotate(180deg)'
-        hintLabel.textContent = 'COLLAPSE'
+        drawer.style.gridTemplateRows  = '1fr'
+        chevron.textContent            = '▲'
+        chevron.style.transform        = 'rotate(180deg)'
+        hintLabel.textContent          = 'COLLAPSE'
       }
     }
 
     document.getElementById('year').textContent = new Date().getFullYear()
 
-    // page title stuff - blink the red dot when live so ppl notice in their tabs
-    // testing does NOT trigger this, we act as if offline for the tab
+    // page title - blink the red dot when live so ppl notice in their tabs
+    // testing does NOT trigger this
     var PAGE_TITLE = 'kazvt!!'
 
     function setTabLiveIndicator(anyoneLive) {
       document.title = anyoneLive ? '🔴 ' + PAGE_TITLE : PAGE_TITLE
     }
 
-    // updates all the og/twitter meta tags so embeds look right when streaming
-    // testing does NOT count as live for embed purposes either
+    // updates og/twitter meta tags so embeds look right when streaming
+    // testing does NOT count as live for embed purposes
     function patchEmbedMeta(platformStates) {
-      var twitchOn = platformStates.twitch === 'live'
+      var twitchOn  = platformStates.twitch  === 'live'
       var youtubeOn = platformStates.youtube === 'live'
-      var kickOn = platformStates.kick === 'live'
-      var anyLive = twitchOn || youtubeOn || kickOn
+      var kickOn    = platformStates.kick    === 'live'
+      var anyLive   = twitchOn || youtubeOn || kickOn
 
       var titleForEmbed = anyLive ? 'kazvt (live rn!)' : 'kazvt'
       document.getElementById('og-title').setAttribute('content', titleForEmbed)
       document.getElementById('twitter-title').setAttribute('content', titleForEmbed)
 
-      // build the description with (live) tags next to whichever platforms are actually live
-      var twitchLine = (twitchOn ? '🟣 twitch (live)' : '🟣 twitch') + ': https://www.twitch.tv/kazvt'
-      var youtubeLine = (youtubeOn ? '🔴 yt (live)' : '🔴 yt') + ': https://www.youtube.com/@kazvt'
-      var kickLine = (kickOn ? '🟢 kick (live)' : '🟢 kick') + ': https://kick.com/kazvt'
+      var twitchLine  = (twitchOn  ? '🟣 twitch (live)' : '🟣 twitch')  + ': https://www.twitch.tv/kazvt'
+      var youtubeLine = (youtubeOn ? '🔴 yt (live)'     : '🔴 yt')      + ': https://www.youtube.com/@kazvt'
+      var kickLine    = (kickOn    ? '🟢 kick (live)'   : '🟢 kick')    + ': https://kick.com/kazvt'
 
       var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine
       document.getElementById('og-description').setAttribute('content', desc)
@@ -825,27 +358,24 @@
 
       // theme-color goes dark when offline/testing so the browser chrome isn't weirdly bright
       document.getElementById('theme-color').setAttribute('content', anyLive ? '#33FF33' : '#0a0a0a')
-
       document.getElementById('og-image').setAttribute('content', 'https://kazvt.com/icon.gif')
       document.getElementById('twitter-image').setAttribute('content', 'https://kazvt.com/icon.gif')
     }
 
-    // pulls status.txt which my server-side script updates every minute or so
+    // pulls status.txt which the server-side script updates every minute or so
     async function fetchPlatformStatuses() {
       var result = {}
       try {
         var resp = await fetch('./status.txt', { cache: 'no-store' })
         if (!resp.ok) throw new Error('status fetch failed: ' + resp.status)
         var raw = await resp.text()
-
         raw.split(/\r?\n/).forEach(function (row) {
           var trimmed = row.trim()
-          if (!trimmed || trimmed[0] === '#') return  // skip blanks + comments
+          if (!trimmed || trimmed[0] === '#') return
           var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline|testing)\s*$/i)
           if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
         })
       } catch (err) {
-        // if the file's missing or broken just treat everything as offline, its fine, dont throw errors
         console.warn('couldnt load status.txt, assuming offline', err)
       }
       return result
@@ -858,7 +388,6 @@
         var resp = await fetch('./last_stream_info.txt', { cache: 'no-store' })
         if (!resp.ok) throw new Error('stream info fetch bombed: ' + resp.status)
         var raw = await resp.text()
-
         raw.split(/\r?\n/).forEach(function (row) {
           var trimmed = row.trim()
           if (!trimmed || trimmed[0] === '#') return
@@ -871,20 +400,18 @@
       return info
     }
 
-    // show/hide the amber NOW_STREAMING box with title + category
+    // show/hide the amber NOW_STREAMING box
     // only shows for properly live streams, not testing
     function renderStreamInfoBox(anyActuallyLive, info) {
-      var box = document.getElementById('streamInfoBlock')
+      var box        = document.getElementById('streamInfoBlock')
       var hasContent = info.title || info.category
-
       if (!anyActuallyLive || !hasContent) {
-        box.classList.add('hidden')
+        box.classList.remove('visible')
         return
       }
-
-      document.getElementById('streamTitle').textContent = (info.title || '???').toUpperCase()
+      document.getElementById('streamTitle').textContent    = (info.title    || '???').toUpperCase()
       document.getElementById('streamCategory').textContent = (info.category || '???').toUpperCase()
-      box.classList.remove('hidden')
+      box.classList.add('visible')
     }
 
     // update one platform button - live/testing/offline styling + pip dot + label text
@@ -893,15 +420,14 @@
       if (!btn) return
 
       var label = btn.querySelector('.status-text')
-      var pip = btn.querySelector('.status-box [aria-hidden="true"]')
+      var pip   = btn.querySelector('.status-box [aria-hidden="true"]')
 
-      // wipe previous state classes before adding the new one
       btn.classList.remove('is-live', 'is-offline', 'is-testing', 'is-loading')
-      pip.classList.remove('pip-live', 'pip-offline', 'pip-testing', 'pip-loading', 'bg-amber', 'bg-dark-green', 'bg-screen-bg')
+      pip.classList.remove('pip-live', 'pip-offline', 'pip-testing', 'pip-loading')
 
       if (liveState === 'live') {
         btn.classList.add('is-live')
-        pip.classList.add('pip-live', 'bg-amber')
+        pip.classList.add('pip-live')
         if (label) {
           label.textContent = 'LIVE'
           label.classList.remove('loading-dots', 'status-text-testing')
@@ -925,36 +451,33 @@
       }
     }
 
-    // main polling tick - fetches both files, applies everything
+    // main polling tick
     async function pollAndRender() {
       var [statuses, streamInfo] = await Promise.all([
         fetchPlatformStatuses(),
         fetchCurrentStreamInfo()
       ])
 
-      var twitch = statuses.twitch || 'offline'
+      var twitch  = statuses.twitch  || 'offline'
       var youtube = statuses.youtube || 'offline'
-      var kick = statuses.kick || 'offline'
+      var kick    = statuses.kick    || 'offline'
 
-      paintPlatformBtn('twitch', twitch)
+      paintPlatformBtn('twitch',  twitch)
       paintPlatformBtn('youtube', youtube)
-      paintPlatformBtn('kick', kick)
+      paintPlatformBtn('kick',    kick)
 
-      // testing does not count as live for tab title, embeds, or stream info box
       var anyActuallyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
-
       setTabLiveIndicator(anyActuallyLive)
       patchEmbedMeta(statuses)
       renderStreamInfoBox(anyActuallyLive, streamInfo)
     }
 
-    // palette/hue knob
-
+    // palette / hue-rotate knob
     var paletteOpen = false
 
     function togglePalette() {
-      var panel = document.getElementById('palettePanel')
-      var arrow = document.getElementById('paletteArrow')
+      var panel   = document.getElementById('palettePanel')
+      var arrow   = document.getElementById('paletteArrow')
       var trigger = document.getElementById('paletteTrigger')
       paletteOpen = !paletteOpen
       panel.style.transform = paletteOpen ? 'translateY(0)' : 'translateY(100%)'
@@ -965,20 +488,15 @@
     function applyHue(deg) {
       deg = parseInt(deg, 10)
 
-      // this is a kinda baked in saturation curve it pulls back the oversaturated pink/magenta band (160-280deg) cuz its too bright
-      // smoothly ramps down to ~0.65 at the centre (220deg) and back up either side
+      // saturation curve: pulls back the oversaturated pink/magenta band (160-280deg)
       var sat = 1.0
       if (deg >= 160 && deg <= 280) {
-        var centre = 220
-        //how far away from the dip zone in either direction(halfWidth)
+        var centre    = 220
         var halfWidth = 70
         var dist = Math.abs(deg - centre)
-        var t = Math.max(0, 1 - dist / halfWidth)
-        // ^^ 0 at edges, 1 at dead centre
-        // smooth it with a simple ease curve
-        t = t * t * (3 - 2 * t)
-        sat = 1.0 - (0.50 * t)
-        //^^ dips to 0.65 at centre, stays 1.0 outside zone
+        var t    = Math.max(0, 1 - dist / halfWidth)
+        t   = t * t * (3 - 2 * t) // smoothstep
+        sat = 1.0 - (0.50 * t)    // dips to 0.65 at centre
       }
 
       var satStr = 'saturate(' + sat.toFixed(3) + ')'
@@ -988,17 +506,15 @@
 
       document.getElementById('hueReadout').textContent = String(deg).padStart(3, '0') + '°'
       document.getElementById('paletteKnob').value = deg
-      try { localStorage.setItem('kazvt_hue', deg) } catch (e) { }
+      try { localStorage.setItem('kazvt_hue', deg) } catch (e) {}
     }
 
-    function resetHue() {
-      applyHue(0)
-    }
+    function resetHue() { applyHue(0) }
 
     // restore saved hue on load
-    ; (function () {
+    ;(function () {
       var saved = 0
-      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch (e) { }
+      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch (e) {}
       if (saved && saved !== 0) applyHue(saved)
     })()
 
