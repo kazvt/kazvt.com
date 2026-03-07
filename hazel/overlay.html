@@ -2822,16 +2822,16 @@
 		}
 
 		.horizontal-ticker-track {
-    align-items: baseline !important;
-}
+			align-items: baseline !important;
+		}
 
-.horizontal-ticker-item {
-    align-items: baseline;
-}
+		.horizontal-ticker-item {
+			align-items: baseline;
+		}
 
-.horizontal-ticker-item * {
-    vertical-align: middle;
-}
+		.horizontal-ticker-item * {
+			vertical-align: middle;
+		}
 	</style>
 </head>
 
@@ -5080,6 +5080,22 @@
 			DoNotShowInitialReply = true;
 		}
 
+		if (urlParams.has("truncatereply")) {
+			// make it so every <i> element is truncated to 10 characters by default OR urlparam get
+			const style = document.createElement('style');
+			const maxLength = parseInt(urlParams.get("truncatereply")) || 10;
+			style.innerHTML = `
+				i {
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					overflow: hidden;
+					display: inline-block;
+					max-width: ${maxLength}ch;
+				}
+			`;
+			document.head.appendChild(style);
+		}
+
 		var stripDonationData = false;
 		if (urlParams.has("stripdonations")) {
 			stripDonationData = true;
@@ -6432,13 +6448,13 @@
 		function deleteMessages(data, deleteOnlyLast = false) {
 			let selector = "";
 			if (data.delete.id) {
-				selector = `[data-mid='${data.delete.id}']`;
+				selector = `[data - mid= '${data.delete.id}']`;
 			} else if (data.delete.chatname && data.delete.type) {
-				selector = `[data-chatname='${data.delete.chatname}'][data-source-type='${data.delete.type}']`;
+				selector = `[data - chatname= '${data.delete.chatname}'][data - source - type='${data.delete.type}']`;
 			} else if (data.delete.type) {
-				selector = `[data-source-type='${data.delete.type}']`;
+				selector = `[data - source - type= '${data.delete.type}']`;
 			} else if (data.delete.chatname) {
-				selector = `[data-chatname='${data.delete.chatname}']`;
+				selector = `[data - chatname= '${data.delete.chatname}']`;
 			}
 
 			if (deleteOnlyLast) {
@@ -6606,13 +6622,13 @@
 			const secondsPast = Math.round((Date.now() - new Date(timestamp)) / 1000);
 
 			if (secondsPast < 60) {
-				return `${secondsPast} seconds ago`;
+				return `${ secondsPast } seconds ago`;
 			} else if (secondsPast < 3600) {
-				return `${Math.round(secondsPast / 60)} minutes ago`;
+				return `${ Math.round(secondsPast / 60) } minutes ago`;
 			} else if (secondsPast < 86400) {
-				return `${Math.round(secondsPast / 3600)} hours ago`;
+				return `${ Math.round(secondsPast / 3600) } hours ago`;
 			} else {
-				return `${Math.round(secondsPast / 86400)} days ago`;
+				return `${ Math.round(secondsPast / 86400) } days ago`;
 			}
 		}
 
@@ -6877,7 +6893,7 @@
 					const smallText = document.createElement("small");
 					const italicsText = document.createElement("i");
 					if (tab.url) {
-						italicsText.textContent = ` - (${tab.url.slice(0, 100)})`;
+						italicsText.textContent = ` - (${ tab.url.slice(0, 100) })`;
 						smallText.appendChild(italicsText);
 					}
 
@@ -7078,12 +7094,12 @@
 					/* 						if (data.markUser.username && data.markUser.type && data.markUser.role) {
 												// Add marker class to all messages from this user
 												document.querySelectorAll("[data-chatname='" + data.markUser.username + "'][data-source-type='" + data.markUser.type + "']").forEach(ele => {
-													ele.classList.add(`marked-${data.markUser.role}`);
+													ele.classList.add(`marked - ${ data.markUser.role } `);
 												});
 												
 												if (data.markUser.type=="youtube"){
 													document.querySelectorAll("[data-chatname='" + data.markUser.username + "'][data-source-type='youtubeshorts']").forEach(ele => {
-														ele.classList.add(`marked-${data.markUser.role}`);
+														ele.classList.add(`marked - ${ data.markUser.role } `);
 													});
 												}
 											} */
@@ -7222,7 +7238,7 @@
 
 					const comparison = compareVersions(urlVersion, "3.21.10");
 					if (socketserver && comparison > 0) {
-						console.log(`URL version ${urlVersion} is too old`);
+						console.log(`URL version ${ urlVersion } is too old`);
 						return false;
 					}
 
@@ -7336,7 +7352,7 @@
 
 					const comparison = compareVersions(urlVersion, "3.21.10");
 					if (socketserver && comparison > 0) {
-						console.log(`URL version ${urlVersion} is too old`);
+						console.log(`URL version ${ urlVersion } is too old`);
 						return false;
 					}
 
@@ -7398,7 +7414,7 @@
 
 						const comparison = compareVersions(urlVersion, "3.21.10");
 						if (socketserver && comparison > 0) {
-							console.log(`URL version ${urlVersion} is too old`);
+							console.log(`URL version ${ urlVersion } is too old`);
 							return false;
 						}
 
@@ -7480,7 +7496,7 @@
 						let productInfo = [];
 						fourthwallData.offers.forEach(offer => {
 							if (offer.name && offer.variant && offer.variant.quantity) {
-								productInfo.push(`${offer.variant.quantity}× ${offer.name}`);
+								productInfo.push(`${ offer.variant.quantity }× ${ offer.name } `);
 							}
 						});
 
@@ -8447,10 +8463,10 @@
 				}, false, true);
 
 				// Show feedback
-				const durationText = duration >= 3600 ? `${duration / 3600} hour(s)` :
-					duration >= 60 ? `${duration / 60} minute(s)` :
-						`${duration} second(s)`;
-				console.log(`Timed out ${userId} for ${durationText}`);
+				const durationText = duration >= 3600 ? `${ duration / 3600 } hour(s)` :
+					duration >= 60 ? `${ duration / 60 } minute(s)` :
+						`${ duration } second(s)`;
+				console.log(`Timed out ${ userId } for ${ durationText }`);
 
 				try {
 					if (userId && userType && duration) {
@@ -8510,7 +8526,7 @@
 
 				const heading = document.createElement("h2");
 				heading.id = "c";
-				heading.innerText = `What message do you want to send ${chatName}?`;
+				heading.innerText = `What message do you want to send ${ chatName }?`;
 				modalContent.appendChild(heading);
 
 				const input = document.createElement("input");
@@ -8544,7 +8560,7 @@
 				const modalContent = modal.querySelector(".modal-content");
 				const heading = modal.querySelector("#c");
 				if (heading) {
-					heading.innerText = `What message do you want to send ${chatName}?`;
+					heading.innerText = `What message do you want to send ${ chatName }?`;
 				}
 
 				const warning = modal.querySelector(".reply-module-warning");
@@ -8581,8 +8597,8 @@
 
 				if (!response.startsWith("@")) {
 					// Don't add @ if username already starts with @
-					const prefix = chatName.startsWith("@") ? chatName : `@${chatName}`;
-					response = `${prefix} ${response}`;
+					const prefix = chatName.startsWith("@") ? chatName : `@${ chatName } `;
+					response = `${ prefix } ${ response } `;
 				}
 
 				let sendBlob = { response };
@@ -9135,7 +9151,7 @@
 			// First handle flag emoji sequences
 			text = text.replace(/(\uD83C[\uDDE6-\uDDFF]){2}/g, (match) => {
 				flags.push(match);
-				return `###FLAG${flagCounter++}###`;
+				return `###FLAG${ flagCounter++ }###`;
 			});
 
 			// Regex for detecting emoji sequences
@@ -9163,8 +9179,8 @@
 			// Replace flag placeholders
 			flags.forEach((flag, index) => {
 				text = text.replace(
-					`###FLAG${index}###`,
-					`<span class='emoji'>${flag}</span>`
+					`###FLAG${ index }###`,
+					`< span class='emoji' > ${ flag }</span > `
 				);
 			});
 
@@ -9864,15 +9880,15 @@
 							hour12: true
 						});
 
-						const extra = saveimg ? `\t${data.chatimg || ""}` : "";
+						const extra = saveimg ? `\t${ data.chatimg || "" } ` : "";
 
 						let text;
 						if ("sentiment" in data) {
-							text = `${data.chatname || ""}\t${data.chatmessage || ""}\t${showType || ""}\t${date}${extra}\t${data.sentiment || ""}\n`;
+							text = `${ data.chatname || "" } \t${ data.chatmessage || "" } \t${ showType || "" } \t${ date }${ extra } \t${ data.sentiment || "" } \n`;
 						} else if ("karma" in data) {
-							text = `${data.chatname || ""}\t${data.chatmessage || ""}\t${showType || ""}\t${date}${extra}\t${data.karma || ""}\n`;
+							text = `${ data.chatname || "" } \t${ data.chatmessage || "" } \t${ showType || "" } \t${ date }${ extra } \t${ data.karma || "" } \n`;
 						} else {
-							text = `${data.chatname || ""}\t${data.chatmessage || ""}\t${showType || ""}\t${date}${extra}\n`;
+							text = `${ data.chatname || "" } \t${ data.chatmessage || "" } \t${ showType || "" } \t${ date }${ extra } \n`;
 						}
 
 						window.ninjafy.appendToFile(electronSavePath, text);
@@ -9889,15 +9905,15 @@
 							hour12: true
 						});
 
-						const extra = saveimg ? `\t${data.chatimg || ""}` : "";
+						const extra = saveimg ? `\t${ data.chatimg || "" } ` : "";
 
 						let text;
 						if ("sentiment" in data) {
-							text = `${data.chatname || ""}\t${data.chatmessage || ""}\t${showType || ""}\t${date}${extra}\t${data.sentiment || ""}\n`;
+							text = `${ data.chatname || "" } \t${ data.chatmessage || "" } \t${ showType || "" } \t${ date }${ extra } \t${ data.sentiment || "" } \n`;
 						} else if ("karma" in data) {
-							text = `${data.chatname || ""}\t${data.chatmessage || ""}\t${showType || ""}\t${date}${extra}\t${data.karma || ""}\n`;
+							text = `${ data.chatname || "" } \t${ data.chatmessage || "" } \t${ showType || "" } \t${ date }${ extra } \t${ data.karma || "" } \n`;
 						} else {
-							text = `${data.chatname || ""}\t${data.chatmessage || ""}\t${showType || ""}\t${date}${extra}\n`;
+							text = `${ data.chatname || "" } \t${ data.chatmessage || "" } \t${ showType || "" } \t${ date }${ extra } \n`;
 						}
 
 						writer.write(encode(text));
@@ -10058,14 +10074,14 @@
 						var ampm = hours >= 12 ? "PM" : "AM";
 						hours = hours % 12;
 						hours = hours ? hours : 12; // the hour '0' should be '12'
-						timeArrived = `${hours}:${minutes} ${ampm}`;
+						timeArrived = `${ hours }:${ minutes } ${ ampm } `;
 
 						if (compactmode) {
 							timeArrived = timeArrived.split(" ")[0]; // Removes AM/PM part
 						}
 					} else {
 						hours = hours < 10 ? "0" + hours : hours;
-						timeArrived = `${hours}:${minutes}`;
+						timeArrived = `${ hours }:${ minutes } `;
 					}
 
 					timeArrived = "<div class='time-arrived'>" + timeArrived + "</div>";
@@ -11148,7 +11164,7 @@
 			try {
 				const filePath = await window.ninjafy.showSaveDialog({
 					title: 'Save Chat Messages',
-					defaultPath: `chat_${Date.now()}.tsv`,
+					defaultPath: `chat_${ Date.now() }.tsv`,
 					filters: [{ name: 'TSV Files', extensions: ['tsv'] }]
 				});
 				if (filePath) {
@@ -11164,7 +11180,7 @@
 		function initializeStream() {
 			try {
 				if (!fileStream) {
-					const filename = `chat_${Date.now()}.tsv`;
+					const filename = `chat_${ Date.now() }.tsv`;
 					fileStream = streamSaver.createWriteStream(filename);
 					writer = fileStream.getWriter();
 				}
@@ -11203,27 +11219,27 @@
 				if (!window.showSaveFilePicker) {
 					console.warn("Open `brave://flags/#file-system-access-api` and enable to use the File API");
 				}
-				newFileHandle = await window.showSaveFilePicker();
+		newFileHandle = await window.showSaveFilePicker();
 			} else if (newFileHandle && data) {
-				try {
-					const writableStream = await newFileHandle.createWritable();
-
-					if (typeof data == "object") {
-						data.chatimg = upscaleImages(data);
-						await writableStream.write(JSON.stringify(data));
-					} else if (typeof data == "string") {
-						await writableStream.write(data);
-					} else {
-						await writableStream.write("");
-					}
-					await writableStream.close();
-				} catch (e) {
-					console.error(e);
-				}
-			} else if (!data) {
+			try {
 				const writableStream = await newFileHandle.createWritable();
+
+				if (typeof data == "object") {
+					data.chatimg = upscaleImages(data);
+					await writableStream.write(JSON.stringify(data));
+				} else if (typeof data == "string") {
+					await writableStream.write(data);
+				} else {
+					await writableStream.write("");
+				}
 				await writableStream.close();
+			} catch (e) {
+				console.error(e);
 			}
+		} else if (!data) {
+			const writableStream = await newFileHandle.createWritable();
+			await writableStream.close();
+		}
 		}
 
 		function getPosition(event) {
