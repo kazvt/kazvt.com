@@ -803,3 +803,138 @@ body {
   .site-footer     { margin-top: 1.5rem; padding-top: 1.5rem; }
   .footer-copy     { font-size: 8px; }
 }
+
+.theme-lillie {
+  --green:       #2EE8A0;
+  --green-glow:  #00FFAA;
+  --green-dark:  #00996A;
+}
+
+.theme-lillie .crt-overlay {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 255, 170, 0.012) 0px,
+    rgba(0, 255, 170, 0.012) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+.theme-lillie .crt-screen {
+  box-shadow: inset 0 0 50px rgba(0, 255, 170, 0.08);
+}
+
+.lillie-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 7px;
+  color: var(--green);
+  text-decoration: none;
+  opacity: 0.55;
+  transition: opacity 0.1s;
+  margin-bottom: 1.75rem;
+}
+
+.lillie-back-link:hover { opacity: 1; }
+
+.lillie-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  padding: 1.5rem 0 1.75rem;
+  border-bottom: 2px dashed var(--green-dark);
+  margin-bottom: 1.75rem;
+}
+
+.lillie-handle {
+  font-size: 1rem;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-shadow: 0 0 10px var(--green-glow), 0 0 20px var(--green-glow);
+  animation: glow 2s ease-in-out infinite;
+}
+
+.lillie-pronouns {
+  font-size: 7px;
+  color: var(--green-dark);
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.lillie-bio {
+  font-size: 8px;
+  color: var(--green);
+  line-height: 2.2;
+  opacity: 0.8;
+  max-width: 36ch;
+  text-align: center;
+}
+
+.lillie-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn-shoutout {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: var(--screen-bg);
+  background-color: var(--green);
+  border: 2px solid var(--green-dark);
+  padding: 1.1rem 1.25rem;
+  transition: all 0.1s;
+  box-shadow: 0 0 18px rgba(0, 255, 170, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-shoutout:hover {
+  background-color: var(--green-glow);
+  transform: scale(1.02);
+  box-shadow: 0 0 28px rgba(0, 255, 170, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-shoutout:active { transform: scale(0.98); }
+
+.btn-shoutout:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--amber), 0 0 0 4px var(--screen-bg);
+}
+
+.btn-shoutout-icon {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  background-color: var(--screen-bg);
+  border: 1px solid var(--green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-shoutout-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex: 1;
+}
+
+.btn-shoutout-hint {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+@media (min-width: 640px) {
+  .lillie-handle    { font-size: 1.2rem; }
+  .lillie-bio       { font-size: 9px; }
+  .btn-shoutout     { padding: 1.1rem 1.5rem; }
+  .btn-shoutout-label { font-size: 11px; }
+}
