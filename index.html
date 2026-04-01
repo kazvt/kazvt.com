@@ -48,19 +48,40 @@
         },
       },
     }
+
   </script>
 
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    #black {
+      height: 100vh;
+      width: 100vw;
+      background-color: transparent;
+    }
+
+    #dvd {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      height: 100px;
+      width: 100px;
+      mask: url("eggsmall.png");
+      -webkit-mask: url("eggsmall.png");
+      background-repeat: no-repeat;
+      background-size: 75px;
+      background-position: center;
+      background: url('eggsmall.png');
+      opacity: 0.9;
+    }
+  </style>
 </head>
 
 <body>
-<<<<<<< HEAD
   <!-- bouncing egg -->
-  <img id="dvdEgg" src="./egg.png" alt="" aria-hidden="true" />
-=======
-<!-- bouncing egg -->
-<img id="dvdEgg" src="./egg.png" alt="" aria-hidden="true" />
->>>>>>> 942c1b336717cb70f5b4b7478211498f8aa82830
+  <div id="black">
+    <div id="dvd"></div>
+  </div>
   <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
   <!-- crt-flicker: kept in markup, animation removed in CSS for accessibility -->
@@ -541,57 +562,48 @@
     pollAndRender()
     setInterval(pollAndRender, 3000)
 
-      ; (function startBouncingEgg() {
-        var egg = document.getElementById('dvdEgg')
-        if (!egg) return
+    let x = 0,
+      y = 0,
+      dirX = 1,
+      dirY = 1;
+    const speed = 2;
+    const pallete = ["#ff8800", "#e124ff", "#6a19ff", "#ff2188"];
+    let dvd = document.getElementById("dvd");
+    // dvd.style.backgroundColor = pallete[0];
+    let prevColorChoiceIndex = 0;
+    let black = document.getElementById("black");
+    const dvdWidth = dvd.clientWidth;
+    const dvdHeight = dvd.clientHeight;
 
-        var eggWidth = 505
-        var eggHeight = 494
+    function getNewRandomColor() {
+      const currentPallete = [...pallete]
+      currentPallete.splice(prevColorChoiceIndex, 1)
+      const colorChoiceIndex = Math.floor(Math.random() * currentPallete.length);
+      prevColorChoiceIndex = colorChoiceIndex < prevColorChoiceIndex ? colorChoiceIndex : colorChoiceIndex + 1;
+      const colorChoice = currentPallete[colorChoiceIndex];
+      return colorChoice;
+    }
+    function animate() {
+      const screenHeight = document.body.clientHeight;
+      const screenWidth = document.body.clientWidth;
 
-        var x = 24
-        var y = 24
-        var dx = 2.2
-        var dy = 1.7
+      if (y + dvdHeight >= screenHeight || y < 0) {
+        dirY *= -1;
+        // dvd.style.backgroundColor = getNewRandomColor();
+      }
+      if (x + dvdWidth >= screenWidth || x < 0) {
+        dirX *= -1;
 
-        function getEggSize() {
-          return {
-            w: egg.offsetWidth,
-            h: egg.offsetHeight
-          };
-        }
+        // dvd.style.backgroundColor = getNewRandomColor();
+      }
+      x += dirX * speed;
+      y += dirY * speed;
+      dvd.style.left = x + "px";
+      dvd.style.top = y + "px";
+      window.requestAnimationFrame(animate);
+    }
 
-        function clampToViewport() {
-          var size = getEggSize();
-          var maxX = Math.max(0, window.innerWidth - size.w);
-          var maxY = Math.max(0, window.innerHeight - size.h);
-          x = Math.max(0, Math.min(x, maxX));
-          y = Math.max(0, Math.min(y, maxY));
-        }
-
-        function tick() {
-          var size = getEggSize();
-          var maxX = Math.max(0, window.innerWidth - size.w);
-          var maxY = Math.max(0, window.innerHeight - size.h);
-
-          x += dx;
-          y += dy;
-
-          if (x <= 0) { x = 0; dx = Math.abs(dx); }
-          else if (x >= maxX) { x = maxX; dx = -Math.abs(dx); }
-
-          if (y <= 0) { y = 0; dy = Math.abs(dy); }
-          else if (y >= maxY) { y = maxY; dy = -Math.abs(dy); }
-
-          egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-          requestAnimationFrame(tick);
-        }
-
-        clampToViewport()
-        egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
-        requestAnimationFrame(tick)
-
-        window.addEventListener('resize', clampToViewport)
-      })()
+    window.requestAnimationFrame(animate);
   </script>
 
 </body>
