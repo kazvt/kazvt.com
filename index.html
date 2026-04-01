@@ -523,58 +523,57 @@
     pollAndRender()
     setInterval(pollAndRender, 3000)
 
-      ;(function startBouncingEgg() {
+  ;(function startBouncingEgg() {
     var egg = document.getElementById('dvdEgg')
     if (!egg) return
+
+    var eggWidth = 505
+    var eggHeight = 494
 
     var x = 24
     var y = 24
     var dx = 2.2
     var dy = 1.7
 
+    function clampToViewport() {
+      var maxX = Math.max(0, window.innerWidth - eggWidth)
+      var maxY = Math.max(0, window.innerHeight - eggHeight)
+      x = Math.max(0, Math.min(x, maxX))
+      y = Math.max(0, Math.min(y, maxY))
+    }
+
     function tick() {
-      var w = egg.offsetWidth || 120
-      var h = egg.offsetHeight || 120
-      var maxX = window.innerWidth - w
-      var maxY = window.innerHeight - h
+      var maxX = Math.max(0, window.innerWidth - eggWidth)
+      var maxY = Math.max(0, window.innerHeight - eggHeight)
 
       x += dx
       y += dy
 
       if (x <= 0) {
         x = 0
-        dx *= -1
+        dx = Math.abs(dx)
       } else if (x >= maxX) {
         x = maxX
-        dx *= -1
+        dx = -Math.abs(dx)
       }
 
       if (y <= 0) {
         y = 0
-        dy *= -1
+        dy = Math.abs(dy)
       } else if (y >= maxY) {
         y = maxY
-        dy *= -1
+        dy = -Math.abs(dy)
       }
 
       egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
       requestAnimationFrame(tick)
     }
 
-    if (egg.complete) {
-      requestAnimationFrame(tick)
-    } else {
-      egg.onload = function () {
-        requestAnimationFrame(tick)
-      }
-    }
+    clampToViewport()
+    egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+    requestAnimationFrame(tick)
 
-    window.addEventListener('resize', function () {
-      var w = egg.offsetWidth || 120
-      var h = egg.offsetHeight || 120
-      x = Math.min(x, window.innerWidth - w)
-      y = Math.min(y, window.innerHeight - h)
-    })
+    window.addEventListener('resize', clampToViewport)
   })()
   </script>
 
