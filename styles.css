@@ -2788,3 +2788,16 @@ body {
   .btn-shoutout       { padding: 1rem 1.25rem; }
   .btn-shoutout-label { font-size: 11px; }
 }
+
+#dvdEgg {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: 120px;      /* change size here */
+  height: auto;
+  z-index: 9999;
+  pointer-events: none; /* lets you click through it */
+  user-select: none;
+  -webkit-user-drag: none;
+  opacity: 0.9;      /* optional */
+}
