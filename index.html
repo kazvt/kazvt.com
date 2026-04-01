@@ -576,8 +576,8 @@
     // dvd.style.backgroundColor = pallete[0];
     let prevColorChoiceIndex = 0;
     let black = document.getElementById("black");
-    const dvdWidth = dvd.clientWidth;
-    const dvdHeight = dvd.clientHeight;
+    const dvdWidth = 100;
+    const dvdHeight = 100;
 
     function getNewRandomColor() {
       const currentPallete = [...pallete]
@@ -588,8 +588,8 @@
       return colorChoice;
     }
     function animate() {
-      const screenHeight = document.body.innerHeight;
-      const screenWidth = document.body.clientWidth;
+      const screenHeight = black.clientHeight;
+      const screenWidth = black.clientWidth;
 
       if (y + dvdHeight >= screenHeight || y < 0) {
         dirY *= -1;
