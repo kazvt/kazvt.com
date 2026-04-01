@@ -87,6 +87,15 @@
 
 				--event-highlight-bg: #20561e;
 				--event-highlight-border: #dcc9c9;
+
+				--event-highlight-raid-bg: #621919;
+				--event-highlight-raid-border: #ffffff;
+				
+				--event-highlight-sub-bg: #5d7f00;
+				--event-highlight-sub-border: #ffffff;
+
+				--slight-highlight-bg: #08441d;
+				--slight-highlight-border: #fff;
 				
 			}
 			.closeBtn {
@@ -2580,6 +2589,35 @@
 		.event-highlight {
 			background-color: var(--event-highlight-bg) !important;
 			border: 1px solid var(--event-highlight-border) !important;
+		}
+
+		.event-highlight-raid {
+			background-color: var(--event-highlight-raid-bg) !important;
+			border: 1px solid var(--event-highlight-raid-border) !important;
+		}
+
+		.event-highlight-sub {
+			background-color: var(--event-highlight-sub-bg) !important;
+			border: 1px solid var(--event-highlight-sub-border) !important;
+		}
+
+		.ellipsis-i {
+			display: inline-block;
+			max-width: 50ch;   /* roughly 50 characters wide */
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			vertical-align: bottom;
+		}
+
+		.slight-highlight {
+			background: var(--slight-highlight-bg) !important;
+			border: 1px solid var(--slight-highlight-border) !important;
+		}
+
+		.debug-highlight {
+			background: red !important;
+			color: yellow !important;
 		}
 
 		</style>
@@ -9710,6 +9748,8 @@
 						chatImg = "";
 					}
 
+					const msgSrc = showType;
+
 					if (largeavatar && showType && showsource) {
 						var sourceNameText = showSourceName ? '<span class="source-name">' + showType.charAt(0).toUpperCase() + showType.slice(1) + '</span>' : '';
 						showType = '<img src="./sources/images/' + showType + '.png" class="icon hl-source-type avatar-badge" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
@@ -9718,7 +9758,8 @@
 						showType = '<img src="./sources/images/' + showType + '.png" class="icon hl-source-type" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
 					} else {
 						showType = "";
-					}
+					}					
+
 
 					if (data.sourceImg && customSource) {
 						if (largeavatar) {
@@ -10016,6 +10057,27 @@
 
 					if (data.event) {
 						node.classList.add("event-highlight");
+						const eventText = node.textContent;
+						if (eventText) {
+							if (/raided|party/i.test(eventText)) {
+								node.classList.add("event-highlight-raid");
+							} else if (/subbed|subscribed|subscription|gifts|gifted/i.test(eventText)) {
+								node.classList.add("event-highlight-sub");
+							} else if (/kicks|goal|bits/i.test(eventText)) {
+								node.classList.add("event-highlight-bits");
+							}
+						}
+					}
+
+					if (msgSrc === "kick" || msgSrc === "youtube") {
+						node.classList.add("slight-highlight");
+					}
+
+
+					if (node.innerHTML && !data.event) {
+						node.innerHTML = node.innerHTML.replace(/<i>([\s\S]*?)<\/i>/gi, function (_, content) {
+							return '<i class="ellipsis-i">' + content.trim() + '</i>';
+						});
 					}
 
 					if (bot && !horizontal) {
@@ -11712,7 +11774,6 @@
 
 			// Initialize hotkeys
 			initHotkeys();
-
 		</script>
 	</body>
 </html>

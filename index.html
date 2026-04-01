@@ -54,7 +54,8 @@
 </head>
 
 <body>
-
+  <!-- bouncing egg -->
+  <img id="dvdEgg" src="./egg.png" alt="" aria-hidden="true" />
   <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
   <!-- crt-flicker: kept in markup, animation removed in CSS for accessibility -->
@@ -83,8 +84,8 @@
         <!-- platform links -->
         <div class="platform-links">
 
-          <a href="https://www.twitch.tv/kazvt" target="_blank" rel="noopener noreferrer"
-            data-platform="twitch" class="btn-platform is-loading">
+          <a href="https://www.twitch.tv/kazvt" target="_blank" rel="noopener noreferrer" data-platform="twitch"
+            class="btn-platform is-loading">
             <div class="btn-platform-left">
               <div class="btn-platform-icon">
                 <svg width="24" height="24" viewBox="50 -30 400 550" fill="#33FF33" xmlns="http://www.w3.org/2000/svg">
@@ -104,12 +105,13 @@
             </div>
           </a>
 
-          <a href="https://www.youtube.com/@kazvt" target="_blank" rel="noopener noreferrer"
-            data-platform="youtube" class="btn-platform is-loading">
+          <a href="https://www.youtube.com/@kazvt" target="_blank" rel="noopener noreferrer" data-platform="youtube"
+            class="btn-platform is-loading">
             <div class="btn-platform-left">
               <div class="btn-platform-icon">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="3.5" mask="url(#yt-corners)" />
+                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="3.5"
+                    mask="url(#yt-corners)" />
                   <path d="M9.5 9l7 3-7 3v-6z" fill="#33FF33" mask="url(#yt-play)" />
                   <mask id="yt-corners">
                     <rect x="0" y="0" width="24" height="24" fill="white" />
@@ -134,13 +136,15 @@
             </div>
           </a>
 
-          <a href="https://kick.com/kazvt" target="_blank" rel="noopener noreferrer"
-            data-platform="kick" class="btn-platform is-loading">
+          <a href="https://kick.com/kazvt" target="_blank" rel="noopener noreferrer" data-platform="kick"
+            class="btn-platform is-loading">
             <div class="btn-platform-left">
               <div class="btn-platform-icon">
                 <svg width="24" height="24" viewBox="-100 -100 700 700" xmlns="http://www.w3.org/2000/svg"
                   fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2">
-                  <path d="M37 .036h164.448v113.621h54.71v-56.82h54.731V.036h164.448v170.777h-54.73v56.82h-54.711v56.8h54.71v56.82h54.73V512.03H310.89v-56.82h-54.73v-56.8h-54.711v113.62H37V.036z" fill="#53fc18" />
+                  <path
+                    d="M37 .036h164.448v113.621h54.71v-56.82h54.731V.036h164.448v170.777h-54.73v56.82h-54.711v56.8h54.71v56.82h54.73V512.03H310.89v-56.82h-54.73v-56.8h-54.711v113.62H37V.036z"
+                    fill="#53fc18" />
                 </svg>
               </div>
               <span class="btn-platform-label">▶ KICK</span>
@@ -190,10 +194,14 @@
                   <div class="absolute top-0 right-0" style="animation: slideIn 0.4s ease-out;">
                     <div class="bio-avatar-frame">
                       <div class="bio-avatar-scanlines"></div>
-                      <span class="absolute -top-px -left-px  w-1.5 h-1.5 border-t border-l border-current opacity-70"></span>
-                      <span class="absolute -top-px -right-px w-1.5 h-1.5 border-t border-r border-current opacity-70"></span>
-                      <span class="absolute -bottom-px -left-px  w-1.5 h-1.5 border-b border-l border-current opacity-70"></span>
-                      <span class="absolute -bottom-px -right-px w-1.5 h-1.5 border-b border-r border-current opacity-70"></span>
+                      <span
+                        class="absolute -top-px -left-px  w-1.5 h-1.5 border-t border-l border-current opacity-70"></span>
+                      <span
+                        class="absolute -top-px -right-px w-1.5 h-1.5 border-t border-r border-current opacity-70"></span>
+                      <span
+                        class="absolute -bottom-px -left-px  w-1.5 h-1.5 border-b border-l border-current opacity-70"></span>
+                      <span
+                        class="absolute -bottom-px -right-px w-1.5 h-1.5 border-b border-r border-current opacity-70"></span>
                       <img src="favicon.svg" alt="kazvt avatar" class="bio-avatar-img" />
                       <div class="bio-avatar-caption">PROFILE.IMG</div>
                     </div>
@@ -242,7 +250,9 @@
             <span class="corner-br"></span>
             <div class="btn-social-icon">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z" fill="#33FF33" />
+                <path
+                  d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"
+                  fill="#33FF33" />
               </svg>
             </div>
             <span class="btn-social-label">TWITTER</span>
@@ -253,7 +263,9 @@
             <span class="corner-br"></span>
             <div class="btn-social-icon">
               <svg width="24" height="24" viewBox="-100 -150 800 800">
-                <path d="m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z" fill="#33FF33" />
+                <path
+                  d="m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z"
+                  fill="#33FF33" />
               </svg>
             </div>
             <span class="btn-social-label">BSKY</span>
@@ -264,7 +276,9 @@
             <span class="corner-br"></span>
             <div class="btn-social-icon">
               <svg class="w-4 h-4" width="24" height="24" viewBox="1 0 22 22" fill="none">
-                <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" fill="#33FF33" />
+                <path
+                  d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"
+                  fill="#33FF33" />
               </svg>
             </div>
             <span class="btn-social-label">DISCORD</span>
@@ -309,20 +323,20 @@
   <script>
     // bio drawer toggle - kaz copied this herself from a stackoverflow thingy, took forever to get right
     function openBioDrawer() {
-      var drawer    = document.getElementById('bioContent')
-      var chevron   = document.getElementById('bioArrow')
+      var drawer = document.getElementById('bioContent')
+      var chevron = document.getElementById('bioArrow')
       var hintLabel = document.getElementById('bioHint')
-      var isOpen    = drawer.style.gridTemplateRows === '1fr'
+      var isOpen = drawer.style.gridTemplateRows === '1fr'
       if (isOpen) {
-        drawer.style.gridTemplateRows  = '0fr'
-        chevron.textContent            = '▼'
-        chevron.style.transform        = ''
-        hintLabel.textContent          = 'EXPAND'
+        drawer.style.gridTemplateRows = '0fr'
+        chevron.textContent = '▼'
+        chevron.style.transform = ''
+        hintLabel.textContent = 'EXPAND'
       } else {
-        drawer.style.gridTemplateRows  = '1fr'
-        chevron.textContent            = '▲'
-        chevron.style.transform        = 'rotate(180deg)'
-        hintLabel.textContent          = 'COLLAPSE'
+        drawer.style.gridTemplateRows = '1fr'
+        chevron.textContent = '▲'
+        chevron.style.transform = 'rotate(180deg)'
+        hintLabel.textContent = 'COLLAPSE'
       }
     }
 
@@ -339,18 +353,18 @@
     // updates og/twitter meta tags so embeds look right when streaming
     // testing does NOT count as live for embed purposes
     function patchEmbedMeta(platformStates) {
-      var twitchOn  = platformStates.twitch  === 'live'
+      var twitchOn = platformStates.twitch === 'live'
       var youtubeOn = platformStates.youtube === 'live'
-      var kickOn    = platformStates.kick    === 'live'
-      var anyLive   = twitchOn || youtubeOn || kickOn
+      var kickOn = platformStates.kick === 'live'
+      var anyLive = twitchOn || youtubeOn || kickOn
 
       var titleForEmbed = anyLive ? 'kazvt (live rn!)' : 'kazvt'
       document.getElementById('og-title').setAttribute('content', titleForEmbed)
       document.getElementById('twitter-title').setAttribute('content', titleForEmbed)
 
-      var twitchLine  = (twitchOn  ? '🟣 twitch (live)' : '🟣 twitch')  + ': https://www.twitch.tv/kazvt'
-      var youtubeLine = (youtubeOn ? '🔴 yt (live)'     : '🔴 yt')      + ': https://www.youtube.com/@kazvt'
-      var kickLine    = (kickOn    ? '🟢 kick (live)'   : '🟢 kick')    + ': https://kick.com/kazvt'
+      var twitchLine = (twitchOn ? '🟣 twitch (live)' : '🟣 twitch') + ': https://www.twitch.tv/kazvt'
+      var youtubeLine = (youtubeOn ? '🔴 yt (live)' : '🔴 yt') + ': https://www.youtube.com/@kazvt'
+      var kickLine = (kickOn ? '🟢 kick (live)' : '🟢 kick') + ': https://kick.com/kazvt'
 
       var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine
       document.getElementById('og-description').setAttribute('content', desc)
@@ -403,13 +417,13 @@
     // show/hide the amber NOW_STREAMING box
     // only shows for properly live streams, not testing
     function renderStreamInfoBox(anyActuallyLive, info) {
-      var box        = document.getElementById('streamInfoBlock')
+      var box = document.getElementById('streamInfoBlock')
       var hasContent = info.title || info.category
       if (!anyActuallyLive || !hasContent) {
         box.classList.remove('visible')
         return
       }
-      document.getElementById('streamTitle').textContent    = (info.title    || '???').toUpperCase()
+      document.getElementById('streamTitle').textContent = (info.title || '???').toUpperCase()
       document.getElementById('streamCategory').textContent = (info.category || '???').toUpperCase()
       box.classList.add('visible')
     }
@@ -420,7 +434,7 @@
       if (!btn) return
 
       var label = btn.querySelector('.status-text')
-      var pip   = btn.querySelector('.status-box [aria-hidden="true"]')
+      var pip = btn.querySelector('.status-box [aria-hidden="true"]')
 
       btn.classList.remove('is-live', 'is-offline', 'is-testing', 'is-loading')
       pip.classList.remove('pip-live', 'pip-offline', 'pip-testing', 'pip-loading')
@@ -458,13 +472,13 @@
         fetchCurrentStreamInfo()
       ])
 
-      var twitch  = statuses.twitch  || 'offline'
+      var twitch = statuses.twitch || 'offline'
       var youtube = statuses.youtube || 'offline'
-      var kick    = statuses.kick    || 'offline'
+      var kick = statuses.kick || 'offline'
 
-      paintPlatformBtn('twitch',  twitch)
+      paintPlatformBtn('twitch', twitch)
       paintPlatformBtn('youtube', youtube)
-      paintPlatformBtn('kick',    kick)
+      paintPlatformBtn('kick', kick)
 
       var anyActuallyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
       setTabLiveIndicator(anyActuallyLive)
@@ -476,8 +490,8 @@
     var paletteOpen = false
 
     function togglePalette() {
-      var panel   = document.getElementById('palettePanel')
-      var arrow   = document.getElementById('paletteArrow')
+      var panel = document.getElementById('palettePanel')
+      var arrow = document.getElementById('paletteArrow')
       var trigger = document.getElementById('paletteTrigger')
       paletteOpen = !paletteOpen
       panel.style.transform = paletteOpen ? 'translateY(0)' : 'translateY(100%)'
@@ -491,11 +505,11 @@
       // saturation curve: pulls back the oversaturated pink/magenta band (160-280deg)
       var sat = 1.0
       if (deg >= 160 && deg <= 280) {
-        var centre    = 220
+        var centre = 220
         var halfWidth = 70
         var dist = Math.abs(deg - centre)
-        var t    = Math.max(0, 1 - dist / halfWidth)
-        t   = t * t * (3 - 2 * t) // smoothstep
+        var t = Math.max(0, 1 - dist / halfWidth)
+        t = t * t * (3 - 2 * t) // smoothstep
         sat = 1.0 - (0.50 * t)    // dips to 0.65 at centre
       }
 
@@ -506,21 +520,73 @@
 
       document.getElementById('hueReadout').textContent = String(deg).padStart(3, '0') + '°'
       document.getElementById('paletteKnob').value = deg
-      try { localStorage.setItem('kazvt_hue', deg) } catch (e) {}
+      try { localStorage.setItem('kazvt_hue', deg) } catch (e) { }
     }
 
     function resetHue() { applyHue(0) }
 
     // restore saved hue on load
-    ;(function () {
+    ; (function () {
       var saved = 0
-      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch (e) {}
+      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch (e) { }
       if (saved && saved !== 0) applyHue(saved)
     })()
 
     // start immediately then poll every 3s
     pollAndRender()
     setInterval(pollAndRender, 3000)
+
+      ; (function startBouncingEgg() {
+        var egg = document.getElementById('dvdEgg')
+        if (!egg) return
+
+        var eggWidth = 505
+        var eggHeight = 494
+
+        var x = 24
+        var y = 24
+        var dx = 2.2
+        var dy = 1.7
+
+        function getEggSize() {
+          return {
+            w: egg.offsetWidth,
+            h: egg.offsetHeight
+          };
+        }
+
+        function clampToViewport() {
+          var size = getEggSize();
+          var maxX = Math.max(0, window.innerWidth - size.w);
+          var maxY = Math.max(0, window.innerHeight - size.h);
+          x = Math.max(0, Math.min(x, maxX));
+          y = Math.max(0, Math.min(y, maxY));
+        }
+
+        function tick() {
+          var size = getEggSize();
+          var maxX = Math.max(0, window.innerWidth - size.w);
+          var maxY = Math.max(0, window.innerHeight - size.h);
+
+          x += dx;
+          y += dy;
+
+          if (x <= 0) { x = 0; dx = Math.abs(dx); }
+          else if (x >= maxX) { x = maxX; dx = -Math.abs(dx); }
+
+          if (y <= 0) { y = 0; dy = Math.abs(dy); }
+          else if (y >= maxY) { y = maxY; dy = -Math.abs(dy); }
+
+          egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+          requestAnimationFrame(tick);
+        }
+
+        clampToViewport()
+        egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+        requestAnimationFrame(tick)
+
+        window.addEventListener('resize', clampToViewport)
+      })()
   </script>
 
 </body>
