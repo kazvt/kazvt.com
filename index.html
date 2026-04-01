@@ -54,8 +54,7 @@
 </head>
 
 <body>
-  <!-- bouncing egg -->
-  <img id="dvdEgg" src="./egg.png" alt="" aria-hidden="true" />
+
   <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
   <!-- crt-flicker: kept in markup, animation removed in CSS for accessibility -->
@@ -535,58 +534,6 @@
     // start immediately then poll every 3s
     pollAndRender()
     setInterval(pollAndRender, 3000)
-
-      ; (function startBouncingEgg() {
-        var egg = document.getElementById('dvdEgg')
-        if (!egg) return
-
-        var eggWidth = 505
-        var eggHeight = 494
-
-        var x = 24
-        var y = 24
-        var dx = 2.2
-        var dy = 1.7
-
-        function getEggSize() {
-          return {
-            w: egg.offsetWidth,
-            h: egg.offsetHeight
-          };
-        }
-
-        function clampToViewport() {
-          var size = getEggSize();
-          var maxX = Math.max(0, window.innerWidth - size.w);
-          var maxY = Math.max(0, window.innerHeight - size.h);
-          x = Math.max(0, Math.min(x, maxX));
-          y = Math.max(0, Math.min(y, maxY));
-        }
-
-        function tick() {
-          var size = getEggSize();
-          var maxX = Math.max(0, window.innerWidth - size.w);
-          var maxY = Math.max(0, window.innerHeight - size.h);
-
-          x += dx;
-          y += dy;
-
-          if (x <= 0) { x = 0; dx = Math.abs(dx); }
-          else if (x >= maxX) { x = maxX; dx = -Math.abs(dx); }
-
-          if (y <= 0) { y = 0; dy = Math.abs(dy); }
-          else if (y >= maxY) { y = maxY; dy = -Math.abs(dy); }
-
-          egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-          requestAnimationFrame(tick);
-        }
-
-        clampToViewport()
-        egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
-        requestAnimationFrame(tick)
-
-        window.addEventListener('resize', clampToViewport)
-      })()
   </script>
 
 </body>
