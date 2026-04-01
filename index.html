@@ -54,7 +54,8 @@
 </head>
 
 <body>
-
+<!-- bouncing egg -->
+<img id="dvdEgg" src="./egg.png" alt="" aria-hidden="true" />
   <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
   <!-- crt-flicker: kept in markup, animation removed in CSS for accessibility -->
@@ -521,6 +522,60 @@
     // start immediately then poll every 3s
     pollAndRender()
     setInterval(pollAndRender, 3000)
+
+      ;(function startBouncingEgg() {
+    var egg = document.getElementById('dvdEgg')
+    if (!egg) return
+
+    var x = 24
+    var y = 24
+    var dx = 2.2
+    var dy = 1.7
+
+    function tick() {
+      var w = egg.offsetWidth || 120
+      var h = egg.offsetHeight || 120
+      var maxX = window.innerWidth - w
+      var maxY = window.innerHeight - h
+
+      x += dx
+      y += dy
+
+      if (x <= 0) {
+        x = 0
+        dx *= -1
+      } else if (x >= maxX) {
+        x = maxX
+        dx *= -1
+      }
+
+      if (y <= 0) {
+        y = 0
+        dy *= -1
+      } else if (y >= maxY) {
+        y = maxY
+        dy *= -1
+      }
+
+      egg.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+      requestAnimationFrame(tick)
+    }
+
+    if (egg.complete) {
+      requestAnimationFrame(tick)
+    } else {
+      egg.onload = function () {
+        requestAnimationFrame(tick)
+      }
+    }
+
+    window.addEventListener('resize', function () {
+      var w = egg.offsetWidth || 120
+      var h = egg.offsetHeight || 120
+      x = Math.min(x, window.innerWidth - w)
+      y = Math.min(y, window.innerHeight - h)
+    })
+  })()
   </script>
 
 </body>
