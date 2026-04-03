@@ -67,40 +67,42 @@
       position: absolute;
       left: 0px;
       top: 0px;
+      height: 100px;
       width: 100px;
       background: url('./eggsmall.png');
-      /* mask: url("./eggsmall.png"); */
-      /* -webkit-mask: url("./eggsmall.png"); */
+      mask: url("./eggsmall.png");
+      -webkit-mask: url("./eggsmall.png");
       background-repeat: no-repeat;
       background-size: 75px;
-      background-position: center top;
+      background-position: center;
       opacity: 1;
       z-index: 10000000;
       image-rendering: auto;
       image-rendering: -webkit-optimize-contrast;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     #dvd-label {
-      margin-top: 78px;
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
       font-family: 'Press Start 2P', monospace;
       font-size: 7px;
       color: #33FF33;
       text-align: center;
       line-height: 1.4;
-      width: 90px;
+      width: 80px;
       word-break: break-word;
       pointer-events: none;
-      text-shadow: 0 0 4px #33FF33;
+      text-shadow: none;
       -webkit-text-stroke: 2px black;
       paint-order: stroke fill;
+      z-index: 10000001;
     }
 
     [data-platform="twitch"] {
       animation: twitch-pulse 2.5s ease-in-out infinite;
-      background: linear-gradient(135deg, rgba(51, 255, 51, 0.06), rgba(120, 255, 120, 0.13));
+      background: linear-gradient(135deg, #33FF33, #27b127);
     }
 
     @keyframes twitch-pulse {
