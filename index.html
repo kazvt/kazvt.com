@@ -54,45 +54,60 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
-    #black {
-      height: 100vh;
-      width: 100vw;
-      background-color: transparent;
-      position: fixed;
-      z-index: 10000000;
-      pointer-events: none;
-    }
+  #black {
+    height: 100vh;
+    width: 100vw;
+    background-color: transparent;
+    position: fixed;
+    z-index: 10000000;
+    pointer-events: none;
+  }
 
-    #dvd {
-      position: absolute;
-      left: 0px;
-      top: 0px;
-      height: 100px;
-      width: 100px;
-      background: url('./eggsmall.png');
-      mask: url("./eggsmall.png");
-      -webkit-mask: url("./eggsmall.png");
-      background-repeat: no-repeat;
-      background-size: 75px;
-      background-position: center;
-      opacity: 1;
-      z-index: 10000000;
+  #dvd {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100px;
+    background: url('./eggsmall.png');
+    mask: url("./eggsmall.png");
+    -webkit-mask: url("./eggsmall.png");
+    background-repeat: no-repeat;
+    background-size: 75px;
+    background-position: center top;
+    opacity: 1;
+    z-index: 10000000;
+    image-rendering: auto;
+    image-rendering: -webkit-optimize-contrast;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-      image-rendering: auto;
-      image-rendering: -webkit-optimize-contrast;
-      /* safari */
-    }
+  #dvd-label {
+    margin-top: 78px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: #33FF33;
+    text-align: center;
+    line-height: 1.4;
+    width: 90px;
+    word-break: break-word;
+    pointer-events: none;
+    text-shadow: 0 0 4px #33FF33;
+  }
   </style>
 </head>
 
 <body>
   <!-- bouncing egg -->
-  <div id="black">
-    <div id="dvd"></div>
+<div id="black">
+  <div id="dvd">
+    <div id="dvd-label">PARTNER PUSH ON TWITCH</div>
   </div>
+</div>
   <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
-  <!-- crt-flicker: kept in markup, animation removed in CSS for accessibility -->
+  <!-- crt-flicker: kept in markup, animation removed for accessibility -->
   <div class="crt-flicker fixed inset-0 z-[99]"></div>
 
   <div class="relative z-10 w-full max-w-[680px] mx-auto px-1 sm:px-5 py-1 sm:py-10">
@@ -128,8 +143,7 @@
                   <rect x="208" y="143" width="48" height="129" />
                 </svg>
               </div>
-              <!-- give it classes that make it purple in tailwind -->
-              <span class="btn-platform-label">▶ TWITCH <b class="text-purple-500">(partner push!)</b></span>
+              <span class="btn-platform-label">▶ TWITCH</span>
             </div>
             <div class="btn-platform-right">
               <div class="status-box">
