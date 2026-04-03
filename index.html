@@ -54,57 +54,57 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
-  #black {
-    height: 100vh;
-    width: 100vw;
-    background-color: transparent;
-    position: fixed;
-    z-index: 10000000;
-    pointer-events: none;
-  }
+    #black {
+      height: 100vh;
+      width: 100vw;
+      background-color: transparent;
+      position: fixed;
+      z-index: 10000000;
+      pointer-events: none;
+    }
 
-  #dvd {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100px;
-    background: url('./eggsmall.png');
-    mask: url("./eggsmall.png");
-    -webkit-mask: url("./eggsmall.png");
-    background-repeat: no-repeat;
-    background-size: 75px;
-    background-position: center top;
-    opacity: 1;
-    z-index: 10000000;
-    image-rendering: auto;
-    image-rendering: -webkit-optimize-contrast;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    #dvd {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      width: 100px;
+      background: url('./eggsmall.png');
+      /* mask: url("./eggsmall.png"); */
+      /* -webkit-mask: url("./eggsmall.png"); */
+      background-repeat: no-repeat;
+      background-size: 75px;
+      background-position: center top;
+      opacity: 1;
+      z-index: 10000000;
+      image-rendering: auto;
+      image-rendering: -webkit-optimize-contrast;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  #dvd-label {
-    margin-top: 78px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px;
-    color: #33FF33;
-    text-align: center;
-    line-height: 1.4;
-    width: 90px;
-    word-break: break-word;
-    pointer-events: none;
-    text-shadow: 0 0 4px #33FF33;
-  }
+    #dvd-label {
+      margin-top: 78px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      color: #33FF33;
+      text-align: center;
+      line-height: 1.4;
+      width: 90px;
+      word-break: break-word;
+      pointer-events: none;
+      text-shadow: 0 0 4px #33FF33;
+    }
   </style>
 </head>
 
 <body>
   <!-- bouncing egg -->
-<div id="black">
-  <div id="dvd">
-    <div id="dvd-label">PARTNER PUSH ON TWITCH</div>
+  <div id="black">
+    <div id="dvd">
+      <div id="dvd-label">PARTNER PUSH ON TWITCH</div>
+    </div>
   </div>
-</div>
   <div class="fixed inset-0 bg-vignette"></div>
   <div class="crt-overlay fixed inset-0 z-[100]"></div>
   <!-- crt-flicker: kept in markup, animation removed for accessibility -->
