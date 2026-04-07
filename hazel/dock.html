@@ -6044,7 +6044,7 @@
 								ele.classList.add("viewerIcons");
 								ele.title = "Viewer count for "+data.type;
 								ele.innerText = viewers[data.type];
-								ele.style.backgroundImage = "url(./sources/images/"+data.type+".png)";
+								ele.style.backgroundImage = "url(https://socialstream.ninja/sources/images/"+data.type+".png)";
 								topBarElement.prepend(ele);
 							}
 							clearTimeout(ele.timeout);
@@ -6077,7 +6077,7 @@
 										ele.classList.add("viewerIcons");
 										ele.title = "Viewer count for "+type;
 										ele.innerText = data.meta[type];
-										ele.style.backgroundImage = "url(./sources/images/"+type+".png)";
+										ele.style.backgroundImage = "url(https://socialstream.ninja/sources/images/"+type+".png)";
 										topBarElement.prepend(ele);
 									}
 									clearTimeout(ele.timeout);
@@ -8000,7 +8000,7 @@
 			}
 
 			var fallbackImage = new Image();
-			fallbackImage.src = "./sources/images/unknown.png";
+			fallbackImage.src = "https://socialstream.ninja/sources/images/unknown.png";
 			fallbackImage.onerror = function () {
 				fallbackImage = false;
 			};
@@ -8021,7 +8021,7 @@
 					ele.style.display = "none";
 					return;
 				}
-				ele.src = "./sources/images/unknown.png";
+				ele.src = "https://socialstream.ninja/sources/images/unknown.png";
 				if (darkmode) {
 					ele.classList.add("invert");
 				}
@@ -9747,13 +9747,13 @@
 						if (fallbackImageAnnouncement && !data.chatname && data.event){
 							chatImg = '<img id="img_' + data.id + '" src="./icons/announcement.png" class="icon ' + (darkmode ? "invert" : "") + ' hl-profile-pic" onerror="errorImage(this);" />';
 						} else if (fallbackImage && !hideUnknownAvatar) {
-							chatImg = '<img id="img_' + data.id + '" src="./sources/images/unknown.png" class="icon ' + (darkmode ? "invert" : "") + ' hl-profile-pic" onerror="errorImage(this);" />';
+							chatImg = '<img id="img_' + data.id + '" src="https://socialstream.ninja/sources/images/unknown.png" class="icon ' + (darkmode ? "invert" : "") + ' hl-profile-pic" onerror="errorImage(this);" />';
 						} else {
 							chatImg = "";
 						}
 					} else if (avatars) {
 						if (data.type && data.type == "twitch" && avatars && !hideUnknownAvatar) {
-							chatImg = '<img id="img_' + data.id + '" src="./sources/images/unknown.png" class="fade-in-image ' + (darkmode ? "invert" : "") + ' icon hl-profile-pic" onerror="errorImage(this);" />';
+							chatImg = '<img id="img_' + data.id + '" src="https://socialstream.ninja/sources/images/unknown.png" class="fade-in-image ' + (darkmode ? "invert" : "") + ' icon hl-profile-pic" onerror="errorImage(this);" />';
 						} else {
 							chatImg = '<img id="img_' + data.id + '" src="' + chatImg + '" class="icon hl-profile-pic" onerror="errorImage(this);" />';
 						}
@@ -9765,10 +9765,10 @@
 
 					if (largeavatar && showType && showsource) {
 						var sourceNameText = showSourceName ? '<span class="source-name">' + showType.charAt(0).toUpperCase() + showType.slice(1) + '</span>' : '';
-						showType = '<img src="./sources/images/' + showType + '.png" class="icon hl-source-type avatar-badge" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
+						showType = '<img src="https://socialstream.ninja/sources/images/' + showType + '.png" class="icon hl-source-type avatar-badge" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
 					} else if (showType && showsource) {
 						var sourceNameText = showSourceName ? '<span class="source-name">' + showType.charAt(0).toUpperCase() + showType.slice(1) + '</span>' : '';
-						showType = '<img src="./sources/images/' + showType + '.png" class="icon hl-source-type" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
+						showType = '<img src="https://socialstream.ninja/sources/images/' + showType + '.png" class="icon hl-source-type" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
 					} else {
 						showType = "";
 					}					
