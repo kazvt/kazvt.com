@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>17-Image Row Grid</title>
+  <style>
+    :root {
+      --columns: 20;
+      --gap: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      color: white;
+      background: #111;
+    }
+
+    body {
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: 100vw 100vh;
+      background-attachment: fixed;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      gap: var(--gap);
+      align-items: start;
+    }
+
+    .cell {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      cursor: pointer;
+      min-height: 1px;
+    }
+
+    .cell img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      background: transparent;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .username-label {
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      transform: translateX(-50%);
+      width: calc(100% - 4px);
+      padding: 0 2px;
+      font-size: 12px;
+      line-height: 1;
+      text-align: center;
+      color: #fff;
+      background: transparent;
+      white-space: normal;
+      overflow-wrap: normal;
+      word-break: normal;
+      pointer-events: none;
+      display: block;
+      -webkit-text-stroke: 1.5px #000;
+      paint-order: stroke fill;
+      text-shadow:
+        1px 0 0 #000,
+        -1px 0 0 #000,
+        0 1px 0 #000,
+        0 -1px 0 #000,
+        1px 1px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000;
+    }
+
+    .hidden-input {
+      display: none;
+    }
+
+    .corner-zone {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      width: 220px;
+      height: 120px;
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .corner-controls {
+      margin: 0 12px 12px 0;
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .corner-button {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      font: inherit;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 160ms ease, transform 160ms ease;
+      pointer-events: auto;
+    }
+
+    .corner-zone:hover .corner-button,
+    .corner-button:focus-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .corner-button:disabled {
+      cursor: wait;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .measure-label {
+      position: absolute;
+      left: -999999px;
+      top: -999999px;
+      visibility: hidden;
+      white-space: nowrap;
+      line-height: 1;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: normal;
+      padding: 0 2px;
+      -webkit-text-stroke: 1.5px #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <input id="imagePicker" class="hidden-input" type="file" accept="image/*" multiple />
+
+    <div id="grid" class="grid"></div>
+
+    <div class="corner-zone" aria-label="Page controls">
+      <div class="corner-controls">
+        <button id="clearButton" class="corner-button" type="button">Clear all</button>
+        <button id="exportButton" class="corner-button" type="button">Export JPEG</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    const grid = document.getElementById('grid');
+    const imagePicker = document.getElementById('imagePicker');
+    const exportButton = document.getElementById('exportButton');
+    const clearButton = document.getElementById('clearButton');
+
+    const CELL_CANDIDATES = ['cell.png', 'cell.jpg', 'cell.jpeg'];
+    const BG_CANDIDATES = ['bg.png', 'bg.jpg', 'bg.jpeg'];
+
+    let cellFallbackFile = null;
+    let waitingForNextImage = false;
+    let isExporting = false;
+    const STORAGE_KEY = 'image-grid-page-state-v1';
+
+    let fitLabelsRaf = 0;
+    let resizeObserver = null;
+
+    function assetExists(src) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = src + '?v=' + Date.now();
+      });
+    }
+
+    async function findFirstExisting(candidates) {
+      for (const file of candidates) {
+        const exists = await assetExists(file);
+        if (exists) return file;
+      }
+      return null;
+    }
+
+    async function applyWallpaper() {
+      const bgFile = await findFirstExisting(BG_CANDIDATES);
+      if (bgFile) {
+        document.body.style.backgroundImage = `url("${bgFile}")`;
+      }
+    }
+
+    function createUsernameLabel(text) {
+      const label = document.createElement('div');
+      label.className = 'username-label';
+      label.textContent = text;
+      return label;
+    }
+
+    function measureTextWidth(text, fontSizePx) {
+      const probe = document.createElement('span');
+      probe.className = 'measure-label';
+      probe.style.fontSize = `${fontSizePx}px`;
+      probe.textContent = text;
+      document.body.appendChild(probe);
+      const width = probe.getBoundingClientRect().width;
+      probe.remove();
+      return width;
+    }
+
+    function getLongestSpaceSeparatedSegment(text) {
+      const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!normalized) return '';
+      const parts = normalized.split(' ');
+      let longest = parts[0] || '';
+      for (const part of parts) {
+        if (part.length > longest.length) {
+          longest = part;
+        }
+      }
+      return longest;
+    }
+
+    function fitUsernameLabel(label) {
+      if (!label || !label.textContent) return;
+
+      const cell = label.closest('.cell');
+      if (!cell) return;
+
+      const usableWidth = Math.max(1, label.clientWidth || (cell.clientWidth - 4));
+      const text = label.textContent.trim();
+      if (!text) return;
+
+      const longestSegment = getLongestSpaceSeparatedSegment(text) || text;
+
+      const testFontSize = 100;
+      const segmentWidthAtTestSize = measureTextWidth(longestSegment, testFontSize);
+
+      if (!segmentWidthAtTestSize) return;
+
+      const fittedFontSize = (usableWidth / segmentWidthAtTestSize) * testFontSize;
+      label.style.fontSize = `${fittedFontSize}px`;
+    }
+
+    function fitAllUsernames() {
+      grid.querySelectorAll('.username-label').forEach(fitUsernameLabel);
+    }
+
+    function queueFitAllUsernames() {
+      cancelAnimationFrame(fitLabelsRaf);
+      fitLabelsRaf = requestAnimationFrame(() => {
+        fitAllUsernames();
+      });
+    }
+
+    function observeCellResize(cell) {
+      if (!resizeObserver || !cell) return;
+      resizeObserver.observe(cell);
+    }
+
+    function setUsername(cell) {
+      const currentLabel = cell.querySelector('.username-label');
+      const currentName = currentLabel ? currentLabel.textContent : '';
+      const username = window.prompt('Enter username:', currentName || '');
+
+      if (username === null) return;
+
+      const trimmed = username.trim();
+      if (!trimmed) {
+        if (currentLabel) currentLabel.remove();
+        saveState();
+        return;
+      }
+
+      let label = currentLabel;
+      if (label) {
+        label.textContent = trimmed;
+      } else {
+        label = createUsernameLabel(trimmed);
+        cell.appendChild(label);
+      }
+
+      fitUsernameLabel(label);
+      saveState();
+    }
+
+    function createCellWithImage(src) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+
+      const img = document.createElement('img');
+      img.alt = 'Grid image';
+      img.src = src;
+
+      img.addEventListener('load', () => {
+        queueFitAllUsernames();
+      });
+
+      cell.appendChild(img);
+
+      cell.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setUsername(cell);
+      });
+
+      observeCellResize(cell);
+
+      return cell;
+    }
+
+    function getPersistableCells() {
+      return Array.from(grid.querySelectorAll('.cell')).map((cell) => {
+        const img = cell.querySelector('img');
+        const label = cell.querySelector('.username-label');
+        return {
+          src: img ? img.src : '',
+          username: label ? label.textContent : '',
+          isFallback: !!(img && cellFallbackFile && img.getAttribute('src') === cellFallbackFile)
+        };
+      });
+    }
+
+    function saveState() {
+      try {
+        const state = {
+          cells: getPersistableCells().filter((item) => {
+            if (!item.src) return false;
+            if (item.src.startsWith('blob:')) return false;
+            return true;
+          })
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn('Failed to save state.', error);
+      }
+    }
+
+    function appendImage(src, username = '') {
+      const cell = createCellWithImage(src);
+      grid.appendChild(cell);
+
+      if (username) {
+        const label = createUsernameLabel(username);
+        cell.appendChild(label);
+        fitUsernameLabel(label);
+      }
+
+      queueFitAllUsernames();
+      saveState();
+      return cell;
+    }
+
+    function addImageFiles(files) {
+      const imageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+      for (const file of imageFiles) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          appendImage(String(reader.result || ''));
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function openPickerForNextImage() {
+      waitingForNextImage = true;
+      imagePicker.value = '';
+      imagePicker.click();
+    }
+
+    imagePicker.addEventListener('change', (event) => {
+      const files = event.target.files || [];
+      if (files.length > 0) {
+        addImageFiles(files);
+      }
+      waitingForNextImage = false;
+    });
+
+    document.addEventListener('click', (event) => {
+      if (isExporting) return;
+      if (event.target.closest('.corner-zone')) return;
+      if (event.target.closest('.cell')) return;
+      if (waitingForNextImage) return;
+
+      if (cellFallbackFile) {
+        appendImage(cellFallbackFile);
+        return;
+      }
+
+      openPickerForNextImage();
+    });
+
+    function clearAllCells() {
+      const cells = grid.querySelectorAll('.cell');
+      cells.forEach((cell) => {
+        if (resizeObserver) resizeObserver.unobserve(cell);
+        cell.remove();
+      });
+
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.warn('Failed to clear saved state.', error);
+      }
+    }
+
+    clearButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      clearAllCells();
+    });
+
+    function downloadDataUrl(filename, dataUrl) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    async function exportWholePageAsJpeg() {
+      if (typeof window.html2canvas !== 'function') {
+        window.alert('Export library failed to load.');
+        return;
+      }
+
+      isExporting = true;
+      exportButton.disabled = true;
+      clearButton.disabled = true;
+      exportButton.textContent = 'Exporting...';
+
+      const originalScrollX = window.scrollX;
+      const originalScrollY = window.scrollY;
+      const doc = document.documentElement;
+      const body = document.body;
+      const cornerZone = document.querySelector('.corner-zone');
+      const previousVisibility = cornerZone ? cornerZone.style.visibility : '';
+
+      const fullWidth = Math.max(
+        doc.scrollWidth,
+        doc.offsetWidth,
+        doc.clientWidth,
+        body.scrollWidth,
+        body.offsetWidth,
+        body.clientWidth
+      );
+
+      const fullHeight = Math.max(
+        doc.scrollHeight,
+        doc.offsetHeight,
+        doc.clientHeight,
+        body.scrollHeight,
+        body.offsetHeight,
+        body.clientHeight
+      );
+
+      try {
+        if (cornerZone) cornerZone.style.visibility = 'hidden';
+
+        fitAllUsernames();
+
+        const canvas = await window.html2canvas(document.body, {
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: '#111',
+          width: fullWidth,
+          height: fullHeight,
+          windowWidth: fullWidth,
+          windowHeight: fullHeight,
+          scrollX: 0,
+          scrollY: 0
+        });
+
+        const jpegQuality = 0.82;
+        const jpegDataUrl = canvas.toDataURL('image/jpeg', jpegQuality);
+        downloadDataUrl('export-lossy.jpg', jpegDataUrl);
+      } catch (error) {
+        console.error(error);
+        window.alert('Failed to export the page as JPEG.');
+      } finally {
+        if (cornerZone) cornerZone.style.visibility = previousVisibility;
+        window.scrollTo(originalScrollX, originalScrollY);
+        exportButton.disabled = false;
+        clearButton.disabled = false;
+        exportButton.textContent = 'Export JPEG';
+        isExporting = false;
+      }
+    }
+
+    exportButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      exportWholePageAsJpeg();
+    });
+
+    function restoreState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.cells) || parsed.cells.length === 0) return false;
+
+        parsed.cells.forEach((item) => {
+          if (!item || !item.src) return;
+          appendImage(item.src, item.username || '');
+        });
+
+        return true;
+      } catch (error) {
+        console.warn('Failed to restore state.', error);
+        return false;
+      }
+    }
+
+    async function init() {
+      if ('ResizeObserver' in window) {
+        resizeObserver = new ResizeObserver(() => {
+          queueFitAllUsernames();
+        });
+      }
+
+      window.addEventListener('resize', queueFitAllUsernames);
+
+      await applyWallpaper();
+      cellFallbackFile = await findFirstExisting(CELL_CANDIDATES);
+
+      const restored = restoreState();
+      if (!restored && cellFallbackFile) {
+        for (let i = 0; i < 20; i += 1) {
+          appendImage(cellFallbackFile);
+        }
+      }
+
+      queueFitAllUsernames();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
