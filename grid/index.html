@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>17-Image Row Grid</title>
+  <title>Grid</title>
   <style>
     :root {
       --columns: 17;
@@ -74,16 +74,18 @@
       left: 50%;
       bottom: 4px;
       transform: translateX(-50%);
+      width: calc(100% - 4px);
       padding: 0 2px;
       font-size: 12px;
       line-height: 1;
       text-align: center;
       color: #fff;
       background: transparent;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: normal;
+      word-break: normal;
       pointer-events: none;
       display: inline-block;
-      max-width: calc(100% - 4px);
       -webkit-text-stroke: 1.5px #000;
       paint-order: stroke fill;
       text-shadow:
@@ -175,6 +177,7 @@
 
     let cellFallbackFile = null;
     let waitingForNextImage = false;
+    let isExporting = false;
     const STORAGE_KEY = 'image-grid-page-state-v1';
 
     let fitLabelsRaf = 0;
@@ -388,6 +391,7 @@
     });
 
     document.addEventListener('click', (event) => {
+      if (isExporting) return;
       if (event.target.closest('.corner-zone')) return;
       if (event.target.closest('.cell')) return;
       if (waitingForNextImage) return;
@@ -415,6 +419,7 @@
     }
 
     clearButton.addEventListener('click', (event) => {
+      event.preventDefault();
       event.stopPropagation();
       clearAllCells();
     });
@@ -434,6 +439,7 @@
         return;
       }
 
+      isExporting = true;
       exportButton.disabled = true;
       clearButton.disabled = true;
       exportButton.textContent = 'Exporting...';
@@ -470,7 +476,7 @@
 
         const canvas = await window.html2canvas(document.body, {
           useCORS: true,
-          allowTaint: true,
+          allowTaint: false,
           backgroundColor: '#111',
           width: fullWidth,
           height: fullHeight,
@@ -492,10 +498,12 @@
         exportButton.disabled = false;
         clearButton.disabled = false;
         exportButton.textContent = 'Export JPEG';
+        isExporting = false;
       }
     }
 
     exportButton.addEventListener('click', (event) => {
+      event.preventDefault();
       event.stopPropagation();
       exportWholePageAsJpeg();
     });
