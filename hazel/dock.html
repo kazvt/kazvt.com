@@ -11818,13 +11818,13 @@
 					if (!textNode) return;
 
 					const raw = textNode.textContent;
-					const nameOnly = raw.replace(/:\s*$/, '').replace(/^@/, '').trim();
+					const nameOnly = raw.replace(/^@/, '').replace(/:\s*$/, '').trim();
 					const nick = nickMap[normalize(nameOnly)];
 					if (!nick) return;
 
 					const span = document.createElement('span');
 					span.className = 'hl-nick';
-					span.textContent = '\u00a0(' + nick + ')';
+					span.textContent = '\u00a0(' + (raw.startsWith('@') ? nick : '@' + nick) + ')';
 
 					textNode.textContent = nameOnly; // non-breaking space
 					textNode.after(span, ':');
