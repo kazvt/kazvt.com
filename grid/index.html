@@ -7,7 +7,7 @@
   <title>17-Image Row Grid</title>
   <style>
     :root {
-      --columns: 17;
+      --columns: 20;
       --gap: 6px;
     }
 
@@ -39,7 +39,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(17, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
       gap: var(--gap);
       align-items: start;
     }
@@ -552,7 +552,7 @@
 
       const restored = restoreState();
       if (!restored && cellFallbackFile) {
-        for (let i = 0; i < 17; i += 1) {
+        for (let i = 0; i < 20; i += 1) {
           appendImage(cellFallbackFile);
         }
       }
