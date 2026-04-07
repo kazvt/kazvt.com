@@ -11787,65 +11787,66 @@
 			}
 
 
-			// Usage: &nicks=user1:nick1,user2:nick2
-			(function () {
-				const normalize = s => s.toLowerCase().replace(/[-_]/g, '_');
+		(function () {
+			const normalize = s => s.toLowerCase().replace(/[-_]/g, '_');
 
-				const raw = nicknamesParam || '';
-				const nickMap = {};
+			const raw = nicknamesParam || '';
+			const nickMap = {};
 
-				raw.replace(/\s/g, '').split(',').forEach(pair => {
-					const sep = pair.indexOf(':');
-					if (sep < 1) return;
-					const user = normalize(pair.slice(0, sep).replace(/^@/, ''));
-					const nick = pair.slice(sep + 1);
-					if (user && nick) nickMap[user] = nick;
-				});
+			raw.replace(/\s/g, '').split(',').forEach(pair => {
+				const sep = pair.indexOf(':');
+				if (sep < 1) return;
+				const user = normalize(pair.slice(0, sep).replace(/^@/, ''));
+				const nick = pair.slice(sep + 1);
+				if (user && nick) nickMap[user] = nick;
+			});
 
-				if (!Object.keys(nickMap).length) return;
+			if (!Object.keys(nickMap).length) return;
 
-				function applyNick(msgNode) {
-					const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
-					if (!nameEl || nameEl.querySelector('.hl-nick')) return;
+			function applyNick(msgNode) {
+				const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+				if (!nameEl || nameEl.querySelector('.hl-nick')) return;
 
-					let textNode = null;
-					for (const child of nameEl.childNodes) {
-						if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
-							textNode = child;
-							break;
-						}
+				let textNode = null;
+				for (const child of nameEl.childNodes) {
+					if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+						textNode = child;
+						break;
 					}
-					if (!textNode) return;
-
-					const raw = textNode.textContent;
-					const nameOnly = raw.replace(/^@/, '').replace(/:\s*$/, '').trim();
-					const nick = nickMap[normalize(nameOnly)];
-					if (!nick) return;
-
-					const span = document.createElement('span');
-					span.className = 'hl-nick';
-					span.textContent = '\u00a0(' + (raw.startsWith('@') ? nick : '@' + nick) + ')';
-
-					textNode.textContent = nameOnly; // non-breaking space
-					textNode.after(span, ':');
 				}
+				if (!textNode) return;
 
-				const observer = new MutationObserver(mutations => {
-					for (const m of mutations) {
-						for (const node of m.addedNodes) {
-							if (node.nodeType !== Node.ELEMENT_NODE) continue;
-							if (node.dataset && node.dataset.mid) {
-								applyNick(node);
-							} else {
-								node.querySelectorAll('[data-mid]').forEach(applyNick);
-							}
+				const rawText = textNode.textContent;
+				const displayName = rawText.replace(/:\s*$/, '').trim(); // keeps @
+				const matchName = displayName.replace(/^@/, '').trim();  // removes @ only for lookup
+
+				const nick = nickMap[normalize(matchName)];
+				if (!nick) return;
+
+				const span = document.createElement('span');
+				span.className = 'hl-nick';
+				span.textContent = '\u00a0(' + nick + ')';
+
+				textNode.textContent = displayName;
+				textNode.after(span, ':');
+			}
+
+			const observer = new MutationObserver(mutations => {
+				for (const m of mutations) {
+					for (const node of m.addedNodes) {
+						if (node.nodeType !== Node.ELEMENT_NODE) continue;
+						if (node.dataset && node.dataset.mid) {
+							applyNick(node);
+						} else {
+							node.querySelectorAll('[data-mid]').forEach(applyNick);
 						}
 					}
-				});
+				}
+			});
 
-				const outputWindow = document.getElementById('output') || document.body;
-				observer.observe(outputWindow, { childList: true, subtree: true });
-			})();
+			const outputWindow = document.getElementById('output') || document.body;
+			observer.observe(outputWindow, { childList: true, subtree: true });
+		})();
 
 			// Initialize hotkeys
 			initHotkeys();
