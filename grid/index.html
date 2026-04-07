@@ -9,10 +9,6 @@
     :root {
       --columns: 17;
       --gap: 6px;
-      --label-bg: rgba(0, 0, 0, 0.72);
-      --label-color: #fff;
-      --username-min-font-size: 6px;
-      --username-max-font-size: 256px;
     }
 
     * {
@@ -220,41 +216,8 @@
       const cell = label.closest('.cell');
       if (!cell) return;
 
-      const rootStyles = getComputedStyle(document.documentElement);
-      const minFont = parseFloat(rootStyles.getPropertyValue('--username-min-font-size')) || 6;
-      const maxFont = parseFloat(rootStyles.getPropertyValue('--username-max-font-size')) || 256;
-
-      const safetyX = 8;
-      const safetyY = 6;
-
-      const availableWidth = Math.max(1, cell.clientWidth - safetyX);
-      const availableHeight = Math.max(1, cell.clientHeight - safetyY);
-
-      if (!availableWidth || !availableHeight) return;
-
-      let low = Math.floor(minFont);
-      let high = Math.floor(maxFont);
-      let best = Math.floor(minFont);
-
-      label.style.fontSize = `${best}px`;
-
-      while (low <= high) {
-        const mid = Math.floor((low + high) / 2);
-        label.style.fontSize = `${mid}px`;
-
-        const rect = label.getBoundingClientRect();
-        const fitsWidth = rect.width <= availableWidth;
-        const fitsHeight = rect.height <= availableHeight;
-
-        if (fitsWidth && fitsHeight) {
-          best = mid;
-          low = mid + 1;
-        } else {
-          high = mid - 1;
-        }
-      }
-
-      label.style.fontSize = `${best}px`;
+      const widthBasedFontSize = Math.max(1, cell.clientWidth);
+      label.style.fontSize = `${widthBasedFontSize}px`;
     }
 
     function fitAllUsernames() {
