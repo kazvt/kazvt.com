@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grid</title>
+  <title>17-Image Row Grid</title>
   <style>
     :root {
       --columns: 17;
@@ -81,7 +81,7 @@
       overflow-wrap: normal;
       word-break: normal;
       pointer-events: none;
-      display: inline-block;
+      display: block;
       -webkit-text-stroke: 1.5px #000;
       paint-order: stroke fill;
       text-shadow:
@@ -143,6 +143,19 @@
       cursor: wait;
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .measure-label {
+      position: absolute;
+      left: -999999px;
+      top: -999999px;
+      visibility: hidden;
+      white-space: nowrap;
+      line-height: 1;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: normal;
+      padding: 0 2px;
+      -webkit-text-stroke: 1.5px #000;
     }
   </style>
 </head>
@@ -210,14 +223,49 @@
       return label;
     }
 
+    function measureTextWidth(text, fontSizePx) {
+      const probe = document.createElement('span');
+      probe.className = 'measure-label';
+      probe.style.fontSize = `${fontSizePx}px`;
+      probe.textContent = text;
+      document.body.appendChild(probe);
+      const width = probe.getBoundingClientRect().width;
+      probe.remove();
+      return width;
+    }
+
+    function getLongestSpaceSeparatedSegment(text) {
+      const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!normalized) return '';
+      const parts = normalized.split(' ');
+      let longest = parts[0] || '';
+      for (const part of parts) {
+        if (part.length > longest.length) {
+          longest = part;
+        }
+      }
+      return longest;
+    }
+
     function fitUsernameLabel(label) {
       if (!label || !label.textContent) return;
 
       const cell = label.closest('.cell');
       if (!cell) return;
 
-      const widthBasedFontSize = Math.max(1, cell.clientWidth);
-      label.style.fontSize = `${widthBasedFontSize}px`;
+      const usableWidth = Math.max(1, label.clientWidth || (cell.clientWidth - 4));
+      const text = label.textContent.trim();
+      if (!text) return;
+
+      const longestSegment = getLongestSpaceSeparatedSegment(text) || text;
+
+      const testFontSize = 100;
+      const segmentWidthAtTestSize = measureTextWidth(longestSegment, testFontSize);
+
+      if (!segmentWidthAtTestSize) return;
+
+      const fittedFontSize = (usableWidth / segmentWidthAtTestSize) * testFontSize;
+      label.style.fontSize = `${fittedFontSize}px`;
     }
 
     function fitAllUsernames() {
