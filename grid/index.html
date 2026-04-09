@@ -310,29 +310,38 @@
       saveState();
     }
 
-    function createCellWithImage(src) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
+  function createCellWithImage(src) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
 
-      const img = document.createElement('img');
-      img.alt = 'Grid image';
-      img.src = src;
+    const img = document.createElement('img');
+    img.alt = 'Grid image';
+    img.src = src;
 
-      img.addEventListener('load', () => {
-        queueFitAllUsernames();
-      });
+    img.addEventListener('load', () => {
+      queueFitAllUsernames();
+    });
 
-      cell.appendChild(img);
+    cell.appendChild(img);
 
-      cell.addEventListener('click', (event) => {
-        event.stopPropagation();
-        setUsername(cell);
-      });
+    cell.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setUsername(cell);
+    });
 
-      observeCellResize(cell);
+    cell.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-      return cell;
-    }
+      if (resizeObserver) resizeObserver.unobserve(cell);
+      cell.remove();
+      saveState();
+    });
+
+    observeCellResize(cell);
+
+    return cell;
+  }
 
     function getPersistableCells() {
       return Array.from(grid.querySelectorAll('.cell')).map((cell) => {
