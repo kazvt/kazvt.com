@@ -120,7 +120,7 @@
       border: 1px solid #33FF33;
       background: rgba(0, 0, 0, 0.88);
       padding: 10px 10px 12px;
-      box-shadow: 0 0 10px rgba(51, 255, 51, 0.25), inset 0 0 8px rgba(0,0,0,0.6);
+      box-shadow: 0 0 10px rgba(51, 255, 51, 0.25), inset 0 0 8px rgba(0, 0, 0, 0.6);
       text-align: left;
     }
 
@@ -178,11 +178,6 @@
       opacity: 1;
     }
 
-    @media (max-width: 900px) {
-      #lillie-alert {
-        display: none;
-      }
-    }
   </style>
 </head>
 
@@ -198,14 +193,16 @@
 
   <!-- lillie suspension alert panel -->
   <aside id="lillie-alert" role="complementary" aria-label="Important notice">
-    <button class="alert-close" onclick="document.getElementById('lillie-alert').style.display='none'" aria-label="Dismiss">✕</button>
+    <button class="alert-close" onclick="document.getElementById('lillie-alert').style.display='none'"
+      aria-label="Dismiss">✕</button>
     <div class="alert-header">⚠ IMPORTANT</div>
     <div class="alert-body">
       please check out <strong>lillie's</strong> video on his suspension
       <br><br>
       if you care about the safety of trans people on twitch
     </div>
-    <a class="alert-link" href="https://www.youtube.com/watch?v=v3QGLXoGrW0" target="_blank" rel="noopener noreferrer">▶ WATCH VIDEO</a>
+    <a class="alert-link" href="https://www.youtube.com/watch?v=v3QGLXoGrW0" target="_blank" rel="noopener noreferrer">▶
+      WATCH VIDEO</a>
   </aside>
 
   <div class="fixed inset-0 bg-vignette"></div>
