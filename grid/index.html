@@ -73,13 +73,16 @@
       width: calc(100% - 4px);
       padding: 0 2px;
       font-size: 12px;
-      line-height: 1;
+      line-height: 1.05;
       text-align: center;
       color: #fff;
       background: transparent;
+
       white-space: normal;
       overflow-wrap: normal;
-      word-break: normal;
+      word-break: keep-all;
+      hyphens: none;
+
       pointer-events: none;
       display: block;
       -webkit-text-stroke: 1.5px #000;
@@ -247,25 +250,50 @@
       return longest;
     }
 
+    function getWords(text) {
+      return String(text || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .filter(Boolean);
+    }
+
     function fitUsernameLabel(label) {
       if (!label || !label.textContent) return;
 
       const cell = label.closest('.cell');
       if (!cell) return;
 
-      const usableWidth = Math.max(1, label.clientWidth || (cell.clientWidth - 4));
       const text = label.textContent.trim();
       if (!text) return;
 
-      const longestSegment = getLongestSpaceSeparatedSegment(text) || text;
+      const usableWidth = Math.max(1, cell.clientWidth - 4);
+
+      // leave a little room so wrapped lines are not clipped
+      const maxHeight = Math.max(1, cell.clientHeight * 0.28);
+
+      const words = getWords(text);
+      if (!words.length) return;
 
       const testFontSize = 100;
-      const segmentWidthAtTestSize = measureTextWidth(longestSegment, testFontSize);
 
-      if (!segmentWidthAtTestSize) return;
+      // fit by widest actual rendered word, not longest by character count
+      let widestWordWidth = 0;
+      for (const word of words) {
+        widestWordWidth = Math.max(widestWordWidth, measureTextWidth(word, testFontSize));
+      }
 
-      const fittedFontSize = (usableWidth / segmentWidthAtTestSize) * testFontSize;
-      label.style.fontSize = `${fittedFontSize}px`;
+      if (!widestWordWidth) return;
+
+      let fontSize = (usableWidth / widestWordWidth) * testFontSize;
+
+      label.style.fontSize = `${fontSize}px`;
+
+      // if wrapping makes it too tall, shrink until it fits
+      while (fontSize > 1 && label.scrollHeight > maxHeight) {
+        fontSize -= 0.5;
+        label.style.fontSize = `${fontSize}px`;
+      }
     }
 
     function fitAllUsernames() {
@@ -310,38 +338,38 @@
       saveState();
     }
 
-  function createCellWithImage(src) {
-    const cell = document.createElement('div');
-    cell.className = 'cell';
+    function createCellWithImage(src) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
 
-    const img = document.createElement('img');
-    img.alt = 'Grid image';
-    img.src = src;
+      const img = document.createElement('img');
+      img.alt = 'Grid image';
+      img.src = src;
 
-    img.addEventListener('load', () => {
-      queueFitAllUsernames();
-    });
+      img.addEventListener('load', () => {
+        queueFitAllUsernames();
+      });
 
-    cell.appendChild(img);
+      cell.appendChild(img);
 
-    cell.addEventListener('click', (event) => {
-      event.stopPropagation();
-      setUsername(cell);
-    });
+      cell.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setUsername(cell);
+      });
 
-    cell.addEventListener('contextmenu', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
+      cell.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-      if (resizeObserver) resizeObserver.unobserve(cell);
-      cell.remove();
-      saveState();
-    });
+        if (resizeObserver) resizeObserver.unobserve(cell);
+        cell.remove();
+        saveState();
+      });
 
-    observeCellResize(cell);
+      observeCellResize(cell);
 
-    return cell;
-  }
+      return cell;
+    }
 
     function getPersistableCells() {
       return Array.from(grid.querySelectorAll('.cell')).map((cell) => {
