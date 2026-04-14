@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>17-Image Row Grid</title>
+  <title>Editable Image Row Grid</title>
   <style>
     :root {
-      --columns: 20;
+      --columns: 15;
       --gap: 6px;
     }
 
@@ -77,12 +77,10 @@
       text-align: center;
       color: #fff;
       background: transparent;
-
       white-space: normal;
       overflow-wrap: normal;
       word-break: keep-all;
       hyphens: none;
-
       pointer-events: none;
       display: block;
       -webkit-text-stroke: 1.5px #000;
@@ -106,8 +104,8 @@
       position: fixed;
       right: 0;
       bottom: 0;
-      width: 220px;
-      height: 120px;
+      width: 320px;
+      min-height: 170px;
       z-index: 100;
       display: flex;
       align-items: flex-end;
@@ -118,28 +116,77 @@
     .corner-controls {
       margin: 0 12px 12px 0;
       display: flex;
+      flex-direction: column;
+      align-items: flex-end;
       gap: 8px;
       pointer-events: auto;
     }
 
-    .corner-button {
-      padding: 10px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      font: inherit;
-      cursor: pointer;
+    .settings-panel,
+    .button-row {
       opacity: 0;
       transform: translateY(8px);
       transition: opacity 160ms ease, transform 160ms ease;
       pointer-events: auto;
     }
 
-    .corner-zone:hover .corner-button,
-    .corner-button:focus-visible {
+    .corner-zone:hover .settings-panel,
+    .corner-zone:hover .button-row,
+    .corner-zone :focus-within {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .settings-panel {
+      min-width: 220px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .settings-title {
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .settings-row label {
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .settings-row input[type="range"] {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .settings-value {
+      min-width: 28px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .corner-button {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 0;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      font: inherit;
+      cursor: pointer;
     }
 
     .corner-button:disabled {
@@ -171,8 +218,19 @@
 
     <div class="corner-zone" aria-label="Page controls">
       <div class="corner-controls">
-        <button id="clearButton" class="corner-button" type="button">Clear all</button>
-        <button id="exportButton" class="corner-button" type="button">Export JPEG</button>
+        <div class="settings-panel">
+          <div class="settings-title">Settings</div>
+          <div class="settings-row">
+            <label for="columnsRange">Cells per row</label>
+            <input id="columnsRange" type="range" min="5" max="30" step="1" value="15" />
+            <span id="columnsValue" class="settings-value">15</span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="clearButton" class="corner-button" type="button">Clear all</button>
+          <button id="exportButton" class="corner-button" type="button">Export JPEG</button>
+        </div>
       </div>
     </div>
   </div>
@@ -183,6 +241,8 @@
     const imagePicker = document.getElementById('imagePicker');
     const exportButton = document.getElementById('exportButton');
     const clearButton = document.getElementById('clearButton');
+    const columnsRange = document.getElementById('columnsRange');
+    const columnsValue = document.getElementById('columnsValue');
 
     const CELL_CANDIDATES = ['cell.png', 'cell.jpg', 'cell.jpeg'];
     const BG_CANDIDATES = ['bg.png', 'bg.jpg', 'bg.jpeg'];
@@ -190,10 +250,18 @@
     let cellFallbackFile = null;
     let waitingForNextImage = false;
     let isExporting = false;
-    const STORAGE_KEY = 'image-grid-page-state-v1';
+
+    const STORAGE_KEY = 'image-grid-page-state-v2';
+    const DEFAULT_COLUMNS = 15;
+    const MIN_COLUMNS = 5;
+    const MAX_COLUMNS = 30;
 
     let fitLabelsRaf = 0;
     let resizeObserver = null;
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
 
     function assetExists(src) {
       return new Promise((resolve) => {
@@ -237,19 +305,6 @@
       return width;
     }
 
-    function getLongestSpaceSeparatedSegment(text) {
-      const normalized = String(text || '').replace(/\s+/g, ' ').trim();
-      if (!normalized) return '';
-      const parts = normalized.split(' ');
-      let longest = parts[0] || '';
-      for (const part of parts) {
-        if (part.length > longest.length) {
-          longest = part;
-        }
-      }
-      return longest;
-    }
-
     function getWords(text) {
       return String(text || '')
         .replace(/\s+/g, ' ')
@@ -268,17 +323,14 @@
       if (!text) return;
 
       const usableWidth = Math.max(1, cell.clientWidth - 4);
-
-      // leave a little room so wrapped lines are not clipped
       const maxHeight = Math.max(1, cell.clientHeight * 0.28);
 
       const words = getWords(text);
       if (!words.length) return;
 
       const testFontSize = 100;
-
-      // fit by widest actual rendered word, not longest by character count
       let widestWordWidth = 0;
+
       for (const word of words) {
         widestWordWidth = Math.max(widestWordWidth, measureTextWidth(word, testFontSize));
       }
@@ -286,10 +338,8 @@
       if (!widestWordWidth) return;
 
       let fontSize = (usableWidth / widestWordWidth) * testFontSize;
-
       label.style.fontSize = `${fontSize}px`;
 
-      // if wrapping makes it too tall, shrink until it fits
       while (fontSize > 1 && label.scrollHeight > maxHeight) {
         fontSize -= 0.5;
         label.style.fontSize = `${fontSize}px`;
@@ -310,6 +360,19 @@
     function observeCellResize(cell) {
       if (!resizeObserver || !cell) return;
       resizeObserver.observe(cell);
+    }
+
+    function setColumns(value, shouldSave = true) {
+      const normalized = clamp(Number(value) || DEFAULT_COLUMNS, MIN_COLUMNS, MAX_COLUMNS);
+      document.documentElement.style.setProperty('--columns', String(normalized));
+      columnsRange.value = String(normalized);
+      columnsValue.textContent = String(normalized);
+
+      queueFitAllUsernames();
+
+      if (shouldSave) {
+        saveState();
+      }
     }
 
     function setUsername(cell) {
@@ -367,7 +430,6 @@
       });
 
       observeCellResize(cell);
-
       return cell;
     }
 
@@ -386,6 +448,7 @@
     function saveState() {
       try {
         const state = {
+          columns: clamp(Number(columnsRange.value) || DEFAULT_COLUMNS, MIN_COLUMNS, MAX_COLUMNS),
           cells: getPersistableCells().filter((item) => {
             if (!item.src) return false;
             if (item.src.startsWith('blob:')) return false;
@@ -460,7 +523,13 @@
       });
 
       try {
-        localStorage.removeItem(STORAGE_KEY);
+        const existingRaw = localStorage.getItem(STORAGE_KEY);
+        const existing = existingRaw ? JSON.parse(existingRaw) : {};
+        const nextState = {
+          columns: clamp(Number(columnsRange.value) || DEFAULT_COLUMNS, MIN_COLUMNS, MAX_COLUMNS),
+          cells: []
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...existing, ...nextState }));
       } catch (error) {
         console.warn('Failed to clear saved state.', error);
       }
@@ -470,6 +539,10 @@
       event.preventDefault();
       event.stopPropagation();
       clearAllCells();
+    });
+
+    columnsRange.addEventListener('input', () => {
+      setColumns(columnsRange.value, true);
     });
 
     function downloadDataUrl(filename, dataUrl) {
@@ -490,6 +563,7 @@
       isExporting = true;
       exportButton.disabled = true;
       clearButton.disabled = true;
+      columnsRange.disabled = true;
       exportButton.textContent = 'Exporting...';
 
       const originalScrollX = window.scrollX;
@@ -545,6 +619,7 @@
         window.scrollTo(originalScrollX, originalScrollY);
         exportButton.disabled = false;
         clearButton.disabled = false;
+        columnsRange.disabled = false;
         exportButton.textContent = 'Export JPEG';
         isExporting = false;
       }
@@ -559,9 +634,18 @@
     function restoreState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return false;
+        if (!raw) {
+          setColumns(DEFAULT_COLUMNS, false);
+          return false;
+        }
+
         const parsed = JSON.parse(raw);
-        if (!parsed || !Array.isArray(parsed.cells) || parsed.cells.length === 0) return false;
+        const savedColumns = parsed && parsed.columns != null ? parsed.columns : DEFAULT_COLUMNS;
+        setColumns(savedColumns, false);
+
+        if (!parsed || !Array.isArray(parsed.cells) || parsed.cells.length === 0) {
+          return false;
+        }
 
         parsed.cells.forEach((item) => {
           if (!item || !item.src) return;
@@ -571,6 +655,7 @@
         return true;
       } catch (error) {
         console.warn('Failed to restore state.', error);
+        setColumns(DEFAULT_COLUMNS, false);
         return false;
       }
     }
@@ -584,12 +669,15 @@
 
       window.addEventListener('resize', queueFitAllUsernames);
 
+      setColumns(DEFAULT_COLUMNS, false);
+
       await applyWallpaper();
       cellFallbackFile = await findFirstExisting(CELL_CANDIDATES);
 
       const restored = restoreState();
       if (!restored && cellFallbackFile) {
-        for (let i = 0; i < 20; i += 1) {
+        const initialCount = clamp(Number(columnsRange.value) || DEFAULT_COLUMNS, MIN_COLUMNS, MAX_COLUMNS);
+        for (let i = 0; i < initialCount; i += 1) {
           appendImage(cellFallbackFile);
         }
       }
