@@ -11954,6 +11954,7 @@
 let megaModulePromise = null;
 
 async function getMegaModule() {
+	if (window.__megaModulePromise) return window.__megaModulePromise;
 	if (megaModulePromise) return megaModulePromise;
 
 	megaModulePromise = import('https://unpkg.com/megajs/dist/main.browser-es.mjs')
@@ -11965,32 +11966,141 @@ async function getMegaModule() {
 	return megaModulePromise;
 }
 
+function parseMegaUrlInfo(url) {
+	try {
+		const parsed = new URL(url, window.location.href);
+		if (!/(^|\.)mega\.nz$/i.test(parsed.hostname)) return null;
+
+		const isFile = /^\/file\//i.test(parsed.pathname);
+		const isFolder = /^\/folder\//i.test(parsed.pathname);
+
+		if (!isFile && !isFolder) return null;
+
+		return {
+			url: parsed.href,
+			isMega: true,
+			isFile,
+			isFolder
+		};
+	} catch (e) {
+		return null;
+	}
+}
+
+function getPreferredFolderFilenames(sourceUrl) {
+	const defaults = [
+		'lurkers_twitch.txt',
+		'lurkers_twitch.json',
+		'customUserData.txt',
+		'customUserData.json',
+		'users.txt',
+		'users.json'
+	];
+
+	try {
+		const parsed = new URL(sourceUrl, window.location.href);
+
+		// optional override for folder links:
+		// &customUserData=https://mega.nz/folder/...#...&customUserDataFile=lurkers_twitch.txt
+		const explicit = urlParams.get("customUserDataFile") || parsed.searchParams.get("file");
+		if (explicit && explicit.trim()) {
+			return [explicit.trim(), ...defaults.filter(x => x !== explicit.trim())];
+		}
+	} catch (e) {}
+
+	return defaults;
+}
+
+function isSupportedUserDataFilename(name) {
+	return /\.(txt|json)$/i.test(String(name || ""));
+}
+
+function scoreFolderCandidate(file, preferredNames) {
+	const name = String(file?.name || "");
+	const lower = name.toLowerCase();
+
+	const preferredIndex = preferredNames.findIndex(x => x.toLowerCase() === lower);
+	if (preferredIndex >= 0) return 1000 - preferredIndex;
+
+	if (lower === 'lurkers_twitch.txt') return 900;
+	if (lower === 'lurkers_twitch.json') return 890;
+	if (lower === 'customuserdata.txt') return 880;
+	if (lower === 'customuserdata.json') return 870;
+
+	if (lower.endsWith('.json')) return 200;
+	if (lower.endsWith('.txt')) return 100;
+	return 0;
+}
+
 async function readMegaSharedFileText(url) {
 	const megaModule = await getMegaModule();
-	const File = megaModule.File;
+	const MEGAFile = megaModule.File;
 
-	const megaFile = File.fromURL(url);
-	const data = await megaFile.downloadBuffer();
+	const megaInfo = parseMegaUrlInfo(url);
+	if (!megaInfo) {
+		throw new Error("Not a valid MEGA file/folder URL");
+	}
+
+	// Backwards-compatible direct file path
+	if (megaInfo.isFile) {
+		const megaFile = MEGAFile.fromURL(url);
+		const data = await megaFile.downloadBuffer();
+		return new TextDecoder().decode(data);
+	}
+
+	// New folder-link path
+	const folder = MEGAFile.fromURL(url);
+	await folder.loadAttributes();
+
+	if (!folder.directory) {
+		throw new Error("MEGA URL looked like a folder link but did not load as a directory");
+	}
+
+	const preferredNames = getPreferredFolderFilenames(url);
+
+	// Search recursively, case-insensitive, only txt/json
+	const matches = folder.filter(file => {
+		if (!file || file.directory) return false;
+		const name = String(file.name || "");
+		if (!isSupportedUserDataFilename(name)) return false;
+
+		const lower = name.toLowerCase();
+		return preferredNames.some(pref => pref.toLowerCase() === lower) || true;
+	}, true);
+
+	if (!matches || !matches.length) {
+		throw new Error("No .txt or .json custom user data file found in MEGA folder");
+	}
+
+	matches.sort((a, b) => {
+		const diff = scoreFolderCandidate(b, preferredNames) - scoreFolderCandidate(a, preferredNames);
+		if (diff !== 0) return diff;
+		return String(a.name || "").localeCompare(String(b.name || ""));
+	});
+
+	const picked = matches[0];
+	const data = await picked.downloadBuffer();
 	return new TextDecoder().decode(data);
 }
 
-	function parseByFileType(rawText, sourceUrl) {
-		const lowerPath = String(sourceUrl || "").toLowerCase().split('?')[0].split('#')[0];
+function parseByFileType(rawText, sourceUrl) {
+	const lowerPath = String(sourceUrl || "").toLowerCase().split('?')[0].split('#')[0];
 
-		if (lowerPath.endsWith('.txt')) {
-			return parseTxtCustomUserData(rawText);
-		}
-		if (lowerPath.endsWith('.json')) {
-			return JSON.parse(rawText);
-		}
-
-		// fallback: try JSON first, then TXT
-		try {
-			return JSON.parse(rawText);
-		} catch (err) {
-			return parseTxtCustomUserData(rawText);
-		}
+	// direct file URLs
+	if (lowerPath.endsWith('.txt')) {
+		return parseTxtCustomUserData(rawText);
 	}
+	if (lowerPath.endsWith('.json')) {
+		return JSON.parse(rawText);
+	}
+
+	// folder links or ambiguous URLs
+	try {
+		return JSON.parse(rawText);
+	} catch (err) {
+		return parseTxtCustomUserData(rawText);
+	}
+}
 
 	async function loadCustomUserData(forceReload = false) {
 		if (!customUserDataParam) {
@@ -12008,7 +12118,9 @@ async function readMegaSharedFileText(url) {
 		try {
 			let rawText = "";
 
-			if (isMegaFileUrl(customUserDataParam)) {
+			const megaInfo = parseMegaUrlInfo(customUserDataParam);
+
+			if (megaInfo) {
 				rawText = await readMegaSharedFileText(customUserDataParam);
 			} else {
 				const response = await fetch(customUserDataParam, { cache: "no-store" });
