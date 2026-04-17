@@ -10,6 +10,9 @@
 		<meta name="robots" content="noindex">
 		<script type="text/javascript" src="currency.js"></script>
 		<script type="text/javascript" src="./libs/objects.js"></script>
+		<script type="module">
+			window.__megaModulePromise = import('https://unpkg.com/megajs/dist/main.browser-es.mjs');
+		</script>
 
 		<style>
 			:root {
@@ -11832,8 +11835,7 @@
 		return null;
 	}
 
-	// Shared name matching helper:
-	// compare without leading @, but keep the visible @ in output.
+	// compare without @, keep visible @ as-is
 	function getResolvedNameParts(nameEl) {
 		const textNode = getPrimaryNameTextNode(nameEl);
 		if (!textNode) return null;
@@ -11871,10 +11873,7 @@
 			if (!trimmed) return;
 			if (trimmed.startsWith('#') || trimmed.startsWith('-')) return;
 
-			// Username is first token after optional whitespace and optional leading ^ chars.
-			// Examples:
-			// roxoah ^^^81307613^^^ @@@roxo@@@ CH1
-			// ^feminine_boy_blue ^^^1353310447^^^ @@@blue@@@ CH1
+			// first token after optional whitespace and optional leading ^ chars
 			const usernameMatch = line.match(/^\s*\^*([^\s]+)/);
 			if (!usernameMatch) return;
 
@@ -11899,7 +11898,6 @@
 		clearObject(nickMap);
 		clearObject(pronounMap);
 
-		// Backwards compatibility first
 		const legacyNickMap = parseInlineNicknamesToMap();
 		Object.assign(nickMap, legacyNickMap);
 
@@ -11910,7 +11908,6 @@
 			source = source.users;
 		}
 
-		// Array format support
 		if (Array.isArray(source)) {
 			source.forEach(entry => {
 				if (!entry || typeof entry !== "object") return;
@@ -11920,18 +11917,12 @@
 				const profile = extractProfile(entry);
 				if (!profile) return;
 
-				// file overrides legacy nick param
 				if (profile.nickname) nickMap[username] = profile.nickname;
 				if (profile.pronouns) pronounMap[username] = profile.pronouns;
 			});
 			return;
 		}
 
-		// Object map format support:
-		// {
-		//   "username1": { nick: "nickname", pronouns: "prons" },
-		//   "username2": { nick: "nickname2", pronouns: "they/them" }
-		// }
 		if (source && typeof source === "object") {
 			Object.entries(source).forEach(([key, value]) => {
 				const username = normalize(String(key).replace(/^@/, ''));
@@ -11940,16 +11931,62 @@
 				const profile = extractProfile(value);
 				if (!profile) return;
 
-				// file overrides legacy nick param
 				if (profile.nickname) nickMap[username] = profile.nickname;
 				if (profile.pronouns) pronounMap[username] = profile.pronouns;
 			});
 		}
 	}
 
+	function isMegaFileUrl(url) {
+		if (!url) return false;
+		try {
+			const parsed = new URL(url, window.location.href);
+			return /(^|\.)mega\.nz$/i.test(parsed.hostname) && (
+				/^\/file\//i.test(parsed.pathname) ||
+				/^\/folder\//i.test(parsed.pathname)
+			);
+		} catch (e) {
+			return false;
+		}
+	}
+
+	async function readMegaSharedFileText(url) {
+		if (!window.__megaModulePromise) {
+			throw new Error("MEGA module loader not initialized");
+		}
+
+		const megaModule = await window.__megaModulePromise;
+		const File = megaModule.File;
+
+		const megaFile = File.fromURL(url);
+
+		// docs say downloadBuffer() on a shared file URL works directly,
+		// and loadAttributes() is only needed if you need metadata like name/size
+		const data = await megaFile.downloadBuffer();
+		return new TextDecoder().decode(data);
+	}
+
+	function parseByFileType(rawText, sourceUrl) {
+		const lowerPath = String(sourceUrl || "").toLowerCase().split('?')[0].split('#')[0];
+
+		if (lowerPath.endsWith('.txt')) {
+			return parseTxtCustomUserData(rawText);
+		}
+		if (lowerPath.endsWith('.json')) {
+			return JSON.parse(rawText);
+		}
+
+		// fallback: try JSON first, then TXT
+		try {
+			return JSON.parse(rawText);
+		} catch (err) {
+			return parseTxtCustomUserData(rawText);
+		}
+	}
+
 	async function loadCustomUserData(forceReload = false) {
 		if (!customUserDataParam) {
-			ingestCustomUserData(null); // still loads legacy nick param
+			ingestCustomUserData(null);
 			customUserDataLoaded = true;
 			return { nickMap, pronounMap };
 		}
@@ -11961,34 +11998,24 @@
 		}
 
 		try {
-			const response = await fetch(customUserDataParam, { cache: "no-store" });
-			if (!response.ok) {
-				throw new Error("Failed to load customUserData: " + response.status);
-			}
+			let rawText = "";
 
-			const lowerPath = String(customUserDataParam || "").toLowerCase().split('?')[0].split('#')[0];
-
-			if (lowerPath.endsWith('.txt')) {
-				const txt = await response.text();
-				customUserDataCache = parseTxtCustomUserData(txt);
-			} else if (lowerPath.endsWith('.json')) {
-				customUserDataCache = await response.json();
+			if (isMegaFileUrl(customUserDataParam)) {
+				rawText = await readMegaSharedFileText(customUserDataParam);
 			} else {
-				// fallback: try json first, then txt
-				const raw = await response.text();
-				try {
-					customUserDataCache = JSON.parse(raw);
-				} catch (err) {
-					customUserDataCache = parseTxtCustomUserData(raw);
+				const response = await fetch(customUserDataParam, { cache: "no-store" });
+				if (!response.ok) {
+					throw new Error("Failed to load customUserData: " + response.status);
 				}
+				rawText = await response.text();
 			}
 
+			customUserDataCache = parseByFileType(rawText, customUserDataParam);
 			ingestCustomUserData(customUserDataCache);
 			customUserDataLoaded = true;
 		} catch (err) {
 			console.error(err);
-			// fallback to legacy nick param only
-			ingestCustomUserData(null);
+			ingestCustomUserData(null); // fallback to legacy nick param only
 			customUserDataLoaded = true;
 		}
 
@@ -12060,7 +12087,6 @@
 		const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
 		if (!badgeContainer) return;
 
-		// Replace only text badges; preserve image/svg badges
 		badgeContainer.querySelectorAll('.hl-badge.textbadge').forEach(el => el.remove());
 
 		if (!pronouns) return;
