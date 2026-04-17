@@ -11835,6 +11835,146 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 	let customUserDataLoaded = false;
 	let pendingRefreshTimer = null;
 
+	const fallbackPronounsCache = new Map();
+	let fallbackPronounsListCache = null;
+	let fallbackPronounsListCacheTime = 0;
+
+	const FALLBACK_PRONOUNS_CACHE_TTL = 15 * 60 * 1000;
+	const FALLBACK_PRONOUNS_LIST_TTL = 24 * 60 * 60 * 1000;
+	const FALLBACK_PRONOUNS_MAX_CACHE_SIZE = 300;
+
+	function normalizeUsernameForPronounLookup(username) {
+		return normalize(String(username || "").replace(/^@/, '').trim());
+	}
+
+	function pruneFallbackPronounCache() {
+		const now = Date.now();
+
+		for (const [username, entry] of fallbackPronounsCache.entries()) {
+			if (!entry || (now - entry.time > FALLBACK_PRONOUNS_CACHE_TTL)) {
+				fallbackPronounsCache.delete(username);
+			}
+		}
+
+		if (fallbackPronounsCache.size > FALLBACK_PRONOUNS_MAX_CACHE_SIZE) {
+			const keys = Array.from(fallbackPronounsCache.keys());
+			for (let i = 0; i < fallbackPronounsCache.size - FALLBACK_PRONOUNS_MAX_CACHE_SIZE; i++) {
+				fallbackPronounsCache.delete(keys[i]);
+			}
+		}
+	}
+
+	async function fetchFallbackUserPronouns(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const now = Date.now();
+		const cached = fallbackPronounsCache.get(normalized);
+		if (cached && (now - cached.time < FALLBACK_PRONOUNS_CACHE_TTL)) {
+			return cached.data;
+		}
+
+		try {
+			const res = await fetch(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
+			const data = await res.json();
+
+			if (res.ok) {
+				fallbackPronounsCache.set(normalized, { data, time: now });
+				pruneFallbackPronounCache();
+				return data;
+			}
+		} catch (e) {}
+
+		fallbackPronounsCache.set(normalized, { data: null, time: now });
+		pruneFallbackPronounCache();
+		return null;
+	}
+
+	async function fetchFallbackPronounsList() {
+		const now = Date.now();
+
+		if (fallbackPronounsListCache && (now - fallbackPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
+			return fallbackPronounsListCache;
+		}
+
+		try {
+			const res = await fetch(`https://api.pronouns.alejo.io/v1/pronouns`);
+			const data = await res.json();
+
+			if (res.ok) {
+				fallbackPronounsListCache = data;
+				fallbackPronounsListCacheTime = now;
+				return data;
+			}
+		} catch (e) {}
+
+		return fallbackPronounsListCache || null;
+	}
+
+	function buildFallbackPronounString(pronounsList, userData) {
+		if (!pronounsList || !userData) return null;
+
+		function getPronouns(list, id) {
+			return id && list[id]
+				? {
+					subject: list[id].subject || null,
+					object: list[id].object || null
+				}
+				: {
+					subject: null,
+					object: null
+				};
+		}
+
+		const { subject: primarySub, object: primaryObj } = getPronouns(pronounsList, userData.pronoun_id);
+		const { subject: secondarySub, object: secondaryObj } = getPronouns(pronounsList, userData.alt_pronoun_id);
+
+		function makePronoun({ primary1, primary2, secondary1, secondary2 } = {}) {
+			const fields = [
+				['primary1', primary1],
+				['primary2', primary2],
+				['secondary1', secondary1],
+				['secondary2', secondary2]
+			];
+
+			const first = fields.find(([, v]) => v);
+			if (!first) return null;
+
+			const [firstKey, prn1] = first;
+			const prn2Candidates =
+				firstKey === 'primary1' ? [secondary1, secondary2, primary2] :
+				firstKey === 'primary2' ? [secondary1, secondary2] :
+				firstKey === 'secondary1' ? [secondary2] : [];
+
+			const prn2 = prn2Candidates.find(v => v);
+
+			if (prn1 === prn2) return prn1;
+			return prn2 ? `${prn1}/${prn2}` : prn1;
+		}
+
+		const result = makePronoun({
+			primary1: primarySub,
+			primary2: primaryObj,
+			secondary1: secondarySub,
+			secondary2: secondaryObj
+		});
+
+		return result ? String(result).trim() : null;
+	}
+
+	async function getFallbackPronounsForUsername(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const userData = await fetchFallbackUserPronouns(normalized);
+		if (!userData) return null;
+
+		const pronounsList = await fetchFallbackPronounsList();
+		if (!pronounsList) return null;
+
+		return buildFallbackPronounString(pronounsList, userData);
+	}
+
 	function clearObject(obj) {
 		Object.keys(obj).forEach(key => delete obj[key]);
 	}
@@ -11886,6 +12026,22 @@ function getResolvedNameParts(nameEl) {
 		hasAtPrefix: /^\s*@/.test(baseName)
 	};
 }
+
+	async function resolvePronounsForMessage(msgNode, parts) {
+		if (!parts) return null;
+
+		const customPronouns = pronounMap[parts.normalizedName];
+		if (customPronouns && customPronouns.trim()) {
+			return customPronouns.trim();
+		}
+
+		const msgSrc = (msgNode?.dataset?.source || msgNode?.getAttribute?.('data-source') || "").toLowerCase();
+		if (!msgSrc || msgSrc === "twitch") {
+			return null;
+		}
+
+		return await getFallbackPronounsForUsername(parts.baseName || parts.displayName);
+	}
 
 	function extractProfile(record) {
 		if (!record || typeof record !== "object") return null;
@@ -12255,50 +12411,59 @@ function applyNick(msgNode) {
 	parts.textNode.after(span, ':');
 }
 
-function isPronounTextBadge(el) {
-	if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
 
-	// already normalized
-	if (el.classList.contains('hl-pronouns')) return true;
+	function isPronounTextBadge(el) {
+		if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
 
-	const text = (el.textContent || "").trim();
-	if (!text.includes('/')) return false;
+		if (el.classList.contains('hl-pronouns')) return true;
 
-	el.classList.add('hl-pronouns');
-	return true;
-}
+		const text = (el.textContent || "").trim();
+		if (!text.includes('/')) return false;
 
-function applyPronouns(msgNode) {
-	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
-	if (!nameEl) return;
+		el.classList.add('hl-pronouns');
+		return true;
+	}
 
-	const parts = getResolvedNameParts(nameEl);
-	if (!parts) return;
+	function normalizePronounBadges(rootNode) {
+		if (!rootNode || !rootNode.querySelectorAll) return;
+		rootNode.querySelectorAll('.hl-badge.textbadge:not(.hl-pronouns)').forEach(isPronounTextBadge);
+	}
 
-	const pronouns = pronounMap[parts.normalizedName];
-	if (!pronouns || !pronouns.trim()) return;
+	async function applyPronouns(msgNode) {
+		const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+		if (!nameEl) return;
 
-	const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
-	if (!badgeContainer) return;
+		const parts = getResolvedNameParts(nameEl);
+		if (!parts) return;
 
-	Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge'))
-		.filter(isPronounTextBadge)
-		.forEach(el => el.remove());
+		const pronouns = await resolvePronounsForMessage(msgNode, parts);
+		if (!pronouns || !pronouns.trim()) return;
 
-	const badge = document.createElement('span');
-	badge.className = 'hl-badge textbadge hl-pronouns';
-	badge.textContent = pronouns.trim();
-	badgeContainer.prepend(badge);
-}
+		const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
+		if (!badgeContainer) return;
 
-	function applyUserMeta(msgNode) {
+		Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge'))
+			.filter(isPronounTextBadge)
+			.forEach(el => el.remove());
+
+		const badge = document.createElement('span');
+		badge.className = 'hl-badge textbadge hl-pronouns';
+		badge.textContent = pronouns.trim();
+		badgeContainer.prepend(badge);
+	}
+
+	async function applyUserMeta(msgNode) {
 		if (!msgNode || !msgNode.querySelector) return;
+
 		applyNick(msgNode);
-		applyPronouns(msgNode);
+		normalizePronounBadges(msgNode);
+		await applyPronouns(msgNode);
 	}
 
 	function applyUserMetaToAllMessages() {
-		document.querySelectorAll('[data-mid]').forEach(applyUserMeta);
+		document.querySelectorAll('[data-mid]').forEach(node => {
+			applyUserMeta(node);
+		});
 	}
 
 	function scheduleUserMetaRefresh() {
@@ -12322,21 +12487,21 @@ loadCustomUserData(false).then(() => {
 	scheduleUserMetaRefresh();
 });
 
-const observer = new MutationObserver(mutations => {
-	for (const m of mutations) {
-		for (const node of m.addedNodes) {
-			if (node.nodeType !== Node.ELEMENT_NODE) continue;
+	const observer = new MutationObserver(mutations => {
+		for (const m of mutations) {
+			for (const node of m.addedNodes) {
+				if (node.nodeType !== Node.ELEMENT_NODE) continue;
 
-			normalizePronounBadges(node);
+				normalizePronounBadges(node);
 
-			if (node.dataset && node.dataset.mid) {
-				applyUserMeta(node);
-			} else if (node.querySelectorAll) {
-				node.querySelectorAll('[data-mid]').forEach(applyUserMeta);
+				if (node.dataset && node.dataset.mid) {
+					applyUserMeta(node);
+				} else if (node.querySelectorAll) {
+					node.querySelectorAll('[data-mid]').forEach(applyUserMeta);
+				}
 			}
 		}
-	}
-});
+	});
 
 	const outputWindow = document.getElementById('output') || document.body;
 	observer.observe(outputWindow, { childList: true, subtree: true });
