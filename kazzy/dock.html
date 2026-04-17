@@ -2635,6 +2635,12 @@
 			vertical-align: middle;
 		}
 
+		.hl-pronouns {
+			background-color: rgba(0, 0, 0, 0.3);
+			border-radius: 4px;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+		}
+
 		</style>
 	</head>
 	<body id="main" class="vanilla notcompactmode">
@@ -12141,6 +12147,12 @@ function parseByFileType(rawText, sourceUrl) {
 
 		return { nickMap, pronounMap };
 	}
+	
+	function normalizePronounBadges(rootNode) {
+	if (!rootNode || !rootNode.querySelectorAll) return;
+
+	rootNode.querySelectorAll('.hl-badge.textbadge:not(.hl-pronouns)').forEach(isPronounTextBadge);
+}
 
 	function ensureBadgeContainer(msgNode, nameEl) {
 		if (!msgNode) return null;
@@ -12198,8 +12210,15 @@ function parseByFileType(rawText, sourceUrl) {
 
 function isPronounTextBadge(el) {
 	if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
+
+	// already normalized
+	if (el.classList.contains('hl-pronouns')) return true;
+
 	const text = (el.textContent || "").trim();
-	return text.includes('/');
+	if (!text.includes('/')) return false;
+
+	el.classList.add('hl-pronouns');
+	return true;
 }
 
 function applyPronouns(msgNode) {
@@ -12215,13 +12234,12 @@ function applyPronouns(msgNode) {
 	const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
 	if (!badgeContainer) return;
 
-	// Only remove existing pronoun-like text badges, not all text badges
 	Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge'))
 		.filter(isPronounTextBadge)
 		.forEach(el => el.remove());
 
 	const badge = document.createElement('span');
-	badge.className = 'hl-badge textbadge';
+	badge.className = 'hl-badge textbadge hl-pronouns';
 	badge.textContent = pronouns.trim();
 	badgeContainer.prepend(badge);
 }
@@ -12252,22 +12270,26 @@ function applyPronouns(msgNode) {
 
 	window.refreshCustomUserData = refreshCustomUserData;
 
-	loadCustomUserData(false).then(() => {
-		scheduleUserMetaRefresh();
-	});
+loadCustomUserData(false).then(() => {
+	normalizePronounBadges(document);
+	scheduleUserMetaRefresh();
+});
 
-	const observer = new MutationObserver(mutations => {
-		for (const m of mutations) {
-			for (const node of m.addedNodes) {
-				if (node.nodeType !== Node.ELEMENT_NODE) continue;
-				if (node.dataset && node.dataset.mid) {
-					applyUserMeta(node);
-				} else if (node.querySelectorAll) {
-					node.querySelectorAll('[data-mid]').forEach(applyUserMeta);
-				}
+const observer = new MutationObserver(mutations => {
+	for (const m of mutations) {
+		for (const node of m.addedNodes) {
+			if (node.nodeType !== Node.ELEMENT_NODE) continue;
+
+			normalizePronounBadges(node);
+
+			if (node.dataset && node.dataset.mid) {
+				applyUserMeta(node);
+			} else if (node.querySelectorAll) {
+				node.querySelectorAll('[data-mid]').forEach(applyUserMeta);
 			}
 		}
-	});
+	}
+});
 
 	const outputWindow = document.getElementById('output') || document.body;
 	observer.observe(outputWindow, { childList: true, subtree: true });
