@@ -3213,6 +3213,7 @@
 			var hasCustomOutline = false;
 			var textGlowEnabled = urlParams.has("textglow");
 			var nicknamesParam = urlParams.get("nick") || urlParams.get("nicks") || urlParams.get("nickname") || urlParams.get("nicknames");
+			var customUserDataParam = urlParams.get("customUserData");
 			var textGlowWidthParam = null;
 			var textGlowColorParam = null;
 
@@ -6364,7 +6365,6 @@
 
 			var activeChatDestinations = new Set();
 
-			
 
 			function processInput(data, force=false) {
 				if ("mid" in data) {
@@ -9694,6 +9694,13 @@
 					
 					var chatmessage = data.chatmessage || "";
 
+						if (chatmessage) {
+						const lowerChatMessage = chatmessage.toLowerCase();
+						if (lowerChatMessage.startsWith("!p") || lowerChatMessage.startsWith("!nick")) {
+							document.dispatchEvent(new CustomEvent('socialstream:userdata-refresh'));
+						}
+					}
+
 					if (chatmessage) {
 						if (stylizeEmoji && !reloaded) {
 							//chatmessage = chatmessage.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/gi, "<span class='emoji'>$1</span>");
@@ -11786,65 +11793,334 @@
 			}
 
 
-			// Usage: &nicks=user1:nick1,user2:nick2
-			(function () {
-				const normalize = s => s.toLowerCase().replace(/[-_]/g, '_');
+(function () {
+	const normalize = s => String(s || "").toLowerCase().replace(/[-_]/g, '_').trim();
 
-				const raw = nicknamesParam || '';
-				const nickMap = {};
+	const nickMap = {};
+	const pronounMap = {};
 
-				raw.replace(/\s/g, '').split(',').forEach(pair => {
-					const sep = pair.indexOf(':');
-					if (sep < 1) return;
-					const user = normalize(pair.slice(0, sep).replace(/^@/, ''));
-					const nick = pair.slice(sep + 1);
-					if (user && nick) nickMap[user] = nick;
-				});
+	let customUserDataCache = null;
+	let customUserDataLoaded = false;
+	let pendingRefreshTimer = null;
 
-				if (!Object.keys(nickMap).length) return;
+	function clearObject(obj) {
+		Object.keys(obj).forEach(key => delete obj[key]);
+	}
 
-				function applyNick(msgNode) {
-					const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
-					if (!nameEl || nameEl.querySelector('.hl-nick')) return;
+	function parseInlineNicknamesToMap() {
+		const legacyMap = {};
+		const raw = nicknamesParam || '';
 
-					let textNode = null;
-					for (const child of nameEl.childNodes) {
-						if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
-							textNode = child;
-							break;
-						}
-					}
-					if (!textNode) return;
+		raw.replace(/\s/g, '').split(',').forEach(pair => {
+			const sep = pair.indexOf(':');
+			if (sep < 1) return;
+			const user = normalize(pair.slice(0, sep).replace(/^@/, ''));
+			const nick = pair.slice(sep + 1).trim();
+			if (user && nick) legacyMap[user] = nick;
+		});
 
-					const raw = textNode.textContent;
-					const nameOnly = raw.replace(/:\s*$/, '').replace(/^@/, '').trim();
-					const nick = nickMap[normalize(nameOnly)];
-					if (!nick) return;
+		return legacyMap;
+	}
 
-					const span = document.createElement('span');
-					span.className = 'hl-nick';
-					span.textContent = '\u00a0(' + nick + ')';
+	function getPrimaryNameTextNode(nameEl) {
+		if (!nameEl) return null;
+		for (const child of nameEl.childNodes) {
+			if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+				return child;
+			}
+		}
+		return null;
+	}
 
-					textNode.textContent = nameOnly; // non-breaking space
-					textNode.after(span, ':');
+	// Shared name matching helper:
+	// compare without leading @, but keep the visible @ in output.
+	function getResolvedNameParts(nameEl) {
+		const textNode = getPrimaryNameTextNode(nameEl);
+		if (!textNode) return null;
+
+		const raw = textNode.textContent || "";
+		const withoutColon = raw.replace(/:\s*$/, '').trim();
+		const compareName = withoutColon.replace(/^@/, '').trim();
+
+		return {
+			textNode,
+			raw,
+			displayName: withoutColon,
+			compareName,
+			normalizedName: normalize(compareName),
+			hasAtPrefix: /^\s*@/.test(withoutColon)
+		};
+	}
+
+	function extractProfile(record) {
+		if (!record || typeof record !== "object") return null;
+
+		const nickname = (record.nickname ?? record.nick ?? "").toString().trim();
+		const pronouns = (record.pronouns ?? record.pronoun ?? "").toString().trim();
+
+		return { nickname, pronouns };
+	}
+
+	function parseTxtCustomUserData(text) {
+		const parsed = {};
+
+		String(text || "").split(/\r?\n/).forEach(line => {
+			if (!line) return;
+
+			const trimmed = line.trim();
+			if (!trimmed) return;
+			if (trimmed.startsWith('#') || trimmed.startsWith('-')) return;
+
+			// Username is first token after optional whitespace and optional leading ^ chars.
+			// Examples:
+			// roxoah ^^^81307613^^^ @@@roxo@@@ CH1
+			// ^feminine_boy_blue ^^^1353310447^^^ @@@blue@@@ CH1
+			const usernameMatch = line.match(/^\s*\^*([^\s]+)/);
+			if (!usernameMatch) return;
+
+			const username = normalize(usernameMatch[1].replace(/^@/, ''));
+			if (!username) return;
+
+			const nickMatch = line.match(/@@@([\s\S]*?)@@@/);
+			const pronounMatch = line.match(/===([\s\S]*?)===/);
+
+			const nickname = nickMatch ? nickMatch[1].trim() : "";
+			const pronouns = pronounMatch ? pronounMatch[1].trim() : "";
+
+			parsed[username] = {};
+			if (nickname) parsed[username].nick = nickname;
+			if (pronouns) parsed[username].pronouns = pronouns;
+		});
+
+		return parsed;
+	}
+
+	function ingestCustomUserData(data) {
+		clearObject(nickMap);
+		clearObject(pronounMap);
+
+		// Backwards compatibility first
+		const legacyNickMap = parseInlineNicknamesToMap();
+		Object.assign(nickMap, legacyNickMap);
+
+		if (!data) return;
+
+		let source = data;
+		if (source && typeof source === "object" && source.users) {
+			source = source.users;
+		}
+
+		// Array format support
+		if (Array.isArray(source)) {
+			source.forEach(entry => {
+				if (!entry || typeof entry !== "object") return;
+				const username = normalize((entry.username ?? entry.user ?? entry.name ?? "").toString().replace(/^@/, ''));
+				if (!username) return;
+
+				const profile = extractProfile(entry);
+				if (!profile) return;
+
+				// file overrides legacy nick param
+				if (profile.nickname) nickMap[username] = profile.nickname;
+				if (profile.pronouns) pronounMap[username] = profile.pronouns;
+			});
+			return;
+		}
+
+		// Object map format support:
+		// {
+		//   "username1": { nick: "nickname", pronouns: "prons" },
+		//   "username2": { nick: "nickname2", pronouns: "they/them" }
+		// }
+		if (source && typeof source === "object") {
+			Object.entries(source).forEach(([key, value]) => {
+				const username = normalize(String(key).replace(/^@/, ''));
+				if (!username) return;
+
+				const profile = extractProfile(value);
+				if (!profile) return;
+
+				// file overrides legacy nick param
+				if (profile.nickname) nickMap[username] = profile.nickname;
+				if (profile.pronouns) pronounMap[username] = profile.pronouns;
+			});
+		}
+	}
+
+	async function loadCustomUserData(forceReload = false) {
+		if (!customUserDataParam) {
+			ingestCustomUserData(null); // still loads legacy nick param
+			customUserDataLoaded = true;
+			return { nickMap, pronounMap };
+		}
+
+		if (customUserDataCache && !forceReload) {
+			ingestCustomUserData(customUserDataCache);
+			customUserDataLoaded = true;
+			return { nickMap, pronounMap };
+		}
+
+		try {
+			const response = await fetch(customUserDataParam, { cache: "no-store" });
+			if (!response.ok) {
+				throw new Error("Failed to load customUserData: " + response.status);
+			}
+
+			const lowerPath = String(customUserDataParam || "").toLowerCase().split('?')[0].split('#')[0];
+
+			if (lowerPath.endsWith('.txt')) {
+				const txt = await response.text();
+				customUserDataCache = parseTxtCustomUserData(txt);
+			} else if (lowerPath.endsWith('.json')) {
+				customUserDataCache = await response.json();
+			} else {
+				// fallback: try json first, then txt
+				const raw = await response.text();
+				try {
+					customUserDataCache = JSON.parse(raw);
+				} catch (err) {
+					customUserDataCache = parseTxtCustomUserData(raw);
 				}
+			}
 
-				const observer = new MutationObserver(mutations => {
-					for (const m of mutations) {
-						for (const node of m.addedNodes) {
-							if (node.nodeType !== Node.ELEMENT_NODE) continue;
-							if (node.dataset && node.dataset.mid) {
-								applyNick(node);
-							} else {
-								node.querySelectorAll('[data-mid]').forEach(applyNick);
-							}
-						}
-					}
-				});
+			ingestCustomUserData(customUserDataCache);
+			customUserDataLoaded = true;
+		} catch (err) {
+			console.error(err);
+			// fallback to legacy nick param only
+			ingestCustomUserData(null);
+			customUserDataLoaded = true;
+		}
 
-				const outputWindow = document.getElementById('output') || document.body;
-				observer.observe(outputWindow, { childList: true, subtree: true });
-			})();
+		return { nickMap, pronounMap };
+	}
+
+	function ensureBadgeContainer(msgNode, nameEl) {
+		if (!msgNode) return null;
+
+		let badgeContainer = null;
+
+		if (nameEl && nameEl.querySelector('.hl-badges')) {
+			badgeContainer = nameEl.querySelector('.hl-badges');
+		}
+
+		if (!badgeContainer && nameEl && nameEl.previousElementSibling && nameEl.previousElementSibling.classList.contains('hl-badges')) {
+			badgeContainer = nameEl.previousElementSibling;
+		}
+
+		if (!badgeContainer && nameEl) {
+			badgeContainer = document.createElement('span');
+			badgeContainer.className = 'hl-badges';
+
+			if (nameEl.parentNode && nameEl.parentNode.classList.contains('hl-firstline')) {
+				nameEl.parentNode.insertBefore(badgeContainer, nameEl);
+			} else if (nameEl.parentNode) {
+				nameEl.insertBefore(badgeContainer, nameEl.firstChild);
+			}
+		}
+
+		return badgeContainer;
+	}
+
+	function applyNick(msgNode) {
+		const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+		if (!nameEl) return;
+
+		const existingNick = nameEl.querySelector('.hl-nick');
+		if (existingNick) existingNick.remove();
+
+		const parts = getResolvedNameParts(nameEl);
+		if (!parts) return;
+
+		const nick = nickMap[parts.normalizedName];
+		if (!nick) {
+			parts.textNode.textContent = parts.displayName;
+			return;
+		}
+
+		const span = document.createElement('span');
+		span.className = 'hl-nick';
+		span.textContent = '\u00a0(' + nick + ')';
+
+		parts.textNode.textContent = parts.displayName;
+		if (parts.textNode.nextSibling && parts.textNode.nextSibling.nodeType === Node.TEXT_NODE && /^\s*:\s*$/.test(parts.textNode.nextSibling.textContent || '')) {
+			parts.textNode.nextSibling.remove();
+		}
+		parts.textNode.after(span, ':');
+	}
+
+	function applyPronouns(msgNode) {
+		const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+		if (!nameEl) return;
+
+		const parts = getResolvedNameParts(nameEl);
+		if (!parts) return;
+
+		const pronouns = pronounMap[parts.normalizedName];
+		const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
+		if (!badgeContainer) return;
+
+		// Replace only text badges; preserve image/svg badges
+		badgeContainer.querySelectorAll('.hl-badge.textbadge').forEach(el => el.remove());
+
+		if (!pronouns) return;
+
+		const badge = document.createElement('span');
+		badge.className = 'hl-badge textbadge';
+		badge.textContent = pronouns;
+		badgeContainer.prepend(badge);
+	}
+
+	function applyUserMeta(msgNode) {
+		if (!msgNode || !msgNode.querySelector) return;
+		applyNick(msgNode);
+		applyPronouns(msgNode);
+	}
+
+	function applyUserMetaToAllMessages() {
+		document.querySelectorAll('[data-mid]').forEach(applyUserMeta);
+	}
+
+	function scheduleUserMetaRefresh() {
+		if (pendingRefreshTimer) clearTimeout(pendingRefreshTimer);
+		pendingRefreshTimer = setTimeout(() => {
+			applyUserMetaToAllMessages();
+			pendingRefreshTimer = null;
+		}, 3000);
+	}
+
+	async function refreshCustomUserData() {
+		await loadCustomUserData(true);
+		scheduleUserMetaRefresh();
+		return { nickMap, pronounMap };
+	}
+
+	window.refreshCustomUserData = refreshCustomUserData;
+
+	loadCustomUserData(false).then(() => {
+		scheduleUserMetaRefresh();
+	});
+
+	const observer = new MutationObserver(mutations => {
+		for (const m of mutations) {
+			for (const node of m.addedNodes) {
+				if (node.nodeType !== Node.ELEMENT_NODE) continue;
+				if (node.dataset && node.dataset.mid) {
+					applyUserMeta(node);
+				} else if (node.querySelectorAll) {
+					node.querySelectorAll('[data-mid]').forEach(applyUserMeta);
+				}
+			}
+		}
+	});
+
+	const outputWindow = document.getElementById('output') || document.body;
+	observer.observe(outputWindow, { childList: true, subtree: true });
+
+	document.addEventListener('socialstream:userdata-refresh', () => {
+		refreshCustomUserData();
+	});
+})();
 
 			// Initialize hotkeys
 			initHotkeys();
