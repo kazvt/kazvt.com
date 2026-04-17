@@ -12196,27 +12196,35 @@ function parseByFileType(rawText, sourceUrl) {
 		parts.textNode.after(span, ':');
 	}
 
-	function applyPronouns(msgNode) {
-		const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
-		if (!nameEl) return;
+function isPronounTextBadge(el) {
+	if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
+	const text = (el.textContent || "").trim();
+	return text.includes('/');
+}
 
-		const parts = getResolvedNameParts(nameEl);
-		if (!parts) return;
+function applyPronouns(msgNode) {
+	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+	if (!nameEl) return;
 
-		const pronouns = pronounMap[parts.normalizedName];
-		if (!pronouns || !pronouns.trim()) return;
+	const parts = getResolvedNameParts(nameEl);
+	if (!parts) return;
 
-		const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
-		if (!badgeContainer) return;
+	const pronouns = pronounMap[parts.normalizedName];
+	if (!pronouns || !pronouns.trim()) return;
 
-		// Only replace text badges if we actually have a non-empty pronoun value
-		badgeContainer.querySelectorAll('.hl-badge.textbadge').forEach(el => el.remove());
+	const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
+	if (!badgeContainer) return;
 
-		const badge = document.createElement('span');
-		badge.className = 'hl-badge textbadge';
-		badge.textContent = pronouns.trim();
-		badgeContainer.prepend(badge);
-	}
+	// Only remove existing pronoun-like text badges, not all text badges
+	Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge'))
+		.filter(isPronounTextBadge)
+		.forEach(el => el.remove());
+
+	const badge = document.createElement('span');
+	badge.className = 'hl-badge textbadge';
+	badge.textContent = pronouns.trim();
+	badgeContainer.prepend(badge);
+}
 
 	function applyUserMeta(msgNode) {
 		if (!msgNode || !msgNode.querySelector) return;
