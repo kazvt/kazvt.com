@@ -10,9 +10,9 @@
 		<meta name="robots" content="noindex">
 		<script type="text/javascript" src="currency.js"></script>
 		<script type="text/javascript" src="./libs/objects.js"></script>
-		<script type="module">
+		<!-- <script type="module">
 			window.__megaModulePromise = import('https://unpkg.com/megajs/dist/main.browser-es.mjs');
-		</script>
+		</script> -->
 
 		<style>
 			:root {
@@ -11950,21 +11950,28 @@
 		}
 	}
 
-	async function readMegaSharedFileText(url) {
-		if (!window.__megaModulePromise) {
-			throw new Error("MEGA module loader not initialized");
-		}
+let megaModulePromise = null;
 
-		const megaModule = await window.__megaModulePromise;
-		const File = megaModule.File;
+async function getMegaModule() {
+	if (megaModulePromise) return megaModulePromise;
 
-		const megaFile = File.fromURL(url);
+	megaModulePromise = import('https://unpkg.com/megajs/dist/main.browser-es.mjs')
+		.catch(err => {
+			megaModulePromise = null;
+			throw err;
+		});
 
-		// docs say downloadBuffer() on a shared file URL works directly,
-		// and loadAttributes() is only needed if you need metadata like name/size
-		const data = await megaFile.downloadBuffer();
-		return new TextDecoder().decode(data);
-	}
+	return megaModulePromise;
+}
+
+async function readMegaSharedFileText(url) {
+	const megaModule = await getMegaModule();
+	const File = megaModule.File;
+
+	const megaFile = File.fromURL(url);
+	const data = await megaFile.downloadBuffer();
+	return new TextDecoder().decode(data);
+}
 
 	function parseByFileType(rawText, sourceUrl) {
 		const lowerPath = String(sourceUrl || "").toLowerCase().split('?')[0].split('#')[0];
