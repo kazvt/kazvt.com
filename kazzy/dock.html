@@ -2636,9 +2636,9 @@
 		}
 
 		.hl-pronouns {
-			background-color: rgba(0, 0, 0, 0.3);
+			background-color: rgba(0, 0, 0, 0.2);
 			border-radius: 4px;
-			border: 1px solid rgba(255, 255, 255, 0.3);
+			border: 1px solid rgba(255, 255, 255, 0.2);
 		}
 
 		</style>
@@ -3226,6 +3226,15 @@
 			var customUserDataParam = urlParams.get("customUserData");
 			var textGlowWidthParam = null;
 			var textGlowColorParam = null;
+
+const primaryNickValue =
+	urlParams.get("primaryNick") ||
+	urlParams.get("primaryNicks") ||
+	urlParams.get("primaryNickname") ||
+	urlParams.get("primaryNicknames");
+
+const usePrimaryNicknames =
+	primaryNickValue !== null && primaryNickValue !== "false" && primaryNickValue !== "0";
 
 			var fontColorParam = normalizeColor(urlParams.get("fontcolor"));
 			if (hasValue(fontColorParam)) {
@@ -11843,23 +11852,27 @@
 	}
 
 	// compare without @, keep visible @ as-is
-	function getResolvedNameParts(nameEl) {
-		const textNode = getPrimaryNameTextNode(nameEl);
-		if (!textNode) return null;
+function getResolvedNameParts(nameEl) {
+	const textNode = getPrimaryNameTextNode(nameEl);
+	if (!textNode) return null;
 
-		const raw = textNode.textContent || "";
-		const withoutColon = raw.replace(/:\s*$/, '').trim();
-		const compareName = withoutColon.replace(/^@/, '').trim();
+	const raw = textNode.textContent || "";
+	const withoutColon = raw.replace(/:\s*$/, '').trim();
 
-		return {
-			textNode,
-			raw,
-			displayName: withoutColon,
-			compareName,
-			normalizedName: normalize(compareName),
-			hasAtPrefix: /^\s*@/.test(withoutColon)
-		};
-	}
+	const storedUsername = (nameEl.dataset && nameEl.dataset.usernameOriginal || "").trim();
+	const baseName = storedUsername || withoutColon;
+
+	const compareName = baseName.replace(/^@/, '').trim();
+
+	return {
+		textNode,
+		raw,
+		displayName: withoutColon,
+		baseName,
+		normalizedName: normalize(compareName),
+		hasAtPrefix: /^\s*@/.test(baseName)
+	};
+}
 
 	function extractProfile(record) {
 		if (!record || typeof record !== "object") return null;
@@ -12181,32 +12194,53 @@ function parseByFileType(rawText, sourceUrl) {
 		return badgeContainer;
 	}
 
-	function applyNick(msgNode) {
-		const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
-		if (!nameEl) return;
+function applyNick(msgNode) {
+	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+	if (!nameEl) return;
 
-		const existingNick = nameEl.querySelector('.hl-nick');
-		if (existingNick) existingNick.remove();
+	const parts = getResolvedNameParts(nameEl);
+	if (!parts) return;
 
-		const parts = getResolvedNameParts(nameEl);
-		if (!parts) return;
-
-		const nick = nickMap[parts.normalizedName];
-		if (!nick || !nick.trim()) {
-			parts.textNode.textContent = parts.displayName;
-			return;
-		}
-
-		const span = document.createElement('span');
-		span.className = 'hl-nick';
-		span.textContent = '\u00a0(' + nick.trim() + ')';
-
-		parts.textNode.textContent = parts.displayName;
-		if (parts.textNode.nextSibling && parts.textNode.nextSibling.nodeType === Node.TEXT_NODE && /^\s*:\s*$/.test(parts.textNode.nextSibling.textContent || '')) {
-			parts.textNode.nextSibling.remove();
-		}
-		parts.textNode.after(span, ':');
+	// Preserve the original username once, before any visual swapping
+	if (!nameEl.dataset.usernameOriginal) {
+		nameEl.dataset.usernameOriginal = parts.displayName;
 	}
+
+	const usernameDisplay = nameEl.dataset.usernameOriginal;
+	const lookupName = normalize(usernameDisplay.replace(/^@/, '').trim());
+	const nick = nickMap[lookupName];
+
+	const existingNick = nameEl.querySelector('.hl-nick');
+	if (existingNick) existingNick.remove();
+
+	if (!nick || !nick.trim()) {
+		// No nickname: restore plain username view
+		parts.textNode.textContent = usernameDisplay;
+		return;
+	}
+
+	const nickText = nick.trim();
+	const span = document.createElement('span');
+	span.className = 'hl-nick';
+
+	if (usePrimaryNicknames) {
+		parts.textNode.textContent = nickText;
+		span.textContent = '\u00a0(' + usernameDisplay + ')';
+	} else {
+		parts.textNode.textContent = usernameDisplay;
+		span.textContent = '\u00a0(' + nickText + ')';
+	}
+
+	if (
+		parts.textNode.nextSibling &&
+		parts.textNode.nextSibling.nodeType === Node.TEXT_NODE &&
+		/^\s*:\s*$/.test(parts.textNode.nextSibling.textContent || '')
+	) {
+		parts.textNode.nextSibling.remove();
+	}
+
+	parts.textNode.after(span, ':');
+}
 
 function isPronounTextBadge(el) {
 	if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
