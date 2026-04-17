@@ -3227,14 +3227,27 @@
 			var textGlowWidthParam = null;
 			var textGlowColorParam = null;
 
-const primaryNickValue =
-	urlParams.get("primaryNick") ||
-	urlParams.get("primaryNicks") ||
-	urlParams.get("primaryNickname") ||
-	urlParams.get("primaryNicknames");
+const primaryNickKeys = [
+  "primaryNick",
+  "primaryNicks",
+  "primaryNickname",
+  "primaryNicknames",
+];
 
-const usePrimaryNicknames =
-	primaryNickValue !== null && primaryNickValue !== "false" && primaryNickValue !== "0";
+const usePrimaryNicknames = primaryNickKeys.some((key) => {
+  if (!urlParams.has(key)) return false;
+
+  const value = urlParams.get(key);
+
+  // exists without value: ?primaryNick or ?primaryNick=
+  if (value === "") return true;
+
+  // exists with explicit false
+  if (value?.toLowerCase() === "false") return false;
+
+  // any other present value counts as true
+  return true;
+});
 
 			var fontColorParam = normalizeColor(urlParams.get("fontcolor"));
 			if (hasValue(fontColorParam)) {
