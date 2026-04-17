@@ -16,7 +16,7 @@
 
 		<style>
 			:root {
-			
+
 				--show-emoji-only: flex;
 				--list-or-horizontal: inline-flex;
 				--show-donos-only: flex;
@@ -12092,16 +12092,17 @@ async function readMegaSharedFileText(url) {
 		if (!parts) return;
 
 		const pronouns = pronounMap[parts.normalizedName];
+		if (!pronouns || !pronouns.trim()) return;
+
 		const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
 		if (!badgeContainer) return;
 
+		// Only replace text badges if we actually have a non-empty pronoun value
 		badgeContainer.querySelectorAll('.hl-badge.textbadge').forEach(el => el.remove());
-
-		if (!pronouns) return;
 
 		const badge = document.createElement('span');
 		badge.className = 'hl-badge textbadge';
-		badge.textContent = pronouns;
+		badge.textContent = pronouns.trim();
 		badgeContainer.prepend(badge);
 	}
 
