@@ -12068,14 +12068,14 @@ async function readMegaSharedFileText(url) {
 		if (!parts) return;
 
 		const nick = nickMap[parts.normalizedName];
-		if (!nick) {
+		if (!nick || !nick.trim()) {
 			parts.textNode.textContent = parts.displayName;
 			return;
 		}
 
 		const span = document.createElement('span');
 		span.className = 'hl-nick';
-		span.textContent = '\u00a0(' + nick + ')';
+		span.textContent = '\u00a0(' + nick.trim() + ')';
 
 		parts.textNode.textContent = parts.displayName;
 		if (parts.textNode.nextSibling && parts.textNode.nextSibling.nodeType === Node.TEXT_NODE && /^\s*:\s*$/.test(parts.textNode.nextSibling.textContent || '')) {
