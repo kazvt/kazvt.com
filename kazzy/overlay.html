@@ -3491,9 +3491,31 @@
 		var customOutlineColorParam = null;
 		var hasCustomOutline = false;
 		var textGlowEnabled = urlParams.has("textglow");
+			var nicknamesParam = urlParams.get("nick") || urlParams.get("nicks") || urlParams.get("nickname") || urlParams.get("nicknames");
+			var customUserDataParam = urlParams.get("customUserData");
 		var textGlowWidthParam = null;
 		var textGlowColorParam = null;
+const primaryNickKeys = [
+  "primaryNick",
+  "primaryNicks",
+  "primaryNickname",
+  "primaryNicknames",
+];
 
+const usePrimaryNicknames = primaryNickKeys.some((key) => {
+  if (!urlParams.has(key)) return false;
+
+  const value = urlParams.get(key);
+
+  // exists without value: ?primaryNick or ?primaryNick=
+  if (value === "") return true;
+
+  // exists with explicit false
+  if (value?.toLowerCase() === "false") return false;
+
+  // any other present value counts as true
+  return true;
+});
 
 
 		var fontColorParam = normalizeColor(urlParams.get("fontcolor"));
