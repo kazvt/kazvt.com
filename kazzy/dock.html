@@ -12037,11 +12037,17 @@ function getResolvedNameParts(nameEl) {
 			return customPronouns.trim();
 		}
 
-		if (!msgSrc || msgSrc === "twitch") {
-			return null;
-		}
+const source =
+	msgNode?.dataset?.type ||
+	msgNode?.dataset?.source ||
+	msgNode?.rawContents?.type ||
+	"";
 
-		return await getFallbackPronounsForUsername(parts.baseName || parts.displayName);
+if (!source || source === "twitch") {
+	return null;
+}
+
+return await getFallbackPronounsForUsername(parts.baseName || parts.displayName);
 	}
 
 	function extractProfile(record) {
