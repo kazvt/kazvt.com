@@ -2865,6 +2865,8 @@
 				console.error("Unhandled Error occured"); //or any message
 				return false;
 			};
+
+			let msgSrc = "";
 			
 			function log(msg) {
 				//	console.log(msg);
@@ -9799,7 +9801,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 						chatImg = "";
 					}
 
-					const msgSrc = showType;
+					msgSrc = showType;
 
 					if (largeavatar && showType && showsource) {
 						var sourceNameText = showSourceName ? '<span class="source-name">' + showType.charAt(0).toUpperCase() + showType.slice(1) + '</span>' : '';
@@ -11828,7 +11830,6 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 (function () {
 	const normalize = s => String(s || "").toLowerCase().replace(/[-_]/g, '_').trim();
 
-	
 	const nickMap = {};
 	const pronounMap = {};
 
@@ -12036,7 +12037,6 @@ function getResolvedNameParts(nameEl) {
 			return customPronouns.trim();
 		}
 
-		const msgSrc = (msgNode?.dataset?.source || msgNode?.getAttribute?.('data-source') || "").toLowerCase();
 		if (!msgSrc || msgSrc === "twitch") {
 			return null;
 		}
