@@ -3129,6 +3129,22 @@
 			}
 		}
 
+        // extra code
+        function stringToDeterministicColor(str) {
+	let hash = 0;
+
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+		hash |= 0; // keep it 32-bit
+	}
+
+	const hue = Math.abs(hash) % 360;
+	const saturation = 70;
+	const lightness = 60;
+
+	return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
 		window.alert = function () {
 			console.log("blocked");
 		};
@@ -10077,6 +10093,8 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 					chatImg = "";
 				}
 
+					var msgSrc = showType;
+
 				if (largeavatar && showType && showsource) {
 					var sourceNameText = showSourceName ? '<span class="source-name">' + showType.charAt(0).toUpperCase() + showType.slice(1) + '</span>' : '';
 					showType = '<img src="./sources/images/' + showType + '.png" class="icon hl-source-type avatar-badge" data-icon-name="' + showType + '" onerror="this.style.display=\'none\'" />' + sourceNameText;
@@ -10384,6 +10402,14 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 				if (makeBlurred) {
 					node.classList.add("blurred");
 				}
+                
+if (msgSrc === "youtube" || msgSrc === "youtubeshorts") {
+	const nameEl = node.querySelector(".hl-name");
+	if (nameEl) {
+		const nameText = (nameEl.dataset.usernameOriginal || nameEl.textContent || "").trim();
+		nameEl.style.color = stringToDeterministicColor(nameText);
+	}
+}
 
 				if (bot && !horizontal) {
 					node.classList.add("bot");
