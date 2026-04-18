@@ -2866,8 +2866,6 @@
 				return false;
 			};
 
-			let msgSrc = "";
-			
 			function log(msg) {
 				//	console.log(msg);
 			}
@@ -9801,7 +9799,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 						chatImg = "";
 					}
 
-					msgSrc = showType;
+					var msgSrc = showType;
 
 					if (largeavatar && showType && showsource) {
 						var sourceNameText = showSourceName ? '<span class="source-name">' + showType.charAt(0).toUpperCase() + showType.slice(1) + '</span>' : '';
