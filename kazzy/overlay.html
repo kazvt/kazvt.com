@@ -12753,13 +12753,17 @@ async function applyPronouns(msgNode) {
 	badgeContainer.prepend(badge);
 }
 
-	async function applyUserMeta(msgNode) {
-		if (!msgNode || !msgNode.querySelector) return;
+async function applyUserMeta(msgNode) {
+	if (!msgNode || !msgNode.querySelector) return;
 
-		applyNick(msgNode);
-		normalizePronounBadges(msgNode);
-		await applyPronouns(msgNode);
+	applyNick(msgNode);
+	normalizePronounBadges(msgNode);
+	await applyPronouns(msgNode);
+
+	if (horizontal && typeof horizontalRealign === "function") {
+		requestAnimationFrame(() => horizontalRealign(false));
 	}
+}
 
 	function applyUserMetaToAllMessages() {
 		document.querySelectorAll('[data-mid]').forEach(node => {
