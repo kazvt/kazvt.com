@@ -1,144 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loading Sentence Wave</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Sentence Wave</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
-  <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css" />
-  <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <style>
+        :root {
+            --gap: 24px;
+            --gif-size: 140px;
+            --font-size: 96px;
+            --outline-color: #000000;
+            --outline-scale: 0.25;
+            --outline-width: calc(var(--font-size) * var(--outline-scale));
+        }
 
-  <style>
-    :root {
-      --bg: #0b1020;
-      --text: #f5f7ff;
-      --glow: rgba(255, 255, 255, 0.18);
-      --gap: clamp(16px, 4vw, 44px);
-      --gif-size: clamp(96px, 14vw, 180px);
-      --font-size: clamp(2.4rem, 7vw, 5.8rem);
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
 
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
+        body {
+            display: grid;
+            place-items: center;
+            background: transparent;
+            font-family: Crash Bandicoot, 'Press Start 2P', monospace;
+            overflow: hidden;
+        }
 
-    body {
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 50% 35%, rgba(255,255,255,0.08), transparent 30%),
-        linear-gradient(180deg, #121933 0%, var(--bg) 100%);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      overflow: hidden;
-    }
+        .wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--gap);
+            width: 100vw;
+            padding: 3vw;
+            overflow: visible;
+        }
 
-    .wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--gap);
-      padding: 24px;
-      width: 100%;
-    }
+        .side-gif {
+            width: var(--gif-size);
+            height: var(--gif-size);
+            object-fit: contain;
+            flex: 0 0 auto;
+            user-select: none;
+            pointer-events: none;
+            vertical-align: middle;
+        }
 
-    .side-gif {
-      width: var(--gif-size);
-      height: var(--gif-size);
-      object-fit: contain;
-      image-rendering: auto;
-      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
-      flex: 0 0 auto;
-      user-select: none;
-      pointer-events: none;
-    }
+        .text-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            flex: 0 1 auto;
+            min-width: 0;
+        }
 
-    h1 {
-      margin: 0;
-      font-size: var(--font-size);
-      font-weight: 900;
-      line-height: 1.05;
-      text-align: center;
-      letter-spacing: 0.03em;
-      text-transform: none;
-      text-shadow:
-        0 0 12px var(--glow),
-        0 4px 18px rgba(0,0,0,0.28);
-      white-space: nowrap;
-    }
+        svg {
+            overflow: visible;
+            display: block;
+            shape-rendering: crispEdges;
+            text-rendering: geometricPrecision;
+        }
 
-    .loading {
-      display: inline-block;
-    }
+        .char-group {
+            transform-box: fill-box;
+            transform-origin: center bottom;
+        }
 
-    .loading .word,
-    .loading .char {
-      display: inline-block;
-    }
+        .char-outline,
+        .char-fill {
+            shape-rendering: crispEdges;
+            text-rendering: geometricPrecision;
+        }
 
-    .loading .char {
-      transform-origin: 50% 100%;
-      will-change: transform, filter;
-    }
+        .char-outline {
+            fill: none;
+            stroke: var(--outline-color);
+            stroke-width: var(--outline-width);
+            stroke-linejoin: miter;
+            stroke-miterlimit: 2;
+            stroke-linecap: butt;
+            paint-order: stroke fill;
+        }
 
-    @media (max-width: 720px) {
-      .wrap {
-        gap: 14px;
-      }
-
-      .side-gif {
-        width: clamp(72px, 18vw, 110px);
-        height: clamp(72px, 18vw, 110px);
-      }
-
-      h1 {
-        white-space: normal;
-      }
-    }
-  </style>
+        .char-fill {
+            fill: url(#textGradient);
+        }
+    </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <img class="side-gif" src="wumpa.gif" alt="Wumpa animation left" />
+    <div class="wrap">
+        <img class="side-gif" src="wumpa.gif" alt="" />
 
-    <h1 class="loading" data-splitting>Loading Sentence...</h1>
+        <div class="text-box">
+            <svg id="titleSvg"></svg>
+        </div>
 
-    <img class="side-gif" src="wumpa.gif" alt="Wumpa animation right" />
-  </div>
+        <img class="side-gif" src="wumpa.gif" alt="" />
+    </div>
 
-  <script>
-    Splitting();
+    <script>
+        const root = document.documentElement;
+        const titleSvg = document.getElementById('titleSvg');
+        const sideGifs = Array.from(document.querySelectorAll('.side-gif'));
 
-    const chars = document.querySelectorAll('.loading .char');
+        const textValue = 'starting soon...';
+        const cycleDuration = 3000;
+        const waveDuration = 2000;
+        const charMoveDuration = 300;
+        const peakY = 30;
 
-    anime({
-      targets: chars,
-      translateY: [
-        { value: -26, duration: 1000, easing: 'easeOutSine' },
-        { value: 0, duration: 1000, easing: 'easeInOutSine' }
-      ],
-      rotateZ: [
-        { value: -12, duration: 1000, easing: 'easeOutSine' },
-        { value: 0, duration: 1000, easing: 'easeInOutSine' }
-      ],
-      scaleY: [
-        { value: 1.16, duration: 1000, easing: 'easeOutSine' },
-        { value: 1, duration: 1000, easing: 'easeInOutSine' }
-      ],
-      duration: 2000,
-      delay: anime.stagger(90, { start: 0, from: 'first' }),
-      endDelay: 1000,
-      loop: true,
-      easing: 'linear'
-    });
-  </script>
+        let chars = [];
+
+        function syncResponsiveVars() {
+            const fontSize = parseFloat(getComputedStyle(root).getPropertyValue('--font-size'));
+            const outlineScale = parseFloat(getComputedStyle(root).getPropertyValue('--outline-scale'));
+            const outlineWidth = Math.max(2, Math.round(fontSize * outlineScale));
+            root.style.setProperty('--outline-width', `${outlineWidth}px`);
+            return outlineWidth;
+        }
+
+        function createSvgText() {
+            titleSvg.innerHTML = '';
+
+            const ns = 'http://www.w3.org/2000/svg';
+
+            const defs = document.createElementNS(ns, 'defs');
+            const gradient = document.createElementNS(ns, 'linearGradient');
+            gradient.setAttribute('id', 'textGradient');
+            gradient.setAttribute('x1', '0%');
+            gradient.setAttribute('y1', '0%');
+            gradient.setAttribute('x2', '0%');
+            gradient.setAttribute('y2', '100%');
+
+            const stop1 = document.createElementNS(ns, 'stop');
+            stop1.setAttribute('offset', '0%');
+            stop1.setAttribute('stop-color', '#7fbb00');
+
+            const stop2 = document.createElementNS(ns, 'stop');
+            stop2.setAttribute('offset', '50%');
+            stop2.setAttribute('stop-color', '#fffb00');
+
+            const stop3 = document.createElementNS(ns, 'stop');
+            stop3.setAttribute('offset', '100%');
+            stop3.setAttribute('stop-color', '#ff0000');
+
+            gradient.appendChild(stop1);
+            gradient.appendChild(stop2);
+            gradient.appendChild(stop3);
+            defs.appendChild(gradient);
+            titleSvg.appendChild(defs);
+
+            const fontSize = parseFloat(getComputedStyle(root).getPropertyValue('--font-size'));
+            const outlineWidth = syncResponsiveVars();
+            const letterSpacing = Math.round(fontSize * 0.03);
+            const y = Math.round(fontSize + outlineWidth);
+
+            let x = Math.round(outlineWidth);
+            chars = [];
+
+            const spaceWidth = Math.round(fontSize * 0.35);
+
+            for (const ch of textValue) {
+                const g = document.createElementNS(ns, 'g');
+                g.setAttribute('class', 'char-group');
+
+                const outline = document.createElementNS(ns, 'text');
+                outline.setAttribute('class', 'char-outline');
+                outline.setAttribute('x', Math.round(x));
+                outline.setAttribute('y', y);
+                outline.setAttribute('font-size', fontSize);
+                outline.setAttribute('font-weight', '900');
+                outline.setAttribute('font-family', "Crash Bandicoot, 'Press Start 2P', monospace");
+                outline.setAttribute('xml:space', 'preserve');
+                outline.textContent = ch;
+
+                const fill = document.createElementNS(ns, 'text');
+                fill.setAttribute('class', 'char-fill');
+                fill.setAttribute('x', Math.round(x));
+                fill.setAttribute('y', y);
+                fill.setAttribute('font-size', fontSize);
+                fill.setAttribute('font-weight', '900');
+                fill.setAttribute('font-family', "Crash Bandicoot, 'Press Start 2P', monospace");
+                fill.setAttribute('xml:space', 'preserve');
+                fill.textContent = ch;
+
+                g.appendChild(outline);
+                g.appendChild(fill);
+                titleSvg.appendChild(g);
+
+                let charWidth;
+                if (ch === ' ') {
+                    charWidth = spaceWidth;
+                } else {
+                    charWidth = Math.round(g.getBBox().width);
+                }
+
+                const extraSpacing = ch === '.'
+                    ? Math.round(-fontSize * 0.15)
+                    : letterSpacing;
+
+                chars.push({ g, width: charWidth, char: ch });
+                x += Math.round(charWidth + extraSpacing);
+            }
+
+            const fullBox = titleSvg.getBBox();
+            titleSvg.setAttribute(
+                'viewBox',
+                `${fullBox.x - outlineWidth} ${fullBox.y - outlineWidth} ${fullBox.width + outlineWidth * 2} ${fullBox.height + outlineWidth * 2}`
+            );
+            titleSvg.setAttribute('width', Math.ceil(fullBox.width + outlineWidth * 2));
+            titleSvg.setAttribute('height', Math.ceil(fullBox.height + outlineWidth * 2));
+        }
+
+        function updateGifSize() {
+            let maxWidth = 0;
+
+            for (const char of chars) {
+                if (char.width > maxWidth) maxWidth = char.width;
+            }
+
+            const gifSize = Math.max(56, Math.round(maxWidth * 2.5));
+            root.style.setProperty('--gif-size', `${gifSize}px`);
+        }
+
+        function fitLayoutToViewport() {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const availableWidth = vw - vw * 0.06;
+
+            let low = 12;
+            let high = Math.min(vw * 0.22, vh * 0.42);
+            let best = low;
+
+            for (let i = 0; i < 24; i++) {
+                const mid = Math.round((low + high) / 2);
+                root.style.setProperty('--font-size', `${mid}px`);
+
+                createSvgText();
+                updateGifSize();
+                createSvgText();
+
+                const textWidth = titleSvg.getBoundingClientRect().width;
+                const gifWidth = sideGifs[0].getBoundingClientRect().width;
+                const gap = Math.max(8, Math.round(mid * 0.18));
+                const totalWidth = textWidth + gifWidth * 2 + gap * 2;
+
+                if (totalWidth <= availableWidth) {
+                    best = mid;
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+
+            root.style.setProperty('--font-size', `${Math.round(best)}px`);
+            root.style.setProperty('--gap', `${Math.max(8, Math.round(best * 0.18))}px`);
+
+            createSvgText();
+            updateGifSize();
+            createSvgText();
+        }
+
+        function resetChars() {
+            chars.forEach(char => {
+                char.g.style.transform = 'translateY(0px)';
+            });
+        }
+
+        function letterOffset(globalTime, index, stepDelay) {
+            const localTime = globalTime - index * stepDelay;
+
+            if (localTime < 0 || localTime >= charMoveDuration) {
+                return 0;
+            }
+
+            const segment = charMoveDuration / 3;
+
+            if (localTime < segment) return -peakY * 0.34;
+            if (localTime < segment * 2) return -peakY;
+            return -peakY * 0.34;
+        }
+
+        function renderFrame(globalTime) {
+            const stepDelay = chars.length > 1
+                ? (waveDuration - charMoveDuration) / (chars.length - 1)
+                : 0;
+
+            chars.forEach((char, index) => {
+                const y = Math.round(letterOffset(globalTime, index, stepDelay));
+                char.g.style.transform = `translateY(${y}px)`;
+            });
+        }
+
+        function startLoop() {
+            resetChars();
+
+            const driver = { t: 0 };
+
+            anime({
+                targets: driver,
+                t: cycleDuration,
+                duration: cycleDuration,
+                easing: 'linear',
+                loop: true,
+                update: () => {
+                    const time = driver.t % cycleDuration;
+
+                    if (time >= waveDuration) {
+                        resetChars();
+                    } else {
+                        renderFrame(time);
+                    }
+                },
+                loopBegin: () => {
+                    driver.t = 0;
+                    resetChars();
+                }
+            });
+        }
+
+        fitLayoutToViewport();
+        resetChars();
+
+        window.addEventListener('resize', () => {
+            fitLayoutToViewport();
+            resetChars();
+        });
+
+        startLoop();
+    </script>
 </body>
+
 </html>
