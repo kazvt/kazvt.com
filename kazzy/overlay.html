@@ -12761,7 +12761,10 @@ async function applyUserMeta(msgNode) {
 	await applyPronouns(msgNode);
 
 	if (horizontal && typeof horizontalRealign === "function") {
-		requestAnimationFrame(() => horizontalRealign(false));
+		requestAnimationFrame(() => {
+			horizontalRealign(false);
+			requestAnimationFrame(() => horizontalRealign(false));
+		});
 	}
 }
 
