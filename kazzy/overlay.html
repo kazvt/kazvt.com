@@ -12725,33 +12725,37 @@ function applyNick(msgNode) {
 		rootNode.querySelectorAll('.hl-badge.textbadge:not(.hl-pronouns)').forEach(isPronounTextBadge);
 	}
 
-async function applyPronouns(msgNode) {
-	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
-	if (!nameEl) return;
+	async function applyPronouns(msgNode) {
+		const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
+		if (!nameEl) return;
 
-	const parts = getResolvedNameParts(nameEl);
-	if (!parts) return;
+		const parts = getResolvedNameParts(nameEl);
+		if (!parts) return;
 
-	const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
-	if (!badgeContainer) return;
+		const badgeContainer = ensureBadgeContainer(msgNode, nameEl);
+		if (!badgeContainer) return;
 
-	const existingPronounBadges = Array.from(
-		badgeContainer.querySelectorAll('.hl-badge.textbadge')
-	).filter(isPronounTextBadge);
+		const existingPronounBadges = Array.from(
+			badgeContainer.querySelectorAll('.hl-badge.textbadge')
+		).filter(isPronounTextBadge);
 
-	const pronouns = await resolvePronounsForMessage(msgNode, parts);
+		const pronouns = await resolvePronounsForMessage(msgNode, parts);
 
-	if (!pronouns || !pronouns.trim()) {
-		return;
+		if (!pronouns || !pronouns.trim()) {
+			return;
+		}
+
+		existingPronounBadges.forEach(el => el.remove());
+
+		const badge = document.createElement('span');
+		badge.className = 'hl-badge textbadge hl-pronouns';
+		badge.textContent = pronouns.trim();
+		badgeContainer.prepend(badge);
+
+		if (horizontal && typeof horizontalRealign === "function") {
+			requestAnimationFrame(() => horizontalRealign(false));
+		}
 	}
-
-	existingPronounBadges.forEach(el => el.remove());
-
-	const badge = document.createElement('span');
-	badge.className = 'hl-badge textbadge hl-pronouns';
-	badge.textContent = pronouns.trim();
-	badgeContainer.prepend(badge);
-}
 
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
