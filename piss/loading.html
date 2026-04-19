@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading Sentence Wave</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
+  <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css" />
+  <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --text: #f5f7ff;
+      --glow: rgba(255, 255, 255, 0.18);
+      --gap: clamp(16px, 4vw, 44px);
+      --gif-size: clamp(96px, 14vw, 180px);
+      --font-size: clamp(2.4rem, 7vw, 5.8rem);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(255,255,255,0.08), transparent 30%),
+        linear-gradient(180deg, #121933 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--gap);
+      padding: 24px;
+      width: 100%;
+    }
+
+    .side-gif {
+      width: var(--gif-size);
+      height: var(--gif-size);
+      object-fit: contain;
+      image-rendering: auto;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
+      flex: 0 0 auto;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: var(--font-size);
+      font-weight: 900;
+      line-height: 1.05;
+      text-align: center;
+      letter-spacing: 0.03em;
+      text-transform: none;
+      text-shadow:
+        0 0 12px var(--glow),
+        0 4px 18px rgba(0,0,0,0.28);
+      white-space: nowrap;
+    }
+
+    .loading {
+      display: inline-block;
+    }
+
+    .loading .word,
+    .loading .char {
+      display: inline-block;
+    }
+
+    .loading .char {
+      transform-origin: 50% 100%;
+      will-change: transform, filter;
+    }
+
+    @media (max-width: 720px) {
+      .wrap {
+        gap: 14px;
+      }
+
+      .side-gif {
+        width: clamp(72px, 18vw, 110px);
+        height: clamp(72px, 18vw, 110px);
+      }
+
+      h1 {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="side-gif" src="wumpa.gif" alt="Wumpa animation left" />
+
+    <h1 class="loading" data-splitting>Loading Sentence...</h1>
+
+    <img class="side-gif" src="wumpa.gif" alt="Wumpa animation right" />
+  </div>
+
+  <script>
+    Splitting();
+
+    const chars = document.querySelectorAll('.loading .char');
+
+    anime({
+      targets: chars,
+      translateY: [
+        { value: -26, duration: 1000, easing: 'easeOutSine' },
+        { value: 0, duration: 1000, easing: 'easeInOutSine' }
+      ],
+      rotateZ: [
+        { value: -12, duration: 1000, easing: 'easeOutSine' },
+        { value: 0, duration: 1000, easing: 'easeInOutSine' }
+      ],
+      scaleY: [
+        { value: 1.16, duration: 1000, easing: 'easeOutSine' },
+        { value: 1, duration: 1000, easing: 'easeInOutSine' }
+      ],
+      duration: 2000,
+      delay: anime.stagger(90, { start: 0, from: 'first' }),
+      endDelay: 1000,
+      loop: true,
+      easing: 'linear'
+    });
+  </script>
+</body>
+</html>
