@@ -422,7 +422,7 @@
 		.horizontal-ticker-track {
 			display: inline-flex;
 			align-items: stretch;
-			gap: var(--horizontal-ticker-gap, 12px);
+			gap: vhorizontal-ticker-gapar(--, 12px);
 			transition: transform var(--horizontal-ticker-duration, 0.55s) var(--horizontal-ticker-ease, cubic-bezier(0.22, 0.61, 0.36, 1));
 			will-change: transform;
 		}
@@ -9319,7 +9319,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 					viewport: null,
 					track: null,
 					direction: horizontalReverse ? "ltr" : "rtl",
-					gap: 12,
+					gap: 15,
 					maxMessages: customNodeLimit || 15,
 					transitionDuration: 520,
 					transitionEasing: "cubic-bezier(0.22, 0.61, 0.36, 1)",
