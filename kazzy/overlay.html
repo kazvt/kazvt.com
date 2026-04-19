@@ -10083,27 +10083,28 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 					}
 				}
 
-				var chatImg = data.chatimg;
-				if (hideUnknownAvatar && isUnknownAvatarURL(chatImg)) {
-					chatImg = "";
-				}
-				if (!chatImg && avatars) {
-					if (fallbackImageAnnouncement && !data.chatname && data.event) {
-						chatImg = '<img id="img_' + data.id + '" src="./icons/announcement.png" class="icon ' + (darkmode ? "invert" : "") + ' hl-profile-pic" onerror="errorImage(this);" />';
-					} else if (fallbackImage && !hideUnknownAvatar) {
-						chatImg = '<img id="img_' + data.id + '" src="./sources/images/unknown.png" class="icon ' + (darkmode ? "invert" : "") + ' hl-profile-pic" onerror="errorImage(this);" />';
-					} else {
-						chatImg = "";
-					}
-				} else if (avatars) {
-					if (data.type && data.type == "twitch" && avatars && !hideUnknownAvatar) {
-						chatImg = '<img id="img_' + data.id + '" src="./sources/images/unknown.png" class="fade-in-image ' + (darkmode ? "invert" : "") + ' icon hl-profile-pic" onerror="errorImage(this);" />';
-					} else {
-						chatImg = '<img id="img_' + data.id + '" src="' + chatImg + '" class="icon hl-profile-pic" onerror="errorImage(this);" />';
-					}
-				} else {
-					chatImg = "";
-				}
+var chatImg = data.chatimg;
+if (hideUnknownAvatar && isUnknownAvatarURL(chatImg)) {
+	chatImg = "";
+}
+
+if (data.event) {
+	chatImg = "";
+} else if (!chatImg && avatars) {
+	if (fallbackImage && !hideUnknownAvatar) {
+		chatImg = '<img id="img_' + data.id + '" src="./sources/images/unknown.png" class="icon ' + (darkmode ? "invert" : "") + ' hl-profile-pic" onerror="errorImage(this);" />';
+	} else {
+		chatImg = "";
+	}
+} else if (avatars) {
+	if (data.type && data.type == "twitch" && !hideUnknownAvatar) {
+		chatImg = '<img id="img_' + data.id + '" src="./sources/images/unknown.png" class="fade-in-image ' + (darkmode ? "invert" : "") + ' icon hl-profile-pic" onerror="errorImage(this);" />';
+	} else {
+		chatImg = '<img id="img_' + data.id + '" src="' + chatImg + '" class="icon hl-profile-pic" onerror="errorImage(this);" />';
+	}
+} else {
+	chatImg = "";
+}
 
 					var msgSrc = showType;
 
