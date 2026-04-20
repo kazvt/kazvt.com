@@ -55,6 +55,7 @@
             user-select: none;
             pointer-events: none;
             vertical-align: middle;
+
         }
 
         .text-box {
@@ -116,7 +117,10 @@
         const titleSvg = document.getElementById('titleSvg');
         const sideGifs = Array.from(document.querySelectorAll('.side-gif'));
 
-        const textValue = 'starting soon...';
+        const defaultText = 'starting soon...';
+        const params = new URLSearchParams(window.location.search);
+        const textValue = params.get('text') || defaultText;
+
         const cycleDuration = 3000;
         const waveDuration = 2000;
         const charMoveDuration = 300;
@@ -225,6 +229,36 @@
             titleSvg.setAttribute('height', Math.ceil(fullBox.height + outlineWidth * 2));
         }
 
+        function updateGifOutlineFilter() {
+            const styles = getComputedStyle(root);
+
+            const fontSize = parseFloat(styles.getPropertyValue('--font-size')) || 96;
+            const outlineScale = parseFloat(styles.getPropertyValue('--outline-scale')) || 0.25;
+            const outlineColor = styles.getPropertyValue('--outline-color').trim() || '#000000';
+
+            const outlineWidth = parseFloat(styles.getPropertyValue('--outline-width')) || 2;
+            const radius = Math.max(1, Math.round(outlineWidth * 0.19));
+
+            const offsets = [
+                [radius, 0],
+                [-radius, 0],
+                [0, radius],
+                [0, -radius],
+                [radius, radius],
+                [-radius, radius],
+                [radius, -radius],
+                [-radius, -radius]
+            ];
+
+            const filterValue = offsets
+                .map(([x, y]) => `drop-shadow(${x}px ${y}px 0 ${outlineColor})`)
+                .join(' ');
+
+            sideGifs.forEach(gif => {
+                gif.style.filter = filterValue;
+            });
+        }
+
         function updateGifSize() {
             let maxWidth = 0;
 
@@ -252,6 +286,7 @@
                 createSvgText();
                 updateGifSize();
                 createSvgText();
+                updateGifOutlineFilter();
 
                 const textWidth = titleSvg.getBoundingClientRect().width;
                 const gifWidth = sideGifs[0].getBoundingClientRect().width;
@@ -272,6 +307,7 @@
             createSvgText();
             updateGifSize();
             createSvgText();
+            updateGifOutlineFilter();
         }
 
         function resetChars() {
@@ -334,10 +370,12 @@
 
         fitLayoutToViewport();
         resetChars();
+        updateGifOutlineFilter();
 
         window.addEventListener('resize', () => {
             fitLayoutToViewport();
             resetChars();
+            updateGifOutlineFilter();
         });
 
         startLoop();
