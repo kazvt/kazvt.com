@@ -181,10 +181,12 @@
         }
 
         .wumpa-inline {
+            font-family: "Crash Bandicoot", "Crash-a-Like", "Comic Sans MS", "Trebuchet MS", Verdana, sans-serif;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-weight: bold;
+            font-size: 14px;
             background: linear-gradient(180deg, #fff8cb 0%, #efd895 100%);
             border: 2px solid #b86a23;
             padding: 3px 8px;
@@ -283,6 +285,45 @@
             background: #fff3c8;
             padding: 4px;
             box-shadow: 4px 4px 0 #4b2e17;
+        }
+
+        /* custom hover tooltip */
+        .kaz-tooltip {
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.96);
+            /* transition:
+                opacity 0.10s ease,
+                transform 0.10s ease; */
+            max-width: 260px;
+            padding: 4px 6px;
+            background: linear-gradient(180deg, #fff3b0 0%, #f7ca6a 100%);
+            border: 3px solid #8a5b2d;
+            box-shadow: 4px 4px 0 #4a3119;
+            color: #4c2c15;
+            font-size: 14px;
+            line-height: 1.25;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 0 #fff6cf;
+            font-family: "Comic Sans MS", "Trebuchet MS", Verdana, sans-serif;
+            white-space: normal;
+        }
+
+        .kaz-tooltip.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* optional: make hovered linked tiles feel more alive */
+        td a:hover img,
+        .partner-badge:hover img,
+        .gif-pill:hover img {
+            filter: brightness(1.08) saturate(1.08);
         }
     </style>
 </head>
@@ -689,6 +730,152 @@
             </tr>
         </table>
     </div>
+
+    <script>
+        (function () {
+            const tooltip = document.createElement("div");
+            tooltip.className = "kaz-tooltip";
+            document.body.appendChild(tooltip);
+
+            let visible = false;
+            let mouseX = 0;
+            let mouseY = 0;
+            let currentX = 0;
+            let currentY = 0;
+            let rafId = null;
+
+            const OFFSET_X = 14;
+            const OFFSET_Y = 20;
+
+            function getTooltipText(el) {
+                if (!el) return "";
+
+                if (el.hasAttribute && el.hasAttribute("alt")) {
+                    return el.getAttribute("alt").trim();
+                }
+
+                if (el.dataset && el.dataset.tooltip) {
+                    return el.dataset.tooltip.trim();
+                }
+
+                if (el.tagName === "A") {
+                    const img = el.querySelector("img[alt]");
+                    if (img) return img.getAttribute("alt").trim();
+                }
+
+                const link = el.closest ? el.closest("a") : null;
+                if (link) {
+                    const img = link.querySelector("img[alt]");
+                    if (img) return img.getAttribute("alt").trim();
+                }
+
+                const img = el.closest ? el.closest("img[alt]") : null;
+                if (img) {
+                    return img.getAttribute("alt").trim();
+                }
+
+                return "";
+            }
+
+            function positionTooltip(x, y) {
+                const pad = 16;
+                const rect = tooltip.getBoundingClientRect();
+
+                const preferLeftSide = x > window.innerWidth / 2;
+
+                let left = preferLeftSide
+                    ? x - rect.width - OFFSET_X
+                    : x + OFFSET_X;
+
+                let top = y + OFFSET_Y;
+
+                if (left + rect.width > window.innerWidth - pad) {
+                    left = x - rect.width - OFFSET_X;
+                }
+                if (left < pad) {
+                    left = x + OFFSET_X;
+                }
+
+                if (top + rect.height > window.innerHeight - pad) {
+                    top = y - rect.height - OFFSET_Y;
+                }
+                if (top < pad) {
+                    top = pad;
+                }
+
+                tooltip.style.left = left + "px";
+                tooltip.style.top = top + "px";
+            }
+
+            function showTooltip(text) {
+                if (!text) return hideTooltip();
+
+                const firstShow = !visible;
+
+                tooltip.textContent = text;
+
+                if (firstShow) {
+                    currentX = mouseX;
+                    currentY = mouseY;
+                    positionTooltip(currentX, currentY);
+                }
+
+                tooltip.classList.add("show");
+                visible = true;
+                startFollow();
+            }
+
+            function hideTooltip() {
+                tooltip.classList.remove("show");
+                visible = false;
+            }
+
+            function startFollow() {
+                if (rafId) return;
+
+                function animate() {
+                    currentX += (mouseX - currentX) * 0.28;
+                    currentY += (mouseY - currentY) * 0.28;
+
+                    positionTooltip(currentX, currentY);
+
+                    rafId = requestAnimationFrame(animate);
+                }
+
+                rafId = requestAnimationFrame(animate);
+            }
+
+            document.addEventListener("mousemove", function (e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                const text = getTooltipText(e.target);
+                if (text) {
+                    showTooltip(text);
+                } else if (visible) {
+                    hideTooltip();
+                }
+            });
+
+            document.addEventListener("mouseover", function (e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                const text = getTooltipText(e.target);
+                if (text) showTooltip(text);
+            });
+
+            document.addEventListener("mouseout", function (e) {
+                const to = e.relatedTarget;
+                if (!to || !getTooltipText(to)) {
+                    hideTooltip();
+                }
+            });
+
+            window.addEventListener("blur", hideTooltip);
+            document.addEventListener("mouseleave", hideTooltip);
+        })();
+    </script>
 </body>
 
 </html>
