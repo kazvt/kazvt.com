@@ -33,7 +33,7 @@
             display: grid;
             place-items: center;
             background: transparent;
-            font-family: Crash Bandicoot, 'Press Start 2P', monospace;
+            font-family: 'Crash Bandicoot', 'Press Start 2P', monospace;
             overflow: hidden;
         }
 
@@ -118,8 +118,17 @@
         const sideGifs = Array.from(document.querySelectorAll('.side-gif'));
 
         const defaultText = 'starting soon...';
+        const defaultOutlineScale = 0.25;
+
         const params = new URLSearchParams(window.location.search);
         const textValue = params.get('text') || defaultText;
+
+        const outlineScaleParam = parseFloat(params.get('outlineScale'));
+        const outlineScaleValue = Number.isFinite(outlineScaleParam) && outlineScaleParam > 0
+            ? outlineScaleParam
+            : defaultOutlineScale;
+
+        root.style.setProperty('--outline-scale', outlineScaleValue);
 
         const cycleDuration = 3000;
         const waveDuration = 2000;
@@ -232,10 +241,7 @@
         function updateGifOutlineFilter() {
             const styles = getComputedStyle(root);
 
-            const fontSize = parseFloat(styles.getPropertyValue('--font-size')) || 96;
-            const outlineScale = parseFloat(styles.getPropertyValue('--outline-scale')) || 0.25;
             const outlineColor = styles.getPropertyValue('--outline-color').trim() || '#000000';
-
             const outlineWidth = parseFloat(styles.getPropertyValue('--outline-width')) || 2;
             const radius = Math.max(1, Math.round(outlineWidth * 0.19));
 
