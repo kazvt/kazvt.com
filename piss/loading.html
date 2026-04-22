@@ -47,7 +47,6 @@
             display: grid;
             place-items: center;
             background: transparent;
-            font-family: 'Crash Bandicoot', 'Press Start 2P', monospace;
             overflow: hidden;
         }
 
@@ -117,13 +116,13 @@
 
 <body>
     <div class="wrap">
-        <img class="side-gif" src="wumpa.gif" alt="" />
+        <img class="side-gif" alt="" />
 
         <div class="text-box">
             <svg id="titleSvg"></svg>
         </div>
 
-        <img class="side-gif" src="wumpa.gif" alt="" />
+        <img class="side-gif" alt="" />
     </div>
 
     <script>
@@ -143,12 +142,10 @@
             : defaultOutlineScale;
         const fontParam = params.get('font');
 
-        const gifParam = params.get('gif');
-        if (gifParam) sideGifs.forEach(gif => gif.src = gifParam);
+        const gifSrc = params.get('gif') || 'wumpa.gif';
+        sideGifs.forEach(gif => gif.src = gifSrc);
 
-        if (fontParam) {
-            document.body.style.fontFamily = fontParam;
-        }
+        document.body.style.fontFamily = fontParam || "'Crash Bandicoot', 'Press Start 2P', monospace";
 
         root.style.setProperty('--outline-scale', outlineScaleValue);
 
