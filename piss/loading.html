@@ -130,6 +130,7 @@
         const fontParam = params.get('font');
 
         if (fontParam) {
+            console.log("fontParam is provided");
             const fontStyleInject = document.createElement('style');
             fontStyleInject.textContent = `
         body {
