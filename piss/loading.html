@@ -147,7 +147,36 @@
 
         document.body.style.fontFamily = fontParam || "'Crash Bandicoot', 'Press Start 2P', monospace";
 
+        function normalizeColor(c) {
+            c = c.trim();
+            return /^[0-9a-fA-F]{3,6}$/.test(c) ? '#' + c : c;
+        }
+
+        function buildGradientStops(colorParam) {
+            if (!colorParam) return [
+                { offset: '0%', color: '#7fbb00' },
+                { offset: '50%', color: '#fffb00' },
+                { offset: '100%', color: '#ff0000' }
+            ];
+
+            const colors = colorParam.split(',').map(normalizeColor);
+            if (colors.length === 1) return [
+                { offset: '0%', color: colors[0] },
+                { offset: '100%', color: colors[0] }
+            ];
+
+            return colors.map((color, i) => ({
+                offset: `${Math.round((i / (colors.length - 1)) * 100)}%`,
+                color
+            }));
+        }
+
         root.style.setProperty('--outline-scale', outlineScaleValue);
+
+        const colorParam = params.get('color');
+        const outlineColorParam = params.get('outlineColor');
+
+        if (outlineColorParam) root.style.setProperty('--outline-color', normalizeColor(outlineColorParam));
 
         const cycleDuration = 3000;
         const waveDuration = 2000;
@@ -177,17 +206,13 @@
             gradient.setAttribute('x2', '0%');
             gradient.setAttribute('y2', '100%');
 
-            const stop1 = document.createElementNS(ns, 'stop');
-            stop1.setAttribute('offset', '0%');
-            stop1.setAttribute('stop-color', '#7fbb00');
-
-            const stop2 = document.createElementNS(ns, 'stop');
-            stop2.setAttribute('offset', '50%');
-            stop2.setAttribute('stop-color', '#fffb00');
-
-            const stop3 = document.createElementNS(ns, 'stop');
-            stop3.setAttribute('offset', '100%');
-            stop3.setAttribute('stop-color', '#ff0000');
+            const stops = buildGradientStops(colorParam);
+            stops.forEach(({ offset, color }) => {
+                const stop = document.createElementNS(ns, 'stop');
+                stop.setAttribute('offset', offset);
+                stop.setAttribute('stop-color', color);
+                gradient.appendChild(stop);
+            });
 
             gradient.appendChild(stop1);
             gradient.appendChild(stop2);
