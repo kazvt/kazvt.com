@@ -260,7 +260,7 @@
                     charWidth = Math.round(g.getBBox().width);
                 }
 
-                const extraSpacing = ch === '.'
+                const extraSpacing = (ch === '.' && !fontParam)
                     ? Math.round(-fontSize * 0.15)
                     : letterSpacing;
 
