@@ -129,7 +129,7 @@
             : defaultOutlineScale;
         const fontParam = params.get('font');
 
-        if (fontParam) {
+        if (fontParam !== null) {
             const fontStyleInject = document.createElement('style');
             fontStyleInject.textContent = `
         body {
