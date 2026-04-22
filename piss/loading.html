@@ -111,6 +111,16 @@
         .char-fill {
             fill: url(#textGradient);
         }
+
+        .custom-font .char-outline {
+            shape-rendering: geometricPrecision;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+        }
+
+        .custom-font .char-fill {
+            shape-rendering: geometricPrecision;
+        }
     </style>
 </head>
 
@@ -146,6 +156,8 @@
         sideGifs.forEach(gif => gif.src = gifSrc);
 
         document.body.style.fontFamily = fontParam || "'Crash Bandicoot', 'Press Start 2P', monospace";
+
+        if (fontParam) document.body.classList.add('custom-font');
 
         function normalizeColor(c) {
             c = c.trim();
