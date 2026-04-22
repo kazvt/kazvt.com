@@ -127,6 +127,18 @@
         const outlineScaleValue = Number.isFinite(outlineScaleParam) && outlineScaleParam > 0
             ? outlineScaleParam
             : defaultOutlineScale;
+        const fontParam = params.get('font');
+
+        if (fontParam) {
+            const fontStyleInject = document.createElement('style');
+            fontStyleInject.textContent = `
+        body {
+            font-family: ${fontParam} !important;
+        }
+        `;
+        }
+
+        document.head.appendChild(fontStyleInject);
 
         root.style.setProperty('--outline-scale', outlineScaleValue);
 
