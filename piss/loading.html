@@ -124,7 +124,7 @@
         const titleSvg = document.getElementById('titleSvg');
         const sideGifs = Array.from(document.querySelectorAll('.side-gif'));
 
-        const defaultText = 'starting soon...';
+        const defaultText = 'sample text...';
         const defaultOutlineScale = 0.25;
 
         const params = new URLSearchParams(window.location.search);
@@ -136,10 +136,12 @@
             : defaultOutlineScale;
         const fontParam = params.get('font');
 
-        if (fontParam) {
-            document.body.style.fontFamily = `${fontParam}`;
-        }
+        const gifParam = params.get('gif');
+        if (gifParam) sideGifs.forEach(gif => gif.src = gifParam);
 
+        if (fontParam) {
+            document.body.style.fontFamily = fontParam;
+        }
 
         root.style.setProperty('--outline-scale', outlineScaleValue);
 
