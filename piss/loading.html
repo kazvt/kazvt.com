@@ -132,12 +132,10 @@
         if (fontParam) {
             console.log("fontParam is provided");
             const fontStyleInject = document.createElement('style');
-            fontStyleInject.textContent = `
-        <style>
+            fontStyleInject.innerHTML = `
             body {
                 font-family: ${fontParam} !important;
             }
-        </style>
         `;
             document.body.appendChild(fontStyleInject);
         } else {
