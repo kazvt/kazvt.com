@@ -884,13 +884,11 @@
                     for (const node of mutation.addedNodes) {
                         if (node.nodeType !== 1) continue;
 
-                        // Check the node itself
                         if (node.tagName === "IMG" && node.src.includes("bravenet.com")) {
                             node.removeAttribute("alt");
                             node.removeAttribute("title");
                         }
 
-                        // Check any img descendants (in case it's wrapped)
                         node.querySelectorAll?.('img[src*="bravenet.com"]').forEach(img => {
                             img.removeAttribute("alt");
                             img.removeAttribute("title");
