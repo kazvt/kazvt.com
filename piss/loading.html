@@ -133,9 +133,11 @@
             console.log("fontParam is provided");
             const fontStyleInject = document.createElement('style');
             fontStyleInject.textContent = `
-        body {
-            font-family: ${fontParam} !important;
-        }
+        <style>
+            body {
+                font-family: ${fontParam} !important;
+            }
+        </style>
         `;
             document.head.appendChild(fontStyleInject);
         } else {
