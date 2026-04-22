@@ -136,9 +136,9 @@
             font-family: ${fontParam} !important;
         }
         `;
+            document.head.appendChild(fontStyleInject);
         }
 
-        document.head.appendChild(fontStyleInject);
 
         root.style.setProperty('--outline-scale', outlineScaleValue);
 
