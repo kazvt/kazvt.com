@@ -1,442 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Loading Text Asset</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading Text Asset</title>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+  <meta property="og:title" content="Loading Text Asset!" />
+  <meta property="og:description" content="Check kazvt.com for more" />
+  <meta property="og:url" content="https://kazvt.com" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Loading Text Asset!" />
+  <meta name="twitter:description" content="Check kazvt.com for more" />
+  <style>
+    :root {
+      --gap: 24px;
+      --gif-size: 140px;
+      --font-size: 96px;
+      --outline-color: #000000;
+      --outline-scale: 0.25;
+      --outline-width: 24px;
+    }
 
-    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    * { box-sizing: border-box; }
 
-    <meta property="og:title" content="Loading Text Asset!" />
-    <meta property="og:description" content="Check kazvt.com for more" />
-    <meta property="og:url" content="https://kazvt.com" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Loading Text Asset!" />
-    <meta name="twitter:description" content="Check kazvt.com for more" />
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
 
-    <style>
-        :root {
-            --gap: 24px;
-            --gif-size: 140px;
-            --font-size: 96px;
-            --outline-color: #000000;
-            --outline-scale: 0.25;
-            --outline-width: calc(var(--font-size) * var(--outline-scale));
-        }
+    body {
+      display: grid;
+      place-items: center;
+      background: transparent;
+      overflow: hidden;
+    }
 
-        /* kazvt.com/fonts/CrashTeamRacing.ttf */
+    .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--gap);
+      width: 100vw;
+      padding: 3vw;
+      overflow: visible;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
 
-        @font-face {
-            font-family: 'Crash Bandicoot';
-            src: url('https://kazvt.com/fonts/CrashTeamRacing.ttf') format('truetype');
-        }
+    .wrap.ready { opacity: 1; }
 
-        * {
-            box-sizing: border-box;
-        }
+    .side-gif {
+      width: var(--gif-size);
+      height: var(--gif-size);
+      object-fit: contain;
+      flex: 0 0 auto;
+      user-select: none;
+      pointer-events: none;
+      vertical-align: middle;
+    }
 
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-        }
+    .text-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
 
-        body {
-            display: grid;
-            place-items: center;
-            background: transparent;
-            overflow: hidden;
-        }
+    svg {
+      overflow: visible;
+      display: block;
+    }
 
-        .wrap {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--gap);
-            width: 100vw;
-            padding: 3vw;
-            overflow: visible;
-        }
+    .char-group {
+      transform-box: fill-box;
+      transform-origin: center bottom;
+    }
 
-        .side-gif {
-            width: var(--gif-size);
-            height: var(--gif-size);
-            object-fit: contain;
-            flex: 0 0 auto;
-            user-select: none;
-            pointer-events: none;
-            vertical-align: middle;
+    .char-outline {
+      fill: none;
+      stroke: var(--outline-color);
+      stroke-linejoin: miter;
+      stroke-miterlimit: 2;
+      stroke-linecap: butt;
+      paint-order: stroke fill;
+    }
 
-        }
+    .char-fill {
+      fill: url(#textGradient);
+    }
 
-        .text-box {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            overflow: visible;
-            flex: 0 1 auto;
-            min-width: 0;
-        }
-
-        svg {
-            overflow: visible;
-            display: block;
-            shape-rendering: crispEdges;
-            text-rendering: geometricPrecision;
-        }
-
-        .char-group {
-            transform-box: fill-box;
-            transform-origin: center bottom;
-        }
-
-        .char-outline,
-        .char-fill {
-            shape-rendering: crispEdges;
-            text-rendering: geometricPrecision;
-        }
-
-        .char-outline {
-            fill: none;
-            stroke: var(--outline-color);
-            stroke-width: var(--outline-width);
-            stroke-linejoin: miter;
-            stroke-miterlimit: 2;
-            stroke-linecap: butt;
-            paint-order: stroke fill;
-        }
-
-        .char-fill {
-            fill: url(#textGradient);
-        }
-
-        .custom-font .char-outline {
-            shape-rendering: geometricPrecision;
-            stroke-linejoin: round;
-            stroke-linecap: round;
-        }
-
-        .custom-font .char-fill {
-            shape-rendering: geometricPrecision;
-        }
-    </style>
+    body.custom-font .char-outline {
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+  </style>
 </head>
-
 <body>
-    <div class="wrap">
-        <img class="side-gif" alt="" />
-
-        <div class="text-box">
-            <svg id="titleSvg"></svg>
-        </div>
-
-        <img class="side-gif" alt="" />
+  <div class="wrap" id="wrap">
+    <img class="side-gif" id="gif1" alt="" />
+    <div class="text-box">
+      <svg id="titleSvg"></svg>
     </div>
+    <img class="side-gif" id="gif2" alt="" />
+  </div>
 
-    <script>
-        const root = document.documentElement;
-        const titleSvg = document.getElementById('titleSvg');
-        const sideGifs = Array.from(document.querySelectorAll('.side-gif'));
+  <script>
+    const root = document.documentElement;
+    const titleSvg = document.getElementById('titleSvg');
+    const wrap = document.getElementById('wrap');
+    const sideGifs = [document.getElementById('gif1'), document.getElementById('gif2')];
 
-        const defaultText = 'sample text...';
-        const defaultOutlineScale = 0.25;
+    // OBS browser source doesn't URL-encode spaces — it passes "text=Hello world"
+    // literally. URLSearchParams behaviour with raw spaces varies across CEF
+    // versions and may truncate or drop the value entirely.
+    // Fix: read the raw href, replace literal spaces with '+' before parsing.
+    function getRobustParams() {
+      const raw = window.location.href;
+      const qIdx = raw.indexOf('?');
+      if (qIdx === -1) return new URLSearchParams();
+      const rawQuery = raw.slice(qIdx + 1);
+      // Only replace spaces that aren't already part of a %xx escape
+      const safe = rawQuery.replace(/ /g, '+');
+      return new URLSearchParams(safe);
+    }
+    const params = getRobustParams();
+    const textValue      = params.get('text')         || 'sample text...';
+    const fontParam      = params.get('font')         || null;
+    const gifSrc         = params.get('gif')          || 'wumpa.gif';
+    const colorParam     = params.get('color')        || null;
+    const outlineColorP  = params.get('outlineColor') || null;
 
-        const params = new URLSearchParams(window.location.search);
-        const textValue = params.get('text') || defaultText;
+    const outlineScaleRaw = parseFloat(params.get('outlineScale'));
+    const outlineScale = (Number.isFinite(outlineScaleRaw) && outlineScaleRaw > 0)
+      ? outlineScaleRaw : 0.25;
 
-        const outlineScaleParam = parseFloat(params.get('outlineScale'));
-        const outlineScaleValue = Number.isFinite(outlineScaleParam) && outlineScaleParam > 0
-            ? outlineScaleParam
-            : defaultOutlineScale;
-        const fontParam = params.get('font');
+    root.style.setProperty('--outline-scale', outlineScale);
+    if (outlineColorP) root.style.setProperty('--outline-color', normalizeColor(outlineColorP));
 
-        const gifSrc = params.get('gif') || 'wumpa.gif';
-        sideGifs.forEach(gif => gif.src = gifSrc);
+    sideGifs.forEach(g => g.src = gifSrc);
 
-        document.body.style.fontFamily = fontParam || "'Crash Bandicoot', 'Press Start 2P', monospace";
+    const FONT_FAMILY = fontParam || "'CrashBandicoot', monospace";
+    if (fontParam) document.body.classList.add('custom-font');
 
-        if (fontParam) document.body.classList.add('custom-font');
+    const cycleDuration   = 3000;
+    const waveDuration    = 2000;
+    const charMoveDuration = 300;
+    const peakY           = 30;
+    let chars = [];
 
-        function normalizeColor(c) {
-            c = c.trim();
-            return /^[0-9a-fA-F]{3,6}$/.test(c) ? '#' + c : c;
+    function normalizeColor(c) {
+      c = c.trim();
+      return /^[0-9a-fA-F]{3,6}$/.test(c) ? '#' + c : c;
+    }
+
+    function buildGradientStops(colorParam) {
+      if (!colorParam) return [
+        { offset: '0%',   color: '#7fbb00' },
+        { offset: '50%',  color: '#fffb00' },
+        { offset: '100%', color: '#ff0000' }
+      ];
+      const colors = colorParam.split(',').map(normalizeColor);
+      if (colors.length === 1) return [
+        { offset: '0%',   color: colors[0] },
+        { offset: '100%', color: colors[0] }
+      ];
+      return colors.map((color, i) => ({
+        offset: `${Math.round((i / (colors.length - 1)) * 100)}%`,
+        color
+      }));
+    }
+
+    function computeOutlineWidth(fontSize) {
+      return Math.max(2, Math.round(fontSize * outlineScale));
+    }
+
+    function createSvgText(fontSize) {
+      const ns = 'http://www.w3.org/2000/svg';
+      titleSvg.innerHTML = '';
+
+      const outlineWidth = computeOutlineWidth(fontSize);
+
+      const defs = document.createElementNS(ns, 'defs');
+      const gradient = document.createElementNS(ns, 'linearGradient');
+      gradient.setAttribute('id', 'textGradient');
+      gradient.setAttribute('x1', '0%');
+      gradient.setAttribute('y1', '0%');
+      gradient.setAttribute('x2', '0%');
+      gradient.setAttribute('y2', '100%');
+      buildGradientStops(colorParam).forEach(({ offset, color }) => {
+        const stop = document.createElementNS(ns, 'stop');
+        stop.setAttribute('offset', offset);
+        stop.setAttribute('stop-color', color);
+        gradient.appendChild(stop);
+      });
+      defs.appendChild(gradient);
+      titleSvg.appendChild(defs);
+
+      const letterSpacing = Math.round(fontSize * 0.03);
+      const y = Math.round(fontSize + outlineWidth);
+      const spaceWidth = Math.round(fontSize * 0.35);
+      const strokeWidthPx = `${outlineWidth}px`;
+
+      let x = Math.round(outlineWidth);
+      chars = [];
+
+      for (const ch of textValue) {
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'char-group');
+
+        const outline = document.createElementNS(ns, 'text');
+        outline.setAttribute('class', 'char-outline');
+        outline.setAttribute('x', x);
+        outline.setAttribute('y', y);
+        outline.setAttribute('font-size', fontSize);
+        outline.setAttribute('font-weight', '900');
+        outline.setAttribute('font-family', FONT_FAMILY);
+        outline.setAttribute('xml:space', 'preserve');
+        outline.style.strokeWidth = strokeWidthPx;
+        outline.textContent = ch;
+
+        const fill = document.createElementNS(ns, 'text');
+        fill.setAttribute('class', 'char-fill');
+        fill.setAttribute('x', x);
+        fill.setAttribute('y', y);
+        fill.setAttribute('font-size', fontSize);
+        fill.setAttribute('font-weight', '900');
+        fill.setAttribute('font-family', FONT_FAMILY);
+        fill.setAttribute('xml:space', 'preserve');
+        fill.textContent = ch;
+
+        g.appendChild(outline);
+        g.appendChild(fill);
+        titleSvg.appendChild(g);
+
+        // getComputedTextLength() returns the typographic advance width —
+        // the actual space the glyph occupies before the next character,
+        // including sidebearings. getBBox().width only returns ink bounds
+        // and is narrower, which caused characters to visually collide.
+        let charWidth = ch === ' ' ? spaceWidth : Math.round(fill.getComputedTextLength());
+        const extraSpacing = (ch === '.' && !fontParam)
+          ? Math.round(-fontSize * 0.15)
+          : letterSpacing;
+
+        chars.push({ g, width: charWidth, char: ch });
+        x += Math.round(charWidth + extraSpacing);
+      }
+
+      const fullBox = titleSvg.getBBox();
+      const vx = fullBox.x - outlineWidth;
+      const vy = fullBox.y - outlineWidth;
+      const vw = fullBox.width  + outlineWidth * 2;
+      const vh = fullBox.height + outlineWidth * 2;
+      titleSvg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+      titleSvg.setAttribute('width',  Math.ceil(vw));
+      titleSvg.setAttribute('height', Math.ceil(vh));
+
+      return { textWidth: Math.ceil(vw), textHeight: Math.ceil(vh) };
+    }
+
+    function gifSizeForFontSize(fontSize) {
+      const approxCharWidth = fontSize * 0.6;
+      return Math.max(56, Math.round(approxCharWidth * 2.5));
+    }
+
+    function applyGifOutlineFilter(fontSize) {
+      const outlineColor = getComputedStyle(root).getPropertyValue('--outline-color').trim() || '#000000';
+      const outlineWidth = computeOutlineWidth(fontSize);
+      const radius = Math.max(1, Math.round(outlineWidth * 0.19));
+      const offsets = [
+        [radius, 0], [-radius, 0],
+        [0, radius], [0, -radius],
+        [radius, radius], [-radius, radius],
+        [radius, -radius], [-radius, -radius]
+      ];
+      const filterValue = offsets.map(([dx, dy]) =>
+        `drop-shadow(${dx}px ${dy}px 0 ${outlineColor})`
+      ).join(' ');
+      sideGifs.forEach(gif => gif.style.filter = filterValue);
+    }
+
+    function fitLayoutToViewport() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const availableWidth = vw - vw * 0.06;
+
+      let low = 12;
+      let high = Math.min(vw * 0.22, vh * 0.42);
+      let bestFontSize = low;
+
+      for (let i = 0; i < 24; i++) {
+        const mid = Math.round((low + high) / 2);
+        const gifSize = gifSizeForFontSize(mid);
+        const gap = Math.max(8, Math.round(mid * 0.18));
+
+        root.style.setProperty('--font-size', `${mid}px`);
+        root.style.setProperty('--gif-size', `${gifSize}px`);
+        root.style.setProperty('--gap', `${gap}px`);
+
+        const { textWidth } = createSvgText(mid);
+        const totalWidth = textWidth + gifSize * 2 + gap * 2;
+
+        if (totalWidth <= availableWidth) {
+          bestFontSize = mid;
+          low = mid + 1;
+        } else {
+          high = mid - 1;
         }
+      }
 
-        function buildGradientStops(colorParam) {
-            if (!colorParam) return [
-                { offset: '0%', color: '#7fbb00' },
-                { offset: '50%', color: '#fffb00' },
-                { offset: '100%', color: '#ff0000' }
-            ];
+      const finalGifSize = gifSizeForFontSize(bestFontSize);
+      const finalGap     = Math.max(8, Math.round(bestFontSize * 0.18));
 
-            const colors = colorParam.split(',').map(normalizeColor);
-            if (colors.length === 1) return [
-                { offset: '0%', color: colors[0] },
-                { offset: '100%', color: colors[0] }
-            ];
+      root.style.setProperty('--font-size', `${bestFontSize}px`);
+      root.style.setProperty('--gif-size',  `${finalGifSize}px`);
+      root.style.setProperty('--gap',       `${finalGap}px`);
 
-            return colors.map((color, i) => ({
-                offset: `${Math.round((i / (colors.length - 1)) * 100)}%`,
-                color
-            }));
-        }
+      createSvgText(bestFontSize);
+      applyGifOutlineFilter(bestFontSize);
+    }
 
-        root.style.setProperty('--outline-scale', outlineScaleValue);
+    function resetChars() {
+      chars.forEach(c => c.g.style.transform = 'translateY(0px)');
+    }
 
-        const colorParam = params.get('color');
-        const outlineColorParam = params.get('outlineColor');
+    function letterOffset(globalTime, index, stepDelay) {
+      const localTime = globalTime - index * stepDelay;
+      if (localTime < 0 || localTime >= charMoveDuration) return 0;
+      const segment = charMoveDuration / 3;
+      if (localTime < segment)     return -peakY * 0.34;
+      if (localTime < segment * 2) return -peakY;
+      return -peakY * 0.34;
+    }
 
-        if (outlineColorParam) root.style.setProperty('--outline-color', normalizeColor(outlineColorParam));
+    function renderFrame(globalTime) {
+      const stepDelay = chars.length > 1
+        ? (waveDuration - charMoveDuration) / (chars.length - 1)
+        : 0;
+      chars.forEach((char, index) => {
+        const y = Math.round(letterOffset(globalTime, index, stepDelay));
+        char.g.style.transform = `translateY(${y}px)`;
+      });
+    }
 
-        const cycleDuration = 3000;
-        const waveDuration = 2000;
-        const charMoveDuration = 300;
-        const peakY = 30;
+    function startLoop() {
+      resetChars();
+      const driver = { t: 0 };
+      anime({
+        targets: driver,
+        t: cycleDuration,
+        duration: cycleDuration,
+        easing: 'linear',
+        loop: true,
+        update: () => {
+          const time = driver.t % cycleDuration;
+          if (time >= waveDuration) resetChars();
+          else renderFrame(time);
+        },
+        loopBegin: () => { driver.t = 0; resetChars(); }
+      });
+    }
 
-        let chars = [];
+    async function loadFont() {
+      const FONT_URL = 'https://kazvt.com/fonts/CrashTeamRacing.ttf';
+      try {
+        const face = new FontFace('CrashBandicoot', `url(${FONT_URL})`, {
+          weight: '400 900',
+          style: 'normal'
+        });
+        const loaded = await Promise.race([
+          face.load(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
+        ]);
+        document.fonts.add(loaded);
+      } catch (e) {
+        // font failed or timed out — fall back gracefully, layout still runs
+      }
+    }
 
-        function syncResponsiveVars() {
-            const fontSize = parseFloat(getComputedStyle(root).getPropertyValue('--font-size'));
-            const outlineScale = parseFloat(getComputedStyle(root).getPropertyValue('--outline-scale'));
-            const outlineWidth = Math.max(2, Math.round(fontSize * outlineScale));
-            root.style.setProperty('--outline-width', `${outlineWidth}px`);
-            return outlineWidth;
-        }
+    async function init() {
+      if (!fontParam) {
+        await loadFont();
+      } else {
+        await document.fonts.ready;
+      }
 
-        function createSvgText() {
-            titleSvg.innerHTML = '';
+      // One rAF after font load to let the browser finish glyph rasterization
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-            const ns = 'http://www.w3.org/2000/svg';
+      fitLayoutToViewport();
+      resetChars();
+      wrap.classList.add('ready');
+      startLoop();
+    }
 
-            const defs = document.createElementNS(ns, 'defs');
-            const gradient = document.createElementNS(ns, 'linearGradient');
-            gradient.setAttribute('id', 'textGradient');
-            gradient.setAttribute('x1', '0%');
-            gradient.setAttribute('y1', '0%');
-            gradient.setAttribute('x2', '0%');
-            gradient.setAttribute('y2', '100%');
-
-            const stops = buildGradientStops(colorParam);
-            stops.forEach(({ offset, color }) => {
-                const stop = document.createElementNS(ns, 'stop');
-                stop.setAttribute('offset', offset);
-                stop.setAttribute('stop-color', color);
-                gradient.appendChild(stop);
-            });
-
-            defs.appendChild(gradient);
-            titleSvg.appendChild(defs);
-
-            const fontSize = parseFloat(getComputedStyle(root).getPropertyValue('--font-size'));
-            const outlineWidth = syncResponsiveVars();
-            const letterSpacing = Math.round(fontSize * 0.03);
-            const y = Math.round(fontSize + outlineWidth);
-
-            let x = Math.round(outlineWidth);
-            chars = [];
-
-            const spaceWidth = Math.round(fontSize * 0.35);
-
-            for (const ch of textValue) {
-                const g = document.createElementNS(ns, 'g');
-                g.setAttribute('class', 'char-group');
-
-                const outline = document.createElementNS(ns, 'text');
-                outline.setAttribute('class', 'char-outline');
-                outline.setAttribute('x', Math.round(x));
-                outline.setAttribute('y', y);
-                outline.setAttribute('font-size', fontSize);
-                outline.setAttribute('font-weight', '900');
-                outline.setAttribute('xml:space', 'preserve');
-                outline.textContent = ch;
-
-                const fill = document.createElementNS(ns, 'text');
-                fill.setAttribute('class', 'char-fill');
-                fill.setAttribute('x', Math.round(x));
-                fill.setAttribute('y', y);
-                fill.setAttribute('font-size', fontSize);
-                fill.setAttribute('font-weight', '900');
-                fill.setAttribute('xml:space', 'preserve');
-                fill.textContent = ch;
-
-                g.appendChild(outline);
-                g.appendChild(fill);
-                titleSvg.appendChild(g);
-
-                let charWidth;
-                if (ch === ' ') {
-                    charWidth = spaceWidth;
-                } else {
-                    charWidth = Math.round(g.getBBox().width);
-                }
-
-                const extraSpacing = (ch === '.' && !fontParam)
-                    ? Math.round(-fontSize * 0.15)
-                    : letterSpacing;
-
-                chars.push({ g, width: charWidth, char: ch });
-                x += Math.round(charWidth + extraSpacing);
-            }
-
-            const fullBox = titleSvg.getBBox();
-            titleSvg.setAttribute(
-                'viewBox',
-                `${fullBox.x - outlineWidth} ${fullBox.y - outlineWidth} ${fullBox.width + outlineWidth * 2} ${fullBox.height + outlineWidth * 2}`
-            );
-            titleSvg.setAttribute('width', Math.ceil(fullBox.width + outlineWidth * 2));
-            titleSvg.setAttribute('height', Math.ceil(fullBox.height + outlineWidth * 2));
-        }
-
-        function updateGifOutlineFilter() {
-            const styles = getComputedStyle(root);
-
-            const outlineColor = styles.getPropertyValue('--outline-color').trim() || '#000000';
-            const outlineWidth = parseFloat(styles.getPropertyValue('--outline-width')) || 2;
-            const radius = Math.max(1, Math.round(outlineWidth * 0.19));
-
-            const offsets = [
-                [radius, 0],
-                [-radius, 0],
-                [0, radius],
-                [0, -radius],
-                [radius, radius],
-                [-radius, radius],
-                [radius, -radius],
-                [-radius, -radius]
-            ];
-
-            const filterValue = offsets
-                .map(([x, y]) => `drop-shadow(${x}px ${y}px 0 ${outlineColor})`)
-                .join(' ');
-
-            sideGifs.forEach(gif => {
-                gif.style.filter = filterValue;
-            });
-        }
-
-        function updateGifSize() {
-            let maxWidth = 0;
-
-            for (const char of chars) {
-                if (char.width > maxWidth) maxWidth = char.width;
-            }
-
-            const gifSize = Math.max(56, Math.round(maxWidth * 2.5));
-            root.style.setProperty('--gif-size', `${gifSize}px`);
-        }
-
-        function fitLayoutToViewport() {
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-            const availableWidth = vw - vw * 0.06;
-
-            let low = 12;
-            let high = Math.min(vw * 0.22, vh * 0.42);
-            let best = low;
-
-            for (let i = 0; i < 24; i++) {
-                const mid = Math.round((low + high) / 2);
-                root.style.setProperty('--font-size', `${mid}px`);
-
-                createSvgText();
-                updateGifSize();
-                createSvgText();
-                updateGifOutlineFilter();
-
-                const textWidth = titleSvg.getBoundingClientRect().width;
-                const gifWidth = sideGifs[0].getBoundingClientRect().width;
-                const gap = Math.max(8, Math.round(mid * 0.18));
-                const totalWidth = textWidth + gifWidth * 2 + gap * 2;
-
-                if (totalWidth <= availableWidth) {
-                    best = mid;
-                    low = mid + 1;
-                } else {
-                    high = mid - 1;
-                }
-            }
-
-            root.style.setProperty('--font-size', `${Math.round(best)}px`);
-            root.style.setProperty('--gap', `${Math.max(8, Math.round(best * 0.18))}px`);
-
-            createSvgText();
-            updateGifSize();
-            createSvgText();
-            updateGifOutlineFilter();
-        }
-
-        function resetChars() {
-            chars.forEach(char => {
-                char.g.style.transform = 'translateY(0px)';
-            });
-        }
-
-        function letterOffset(globalTime, index, stepDelay) {
-            const localTime = globalTime - index * stepDelay;
-
-            if (localTime < 0 || localTime >= charMoveDuration) {
-                return 0;
-            }
-
-            const segment = charMoveDuration / 3;
-
-            if (localTime < segment) return -peakY * 0.34;
-            if (localTime < segment * 2) return -peakY;
-            return -peakY * 0.34;
-        }
-
-        function renderFrame(globalTime) {
-            const stepDelay = chars.length > 1
-                ? (waveDuration - charMoveDuration) / (chars.length - 1)
-                : 0;
-
-            chars.forEach((char, index) => {
-                const y = Math.round(letterOffset(globalTime, index, stepDelay));
-                char.g.style.transform = `translateY(${y}px)`;
-            });
-        }
-
-        function startLoop() {
-            resetChars();
-
-            const driver = { t: 0 };
-
-            anime({
-                targets: driver,
-                t: cycleDuration,
-                duration: cycleDuration,
-                easing: 'linear',
-                loop: true,
-                update: () => {
-                    const time = driver.t % cycleDuration;
-
-                    if (time >= waveDuration) {
-                        resetChars();
-                    } else {
-                        renderFrame(time);
-                    }
-                },
-                loopBegin: () => {
-                    driver.t = 0;
-                    resetChars();
-                }
-            });
-        }
-
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
         fitLayoutToViewport();
         resetChars();
-        updateGifOutlineFilter();
+      }, 100);
+    });
 
-        window.addEventListener('resize', () => {
-            fitLayoutToViewport();
-            resetChars();
-            updateGifOutlineFilter();
-        });
-
-        startLoop();
-    </script>
+    init();
+  </script>
 </body>
-
 </html>
