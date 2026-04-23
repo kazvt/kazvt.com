@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beat Synced Video Warp</title>
+    <style>
+        :root {
+            --bg: #0b0d12;
+            --panel: #141924;
+            --panel2: #0f131c;
+            --text: #e7ecf3;
+            --muted: #9ba7b8;
+            --accent: #7cc6ff;
+            --good: #7ee2a8;
+            --warn: #ffd27a;
+            --bad: #ff8c8c;
+            --border: #263043;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, Arial, sans-serif;
+            background: linear-gradient(180deg, #090b10, #121722);
+            color: var(--text);
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(20, 25, 36, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        video {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 14px;
+            display: block;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0 0 14px;
+        }
+
+        h2 {
+            font-size: 15px;
+            margin: 0 0 10px;
+            color: var(--accent);
+        }
+
+        p,
+        li,
+        label,
+        button,
+        input,
+        select,
+        textarea,
+        pre,
+        code {
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin: 14px 0;
+        }
+
+        button {
+            background: #1e2737;
+            color: var(--text);
+            border: 1px solid #324158;
+            border-radius: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #243047;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #121827;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            gap: 8px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 10px;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            background: #0e1320;
+            color: var(--text);
+            border: 1px solid #2a3448;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        textarea {
+            min-height: 88px;
+            resize: vertical;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        .small {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 12px;
+            background: #111726;
+            border: 1px solid var(--border);
+            white-space: pre-wrap;
+            line-height: 1.45;
+        }
+
+        .good {
+            color: var(--good);
+        }
+
+        .warn {
+            color: var(--warn);
+        }
+
+        .bad {
+            color: var(--bad);
+        }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        .two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .statlist {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 10px;
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .footer-note {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 210, 122, 0.08);
+            border: 1px solid rgba(255, 210, 122, 0.25);
+            color: #ffd27a;
+        }
+
+        @media (max-width: 920px) {
+            .wrap {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="panel">
+            <h1>Beat-Synced Video Warp</h1>
+            <video id="video" src="video.mp4" muted playsinline preload="auto"></video>
+
+            <div class="controls">
+                <button id="loadBtn">Load Files</button>
+                <button id="playBtn">Play</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="restartBtn">Restart</button>
+                <span class="pill">Audio master clock</span>
+                <span class="pill" id="enginePill">Engine: Continuous</span>
+            </div>
+
+            <div class="status" id="status">Idle.</div>
+
+            <div class="statlist">
+                <div class="stat"><span>Loaded MIDI</span><span id="loadedMidi" class="mono">none</span></div>
+                <div class="stat"><span>Beat count</span><span id="beatCount" class="mono">0</span></div>
+                <div class="stat"><span>Current beat interval</span><span id="intervalView" class="mono">-</span></div>
+                <div class="stat"><span>Playback rate</span><span id="rateView" class="mono">1.000</span></div>
+                <div class="stat"><span>Audio time</span><span id="audioTimeView" class="mono">0.000</span></div>
+                <div class="stat"><span>Video time</span><span id="videoTimeView" class="mono">0.000</span></div>
+            </div>
+
+            <div class="footer-note" id="warningBox">
+                Continuous mode keeps the video actually playing all the time and steers it with playbackRate.
+                Pendulum mode in normal browser video cannot do true reverse playback reliably, so this page
+                automatically switches to a precision seek mode for pendulum. That is visually accurate, but it may
+                repeat or skip frames.
+            </div>
+        </div>
+
+        <div class="panel grid">
+            <div>
+                <h2>Config</h2>
+
+                <div class="row">
+                    <label for="fpsInput">Video FPS</label>
+                    <input id="fpsInput" type="number" step="0.001" value="30" />
+                </div>
+
+                <div class="row">
+                    <label for="markersInput">Beat frames</label>
+                    <textarea id="markersInput">0, 30, 60, 90</textarea>
+                </div>
+
+                <div class="row">
+                    <label for="modeSelect">Traversal mode</label>
+                    <select id="modeSelect">
+                        <option value="loop" selected>Loop (1 2 3 4 1 2 3 4)</option>
+                        <option value="pendulum">Pendulum (1 2 3 4 3 2 1 2 3 4)</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <label for="easeSelect">Interpolation</label>
+                    <select id="easeSelect">
+                        <option value="linear">Linear</option>
+                        <option value="easeInOutSine" selected>Ease In Out Sine</option>
+                        <option value="easeInOutCubic">Ease In Out Cubic</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <label for="kpInput">Drift correction</label>
+                    <input id="kpInput" type="number" step="0.001" value="0.85" />
+                </div>
+
+                <div class="row">
+                    <label for="maxRateInput">Max playbackRate</label>
+                    <input id="maxRateInput" type="number" step="0.01" value="4.0" />
+                </div>
+
+                <div class="row">
+                    <label for="minRateInput">Min playbackRate</label>
+                    <input id="minRateInput" type="number" step="0.01" value="0.25" />
+                </div>
+
+                <div class="row">
+                    <label for="beatStrideInput">Use every Nth MIDI note</label>
+                    <input id="beatStrideInput" type="number" step="1" min="1" value="1" />
+                </div>
+
+                <div class="small">
+                    The beat frames are frame numbers inside <span class="mono">video.mp4</span>.
+                    Example: <span class="mono">0, 30, 60, 90</span> means 4 marked sync frames in a 30fps video.
+                </div>
+            </div>
+
+            <div>
+                <h2>What this does</h2>
+                <ul>
+                    <li><span class="good">Loop mode</span>: the video keeps playing continuously and is
+                        speed-controlled so marked frames land near the MIDI beat times.</li>
+                    <li><span class="warn">Pendulum mode</span>: auto-switches to precision mode because reverse MP4
+                        playback is not dependable in browser video.</li>
+                    <li>The page tries <span class="mono">data.midi</span> first, then <span
+                            class="mono">data.mid</span>.</li>
+                    <li>MIDI note-on events become the beat times.</li>
+                </ul>
+
+                <h2>Run it</h2>
+                <div class="status mono">
+                    python -m http.server 8000
+
+                    then open:
+                    http://localhost:8000
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="song" src="song1.mp3" preload="auto"></audio>
+
+    <script>
+        // =========================
+        // CONFIG / STATE
+        // =========================
+        const state = {
+            beatTimes: [],
+            midiLoadedFrom: null,
+            isLoaded: false,
+            rafId: 0,
+            lastTickMs: 0,
+            mode: "loop",
+            engine: "continuous", // "continuous" or "precision"
+            currentInterval: -1,
+            continuousBaseOffset: 0,
+            wasPlaying: false
+        };
+
+        const els = {
+            video: document.getElementById("video"),
+            song: document.getElementById("song"),
+            status: document.getElementById("status"),
+            loadBtn: document.getElementById("loadBtn"),
+            playBtn: document.getElementById("playBtn"),
+            pauseBtn: document.getElementById("pauseBtn"),
+            restartBtn: document.getElementById("restartBtn"),
+            fpsInput: document.getElementById("fpsInput"),
+            markersInput: document.getElementById("markersInput"),
+            modeSelect: document.getElementById("modeSelect"),
+            easeSelect: document.getElementById("easeSelect"),
+            kpInput: document.getElementById("kpInput"),
+            maxRateInput: document.getElementById("maxRateInput"),
+            minRateInput: document.getElementById("minRateInput"),
+            beatStrideInput: document.getElementById("beatStrideInput"),
+            enginePill: document.getElementById("enginePill"),
+            loadedMidi: document.getElementById("loadedMidi"),
+            beatCount: document.getElementById("beatCount"),
+            intervalView: document.getElementById("intervalView"),
+            rateView: document.getElementById("rateView"),
+            audioTimeView: document.getElementById("audioTimeView"),
+            videoTimeView: document.getElementById("videoTimeView"),
+            warningBox: document.getElementById("warningBox")
+        };
+
+        // =========================
+        // HELPERS
+        // =========================
+        function setStatus(msg, cls = "") {
+            els.status.className = "status" + (cls ? " " + cls : "");
+            els.status.textContent = msg;
+        }
+
+        function clamp(v, lo, hi) {
+            return Math.max(lo, Math.min(hi, v));
+        }
+
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function wrapTime(t, duration) {
+            if (duration <= 0) return 0;
+            return mod(t, duration);
+        }
+
+        function shortestWrappedDiff(target, actual, duration) {
+            let d = target - actual;
+            while (d > duration / 2) d -= duration;
+            while (d < -duration / 2) d += duration;
+            return d;
+        }
+
+        function easeValue(name, t) {
+            const x = clamp(t, 0, 1);
+            if (name === "linear") return x;
+            if (name === "easeInOutSine") return -(Math.cos(Math.PI * x) - 1) / 2;
+            if (name === "easeInOutCubic") {
+                return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+            }
+            return x;
+        }
+
+        function parseNumberList(text) {
+            return text
+                .split(/[,\s]+/)
+                .map(s => s.trim())
+                .filter(Boolean)
+                .map(Number)
+                .filter(n => Number.isFinite(n));
+        }
+
+        function updateStats() {
+            els.loadedMidi.textContent = state.midiLoadedFrom || "none";
+            els.beatCount.textContent = String(state.beatTimes.length);
+            els.intervalView.textContent = state.currentInterval >= 0
+                ? `${state.currentInterval} -> ${state.currentInterval + 1}`
+                : "-";
+            els.audioTimeView.textContent = els.song.currentTime.toFixed(3);
+            els.videoTimeView.textContent = els.video.currentTime.toFixed(3);
+            els.rateView.textContent = Number(els.video.playbackRate || 0).toFixed(3);
+            els.enginePill.textContent = `Engine: ${state.engine === "continuous" ? "Continuous" : "Precision"}`;
+        }
+
+        function getUserConfig() {
+            const fps = Number(els.fpsInput.value) || 30;
+            const markerFrames = parseNumberList(els.markersInput.value);
+            const markersSec = markerFrames.map(f => f / fps).sort((a, b) => a - b);
+
+            const mode = els.modeSelect.value;
+            const ease = els.easeSelect.value;
+            const kp = Number(els.kpInput.value) || 0.85;
+            const maxRate = Number(els.maxRateInput.value) || 4.0;
+            const minRate = Number(els.minRateInput.value) || 0.25;
+            const beatStride = Math.max(1, Math.floor(Number(els.beatStrideInput.value) || 1));
+
+            return { fps, markerFrames, markersSec, mode, ease, kp, maxRate, minRate, beatStride };
+        }
+
+        function validateSetup() {
+            const cfg = getUserConfig();
+
+            if (!Number.isFinite(els.video.duration) || els.video.duration <= 0) {
+                throw new Error("video.mp4 metadata not loaded yet.");
+            }
+
+            if (cfg.markersSec.length < 2) {
+                throw new Error("You need at least 2 beat frames.");
+            }
+
+            if (state.beatTimes.length < 2) {
+                throw new Error("MIDI must contain at least 2 note-on events.");
+            }
+
+            const lastMarker = Math.max(...cfg.markersSec);
+            if (lastMarker > els.video.duration + 0.001) {
+                throw new Error(
+                    `Some beat frames are outside the video. Last marker=${lastMarker.toFixed(3)}s, video=${els.video.duration.toFixed(3)}s`
+                );
+            }
+
+            return cfg;
+        }
+
+        function buildTraversalPath(markerCount, eventCount, mode) {
+            if (markerCount <= 0 || eventCount <= 0) return [];
+            if (markerCount === 1) return Array(eventCount).fill(0);
+
+            const path = [];
+            let index = 0;
+            let dir = 1;
+
+            for (let i = 0; i < eventCount; i++) {
+                path.push(index);
+
+                if (mode === "loop") {
+                    index = (index + 1) % markerCount;
+                } else if (mode === "pendulum") {
+                    index += dir;
+                    if (index >= markerCount) {
+                        index = markerCount - 2;
+                        dir = -1;
+                    } else if (index < 0) {
+                        index = 1;
+                        dir = 1;
+                    }
+                }
+            }
+
+            return path;
+        }
+
+        function buildIntervals(beatTimes, markersSec, videoDuration, mode) {
+            const path = buildTraversalPath(markersSec.length, beatTimes.length, mode);
+            const intervals = [];
+
+            for (let i = 0; i < beatTimes.length - 1; i++) {
+                const beatA = beatTimes[i];
+                const beatB = beatTimes[i + 1];
+                if (!(beatB > beatA)) continue;
+
+                const idxA = path[i];
+                const idxB = path[i + 1];
+                const markerA = markersSec[idxA];
+                const markerB = markersSec[idxB];
+
+                let sourceDelta;
+                let forwardWrapped = false;
+
+                if (mode === "loop") {
+                    sourceDelta = markerB - markerA;
+                    if (sourceDelta <= 0) {
+                        sourceDelta += videoDuration;
+                        forwardWrapped = true;
+                    }
+                } else {
+                    sourceDelta = markerB - markerA;
+                }
+
+                intervals.push({
+                    i,
+                    beatA,
+                    beatB,
+                    beatDur: beatB - beatA,
+                    idxA,
+                    idxB,
+                    markerA,
+                    markerB,
+                    sourceDelta,
+                    desiredRate: sourceDelta / (beatB - beatA),
+                    forwardWrapped
+                });
+            }
+
+            return intervals;
+        }
+
+        function findInterval(intervals, audioTime) {
+            if (!intervals.length) return null;
+            if (audioTime <= intervals[0].beatA) return intervals[0];
+            if (audioTime >= intervals[intervals.length - 1].beatB) return intervals[intervals.length - 1];
+
+            let lo = 0;
+            let hi = intervals.length - 1;
+
+            while (lo <= hi) {
+                const mid = (lo + hi) >> 1;
+                const x = intervals[mid];
+                if (audioTime < x.beatA) hi = mid - 1;
+                else if (audioTime >= x.beatB) lo = mid + 1;
+                else return x;
+            }
+
+            return intervals[Math.max(0, Math.min(intervals.length - 1, lo))];
+        }
+
+        // =========================
+        // MIDI PARSER
+        // =========================
+        function parseMidi(arrayBuffer) {
+            const dv = new DataView(arrayBuffer);
+            let p = 0;
+
+            function readStr(n) {
+                let s = "";
+                for (let i = 0; i < n; i++) s += String.fromCharCode(dv.getUint8(p++));
+                return s;
+            }
+
+            function readU16() {
+                const v = dv.getUint16(p);
+                p += 2;
+                return v;
+            }
+
+            function readU32() {
+                const v = dv.getUint32(p);
+                p += 4;
+                return v;
+            }
+
+            function readVar() {
+                let result = 0;
+                while (true) {
+                    const b = dv.getUint8(p++);
+                    result = (result << 7) | (b & 0x7f);
+                    if ((b & 0x80) === 0) break;
+                }
+                return result;
+            }
+
+            if (readStr(4) !== "MThd") {
+                throw new Error("Invalid MIDI: missing MThd");
+            }
+
+            const headerLen = readU32();
+            const format = readU16();
+            const nTracks = readU16();
+            const division = readU16();
+
+            p = 8 + headerLen;
+
+            if (division & 0x8000) {
+                throw new Error("SMPTE time division MIDI is not supported in this simple parser.");
+            }
+
+            const ppq = division;
+            const tempoEvents = [{ tick: 0, usPerQuarter: 500000 }];
+            const noteOns = [];
+
+            for (let trackIndex = 0; trackIndex < nTracks; trackIndex++) {
+                const chunkType = readStr(4);
+                if (chunkType !== "MTrk") {
+                    throw new Error("Invalid MIDI: missing MTrk");
+                }
+                const trackLen = readU32();
+                const trackEnd = p + trackLen;
+
+                let tick = 0;
+                let runningStatus = 0;
+
+                while (p < trackEnd) {
+                    const delta = readVar();
+                    tick += delta;
+
+                    let status = dv.getUint8(p++);
+                    if (status < 0x80) {
+                        p--;
+                        status = runningStatus;
+                    } else {
+                        runningStatus = status;
+                    }
+
+                    if (status === 0xff) {
+                        const metaType = dv.getUint8(p++);
+                        const len = readVar();
+
+                        if (metaType === 0x51 && len === 3) {
+                            const usPerQuarter =
+                                (dv.getUint8(p) << 16) |
+                                (dv.getUint8(p + 1) << 8) |
+                                dv.getUint8(p + 2);
+                            tempoEvents.push({ tick, usPerQuarter });
+                        }
+                        p += len;
+                    } else if (status === 0xf0 || status === 0xf7) {
+                        const len = readVar();
+                        p += len;
+                    } else {
+                        const hi = status & 0xf0;
+                        const channel = status & 0x0f;
+                        void channel;
+
+                        if (hi === 0x80 || hi === 0x90 || hi === 0xa0 || hi === 0xb0 || hi === 0xe0) {
+                            const data1 = dv.getUint8(p++);
+                            const data2 = dv.getUint8(p++);
+
+                            if (hi === 0x90 && data2 > 0) {
+                                noteOns.push({
+                                    tick,
+                                    note: data1,
+                                    velocity: data2,
+                                    track: trackIndex
+                                });
+                            }
+                        } else if (hi === 0xc0 || hi === 0xd0) {
+                            p += 1;
+                        } else {
+                            throw new Error("Unknown MIDI event.");
+                        }
+                    }
+                }
+
+                p = trackEnd;
+            }
+
+            tempoEvents.sort((a, b) => a.tick - b.tick);
+            noteOns.sort((a, b) => a.tick - b.tick);
+
+            function tickToSeconds(targetTick) {
+                let seconds = 0;
+                let prevTick = 0;
+                let currentTempo = tempoEvents[0].usPerQuarter;
+
+                for (let i = 1; i < tempoEvents.length; i++) {
+                    const t = tempoEvents[i];
+                    if (t.tick >= targetTick) break;
+
+                    const dt = t.tick - prevTick;
+                    seconds += (dt / ppq) * (currentTempo / 1_000_000);
+                    prevTick = t.tick;
+                    currentTempo = t.usPerQuarter;
+                }
+
+                const remaining = targetTick - prevTick;
+                seconds += (remaining / ppq) * (currentTempo / 1_000_000);
+                return seconds;
+            }
+
+            const noteTimes = noteOns.map(n => ({
+                ...n,
+                timeSec: tickToSeconds(n.tick)
+            }));
+
+            return {
+                format,
+                ppq,
+                tempoEvents,
+                notes: noteTimes
+            };
+        }
+
+        async function fetchFirstMidi() {
+            const candidates = ["data.midi", "data.mid"];
+            const errors = [];
+
+            for (const name of candidates) {
+                try {
+                    const res = await fetch(name, { cache: "no-store" });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const buf = await res.arrayBuffer();
+                    return { name, data: parseMidi(buf) };
+                } catch (err) {
+                    errors.push(`${name}: ${err.message}`);
+                }
+            }
+
+            throw new Error("Could not load MIDI.\n" + errors.join("\n"));
+        }
+
+        // =========================
+        // LOADING
+        // =========================
+        async function waitForMediaReady() {
+            const videoReady = new Promise((resolve, reject) => {
+                if (els.video.readyState >= 1 && Number.isFinite(els.video.duration)) return resolve();
+                els.video.addEventListener("loadedmetadata", resolve, { once: true });
+                els.video.addEventListener("error", () => reject(new Error("Failed loading video.mp4")), { once: true });
+            });
+
+            const audioReady = new Promise((resolve, reject) => {
+                if (els.song.readyState >= 1 && Number.isFinite(els.song.duration)) return resolve();
+                els.song.addEventListener("loadedmetadata", resolve, { once: true });
+                els.song.addEventListener("error", () => reject(new Error("Failed loading song1.mp3")), { once: true });
+            });
+
+            await Promise.all([videoReady, audioReady]);
+        }
+
+        async function loadEverything() {
+            setStatus("Loading media and MIDI...");
+            try {
+                await waitForMediaReady();
+                const midi = await fetchFirstMidi();
+
+                const cfg = getUserConfig();
+                let beatTimes = midi.data.notes.map(n => n.timeSec);
+
+                if (cfg.beatStride > 1) {
+                    beatTimes = beatTimes.filter((_, i) => i % cfg.beatStride === 0);
+                }
+
+                state.beatTimes = beatTimes;
+                state.midiLoadedFrom = midi.name;
+                state.isLoaded = true;
+
+                setStatus(
+                    `Loaded OK.\n` +
+                    `video.mp4 duration: ${els.video.duration.toFixed(3)}s\n` +
+                    `song1.mp3 duration: ${els.song.duration.toFixed(3)}s\n` +
+                    `MIDI: ${midi.name}\n` +
+                    `MIDI note-on beat count: ${state.beatTimes.length}`
+                    , "good");
+
+                updateEngineFromMode();
+                updateStats();
+            } catch (err) {
+                state.isLoaded = false;
+                setStatus(`Load failed:\n${err.message}`, "bad");
+            }
+        }
+
+        function updateEngineFromMode() {
+            state.mode = els.modeSelect.value;
+            if (state.mode === "pendulum") {
+                state.engine = "precision";
+                els.warningBox.style.display = "";
+            } else {
+                state.engine = "continuous";
+                els.warningBox.style.display = "";
+            }
+            updateStats();
+        }
+
+        // =========================
+        // SYNC ENGINES
+        // =========================
+
+        function syncContinuous(intervals, audioTime, cfg) {
+            const interval = findInterval(intervals, audioTime);
+            if (!interval) return;
+
+            state.currentInterval = interval.i;
+
+            const u = clamp((audioTime - interval.beatA) / interval.beatDur, 0, 1);
+            const eased = easeValue(cfg.ease, u);
+
+            let targetTimeUnwrapped = interval.markerA + interval.sourceDelta * eased;
+            let targetTimeWrapped = wrapTime(targetTimeUnwrapped, els.video.duration);
+            let actualTime = els.video.currentTime;
+
+            const diff = shortestWrappedDiff(targetTimeWrapped, actualTime, els.video.duration);
+
+            let rate = interval.desiredRate + cfg.kp * diff;
+            rate = clamp(rate, cfg.minRate, cfg.maxRate);
+
+            if (Math.abs(rate - els.video.playbackRate) > 0.001) {
+                els.video.playbackRate = rate;
+            }
+        }
+
+        function syncPrecision(intervals, audioTime, cfg) {
+            const interval = findInterval(intervals, audioTime);
+            if (!interval) return;
+
+            state.currentInterval = interval.i;
+
+            const u = clamp((audioTime - interval.beatA) / interval.beatDur, 0, 1);
+            const eased = easeValue(cfg.ease, u);
+
+            const targetTime = wrapTime(interval.markerA + interval.sourceDelta * eased, els.video.duration);
+
+            if (!els.video.paused) {
+                els.video.pause();
+            }
+
+            const delta = Math.abs(els.video.currentTime - targetTime);
+            if (delta > 0.0015) {
+                els.video.currentTime = targetTime;
+            }
+            els.video.playbackRate = 1.0;
+        }
+
+        function tick() {
+            cancelAnimationFrame(state.rafId);
+
+            try {
+                if (!state.isLoaded) {
+                    updateStats();
+                    return;
+                }
+
+                const cfg = validateSetup();
+                const intervals = buildIntervals(state.beatTimes, cfg.markersSec, els.video.duration, cfg.mode);
+
+                if (!intervals.length) {
+                    throw new Error("No valid beat intervals could be built.");
+                }
+
+                const audioTime = els.song.currentTime;
+
+                if (!els.song.paused) {
+                    if (state.engine === "continuous") {
+                        if (els.video.paused) {
+                            // Start near the first marker when playback begins
+                            if (Math.abs(els.video.currentTime - intervals[0].markerA) > 0.02) {
+                                els.video.currentTime = intervals[0].markerA;
+                            }
+                            els.video.play();
+                        }
+                        syncContinuous(intervals, audioTime, cfg);
+                    } else {
+                        syncPrecision(intervals, audioTime, cfg);
+                    }
+                }
+
+                updateStats();
+            } catch (err) {
+                setStatus(`Runtime error:\n${err.message}`, "bad");
+            }
+
+            state.rafId = requestAnimationFrame(tick);
+        }
+
+        // =========================
+        // PLAYBACK CONTROLS
+        // =========================
+        async function startPlayback() {
+            try {
+                if (!state.isLoaded) {
+                    await loadEverything();
+                }
+
+                const cfg = validateSetup();
+                updateEngineFromMode();
+
+                const intervals = buildIntervals(state.beatTimes, cfg.markersSec, els.video.duration, cfg.mode);
+                if (!intervals.length) {
+                    throw new Error("Not enough beat intervals.");
+                }
+
+                els.song.currentTime = 0;
+
+                if (state.engine === "continuous") {
+                    els.video.currentTime = intervals[0].markerA;
+                    els.video.playbackRate = 1.0;
+                    await els.video.play();
+                } else {
+                    els.video.pause();
+                    els.video.currentTime = intervals[0].markerA;
+                }
+
+                await els.song.play();
+
+                setStatus(
+                    `Playing.\n` +
+                    `Mode: ${cfg.mode}\n` +
+                    `Engine: ${state.engine}\n` +
+                    `Markers: ${cfg.markerFrames.join(", ")}\n` +
+                    `Beat count: ${state.beatTimes.length}`
+                    , "good");
+            } catch (err) {
+                setStatus(`Could not start playback:\n${err.message}`, "bad");
+            }
+        }
+
+        function pausePlayback() {
+            els.song.pause();
+            els.video.pause();
+            updateStats();
+            setStatus("Paused.");
+        }
+
+        function restartPlayback() {
+            els.song.pause();
+            els.video.pause();
+
+            els.song.currentTime = 0;
+            els.video.currentTime = 0;
+            els.video.playbackRate = 1.0;
+            state.currentInterval = -1;
+
+            updateStats();
+            setStatus("Restarted to zero.");
+        }
+
+        // =========================
+        // EVENTS
+        // =========================
+        els.loadBtn.addEventListener("click", loadEverything);
+        els.playBtn.addEventListener("click", startPlayback);
+        els.pauseBtn.addEventListener("click", pausePlayback);
+        els.restartBtn.addEventListener("click", restartPlayback);
+
+        els.modeSelect.addEventListener("change", () => {
+            updateEngineFromMode();
+            setStatus(
+                state.mode === "pendulum"
+                    ? "Pendulum selected. Engine switched to precision seek mode because reverse MP4 playback is not dependable in browsers."
+                    : "Loop selected. Engine switched to continuous playback-rate sync mode."
+            );
+        });
+
+        [
+            els.fpsInput,
+            els.markersInput,
+            els.easeSelect,
+            els.kpInput,
+            els.maxRateInput,
+            els.minRateInput,
+            els.beatStrideInput
+        ].forEach(el => {
+            el.addEventListener("change", () => {
+                try {
+                    const cfg = getUserConfig();
+                    setStatus(
+                        `Config updated.\n` +
+                        `FPS: ${cfg.fps}\n` +
+                        `Markers: ${cfg.markerFrames.join(", ")}\n` +
+                        `Mode: ${cfg.mode}\n` +
+                        `Ease: ${cfg.ease}`
+                    );
+                } catch (err) {
+                    setStatus(`Config error:\n${err.message}`, "bad");
+                }
+            });
+        });
+
+        // Keep UI stats live even before playing
+        requestAnimationFrame(tick);
+
+        // Helpful startup note
+        setStatus(
+            "Ready.\n" +
+            "1) Make sure video.mp4, song1.mp3, and data.midi or data.mid are in this folder.\n" +
+            "2) Click Load Files.\n" +
+            "3) Set your beat frames.\n" +
+            "4) Click Play."
+        );
+    </script>
+</body>
+
+</html>
