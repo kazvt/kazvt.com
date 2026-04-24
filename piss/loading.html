@@ -169,7 +169,17 @@
     root.style.setProperty('--outline-scale', outlineScale);
     if (outlineColorP) root.style.setProperty('--outline-color', normalizeColor(outlineColorP));
 
-    sideGifs.forEach(g => g.src = gifSrc);
+    sideGifs.forEach(g => {
+      if (hasValidGif) {
+        g.src = gifSrc;
+        g.style.display = '';
+        g.style.filter = '';
+      } else {
+        g.removeAttribute('src');
+        g.style.display = 'none';
+        g.style.filter = 'none';
+      }
+    });
 
     const FONT_FAMILY = fontParam || "'CrashBandicoot', monospace";
     if (fontParam) document.body.classList.add('custom-font');
@@ -330,7 +340,9 @@
         root.style.setProperty('--gap', `${gap}px`);
 
         const { textWidth } = createSvgText(mid);
-        const totalWidth = textWidth + gifSize * 2 + gap * 2;
+        const totalWidth = hasValidGif
+          ? textWidth + gifSize * 2 + gap * 2
+          : textWidth;
 
         if (totalWidth <= availableWidth) {
           bestFontSize = mid;
@@ -348,7 +360,15 @@
       root.style.setProperty('--gap', `${finalGap}px`);
 
       createSvgText(bestFontSize);
-      applyGifOutlineFilter(bestFontSize);
+      if (hasValidGif) {
+        applyGifOutlineFilter(bestFontSize);
+      } else {
+        sideGifs.forEach(gif => {
+          gif.removeAttribute('src');
+          gif.style.display = 'none';
+          gif.style.filter = 'none';
+        });
+      }
     }
 
     function resetChars() {
