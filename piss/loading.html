@@ -134,7 +134,7 @@
       return new URLSearchParams(safe);
     }
     const params = getRobustParams();
-    const textValue = params.get('text') || 'sample text...';
+    const textValue = params.get('text') || '';
     const fontParam = params.get('font') || null;
     const gifparam = params.get('gif');
 
