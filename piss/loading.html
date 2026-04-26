@@ -134,7 +134,7 @@
       return new URLSearchParams(safe);
     }
     const params = getRobustParams();
-    const textValue = params.get('text') || '';
+    const textValue = params.get('text') || 'sample text...';
     const fontParam = params.get('font') || null;
     const gifparam = params.get('gif');
 
@@ -246,6 +246,8 @@
       let x = Math.round(outlineWidth);
       chars = [];
 
+      // check if textValue spells "null" and treat it as empty string to allow disabling text via URL param
+      if (textValue === 'null') textValue = '';
       for (const ch of textValue) {
         const g = document.createElementNS(ns, 'g');
         g.setAttribute('class', 'char-group');
