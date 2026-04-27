@@ -8,15 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    .card {
-      perspective: 1000px;
-    }
-
-    .collectable {
-      transform-style: preserve-3d;
-      will-change: transform, filter;
-    }
-
     .collectable-wrap::before {
       content: "";
       position: absolute;
@@ -58,82 +49,37 @@
       auto-rows-fr
     "
   >
-    <div class="card grid place-items-center">
-      <div class="collectable-wrap relative grid place-items-center">
-        <img
-          src="3.gif"
-          alt=""
-          class="collectable max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
-        />
-      </div>
+    <div class="collectable-wrap relative grid place-items-center">
+      <img
+        src="3.gif"
+        alt=""
+        class="max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
+      />
     </div>
 
-    <div class="card grid place-items-center">
-      <div class="collectable-wrap relative grid place-items-center">
-        <img
-          src="1.gif"
-          alt=""
-          class="collectable max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
-        />
-      </div>
+    <div class="collectable-wrap relative grid place-items-center">
+      <img
+        src="1.gif"
+        alt=""
+        class="max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
+      />
     </div>
 
-    <div class="card grid place-items-center">
-      <div class="collectable-wrap relative grid place-items-center">
-        <img
-          src="2.gif"
-          alt=""
-          class="collectable max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
-        />
-      </div>
+    <div class="collectable-wrap relative grid place-items-center">
+      <img
+        src="2.gif"
+        alt=""
+        class="max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
+      />
     </div>
 
-    <div class="card grid place-items-center">
-      <div class="collectable-wrap relative grid place-items-center">
-        <img
-          src="4.gif"
-          alt=""
-          class="collectable max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
-        />
-      </div>
+    <div class="collectable-wrap relative grid place-items-center">
+      <img
+        src="4.gif"
+        alt=""
+        class="max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] w-full object-contain transition duration-300 ease-out hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(255,255,255,0.35)]"
+      />
     </div>
   </main>
-
-  <script>
-    const cards = document.querySelectorAll(".card");
-
-    cards.forEach((card) => {
-      const image = card.querySelector(".collectable");
-
-      card.addEventListener("mousemove", (event) => {
-        const rect = card.getBoundingClientRect();
-
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -50;
-        const rotateY = ((x - centerX) / centerX) * 50;
-
-        image.style.transform = `
-          scale(1.12)
-          rotateX(${rotateX}deg)
-          rotateY(${rotateY}deg)
-          translateY(-10px)
-        `;
-      });
-
-      card.addEventListener("mouseleave", () => {
-        image.style.transform = `
-          scale(1)
-          rotateX(0deg)
-          rotateY(0deg)
-          translateY(0)
-        `;
-      });
-    });
-  </script>
 </body>
 </html>
