@@ -1,0 +1,579 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Logo Mask Exporter</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      overflow: auto;
+    }
+
+    .app {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      padding: 20px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #2f2f2f;
+      padding: 10px;
+      border-radius: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    input,
+    button {
+      background: #1d1d1d;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 5px;
+      padding: 7px;
+    }
+
+    input[type="color"] {
+      padding: 0;
+      width: 42px;
+      height: 34px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .stage {
+      position: relative;
+      padding: 120px;
+      overflow: visible;
+      user-select: none;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      border: 1px solid #555;
+      background:
+        linear-gradient(45deg, #bbb 25%, transparent 25%),
+        linear-gradient(-45deg, #bbb 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #bbb 75%),
+        linear-gradient(-45deg, transparent 75%, #bbb 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-color: #eee;
+      max-width: calc(90vw - 240px);
+      max-height: calc(80vh - 240px);
+      cursor: grab;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    #transformBox {
+      position: absolute;
+      border: 1.5px dashed #00aaff;
+      display: none;
+      cursor: move;
+      z-index: 5;
+      pointer-events: auto;
+    }
+
+    .handle {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border: 2px solid #00aaff;
+      box-sizing: border-box;
+      display: none;
+      z-index: 6;
+      pointer-events: auto;
+      transform: translate(-50%, -50%);
+    }
+
+    .handle[data-handle="nw"],
+    .handle[data-handle="se"] {
+      cursor: nwse-resize;
+    }
+
+    .handle[data-handle="ne"],
+    .handle[data-handle="sw"] {
+      cursor: nesw-resize;
+    }
+
+    .handle[data-handle="n"],
+    .handle[data-handle="s"] {
+      cursor: ns-resize;
+    }
+
+    .handle[data-handle="e"],
+    .handle[data-handle="w"] {
+      cursor: ew-resize;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="controls">
+      <input id="upload" type="file" accept="image/*">
+
+      <label>
+        shadow
+        <input id="shadowColor" type="color" value="#000000">
+      </label>
+
+      <label>
+        4px outline
+        <input id="outerStrokeColor" type="color" value="#ffffff">
+      </label>
+
+      <label>
+        2px outline
+        <input id="innerStrokeColor" type="color" value="#000000">
+      </label>
+
+      <button id="exportBtn">Export PNG</button>
+    </div>
+
+    <div id="stage" class="stage">
+      <canvas id="canvas"></canvas>
+
+      <div id="transformBox"></div>
+
+      <div class="handle" data-handle="nw"></div>
+      <div class="handle" data-handle="n"></div>
+      <div class="handle" data-handle="ne"></div>
+      <div class="handle" data-handle="e"></div>
+      <div class="handle" data-handle="se"></div>
+      <div class="handle" data-handle="s"></div>
+      <div class="handle" data-handle="sw"></div>
+      <div class="handle" data-handle="w"></div>
+    </div>
+  </div>
+
+  <script>
+    const stage = document.getElementById("stage");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    const upload = document.getElementById("upload");
+    const shadowColor = document.getElementById("shadowColor");
+    const outerStrokeColor = document.getElementById("outerStrokeColor");
+    const innerStrokeColor = document.getElementById("innerStrokeColor");
+    const exportBtn = document.getElementById("exportBtn");
+
+    const transformBox = document.getElementById("transformBox");
+    const handles = [...document.querySelectorAll(".handle")];
+
+    const OUTER_STROKE = 4;
+    const INNER_STROKE = 2;
+
+    let logo = null;
+    let shadow = null;
+    let imported = null;
+
+    let imgX = 0;
+    let imgY = 0;
+    let imgScaleX = 1;
+    let imgScaleY = 1;
+
+    let action = null;
+    let activeHandle = null;
+    let startPointer = null;
+    let startBox = null;
+
+    function makeCanvas(w, h) {
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      return c;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(src);
+        img.src = src;
+      });
+    }
+
+    async function init() {
+      logo = await loadImage("logo.png");
+      shadow = await loadImage("logo_shadow.png");
+
+      canvas.width = Math.max(logo.naturalWidth, shadow.naturalWidth);
+      canvas.height = Math.max(logo.naturalHeight, shadow.naturalHeight);
+
+      imgX = canvas.width / 2;
+      imgY = canvas.height / 2;
+
+      render();
+    }
+
+    function drawSolidShadow() {
+      const out = makeCanvas(canvas.width, canvas.height);
+      const o = out.getContext("2d");
+
+      o.drawImage(shadow, 0, 0);
+
+      o.globalCompositeOperation = "source-in";
+      o.fillStyle = shadowColor.value;
+      o.fillRect(0, 0, out.width, out.height);
+
+      o.globalCompositeOperation = "source-over";
+
+      return out;
+    }
+
+    function drawMaskedImage() {
+      const out = makeCanvas(canvas.width, canvas.height);
+      const o = out.getContext("2d");
+
+      if (!imported) {
+        o.drawImage(logo, 0, 0);
+        return out;
+      }
+
+      o.save();
+      o.translate(imgX, imgY);
+      o.scale(imgScaleX, imgScaleY);
+      o.drawImage(
+        imported,
+        -imported.naturalWidth / 2,
+        -imported.naturalHeight / 2
+      );
+      o.restore();
+
+      o.globalCompositeOperation = "destination-in";
+      o.drawImage(logo, 0, 0);
+
+      o.globalCompositeOperation = "source-over";
+
+      return out;
+    }
+
+    function makeGroup() {
+      const group = makeCanvas(canvas.width, canvas.height);
+      const g = group.getContext("2d");
+
+      g.drawImage(drawSolidShadow(), 0, 0);
+      g.drawImage(drawMaskedImage(), 0, 0);
+
+      return group;
+    }
+
+    function outsideStroke(mask, size, color) {
+      const out = makeCanvas(mask.width, mask.height);
+      const o = out.getContext("2d");
+      const r = Math.ceil(size);
+
+      for (let y = -r; y <= r; y++) {
+        for (let x = -r; x <= r; x++) {
+          if (x * x + y * y <= r * r) {
+            o.drawImage(mask, x, y);
+          }
+        }
+      }
+
+      o.globalCompositeOperation = "source-in";
+      o.fillStyle = color;
+      o.fillRect(0, 0, out.width, out.height);
+
+      o.globalCompositeOperation = "destination-out";
+      o.drawImage(mask, 0, 0);
+
+      o.globalCompositeOperation = "source-over";
+
+      return out;
+    }
+
+    function finalImage() {
+      const group = makeGroup();
+
+      const result = makeCanvas(canvas.width, canvas.height);
+      const r = result.getContext("2d");
+
+      r.drawImage(outsideStroke(group, OUTER_STROKE, outerStrokeColor.value), 0, 0);
+      r.drawImage(outsideStroke(group, INNER_STROKE, innerStrokeColor.value), 0, 0);
+      r.drawImage(group, 0, 0);
+
+      return result;
+    }
+
+    function getImageBox() {
+      if (!imported) return null;
+
+      const w = imported.naturalWidth * imgScaleX;
+      const h = imported.naturalHeight * imgScaleY;
+
+      return {
+        left: imgX - w / 2,
+        top: imgY - h / 2,
+        right: imgX + w / 2,
+        bottom: imgY + h / 2,
+        width: w,
+        height: h
+      };
+    }
+
+    function canvasToStagePoint(x, y) {
+      const canvasRect = canvas.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+
+      return {
+        x: canvasRect.left - stageRect.left + (x / canvas.width) * canvasRect.width,
+        y: canvasRect.top - stageRect.top + (y / canvas.height) * canvasRect.height
+      };
+    }
+
+    function pointerToCanvas(e) {
+      const rect = canvas.getBoundingClientRect();
+
+      return {
+        x: (e.clientX - rect.left) * canvas.width / rect.width,
+        y: (e.clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+
+    function getHandlePoints() {
+      const b = getImageBox();
+      if (!b) return {};
+
+      const cx = (b.left + b.right) / 2;
+      const cy = (b.top + b.bottom) / 2;
+
+      return {
+        nw: { x: b.left, y: b.top },
+        n:  { x: cx, y: b.top },
+        ne: { x: b.right, y: b.top },
+        e:  { x: b.right, y: cy },
+        se: { x: b.right, y: b.bottom },
+        s:  { x: cx, y: b.bottom },
+        sw: { x: b.left, y: b.bottom },
+        w:  { x: b.left, y: cy }
+      };
+    }
+
+    function updateOverlay() {
+      if (!imported) {
+        transformBox.style.display = "none";
+        handles.forEach(h => h.style.display = "none");
+        return;
+      }
+
+      const b = getImageBox();
+
+      const topLeft = canvasToStagePoint(b.left, b.top);
+      const bottomRight = canvasToStagePoint(b.right, b.bottom);
+
+      transformBox.style.display = "block";
+      transformBox.style.left = `${topLeft.x}px`;
+      transformBox.style.top = `${topLeft.y}px`;
+      transformBox.style.width = `${bottomRight.x - topLeft.x}px`;
+      transformBox.style.height = `${bottomRight.y - topLeft.y}px`;
+
+      const points = getHandlePoints();
+
+      handles.forEach(handle => {
+        const name = handle.dataset.handle;
+        const p = canvasToStagePoint(points[name].x, points[name].y);
+
+        handle.style.display = "block";
+        handle.style.left = `${p.x}px`;
+        handle.style.top = `${p.y}px`;
+      });
+    }
+
+    function render() {
+      if (!logo || !shadow) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(finalImage(), 0, 0);
+
+      updateOverlay();
+    }
+
+    upload.addEventListener("change", () => {
+      const file = upload.files[0];
+      if (!file) return;
+
+      const img = new Image();
+
+      img.onload = () => {
+        imported = img;
+
+        const fit = Math.max(
+          canvas.width / imported.naturalWidth,
+          canvas.height / imported.naturalHeight
+        );
+
+        imgScaleX = fit;
+        imgScaleY = fit;
+        imgX = canvas.width / 2;
+        imgY = canvas.height / 2;
+
+        render();
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+
+    shadowColor.addEventListener("input", render);
+    outerStrokeColor.addEventListener("input", render);
+    innerStrokeColor.addEventListener("input", render);
+
+    function startMove(e) {
+      if (!imported) return;
+
+      action = "move";
+      activeHandle = null;
+      startPointer = pointerToCanvas(e);
+      startBox = {
+        ...getImageBox(),
+        imgX,
+        imgY,
+        imgScaleX,
+        imgScaleY
+      };
+
+      e.preventDefault();
+    }
+
+    function startScale(e, handleName) {
+      if (!imported) return;
+
+      action = "scale";
+      activeHandle = handleName;
+      startPointer = pointerToCanvas(e);
+      startBox = {
+        ...getImageBox(),
+        imgX,
+        imgY,
+        imgScaleX,
+        imgScaleY
+      };
+
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function moveTransform(e) {
+      if (!imported || !action) return;
+
+      const p = pointerToCanvas(e);
+      const dx = p.x - startPointer.x;
+      const dy = p.y - startPointer.y;
+
+      if (action === "move") {
+        imgX = startBox.imgX + dx;
+        imgY = startBox.imgY + dy;
+        render();
+        return;
+      }
+
+      let left = startBox.left;
+      let right = startBox.right;
+      let top = startBox.top;
+      let bottom = startBox.bottom;
+
+      if (activeHandle.includes("w")) left += dx;
+      if (activeHandle.includes("e")) right += dx;
+      if (activeHandle.includes("n")) top += dy;
+      if (activeHandle.includes("s")) bottom += dy;
+
+      const minSize = 20;
+
+      if (right - left < minSize) {
+        if (activeHandle.includes("w")) left = right - minSize;
+        if (activeHandle.includes("e")) right = left + minSize;
+      }
+
+      if (bottom - top < minSize) {
+        if (activeHandle.includes("n")) top = bottom - minSize;
+        if (activeHandle.includes("s")) bottom = top + minSize;
+      }
+
+      imgX = (left + right) / 2;
+      imgY = (top + bottom) / 2;
+      imgScaleX = (right - left) / imported.naturalWidth;
+      imgScaleY = (bottom - top) / imported.naturalHeight;
+
+      render();
+    }
+
+    function endTransform() {
+      action = null;
+      activeHandle = null;
+      startPointer = null;
+      startBox = null;
+    }
+
+    canvas.addEventListener("pointerdown", startMove);
+    transformBox.addEventListener("pointerdown", startMove);
+
+    handles.forEach(handle => {
+      handle.addEventListener("pointerdown", e => {
+        startScale(e, handle.dataset.handle);
+      });
+    });
+
+    window.addEventListener("pointermove", moveTransform);
+    window.addEventListener("pointerup", endTransform);
+    window.addEventListener("pointercancel", endTransform);
+
+    canvas.addEventListener("wheel", e => {
+      if (!imported) return;
+
+      e.preventDefault();
+
+      const p = pointerToCanvas(e);
+      const zoom = e.deltaY < 0 ? 1.06 : 0.94;
+
+      imgX = p.x - (p.x - imgX) * zoom;
+      imgY = p.y - (p.y - imgY) * zoom;
+
+      imgScaleX *= zoom;
+      imgScaleY *= zoom;
+
+      render();
+    }, { passive: false });
+
+    exportBtn.addEventListener("click", () => {
+      const out = finalImage();
+
+      const a = document.createElement("a");
+      a.download = "export.png";
+      a.href = out.toDataURL("image/png");
+      a.click();
+    });
+
+    window.addEventListener("resize", updateOverlay);
+    window.addEventListener("scroll", updateOverlay, true);
+
+    init().catch(() => {
+      alert("Missing logo.png or logo_shadow.png next to this HTML file.");
+    });
+  </script>
+</body>
+</html>
