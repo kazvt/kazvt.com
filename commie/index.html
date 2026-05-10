@@ -145,7 +145,7 @@
 <body>
     <div class="app">
         <div class="controls">
-            <input id="upload" type="file" accept="image/*,.gif">
+            <input id="upload" type="file" accept="image/*,.gif,.webp">
 
             <label>
                 shadow
@@ -300,7 +300,7 @@
         function getImportedSource() {
             if (!imported) return null;
 
-            if (imported.type === "gif") {
+            if (imported.frames) {
                 const index = getGifFrameIndex(imported);
                 return imported.frames[index].canvas;
             }
@@ -657,6 +657,87 @@
             }
         }
 
+        async function isWebpFile(file) {
+            const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+
+            const riff = String.fromCharCode(...header.slice(0, 4));
+            const webp = String.fromCharCode(...header.slice(8, 12));
+
+            return riff === "RIFF" && webp === "WEBP";
+        }
+
+        async function loadWebpImport(file) {
+            if (!("ImageDecoder" in window)) {
+                throw new Error("This browser does not support ImageDecoder, which is needed for animated WebP import.");
+            }
+
+            const supported = await ImageDecoder.isTypeSupported("image/webp");
+
+            if (!supported) {
+                throw new Error("This browser's ImageDecoder does not support image/webp.");
+            }
+
+            const buffer = await file.arrayBuffer();
+
+            const decoder = new ImageDecoder({
+                data: buffer,
+                type: "image/webp"
+            });
+
+            await decoder.tracks.ready;
+
+            const track = decoder.tracks.selectedTrack;
+            const frameCount = track.frameCount || 1;
+
+            const frames = [];
+            let width = 0;
+            let height = 0;
+
+            for (let i = 0; i < frameCount; i++) {
+                const result = await decoder.decode({ frameIndex: i });
+                const image = result.image;
+
+                width = image.displayWidth || image.codedWidth;
+                height = image.displayHeight || image.codedHeight;
+
+                const frameCanvas = makeCanvas(width, height);
+                const frameCtx = frameCanvas.getContext("2d");
+
+                frameCtx.drawImage(image, 0, 0);
+
+                frames.push({
+                    canvas: frameCanvas,
+                    delay: Math.max(20, image.duration ? image.duration / 1000 : 100)
+                });
+
+                image.close();
+            }
+
+            decoder.close();
+
+            const duration = frames.reduce((sum, frame) => sum + frame.delay, 0);
+
+            imported = {
+                type: "webp",
+                frames,
+                width,
+                height,
+                duration,
+                startedAt: performance.now(),
+                animated: frames.length > 1
+            };
+
+            fitImportedToCanvas();
+            updateExportButton();
+            render();
+
+            if (imported.animated) {
+                startAnimationLoop();
+            } else {
+                stopAnimationLoop();
+            }
+        }
+
         async function isGifFile(file) {
             const header = new Uint8Array(await file.slice(0, 6).arrayBuffer());
             const signature = String.fromCharCode(...header);
@@ -669,10 +750,13 @@
             if (!file) return;
 
             const isGif = await isGifFile(file);
+            const isWebp = await isWebpFile(file);
 
             try {
                 if (isGif) {
                     await loadGifImport(file);
+                } else if (isWebp) {
+                    await loadWebpImport(file);
                 } else {
                     await loadStaticImport(file);
                 }
@@ -685,7 +769,15 @@
                     imported = null;
                     exportBtn.textContent = "GIF import failed";
                     render();
-                    alert("GIF import failed. Check the browser console for the real error.");
+                    alert("GIF import failed. Check the browser console.");
+                    return;
+                }
+
+                if (isWebp) {
+                    imported = null;
+                    exportBtn.textContent = "WebP import failed";
+                    render();
+                    alert("Animated WebP import failed. This browser may not support ImageDecoder for WebP.");
                     return;
                 }
 
