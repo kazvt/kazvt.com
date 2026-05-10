@@ -145,7 +145,7 @@
 <body>
     <div class="app">
         <div class="controls">
-            <input id="upload" type="file" accept="image/*">
+            <input id="upload" type="file" accept="image/*,.gif">
 
             <label>
                 shadow
@@ -165,7 +165,7 @@
                 <button type="button" class="pickBtn" data-pick="innerStrokeColor">pick</button>
             </label>
 
-            <button id="exportBtn" type="button">Export PNG</button>
+            <button id="exportBtn" type="button">Export</button>
         </div>
 
         <div id="stage" class="stage">
@@ -183,6 +183,9 @@
             <div class="handle" data-handle="w"></div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gifuct-js@1.0.0/dist/gifuct-js.min.js"></script>
+    <script src="./gif.js"></script>
 
     <script>
         const stage = document.getElementById("stage");
@@ -203,7 +206,32 @@
 
         let logo = null;
         let shadow = null;
+
+        /*
+            imported can now be:
+            {
+                type: "image",
+                image,
+                width,
+                height,
+                animated: false
+            }
+    
+            or:
+    
+            {
+                type: "gif",
+                frames: [{ canvas, delay }],
+                width,
+                height,
+                duration,
+                startedAt,
+                animated: true
+            }
+        */
         let imported = null;
+        let forcedGifFrameIndex = null;
+        let animationLoopId = null;
 
         let imgX = 0;
         let imgY = 0;
@@ -246,6 +274,63 @@
             render();
         }
 
+        function getImportedWidth() {
+            return imported ? imported.width : 0;
+        }
+
+        function getImportedHeight() {
+            return imported ? imported.height : 0;
+        }
+
+        function getGifFrameIndex(gifImport) {
+            if (forcedGifFrameIndex !== null) return forcedGifFrameIndex;
+
+            const elapsed = (performance.now() - gifImport.startedAt) % gifImport.duration;
+
+            let t = 0;
+            for (let i = 0; i < gifImport.frames.length; i++) {
+                t += gifImport.frames[i].delay;
+                if (elapsed < t) return i;
+            }
+
+            return 0;
+        }
+
+        function getImportedSource() {
+            if (!imported) return null;
+
+            if (imported.type === "gif") {
+                const index = getGifFrameIndex(imported);
+                return imported.frames[index].canvas;
+            }
+
+            return imported.image;
+        }
+
+        function updateExportButton() {
+            exportBtn.textContent = imported && imported.animated ? "Export GIF" : "Export PNG";
+        }
+
+        function startAnimationLoop() {
+            stopAnimationLoop();
+
+            if (!imported || !imported.animated) return;
+
+            const tick = () => {
+                render();
+                animationLoopId = requestAnimationFrame(tick);
+            };
+
+            animationLoopId = requestAnimationFrame(tick);
+        }
+
+        function stopAnimationLoop() {
+            if (animationLoopId !== null) {
+                cancelAnimationFrame(animationLoopId);
+                animationLoopId = null;
+            }
+        }
+
         function drawSolidShadow() {
             const out = makeCanvas(canvas.width, canvas.height);
             const o = out.getContext("2d");
@@ -270,13 +355,15 @@
                 return out;
             }
 
+            const source = getImportedSource();
+
             o.save();
             o.translate(imgX, imgY);
             o.scale(imgScaleX, imgScaleY);
             o.drawImage(
-                imported,
-                -imported.naturalWidth / 2,
-                -imported.naturalHeight / 2
+                source,
+                -getImportedWidth() / 2,
+                -getImportedHeight() / 2
             );
             o.restore();
 
@@ -339,8 +426,8 @@
         function getImageBox() {
             if (!imported) return null;
 
-            const w = imported.naturalWidth * imgScaleX;
-            const h = imported.naturalHeight * imgScaleY;
+            const w = getImportedWidth() * imgScaleX;
+            const h = getImportedHeight() * imgScaleY;
 
             return {
                 left: imgX - w / 2,
@@ -429,29 +516,155 @@
             updateOverlay();
         }
 
-        upload.addEventListener("change", () => {
+        function fitImportedToCanvas() {
+            if (!imported) return;
+
+            const fit = Math.max(
+                canvas.width / getImportedWidth(),
+                canvas.height / getImportedHeight()
+            );
+
+            imgScaleX = fit;
+            imgScaleY = fit;
+            imgX = canvas.width / 2;
+            imgY = canvas.height / 2;
+        }
+
+        async function loadStaticImport(file) {
+            const objectUrl = URL.createObjectURL(file);
+            const img = await loadImage(objectUrl);
+
+            imported = {
+                type: "image",
+                image: img,
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+                animated: false
+            };
+
+            fitImportedToCanvas();
+            updateExportButton();
+            stopAnimationLoop();
+            render();
+        }
+
+        function getGifLogicalSize(parsed, frames) {
+            const width =
+                parsed?.lsd?.width ||
+                Math.max(...frames.map(f => f.dims.left + f.dims.width));
+
+            const height =
+                parsed?.lsd?.height ||
+                Math.max(...frames.map(f => f.dims.top + f.dims.height));
+
+            return { width, height };
+        }
+
+        function composeGifFrames(rawFrames, width, height) {
+            const working = makeCanvas(width, height);
+            const wctx = working.getContext("2d", { willReadFrequently: true });
+
+            const composed = [];
+
+            let previousFrame = null;
+            let restoreData = null;
+
+            for (const frame of rawFrames) {
+                if (previousFrame) {
+                    const d = previousFrame.dims;
+
+                    if (previousFrame.disposalType === 2) {
+                        wctx.clearRect(d.left, d.top, d.width, d.height);
+                    } else if (previousFrame.disposalType === 3 && restoreData) {
+                        wctx.putImageData(restoreData, 0, 0);
+                    }
+                }
+
+                restoreData =
+                    frame.disposalType === 3
+                        ? wctx.getImageData(0, 0, width, height)
+                        : null;
+
+                const patch = new ImageData(
+                    new Uint8ClampedArray(frame.patch),
+                    frame.dims.width,
+                    frame.dims.height
+                );
+
+                wctx.putImageData(patch, frame.dims.left, frame.dims.top);
+
+                const fullFrame = makeCanvas(width, height);
+                fullFrame.getContext("2d").drawImage(working, 0, 0);
+
+                composed.push({
+                    canvas: fullFrame,
+                    delay: Math.max(20, frame.delay || 100)
+                });
+
+                previousFrame = frame;
+            }
+
+            return composed;
+        }
+
+        async function loadGifImport(file) {
+            if (!window.gifuct) {
+                throw new Error("gifuct-js is missing. Add gifuct-js before your main script.");
+            }
+
+            const buffer = await file.arrayBuffer();
+            const parsed = window.gifuct.parseGIF(buffer);
+            const rawFrames = window.gifuct.decompressFrames(parsed, true);
+
+            if (!rawFrames.length) {
+                await loadStaticImport(file);
+                return;
+            }
+
+            const { width, height } = getGifLogicalSize(parsed, rawFrames);
+            const frames = composeGifFrames(rawFrames, width, height);
+            const duration = frames.reduce((sum, frame) => sum + frame.delay, 0);
+
+            imported = {
+                type: "gif",
+                frames,
+                width,
+                height,
+                duration,
+                startedAt: performance.now(),
+                animated: frames.length > 1
+            };
+
+            fitImportedToCanvas();
+            updateExportButton();
+
+            render();
+
+            if (imported.animated) {
+                startAnimationLoop();
+            } else {
+                stopAnimationLoop();
+            }
+        }
+
+        upload.addEventListener("change", async () => {
             const file = upload.files[0];
             if (!file) return;
 
-            const img = new Image();
+            const isGif =
+                file.type === "image/gif" ||
+                file.name.toLowerCase().endsWith(".gif");
 
-            img.onload = () => {
-                imported = img;
-
-                const fit = Math.max(
-                    canvas.width / imported.naturalWidth,
-                    canvas.height / imported.naturalHeight
-                );
-
-                imgScaleX = fit;
-                imgScaleY = fit;
-                imgX = canvas.width / 2;
-                imgY = canvas.height / 2;
-
-                render();
-            };
-
-            img.src = URL.createObjectURL(file);
+            try {
+                if (isGif) {
+                    await loadGifImport(file);
+                } else {
+                    await loadStaticImport(file);
+                }
+            } catch (err) {
+                console.error(err);
+                await loadStaticImport(file);
+            }
         });
 
         shadowColor.addEventListener("input", render);
@@ -528,7 +741,6 @@
                 render();
             } catch (err) {
                 stopPicking();
-                // alert("Could not sample the canvas. Run this through localhost instead of opening it as file://.");
             }
         }, true);
 
@@ -607,8 +819,8 @@
 
             imgX = (left + right) / 2;
             imgY = (top + bottom) / 2;
-            imgScaleX = (right - left) / imported.naturalWidth;
-            imgScaleY = (bottom - top) / imported.naturalHeight;
+            imgScaleX = (right - left) / getImportedWidth();
+            imgScaleY = (bottom - top) / getImportedHeight();
 
             render();
         }
@@ -650,16 +862,172 @@
             render();
         }, { passive: false });
 
-        exportBtn.addEventListener("click", () => {
-            try {
-                const out = finalImage();
+        function downloadBlob(blob, filename) {
+            const a = document.createElement("a");
+            const url = URL.createObjectURL(blob);
 
-                const a = document.createElement("a");
-                a.download = "export.png";
-                a.href = out.toDataURL("image/png");
-                a.click();
+            a.download = filename;
+            a.href = url;
+            a.click();
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function collectVisibleColorsAndPrepareFrame(sourceCanvas, transparentRgb) {
+            const out = makeCanvas(sourceCanvas.width, sourceCanvas.height);
+            const o = out.getContext("2d", { willReadFrequently: true });
+
+            o.drawImage(sourceCanvas, 0, 0);
+
+            const imageData = o.getImageData(0, 0, out.width, out.height);
+            const data = imageData.data;
+            const visibleColors = new Set();
+
+            for (let i = 0; i < data.length; i += 4) {
+                const alpha = data[i + 3];
+
+                if (alpha < 128) {
+                    data[i] = transparentRgb[0];
+                    data[i + 1] = transparentRgb[1];
+                    data[i + 2] = transparentRgb[2];
+                    data[i + 3] = 255;
+                } else {
+                    const key = `${data[i]},${data[i + 1]},${data[i + 2]}`;
+                    visibleColors.add(key);
+                    data[i + 3] = 255;
+                }
+            }
+
+            o.putImageData(imageData, 0, 0);
+
+            return { canvas: out, visibleColors };
+        }
+
+        function chooseTransparentColor(visibleColorSets) {
+            const candidates = [
+                [0, 255, 0],
+                [255, 0, 255],
+                [0, 255, 255],
+                [255, 255, 0],
+                [255, 0, 0],
+                [0, 0, 255]
+            ];
+
+            const used = new Set();
+
+            visibleColorSets.forEach(set => {
+                set.forEach(color => used.add(color));
+            });
+
+            for (const rgb of candidates) {
+                const key = `${rgb[0]},${rgb[1]},${rgb[2]}`;
+                if (!used.has(key)) return rgb;
+            }
+
+            return [0, 255, 0];
+        }
+
+        function rgbToGifTransparentNumber(rgb) {
+            return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+        }
+
+        async function exportAnimatedGif() {
+            if (!window.GIF) {
+                throw new Error("gif.js is missing. Add gif.js before your main script.");
+            }
+
+            exportBtn.disabled = true;
+            exportBtn.textContent = "Rendering GIF...";
+
+            const renderedFrames = [];
+            const visibleColorSets = [];
+
+            try {
+                for (let i = 0; i < imported.frames.length; i++) {
+                    forcedGifFrameIndex = i;
+                    const frameCanvas = finalImage();
+                    renderedFrames.push(frameCanvas);
+                }
+
+                forcedGifFrameIndex = null;
+
+                const firstPass = renderedFrames.map(frameCanvas => {
+                    const temp = makeCanvas(frameCanvas.width, frameCanvas.height);
+                    const t = temp.getContext("2d", { willReadFrequently: true });
+                    t.drawImage(frameCanvas, 0, 0);
+
+                    const imageData = t.getImageData(0, 0, temp.width, temp.height);
+                    const set = new Set();
+
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        if (imageData.data[i + 3] >= 128) {
+                            set.add(`${imageData.data[i]},${imageData.data[i + 1]},${imageData.data[i + 2]}`);
+                        }
+                    }
+
+                    return set;
+                });
+
+                visibleColorSets.push(...firstPass);
+
+                const transparentRgb = chooseTransparentColor(visibleColorSets);
+
+                const preparedFrames = renderedFrames.map(frameCanvas => {
+                    return collectVisibleColorsAndPrepareFrame(frameCanvas, transparentRgb).canvas;
+                });
+
+                const gif = new GIF({
+                    workers: 2,
+                    quality: 10,
+                    repeat: 0,
+                    width: canvas.width,
+                    height: canvas.height,
+                    workerScript: "./gif.worker.js",
+                    transparent: rgbToGifTransparentNumber(transparentRgb)
+                });
+
+                preparedFrames.forEach((frameCanvas, i) => {
+                    gif.addFrame(frameCanvas, {
+                        delay: imported.frames[i].delay,
+                        copy: true
+                    });
+                });
+
+                const blob = await new Promise((resolve, reject) => {
+                    gif.on("finished", resolve);
+                    gif.on("abort", () => reject(new Error("GIF export aborted.")));
+                    gif.render();
+                });
+
+                downloadBlob(blob, "export.gif");
+            } finally {
+                forcedGifFrameIndex = null;
+                exportBtn.disabled = false;
+                updateExportButton();
+                render();
+            }
+        }
+
+        function exportPng() {
+            const out = finalImage();
+
+            const a = document.createElement("a");
+            a.download = "export.png";
+            a.href = out.toDataURL("image/png");
+            a.click();
+        }
+
+        exportBtn.addEventListener("click", async () => {
+            try {
+                if (imported && imported.animated) {
+                    await exportAnimatedGif();
+                } else {
+                    exportPng();
+                }
             } catch (err) {
-                // alert("Could not export. Run this through localhost instead of opening it as file://.");
+                console.error(err);
+                exportBtn.disabled = false;
+                updateExportButton();
             }
         });
 
