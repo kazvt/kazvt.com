@@ -184,10 +184,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/gifuct-js@1.0.0/dist/gifuct-js.min.js"></script>
     <script src="./gif.js"></script>
 
-    <script>
+    <script type="module">
+        import { parseGIF, decompressFrames } from "https://esm.sh/gifuct-js@2.1.2";
         const stage = document.getElementById("stage");
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -608,17 +608,15 @@
         }
 
         async function loadGifImport(file) {
-            if (!window.gifuct) {
-                throw new Error("gifuct-js is missing. Add gifuct-js before your main script.");
-            }
-
             const buffer = await file.arrayBuffer();
-            const parsed = window.gifuct.parseGIF(buffer);
-            const rawFrames = window.gifuct.decompressFrames(parsed, true);
+
+            const parsed = parseGIF(buffer);
+            const rawFrames = decompressFrames(parsed, true);
+
+            console.log("GIF frames decoded:", rawFrames.length);
 
             if (!rawFrames.length) {
-                await loadStaticImport(file);
-                return;
+                throw new Error("GIF decoded, but no frames were found.");
             }
 
             const { width, height } = getGifLogicalSize(parsed, rawFrames);
@@ -647,13 +645,18 @@
             }
         }
 
+        async function isGifFile(file) {
+            const header = new Uint8Array(await file.slice(0, 6).arrayBuffer());
+            const signature = String.fromCharCode(...header);
+
+            return signature === "GIF87a" || signature === "GIF89a";
+        }
+
         upload.addEventListener("change", async () => {
             const file = upload.files[0];
             if (!file) return;
 
-            const isGif =
-                file.type === "image/gif" ||
-                file.name.toLowerCase().endsWith(".gif");
+            const isGif = await isGifFile(file);
 
             try {
                 if (isGif) {
@@ -662,8 +665,19 @@
                     await loadStaticImport(file);
                 }
             } catch (err) {
-                console.error(err);
-                await loadStaticImport(file);
+                console.error("Import failed:", err);
+
+                stopAnimationLoop();
+
+                if (isGif) {
+                    imported = null;
+                    exportBtn.textContent = "GIF import failed";
+                    render();
+                    alert("GIF import failed. Check the browser console for the real error.");
+                    return;
+                }
+
+                alert("Image import failed. Check the browser console.");
             }
         });
 
