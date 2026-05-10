@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>commaker</title>
+    <title>commie</title>
+
+    <!-- this can be reused for any logo generator, im just using it as a sickle and hammer emoji maker rn cause its most practical to me -->
 
     <style>
         body {
@@ -189,301 +191,306 @@
 
     <script type="module">
         import { parseGIF, decompressFrames } from "https://esm.sh/gifuct-js@2.1.2";
+        const stage = document.getElementById("stage");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-        const stageEl = document.getElementById("stage");
-        const editorCanvas = document.getElementById("canvas");
-        const editorCtx = editorCanvas.getContext("2d", { willReadFrequently: true });
-
-        const uploadInput = document.getElementById("upload");
-        const shadowPicker = document.getElementById("shadowColor");
-        const outerStrokePicker = document.getElementById("outerStrokeColor");
-        const innerStrokePicker = document.getElementById("innerStrokeColor");
-        const exportButton = document.getElementById("exportBtn");
+        const upload = document.getElementById("upload");
+        const shadowColor = document.getElementById("shadowColor");
+        const outerStrokeColor = document.getElementById("outerStrokeColor");
+        const innerStrokeColor = document.getElementById("innerStrokeColor");
+        const exportBtn = document.getElementById("exportBtn");
 
         const transformBox = document.getElementById("transformBox");
-        const resizeHandles = [...document.querySelectorAll(".handle")];
+        const handles = [...document.querySelectorAll(".handle")];
 
-        // These match the little sticker style I was aiming for.
-        // Not configurable in the UI yet because three color controls already felt busy.
-        const FAT_OUTLINE = 4;
-        const THIN_OUTLINE = 2;
+        const OUTER_STROKE = 4;
+        const INNER_STROKE = 2;
 
-        let logoImg = null;
-        let shadowImg = null;
+        let logo = null;
+        let shadow = null;
 
-        // currentArtwork is either a normal image or a list of already-composed animation frames.
-        // I left this fairly plain instead of wrapping it in a class; it is easier to debug in DevTools.
-        let currentArtwork = null;
-        let heldFrameIndex = null;
-        let previewLoop = null;
+        /*
+            imported can now be:
+            {
+                type: "image",
+                image,
+                width,
+                height,
+                animated: false
+            }
+    
+            or:
+    
+            {
+                type: "gif",
+                frames: [{ canvas, delay }],
+                width,
+                height,
+                duration,
+                startedAt,
+                animated: true
+            }
+        */
+        let imported = null;
+        let forcedGifFrameIndex = null;
+        let animationLoopId = null;
 
-        let artCenterX = 0;
-        let artCenterY = 0;
-        let artScaleX = 1;
-        let artScaleY = 1;
+        let imgX = 0;
+        let imgY = 0;
+        let imgScaleX = 1;
+        let imgScaleY = 1;
 
-        let dragKind = null;
-        let selectedHandle = null;
-        let pointerStart = null;
-        let boxStart = null;
+        let action = null;
+        let activeHandle = null;
+        let startPointer = null;
+        let startBox = null;
 
-        let pickerWaitingForClick = null;
+        let pickingColorInput = null;
 
-        function newCanvas(width, height) {
+        function makeCanvas(w, h) {
             const c = document.createElement("canvas");
-            c.width = width;
-            c.height = height;
+            c.width = w;
+            c.height = h;
             return c;
         }
 
-        function loadPicture(src) {
+        function loadImage(src) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
-
                 img.onload = () => resolve(img);
                 img.onerror = () => reject(src);
                 img.src = src;
             });
         }
 
-        async function startApp() {
-            logoImg = await loadPicture("logo.png");
-            shadowImg = await loadPicture("logo_shadow.png");
+        async function init() {
+            logo = await loadImage("logo.png");
+            shadow = await loadImage("logo_shadow.png");
 
-            editorCanvas.width = Math.max(logoImg.naturalWidth, shadowImg.naturalWidth);
-            editorCanvas.height = Math.max(logoImg.naturalHeight, shadowImg.naturalHeight);
+            canvas.width = Math.max(logo.naturalWidth, shadow.naturalWidth);
+            canvas.height = Math.max(logo.naturalHeight, shadow.naturalHeight);
 
-            artCenterX = editorCanvas.width / 2;
-            artCenterY = editorCanvas.height / 2;
+            imgX = canvas.width / 2;
+            imgY = canvas.height / 2;
 
-            paint();
+            render();
         }
 
-        function artworkWidth() {
-            return currentArtwork ? currentArtwork.width : 0;
+        function getImportedWidth() {
+            return imported ? imported.width : 0;
         }
 
-        function artworkHeight() {
-            return currentArtwork ? currentArtwork.height : 0;
+        function getImportedHeight() {
+            return imported ? imported.height : 0;
         }
 
-        function frameIndexFor(artwork) {
-            if (heldFrameIndex !== null) {
-                return heldFrameIndex;
+        function getGifFrameIndex(gifImport) {
+            if (forcedGifFrameIndex !== null) return forcedGifFrameIndex;
+
+            const elapsed = (performance.now() - gifImport.startedAt) % gifImport.duration;
+
+            let t = 0;
+            for (let i = 0; i < gifImport.frames.length; i++) {
+                t += gifImport.frames[i].delay;
+                if (elapsed < t) return i;
             }
 
-            const passed = (performance.now() - artwork.startedAt) % artwork.duration;
-            let runningTime = 0;
-
-            for (let i = 0; i < artwork.frames.length; i++) {
-                runningTime += artwork.frames[i].delay;
-                if (passed < runningTime) {
-                    return i;
-                }
-            }
-
-            // Should almost never hit, but GIF timing can be weird, so frame zero is safe enough.
             return 0;
         }
 
-        function artworkSource() {
-            if (!currentArtwork) {
-                return null;
+        function getImportedSource() {
+            if (!imported) return null;
+
+            if (imported.frames) {
+                const index = getGifFrameIndex(imported);
+                return imported.frames[index].canvas;
             }
 
-            if (currentArtwork.frames) {
-                const frame = frameIndexFor(currentArtwork);
-                return currentArtwork.frames[frame].canvas;
-            }
-
-            return currentArtwork.image;
+            return imported.image;
         }
 
-        function updateExportLabel() {
-            exportButton.textContent = currentArtwork && currentArtwork.animated ? "Export GIF" : "Export PNG";
+        function updateExportButton() {
+            exportBtn.textContent = imported && imported.animated ? "Export GIF" : "Export PNG";
         }
 
-        function runPreviewLoop() {
-            stopPreviewLoop();
+        function startAnimationLoop() {
+            stopAnimationLoop();
 
-            if (!currentArtwork || !currentArtwork.animated) {
-                return;
-            }
+            if (!imported || !imported.animated) return;
 
-            const loopOnce = () => {
-                paint();
-                previewLoop = requestAnimationFrame(loopOnce);
+            const tick = () => {
+                render();
+                animationLoopId = requestAnimationFrame(tick);
             };
 
-            previewLoop = requestAnimationFrame(loopOnce);
+            animationLoopId = requestAnimationFrame(tick);
         }
 
-        function stopPreviewLoop() {
-            if (previewLoop !== null) {
-                cancelAnimationFrame(previewLoop);
-                previewLoop = null;
+        function stopAnimationLoop() {
+            if (animationLoopId !== null) {
+                cancelAnimationFrame(animationLoopId);
+                animationLoopId = null;
             }
         }
 
-        function drawColoredShadow() {
-            const out = newCanvas(editorCanvas.width, editorCanvas.height);
-            const outCtx = out.getContext("2d");
+        function drawSolidShadow() {
+            const out = makeCanvas(canvas.width, canvas.height);
+            const o = out.getContext("2d");
 
-            outCtx.drawImage(shadowImg, 0, 0);
+            o.drawImage(shadow, 0, 0);
 
-            outCtx.globalCompositeOperation = "source-in";
-            outCtx.fillStyle = shadowPicker.value;
-            outCtx.fillRect(0, 0, out.width, out.height);
+            o.globalCompositeOperation = "source-in";
+            o.fillStyle = shadowColor.value;
+            o.fillRect(0, 0, out.width, out.height);
 
-            outCtx.globalCompositeOperation = "source-over";
+            o.globalCompositeOperation = "source-over";
+
             return out;
         }
 
-        function drawArtworkInsideLogo() {
-            const out = newCanvas(editorCanvas.width, editorCanvas.height);
-            const outCtx = out.getContext("2d");
+        function drawMaskedImage() {
+            const out = makeCanvas(canvas.width, canvas.height);
+            const o = out.getContext("2d");
 
-            if (!currentArtwork) {
-                outCtx.drawImage(logoImg, 0, 0);
+            if (!imported) {
+                o.drawImage(logo, 0, 0);
                 return out;
             }
 
-            const source = artworkSource();
+            const source = getImportedSource();
 
-            outCtx.save();
-            outCtx.translate(artCenterX, artCenterY);
-            outCtx.scale(artScaleX, artScaleY);
-            outCtx.drawImage(
+            o.save();
+            o.translate(imgX, imgY);
+            o.scale(imgScaleX, imgScaleY);
+            o.drawImage(
                 source,
-                -artworkWidth() / 2,
-                -artworkHeight() / 2
+                -getImportedWidth() / 2,
+                -getImportedHeight() / 2
             );
-            outCtx.restore();
+            o.restore();
 
-            // Clip the uploaded image to the logo shape. This is the main trick of the whole page.
-            outCtx.globalCompositeOperation = "destination-in";
-            outCtx.drawImage(logoImg, 0, 0);
+            o.globalCompositeOperation = "destination-in";
+            o.drawImage(logo, 0, 0);
 
-            outCtx.globalCompositeOperation = "source-over";
+            o.globalCompositeOperation = "source-over";
+
             return out;
         }
 
-        function makeStickerLayer() {
-            const sticker = newCanvas(editorCanvas.width, editorCanvas.height);
-            const stickerCtx = sticker.getContext("2d");
+        function makeGroup() {
+            const group = makeCanvas(canvas.width, canvas.height);
+            const g = group.getContext("2d");
 
-            stickerCtx.drawImage(drawColoredShadow(), 0, 0);
-            stickerCtx.drawImage(drawArtworkInsideLogo(), 0, 0);
+            g.drawImage(drawSolidShadow(), 0, 0);
+            g.drawImage(drawMaskedImage(), 0, 0);
 
-            return sticker;
+            return group;
         }
 
-        function strokeOutside(maskCanvas, amount, color) {
-            const out = newCanvas(maskCanvas.width, maskCanvas.height);
-            const outCtx = out.getContext("2d");
-            const radius = Math.ceil(amount);
+        function outsideStroke(mask, size, color) {
+            const out = makeCanvas(mask.width, mask.height);
+            const o = out.getContext("2d");
+            const r = Math.ceil(size);
 
-            // This brute-force stamp method is not glamorous, but for these small masks it is simple
-            // and gives a nice rounded outline without pulling in another dependency.
-            for (let y = -radius; y <= radius; y++) {
-                for (let x = -radius; x <= radius; x++) {
-                    if (x * x + y * y <= radius * radius) {
-                        outCtx.drawImage(maskCanvas, x, y);
+            for (let y = -r; y <= r; y++) {
+                for (let x = -r; x <= r; x++) {
+                    if (x * x + y * y <= r * r) {
+                        o.drawImage(mask, x, y);
                     }
                 }
             }
 
-            outCtx.globalCompositeOperation = "source-in";
-            outCtx.fillStyle = color;
-            outCtx.fillRect(0, 0, out.width, out.height);
+            o.globalCompositeOperation = "source-in";
+            o.fillStyle = color;
+            o.fillRect(0, 0, out.width, out.height);
 
-            outCtx.globalCompositeOperation = "destination-out";
-            outCtx.drawImage(maskCanvas, 0, 0);
+            o.globalCompositeOperation = "destination-out";
+            o.drawImage(mask, 0, 0);
 
-            outCtx.globalCompositeOperation = "source-over";
+            o.globalCompositeOperation = "source-over";
+
             return out;
         }
 
-        function finalArtworkCanvas() {
-            const sticker = makeStickerLayer();
-            const result = newCanvas(editorCanvas.width, editorCanvas.height);
-            const resultCtx = result.getContext("2d");
+        function finalImage() {
+            const group = makeGroup();
 
-            resultCtx.drawImage(strokeOutside(sticker, FAT_OUTLINE, outerStrokePicker.value), 0, 0);
-            resultCtx.drawImage(strokeOutside(sticker, THIN_OUTLINE, innerStrokePicker.value), 0, 0);
-            resultCtx.drawImage(sticker, 0, 0);
+            const result = makeCanvas(canvas.width, canvas.height);
+            const r = result.getContext("2d");
+
+            r.drawImage(outsideStroke(group, OUTER_STROKE, outerStrokeColor.value), 0, 0);
+            r.drawImage(outsideStroke(group, INNER_STROKE, innerStrokeColor.value), 0, 0);
+            r.drawImage(group, 0, 0);
 
             return result;
         }
 
-        function artworkBox() {
-            if (!currentArtwork) {
-                return null;
-            }
+        function getImageBox() {
+            if (!imported) return null;
 
-            const w = artworkWidth() * artScaleX;
-            const h = artworkHeight() * artScaleY;
+            const w = getImportedWidth() * imgScaleX;
+            const h = getImportedHeight() * imgScaleY;
 
             return {
-                left: artCenterX - w / 2,
-                top: artCenterY - h / 2,
-                right: artCenterX + w / 2,
-                bottom: artCenterY + h / 2,
+                left: imgX - w / 2,
+                top: imgY - h / 2,
+                right: imgX + w / 2,
+                bottom: imgY + h / 2,
                 width: w,
                 height: h
             };
         }
 
-        function canvasPointToStage(x, y) {
-            const canvasRect = editorCanvas.getBoundingClientRect();
-            const stageRect = stageEl.getBoundingClientRect();
+        function canvasToStagePoint(x, y) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
 
             return {
-                x: canvasRect.left - stageRect.left + (x / editorCanvas.width) * canvasRect.width,
-                y: canvasRect.top - stageRect.top + (y / editorCanvas.height) * canvasRect.height
+                x: canvasRect.left - stageRect.left + (x / canvas.width) * canvasRect.width,
+                y: canvasRect.top - stageRect.top + (y / canvas.height) * canvasRect.height
             };
         }
 
-        function eventPointOnCanvas(evt) {
-            const rect = editorCanvas.getBoundingClientRect();
+        function pointerToCanvas(e) {
+            const rect = canvas.getBoundingClientRect();
 
             return {
-                x: (evt.clientX - rect.left) * editorCanvas.width / rect.width,
-                y: (evt.clientY - rect.top) * editorCanvas.height / rect.height
+                x: (e.clientX - rect.left) * canvas.width / rect.width,
+                y: (e.clientY - rect.top) * canvas.height / rect.height
             };
         }
 
-        function handleAnchorPoints() {
-            const box = artworkBox();
-            if (!box) {
-                return {};
-            }
+        function getHandlePoints() {
+            const b = getImageBox();
+            if (!b) return {};
 
-            const midX = (box.left + box.right) / 2;
-            const midY = (box.top + box.bottom) / 2;
+            const cx = (b.left + b.right) / 2;
+            const cy = (b.top + b.bottom) / 2;
 
             return {
-                nw: { x: box.left, y: box.top },
-                n: { x: midX, y: box.top },
-                ne: { x: box.right, y: box.top },
-                e: { x: box.right, y: midY },
-                se: { x: box.right, y: box.bottom },
-                s: { x: midX, y: box.bottom },
-                sw: { x: box.left, y: box.bottom },
-                w: { x: box.left, y: midY }
+                nw: { x: b.left, y: b.top },
+                n: { x: cx, y: b.top },
+                ne: { x: b.right, y: b.top },
+                e: { x: b.right, y: cy },
+                se: { x: b.right, y: b.bottom },
+                s: { x: cx, y: b.bottom },
+                sw: { x: b.left, y: b.bottom },
+                w: { x: b.left, y: cy }
             };
         }
 
-        function refreshTransformOverlay() {
-            if (!currentArtwork) {
+        function updateOverlay() {
+            if (!imported) {
                 transformBox.style.display = "none";
-                resizeHandles.forEach(handle => handle.style.display = "none");
+                handles.forEach(h => h.style.display = "none");
                 return;
             }
 
-            const box = artworkBox();
-            const topLeft = canvasPointToStage(box.left, box.top);
-            const bottomRight = canvasPointToStage(box.right, box.bottom);
+            const b = getImageBox();
+
+            const topLeft = canvasToStagePoint(b.left, b.top);
+            const bottomRight = canvasToStagePoint(b.right, b.bottom);
 
             transformBox.style.display = "block";
             transformBox.style.left = `${topLeft.x}px`;
@@ -491,51 +498,46 @@
             transformBox.style.width = `${bottomRight.x - topLeft.x}px`;
             transformBox.style.height = `${bottomRight.y - topLeft.y}px`;
 
-            const points = handleAnchorPoints();
+            const points = getHandlePoints();
 
-            resizeHandles.forEach(handle => {
-                const handleName = handle.dataset.handle;
-                const point = canvasPointToStage(points[handleName].x, points[handleName].y);
+            handles.forEach(handle => {
+                const name = handle.dataset.handle;
+                const p = canvasToStagePoint(points[name].x, points[name].y);
 
                 handle.style.display = "block";
-                handle.style.left = `${point.x}px`;
-                handle.style.top = `${point.y}px`;
+                handle.style.left = `${p.x}px`;
+                handle.style.top = `${p.y}px`;
             });
         }
 
-        function paint() {
-            if (!logoImg || !shadowImg) {
-                return;
-            }
+        function render() {
+            if (!logo || !shadow) return;
 
-            editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-            editorCtx.drawImage(finalArtworkCanvas(), 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(finalImage(), 0, 0);
 
-            refreshTransformOverlay();
+            updateOverlay();
         }
 
-        function fitArtworkOverCanvas() {
-            if (!currentArtwork) {
-                return;
-            }
+        function fitImportedToCanvas() {
+            if (!imported) return;
 
-            // Cover the logo area instead of contain it. This is intentional, even though it means cropping.
             const fit = Math.max(
-                editorCanvas.width / artworkWidth(),
-                editorCanvas.height / artworkHeight()
+                canvas.width / getImportedWidth(),
+                canvas.height / getImportedHeight()
             );
 
-            artScaleX = fit;
-            artScaleY = fit;
-            artCenterX = editorCanvas.width / 2;
-            artCenterY = editorCanvas.height / 2;
+            imgScaleX = fit;
+            imgScaleY = fit;
+            imgX = canvas.width / 2;
+            imgY = canvas.height / 2;
         }
 
-        async function loadStillImage(file) {
+        async function loadStaticImport(file) {
             const objectUrl = URL.createObjectURL(file);
-            const img = await loadPicture(objectUrl);
+            const img = await loadImage(objectUrl);
 
-            currentArtwork = {
+            imported = {
                 type: "image",
                 image: img,
                 width: img.naturalWidth,
@@ -543,48 +545,50 @@
                 animated: false
             };
 
-            fitArtworkOverCanvas();
-            updateExportLabel();
-            stopPreviewLoop();
-            paint();
+            fitImportedToCanvas();
+            updateExportButton();
+            stopAnimationLoop();
+            render();
         }
 
-        function readGifSize(parsed, frames) {
+        function getGifLogicalSize(parsed, frames) {
             const width =
                 parsed?.lsd?.width ||
-                Math.max(...frames.map(frame => frame.dims.left + frame.dims.width));
+                Math.max(...frames.map(f => f.dims.left + f.dims.width));
 
             const height =
                 parsed?.lsd?.height ||
-                Math.max(...frames.map(frame => frame.dims.top + frame.dims.height));
+                Math.max(...frames.map(f => f.dims.top + f.dims.height));
 
             return { width, height };
         }
 
         function composeGifFrames(rawFrames, width, height) {
-            const workCanvas = newCanvas(width, height);
-            const workCtx = workCanvas.getContext("2d", { willReadFrequently: true });
+            const working = makeCanvas(width, height);
+            const wctx = working.getContext("2d", { willReadFrequently: true });
 
-            const finishedFrames = [];
-            let lastFrame = null;
-            let savedCanvasState = null;
+            const composed = [];
+
+            let previousFrame = null;
+            let restoreData = null;
 
             for (const frame of rawFrames) {
-                if (lastFrame) {
-                    const old = lastFrame.dims;
+                if (previousFrame) {
+                    const d = previousFrame.dims;
 
-                    if (lastFrame.disposalType === 2) {
-                        workCtx.clearRect(old.left, old.top, old.width, old.height);
-                    } else if (lastFrame.disposalType === 3 && savedCanvasState) {
-                        workCtx.putImageData(savedCanvasState, 0, 0);
+                    if (previousFrame.disposalType === 2) {
+                        wctx.clearRect(d.left, d.top, d.width, d.height);
+                    } else if (previousFrame.disposalType === 3 && restoreData) {
+                        wctx.putImageData(restoreData, 0, 0);
                     }
                 }
 
-                savedCanvasState = frame.disposalType === 3
-                    ? workCtx.getImageData(0, 0, width, height)
-                    : null;
+                restoreData =
+                    frame.disposalType === 3
+                        ? wctx.getImageData(0, 0, width, height)
+                        : null;
 
-                const patchCanvas = newCanvas(frame.dims.width, frame.dims.height);
+                const patchCanvas = makeCanvas(frame.dims.width, frame.dims.height);
                 const patchCtx = patchCanvas.getContext("2d");
 
                 const patch = new ImageData(
@@ -594,24 +598,26 @@
                 );
 
                 patchCtx.putImageData(patch, 0, 0);
-                workCtx.drawImage(patchCanvas, frame.dims.left, frame.dims.top);
 
-                const fullFrame = newCanvas(width, height);
-                fullFrame.getContext("2d").drawImage(workCanvas, 0, 0);
+                wctx.drawImage(patchCanvas, frame.dims.left, frame.dims.top);
 
-                finishedFrames.push({
+                const fullFrame = makeCanvas(width, height);
+                fullFrame.getContext("2d").drawImage(working, 0, 0);
+
+                composed.push({
                     canvas: fullFrame,
                     delay: Math.max(20, frame.delay || 100)
                 });
 
-                lastFrame = frame;
+                previousFrame = frame;
             }
 
-            return finishedFrames;
+            return composed;
         }
 
-        async function loadGifImage(file) {
+        async function loadGifImport(file) {
             const buffer = await file.arrayBuffer();
+
             const parsed = parseGIF(buffer);
             const rawFrames = decompressFrames(parsed, true);
 
@@ -621,32 +627,33 @@
                 throw new Error("GIF decoded, but no frames were found.");
             }
 
-            const size = readGifSize(parsed, rawFrames);
-            const frames = composeGifFrames(rawFrames, size.width, size.height);
-            const duration = frames.reduce((total, frame) => total + frame.delay, 0);
+            const { width, height } = getGifLogicalSize(parsed, rawFrames);
+            const frames = composeGifFrames(rawFrames, width, height);
+            const duration = frames.reduce((sum, frame) => sum + frame.delay, 0);
 
-            currentArtwork = {
+            imported = {
                 type: "gif",
                 frames,
-                width: size.width,
-                height: size.height,
+                width,
+                height,
                 duration,
                 startedAt: performance.now(),
                 animated: frames.length > 1
             };
 
-            fitArtworkOverCanvas();
-            updateExportLabel();
-            paint();
+            fitImportedToCanvas();
+            updateExportButton();
 
-            if (currentArtwork.animated) {
-                runPreviewLoop();
+            render();
+
+            if (imported.animated) {
+                startAnimationLoop();
             } else {
-                stopPreviewLoop();
+                stopAnimationLoop();
             }
         }
 
-        async function looksLikeWebp(file) {
+        async function isWebpFile(file) {
             const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
 
             const riff = String.fromCharCode(...header.slice(0, 4));
@@ -655,18 +662,19 @@
             return riff === "RIFF" && webp === "WEBP";
         }
 
-        async function loadWebpImage(file) {
+        async function loadWebpImport(file) {
             if (!("ImageDecoder" in window)) {
                 throw new Error("This browser does not support ImageDecoder, which is needed for animated WebP import.");
             }
 
-            const canDecodeWebp = await ImageDecoder.isTypeSupported("image/webp");
+            const supported = await ImageDecoder.isTypeSupported("image/webp");
 
-            if (!canDecodeWebp) {
+            if (!supported) {
                 throw new Error("This browser's ImageDecoder does not support image/webp.");
             }
 
             const buffer = await file.arrayBuffer();
+
             const decoder = new ImageDecoder({
                 data: buffer,
                 type: "image/webp"
@@ -674,21 +682,21 @@
 
             await decoder.tracks.ready;
 
-            const selectedTrack = decoder.tracks.selectedTrack;
-            const totalFrames = selectedTrack.frameCount || 1;
+            const track = decoder.tracks.selectedTrack;
+            const frameCount = track.frameCount || 1;
 
             const frames = [];
             let width = 0;
             let height = 0;
 
-            for (let i = 0; i < totalFrames; i++) {
-                const decoded = await decoder.decode({ frameIndex: i });
-                const image = decoded.image;
+            for (let i = 0; i < frameCount; i++) {
+                const result = await decoder.decode({ frameIndex: i });
+                const image = result.image;
 
                 width = image.displayWidth || image.codedWidth;
                 height = image.displayHeight || image.codedHeight;
 
-                const frameCanvas = newCanvas(width, height);
+                const frameCanvas = makeCanvas(width, height);
                 const frameCtx = frameCanvas.getContext("2d");
 
                 frameCtx.drawImage(image, 0, 0);
@@ -703,9 +711,9 @@
 
             decoder.close();
 
-            const duration = frames.reduce((total, frame) => total + frame.delay, 0);
+            const duration = frames.reduce((sum, frame) => sum + frame.delay, 0);
 
-            currentArtwork = {
+            imported = {
                 type: "webp",
                 frames,
                 width,
@@ -715,57 +723,56 @@
                 animated: frames.length > 1
             };
 
-            fitArtworkOverCanvas();
-            updateExportLabel();
-            paint();
+            fitImportedToCanvas();
+            updateExportButton();
+            render();
 
-            if (currentArtwork.animated) {
-                runPreviewLoop();
+            if (imported.animated) {
+                startAnimationLoop();
             } else {
-                stopPreviewLoop();
+                stopAnimationLoop();
             }
         }
 
-        async function looksLikeGif(file) {
+        async function isGifFile(file) {
             const header = new Uint8Array(await file.slice(0, 6).arrayBuffer());
             const signature = String.fromCharCode(...header);
 
             return signature === "GIF87a" || signature === "GIF89a";
         }
 
-        uploadInput.addEventListener("change", async () => {
-            const file = uploadInput.files[0];
-            if (!file) {
-                return;
-            }
+        upload.addEventListener("change", async () => {
+            const file = upload.files[0];
+            if (!file) return;
 
-            const isGif = await looksLikeGif(file);
-            const isWebp = await looksLikeWebp(file);
+            const isGif = await isGifFile(file);
+            const isWebp = await isWebpFile(file);
 
             try {
                 if (isGif) {
-                    await loadGifImage(file);
+                    await loadGifImport(file);
                 } else if (isWebp) {
-                    await loadWebpImage(file);
+                    await loadWebpImport(file);
                 } else {
-                    await loadStillImage(file);
+                    await loadStaticImport(file);
                 }
             } catch (err) {
                 console.error("Import failed:", err);
-                stopPreviewLoop();
+
+                stopAnimationLoop();
 
                 if (isGif) {
-                    currentArtwork = null;
-                    exportButton.textContent = "GIF import failed";
-                    paint();
+                    imported = null;
+                    exportBtn.textContent = "GIF import failed";
+                    render();
                     alert("GIF import failed. Check the browser console.");
                     return;
                 }
 
                 if (isWebp) {
-                    currentArtwork = null;
-                    exportButton.textContent = "WebP import failed";
-                    paint();
+                    imported = null;
+                    exportBtn.textContent = "WebP import failed";
+                    render();
                     alert("Animated WebP import failed. This browser may not support ImageDecoder for WebP.");
                     return;
                 }
@@ -774,225 +781,219 @@
             }
         });
 
-        shadowPicker.addEventListener("input", paint);
-        outerStrokePicker.addEventListener("input", paint);
-        innerStrokePicker.addEventListener("input", paint);
+        shadowColor.addEventListener("input", render);
+        outerStrokeColor.addEventListener("input", render);
+        innerStrokeColor.addEventListener("input", render);
 
-        function startManualColorPick(input) {
-            pickerWaitingForClick = input;
+        function startPicking(input) {
+            pickingColorInput = input;
             document.body.classList.add("picking");
         }
 
-        function cancelManualColorPick() {
-            pickerWaitingForClick = null;
+        function stopPicking() {
+            pickingColorInput = null;
             document.body.classList.remove("picking");
         }
 
         document.querySelectorAll(".pickBtn").forEach(button => {
-            button.addEventListener("click", async evt => {
-                evt.preventDefault();
-                evt.stopPropagation();
+            button.addEventListener("click", async e => {
+                e.preventDefault();
+                e.stopPropagation();
 
                 const targetInput = document.getElementById(button.dataset.pick);
 
                 if (window.EyeDropper) {
                     try {
-                        const dropper = new EyeDropper();
-                        const result = await dropper.open();
+                        const eyeDropper = new EyeDropper();
+                        const result = await eyeDropper.open();
 
                         targetInput.value = result.sRGBHex;
-                        paint();
+                        render();
                         return;
                     } catch (err) {
-                        // User probably pressed escape. No need to nag them with an alert.
                         return;
                     }
                 }
 
-                // Fallback for browsers without EyeDropper: pick from the canvas only.
-                startManualColorPick(targetInput);
+                startPicking(targetInput);
             });
         });
 
-        window.addEventListener("pointerdown", evt => {
-            if (!pickerWaitingForClick) {
+        window.addEventListener("pointerdown", e => {
+            if (!pickingColorInput) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const rect = canvas.getBoundingClientRect();
+
+            const inside =
+                e.clientX >= rect.left &&
+                e.clientX <= rect.right &&
+                e.clientY >= rect.top &&
+                e.clientY <= rect.bottom;
+
+            if (!inside) {
+                stopPicking();
                 return;
             }
 
-            evt.preventDefault();
-            evt.stopPropagation();
-
-            const rect = editorCanvas.getBoundingClientRect();
-            const isInsideCanvas =
-                evt.clientX >= rect.left &&
-                evt.clientX <= rect.right &&
-                evt.clientY >= rect.top &&
-                evt.clientY <= rect.bottom;
-
-            if (!isInsideCanvas) {
-                cancelManualColorPick();
-                return;
-            }
-
-            const x = Math.floor((evt.clientX - rect.left) * editorCanvas.width / rect.width);
-            const y = Math.floor((evt.clientY - rect.top) * editorCanvas.height / rect.height);
+            const x = Math.floor((e.clientX - rect.left) * canvas.width / rect.width);
+            const y = Math.floor((e.clientY - rect.top) * canvas.height / rect.height);
 
             try {
-                const pixel = editorCtx.getImageData(x, y, 1, 1).data;
-                const hex = "#" + [pixel[0], pixel[1], pixel[2]]
-                    .map(value => value.toString(16).padStart(2, "0"))
-                    .join("");
+                const pixel = ctx.getImageData(x, y, 1, 1).data;
 
-                pickerWaitingForClick.value = hex;
-                cancelManualColorPick();
-                paint();
+                const hex =
+                    "#" +
+                    [pixel[0], pixel[1], pixel[2]]
+                        .map(v => v.toString(16).padStart(2, "0"))
+                        .join("");
+
+                pickingColorInput.value = hex;
+                stopPicking();
+                render();
             } catch (err) {
-                cancelManualColorPick();
+                stopPicking();
             }
         }, true);
 
-        function startMoving(evt) {
-            if (pickerWaitingForClick || !currentArtwork) {
-                return;
-            }
+        function startMove(e) {
+            if (pickingColorInput) return;
+            if (!imported) return;
 
-            dragKind = "move";
-            selectedHandle = null;
-            pointerStart = eventPointOnCanvas(evt);
-            boxStart = {
-                ...artworkBox(),
-                artCenterX,
-                artCenterY,
-                artScaleX,
-                artScaleY
+            action = "move";
+            activeHandle = null;
+            startPointer = pointerToCanvas(e);
+            startBox = {
+                ...getImageBox(),
+                imgX,
+                imgY,
+                imgScaleX,
+                imgScaleY
             };
 
-            evt.preventDefault();
+            e.preventDefault();
         }
 
-        function startResizing(evt, handleName) {
-            if (pickerWaitingForClick || !currentArtwork) {
-                return;
-            }
+        function startScale(e, handleName) {
+            if (pickingColorInput) return;
+            if (!imported) return;
 
-            dragKind = "resize";
-            selectedHandle = handleName;
-            pointerStart = eventPointOnCanvas(evt);
-            boxStart = {
-                ...artworkBox(),
-                artCenterX,
-                artCenterY,
-                artScaleX,
-                artScaleY
+            action = "scale";
+            activeHandle = handleName;
+            startPointer = pointerToCanvas(e);
+            startBox = {
+                ...getImageBox(),
+                imgX,
+                imgY,
+                imgScaleX,
+                imgScaleY
             };
 
-            evt.preventDefault();
-            evt.stopPropagation();
+            e.preventDefault();
+            e.stopPropagation();
         }
 
-        function updateDrag(evt) {
-            if (!currentArtwork || !dragKind) {
+        function moveTransform(e) {
+            if (!imported || !action) return;
+
+            const p = pointerToCanvas(e);
+            const dx = p.x - startPointer.x;
+            const dy = p.y - startPointer.y;
+
+            if (action === "move") {
+                imgX = startBox.imgX + dx;
+                imgY = startBox.imgY + dy;
+                render();
                 return;
             }
 
-            const p = eventPointOnCanvas(evt);
-            const dx = p.x - pointerStart.x;
-            const dy = p.y - pointerStart.y;
+            let left = startBox.left;
+            let right = startBox.right;
+            let top = startBox.top;
+            let bottom = startBox.bottom;
 
-            if (dragKind === "move") {
-                artCenterX = boxStart.artCenterX + dx;
-                artCenterY = boxStart.artCenterY + dy;
-                paint();
-                return;
-            }
-
-            let left = boxStart.left;
-            let right = boxStart.right;
-            let top = boxStart.top;
-            let bottom = boxStart.bottom;
-
-            if (selectedHandle.includes("w")) left += dx;
-            if (selectedHandle.includes("e")) right += dx;
-            if (selectedHandle.includes("n")) top += dy;
-            if (selectedHandle.includes("s")) bottom += dy;
+            if (activeHandle.includes("w")) left += dx;
+            if (activeHandle.includes("e")) right += dx;
+            if (activeHandle.includes("n")) top += dy;
+            if (activeHandle.includes("s")) bottom += dy;
 
             const minSize = 20;
 
             if (right - left < minSize) {
-                if (selectedHandle.includes("w")) left = right - minSize;
-                if (selectedHandle.includes("e")) right = left + minSize;
+                if (activeHandle.includes("w")) left = right - minSize;
+                if (activeHandle.includes("e")) right = left + minSize;
             }
 
             if (bottom - top < minSize) {
-                if (selectedHandle.includes("n")) top = bottom - minSize;
-                if (selectedHandle.includes("s")) bottom = top + minSize;
+                if (activeHandle.includes("n")) top = bottom - minSize;
+                if (activeHandle.includes("s")) bottom = top + minSize;
             }
 
-            artCenterX = (left + right) / 2;
-            artCenterY = (top + bottom) / 2;
-            artScaleX = (right - left) / artworkWidth();
-            artScaleY = (bottom - top) / artworkHeight();
+            imgX = (left + right) / 2;
+            imgY = (top + bottom) / 2;
+            imgScaleX = (right - left) / getImportedWidth();
+            imgScaleY = (bottom - top) / getImportedHeight();
 
-            paint();
+            render();
         }
 
-        function stopDragging() {
-            dragKind = null;
-            selectedHandle = null;
-            pointerStart = null;
-            boxStart = null;
+        function endTransform() {
+            action = null;
+            activeHandle = null;
+            startPointer = null;
+            startBox = null;
         }
 
-        editorCanvas.addEventListener("pointerdown", startMoving);
-        transformBox.addEventListener("pointerdown", startMoving);
+        canvas.addEventListener("pointerdown", startMove);
+        transformBox.addEventListener("pointerdown", startMove);
 
-        resizeHandles.forEach(handle => {
-            handle.addEventListener("pointerdown", evt => {
-                startResizing(evt, handle.dataset.handle);
+        handles.forEach(handle => {
+            handle.addEventListener("pointerdown", e => {
+                startScale(e, handle.dataset.handle);
             });
         });
 
-        window.addEventListener("pointermove", updateDrag);
-        window.addEventListener("pointerup", stopDragging);
-        window.addEventListener("pointercancel", stopDragging);
+        window.addEventListener("pointermove", moveTransform);
+        window.addEventListener("pointerup", endTransform);
+        window.addEventListener("pointercancel", endTransform);
 
-        editorCanvas.addEventListener("wheel", evt => {
-            if (!currentArtwork) {
-                return;
-            }
+        canvas.addEventListener("wheel", e => {
+            if (!imported) return;
 
-            evt.preventDefault();
+            e.preventDefault();
 
-            const p = eventPointOnCanvas(evt);
-            const zoom = evt.deltaY < 0 ? 1.06 : 0.94;
+            const p = pointerToCanvas(e);
+            const zoom = e.deltaY < 0 ? 1.06 : 0.94;
 
-            artCenterX = p.x - (p.x - artCenterX) * zoom;
-            artCenterY = p.y - (p.y - artCenterY) * zoom;
+            imgX = p.x - (p.x - imgX) * zoom;
+            imgY = p.y - (p.y - imgY) * zoom;
 
-            artScaleX *= zoom;
-            artScaleY *= zoom;
+            imgScaleX *= zoom;
+            imgScaleY *= zoom;
 
-            paint();
+            render();
         }, { passive: false });
 
         function downloadBlob(blob, filename) {
-            const link = document.createElement("a");
+            const a = document.createElement("a");
             const url = URL.createObjectURL(blob);
 
-            link.download = filename;
-            link.href = url;
-            link.click();
+            a.download = filename;
+            a.href = url;
+            a.click();
 
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
-        function flattenFrameForGif(sourceCanvas, transparentRgb) {
-            const out = newCanvas(sourceCanvas.width, sourceCanvas.height);
-            const outCtx = out.getContext("2d", { willReadFrequently: true });
+        function collectVisibleColorsAndPrepareFrame(sourceCanvas, transparentRgb) {
+            const out = makeCanvas(sourceCanvas.width, sourceCanvas.height);
+            const o = out.getContext("2d", { willReadFrequently: true });
 
-            outCtx.drawImage(sourceCanvas, 0, 0);
+            o.drawImage(sourceCanvas, 0, 0);
 
-            const imageData = outCtx.getImageData(0, 0, out.width, out.height);
+            const imageData = o.getImageData(0, 0, out.width, out.height);
             const data = imageData.data;
             const visibleColors = new Set();
 
@@ -1011,12 +1012,12 @@
                 }
             }
 
-            outCtx.putImageData(imageData, 0, 0);
+            o.putImageData(imageData, 0, 0);
+
             return { canvas: out, visibleColors };
         }
 
-        function pickGifTransparentColor(colorSets) {
-            // Bright weird colors are easier to avoid in most user images. Not perfect, but good enough.
+        function chooseTransparentColor(visibleColorSets) {
             const candidates = [
                 [0, 255, 0],
                 [255, 0, 255],
@@ -1026,83 +1027,82 @@
                 [0, 0, 255]
             ];
 
-            const usedColors = new Set();
+            const used = new Set();
 
-            colorSets.forEach(set => {
-                set.forEach(color => usedColors.add(color));
+            visibleColorSets.forEach(set => {
+                set.forEach(color => used.add(color));
             });
 
             for (const rgb of candidates) {
                 const key = `${rgb[0]},${rgb[1]},${rgb[2]}`;
-                if (!usedColors.has(key)) {
-                    return rgb;
-                }
+                if (!used.has(key)) return rgb;
             }
 
             return [0, 255, 0];
         }
 
-        function gifTransparentNumber(rgb) {
+        function rgbToGifTransparentNumber(rgb) {
             return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
         }
 
-        async function exportAsAnimatedGif() {
+        async function exportAnimatedGif() {
             if (!window.GIF) {
                 throw new Error("gif.js is missing. Add gif.js before your main script.");
             }
 
-            exportButton.disabled = true;
-            exportButton.textContent = "Rendering GIF...";
+            exportBtn.disabled = true;
+            exportBtn.textContent = "Rendering GIF...";
 
             const renderedFrames = [];
             const visibleColorSets = [];
 
             try {
-                for (let i = 0; i < currentArtwork.frames.length; i++) {
-                    heldFrameIndex = i;
-                    renderedFrames.push(finalArtworkCanvas());
+                for (let i = 0; i < imported.frames.length; i++) {
+                    forcedGifFrameIndex = i;
+                    const frameCanvas = finalImage();
+                    renderedFrames.push(frameCanvas);
                 }
 
-                heldFrameIndex = null;
+                forcedGifFrameIndex = null;
 
-                // First pass: find colors that are actually visible, so we do not pick one as transparency.
-                const colorPass = renderedFrames.map(frameCanvas => {
-                    const temp = newCanvas(frameCanvas.width, frameCanvas.height);
-                    const tempCtx = temp.getContext("2d", { willReadFrequently: true });
-                    tempCtx.drawImage(frameCanvas, 0, 0);
+                const firstPass = renderedFrames.map(frameCanvas => {
+                    const temp = makeCanvas(frameCanvas.width, frameCanvas.height);
+                    const t = temp.getContext("2d", { willReadFrequently: true });
+                    t.drawImage(frameCanvas, 0, 0);
 
-                    const imageData = tempCtx.getImageData(0, 0, temp.width, temp.height);
-                    const colors = new Set();
+                    const imageData = t.getImageData(0, 0, temp.width, temp.height);
+                    const set = new Set();
 
                     for (let i = 0; i < imageData.data.length; i += 4) {
                         if (imageData.data[i + 3] >= 128) {
-                            colors.add(`${imageData.data[i]},${imageData.data[i + 1]},${imageData.data[i + 2]}`);
+                            set.add(`${imageData.data[i]},${imageData.data[i + 1]},${imageData.data[i + 2]}`);
                         }
                     }
 
-                    return colors;
+                    return set;
                 });
 
-                visibleColorSets.push(...colorPass);
+                visibleColorSets.push(...firstPass);
 
-                const transparentRgb = pickGifTransparentColor(visibleColorSets);
+                const transparentRgb = chooseTransparentColor(visibleColorSets);
+
                 const preparedFrames = renderedFrames.map(frameCanvas => {
-                    return flattenFrameForGif(frameCanvas, transparentRgb).canvas;
+                    return collectVisibleColorsAndPrepareFrame(frameCanvas, transparentRgb).canvas;
                 });
 
                 const gif = new GIF({
                     workers: 2,
                     quality: 10,
                     repeat: 0,
-                    width: editorCanvas.width,
-                    height: editorCanvas.height,
+                    width: canvas.width,
+                    height: canvas.height,
                     workerScript: "./gif.worker.js",
-                    transparent: gifTransparentNumber(transparentRgb)
+                    transparent: rgbToGifTransparentNumber(transparentRgb)
                 });
 
                 preparedFrames.forEach((frameCanvas, i) => {
                     gif.addFrame(frameCanvas, {
-                        delay: currentArtwork.frames[i].delay,
+                        delay: imported.frames[i].delay,
                         copy: true
                     });
                 });
@@ -1115,41 +1115,40 @@
 
                 downloadBlob(blob, "export.gif");
             } finally {
-                heldFrameIndex = null;
-                exportButton.disabled = false;
-                updateExportLabel();
-                paint();
+                forcedGifFrameIndex = null;
+                exportBtn.disabled = false;
+                updateExportButton();
+                render();
             }
         }
 
-        function exportAsPng() {
-            const out = finalArtworkCanvas();
+        function exportPng() {
+            const out = finalImage();
 
-            const link = document.createElement("a");
-            link.download = "export.png";
-            link.href = out.toDataURL("image/png");
-            link.click();
+            const a = document.createElement("a");
+            a.download = "export.png";
+            a.href = out.toDataURL("image/png");
+            a.click();
         }
 
-        exportButton.addEventListener("click", async () => {
+        exportBtn.addEventListener("click", async () => {
             try {
-                if (currentArtwork && currentArtwork.animated) {
-                    await exportAsAnimatedGif();
+                if (imported && imported.animated) {
+                    await exportAnimatedGif();
                 } else {
-                    exportAsPng();
+                    exportPng();
                 }
             } catch (err) {
                 console.error(err);
-                exportButton.disabled = false;
-                updateExportLabel();
+                exportBtn.disabled = false;
+                updateExportButton();
             }
         });
 
-        window.addEventListener("resize", refreshTransformOverlay);
-        window.addEventListener("scroll", refreshTransformOverlay, true);
+        window.addEventListener("resize", updateOverlay);
+        window.addEventListener("scroll", updateOverlay, true);
 
-        startApp().catch(() => {
-            // Keeping this quiet because I usually run the file before copying the image assets over.
+        init().catch(() => {
             // alert("Missing logo.png or logo_shadow.png next to this HTML file.");
         });
     </script>
