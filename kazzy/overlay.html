@@ -2855,23 +2855,53 @@
 	overflow: visible;
 }
 
-/* Limit chat messages to 40vw, wrap, max 3 lines, then ellipsis */
-.hl-message,
-.nowrapmsg .hl-message,
-.allowfat .hl-message {
+/* Whole chat node is capped to 40vw */
+.highlight-chat {
+	box-sizing: border-box;
 	max-width: 40vw !important;
+	width: fit-content !important;
+
+	display: inline-flex !important;
+	flex-wrap: nowrap !important;
+	align-items: flex-start !important;
+
+	overflow: hidden !important;
+}
+
+/* Keep badges/name/icon as fixed inline pieces */
+.highlight-chat .hl-name,
+.highlight-chat .hl-badges,
+.highlight-chat .hl-badge,
+.highlight-chat > img.icon,
+.highlight-chat .time-arrived,
+.highlight-chat .source-name {
+	flex: 0 0 auto !important;
+}
+
+/* Message sits beside the username, but shrinks inside the 40vw node */
+.highlight-chat .hl-message,
+.nowrapmsg .highlight-chat .hl-message,
+.allowfat .highlight-chat .hl-message {
+	flex: 1 1 auto !important;
+	min-width: 0 !important;
+	width: auto !important;
+	max-width: none !important;
+
+	display: block !important;
 	overflow: hidden !important;
 	white-space: normal !important;
 	overflow-wrap: anywhere !important;
 	word-break: break-word !important;
 }
 
-.hl-message .hl-content,
-.nowrapmsg .hl-message .hl-content {
+/* Clamp only the message text inside its available space */
+.highlight-chat .hl-message .hl-content,
+.nowrapmsg .highlight-chat .hl-message .hl-content {
 	display: -webkit-box !important;
 	-webkit-box-orient: vertical !important;
 	-webkit-line-clamp: 3 !important;
 	line-clamp: 3;
+
 	max-width: 100% !important;
 	overflow: hidden !important;
 	text-overflow: ellipsis !important;
