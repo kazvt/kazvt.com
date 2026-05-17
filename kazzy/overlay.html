@@ -2855,56 +2855,65 @@
 	overflow: visible;
 }
 
-/* cap the WHOLE message node, not just the text */
-.highlight-chat {
+/* Whole message node = 40vw, normal inline flow, max 3 lines */
+.highlight-chat:not(.expand) {
+	box-sizing: border-box !important;
+	display: inline-block !important;
 	max-width: 40vw !important;
-	width: fit-content !important;
+	width: auto !important;
 
-	display: -webkit-box !important;
-	-webkit-box-orient: vertical !important;
-	-webkit-line-clamp: 3 !important;
-	line-clamp: 3;
-
-	overflow: hidden !important;
 	white-space: normal !important;
 	overflow-wrap: anywhere !important;
 	word-break: break-word !important;
+
+	line-height: var(--message-line-height, 22px) !important;
+	max-height: calc(var(--message-line-height, 22px) * 3) !important;
+	overflow: hidden !important;
+
+	position: relative !important;
+	vertical-align: top !important;
 }
 
-/* undo twolines splitting: make firstline + message behave like one inline flow */
-.twoLines .highlight-chat > .hl-firstline,
-.twoLines .highlight-chat > .hl-message {
-	display: contents !important;
-}
-
-/* undo nowrapmsg forcing single-line message text */
-.nowrapmsg .hl-message,
-.nowrapmsg .hl-message .hl-content,
-.hl-message,
-.hl-content {
+/* Make the existing divs behave like one inline sentence:
+   badges + username + message all stay in the same flow */
+.highlight-chat:not(.expand) > .queueid,
+.highlight-chat:not(.expand) > .time-arrived,
+.highlight-chat:not(.expand) > .source-name,
+.highlight-chat:not(.expand) > .hl-name,
+.highlight-chat:not(.expand) > .hl-badges,
+.highlight-chat:not(.expand) > .hl-message {
+	display: inline !important;
+	width: auto !important;
 	max-width: none !important;
-	overflow: visible !important;
+	min-width: 0 !important;
+
 	white-space: normal !important;
+	overflow: visible !important;
 	text-overflow: clip !important;
 	overflow-wrap: anywhere !important;
 	word-break: break-word !important;
-}
 
-/* keep name/badges/icons inline beside the message */
-.highlight-chat .hl-name,
-.highlight-chat .hl-badges,
-.highlight-chat .hl-badge,
-.highlight-chat .time-arrived,
-.highlight-chat .source-name,
-.highlight-chat .queueid {
-	display: inline-flex !important;
 	vertical-align: baseline !important;
 }
 
-.highlight-chat img,
-.highlight-chat svg {
+/* Keep icons/badges inline without turning the row into flex */
+.highlight-chat:not(.expand) > img,
+.highlight-chat:not(.expand) > svg,
+.highlight-chat:not(.expand) .hl-badge {
 	display: inline-block !important;
-	vertical-align: top !important;
+	vertical-align: text-bottom !important;
+}
+
+/* Undo msgmaxwidth / nowrapmsg if that class is present */
+.nowrapmsg .highlight-chat:not(.expand) .hl-message,
+.nowrapmsg .highlight-chat:not(.expand) .hl-content {
+	display: inline !important;
+	max-width: none !important;
+	white-space: normal !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+	overflow-wrap: anywhere !important;
+	word-break: break-word !important;
 }
 		
 	</style>
@@ -12808,6 +12817,41 @@ function applyNick(msgNode) {
 			requestAnimationFrame(() => horizontalRealign(false));
 		}
 	}
+
+	(function () {
+	function updateChatEllipsis(el) {
+		el.classList.remove("chat-overflowing");
+
+		requestAnimationFrame(function () {
+			if (el.scrollHeight > el.clientHeight + 1) {
+				el.classList.add("chat-overflowing");
+			}
+		});
+	}
+
+	const observer = new MutationObserver(function (mutations) {
+		for (const mutation of mutations) {
+			for (const node of mutation.addedNodes) {
+				if (node.nodeType !== 1) continue;
+
+				if (node.matches && node.matches(".highlight-chat")) {
+					updateChatEllipsis(node);
+				}
+
+				if (node.querySelectorAll) {
+					node.querySelectorAll(".highlight-chat").forEach(updateChatEllipsis);
+				}
+			}
+		}
+	});
+
+	observer.observe(document.getElementById("output") || document.body, {
+		childList: true,
+		subtree: true
+	});
+
+	document.querySelectorAll(".highlight-chat").forEach(updateChatEllipsis);
+})();
 
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
