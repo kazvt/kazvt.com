@@ -2855,63 +2855,61 @@
 	overflow: visible;
 }
 
-/* Whole chat item is capped to 40vw */
+/* Clamp the whole chat node, not the message element */
 .highlight-chat {
 	box-sizing: border-box !important;
 	max-width: 40vw !important;
 	width: fit-content !important;
 
-	display: inline-flex !important;
-	flex-direction: row !important;
-	flex-wrap: nowrap !important;
-	align-items: flex-start !important;
-
-	overflow: hidden !important;
-}
-
-/* Keep username/badges/icons on the same row as the message */
-.highlight-chat > .queueid,
-.highlight-chat > .time-arrived,
-.highlight-chat > .source-name,
-.highlight-chat > .hl-name,
-.highlight-chat > .hl-badges,
-.highlight-chat > img,
-.highlight-chat > svg {
-	flex: 0 0 auto !important;
-}
-
-/* Message stays beside the username, but wraps inside remaining 40vw space */
-.highlight-chat > .hl-message {
-	flex: 1 1 auto !important;
-	min-width: 0 !important;
-	max-width: none !important;
-
-	white-space: normal !important;
-	overflow-wrap: anywhere !important;
-	word-break: break-word !important;
-}
-
-/* True 3-line CSS clamp/ellipsis on the message text */
-.highlight-chat > .hl-message.hl-content,
-.highlight-chat > .hl-message > .hl-content {
 	display: -webkit-box !important;
 	-webkit-box-orient: vertical !important;
 	-webkit-line-clamp: 3 !important;
 	line-clamp: 3;
 
 	overflow: hidden !important;
-	text-overflow: ellipsis !important;
 	white-space: normal !important;
 	overflow-wrap: anywhere !important;
 	word-break: break-word !important;
+	line-height: max(var(--message-line-height), var(--comment-font-size)) !important;
 }
 
-/* Override msgmaxwidth / nowrapmsg if that class exists */
-.nowrapmsg .highlight-chat > .hl-message,
-.nowrapmsg .highlight-chat > .hl-message.hl-content,
-.nowrapmsg .highlight-chat > .hl-message > .hl-content {
+/* Force the internal pieces to behave like one inline sentence */
+.highlight-chat > .queueid,
+.highlight-chat > .time-arrived,
+.highlight-chat > .source-name,
+.highlight-chat > .hl-name,
+.highlight-chat > .hl-badges,
+.highlight-chat > .hl-message,
+.highlight-chat .hl-content {
+	display: inline !important;
+	width: auto !important;
 	max-width: none !important;
+	min-width: 0 !important;
+
+	overflow: visible !important;
 	white-space: normal !important;
+	text-overflow: clip !important;
+	overflow-wrap: anywhere !important;
+	word-break: break-word !important;
+	vertical-align: baseline !important;
+}
+
+/* Icons/badges stay inline */
+.highlight-chat img,
+.highlight-chat svg,
+.highlight-chat .hl-badge {
+	display: inline-block !important;
+	vertical-align: text-bottom !important;
+}
+
+/* Undo nowrapmsg/msgmaxwidth if present */
+.nowrapmsg .highlight-chat .hl-message,
+.nowrapmsg .highlight-chat .hl-content {
+	display: inline !important;
+	max-width: none !important;
+	overflow: visible !important;
+	white-space: normal !important;
+	text-overflow: clip !important;
 	overflow-wrap: anywhere !important;
 	word-break: break-word !important;
 }
