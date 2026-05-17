@@ -2854,6 +2854,31 @@
 	margin-inline: -5px;
 	overflow: visible;
 }
+
+/* Limit chat messages to 40vw, wrap, max 3 lines, then ellipsis */
+.hl-message,
+.nowrapmsg .hl-message,
+.allowfat .hl-message {
+	max-width: 40vw !important;
+	overflow: hidden !important;
+	white-space: normal !important;
+	overflow-wrap: anywhere !important;
+	word-break: break-word !important;
+}
+
+.hl-message .hl-content,
+.nowrapmsg .hl-message .hl-content {
+	display: -webkit-box !important;
+	-webkit-box-orient: vertical !important;
+	-webkit-line-clamp: 3 !important;
+	line-clamp: 3;
+	max-width: 100% !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: normal !important;
+	overflow-wrap: anywhere !important;
+	word-break: break-word !important;
+}
 		
 	</style>
 </head>
