@@ -2969,6 +2969,28 @@
 	padding-top: 0.15em !important;
 	padding-bottom: 0.15em !important;
 }
+
+/* Vertically center image badges too */
+.highlight-chat .hl-badges {
+	display: inline-flex !important;
+	align-items: center !important;
+	vertical-align: middle !important;
+	line-height: var(--message-line-height, 22px) !important;
+}
+
+.highlight-chat .hl-badges img.hl-badge,
+.highlight-chat .hl-badges .hl-badge:not(.textbadge),
+.highlight-chat .hl-badges .hl-badge.svg,
+.highlight-chat .hl-badges .hl-badge.svg svg {
+	align-self: center !important;
+	vertical-align: middle !important;
+
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+
+	position: static !important;
+	top: auto !important;
+}
 		
 	</style>
 </head>
