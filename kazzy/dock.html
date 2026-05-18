@@ -12334,10 +12334,18 @@ function parseByFileType(rawText, sourceUrl) {
 			ingestCustomUserData(customUserDataCache);
 			customUserDataLoaded = true;
 		} catch (err) {
-			console.error(err);
-			ingestCustomUserData(null); // fallback to legacy nick param only
-			customUserDataLoaded = true;
-		}
+	console.error(err);
+
+	// If MEGA/fetch fails, do NOT wipe existing loaded user data.
+	// Keep the last successful data if we have it.
+	if (customUserDataCache) {
+		ingestCustomUserData(customUserDataCache);
+	} else {
+		ingestCustomUserData(null); // first load failed, fallback only
+	}
+
+	customUserDataLoaded = true;
+}
 
 		return { nickMap, pronounMap };
 	}
@@ -12502,6 +12510,32 @@ async function applyPronouns(msgNode) {
 loadCustomUserData(false).then(() => {
 	normalizePronounBadges(document);
 	scheduleUserMetaRefresh();
+});
+
+// Keep trying to refresh custom user data every minute.
+// This helps if MEGA failed during startup or if the file changes later.
+let customUserDataRefreshInProgress = false;
+
+async function autoRefreshCustomUserData() {
+	if (!customUserDataParam) return;
+	if (customUserDataRefreshInProgress) return;
+
+	customUserDataRefreshInProgress = true;
+
+	try {
+		await refreshCustomUserData();
+		console.log("customUserData refreshed");
+	} catch (err) {
+		console.error("customUserData auto-refresh failed", err);
+	} finally {
+		customUserDataRefreshInProgress = false;
+	}
+}
+
+setInterval(autoRefreshCustomUserData, 60 * 1000);
+
+window.addEventListener("online", () => {
+	autoRefreshCustomUserData();
 });
 
 	const observer = new MutationObserver(mutations => {
