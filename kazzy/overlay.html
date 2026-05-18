@@ -10540,8 +10540,10 @@ if (badge.type && badge.type == "img" && badge.src) {
 						} else if (chatbadges) {
 							chatname = '<span class="hl-badges">' + chatbadges + "</span><div " + nameColor + ' dir="' + textDirection + '" class="hl-name' + splitMode + '">' + chatname + afterName + "</div>";
 						} else {
-							chatname = '<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + afterName + "</div>";
-						}
+chatname =
+	(chatbadges ? '<span class="hl-badges">' + chatbadges + '</span>' : '') +
+	'<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + afterName + "</div>";
+}
 					} else {
 chatname =
 	(chatbadges ? '<span class="hl-badges">' + chatbadges + '</span>' : '') +
