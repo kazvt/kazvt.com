@@ -2944,18 +2944,30 @@
 	top: auto !important;
 }
 
+/* Vertically center text badges/pronoun badges with the name + message */
+.highlight-chat .hl-badges {
+	display: inline-flex !important;
+	align-items: center !important;
+	vertical-align: middle !important;
+	line-height: var(--message-line-height, 22px) !important;
+}
+
 .highlight-chat .hl-badge.textbadge {
 	display: inline-flex !important;
 	align-items: center !important;
 	justify-content: center !important;
 
-	vertical-align: middle !important;
+	height: auto !important;
+	min-height: 1em !important;
+	max-height: none !important;
+
 	line-height: 1 !important;
+	vertical-align: middle !important;
 
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
-	position: relative !important;
-	top: auto !important;
+	padding-top: 0.15em !important;
+	padding-bottom: 0.15em !important;
 }
 		
 	</style>
