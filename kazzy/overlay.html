@@ -10333,7 +10333,9 @@ if (data.event) {
 					nameColor = "style='display: flex;'";
 				}
 
-				var chatbadges = "";
+var chatbadges = "";
+var imageChatbadges = "";
+var textChatbadges = "";
 
 				if (giveVIPBadge && vip) {
 					if (!data.chatbadges) {
@@ -10379,21 +10381,22 @@ if (data.event) {
 					} else {
 						data.chatbadges.forEach(badge => {
 							if (typeof badge == "object") {
-								if (badge.type && badge.type == "img" && badge.src) {
-									if (badge.bgcolor) {
-										chatbadges += "<img class='hl-badge' style='background-color:" + badge.bgcolor + ";' src='" + badge.src + "' />";
-									} else {
-										chatbadges += "<img class='hl-badge' src='" + badge.src + "' />";
-									}
-								} else if (badge.type && badge.type == "svg" && badge.html) {
-									chatbadges += "<span class='hl-badge svg'>" + badge.html + "</span>";
-								} else if (badge.type && badge.type == "text" && badge.text) {
-									chatbadges += "<span class='hl-badge textbadge'>" + badge.text + "</span>";
-								}
+if (badge.type && badge.type == "img" && badge.src) {
+	if (badge.bgcolor) {
+		imageChatbadges += "<img class='hl-badge' style='background-color:" + badge.bgcolor + ";' src='" + badge.src + "' />";
+	} else {
+		imageChatbadges += "<img class='hl-badge' src='" + badge.src + "' />";
+	}
+} else if (badge.type && badge.type == "svg" && badge.html) {
+	imageChatbadges += "<span class='hl-badge svg'>" + badge.html + "</span>";
+} else if (badge.type && badge.type == "text" && badge.text) {
+	textChatbadges += "<span class='hl-badge textbadge'>" + badge.text + "</span>";
+}
 							} else {
-								chatbadges += "<img class='hl-badge' src='" + badge + "' />";
+								imageChatbadges += "<img class='hl-badge' src='" + badge + "' />";
 							}
 						});
+						chatbadges = imageChatbadges + textChatbadges;
 					}
 				}
 
