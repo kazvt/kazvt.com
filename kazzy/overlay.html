@@ -3010,7 +3010,7 @@
 	top: auto !important;
 	align-self: center !important;
 }
-		
+
 	</style>
 </head>
 
@@ -3678,7 +3678,7 @@
 		var textGlowWidthParam = null;
 		var textGlowColorParam = null;
 
-        
+
         var nicknamesParam = urlParams.get("nick") || urlParams.get("nicks") || urlParams.get("nickname") || urlParams.get("nicknames");
 var customUserDataParam = urlParams.get("customUserData");
 
@@ -5703,8 +5703,27 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 			var bolderShadow = "-3px -3px #000000, -3px -1.5px #000000, -3px 0px #000000, -3px 1.5px #000000, -3px 3px #000000, -1.5px -3px #000000, -1.5px -1.5px #000000, -1.5px 0px #000000, -1.5px 1.5px #000000, -1.5px 3px #000000, 0px -3px #000000, 0px -1.5px #000000, 0px 0px #000000, 0px 1.5px #000000, 0px 3px #000000, 1.5px -3px #000000, 1.5px -1.5px #000000, 1.5px 0px #000000, 1.5px 1.5px #000000, 1.5px 3px #000000, 3px -3px #000000, 3px -1.5px #000000, 3px 0px #000000, 3px 1.5px #000000, 3px 3px #000000";
 			setTextShadow(bolderShadow);
 		} else if (urlParams.has("thinner")) {
-			var thinnerShadow = "-1.5px -1.5px #000000, -1.5px -0.75px #000000, -1.5px 0px #000000, -1.5px 0.75px #000000, -1.5px 1.5px #000000, -0.75px -1.5px #000000, -0.75px -0.75px #000000, -0.75px 0px #000000, -0.75px 0.75px #000000, -0.75px 1.5px #000000, 0px -1.5px #000000, 0px -0.75px #000000, 0px 0px #000000, 0px 0.75px #000000, 0px 1.5px #000000, 0.75px -1.5px #000000, 0.75px -0.75px #000000, 0.75px 0px #000000, 0.75px 0.75px #000000, 0.75px 1.5px #000000, 1.5px -1.5px #000000, 1.5px -0.75px #000000, 1.5px 0px #000000, 1.5px 0.75px #000000, 1.5px 1.5px #000000";
-			setTextShadow(thinnerShadow);
+			function makeTextOutline(radius = 3, step = 0.75, color = "#000000") {
+	const shadows = [];
+
+	for (let x = -radius; x <= radius; x += step) {
+		for (let y = -radius; y <= radius; y += step) {
+			if (x === 0 && y === 0) continue;
+
+			// Keeps it rounded instead of a blocky square shadow
+			if (Math.hypot(x, y) <= radius) {
+				const xVal = Number(x.toFixed(2));
+				const yVal = Number(y.toFixed(2));
+				shadows.push(`${xVal}px ${yVal}px 0 ${color}`);
+			}
+		}
+	}
+
+	return shadows.join(", ");
+}
+
+var bolderShadow = makeTextOutline(3, 0.75, "#000000");
+setTextShadow(bolderShadow);
 		}
 
 		if (hasTextGlow) {
@@ -7312,7 +7331,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 												document.querySelectorAll("[data-chatname='" + data.markUser.username + "'][data-source-type='" + data.markUser.type + "']").forEach(ele => {
 													ele.classList.add(`marked - ${ data.markUser.role } `);
 												});
-												
+
 												if (data.markUser.type=="youtube"){
 													document.querySelectorAll("[data-chatname='" + data.markUser.username + "'][data-source-type='youtubeshorts']").forEach(ele => {
 														ele.classList.add(`marked - ${ data.markUser.role } `);
@@ -7620,7 +7639,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 					return;
 				}
 			}
-			// Buy Me a Coffe New Membership and Donation detection 
+			// Buy Me a Coffe New Membership and Donation detection
 			else if ("bmac" in data) {
 				try {
 					if (!data.bmac) {
@@ -10576,7 +10595,7 @@ chatname =
 				if (makeBlurred) {
 					node.classList.add("blurred");
 				}
-                
+
 if (msgSrc === "youtube" || msgSrc === "youtubeshorts") {
 	const nameEl = node.querySelector(".hl-name");
 	if (nameEl) {
@@ -12074,8 +12093,8 @@ if (msgSrc === "youtube" || msgSrc === "youtubeshorts") {
 
 		// Below will cycle your OBS scenes when a user enter !cycle into chat. (assumign &cycle is added)
 		//
-		// You also need to have the dock.html in your OBS, 
-		// with your OBS set to "Advanced access" page permissions, 
+		// You also need to have the dock.html in your OBS,
+		// with your OBS set to "Advanced access" page permissions,
 		// and have &obscontrol added to the dock.html URL
 		//
 		function getOBSDetails() {
@@ -12786,7 +12805,7 @@ function parseByFileType(rawText, sourceUrl) {
 
 		return { nickMap, pronounMap };
 	}
-	
+
 	function normalizePronounBadges(rootNode) {
 	if (!rootNode || !rootNode.querySelectorAll) return;
 
