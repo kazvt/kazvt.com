@@ -3013,6 +3013,20 @@
 	align-self: center !important;
 }
 
+/* Vertically center normal emotes inside message content only */
+.highlight-chat .hl-content img:not(.chat-line__message--emote-gigantified):not(.hl-badge):not(.icon),
+.highlight-chat .hl-content svg:not(.chat-line__message--emote-gigantified):not(.hl-badge):not(.icon),
+.highlight-chat .hl-content video:not(.chat-line__message--emote-gigantified) {
+	display: inline-block !important;
+	vertical-align: middle !important;
+
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+
+	position: static !important;
+	top: auto !important;
+}
+
 	</style>
 </head>
 
