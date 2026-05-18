@@ -10498,7 +10498,9 @@ if (badge.type && badge.type == "img" && badge.src) {
 							chatname = '<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + afterName + "</div>";
 						}
 					} else {
-						chatname = '<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatbadges + chatname + "</div>";
+chatname =
+	(chatbadges ? '<span class="hl-badges">' + chatbadges + '</span>' : '') +
+	'<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + "</div>";
 					}
 				} else if (specialMessage && compactmode) {
 					chatname = '<div dir="' + textDirection + '" class="hl-name' + splitMode + '"></div>';
@@ -12903,10 +12905,11 @@ function applyNick(msgNode) {
 
 		existingPronounBadges.forEach(el => el.remove());
 
-		const badge = document.createElement('span');
-		badge.className = 'hl-badge textbadge hl-pronouns';
-		badge.textContent = pronouns.trim();
-		badgeContainer.prepend(badge);
+const badge = document.createElement('span');
+badge.className = 'hl-badge textbadge hl-pronouns';
+badge.textContent = pronouns.trim();
+
+badgeContainer.appendChild(badge);
 
 		if (horizontal && typeof horizontalRealign === "function") {
 			requestAnimationFrame(() => horizontalRealign(false));
