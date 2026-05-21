@@ -12969,13 +12969,17 @@ async function applyPronouns(msgNode) {
 		return;
 	}
 
-	let badge = allPronounBadges[0] || document.createElement('span');
+	let badge = allPronounBadges[allPronounBadges.length - 1] || document.createElement('span');
+
 	badge.className = 'hl-badge textbadge hl-pronouns';
 	badge.textContent = pronouns.trim();
 
-	allPronounBadges.slice(1).forEach(el => el.remove());
+	allPronounBadges.forEach(el => {
+		if (el !== badge) el.remove();
+	});
 
-	badgeContainer.prepend(badge);
+	// This keeps the textbadge after image badges and directly before the username
+	badgeContainer.appendChild(badge);
 
 	if (horizontal && typeof horizontalRealign === "function") {
 		requestAnimationFrame(() => horizontalRealign(false));
