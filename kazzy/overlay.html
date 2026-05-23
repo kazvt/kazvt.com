@@ -10517,20 +10517,15 @@ if (badge.type && badge.type == "img" && badge.src) {
 					lastType = data.type;
 				}
 
-				var afterName = ":";
-				if (twoLines) {
-					afterName = "";
-				}
-				if (nocolon) {
-					afterName = "";
-				}
+var afterName = ":";
 
 				if (trimName) {
 					chatname = truncateText(chatname, trimName);
 				}
 
 				if (largeavatar) {
-					chatname = '<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + (chatname || "") + '<span class="hl-badges">' + chatbadges + "</span></div>";
+					// chatname = '<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + (chatname || "") + '<span class="hl-badges">' + chatbadges + "</span></div>";
+					chatname = '<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + (chatname ? chatname + afterName : "") + '<span class="hl-badges">' + chatbadges + "</span></div>";
 				} else if (chatname) {
 					if (compactmode) {
 						if (specialMessage) {
@@ -10543,9 +10538,9 @@ chatname =
 	'<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + afterName + "</div>";
 }
 					} else {
-chatname =
+						chatname =
 	(chatbadges ? '<span class="hl-badges">' + chatbadges + '</span>' : '') +
-	'<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + "</div>";
+	'<div dir="' + textDirection + '" ' + nameColor + ' class="hl-name' + splitMode + '">' + chatname + afterName + "</div>";
 					}
 				} else if (specialMessage && compactmode) {
 					chatname = '<div dir="' + textDirection + '" class="hl-name' + splitMode + '"></div>';
@@ -12869,7 +12864,42 @@ function parseByFileType(rawText, sourceUrl) {
 
 		return badgeContainer;
 	}
+function isColonTextNode(node) {
+	return node &&
+		node.nodeType === Node.TEXT_NODE &&
+		/^\s*:\s*$/.test(node.textContent || '');
+}
 
+function removeImmediateColonAfter(node) {
+	let next = node && node.nextSibling;
+
+	while (isColonTextNode(next)) {
+		const doomed = next;
+		next = next.nextSibling;
+		doomed.remove();
+	}
+}
+
+function ensureUsernameColonInName(nameEl) {
+	const textNode = getPrimaryNameTextNode(nameEl);
+	if (!textNode) return;
+
+	const cleanName = (textNode.textContent || '').replace(/:\s*$/, '').trim();
+	if (!cleanName) return;
+
+	textNode.textContent = cleanName;
+
+	const nickEl = nameEl.querySelector('.hl-nick');
+
+	removeImmediateColonAfter(textNode);
+
+	if (nickEl) {
+		removeImmediateColonAfter(nickEl);
+		nickEl.after(':');
+	} else {
+		textNode.after(':');
+	}
+}
 function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
@@ -12889,12 +12919,12 @@ function applyNick(msgNode) {
 	const existingNick = nameEl.querySelector('.hl-nick');
 	if (existingNick) existingNick.remove();
 
-	if (!nick || !nick.trim()) {
-		// No nickname: restore plain username view
-		parts.textNode.textContent = usernameDisplay;
-		return;
-	}
-
+if (!nick || !nick.trim()) {
+	// No nickname: restore plain username view
+	parts.textNode.textContent = usernameDisplay;
+	ensureUsernameColonInName(nameEl);
+	return;
+}
 	const nickText = nick.trim();
 	const span = document.createElement('span');
 	span.className = 'hl-nick';
@@ -12907,15 +12937,9 @@ function applyNick(msgNode) {
 		span.textContent = '\u00a0(' + nickText + ')';
 	}
 
-	if (
-		parts.textNode.nextSibling &&
-		parts.textNode.nextSibling.nodeType === Node.TEXT_NODE &&
-		/^\s*:\s*$/.test(parts.textNode.nextSibling.textContent || '')
-	) {
-		parts.textNode.nextSibling.remove();
-	}
-
-	parts.textNode.after(span, ':');
+removeImmediateColonAfter(parts.textNode);
+parts.textNode.after(span);
+ensureUsernameColonInName(nameEl);
 }
 
 
@@ -12936,7 +12960,7 @@ function applyNick(msgNode) {
 		rootNode.querySelectorAll('.hl-badge.textbadge:not(.hl-pronouns)').forEach(isPronounTextBadge);
 	}
 
-	
+
 async function applyPronouns(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
