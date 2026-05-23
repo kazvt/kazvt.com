@@ -2879,8 +2879,9 @@
 
 	overflow: hidden !important;
 	white-space: normal !important;
-	overflow-wrap: anywhere !important;
-	word-break: break-all !important;
+overflow-wrap: break-word !important;
+word-break: normal !important;
+hyphens: manual !important;
 	line-height: max(var(--message-line-height), var(--comment-font-size)) !important;
 }
 
@@ -2900,8 +2901,9 @@
 	overflow: visible !important;
 	white-space: normal !important;
 	text-overflow: clip !important;
-	overflow-wrap: anywhere !important;
-	word-break: break-all !important;
+overflow-wrap: break-word !important;
+word-break: normal !important;
+hyphens: manual !important;
 	vertical-align: baseline !important;
 }
 
@@ -2921,8 +2923,9 @@
 	overflow: visible !important;
 	white-space: normal !important;
 	text-overflow: clip !important;
-	overflow-wrap: anywhere !important;
-	word-break: break-all !important;
+overflow-wrap: break-word !important;
+word-break: normal !important;
+hyphens: manual !important;
 }
 
 .horizontal .highlight-chat {
@@ -3030,6 +3033,14 @@
 
 	position: static !important;
 	top: auto !important;
+}
+
+.hl-name {
+	/* ellipsis for long names */
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: nowrap !important;
+	max-width: 1vw;
 }
 	</style>
 </head>
@@ -12997,16 +13008,78 @@ async function applyPronouns(msgNode) {
 	});
 
 	// This keeps the textbadge after image badges and directly before the username
-	badgeContainer.appendChild(badge);
+badgeContainer.appendChild(badge);
 
-	if (horizontal && typeof horizontalRealign === "function") {
-		requestAnimationFrame(() => horizontalRealign(false));
+		if (horizontal && typeof horizontalRealign === "function") {
+			requestAnimationFrame(() => horizontalRealign(false));
+		}
 	}
+
+function addSoftHyphensToOverlayText(text) {
+	const SOFT_HYPHEN = '\u00AD';
+
+	const segmenter = window.Intl && Intl.Segmenter
+		? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+		: null;
+
+	return text.replace(/\u00AD/g, "").replace(/[^\s]{10,}/g, word => {
+		if (/^(https?:\/\/|www\.)/i.test(word)) return word;
+		if (/@|#/.test(word)) return word;
+
+		const chars = segmenter
+			? Array.from(segmenter.segment(word), s => s.segment)
+			: Array.from(word);
+
+		if (chars.length < 10) return word;
+
+		return chars.join(SOFT_HYPHEN);
+	});
 }
 
+function softHyphenateMessage(msgNode) {
+	if (!msgNode || !msgNode.querySelectorAll) return;
+	if (msgNode.dataset.softHyphenated === "1") return;
+
+	const targets = msgNode.querySelectorAll(".hl-content");
+
+	targets.forEach(root => {
+		const walker = document.createTreeWalker(
+			root,
+			NodeFilter.SHOW_TEXT,
+			{
+				acceptNode(node) {
+					if (!node.nodeValue || !node.nodeValue.trim()) {
+						return NodeFilter.FILTER_REJECT;
+					}
+
+					const parent = node.parentElement;
+					if (
+						parent &&
+						parent.closest('.hl-badge, .hl-name, .time-arrived, .source-name, script, style')
+					) {
+						return NodeFilter.FILTER_REJECT;
+					}
+
+					return NodeFilter.FILTER_ACCEPT;
+				}
+			}
+		);
+
+		const nodes = [];
+		while (walker.nextNode()) nodes.push(walker.currentNode);
+
+		nodes.forEach(node => {
+			node.nodeValue = addSoftHyphensToOverlayText(node.nodeValue);
+		});
+	});
+
+	msgNode.dataset.softHyphenated = "1";
+}
 
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
+
+	softHyphenateMessage(msgNode);
 
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
