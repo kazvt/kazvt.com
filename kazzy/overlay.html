@@ -3046,16 +3046,16 @@ hyphens: manual !important;
 
 /* PFP over platform icon, without changing layout spacing */
 :root {
-	--source-ring-size: 32px;
+	--source-ring-size: 40px;
 	--profile-pic-size: 24px;
 }
 
-/* The message line becomes the positioning parent */
 .highlight-chat .hl-message {
 	position: relative !important;
+	overflow: visible !important;
 }
 
-/* PFP stays as the only layout-sized avatar */
+/* Keep PFP as the only layout-sized avatar */
 .highlight-chat .hl-profile-pic {
 	position: relative !important;
 	display: inline-block !important;
@@ -3077,7 +3077,7 @@ hyphens: manual !important;
 	z-index: 2 !important;
 }
 
-/* Source icon is visual-only: bigger, behind the PFP, no layout width */
+/* Platform icon behind PFP */
 .highlight-chat .hl-source-type {
 	position: absolute !important;
 
@@ -3096,9 +3096,10 @@ hyphens: manual !important;
 	padding: 0 !important;
 
 	border-radius: 50% !important;
-	object-fit: cover !important;
+	object-fit: contain !important;
 	z-index: 1 !important;
 	pointer-events: none !important;
+	opacity: 1 !important;
 }
 
 	</style>
