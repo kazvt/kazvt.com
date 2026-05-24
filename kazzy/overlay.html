@@ -5325,25 +5325,23 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 			DoNotShowInitialReply = true;
 		}
 
-		if (urlParams.has("truncatereply")) {
-			// make it so every <i> element is truncated to 10 characters by default OR urlparam get
-			const style = document.createElement('style');
-			const maxLength = parseInt(urlParams.get("truncatereply")) || 10;
-style.innerHTML = `
-	i {
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow: hidden;
-		display: inline-block;
-		max-width: ${maxLength}ch;
+var truncateReplyLength = false;
+if (urlParams.has("truncatereply")) {
+	truncateReplyLength = parseInt(urlParams.get("truncatereply")) || 10;
+}
 
-		vertical-align: -0.12em;
-		line-height: inherit;
-		height: 1em;
+function truncateReplyTextForOverlay(text, maxLength) {
+	maxLength = parseInt(maxLength) || 0;
+	if (!maxLength) return text;
+
+	const chars = Array.from(String(text || ""));
+
+	if (chars.length <= maxLength) {
+		return text;
 	}
-`;
-			document.head.appendChild(style);
-		}
+
+	return chars.slice(0, Math.max(0, maxLength - 1)).join("") + "…";
+}
 
 		var stripDonationData = false;
 		if (urlParams.has("stripdonations")) {
@@ -10131,10 +10129,15 @@ setTextShadow(bolderShadow);
 				if (data.chatmessage) {
 					if (stripHTML) {
 						data.chatmessage = stripHtmlFunction(data.chatmessage);
-					} else if (data.event) {
-						data.chatmessage = data.chatmessage.trim();
-						data.chatmessage = "<i>" + data.chatmessage + "</i>";
-					}
+} else if (data.event) {
+	data.chatmessage = data.chatmessage.trim();
+
+	if (truncateReplyLength) {
+		data.chatmessage = truncateReplyTextForOverlay(data.chatmessage, truncateReplyLength);
+	}
+
+	data.chatmessage = "<i>" + data.chatmessage + "</i>";
+}
 				} else {
 					data.chatmessage = "";
 				}
