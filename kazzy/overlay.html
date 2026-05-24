@@ -5334,10 +5334,12 @@ style.innerHTML = `
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		overflow: hidden;
-		max-width: ${maxLength}ch;
 		display: inline-block;
+		max-width: ${maxLength}ch;
 
-		vertical-align: middle;
+		vertical-align: -0.12em;
+		line-height: inherit;
+		height: 1em;
 	}
 `;
 			document.head.appendChild(style);
