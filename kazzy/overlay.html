@@ -3044,62 +3044,93 @@ hyphens: manual !important;
 	vertical-align: middle !important;
 }
 
-/* PFP over platform icon, without changing layout spacing */
+/* Hide platform/source image icons */
+.highlight-chat .hl-source-type {
+	display: none !important;
+}
+
+/* Platform-coloured outline around PFPs */
 :root {
-	--source-ring-size: 40px;
-	--profile-pic-size: 24px;
+	--platform-pfp-outline-size: 4px;
+	--platform-pfp-outline-default: #888;
 }
 
-.highlight-chat .hl-message {
-	position: relative !important;
-	overflow: visible !important;
-}
-
-/* Keep PFP as the only layout-sized avatar */
 .highlight-chat .hl-profile-pic {
-	position: relative !important;
-	display: inline-block !important;
-
-	width: var(--profile-pic-size) !important;
-	height: var(--profile-pic-size) !important;
-	min-width: var(--profile-pic-size) !important;
-	max-width: var(--profile-pic-size) !important;
-	min-height: var(--profile-pic-size) !important;
-	max-height: var(--profile-pic-size) !important;
-
-	margin: 0 2px 0 0 !important;
-	padding: 0 !important;
-
 	border-radius: 50% !important;
-	object-fit: cover !important;
+	outline: var(--platform-pfp-outline-size) solid var(--platform-pfp-outline-default) !important;
+	outline-offset: 0 !important;
+
+	margin-left: 0 !important;
 	vertical-align: middle !important;
 	align-self: center !important;
-	z-index: 2 !important;
 }
 
-/* Platform icon behind PFP */
-.highlight-chat .hl-source-type {
-	position: absolute !important;
+/* Twitch */
+.highlight-chat[data-source-type="twitch"] .hl-profile-pic {
+	outline-color: #9146ff !important;
+}
 
-	width: var(--source-ring-size) !important;
-	height: var(--source-ring-size) !important;
-	min-width: var(--source-ring-size) !important;
-	max-width: var(--source-ring-size) !important;
-	min-height: var(--source-ring-size) !important;
-	max-height: var(--source-ring-size) !important;
+/* Kick */
+.highlight-chat[data-source-type="kick"] .hl-profile-pic {
+	outline-color: #53fc18 !important;
+}
 
-	left: calc((var(--profile-pic-size) - var(--source-ring-size)) / 2) !important;
-	top: 50% !important;
-	transform: translateY(-50%) !important;
+/* YouTube */
+.highlight-chat[data-source-type="youtube"] .hl-profile-pic,
+.highlight-chat[data-source-type="yt"] .hl-profile-pic {
+	outline-color: #ff0000 !important;
+}
 
-	margin: 0 !important;
-	padding: 0 !important;
+/* X / Twitter */
+.highlight-chat[data-source-type="x"] .hl-profile-pic,
+.highlight-chat[data-source-type="twitter"] .hl-profile-pic {
+	outline-color: #000 !important;
+}
 
-	border-radius: 50% !important;
-	object-fit: contain !important;
-	z-index: 1 !important;
-	pointer-events: none !important;
-	opacity: 1 !important;
+/* Facebook */
+.highlight-chat[data-source-type="facebook"] .hl-profile-pic,
+.highlight-chat[data-source-type="fb"] .hl-profile-pic {
+	outline-color: #1877f2 !important;
+}
+
+/* Instagram */
+.highlight-chat[data-source-type="instagram"] .hl-profile-pic,
+.highlight-chat[data-source-type="ig"] .hl-profile-pic {
+	outline-color: #e1306c !important;
+}
+
+/* TikTok */
+.highlight-chat[data-source-type="tiktok"] .hl-profile-pic {
+	outline-color: #00f2ea !important;
+}
+
+/* Discord */
+.highlight-chat[data-source-type="discord"] .hl-profile-pic {
+	outline-color: #5865f2 !important;
+}
+
+/* Trovo */
+.highlight-chat[data-source-type="trovo"] .hl-profile-pic {
+	outline-color: #19d66b !important;
+}
+
+/* Rumble */
+.highlight-chat[data-source-type="rumble"] .hl-profile-pic {
+	outline-color: #85c742 !important;
+}
+
+/* Owncast fallback solid outline */
+.highlight-chat[data-source-type="owncast"] .hl-profile-pic {
+	outline-color: #7b5cff !important;
+}
+
+.highlight-chat[data-source-type="owncast"] .hl-profile-pic {
+	outline: none !important;
+	box-shadow:
+		0 -3px 0 1px #2aa8ff,
+		0 3px 0 1px #8b5cff,
+		3px 0 0 1px #5f7dff,
+		-3px 0 0 1px #5f7dff !important;
 }
 
 	</style>
