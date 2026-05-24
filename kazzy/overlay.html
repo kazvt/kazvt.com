@@ -3044,45 +3044,22 @@ hyphens: manual !important;
 	vertical-align: middle !important;
 }
 
-/* Overlay platform/source icon behind the profile picture */
+/* PFP over platform icon, without changing layout spacing */
 :root {
 	--source-ring-size: 32px;
 	--profile-pic-size: 24px;
-	--source-ring-overlap: -28px;
 }
 
-/* Make both icons center-align without adding top/bottom padding */
-.highlight-chat .hl-source-type,
+/* The message line becomes the positioning parent */
+.highlight-chat .hl-message {
+	position: relative !important;
+}
+
+/* PFP stays as the only layout-sized avatar */
 .highlight-chat .hl-profile-pic {
 	position: relative !important;
 	display: inline-block !important;
-	vertical-align: middle !important;
-	align-self: center !important;
 
-	margin-top: 0 !important;
-	margin-bottom: 0 !important;
-
-	object-fit: cover !important;
-}
-
-/* Platform/source icon: bigger, behind the avatar */
-.highlight-chat .hl-source-type {
-	width: var(--source-ring-size) !important;
-	height: var(--source-ring-size) !important;
-	min-width: var(--source-ring-size) !important;
-	max-width: var(--source-ring-size) !important;
-	min-height: var(--source-ring-size) !important;
-	max-height: var(--source-ring-size) !important;
-
-	margin-left: 0 !important;
-	margin-right: 0 !important;
-
-	border-radius: 50% !important;
-	z-index: 1 !important;
-}
-
-/* Profile picture: smaller, on top */
-.highlight-chat .hl-profile-pic {
 	width: var(--profile-pic-size) !important;
 	height: var(--profile-pic-size) !important;
 	min-width: var(--profile-pic-size) !important;
@@ -3090,25 +3067,38 @@ hyphens: manual !important;
 	min-height: var(--profile-pic-size) !important;
 	max-height: var(--profile-pic-size) !important;
 
+	margin: 0 2px 0 0 !important;
+	padding: 0 !important;
+
 	border-radius: 50% !important;
+	object-fit: cover !important;
+	vertical-align: middle !important;
+	align-self: center !important;
 	z-index: 2 !important;
 }
 
-/* Normal/twoLines/split/compact order: source icon comes before PFP */
-.highlight-chat .hl-source-type + .hl-profile-pic {
-	margin-left: var(--source-ring-overlap) !important;
-	margin-right: 0 !important;
-}
+/* Source icon is visual-only: bigger, behind the PFP, no layout width */
+.highlight-chat .hl-source-type {
+	position: absolute !important;
 
-/* Large-avatar order: PFP comes before source icon inside .hl-leftside */
-.highlight-chat .hl-leftside .hl-profile-pic + .hl-source-type {
-	margin-left: var(--source-ring-overlap) !important;
-	margin-right: 0 !important;
+	width: var(--source-ring-size) !important;
+	height: var(--source-ring-size) !important;
+	min-width: var(--source-ring-size) !important;
+	max-width: var(--source-ring-size) !important;
+	min-height: var(--source-ring-size) !important;
+	max-height: var(--source-ring-size) !important;
+
+	left: calc((var(--profile-pic-size) - var(--source-ring-size)) / 2) !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+
+	border-radius: 50% !important;
+	object-fit: cover !important;
 	z-index: 1 !important;
-}
-
-.highlight-chat .hl-leftside .hl-profile-pic {
-	z-index: 2 !important;
+	pointer-events: none !important;
 }
 
 	</style>
