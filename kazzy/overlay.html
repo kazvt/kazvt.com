@@ -806,13 +806,15 @@
 			margin: 1px 0px;
 		}
 
-		.hl-message {
-			margin: auto 1px;
-			overflow-wrap: anywhere;
-			line-height: max(var(--message-line-height), var(--comment-font-size));
-			font-weight: var(--message-font-weight);
-			font-size: var(--comment-font-size);
-		}
+.hl-message {
+	margin: auto 1px;
+	overflow-wrap: break-word;
+	word-break: normal;
+	hyphens: manual;
+	line-height: max(var(--message-line-height), var(--comment-font-size));
+	font-weight: var(--message-font-weight);
+	font-size: var(--comment-font-size);
+}
 
 		.hl-name {
 			overflow-wrap: normal;
@@ -1160,12 +1162,14 @@
 		}
 
 
-		.highlight-chat.expand {
-			animation: expand 2s;
-			overflow: visible;
-			word-break: break-all;
-			line-break: anywhere;
-		}
+.highlight-chat.expand {
+	animation: expand 2s;
+	overflow: visible;
+	word-break: normal;
+	line-break: auto;
+	overflow-wrap: break-word;
+	hyphens: manual;
+}
 
 		@keyframes slideLeft {
 			from {
@@ -2882,6 +2886,7 @@
 overflow-wrap: break-word !important;
 word-break: normal !important;
 hyphens: manual !important;
+line-break: auto !important;
 	line-height: max(var(--message-line-height), var(--comment-font-size)) !important;
 }
 
@@ -11377,6 +11382,7 @@ if (msgSrc === "youtube" || msgSrc === "youtubeshorts") {
 			send2Extension(msg.overlayNinja);
 		}
 
+
 function truncateText(text, maxLength) {
 	maxLength = parseInt(maxLength) || 0;
 	if (!maxLength) return text;
@@ -13016,23 +13022,60 @@ badgeContainer.appendChild(badge);
 
 function addSoftHyphensToOverlayText(text) {
 	const SOFT_HYPHEN = '\u00AD';
+	const NBSP = '\u00A0';
+
+	// Lower number = more words can split with a hyphen.
+	// 5 is a good balance. Use 4 if you want it more aggressive.
+	const MIN_HYPHENATE_CHARS = 5;
+
+	// true = tries harder to avoid moving a whole word to the next line.
+	// It does this by preventing the space before a hyphenatable word from being used as the break.
+	const FORCE_HYPHEN_FILL = true;
 
 	const segmenter = window.Intl && Intl.Segmenter
 		? new Intl.Segmenter(undefined, { granularity: "grapheme" })
 		: null;
 
-	return text.replace(/\u00AD/g, "").replace(/[^\s]{10,}/g, word => {
-		if (/^(https?:\/\/|www\.)/i.test(word)) return word;
-		if (/@|#/.test(word)) return word;
+	function shouldSkipWord(word) {
+		return /^(https?:\/\/|www\.)/i.test(word) || /@|#/.test(word);
+	}
 
-		const chars = segmenter
+	function getChars(word) {
+		return segmenter
 			? Array.from(segmenter.segment(word), s => s.segment)
 			: Array.from(word);
+	}
 
-		if (chars.length < 10) return word;
+	function shouldHyphenateWord(word) {
+		if (!word || shouldSkipWord(word)) return false;
+		return getChars(word).length >= MIN_HYPHENATE_CHARS;
+	}
 
-		return chars.join(SOFT_HYPHEN);
-	});
+	function hyphenateWord(word) {
+		if (!shouldHyphenateWord(word)) return word;
+		return getChars(word).join(SOFT_HYPHEN);
+	}
+
+	const parts = String(text || "").replace(/\u00AD/g, "").split(/(\s+)/);
+
+	for (let i = 0; i < parts.length; i++) {
+		const part = parts[i];
+
+		if (/^\s+$/.test(part)) {
+			const nextWord = parts[i + 1] || "";
+
+			if (FORCE_HYPHEN_FILL && shouldHyphenateWord(nextWord)) {
+				// Preserve newlines/tabs, but make normal spaces non-breaking.
+				parts[i] = part.replace(/ /g, NBSP);
+			}
+
+			continue;
+		}
+
+		parts[i] = hyphenateWord(part);
+	}
+
+	return parts.join("");
 }
 
 function softHyphenateMessage(msgNode) {
