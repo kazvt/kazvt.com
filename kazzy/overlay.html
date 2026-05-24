@@ -13177,7 +13177,7 @@ function addSoftHyphensToOverlayText(text) {
 	// URL: &hyphenatechars=4
 	const MIN_HYPHENATE_CHARS = Math.max(
 		2,
-		parseInt(urlParams.get("hyphenatechars"), 10) || 5
+		parseInt(urlParams.get("hyphenatechars"), 10) || 3
 	);
 
 	// true = tries harder to avoid moving a whole word to the next line.
