@@ -13174,8 +13174,11 @@ function addSoftHyphensToOverlayText(text) {
 	const NBSP = '\u00A0';
 
 	// Lower number = more words can split with a hyphen.
-	// 5 is a good balance. Use 4 if you want it more aggressive.
-	const MIN_HYPHENATE_CHARS = 5;
+	// URL: &hyphenatechars=4
+	const MIN_HYPHENATE_CHARS = Math.max(
+		2,
+		parseInt(urlParams.get("hyphenatechars"), 10) || 5
+	);
 
 	// true = tries harder to avoid moving a whole word to the next line.
 	// It does this by preventing the space before a hyphenatable word from being used as the break.
