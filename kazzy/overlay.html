@@ -2836,7 +2836,7 @@
 		}
 
 		.horizontal-ticker-item * {
-			vertical-align: top;
+			/* vertical-align: top; */
 		}
 
 		.hl-nick {
@@ -10136,7 +10136,7 @@ setTextShadow(bolderShadow);
 		data.chatmessage = truncateReplyTextForOverlay(data.chatmessage, truncateReplyLength);
 	}
 
-	data.chatmessage = "<i>" + data.chatmessage + "</i>";
+	data.chatmessage = "<i class='vertical-align: middle !important;'>" + data.chatmessage + "</i>";
 }
 				} else {
 					data.chatmessage = "";
