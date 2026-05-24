@@ -5327,22 +5327,22 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 
 		if (urlParams.has("truncatereply")) {
 			// make it so every <i> element is truncated to 10 characters by default OR urlparam get
-			const style = document.createElement('style');
+			// const style = document.createElement('style');
 			const maxLength = parseInt(urlParams.get("truncatereply")) || 10;
-style.innerHTML = `
-	i {
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow: hidden;
-		display: inline-block;
-		max-width: ${maxLength}ch;
+// style.innerHTML = `
+// 	i {
+// 		text-overflow: ellipsis;
+// 		white-space: nowrap;
+// 		overflow: hidden;
+// 		display: inline-block;
+// 		max-width: ${maxLength}ch;
 
-		vertical-align: baseline;
-		line-height: inherit;
-		height: 1em;
-	}
-`;
-			document.head.appendChild(style);
+// 		vertical-align: baseline;
+// 		line-height: inherit;
+// 		height: 1em;
+// 	}
+// `;
+			// document.head.appendChild(style);
 		}
 
 		var stripDonationData = false;
