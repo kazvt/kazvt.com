@@ -3040,6 +3040,10 @@ hyphens: manual !important;
 	top: auto !important;
 }
 
+.hl-event-text {
+	vertical-align: middle !important;
+}
+
 	</style>
 </head>
 
@@ -5325,12 +5329,17 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 			DoNotShowInitialReply = true;
 		}
 
+var truncateEventLength = false;
+if (urlParams.has("truncateevent")) {
+	truncateEventLength = parseInt(urlParams.get("truncateevent")) || 10;
+}
+
 var truncateReplyLength = false;
 if (urlParams.has("truncatereply")) {
 	truncateReplyLength = parseInt(urlParams.get("truncatereply")) || 10;
 }
 
-function truncateReplyTextForOverlay(text, maxLength) {
+function truncateOverlayText(text, maxLength) {
 	maxLength = parseInt(maxLength) || 0;
 	if (!maxLength) return text;
 
@@ -5341,6 +5350,45 @@ function truncateReplyTextForOverlay(text, maxLength) {
 	}
 
 	return chars.slice(0, Math.max(0, maxLength - 1)).join("") + "…";
+}
+
+function truncateEventTextForOverlay(text, maxLength) {
+	return truncateOverlayText(text, maxLength);
+}
+
+function truncateReplyTextForOverlay(text, maxLength) {
+	return truncateOverlayText(text, maxLength);
+}
+
+function truncateReplyPrefixInNode(node, maxLength) {
+	if (!node || !maxLength) return;
+
+	// Pure events are handled by truncateevent, not truncatereply.
+	if (node.dataset && node.dataset.event) return;
+
+	const content = node.querySelector(".hl-content");
+	if (!content) return;
+
+	const firstMeaningfulNode = Array.from(content.childNodes).find(child => {
+		if (child.nodeType === Node.TEXT_NODE) {
+			return !!child.textContent.trim();
+		}
+		return child.nodeType === Node.ELEMENT_NODE;
+	});
+
+	if (!firstMeaningfulNode || firstMeaningfulNode.nodeType !== Node.ELEMENT_NODE) return;
+	if (firstMeaningfulNode.tagName !== "I") return;
+
+	const replyItalic = firstMeaningfulNode;
+	const replyText = (replyItalic.textContent || "").trim();
+
+	// Safety: only truncate reply-looking italic prefixes.
+	if (!/^replying\s+to\b/i.test(replyText)) return;
+
+	const target = replyItalic.querySelector("small") || replyItalic;
+	target.textContent = truncateReplyTextForOverlay(replyText, maxLength);
+
+	replyItalic.classList.add("hl-reply-prefix");
 }
 
 		var stripDonationData = false;
@@ -10132,11 +10180,11 @@ setTextShadow(bolderShadow);
 } else if (data.event) {
 	data.chatmessage = data.chatmessage.trim();
 
-	if (truncateReplyLength) {
-		data.chatmessage = truncateReplyTextForOverlay(data.chatmessage, truncateReplyLength);
+	if (truncateEventLength) {
+		data.chatmessage = truncateEventTextForOverlay(data.chatmessage, truncateEventLength);
 	}
 
-	data.chatmessage = "<i class='vertical-align: middle !important;'>" + data.chatmessage + "</i>";
+	data.chatmessage = "<i class='hl-event-text'>" + data.chatmessage + "</i>";
 }
 				} else {
 					data.chatmessage = "";
@@ -10622,8 +10670,13 @@ chatname =
 					var node = createElementFromHTML('<div id="msg_' + data.id + '" ' + mid + ' data-menu="context-menu" class="highlight-chat' + larger + expand + '" data-source-type="' + data.type + '">' + "<div class='queueid'></div>" + showType + chatImg + timeArrived + chatname + '<div class="hl-message hl-content" dir="' + textDirection + '" id="content_' + data.id + '">' + chatmessage + "</div>" + addImage + donationHTML + "</div>");
 				}
 
+				if (truncateReplyLength && !data.event) {
+	truncateReplyPrefixInNode(node, truncateReplyLength);
+}
+
 				if (filtering) {
 					filterMessage(node);
+					
 				}
 
 				if (makeBlurred) {
