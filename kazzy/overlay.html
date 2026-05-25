@@ -13175,10 +13175,7 @@ function addSoftHyphensToOverlayText(text) {
 
 	// Lower number = more words can split with a hyphen.
 	// URL: &hyphenatechars=4
-	const MIN_HYPHENATE_CHARS = Math.max(
-		2,
-		parseInt(urlParams.get("hyphenatechars"), 10) || 3
-	);
+	const MIN_HYPHENATE_CHARS = 2;
 
 	// true = tries harder to avoid moving a whole word to the next line.
 	// It does this by preventing the space before a hyphenatable word from being used as the break.
