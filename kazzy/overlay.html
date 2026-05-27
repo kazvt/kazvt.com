@@ -10653,9 +10653,10 @@ if (badge.type && badge.type == "img" && badge.src) {
 					data.bot = true;
 				}
 
-				var chatname = data.chatname;
+var chatname = data.chatname;
+var originalChatnameForLookup = chatname || "";
 
-				if (simpleSequence && (chatname == lastChatName) && (data.type == lastType)) {
+if (simpleSequence && (chatname == lastChatName) && (data.type == lastType)) {
 					chatname = "";
 					//timeArrived = "";
 					chatImg = "";
@@ -10759,12 +10760,17 @@ chatname =
 					var node = createElementFromHTML('<div id="msg_' + data.id + '" ' + mid + ' data-menu="context-menu" class="highlight-chat' + larger + expand + '" data-source-type="' + data.type + '">' + "<div class='queueid'></div>" + showType + chatImg + timeArrived + chatname + '<div class="hl-message hl-content" dir="' + textDirection + '" id="content_' + data.id + '">' + chatmessage + "</div>" + addImage + donationHTML + "</div>");
 				}
 
-				if (truncateReplyLength && !data.event) {
+const nameElForLookup = node.querySelector && node.querySelector(".hl-name");
+if (nameElForLookup && originalChatnameForLookup && !nameElForLookup.dataset.usernameOriginal) {
+	nameElForLookup.dataset.usernameOriginal = String(originalChatnameForLookup).replace(/:\s*$/, "").trim();
+}
+
+if (truncateReplyLength && !data.event) {
 	truncateReplyPrefixInNode(node, truncateReplyLength);
 }
 
-				if (filtering) {
-					filterMessage(node);
+if (filtering) {
+	filterMessage(node);
 					
 				}
 
