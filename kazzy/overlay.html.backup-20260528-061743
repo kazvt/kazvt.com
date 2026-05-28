@@ -2875,9 +2875,6 @@
 	box-sizing: border-box !important;
 	width: max-content !important;
 	max-width: 40vw !important;
-	text-align: justify !important;
-	text-align-last: start !important;
-	text-justify: inter-word;
 
 	display: -webkit-box !important;
 	-webkit-box-orient: vertical !important;
@@ -5449,14 +5446,7 @@ function truncateEventTextForOverlay(text, maxLength) {
 }
 
 function truncateReplyTextForOverlay(text, maxLength) {
-	const value = String(text || "");
-	const replyParts = value.match(/^(replying\s+to\s+[^:]*:\s*)([\s\S]*)$/i);
-
-	if (!replyParts) {
-		return truncateOverlayText(text, maxLength);
-	}
-
-	return replyParts[1] + truncateOverlayText(replyParts[2], maxLength);
+	return truncateOverlayText(text, maxLength);
 }
 
 function truncateReplyPrefixInNode(node, maxLength) {
@@ -13081,12 +13071,6 @@ function ensureUsernameColonInName(nameEl) {
 		textNode.after(':');
 	}
 }
-
-function getVisibleUsernameForOverlay(username) {
-	const value = String(username || "");
-	return (typeof trimName !== "undefined" && trimName) ? truncateText(value, trimName) : value;
-}
-
 function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
@@ -13100,7 +13084,6 @@ function applyNick(msgNode) {
 	}
 
 	const usernameDisplay = nameEl.dataset.usernameOriginal;
-	const visibleUsername = getVisibleUsernameForOverlay(usernameDisplay);
 	const lookupName = normalize(usernameDisplay.replace(/^@/, '').trim());
 	const nick = nickMap[lookupName];
 
@@ -13109,7 +13092,7 @@ function applyNick(msgNode) {
 
 if (!nick || !nick.trim()) {
 	// No nickname: restore plain username view
-	parts.textNode.textContent = visibleUsername;
+	parts.textNode.textContent = usernameDisplay;
 	ensureUsernameColonInName(nameEl);
 	return;
 }
@@ -13119,9 +13102,9 @@ if (!nick || !nick.trim()) {
 
 	if (usePrimaryNicknames) {
 		parts.textNode.textContent = nickText;
-		span.textContent = '\u00a0(' + visibleUsername + ')';
+		span.textContent = '\u00a0(' + usernameDisplay + ')';
 	} else {
-		parts.textNode.textContent = visibleUsername;
+		parts.textNode.textContent = usernameDisplay;
 		span.textContent = '\u00a0(' + nickText + ')';
 	}
 
@@ -13200,8 +13183,9 @@ function addSoftHyphensToOverlayText(text) {
 	// URL: &hyphenatechars=4
 	const MIN_HYPHENATE_CHARS = 2;
 
-	// Keep spaces breakable/stretchable so CSS justification can fill wrapped rows.
-	const FORCE_HYPHEN_FILL = false;
+	// true = tries harder to avoid moving a whole word to the next line.
+	// It does this by preventing the space before a hyphenatable word from being used as the break.
+	const FORCE_HYPHEN_FILL = true;
 
 	const segmenter = window.Intl && Intl.Segmenter
 		? new Intl.Segmenter(undefined, { granularity: "grapheme" })

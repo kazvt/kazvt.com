@@ -13081,12 +13081,6 @@ function ensureUsernameColonInName(nameEl) {
 		textNode.after(':');
 	}
 }
-
-function getVisibleUsernameForOverlay(username) {
-	const value = String(username || "");
-	return (typeof trimName !== "undefined" && trimName) ? truncateText(value, trimName) : value;
-}
-
 function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
@@ -13100,7 +13094,6 @@ function applyNick(msgNode) {
 	}
 
 	const usernameDisplay = nameEl.dataset.usernameOriginal;
-	const visibleUsername = getVisibleUsernameForOverlay(usernameDisplay);
 	const lookupName = normalize(usernameDisplay.replace(/^@/, '').trim());
 	const nick = nickMap[lookupName];
 
@@ -13109,7 +13102,7 @@ function applyNick(msgNode) {
 
 if (!nick || !nick.trim()) {
 	// No nickname: restore plain username view
-	parts.textNode.textContent = visibleUsername;
+	parts.textNode.textContent = usernameDisplay;
 	ensureUsernameColonInName(nameEl);
 	return;
 }
@@ -13119,9 +13112,9 @@ if (!nick || !nick.trim()) {
 
 	if (usePrimaryNicknames) {
 		parts.textNode.textContent = nickText;
-		span.textContent = '\u00a0(' + visibleUsername + ')';
+		span.textContent = '\u00a0(' + usernameDisplay + ')';
 	} else {
-		parts.textNode.textContent = visibleUsername;
+		parts.textNode.textContent = usernameDisplay;
 		span.textContent = '\u00a0(' + nickText + ')';
 	}
 
