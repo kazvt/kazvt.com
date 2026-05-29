@@ -80,7 +80,6 @@
 
 			--scrollbar-visible: inherit;
 			--padding-rows: 3px;
-			--horizontal-message-gap: 4px;
 
 			--text-stroke-width: 0px;
 			--text-stroke-color: #000;
@@ -2939,7 +2938,7 @@ hyphens: manual !important;
 }
 
 .horizontal .highlight-chat {
-	margin-right: var(--horizontal-message-gap, 4px) !important;
+	margin-right: 4px !important;
 }
 
 .highlight-chat > .hl-name {
@@ -5375,11 +5374,6 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 
 		if (urlParams.has("padding")) {
 			document.documentElement.style.setProperty("--padding-rows", (parseInt(urlParams.get("padding") || 5)) + "px");
-		}
-
-		var horizontalGapParam = urlParams.get("tickergap") || urlParams.get("horizontalgap");
-		if (horizontalGapParam !== null) {
-			document.documentElement.style.setProperty("--horizontal-message-gap", (parseInt(horizontalGapParam || 4)) + "px");
 		}
 
 		var NormalizeText = false;
