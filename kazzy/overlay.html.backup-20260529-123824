@@ -2873,24 +2873,14 @@
 	overflow: visible;
 }
 
-.hl-content.hl-line-justified .hl-visual-line {
-	display: inline;
-}
-
-.hl-content.hl-line-justified .hl-visual-line.hl-visual-line-fill {
-	display: inline-block;
-	text-align: justify !important;
-	text-align-last: justify !important;
-	text-justify: inter-character;
-	word-spacing: var(--hl-line-word-spacing, normal);
-	letter-spacing: var(--hl-line-letter-spacing, normal);
-}
-
 /* Clamp the whole chat node, not the message element */
 .highlight-chat {
 	box-sizing: border-box !important;
 	width: max-content !important;
 	max-width: 40vw !important;
+	text-align: justify !important;
+	text-align-last: start !important;
+	text-justify: inter-word;
 
 	display: -webkit-box !important;
 	-webkit-box-orient: vertical !important;
@@ -13312,179 +13302,6 @@ function softHyphenateMessage(msgNode) {
 	msgNode.dataset.softHyphenated = "1";
 }
 
-function hasElementChildren(node) {
-	return Array.from(node.childNodes || []).some(child => child.nodeType === Node.ELEMENT_NODE);
-}
-
-function getTextUnitsWithOffsets(text) {
-	const units = [];
-	let offset = 0;
-
-	for (const char of String(text || "")) {
-		units.push({ char, start: offset, end: offset + char.length });
-		offset += char.length;
-	}
-
-	return units;
-}
-
-function lineBreakUsesSoftHyphen(source, endOffset) {
-	const SOFT_HYPHEN = '\u00AD';
-	let offset = endOffset;
-	let sawSoftHyphen = false;
-
-	while (source[offset] === SOFT_HYPHEN) {
-		sawSoftHyphen = true;
-		offset++;
-	}
-
-	return sawSoftHyphen && offset < source.length && !/\s/.test(source[offset] || "");
-}
-
-function getMeasuredTextLines(root, source) {
-	root.textContent = source;
-
-	const textNode = root.firstChild;
-	if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return [];
-
-	const range = document.createRange();
-	const units = getTextUnitsWithOffsets(source);
-	const lines = [];
-	const softHyphen = '\u00AD';
-	const lineThreshold = Math.max(2, (parseFloat(getComputedStyle(root).fontSize) || 16) * 0.2);
-
-	units.forEach(unit => {
-		if (unit.char === softHyphen) return;
-
-		range.setStart(textNode, unit.start);
-		range.setEnd(textNode, unit.end);
-
-		const rects = range.getClientRects();
-		if (!rects.length) return;
-
-		const rect = rects[0];
-		if (!rect || (!rect.width && !rect.height)) return;
-
-		let line = lines[lines.length - 1];
-		if (!line || Math.abs(rect.top - line.top) > lineThreshold) {
-			line = {
-				start: unit.start,
-				end: unit.end,
-				top: rect.top,
-				left: rect.left,
-				right: rect.right
-			};
-			lines.push(line);
-		} else {
-			line.end = unit.end;
-			line.left = Math.min(line.left, rect.left);
-			line.right = Math.max(line.right, rect.right);
-		}
-	});
-
-	range.detach();
-	return lines;
-}
-
-function getDisplayLineText(source, line, lineIndex, hyphenated) {
-	let value = source.slice(line.start, line.end).replace(/\u00AD/g, "");
-
-	if (lineIndex > 0) {
-		value = value.replace(/^\s+/, "");
-	}
-
-	value = value.replace(/\s+$/, "");
-
-	if (hyphenated) {
-		value += "-";
-	}
-
-	return value;
-}
-
-function justifyWrappedMessageLines(msgNode) {
-	if (!msgNode || !msgNode.querySelectorAll) return;
-
-	msgNode.querySelectorAll(".hl-content").forEach(root => {
-		if (!root.dataset.lineJustifySource && hasElementChildren(root)) return;
-
-		const source = root.dataset.lineJustifySource || root.textContent || "";
-		if (!source.replace(/\u00AD/g, "").trim()) return;
-
-		root.dataset.lineJustifySource = source;
-		root.classList.remove("hl-line-justified");
-
-		const lines = getMeasuredTextLines(root, source);
-		if (lines.length < 3) {
-			root.textContent = source;
-			return;
-		}
-
-		const containerRect = msgNode.getBoundingClientRect();
-		const edgeTolerance = Math.max(4, Math.min(12, containerRect.width * 0.04));
-		const shouldJustify = lines.map((line, index) => {
-			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
-			const reachesEnd = line.right >= containerRect.right - edgeTolerance;
-			return index > 0 && index < lines.length - 1 && hyphenated && reachesEnd;
-		});
-
-		if (!shouldJustify.some(Boolean)) {
-			root.textContent = source;
-			return;
-		}
-
-		const fragment = document.createDocumentFragment();
-
-		lines.forEach((line, index) => {
-			if (index > 0) {
-				fragment.appendChild(document.createElement("br"));
-			}
-
-			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
-			const span = document.createElement("span");
-			const displayText = getDisplayLineText(source, line, index, hyphenated);
-			span.className = "hl-visual-line";
-			span.textContent = displayText;
-
-			if (shouldJustify[index]) {
-				const extraSpace = Math.max(0, containerRect.right - line.right);
-				const spaces = (displayText.match(/ /g) || []).length;
-				span.classList.add("hl-visual-line-fill");
-
-				if (extraSpace > 0 && spaces > 0) {
-					span.style.setProperty("--hl-line-word-spacing", (extraSpace / spaces).toFixed(3) + "px");
-				} else if (extraSpace > 0) {
-					const stretchChars = Math.max(1, Array.from(displayText.replace(/\s/g, "")).length - 1);
-					span.style.setProperty("--hl-line-letter-spacing", (extraSpace / stretchChars).toFixed(3) + "px");
-				}
-			}
-
-			fragment.appendChild(span);
-		});
-
-		root.textContent = "";
-		root.appendChild(fragment);
-		root.classList.add("hl-line-justified");
-	});
-}
-
-function scheduleWrappedLineJustification(msgNode) {
-	if (!msgNode || !msgNode.querySelectorAll) return;
-	if (msgNode.dataset.lineJustifyQueued === "1") return;
-
-	msgNode.dataset.lineJustifyQueued = "1";
-	requestAnimationFrame(() => {
-		requestAnimationFrame(() => {
-			delete msgNode.dataset.lineJustifyQueued;
-			justifyWrappedMessageLines(msgNode);
-
-			if (horizontal && typeof horizontalRealign === "function") {
-				horizontalRealign(false);
-			}
-		});
-	});
-}
-
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
@@ -13493,7 +13310,6 @@ async function applyUserMeta(msgNode) {
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
 	await applyPronouns(msgNode);
-	scheduleWrappedLineJustification(msgNode);
 
 	if (horizontal && typeof horizontalRealign === "function") {
 		requestAnimationFrame(() => {
