@@ -74,6 +74,7 @@
 			--bgcolor-bubble: #000d;
 			--bgcolor-bubble-odd: #111d;
 			--name-bubble-bg: #2a5bd7;
+
 			--name-bubble-text: var(--font-color-name);
 			--name-bubble-radius: 999px;
 			--name-bubble-padding: 2px 8px;
@@ -2939,7 +2940,12 @@ hyphens: manual !important;
 }
 
 .horizontal .highlight-chat {
-	margin-right: var(--horizontal-message-gap, 4px) !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+.horizontal .highlight-chat + .highlight-chat {
+	margin-left: var(--horizontal-message-gap, 4px) !important;
 }
 
 .highlight-chat > .hl-name {
