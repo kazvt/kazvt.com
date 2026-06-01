@@ -5,9 +5,9 @@
       "userNameRegex": null,
       "source": "kick",
       "firstMessage": true,
-      "excludeSubscribers": false,
-      "excludeModerators": false,
-      "excludeVips": false,
+      "excludeSubscribers": true,
+      "excludeModerators": true,
+      "excludeVips": true,
       "punishment": "ban",
       "reason": "one of those fent bots."
     }
