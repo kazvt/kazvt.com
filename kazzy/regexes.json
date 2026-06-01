@@ -1,0 +1,15 @@
+{
+  "rules": [
+    {
+      "messageRegex": "\\bfent\\b",
+      "userNameRegex": null,
+      "source": "kick",
+      "firstMessage": true,
+      "excludeSubscribers": true,
+      "excludeModerators": true,
+      "excludeVips": true,
+      "punishment": "ban",
+      "reason": "one of those fent bots"
+    }
+  ]
+}
