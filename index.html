@@ -502,6 +502,12 @@
       btn.classList.remove('is-live', 'is-offline', 'is-testing', 'is-loading')
       pip.classList.remove('pip-live', 'pip-offline', 'pip-testing', 'pip-loading')
 
+      if (platform === 'youtube') {
+        btn.href = liveState === 'live'
+          ? 'https://www.youtube.com/@kazvt/live'
+          : 'https://www.youtube.com/@kazvt'
+      }
+
       if (liveState === 'live') {
         btn.classList.add('is-live')
         pip.classList.add('pip-live')
