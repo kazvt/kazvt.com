@@ -1,0 +1,1960 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>forum signature dasher</title>
+  <script>
+    window.tailwind = { config: { corePlugins: { preflight: false } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --paper: #fff6d8;
+      --paper2: #efe0b8;
+      --paper3: #dfc995;
+      --ink: #140306;
+      --ink2: #2a070c;
+      --accent: #9d3d2c;
+      --line: #140306;
+      --shadow: rgba(20, 3, 6, 0.35);
+      --checker1: #ead9ad;
+      --checker2: #fff6d8;
+      --blue: #2563eb;
+      font-family: system-ui;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui !important;
+      font-weight: 700 !important;
+    }
+
+    *::before,
+    *::after {
+      font-family: system-ui !important;
+      font-weight: 700 !important;
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    label,
+    option,
+    .small,
+    .status-chip,
+    .scale-readout {
+      font-family: system-ui !important;
+      font-weight: 700 !important;
+      font-synthesis-weight: none;
+    }
+
+    ::placeholder {
+      font-family: system-ui !important;
+      font-weight: 700 !important;
+      opacity: 0.75;
+    }
+
+    h1, h2, h3,
+    .brand,
+    .head,
+    .btn,
+    .file-btn,
+    button {
+      font-family: system-ui !important;
+      font-weight: 900 !important;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: system-ui;
+      font-weight: 700;
+      overflow: hidden;
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      background: var(--paper);
+    }
+
+    .top {
+      border-bottom: 3px solid var(--line);
+      background: var(--ink);
+      color: var(--paper);
+      display: grid;
+      grid-template-columns: auto minmax(260px, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 0 12px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand {
+      white-space: nowrap;
+      font-size: 16px;
+      letter-spacing: 0.12em;
+    }
+
+    .top-pill,
+    .top-center {
+      min-width: 0;
+      height: 28px;
+      border: 2px solid var(--paper);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      padding: 0 14px;
+      font-size: 11px;
+      background: rgba(255, 246, 216, 0.08);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-center {
+      background: transparent;
+    }
+
+    .status-chip {
+      justify-self: end;
+      font-size: 11px;
+      opacity: 0.75;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+
+    main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(350px, 410px) minmax(430px, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .panel,
+    .preview {
+      min-width: 0;
+      min-height: 0;
+      border: 3px solid var(--line);
+      background: var(--paper2);
+      display: grid;
+      grid-template-rows: 36px 1fr;
+      box-shadow: 0 5px 0 var(--ink);
+      overflow: hidden;
+    }
+
+    .preview {
+      position: static;
+      padding: 0;
+      max-height: none;
+    }
+
+    .head {
+      background: var(--paper);
+      border-bottom: 3px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .panel-scroll,
+    .preview-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .panel-scroll {
+      direction: rtl;
+      scrollbar-gutter: stable both-edges;
+    }
+
+    .panel-scroll > * {
+      direction: ltr;
+    }
+
+    .preview-body {
+      background:
+        linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+        var(--checker2);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+    }
+
+    .canvas-stage {
+      min-width: 0;
+      min-height: 0;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 4px 0 var(--ink);
+      padding: 12px;
+      display: grid;
+      place-items: center;
+    }
+
+    .editor-block {
+      min-width: 0;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 4px 0 var(--ink);
+      padding: 8px;
+    }
+
+    .editor-block + .editor-block {
+      margin-top: 0;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    label {
+      display: block;
+      margin-top: 8px;
+      font-size: 10.5px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      margin-top: 4px;
+      font: inherit;
+    }
+
+    input[type="file"] {
+      border: 2px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 7px;
+      font-size: 11px;
+      font-weight: 900;
+      box-shadow: 0 3px 0 var(--ink);
+    }
+
+    input[type="file"]::file-selector-button {
+      min-height: 28px;
+      margin-right: 8px;
+      border: 2px solid var(--line);
+      background: var(--accent);
+      color: var(--paper);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 2px 0 var(--ink);
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"] {
+      height: 32px;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font-weight: 900;
+      padding: 0 6px;
+      border-radius: 0;
+      box-shadow: 0 3px 0 var(--ink);
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 34px;
+      border: 2px solid var(--line);
+      background: var(--paper2);
+      padding: 2px;
+      border-radius: 0;
+      box-shadow: 0 3px 0 var(--ink);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--ink);
+    }
+
+    input[type="checkbox"] {
+      accent-color: var(--ink);
+    }
+
+    button {
+      min-height: 34px;
+      border: 2px solid var(--line);
+      border-radius: 0;
+      background: var(--paper2);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 3px 0 var(--ink);
+      font-weight: 900;
+      font-size: 12px;
+      line-height: 1.1;
+      user-select: none;
+      padding: 0 8px;
+      text-transform: uppercase;
+      transition: background 0.1s;
+    }
+
+    button:hover {
+      background: var(--paper);
+    }
+
+    button:active,
+    button.is-active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--ink);
+    }
+
+    button.is-active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    button.secondary {
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    button.secondary:hover {
+      background: var(--paper2);
+    }
+
+    #renderBtn,
+    #downloadBtn {
+      background: var(--accent);
+      color: var(--paper);
+    }
+
+    #downloadBtn.secondary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    #downloadBtn:not(:disabled):hover {
+      background: var(--ink2);
+      color: var(--paper);
+    }
+
+    button:disabled,
+    input:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .button-row button {
+      margin-top: 0;
+    }
+
+    .colour-control-row,
+    .picker-action-row {
+      display: grid;
+      grid-template-columns: 1fr 36px;
+      gap: 6px;
+      align-items: end;
+    }
+
+    .colour-control-row input,
+    .picker-action-row select {
+      margin-top: 4px;
+    }
+
+    button.icon-button {
+      width: 36px;
+      min-width: 36px;
+      height: 34px;
+      min-height: 34px;
+      padding: 0;
+      margin-top: 4px;
+      border-radius: 0;
+    }
+
+    .dropper-icon {
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+
+    .dropper-icon path {
+      fill: currentColor;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .toggle-field {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      padding: 7px 9px;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 2px 0 var(--ink);
+      font-size: 10.5px;
+      font-weight: 900;
+      line-height: 1.25;
+      cursor: pointer;
+    }
+
+    .toggle-field input {
+      width: auto;
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    .colour-transparent-toggle {
+      margin-top: 7px;
+      color: var(--ink);
+      opacity: 0.88;
+    }
+
+    .picker-card {
+      margin-top: 10px;
+      padding: 8px;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 3px 0 var(--ink);
+    }
+
+    .picked-colour-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .picked-colour-swatch {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--line);
+      box-shadow: 0 2px 0 var(--ink);
+      background-image:
+        linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+        var(--checker2);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    }
+
+    .small {
+      font-size: 11px;
+      color: var(--ink);
+      font-weight: 900;
+      line-height: 1.5;
+      opacity: 0.7;
+    }
+
+    .scale-readout {
+      margin-top: 2px;
+      text-align: right;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      border: 3px solid var(--line);
+      background-image:
+        linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+        var(--checker2);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+      box-shadow: 0 4px 0 var(--ink);
+      image-rendering: auto;
+    }
+
+    .crop-shell {
+      display: inline-block;
+      max-width: 100%;
+      border: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .crop-canvas {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .crop-canvas.is-dragging {
+      cursor: grabbing;
+    }
+
+    canvas.is-picking,
+    .crop-canvas.is-picking {
+      cursor: crosshair;
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .metric-grid label,
+    .background-compact label,
+    .side-section > label {
+      margin-top: 0;
+    }
+
+    .compact-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .hint-dot {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 9px;
+      line-height: 1;
+      background: var(--paper2);
+      box-shadow: 0 2px 0 var(--ink);
+      cursor: help;
+      flex-shrink: 0;
+    }
+
+    .background-compact {
+      border: 2px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 3px 0 var(--ink);
+      padding: 7px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .background-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .toggle-pill,
+    .mini-check {
+      height: 34px;
+      margin: 0;
+      border: 2px solid var(--line);
+      background: var(--paper2);
+      box-shadow: 0 3px 0 var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 10.5px;
+      transition: background 0.1s;
+    }
+
+    .toggle-pill:hover,
+    .mini-check:hover {
+      background: var(--paper);
+    }
+
+    .toggle-pill input,
+    .mini-check input {
+      width: auto;
+      margin: 0;
+    }
+
+    .background-row .colour-control-row {
+      min-width: 0;
+    }
+
+    .background-row input[type="color"] {
+      margin-top: 0;
+    }
+
+    .background-row .icon-button {
+      margin-top: 0;
+    }
+
+    .side-section {
+      display: grid;
+      gap: 6px;
+    }
+
+    .side-button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .side-choice {
+      min-height: 36px;
+      margin: 0;
+      grid-template-columns: 24px 1fr;
+      justify-content: start;
+      justify-items: start;
+      gap: 6px;
+      text-align: left;
+      font-size: 10.5px;
+      letter-spacing: 0.04em;
+    }
+
+    .side-choice svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .side-choice.is-active,
+    .side-choice[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--paper);
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--ink);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 2px solid var(--line);
+    }
+
+    .head span:last-child {
+      opacity: 0.5;
+      font-size: 10px;
+    }
+
+    .action-row button {
+      margin-top: 0 !important;
+    }
+
+    @media (max-width: 520px) {
+      .metric-grid,
+      .background-row,
+      .action-row {
+        grid-template-columns: 1fr;
+      }
+
+      .side-button-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 1000px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        height: auto;
+        min-height: 100vh;
+        grid-template-rows: auto 1fr;
+      }
+
+      .top {
+        grid-template-columns: 1fr auto;
+        row-gap: 7px;
+        padding: 8px 12px;
+      }
+
+      .top-pill,
+      .top-center {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .status-chip {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .preview {
+        min-height: 420px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">DASHER</div>
+      <div class="top-pill">like those uhh old forum style alternating dash border signature thingies</div>
+      <div class="top-center">Recommended: 1116 × 257 px</div>
+      <div class="status-chip">PNG/JPEG</div>
+    </header>
+
+    <main>
+      <section class="panel controls-panel">
+        <div class="head">
+          <span>Controls</span>
+          <span>Export PNG</span>
+        </div>
+        <div class="panel-scroll">
+      <label for="fileInput">Image file</label>
+      <input id="fileInput" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" />
+
+      <div id="cropControls" hidden>
+        <input id="fixedCropToggle" type="checkbox" checked hidden aria-hidden="true" />
+        <div id="cropSizingControls">
+          <div class="row">
+            <div>
+              <label for="cropWidth">Crop width, px</label>
+              <input id="cropWidth" type="number" min="1" step="1" title="Starter crop is 1116 × 257. Change it once and future uploads in this tab reuse that size." />
+            </div>
+            <div>
+              <label for="cropHeight">Crop height, px</label>
+              <input id="cropHeight" type="number" min="1" step="1" title="Starter crop is 1116 × 257. Change it once and future uploads in this tab reuse that size." />
+            </div>
+          </div>
+
+          <label for="imageScale">Image size</label>
+          <input id="imageScale" type="range" min="1" max="800" step="1" value="100" />
+          <div id="scaleValue" class="small scale-readout">100%</div>
+
+          <div class="button-row">
+            <button id="fitImageBtn" class="secondary" type="button" title="Fit the full image inside the crop">Fit</button>
+            <button id="fillImageBtn" class="secondary" type="button" title="Fill the whole crop with the image">Fill</button>
+            <button id="centerImageBtn" class="secondary" type="button" title="Centre the image in the crop">Centre</button>
+            <button id="resetCropBtn" class="secondary" type="button" title="Reset crop position, zoom, and size for this tab">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-grid grid grid-cols-2 gap-2">
+        <div>
+          <label class="compact-label" for="dashCount">
+            <span>Dashes</span>
+            <span class="hint-dot" title="Total dash segments along the selected border path. Segments are evenly spaced with no gaps.">?</span>
+          </label>
+          <input id="dashCount" type="number" min="1" step="1" value="62" title="Total dash segments along the selected border path" />
+        </div>
+        <div>
+          <label class="compact-label" for="lineWidth">
+            <span>Dash width</span>
+            <span class="hint-dot" title="Line thickness in pixels.">?</span>
+          </label>
+          <input id="lineWidth" type="number" min="1" step="1" value="11" title="Line thickness in pixels" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="colorA">Dash colour A</label>
+          <div class="colour-control-row">
+            <input id="colorA" type="color" value="#000000" />
+            <button id="pickColorABtn" class="secondary icon-button colour-dropper-button" type="button" disabled title="Pick dash colour A from preview" aria-label="Pick dash colour A from preview">
+              <svg class="dropper-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14.7 3.3a2.4 2.4 0 0 1 3.4 0l2.6 2.6a2.4 2.4 0 0 1 0 3.4l-1.6 1.6 1.1 1.1-1.4 1.4-1.1-1.1-7.9 7.9H4v-5.8l7.9-7.9-1.1-1.1 1.4-1.4 1.1 1.1 1.4-1.8Zm-8.7 12v2.7h2.7l7.6-7.6-2.7-2.7-7.6 7.6Zm9-9 2.7 2.7 1.6-1.6a.4.4 0 0 0 0-.6l-2.6-2.6a.4.4 0 0 0-.6 0L15 6.3Z" fill="currentColor" />
+            </svg>
+              <span class="visually-hidden">Pick dash colour A from preview</span>
+            </button>
+          </div>
+          <label class="toggle-field colour-transparent-toggle" for="colorATransparent">
+            <input id="colorATransparent" type="checkbox" />
+            <span title="Leave this dash colour transparent">CLEAR</span>
+          </label>
+        </div>
+        <div>
+          <label for="colorB">Dash colour B</label>
+          <div class="colour-control-row">
+            <input id="colorB" type="color" value="#ffffff" />
+            <button id="pickColorBBtn" class="secondary icon-button colour-dropper-button" type="button" disabled title="Pick dash colour B from preview" aria-label="Pick dash colour B from preview">
+              <svg class="dropper-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14.7 3.3a2.4 2.4 0 0 1 3.4 0l2.6 2.6a2.4 2.4 0 0 1 0 3.4l-1.6 1.6 1.1 1.1-1.4 1.4-1.1-1.1-7.9 7.9H4v-5.8l7.9-7.9-1.1-1.1 1.4-1.4 1.1 1.1 1.4-1.8Zm-8.7 12v2.7h2.7l7.6-7.6-2.7-2.7-7.6 7.6Zm9-9 2.7 2.7 1.6-1.6a.4.4 0 0 0 0-.6l-2.6-2.6a.4.4 0 0 0-.6 0L15 6.3Z" fill="currentColor" />
+            </svg>
+              <span class="visually-hidden">Pick dash colour B from preview</span>
+            </button>
+          </div>
+          <label class="toggle-field colour-transparent-toggle" for="colorBTransparent">
+            <input id="colorBTransparent" type="checkbox" />
+            <span title="Leave this dash colour transparent">CLEAR</span>
+          </label>
+        </div>
+      </div>
+      <div class="background-compact" title="Turn BG off for transparent unused crop/export areas, or turn it on and choose a fill colour.">
+        <div class="background-row grid grid-cols-[auto_1fr_auto] gap-2 items-center">
+          <label class="toggle-pill" for="canvasBackgroundToggle" title="Enable canvas background fill">
+            <input id="canvasBackgroundToggle" type="checkbox" />
+            <span>BG</span>
+          </label>
+          <div class="colour-control-row">
+            <input id="canvasBackgroundColor" type="color" value="#ffffff" disabled title="Canvas background colour" aria-label="Canvas background colour" />
+            <button id="pickCanvasBackgroundBtn" class="secondary icon-button colour-dropper-button" type="button" disabled title="Sample background colour from preview" aria-label="Sample background colour from preview">
+              <svg class="dropper-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14.7 3.3a2.4 2.4 0 0 1 3.4 0l2.6 2.6a2.4 2.4 0 0 1 0 3.4l-1.6 1.6 1.1 1.1-1.4 1.4-1.1-1.1-7.9 7.9H4v-5.8l7.9-7.9-1.1-1.1 1.4-1.4 1.1 1.1 1.4-1.8Zm-8.7 12v2.7h2.7l7.6-7.6-2.7-2.7-7.6 7.6Zm9-9 2.7 2.7 1.6-1.6a.4.4 0 0 0 0-.6l-2.6-2.6a.4.4 0 0 0-.6 0L15 6.3Z" fill="currentColor" />
+              </svg>
+              <span class="visually-hidden">Sample background colour from preview</span>
+            </button>
+          </div>
+          <label class="mini-check" for="canvasBackgroundTransparent" title="Keep the background transparent even while BG is enabled">
+            <input id="canvasBackgroundTransparent" type="checkbox" disabled />
+            <span>CLEAR</span>
+          </label>
+        </div>
+      </div>
+
+      <div hidden aria-hidden="true">
+        <select id="pickTarget" tabindex="-1">
+          <option value="canvasBackgroundColor">Canvas background colour</option>
+          <option value="colorA">Dash colour A</option>
+          <option value="colorB">Dash colour B</option>
+        </select>
+        <button id="startColorPickBtn" type="button" disabled tabindex="-1">Pick</button>
+        <span id="pickedColorSwatch"></span>
+        <span id="pickedColorValue"></span>
+      </div>
+
+      <label class="compact-label" for="inset">
+        <span>Inset</span>
+        <span class="hint-dot" title="Positive = move border inward. Negative = draw outside and add export padding.">?</span>
+      </label>
+      <input id="inset" type="number" step="1" value="0" title="Positive moves inward; negative draws outside and adds export padding" />
+
+      <div class="side-section">
+        <label>Sides to draw</label>
+        <input id="sides" type="hidden" value="all" />
+        <div class="side-button-grid grid grid-cols-2 gap-1.5" role="group" aria-label="Sides to draw">
+          <button class="side-choice is-active" type="button" data-sides="all" aria-pressed="true" title="Draw all sides">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" /></svg>
+            <span>ALL</span>
+          </button>
+          <button class="side-choice" type="button" data-sides="top-bottom" aria-pressed="false" title="Draw top and bottom only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" opacity="0.25" /><path d="M5 5h14" /><path d="M5 19h14" /></svg>
+            <span>TOP + BOTTOM</span>
+          </button>
+          <button class="side-choice" type="button" data-sides="left-right" aria-pressed="false" title="Draw left and right only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" opacity="0.25" /><path d="M5 5v14" /><path d="M19 5v14" /></svg>
+            <span>LEFT + RIGHT</span>
+          </button>
+          <button class="side-choice" type="button" data-sides="top" aria-pressed="false" title="Draw top only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14" /><rect x="5" y="5" width="14" height="14" opacity="0.25" /></svg>
+            <span>TOP</span>
+          </button>
+          <button class="side-choice" type="button" data-sides="right" aria-pressed="false" title="Draw right only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14" /><rect x="5" y="5" width="14" height="14" opacity="0.25" /></svg>
+            <span>RIGHT</span>
+          </button>
+          <button class="side-choice" type="button" data-sides="bottom" aria-pressed="false" title="Draw bottom only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18h14" /><rect x="5" y="5" width="14" height="14" opacity="0.25" /></svg>
+            <span>BOTTOM</span>
+          </button>
+          <button class="side-choice" type="button" data-sides="left" aria-pressed="false" title="Draw left only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14" /><rect x="5" y="5" width="14" height="14" opacity="0.25" /></svg>
+            <span>LEFT</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="action-row grid grid-cols-1 gap-2">
+        <button id="renderBtn" hidden disabled aria-hidden="true">Apply</button>
+        <button id="downloadBtn" class="secondary" disabled>Export PNG</button>
+      </div>
+        </div>
+      </section>
+
+      <section class="panel preview">
+        <div class="head">
+          <span>Canvas</span>
+          <span>crop · dash · export</span>
+        </div>
+        <div class="preview-body">
+      <div id="cropEditor" hidden aria-hidden="true">
+        <canvas id="cropCanvas" class="crop-canvas"></canvas>
+      </div>
+
+      <div class="canvas-stage">
+        <canvas id="canvas" title="Drag to move the image inside the crop. Use the mouse wheel to zoom. Crop guides appear on hover and fade away after a moment."></canvas>
+      </div>
+      <p id="status" class="small" style="padding: 0 2px;">Load an image to get started.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const cropControls = document.getElementById("cropControls");
+    const fixedCropToggle = document.getElementById("fixedCropToggle");
+    const cropSizingControls = document.getElementById("cropSizingControls");
+    const cropWidthInput = document.getElementById("cropWidth");
+    const cropHeightInput = document.getElementById("cropHeight");
+    const imageScaleInput = document.getElementById("imageScale");
+    const scaleValue = document.getElementById("scaleValue");
+    const fitImageBtn = document.getElementById("fitImageBtn");
+    const fillImageBtn = document.getElementById("fillImageBtn");
+    const centerImageBtn = document.getElementById("centerImageBtn");
+    const resetCropBtn = document.getElementById("resetCropBtn");
+    const dashCountInput = document.getElementById("dashCount");
+    const lineWidthInput = document.getElementById("lineWidth");
+    const colorAInput = document.getElementById("colorA");
+    const colorATransparentInput = document.getElementById("colorATransparent");
+    const pickColorABtn = document.getElementById("pickColorABtn");
+    const colorBInput = document.getElementById("colorB");
+    const colorBTransparentInput = document.getElementById("colorBTransparent");
+    const pickColorBBtn = document.getElementById("pickColorBBtn");
+    const canvasBackgroundToggle = document.getElementById("canvasBackgroundToggle");
+    const canvasBackgroundColorInput = document.getElementById("canvasBackgroundColor");
+    const canvasBackgroundTransparentInput = document.getElementById("canvasBackgroundTransparent");
+    const pickCanvasBackgroundBtn = document.getElementById("pickCanvasBackgroundBtn");
+    const pickTargetInput = document.getElementById("pickTarget");
+    const startColorPickBtn = document.getElementById("startColorPickBtn");
+    const pickedColorSwatch = document.getElementById("pickedColorSwatch");
+    const pickedColorValue = document.getElementById("pickedColorValue");
+    const insetInput = document.getElementById("inset");
+    const sidesInput = document.getElementById("sides");
+    const sideChoiceButtons = Array.from(document.querySelectorAll("[data-sides]"));
+    const renderBtn = document.getElementById("renderBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const cropEditor = document.getElementById("cropEditor");
+    const cropCanvas = document.getElementById("cropCanvas");
+    const cropCtx = cropCanvas.getContext("2d");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const status = document.getElementById("status");
+    const editedCanvas = document.createElement("canvas");
+    const editedCtx = editedCanvas.getContext("2d");
+    const sampleCanvas = document.createElement("canvas");
+    sampleCanvas.width = 1;
+    sampleCanvas.height = 1;
+    const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true });
+
+    const DEFAULT_CROP_WIDTH = 1116;
+    const DEFAULT_CROP_HEIGHT = 257;
+    const MAX_CANVAS_SIZE = 12000;
+    const SUPPORTED_IMAGE_TYPES = ["image/png", "image/jpeg"];
+    const SUPPORTED_IMAGE_EXTENSION = /\.(png|jpe?g)$/i;
+
+    let originalImage = null;
+    let originalFileName = "alternating-dashes.png";
+    let isColorPickMode = false;
+    let hasUserChangedCropSize = false;
+    let sessionCropWidth = DEFAULT_CROP_WIDTH;
+    let sessionCropHeight = DEFAULT_CROP_HEIGHT;
+    let showCropGuides = false;
+    let cropGuideHideTimer = null;
+    let currentOutputPadding = 0;
+    let cropState = {
+      width: 1,
+      height: 1,
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0,
+      previewScale: 1,
+      dragging: false,
+      pointerId: null,
+      lastX: 0,
+      lastY: 0
+    };
+
+
+    const colourDropperButtons = [
+      pickColorABtn,
+      pickColorBBtn,
+      pickCanvasBackgroundBtn,
+      startColorPickBtn
+    ];
+
+    fileInput.addEventListener("change", loadPng);
+    renderBtn.addEventListener("click", render);
+    downloadBtn.addEventListener("click", downloadPng);
+    fixedCropToggle.addEventListener("change", handleFixedCropToggle);
+    cropWidthInput.addEventListener("input", handleCropSizeInput);
+    cropHeightInput.addEventListener("input", handleCropSizeInput);
+    imageScaleInput.addEventListener("input", handleScaleInput);
+    fitImageBtn.addEventListener("click", () => setImageFit("fit"));
+    fillImageBtn.addEventListener("click", () => setImageFit("fill"));
+    centerImageBtn.addEventListener("click", () => {
+      centerImage();
+      updateEditedPreviewAndOutput();
+    });
+    resetCropBtn.addEventListener("click", resetCrop);
+    canvasBackgroundToggle.addEventListener("change", () => {
+      syncCanvasBackgroundUi();
+      if (originalImage) updateEditedPreviewAndOutput();
+    });
+    canvasBackgroundColorInput.addEventListener("input", () => {
+      if (originalImage) updateEditedPreviewAndOutput();
+    });
+    sideChoiceButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        sidesInput.value = button.dataset.sides;
+        syncSideButtons();
+        if (originalImage) render();
+      });
+    });
+    [
+      colorATransparentInput,
+      colorBTransparentInput,
+      canvasBackgroundTransparentInput
+    ].forEach(control => {
+      control.addEventListener("change", () => {
+        syncColourTransparencyUi();
+        if (originalImage) updateEditedPreviewAndOutput();
+      });
+    });
+    pickColorABtn.addEventListener("click", () => startColorPickForTarget("colorA"));
+    pickColorBBtn.addEventListener("click", () => startColorPickForTarget("colorB"));
+    pickCanvasBackgroundBtn.addEventListener("click", () => startColorPickForTarget("canvasBackgroundColor"));
+    startColorPickBtn.addEventListener("click", toggleColorPickMode);
+    canvas.addEventListener("pointerdown", handleCanvasPointerDown);
+    canvas.addEventListener("pointermove", handleCanvasPointerMove);
+    canvas.addEventListener("pointerleave", scheduleCropGuideHide);
+    canvas.addEventListener("pointerenter", handleCanvasPointerMove);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && isColorPickMode) {
+        setColorPickMode(false);
+        if (originalImage) render();
+      }
+    });
+    canvas.addEventListener("pointerup", endCropDrag);
+    canvas.addEventListener("pointercancel", endCropDrag);
+    canvas.addEventListener("wheel", zoomCropImage, { passive: false });
+    window.addEventListener("resize", () => {
+      if (originalImage) drawCropPreview();
+    });
+
+    [
+      dashCountInput,
+      lineWidthInput,
+      colorAInput,
+      colorBInput,
+      colorATransparentInput,
+      colorBTransparentInput,
+      insetInput,
+      sidesInput
+    ].forEach(control => {
+      control.addEventListener("input", () => {
+        if (originalImage) render();
+      });
+    });
+
+    setLoadedControls(false);
+    syncCanvasBackgroundUi();
+    syncSideButtons();
+
+    function syncSideButtons() {
+      sideChoiceButtons.forEach(button => {
+        const isActive = button.dataset.sides === sidesInput.value;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+    }
+
+    function handleCanvasPointerDown(event) {
+      revealCropGuidesFromPointer(event);
+
+      if (isColorPickMode) {
+        pickColorFromDashedPreview(event);
+        return;
+      }
+
+      startCropDrag(event);
+    }
+
+    function handleCanvasPointerMove(event) {
+      revealCropGuidesFromPointer(event);
+      dragCropImage(event);
+    }
+
+    function revealCropGuidesFromPointer(event) {
+      if (!originalImage) return;
+
+      if (cropState.dragging || isPointInsideCropRect(event)) {
+        setCropGuidesVisible(true);
+        clearTimeout(cropGuideHideTimer);
+      } else {
+        scheduleCropGuideHide();
+      }
+    }
+
+    function scheduleCropGuideHide() {
+      clearTimeout(cropGuideHideTimer);
+      cropGuideHideTimer = setTimeout(() => setCropGuidesVisible(false), 2000);
+    }
+
+    function setCropGuidesVisible(isVisible) {
+      if (showCropGuides === isVisible) return;
+      showCropGuides = isVisible;
+      if (originalImage) render();
+    }
+
+    function loadPng(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!isSupportedImageFile(file)) {
+        alert("Please choose a PNG or JPEG file.");
+        fileInput.value = "";
+        return;
+      }
+
+      originalFileName = file.name.replace(SUPPORTED_IMAGE_EXTENSION, "") + "-alternating-dashes.png";
+
+      const img = new Image();
+
+      img.onload = () => {
+        originalImage = img;
+
+        initializeCrop();
+        setLoadedControls(true);
+        updateEditedPreviewAndOutput();
+
+        URL.revokeObjectURL(img.src);
+      };
+
+      img.onerror = () => {
+        alert("Could not load this image.");
+      };
+
+      img.src = URL.createObjectURL(file);
+    }
+
+    function isSupportedImageFile(file) {
+      return SUPPORTED_IMAGE_TYPES.includes(file.type) || SUPPORTED_IMAGE_EXTENSION.test(file.name);
+    }
+
+    function setLoadedControls(isLoaded) {
+      renderBtn.disabled = !isLoaded;
+      downloadBtn.disabled = !isLoaded;
+      startColorPickBtn.disabled = !isLoaded;
+      colourDropperButtons.forEach(button => {
+        button.disabled = !isLoaded;
+      });
+      cropControls.hidden = !isLoaded;
+
+      [
+        fixedCropToggle,
+        cropWidthInput,
+        cropHeightInput,
+        imageScaleInput,
+        fitImageBtn,
+        fillImageBtn,
+        centerImageBtn,
+        resetCropBtn
+      ].forEach(control => {
+        control.disabled = !isLoaded;
+      });
+
+      syncCropModeUi();
+      syncCanvasBackgroundUi();
+    }
+
+    function initializeCrop() {
+      fixedCropToggle.checked = true;
+      cropState.width = hasUserChangedCropSize ? sessionCropWidth : DEFAULT_CROP_WIDTH;
+      cropState.height = hasUserChangedCropSize ? sessionCropHeight : DEFAULT_CROP_HEIGHT;
+      cropState.scale = 1;
+      cropState.offsetX = 0;
+      cropState.offsetY = 0;
+      showCropGuides = false;
+      clearTimeout(cropGuideHideTimer);
+      centerImage();
+
+      cropWidthInput.value = cropState.width;
+      cropHeightInput.value = cropState.height;
+      syncScaleControl();
+      syncCropModeUi();
+    }
+
+    function handleFixedCropToggle() {
+      if (!originalImage) {
+        syncCropModeUi();
+        return;
+      }
+
+      initializeCrop();
+      updateEditedPreviewAndOutput();
+    }
+
+    function syncCropModeUi() {
+      const isLoaded = Boolean(originalImage);
+      fixedCropToggle.checked = true;
+      cropSizingControls.hidden = !isLoaded;
+      cropEditor.hidden = true;
+
+      [
+        cropWidthInput,
+        cropHeightInput,
+        imageScaleInput,
+        fitImageBtn,
+        fillImageBtn,
+        centerImageBtn,
+        resetCropBtn
+      ].forEach(control => {
+        control.disabled = !isLoaded;
+      });
+    }
+
+    function syncCanvasBackgroundUi() {
+      syncColourTransparencyUi();
+    }
+
+    function syncColourTransparencyUi() {
+      colorAInput.disabled = colorATransparentInput.checked;
+      colorBInput.disabled = colorBTransparentInput.checked;
+      canvasBackgroundTransparentInput.disabled = !canvasBackgroundToggle.checked;
+      canvasBackgroundColorInput.disabled = !canvasBackgroundToggle.checked || canvasBackgroundTransparentInput.checked;
+      pickCanvasBackgroundBtn.disabled = !originalImage || !canvasBackgroundToggle.checked || canvasBackgroundTransparentInput.checked;
+    }
+
+    function isTransparentColourValue(colour) {
+      return colour === "transparent";
+    }
+
+    function getColourFromInputs(colourInput, transparentInput) {
+      return transparentInput.checked ? "transparent" : colourInput.value;
+    }
+
+    function setColourOnInputs(colourInput, transparentInput, colour) {
+      const isTransparent = isTransparentColourValue(colour);
+      transparentInput.checked = isTransparent;
+
+      if (!isTransparent) {
+        colourInput.value = colour;
+      }
+
+      syncColourTransparencyUi();
+    }
+
+    function formatColourForDisplay(colour) {
+      return isTransparentColourValue(colour) ? "transparent / no colour" : colour.toUpperCase();
+    }
+
+    function setPickedSwatchColour(colour) {
+      pickedColorSwatch.style.background = isTransparentColourValue(colour) ? "" : colour;
+    }
+
+    function isCanvasBackgroundEnabled() {
+      return canvasBackgroundToggle.checked;
+    }
+
+    function getCanvasBackgroundColor() {
+      return getColourFromInputs(canvasBackgroundColorInput, canvasBackgroundTransparentInput);
+    }
+
+    function fillCanvasBackground(context, width, height) {
+      if (!isCanvasBackgroundEnabled()) return;
+
+      const backgroundColour = getCanvasBackgroundColor();
+      if (isTransparentColourValue(backgroundColour)) return;
+
+      context.fillStyle = backgroundColour;
+      context.fillRect(0, 0, width, height);
+    }
+
+    function startColorPickForTarget(targetValue) {
+      if (!originalImage) return;
+      pickTargetInput.value = targetValue;
+      setColorPickMode(true);
+    }
+
+    function toggleColorPickMode() {
+      if (!originalImage) return;
+      setColorPickMode(!isColorPickMode);
+    }
+
+    function setColorPickMode(isActive) {
+      isColorPickMode = isActive;
+      const activeTarget = pickTargetInput.value;
+      colourDropperButtons.forEach(button => button.classList.remove("is-active"));
+
+      if (isActive) {
+        startColorPickBtn.classList.add("is-active");
+        if (activeTarget === "colorA") pickColorABtn.classList.add("is-active");
+        if (activeTarget === "colorB") pickColorBBtn.classList.add("is-active");
+        if (activeTarget === "canvasBackgroundColor") pickCanvasBackgroundBtn.classList.add("is-active");
+        startColorPickBtn.title = "Cancel colour pick";
+        startColorPickBtn.setAttribute("aria-label", "Cancel colour pick");
+      } else {
+        startColorPickBtn.title = "Pick selected colour from preview";
+        startColorPickBtn.setAttribute("aria-label", "Pick selected colour from preview");
+      }
+
+      canvas.classList.toggle("is-picking", isActive);
+
+      if (isActive) {
+        status.textContent = `Pick ${getPickTargetLabel()}: click the live canvas. Esc cancels.`;
+      }
+    }
+
+    function pickColorFromCropPreview(event) {
+      if (!isColorPickMode || !originalImage) return;
+
+      event.preventDefault();
+      const point = getCropPoint(event);
+      const sourceX = Math.floor((point.x - cropState.offsetX) / cropState.scale);
+      const sourceY = Math.floor((point.y - cropState.offsetY) / cropState.scale);
+
+      if (
+        sourceX < 0 ||
+        sourceY < 0 ||
+        sourceX >= originalImage.naturalWidth ||
+        sourceY >= originalImage.naturalHeight
+      ) {
+        status.textContent = "That spot is outside the uploaded image. Click on the image itself, or use the dashed preview to sample the final canvas/background.";
+        return;
+      }
+
+      const colour = sampleOriginalImagePixel(sourceX, sourceY);
+      if (colour) applyPickedColor(colour);
+    }
+
+    function pickColorFromDashedPreview(event) {
+      if (!isColorPickMode || !originalImage) return;
+
+      event.preventDefault();
+      const colour = sampleCanvasPixel(canvas, ctx, event);
+      if (colour) applyPickedColor(colour);
+    }
+
+    function sampleOriginalImagePixel(sourceX, sourceY) {
+      sampleCtx.clearRect(0, 0, 1, 1);
+      sampleCtx.drawImage(originalImage, sourceX, sourceY, 1, 1, 0, 0, 1, 1);
+      const [red, green, blue, alpha] = sampleCtx.getImageData(0, 0, 1, 1).data;
+
+      if (alpha === 0) {
+        return "transparent";
+      }
+
+      return rgbToHex(red, green, blue);
+    }
+
+    function sampleCanvasPixel(sourceCanvas, sourceCtx, event) {
+      const rect = sourceCanvas.getBoundingClientRect();
+      const x = Math.floor((event.clientX - rect.left) * sourceCanvas.width / rect.width);
+      const y = Math.floor((event.clientY - rect.top) * sourceCanvas.height / rect.height);
+
+      if (x < 0 || y < 0 || x >= sourceCanvas.width || y >= sourceCanvas.height) {
+        return null;
+      }
+
+      const [red, green, blue, alpha] = sourceCtx.getImageData(x, y, 1, 1).data;
+
+      if (alpha === 0) {
+        return "transparent";
+      }
+
+      return rgbToHex(red, green, blue);
+    }
+
+    function rgbToHex(red, green, blue) {
+      return `#${[red, green, blue]
+        .map(value => value.toString(16).padStart(2, "0"))
+        .join("")}`;
+    }
+
+    function applyPickedColor(colour) {
+      const targetInput = getPickTargetInput();
+      const targetTransparentInput = getPickTargetTransparentInput();
+      if (!targetInput || !targetTransparentInput) return;
+
+      if (targetInput === canvasBackgroundColorInput) {
+        canvasBackgroundToggle.checked = true;
+      }
+
+      setColourOnInputs(targetInput, targetTransparentInput, colour);
+      setPickedSwatchColour(colour);
+      pickedColorValue.textContent = `Picked ${formatColourForDisplay(colour)} for ${getPickTargetLabel()}.`;
+      setColorPickMode(false);
+      updateEditedPreviewAndOutput();
+    }
+
+    function getPickTargetInput() {
+      if (pickTargetInput.value === "colorA") return colorAInput;
+      if (pickTargetInput.value === "colorB") return colorBInput;
+      return canvasBackgroundColorInput;
+    }
+
+    function getPickTargetTransparentInput() {
+      if (pickTargetInput.value === "colorA") return colorATransparentInput;
+      if (pickTargetInput.value === "colorB") return colorBTransparentInput;
+      return canvasBackgroundTransparentInput;
+    }
+
+    function getPickTargetLabel() {
+      if (pickTargetInput.value === "colorA") return "dash colour A";
+      if (pickTargetInput.value === "colorB") return "dash colour B";
+      return "canvas background colour";
+    }
+
+    function handleCropSizeInput() {
+      if (!originalImage) return;
+
+      const nextSize = readCropSizeInputs();
+      if (!nextSize) return;
+
+      const oldWidth = cropState.width;
+      const oldHeight = cropState.height;
+      const imageAnchorX = (oldWidth / 2 - cropState.offsetX) / cropState.scale;
+      const imageAnchorY = (oldHeight / 2 - cropState.offsetY) / cropState.scale;
+
+      cropState.width = nextSize.width;
+      cropState.height = nextSize.height;
+      hasUserChangedCropSize = true;
+      sessionCropWidth = cropState.width;
+      sessionCropHeight = cropState.height;
+      cropState.offsetX = cropState.width / 2 - imageAnchorX * cropState.scale;
+      cropState.offsetY = cropState.height / 2 - imageAnchorY * cropState.scale;
+
+      cropWidthInput.value = cropState.width;
+      cropHeightInput.value = cropState.height;
+      updateEditedPreviewAndOutput();
+    }
+
+    function readCropSizeInputs() {
+      const width = Math.floor(Number(cropWidthInput.value));
+      const height = Math.floor(Number(cropHeightInput.value));
+
+      if (!Number.isFinite(width) || !Number.isFinite(height) || width < 1 || height < 1) {
+        return null;
+      }
+
+      return {
+        width: Math.min(MAX_CANVAS_SIZE, width),
+        height: Math.min(MAX_CANVAS_SIZE, height)
+      };
+    }
+
+    function handleScaleInput() {
+      if (!originalImage) return;
+
+      const nextScale = Number(imageScaleInput.value) / 100;
+      setImageScale(nextScale, cropState.width / 2, cropState.height / 2);
+      updateEditedPreviewAndOutput();
+    }
+
+    function setImageFit(mode) {
+      if (!originalImage) return;
+
+      const fitScale = Math.min(
+        cropState.width / originalImage.naturalWidth,
+        cropState.height / originalImage.naturalHeight
+      );
+      const fillScale = Math.max(
+        cropState.width / originalImage.naturalWidth,
+        cropState.height / originalImage.naturalHeight
+      );
+
+      cropState.scale = mode === "fill" ? fillScale : fitScale;
+      centerImage();
+      syncScaleControl();
+      updateEditedPreviewAndOutput();
+    }
+
+    function centerImage() {
+      if (!originalImage) return;
+
+      cropState.offsetX = (cropState.width - originalImage.naturalWidth * cropState.scale) / 2;
+      cropState.offsetY = (cropState.height - originalImage.naturalHeight * cropState.scale) / 2;
+    }
+
+    function resetCrop() {
+      if (!originalImage) return;
+
+      initializeCrop();
+      updateEditedPreviewAndOutput();
+    }
+
+    function setImageScale(nextScale, anchorX, anchorY) {
+      const oldScale = cropState.scale || 1;
+      const scale = Math.min(80, Math.max(0.01, nextScale));
+      const imageAnchorX = (anchorX - cropState.offsetX) / oldScale;
+      const imageAnchorY = (anchorY - cropState.offsetY) / oldScale;
+
+      cropState.scale = scale;
+      cropState.offsetX = anchorX - imageAnchorX * scale;
+      cropState.offsetY = anchorY - imageAnchorY * scale;
+      syncScaleControl();
+    }
+
+    function syncScaleControl() {
+      const percent = Math.max(1, Math.round(cropState.scale * 100));
+      imageScaleInput.max = String(Math.max(800, percent));
+      imageScaleInput.value = String(percent);
+      scaleValue.textContent = `${percent}%`;
+    }
+
+    function updateEditedPreviewAndOutput() {
+      syncCropModeUi();
+      render();
+    }
+
+    function drawCropPreview() {
+      render();
+    }
+
+    function drawFixedCropGuides(imageX = currentOutputPadding, imageY = currentOutputPadding) {
+      const guideWidth = Math.max(1, Math.min(4, Math.round(Math.min(cropState.width, cropState.height) / 90)));
+      const borderInset = Math.min(guideWidth / 2, cropState.width / 2, cropState.height / 2);
+
+      ctx.save();
+      ctx.translate(imageX, imageY);
+      ctx.beginPath();
+      ctx.moveTo(cropState.width / 3, 0);
+      ctx.lineTo(cropState.width / 3, cropState.height);
+      ctx.moveTo(cropState.width * 2 / 3, 0);
+      ctx.lineTo(cropState.width * 2 / 3, cropState.height);
+      ctx.moveTo(0, cropState.height / 3);
+      ctx.lineTo(cropState.width, cropState.height / 3);
+      ctx.moveTo(0, cropState.height * 2 / 3);
+      ctx.lineTo(cropState.width, cropState.height * 2 / 3);
+      ctx.lineWidth = guideWidth * 2;
+      ctx.strokeStyle = "rgba(20, 3, 6, 0.65)";
+      ctx.stroke();
+      ctx.lineWidth = guideWidth;
+      ctx.strokeStyle = "rgba(255, 246, 216, 0.95)";
+      ctx.stroke();
+
+      ctx.lineWidth = guideWidth * 2;
+      ctx.strokeStyle = "rgba(20, 3, 6, 0.88)";
+      ctx.strokeRect(
+        borderInset,
+        borderInset,
+        Math.max(0, cropState.width - borderInset * 2),
+        Math.max(0, cropState.height - borderInset * 2)
+      );
+      ctx.restore();
+    }
+
+    function getCanvasPoint(event) {
+      const rect = canvas.getBoundingClientRect();
+
+      return {
+        x: (event.clientX - rect.left) * canvas.width / rect.width,
+        y: (event.clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+
+    function getCropPoint(event) {
+      const point = getCanvasPoint(event);
+
+      return {
+        x: point.x - currentOutputPadding,
+        y: point.y - currentOutputPadding
+      };
+    }
+
+    function isPointInsideCropRect(event) {
+      const point = getCropPoint(event);
+      return point.x >= 0 && point.y >= 0 && point.x <= cropState.width && point.y <= cropState.height;
+    }
+
+    function startCropDrag(event) {
+      if (!originalImage || isColorPickMode || !isPointInsideCropRect(event)) return;
+
+      const point = getCropPoint(event);
+      cropState.dragging = true;
+      cropState.pointerId = event.pointerId;
+      cropState.lastX = point.x;
+      cropState.lastY = point.y;
+      canvas.classList.add("is-dragging");
+      canvas.setPointerCapture(event.pointerId);
+    }
+
+    function dragCropImage(event) {
+      if (!cropState.dragging || cropState.pointerId !== event.pointerId) return;
+
+      const point = getCropPoint(event);
+      cropState.offsetX += point.x - cropState.lastX;
+      cropState.offsetY += point.y - cropState.lastY;
+      cropState.lastX = point.x;
+      cropState.lastY = point.y;
+
+      updateEditedPreviewAndOutput();
+    }
+
+    function endCropDrag(event) {
+      if (cropState.pointerId !== event.pointerId) return;
+
+      if (canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+
+      cropState.dragging = false;
+      cropState.pointerId = null;
+      canvas.classList.remove("is-dragging");
+      scheduleCropGuideHide();
+    }
+
+    function zoomCropImage(event) {
+      if (!originalImage || !fixedCropToggle.checked || isColorPickMode) return;
+
+      event.preventDefault();
+      const point = getCropPoint(event);
+      const zoomFactor = Math.exp(-event.deltaY * 0.001);
+      setImageScale(cropState.scale * zoomFactor, point.x, point.y);
+      updateEditedPreviewAndOutput();
+    }
+
+    function buildEditedImage() {
+      editedCanvas.width = cropState.width;
+      editedCanvas.height = cropState.height;
+      editedCtx.clearRect(0, 0, editedCanvas.width, editedCanvas.height);
+      fillCanvasBackground(editedCtx, editedCanvas.width, editedCanvas.height);
+      editedCtx.imageSmoothingEnabled = true;
+      editedCtx.imageSmoothingQuality = "high";
+      editedCtx.drawImage(
+        originalImage,
+        cropState.offsetX,
+        cropState.offsetY,
+        originalImage.naturalWidth * cropState.scale,
+        originalImage.naturalHeight * cropState.scale
+      );
+
+      return editedCanvas;
+    }
+
+    function getDashSource() {
+      const editedImage = buildEditedImage();
+
+      return {
+        image: editedImage,
+        width: editedImage.width,
+        height: editedImage.height,
+        mode: "crop"
+      };
+    }
+
+    function render() {
+      if (!originalImage) return;
+
+      const source = getDashSource();
+      const dashCount = Math.max(1, Math.floor(Number(dashCountInput.value) || 1));
+      const lineWidth = Math.max(1, Math.floor(Number(lineWidthInput.value) || 1));
+      const colorA = getColourFromInputs(colorAInput, colorATransparentInput);
+      const colorB = getColourFromInputs(colorBInput, colorBTransparentInput);
+
+      // Allow negative inset.
+      const extraInset = Math.floor(Number(insetInput.value) || 0);
+
+      const selectedSides = sidesInput.value;
+
+      // If inset is negative, expand the canvas so the outside border is included.
+      const outsidePadding = Math.max(0, -extraInset);
+      currentOutputPadding = outsidePadding;
+
+      canvas.width = source.width + outsidePadding * 2;
+      canvas.height = source.height + outsidePadding * 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      fillCanvasBackground(ctx, canvas.width, canvas.height);
+
+      // Draw the current source centered inside the expanded canvas.
+      ctx.drawImage(source.image, outsidePadding, outsidePadding);
+
+      const didDrawBorder = drawInsideAlternatingBorder({
+        dashCount,
+        lineWidth,
+        colorA,
+        colorB,
+        extraInset,
+        selectedSides,
+        imageX: outsidePadding,
+        imageY: outsidePadding,
+        imageWidth: source.width,
+        imageHeight: source.height
+      });
+
+      if (!didDrawBorder) return;
+
+      if (showCropGuides) {
+        drawFixedCropGuides(outsidePadding, outsidePadding);
+      }
+
+      status.textContent = `${source.width} x ${source.height}px crop, ${canvas.width} x ${canvas.height}px export.`;
+
+      if (outsidePadding > 0) {
+        status.textContent += isCanvasBackgroundEnabled() && !isTransparentColourValue(getCanvasBackgroundColor())
+          ? " Negative inset added background-coloured padding."
+          : " Negative inset added transparent padding.";
+      }
+
+      if (isCanvasBackgroundEnabled()) {
+        status.textContent += ` Canvas background: ${formatColourForDisplay(getCanvasBackgroundColor())}.`;
+      }
+    }
+
+    function shouldDrawSide(selectedSides, side) {
+      if (selectedSides === "all") return true;
+      if (selectedSides === side) return true;
+      if (selectedSides === "top-bottom" && (side === "top" || side === "bottom")) return true;
+      if (selectedSides === "left-right" && (side === "left" || side === "right")) return true;
+      return false;
+    }
+
+    function drawInsideAlternatingBorder(options) {
+      const {
+        dashCount,
+        lineWidth,
+        colorA,
+        colorB,
+        extraInset,
+        selectedSides,
+        imageX,
+        imageY,
+        imageWidth,
+        imageHeight
+      } = options;
+
+      const half = lineWidth / 2;
+
+      const x1 = imageX + extraInset + half;
+      const y1 = imageY + extraInset + half;
+      const x2 = imageX + imageWidth - extraInset - half;
+      const y2 = imageY + imageHeight - extraInset - half;
+
+      if (x2 <= x1 || y2 <= y1) {
+        status.textContent = "The line is too thick or inset too far for this image.";
+        return false;
+      }
+
+      const pathSegments = [];
+
+      if (shouldDrawSide(selectedSides, "top")) {
+        pathSegments.push(makeSegment(x1, y1, x2, y1, "horizontal"));
+      }
+
+      if (shouldDrawSide(selectedSides, "right")) {
+        pathSegments.push(makeSegment(x2, y1, x2, y2, "vertical"));
+      }
+
+      if (shouldDrawSide(selectedSides, "bottom")) {
+        pathSegments.push(makeSegment(x2, y2, x1, y2, "horizontal"));
+      }
+
+      if (shouldDrawSide(selectedSides, "left")) {
+        pathSegments.push(makeSegment(x1, y2, x1, y1, "vertical"));
+      }
+
+      if (pathSegments.length === 0) return false;
+
+      const totalLength = pathSegments.reduce((sum, segment) => sum + segment.length, 0);
+      if (totalLength <= 0) return false;
+
+      const dashLength = totalLength / dashCount;
+
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.clip();
+
+      for (let i = 0; i < dashCount; i++) {
+        const dashStart = i * dashLength;
+        const dashEnd = i === dashCount - 1
+          ? totalLength
+          : (i + 1) * dashLength;
+
+        const dashColour = i % 2 === 0 ? colorA : colorB;
+        if (isTransparentColourValue(dashColour)) continue;
+
+        ctx.fillStyle = dashColour;
+
+        drawFilledIntervalAlongPath({
+          pathSegments,
+          intervalStart: dashStart,
+          intervalEnd: dashEnd,
+          lineWidth
+        });
+      }
+
+      ctx.restore();
+      return true;
+    }
+
+    function makeSegment(x1, y1, x2, y2, orientation) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const length = Math.hypot(dx, dy);
+
+      return {
+        x1,
+        y1,
+        x2,
+        y2,
+        length,
+        ux: dx / length,
+        uy: dy / length,
+        orientation
+      };
+    }
+
+    function drawFilledIntervalAlongPath(options) {
+      const {
+        pathSegments,
+        intervalStart,
+        intervalEnd,
+        lineWidth
+      } = options;
+
+      const half = lineWidth / 2;
+      const tinyOverlap = 0.05;
+      let travelled = 0;
+
+      for (const segment of pathSegments) {
+        const segmentStart = travelled;
+        const segmentEnd = travelled + segment.length;
+
+        const overlapStart = Math.max(intervalStart, segmentStart);
+        const overlapEnd = Math.min(intervalEnd, segmentEnd);
+
+        if (overlapEnd > overlapStart) {
+          let localStart = overlapStart - segmentStart;
+          let localEnd = overlapEnd - segmentStart;
+
+          // Tiny overlap avoids subpixel hairline cracks between alternating colours.
+          localStart -= tinyOverlap;
+          localEnd += tinyOverlap;
+
+          // When a coloured section reaches the end of a side, extend it by half
+          // the line width into the corner square to avoid corner holes.
+          if (overlapStart <= segmentStart + tinyOverlap) {
+            localStart = -half;
+          }
+
+          if (overlapEnd >= segmentEnd - tinyOverlap) {
+            localEnd = segment.length + half;
+          }
+
+          fillSegmentRectangle(segment, localStart, localEnd, lineWidth);
+        }
+
+        travelled = segmentEnd;
+
+        if (travelled >= intervalEnd) break;
+      }
+    }
+
+    function fillSegmentRectangle(segment, localStart, localEnd, lineWidth) {
+      const half = lineWidth / 2;
+
+      const ax = segment.x1 + segment.ux * localStart;
+      const ay = segment.y1 + segment.uy * localStart;
+      const bx = segment.x1 + segment.ux * localEnd;
+      const by = segment.y1 + segment.uy * localEnd;
+
+      if (segment.orientation === "horizontal") {
+        const x = Math.min(ax, bx);
+        const y = segment.y1 - half;
+        const width = Math.abs(bx - ax);
+        const height = lineWidth;
+
+        ctx.fillRect(x, y, width, height);
+      } else {
+        const x = segment.x1 - half;
+        const y = Math.min(ay, by);
+        const width = lineWidth;
+        const height = Math.abs(by - ay);
+
+        ctx.fillRect(x, y, width, height);
+      }
+    }
+
+    function downloadPng() {
+      if (!originalImage) return;
+
+      const guidesWereVisible = showCropGuides;
+      showCropGuides = false;
+      render();
+
+      const link = document.createElement("a");
+      link.download = originalFileName;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      showCropGuides = guidesWereVisible;
+      if (showCropGuides) render();
+    }
+  </script>
+</body>
+
+</html>
