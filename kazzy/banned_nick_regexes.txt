@@ -1,0 +1,8 @@
+\d
+(ph|f)[a@]g[s\$]?
+(ph|f)[a@]gg[i1]ng
+(ph|f)[a@]gg?[o0][t\+][s\$]?
+(ph|f)[a@]gg[s\$]
+n[i1]+[g5]+[a4]+
+n[i1]+[g5]+[e3]+r
+[t7]r+[a4]+n+y

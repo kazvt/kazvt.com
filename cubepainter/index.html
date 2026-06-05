@@ -1,0 +1,4348 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CubePaint</title>
+
+    <style>
+        :root {
+            --paper: #fff6d8;
+            --paper2: #efe0b8;
+            --paper3: #dfc995;
+            --ink: #140306;
+            --ink2: #2a070c;
+            --accent: #9d3d2c;
+            --line: #140306;
+            --shadow: rgba(20, 3, 6, 0.35);
+            --checker1: #ead9ad;
+            --checker2: #fff6d8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .app {
+            height: 100vh;
+            display: grid;
+            grid-template-rows: 42px 1fr;
+            background: var(--paper);
+        }
+
+        .top {
+            border-bottom: 3px solid var(--line);
+            background: var(--ink);
+            color: var(--paper);
+            display: grid;
+            grid-template-columns: auto minmax(220px, 360px) minmax(140px, 220px) auto 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 0 12px;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+        }
+
+        .brand {
+            white-space: nowrap;
+        }
+
+        .shape-fader,
+        .poly-fader {
+            min-width: 0;
+            height: 28px;
+            border: 2px solid var(--paper);
+            border-radius: 999px;
+            display: grid;
+            gap: 8px;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 11px;
+            background: rgba(255, 246, 216, 0.08);
+        }
+
+        .shape-fader {
+            grid-template-columns: 88px 1fr;
+        }
+
+        .poly-fader {
+            grid-template-columns: 42px 1fr 34px;
+        }
+
+        .shape-fader input[type="range"],
+        .poly-fader input[type="range"] {
+            width: 100%;
+            accent-color: var(--paper);
+        }
+
+        .shape-fader span,
+        .poly-fader span,
+        .poly-fader strong {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .poly-fader strong {
+            font-size: 10px;
+            text-align: right;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .top-center {
+            border: 2px solid var(--paper);
+            border-radius: 999px;
+            padding: 3px 14px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status {
+            justify-self: end;
+            font-size: 12px;
+            opacity: 0.85;
+            white-space: nowrap;
+        }
+
+        main {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 430px minmax(360px, 1fr) 220px;
+            gap: 8px;
+            padding: 8px;
+        }
+
+        .panel {
+            min-width: 0;
+            min-height: 0;
+            border: 3px solid var(--line);
+            background: var(--paper2);
+            display: grid;
+            grid-template-rows: 34px 1fr;
+            box-shadow: 0 5px 0 var(--ink);
+            overflow: hidden;
+        }
+
+        .head {
+            background: var(--paper);
+            border-bottom: 3px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 9px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+        }
+
+        .head-title {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .draw-body {
+            min-height: 0;
+            display: grid;
+            grid-template-rows: 1fr auto;
+        }
+
+        .canvas-wrap {
+            min-height: 0;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            display: grid;
+            place-items: center;
+            align-self: center;
+            justify-self: center;
+            position: relative;
+            background:
+                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+                var(--checker2);
+            background-size: 22px 22px;
+            background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+        }
+
+        .canvas-stack {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            aspect-ratio: 1 / 1;
+        }
+
+        #paintCanvas,
+        #guideCanvas {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            display: block;
+        }
+
+        #paintCanvas {
+            position: absolute;
+            inset: 0;
+            border: 3px solid var(--line);
+            background: transparent;
+            cursor: none;
+            touch-action: none;
+            box-shadow: 0 4px 0 var(--ink);
+            z-index: 1;
+        }
+
+        #guideCanvas {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .toolbar {
+            border-top: 3px solid var(--line);
+            background: var(--paper);
+            padding: 8px;
+            display: grid;
+            gap: 7px;
+        }
+
+        .tools {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+        }
+
+        .controls {
+            display: grid;
+            gap: 7px;
+            align-items: stretch;
+        }
+
+        .color-picker-shell {
+            position: relative;
+            z-index: 20;
+        }
+
+        .color-row {
+            display: flex;
+            align-items: stretch;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .color-row .color-picker-toggle {
+            flex: 1 1 50%;
+            min-width: 50%;
+        }
+
+        .quick-color-history {
+            flex: 0 0 auto;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 36px;
+            gap: 6px;
+            align-items: stretch;
+        }
+
+        .quick-swatch {
+            width: 36px;
+            height: 36px;
+            aspect-ratio: 1 / 1;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--ink);
+            padding: 0;
+        }
+
+        .quick-swatch:hover,
+        .quick-swatch.active {
+            outline: 2px solid var(--paper);
+            outline-offset: -5px;
+        }
+
+        .quick-swatch:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .color-picker-toggle {
+            width: 100%;
+            height: 36px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            display: grid;
+            grid-template-columns: 38px 1fr auto;
+            gap: 7px;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--ink);
+            font-weight: 900;
+            font-size: 12px;
+            padding: 0 8px;
+            text-align: left;
+        }
+
+        .color-picker-toggle:hover {
+            background: var(--paper);
+        }
+
+        .color-picker-toggle:active,
+        .color-picker-toggle.open {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .color-picker-chip {
+            height: 22px;
+            border: 2px solid var(--line);
+            background: var(--ink);
+        }
+
+        .color-picker-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: calc(100% + 8px);
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            box-shadow: 0 5px 0 var(--ink);
+            padding: 6px;
+            display: none;
+            gap: 7px;
+        }
+
+        .color-picker-panel.open {
+            display: grid;
+        }
+
+        .color-picker-main {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 22px 96px;
+            gap: 7px;
+            align-items: stretch;
+        }
+
+        #colorSquare,
+        #hueSlider {
+            display: block;
+            border: 2px solid var(--line);
+            background: var(--paper);
+            box-shadow: 0 3px 0 var(--ink);
+            image-rendering: pixelated;
+            touch-action: none;
+        }
+
+        #colorSquare {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            cursor: crosshair;
+        }
+
+        #hueSlider {
+            width: 22px;
+            height: 100%;
+            cursor: ns-resize;
+        }
+
+        .color-picker-meta {
+            display: grid;
+            gap: 6px;
+            align-content: start;
+        }
+
+        .color-swatch {
+            height: 38px;
+            border: 2px solid var(--line);
+            box-shadow: 0 3px 0 var(--ink);
+            background: var(--ink);
+        }
+
+        .color-readout {
+            border: 2px solid var(--line);
+            background: var(--paper);
+            box-shadow: 0 3px 0 var(--ink);
+            padding: 4px 6px;
+            display: grid;
+            gap: 2px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+        .color-readout span {
+            opacity: 0.75;
+        }
+
+        #colorHexReadout {
+            font-size: 12px;
+        }
+
+        .color-history {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 5px;
+            align-items: start;
+        }
+
+        .history-swatch {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            min-height: 16px;
+            border: 2px solid var(--line);
+            background: var(--paper);
+            cursor: pointer;
+            box-shadow: 0 2px 0 var(--ink);
+        }
+
+        .history-swatch:hover,
+        .history-swatch.active {
+            outline: 2px solid var(--paper);
+            outline-offset: -4px;
+        }
+
+        .history-swatch:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .size-row,
+        .tiling-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 7px;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .copy-paste {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 6px;
+        }
+
+        .btn,
+        .file-btn {
+            height: 34px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--ink);
+            font-weight: 900;
+            font-size: 12px;
+            user-select: none;
+            padding: 0 8px;
+        }
+
+        .btn:hover,
+        .file-btn:hover {
+            background: var(--paper);
+        }
+
+        .btn:active,
+        .file-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .btn.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .btn.accent {
+            background: var(--accent);
+            color: var(--paper);
+        }
+
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .btn svg,
+        .file-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .map-mode-btn {
+            width: 28px;
+            height: 24px;
+            min-width: 0;
+            padding: 0;
+            box-shadow: 0 2px 0 var(--ink);
+        }
+
+        .map-mode-btn[hidden] {
+            display: none;
+        }
+
+        .map-mode-btn svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .map-mode-btn .map-icon-fit {
+            display: none;
+        }
+
+        .map-mode-btn[data-mode="fit"] .map-icon-full {
+            display: none;
+        }
+
+        .map-mode-btn[data-mode="fit"] .map-icon-fit {
+            display: block;
+        }
+
+        #undoBtn svg,
+        #redoBtn svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 34px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            padding: 2px;
+            box-shadow: 0 3px 0 var(--ink);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--ink);
+        }
+
+        .view-body {
+            min-height: 0;
+            display: grid;
+            grid-template-rows: 1fr auto;
+        }
+
+        #cubeStage {
+            min-height: 0;
+            position: relative;
+            background: var(--ink);
+            overflow: hidden;
+        }
+
+        #cubeStage canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .webgl-fallback {
+            height: 100%;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            color: var(--paper);
+            background: var(--ink);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1.6;
+        }
+
+        .view-help {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            color: var(--paper);
+            background: rgba(20, 3, 6, 0.72);
+            border: 2px solid var(--paper);
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 900;
+            pointer-events: none;
+        }
+
+        .preview-debug {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 5;
+            min-width: 190px;
+            max-width: min(310px, calc(100% - 20px));
+            margin: 0;
+            padding: 8px;
+            border: 2px solid var(--paper);
+            background: rgba(20, 3, 6, 0.82);
+            color: var(--paper);
+            box-shadow: 0 3px 0 rgba(255, 246, 216, 0.32);
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1.45;
+            letter-spacing: 0.03em;
+            pointer-events: none;
+            white-space: pre-wrap;
+        }
+
+        .export {
+            border-top: 3px solid var(--line);
+            background: var(--paper);
+            padding: 8px;
+            display: grid;
+            gap: 7px;
+        }
+
+        .export-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr) 58px 58px 58px;
+            gap: 6px;
+            align-items: end;
+        }
+
+        .field {
+            display: grid;
+            gap: 2px;
+        }
+
+        .field span {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            height: 32px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            font-weight: 900;
+            padding: 0 5px;
+            box-shadow: 0 3px 0 var(--ink);
+        }
+
+        #result {
+            min-height: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        #result a {
+            color: var(--ink);
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        .faces-body {
+            min-height: 0;
+            display: grid;
+            grid-template-rows: 1fr auto;
+        }
+
+        .face-list {
+            overflow: auto;
+            padding: 7px;
+            display: grid;
+            align-content: start;
+            gap: 7px;
+        }
+
+        .face-card {
+            border: 2px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 7px;
+            align-items: center;
+            padding: 5px;
+            cursor: pointer;
+            text-align: left;
+            box-shadow: 0 3px 0 var(--ink);
+        }
+
+        .face-card.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .face-card canvas {
+            width: 48px;
+            height: 48px;
+            border: 2px solid currentColor;
+            background:
+                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+                var(--checker2);
+            background-size: 12px 12px;
+            background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+        }
+
+        .face-name {
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        .face-file {
+            max-width: 125px;
+            font-size: 10px;
+            opacity: 0.75;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .face-tile {
+            margin-top: 2px;
+            font-size: 10px;
+            font-weight: 900;
+            opacity: 0.85;
+        }
+
+        .small-note {
+            border-top: 3px solid var(--line);
+            padding: 8px;
+            background: var(--paper);
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        @media (max-width: 1000px) {
+            body {
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100vh;
+                grid-template-rows: auto 1fr;
+            }
+
+            .top {
+                grid-template-columns: 1fr auto;
+                row-gap: 7px;
+                padding: 8px 12px;
+            }
+
+            .shape-fader,
+            .poly-fader {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+            .shape-fader {
+                order: 3;
+            }
+
+            .poly-fader {
+                order: 4;
+            }
+
+            .top-center {
+                justify-self: start;
+            }
+
+            .status {
+                grid-column: 2;
+                grid-row: 1;
+            }
+
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                min-height: 420px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="top">
+            <div class="brand">CUBEPAINT</div>
+            <div class="shape-fader" title="shape selector">
+                <span id="shapeNameReadout">CUBE</span>
+                <input id="shapeSlider" type="range" min="0" max="0" step="1" value="0" aria-label="shape selector" />
+            </div>
+            <div class="poly-fader" id="polyFader" title="low-poly control" hidden>
+                <span>POLY</span>
+                <input id="polySlider" type="range" min="0" max="5" step="1" value="5" aria-label="low-poly amount" />
+                <strong id="polyReadout">STD</strong>
+            </div>
+            <div class="top-center" id="activeFaceTitle">FRONT</div>
+            <div class="status" id="status">READY</div>
+        </header>
+
+        <main>
+            <section class="panel">
+                <div class="head">
+                    <div class="head-title">
+                        <span>CANVAS</span>
+                        <button class="btn map-mode-btn" id="mapModeBtn" type="button" data-mode="whole"
+                            title="Whole Shape mode" aria-label="Whole Shape mode" hidden>
+                            <svg class="map-icon-full" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="4" y="4" width="16" height="16" rx="1" />
+                                <path d="M8 4H4v4" />
+                                <path d="M16 4h4v4" />
+                                <path d="M20 16v4h-4" />
+                                <path d="M4 16v4h4" />
+                            </svg>
+                            <svg class="map-icon-fit" viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="4" y="4" width="16" height="16" rx="1" />
+                                <path d="M12 6l7 12H5z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <span id="brushReadout">8PX</span>
+                </div>
+
+                <div class="draw-body">
+                    <div class="canvas-wrap">
+                        <div class="canvas-stack">
+                            <canvas id="paintCanvas" width="512" height="512"></canvas>
+                            <canvas id="guideCanvas" width="512" height="512" aria-hidden="true"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="tools">
+                            <button class="btn active" id="pencilBtn" title="pencil">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 20l4-1 11-11-3-3L5 16z" />
+                                    <path d="M14 6l3 3" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="eraserBtn" title="eraser">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 15l8-8 8 8-5 5H9z" />
+                                    <path d="M9 20h11" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="lineBtn" title="line">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 19L19 5" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="rectBtn" title="rectangle">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="5" y="6" width="14" height="12" rx="1" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="circleBtn" title="circle">
+                                <svg viewBox="0 0 24 24">
+                                    <ellipse cx="12" cy="12" rx="7" ry="6" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="fillBtn" title="fill">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 13l7-7 7 7-7 7z" />
+                                    <path d="M19 15c2 2 2 4 0 4s-2-2 0-4z" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="undoBtn" title="undo">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M9 14 4 9l5-5" />
+                                    <path d="M4 9h10.5A5.5 5.5 0 0 1 20 14.5v0A5.5 5.5 0 0 1 14.5 20H11" />
+                                </svg>
+                            </button>
+
+                            <button class="btn" id="redoBtn" title="redo">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="m15 14 5-5-5-5" />
+                                    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="controls">
+                            <div class="color-picker-shell" id="colorPickerShell">
+                                <div class="color-row">
+                                    <button class="color-picker-toggle" id="colorPickerToggle" type="button"
+                                        title="open color picker">
+                                        <span class="color-picker-chip" id="colorPickerChip"></span>
+                                        <span id="colorToggleText">#140306</span>
+                                        <span>▴</span>
+                                    </button>
+                                    <div class="quick-color-history" id="quickColorHistory"
+                                        aria-label="quick color history"></div>
+                                </div>
+
+                                <div class="color-picker-panel" id="colorPickerPanel">
+                                    <div class="color-picker-main">
+                                        <canvas id="colorSquare" width="112" height="112"
+                                            title="saturation and brightness"></canvas>
+                                        <canvas id="hueSlider" width="22" height="112" title="hue"></canvas>
+
+                                        <div class="color-picker-meta">
+                                            <div class="color-swatch" id="colorSwatch"></div>
+                                            <div class="color-readout">
+                                                <span>COLOR</span>
+                                                <div id="colorHexReadout">#140306</div>
+                                            </div>
+                                            <div class="color-history" id="colorHistory" aria-label="color history">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="size-row">
+                                <span>BRUSH SIZE</span>
+                                <input id="brushSize" type="range" min="1" max="80" value="8" title="size" />
+                                <span id="sizeMiniReadout">8PX</span>
+                            </div>
+
+                            <div class="tiling-row">
+                                <span>TILING</span>
+                                <input id="tilingSlider" type="range" min="1" max="16" value="1"
+                                    title="selected face tiling" />
+                                <span id="tilingReadout">1×</span>
+                            </div>
+
+                            <input id="brushColor" type="hidden" value="#140306" />
+                        </div>
+
+                        <div class="copy-paste">
+                            <button class="btn" id="copyBtn">COPY</button>
+                            <button class="btn" id="pasteBtn">PASTE</button>
+
+                            <label class="file-btn" for="imageUpload" title="upload">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 4v10" />
+                                    <path d="M8 8l4-4 4 4" />
+                                    <path d="M5 20h14" />
+                                </svg>
+                            </label>
+                            <input id="imageUpload" type="file" accept="image/*" />
+                        </div>
+
+                        <button class="btn accent" id="clearBtn">CLEAR</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="head">
+                    <span>VIEW</span>
+                    <span>DRAG VERTICAL ONLY</span>
+                </div>
+
+                <div class="view-body">
+                    <div id="cubeStage">
+                        <pre class="preview-debug" id="previewDebug" hidden></pre>
+                        <div class="view-help">drag = vertical camera orbit · click face select · wheel zoom</div>
+                    </div>
+
+                    <div class="export">
+                        <div class="export-grid">
+                            <div class="field">
+                                <span>SPD</span>
+                                <input id="speed" type="range" min="0" max="3" step="0.05" value="0.6" />
+                            </div>
+
+                            <div class="field">
+                                <span>SIZE</span>
+                                <select id="gifSize">
+                                    <option value="384">384</option>
+                                    <option value="512" selected>512</option>
+                                    <option value="720">720</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <span>FRM</span>
+                                <input id="gifFrames" type="number" min="24" max="180" value="96" />
+                            </div>
+
+                            <div class="field">
+                                <span>FPS</span>
+                                <input id="gifFps" type="number" min="8" max="30" value="24" />
+                            </div>
+
+                            <div class="field">
+                                <span>BG</span>
+                                <input id="bgColor" type="color" value="#140306" />
+                            </div>
+
+                            <button class="btn" id="resetViewBtn" title="reset view">VIEW</button>
+
+                            <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
+
+                            <button class="btn accent" id="exportGifBtn" title="export gif">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 3v12" />
+                                    <path d="M7 10l5 5 5-5" />
+                                    <path d="M5 21h14" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div id="result"></div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="panel">
+                <div class="head">
+                    <span>FACES</span>
+                    <span>SELECT</span>
+                </div>
+
+                <div class="faces-body">
+                    <div class="face-list" id="faceList"></div>
+                    <div class="small-note">COPY STORES CURRENT FACE<br>PASTE OVERWRITES SELECTED FACE<br>BLANK =
+                        transparent</div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
+
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+  }
+}
+</script>
+
+    <script type="module">
+        import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
+
+        const FACE_SIZE = 512;
+        const MAX_UNDO_HISTORY = 40;
+        const BLANK_FILL = "#fff6d8";
+        const HUE_STEPS = 24;
+        const SAT_STEPS = 16;
+        const VALUE_STEPS = 16;
+        const STORAGE_KEY = "cubepaint_session_v4";
+        const COOKIE_KEY = "cubepaint_settings_v4";
+        const DEFAULT_COLOR_HISTORY = ["#140306", "#EFE0B8"];
+        const MAX_USER_COLORS = 20;
+        const MAX_TILING = 16;
+        const DEFAULT_POLY_LEVEL = 5;
+        const POLY_LABELS = ["LOW", "L2", "L3", "L4", "L5", "STD"];
+        const debugging_mode = false;
+
+        const SHAPE_DEFS = [
+            {
+                id: "cube",
+                label: "CUBE",
+                geometry: "box",
+                grouping: "box",
+                faces: ["RIGHT", "LEFT", "TOP", "BOTTOM", "FRONT", "BACK"],
+                slots: { right: "RIGHT", left: "LEFT", top: "TOP", bottom: "BOTTOM", front: "FRONT", back: "BACK" },
+                defaultFace: "FRONT"
+            },
+            {
+                id: "pyramid",
+                label: "PYRAMID",
+                geometry: "pyramid",
+                grouping: "pyramid",
+                faces: ["BASE", "FRONT", "RIGHT", "BACK", "LEFT"],
+                slots: { base: "BASE", bottom: "BASE", front: "FRONT", right: "RIGHT", back: "BACK", left: "LEFT" },
+                defaultFace: "FRONT"
+            },
+            {
+                id: "sphere",
+                label: "SPHERE",
+                geometry: "sphere",
+                grouping: "single",
+                lowPoly: true,
+                faces: ["BODY"],
+                slots: { body: "BODY", surface: "BODY", front: "BODY", right: "BODY", back: "BODY", left: "BODY", top: "BODY", bottom: "BODY" },
+                defaultFace: "BODY"
+            },
+            {
+                id: "cylinder",
+                label: "CYLINDER",
+                geometry: "cylinder",
+                grouping: "cylinder",
+                lowPoly: true,
+                faces: ["TOP", "BODY", "BOTTOM"],
+                slots: { top: "TOP", body: "BODY", front: "BODY", right: "BODY", back: "BODY", left: "BODY", bottom: "BOTTOM" },
+                defaultFace: "BODY"
+            },
+            {
+                id: "cone",
+                label: "CONE",
+                geometry: "cone",
+                grouping: "cone",
+                lowPoly: true,
+                faces: ["BODY", "BASE"],
+                slots: { body: "BODY", front: "BODY", right: "BODY", back: "BODY", left: "BODY", base: "BASE", bottom: "BASE" },
+                defaultFace: "BODY"
+            },
+            {
+                id: "doughnut",
+                label: "DOUGHNUT",
+                geometry: "torus",
+                grouping: "single",
+                lowPoly: true,
+                faces: ["SURFACE"],
+                slots: { surface: "SURFACE", body: "SURFACE", front: "SURFACE", top: "SURFACE", bottom: "SURFACE" },
+                defaultFace: "SURFACE"
+            },
+            {
+                id: "diamond",
+                label: "DIAMOND",
+                geometry: "diamond",
+                grouping: "diamond",
+                faces: ["TOP FRONT", "TOP RIGHT", "TOP BACK", "TOP LEFT", "BOTTOM FRONT", "BOTTOM RIGHT", "BOTTOM BACK", "BOTTOM LEFT"],
+                slots: { topFront: "TOP FRONT", topRight: "TOP RIGHT", topBack: "TOP BACK", topLeft: "TOP LEFT", bottomFront: "BOTTOM FRONT", bottomRight: "BOTTOM RIGHT", bottomBack: "BOTTOM BACK", bottomLeft: "BOTTOM LEFT" },
+                defaultFace: "TOP FRONT"
+            },
+            {
+                id: "tetrahedron",
+                label: "TETRA",
+                geometry: "tetrahedron",
+                grouping: "tetrahedron",
+                faces: ["FRONT", "RIGHT", "LEFT", "BASE"],
+                slots: { front: "FRONT", right: "RIGHT", left: "LEFT", back: "LEFT", base: "BASE", bottom: "BASE" },
+                defaultFace: "FRONT"
+            },
+            {
+                id: "capsule",
+                label: "CAPSULE",
+                geometry: "capsule",
+                grouping: "single",
+                lowPoly: true,
+                faces: ["SURFACE"],
+                slots: { surface: "SURFACE", body: "SURFACE", front: "SURFACE", top: "SURFACE", bottom: "SURFACE" },
+                defaultFace: "SURFACE"
+            },
+            {
+                id: "brick",
+                label: "BRICK",
+                geometry: "brick",
+                grouping: "box",
+                faces: ["RIGHT", "LEFT", "TOP", "BOTTOM", "FRONT", "BACK"],
+                slots: { right: "RIGHT", left: "LEFT", top: "TOP", bottom: "BOTTOM", front: "FRONT", back: "BACK" },
+                defaultFace: "FRONT"
+            }
+        ];
+
+        const paintCanvas = document.getElementById("paintCanvas");
+        const paintCtx = paintCanvas.getContext("2d", { willReadFrequently: true });
+        paintCtx.imageSmoothingEnabled = false;
+        paintCanvas.style.imageRendering = "pixelated";
+        const guideCanvas = document.getElementById("guideCanvas");
+        const guideCtx = guideCanvas.getContext("2d");
+        guideCtx.imageSmoothingEnabled = false;
+        guideCanvas.style.imageRendering = "pixelated";
+
+        const stage = document.getElementById("cubeStage");
+        const canvasWrap = document.querySelector(".canvas-wrap");
+        const drawBody = document.querySelector(".draw-body");
+        const toolbar = document.querySelector(".toolbar");
+        const statusEl = document.getElementById("status");
+        const activeFaceTitle = document.getElementById("activeFaceTitle");
+        const brushReadout = document.getElementById("brushReadout");
+        const faceList = document.getElementById("faceList");
+        const previewDebug = document.getElementById("previewDebug");
+        const shapeSlider = document.getElementById("shapeSlider");
+        const shapeNameReadout = document.getElementById("shapeNameReadout");
+        const polyFader = document.getElementById("polyFader");
+        const polySlider = document.getElementById("polySlider");
+        const polyReadout = document.getElementById("polyReadout");
+
+        const brushColor = document.getElementById("brushColor");
+        const brushSize = document.getElementById("brushSize");
+        const colorSquare = document.getElementById("colorSquare");
+        const colorSquareCtx = colorSquare.getContext("2d", { willReadFrequently: true });
+        const hueSlider = document.getElementById("hueSlider");
+        const hueSliderCtx = hueSlider.getContext("2d", { willReadFrequently: true });
+        const colorSwatch = document.getElementById("colorSwatch");
+        const colorHexReadout = document.getElementById("colorHexReadout");
+        const colorPickerShell = document.getElementById("colorPickerShell");
+        const colorPickerToggle = document.getElementById("colorPickerToggle");
+        const colorPickerPanel = document.getElementById("colorPickerPanel");
+        const colorPickerChip = document.getElementById("colorPickerChip");
+        const colorToggleText = document.getElementById("colorToggleText");
+        const colorHistoryEl = document.getElementById("colorHistory");
+        const quickColorHistoryEl = document.getElementById("quickColorHistory");
+        const sizeMiniReadout = document.getElementById("sizeMiniReadout");
+        const tilingSlider = document.getElementById("tilingSlider");
+        const tilingReadout = document.getElementById("tilingReadout");
+        colorSquareCtx.imageSmoothingEnabled = false;
+        hueSliderCtx.imageSmoothingEnabled = false;
+
+        shapeSlider.max = String(SHAPE_DEFS.length - 1);
+
+        let tool = "pencil";
+        let drawing = false;
+        let brushCursorPoint = null;
+        let brushCursorVisible = false;
+        let last = null;
+        let hueIndex = 0;
+        let satIndex = SAT_STEPS - 1;
+        let valueIndex = VALUE_STEPS - 1;
+        let draggingSquare = false;
+        let draggingHue = false;
+        let shapeStart = null;
+        let shapeSnapshot = null;
+        let copyBuffer = null;
+        let renderer = null;
+        let scene = null;
+        let camera = null;
+        let shapeMesh = null;
+        let materials = [];
+        let textures = [];
+        let webglAvailable = false;
+        let previewDragging = false;
+        let previewDragButton = 0;
+        let previewLast = null;
+        let userIsRotatingPreview = false;
+        let previewPointerStart = null;
+        let previewMoved = false;
+        const DEFAULT_CAMERA_DISTANCE = 6.15;
+        const CAMERA_BASE_VECTOR = new THREE.Vector3(3.4, 2.4, 4.4).normalize();
+        const CAMERA_BASE_ELEVATION = Math.atan2(CAMERA_BASE_VECTOR.y, CAMERA_BASE_VECTOR.z);
+        const CAMERA_VERTICAL_LIMIT = 1.15;
+        let cameraDistance = DEFAULT_CAMERA_DISTANCE;
+        let cameraVerticalOrbit = 0;
+        let cameraPanOffset = new THREE.Vector3(0, 0, 0);
+        let colorHistory = [];
+        let saveTimer = null;
+        let loadingSession = true;
+        let shapeStore = {};
+        let shapeRotations = {};
+        let shapePolyLevels = {};
+        let currentShapeIndex = 0;
+        let currentShapeId = SHAPE_DEFS[0].id;
+        let faces = [];
+        let currentFace = 0;
+        let shadingEnabled = false;
+        let ambientLight = null;
+        let keyLight = null;
+        let fillLight = null;
+
+        const savedSession = loadStoredSession();
+        if (savedSession?.settings?.shadingEnabled != null) {
+            shadingEnabled = savedSession.settings.shadingEnabled === true || savedSession.settings.shadingEnabled === "true";
+        }
+        if (savedSession && savedSession.currentShapeId) {
+            const savedIndex = SHAPE_DEFS.findIndex((shape) => shape.id === savedSession.currentShapeId);
+            if (savedIndex >= 0) {
+                currentShapeIndex = savedIndex;
+                currentShapeId = SHAPE_DEFS[currentShapeIndex].id;
+            }
+        }
+        if (savedSession && savedSession.camera) {
+            cameraDistance = Number(savedSession.camera.distance) || cameraDistance;
+            cameraVerticalOrbit = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, Number(savedSession.camera.verticalOrbit) || 0));
+        }
+        if (savedSession && savedSession.shapeRotations) {
+            shapeRotations = savedSession.shapeRotations;
+        }
+        if (savedSession && savedSession.shapePolyLevels) {
+            shapePolyLevels = savedSession.shapePolyLevels;
+        }
+        if (savedSession && savedSession.currentShapeId === "donut") {
+            currentShapeId = "doughnut";
+            currentShapeIndex = Math.max(0, SHAPE_DEFS.findIndex((shape) => shape.id === "doughnut"));
+        }
+
+        faces = ensureShapeFaces(currentShapeId);
+        currentFace = getShapeStore(currentShapeId).currentFace;
+
+        function getCurrentShapeDef() {
+            return SHAPE_DEFS[currentShapeIndex];
+        }
+
+        function findShapeDef(id) {
+            if (id === "donut") id = "doughnut";
+            return SHAPE_DEFS.find((shape) => shape.id === id) || null;
+        }
+
+        function shapeDefById(id) {
+            return findShapeDef(id) || SHAPE_DEFS[0];
+        }
+
+        function setStatus(text) {
+            statusEl.textContent = text;
+        }
+
+        function normalizeHex(hex, fallback = "#140306") {
+            if (typeof hex !== "string") return fallback;
+            let clean = hex.trim().replace(/^#/, "").toUpperCase();
+            if (/^[0-9A-F]{3}$/.test(clean)) {
+                clean = clean.split("").map((char) => char + char).join("");
+            }
+            if (!/^[0-9A-F]{6}$/.test(clean)) return fallback;
+            return `#${clean}`;
+        }
+
+        function readCookieSettings() {
+            const cookie = document.cookie.split("; ").find((part) => part.startsWith(`${COOKIE_KEY}=`));
+            if (!cookie) return null;
+            try {
+                return JSON.parse(decodeURIComponent(cookie.slice(COOKIE_KEY.length + 1)));
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function loadStoredSession() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (error) {
+                console.warn("CubePaint local storage could not be read:", error);
+            }
+
+            return readCookieSettings();
+        }
+
+        function makeCanvas() {
+            const canvas = document.createElement("canvas");
+            canvas.width = FACE_SIZE;
+            canvas.height = FACE_SIZE;
+            canvas.style.imageRendering = "pixelated";
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.imageSmoothingEnabled = false;
+            return canvas;
+        }
+
+        function fillBlank(canvas) {
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            ctx.fillStyle = BLANK_FILL;
+            ctx.fillRect(0, 0, FACE_SIZE, FACE_SIZE);
+        }
+
+        function createFace(name) {
+            const canvas = makeCanvas();
+            const textureCanvas = makeCanvas();
+            fillBlank(canvas);
+            fillBlank(textureCanvas);
+
+            return {
+                name,
+                canvas,
+                textureCanvas,
+                hasArt: true,
+                changed: false,
+                sourceName: "blank",
+                thumb: null,
+                animation: null,
+                tiling: 1,
+                mapMode: "whole",
+                undo: [],
+                redo: []
+            };
+        }
+
+        function getShapeStore(id) {
+            const def = shapeDefById(id);
+            if (!shapeStore[id]) {
+                const createdFaces = def.faces.map((name) => createFace(name));
+                const defaultIndex = Math.max(0, def.faces.indexOf(def.defaultFace));
+                shapeStore[id] = {
+                    id,
+                    faces: createdFaces,
+                    currentFace: defaultIndex
+                };
+            } else {
+                const store = shapeStore[id];
+                const existingByName = new Map(store.faces.map((face) => [face.name, face]));
+                if (store.faces.length !== def.faces.length || store.faces.some((face, index) => face.name !== def.faces[index])) {
+                    store.faces = def.faces.map((name) => existingByName.get(name) || createFace(name));
+                    store.currentFace = Math.max(0, Math.min(store.faces.length - 1, store.currentFace || 0));
+                }
+            }
+            return shapeStore[id];
+        }
+
+        function ensureShapeFaces(id) {
+            return getShapeStore(id).faces;
+        }
+
+        function saveCurrentShapeContext() {
+            if (!currentShapeId || !shapeStore[currentShapeId]) return;
+            shapeStore[currentShapeId].currentFace = Math.max(0, Math.min(faces.length - 1, currentFace));
+            if (shapeMesh) {
+                shapeRotations[currentShapeId] = {
+                    x: shapeMesh.rotation.x,
+                    y: shapeMesh.rotation.y,
+                    z: 0
+                };
+            }
+        }
+
+        function getCurrentPolyLevel() {
+            return Math.max(0, Math.min(DEFAULT_POLY_LEVEL, Number(shapePolyLevels[currentShapeId] ?? DEFAULT_POLY_LEVEL)));
+        }
+
+        function updatePolyControl() {
+            const def = getCurrentShapeDef();
+            const supported = Boolean(def.lowPoly);
+            polyFader.hidden = !supported;
+            const level = getCurrentPolyLevel();
+            polySlider.value = String(level);
+            polyReadout.textContent = POLY_LABELS[level] || String(level);
+        }
+
+        function currentFaceTiling() {
+            const face = faces[currentFace];
+            return Math.max(1, Math.min(MAX_TILING, Number(face?.tiling || 1)));
+        }
+
+        function tilingLabel(value) {
+            const tiles = Math.max(1, Math.min(MAX_TILING, Number(value) || 1));
+            return tiles === 1 ? "1 IMAGE" : `${tiles}×${tiles}`;
+        }
+
+        function updateTilingControl() {
+            const value = currentFaceTiling();
+            tilingSlider.value = String(value);
+            tilingReadout.textContent = tilingLabel(value);
+        }
+
+        function markFaceChanged(index, sourceName = "drawn") {
+            const face = faces[index];
+            if (!face) return;
+            face.changed = true;
+            if (face.sourceName === "blank" || face.sourceName === "transparent") {
+                face.sourceName = sourceName;
+            }
+        }
+
+        function clearGuideCanvas() {
+            guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+        }
+
+        function drawGuideCircle(cx, cy, r) {
+            guideCtx.beginPath();
+            guideCtx.arc(cx, cy, r, 0, Math.PI * 2);
+            guideCtx.stroke();
+        }
+
+        function drawGuideRing(cx, cy, outerR, innerR) {
+            drawGuideCircle(cx, cy, outerR);
+            drawGuideCircle(cx, cy, innerR);
+        }
+
+        function drawGuideTriangle(points) {
+            guideCtx.beginPath();
+            guideCtx.moveTo(points[0][0], points[0][1]);
+            for (let i = 1; i < points.length; i++) {
+                guideCtx.lineTo(points[i][0], points[i][1]);
+            }
+            guideCtx.closePath();
+            guideCtx.stroke();
+        }
+
+        function drawGuideDiamond(points) {
+            drawGuideTriangle(points);
+        }
+
+        function drawGuideRect(x, y, w, h) {
+            guideCtx.strokeRect(x, y, w, h);
+        }
+
+        function drawGuideCapsule(x, y, w, h) {
+            const vertical = h >= w;
+            const r = vertical ? w / 2 : h / 2;
+
+            guideCtx.beginPath();
+
+            if (vertical) {
+                const cx = x + w / 2;
+                guideCtx.moveTo(x, y + r);
+                guideCtx.arc(cx, y + r, r, Math.PI, 0);
+                guideCtx.lineTo(x + w, y + h - r);
+                guideCtx.arc(cx, y + h - r, r, 0, Math.PI);
+            } else {
+                const cy = y + h / 2;
+                guideCtx.moveTo(x + r, y);
+                guideCtx.lineTo(x + w - r, y);
+                guideCtx.arc(x + w - r, cy, r, -Math.PI / 2, Math.PI / 2);
+                guideCtx.lineTo(x + r, y + h);
+                guideCtx.arc(x + r, cy, r, Math.PI / 2, Math.PI * 1.5);
+            }
+
+            guideCtx.closePath();
+            guideCtx.stroke();
+        }
+
+        function traceGuidePath(ctx, profile) {
+            if (!profile) return false;
+
+            ctx.beginPath();
+
+            switch (profile.kind) {
+                case "circle":
+                    ctx.arc(profile.cx, profile.cy, profile.r, 0, Math.PI * 2);
+                    return true;
+                case "ring":
+                    ctx.arc(profile.cx, profile.cy, profile.rOuter, 0, Math.PI * 2);
+                    ctx.moveTo(profile.cx + profile.rInner, profile.cy);
+                    ctx.arc(profile.cx, profile.cy, profile.rInner, 0, Math.PI * 2);
+                    return true;
+                case "rect":
+                    ctx.rect(profile.x, profile.y, profile.w, profile.h);
+                    return true;
+                case "triangle":
+                case "diamond":
+                    if (!profile.points || profile.points.length < 3) return false;
+                    ctx.moveTo(profile.points[0][0], profile.points[0][1]);
+                    for (let i = 1; i < profile.points.length; i++) {
+                        ctx.lineTo(profile.points[i][0], profile.points[i][1]);
+                    }
+                    ctx.closePath();
+                    return true;
+                case "capsule":
+                    traceCapsulePath(ctx, profile.x, profile.y, profile.w, profile.h);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        function traceCapsulePath(ctx, x, y, w, h) {
+            const vertical = h >= w;
+            const r = vertical ? w / 2 : h / 2;
+
+            if (vertical) {
+                const cx = x + w / 2;
+                ctx.moveTo(x, y + r);
+                ctx.arc(cx, y + r, r, Math.PI, 0);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.arc(cx, y + h - r, r, 0, Math.PI);
+            } else {
+                const cy = y + h / 2;
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.arc(x + w - r, cy, r, -Math.PI / 2, Math.PI / 2);
+                ctx.lineTo(x + r, y + h);
+                ctx.arc(x + r, cy, r, Math.PI / 2, Math.PI * 1.5);
+            }
+
+            ctx.closePath();
+        }
+
+        function drawFitGuide(profile) {
+            if (!profile) return;
+
+            guideCtx.save();
+            guideCtx.strokeStyle = "rgba(157, 61, 44, 0.95)";
+            guideCtx.lineWidth = 3;
+            guideCtx.setLineDash([10, 7]);
+
+            switch (profile.kind) {
+                case "circle":
+                    drawGuideCircle(profile.cx, profile.cy, profile.r);
+                    break;
+                case "ring":
+                    drawGuideRing(profile.cx, profile.cy, profile.rOuter, profile.rInner);
+                    break;
+                case "rect":
+                    drawGuideRect(profile.x, profile.y, profile.w, profile.h);
+                    break;
+                case "triangle":
+                    drawGuideTriangle(profile.points);
+                    break;
+                case "diamond":
+                    drawGuideDiamond(profile.points);
+                    break;
+                case "capsule":
+                    drawGuideCapsule(profile.x, profile.y, profile.w, profile.h);
+                    break;
+            }
+
+            guideCtx.restore();
+        }
+
+        function drawCanvasGuide() {
+            if (!guideCtx) return;
+            clearGuideCanvas();
+
+            const def = getCurrentShapeDef();
+            const face = faces[currentFace];
+            if (!def || !face) return;
+
+            if (!faceSupportsFitMode(def, face)) return;
+            if (face.mapMode !== "fit") return;
+
+            const profile = getFaceFitProfile(def, face);
+            drawFitGuide(profile);
+        }
+
+        function resizePaintArea() {
+            const availableWidth = Math.max(120, drawBody.clientWidth - 20);
+            const availableHeight = Math.max(120, drawBody.clientHeight - toolbar.offsetHeight - 20);
+            const size = Math.max(120, Math.floor(Math.min(availableWidth, availableHeight, 390)));
+            canvasWrap.style.width = `${size}px`;
+            canvasWrap.style.height = `${size}px`;
+        }
+
+        function positionCamera(targetCamera, distance, verticalOrbit) {
+            if (!targetCamera) return;
+            const basePosition = CAMERA_BASE_VECTOR.clone().multiplyScalar(distance);
+            const x = basePosition.x;
+            const yzRadius = Math.sqrt(Math.max(0.0001, (distance * distance) - (x * x)));
+            const angle = CAMERA_BASE_ELEVATION + verticalOrbit;
+
+            targetCamera.position.set(
+                x,
+                Math.sin(angle) * yzRadius,
+                Math.cos(angle) * yzRadius
+            );
+            
+            targetCamera.position.add(cameraPanOffset);
+            targetCamera.lookAt(cameraPanOffset);
+            targetCamera.updateProjectionMatrix();
+        }
+
+        function applyCameraDistance() {
+            positionCamera(camera, cameraDistance, cameraVerticalOrbit);
+        }
+
+        function resizeRenderer() {
+            resizePaintArea();
+            drawCanvasGuide();
+            if (!webglAvailable || !renderer || !camera) return;
+
+            const width = Math.max(1, stage.clientWidth);
+            const height = Math.max(1, stage.clientHeight);
+
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            applyCameraDistance();
+        }
+
+        const resizeObserver = new ResizeObserver(resizeRenderer);
+        resizeObserver.observe(stage);
+        resizeObserver.observe(drawBody);
+        resizeObserver.observe(toolbar);
+        window.addEventListener("resize", resizeRenderer);
+
+        function isCanvasBlank(canvas) {
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+            for (let i = 3; i < data.length; i += 4) {
+                if (data[i] !== 0) return false;
+            }
+
+            return true;
+        }
+
+        function snapshotCanvas(canvas) {
+            return canvas
+                .getContext("2d", { willReadFrequently: true })
+                .getImageData(0, 0, FACE_SIZE, FACE_SIZE);
+        }
+
+        function restoreCanvas(canvas, imageData) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function stopFaceAnimation(face) {
+            if (!face || !face.animation) return;
+
+            if (face.animation.url) {
+                URL.revokeObjectURL(face.animation.url);
+            }
+
+            face.animation = null;
+        }
+
+        function faceSupportsFitMode(def, face) {
+            if (!def || !face) return false;
+
+            switch (def.geometry) {
+                case "box":
+                    return false; // cube already square
+                case "sphere":
+                    return false;
+                case "pyramid":
+                    return face.name !== "BASE";
+                case "cylinder":
+                    return true;
+                case "cone":
+                    return true;
+                case "torus":
+                    return true;
+                case "diamond":
+                    return true;
+                case "tetrahedron":
+                    return true;
+                case "capsule":
+                    return false;
+                case "brick":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        const MAP_MODE_META = {
+            whole: {
+                label: "Whole Shape",
+                status: "WHOLE SHAPE"
+            },
+            fit: {
+                label: "Inner Guide",
+                status: "INNER GUIDE"
+            }
+        };
+
+        function updateMapModeControl() {
+            const btn = document.getElementById("mapModeBtn");
+            if (!btn) return;
+
+            const def = getCurrentShapeDef();
+            const face = faces[currentFace];
+            const supported = faceSupportsFitMode(def, face);
+
+            btn.hidden = !supported;
+
+            if (!supported) return;
+
+            const mode = face.mapMode === "fit" ? "fit" : "whole";
+            const nextMode = mode === "fit" ? "whole" : "fit";
+            const current = MAP_MODE_META[mode];
+            const next = MAP_MODE_META[nextMode];
+
+            btn.dataset.mode = mode;
+            btn.classList.toggle("active", mode === "fit");
+            btn.title = `${current.label} mode. Click for ${next.label}.`;
+            btn.setAttribute("aria-label", `${current.label} mode. Switch to ${next.label}.`);
+        }
+
+        function drawImageCover(ctx, image) {
+            ctx.imageSmoothingEnabled = false;
+            const scale = Math.max(FACE_SIZE / image.width, FACE_SIZE / image.height);
+            const w = image.width * scale;
+            const h = image.height * scale;
+            ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            ctx.drawImage(image, (FACE_SIZE - w) / 2, (FACE_SIZE - h) / 2, w, h);
+        }
+
+        function syncAnimatedFace(index) {
+            const face = faces[index];
+            if (!face || !face.animation || !face.animation.image.complete) return false;
+
+            const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
+            drawImageCover(ctx, face.animation.image);
+            face.hasArt = true;
+            face.changed = true;
+            rebuildTexture(index);
+
+            if (index === currentFace && !drawing) {
+                paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+                paintCtx.drawImage(face.canvas, 0, 0);
+            }
+
+            return true;
+        }
+
+        function updateAnimatedFaces() {
+            let changed = false;
+
+            faces.forEach((face, index) => {
+                if (syncAnimatedFace(index)) {
+                    changed = true;
+                }
+            });
+
+            return changed;
+        }
+
+        function pushUndo(index) {
+            const face = faces[index];
+            if (!face) return;
+
+            face.undo.push({
+                imageData: snapshotCanvas(face.canvas),
+                hasArt: face.hasArt,
+                sourceName: face.sourceName,
+                changed: face.changed
+            });
+
+            if (face.undo.length > MAX_UNDO_HISTORY) {
+                face.undo.shift();
+            }
+
+            face.redo = [];
+            updateUndoRedo();
+        }
+
+        function restoreState(index, state) {
+            const face = faces[index];
+            if (!face) return;
+
+            stopFaceAnimation(face);
+            restoreCanvas(face.canvas, state.imageData);
+            face.hasArt = state.hasArt;
+            face.sourceName = state.sourceName;
+            face.changed = state.changed ?? true;
+
+            rebuildTexture(index);
+
+            if (index === currentFace) {
+                loadFaceIntoEditor(false);
+            }
+
+            renderFaceList();
+            updateUndoRedo();
+            scheduleSave();
+        }
+
+        function undoFace() {
+            const face = faces[currentFace];
+            if (!face || !face.undo.length) return;
+
+            face.redo.push({
+                imageData: snapshotCanvas(face.canvas),
+                hasArt: face.hasArt,
+                sourceName: face.sourceName,
+                changed: face.changed
+            });
+
+            restoreState(currentFace, face.undo.pop());
+            setStatus("UNDO");
+        }
+
+        function redoFace() {
+            const face = faces[currentFace];
+            if (!face || !face.redo.length) return;
+
+            face.undo.push({
+                imageData: snapshotCanvas(face.canvas),
+                hasArt: face.hasArt,
+                sourceName: face.sourceName,
+                changed: face.changed
+            });
+
+            restoreState(currentFace, face.redo.pop());
+            setStatus("REDO");
+        }
+
+        function updateUndoRedo() {
+            document.getElementById("undoBtn").disabled = !faces[currentFace] || faces[currentFace].undo.length === 0;
+            document.getElementById("redoBtn").disabled = !faces[currentFace] || faces[currentFace].redo.length === 0;
+        }
+
+        function clipTextureToGuide(ctx, face) {
+            const def = getCurrentShapeDef();
+            if (!face || face.mapMode !== "fit" || !faceSupportsFitMode(def, face)) return;
+
+            const profile = getFaceFitProfile(def, face);
+            if (!profile) return;
+            if (profile.kind === "triangle" || profile.kind === "rect" || profile.kind === "circle") return;
+
+            ctx.save();
+            ctx.globalCompositeOperation = "destination-in";
+            ctx.fillStyle = "#000";
+
+            if (traceGuidePath(ctx, profile)) {
+                ctx.fill("evenodd");
+            }
+
+            ctx.restore();
+        }
+
+        function rebuildTexture(index) {
+            const face = faces[index];
+            if (!face) return;
+            const ctx = face.textureCanvas.getContext("2d", { willReadFrequently: true });
+            const tiles = Math.max(1, Math.min(MAX_TILING, Number(face.tiling || 1)));
+            const tileSize = FACE_SIZE / tiles;
+
+            ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+
+            if (face.hasArt) {
+                ctx.imageSmoothingEnabled = false;
+                for (let y = 0; y < tiles; y++) {
+                    for (let x = 0; x < tiles; x++) {
+                        ctx.drawImage(face.canvas, Math.floor(x * tileSize), Math.floor(y * tileSize), Math.ceil(tileSize), Math.ceil(tileSize));
+                    }
+                }
+            }
+
+            clipTextureToGuide(ctx, face);
+
+            if (textures[index]) {
+                textures[index].needsUpdate = true;
+            }
+
+            updateThumb(index);
+        }
+
+        function rebuildAllTextures() {
+            faces.forEach((_, index) => rebuildTexture(index));
+        }
+
+        function loadFaceIntoEditor(updateList = true) {
+            const face = faces[currentFace];
+            if (!face) return;
+
+            paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            paintCtx.drawImage(face.canvas, 0, 0);
+            drawCanvasGuide();
+
+            activeFaceTitle.textContent = `${getCurrentShapeDef().label} · ${face.name}`;
+            updateTilingControl();
+            updateMapModeControl();
+
+            if (updateList) {
+                renderFaceList();
+            }
+
+            updateUndoRedo();
+        }
+
+        function saveEditorToFace(updateList = false, persist = true) {
+            const face = faces[currentFace];
+            if (!face) return;
+            const ctx = face.canvas.getContext("2d");
+
+            ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            ctx.drawImage(paintCanvas, 0, 0);
+
+            face.hasArt = !isCanvasBlank(face.canvas);
+
+            if (!face.hasArt) {
+                face.sourceName = "transparent";
+                face.changed = true;
+            } else if (face.sourceName === "transparent") {
+                face.sourceName = "drawn";
+                face.changed = true;
+            }
+
+            rebuildTexture(currentFace);
+
+            if (updateList) {
+                renderFaceList();
+            }
+
+            if (persist && !loadingSession) {
+                scheduleSave();
+            }
+        }
+
+        function switchFace(index, flashPreview = false) {
+            if (index === currentFace) {
+                loadFaceIntoEditor(true);
+                if (flashPreview) flashSelectedMaterial(index);
+                return;
+            }
+            saveEditorToFace(true);
+            currentFace = index;
+            getShapeStore(currentShapeId).currentFace = currentFace;
+            loadFaceIntoEditor(true);
+            if (flashPreview) flashSelectedMaterial(index);
+            scheduleSave();
+        }
+
+        function updateThumb(index) {
+            const face = faces[index];
+            if (!face || !face.thumb) return;
+
+            const ctx = face.thumb.getContext("2d");
+            ctx.clearRect(0, 0, face.thumb.width, face.thumb.height);
+            ctx.drawImage(face.textureCanvas, 0, 0, face.thumb.width, face.thumb.height);
+        }
+
+        function renderFaceList() {
+            faceList.innerHTML = "";
+
+            faces.forEach((face, index) => {
+                const card = document.createElement("button");
+                card.type = "button";
+                card.className = `face-card ${index === currentFace ? "active" : ""}`;
+                card.title = face.name;
+                card.addEventListener("click", () => switchFace(index, true));
+
+                const thumb = document.createElement("canvas");
+                thumb.width = 96;
+                thumb.height = 96;
+                thumb.style.imageRendering = "pixelated";
+                thumb.getContext("2d", { willReadFrequently: true }).imageSmoothingEnabled = false;
+                face.thumb = thumb;
+
+                const meta = document.createElement("div");
+
+                const name = document.createElement("div");
+                name.className = "face-name";
+                name.textContent = face.name;
+
+                const file = document.createElement("div");
+                file.className = "face-file";
+                file.textContent = face.hasArt ? face.sourceName : "transparent";
+
+                const tile = document.createElement("div");
+                tile.className = "face-tile";
+                tile.textContent = `TILING ${tilingLabel(face.tiling)}`;
+
+                meta.append(name, file, tile);
+                card.append(thumb, meta);
+                faceList.append(card);
+
+                updateThumb(index);
+            });
+
+            updateUndoRedo();
+        }
+
+        function setTool(next) {
+            tool = next;
+
+            for (const [id, name] of [
+                ["pencilBtn", "pencil"],
+                ["eraserBtn", "eraser"],
+                ["lineBtn", "line"],
+                ["rectBtn", "rect"],
+                ["circleBtn", "circle"],
+                ["fillBtn", "fill"]
+            ]) {
+                document.getElementById(id).classList.toggle("active", tool === name);
+            }
+
+            paintCanvas.style.cursor = tool === "eraser" ? "cell" : "crosshair";
+            if (!loadingSession) scheduleSave();
+        }
+
+        function shapeIndexById(id) {
+            return SHAPE_DEFS.findIndex((shape) => shape.id === id);
+        }
+
+        function updateShapeReadout() {
+            const def = getCurrentShapeDef();
+            shapeNameReadout.textContent = def.label;
+            shapeSlider.value = String(currentShapeIndex);
+            updatePolyControl();
+        }
+
+        function switchShape(nextIndex) {
+            nextIndex = Math.max(0, Math.min(SHAPE_DEFS.length - 1, Number(nextIndex) || 0));
+            if (nextIndex === currentShapeIndex) return;
+
+            saveEditorToFace(true, false);
+            saveCurrentShapeContext();
+
+            currentShapeIndex = nextIndex;
+            currentShapeId = SHAPE_DEFS[currentShapeIndex].id;
+            faces = ensureShapeFaces(currentShapeId);
+            currentFace = Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace));
+
+            buildShapeMesh();
+            updateShapeReadout();
+            loadFaceIntoEditor(true);
+            rebuildAllTextures();
+            setStatus(getCurrentShapeDef().label);
+            scheduleSave();
+        }
+
+        function disposeCurrentMesh() {
+            if (!shapeMesh) return;
+            scene.remove(shapeMesh);
+            if (shapeMesh.geometry) shapeMesh.geometry.dispose();
+            materials.forEach((material) => material.dispose());
+            textures.forEach((texture) => texture.dispose());
+            materials = [];
+            textures = [];
+            shapeMesh = null;
+        }
+
+        function pushMappedVertex(data, point, u, v) {
+            data.positions.push(point.x, point.y, point.z);
+            data.uvs.push(u, v);
+        }
+
+        function warpedTrianglePoint(apex, baseLeft, baseRight, u, v) {
+            const base = new THREE.Vector3().lerpVectors(baseLeft, baseRight, u);
+            return new THREE.Vector3().lerpVectors(apex, base, v);
+        }
+
+        function addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, subdivisions = 18) {
+            const start = data.positions.length / 3;
+            const steps = Math.max(2, subdivisions | 0);
+
+            for (let row = 0; row < steps; row++) {
+                const v0 = row / steps;
+                const v1 = (row + 1) / steps;
+
+                for (let col = 0; col < steps; col++) {
+                    const u0 = col / steps;
+                    const u1 = (col + 1) / steps;
+
+                    const p00 = warpedTrianglePoint(apex, baseLeft, baseRight, u0, v0);
+                    const p10 = warpedTrianglePoint(apex, baseLeft, baseRight, u1, v0);
+                    const p01 = warpedTrianglePoint(apex, baseLeft, baseRight, u0, v1);
+                    const p11 = warpedTrianglePoint(apex, baseLeft, baseRight, u1, v1);
+
+                    pushMappedVertex(data, p00, u0, 1 - v0);
+                    pushMappedVertex(data, p01, u0, 1 - v1);
+                    pushMappedVertex(data, p11, u1, 1 - v1);
+
+                    pushMappedVertex(data, p00, u0, 1 - v0);
+                    pushMappedVertex(data, p11, u1, 1 - v1);
+                    pushMappedVertex(data, p10, u1, 1 - v0);
+                }
+            }
+
+            data.groups.push({
+                start,
+                count: (data.positions.length / 3) - start,
+                materialIndex
+            });
+        }
+
+        function uvFromGuidePoint(point) {
+            return {
+                u: point[0] / FACE_SIZE,
+                v: 1 - (point[1] / FACE_SIZE)
+            };
+        }
+
+        function addInnerGuideTriangleFace(data, materialIndex, apex, baseLeft, baseRight, profile) {
+            const points = profile?.points || [
+                [FACE_SIZE / 2, 0],
+                [FACE_SIZE, FACE_SIZE],
+                [0, FACE_SIZE]
+            ];
+            const apexUv = uvFromGuidePoint(points[0]);
+            const rightUv = uvFromGuidePoint(points[1]);
+            const leftUv = uvFromGuidePoint(points[2]);
+            const start = data.positions.length / 3;
+
+            pushMappedVertex(data, apex, apexUv.u, apexUv.v);
+            pushMappedVertex(data, baseLeft, leftUv.u, leftUv.v);
+            pushMappedVertex(data, baseRight, rightUv.u, rightUv.v);
+
+            data.groups.push({
+                start,
+                count: (data.positions.length / 3) - start,
+                materialIndex
+            });
+        }
+
+        function addShapeModeTriangleFace(data, def, faceName, apex, baseLeft, baseRight) {
+            const materialIndex = faceMaterialIndex(def, faceName);
+            const face = faces[materialIndex];
+            const profile = getFaceFitProfile(def, face);
+
+            if (face?.mapMode === "fit" && profile?.kind === "triangle") {
+                addInnerGuideTriangleFace(data, materialIndex, apex, baseLeft, baseRight, profile);
+                return;
+            }
+
+            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight);
+        }
+
+        function mapUvToGuideRect(profile, u, v) {
+            const x = Math.max(0, Math.min(FACE_SIZE, Number(profile.x) || 0));
+            const y = Math.max(0, Math.min(FACE_SIZE, Number(profile.y) || 0));
+            const w = Math.max(1, Math.min(FACE_SIZE - x, Number(profile.w) || FACE_SIZE));
+            const h = Math.max(1, Math.min(FACE_SIZE - y, Number(profile.h) || FACE_SIZE));
+            const canvasX = x + clamp01(u) * w;
+            const canvasY = y + (1 - clamp01(v)) * h;
+
+            return {
+                u: canvasX / FACE_SIZE,
+                v: 1 - (canvasY / FACE_SIZE)
+            };
+        }
+
+        function applyInnerGuideUvForTriangle(def, face, uv, ia, ib, ic) {
+            if (face?.mapMode !== "fit") return;
+
+            const profile = getFaceFitProfile(def, face);
+            if (profile?.kind !== "rect") return;
+
+            [ia, ib, ic].forEach((index) => {
+                const next = mapUvToGuideRect(profile, uv.getX(index), uv.getY(index));
+                uv.setXY(index, next.u, next.v);
+            });
+        }
+
+        function addFullCanvasQuadFace(data, materialIndex, topLeft, topRight, bottomRight, bottomLeft) {
+            const start = data.positions.length / 3;
+
+            pushMappedVertex(data, topLeft, 0, 1);
+            pushMappedVertex(data, bottomLeft, 0, 0);
+            pushMappedVertex(data, bottomRight, 1, 0);
+
+            pushMappedVertex(data, topLeft, 0, 1);
+            pushMappedVertex(data, bottomRight, 1, 0);
+            pushMappedVertex(data, topRight, 1, 1);
+
+            data.groups.push({
+                start,
+                count: (data.positions.length / 3) - start,
+                materialIndex
+            });
+        }
+
+        function finalizeFullCanvasGeometry(data) {
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(data.positions, 3));
+            geometry.setAttribute('uv', new THREE.Float32BufferAttribute(data.uvs, 2));
+            geometry.clearGroups();
+            data.groups.forEach((group) => geometry.addGroup(group.start, group.count, group.materialIndex));
+            geometry.computeVertexNormals();
+            geometry.userData.fullCanvasFaceMapped = true;
+            return geometry;
+        }
+
+        function faceMaterialIndex(def, faceName) {
+            return Math.max(0, def.faces.indexOf(faceName));
+        }
+
+        function createFullCanvasPyramidGeometry(def) {
+            const data = { positions: [], uvs: [], groups: [] };
+            const halfHeight = 1.1;
+            const corner = 1.55 / Math.SQRT2;
+            const apex = new THREE.Vector3(0, halfHeight, 0);
+            const frontLeft = new THREE.Vector3(-corner, -halfHeight, corner);
+            const frontRight = new THREE.Vector3(corner, -halfHeight, corner);
+            const backRight = new THREE.Vector3(corner, -halfHeight, -corner);
+            const backLeft = new THREE.Vector3(-corner, -halfHeight, -corner);
+
+            addFullCanvasQuadFace(data, faceMaterialIndex(def, 'BASE'), backLeft, backRight, frontRight, frontLeft);
+            addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight);
+            addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, backRight);
+            addShapeModeTriangleFace(data, def, 'BACK', apex, backRight, backLeft);
+            addShapeModeTriangleFace(data, def, 'LEFT', apex, backLeft, frontLeft);
+
+            return finalizeFullCanvasGeometry(data);
+        }
+
+        function createFullCanvasDiamondGeometry(def) {
+            const data = { positions: [], uvs: [], groups: [] };
+            const radius = 1.35;
+            const side = radius * 0.9;
+            const height = radius * 1.38;
+            const top = new THREE.Vector3(0, height, 0);
+            const bottom = new THREE.Vector3(0, -height, 0);
+            const front = new THREE.Vector3(0, 0, side);
+            const right = new THREE.Vector3(side, 0, 0);
+            const back = new THREE.Vector3(0, 0, -side);
+            const left = new THREE.Vector3(-side, 0, 0);
+
+            addShapeModeTriangleFace(data, def, 'TOP FRONT', top, front, right);
+            addShapeModeTriangleFace(data, def, 'TOP RIGHT', top, right, back);
+            addShapeModeTriangleFace(data, def, 'TOP BACK', top, back, left);
+            addShapeModeTriangleFace(data, def, 'TOP LEFT', top, left, front);
+            addShapeModeTriangleFace(data, def, 'BOTTOM FRONT', bottom, right, front);
+            addShapeModeTriangleFace(data, def, 'BOTTOM RIGHT', bottom, back, right);
+            addShapeModeTriangleFace(data, def, 'BOTTOM BACK', bottom, left, back);
+            addShapeModeTriangleFace(data, def, 'BOTTOM LEFT', bottom, front, left);
+
+            return finalizeFullCanvasGeometry(data);
+        }
+
+        function createFullCanvasTetrahedronGeometry(def) {
+            const data = { positions: [], uvs: [], groups: [] };
+            const apex = new THREE.Vector3(0, 1.35, 0);
+            const frontLeft = new THREE.Vector3(-1.15, -0.75, 0.7);
+            const frontRight = new THREE.Vector3(1.15, -0.75, 0.7);
+            const back = new THREE.Vector3(0, -0.75, -1.3);
+
+            addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight);
+            addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, back);
+            addShapeModeTriangleFace(data, def, 'LEFT', apex, back, frontLeft);
+            addShapeModeTriangleFace(data, def, 'BASE', back, frontRight, frontLeft);
+
+            return finalizeFullCanvasGeometry(data);
+        }
+
+        function applyFaceUvMapping(geometry, def) {
+            if (!geometry.attributes.uv) return;
+
+            const uv = geometry.attributes.uv;
+            const position = geometry.attributes.position;
+            const index = geometry.index;
+
+            const a = new THREE.Vector3();
+            const b = new THREE.Vector3();
+            const c = new THREE.Vector3();
+            const center = new THREE.Vector3();
+            const normal = new THREE.Vector3();
+
+            const triCount = index ? index.count / 3 : position.count / 3;
+
+            for (let tri = 0; tri < triCount; tri++) {
+                const ia = index ? index.getX(tri * 3) : tri * 3;
+                const ib = index ? index.getX(tri * 3 + 1) : tri * 3 + 1;
+                const ic = index ? index.getX(tri * 3 + 2) : tri * 3 + 2;
+
+                a.fromBufferAttribute(position, ia);
+                b.fromBufferAttribute(position, ib);
+                c.fromBufferAttribute(position, ic);
+
+                center.copy(a).add(b).add(c).multiplyScalar(1 / 3);
+                normal.subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
+
+                const materialIndex = Math.max(0, Math.min(def.faces.length - 1, materialIndexForTriangle(def, center, normal)));
+                const face = faces[materialIndex];
+                if (!face) continue;
+
+                applyWholeUvForTriangle(def, face, uv, ia, ib, ic, a, b, c, normal, center);
+                applyInnerGuideUvForTriangle(def, face, uv, ia, ib, ic);
+            }
+
+            uv.needsUpdate = true;
+        }
+
+        function applyWholeUvForTriangle(def, face, uv, ia, ib, ic, a, b, c, normal, center) {
+            // Whole mode keeps the geometry's original full-canvas UVs.
+        }
+
+        function createGeometry(def) {
+            const level = getCurrentPolyLevel();
+            const radial = [6, 8, 10, 12, 18, 32][level] || 32;
+            const sphereW = [8, 10, 12, 16, 24, 40][level] || 40;
+            const sphereH = [6, 8, 10, 12, 18, 24][level] || 24;
+            const torusTubular = [16, 20, 24, 32, 48, 72][level] || 72;
+            const torusRadial = [6, 8, 10, 12, 18, 24][level] || 24;
+            const capSegments = [4, 5, 6, 8, 12, 18][level] || 18;
+            let geometry;
+
+            switch (def.geometry) {
+                case "box":
+                    geometry = new THREE.BoxGeometry(2, 2, 2);
+                    break;
+                case "brick":
+                    geometry = new THREE.BoxGeometry(2.55, 1.35, 1.75);
+                    break;
+                case "pyramid":
+                    geometry = createFullCanvasPyramidGeometry(def);
+                    break;
+                case "sphere":
+                    geometry = new THREE.SphereGeometry(1.35, sphereW, sphereH);
+                    break;
+                case "cylinder":
+                    geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.2, radial, 1, false);
+                    break;
+                case "cone":
+                    geometry = new THREE.ConeGeometry(1.25, 2.3, radial, 1, false);
+                    break;
+                case "torus":
+                    geometry = new THREE.TorusGeometry(1.05, 0.35, torusRadial, torusTubular);
+                    geometry.rotateX(Math.PI / 2);
+                    break;
+                case "diamond":
+                    geometry = createFullCanvasDiamondGeometry(def);
+                    break;
+                case "tetrahedron":
+                    geometry = createFullCanvasTetrahedronGeometry(def);
+                    break;
+                case "capsule":
+                    geometry = new THREE.CapsuleGeometry(0.78, 1.2, capSegments, radial);
+                    break;
+                default:
+                    geometry = new THREE.BoxGeometry(2, 2, 2);
+                    break;
+            }
+
+            if (geometry.userData.fullCanvasFaceMapped) {
+                return geometry;
+            }
+
+            geometry.computeVertexNormals();
+            assignGeometryGroups(geometry, def);
+            applyFaceUvMapping(geometry, def);
+            return geometry;
+        }
+
+        function slotIndex(def, key, fallback = 0) {
+            const name = def.slots[key];
+            const index = def.faces.indexOf(name);
+            return index >= 0 ? index : fallback;
+        }
+
+        function directionFromCenter(center) {
+            const angle = Math.atan2(center.x, center.z);
+            if (angle > -Math.PI / 4 && angle <= Math.PI / 4) return "front";
+            if (angle > Math.PI / 4 && angle <= 3 * Math.PI / 4) return "right";
+            if (angle <= -Math.PI / 4 && angle > -3 * Math.PI / 4) return "left";
+            return "back";
+        }
+
+        function directionIndex(def, center, fallback = 0) {
+            return slotIndex(def, directionFromCenter(center), fallback);
+        }
+
+        function boxFaceIndex(def, normal) {
+            const absX = Math.abs(normal.x);
+            const absY = Math.abs(normal.y);
+            const absZ = Math.abs(normal.z);
+            if (absX >= absY && absX >= absZ) return slotIndex(def, normal.x >= 0 ? "right" : "left");
+            if (absY >= absX && absY >= absZ) return slotIndex(def, normal.y >= 0 ? "top" : "bottom");
+            return slotIndex(def, normal.z >= 0 ? "front" : "back");
+        }
+
+        function diamondFaceIndex(def, center) {
+            const dir = directionFromCenter(center);
+            const top = center.y >= 0;
+            const key = `${top ? "top" : "bottom"}${dir[0].toUpperCase()}${dir.slice(1)}`;
+            return slotIndex(def, key, directionIndex(def, center));
+        }
+
+        function tetraFaceIndex(def, center, normal) {
+            if (normal.y < -0.45 || center.y < -0.75) return slotIndex(def, "base");
+            const dir = directionFromCenter(center);
+            if (dir === "back") return slotIndex(def, center.x >= 0 ? "right" : "left");
+            return slotIndex(def, dir, 0);
+        }
+
+        function polyZoneIndex(def, center) {
+            if (center.y > 0.55) return slotIndex(def, "top");
+            if (center.y < -0.55) return slotIndex(def, "bottom");
+            return directionIndex(def, center);
+        }
+
+        function materialIndexForTriangle(def, center, normal) {
+            switch (def.grouping) {
+                case "single":
+                    return 0;
+                case "box":
+                    return boxFaceIndex(def, normal);
+                case "pyramid":
+                    if (normal.y < -0.55 || center.y < -0.95) return slotIndex(def, "base");
+                    return directionIndex(def, center);
+                case "sphere":
+                    if (center.y > 0.74) return slotIndex(def, "top");
+                    if (center.y < -0.74) return slotIndex(def, "bottom");
+                    return slotIndex(def, "body");
+                case "cylinder":
+                    if (normal.y > 0.75) return slotIndex(def, "top");
+                    if (normal.y < -0.75) return slotIndex(def, "bottom");
+                    return slotIndex(def, "body");
+                case "cone":
+                    if (normal.y < -0.55 || center.y < -1.05) return slotIndex(def, "base");
+                    return slotIndex(def, "body");
+                case "diamond":
+                    return diamondFaceIndex(def, center);
+                case "tetrahedron":
+                    return tetraFaceIndex(def, center, normal);
+                default:
+                    return 0;
+            }
+        }
+
+        function assignGeometryGroups(geometry, def) {
+            geometry.clearGroups();
+            const position = geometry.attributes.position;
+            const index = geometry.index;
+            const triCount = index ? index.count / 3 : position.count / 3;
+            const a = new THREE.Vector3();
+            const b = new THREE.Vector3();
+            const c = new THREE.Vector3();
+            const center = new THREE.Vector3();
+            const normal = new THREE.Vector3();
+
+            for (let tri = 0; tri < triCount; tri++) {
+                const ia = index ? index.getX(tri * 3) : tri * 3;
+                const ib = index ? index.getX(tri * 3 + 1) : tri * 3 + 1;
+                const ic = index ? index.getX(tri * 3 + 2) : tri * 3 + 2;
+
+                a.fromBufferAttribute(position, ia);
+                b.fromBufferAttribute(position, ib);
+                c.fromBufferAttribute(position, ic);
+                center.copy(a).add(b).add(c).multiplyScalar(1 / 3);
+                normal.subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
+
+                const materialIndex = Math.max(0, Math.min(def.faces.length - 1, materialIndexForTriangle(def, center, normal)));
+                geometry.addGroup(tri * 3, 3, materialIndex);
+            }
+        }
+
+        function ensureShadingLights() {
+            if (!scene || ambientLight) return;
+
+            // Small base light so shaded mode is not completely black.
+            ambientLight = new THREE.AmbientLight(0xffffff, 0);
+
+            // Main dramatic light from the LEFT of the shape.
+            keyLight = new THREE.DirectionalLight(0xffffff, 0);
+            keyLight.position.set(-5, 3, 4);
+
+            // Optional very weak fill from the opposite side.
+            // Keep this low so the left light stays dramatic.
+            fillLight = new THREE.DirectionalLight(0xffffff, 0);
+            fillLight.position.set(4, 1, -3);
+
+            scene.add(ambientLight, keyLight, fillLight);
+        }
+
+        function updateShadingLights() {
+            ensureShadingLights();
+
+            if (!ambientLight || !keyLight || !fillLight) return;
+
+            if (shadingEnabled) {
+                ambientLight.intensity = 0.22;
+                keyLight.intensity = 2.25;
+                fillLight.intensity = 0.08;
+            } else {
+                ambientLight.intensity = 0;
+                keyLight.intensity = 0;
+                fillLight.intensity = 0;
+            }
+
+            ambientLight.visible = true;
+            keyLight.visible = true;
+            fillLight.visible = true;
+        }
+
+        function makeFaceMaterial(texture) {
+            const shared = {
+                map: texture,
+                transparent: true,
+                alphaTest: 0.01,
+                side: THREE.DoubleSide
+            };
+
+            if (shadingEnabled) {
+                return new THREE.MeshStandardMaterial({
+                    ...shared,
+                    roughness: 0.72,
+                    metalness: 0,
+                    color: 0xffffff
+                });
+            }
+
+            return new THREE.MeshBasicMaterial(shared);
+        }
+
+        function makeCanvasTexture(canvas, targetRenderer = renderer) {
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.anisotropy = targetRenderer?.capabilities?.getMaxAnisotropy?.() || 1;
+            texture.magFilter = THREE.NearestFilter;
+            texture.minFilter = THREE.NearestFilter;
+            texture.generateMipmaps = false;
+            return texture;
+        }
+
+        function addShadingLightsToScene(targetScene) {
+            const ambient = new THREE.AmbientLight(0xffffff, shadingEnabled ? 0.22 : 0);
+            const key = new THREE.DirectionalLight(0xffffff, shadingEnabled ? 2.25 : 0);
+            const fill = new THREE.DirectionalLight(0xffffff, shadingEnabled ? 0.08 : 0);
+
+            key.position.set(-5, 3, 4);
+            fill.position.set(4, 1, -3);
+            targetScene.add(ambient, key, fill);
+        }
+
+        function updateShadingButton() {
+            const btn = document.getElementById("shadingBtn");
+            if (!btn) return;
+
+            btn.classList.toggle("active", shadingEnabled);
+            btn.textContent = shadingEnabled ? "LIT" : "SHADE";
+            btn.title = shadingEnabled ? "shading on" : "shading off";
+        }
+
+        function rebuildMaterialsForShading() {
+            if (!shapeMesh || !textures.length) return;
+
+            const oldMaterials = Array.isArray(materials) ? materials : [];
+
+            materials = textures.map((texture) => makeFaceMaterial(texture));
+            shapeMesh.material = materials;
+
+            oldMaterials.forEach((material) => {
+                if (material && typeof material.dispose === "function") {
+                    material.dispose();
+                }
+            });
+
+            updateShadingLights();
+        }
+
+        function setShadingEnabled(next, persist = true) {
+            shadingEnabled = Boolean(next);
+
+            updateShadingButton();
+            updateShadingLights();
+            rebuildMaterialsForShading();
+
+            setStatus(shadingEnabled ? "SHADE ON" : "SHADE OFF");
+
+            if (persist && !loadingSession) {
+                scheduleSave();
+            }
+        }
+
+        function buildShapeMesh() {
+            if (!webglAvailable || !scene) return;
+
+            disposeCurrentMesh();
+
+            textures = faces.map((face) => makeCanvasTexture(face.textureCanvas));
+
+            materials = textures.map(makeFaceMaterial);
+            const def = getCurrentShapeDef();
+            const geometry = createGeometry(def);
+            shapeMesh = new THREE.Mesh(geometry, materials);
+            const savedRotation = shapeRotations[currentShapeId] || { x: 0, y: 0, z: 0 };
+            // shapeMesh.rotation.set(savedRotation.x ?? 0, savedRotation.y ?? 0, 0);
+            shapeMesh.rotation.set(0, 0, 0);
+            scene.add(shapeMesh);
+            updateShadingLights();
+            updateShadingButton();
+            rebuildAllTextures();
+            updateDebugInfo();
+        }
+
+        try {
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                preserveDrawingBuffer: true
+            });
+
+            webglAvailable = true;
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.setClearColor(document.getElementById("bgColor").value);
+            stage.appendChild(renderer.domElement);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+            applyCameraDistance();
+            buildShapeMesh();
+        } catch (error) {
+            webglAvailable = false;
+            stage.innerHTML = '<div class="webgl-fallback">3D PREVIEW NEEDS WEBGL<br>PAINTING STILL WORKS<br>TRY ENABLING HARDWARE ACCELERATION OR UPDATING GPU DRIVERS</div>';
+            document.getElementById("exportGifBtn").disabled = true;
+            setStatus("NO WEBGL");
+            console.warn("CubePaint WebGL preview disabled:", error);
+        }
+
+        const raycaster = new THREE.Raycaster();
+        const pointerNdc = new THREE.Vector2();
+        let selectionFlashFrame = null;
+        let selectionFlashRestore = null;
+
+        function roundDebug(value) {
+            return Number.isFinite(value) ? value.toFixed(3) : "0.000";
+        }
+
+        function degreesDebug(value) {
+            return roundDebug(value * 180 / Math.PI);
+        }
+
+        function updateDebugInfo() {
+            if (!previewDebug) return;
+            previewDebug.hidden = !debugging_mode;
+            if (!debugging_mode) return;
+
+            const rot = shapeMesh?.rotation || { x: 0, y: 0, z: 0 };
+            const pos = camera?.position || { x: 0, y: 0, z: 0 };
+            const defaultPos = CAMERA_BASE_VECTOR.clone().multiplyScalar(DEFAULT_CAMERA_DISTANCE);
+            const relPos = {
+                x: pos.x - defaultPos.x,
+                y: pos.y - defaultPos.y,
+                z: pos.z - defaultPos.z
+            };
+            previewDebug.textContent = [
+                `SHAPE  ${getCurrentShapeDef().label}`,
+                `FACE   ${faces[currentFace]?.name || "NONE"}`,
+                `CAM X  ${roundDebug(relPos.x)}`,
+                `CAM Y  ${roundDebug(relPos.y)}`,
+                `CAM Z  ${roundDebug(relPos.z)}`,
+                `DIST   ${roundDebug(cameraDistance)}`,
+                `CAM V  ${roundDebug(cameraVerticalOrbit)} RAD / ${degreesDebug(cameraVerticalOrbit)}°`,
+                `ROT X  ${roundDebug(rot.x)} RAD / ${degreesDebug(rot.x)}°`,
+                `ROT Y  ${roundDebug(rot.y)} RAD / ${degreesDebug(rot.y)}°`,
+                `ROT Z  ${roundDebug(rot.z)} RAD / ${degreesDebug(rot.z)}°`
+            ].join("\n");
+        }
+
+        function resetView() {
+            if (!shapeMesh) return;
+            shapeMesh.rotation.set(0, 0, 0);
+            cameraDistance = DEFAULT_CAMERA_DISTANCE;
+            cameraVerticalOrbit = 0;
+            cameraPanOffset.set(0, 0, 0);
+            applyCameraDistance();
+            saveCurrentShapeContext();
+            setStatus("VIEW RESET");
+            updateDebugInfo();
+            scheduleSave();
+        }
+
+        function flashSelectedMaterial(index) {
+            const material = materials[index];
+            if (!material) return;
+
+            if (selectionFlashFrame) {
+                cancelAnimationFrame(selectionFlashFrame);
+                selectionFlashFrame = null;
+            }
+
+            if (selectionFlashRestore) {
+                selectionFlashRestore.material.color.copy(selectionFlashRestore.original);
+                selectionFlashRestore.material.needsUpdate = true;
+                selectionFlashRestore = null;
+            }
+
+            const original = material.color.clone();
+            const flashColor = new THREE.Color("#fff");
+            const fadeMs = 520;
+
+            // instant flash start sooo no fade in
+            material.color.copy(flashColor);
+            material.needsUpdate = true;
+
+            selectionFlashRestore = { material, original };
+
+            const start = performance.now();
+
+            function fade(now) {
+                const t = Math.min(1, (now - start) / fadeMs);
+
+                // Fade out only: flash color -> original color.
+                material.color.lerpColors(flashColor, original, t);
+                material.needsUpdate = true;
+
+                if (t < 1) {
+                    selectionFlashFrame = requestAnimationFrame(fade);
+                } else {
+                    material.color.copy(original);
+                    material.needsUpdate = true;
+                    selectionFlashFrame = null;
+                    selectionFlashRestore = null;
+                }
+            }
+
+            selectionFlashFrame = requestAnimationFrame(fade);
+        }
+
+        function selectPreviewFace(event) {
+            if (!renderer || !camera || !shapeMesh) return false;
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointerNdc, camera);
+            const hit = raycaster.intersectObject(shapeMesh, false)[0];
+            if (!hit || !hit.face) return false;
+            const index = Math.max(0, Math.min(faces.length - 1, hit.face.materialIndex || 0));
+            switchFace(index, true);
+            setStatus(`SELECT ${faces[index]?.name || "FACE"}`);
+            updateDebugInfo();
+            return true;
+        }
+
+        function startPreviewDrag(event) {
+            if (!webglAvailable || !renderer || !shapeMesh || (event.button !== 0 && event.button !== 1)) return;
+            event.preventDefault();
+            previewDragging = true;
+            previewDragButton = event.button;
+            userIsRotatingPreview = (event.button === 0);
+            previewMoved = false;
+            previewPointerStart = { x: event.clientX, y: event.clientY };
+            previewLast = { x: event.clientX, y: event.clientY };
+            renderer.domElement.setPointerCapture(event.pointerId);
+        }
+
+        function movePreviewDrag(event) {
+            if (!previewDragging || !shapeMesh || !previewLast) return;
+            event.preventDefault();
+            
+            if (previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) > 4) {
+                previewMoved = true;
+            }
+
+            if (previewDragButton === 1) {
+                const dx = event.clientX - previewLast.x;
+                const dy = event.clientY - previewLast.y;
+                const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+                const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+                const scale = cameraDistance * 0.0025;
+                cameraPanOffset.add(right.multiplyScalar(-dx * scale));
+                cameraPanOffset.add(up.multiplyScalar(dy * scale));
+                applyCameraDistance();
+            } else {
+                const dy = event.clientY - previewLast.y;
+                cameraVerticalOrbit = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, cameraVerticalOrbit + dy * 0.01));
+                applyCameraDistance();
+            }
+
+            previewLast = { x: event.clientX, y: event.clientY };
+            updateDebugInfo();
+            scheduleSave();
+        }
+
+        function stopPreviewDrag(event) {
+            if (!previewDragging) return;
+            const wasClick = (previewDragButton === 0) && !previewMoved && previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) <= 4;
+            previewDragging = false;
+            userIsRotatingPreview = false;
+            previewLast = null;
+            previewPointerStart = null;
+            if (renderer && renderer.domElement.hasPointerCapture(event.pointerId)) {
+                renderer.domElement.releasePointerCapture(event.pointerId);
+            }
+            if (wasClick) {
+                selectPreviewFace(event);
+            } else {
+                saveCurrentShapeContext();
+                setStatus("VIEW");
+                scheduleSave();
+            }
+        }
+
+        if (renderer) {
+            renderer.domElement.style.touchAction = "none";
+            renderer.domElement.addEventListener("pointerdown", startPreviewDrag);
+            renderer.domElement.addEventListener("pointermove", movePreviewDrag);
+            renderer.domElement.addEventListener("pointerup", stopPreviewDrag);
+            renderer.domElement.addEventListener("pointercancel", stopPreviewDrag);
+            renderer.domElement.addEventListener("wheel", (event) => {
+                event.preventDefault();
+                cameraDistance = Math.max(2.8, Math.min(8, cameraDistance + Math.sign(event.deltaY) * 0.35));
+                applyCameraDistance();
+                updateDebugInfo();
+                scheduleSave();
+            }, { passive: false });
+        }
+
+        document.getElementById("pencilBtn").addEventListener("click", () => setTool("pencil"));
+        document.getElementById("eraserBtn").addEventListener("click", () => setTool("eraser"));
+        document.getElementById("lineBtn").addEventListener("click", () => setTool("line"));
+        document.getElementById("rectBtn").addEventListener("click", () => setTool("rect"));
+        document.getElementById("circleBtn").addEventListener("click", () => setTool("circle"));
+        document.getElementById("fillBtn").addEventListener("click", () => setTool("fill"));
+        document.getElementById("undoBtn").addEventListener("click", undoFace);
+        document.getElementById("redoBtn").addEventListener("click", redoFace);
+        document.getElementById("shadingBtn").addEventListener("click", () => {
+            setShadingEnabled(!shadingEnabled);
+        });
+
+        document.getElementById("mapModeBtn").addEventListener("click", () => {
+            const face = faces[currentFace];
+            const def = getCurrentShapeDef();
+            if (!face || !faceSupportsFitMode(def, face)) return;
+
+            face.mapMode = face.mapMode === "whole" ? "fit" : "whole";
+
+            updateMapModeControl();
+            drawCanvasGuide();
+            rebuildTexture(currentFace);
+            buildShapeMesh(); // safest way, because UV/mapping may need rebuilding
+            scheduleSave();
+
+            setStatus(MAP_MODE_META[face.mapMode === "fit" ? "fit" : "whole"].status);
+        });
+
+        function getFaceFitProfile(def, face) {
+            if (!def || !face) return null;
+
+            switch (def.geometry) {
+                case "pyramid":
+                    if (face.name === "BASE") return null;
+                    return {
+                        kind: "triangle",
+                        points: [
+                            [FACE_SIZE / 2, 0],
+                            [FACE_SIZE, FACE_SIZE],
+                            [0, FACE_SIZE]
+                        ]
+                    };
+
+                case "cylinder":
+                    if (face.name === "TOP" || face.name === "BOTTOM") {
+                        return {
+                            kind: "circle",
+                            cx: FACE_SIZE / 2,
+                            cy: FACE_SIZE / 2,
+                            r: FACE_SIZE / 2
+                        };
+                    }
+                    if (face.name === "BODY") {
+                        const aspect = (2 * Math.PI * 1.2) / 2.2; // circumference / height
+                        const rectH = FACE_SIZE / aspect;
+                        const y = (FACE_SIZE - rectH) / 2;
+                        return {
+                            kind: "rect",
+                            x: 0,
+                            y,
+                            w: FACE_SIZE,
+                            h: rectH
+                        };
+                    }
+                    return null;
+
+                case "cone":
+                    if (face.name === "BASE") {
+                        return {
+                            kind: "circle",
+                            cx: FACE_SIZE / 2,
+                            cy: FACE_SIZE / 2,
+                            r: FACE_SIZE / 2
+                        };
+                    }
+                    if (face.name === "BODY") {
+                        const r = 1.25;
+                        const h = 2.3;
+                        const slant = Math.sqrt(r * r + h * h);
+                        const aspect = (2 * Math.PI * r) / slant;
+                        const rectH = FACE_SIZE / aspect;
+                        const y = (FACE_SIZE - rectH) / 2;
+                        return {
+                            kind: "rect",
+                            x: 0,
+                            y,
+                            w: FACE_SIZE,
+                            h: rectH
+                        };
+                    }
+                    return null;
+
+                case "torus":
+                    return {
+                        kind: "ring",
+                        cx: FACE_SIZE / 2,
+                        cy: FACE_SIZE / 2,
+                        rOuter: FACE_SIZE * 0.5,
+                        rInner: FACE_SIZE * 0.22
+                    };
+
+                case "diamond":
+                case "tetrahedron":
+                    return {
+                        kind: "triangle",
+                        points: [
+                            [FACE_SIZE / 2, 0],
+                            [FACE_SIZE, FACE_SIZE],
+                            [0, FACE_SIZE]
+                        ]
+                    };
+
+                case "capsule":
+                    return {
+                        kind: "capsule",
+                        x: FACE_SIZE * 0.18,
+                        y: 0,
+                        w: FACE_SIZE * 0.64,
+                        h: FACE_SIZE
+                    };
+
+                case "brick":
+                    return getBrickFaceProfile(face.name);
+
+                default:
+                    return null;
+            }
+        }
+
+        function getBrickFaceProfile(faceName) {
+            let faceW = 1;
+            let faceH = 1;
+
+            switch (faceName) {
+                case "FRONT":
+                case "BACK":
+                    faceW = 2.55;
+                    faceH = 1.35;
+                    break;
+                case "LEFT":
+                case "RIGHT":
+                    faceW = 1.75;
+                    faceH = 1.35;
+                    break;
+                case "TOP":
+                case "BOTTOM":
+                    faceW = 2.55;
+                    faceH = 1.75;
+                    break;
+                default:
+                    return null;
+            }
+
+            const aspect = faceW / faceH;
+
+            if (aspect >= 1) {
+                const h = FACE_SIZE / aspect;
+                return {
+                    kind: "rect",
+                    x: 0,
+                    y: (FACE_SIZE - h) / 2,
+                    w: FACE_SIZE,
+                    h
+                };
+            } else {
+                const w = FACE_SIZE * aspect;
+                return {
+                    kind: "rect",
+                    x: (FACE_SIZE - w) / 2,
+                    y: 0,
+                    w,
+                    h: FACE_SIZE
+                };
+            }
+        }
+
+        shapeSlider.addEventListener("input", () => switchShape(Number(shapeSlider.value)));
+
+        polySlider.addEventListener("input", () => {
+            shapePolyLevels[currentShapeId] = Number(polySlider.value);
+            updatePolyControl();
+            buildShapeMesh();
+            setStatus("POLY");
+            scheduleSave();
+        });
+
+        tilingSlider.addEventListener("input", () => {
+            const face = faces[currentFace];
+            if (!face) return;
+            face.tiling = Math.max(1, Math.min(MAX_TILING, Number(tilingSlider.value) || 1));
+            face.changed = true;
+            updateTilingControl();
+            rebuildTexture(currentFace);
+            renderFaceList();
+            setStatus("TILING");
+            scheduleSave();
+        });
+
+        document.getElementById("resetViewBtn").addEventListener("click", resetView);
+
+        brushSize.addEventListener("input", () => {
+            brushReadout.textContent = `${brushSize.value}PX`;
+            sizeMiniReadout.textContent = `${brushSize.value}PX`;
+            drawBrushCursor();
+            scheduleSave();
+        });
+
+        function clamp01(value) {
+            return Math.max(0, Math.min(1, value));
+        }
+
+        function hsvToRgb(h, s, v) {
+            const hue = ((h % 1) + 1) % 1;
+            const i = Math.floor(hue * 6);
+            const f = hue * 6 - i;
+            const p = v * (1 - s);
+            const q = v * (1 - f * s);
+            const t = v * (1 - (1 - f) * s);
+
+            let r = 0;
+            let g = 0;
+            let b = 0;
+
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+
+        function rgbToHex(rgb) {
+            return `#${[rgb.r, rgb.g, rgb.b].map((value) => value.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
+        }
+
+        function hexToRgb(hex) {
+            const normalized = normalizeHex(hex);
+            return {
+                r: parseInt(normalized.slice(1, 3), 16),
+                g: parseInt(normalized.slice(3, 5), 16),
+                b: parseInt(normalized.slice(5, 7), 16)
+            };
+        }
+
+        function rgbToHsv(r, g, b) {
+            const rn = r / 255;
+            const gn = g / 255;
+            const bn = b / 255;
+            const max = Math.max(rn, gn, bn);
+            const min = Math.min(rn, gn, bn);
+            const delta = max - min;
+            let h = 0;
+
+            if (delta !== 0) {
+                if (max === rn) h = ((gn - bn) / delta) % 6;
+                if (max === gn) h = (bn - rn) / delta + 2;
+                if (max === bn) h = (rn - gn) / delta + 4;
+                h /= 6;
+            }
+
+            if (h < 0) h += 1;
+
+            return {
+                h,
+                s: max === 0 ? 0 : delta / max,
+                v: max
+            };
+        }
+
+        function quantizedHue(step) {
+            return step / HUE_STEPS;
+        }
+
+        function quantizedSaturation(step) {
+            return SAT_STEPS <= 1 ? 0 : step / (SAT_STEPS - 1);
+        }
+
+        function quantizedValue(step) {
+            return VALUE_STEPS <= 1 ? 1 : 1 - (step / (VALUE_STEPS - 1));
+        }
+
+        function fillSolidCell(ctx, x0, y0, x1, y1, color) {
+            ctx.fillStyle = rgbToHex(color);
+            ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
+        }
+
+        function drawColorSquare() {
+            const cellWidth = colorSquare.width / SAT_STEPS;
+            const cellHeight = colorSquare.height / VALUE_STEPS;
+            const hue = quantizedHue(hueIndex);
+            colorSquareCtx.clearRect(0, 0, colorSquare.width, colorSquare.height);
+
+            for (let sy = 0; sy < SAT_STEPS; sy++) {
+                for (let vy = 0; vy < VALUE_STEPS; vy++) {
+                    const x0 = Math.floor(sy * cellWidth);
+                    const y0 = Math.floor(vy * cellHeight);
+                    const x1 = Math.floor((sy + 1) * cellWidth);
+                    const y1 = Math.floor((vy + 1) * cellHeight);
+                    const base = hsvToRgb(hue, quantizedSaturation(sy), quantizedValue(vy));
+                    fillSolidCell(colorSquareCtx, x0, y0, x1, y1, base);
+                }
+            }
+
+            const selectX = Math.floor(satIndex * cellWidth);
+            const selectY = Math.floor(valueIndex * cellHeight);
+            const selectW = Math.max(2, Math.ceil(cellWidth));
+            const selectH = Math.max(2, Math.ceil(cellHeight));
+
+            colorSquareCtx.strokeStyle = "#fff6d8";
+            colorSquareCtx.lineWidth = 2;
+            colorSquareCtx.strokeRect(selectX + 1, selectY + 1, Math.max(0, selectW - 2), Math.max(0, selectH - 2));
+            colorSquareCtx.strokeStyle = "#140306";
+            colorSquareCtx.lineWidth = 1;
+            colorSquareCtx.strokeRect(selectX + 0.5, selectY + 0.5, Math.max(1, selectW - 1), Math.max(1, selectH - 1));
+        }
+
+        function drawHueSlider() {
+            const bandHeight = hueSlider.height / HUE_STEPS;
+            hueSliderCtx.clearRect(0, 0, hueSlider.width, hueSlider.height);
+
+            for (let hy = 0; hy < HUE_STEPS; hy++) {
+                const y0 = Math.floor(hy * bandHeight);
+                const y1 = Math.floor((hy + 1) * bandHeight);
+                const base = hsvToRgb(quantizedHue(hy), 1, 1);
+                fillSolidCell(hueSliderCtx, 0, y0, hueSlider.width, y1, base);
+            }
+
+            const selectY = Math.floor(hueIndex * bandHeight);
+            const selectH = Math.max(2, Math.ceil(bandHeight));
+            hueSliderCtx.strokeStyle = "#fff6d8";
+            hueSliderCtx.lineWidth = 2;
+            hueSliderCtx.strokeRect(1, selectY + 1, Math.max(0, hueSlider.width - 2), Math.max(0, selectH - 2));
+            hueSliderCtx.strokeStyle = "#140306";
+            hueSliderCtx.lineWidth = 1;
+            hueSliderCtx.strokeRect(0.5, selectY + 0.5, Math.max(1, hueSlider.width - 1), Math.max(1, selectH - 1));
+        }
+
+        function applyBrushColor(hex) {
+            const normalized = normalizeHex(hex);
+            brushColor.value = normalized;
+            colorSwatch.style.background = normalized;
+            colorPickerChip.style.background = normalized;
+            colorHexReadout.textContent = normalized;
+            colorToggleText.textContent = normalized;
+            drawHueSlider();
+            drawColorSquare();
+            renderColorHistory();
+        }
+
+        function setBrushColorFromIndices() {
+            const rgb = hsvToRgb(
+                quantizedHue(hueIndex),
+                quantizedSaturation(satIndex),
+                quantizedValue(valueIndex)
+            );
+            applyBrushColor(rgbToHex(rgb));
+        }
+
+        function setBrushColorHex(hex, commit = false) {
+            const normalized = normalizeHex(hex);
+            const rgb = hexToRgb(normalized);
+            const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+            hueIndex = Math.max(0, Math.min(HUE_STEPS - 1, Math.round(hsv.h * HUE_STEPS) % HUE_STEPS));
+            satIndex = Math.max(0, Math.min(SAT_STEPS - 1, Math.round(hsv.s * (SAT_STEPS - 1))));
+            valueIndex = Math.max(0, Math.min(VALUE_STEPS - 1, Math.round((1 - hsv.v) * (VALUE_STEPS - 1))));
+            applyBrushColor(normalized);
+            if (commit) commitCurrentColorToHistory();
+        }
+
+        function initializeBrushColorState() {
+            setBrushColorHex(brushColor.value, false);
+        }
+
+        function colorIsDefault(hex) {
+            const normalized = normalizeHex(hex);
+            return DEFAULT_COLOR_HISTORY.includes(normalized);
+        }
+
+        function addColorToHistory(hex) {
+            const normalized = normalizeHex(hex);
+            if (colorIsDefault(normalized)) {
+                renderColorHistory();
+                return;
+            }
+            colorHistory = colorHistory.filter((item) => normalizeHex(item) !== normalized);
+            colorHistory.push(normalized);
+            colorHistory = colorHistory.slice(-MAX_USER_COLORS);
+            renderColorHistory();
+        }
+
+        function commitCurrentColorToHistory() {
+            addColorToHistory(brushColor.value);
+            scheduleSave();
+        }
+
+        function makeColorButton(hex, className, commitOnClick = false) {
+            const normalized = normalizeHex(hex);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `${className} ${normalizeHex(brushColor.value) === normalized ? "active" : ""}`;
+            button.title = normalized;
+            button.style.background = normalized;
+            button.addEventListener("click", () => {
+                setBrushColorHex(normalized, commitOnClick);
+                setStatus("COLOR");
+                scheduleSave();
+            });
+            return button;
+        }
+
+        function renderColorHistory() {
+            colorHistoryEl.innerHTML = "";
+            quickColorHistoryEl.innerHTML = "";
+            const swatches = [...DEFAULT_COLOR_HISTORY, ...colorHistory].slice(0, DEFAULT_COLOR_HISTORY.length + MAX_USER_COLORS);
+            swatches.forEach((hex) => {
+                colorHistoryEl.append(makeColorButton(hex, "history-swatch", false));
+            });
+
+            const quickSwatches = swatches.slice(Math.max(0, swatches.length - 5));
+            quickSwatches.forEach((hex) => {
+                quickColorHistoryEl.append(makeColorButton(hex, "quick-swatch", false));
+            });
+        }
+
+        function updateSquareFromEvent(event) {
+            const rect = colorSquare.getBoundingClientRect();
+            const relX = clamp01((event.clientX - rect.left) / rect.width);
+            const relY = clamp01((event.clientY - rect.top) / rect.height);
+            satIndex = Math.max(0, Math.min(SAT_STEPS - 1, Math.round(relX * (SAT_STEPS - 1))));
+            valueIndex = Math.max(0, Math.min(VALUE_STEPS - 1, Math.round(relY * (VALUE_STEPS - 1))));
+            setBrushColorFromIndices();
+        }
+
+        function updateHueFromEvent(event) {
+            const rect = hueSlider.getBoundingClientRect();
+            const relY = clamp01((event.clientY - rect.top) / rect.height);
+            hueIndex = Math.max(0, Math.min(HUE_STEPS - 1, Math.round(relY * (HUE_STEPS - 1))));
+            setBrushColorFromIndices();
+        }
+
+        colorSquare.addEventListener("pointerdown", (event) => {
+            draggingSquare = true;
+            colorSquare.setPointerCapture(event.pointerId);
+            updateSquareFromEvent(event);
+            setStatus("COLOR");
+        });
+
+        colorSquare.addEventListener("pointermove", (event) => {
+            if (!draggingSquare) return;
+            updateSquareFromEvent(event);
+        });
+
+        colorSquare.addEventListener("pointerup", () => {
+            draggingSquare = false;
+            commitCurrentColorToHistory();
+        });
+
+        colorSquare.addEventListener("pointercancel", () => {
+            draggingSquare = false;
+            commitCurrentColorToHistory();
+        });
+
+        hueSlider.addEventListener("pointerdown", (event) => {
+            draggingHue = true;
+            hueSlider.setPointerCapture(event.pointerId);
+            updateHueFromEvent(event);
+            setStatus("COLOR");
+        });
+
+        hueSlider.addEventListener("pointermove", (event) => {
+            if (!draggingHue) return;
+            updateHueFromEvent(event);
+        });
+
+        hueSlider.addEventListener("pointerup", () => {
+            draggingHue = false;
+            commitCurrentColorToHistory();
+        });
+
+        hueSlider.addEventListener("pointercancel", () => {
+            draggingHue = false;
+            commitCurrentColorToHistory();
+        });
+
+        function setColorPickerOpen(open) {
+            colorPickerPanel.classList.toggle("open", open);
+            colorPickerToggle.classList.toggle("open", open);
+            colorPickerToggle.querySelector("span:last-child").textContent = open ? "▾" : "▴";
+        }
+
+        colorPickerToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            setColorPickerOpen(!colorPickerPanel.classList.contains("open"));
+        });
+
+        colorPickerShell.addEventListener("pointerdown", (event) => {
+            event.stopPropagation();
+        });
+
+        document.addEventListener("pointerdown", () => {
+            setColorPickerOpen(false);
+        });
+
+        function canvasPoint(event) {
+            const rect = paintCanvas.getBoundingClientRect();
+
+            return {
+                x: (event.clientX - rect.left) * (paintCanvas.width / rect.width),
+                y: (event.clientY - rect.top) * (paintCanvas.height / rect.height)
+            };
+        }
+
+        function clampCoord(value) {
+            return Math.max(0, Math.min(FACE_SIZE - 1, Math.round(value)));
+        }
+
+        function stampSquare(ctx, centerX, centerY, size, erase = false) {
+            const brush = Math.max(1, Math.round(size));
+            const radius = brush / 2;
+            const radiusSq = radius * radius;
+            const localCenter = (brush - 1) / 2;
+
+            const startX = Math.round(centerX - localCenter);
+            const startY = Math.round(centerY - localCenter);
+
+            if (!erase) {
+                ctx.fillStyle = brushColor.value;
+            }
+
+            // Pixelated round brush: draws hard-edged horizontal pixel rows,
+            // not a smooth anti-aliased canvas arc.
+            for (let py = 0; py < brush; py++) {
+                const y = startY + py;
+                if (y < 0 || y >= FACE_SIZE) continue;
+
+                const dy = py - localCenter;
+                const span = Math.sqrt(Math.max(0, radiusSq - dy * dy));
+
+                const localX0 = Math.ceil(localCenter - span);
+                const localX1 = Math.floor(localCenter + span);
+
+                const x0 = Math.max(0, startX + localX0);
+                const x1 = Math.min(FACE_SIZE - 1, startX + localX1);
+                const width = x1 - x0 + 1;
+
+                if (width <= 0) continue;
+
+                if (erase) {
+                    ctx.clearRect(x0, y, width, 1);
+                } else {
+                    ctx.fillRect(x0, y, width, 1);
+                }
+            }
+        }
+
+
+        function rasterLine(x0, y0, x1, y1, plot) {
+            x0 = clampCoord(x0);
+            y0 = clampCoord(y0);
+            x1 = clampCoord(x1);
+            y1 = clampCoord(y1);
+
+            let dx = Math.abs(x1 - x0);
+            let sx = x0 < x1 ? 1 : -1;
+            let dy = -Math.abs(y1 - y0);
+            let sy = y0 < y1 ? 1 : -1;
+            let err = dx + dy;
+
+            while (true) {
+                plot(x0, y0);
+
+                if (x0 === x1 && y0 === y1) {
+                    break;
+                }
+
+                const e2 = err * 2;
+
+                if (e2 >= dy) {
+                    err += dy;
+                    x0 += sx;
+                }
+
+                if (e2 <= dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
+        }
+
+        function plotBrush(ctx, x, y, erase = false) {
+            stampSquare(ctx, x, y, Number(brushSize.value), erase);
+        }
+
+        function drawLinePixels(ctx, startPoint, endPoint, erase = false) {
+            rasterLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, (x, y) => {
+                plotBrush(ctx, x, y, erase);
+            });
+        }
+
+        function drawRectPixels(ctx, startPoint, endPoint) {
+            const x0 = clampCoord(Math.min(startPoint.x, endPoint.x));
+            const y0 = clampCoord(Math.min(startPoint.y, endPoint.y));
+            const x1 = clampCoord(Math.max(startPoint.x, endPoint.x));
+            const y1 = clampCoord(Math.max(startPoint.y, endPoint.y));
+
+            rasterLine(x0, y0, x1, y0, (x, y) => plotBrush(ctx, x, y));
+            if (y1 !== y0) {
+                rasterLine(x0, y1, x1, y1, (x, y) => plotBrush(ctx, x, y));
+            }
+            rasterLine(x0, y0, x0, y1, (x, y) => plotBrush(ctx, x, y));
+            if (x1 !== x0) {
+                rasterLine(x1, y0, x1, y1, (x, y) => plotBrush(ctx, x, y));
+            }
+        }
+
+        function plotEllipseSymmetry(cx, cy, x, y, plot) {
+            plot(cx + x, cy + y);
+            plot(cx - x, cy + y);
+            plot(cx + x, cy - y);
+            plot(cx - x, cy - y);
+        }
+
+        function drawEllipsePixels(ctx, startPoint, endPoint) {
+            const left = clampCoord(Math.min(startPoint.x, endPoint.x));
+            const top = clampCoord(Math.min(startPoint.y, endPoint.y));
+            const right = clampCoord(Math.max(startPoint.x, endPoint.x));
+            const bottom = clampCoord(Math.max(startPoint.y, endPoint.y));
+            const rx = Math.round((right - left) / 2);
+            const ry = Math.round((bottom - top) / 2);
+            const cx = Math.round((left + right) / 2);
+            const cy = Math.round((top + bottom) / 2);
+
+            if (rx === 0 && ry === 0) {
+                plotBrush(ctx, cx, cy);
+                return;
+            }
+            if (rx === 0) {
+                rasterLine(cx, top, cx, bottom, (x, y) => plotBrush(ctx, x, y));
+                return;
+            }
+            if (ry === 0) {
+                rasterLine(left, cy, right, cy, (x, y) => plotBrush(ctx, x, y));
+                return;
+            }
+
+            const plot = (x, y) => plotBrush(ctx, x, y);
+            const rxSq = rx * rx;
+            const rySq = ry * ry;
+            let x = 0;
+            let y = ry;
+            let dx = 0;
+            let dy = 2 * rxSq * y;
+            let p1 = rySq - (rxSq * ry) + (0.25 * rxSq);
+
+            while (dx < dy) {
+                plotEllipseSymmetry(cx, cy, x, y, plot);
+                x += 1;
+                dx += 2 * rySq;
+
+                if (p1 < 0) {
+                    p1 += dx + rySq;
+                } else {
+                    y -= 1;
+                    dy -= 2 * rxSq;
+                    p1 += dx - dy + rySq;
+                }
+            }
+
+            let p2 = (rySq * (x + 0.5) * (x + 0.5)) + (rxSq * (y - 1) * (y - 1)) - (rxSq * rySq);
+
+            while (y >= 0) {
+                plotEllipseSymmetry(cx, cy, x, y, plot);
+                y -= 1;
+                dy -= 2 * rxSq;
+
+                if (p2 > 0) {
+                    p2 += rxSq - dy;
+                } else {
+                    x += 1;
+                    dx += 2 * rySq;
+                    p2 += dx - dy + rxSq;
+                }
+            }
+        }
+
+        function strokeTo(point) {
+            if (!last) {
+                last = point;
+            }
+
+            drawLinePixels(paintCtx, last, point, tool === "eraser");
+            last = point;
+            markFaceChanged(currentFace);
+            saveEditorToFace(false);
+        }
+
+        function previewShape(point) {
+            paintCtx.putImageData(shapeSnapshot, 0, 0);
+
+            if (tool === "line") {
+                drawLinePixels(paintCtx, shapeStart, point, false);
+            }
+            if (tool === "rect") {
+                drawRectPixels(paintCtx, shapeStart, point);
+            }
+            if (tool === "circle") {
+                drawEllipsePixels(paintCtx, shapeStart, point);
+            }
+
+            markFaceChanged(currentFace);
+            saveEditorToFace(false);
+        }
+
+        function colorFromHex(hex) {
+            const rgb = hexToRgb(hex);
+            return { r: rgb.r, g: rgb.g, b: rgb.b, a: 255 };
+        }
+
+        function colorsEqual(a, b) {
+            return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a;
+        }
+
+        function pixelWithinTolerance(data, index, target, tolerance, alphaTolerance) {
+            return Math.abs(data[index] - target.r) <= tolerance &&
+                Math.abs(data[index + 1] - target.g) <= tolerance &&
+                Math.abs(data[index + 2] - target.b) <= tolerance &&
+                Math.abs(data[index + 3] - target.a) <= alphaTolerance;
+        }
+
+        function floodFill(point) {
+            const x = clampCoord(point.x);
+            const y = clampCoord(point.y);
+            const imageData = paintCtx.getImageData(0, 0, FACE_SIZE, FACE_SIZE);
+            const data = imageData.data;
+            const startIndex = (y * FACE_SIZE + x) * 4;
+            const target = {
+                r: data[startIndex],
+                g: data[startIndex + 1],
+                b: data[startIndex + 2],
+                a: data[startIndex + 3]
+            };
+            const replacement = colorFromHex(brushColor.value);
+
+            if (colorsEqual(target, replacement)) {
+                setStatus("SAME");
+                return;
+            }
+
+            const tolerance = target.a === 0 ? 0 : 64;
+            const alphaTolerance = target.a === 0 ? 0 : 96;
+            const visited = new Uint8Array(FACE_SIZE * FACE_SIZE);
+            const stack = [[x, y]];
+
+            while (stack.length) {
+                const [nextX, nextY] = stack.pop();
+
+                if (nextX < 0 || nextX >= FACE_SIZE || nextY < 0 || nextY >= FACE_SIZE) {
+                    continue;
+                }
+
+                const pixelIndex = nextY * FACE_SIZE + nextX;
+                if (visited[pixelIndex]) {
+                    continue;
+                }
+                visited[pixelIndex] = 1;
+
+                const index = pixelIndex * 4;
+                if (!pixelWithinTolerance(data, index, target, tolerance, alphaTolerance)) {
+                    continue;
+                }
+
+                data[index] = replacement.r;
+                data[index + 1] = replacement.g;
+                data[index + 2] = replacement.b;
+                data[index + 3] = replacement.a;
+
+                stack.push([nextX + 1, nextY]);
+                stack.push([nextX - 1, nextY]);
+                stack.push([nextX, nextY + 1]);
+                stack.push([nextX, nextY - 1]);
+                stack.push([nextX + 1, nextY + 1]);
+                stack.push([nextX - 1, nextY - 1]);
+                stack.push([nextX + 1, nextY - 1]);
+                stack.push([nextX - 1, nextY + 1]);
+            }
+
+            paintCtx.putImageData(imageData, 0, 0);
+            faces[currentFace].sourceName = "fill";
+            faces[currentFace].changed = true;
+            setStatus("FILL");
+        }
+
+        paintCanvas.addEventListener("pointerdown", (event) => {
+            const point = canvasPoint(event);
+            stopFaceAnimation(faces[currentFace]);
+
+            if (tool === "fill") {
+                pushUndo(currentFace);
+                floodFill(point);
+                saveEditorToFace(true);
+                return;
+            }
+
+            pushUndo(currentFace);
+
+            drawing = true;
+            paintCanvas.setPointerCapture(event.pointerId);
+            last = point;
+
+            if (["line", "rect", "circle"].includes(tool)) {
+                shapeStart = last;
+                shapeSnapshot = paintCtx.getImageData(0, 0, FACE_SIZE, FACE_SIZE);
+            } else {
+                strokeTo(last);
+            }
+        });
+
+        paintCanvas.addEventListener("pointermove", (event) => {
+            if (!drawing) return;
+
+            const point = canvasPoint(event);
+
+            if (["line", "rect", "circle"].includes(tool)) {
+                previewShape(point);
+            } else {
+                strokeTo(point);
+            }
+        });
+
+        paintCanvas.addEventListener("pointerenter", (event) => {
+            brushCursorVisible = true;
+            brushCursorPoint = canvasPoint(event);
+            drawBrushCursor();
+        });
+
+        paintCanvas.addEventListener("pointermove", (event) => {
+            brushCursorVisible = true;
+            brushCursorPoint = canvasPoint(event);
+            drawBrushCursor();
+        });
+
+        function plotCursorPixel(ctx, x, y) {
+            x = Math.round(x);
+            y = Math.round(y);
+
+            if (x < 0 || x >= FACE_SIZE || y < 0 || y >= FACE_SIZE) return;
+
+            ctx.fillRect(x, y, 1, 1);
+        }
+
+        function drawPixelCircleOutline(ctx, cx, cy, radius) {
+            cx = Math.round(cx);
+            cy = Math.round(cy);
+            radius = Math.max(1, Math.round(radius));
+
+            let x = radius;
+            let y = 0;
+            let err = 0;
+
+            while (x >= y) {
+                plotCursorPixel(ctx, cx + x, cy + y);
+                plotCursorPixel(ctx, cx + y, cy + x);
+                plotCursorPixel(ctx, cx - y, cy + x);
+                plotCursorPixel(ctx, cx - x, cy + y);
+                plotCursorPixel(ctx, cx - x, cy - y);
+                plotCursorPixel(ctx, cx - y, cy - x);
+                plotCursorPixel(ctx, cx + y, cy - x);
+                plotCursorPixel(ctx, cx + x, cy - y);
+
+                y++;
+
+                if (err <= 0) {
+                    err += 2 * y + 1;
+                }
+
+                if (err > 0) {
+                    x--;
+                    err -= 2 * x + 1;
+                }
+            }
+        }
+
+        function drawBrushCursor() {
+            drawCanvasGuide();
+
+            if (!brushCursorVisible || !brushCursorPoint || tool === "fill") return;
+
+            const brush = Math.max(1, Math.round(Number(brushSize.value) || 1));
+            const radius = Math.max(1, (brush - 1) / 2);
+            const cx = brushCursorPoint.x;
+            const cy = brushCursorPoint.y;
+
+            guideCtx.save();
+            guideCtx.imageSmoothingEnabled = false;
+
+            // Light offset so the cursor is visible on dark colors.
+            guideCtx.fillStyle = "rgba(255, 246, 216, 0.95)";
+            drawPixelCircleOutline(guideCtx, cx + 1, cy + 1, radius);
+
+            // Main dark pixel outline.
+            guideCtx.fillStyle = "rgba(20, 3, 6, 0.95)";
+            drawPixelCircleOutline(guideCtx, cx, cy, radius);
+
+            guideCtx.restore();
+        }
+
+        function hideBrushCursor() {
+            brushCursorVisible = false;
+            brushCursorPoint = null;
+            drawCanvasGuide();
+        }
+
+        paintCanvas.addEventListener("pointerleave", hideBrushCursor);
+        paintCanvas.addEventListener("pointercancel", hideBrushCursor);
+
+        function stopDrawing() {
+            if (drawing) {
+                saveEditorToFace(true);
+                scheduleSave();
+            }
+
+            drawing = false;
+            last = null;
+            shapeStart = null;
+            shapeSnapshot = null;
+        }
+
+        paintCanvas.addEventListener("pointerup", stopDrawing);
+        paintCanvas.addEventListener("pointercancel", stopDrawing);
+        paintCanvas.addEventListener("pointerleave", stopDrawing);
+
+        document.getElementById("clearBtn").addEventListener("click", () => {
+            pushUndo(currentFace);
+
+            stopFaceAnimation(faces[currentFace]);
+            paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            paintCtx.fillStyle = BLANK_FILL;
+            paintCtx.fillRect(0, 0, FACE_SIZE, FACE_SIZE);
+            faces[currentFace].sourceName = "blank";
+            faces[currentFace].changed = false;
+            faces[currentFace].hasArt = true;
+
+            saveEditorToFace(true);
+            setStatus("CLEAR");
+        });
+
+        document.getElementById("imageUpload").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            pushUndo(currentFace);
+            stopFaceAnimation(faces[currentFace]);
+
+            const image = new Image();
+            image.crossOrigin = "anonymous";
+            image.decoding = "async";
+            const url = URL.createObjectURL(file);
+            const isGif = file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif");
+
+            image.onload = () => {
+                const face = faces[currentFace];
+
+                if (isGif) {
+                    face.animation = {
+                        image,
+                        url,
+                        sourceName: file.name,
+                        kind: "gif"
+                    };
+                    face.sourceName = file.name;
+                    face.hasArt = true;
+                    face.changed = true;
+                    syncAnimatedFace(currentFace);
+                    renderFaceList();
+                    scheduleSave();
+                    setStatus("GIF");
+                } else {
+                    paintCtx.save();
+                    paintCtx.globalCompositeOperation = "source-over";
+                    drawImageCover(paintCtx, image);
+                    paintCtx.restore();
+
+                    face.sourceName = file.name;
+                    face.changed = true;
+                    saveEditorToFace(true);
+
+                    URL.revokeObjectURL(url);
+                    setStatus("LOAD");
+                }
+            };
+
+            image.src = url;
+            event.target.value = "";
+        });
+
+        function moveSelectedFace(delta) {
+            if (!faces.length) return;
+
+            const next = (currentFace + delta + faces.length) % faces.length;
+            switchFace(next, true);
+            setStatus(`SELECT ${faces[next]?.name || "FACE"}`);
+            updateDebugInfo();
+        }
+
+
+        function copyCurrentFace() {
+            saveEditorToFace(true);
+
+            const face = faces[currentFace];
+            if (!face) return;
+
+            copyBuffer = {
+                imageData: snapshotCanvas(face.canvas),
+                hasArt: face.hasArt,
+                sourceName: face.sourceName,
+                changed: face.changed,
+                tiling: face.tiling
+            };
+
+            setStatus("COPIED");
+        }
+
+        function pasteToCurrentFace() {
+            if (!copyBuffer) {
+                setStatus("NO COPY");
+                return;
+            }
+
+            const face = faces[currentFace];
+            if (!face) return;
+
+            pushUndo(currentFace);
+            stopFaceAnimation(face);
+
+            restoreCanvas(face.canvas, copyBuffer.imageData);
+            face.hasArt = copyBuffer.hasArt;
+            face.sourceName = copyBuffer.sourceName || "pasted";
+            face.changed = true;
+            face.tiling = Math.max(1, Math.min(MAX_TILING, Number(copyBuffer.tiling || face.tiling || 1)));
+
+            rebuildTexture(currentFace);
+            loadFaceIntoEditor(true);
+            renderFaceList();
+            updateTilingControl();
+            scheduleSave();
+            setStatus("PASTED");
+        }
+
+        document.getElementById("copyBtn").addEventListener("click", copyCurrentFace);
+        document.getElementById("pasteBtn").addEventListener("click", pasteToCurrentFace);
+
+        document.getElementById("bgColor").addEventListener("input", (event) => {
+            if (renderer) {
+                renderer.setClearColor(event.target.value);
+            }
+            scheduleSave();
+        });
+
+        for (const id of ["speed", "gifSize", "gifFrames", "gifFps"]) {
+            document.getElementById(id).addEventListener("input", scheduleSave);
+        }
+
+        function isTypingTarget(target) {
+            return target &&
+                (
+                    target.tagName === "INPUT" ||
+                    target.tagName === "TEXTAREA" ||
+                    target.tagName === "SELECT" ||
+                    target.isContentEditable
+                );
+        }
+
+        document.addEventListener("keydown", (event) => {
+            const key = event.key.toLowerCase();
+            const mod = event.ctrlKey || event.metaKey;
+
+            // Don't hijack shortcuts while typing in inputs/sliders/selects.
+            if (isTypingTarget(event.target)) return;
+
+            if (mod && key === "z" && !event.shiftKey) {
+                event.preventDefault();
+                undoFace();
+                return;
+            }
+
+            if (mod && (key === "y" || (key === "z" && event.shiftKey))) {
+                event.preventDefault();
+                redoFace();
+                return;
+            }
+
+            if (mod && key === "c") {
+                event.preventDefault();
+                copyCurrentFace();
+                return;
+            }
+
+            if (mod && key === "v") {
+                event.preventDefault();
+                pasteToCurrentFace();
+                return;
+            }
+
+            if (!mod && event.key === "ArrowUp") {
+                event.preventDefault();
+                moveSelectedFace(-1);
+                return;
+            }
+
+            if (!mod && event.key === "ArrowDown") {
+                event.preventDefault();
+                moveSelectedFace(1);
+                return;
+            }
+        });
+
+        let lastTime = performance.now();
+
+        function animate(now) {
+            updateAnimatedFaces();
+
+            const dt = Math.min((now - lastTime) / 1000, 0.05);
+            lastTime = now;
+
+            if (webglAvailable && renderer && scene && camera && shapeMesh) {
+                const speed = Number(document.getElementById("speed").value);
+
+                shapeMesh.rotation.y += dt * speed;
+                shapeMesh.rotation.z = 0;
+
+                updateDebugInfo();
+                renderer.render(scene, camera);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = filename;
+            link.textContent = filename;
+            link.click();
+
+            const result = document.getElementById("result");
+            result.innerHTML = "";
+            result.append(link);
+        }
+
+        document.getElementById("exportGifBtn").addEventListener("click", async () => {
+            if (!webglAvailable || !renderer || !scene || !camera || !shapeMesh) {
+                setStatus("NO WEBGL");
+                return;
+            }
+
+            saveEditorToFace(true);
+
+            if (!window.GIF) {
+                setStatus("GIF LIB?");
+                return;
+            }
+
+            const exportBtn = document.getElementById("exportGifBtn");
+            exportBtn.disabled = true;
+            setStatus("RENDER");
+
+            const size = Number(document.getElementById("gifSize").value);
+            const frames = Math.max(24, Math.min(180, Number(document.getElementById("gifFrames").value) || 96));
+            const fps = Math.max(8, Math.min(30, Number(document.getElementById("gifFps").value) || 24));
+            const delay = Math.round(1000 / fps);
+
+            const exportRenderer = new THREE.WebGLRenderer({
+                antialias: true,
+                preserveDrawingBuffer: true
+            });
+            exportRenderer.setPixelRatio(1);
+            exportRenderer.setSize(size, size, false);
+            exportRenderer.setClearColor(document.getElementById("bgColor").value);
+
+            const exportScene = new THREE.Scene();
+            const exportCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+            positionCamera(exportCamera, DEFAULT_CAMERA_DISTANCE, 0);
+            addShadingLightsToScene(exportScene);
+
+            const exportTextures = faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
+            const exportMaterials = exportTextures.map(makeFaceMaterial);
+            const exportGeometry = createGeometry(getCurrentShapeDef());
+            const exportMesh = new THREE.Mesh(exportGeometry, exportMaterials);
+            exportScene.add(exportMesh);
+
+            function cleanupExportRenderer() {
+                exportScene.remove(exportMesh);
+                exportGeometry.dispose();
+                exportMaterials.forEach((material) => material.dispose());
+                exportTextures.forEach((texture) => texture.dispose());
+                exportRenderer.dispose();
+            }
+
+            const gif = new GIF({
+                workers: 2,
+                quality: 8,
+                width: size,
+                height: size,
+                workerScript: "https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js"
+            });
+
+            gif.on("progress", (progress) => {
+                setStatus(`${Math.round(progress * 100)}%`);
+            });
+
+            gif.on("finished", (blob) => {
+                cleanupExportRenderer();
+                downloadBlob(blob, "cubepaint.gif");
+                setStatus(`${(blob.size / 1024 / 1024).toFixed(2)}MB`);
+
+                exportBtn.disabled = false;
+            });
+
+            try {
+                for (let i = 0; i < frames; i++) {
+                    const t = i / frames;
+
+                    exportMesh.rotation.x = 0;
+                    exportMesh.rotation.y = t * Math.PI * 2;
+                    exportMesh.rotation.z = 0;
+
+                    exportRenderer.render(exportScene, exportCamera);
+                    gif.addFrame(exportRenderer.domElement, { copy: true, delay });
+
+                    if (i % 8 === 0) {
+                        setStatus(`${i + 1}/${frames}`);
+                        await new Promise(requestAnimationFrame);
+                    }
+                }
+
+                setStatus("GIF");
+                gif.render();
+            } catch (error) {
+                cleanupExportRenderer();
+                exportBtn.disabled = false;
+                setStatus("GIF ERR");
+                console.warn("CubePaint GIF export failed:", error);
+            }
+        });
+
+        function serializeFace(face) {
+            const state = {
+                name: face.name,
+                hasArt: face.hasArt,
+                changed: face.changed,
+                sourceName: face.sourceName,
+                tiling: Math.max(1, Math.min(MAX_TILING, Number(face.tiling || 1))),
+                mapMode: face.mapMode === "fit" ? "fit" : "whole"
+            };
+
+            if (face.changed || face.sourceName !== "blank" || !face.hasArt) {
+                try {
+                    state.image = face.canvas.toDataURL("image/png");
+                } catch (error) {
+                    console.warn("Face could not be serialized:", face.name, error);
+                }
+            }
+
+            return state;
+        }
+
+        function makeSessionPayload() {
+            saveCurrentShapeContext();
+            const shapes = {};
+            Object.entries(shapeStore).forEach(([id, store]) => {
+                shapes[id] = {
+                    currentFace: store.currentFace,
+                    faces: store.faces.map(serializeFace)
+                };
+            });
+
+            return {
+                version: 6,
+                savedAt: Date.now(),
+                currentShapeId,
+                tool,
+                color: normalizeHex(brushColor.value),
+                brushSize: brushSize.value,
+                hueIndex,
+                satIndex,
+                valueIndex,
+                colorHistory,
+                settings: {
+                    speed: document.getElementById("speed").value,
+                    gifSize: document.getElementById("gifSize").value,
+                    gifFrames: document.getElementById("gifFrames").value,
+                    gifFps: document.getElementById("gifFps").value,
+                    bgColor: document.getElementById("bgColor").value,
+                    shadingEnabled
+                },
+                camera: {
+                    distance: cameraDistance,
+                    verticalOrbit: cameraVerticalOrbit
+                },
+                shapeRotations,
+                shapePolyLevels,
+                shapes
+            };
+        }
+
+        function saveCookieSettings(payload) {
+            const cookiePayload = {
+                version: payload.version,
+                currentShapeId: payload.currentShapeId,
+                tool: payload.tool,
+                color: payload.color,
+                brushSize: payload.brushSize,
+                hueIndex: payload.hueIndex,
+                satIndex: payload.satIndex,
+                valueIndex: payload.valueIndex,
+                colorHistory: payload.colorHistory,
+                settings: payload.settings,
+                camera: payload.camera,
+                shapeRotations: payload.shapeRotations,
+                shapePolyLevels: payload.shapePolyLevels
+            };
+
+            try {
+                document.cookie = `${COOKIE_KEY}=${encodeURIComponent(JSON.stringify(cookiePayload))}; max-age=31536000; path=/; SameSite=Lax`;
+            } catch (error) {
+                console.warn("CubePaint settings cookie could not be written:", error);
+            }
+        }
+
+        function saveSession() {
+            if (loadingSession) return;
+            saveEditorToFace(false, false);
+            const payload = makeSessionPayload();
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                saveCookieSettings(payload);
+                setStatus("SAVED");
+            } catch (error) {
+                console.warn("CubePaint session could not be saved:", error);
+                saveCookieSettings(payload);
+                setStatus("SAVE LIMIT");
+            }
+        }
+
+        function scheduleSave() {
+            if (loadingSession) return;
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveSession, 650);
+        }
+
+        function restoreInputsFromSession(session) {
+            if (!session) return;
+
+            if (session.settings) {
+                if (session.settings.speed != null) document.getElementById("speed").value = session.settings.speed;
+                if (session.settings.gifSize != null) document.getElementById("gifSize").value = session.settings.gifSize;
+                if (session.settings.gifFrames != null) document.getElementById("gifFrames").value = session.settings.gifFrames;
+                if (session.settings.gifFps != null) document.getElementById("gifFps").value = session.settings.gifFps;
+                if (session.settings.bgColor != null) document.getElementById("bgColor").value = normalizeHex(session.settings.bgColor, "#140306");
+                if (session.settings.shadingEnabled != null) {
+                    setShadingEnabled(
+                        session.settings.shadingEnabled === true || session.settings.shadingEnabled === "true",
+                        false
+                    );
+                }
+            }
+
+            if (renderer) {
+                renderer.setClearColor(document.getElementById("bgColor").value);
+            }
+
+            if (session.brushSize != null) {
+                brushSize.value = String(Math.max(Number(brushSize.min), Math.min(Number(brushSize.max), Number(session.brushSize) || 8)));
+            }
+
+            brushReadout.textContent = `${brushSize.value}PX`;
+            sizeMiniReadout.textContent = `${brushSize.value}PX`;
+
+            if (Array.isArray(session.colorHistory)) {
+                colorHistory = session.colorHistory
+                    .map((hex) => normalizeHex(hex, ""))
+                    .filter((hex) => /^#[0-9A-F]{6}$/.test(hex) && !colorIsDefault(hex))
+                    .slice(-MAX_USER_COLORS);
+            }
+
+            brushColor.value = normalizeHex(session.color || brushColor.value);
+            if (Number.isInteger(session.hueIndex)) hueIndex = session.hueIndex;
+            if (Number.isInteger(session.satIndex)) satIndex = session.satIndex;
+            if (Number.isInteger(session.valueIndex)) valueIndex = session.valueIndex;
+            setBrushColorHex(brushColor.value, false);
+
+            if (session.tool) {
+                setTool(session.tool);
+            }
+        }
+
+        function loadImageToFace(shapeId, faceIndex, savedFace) {
+            const store = getShapeStore(shapeId);
+            const face = store.faces[faceIndex];
+            if (!face) return;
+
+            face.hasArt = savedFace.hasArt ?? true;
+            face.changed = savedFace.changed ?? Boolean(savedFace.image);
+            face.sourceName = savedFace.sourceName || "blank";
+            face.tiling = Math.max(1, Math.min(MAX_TILING, Number(savedFace.tiling || 1)));
+            face.mapMode = savedFace.mapMode === "fit" ? "fit" : "whole";
+
+            if (!savedFace.image) {
+                if (!face.changed && face.sourceName === "blank") {
+                    fillBlank(face.canvas);
+                }
+                if (shapeId === currentShapeId) {
+                    rebuildTexture(faceIndex);
+                    renderFaceList();
+                }
+                return;
+            }
+
+            const image = new Image();
+            image.onload = () => {
+                const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
+                ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+                ctx.drawImage(image, 0, 0, FACE_SIZE, FACE_SIZE);
+
+                if (shapeId === currentShapeId) {
+                    rebuildTexture(faceIndex);
+                    if (faceIndex === currentFace) {
+                        loadFaceIntoEditor(false);
+                    }
+                    renderFaceList();
+                }
+            };
+            image.src = savedFace.image;
+        }
+
+        function restoreShapesFromSession(session) {
+            if (!session || !session.shapes) return;
+
+            Object.entries(session.shapes).forEach(([shapeId, savedShape]) => {
+                if (shapeId === "donut") shapeId = "doughnut";
+                if (!findShapeDef(shapeId)) return;
+                const store = getShapeStore(shapeId);
+                if (Number.isInteger(savedShape.currentFace)) {
+                    store.currentFace = Math.max(0, Math.min(store.faces.length - 1, savedShape.currentFace));
+                }
+                if (Array.isArray(savedShape.faces)) {
+                    savedShape.faces.forEach((savedFace, faceIndex) => {
+                        loadImageToFace(shapeId, faceIndex, savedFace);
+                    });
+                }
+            });
+
+            const currentStore = getShapeStore(currentShapeId);
+            currentFace = Math.max(0, Math.min(faces.length - 1, currentStore.currentFace));
+        }
+
+        function boot() {
+            restoreInputsFromSession(savedSession);
+            restoreShapesFromSession(savedSession);
+
+            updateShapeReadout();
+            buildShapeMesh();
+            rebuildAllTextures();
+            renderFaceList();
+            loadFaceIntoEditor(false);
+            updateUndoRedo();
+            resizeRenderer();
+            renderColorHistory();
+
+            loadingSession = false;
+            setStatus(savedSession ? "RESTORED" : "READY");
+        }
+
+        boot();
+    </script>
+</body>
+
+</html>
