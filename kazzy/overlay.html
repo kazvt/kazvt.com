@@ -3159,7 +3159,7 @@ hyphens: manual !important;
 		-3px 0 0 1px #5f7dff !important;
 }
 
-body.twoLines .hl-firstline,
+/* body.twoLines .hl-firstline,
 body.twoLines .hl-firstline *,
 body.twoLines .hl-name {
 	text-align: left !important;
@@ -3168,6 +3168,23 @@ body.twoLines .hl-name {
 	letter-spacing: normal !important;
 	word-spacing: normal !important;
 	justify-content: flex-start !important;
+} */
+
+body.twoLines .hl-firstline {
+	display: flex !important;
+	justify-content: flex-start !important;
+	text-align: left !important;
+}
+
+body.twoLines .hl-firstline .hl-name {
+	margin: auto 5px auto 0 !important;
+	margin-left: 0 !important;
+	margin-right: 5px !important;
+	width: fit-content !important;
+}
+
+body.twoLines .hl-firstline .hl-badges {
+	margin-left: 0 !important;
 }
 
 	</style>
