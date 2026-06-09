@@ -13296,6 +13296,25 @@ function parseByFileType(rawText, sourceUrl) {
 
 		return badgeContainer;
 	}
+
+	function moveDockTextBadgesBeforeUsername(msgNode) {
+	if (!msgNode || !msgNode.querySelectorAll) return;
+
+	const nameEl = msgNode.querySelector('.hl-name');
+	if (!nameEl) return;
+
+	const badgeContainer =
+		nameEl.querySelector('.hl-badges') ||
+		(nameEl.previousElementSibling && nameEl.previousElementSibling.classList.contains('hl-badges')
+			? nameEl.previousElementSibling
+			: null);
+
+	if (!badgeContainer) return;
+
+	Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge')).forEach(badge => {
+		badgeContainer.appendChild(badge);
+	});
+}
 function isColonTextNode(node) {
 	return node &&
 		node.nodeType === Node.TEXT_NODE &&
@@ -13716,19 +13735,11 @@ function scheduleWrappedLineJustification(msgNode) {
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
-	softHyphenateMessage(msgNode);
-
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
+	moveDockTextBadgesBeforeUsername(msgNode);
 	await applyPronouns(msgNode);
-	scheduleWrappedLineJustification(msgNode);
-
-	if (horizontal && typeof horizontalRealign === "function") {
-		requestAnimationFrame(() => {
-			horizontalRealign(false);
-			requestAnimationFrame(() => horizontalRealign(false));
-		});
-	}
+	moveDockTextBadgesBeforeUsername(msgNode);
 }
 
 	function applyUserMetaToAllMessages() {
