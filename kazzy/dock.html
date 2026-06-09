@@ -12690,6 +12690,25 @@ function parseByFileType(rawText, sourceUrl, sourceName = "") {
 		return badgeContainer;
 	}
 
+function moveDockTextBadgesBeforeUsername(msgNode) {
+	if (!msgNode || !msgNode.querySelectorAll) return;
+
+	const nameEl = msgNode.querySelector('.hl-name');
+	if (!nameEl) return;
+
+	const badgeContainer =
+		nameEl.querySelector('.hl-badges') ||
+		(nameEl.previousElementSibling && nameEl.previousElementSibling.classList.contains('hl-badges')
+			? nameEl.previousElementSibling
+			: null);
+
+	if (!badgeContainer) return;
+
+	Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge')).forEach(badge => {
+		badgeContainer.appendChild(badge);
+	});
+}
+
 function capDockNicknameForDisplay(value) {
 	const chars = Array.from(String(value || "").trim());
 	return chars.length > 10 ? chars.slice(0, 10).join("") : chars.join("");
@@ -12796,16 +12815,18 @@ async function applyPronouns(msgNode) {
 
 	allPronounBadges.slice(1).forEach(el => el.remove());
 
-	badgeContainer.prepend(badge);
+badgeContainer.appendChild(badge);
 }
 
-	async function applyUserMeta(msgNode) {
-		if (!msgNode || !msgNode.querySelector) return;
+async function applyUserMeta(msgNode) {
+	if (!msgNode || !msgNode.querySelector) return;
 
-		applyNick(msgNode);
-		normalizePronounBadges(msgNode);
-		await applyPronouns(msgNode);
-	}
+	applyNick(msgNode);
+	normalizePronounBadges(msgNode);
+	moveDockTextBadgesBeforeUsername(msgNode);
+	await applyPronouns(msgNode);
+	moveDockTextBadgesBeforeUsername(msgNode);
+}
 
 	function applyUserMetaToAllMessages() {
 		document.querySelectorAll('[data-mid]').forEach(node => {
