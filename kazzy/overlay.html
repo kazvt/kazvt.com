@@ -6048,35 +6048,51 @@ setTextShadow(bolderShadow);
 			document.body.classList.remove("vanilla");
 		}
 
-		if (alignbottom || fadetop) {
-			const ro = new MutationObserver(mutations => {
-				if (reversed && !forceAutoscroll) {
-				} else {
-					var delta = 0;
-					if (getById("output").lastChild) {
-						delta = parseInt(getById("output").lastChild.clientHeight);
-					}
-					if (getById("output").scrollHeight < getById("output").scrollTop + getById("output").clientHeight + autoScrollCatch + delta || forceAutoscroll) {
-						jumptoBottom2()
-					}
-				}
-			});
-			ro.observe(getById("output"), { childList: true, attributes: false, subtree: false });
-		} else {
-			const ro = new ResizeObserver(entries => {
-				if (reversed && !forceAutoscroll) {
-				} else {
-					var delta = 0;
-					if (getById("output").lastChild) {
-						delta = parseInt(getById("output").lastChild.clientHeight);
-					}
-					if (document.body.scrollHeight < document.body.scrollTop + document.body.clientHeight + autoScrollCatch + delta || forceAutoscroll) {
-						jumptoBottom2()
-					}
-				}
-			});
-			ro.observe(document.scrollingElement);
-		}
+function getDockScrollTarget() {
+	return alignbottom || fadetop
+		? getById("output")
+		: (document.scrollingElement || document.documentElement);
+}
+
+function isDockNearBottom(extra = 120) {
+	const target = getDockScrollTarget();
+	if (!target) return false;
+
+	const distanceFromBottom = target.scrollHeight - (target.scrollTop + target.clientHeight);
+	return distanceFromBottom <= extra;
+}
+
+function dockAutoScrollIfNearBottom(extra = 120) {
+	if (reversed && !forceAutoscroll) return;
+	if (!forceAutoscroll && !isDockNearBottom(extra)) return;
+
+	requestAnimationFrame(() => {
+		jumptoBottom2();
+
+		// Second pass catches messages that grow after render, like wrapped/two-line rows.
+		requestAnimationFrame(() => {
+			if (forceAutoscroll || isDockNearBottom(extra)) {
+				jumptoBottom2();
+			}
+		});
+	});
+}
+
+const dockOutputScrollObserver = new MutationObserver(() => {
+	dockAutoScrollIfNearBottom(140);
+});
+
+dockOutputScrollObserver.observe(getById("output"), {
+	childList: true,
+	attributes: false,
+	subtree: false
+});
+
+const dockOutputResizeObserver = new ResizeObserver(() => {
+	dockAutoScrollIfNearBottom(140);
+});
+
+dockOutputResizeObserver.observe(getById("output"));
 
 		if (historyMode) {
 			var historyScrollContainer = alignbottom || fadetop ? getById("output") : document.scrollingElement;
