@@ -12689,6 +12689,12 @@ function parseByFileType(rawText, sourceUrl, sourceName = "") {
 
 		return badgeContainer;
 	}
+
+function capDockNicknameForDisplay(value) {
+	const chars = Array.from(String(value || "").trim());
+	return chars.length > 10 ? chars.slice(0, 10).join("") : chars.join("");
+}
+
 function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
@@ -12717,7 +12723,7 @@ function applyNick(msgNode) {
 		return;
 	}
 
-	const nickText = nick.trim();
+const nickText = capDockNicknameForDisplay(nick);
 	const span = document.createElement('span');
 	span.className = 'hl-nick';
 
