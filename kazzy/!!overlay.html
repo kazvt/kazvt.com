@@ -472,7 +472,7 @@
 		}
 
 		.hl-badge {
-			margin: 0px 2px 0px 0px;
+			margin: 0px 4px 0px 0px;
 			max-width: 100px;
 			max-height: 20px;
 			height: 20px;
@@ -6048,35 +6048,51 @@ setTextShadow(bolderShadow);
 			document.body.classList.remove("vanilla");
 		}
 
-		if (alignbottom || fadetop) {
-			const ro = new MutationObserver(mutations => {
-				if (reversed && !forceAutoscroll) {
-				} else {
-					var delta = 0;
-					if (getById("output").lastChild) {
-						delta = parseInt(getById("output").lastChild.clientHeight);
-					}
-					if (getById("output").scrollHeight < getById("output").scrollTop + getById("output").clientHeight + autoScrollCatch + delta || forceAutoscroll) {
-						jumptoBottom2()
-					}
-				}
-			});
-			ro.observe(getById("output"), { childList: true, attributes: false, subtree: false });
-		} else {
-			const ro = new ResizeObserver(entries => {
-				if (reversed && !forceAutoscroll) {
-				} else {
-					var delta = 0;
-					if (getById("output").lastChild) {
-						delta = parseInt(getById("output").lastChild.clientHeight);
-					}
-					if (document.body.scrollHeight < document.body.scrollTop + document.body.clientHeight + autoScrollCatch + delta || forceAutoscroll) {
-						jumptoBottom2()
-					}
-				}
-			});
-			ro.observe(document.scrollingElement);
-		}
+function getDockScrollTarget() {
+	return alignbottom || fadetop
+		? getById("output")
+		: (document.scrollingElement || document.documentElement);
+}
+
+function isDockNearBottom(extra = 120) {
+	const target = getDockScrollTarget();
+	if (!target) return false;
+
+	const distanceFromBottom = target.scrollHeight - (target.scrollTop + target.clientHeight);
+	return distanceFromBottom <= extra;
+}
+
+function dockAutoScrollIfNearBottom(extra = 120) {
+	if (reversed && !forceAutoscroll) return;
+	if (!forceAutoscroll && !isDockNearBottom(extra)) return;
+
+	requestAnimationFrame(() => {
+		jumptoBottom2();
+
+		// Second pass catches messages that grow after render, like wrapped/two-line rows.
+		requestAnimationFrame(() => {
+			if (forceAutoscroll || isDockNearBottom(extra)) {
+				jumptoBottom2();
+			}
+		});
+	});
+}
+
+const dockOutputScrollObserver = new MutationObserver(() => {
+	dockAutoScrollIfNearBottom(140);
+});
+
+dockOutputScrollObserver.observe(getById("output"), {
+	childList: true,
+	attributes: false,
+	subtree: false
+});
+
+const dockOutputResizeObserver = new ResizeObserver(() => {
+	dockAutoScrollIfNearBottom(140);
+});
+
+dockOutputResizeObserver.observe(getById("output"));
 
 		if (historyMode) {
 			var historyScrollContainer = alignbottom || fadetop ? getById("output") : document.scrollingElement;
@@ -13280,6 +13296,25 @@ function parseByFileType(rawText, sourceUrl) {
 
 		return badgeContainer;
 	}
+
+	function moveDockTextBadgesBeforeUsername(msgNode) {
+	if (!msgNode || !msgNode.querySelectorAll) return;
+
+	const nameEl = msgNode.querySelector('.hl-name');
+	if (!nameEl) return;
+
+	const badgeContainer =
+		nameEl.querySelector('.hl-badges') ||
+		(nameEl.previousElementSibling && nameEl.previousElementSibling.classList.contains('hl-badges')
+			? nameEl.previousElementSibling
+			: null);
+
+	if (!badgeContainer) return;
+
+	Array.from(badgeContainer.querySelectorAll('.hl-badge.textbadge')).forEach(badge => {
+		badgeContainer.appendChild(badge);
+	});
+}
 function isColonTextNode(node) {
 	return node &&
 		node.nodeType === Node.TEXT_NODE &&
@@ -13700,19 +13735,11 @@ function scheduleWrappedLineJustification(msgNode) {
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
-	softHyphenateMessage(msgNode);
-
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
+	moveDockTextBadgesBeforeUsername(msgNode);
 	await applyPronouns(msgNode);
-	scheduleWrappedLineJustification(msgNode);
-
-	if (horizontal && typeof horizontalRealign === "function") {
-		requestAnimationFrame(() => {
-			horizontalRealign(false);
-			requestAnimationFrame(() => horizontalRealign(false));
-		});
-	}
+	moveDockTextBadgesBeforeUsername(msgNode);
 }
 
 	function applyUserMetaToAllMessages() {
