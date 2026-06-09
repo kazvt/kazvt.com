@@ -13743,7 +13743,8 @@ if (lines.length < 3) {
 	return;
 }
 
-const containerRect = msgNode.getBoundingClientRect();
+const messageBox = root.closest(".hl-message") || root;
+const containerRect = messageBox.getBoundingClientRect();
 lines = fitRenderedHyphenLines(root, source, lines, containerRect);
 
 const edgeTolerance = Math.max(4, Math.min(12, containerRect.width * 0.04));
@@ -13815,19 +13816,15 @@ function scheduleWrappedLineJustification(msgNode) {
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
-	softHyphenateMessage(msgNode);
-
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
+	moveDockTextBadgesBeforeUsername(msgNode);
 	await applyPronouns(msgNode);
-	scheduleWrappedLineJustification(msgNode);
+	moveDockTextBadgesBeforeUsername(msgNode);
 
-	if (horizontal && typeof horizontalRealign === "function") {
-		requestAnimationFrame(() => {
-			horizontalRealign(false);
-			requestAnimationFrame(() => horizontalRealign(false));
-		});
-	}
+	// Pronouns/textbadges load async and can change the first-line layout.
+	// Re-measure the message line after they are in place.
+	scheduleWrappedLineJustification(msgNode);
 }
 
 	function applyUserMetaToAllMessages() {
