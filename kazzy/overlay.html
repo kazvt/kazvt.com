@@ -12533,307 +12533,302 @@ function truncateText(text, maxLength) {
 	let customUserDataLoaded = false;
 	let pendingRefreshTimer = null;
 
-const fallbackPronounsCache = new Map();
-let alejoPronounsListCache = null;
-let alejoPronounsListCacheTime = 0;
+	const fallbackPronounsCache = new Map();
+	let alejoPronounsListCache = null;
+	let alejoPronounsListCacheTime = 0;
 
-const FALLBACK_PRONOUNS_CACHE_TTL = 15 * 60 * 1000;
-const FALLBACK_PRONOUNS_LIST_TTL = 24 * 60 * 60 * 1000;
-const FALLBACK_PRONOUNS_MAX_CACHE_SIZE = 300;
+	const FALLBACK_PRONOUNS_CACHE_TTL = 15 * 60 * 1000;
+	const FALLBACK_PRONOUNS_LIST_TTL = 24 * 60 * 60 * 1000;
+	const FALLBACK_PRONOUNS_MAX_CACHE_SIZE = 300;
 
-function normalizeUsernameForPronounLookup(username) {
-	return normalize(String(username || "").replace(/^@/, '').trim());
-}
-
-function pruneFallbackPronounCache() {
-	const now = Date.now();
-
-	for (const [key, entry] of fallbackPronounsCache.entries()) {
-		if (!entry || (now - entry.time > FALLBACK_PRONOUNS_CACHE_TTL)) {
-			fallbackPronounsCache.delete(key);
-		}
+	function normalizeUsernameForPronounLookup(username) {
+		return normalize(String(username || "").replace(/^@/, '').trim());
 	}
 
-	if (fallbackPronounsCache.size > FALLBACK_PRONOUNS_MAX_CACHE_SIZE) {
-		const keys = Array.from(fallbackPronounsCache.keys());
-		for (let i = 0; i < fallbackPronounsCache.size - FALLBACK_PRONOUNS_MAX_CACHE_SIZE; i++) {
-			fallbackPronounsCache.delete(keys[i]);
-		}
-	}
-}
+	function pruneFallbackPronounCache() {
+		const now = Date.now();
 
-function getCachedFallbackPronouns(key) {
-	const now = Date.now();
-	const cached = fallbackPronounsCache.get(key);
-	if (!cached || (now - cached.time >= FALLBACK_PRONOUNS_CACHE_TTL)) return undefined;
-	return cached.data || null;
-}
-
-function setCachedFallbackPronouns(key, data) {
-	fallbackPronounsCache.set(key, { data: data || null, time: Date.now() });
-	pruneFallbackPronounCache();
-	return data || null;
-}
-
-async function fetchJsonNoThrow(url, options = {}) {
-	try {
-		const res = await fetch(url, Object.assign({ cache: "no-store" }, options));
-		if (!res.ok) return null;
-		return await res.json();
-	} catch (e) {
-		return null;
-	}
-}
-
-async function fetchAlejoUserPronouns(username) {
-	const normalized = normalizeUsernameForPronounLookup(username);
-	if (!normalized) return null;
-
-	const cacheKey = `alejo:${normalized}`;
-	const cached = getCachedFallbackPronouns(cacheKey);
-	if (cached !== undefined) return cached;
-
-	const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
-	return setCachedFallbackPronouns(cacheKey, data);
-}
-
-async function fetchAlejoPronounsList() {
-	const now = Date.now();
-
-	if (alejoPronounsListCache && (now - alejoPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
-		return alejoPronounsListCache;
-	}
-
-	const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/pronouns`);
-	if (data) {
-		alejoPronounsListCache = data;
-		alejoPronounsListCacheTime = now;
-	}
-
-	return alejoPronounsListCache || null;
-}
-
-function buildAlejoPronounString(pronounsList, userData) {
-	if (!pronounsList || !userData) return null;
-
-	function getPronouns(list, id) {
-		return id && list[id]
-			? {
-				subject: list[id].subject || null,
-				object: list[id].object || null
+		for (const [key, entry] of fallbackPronounsCache.entries()) {
+			if (!entry || (now - entry.time > FALLBACK_PRONOUNS_CACHE_TTL)) {
+				fallbackPronounsCache.delete(key);
 			}
-			: {
-				subject: null,
-				object: null
-			};
+		}
+
+		if (fallbackPronounsCache.size > FALLBACK_PRONOUNS_MAX_CACHE_SIZE) {
+			const keys = Array.from(fallbackPronounsCache.keys());
+			for (let i = 0; i < fallbackPronounsCache.size - FALLBACK_PRONOUNS_MAX_CACHE_SIZE; i++) {
+				fallbackPronounsCache.delete(keys[i]);
+			}
+		}
 	}
 
-	const { subject: primarySub, object: primaryObj } = getPronouns(pronounsList, userData.pronoun_id);
-	const { subject: secondarySub, object: secondaryObj } = getPronouns(pronounsList, userData.alt_pronoun_id);
-
-	function makePronoun({ primary1, primary2, secondary1, secondary2 } = {}) {
-		const fields = [
-			['primary1', primary1],
-			['primary2', primary2],
-			['secondary1', secondary1],
-			['secondary2', secondary2]
-		];
-
-		const first = fields.find(([, v]) => v);
-		if (!first) return null;
-
-		const [firstKey, prn1] = first;
-		const prn2Candidates =
-			firstKey === 'primary1' ? [secondary1, secondary2, primary2] :
-			firstKey === 'primary2' ? [secondary1, secondary2] :
-			firstKey === 'secondary1' ? [secondary2] : [];
-
-		const prn2 = prn2Candidates.find(v => v);
-
-		if (prn1 === prn2) return prn1;
-		return prn2 ? `${prn1}/${prn2}` : prn1;
+	function getCachedFallbackPronouns(key) {
+		const now = Date.now();
+		const cached = fallbackPronounsCache.get(key);
+		if (!cached || (now - cached.time >= FALLBACK_PRONOUNS_CACHE_TTL)) return undefined;
+		return cached.data || null;
 	}
 
-	const result = makePronoun({
-		primary1: primarySub,
-		primary2: primaryObj,
-		secondary1: secondarySub,
-		secondary2: secondaryObj
-	});
-
-	return result ? String(result).trim() : null;
-}
-
-async function getAlejoPronounsForUsername(username) {
-	const normalized = normalizeUsernameForPronounLookup(username);
-	if (!normalized) return null;
-
-	const userData = await fetchAlejoUserPronouns(normalized);
-	if (!userData) return null;
-
-	const pronounsList = await fetchAlejoPronounsList();
-	if (!pronounsList) return null;
-
-	return buildAlejoPronounString(pronounsList, userData);
-}
-
-function normalizeFallbackPronounText(value) {
-	if (value == null) return null;
-
-	if (Array.isArray(value)) {
-		const joined = value.map(normalizeFallbackPronounText).filter(Boolean).join('/');
-		return joined || null;
+	function setCachedFallbackPronouns(key, data) {
+		fallbackPronounsCache.set(key, { data: data || null, time: Date.now() });
+		pruneFallbackPronounCache();
+		return data || null;
 	}
 
-	if (typeof value === "object") {
-		const objectValue =
-			value.pronouns ?? value.pronoun ?? value.prns ?? value.prn ??
-			value.display ?? value.label ?? value.value ?? value.text ?? value.name;
+	async function fetchJsonNoThrow(url, options = {}) {
+		try {
+			const res = await fetch(url, Object.assign({ cache: "no-store" }, options));
+			if (!res.ok) return null;
+			return await res.json();
+		} catch (e) {
+			return null;
+		}
+	}
 
-		if (objectValue != null) return normalizeFallbackPronounText(objectValue);
+	async function fetchAlejoUserPronouns(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
 
-		if (value.subject && value.object) {
-			return normalizeFallbackPronounText(String(value.subject) + "/" + String(value.object));
+		const cacheKey = `alejo:${normalized}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
+
+		const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
+		return setCachedFallbackPronouns(cacheKey, data);
+	}
+
+	async function fetchAlejoPronounsList() {
+		const now = Date.now();
+
+		if (alejoPronounsListCache && (now - alejoPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
+			return alejoPronounsListCache;
+		}
+
+		const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/pronouns`);
+		if (data) {
+			alejoPronounsListCache = data;
+			alejoPronounsListCacheTime = now;
+		}
+
+		return alejoPronounsListCache || null;
+	}
+
+	function buildAlejoPronounString(pronounsList, userData) {
+		if (!pronounsList || !userData) return null;
+
+		function getPronouns(list, id) {
+			return id && list[id]
+				? { subject: list[id].subject || null, object: list[id].object || null }
+				: { subject: null, object: null };
+		}
+
+		const { subject: primarySub, object: primaryObj } = getPronouns(pronounsList, userData.pronoun_id);
+		const { subject: secondarySub, object: secondaryObj } = getPronouns(pronounsList, userData.alt_pronoun_id);
+
+		function makePronoun({ primary1, primary2, secondary1, secondary2 } = {}) {
+			const fields = [
+				['primary1', primary1],
+				['primary2', primary2],
+				['secondary1', secondary1],
+				['secondary2', secondary2]
+			];
+
+			const first = fields.find(([, v]) => v);
+			if (!first) return null;
+
+			const [firstKey, prn1] = first;
+			const prn2Candidates =
+				firstKey === 'primary1' ? [secondary1, secondary2, primary2] :
+				firstKey === 'primary2' ? [secondary1, secondary2] :
+				firstKey === 'secondary1' ? [secondary2] : [];
+
+			const prn2 = prn2Candidates.find(v => v);
+
+			if (prn1 === prn2) return prn1;
+			return prn2 ? `${prn1}/${prn2}` : prn1;
+		}
+
+		const result = makePronoun({
+			primary1: primarySub,
+			primary2: primaryObj,
+			secondary1: secondarySub,
+			secondary2: secondaryObj
+		});
+
+		return result ? String(result).trim() : null;
+	}
+
+	async function getAlejoPronounsForUsername(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const userData = await fetchAlejoUserPronouns(normalized);
+		if (!userData) return null;
+
+		const pronounsList = await fetchAlejoPronounsList();
+		if (!pronounsList) return null;
+
+		return buildAlejoPronounString(pronounsList, userData);
+	}
+
+	function normalizeFallbackPronounText(value) {
+		if (value == null) return null;
+
+		if (Array.isArray(value)) {
+			const joined = value.map(normalizeFallbackPronounText).filter(Boolean).join('/');
+			return joined || null;
+		}
+
+		if (typeof value === "object") {
+			const objectValue =
+				value.pronouns ?? value.pronoun ?? value.prns ?? value.prn ??
+				value.display ?? value.label ?? value.value ?? value.text ?? value.name;
+
+			if (objectValue != null) return normalizeFallbackPronounText(objectValue);
+
+			if (value.subject && value.object) {
+				return normalizeFallbackPronounText(String(value.subject) + "/" + String(value.object));
+			}
+
+			return null;
+		}
+
+		const text = String(value).trim().toLowerCase();
+		if (!text || text === "null" || text === "undefined" || text === "unspecified") return null;
+		return text.replace(/\s+/g, '');
+	}
+
+	function extractAeroKickPronouns(data, depth = 0, seen = new Set()) {
+		if (!data || depth > 4 || seen.has(data)) return null;
+		if (typeof data !== "object") return normalizeFallbackPronounText(data);
+
+		seen.add(data);
+
+		const direct = normalizeFallbackPronounText(
+			data.pronouns ?? data.pronoun ?? data.prns ?? data.prn ??
+			data.kickPronouns ?? data.kick_pronouns
+		);
+
+		if (direct) return direct;
+
+		for (const value of Object.values(data)) {
+			const nested = extractAeroKickPronouns(value, depth + 1, seen);
+			if (nested) return nested;
 		}
 
 		return null;
 	}
 
-	const text = String(value).trim().toLowerCase();
-	if (!text || text === "null" || text === "undefined" || text === "unspecified") return null;
-	return text.replace(/\s+/g, '');
-}
+	async function getAeroKickPronounsForUsername(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
 
-function extractAeroKickPronouns(data, depth = 0, seen = new Set()) {
-	if (!data || depth > 4 || seen.has(data)) return null;
-	if (typeof data !== "object") return normalizeFallbackPronounText(data);
+		const cacheKey = `aerokick:${normalized}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
 
-	seen.add(data);
+		const data = await fetchJsonNoThrow(`https://api.aerokick.app/api/v1/channel/kick/${encodeURIComponent(normalized)}`);
+		const pronouns = extractAeroKickPronouns(data);
 
-	const direct = normalizeFallbackPronounText(
-		data.pronouns ?? data.pronoun ?? data.prns ?? data.prn ??
-		data.kickPronouns ?? data.kick_pronouns
-	);
-
-	if (direct) return direct;
-
-	for (const value of Object.values(data)) {
-		const nested = extractAeroKickPronouns(value, depth + 1, seen);
-		if (nested) return nested;
+		return setCachedFallbackPronouns(cacheKey, pronouns);
 	}
 
-	return null;
-}
+	function getMessageSourceForPronounLookup(msgNode) {
+		const raw = String(
+			msgNode?.dataset?.sourceType ||
+			msgNode?.dataset?.type ||
+			msgNode?.dataset?.source ||
+			msgNode?.rawContents?.type ||
+			""
+		).toLowerCase();
 
-async function getAeroKickPronounsForUsername(username) {
-	const normalized = normalizeUsernameForPronounLookup(username);
-	if (!normalized) return null;
-
-	const cacheKey = `aerokick:${normalized}`;
-	const cached = getCachedFallbackPronouns(cacheKey);
-	if (cached !== undefined) return cached;
-
-	const data = await fetchJsonNoThrow(`https://api.aerokick.app/api/v1/channel/kick/${encodeURIComponent(normalized)}`);
-	const pronouns = extractAeroKickPronouns(data);
-
-	return setCachedFallbackPronouns(cacheKey, pronouns);
-}
-
-function getMessageSourceForPronounLookup(msgNode) {
-	const raw = String(
-		msgNode?.dataset?.sourceType ||
-		msgNode?.dataset?.type ||
-		msgNode?.dataset?.source ||
-		msgNode?.rawContents?.type ||
-		""
-	).toLowerCase();
-
-	if (raw.includes("twitch")) return "twitch";
-	if (raw.includes("kick")) return "kick";
-	if (raw.includes("youtube") || raw.includes("youtubeshorts")) return "youtube";
-	return raw;
-}
-
-function getPronounDbTwitchId(msgNode) {
-	const source = getMessageSourceForPronounLookup(msgNode);
-	if (source !== "twitch") return "";
-
-	const rawContents = msgNode?.rawContents || {};
-	const id = String(
-		msgNode?.dataset?.userid ||
-		rawContents.userid ||
-		rawContents.userId ||
-		rawContents.userID ||
-		rawContents.user_id ||
-		rawContents.uid ||
-		""
-	).trim();
-
-	return /^\d+$/.test(id) ? id : "";
-}
-
-function pronounDbSetToText(set) {
-	const map = {
-		he: "he/him",
-		she: "she/her",
-		they: "they/them",
-		it: "it/its",
-		any: "any",
-		ask: "ask",
-		avoid: "avoid",
-		other: "other"
-	};
-
-	return map[String(set || "").toLowerCase()] || null;
-}
-
-function buildPronounDbPronounString(entry) {
-	const sets = entry?.sets?.en;
-	if (!Array.isArray(sets) || !sets.length) return null;
-
-	if (sets.includes("avoid")) return "avoid";
-	if (sets.includes("any")) return "any";
-	if (sets.includes("ask")) return "ask";
-
-	const basicSets = sets.filter(set => ["he", "she", "they", "it"].includes(String(set).toLowerCase()));
-	if (!basicSets.length) return pronounDbSetToText(sets[0]);
-
-	if (basicSets.length >= 2) {
-		return String(basicSets[0]).toLowerCase() + "/" + String(basicSets[1]).toLowerCase();
+		if (raw.includes("twitch")) return "twitch";
+		if (raw.includes("kick")) return "kick";
+		if (raw.includes("youtube") || raw.includes("youtubeshorts")) return "youtube";
+		return raw;
 	}
 
-	return pronounDbSetToText(basicSets[0]);
-}
+	function getPronounDbTwitchId(msgNode) {
+		const source = getMessageSourceForPronounLookup(msgNode);
+		if (source !== "twitch") return "";
 
-async function getPronounDbPronounsForMessage(msgNode) {
-	const twitchId = getPronounDbTwitchId(msgNode);
-	if (!twitchId) return null;
+		const rawContents = msgNode?.rawContents || {};
+		const id = String(
+			msgNode?.dataset?.userid ||
+			msgNode?.dataset?.userId ||
+			rawContents.userid ||
+			rawContents.userId ||
+			rawContents.userID ||
+			rawContents.user_id ||
+			rawContents.uid ||
+			""
+		).trim();
 
-	const cacheKey = `pronoundb:twitch:${twitchId}`;
-	const cached = getCachedFallbackPronouns(cacheKey);
-	if (cached !== undefined) return cached;
+		return /^\d+$/.test(id) ? id : "";
+	}
 
-	const data = await fetchJsonNoThrow(
-		`https://pronoundb.org/api/v2/lookup?platform=twitch&ids=${encodeURIComponent(twitchId)}`,
-		{ headers: { "X-PronounDB-Source": "multichat-overlay-local/1.0" } }
-	);
+	function pronounDbSetToText(set) {
+		const map = {
+			he: "he/him",
+			she: "she/her",
+			they: "they/them",
+			it: "it/its",
+			any: "any",
+			ask: "ask",
+			avoid: "avoid",
+			other: "other"
+		};
 
-	const pronouns = data && data[twitchId] ? buildPronounDbPronounString(data[twitchId]) : null;
-	return setCachedFallbackPronouns(cacheKey, pronouns);
-}
+		return map[String(set || "").toLowerCase()] || null;
+	}
 
-async function getFallbackPronounsForMessage(msgNode, username) {
-	const normalized = normalizeUsernameForPronounLookup(username);
-	if (!normalized) return null;
+	function buildPronounDbPronounString(entry) {
+		const sets = entry?.sets?.en;
+		if (!Array.isArray(sets) || !sets.length) return null;
 
-	const alejo = await getAlejoPronounsForUsername(normalized);
-	if (alejo) return alejo;
+		if (sets.includes("avoid")) return "avoid";
+		if (sets.includes("any")) return "any";
+		if (sets.includes("ask")) return "ask";
 
-	const aeroKick = await getAeroKickPronounsForUsername(normalized);
-	if (aeroKick) return aeroKick;
+		const basicSets = sets.filter(set => ["he", "she", "they", "it"].includes(String(set).toLowerCase()));
+		if (!basicSets.length) return pronounDbSetToText(sets[0]);
 
-	return await getPronounDbPronounsForMessage(msgNode);
-}
+		if (basicSets.length >= 2) {
+			return String(basicSets[0]).toLowerCase() + "/" + String(basicSets[1]).toLowerCase();
+		}
+
+		return pronounDbSetToText(basicSets[0]);
+	}
+
+	async function getPronounDbPronounsForMessage(msgNode) {
+		const twitchId = getPronounDbTwitchId(msgNode);
+		if (!twitchId) return null;
+
+		const cacheKey = `pronoundb:twitch:${twitchId}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
+
+		const data = await fetchJsonNoThrow(
+			`https://pronoundb.org/api/v2/lookup?platform=twitch&ids=${encodeURIComponent(twitchId)}`,
+			{ headers: { "X-PronounDB-Source": "kazlurker-local-overlay/1.0" } }
+		);
+
+		const pronouns = data && data[twitchId] ? buildPronounDbPronounString(data[twitchId]) : null;
+		return setCachedFallbackPronouns(cacheKey, pronouns);
+	}
+
+	async function getFallbackPronounsForMessage(msgNode, username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const alejo = await getAlejoPronounsForUsername(normalized);
+		if (alejo) return alejo;
+
+		const aeroKick = await getAeroKickPronounsForUsername(normalized);
+		if (aeroKick) return aeroKick;
+
+		return await getPronounDbPronounsForMessage(msgNode);
+	}
 
 	function clearObject(obj) {
 		Object.keys(obj).forEach(key => delete obj[key]);
@@ -12908,8 +12903,8 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		return { nickname, pronouns };
 	}
 
-	function parseOverlayUserDataExpiry(value) {
-		const raw = String(value || "").trim();
+	function parseOverlayUserDataExpiry(raw) {
+		raw = String(raw || "").trim();
 		if (!raw) return 0;
 
 		// Streamer.bot writes ISO UTC, but accept unix seconds/ms too.
@@ -12968,14 +12963,14 @@ async function resolvePronounsForMessage(msgNode, parts) {
 			if (!trimmed) return;
 			if (trimmed.startsWith('#') || trimmed.startsWith('-')) return;
 
-			// first token after optional whitespace and optional leading ^ chars
+			// First token after optional whitespace and optional leading ^ chars is the lookup username.
 			const usernameMatch = line.match(/^\s*\^*([^\s]+)/);
 			if (!usernameMatch) return;
 
 			const username = normalize(usernameMatch[1].replace(/^@/, ''));
 			if (!username) return;
 
-			// Bracketed timed blocks override permanent wrappers until they expire:
+			// Timed Streamer.bot blocks override permanent wrappers until they expire:
 			//   [@@@Nick@@@ til 2026-06-09T12:00:00Z]
 			//   [===she/her=== til 2026-06-09T12:00:00Z]
 			const timedNickname = getTimedOverlayUserDataValue(line, '@@@');
@@ -13090,8 +13085,8 @@ function getPreferredFolderFilenames(sourceUrl) {
 	const defaults = [
 		'overlayUserData.txt',
 		'overlayUserData.json',
-		'lurkers_twitch.txt',
-		'lurkers_twitch.json',
+		// 'lurkers_twitch.txt',
+		// 'lurkers_twitch.json',
 		'customUserData.txt',
 		'customUserData.json',
 		'users.txt',
@@ -13123,8 +13118,10 @@ function scoreFolderCandidate(file, preferredNames) {
 	const preferredIndex = preferredNames.findIndex(x => x.toLowerCase() === lower);
 	if (preferredIndex >= 0) return 1000 - preferredIndex;
 
-	if (lower === 'lurkers_twitch.txt') return 900;
-	if (lower === 'lurkers_twitch.json') return 890;
+	// if (lower === 'lurkers_twitch.txt') return 900;
+	// if (lower === 'lurkers_twitch.json') return 890;
+	if (lower === 'overlayuserdata.txt') return 980;
+	if (lower === 'overlayuserdata.json') return 970;
 	if (lower === 'customuserdata.txt') return 880;
 	if (lower === 'customuserdata.json') return 870;
 
@@ -13166,7 +13163,7 @@ async function readMegaSharedFileText(url) {
 		if (!isSupportedUserDataFilename(name)) return false;
 
 		const lower = name.toLowerCase();
-		return preferredNames.some(pref => pref.toLowerCase() === lower) || true;
+		return preferredNames.some(pref => pref.toLowerCase() === lower);
 	}, true);
 
 	if (!matches || !matches.length) {

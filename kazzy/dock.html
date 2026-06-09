@@ -3230,6 +3230,13 @@
 			var textGlowEnabled = urlParams.has("textglow");
 			var nicknamesParam = urlParams.get("nick") || urlParams.get("nicks") || urlParams.get("nickname") || urlParams.get("nicknames");
 			var customUserDataParam = urlParams.get("customUserData");
+var customUserDataPickedFilename = "";
+var dockLurkerFallbackRawText = "";
+var dockLurkerFallbackSourceName = "";
+var dockLurkerFallbackDataCache = null;
+
+const dockLurkerNickFallbackMap = {};
+const dockLurkerPronounFallbackMap = {};
 			var textGlowWidthParam = null;
 			var textGlowColorParam = null;
 
@@ -11843,8 +11850,8 @@ if (data.event) {
 	let pendingRefreshTimer = null;
 
 	const fallbackPronounsCache = new Map();
-	let fallbackPronounsListCache = null;
-	let fallbackPronounsListCacheTime = 0;
+	let alejoPronounsListCache = null;
+	let alejoPronounsListCacheTime = 0;
 
 	const FALLBACK_PRONOUNS_CACHE_TTL = 15 * 60 * 1000;
 	const FALLBACK_PRONOUNS_LIST_TTL = 24 * 60 * 60 * 1000;
@@ -11857,9 +11864,9 @@ if (data.event) {
 	function pruneFallbackPronounCache() {
 		const now = Date.now();
 
-		for (const [username, entry] of fallbackPronounsCache.entries()) {
+		for (const [key, entry] of fallbackPronounsCache.entries()) {
 			if (!entry || (now - entry.time > FALLBACK_PRONOUNS_CACHE_TTL)) {
-				fallbackPronounsCache.delete(username);
+				fallbackPronounsCache.delete(key);
 			}
 		}
 
@@ -11871,66 +11878,64 @@ if (data.event) {
 		}
 	}
 
-	async function fetchFallbackUserPronouns(username) {
+	function getCachedFallbackPronouns(key) {
+		const now = Date.now();
+		const cached = fallbackPronounsCache.get(key);
+		if (!cached || (now - cached.time >= FALLBACK_PRONOUNS_CACHE_TTL)) return undefined;
+		return cached.data || null;
+	}
+
+	function setCachedFallbackPronouns(key, data) {
+		fallbackPronounsCache.set(key, { data: data || null, time: Date.now() });
+		pruneFallbackPronounCache();
+		return data || null;
+	}
+
+	async function fetchJsonNoThrow(url, options = {}) {
+		try {
+			const res = await fetch(url, Object.assign({ cache: "no-store" }, options));
+			if (!res.ok) return null;
+			return await res.json();
+		} catch (e) {
+			return null;
+		}
+	}
+
+	async function fetchAlejoUserPronouns(username) {
 		const normalized = normalizeUsernameForPronounLookup(username);
 		if (!normalized) return null;
 
-		const now = Date.now();
-		const cached = fallbackPronounsCache.get(normalized);
-		if (cached && (now - cached.time < FALLBACK_PRONOUNS_CACHE_TTL)) {
-			return cached.data;
-		}
+		const cacheKey = `alejo:${normalized}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
 
-		try {
-			const res = await fetch(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
-			const data = await res.json();
-
-			if (res.ok) {
-				fallbackPronounsCache.set(normalized, { data, time: now });
-				pruneFallbackPronounCache();
-				return data;
-			}
-		} catch (e) {}
-
-		fallbackPronounsCache.set(normalized, { data: null, time: now });
-		pruneFallbackPronounCache();
-		return null;
+		const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
+		return setCachedFallbackPronouns(cacheKey, data);
 	}
 
-	async function fetchFallbackPronounsList() {
+	async function fetchAlejoPronounsList() {
 		const now = Date.now();
 
-		if (fallbackPronounsListCache && (now - fallbackPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
-			return fallbackPronounsListCache;
+		if (alejoPronounsListCache && (now - alejoPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
+			return alejoPronounsListCache;
 		}
 
-		try {
-			const res = await fetch(`https://api.pronouns.alejo.io/v1/pronouns`);
-			const data = await res.json();
+		const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/pronouns`);
+		if (data) {
+			alejoPronounsListCache = data;
+			alejoPronounsListCacheTime = now;
+		}
 
-			if (res.ok) {
-				fallbackPronounsListCache = data;
-				fallbackPronounsListCacheTime = now;
-				return data;
-			}
-		} catch (e) {}
-
-		return fallbackPronounsListCache || null;
+		return alejoPronounsListCache || null;
 	}
 
-	function buildFallbackPronounString(pronounsList, userData) {
+	function buildAlejoPronounString(pronounsList, userData) {
 		if (!pronounsList || !userData) return null;
 
 		function getPronouns(list, id) {
 			return id && list[id]
-				? {
-					subject: list[id].subject || null,
-					object: list[id].object || null
-				}
-				: {
-					subject: null,
-					object: null
-				};
+				? { subject: list[id].subject || null, object: list[id].object || null }
+				: { subject: null, object: null };
 		}
 
 		const { subject: primarySub, object: primaryObj } = getPronouns(pronounsList, userData.pronoun_id);
@@ -11969,17 +11974,176 @@ if (data.event) {
 		return result ? String(result).trim() : null;
 	}
 
-	async function getFallbackPronounsForUsername(username) {
+	async function getAlejoPronounsForUsername(username) {
 		const normalized = normalizeUsernameForPronounLookup(username);
 		if (!normalized) return null;
 
-		const userData = await fetchFallbackUserPronouns(normalized);
+		const userData = await fetchAlejoUserPronouns(normalized);
 		if (!userData) return null;
 
-		const pronounsList = await fetchFallbackPronounsList();
+		const pronounsList = await fetchAlejoPronounsList();
 		if (!pronounsList) return null;
 
-		return buildFallbackPronounString(pronounsList, userData);
+		return buildAlejoPronounString(pronounsList, userData);
+	}
+
+	function normalizeFallbackPronounText(value) {
+		if (value == null) return null;
+
+		if (Array.isArray(value)) {
+			const joined = value.map(normalizeFallbackPronounText).filter(Boolean).join('/');
+			return joined || null;
+		}
+
+		if (typeof value === "object") {
+			const objectValue =
+				value.pronouns ?? value.pronoun ?? value.prns ?? value.prn ??
+				value.display ?? value.label ?? value.value ?? value.text ?? value.name;
+
+			if (objectValue != null) return normalizeFallbackPronounText(objectValue);
+
+			if (value.subject && value.object) {
+				return normalizeFallbackPronounText(String(value.subject) + "/" + String(value.object));
+			}
+
+			return null;
+		}
+
+		const text = String(value).trim().toLowerCase();
+		if (!text || text === "null" || text === "undefined" || text === "unspecified") return null;
+		return text.replace(/\s+/g, '');
+	}
+
+	function extractAeroKickPronouns(data, depth = 0, seen = new Set()) {
+		if (!data || depth > 4 || seen.has(data)) return null;
+		if (typeof data !== "object") return normalizeFallbackPronounText(data);
+
+		seen.add(data);
+
+		const direct = normalizeFallbackPronounText(
+			data.pronouns ?? data.pronoun ?? data.prns ?? data.prn ??
+			data.kickPronouns ?? data.kick_pronouns
+		);
+
+		if (direct) return direct;
+
+		for (const value of Object.values(data)) {
+			const nested = extractAeroKickPronouns(value, depth + 1, seen);
+			if (nested) return nested;
+		}
+
+		return null;
+	}
+
+	async function getAeroKickPronounsForUsername(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const cacheKey = `aerokick:${normalized}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
+
+		const data = await fetchJsonNoThrow(`https://api.aerokick.app/api/v1/channel/kick/${encodeURIComponent(normalized)}`);
+		const pronouns = extractAeroKickPronouns(data);
+
+		return setCachedFallbackPronouns(cacheKey, pronouns);
+	}
+
+	function getMessageSourceForPronounLookup(msgNode) {
+		const raw = String(
+			msgNode?.dataset?.sourceType ||
+			msgNode?.dataset?.type ||
+			msgNode?.dataset?.source ||
+			msgNode?.rawContents?.type ||
+			""
+		).toLowerCase();
+
+		if (raw.includes("twitch")) return "twitch";
+		if (raw.includes("kick")) return "kick";
+		if (raw.includes("youtube") || raw.includes("youtubeshorts")) return "youtube";
+		return raw;
+	}
+
+	function getPronounDbTwitchId(msgNode) {
+		const source = getMessageSourceForPronounLookup(msgNode);
+		if (source !== "twitch") return "";
+
+		const rawContents = msgNode?.rawContents || {};
+		const id = String(
+			msgNode?.dataset?.userid ||
+			msgNode?.dataset?.userId ||
+			rawContents.userid ||
+			rawContents.userId ||
+			rawContents.userID ||
+			rawContents.user_id ||
+			rawContents.uid ||
+			""
+		).trim();
+
+		return /^\d+$/.test(id) ? id : "";
+	}
+
+	function pronounDbSetToText(set) {
+		const map = {
+			he: "he/him",
+			she: "she/her",
+			they: "they/them",
+			it: "it/its",
+			any: "any",
+			ask: "ask",
+			avoid: "avoid",
+			other: "other"
+		};
+
+		return map[String(set || "").toLowerCase()] || null;
+	}
+
+	function buildPronounDbPronounString(entry) {
+		const sets = entry?.sets?.en;
+		if (!Array.isArray(sets) || !sets.length) return null;
+
+		if (sets.includes("avoid")) return "avoid";
+		if (sets.includes("any")) return "any";
+		if (sets.includes("ask")) return "ask";
+
+		const basicSets = sets.filter(set => ["he", "she", "they", "it"].includes(String(set).toLowerCase()));
+		if (!basicSets.length) return pronounDbSetToText(sets[0]);
+
+		if (basicSets.length >= 2) {
+			return String(basicSets[0]).toLowerCase() + "/" + String(basicSets[1]).toLowerCase();
+		}
+
+		return pronounDbSetToText(basicSets[0]);
+	}
+
+	async function getPronounDbPronounsForMessage(msgNode) {
+		const twitchId = getPronounDbTwitchId(msgNode);
+		if (!twitchId) return null;
+
+		const cacheKey = `pronoundb:twitch:${twitchId}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
+
+		const data = await fetchJsonNoThrow(
+			`https://pronoundb.org/api/v2/lookup?platform=twitch&ids=${encodeURIComponent(twitchId)}`,
+			{ headers: { "X-PronounDB-Source": "kazlurker-local-overlay/1.0" } }
+		);
+
+		const pronouns = data && data[twitchId] ? buildPronounDbPronounString(data[twitchId]) : null;
+		return setCachedFallbackPronouns(cacheKey, pronouns);
+	}
+
+	async function getFallbackPronounsForMessage(msgNode, username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const alejo = await getAlejoPronounsForUsername(normalized);
+		if (alejo) return alejo;
+
+		const aeroKick = await getAeroKickPronounsForUsername(normalized);
+		if (aeroKick) return aeroKick;
+
+		return await getPronounDbPronounsForMessage(msgNode);
 	}
 
 	function clearObject(obj) {
@@ -12034,6 +12198,7 @@ function getResolvedNameParts(nameEl) {
 	};
 }
 
+
 async function resolvePronounsForMessage(msgNode, parts) {
 	if (!parts) return null;
 
@@ -12042,17 +12207,29 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		return customPronouns.trim();
 	}
 
-	const source =
-		msgNode?.dataset?.type ||
-		msgNode?.dataset?.source ||
-		msgNode?.rawContents?.type ||
-		"";
+	let fallbackPronouns = null;
 
-	// if (!source || source === "twitch") {
-	// 	return null;
-	// }
+	if (typeof getFallbackPronounsForMessage === "function") {
+		fallbackPronouns = await getFallbackPronounsForMessage(
+			msgNode,
+			parts.baseName || parts.displayName
+		);
+	} else if (typeof getFallbackPronounsForUsername === "function") {
+		fallbackPronouns = await getFallbackPronounsForUsername(
+			parts.baseName || parts.displayName
+		);
+	}
 
-	return await getFallbackPronounsForUsername(parts.baseName || parts.displayName);
+	if (fallbackPronouns && String(fallbackPronouns).trim()) {
+		return String(fallbackPronouns).trim();
+	}
+
+	const lurkerPronouns = dockLurkerPronounFallbackMap[parts.normalizedName];
+	if (lurkerPronouns && lurkerPronouns.trim()) {
+		return lurkerPronouns.trim();
+	}
+
+	return null;
 }
 
 	function extractProfile(record) {
@@ -12062,6 +12239,56 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		const pronouns = (record.pronouns ?? record.pronoun ?? "").toString().trim();
 
 		return { nickname, pronouns };
+	}
+
+		function parseOverlayUserDataExpiry(raw) {
+		raw = String(raw || "").trim();
+		if (!raw) return 0;
+
+		// Streamer.bot writes ISO UTC, but accept unix seconds/ms too.
+		if (/^\d+$/.test(raw)) {
+			const numeric = Number(raw);
+			if (!Number.isFinite(numeric)) return 0;
+			return numeric < 100000000000 ? numeric * 1000 : numeric;
+		}
+
+		const parsed = Date.parse(raw);
+		return Number.isFinite(parsed) ? parsed : 0;
+	}
+
+	function getTimedOverlayUserDataValue(line, marker) {
+		const escaped = String(marker || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const pattern = new RegExp('\\[' + escaped + '([\\s\\S]*?)' + escaped + '\\s+til\\s+([^\\]]+)\\]', 'gi');
+		const now = Date.now();
+		let latest = null;
+
+		String(line || "").replace(pattern, (full, value, expiresRaw) => {
+			const expiresAt = parseOverlayUserDataExpiry(expiresRaw);
+			if (!expiresAt || expiresAt <= now) return full;
+
+			latest = {
+				value: String(value || "").trim(),
+				expiresAt
+			};
+
+			return full;
+		});
+
+		return latest && latest.value ? latest.value : "";
+	}
+
+	function stripTimedOverlayUserDataBlocks(line) {
+		return String(line || "")
+			.replace(/\[@@@[\s\S]*?@@@\s+til\s+[^\]]+\]/gi, " ")
+			.replace(/\[===[\s\S]*?===\s+til\s+[^\]]+\]/gi, " ");
+	}
+
+	function getPermanentOverlayUserDataValue(line, marker) {
+		const stableLine = stripTimedOverlayUserDataBlocks(line);
+		const escaped = String(marker || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const pattern = new RegExp(escaped + '([\\s\\S]*?)' + escaped);
+		const match = stableLine.match(pattern);
+		return match ? String(match[1] || "").trim() : "";
 	}
 
 	function parseTxtCustomUserData(text) {
@@ -12074,18 +12301,23 @@ async function resolvePronounsForMessage(msgNode, parts) {
 			if (!trimmed) return;
 			if (trimmed.startsWith('#') || trimmed.startsWith('-')) return;
 
-			// first token after optional whitespace and optional leading ^ chars
+			// First token after optional whitespace and optional leading ^ chars is the lookup username.
 			const usernameMatch = line.match(/^\s*\^*([^\s]+)/);
 			if (!usernameMatch) return;
 
 			const username = normalize(usernameMatch[1].replace(/^@/, ''));
 			if (!username) return;
 
-			const nickMatch = line.match(/@@@([\s\S]*?)@@@/);
-			const pronounMatch = line.match(/===([\s\S]*?)===/);
+			// Timed Streamer.bot blocks override permanent wrappers until they expire:
+			//   [@@@Nick@@@ til 2026-06-09T12:00:00Z]
+			//   [===she/her=== til 2026-06-09T12:00:00Z]
+			const timedNickname = getTimedOverlayUserDataValue(line, '@@@');
+			const timedPronouns = getTimedOverlayUserDataValue(line, '===');
+			const permanentNickname = getPermanentOverlayUserDataValue(line, '@@@');
+			const permanentPronouns = getPermanentOverlayUserDataValue(line, '===');
 
-			const nickname = nickMatch ? nickMatch[1].trim() : "";
-			const pronouns = pronounMatch ? pronounMatch[1].trim() : "";
+			const nickname = timedNickname || permanentNickname;
+			const pronouns = timedPronouns || permanentPronouns;
 
 			parsed[username] = {};
 			if (nickname) parsed[username].nick = nickname;
@@ -12095,13 +12327,7 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		return parsed;
 	}
 
-	function ingestCustomUserData(data) {
-		clearObject(nickMap);
-		clearObject(pronounMap);
-
-		const legacyNickMap = parseInlineNicknamesToMap();
-		Object.assign(nickMap, legacyNickMap);
-
+	function ingestProfileDataIntoMaps(data, targetNickMap, targetPronounMap) {
 		if (!data) return;
 
 		let source = data;
@@ -12112,15 +12338,17 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		if (Array.isArray(source)) {
 			source.forEach(entry => {
 				if (!entry || typeof entry !== "object") return;
+
 				const username = normalize((entry.username ?? entry.user ?? entry.name ?? "").toString().replace(/^@/, ''));
 				if (!username) return;
 
 				const profile = extractProfile(entry);
 				if (!profile) return;
 
-				if (profile.nickname) nickMap[username] = profile.nickname;
-				if (profile.pronouns) pronounMap[username] = profile.pronouns;
+				if (profile.nickname) targetNickMap[username] = profile.nickname;
+				if (profile.pronouns) targetPronounMap[username] = profile.pronouns;
 			});
+
 			return;
 		}
 
@@ -12132,10 +12360,27 @@ async function resolvePronounsForMessage(msgNode, parts) {
 				const profile = extractProfile(value);
 				if (!profile) return;
 
-				if (profile.nickname) nickMap[username] = profile.nickname;
-				if (profile.pronouns) pronounMap[username] = profile.pronouns;
+				if (profile.nickname) targetNickMap[username] = profile.nickname;
+				if (profile.pronouns) targetPronounMap[username] = profile.pronouns;
 			});
 		}
+	}
+
+	function ingestCustomUserData(data) {
+		clearObject(nickMap);
+		clearObject(pronounMap);
+
+		const legacyNickMap = parseInlineNicknamesToMap();
+		Object.assign(nickMap, legacyNickMap);
+
+		ingestProfileDataIntoMaps(data, nickMap, pronounMap);
+	}
+
+	function ingestDockLurkerFallbackUserData(data) {
+		clearObject(dockLurkerNickFallbackMap);
+		clearObject(dockLurkerPronounFallbackMap);
+
+		ingestProfileDataIntoMaps(data, dockLurkerNickFallbackMap, dockLurkerPronounFallbackMap);
 	}
 
 	function isMegaFileUrl(url) {
@@ -12186,11 +12431,10 @@ function parseMegaUrlInfo(url) {
 		return null;
 	}
 }
-
 function getPreferredFolderFilenames(sourceUrl) {
 	const defaults = [
-		'lurkers_twitch.txt',
-		'lurkers_twitch.json',
+		'overlayUserData.txt',
+		'overlayUserData.json',
 		'customUserData.txt',
 		'customUserData.json',
 		'users.txt',
@@ -12200,8 +12444,8 @@ function getPreferredFolderFilenames(sourceUrl) {
 	try {
 		const parsed = new URL(sourceUrl, window.location.href);
 
-		// optional override for folder links:
-		// &customUserData=https://mega.nz/folder/...#...&customUserDataFile=lurkers_twitch.txt
+		// optional override for primary folder file:
+		// &customUserData=https://mega.nz/folder/...#...&customUserDataFile=overlayUserData.txt
 		const explicit = urlParams.get("customUserDataFile") || parsed.searchParams.get("file");
 		if (explicit && explicit.trim()) {
 			return [explicit.trim(), ...defaults.filter(x => x !== explicit.trim())];
@@ -12209,6 +12453,13 @@ function getPreferredFolderFilenames(sourceUrl) {
 	} catch (e) {}
 
 	return defaults;
+}
+
+function getDockLurkerFallbackFilenames() {
+	return [
+		'lurkers_twitch.txt',
+		'lurkers_twitch.json'
+	];
 }
 
 function isSupportedUserDataFilename(name) {
@@ -12222,17 +12473,59 @@ function scoreFolderCandidate(file, preferredNames) {
 	const preferredIndex = preferredNames.findIndex(x => x.toLowerCase() === lower);
 	if (preferredIndex >= 0) return 1000 - preferredIndex;
 
-	if (lower === 'lurkers_twitch.txt') return 900;
-	if (lower === 'lurkers_twitch.json') return 890;
+	if (lower === 'overlayuserdata.txt') return 980;
+	if (lower === 'overlayuserdata.json') return 970;
 	if (lower === 'customuserdata.txt') return 880;
 	if (lower === 'customuserdata.json') return 870;
+	if (lower === 'users.txt') return 760;
+	if (lower === 'users.json') return 750;
+	if (lower === 'lurkers_twitch.txt') return 500;
+	if (lower === 'lurkers_twitch.json') return 490;
 
 	if (lower.endsWith('.json')) return 200;
 	if (lower.endsWith('.txt')) return 100;
 	return 0;
 }
 
+function findBestMegaFolderFile(folder, preferredNames, allowOnlyPreferred = true) {
+	const preferredLower = preferredNames.map(x => x.toLowerCase());
+
+	const matches = folder.filter(file => {
+		if (!file || file.directory) return false;
+
+		const name = String(file.name || "");
+		if (!isSupportedUserDataFilename(name)) return false;
+
+		const lower = name.toLowerCase();
+
+		if (allowOnlyPreferred) {
+			return preferredLower.includes(lower);
+		}
+
+		return true;
+	}, true);
+
+	if (!matches || !matches.length) return null;
+
+	matches.sort((a, b) => {
+		const diff = scoreFolderCandidate(b, preferredNames) - scoreFolderCandidate(a, preferredNames);
+		if (diff !== 0) return diff;
+		return String(a.name || "").localeCompare(String(b.name || ""));
+	});
+
+	return matches[0] || null;
+}
+
+async function downloadMegaFileText(file) {
+	const data = await file.downloadBuffer();
+	return new TextDecoder().decode(data);
+}
+
 async function readMegaSharedFileText(url) {
+	customUserDataPickedFilename = "";
+	dockLurkerFallbackRawText = "";
+	dockLurkerFallbackSourceName = "";
+
 	const megaModule = await getMegaModule();
 	const MEGAFile = megaModule.File;
 
@@ -12241,14 +12534,14 @@ async function readMegaSharedFileText(url) {
 		throw new Error("Not a valid MEGA file/folder URL");
 	}
 
-	// Backwards-compatible direct file path
+	// Direct file link: use it as primary. No separate lurkers_twitch fallback is possible.
 	if (megaInfo.isFile) {
 		const megaFile = MEGAFile.fromURL(url);
 		const data = await megaFile.downloadBuffer();
 		return new TextDecoder().decode(data);
 	}
 
-	// New folder-link path
+	// Folder link: load primary overlayUserData/custom file, then separately load Dock-only lurkers fallback.
 	const folder = MEGAFile.fromURL(url);
 	await folder.loadAttributes();
 
@@ -12257,44 +12550,39 @@ async function readMegaSharedFileText(url) {
 	}
 
 	const preferredNames = getPreferredFolderFilenames(url);
+	const primaryFile = findBestMegaFolderFile(folder, preferredNames, true);
 
-	// Search recursively, case-insensitive, only txt/json
-	const matches = folder.filter(file => {
-		if (!file || file.directory) return false;
-		const name = String(file.name || "");
-		if (!isSupportedUserDataFilename(name)) return false;
+	const lurkerFallbackFile = findBestMegaFolderFile(
+		folder,
+		getDockLurkerFallbackFilenames(),
+		true
+	);
 
-		const lower = name.toLowerCase();
-		return preferredNames.some(pref => pref.toLowerCase() === lower) || true;
-	}, true);
-
-	if (!matches || !matches.length) {
-		throw new Error("No .txt or .json custom user data file found in MEGA folder");
+	if (lurkerFallbackFile) {
+		dockLurkerFallbackSourceName = String(lurkerFallbackFile.name || "");
+		dockLurkerFallbackRawText = await downloadMegaFileText(lurkerFallbackFile);
 	}
 
-	matches.sort((a, b) => {
-		const diff = scoreFolderCandidate(b, preferredNames) - scoreFolderCandidate(a, preferredNames);
-		if (diff !== 0) return diff;
-		return String(a.name || "").localeCompare(String(b.name || ""));
-	});
+	if (!primaryFile) {
+		if (lurkerFallbackFile) return "";
+		throw new Error("No overlayUserData/custom user data file found in MEGA folder");
+	}
 
-	const picked = matches[0];
-	const data = await picked.downloadBuffer();
-	return new TextDecoder().decode(data);
+	customUserDataPickedFilename = String(primaryFile.name || "");
+	return await downloadMegaFileText(primaryFile);
 }
 
-function parseByFileType(rawText, sourceUrl) {
-	const lowerPath = String(sourceUrl || "").toLowerCase().split('?')[0].split('#')[0];
+function parseByFileType(rawText, sourceUrl, sourceName = "") {
+	const lowerPath = String(sourceName || sourceUrl || "").toLowerCase().split('?')[0].split('#')[0];
 
-	// direct file URLs
 	if (lowerPath.endsWith('.txt')) {
 		return parseTxtCustomUserData(rawText);
 	}
+
 	if (lowerPath.endsWith('.json')) {
 		return JSON.parse(rawText);
 	}
 
-	// folder links or ambiguous URLs
 	try {
 		return JSON.parse(rawText);
 	} catch (err) {
@@ -12305,12 +12593,14 @@ function parseByFileType(rawText, sourceUrl) {
 	async function loadCustomUserData(forceReload = false) {
 		if (!customUserDataParam) {
 			ingestCustomUserData(null);
+			ingestDockLurkerFallbackUserData(null);
 			customUserDataLoaded = true;
 			return { nickMap, pronounMap };
 		}
 
 		if (customUserDataCache && !forceReload) {
 			ingestCustomUserData(customUserDataCache);
+			ingestDockLurkerFallbackUserData(dockLurkerFallbackDataCache);
 			customUserDataLoaded = true;
 			return { nickMap, pronounMap };
 		}
@@ -12323,6 +12613,10 @@ function parseByFileType(rawText, sourceUrl) {
 			if (megaInfo) {
 				rawText = await readMegaSharedFileText(customUserDataParam);
 			} else {
+				customUserDataPickedFilename = "";
+				dockLurkerFallbackRawText = "";
+				dockLurkerFallbackSourceName = "";
+
 				const response = await fetch(customUserDataParam, { cache: "no-store" });
 				if (!response.ok) {
 					throw new Error("Failed to load customUserData: " + response.status);
@@ -12330,26 +12624,39 @@ function parseByFileType(rawText, sourceUrl) {
 				rawText = await response.text();
 			}
 
-			customUserDataCache = parseByFileType(rawText, customUserDataParam);
+			customUserDataCache = rawText && rawText.trim()
+				? parseByFileType(rawText, customUserDataParam, customUserDataPickedFilename)
+				: null;
+
+			dockLurkerFallbackDataCache = dockLurkerFallbackRawText && dockLurkerFallbackRawText.trim()
+				? parseByFileType(dockLurkerFallbackRawText, customUserDataParam, dockLurkerFallbackSourceName)
+				: null;
+
 			ingestCustomUserData(customUserDataCache);
+			ingestDockLurkerFallbackUserData(dockLurkerFallbackDataCache);
+
 			customUserDataLoaded = true;
 		} catch (err) {
-	console.error(err);
+			console.error(err);
 
-	// If MEGA/fetch fails, do NOT wipe existing loaded user data.
-	// Keep the last successful data if we have it.
-	if (customUserDataCache) {
-		ingestCustomUserData(customUserDataCache);
-	} else {
-		ingestCustomUserData(null); // first load failed, fallback only
-	}
+			// If MEGA/fetch fails, do NOT wipe existing loaded user data.
+			if (customUserDataCache) {
+				ingestCustomUserData(customUserDataCache);
+			} else {
+				ingestCustomUserData(null);
+			}
 
-	customUserDataLoaded = true;
-}
+			if (dockLurkerFallbackDataCache) {
+				ingestDockLurkerFallbackUserData(dockLurkerFallbackDataCache);
+			} else {
+				ingestDockLurkerFallbackUserData(null);
+			}
+
+			customUserDataLoaded = true;
+		}
 
 		return { nickMap, pronounMap };
 	}
-	
 	function normalizePronounBadges(rootNode) {
 	if (!rootNode || !rootNode.querySelectorAll) return;
 
@@ -12382,7 +12689,6 @@ function parseByFileType(rawText, sourceUrl) {
 
 		return badgeContainer;
 	}
-
 function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
@@ -12397,7 +12703,10 @@ function applyNick(msgNode) {
 
 	const usernameDisplay = nameEl.dataset.usernameOriginal;
 	const lookupName = normalize(usernameDisplay.replace(/^@/, '').trim());
-	const nick = nickMap[lookupName];
+
+	const nick =
+		nickMap[lookupName] ||
+		dockLurkerNickFallbackMap[lookupName];
 
 	const existingNick = nameEl.querySelector('.hl-nick');
 	if (existingNick) existingNick.remove();
@@ -12430,8 +12739,6 @@ function applyNick(msgNode) {
 
 	parts.textNode.after(span, ':');
 }
-
-
 	function isPronounTextBadge(el) {
 		if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
 
