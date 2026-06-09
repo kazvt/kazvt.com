@@ -13643,6 +13643,88 @@ function getDisplayLineText(source, line, lineIndex, hyphenated) {
 	return value;
 }
 
+function measureOverlayVisualLineWidth(root, text) {
+	const span = document.createElement("span");
+	const style = getComputedStyle(root);
+
+	span.style.position = "absolute";
+	span.style.visibility = "hidden";
+	span.style.pointerEvents = "none";
+	span.style.whiteSpace = "pre";
+	span.style.font = style.font;
+	span.style.fontKerning = style.fontKerning;
+	span.style.textTransform = style.textTransform;
+	span.style.letterSpacing = "normal";
+	span.textContent = text;
+
+	document.body.appendChild(span);
+	const width = span.getBoundingClientRect().width;
+	span.remove();
+
+	return width;
+}
+
+function previousSoftHyphenBreakOffset(source, endOffset, startOffset) {
+	const units = getTextUnitsWithOffsets(source);
+
+	for (let i = units.length - 1; i >= 0; i--) {
+		const unit = units[i];
+
+		if (unit.char === '\u00AD') continue;
+		if (unit.end >= endOffset) continue;
+		if (unit.end <= startOffset) break;
+
+		if (lineBreakUsesSoftHyphen(source, unit.end)) {
+			return unit.end;
+		}
+	}
+
+	return endOffset;
+}
+
+function fitRenderedHyphenLines(root, source, lines, containerRect) {
+	const fitted = lines.map(line => ({ ...line }));
+	const pxTolerance = 0.75;
+
+	for (let i = 0; i < fitted.length - 1; i++) {
+		const line = fitted[i];
+		const nextLine = fitted[i + 1];
+
+		if (!lineBreakUsesSoftHyphen(source, line.end)) continue;
+
+		const availableWidth = Math.max(10, containerRect.right - line.left);
+
+		let displayText = getDisplayLineText(source, line, i, true);
+		let renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+
+		while (renderedWidth > availableWidth + pxTolerance) {
+			const previousEnd = previousSoftHyphenBreakOffset(source, line.end, line.start);
+
+			if (!previousEnd || previousEnd === line.end) break;
+
+			line.end = previousEnd;
+
+			// Move the trimmed character(s) onto the next visual line.
+			nextLine.start = previousEnd;
+
+			displayText = getDisplayLineText(source, line, i, true);
+			renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+		}
+
+		line.renderedWidth = renderedWidth;
+		line.right = line.left + renderedWidth;
+	}
+
+	fitted.forEach((line, index) => {
+		const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
+		const displayText = getDisplayLineText(source, line, index, hyphenated);
+		line.renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+		line.right = line.left + line.renderedWidth;
+	});
+
+	return fitted;
+}
+
 function justifyWrappedMessageLines(msgNode) {
 	if (!msgNode || !msgNode.querySelectorAll) return;
 
@@ -13655,19 +13737,22 @@ function justifyWrappedMessageLines(msgNode) {
 		root.dataset.lineJustifySource = source;
 		root.classList.remove("hl-line-justified");
 
-		const lines = getMeasuredTextLines(root, source);
-		if (lines.length < 3) {
-			root.textContent = source;
-			return;
-		}
+let lines = getMeasuredTextLines(root, source);
+if (lines.length < 3) {
+	root.textContent = source;
+	return;
+}
 
-		const containerRect = msgNode.getBoundingClientRect();
-		const edgeTolerance = Math.max(4, Math.min(12, containerRect.width * 0.04));
-		const shouldJustify = lines.map((line, index) => {
-			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
-			const reachesEnd = line.right >= containerRect.right - edgeTolerance;
-			return index > 0 && index < lines.length - 1 && hyphenated && reachesEnd;
-		});
+const containerRect = msgNode.getBoundingClientRect();
+lines = fitRenderedHyphenLines(root, source, lines, containerRect);
+
+const edgeTolerance = Math.max(4, Math.min(12, containerRect.width * 0.04));
+const shouldJustify = lines.map((line, index) => {
+	const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
+	const availableWidth = Math.max(10, containerRect.right - line.left);
+	const reachesEnd = line.renderedWidth >= availableWidth - edgeTolerance;
+	return index > 0 && index < lines.length - 1 && hyphenated && reachesEnd;
+});
 
 		if (!shouldJustify.some(Boolean)) {
 			root.textContent = source;
@@ -13688,7 +13773,8 @@ function justifyWrappedMessageLines(msgNode) {
 			span.textContent = displayText;
 
 			if (shouldJustify[index]) {
-				const extraSpace = Math.max(0, containerRect.right - line.right);
+const availableWidth = Math.max(10, containerRect.right - line.left);
+const extraSpace = Math.max(0, availableWidth - line.renderedWidth);
 				const spaces = (displayText.match(/ /g) || []).length;
 				span.classList.add("hl-visual-line-fill");
 
