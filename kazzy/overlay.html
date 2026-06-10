@@ -2879,11 +2879,9 @@
 
 .hl-content.hl-line-justified .hl-visual-line.hl-visual-line-fill {
 	display: inline-block;
-	text-align: justify !important;
-	text-align-last: justify !important;
-	text-justify: inter-character;
-	word-spacing: var(--hl-line-word-spacing, normal);
-	letter-spacing: var(--hl-line-letter-spacing, normal);
+	transform-origin: left center;
+	transform: scaleX(var(--hl-line-scale, 1));
+	white-space: pre;
 }
 
 /* Clamp the whole chat node, not the message element */
@@ -13772,22 +13770,17 @@ const shouldJustify = lines.map((line, index) => {
 			span.className = "hl-visual-line";
 			span.textContent = displayText;
 
-			if (shouldJustify[index]) {
-const availableWidth = Math.max(10, containerRect.right - line.left);
-const extraSpace = Math.max(0, availableWidth - line.renderedWidth);
-const spaces = (displayText.match(/ /g) || []).length;
+if (shouldJustify[index]) {
+	const availableWidth = Math.max(10, containerRect.right - line.left);
+	const renderedWidth = line.renderedWidth || measureOverlayVisualLineWidth(root, displayText);
 
-span.classList.add("hl-visual-line-fill");
-span.style.width = availableWidth.toFixed(3) + "px";
-span.style.boxSizing = "border-box";
+	span.classList.add("hl-visual-line-fill");
 
-if (extraSpace > 0 && spaces > 0) {
-	span.style.setProperty("--hl-line-word-spacing", (extraSpace / spaces).toFixed(3) + "px");
-} else if (extraSpace > 0) {
-	const stretchChars = Math.max(1, Array.from(displayText.replace(/\s/g, "")).length - 1);
-	span.style.setProperty("--hl-line-letter-spacing", (extraSpace / stretchChars).toFixed(3) + "px");
+	if (renderedWidth > 0 && availableWidth > renderedWidth) {
+		const scale = availableWidth / renderedWidth;
+		span.style.setProperty("--hl-line-scale", scale.toFixed(5));
+	}
 }
-			}
 
 			fragment.appendChild(span);
 		});
