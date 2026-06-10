@@ -13488,7 +13488,7 @@ function getVisibleUsernameForOverlay(username) {
 	return (typeof trimName !== "undefined" && trimName) ? truncateText(value, trimName) : value;
 }
 
-function applyNick(msgNode, animateMetaChange = false) {
+function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
 
@@ -13515,7 +13515,7 @@ function applyNick(msgNode, animateMetaChange = false) {
 		parts.textNode.textContent = visibleUsername;
 		ensureUsernameColonInName(nameEl);
 
-		if (animateMetaChange && (existingNick || previousMainText !== visibleUsername)) {
+		if (existingNick || previousMainText !== visibleUsername) {
 			animateOverlayHeaderMeta(nameEl);
 		}
 
@@ -13542,7 +13542,7 @@ function applyNick(msgNode, animateMetaChange = false) {
 	parts.textNode.after(span);
 	ensureUsernameColonInName(nameEl);
 
-	if (animateMetaChange && (previousMainText !== parts.textNode.textContent || previousNickText !== nextNickText)) {
+	if (previousMainText !== parts.textNode.textContent || previousNickText !== nextNickText) {
 		animateOverlayMetaElement(span, "22em");
 		animateOverlayHeaderMeta(nameEl);
 	}
@@ -13609,9 +13609,7 @@ async function applyPronouns(msgNode) {
 	// This keeps the textbadge after image badges and directly before the username
 	badgeContainer.appendChild(badge);
 
-	const animateMetaChange = msgNode.dataset.overlayMetaRendered === "1";
-
-	if (animateMetaChange && (badgeWasNew || previousPronounText !== nextPronounText)) {
+	if (badgeWasNew || previousPronounText !== nextPronounText) {
 		animateOverlayMetaElement(badge, "8em");
 		animateOverlayHeaderMeta(nameEl);
 	}
@@ -14202,28 +14200,13 @@ async function applyUserMeta(msgNode) {
 
 	softHyphenateMessage(msgNode);
 
-	const animateImmediateMetaChange = msgNode.dataset.overlayMetaRendered === "1";
-
-	applyNick(msgNode, animateImmediateMetaChange);
+	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
 
 	// Draw the message immediately using the same stable width that will be used
 	// after delayed pronoun/textbadge data arrives. This prevents the initial render
 	// from having a different wrap/ellipsis shape.
 	scheduleWrappedLineJustification(msgNode);
-
-	// Mark the initial visible render after layout has had a moment to settle.
-	// Cached nick/pronoun data appears normally before this flag is set.
-	// Truly delayed metadata that reappears after this point gets the smooth reveal.
-	if (!animateImmediateMetaChange && msgNode.dataset.overlayMetaRenderQueued !== "1") {
-		msgNode.dataset.overlayMetaRenderQueued = "1";
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				msgNode.dataset.overlayMetaRendered = "1";
-				delete msgNode.dataset.overlayMetaRenderQueued;
-			});
-		});
-	}
 
 	await applyPronouns(msgNode);
 
