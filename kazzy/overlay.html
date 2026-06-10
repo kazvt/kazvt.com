@@ -2879,9 +2879,13 @@
 
 .hl-content.hl-line-justified .hl-visual-line.hl-visual-line-fill {
 	display: inline-block;
-	transform-origin: left center;
-	transform: scaleX(var(--hl-line-scale, 1));
 	white-space: pre;
+}
+
+.hl-content.hl-line-justified .hl-line-space {
+	display: inline-block;
+	height: 1em;
+	vertical-align: baseline;
 }
 
 /* Clamp the whole chat node, not the message element */
@@ -13661,7 +13665,72 @@ function measureOverlayVisualLineWidth(root, text) {
 
 	return width;
 }
+function getOverlayVisibleLineLimit(msgNode) {
+	const style = getComputedStyle(msgNode);
+	const raw =
+		style.webkitLineClamp ||
+		style.lineClamp ||
+		style.getPropertyValue("-webkit-line-clamp") ||
+		"";
 
+	const value = parseInt(raw, 10);
+	return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function isOverlayEllipsisLine(msgNode, lines, index) {
+	const limit = getOverlayVisibleLineLimit(msgNode);
+
+	// If CSS line-clamp will hide lines after this one,
+	// this visible line gets the ellipsis, so do not add a manual hyphen.
+	return limit > 0 && lines.length > limit && index >= limit - 1;
+}
+
+function buildOverlayVisualLineSpan(root, displayText, availableWidth, renderedWidth, shouldFill) {
+	const span = document.createElement("span");
+	span.className = "hl-visual-line";
+
+	if (!shouldFill) {
+		span.textContent = displayText;
+		return span;
+	}
+
+	span.classList.add("hl-visual-line-fill");
+	span.style.width = availableWidth.toFixed(3) + "px";
+
+	const extraSpace = Math.max(0, availableWidth - renderedWidth);
+	const spaceCount = (displayText.match(/ /g) || []).length;
+
+	if (extraSpace > 0 && spaceCount > 0) {
+		const normalSpaceWidth = measureOverlayVisualLineWidth(root, " ");
+		const targetSpaceWidth = normalSpaceWidth + (extraSpace / spaceCount);
+
+		displayText.split(/( +)/).forEach(part => {
+			if (!part) return;
+
+			if (/^ +$/.test(part)) {
+				for (let i = 0; i < part.length; i++) {
+					const spacer = document.createElement("span");
+					spacer.className = "hl-line-space";
+					spacer.style.width = targetSpaceWidth.toFixed(3) + "px";
+					span.appendChild(spacer);
+				}
+			} else {
+				span.appendChild(document.createTextNode(part));
+			}
+		});
+
+		return span;
+	}
+
+	// Fallback for lines with no spaces.
+	if (extraSpace > 0) {
+		const stretchChars = Math.max(1, Array.from(displayText.replace(/\s/g, "")).length - 1);
+		span.style.letterSpacing = (extraSpace / stretchChars).toFixed(3) + "px";
+	}
+
+	span.textContent = displayText;
+	return span;
+}
 function previousSoftHyphenBreakOffset(source, endOffset, startOffset) {
 	const units = getTextUnitsWithOffsets(source);
 
@@ -13745,11 +13814,13 @@ const messageBox = root.closest(".hl-message") || root;
 const containerRect = messageBox.getBoundingClientRect();
 lines = fitRenderedHyphenLines(root, source, lines, containerRect);
 
-// A line ending through a soft-hyphen is already a filled/wrapped line.
-// Justify those lines only. Do not justify the final unfinished line.
 const shouldJustify = lines.map((line, index) => {
 	const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
-	return index < lines.length - 1 && hyphenated;
+	const ellipsisLine = isOverlayEllipsisLine(msgNode, lines, index);
+
+	// Justify only real wrapped soft-hyphen lines.
+	// Do not justify the CSS-clamped ellipsis line.
+	return index < lines.length - 1 && hyphenated && !ellipsisLine;
 });
 
 		if (!shouldJustify.some(Boolean)) {
@@ -13759,31 +13830,28 @@ const shouldJustify = lines.map((line, index) => {
 
 		const fragment = document.createDocumentFragment();
 
-		lines.forEach((line, index) => {
-			if (index > 0) {
-				fragment.appendChild(document.createElement("br"));
-			}
+lines.forEach((line, index) => {
+	if (index > 0) {
+		fragment.appendChild(document.createElement("br"));
+	}
 
-			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
-			const span = document.createElement("span");
-			const displayText = getDisplayLineText(source, line, index, hyphenated);
-			span.className = "hl-visual-line";
-			span.textContent = displayText;
+	const ellipsisLine = isOverlayEllipsisLine(msgNode, lines, index);
+	const hyphenated = lineBreakUsesSoftHyphen(source, line.end) && !ellipsisLine;
+	const displayText = getDisplayLineText(source, line, index, hyphenated);
 
-if (shouldJustify[index]) {
 	const availableWidth = Math.max(10, containerRect.right - line.left);
 	const renderedWidth = line.renderedWidth || measureOverlayVisualLineWidth(root, displayText);
 
-	span.classList.add("hl-visual-line-fill");
+	const span = buildOverlayVisualLineSpan(
+		root,
+		displayText,
+		availableWidth,
+		renderedWidth,
+		shouldJustify[index]
+	);
 
-	if (renderedWidth > 0 && availableWidth > renderedWidth) {
-		const scale = availableWidth / renderedWidth;
-		span.style.setProperty("--hl-line-scale", scale.toFixed(5));
-	}
-}
-
-			fragment.appendChild(span);
-		});
+	fragment.appendChild(span);
+});
 
 		root.textContent = "";
 		root.appendChild(fragment);
