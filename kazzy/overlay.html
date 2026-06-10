@@ -13699,25 +13699,45 @@ function getPlainOverlayLineText(source, line, lineIndex) {
 
 function fitOverlayLineWithDots(root, text, availableWidth) {
 	const dots = "...";
-	let value = String(text || "").replace(/\u00AD/g, "").replace(/\s+$/, "");
+	const raw = String(text || "")
+		.replace(/\u00AD/g, "")
+		.replace(/\s+$/, "");
 
-	if (measureOverlayVisualLineWidth(root, value + dots) <= availableWidth) {
-		return value + dots;
-	}
+	const chars = Array.from(raw);
+	let bestText = dots;
+	let bestWidth = measureOverlayVisualLineWidth(root, dots);
 
-	const chars = Array.from(value);
+	let low = 0;
+	let high = chars.length;
 
-	while (chars.length) {
-		const candidate = chars.join("").replace(/\s+$/, "") + dots;
+	while (low <= high) {
+		const mid = Math.floor((low + high) / 2);
+		const candidate = chars.slice(0, mid).join("").replace(/\s+$/, "") + dots;
+		const candidateWidth = measureOverlayVisualLineWidth(root, candidate);
 
-		if (measureOverlayVisualLineWidth(root, candidate) <= availableWidth) {
-			return candidate;
+		if (candidateWidth <= availableWidth) {
+			bestText = candidate;
+			bestWidth = candidateWidth;
+			low = mid + 1;
+		} else {
+			high = mid - 1;
 		}
-
-		chars.pop();
 	}
 
-	return dots;
+	return {
+		text: bestText,
+		width: bestWidth
+	};
+}
+
+function getPlainOverlayRemainderText(source, startOffset, lineIndex) {
+	let value = source.slice(startOffset).replace(/\u00AD/g, "");
+
+	if (lineIndex > 0) {
+		value = value.replace(/^\s+/, "");
+	}
+
+	return value;
 }
 
 function buildOverlayVisualLineSpan(root, displayText, availableWidth, renderedWidth, shouldFill) {
@@ -13891,14 +13911,21 @@ function justifyWrappedMessageLines(msgNode) {
 
 			const availableWidth = Math.max(10, fillRight - line.left);
 
-			if (isClamped && index === lastRenderedIndex) {
-				const plainText = getPlainOverlayLineText(source, line, index);
-				const span = document.createElement("span");
-				span.className = "hl-visual-line";
-				span.textContent = fitOverlayLineWithDots(root, plainText, availableWidth);
-				fragment.appendChild(span);
-				break;
-			}
+if (isClamped && index === lastRenderedIndex) {
+	const plainText = getPlainOverlayRemainderText(source, line.start, index);
+	const fitted = fitOverlayLineWithDots(root, plainText, availableWidth);
+
+	const span = buildOverlayVisualLineSpan(
+		root,
+		fitted.text,
+		availableWidth,
+		fitted.width,
+		true
+	);
+
+	fragment.appendChild(span);
+	break;
+}
 
 			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
 			const displayText = getDisplayLineText(source, line, index, hyphenated);
