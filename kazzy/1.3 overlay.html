@@ -2907,25 +2907,9 @@
 
 .highlight-chat.hl-manual-clamp {
 	display: inline-block !important;
-	width: var(--hl-stable-message-width, 40vw) !important;
-	max-width: var(--hl-stable-message-width, 40vw) !important;
 	-webkit-box-orient: unset !important;
 	-webkit-line-clamp: unset !important;
 	line-clamp: unset !important;
-	overflow: visible !important;
-	contain: none !important;
-}
-
-.highlight-chat.hl-manual-clamp .hl-message {
-	width: var(--hl-stable-message-width, 40vw) !important;
-	max-width: var(--hl-stable-message-width, 40vw) !important;
-	overflow: visible !important;
-}
-
-.highlight-chat.hl-manual-clamp .hl-content.hl-line-justified {
-	display: inline-block !important;
-	width: var(--hl-stable-message-width, 40vw) !important;
-	max-width: var(--hl-stable-message-width, 40vw) !important;
 	overflow: visible !important;
 }
 
@@ -13802,54 +13786,37 @@ function fitOverlayLineWithDots(root, text, targetWidth) {
 	};
 }
 
-function getOverlayStableMessageWidth(root, msgNode) {
-	const msgStyle = getComputedStyle(msgNode);
-	const rootStyle = getComputedStyle(root);
-
-	const msgMaxWidth = getCssPixelValue(msgStyle.maxWidth);
-	const rootMaxWidth = getCssPixelValue(rootStyle.maxWidth);
-	const viewportWidth = Math.max(10, document.documentElement.clientWidth || window.innerWidth || 0);
-
-	let target = msgMaxWidth > 0 ? msgMaxWidth : 0;
-
-	if (!target && rootMaxWidth > 0) {
-		target = rootMaxWidth;
-	}
-
-	if (!target) {
-		target = viewportWidth * 0.40;
-	}
-
-	// Keep a small internal safety gutter so text stroke/shadow/dots are not clipped
-	// by OBS/browser paint boundaries, while still preserving a stable wrap width.
-	const safetyGutter = 2;
-	target = Math.min(target, viewportWidth);
-	target = Math.max(10, Math.floor(target - safetyGutter));
-
-	return target;
-}
-
-function lockOverlayMessageWidth(root, msgNode, targetWidth) {
-	const width = Math.max(10, Number(targetWidth) || 0);
-	const value = width.toFixed(3) + "px";
-
-	msgNode.style.setProperty("--hl-stable-message-width", value);
-	root.style.width = value;
-	root.style.maxWidth = value;
-}
-
-function unlockOverlayMessageWidth(root, msgNode) {
-	root.style.removeProperty("width");
-	root.style.removeProperty("max-width");
-	msgNode.style.removeProperty("--hl-stable-message-width");
-}
-
 function getOverlayTargetLineWidth(root, msgNode, lines) {
-	// Keep one fixed target based on the overlay CSS max-width only.
-	// Do not grow it from measured line text: delayed pronoun/textbadge renders
-	// can otherwise change the parent box and cause a different wrap/ellipsis shape.
-	return getOverlayStableMessageWidth(root, msgNode);
+	const rootRect = root.getBoundingClientRect();
+	const msgRect = msgNode.getBoundingClientRect();
+	const msgStyle = getComputedStyle(msgNode);
+	const maxWidth = getCssPixelValue(msgStyle.maxWidth);
+
+	const measuredLineWidth = Math.max(
+		10,
+		...lines.map(line => Math.max(0, (line.renderedWidth || (line.right - line.left) || 0)))
+	);
+
+	const maxMeasuredRight = Math.max(
+		0,
+		...lines.map(line => Math.max(0, line.right - rootRect.left))
+	);
+
+	const rootOffsetInsideMsg = Math.max(0, rootRect.left - msgRect.left);
+	const msgActualWidth = Math.max(0, msgRect.width - rootOffsetInsideMsg);
+	const cssMaxWidth = maxWidth > 0 ? Math.max(0, maxWidth - rootOffsetInsideMsg) : 0;
+
+	// Prefer the actual CSS wrap width, not each line's current text width.
+	// This makes all wrapped/ellipsised visual lines share one exact target.
+	return Math.ceil(Math.max(
+		10,
+		cssMaxWidth,
+		msgActualWidth,
+		maxMeasuredRight,
+		measuredLineWidth
+	)) + 1;
 }
+
 function buildOverlayVisualLineSpan(root, displayText, targetWidth, renderedWidth, shouldFill) {
 	const span = document.createElement("span");
 	span.className = "hl-visual-line";
@@ -13972,26 +13939,19 @@ function justifyWrappedMessageLines(msgNode) {
 		if (!root.dataset.lineJustifySource && hasElementChildren(root)) return;
 
 		const source = root.dataset.lineJustifySource || root.textContent || "";
-		if (!source.replace(/­/g, "").trim()) return;
+		if (!source.replace(/\u00AD/g, "").trim()) return;
 
 		root.dataset.lineJustifySource = source;
 		root.classList.remove("hl-line-justified");
-
-		const baseTargetLineWidth = getOverlayStableMessageWidth(root, msgNode);
-		lockOverlayMessageWidth(root, msgNode, baseTargetLineWidth);
 
 		let lines = getMeasuredTextLines(root, source);
 
 		if (lines.length < 2) {
 			root.textContent = source;
-			root.classList.remove("hl-line-justified");
-			unlockOverlayMessageWidth(root, msgNode);
 			return;
 		}
 
 		let targetLineWidth = getOverlayTargetLineWidth(root, msgNode, lines);
-		lockOverlayMessageWidth(root, msgNode, targetLineWidth);
-
 		const rootRect = root.getBoundingClientRect();
 		const fittingRect = {
 			left: rootRect.left,
@@ -14001,7 +13961,6 @@ function justifyWrappedMessageLines(msgNode) {
 
 		lines = fitRenderedHyphenLines(root, source, lines, fittingRect);
 		targetLineWidth = getOverlayTargetLineWidth(root, msgNode, lines);
-		lockOverlayMessageWidth(root, msgNode, targetLineWidth);
 
 		const visibleLimit = getOverlayVisibleLineLimit(msgNode);
 		const isClamped = visibleLimit > 0 && lines.length > visibleLimit;
@@ -14046,12 +14005,12 @@ function justifyWrappedMessageLines(msgNode) {
 		root.appendChild(fragment);
 		root.classList.add("hl-line-justified");
 
-		// Keep the stable message box for every manually wrapped/equalised message,
-		// not only for clamped messages. This prevents delayed pronoun/textbadge render
-		// from changing the line width or clipping the right edge.
-		msgNode.classList.add("hl-manual-clamp");
+		if (isClamped) {
+			msgNode.classList.add("hl-manual-clamp");
+		}
 	});
 }
+
 function scheduleWrappedLineJustification(msgNode) {
 	if (!msgNode || !msgNode.querySelectorAll) return;
 	if (msgNode.dataset.lineJustifyQueued === "1") return;
@@ -14076,16 +14035,8 @@ async function applyUserMeta(msgNode) {
 
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
-
-	// Draw the message immediately using the same stable width that will be used
-	// after delayed pronoun/textbadge data arrives. This prevents the initial render
-	// from having a different wrap/ellipsis shape.
-	scheduleWrappedLineJustification(msgNode);
-
 	await applyPronouns(msgNode);
 
-	// Pronouns/textbadges can arrive async and affect the header width. Re-run the
-	// layout, but the message width is locked to the same stable max width above.
 	scheduleWrappedLineJustification(msgNode);
 
 	if (horizontal && typeof horizontalRealign === "function") {
