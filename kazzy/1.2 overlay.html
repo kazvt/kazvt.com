@@ -74,12 +74,14 @@
 			--bgcolor-bubble: #000d;
 			--bgcolor-bubble-odd: #111d;
 			--name-bubble-bg: #2a5bd7;
+
 			--name-bubble-text: var(--font-color-name);
 			--name-bubble-radius: 999px;
 			--name-bubble-padding: 2px 8px;
 
 			--scrollbar-visible: inherit;
 			--padding-rows: 3px;
+			--horizontal-message-gap: 4px;
 
 			--text-stroke-width: 0px;
 			--text-stroke-color: #000;
@@ -470,7 +472,7 @@
 		}
 
 		.hl-badge {
-			margin: 0px 2px 0px 0px;
+			margin: 0px 4px 0px 0px;
 			max-width: 100px;
 			max-height: 20px;
 			height: 20px;
@@ -1141,7 +1143,7 @@
 		}
 
 		.hl-badges {
-			margin-left: 4px;
+			margin-left: 0;
 		}
 
 		.hl-badges:first-child {
@@ -1352,7 +1354,7 @@
 
 		.hl-name {
 			font-weight: var(--name-font-weight, 700);
-			margin: auto 5px;
+			margin: auto 5px auto auto;
 			position: relative;
 			left: 0;
 			width: fit-content;
@@ -1813,6 +1815,7 @@
 
 			color: #f5f5f5;
 			opacity: 1;
+
 			/* Firefox */
 		}
 
@@ -1820,7 +1823,7 @@
 			border-radius: 6px;
 			padding: 0 5px;
 			font-size: 100%;
-			margin: 0 4px 0 4px;
+			margin: 0 5px 0 0;
 		}
 
 		input[type="text"] {
@@ -2870,14 +2873,55 @@
 	overflow: visible;
 }
 
+.hl-content.hl-line-justified .hl-visual-line {
+	display: inline;
+}
+
+.hl-content.hl-line-justified .hl-visual-line.hl-visual-line-fill {
+	display: inline-flex;
+	align-items: baseline;
+	width: var(--hl-line-target-width);
+	max-width: var(--hl-line-target-width);
+	min-width: var(--hl-line-target-width);
+	white-space: pre;
+	vertical-align: baseline;
+}
+
+.hl-content.hl-line-justified .hl-line-word {
+	flex: 0 0 auto;
+	white-space: pre;
+}
+
+.hl-content.hl-line-justified .hl-line-space {
+	display: inline-block;
+	flex: 1 1 0;
+	min-width: var(--hl-line-space-min, 0.25em);
+	height: 0;
+	line-height: 0;
+	font-size: inherit;
+	vertical-align: baseline;
+}
+
+.highlight-chat.hl-manual-clamp {
+	display: inline-block !important;
+	-webkit-box-orient: unset !important;
+	-webkit-line-clamp: unset !important;
+	line-clamp: unset !important;
+	overflow: visible !important;
+}
+
+.highlight-chat.hl-manual-clamp {
+	display: inline-block !important;
+	-webkit-box-orient: unset !important;
+	-webkit-line-clamp: unset !important;
+	line-clamp: unset !important;
+}
+
 /* Clamp the whole chat node, not the message element */
 .highlight-chat {
 	box-sizing: border-box !important;
 	width: max-content !important;
 	max-width: 40vw !important;
-	text-align: justify !important;
-	text-align-last: start !important;
-	text-justify: inter-word;
 
 	display: -webkit-box !important;
 	-webkit-box-orient: vertical !important;
@@ -2937,7 +2981,12 @@ hyphens: manual !important;
 }
 
 .horizontal .highlight-chat {
-	margin-right: 4px !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+.horizontal .highlight-chat + .highlight-chat {
+	margin-left: var(--horizontal-message-gap, 4px) !important;
 }
 
 .highlight-chat > .hl-name {
@@ -3013,6 +3062,10 @@ hyphens: manual !important;
 	top: auto !important;
 }
 
+.highlight-chat .hl-badges .hl-badge:not(.textbadge) {
+	margin-right: 5px !important;
+}
+
 /* Vertically center avatar + platform/source icons */
 .highlight-chat > img.icon,
 .highlight-chat > svg.icon,
@@ -3064,6 +3117,7 @@ hyphens: manual !important;
 	outline-offset: 0 !important;
 
 	margin-left: 0 !important;
+	margin-right: calc(var(--platform-pfp-outline-size) + 3px) !important;
 	vertical-align: middle !important;
 	align-self: center !important;
 }
@@ -3134,6 +3188,35 @@ hyphens: manual !important;
 		0 3px 0 1px #8b5cff,
 		3px 0 0 1px #5f7dff,
 		-3px 0 0 1px #5f7dff !important;
+}
+
+body.twoLines .hl-firstline,
+body.twoLines .hl-firstline *,
+body.twoLines .hl-name {
+	text-align: left !important;
+	text-align-last: auto !important;
+	text-justify: auto !important;
+	letter-spacing: normal !important;
+	word-spacing: normal !important;
+	justify-content: flex-start !important;
+}
+
+body.twoLines .hl-firstline {
+	display: flex !important;
+	justify-content: flex-start !important;
+	text-align: left !important;
+}
+
+
+body.twoLines .hl-firstline .hl-name {
+	margin: auto 5px auto 0 !important;
+	margin-left: 0 !important;
+	margin-right: 5px !important;
+	width: fit-content !important;
+}
+
+body.twoLines .hl-firstline .hl-badges {
+	margin-left: 0 !important;
 }
 
 	</style>
@@ -3751,7 +3834,7 @@ hyphens: manual !important;
 		var filterAddNameAndTime = false;
 		var applyCustomActions = false;
 		var showsource = true;
-		var compactmode = false;
+		var compactmode = true;
 		var darkmode = null;
 		var scale = 1;
 		var forceAutoscroll = false;
@@ -5375,6 +5458,11 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 			document.documentElement.style.setProperty("--padding-rows", (parseInt(urlParams.get("padding") || 5)) + "px");
 		}
 
+		var horizontalGapParam = urlParams.get("tickergap") || urlParams.get("horizontalgap");
+		if (horizontalGapParam !== null) {
+			document.documentElement.style.setProperty("--horizontal-message-gap", (parseInt(horizontalGapParam || 4)) + "px");
+		}
+
 		var NormalizeText = false;
 		if (urlParams.has("normalize")) {
 			NormalizeText = true;
@@ -5449,7 +5537,14 @@ function truncateEventTextForOverlay(text, maxLength) {
 }
 
 function truncateReplyTextForOverlay(text, maxLength) {
-	return truncateOverlayText(text, maxLength);
+	const value = String(text || "");
+	const replyParts = value.match(/^(replying\s+to\s+[^:]*:\s*)([\s\S]*)$/i);
+
+	if (!replyParts) {
+		return truncateOverlayText(text, maxLength);
+	}
+
+	return replyParts[1] + truncateOverlayText(replyParts[2], maxLength);
 }
 
 function truncateReplyPrefixInNode(node, maxLength) {
@@ -12499,8 +12594,8 @@ function truncateText(text, maxLength) {
 	let pendingRefreshTimer = null;
 
 	const fallbackPronounsCache = new Map();
-	let fallbackPronounsListCache = null;
-	let fallbackPronounsListCacheTime = 0;
+	let alejoPronounsListCache = null;
+	let alejoPronounsListCacheTime = 0;
 
 	const FALLBACK_PRONOUNS_CACHE_TTL = 15 * 60 * 1000;
 	const FALLBACK_PRONOUNS_LIST_TTL = 24 * 60 * 60 * 1000;
@@ -12513,9 +12608,9 @@ function truncateText(text, maxLength) {
 	function pruneFallbackPronounCache() {
 		const now = Date.now();
 
-		for (const [username, entry] of fallbackPronounsCache.entries()) {
+		for (const [key, entry] of fallbackPronounsCache.entries()) {
 			if (!entry || (now - entry.time > FALLBACK_PRONOUNS_CACHE_TTL)) {
-				fallbackPronounsCache.delete(username);
+				fallbackPronounsCache.delete(key);
 			}
 		}
 
@@ -12527,66 +12622,64 @@ function truncateText(text, maxLength) {
 		}
 	}
 
-	async function fetchFallbackUserPronouns(username) {
+	function getCachedFallbackPronouns(key) {
+		const now = Date.now();
+		const cached = fallbackPronounsCache.get(key);
+		if (!cached || (now - cached.time >= FALLBACK_PRONOUNS_CACHE_TTL)) return undefined;
+		return cached.data || null;
+	}
+
+	function setCachedFallbackPronouns(key, data) {
+		fallbackPronounsCache.set(key, { data: data || null, time: Date.now() });
+		pruneFallbackPronounCache();
+		return data || null;
+	}
+
+	async function fetchJsonNoThrow(url, options = {}) {
+		try {
+			const res = await fetch(url, Object.assign({ cache: "no-store" }, options));
+			if (!res.ok) return null;
+			return await res.json();
+		} catch (e) {
+			return null;
+		}
+	}
+
+	async function fetchAlejoUserPronouns(username) {
 		const normalized = normalizeUsernameForPronounLookup(username);
 		if (!normalized) return null;
 
-		const now = Date.now();
-		const cached = fallbackPronounsCache.get(normalized);
-		if (cached && (now - cached.time < FALLBACK_PRONOUNS_CACHE_TTL)) {
-			return cached.data;
-		}
+		const cacheKey = `alejo:${normalized}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
 
-		try {
-			const res = await fetch(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
-			const data = await res.json();
-
-			if (res.ok) {
-				fallbackPronounsCache.set(normalized, { data, time: now });
-				pruneFallbackPronounCache();
-				return data;
-			}
-		} catch (e) {}
-
-		fallbackPronounsCache.set(normalized, { data: null, time: now });
-		pruneFallbackPronounCache();
-		return null;
+		const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/users/${encodeURIComponent(normalized)}`);
+		return setCachedFallbackPronouns(cacheKey, data);
 	}
 
-	async function fetchFallbackPronounsList() {
+	async function fetchAlejoPronounsList() {
 		const now = Date.now();
 
-		if (fallbackPronounsListCache && (now - fallbackPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
-			return fallbackPronounsListCache;
+		if (alejoPronounsListCache && (now - alejoPronounsListCacheTime < FALLBACK_PRONOUNS_LIST_TTL)) {
+			return alejoPronounsListCache;
 		}
 
-		try {
-			const res = await fetch(`https://api.pronouns.alejo.io/v1/pronouns`);
-			const data = await res.json();
+		const data = await fetchJsonNoThrow(`https://api.pronouns.alejo.io/v1/pronouns`);
+		if (data) {
+			alejoPronounsListCache = data;
+			alejoPronounsListCacheTime = now;
+		}
 
-			if (res.ok) {
-				fallbackPronounsListCache = data;
-				fallbackPronounsListCacheTime = now;
-				return data;
-			}
-		} catch (e) {}
-
-		return fallbackPronounsListCache || null;
+		return alejoPronounsListCache || null;
 	}
 
-	function buildFallbackPronounString(pronounsList, userData) {
+	function buildAlejoPronounString(pronounsList, userData) {
 		if (!pronounsList || !userData) return null;
 
 		function getPronouns(list, id) {
 			return id && list[id]
-				? {
-					subject: list[id].subject || null,
-					object: list[id].object || null
-				}
-				: {
-					subject: null,
-					object: null
-				};
+				? { subject: list[id].subject || null, object: list[id].object || null }
+				: { subject: null, object: null };
 		}
 
 		const { subject: primarySub, object: primaryObj } = getPronouns(pronounsList, userData.pronoun_id);
@@ -12625,17 +12718,176 @@ function truncateText(text, maxLength) {
 		return result ? String(result).trim() : null;
 	}
 
-	async function getFallbackPronounsForUsername(username) {
+	async function getAlejoPronounsForUsername(username) {
 		const normalized = normalizeUsernameForPronounLookup(username);
 		if (!normalized) return null;
 
-		const userData = await fetchFallbackUserPronouns(normalized);
+		const userData = await fetchAlejoUserPronouns(normalized);
 		if (!userData) return null;
 
-		const pronounsList = await fetchFallbackPronounsList();
+		const pronounsList = await fetchAlejoPronounsList();
 		if (!pronounsList) return null;
 
-		return buildFallbackPronounString(pronounsList, userData);
+		return buildAlejoPronounString(pronounsList, userData);
+	}
+
+	function normalizeFallbackPronounText(value) {
+		if (value == null) return null;
+
+		if (Array.isArray(value)) {
+			const joined = value.map(normalizeFallbackPronounText).filter(Boolean).join('/');
+			return joined || null;
+		}
+
+		if (typeof value === "object") {
+			const objectValue =
+				value.pronouns ?? value.pronoun ?? value.prns ?? value.prn ??
+				value.display ?? value.label ?? value.value ?? value.text ?? value.name;
+
+			if (objectValue != null) return normalizeFallbackPronounText(objectValue);
+
+			if (value.subject && value.object) {
+				return normalizeFallbackPronounText(String(value.subject) + "/" + String(value.object));
+			}
+
+			return null;
+		}
+
+		const text = String(value).trim().toLowerCase();
+		if (!text || text === "null" || text === "undefined" || text === "unspecified") return null;
+		return text.replace(/\s+/g, '');
+	}
+
+	function extractAeroKickPronouns(data, depth = 0, seen = new Set()) {
+		if (!data || depth > 4 || seen.has(data)) return null;
+		if (typeof data !== "object") return normalizeFallbackPronounText(data);
+
+		seen.add(data);
+
+		const direct = normalizeFallbackPronounText(
+			data.pronouns ?? data.pronoun ?? data.prns ?? data.prn ??
+			data.kickPronouns ?? data.kick_pronouns
+		);
+
+		if (direct) return direct;
+
+		for (const value of Object.values(data)) {
+			const nested = extractAeroKickPronouns(value, depth + 1, seen);
+			if (nested) return nested;
+		}
+
+		return null;
+	}
+
+	async function getAeroKickPronounsForUsername(username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const cacheKey = `aerokick:${normalized}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
+
+		const data = await fetchJsonNoThrow(`https://api.aerokick.app/api/v1/channel/kick/${encodeURIComponent(normalized)}`);
+		const pronouns = extractAeroKickPronouns(data);
+
+		return setCachedFallbackPronouns(cacheKey, pronouns);
+	}
+
+	function getMessageSourceForPronounLookup(msgNode) {
+		const raw = String(
+			msgNode?.dataset?.sourceType ||
+			msgNode?.dataset?.type ||
+			msgNode?.dataset?.source ||
+			msgNode?.rawContents?.type ||
+			""
+		).toLowerCase();
+
+		if (raw.includes("twitch")) return "twitch";
+		if (raw.includes("kick")) return "kick";
+		if (raw.includes("youtube") || raw.includes("youtubeshorts")) return "youtube";
+		return raw;
+	}
+
+	function getPronounDbTwitchId(msgNode) {
+		const source = getMessageSourceForPronounLookup(msgNode);
+		if (source !== "twitch") return "";
+
+		const rawContents = msgNode?.rawContents || {};
+		const id = String(
+			msgNode?.dataset?.userid ||
+			msgNode?.dataset?.userId ||
+			rawContents.userid ||
+			rawContents.userId ||
+			rawContents.userID ||
+			rawContents.user_id ||
+			rawContents.uid ||
+			""
+		).trim();
+
+		return /^\d+$/.test(id) ? id : "";
+	}
+
+	function pronounDbSetToText(set) {
+		const map = {
+			he: "he/him",
+			she: "she/her",
+			they: "they/them",
+			it: "it/its",
+			any: "any",
+			ask: "ask",
+			avoid: "avoid",
+			other: "other"
+		};
+
+		return map[String(set || "").toLowerCase()] || null;
+	}
+
+	function buildPronounDbPronounString(entry) {
+		const sets = entry?.sets?.en;
+		if (!Array.isArray(sets) || !sets.length) return null;
+
+		if (sets.includes("avoid")) return "avoid";
+		if (sets.includes("any")) return "any";
+		if (sets.includes("ask")) return "ask";
+
+		const basicSets = sets.filter(set => ["he", "she", "they", "it"].includes(String(set).toLowerCase()));
+		if (!basicSets.length) return pronounDbSetToText(sets[0]);
+
+		if (basicSets.length >= 2) {
+			return String(basicSets[0]).toLowerCase() + "/" + String(basicSets[1]).toLowerCase();
+		}
+
+		return pronounDbSetToText(basicSets[0]);
+	}
+
+	async function getPronounDbPronounsForMessage(msgNode) {
+		const twitchId = getPronounDbTwitchId(msgNode);
+		if (!twitchId) return null;
+
+		const cacheKey = `pronoundb:twitch:${twitchId}`;
+		const cached = getCachedFallbackPronouns(cacheKey);
+		if (cached !== undefined) return cached;
+
+		const data = await fetchJsonNoThrow(
+			`https://pronoundb.org/api/v2/lookup?platform=twitch&ids=${encodeURIComponent(twitchId)}`,
+			{ headers: { "X-PronounDB-Source": "kazlurker-local-overlay/1.0" } }
+		);
+
+		const pronouns = data && data[twitchId] ? buildPronounDbPronounString(data[twitchId]) : null;
+		return setCachedFallbackPronouns(cacheKey, pronouns);
+	}
+
+	async function getFallbackPronounsForMessage(msgNode, username) {
+		const normalized = normalizeUsernameForPronounLookup(username);
+		if (!normalized) return null;
+
+		const alejo = await getAlejoPronounsForUsername(normalized);
+		if (alejo) return alejo;
+
+		const aeroKick = await getAeroKickPronounsForUsername(normalized);
+		if (aeroKick) return aeroKick;
+
+		return await getPronounDbPronounsForMessage(msgNode);
 	}
 
 	function clearObject(obj) {
@@ -12698,18 +12950,9 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		return customPronouns.trim();
 	}
 
-	const source =
-		msgNode?.dataset?.type ||
-		msgNode?.dataset?.source ||
-		msgNode?.rawContents?.type ||
-		"";
-
-	// if (!source || source === "twitch") {
-	// 	return null;
-	// }
-
-	return await getFallbackPronounsForUsername(parts.baseName || parts.displayName);
+	return await getFallbackPronounsForMessage(msgNode, parts.baseName || parts.displayName);
 }
+
 
 	function extractProfile(record) {
 		if (!record || typeof record !== "object") return null;
@@ -12718,6 +12961,56 @@ async function resolvePronounsForMessage(msgNode, parts) {
 		const pronouns = (record.pronouns ?? record.pronoun ?? "").toString().trim();
 
 		return { nickname, pronouns };
+	}
+
+	function parseOverlayUserDataExpiry(raw) {
+		raw = String(raw || "").trim();
+		if (!raw) return 0;
+
+		// Streamer.bot writes ISO UTC, but accept unix seconds/ms too.
+		if (/^\d+$/.test(raw)) {
+			const numeric = Number(raw);
+			if (!Number.isFinite(numeric)) return 0;
+			return numeric < 100000000000 ? numeric * 1000 : numeric;
+		}
+
+		const parsed = Date.parse(raw);
+		return Number.isFinite(parsed) ? parsed : 0;
+	}
+
+	function getTimedOverlayUserDataValue(line, marker) {
+		const escaped = String(marker || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const pattern = new RegExp('\\[' + escaped + '([\\s\\S]*?)' + escaped + '\\s+til\\s+([^\\]]+)\\]', 'gi');
+		const now = Date.now();
+		let latest = null;
+
+		String(line || "").replace(pattern, (full, value, expiresRaw) => {
+			const expiresAt = parseOverlayUserDataExpiry(expiresRaw);
+			if (!expiresAt || expiresAt <= now) return full;
+
+			latest = {
+				value: String(value || "").trim(),
+				expiresAt
+			};
+
+			return full;
+		});
+
+		return latest && latest.value ? latest.value : "";
+	}
+
+	function stripTimedOverlayUserDataBlocks(line) {
+		return String(line || "")
+			.replace(/\[@@@[\s\S]*?@@@\s+til\s+[^\]]+\]/gi, " ")
+			.replace(/\[===[\s\S]*?===\s+til\s+[^\]]+\]/gi, " ");
+	}
+
+	function getPermanentOverlayUserDataValue(line, marker) {
+		const stableLine = stripTimedOverlayUserDataBlocks(line);
+		const escaped = String(marker || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const pattern = new RegExp(escaped + '([\\s\\S]*?)' + escaped);
+		const match = stableLine.match(pattern);
+		return match ? String(match[1] || "").trim() : "";
 	}
 
 	function parseTxtCustomUserData(text) {
@@ -12730,18 +13023,23 @@ async function resolvePronounsForMessage(msgNode, parts) {
 			if (!trimmed) return;
 			if (trimmed.startsWith('#') || trimmed.startsWith('-')) return;
 
-			// first token after optional whitespace and optional leading ^ chars
+			// First token after optional whitespace and optional leading ^ chars is the lookup username.
 			const usernameMatch = line.match(/^\s*\^*([^\s]+)/);
 			if (!usernameMatch) return;
 
 			const username = normalize(usernameMatch[1].replace(/^@/, ''));
 			if (!username) return;
 
-			const nickMatch = line.match(/@@@([\s\S]*?)@@@/);
-			const pronounMatch = line.match(/===([\s\S]*?)===/);
+			// Timed Streamer.bot blocks override permanent wrappers until they expire:
+			//   [@@@Nick@@@ til 2026-06-09T12:00:00Z]
+			//   [===she/her=== til 2026-06-09T12:00:00Z]
+			const timedNickname = getTimedOverlayUserDataValue(line, '@@@');
+			const timedPronouns = getTimedOverlayUserDataValue(line, '===');
+			const permanentNickname = getPermanentOverlayUserDataValue(line, '@@@');
+			const permanentPronouns = getPermanentOverlayUserDataValue(line, '===');
 
-			const nickname = nickMatch ? nickMatch[1].trim() : "";
-			const pronouns = pronounMatch ? pronounMatch[1].trim() : "";
+			const nickname = timedNickname || permanentNickname;
+			const pronouns = timedPronouns || permanentPronouns;
 
 			parsed[username] = {};
 			if (nickname) parsed[username].nick = nickname;
@@ -12845,8 +13143,10 @@ function parseMegaUrlInfo(url) {
 
 function getPreferredFolderFilenames(sourceUrl) {
 	const defaults = [
-		'lurkers_twitch.txt',
-		'lurkers_twitch.json',
+		'overlayUserData.txt',
+		'overlayUserData.json',
+		// 'lurkers_twitch.txt',
+		// 'lurkers_twitch.json',
 		'customUserData.txt',
 		'customUserData.json',
 		'users.txt',
@@ -12878,8 +13178,10 @@ function scoreFolderCandidate(file, preferredNames) {
 	const preferredIndex = preferredNames.findIndex(x => x.toLowerCase() === lower);
 	if (preferredIndex >= 0) return 1000 - preferredIndex;
 
-	if (lower === 'lurkers_twitch.txt') return 900;
-	if (lower === 'lurkers_twitch.json') return 890;
+	// if (lower === 'lurkers_twitch.txt') return 900;
+	// if (lower === 'lurkers_twitch.json') return 890;
+	if (lower === 'overlayuserdata.txt') return 980;
+	if (lower === 'overlayuserdata.json') return 970;
 	if (lower === 'customuserdata.txt') return 880;
 	if (lower === 'customuserdata.json') return 870;
 
@@ -12921,7 +13223,7 @@ async function readMegaSharedFileText(url) {
 		if (!isSupportedUserDataFilename(name)) return false;
 
 		const lower = name.toLowerCase();
-		return preferredNames.some(pref => pref.toLowerCase() === lower) || true;
+		return preferredNames.some(pref => pref.toLowerCase() === lower);
 	}, true);
 
 	if (!matches || !matches.length) {
@@ -13074,6 +13376,12 @@ function ensureUsernameColonInName(nameEl) {
 		textNode.after(':');
 	}
 }
+
+function getVisibleUsernameForOverlay(username) {
+	const value = String(username || "");
+	return (typeof trimName !== "undefined" && trimName) ? truncateText(value, trimName) : value;
+}
+
 function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
@@ -13087,6 +13395,7 @@ function applyNick(msgNode) {
 	}
 
 	const usernameDisplay = nameEl.dataset.usernameOriginal;
+	const visibleUsername = getVisibleUsernameForOverlay(usernameDisplay);
 	const lookupName = normalize(usernameDisplay.replace(/^@/, '').trim());
 	const nick = nickMap[lookupName];
 
@@ -13095,7 +13404,7 @@ function applyNick(msgNode) {
 
 if (!nick || !nick.trim()) {
 	// No nickname: restore plain username view
-	parts.textNode.textContent = usernameDisplay;
+	parts.textNode.textContent = visibleUsername;
 	ensureUsernameColonInName(nameEl);
 	return;
 }
@@ -13105,9 +13414,9 @@ if (!nick || !nick.trim()) {
 
 	if (usePrimaryNicknames) {
 		parts.textNode.textContent = nickText;
-		span.textContent = '\u00a0(' + usernameDisplay + ')';
+		span.textContent = '\u00a0(' + visibleUsername + ')';
 	} else {
-		parts.textNode.textContent = usernameDisplay;
+		parts.textNode.textContent = visibleUsername;
 		span.textContent = '\u00a0(' + nickText + ')';
 	}
 
@@ -13184,7 +13493,7 @@ function addSoftHyphensToOverlayText(text) {
 
 	// Lower number = more words can split with a hyphen.
 	// URL: &hyphenatechars=4
-	const MIN_HYPHENATE_CHARS = 2;
+	const MIN_HYPHENATE_CHARS = 1;
 
 	// Keep spaces breakable/stretchable so CSS justification can fill wrapped rows.
 	const FORCE_HYPHEN_FILL = false;
@@ -13275,6 +13584,416 @@ function softHyphenateMessage(msgNode) {
 	msgNode.dataset.softHyphenated = "1";
 }
 
+function hasElementChildren(node) {
+	return Array.from(node.childNodes || []).some(child => child.nodeType === Node.ELEMENT_NODE);
+}
+
+function getTextUnitsWithOffsets(text) {
+	const units = [];
+	let offset = 0;
+
+	for (const char of String(text || "")) {
+		units.push({ char, start: offset, end: offset + char.length });
+		offset += char.length;
+	}
+
+	return units;
+}
+
+function lineBreakUsesSoftHyphen(source, endOffset) {
+	const SOFT_HYPHEN = '\u00AD';
+	let offset = endOffset;
+	let sawSoftHyphen = false;
+
+	while (source[offset] === SOFT_HYPHEN) {
+		sawSoftHyphen = true;
+		offset++;
+	}
+
+	return sawSoftHyphen && offset < source.length && !/\s/.test(source[offset] || "");
+}
+
+function getMeasuredTextLines(root, source) {
+	root.textContent = source;
+
+	const textNode = root.firstChild;
+	if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return [];
+
+	const range = document.createRange();
+	const units = getTextUnitsWithOffsets(source);
+	const lines = [];
+	const softHyphen = '\u00AD';
+	const lineThreshold = Math.max(2, (parseFloat(getComputedStyle(root).fontSize) || 16) * 0.2);
+
+	units.forEach(unit => {
+		if (unit.char === softHyphen) return;
+
+		range.setStart(textNode, unit.start);
+		range.setEnd(textNode, unit.end);
+
+		const rects = range.getClientRects();
+		if (!rects.length) return;
+
+		const rect = rects[0];
+		if (!rect || (!rect.width && !rect.height)) return;
+
+		let line = lines[lines.length - 1];
+		if (!line || Math.abs(rect.top - line.top) > lineThreshold) {
+			line = {
+				start: unit.start,
+				end: unit.end,
+				top: rect.top,
+				left: rect.left,
+				right: rect.right
+			};
+			lines.push(line);
+		} else {
+			line.end = unit.end;
+			line.left = Math.min(line.left, rect.left);
+			line.right = Math.max(line.right, rect.right);
+		}
+	});
+
+	range.detach();
+	return lines;
+}
+
+function getDisplayLineText(source, line, lineIndex, hyphenated) {
+	let value = source.slice(line.start, line.end).replace(/\u00AD/g, "");
+
+	if (lineIndex > 0) {
+		value = value.replace(/^\s+/, "");
+	}
+
+	value = value.replace(/\s+$/, "");
+
+	if (hyphenated) {
+		value += "-";
+	}
+
+	return value;
+}
+
+function measureOverlayVisualLineWidth(root, text) {
+	const span = document.createElement("span");
+	const style = getComputedStyle(root);
+
+	span.style.position = "absolute";
+	span.style.visibility = "hidden";
+	span.style.pointerEvents = "none";
+	span.style.whiteSpace = "pre";
+	span.style.font = style.font;
+	span.style.fontKerning = style.fontKerning;
+	span.style.textTransform = style.textTransform;
+	span.style.letterSpacing = "normal";
+	span.textContent = text;
+
+	document.body.appendChild(span);
+	const width = span.getBoundingClientRect().width;
+	span.remove();
+
+	return width;
+}
+function getOverlayVisibleLineLimit(msgNode) {
+	const style = getComputedStyle(msgNode);
+	const raw =
+		style.webkitLineClamp ||
+		style.lineClamp ||
+		style.getPropertyValue("-webkit-line-clamp") ||
+		"";
+
+	const value = parseInt(raw, 10);
+	return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function getPlainOverlayLineText(source, line, lineIndex) {
+	let value = source.slice(line.start, line.end).replace(/\u00AD/g, "");
+
+	if (lineIndex > 0) {
+		value = value.replace(/^\s+/, "");
+	}
+
+	return value.replace(/\s+$/, "");
+}
+function getOverlayTextChars(text) {
+	if (window.Intl && Intl.Segmenter) {
+		const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+		return Array.from(segmenter.segment(String(text || "")), s => s.segment);
+	}
+
+	return Array.from(String(text || ""));
+}
+
+function getPlainOverlayRemainderText(source, startOffset, lineIndex) {
+	let value = source.slice(startOffset).replace(/\u00AD/g, "");
+
+	if (lineIndex > 0) {
+		value = value.replace(/^\s+/, "");
+	}
+
+	return value;
+}
+
+function fitOverlayLineWithDots(root, text, targetWidth) {
+	const dots = "...";
+	const raw = String(text || "")
+		.replace(/\u00AD/g, "")
+		.replace(/\s+$/, "");
+
+	const chars = getOverlayTextChars(raw);
+
+	let bestText = dots;
+	let bestWidth = measureOverlayVisualLineWidth(root, dots);
+
+	let low = 0;
+	let high = chars.length;
+
+	while (low <= high) {
+		const mid = Math.floor((low + high) / 2);
+		const candidate = chars.slice(0, mid).join("").replace(/\s+$/, "") + dots;
+		const candidateWidth = measureOverlayVisualLineWidth(root, candidate);
+
+		if (candidateWidth <= targetWidth) {
+			bestText = candidate;
+			bestWidth = candidateWidth;
+			low = mid + 1;
+		} else {
+			high = mid - 1;
+		}
+	}
+
+	return {
+		text: bestText,
+		width: bestWidth
+	};
+}
+
+function buildOverlayVisualLineSpan(root, displayText, targetWidth, renderedWidth, shouldFill) {
+	const span = document.createElement("span");
+	span.className = "hl-visual-line";
+
+	if (!shouldFill) {
+		span.textContent = displayText;
+		return span;
+	}
+
+	span.classList.add("hl-visual-line-fill");
+	span.style.setProperty("--hl-line-target-width", targetWidth.toFixed(3) + "px");
+
+	const normalSpaceWidth = measureOverlayVisualLineWidth(root, " ");
+	span.style.setProperty("--hl-line-space-min", normalSpaceWidth.toFixed(3) + "px");
+
+	const parts = String(displayText || "").split(/( +)/);
+	const spaceCount = (displayText.match(/ /g) || []).length;
+
+	if (spaceCount > 0) {
+		parts.forEach(part => {
+			if (!part) return;
+
+			if (/^ +$/.test(part)) {
+				for (let i = 0; i < part.length; i++) {
+					const spacer = document.createElement("span");
+					spacer.className = "hl-line-space";
+					span.appendChild(spacer);
+				}
+			} else {
+				const word = document.createElement("span");
+				word.className = "hl-line-word";
+				word.textContent = part;
+				span.appendChild(word);
+			}
+		});
+
+		return span;
+	}
+
+	// No spaces: character-stretch fallback.
+	span.style.display = "inline-block";
+	span.style.width = targetWidth.toFixed(3) + "px";
+
+	const extraSpace = Math.max(0, targetWidth - renderedWidth);
+	if (extraSpace > 0) {
+		const stretchChars = Math.max(1, getOverlayTextChars(displayText).length - 1);
+		span.style.letterSpacing = (extraSpace / stretchChars).toFixed(3) + "px";
+	}
+
+	span.textContent = displayText;
+	return span;
+}
+
+function previousSoftHyphenBreakOffset(source, endOffset, startOffset) {
+	const units = getTextUnitsWithOffsets(source);
+
+	for (let i = units.length - 1; i >= 0; i--) {
+		const unit = units[i];
+
+		if (unit.char === '\u00AD') continue;
+		if (unit.end >= endOffset) continue;
+		if (unit.end <= startOffset) break;
+
+		if (lineBreakUsesSoftHyphen(source, unit.end)) {
+			return unit.end;
+		}
+	}
+
+	return endOffset;
+}
+
+function fitRenderedHyphenLines(root, source, lines, containerRect) {
+	const fitted = lines.map(line => ({ ...line }));
+	const pxTolerance = 0.75;
+
+	for (let i = 0; i < fitted.length - 1; i++) {
+		const line = fitted[i];
+		const nextLine = fitted[i + 1];
+
+		if (!lineBreakUsesSoftHyphen(source, line.end)) continue;
+
+		const availableWidth = Math.max(10, containerRect.right - line.left);
+
+		let displayText = getDisplayLineText(source, line, i, true);
+		let renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+
+		while (renderedWidth > availableWidth + pxTolerance) {
+			const previousEnd = previousSoftHyphenBreakOffset(source, line.end, line.start);
+
+			if (!previousEnd || previousEnd === line.end) break;
+
+			line.end = previousEnd;
+
+			// Move the trimmed character(s) onto the next visual line.
+			nextLine.start = previousEnd;
+
+			displayText = getDisplayLineText(source, line, i, true);
+			renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+		}
+
+		line.renderedWidth = renderedWidth;
+		line.right = line.left + renderedWidth;
+	}
+
+	fitted.forEach((line, index) => {
+		const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
+		const displayText = getDisplayLineText(source, line, index, hyphenated);
+		line.renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+		line.right = line.left + line.renderedWidth;
+	});
+
+	return fitted;
+}
+function justifyWrappedMessageLines(msgNode) {
+	if (!msgNode || !msgNode.querySelectorAll) return;
+
+	msgNode.classList.remove("hl-manual-clamp");
+
+	msgNode.querySelectorAll(".hl-content").forEach(root => {
+		if (!root.dataset.lineJustifySource && hasElementChildren(root)) return;
+
+		const source = root.dataset.lineJustifySource || root.textContent || "";
+		if (!source.replace(/\u00AD/g, "").trim()) return;
+
+		root.dataset.lineJustifySource = source;
+		root.classList.remove("hl-line-justified");
+
+		let lines = getMeasuredTextLines(root, source);
+
+		if (lines.length < 2) {
+			root.textContent = source;
+			return;
+		}
+
+		const messageBox = root.closest(".hl-message") || root;
+		const containerRect = messageBox.getBoundingClientRect();
+
+		lines = fitRenderedHyphenLines(root, source, lines, containerRect);
+
+		const visibleLimit = getOverlayVisibleLineLimit(msgNode);
+		const isClamped = visibleLimit > 0 && lines.length > visibleLimit;
+		const renderLineCount = isClamped ? visibleLimit : lines.length;
+		const lastRenderedIndex = renderLineCount - 1;
+
+		// One shared target width for every filled/ellipsised rendered line.
+		const targetLineWidth = Math.ceil(Math.max(
+			10,
+			containerRect.width,
+			...lines.slice(0, renderLineCount).map(line => {
+				return line.renderedWidth || Math.max(0, line.right - line.left);
+			})
+		)) + 1;
+
+		const fragment = document.createDocumentFragment();
+
+		for (let index = 0; index < renderLineCount; index++) {
+			const line = lines[index];
+
+			if (index > 0) {
+				fragment.appendChild(document.createElement("br"));
+			}
+
+			const isEllipsisLine = isClamped && index === lastRenderedIndex;
+
+			if (isEllipsisLine) {
+				const plainText = getPlainOverlayRemainderText(source, line.start, index);
+				const fitted = fitOverlayLineWithDots(root, plainText, targetLineWidth);
+
+				const span = buildOverlayVisualLineSpan(
+					root,
+					fitted.text,
+					targetLineWidth,
+					fitted.width,
+					true
+				);
+
+				fragment.appendChild(span);
+				break;
+			}
+
+			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
+			const displayText = getDisplayLineText(source, line, index, hyphenated);
+			const renderedWidth = measureOverlayVisualLineWidth(root, displayText);
+
+			// Every visible line before the final visible line is a wrapped/filled line.
+			// Final unclamped line is not justified. Final clamped line is handled above.
+			const shouldFill = index < lastRenderedIndex;
+
+			const span = buildOverlayVisualLineSpan(
+				root,
+				displayText,
+				targetLineWidth,
+				renderedWidth,
+				shouldFill
+			);
+
+			fragment.appendChild(span);
+		}
+
+		root.textContent = "";
+		root.appendChild(fragment);
+		root.classList.add("hl-line-justified");
+
+		if (isClamped) {
+			msgNode.classList.add("hl-manual-clamp");
+		}
+	});
+}
+
+function scheduleWrappedLineJustification(msgNode) {
+	if (!msgNode || !msgNode.querySelectorAll) return;
+	if (msgNode.dataset.lineJustifyQueued === "1") return;
+
+	msgNode.dataset.lineJustifyQueued = "1";
+	requestAnimationFrame(() => {
+		requestAnimationFrame(() => {
+			delete msgNode.dataset.lineJustifyQueued;
+			justifyWrappedMessageLines(msgNode);
+
+			if (horizontal && typeof horizontalRealign === "function") {
+				horizontalRealign(false);
+			}
+		});
+	});
+}
+
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
@@ -13283,6 +14002,8 @@ async function applyUserMeta(msgNode) {
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
 	await applyPronouns(msgNode);
+
+	scheduleWrappedLineJustification(msgNode);
 
 	if (horizontal && typeof horizontalRealign === "function") {
 		requestAnimationFrame(() => {
@@ -13339,7 +14060,9 @@ async function autoRefreshCustomUserData() {
 	}
 }
 
-setInterval(autoRefreshCustomUserData, 60 * 1000);
+const POLLING_INTERVAL = 60 * 1000; // 1 minute
+
+setInterval(autoRefreshCustomUserData, POLLING_INTERVAL);
 
 window.addEventListener("online", () => {
 	autoRefreshCustomUserData();

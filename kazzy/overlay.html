@@ -2878,13 +2878,27 @@
 }
 
 .hl-content.hl-line-justified .hl-visual-line.hl-visual-line-fill {
-	display: inline-block;
+	display: inline-flex !important;
+	align-items: baseline;
+	box-sizing: border-box;
+	width: var(--hl-line-target-width) !important;
+	max-width: var(--hl-line-target-width) !important;
+	min-width: var(--hl-line-target-width) !important;
 	white-space: pre;
+	vertical-align: baseline;
+	line-height: inherit;
+}
+
+.hl-content.hl-line-justified .hl-line-word {
+	flex: 0 0 auto;
+	white-space: pre;
+	line-height: inherit;
 }
 
 .hl-content.hl-line-justified .hl-line-space {
 	display: inline-block;
-	width: var(--hl-line-space-width, 0.25em);
+	flex: 1 1 0;
+	min-width: var(--hl-line-space-min, 0.25em);
 	height: 0;
 	line-height: 0;
 	font-size: inherit;
@@ -2896,6 +2910,7 @@
 	-webkit-box-orient: unset !important;
 	-webkit-line-clamp: unset !important;
 	line-clamp: unset !important;
+	overflow: visible !important;
 }
 
 /* Clamp the whole chat node, not the message element */
@@ -13696,14 +13711,55 @@ function getPlainOverlayLineText(source, line, lineIndex) {
 
 	return value.replace(/\s+$/, "");
 }
+function getOverlayTextChars(text) {
+	if (window.Intl && Intl.Segmenter) {
+		const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+		return Array.from(segmenter.segment(String(text || "")), s => s.segment);
+	}
 
-function fitOverlayLineWithDots(root, text, availableWidth) {
+	return Array.from(String(text || ""));
+}
+
+function getCssPixelValue(value) {
+	const raw = String(value || "").trim();
+	if (!raw || raw === "none" || raw === "auto") return 0;
+
+	if (raw.endsWith("px")) {
+		const px = parseFloat(raw);
+		return Number.isFinite(px) ? px : 0;
+	}
+
+	if (raw.endsWith("vw")) {
+		const vw = parseFloat(raw);
+		return Number.isFinite(vw) ? (window.innerWidth * vw / 100) : 0;
+	}
+
+	if (raw.endsWith("vh")) {
+		const vh = parseFloat(raw);
+		return Number.isFinite(vh) ? (window.innerHeight * vh / 100) : 0;
+	}
+
+	const numeric = parseFloat(raw);
+	return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function getPlainOverlayRemainderText(source, startOffset, lineIndex) {
+	let value = source.slice(startOffset).replace(/\u00AD/g, "");
+
+	if (lineIndex > 0) {
+		value = value.replace(/^\s+/, "");
+	}
+
+	return value;
+}
+
+function fitOverlayLineWithDots(root, text, targetWidth) {
 	const dots = "...";
 	const raw = String(text || "")
 		.replace(/\u00AD/g, "")
 		.replace(/\s+$/, "");
 
-	const chars = Array.from(raw);
+	const chars = getOverlayTextChars(raw);
 	let bestText = dots;
 	let bestWidth = measureOverlayVisualLineWidth(root, dots);
 
@@ -13715,7 +13771,7 @@ function fitOverlayLineWithDots(root, text, availableWidth) {
 		const candidate = chars.slice(0, mid).join("").replace(/\s+$/, "") + dots;
 		const candidateWidth = measureOverlayVisualLineWidth(root, candidate);
 
-		if (candidateWidth <= availableWidth) {
+		if (candidateWidth <= targetWidth) {
 			bestText = candidate;
 			bestWidth = candidateWidth;
 			low = mid + 1;
@@ -13730,17 +13786,38 @@ function fitOverlayLineWithDots(root, text, availableWidth) {
 	};
 }
 
-function getPlainOverlayRemainderText(source, startOffset, lineIndex) {
-	let value = source.slice(startOffset).replace(/\u00AD/g, "");
+function getOverlayTargetLineWidth(root, msgNode, lines) {
+	const rootRect = root.getBoundingClientRect();
+	const msgRect = msgNode.getBoundingClientRect();
+	const msgStyle = getComputedStyle(msgNode);
+	const maxWidth = getCssPixelValue(msgStyle.maxWidth);
 
-	if (lineIndex > 0) {
-		value = value.replace(/^\s+/, "");
-	}
+	const measuredLineWidth = Math.max(
+		10,
+		...lines.map(line => Math.max(0, (line.renderedWidth || (line.right - line.left) || 0)))
+	);
 
-	return value;
+	const maxMeasuredRight = Math.max(
+		0,
+		...lines.map(line => Math.max(0, line.right - rootRect.left))
+	);
+
+	const rootOffsetInsideMsg = Math.max(0, rootRect.left - msgRect.left);
+	const msgActualWidth = Math.max(0, msgRect.width - rootOffsetInsideMsg);
+	const cssMaxWidth = maxWidth > 0 ? Math.max(0, maxWidth - rootOffsetInsideMsg) : 0;
+
+	// Prefer the actual CSS wrap width, not each line's current text width.
+	// This makes all wrapped/ellipsised visual lines share one exact target.
+	return Math.ceil(Math.max(
+		10,
+		cssMaxWidth,
+		msgActualWidth,
+		maxMeasuredRight,
+		measuredLineWidth
+	)) + 1;
 }
 
-function buildOverlayVisualLineSpan(root, displayText, availableWidth, renderedWidth, shouldFill) {
+function buildOverlayVisualLineSpan(root, displayText, targetWidth, renderedWidth, shouldFill) {
 	const span = document.createElement("span");
 	span.className = "hl-visual-line";
 
@@ -13750,38 +13827,42 @@ function buildOverlayVisualLineSpan(root, displayText, availableWidth, renderedW
 	}
 
 	span.classList.add("hl-visual-line-fill");
+	span.style.setProperty("--hl-line-target-width", targetWidth.toFixed(3) + "px");
 
-	// Slight overfill avoids tiny sub-pixel gaps at the right edge.
-	const targetWidth = availableWidth + 1;
-	const extraSpace = Math.max(0, targetWidth - renderedWidth);
+	const normalSpaceWidth = measureOverlayVisualLineWidth(root, " ");
+	span.style.setProperty("--hl-line-space-min", normalSpaceWidth.toFixed(3) + "px");
+
+	const parts = String(displayText || "").split(/( +)/);
 	const spaceCount = (displayText.match(/ /g) || []).length;
 
-	span.style.width = targetWidth.toFixed(3) + "px";
-
-	if (extraSpace > 0 && spaceCount > 0) {
-		const normalSpaceWidth = measureOverlayVisualLineWidth(root, " ");
-		const targetSpaceWidth = normalSpaceWidth + (extraSpace / spaceCount);
-
-		displayText.split(/( +)/).forEach(part => {
+	if (spaceCount > 0) {
+		parts.forEach(part => {
 			if (!part) return;
 
 			if (/^ +$/.test(part)) {
 				for (let i = 0; i < part.length; i++) {
 					const spacer = document.createElement("span");
 					spacer.className = "hl-line-space";
-					spacer.style.setProperty("--hl-line-space-width", targetSpaceWidth.toFixed(3) + "px");
 					span.appendChild(spacer);
 				}
 			} else {
-				span.appendChild(document.createTextNode(part));
+				const word = document.createElement("span");
+				word.className = "hl-line-word";
+				word.textContent = part;
+				span.appendChild(word);
 			}
 		});
 
 		return span;
 	}
 
+	// No spaces to expand: stretch between graphemes instead.
+	span.style.display = "inline-block";
+	span.style.width = targetWidth.toFixed(3) + "px";
+
+	const extraSpace = Math.max(0, targetWidth - renderedWidth);
 	if (extraSpace > 0) {
-		const stretchChars = Math.max(1, Array.from(displayText.replace(/\s/g, "")).length - 1);
+		const stretchChars = Math.max(1, getOverlayTextChars(displayText).length - 1);
 		span.style.letterSpacing = (extraSpace / stretchChars).toFixed(3) + "px";
 	}
 
@@ -13849,7 +13930,6 @@ function fitRenderedHyphenLines(root, source, lines, containerRect) {
 
 	return fitted;
 }
-
 function justifyWrappedMessageLines(msgNode) {
 	if (!msgNode || !msgNode.querySelectorAll) return;
 
@@ -13871,34 +13951,21 @@ function justifyWrappedMessageLines(msgNode) {
 			return;
 		}
 
-		const messageBox = root.closest(".hl-message") || root;
-		const containerRect = messageBox.getBoundingClientRect();
+		let targetLineWidth = getOverlayTargetLineWidth(root, msgNode, lines);
+		const rootRect = root.getBoundingClientRect();
+		const fittingRect = {
+			left: rootRect.left,
+			right: rootRect.left + targetLineWidth,
+			width: targetLineWidth
+		};
 
-		lines = fitRenderedHyphenLines(root, source, lines, containerRect);
+		lines = fitRenderedHyphenLines(root, source, lines, fittingRect);
+		targetLineWidth = getOverlayTargetLineWidth(root, msgNode, lines);
 
 		const visibleLimit = getOverlayVisibleLineLimit(msgNode);
 		const isClamped = visibleLimit > 0 && lines.length > visibleLimit;
 		const renderLineCount = isClamped ? visibleLimit : lines.length;
 		const lastRenderedIndex = renderLineCount - 1;
-
-		const fillRight = Math.max(
-			containerRect.right,
-			...lines.slice(0, renderLineCount).map(line => {
-				const width = line.renderedWidth || Math.max(0, line.right - line.left);
-				return line.left + width;
-			})
-		);
-
-		const shouldJustify = lines.map((line, index) => {
-			// Every visible line before the final visible line is a filled/wrapped line.
-			// This includes lines that wrap at spaces, not just soft-hyphen breaks.
-			return index < lastRenderedIndex;
-		});
-
-		if (!shouldJustify.some(Boolean) && !isClamped) {
-			root.textContent = source;
-			return;
-		}
 
 		const fragment = document.createDocumentFragment();
 
@@ -13909,37 +13976,29 @@ function justifyWrappedMessageLines(msgNode) {
 				fragment.appendChild(document.createElement("br"));
 			}
 
-			const availableWidth = Math.max(10, fillRight - line.left);
+			const isEllipsisLine = isClamped && index === lastRenderedIndex;
 
-if (isClamped && index === lastRenderedIndex) {
-	const plainText = getPlainOverlayRemainderText(source, line.start, index);
-	const fitted = fitOverlayLineWithDots(root, plainText, availableWidth);
+			if (isEllipsisLine) {
+				const plainText = getPlainOverlayRemainderText(source, line.start, index);
+				const fitted = fitOverlayLineWithDots(root, plainText, targetLineWidth);
 
-	const span = buildOverlayVisualLineSpan(
-		root,
-		fitted.text,
-		availableWidth,
-		fitted.width,
-		true
-	);
-
-	fragment.appendChild(span);
-	break;
-}
+				fragment.appendChild(
+					buildOverlayVisualLineSpan(root, fitted.text, targetLineWidth, fitted.width, true)
+				);
+				break;
+			}
 
 			const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
 			const displayText = getDisplayLineText(source, line, index, hyphenated);
 			const renderedWidth = measureOverlayVisualLineWidth(root, displayText);
 
-			const span = buildOverlayVisualLineSpan(
-				root,
-				displayText,
-				availableWidth,
-				renderedWidth,
-				shouldJustify[index]
-			);
+			// Equalise only lines that are actually filled by wrapping.
+			// The final visible line is only filled when it is the ellipsis line above.
+			const shouldFill = index < lastRenderedIndex;
 
-			fragment.appendChild(span);
+			fragment.appendChild(
+				buildOverlayVisualLineSpan(root, displayText, targetLineWidth, renderedWidth, shouldFill)
+			);
 		}
 
 		root.textContent = "";
