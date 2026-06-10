@@ -10178,39 +10178,6 @@ setTextShadow(bolderShadow);
 			smoothPlaybackTimer = setTimeout(processSmoothMessageBuffer, nextDelay);
 		}
 
-
-		var customUserDataCommandRefreshTimer = null;
-
-		function isCustomUserDataCommandMessage(message) {
-			const text = String(message || "")
-				.replace(/<[^>]*>/g, "")
-				.trimStart();
-
-			return /^!(?:pronouns|pronoun|prns|prn|nicknames|nickname|nicks|nick)\b/i.test(text);
-		}
-
-		function scheduleCustomUserDataCommandRefresh(message) {
-			if (!isCustomUserDataCommandMessage(message)) return;
-
-			if (customUserDataCommandRefreshTimer) {
-				clearTimeout(customUserDataCommandRefreshTimer);
-			}
-
-			customUserDataCommandRefreshTimer = setTimeout(() => {
-				customUserDataCommandRefreshTimer = null;
-
-				try {
-					if (typeof window.refreshCustomUserData === "function") {
-						window.refreshCustomUserData();
-					} else {
-						document.dispatchEvent(new CustomEvent("socialstream:userdata-refresh"));
-					}
-				} catch (err) {
-					console.error("customUserData command refresh failed", err);
-				}
-			}, 5000);
-		}
-
 		function processData(data, reloaded = false) {
 			var processDataOptions = {};
 			if (reloaded && typeof reloaded === "object") {
@@ -10282,8 +10249,6 @@ setTextShadow(bolderShadow);
 				if (DoNotShowInitialReply && data.reply) { // I'll need to invert this in the future.
 					data.chatmessage = data.reply;
 				}
-
-				scheduleCustomUserDataCommandRefresh(data.chatmessage);
 
 				// Block messages containing specific words/phrases
 				if (blockedWords.length) {

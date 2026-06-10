@@ -2647,68 +2647,6 @@
 			color: #fff;
 		}
 
-
-/* Smooth delayed nickname/pronoun/textbadge reveal.
-   Cached metadata renders normally; this class is only added after the message is already visible. */
-.hl-meta-appear {
-	display: inline-block !important;
-	overflow: hidden;
-	transform-origin: left center;
-	vertical-align: inherit;
-	will-change: max-width, opacity, transform, filter;
-	animation: hlMetaAppear 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.hl-name.hl-meta-reflow {
-	will-change: transform, opacity, filter;
-	animation: hlMetaHeaderSettle 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes hlMetaAppear {
-	0% {
-		max-width: 0;
-		opacity: 0;
-		transform: translateX(-6px) scaleX(0.45);
-		filter: blur(1px);
-	}
-	45% {
-		max-width: var(--hl-meta-appear-max, 18em);
-		opacity: 0.12;
-		transform: translateX(-2px) scaleX(0.82);
-		filter: blur(0.5px);
-	}
-	100% {
-		max-width: var(--hl-meta-appear-max, 18em);
-		opacity: 1;
-		transform: translateX(0) scaleX(1);
-		filter: blur(0);
-	}
-}
-
-@keyframes hlMetaHeaderSettle {
-	0% {
-		transform: translateX(-3px);
-		opacity: 0.92;
-		filter: blur(0.6px);
-	}
-	100% {
-		transform: translateX(0);
-		opacity: 1;
-		filter: blur(0);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.hl-meta-appear,
-	.hl-name.hl-meta-reflow {
-		animation: none !important;
-		max-width: none !important;
-		transform: none !important;
-		filter: none !important;
-		opacity: 1 !important;
-	}
-}
-
 		</style>
 	</head>
 	<body id="main" class="vanilla notcompactmode">
@@ -9408,39 +9346,6 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 				smoothPlaybackTimer = setTimeout(processSmoothMessageBuffer, nextDelay);
 			}
 
-
-		var customUserDataCommandRefreshTimer = null;
-
-		function isCustomUserDataCommandMessage(message) {
-			const text = String(message || "")
-				.replace(/<[^>]*>/g, "")
-				.trimStart();
-
-			return /^!(?:pronouns|pronoun|prns|prn|nicknames|nickname|nicks|nick)\b/i.test(text);
-		}
-
-		function scheduleCustomUserDataCommandRefresh(message) {
-			if (!isCustomUserDataCommandMessage(message)) return;
-
-			if (customUserDataCommandRefreshTimer) {
-				clearTimeout(customUserDataCommandRefreshTimer);
-			}
-
-			customUserDataCommandRefreshTimer = setTimeout(() => {
-				customUserDataCommandRefreshTimer = null;
-
-				try {
-					if (typeof window.refreshCustomUserData === "function") {
-						window.refreshCustomUserData();
-					} else {
-						document.dispatchEvent(new CustomEvent("socialstream:userdata-refresh"));
-					}
-				} catch (err) {
-					console.error("customUserData command refresh failed", err);
-				}
-			}, 5000);
-		}
-
 			function processData(data, reloaded = false) {
 				var processDataOptions = {};
 				if (reloaded && typeof reloaded === "object") {
@@ -9512,8 +9417,6 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 					if (DoNotShowInitialReply && data.reply){ // I'll need to invert this in the future.
 						data.chatmessage = data.reply;
 					}
-
-					scheduleCustomUserDataCommandRefresh(data.chatmessage);
 
 					// Block messages containing specific words/phrases
 					if (blockedWords.length) {
@@ -12295,32 +12198,6 @@ function getResolvedNameParts(nameEl) {
 	};
 }
 
-function hasInstantPronounsForMessage(msgNode, parts) {
-	if (!parts) return false;
-
-	const customPronouns = pronounMap[parts.normalizedName];
-	if (customPronouns && customPronouns.trim()) return true;
-
-	const lurkerPronouns = dockLurkerPronounFallbackMap[parts.normalizedName];
-	if (lurkerPronouns && lurkerPronouns.trim()) return true;
-
-	const normalized = normalizeUsernameForPronounLookup(parts.baseName || parts.displayName);
-	if (!normalized) return false;
-
-	const alejo = getCachedFallbackPronouns(`alejo:${normalized}`);
-	if (alejo) return true;
-
-	const aeroKick = getCachedFallbackPronouns(`aerokick:${normalized}`);
-	if (aeroKick) return true;
-
-	const twitchId = getPronounDbTwitchId(msgNode);
-	if (twitchId) {
-		const pronounDb = getCachedFallbackPronouns(`pronoundb:twitch:${twitchId}`);
-		if (pronounDb) return true;
-	}
-
-	return false;
-}
 
 async function resolvePronounsForMessage(msgNode, parts) {
 	if (!parts) return null;
@@ -12832,47 +12709,12 @@ function moveDockTextBadgesBeforeUsername(msgNode) {
 	});
 }
 
-function animateDockMetaElement(el, maxWidth = "18em") {
-	if (!el || !el.classList) return;
-
-	el.style.setProperty("--hl-meta-appear-max", maxWidth);
-	el.classList.remove("hl-meta-appear");
-
-	// Force the browser to see the removal before re-adding the class.
-	void el.offsetWidth;
-
-	el.classList.add("hl-meta-appear");
-
-	clearTimeout(el._hlMetaAppearTimer);
-	el._hlMetaAppearTimer = setTimeout(() => {
-		if (el && el.classList) {
-			el.classList.remove("hl-meta-appear");
-			el.style.removeProperty("--hl-meta-appear-max");
-		}
-	}, 520);
-}
-
-function animateDockHeaderMeta(nameEl) {
-	if (!nameEl || !nameEl.classList) return;
-
-	nameEl.classList.remove("hl-meta-reflow");
-	void nameEl.offsetWidth;
-	nameEl.classList.add("hl-meta-reflow");
-
-	clearTimeout(nameEl._hlMetaReflowTimer);
-	nameEl._hlMetaReflowTimer = setTimeout(() => {
-		if (nameEl && nameEl.classList) {
-			nameEl.classList.remove("hl-meta-reflow");
-		}
-	}, 520);
-}
-
 function capDockNicknameForDisplay(value) {
 	const chars = Array.from(String(value || "").trim());
 	return chars.length > 10 ? chars.slice(0, 10).join("") : chars.join("");
 }
 
-function applyNick(msgNode, animateMetaChange = false) {
+function applyNick(msgNode) {
 	const nameEl = msgNode.querySelector && msgNode.querySelector('.hl-name');
 	if (!nameEl) return;
 
@@ -12891,37 +12733,26 @@ function applyNick(msgNode, animateMetaChange = false) {
 		nickMap[lookupName] ||
 		dockLurkerNickFallbackMap[lookupName];
 
-	const previousMainText = parts.textNode.textContent || "";
 	const existingNick = nameEl.querySelector('.hl-nick');
-	const previousNickText = existingNick ? (existingNick.textContent || "") : "";
 	if (existingNick) existingNick.remove();
 
 	if (!nick || !nick.trim()) {
 		// No nickname: restore plain username view
 		parts.textNode.textContent = usernameDisplay;
-
-		if (animateMetaChange && (existingNick || previousMainText !== usernameDisplay)) {
-			animateDockHeaderMeta(nameEl);
-		}
-
 		return;
 	}
 
-	const nickText = capDockNicknameForDisplay(nick);
+const nickText = capDockNicknameForDisplay(nick);
 	const span = document.createElement('span');
 	span.className = 'hl-nick';
 
-	let nextNickText = '';
-
 	if (usePrimaryNicknames) {
 		parts.textNode.textContent = nickText;
-		nextNickText = '\u00a0(' + usernameDisplay + ')';
+		span.textContent = '\u00a0(' + usernameDisplay + ')';
 	} else {
 		parts.textNode.textContent = usernameDisplay;
-		nextNickText = '\u00a0(' + nickText + ')';
+		span.textContent = '\u00a0(' + nickText + ')';
 	}
-
-	span.textContent = nextNickText;
 
 	if (
 		parts.textNode.nextSibling &&
@@ -12932,13 +12763,7 @@ function applyNick(msgNode, animateMetaChange = false) {
 	}
 
 	parts.textNode.after(span, ':');
-
-	if (animateMetaChange && (previousMainText !== parts.textNode.textContent || previousNickText !== nextNickText)) {
-		animateDockMetaElement(span, "22em");
-		animateDockHeaderMeta(nameEl);
-	}
 }
-
 	function isPronounTextBadge(el) {
 		if (!el || !el.classList || !el.classList.contains('textbadge')) return false;
 
@@ -12969,10 +12794,6 @@ async function applyPronouns(msgNode) {
 	const pronounRun = String((Number(msgNode.dataset.pronounRun || 0) + 1));
 	msgNode.dataset.pronounRun = pronounRun;
 
-	// Custom, lurker, and already-cached fallback pronouns should render normally.
-	// Only animate when the badge truly arrives after the message was visible.
-	const pronounsWereInstantlyAvailable = hasInstantPronounsForMessage(msgNode, parts);
-
 	const pronouns = await resolvePronounsForMessage(msgNode, parts);
 
 	// Ignore stale overlapping async runs.
@@ -12987,50 +12808,22 @@ async function applyPronouns(msgNode) {
 		return;
 	}
 
-	let badge = allPronounBadges[allPronounBadges.length - 1] || document.createElement('span');
-	const badgeWasNew = !badge.parentNode;
-	const previousPronounText = badge.textContent || "";
-	const nextPronounText = pronouns.trim();
+	let badge = allPronounBadges[0] || document.createElement('span');
 
 	badge.className = 'hl-badge textbadge hl-pronouns';
-	badge.textContent = nextPronounText;
+	badge.textContent = pronouns.trim();
 
-	allPronounBadges.forEach(el => {
-		if (el !== badge) el.remove();
-	});
+	allPronounBadges.slice(1).forEach(el => el.remove());
 
-	badgeContainer.appendChild(badge);
-
-	const animateMetaChange = msgNode.dataset.dockMetaRendered === "1" && !pronounsWereInstantlyAvailable;
-
-	if (animateMetaChange && (badgeWasNew || previousPronounText !== nextPronounText)) {
-		animateDockMetaElement(badge, "8em");
-		animateDockHeaderMeta(nameEl);
-	}
+badgeContainer.appendChild(badge);
 }
 
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
-	const animateImmediateMetaChange = msgNode.dataset.dockMetaRendered === "1";
-
-	applyNick(msgNode, animateImmediateMetaChange);
+	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
 	moveDockTextBadgesBeforeUsername(msgNode);
-
-	// Mark the initial visible render after layout has settled.
-	// Metadata available before this point appears normally with no animation.
-	// Metadata that arrives later gets the smooth make-space reveal.
-	if (!animateImmediateMetaChange && msgNode.dataset.dockMetaRenderQueued !== "1") {
-		msgNode.dataset.dockMetaRenderQueued = "1";
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				msgNode.dataset.dockMetaRendered = "1";
-				delete msgNode.dataset.dockMetaRenderQueued;
-			});
-		});
-	}
-
 	await applyPronouns(msgNode);
 	moveDockTextBadgesBeforeUsername(msgNode);
 }
