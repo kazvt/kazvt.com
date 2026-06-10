@@ -9438,7 +9438,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 				} catch (err) {
 					console.error("customUserData command refresh failed", err);
 				}
-			}, 5000);
+			}, 10 * 1000);
 		}
 
 			function processData(data, reloaded = false) {
