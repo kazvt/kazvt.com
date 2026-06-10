@@ -3290,25 +3290,6 @@ body.twoLines .hl-firstline .hl-badges {
 	margin-left: 0 !important;
 }
 
-body.twoLines .hl-firstline {
-	align-items: center !important;
-	line-height: var(--message-line-height, 22px) !important;
-}
-
-body.twoLines .hl-firstline .hl-name {
-	top: 0 !important;
-	bottom: auto !important;
-	position: relative !important;
-
-	display: inline-flex !important;
-	align-items: center !important;
-
-	line-height: 1 !important;
-	height: 20px !important;
-
-	transform: translateY(-1px) !important;
-}
-
 	</style>
 </head>
 
@@ -13032,30 +13013,6 @@ function getResolvedNameParts(nameEl) {
 	};
 }
 
-function hasInstantPronounsForMessage(msgNode, parts) {
-	if (!parts) return false;
-
-	const customPronouns = pronounMap[parts.normalizedName];
-	if (customPronouns && customPronouns.trim()) return true;
-
-	const normalized = normalizeUsernameForPronounLookup(parts.baseName || parts.displayName);
-	if (!normalized) return false;
-
-	const alejo = getCachedFallbackPronouns(`alejo:${normalized}`);
-	if (alejo) return true;
-
-	const aeroKick = getCachedFallbackPronouns(`aerokick:${normalized}`);
-	if (aeroKick) return true;
-
-	const twitchId = getPronounDbTwitchId(msgNode);
-	if (twitchId) {
-		const pronounDb = getCachedFallbackPronouns(`pronoundb:twitch:${twitchId}`);
-		if (pronounDb) return true;
-	}
-
-	return false;
-}
-
 async function resolvePronounsForMessage(msgNode, parts) {
 	if (!parts) return null;
 
@@ -13624,10 +13581,6 @@ async function applyPronouns(msgNode) {
 	const pronounRun = String((Number(msgNode.dataset.pronounRun || 0) + 1));
 	msgNode.dataset.pronounRun = pronounRun;
 
-	// Cached/custom pronouns should appear as part of the normal render.
-	// Only animate when the badge truly arrives later and has to make room after the message is visible.
-	const pronounsWereInstantlyAvailable = hasInstantPronounsForMessage(msgNode, parts);
-
 	const pronouns = await resolvePronounsForMessage(msgNode, parts);
 
 	if (msgNode.dataset.pronounRun !== pronounRun) return;
@@ -13656,7 +13609,7 @@ async function applyPronouns(msgNode) {
 	// This keeps the textbadge after image badges and directly before the username
 	badgeContainer.appendChild(badge);
 
-	const animateMetaChange = msgNode.dataset.overlayMetaRendered === "1" && !pronounsWereInstantlyAvailable;
+	const animateMetaChange = msgNode.dataset.overlayMetaRendered === "1";
 
 	if (animateMetaChange && (badgeWasNew || previousPronounText !== nextPronounText)) {
 		animateOverlayMetaElement(badge, "8em");
