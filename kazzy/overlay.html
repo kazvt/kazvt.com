@@ -13738,7 +13738,7 @@ function justifyWrappedMessageLines(msgNode) {
 		root.classList.remove("hl-line-justified");
 
 let lines = getMeasuredTextLines(root, source);
-if (lines.length < 3) {
+if (lines.length < 2) {
 	root.textContent = source;
 	return;
 }
@@ -13747,12 +13747,11 @@ const messageBox = root.closest(".hl-message") || root;
 const containerRect = messageBox.getBoundingClientRect();
 lines = fitRenderedHyphenLines(root, source, lines, containerRect);
 
-const edgeTolerance = Math.max(4, Math.min(12, containerRect.width * 0.04));
+// A line ending through a soft-hyphen is already a filled/wrapped line.
+// Justify those lines only. Do not justify the final unfinished line.
 const shouldJustify = lines.map((line, index) => {
 	const hyphenated = lineBreakUsesSoftHyphen(source, line.end);
-	const availableWidth = Math.max(10, containerRect.right - line.left);
-	const reachesEnd = line.renderedWidth >= availableWidth - edgeTolerance;
-	return index > 0 && index < lines.length - 1 && hyphenated && reachesEnd;
+	return index < lines.length - 1 && hyphenated;
 });
 
 		if (!shouldJustify.some(Boolean)) {
@@ -13776,15 +13775,18 @@ const shouldJustify = lines.map((line, index) => {
 			if (shouldJustify[index]) {
 const availableWidth = Math.max(10, containerRect.right - line.left);
 const extraSpace = Math.max(0, availableWidth - line.renderedWidth);
-				const spaces = (displayText.match(/ /g) || []).length;
-				span.classList.add("hl-visual-line-fill");
+const spaces = (displayText.match(/ /g) || []).length;
 
-				if (extraSpace > 0 && spaces > 0) {
-					span.style.setProperty("--hl-line-word-spacing", (extraSpace / spaces).toFixed(3) + "px");
-				} else if (extraSpace > 0) {
-					const stretchChars = Math.max(1, Array.from(displayText.replace(/\s/g, "")).length - 1);
-					span.style.setProperty("--hl-line-letter-spacing", (extraSpace / stretchChars).toFixed(3) + "px");
-				}
+span.classList.add("hl-visual-line-fill");
+span.style.width = availableWidth.toFixed(3) + "px";
+span.style.boxSizing = "border-box";
+
+if (extraSpace > 0 && spaces > 0) {
+	span.style.setProperty("--hl-line-word-spacing", (extraSpace / spaces).toFixed(3) + "px");
+} else if (extraSpace > 0) {
+	const stretchChars = Math.max(1, Array.from(displayText.replace(/\s/g, "")).length - 1);
+	span.style.setProperty("--hl-line-letter-spacing", (extraSpace / stretchChars).toFixed(3) + "px");
+}
 			}
 
 			fragment.appendChild(span);
