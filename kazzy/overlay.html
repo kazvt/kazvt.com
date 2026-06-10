@@ -13879,7 +13879,9 @@ async function autoRefreshCustomUserData() {
 	}
 }
 
-setInterval(autoRefreshCustomUserData, 60 * 1000);
+const POLLING_INTERVAL = 60 * 1000; // 1 minute
+
+setInterval(autoRefreshCustomUserData, POLLING_INTERVAL);
 
 window.addEventListener("online", () => {
 	autoRefreshCustomUserData();
