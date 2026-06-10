@@ -13816,15 +13816,20 @@ function scheduleWrappedLineJustification(msgNode) {
 async function applyUserMeta(msgNode) {
 	if (!msgNode || !msgNode.querySelector) return;
 
+	softHyphenateMessage(msgNode);
+
 	applyNick(msgNode);
 	normalizePronounBadges(msgNode);
-	moveDockTextBadgesBeforeUsername(msgNode);
 	await applyPronouns(msgNode);
-	moveDockTextBadgesBeforeUsername(msgNode);
 
-	// Pronouns/textbadges load async and can change the first-line layout.
-	// Re-measure the message line after they are in place.
 	scheduleWrappedLineJustification(msgNode);
+
+	if (horizontal && typeof horizontalRealign === "function") {
+		requestAnimationFrame(() => {
+			horizontalRealign(false);
+			requestAnimationFrame(() => horizontalRealign(false));
+		});
+	}
 }
 
 	function applyUserMetaToAllMessages() {
