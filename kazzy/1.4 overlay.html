@@ -2929,65 +2929,6 @@
 	overflow: visible !important;
 }
 
-.hl-meta-appear {
-	display: inline-block !important;
-	overflow: hidden;
-	transform-origin: left center;
-	vertical-align: top;
-	will-change: max-width, opacity, transform, filter;
-	animation: hlMetaAppear 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.hl-name.hl-meta-reflow {
-	will-change: transform, opacity, filter;
-	animation: hlMetaHeaderSettle 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes hlMetaAppear {
-	0% {
-		max-width: 0;
-		opacity: 0;
-		transform: translateX(-6px) scaleX(0.45);
-		filter: blur(1px);
-	}
-	45% {
-		max-width: var(--hl-meta-appear-max, 18em);
-		opacity: 0.12;
-		transform: translateX(-2px) scaleX(0.82);
-		filter: blur(0.5px);
-	}
-	100% {
-		max-width: var(--hl-meta-appear-max, 18em);
-		opacity: 1;
-		transform: translateX(0) scaleX(1);
-		filter: blur(0);
-	}
-}
-
-@keyframes hlMetaHeaderSettle {
-	0% {
-		transform: translateX(-3px);
-		opacity: 0.92;
-		filter: blur(0.6px);
-	}
-	100% {
-		transform: translateX(0);
-		opacity: 1;
-		filter: blur(0);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.hl-meta-appear,
-	.hl-name.hl-meta-reflow {
-		animation: none !important;
-		max-width: none !important;
-		transform: none !important;
-		filter: none !important;
-		opacity: 1 !important;
-	}
-}
-
 /* Clamp the whole chat node, not the message element */
 .highlight-chat {
 	box-sizing: border-box !important;
@@ -13448,41 +13389,6 @@ function ensureUsernameColonInName(nameEl) {
 	}
 }
 
-function animateOverlayMetaElement(el, maxWidth = "18em") {
-	if (!el || !el.classList) return;
-
-	el.style.setProperty("--hl-meta-appear-max", maxWidth);
-	el.classList.remove("hl-meta-appear");
-
-	// Force the browser to see the removal before re-adding the class.
-	void el.offsetWidth;
-
-	el.classList.add("hl-meta-appear");
-
-	clearTimeout(el._hlMetaAppearTimer);
-	el._hlMetaAppearTimer = setTimeout(() => {
-		if (el && el.classList) {
-			el.classList.remove("hl-meta-appear");
-			el.style.removeProperty("--hl-meta-appear-max");
-		}
-	}, 520);
-}
-
-function animateOverlayHeaderMeta(nameEl) {
-	if (!nameEl || !nameEl.classList) return;
-
-	nameEl.classList.remove("hl-meta-reflow");
-	void nameEl.offsetWidth;
-	nameEl.classList.add("hl-meta-reflow");
-
-	clearTimeout(nameEl._hlMetaReflowTimer);
-	nameEl._hlMetaReflowTimer = setTimeout(() => {
-		if (nameEl && nameEl.classList) {
-			nameEl.classList.remove("hl-meta-reflow");
-		}
-	}, 520);
-}
-
 function getVisibleUsernameForOverlay(username) {
 	const value = String(username || "");
 	return (typeof trimName !== "undefined" && trimName) ? truncateText(value, trimName) : value;
@@ -13504,50 +13410,32 @@ function applyNick(msgNode) {
 	const visibleUsername = getVisibleUsernameForOverlay(usernameDisplay);
 	const lookupName = normalize(usernameDisplay.replace(/^@/, '').trim());
 	const nick = nickMap[lookupName];
-	const previousMainText = parts.textNode.textContent || "";
 
 	const existingNick = nameEl.querySelector('.hl-nick');
-	const previousNickText = existingNick ? (existingNick.textContent || "") : "";
 	if (existingNick) existingNick.remove();
 
-	if (!nick || !nick.trim()) {
-		// No nickname: restore plain username view
-		parts.textNode.textContent = visibleUsername;
-		ensureUsernameColonInName(nameEl);
-
-		if (existingNick || previousMainText !== visibleUsername) {
-			animateOverlayHeaderMeta(nameEl);
-		}
-
-		return;
-	}
-
+if (!nick || !nick.trim()) {
+	// No nickname: restore plain username view
+	parts.textNode.textContent = visibleUsername;
+	ensureUsernameColonInName(nameEl);
+	return;
+}
 	const nickText = nick.trim();
 	const span = document.createElement('span');
 	span.className = 'hl-nick';
 
-	let nextNickText = '';
-
 	if (usePrimaryNicknames) {
 		parts.textNode.textContent = nickText;
-		nextNickText = '\u00a0(' + visibleUsername + ')';
+		span.textContent = '\u00a0(' + visibleUsername + ')';
 	} else {
 		parts.textNode.textContent = visibleUsername;
-		nextNickText = '\u00a0(' + nickText + ')';
+		span.textContent = '\u00a0(' + nickText + ')';
 	}
 
-	span.textContent = nextNickText;
-
-	removeImmediateColonAfter(parts.textNode);
-	parts.textNode.after(span);
-	ensureUsernameColonInName(nameEl);
-
-	if (previousMainText !== parts.textNode.textContent || previousNickText !== nextNickText) {
-		animateOverlayMetaElement(span, "22em");
-		animateOverlayHeaderMeta(nameEl);
-	}
+removeImmediateColonAfter(parts.textNode);
+parts.textNode.after(span);
+ensureUsernameColonInName(nameEl);
 }
-
 
 
 	function isPronounTextBadge(el) {
@@ -13595,24 +13483,16 @@ async function applyPronouns(msgNode) {
 	}
 
 	let badge = allPronounBadges[allPronounBadges.length - 1] || document.createElement('span');
-	const badgeWasNew = !badge.parentNode;
-	const previousPronounText = badge.textContent || "";
-	const nextPronounText = pronouns.trim();
 
 	badge.className = 'hl-badge textbadge hl-pronouns';
-	badge.textContent = nextPronounText;
+	badge.textContent = pronouns.trim();
 
 	allPronounBadges.forEach(el => {
 		if (el !== badge) el.remove();
 	});
 
 	// This keeps the textbadge after image badges and directly before the username
-	badgeContainer.appendChild(badge);
-
-	if (badgeWasNew || previousPronounText !== nextPronounText) {
-		animateOverlayMetaElement(badge, "8em");
-		animateOverlayHeaderMeta(nameEl);
-	}
+badgeContainer.appendChild(badge);
 
 		if (horizontal && typeof horizontalRealign === "function") {
 			requestAnimationFrame(() => horizontalRealign(false));
@@ -13965,16 +13845,10 @@ function unlockOverlayMessageWidth(root, msgNode) {
 }
 
 function getOverlayTargetLineWidth(root, msgNode, lines) {
-	// Use only the stable CSS max width, not the current highlight-chat width.
-	// The highlight width changes when delayed pronoun/textbadges render, which was
-	// causing the message to rewrap differently. This keeps pre/post badge layout identical.
-	const stableWidth = getOverlayStableMessageWidth(root, msgNode);
-
-	const measuredLineWidth = Array.isArray(lines) && lines.length
-		? Math.max(...lines.map(line => Math.max(0, (line.renderedWidth || (line.right - line.left) || 0))))
-		: 0;
-
-	return Math.ceil(Math.max(10, stableWidth, measuredLineWidth));
+	// Keep one fixed target based on the overlay CSS max-width only.
+	// Do not grow it from measured line text: delayed pronoun/textbadge renders
+	// can otherwise change the parent box and cause a different wrap/ellipsis shape.
+	return getOverlayStableMessageWidth(root, msgNode);
 }
 function buildOverlayVisualLineSpan(root, displayText, targetWidth, renderedWidth, shouldFill) {
 	const span = document.createElement("span");
