@@ -3923,128 +3923,6 @@ body {
 		var tainted = false;
 
 		var urlParams = new URLSearchParams(window.location.search);
-
-		// Username luminance clamp for local Ninja URLs.
-		// Usage: ?colorLowest=50&colorHighest=100. Values are percentages from 0 to 100.
-		function getNumericUrlParam(names, fallback, min, max) {
-			for (var i = 0; i < names.length; i++) {
-				if (!urlParams.has(names[i])) continue;
-				var raw = urlParams.get(names[i]);
-				if (raw === null || raw === "") continue;
-				var value = parseFloat(String(raw).replace("%", ""));
-				if (!isNaN(value)) {
-					return clamp(value, min, max);
-				}
-			}
-			return fallback;
-		}
-
-		var colorLowest = getNumericUrlParam(["colorLowest", "colorlowest"], 50, 0, 100);
-		var colorHighest = getNumericUrlParam(["colorHighest", "colorhighest"], 100, 0, 100);
-		if (colorLowest > colorHighest) {
-			var colorRangeSwap = colorLowest;
-			colorLowest = colorHighest;
-			colorHighest = colorRangeSwap;
-		}
-
-		function hslToRgb(h, s, l) {
-			h = (((h % 360) + 360) % 360) / 360;
-			s = clamp(s, 0, 1);
-			l = clamp(l, 0, 1);
-
-			if (s === 0) {
-				var gray = Math.round(l * 255);
-				return { r: gray, g: gray, b: gray };
-			}
-
-			function hue2rgb(p, q, t) {
-				if (t < 0) t += 1;
-				if (t > 1) t -= 1;
-				if (t < 1 / 6) return p + (q - p) * 6 * t;
-				if (t < 1 / 2) return q;
-				if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-				return p;
-			}
-
-			var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-			var p = 2 * l - q;
-			return {
-				r: Math.round(hue2rgb(p, q, h + 1 / 3) * 255),
-				g: Math.round(hue2rgb(p, q, h) * 255),
-				b: Math.round(hue2rgb(p, q, h - 1 / 3) * 255)
-			};
-		}
-
-		function rgbToHsl(rgb) {
-			var r = clamp(rgb.r, 0, 255) / 255;
-			var g = clamp(rgb.g, 0, 255) / 255;
-			var b = clamp(rgb.b, 0, 255) / 255;
-			var max = Math.max(r, g, b);
-			var min = Math.min(r, g, b);
-			var h = 0;
-			var s = 0;
-			var l = (max + min) / 2;
-
-			if (max !== min) {
-				var d = max - min;
-				s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-				switch (max) {
-					case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-					case g: h = (b - r) / d + 2; break;
-					case b: h = (r - g) / d + 4; break;
-				}
-				h *= 60;
-			}
-
-			return { h: h, s: s, l: l };
-		}
-
-		function parseHslColorToRgb(colorValue) {
-			var color = String(colorValue || "").trim();
-			var match = color.match(/^hsla?\(\s*([-\d.]+)(?:deg)?\s*,\s*([-\d.]+)%\s*,\s*([-\d.]+)%(?:\s*,\s*[\d.]+)?\s*\)$/i);
-			if (!match) return null;
-			return hslToRgb(parseFloat(match[1]) || 0, (parseFloat(match[2]) || 0) / 100, (parseFloat(match[3]) || 0) / 100);
-		}
-
-		function resolveUsernameColorToRgb(colorValue) {
-			var rgb = parseColorToRgb(colorValue) || parseHslColorToRgb(colorValue);
-			if (rgb) return rgb;
-
-			// Last-resort browser parser for named CSS colours or modern colour syntaxes.
-			try {
-				var probe = resolveUsernameColorToRgb._probe;
-				if (!probe) {
-					probe = document.createElement("span");
-					probe.style.display = "none";
-					document.body.appendChild(probe);
-					resolveUsernameColorToRgb._probe = probe;
-				}
-				probe.style.color = "";
-				probe.style.color = String(colorValue || "");
-				if (!probe.style.color) return null;
-				return parseColorToRgb(getComputedStyle(probe).color);
-			} catch (e) {
-				return null;
-			}
-		}
-
-		function clampUsernameColorForDisplay(colorValue) {
-			if (!hasValue(colorValue)) return colorValue;
-			var rgb = resolveUsernameColorToRgb(colorValue);
-			if (!rgb) return colorValue;
-
-			var hsl = rgbToHsl(rgb);
-			var low = colorLowest / 100;
-			var high = colorHighest / 100;
-			var clampedLightness = clamp(hsl.l, low, high);
-
-			if (Math.abs(clampedLightness - hsl.l) < 0.0001) {
-				return colorValue;
-			}
-
-			return "hsl(" + Math.round(hsl.h) + ", " + Math.round(hsl.s * 100) + "%, " + Math.round(clampedLightness * 100) + "%)";
-		}
-
 		var treatTikTokFansAsMembers = urlParams.has("tiktokfans");
 		var msgMaxChars = null;
 		if (urlParams.get("msgmaxchars")) {
@@ -10901,11 +10779,10 @@ if (data.event) {
 				}
 
 				var nameColor = "";
-				var displayNameColor = data.nameColor ? clampUsernameColorForDisplay(data.nameColor) : "";
-				if (displayNameColor && colorized) {
-					nameColor = "style='color:" + displayNameColor + ";'";
+				if (data.nameColor && colorized) {
+					nameColor = "style='color:" + data.nameColor + ";'";
 					if (largeavatar) {
-						nameColor = "style='color:" + displayNameColor + ";display: flex;'";
+						nameColor = "style='color:" + data.nameColor + ";display: flex;'";
 					}
 				} else if (largeavatar) {
 					nameColor = "style='display: flex;'";
@@ -11164,7 +11041,7 @@ if (msgSrc === "youtube" || msgSrc === "youtubeshorts") {
 	const nameEl = node.querySelector(".hl-name");
 	if (nameEl) {
 		const nameText = (nameEl.dataset.usernameOriginal || nameEl.textContent || "").trim();
-		nameEl.style.color = clampUsernameColorForDisplay(stringToDeterministicColor(nameText));
+		nameEl.style.color = stringToDeterministicColor(nameText);
 	}
 }
 
