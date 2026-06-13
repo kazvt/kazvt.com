@@ -88,9 +88,6 @@
 			--text-shadow: -2px -2px #000000, -2px -1px #000000, -2px 0px #000000, -2px 1px #000000, -2px 2px #000000, -1px -2px #000000, -1px -1px #000000, -1px 0px #000000, -1px 1px #000000, -1px 2px #000000, 0px -2px #000000, 0px -1px #000000, 0px 0px #000000, 0px 1px #000000, 0px 2px #000000, 1px -2px #000000, 1px -1px #000000, 1px 0px #000000, 1px 1px #000000, 1px 2px #000000, 2px -2px #000000, 2px -1px #000000, 2px 0px #000000, 2px 1px #000000, 2px 2px #000000;
 			--text-glow: 0 0 #0000;
 
-			--textbadge-bg: rgba(0, 0, 0, 0.3);
-			--textbadge-font-color: #fff;
-
 		}
 
 		.closeBtn {
@@ -2851,8 +2848,8 @@
 		}
 
 		.hl-pronouns {
-			color: var(--textbadge-font-color) !important;
-			background: var(--textbadge-bg) !important;
+			color: var(--font-color) !important;
+			background: transparent !important;
 			text-transform: lowercase !important;
 		}
 
@@ -3310,39 +3307,6 @@ body.twoLines .hl-firstline .hl-name {
 	height: 20px !important;
 
 	transform: translateY(-1px) !important;
-}
-
-
-/* Local overlay top-edge alignment fix
-   Keep global page/output wrappers flush with the viewport top, and remove the
-   first rendered row's inherited vertical row padding so chat can touch y=0. */
-html,
-body,
-#main,
-#output,
-#pinned,
-.output {
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-}
-
-html,
-body {
-	margin: 0 !important;
-	padding: 0 !important;
-}
-
-#output > .highlight-chat:first-child,
-#pinned > .highlight-chat:first-child,
-.output > .highlight-chat:first-child {
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-}
-
-#output.alignbottom > .highlight-chat:first-child,
-#pinned.alignbottom > .highlight-chat:first-child,
-.output.alignbottom > .highlight-chat:first-child {
-	padding-top: var(--padding-rows) !important;
 }
 
 	</style>
