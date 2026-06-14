@@ -7962,9 +7962,6 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 			}
 			function jumptoBottom2() {
 				var target = alignbottom || fadetop ? getById("output") : document.scrollingElement;
-				if (!target) {
-					return;
-				}
 				if (scrolltype == "instant") {
 					target.scrollTop = target.scrollHeight;
 				} else {
@@ -7972,58 +7969,6 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 						top: target.scrollHeight,
 						left: 0,
 						behavior: scrolltype
-					});
-				}
-			}
-
-			function getDockScrollTarget() {
-				return alignbottom || fadetop ? getById("output") : document.scrollingElement;
-			}
-
-			function isDockAtLiveBottom(extraThreshold = 0) {
-				var target = getDockScrollTarget();
-				if (!target) {
-					return false;
-				}
-				var threshold = Math.max(autoScrollCatch || 0, 80) + (extraThreshold || 0);
-				var distance = target.scrollHeight - (target.scrollTop + target.clientHeight);
-				return distance <= threshold;
-			}
-
-			function dockSnapToBottomInstant() {
-				var target = getDockScrollTarget();
-				if (!target) {
-					return;
-				}
-				target.scrollTop = target.scrollHeight;
-			}
-
-			function scheduleDockBottomSettle(wasAtLiveBottom, node) {
-				if (reversed && !forceAutoscroll) {
-					return;
-				}
-				if (!forceAutoscroll && !wasAtLiveBottom) {
-					return;
-				}
-				var settle = function() {
-					if (forceAutoscroll || wasAtLiveBottom || isDockAtLiveBottom(160)) {
-						dockSnapToBottomInstant();
-					}
-				};
-				settle();
-				requestAnimationFrame(function() {
-					settle();
-					requestAnimationFrame(settle);
-				});
-				[40, 120, 260, 520, 900].forEach(function(delay) {
-					setTimeout(settle, delay);
-				});
-				if (node && node.querySelectorAll) {
-					var media = node.querySelectorAll("img, video");
-					media.forEach(function(ele) {
-						ele.addEventListener("load", settle, { once: true });
-						ele.addEventListener("loadedmetadata", settle, { once: true });
-						ele.addEventListener("error", settle, { once: true });
 					});
 				}
 			}
@@ -10584,14 +10529,12 @@ if (data.event) {
 						},waitToReveal,node)
 					}
 
-					var dockWasAtLiveBottomBeforeInsert = !horizontal && !prependMode && isDockAtLiveBottom();
 					if (horizontal) {
 						horizontalAddNodeToTicker(node);
 					} else if (prependMode) {
 						mainOutputWindow.insertBefore(node, mainOutputWindow.firstChild);
 					} else {
 						mainOutputWindow.appendChild(node);
-						scheduleDockBottomSettle(dockWasAtLiveBottomBeforeInsert, node);
 					}
 
 					let hlMessage = node.querySelector(".hl-message");
