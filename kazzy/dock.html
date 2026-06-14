@@ -7985,7 +7985,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 				if (!target) {
 					return false;
 				}
-				var threshold = Math.max(autoScrollCatch || 0, 80) + (extraThreshold || 0);
+				var threshold = Math.max(autoScrollCatch || 0, 30) + (extraThreshold || 0);
 				var distance = target.scrollHeight - (target.scrollTop + target.clientHeight);
 				return distance <= threshold;
 			}
@@ -8006,7 +8006,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 					return;
 				}
 				var settle = function() {
-					if (forceAutoscroll || wasAtLiveBottom || isDockAtLiveBottom(160)) {
+					if (forceAutoscroll || wasAtLiveBottom || isDockAtLiveBottom(40)) {
 						dockSnapToBottomInstant();
 					}
 				};
