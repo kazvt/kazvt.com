@@ -3182,12 +3182,14 @@ hyphens: manual !important;
 :root {
 	--platform-pfp-outline-size: 3px;
 	--platform-pfp-outline-default: #888;
+	--platform-pfp-outline-color: var(--platform-pfp-outline-default);
 }
 
 .highlight-chat .hl-profile-pic {
 	border-radius: 50% !important;
-	outline: var(--platform-pfp-outline-size) solid var(--platform-pfp-outline-default) !important;
+	outline: var(--platform-pfp-outline-size) solid var(--platform-pfp-outline-color) !important;
 	outline-offset: 0 !important;
+	box-shadow: 0 0 8px 1.5px var(--platform-pfp-outline-color) !important;
 
 	margin-left: 0 !important;
 	margin-right: calc(var(--platform-pfp-outline-size) + 3px) !important;
@@ -3197,61 +3199,61 @@ hyphens: manual !important;
 
 /* Twitch */
 .highlight-chat[data-source-type="twitch"] .hl-profile-pic {
-	outline-color: #9146ff !important;
+	--platform-pfp-outline-color: #9146ff;
 }
 
 /* Kick */
 .highlight-chat[data-source-type="kick"] .hl-profile-pic {
-	outline-color: #53fc18 !important;
+	--platform-pfp-outline-color: #53fc18;
 }
 
 /* YouTube */
 .highlight-chat[data-source-type="youtube"] .hl-profile-pic,
 .highlight-chat[data-source-type="yt"] .hl-profile-pic {
-	outline-color: #ff0000 !important;
+	--platform-pfp-outline-color: #ff0000;
 }
 
 /* X / Twitter */
 .highlight-chat[data-source-type="x"] .hl-profile-pic,
 .highlight-chat[data-source-type="twitter"] .hl-profile-pic {
-	outline-color: #000 !important;
+	--platform-pfp-outline-color: #000;
 }
 
 /* Facebook */
 .highlight-chat[data-source-type="facebook"] .hl-profile-pic,
 .highlight-chat[data-source-type="fb"] .hl-profile-pic {
-	outline-color: #1877f2 !important;
+	--platform-pfp-outline-color: #1877f2;
 }
 
 /* Instagram */
 .highlight-chat[data-source-type="instagram"] .hl-profile-pic,
 .highlight-chat[data-source-type="ig"] .hl-profile-pic {
-	outline-color: #e1306c !important;
+	--platform-pfp-outline-color: #e1306c;
 }
 
 /* TikTok */
 .highlight-chat[data-source-type="tiktok"] .hl-profile-pic {
-	outline-color: #00f2ea !important;
+	--platform-pfp-outline-color: #00f2ea;
 }
 
 /* Discord */
 .highlight-chat[data-source-type="discord"] .hl-profile-pic {
-	outline-color: #5865f2 !important;
+	--platform-pfp-outline-color: #5865f2;
 }
 
 /* Trovo */
 .highlight-chat[data-source-type="trovo"] .hl-profile-pic {
-	outline-color: #19d66b !important;
+	--platform-pfp-outline-color: #19d66b;
 }
 
 /* Rumble */
 .highlight-chat[data-source-type="rumble"] .hl-profile-pic {
-	outline-color: #85c742 !important;
+	--platform-pfp-outline-color: #85c742;
 }
 
 /* Owncast fallback solid outline */
 .highlight-chat[data-source-type="owncast"] .hl-profile-pic {
-	outline-color: #7b5cff !important;
+	--platform-pfp-outline-color: #7b5cff;
 }
 
 .highlight-chat[data-source-type="owncast"] .hl-profile-pic {
@@ -3260,7 +3262,8 @@ hyphens: manual !important;
 		0 -3px 0 1px #2aa8ff,
 		0 3px 0 1px #8b5cff,
 		3px 0 0 1px #5f7dff,
-		-3px 0 0 1px #5f7dff !important;
+		-3px 0 0 1px #5f7dff,
+		0 0 8px 1.5px #5f7dff !important;
 }
 
 body.twoLines .hl-firstline,
