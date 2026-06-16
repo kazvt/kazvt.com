@@ -3447,56 +3447,8 @@ body {
 	padding-top: 0 !important;
 }
 
-#topbar:empty,
-#pinned:empty {
-	display: none !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	border: 0 !important;
-}
-
-#output:not(.alignbottom) {
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-	border-top: 0 !important;
-}
-
-#output:not(.alignbottom) > .highlight-chat:first-child {
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-	border-top-width: 0 !important;
-}
-
-#output:not(.alignbottom) > .highlight-chat:first-child > *,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-leftside,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-profile-pic,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-rightside,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-righttopline,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-firstline,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-name,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-badges,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-message,
-#output:not(.alignbottom) > .highlight-chat:first-child .hl-content,
-#output:not(.alignbottom) > .highlight-chat:first-child .bubble,
-#output:not(.alignbottom) > .highlight-chat:first-child > .time-arrived,
-#output:not(.alignbottom) > .highlight-chat:first-child > .source-name,
-#output:not(.alignbottom) > .highlight-chat:first-child > img.icon,
-#output:not(.alignbottom) > .highlight-chat:first-child > svg.icon {
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-	top: 0 !important;
-}
-
-body.twoLines #output:not(.alignbottom) > .highlight-chat:first-child .hl-firstline,
-body.notcompactmode #output:not(.alignbottom) > .highlight-chat:first-child .hl-firstline {
-	margin-top: 0 !important;
-}
-
-
-/* Ninja overlay snug top edge fix
-   The visible gap was coming from both row padding and the anonymous line box
-   around inline chat rows. Keep the left behavior, but let the first chat pixel
-   begin at y=0 like the left edge begins at x=0. */
+/* Ninja overlay top-margin-only fix
+   Keep message internals untouched: no crop/shift/line-height overrides. */
 html,
 body {
 	margin-top: 0 !important;
@@ -3504,80 +3456,34 @@ body {
 	border-top: 0 !important;
 }
 
-#topbar,
 #topbar:empty,
 #pinned:empty {
 	display: none !important;
 	height: 0 !important;
 	min-height: 0 !important;
 	max-height: 0 !important;
-	line-height: 0 !important;
 	margin: 0 !important;
 	padding: 0 !important;
 	border: 0 !important;
 	overflow: hidden !important;
 }
 
-.output-container,
-#output,
-#output.output,
 #output:not(.alignbottom),
-.horizontal-ticker-root,
-.horizontal-ticker-viewport,
-.horizontal-ticker-track {
+#output:not(.alignbottom).output,
+#output:not(.alignbottom) > .horizontal-ticker-root:first-child,
+#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-viewport,
+#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-track {
 	margin-top: 0 !important;
 	padding-top: 0 !important;
 	border-top: 0 !important;
-	top: 0 !important;
-	line-height: 0 !important;
-	mask-image: none !important;
-	-webkit-mask-image: none !important;
 }
 
-#output:not(.alignbottom) {
-	position: fixed !important;
-	left: 0 !important;
-	right: auto !important;
-	bottom: auto !important;
-	inset-block-start: 0 !important;
-	inset-inline-start: 0 !important;
-	transform-origin: 0 0 !important;
-}
-
-#output > *,
-#output .horizontal-ticker-track > *,
-#output .highlight-chat,
-#output .highlight-chat.compactmode,
-#output .horizontal .highlight-chat,
-#output .horizontal .highlight-chat.compactmode {
+#output:not(.alignbottom) > .highlight-chat:first-child,
+#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-item:first-child,
+#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-item:first-child .highlight-chat {
 	margin-top: 0 !important;
 	padding-top: 0 !important;
-	border-top: 0 !important;
-	top: 0 !important;
-}
-
-#output .highlight-chat,
-#output .highlight-chat > .hl-name,
-#output .highlight-chat > .hl-badges,
-#output .highlight-chat > .hl-message,
-#output .highlight-chat .hl-content,
-#output .highlight-chat .hl-firstline,
-#output .highlight-chat .hl-righttopline,
-#output .highlight-chat .hl-leftside,
-#output .highlight-chat .hl-rightside {
-	line-height: max(var(--message-line-height), var(--comment-font-size)) !important;
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-	top: 0 !important;
-}
-
-#output > .highlight-chat:first-child,
-#output .horizontal-ticker-track > .horizontal-ticker-item:first-child,
-#output .horizontal-ticker-track > .horizontal-ticker-item:first-child .highlight-chat,
-#output > *:first-child .highlight-chat:first-child {
-	margin-top: 0 !important;
-	padding-top: 0 !important;
-	transform-origin: 0 0 !important;
+	border-top-width: 0 !important;
 }
 
 </style>
