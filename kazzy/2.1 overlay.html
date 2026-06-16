@@ -3432,51 +3432,7 @@ body {
 	vertical-align: middle !important;
 }
 
-		
-
-	/* Local overlay true top-flush fix: remove empty pinned/topbar space and
-	   clear the first visible chat row's inherited vertical offset. */
-	#topbar:empty,
-	#pinned:empty {
-		display: none !important;
-		height: 0 !important;
-		min-height: 0 !important;
-		max-height: 0 !important;
-		margin: 0 !important;
-		padding: 0 !important;
-		border: 0 !important;
-		overflow: hidden !important;
-	}
-
-	#output:not(.alignbottom),
-	#pinned:not(.alignbottom),
-	.output:not(.alignbottom) {
-		margin-top: 0 !important;
-		padding-top: 0 !important;
-		border-top: 0 !important;
-	}
-
-	#output:not(.alignbottom) > :first-child,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-track,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-item:first-child,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child .highlight-chat:first-child,
-	#pinned:not(.alignbottom) > :first-child,
-	.output:not(.alignbottom) > :first-child {
-		margin-top: 0 !important;
-		padding-top: 0 !important;
-	}
-
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > .icon,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > img.icon,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > svg.icon,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > .hl-source-type,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > .time-arrived {
-		margin-top: 0 !important;
-	}
-
-			</style>
+		</style>
 </head>
 
 <body id="main" class="vanilla notcompactmode">
