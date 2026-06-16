@@ -3434,49 +3434,62 @@ body {
 
 		
 
-	/* Local overlay true top-flush fix: remove empty pinned/topbar space and
-	   clear the first visible chat row's inherited vertical offset. */
-	#topbar:empty,
-	#pinned:empty {
-		display: none !important;
-		height: 0 !important;
-		min-height: 0 !important;
-		max-height: 0 !important;
-		margin: 0 !important;
-		padding: 0 !important;
-		border: 0 !important;
-		overflow: hidden !important;
-	}
+/* Local overlay true top-flush fix
+   Disable the optional top fade mask and remove the first visible chat row's
+   own top spacing so the message content itself starts at y=0. */
+.output-container {
+	mask-image: none !important;
+	-webkit-mask-image: none !important;
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+}
 
-	#output:not(.alignbottom),
-	#pinned:not(.alignbottom),
-	.output:not(.alignbottom) {
-		margin-top: 0 !important;
-		padding-top: 0 !important;
-		border-top: 0 !important;
-	}
+#topbar:empty,
+#pinned:empty {
+	display: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+}
 
-	#output:not(.alignbottom) > :first-child,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-track,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child .horizontal-ticker-item:first-child,
-	#output:not(.alignbottom) > .horizontal-ticker-root:first-child .highlight-chat:first-child,
-	#pinned:not(.alignbottom) > :first-child,
-	.output:not(.alignbottom) > :first-child {
-		margin-top: 0 !important;
-		padding-top: 0 !important;
-	}
+#output:not(.alignbottom) {
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+	border-top: 0 !important;
+}
 
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > .icon,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > img.icon,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > svg.icon,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > .hl-source-type,
-	#output:not(.alignbottom) > .highlight-chat:first-of-type > .time-arrived {
-		margin-top: 0 !important;
-	}
+#output:not(.alignbottom) > .highlight-chat:first-child {
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+	border-top-width: 0 !important;
+}
 
-			</style>
+#output:not(.alignbottom) > .highlight-chat:first-child > *,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-leftside,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-profile-pic,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-rightside,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-righttopline,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-firstline,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-name,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-badges,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-message,
+#output:not(.alignbottom) > .highlight-chat:first-child .hl-content,
+#output:not(.alignbottom) > .highlight-chat:first-child .bubble,
+#output:not(.alignbottom) > .highlight-chat:first-child > .time-arrived,
+#output:not(.alignbottom) > .highlight-chat:first-child > .source-name,
+#output:not(.alignbottom) > .highlight-chat:first-child > img.icon,
+#output:not(.alignbottom) > .highlight-chat:first-child > svg.icon {
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+	top: 0 !important;
+}
+
+body.twoLines #output:not(.alignbottom) > .highlight-chat:first-child .hl-firstline,
+body.notcompactmode #output:not(.alignbottom) > .highlight-chat:first-child .hl-firstline {
+	margin-top: 0 !important;
+}
+
+</style>
 </head>
 
 <body id="main" class="vanilla notcompactmode">
