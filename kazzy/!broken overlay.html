@@ -10418,7 +10418,7 @@ setTextShadow(bolderShadow);
 		function applyOverlayDynamicEmoteSizingWithNativeEmoji(node) {
 			if (!node || !node.querySelector) return;
 			ssnUpgradeNativeEmojiNode(node);
-			applyOverlayDynamicEmoteSizing(node);
+			applyOverlayDynamicEmoteSizingWithNativeEmoji(node);
 		}
 
 
@@ -13316,20 +13316,9 @@ function truncateText(text, maxLength) {
 		}
 
 		function initHotkeys() {
-			const chromeApi = (typeof chrome !== "undefined") ? chrome : null;
-			const storage = (chromeApi && chromeApi.storage && chromeApi.storage.sync) ? chromeApi.storage.sync : null;
-
-			function sendHotkeyAction(action) {
-				if (chromeApi && chromeApi.runtime && chromeApi.runtime.sendMessage) {
-					chromeApi.runtime.sendMessage({ cmd: action });
-					return;
-				}
-
-				// Normal HTML/browser fallback: no extension runtime exists.
-				window.dispatchEvent(new CustomEvent("ssn-hotkey-action", { detail: { cmd: action } }));
-			}
-
-			function attachHotkeyListener(hotkeys) {
+			const storage = (chrome && chrome.storage && chrome.storage.sync) ? chrome.storage.sync : null;
+			if (!storage) {
+				const hotkeys = DEFAULT_HOTKEYS;
 				document.addEventListener('keydown', (e) => {
 					// Don't trigger if typing in input/textarea/select
 					if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
@@ -13339,18 +13328,28 @@ function truncateText(text, maxLength) {
 					const action = hotkeys[combo];
 					if (action) {
 						e.preventDefault();
-						sendHotkeyAction(action);
+						if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+							chrome.runtime.sendMessage({ cmd: action });
+						}
 					}
 				});
-			}
-
-			if (!storage) {
-				attachHotkeyListener(DEFAULT_HOTKEYS);
 				return;
 			}
-
 			storage.get(['hotkeys'], (result) => {
-				attachHotkeyListener(result.hotkeys || DEFAULT_HOTKEYS);
+				const hotkeys = result.hotkeys || DEFAULT_HOTKEYS;
+
+				document.addEventListener('keydown', (e) => {
+					// Don't trigger if typing in input/textarea/select
+					if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+					if (e.target.isContentEditable) return;
+
+					const combo = buildKeyCombo(e);
+					const action = hotkeys[combo];
+					if (action) {
+						e.preventDefault();
+						chrome.runtime.sendMessage({ cmd: action });
+					}
+				});
 			});
 		}
 
