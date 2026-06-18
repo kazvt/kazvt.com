@@ -3570,26 +3570,29 @@ body {
 }
 
 
-/* Patch: make native/default Unicode emoji render like phone emoji emotes, not tiny text. */
-.hl-content span.emoji,
+/* Patch: native/default Unicode emoji participate in emote-only sizing.
+   Mixed text + emoji stays normal text size. */
+.hl-content span.emoji.ssn-native-emoji,
 .hl-content span.ssn-native-emoji,
 span.emoji.ssn-native-emoji {
 	display: inline-flex !important;
 	align-items: center !important;
 	justify-content: center !important;
-	width: 1.35em !important;
-	min-width: 1.35em !important;
-	height: 1.35em !important;
+	width: auto !important;
+	min-width: 0 !important;
+	height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
 	font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "Twemoji Mozilla", sans-serif !important;
-	font-size: max(28px, calc(var(--message-line-height, 22px) * 1.45)) !important;
-	line-height: 1 !important;
-	vertical-align: middle !important;
-	top: 0 !important;
-	position: relative !important;
+	font-size: 1em !important;
+	line-height: inherit !important;
+	vertical-align: baseline !important;
+	top: auto !important;
+	position: static !important;
 	text-shadow: none !important;
 	-webkit-text-stroke: 0 transparent !important;
 	text-stroke: 0 transparent !important;
-	filter: drop-shadow(0 1px 1px rgb(0 0 0 / 55%));
+	filter: none !important;
 }
 
 .highlight-chat.ssn-emote-only-single .hl-content span.emoji,
@@ -3614,6 +3617,23 @@ span.emoji.ssn-native-emoji {
 	line-height: 1 !important;
 	margin: 0 1px !important;
 	vertical-align: middle !important;
+}
+
+.highlight-chat.ssn-emote-has-text .hl-content span.emoji.ssn-native-emoji,
+.highlight-chat.ssn-emote-has-text .hl-content span.ssn-native-emoji {
+	display: inline-flex !important;
+	width: auto !important;
+	min-width: 0 !important;
+	height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
+	font-size: 1em !important;
+	line-height: inherit !important;
+	margin: 0 !important;
+	vertical-align: baseline !important;
+	top: auto !important;
+	position: static !important;
+	filter: none !important;
 }
 
 .highlight-chat.ssn-emote-only-single .hl-content,
@@ -10245,7 +10265,15 @@ setTextShadow(bolderShadow);
 
 		function applyOverlayDynamicEmoteSizing(node) {
 			if (!node || !node.querySelector) return;
-			const content = node.querySelector(".hl-content");
+
+			const row = (node.matches && node.matches(".highlight-chat"))
+				? node
+				: ((node.closest && node.closest(".highlight-chat")) || node);
+
+			const content = (node.matches && node.matches(".hl-content"))
+				? node
+				: ((row.querySelector && row.querySelector(".hl-content")) || node.querySelector(".hl-content"));
+
 			if (!content) return;
 
 			function isBadgeOrIconElement(el) {
@@ -10309,13 +10337,22 @@ setTextShadow(bolderShadow);
 				}
 			}
 
-			node.classList.remove("ssn-emote-only-single", "ssn-emote-only-multi");
-			content.querySelectorAll(".ssn-dynamic-sized-emote.chat-line__message--emote-gigantified").forEach(function (el) {
-				el.classList.remove("chat-line__message--emote-gigantified");
-			});
+			function clearDynamicEmoteSizing() {
+				row.classList.remove("ssn-emote-only-single", "ssn-emote-only-multi");
+				content.querySelectorAll(".ssn-dynamic-sized-emote.chat-line__message--emote-gigantified, .ssn-native-emoji.chat-line__message--emote-gigantified").forEach(function (el) {
+					el.classList.remove("chat-line__message--emote-gigantified");
+				});
+			}
+
+			clearDynamicEmoteSizing();
 
 			// Text + emoji/emote messages should never get single/multi emote sizing.
-			if (hasVisibleNonEmoteText(content)) return;
+			if (hasVisibleNonEmoteText(content)) {
+				row.classList.add("ssn-emote-has-text");
+				return;
+			}
+
+			row.classList.remove("ssn-emote-has-text");
 
 			let emoteCount = 0;
 
@@ -10367,12 +10404,12 @@ setTextShadow(bolderShadow);
 			if (emoteCount < 1) return;
 
 			if (emoteCount === 1) {
-				node.classList.add("ssn-emote-only-single");
+				row.classList.add("ssn-emote-only-single");
 				content.querySelectorAll(".ssn-dynamic-sized-emote").forEach(function (el) {
 					el.classList.add("chat-line__message--emote-gigantified");
 				});
 			} else {
-				node.classList.add("ssn-emote-only-multi");
+				row.classList.add("ssn-emote-only-multi");
 			}
 		}
 
