@@ -10351,29 +10351,47 @@ setTextShadow(bolderShadow);
 		function ssnUpgradeNativeEmojiNode(root) {
 			if (!root || !root.querySelector) return;
 			const content = root.matches && root.matches(".hl-content") ? root : root.querySelector(".hl-content");
-			if (!content) return;
+			if (!content || content.dataset.ssnNativeEmojiUpgraded === "true") return;
 
-			const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
-				acceptNode(node) {
-					if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-					if (node.parentElement && (node.parentElement.closest(".emoji, .hl-badge, .icon, .hl-badges") || node.parentElement.tagName === "SCRIPT" || node.parentElement.tagName === "STYLE")) {
-						return NodeFilter.FILTER_REJECT;
-					}
-					return ssnNativeEmojiPattern().test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-				}
-			});
-
+			const pattern = ssnNativeEmojiPattern();
 			const textNodes = [];
-			while (walker.nextNode()) textNodes.push(walker.currentNode);
+			const stack = Array.from(content.childNodes || []);
+
+			while (stack.length) {
+				const node = stack.shift();
+				if (!node) continue;
+
+				if (node.nodeType === Node.TEXT_NODE) {
+					const value = node.nodeValue || "";
+					pattern.lastIndex = 0;
+					if (value && pattern.test(value)) {
+						textNodes.push(node);
+					}
+					continue;
+				}
+
+				if (node.nodeType !== Node.ELEMENT_NODE) continue;
+
+				const el = node;
+				if (
+					el.closest(".emoji, .hl-badge, .icon, .hl-badges") ||
+					el.tagName === "SCRIPT" ||
+					el.tagName === "STYLE"
+				) {
+					continue;
+				}
+
+				stack.unshift(...Array.from(el.childNodes || []));
+			}
 
 			for (const node of textNodes) {
 				const text = node.nodeValue || "";
-				const pattern = ssnNativeEmojiPattern();
+				const localPattern = ssnNativeEmojiPattern();
 				let last = 0;
 				let match;
 				const frag = document.createDocumentFragment();
 
-				while ((match = pattern.exec(text))) {
+				while ((match = localPattern.exec(text))) {
 					if (match.index > last) {
 						frag.append(document.createTextNode(text.slice(last, match.index)));
 					}
@@ -10394,6 +10412,7 @@ setTextShadow(bolderShadow);
 			content.querySelectorAll("span.emoji").forEach((emoji) => {
 				emoji.classList.add("ssn-native-emoji");
 			});
+			content.dataset.ssnNativeEmojiUpgraded = "true";
 		}
 
 		function applyOverlayDynamicEmoteSizingWithNativeEmoji(node) {
@@ -15032,46 +15051,6 @@ window.addEventListener("online", () => {
 		initHotkeys();
 
 	</script>
-
-<script>
-(function () {
-	function startSSNNativeEmojiObserver() {
-		if (window.__ssnNativeEmojiObserverStarted) return;
-		window.__ssnNativeEmojiObserverStarted = true;
-
-		var target = document.getElementById("output") || document.body;
-		if (!target || !window.MutationObserver) return;
-
-		var schedule = function (node) {
-			if (!node || node.nodeType !== 1) return;
-			var item = node.classList && node.classList.contains("highlight-chat") ? node : node.closest && node.closest(".highlight-chat");
-			if (!item || item.__ssnNativeEmojiScheduled) return;
-			item.__ssnNativeEmojiScheduled = true;
-			requestAnimationFrame(function () {
-				item.__ssnNativeEmojiScheduled = false;
-				if (typeof window.applyOverlayDynamicEmoteSizingWithNativeEmoji === "function") {
-					window.applyOverlayDynamicEmoteSizingWithNativeEmoji(item);
-				}
-			});
-		};
-
-		new MutationObserver(function (records) {
-			for (var i = 0; i < records.length; i++) {
-				for (var j = 0; j < records[i].addedNodes.length; j++) {
-					schedule(records[i].addedNodes[j]);
-				}
-				if (records[i].target) schedule(records[i].target);
-			}
-		}).observe(target, { childList: true, subtree: true, characterData: true });
-	}
-
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", startSSNNativeEmojiObserver, { once: true });
-	} else {
-		startSSNNativeEmojiObserver();
-	}
-})();
-</script>
 
 </body>
 
