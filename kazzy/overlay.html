@@ -10248,9 +10248,6 @@ setTextShadow(bolderShadow);
 			const content = node.querySelector(".hl-content");
 			if (!content) return;
 
-			let emoteCount = 0;
-			let hasText = false;
-
 			function isBadgeOrIconElement(el) {
 				if (!el || !el.classList) return false;
 				return el.classList.contains("hl-badge") ||
@@ -10260,6 +10257,51 @@ setTextShadow(bolderShadow);
 					el.closest(".hl-badges");
 			}
 
+			function isIgnorableText(text) {
+				return !String(text || "").replace(/[\s\u00A0\u200B-\u200D\uFE0F]+/g, "").length;
+			}
+
+			function isEmoteElement(el) {
+				if (!el || !el.classList || isBadgeOrIconElement(el)) return false;
+				return el.classList.contains("emote-container") ||
+					el.classList.contains("emoji") ||
+					el.classList.contains("ssn-native-emoji") ||
+					(el.matches && el.matches("img, svg, video"));
+			}
+
+			function hasVisibleNonEmoteText(root) {
+				const stack = Array.from(root.childNodes || []);
+
+				while (stack.length) {
+					const child = stack.shift();
+					if (!child) continue;
+
+					if (child.nodeType === Node.TEXT_NODE) {
+						const rawText = child.nodeValue || "";
+						if (isIgnorableText(rawText)) continue;
+
+						// Raw native emoji text should not make a message count as text.
+						// Anything left after stripping emoji means normal text exists, so sizing stays normal.
+						if (countEmojiOnlyTextForSizing(rawText).hasText) {
+							return true;
+						}
+						continue;
+					}
+
+					if (child.nodeType !== Node.ELEMENT_NODE) continue;
+
+					const el = child;
+					const tag = (el.tagName || "").toLowerCase();
+					if (tag === "br" || isBadgeOrIconElement(el) || isEmoteElement(el)) {
+						continue;
+					}
+
+					stack.unshift(...Array.from(el.childNodes || []));
+				}
+
+				return false;
+			}
+
 			function rememberEmoteElement(el) {
 				if (!el || !el.classList) return;
 				if (el.matches("img, svg, video")) {
@@ -10267,13 +10309,21 @@ setTextShadow(bolderShadow);
 				}
 			}
 
+			node.classList.remove("ssn-emote-only-single", "ssn-emote-only-multi");
+			content.querySelectorAll(".ssn-dynamic-sized-emote.chat-line__message--emote-gigantified").forEach(function (el) {
+				el.classList.remove("chat-line__message--emote-gigantified");
+			});
+
+			// Text + emoji/emote messages should never get single/multi emote sizing.
+			if (hasVisibleNonEmoteText(content)) return;
+
+			let emoteCount = 0;
+
 			function walk(child) {
-				if (hasText || !child) return;
+				if (!child) return;
 
 				if (child.nodeType === Node.TEXT_NODE) {
-					const result = countEmojiOnlyTextForSizing(child.nodeValue || "");
-					emoteCount += result.count;
-					if (result.hasText) hasText = true;
+					emoteCount += countEmojiOnlyTextForSizing(child.nodeValue || "").count;
 					return;
 				}
 
@@ -10282,22 +10332,20 @@ setTextShadow(bolderShadow);
 				const el = child;
 				const tag = (el.tagName || "").toLowerCase();
 
-				if (tag === "br") return;
-				if (isBadgeOrIconElement(el)) return;
+				if (tag === "br" || isBadgeOrIconElement(el)) return;
 
 				// Social Stream Ninja stacks zero-width emotes inside an emote container;
 				// treat the whole stack as one visual emote, not multiple pieces.
 				if (el.classList.contains("emote-container")) {
 					emoteCount++;
-					rememberEmoteElement(el.querySelector("img, svg, video"));
+					el.querySelectorAll("img, svg, video").forEach(rememberEmoteElement);
 					return;
 				}
 
-				if (el.classList.contains("emoji")) {
+				if (el.classList.contains("emoji") || el.classList.contains("ssn-native-emoji")) {
 					el.classList.add("ssn-native-emoji", "ssn-dynamic-sized-emote");
 					const result = countEmojiOnlyTextForSizing(el.textContent || "");
 					emoteCount += Math.max(1, result.count);
-					if (result.hasText) hasText = true;
 					return;
 				}
 
@@ -10309,21 +10357,14 @@ setTextShadow(bolderShadow);
 
 				for (const nested of Array.from(el.childNodes || [])) {
 					walk(nested);
-					if (hasText) break;
 				}
 			}
 
 			for (const child of Array.from(content.childNodes || [])) {
 				walk(child);
-				if (hasText) break;
 			}
 
-			node.classList.remove("ssn-emote-only-single", "ssn-emote-only-multi");
-			content.querySelectorAll(".ssn-dynamic-sized-emote.chat-line__message--emote-gigantified").forEach(function (el) {
-				el.classList.remove("chat-line__message--emote-gigantified");
-			});
-
-			if (hasText || emoteCount < 1) return;
+			if (emoteCount < 1) return;
 
 			if (emoteCount === 1) {
 				node.classList.add("ssn-emote-only-single");
