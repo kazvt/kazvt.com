@@ -555,6 +555,28 @@
             color: var(--ink);
         }
 
+        .face-map-mode-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 18px;
+            border-width: 2px;
+            box-shadow: 0 1px 0 var(--ink);
+            z-index: 3;
+            opacity: 0.88;
+        }
+
+        .face-map-mode-btn svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .face-map-mode-btn:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
         #undoBtn svg,
         #redoBtn svg {
             width: 20px;
@@ -680,30 +702,72 @@
         }
 
         .view-help {
+            display: none;
+        }
+
+        .stage-reset-view {
             position: absolute;
-            left: 10px;
-            bottom: 10px;
-            color: var(--paper);
-            background: rgba(20, 3, 6, 0.72);
-            border: 2px solid var(--paper);
-            padding: 4px 8px;
-            font-size: 11px;
+            top: 8px;
+            right: 8px;
+            z-index: 6;
+            height: 24px;
+            min-width: 48px;
+            border: 2px solid rgba(255, 246, 216, 0.48);
+            background: rgba(20, 3, 6, 0.16);
+            color: rgba(255, 246, 216, 0.72);
             font-weight: 900;
-            pointer-events: none;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .stage-reset-view:hover {
+            color: var(--paper);
+            border-color: var(--paper);
+            background: rgba(20, 3, 6, 0.38);
         }
 
         .transform-mode-readout {
             position: absolute;
-            right: 10px;
+            left: 10px;
             bottom: 10px;
+            z-index: 6;
             color: var(--paper);
-            background: rgba(20, 3, 6, 0.72);
-            border: 2px solid var(--paper);
-            padding: 4px 8px;
-            font-size: 11px;
+            background: rgba(20, 3, 6, 0.55);
+            border: 2px solid rgba(255, 246, 216, 0.78);
+            padding: 5px 7px;
+            font-size: 10px;
             font-weight: 900;
             pointer-events: none;
             letter-spacing: 0.04em;
+            display: grid;
+            grid-template-columns: auto auto;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .unity-gizmo-mini {
+            width: 34px;
+            height: 34px;
+            display: block;
+        }
+
+        .unity-gizmo-mini .axis-x { stroke: #ff4b4b; fill: #ff4b4b; }
+        .unity-gizmo-mini .axis-y { stroke: #49e066; fill: #49e066; }
+        .unity-gizmo-mini .axis-z { stroke: #5b8cff; fill: #5b8cff; }
+        .unity-gizmo-mini .axis-muted { stroke: rgba(255,246,216,.72); fill: none; }
+
+        .transform-mode-label {
+            display: grid;
+            gap: 1px;
+            line-height: 1.05;
+        }
+
+        .transform-mode-label small {
+            opacity: 0.72;
+            font-size: 8px;
+            letter-spacing: 0.1em;
         }
 
         .preview-debug {
@@ -928,17 +992,19 @@
         }
 
         .face-card {
+            position: relative;
             border: 2px solid var(--line);
             background: var(--paper);
             color: var(--ink);
             display: grid;
-            grid-template-columns: 48px 1fr 30px;
+            grid-template-columns: 48px minmax(0, 1fr);
             gap: 7px;
             align-items: center;
-            padding: 5px;
+            padding: 5px 26px 5px 5px;
             cursor: pointer;
             text-align: left;
             box-shadow: 0 3px 0 var(--ink);
+            overflow: hidden;
         }
 
         .face-card.active {
@@ -1052,7 +1118,7 @@
             </div>
             <div class="poly-fader" id="polyFader" title="low-poly control" hidden>
                 <span>POLY</span>
-                <input id="polySlider" type="range" min="0" max="8" step="1" value="5" aria-label="low-poly amount" />
+                <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="low-poly amount" />
                 <strong id="polyReadout">STD</strong>
             </div>
             <div class="top-center" id="activeFaceTitle">FRONT</div>
@@ -1214,8 +1280,9 @@
                 <div class="view-body">
                     <div id="cubeStage">
                         <pre class="preview-debug" id="previewDebug" hidden></pre>
-                        <div class="view-help">drag background = vertical camera orbit · click face select · wheel zoom</div>
-                        <div class="transform-mode-readout" id="transformModeReadout">R ROTATE · V MOVE</div>
+                        <button class="stage-reset-view" id="stageResetViewBtn" type="button" title="reset view">RESET</button>
+                        <div class="view-help" aria-hidden="true"></div>
+                        <div class="transform-mode-readout" id="transformModeReadout" aria-live="polite"></div>
                     </div>
 
                     <div class="export">
@@ -1270,7 +1337,7 @@
                                 <input id="bgColor" type="hidden" value="#140306" />
                             </div>
 
-                            <button class="btn" id="resetViewBtn" title="reset view">VIEW</button>
+                            <button class="btn" id="resetViewBtn" title="reset view" hidden>VIEW</button>
 
                             <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
 
@@ -1331,9 +1398,9 @@
         const DEFAULT_COLOR_HISTORY = ["#140306", "#EFE0B8"];
         const MAX_USER_COLORS = 20;
         const MAX_TILING = 16;
-        const DEFAULT_POLY_LEVEL = 5;
-        const MAX_POLY_LEVEL = 8;
-        const POLY_LABELS = ["PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "MAX"];
+        const DEFAULT_POLY_LEVEL = 7;
+        const MAX_POLY_LEVEL = 10;
+        const POLY_LABELS = ["DOT", "TINY", "PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "MAX"];
         const debugging_mode = false;
 
         const SHAPE_DEFS = [
@@ -1534,6 +1601,10 @@
         let transformControls = null;
         let transformMode = "rotate";
         let transformControlDragging = false;
+        let unitySnapHeld = false;
+        let unitySnapToggled = false;
+        let unityCtrlSnapHeld = false;
+        let lastTransformSaveAt = 0;
         let materials = [];
         let textures = [];
         let webglAvailable = false;
@@ -1552,6 +1623,9 @@
         let cameraPanOffset = new THREE.Vector3(0, 0, 0);
         let colorHistory = [];
         let saveTimer = null;
+        let idleSaveHandle = null;
+        let preferCompactSession = false;
+        let imageRevisionCounter = 1;
         let loadingSession = true;
         let shapeStore = {};
         let shapeRotations = {};
@@ -1687,6 +1761,8 @@
                 animation: null,
                 tiling: 1,
                 mapMode: "whole",
+                imageRevision: imageRevisionCounter++,
+                _saveCache: null,
                 undo: [],
                 redo: []
             };
@@ -1792,10 +1868,18 @@
             tilingReadout.textContent = tilingLabel(value);
         }
 
+        function markFaceImageDirty(faceOrIndex) {
+            const face = typeof faceOrIndex === "number" ? faces[faceOrIndex] : faceOrIndex;
+            if (!face) return;
+            face.imageRevision = imageRevisionCounter++;
+            face._saveCache = null;
+        }
+
         function markFaceChanged(index, sourceName = "drawn") {
             const face = faces[index];
             if (!face) return;
             face.changed = true;
+            markFaceImageDirty(face);
             if (face.sourceName === "blank" || face.sourceName === "transparent") {
                 face.sourceName = sourceName;
             }
@@ -2159,6 +2243,7 @@
             drawImageCover(ctx, face.animation.image);
             face.hasArt = true;
             face.changed = true;
+            markFaceImageDirty(face);
             rebuildTexture(index);
 
             if (index === currentFace && !drawing) {
@@ -2209,6 +2294,7 @@
             face.hasArt = state.hasArt;
             face.sourceName = state.sourceName;
             face.changed = state.changed ?? true;
+            markFaceImageDirty(face);
 
             rebuildTexture(index);
 
@@ -2341,6 +2427,10 @@
             } else if (face.sourceName === "transparent") {
                 face.sourceName = "drawn";
                 face.changed = true;
+            }
+
+            if (persist && face.changed) {
+                markFaceImageDirty(face);
             }
 
             rebuildTexture(currentFace);
@@ -2739,11 +2829,38 @@
                 const face = faces[materialIndex];
                 if (!face) continue;
 
+                if (applyCylinderBodyInnerGuideUv(def, face, uv, ia, ib, ic, a, b, c)) {
+                    continue;
+                }
+
                 applyWholeUvForTriangle(def, face, uv, ia, ib, ic, a, b, c, normal, center);
                 applyInnerGuideUvForTriangle(def, face, uv, ia, ib, ic);
             }
 
             uv.needsUpdate = true;
+        }
+
+        function applyCylinderBodyInnerGuideUv(def, face, uv, ia, ib, ic, a, b, c) {
+            if (def.geometry !== "cylinder" || face.name !== "BODY" || face.mapMode !== "fit") return false;
+            const profile = getFaceFitProfile(def, face);
+            if (profile?.kind !== "rect") return false;
+
+            const points = [a, b, c];
+            const uVals = points.map((point) => 0.5 + Math.atan2(point.x, point.z) / (Math.PI * 2));
+            const minU = Math.min(...uVals);
+            const maxU = Math.max(...uVals);
+            const adjusted = maxU - minU > 0.5 ? uVals.map((u) => u < 0.5 ? u + 1 : u) : uVals;
+            const height = 2.2;
+
+            [ia, ib, ic].forEach((index, order) => {
+                const point = points[order];
+                const u = ((adjusted[order] % 1) + 1) % 1;
+                const v = Math.max(0, Math.min(1, (point.y + height / 2) / height));
+                const next = mapUvToGuideRect(profile, u, v);
+                uv.setXY(index, next.u, next.v);
+            });
+
+            return true;
         }
 
         function applyWholeUvForTriangle(def, face, uv, ia, ib, ic, a, b, c, normal, center) {
@@ -2852,12 +2969,12 @@
 
         function createGeometry(def) {
             const level = getCurrentPolyLevel();
-            const radial = [3, 4, 5, 6, 8, 32, 48, 64, 96][level] || 32;
-            const sphereW = [4, 5, 6, 8, 12, 40, 64, 96, 128][level] || 40;
-            const sphereH = [3, 4, 5, 6, 8, 24, 32, 48, 64][level] || 24;
-            const torusTubular = [6, 8, 10, 12, 18, 72, 96, 128, 160][level] || 72;
-            const torusRadial = [3, 4, 5, 6, 8, 24, 32, 48, 64][level] || 24;
-            const capSegments = [1, 2, 3, 4, 6, 18, 24, 32, 48][level] || 18;
+            const radial = [3, 3, 4, 5, 6, 8, 12, 32, 48, 64, 96][level] || 32;
+            const sphereW = [3, 4, 5, 6, 8, 12, 18, 40, 64, 96, 128][level] || 40;
+            const sphereH = [2, 3, 4, 5, 6, 8, 12, 24, 32, 48, 64][level] || 24;
+            const torusTubular = [4, 5, 6, 8, 10, 12, 18, 72, 96, 128, 160][level] || 72;
+            const torusRadial = [3, 3, 4, 5, 6, 8, 12, 24, 32, 48, 64][level] || 24;
+            const capSegments = [1, 1, 2, 3, 4, 6, 8, 18, 24, 32, 48][level] || 18;
             let geometry;
 
             switch (def.geometry) {
@@ -2868,7 +2985,8 @@
                     geometry = new THREE.BoxGeometry(2.55, 1.35, 1.75);
                     break;
                 case "book":
-                    geometry = new THREE.BoxGeometry(2.45, 1.7, 0.42);
+                    // Upright portrait book: x = cover width, y = height, z = thickness.
+                    geometry = new THREE.BoxGeometry(1.45, 2.25, 0.38);
                     break;
                 case "pyramid":
                     geometry = createFullCanvasPyramidGeometry(def);
@@ -3083,6 +3201,8 @@
             texture.anisotropy = targetRenderer?.capabilities?.getMaxAnisotropy?.() || 1;
             texture.magFilter = THREE.NearestFilter;
             texture.minFilter = THREE.NearestFilter;
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
             texture.generateMipmaps = false;
             return texture;
         }
@@ -3137,18 +3257,53 @@
             }
         }
 
+        function moveGizmoSvg() {
+            return `
+                <svg class="unity-gizmo-mini" viewBox="0 0 36 36" aria-hidden="true">
+                    <path class="axis-x" d="M18 18 L31 18" stroke-width="3" stroke-linecap="square"/>
+                    <path class="axis-x" d="M31 18 l-5 -4 v8z"/>
+                    <path class="axis-y" d="M18 18 L18 5" stroke-width="3" stroke-linecap="square"/>
+                    <path class="axis-y" d="M18 5 l-4 5 h8z"/>
+                    <path class="axis-z" d="M18 18 L8 27" stroke-width="3" stroke-linecap="square"/>
+                    <path class="axis-z" d="M8 27 l2 -6 4 5z"/>
+                    <rect class="axis-muted" x="15" y="15" width="6" height="6" stroke-width="2"/>
+                </svg>`;
+        }
+
+        function rotateGizmoSvg() {
+            return `
+                <svg class="unity-gizmo-mini" viewBox="0 0 36 36" aria-hidden="true">
+                    <ellipse class="axis-x" cx="18" cy="18" rx="13" ry="5" stroke-width="2.4" fill="none" transform="rotate(90 18 18)"/>
+                    <ellipse class="axis-y" cx="18" cy="18" rx="13" ry="5" stroke-width="2.4" fill="none"/>
+                    <ellipse class="axis-z" cx="18" cy="18" rx="13" ry="13" stroke-width="2.2" fill="none"/>
+                    <circle class="axis-muted" cx="18" cy="18" r="2" stroke-width="2"/>
+                </svg>`;
+        }
+
+        function updateTransformSnapping() {
+            if (!transformControls) return;
+            const snapping = unitySnapHeld || unitySnapToggled || unityCtrlSnapHeld;
+            transformControls.setTranslationSnap(snapping ? 0.25 : null);
+            transformControls.setRotationSnap(snapping ? THREE.MathUtils.degToRad(15) : null);
+        }
+
         function updateTransformModeReadout() {
             const readout = document.getElementById("transformModeReadout");
             if (!readout) return;
-            readout.textContent = transformMode === "move" ? "V MOVE · R ROTATE" : "R ROTATE · V MOVE";
-            readout.title = transformMode === "move" ? "Move mode active" : "Rotate mode active";
+            const isMove = transformMode === "move";
+            readout.innerHTML = `${isMove ? moveGizmoSvg() : rotateGizmoSvg()}<span class="transform-mode-label"><b>${isMove ? "W MOVE" : "E ROTATE"}</b><small>${unitySnapHeld || unitySnapToggled || unityCtrlSnapHeld ? "SNAP ON" : "CTRL SNAP"}</small></span>`;
+            readout.title = isMove ? "Unity-style Move tool active" : "Unity-style Rotate tool active";
         }
 
         function updateTransformControlsMode(status = true) {
             if (transformControls) {
                 transformControls.setMode(transformMode === "move" ? "translate" : "rotate");
-                transformControls.setSpace(transformMode === "move" ? "world" : "local");
-                transformControls.setSize(transformMode === "move" ? 0.85 : 0.9);
+                transformControls.setSpace(transformMode === "move" ? "global" : "local");
+                transformControls.setSize(transformMode === "move" ? 0.9 : 0.95);
+                transformControls.showX = true;
+                transformControls.showY = true;
+                transformControls.showZ = true;
+                updateTransformSnapping();
                 if (shapeRoot && transformControls.object !== shapeRoot) {
                     transformControls.attach(shapeRoot);
                 }
@@ -3177,7 +3332,11 @@
             });
             transformControls.addEventListener("objectChange", () => {
                 saveCurrentShapeContext();
-                updateDebugInfo();
+                const now = performance.now();
+                if (now - lastTransformSaveAt > 250) {
+                    updateDebugInfo();
+                    lastTransformSaveAt = now;
+                }
             });
             scene.add(transformControls);
             updateTransformControlsMode(false);
@@ -3688,6 +3847,7 @@
         });
 
         document.getElementById("resetViewBtn").addEventListener("click", resetView);
+        document.getElementById("stageResetViewBtn")?.addEventListener("click", resetView);
 
         brushSize.addEventListener("input", () => {
             brushReadout.textContent = `${brushSize.value}PX`;
@@ -4624,6 +4784,7 @@
             faces[currentFace].sourceName = "blank";
             faces[currentFace].changed = false;
             faces[currentFace].hasArt = true;
+            markFaceImageDirty(faces[currentFace]);
 
             saveEditorToFace(true);
             setStatus("CLEAR");
@@ -4655,6 +4816,7 @@
                     face.sourceName = file.name;
                     face.hasArt = true;
                     face.changed = true;
+                    markFaceImageDirty(face);
                     syncAnimatedFace(currentFace);
                     renderFaceList();
                     scheduleSave();
@@ -4667,6 +4829,7 @@
 
                     face.sourceName = file.name;
                     face.changed = true;
+                    markFaceImageDirty(face);
                     saveEditorToFace(true);
 
                     URL.revokeObjectURL(url);
@@ -4721,6 +4884,7 @@
             face.hasArt = copyBuffer.hasArt;
             face.sourceName = copyBuffer.sourceName || "pasted";
             face.changed = true;
+            markFaceImageDirty(face);
             face.tiling = Math.max(1, Math.min(MAX_TILING, Number(copyBuffer.tiling || face.tiling || 1)));
 
             rebuildTexture(currentFace);
@@ -4783,17 +4947,43 @@
                 return;
             }
 
+            if (!mod && key === "w") {
+                event.preventDefault();
+                setTransformMode("move");
+                return;
+            }
+
+            if (!mod && key === "e") {
+                event.preventDefault();
+                setTransformMode("rotate");
+                return;
+            }
+
+            // Legacy aliases from the previous CubePaint build. Unity-native keys are W/E.
             if (!mod && key === "r") {
                 event.preventDefault();
                 setTransformMode("rotate");
                 return;
             }
 
-            if (!mod && key === "v") {
+            if (!mod && event.shiftKey && key === "v") {
                 event.preventDefault();
-                setTransformMode("move");
+                unitySnapToggled = !unitySnapToggled;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                setStatus(unitySnapToggled ? "SNAP ON" : "SNAP OFF");
                 return;
             }
+
+            if (!mod && key === "v") {
+                event.preventDefault();
+                unitySnapHeld = true;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                setStatus("SNAP");
+                return;
+            }
+
 
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
@@ -4805,6 +4995,35 @@
                 event.preventDefault();
                 moveSelectedFace(1);
                 return;
+            }
+        });
+
+        document.addEventListener("keyup", (event) => {
+            if (isTypingTarget(event.target)) return;
+            const key = event.key.toLowerCase();
+            if (key === "v" && unitySnapHeld) {
+                unitySnapHeld = false;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                if (!unitySnapToggled) setStatus(transformMode === "move" ? "MOVE" : "ROTATE");
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (isTypingTarget(event.target)) return;
+            if (event.ctrlKey || event.metaKey) {
+                unityCtrlSnapHeld = true;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+            }
+        });
+
+        document.addEventListener("keyup", (event) => {
+            if (isTypingTarget(event.target)) return;
+            if (!event.ctrlKey && !event.metaKey) {
+                unityCtrlSnapHeld = false;
+                updateTransformSnapping();
+                updateTransformModeReadout();
             }
         });
 
@@ -4993,8 +5212,20 @@
             if (face.changed || face.sourceName !== "blank" || !face.hasArt) {
                 try {
                     const imageType = options.imageType || "image/png";
-                    const quality = options.imageQuality;
-                    state.image = face.canvas.toDataURL(imageType, quality);
+                    const quality = options.imageQuality ?? null;
+                    const revision = face.imageRevision || 0;
+                    const cached = face._saveCache;
+
+                    if (!cached || cached.revision !== revision || cached.imageType !== imageType || cached.imageQuality !== quality) {
+                        face._saveCache = {
+                            revision,
+                            imageType,
+                            imageQuality: quality,
+                            image: face.canvas.toDataURL(imageType, quality)
+                        };
+                    }
+
+                    state.image = face._saveCache.image;
                     state.imageType = imageType;
                 } catch (error) {
                     console.warn("Face could not be serialized:", face.name, error);
@@ -5075,17 +5306,22 @@
         function saveSession() {
             if (loadingSession) return;
             saveEditorToFace(false, false);
-            const payload = makeSessionPayload();
+
+            const primaryOptions = preferCompactSession
+                ? { imageType: "image/webp", imageQuality: 0.55, compact: true }
+                : {};
+            const payload = makeSessionPayload(primaryOptions);
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
                 saveCookieSettings(payload);
-                setStatus("SAVED");
+                setStatus(preferCompactSession ? "SAVED SMALL" : "SAVED");
                 return;
             } catch (error) {
-                console.warn("CubePaint full PNG session could not be saved:", error);
+                console.warn("CubePaint session could not be saved in preferred format:", error);
             }
 
+            preferCompactSession = true;
             const compactPayload = makeSessionPayload({ imageType: "image/webp", imageQuality: 0.55, compact: true });
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(compactPayload));
@@ -5099,10 +5335,32 @@
             }
         }
 
+        function runScheduledSave() {
+            saveTimer = null;
+            if (idleSaveHandle && "cancelIdleCallback" in window) {
+                cancelIdleCallback(idleSaveHandle);
+                idleSaveHandle = null;
+            }
+
+            if ("requestIdleCallback" in window) {
+                idleSaveHandle = requestIdleCallback(() => {
+                    idleSaveHandle = null;
+                    saveSession();
+                }, { timeout: 1800 });
+                return;
+            }
+
+            saveSession();
+        }
+
         function scheduleSave() {
             if (loadingSession) return;
             clearTimeout(saveTimer);
-            saveTimer = setTimeout(saveSession, 650);
+            if (idleSaveHandle && "cancelIdleCallback" in window) {
+                cancelIdleCallback(idleSaveHandle);
+                idleSaveHandle = null;
+            }
+            saveTimer = setTimeout(runScheduledSave, 1200);
         }
 
         function restoreInputsFromSession(session) {
@@ -5180,6 +5438,13 @@
                 const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
                 ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
                 ctx.drawImage(image, 0, 0, FACE_SIZE, FACE_SIZE);
+                markFaceImageDirty(face);
+                face._saveCache = {
+                    revision: face.imageRevision,
+                    imageType: savedFace.imageType || "image/png",
+                    imageQuality: null,
+                    image: savedFace.image
+                };
 
                 if (shapeId === currentShapeId) {
                     rebuildTexture(faceIndex);
