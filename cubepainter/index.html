@@ -5,14 +5,38 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CubePaint</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+        @font-face {
+            font-family: "Monaspace Krypton Frozen";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 400;
+            src: url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-400-normal.woff2") format("woff2"),
+                 url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-400-normal.woff") format("woff");
+        }
+
+        @font-face {
+            font-family: "Monaspace Krypton Frozen";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 700;
+            src: url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff2") format("woff2"),
+                 url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff") format("woff");
+        }
+
+        @font-face {
+            font-family: "Monaspace Krypton Frozen";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 800;
+            src: url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-800-normal.woff2") format("woff2"),
+                 url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-800-normal.woff") format("woff");
+        }
 
         :root {
-            --font-ui: "Share Tech Mono", "Courier New", monospace;
+            --font-ui: "Monaspace Krypton Frozen", "Monaspace Krypton", "Courier New", monospace;
             --paper: #fff6d8;
             --paper2: #efe0b8;
             --paper3: #dfc995;
@@ -35,6 +59,7 @@
             background: var(--paper);
             color: var(--ink);
             font-family: var(--font-ui);
+            font-feature-settings: "calt" 1, "liga" 1, "ss01" 1, "ss02" 1, "ss03" 1, "ss04" 1, "ss05" 1, "ss06" 1, "ss07" 1, "ss08" 1, "ss09" 1, "ss10" 1;
             overflow: hidden;
             -webkit-font-smoothing: none;
             text-rendering: geometricPrecision;
@@ -5297,7 +5322,13 @@
             const startX = Math.round(centerX - localCenter);
             const startY = Math.round(centerY - localCenter);
 
+            ctx.save();
+
             if (!erase) {
+                // Treat the selected RGBA colour as the actual paint being laid down.
+                // The default source-over blend would flatten partial-alpha paint onto
+                // the existing opaque blank canvas, making transparent colours look solid.
+                ctx.globalCompositeOperation = "copy";
                 ctx.fillStyle = rgbaFromHex(brushColor.value, quantizedAlpha(alphaIndex));
             }
 
@@ -5325,6 +5356,8 @@
                     ctx.fillRect(x0, y, width, 1);
                 }
             }
+
+            ctx.restore();
         }
 
 
@@ -6011,6 +6044,20 @@
             targetCamera.updateProjectionMatrix();
         }
 
+        function makeExportCameraFromCurrentView() {
+            const exportCamera = new THREE.PerspectiveCamera(camera.fov, 1, camera.near, camera.far);
+            exportCamera.position.copy(camera.position);
+            exportCamera.quaternion.copy(camera.quaternion);
+            exportCamera.up.copy(camera.up);
+            exportCamera.zoom = camera.zoom;
+            exportCamera.filmGauge = camera.filmGauge;
+            exportCamera.filmOffset = camera.filmOffset;
+            exportCamera.aspect = 1;
+            exportCamera.updateMatrixWorld(true);
+            exportCamera.updateProjectionMatrix();
+            return exportCamera;
+        }
+
         function appendViewControlHint(container) {
             if (!container) return;
             const hint = document.createElement("div");
@@ -6072,8 +6119,7 @@
             exportRenderer.setClearColor(transparentExport ? transparentKey : bgColor.value, transparentExport ? 0 : bgAlpha);
 
             const exportScene = new THREE.Scene();
-            const exportCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-            positionCamera(exportCamera, DEFAULT_CAMERA_DISTANCE, 0, 0, new THREE.Vector3(0, 0, 0));
+            const exportCamera = makeExportCameraFromCurrentView();
             addShadingLightsToScene(exportScene);
 
             const exportTextures = faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
@@ -6129,12 +6175,16 @@
             });
 
             try {
+                const baseExportMeshRotation = shapeMesh.rotation.clone();
+                const exportSpeed = Math.max(0, Number(document.getElementById("speed")?.value || 0));
+                const exportDurationSeconds = (frames * delay) / 1000;
+                const exportRotationSpan = exportSpeed * exportDurationSeconds;
+
                 for (let i = 0; i < frames; i++) {
                     const t = i / frames;
 
-                    exportMesh.rotation.x = 0;
-                    exportMesh.rotation.y = t * Math.PI * 2;
-                    exportMesh.rotation.z = 0;
+                    exportMesh.rotation.copy(baseExportMeshRotation);
+                    exportMesh.rotation.y += t * exportRotationSpan;
                     applyVertexWobbleToMesh(exportMesh, i * delay);
 
                     exportRenderer.render(exportScene, exportCamera);
