@@ -83,8 +83,8 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(104px, 142px) minmax(176px, 232px) minmax(430px, 1fr) auto minmax(92px, auto);
-            gap: 14px;
+            grid-template-columns: auto minmax(104px, 142px) minmax(150px, 210px) minmax(176px, 232px) minmax(360px, 1fr) minmax(92px, auto);
+            gap: 12px;
             align-items: center;
             padding: 10px 12px;
             font-weight: 900;
@@ -194,27 +194,29 @@
             gap: 0;
             padding: 0;
             min-width: 0;
-            overflow: visible;
+            overflow: hidden;
         }
 
         .shape-extra-control-list {
             display: flex;
             flex-flow: row nowrap;
-            gap: 14px;
+            gap: 12px;
             min-width: 0;
             align-items: center;
             justify-content: start;
-            overflow: visible;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
         }
 
         .shape-extra-control {
             display: grid;
             grid-template-rows: 16px 24px;
             gap: 6px;
-            min-width: 132px;
-            width: 148px;
-            max-width: 160px;
-            flex: 1 1 148px;
+            min-width: 118px;
+            width: 134px;
+            max-width: 148px;
+            flex: 1 0 134px;
             align-items: center;
         }
 
@@ -264,13 +266,19 @@
         .top-center {
             border: 2px solid var(--paper);
             border-radius: 0;
-            padding: 3px 14px;
-            font-size: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
             white-space: nowrap;
-            min-width: 150px;
+            min-width: 0;
+            width: 100%;
+            max-width: 210px;
             display: grid;
             place-items: center;
             text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: static;
+            z-index: auto;
         }
 
         .status {
@@ -1393,7 +1401,9 @@
             }
 
             .top-center {
+                order: 2;
                 justify-self: stretch;
+                max-width: none;
             }
 
             .status {
@@ -1424,6 +1434,7 @@
                 <div class="shape-select-menu" id="shapeSelectMenu" role="listbox" hidden></div>
                 <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
+            <div class="top-center" id="activeFaceTitle">FRONT</div>
             <div class="poly-fader" id="polyFader" title="low-poly control" hidden>
                 <span>POLY</span>
                 <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="low-poly amount" />
@@ -1432,7 +1443,6 @@
             <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
                 <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
             </div>
-            <div class="top-center" id="activeFaceTitle">FRONT</div>
             <div class="status" id="status">READY</div>
         </header>
 
