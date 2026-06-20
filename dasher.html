@@ -9,6 +9,8 @@
     window.tailwind = { config: { corePlugins: { preflight: false } } };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
   <style>
     :root {
       --paper: #fff6d8;
@@ -530,6 +532,10 @@
       background-size: 22px 22px;
       background-position: 0 0, 0 11px, 11px -11px, -11px 0;
       box-shadow: 0 4px 0 var(--ink);
+      image-rendering: pixelated;
+    }
+
+    body.smooth-rendering canvas {
       image-rendering: auto;
     }
 
@@ -769,18 +775,18 @@
       <div class="brand">DASHER</div>
       <div class="top-pill">like those uhh old forum style alternating dash border signature thingies</div>
       <div class="top-center">Recommended: 1116 × 257 px</div>
-      <div class="status-chip">PNG/JPEG</div>
+      <div class="status-chip">PNG/JPEG/GIF</div>
     </header>
 
     <main>
       <section class="panel controls-panel">
         <div class="head">
           <span>Controls</span>
-          <span>Export PNG</span>
+          <span>Export PNG/GIF</span>
         </div>
         <div class="panel-scroll">
       <label for="fileInput">Image file</label>
-      <input id="fileInput" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" />
+      <input id="fileInput" type="file" accept="image/png,image/jpeg,image/gif,.png,.jpg,.jpeg,.gif" />
 
       <div id="cropControls" hidden>
         <input id="fixedCropToggle" type="checkbox" checked hidden aria-hidden="true" />
@@ -806,6 +812,23 @@
             <button id="centerImageBtn" class="secondary" type="button" title="Centre the image in the crop">Centre</button>
             <button id="resetCropBtn" class="secondary" type="button" title="Reset crop position, zoom, and size for this tab">Reset</button>
           </div>
+        </div>
+      </div>
+
+      <div class="metric-grid grid grid-cols-2 gap-2">
+        <div>
+          <label for="resamplingMode">Resampling</label>
+          <select id="resamplingMode" title="Nearest neighbour keeps small pixel art sharp; bilinear smooths scaled images.">
+            <option value="nearest" selected>Nearest neighbour</option>
+            <option value="bilinear">Bilinear</option>
+          </select>
+        </div>
+        <div>
+          <label for="exportFormat">Export as</label>
+          <select id="exportFormat" title="PNG exports the current frame. GIF exports imported GIF frames and/or marching ants animation.">
+            <option value="png" selected>PNG</option>
+            <option value="gif">GIF</option>
+          </select>
         </div>
       </div>
 
@@ -893,11 +916,35 @@
         <span id="pickedColorValue"></span>
       </div>
 
-      <label class="compact-label" for="inset">
-        <span>Inset</span>
-        <span class="hint-dot" title="Positive = move border inward. Negative = draw outside and add export padding.">?</span>
-      </label>
-      <input id="inset" type="number" step="1" value="0" title="Positive moves inward; negative draws outside and adds export padding" />
+      <div class="metric-grid grid grid-cols-2 gap-2">
+        <div>
+          <label class="compact-label" for="inset">
+            <span>Inset</span>
+            <span class="hint-dot" title="Positive = move border inward. Negative = draw outside and add export padding.">?</span>
+          </label>
+          <input id="inset" type="number" step="1" value="0" title="Positive moves inward; negative draws outside and adds export padding" />
+        </div>
+        <div>
+          <label>Stroke alignment</label>
+          <label class="toggle-field" for="outsideStrokeAlignToggle" title="Automatically set inset to the negative dash width, so the stroke sits outside and its inner edge stays flush with the crop edge.">
+            <input id="outsideStrokeAlignToggle" type="checkbox" />
+            <span>OUTSIDE STROKE</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="metric-grid grid grid-cols-2 gap-2">
+        <div>
+          <label class="toggle-field" for="marchingAntsToggle" title="Animate the alternating dashes so they walk along the selected border path.">
+            <input id="marchingAntsToggle" type="checkbox" />
+            <span>MARCHING ANTS</span>
+          </label>
+        </div>
+        <div>
+          <label for="marchingAntsSpeed">Ant speed</label>
+          <input id="marchingAntsSpeed" type="number" min="0.1" max="8" step="0.1" value="1" title="Marching ants speed multiplier" />
+        </div>
+      </div>
 
       <div class="side-section">
         <label>Sides to draw</label>
@@ -990,6 +1037,11 @@
     const pickedColorSwatch = document.getElementById("pickedColorSwatch");
     const pickedColorValue = document.getElementById("pickedColorValue");
     const insetInput = document.getElementById("inset");
+    const outsideStrokeAlignToggle = document.getElementById("outsideStrokeAlignToggle");
+    const marchingAntsToggle = document.getElementById("marchingAntsToggle");
+    const marchingAntsSpeedInput = document.getElementById("marchingAntsSpeed");
+    const resamplingModeInput = document.getElementById("resamplingMode");
+    const exportFormatInput = document.getElementById("exportFormat");
     const sidesInput = document.getElementById("sides");
     const sideChoiceButtons = Array.from(document.querySelectorAll("[data-sides]"));
     const renderBtn = document.getElementById("renderBtn");
@@ -1010,11 +1062,22 @@
     const DEFAULT_CROP_WIDTH = 1116;
     const DEFAULT_CROP_HEIGHT = 257;
     const MAX_CANVAS_SIZE = 12000;
-    const SUPPORTED_IMAGE_TYPES = ["image/png", "image/jpeg"];
-    const SUPPORTED_IMAGE_EXTENSION = /\.(png|jpe?g)$/i;
+    const DEFAULT_GIF_DELAY = 80;
+    const MARCHING_ANTS_LOOP_MS = 1200;
+    const MARCHING_ANTS_EXPORT_FRAMES = 24;
+    const GIF_WORKER_SCRIPT = "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js";
+    const SUPPORTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/gif"];
+    const SUPPORTED_IMAGE_EXTENSION = /\.(png|jpe?g|gif)$/i;
+    const GIF_IMAGE_EXTENSION = /\.gif$/i;
 
     let originalImage = null;
+    let originalFrames = [];
+    let originalBaseName = "alternating-dashes";
     let originalFileName = "alternating-dashes.png";
+    let currentFrameIndex = 0;
+    let previewAnimationStartTime = 0;
+    let animationFrameRequest = null;
+    let isExportingGif = false;
     let isColorPickMode = false;
     let hasUserChangedCropSize = false;
     let sessionCropWidth = DEFAULT_CROP_WIDTH;
@@ -1043,9 +1106,9 @@
       startColorPickBtn
     ];
 
-    fileInput.addEventListener("change", loadPng);
+    fileInput.addEventListener("change", loadImageFile);
     renderBtn.addEventListener("click", render);
-    downloadBtn.addEventListener("click", downloadPng);
+    downloadBtn.addEventListener("click", downloadCurrentExport);
     fixedCropToggle.addEventListener("change", handleFixedCropToggle);
     cropWidthInput.addEventListener("input", handleCropSizeInput);
     cropHeightInput.addEventListener("input", handleCropSizeInput);
@@ -1057,6 +1120,23 @@
       updateEditedPreviewAndOutput();
     });
     resetCropBtn.addEventListener("click", resetCrop);
+    outsideStrokeAlignToggle.addEventListener("change", () => {
+      syncOutsideStrokeAlignment();
+      if (originalImage) render();
+    });
+    marchingAntsToggle.addEventListener("change", () => {
+      syncAnimationLoop();
+      if (originalImage) render();
+    });
+    marchingAntsSpeedInput.addEventListener("input", () => {
+      syncAnimationLoop();
+      if (originalImage) render();
+    });
+    resamplingModeInput.addEventListener("change", () => {
+      syncResamplingUi();
+      if (originalImage) updateEditedPreviewAndOutput();
+    });
+    exportFormatInput.addEventListener("change", syncDownloadButtonLabel);
     canvasBackgroundToggle.addEventListener("change", () => {
       syncCanvasBackgroundUi();
       if (originalImage) updateEditedPreviewAndOutput();
@@ -1113,6 +1193,7 @@
       sidesInput
     ].forEach(control => {
       control.addEventListener("input", () => {
+        if (control === lineWidthInput) syncOutsideStrokeAlignment();
         if (originalImage) render();
       });
     });
@@ -1120,6 +1201,9 @@
     setLoadedControls(false);
     syncCanvasBackgroundUi();
     syncSideButtons();
+    syncOutsideStrokeAlignment();
+    syncResamplingUi();
+    syncDownloadButtonLabel();
 
     function syncSideButtons() {
       sideChoiceButtons.forEach(button => {
@@ -1127,6 +1211,133 @@
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
       });
+    }
+
+    function getLineWidthValue() {
+      return Math.max(1, Math.floor(Number(lineWidthInput.value) || 1));
+    }
+
+    function syncOutsideStrokeAlignment() {
+      const isOutsideAligned = outsideStrokeAlignToggle.checked;
+      insetInput.disabled = isOutsideAligned;
+
+      if (isOutsideAligned) {
+        insetInput.value = String(-getLineWidthValue());
+      }
+    }
+
+    function isNearestResampling() {
+      return resamplingModeInput.value === "nearest";
+    }
+
+    function syncResamplingUi() {
+      document.body.classList.toggle("smooth-rendering", !isNearestResampling());
+    }
+
+    function setCanvasResampling(context) {
+      const useNearest = isNearestResampling();
+      context.imageSmoothingEnabled = !useNearest;
+      context.imageSmoothingQuality = useNearest ? "low" : "high";
+    }
+
+    function syncDownloadButtonLabel() {
+      const format = exportFormatInput.value === "gif" ? "GIF" : "PNG";
+      downloadBtn.textContent = `Export ${format}`;
+      originalFileName = `${originalBaseName}-alternating-dashes.${format.toLowerCase()}`;
+    }
+
+    function getOriginalWidth() {
+      return originalImage ? (originalImage.naturalWidth || originalImage.width || 0) : 0;
+    }
+
+    function getOriginalHeight() {
+      return originalImage ? (originalImage.naturalHeight || originalImage.height || 0) : 0;
+    }
+
+    function getFrameImage(frameIndex = currentFrameIndex) {
+      if (!originalFrames.length) return originalImage;
+      const safeIndex = ((Math.floor(frameIndex) % originalFrames.length) + originalFrames.length) % originalFrames.length;
+      return originalFrames[safeIndex].image;
+    }
+
+    function getFrameDelay(frameIndex = currentFrameIndex) {
+      if (!originalFrames.length) return DEFAULT_GIF_DELAY;
+      const safeIndex = ((Math.floor(frameIndex) % originalFrames.length) + originalFrames.length) % originalFrames.length;
+      return normalizeFrameDelay(originalFrames[safeIndex].delay);
+    }
+
+    function isMarchingAntsEnabled() {
+      return marchingAntsToggle.checked;
+    }
+
+    function getMarchingAntsSpeed() {
+      const speed = Number(marchingAntsSpeedInput.value);
+      return Number.isFinite(speed) ? Math.min(8, Math.max(0.1, speed)) : 1;
+    }
+
+    function getMarchingAntsProgressForElapsed(elapsedMs) {
+      if (!isMarchingAntsEnabled()) return 0;
+      const loopMs = MARCHING_ANTS_LOOP_MS / getMarchingAntsSpeed();
+      return ((elapsedMs % loopMs) / loopMs) * 2;
+    }
+
+    function getMarchingAntsProgress(timestamp = performance.now()) {
+      if (!isMarchingAntsEnabled()) return 0;
+      if (!previewAnimationStartTime) previewAnimationStartTime = timestamp;
+      return getMarchingAntsProgressForElapsed(timestamp - previewAnimationStartTime);
+    }
+
+    function shouldAnimatePreview() {
+      return Boolean(originalImage) && (originalFrames.length > 1 || isMarchingAntsEnabled());
+    }
+
+    function startAnimationLoop() {
+      if (animationFrameRequest || !shouldAnimatePreview()) return;
+      previewAnimationStartTime = performance.now();
+      animationFrameRequest = requestAnimationFrame(runAnimationFrame);
+    }
+
+    function stopAnimationLoop() {
+      if (animationFrameRequest) {
+        cancelAnimationFrame(animationFrameRequest);
+        animationFrameRequest = null;
+      }
+    }
+
+    function syncAnimationLoop() {
+      if (shouldAnimatePreview()) {
+        startAnimationLoop();
+      } else {
+        stopAnimationLoop();
+      }
+    }
+
+    function runAnimationFrame(timestamp) {
+      animationFrameRequest = null;
+
+      if (!shouldAnimatePreview() || isExportingGif) {
+        syncAnimationLoop();
+        return;
+      }
+
+      currentFrameIndex = getFrameIndexAtTime(timestamp);
+      render({ timestamp });
+      animationFrameRequest = requestAnimationFrame(runAnimationFrame);
+    }
+
+    function getFrameIndexAtTime(timestamp = performance.now()) {
+      if (!originalFrames.length || originalFrames.length === 1) return 0;
+      if (!previewAnimationStartTime) previewAnimationStartTime = timestamp;
+
+      const totalDuration = originalFrames.reduce((sum, frame) => sum + normalizeFrameDelay(frame.delay), 0);
+      let elapsed = (timestamp - previewAnimationStartTime) % totalDuration;
+
+      for (let i = 0; i < originalFrames.length; i++) {
+        elapsed -= normalizeFrameDelay(originalFrames[i].delay);
+        if (elapsed <= 0) return i;
+      }
+
+      return originalFrames.length - 1;
     }
 
     function handleCanvasPointerDown(event) {
@@ -1167,39 +1378,155 @@
       if (originalImage) render();
     }
 
-    function loadPng(event) {
+    async function loadImageFile(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       if (!isSupportedImageFile(file)) {
-        alert("Please choose a PNG or JPEG file.");
+        alert("Please choose a PNG, JPEG, or GIF file.");
         fileInput.value = "";
         return;
       }
 
-      originalFileName = file.name.replace(SUPPORTED_IMAGE_EXTENSION, "") + "-alternating-dashes.png";
+      stopAnimationLoop();
+      originalImage = null;
+      originalFrames = [];
+      currentFrameIndex = 0;
+      previewAnimationStartTime = 0;
+      originalBaseName = file.name.replace(SUPPORTED_IMAGE_EXTENSION, "") || "alternating-dashes";
+      originalFileName = `${originalBaseName}-alternating-dashes.png`;
+      status.textContent = "Loading image...";
 
-      const img = new Image();
-
-      img.onload = () => {
-        originalImage = img;
+      try {
+        if (isGifFile(file)) {
+          await loadGifFile(file);
+        } else {
+          await loadStaticImageFile(file);
+        }
 
         initializeCrop();
         setLoadedControls(true);
         updateEditedPreviewAndOutput();
-
-        URL.revokeObjectURL(img.src);
-      };
-
-      img.onerror = () => {
+        syncAnimationLoop();
+      } catch (error) {
+        console.error(error);
         alert("Could not load this image.");
-      };
+        fileInput.value = "";
+        setLoadedControls(false);
+        status.textContent = "Load an image to get started.";
+      }
+    }
 
-      img.src = URL.createObjectURL(file);
+    function loadStaticImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+          originalImage = img;
+          originalFrames = [{ image: img, delay: DEFAULT_GIF_DELAY }];
+          exportFormatInput.value = "png";
+          syncDownloadButtonLabel();
+          URL.revokeObjectURL(objectUrl);
+          resolve();
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Could not load static image."));
+        };
+
+        img.src = objectUrl;
+      });
+    }
+
+    async function loadGifFile(file) {
+      const decoder = getGifDecoder();
+      if (!decoder) {
+        throw new Error("GIF decoder library did not load.");
+      }
+
+      const buffer = await file.arrayBuffer();
+      const decodedFrames = decodeGifFrames(buffer, decoder);
+
+      if (!decodedFrames.length) {
+        throw new Error("No GIF frames decoded.");
+      }
+
+      originalFrames = decodedFrames;
+      originalImage = originalFrames[0].image;
+      exportFormatInput.value = "gif";
+      syncDownloadButtonLabel();
+    }
+
+    function getGifDecoder() {
+      if (typeof parseGIF === "function" && typeof decompressFrames === "function") {
+        return { parseGIF, decompressFrames };
+      }
+
+      if (window.gifuct && typeof window.gifuct.parseGIF === "function" && typeof window.gifuct.decompressFrames === "function") {
+        return window.gifuct;
+      }
+
+      return null;
+    }
+
+    function decodeGifFrames(buffer, decoder) {
+      const gif = decoder.parseGIF(buffer);
+      const frames = decoder.decompressFrames(gif, true);
+      const width = gif.lsd.width;
+      const height = gif.lsd.height;
+      const compositeCanvas = document.createElement("canvas");
+      const compositeCtx = compositeCanvas.getContext("2d");
+      const outputFrames = [];
+
+      compositeCanvas.width = width;
+      compositeCanvas.height = height;
+      compositeCtx.imageSmoothingEnabled = false;
+
+      frames.forEach(frame => {
+        const dims = frame.dims;
+        const previousImageData = frame.disposalType === 3
+          ? compositeCtx.getImageData(0, 0, width, height)
+          : null;
+        const patchData = new ImageData(new Uint8ClampedArray(frame.patch), dims.width, dims.height);
+
+        compositeCtx.putImageData(patchData, dims.left, dims.top);
+
+        const frameCanvas = document.createElement("canvas");
+        const frameCtx = frameCanvas.getContext("2d");
+        frameCanvas.width = width;
+        frameCanvas.height = height;
+        frameCtx.imageSmoothingEnabled = false;
+        frameCtx.drawImage(compositeCanvas, 0, 0);
+
+        outputFrames.push({
+          image: frameCanvas,
+          delay: normalizeFrameDelay((frame.delay || 10) * 10)
+        });
+
+        if (frame.disposalType === 2) {
+          compositeCtx.clearRect(dims.left, dims.top, dims.width, dims.height);
+        } else if (frame.disposalType === 3 && previousImageData) {
+          compositeCtx.putImageData(previousImageData, 0, 0);
+        }
+      });
+
+      return outputFrames;
     }
 
     function isSupportedImageFile(file) {
       return SUPPORTED_IMAGE_TYPES.includes(file.type) || SUPPORTED_IMAGE_EXTENSION.test(file.name);
+    }
+
+    function isGifFile(file) {
+      return file.type === "image/gif" || GIF_IMAGE_EXTENSION.test(file.name);
+    }
+
+    function normalizeFrameDelay(delayMs) {
+      const delay = Number(delayMs);
+      if (!Number.isFinite(delay) || delay <= 0) return DEFAULT_GIF_DELAY;
+      return Math.min(1000, Math.max(20, Math.round(delay)));
     }
 
     function setLoadedControls(isLoaded) {
@@ -1219,13 +1546,18 @@
         fitImageBtn,
         fillImageBtn,
         centerImageBtn,
-        resetCropBtn
+        resetCropBtn,
+        marchingAntsToggle,
+        marchingAntsSpeedInput,
+        exportFormatInput
       ].forEach(control => {
         control.disabled = !isLoaded;
       });
 
       syncCropModeUi();
       syncCanvasBackgroundUi();
+      syncOutsideStrokeAlignment();
+      syncDownloadButtonLabel();
     }
 
     function initializeCrop() {
@@ -1377,8 +1709,8 @@
       if (
         sourceX < 0 ||
         sourceY < 0 ||
-        sourceX >= originalImage.naturalWidth ||
-        sourceY >= originalImage.naturalHeight
+        sourceX >= getOriginalWidth() ||
+        sourceY >= getOriginalHeight()
       ) {
         status.textContent = "That spot is outside the uploaded image. Click on the image itself, or use the dashed preview to sample the final canvas/background.";
         return;
@@ -1397,8 +1729,9 @@
     }
 
     function sampleOriginalImagePixel(sourceX, sourceY) {
+      const frameImage = getFrameImage();
       sampleCtx.clearRect(0, 0, 1, 1);
-      sampleCtx.drawImage(originalImage, sourceX, sourceY, 1, 1, 0, 0, 1, 1);
+      sampleCtx.drawImage(frameImage, sourceX, sourceY, 1, 1, 0, 0, 1, 1);
       const [red, green, blue, alpha] = sampleCtx.getImageData(0, 0, 1, 1).data;
 
       if (alpha === 0) {
@@ -1516,12 +1849,12 @@
       if (!originalImage) return;
 
       const fitScale = Math.min(
-        cropState.width / originalImage.naturalWidth,
-        cropState.height / originalImage.naturalHeight
+        cropState.width / getOriginalWidth(),
+        cropState.height / getOriginalHeight()
       );
       const fillScale = Math.max(
-        cropState.width / originalImage.naturalWidth,
-        cropState.height / originalImage.naturalHeight
+        cropState.width / getOriginalWidth(),
+        cropState.height / getOriginalHeight()
       );
 
       cropState.scale = mode === "fill" ? fillScale : fitScale;
@@ -1533,8 +1866,8 @@
     function centerImage() {
       if (!originalImage) return;
 
-      cropState.offsetX = (cropState.width - originalImage.naturalWidth * cropState.scale) / 2;
-      cropState.offsetY = (cropState.height - originalImage.naturalHeight * cropState.scale) / 2;
+      cropState.offsetX = (cropState.width - getOriginalWidth() * cropState.scale) / 2;
+      cropState.offsetY = (cropState.height - getOriginalHeight() * cropState.scale) / 2;
     }
 
     function resetCrop() {
@@ -1675,26 +2008,27 @@
       updateEditedPreviewAndOutput();
     }
 
-    function buildEditedImage() {
+    function buildEditedImage(frameIndex = currentFrameIndex) {
+      const frameImage = getFrameImage(frameIndex);
+
       editedCanvas.width = cropState.width;
       editedCanvas.height = cropState.height;
       editedCtx.clearRect(0, 0, editedCanvas.width, editedCanvas.height);
       fillCanvasBackground(editedCtx, editedCanvas.width, editedCanvas.height);
-      editedCtx.imageSmoothingEnabled = true;
-      editedCtx.imageSmoothingQuality = "high";
+      setCanvasResampling(editedCtx);
       editedCtx.drawImage(
-        originalImage,
+        frameImage,
         cropState.offsetX,
         cropState.offsetY,
-        originalImage.naturalWidth * cropState.scale,
-        originalImage.naturalHeight * cropState.scale
+        getOriginalWidth() * cropState.scale,
+        getOriginalHeight() * cropState.scale
       );
 
       return editedCanvas;
     }
 
-    function getDashSource() {
-      const editedImage = buildEditedImage();
+    function getDashSource(frameIndex = currentFrameIndex) {
+      const editedImage = buildEditedImage(frameIndex);
 
       return {
         image: editedImage,
@@ -1704,18 +2038,24 @@
       };
     }
 
-    function render() {
+    function render(options = {}) {
       if (!originalImage) return;
 
-      const source = getDashSource();
+      const frameIndex = options.frameIndex ?? currentFrameIndex;
+      const timestamp = options.timestamp ?? performance.now();
+      const includeGuides = options.includeGuides ?? showCropGuides;
+      const shouldUpdateStatus = options.updateStatus !== false;
+      const marchingAntsProgress = options.marchingAntsProgress ?? getMarchingAntsProgress(timestamp);
+      const source = getDashSource(frameIndex);
       const dashCount = Math.max(1, Math.floor(Number(dashCountInput.value) || 1));
-      const lineWidth = Math.max(1, Math.floor(Number(lineWidthInput.value) || 1));
+      const lineWidth = getLineWidthValue();
       const colorA = getColourFromInputs(colorAInput, colorATransparentInput);
       const colorB = getColourFromInputs(colorBInput, colorBTransparentInput);
 
+      syncOutsideStrokeAlignment();
+
       // Allow negative inset.
       const extraInset = Math.floor(Number(insetInput.value) || 0);
-
       const selectedSides = sidesInput.value;
 
       // If inset is negative, expand the canvas so the outside border is included.
@@ -1727,6 +2067,7 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       fillCanvasBackground(ctx, canvas.width, canvas.height);
+      setCanvasResampling(ctx);
 
       // Draw the current source centered inside the expanded canvas.
       ctx.drawImage(source.image, outsidePadding, outsidePadding);
@@ -1741,16 +2082,31 @@
         imageX: outsidePadding,
         imageY: outsidePadding,
         imageWidth: source.width,
-        imageHeight: source.height
+        imageHeight: source.height,
+        marchingAntsProgress
       });
 
       if (!didDrawBorder) return;
 
-      if (showCropGuides) {
+      if (includeGuides) {
         drawFixedCropGuides(outsidePadding, outsidePadding);
       }
 
+      if (!shouldUpdateStatus) return;
+
       status.textContent = `${source.width} x ${source.height}px crop, ${canvas.width} x ${canvas.height}px export.`;
+
+      if (originalFrames.length > 1) {
+        status.textContent += ` Animated GIF source: ${originalFrames.length} frames.`;
+      }
+
+      if (isMarchingAntsEnabled()) {
+        status.textContent += " Marching ants preview is on.";
+      }
+
+      if (outsideStrokeAlignToggle.checked) {
+        status.textContent += " Outside stroke alignment is setting inset to -dash width.";
+      }
 
       if (outsidePadding > 0) {
         status.textContent += isCanvasBackgroundEnabled() && !isTransparentColourValue(getCanvasBackgroundColor())
@@ -1782,7 +2138,8 @@
         imageX,
         imageY,
         imageWidth,
-        imageHeight
+        imageHeight,
+        marchingAntsProgress = 0
       } = options;
 
       const half = lineWidth / 2;
@@ -1821,6 +2178,7 @@
       if (totalLength <= 0) return false;
 
       const dashLength = totalLength / dashCount;
+      const phaseDistance = (marchingAntsProgress % 2) * dashLength;
 
       ctx.save();
 
@@ -1829,20 +2187,19 @@
       ctx.clip();
 
       for (let i = 0; i < dashCount; i++) {
-        const dashStart = i * dashLength;
-        const dashEnd = i === dashCount - 1
-          ? totalLength
-          : (i + 1) * dashLength;
+        const dashStart = i * dashLength + phaseDistance;
+        const dashEnd = dashStart + dashLength;
 
         const dashColour = i % 2 === 0 ? colorA : colorB;
         if (isTransparentColourValue(dashColour)) continue;
 
         ctx.fillStyle = dashColour;
 
-        drawFilledIntervalAlongPath({
+        drawWrappedFilledIntervalAlongPath({
           pathSegments,
           intervalStart: dashStart,
           intervalEnd: dashEnd,
+          totalLength,
           lineWidth
         });
       }
@@ -1866,6 +2223,45 @@
         uy: dy / length,
         orientation
       };
+    }
+
+    function drawWrappedFilledIntervalAlongPath(options) {
+      const {
+        pathSegments,
+        intervalStart,
+        intervalEnd,
+        totalLength,
+        lineWidth
+      } = options;
+      const intervalLength = intervalEnd - intervalStart;
+
+      if (intervalLength <= 0 || totalLength <= 0) return;
+
+      const wrappedStart = ((intervalStart % totalLength) + totalLength) % totalLength;
+      const wrappedEnd = wrappedStart + intervalLength;
+
+      if (wrappedEnd <= totalLength) {
+        drawFilledIntervalAlongPath({
+          pathSegments,
+          intervalStart: wrappedStart,
+          intervalEnd: wrappedEnd,
+          lineWidth
+        });
+        return;
+      }
+
+      drawFilledIntervalAlongPath({
+        pathSegments,
+        intervalStart: wrappedStart,
+        intervalEnd: totalLength,
+        lineWidth
+      });
+      drawFilledIntervalAlongPath({
+        pathSegments,
+        intervalStart: 0,
+        intervalEnd: wrappedEnd - totalLength,
+        lineWidth
+      });
     }
 
     function drawFilledIntervalAlongPath(options) {
@@ -1939,20 +2335,138 @@
       }
     }
 
+    async function downloadCurrentExport() {
+      if (!originalImage || isExportingGif) return;
+
+      syncDownloadButtonLabel();
+
+      if (exportFormatInput.value === "gif") {
+        await downloadGif();
+        return;
+      }
+
+      downloadPng();
+    }
+
     function downloadPng() {
       if (!originalImage) return;
 
       const guidesWereVisible = showCropGuides;
       showCropGuides = false;
-      render();
+      render({ includeGuides: false });
 
       const link = document.createElement("a");
-      link.download = originalFileName;
+      link.download = `${originalBaseName}-alternating-dashes.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
 
       showCropGuides = guidesWereVisible;
       if (showCropGuides) render();
+    }
+
+    async function downloadGif() {
+      if (!originalImage) return;
+
+      if (typeof GIF !== "function") {
+        alert("The GIF exporter did not load. Check your connection and try again, or export PNG instead.");
+        return;
+      }
+
+      const guidesWereVisible = showCropGuides;
+      const previousFrameIndex = currentFrameIndex;
+      const wasAnimating = Boolean(animationFrameRequest);
+      const frames = buildGifExportFramePlan();
+
+      isExportingGif = true;
+      stopAnimationLoop();
+      showCropGuides = false;
+      downloadBtn.disabled = true;
+      status.textContent = `Rendering GIF: 0/${frames.length} frames...`;
+
+      try {
+        const gifBlob = await encodeGif(frames);
+        const objectUrl = URL.createObjectURL(gifBlob);
+        const link = document.createElement("a");
+        link.download = `${originalBaseName}-alternating-dashes.gif`;
+        link.href = objectUrl;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        status.textContent = `Exported GIF with ${frames.length} frame${frames.length === 1 ? "" : "s"}.`;
+      } catch (error) {
+        console.error(error);
+        alert("Could not export the GIF. Try a smaller crop, fewer GIF frames, or export PNG instead.");
+        status.textContent = "GIF export failed.";
+      } finally {
+        isExportingGif = false;
+        showCropGuides = guidesWereVisible;
+        currentFrameIndex = previousFrameIndex;
+        downloadBtn.disabled = !originalImage;
+        render();
+        if (wasAnimating || shouldAnimatePreview()) syncAnimationLoop();
+      }
+    }
+
+    function buildGifExportFramePlan() {
+      const hasSourceAnimation = originalFrames.length > 1;
+      const hasMarchingAnts = isMarchingAntsEnabled();
+
+      if (hasSourceAnimation) {
+        let elapsed = 0;
+        return originalFrames.map((frame, index) => {
+          const delay = normalizeFrameDelay(frame.delay);
+          const plan = {
+            frameIndex: index,
+            delay,
+            marchingAntsProgress: hasMarchingAnts ? getMarchingAntsProgressForElapsed(elapsed) : 0
+          };
+          elapsed += delay;
+          return plan;
+        });
+      }
+
+      if (hasMarchingAnts) {
+        const delay = Math.round(MARCHING_ANTS_LOOP_MS / getMarchingAntsSpeed() / MARCHING_ANTS_EXPORT_FRAMES);
+        return Array.from({ length: MARCHING_ANTS_EXPORT_FRAMES }, (_, index) => ({
+          frameIndex: 0,
+          delay: normalizeFrameDelay(delay),
+          marchingAntsProgress: index / MARCHING_ANTS_EXPORT_FRAMES * 2
+        }));
+      }
+
+      return [{
+        frameIndex: 0,
+        delay: 250,
+        marchingAntsProgress: 0
+      }];
+    }
+
+    function encodeGif(frames) {
+      return new Promise((resolve, reject) => {
+        const gif = new GIF({
+          workers: 2,
+          quality: isNearestResampling() ? 1 : 10,
+          workerScript: GIF_WORKER_SCRIPT,
+          transparent: null
+        });
+
+        frames.forEach((frame, index) => {
+          render({
+            frameIndex: frame.frameIndex,
+            marchingAntsProgress: frame.marchingAntsProgress,
+            includeGuides: false,
+            updateStatus: false
+          });
+          gif.addFrame(ctx, { copy: true, delay: normalizeFrameDelay(frame.delay) });
+          status.textContent = `Rendering GIF: ${index + 1}/${frames.length} frames...`;
+        });
+
+        gif.on("progress", progress => {
+          status.textContent = `Encoding GIF: ${Math.round(progress * 100)}%...`;
+        });
+        gif.on("finished", resolve);
+        gif.on("abort", () => reject(new Error("GIF export was aborted.")));
+        gif.render();
+      });
     }
   </script>
 </body>
