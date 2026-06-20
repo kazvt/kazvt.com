@@ -151,18 +151,22 @@
 
         .top-param-controls {
             min-width: 0;
+            min-height: 40px;
             display: grid;
             grid-auto-flow: column;
             grid-auto-columns: minmax(0, 1fr);
             gap: 10px;
             align-items: center;
+            align-self: center;
             overflow: hidden;
+            transform: translateY(-3px);
         }
 
         .poly-fader {
             grid-template-columns: minmax(0, 1fr);
-            grid-template-rows: 12px 24px;
-            gap: 5px;
+            grid-template-rows: 11px 23px;
+            gap: 3px;
+            align-self: center;
         }
 
         .top-control-readout,
@@ -192,10 +196,11 @@
 
         .shape-extra-control {
             display: grid;
-            grid-template-rows: 12px 24px;
-            gap: 5px;
+            grid-template-rows: 11px 23px;
+            gap: 3px;
             min-width: 0;
             align-items: center;
+            align-self: center;
         }
 
         .shape-extra-control input[type="range"] {
@@ -1417,6 +1422,7 @@
                 grid-column: 1 / -1;
                 width: 100%;
                 grid-auto-columns: minmax(0, 1fr);
+                transform: none;
             }
 
             .top-center {
@@ -2130,8 +2136,6 @@
                 "fillBtn",
                 "undoBtn",
                 "redoBtn",
-                "copyBtn",
-                "pasteBtn",
                 "clearBtn",
                 "colorPickerToggle",
                 "brushSize"
@@ -2160,8 +2164,6 @@
                 "fillBtn",
                 "undoBtn",
                 "redoBtn",
-                "copyBtn",
-                "pasteBtn",
                 "clearBtn",
                 "colorPickerToggle",
                 "brushSize"
@@ -2747,7 +2749,7 @@
         function stopFaceAnimation(face) {
             if (!face || !face.animation) return;
 
-            if (face.animation.url) {
+            if (face.animation.url && !face.animation.shared) {
                 URL.revokeObjectURL(face.animation.url);
             }
 
@@ -6656,32 +6658,59 @@
         }
 
 
-        function copyCurrentFace() {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
-            saveEditorToFace(true);
+        function cloneAnimationPayload(animation) {
+            if (!animation) return null;
 
+            if (animation.kind === "gifFrames" && animation.frames?.length) {
+                return {
+                    kind: "gifFrames",
+                    frames: animation.frames,
+                    sourceName: animation.sourceName || "animated.gif",
+                    startedAt: performance.now(),
+                    currentFrame: -1,
+                    totalDuration: animation.totalDuration || animation.frames.reduce((sum, frame) => sum + Math.max(20, Number(frame.duration) || 100), 0)
+                };
+            }
+
+            if (animation.image) {
+                return {
+                    kind: animation.kind || "gif",
+                    image: animation.image,
+                    sourceName: animation.sourceName || "animated.gif",
+                    startedAt: performance.now(),
+                    currentFrame: -1,
+                    shared: true
+                };
+            }
+
+            return null;
+        }
+
+        function copyCurrentFace() {
             const face = faces[currentFace];
             if (!face) return;
+
+            if (!face.animation) {
+                saveEditorToFace(true);
+            } else {
+                syncAnimatedFace(currentFace, performance.now(), true);
+            }
+
+            const animation = cloneAnimationPayload(face.animation);
 
             copyBuffer = {
                 imageData: snapshotCanvas(face.canvas),
                 hasArt: face.hasArt,
                 sourceName: face.sourceName,
                 changed: face.changed,
-                tiling: face.tiling
+                tiling: face.tiling,
+                animation
             };
 
-            setStatus("COPIED");
+            setStatus(animation ? "GIF COPIED" : "COPIED");
         }
 
         function pasteToCurrentFace() {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
             if (!copyBuffer) {
                 setStatus("NO COPY");
                 return;
@@ -6690,8 +6719,24 @@
             const face = faces[currentFace];
             if (!face) return;
 
+            if (isGifLockedFace() && !copyBuffer.animation) {
+                showGifNoDraw();
+                return;
+            }
+
             pushUndo(currentFace);
             stopFaceAnimation(face);
+
+            if (copyBuffer.animation) {
+                const animation = cloneAnimationPayload(copyBuffer.animation);
+                if (animation) {
+                    face.tiling = Math.max(1, Math.min(MAX_TILING, Number(copyBuffer.tiling || face.tiling || 1)));
+                    installAnimatedGifFace(currentFace, animation);
+                    updateTilingControl();
+                    setStatus("GIF PASTED");
+                    return;
+                }
+            }
 
             restoreCanvas(face.canvas, copyBuffer.imageData);
             face.hasArt = copyBuffer.hasArt;
@@ -6704,6 +6749,7 @@
             loadFaceIntoEditor(true);
             renderFaceList();
             updateTilingControl();
+            updateGifLayerLockUi();
             scheduleSave();
             setStatus("PASTED");
         }
@@ -7114,6 +7160,7 @@
 
         function serializeFace(face, options = {}, def = null) {
             normalizeFaceMapMode(def, face);
+            const gifPoster = Boolean(face.animation);
             const state = {
                 name: face.name,
                 hasArt: face.hasArt,
@@ -7123,10 +7170,14 @@
                 mapMode: face.mapMode === "fit" ? "fit" : "whole"
             };
 
+            if (gifPoster) {
+                state.gifPoster = true;
+            }
+
             if (!options.skipImages && (face.changed || face.sourceName !== "blank" || !face.hasArt)) {
                 try {
-                    const imageType = options.imageType || "image/png";
-                    const quality = options.imageQuality ?? null;
+                    const imageType = gifPoster ? "image/webp" : (options.imageType || "image/png");
+                    const quality = gifPoster ? 0.35 : (options.imageQuality ?? null);
                     const revision = face.imageRevision || 0;
                     const cached = face._saveCache;
 
