@@ -74,7 +74,7 @@
         .app {
             height: 100vh;
             display: grid;
-            grid-template-rows: 56px 1fr;
+            grid-template-rows: 66px 1fr;
             background: var(--paper);
         }
 
@@ -83,10 +83,10 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(104px, 150px) minmax(176px, 250px) minmax(300px, 460px) auto 1fr;
-            gap: 10px;
+            grid-template-columns: auto minmax(104px, 150px) minmax(176px, 240px) minmax(320px, 520px) auto 1fr;
+            gap: 12px;
             align-items: center;
-            padding: 6px 12px;
+            padding: 8px 12px;
             font-weight: 900;
             letter-spacing: 0.06em;
         }
@@ -199,18 +199,19 @@
 
         .shape-extra-control-list {
             display: grid;
-            grid-auto-flow: column;
-            grid-auto-columns: minmax(118px, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(138px, 156px));
+            gap: 12px;
             min-width: 0;
             align-items: center;
+            justify-content: start;
         }
 
         .shape-extra-control {
             display: grid;
-            grid-template-rows: 13px 18px;
-            gap: 4px;
+            grid-template-rows: 15px 22px;
+            gap: 5px;
             min-width: 0;
+            width: min(156px, 100%);
             align-items: center;
         }
 
@@ -226,7 +227,7 @@
         }
 
         .shape-extra-control input[type="range"] {
-            height: 18px;
+            height: 22px;
         }
 
         .shape-fader input[type="range"],
@@ -3235,13 +3236,18 @@
             });
         }
 
-        function addShapeModeTriangleFace(data, def, faceName, apex, baseLeft, baseRight) {
+        function addShapeModeTriangleFace(data, def, faceName, apex, baseLeft, baseRight, soft = null) {
             const materialIndex = faceMaterialIndex(def, faceName);
             const face = faces[materialIndex];
             const profile = getFaceFitProfile(def, face);
 
             if (face?.mapMode === "fit" && profile?.kind === "triangle") {
                 addInnerGuideTriangleFace(data, materialIndex, apex, baseLeft, baseRight, profile);
+                return;
+            }
+
+            if (soft?.amount > 0.001) {
+                addSoftCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, soft.amount, soft.bounds);
                 return;
             }
 
@@ -3345,10 +3351,10 @@
         }
 
         function createSoftBookGeometry(width, height, depth, cornerAmount = 0) {
-            const amount = Math.max(0, Math.min(1, Number(cornerAmount) || 0));
-            const segments = amount <= 0.001 ? 1 : Math.max(4, Math.min(18, 3 + Math.round(amount * 15)));
+            const amount = Math.max(0, Math.min(0.68, Number(cornerAmount) || 0));
+            const segments = amount <= 0.001 ? 1 : Math.max(5, Math.min(12, 4 + Math.round(amount * 10)));
             const geometry = new THREE.BoxGeometry(width, height, depth, segments, segments, 1);
-            const radius = Math.min(width, height) * 0.34 * amount;
+            const radius = Math.min(width, height) * 0.26 * amount;
             if (radius <= 0.0001) return geometry;
 
             const pos = geometry.attributes.position;
@@ -3376,32 +3382,135 @@
             return geometry;
         }
 
+        function ellipsoidSurfacePoint(point, bounds) {
+            const sx = Math.max(0.001, Number(bounds?.x) || 1);
+            const sy = Math.max(0.001, Number(bounds?.y) || 1);
+            const sz = Math.max(0.001, Number(bounds?.z) || 1);
+            const dir = point.clone();
+            if (dir.lengthSq() < 0.000001) return point.clone();
+            dir.normalize();
+            const denom = Math.sqrt((dir.x * dir.x) / (sx * sx) + (dir.y * dir.y) / (sy * sy) + (dir.z * dir.z) / (sz * sz));
+            if (denom <= 0.000001) return point.clone();
+            return dir.multiplyScalar(1 / denom);
+        }
+
+        function softenPolyPoint(point, amount, bounds) {
+            const value = Math.max(0, Math.min(1, Number(amount) || 0));
+            if (value <= 0.001) return point.clone();
+            const target = ellipsoidSurfacePoint(point, bounds);
+            return point.clone().lerp(target, Math.min(0.88, 0.18 + value * 0.7));
+        }
+
+        function warpedSoftTrianglePoint(apex, baseLeft, baseRight, u, v, amount, bounds) {
+            const point = warpedTrianglePoint(apex, baseLeft, baseRight, u, v);
+            return softenPolyPoint(point, amount, bounds);
+        }
+
+        function addSoftCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, amount, bounds) {
+            const steps = amount <= 0.001 ? 1 : Math.max(4, Math.min(8, 4 + Math.round(amount * 4)));
+            const start = data.positions.length / 3;
+
+            if (steps <= 1) {
+                pushMappedVertex(data, apex, 0.5, 1);
+                pushMappedVertex(data, baseLeft, 0, 0);
+                pushMappedVertex(data, baseRight, 1, 0);
+                data.groups.push({ start, count: (data.positions.length / 3) - start, materialIndex });
+                return;
+            }
+
+            for (let row = 0; row < steps; row++) {
+                const v0 = row / steps;
+                const v1 = (row + 1) / steps;
+                for (let col = 0; col < steps; col++) {
+                    const u0 = col / steps;
+                    const u1 = (col + 1) / steps;
+                    const p00 = warpedSoftTrianglePoint(apex, baseLeft, baseRight, u0, v0, amount, bounds);
+                    const p10 = warpedSoftTrianglePoint(apex, baseLeft, baseRight, u1, v0, amount, bounds);
+                    const p01 = warpedSoftTrianglePoint(apex, baseLeft, baseRight, u0, v1, amount, bounds);
+                    const p11 = warpedSoftTrianglePoint(apex, baseLeft, baseRight, u1, v1, amount, bounds);
+
+                    pushMappedVertex(data, p00, u0, 1 - v0);
+                    pushMappedVertex(data, p01, u0, 1 - v1);
+                    pushMappedVertex(data, p11, u1, 1 - v1);
+                    pushMappedVertex(data, p00, u0, 1 - v0);
+                    pushMappedVertex(data, p11, u1, 1 - v1);
+                    pushMappedVertex(data, p10, u1, 1 - v0);
+                }
+            }
+
+            data.groups.push({ start, count: (data.positions.length / 3) - start, materialIndex });
+        }
+
+        function addSoftCanvasQuadFace(data, materialIndex, topLeft, topRight, bottomRight, bottomLeft, amount, bounds) {
+            const steps = amount <= 0.001 ? 1 : Math.max(4, Math.min(8, 4 + Math.round(amount * 4)));
+            const start = data.positions.length / 3;
+
+            if (steps <= 1) {
+                addFullCanvasQuadFace(data, materialIndex, topLeft, topRight, bottomRight, bottomLeft);
+                return;
+            }
+
+            const lerp2 = (leftA, rightA, leftB, rightB, u, v) => {
+                const top = new THREE.Vector3().lerpVectors(leftA, rightA, u);
+                const bottom = new THREE.Vector3().lerpVectors(leftB, rightB, u);
+                return new THREE.Vector3().lerpVectors(top, bottom, v);
+            };
+
+            for (let y = 0; y < steps; y++) {
+                const v0 = y / steps;
+                const v1 = (y + 1) / steps;
+                for (let x = 0; x < steps; x++) {
+                    const u0 = x / steps;
+                    const u1 = (x + 1) / steps;
+                    const p00 = softenPolyPoint(lerp2(topLeft, topRight, bottomLeft, bottomRight, u0, v0), amount, bounds);
+                    const p10 = softenPolyPoint(lerp2(topLeft, topRight, bottomLeft, bottomRight, u1, v0), amount, bounds);
+                    const p01 = softenPolyPoint(lerp2(topLeft, topRight, bottomLeft, bottomRight, u0, v1), amount, bounds);
+                    const p11 = softenPolyPoint(lerp2(topLeft, topRight, bottomLeft, bottomRight, u1, v1), amount, bounds);
+
+                    pushMappedVertex(data, p00, u0, 1 - v0);
+                    pushMappedVertex(data, p01, u0, 1 - v1);
+                    pushMappedVertex(data, p11, u1, 1 - v1);
+                    pushMappedVertex(data, p00, u0, 1 - v0);
+                    pushMappedVertex(data, p11, u1, 1 - v1);
+                    pushMappedVertex(data, p10, u1, 1 - v0);
+                }
+            }
+
+            data.groups.push({ start, count: (data.positions.length / 3) - start, materialIndex });
+        }
+
         function createFullCanvasPyramidGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
             const flatten = getCurrentShapeOption("flatten");
+            const cornerAmount = getCurrentShapeOption("corner");
             const halfHeight = 1.1 - flatten * 0.35;
             const corner = (1.55 + flatten * 1.35) / Math.SQRT2;
+            const soft = { amount: cornerAmount, bounds: { x: corner * 1.08, y: halfHeight, z: corner * 1.08 } };
             const apex = new THREE.Vector3(0, halfHeight, 0);
             const frontLeft = new THREE.Vector3(-corner, -halfHeight, corner);
             const frontRight = new THREE.Vector3(corner, -halfHeight, corner);
             const backRight = new THREE.Vector3(corner, -halfHeight, -corner);
             const backLeft = new THREE.Vector3(-corner, -halfHeight, -corner);
 
-            addFullCanvasQuadFace(data, faceMaterialIndex(def, 'BASE'), backLeft, backRight, frontRight, frontLeft);
-            addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight);
-            addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, backRight);
-            addShapeModeTriangleFace(data, def, 'BACK', apex, backRight, backLeft);
-            addShapeModeTriangleFace(data, def, 'LEFT', apex, backLeft, frontLeft);
+            addSoftCanvasQuadFace(data, faceMaterialIndex(def, 'BASE'), backLeft, backRight, frontRight, frontLeft, soft.amount, soft.bounds);
+            addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight, soft);
+            addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, backRight, soft);
+            addShapeModeTriangleFace(data, def, 'BACK', apex, backRight, backLeft, soft);
+            addShapeModeTriangleFace(data, def, 'LEFT', apex, backLeft, frontLeft, soft);
 
-            return finalizeFullCanvasGeometry(data);
+            const geometry = finalizeFullCanvasGeometry(data);
+            if (cornerAmount > 0.001) smoothNormalsBySharedPosition(geometry, false);
+            return geometry;
         }
 
         function createFullCanvasDiamondGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
             const flatten = getCurrentShapeOption("flatten");
+            const cornerAmount = getCurrentShapeOption("corner");
             const radius = 1.35;
             const side = radius * (0.9 + flatten * 0.95);
             const height = radius * (1.38 - flatten * 0.28);
+            const soft = { amount: cornerAmount, bounds: { x: side, y: height, z: side } };
             const top = new THREE.Vector3(0, height, 0);
             const bottom = new THREE.Vector3(0, -height, 0);
             const front = new THREE.Vector3(0, 0, side);
@@ -3409,33 +3518,39 @@
             const back = new THREE.Vector3(0, 0, -side);
             const left = new THREE.Vector3(-side, 0, 0);
 
-            addShapeModeTriangleFace(data, def, 'TOP FRONT', top, front, right);
-            addShapeModeTriangleFace(data, def, 'TOP RIGHT', top, right, back);
-            addShapeModeTriangleFace(data, def, 'TOP BACK', top, back, left);
-            addShapeModeTriangleFace(data, def, 'TOP LEFT', top, left, front);
-            addShapeModeTriangleFace(data, def, 'BOTTOM FRONT', bottom, right, front);
-            addShapeModeTriangleFace(data, def, 'BOTTOM RIGHT', bottom, back, right);
-            addShapeModeTriangleFace(data, def, 'BOTTOM BACK', bottom, left, back);
-            addShapeModeTriangleFace(data, def, 'BOTTOM LEFT', bottom, front, left);
+            addShapeModeTriangleFace(data, def, 'TOP FRONT', top, front, right, soft);
+            addShapeModeTriangleFace(data, def, 'TOP RIGHT', top, right, back, soft);
+            addShapeModeTriangleFace(data, def, 'TOP BACK', top, back, left, soft);
+            addShapeModeTriangleFace(data, def, 'TOP LEFT', top, left, front, soft);
+            addShapeModeTriangleFace(data, def, 'BOTTOM FRONT', bottom, right, front, soft);
+            addShapeModeTriangleFace(data, def, 'BOTTOM RIGHT', bottom, back, right, soft);
+            addShapeModeTriangleFace(data, def, 'BOTTOM BACK', bottom, left, back, soft);
+            addShapeModeTriangleFace(data, def, 'BOTTOM LEFT', bottom, front, left, soft);
 
-            return finalizeFullCanvasGeometry(data);
+            const geometry = finalizeFullCanvasGeometry(data);
+            if (cornerAmount > 0.001) smoothNormalsBySharedPosition(geometry, false);
+            return geometry;
         }
 
         function createFullCanvasTetrahedronGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
             const flatten = getCurrentShapeOption("flatten");
+            const cornerAmount = getCurrentShapeOption("corner");
             const base = 1 + flatten * 0.9;
             const apex = new THREE.Vector3(0, 1.35 - flatten * 0.45, 0);
             const frontLeft = new THREE.Vector3(-1.15 * base, -0.75, 0.7 * base);
             const frontRight = new THREE.Vector3(1.15 * base, -0.75, 0.7 * base);
             const back = new THREE.Vector3(0, -0.75, -1.3 * base);
+            const soft = { amount: cornerAmount, bounds: { x: 1.15 * base, y: 1.35, z: 1.3 * base } };
 
-            addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight);
-            addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, back);
-            addShapeModeTriangleFace(data, def, 'LEFT', apex, back, frontLeft);
-            addShapeModeTriangleFace(data, def, 'BASE', back, frontRight, frontLeft);
+            addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight, soft);
+            addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, back, soft);
+            addShapeModeTriangleFace(data, def, 'LEFT', apex, back, frontLeft, soft);
+            addShapeModeTriangleFace(data, def, 'BASE', back, frontRight, frontLeft, soft);
 
-            return finalizeFullCanvasGeometry(data);
+            const geometry = finalizeFullCanvasGeometry(data);
+            if (cornerAmount > 0.001) smoothNormalsBySharedPosition(geometry, false);
+            return geometry;
         }
 
         function applyFaceUvMapping(geometry, def) {
@@ -3465,7 +3580,8 @@
                 center.copy(a).add(b).add(c).multiplyScalar(1 / 3);
                 normal.subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
 
-                const materialIndex = Math.max(0, Math.min(def.faces.length - 1, materialIndexForTriangle(def, center, normal)));
+                const groupedMaterialIndex = geometry.userData.useStoredGroupsForUv ? groupedMaterialIndexForTriangle(geometry, tri) : null;
+                const materialIndex = Math.max(0, Math.min(def.faces.length - 1, groupedMaterialIndex ?? materialIndexForTriangle(def, center, normal)));
                 const face = faces[materialIndex];
                 if (!face) continue;
 
@@ -3714,7 +3830,7 @@
             setVertexWobbleAmount(enabled ? 0.5 : 0, persist);
         }
 
-        function smoothNormalsBySharedPosition(geometry) {
+        function smoothNormalsBySharedPosition(geometry, splitByMaterial = true) {
             if (!geometry?.attributes?.position || !geometry?.attributes?.normal) return;
             const position = geometry.attributes.position;
             const normal = geometry.attributes.normal;
@@ -3727,14 +3843,16 @@
             const sums = new Map();
             const temp = new THREE.Vector3();
             for (let i = 0; i < position.count; i++) {
-                const key = `${stablePositionKey(position.getX(i), position.getY(i), position.getZ(i))}:${groupForVertex[i]}`;
+                const baseKey = stablePositionKey(position.getX(i), position.getY(i), position.getZ(i));
+                const key = splitByMaterial ? `${baseKey}:${groupForVertex[i]}` : baseKey;
                 if (!sums.has(key)) sums.set(key, new THREE.Vector3());
                 temp.set(normal.getX(i), normal.getY(i), normal.getZ(i));
                 sums.get(key).add(temp);
             }
             sums.forEach((sum) => sum.normalize());
             for (let i = 0; i < position.count; i++) {
-                const key = `${stablePositionKey(position.getX(i), position.getY(i), position.getZ(i))}:${groupForVertex[i]}`;
+                const baseKey = stablePositionKey(position.getX(i), position.getY(i), position.getZ(i));
+                const key = splitByMaterial ? `${baseKey}:${groupForVertex[i]}` : baseKey;
                 const n = sums.get(key) || temp.set(0, 1, 0);
                 normal.setXYZ(i, n.x, n.y, n.z);
             }
@@ -3834,7 +3952,11 @@
             }
 
             geometry.computeVertexNormals();
-            assignGeometryGroups(geometry, def);
+            if (def.geometry === "book") {
+                remapBoxGeometryGroups(geometry, def);
+            } else {
+                assignGeometryGroups(geometry, def);
+            }
             applyFaceUvMapping(geometry, def);
             if (def.lowPoly && level >= 7) {
                 smoothNormalsBySharedPosition(geometry);
@@ -3888,6 +4010,22 @@
             if (center.y > 0.55) return slotIndex(def, "top");
             if (center.y < -0.55) return slotIndex(def, "bottom");
             return directionIndex(def, center);
+        }
+
+        function remapBoxGeometryGroups(geometry, def) {
+            const keys = ["right", "left", "top", "bottom", "front", "back"];
+            geometry.groups.forEach((group, index) => {
+                const source = Number.isInteger(group.materialIndex) ? group.materialIndex : index;
+                const key = keys[Math.max(0, Math.min(keys.length - 1, source))] || "front";
+                group.materialIndex = slotIndex(def, key);
+            });
+            geometry.userData.useStoredGroupsForUv = true;
+        }
+
+        function groupedMaterialIndexForTriangle(geometry, tri) {
+            const start = tri * 3;
+            const group = geometry.groups.find((entry) => start >= entry.start && start < entry.start + entry.count);
+            return group ? group.materialIndex : null;
         }
 
         function materialIndexForTriangle(def, center, normal) {
