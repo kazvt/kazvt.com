@@ -658,6 +658,11 @@
             color: rgba(20, 3, 6, 0.62);
         }
 
+        .copy-paste .file-btn {
+            height: 40px;
+            align-self: stretch;
+        }
+
         .btn:disabled {
             opacity: 0.35;
             cursor: not-allowed;
@@ -3238,8 +3243,7 @@
                 return;
             }
 
-            const cornerSteps = 1 + Math.round(getCurrentShapeOption("corner") * 5);
-            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, cornerSteps);
+            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight);
         }
 
         function mapUvToGuideRect(profile, u, v) {
@@ -3728,36 +3732,6 @@
             return targetCanvas;
         }
 
-
-
-        function applySlimeCornerSmoothing(geometry, amount = 0) {
-            amount = Math.max(0, Math.min(1, Number(amount) || 0));
-            if (amount <= 0.001 || !geometry?.attributes?.position) return;
-            const pos = geometry.attributes.position;
-            geometry.computeBoundingBox();
-            const box = geometry.boundingBox;
-            const center = new THREE.Vector3();
-            box.getCenter(center);
-            const size = new THREE.Vector3();
-            box.getSize(size);
-            const radius = Math.max(size.x, size.y, size.z) * 0.62;
-            const point = new THREE.Vector3();
-            const dir = new THREE.Vector3();
-            const target = new THREE.Vector3();
-            const mix = amount * 0.38;
-            for (let i = 0; i < pos.count; i++) {
-                point.fromBufferAttribute(pos, i);
-                dir.copy(point).sub(center);
-                if (dir.lengthSq() > 0.000001) {
-                    target.copy(center).add(dir.normalize().multiplyScalar(radius));
-                    point.lerp(target, mix);
-                    pos.setXYZ(i, point.x, point.y, point.z);
-                }
-            }
-            pos.needsUpdate = true;
-            geometry.computeVertexNormals();
-        }
-
         function createGeometry(def) {
             const level = getCurrentPolyLevel();
             // Higher settings should mean visually smooth, not absurdly dense.
@@ -3817,7 +3791,6 @@
             }
 
             if (geometry.userData.fullCanvasFaceMapped) {
-                applySlimeCornerSmoothing(geometry, getCurrentShapeOption("corner"));
                 cacheBaseGeometryPositions(geometry);
                 return geometry;
             }
