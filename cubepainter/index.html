@@ -74,7 +74,7 @@
         .app {
             height: 100vh;
             display: grid;
-            grid-template-rows: 42px 1fr;
+            grid-template-rows: 56px 1fr;
             background: var(--paper);
         }
 
@@ -83,10 +83,10 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(118px, 172px) minmax(130px, 200px) minmax(170px, 280px) auto 1fr;
-            gap: 12px;
+            grid-template-columns: auto minmax(104px, 150px) minmax(176px, 250px) minmax(300px, 460px) auto 1fr;
+            gap: 10px;
             align-items: center;
-            padding: 0 12px;
+            padding: 6px 12px;
             font-weight: 900;
             letter-spacing: 0.06em;
         }
@@ -99,15 +99,15 @@
         .poly-fader,
         .shape-extra-controls {
             min-width: 0;
-            height: 28px;
-            border: 2px solid var(--paper);
+            min-height: 38px;
+            border: 0;
             border-radius: 0;
             display: grid;
             gap: 8px;
             align-items: center;
-            padding: 0 10px;
+            padding: 0;
             font-size: 11px;
-            background: rgba(255, 246, 216, 0.08);
+            background: transparent;
         }
 
         .shape-fader {
@@ -119,7 +119,7 @@
 
         .shape-select-toggle {
             width: 100%;
-            height: 100%;
+            min-height: 32px;
             border: 0;
             background: var(--ink2);
             color: var(--paper);
@@ -186,35 +186,37 @@
         }
 
         .poly-fader {
-            grid-template-columns: 42px 1fr 34px;
+            grid-template-columns: 48px minmax(120px, 1fr) 46px;
         }
 
         .shape-extra-controls {
             grid-template-columns: 1fr;
-            gap: 5px;
-            padding: 3px 6px;
+            gap: 6px;
+            padding: 0;
             min-width: 0;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .shape-extra-control-list {
             display: grid;
             grid-auto-flow: column;
-            grid-auto-columns: minmax(70px, 1fr);
-            gap: 5px;
+            grid-auto-columns: minmax(118px, 1fr);
+            gap: 10px;
             min-width: 0;
+            align-items: center;
         }
 
         .shape-extra-control {
             display: grid;
-            grid-template-rows: 10px 1fr;
-            gap: 2px;
+            grid-template-rows: 13px 18px;
+            gap: 4px;
             min-width: 0;
+            align-items: center;
         }
 
         .shape-extra-control label {
-            font-size: 8px;
-            line-height: 10px;
+            font-size: 9px;
+            line-height: 13px;
             font-weight: 900;
             letter-spacing: 0.04em;
             white-space: nowrap;
@@ -224,7 +226,7 @@
         }
 
         .shape-extra-control input[type="range"] {
-            height: 12px;
+            height: 18px;
         }
 
         .shape-fader input[type="range"],
@@ -3342,6 +3344,38 @@
             return geometry;
         }
 
+        function createSoftBookGeometry(width, height, depth, cornerAmount = 0) {
+            const amount = Math.max(0, Math.min(1, Number(cornerAmount) || 0));
+            const segments = amount <= 0.001 ? 1 : Math.max(4, Math.min(18, 3 + Math.round(amount * 15)));
+            const geometry = new THREE.BoxGeometry(width, height, depth, segments, segments, 1);
+            const radius = Math.min(width, height) * 0.34 * amount;
+            if (radius <= 0.0001) return geometry;
+
+            const pos = geometry.attributes.position;
+            const hx = width / 2;
+            const hy = height / 2;
+            const ix = Math.max(0.001, hx - radius);
+            const iy = Math.max(0.001, hy - radius);
+            const p = new THREE.Vector3();
+            const d2 = new THREE.Vector2();
+
+            for (let i = 0; i < pos.count; i++) {
+                p.fromBufferAttribute(pos, i);
+                const cx = Math.max(-ix, Math.min(ix, p.x));
+                const cy = Math.max(-iy, Math.min(iy, p.y));
+                d2.set(p.x - cx, p.y - cy);
+                if (d2.lengthSq() > 0.000001) {
+                    d2.normalize().multiplyScalar(radius);
+                    p.x = cx + d2.x;
+                    p.y = cy + d2.y;
+                    pos.setXYZ(i, p.x, p.y, p.z);
+                }
+            }
+            pos.needsUpdate = true;
+            geometry.computeVertexNormals();
+            return geometry;
+        }
+
         function createFullCanvasPyramidGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
             const flatten = getCurrentShapeOption("flatten");
@@ -3756,8 +3790,8 @@
                     geometry = createRoundedBoxGeometry(1.8 + length * 3.0, 1.35, 1.75, corner);
                     break;
                 case "book":
-                    // Upright portrait book: x = cover width, y = height, z = thickness.
-                    geometry = createRoundedBoxGeometry(1.45, 2.25, 0.2 + thickness * 1.1, corner);
+                    // Upright portrait book: broad cover-corner smoothing, not tiny per-edge bevels.
+                    geometry = createSoftBookGeometry(1.45, 2.25, 0.2 + thickness * 1.1, corner);
                     break;
                 case "pyramid":
                     geometry = createFullCanvasPyramidGeometry(def);
