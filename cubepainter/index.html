@@ -557,10 +557,10 @@
 
         .face-map-mode-btn {
             position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 20px;
-            height: 18px;
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
             border-width: 2px;
             box-shadow: 0 1px 0 var(--ink);
             z-index: 3;
@@ -568,8 +568,8 @@
         }
 
         .face-map-mode-btn svg {
-            width: 13px;
-            height: 13px;
+            width: 10px;
+            height: 10px;
         }
 
         .face-map-mode-btn:hover {
@@ -801,7 +801,7 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr) minmax(118px, 1.35fr) 58px 58px 66px 58px;
+            grid-template-columns: repeat(4, 1fr) minmax(118px, 1.35fr) 58px minmax(82px, 1fr) 58px;
             gap: 6px;
             align-items: end;
         }
@@ -965,6 +965,30 @@
             color: var(--paper);
         }
 
+        .psx-field {
+            min-width: 0;
+            display: grid;
+            grid-template-rows: auto 20px auto;
+            gap: 0;
+            align-self: stretch;
+        }
+
+        .psx-field input[type="range"] {
+            --slider-track: var(--paper3);
+            --slider-fill: var(--accent);
+            --slider-thumb: var(--paper);
+        }
+
+        #psxWobbleReadout {
+            min-height: 10px;
+            text-align: center;
+            font-size: 9px;
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+
         #result {
             min-height: 16px;
             display: flex;
@@ -1000,7 +1024,7 @@
             grid-template-columns: 48px minmax(0, 1fr);
             gap: 7px;
             align-items: center;
-            padding: 5px 26px 5px 5px;
+            padding: 5px 21px 5px 5px;
             cursor: pointer;
             text-align: left;
             box-shadow: 0 3px 0 var(--ink);
@@ -1341,7 +1365,11 @@
 
                             <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
 
-                            <button class="btn" id="wobbleBtn" title="toggle PSX vertex snapping wobble">PSX</button>
+                            <div class="field psx-field" title="PSX vertex snap/wobble intensity">
+                                <span>PSX</span>
+                                <input id="psxWobble" type="range" min="0" max="100" step="1" value="0" aria-label="PSX wobble intensity" />
+                                <strong id="psxWobbleReadout">OFF</strong>
+                            </div>
 
                             <button class="btn accent" id="exportGifBtn" title="export gif">
                                 <svg viewBox="0 0 24 24">
@@ -1400,7 +1428,7 @@
         const MAX_TILING = 16;
         const DEFAULT_POLY_LEVEL = 7;
         const MAX_POLY_LEVEL = 10;
-        const POLY_LABELS = ["DOT", "TINY", "PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "MAX"];
+        const POLY_LABELS = ["DOT", "TINY", "PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "SILK"];
         const debugging_mode = false;
 
         const SHAPE_DEFS = [
@@ -1566,7 +1594,8 @@
         const bgSwatch = document.getElementById("bgSwatch");
         const bgColorHexReadout = document.getElementById("bgColorHexReadout");
         const bgTransparentBtn = document.getElementById("bgTransparentBtn");
-        const wobbleBtn = document.getElementById("wobbleBtn");
+        const psxWobble = document.getElementById("psxWobble");
+        const psxWobbleReadout = document.getElementById("psxWobbleReadout");
         colorSquareCtx.imageSmoothingEnabled = false;
         hueSliderCtx.imageSmoothingEnabled = false;
         bgColorSquareCtx.imageSmoothingEnabled = false;
@@ -1637,6 +1666,7 @@
         let currentFace = 0;
         let shadingEnabled = false;
         let vertexWobbleEnabled = false;
+        let vertexWobbleAmount = 0;
         let ambientLight = null;
         let keyLight = null;
         let fillLight = null;
@@ -1648,8 +1678,12 @@
         if (savedSession?.settings?.bgTransparent != null) {
             bgTransparent = savedSession.settings.bgTransparent === true || savedSession.settings.bgTransparent === "true";
         }
-        if (savedSession?.settings?.vertexWobbleEnabled != null) {
+        if (savedSession?.settings?.vertexWobbleAmount != null) {
+            vertexWobbleAmount = Math.max(0, Math.min(1, Number(savedSession.settings.vertexWobbleAmount) || 0));
+            vertexWobbleEnabled = vertexWobbleAmount > 0.001;
+        } else if (savedSession?.settings?.vertexWobbleEnabled != null) {
             vertexWobbleEnabled = savedSession.settings.vertexWobbleEnabled === true || savedSession.settings.vertexWobbleEnabled === "true";
+            vertexWobbleAmount = vertexWobbleEnabled ? 0.5 : 0;
         }
         if (savedSession && savedSession.currentShapeId) {
             const savedIndex = SHAPE_DEFS.findIndex((shape) => shape.id === savedSession.currentShapeId);
@@ -2605,9 +2639,24 @@
             return new THREE.Vector3().lerpVectors(apex, base, v);
         }
 
-        function addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, subdivisions = 18) {
+        function addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, subdivisions = 1) {
             const start = data.positions.length / 3;
-            const steps = Math.max(2, subdivisions | 0);
+            const steps = Math.max(1, subdivisions | 0);
+
+            // Basic triangular solids should stay genuinely minimal.  A single textured
+            // triangle is enough for pyramid / tetra / diamond faces, and it prevents
+            // PSX wobble from revealing unnecessary hidden tessellation.
+            if (steps <= 1) {
+                pushMappedVertex(data, apex, 0.5, 1);
+                pushMappedVertex(data, baseLeft, 0, 0);
+                pushMappedVertex(data, baseRight, 1, 0);
+                data.groups.push({
+                    start,
+                    count: (data.positions.length / 3) - start,
+                    materialIndex
+                });
+                return;
+            }
 
             for (let row = 0; row < steps; row++) {
                 const v0 = row / steps;
@@ -2882,9 +2931,47 @@
             });
         }
 
+        function stablePositionKey(x, y, z) {
+            const scale = 10000;
+            return `${Math.round(x * scale)},${Math.round(y * scale)},${Math.round(z * scale)}`;
+        }
+
+        function hashPositionSeed(x, y, z) {
+            const raw = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453;
+            return raw - Math.floor(raw);
+        }
+
         function cacheBaseGeometryPositions(geometry) {
             if (!geometry?.attributes?.position) return;
-            geometry.userData.basePositions = new Float32Array(geometry.attributes.position.array);
+            const source = geometry.attributes.position.array;
+            const base = new Float32Array(source);
+            const vertexCount = geometry.attributes.position.count;
+            const clusterIndex = new Int32Array(vertexCount);
+            const clusters = [];
+            const byKey = new Map();
+
+            for (let i = 0; i < vertexCount; i++) {
+                const x = base[i * 3];
+                const y = base[i * 3 + 1];
+                const z = base[i * 3 + 2];
+                const key = stablePositionKey(x, y, z);
+                let cluster = byKey.get(key);
+                if (cluster == null) {
+                    cluster = clusters.length;
+                    byKey.set(key, cluster);
+                    clusters.push({
+                        x,
+                        y,
+                        z,
+                        seed: hashPositionSeed(x, y, z)
+                    });
+                }
+                clusterIndex[i] = cluster;
+            }
+
+            geometry.userData.basePositions = base;
+            geometry.userData.wobbleClusterIndex = clusterIndex;
+            geometry.userData.wobbleClusters = clusters;
             geometry.userData.wobbleApplied = false;
         }
 
@@ -2893,53 +2980,91 @@
             const geometry = mesh.geometry;
             const attr = geometry.attributes.position;
             const base = geometry.userData.basePositions;
-            if (!base) return;
+            const clusterIndex = geometry.userData.wobbleClusterIndex;
+            const clusters = geometry.userData.wobbleClusters;
+            if (!base || !clusterIndex || !clusters) return;
 
-            if (!vertexWobbleEnabled) {
+            const amount = Math.max(0, Math.min(1, Number(vertexWobbleAmount) || 0));
+            if (amount <= 0.001) {
                 if (geometry.userData.wobbleApplied) {
                     attr.array.set(base);
                     attr.needsUpdate = true;
-                    geometry.computeVertexNormals();
+                    if (shadingEnabled) geometry.computeVertexNormals();
                     geometry.userData.wobbleApplied = false;
                 }
                 return;
             }
 
             const arr = attr.array;
-            const step = Math.floor(timeMs / 85);
-            const snap = 1 / 34;
-            const jitterAmount = 0.011;
+            const step = Math.floor(timeMs / 82);
+            const snap = 1 / (90 - amount * 76); // low = subtle, high = chunky PSX grid
+            const jitterAmount = 0.008 + amount * 0.13;
+            const snapped = new Array(clusters.length);
 
-            for (let i = 0; i < arr.length; i += 3) {
-                const seed = i * 0.731 + step * 1.913;
+            for (let c = 0; c < clusters.length; c++) {
+                const cluster = clusters[c];
+                const seed = cluster.seed * 1000 + step * 1.913;
                 const jx = Math.sin(seed + 1.7) * jitterAmount;
                 const jy = Math.sin(seed * 1.31 + 4.1) * jitterAmount;
                 const jz = Math.sin(seed * 1.67 + 2.9) * jitterAmount;
+                snapped[c] = {
+                    x: Math.round((cluster.x + jx) / snap) * snap,
+                    y: Math.round((cluster.y + jy) / snap) * snap,
+                    z: Math.round((cluster.z + jz) / snap) * snap
+                };
+            }
 
-                arr[i] = Math.round((base[i] + jx) / snap) * snap;
-                arr[i + 1] = Math.round((base[i + 1] + jy) / snap) * snap;
-                arr[i + 2] = Math.round((base[i + 2] + jz) / snap) * snap;
+            for (let i = 0; i < clusterIndex.length; i++) {
+                const point = snapped[clusterIndex[i]];
+                const j = i * 3;
+                arr[j] = point.x;
+                arr[j + 1] = point.y;
+                arr[j + 2] = point.z;
             }
 
             attr.needsUpdate = true;
-            geometry.computeVertexNormals();
+            if (shadingEnabled) geometry.computeVertexNormals();
             geometry.userData.wobbleApplied = true;
         }
 
         function updateWobbleButton() {
-            if (!wobbleBtn) return;
-            wobbleBtn.classList.toggle("active", vertexWobbleEnabled);
-            wobbleBtn.title = vertexWobbleEnabled ? "PSX vertex wobble is on" : "toggle PSX vertex snapping wobble";
+            if (!psxWobble || !psxWobbleReadout) return;
+            const amount = Math.max(0, Math.min(1, Number(vertexWobbleAmount) || 0));
+            const percent = Math.round(amount * 100);
+            if (Math.abs(Number(psxWobble.value) - percent) > 1) {
+                psxWobble.value = String(percent);
+            }
+            updateRangeProgress(psxWobble);
+            psxWobble.classList.toggle("active", amount > 0.001);
+            psxWobble.title = amount <= 0.001
+                ? "PSX wobble off"
+                : amount < 0.34
+                    ? "subtle PSX wobble"
+                    : amount < 0.67
+                        ? "sweet-spot PSX wobble"
+                        : "intense PSX wobble";
+            psxWobbleReadout.textContent = amount <= 0.001
+                ? "OFF"
+                : amount < 0.34
+                    ? "LOW"
+                    : amount < 0.67
+                        ? "SWEET"
+                        : "INTENSE";
         }
 
-        function setVertexWobbleEnabled(enabled, persist = true) {
-            vertexWobbleEnabled = Boolean(enabled);
+        function setVertexWobbleAmount(amount, persist = true) {
+            vertexWobbleAmount = Math.max(0, Math.min(1, Number(amount) || 0));
+            vertexWobbleEnabled = vertexWobbleAmount > 0.001;
             updateWobbleButton();
             if (!vertexWobbleEnabled && shapeMesh) {
                 applyVertexWobbleToMesh(shapeMesh, performance.now());
             }
-            setStatus(vertexWobbleEnabled ? "PSX WOBBLE" : "PSX OFF");
+            setStatus(vertexWobbleEnabled ? `PSX ${Math.round(vertexWobbleAmount * 100)}%` : "PSX OFF");
             if (persist) scheduleSave();
+        }
+
+        function setVertexWobbleEnabled(enabled, persist = true) {
+            setVertexWobbleAmount(enabled ? 0.5 : 0, persist);
         }
 
         function makeTransparentGifFrame(sourceCanvas, targetCanvas, transparentKey) {
@@ -2969,12 +3094,14 @@
 
         function createGeometry(def) {
             const level = getCurrentPolyLevel();
-            const radial = [3, 3, 4, 5, 6, 8, 12, 32, 48, 64, 96][level] || 32;
-            const sphereW = [3, 4, 5, 6, 8, 12, 18, 40, 64, 96, 128][level] || 40;
-            const sphereH = [2, 3, 4, 5, 6, 8, 12, 24, 32, 48, 64][level] || 24;
-            const torusTubular = [4, 5, 6, 8, 10, 12, 18, 72, 96, 128, 160][level] || 72;
-            const torusRadial = [3, 3, 4, 5, 6, 8, 12, 24, 32, 48, 64][level] || 24;
-            const capSegments = [1, 1, 2, 3, 4, 6, 8, 18, 24, 32, 48][level] || 18;
+            // Higher settings should mean visually smooth, not absurdly dense.
+            // These caps stay responsive after the mesh is split for per-face textures.
+            const radial = [3, 3, 4, 5, 6, 8, 10, 18, 24, 32, 40][level] || 18;
+            const sphereW = [4, 5, 6, 8, 10, 14, 18, 28, 36, 44, 52][level] || 28;
+            const sphereH = [2, 3, 4, 5, 6, 8, 10, 14, 18, 22, 26][level] || 14;
+            const torusTubular = [5, 6, 8, 10, 12, 16, 20, 32, 40, 48, 56][level] || 32;
+            const torusRadial = [3, 3, 4, 5, 6, 8, 10, 14, 18, 22, 26][level] || 14;
+            const capSegments = [1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14][level] || 8;
             let geometry;
 
             switch (def.geometry) {
@@ -4898,8 +5025,8 @@
         document.getElementById("copyBtn").addEventListener("click", copyCurrentFace);
         document.getElementById("pasteBtn").addEventListener("click", pasteToCurrentFace);
 
-        wobbleBtn.addEventListener("click", () => {
-            setVertexWobbleEnabled(!vertexWobbleEnabled);
+        psxWobble.addEventListener("input", () => {
+            setVertexWobbleAmount(Number(psxWobble.value) / 100);
         });
 
         for (const id of ["speed", "gifSize", "gifFrames", "gifFps"]) {
@@ -5265,7 +5392,8 @@
                     bgColor: bgColor.value,
                     bgTransparent,
                     shadingEnabled,
-                    vertexWobbleEnabled
+                    vertexWobbleEnabled,
+                    vertexWobbleAmount
                 },
                 camera: {
                     distance: cameraDistance,
@@ -5373,7 +5501,13 @@
                 if (session.settings.gifFps != null) document.getElementById("gifFps").value = session.settings.gifFps;
                 if (session.settings.bgColor != null) applyBgColor(session.settings.bgColor, false);
                 if (session.settings.bgTransparent != null) bgTransparent = session.settings.bgTransparent === true || session.settings.bgTransparent === "true";
-                if (session.settings.vertexWobbleEnabled != null) vertexWobbleEnabled = session.settings.vertexWobbleEnabled === true || session.settings.vertexWobbleEnabled === "true";
+                if (session.settings.vertexWobbleAmount != null) {
+                    vertexWobbleAmount = Math.max(0, Math.min(1, Number(session.settings.vertexWobbleAmount) || 0));
+                    vertexWobbleEnabled = vertexWobbleAmount > 0.001;
+                } else if (session.settings.vertexWobbleEnabled != null) {
+                    vertexWobbleEnabled = session.settings.vertexWobbleEnabled === true || session.settings.vertexWobbleEnabled === "true";
+                    vertexWobbleAmount = vertexWobbleEnabled ? 0.5 : 0;
+                }
                 updateBgPickerVisuals();
                 updateWobbleButton();
                 if (session.settings.shadingEnabled != null) {
