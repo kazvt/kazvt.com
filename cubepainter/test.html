@@ -83,8 +83,8 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(104px, 142px) minmax(150px, 210px) minmax(176px, 232px) minmax(360px, 1fr) minmax(92px, auto);
-            gap: 12px;
+            grid-template-columns: auto minmax(96px, 128px) minmax(150px, 200px) minmax(128px, 174px) minmax(260px, 1fr) minmax(92px, auto);
+            gap: 10px;
             align-items: center;
             padding: 10px 12px;
             font-weight: 900;
@@ -186,7 +186,29 @@
         }
 
         .poly-fader {
-            grid-template-columns: 48px minmax(120px, 1fr) 46px;
+            grid-template-columns: 1fr;
+            grid-template-rows: 12px 24px;
+            gap: 5px;
+        }
+
+        .top-control-readout,
+        .shape-extra-readout {
+            display: block;
+            min-width: 0;
+            text-align: center;
+            font-size: 9px;
+            line-height: 12px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .top-control-readout strong,
+        .shape-extra-readout strong {
+            color: currentColor;
+            font: inherit;
         }
 
         .shape-extra-controls {
@@ -198,37 +220,20 @@
         }
 
         .shape-extra-control-list {
-            display: flex;
-            flex-flow: row nowrap;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+            gap: 10px;
             min-width: 0;
             align-items: center;
-            justify-content: start;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: thin;
+            overflow: visible;
         }
 
         .shape-extra-control {
             display: grid;
-            grid-template-rows: 16px 24px;
-            gap: 6px;
-            min-width: 118px;
-            width: 134px;
-            max-width: 148px;
-            flex: 1 0 134px;
+            grid-template-rows: 12px 24px;
+            gap: 5px;
+            min-width: 0;
             align-items: center;
-        }
-
-        .shape-extra-control label {
-            font-size: 9px;
-            line-height: 13px;
-            font-weight: 900;
-            letter-spacing: 0.04em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: center;
         }
 
         .shape-extra-control input[type="range"] {
@@ -247,16 +252,10 @@
 
         .shape-fader span,
         .poly-fader span,
-        .poly-fader strong,
         .shape-extra-controls span {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .poly-fader strong {
-            font-size: 10px;
-            text-align: right;
         }
 
         [hidden] {
@@ -994,13 +993,21 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(58px, 1fr)) 38px 44px 42px;
+            grid-template-columns: minmax(128px, 1.3fr) minmax(86px, 1fr) minmax(86px, 1fr) 38px 44px 42px;
             gap: 6px;
             align-items: end;
         }
 
         .export-grid .field {
             min-width: 0;
+        }
+
+        .speed-stack {
+            display: grid;
+            grid-template-rows: repeat(2, minmax(30px, auto));
+            gap: 4px;
+            min-width: 0;
+            align-self: end;
         }
 
         .speed-field,
@@ -1010,6 +1017,7 @@
             display: grid;
             grid-template-rows: auto 20px;
             gap: 2px;
+            min-width: 0;
         }
 
         .speed-field input[type="range"],
@@ -1071,9 +1079,16 @@
         }
 
 
-        @media (max-width: 720px) {
+        @media (max-width: 860px) {
             .export-grid {
-                grid-template-columns: repeat(4, minmax(52px, 1fr));
+                grid-template-columns: minmax(124px, 1.35fr) minmax(82px, 1fr) minmax(82px, 1fr) repeat(3, minmax(38px, 48px));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .export-grid {
+                grid-template-columns: minmax(132px, 1fr) minmax(96px, 1fr) minmax(96px, 1fr);
+                align-items: stretch;
             }
 
             .bg-field,
@@ -1409,9 +1424,9 @@
             }
 
             .shape-extra-control-list {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                padding-bottom: 2px;
+                grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+                overflow: visible;
+                padding-bottom: 0;
             }
 
             .top-center {
@@ -1449,10 +1464,9 @@
                 <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
             <div class="top-center" id="activeFaceTitle">FRONT</div>
-            <div class="poly-fader" id="polyFader" title="low-poly control" hidden>
-                <span>POLY</span>
-                <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="low-poly amount" />
-                <strong id="polyReadout">STD</strong>
+            <div class="poly-fader" id="polyFader" title="POLY: STD" hidden>
+                <span class="top-control-readout">POLY: <strong id="polyReadout">STD</strong></span>
+                <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="POLY" />
             </div>
             <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
                 <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
@@ -1625,14 +1639,15 @@
 
                     <div class="export">
                         <div class="export-grid">
-                            <div class="field speed-field x-speed-field" title="X SPD preview">
-                                <span class="field-label">X SPD: <strong id="xSpeedReadout">CRUISE</strong></span>
-                                <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X SPD preview" aria-label="X SPD preview" />
-                            </div>
-
-                            <div class="field speed-field y-speed-field" title="Y SPD preview">
-                                <span class="field-label">Y SPD: <strong id="ySpeedReadout">SLEEPY</strong></span>
-                                <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y SPD preview" aria-label="Y SPD preview" />
+                            <div class="field speed-stack" title="speed preview">
+                                <div class="speed-field x-speed-field" title="X SPD preview">
+                                    <span class="field-label">X SPD: <strong id="xSpeedReadout">CRUISE</strong></span>
+                                    <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X SPD preview" aria-label="X SPD preview" />
+                                </div>
+                                <div class="speed-field y-speed-field" title="Y SPD preview">
+                                    <span class="field-label">Y SPD: <strong id="ySpeedReadout">SLEEPY</strong></span>
+                                    <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y SPD preview" aria-label="Y SPD preview" />
+                                </div>
                             </div>
 
                             <input id="gifSize" type="hidden" value="512" />
@@ -2295,21 +2310,29 @@
             options.forEach((key) => {
                 const wrap = document.createElement("div");
                 wrap.className = "shape-extra-control";
-                const label = document.createElement("label");
-                label.textContent = SHAPE_OPTION_LABELS[key] || key.toUpperCase();
+                const baseLabel = SHAPE_OPTION_LABELS[key] || key.toUpperCase();
+                const readout = document.createElement("span");
+                readout.className = "shape-extra-readout";
                 const input = document.createElement("input");
                 input.type = "range";
                 input.min = "0";
                 input.max = "100";
                 input.step = "1";
                 input.value = String(getShapeOption(currentShapeId, key));
-                input.title = label.textContent;
-                input.setAttribute("aria-label", label.textContent);
+                const syncReadout = () => {
+                    const text = `${baseLabel}: ${Math.round(Number(input.value) || 0)}`;
+                    readout.textContent = text;
+                    input.title = text;
+                    wrap.title = text;
+                    input.setAttribute("aria-label", text);
+                };
+                syncReadout();
                 input.addEventListener("input", () => {
                     updateRangeProgress(input);
+                    syncReadout();
                     setShapeOption(currentShapeId, key, input.value);
                 });
-                wrap.append(label, input);
+                wrap.append(readout, input);
                 shapeExtraControlList.append(wrap);
                 updateRangeProgress(input);
             });
@@ -2327,6 +2350,9 @@
             polySlider.value = String(level);
             updateRangeProgress(polySlider);
             polyReadout.textContent = POLY_LABELS[level] || String(level);
+            polyFader.title = `POLY: ${polyReadout.textContent}`;
+            polySlider.title = `POLY: ${polyReadout.textContent}`;
+            polySlider.setAttribute("aria-label", `POLY: ${polyReadout.textContent}`);
             updateShapeExtraControls();
         }
 
