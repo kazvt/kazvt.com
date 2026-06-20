@@ -108,10 +108,6 @@
             background: var(--ink);
         }
 
-        .shape-select-toggle.active {
-            background: var(--ink2);
-        }
-
         .shape-select-caret {
             font-size: 12px;
             line-height: 1;
@@ -894,9 +890,9 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 6px;
-            align-items: end;
+            align-items: stretch;
         }
 
         .export-grid .field {
@@ -908,7 +904,7 @@
             align-self: stretch;
             display: grid;
             grid-template-rows: auto 22px;
-            gap: 2px;
+            gap: 3px;
         }
 
         .fps-field input[type="range"] {
@@ -932,6 +928,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: center;
+            font-size: 9px;
+            line-height: 12px;
         }
 
         .field {
@@ -991,14 +990,7 @@
         .bg-picker-toggle.transparent {
             color: var(--ink);
             text-shadow: 0 1px 0 var(--paper);
-            background:
-                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
-                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
-                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
-                var(--checker2);
-            background-size: 12px 12px;
-            background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+            background: repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 8px 8px;
         }
 
         .bg-picker-toggle:hover,
@@ -1014,14 +1006,7 @@
         }
 
         .bg-picker-chip.transparent {
-            background:
-                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
-                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
-                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
-                var(--checker2);
-            background-size: 10px 10px;
-            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+            background: repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 6px 6px;
         }
 
         .bg-picker-panel {
@@ -1086,28 +1071,23 @@
         }
 
         .bg-swatch.transparent {
-            background:
-                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
-                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
-                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
-                var(--checker2);
-            background-size: 12px 12px;
-            background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+            background: repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 8px 8px;
         }
 
-        .alpha-readout {
-            min-height: 30px;
+        .bg-transparent-btn {
+            height: 30px;
             border: 2px solid var(--line);
             background: var(--paper);
             color: var(--ink);
             box-shadow: 0 3px 0 var(--ink);
-            display: grid;
-            place-items: center;
+            cursor: pointer;
             font-weight: 900;
             font-size: 10px;
-            line-height: 1.1;
-            text-align: center;
+        }
+
+        .bg-transparent-btn.active {
+            background: var(--ink);
+            color: var(--paper);
         }
 
         .psx-field input[type="range"] {
@@ -1484,8 +1464,8 @@
                                                 <div class="color-readout">
                                                     <span>BG</span>
                                                     <div id="bgColorHexReadout">#140306</div>
+                                                    <div class="alpha-readout" id="bgOpacityReadout">ALPHA 100%</div>
                                                 </div>
-                                                <div class="alpha-readout" id="bgOpacityReadout">OPACITY 100%</div>
                                             </div>
                                         </div>
                                     </div>
@@ -2263,7 +2243,9 @@
 
         function setWarudoLookAt(target = cameraPanOffset) {
             if (!camera) return;
-            const direction = target.clone().sub(warudoCameraPosition).normalize();
+            const direction = target.clone().sub(warudoCameraPosition);
+            if (direction.lengthSq() < 0.0001) direction.set(-CAMERA_BASE_VECTOR.x, -CAMERA_BASE_VECTOR.y, -CAMERA_BASE_VECTOR.z);
+            direction.normalize();
             cameraVerticalOrbit = clampWarudoPitch(Math.asin(Math.max(-1, Math.min(1, direction.y))));
             cameraHorizontalOrbit = Math.atan2(-direction.x, -direction.z);
         }
@@ -3714,9 +3696,9 @@
                 `CAM X  ${roundDebug(relPos.x)}`,
                 `CAM Y  ${roundDebug(relPos.y)}`,
                 `CAM Z  ${roundDebug(relPos.z)}`,
-                `WARUDO X ${roundDebug(warudoCameraPosition.x)}`,
-                `WARUDO Y ${roundDebug(warudoCameraPosition.y)}`,
-                `WARUDO Z ${roundDebug(warudoCameraPosition.z)}`,
+                `CAM X ${roundDebug(warudoCameraPosition.x)}`,
+                `CAM Y ${roundDebug(warudoCameraPosition.y)}`,
+                `CAM Z ${roundDebug(warudoCameraPosition.z)}`,
                 `LOOK V ${roundDebug(cameraVerticalOrbit)} RAD / ${degreesDebug(cameraVerticalOrbit)}°`,
                 `LOOK H ${roundDebug(cameraHorizontalOrbit)} RAD / ${degreesDebug(cameraHorizontalOrbit)}°`,
                 `OBJ X  ${roundDebug(objPos.x)}`,
@@ -4013,7 +3995,7 @@
                 renderer.domElement.setPointerCapture(event.pointerId);
                 renderer.domElement.classList.add("warudo-looking");
                 startWarudoLoop();
-                setStatus("WARUDO LOOK");
+                setStatus("LOOK");
                 return;
             }
 
@@ -4521,7 +4503,7 @@
         function drawAlphaGradientSlider(ctx, canvas, hex, selectedIndex) {
             const width = canvas.width;
             const height = canvas.height;
-            drawCheckerCells(ctx, width, height, 5);
+            drawCheckerCells(ctx, width, height, 4);
             const rgb = hexToRgb(normalizeHex(hex));
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
             gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`);
@@ -4605,7 +4587,7 @@
             brushColor.value = normalized;
             colorSwatch.style.background = normalized;
             colorPickerChip.style.background = normalized;
-            colorHexReadout.textContent = `${normalized} · ${alphaPercent(quantizedAlpha(alphaIndex))}`;
+            colorHexReadout.textContent = `${normalized} · ALPHA ${alphaPercent(quantizedAlpha(alphaIndex))}`;
             colorToggleText.textContent = normalized;
             colorSwatch.style.background = rgbaFromHex(normalized, quantizedAlpha(alphaIndex));
             colorPickerChip.style.background = rgbaFromHex(normalized, quantizedAlpha(alphaIndex));
@@ -4757,6 +4739,28 @@
             commitCurrentColorToHistory();
         });
 
+        colorAlphaSlider.addEventListener("pointerdown", (event) => {
+            draggingAlpha = true;
+            colorAlphaSlider.setPointerCapture(event.pointerId);
+            updateAlphaFromEvent(event);
+            setStatus("ALPHA");
+        });
+
+        colorAlphaSlider.addEventListener("pointermove", (event) => {
+            if (!draggingAlpha) return;
+            updateAlphaFromEvent(event);
+        });
+
+        colorAlphaSlider.addEventListener("pointerup", () => {
+            draggingAlpha = false;
+            commitCurrentColorToHistory();
+        });
+
+        colorAlphaSlider.addEventListener("pointercancel", () => {
+            draggingAlpha = false;
+            commitCurrentColorToHistory();
+        });
+
         function setColorPickerOpen(open) {
             colorPickerPanel.classList.toggle("open", open);
             colorPickerToggle.classList.toggle("open", open);
@@ -4833,7 +4837,7 @@
         }
 
         function bgCheckerBackgroundWithOverlay(hex, alpha) {
-            const checker = `linear-gradient(45deg, var(--checker1) 25%, transparent 25%), linear-gradient(-45deg, var(--checker1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--checker1) 75%), linear-gradient(-45deg, transparent 75%, var(--checker1) 75%), var(--checker2)`;
+            const checker = `repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%)`;
             if (alpha <= 0.001) return checker;
             return `linear-gradient(${rgbaFromHex(hex, alpha)}, ${rgbaFromHex(hex, alpha)}), ${checker}`;
         }
@@ -4853,15 +4857,17 @@
             bgAlpha = quantizedAlpha(bgAlphaIndex);
             bgPickerChip.style.background = rgbaFromHex(normalized, bgAlpha);
             bgSwatch.style.background = rgbaFromHex(normalized, bgAlpha);
-            bgColorHexReadout.textContent = `${normalized} · ${alphaPercent(bgAlpha)}`;
+            bgColorHexReadout.textContent = normalized;
             bgColorToggleText.textContent = "BG";
             bgAlphaReadout.textContent = alphaPercent(bgAlpha);
             bgPickerToggle.style.setProperty("--bg-button-color", normalized);
             bgPickerToggle.style.background = bgAlpha >= 0.999 ? normalized : bgCheckerBackgroundWithOverlay(normalized, bgAlpha);
+            bgPickerToggle.style.backgroundSize = bgAlpha >= 0.999 ? "" : "auto, 8px 8px";
+            bgPickerToggle.style.backgroundPosition = bgAlpha >= 0.999 ? "" : "0 0, 0 0";
             bgPickerToggle.classList.toggle("transparent", bgAlpha < 0.999);
             bgPickerChip.classList.toggle("transparent", bgAlpha < 0.001);
             bgSwatch.classList.toggle("transparent", bgAlpha < 0.001);
-            if (bgOpacityReadout) bgOpacityReadout.textContent = `OPACITY ${alphaPercent(bgAlpha)}`;
+            if (bgOpacityReadout) bgOpacityReadout.textContent = `ALPHA ${alphaPercent(bgAlpha)}`;
             drawBgHueSlider();
             drawBgColorSquare();
             drawBgAlphaSlider();
@@ -4965,7 +4971,7 @@
             draggingBgAlpha = true;
             bgAlphaSlider.setPointerCapture(event.pointerId);
             updateBgAlphaFromEvent(event);
-            setStatus("BG OPACITY");
+            setStatus("BG ALPHA");
         });
 
         bgAlphaSlider.addEventListener("pointermove", (event) => {
@@ -5604,44 +5610,6 @@
                 return;
             }
 
-            if (!mod && key === "w") {
-                event.preventDefault();
-                setTransformMode("move");
-                return;
-            }
-
-            if (!mod && key === "e") {
-                event.preventDefault();
-                setTransformMode("rotate");
-                return;
-            }
-
-            // Legacy aliases from the previous CubePaint build. Unity-native keys are W/E.
-            if (!mod && key === "r") {
-                event.preventDefault();
-                setTransformMode("rotate");
-                return;
-            }
-
-            if (!mod && event.shiftKey && key === "v") {
-                event.preventDefault();
-                unitySnapToggled = !unitySnapToggled;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                setStatus(unitySnapToggled ? "SNAP ON" : "SNAP OFF");
-                return;
-            }
-
-            if (!mod && key === "v") {
-                event.preventDefault();
-                unitySnapHeld = true;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                setStatus("SNAP");
-                return;
-            }
-
-
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
                 moveSelectedFace(-1);
@@ -5666,9 +5634,7 @@
             if (webglAvailable && renderer && scene && camera && shapeMesh) {
                 const speed = Number(document.getElementById("speed").value);
 
-                if (!transformControlDragging) {
-                    shapeMesh.rotation.y += dt * speed;
-                }
+                shapeMesh.rotation.y += dt * speed;
 
                 applyVertexWobbleToMesh(shapeMesh, now);
                 updateDebugInfo();
@@ -5709,6 +5675,15 @@
         function hideSaveOverlay() {
             const overlay = document.getElementById("saveOverlay");
             if (overlay) overlay.hidden = true;
+        }
+
+        function positionCamera(targetCamera, distance = DEFAULT_CAMERA_DISTANCE, verticalOrbit = 0, horizontalOrbit = 0, target = new THREE.Vector3(0, 0, 0)) {
+            if (!targetCamera) return;
+            const base = CAMERA_BASE_VECTOR.clone().multiplyScalar(distance);
+            base.applyAxisAngle(new THREE.Vector3(0, 1, 0), horizontalOrbit || 0);
+            targetCamera.position.copy(target).add(base);
+            targetCamera.lookAt(target);
+            targetCamera.updateProjectionMatrix();
         }
 
         function downloadBlob(blob, filename) {
