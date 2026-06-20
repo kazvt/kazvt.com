@@ -1044,7 +1044,7 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.js"></script>
 
     <script type="importmap">
 {
@@ -1066,6 +1066,7 @@
         const VALUE_STEPS = 16;
         const STORAGE_KEY = "cubepaint_session_v4";
         const COOKIE_KEY = "cubepaint_settings_v4";
+        const GIF_WORKER_URL = "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js";
         const DEFAULT_COLOR_HISTORY = ["#140306", "#EFE0B8"];
         const MAX_USER_COLORS = 20;
         const MAX_TILING = 16;
@@ -1254,6 +1255,8 @@
         let colorHistory = [];
         let saveTimer = null;
         let loadingSession = true;
+        let gifWorkerBlobUrl = null;
+        let compactSessionMode = false;
         let shapeStore = {};
         let shapeRotations = {};
         let shapePolyLevels = {};
@@ -3926,13 +3929,23 @@
         }
 
         function isTypingTarget(target) {
-            return target &&
-                (
-                    target.tagName === "INPUT" ||
-                    target.tagName === "TEXTAREA" ||
-                    target.tagName === "SELECT" ||
-                    target.isContentEditable
-                );
+            if (!target) return false;
+
+            if (target.isContentEditable) return true;
+
+            if (target.tagName === "TEXTAREA" || target.tagName === "SELECT") {
+                return true;
+            }
+
+            if (target.tagName === "INPUT") {
+                const type = (target.type || "text").toLowerCase();
+
+                // Range/color controls keep focus after use. Do not let that block
+                // app-level shortcuts like Ctrl+C / Ctrl+V / undo / redo.
+                return !["range", "color", "button", "checkbox", "radio"].includes(type);
+            }
+
+            return false;
         }
 
         document.addEventListener("keydown", (event) => {
@@ -4016,6 +4029,29 @@
             result.append(link);
         }
 
+        async function getGifWorkerScriptUrl() {
+            if (gifWorkerBlobUrl) return gifWorkerBlobUrl;
+
+            try {
+                const response = await fetch(GIF_WORKER_URL, { cache: "force-cache" });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const workerSource = await response.text();
+                gifWorkerBlobUrl = URL.createObjectURL(new Blob([workerSource], { type: "application/javascript" }));
+                return gifWorkerBlobUrl;
+            } catch (error) {
+                console.warn("CubePaint GIF worker could not be prepared as a blob URL; falling back to CDN URL:", error);
+                return GIF_WORKER_URL;
+            }
+        }
+
+        window.addEventListener("beforeunload", () => {
+            if (gifWorkerBlobUrl) {
+                URL.revokeObjectURL(gifWorkerBlobUrl);
+                gifWorkerBlobUrl = null;
+            }
+        });
+
         document.getElementById("exportGifBtn").addEventListener("click", async () => {
             if (!webglAvailable || !renderer || !scene || !camera || !shapeMesh) {
                 setStatus("NO WEBGL");
@@ -4065,12 +4101,23 @@
                 exportRenderer.dispose();
             }
 
+            let workerScript;
+            try {
+                workerScript = await getGifWorkerScriptUrl();
+            } catch (error) {
+                cleanupExportRenderer();
+                exportBtn.disabled = false;
+                setStatus("GIF WORKER");
+                console.warn("CubePaint GIF worker setup failed:", error);
+                return;
+            }
+
             const gif = new GIF({
                 workers: 2,
                 quality: 8,
                 width: size,
                 height: size,
-                workerScript: "https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js"
+                workerScript
             });
 
             gif.on("progress", (progress) => {
@@ -4112,7 +4159,17 @@
             }
         });
 
-        function serializeFace(face) {
+        function canvasToSessionDataUrl(canvas, compact = false) {
+            if (!compact) return canvas.toDataURL("image/png");
+
+            const webp = canvas.toDataURL("image/webp", 0.86);
+            if (webp.startsWith("data:image/webp")) return webp;
+
+            return canvas.toDataURL("image/png");
+        }
+
+        function serializeFace(face, options = {}) {
+            const compactImages = Boolean(options.compactImages);
             const state = {
                 name: face.name,
                 hasArt: face.hasArt,
@@ -4124,7 +4181,7 @@
 
             if (face.changed || face.sourceName !== "blank" || !face.hasArt) {
                 try {
-                    state.image = face.canvas.toDataURL("image/png");
+                    state.image = canvasToSessionDataUrl(face.canvas, compactImages);
                 } catch (error) {
                     console.warn("Face could not be serialized:", face.name, error);
                 }
@@ -4133,13 +4190,13 @@
             return state;
         }
 
-        function makeSessionPayload() {
+        function makeSessionPayload(options = {}) {
             saveCurrentShapeContext();
             const shapes = {};
             Object.entries(shapeStore).forEach(([id, store]) => {
                 shapes[id] = {
                     currentFace: store.currentFace,
-                    faces: store.faces.map(serializeFace)
+                    faces: store.faces.map((face) => serializeFace(face, options))
                 };
             });
 
@@ -4199,17 +4256,39 @@
         function saveSession() {
             if (loadingSession) return;
             saveEditorToFace(false, false);
-            const payload = makeSessionPayload();
+
+            const payload = makeSessionPayload({ compactImages: compactSessionMode });
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
                 saveCookieSettings(payload);
-                setStatus("SAVED");
+                setStatus(compactSessionMode ? "SAVED SMALL" : "SAVED");
+                return;
             } catch (error) {
-                console.warn("CubePaint session could not be saved:", error);
-                saveCookieSettings(payload);
-                setStatus("SAVE LIMIT");
+                console.warn("CubePaint session could not be saved in normal mode:", error);
             }
+
+            if (!compactSessionMode) {
+                try {
+                    const compactPayload = makeSessionPayload({ compactImages: true });
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(compactPayload));
+                    saveCookieSettings(compactPayload);
+                    compactSessionMode = true;
+                    setStatus("SAVED SMALL");
+                    return;
+                } catch (compactError) {
+                    console.warn("CubePaint compact session could not be saved:", compactError);
+                }
+            }
+
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (removeError) {
+                console.warn("CubePaint local storage could not be cleared after quota failure:", removeError);
+            }
+
+            saveCookieSettings(payload);
+            setStatus("SAVE LIMIT");
         }
 
         function scheduleSave() {
