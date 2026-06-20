@@ -890,8 +890,8 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: 68px minmax(92px, 1fr) 40px 46px minmax(92px, 1fr) 40px;
-            gap: 5px;
+            grid-template-columns: repeat(3, minmax(74px, 1fr)) 38px 44px 42px;
+            gap: 6px;
             align-items: end;
         }
 
@@ -899,14 +899,22 @@
             min-width: 0;
         }
 
+        .speed-field,
         .fps-field,
         .psx-field {
             align-self: end;
             display: grid;
-            grid-template-rows: auto 18px;
+            grid-template-rows: auto 20px;
             gap: 2px;
         }
 
+        .speed-field input[type="range"],
+        .fps-field input[type="range"],
+        .psx-field input[type="range"] {
+            height: 22px;
+        }
+
+        .speed-field input[type="range"],
         .fps-field input[type="range"] {
             --slider-track: var(--paper3);
             --slider-fill: var(--ink);
@@ -969,7 +977,7 @@
         .bg-picker-toggle {
             --bg-button-color: #140306;
             width: 100%;
-            height: 28px;
+            height: 30px;
             border: 2px solid var(--line);
             background: var(--bg-button-color);
             color: var(--paper);
@@ -990,7 +998,7 @@
         .bg-picker-toggle.transparent {
             color: var(--ink);
             text-shadow: 0 1px 0 var(--paper);
-            background: repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 6px 6px;
+            background-repeat: repeat;
         }
 
         .bg-picker-toggle:hover,
@@ -1099,10 +1107,10 @@
 
         .export-grid > .btn {
             width: 100%;
-            height: 28px;
+            height: 30px;
             min-width: 0;
-            padding: 0 4px;
-            font-size: 9px;
+            padding: 0 3px;
+            font-size: 8px;
         }
 
         .export-grid > .btn svg {
@@ -1488,17 +1496,22 @@
 
                     <div class="export">
                         <div class="export-grid">
-                            <div class="field">
-                                <span>SPD</span>
+                            <div class="field speed-field" title="preview spin speed">
+                                <span class="field-label">SPEED</span>
                                 <input id="speed" type="range" min="0" max="3" step="0.05" value="0.6" />
                             </div>
 
                             <input id="gifSize" type="hidden" value="512" />
                             <input id="gifFrames" type="hidden" value="72" />
 
-                            <div class="field fps-field" title="GIF playback feel">
+                            <div class="field fps-field" title="GIF playback feel; preview updates at this cadence too">
                                 <span class="field-label">FPS: <strong id="gifFpsReadout">CLASSIC</strong></span>
                                 <input id="gifFps" type="range" min="0" max="4" step="1" value="2" aria-label="GIF smoothness" />
+                            </div>
+
+                            <div class="field psx-field" title="snapped PSX vertex snap/wobble intensity">
+                                <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
+                                <input id="psxWobble" type="range" min="0" max="4" step="1" value="0" aria-label="PSX wobble intensity" />
                             </div>
 
                             <div class="field bg-field">
@@ -1531,11 +1544,6 @@
                             <button class="btn" id="resetViewBtn" title="reset view" hidden>RESET VIEW</button>
 
                             <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
-
-                            <div class="field psx-field" title="PSX vertex snap/wobble intensity">
-                                <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
-                                <input id="psxWobble" type="range" min="0" max="100" step="1" value="0" aria-label="PSX wobble intensity" />
-                            </div>
 
                             <button class="btn accent" id="exportGifBtn" title="export gif">
                                 <svg viewBox="0 0 24 24">
@@ -1599,6 +1607,8 @@
         const GIF_FPS_PRESETS = [8, 12, 15, 20, 24];
         const GIF_FPS_LABELS = ["CHOPPY", "SNAPPY", "CLASSIC", "SMOOTH", "SILKY"];
         const DEFAULT_GIF_FPS_INDEX = 2;
+        const PSX_WOBBLE_PRESETS = [0, 0.08, 0.25, 0.55, 1];
+        const PSX_WOBBLE_LABELS = ["OFF", "TINY", "LOW", "CHUNKY", "INTENSE"];
         const GIF_WORKER_URL = "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js";
         const POLY_LABELS = ["DOT", "TINY", "PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "SILK"];
         const debugging_mode = false;
@@ -3216,6 +3226,7 @@
             readout.textContent = GIF_FPS_LABELS[index] || "CLASSIC";
             slider.title = `${readout.textContent} GIF playback`;
             updateRangeProgress(slider);
+            previewFpsTickTime = 0;
         }
 
         function stablePositionKey(x, y, z) {
@@ -3316,33 +3327,37 @@
             geometry.userData.wobbleApplied = true;
         }
 
+        function nearestPsxWobbleLevel(amount) {
+            const value = Math.max(0, Math.min(1, Number(amount) || 0));
+            let closest = 0;
+            let best = Infinity;
+            PSX_WOBBLE_PRESETS.forEach((preset, index) => {
+                const distance = Math.abs(value - preset);
+                if (distance < best) {
+                    best = distance;
+                    closest = index;
+                }
+            });
+            return closest;
+        }
+
         function updateWobbleButton() {
             if (!psxWobble || !psxWobbleReadout) return;
             const amount = Math.max(0, Math.min(1, Number(vertexWobbleAmount) || 0));
-            const percent = Math.round(amount * 100);
-            if (Math.abs(Number(psxWobble.value) - percent) > 1) {
-                psxWobble.value = String(percent);
-            }
+            const level = nearestPsxWobbleLevel(amount);
+            psxWobble.value = String(level);
             updateRangeProgress(psxWobble);
-            psxWobble.classList.toggle("active", amount > 0.001);
-            psxWobble.title = amount <= 0.001
+            psxWobble.classList.toggle("active", level > 0);
+            psxWobble.title = level <= 0
                 ? "PSX wobble off"
-                : amount < 0.14
-                    ? "subtle PSX shimmer"
-                    : amount < 0.56
+                : level === 1
+                    ? "tiny snapped PSX shimmer"
+                    : level === 2
                         ? "LOW sweet-spot PSX wobble"
-                        : amount < 0.78
-                            ? "chunky PSX wobble"
-                            : "extreme PSX wobble";
-            psxWobbleReadout.textContent = amount <= 0.001
-                ? "OFF"
-                : amount < 0.14
-                    ? "TINY"
-                    : amount < 0.56
-                        ? "LOW"
-                        : amount < 0.78
-                            ? "CHUNKY"
-                            : "INTENSE";
+                        : level === 3
+                            ? "chunky snapped PSX wobble"
+                            : "extreme snapped PSX wobble";
+            psxWobbleReadout.textContent = PSX_WOBBLE_LABELS[level] || "OFF";
         }
 
         function setVertexWobbleAmount(amount, persist = true) {
@@ -4957,19 +4972,19 @@
             bgHueSliderCtx.strokeStyle = "#fff6d8";
             bgHueSliderCtx.lineWidth = 2;
             bgHueSliderCtx.strokeRect(1, selectY + 1, Math.max(0, bgHueSlider.width - 2), Math.max(0, selectH - 2));
-            bgHueSliderCtx.strokeStyle = "#140306";
-            bgHueSliderCtx.lineWidth = 1;
-            bgHueSliderCtx.strokeRect(0.5, selectY + 0.5, Math.max(1, bgHueSlider.width - 1), Math.max(0, selectH - 1));
+            ctx.strokeStyle = "#140306";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0.5, selectY + 0.5, Math.max(1, width - 1), Math.max(0, selectH - 1));
         }
 
         function drawBgAlphaSlider() {
             drawAlphaGradientSlider(bgAlphaSliderCtx, bgAlphaSlider, bgColor.value, bgAlphaIndex);
         }
 
+        const SQUARE_CHECKER_SVG_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Crect width='8' height='8' fill='%23fff6d8'/%3E%3Crect width='4' height='4' fill='%23ead9ad'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23ead9ad'/%3E%3C/svg%3E")`;
+
         function bgCheckerBackgroundWithOverlay(hex, alpha) {
-            const checker = `repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 6px 6px`;
-            if (alpha <= 0.001) return checker;
-            return `linear-gradient(${rgbaFromHex(hex, alpha)}, ${rgbaFromHex(hex, alpha)}), ${checker}`;
+            return `linear-gradient(${rgbaFromHex(hex, alpha)}, ${rgbaFromHex(hex, alpha)}), ${SQUARE_CHECKER_SVG_BG}`;
         }
 
         function applyPreviewBackground() {
@@ -4992,8 +5007,9 @@
             bgAlphaReadout.textContent = alphaPercent(bgAlpha);
             bgPickerToggle.style.setProperty("--bg-button-color", normalized);
             bgPickerToggle.style.background = bgAlpha >= 0.999 ? normalized : bgCheckerBackgroundWithOverlay(normalized, bgAlpha);
-            bgPickerToggle.style.backgroundSize = bgAlpha >= 0.999 ? "" : "auto, 8px 8px";
+            bgPickerToggle.style.backgroundSize = bgAlpha >= 0.999 ? "" : "100% 100%, 8px 8px";
             bgPickerToggle.style.backgroundPosition = bgAlpha >= 0.999 ? "" : "0 0, 0 0";
+            bgPickerToggle.style.backgroundRepeat = bgAlpha >= 0.999 ? "" : "no-repeat, repeat";
             bgPickerToggle.classList.toggle("transparent", bgAlpha < 0.999);
             bgPickerChip.classList.toggle("transparent", bgAlpha < 0.001);
             bgSwatch.classList.toggle("transparent", bgAlpha < 0.001);
@@ -5687,7 +5703,9 @@
         document.getElementById("pasteBtn").addEventListener("click", pasteToCurrentFace);
 
         psxWobble.addEventListener("input", () => {
-            setVertexWobbleAmount(Number(psxWobble.value) / 100);
+            const level = Math.max(0, Math.min(PSX_WOBBLE_PRESETS.length - 1, Math.round(Number(psxWobble.value) || 0)));
+            psxWobble.value = String(level);
+            setVertexWobbleAmount(PSX_WOBBLE_PRESETS[level] ?? 0);
         });
 
         document.getElementById("gifFps")?.addEventListener("input", () => {
@@ -5797,6 +5815,7 @@
         });
 
         let lastTime = performance.now();
+        let previewFpsTickTime = 0;
 
         function animate(now) {
             updateAnimatedFaces();
@@ -5806,10 +5825,17 @@
 
             if (webglAvailable && renderer && scene && camera && shapeMesh) {
                 const speed = Number(document.getElementById("speed").value);
+                const previewInterval = 1000 / Math.max(1, getGifFpsValue());
+                if (!previewFpsTickTime) previewFpsTickTime = now;
+                const elapsed = now - previewFpsTickTime;
 
-                shapeMesh.rotation.y += dt * speed;
+                if (elapsed >= previewInterval || elapsed < 0) {
+                    const tickDt = Math.min(elapsed / 1000, 0.25);
+                    shapeMesh.rotation.y += tickDt * speed;
+                    applyVertexWobbleToMesh(shapeMesh, now);
+                    previewFpsTickTime = now - (elapsed % previewInterval);
+                }
 
-                applyVertexWobbleToMesh(shapeMesh, now);
                 updateDebugInfo();
                 renderer.render(scene, camera);
             }
@@ -6354,6 +6380,7 @@
             renderColorHistory();
             setBgColorHex(bgColor.value, false);
             updateBgPickerVisuals();
+            updateGifFpsReadout();
             updateWobbleButton();
             initializeRangeProgress();
 
