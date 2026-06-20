@@ -51,7 +51,7 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(220px, 360px) minmax(140px, 220px) auto 1fr;
+            grid-template-columns: auto minmax(130px, 190px) minmax(140px, 220px) auto 1fr;
             gap: 12px;
             align-items: center;
             padding: 0 12px;
@@ -88,15 +88,15 @@
             width: 100%;
             height: 100%;
             border: 0;
-            background: var(--accent);
+            background: var(--ink2);
             color: var(--paper);
             display: grid;
             grid-template-columns: 1fr auto;
             align-items: center;
-            gap: 8px;
-            padding: 0 10px;
+            gap: 6px;
+            padding: 0 8px;
             font-weight: 900;
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 0.06em;
             cursor: pointer;
             text-align: left;
@@ -105,6 +105,10 @@
 
         .shape-select-toggle:hover,
         .shape-select-toggle.open {
+            background: var(--ink);
+        }
+
+        .shape-select-toggle.active {
             background: var(--ink2);
         }
 
@@ -120,7 +124,7 @@
             right: -2px;
             z-index: 80;
             border: 2px solid var(--paper);
-            background: var(--accent);
+            background: var(--ink2);
             color: var(--paper);
             box-shadow: 0 5px 0 var(--ink);
             display: grid;
@@ -134,21 +138,22 @@
 
         .shape-select-option {
             border: 0;
-            border-bottom: 2px solid rgba(255,246,216,0.28);
-            background: var(--accent);
+            border-bottom: 2px solid rgba(255,246,216,0.22);
+            background: var(--ink2);
             color: var(--paper);
-            height: 30px;
+            height: 28px;
             text-align: left;
-            padding: 0 10px;
+            padding: 0 8px;
             font: inherit;
             font-weight: 900;
+            font-size: 10px;
             letter-spacing: 0.06em;
             cursor: pointer;
         }
 
         .shape-select-option:hover,
         .shape-select-option.active {
-            background: var(--ink2);
+            background: var(--accent);
         }
 
         .poly-fader {
@@ -191,7 +196,6 @@
             display: grid;
             place-items: center;
             text-align: center;
-            justify-self: center;
         }
 
         .status {
@@ -419,13 +423,14 @@
 
         .color-picker-main {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 22px 96px;
+            grid-template-columns: minmax(0, 1fr) 22px 22px 96px;
             gap: 7px;
             align-items: stretch;
         }
 
         #colorSquare,
-        #hueSlider {
+        #hueSlider,
+        #colorAlphaSlider {
             display: block;
             border: 2px solid var(--line);
             background: var(--paper);
@@ -440,7 +445,8 @@
             cursor: crosshair;
         }
 
-        #hueSlider {
+        #hueSlider,
+        #colorAlphaSlider {
             width: 22px;
             height: 100%;
             cursor: ns-resize;
@@ -789,7 +795,7 @@
             right: 8px;
             z-index: 6;
             height: 24px;
-            min-width: 48px;
+            min-width: 78px;
             border: 2px solid rgba(255, 246, 216, 0.48);
             background: rgba(20, 3, 6, 0.16);
             color: rgba(255, 246, 216, 0.72);
@@ -888,8 +894,8 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: minmax(88px, 0.95fr) minmax(126px, 1.2fr) minmax(118px, 1.15fr) 58px 58px;
-            gap: 7px;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
             align-items: end;
         }
 
@@ -901,8 +907,8 @@
         .psx-field {
             align-self: stretch;
             display: grid;
-            grid-template-rows: auto 20px auto;
-            gap: 0;
+            grid-template-rows: auto 22px;
+            gap: 2px;
         }
 
         .fps-field input[type="range"] {
@@ -913,12 +919,19 @@
 
         #gifFpsReadout,
         #psxWobbleReadout {
-            min-height: 10px;
             text-align: center;
             font-size: 9px;
             line-height: 1;
             font-weight: 900;
             letter-spacing: 0.04em;
+        }
+
+        .field-label {
+            display: block;
+            min-height: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .field {
@@ -1015,7 +1028,7 @@
             position: absolute;
             right: 0;
             bottom: calc(100% + 8px);
-            width: 245px;
+            width: 274px;
             border: 2px solid var(--line);
             background: var(--paper2);
             box-shadow: 0 5px 0 var(--ink);
@@ -1030,13 +1043,14 @@
 
         .bg-picker-main {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 22px 78px;
+            grid-template-columns: minmax(0, 1fr) 22px 22px 78px;
             gap: 7px;
             align-items: stretch;
         }
 
         #bgColorSquare,
-        #bgHueSlider {
+        #bgHueSlider,
+        #bgAlphaSlider {
             display: block;
             border: 2px solid var(--line);
             background: var(--paper);
@@ -1051,7 +1065,8 @@
             cursor: crosshair;
         }
 
-        #bgHueSlider {
+        #bgHueSlider,
+        #bgAlphaSlider {
             width: 22px;
             height: 100%;
             cursor: ns-resize;
@@ -1081,20 +1096,18 @@
             background-position: 0 0, 0 6px, 6px -6px, -6px 0;
         }
 
-        .bg-transparent-btn {
-            height: 30px;
+        .alpha-readout {
+            min-height: 30px;
             border: 2px solid var(--line);
             background: var(--paper);
             color: var(--ink);
             box-shadow: 0 3px 0 var(--ink);
-            cursor: pointer;
+            display: grid;
+            place-items: center;
             font-weight: 900;
             font-size: 10px;
-        }
-
-        .bg-transparent-btn.active {
-            background: var(--ink);
-            color: var(--paper);
+            line-height: 1.1;
+            text-align: center;
         }
 
         .psx-field input[type="range"] {
@@ -1365,6 +1378,7 @@
                                         <canvas id="colorSquare" width="112" height="112"
                                             title="saturation and brightness"></canvas>
                                         <canvas id="hueSlider" width="22" height="112" title="hue"></canvas>
+                                        <canvas id="colorAlphaSlider" width="22" height="112" title="opacity"></canvas>
 
                                         <div class="color-picker-meta">
                                             <div class="color-swatch" id="colorSwatch"></div>
@@ -1423,7 +1437,7 @@
                 <div class="view-body">
                     <div id="cubeStage">
                         <pre class="preview-debug" id="previewDebug" hidden></pre>
-                        <button class="stage-reset-view" id="stageResetViewBtn" type="button" title="reset view">RESET</button>
+                        <button class="stage-reset-view" id="stageResetViewBtn" type="button" title="reset view">RESET VIEW</button>
                         <div class="save-overlay" id="saveOverlay" hidden>
                             <div class="save-cube" aria-hidden="true">
                                 <span class="save-cube-face save-cube-front"></span>
@@ -1448,9 +1462,8 @@
                             <input id="gifFrames" type="hidden" value="72" />
 
                             <div class="field fps-field" title="GIF playback feel">
-                                <span>FPS</span>
+                                <span class="field-label">FPS: <strong id="gifFpsReadout">CLASSIC</strong></span>
                                 <input id="gifFps" type="range" min="0" max="4" step="1" value="2" aria-label="GIF smoothness" />
-                                <strong id="gifFpsReadout">CLASSIC</strong>
                             </div>
 
                             <div class="field bg-field">
@@ -1465,13 +1478,14 @@
                                         <div class="bg-picker-main">
                                             <canvas id="bgColorSquare" width="112" height="112" title="background saturation and brightness"></canvas>
                                             <canvas id="bgHueSlider" width="22" height="112" title="background hue"></canvas>
+                                            <canvas id="bgAlphaSlider" width="22" height="112" title="background opacity"></canvas>
                                             <div class="bg-picker-meta">
                                                 <div class="bg-swatch" id="bgSwatch"></div>
                                                 <div class="color-readout">
                                                     <span>BG</span>
                                                     <div id="bgColorHexReadout">#140306</div>
                                                 </div>
-                                                <button class="bg-transparent-btn" id="bgTransparentBtn" type="button">TRANSPARENT</button>
+                                                <div class="alpha-readout" id="bgOpacityReadout">OPACITY 100%</div>
                                             </div>
                                         </div>
                                     </div>
@@ -1479,14 +1493,13 @@
                                 <input id="bgColor" type="hidden" value="#140306" />
                             </div>
 
-                            <button class="btn" id="resetViewBtn" title="reset view" hidden>VIEW</button>
+                            <button class="btn" id="resetViewBtn" title="reset view" hidden>RESET VIEW</button>
 
                             <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
 
                             <div class="field psx-field" title="PSX vertex snap/wobble intensity">
-                                <span>PSX</span>
+                                <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
                                 <input id="psxWobble" type="range" min="0" max="100" step="1" value="0" aria-label="PSX wobble intensity" />
-                                <strong id="psxWobbleReadout">OFF</strong>
                             </div>
 
                             <button class="btn accent" id="exportGifBtn" title="export gif">
@@ -1538,6 +1551,7 @@
         const HUE_STEPS = 24;
         const SAT_STEPS = 16;
         const VALUE_STEPS = 16;
+        const ALPHA_STEPS = 16;
         const STORAGE_KEY = "cubepaint_session_v4";
         const COOKIE_KEY = "cubepaint_settings_v4";
         const DEFAULT_COLOR_HISTORY = ["#140306", "#EFE0B8"];
@@ -1694,6 +1708,8 @@
         const colorSquareCtx = colorSquare.getContext("2d", { willReadFrequently: true });
         const hueSlider = document.getElementById("hueSlider");
         const hueSliderCtx = hueSlider.getContext("2d", { willReadFrequently: true });
+        const colorAlphaSlider = document.getElementById("colorAlphaSlider");
+        const colorAlphaSliderCtx = colorAlphaSlider.getContext("2d", { willReadFrequently: true });
         const colorSwatch = document.getElementById("colorSwatch");
         const colorHexReadout = document.getElementById("colorHexReadout");
         const colorPickerShell = document.getElementById("colorPickerShell");
@@ -1717,15 +1733,19 @@
         const bgColorSquareCtx = bgColorSquare.getContext("2d", { willReadFrequently: true });
         const bgHueSlider = document.getElementById("bgHueSlider");
         const bgHueSliderCtx = bgHueSlider.getContext("2d", { willReadFrequently: true });
+        const bgAlphaSlider = document.getElementById("bgAlphaSlider");
+        const bgAlphaSliderCtx = bgAlphaSlider.getContext("2d", { willReadFrequently: true });
         const bgSwatch = document.getElementById("bgSwatch");
         const bgColorHexReadout = document.getElementById("bgColorHexReadout");
-        const bgTransparentBtn = document.getElementById("bgTransparentBtn");
+        const bgOpacityReadout = document.getElementById("bgOpacityReadout");
         const psxWobble = document.getElementById("psxWobble");
         const psxWobbleReadout = document.getElementById("psxWobbleReadout");
         colorSquareCtx.imageSmoothingEnabled = false;
         hueSliderCtx.imageSmoothingEnabled = false;
+        colorAlphaSliderCtx.imageSmoothingEnabled = false;
         bgColorSquareCtx.imageSmoothingEnabled = false;
         bgHueSliderCtx.imageSmoothingEnabled = false;
+        bgAlphaSliderCtx.imageSmoothingEnabled = false;
 
         shapeSlider.max = String(SHAPE_DEFS.length - 1);
 
@@ -1737,14 +1757,18 @@
         let hueIndex = 0;
         let satIndex = SAT_STEPS - 1;
         let valueIndex = VALUE_STEPS - 1;
+        let alphaIndex = 0;
         let bgHueIndex = 0;
         let bgSatIndex = SAT_STEPS - 1;
         let bgValueIndex = VALUE_STEPS - 1;
-        let bgTransparent = false;
+        let bgAlphaIndex = 0;
+        let bgAlpha = 1;
         let draggingSquare = false;
         let draggingHue = false;
+        let draggingAlpha = false;
         let draggingBgSquare = false;
         let draggingBgHue = false;
+        let draggingBgAlpha = false;
         let shapeStart = null;
         let shapeSnapshot = null;
         let copyBuffer = null;
@@ -1807,8 +1831,12 @@
         if (savedSession?.settings?.shadingEnabled != null) {
             shadingEnabled = savedSession.settings.shadingEnabled === true || savedSession.settings.shadingEnabled === "true";
         }
-        if (savedSession?.settings?.bgTransparent != null) {
-            bgTransparent = savedSession.settings.bgTransparent === true || savedSession.settings.bgTransparent === "true";
+        if (savedSession?.settings?.bgAlpha != null) {
+            bgAlpha = Math.max(0, Math.min(1, Number(savedSession.settings.bgAlpha)));
+            bgAlphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round((1 - bgAlpha) * (ALPHA_STEPS - 1))));
+        } else if (savedSession?.settings?.bgTransparent != null) {
+            bgAlpha = (savedSession.settings.bgTransparent === true || savedSession.settings.bgTransparent === "true") ? 0 : 1;
+            bgAlphaIndex = bgAlpha === 0 ? ALPHA_STEPS - 1 : 0;
         }
         if (savedSession?.settings?.vertexWobbleAmount != null) {
             vertexWobbleAmount = Math.max(0, Math.min(1, Number(savedSession.settings.vertexWobbleAmount) || 0));
@@ -2779,6 +2807,14 @@
 
         function disposeCurrentMesh() {
             if (!shapeMesh && !shapeRoot) return;
+            if (transformControls) {
+                transformControls.detach();
+            }
+            if (transformControlsHelper) {
+                scene.remove(transformControlsHelper);
+                transformControlsHelper = null;
+                transformControls = null;
+            }
             if (shapeRoot) {
                 scene.remove(shapeRoot);
             } else if (shapeMesh) {
@@ -3646,6 +3682,7 @@
         let selectionOutlineFrame = null;
         let selectionFlashRestore = null;
         let selectionOutline = null;
+        let selectionFaceOverlay = null;
         let hoverFaceIndex = -1;
 
         function roundDebug(value) {
@@ -3723,6 +3760,17 @@
                 selectionOutline.material?.dispose();
                 selectionOutline = null;
             }
+            if (selectionFaceOverlay) {
+                selectionFaceOverlay.parent?.remove(selectionFaceOverlay);
+                selectionFaceOverlay.geometry?.dispose();
+                selectionFaceOverlay.material?.dispose();
+                selectionFaceOverlay = null;
+            }
+        }
+
+        function faceGroupsForMaterial(materialIndex) {
+            if (!shapeMesh?.geometry) return [];
+            return shapeMesh.geometry.groups.filter((item) => item.materialIndex === materialIndex);
         }
 
         function makeFaceBoundaryGeometry(materialIndex) {
@@ -3730,8 +3778,8 @@
             const geometry = shapeMesh.geometry;
             const pos = geometry.getAttribute("position");
             if (!pos) return null;
-            const group = geometry.groups.find((item) => item.materialIndex === materialIndex);
-            if (!group) return null;
+            const groups = faceGroupsForMaterial(materialIndex);
+            if (!groups.length) return null;
             const indexAttr = geometry.index;
             const edges = new Map();
 
@@ -3756,14 +3804,16 @@
                 }
             }
 
-            for (let i = group.start; i < group.start + group.count; i += 3) {
-                const a = readVertex(i);
-                const b = readVertex(i + 1);
-                const c = readVertex(i + 2);
-                addEdge(a, b);
-                addEdge(b, c);
-                addEdge(c, a);
-            }
+            groups.forEach((group) => {
+                for (let i = group.start; i < group.start + group.count; i += 3) {
+                    const a = readVertex(i);
+                    const b = readVertex(i + 1);
+                    const c = readVertex(i + 2);
+                    addEdge(a, b);
+                    addEdge(b, c);
+                    addEdge(c, a);
+                }
+            });
 
             const linePositions = [];
             edges.forEach((edge) => {
@@ -3777,6 +3827,36 @@
             return outlineGeometry;
         }
 
+        function makeFaceSurfaceGeometry(materialIndex) {
+            if (!shapeMesh?.geometry) return null;
+            const geometry = shapeMesh.geometry;
+            const pos = geometry.getAttribute("position");
+            if (!pos) return null;
+            const groups = faceGroupsForMaterial(materialIndex);
+            if (!groups.length) return null;
+            const indexAttr = geometry.index;
+            const positions = [];
+
+            function pushVertex(vertexNumber) {
+                const i = indexAttr ? indexAttr.getX(vertexNumber) : vertexNumber;
+                positions.push(pos.getX(i), pos.getY(i), pos.getZ(i));
+            }
+
+            groups.forEach((group) => {
+                for (let i = group.start; i < group.start + group.count; i += 3) {
+                    pushVertex(i);
+                    pushVertex(i + 1);
+                    pushVertex(i + 2);
+                }
+            });
+
+            if (!positions.length) return null;
+            const surfaceGeometry = new THREE.BufferGeometry();
+            surfaceGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+            surfaceGeometry.computeVertexNormals();
+            return surfaceGeometry;
+        }
+
         function flashSelectedMaterial(index) {
             const material = materials[index];
             if (!material) return;
@@ -3787,19 +3867,29 @@
             }
 
             if (selectionFlashRestore) {
-                selectionFlashRestore.material.color.copy(selectionFlashRestore.original);
-                selectionFlashRestore.material.needsUpdate = true;
                 selectionFlashRestore = null;
             }
             disposeSelectionOutline();
 
-            const original = material.color.clone();
-            const flashColor = new THREE.Color("#ffffff");
+            const flashColor = new THREE.Color("#fff6d8");
             const fadeMs = 1000;
 
-            material.color.copy(flashColor);
-            material.needsUpdate = true;
-            selectionFlashRestore = { material, original };
+            const surfaceGeometry = makeFaceSurfaceGeometry(index);
+            if (surfaceGeometry && shapeMesh) {
+                selectionFaceOverlay = new THREE.Mesh(
+                    surfaceGeometry,
+                    new THREE.MeshBasicMaterial({
+                        color: flashColor,
+                        transparent: true,
+                        opacity: 0.92,
+                        side: THREE.DoubleSide,
+                        depthTest: false,
+                        depthWrite: false
+                    })
+                );
+                selectionFaceOverlay.renderOrder = 999;
+                shapeMesh.add(selectionFaceOverlay);
+            }
 
             const outlineGeometry = makeFaceBoundaryGeometry(index);
             if (outlineGeometry && shapeMesh) {
@@ -3808,7 +3898,7 @@
                     new THREE.LineBasicMaterial({
                         color: 0xff8a00,
                         transparent: true,
-                        opacity: 0.96,
+                        opacity: 0.98,
                         depthTest: false,
                         depthWrite: false
                     })
@@ -3821,15 +3911,13 @@
 
             function fade(now) {
                 const t = Math.min(1, (now - start) / fadeMs);
-                material.color.lerpColors(flashColor, original, t);
-                material.needsUpdate = true;
-                if (selectionOutline?.material) selectionOutline.material.opacity = 0.96 * (1 - t);
+                const opacity = 1 - t;
+                if (selectionFaceOverlay?.material) selectionFaceOverlay.material.opacity = 0.92 * opacity;
+                if (selectionOutline?.material) selectionOutline.material.opacity = 0.98 * opacity;
 
                 if (t < 1) {
                     selectionFlashFrame = requestAnimationFrame(fade);
                 } else {
-                    material.color.copy(original);
-                    material.needsUpdate = true;
                     selectionFlashFrame = null;
                     selectionFlashRestore = null;
                     disposeSelectionOutline();
@@ -4406,6 +4494,52 @@
             return VALUE_STEPS <= 1 ? 1 : 1 - (step / (VALUE_STEPS - 1));
         }
 
+        function quantizedAlpha(step) {
+            return ALPHA_STEPS <= 1 ? 1 : 1 - (step / (ALPHA_STEPS - 1));
+        }
+
+        function alphaPercent(alpha) {
+            return `${Math.round(Math.max(0, Math.min(1, alpha)) * 100)}%`;
+        }
+
+        function rgbaFromHex(hex, alpha) {
+            const rgb = hexToRgb(normalizeHex(hex));
+            return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${Math.max(0, Math.min(1, alpha)).toFixed(3)})`;
+        }
+
+        function drawCheckerCells(ctx, width, height, size = 6) {
+            ctx.clearRect(0, 0, width, height);
+            for (let y = 0; y < height; y += size) {
+                for (let x = 0; x < width; x += size) {
+                    const even = ((x / size) + (y / size)) % 2 === 0;
+                    ctx.fillStyle = even ? "#fff6d8" : "#ead9ad";
+                    ctx.fillRect(x, y, size, size);
+                }
+            }
+        }
+
+        function drawAlphaGradientSlider(ctx, canvas, hex, selectedIndex) {
+            const width = canvas.width;
+            const height = canvas.height;
+            drawCheckerCells(ctx, width, height, 5);
+            const rgb = hexToRgb(normalizeHex(hex));
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`);
+            gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            const bandHeight = height / ALPHA_STEPS;
+            const selectY = Math.floor(selectedIndex * bandHeight);
+            const selectH = Math.max(2, Math.ceil(bandHeight));
+            ctx.strokeStyle = "#fff6d8";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, selectY + 1, Math.max(0, width - 2), Math.max(0, selectH - 2));
+            ctx.strokeStyle = "#140306";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0.5, selectY + 0.5, Math.max(1, width - 1), Math.max(0, selectH - 1));
+        }
+
         function fillSolidCell(ctx, x0, y0, x1, y1, color) {
             ctx.fillStyle = rgbToHex(color);
             ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
@@ -4462,15 +4596,22 @@
             hueSliderCtx.strokeRect(0.5, selectY + 0.5, Math.max(1, hueSlider.width - 1), Math.max(1, selectH - 1));
         }
 
+        function drawColorAlphaSlider() {
+            drawAlphaGradientSlider(colorAlphaSliderCtx, colorAlphaSlider, brushColor.value, alphaIndex);
+        }
+
         function applyBrushColor(hex) {
             const normalized = normalizeHex(hex);
             brushColor.value = normalized;
             colorSwatch.style.background = normalized;
             colorPickerChip.style.background = normalized;
-            colorHexReadout.textContent = normalized;
+            colorHexReadout.textContent = `${normalized} · ${alphaPercent(quantizedAlpha(alphaIndex))}`;
             colorToggleText.textContent = normalized;
+            colorSwatch.style.background = rgbaFromHex(normalized, quantizedAlpha(alphaIndex));
+            colorPickerChip.style.background = rgbaFromHex(normalized, quantizedAlpha(alphaIndex));
             drawHueSlider();
             drawColorSquare();
+            drawColorAlphaSlider();
             renderColorHistory();
         }
 
@@ -4563,6 +4704,13 @@
             const relY = clamp01((event.clientY - rect.top) / rect.height);
             hueIndex = Math.max(0, Math.min(HUE_STEPS - 1, Math.round(relY * (HUE_STEPS - 1))));
             setBrushColorFromIndices();
+        }
+
+        function updateAlphaFromEvent(event) {
+            const rect = colorAlphaSlider.getBoundingClientRect();
+            const relY = clamp01((event.clientY - rect.top) / rect.height);
+            alphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round(relY * (ALPHA_STEPS - 1))));
+            applyBrushColor(brushColor.value);
         }
 
         colorSquare.addEventListener("pointerdown", (event) => {
@@ -4680,30 +4828,43 @@
             bgHueSliderCtx.strokeRect(0.5, selectY + 0.5, Math.max(1, bgHueSlider.width - 1), Math.max(0, selectH - 1));
         }
 
+        function drawBgAlphaSlider() {
+            drawAlphaGradientSlider(bgAlphaSliderCtx, bgAlphaSlider, bgColor.value, bgAlphaIndex);
+        }
+
+        function bgCheckerBackgroundWithOverlay(hex, alpha) {
+            const checker = `linear-gradient(45deg, var(--checker1) 25%, transparent 25%), linear-gradient(-45deg, var(--checker1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--checker1) 75%), linear-gradient(-45deg, transparent 75%, var(--checker1) 75%), var(--checker2)`;
+            if (alpha <= 0.001) return checker;
+            return `linear-gradient(${rgbaFromHex(hex, alpha)}, ${rgbaFromHex(hex, alpha)}), ${checker}`;
+        }
+
         function applyPreviewBackground() {
-            stage.classList.toggle("transparent-bg", bgTransparent);
-            stage.style.backgroundColor = bgTransparent ? "" : bgColor.value;
+            const normalized = normalizeHex(bgColor.value, "#140306");
+            stage.classList.toggle("transparent-bg", bgAlpha < 0.999);
+            stage.style.backgroundColor = bgAlpha >= 0.999 ? normalized : "";
 
             if (renderer) {
-                renderer.setClearColor(bgTransparent ? 0x000000 : bgColor.value, bgTransparent ? 0 : 1);
+                renderer.setClearColor(normalized, bgAlpha);
             }
         }
 
         function updateBgPickerVisuals() {
             const normalized = normalizeHex(bgColor.value, "#140306");
-            bgPickerChip.style.background = normalized;
-            bgSwatch.style.background = normalized;
-            bgColorHexReadout.textContent = normalized;
+            bgAlpha = quantizedAlpha(bgAlphaIndex);
+            bgPickerChip.style.background = rgbaFromHex(normalized, bgAlpha);
+            bgSwatch.style.background = rgbaFromHex(normalized, bgAlpha);
+            bgColorHexReadout.textContent = `${normalized} · ${alphaPercent(bgAlpha)}`;
             bgColorToggleText.textContent = "BG";
-            bgAlphaReadout.textContent = bgTransparent ? "TRANS" : "OPAQUE";
+            bgAlphaReadout.textContent = alphaPercent(bgAlpha);
             bgPickerToggle.style.setProperty("--bg-button-color", normalized);
-            bgPickerToggle.classList.toggle("transparent", bgTransparent);
-            bgTransparentBtn.classList.toggle("active", bgTransparent);
-            bgTransparentBtn.textContent = "TRANSPARENT";
-            bgPickerChip.classList.toggle("transparent", bgTransparent);
-            bgSwatch.classList.toggle("transparent", bgTransparent);
+            bgPickerToggle.style.background = bgAlpha >= 0.999 ? normalized : bgCheckerBackgroundWithOverlay(normalized, bgAlpha);
+            bgPickerToggle.classList.toggle("transparent", bgAlpha < 0.999);
+            bgPickerChip.classList.toggle("transparent", bgAlpha < 0.001);
+            bgSwatch.classList.toggle("transparent", bgAlpha < 0.001);
+            if (bgOpacityReadout) bgOpacityReadout.textContent = `OPACITY ${alphaPercent(bgAlpha)}`;
             drawBgHueSlider();
             drawBgColorSquare();
+            drawBgAlphaSlider();
             applyPreviewBackground();
         }
 
@@ -4747,6 +4908,13 @@
             const relY = clamp01((event.clientY - rect.top) / rect.height);
             bgHueIndex = Math.max(0, Math.min(HUE_STEPS - 1, Math.round(relY * (HUE_STEPS - 1))));
             setBgColorFromIndices();
+        }
+
+        function updateBgAlphaFromEvent(event) {
+            const rect = bgAlphaSlider.getBoundingClientRect();
+            const relY = clamp01((event.clientY - rect.top) / rect.height);
+            bgAlphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round(relY * (ALPHA_STEPS - 1))));
+            updateBgPickerVisuals();
         }
 
         bgColorSquare.addEventListener("pointerdown", (event) => {
@@ -4793,6 +4961,28 @@
             scheduleSave();
         });
 
+        bgAlphaSlider.addEventListener("pointerdown", (event) => {
+            draggingBgAlpha = true;
+            bgAlphaSlider.setPointerCapture(event.pointerId);
+            updateBgAlphaFromEvent(event);
+            setStatus("BG OPACITY");
+        });
+
+        bgAlphaSlider.addEventListener("pointermove", (event) => {
+            if (!draggingBgAlpha) return;
+            updateBgAlphaFromEvent(event);
+        });
+
+        bgAlphaSlider.addEventListener("pointerup", () => {
+            draggingBgAlpha = false;
+            scheduleSave();
+        });
+
+        bgAlphaSlider.addEventListener("pointercancel", () => {
+            draggingBgAlpha = false;
+            scheduleSave();
+        });
+
         function setBgPickerOpen(open) {
             bgPickerPanel.classList.toggle("open", open);
             bgPickerToggle.classList.toggle("open", open);
@@ -4806,14 +4996,6 @@
 
         bgPickerShell.addEventListener("pointerdown", (event) => {
             event.stopPropagation();
-        });
-
-        bgTransparentBtn.addEventListener("click", (event) => {
-            event.stopPropagation();
-            bgTransparent = !bgTransparent;
-            updateBgPickerVisuals();
-            setStatus(bgTransparent ? "BG TRANS" : "BG COLOR");
-            scheduleSave();
         });
 
         function canvasPoint(event) {
@@ -4839,7 +5021,7 @@
             const startY = Math.round(centerY - localCenter);
 
             if (!erase) {
-                ctx.fillStyle = brushColor.value;
+                ctx.fillStyle = rgbaFromHex(brushColor.value, quantizedAlpha(alphaIndex));
             }
 
             // Pixelated round brush: draws hard-edged horizontal pixel rows,
@@ -5028,7 +5210,7 @@
 
         function colorFromHex(hex) {
             const rgb = hexToRgb(hex);
-            return { r: rgb.r, g: rgb.g, b: rgb.b, a: 255 };
+            return { r: rgb.r, g: rgb.g, b: rgb.b, a: Math.round(quantizedAlpha(alphaIndex) * 255) };
         }
 
         function colorsEqual(a, b) {
@@ -5422,6 +5604,44 @@
                 return;
             }
 
+            if (!mod && key === "w") {
+                event.preventDefault();
+                setTransformMode("move");
+                return;
+            }
+
+            if (!mod && key === "e") {
+                event.preventDefault();
+                setTransformMode("rotate");
+                return;
+            }
+
+            // Legacy aliases from the previous CubePaint build. Unity-native keys are W/E.
+            if (!mod && key === "r") {
+                event.preventDefault();
+                setTransformMode("rotate");
+                return;
+            }
+
+            if (!mod && event.shiftKey && key === "v") {
+                event.preventDefault();
+                unitySnapToggled = !unitySnapToggled;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                setStatus(unitySnapToggled ? "SNAP ON" : "SNAP OFF");
+                return;
+            }
+
+            if (!mod && key === "v") {
+                event.preventDefault();
+                unitySnapHeld = true;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                setStatus("SNAP");
+                return;
+            }
+
+
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
                 moveSelectedFace(-1);
@@ -5446,7 +5666,9 @@
             if (webglAvailable && renderer && scene && camera && shapeMesh) {
                 const speed = Number(document.getElementById("speed").value);
 
-                shapeMesh.rotation.y += dt * speed;
+                if (!transformControlDragging) {
+                    shapeMesh.rotation.y += dt * speed;
+                }
 
                 applyVertexWobbleToMesh(shapeMesh, now);
                 updateDebugInfo();
@@ -5526,7 +5748,7 @@
             const fps = getGifFpsValue();
             const delay = Math.round(1000 / fps);
 
-            const transparentExport = bgTransparent;
+            const transparentExport = bgAlpha <= 0.001;
             const transparentKey = 0x010203;
             const exportRenderer = new THREE.WebGLRenderer({
                 antialias: true,
@@ -5535,7 +5757,7 @@
             });
             exportRenderer.setPixelRatio(1);
             exportRenderer.setSize(size, size, false);
-            exportRenderer.setClearColor(transparentExport ? transparentKey : bgColor.value, transparentExport ? 0 : 1);
+            exportRenderer.setClearColor(transparentExport ? transparentKey : bgColor.value, transparentExport ? 0 : bgAlpha);
 
             const exportScene = new THREE.Scene();
             const exportCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
@@ -5678,6 +5900,7 @@
                 hueIndex,
                 satIndex,
                 valueIndex,
+                alphaIndex,
                 colorHistory,
                 settings: {
                     speed: document.getElementById("speed").value,
@@ -5686,7 +5909,9 @@
                     gifFpsIndex: Math.max(0, Math.min(GIF_FPS_PRESETS.length - 1, Math.round(Number(document.getElementById("gifFps")?.value ?? DEFAULT_GIF_FPS_INDEX)))),
                     gifFps: getGifFpsValue(),
                     bgColor: bgColor.value,
-                    bgTransparent,
+                    bgAlpha,
+                    bgAlphaIndex,
+                    bgTransparent: bgAlpha <= 0.001,
                     shadingEnabled,
                     vertexWobbleEnabled,
                     vertexWobbleAmount
@@ -5828,7 +6053,16 @@
                     document.getElementById("gifFps").value = String(closest);
                 }
                 if (session.settings.bgColor != null) applyBgColor(session.settings.bgColor, false);
-                if (session.settings.bgTransparent != null) bgTransparent = session.settings.bgTransparent === true || session.settings.bgTransparent === "true";
+                if (session.settings.bgAlphaIndex != null) {
+                    bgAlphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round(Number(session.settings.bgAlphaIndex) || 0)));
+                    bgAlpha = quantizedAlpha(bgAlphaIndex);
+                } else if (session.settings.bgAlpha != null) {
+                    bgAlpha = Math.max(0, Math.min(1, Number(session.settings.bgAlpha)));
+                    bgAlphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round((1 - bgAlpha) * (ALPHA_STEPS - 1))));
+                } else if (session.settings.bgTransparent != null) {
+                    bgAlpha = (session.settings.bgTransparent === true || session.settings.bgTransparent === "true") ? 0 : 1;
+                    bgAlphaIndex = bgAlpha === 0 ? ALPHA_STEPS - 1 : 0;
+                }
                 if (session.settings.vertexWobbleAmount != null) {
                     vertexWobbleAmount = Math.max(0, Math.min(1, Number(session.settings.vertexWobbleAmount) || 0));
                     vertexWobbleEnabled = vertexWobbleAmount > 0.001;
@@ -5855,6 +6089,9 @@
             brushReadout.textContent = `${brushSize.value}PX`;
             sizeMiniReadout.textContent = `${brushSize.value}PX`;
 
+            if (session.alphaIndex != null) {
+                alphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round(Number(session.alphaIndex) || 0)));
+            }
             if (Array.isArray(session.colorHistory)) {
                 colorHistory = session.colorHistory
                     .map((hex) => normalizeHex(hex, ""))
