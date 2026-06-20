@@ -83,7 +83,7 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(96px, 128px) minmax(150px, 200px) minmax(128px, 174px) minmax(260px, 1fr) minmax(92px, auto);
+            grid-template-columns: auto minmax(124px, 150px) minmax(130px, 210px) minmax(260px, 1fr) minmax(92px, auto);
             gap: 10px;
             align-items: center;
             padding: 10px 12px;
@@ -111,82 +111,56 @@
         }
 
         .shape-fader {
-            grid-template-columns: 1fr;
+            grid-template-columns: 28px minmax(0, 1fr) 28px;
             position: relative;
             padding: 0;
             overflow: visible;
+            gap: 4px;
         }
 
-        .shape-select-toggle {
-            width: 100%;
+        .shape-cycle-btn,
+        .shape-cycle-current {
             min-height: 32px;
             border: 0;
             background: var(--ink2);
             color: var(--paper);
             display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            gap: 6px;
-            padding: 0 8px;
+            place-items: center;
             font-weight: 900;
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 0.06em;
             cursor: pointer;
-            text-align: left;
             box-shadow: inset 0 0 0 1px rgba(255,246,216,0.2);
         }
 
-        .shape-select-toggle:hover,
-        .shape-select-toggle.open {
+        .shape-cycle-current {
+            min-width: 0;
+            padding: 0 6px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .shape-cycle-btn:hover,
+        .shape-cycle-current:hover {
             background: var(--ink);
         }
 
-        .shape-select-caret {
-            font-size: 12px;
-            line-height: 1;
-        }
-
         .shape-select-menu {
-            position: absolute;
-            top: calc(100% + 4px);
-            left: -2px;
-            right: -2px;
-            z-index: 80;
-            border: 2px solid var(--paper);
-            background: var(--ink2);
-            color: var(--paper);
-            box-shadow: 0 5px 0 var(--ink);
-            display: grid;
-            max-height: 260px;
-            overflow: auto;
-        }
-
-        .shape-select-menu[hidden] {
             display: none !important;
         }
 
-        .shape-select-option {
-            border: 0;
-            border-bottom: 2px solid rgba(255,246,216,0.22);
-            background: var(--ink2);
-            color: var(--paper);
-            height: 28px;
-            text-align: left;
-            padding: 0 8px;
-            font: inherit;
-            font-weight: 900;
-            font-size: 10px;
-            letter-spacing: 0.06em;
-            cursor: pointer;
-        }
-
-        .shape-select-option:hover,
-        .shape-select-option.active {
-            background: var(--accent);
+        .top-param-controls {
+            min-width: 0;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            overflow: hidden;
         }
 
         .poly-fader {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             grid-template-rows: 12px 24px;
             gap: 5px;
         }
@@ -211,21 +185,9 @@
             font: inherit;
         }
 
-        .shape-extra-controls {
-            grid-template-columns: 1fr;
-            gap: 0;
-            padding: 0;
-            min-width: 0;
-            overflow: hidden;
-        }
-
+        .shape-extra-controls,
         .shape-extra-control-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
-            gap: 10px;
-            min-width: 0;
-            align-items: center;
-            overflow: visible;
+            display: contents;
         }
 
         .shape-extra-control {
@@ -1444,30 +1406,17 @@
                 padding: 8px 12px;
             }
 
-            .shape-fader,
-            .poly-fader {
+            .shape-fader {
+                order: 3;
                 grid-column: 1 / -1;
                 width: 100%;
             }
 
-            .shape-fader {
-                order: 3;
-            }
-
-            .poly-fader {
-                order: 4;
-            }
-
-            .shape-extra-controls {
+            .top-param-controls {
                 order: 5;
                 grid-column: 1 / -1;
                 width: 100%;
-            }
-
-            .shape-extra-control-list {
-                grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
-                overflow: visible;
-                padding-bottom: 0;
+                grid-auto-columns: minmax(0, 1fr);
             }
 
             .top-center {
@@ -1496,21 +1445,24 @@
     <div class="app">
         <header class="top">
             <div class="brand">CUBEPAINT</div>
-            <div class="shape-fader shape-select" id="shapeSelect" title="shape selector">
-                <button class="shape-select-toggle" id="shapeSelectToggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
+                <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>
+                <button class="shape-cycle-current" id="shapeSelectToggle" type="button" aria-label="current shape">
                     <span id="shapeNameReadout">CUBE</span>
-                    <span class="shape-select-caret">▾</span>
                 </button>
+                <button class="shape-cycle-btn" id="shapeNextBtn" type="button" aria-label="next shape">›</button>
                 <div class="shape-select-menu" id="shapeSelectMenu" role="listbox" hidden></div>
                 <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
             <div class="top-center" id="activeFaceTitle">FRONT</div>
-            <div class="poly-fader" id="polyFader" title="POLY: STD" hidden>
-                <span class="top-control-readout">POLY: <strong id="polyReadout">STD</strong></span>
-                <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="POLY" />
-            </div>
-            <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
-                <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
+            <div class="top-param-controls" id="topParamControls">
+                <div class="poly-fader" id="polyFader" title="POLY: STD" hidden>
+                    <span class="top-control-readout">POLY: <strong id="polyReadout">STD</strong></span>
+                    <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="POLY" />
+                </div>
+                <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
+                    <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
+                </div>
             </div>
             <div class="status" id="status">READY</div>
         </header>
@@ -1946,6 +1898,8 @@
         const shapeSelect = document.getElementById("shapeSelect");
         const shapeSelectToggle = document.getElementById("shapeSelectToggle");
         const shapeSelectMenu = document.getElementById("shapeSelectMenu");
+        const shapePrevBtn = document.getElementById("shapePrevBtn");
+        const shapeNextBtn = document.getElementById("shapeNextBtn");
         const shapeNameReadout = document.getElementById("shapeNameReadout");
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
@@ -3382,30 +3336,20 @@
         }
 
         function setShapeDropdownOpen(open) {
-            if (!shapeSelectMenu || !shapeSelectToggle) return;
-            shapeSelectMenu.hidden = !open;
-            shapeSelectToggle.classList.toggle("open", open);
-            shapeSelectToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            if (!shapeSelectMenu) return;
+            shapeSelectMenu.hidden = true;
         }
 
         function renderShapeDropdown() {
             if (!shapeSelectMenu) return;
             shapeSelectMenu.innerHTML = "";
-            SHAPE_DEFS.forEach((shape, index) => {
-                const option = document.createElement("button");
-                option.type = "button";
-                option.className = `shape-select-option ${index === currentShapeIndex ? "active" : ""}`;
-                option.textContent = shape.label;
-                option.setAttribute("role", "option");
-                option.setAttribute("aria-selected", index === currentShapeIndex ? "true" : "false");
-                option.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setShapeDropdownOpen(false);
-                    switchShape(index);
-                });
-                shapeSelectMenu.append(option);
-            });
+            shapeSelectMenu.hidden = true;
+        }
+
+        function cycleShape(delta) {
+            const total = SHAPE_DEFS.length;
+            if (!total) return;
+            switchShape((currentShapeIndex + delta + total) % total);
         }
 
         function updateShapeReadout() {
@@ -4607,6 +4551,17 @@
             
         }
 
+        function centerGeometryOnOrigin(geometry) {
+            if (!geometry) return;
+            geometry.computeBoundingBox();
+            if (!geometry.boundingBox) return;
+            const center = new THREE.Vector3();
+            geometry.boundingBox.getCenter(center);
+            geometry.translate(-center.x, -center.y, -center.z);
+            geometry.computeBoundingBox();
+            geometry.computeBoundingSphere();
+        }
+
         function buildShapeMesh() {
             if (!webglAvailable || !scene) return;
 
@@ -4617,6 +4572,7 @@
             materials = textures.map(makeFaceMaterial);
             const def = getCurrentShapeDef();
             const geometry = createGeometry(def);
+            centerGeometryOnOrigin(geometry);
             shapeMesh = new THREE.Mesh(geometry, materials);
             shapeRoot = new THREE.Group();
             shapeRoot.name = `${def.label} TRANSFORM`;
@@ -5430,12 +5386,22 @@
             }
         }
 
-        shapeSelectToggle?.addEventListener("click", (event) => {
+        shapePrevBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
             event.stopPropagation();
-            setShapeDropdownOpen(shapeSelectMenu.hidden);
+            cycleShape(-1);
         });
 
-        document.addEventListener("click", () => setShapeDropdownOpen(false));
+        shapeNextBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            cycleShape(1);
+        });
+
+        shapeSelectToggle?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+        });
 
         shapeSlider.addEventListener("input", () => switchShape(Number(shapeSlider.value)));
 
@@ -7046,6 +7012,7 @@
             const exportTextures = faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
             const exportMaterials = exportTextures.map(makeFaceMaterial);
             const exportGeometry = createGeometry(getCurrentShapeDef());
+            centerGeometryOnOrigin(exportGeometry);
             const exportMesh = new THREE.Mesh(exportGeometry, exportMaterials);
             const exportRoot = new THREE.Group();
             exportRoot.add(exportMesh);

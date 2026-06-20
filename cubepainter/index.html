@@ -83,8 +83,8 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(104px, 142px) minmax(150px, 210px) minmax(176px, 232px) minmax(360px, 1fr) minmax(92px, auto);
-            gap: 12px;
+            grid-template-columns: auto minmax(124px, 150px) minmax(130px, 210px) minmax(260px, 1fr) minmax(92px, auto);
+            gap: 10px;
             align-items: center;
             padding: 10px 12px;
             font-weight: 900;
@@ -111,124 +111,91 @@
         }
 
         .shape-fader {
-            grid-template-columns: 1fr;
+            grid-template-columns: 28px minmax(0, 1fr) 28px;
             position: relative;
             padding: 0;
             overflow: visible;
+            gap: 4px;
         }
 
-        .shape-select-toggle {
-            width: 100%;
+        .shape-cycle-btn,
+        .shape-cycle-current {
             min-height: 32px;
             border: 0;
             background: var(--ink2);
             color: var(--paper);
             display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            gap: 6px;
-            padding: 0 8px;
+            place-items: center;
             font-weight: 900;
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 0.06em;
             cursor: pointer;
-            text-align: left;
             box-shadow: inset 0 0 0 1px rgba(255,246,216,0.2);
         }
 
-        .shape-select-toggle:hover,
-        .shape-select-toggle.open {
+        .shape-cycle-current {
+            min-width: 0;
+            padding: 0 6px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .shape-cycle-btn:hover,
+        .shape-cycle-current:hover {
             background: var(--ink);
         }
 
-        .shape-select-caret {
-            font-size: 12px;
-            line-height: 1;
-        }
-
         .shape-select-menu {
-            position: absolute;
-            top: calc(100% + 4px);
-            left: -2px;
-            right: -2px;
-            z-index: 80;
-            border: 2px solid var(--paper);
-            background: var(--ink2);
-            color: var(--paper);
-            box-shadow: 0 5px 0 var(--ink);
-            display: grid;
-            max-height: 260px;
-            overflow: auto;
-        }
-
-        .shape-select-menu[hidden] {
             display: none !important;
         }
 
-        .shape-select-option {
-            border: 0;
-            border-bottom: 2px solid rgba(255,246,216,0.22);
-            background: var(--ink2);
-            color: var(--paper);
-            height: 28px;
-            text-align: left;
-            padding: 0 8px;
-            font: inherit;
-            font-weight: 900;
-            font-size: 10px;
-            letter-spacing: 0.06em;
-            cursor: pointer;
-        }
-
-        .shape-select-option:hover,
-        .shape-select-option.active {
-            background: var(--accent);
-        }
-
-        .poly-fader {
-            grid-template-columns: 48px minmax(120px, 1fr) 46px;
-        }
-
-        .shape-extra-controls {
-            grid-template-columns: 1fr;
-            gap: 0;
-            padding: 0;
+        .top-param-controls {
             min-width: 0;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
             overflow: hidden;
         }
 
-        .shape-extra-control-list {
-            display: flex;
-            flex-flow: row nowrap;
-            gap: 12px;
+        .poly-fader {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: 12px 24px;
+            gap: 5px;
+        }
+
+        .top-control-readout,
+        .shape-extra-readout {
+            display: block;
             min-width: 0;
-            align-items: center;
-            justify-content: start;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: thin;
-        }
-
-        .shape-extra-control {
-            display: grid;
-            grid-template-rows: 16px 24px;
-            gap: 6px;
-            min-width: 118px;
-            width: 134px;
-            max-width: 148px;
-            flex: 1 0 134px;
-            align-items: center;
-        }
-
-        .shape-extra-control label {
+            text-align: center;
             font-size: 9px;
-            line-height: 13px;
+            line-height: 12px;
             font-weight: 900;
             letter-spacing: 0.04em;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            text-align: center;
+        }
+
+        .top-control-readout strong,
+        .shape-extra-readout strong {
+            color: currentColor;
+            font: inherit;
+        }
+
+        .shape-extra-controls,
+        .shape-extra-control-list {
+            display: contents;
+        }
+
+        .shape-extra-control {
+            display: grid;
+            grid-template-rows: 12px 24px;
+            gap: 5px;
+            min-width: 0;
+            align-items: center;
         }
 
         .shape-extra-control input[type="range"] {
@@ -247,16 +214,10 @@
 
         .shape-fader span,
         .poly-fader span,
-        .poly-fader strong,
         .shape-extra-controls span {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .poly-fader strong {
-            font-size: 10px;
-            text-align: right;
         }
 
         [hidden] {
@@ -677,6 +638,27 @@
             align-self: stretch;
         }
 
+
+
+        .gif-locked-control {
+            opacity: 0.38;
+            filter: grayscale(1);
+            cursor: not-allowed !important;
+        }
+
+        .gif-locked-control * {
+            cursor: not-allowed !important;
+        }
+
+        .btn.active.gif-locked-control {
+            background: var(--paper2);
+            color: var(--ink);
+        }
+
+        #paintCanvas.gif-locked-canvas {
+            cursor: not-allowed !important;
+        }
+
         .btn:disabled {
             opacity: 0.35;
             cursor: not-allowed;
@@ -994,7 +976,7 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(58px, 1fr)) 38px 44px 42px;
+            grid-template-columns: minmax(128px, 1.3fr) minmax(86px, 1fr) minmax(86px, 1fr) 38px 44px 42px;
             gap: 6px;
             align-items: end;
         }
@@ -1003,16 +985,37 @@
             min-width: 0;
         }
 
-        .speed-field,
+        .speed-stack {
+            display: grid;
+            grid-template-rows: repeat(2, 20px);
+            gap: 2px;
+            min-width: 0;
+            align-self: end;
+        }
+
+        .speed-field {
+            align-self: center;
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1fr);
+            gap: 5px;
+            align-items: center;
+            min-width: 0;
+        }
+
         .fps-field,
         .psx-field {
             align-self: end;
             display: grid;
             grid-template-rows: auto 20px;
             gap: 2px;
+            min-width: 0;
         }
 
-        .speed-field input[type="range"],
+        .speed-field input[type="range"] {
+            height: 18px;
+            min-width: 0;
+        }
+
         .fps-field input[type="range"],
         .psx-field input[type="range"] {
             height: 22px;
@@ -1047,6 +1050,14 @@
             line-height: 12px;
         }
 
+        .speed-field .field-label {
+            min-height: 0;
+            text-align: right;
+            font-size: 10px;
+            line-height: 1;
+            letter-spacing: 0.02em;
+        }
+
         .field {
             display: grid;
             gap: 2px;
@@ -1071,9 +1082,16 @@
         }
 
 
-        @media (max-width: 720px) {
+        @media (max-width: 860px) {
             .export-grid {
-                grid-template-columns: repeat(4, minmax(52px, 1fr));
+                grid-template-columns: minmax(124px, 1.35fr) minmax(82px, 1fr) minmax(82px, 1fr) repeat(3, minmax(38px, 48px));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .export-grid {
+                grid-template-columns: minmax(132px, 1fr) minmax(96px, 1fr) minmax(96px, 1fr);
+                align-items: stretch;
             }
 
             .bg-field,
@@ -1388,30 +1406,17 @@
                 padding: 8px 12px;
             }
 
-            .shape-fader,
-            .poly-fader {
+            .shape-fader {
+                order: 3;
                 grid-column: 1 / -1;
                 width: 100%;
             }
 
-            .shape-fader {
-                order: 3;
-            }
-
-            .poly-fader {
-                order: 4;
-            }
-
-            .shape-extra-controls {
+            .top-param-controls {
                 order: 5;
                 grid-column: 1 / -1;
                 width: 100%;
-            }
-
-            .shape-extra-control-list {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                padding-bottom: 2px;
+                grid-auto-columns: minmax(0, 1fr);
             }
 
             .top-center {
@@ -1440,22 +1445,24 @@
     <div class="app">
         <header class="top">
             <div class="brand">CUBEPAINT</div>
-            <div class="shape-fader shape-select" id="shapeSelect" title="shape selector">
-                <button class="shape-select-toggle" id="shapeSelectToggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
+                <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>
+                <button class="shape-cycle-current" id="shapeSelectToggle" type="button" aria-label="current shape">
                     <span id="shapeNameReadout">CUBE</span>
-                    <span class="shape-select-caret">▾</span>
                 </button>
+                <button class="shape-cycle-btn" id="shapeNextBtn" type="button" aria-label="next shape">›</button>
                 <div class="shape-select-menu" id="shapeSelectMenu" role="listbox" hidden></div>
                 <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
             <div class="top-center" id="activeFaceTitle">FRONT</div>
-            <div class="poly-fader" id="polyFader" title="low-poly control" hidden>
-                <span>POLY</span>
-                <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="low-poly amount" />
-                <strong id="polyReadout">STD</strong>
-            </div>
-            <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
-                <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
+            <div class="top-param-controls" id="topParamControls">
+                <div class="poly-fader" id="polyFader" title="POLY: STD" hidden>
+                    <span class="top-control-readout">POLY: <strong id="polyReadout">STD</strong></span>
+                    <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="POLY" />
+                </div>
+                <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
+                    <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
+                </div>
             </div>
             <div class="status" id="status">READY</div>
         </header>
@@ -1625,14 +1632,15 @@
 
                     <div class="export">
                         <div class="export-grid">
-                            <div class="field speed-field x-speed-field" title="X SPD preview">
-                                <span class="field-label">X SPD: <strong id="xSpeedReadout">CRUISE</strong></span>
-                                <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X SPD preview" aria-label="X SPD preview" />
-                            </div>
-
-                            <div class="field speed-field y-speed-field" title="Y SPD preview">
-                                <span class="field-label">Y SPD: <strong id="ySpeedReadout">SLEEPY</strong></span>
-                                <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y SPD preview" aria-label="Y SPD preview" />
+                            <div class="field speed-stack" title="speed preview">
+                                <div class="speed-field x-speed-field" title="X speed preview">
+                                    <span class="field-label" title="X speed preview">XS:</span>
+                                    <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X speed preview" aria-label="X speed preview" />
+                                </div>
+                                <div class="speed-field y-speed-field" title="Y speed preview">
+                                    <span class="field-label" title="Y speed preview">YS:</span>
+                                    <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y speed preview" aria-label="Y speed preview" />
+                                </div>
                             </div>
 
                             <input id="gifSize" type="hidden" value="512" />
@@ -1736,6 +1744,7 @@
         const MAX_POLY_LEVEL = 10;
         const DEFAULT_GIF_SIZE = 512;
         const DEFAULT_GIF_FRAMES = 72;
+        const MAX_DECODED_GIF_FRAMES = 360;
         const GIF_FPS_PRESETS = [8, 12, 15, 20, 24];
         const GIF_FPS_LABELS = ["CHOPPY", "SNAPPY", "CLASSIC", "SMOOTH", "SILKY"];
         const DEFAULT_GIF_FPS_INDEX = 2;
@@ -1889,6 +1898,8 @@
         const shapeSelect = document.getElementById("shapeSelect");
         const shapeSelectToggle = document.getElementById("shapeSelectToggle");
         const shapeSelectMenu = document.getElementById("shapeSelectMenu");
+        const shapePrevBtn = document.getElementById("shapePrevBtn");
+        const shapeNextBtn = document.getElementById("shapeNextBtn");
         const shapeNameReadout = document.getElementById("shapeNameReadout");
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
@@ -2099,6 +2110,80 @@
             statusEl.textContent = text;
         }
 
+        function isGifLockedFace(index = currentFace) {
+            return Boolean(faces[index]?.animation);
+        }
+
+        function showGifNoDraw(index = currentFace) {
+            setStatus("gifs = no draw");
+            flashSelectedMaterial(index);
+        }
+
+        function updateGifLayerLockUi() {
+            const locked = isGifLockedFace();
+            const ids = [
+                "pencilBtn",
+                "eraserBtn",
+                "lineBtn",
+                "rectBtn",
+                "circleBtn",
+                "fillBtn",
+                "undoBtn",
+                "redoBtn",
+                "copyBtn",
+                "pasteBtn",
+                "clearBtn",
+                "colorPickerToggle",
+                "brushSize"
+            ];
+            ids.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.toggle("gif-locked-control", locked);
+                el.setAttribute("aria-disabled", locked ? "true" : "false");
+                el.title = locked ? "gifs = no draw" : (el.dataset.defaultTitle || el.title || "");
+            });
+            if (locked) {
+                colorPickerPanel?.classList.remove("open");
+                colorPickerToggle?.classList.remove("open");
+            }
+            paintCanvas.classList.toggle("gif-locked-canvas", locked);
+        }
+
+        function markGifLockableControls() {
+            [
+                "pencilBtn",
+                "eraserBtn",
+                "lineBtn",
+                "rectBtn",
+                "circleBtn",
+                "fillBtn",
+                "undoBtn",
+                "redoBtn",
+                "copyBtn",
+                "pasteBtn",
+                "clearBtn",
+                "colorPickerToggle",
+                "brushSize"
+            ].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.add("gif-lockable-control");
+                el.dataset.defaultTitle = el.title || "";
+            });
+        }
+
+        function blockGifLockedInteraction(event) {
+            if (!isGifLockedFace()) return false;
+            const target = event.target;
+            if (!target?.closest?.(".gif-lockable-control")) return false;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            showGifNoDraw();
+            updateGifLayerLockUi();
+            return true;
+        }
+
         function normalizeHex(hex, fallback = "#140306") {
             if (typeof hex !== "string") return fallback;
             let clean = hex.trim().replace(/^#/, "").toUpperCase();
@@ -2294,21 +2379,29 @@
             options.forEach((key) => {
                 const wrap = document.createElement("div");
                 wrap.className = "shape-extra-control";
-                const label = document.createElement("label");
-                label.textContent = SHAPE_OPTION_LABELS[key] || key.toUpperCase();
+                const baseLabel = SHAPE_OPTION_LABELS[key] || key.toUpperCase();
+                const readout = document.createElement("span");
+                readout.className = "shape-extra-readout";
                 const input = document.createElement("input");
                 input.type = "range";
                 input.min = "0";
                 input.max = "100";
                 input.step = "1";
                 input.value = String(getShapeOption(currentShapeId, key));
-                input.title = label.textContent;
-                input.setAttribute("aria-label", label.textContent);
+                const syncReadout = () => {
+                    const text = `${baseLabel}: ${Math.round(Number(input.value) || 0)}`;
+                    readout.textContent = text;
+                    input.title = text;
+                    wrap.title = text;
+                    input.setAttribute("aria-label", text);
+                };
+                syncReadout();
                 input.addEventListener("input", () => {
                     updateRangeProgress(input);
+                    syncReadout();
                     setShapeOption(currentShapeId, key, input.value);
                 });
-                wrap.append(label, input);
+                wrap.append(readout, input);
                 shapeExtraControlList.append(wrap);
                 updateRangeProgress(input);
             });
@@ -2326,6 +2419,9 @@
             polySlider.value = String(level);
             updateRangeProgress(polySlider);
             polyReadout.textContent = POLY_LABELS[level] || String(level);
+            polyFader.title = `POLY: ${polyReadout.textContent}`;
+            polySlider.title = `POLY: ${polyReadout.textContent}`;
+            polySlider.setAttribute("aria-label", `POLY: ${polyReadout.textContent}`);
             updateShapeExtraControls();
         }
 
@@ -2782,23 +2878,119 @@
         }
 
         function drawImageCover(ctx, image) {
+            const width = Number(image?.naturalWidth || image?.videoWidth || image?.displayWidth || image?.width || FACE_SIZE);
+            const height = Number(image?.naturalHeight || image?.videoHeight || image?.displayHeight || image?.height || FACE_SIZE);
             ctx.imageSmoothingEnabled = false;
-            const scale = Math.max(FACE_SIZE / image.width, FACE_SIZE / image.height);
-            const w = image.width * scale;
-            const h = image.height * scale;
+            const scale = Math.max(FACE_SIZE / width, FACE_SIZE / height);
+            const w = width * scale;
+            const h = height * scale;
             ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
             ctx.drawImage(image, (FACE_SIZE - w) / 2, (FACE_SIZE - h) / 2, w, h);
         }
 
-        function syncAnimatedFace(index) {
-            const face = faces[index];
-            if (!face || !face.animation || !face.animation.image.complete) return false;
+        function makeCoveredFrameCanvas(source) {
+            const frameCanvas = makeCanvas();
+            const ctx = frameCanvas.getContext("2d", { willReadFrequently: true });
+            drawImageCover(ctx, source);
+            return frameCanvas;
+        }
 
-            const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
-            drawImageCover(ctx, face.animation.image);
+        async function decodeGifFileFrames(file) {
+            if (!("ImageDecoder" in window)) return null;
+
+            const bytes = new Uint8Array(await file.arrayBuffer());
+            const decoder = new ImageDecoder({
+                data: bytes,
+                type: file.type || "image/gif"
+            });
+            await decoder.tracks.ready;
+
+            const track = decoder.tracks.selectedTrack;
+            const reportedFrameCount = Number(track?.frameCount || 0);
+            const frameLimit = Math.max(1, Math.min(MAX_DECODED_GIF_FRAMES, reportedFrameCount || MAX_DECODED_GIF_FRAMES));
+            const decoded = [];
+
+            for (let frameIndex = 0; frameIndex < frameLimit; frameIndex++) {
+                let result;
+                try {
+                    result = await decoder.decode({ frameIndex });
+                } catch (error) {
+                    break;
+                }
+
+                const frame = result?.image;
+                if (!frame) break;
+
+                const duration = Math.max(20, Math.round((Number(frame.duration) || 100000) / 1000));
+                decoded.push({
+                    canvas: makeCoveredFrameCanvas(frame),
+                    duration
+                });
+                frame.close?.();
+
+                if (reportedFrameCount && frameIndex >= reportedFrameCount - 1) break;
+                if (result.complete && !reportedFrameCount) break;
+            }
+
+            decoder.close?.();
+            return decoded.length ? decoded : null;
+        }
+
+        function installAnimatedGifFace(index, animation) {
+            const face = faces[index];
+            if (!face) return false;
+
+            stopFaceAnimation(face);
+            face.animation = animation;
+            face.sourceName = animation.sourceName || "animated.gif";
             face.hasArt = true;
             face.changed = true;
-            markFaceImageDirty(face);
+            face._saveCache = null;
+            syncAnimatedFace(index, performance.now(), true);
+            renderFaceList();
+            updateGifLayerLockUi();
+            scheduleSave();
+            return true;
+        }
+
+        function animatedFrameIndexAt(animation, timeMs) {
+            if (!animation?.frames?.length) return 0;
+            const total = animation.totalDuration || animation.frames.reduce((sum, frame) => sum + Math.max(20, Number(frame.duration) || 100), 0);
+            animation.totalDuration = total;
+            let t = ((timeMs % total) + total) % total;
+
+            for (let index = 0; index < animation.frames.length; index++) {
+                t -= Math.max(20, Number(animation.frames[index].duration) || 100);
+                if (t < 0) return index;
+            }
+
+            return 0;
+        }
+
+        function syncAnimatedFace(index, now = performance.now(), force = false) {
+            const face = faces[index];
+            if (!face || !face.animation) return false;
+
+            let source = null;
+
+            if (face.animation.kind === "gifFrames" && face.animation.frames?.length) {
+                const frameIndex = animatedFrameIndexAt(face.animation, now - (face.animation.startedAt || 0));
+                if (!force && face.animation.currentFrame === frameIndex) return false;
+                face.animation.currentFrame = frameIndex;
+                source = face.animation.frames[frameIndex].canvas;
+            } else if (face.animation.image?.complete) {
+                const lastSync = Number(face.animation.lastSync || 0);
+                if (!force && now - lastSync < 45) return false;
+                face.animation.lastSync = now;
+                source = face.animation.image;
+            }
+
+            if (!source) return false;
+
+            const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
+            drawImageCover(ctx, source);
+            face.hasArt = true;
+            face.changed = true;
             rebuildTexture(index);
 
             if (index === currentFace && !drawing) {
@@ -2809,16 +3001,39 @@
             return true;
         }
 
-        function updateAnimatedFaces() {
+        function updateAnimatedFaces(now = performance.now()) {
             let changed = false;
 
             faces.forEach((face, index) => {
-                if (syncAnimatedFace(index)) {
+                if (syncAnimatedFace(index, now)) {
                     changed = true;
                 }
             });
 
             return changed;
+        }
+
+        function updateAnimatedFacesForExport(timeMs) {
+            let changed = false;
+
+            faces.forEach((face, index) => {
+                if (!face?.animation) return;
+                if (syncAnimatedFace(index, timeMs, true)) changed = true;
+            });
+
+            return changed;
+        }
+
+        function animatedFaceFrameCount(face) {
+            const frames = face?.animation?.frames;
+            if (!Array.isArray(frames) || !frames.length) return 0;
+            return Math.max(0, Math.min(MAX_DECODED_GIF_FRAMES, frames.length));
+        }
+
+        function staticExportFrameCount() {
+            const animatedCount = faces.reduce((best, face) => Math.max(best, animatedFaceFrameCount(face)), 0);
+            if (animatedCount <= 0) return 15;
+            return animatedCount * Math.max(1, Math.ceil(15 / animatedCount));
         }
 
         function pushUndo(index) {
@@ -2863,6 +3078,10 @@
         }
 
         function undoFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             const face = faces[currentFace];
             if (!face || !face.undo.length) return;
 
@@ -2878,6 +3097,10 @@
         }
 
         function redoFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             const face = faces[currentFace];
             if (!face || !face.redo.length) return;
 
@@ -2964,6 +3187,7 @@
             }
 
             updateUndoRedo();
+            updateGifLayerLockUi();
         }
 
         function saveEditorToFace(updateList = false, persist = true) {
@@ -3085,6 +3309,11 @@
         }
 
         function setTool(next) {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                updateGifLayerLockUi();
+                return;
+            }
             tool = next;
 
             for (const [id, name] of [
@@ -3107,30 +3336,20 @@
         }
 
         function setShapeDropdownOpen(open) {
-            if (!shapeSelectMenu || !shapeSelectToggle) return;
-            shapeSelectMenu.hidden = !open;
-            shapeSelectToggle.classList.toggle("open", open);
-            shapeSelectToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            if (!shapeSelectMenu) return;
+            shapeSelectMenu.hidden = true;
         }
 
         function renderShapeDropdown() {
             if (!shapeSelectMenu) return;
             shapeSelectMenu.innerHTML = "";
-            SHAPE_DEFS.forEach((shape, index) => {
-                const option = document.createElement("button");
-                option.type = "button";
-                option.className = `shape-select-option ${index === currentShapeIndex ? "active" : ""}`;
-                option.textContent = shape.label;
-                option.setAttribute("role", "option");
-                option.setAttribute("aria-selected", index === currentShapeIndex ? "true" : "false");
-                option.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setShapeDropdownOpen(false);
-                    switchShape(index);
-                });
-                shapeSelectMenu.append(option);
-            });
+            shapeSelectMenu.hidden = true;
+        }
+
+        function cycleShape(delta) {
+            const total = SHAPE_DEFS.length;
+            if (!total) return;
+            switchShape((currentShapeIndex + delta + total) % total);
         }
 
         function updateShapeReadout() {
@@ -3691,12 +3910,14 @@
 
         function updateSingleSpeedReadout(id, readout, label) {
             const slider = document.getElementById(id);
-            if (!slider || !readout) return;
+            if (!slider) return;
             const max = Math.max(1, Number(slider.max || 3));
             const value = Math.max(0, Math.min(max, Number(slider.value) || 0));
             const index = Math.max(0, Math.min(SPEED_LABELS.length - 1, Math.round((value / max) * (SPEED_LABELS.length - 1))));
-            readout.textContent = SPEED_LABELS[index] || "CRUISE";
-            slider.title = `${label}: ${readout.textContent}`;
+            const text = SPEED_LABELS[index] || "CRUISE";
+            if (readout) readout.textContent = text;
+            slider.title = `${label}: ${text}`;
+            slider.closest(".speed-field")?.setAttribute("title", `${label}: ${text}`);
             updateRangeProgress(slider);
         }
 
@@ -3909,24 +4130,80 @@
             normal.needsUpdate = true;
         }
 
+        function transparentKeyRgb(transparentKey) {
+            return {
+                r: (transparentKey >> 16) & 255,
+                g: (transparentKey >> 8) & 255,
+                b: transparentKey & 255
+            };
+        }
+
+        function setTransparentKeyPixel(data, i, keyRgb) {
+            data[i] = keyRgb.r;
+            data[i + 1] = keyRgb.g;
+            data[i + 2] = keyRgb.b;
+            data[i + 3] = 255;
+        }
+
         function makeTransparentGifFrame(sourceCanvas, targetCanvas, transparentKey) {
             const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
             ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
             ctx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
             const frame = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
             const data = frame.data;
-            const r = (transparentKey >> 16) & 255;
-            const g = (transparentKey >> 8) & 255;
-            const b = transparentKey & 255;
+            const keyRgb = transparentKeyRgb(transparentKey);
 
             for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] < 128) {
-                    data[i] = r;
-                    data[i + 1] = g;
-                    data[i + 2] = b;
-                    data[i + 3] = 255;
+                if (data[i + 3] < 96) {
+                    setTransparentKeyPixel(data, i, keyRgb);
                 } else {
                     data[i + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(frame, 0, 0);
+            return targetCanvas;
+        }
+
+        function makeDitheredBgGifFrame(sourceCanvas, targetCanvas, transparentKey, bgHex, alpha) {
+            const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
+            ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+            ctx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
+            const frame = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
+            const data = frame.data;
+            const keyRgb = transparentKeyRgb(transparentKey);
+            const bgRgb = hexToRgb(bgHex);
+            const clampedAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+            const bayer = [
+                0, 48, 12, 60, 3, 51, 15, 63,
+                32, 16, 44, 28, 35, 19, 47, 31,
+                8, 56, 4, 52, 11, 59, 7, 55,
+                40, 24, 36, 20, 43, 27, 39, 23,
+                2, 50, 14, 62, 1, 49, 13, 61,
+                34, 18, 46, 30, 33, 17, 45, 29,
+                10, 58, 6, 54, 9, 57, 5, 53,
+                42, 26, 38, 22, 41, 25, 37, 21
+            ];
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const i = (y * w + x) * 4;
+                    const sourceAlpha = data[i + 3];
+                    if (sourceAlpha < 16) {
+                        const threshold = (bayer[(y & 7) * 8 + (x & 7)] + 0.5) / 64;
+                        if (clampedAlpha >= threshold) {
+                            data[i] = bgRgb.r;
+                            data[i + 1] = bgRgb.g;
+                            data[i + 2] = bgRgb.b;
+                            data[i + 3] = 255;
+                        } else {
+                            setTransparentKeyPixel(data, i, keyRgb);
+                        }
+                    } else {
+                        data[i + 3] = 255;
+                    }
                 }
             }
 
@@ -4274,6 +4551,17 @@
             
         }
 
+        function centerGeometryOnOrigin(geometry) {
+            if (!geometry) return;
+            geometry.computeBoundingBox();
+            if (!geometry.boundingBox) return;
+            const center = new THREE.Vector3();
+            geometry.boundingBox.getCenter(center);
+            geometry.translate(-center.x, -center.y, -center.z);
+            geometry.computeBoundingBox();
+            geometry.computeBoundingSphere();
+        }
+
         function buildShapeMesh() {
             if (!webglAvailable || !scene) return;
 
@@ -4284,6 +4572,7 @@
             materials = textures.map(makeFaceMaterial);
             const def = getCurrentShapeDef();
             const geometry = createGeometry(def);
+            centerGeometryOnOrigin(geometry);
             shapeMesh = new THREE.Mesh(geometry, materials);
             shapeRoot = new THREE.Group();
             shapeRoot.name = `${def.label} TRANSFORM`;
@@ -5097,12 +5386,22 @@
             }
         }
 
-        shapeSelectToggle?.addEventListener("click", (event) => {
+        shapePrevBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
             event.stopPropagation();
-            setShapeDropdownOpen(shapeSelectMenu.hidden);
+            cycleShape(-1);
         });
 
-        document.addEventListener("click", () => setShapeDropdownOpen(false));
+        shapeNextBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            cycleShape(1);
+        });
+
+        shapeSelectToggle?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+        });
 
         shapeSlider.addEventListener("input", () => switchShape(Number(shapeSlider.value)));
 
@@ -6105,6 +6404,11 @@
         }
 
         paintCanvas.addEventListener("pointerdown", (event) => {
+            if (isGifLockedFace()) {
+                event.preventDefault();
+                showGifNoDraw();
+                return;
+            }
             const point = canvasPoint(event);
             stopFaceAnimation(faces[currentFace]);
 
@@ -6142,12 +6446,20 @@
         });
 
         paintCanvas.addEventListener("pointerenter", (event) => {
+            if (isGifLockedFace()) {
+                hideBrushCursor();
+                return;
+            }
             brushCursorVisible = true;
             brushCursorPoint = canvasPoint(event);
             drawBrushCursor();
         });
 
         paintCanvas.addEventListener("pointermove", (event) => {
+            if (isGifLockedFace()) {
+                hideBrushCursor();
+                return;
+            }
             brushCursorVisible = true;
             brushCursorPoint = canvasPoint(event);
             drawBrushCursor();
@@ -6197,6 +6509,7 @@
         function drawBrushCursor() {
             drawCanvasGuide();
 
+            if (isGifLockedFace()) return;
             if (!brushCursorVisible || !brushCursorPoint || tool === "fill") return;
 
             const brush = Math.max(1, Math.round(Number(brushSize.value) || 1));
@@ -6244,6 +6557,10 @@
         paintCanvas.addEventListener("pointerleave", stopDrawing);
 
         document.getElementById("clearBtn").addEventListener("click", () => {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             pushUndo(currentFace);
 
             stopFaceAnimation(faces[currentFace]);
@@ -6259,36 +6576,56 @@
             setStatus("CLEAR");
         });
 
-        document.getElementById("imageUpload").addEventListener("change", (event) => {
+        document.getElementById("imageUpload").addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (!file) return;
+            event.target.value = "";
 
-            pushUndo(currentFace);
-            stopFaceAnimation(faces[currentFace]);
+            const targetFaceIndex = currentFace;
+            pushUndo(targetFaceIndex);
+            stopFaceAnimation(faces[targetFaceIndex]);
+
+            const url = URL.createObjectURL(file);
+            const isGif = file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif");
+
+            if (isGif) {
+                try {
+                    const frames = await decodeGifFileFrames(file);
+                    if (frames?.length) {
+                        installAnimatedGifFace(targetFaceIndex, {
+                            kind: "gifFrames",
+                            frames,
+                            sourceName: file.name,
+                            startedAt: performance.now(),
+                            currentFrame: -1,
+                            totalDuration: frames.reduce((sum, frame) => sum + Math.max(20, Number(frame.duration) || 100), 0)
+                        });
+                        URL.revokeObjectURL(url);
+                        setStatus("GIF");
+                        return;
+                    }
+                } catch (error) {
+                    console.warn("CubePaint GIF decode failed; using browser animation fallback:", error);
+                }
+            }
 
             const image = new Image();
             image.crossOrigin = "anonymous";
             image.decoding = "async";
-            const url = URL.createObjectURL(file);
-            const isGif = file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif");
 
             image.onload = () => {
-                const face = faces[currentFace];
+                const face = faces[targetFaceIndex];
+                if (!face) return;
 
                 if (isGif) {
-                    face.animation = {
+                    installAnimatedGifFace(targetFaceIndex, {
                         image,
                         url,
                         sourceName: file.name,
-                        kind: "gif"
-                    };
-                    face.sourceName = file.name;
-                    face.hasArt = true;
-                    face.changed = true;
-                    markFaceImageDirty(face);
-                    syncAnimatedFace(currentFace);
-                    renderFaceList();
-                    scheduleSave();
+                        kind: "gif",
+                        startedAt: performance.now(),
+                        currentFrame: -1
+                    });
                     setStatus("GIF");
                 } else {
                     paintCtx.save();
@@ -6307,7 +6644,6 @@
             };
 
             image.src = url;
-            event.target.value = "";
         });
 
         function moveSelectedFace(delta) {
@@ -6321,6 +6657,10 @@
 
 
         function copyCurrentFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             saveEditorToFace(true);
 
             const face = faces[currentFace];
@@ -6338,6 +6678,10 @@
         }
 
         function pasteToCurrentFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             if (!copyBuffer) {
                 setStatus("NO COPY");
                 return;
@@ -6366,6 +6710,12 @@
 
         document.getElementById("copyBtn").addEventListener("click", copyCurrentFace);
         document.getElementById("pasteBtn").addEventListener("click", pasteToCurrentFace);
+
+        markGifLockableControls();
+        toolbar.addEventListener("pointerdown", blockGifLockedInteraction, true);
+        toolbar.addEventListener("click", blockGifLockedInteraction, true);
+        toolbar.addEventListener("input", blockGifLockedInteraction, true);
+        updateGifLayerLockUi();
 
         psxWobble.addEventListener("input", () => {
             const level = Math.max(0, Math.min(PSX_WOBBLE_PRESETS.length - 1, Math.round(Number(psxWobble.value) || 0)));
@@ -6486,7 +6836,7 @@
         let previewFpsTickTime = 0;
 
         function animate(now) {
-            updateAnimatedFaces();
+            updateAnimatedFaces(now);
 
             const dt = Math.min((now - lastTime) / 1000, 0.05);
             lastTime = now;
@@ -6635,14 +6985,17 @@
             const exportShouldSpin = exportMaxSpeed > 0.001;
             const fullTurnSeconds = exportShouldSpin ? (Math.PI * 2) / exportMaxSpeed : 0;
             const seamlessLoopSeconds = exportShouldSpin ? Math.max(1.2, Math.min(12, fullTurnSeconds)) : 0;
-            const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : 1;
+            const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : staticExportFrameCount();
 
             const transparentExport = bgAlpha <= 0.001;
+            const ditheredTransparentExport = bgAlpha > 0.001 && bgAlpha < 0.999;
+            const binaryTransparentExport = transparentExport || ditheredTransparentExport;
             const transparentKey = 0x010203;
             const exportRenderer = new THREE.WebGLRenderer({
                 antialias: true,
                 preserveDrawingBuffer: true,
-                alpha: true
+                alpha: true,
+                premultipliedAlpha: false
             });
             exportRenderer.setPixelRatio(1);
             const exportAliasScale = currentPsxAliasScale();
@@ -6650,7 +7003,7 @@
             const exportRenderHeight = Math.max(1, Math.round(exportHeight * exportAliasScale));
             exportRenderer.setSize(exportRenderWidth, exportRenderHeight, false);
             exportRenderer.domElement.style.imageRendering = exportAliasScale < 0.999 ? "pixelated" : "";
-            exportRenderer.setClearColor(transparentExport ? transparentKey : bgColor.value, transparentExport ? 0 : bgAlpha);
+            exportRenderer.setClearColor(binaryTransparentExport ? transparentKey : bgColor.value, binaryTransparentExport ? 0 : 1);
 
             const exportScene = new THREE.Scene();
             const exportCamera = makeExportCameraFromCurrentView(exportWidth / exportHeight);
@@ -6659,6 +7012,7 @@
             const exportTextures = faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
             const exportMaterials = exportTextures.map(makeFaceMaterial);
             const exportGeometry = createGeometry(getCurrentShapeDef());
+            centerGeometryOnOrigin(exportGeometry);
             const exportMesh = new THREE.Mesh(exportGeometry, exportMaterials);
             const exportRoot = new THREE.Group();
             exportRoot.add(exportMesh);
@@ -6684,7 +7038,7 @@
                 height: exportHeight,
                 workerScript
             };
-            if (transparentExport) gifOptions.transparent = transparentKey;
+            if (binaryTransparentExport) gifOptions.transparent = transparentKey;
             const gif = new GIF(gifOptions);
             const frameCanvas = document.createElement("canvas");
             frameCanvas.width = exportWidth;
@@ -6719,6 +7073,11 @@
                     exportMesh.rotation.copy(baseExportMeshRotation);
                     exportMesh.rotation.y += t * exportXRotationSpan;
                     exportMesh.rotation.x += t * exportYRotationSpan;
+                    if (updateAnimatedFacesForExport(i * delay)) {
+                        exportTextures.forEach((texture) => {
+                            texture.needsUpdate = true;
+                        });
+                    }
                     applyVertexWobbleToMesh(exportMesh, i * delay);
 
                     exportRenderer.render(exportScene, exportCamera);
@@ -6728,9 +7087,12 @@
                         aliasFrameCtx.drawImage(exportRenderer.domElement, 0, 0, exportWidth, exportHeight);
                         frameSource = aliasFrameCanvas;
                     }
-                    const frame = transparentExport
-                        ? makeTransparentGifFrame(frameSource, frameCanvas, transparentKey)
-                        : frameSource;
+                    let frame = frameSource;
+                    if (transparentExport) {
+                        frame = makeTransparentGifFrame(frameSource, frameCanvas, transparentKey);
+                    } else if (ditheredTransparentExport) {
+                        frame = makeDitheredBgGifFrame(frameSource, frameCanvas, transparentKey, bgColor.value, bgAlpha);
+                    }
                     gif.addFrame(frame, { copy: true, delay });
 
                     if (i % 8 === 0) {
