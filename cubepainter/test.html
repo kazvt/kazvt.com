@@ -1025,13 +1025,21 @@
 
         .speed-stack {
             display: grid;
-            grid-template-rows: repeat(2, minmax(30px, auto));
-            gap: 4px;
+            grid-template-rows: repeat(2, 20px);
+            gap: 2px;
             min-width: 0;
             align-self: end;
         }
 
-        .speed-field,
+        .speed-field {
+            align-self: center;
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1fr);
+            gap: 5px;
+            align-items: center;
+            min-width: 0;
+        }
+
         .fps-field,
         .psx-field {
             align-self: end;
@@ -1041,7 +1049,11 @@
             min-width: 0;
         }
 
-        .speed-field input[type="range"],
+        .speed-field input[type="range"] {
+            height: 18px;
+            min-width: 0;
+        }
+
         .fps-field input[type="range"],
         .psx-field input[type="range"] {
             height: 22px;
@@ -1074,6 +1086,14 @@
             text-align: center;
             font-size: 9px;
             line-height: 12px;
+        }
+
+        .speed-field .field-label {
+            min-height: 0;
+            text-align: right;
+            font-size: 10px;
+            line-height: 1;
+            letter-spacing: 0.02em;
         }
 
         .field {
@@ -1661,13 +1681,13 @@
                     <div class="export">
                         <div class="export-grid">
                             <div class="field speed-stack" title="speed preview">
-                                <div class="speed-field x-speed-field" title="X SPD preview">
-                                    <span class="field-label">X SPD: <strong id="xSpeedReadout">CRUISE</strong></span>
-                                    <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X SPD preview" aria-label="X SPD preview" />
+                                <div class="speed-field x-speed-field" title="X speed preview">
+                                    <span class="field-label" title="X speed preview">XS:</span>
+                                    <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X speed preview" aria-label="X speed preview" />
                                 </div>
-                                <div class="speed-field y-speed-field" title="Y SPD preview">
-                                    <span class="field-label">Y SPD: <strong id="ySpeedReadout">SLEEPY</strong></span>
-                                    <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y SPD preview" aria-label="Y SPD preview" />
+                                <div class="speed-field y-speed-field" title="Y speed preview">
+                                    <span class="field-label" title="Y speed preview">YS:</span>
+                                    <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y speed preview" aria-label="Y speed preview" />
                                 </div>
                             </div>
 
@@ -3946,12 +3966,14 @@
 
         function updateSingleSpeedReadout(id, readout, label) {
             const slider = document.getElementById(id);
-            if (!slider || !readout) return;
+            if (!slider) return;
             const max = Math.max(1, Number(slider.max || 3));
             const value = Math.max(0, Math.min(max, Number(slider.value) || 0));
             const index = Math.max(0, Math.min(SPEED_LABELS.length - 1, Math.round((value / max) * (SPEED_LABELS.length - 1))));
-            readout.textContent = SPEED_LABELS[index] || "CRUISE";
-            slider.title = `${label}: ${readout.textContent}`;
+            const text = SPEED_LABELS[index] || "CRUISE";
+            if (readout) readout.textContent = text;
+            slider.title = `${label}: ${text}`;
+            slider.closest(".speed-field")?.setAttribute("title", `${label}: ${text}`);
             updateRangeProgress(slider);
         }
 
