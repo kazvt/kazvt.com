@@ -2954,6 +2954,18 @@
             return changed;
         }
 
+        function animatedFaceFrameCount(face) {
+            const frames = face?.animation?.frames;
+            if (!Array.isArray(frames) || !frames.length) return 0;
+            return Math.max(0, Math.min(MAX_DECODED_GIF_FRAMES, frames.length));
+        }
+
+        function staticExportFrameCount() {
+            const animatedCount = faces.reduce((best, face) => Math.max(best, animatedFaceFrameCount(face)), 0);
+            if (animatedCount <= 0) return 15;
+            return animatedCount * Math.max(1, Math.ceil(15 / animatedCount));
+        }
+
         function pushUndo(index) {
             const face = faces[index];
             if (!face) return;
@@ -6787,7 +6799,7 @@
             const exportShouldSpin = exportMaxSpeed > 0.001;
             const fullTurnSeconds = exportShouldSpin ? (Math.PI * 2) / exportMaxSpeed : 0;
             const seamlessLoopSeconds = exportShouldSpin ? Math.max(1.2, Math.min(12, fullTurnSeconds)) : 0;
-            const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : 1;
+            const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : staticExportFrameCount();
 
             const transparentExport = bgAlpha <= 0.001;
             const transparentKey = 0x010203;
