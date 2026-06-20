@@ -68,7 +68,7 @@
             min-width: 0;
             height: 28px;
             border: 2px solid var(--paper);
-            border-radius: 999px;
+            border-radius: 0;
             display: grid;
             gap: 8px;
             align-items: center;
@@ -78,7 +78,77 @@
         }
 
         .shape-fader {
-            grid-template-columns: 88px 1fr;
+            grid-template-columns: 1fr;
+            position: relative;
+            padding: 0;
+            overflow: visible;
+        }
+
+        .shape-select-toggle {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: var(--accent);
+            color: var(--paper);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 8px;
+            padding: 0 10px;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            text-align: left;
+            box-shadow: inset 0 0 0 1px rgba(255,246,216,0.2);
+        }
+
+        .shape-select-toggle:hover,
+        .shape-select-toggle.open {
+            background: var(--ink2);
+        }
+
+        .shape-select-caret {
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .shape-select-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: -2px;
+            right: -2px;
+            z-index: 80;
+            border: 2px solid var(--paper);
+            background: var(--accent);
+            color: var(--paper);
+            box-shadow: 0 5px 0 var(--ink);
+            display: grid;
+            max-height: 260px;
+            overflow: auto;
+        }
+
+        .shape-select-menu[hidden] {
+            display: none !important;
+        }
+
+        .shape-select-option {
+            border: 0;
+            border-bottom: 2px solid rgba(255,246,216,0.28);
+            background: var(--accent);
+            color: var(--paper);
+            height: 30px;
+            text-align: left;
+            padding: 0 10px;
+            font: inherit;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+        }
+
+        .shape-select-option:hover,
+        .shape-select-option.active {
+            background: var(--ink2);
         }
 
         .poly-fader {
@@ -113,7 +183,7 @@
 
         .top-center {
             border: 2px solid var(--paper);
-            border-radius: 999px;
+            border-radius: 0;
             padding: 3px 14px;
             font-size: 12px;
             white-space: nowrap;
@@ -121,6 +191,7 @@
             display: grid;
             place-items: center;
             text-align: center;
+            justify-self: center;
         }
 
         .status {
@@ -735,68 +806,6 @@
             background: rgba(20, 3, 6, 0.38);
         }
 
-        .transform-mode-switch {
-            position: absolute;
-            left: 10px;
-            bottom: 10px;
-            z-index: 8;
-            color: var(--paper);
-            background: rgba(20, 3, 6, 0.55);
-            border: 2px solid rgba(255, 246, 216, 0.7);
-            padding: 4px;
-            font-size: 9px;
-            font-weight: 900;
-            letter-spacing: 0.06em;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            align-items: stretch;
-        }
-
-        .transform-mode-switch button {
-            min-width: 62px;
-            border: 2px solid rgba(255, 246, 216, 0.48);
-            background: rgba(255, 246, 216, 0.08);
-            color: rgba(255, 246, 216, 0.82);
-            font: inherit;
-            cursor: pointer;
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 4px;
-            align-items: center;
-            justify-content: center;
-            padding: 3px 5px;
-        }
-
-        .transform-mode-switch button.active {
-            background: rgba(255, 246, 216, 0.9);
-            color: var(--ink);
-            border-color: var(--paper);
-        }
-
-        .unity-gizmo-mini {
-            width: 34px;
-            height: 34px;
-            display: block;
-        }
-
-        .unity-gizmo-mini .axis-x { stroke: #ff4b4b; fill: #ff4b4b; }
-        .unity-gizmo-mini .axis-y { stroke: #49e066; fill: #49e066; }
-        .unity-gizmo-mini .axis-z { stroke: #5b8cff; fill: #5b8cff; }
-        .unity-gizmo-mini .axis-muted { stroke: rgba(255,246,216,.72); fill: none; }
-
-        .transform-mode-label {
-            display: grid;
-            gap: 1px;
-            line-height: 1.05;
-        }
-
-        .transform-mode-label small {
-            opacity: 0.72;
-            font-size: 8px;
-            letter-spacing: 0.1em;
-        }
-
         .save-overlay {
             position: absolute;
             inset: 0;
@@ -817,16 +826,35 @@
             display: none !important;
         }
 
-        .save-spinner {
-            width: 58px;
-            height: 58px;
-            border: 5px solid rgba(255, 246, 216, 0.25);
-            border-top-color: var(--paper);
-            animation: save-spin 0.72s steps(12) infinite;
+        .save-cube {
+            --cube-size: 54px;
+            width: var(--cube-size);
+            height: var(--cube-size);
+            position: relative;
+            transform-style: preserve-3d;
+            animation: save-cube-spin 0.82s linear infinite;
+            filter: drop-shadow(0 8px 0 rgba(20,3,6,.42));
         }
 
-        @keyframes save-spin {
-            to { transform: rotate(360deg); }
+        .save-cube-face {
+            position: absolute;
+            inset: 0;
+            border: 2px solid var(--ink);
+            background: linear-gradient(135deg, #fff6d8 0%, #efe0b8 58%, #dfc995 100%);
+            box-shadow: inset 0 0 14px rgba(255,255,255,.24);
+            opacity: .98;
+        }
+
+        .save-cube-front { transform: translateZ(calc(var(--cube-size) / 2)); }
+        .save-cube-back { transform: rotateY(180deg) translateZ(calc(var(--cube-size) / 2)); }
+        .save-cube-right { transform: rotateY(90deg) translateZ(calc(var(--cube-size) / 2)); }
+        .save-cube-left { transform: rotateY(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+        .save-cube-top { transform: rotateX(90deg) translateZ(calc(var(--cube-size) / 2)); }
+        .save-cube-bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+
+        @keyframes save-cube-spin {
+            from { transform: rotateX(-18deg) rotateY(0deg) rotateZ(0deg); }
+            to { transform: rotateX(342deg) rotateY(720deg) rotateZ(180deg); }
         }
 
         .preview-debug {
@@ -927,11 +955,12 @@
         }
 
         .bg-picker-toggle {
+            --bg-button-color: #140306;
             width: 100%;
             height: 32px;
             border: 2px solid var(--line);
-            background: var(--paper2);
-            color: var(--ink);
+            background: var(--bg-button-color);
+            color: var(--paper);
             display: grid;
             grid-template-columns: 1fr;
             gap: 0;
@@ -942,12 +971,27 @@
             font-weight: 900;
             font-size: 10px;
             padding: 0 6px;
-            text-align: left;
+            text-align: center;
+            text-shadow: 0 1px 0 var(--ink);
+        }
+
+        .bg-picker-toggle.transparent {
+            color: var(--ink);
+            text-shadow: 0 1px 0 var(--paper);
+            background:
+                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+                var(--checker2);
+            background-size: 12px 12px;
+            background-position: 0 0, 0 6px, 6px -6px, -6px 0;
         }
 
         .bg-picker-toggle:hover,
         .bg-picker-toggle.open {
-            background: var(--paper);
+            outline: 2px solid var(--paper);
+            outline-offset: -5px;
         }
 
         .bg-picker-chip {
@@ -1184,7 +1228,7 @@
             }
 
             .top-center {
-                justify-self: start;
+                justify-self: stretch;
             }
 
             .status {
@@ -1207,9 +1251,13 @@
     <div class="app">
         <header class="top">
             <div class="brand">CUBEPAINT</div>
-            <div class="shape-fader" title="shape selector">
-                <span id="shapeNameReadout">CUBE</span>
-                <input id="shapeSlider" type="range" min="0" max="0" step="1" value="0" aria-label="shape selector" />
+            <div class="shape-fader shape-select" id="shapeSelect" title="shape selector">
+                <button class="shape-select-toggle" id="shapeSelectToggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span id="shapeNameReadout">CUBE</span>
+                    <span class="shape-select-caret">▾</span>
+                </button>
+                <div class="shape-select-menu" id="shapeSelectMenu" role="listbox" hidden></div>
+                <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
             <div class="poly-fader" id="polyFader" title="low-poly control" hidden>
                 <span>POLY</span>
@@ -1376,8 +1424,17 @@
                     <div id="cubeStage">
                         <pre class="preview-debug" id="previewDebug" hidden></pre>
                         <button class="stage-reset-view" id="stageResetViewBtn" type="button" title="reset view">RESET</button>
-                        <div class="transform-mode-switch" id="transformModeReadout" aria-live="polite"></div>
-                        <div class="save-overlay" id="saveOverlay" hidden><div class="save-spinner"></div><strong id="saveOverlayText">SAVING</strong></div>
+                        <div class="save-overlay" id="saveOverlay" hidden>
+                            <div class="save-cube" aria-hidden="true">
+                                <span class="save-cube-face save-cube-front"></span>
+                                <span class="save-cube-face save-cube-back"></span>
+                                <span class="save-cube-face save-cube-right"></span>
+                                <span class="save-cube-face save-cube-left"></span>
+                                <span class="save-cube-face save-cube-top"></span>
+                                <span class="save-cube-face save-cube-bottom"></span>
+                            </div>
+                            <strong id="saveOverlayText">SAVING</strong>
+                        </div>
                     </div>
 
                     <div class="export">
@@ -1474,7 +1531,6 @@
 
     <script type="module">
         import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
-        import { TransformControls } from "three/addons/controls/TransformControls.js";
 
         const FACE_SIZE = 512;
         const MAX_UNDO_HISTORY = 40;
@@ -1624,6 +1680,9 @@
         const faceList = document.getElementById("faceList");
         const previewDebug = document.getElementById("previewDebug");
         const shapeSlider = document.getElementById("shapeSlider");
+        const shapeSelect = document.getElementById("shapeSelect");
+        const shapeSelectToggle = document.getElementById("shapeSelectToggle");
+        const shapeSelectMenu = document.getElementById("shapeSelectMenu");
         const shapeNameReadout = document.getElementById("shapeNameReadout");
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
@@ -1696,12 +1755,11 @@
         let shapeRoot = null;
         let transformControls = null;
         let transformControlsHelper = null;
-        let transformMode = "rotate";
-        let transformControlDragging = false;
-        let unitySnapHeld = false;
-        let unitySnapToggled = false;
-        let unityCtrlSnapHeld = false;
-        let lastTransformSaveAt = 0;
+        let warudoLookActive = false;
+        let warudoPointerId = null;
+        const warudoKeys = new Set();
+        let warudoMoveFrame = null;
+        let warudoLastFrameTime = 0;
         let materials = [];
         let textures = [];
         let webglAvailable = false;
@@ -1720,6 +1778,9 @@
         let cameraVerticalOrbit = 0;
         let cameraHorizontalOrbit = 0;
         let cameraPanOffset = new THREE.Vector3(0, 0, 0);
+        const DEFAULT_WARUDO_CAMERA_POSITION = CAMERA_BASE_VECTOR.clone().multiplyScalar(DEFAULT_CAMERA_DISTANCE);
+        let warudoCameraPosition = DEFAULT_WARUDO_CAMERA_POSITION.clone();
+        let warudoCameraHasSavedPose = false;
         let colorHistory = [];
         let saveTimer = null;
         let idleSaveHandle = null;
@@ -1767,6 +1828,14 @@
             cameraDistance = Number(savedSession.camera.distance) || cameraDistance;
             cameraVerticalOrbit = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, Number(savedSession.camera.verticalOrbit) || 0));
             cameraHorizontalOrbit = Number(savedSession.camera.horizontalOrbit) || 0;
+            if (savedSession.camera.position) {
+                warudoCameraPosition.set(
+                    Number(savedSession.camera.position.x) || DEFAULT_WARUDO_CAMERA_POSITION.x,
+                    Number(savedSession.camera.position.y) || DEFAULT_WARUDO_CAMERA_POSITION.y,
+                    Number(savedSession.camera.position.z) || DEFAULT_WARUDO_CAMERA_POSITION.z
+                );
+                warudoCameraHasSavedPose = true;
+            }
         }
         if (savedSession && savedSession.shapeRotations) {
             shapeRotations = savedSession.shapeRotations;
@@ -2160,25 +2229,23 @@
             canvasWrap.style.height = `${size}px`;
         }
 
-        function positionCamera(targetCamera, distance, verticalOrbit, horizontalOrbit = 0, panTarget = cameraPanOffset) {
-            if (!targetCamera) return;
-            const elevation = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, CAMERA_BASE_ELEVATION + verticalOrbit));
-            const azimuth = CAMERA_BASE_AZIMUTH + horizontalOrbit;
-            const flatRadius = Math.cos(elevation) * distance;
+        function clampWarudoPitch(value) {
+            return Math.max(-1.45, Math.min(1.45, value));
+        }
 
-            targetCamera.position.set(
-                Math.cos(azimuth) * flatRadius,
-                Math.sin(elevation) * distance,
-                Math.sin(azimuth) * flatRadius
-            );
-
-            targetCamera.position.add(panTarget);
-            targetCamera.lookAt(panTarget);
-            targetCamera.updateProjectionMatrix();
+        function setWarudoLookAt(target = cameraPanOffset) {
+            if (!camera) return;
+            const direction = target.clone().sub(warudoCameraPosition).normalize();
+            cameraVerticalOrbit = clampWarudoPitch(Math.asin(Math.max(-1, Math.min(1, direction.y))));
+            cameraHorizontalOrbit = Math.atan2(-direction.x, -direction.z);
         }
 
         function applyCameraDistance() {
-            positionCamera(camera, cameraDistance, cameraVerticalOrbit, cameraHorizontalOrbit);
+            if (!camera) return;
+            camera.position.copy(warudoCameraPosition);
+            camera.rotation.order = "YXZ";
+            camera.rotation.set(cameraVerticalOrbit, cameraHorizontalOrbit, 0, "YXZ");
+            camera.updateProjectionMatrix();
         }
 
         function resizeRenderer() {
@@ -2654,11 +2721,39 @@
             return SHAPE_DEFS.findIndex((shape) => shape.id === id);
         }
 
+        function setShapeDropdownOpen(open) {
+            if (!shapeSelectMenu || !shapeSelectToggle) return;
+            shapeSelectMenu.hidden = !open;
+            shapeSelectToggle.classList.toggle("open", open);
+            shapeSelectToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        }
+
+        function renderShapeDropdown() {
+            if (!shapeSelectMenu) return;
+            shapeSelectMenu.innerHTML = "";
+            SHAPE_DEFS.forEach((shape, index) => {
+                const option = document.createElement("button");
+                option.type = "button";
+                option.className = `shape-select-option ${index === currentShapeIndex ? "active" : ""}`;
+                option.textContent = shape.label;
+                option.setAttribute("role", "option");
+                option.setAttribute("aria-selected", index === currentShapeIndex ? "true" : "false");
+                option.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setShapeDropdownOpen(false);
+                    switchShape(index);
+                });
+                shapeSelectMenu.append(option);
+            });
+        }
+
         function updateShapeReadout() {
             const def = getCurrentShapeDef();
             shapeNameReadout.textContent = def.label;
             shapeSlider.value = String(currentShapeIndex);
             updateRangeProgress(shapeSlider);
+            renderShapeDropdown();
             updatePolyControl();
         }
 
@@ -2684,14 +2779,6 @@
 
         function disposeCurrentMesh() {
             if (!shapeMesh && !shapeRoot) return;
-            if (transformControls) {
-                transformControls.detach();
-            }
-            if (transformControlsHelper) {
-                scene.remove(transformControlsHelper);
-                transformControlsHelper = null;
-                transformControls = null;
-            }
             if (shapeRoot) {
                 scene.remove(shapeRoot);
             } else if (shapeMesh) {
@@ -3482,109 +3569,24 @@
             }
         }
 
-        function moveGizmoSvg() {
-            return `
-                <svg class="unity-gizmo-mini" viewBox="0 0 36 36" aria-hidden="true">
-                    <path class="axis-x" d="M18 18 L31 18" stroke-width="3" stroke-linecap="square"/>
-                    <path class="axis-x" d="M31 18 l-5 -4 v8z"/>
-                    <path class="axis-y" d="M18 18 L18 5" stroke-width="3" stroke-linecap="square"/>
-                    <path class="axis-y" d="M18 5 l-4 5 h8z"/>
-                    <path class="axis-z" d="M18 18 L8 27" stroke-width="3" stroke-linecap="square"/>
-                    <path class="axis-z" d="M8 27 l2 -6 4 5z"/>
-                    <rect class="axis-muted" x="15" y="15" width="6" height="6" stroke-width="2"/>
-                </svg>`;
-        }
-
-        function rotateGizmoSvg() {
-            return `
-                <svg class="unity-gizmo-mini" viewBox="0 0 36 36" aria-hidden="true">
-                    <ellipse class="axis-x" cx="18" cy="18" rx="13" ry="5" stroke-width="2.4" fill="none" transform="rotate(90 18 18)"/>
-                    <ellipse class="axis-y" cx="18" cy="18" rx="13" ry="5" stroke-width="2.4" fill="none"/>
-                    <ellipse class="axis-z" cx="18" cy="18" rx="13" ry="13" stroke-width="2.2" fill="none"/>
-                    <circle class="axis-muted" cx="18" cy="18" r="2" stroke-width="2"/>
-                </svg>`;
-        }
-
-        function updateTransformSnapping() {
-            if (!transformControls) return;
-            const snapping = unitySnapHeld || unitySnapToggled || unityCtrlSnapHeld;
-            transformControls.setTranslationSnap(snapping ? 0.25 : null);
-            transformControls.setRotationSnap(snapping ? THREE.MathUtils.degToRad(15) : null);
-        }
-
         function updateTransformModeReadout() {
-            const readout = document.getElementById("transformModeReadout");
-            if (!readout) return;
-            const isMove = transformMode === "move";
-            readout.innerHTML = `
-                <button type="button" class="${isMove ? "active" : ""}" data-transform-mode="move" title="Position / Move gizmo">${moveGizmoSvg()}<span>POSITION</span></button>
-                <button type="button" class="${!isMove ? "active" : ""}" data-transform-mode="rotate" title="Rotation gizmo">${rotateGizmoSvg()}<span>ROTATE</span></button>
-            `;
-            readout.querySelectorAll("button[data-transform-mode]").forEach((button) => {
-                button.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setTransformMode(button.dataset.transformMode);
-                });
-            });
+            // Warudo-style camera mode has no object transform HUD.
         }
 
-        function updateTransformControlsMode(status = true) {
-            if (transformControls) {
-                transformControls.setMode(transformMode === "move" ? "translate" : "rotate");
-                transformControls.setSpace(transformMode === "move" ? "global" : "local");
-                transformControls.setSize(transformMode === "move" ? 0.9 : 0.95);
-                transformControls.showX = true;
-                transformControls.showY = true;
-                transformControls.showZ = true;
-                updateTransformSnapping();
-                if (shapeRoot && transformControls.object !== shapeRoot) {
-                    transformControls.attach(shapeRoot);
-                }
-            }
-            updateTransformModeReadout();
-            if (status) setStatus(transformMode === "move" ? "MOVE" : "ROTATE");
+        function updateTransformControlsMode() {
+            // TransformControls removed: viewport navigation is now player/free-look based.
         }
 
-        function setTransformMode(nextMode) {
-            transformMode = nextMode === "move" ? "move" : "rotate";
-            updateTransformControlsMode(true);
+        function setTransformMode() {
+            // Kept as a compatibility no-op for old saved event paths.
         }
 
         function ensureTransformControls() {
-            if (!webglAvailable || !renderer || !camera || !scene || transformControls) return;
-
-            transformControls = new TransformControls(camera, renderer.domElement);
-            transformControlsHelper = typeof transformControls.getHelper === "function"
-                ? transformControls.getHelper()
-                : transformControls;
-            transformControlsHelper.renderOrder = 900;
-            scene.add(transformControlsHelper);
-            transformControls.addEventListener("dragging-changed", (event) => {
-                transformControlDragging = Boolean(event.value);
-                userIsRotatingPreview = transformControlDragging;
-                if (!transformControlDragging) {
-                    saveCurrentShapeContext();
-                    updateDebugInfo();
-                    scheduleSave();
-                }
-            });
-            transformControls.addEventListener("objectChange", () => {
-                saveCurrentShapeContext();
-                const now = performance.now();
-                if (now - lastTransformSaveAt > 250) {
-                    updateDebugInfo();
-                    lastTransformSaveAt = now;
-                }
-            });
-            updateTransformControlsMode(false);
+            // No gizmo handles in Warudo camera mode.
         }
 
         function syncTransformControls() {
-            ensureTransformControls();
-            if (!transformControls || !shapeRoot) return;
-            transformControls.attach(shapeRoot);
-            updateTransformControlsMode(false);
+            // No gizmo handles in Warudo camera mode.
         }
 
         function buildShapeMesh() {
@@ -3624,6 +3626,10 @@
 
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+            if (!warudoCameraHasSavedPose) {
+                warudoCameraPosition.copy(DEFAULT_WARUDO_CAMERA_POSITION);
+                setWarudoLookAt(cameraPanOffset);
+            }
             applyCameraDistance();
             buildShapeMesh();
         } catch (error) {
@@ -3671,9 +3677,11 @@
                 `CAM X  ${roundDebug(relPos.x)}`,
                 `CAM Y  ${roundDebug(relPos.y)}`,
                 `CAM Z  ${roundDebug(relPos.z)}`,
-                `DIST   ${roundDebug(cameraDistance)}`,
-                `CAM V  ${roundDebug(cameraVerticalOrbit)} RAD / ${degreesDebug(cameraVerticalOrbit)}°`,
-                `CAM H  ${roundDebug(cameraHorizontalOrbit)} RAD / ${degreesDebug(cameraHorizontalOrbit)}°`,
+                `WARUDO X ${roundDebug(warudoCameraPosition.x)}`,
+                `WARUDO Y ${roundDebug(warudoCameraPosition.y)}`,
+                `WARUDO Z ${roundDebug(warudoCameraPosition.z)}`,
+                `LOOK V ${roundDebug(cameraVerticalOrbit)} RAD / ${degreesDebug(cameraVerticalOrbit)}°`,
+                `LOOK H ${roundDebug(cameraHorizontalOrbit)} RAD / ${degreesDebug(cameraHorizontalOrbit)}°`,
                 `OBJ X  ${roundDebug(objPos.x)}`,
                 `OBJ Y  ${roundDebug(objPos.y)}`,
                 `OBJ Z  ${roundDebug(objPos.z)}`,
@@ -3694,9 +3702,9 @@
                 shapeMesh.rotation.set(0, 0, 0);
             }
             cameraDistance = DEFAULT_CAMERA_DISTANCE;
-            cameraVerticalOrbit = 0;
-            cameraHorizontalOrbit = 0;
             cameraPanOffset.set(0, 0, 0);
+            warudoCameraPosition.copy(DEFAULT_WARUDO_CAMERA_POSITION);
+            setWarudoLookAt(cameraPanOffset);
             applyCameraDistance();
             saveCurrentShapeContext();
             setStatus("VIEW RESET");
@@ -3846,42 +3854,105 @@
             return true;
         }
 
-        function getUnityMouseAction(event) {
-            const alt = event.altKey || event.getModifierState?.("Alt") || false;
-            if (transformControls?.dragging || transformControls?.axis) return null;
-            if (event.button === 0 && !alt) return "select";
-            if (event.button === 0 && alt) return "orbit";
-            if (event.button === 1) return "pan";
-            if (event.button === 2 && alt) return "zoom";
-            if (event.button === 2) return "orbit";
-            return null;
+        function getWarudoForwardVector(flat = false) {
+            const forward = new THREE.Vector3(0, 0, -1).applyEuler(camera.rotation);
+            if (flat) {
+                forward.y = 0;
+                if (forward.lengthSq() < 0.0001) forward.set(0, 0, -1);
+            }
+            return forward.normalize();
+        }
+
+        function getWarudoRightVector() {
+            const right = new THREE.Vector3(1, 0, 0).applyEuler(camera.rotation);
+            right.y = 0;
+            if (right.lengthSq() < 0.0001) right.set(1, 0, 0);
+            return right.normalize();
+        }
+
+        function moveWarudoCamera(dt) {
+            if (!warudoLookActive || !camera) return;
+            const move = new THREE.Vector3();
+            const forward = getWarudoForwardVector(true);
+            const right = getWarudoRightVector();
+            if (warudoKeys.has("w")) move.add(forward);
+            if (warudoKeys.has("s")) move.sub(forward);
+            if (warudoKeys.has("d")) move.add(right);
+            if (warudoKeys.has("a")) move.sub(right);
+            if (warudoKeys.has("e")) move.y += 1;
+            if (warudoKeys.has("q")) move.y -= 1;
+            if (move.lengthSq() > 0) {
+                const speed = (warudoKeys.has("shift") ? 7.5 : 3.2) * Math.max(0.2, Number(document.getElementById("speed")?.value || 0.6) + 0.65);
+                warudoCameraPosition.add(move.normalize().multiplyScalar(speed * dt));
+                applyCameraDistance();
+                updateDebugInfo();
+            }
+        }
+
+        function warudoCameraLoop(now) {
+            if (!warudoLookActive) {
+                warudoMoveFrame = null;
+                warudoLastFrameTime = 0;
+                return;
+            }
+            const dt = warudoLastFrameTime ? Math.min(0.05, (now - warudoLastFrameTime) / 1000) : 0;
+            warudoLastFrameTime = now;
+            moveWarudoCamera(dt);
+            warudoMoveFrame = requestAnimationFrame(warudoCameraLoop);
+        }
+
+        function startWarudoLoop() {
+            if (!warudoMoveFrame) {
+                warudoLastFrameTime = 0;
+                warudoMoveFrame = requestAnimationFrame(warudoCameraLoop);
+            }
         }
 
         function startPreviewDrag(event) {
             if (!webglAvailable || !renderer || !shapeMesh) return;
-            const action = getUnityMouseAction(event);
-            if (!action) return;
-            event.preventDefault();
-            previewDragging = action;
-            previewDragButton = event.button;
-            userIsRotatingPreview = action === "orbit";
+            stage.focus?.();
             previewMoved = false;
             previewPointerStart = { x: event.clientX, y: event.clientY };
             previewLast = { x: event.clientX, y: event.clientY };
-            renderer.domElement.setPointerCapture(event.pointerId);
+            previewDragButton = event.button;
+
+            if (event.button === 2) {
+                event.preventDefault();
+                previewDragging = "warudo-look";
+                warudoLookActive = true;
+                warudoPointerId = event.pointerId;
+                userIsRotatingPreview = true;
+                renderer.domElement.setPointerCapture(event.pointerId);
+                renderer.domElement.classList.add("warudo-looking");
+                startWarudoLoop();
+                setStatus("WARUDO LOOK");
+                return;
+            }
+
+            if (event.button === 1) {
+                event.preventDefault();
+                previewDragging = "warudo-pan";
+                renderer.domElement.setPointerCapture(event.pointerId);
+                setStatus("PAN");
+                return;
+            }
+
+            if (event.button === 0) {
+                previewDragging = "select";
+                renderer.domElement.setPointerCapture(event.pointerId);
+            }
         }
 
         function panCameraByPixels(dx, dy) {
             const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
             const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
-            const scale = cameraDistance * 0.0025;
-            cameraPanOffset.add(right.multiplyScalar(-dx * scale));
-            cameraPanOffset.add(up.multiplyScalar(dy * scale));
+            const scale = 0.0065 * Math.max(0.75, cameraDistance / DEFAULT_CAMERA_DISTANCE);
+            warudoCameraPosition.add(right.multiplyScalar(-dx * scale));
+            warudoCameraPosition.add(up.multiplyScalar(dy * scale));
             applyCameraDistance();
         }
 
         function movePreviewDrag(event) {
-            if (transformControls?.dragging) return;
             if (!previewDragging || !shapeMesh || !previewLast) return;
             event.preventDefault();
 
@@ -3892,15 +3963,12 @@
                 previewMoved = true;
             }
 
-            if (previewDragging === "pan") {
+            if (previewDragging === "warudo-look") {
+                cameraHorizontalOrbit -= dx * 0.0048;
+                cameraVerticalOrbit = clampWarudoPitch(cameraVerticalOrbit - dy * 0.0048);
+                applyCameraDistance();
+            } else if (previewDragging === "warudo-pan") {
                 panCameraByPixels(dx, dy);
-            } else if (previewDragging === "zoom") {
-                cameraDistance = Math.max(2.2, Math.min(12, cameraDistance + dy * 0.02));
-                applyCameraDistance();
-            } else if (previewDragging === "orbit") {
-                cameraHorizontalOrbit -= dx * 0.01;
-                cameraVerticalOrbit = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, cameraVerticalOrbit + dy * 0.01));
-                applyCameraDistance();
             }
 
             previewLast = { x: event.clientX, y: event.clientY };
@@ -3908,9 +3976,9 @@
         }
 
         function stopPreviewDrag(event) {
-            if (transformControls?.dragging) return;
             if (!previewDragging) return;
             const wasClick = (previewDragging === "select") && !previewMoved && previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) <= 4;
+            const endingLook = previewDragging === "warudo-look";
             previewDragging = false;
             userIsRotatingPreview = false;
             previewLast = null;
@@ -3918,17 +3986,22 @@
             if (renderer && renderer.domElement.hasPointerCapture(event.pointerId)) {
                 renderer.domElement.releasePointerCapture(event.pointerId);
             }
+            if (endingLook) {
+                warudoLookActive = false;
+                warudoPointerId = null;
+                warudoKeys.clear();
+                renderer?.domElement.classList.remove("warudo-looking");
+            }
             if (wasClick) {
                 selectPreviewFace(event);
             } else {
-                saveCurrentShapeContext();
                 setStatus("VIEW");
                 scheduleSave();
             }
         }
 
         function hoverPreviewFace(event) {
-            if (!renderer || !camera || !shapeMesh || previewDragging || transformControls?.dragging || transformControls?.axis) return;
+            if (!renderer || !camera || !shapeMesh || previewDragging) return;
             const rect = renderer.domElement.getBoundingClientRect();
             pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -3955,13 +4028,39 @@
             renderer.domElement.addEventListener("pointercancel", stopPreviewDrag);
             renderer.domElement.addEventListener("wheel", (event) => {
                 event.preventDefault();
-                cameraDistance = Math.max(2.2, Math.min(12, cameraDistance + Math.sign(event.deltaY) * 0.35));
+                const forward = getWarudoForwardVector(false);
+                const amount = -Math.sign(event.deltaY) * 0.55;
+                warudoCameraPosition.add(forward.multiplyScalar(amount));
+                cameraDistance = Math.max(2.2, Math.min(20, warudoCameraPosition.length()));
                 applyCameraDistance();
                 updateDebugInfo();
                 scheduleSave();
             }, { passive: false });
         }
 
+
+        window.addEventListener("keydown", (event) => {
+            if (!warudoLookActive) return;
+            const key = event.key.toLowerCase();
+            if (["w", "a", "s", "d", "q", "e"].includes(key)) {
+                event.preventDefault();
+                warudoKeys.add(key);
+                startWarudoLoop();
+            }
+            if (event.key === "Shift") {
+                warudoKeys.add("shift");
+            }
+        });
+
+        window.addEventListener("keyup", (event) => {
+            const key = event.key.toLowerCase();
+            if (["w", "a", "s", "d", "q", "e"].includes(key)) {
+                warudoKeys.delete(key);
+            }
+            if (event.key === "Shift") {
+                warudoKeys.delete("shift");
+            }
+        });
         document.getElementById("pencilBtn").addEventListener("click", () => setTool("pencil"));
         document.getElementById("eraserBtn").addEventListener("click", () => setTool("eraser"));
         document.getElementById("lineBtn").addEventListener("click", () => setTool("line"));
@@ -4185,6 +4284,13 @@
                 };
             }
         }
+
+        shapeSelectToggle?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            setShapeDropdownOpen(shapeSelectMenu.hidden);
+        });
+
+        document.addEventListener("click", () => setShapeDropdownOpen(false));
 
         shapeSlider.addEventListener("input", () => switchShape(Number(shapeSlider.value)));
 
@@ -4590,6 +4696,8 @@
             bgColorHexReadout.textContent = normalized;
             bgColorToggleText.textContent = "BG";
             bgAlphaReadout.textContent = bgTransparent ? "TRANS" : "OPAQUE";
+            bgPickerToggle.style.setProperty("--bg-button-color", normalized);
+            bgPickerToggle.classList.toggle("transparent", bgTransparent);
             bgTransparentBtn.classList.toggle("active", bgTransparent);
             bgTransparentBtn.textContent = "TRANSPARENT";
             bgPickerChip.classList.toggle("transparent", bgTransparent);
@@ -5314,44 +5422,6 @@
                 return;
             }
 
-            if (!mod && key === "w") {
-                event.preventDefault();
-                setTransformMode("move");
-                return;
-            }
-
-            if (!mod && key === "e") {
-                event.preventDefault();
-                setTransformMode("rotate");
-                return;
-            }
-
-            // Legacy aliases from the previous CubePaint build. Unity-native keys are W/E.
-            if (!mod && key === "r") {
-                event.preventDefault();
-                setTransformMode("rotate");
-                return;
-            }
-
-            if (!mod && event.shiftKey && key === "v") {
-                event.preventDefault();
-                unitySnapToggled = !unitySnapToggled;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                setStatus(unitySnapToggled ? "SNAP ON" : "SNAP OFF");
-                return;
-            }
-
-            if (!mod && key === "v") {
-                event.preventDefault();
-                unitySnapHeld = true;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                setStatus("SNAP");
-                return;
-            }
-
-
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
                 moveSelectedFace(-1);
@@ -5376,9 +5446,7 @@
             if (webglAvailable && renderer && scene && camera && shapeMesh) {
                 const speed = Number(document.getElementById("speed").value);
 
-                if (!transformControlDragging) {
-                    shapeMesh.rotation.y += dt * speed;
-                }
+                shapeMesh.rotation.y += dt * speed;
 
                 applyVertexWobbleToMesh(shapeMesh, now);
                 updateDebugInfo();
@@ -5626,7 +5694,12 @@
                 camera: {
                     distance: cameraDistance,
                     verticalOrbit: cameraVerticalOrbit,
-                    horizontalOrbit: cameraHorizontalOrbit
+                    horizontalOrbit: cameraHorizontalOrbit,
+                    position: {
+                        x: warudoCameraPosition.x,
+                        y: warudoCameraPosition.y,
+                        z: warudoCameraPosition.z
+                    }
                 },
                 shapeRotations,
                 shapeTransforms,
@@ -5741,8 +5814,18 @@
                 document.getElementById("gifSize").value = String(DEFAULT_GIF_SIZE);
                 if (session.settings.gifFpsIndex != null) {
                     document.getElementById("gifFps").value = String(Math.max(0, Math.min(GIF_FPS_PRESETS.length - 1, Math.round(Number(session.settings.gifFpsIndex)))));
-                } else {
-                    document.getElementById("gifFps").value = String(DEFAULT_GIF_FPS_INDEX);
+                } else if (session.settings.gifFps != null) {
+                    const oldFps = Number(session.settings.gifFps);
+                    let closest = DEFAULT_GIF_FPS_INDEX;
+                    let best = Infinity;
+                    GIF_FPS_PRESETS.forEach((fps, index) => {
+                        const distance = Math.abs(fps - oldFps);
+                        if (distance < best) {
+                            best = distance;
+                            closest = index;
+                        }
+                    });
+                    document.getElementById("gifFps").value = String(closest);
                 }
                 if (session.settings.bgColor != null) applyBgColor(session.settings.bgColor, false);
                 if (session.settings.bgTransparent != null) bgTransparent = session.settings.bgTransparent === true || session.settings.bgTransparent === "true";
