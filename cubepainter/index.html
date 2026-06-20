@@ -83,7 +83,7 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(130px, 190px) minmax(140px, 220px) auto 1fr;
+            grid-template-columns: auto minmax(118px, 172px) minmax(130px, 200px) minmax(170px, 280px) auto 1fr;
             gap: 12px;
             align-items: center;
             padding: 0 12px;
@@ -96,7 +96,8 @@
         }
 
         .shape-fader,
-        .poly-fader {
+        .poly-fader,
+        .shape-extra-controls {
             min-width: 0;
             height: 28px;
             border: 2px solid var(--paper);
@@ -188,8 +189,47 @@
             grid-template-columns: 42px 1fr 34px;
         }
 
+        .shape-extra-controls {
+            grid-template-columns: 1fr;
+            gap: 5px;
+            padding: 3px 6px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .shape-extra-control-list {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(70px, 1fr);
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .shape-extra-control {
+            display: grid;
+            grid-template-rows: 10px 1fr;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .shape-extra-control label {
+            font-size: 8px;
+            line-height: 10px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        .shape-extra-control input[type="range"] {
+            height: 12px;
+        }
+
         .shape-fader input[type="range"],
-        .poly-fader input[type="range"] {
+        .poly-fader input[type="range"],
+        .shape-extra-controls input[type="range"] {
             width: 100%;
             --slider-track: rgba(255, 246, 216, 0.35);
             --slider-fill: var(--paper);
@@ -199,7 +239,8 @@
 
         .shape-fader span,
         .poly-fader span,
-        .poly-fader strong {
+        .poly-fader strong,
+        .shape-extra-controls span {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1328,6 +1369,12 @@
                 order: 4;
             }
 
+            .shape-extra-controls {
+                order: 5;
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
             .top-center {
                 justify-self: stretch;
             }
@@ -1364,6 +1411,9 @@
                 <span>POLY</span>
                 <input id="polySlider" type="range" min="0" max="10" step="1" value="7" aria-label="low-poly amount" />
                 <strong id="polyReadout">STD</strong>
+            </div>
+            <div class="shape-extra-controls" id="shapeExtraControls" title="shape controls" hidden>
+                <div class="shape-extra-control-list" id="shapeExtraControlList"></div>
             </div>
             <div class="top-center" id="activeFaceTitle">FRONT</div>
             <div class="status" id="status">READY</div>
@@ -1549,7 +1599,7 @@
 
                             <div class="field psx-field" title="PSX aliasing">
                                 <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
-                                <input id="psxWobble" type="range" min="0" max="4" step="1" value="0" title="PSX aliasing" aria-label="PSX aliasing" />
+                                <input id="psxWobble" type="range" min="0" max="4" step="1" value="1" title="PSX aliasing" aria-label="PSX aliasing" />
                             </div>
 
                             <div class="field bg-field">
@@ -1646,6 +1696,19 @@
         const SPEED_LABELS = ["SLEEPY", "COZY", "CRUISE", "ZIPPY", "ZOOMY"];
         const PSX_WOBBLE_PRESETS = [0, 0.08, 0.25, 0.55, 1];
         const PSX_ALIAS_SCALE_PRESETS = [1, 0.78, 0.54, 0.34, 0.34];
+        const DEFAULT_PSX_WOBBLE_LEVEL = 1;
+        const SHAPE_OPTION_DEFAULTS = {
+            corner: 0,
+            thickness: 16,
+            length: 35,
+            flatten: 0
+        };
+        const SHAPE_OPTION_LABELS = {
+            corner: "CORNER",
+            thickness: "THICK",
+            length: "LENGTH",
+            flatten: "FLATTEN"
+        };
         const PSX_WOBBLE_LABELS = ["OFF", "TINY", "LOW", "CHUNKY", "INTENSE"];
         const GIF_WORKER_URL = "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js";
         const POLY_LABELS = ["DOT", "TINY", "PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "SILK"];
@@ -1784,6 +1847,8 @@
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
         const polyReadout = document.getElementById("polyReadout");
+        const shapeExtraControls = document.getElementById("shapeExtraControls");
+        const shapeExtraControlList = document.getElementById("shapeExtraControlList");
 
         const brushColor = document.getElementById("brushColor");
         const brushSize = document.getElementById("brushSize");
@@ -1900,13 +1965,14 @@
         let shapeRotations = {};
         let shapeTransforms = {};
         let shapePolyLevels = {};
+        let shapeOptions = {};
         let currentShapeIndex = 0;
         let currentShapeId = SHAPE_DEFS[0].id;
         let faces = [];
         let currentFace = 0;
         let shadingEnabled = false;
-        let vertexWobbleEnabled = false;
-        let vertexWobbleAmount = 0;
+        let vertexWobbleEnabled = true;
+        let vertexWobbleAmount = PSX_WOBBLE_PRESETS[DEFAULT_PSX_WOBBLE_LEVEL] || 0.08;
         let ambientLight = null;
         let keyLight = null;
         let fillLight = null;
@@ -1957,6 +2023,9 @@
         }
         if (savedSession && savedSession.shapePolyLevels) {
             shapePolyLevels = savedSession.shapePolyLevels;
+        }
+        if (savedSession && savedSession.shapeOptions) {
+            shapeOptions = savedSession.shapeOptions;
         }
         if (savedSession && savedSession.currentShapeId === "donut") {
             currentShapeId = "doughnut";
@@ -2125,6 +2194,79 @@
             target.rotation.set(transform.rotation.x, transform.rotation.y, transform.rotation.z);
         }
 
+        function shapeOptionDefinitions(def = getCurrentShapeDef()) {
+            if (!def) return [];
+            const options = [];
+            if (!def.lowPoly) options.push("corner");
+            switch (def.geometry) {
+                case "book":
+                    options.push("thickness");
+                    break;
+                case "brick":
+                case "capsule":
+                case "cylinder":
+                    options.push("length");
+                    break;
+                case "cone":
+                case "pyramid":
+                case "tetrahedron":
+                case "diamond":
+                case "sphere":
+                    options.push("flatten");
+                    break;
+            }
+            return [...new Set(options)];
+        }
+
+        function getShapeOption(shapeId, key) {
+            const shapeSettings = shapeOptions[shapeId] || {};
+            const fallback = SHAPE_OPTION_DEFAULTS[key] ?? 0;
+            return Math.max(0, Math.min(100, Number(shapeSettings[key] ?? fallback) || 0));
+        }
+
+        function getCurrentShapeOption(key) {
+            return getShapeOption(currentShapeId, key) / 100;
+        }
+
+        function setShapeOption(shapeId, key, value, persist = true) {
+            if (!shapeOptions[shapeId]) shapeOptions[shapeId] = {};
+            shapeOptions[shapeId][key] = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+            if (shapeId === currentShapeId) {
+                buildShapeMesh();
+                renderFaceList();
+            }
+            if (persist && !loadingSession) scheduleSave();
+        }
+
+        function updateShapeExtraControls() {
+            if (!shapeExtraControls || !shapeExtraControlList) return;
+            const def = getCurrentShapeDef();
+            const options = shapeOptionDefinitions(def);
+            shapeExtraControlList.innerHTML = "";
+            shapeExtraControls.hidden = options.length === 0;
+            options.forEach((key) => {
+                const wrap = document.createElement("div");
+                wrap.className = "shape-extra-control";
+                const label = document.createElement("label");
+                label.textContent = SHAPE_OPTION_LABELS[key] || key.toUpperCase();
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "1";
+                input.value = String(getShapeOption(currentShapeId, key));
+                input.title = label.textContent;
+                input.setAttribute("aria-label", label.textContent);
+                input.addEventListener("input", () => {
+                    updateRangeProgress(input);
+                    setShapeOption(currentShapeId, key, input.value);
+                });
+                wrap.append(label, input);
+                shapeExtraControlList.append(wrap);
+                updateRangeProgress(input);
+            });
+        }
+
         function getCurrentPolyLevel() {
             return Math.max(0, Math.min(MAX_POLY_LEVEL, Number(shapePolyLevels[currentShapeId] ?? DEFAULT_POLY_LEVEL)));
         }
@@ -2137,6 +2279,7 @@
             polySlider.value = String(level);
             updateRangeProgress(polySlider);
             polyReadout.textContent = POLY_LABELS[level] || String(level);
+            updateShapeExtraControls();
         }
 
         function currentFaceTiling() {
@@ -2338,6 +2481,46 @@
 
             const profile = getFaceFitProfile(def, face);
             drawFitGuide(profile);
+        }
+
+        let canvasSelectionFlashFrame = null;
+
+        function flashCanvasSelectionGuide(faceIndex = currentFace) {
+            if (!guideCtx) return;
+            if (canvasSelectionFlashFrame) {
+                cancelAnimationFrame(canvasSelectionFlashFrame);
+                canvasSelectionFlashFrame = null;
+            }
+            const start = performance.now();
+            const fadeMs = 1000;
+            const def = getCurrentShapeDef();
+            const face = faces[faceIndex];
+
+            function drawFrame(now) {
+                const t = Math.min(1, (now - start) / fadeMs);
+                drawCanvasGuide();
+                guideCtx.save();
+                guideCtx.strokeStyle = `rgba(255, 138, 0, ${0.98 * (1 - t)})`;
+                guideCtx.lineWidth = 5;
+                guideCtx.setLineDash([12, 7]);
+                guideCtx.lineJoin = "miter";
+
+                const useGuide = face && (face.mapMode === "fit" || isAlwaysInnerGuideCircleFace(def, face));
+                const profile = useGuide ? getFaceFitProfile(def, face) : null;
+                if (profile && traceGuidePath(guideCtx, profile)) {
+                    guideCtx.stroke();
+                } else {
+                    guideCtx.strokeRect(4, 4, FACE_SIZE - 8, FACE_SIZE - 8);
+                }
+                guideCtx.restore();
+                if (t < 1) {
+                    canvasSelectionFlashFrame = requestAnimationFrame(drawFrame);
+                } else {
+                    canvasSelectionFlashFrame = null;
+                    drawCanvasGuide();
+                }
+            }
+            canvasSelectionFlashFrame = requestAnimationFrame(drawFrame);
         }
 
         function resizePaintArea() {
@@ -2910,6 +3093,7 @@
             updateRangeProgress(shapeSlider);
             renderShapeDropdown();
             updatePolyControl();
+            updateShapeExtraControls();
         }
 
         function switchShape(nextIndex) {
@@ -3054,7 +3238,8 @@
                 return;
             }
 
-            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight);
+            const cornerSteps = 1 + Math.round(getCurrentShapeOption("corner") * 5);
+            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, cornerSteps);
         }
 
         function mapUvToGuideRect(profile, u, v) {
@@ -3116,10 +3301,48 @@
             return Math.max(0, def.faces.indexOf(faceName));
         }
 
+        function createRoundedBoxGeometry(width, height, depth, cornerAmount = 0) {
+            const amount = Math.max(0, Math.min(1, Number(cornerAmount) || 0));
+            const radius = Math.min(width, height, depth) * 0.22 * amount;
+            const segments = amount <= 0.001 ? 1 : Math.max(2, Math.min(10, 1 + Math.round(amount * 9)));
+            const geometry = new THREE.BoxGeometry(width, height, depth, segments, segments, segments);
+            if (radius <= 0.0001) return geometry;
+
+            const pos = geometry.attributes.position;
+            const hx = width / 2;
+            const hy = height / 2;
+            const hz = depth / 2;
+            const ix = Math.max(0.001, hx - radius);
+            const iy = Math.max(0.001, hy - radius);
+            const iz = Math.max(0.001, hz - radius);
+            const p = new THREE.Vector3();
+            const c = new THREE.Vector3();
+            const d = new THREE.Vector3();
+
+            for (let i = 0; i < pos.count; i++) {
+                p.fromBufferAttribute(pos, i);
+                c.set(
+                    Math.max(-ix, Math.min(ix, p.x)),
+                    Math.max(-iy, Math.min(iy, p.y)),
+                    Math.max(-iz, Math.min(iz, p.z))
+                );
+                d.copy(p).sub(c);
+                if (d.lengthSq() > 0.000001) {
+                    d.normalize().multiplyScalar(radius);
+                    p.copy(c).add(d);
+                    pos.setXYZ(i, p.x, p.y, p.z);
+                }
+            }
+            pos.needsUpdate = true;
+            geometry.computeVertexNormals();
+            return geometry;
+        }
+
         function createFullCanvasPyramidGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
-            const halfHeight = 1.1;
-            const corner = 1.55 / Math.SQRT2;
+            const flatten = getCurrentShapeOption("flatten");
+            const halfHeight = 1.1 - flatten * 0.35;
+            const corner = (1.55 + flatten * 1.35) / Math.SQRT2;
             const apex = new THREE.Vector3(0, halfHeight, 0);
             const frontLeft = new THREE.Vector3(-corner, -halfHeight, corner);
             const frontRight = new THREE.Vector3(corner, -halfHeight, corner);
@@ -3137,9 +3360,10 @@
 
         function createFullCanvasDiamondGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
+            const flatten = getCurrentShapeOption("flatten");
             const radius = 1.35;
-            const side = radius * 0.9;
-            const height = radius * 1.38;
+            const side = radius * (0.9 + flatten * 0.95);
+            const height = radius * (1.38 - flatten * 0.28);
             const top = new THREE.Vector3(0, height, 0);
             const bottom = new THREE.Vector3(0, -height, 0);
             const front = new THREE.Vector3(0, 0, side);
@@ -3161,10 +3385,12 @@
 
         function createFullCanvasTetrahedronGeometry(def) {
             const data = { positions: [], uvs: [], groups: [] };
-            const apex = new THREE.Vector3(0, 1.35, 0);
-            const frontLeft = new THREE.Vector3(-1.15, -0.75, 0.7);
-            const frontRight = new THREE.Vector3(1.15, -0.75, 0.7);
-            const back = new THREE.Vector3(0, -0.75, -1.3);
+            const flatten = getCurrentShapeOption("flatten");
+            const base = 1 + flatten * 0.9;
+            const apex = new THREE.Vector3(0, 1.35 - flatten * 0.45, 0);
+            const frontLeft = new THREE.Vector3(-1.15 * base, -0.75, 0.7 * base);
+            const frontRight = new THREE.Vector3(1.15 * base, -0.75, 0.7 * base);
+            const back = new THREE.Vector3(0, -0.75, -1.3 * base);
 
             addShapeModeTriangleFace(data, def, 'FRONT', apex, frontLeft, frontRight);
             addShapeModeTriangleFace(data, def, 'RIGHT', apex, frontRight, back);
@@ -3226,7 +3452,7 @@
             const minU = Math.min(...uVals);
             const maxU = Math.max(...uVals);
             const adjusted = maxU - minU > 0.5 ? uVals.map((u) => u < 0.5 ? u + 1 : u) : uVals;
-            const height = 2.2;
+            const height = def.geometry === "cylinder" ? (1.4 + getCurrentShapeOption("length") * 2.3) : 2.2;
 
             [ia, ib, ic].forEach((index, order) => {
                 const point = points[order];
@@ -3450,6 +3676,33 @@
             setVertexWobbleAmount(enabled ? 0.5 : 0, persist);
         }
 
+        function smoothNormalsBySharedPosition(geometry) {
+            if (!geometry?.attributes?.position || !geometry?.attributes?.normal) return;
+            const position = geometry.attributes.position;
+            const normal = geometry.attributes.normal;
+            const groupForVertex = new Array(position.count).fill(0);
+            geometry.groups.forEach((group) => {
+                for (let i = group.start; i < group.start + group.count; i++) {
+                    groupForVertex[i] = group.materialIndex || 0;
+                }
+            });
+            const sums = new Map();
+            const temp = new THREE.Vector3();
+            for (let i = 0; i < position.count; i++) {
+                const key = `${stablePositionKey(position.getX(i), position.getY(i), position.getZ(i))}:${groupForVertex[i]}`;
+                if (!sums.has(key)) sums.set(key, new THREE.Vector3());
+                temp.set(normal.getX(i), normal.getY(i), normal.getZ(i));
+                sums.get(key).add(temp);
+            }
+            sums.forEach((sum) => sum.normalize());
+            for (let i = 0; i < position.count; i++) {
+                const key = `${stablePositionKey(position.getX(i), position.getY(i), position.getZ(i))}:${groupForVertex[i]}`;
+                const n = sums.get(key) || temp.set(0, 1, 0);
+                normal.setXYZ(i, n.x, n.y, n.z);
+            }
+            normal.needsUpdate = true;
+        }
+
         function makeTransparentGifFrame(sourceCanvas, targetCanvas, transparentKey) {
             const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
             ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
@@ -3475,40 +3728,75 @@
             return targetCanvas;
         }
 
+
+
+        function applySlimeCornerSmoothing(geometry, amount = 0) {
+            amount = Math.max(0, Math.min(1, Number(amount) || 0));
+            if (amount <= 0.001 || !geometry?.attributes?.position) return;
+            const pos = geometry.attributes.position;
+            geometry.computeBoundingBox();
+            const box = geometry.boundingBox;
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const radius = Math.max(size.x, size.y, size.z) * 0.62;
+            const point = new THREE.Vector3();
+            const dir = new THREE.Vector3();
+            const target = new THREE.Vector3();
+            const mix = amount * 0.38;
+            for (let i = 0; i < pos.count; i++) {
+                point.fromBufferAttribute(pos, i);
+                dir.copy(point).sub(center);
+                if (dir.lengthSq() > 0.000001) {
+                    target.copy(center).add(dir.normalize().multiplyScalar(radius));
+                    point.lerp(target, mix);
+                    pos.setXYZ(i, point.x, point.y, point.z);
+                }
+            }
+            pos.needsUpdate = true;
+            geometry.computeVertexNormals();
+        }
+
         function createGeometry(def) {
             const level = getCurrentPolyLevel();
             // Higher settings should mean visually smooth, not absurdly dense.
-            // These caps stay responsive after the mesh is split for per-face textures.
-            const radial = [3, 3, 4, 5, 6, 8, 10, 18, 24, 32, 40][level] || 18;
-            const sphereW = [4, 5, 6, 8, 10, 14, 18, 28, 36, 44, 52][level] || 28;
-            const sphereH = [2, 3, 4, 5, 6, 8, 10, 14, 18, 22, 26][level] || 14;
-            const torusTubular = [5, 6, 8, 10, 12, 16, 20, 32, 40, 48, 56][level] || 32;
-            const torusRadial = [3, 3, 4, 5, 6, 8, 10, 14, 18, 22, 26][level] || 14;
-            const capSegments = [1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14][level] || 8;
+            // Past STD, we cap topology and improve normals instead of adding lots of triangles.
+            const radial = [3, 3, 4, 5, 6, 8, 10, 16, 18, 20, 22][level] || 16;
+            const sphereW = [4, 5, 6, 8, 10, 14, 18, 24, 26, 28, 30][level] || 24;
+            const sphereH = [2, 3, 4, 5, 6, 8, 10, 12, 13, 14, 15][level] || 12;
+            const torusTubular = [5, 6, 8, 10, 12, 16, 20, 26, 28, 30, 32][level] || 26;
+            const torusRadial = [3, 3, 4, 5, 6, 8, 10, 12, 13, 14, 15][level] || 12;
+            const capSegments = [1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9][level] || 7;
+            const corner = getCurrentShapeOption("corner");
+            const length = getCurrentShapeOption("length");
+            const flatten = getCurrentShapeOption("flatten");
+            const thickness = getCurrentShapeOption("thickness");
             let geometry;
 
             switch (def.geometry) {
                 case "box":
-                    geometry = new THREE.BoxGeometry(2, 2, 2);
+                    geometry = createRoundedBoxGeometry(2, 2, 2, corner);
                     break;
                 case "brick":
-                    geometry = new THREE.BoxGeometry(2.55, 1.35, 1.75);
+                    geometry = createRoundedBoxGeometry(1.8 + length * 3.0, 1.35, 1.75, corner);
                     break;
                 case "book":
                     // Upright portrait book: x = cover width, y = height, z = thickness.
-                    geometry = new THREE.BoxGeometry(1.45, 2.25, 0.38);
+                    geometry = createRoundedBoxGeometry(1.45, 2.25, 0.2 + thickness * 1.1, corner);
                     break;
                 case "pyramid":
                     geometry = createFullCanvasPyramidGeometry(def);
                     break;
                 case "sphere":
                     geometry = new THREE.SphereGeometry(1.35, sphereW, sphereH);
+                    geometry.scale(1 + flatten * 0.9, 1 - flatten * 0.5, 1 + flatten * 0.9);
                     break;
                 case "cylinder":
-                    geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.2, radial, 1, false);
+                    geometry = new THREE.CylinderGeometry(1.2, 1.2, 1.4 + length * 2.3, radial, 1, false);
                     break;
                 case "cone":
-                    geometry = new THREE.ConeGeometry(1.25, 2.3, radial, 1, false);
+                    geometry = new THREE.ConeGeometry(0.95 + flatten * 1.25, 2.3 - flatten * 0.72, radial, 1, false);
                     break;
                 case "torus":
                     geometry = new THREE.TorusGeometry(1.05, 0.35, torusRadial, torusTubular);
@@ -3521,14 +3809,15 @@
                     geometry = createFullCanvasTetrahedronGeometry(def);
                     break;
                 case "capsule":
-                    geometry = new THREE.CapsuleGeometry(0.78, 1.2, capSegments, radial);
+                    geometry = new THREE.CapsuleGeometry(0.78, 0.4 + length * 2.3, capSegments, radial);
                     break;
                 default:
-                    geometry = new THREE.BoxGeometry(2, 2, 2);
+                    geometry = createRoundedBoxGeometry(2, 2, 2, corner);
                     break;
             }
 
             if (geometry.userData.fullCanvasFaceMapped) {
+                applySlimeCornerSmoothing(geometry, getCurrentShapeOption("corner"));
                 cacheBaseGeometryPositions(geometry);
                 return geometry;
             }
@@ -3540,6 +3829,9 @@
             geometry.computeVertexNormals();
             assignGeometryGroups(geometry, def);
             applyFaceUvMapping(geometry, def);
+            if (def.lowPoly && level >= 7) {
+                smoothNormalsBySharedPosition(geometry);
+            }
             cacheBaseGeometryPositions(geometry);
             return geometry;
         }
@@ -4020,6 +4312,7 @@
         }
 
         function flashSelectedMaterial(index) {
+            if (index === currentFace) flashCanvasSelectionGuide(index);
             const material = materials[index];
             if (!material) return;
 
@@ -6029,15 +6322,28 @@
             targetCamera.updateProjectionMatrix();
         }
 
-        function makeExportCameraFromCurrentView() {
-            const exportCamera = new THREE.PerspectiveCamera(camera.fov, 1, camera.near, camera.far);
+        function getExportViewSize() {
+            const rect = renderer?.domElement?.getBoundingClientRect?.();
+            const viewW = Math.max(1, Math.round(rect?.width || stage.clientWidth || DEFAULT_GIF_SIZE));
+            const viewH = Math.max(1, Math.round(rect?.height || stage.clientHeight || DEFAULT_GIF_SIZE));
+            const maxSide = DEFAULT_GIF_SIZE;
+            const scale = Math.min(1, maxSide / Math.max(viewW, viewH));
+            return {
+                width: Math.max(64, Math.round(viewW * scale)),
+                height: Math.max(64, Math.round(viewH * scale)),
+                aspect: viewW / viewH
+            };
+        }
+
+        function makeExportCameraFromCurrentView(aspect = 1) {
+            const exportCamera = new THREE.PerspectiveCamera(camera.fov, aspect, camera.near, camera.far);
             exportCamera.position.copy(camera.position);
             exportCamera.quaternion.copy(camera.quaternion);
             exportCamera.up.copy(camera.up);
             exportCamera.zoom = camera.zoom;
             exportCamera.filmGauge = camera.filmGauge;
             exportCamera.filmOffset = camera.filmOffset;
-            exportCamera.aspect = 1;
+            exportCamera.aspect = aspect;
             exportCamera.updateMatrixWorld(true);
             exportCamera.updateProjectionMatrix();
             return exportCamera;
@@ -6084,10 +6390,17 @@
             showSaveOverlay("SAVING GIF");
             setStatus("RENDER");
 
-            const size = DEFAULT_GIF_SIZE;
-            const frames = DEFAULT_GIF_FRAMES;
+            const exportViewSize = getExportViewSize();
+            const size = Math.max(exportViewSize.width, exportViewSize.height);
+            const exportWidth = exportViewSize.width;
+            const exportHeight = exportViewSize.height;
             const fps = getGifFpsValue();
             const delay = Math.round(1000 / fps);
+            const exportSpeed = Math.max(0, Number(document.getElementById("speed")?.value || 0));
+            const exportShouldSpin = exportSpeed > 0.001;
+            const fullTurnSeconds = exportShouldSpin ? (Math.PI * 2) / exportSpeed : 0;
+            const seamlessLoopSeconds = exportShouldSpin ? Math.max(1.2, Math.min(12, fullTurnSeconds)) : 0;
+            const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : 1;
 
             const transparentExport = bgAlpha <= 0.001;
             const transparentKey = 0x010203;
@@ -6098,13 +6411,14 @@
             });
             exportRenderer.setPixelRatio(1);
             const exportAliasScale = currentPsxAliasScale();
-            const exportRenderSize = Math.max(1, Math.round(size * exportAliasScale));
-            exportRenderer.setSize(exportRenderSize, exportRenderSize, false);
+            const exportRenderWidth = Math.max(1, Math.round(exportWidth * exportAliasScale));
+            const exportRenderHeight = Math.max(1, Math.round(exportHeight * exportAliasScale));
+            exportRenderer.setSize(exportRenderWidth, exportRenderHeight, false);
             exportRenderer.domElement.style.imageRendering = exportAliasScale < 0.999 ? "pixelated" : "";
             exportRenderer.setClearColor(transparentExport ? transparentKey : bgColor.value, transparentExport ? 0 : bgAlpha);
 
             const exportScene = new THREE.Scene();
-            const exportCamera = makeExportCameraFromCurrentView();
+            const exportCamera = makeExportCameraFromCurrentView(exportWidth / exportHeight);
             addShadingLightsToScene(exportScene);
 
             const exportTextures = faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
@@ -6131,18 +6445,18 @@
             const gifOptions = {
                 workers: 2,
                 quality: 8,
-                width: size,
-                height: size,
+                width: exportWidth,
+                height: exportHeight,
                 workerScript
             };
             if (transparentExport) gifOptions.transparent = transparentKey;
             const gif = new GIF(gifOptions);
             const frameCanvas = document.createElement("canvas");
-            frameCanvas.width = size;
-            frameCanvas.height = size;
+            frameCanvas.width = exportWidth;
+            frameCanvas.height = exportHeight;
             const aliasFrameCanvas = document.createElement("canvas");
-            aliasFrameCanvas.width = size;
-            aliasFrameCanvas.height = size;
+            aliasFrameCanvas.width = exportWidth;
+            aliasFrameCanvas.height = exportHeight;
             const aliasFrameCtx = aliasFrameCanvas.getContext("2d");
             aliasFrameCtx.imageSmoothingEnabled = false;
 
@@ -6161,12 +6475,10 @@
 
             try {
                 const baseExportMeshRotation = shapeMesh.rotation.clone();
-                const exportSpeed = Math.max(0, Number(document.getElementById("speed")?.value || 0));
-                const exportDurationSeconds = (frames * delay) / 1000;
-                const exportRotationSpan = exportSpeed * exportDurationSeconds;
+                const exportRotationSpan = exportShouldSpin ? Math.PI * 2 : 0;
 
                 for (let i = 0; i < frames; i++) {
-                    const t = i / frames;
+                    const t = exportShouldSpin ? i / frames : 0;
 
                     exportMesh.rotation.copy(baseExportMeshRotation);
                     exportMesh.rotation.y += t * exportRotationSpan;
@@ -6175,8 +6487,8 @@
                     exportRenderer.render(exportScene, exportCamera);
                     let frameSource = exportRenderer.domElement;
                     if (exportAliasScale < 0.999) {
-                        aliasFrameCtx.clearRect(0, 0, size, size);
-                        aliasFrameCtx.drawImage(exportRenderer.domElement, 0, 0, size, size);
+                        aliasFrameCtx.clearRect(0, 0, exportWidth, exportHeight);
+                        aliasFrameCtx.drawImage(exportRenderer.domElement, 0, 0, exportWidth, exportHeight);
                         frameSource = aliasFrameCanvas;
                     }
                     const frame = transparentExport
@@ -6288,6 +6600,7 @@
                 shapeRotations,
                 shapeTransforms,
                 shapePolyLevels,
+                shapeOptions,
                 shapes
             };
         }
@@ -6307,7 +6620,8 @@
                 camera: payload.camera,
                 shapeRotations: payload.shapeRotations,
                 shapeTransforms: payload.shapeTransforms,
-                shapePolyLevels: payload.shapePolyLevels
+                shapePolyLevels: payload.shapePolyLevels,
+                shapeOptions: payload.shapeOptions
             };
 
             try {
@@ -6554,6 +6868,7 @@
             setBgColorHex(bgColor.value, false);
             updateBgPickerVisuals();
             updateWobbleButton();
+            updateShapeExtraControls();
             updateSpeedReadout();
             initializeRangeProgress();
 
