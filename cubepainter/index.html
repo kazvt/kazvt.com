@@ -890,9 +890,9 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 6px;
-            align-items: stretch;
+            grid-template-columns: 68px minmax(92px, 1fr) 40px 46px minmax(92px, 1fr) 40px;
+            gap: 5px;
+            align-items: end;
         }
 
         .export-grid .field {
@@ -901,10 +901,10 @@
 
         .fps-field,
         .psx-field {
-            align-self: stretch;
+            align-self: end;
             display: grid;
-            grid-template-rows: auto 22px;
-            gap: 3px;
+            grid-template-rows: auto 18px;
+            gap: 2px;
         }
 
         .fps-field input[type="range"] {
@@ -969,7 +969,7 @@
         .bg-picker-toggle {
             --bg-button-color: #140306;
             width: 100%;
-            height: 32px;
+            height: 28px;
             border: 2px solid var(--line);
             background: var(--bg-button-color);
             color: var(--paper);
@@ -990,7 +990,7 @@
         .bg-picker-toggle.transparent {
             color: var(--ink);
             text-shadow: 0 1px 0 var(--paper);
-            background: repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 8px 8px;
+            background: repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 6px 6px;
         }
 
         .bg-picker-toggle:hover,
@@ -1028,7 +1028,7 @@
 
         .bg-picker-main {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 22px 22px 78px;
+            grid-template-columns: minmax(0, 1fr) 22px 78px;
             gap: 7px;
             align-items: stretch;
         }
@@ -1097,16 +1097,71 @@
         }
 
 
+        .export-grid > .btn {
+            width: 100%;
+            height: 28px;
+            min-width: 0;
+            padding: 0 4px;
+            font-size: 9px;
+        }
+
+        .export-grid > .btn svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .export-grid .field > span:not(.field-label) {
+            min-height: 10px;
+            line-height: 10px;
+            font-size: 9px;
+        }
+
+        .bg-field > span {
+            display: none;
+        }
+
+        .bg-field {
+            align-self: end;
+        }
+
+        .bg-picker-shell {
+            width: 100%;
+        }
+
+        #shadingBtn {
+            font-size: 8px;
+            letter-spacing: 0.02em;
+        }
+
         #result {
             min-height: 16px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         #result a {
             color: var(--ink);
             font-weight: 900;
-            font-size: 12px;
+            font-size: 11px;
+        }
+
+        .view-control-hint {
+            color: var(--ink2);
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            opacity: 0.82;
+            white-space: nowrap;
+        }
+
+        .history-swatch,
+        .quick-swatch,
+        .color-swatch,
+        .color-picker-chip {
+            background-clip: padding-box;
         }
 
         .faces-body {
@@ -1491,7 +1546,7 @@
                             </button>
                         </div>
 
-                        <div id="result"></div>
+                        <div id="result"><div class="view-control-hint">Left Click -> Edit Layer · Look -> Right Click · Move -> WASD · QE -> Ascend/Descend</div></div>
                     </div>
                 </div>
             </section>
@@ -1969,6 +2024,7 @@
                     store.currentFace = Math.max(0, Math.min(store.faces.length - 1, store.currentFace || 0));
                 }
             }
+            shapeStore[id].faces.forEach((face) => normalizeFaceMapMode(def, face));
             return shapeStore[id];
         }
 
@@ -2222,6 +2278,12 @@
             const face = faces[currentFace];
             if (!def || !face) return;
 
+            if (isAlwaysInnerGuideCircleFace(def, face)) {
+                face.mapMode = "fit";
+                drawFitGuide(getFaceFitProfile(def, face));
+                return;
+            }
+
             if (!faceSupportsFitMode(def, face)) return;
             if (face.mapMode !== "fit") return;
 
@@ -2310,8 +2372,22 @@
             face.animation = null;
         }
 
+        function isAlwaysInnerGuideCircleFace(def, face) {
+            if (!def || !face) return false;
+            const profile = getFaceFitProfile(def, face);
+            return profile?.kind === "circle";
+        }
+
+        function normalizeFaceMapMode(def, face) {
+            if (!def || !face) return;
+            if (isAlwaysInnerGuideCircleFace(def, face)) {
+                face.mapMode = "fit";
+            }
+        }
+
         function faceSupportsFitMode(def, face) {
             if (!def || !face) return false;
+            if (isAlwaysInnerGuideCircleFace(def, face)) return false;
 
             switch (def.geometry) {
                 case "box":
@@ -2384,6 +2460,17 @@
 
         function updateMapModeButtonVisual(btn, def, face) {
             if (!btn) return false;
+
+            if (isAlwaysInnerGuideCircleFace(def, face)) {
+                face.mapMode = "fit";
+                btn.hidden = true;
+                btn.innerHTML = "";
+                btn.classList.remove("active");
+                btn.removeAttribute("title");
+                btn.removeAttribute("aria-label");
+                return false;
+            }
+
             const supported = faceSupportsFitMode(def, face);
             btn.hidden = !supported;
 
@@ -2660,7 +2747,6 @@
                 card.tabIndex = 0;
                 card.setAttribute("role", "button");
                 card.addEventListener("click", () => switchFace(index, true));
-                card.addEventListener("mouseenter", () => flashSelectedMaterial(index));
                 card.addEventListener("keydown", (event) => {
                     if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
@@ -2692,15 +2778,18 @@
                 const mapBtn = document.createElement("button");
                 mapBtn.type = "button";
                 mapBtn.className = "face-map-mode-btn";
-                updateMapModeButtonVisual(mapBtn, def, face);
-                mapBtn.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    toggleFaceMapMode(index);
-                });
+                const hasMapToggle = updateMapModeButtonVisual(mapBtn, def, face);
+                if (hasMapToggle) {
+                    mapBtn.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        toggleFaceMapMode(index);
+                    });
+                }
 
                 meta.append(name, file, tile);
-                card.append(thumb, meta, mapBtn);
+                card.append(thumb, meta);
+                if (hasMapToggle) card.append(mapBtn);
                 faceList.append(card);
 
                 updateThumb(index);
@@ -3183,7 +3272,8 @@
             if (!base || !clusterIndex || !clusters) return;
 
             const sliderAmount = Math.max(0, Math.min(1, Number(vertexWobbleAmount) || 0));
-            const amount = Math.pow(sliderAmount, 1.65);
+            // Exponential response: the displayed slider remains linear, but the middle is intentionally subtle.
+            const amount = Math.pow(sliderAmount, 2.2);
             if (amount <= 0.001) {
                 if (geometry.userData.wobbleApplied) {
                     attr.array.set(base);
@@ -3237,20 +3327,20 @@
             psxWobble.classList.toggle("active", amount > 0.001);
             psxWobble.title = amount <= 0.001
                 ? "PSX wobble off"
-                : amount < 0.12
+                : amount < 0.14
                     ? "subtle PSX shimmer"
-                    : amount < 0.34
+                    : amount < 0.56
                         ? "LOW sweet-spot PSX wobble"
-                        : amount < 0.67
+                        : amount < 0.78
                             ? "chunky PSX wobble"
                             : "extreme PSX wobble";
             psxWobbleReadout.textContent = amount <= 0.001
                 ? "OFF"
-                : amount < 0.12
+                : amount < 0.14
                     ? "TINY"
-                    : amount < 0.34
+                    : amount < 0.56
                         ? "LOW"
-                        : amount < 0.67
+                        : amount < 0.78
                             ? "CHUNKY"
                             : "INTENSE";
         }
@@ -4071,29 +4161,15 @@
         }
 
         function hoverPreviewFace(event) {
-            if (!renderer || !camera || !shapeMesh || previewDragging) return;
-            const rect = renderer.domElement.getBoundingClientRect();
-            pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-            raycaster.setFromCamera(pointerNdc, camera);
-            const hit = raycaster.intersectObject(shapeMesh, false)[0];
-            const index = hit?.face ? Math.max(0, Math.min(faces.length - 1, hit.face.materialIndex || 0)) : -1;
-            if (index >= 0 && index !== hoverFaceIndex) {
-                hoverFaceIndex = index;
-                flashSelectedMaterial(index);
-            } else if (index < 0) {
-                hoverFaceIndex = -1;
-            }
+            // Hover intentionally does not trigger face flashes; selection feedback happens on click only.
+            return false;
         }
 
         if (renderer) {
             renderer.domElement.style.touchAction = "none";
             renderer.domElement.addEventListener("contextmenu", (event) => event.preventDefault());
             renderer.domElement.addEventListener("pointerdown", startPreviewDrag);
-            renderer.domElement.addEventListener("pointermove", (event) => {
-                movePreviewDrag(event);
-                hoverPreviewFace(event);
-            });
+            renderer.domElement.addEventListener("pointermove", movePreviewDrag);
             renderer.domElement.addEventListener("pointerup", stopPreviewDrag);
             renderer.domElement.addEventListener("pointercancel", stopPreviewDrag);
             renderer.domElement.addEventListener("wheel", (event) => {
@@ -4146,7 +4222,20 @@
         function toggleFaceMapMode(index = currentFace) {
             const face = faces[index];
             const def = getCurrentShapeDef();
-            if (!face || !faceSupportsFitMode(def, face)) return;
+            if (!face) return;
+
+            if (isAlwaysInnerGuideCircleFace(def, face)) {
+                face.mapMode = "fit";
+                if (index === currentFace) {
+                    updateMapModeControl();
+                    drawCanvasGuide();
+                }
+                renderFaceList();
+                setStatus("INNER GUIDE");
+                return;
+            }
+
+            if (!faceSupportsFitMode(def, face)) return;
 
             face.mapMode = face.mapMode === "whole" ? "fit" : "whole";
             face.changed = true;
@@ -4296,13 +4385,13 @@
             switch (faceName) {
                 case "FRONT COVER":
                 case "BACK COVER":
-                    return rectFitProfile(2.45, 1.7);
+                    return rectFitProfile(1.45, 2.25);
                 case "SPINE":
                 case "PAGE EDGE":
-                    return rectFitProfile(0.42, 1.7);
+                    return rectFitProfile(0.38, 2.25);
                 case "TOP PAGES":
                 case "BOTTOM PAGES":
-                    return rectFitProfile(2.45, 0.42);
+                    return rectFitProfile(1.45, 0.38);
                 default:
                     return null;
             }
@@ -4585,12 +4674,10 @@
         function applyBrushColor(hex) {
             const normalized = normalizeHex(hex);
             brushColor.value = normalized;
-            colorSwatch.style.background = normalized;
-            colorPickerChip.style.background = normalized;
             colorHexReadout.textContent = `${normalized} · ALPHA ${alphaPercent(quantizedAlpha(alphaIndex))}`;
             colorToggleText.textContent = normalized;
-            colorSwatch.style.background = rgbaFromHex(normalized, quantizedAlpha(alphaIndex));
-            colorPickerChip.style.background = rgbaFromHex(normalized, quantizedAlpha(alphaIndex));
+            colorSwatch.style.background = bgCheckerBackgroundWithOverlay(normalized, quantizedAlpha(alphaIndex));
+            colorPickerChip.style.background = bgCheckerBackgroundWithOverlay(normalized, quantizedAlpha(alphaIndex));
             drawHueSlider();
             drawColorSquare();
             drawColorAlphaSlider();
@@ -4621,37 +4708,78 @@
             setBrushColorHex(brushColor.value, false);
         }
 
-        function colorIsDefault(hex) {
-            const normalized = normalizeHex(hex);
-            return DEFAULT_COLOR_HISTORY.includes(normalized);
+        function normalizeColorHistoryEntry(entry) {
+            if (typeof entry === "string") {
+                const hex = normalizeHex(entry, "");
+                if (!/^#[0-9A-F]{6}$/.test(hex)) return null;
+                return { hex, alphaIndex: 0 };
+            }
+            if (entry && typeof entry === "object") {
+                const hex = normalizeHex(entry.hex, "");
+                if (!/^#[0-9A-F]{6}$/.test(hex)) return null;
+                const savedAlpha = entry.alphaIndex != null
+                    ? Number(entry.alphaIndex)
+                    : Math.round((1 - Math.max(0, Math.min(1, Number(entry.alpha ?? 1)))) * (ALPHA_STEPS - 1));
+                return {
+                    hex,
+                    alphaIndex: Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round(savedAlpha) || 0))
+                };
+            }
+            return null;
         }
 
-        function addColorToHistory(hex) {
-            const normalized = normalizeHex(hex);
-            if (colorIsDefault(normalized)) {
+        function colorEntryKey(entry) {
+            const normalized = normalizeColorHistoryEntry(entry);
+            return normalized ? `${normalized.hex}@${normalized.alphaIndex}` : "";
+        }
+
+        function colorEntryIsActive(entry) {
+            const normalized = normalizeColorHistoryEntry(entry);
+            return Boolean(normalized)
+                && normalizeHex(brushColor.value) === normalized.hex
+                && Number(alphaIndex) === Number(normalized.alphaIndex);
+        }
+
+        function colorIsDefault(entry) {
+            const normalized = normalizeColorHistoryEntry(entry) || normalizeColorHistoryEntry(String(entry || ""));
+            return Boolean(normalized)
+                && normalized.alphaIndex === 0
+                && DEFAULT_COLOR_HISTORY.includes(normalized.hex);
+        }
+
+        function addColorToHistory(hex, alphaStep = alphaIndex) {
+            const entry = normalizeColorHistoryEntry({ hex, alphaIndex: alphaStep });
+            if (!entry) return;
+            if (colorIsDefault(entry)) {
                 renderColorHistory();
                 return;
             }
-            colorHistory = colorHistory.filter((item) => normalizeHex(item) !== normalized);
-            colorHistory.push(normalized);
+            const key = colorEntryKey(entry);
+            colorHistory = colorHistory
+                .map(normalizeColorHistoryEntry)
+                .filter(Boolean)
+                .filter((item) => colorEntryKey(item) !== key);
+            colorHistory.push(entry);
             colorHistory = colorHistory.slice(-MAX_USER_COLORS);
             renderColorHistory();
         }
 
         function commitCurrentColorToHistory() {
-            addColorToHistory(brushColor.value);
+            addColorToHistory(brushColor.value, alphaIndex);
             scheduleSave();
         }
 
-        function makeColorButton(hex, className, commitOnClick = false) {
-            const normalized = normalizeHex(hex);
+        function makeColorButton(entry, className, commitOnClick = false) {
+            const normalized = normalizeColorHistoryEntry(entry);
+            if (!normalized) return document.createTextNode("");
             const button = document.createElement("button");
             button.type = "button";
-            button.className = `${className} ${normalizeHex(brushColor.value) === normalized ? "active" : ""}`;
-            button.title = normalized;
-            button.style.background = normalized;
+            button.className = `${className} ${colorEntryIsActive(normalized) ? "active" : ""}`;
+            button.title = `${normalized.hex} · ALPHA ${alphaPercent(quantizedAlpha(normalized.alphaIndex))}`;
+            button.style.background = bgCheckerBackgroundWithOverlay(normalized.hex, quantizedAlpha(normalized.alphaIndex));
             button.addEventListener("click", () => {
-                setBrushColorHex(normalized, commitOnClick);
+                alphaIndex = normalized.alphaIndex;
+                setBrushColorHex(normalized.hex, commitOnClick);
                 setStatus("COLOR");
                 scheduleSave();
             });
@@ -4661,14 +4789,16 @@
         function renderColorHistory() {
             colorHistoryEl.innerHTML = "";
             quickColorHistoryEl.innerHTML = "";
-            const swatches = [...DEFAULT_COLOR_HISTORY, ...colorHistory].slice(0, DEFAULT_COLOR_HISTORY.length + MAX_USER_COLORS);
-            swatches.forEach((hex) => {
-                colorHistoryEl.append(makeColorButton(hex, "history-swatch", false));
+            colorHistory = colorHistory.map(normalizeColorHistoryEntry).filter(Boolean).slice(-MAX_USER_COLORS);
+            const defaultEntries = DEFAULT_COLOR_HISTORY.map((hex) => ({ hex, alphaIndex: 0 }));
+            const swatches = [...defaultEntries, ...colorHistory].slice(0, DEFAULT_COLOR_HISTORY.length + MAX_USER_COLORS);
+            swatches.forEach((entry) => {
+                colorHistoryEl.append(makeColorButton(entry, "history-swatch", false));
             });
 
             const quickSwatches = swatches.slice(Math.max(0, swatches.length - 5));
-            quickSwatches.forEach((hex) => {
-                quickColorHistoryEl.append(makeColorButton(hex, "quick-swatch", false));
+            quickSwatches.forEach((entry) => {
+                quickColorHistoryEl.append(makeColorButton(entry, "quick-swatch", false));
             });
         }
 
@@ -4837,7 +4967,7 @@
         }
 
         function bgCheckerBackgroundWithOverlay(hex, alpha) {
-            const checker = `repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%)`;
+            const checker = `repeating-conic-gradient(var(--checker1) 0% 25%, var(--checker2) 0% 50%) 0 0 / 6px 6px`;
             if (alpha <= 0.001) return checker;
             return `linear-gradient(${rgbaFromHex(hex, alpha)}, ${rgbaFromHex(hex, alpha)}), ${checker}`;
         }
@@ -5579,6 +5709,11 @@
             return ["text", "search", "url", "tel", "email", "password", "number"].includes(type);
         }
 
+        document.addEventListener("contextmenu", (event) => {
+            const allowedDownloadLink = event.target.closest?.("#result a[download]");
+            if (!allowedDownloadLink) event.preventDefault();
+        });
+
         document.addEventListener("keydown", (event) => {
             const key = event.key.toLowerCase();
             const mod = event.ctrlKey || event.metaKey;
@@ -5609,6 +5744,44 @@
                 pasteToCurrentFace();
                 return;
             }
+
+            if (!mod && key === "w") {
+                event.preventDefault();
+                setTransformMode("move");
+                return;
+            }
+
+            if (!mod && key === "e") {
+                event.preventDefault();
+                setTransformMode("rotate");
+                return;
+            }
+
+            // Legacy aliases from the previous CubePaint build. Unity-native keys are W/E.
+            if (!mod && key === "r") {
+                event.preventDefault();
+                setTransformMode("rotate");
+                return;
+            }
+
+            if (!mod && event.shiftKey && key === "v") {
+                event.preventDefault();
+                unitySnapToggled = !unitySnapToggled;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                setStatus(unitySnapToggled ? "SNAP ON" : "SNAP OFF");
+                return;
+            }
+
+            if (!mod && key === "v") {
+                event.preventDefault();
+                unitySnapHeld = true;
+                updateTransformSnapping();
+                updateTransformModeReadout();
+                setStatus("SNAP");
+                return;
+            }
+
 
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
@@ -5686,6 +5859,14 @@
             targetCamera.updateProjectionMatrix();
         }
 
+        function appendViewControlHint(container) {
+            if (!container) return;
+            const hint = document.createElement("div");
+            hint.className = "view-control-hint";
+            hint.textContent = "Left Click -> Edit Layer · Look -> Right Click · Move -> WASD · QE -> Ascend/Descend";
+            container.append(hint);
+        }
+
         function downloadBlob(blob, filename) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -5698,6 +5879,7 @@
             const result = document.getElementById("result");
             result.innerHTML = "";
             result.append(link);
+            appendViewControlHint(result);
         }
 
         document.getElementById("exportGifBtn").addEventListener("click", async () => {
@@ -5818,7 +6000,8 @@
             }
         });
 
-        function serializeFace(face, options = {}) {
+        function serializeFace(face, options = {}, def = null) {
+            normalizeFaceMapMode(def, face);
             const state = {
                 name: face.name,
                 hasArt: face.hasArt,
@@ -5861,7 +6044,7 @@
                 shapes[id] = {
                     currentFace: store.currentFace,
                     transform: shapeTransforms[id] || null,
-                    faces: store.faces.map((face) => serializeFace(face, options))
+                    faces: store.faces.map((face) => serializeFace(face, options, shapeDefById(id)))
                 };
             });
 
@@ -5876,7 +6059,7 @@
                 satIndex,
                 valueIndex,
                 alphaIndex,
-                colorHistory,
+                colorHistory: colorHistory.map(normalizeColorHistoryEntry).filter(Boolean),
                 settings: {
                     speed: document.getElementById("speed").value,
                     gifSize: DEFAULT_GIF_SIZE,
@@ -6069,8 +6252,9 @@
             }
             if (Array.isArray(session.colorHistory)) {
                 colorHistory = session.colorHistory
-                    .map((hex) => normalizeHex(hex, ""))
-                    .filter((hex) => /^#[0-9A-F]{6}$/.test(hex) && !colorIsDefault(hex))
+                    .map(normalizeColorHistoryEntry)
+                    .filter(Boolean)
+                    .filter((entry) => !colorIsDefault(entry))
                     .slice(-MAX_USER_COLORS);
             }
 
@@ -6095,6 +6279,7 @@
             face.sourceName = savedFace.sourceName || "blank";
             face.tiling = Math.max(1, Math.min(MAX_TILING, Number(savedFace.tiling || 1)));
             face.mapMode = savedFace.mapMode === "fit" ? "fit" : "whole";
+            normalizeFaceMapMode(shapeDefById(shapeId), face);
 
             if (!savedFace.image) {
                 if (!face.changed && face.sourceName === "blank") {
