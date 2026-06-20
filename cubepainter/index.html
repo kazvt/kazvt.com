@@ -5,9 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CubePaint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
         :root {
+            --font-ui: "Share Tech Mono", "Courier New", monospace;
             --paper: #fff6d8;
             --paper2: #efe0b8;
             --paper3: #dfc995;
@@ -29,8 +34,10 @@
             min-height: 100vh;
             background: var(--paper);
             color: var(--ink);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-family: var(--font-ui);
             overflow: hidden;
+            -webkit-font-smoothing: none;
+            text-rendering: geometricPrecision;
         }
 
         button,
