@@ -1486,22 +1486,22 @@
 
                     <div class="export">
                         <div class="export-grid">
-                            <div class="field speed-field" title="preview spin speed">
+                            <div class="field speed-field" title="SPEED preview">
                                 <span class="field-label">SPEED: <strong id="speedReadout">CRUISE</strong></span>
-                                <input id="speed" type="range" min="0" max="3" step="0.05" value="0.6" />
+                                <input id="speed" type="range" min="0" max="3" step="0.05" value="0.6" title="SPEED preview" aria-label="SPEED preview" />
                             </div>
 
                             <input id="gifSize" type="hidden" value="512" />
                             <input id="gifFrames" type="hidden" value="72" />
 
-                            <div class="field fps-field" title="GIF playback feel; preview updates at this cadence too">
+                            <div class="field fps-field" title="FPS preview">
                                 <span class="field-label">FPS: <strong id="gifFpsReadout">CLASSIC</strong></span>
-                                <input id="gifFps" type="range" min="0" max="4" step="1" value="2" aria-label="GIF smoothness" />
+                                <input id="gifFps" type="range" min="0" max="4" step="1" value="2" title="FPS preview" aria-label="FPS preview" />
                             </div>
 
-                            <div class="field psx-field" title="snapped PSX wobble plus chunky preview aliasing">
+                            <div class="field psx-field" title="PSX aliasing">
                                 <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
-                                <input id="psxWobble" type="range" min="0" max="4" step="1" value="0" aria-label="PSX wobble intensity" />
+                                <input id="psxWobble" type="range" min="0" max="4" step="1" value="0" title="PSX aliasing" aria-label="PSX aliasing" />
                             </div>
 
                             <div class="field bg-field">
@@ -1544,7 +1544,7 @@
                             </button>
                         </div>
 
-                        <div id="result"><div class="view-control-hint">LEFT = SELECT | RIGHT = LOOK | MIDDLE = PAN | WASD = MOVE | QE = HEIGHT</div></div>
+                        <div id="result"><div class="view-control-hint">LEFT = SELECT | RIGHT = LOOK | MIDDLE = PAN | WASD = MOVE | SHFT = SPRINT | QE = HEIGHT</div></div>
                     </div>
                 </div>
             </section>
@@ -4680,9 +4680,9 @@
             ctx.strokeStyle = "#fff6d8";
             ctx.lineWidth = 2;
             ctx.strokeRect(1, selectY + 1, Math.max(0, width - 2), Math.max(0, selectH - 2));
-            bgHueSliderCtx.strokeStyle = "#140306";
-            bgHueSliderCtx.lineWidth = 1;
-            bgHueSliderCtx.strokeRect(0.5, selectY + 0.5, Math.max(1, bgHueSlider.width - 1), Math.max(0, selectH - 1));
+            ctx.strokeStyle = "#140306";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0.5, selectY + 0.5, Math.max(1, width - 1), Math.max(0, selectH - 1));
         }
 
         function fillSolidCell(ctx, x0, y0, x1, y1, color) {
@@ -4743,6 +4743,19 @@
 
         function drawColorAlphaSlider() {
             drawAlphaGradientSlider(colorAlphaSliderCtx, colorAlphaSlider, brushColor.value, alphaIndex);
+        }
+
+        function redrawPickerCanvasesAfterLayout() {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    drawHueSlider();
+                    drawColorSquare();
+                    drawColorAlphaSlider();
+                    drawBgHueSlider();
+                    drawBgColorSquare();
+                    drawBgAlphaSlider();
+                });
+            });
         }
 
         function applyBrushColor(hex) {
@@ -4969,6 +4982,7 @@
             colorPickerPanel.classList.toggle("open", open);
             colorPickerToggle.classList.toggle("open", open);
             colorPickerToggle.querySelector("span:last-child").textContent = open ? "▾" : "▴";
+            if (open) redrawPickerCanvasesAfterLayout();
         }
 
         colorPickerToggle.addEventListener("click", (event) => {
@@ -5197,6 +5211,7 @@
         function setBgPickerOpen(open) {
             bgPickerPanel.classList.toggle("open", open);
             bgPickerToggle.classList.toggle("open", open);
+            if (open) redrawPickerCanvasesAfterLayout();
         }
 
         bgPickerToggle.addEventListener("click", (event) => {
@@ -5208,6 +5223,12 @@
         bgPickerShell.addEventListener("pointerdown", (event) => {
             event.stopPropagation();
         });
+
+
+        window.addEventListener("load", redrawPickerCanvasesAfterLayout);
+        if (document.fonts?.ready) {
+            document.fonts.ready.then(redrawPickerCanvasesAfterLayout).catch(() => {});
+        }
 
         function canvasPoint(event) {
             const rect = paintCanvas.getBoundingClientRect();
@@ -5949,7 +5970,7 @@
             if (!container) return;
             const hint = document.createElement("div");
             hint.className = "view-control-hint";
-            hint.textContent = "LEFT = SELECT | RIGHT = LOOK | MIDDLE = PAN | WASD = MOVE | QE = HEIGHT";
+            hint.textContent = "LEFT = SELECT | RIGHT = LOOK | MIDDLE = PAN | WASD = MOVE | SHFT = SPRINT | QE = HEIGHT";
             container.append(hint);
         }
 
