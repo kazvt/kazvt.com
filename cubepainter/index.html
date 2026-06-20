@@ -498,7 +498,8 @@
             stroke-linejoin: round;
         }
 
-        .map-mode-btn {
+        .map-mode-btn,
+        .face-map-mode-btn {
             width: 28px;
             height: 24px;
             min-width: 0;
@@ -506,25 +507,45 @@
             box-shadow: 0 2px 0 var(--ink);
         }
 
-        .map-mode-btn[hidden] {
+        .map-mode-btn[hidden],
+        .face-map-mode-btn[hidden] {
             display: none;
         }
 
-        .map-mode-btn svg {
+        .map-mode-btn svg,
+        .face-map-mode-btn svg {
             width: 17px;
             height: 17px;
         }
 
-        .map-mode-btn .map-icon-fit {
-            display: none;
+        .map-mode-btn svg *,
+        .face-map-mode-btn svg * {
+            vector-effect: non-scaling-stroke;
         }
 
-        .map-mode-btn[data-mode="fit"] .map-icon-full {
-            display: none;
+        .face-map-mode-btn {
+            align-self: center;
+            justify-self: end;
+            background: var(--paper2);
+            color: var(--ink);
+            border: 2px solid var(--line);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
         }
 
-        .map-mode-btn[data-mode="fit"] .map-icon-fit {
-            display: block;
+        .face-card.active .face-map-mode-btn {
+            border-color: currentColor;
+        }
+
+        .face-map-mode-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .face-card.active .face-map-mode-btn.active {
+            background: var(--paper);
+            color: var(--ink);
         }
 
         #undoBtn svg,
@@ -595,6 +616,20 @@
             font-size: 11px;
             font-weight: 900;
             pointer-events: none;
+        }
+
+        .transform-mode-readout {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            color: var(--paper);
+            background: rgba(20, 3, 6, 0.72);
+            border: 2px solid var(--paper);
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 900;
+            pointer-events: none;
+            letter-spacing: 0.04em;
         }
 
         .preview-debug {
@@ -687,7 +722,7 @@
             background: var(--paper);
             color: var(--ink);
             display: grid;
-            grid-template-columns: 48px 1fr;
+            grid-template-columns: 48px 1fr 30px;
             gap: 7px;
             align-items: center;
             padding: 5px;
@@ -821,16 +856,8 @@
                         <span>CANVAS</span>
                         <button class="btn map-mode-btn" id="mapModeBtn" type="button" data-mode="whole"
                             title="Whole Shape mode" aria-label="Whole Shape mode" hidden>
-                            <svg class="map-icon-full" viewBox="0 0 24 24" aria-hidden="true">
-                                <rect x="4" y="4" width="16" height="16" rx="1" />
-                                <path d="M8 4H4v4" />
-                                <path d="M16 4h4v4" />
-                                <path d="M20 16v4h-4" />
-                                <path d="M4 16v4h4" />
-                            </svg>
-                            <svg class="map-icon-fit" viewBox="0 0 24 24" aria-hidden="true">
-                                <rect x="4" y="4" width="16" height="16" rx="1" />
-                                <path d="M12 6l7 12H5z" />
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="5" y="5" width="14" height="14" rx="1" stroke-dasharray="3 2" />
                             </svg>
                         </button>
                     </div>
@@ -977,7 +1004,8 @@
                 <div class="view-body">
                     <div id="cubeStage">
                         <pre class="preview-debug" id="previewDebug" hidden></pre>
-                        <div class="view-help">drag = vertical camera orbit · click face select · wheel zoom</div>
+                        <div class="view-help">drag background = vertical camera orbit · click face select · wheel zoom</div>
+                        <div class="transform-mode-readout" id="transformModeReadout">R ROTATE · V MOVE</div>
                     </div>
 
                     <div class="export">
@@ -1057,6 +1085,7 @@
 
     <script type="module">
         import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
+        import { TransformControls } from "three/addons/controls/TransformControls.js";
 
         const FACE_SIZE = 512;
         const MAX_UNDO_HISTORY = 40;
@@ -1066,7 +1095,6 @@
         const VALUE_STEPS = 16;
         const STORAGE_KEY = "cubepaint_session_v4";
         const COOKIE_KEY = "cubepaint_settings_v4";
-        const GIF_WORKER_URL = "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js";
         const DEFAULT_COLOR_HISTORY = ["#140306", "#EFE0B8"];
         const MAX_USER_COLORS = 20;
         const MAX_TILING = 16;
@@ -1169,6 +1197,15 @@
                 faces: ["RIGHT", "LEFT", "TOP", "BOTTOM", "FRONT", "BACK"],
                 slots: { right: "RIGHT", left: "LEFT", top: "TOP", bottom: "BOTTOM", front: "FRONT", back: "BACK" },
                 defaultFace: "FRONT"
+            },
+            {
+                id: "book",
+                label: "BOOK",
+                geometry: "book",
+                grouping: "box",
+                faces: ["FRONT COVER", "BACK COVER", "SPINE", "PAGE EDGE", "TOP PAGES", "BOTTOM PAGES"],
+                slots: { front: "FRONT COVER", back: "BACK COVER", left: "SPINE", right: "PAGE EDGE", top: "TOP PAGES", bottom: "BOTTOM PAGES" },
+                defaultFace: "FRONT COVER"
             }
         ];
 
@@ -1236,6 +1273,10 @@
         let scene = null;
         let camera = null;
         let shapeMesh = null;
+        let shapeRoot = null;
+        let transformControls = null;
+        let transformMode = "rotate";
+        let transformControlDragging = false;
         let materials = [];
         let textures = [];
         let webglAvailable = false;
@@ -1255,10 +1296,9 @@
         let colorHistory = [];
         let saveTimer = null;
         let loadingSession = true;
-        let gifWorkerBlobUrl = null;
-        let compactSessionMode = false;
         let shapeStore = {};
         let shapeRotations = {};
+        let shapeTransforms = {};
         let shapePolyLevels = {};
         let currentShapeIndex = 0;
         let currentShapeId = SHAPE_DEFS[0].id;
@@ -1286,6 +1326,9 @@
         }
         if (savedSession && savedSession.shapeRotations) {
             shapeRotations = savedSession.shapeRotations;
+        }
+        if (savedSession && savedSession.shapeTransforms) {
+            shapeTransforms = savedSession.shapeTransforms;
         }
         if (savedSession && savedSession.shapePolyLevels) {
             shapePolyLevels = savedSession.shapePolyLevels;
@@ -1413,13 +1456,45 @@
         function saveCurrentShapeContext() {
             if (!currentShapeId || !shapeStore[currentShapeId]) return;
             shapeStore[currentShapeId].currentFace = Math.max(0, Math.min(faces.length - 1, currentFace));
-            if (shapeMesh) {
-                shapeRotations[currentShapeId] = {
-                    x: shapeMesh.rotation.x,
-                    y: shapeMesh.rotation.y,
-                    z: 0
+            if (shapeRoot) {
+                shapeTransforms[currentShapeId] = {
+                    position: {
+                        x: shapeRoot.position.x,
+                        y: shapeRoot.position.y,
+                        z: shapeRoot.position.z
+                    },
+                    rotation: {
+                        x: shapeRoot.rotation.x,
+                        y: shapeRoot.rotation.y,
+                        z: shapeRoot.rotation.z
+                    }
                 };
+                shapeRotations[currentShapeId] = { ...shapeTransforms[currentShapeId].rotation };
             }
+        }
+
+        function getStoredShapeTransform(id) {
+            const transform = shapeTransforms[id] || {};
+            const legacyRotation = shapeRotations[id] || {};
+            return {
+                position: {
+                    x: Number(transform.position?.x) || 0,
+                    y: Number(transform.position?.y) || 0,
+                    z: Number(transform.position?.z) || 0
+                },
+                rotation: {
+                    x: Number(transform.rotation?.x ?? legacyRotation.x) || 0,
+                    y: Number(transform.rotation?.y ?? legacyRotation.y) || 0,
+                    z: Number(transform.rotation?.z ?? legacyRotation.z) || 0
+                }
+            };
+        }
+
+        function applyStoredShapeTransform(target, id) {
+            if (!target) return;
+            const transform = getStoredShapeTransform(id);
+            target.position.set(transform.position.x, transform.position.y, transform.position.z);
+            target.rotation.set(transform.rotation.x, transform.rotation.y, transform.rotation.z);
         }
 
         function getCurrentPolyLevel() {
@@ -1727,6 +1802,8 @@
                     return false;
                 case "brick":
                     return true;
+                case "book":
+                    return true;
                 default:
                     return false;
             }
@@ -1743,27 +1820,60 @@
             }
         };
 
-        function updateMapModeControl() {
-            const btn = document.getElementById("mapModeBtn");
-            if (!btn) return;
+        function guideIconSvg(profile) {
+            const common = 'fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2"';
+            const kind = profile?.kind || "rect";
 
-            const def = getCurrentShapeDef();
-            const face = faces[currentFace];
+            if (kind === "triangle") {
+                return `<svg viewBox="0 0 24 24" aria-hidden="true"><path ${common} d="M12 4 20 20H4Z" /></svg>`;
+            }
+
+            if (kind === "circle") {
+                return `<svg viewBox="0 0 24 24" aria-hidden="true"><circle ${common} cx="12" cy="12" r="8" /></svg>`;
+            }
+
+            if (kind === "ring") {
+                return `<svg viewBox="0 0 24 24" aria-hidden="true"><circle ${common} cx="12" cy="12" r="8" /><circle ${common} cx="12" cy="12" r="3.7" /></svg>`;
+            }
+
+            if (kind === "capsule") {
+                return `<svg viewBox="0 0 24 24" aria-hidden="true"><path ${common} d="M9 4h6a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z" /></svg>`;
+            }
+
+            if (kind === "rect") {
+                const wide = Number(profile?.w || FACE_SIZE) >= Number(profile?.h || FACE_SIZE);
+                return wide
+                    ? `<svg viewBox="0 0 24 24" aria-hidden="true"><rect ${common} x="4" y="7" width="16" height="10" rx="1" /></svg>`
+                    : `<svg viewBox="0 0 24 24" aria-hidden="true"><rect ${common} x="7" y="4" width="10" height="16" rx="1" /></svg>`;
+            }
+
+            return `<svg viewBox="0 0 24 24" aria-hidden="true"><rect ${common} x="5" y="5" width="14" height="14" rx="1" /></svg>`;
+        }
+
+        function updateMapModeButtonVisual(btn, def, face) {
+            if (!btn) return false;
             const supported = faceSupportsFitMode(def, face);
-
             btn.hidden = !supported;
 
-            if (!supported) return;
+            if (!supported) return false;
 
             const mode = face.mapMode === "fit" ? "fit" : "whole";
             const nextMode = mode === "fit" ? "whole" : "fit";
             const current = MAP_MODE_META[mode];
             const next = MAP_MODE_META[nextMode];
+            const profile = getFaceFitProfile(def, face);
 
             btn.dataset.mode = mode;
             btn.classList.toggle("active", mode === "fit");
-            btn.title = `${current.label} mode. Click for ${next.label}.`;
-            btn.setAttribute("aria-label", `${current.label} mode. Switch to ${next.label}.`);
+            btn.title = `${face.name}: ${current.label} mode. Click for ${next.label}.`;
+            btn.setAttribute("aria-label", `${face.name}: ${current.label} mode. Switch to ${next.label}.`);
+            btn.innerHTML = guideIconSvg(profile);
+            return true;
+        }
+
+        function updateMapModeControl() {
+            const btn = document.getElementById("mapModeBtn");
+            updateMapModeButtonVisual(btn, getCurrentShapeDef(), faces[currentFace]);
         }
 
         function drawImageCover(ctx, image) {
@@ -2003,13 +2113,21 @@
 
         function renderFaceList() {
             faceList.innerHTML = "";
+            const def = getCurrentShapeDef();
 
             faces.forEach((face, index) => {
-                const card = document.createElement("button");
-                card.type = "button";
+                const card = document.createElement("div");
                 card.className = `face-card ${index === currentFace ? "active" : ""}`;
                 card.title = face.name;
+                card.tabIndex = 0;
+                card.setAttribute("role", "button");
                 card.addEventListener("click", () => switchFace(index, true));
+                card.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        switchFace(index, true);
+                    }
+                });
 
                 const thumb = document.createElement("canvas");
                 thumb.width = 96;
@@ -2032,8 +2150,18 @@
                 tile.className = "face-tile";
                 tile.textContent = `TILING ${tilingLabel(face.tiling)}`;
 
+                const mapBtn = document.createElement("button");
+                mapBtn.type = "button";
+                mapBtn.className = "face-map-mode-btn";
+                updateMapModeButtonVisual(mapBtn, def, face);
+                mapBtn.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleFaceMapMode(index);
+                });
+
                 meta.append(name, file, tile);
-                card.append(thumb, meta);
+                card.append(thumb, meta, mapBtn);
                 faceList.append(card);
 
                 updateThumb(index);
@@ -2092,14 +2220,22 @@
         }
 
         function disposeCurrentMesh() {
-            if (!shapeMesh) return;
-            scene.remove(shapeMesh);
-            if (shapeMesh.geometry) shapeMesh.geometry.dispose();
+            if (!shapeMesh && !shapeRoot) return;
+            if (transformControls) {
+                transformControls.detach();
+            }
+            if (shapeRoot) {
+                scene.remove(shapeRoot);
+            } else if (shapeMesh) {
+                scene.remove(shapeMesh);
+            }
+            if (shapeMesh?.geometry) shapeMesh.geometry.dispose();
             materials.forEach((material) => material.dispose());
             textures.forEach((texture) => texture.dispose());
             materials = [];
             textures = [];
             shapeMesh = null;
+            shapeRoot = null;
         }
 
         function pushMappedVertex(data, point, u, v) {
@@ -2364,6 +2500,9 @@
                 case "brick":
                     geometry = new THREE.BoxGeometry(2.55, 1.35, 1.75);
                     break;
+                case "book":
+                    geometry = new THREE.BoxGeometry(2.45, 1.7, 0.42);
+                    break;
                 case "pyramid":
                     geometry = createFullCanvasPyramidGeometry(def);
                     break;
@@ -2625,6 +2764,59 @@
             }
         }
 
+        function updateTransformModeReadout() {
+            const readout = document.getElementById("transformModeReadout");
+            if (!readout) return;
+            readout.textContent = transformMode === "move" ? "V MOVE · R ROTATE" : "R ROTATE · V MOVE";
+            readout.title = transformMode === "move" ? "Move mode active" : "Rotate mode active";
+        }
+
+        function updateTransformControlsMode(status = true) {
+            if (transformControls) {
+                transformControls.setMode(transformMode === "move" ? "translate" : "rotate");
+                transformControls.setSpace(transformMode === "move" ? "world" : "local");
+                transformControls.setSize(transformMode === "move" ? 0.85 : 0.9);
+                if (shapeRoot && transformControls.object !== shapeRoot) {
+                    transformControls.attach(shapeRoot);
+                }
+            }
+            updateTransformModeReadout();
+            if (status) setStatus(transformMode === "move" ? "MOVE" : "ROTATE");
+        }
+
+        function setTransformMode(nextMode) {
+            transformMode = nextMode === "move" ? "move" : "rotate";
+            updateTransformControlsMode(true);
+        }
+
+        function ensureTransformControls() {
+            if (!webglAvailable || !renderer || !camera || !scene || transformControls) return;
+
+            transformControls = new TransformControls(camera, renderer.domElement);
+            transformControls.addEventListener("dragging-changed", (event) => {
+                transformControlDragging = Boolean(event.value);
+                userIsRotatingPreview = transformControlDragging;
+                if (!transformControlDragging) {
+                    saveCurrentShapeContext();
+                    updateDebugInfo();
+                    scheduleSave();
+                }
+            });
+            transformControls.addEventListener("objectChange", () => {
+                saveCurrentShapeContext();
+                updateDebugInfo();
+            });
+            scene.add(transformControls);
+            updateTransformControlsMode(false);
+        }
+
+        function syncTransformControls() {
+            ensureTransformControls();
+            if (!transformControls || !shapeRoot) return;
+            transformControls.attach(shapeRoot);
+            updateTransformControlsMode(false);
+        }
+
         function buildShapeMesh() {
             if (!webglAvailable || !scene) return;
 
@@ -2636,10 +2828,12 @@
             const def = getCurrentShapeDef();
             const geometry = createGeometry(def);
             shapeMesh = new THREE.Mesh(geometry, materials);
-            const savedRotation = shapeRotations[currentShapeId] || { x: 0, y: 0, z: 0 };
-            // shapeMesh.rotation.set(savedRotation.x ?? 0, savedRotation.y ?? 0, 0);
-            shapeMesh.rotation.set(0, 0, 0);
-            scene.add(shapeMesh);
+            shapeRoot = new THREE.Group();
+            shapeRoot.name = `${def.label} TRANSFORM`;
+            shapeRoot.add(shapeMesh);
+            applyStoredShapeTransform(shapeRoot, currentShapeId);
+            scene.add(shapeRoot);
+            syncTransformControls();
             updateShadingLights();
             updateShadingButton();
             rebuildAllTextures();
@@ -2687,7 +2881,9 @@
             previewDebug.hidden = !debugging_mode;
             if (!debugging_mode) return;
 
-            const rot = shapeMesh?.rotation || { x: 0, y: 0, z: 0 };
+            const rot = shapeRoot?.rotation || { x: 0, y: 0, z: 0 };
+            const objPos = shapeRoot?.position || { x: 0, y: 0, z: 0 };
+            const spin = shapeMesh?.rotation || { x: 0, y: 0, z: 0 };
             const pos = camera?.position || { x: 0, y: 0, z: 0 };
             const defaultPos = CAMERA_BASE_VECTOR.clone().multiplyScalar(DEFAULT_CAMERA_DISTANCE);
             const relPos = {
@@ -2703,15 +2899,25 @@
                 `CAM Z  ${roundDebug(relPos.z)}`,
                 `DIST   ${roundDebug(cameraDistance)}`,
                 `CAM V  ${roundDebug(cameraVerticalOrbit)} RAD / ${degreesDebug(cameraVerticalOrbit)}°`,
+                `OBJ X  ${roundDebug(objPos.x)}`,
+                `OBJ Y  ${roundDebug(objPos.y)}`,
+                `OBJ Z  ${roundDebug(objPos.z)}`,
                 `ROT X  ${roundDebug(rot.x)} RAD / ${degreesDebug(rot.x)}°`,
                 `ROT Y  ${roundDebug(rot.y)} RAD / ${degreesDebug(rot.y)}°`,
-                `ROT Z  ${roundDebug(rot.z)} RAD / ${degreesDebug(rot.z)}°`
+                `ROT Z  ${roundDebug(rot.z)} RAD / ${degreesDebug(rot.z)}°`,
+                `SPIN Y ${roundDebug(spin.y)} RAD / ${degreesDebug(spin.y)}°`
             ].join("\n");
         }
 
         function resetView() {
-            if (!shapeMesh) return;
-            shapeMesh.rotation.set(0, 0, 0);
+            if (!shapeMesh && !shapeRoot) return;
+            if (shapeRoot) {
+                shapeRoot.position.set(0, 0, 0);
+                shapeRoot.rotation.set(0, 0, 0);
+            }
+            if (shapeMesh) {
+                shapeMesh.rotation.set(0, 0, 0);
+            }
             cameraDistance = DEFAULT_CAMERA_DISTANCE;
             cameraVerticalOrbit = 0;
             cameraPanOffset.set(0, 0, 0);
@@ -2785,6 +2991,7 @@
         }
 
         function startPreviewDrag(event) {
+            if (transformControls?.dragging || transformControls?.axis) return;
             if (!webglAvailable || !renderer || !shapeMesh || (event.button !== 0 && event.button !== 1)) return;
             event.preventDefault();
             previewDragging = true;
@@ -2797,6 +3004,7 @@
         }
 
         function movePreviewDrag(event) {
+            if (transformControls?.dragging) return;
             if (!previewDragging || !shapeMesh || !previewLast) return;
             event.preventDefault();
             
@@ -2825,6 +3033,7 @@
         }
 
         function stopPreviewDrag(event) {
+            if (transformControls?.dragging) return;
             if (!previewDragging) return;
             const wasClick = (previewDragButton === 0) && !previewMoved && previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) <= 4;
             previewDragging = false;
@@ -2870,21 +3079,27 @@
             setShadingEnabled(!shadingEnabled);
         });
 
-        document.getElementById("mapModeBtn").addEventListener("click", () => {
-            const face = faces[currentFace];
+        function toggleFaceMapMode(index = currentFace) {
+            const face = faces[index];
             const def = getCurrentShapeDef();
             if (!face || !faceSupportsFitMode(def, face)) return;
 
             face.mapMode = face.mapMode === "whole" ? "fit" : "whole";
+            face.changed = true;
 
-            updateMapModeControl();
-            drawCanvasGuide();
-            rebuildTexture(currentFace);
+            if (index === currentFace) {
+                updateMapModeControl();
+                drawCanvasGuide();
+            }
+            rebuildTexture(index);
             buildShapeMesh(); // safest way, because UV/mapping may need rebuilding
+            renderFaceList();
             scheduleSave();
 
             setStatus(MAP_MODE_META[face.mapMode === "fit" ? "fit" : "whole"].status);
-        });
+        }
+
+        document.getElementById("mapModeBtn").addEventListener("click", () => toggleFaceMapMode(currentFace));
 
         function getFaceFitProfile(def, face) {
             if (!def || !face) return null;
@@ -2982,6 +3197,49 @@
                 case "brick":
                     return getBrickFaceProfile(face.name);
 
+                case "book":
+                    return getBookFaceProfile(face.name);
+
+                default:
+                    return null;
+            }
+        }
+
+        function rectFitProfile(faceW, faceH) {
+            const aspect = faceW / faceH;
+
+            if (aspect >= 1) {
+                const h = FACE_SIZE / aspect;
+                return {
+                    kind: "rect",
+                    x: 0,
+                    y: (FACE_SIZE - h) / 2,
+                    w: FACE_SIZE,
+                    h
+                };
+            }
+
+            const w = FACE_SIZE * aspect;
+            return {
+                kind: "rect",
+                x: (FACE_SIZE - w) / 2,
+                y: 0,
+                w,
+                h: FACE_SIZE
+            };
+        }
+
+        function getBookFaceProfile(faceName) {
+            switch (faceName) {
+                case "FRONT COVER":
+                case "BACK COVER":
+                    return rectFitProfile(2.45, 1.7);
+                case "SPINE":
+                case "PAGE EDGE":
+                    return rectFitProfile(0.42, 1.7);
+                case "TOP PAGES":
+                case "BOTTOM PAGES":
+                    return rectFitProfile(2.45, 0.42);
                 default:
                     return null;
             }
@@ -3930,22 +4188,12 @@
 
         function isTypingTarget(target) {
             if (!target) return false;
-
             if (target.isContentEditable) return true;
+            if (target.tagName === "TEXTAREA" || target.tagName === "SELECT") return true;
+            if (target.tagName !== "INPUT") return false;
 
-            if (target.tagName === "TEXTAREA" || target.tagName === "SELECT") {
-                return true;
-            }
-
-            if (target.tagName === "INPUT") {
-                const type = (target.type || "text").toLowerCase();
-
-                // Range/color controls keep focus after use. Do not let that block
-                // app-level shortcuts like Ctrl+C / Ctrl+V / undo / redo.
-                return !["range", "color", "button", "checkbox", "radio"].includes(type);
-            }
-
-            return false;
+            const type = (target.type || "text").toLowerCase();
+            return ["text", "search", "url", "tel", "email", "password", "number"].includes(type);
         }
 
         document.addEventListener("keydown", (event) => {
@@ -3979,6 +4227,18 @@
                 return;
             }
 
+            if (!mod && key === "r") {
+                event.preventDefault();
+                setTransformMode("rotate");
+                return;
+            }
+
+            if (!mod && key === "v") {
+                event.preventDefault();
+                setTransformMode("move");
+                return;
+            }
+
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
                 moveSelectedFace(-1);
@@ -4003,8 +4263,9 @@
             if (webglAvailable && renderer && scene && camera && shapeMesh) {
                 const speed = Number(document.getElementById("speed").value);
 
-                shapeMesh.rotation.y += dt * speed;
-                shapeMesh.rotation.z = 0;
+                if (!transformControlDragging) {
+                    shapeMesh.rotation.y += dt * speed;
+                }
 
                 updateDebugInfo();
                 renderer.render(scene, camera);
@@ -4014,6 +4275,24 @@
         }
 
         requestAnimationFrame(animate);
+
+
+        let gifWorkerObjectUrl = null;
+
+        async function getGifWorkerScriptUrl() {
+            if (gifWorkerObjectUrl) return gifWorkerObjectUrl;
+
+            try {
+                const response = await fetch(GIF_WORKER_URL, { cache: "force-cache" });
+                if (!response.ok) throw new Error(`GIF worker ${response.status}`);
+                const source = await response.text();
+                gifWorkerObjectUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
+                return gifWorkerObjectUrl;
+            } catch (error) {
+                console.warn("CubePaint GIF worker blob fallback failed; trying direct URL:", error);
+                return GIF_WORKER_URL;
+            }
+        }
 
         function downloadBlob(blob, filename) {
             const url = URL.createObjectURL(blob);
@@ -4028,29 +4307,6 @@
             result.innerHTML = "";
             result.append(link);
         }
-
-        async function getGifWorkerScriptUrl() {
-            if (gifWorkerBlobUrl) return gifWorkerBlobUrl;
-
-            try {
-                const response = await fetch(GIF_WORKER_URL, { cache: "force-cache" });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                const workerSource = await response.text();
-                gifWorkerBlobUrl = URL.createObjectURL(new Blob([workerSource], { type: "application/javascript" }));
-                return gifWorkerBlobUrl;
-            } catch (error) {
-                console.warn("CubePaint GIF worker could not be prepared as a blob URL; falling back to CDN URL:", error);
-                return GIF_WORKER_URL;
-            }
-        }
-
-        window.addEventListener("beforeunload", () => {
-            if (gifWorkerBlobUrl) {
-                URL.revokeObjectURL(gifWorkerBlobUrl);
-                gifWorkerBlobUrl = null;
-            }
-        });
 
         document.getElementById("exportGifBtn").addEventListener("click", async () => {
             if (!webglAvailable || !renderer || !scene || !camera || !shapeMesh) {
@@ -4091,27 +4347,23 @@
             const exportMaterials = exportTextures.map(makeFaceMaterial);
             const exportGeometry = createGeometry(getCurrentShapeDef());
             const exportMesh = new THREE.Mesh(exportGeometry, exportMaterials);
-            exportScene.add(exportMesh);
+            const exportRoot = new THREE.Group();
+            exportRoot.add(exportMesh);
+            if (shapeRoot) {
+                exportRoot.position.copy(shapeRoot.position);
+                exportRoot.rotation.copy(shapeRoot.rotation);
+            }
+            exportScene.add(exportRoot);
 
             function cleanupExportRenderer() {
-                exportScene.remove(exportMesh);
+                exportScene.remove(exportRoot);
                 exportGeometry.dispose();
                 exportMaterials.forEach((material) => material.dispose());
                 exportTextures.forEach((texture) => texture.dispose());
                 exportRenderer.dispose();
             }
 
-            let workerScript;
-            try {
-                workerScript = await getGifWorkerScriptUrl();
-            } catch (error) {
-                cleanupExportRenderer();
-                exportBtn.disabled = false;
-                setStatus("GIF WORKER");
-                console.warn("CubePaint GIF worker setup failed:", error);
-                return;
-            }
-
+            const workerScript = await getGifWorkerScriptUrl();
             const gif = new GIF({
                 workers: 2,
                 quality: 8,
@@ -4159,17 +4411,7 @@
             }
         });
 
-        function canvasToSessionDataUrl(canvas, compact = false) {
-            if (!compact) return canvas.toDataURL("image/png");
-
-            const webp = canvas.toDataURL("image/webp", 0.86);
-            if (webp.startsWith("data:image/webp")) return webp;
-
-            return canvas.toDataURL("image/png");
-        }
-
         function serializeFace(face, options = {}) {
-            const compactImages = Boolean(options.compactImages);
             const state = {
                 name: face.name,
                 hasArt: face.hasArt,
@@ -4181,7 +4423,10 @@
 
             if (face.changed || face.sourceName !== "blank" || !face.hasArt) {
                 try {
-                    state.image = canvasToSessionDataUrl(face.canvas, compactImages);
+                    const imageType = options.imageType || "image/png";
+                    const quality = options.imageQuality;
+                    state.image = face.canvas.toDataURL(imageType, quality);
+                    state.imageType = imageType;
                 } catch (error) {
                     console.warn("Face could not be serialized:", face.name, error);
                 }
@@ -4196,12 +4441,13 @@
             Object.entries(shapeStore).forEach(([id, store]) => {
                 shapes[id] = {
                     currentFace: store.currentFace,
+                    transform: shapeTransforms[id] || null,
                     faces: store.faces.map((face) => serializeFace(face, options))
                 };
             });
 
             return {
-                version: 6,
+                version: options.compact ? 7 : 6,
                 savedAt: Date.now(),
                 currentShapeId,
                 tool,
@@ -4224,6 +4470,7 @@
                     verticalOrbit: cameraVerticalOrbit
                 },
                 shapeRotations,
+                shapeTransforms,
                 shapePolyLevels,
                 shapes
             };
@@ -4243,6 +4490,7 @@
                 settings: payload.settings,
                 camera: payload.camera,
                 shapeRotations: payload.shapeRotations,
+                shapeTransforms: payload.shapeTransforms,
                 shapePolyLevels: payload.shapePolyLevels
             };
 
@@ -4256,39 +4504,28 @@
         function saveSession() {
             if (loadingSession) return;
             saveEditorToFace(false, false);
-
-            const payload = makeSessionPayload({ compactImages: compactSessionMode });
+            const payload = makeSessionPayload();
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
                 saveCookieSettings(payload);
-                setStatus(compactSessionMode ? "SAVED SMALL" : "SAVED");
+                setStatus("SAVED");
                 return;
             } catch (error) {
-                console.warn("CubePaint session could not be saved in normal mode:", error);
+                console.warn("CubePaint full PNG session could not be saved:", error);
             }
 
-            if (!compactSessionMode) {
-                try {
-                    const compactPayload = makeSessionPayload({ compactImages: true });
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(compactPayload));
-                    saveCookieSettings(compactPayload);
-                    compactSessionMode = true;
-                    setStatus("SAVED SMALL");
-                    return;
-                } catch (compactError) {
-                    console.warn("CubePaint compact session could not be saved:", compactError);
-                }
-            }
-
+            const compactPayload = makeSessionPayload({ imageType: "image/webp", imageQuality: 0.55, compact: true });
             try {
-                localStorage.removeItem(STORAGE_KEY);
-            } catch (removeError) {
-                console.warn("CubePaint local storage could not be cleared after quota failure:", removeError);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(compactPayload));
+                saveCookieSettings(compactPayload);
+                setStatus("SAVED SMALL");
+                return;
+            } catch (compactError) {
+                console.warn("CubePaint compact session could not be saved:", compactError);
+                saveCookieSettings(compactPayload);
+                setStatus("SAVE LIMIT");
             }
-
-            saveCookieSettings(payload);
-            setStatus("SAVE LIMIT");
         }
 
         function scheduleSave() {
@@ -4391,6 +4628,9 @@
                 const store = getShapeStore(shapeId);
                 if (Number.isInteger(savedShape.currentFace)) {
                     store.currentFace = Math.max(0, Math.min(store.faces.length - 1, savedShape.currentFace));
+                }
+                if (savedShape.transform) {
+                    shapeTransforms[shapeId] = savedShape.transform;
                 }
                 if (Array.isArray(savedShape.faces)) {
                     savedShape.faces.forEach((savedFace, faceIndex) => {
