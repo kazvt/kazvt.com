@@ -4186,24 +4186,80 @@
             normal.needsUpdate = true;
         }
 
+        function transparentKeyRgb(transparentKey) {
+            return {
+                r: (transparentKey >> 16) & 255,
+                g: (transparentKey >> 8) & 255,
+                b: transparentKey & 255
+            };
+        }
+
+        function setTransparentKeyPixel(data, i, keyRgb) {
+            data[i] = keyRgb.r;
+            data[i + 1] = keyRgb.g;
+            data[i + 2] = keyRgb.b;
+            data[i + 3] = 255;
+        }
+
         function makeTransparentGifFrame(sourceCanvas, targetCanvas, transparentKey) {
             const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
             ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
             ctx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
             const frame = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
             const data = frame.data;
-            const r = (transparentKey >> 16) & 255;
-            const g = (transparentKey >> 8) & 255;
-            const b = transparentKey & 255;
+            const keyRgb = transparentKeyRgb(transparentKey);
 
             for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] < 128) {
-                    data[i] = r;
-                    data[i + 1] = g;
-                    data[i + 2] = b;
-                    data[i + 3] = 255;
+                if (data[i + 3] < 96) {
+                    setTransparentKeyPixel(data, i, keyRgb);
                 } else {
                     data[i + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(frame, 0, 0);
+            return targetCanvas;
+        }
+
+        function makeDitheredBgGifFrame(sourceCanvas, targetCanvas, transparentKey, bgHex, alpha) {
+            const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
+            ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+            ctx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
+            const frame = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
+            const data = frame.data;
+            const keyRgb = transparentKeyRgb(transparentKey);
+            const bgRgb = hexToRgb(bgHex);
+            const clampedAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+            const bayer = [
+                0, 48, 12, 60, 3, 51, 15, 63,
+                32, 16, 44, 28, 35, 19, 47, 31,
+                8, 56, 4, 52, 11, 59, 7, 55,
+                40, 24, 36, 20, 43, 27, 39, 23,
+                2, 50, 14, 62, 1, 49, 13, 61,
+                34, 18, 46, 30, 33, 17, 45, 29,
+                10, 58, 6, 54, 9, 57, 5, 53,
+                42, 26, 38, 22, 41, 25, 37, 21
+            ];
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const i = (y * w + x) * 4;
+                    const sourceAlpha = data[i + 3];
+                    if (sourceAlpha < 16) {
+                        const threshold = (bayer[(y & 7) * 8 + (x & 7)] + 0.5) / 64;
+                        if (clampedAlpha >= threshold) {
+                            data[i] = bgRgb.r;
+                            data[i + 1] = bgRgb.g;
+                            data[i + 2] = bgRgb.b;
+                            data[i + 3] = 255;
+                        } else {
+                            setTransparentKeyPixel(data, i, keyRgb);
+                        }
+                    } else {
+                        data[i + 3] = 255;
+                    }
                 }
             }
 
@@ -6966,11 +7022,14 @@
             const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : staticExportFrameCount();
 
             const transparentExport = bgAlpha <= 0.001;
+            const ditheredTransparentExport = bgAlpha > 0.001 && bgAlpha < 0.999;
+            const binaryTransparentExport = transparentExport || ditheredTransparentExport;
             const transparentKey = 0x010203;
             const exportRenderer = new THREE.WebGLRenderer({
                 antialias: true,
                 preserveDrawingBuffer: true,
-                alpha: true
+                alpha: true,
+                premultipliedAlpha: false
             });
             exportRenderer.setPixelRatio(1);
             const exportAliasScale = currentPsxAliasScale();
@@ -6978,7 +7037,7 @@
             const exportRenderHeight = Math.max(1, Math.round(exportHeight * exportAliasScale));
             exportRenderer.setSize(exportRenderWidth, exportRenderHeight, false);
             exportRenderer.domElement.style.imageRendering = exportAliasScale < 0.999 ? "pixelated" : "";
-            exportRenderer.setClearColor(transparentExport ? transparentKey : bgColor.value, transparentExport ? 0 : bgAlpha);
+            exportRenderer.setClearColor(binaryTransparentExport ? transparentKey : bgColor.value, binaryTransparentExport ? 0 : 1);
 
             const exportScene = new THREE.Scene();
             const exportCamera = makeExportCameraFromCurrentView(exportWidth / exportHeight);
@@ -7012,7 +7071,7 @@
                 height: exportHeight,
                 workerScript
             };
-            if (transparentExport) gifOptions.transparent = transparentKey;
+            if (binaryTransparentExport) gifOptions.transparent = transparentKey;
             const gif = new GIF(gifOptions);
             const frameCanvas = document.createElement("canvas");
             frameCanvas.width = exportWidth;
@@ -7061,9 +7120,12 @@
                         aliasFrameCtx.drawImage(exportRenderer.domElement, 0, 0, exportWidth, exportHeight);
                         frameSource = aliasFrameCanvas;
                     }
-                    const frame = transparentExport
-                        ? makeTransparentGifFrame(frameSource, frameCanvas, transparentKey)
-                        : frameSource;
+                    let frame = frameSource;
+                    if (transparentExport) {
+                        frame = makeTransparentGifFrame(frameSource, frameCanvas, transparentKey);
+                    } else if (ditheredTransparentExport) {
+                        frame = makeDitheredBgGifFrame(frameSource, frameCanvas, transparentKey, bgColor.value, bgAlpha);
+                    }
                     gif.addFrame(frame, { copy: true, delay });
 
                     if (i % 8 === 0) {
