@@ -310,7 +310,7 @@
             font-weight: 900;
             font-size: 12px;
             padding: 0 8px;
-            text-align: left;
+            text-align: center;
         }
 
         .color-picker-toggle:hover {
@@ -558,9 +558,9 @@
         .face-map-mode-btn {
             position: absolute;
             top: 3px;
-            right: 3px;
-            width: 16px;
-            height: 16px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
             border-width: 2px;
             box-shadow: 0 1px 0 var(--ink);
             z-index: 3;
@@ -568,8 +568,8 @@
         }
 
         .face-map-mode-btn svg {
-            width: 10px;
-            height: 10px;
+            width: 9px;
+            height: 9px;
         }
 
         .face-map-mode-btn:hover {
@@ -728,23 +728,43 @@
             background: rgba(20, 3, 6, 0.38);
         }
 
-        .transform-mode-readout {
+        .transform-mode-switch {
             position: absolute;
             left: 10px;
             bottom: 10px;
-            z-index: 6;
+            z-index: 8;
             color: var(--paper);
             background: rgba(20, 3, 6, 0.55);
-            border: 2px solid rgba(255, 246, 216, 0.78);
-            padding: 5px 7px;
-            font-size: 10px;
+            border: 2px solid rgba(255, 246, 216, 0.7);
+            padding: 4px;
+            font-size: 9px;
             font-weight: 900;
-            pointer-events: none;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.06em;
             display: grid;
-            grid-template-columns: auto auto;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            align-items: stretch;
+        }
+
+        .transform-mode-switch button {
+            min-width: 62px;
+            border: 2px solid rgba(255, 246, 216, 0.48);
+            background: rgba(255, 246, 216, 0.08);
+            color: rgba(255, 246, 216, 0.82);
+            font: inherit;
+            cursor: pointer;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            padding: 3px 5px;
+        }
+
+        .transform-mode-switch button.active {
+            background: rgba(255, 246, 216, 0.9);
+            color: var(--ink);
+            border-color: var(--paper);
         }
 
         .unity-gizmo-mini {
@@ -768,6 +788,38 @@
             opacity: 0.72;
             font-size: 8px;
             letter-spacing: 0.1em;
+        }
+
+        .save-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 40;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            gap: 14px;
+            background: rgba(20, 3, 6, 0.42);
+            color: var(--paper);
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            pointer-events: none;
+        }
+
+        .save-overlay[hidden] {
+            display: none !important;
+        }
+
+        .save-spinner {
+            width: 58px;
+            height: 58px;
+            border: 5px solid rgba(255, 246, 216, 0.25);
+            border-top-color: var(--paper);
+            animation: save-spin 0.72s steps(12) infinite;
+        }
+
+        @keyframes save-spin {
+            to { transform: rotate(360deg); }
         }
 
         .preview-debug {
@@ -801,7 +853,7 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr) minmax(118px, 1.35fr) 58px minmax(82px, 1fr) 58px;
+            grid-template-columns: repeat(3, 1fr) minmax(94px, 1fr) 58px minmax(82px, 1fr) 58px;
             gap: 6px;
             align-items: end;
         }
@@ -846,15 +898,16 @@
             background: var(--paper2);
             color: var(--ink);
             display: grid;
-            grid-template-columns: 24px minmax(0, 1fr) auto;
-            gap: 5px;
+            grid-template-columns: 1fr;
+            gap: 0;
             align-items: center;
+            justify-items: center;
             cursor: pointer;
             box-shadow: 0 3px 0 var(--ink);
             font-weight: 900;
             font-size: 10px;
             padding: 0 6px;
-            text-align: left;
+            text-align: center;
         }
 
         .bg-picker-toggle:hover,
@@ -1024,7 +1077,7 @@
             grid-template-columns: 48px minmax(0, 1fr);
             gap: 7px;
             align-items: center;
-            padding: 5px 21px 5px 5px;
+            padding: 5px 18px 5px 5px;
             cursor: pointer;
             text-align: left;
             box-shadow: 0 3px 0 var(--ink);
@@ -1298,15 +1351,15 @@
             <section class="panel">
                 <div class="head">
                     <span>VIEW</span>
-                    <span>DRAG VERTICAL ONLY</span>
+                    <span>MOUSE</span>
                 </div>
 
                 <div class="view-body">
                     <div id="cubeStage">
                         <pre class="preview-debug" id="previewDebug" hidden></pre>
                         <button class="stage-reset-view" id="stageResetViewBtn" type="button" title="reset view">RESET</button>
-                        <div class="view-help" aria-hidden="true"></div>
-                        <div class="transform-mode-readout" id="transformModeReadout" aria-live="polite"></div>
+                        <div class="transform-mode-switch" id="transformModeReadout" aria-live="polite"></div>
+                        <div class="save-overlay" id="saveOverlay" hidden><div class="save-spinner"></div><strong id="saveOverlayText">SAVING</strong></div>
                     </div>
 
                     <div class="export">
@@ -1325,10 +1378,7 @@
                                 </select>
                             </div>
 
-                            <div class="field">
-                                <span>FRM</span>
-                                <input id="gifFrames" type="number" min="24" max="180" value="96" />
-                            </div>
+                            <input id="gifFrames" type="hidden" value="72" />
 
                             <div class="field">
                                 <span>FPS</span>
@@ -1339,9 +1389,9 @@
                                 <span>BG</span>
                                 <div class="bg-picker-shell" id="bgPickerShell">
                                     <button class="bg-picker-toggle" id="bgPickerToggle" type="button" title="background color and transparency">
-                                        <span class="bg-picker-chip" id="bgPickerChip"></span>
-                                        <span id="bgColorToggleText">#140306</span>
-                                        <strong id="bgAlphaReadout">OPAQUE</strong>
+                                        <span id="bgColorToggleText">BG</span>
+                                        <span class="bg-picker-chip" id="bgPickerChip" hidden></span>
+                                        <strong id="bgAlphaReadout" hidden>OPAQUE</strong>
                                     </button>
                                     <div class="bg-picker-panel" id="bgPickerPanel">
                                         <div class="bg-picker-main">
@@ -1428,6 +1478,8 @@
         const MAX_TILING = 16;
         const DEFAULT_POLY_LEVEL = 7;
         const MAX_POLY_LEVEL = 10;
+        const DEFAULT_GIF_FRAMES = 72;
+        const GIF_WORKER_URL = "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js";
         const POLY_LABELS = ["DOT", "TINY", "PSX", "CRUNCH", "LOW", "L2", "L3", "STD", "SMOOTH", "S2", "SILK"];
         const debugging_mode = false;
 
@@ -1628,6 +1680,7 @@
         let shapeMesh = null;
         let shapeRoot = null;
         let transformControls = null;
+        let transformControlsHelper = null;
         let transformMode = "rotate";
         let transformControlDragging = false;
         let unitySnapHeld = false;
@@ -1645,15 +1698,18 @@
         let previewMoved = false;
         const DEFAULT_CAMERA_DISTANCE = 6.15;
         const CAMERA_BASE_VECTOR = new THREE.Vector3(3.4, 2.4, 4.4).normalize();
-        const CAMERA_BASE_ELEVATION = Math.atan2(CAMERA_BASE_VECTOR.y, CAMERA_BASE_VECTOR.z);
+        const CAMERA_BASE_ELEVATION = Math.asin(CAMERA_BASE_VECTOR.y);
+        const CAMERA_BASE_AZIMUTH = Math.atan2(CAMERA_BASE_VECTOR.z, CAMERA_BASE_VECTOR.x);
         const CAMERA_VERTICAL_LIMIT = 1.15;
         let cameraDistance = DEFAULT_CAMERA_DISTANCE;
         let cameraVerticalOrbit = 0;
+        let cameraHorizontalOrbit = 0;
         let cameraPanOffset = new THREE.Vector3(0, 0, 0);
         let colorHistory = [];
         let saveTimer = null;
         let idleSaveHandle = null;
         let preferCompactSession = false;
+        let localStorageImageSaveDisabled = false;
         let imageRevisionCounter = 1;
         let loadingSession = true;
         let shapeStore = {};
@@ -1695,6 +1751,7 @@
         if (savedSession && savedSession.camera) {
             cameraDistance = Number(savedSession.camera.distance) || cameraDistance;
             cameraVerticalOrbit = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, Number(savedSession.camera.verticalOrbit) || 0));
+            cameraHorizontalOrbit = Number(savedSession.camera.horizontalOrbit) || 0;
         }
         if (savedSession && savedSession.shapeRotations) {
             shapeRotations = savedSession.shapeRotations;
@@ -2088,26 +2145,25 @@
             canvasWrap.style.height = `${size}px`;
         }
 
-        function positionCamera(targetCamera, distance, verticalOrbit) {
+        function positionCamera(targetCamera, distance, verticalOrbit, horizontalOrbit = 0, panTarget = cameraPanOffset) {
             if (!targetCamera) return;
-            const basePosition = CAMERA_BASE_VECTOR.clone().multiplyScalar(distance);
-            const x = basePosition.x;
-            const yzRadius = Math.sqrt(Math.max(0.0001, (distance * distance) - (x * x)));
-            const angle = CAMERA_BASE_ELEVATION + verticalOrbit;
+            const elevation = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, CAMERA_BASE_ELEVATION + verticalOrbit));
+            const azimuth = CAMERA_BASE_AZIMUTH + horizontalOrbit;
+            const flatRadius = Math.cos(elevation) * distance;
 
             targetCamera.position.set(
-                x,
-                Math.sin(angle) * yzRadius,
-                Math.cos(angle) * yzRadius
+                Math.cos(azimuth) * flatRadius,
+                Math.sin(elevation) * distance,
+                Math.sin(azimuth) * flatRadius
             );
-            
-            targetCamera.position.add(cameraPanOffset);
-            targetCamera.lookAt(cameraPanOffset);
+
+            targetCamera.position.add(panTarget);
+            targetCamera.lookAt(panTarget);
             targetCamera.updateProjectionMatrix();
         }
 
         function applyCameraDistance() {
-            positionCamera(camera, cameraDistance, cameraVerticalOrbit);
+            positionCamera(camera, cameraDistance, cameraVerticalOrbit, cameraHorizontalOrbit);
         }
 
         function resizeRenderer() {
@@ -2512,6 +2568,7 @@
                 card.tabIndex = 0;
                 card.setAttribute("role", "button");
                 card.addEventListener("click", () => switchFace(index, true));
+                card.addEventListener("mouseenter", () => flashSelectedMaterial(index));
                 card.addEventListener("keydown", (event) => {
                     if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
@@ -2614,6 +2671,11 @@
             if (!shapeMesh && !shapeRoot) return;
             if (transformControls) {
                 transformControls.detach();
+            }
+            if (transformControlsHelper) {
+                scene.remove(transformControlsHelper);
+                transformControlsHelper = null;
+                transformControls = null;
             }
             if (shapeRoot) {
                 scene.remove(shapeRoot);
@@ -3418,8 +3480,17 @@
             const readout = document.getElementById("transformModeReadout");
             if (!readout) return;
             const isMove = transformMode === "move";
-            readout.innerHTML = `${isMove ? moveGizmoSvg() : rotateGizmoSvg()}<span class="transform-mode-label"><b>${isMove ? "W MOVE" : "E ROTATE"}</b><small>${unitySnapHeld || unitySnapToggled || unityCtrlSnapHeld ? "SNAP ON" : "CTRL SNAP"}</small></span>`;
-            readout.title = isMove ? "Unity-style Move tool active" : "Unity-style Rotate tool active";
+            readout.innerHTML = `
+                <button type="button" class="${isMove ? "active" : ""}" data-transform-mode="move" title="Position / Move gizmo">${moveGizmoSvg()}<span>POSITION</span></button>
+                <button type="button" class="${!isMove ? "active" : ""}" data-transform-mode="rotate" title="Rotation gizmo">${rotateGizmoSvg()}<span>ROTATE</span></button>
+            `;
+            readout.querySelectorAll("button[data-transform-mode]").forEach((button) => {
+                button.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setTransformMode(button.dataset.transformMode);
+                });
+            });
         }
 
         function updateTransformControlsMode(status = true) {
@@ -3448,6 +3519,11 @@
             if (!webglAvailable || !renderer || !camera || !scene || transformControls) return;
 
             transformControls = new TransformControls(camera, renderer.domElement);
+            transformControlsHelper = typeof transformControls.getHelper === "function"
+                ? transformControls.getHelper()
+                : transformControls;
+            transformControlsHelper.renderOrder = 900;
+            scene.add(transformControlsHelper);
             transformControls.addEventListener("dragging-changed", (event) => {
                 transformControlDragging = Boolean(event.value);
                 userIsRotatingPreview = transformControlDragging;
@@ -3465,7 +3541,6 @@
                     lastTransformSaveAt = now;
                 }
             });
-            scene.add(transformControls);
             updateTransformControlsMode(false);
         }
 
@@ -3526,7 +3601,10 @@
         const raycaster = new THREE.Raycaster();
         const pointerNdc = new THREE.Vector2();
         let selectionFlashFrame = null;
+        let selectionOutlineFrame = null;
         let selectionFlashRestore = null;
+        let selectionOutline = null;
+        let hoverFaceIndex = -1;
 
         function roundDebug(value) {
             return Number.isFinite(value) ? value.toFixed(3) : "0.000";
@@ -3559,6 +3637,7 @@
                 `CAM Z  ${roundDebug(relPos.z)}`,
                 `DIST   ${roundDebug(cameraDistance)}`,
                 `CAM V  ${roundDebug(cameraVerticalOrbit)} RAD / ${degreesDebug(cameraVerticalOrbit)}°`,
+                `CAM H  ${roundDebug(cameraHorizontalOrbit)} RAD / ${degreesDebug(cameraHorizontalOrbit)}°`,
                 `OBJ X  ${roundDebug(objPos.x)}`,
                 `OBJ Y  ${roundDebug(objPos.y)}`,
                 `OBJ Z  ${roundDebug(objPos.z)}`,
@@ -3580,12 +3659,78 @@
             }
             cameraDistance = DEFAULT_CAMERA_DISTANCE;
             cameraVerticalOrbit = 0;
+            cameraHorizontalOrbit = 0;
             cameraPanOffset.set(0, 0, 0);
             applyCameraDistance();
             saveCurrentShapeContext();
             setStatus("VIEW RESET");
             updateDebugInfo();
             scheduleSave();
+        }
+
+        function disposeSelectionOutline() {
+            if (selectionOutlineFrame) {
+                cancelAnimationFrame(selectionOutlineFrame);
+                selectionOutlineFrame = null;
+            }
+            if (selectionOutline) {
+                selectionOutline.parent?.remove(selectionOutline);
+                selectionOutline.geometry?.dispose();
+                selectionOutline.material?.dispose();
+                selectionOutline = null;
+            }
+        }
+
+        function makeFaceBoundaryGeometry(materialIndex) {
+            if (!shapeMesh?.geometry) return null;
+            const geometry = shapeMesh.geometry;
+            const pos = geometry.getAttribute("position");
+            if (!pos) return null;
+            const group = geometry.groups.find((item) => item.materialIndex === materialIndex);
+            if (!group) return null;
+            const indexAttr = geometry.index;
+            const edges = new Map();
+
+            function readVertex(vertexNumber) {
+                const i = indexAttr ? indexAttr.getX(vertexNumber) : vertexNumber;
+                return [pos.getX(i), pos.getY(i), pos.getZ(i)];
+            }
+
+            function keyOf(v) {
+                return `${v[0].toFixed(4)},${v[1].toFixed(4)},${v[2].toFixed(4)}`;
+            }
+
+            function addEdge(a, b) {
+                const ak = keyOf(a);
+                const bk = keyOf(b);
+                const key = ak < bk ? `${ak}|${bk}` : `${bk}|${ak}`;
+                const saved = edges.get(key);
+                if (saved) {
+                    saved.count++;
+                } else {
+                    edges.set(key, { a, b, count: 1 });
+                }
+            }
+
+            for (let i = group.start; i < group.start + group.count; i += 3) {
+                const a = readVertex(i);
+                const b = readVertex(i + 1);
+                const c = readVertex(i + 2);
+                addEdge(a, b);
+                addEdge(b, c);
+                addEdge(c, a);
+            }
+
+            const linePositions = [];
+            edges.forEach((edge) => {
+                if (edge.count !== 1) return;
+                linePositions.push(...edge.a, ...edge.b);
+            });
+
+            if (!linePositions.length) return null;
+            const outlineGeometry = new THREE.BufferGeometry();
+            outlineGeometry.setAttribute("position", new THREE.Float32BufferAttribute(linePositions, 3));
+            return outlineGeometry;
         }
 
         function flashSelectedMaterial(index) {
@@ -3602,25 +3747,39 @@
                 selectionFlashRestore.material.needsUpdate = true;
                 selectionFlashRestore = null;
             }
+            disposeSelectionOutline();
 
             const original = material.color.clone();
-            const flashColor = new THREE.Color("#fff");
-            const fadeMs = 520;
+            const flashColor = new THREE.Color("#ffffff");
+            const fadeMs = 1000;
 
-            // instant flash start sooo no fade in
             material.color.copy(flashColor);
             material.needsUpdate = true;
-
             selectionFlashRestore = { material, original };
+
+            const outlineGeometry = makeFaceBoundaryGeometry(index);
+            if (outlineGeometry && shapeMesh) {
+                selectionOutline = new THREE.LineSegments(
+                    outlineGeometry,
+                    new THREE.LineBasicMaterial({
+                        color: 0xff8a00,
+                        transparent: true,
+                        opacity: 0.96,
+                        depthTest: false,
+                        depthWrite: false
+                    })
+                );
+                selectionOutline.renderOrder = 1000;
+                shapeMesh.add(selectionOutline);
+            }
 
             const start = performance.now();
 
             function fade(now) {
                 const t = Math.min(1, (now - start) / fadeMs);
-
-                // Fade out only: flash color -> original color.
                 material.color.lerpColors(flashColor, original, t);
                 material.needsUpdate = true;
+                if (selectionOutline?.material) selectionOutline.material.opacity = 0.96 * (1 - t);
 
                 if (t < 1) {
                     selectionFlashFrame = requestAnimationFrame(fade);
@@ -3629,6 +3788,7 @@
                     material.needsUpdate = true;
                     selectionFlashFrame = null;
                     selectionFlashRestore = null;
+                    disposeSelectionOutline();
                 }
             }
 
@@ -3650,52 +3810,71 @@
             return true;
         }
 
+        function getUnityMouseAction(event) {
+            const alt = event.altKey || event.getModifierState?.("Alt") || false;
+            if (transformControls?.dragging || transformControls?.axis) return null;
+            if (event.button === 0 && !alt) return "select";
+            if (event.button === 0 && alt) return "orbit";
+            if (event.button === 1) return "pan";
+            if (event.button === 2 && alt) return "zoom";
+            if (event.button === 2) return "orbit";
+            return null;
+        }
+
         function startPreviewDrag(event) {
-            if (transformControls?.dragging || transformControls?.axis) return;
-            if (!webglAvailable || !renderer || !shapeMesh || (event.button !== 0 && event.button !== 1)) return;
+            if (!webglAvailable || !renderer || !shapeMesh) return;
+            const action = getUnityMouseAction(event);
+            if (!action) return;
             event.preventDefault();
-            previewDragging = true;
+            previewDragging = action;
             previewDragButton = event.button;
-            userIsRotatingPreview = (event.button === 0);
+            userIsRotatingPreview = action === "orbit";
             previewMoved = false;
             previewPointerStart = { x: event.clientX, y: event.clientY };
             previewLast = { x: event.clientX, y: event.clientY };
             renderer.domElement.setPointerCapture(event.pointerId);
         }
 
+        function panCameraByPixels(dx, dy) {
+            const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+            const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+            const scale = cameraDistance * 0.0025;
+            cameraPanOffset.add(right.multiplyScalar(-dx * scale));
+            cameraPanOffset.add(up.multiplyScalar(dy * scale));
+            applyCameraDistance();
+        }
+
         function movePreviewDrag(event) {
             if (transformControls?.dragging) return;
             if (!previewDragging || !shapeMesh || !previewLast) return;
             event.preventDefault();
-            
+
+            const dx = event.clientX - previewLast.x;
+            const dy = event.clientY - previewLast.y;
+
             if (previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) > 4) {
                 previewMoved = true;
             }
 
-            if (previewDragButton === 1) {
-                const dx = event.clientX - previewLast.x;
-                const dy = event.clientY - previewLast.y;
-                const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
-                const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
-                const scale = cameraDistance * 0.0025;
-                cameraPanOffset.add(right.multiplyScalar(-dx * scale));
-                cameraPanOffset.add(up.multiplyScalar(dy * scale));
+            if (previewDragging === "pan") {
+                panCameraByPixels(dx, dy);
+            } else if (previewDragging === "zoom") {
+                cameraDistance = Math.max(2.2, Math.min(12, cameraDistance + dy * 0.02));
                 applyCameraDistance();
-            } else {
-                const dy = event.clientY - previewLast.y;
+            } else if (previewDragging === "orbit") {
+                cameraHorizontalOrbit -= dx * 0.01;
                 cameraVerticalOrbit = Math.max(-CAMERA_VERTICAL_LIMIT, Math.min(CAMERA_VERTICAL_LIMIT, cameraVerticalOrbit + dy * 0.01));
                 applyCameraDistance();
             }
 
             previewLast = { x: event.clientX, y: event.clientY };
             updateDebugInfo();
-            scheduleSave();
         }
 
         function stopPreviewDrag(event) {
             if (transformControls?.dragging) return;
             if (!previewDragging) return;
-            const wasClick = (previewDragButton === 0) && !previewMoved && previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) <= 4;
+            const wasClick = (previewDragging === "select") && !previewMoved && previewPointerStart && Math.hypot(event.clientX - previewPointerStart.x, event.clientY - previewPointerStart.y) <= 4;
             previewDragging = false;
             userIsRotatingPreview = false;
             previewLast = null;
@@ -3712,15 +3891,35 @@
             }
         }
 
+        function hoverPreviewFace(event) {
+            if (!renderer || !camera || !shapeMesh || previewDragging || transformControls?.dragging || transformControls?.axis) return;
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointerNdc, camera);
+            const hit = raycaster.intersectObject(shapeMesh, false)[0];
+            const index = hit?.face ? Math.max(0, Math.min(faces.length - 1, hit.face.materialIndex || 0)) : -1;
+            if (index >= 0 && index !== hoverFaceIndex) {
+                hoverFaceIndex = index;
+                flashSelectedMaterial(index);
+            } else if (index < 0) {
+                hoverFaceIndex = -1;
+            }
+        }
+
         if (renderer) {
             renderer.domElement.style.touchAction = "none";
+            renderer.domElement.addEventListener("contextmenu", (event) => event.preventDefault());
             renderer.domElement.addEventListener("pointerdown", startPreviewDrag);
-            renderer.domElement.addEventListener("pointermove", movePreviewDrag);
+            renderer.domElement.addEventListener("pointermove", (event) => {
+                movePreviewDrag(event);
+                hoverPreviewFace(event);
+            });
             renderer.domElement.addEventListener("pointerup", stopPreviewDrag);
             renderer.domElement.addEventListener("pointercancel", stopPreviewDrag);
             renderer.domElement.addEventListener("wheel", (event) => {
                 event.preventDefault();
-                cameraDistance = Math.max(2.8, Math.min(8, cameraDistance + Math.sign(event.deltaY) * 0.35));
+                cameraDistance = Math.max(2.2, Math.min(12, cameraDistance + Math.sign(event.deltaY) * 0.35));
                 applyCameraDistance();
                 updateDebugInfo();
                 scheduleSave();
@@ -4353,10 +4552,10 @@
             bgPickerChip.style.background = normalized;
             bgSwatch.style.background = normalized;
             bgColorHexReadout.textContent = normalized;
-            bgColorToggleText.textContent = bgTransparent ? "TRANSPARENT" : normalized;
+            bgColorToggleText.textContent = "BG";
             bgAlphaReadout.textContent = bgTransparent ? "TRANS" : "OPAQUE";
             bgTransparentBtn.classList.toggle("active", bgTransparent);
-            bgTransparentBtn.textContent = bgTransparent ? "TRANSPARENCY ON" : "TRANSPARENT";
+            bgTransparentBtn.textContent = "TRANSPARENT";
             bgPickerChip.classList.toggle("transparent", bgTransparent);
             bgSwatch.classList.toggle("transparent", bgTransparent);
             drawBgHueSlider();
@@ -5029,8 +5228,8 @@
             setVertexWobbleAmount(Number(psxWobble.value) / 100);
         });
 
-        for (const id of ["speed", "gifSize", "gifFrames", "gifFps"]) {
-            document.getElementById(id).addEventListener("input", scheduleSave);
+        for (const id of ["speed", "gifSize", "gifFps"]) {
+            document.getElementById(id)?.addEventListener("input", scheduleSave);
         }
 
         function isTypingTarget(target) {
@@ -5074,44 +5273,6 @@
                 return;
             }
 
-            if (!mod && key === "w") {
-                event.preventDefault();
-                setTransformMode("move");
-                return;
-            }
-
-            if (!mod && key === "e") {
-                event.preventDefault();
-                setTransformMode("rotate");
-                return;
-            }
-
-            // Legacy aliases from the previous CubePaint build. Unity-native keys are W/E.
-            if (!mod && key === "r") {
-                event.preventDefault();
-                setTransformMode("rotate");
-                return;
-            }
-
-            if (!mod && event.shiftKey && key === "v") {
-                event.preventDefault();
-                unitySnapToggled = !unitySnapToggled;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                setStatus(unitySnapToggled ? "SNAP ON" : "SNAP OFF");
-                return;
-            }
-
-            if (!mod && key === "v") {
-                event.preventDefault();
-                unitySnapHeld = true;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                setStatus("SNAP");
-                return;
-            }
-
-
             if (!mod && event.key === "ArrowUp") {
                 event.preventDefault();
                 moveSelectedFace(-1);
@@ -5122,35 +5283,6 @@
                 event.preventDefault();
                 moveSelectedFace(1);
                 return;
-            }
-        });
-
-        document.addEventListener("keyup", (event) => {
-            if (isTypingTarget(event.target)) return;
-            const key = event.key.toLowerCase();
-            if (key === "v" && unitySnapHeld) {
-                unitySnapHeld = false;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-                if (!unitySnapToggled) setStatus(transformMode === "move" ? "MOVE" : "ROTATE");
-            }
-        });
-
-        document.addEventListener("keydown", (event) => {
-            if (isTypingTarget(event.target)) return;
-            if (event.ctrlKey || event.metaKey) {
-                unityCtrlSnapHeld = true;
-                updateTransformSnapping();
-                updateTransformModeReadout();
-            }
-        });
-
-        document.addEventListener("keyup", (event) => {
-            if (isTypingTarget(event.target)) return;
-            if (!event.ctrlKey && !event.metaKey) {
-                unityCtrlSnapHeld = false;
-                updateTransformSnapping();
-                updateTransformModeReadout();
             }
         });
 
@@ -5197,6 +5329,19 @@
             }
         }
 
+        function showSaveOverlay(text = "SAVING") {
+            const overlay = document.getElementById("saveOverlay");
+            const label = document.getElementById("saveOverlayText");
+            if (!overlay) return;
+            if (label) label.textContent = text;
+            overlay.hidden = false;
+        }
+
+        function hideSaveOverlay() {
+            const overlay = document.getElementById("saveOverlay");
+            if (overlay) overlay.hidden = true;
+        }
+
         function downloadBlob(blob, filename) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -5226,10 +5371,11 @@
 
             const exportBtn = document.getElementById("exportGifBtn");
             exportBtn.disabled = true;
+            showSaveOverlay("SAVING GIF");
             setStatus("RENDER");
 
             const size = Number(document.getElementById("gifSize").value);
-            const frames = Math.max(24, Math.min(180, Number(document.getElementById("gifFrames").value) || 96));
+            const frames = DEFAULT_GIF_FRAMES;
             const fps = Math.max(8, Math.min(30, Number(document.getElementById("gifFps").value) || 24));
             const delay = Math.round(1000 / fps);
 
@@ -5246,7 +5392,7 @@
 
             const exportScene = new THREE.Scene();
             const exportCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-            positionCamera(exportCamera, DEFAULT_CAMERA_DISTANCE, 0);
+            positionCamera(exportCamera, DEFAULT_CAMERA_DISTANCE, 0, 0, new THREE.Vector3(0, 0, 0));
             addShadingLightsToScene(exportScene);
 
             const exportTextures = faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
@@ -5290,6 +5436,7 @@
             gif.on("finished", (blob) => {
                 cleanupExportRenderer();
                 downloadBlob(blob, "cubepaint.gif");
+                hideSaveOverlay();
                 setStatus(`${(blob.size / 1024 / 1024).toFixed(2)}MB`);
 
                 exportBtn.disabled = false;
@@ -5320,6 +5467,7 @@
                 gif.render();
             } catch (error) {
                 cleanupExportRenderer();
+                hideSaveOverlay();
                 exportBtn.disabled = false;
                 setStatus("GIF ERR");
                 console.warn("CubePaint GIF export failed:", error);
@@ -5336,7 +5484,7 @@
                 mapMode: face.mapMode === "fit" ? "fit" : "whole"
             };
 
-            if (face.changed || face.sourceName !== "blank" || !face.hasArt) {
+            if (!options.skipImages && (face.changed || face.sourceName !== "blank" || !face.hasArt)) {
                 try {
                     const imageType = options.imageType || "image/png";
                     const quality = options.imageQuality ?? null;
@@ -5387,7 +5535,7 @@
                 settings: {
                     speed: document.getElementById("speed").value,
                     gifSize: document.getElementById("gifSize").value,
-                    gifFrames: document.getElementById("gifFrames").value,
+                    gifFrames: DEFAULT_GIF_FRAMES,
                     gifFps: document.getElementById("gifFps").value,
                     bgColor: bgColor.value,
                     bgTransparent,
@@ -5397,7 +5545,8 @@
                 },
                 camera: {
                     distance: cameraDistance,
-                    verticalOrbit: cameraVerticalOrbit
+                    verticalOrbit: cameraVerticalOrbit,
+                    horizontalOrbit: cameraHorizontalOrbit
                 },
                 shapeRotations,
                 shapeTransforms,
@@ -5435,22 +5584,28 @@
             if (loadingSession) return;
             saveEditorToFace(false, false);
 
-            const primaryOptions = preferCompactSession
-                ? { imageType: "image/webp", imageQuality: 0.55, compact: true }
-                : {};
-            const payload = makeSessionPayload(primaryOptions);
+            const options = localStorageImageSaveDisabled
+                ? { skipImages: true, compact: true }
+                : (preferCompactSession ? { imageType: "image/webp", imageQuality: 0.45, compact: true } : { imageType: "image/webp", imageQuality: 0.58, compact: true });
+            const payload = makeSessionPayload(options);
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
                 saveCookieSettings(payload);
-                setStatus(preferCompactSession ? "SAVED SMALL" : "SAVED");
+                setStatus(localStorageImageSaveDisabled ? "SAVED SETTINGS" : "SAVED");
                 return;
             } catch (error) {
                 console.warn("CubePaint session could not be saved in preferred format:", error);
             }
 
             preferCompactSession = true;
-            const compactPayload = makeSessionPayload({ imageType: "image/webp", imageQuality: 0.55, compact: true });
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (removeError) {
+                console.warn("CubePaint old session could not be cleared:", removeError);
+            }
+
+            const compactPayload = makeSessionPayload({ imageType: "image/webp", imageQuality: 0.32, compact: true });
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(compactPayload));
                 saveCookieSettings(compactPayload);
@@ -5458,8 +5613,15 @@
                 return;
             } catch (compactError) {
                 console.warn("CubePaint compact session could not be saved:", compactError);
-                saveCookieSettings(compactPayload);
-                setStatus("SAVE LIMIT");
+                localStorageImageSaveDisabled = true;
+                const skinnyPayload = makeSessionPayload({ skipImages: true, compact: true });
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(skinnyPayload));
+                } catch (skinnyError) {
+                    console.warn("CubePaint settings-only local save could not be written:", skinnyError);
+                }
+                saveCookieSettings(skinnyPayload);
+                setStatus("SAVED SETTINGS");
             }
         }
 
@@ -5474,7 +5636,7 @@
                 idleSaveHandle = requestIdleCallback(() => {
                     idleSaveHandle = null;
                     saveSession();
-                }, { timeout: 1800 });
+                }, { timeout: 8000 });
                 return;
             }
 
@@ -5488,7 +5650,7 @@
                 cancelIdleCallback(idleSaveHandle);
                 idleSaveHandle = null;
             }
-            saveTimer = setTimeout(runScheduledSave, 1200);
+            saveTimer = setTimeout(runScheduledSave, 4500);
         }
 
         function restoreInputsFromSession(session) {
@@ -5497,8 +5659,7 @@
             if (session.settings) {
                 if (session.settings.speed != null) document.getElementById("speed").value = session.settings.speed;
                 if (session.settings.gifSize != null) document.getElementById("gifSize").value = session.settings.gifSize;
-                if (session.settings.gifFrames != null) document.getElementById("gifFrames").value = session.settings.gifFrames;
-                if (session.settings.gifFps != null) document.getElementById("gifFps").value = session.settings.gifFps;
+                                if (session.settings.gifFps != null) document.getElementById("gifFps").value = session.settings.gifFps;
                 if (session.settings.bgColor != null) applyBgColor(session.settings.bgColor, false);
                 if (session.settings.bgTransparent != null) bgTransparent = session.settings.bgTransparent === true || session.settings.bgTransparent === "true";
                 if (session.settings.vertexWobbleAmount != null) {
