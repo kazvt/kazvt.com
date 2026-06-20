@@ -676,6 +676,27 @@
             align-self: stretch;
         }
 
+
+
+        .gif-locked-control {
+            opacity: 0.38;
+            filter: grayscale(1);
+            cursor: not-allowed !important;
+        }
+
+        .gif-locked-control * {
+            cursor: not-allowed !important;
+        }
+
+        .btn.active.gif-locked-control {
+            background: var(--paper2);
+            color: var(--ink);
+        }
+
+        #paintCanvas.gif-locked-canvas {
+            cursor: not-allowed !important;
+        }
+
         .btn:disabled {
             opacity: 0.35;
             cursor: not-allowed;
@@ -2115,6 +2136,80 @@
             statusEl.textContent = text;
         }
 
+        function isGifLockedFace(index = currentFace) {
+            return Boolean(faces[index]?.animation);
+        }
+
+        function showGifNoDraw(index = currentFace) {
+            setStatus("gifs = no draw");
+            flashSelectedMaterial(index);
+        }
+
+        function updateGifLayerLockUi() {
+            const locked = isGifLockedFace();
+            const ids = [
+                "pencilBtn",
+                "eraserBtn",
+                "lineBtn",
+                "rectBtn",
+                "circleBtn",
+                "fillBtn",
+                "undoBtn",
+                "redoBtn",
+                "copyBtn",
+                "pasteBtn",
+                "clearBtn",
+                "colorPickerToggle",
+                "brushSize"
+            ];
+            ids.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.toggle("gif-locked-control", locked);
+                el.setAttribute("aria-disabled", locked ? "true" : "false");
+                el.title = locked ? "gifs = no draw" : (el.dataset.defaultTitle || el.title || "");
+            });
+            if (locked) {
+                colorPickerPanel?.classList.remove("open");
+                colorPickerToggle?.classList.remove("open");
+            }
+            paintCanvas.classList.toggle("gif-locked-canvas", locked);
+        }
+
+        function markGifLockableControls() {
+            [
+                "pencilBtn",
+                "eraserBtn",
+                "lineBtn",
+                "rectBtn",
+                "circleBtn",
+                "fillBtn",
+                "undoBtn",
+                "redoBtn",
+                "copyBtn",
+                "pasteBtn",
+                "clearBtn",
+                "colorPickerToggle",
+                "brushSize"
+            ].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.add("gif-lockable-control");
+                el.dataset.defaultTitle = el.title || "";
+            });
+        }
+
+        function blockGifLockedInteraction(event) {
+            if (!isGifLockedFace()) return false;
+            const target = event.target;
+            if (!target?.closest?.(".gif-lockable-control")) return false;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            showGifNoDraw();
+            updateGifLayerLockUi();
+            return true;
+        }
+
         function normalizeHex(hex, fallback = "#140306") {
             if (typeof hex !== "string") return fallback;
             let clean = hex.trim().replace(/^#/, "").toUpperCase();
@@ -2879,6 +2974,7 @@
             face._saveCache = null;
             syncAnimatedFace(index, performance.now(), true);
             renderFaceList();
+            updateGifLayerLockUi();
             scheduleSave();
             return true;
         }
@@ -3008,6 +3104,10 @@
         }
 
         function undoFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             const face = faces[currentFace];
             if (!face || !face.undo.length) return;
 
@@ -3023,6 +3123,10 @@
         }
 
         function redoFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             const face = faces[currentFace];
             if (!face || !face.redo.length) return;
 
@@ -3109,6 +3213,7 @@
             }
 
             updateUndoRedo();
+            updateGifLayerLockUi();
         }
 
         function saveEditorToFace(updateList = false, persist = true) {
@@ -3230,6 +3335,11 @@
         }
 
         function setTool(next) {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                updateGifLayerLockUi();
+                return;
+            }
             tool = next;
 
             for (const [id, name] of [
@@ -6250,6 +6360,11 @@
         }
 
         paintCanvas.addEventListener("pointerdown", (event) => {
+            if (isGifLockedFace()) {
+                event.preventDefault();
+                showGifNoDraw();
+                return;
+            }
             const point = canvasPoint(event);
             stopFaceAnimation(faces[currentFace]);
 
@@ -6287,12 +6402,20 @@
         });
 
         paintCanvas.addEventListener("pointerenter", (event) => {
+            if (isGifLockedFace()) {
+                hideBrushCursor();
+                return;
+            }
             brushCursorVisible = true;
             brushCursorPoint = canvasPoint(event);
             drawBrushCursor();
         });
 
         paintCanvas.addEventListener("pointermove", (event) => {
+            if (isGifLockedFace()) {
+                hideBrushCursor();
+                return;
+            }
             brushCursorVisible = true;
             brushCursorPoint = canvasPoint(event);
             drawBrushCursor();
@@ -6342,6 +6465,7 @@
         function drawBrushCursor() {
             drawCanvasGuide();
 
+            if (isGifLockedFace()) return;
             if (!brushCursorVisible || !brushCursorPoint || tool === "fill") return;
 
             const brush = Math.max(1, Math.round(Number(brushSize.value) || 1));
@@ -6389,6 +6513,10 @@
         paintCanvas.addEventListener("pointerleave", stopDrawing);
 
         document.getElementById("clearBtn").addEventListener("click", () => {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             pushUndo(currentFace);
 
             stopFaceAnimation(faces[currentFace]);
@@ -6485,6 +6613,10 @@
 
 
         function copyCurrentFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             saveEditorToFace(true);
 
             const face = faces[currentFace];
@@ -6502,6 +6634,10 @@
         }
 
         function pasteToCurrentFace() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                return;
+            }
             if (!copyBuffer) {
                 setStatus("NO COPY");
                 return;
@@ -6530,6 +6666,12 @@
 
         document.getElementById("copyBtn").addEventListener("click", copyCurrentFace);
         document.getElementById("pasteBtn").addEventListener("click", pasteToCurrentFace);
+
+        markGifLockableControls();
+        toolbar.addEventListener("pointerdown", blockGifLockedInteraction, true);
+        toolbar.addEventListener("click", blockGifLockedInteraction, true);
+        toolbar.addEventListener("input", blockGifLockedInteraction, true);
+        updateGifLayerLockUi();
 
         psxWobble.addEventListener("input", () => {
             const level = Math.max(0, Math.min(PSX_WOBBLE_PRESETS.length - 1, Math.round(Number(psxWobble.value) || 0)));
