@@ -1572,6 +1572,16 @@
       return Math.min(1000, Math.max(20, Math.round(delay)));
     }
 
+    function isFinitePositiveDimension(value) {
+      return Number.isFinite(value) && value >= 1;
+    }
+
+    function hasValidCanvasSize(sourceCanvas) {
+      return Boolean(sourceCanvas) &&
+        isFinitePositiveDimension(sourceCanvas.width) &&
+        isFinitePositiveDimension(sourceCanvas.height);
+    }
+
     function setLoadedControls(isLoaded) {
       renderBtn.disabled = !isLoaded;
       downloadBtn.disabled = !isLoaded;
@@ -2110,7 +2120,7 @@
     }
 
     function render(options = {}) {
-      if (!originalImage) return;
+      if (!originalImage) return false;
 
       const frameIndex = options.frameIndex ?? currentFrameIndex;
       const timestamp = options.timestamp ?? performance.now();
@@ -2118,6 +2128,11 @@
       const shouldUpdateStatus = options.updateStatus !== false;
       const marchingAntsProgress = options.marchingAntsProgress ?? getMarchingAntsProgress(timestamp);
       const source = getDashSource(frameIndex);
+      if (!source || !isFinitePositiveDimension(source.width) || !isFinitePositiveDimension(source.height)) {
+        status.textContent = "The current crop produced an invalid canvas size. Check crop width and height.";
+        return false;
+      }
+
       const dashCount = Math.max(1, Math.floor(Number(dashCountInput.value) || 1));
       const lineWidth = getLineWidthValue();
       const colorA = getColourFromInputs(colorAInput, colorATransparentInput);
@@ -2157,13 +2172,13 @@
         marchingAntsProgress
       });
 
-      if (!didDrawBorder) return;
+      if (!didDrawBorder) return false;
 
       if (includeGuides) {
         drawFixedCropGuides(outsidePadding, outsidePadding);
       }
 
-      if (!shouldUpdateStatus) return;
+      if (!shouldUpdateStatus) return true;
 
       status.textContent = `${source.width} x ${source.height}px crop, ${canvas.width} x ${canvas.height}px export.`;
 
@@ -2188,6 +2203,8 @@
       if (isCanvasBackgroundEnabled()) {
         status.textContent += ` Canvas background: ${formatColourForDisplay(getCanvasBackgroundColor())}.`;
       }
+
+      return true;
     }
 
     function shouldDrawSide(selectedSides, side) {
@@ -2513,23 +2530,72 @@
 
     function encodeGif(frames) {
       return new Promise((resolve, reject) => {
+        if (!frames.length) {
+          reject(new Error("No GIF frames to export."));
+          return;
+        }
+
+        const firstFrame = frames[0];
+        const firstFrameRendered = render({
+          frameIndex: firstFrame.frameIndex,
+          marchingAntsProgress: firstFrame.marchingAntsProgress,
+          includeGuides: false,
+          updateStatus: false
+        });
+
+        if (!firstFrameRendered || !hasValidCanvasSize(canvas)) {
+          reject(new Error("GIF export could not render a valid first frame."));
+          return;
+        }
+
+        const gifWidth = Math.floor(canvas.width);
+        const gifHeight = Math.floor(canvas.height);
+        const frameCanvas = document.createElement("canvas");
+        const frameCtx = frameCanvas.getContext("2d", { willReadFrequently: true });
+        frameCanvas.width = gifWidth;
+        frameCanvas.height = gifHeight;
+        setCanvasResampling(frameCtx);
+
         const gif = new GIF({
           workers: 2,
           quality: isNearestResampling() ? 1 : 10,
+          width: gifWidth,
+          height: gifHeight,
           workerScript: GIF_WORKER_SCRIPT,
           transparent: null
         });
 
-        frames.forEach((frame, index) => {
-          render({
-            frameIndex: frame.frameIndex,
-            marchingAntsProgress: frame.marchingAntsProgress,
-            includeGuides: false,
-            updateStatus: false
-          });
-          gif.addFrame(ctx, { copy: true, delay: normalizeFrameDelay(frame.delay) });
+        function addRenderedCanvasToGif(frame, index) {
+          if (!hasValidCanvasSize(canvas)) {
+            throw new Error("GIF export rendered an invalid frame size.");
+          }
+
+          if (canvas.width !== gifWidth || canvas.height !== gifHeight) {
+            throw new Error("GIF export frame size changed while rendering.");
+          }
+
+          frameCtx.clearRect(0, 0, gifWidth, gifHeight);
+          frameCtx.drawImage(canvas, 0, 0);
+          gif.addFrame(frameCanvas, { copy: true, delay: normalizeFrameDelay(frame.delay) });
           status.textContent = `Rendering GIF: ${index + 1}/${frames.length} frames...`;
-        });
+        }
+
+        try {
+          addRenderedCanvasToGif(firstFrame, 0);
+
+          frames.slice(1).forEach((frame, frameOffset) => {
+            render({
+              frameIndex: frame.frameIndex,
+              marchingAntsProgress: frame.marchingAntsProgress,
+              includeGuides: false,
+              updateStatus: false
+            });
+            addRenderedCanvasToGif(frame, frameOffset + 1);
+          });
+        } catch (error) {
+          reject(error);
+          return;
+        }
 
         gif.on("progress", progress => {
           status.textContent = `Encoding GIF: ${Math.round(progress * 100)}%...`;
