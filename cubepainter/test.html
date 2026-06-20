@@ -5,6 +5,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CubePaint</title>
+    <meta name="description" content="CubePaint is a playful browser tool for painting textures onto simple 3D shapes, previewing them live, and exporting seamless little GIFs." />
+    <meta name="theme-color" content="#140306" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="favicon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubePaint" />
+    <meta property="og:title" content="CubePaint" />
+    <meta property="og:description" content="CubePaint is a playful browser tool for painting textures onto simple 3D shapes, previewing them live, and exporting seamless little GIFs." />
+    <meta property="og:image" content="thumbnail.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="CubePaint preview" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CubePaint" />
+    <meta name="twitter:description" content="CubePaint is a playful browser tool for painting textures onto simple 3D shapes, previewing them live, and exporting seamless little GIFs." />
+    <meta name="twitter:image" content="thumbnail.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
     <style>
@@ -135,9 +151,21 @@
 
         .shape-cycle-current {
             min-width: 0;
-            padding: 0 6px;
+            padding: 0 7px 0 5px;
             font-size: 10px;
             text-align: center;
+            grid-template-columns: 28px minmax(0, auto);
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .shape-icon-canvas {
+            width: 26px;
+            height: 26px;
+            display: block;
+            image-rendering: pixelated;
+            pointer-events: none;
         }
 
         .shape-cycle-btn:hover,
@@ -151,18 +179,22 @@
 
         .top-param-controls {
             min-width: 0;
+            min-height: 40px;
             display: grid;
             grid-auto-flow: column;
             grid-auto-columns: minmax(0, 1fr);
             gap: 10px;
             align-items: center;
+            align-self: center;
             overflow: hidden;
+            transform: translateY(-3px);
         }
 
         .poly-fader {
             grid-template-columns: minmax(0, 1fr);
-            grid-template-rows: 12px 24px;
-            gap: 5px;
+            grid-template-rows: 11px 23px;
+            gap: 3px;
+            align-self: center;
         }
 
         .top-control-readout,
@@ -192,10 +224,11 @@
 
         .shape-extra-control {
             display: grid;
-            grid-template-rows: 12px 24px;
-            gap: 5px;
+            grid-template-rows: 11px 23px;
+            gap: 3px;
             min-width: 0;
             align-items: center;
+            align-self: center;
         }
 
         .shape-extra-control input[type="range"] {
@@ -1417,6 +1450,7 @@
                 grid-column: 1 / -1;
                 width: 100%;
                 grid-auto-columns: minmax(0, 1fr);
+                transform: none;
             }
 
             .top-center {
@@ -1448,6 +1482,7 @@
             <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
                 <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>
                 <button class="shape-cycle-current" id="shapeSelectToggle" type="button" aria-label="current shape">
+                    <canvas class="shape-icon-canvas" id="shapeIconCanvas" width="32" height="32" aria-hidden="true"></canvas>
                     <span id="shapeNameReadout">CUBE</span>
                 </button>
                 <button class="shape-cycle-btn" id="shapeNextBtn" type="button" aria-label="next shape">›</button>
@@ -1901,6 +1936,7 @@
         const shapePrevBtn = document.getElementById("shapePrevBtn");
         const shapeNextBtn = document.getElementById("shapeNextBtn");
         const shapeNameReadout = document.getElementById("shapeNameReadout");
+        const shapeIconCanvas = document.getElementById("shapeIconCanvas");
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
         const polyReadout = document.getElementById("polyReadout");
@@ -1986,6 +2022,11 @@
         let shapeRoot = null;
         let transformControls = null;
         let transformControlsHelper = null;
+        let shapeIconRenderer = null;
+        let shapeIconScene = null;
+        let shapeIconCamera = null;
+        let shapeIconMesh = null;
+        let shapeIconDirty = true;
         let warudoLookActive = false;
         let warudoPointerId = null;
         const warudoKeys = new Set();
@@ -2130,8 +2171,6 @@
                 "fillBtn",
                 "undoBtn",
                 "redoBtn",
-                "copyBtn",
-                "pasteBtn",
                 "clearBtn",
                 "colorPickerToggle",
                 "brushSize"
@@ -2160,8 +2199,6 @@
                 "fillBtn",
                 "undoBtn",
                 "redoBtn",
-                "copyBtn",
-                "pasteBtn",
                 "clearBtn",
                 "colorPickerToggle",
                 "brushSize"
@@ -2366,6 +2403,7 @@
             if (shapeId === currentShapeId) {
                 rebuildShapeMeshWithoutMovingView();
                 renderFaceList();
+                markShapeIconDirty();
             }
             if (persist && !loadingSession) scheduleSave();
         }
@@ -2747,7 +2785,7 @@
         function stopFaceAnimation(face) {
             if (!face || !face.animation) return;
 
-            if (face.animation.url) {
+            if (face.animation.url && !face.animation.shared) {
                 URL.revokeObjectURL(face.animation.url);
             }
 
@@ -3360,6 +3398,7 @@
             renderShapeDropdown();
             updatePolyControl();
             updateShapeExtraControls();
+            markShapeIconDirty();
         }
 
         function switchShape(nextIndex) {
@@ -3843,6 +3882,10 @@
                 const face = faces[materialIndex];
                 if (!face) continue;
 
+                if (applyTorusInnerGuideUv(def, face, uv, ia, ib, ic, a, b, c)) {
+                    continue;
+                }
+
                 if (applyCylinderBodyInnerGuideUv(def, face, uv, ia, ib, ic, a, b, c)) {
                     continue;
                 }
@@ -3852,6 +3895,30 @@
             }
 
             uv.needsUpdate = true;
+        }
+
+        function applyTorusInnerGuideUv(def, face, uv, ia, ib, ic, a, b, c) {
+            if (def.geometry !== "torus" || face?.mapMode !== "fit") return false;
+            const profile = getFaceFitProfile(def, face);
+            if (profile?.kind !== "ring") return false;
+
+            const majorRadius = 1.05;
+            const tubeRadius = 0.35;
+            const points = [a, b, c];
+
+            [ia, ib, ic].forEach((index, order) => {
+                const point = points[order];
+                const major = Math.sqrt(point.x * point.x + point.z * point.z);
+                const radial01 = clamp01((major - (majorRadius - tubeRadius)) / (tubeRadius * 2));
+                let angle = Math.atan2(point.z, point.x);
+                if (point.y >= 0) angle = -angle;
+                const radius = profile.rInner + radial01 * (profile.rOuter - profile.rInner);
+                const canvasX = profile.cx + Math.cos(angle) * radius;
+                const canvasY = profile.cy + Math.sin(angle) * radius;
+                uv.setXY(index, canvasX / FACE_SIZE, 1 - (canvasY / FACE_SIZE));
+            });
+
+            return true;
         }
 
         function applyCylinderBodyInnerGuideUv(def, face, uv, ia, ib, ic, a, b, c) {
@@ -4562,6 +4629,72 @@
             geometry.computeBoundingSphere();
         }
 
+        function markShapeIconDirty() {
+            shapeIconDirty = true;
+        }
+
+        function ensureShapeIconRenderer() {
+            if (!shapeIconCanvas || shapeIconRenderer) return Boolean(shapeIconRenderer);
+            try {
+                shapeIconRenderer = new THREE.WebGLRenderer({
+                    canvas: shapeIconCanvas,
+                    antialias: false,
+                    alpha: true
+                });
+                shapeIconRenderer.setPixelRatio(1);
+                shapeIconRenderer.setSize(32, 32, false);
+                shapeIconRenderer.outputColorSpace = THREE.SRGBColorSpace;
+                shapeIconScene = new THREE.Scene();
+                shapeIconCamera = new THREE.PerspectiveCamera(34, 1, 0.1, 20);
+                shapeIconCamera.position.set(3.2, 2.4, 4.4);
+                shapeIconCamera.lookAt(0, 0, 0);
+                shapeIconScene.add(new THREE.AmbientLight(0xfff6d8, 1.45));
+                const light = new THREE.DirectionalLight(0xfff6d8, 2.4);
+                light.position.set(3, 4, 5);
+                shapeIconScene.add(light);
+                return true;
+            } catch (error) {
+                shapeIconCanvas.hidden = true;
+                return false;
+            }
+        }
+
+        function updateShapeIconMesh() {
+            if (!ensureShapeIconRenderer() || !shapeIconScene) return;
+            if (shapeIconMesh) {
+                shapeIconScene.remove(shapeIconMesh);
+                if (shapeIconMesh.geometry) shapeIconMesh.geometry.dispose();
+                if (shapeIconMesh.material) shapeIconMesh.material.dispose();
+                shapeIconMesh = null;
+            }
+            const def = getCurrentShapeDef();
+            const geometry = createGeometry(def);
+            centerGeometryOnOrigin(geometry);
+            geometry.computeBoundingSphere();
+            const radius = Math.max(0.001, geometry.boundingSphere?.radius || 1);
+            geometry.scaleScalar(1.32 / radius);
+            geometry.computeBoundingSphere();
+            const material = new THREE.MeshLambertMaterial({
+                color: 0xfff6d8,
+                emissive: 0x241713,
+                emissiveIntensity: 0.15
+            });
+            shapeIconMesh = new THREE.Mesh(geometry, material);
+            shapeIconMesh.rotation.set(0.22, -0.55, 0);
+            shapeIconScene.add(shapeIconMesh);
+            shapeIconDirty = false;
+        }
+
+        function renderShapeIcon(now = performance.now()) {
+            if (!ensureShapeIconRenderer()) return;
+            if (shapeIconDirty || !shapeIconMesh) updateShapeIconMesh();
+            if (!shapeIconMesh || !shapeIconScene || !shapeIconCamera) return;
+            const time = now * 0.001;
+            shapeIconMesh.rotation.y = time * 1.35;
+            shapeIconMesh.rotation.x = 0.18 + Math.sin(time * 0.85) * 0.08;
+            shapeIconRenderer.render(shapeIconScene, shapeIconCamera);
+        }
+
         function buildShapeMesh() {
             if (!webglAvailable || !scene) return;
 
@@ -4584,6 +4717,7 @@
             updateShadingButton();
             rebuildAllTextures();
             updateDebugInfo();
+            markShapeIconDirty();
         }
 
         try {
@@ -5409,6 +5543,7 @@
             shapePolyLevels[currentShapeId] = Number(polySlider.value);
             updatePolyControl();
             rebuildShapeMeshWithoutMovingView();
+            markShapeIconDirty();
             setStatus("POLY");
             scheduleSave();
         });
@@ -6656,32 +6791,59 @@
         }
 
 
-        function copyCurrentFace() {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
-            saveEditorToFace(true);
+        function cloneAnimationPayload(animation) {
+            if (!animation) return null;
 
+            if (animation.kind === "gifFrames" && animation.frames?.length) {
+                return {
+                    kind: "gifFrames",
+                    frames: animation.frames,
+                    sourceName: animation.sourceName || "animated.gif",
+                    startedAt: performance.now(),
+                    currentFrame: -1,
+                    totalDuration: animation.totalDuration || animation.frames.reduce((sum, frame) => sum + Math.max(20, Number(frame.duration) || 100), 0)
+                };
+            }
+
+            if (animation.image) {
+                return {
+                    kind: animation.kind || "gif",
+                    image: animation.image,
+                    sourceName: animation.sourceName || "animated.gif",
+                    startedAt: performance.now(),
+                    currentFrame: -1,
+                    shared: true
+                };
+            }
+
+            return null;
+        }
+
+        function copyCurrentFace() {
             const face = faces[currentFace];
             if (!face) return;
+
+            if (!face.animation) {
+                saveEditorToFace(true);
+            } else {
+                syncAnimatedFace(currentFace, performance.now(), true);
+            }
+
+            const animation = cloneAnimationPayload(face.animation);
 
             copyBuffer = {
                 imageData: snapshotCanvas(face.canvas),
                 hasArt: face.hasArt,
                 sourceName: face.sourceName,
                 changed: face.changed,
-                tiling: face.tiling
+                tiling: face.tiling,
+                animation
             };
 
-            setStatus("COPIED");
+            setStatus(animation ? "GIF COPIED" : "COPIED");
         }
 
         function pasteToCurrentFace() {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
             if (!copyBuffer) {
                 setStatus("NO COPY");
                 return;
@@ -6690,8 +6852,24 @@
             const face = faces[currentFace];
             if (!face) return;
 
+            if (isGifLockedFace() && !copyBuffer.animation) {
+                showGifNoDraw();
+                return;
+            }
+
             pushUndo(currentFace);
             stopFaceAnimation(face);
+
+            if (copyBuffer.animation) {
+                const animation = cloneAnimationPayload(copyBuffer.animation);
+                if (animation) {
+                    face.tiling = Math.max(1, Math.min(MAX_TILING, Number(copyBuffer.tiling || face.tiling || 1)));
+                    installAnimatedGifFace(currentFace, animation);
+                    updateTilingControl();
+                    setStatus("GIF PASTED");
+                    return;
+                }
+            }
 
             restoreCanvas(face.canvas, copyBuffer.imageData);
             face.hasArt = copyBuffer.hasArt;
@@ -6704,6 +6882,7 @@
             loadFaceIntoEditor(true);
             renderFaceList();
             updateTilingControl();
+            updateGifLayerLockUi();
             scheduleSave();
             setStatus("PASTED");
         }
@@ -6860,6 +7039,7 @@
                 renderer.render(scene, camera);
             }
 
+            renderShapeIcon(now);
             requestAnimationFrame(animate);
         }
 
@@ -7114,6 +7294,7 @@
 
         function serializeFace(face, options = {}, def = null) {
             normalizeFaceMapMode(def, face);
+            const gifPoster = Boolean(face.animation);
             const state = {
                 name: face.name,
                 hasArt: face.hasArt,
@@ -7123,10 +7304,14 @@
                 mapMode: face.mapMode === "fit" ? "fit" : "whole"
             };
 
+            if (gifPoster) {
+                state.gifPoster = true;
+            }
+
             if (!options.skipImages && (face.changed || face.sourceName !== "blank" || !face.hasArt)) {
                 try {
-                    const imageType = options.imageType || "image/png";
-                    const quality = options.imageQuality ?? null;
+                    const imageType = gifPoster ? "image/webp" : (options.imageType || "image/png");
+                    const quality = gifPoster ? 0.35 : (options.imageQuality ?? null);
                     const revision = face.imageRevision || 0;
                     const cached = face._saveCache;
 
