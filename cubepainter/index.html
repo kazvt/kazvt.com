@@ -324,6 +324,8 @@
             min-height: 0;
             display: grid;
             grid-template-rows: 1fr auto;
+            position: relative;
+            overflow: visible;
         }
 
         .canvas-wrap {
@@ -386,6 +388,8 @@
             padding: 8px;
             display: grid;
             gap: 7px;
+            position: relative;
+            z-index: 8;
         }
 
         .tools {
@@ -1765,7 +1769,7 @@
         import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
 
         const FACE_SIZE = 512;
-        const PHOTO_OVERLAY_PAD = 112;
+        const PHOTO_OVERLAY_PAD = 512;
         const MAX_UNDO_HISTORY = 40;
         const BLANK_FILL = "#fff6d8";
         const HUE_STEPS = 24;
@@ -3106,7 +3110,7 @@
         }
 
         function photoCursorForHit(hit, event = null) {
-            if (!hit) return "none";
+            if (!hit) return "crosshair";
             if (event?.ctrlKey && hit.mode === "scale") return "crosshair";
             if (hit.mode === "anchor") return "grab";
             if (hit.mode === "move") return "move";
@@ -3130,10 +3134,57 @@
             }[handle] || { x: 0, y: 0 };
         }
 
+        function clampPhotoAnchor(layer, x, y) {
+            const halfW = Math.max(1, Number(layer.width) || 1) / 2;
+            const halfH = Math.max(1, Number(layer.height) || 1) / 2;
+            return {
+                x: Math.max(-halfW, Math.min(halfW, x)),
+                y: Math.max(-halfH, Math.min(halfH, y))
+            };
+        }
+
+        function snapPhotoAnchor(layer, x, y, enabled = true) {
+            const clamped = clampPhotoAnchor(layer, x, y);
+            if (!enabled) return clamped;
+            const halfW = Math.max(1, Number(layer.width) || 1) / 2;
+            const halfH = Math.max(1, Number(layer.height) || 1) / 2;
+            const snap = Math.max(10, Math.min(24, Math.min(halfW, halfH) * 0.12));
+            const targets = [
+                { x: 0, y: 0 },
+                { x: -halfW, y: -halfH },
+                { x: halfW, y: -halfH },
+                { x: halfW, y: halfH },
+                { x: -halfW, y: halfH }
+            ];
+            let best = null;
+            let bestDistance = Infinity;
+            targets.forEach((target) => {
+                const distance = Math.hypot(clamped.x - target.x, clamped.y - target.y);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    best = target;
+                }
+            });
+            return best && bestDistance <= snap ? { x: best.x, y: best.y } : clamped;
+        }
+
+        function photoScaledAnchor(start, nextW, nextH) {
+            const safeW = Math.max(1, Number(start.width) || 1);
+            const safeH = Math.max(1, Number(start.height) || 1);
+            return {
+                x: (Number(start.anchorX) || 0) / safeW * nextW,
+                y: (Number(start.anchorY) || 0) / safeH * nextH
+            };
+        }
+
         function startPhotoTransform(event, point, hit) {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
             if (!layer?.image || !hit) return false;
+            if (hit.mode === "anchor" && !(event.altKey || event.ctrlKey)) {
+                if (!photoPointInLayer(layer, point, 0)) return false;
+                hit = { mode: "move", handle: "move" };
+            }
             event.preventDefault();
             event.stopPropagation();
             photoLayerSelected = true;
@@ -3168,8 +3219,9 @@
                 layer.y = start.y + dy;
             } else if (photoTransformDrag.mode === "anchor") {
                 const local = photoWorldToLocal(start, point.x, point.y);
-                layer.anchorX = Math.max(-start.width / 2, Math.min(start.width / 2, local.x));
-                layer.anchorY = Math.max(-start.height / 2, Math.min(start.height / 2, local.y));
+                const snapped = snapPhotoAnchor(start, local.x, local.y, !event.shiftKey);
+                layer.anchorX = snapped.x;
+                layer.anchorY = snapped.y;
             } else if (photoTransformDrag.mode === "rotate") {
                 const pivot = photoLayerAnchorWorld(start);
                 const a0 = Math.atan2(photoTransformDrag.startPoint.y - pivot.y, photoTransformDrag.startPoint.x - pivot.x);
@@ -3191,12 +3243,16 @@
                 const handle = photoTransformDrag.handle;
                 const local = photoWorldToLocal(start, point.x, point.y);
                 const fixedHandle = event.altKey ? "anchor" : oppositePhotoHandle(handle);
-                const fixed = fixedHandle === "anchor" ? { x: start.anchorX, y: start.anchorY } : photoHandleLocal(start, fixedHandle);
-                const movingStart = photoHandleLocal(start, handle);
+                const fixedStart = fixedHandle === "anchor" ? { x: start.anchorX, y: start.anchorY } : photoHandleLocal(start, fixedHandle);
                 let nextW = start.width;
                 let nextH = start.height;
-                if (["nw", "ne", "se", "sw", "e", "w"].includes(handle)) nextW = Math.max(8, Math.abs(local.x - fixed.x));
-                if (["nw", "ne", "se", "sw", "n", "s"].includes(handle)) nextH = Math.max(8, Math.abs(local.y - fixed.y));
+                const corner = ["nw", "ne", "se", "sw"].includes(handle);
+                const horizontal = corner || ["e", "w"].includes(handle);
+                const vertical = corner || ["n", "s"].includes(handle);
+
+                if (horizontal) nextW = Math.max(8, Math.abs(local.x - fixedStart.x));
+                if (vertical) nextH = Math.max(8, Math.abs(local.y - fixedStart.y));
+
                 if (event.shiftKey) {
                     const ratio = start.width / Math.max(1, start.height);
                     if (["n", "s"].includes(handle)) nextW = nextH * ratio;
@@ -3204,35 +3260,17 @@
                     else if (nextW / Math.max(1, nextH) > ratio) nextH = nextW / ratio;
                     else nextW = nextH * ratio;
                 }
-                const signX = movingStart.x >= fixed.x ? 1 : -1;
-                const signY = movingStart.y >= fixed.y ? 1 : -1;
-                let movingNext;
-                if (["n", "s"].includes(handle)) {
-                    movingNext = { x: fixed.x, y: fixed.y + signY * Math.max(8, nextH) };
-                } else if (["e", "w"].includes(handle)) {
-                    movingNext = { x: fixed.x + signX * Math.max(8, nextW), y: fixed.y };
-                } else {
-                    movingNext = {
-                        x: fixed.x + signX * Math.max(8, nextW),
-                        y: fixed.y + signY * Math.max(8, nextH)
-                    };
-                }
-                const centerLocal = {
-                    x: (fixed.x + movingNext.x) / 2,
-                    y: (fixed.y + movingNext.y) / 2
-                };
-                const fixedWorld = photoLocalToWorld(start, fixed.x, fixed.y);
+
+                const anchorNext = photoScaledAnchor(start, nextW, nextH);
+                const fixedNext = fixedHandle === "anchor" ? anchorNext : photoHandleLocal({ width: nextW, height: nextH }, fixedHandle);
+                const fixedWorld = photoLocalToWorld(start, fixedStart.x, fixedStart.y);
                 const startMatrix = photoLayerMatrix(start);
                 layer.width = Math.max(8, nextW);
                 layer.height = Math.max(8, nextH);
-                layer.anchorX = start.anchorX - centerLocal.x;
-                layer.anchorY = start.anchorY - centerLocal.y;
-                const a = startMatrix.a;
-                const b = startMatrix.b;
-                const c = startMatrix.c;
-                const d = startMatrix.d;
-                layer.x = fixedWorld.x - (a * (fixed.x - centerLocal.x) + c * (fixed.y - centerLocal.y));
-                layer.y = fixedWorld.y - (b * (fixed.x - centerLocal.x) + d * (fixed.y - centerLocal.y));
+                layer.anchorX = anchorNext.x;
+                layer.anchorY = anchorNext.y;
+                layer.x = fixedWorld.x - (startMatrix.a * fixedNext.x + startMatrix.c * fixedNext.y);
+                layer.y = fixedWorld.y - (startMatrix.b * fixedNext.x + startMatrix.d * fixedNext.y);
             }
 
             refreshCurrentPhotoLayer(false);
@@ -5159,7 +5197,8 @@
             centerGeometryOnOrigin(geometry);
             geometry.computeBoundingSphere();
             const radius = Math.max(0.001, geometry.boundingSphere?.radius || 1);
-            geometry.scaleScalar(1.32 / radius);
+            const iconScale = 1.32 / radius;
+            geometry.scale(iconScale, iconScale, iconScale);
             geometry.computeBoundingSphere();
             const material = new THREE.MeshLambertMaterial({
                 color: 0xfff6d8,
