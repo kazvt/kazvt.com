@@ -921,6 +921,7 @@
             --slider-thumb: var(--paper);
         }
 
+        #speedReadout,
         #gifFpsReadout,
         #psxWobbleReadout {
             text-align: center;
@@ -1497,7 +1498,7 @@
                     <div class="export">
                         <div class="export-grid">
                             <div class="field speed-field" title="preview spin speed">
-                                <span class="field-label">SPEED</span>
+                                <span class="field-label">SPEED: <strong id="speedReadout">CRUISE</strong></span>
                                 <input id="speed" type="range" min="0" max="3" step="0.05" value="0.6" />
                             </div>
 
@@ -1554,7 +1555,7 @@
                             </button>
                         </div>
 
-                        <div id="result"><div class="view-control-hint">Left Click -> Edit Layer · Look -> Right Click · Move -> WASD · QE -> Ascend/Descend</div></div>
+                        <div id="result"><div class="view-control-hint">Left Click -> Edit Layer || Look -> Right Click || Move -> WASD || QE -> Descend/Ascend</div></div>
                     </div>
                 </div>
             </section>
@@ -1607,6 +1608,7 @@
         const GIF_FPS_PRESETS = [8, 12, 15, 20, 24];
         const GIF_FPS_LABELS = ["CHOPPY", "SNAPPY", "CLASSIC", "SMOOTH", "SILKY"];
         const DEFAULT_GIF_FPS_INDEX = 2;
+        const SPEED_LABELS = ["SLEEPY", "COZY", "CRUISE", "ZIPPY", "ZOOMY"];
         const PSX_WOBBLE_PRESETS = [0, 0.08, 0.25, 0.55, 1];
         const PSX_WOBBLE_LABELS = ["OFF", "TINY", "LOW", "CHUNKY", "INTENSE"];
         const GIF_WORKER_URL = "https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js";
@@ -1753,6 +1755,7 @@
         const colorSquareCtx = colorSquare.getContext("2d", { willReadFrequently: true });
         const hueSlider = document.getElementById("hueSlider");
         const hueSliderCtx = hueSlider.getContext("2d", { willReadFrequently: true });
+        const speedReadout = document.getElementById("speedReadout");
         const colorAlphaSlider = document.getElementById("colorAlphaSlider");
         const colorAlphaSliderCtx = colorAlphaSlider.getContext("2d", { willReadFrequently: true });
         const colorSwatch = document.getElementById("colorSwatch");
@@ -3218,6 +3221,17 @@
             return GIF_FPS_PRESETS[index] || GIF_FPS_PRESETS[DEFAULT_GIF_FPS_INDEX] || 15;
         }
 
+        function updateSpeedReadout() {
+            const slider = document.getElementById("speed");
+            if (!slider || !speedReadout) return;
+            const max = Math.max(1, Number(slider.max || 3));
+            const value = Math.max(0, Math.min(max, Number(slider.value) || 0));
+            const index = Math.max(0, Math.min(SPEED_LABELS.length - 1, Math.round((value / max) * (SPEED_LABELS.length - 1))));
+            speedReadout.textContent = SPEED_LABELS[index] || "CRUISE";
+            slider.title = `SPEED: ${speedReadout.textContent}`;
+            updateRangeProgress(slider);
+        }
+
         function updateGifFpsReadout() {
             const slider = document.getElementById("gifFps");
             const readout = document.getElementById("gifFpsReadout");
@@ -4056,11 +4070,28 @@
             if (warudoKeys.has("a")) move.sub(right);
             if (warudoKeys.has("e")) move.y += 1;
             if (warudoKeys.has("q")) move.y -= 1;
+
+            const movingOnGround = warudoKeys.has("w") || warudoKeys.has("a") || warudoKeys.has("s") || warudoKeys.has("d");
+            const ascending = warudoKeys.has("e");
+            const descending = warudoKeys.has("q");
+
             if (move.lengthSq() > 0) {
                 const speed = (warudoKeys.has("shift") ? 7.5 : 3.2) * Math.max(0.2, Number(document.getElementById("speed")?.value || 0.6) + 0.65);
                 warudoCameraPosition.add(move.normalize().multiplyScalar(speed * dt));
                 applyCameraDistance();
                 updateDebugInfo();
+
+                if (ascending && !descending) {
+                    setStatus("ASCENDING");
+                } else if (descending && !ascending) {
+                    setStatus("DESCENDING");
+                } else if (movingOnGround) {
+                    setStatus("MOVING");
+                } else {
+                    setStatus("MOVING");
+                }
+            } else {
+                setStatus("LOOK");
             }
         }
 
@@ -4593,21 +4624,35 @@
             return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${Math.max(0, Math.min(1, alpha)).toFixed(3)})`;
         }
 
+        function syncCanvasBackingStore(canvas, minWidth = 1, minHeight = 1) {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = Math.max(1, Math.round(window.devicePixelRatio || 1));
+            const nextWidth = Math.max(minWidth, Math.round((rect.width || canvas.width || minWidth) * dpr));
+            const nextHeight = Math.max(minHeight, Math.round((rect.height || canvas.height || minHeight) * dpr));
+            if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+                canvas.width = nextWidth;
+                canvas.height = nextHeight;
+            }
+            return { width: canvas.width, height: canvas.height, dpr };
+        }
+
         function drawCheckerCells(ctx, width, height, size = 6) {
             ctx.clearRect(0, 0, width, height);
-            for (let y = 0; y < height; y += size) {
-                for (let x = 0; x < width; x += size) {
-                    const even = ((x / size) + (y / size)) % 2 === 0;
+            const cell = Math.max(2, Math.round(size));
+            for (let y = 0; y < height; y += cell) {
+                for (let x = 0; x < width; x += cell) {
+                    const even = ((Math.floor(x / cell) + Math.floor(y / cell)) % 2) === 0;
                     ctx.fillStyle = even ? "#fff6d8" : "#ead9ad";
-                    ctx.fillRect(x, y, size, size);
+                    ctx.fillRect(x, y, Math.min(cell, width - x), Math.min(cell, height - y));
                 }
             }
         }
 
         function drawAlphaGradientSlider(ctx, canvas, hex, selectedIndex) {
-            const width = canvas.width;
-            const height = canvas.height;
-            drawCheckerCells(ctx, width, height, 4);
+            const metrics = syncCanvasBackingStore(canvas, 22, 112);
+            const width = metrics.width;
+            const height = metrics.height;
+            drawCheckerCells(ctx, width, height, Math.max(4, Math.round(width / 4)));
             const rgb = hexToRgb(normalizeHex(hex));
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
             gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`);
@@ -5708,14 +5753,15 @@
             setVertexWobbleAmount(PSX_WOBBLE_PRESETS[level] ?? 0);
         });
 
+        document.getElementById("speed")?.addEventListener("input", () => {
+            updateSpeedReadout();
+            scheduleSave();
+        });
+
         document.getElementById("gifFps")?.addEventListener("input", () => {
             updateGifFpsReadout();
             scheduleSave();
         });
-
-        for (const id of ["speed"]) {
-            document.getElementById(id)?.addEventListener("input", scheduleSave);
-        }
 
         function isTypingTarget(target) {
             if (!target) return false;
@@ -5889,7 +5935,7 @@
             if (!container) return;
             const hint = document.createElement("div");
             hint.className = "view-control-hint";
-            hint.textContent = "Left Click -> Edit Layer · Look -> Right Click · Move -> WASD · QE -> Ascend/Descend";
+            hint.textContent = "Left Click -> Edit Layer || Look -> Right Click || Move -> WASD || QE -> Descend/Ascend";
             container.append(hint);
         }
 
@@ -6380,8 +6426,8 @@
             renderColorHistory();
             setBgColorHex(bgColor.value, false);
             updateBgPickerVisuals();
-            updateGifFpsReadout();
             updateWobbleButton();
+            updateSpeedReadout();
             initializeRangeProgress();
 
             loadingSession = false;
