@@ -569,6 +569,27 @@
             color: var(--paper);
         }
 
+
+
+        .copy-shortcut-btn {
+            height: 40px;
+            grid-template-rows: auto auto;
+            gap: 1px;
+            line-height: 1;
+            padding: 4px 8px 5px;
+        }
+
+        .copy-shortcut-btn .copy-main {
+            font-size: 12px;
+            letter-spacing: 0.04em;
+        }
+
+        .copy-shortcut-btn .copy-shortcut {
+            font-size: 8px;
+            letter-spacing: 0.03em;
+            color: rgba(20, 3, 6, 0.62);
+        }
+
         .btn:disabled {
             opacity: 0.35;
             cursor: not-allowed;
@@ -1450,8 +1471,8 @@
                         </div>
 
                         <div class="copy-paste">
-                            <button class="btn" id="copyBtn">COPY (CTRL+C)</button>
-                            <button class="btn" id="pasteBtn">PASTE (CTRL+V)</button>
+                            <button class="btn copy-shortcut-btn" id="copyBtn"><span class="copy-main">COPY</span><span class="copy-shortcut">CTRL+C</span></button>
+                            <button class="btn copy-shortcut-btn" id="pasteBtn"><span class="copy-main">PASTE</span><span class="copy-shortcut">CTRL+V</span></button>
 
                             <label class="file-btn" for="imageUpload" title="upload">
                                 <svg viewBox="0 0 24 24">
@@ -4278,6 +4299,27 @@
             setShadingEnabled(!shadingEnabled);
         });
 
+        function rebuildShapeMeshWithoutMovingView() {
+            const savedWarudoCameraPosition = warudoCameraPosition.clone();
+            const savedCameraPanOffset = cameraPanOffset.clone();
+            const savedCameraDistance = cameraDistance;
+            const savedVerticalOrbit = cameraVerticalOrbit;
+            const savedHorizontalOrbit = cameraHorizontalOrbit;
+            const savedFaceIndex = currentFace;
+
+            saveCurrentShapeContext();
+            buildShapeMesh();
+
+            currentFace = Math.max(0, Math.min(faces.length - 1, savedFaceIndex));
+            warudoCameraPosition.copy(savedWarudoCameraPosition);
+            cameraPanOffset.copy(savedCameraPanOffset);
+            cameraDistance = savedCameraDistance;
+            cameraVerticalOrbit = savedVerticalOrbit;
+            cameraHorizontalOrbit = savedHorizontalOrbit;
+            applyCameraDistance();
+            updateDebugInfo();
+        }
+
         function toggleFaceMapMode(index = currentFace) {
             const face = faces[index];
             const def = getCurrentShapeDef();
@@ -4290,6 +4332,7 @@
                     drawCanvasGuide();
                 }
                 renderFaceList();
+                flashSelectedMaterial(index);
                 setStatus("INNER GUIDE");
                 return;
             }
@@ -4303,9 +4346,11 @@
                 updateMapModeControl();
                 drawCanvasGuide();
             }
+
             rebuildTexture(index);
-            buildShapeMesh(); // safest way, because UV/mapping may need rebuilding
+            rebuildShapeMeshWithoutMovingView();
             renderFaceList();
+            flashSelectedMaterial(index);
             scheduleSave();
 
             setStatus(MAP_MODE_META[face.mapMode === "fit" ? "fit" : "whole"].status);
