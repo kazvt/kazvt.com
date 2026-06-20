@@ -994,7 +994,7 @@
 
         .export-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(74px, 1fr)) 38px 44px 42px;
+            grid-template-columns: repeat(4, minmax(58px, 1fr)) 38px 44px 42px;
             gap: 6px;
             align-items: end;
         }
@@ -1025,7 +1025,8 @@
             --slider-thumb: var(--paper);
         }
 
-        #speedReadout,
+        #xSpeedReadout,
+        #ySpeedReadout,
         #gifFpsReadout,
         #psxWobbleReadout {
             text-align: center;
@@ -1067,6 +1068,19 @@
             font-weight: 900;
             padding: 0 5px;
             box-shadow: 0 3px 0 var(--ink);
+        }
+
+
+        @media (max-width: 720px) {
+            .export-grid {
+                grid-template-columns: repeat(4, minmax(52px, 1fr));
+            }
+
+            .bg-field,
+            #shadingBtn,
+            #exportGifBtn {
+                min-width: 0;
+            }
         }
 
         .bg-field {
@@ -1611,9 +1625,14 @@
 
                     <div class="export">
                         <div class="export-grid">
-                            <div class="field speed-field" title="SPEED preview">
-                                <span class="field-label">SPEED: <strong id="speedReadout">CRUISE</strong></span>
-                                <input id="speed" type="range" min="0" max="3" step="0.05" value="0.6" title="SPEED preview" aria-label="SPEED preview" />
+                            <div class="field speed-field x-speed-field" title="X SPD preview">
+                                <span class="field-label">X SPD: <strong id="xSpeedReadout">CRUISE</strong></span>
+                                <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X SPD preview" aria-label="X SPD preview" />
+                            </div>
+
+                            <div class="field speed-field y-speed-field" title="Y SPD preview">
+                                <span class="field-label">Y SPD: <strong id="ySpeedReadout">SLEEPY</strong></span>
+                                <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y SPD preview" aria-label="Y SPD preview" />
                             </div>
 
                             <input id="gifSize" type="hidden" value="512" />
@@ -1883,7 +1902,8 @@
         const colorSquareCtx = colorSquare.getContext("2d", { willReadFrequently: true });
         const hueSlider = document.getElementById("hueSlider");
         const hueSliderCtx = hueSlider.getContext("2d", { willReadFrequently: true });
-        const speedReadout = document.getElementById("speedReadout");
+        const xSpeedReadout = document.getElementById("xSpeedReadout");
+        const ySpeedReadout = document.getElementById("ySpeedReadout");
         const colorAlphaSlider = document.getElementById("colorAlphaSlider");
         const colorAlphaSliderCtx = colorAlphaSlider.getContext("2d", { willReadFrequently: true });
         const colorSwatch = document.getElementById("colorSwatch");
@@ -3663,15 +3683,26 @@
             return GIF_FPS_PRESETS[index] || GIF_FPS_PRESETS[DEFAULT_GIF_FPS_INDEX] || 15;
         }
 
-        function updateSpeedReadout() {
-            const slider = document.getElementById("speed");
-            if (!slider || !speedReadout) return;
+        function readSpeedSlider(id) {
+            const slider = document.getElementById(id);
+            if (!slider) return 0;
+            return Math.max(0, Number(slider.value) || 0);
+        }
+
+        function updateSingleSpeedReadout(id, readout, label) {
+            const slider = document.getElementById(id);
+            if (!slider || !readout) return;
             const max = Math.max(1, Number(slider.max || 3));
             const value = Math.max(0, Math.min(max, Number(slider.value) || 0));
             const index = Math.max(0, Math.min(SPEED_LABELS.length - 1, Math.round((value / max) * (SPEED_LABELS.length - 1))));
-            speedReadout.textContent = SPEED_LABELS[index] || "CRUISE";
-            slider.title = `SPEED: ${speedReadout.textContent}`;
+            readout.textContent = SPEED_LABELS[index] || "CRUISE";
+            slider.title = `${label}: ${readout.textContent}`;
             updateRangeProgress(slider);
+        }
+
+        function updateSpeedReadout() {
+            updateSingleSpeedReadout("xSpeed", xSpeedReadout, "X SPD");
+            updateSingleSpeedReadout("ySpeed", ySpeedReadout, "Y SPD");
         }
 
         function updateGifFpsReadout() {
@@ -4343,7 +4374,8 @@
                 `ROT X  ${roundDebug(rot.x)} RAD / ${degreesDebug(rot.x)}°`,
                 `ROT Y  ${roundDebug(rot.y)} RAD / ${degreesDebug(rot.y)}°`,
                 `ROT Z  ${roundDebug(rot.z)} RAD / ${degreesDebug(rot.z)}°`,
-                `SPIN Y ${roundDebug(spin.y)} RAD / ${degreesDebug(spin.y)}°`
+                `SPIN X ${roundDebug(spin.y)} RAD / ${degreesDebug(spin.y)}°`,
+                `SPIN Y ${roundDebug(spin.x)} RAD / ${degreesDebug(spin.x)}°`
             ].join("\n");
         }
 
@@ -4594,7 +4626,7 @@
             const descending = warudoKeys.has("q");
 
             if (move.lengthSq() > 0) {
-                const speed = (warudoKeys.has("shift") ? 7.5 : 3.2) * Math.max(0.2, Number(document.getElementById("speed")?.value || 0.6) + 0.65);
+                const speed = (warudoKeys.has("shift") ? 7.5 : 3.2) * Math.max(0.2, Math.max(readSpeedSlider("xSpeed"), readSpeedSlider("ySpeed"), 0.6) + 0.65);
                 warudoCameraPosition.add(move.normalize().multiplyScalar(speed * dt));
                 applyCameraDistance();
                 updateDebugInfo();
@@ -6341,9 +6373,11 @@
             setVertexWobbleAmount(PSX_WOBBLE_PRESETS[level] ?? 0);
         });
 
-        document.getElementById("speed")?.addEventListener("input", () => {
-            updateSpeedReadout();
-            scheduleSave();
+        ["xSpeed", "ySpeed"].forEach((id) => {
+            document.getElementById(id)?.addEventListener("input", () => {
+                updateSpeedReadout();
+                scheduleSave();
+            });
         });
 
         document.getElementById("gifFps")?.addEventListener("input", () => {
@@ -6458,14 +6492,16 @@
             lastTime = now;
 
             if (webglAvailable && renderer && scene && camera && shapeMesh) {
-                const speed = Number(document.getElementById("speed").value);
+                const xSpeed = readSpeedSlider("xSpeed");
+                const ySpeed = readSpeedSlider("ySpeed");
                 const previewInterval = 1000 / Math.max(1, getGifFpsValue());
                 if (!previewFpsTickTime) previewFpsTickTime = now;
                 const elapsed = now - previewFpsTickTime;
 
                 if (elapsed >= previewInterval || elapsed < 0) {
                     const tickDt = Math.min(elapsed / 1000, 0.25);
-                    shapeMesh.rotation.y += tickDt * speed;
+                    shapeMesh.rotation.y += tickDt * xSpeed;
+                    shapeMesh.rotation.x += tickDt * ySpeed;
                     applyVertexWobbleToMesh(shapeMesh, now);
                     previewFpsTickTime = now - (elapsed % previewInterval);
                 }
@@ -6593,9 +6629,11 @@
             const exportHeight = exportViewSize.height;
             const fps = getGifFpsValue();
             const delay = Math.round(1000 / fps);
-            const exportSpeed = Math.max(0, Number(document.getElementById("speed")?.value || 0));
-            const exportShouldSpin = exportSpeed > 0.001;
-            const fullTurnSeconds = exportShouldSpin ? (Math.PI * 2) / exportSpeed : 0;
+            const exportXSpeed = readSpeedSlider("xSpeed");
+            const exportYSpeed = readSpeedSlider("ySpeed");
+            const exportMaxSpeed = Math.max(exportXSpeed, exportYSpeed);
+            const exportShouldSpin = exportMaxSpeed > 0.001;
+            const fullTurnSeconds = exportShouldSpin ? (Math.PI * 2) / exportMaxSpeed : 0;
             const seamlessLoopSeconds = exportShouldSpin ? Math.max(1.2, Math.min(12, fullTurnSeconds)) : 0;
             const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : 1;
 
@@ -6672,13 +6710,15 @@
 
             try {
                 const baseExportMeshRotation = shapeMesh.rotation.clone();
-                const exportRotationSpan = exportShouldSpin ? Math.PI * 2 : 0;
+                const exportXRotationSpan = exportShouldSpin && exportXSpeed > 0.001 ? Math.PI * 2 : 0;
+                const exportYRotationSpan = exportShouldSpin && exportYSpeed > 0.001 ? Math.PI * 2 : 0;
 
                 for (let i = 0; i < frames; i++) {
                     const t = exportShouldSpin ? i / frames : 0;
 
                     exportMesh.rotation.copy(baseExportMeshRotation);
-                    exportMesh.rotation.y += t * exportRotationSpan;
+                    exportMesh.rotation.y += t * exportXRotationSpan;
+                    exportMesh.rotation.x += t * exportYRotationSpan;
                     applyVertexWobbleToMesh(exportMesh, i * delay);
 
                     exportRenderer.render(exportScene, exportCamera);
@@ -6771,7 +6811,8 @@
                 alphaIndex: 0,
                 colorHistory: colorHistory.map(normalizeColorHistoryEntry).filter(Boolean),
                 settings: {
-                    speed: document.getElementById("speed").value,
+                    xSpeed: document.getElementById("xSpeed")?.value ?? "0.6",
+                    ySpeed: document.getElementById("ySpeed")?.value ?? "0",
                     gifSize: DEFAULT_GIF_SIZE,
                     gifFrames: DEFAULT_GIF_FRAMES,
                     gifFpsIndex: Math.max(0, Math.min(GIF_FPS_PRESETS.length - 1, Math.round(Number(document.getElementById("gifFps")?.value ?? DEFAULT_GIF_FPS_INDEX)))),
@@ -6905,7 +6946,12 @@
             if (!session) return;
 
             if (session.settings) {
-                if (session.settings.speed != null) document.getElementById("speed").value = session.settings.speed;
+                if (session.settings.xSpeed != null) {
+                    document.getElementById("xSpeed").value = session.settings.xSpeed;
+                } else if (session.settings.speed != null) {
+                    document.getElementById("xSpeed").value = session.settings.speed;
+                }
+                if (session.settings.ySpeed != null) document.getElementById("ySpeed").value = session.settings.ySpeed;
                 document.getElementById("gifSize").value = String(DEFAULT_GIF_SIZE);
                 if (session.settings.gifFpsIndex != null) {
                     document.getElementById("gifFps").value = String(Math.max(0, Math.min(GIF_FPS_PRESETS.length - 1, Math.round(Number(session.settings.gifFpsIndex)))));
