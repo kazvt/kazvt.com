@@ -74,7 +74,7 @@
         .app {
             height: 100vh;
             display: grid;
-            grid-template-rows: 66px 1fr;
+            grid-template-rows: 72px 1fr;
             background: var(--paper);
         }
 
@@ -83,10 +83,10 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(104px, 150px) minmax(176px, 240px) minmax(320px, 520px) auto 1fr;
-            gap: 12px;
+            grid-template-columns: auto minmax(104px, 142px) minmax(176px, 232px) minmax(430px, 1fr) auto minmax(92px, auto);
+            gap: 14px;
             align-items: center;
-            padding: 8px 12px;
+            padding: 10px 12px;
             font-weight: 900;
             letter-spacing: 0.06em;
         }
@@ -191,27 +191,30 @@
 
         .shape-extra-controls {
             grid-template-columns: 1fr;
-            gap: 6px;
+            gap: 0;
             padding: 0;
             min-width: 0;
             overflow: visible;
         }
 
         .shape-extra-control-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(138px, 156px));
-            gap: 12px;
+            display: flex;
+            flex-flow: row nowrap;
+            gap: 14px;
             min-width: 0;
             align-items: center;
             justify-content: start;
+            overflow: visible;
         }
 
         .shape-extra-control {
             display: grid;
-            grid-template-rows: 15px 22px;
-            gap: 5px;
-            min-width: 0;
-            width: min(156px, 100%);
+            grid-template-rows: 16px 24px;
+            gap: 6px;
+            min-width: 132px;
+            width: 148px;
+            max-width: 160px;
+            flex: 1 1 148px;
             align-items: center;
         }
 
@@ -227,7 +230,7 @@
         }
 
         .shape-extra-control input[type="range"] {
-            height: 22px;
+            height: 24px;
         }
 
         .shape-fader input[type="range"],
@@ -1381,6 +1384,12 @@
                 order: 5;
                 grid-column: 1 / -1;
                 width: 100%;
+            }
+
+            .shape-extra-control-list {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 2px;
             }
 
             .top-center {
