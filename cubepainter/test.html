@@ -351,6 +351,7 @@
             height: 100%;
             position: relative;
             aspect-ratio: 1 / 1;
+            overflow: visible;
         }
 
         #paintCanvas,
@@ -1764,6 +1765,7 @@
         import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
 
         const FACE_SIZE = 512;
+        const PHOTO_OVERLAY_PAD = 112;
         const MAX_UNDO_HISTORY = 40;
         const BLANK_FILL = "#fff6d8";
         const HUE_STEPS = 24;
@@ -1917,6 +1919,12 @@
         paintCanvas.style.imageRendering = "pixelated";
         const guideCanvas = document.getElementById("guideCanvas");
         const guideCtx = guideCanvas.getContext("2d");
+        guideCanvas.width = FACE_SIZE + PHOTO_OVERLAY_PAD * 2;
+        guideCanvas.height = FACE_SIZE + PHOTO_OVERLAY_PAD * 2;
+        guideCanvas.style.left = `${-(PHOTO_OVERLAY_PAD / FACE_SIZE) * 100}%`;
+        guideCanvas.style.top = `${-(PHOTO_OVERLAY_PAD / FACE_SIZE) * 100}%`;
+        guideCanvas.style.width = `${100 + (PHOTO_OVERLAY_PAD * 2 / FACE_SIZE) * 100}%`;
+        guideCanvas.style.height = `${100 + (PHOTO_OVERLAY_PAD * 2 / FACE_SIZE) * 100}%`;
         guideCtx.imageSmoothingEnabled = false;
         guideCanvas.style.imageRendering = "pixelated";
 
@@ -2016,6 +2024,7 @@
         let shapeSnapshot = null;
         let copyBuffer = null;
         let photoTransformDrag = null;
+        let photoLayerSelected = false;
         let photoAntsOffset = 0;
         let photoAntsFrame = null;
         let renderer = null;
@@ -2502,7 +2511,9 @@
         }
 
         function clearGuideCanvas() {
+            guideCtx.setTransform(1, 0, 0, 1, 0, 0);
             guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+            guideCtx.setTransform(1, 0, 0, 1, PHOTO_OVERLAY_PAD, PHOTO_OVERLAY_PAD);
         }
 
         function drawGuideCircle(cx, cy, r) {
@@ -2854,14 +2865,18 @@
         function clearPhotoLayer(face) {
             if (!face) return;
             face.imageLayer = null;
+            photoLayerSelected = false;
             stopPhotoAnts();
+            updatePhotoGuidePointerEvents();
         }
 
         function commitCurrentPhotoLayer() {
             const face = faces[currentFace];
             if (!face || !face.imageLayer) return;
             face.imageLayer = null;
+            photoLayerSelected = false;
             stopPhotoAnts();
+            updatePhotoGuidePointerEvents();
             drawCanvasGuide();
         }
 
@@ -2914,6 +2929,11 @@
             };
         }
 
+        function photoRotateHandleWorld(layer) {
+            const h = Math.max(1, Number(layer.height) || 1) / 2;
+            return photoLocalToWorld(layer, 0, -h - 34);
+        }
+
         function photoLayerAnchorWorld(layer) {
             return photoLocalToWorld(layer, Number(layer.anchorX) || 0, Number(layer.anchorY) || 0);
         }
@@ -2928,6 +2948,26 @@
             ctx.drawImage(layer.image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
             ctx.restore();
             return true;
+        }
+
+        function updatePhotoGuidePointerEvents() {
+            const face = faces[currentFace];
+            const active = Boolean(photoLayerSelected && face?.imageLayer?.image && !isGifLockedFace());
+            guideCanvas.style.pointerEvents = active ? "auto" : "none";
+        }
+
+        function selectPhotoLayer() {
+            const face = faces[currentFace];
+            photoLayerSelected = Boolean(face?.imageLayer?.image && !isGifLockedFace());
+            updatePhotoGuidePointerEvents();
+            drawCanvasGuide();
+        }
+
+        function deselectPhotoLayer() {
+            photoLayerSelected = false;
+            stopPhotoAnts();
+            updatePhotoGuidePointerEvents();
+            drawCanvasGuide();
         }
 
         function renderPhotoLayerFace(face, targetCtx = null) {
@@ -2961,7 +3001,11 @@
         function drawPhotoTransformOverlay() {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
-            if (!layer?.image || isGifLockedFace()) return;
+            if (!layer?.image || isGifLockedFace() || !photoLayerSelected) {
+                updatePhotoGuidePointerEvents();
+                return;
+            }
+            updatePhotoGuidePointerEvents();
             const points = photoLayerCorners(layer);
             const sequence = [points.nw, points.ne, points.se, points.sw];
             guideCtx.save();
@@ -2987,6 +3031,24 @@
                 guideCtx.fillRect(point.x - 5, point.y - 5, 10, 10);
                 guideCtx.strokeRect(point.x - 5, point.y - 5, 10, 10);
             });
+            const rotatePoint = photoRotateHandleWorld(layer);
+            guideCtx.beginPath();
+            guideCtx.moveTo(points.n.x, points.n.y);
+            guideCtx.lineTo(rotatePoint.x, rotatePoint.y);
+            guideCtx.strokeStyle = "rgba(255, 246, 216, 0.92)";
+            guideCtx.lineWidth = 2;
+            guideCtx.stroke();
+            guideCtx.beginPath();
+            guideCtx.arc(rotatePoint.x, rotatePoint.y, 9, 0, Math.PI * 2);
+            guideCtx.fillStyle = "rgba(255, 246, 216, 0.98)";
+            guideCtx.fill();
+            guideCtx.strokeStyle = "rgba(20, 3, 6, 0.95)";
+            guideCtx.stroke();
+            guideCtx.fillStyle = "rgba(20, 3, 6, 0.95)";
+            guideCtx.font = "900 13px var(--ui-font)";
+            guideCtx.textAlign = "center";
+            guideCtx.textBaseline = "middle";
+            guideCtx.fillText("↻", rotatePoint.x, rotatePoint.y + 0.5);
             const anchor = photoLayerAnchorWorld(layer);
             guideCtx.beginPath();
             guideCtx.arc(anchor.x, anchor.y, 6, 0, Math.PI * 2);
@@ -3032,12 +3094,13 @@
             const layer = face?.imageLayer;
             if (!layer?.image || isGifLockedFace()) return null;
             const points = photoLayerCorners(layer);
+            const rotatePoint = photoRotateHandleWorld(layer);
             const anchor = photoLayerAnchorWorld(layer);
+            if (photoDistance(point, rotatePoint) <= 16) return { mode: "rotate", handle: "rotate" };
             if (photoDistance(point, anchor) <= 12) return { mode: "anchor", handle: "anchor" };
             for (const key of ["nw", "n", "ne", "e", "se", "s", "sw", "w"]) {
                 if (photoDistance(point, points[key]) <= 13) return { mode: "scale", handle: key };
             }
-            if (!photoPointInLayer(layer, point, 0) && photoPointInLayer(layer, point, 36)) return { mode: "rotate", handle: "rotate" };
             if (photoPointInLayer(layer, point, 0)) return { mode: "move", handle: "move" };
             return null;
         }
@@ -3047,7 +3110,7 @@
             if (event?.ctrlKey && hit.mode === "scale") return "crosshair";
             if (hit.mode === "anchor") return "grab";
             if (hit.mode === "move") return "move";
-            if (hit.mode === "rotate") return "grab";
+            if (hit.mode === "rotate") return "alias";
             if (["n", "s"].includes(hit.handle)) return "ns-resize";
             if (["e", "w"].includes(hit.handle)) return "ew-resize";
             if (["nw", "se"].includes(hit.handle)) return "nwse-resize";
@@ -3073,6 +3136,8 @@
             if (!layer?.image || !hit) return false;
             event.preventDefault();
             event.stopPropagation();
+            photoLayerSelected = true;
+            updatePhotoGuidePointerEvents();
             pushUndo(currentFace);
             photoTransformDrag = {
                 pointerId: event.pointerId,
@@ -3082,7 +3147,8 @@
                 startLayer: clonePhotoLayer(layer, true),
                 startLocal: photoWorldToLocal(layer, point.x, point.y)
             };
-            paintCanvas.setPointerCapture(event.pointerId);
+            const captureTarget = event.currentTarget?.setPointerCapture ? event.currentTarget : paintCanvas;
+            captureTarget.setPointerCapture(event.pointerId);
             hideBrushCursor();
             setStatus(photoTransformDrag.mode.toUpperCase());
             return true;
@@ -3140,10 +3206,17 @@
                 }
                 const signX = movingStart.x >= fixed.x ? 1 : -1;
                 const signY = movingStart.y >= fixed.y ? 1 : -1;
-                const movingNext = {
-                    x: fixed.x + signX * (Math.max(8, nextW)),
-                    y: fixed.y + signY * (Math.max(8, nextH))
-                };
+                let movingNext;
+                if (["n", "s"].includes(handle)) {
+                    movingNext = { x: fixed.x, y: fixed.y + signY * Math.max(8, nextH) };
+                } else if (["e", "w"].includes(handle)) {
+                    movingNext = { x: fixed.x + signX * Math.max(8, nextW), y: fixed.y };
+                } else {
+                    movingNext = {
+                        x: fixed.x + signX * Math.max(8, nextW),
+                        y: fixed.y + signY * Math.max(8, nextH)
+                    };
+                }
                 const centerLocal = {
                     x: (fixed.x + movingNext.x) / 2,
                     y: (fixed.y + movingNext.y) / 2
@@ -3194,6 +3267,8 @@
                 anchorX: 0,
                 anchorY: 0
             };
+            photoLayerSelected = true;
+            updatePhotoGuidePointerEvents();
             renderPhotoLayerFace(face);
             markFaceImageDirty(face);
         }
@@ -3384,7 +3459,6 @@
             const face = faces[index];
             if (!face) return false;
 
-            clearPhotoLayer(face);
             stopFaceAnimation(face);
             face.animation = animation;
             face.sourceName = animation.sourceName || "animated.gif";
@@ -3625,6 +3699,8 @@
 
             paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
             paintCtx.drawImage(face.canvas, 0, 0);
+            photoLayerSelected = Boolean(face.imageLayer?.image && !isGifLockedFace());
+            updatePhotoGuidePointerEvents();
             drawCanvasGuide();
 
             activeFaceTitle.textContent = `${getCurrentShapeDef().label} · ${face.name}`;
@@ -6949,6 +7025,33 @@
             setStatus("FILL");
         }
 
+        function handlePhotoGuidePointerDown(event) {
+            if (!photoLayerSelected) return;
+            if (isGifLockedFace()) return;
+            const point = canvasPoint(event);
+            const hit = photoHitTest(point);
+            if (hit && startPhotoTransform(event, point, hit)) return;
+            deselectPhotoLayer();
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        function handlePhotoGuidePointerMove(event) {
+            if (!photoLayerSelected && !photoTransformDrag) return;
+            const point = canvasPoint(event);
+            if (photoTransformDrag) {
+                updatePhotoTransform(event, point);
+                return;
+            }
+            const hit = photoHitTest(point);
+            guideCanvas.style.cursor = photoCursorForHit(hit, event);
+        }
+
+        guideCanvas.addEventListener("pointerdown", handlePhotoGuidePointerDown);
+        guideCanvas.addEventListener("pointermove", handlePhotoGuidePointerMove);
+        guideCanvas.addEventListener("pointerup", stopDrawing);
+        guideCanvas.addEventListener("pointercancel", stopDrawing);
+
         paintCanvas.addEventListener("pointerdown", (event) => {
             if (isGifLockedFace()) {
                 event.preventDefault();
@@ -6956,8 +7059,14 @@
                 return;
             }
             const point = canvasPoint(event);
+            const face = faces[currentFace];
             const photoHit = photoHitTest(point);
             if (photoHit && startPhotoTransform(event, point, photoHit)) return;
+            if (face?.imageLayer?.image && photoLayerSelected) {
+                deselectPhotoLayer();
+                event.preventDefault();
+                return;
+            }
             stopFaceAnimation(faces[currentFace]);
 
             if (tool === "fill") {
