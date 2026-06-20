@@ -324,6 +324,8 @@
             min-height: 0;
             display: grid;
             grid-template-rows: 1fr auto;
+            position: relative;
+            overflow: visible;
         }
 
         .canvas-wrap {
@@ -386,6 +388,8 @@
             padding: 8px;
             display: grid;
             gap: 7px;
+            position: relative;
+            z-index: 8;
         }
 
         .tools {
@@ -555,6 +559,37 @@
             font-size: 10px;
             font-weight: 900;
             letter-spacing: 0.04em;
+        }
+
+        .eyedropper-btn {
+            width: 100%;
+            height: 28px;
+            border: 2px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            padding: 0 6px;
+        }
+
+        .eyedropper-btn:hover {
+            background: var(--paper3);
+        }
+
+        .eyedropper-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .eyedropper-btn:disabled {
+            opacity: 0.42;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .color-readout span {
@@ -1608,6 +1643,7 @@
                                                 <span>COLOR</span>
                                                 <div id="colorHexReadout">#140306</div>
                                             </div>
+                                            <button class="eyedropper-btn" id="colorEyeDropperBtn" type="button" title="pick color from screen">PICK</button>
                                             <div class="color-history" id="colorHistory" aria-label="color history">
                                             </div>
                                         </div>
@@ -1712,6 +1748,7 @@
                                                     <div id="bgColorHexReadout">#140306</div>
                                                     <div class="alpha-readout" id="bgOpacityReadout">ALPHA 100%</div>
                                                 </div>
+                                                <button class="eyedropper-btn" id="bgEyeDropperBtn" type="button" title="pick background color from screen">PICK</button>
                                             </div>
                                         </div>
                                     </div>
@@ -1765,7 +1802,7 @@
         import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
 
         const FACE_SIZE = 512;
-        const PHOTO_OVERLAY_PAD = 112;
+        const PHOTO_OVERLAY_PAD = 512;
         const MAX_UNDO_HISTORY = 40;
         const BLANK_FILL = "#fff6d8";
         const HUE_STEPS = 24;
@@ -1968,6 +2005,7 @@
         const colorPickerPanel = document.getElementById("colorPickerPanel");
         const colorPickerChip = document.getElementById("colorPickerChip");
         const colorToggleText = document.getElementById("colorToggleText");
+        const colorEyeDropperBtn = document.getElementById("colorEyeDropperBtn");
         const colorHistoryEl = document.getElementById("colorHistory");
         const quickColorHistoryEl = document.getElementById("quickColorHistory");
         const sizeMiniReadout = document.getElementById("sizeMiniReadout");
@@ -1987,6 +2025,7 @@
         const bgAlphaSlider = document.getElementById("bgAlphaSlider");
         const bgAlphaSliderCtx = bgAlphaSlider.getContext("2d", { willReadFrequently: true });
         const bgSwatch = document.getElementById("bgSwatch");
+        const bgEyeDropperBtn = document.getElementById("bgEyeDropperBtn");
         const bgColorHexReadout = document.getElementById("bgColorHexReadout");
         const bgOpacityReadout = document.getElementById("bgOpacityReadout");
         const psxWobble = document.getElementById("psxWobble");
@@ -2952,13 +2991,13 @@
 
         function updatePhotoGuidePointerEvents() {
             const face = faces[currentFace];
-            const active = Boolean(photoLayerSelected && face?.imageLayer?.image && !isGifLockedFace());
+            const active = Boolean(photoLayerSelected && face?.imageLayer?.image);
             guideCanvas.style.pointerEvents = active ? "auto" : "none";
         }
 
         function selectPhotoLayer() {
             const face = faces[currentFace];
-            photoLayerSelected = Boolean(face?.imageLayer?.image && !isGifLockedFace());
+            photoLayerSelected = Boolean(face?.imageLayer?.image);
             updatePhotoGuidePointerEvents();
             drawCanvasGuide();
         }
@@ -3001,7 +3040,7 @@
         function drawPhotoTransformOverlay() {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
-            if (!layer?.image || isGifLockedFace() || !photoLayerSelected) {
+            if (!layer?.image || !photoLayerSelected) {
                 updatePhotoGuidePointerEvents();
                 return;
             }
@@ -3092,7 +3131,7 @@
         function photoHitTest(point) {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
-            if (!layer?.image || isGifLockedFace()) return null;
+            if (!layer?.image) return null;
             const points = photoLayerCorners(layer);
             const rotatePoint = photoRotateHandleWorld(layer);
             const anchor = photoLayerAnchorWorld(layer);
@@ -3106,7 +3145,7 @@
         }
 
         function photoCursorForHit(hit, event = null) {
-            if (!hit) return "none";
+            if (!hit) return "crosshair";
             if (event?.ctrlKey && hit.mode === "scale") return "crosshair";
             if (hit.mode === "anchor") return "grab";
             if (hit.mode === "move") return "move";
@@ -3130,10 +3169,57 @@
             }[handle] || { x: 0, y: 0 };
         }
 
+        function clampPhotoAnchor(layer, x, y) {
+            const halfW = Math.max(1, Number(layer.width) || 1) / 2;
+            const halfH = Math.max(1, Number(layer.height) || 1) / 2;
+            return {
+                x: Math.max(-halfW, Math.min(halfW, x)),
+                y: Math.max(-halfH, Math.min(halfH, y))
+            };
+        }
+
+        function snapPhotoAnchor(layer, x, y, enabled = true) {
+            const clamped = clampPhotoAnchor(layer, x, y);
+            if (!enabled) return clamped;
+            const halfW = Math.max(1, Number(layer.width) || 1) / 2;
+            const halfH = Math.max(1, Number(layer.height) || 1) / 2;
+            const snap = Math.max(10, Math.min(24, Math.min(halfW, halfH) * 0.12));
+            const targets = [
+                { x: 0, y: 0 },
+                { x: -halfW, y: -halfH },
+                { x: halfW, y: -halfH },
+                { x: halfW, y: halfH },
+                { x: -halfW, y: halfH }
+            ];
+            let best = null;
+            let bestDistance = Infinity;
+            targets.forEach((target) => {
+                const distance = Math.hypot(clamped.x - target.x, clamped.y - target.y);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    best = target;
+                }
+            });
+            return best && bestDistance <= snap ? { x: best.x, y: best.y } : clamped;
+        }
+
+        function photoScaledAnchor(start, nextW, nextH) {
+            const safeW = Math.max(1, Number(start.width) || 1);
+            const safeH = Math.max(1, Number(start.height) || 1);
+            return {
+                x: (Number(start.anchorX) || 0) / safeW * nextW,
+                y: (Number(start.anchorY) || 0) / safeH * nextH
+            };
+        }
+
         function startPhotoTransform(event, point, hit) {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
             if (!layer?.image || !hit) return false;
+            if (hit.mode === "anchor" && !(event.altKey || event.ctrlKey)) {
+                if (!photoPointInLayer(layer, point, 0)) return false;
+                hit = { mode: "move", handle: "move" };
+            }
             event.preventDefault();
             event.stopPropagation();
             photoLayerSelected = true;
@@ -3168,8 +3254,9 @@
                 layer.y = start.y + dy;
             } else if (photoTransformDrag.mode === "anchor") {
                 const local = photoWorldToLocal(start, point.x, point.y);
-                layer.anchorX = Math.max(-start.width / 2, Math.min(start.width / 2, local.x));
-                layer.anchorY = Math.max(-start.height / 2, Math.min(start.height / 2, local.y));
+                const snapped = snapPhotoAnchor(start, local.x, local.y, !event.shiftKey);
+                layer.anchorX = snapped.x;
+                layer.anchorY = snapped.y;
             } else if (photoTransformDrag.mode === "rotate") {
                 const pivot = photoLayerAnchorWorld(start);
                 const a0 = Math.atan2(photoTransformDrag.startPoint.y - pivot.y, photoTransformDrag.startPoint.x - pivot.x);
@@ -3191,12 +3278,16 @@
                 const handle = photoTransformDrag.handle;
                 const local = photoWorldToLocal(start, point.x, point.y);
                 const fixedHandle = event.altKey ? "anchor" : oppositePhotoHandle(handle);
-                const fixed = fixedHandle === "anchor" ? { x: start.anchorX, y: start.anchorY } : photoHandleLocal(start, fixedHandle);
-                const movingStart = photoHandleLocal(start, handle);
+                const fixedStart = fixedHandle === "anchor" ? { x: start.anchorX, y: start.anchorY } : photoHandleLocal(start, fixedHandle);
                 let nextW = start.width;
                 let nextH = start.height;
-                if (["nw", "ne", "se", "sw", "e", "w"].includes(handle)) nextW = Math.max(8, Math.abs(local.x - fixed.x));
-                if (["nw", "ne", "se", "sw", "n", "s"].includes(handle)) nextH = Math.max(8, Math.abs(local.y - fixed.y));
+                const corner = ["nw", "ne", "se", "sw"].includes(handle);
+                const horizontal = corner || ["e", "w"].includes(handle);
+                const vertical = corner || ["n", "s"].includes(handle);
+
+                if (horizontal) nextW = Math.max(8, Math.abs(local.x - fixedStart.x));
+                if (vertical) nextH = Math.max(8, Math.abs(local.y - fixedStart.y));
+
                 if (event.shiftKey) {
                     const ratio = start.width / Math.max(1, start.height);
                     if (["n", "s"].includes(handle)) nextW = nextH * ratio;
@@ -3204,35 +3295,17 @@
                     else if (nextW / Math.max(1, nextH) > ratio) nextH = nextW / ratio;
                     else nextW = nextH * ratio;
                 }
-                const signX = movingStart.x >= fixed.x ? 1 : -1;
-                const signY = movingStart.y >= fixed.y ? 1 : -1;
-                let movingNext;
-                if (["n", "s"].includes(handle)) {
-                    movingNext = { x: fixed.x, y: fixed.y + signY * Math.max(8, nextH) };
-                } else if (["e", "w"].includes(handle)) {
-                    movingNext = { x: fixed.x + signX * Math.max(8, nextW), y: fixed.y };
-                } else {
-                    movingNext = {
-                        x: fixed.x + signX * Math.max(8, nextW),
-                        y: fixed.y + signY * Math.max(8, nextH)
-                    };
-                }
-                const centerLocal = {
-                    x: (fixed.x + movingNext.x) / 2,
-                    y: (fixed.y + movingNext.y) / 2
-                };
-                const fixedWorld = photoLocalToWorld(start, fixed.x, fixed.y);
+
+                const anchorNext = photoScaledAnchor(start, nextW, nextH);
+                const fixedNext = fixedHandle === "anchor" ? anchorNext : photoHandleLocal({ width: nextW, height: nextH }, fixedHandle);
+                const fixedWorld = photoLocalToWorld(start, fixedStart.x, fixedStart.y);
                 const startMatrix = photoLayerMatrix(start);
                 layer.width = Math.max(8, nextW);
                 layer.height = Math.max(8, nextH);
-                layer.anchorX = start.anchorX - centerLocal.x;
-                layer.anchorY = start.anchorY - centerLocal.y;
-                const a = startMatrix.a;
-                const b = startMatrix.b;
-                const c = startMatrix.c;
-                const d = startMatrix.d;
-                layer.x = fixedWorld.x - (a * (fixed.x - centerLocal.x) + c * (fixed.y - centerLocal.y));
-                layer.y = fixedWorld.y - (b * (fixed.x - centerLocal.x) + d * (fixed.y - centerLocal.y));
+                layer.anchorX = anchorNext.x;
+                layer.anchorY = anchorNext.y;
+                layer.x = fixedWorld.x - (startMatrix.a * fixedNext.x + startMatrix.c * fixedNext.y);
+                layer.y = fixedWorld.y - (startMatrix.b * fixedNext.x + startMatrix.d * fixedNext.y);
             }
 
             refreshCurrentPhotoLayer(false);
@@ -3248,7 +3321,7 @@
                 markFaceImageDirty(face);
             }
             refreshCurrentPhotoLayer(true);
-            setStatus("IMAGE");
+            setStatus(isGifLockedFace() ? "GIF" : "IMAGE");
         }
 
         function setupPhotoLayerFromImage(face, image, sourceName, sourceDataUrl = null) {
@@ -3455,18 +3528,59 @@
             return decoded.length ? decoded : null;
         }
 
-        function installAnimatedGifFace(index, animation) {
+        function gifAnimationFirstSource(animation) {
+            if (animation?.kind === "gifFrames" && animation.frames?.length) return animation.frames[0].canvas;
+            if (animation?.image) return animation.image;
+            return null;
+        }
+
+        function ensureGifImageLayer(face, animation, imageLayer = null) {
+            const source = gifAnimationFirstSource(animation);
+            if (!face || !source) return false;
+            if (imageLayer) {
+                face.imageLayer = clonePhotoLayer(imageLayer, false);
+                face.imageLayer.image = source;
+                face.imageLayer.sourceDataUrl = null;
+                face.imageLayer.sourceName = animation.sourceName || imageLayer.sourceName || "animated.gif";
+            } else if (!face.imageLayer) {
+                const scale = Math.min(FACE_SIZE * 0.82 / Math.max(1, source.width), FACE_SIZE * 0.82 / Math.max(1, source.height), 1.5);
+                face.imageLayer = {
+                    image: source,
+                    sourceDataUrl: null,
+                    sourceName: animation.sourceName || "animated.gif",
+                    x: FACE_SIZE / 2,
+                    y: FACE_SIZE / 2,
+                    width: Math.max(8, source.width * scale),
+                    height: Math.max(8, source.height * scale),
+                    rotation: 0,
+                    skewX: 0,
+                    skewY: 0,
+                    anchorX: 0,
+                    anchorY: 0
+                };
+            } else {
+                face.imageLayer.image = source;
+                face.imageLayer.sourceName = animation.sourceName || face.imageLayer.sourceName || "animated.gif";
+                face.imageLayer.sourceDataUrl = null;
+            }
+            return true;
+        }
+
+        function installAnimatedGifFace(index, animation, imageLayer = null) {
             const face = faces[index];
             if (!face) return false;
 
             stopFaceAnimation(face);
             face.animation = animation;
+            ensureGifImageLayer(face, animation, imageLayer);
             face.sourceName = animation.sourceName || "animated.gif";
             face.hasArt = true;
             face.changed = true;
             face._saveCache = null;
+            photoLayerSelected = index === currentFace;
             syncAnimatedFace(index, performance.now(), true);
             renderFaceList();
+            updatePhotoGuidePointerEvents();
             updateGifLayerLockUi();
             scheduleSave();
             return true;
@@ -3506,15 +3620,21 @@
 
             if (!source) return false;
 
-            const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
-            drawImageCover(ctx, source);
-            face.hasArt = true;
-            face.changed = true;
+            if (face.imageLayer) {
+                face.imageLayer.image = source;
+                renderPhotoLayerFace(face);
+            } else {
+                const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
+                drawImageCover(ctx, source);
+                face.hasArt = true;
+                face.changed = true;
+            }
             rebuildTexture(index);
 
             if (index === currentFace && !drawing) {
                 paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
                 paintCtx.drawImage(face.canvas, 0, 0);
+                drawCanvasGuide();
             }
 
             return true;
@@ -3699,7 +3819,7 @@
 
             paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
             paintCtx.drawImage(face.canvas, 0, 0);
-            photoLayerSelected = Boolean(face.imageLayer?.image && !isGifLockedFace());
+            photoLayerSelected = Boolean(face.imageLayer?.image);
             updatePhotoGuidePointerEvents();
             drawCanvasGuide();
 
@@ -5159,7 +5279,8 @@
             centerGeometryOnOrigin(geometry);
             geometry.computeBoundingSphere();
             const radius = Math.max(0.001, geometry.boundingSphere?.radius || 1);
-            geometry.scaleScalar(1.32 / radius);
+            const iconScale = 1.32 / radius;
+            geometry.scale(iconScale, iconScale, iconScale);
             geometry.computeBoundingSphere();
             const material = new THREE.MeshLambertMaterial({
                 color: 0xfff6d8,
@@ -6479,6 +6600,41 @@
             commitCurrentColorToHistory();
         });
 
+        async function openScreenEyeDropper(kind) {
+            if (!("EyeDropper" in window)) {
+                setStatus("NO EYEDROPPER");
+                return;
+            }
+
+            try {
+                const result = await new window.EyeDropper().open();
+                const picked = normalizeHex(result?.sRGBHex, "");
+                if (!/^#[0-9A-F]{6}$/.test(picked)) return;
+
+                if (kind === "bg") {
+                    bgAlphaIndex = 0;
+                    setBgColorHex(picked, true);
+                    setStatus("BG PICKED");
+                    scheduleSave();
+                    return;
+                }
+
+                setBrushColorHex(picked, true);
+                setStatus("PICKED");
+                scheduleSave();
+            } catch (error) {
+                if (error?.name !== "AbortError") setStatus("PICK CANCELLED");
+            }
+        }
+
+        if (colorEyeDropperBtn) {
+            colorEyeDropperBtn.disabled = !("EyeDropper" in window);
+            colorEyeDropperBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                openScreenEyeDropper("color");
+            });
+        }
+
         function setColorPickerOpen(open) {
             colorPickerPanel.classList.toggle("open", open);
             colorPickerToggle.classList.toggle("open", open);
@@ -6708,6 +6864,14 @@
             draggingBgAlpha = false;
             scheduleSave();
         });
+
+        if (bgEyeDropperBtn) {
+            bgEyeDropperBtn.disabled = !("EyeDropper" in window);
+            bgEyeDropperBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                openScreenEyeDropper("bg");
+            });
+        }
 
         function setBgPickerOpen(open) {
             bgPickerPanel.classList.toggle("open", open);
@@ -7027,7 +7191,6 @@
 
         function handlePhotoGuidePointerDown(event) {
             if (!photoLayerSelected) return;
-            if (isGifLockedFace()) return;
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
             if (hit && startPhotoTransform(event, point, hit)) return;
@@ -7053,15 +7216,16 @@
         guideCanvas.addEventListener("pointercancel", stopDrawing);
 
         paintCanvas.addEventListener("pointerdown", (event) => {
-            if (isGifLockedFace()) {
-                event.preventDefault();
-                showGifNoDraw();
-                return;
-            }
             const point = canvasPoint(event);
             const face = faces[currentFace];
             const photoHit = photoHitTest(point);
             if (photoHit && startPhotoTransform(event, point, photoHit)) return;
+            if (isGifLockedFace()) {
+                if (face?.imageLayer?.image && photoLayerSelected) deselectPhotoLayer();
+                event.preventDefault();
+                showGifNoDraw();
+                return;
+            }
             if (face?.imageLayer?.image && photoLayerSelected) {
                 deselectPhotoLayer();
                 event.preventDefault();
@@ -7108,14 +7272,15 @@
         });
 
         paintCanvas.addEventListener("pointerenter", (event) => {
-            if (isGifLockedFace()) {
-                hideBrushCursor();
-                return;
-            }
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
             if (hit) {
                 paintCanvas.style.cursor = photoCursorForHit(hit, event);
+                hideBrushCursor();
+                return;
+            }
+            if (isGifLockedFace()) {
+                paintCanvas.style.cursor = "crosshair";
                 hideBrushCursor();
                 return;
             }
@@ -7126,14 +7291,15 @@
         });
 
         paintCanvas.addEventListener("pointermove", (event) => {
-            if (isGifLockedFace()) {
-                hideBrushCursor();
-                return;
-            }
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
             if (hit) {
                 paintCanvas.style.cursor = photoCursorForHit(hit, event);
+                hideBrushCursor();
+                return;
+            }
+            if (isGifLockedFace()) {
+                paintCanvas.style.cursor = "crosshair";
                 hideBrushCursor();
                 return;
             }
@@ -7415,7 +7581,7 @@
                 const animation = cloneAnimationPayload(copyBuffer.animation);
                 if (animation) {
                     face.tiling = Math.max(1, Math.min(MAX_TILING, Number(copyBuffer.tiling || face.tiling || 1)));
-                    installAnimatedGifFace(currentFace, animation);
+                    installAnimatedGifFace(currentFace, animation, copyBuffer.imageLayer);
                     updateTilingControl();
                     setStatus("GIF PASTED");
                     return;
