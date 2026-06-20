@@ -1107,7 +1107,9 @@
     const DEFAULT_GIF_DELAY = 80;
     const MARCHING_ANTS_LOOP_MS = 1200;
     const MARCHING_ANTS_EXPORT_FRAMES = 24;
-    const GIF_WORKER_SCRIPT = "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js";
+    const GIF_WORKER_CDN_SCRIPT = "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js";
+    let gifWorkerScriptUrl = null;
+    let gifWorkerScriptLoadPromise = null;
     const SUPPORTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/gif"];
     const SUPPORTED_IMAGE_EXTENSION = /\.(png|jpe?g|gif)$/i;
     const GIF_IMAGE_EXTENSION = /\.gif$/i;
@@ -2482,7 +2484,8 @@
         status.textContent = `Exported GIF with ${frames.length} frame${frames.length === 1 ? "" : "s"}.`;
       } catch (error) {
         console.error(error);
-        alert("Could not export the GIF. Try a smaller crop, fewer GIF frames, or export PNG instead.");
+        const detail = error && error.message ? `\n\n${error.message}` : "";
+        alert(`Could not export the GIF. Try a smaller crop, fewer GIF frames, or export PNG instead.${detail}`);
         status.textContent = "GIF export failed.";
       } finally {
         isExportingGif = false;
@@ -2528,7 +2531,49 @@
       }];
     }
 
-    function encodeGif(frames) {
+    async function getGifWorkerScriptUrl() {
+      if (gifWorkerScriptUrl) return gifWorkerScriptUrl;
+
+      if (!gifWorkerScriptLoadPromise) {
+        gifWorkerScriptLoadPromise = fetch(GIF_WORKER_CDN_SCRIPT, { cache: "force-cache" })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Could not load GIF worker script (${response.status}).`);
+            }
+            return response.blob();
+          })
+          .then(workerBlob => {
+            gifWorkerScriptUrl = URL.createObjectURL(workerBlob);
+            return gifWorkerScriptUrl;
+          })
+          .catch(fetchError => {
+            // Fallback for hosts that allow blob workers but block cross-origin
+            // Worker(...) URLs directly. The worker itself imports the CDN file.
+            try {
+              const shimSource = `importScripts(${JSON.stringify(GIF_WORKER_CDN_SCRIPT)});`;
+              gifWorkerScriptUrl = URL.createObjectURL(new Blob([shimSource], { type: "application/javascript" }));
+              return gifWorkerScriptUrl;
+            } catch (blobError) {
+              gifWorkerScriptLoadPromise = null;
+              throw fetchError || blobError;
+            }
+          });
+      }
+
+      return gifWorkerScriptLoadPromise;
+    }
+
+    window.addEventListener("pagehide", () => {
+      if (gifWorkerScriptUrl) {
+        URL.revokeObjectURL(gifWorkerScriptUrl);
+        gifWorkerScriptUrl = null;
+        gifWorkerScriptLoadPromise = null;
+      }
+    });
+
+    async function encodeGif(frames) {
+      const workerScriptUrl = await getGifWorkerScriptUrl();
+
       return new Promise((resolve, reject) => {
         if (!frames.length) {
           reject(new Error("No GIF frames to export."));
@@ -2561,7 +2606,7 @@
           quality: isNearestResampling() ? 1 : 10,
           width: gifWidth,
           height: gifHeight,
-          workerScript: GIF_WORKER_SCRIPT,
+          workerScript: workerScriptUrl,
           transparent: null
         });
 
