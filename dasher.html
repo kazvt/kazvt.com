@@ -9,9 +9,46 @@
     window.tailwind = { config: { corePlugins: { preflight: false } } };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <script src="https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
   <style>
+    @font-face {
+      font-family: "Monaspace Krypton Frozen";
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src:
+        local("Monaspace Krypton Frozen"),
+        local("MonaspaceKryptonFrozen-Regular"),
+        url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-400-normal.woff2") format("woff2"),
+        url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-400-normal.woff") format("woff");
+    }
+
+    @font-face {
+      font-family: "Monaspace Krypton Frozen";
+      font-style: normal;
+      font-display: swap;
+      font-weight: 700;
+      src:
+        local("Monaspace Krypton Frozen Bold"),
+        local("MonaspaceKryptonFrozen-Bold"),
+        url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff2") format("woff2"),
+        url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff") format("woff");
+    }
+
+    @font-face {
+      font-family: "Monaspace Krypton Frozen";
+      font-style: normal;
+      font-display: swap;
+      font-weight: 800 900;
+      src:
+        local("Monaspace Krypton Frozen ExtraBold"),
+        local("MonaspaceKryptonFrozen-ExtraBold"),
+        url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-800-normal.woff2") format("woff2"),
+        url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-800-normal.woff") format("woff");
+    }
+
     :root {
       --paper: #fff6d8;
       --paper2: #efe0b8;
@@ -24,7 +61,8 @@
       --checker1: #ead9ad;
       --checker2: #fff6d8;
       --blue: #2563eb;
-      font-family: system-ui;
+      --ui-font: "Monaspace Krypton Frozen", "Monaspace Krypton", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: var(--ui-font);
       font-weight: 700;
       color: var(--ink);
       background: var(--paper);
@@ -32,13 +70,15 @@
 
     * {
       box-sizing: border-box;
-      font-family: system-ui !important;
+      font-family: var(--ui-font) !important;
       font-weight: 700 !important;
+      font-variant-ligatures: contextual common-ligatures;
+      font-feature-settings: "calt" 1, "liga" 1, "ss01" 1, "ss02" 1, "ss03" 1, "ss04" 1, "ss05" 1, "ss06" 1, "ss07" 1, "ss08" 1, "ss09" 1, "ss10" 1;
     }
 
     *::before,
     *::after {
-      font-family: system-ui !important;
+      font-family: var(--ui-font) !important;
       font-weight: 700 !important;
     }
 
@@ -51,13 +91,13 @@
     .small,
     .status-chip,
     .scale-readout {
-      font-family: system-ui !important;
+      font-family: var(--ui-font) !important;
       font-weight: 700 !important;
       font-synthesis-weight: none;
     }
 
     ::placeholder {
-      font-family: system-ui !important;
+      font-family: var(--ui-font) !important;
       font-weight: 700 !important;
       opacity: 0.75;
     }
@@ -68,7 +108,7 @@
     .btn,
     .file-btn,
     button {
-      font-family: system-ui !important;
+      font-family: var(--ui-font) !important;
       font-weight: 900 !important;
     }
 
@@ -77,7 +117,7 @@
       min-height: 100vh;
       background: var(--paper);
       color: var(--ink);
-      font-family: system-ui;
+      font-family: var(--ui-font);
       font-weight: 700;
       overflow: hidden;
     }
@@ -394,7 +434,7 @@
 
     .button-row {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
       gap: 6px;
       margin-top: 6px;
     }
@@ -810,6 +850,7 @@
             <button id="fitImageBtn" class="secondary" type="button" title="Fit the full image inside the crop">Fit</button>
             <button id="fillImageBtn" class="secondary" type="button" title="Fill the whole crop with the image">Fill</button>
             <button id="centerImageBtn" class="secondary" type="button" title="Centre the image in the crop">Centre</button>
+            <button id="useImageSizeBtn" class="secondary" type="button" title="Set crop width and height to the uploaded image's actual pixel dimensions">Image size</button>
             <button id="resetCropBtn" class="secondary" type="button" title="Reset crop position, zoom, and size for this tab">Reset</button>
           </div>
         </div>
@@ -1020,6 +1061,7 @@
     const fillImageBtn = document.getElementById("fillImageBtn");
     const centerImageBtn = document.getElementById("centerImageBtn");
     const resetCropBtn = document.getElementById("resetCropBtn");
+    const useImageSizeBtn = document.getElementById("useImageSizeBtn");
     const dashCountInput = document.getElementById("dashCount");
     const lineWidthInput = document.getElementById("lineWidth");
     const colorAInput = document.getElementById("colorA");
@@ -1120,6 +1162,7 @@
       updateEditedPreviewAndOutput();
     });
     resetCropBtn.addEventListener("click", resetCrop);
+    useImageSizeBtn.addEventListener("click", useImageDimensionsForCrop);
     outsideStrokeAlignToggle.addEventListener("change", () => {
       syncOutsideStrokeAlignment();
       if (originalImage) render();
@@ -1547,6 +1590,7 @@
         fillImageBtn,
         centerImageBtn,
         resetCropBtn,
+        useImageSizeBtn,
         marchingAntsToggle,
         marchingAntsSpeedInput,
         exportFormatInput
@@ -1600,7 +1644,8 @@
         fitImageBtn,
         fillImageBtn,
         centerImageBtn,
-        resetCropBtn
+        resetCropBtn,
+        useImageSizeBtn
       ].forEach(control => {
         control.disabled = !isLoaded;
       });
@@ -1868,6 +1913,32 @@
 
       cropState.offsetX = (cropState.width - getOriginalWidth() * cropState.scale) / 2;
       cropState.offsetY = (cropState.height - getOriginalHeight() * cropState.scale) / 2;
+    }
+
+    function useImageDimensionsForCrop() {
+      if (!originalImage) return;
+
+      const imageWidth = Math.min(MAX_CANVAS_SIZE, Math.max(1, Math.floor(getOriginalWidth())));
+      const imageHeight = Math.min(MAX_CANVAS_SIZE, Math.max(1, Math.floor(getOriginalHeight())));
+
+      if (!imageWidth || !imageHeight) {
+        status.textContent = "Could not read the uploaded image dimensions.";
+        return;
+      }
+
+      cropState.width = imageWidth;
+      cropState.height = imageHeight;
+      cropState.scale = 1;
+      cropState.offsetX = 0;
+      cropState.offsetY = 0;
+      hasUserChangedCropSize = true;
+      sessionCropWidth = cropState.width;
+      sessionCropHeight = cropState.height;
+      cropWidthInput.value = cropState.width;
+      cropHeightInput.value = cropState.height;
+      syncScaleControl();
+      updateEditedPreviewAndOutput();
+      status.textContent += ` Crop size matched uploaded image: ${imageWidth} × ${imageHeight}px.`;
     }
 
     function resetCrop() {
