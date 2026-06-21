@@ -99,7 +99,7 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(132px, 170px) minmax(130px, 210px) minmax(260px, 1fr) minmax(92px, auto);
+            grid-template-columns: auto var(--shape-select-width, 220px) minmax(130px, 210px) minmax(260px, 1fr) minmax(92px, auto);
             gap: 10px;
             align-items: center;
             padding: 10px 12px;
@@ -169,11 +169,11 @@
 
         .shape-cycle-current #shapeNameReadout {
             min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            overflow: visible;
+            text-overflow: clip;
             white-space: nowrap;
             justify-self: center;
-            max-width: 100%;
+            max-width: none;
         }
 
         .shape-icon-canvas {
@@ -198,13 +198,18 @@
             min-width: 0;
             min-height: 40px;
             display: grid;
-            grid-auto-flow: column;
-            grid-auto-columns: minmax(0, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(var(--top-fader-count, 1), minmax(0, 1fr));
+            gap: clamp(6px, 1vw, 10px);
             align-items: center;
             align-self: center;
+            justify-content: stretch;
             overflow: hidden;
             transform: translateY(-3px);
+        }
+
+        .top-param-controls.one-fader {
+            grid-template-columns: minmax(0, 50%);
+            justify-content: center;
         }
 
         .poly-fader {
@@ -427,6 +432,7 @@
             height: 17px;
             opacity: 0.5;
             justify-self: center;
+            pointer-events: none;
         }
 
         .shape-tool-btn .shape-icon-active {
@@ -1533,7 +1539,6 @@
                 order: 5;
                 grid-column: 1 / -1;
                 width: 100%;
-                grid-auto-columns: minmax(0, 1fr);
                 transform: none;
             }
 
@@ -1620,12 +1625,12 @@
 
                             <button class="btn" id="eraserBtn" title="eraser">
                                 <svg viewBox="0 0 24 24">
-                                    <path d="M4 15l8-8 8 8-5 5H9z" />
-                                    <path d="M9 20h11" />
+                                    <path d="M20 15l-8-8-8 8 5 5h6z" />
+                                    <path d="M15 20H4" />
                                 </svg>
                             </button>
 
-                            <button class="btn shape-tool-btn" id="shapeToolBtn" title="shape tool">
+                            <button class="btn shape-tool-btn" id="shapeToolBtn" title="line | rectangle | circle">
                                 <svg data-shape-tool-icon="line" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M5 19L19 5" />
                                 </svg>
@@ -1646,12 +1651,12 @@
 
                             <button class="btn move-tool-btn" id="moveBtn" title="move">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 3v18" />
-                                    <path d="M8 7l4-4 4 4" />
-                                    <path d="M8 17l4 4 4-4" />
-                                    <path d="M3 12h18" />
-                                    <path d="M7 8l-4 4 4 4" />
-                                    <path d="M17 8l4 4-4 4" />
+                                    <path d="M12 4v16" />
+                                    <path d="M10.5 5.5L12 4l1.5 1.5" />
+                                    <path d="M10.5 18.5L12 20l1.5-1.5" />
+                                    <path d="M4 12h16" />
+                                    <path d="M5.5 10.5L4 12l1.5 1.5" />
+                                    <path d="M18.5 10.5L20 12l-1.5 1.5" />
                                 </svg>
                             </button>
 
@@ -1855,7 +1860,7 @@
         import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js";
 
         const FACE_SIZE = 512;
-        const PHOTO_OVERLAY_PAD = 512;
+        const PHOTO_OVERLAY_PAD = 1536;
         const MAX_UNDO_HISTORY = 40;
         const BLANK_FILL = "#fff6d8";
         const HUE_STEPS = 24;
@@ -2035,6 +2040,7 @@
         const shapeNextBtn = document.getElementById("shapeNextBtn");
         const shapeNameReadout = document.getElementById("shapeNameReadout");
         const shapeIconCanvas = document.getElementById("shapeIconCanvas");
+        const topParamControls = document.getElementById("topParamControls");
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
         const polyReadout = document.getElementById("polyReadout");
@@ -2512,6 +2518,16 @@
             if (persist && !loadingSession) scheduleSave();
         }
 
+        function updateTopFaderLayout() {
+            if (!topParamControls) return;
+            const polyCount = polyFader && !polyFader.hidden ? 1 : 0;
+            const extraCount = shapeExtraControlList ? shapeExtraControlList.querySelectorAll(".shape-extra-control").length : 0;
+            const count = polyCount + extraCount;
+            topParamControls.style.setProperty("--top-fader-count", String(Math.max(1, count)));
+            topParamControls.classList.toggle("one-fader", count === 1);
+            topParamControls.classList.toggle("empty-faders", count === 0);
+        }
+
         function updateShapeExtraControls() {
             if (!shapeExtraControls || !shapeExtraControlList) return;
             const def = getCurrentShapeDef();
@@ -2547,6 +2563,7 @@
                 shapeExtraControlList.append(wrap);
                 updateRangeProgress(input);
             });
+            updateTopFaderLayout();
         }
 
         function getCurrentPolyLevel() {
@@ -2717,11 +2734,17 @@
             ctx.closePath();
         }
 
+        function innerGuidePulseStroke() {
+            const mix = 0.5 + Math.sin(performance.now() * 0.007) * 0.5;
+            const value = Math.round(20 + mix * 235);
+            return `rgba(${value}, ${value}, ${value}, 0.98)`;
+        }
+
         function drawFitGuide(profile) {
             if (!profile) return;
 
             guideCtx.save();
-            guideCtx.strokeStyle = "rgba(157, 61, 44, 0.95)";
+            guideCtx.strokeStyle = innerGuidePulseStroke();
             guideCtx.lineWidth = 3;
             guideCtx.setLineDash([10, 7]);
 
@@ -2800,6 +2823,10 @@
                 const useGuide = face && (face.mapMode === "fit" || isAlwaysInnerGuideCircleFace(def, face));
                 const profile = useGuide ? getFaceFitProfile(def, face) : null;
                 if (profile && traceGuidePath(guideCtx, profile)) {
+                    guideCtx.save();
+                    guideCtx.fillStyle = `rgba(255, 246, 216, ${0.42 * (1 - t)})`;
+                    guideCtx.fill("evenodd");
+                    guideCtx.restore();
                     guideCtx.stroke();
                 } else {
                     guideCtx.strokeRect(4, 4, FACE_SIZE - 8, FACE_SIZE - 8);
@@ -2903,6 +2930,17 @@
             face.animation = null;
         }
 
+        function normalizePhotoWarp(layer) {
+            const source = layer?.warp || {};
+            const empty = { x: 0, y: 0 };
+            return {
+                nw: { x: Number(source.nw?.x) || 0, y: Number(source.nw?.y) || 0 },
+                ne: { x: Number(source.ne?.x) || 0, y: Number(source.ne?.y) || 0 },
+                se: { x: Number(source.se?.x) || 0, y: Number(source.se?.y) || 0 },
+                sw: { x: Number(source.sw?.x) || 0, y: Number(source.sw?.y) || 0 }
+            };
+        }
+
         function clonePhotoLayer(layer, includeImage = true) {
             if (!layer) return null;
             return {
@@ -2917,7 +2955,8 @@
                 skewX: Number(layer.skewX) || 0,
                 skewY: Number(layer.skewY) || 0,
                 anchorX: Number(layer.anchorX) || 0,
-                anchorY: Number(layer.anchorY) || 0
+                anchorY: Number(layer.anchorY) || 0,
+                warp: normalizePhotoWarp(layer)
             };
         }
 
@@ -3005,39 +3044,130 @@
             };
         }
 
-        function photoLayerCorners(layer) {
+        function photoBaseLocalCorners(layer) {
             const w = Math.max(1, Number(layer.width) || 1) / 2;
             const h = Math.max(1, Number(layer.height) || 1) / 2;
             return {
-                nw: photoLocalToWorld(layer, -w, -h),
-                n: photoLocalToWorld(layer, 0, -h),
-                ne: photoLocalToWorld(layer, w, -h),
-                e: photoLocalToWorld(layer, w, 0),
-                se: photoLocalToWorld(layer, w, h),
-                s: photoLocalToWorld(layer, 0, h),
-                sw: photoLocalToWorld(layer, -w, h),
-                w: photoLocalToWorld(layer, -w, 0)
+                nw: { x: -w, y: -h },
+                ne: { x: w, y: -h },
+                se: { x: w, y: h },
+                sw: { x: -w, y: h }
             };
         }
 
+        function photoWarpLocalCorners(layer) {
+            const base = photoBaseLocalCorners(layer);
+            const warp = normalizePhotoWarp(layer);
+            return {
+                nw: { x: base.nw.x + warp.nw.x, y: base.nw.y + warp.nw.y },
+                ne: { x: base.ne.x + warp.ne.x, y: base.ne.y + warp.ne.y },
+                se: { x: base.se.x + warp.se.x, y: base.se.y + warp.se.y },
+                sw: { x: base.sw.x + warp.sw.x, y: base.sw.y + warp.sw.y }
+            };
+        }
+
+        function photoMidpoint(a, b) {
+            return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        }
+
+        function photoLayerCorners(layer) {
+            const local = photoWarpLocalCorners(layer);
+            const world = {
+                nw: photoLocalToWorld(layer, local.nw.x, local.nw.y),
+                ne: photoLocalToWorld(layer, local.ne.x, local.ne.y),
+                se: photoLocalToWorld(layer, local.se.x, local.se.y),
+                sw: photoLocalToWorld(layer, local.sw.x, local.sw.y)
+            };
+            world.n = photoMidpoint(world.nw, world.ne);
+            world.e = photoMidpoint(world.ne, world.se);
+            world.s = photoMidpoint(world.sw, world.se);
+            world.w = photoMidpoint(world.nw, world.sw);
+            return world;
+        }
+
         function photoRotateHandleWorld(layer) {
-            const h = Math.max(1, Number(layer.height) || 1) / 2;
-            return photoLocalToWorld(layer, 0, -h - 34);
+            const points = photoLayerCorners(layer);
+            const dx = points.n.x - photoLayerAnchorWorld(layer).x;
+            const dy = points.n.y - photoLayerAnchorWorld(layer).y;
+            const len = Math.hypot(dx, dy) || 1;
+            return { x: points.n.x + dx / len * 34, y: points.n.y + dy / len * 34 };
         }
 
         function photoLayerAnchorWorld(layer) {
             return photoLocalToWorld(layer, Number(layer.anchorX) || 0, Number(layer.anchorY) || 0);
         }
 
+        function photoQuadPoint(corners, u, v) {
+            const top = {
+                x: corners.nw.x + (corners.ne.x - corners.nw.x) * u,
+                y: corners.nw.y + (corners.ne.y - corners.nw.y) * u
+            };
+            const bottom = {
+                x: corners.sw.x + (corners.se.x - corners.sw.x) * u,
+                y: corners.sw.y + (corners.se.y - corners.sw.y) * u
+            };
+            return {
+                x: top.x + (bottom.x - top.x) * v,
+                y: top.y + (bottom.y - top.y) * v
+            };
+        }
+
+        function photoTriangleMatrix(s0, s1, s2, d0, d1, d2) {
+            const den = s0.x * (s1.y - s2.y) + s1.x * (s2.y - s0.y) + s2.x * (s0.y - s1.y);
+            if (Math.abs(den) < 0.000001) return null;
+            return {
+                a: (d0.x * (s1.y - s2.y) + d1.x * (s2.y - s0.y) + d2.x * (s0.y - s1.y)) / den,
+                b: (d0.y * (s1.y - s2.y) + d1.y * (s2.y - s0.y) + d2.y * (s0.y - s1.y)) / den,
+                c: (d0.x * (s2.x - s1.x) + d1.x * (s0.x - s2.x) + d2.x * (s1.x - s0.x)) / den,
+                d: (d0.y * (s2.x - s1.x) + d1.y * (s0.x - s2.x) + d2.y * (s1.x - s0.x)) / den,
+                e: (d0.x * (s1.x * s2.y - s2.x * s1.y) + d1.x * (s2.x * s0.y - s0.x * s2.y) + d2.x * (s0.x * s1.y - s1.x * s0.y)) / den,
+                f: (d0.y * (s1.x * s2.y - s2.x * s1.y) + d1.y * (s2.x * s0.y - s0.x * s2.y) + d2.y * (s0.x * s1.y - s1.x * s0.y)) / den
+            };
+        }
+
+        function photoDrawTriangle(ctx, image, s0, s1, s2, d0, d1, d2) {
+            const matrix = photoTriangleMatrix(s0, s1, s2, d0, d1, d2);
+            if (!matrix) return;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(d0.x, d0.y);
+            ctx.lineTo(d1.x, d1.y);
+            ctx.lineTo(d2.x, d2.y);
+            ctx.closePath();
+            ctx.clip();
+            ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(image, 0, 0);
+            ctx.restore();
+        }
+
         function renderPhotoLayerToContext(layer, ctx) {
             if (!layer?.image) return false;
-            ctx.save();
-            ctx.imageSmoothingEnabled = false;
-            ctx.translate(layer.x, layer.y);
-            ctx.rotate(layer.rotation || 0);
-            ctx.transform(1, Number(layer.skewY) || 0, Number(layer.skewX) || 0, 1, 0, 0);
-            ctx.drawImage(layer.image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
-            ctx.restore();
+            const image = layer.image;
+            const localCorners = photoWarpLocalCorners(layer);
+            const steps = 12;
+            for (let y = 0; y < steps; y++) {
+                const v0 = y / steps;
+                const v1 = (y + 1) / steps;
+                for (let x = 0; x < steps; x++) {
+                    const u0 = x / steps;
+                    const u1 = (x + 1) / steps;
+                    const l00 = photoQuadPoint(localCorners, u0, v0);
+                    const l10 = photoQuadPoint(localCorners, u1, v0);
+                    const l01 = photoQuadPoint(localCorners, u0, v1);
+                    const l11 = photoQuadPoint(localCorners, u1, v1);
+                    const d00 = photoLocalToWorld(layer, l00.x, l00.y);
+                    const d10 = photoLocalToWorld(layer, l10.x, l10.y);
+                    const d01 = photoLocalToWorld(layer, l01.x, l01.y);
+                    const d11 = photoLocalToWorld(layer, l11.x, l11.y);
+                    const s00 = { x: u0 * image.width, y: v0 * image.height };
+                    const s10 = { x: u1 * image.width, y: v0 * image.height };
+                    const s01 = { x: u0 * image.width, y: v1 * image.height };
+                    const s11 = { x: u1 * image.width, y: v1 * image.height };
+                    photoDrawTriangle(ctx, image, s00, s01, s11, d00, d01, d11);
+                    photoDrawTriangle(ctx, image, s00, s11, s10, d00, d11, d10);
+                }
+            }
             return true;
         }
 
@@ -3197,12 +3327,14 @@
             return null;
         }
 
+        const photoRotateCursor = 'url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M23 9a10 10 0 1 0 2.5 10' fill='none' stroke='%23140306' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M23 9a10 10 0 1 0 2.5 10' fill='none' stroke='%23fff6d8' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M22 4l7 3-5 6z' fill='%23140306'/%3E%3Cpath d='M23.5 6.4l3.2 1.3-2.3 2.8z' fill='%23fff6d8'/%3E%3C/svg%3E") 16 16, alias';
+
         function photoCursorForHit(hit, event = null) {
             if (!hit) return "crosshair";
-            if (event?.ctrlKey && hit.mode === "scale") return "crosshair";
+            if (event?.ctrlKey && hit.mode === "scale") return "cell";
             if (hit.mode === "anchor") return "grab";
             if (hit.mode === "move") return "move";
-            if (hit.mode === "rotate") return "alias";
+            if (hit.mode === "rotate") return photoRotateCursor;
             if (["n", "s"].includes(hit.handle)) return "ns-resize";
             if (["e", "w"].includes(hit.handle)) return "ew-resize";
             if (["nw", "se"].includes(hit.handle)) return "nwse-resize";
@@ -3240,9 +3372,13 @@
             const targets = [
                 { x: 0, y: 0 },
                 { x: -halfW, y: -halfH },
+                { x: 0, y: -halfH },
                 { x: halfW, y: -halfH },
+                { x: halfW, y: 0 },
                 { x: halfW, y: halfH },
-                { x: -halfW, y: halfH }
+                { x: 0, y: halfH },
+                { x: -halfW, y: halfH },
+                { x: -halfW, y: 0 }
             ];
             let best = null;
             let bestDistance = Infinity;
@@ -3269,10 +3405,6 @@
             const face = faces[currentFace];
             const layer = face?.imageLayer;
             if (tool !== "move" || !layer?.image || !hit) return false;
-            if (hit.mode === "anchor" && !(event.altKey || event.ctrlKey)) {
-                if (!photoPointInLayer(layer, point, 0)) return false;
-                hit = { mode: "move", handle: "move" };
-            }
             event.preventDefault();
             event.stopPropagation();
             photoLayerSelected = true;
@@ -3280,7 +3412,7 @@
             pushUndo(currentFace);
             photoTransformDrag = {
                 pointerId: event.pointerId,
-                mode: event.ctrlKey && hit.mode === "scale" ? "skew" : hit.mode,
+                mode: event.ctrlKey && hit.mode === "scale" ? "distort" : hit.mode,
                 handle: hit.handle,
                 startPoint: point,
                 startLayer: clonePhotoLayer(layer, true),
@@ -3314,19 +3446,51 @@
                 const pivot = photoLayerAnchorWorld(start);
                 const a0 = Math.atan2(photoTransformDrag.startPoint.y - pivot.y, photoTransformDrag.startPoint.x - pivot.x);
                 const a1 = Math.atan2(point.y - pivot.y, point.x - pivot.x);
-                layer.rotation = start.rotation + a1 - a0;
-            } else if (photoTransformDrag.mode === "skew") {
-                const local = photoWorldToLocal(start, point.x, point.y);
-                const sx = (local.x - photoTransformDrag.startLocal.x) / Math.max(1, start.height);
-                const sy = (local.y - photoTransformDrag.startLocal.y) / Math.max(1, start.width);
-                if (["n", "s"].includes(photoTransformDrag.handle)) layer.skewX = start.skewX + sx * 1.8;
-                else if (["e", "w"].includes(photoTransformDrag.handle)) layer.skewY = start.skewY + sy * 1.8;
-                else {
-                    layer.skewX = start.skewX + sx * 1.4;
-                    layer.skewY = start.skewY + sy * 1.4;
+                let nextRotation = start.rotation + a1 - a0;
+                if (event.shiftKey) {
+                    const snap = Math.PI / 4;
+                    nextRotation = Math.round(nextRotation / snap) * snap;
                 }
-                layer.skewX = Math.max(-1.6, Math.min(1.6, layer.skewX));
-                layer.skewY = Math.max(-1.6, Math.min(1.6, layer.skewY));
+                layer.rotation = nextRotation;
+            } else if (photoTransformDrag.mode === "distort") {
+                const handle = photoTransformDrag.handle;
+                const local = photoWorldToLocal(start, point.x, point.y);
+                const base = photoBaseLocalCorners(start);
+                const startWarp = normalizePhotoWarp(start);
+                const startHandleLocal = photoHandleLocal(start, handle);
+                const delta = {
+                    x: local.x - startHandleLocal.x,
+                    y: local.y - startHandleLocal.y
+                };
+                const nextWarp = normalizePhotoWarp(start);
+                const applyCorner = (key, target) => {
+                    nextWarp[key] = {
+                        x: target.x - base[key].x,
+                        y: target.y - base[key].y
+                    };
+                };
+                const shiftCorner = (key) => {
+                    nextWarp[key] = {
+                        x: startWarp[key].x + delta.x,
+                        y: startWarp[key].y + delta.y
+                    };
+                };
+                if (["nw", "ne", "se", "sw"].includes(handle)) {
+                    applyCorner(handle, local);
+                } else if (handle === "n") {
+                    shiftCorner("nw");
+                    shiftCorner("ne");
+                } else if (handle === "e") {
+                    shiftCorner("ne");
+                    shiftCorner("se");
+                } else if (handle === "s") {
+                    shiftCorner("sw");
+                    shiftCorner("se");
+                } else if (handle === "w") {
+                    shiftCorner("nw");
+                    shiftCorner("sw");
+                }
+                layer.warp = nextWarp;
             } else if (photoTransformDrag.mode === "scale") {
                 const handle = photoTransformDrag.handle;
                 const local = photoWorldToLocal(start, point.x, point.y);
@@ -3353,10 +3517,19 @@
                 const fixedNext = fixedHandle === "anchor" ? anchorNext : photoHandleLocal({ width: nextW, height: nextH }, fixedHandle);
                 const fixedWorld = photoLocalToWorld(start, fixedStart.x, fixedStart.y);
                 const startMatrix = photoLayerMatrix(start);
+                const warpStart = normalizePhotoWarp(start);
+                const scaleX = Math.max(8, nextW) / Math.max(1, start.width);
+                const scaleY = Math.max(8, nextH) / Math.max(1, start.height);
                 layer.width = Math.max(8, nextW);
                 layer.height = Math.max(8, nextH);
                 layer.anchorX = anchorNext.x;
                 layer.anchorY = anchorNext.y;
+                layer.warp = {
+                    nw: { x: warpStart.nw.x * scaleX, y: warpStart.nw.y * scaleY },
+                    ne: { x: warpStart.ne.x * scaleX, y: warpStart.ne.y * scaleY },
+                    se: { x: warpStart.se.x * scaleX, y: warpStart.se.y * scaleY },
+                    sw: { x: warpStart.sw.x * scaleX, y: warpStart.sw.y * scaleY }
+                };
                 layer.x = fixedWorld.x - (startMatrix.a * fixedNext.x + startMatrix.c * fixedNext.y);
                 layer.y = fixedWorld.y - (startMatrix.b * fixedNext.x + startMatrix.d * fixedNext.y);
             }
@@ -3391,7 +3564,8 @@
                 skewX: 0,
                 skewY: 0,
                 anchorX: 0,
-                anchorY: 0
+                anchorY: 0,
+                warp: normalizePhotoWarp(null)
             };
             photoLayerSelected = true;
             updatePhotoGuidePointerEvents();
@@ -3609,7 +3783,8 @@
                     skewX: 0,
                     skewY: 0,
                     anchorX: 0,
-                    anchorY: 0
+                    anchorY: 0,
+                    warp: normalizePhotoWarp(null)
                 };
             } else {
                 face.imageLayer.image = source;
@@ -4080,23 +4255,33 @@
             if (!loadingSession) scheduleSave();
         }
 
-        function useShapeToolButton() {
+        function useShapeToolButton(event) {
             if (isGifLockedFace()) {
                 showGifNoDraw();
                 updateGifLayerLockUi();
                 return;
             }
-            if (isShapeToolName(tool)) {
-                const order = ["line", "rect", "circle"];
-                shapeTool = order[(order.indexOf(shapeTool) + 1) % order.length];
-                setTool(shapeTool);
-            } else {
-                setTool(shapeTool);
+            const order = ["line", "rect", "circle"];
+            let selected = shapeTool;
+            const button = event?.currentTarget || document.getElementById("shapeToolBtn");
+            if (button && event && Number.isFinite(event.clientX)) {
+                const rect = button.getBoundingClientRect();
+                const third = Math.max(1, rect.width / 3);
+                const index = Math.max(0, Math.min(2, Math.floor((event.clientX - rect.left) / third)));
+                selected = order[index];
             }
+            shapeTool = selected;
+            setTool(selected);
         }
 
         function shapeIndexById(id) {
             return SHAPE_DEFS.findIndex((shape) => shape.id === id);
+        }
+
+        function updateShapeSelectorWidth() {
+            const longest = SHAPE_DEFS.reduce((max, shape) => Math.max(max, String(shape.label || "").length), 0);
+            const labelChars = Math.max(8, longest);
+            document.documentElement.style.setProperty("--shape-select-width", `calc(${labelChars}ch + 124px)`);
         }
 
         function setShapeDropdownOpen(open) {
@@ -7937,6 +8122,18 @@
 
         let lastTime = performance.now();
         let previewFpsTickTime = 0;
+        let guidePulseTickTime = 0;
+
+        function shouldPulseCanvasGuide(now) {
+            if (canvasSelectionFlashFrame) return false;
+            const face = faces[currentFace];
+            const def = getCurrentShapeDef();
+            const pulsing = Boolean(face && (face.mapMode === "fit" || isAlwaysInnerGuideCircleFace(def, face)));
+            if (!pulsing) return false;
+            if (now - guidePulseTickTime < 60) return false;
+            guidePulseTickTime = now;
+            return true;
+        }
 
         function animate(now) {
             updateAnimatedFaces(now);
@@ -7961,6 +8158,10 @@
 
                 updateDebugInfo();
                 renderer.render(scene, camera);
+            }
+
+            if (shouldPulseCanvasGuide(now)) {
+                drawCanvasGuide();
             }
 
             renderShapeIcon(now);
@@ -8593,6 +8794,7 @@
             restoreInputsFromSession(savedSession);
             restoreShapesFromSession(savedSession);
 
+            updateShapeSelectorWidth();
             updateShapeReadout();
             buildShapeMesh();
             rebuildAllTextures();
