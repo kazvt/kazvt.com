@@ -474,37 +474,45 @@
             display: grid;
             gap: 7px;
             align-items: stretch;
+            min-width: 0;
         }
 
         .color-picker-shell {
             position: relative;
             z-index: 20;
+            min-width: 0;
         }
 
         .color-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(112px, 198px);
             align-items: stretch;
-            gap: 6px;
+            gap: clamp(3px, 1vw, 6px);
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .color-row .color-picker-toggle {
-            flex: 1 1 50%;
-            min-width: 50%;
+            min-width: 0;
         }
 
         .quick-color-history {
-            flex: 0 0 auto;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
             display: grid;
-            grid-auto-flow: column;
-            grid-auto-columns: 36px;
-            gap: 6px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: clamp(3px, 1vw, 6px);
             align-items: stretch;
+            justify-content: stretch;
         }
 
         .quick-swatch {
-            width: 36px;
-            height: 36px;
+            width: 100%;
+            height: auto;
+            min-width: 0;
             aspect-ratio: 1 / 1;
             border: 2px solid var(--line);
             background: var(--paper2);
@@ -1817,14 +1825,18 @@
                 font-size: 10px;
             }
 
-            .quick-color-history {
-                grid-auto-columns: 28px;
+            .color-row {
+                grid-template-columns: minmax(0, 1fr) minmax(92px, 38%);
                 gap: 4px;
             }
 
+            .quick-color-history {
+                gap: 3px;
+            }
+
             .quick-swatch {
-                width: 28px;
-                height: 28px;
+                width: 100%;
+                height: auto;
             }
 
             .color-picker-toggle {
@@ -2055,6 +2067,86 @@
                 letter-spacing: 0.02em;
             }
         }
+
+        .top-param-controls {
+            height: 44px;
+            min-height: 44px;
+            align-items: center;
+            transform: none;
+        }
+
+        .top-param-controls .poly-fader,
+        .top-param-controls .shape-extra-control {
+            position: relative;
+            display: grid;
+            grid-template-rows: 1fr;
+            align-items: center;
+            align-content: center;
+            min-height: 40px;
+            height: 40px;
+            padding: 0;
+            gap: 0;
+        }
+
+        .top-param-controls .top-control-readout,
+        .top-param-controls .shape-extra-readout {
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 11px;
+            line-height: 10px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .top-param-controls .poly-fader input[type="range"],
+        .top-param-controls .shape-extra-control input[type="range"] {
+            align-self: center;
+            height: 24px;
+            margin: 8px 0 0;
+        }
+
+        @media (max-width: 1160px) {
+            .top-param-controls {
+                height: 40px;
+                min-height: 40px;
+            }
+
+            .top-param-controls .poly-fader,
+            .top-param-controls .shape-extra-control {
+                min-height: 36px;
+                height: 36px;
+                grid-template-rows: 1fr;
+                gap: 0;
+            }
+
+            .top-param-controls .poly-fader input[type="range"],
+            .top-param-controls .shape-extra-control input[type="range"] {
+                height: 22px;
+                margin-top: 7px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .top-param-controls {
+                height: 36px;
+                min-height: 36px;
+            }
+
+            .top-param-controls .poly-fader,
+            .top-param-controls .shape-extra-control {
+                min-height: 32px;
+                height: 32px;
+                grid-template-rows: 1fr;
+                gap: 0;
+            }
+
+            .top-param-controls .poly-fader input[type="range"],
+            .top-param-controls .shape-extra-control input[type="range"] {
+                height: 20px;
+                margin-top: 6px;
+            }
+        }
+
 </style>
 </head>
 
@@ -5070,7 +5162,8 @@
                 return;
             }
 
-            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight);
+            const wholeCanvasSteps = ["pyramid", "tetrahedron"].includes(def.geometry) ? 12 : 1;
+            addFullCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, wholeCanvasSteps);
         }
 
         function mapUvToGuideRect(profile, u, v) {
@@ -6828,6 +6921,11 @@
             restoreWarudoViewState(savedView);
         }
 
+        function flashGuideToggleFace(index) {
+            const safeIndex = Math.max(0, Math.min(faces.length - 1, Number(index) || 0));
+            requestAnimationFrame(() => flashSelectedMaterial(safeIndex));
+        }
+
         function toggleFaceMapMode(index = currentFace) {
             const face = faces[index];
             const def = getCurrentShapeDef();
@@ -6840,7 +6938,7 @@
                     drawCanvasGuide();
                 }
                 renderFaceList();
-                flashSelectedMaterial(index);
+                flashGuideToggleFace(index);
                 setStatus("INNER GUIDE");
                 return;
             }
@@ -6858,7 +6956,7 @@
             rebuildTexture(index);
             rebuildShapeMeshWithoutMovingView();
             renderFaceList();
-            flashSelectedMaterial(index);
+            flashGuideToggleFace(index);
             scheduleSave();
 
             setStatus(MAP_MODE_META[face.mapMode === "fit" ? "fit" : "whole"].status);
