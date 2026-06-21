@@ -207,12 +207,13 @@
             display: grid;
             place-items: center;
             overflow: hidden;
-            touch-action: pan-y;
+            touch-action: manipulation;
             cursor: zoom-in;
+            user-select: none;
         }
 
         .creation-media.zoomed {
-            cursor: zoom-out;
+            cursor: zoom-in;
         }
 
         .creation-frame img {
@@ -361,10 +362,6 @@
         .creation-frame,
         .gallery-copy {
             min-width: 0;
-        }
-
-        .gallery-grid {
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
         }
 
         .gallery-top {
@@ -588,6 +585,8 @@
 
             const media = document.createElement("div");
             media.className = "creation-media";
+            media.title = "left-click zooms in; right-click zooms out";
+            media.setAttribute("aria-label", "left-click zooms in; right-click zooms out");
 
             const img = document.createElement("img");
             img.loading = "lazy";
@@ -619,17 +618,19 @@
                 renderMedia();
             });
 
-            media.addEventListener("wheel", (event) => {
+            media.addEventListener("click", (event) => {
+                if (img.hidden) return;
+                const current = Number(media.dataset.zoom || 1) || 1;
+                const point = mediaPointerPercent(media, event);
+                setMediaZoom(media, current + 0.25, point.x, point.y);
+            });
+
+            media.addEventListener("contextmenu", (event) => {
                 if (img.hidden) return;
                 event.preventDefault();
                 const current = Number(media.dataset.zoom || 1) || 1;
-                const step = event.deltaY < 0 ? 1.16 : 1 / 1.16;
                 const point = mediaPointerPercent(media, event);
-                setMediaZoom(media, current * step, point.x, point.y);
-            }, { passive: false });
-
-            media.addEventListener("dblclick", () => {
-                resetMediaZoom(media);
+                setMediaZoom(media, current - 0.25, point.x, point.y);
             });
 
             media.append(img, missing);
