@@ -2465,6 +2465,67 @@
             }
         }
 
+
+        .color-picker-panel,
+        .bg-picker-panel {
+            position: fixed !important;
+            left: 6px;
+            top: 6px;
+            right: auto !important;
+            bottom: auto !important;
+            width: var(--floating-picker-width, 320px) !important;
+            max-width: calc(100vw - 12px) !important;
+            max-height: calc(100dvh - 12px) !important;
+            z-index: 100000 !important;
+            box-sizing: border-box;
+            overflow: hidden !important;
+        }
+
+        .color-picker-panel {
+            --floating-picker-width: min(332px, calc(100vw - 12px));
+        }
+
+        .bg-picker-panel {
+            --floating-picker-width: min(294px, calc(100vw - 12px));
+        }
+
+        .color-picker-main,
+        .bg-picker-main,
+        .color-picker-meta,
+        .bg-picker-meta {
+            min-width: 0;
+        }
+
+        .toolbar {
+            align-content: start;
+        }
+
+        .tools {
+            margin-bottom: clamp(2px, 0.45dvh, 5px) !important;
+        }
+
+        .controls {
+            gap: clamp(5px, 0.95dvh, 9px) !important;
+            padding-top: clamp(2px, 0.45dvh, 5px);
+            box-sizing: border-box;
+        }
+
+        .color-row {
+            align-items: center;
+            min-height: clamp(30px, 5dvh, 40px);
+        }
+
+        @media (max-height: 560px) {
+            .tools {
+                margin-bottom: 2px !important;
+            }
+
+            .controls {
+                gap: 4px !important;
+                padding-top: 2px;
+            }
+        }
+
         @media (max-height: 620px) {
             .app {
                 grid-template-rows: clamp(40px, 9dvh, 56px) minmax(0, 1fr) !important;
@@ -8101,11 +8162,38 @@
             });
         }
 
+
+        function placeFloatingPicker(panel, anchor, preferredWidth) {
+            if (!panel || !anchor || !panel.classList.contains("open")) return;
+            const pad = 6;
+            const viewportWidth = Math.max(240, window.innerWidth || document.documentElement.clientWidth || 0);
+            const viewportHeight = Math.max(240, window.innerHeight || document.documentElement.clientHeight || 0);
+            const anchorRect = anchor.getBoundingClientRect();
+            const panelWidth = Math.max(220, Math.min(preferredWidth, viewportWidth - pad * 2));
+            panel.style.setProperty("--floating-picker-width", `${panelWidth}px`);
+            const panelHeight = Math.min(panel.offsetHeight || 220, viewportHeight - pad * 2);
+            const left = Math.max(pad, Math.min(anchorRect.left, viewportWidth - panelWidth - pad));
+            let top = anchorRect.top - panelHeight - 8;
+            if (top < pad) top = anchorRect.bottom + 8;
+            top = Math.max(pad, Math.min(top, viewportHeight - panelHeight - pad));
+            panel.style.left = `${left}px`;
+            panel.style.top = `${top}px`;
+        }
+
+        function placeOpenPickers() {
+            placeFloatingPicker(colorPickerPanel, colorPickerToggle, 332);
+            placeFloatingPicker(bgPickerPanel, bgPickerToggle, 294);
+        }
+
         function setColorPickerOpen(open) {
             colorPickerPanel.classList.toggle("open", open);
             colorPickerToggle.classList.toggle("open", open);
             colorPickerToggle.querySelector("span:last-child").textContent = open ? "▾" : "▴";
-            if (open) redrawPickerCanvasesAfterLayout();
+            if (open) {
+                placeOpenPickers();
+                redrawPickerCanvasesAfterLayout();
+                requestAnimationFrame(placeOpenPickers);
+            }
         }
 
         colorPickerToggle.addEventListener("click", (event) => {
@@ -8344,7 +8432,11 @@
         function setBgPickerOpen(open) {
             bgPickerPanel.classList.toggle("open", open);
             bgPickerToggle.classList.toggle("open", open);
-            if (open) redrawPickerCanvasesAfterLayout();
+            if (open) {
+                placeOpenPickers();
+                redrawPickerCanvasesAfterLayout();
+                requestAnimationFrame(placeOpenPickers);
+            }
         }
 
         bgPickerToggle.addEventListener("click", (event) => {
@@ -8358,9 +8450,16 @@
         });
 
 
-        window.addEventListener("load", redrawPickerCanvasesAfterLayout);
+        window.addEventListener("load", () => {
+            redrawPickerCanvasesAfterLayout();
+            placeOpenPickers();
+        });
+        window.addEventListener("resize", placeOpenPickers);
         if (document.fonts?.ready) {
-            document.fonts.ready.then(redrawPickerCanvasesAfterLayout).catch(() => {});
+            document.fonts.ready.then(() => {
+                redrawPickerCanvasesAfterLayout();
+                placeOpenPickers();
+            }).catch(() => {});
         }
 
         function canvasPoint(event) {
