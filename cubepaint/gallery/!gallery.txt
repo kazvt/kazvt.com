@@ -1,1 +1,3 @@
 Transrantula.txt
+Susie.txt
+Tarofel.txt
