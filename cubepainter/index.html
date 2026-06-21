@@ -99,7 +99,7 @@
             background: var(--ink);
             color: var(--paper);
             display: grid;
-            grid-template-columns: auto minmax(124px, 150px) minmax(130px, 210px) minmax(260px, 1fr) minmax(92px, auto);
+            grid-template-columns: auto minmax(132px, 170px) minmax(130px, 210px) minmax(260px, 1fr) minmax(92px, auto);
             gap: 10px;
             align-items: center;
             padding: 10px 12px;
@@ -151,13 +151,29 @@
 
         .shape-cycle-current {
             min-width: 0;
-            padding: 0 7px 0 5px;
+            padding: 0 5px;
             font-size: 10px;
             text-align: center;
-            grid-template-columns: 28px minmax(0, auto);
-            gap: 5px;
-            justify-content: center;
+            grid-template-columns: 31px minmax(0, 1fr) 31px;
+            gap: 0;
+            justify-content: stretch;
             align-items: center;
+        }
+
+        .shape-cycle-current::after {
+            content: "";
+            width: 31px;
+            height: 1px;
+            pointer-events: none;
+        }
+
+        .shape-cycle-current #shapeNameReadout {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            justify-self: center;
+            max-width: 100%;
         }
 
         .shape-icon-canvas {
@@ -166,6 +182,7 @@
             display: block;
             image-rendering: pixelated;
             pointer-events: none;
+            justify-self: start;
         }
 
         .shape-cycle-btn:hover,
@@ -398,6 +415,29 @@
             gap: 6px;
         }
 
+        .shape-tool-btn {
+            grid-column: span 2;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            padding: 0 5px;
+        }
+
+        .shape-tool-btn svg {
+            width: 17px;
+            height: 17px;
+            opacity: 0.5;
+            justify-self: center;
+        }
+
+        .shape-tool-btn .shape-icon-active {
+            opacity: 1;
+        }
+
+        .move-tool-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
         .controls {
             display: grid;
             gap: 7px;
@@ -559,6 +599,45 @@
             font-size: 10px;
             font-weight: 900;
             letter-spacing: 0.04em;
+        }
+
+        .picker-sampler-btn,
+        .eyedropper-btn {
+            width: 100%;
+            height: 28px;
+            border: 2px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            padding: 0 6px;
+        }
+
+        .picker-sampler-btn:hover,
+        .eyedropper-btn:hover {
+            background: var(--paper3);
+        }
+
+        .picker-sampler-btn:active,
+        .eyedropper-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .picker-sampler-btn.active,
+        .eyedropper-btn.active {
+            background: var(--accent);
+            color: var(--paper);
+        }
+
+        body.color-sample-mode,
+        body.color-sample-mode * {
+            cursor: crosshair !important;
         }
 
         .color-readout span {
@@ -1546,20 +1625,14 @@
                                 </svg>
                             </button>
 
-                            <button class="btn" id="lineBtn" title="line">
-                                <svg viewBox="0 0 24 24">
+                            <button class="btn shape-tool-btn" id="shapeToolBtn" title="shape tool">
+                                <svg data-shape-tool-icon="line" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M5 19L19 5" />
                                 </svg>
-                            </button>
-
-                            <button class="btn" id="rectBtn" title="rectangle">
-                                <svg viewBox="0 0 24 24">
+                                <svg data-shape-tool-icon="rect" viewBox="0 0 24 24" aria-hidden="true">
                                     <rect x="5" y="6" width="14" height="12" rx="1" />
                                 </svg>
-                            </button>
-
-                            <button class="btn" id="circleBtn" title="circle">
-                                <svg viewBox="0 0 24 24">
+                                <svg data-shape-tool-icon="circle" viewBox="0 0 24 24" aria-hidden="true">
                                     <ellipse cx="12" cy="12" rx="7" ry="6" />
                                 </svg>
                             </button>
@@ -1568,6 +1641,17 @@
                                 <svg viewBox="0 0 24 24">
                                     <path d="M5 13l7-7 7 7-7 7z" />
                                     <path d="M19 15c2 2 2 4 0 4s-2-2 0-4z" />
+                                </svg>
+                            </button>
+
+                            <button class="btn move-tool-btn" id="moveBtn" title="move">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 3v18" />
+                                    <path d="M8 7l4-4 4 4" />
+                                    <path d="M8 17l4 4 4-4" />
+                                    <path d="M3 12h18" />
+                                    <path d="M7 8l-4 4 4 4" />
+                                    <path d="M17 8l4 4-4 4" />
                                 </svg>
                             </button>
 
@@ -1612,6 +1696,7 @@
                                                 <span>COLOR</span>
                                                 <div id="colorHexReadout">#140306</div>
                                             </div>
+                                            <button class="picker-sampler-btn" id="colorEyeDropperBtn" type="button" title="pick color from canvas or view">PICK</button>
                                             <div class="color-history" id="colorHistory" aria-label="color history">
                                             </div>
                                         </div>
@@ -1716,6 +1801,7 @@
                                                     <div id="bgColorHexReadout">#140306</div>
                                                     <div class="alpha-readout" id="bgOpacityReadout">ALPHA 100%</div>
                                                 </div>
+                                                <button class="picker-sampler-btn" id="bgEyeDropperBtn" type="button" title="pick background color from canvas or view">PICK</button>
                                             </div>
                                         </div>
                                     </div>
@@ -1972,6 +2058,7 @@
         const colorPickerPanel = document.getElementById("colorPickerPanel");
         const colorPickerChip = document.getElementById("colorPickerChip");
         const colorToggleText = document.getElementById("colorToggleText");
+        const colorEyeDropperBtn = document.getElementById("colorEyeDropperBtn");
         const colorHistoryEl = document.getElementById("colorHistory");
         const quickColorHistoryEl = document.getElementById("quickColorHistory");
         const sizeMiniReadout = document.getElementById("sizeMiniReadout");
@@ -1991,6 +2078,7 @@
         const bgAlphaSlider = document.getElementById("bgAlphaSlider");
         const bgAlphaSliderCtx = bgAlphaSlider.getContext("2d", { willReadFrequently: true });
         const bgSwatch = document.getElementById("bgSwatch");
+        const bgEyeDropperBtn = document.getElementById("bgEyeDropperBtn");
         const bgColorHexReadout = document.getElementById("bgColorHexReadout");
         const bgOpacityReadout = document.getElementById("bgOpacityReadout");
         const psxWobble = document.getElementById("psxWobble");
@@ -2005,6 +2093,8 @@
         shapeSlider.max = String(SHAPE_DEFS.length - 1);
 
         let tool = "pencil";
+        let shapeTool = "line";
+        let beforeMoveTool = "pencil";
         let drawing = false;
         let brushCursorPoint = null;
         let brushCursorVisible = false;
@@ -2024,6 +2114,7 @@
         let draggingBgSquare = false;
         let draggingBgHue = false;
         let draggingBgAlpha = false;
+        let customColorPickMode = null;
         let shapeStart = null;
         let shapeSnapshot = null;
         let copyBuffer = null;
@@ -2181,9 +2272,7 @@
             const ids = [
                 "pencilBtn",
                 "eraserBtn",
-                "lineBtn",
-                "rectBtn",
-                "circleBtn",
+                "shapeToolBtn",
                 "fillBtn",
                 "undoBtn",
                 "redoBtn",
@@ -2209,9 +2298,7 @@
             [
                 "pencilBtn",
                 "eraserBtn",
-                "lineBtn",
-                "rectBtn",
-                "circleBtn",
+                "shapeToolBtn",
                 "fillBtn",
                 "undoBtn",
                 "redoBtn",
@@ -2956,13 +3043,13 @@
 
         function updatePhotoGuidePointerEvents() {
             const face = faces[currentFace];
-            const active = Boolean(photoLayerSelected && face?.imageLayer?.image && !isGifLockedFace());
+            const active = Boolean(tool === "move" && photoLayerSelected && face?.imageLayer?.image);
             guideCanvas.style.pointerEvents = active ? "auto" : "none";
         }
 
         function selectPhotoLayer() {
             const face = faces[currentFace];
-            photoLayerSelected = Boolean(face?.imageLayer?.image && !isGifLockedFace());
+            photoLayerSelected = Boolean(tool === "move" && face?.imageLayer?.image);
             updatePhotoGuidePointerEvents();
             drawCanvasGuide();
         }
@@ -3005,7 +3092,7 @@
         function drawPhotoTransformOverlay() {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
-            if (!layer?.image || isGifLockedFace() || !photoLayerSelected) {
+            if (tool !== "move" || !layer?.image || !photoLayerSelected) {
                 updatePhotoGuidePointerEvents();
                 return;
             }
@@ -3094,9 +3181,10 @@
         }
 
         function photoHitTest(point) {
+            if (tool !== "move") return null;
             const face = faces[currentFace];
             const layer = face?.imageLayer;
-            if (!layer?.image || isGifLockedFace()) return null;
+            if (!layer?.image) return null;
             const points = photoLayerCorners(layer);
             const rotatePoint = photoRotateHandleWorld(layer);
             const anchor = photoLayerAnchorWorld(layer);
@@ -3180,7 +3268,7 @@
         function startPhotoTransform(event, point, hit) {
             const face = faces[currentFace];
             const layer = face?.imageLayer;
-            if (!layer?.image || !hit) return false;
+            if (tool !== "move" || !layer?.image || !hit) return false;
             if (hit.mode === "anchor" && !(event.altKey || event.ctrlKey)) {
                 if (!photoPointInLayer(layer, point, 0)) return false;
                 hit = { mode: "move", handle: "move" };
@@ -3286,7 +3374,7 @@
                 markFaceImageDirty(face);
             }
             refreshCurrentPhotoLayer(true);
-            setStatus("IMAGE");
+            setStatus(isGifLockedFace() ? "GIF" : "IMAGE");
         }
 
         function setupPhotoLayerFromImage(face, image, sourceName, sourceDataUrl = null) {
@@ -3493,18 +3581,59 @@
             return decoded.length ? decoded : null;
         }
 
-        function installAnimatedGifFace(index, animation) {
+        function gifAnimationFirstSource(animation) {
+            if (animation?.kind === "gifFrames" && animation.frames?.length) return animation.frames[0].canvas;
+            if (animation?.image) return animation.image;
+            return null;
+        }
+
+        function ensureGifImageLayer(face, animation, imageLayer = null) {
+            const source = gifAnimationFirstSource(animation);
+            if (!face || !source) return false;
+            if (imageLayer) {
+                face.imageLayer = clonePhotoLayer(imageLayer, false);
+                face.imageLayer.image = source;
+                face.imageLayer.sourceDataUrl = null;
+                face.imageLayer.sourceName = animation.sourceName || imageLayer.sourceName || "animated.gif";
+            } else if (!face.imageLayer) {
+                const scale = Math.min(FACE_SIZE * 0.82 / Math.max(1, source.width), FACE_SIZE * 0.82 / Math.max(1, source.height), 1.5);
+                face.imageLayer = {
+                    image: source,
+                    sourceDataUrl: null,
+                    sourceName: animation.sourceName || "animated.gif",
+                    x: FACE_SIZE / 2,
+                    y: FACE_SIZE / 2,
+                    width: Math.max(8, source.width * scale),
+                    height: Math.max(8, source.height * scale),
+                    rotation: 0,
+                    skewX: 0,
+                    skewY: 0,
+                    anchorX: 0,
+                    anchorY: 0
+                };
+            } else {
+                face.imageLayer.image = source;
+                face.imageLayer.sourceName = animation.sourceName || face.imageLayer.sourceName || "animated.gif";
+                face.imageLayer.sourceDataUrl = null;
+            }
+            return true;
+        }
+
+        function installAnimatedGifFace(index, animation, imageLayer = null) {
             const face = faces[index];
             if (!face) return false;
 
             stopFaceAnimation(face);
             face.animation = animation;
+            ensureGifImageLayer(face, animation, imageLayer);
             face.sourceName = animation.sourceName || "animated.gif";
             face.hasArt = true;
             face.changed = true;
             face._saveCache = null;
+            photoLayerSelected = index === currentFace;
             syncAnimatedFace(index, performance.now(), true);
             renderFaceList();
+            updatePhotoGuidePointerEvents();
             updateGifLayerLockUi();
             scheduleSave();
             return true;
@@ -3544,15 +3673,21 @@
 
             if (!source) return false;
 
-            const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
-            drawImageCover(ctx, source);
-            face.hasArt = true;
-            face.changed = true;
+            if (face.imageLayer) {
+                face.imageLayer.image = source;
+                renderPhotoLayerFace(face);
+            } else {
+                const ctx = face.canvas.getContext("2d", { willReadFrequently: true });
+                drawImageCover(ctx, source);
+                face.hasArt = true;
+                face.changed = true;
+            }
             rebuildTexture(index);
 
             if (index === currentFace && !drawing) {
                 paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
                 paintCtx.drawImage(face.canvas, 0, 0);
+                drawCanvasGuide();
             }
 
             return true;
@@ -3737,7 +3872,7 @@
 
             paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
             paintCtx.drawImage(face.canvas, 0, 0);
-            photoLayerSelected = Boolean(face.imageLayer?.image && !isGifLockedFace());
+            photoLayerSelected = Boolean(tool === "move" && face.imageLayer?.image);
             updatePhotoGuidePointerEvents();
             drawCanvasGuide();
 
@@ -3871,27 +4006,93 @@
             updateUndoRedo();
         }
 
+        function isShapeToolName(name) {
+            return ["line", "rect", "circle"].includes(name);
+        }
+
+        function updateShapeToolButton() {
+            const button = document.getElementById("shapeToolBtn");
+            if (!button) return;
+            button.classList.toggle("active", isShapeToolName(tool));
+            button.title = isShapeToolName(tool) ? `${shapeTool} shape` : "shape tool";
+            button.querySelectorAll("[data-shape-tool-icon]").forEach((icon) => {
+                icon.classList.toggle("shape-icon-active", icon.dataset.shapeToolIcon === shapeTool);
+            });
+        }
+
+        function enterMoveTool() {
+            const fallback = isShapeToolName(tool) ? shapeTool : tool;
+            beforeMoveTool = fallback && fallback !== "move" ? fallback : "pencil";
+            tool = "move";
+            photoLayerSelected = Boolean(faces[currentFace]?.imageLayer?.image);
+            updateToolButtons();
+            updatePhotoGuidePointerEvents();
+            drawCanvasGuide();
+            setStatus("MOVE");
+            if (!loadingSession) scheduleSave();
+        }
+
+        function exitMoveTool() {
+            if (tool !== "move") return;
+            const next = beforeMoveTool && beforeMoveTool !== "move" ? beforeMoveTool : "pencil";
+            photoLayerSelected = false;
+            tool = next;
+            if (isShapeToolName(tool)) shapeTool = tool;
+            updateToolButtons();
+            updatePhotoGuidePointerEvents();
+            drawCanvasGuide();
+            setStatus(tool.toUpperCase());
+            if (!loadingSession) scheduleSave();
+        }
+
+        function updateToolButtons() {
+            for (const [id, name] of [
+                ["pencilBtn", "pencil"],
+                ["eraserBtn", "eraser"],
+                ["fillBtn", "fill"],
+                ["moveBtn", "move"]
+            ]) {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle("active", tool === name);
+            }
+            updateShapeToolButton();
+            if (tool === "move") paintCanvas.style.cursor = "move";
+            else paintCanvas.style.cursor = tool === "eraser" ? "cell" : "crosshair";
+            updateGifLayerLockUi();
+        }
+
         function setTool(next) {
+            if (isShapeToolName(next)) shapeTool = next;
+            if (next === "move") {
+                enterMoveTool();
+                return;
+            }
             if (isGifLockedFace()) {
                 showGifNoDraw();
                 updateGifLayerLockUi();
                 return;
             }
+            if (tool === "move") photoLayerSelected = false;
             tool = next;
-
-            for (const [id, name] of [
-                ["pencilBtn", "pencil"],
-                ["eraserBtn", "eraser"],
-                ["lineBtn", "line"],
-                ["rectBtn", "rect"],
-                ["circleBtn", "circle"],
-                ["fillBtn", "fill"]
-            ]) {
-                document.getElementById(id).classList.toggle("active", tool === name);
-            }
-
-            paintCanvas.style.cursor = tool === "eraser" ? "cell" : "crosshair";
+            updateToolButtons();
+            updatePhotoGuidePointerEvents();
+            drawCanvasGuide();
             if (!loadingSession) scheduleSave();
+        }
+
+        function useShapeToolButton() {
+            if (isGifLockedFace()) {
+                showGifNoDraw();
+                updateGifLayerLockUi();
+                return;
+            }
+            if (isShapeToolName(tool)) {
+                const order = ["line", "rect", "circle"];
+                shapeTool = order[(order.indexOf(shapeTool) + 1) % order.length];
+                setTool(shapeTool);
+            } else {
+                setTool(shapeTool);
+            }
         }
 
         function shapeIndexById(id) {
@@ -5754,10 +5955,9 @@
         });
         document.getElementById("pencilBtn").addEventListener("click", () => setTool("pencil"));
         document.getElementById("eraserBtn").addEventListener("click", () => setTool("eraser"));
-        document.getElementById("lineBtn").addEventListener("click", () => setTool("line"));
-        document.getElementById("rectBtn").addEventListener("click", () => setTool("rect"));
-        document.getElementById("circleBtn").addEventListener("click", () => setTool("circle"));
+        document.getElementById("shapeToolBtn").addEventListener("click", useShapeToolButton);
         document.getElementById("fillBtn").addEventListener("click", () => setTool("fill"));
+        document.getElementById("moveBtn").addEventListener("click", () => setTool("move"));
         document.getElementById("undoBtn").addEventListener("click", undoFace);
         document.getElementById("redoBtn").addEventListener("click", redoFace);
         document.getElementById("shadingBtn").addEventListener("click", () => {
@@ -6518,6 +6718,108 @@
             commitCurrentColorToHistory();
         });
 
+        function rgbToHexString(r, g, b) {
+            return `#${[r, g, b].map((value) => Math.max(0, Math.min(255, value | 0)).toString(16).padStart(2, "0")).join("")}`.toUpperCase();
+        }
+
+        function sampleCanvasElementColor(canvas, event, sourceCtx = null) {
+            if (!canvas) return null;
+            const rect = canvas.getBoundingClientRect();
+            if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return null;
+            const x = Math.max(0, Math.min(canvas.width - 1, Math.floor((event.clientX - rect.left) * (canvas.width / rect.width))));
+            const y = Math.max(0, Math.min(canvas.height - 1, Math.floor((event.clientY - rect.top) * (canvas.height / rect.height))));
+
+            try {
+                const pixel = (sourceCtx || canvas.getContext("2d", { willReadFrequently: true })).getImageData(x, y, 1, 1).data;
+                if (pixel[3] <= 0) return null;
+                return rgbToHexString(pixel[0], pixel[1], pixel[2]);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function samplePreviewColor(event) {
+            if (!renderer || !renderer.domElement) return null;
+            const canvas = renderer.domElement;
+            const rect = canvas.getBoundingClientRect();
+            if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return null;
+
+            try {
+                if (scene && camera) renderer.render(scene, camera);
+                const gl = renderer.getContext();
+                const x = Math.max(0, Math.min(canvas.width - 1, Math.floor((event.clientX - rect.left) * (canvas.width / rect.width))));
+                const y = Math.max(0, Math.min(canvas.height - 1, Math.floor((rect.bottom - event.clientY) * (canvas.height / rect.height))));
+                const pixel = new Uint8Array(4);
+                gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+                if (pixel[3] <= 0) return null;
+                return rgbToHexString(pixel[0], pixel[1], pixel[2]);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function sampleCustomPickerColor(event) {
+            return sampleCanvasElementColor(paintCanvas, event, paintCtx) ||
+                sampleCanvasElementColor(colorSquare, event, colorSquareCtx) ||
+                sampleCanvasElementColor(hueSlider, event, hueSliderCtx) ||
+                sampleCanvasElementColor(bgColorSquare, event, bgColorSquareCtx) ||
+                sampleCanvasElementColor(bgHueSlider, event, bgHueSliderCtx) ||
+                samplePreviewColor(event);
+        }
+
+        function setCustomColorPickMode(kind) {
+            customColorPickMode = kind;
+            document.body.classList.toggle("color-sample-mode", Boolean(kind));
+            colorEyeDropperBtn?.classList.toggle("active", kind === "color");
+            bgEyeDropperBtn?.classList.toggle("active", kind === "bg");
+            setStatus(kind === "bg" ? "PICK BG" : "PICK COLOR");
+        }
+
+        function finishCustomColorPick(event) {
+            if (!customColorPickMode) return;
+            const picked = sampleCustomPickerColor(event);
+            const kind = customColorPickMode;
+            setCustomColorPickMode(null);
+
+            if (!picked) {
+                setStatus("NO COLOR");
+                return;
+            }
+
+            if (kind === "bg") {
+                bgAlphaIndex = 0;
+                setBgColorHex(picked, true);
+                setStatus("BG PICKED");
+                scheduleSave();
+                return;
+            }
+
+            setBrushColorHex(picked, true);
+            setStatus("PICKED");
+            scheduleSave();
+        }
+
+        document.addEventListener("pointerdown", (event) => {
+            if (!customColorPickMode) return;
+            if (event.target.closest?.(".picker-sampler-btn")) return;
+            event.preventDefault();
+            event.stopPropagation();
+            finishCustomColorPick(event);
+        }, true);
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape" || !customColorPickMode) return;
+            setCustomColorPickMode(null);
+            setStatus("PICK CANCELLED");
+        });
+
+        if (colorEyeDropperBtn) {
+            colorEyeDropperBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                setCustomColorPickMode(customColorPickMode === "color" ? null : "color");
+            });
+        }
+
         function setColorPickerOpen(open) {
             colorPickerPanel.classList.toggle("open", open);
             colorPickerToggle.classList.toggle("open", open);
@@ -6747,6 +7049,13 @@
             draggingBgAlpha = false;
             scheduleSave();
         });
+
+        if (bgEyeDropperBtn) {
+            bgEyeDropperBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                setCustomColorPickMode(customColorPickMode === "bg" ? null : "bg");
+            });
+        }
 
         function setBgPickerOpen(open) {
             bgPickerPanel.classList.toggle("open", open);
@@ -7066,13 +7375,12 @@
 
         function handlePhotoGuidePointerDown(event) {
             if (!photoLayerSelected) return;
-            if (isGifLockedFace()) return;
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
             if (hit && startPhotoTransform(event, point, hit)) return;
-            deselectPhotoLayer();
             event.preventDefault();
             event.stopPropagation();
+            exitMoveTool();
         }
 
         function handlePhotoGuidePointerMove(event) {
@@ -7092,18 +7400,20 @@
         guideCanvas.addEventListener("pointercancel", stopDrawing);
 
         paintCanvas.addEventListener("pointerdown", (event) => {
-            if (isGifLockedFace()) {
-                event.preventDefault();
-                showGifNoDraw();
-                return;
-            }
             const point = canvasPoint(event);
             const face = faces[currentFace];
             const photoHit = photoHitTest(point);
-            if (photoHit && startPhotoTransform(event, point, photoHit)) return;
-            if (face?.imageLayer?.image && photoLayerSelected) {
-                deselectPhotoLayer();
+            if (tool === "move") {
+                if (photoHit && startPhotoTransform(event, point, photoHit)) return;
+                if (face?.imageLayer?.image) {
+                    event.preventDefault();
+                    exitMoveTool();
+                    return;
+                }
+            }
+            if (isGifLockedFace()) {
                 event.preventDefault();
+                showGifNoDraw();
                 return;
             }
             stopFaceAnimation(faces[currentFace]);
@@ -7147,14 +7457,25 @@
         });
 
         paintCanvas.addEventListener("pointerenter", (event) => {
-            if (isGifLockedFace()) {
-                hideBrushCursor();
-                return;
-            }
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
             if (hit) {
                 paintCanvas.style.cursor = photoCursorForHit(hit, event);
+                hideBrushCursor();
+                return;
+            }
+            if (isGifLockedFace()) {
+                paintCanvas.style.cursor = "crosshair";
+                hideBrushCursor();
+                return;
+            }
+            if (tool === "move") {
+                paintCanvas.style.cursor = "move";
+                hideBrushCursor();
+                return;
+            }
+            if (tool === "move") {
+                paintCanvas.style.cursor = "move";
                 hideBrushCursor();
                 return;
             }
@@ -7165,14 +7486,15 @@
         });
 
         paintCanvas.addEventListener("pointermove", (event) => {
-            if (isGifLockedFace()) {
-                hideBrushCursor();
-                return;
-            }
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
             if (hit) {
                 paintCanvas.style.cursor = photoCursorForHit(hit, event);
+                hideBrushCursor();
+                return;
+            }
+            if (isGifLockedFace()) {
+                paintCanvas.style.cursor = "crosshair";
                 hideBrushCursor();
                 return;
             }
@@ -7226,7 +7548,7 @@
         function drawBrushCursor() {
             drawCanvasGuide();
 
-            if (isGifLockedFace()) return;
+            if (isGifLockedFace() || tool === "move") return;
             if (!brushCursorVisible || !brushCursorPoint || tool === "fill") return;
 
             const brush = Math.max(1, Math.round(Number(brushSize.value) || 1));
@@ -7323,6 +7645,7 @@
                             totalDuration: frames.reduce((sum, frame) => sum + Math.max(20, Number(frame.duration) || 100), 0)
                         });
                         URL.revokeObjectURL(url);
+                        if (targetFaceIndex === currentFace) enterMoveTool();
                         setStatus("GIF");
                         return;
                     }
@@ -7348,6 +7671,7 @@
                         startedAt: performance.now(),
                         currentFrame: -1
                     });
+                    if (targetFaceIndex === currentFace) enterMoveTool();
                     setStatus("GIF");
                 } else {
                     const reader = new FileReader();
@@ -7356,7 +7680,10 @@
                         paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
                         paintCtx.drawImage(face.canvas, 0, 0);
                         rebuildTexture(targetFaceIndex);
-                        if (targetFaceIndex === currentFace) loadFaceIntoEditor(true);
+                        if (targetFaceIndex === currentFace) {
+                            loadFaceIntoEditor(true);
+                            enterMoveTool();
+                        }
                         renderFaceList();
                         scheduleSave();
                     };
@@ -7454,7 +7781,7 @@
                 const animation = cloneAnimationPayload(copyBuffer.animation);
                 if (animation) {
                     face.tiling = Math.max(1, Math.min(MAX_TILING, Number(copyBuffer.tiling || face.tiling || 1)));
-                    installAnimatedGifFace(currentFace, animation);
+                    installAnimatedGifFace(currentFace, animation, copyBuffer.imageLayer);
                     updateTilingControl();
                     setStatus("GIF PASTED");
                     return;
@@ -7526,6 +7853,12 @@
 
             
             if (isTypingTarget(event.target)) return;
+
+            if (!mod && event.key === "Enter" && tool === "move") {
+                event.preventDefault();
+                exitMoveTool();
+                return;
+            }
 
             if (mod && key === "z" && !event.shiftKey) {
                 event.preventDefault();
