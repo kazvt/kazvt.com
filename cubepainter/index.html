@@ -107,8 +107,34 @@
             letter-spacing: 0.06em;
         }
 
+        .brand-wrap {
+            min-width: 0;
+            display: grid;
+            gap: 2px;
+            align-content: center;
+            justify-items: start;
+            line-height: 1;
+        }
+
         .brand {
             white-space: nowrap;
+        }
+
+        .brand-gallery {
+            color: var(--paper2);
+            text-decoration: none;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            line-height: 1;
+            opacity: 0.9;
+        }
+
+        .brand-gallery:hover,
+        .brand-gallery:focus-visible {
+            color: var(--paper);
+            text-decoration: underline;
+            text-underline-offset: 3px;
         }
 
         .shape-fader,
@@ -1567,7 +1593,10 @@
 <body>
     <div class="app">
         <header class="top">
-            <div class="brand">CUBEPAINT</div>
+            <div class="brand-wrap">
+                <div class="brand">CUBEPAINT</div>
+                <a class="brand-gallery" href="gallery.html">GALLERY</a>
+            </div>
             <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
                 <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>
                 <button class="shape-cycle-current" id="shapeSelectToggle" type="button" aria-label="current shape">
@@ -7115,7 +7144,10 @@
         if (colorEyeDropperBtn) {
             colorEyeDropperBtn.addEventListener("click", (event) => {
                 event.stopPropagation();
-                setCustomColorPickMode(customColorPickMode === "color" ? null : "color");
+                const nextMode = customColorPickMode === "color" ? null : "color";
+                setColorPickerOpen(false);
+                setBgPickerOpen(false);
+                setCustomColorPickMode(nextMode);
             });
         }
 
@@ -7352,7 +7384,10 @@
         if (bgEyeDropperBtn) {
             bgEyeDropperBtn.addEventListener("click", (event) => {
                 event.stopPropagation();
-                setCustomColorPickMode(customColorPickMode === "bg" ? null : "bg");
+                const nextMode = customColorPickMode === "bg" ? null : "bg";
+                setColorPickerOpen(false);
+                setBgPickerOpen(false);
+                setCustomColorPickMode(nextMode);
             });
         }
 
@@ -8151,6 +8186,12 @@
             return ["text", "search", "url", "tel", "email", "password", "number"].includes(type);
         }
 
+        function isSliderTarget(target) {
+            if (!target || target.tagName !== "INPUT") return false;
+            const type = (target.type || "text").toLowerCase();
+            return ["range", "color"].includes(type);
+        }
+
         document.addEventListener("contextmenu", (event) => {
             const allowedDownloadLink = event.target.closest?.("#result a[download]");
             if (!allowedDownloadLink) event.preventDefault();
@@ -8162,6 +8203,20 @@
 
             
             if (isTypingTarget(event.target)) return;
+
+            if (!mod && !event.altKey && !event.shiftKey && !isSliderTarget(event.target) && event.key === "ArrowLeft") {
+                event.preventDefault();
+                cycleShape(-1);
+                setStatus(getCurrentShapeDef().label);
+                return;
+            }
+
+            if (!mod && !event.altKey && !event.shiftKey && !isSliderTarget(event.target) && event.key === "ArrowRight") {
+                event.preventDefault();
+                cycleShape(1);
+                setStatus(getCurrentShapeDef().label);
+                return;
+            }
 
             if (!mod && event.key === "Enter" && tool === "move") {
                 event.preventDefault();

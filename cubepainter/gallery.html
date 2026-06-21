@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CubePaint Gallery</title>
+    <meta name="description" content="A small CubePaint gallery for sharing animated creations and short creator notes." />
+    <meta name="theme-color" content="#140306" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="favicon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubePaint" />
+    <meta property="og:title" content="CubePaint Gallery" />
+    <meta property="og:description" content="A small CubePaint gallery for sharing animated creations and short creator notes." />
+    <meta property="og:image" content="thumbnail.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CubePaint Gallery" />
+    <meta name="twitter:description" content="A small CubePaint gallery for sharing animated creations and short creator notes." />
+    <meta name="twitter:image" content="thumbnail.png" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+    <style>
+        @font-face {
+            font-family: "Monaspace Krypton Frozen";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 400;
+            src: url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-400-normal.woff2") format("woff2"),
+                 url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-400-normal.woff") format("woff");
+        }
+
+        @font-face {
+            font-family: "Monaspace Krypton Frozen";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 700;
+            src: url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff2") format("woff2"),
+                 url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff") format("woff");
+        }
+
+        @font-face {
+            font-family: "Monaspace Krypton Frozen";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 900;
+            src: url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff2") format("woff2"),
+                 url("https://cdn.jsdelivr.net/fontsource/fonts/monaspace-krypton@latest/latin-700-normal.woff") format("woff");
+        }
+
+        :root {
+            --font-main: "Monaspace Krypton Frozen", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            --paper: #fff6d8;
+            --paper2: #efe0b8;
+            --paper3: #dfc995;
+            --ink: #140306;
+            --ink2: #2a070c;
+            --accent: #9d3d2c;
+            --line: #140306;
+            --shadow: rgba(20, 3, 6, 0.35);
+            --checker1: #ead9ad;
+            --checker2: #fff6d8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-main);
+            font-feature-settings: "calt" 1, "liga" 1, "ss01" 1, "ss02" 1, "ss03" 1;
+            letter-spacing: 0.03em;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .gallery-app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .gallery-top {
+            border-bottom: 3px solid var(--line);
+            background: var(--ink);
+            color: var(--paper);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 10px 12px;
+            font-weight: 900;
+        }
+
+        .brand-wrap {
+            display: grid;
+            gap: 3px;
+            line-height: 1;
+        }
+
+        .brand {
+            letter-spacing: 0.09em;
+            white-space: nowrap;
+        }
+
+        .brand-sub {
+            color: var(--paper2);
+            font-size: 9px;
+            letter-spacing: 0.14em;
+        }
+
+        .gallery-title {
+            justify-self: center;
+            border: 2px solid var(--paper);
+            padding: 5px 12px;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+
+        .back-link {
+            min-height: 32px;
+            border: 2px solid var(--paper);
+            display: grid;
+            place-items: center;
+            padding: 0 10px;
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            box-shadow: 0 3px 0 rgba(255, 246, 216, 0.28);
+        }
+
+        .back-link:hover,
+        .back-link:focus-visible {
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        main {
+            min-width: 0;
+            padding: 12px;
+            display: grid;
+            align-content: start;
+            gap: 12px;
+        }
+
+        .gallery-note {
+            border: 3px solid var(--line);
+            background: var(--paper2);
+            box-shadow: 0 5px 0 var(--ink);
+            padding: 10px;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1.5;
+        }
+
+        .gallery-grid {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            align-items: start;
+        }
+
+        .gallery-card {
+            min-width: 0;
+            border: 3px solid var(--line);
+            background: var(--paper2);
+            box-shadow: 0 5px 0 var(--ink);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            overflow: hidden;
+        }
+
+        .creation-frame {
+            background:
+                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+                var(--checker2);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+            border-bottom: 3px solid var(--line);
+            aspect-ratio: 1 / 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .creation-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            display: block;
+        }
+
+        .creation-missing {
+            width: 100%;
+            height: 100%;
+            border: 2px dashed var(--line);
+            display: grid;
+            place-items: center;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 8px;
+            color: var(--ink2);
+        }
+
+        .gallery-copy {
+            padding: 9px;
+            display: grid;
+            gap: 7px;
+        }
+
+        .gallery-user {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 5px 7px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            word-break: break-word;
+        }
+
+        .gallery-bio {
+            margin: 0;
+            white-space: pre-wrap;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1.55;
+        }
+
+        .empty-state {
+            border: 3px dashed var(--line);
+            background: var(--paper2);
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 620px) {
+            .gallery-top {
+                grid-template-columns: 1fr auto;
+            }
+
+            .gallery-title {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                justify-self: stretch;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="gallery-app">
+        <header class="gallery-top">
+            <div class="brand-wrap">
+                <div class="brand">CUBEPAINT</div>
+                <div class="brand-sub">GALLERY</div>
+            </div>
+            <div class="gallery-title">CREATIONS</div>
+            <a class="back-link" href="index.html">BACK</a>
+        </header>
+
+        <main>
+            <div class="gallery-note" id="galleryStatus">LOADING GALLERY</div>
+            <section class="gallery-grid" id="galleryGrid" aria-label="CubePaint gallery"></section>
+        </main>
+    </div>
+
+    <script>
+        const grid = document.getElementById("galleryGrid");
+        const statusEl = document.getElementById("galleryStatus");
+        const manifestNames = ["gallery.txt", "gallery-index.txt", "creators.txt"];
+
+        function cleanLines(text) {
+            return text.replace(/\r/g, "").split("\n").map((line) => line.trim()).filter((line) => line && !line.startsWith("#"));
+        }
+
+        async function fetchText(path) {
+            const response = await fetch(path, { cache: "no-store" });
+            if (!response.ok) throw new Error(path);
+            return response.text();
+        }
+
+        async function findManifestEntries() {
+            for (const manifest of manifestNames) {
+                try {
+                    const text = await fetchText(manifest);
+                    const entries = cleanLines(text).map((line) => line.endsWith(".txt") ? line : `${line}.txt`);
+                    if (entries.length) return entries;
+                } catch (error) {}
+            }
+
+            try {
+                const html = await fetchText("./");
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                const entries = [...doc.querySelectorAll("a")]
+                    .map((link) => link.getAttribute("href") || "")
+                    .map((href) => href.split("?")[0].split("#")[0])
+                    .filter((href) => href.endsWith(".txt"))
+                    .filter((href) => !manifestNames.includes(href.split("/").pop()));
+                return [...new Set(entries)];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function displayNameFromPath(path) {
+            const file = path.split("/").pop() || path;
+            return decodeURIComponent(file.replace(/\.txt$/i, "").replace(/[-_]+/g, " "));
+        }
+
+        function parseEntry(path, text) {
+            const lines = text.replace(/\r/g, "").split("\n");
+            const user = displayNameFromPath(path);
+            let creation = "";
+            const bioLines = [];
+
+            for (const originalLine of lines) {
+                const line = originalLine.trim();
+                const match = line.match(/^(gif|image|creation)\s*:\s*(.+)$/i);
+                if (!creation && match) {
+                    creation = match[2].trim();
+                    continue;
+                }
+                if (!creation && /\.(gif|png|jpg|jpeg|webp)$/i.test(line)) {
+                    creation = line;
+                    continue;
+                }
+                bioLines.push(originalLine);
+            }
+
+            if (!creation) creation = `${path.replace(/\.txt$/i, "")}.gif`;
+            return {
+                user,
+                creation,
+                bio: bioLines.join("\n").trim() || "No description yet."
+            };
+        }
+
+        function makeCard(entry) {
+            const card = document.createElement("article");
+            card.className = "gallery-card";
+
+            const frame = document.createElement("div");
+            frame.className = "creation-frame";
+
+            const img = document.createElement("img");
+            img.src = entry.creation;
+            img.alt = `${entry.user} creation`;
+            img.loading = "lazy";
+            img.decoding = "async";
+            img.addEventListener("error", () => {
+                frame.textContent = "";
+                const missing = document.createElement("div");
+                missing.className = "creation-missing";
+                missing.textContent = `${entry.creation} not found`;
+                frame.append(missing);
+            }, { once: true });
+            frame.append(img);
+
+            const copy = document.createElement("div");
+            copy.className = "gallery-copy";
+
+            const user = document.createElement("div");
+            user.className = "gallery-user";
+            user.textContent = entry.user;
+
+            const bio = document.createElement("p");
+            bio.className = "gallery-bio";
+            bio.textContent = entry.bio;
+
+            copy.append(user, bio);
+            card.append(frame, copy);
+            return card;
+        }
+
+        async function bootGallery() {
+            const files = await findManifestEntries();
+            if (!files.length) {
+                statusEl.textContent = "ADD GALLERY.TXT WITH ONE CREATOR TXT FILE PER LINE";
+                const empty = document.createElement("div");
+                empty.className = "empty-state";
+                empty.textContent = "Example: put names like Username.txt in gallery.txt, then put creation.gif and a short bio inside Username.txt.";
+                grid.append(empty);
+                return;
+            }
+
+            const entries = [];
+            for (const file of files) {
+                try {
+                    const text = await fetchText(file);
+                    entries.push(parseEntry(file, text));
+                } catch (error) {}
+            }
+
+            if (!entries.length) {
+                statusEl.textContent = "NO GALLERY ENTRIES LOADED";
+                return;
+            }
+
+            statusEl.textContent = `${entries.length} CREATION${entries.length === 1 ? "" : "S"}`;
+            grid.replaceChildren(...entries.map(makeCard));
+        }
+
+        bootGallery();
+    </script>
+</body>
+
+</html>
