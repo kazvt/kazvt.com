@@ -2280,9 +2280,6 @@
                 "eraserBtn",
                 "shapeToolBtn",
                 "fillBtn",
-                "undoBtn",
-                "redoBtn",
-                "clearBtn",
                 "colorPickerToggle",
                 "brushSize"
             ];
@@ -2306,9 +2303,6 @@
                 "eraserBtn",
                 "shapeToolBtn",
                 "fillBtn",
-                "undoBtn",
-                "redoBtn",
-                "clearBtn",
                 "colorPickerToggle",
                 "brushSize"
             ].forEach((id) => {
@@ -3112,6 +3106,36 @@
             };
         }
 
+        function photoExpandTriangle(points, amount = 0.75) {
+            const center = {
+                x: (points[0].x + points[1].x + points[2].x) / 3,
+                y: (points[0].y + points[1].y + points[2].y) / 3
+            };
+            return points.map((point) => {
+                const dx = point.x - center.x;
+                const dy = point.y - center.y;
+                const len = Math.hypot(dx, dy) || 1;
+                return {
+                    x: point.x + dx / len * amount,
+                    y: point.y + dy / len * amount
+                };
+            });
+        }
+
+        function photoWarpIsFlat(layer) {
+            const warp = normalizePhotoWarp(layer);
+            return [warp.nw, warp.ne, warp.se, warp.sw].every((point) => Math.abs(point.x) < 0.001 && Math.abs(point.y) < 0.001);
+        }
+
+        function photoDrawAffineImage(layer, ctx, image) {
+            ctx.save();
+            const matrix = photoLayerMatrix(layer);
+            ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
+            ctx.restore();
+        }
+
         function photoTriangleMatrix(s0, s1, s2, d0, d1, d2) {
             const den = s0.x * (s1.y - s2.y) + s1.x * (s2.y - s0.y) + s2.x * (s0.y - s1.y);
             if (Math.abs(den) < 0.000001) return null;
@@ -3128,11 +3152,12 @@
         function photoDrawTriangle(ctx, image, s0, s1, s2, d0, d1, d2) {
             const matrix = photoTriangleMatrix(s0, s1, s2, d0, d1, d2);
             if (!matrix) return;
+            const expanded = photoExpandTriangle([d0, d1, d2], 0.95);
             ctx.save();
             ctx.beginPath();
-            ctx.moveTo(d0.x, d0.y);
-            ctx.lineTo(d1.x, d1.y);
-            ctx.lineTo(d2.x, d2.y);
+            ctx.moveTo(expanded[0].x, expanded[0].y);
+            ctx.lineTo(expanded[1].x, expanded[1].y);
+            ctx.lineTo(expanded[2].x, expanded[2].y);
             ctx.closePath();
             ctx.clip();
             ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
@@ -3144,6 +3169,10 @@
         function renderPhotoLayerToContext(layer, ctx) {
             if (!layer?.image) return false;
             const image = layer.image;
+            if (photoWarpIsFlat(layer)) {
+                photoDrawAffineImage(layer, ctx, image);
+                return true;
+            }
             const localCorners = photoWarpLocalCorners(layer);
             const steps = 12;
             for (let y = 0; y < steps; y++) {
@@ -3201,6 +3230,66 @@
             face.hasArt = true;
             face.changed = true;
             face.sourceName = face.imageLayer.sourceName || face.sourceName || "image";
+            return true;
+        }
+
+        function makeCanvasPhotoSource(canvas) {
+            const source = document.createElement("canvas");
+            source.width = FACE_SIZE;
+            source.height = FACE_SIZE;
+            source.style.imageRendering = "pixelated";
+            const ctx = source.getContext("2d", { willReadFrequently: true });
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+            ctx.drawImage(canvas, 0, 0);
+            return source;
+        }
+
+        function ensureMoveCanvasPhotoLayer() {
+            const face = faces[currentFace];
+            if (!face) return false;
+            if (face.imageLayer?.image) return true;
+
+            if (face.animation) {
+                const installed = ensureGifImageLayer(face, face.animation);
+                if (installed) {
+                    syncAnimatedFace(currentFace, performance.now(), true);
+                    return true;
+                }
+            }
+
+            if (!face.hasArt || isCanvasBlank(face.canvas)) return false;
+
+            const source = makeCanvasPhotoSource(face.canvas);
+            let sourceDataUrl = null;
+            try {
+                sourceDataUrl = source.toDataURL("image/webp", 0.82);
+            } catch (error) {
+                sourceDataUrl = null;
+            }
+
+            face.imageLayer = {
+                image: source,
+                sourceDataUrl,
+                sourceName: face.sourceName && face.sourceName !== "transparent" ? face.sourceName : "canvas",
+                x: FACE_SIZE / 2,
+                y: FACE_SIZE / 2,
+                width: FACE_SIZE,
+                height: FACE_SIZE,
+                rotation: 0,
+                skewX: 0,
+                skewY: 0,
+                anchorX: 0,
+                anchorY: 0,
+                warp: normalizePhotoWarp(null)
+            };
+            photoLayerSelected = true;
+            face.hasArt = true;
+            face.changed = true;
+            markFaceImageDirty(face);
+            renderPhotoLayerFace(face, paintCtx);
+            rebuildTexture(currentFace);
+            renderFaceList();
             return true;
         }
 
@@ -3457,11 +3546,7 @@
                 const local = photoWorldToLocal(start, point.x, point.y);
                 const base = photoBaseLocalCorners(start);
                 const startWarp = normalizePhotoWarp(start);
-                const startHandleLocal = photoHandleLocal(start, handle);
-                const delta = {
-                    x: local.x - startHandleLocal.x,
-                    y: local.y - startHandleLocal.y
-                };
+                const startCorners = photoWarpLocalCorners(start);
                 const nextWarp = normalizePhotoWarp(start);
                 const applyCorner = (key, target) => {
                     nextWarp[key] = {
@@ -3469,26 +3554,29 @@
                         y: target.y - base[key].y
                     };
                 };
-                const shiftCorner = (key) => {
-                    nextWarp[key] = {
-                        x: startWarp[key].x + delta.x,
-                        y: startWarp[key].y + delta.y
+                const moveEdgeTo = (a, b, target) => {
+                    const midpoint = photoMidpoint(startCorners[a], startCorners[b]);
+                    const delta = {
+                        x: target.x - midpoint.x,
+                        y: target.y - midpoint.y
                     };
+                    [a, b].forEach((key) => {
+                        nextWarp[key] = {
+                            x: startWarp[key].x + delta.x,
+                            y: startWarp[key].y + delta.y
+                        };
+                    });
                 };
                 if (["nw", "ne", "se", "sw"].includes(handle)) {
                     applyCorner(handle, local);
                 } else if (handle === "n") {
-                    shiftCorner("nw");
-                    shiftCorner("ne");
+                    moveEdgeTo("nw", "ne", local);
                 } else if (handle === "e") {
-                    shiftCorner("ne");
-                    shiftCorner("se");
+                    moveEdgeTo("ne", "se", local);
                 } else if (handle === "s") {
-                    shiftCorner("sw");
-                    shiftCorner("se");
+                    moveEdgeTo("sw", "se", local);
                 } else if (handle === "w") {
-                    shiftCorner("nw");
-                    shiftCorner("sw");
+                    moveEdgeTo("nw", "sw", local);
                 }
                 layer.warp = nextWarp;
             } else if (photoTransformDrag.mode === "scale") {
@@ -3496,14 +3584,34 @@
                 const local = photoWorldToLocal(start, point.x, point.y);
                 const fixedHandle = event.altKey ? "anchor" : oppositePhotoHandle(handle);
                 const fixedStart = fixedHandle === "anchor" ? { x: start.anchorX, y: start.anchorY } : photoHandleLocal(start, fixedHandle);
+                const grabbedStart = photoHandleLocal(start, handle);
                 let nextW = start.width;
                 let nextH = start.height;
                 const corner = ["nw", "ne", "se", "sw"].includes(handle);
                 const horizontal = corner || ["e", "w"].includes(handle);
                 const vertical = corner || ["n", "s"].includes(handle);
 
-                if (horizontal) nextW = Math.max(8, Math.abs(local.x - fixedStart.x));
-                if (vertical) nextH = Math.max(8, Math.abs(local.y - fixedStart.y));
+                if (event.altKey) {
+                    const startVector = {
+                        x: grabbedStart.x - fixedStart.x,
+                        y: grabbedStart.y - fixedStart.y
+                    };
+                    const currentVector = {
+                        x: local.x - fixedStart.x,
+                        y: local.y - fixedStart.y
+                    };
+                    if (horizontal) {
+                        const base = Math.abs(startVector.x) || Math.max(1, start.width / 2);
+                        nextW = Math.max(8, start.width * Math.abs(currentVector.x) / base);
+                    }
+                    if (vertical) {
+                        const base = Math.abs(startVector.y) || Math.max(1, start.height / 2);
+                        nextH = Math.max(8, start.height * Math.abs(currentVector.y) / base);
+                    }
+                } else {
+                    if (horizontal) nextW = Math.max(8, Math.abs(local.x - fixedStart.x));
+                    if (vertical) nextH = Math.max(8, Math.abs(local.y - fixedStart.y));
+                }
 
                 if (event.shiftKey) {
                     const ratio = start.width / Math.max(1, start.height);
@@ -3903,17 +4011,25 @@
             return animatedCount * Math.max(1, Math.ceil(15 / animatedCount));
         }
 
-        function pushUndo(index) {
-            const face = faces[index];
-            if (!face) return;
-
-            face.undo.push({
+        function captureFaceState(face) {
+            if (!face) return null;
+            return {
                 imageData: snapshotCanvas(face.canvas),
                 hasArt: face.hasArt,
                 sourceName: face.sourceName,
                 changed: face.changed,
-                imageLayer: clonePhotoLayer(face.imageLayer, true)
-            });
+                imageLayer: clonePhotoLayer(face.imageLayer, true),
+                animation: cloneAnimationPayload(face.animation)
+            };
+        }
+
+        function pushUndo(index) {
+            const face = faces[index];
+            if (!face) return;
+
+            const state = captureFaceState(face);
+            if (!state) return;
+            face.undo.push(state);
 
             if (face.undo.length > MAX_UNDO_HISTORY) {
                 face.undo.shift();
@@ -3925,7 +4041,7 @@
 
         function restoreState(index, state) {
             const face = faces[index];
-            if (!face) return;
+            if (!face || !state) return;
 
             stopFaceAnimation(face);
             restoreCanvas(face.canvas, state.imageData);
@@ -3933,9 +4049,14 @@
             face.sourceName = state.sourceName;
             face.changed = state.changed ?? true;
             face.imageLayer = clonePhotoLayer(state.imageLayer, true);
-            markFaceImageDirty(face);
-
-            rebuildTexture(index);
+            const animation = cloneAnimationPayload(state.animation);
+            if (animation) {
+                installAnimatedGifFace(index, animation, state.imageLayer);
+            } else {
+                face.animation = null;
+                markFaceImageDirty(face);
+                rebuildTexture(index);
+            }
 
             if (index === currentFace) {
                 loadFaceIntoEditor(false);
@@ -3943,44 +4064,27 @@
 
             renderFaceList();
             updateUndoRedo();
+            updateGifLayerLockUi();
             scheduleSave();
         }
 
         function undoFace() {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
             const face = faces[currentFace];
             if (!face || !face.undo.length) return;
 
-            face.redo.push({
-                imageData: snapshotCanvas(face.canvas),
-                hasArt: face.hasArt,
-                sourceName: face.sourceName,
-                changed: face.changed,
-                imageLayer: clonePhotoLayer(face.imageLayer, true)
-            });
+            const state = captureFaceState(face);
+            if (state) face.redo.push(state);
 
             restoreState(currentFace, face.undo.pop());
             setStatus("UNDO");
         }
 
         function redoFace() {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
             const face = faces[currentFace];
             if (!face || !face.redo.length) return;
 
-            face.undo.push({
-                imageData: snapshotCanvas(face.canvas),
-                hasArt: face.hasArt,
-                sourceName: face.sourceName,
-                changed: face.changed,
-                imageLayer: clonePhotoLayer(face.imageLayer, true)
-            });
+            const state = captureFaceState(face);
+            if (state) face.undo.push(state);
 
             restoreState(currentFace, face.redo.pop());
             setStatus("REDO");
@@ -4045,6 +4149,7 @@
             const face = faces[currentFace];
             if (!face) return;
 
+            if (tool === "move") ensureMoveCanvasPhotoLayer();
             paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
             paintCtx.drawImage(face.canvas, 0, 0);
             photoLayerSelected = Boolean(tool === "move" && face.imageLayer?.image);
@@ -4199,16 +4304,25 @@
             const fallback = isShapeToolName(tool) ? shapeTool : tool;
             beforeMoveTool = fallback && fallback !== "move" ? fallback : "pencil";
             tool = "move";
+            ensureMoveCanvasPhotoLayer();
             photoLayerSelected = Boolean(faces[currentFace]?.imageLayer?.image);
             updateToolButtons();
             updatePhotoGuidePointerEvents();
             drawCanvasGuide();
-            setStatus("MOVE");
+            setStatus(photoLayerSelected ? "MOVE" : "MOVE");
             if (!loadingSession) scheduleSave();
         }
 
         function exitMoveTool() {
             if (tool !== "move") return;
+            if (isGifLockedFace()) {
+                tool = "move";
+                updateToolButtons();
+                updatePhotoGuidePointerEvents();
+                drawCanvasGuide();
+                setStatus("MOVE");
+                return;
+            }
             const next = beforeMoveTool && beforeMoveTool !== "move" ? beforeMoveTool : "pencil";
             photoLayerSelected = false;
             tool = next;
@@ -7565,6 +7679,11 @@
             if (hit && startPhotoTransform(event, point, hit)) return;
             event.preventDefault();
             event.stopPropagation();
+            if (isGifLockedFace()) {
+                deselectPhotoLayer();
+                setStatus("MOVE");
+                return;
+            }
             exitMoveTool();
         }
 
@@ -7592,6 +7711,11 @@
                 if (photoHit && startPhotoTransform(event, point, photoHit)) return;
                 if (face?.imageLayer?.image) {
                     event.preventDefault();
+                    if (isGifLockedFace()) {
+                        deselectPhotoLayer();
+                        setStatus("MOVE");
+                        return;
+                    }
                     exitMoveTool();
                     return;
                 }
@@ -7785,23 +7909,23 @@
         paintCanvas.addEventListener("pointerleave", stopDrawing);
 
         document.getElementById("clearBtn").addEventListener("click", () => {
-            if (isGifLockedFace()) {
-                showGifNoDraw();
-                return;
-            }
+            const face = faces[currentFace];
+            if (!face) return;
             pushUndo(currentFace);
-            clearPhotoLayer(faces[currentFace]);
+            clearPhotoLayer(face);
+            stopFaceAnimation(face);
+            face.animation = null;
 
-            stopFaceAnimation(faces[currentFace]);
             paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
             paintCtx.fillStyle = BLANK_FILL;
             paintCtx.fillRect(0, 0, FACE_SIZE, FACE_SIZE);
-            faces[currentFace].sourceName = "blank";
-            faces[currentFace].changed = false;
-            faces[currentFace].hasArt = true;
-            markFaceImageDirty(faces[currentFace]);
+            face.sourceName = "blank";
+            face.changed = false;
+            face.hasArt = true;
+            markFaceImageDirty(face);
 
             saveEditorToFace(true);
+            updateGifLayerLockUi();
             setStatus("CLEAR");
         });
 
@@ -8041,6 +8165,11 @@
 
             if (!mod && event.key === "Enter" && tool === "move") {
                 event.preventDefault();
+                if (isGifLockedFace()) {
+                    deselectPhotoLayer();
+                    setStatus("MOVE");
+                    return;
+                }
                 exitMoveTool();
                 return;
             }
