@@ -191,8 +191,21 @@
             border-bottom: 3px solid var(--line);
             aspect-ratio: 1 / 1;
             display: grid;
-            place-items: center;
+            grid-template-columns: 30px minmax(0, 1fr) 30px;
+            grid-template-rows: minmax(0, 1fr) auto;
+            gap: 6px;
+            align-items: center;
             padding: 8px;
+        }
+
+        .creation-media {
+            min-width: 0;
+            width: 100%;
+            height: 100%;
+            grid-column: 2;
+            grid-row: 1;
+            display: grid;
+            place-items: center;
         }
 
         .creation-frame img {
@@ -201,6 +214,61 @@
             object-fit: contain;
             image-rendering: pixelated;
             display: block;
+        }
+
+        .gallery-nav {
+            width: 30px;
+            min-width: 30px;
+            height: 54px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            font: inherit;
+            font-size: 16px;
+            font-weight: 900;
+            padding: 0;
+            user-select: none;
+        }
+
+        .gallery-nav:hover,
+        .gallery-nav:focus-visible {
+            background: var(--paper);
+        }
+
+        .gallery-nav:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .gallery-nav:disabled {
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        .gallery-prev {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .gallery-next {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .gallery-count {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            justify-self: center;
+            min-height: 18px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            padding: 2px 7px;
+            font-size: 9px;
+            font-weight: 900;
         }
 
         .creation-missing {
@@ -271,6 +339,77 @@
                 grid-template-columns: 1fr;
             }
         }
+
+
+        .gallery-app,
+        .gallery-top,
+        main,
+        .gallery-grid,
+        .gallery-card,
+        .creation-frame,
+        .gallery-copy {
+            min-width: 0;
+        }
+
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        }
+
+        .gallery-top {
+            grid-template-columns: minmax(90px, auto) minmax(0, 1fr) minmax(70px, auto);
+        }
+
+        .gallery-title,
+        .back-link,
+        .brand,
+        .brand-sub {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .creation-frame {
+            grid-template-columns: clamp(24px, 8vw, 30px) minmax(0, 1fr) clamp(24px, 8vw, 30px);
+            padding: clamp(6px, 2vw, 8px);
+        }
+
+        .gallery-nav {
+            width: clamp(24px, 8vw, 30px);
+            min-width: clamp(24px, 8vw, 30px);
+            height: clamp(42px, 12vw, 54px);
+        }
+
+        @media (max-width: 720px) {
+            .gallery-top {
+                grid-template-columns: 1fr auto;
+                gap: 8px;
+            }
+
+            .gallery-title {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                justify-self: stretch;
+            }
+
+            main {
+                padding: 8px;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .gallery-note,
+            .gallery-bio,
+            .empty-state {
+                font-size: 10px;
+            }
+
+            .back-link {
+                padding: 0 7px;
+                font-size: 10px;
+            }
+        }
+
     </style>
 </head>
 
@@ -286,7 +425,7 @@
         </header>
 
         <main>
-            <div class="gallery-note" id="galleryStatus">LOADING GALLERY</div>
+            <div class="gallery-note" id="galleryStatus">folder notes<br>gifs + tiny bio</div>
             <section class="gallery-grid" id="galleryGrid" aria-label="CubePaint gallery"></section>
         </main>
     </div>
@@ -294,7 +433,9 @@
     <script>
         const grid = document.getElementById("galleryGrid");
         const statusEl = document.getElementById("galleryStatus");
-        const manifestNames = ["gallery.txt", "gallery-index.txt", "creators.txt"];
+        const galleryFolders = ["gallery", "/gallery", "./gallery", "."];
+        const manifestFile = "!gallery.txt";
+        const imagePattern = /\.(gif|png|jpg|jpeg|webp|avif)$/i;
 
         function cleanLines(text) {
             return text.replace(/\r/g, "").split("\n").map((line) => line.trim()).filter((line) => line && !line.startsWith("#"));
@@ -306,27 +447,29 @@
             return response.text();
         }
 
+        function joinPath(base, file) {
+            const cleanBase = String(base || "").replace(/\/$/, "");
+            const cleanFile = String(file || "").replace(/^\//, "");
+            return cleanBase ? `${cleanBase}/${cleanFile}` : cleanFile;
+        }
+
+        function folderFromPath(path) {
+            const parts = String(path || "").split("/");
+            parts.pop();
+            return parts.join("/");
+        }
+
         async function findManifestEntries() {
-            for (const manifest of manifestNames) {
+            for (const folder of galleryFolders) {
+                const manifestPath = joinPath(folder, manifestFile);
                 try {
-                    const text = await fetchText(manifest);
-                    const entries = cleanLines(text).map((line) => line.endsWith(".txt") ? line : `${line}.txt`);
+                    const text = await fetchText(manifestPath);
+                    const base = folderFromPath(manifestPath);
+                    const entries = cleanLines(text).map((line) => joinPath(base, line.endsWith(".txt") ? line : `${line}.txt`));
                     if (entries.length) return entries;
                 } catch (error) {}
             }
-
-            try {
-                const html = await fetchText("./");
-                const doc = new DOMParser().parseFromString(html, "text/html");
-                const entries = [...doc.querySelectorAll("a")]
-                    .map((link) => link.getAttribute("href") || "")
-                    .map((href) => href.split("?")[0].split("#")[0])
-                    .filter((href) => href.endsWith(".txt"))
-                    .filter((href) => !manifestNames.includes(href.split("/").pop()));
-                return [...new Set(entries)];
-            } catch (error) {
-                return [];
-            }
+            return [];
         }
 
         function displayNameFromPath(path) {
@@ -334,54 +477,112 @@
             return decodeURIComponent(file.replace(/\.txt$/i, "").replace(/[-_]+/g, " "));
         }
 
+        function splitCreationList(value) {
+            return value.split(/[,|]/).map((item) => item.trim()).filter(Boolean);
+        }
+
         function parseEntry(path, text) {
             const lines = text.replace(/\r/g, "").split("\n");
             const user = displayNameFromPath(path);
-            let creation = "";
+            const base = folderFromPath(path);
+            const creations = [];
             const bioLines = [];
+
+            function addCreation(src) {
+                const clean = String(src || "").trim();
+                if (!imagePattern.test(clean)) return;
+                creations.push(/^(https?:|data:|\/)/i.test(clean) ? clean : joinPath(base, clean));
+            }
 
             for (const originalLine of lines) {
                 const line = originalLine.trim();
-                const match = line.match(/^(gif|image|creation)\s*:\s*(.+)$/i);
-                if (!creation && match) {
-                    creation = match[2].trim();
+                const match = line.match(/^(gif|gifs|image|images|creation|creations)\s*:\s*(.+)$/i);
+                if (match) {
+                    splitCreationList(match[2]).forEach(addCreation);
                     continue;
                 }
-                if (!creation && /\.(gif|png|jpg|jpeg|webp)$/i.test(line)) {
-                    creation = line;
+                if (imagePattern.test(line)) {
+                    addCreation(line);
                     continue;
                 }
                 bioLines.push(originalLine);
             }
 
-            if (!creation) creation = `${path.replace(/\.txt$/i, "")}.gif`;
+            if (!creations.length) creations.push(`${path.replace(/\.txt$/i, "")}.gif`);
             return {
                 user,
-                creation,
-                bio: bioLines.join("\n").trim() || "No description yet."
+                creations: [...new Set(creations)],
+                bio: bioLines.join("\n").trim() || "No note yet."
+            };
+        }
+
+        function setGalleryImage(frame, img, missing, entry, index) {
+            const src = entry.creations[index];
+            img.hidden = false;
+            missing.hidden = true;
+            img.src = src;
+            img.alt = `${entry.user} creation ${index + 1}`;
+            img.onerror = () => {
+                img.hidden = true;
+                missing.hidden = false;
+                missing.textContent = `${src} not found`;
             };
         }
 
         function makeCard(entry) {
             const card = document.createElement("article");
             card.className = "gallery-card";
+            let index = 0;
 
             const frame = document.createElement("div");
             frame.className = "creation-frame";
 
+            const prev = document.createElement("button");
+            prev.type = "button";
+            prev.className = "gallery-nav gallery-prev";
+            prev.textContent = "‹";
+            prev.title = "previous";
+
+            const next = document.createElement("button");
+            next.type = "button";
+            next.className = "gallery-nav gallery-next";
+            next.textContent = "›";
+            next.title = "next";
+
+            const media = document.createElement("div");
+            media.className = "creation-media";
+
             const img = document.createElement("img");
-            img.src = entry.creation;
-            img.alt = `${entry.user} creation`;
             img.loading = "lazy";
             img.decoding = "async";
-            img.addEventListener("error", () => {
-                frame.textContent = "";
-                const missing = document.createElement("div");
-                missing.className = "creation-missing";
-                missing.textContent = `${entry.creation} not found`;
-                frame.append(missing);
-            }, { once: true });
-            frame.append(img);
+
+            const missing = document.createElement("div");
+            missing.className = "creation-missing";
+            missing.hidden = true;
+
+            const count = document.createElement("div");
+            count.className = "gallery-count";
+
+            function renderMedia() {
+                setGalleryImage(frame, img, missing, entry, index);
+                const many = entry.creations.length > 1;
+                prev.disabled = !many;
+                next.disabled = !many;
+                count.textContent = many ? `${index + 1}/${entry.creations.length}` : "1/1";
+            }
+
+            prev.addEventListener("click", () => {
+                index = (index - 1 + entry.creations.length) % entry.creations.length;
+                renderMedia();
+            });
+
+            next.addEventListener("click", () => {
+                index = (index + 1) % entry.creations.length;
+                renderMedia();
+            });
+
+            media.append(img, missing);
+            frame.append(prev, media, next, count);
 
             const copy = document.createElement("div");
             copy.className = "gallery-copy";
@@ -396,16 +597,17 @@
 
             copy.append(user, bio);
             card.append(frame, copy);
+            renderMedia();
             return card;
         }
 
         async function bootGallery() {
             const files = await findManifestEntries();
             if (!files.length) {
-                statusEl.textContent = "ADD GALLERY.TXT WITH ONE CREATOR TXT FILE PER LINE";
+                statusEl.innerHTML = "no folder notes<br>add !gallery.txt";
                 const empty = document.createElement("div");
                 empty.className = "empty-state";
-                empty.textContent = "Example: put names like Username.txt in gallery.txt, then put creation.gif and a short bio inside Username.txt.";
+                empty.textContent = "no notes found yet";
                 grid.append(empty);
                 return;
             }
@@ -419,11 +621,11 @@
             }
 
             if (!entries.length) {
-                statusEl.textContent = "NO GALLERY ENTRIES LOADED";
+                statusEl.textContent = "no entries loaded";
                 return;
             }
 
-            statusEl.textContent = `${entries.length} CREATION${entries.length === 1 ? "" : "S"}`;
+            statusEl.innerHTML = `${entries.length} card${entries.length === 1 ? "" : "s"}<br>folder loaded`;
             grid.replaceChildren(...entries.map(makeCard));
         }
 

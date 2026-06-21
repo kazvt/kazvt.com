@@ -1587,6 +1587,293 @@
                 min-height: 420px;
             }
         }
+
+
+        html {
+            min-width: 0;
+            width: 100%;
+        }
+
+        body {
+            min-width: 0;
+        }
+
+        .app,
+        main,
+        .panel,
+        .toolbar,
+        .export,
+        .top,
+        .draw-body,
+        .view-body,
+        .faces-body {
+            min-width: 0;
+        }
+
+        .top {
+            grid-template-columns: minmax(74px, auto) minmax(0, var(--shape-select-width, 260px)) minmax(120px, 210px) minmax(0, 1fr) minmax(48px, auto);
+            grid-auto-flow: row dense;
+        }
+
+        .shape-cycle-current {
+            min-width: 0;
+        }
+
+        .top-param-controls {
+            grid-template-columns: repeat(var(--top-fader-count, 1), minmax(0, 1fr));
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .top-param-controls.one-fader {
+            grid-template-columns: minmax(0, min(50%, 280px));
+            justify-content: center;
+        }
+
+        .poly-fader,
+        .shape-extra-control {
+            min-width: 0;
+            width: 100%;
+        }
+
+        main {
+            grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.35fr) minmax(178px, 0.55fr);
+        }
+
+        .canvas-wrap {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .tools {
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+        }
+
+        .btn,
+        .file-btn,
+        .color-picker-toggle,
+        .bg-picker-toggle {
+            min-width: 0;
+        }
+
+        .copy-paste {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .color-picker-panel,
+        .bg-picker-panel {
+            max-width: calc(100vw - 24px);
+        }
+
+        .export-grid {
+            grid-template-columns: minmax(108px, 1.2fr) minmax(82px, 1fr) minmax(82px, 1fr) minmax(34px, 0.42fr) minmax(40px, 0.48fr) minmax(40px, 0.48fr);
+        }
+
+        .view-control-hint {
+            max-width: 100%;
+            white-space: normal;
+            line-height: 1.35;
+        }
+
+        .face-file,
+        .face-name,
+        .face-tile {
+            max-width: 100%;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 1350px) {
+            .top {
+                grid-template-columns: minmax(74px, auto) minmax(0, var(--shape-select-width, 260px)) minmax(120px, 1fr);
+                grid-template-rows: auto auto;
+                align-items: center;
+            }
+
+            .top-param-controls {
+                grid-column: 2 / -1;
+                grid-row: 2;
+                transform: none;
+            }
+
+            .status {
+                grid-column: 1;
+                grid-row: 2;
+                justify-self: start;
+            }
+        }
+
+        @media (max-width: 1150px) and (min-width: 821px) {
+            body {
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100dvh;
+            }
+
+            main {
+                grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.15fr);
+            }
+
+            main > aside.panel {
+                grid-column: 1 / -1;
+                min-height: 230px;
+            }
+
+            .face-list {
+                grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            }
+        }
+
+        @media (max-width: 820px) {
+            body {
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100dvh;
+                grid-template-rows: auto 1fr;
+            }
+
+            main {
+                grid-template-columns: 1fr;
+                padding: 6px;
+                gap: 7px;
+            }
+
+            .panel {
+                min-height: min(440px, calc(100dvh - 96px));
+            }
+
+            .top {
+                grid-template-columns: 1fr;
+                gap: 7px;
+                padding: 8px;
+            }
+
+            .brand-wrap,
+            .shape-fader,
+            .top-center,
+            .top-param-controls,
+            .status {
+                grid-column: 1;
+                grid-row: auto;
+                justify-self: stretch;
+                width: 100%;
+            }
+
+            .brand-wrap {
+                justify-items: center;
+            }
+
+            .status {
+                justify-self: center;
+                text-align: center;
+            }
+
+            .shape-fader {
+                max-width: min(100%, 340px);
+                justify-self: center;
+            }
+
+            .top-param-controls.one-fader {
+                grid-template-columns: minmax(0, min(100%, 280px));
+            }
+
+            .export-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                align-items: stretch;
+            }
+
+            .speed-stack {
+                min-width: 0;
+            }
+
+            .export-grid > .btn,
+            .bg-picker-toggle {
+                height: 32px;
+            }
+
+            .bg-picker-panel {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .tools {
+                gap: 4px;
+            }
+
+            .btn,
+            .file-btn {
+                padding-left: 3px;
+                padding-right: 3px;
+                font-size: 10px;
+            }
+
+            .quick-color-history {
+                grid-auto-columns: 28px;
+                gap: 4px;
+            }
+
+            .quick-swatch {
+                width: 28px;
+                height: 28px;
+            }
+
+            .color-picker-toggle {
+                min-height: 34px;
+                grid-template-columns: 30px 1fr auto;
+                padding: 0 5px;
+            }
+
+            .color-picker-main,
+            .bg-picker-main {
+                grid-template-columns: minmax(0, 1fr) 20px 20px;
+            }
+
+            .color-picker-meta,
+            .bg-picker-meta {
+                grid-column: 1 / -1;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: start;
+            }
+
+            .export-grid {
+                gap: 5px;
+            }
+
+            .face-card {
+                grid-template-columns: 40px minmax(0, 1fr);
+            }
+
+            .face-card canvas {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-height: 740px) and (min-width: 821px) {
+            body {
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100dvh;
+            }
+
+            main {
+                min-height: 640px;
+            }
+        }
+
     </style>
 </head>
 
@@ -1595,7 +1882,7 @@
         <header class="top">
             <div class="brand-wrap">
                 <div class="brand">CUBEPAINT</div>
-                <a class="brand-gallery" href="gallery.html">GALLERY</a>
+                <a class="brand-gallery" href="/gallery">GALLERY</a>
             </div>
             <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
                 <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>
@@ -4424,7 +4711,7 @@
         function updateShapeSelectorWidth() {
             const longest = SHAPE_DEFS.reduce((max, shape) => Math.max(max, String(shape.label || "").length), 0);
             const labelChars = Math.max(8, longest);
-            document.documentElement.style.setProperty("--shape-select-width", `calc(${labelChars}ch + 124px)`);
+            document.documentElement.style.setProperty("--shape-select-width", `clamp(210px, calc(${labelChars}ch + 124px), min(340px, calc(100vw - 24px)))`);
         }
 
         function setShapeDropdownOpen(open) {
@@ -5266,35 +5553,19 @@
             data[i + 3] = 255;
         }
 
-        function makeTransparentGifFrame(sourceCanvas, targetCanvas, transparentKey) {
+        function makeStableGifFrame(sourceCanvas, targetCanvas, transparentKey, bgHex, alpha) {
             const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
-            ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
-            ctx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
-            const frame = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
-            const data = frame.data;
-            const keyRgb = transparentKeyRgb(transparentKey);
-
-            for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] < 96) {
-                    setTransparentKeyPixel(data, i, keyRgb);
-                } else {
-                    data[i + 3] = 255;
-                }
-            }
-
-            ctx.putImageData(frame, 0, 0);
-            return targetCanvas;
-        }
-
-        function makeDitheredBgGifFrame(sourceCanvas, targetCanvas, transparentKey, bgHex, alpha) {
-            const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
-            ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
-            ctx.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
-            const frame = ctx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
-            const data = frame.data;
+            const w = targetCanvas.width;
+            const h = targetCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.drawImage(sourceCanvas, 0, 0, w, h);
+            const source = ctx.getImageData(0, 0, w, h);
+            const output = ctx.createImageData(w, h);
+            const src = source.data;
+            const dst = output.data;
             const keyRgb = transparentKeyRgb(transparentKey);
             const bgRgb = hexToRgb(bgHex);
-            const clampedAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+            const bgAlphaClamped = Math.max(0, Math.min(1, Number(alpha) || 0));
             const bayer = [
                 0, 48, 12, 60, 3, 51, 15, 63,
                 32, 16, 44, 28, 35, 19, 47, 31,
@@ -5305,30 +5576,60 @@
                 10, 58, 6, 54, 9, 57, 5, 53,
                 42, 26, 38, 22, 41, 25, 37, 21
             ];
-            const w = targetCanvas.width;
-            const h = targetCanvas.height;
+
+            function writeBg(i, x, y) {
+                if (bgAlphaClamped <= 0.001) {
+                    dst[i] = keyRgb.r;
+                    dst[i + 1] = keyRgb.g;
+                    dst[i + 2] = keyRgb.b;
+                    dst[i + 3] = 255;
+                    return false;
+                }
+                if (bgAlphaClamped >= 0.999) {
+                    dst[i] = bgRgb.r;
+                    dst[i + 1] = bgRgb.g;
+                    dst[i + 2] = bgRgb.b;
+                    dst[i + 3] = 255;
+                    return true;
+                }
+                const threshold = (bayer[(y & 7) * 8 + (x & 7)] + 0.5) / 64;
+                if (bgAlphaClamped >= threshold) {
+                    dst[i] = bgRgb.r;
+                    dst[i + 1] = bgRgb.g;
+                    dst[i + 2] = bgRgb.b;
+                    dst[i + 3] = 255;
+                    return true;
+                }
+                dst[i] = keyRgb.r;
+                dst[i + 1] = keyRgb.g;
+                dst[i + 2] = keyRgb.b;
+                dst[i + 3] = 255;
+                return false;
+            }
 
             for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
                     const i = (y * w + x) * 4;
-                    const sourceAlpha = data[i + 3];
-                    if (sourceAlpha < 16) {
-                        const threshold = (bayer[(y & 7) * 8 + (x & 7)] + 0.5) / 64;
-                        if (clampedAlpha >= threshold) {
-                            data[i] = bgRgb.r;
-                            data[i + 1] = bgRgb.g;
-                            data[i + 2] = bgRgb.b;
-                            data[i + 3] = 255;
-                        } else {
-                            setTransparentKeyPixel(data, i, keyRgb);
-                        }
-                    } else {
-                        data[i + 3] = 255;
+                    const bgIsOpaque = writeBg(i, x, y);
+                    const sourceAlpha = src[i + 3] / 255;
+                    const isKeyPixel = Math.abs(src[i] - keyRgb.r) <= 1 && Math.abs(src[i + 1] - keyRgb.g) <= 1 && Math.abs(src[i + 2] - keyRgb.b) <= 1;
+                    if (sourceAlpha <= 0.015 || isKeyPixel) continue;
+                    if (!bgIsOpaque && sourceAlpha < 0.5) continue;
+                    if (sourceAlpha >= 0.985 || !bgIsOpaque) {
+                        dst[i] = src[i];
+                        dst[i + 1] = src[i + 1];
+                        dst[i + 2] = src[i + 2];
+                        dst[i + 3] = 255;
+                        continue;
                     }
+                    dst[i] = Math.round(src[i] * sourceAlpha + dst[i] * (1 - sourceAlpha));
+                    dst[i + 1] = Math.round(src[i + 1] * sourceAlpha + dst[i + 1] * (1 - sourceAlpha));
+                    dst[i + 2] = Math.round(src[i + 2] * sourceAlpha + dst[i + 2] * (1 - sourceAlpha));
+                    dst[i + 3] = 255;
                 }
             }
 
-            ctx.putImageData(frame, 0, 0);
+            ctx.putImageData(output, 0, 0);
             return targetCanvas;
         }
 
@@ -8479,11 +8780,11 @@
             const transparentExport = bgAlpha <= 0.001;
             const ditheredTransparentExport = bgAlpha > 0.001 && bgAlpha < 0.999;
             const binaryTransparentExport = transparentExport || ditheredTransparentExport;
-            const transparentKey = 0x010203;
+            const transparentKey = 0xff00ff;
             const exportRenderer = new THREE.WebGLRenderer({
-                antialias: true,
+                antialias: !binaryTransparentExport,
                 preserveDrawingBuffer: true,
-                alpha: true,
+                alpha: false,
                 premultipliedAlpha: false
             });
             exportRenderer.setPixelRatio(1);
@@ -8492,7 +8793,7 @@
             const exportRenderHeight = Math.max(1, Math.round(exportHeight * exportAliasScale));
             exportRenderer.setSize(exportRenderWidth, exportRenderHeight, false);
             exportRenderer.domElement.style.imageRendering = exportAliasScale < 0.999 ? "pixelated" : "";
-            exportRenderer.setClearColor(binaryTransparentExport ? transparentKey : bgColor.value, binaryTransparentExport ? 0 : 1);
+            exportRenderer.setClearColor(binaryTransparentExport ? transparentKey : bgColor.value, 1);
 
             const exportScene = new THREE.Scene();
             const exportCamera = makeExportCameraFromCurrentView(exportWidth / exportHeight);
@@ -8527,6 +8828,8 @@
                 height: exportHeight,
                 workerScript
             };
+            gifOptions.dither = false;
+            gifOptions.globalPalette = true;
             if (binaryTransparentExport) gifOptions.transparent = transparentKey;
             const gif = new GIF(gifOptions);
             const frameCanvas = document.createElement("canvas");
@@ -8576,13 +8879,8 @@
                         aliasFrameCtx.drawImage(exportRenderer.domElement, 0, 0, exportWidth, exportHeight);
                         frameSource = aliasFrameCanvas;
                     }
-                    let frame = frameSource;
-                    if (transparentExport) {
-                        frame = makeTransparentGifFrame(frameSource, frameCanvas, transparentKey);
-                    } else if (ditheredTransparentExport) {
-                        frame = makeDitheredBgGifFrame(frameSource, frameCanvas, transparentKey, bgColor.value, bgAlpha);
-                    }
-                    gif.addFrame(frame, { copy: true, delay });
+                    const frame = makeStableGifFrame(frameSource, frameCanvas, transparentKey, bgColor.value, bgAlpha);
+                    gif.addFrame(frame, { copy: true, delay, dispose: 2 });
 
                     if (i % 8 === 0) {
                         setStatus(`${i + 1}/${frames}`);
