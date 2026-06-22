@@ -420,7 +420,10 @@
         .gallery-grid,
         .gallery-card,
         .creation-frame,
-
+        .creation-media,
+        .gallery-copy {
+            min-width: 0;
+        }
 
         .creation-loading {
             position: absolute;
@@ -460,13 +463,8 @@
             border: 2px solid var(--line);
             background: var(--paper2);
             color: var(--ink);
-            box-shadow: 0 3px 0 var(--ink);
             box-shadow: 0 2px 0 var(--ink);
             letter-spacing: 0.05em;
-        }
-
-        .gallery-copy {
-            min-width: 0;
         }
 
         .gallery-top {
@@ -523,6 +521,37 @@
             }
         }
 
+
+        /* Final gallery layout guard: 3-card grid on desktop, 2 on tablet, 1 on phones. */
+        .gallery-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: clamp(8px, 1.4vw, 12px) !important;
+            align-items: start !important;
+            width: 100%;
+        }
+
+        .gallery-card {
+            position: relative;
+            width: 100%;
+        }
+
+        .creation-frame {
+            width: 100%;
+            aspect-ratio: 4.5 / 3;
+        }
+
+        @media (max-width: 900px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .gallery-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 
