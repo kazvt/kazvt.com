@@ -216,6 +216,20 @@
             background: var(--ink);
         }
 
+        .shape-cycle-btn:disabled,
+        .shape-cycle-btn[aria-disabled="true"] {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: rgba(42, 7, 12, 0.58);
+            color: rgba(255, 246, 216, 0.56);
+            box-shadow: inset 0 0 0 1px rgba(255,246,216,0.1);
+        }
+
+        .shape-cycle-btn:disabled:hover,
+        .shape-cycle-btn[aria-disabled="true"]:hover {
+            background: rgba(42, 7, 12, 0.58);
+        }
+
         .shape-select-menu {
             display: none !important;
         }
@@ -3209,7 +3223,27 @@
         let keyLight = null;
         let fillLight = null;
 
+        let didRandomizeInitialShape = false;
+
+        function randomInitialShapeIndex() {
+            const total = SHAPE_DEFS.length;
+            if (!total) return 0;
+            const cryptoObj = window.crypto || window.msCrypto;
+            if (cryptoObj?.getRandomValues) {
+                const values = new Uint32Array(1);
+                cryptoObj.getRandomValues(values);
+                return values[0] % total;
+            }
+            return Math.floor(Math.random() * total);
+        }
+
         const savedSession = loadStoredSession();
+        const savedCurrentShapeId = savedSession?.currentShapeId === "donut" ? "doughnut" : savedSession?.currentShapeId;
+        if (!savedCurrentShapeId) {
+            currentShapeIndex = randomInitialShapeIndex();
+            currentShapeId = SHAPE_DEFS[currentShapeIndex].id;
+            didRandomizeInitialShape = true;
+        }
         if (savedSession?.settings?.shadingEnabled != null) {
             shadingEnabled = savedSession.settings.shadingEnabled === true || savedSession.settings.shadingEnabled === "true";
         }
@@ -3227,8 +3261,8 @@
             vertexWobbleEnabled = savedSession.settings.vertexWobbleEnabled === true || savedSession.settings.vertexWobbleEnabled === "true";
             vertexWobbleAmount = vertexWobbleEnabled ? 0.5 : 0;
         }
-        if (savedSession && savedSession.currentShapeId) {
-            const savedIndex = SHAPE_DEFS.findIndex((shape) => shape.id === savedSession.currentShapeId);
+        if (savedCurrentShapeId) {
+            const savedIndex = SHAPE_DEFS.findIndex((shape) => shape.id === savedCurrentShapeId);
             if (savedIndex >= 0) {
                 currentShapeIndex = savedIndex;
                 currentShapeId = SHAPE_DEFS[currentShapeIndex].id;
@@ -3259,7 +3293,7 @@
         if (savedSession && savedSession.shapeOptions) {
             shapeOptions = savedSession.shapeOptions;
         }
-        if (savedSession && savedSession.currentShapeId === "donut") {
+        if (savedCurrentShapeId === "donut") {
             currentShapeId = "doughnut";
             currentShapeIndex = Math.max(0, SHAPE_DEFS.findIndex((shape) => shape.id === "doughnut"));
         }
@@ -4141,8 +4175,8 @@
             const width = Math.max(1, Number(layer.width) || 1);
             const height = Math.max(1, Number(layer.height) || 1);
             return {
-                u: Math.max(0, Math.min(1, (x + width / 2) / width)),
-                v: Math.max(0, Math.min(1, (y + height / 2) / height))
+                u: clamp((x + width / 2) / width, 0, 1),
+                v: clamp((y + height / 2) / height, 0, 1)
             };
         }
 
@@ -5468,10 +5502,33 @@
             shapeSelectMenu.hidden = true;
         }
 
+        function updateShapeCycleButtons() {
+            const atStart = currentShapeIndex <= 0;
+            const atEnd = currentShapeIndex >= SHAPE_DEFS.length - 1;
+
+            if (shapePrevBtn) {
+                shapePrevBtn.disabled = atStart;
+                shapePrevBtn.setAttribute("aria-disabled", String(atStart));
+                shapePrevBtn.title = atStart ? "first shape" : "previous shape";
+            }
+
+            if (shapeNextBtn) {
+                shapeNextBtn.disabled = atEnd;
+                shapeNextBtn.setAttribute("aria-disabled", String(atEnd));
+                shapeNextBtn.title = atEnd ? "last shape" : "next shape";
+            }
+        }
+
         function cycleShape(delta) {
             const total = SHAPE_DEFS.length;
-            if (!total) return;
-            switchShape((currentShapeIndex + delta + total) % total);
+            if (!total) return false;
+            const nextIndex = Math.max(0, Math.min(total - 1, currentShapeIndex + delta));
+            if (nextIndex === currentShapeIndex) {
+                updateShapeCycleButtons();
+                return false;
+            }
+            switchShape(nextIndex);
+            return true;
         }
 
         function updateShapeReadout() {
@@ -5480,6 +5537,7 @@
             shapeSlider.value = String(currentShapeIndex);
             updateRangeProgress(shapeSlider);
             renderShapeDropdown();
+            updateShapeCycleButtons();
             updatePolyControl();
             updateShapeExtraControls();
             markShapeIconDirty();
@@ -9294,15 +9352,13 @@
 
             if (!mod && !event.altKey && !event.shiftKey && !isSliderTarget(event.target) && event.key === "ArrowLeft") {
                 event.preventDefault();
-                cycleShape(-1);
-                setStatus(getCurrentShapeDef().label);
+                if (cycleShape(-1)) setStatus(getCurrentShapeDef().label);
                 return;
             }
 
             if (!mod && !event.altKey && !event.shiftKey && !isSliderTarget(event.target) && event.key === "ArrowRight") {
                 event.preventDefault();
-                cycleShape(1);
-                setStatus(getCurrentShapeDef().label);
+                if (cycleShape(1)) setStatus(getCurrentShapeDef().label);
                 return;
             }
 
@@ -10081,6 +10137,10 @@
 
             loadingSession = false;
             setStatus(savedSession ? "RESTORED" : "READY");
+            if (didRandomizeInitialShape) {
+                saveSession();
+                setStatus("READY");
+            }
         }
 
         boot();
