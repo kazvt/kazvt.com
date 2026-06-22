@@ -20,6 +20,7 @@
     <meta name="twitter:description" content="A small CubePaint gallery for sharing animated creations and short creator notes." />
     <meta name="twitter:image" content="thumbnail.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         @font-face {
@@ -155,16 +156,6 @@
             gap: 12px;
         }
 
-        .gallery-note {
-            border: 3px solid var(--line);
-            background: var(--paper2);
-            box-shadow: 0 5px 0 var(--ink);
-            padding: 10px;
-            font-size: 11px;
-            font-weight: 900;
-            line-height: 1.5;
-        }
-
         .gallery-grid {
             min-width: 0;
             display: grid;
@@ -193,7 +184,7 @@
             background-size: 16px 16px;
             background-position: 0 0, 0 8px, 8px -8px, -8px 0;
             border-bottom: 3px solid var(--line);
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 4.5 / 3;
             display: grid;
             grid-template-columns: 30px minmax(0, 1fr) 30px;
             grid-template-rows: minmax(0, 1fr) auto;
@@ -220,7 +211,7 @@
             cursor: zoom-in;
         }
 
-        .creation-frame img {
+        .creation-frame .creation-img {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -299,6 +290,44 @@
             font-weight: 900;
             padding: 8px;
             color: var(--ink2);
+        }
+
+        .creation-loading {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            gap: 8px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--ink2);
+            pointer-events: none;
+        }
+
+        .creation-loading[hidden] {
+            display: none !important;
+        }
+
+        .creation-loading img {
+            width: min(64px, 42%);
+            height: auto;
+            object-fit: contain;
+            image-rendering: pixelated;
+            display: block;
+            transform: none;
+            pointer-events: none;
+        }
+
+        .creation-loading span {
+            display: block;
+            padding: 2px 7px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            box-shadow: 0 2px 0 var(--ink);
+            letter-spacing: 0.05em;
         }
 
         .gallery-copy {
@@ -411,7 +440,6 @@
         }
 
         @media (max-width: 420px) {
-            .gallery-note,
             .gallery-bio,
             .empty-state {
                 font-size: 10px;
@@ -434,18 +462,16 @@
                 <div class="brand-sub">GALLERY</div>
             </div>
             <div class="gallery-title">CREATIONS</div>
-            <a class="back-link" href="index.html">BACK</a>
+            <a class="back-link" href="index">BACK</a>
         </header>
 
-        <main>
-            <div class="gallery-note" id="galleryStatus">folder notes<br>gifs + tiny bio</div>
+        <main class="grid content-start gap-3">
             <section class="gallery-grid" id="galleryGrid" aria-label="CubePaint gallery"></section>
         </main>
     </div>
 
     <script>
         const grid = document.getElementById("galleryGrid");
-        const statusEl = document.getElementById("galleryStatus");
         const galleryFolders = ["gallery", "/gallery", "./gallery", "."];
         const manifestFile = "!gallery.txt";
         const imagePattern = /\.(gif|png|jpg|jpeg|webp|avif)$/i;
@@ -529,17 +555,24 @@
             };
         }
 
-        function setGalleryImage(frame, img, missing, entry, index) {
+        function setGalleryImage(frame, img, missing, loading, entry, index) {
             const src = entry.creations[index];
-            img.hidden = false;
+            img.hidden = true;
             missing.hidden = true;
-            img.src = src;
+            loading.hidden = false;
             img.alt = `${entry.user} creation ${index + 1}`;
+            img.onload = () => {
+                loading.hidden = true;
+                missing.hidden = true;
+                img.hidden = false;
+            };
             img.onerror = () => {
+                loading.hidden = true;
                 img.hidden = true;
                 missing.hidden = false;
                 missing.textContent = `${src} not found`;
             };
+            img.src = src;
         }
 
 
@@ -584,6 +617,7 @@
             media.setAttribute("aria-label", "left-click zooms in; right-click zooms out");
 
             const img = document.createElement("img");
+            img.className = "creation-img";
             img.loading = "lazy";
             img.decoding = "async";
 
@@ -591,11 +625,22 @@
             missing.className = "creation-missing";
             missing.hidden = true;
 
+            const loading = document.createElement("div");
+            loading.className = "creation-loading";
+            loading.setAttribute("aria-live", "polite");
+            const loadingImg = document.createElement("img");
+            loadingImg.src = "loading.gif";
+            loadingImg.alt = "";
+            loadingImg.setAttribute("aria-hidden", "true");
+            const loadingText = document.createElement("span");
+            loadingText.textContent = "LOADING GIF";
+            loading.append(loadingImg, loadingText);
+
             const count = document.createElement("div");
             count.className = "gallery-count";
 
             function renderMedia() {
-                setGalleryImage(frame, img, missing, entry, index);
+                setGalleryImage(frame, img, missing, loading, entry, index);
                 resetMediaZoom(media);
                 const many = entry.creations.length > 1;
                 prev.disabled = !many;
@@ -626,7 +671,7 @@
                 setMediaZoom(media, current - 0.25);
             });
 
-            media.append(img, missing);
+            media.append(img, missing, loading);
             frame.append(prev, media, next, count);
 
             const copy = document.createElement("div");
@@ -649,7 +694,6 @@
         async function bootGallery() {
             const files = await findManifestEntries();
             if (!files.length) {
-                statusEl.innerHTML = "no folder notes<br>add !gallery.txt";
                 const empty = document.createElement("div");
                 empty.className = "empty-state";
                 empty.textContent = "no notes found yet";
@@ -666,11 +710,13 @@
             }
 
             if (!entries.length) {
-                statusEl.textContent = "no entries loaded";
+                const empty = document.createElement("div");
+                empty.className = "empty-state";
+                empty.textContent = "no entries loaded";
+                grid.replaceChildren(empty);
                 return;
             }
 
-            statusEl.innerHTML = `${entries.length} card${entries.length === 1 ? "" : "s"}<br>folder loaded`;
             grid.replaceChildren(...entries.map(makeCard));
         }
 
