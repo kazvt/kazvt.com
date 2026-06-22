@@ -21,12 +21,6 @@
     <meta name="twitter:image" content="thumbnail.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
-    <script>
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = { corePlugins: { preflight: false } };
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
         @font-face {
             font-family: "Monaspace Krypton Frozen";
@@ -199,7 +193,7 @@
             background-size: 16px 16px;
             background-position: 0 0, 0 8px, 8px -8px, -8px 0;
             border-bottom: 3px solid var(--line);
-            aspect-ratio: 4.5 / 3;
+            aspect-ratio: 1 / 1;
             display: grid;
             grid-template-columns: 30px minmax(0, 1fr) 30px;
             grid-template-rows: minmax(0, 1fr) auto;
@@ -445,7 +439,7 @@
 
         <main>
             <div class="gallery-note" id="galleryStatus">folder notes<br>gifs + tiny bio</div>
-            <section class="gallery-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="galleryGrid" aria-label="CubePaint gallery"></section>
+            <section class="gallery-grid" id="galleryGrid" aria-label="CubePaint gallery"></section>
         </main>
     </div>
 
@@ -566,11 +560,11 @@
 
         function makeCard(entry) {
             const card = document.createElement("article");
-            card.className = "gallery-card min-w-0";
+            card.className = "gallery-card";
             let index = 0;
 
             const frame = document.createElement("div");
-            frame.className = "creation-frame aspect-[4.5/3] w-full";
+            frame.className = "creation-frame";
 
             const prev = document.createElement("button");
             prev.type = "button";

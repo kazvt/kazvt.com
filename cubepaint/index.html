@@ -4126,6 +4126,42 @@
             };
         }
 
+        function photoWarpCornersFromWarp(layer, warp) {
+            const base = photoBaseLocalCorners(layer);
+            const normalizedWarp = normalizePhotoWarp({ warp });
+            return {
+                nw: { x: base.nw.x + normalizedWarp.nw.x, y: base.nw.y + normalizedWarp.nw.y },
+                ne: { x: base.ne.x + normalizedWarp.ne.x, y: base.ne.y + normalizedWarp.ne.y },
+                se: { x: base.se.x + normalizedWarp.se.x, y: base.se.y + normalizedWarp.se.y },
+                sw: { x: base.sw.x + normalizedWarp.sw.x, y: base.sw.y + normalizedWarp.sw.y }
+            };
+        }
+
+        function photoLocalUv(layer, x, y) {
+            const width = Math.max(1, Number(layer.width) || 1);
+            const height = Math.max(1, Number(layer.height) || 1);
+            return {
+                u: Math.max(0, Math.min(1, (x + width / 2) / width)),
+                v: Math.max(0, Math.min(1, (y + height / 2) / height))
+            };
+        }
+
+        function photoWarpedLocalPoint(layer, warp, x, y) {
+            const uv = photoLocalUv(layer, x, y);
+            return photoQuadPoint(photoWarpCornersFromWarp(layer, warp), uv.u, uv.v);
+        }
+
+        function photoAnchorAfterRelativeWarp(start, nextWarp) {
+            const anchorX = Number(start.anchorX) || 0;
+            const anchorY = Number(start.anchorY) || 0;
+            const before = photoWarpedLocalPoint(start, normalizePhotoWarp(start), anchorX, anchorY);
+            const after = photoWarpedLocalPoint(start, nextWarp, anchorX, anchorY);
+            return {
+                x: anchorX + (after.x - before.x),
+                y: anchorY + (after.y - before.y)
+            };
+        }
+
         function photoExpandTriangle(points, amount = 0.75) {
             const center = {
                 x: (points[0].x + points[1].x + points[2].x) / 3,
@@ -4598,6 +4634,9 @@
                 } else if (handle === "w") {
                     moveEdgeTo("nw", "sw", local);
                 }
+                const nextAnchor = photoAnchorAfterRelativeWarp(start, nextWarp);
+                layer.anchorX = nextAnchor.x;
+                layer.anchorY = nextAnchor.y;
                 layer.warp = nextWarp;
             } else if (photoTransformDrag.mode === "scale") {
                 const handle = photoTransformDrag.handle;
