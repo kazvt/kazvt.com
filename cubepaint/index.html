@@ -2592,6 +2592,322 @@
             }
         }
 
+
+        /* Mobile responsiveness safety pass: let the app scroll instead of hiding squeezed controls. */
+        @media (max-width: 760px) {
+            html,
+            body {
+                height: auto !important;
+                min-height: 100dvh !important;
+                max-height: none !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+            }
+
+            .app {
+                width: 100% !important;
+                height: auto !important;
+                min-height: 100dvh !important;
+                max-height: none !important;
+                grid-template-rows: auto auto !important;
+                overflow: visible !important;
+            }
+
+            .top {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                grid-template-rows: auto !important;
+                grid-auto-flow: row !important;
+                gap: 7px !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 8px !important;
+                letter-spacing: 0.05em !important;
+            }
+
+            .brand-wrap,
+            .shape-fader,
+            .top-center,
+            .top-param-controls,
+            .status {
+                grid-column: 1 !important;
+                grid-row: auto !important;
+                width: 100% !important;
+                max-width: none !important;
+                justify-self: stretch !important;
+                align-self: stretch !important;
+            }
+
+            .brand-wrap {
+                grid-template-columns: 1fr auto !important;
+                align-items: center !important;
+                justify-items: stretch !important;
+                gap: 8px !important;
+            }
+
+            .brand {
+                font-size: clamp(12px, 4vw, 16px) !important;
+            }
+
+            .brand-gallery {
+                justify-self: end !important;
+                font-size: clamp(9px, 2.7vw, 11px) !important;
+                letter-spacing: 0.1em !important;
+            }
+
+            .shape-fader {
+                grid-template-columns: 34px minmax(0, 1fr) 34px !important;
+                gap: 5px !important;
+            }
+
+            .shape-cycle-btn,
+            .shape-cycle-current {
+                height: 34px !important;
+                min-height: 34px !important;
+                font-size: 11px !important;
+            }
+
+            .shape-cycle-current {
+                grid-template-columns: 30px minmax(0, 1fr) 30px !important;
+                padding: 0 4px !important;
+            }
+
+            .shape-icon-canvas {
+                width: 24px !important;
+                height: 24px !important;
+            }
+
+            .top-center {
+                max-width: none !important;
+                height: 32px !important;
+                min-height: 32px !important;
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+            }
+
+            .top-param-controls {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+                height: auto !important;
+                min-height: 42px !important;
+                max-height: none !important;
+                overflow: visible !important;
+                gap: 7px !important;
+            }
+
+            .top-param-controls.one-fader {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            .top-param-controls .poly-fader,
+            .top-param-controls .shape-extra-control {
+                height: 38px !important;
+                min-height: 38px !important;
+            }
+
+            .status {
+                justify-self: stretch !important;
+                text-align: center !important;
+                font-size: 10px !important;
+            }
+
+            main {
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) !important;
+                grid-template-rows: auto auto auto !important;
+                grid-auto-rows: auto !important;
+                padding: 8px !important;
+                gap: 10px !important;
+            }
+
+            main > section.panel:nth-of-type(1),
+            main > section.panel:nth-of-type(2),
+            main > aside.panel {
+                grid-column: 1 !important;
+                grid-row: auto !important;
+            }
+
+            main > .panel,
+            main > aside.panel,
+            .panel {
+                min-width: 0 !important;
+                min-height: 0 !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                overflow: visible !important;
+                grid-template-rows: 34px auto !important;
+            }
+
+            .head {
+                height: 34px !important;
+                font-size: 11px !important;
+            }
+
+            .draw-body,
+            .view-body,
+            .faces-body {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .draw-body {
+                grid-template-rows: auto auto !important;
+            }
+
+            .canvas-wrap {
+                height: auto !important;
+                min-height: min(78vw, 420px) !important;
+                max-height: none !important;
+                padding: 8px !important;
+                overflow: visible !important;
+            }
+
+            .canvas-stack {
+                width: min(100%, calc(100vw - 40px)) !important;
+                height: auto !important;
+                max-height: none !important;
+                aspect-ratio: 1 / 1 !important;
+            }
+
+            .toolbar,
+            .export {
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 7px !important;
+                gap: 7px !important;
+            }
+
+            .tools {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: 6px !important;
+            }
+
+            .btn,
+            .file-btn,
+            .color-picker-toggle,
+            .bg-picker-toggle {
+                height: 34px !important;
+                min-height: 34px !important;
+                font-size: 11px !important;
+                padding-left: 5px !important;
+                padding-right: 5px !important;
+            }
+
+            .controls {
+                gap: 7px !important;
+                padding-top: 0 !important;
+                overflow: visible !important;
+            }
+
+            .color-row {
+                grid-template-columns: minmax(0, 1fr) minmax(104px, 36%) !important;
+                min-height: 34px !important;
+                gap: 5px !important;
+            }
+
+            .copy-paste {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(46px, 0.42fr) !important;
+                gap: 6px !important;
+            }
+
+            .view-body {
+                grid-template-rows: minmax(300px, 62dvh) auto !important;
+            }
+
+            #cubeStage {
+                min-height: 300px !important;
+                height: 62dvh !important;
+            }
+
+            .export-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 6px !important;
+            }
+
+            .speed-stack {
+                grid-column: 1 / -1 !important;
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                grid-template-rows: auto !important;
+                gap: 6px !important;
+            }
+
+            .speed-field {
+                grid-template-columns: 28px minmax(0, 1fr) !important;
+            }
+
+            #result,
+            .view-control-hint {
+                max-height: none !important;
+                overflow: visible !important;
+                white-space: normal !important;
+                font-size: 9px !important;
+                line-height: 1.35 !important;
+            }
+
+            .face-list {
+                max-height: none !important;
+                overflow: visible !important;
+                grid-template-columns: repeat(auto-fit, minmax(min(148px, 100%), 1fr)) !important;
+                padding: 7px !important;
+                gap: 7px !important;
+            }
+
+            .face-card {
+                grid-template-columns: 42px minmax(0, 1fr) !important;
+                min-height: 54px !important;
+            }
+
+            .face-card canvas {
+                width: 42px !important;
+                height: 42px !important;
+            }
+
+            .color-picker-panel,
+            .bg-picker-panel {
+                overflow: auto !important;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .color-row {
+                grid-template-columns: 1fr !important;
+            }
+
+            .quick-color-history {
+                grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            }
+
+            .export-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+
+            .speed-stack {
+                grid-column: 1 / -1 !important;
+            }
+
+            .bg-field,
+            #shadingBtn,
+            #exportGifBtn {
+                min-width: 0 !important;
+            }
+
+            .view-body {
+                grid-template-rows: minmax(280px, 58dvh) auto !important;
+            }
+
+            #cubeStage {
+                min-height: 280px !important;
+                height: 58dvh !important;
+            }
+        }
+
     </style>
 </head>
 
@@ -2600,7 +2916,7 @@
         <header class="top">
             <div class="brand-wrap">
                 <div class="brand">CUBEPAINT</div>
-                <a class="brand-gallery" href="gallery.html">GALLERY</a>
+                <a class="brand-gallery" href="gallery">GALLERY</a>
             </div>
             <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
                 <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>

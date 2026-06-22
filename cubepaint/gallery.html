@@ -156,6 +156,16 @@
             gap: 12px;
         }
 
+        .gallery-note {
+            border: 3px solid var(--line);
+            background: var(--paper2);
+            box-shadow: 0 5px 0 var(--ink);
+            padding: 10px;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1.5;
+        }
+
         .gallery-grid {
             min-width: 0;
             display: grid;
@@ -205,6 +215,7 @@
             touch-action: manipulation;
             cursor: zoom-in;
             user-select: none;
+            position: relative;
         }
 
         .creation-media.zoomed {
@@ -219,9 +230,14 @@
             display: block;
             transform: scale(var(--gallery-zoom, 1));
             transform-origin: 50% 50%;
-            transition: transform 90ms linear;
-            will-change: transform;
+            transition: transform 90ms linear, opacity 120ms linear;
+            will-change: transform, opacity;
             pointer-events: none;
+            opacity: 1;
+        }
+
+        .creation-media.is-loading .creation-img {
+            opacity: 0;
         }
 
         .gallery-nav {
@@ -290,9 +306,18 @@
             font-weight: 900;
             padding: 8px;
             color: var(--ink2);
+            grid-column: 1;
+            grid-row: 1;
+            z-index: 3;
+            background: var(--paper2);
         }
 
+
+
         .creation-loading {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
             width: 100%;
             height: 100%;
             display: grid;
@@ -304,6 +329,7 @@
             font-weight: 900;
             color: var(--ink2);
             pointer-events: none;
+            background: rgba(255, 246, 216, 0.58);
         }
 
         .creation-loading[hidden] {
@@ -326,6 +352,7 @@
             border: 2px solid var(--line);
             background: var(--paper2);
             color: var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
             box-shadow: 0 2px 0 var(--ink);
             letter-spacing: 0.05em;
         }
@@ -393,6 +420,51 @@
         .gallery-grid,
         .gallery-card,
         .creation-frame,
+
+
+        .creation-loading {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            gap: 8px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--ink2);
+            pointer-events: none;
+            background: rgba(255, 246, 216, 0.58);
+        }
+
+        .creation-loading[hidden] {
+            display: none !important;
+        }
+
+        .creation-loading img {
+            width: min(64px, 42%);
+            height: auto;
+            object-fit: contain;
+            image-rendering: pixelated;
+            display: block;
+            transform: none;
+            pointer-events: none;
+        }
+
+        .creation-loading span {
+            display: block;
+            padding: 2px 7px;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
+            box-shadow: 0 2px 0 var(--ink);
+            letter-spacing: 0.05em;
+        }
+
         .gallery-copy {
             min-width: 0;
         }
@@ -555,23 +627,45 @@
             };
         }
 
-        function setGalleryImage(frame, img, missing, loading, entry, index) {
+        function setGalleryImage(media, img, missing, loading, entry, index) {
             const src = entry.creations[index];
-            img.hidden = true;
+            const loadToken = `${Date.now()}-${Math.random()}`;
+            img.dataset.loadToken = loadToken;
+            img.alt = `${entry.user} creation ${index + 1}`;
+            img.hidden = false;
             missing.hidden = true;
             loading.hidden = false;
-            img.alt = `${entry.user} creation ${index + 1}`;
+            media.classList.add("is-loading");
+            media.classList.remove("is-loaded", "is-missing");
+
             img.onload = () => {
+                if (img.dataset.loadToken !== loadToken) return;
                 loading.hidden = true;
                 missing.hidden = true;
                 img.hidden = false;
+                media.classList.remove("is-loading", "is-missing");
+                media.classList.add("is-loaded");
             };
             img.onerror = () => {
+                if (img.dataset.loadToken !== loadToken) return;
                 loading.hidden = true;
                 img.hidden = true;
                 missing.hidden = false;
                 missing.textContent = `${src} not found`;
+                media.classList.remove("is-loading", "is-loaded");
+                media.classList.add("is-missing");
             };
+
+            if (img.dataset.currentSrc === src && img.complete) {
+                if (img.naturalWidth > 0) {
+                    img.onload();
+                } else {
+                    img.onerror();
+                }
+                return;
+            }
+
+            img.dataset.currentSrc = src;
             img.src = src;
         }
 
@@ -639,22 +733,31 @@
             const count = document.createElement("div");
             count.className = "gallery-count";
 
-            function renderMedia() {
-                setGalleryImage(frame, img, missing, loading, entry, index);
-                resetMediaZoom(media);
+            function updateGalleryNavState() {
                 const many = entry.creations.length > 1;
-                prev.disabled = !many;
-                next.disabled = !many;
+                prev.disabled = !many || index <= 0;
+                next.disabled = !many || index >= entry.creations.length - 1;
+                prev.setAttribute("aria-disabled", prev.disabled ? "true" : "false");
+                next.setAttribute("aria-disabled", next.disabled ? "true" : "false");
                 count.textContent = many ? `${index + 1}/${entry.creations.length}` : "1/1";
             }
 
+            function renderMedia() {
+                index = clamp(index, 0, entry.creations.length - 1);
+                setGalleryImage(media, img, missing, loading, entry, index);
+                resetMediaZoom(media);
+                updateGalleryNavState();
+            }
+
             prev.addEventListener("click", () => {
-                index = (index - 1 + entry.creations.length) % entry.creations.length;
+                if (index <= 0) return;
+                index -= 1;
                 renderMedia();
             });
 
             next.addEventListener("click", () => {
-                index = (index + 1) % entry.creations.length;
+                if (index >= entry.creations.length - 1) return;
+                index += 1;
                 renderMedia();
             });
 
