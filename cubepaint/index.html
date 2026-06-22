@@ -2592,6 +2592,58 @@
             }
         }
 
+
+        /* Keep the canvas color pickers as true squares.
+           The floating/mobile picker rules above can otherwise stretch the
+           saturation/value canvas into a wide rectangle. */
+        .color-picker-main {
+            grid-template-columns: minmax(112px, 1fr) 22px 96px !important;
+            align-items: start !important;
+        }
+
+        #colorSquare {
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 1 / 1 !important;
+            align-self: start !important;
+            justify-self: stretch !important;
+        }
+
+        #hueSlider {
+            height: auto !important;
+            min-height: 0 !important;
+            aspect-ratio: 22 / 112;
+            align-self: stretch !important;
+        }
+
+        @media (max-width: 520px) {
+            .color-picker-main {
+                grid-template-columns: minmax(0, 1fr) 20px !important;
+                grid-template-rows: auto auto !important;
+            }
+
+            #colorSquare {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            #hueSlider {
+                grid-column: 2;
+                grid-row: 1;
+                width: 20px !important;
+                height: 100% !important;
+            }
+
+            #colorAlphaSlider {
+                display: none !important;
+            }
+
+            .color-picker-meta {
+                grid-column: 1 / -1 !important;
+                grid-row: 2;
+            }
+        }
+
     </style>
 </head>
 
