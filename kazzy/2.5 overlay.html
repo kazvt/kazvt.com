@@ -3851,47 +3851,6 @@ span.emoji.ssn-native-emoji {
 	}
 }
 
-
-/* Patch: prevent paid Twitch gigantified glow clipping without adding emote margin/padding.
-   The glow is painted outside the image box, so we relax clipping on the paid row and
-   give ticker viewports an expanded clip-path bleed area instead of layout spacing. */
-:root {
-	--ssn-paid-gigantified-glow-bleed: 36px;
-}
-
-.highlight-chat.ssn-has-real-twitch-gigantified,
-.highlight-chat.ssn-has-real-twitch-gigantified.larger-emojis,
-.ssn-has-real-twitch-gigantified.horizontal-ticker-item,
-.ssn-has-real-twitch-gigantified .hl-message,
-.ssn-has-real-twitch-gigantified .hl-content,
-.ssn-has-real-twitch-gigantified .hl-imgContent,
-.ssn-has-real-twitch-gigantified .ssn-real-twitch-gigantified-container,
-.ssn-has-real-twitch-gigantified .ssn-real-twitch-gigantified-emote {
-	overflow: visible !important;
-	contain: none !important;
-}
-
-.horizontal-ticker-root,
-.horizontal-ticker-track,
-.horizontal-ticker-item.ssn-has-real-twitch-gigantified {
-	overflow: visible !important;
-	contain: none !important;
-}
-
-/* Keep ticker masking mostly intact, but expand the paint/clip area just enough for the glow.
-   This does not add margin/padding or change layout size. */
-.horizontal-ticker-viewport {
-	overflow: visible !important;
-	clip-path: inset(calc(-1 * var(--ssn-paid-gigantified-glow-bleed)) calc(-1 * var(--ssn-paid-gigantified-glow-bleed)) calc(-1 * var(--ssn-paid-gigantified-glow-bleed)) calc(-1 * var(--ssn-paid-gigantified-glow-bleed))) !important;
-	contain: none !important;
-}
-
-#output:has(.ssn-has-real-twitch-gigantified),
-#pinned:has(.ssn-has-real-twitch-gigantified) {
-	overflow-x: visible !important;
-	contain: none !important;
-}
-
 	</style>
 </head>
 
