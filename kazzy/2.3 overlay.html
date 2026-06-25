@@ -3659,8 +3659,8 @@ span.emoji.ssn-native-emoji {
 /* Patch: real Twitch paid/gigantified emotes match the local lone-emote size,
    get a rainbow drop-shadow glow, and keep enough overflow for the glow/animation. */
 :root {
-	--ssn-gigantified-paid-size: 100px;
-	--ssn-gigantified-paid-max-width: 180px;
+	--ssn-gigantified-paid-size: 80px;
+	--ssn-gigantified-paid-max-width: 160px;
 }
 
 .highlight-chat.ssn-has-real-twitch-gigantified,
@@ -3670,13 +3670,11 @@ span.emoji.ssn-native-emoji {
 }
 
 .highlight-chat.ssn-has-real-twitch-gigantified .hl-message,
-.highlight-chat.ssn-has-real-twitch-gigantified .hl-content,
-.highlight-chat.ssn-has-real-twitch-gigantified .hl-imgContent {
+.highlight-chat.ssn-has-real-twitch-gigantified .hl-content {
 	overflow: visible !important;
 }
 
-.highlight-chat.ssn-has-real-twitch-gigantified .hl-content,
-.highlight-chat.ssn-has-real-twitch-gigantified .hl-imgContent {
+.highlight-chat.ssn-has-real-twitch-gigantified .hl-content {
 	min-height: var(--ssn-gigantified-paid-size) !important;
 	line-height: var(--ssn-gigantified-paid-size) !important;
 	display: inline-flex !important;
@@ -10450,52 +10448,28 @@ setTextShadow(bolderShadow);
 				? node
 				: ((node.closest && node.closest(".highlight-chat")) || node);
 
-			if (!row || !row.querySelector || !row.classList) return null;
-
 			const content = (node.matches && node.matches(".hl-content"))
 				? node
-				: row.querySelector(".hl-message > .hl-content, .hl-content");
+				: ((row.querySelector && row.querySelector(".hl-content")) || node.querySelector(".hl-content"));
 
-			// Twitch paid/bits gigantified emotes arrive from Social Stream as a separate
-			// .hl-imgContent image beside an empty .hl-content, not as an image inside
-			// .hl-content. The overlay's lone-emote booster adds Twitch's class locally,
-			// so that class alone is intentionally not used as the paid-emote signal.
-			const contentIsEmpty = !content || (
-				!content.textContent.trim() &&
-				!content.querySelector("img, svg, video, .emote-container")
-			);
+			if (!content) return null;
 
-			let hasRealGigantified = false;
-
-			if (
-				row.getAttribute("data-source-type") === "twitch" &&
-				contentIsEmpty &&
-				!row.classList.contains("ssn-emote-only-single") &&
-				!row.querySelector(".ssn-overlay-single-emote-boosted")
-			) {
-				row.querySelectorAll('.hl-message > .hl-imgContent > img[src*="static-cdn.jtvnw.net/emoticons/v2/"], .hl-message > .hl-imgContent > video[src*="static-cdn.jtvnw.net/emoticons/v2/"], .hl-message > .hl-imgContent > svg').forEach(function (el) {
+			content.querySelectorAll("img.chat-line__message--emote-gigantified, svg.chat-line__message--emote-gigantified, video.chat-line__message--emote-gigantified").forEach(function (el) {
+				// This class is also added locally for ordinary lone-emote messages.
+				// Anything that did not come from that local boost is treated as Twitch's real paid/gigantified emote.
+				if (!el.classList.contains("ssn-overlay-single-emote-boosted")) {
 					el.classList.add("ssn-real-twitch-gigantified-emote");
-					hasRealGigantified = true;
-				});
-			}
-
-			if (content) {
-				content.querySelectorAll("img.chat-line__message--emote-gigantified, svg.chat-line__message--emote-gigantified, video.chat-line__message--emote-gigantified").forEach(function (el) {
-					// This class is also added locally for ordinary lone-emote messages.
-					// Anything that did not come from that local boost is treated as Twitch's real paid/gigantified emote.
-					if (!el.classList.contains("ssn-overlay-single-emote-boosted")) {
-						el.classList.add("ssn-real-twitch-gigantified-emote");
-						const wrapper = el.closest && el.closest(".emote-container");
-						if (wrapper && wrapper.classList) {
-							wrapper.classList.add("ssn-real-twitch-gigantified-container");
-						}
-						hasRealGigantified = true;
+					const wrapper = el.closest && el.closest(".emote-container");
+					if (wrapper && wrapper.classList) {
+						wrapper.classList.add("ssn-real-twitch-gigantified-container");
 					}
-				});
-			}
+				}
+			});
 
-			hasRealGigantified = hasRealGigantified || !!row.querySelector(".ssn-real-twitch-gigantified-emote");
-			row.classList.toggle("ssn-has-real-twitch-gigantified", hasRealGigantified);
+			const hasRealGigantified = !!content.querySelector(".ssn-real-twitch-gigantified-emote");
+			if (row && row.classList) {
+				row.classList.toggle("ssn-has-real-twitch-gigantified", hasRealGigantified);
+			}
 
 			return hasRealGigantified ? row : null;
 		}
@@ -10515,7 +10489,7 @@ setTextShadow(bolderShadow);
 
 			ssnMarkRealTwitchGigantifiedEmotes(content);
 
-			const realGigantifiedEmotes = Array.from(row.querySelectorAll(".ssn-real-twitch-gigantified-emote"));
+			const realGigantifiedEmotes = Array.from(content.querySelectorAll(".ssn-real-twitch-gigantified-emote"));
 			if (!realGigantifiedEmotes.length) {
 				if (row && row.classList) row.classList.remove("ssn-has-real-twitch-gigantified");
 				return;
