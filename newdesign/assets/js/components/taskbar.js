@@ -15,19 +15,20 @@ function startClock(clock) {
 }
 
 function createStartButton(label) {
-  return createElement("button", {
+  return createElement("div", {
     className: "taskbar__start h-[30px] w-[100px] shrink-0 cursor-pointer",
-    type: "button",
     title: label,
+    role: "button",
     "aria-label": label
   });
 }
 
 function createTaskButton(title) {
-  return createElement("button", {
+  return createElement("div", {
     className: "taskbar__task is-active inline-flex h-[24px] w-[220px] min-w-[150px] max-w-[34vw] items-center gap-1 overflow-hidden rounded-[2px] px-[7px] py-0 text-[11px] font-bold leading-none",
-    type: "button",
-    title
+    title,
+    role: "button",
+    "aria-label": title
   }, [
     createElement("span", { className: "taskbar__task-icon", "aria-hidden": "true" }),
     createElement("span", { className: "truncate", text: title })

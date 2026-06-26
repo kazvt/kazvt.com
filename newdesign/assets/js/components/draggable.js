@@ -8,13 +8,14 @@ function clamp(value, min, max) {
 }
 
 function getBounds(element) {
-  const rect = element.getBoundingClientRect();
+  const width = element.offsetWidth;
+  const height = element.offsetHeight;
   const taskbarHeight = getTaskbarHeight();
   return {
     minX: 0,
     minY: 0,
-    maxX: Math.max(0, window.innerWidth - rect.width),
-    maxY: Math.max(0, window.innerHeight - taskbarHeight - rect.height)
+    maxX: Math.max(0, window.innerWidth - width),
+    maxY: Math.max(0, window.innerHeight - taskbarHeight - height)
   };
 }
 
@@ -31,29 +32,33 @@ export function keepInsideViewport(element) {
 
 export function makeDraggable(element, handle) {
   let drag = null;
-  handle.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0) return;
+  const start = (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
     if (event.target.closest(".title-bar-controls")) return;
     const rect = element.getBoundingClientRect();
     drag = {
-      pointerId: event.pointerId,
+      id: event.pointerId,
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top
     };
     element.classList.add("is-dragging");
-    handle.setPointerCapture(event.pointerId);
-  });
-  handle.addEventListener("pointermove", (event) => {
-    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+  };
+  const move = (event) => {
+    if (!drag) return;
+    if (event.pointerId !== undefined && drag.id !== undefined && event.pointerId !== drag.id) return;
     placeElement(element, event.clientX - drag.offsetX, event.clientY - drag.offsetY);
-  });
-  const stop = (event) => {
-    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+  };
+  const stop = () => {
+    if (!drag) return;
     drag = null;
     element.classList.remove("is-dragging");
   };
-  handle.addEventListener("pointerup", stop);
-  handle.addEventListener("pointercancel", stop);
+  handle.addEventListener("pointerdown", start);
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", stop);
+  window.addEventListener("pointercancel", stop);
   window.addEventListener("resize", () => keepInsideViewport(element));
   window.addEventListener("load", () => keepInsideViewport(element));
   keepInsideViewport(element);
