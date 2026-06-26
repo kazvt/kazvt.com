@@ -52,6 +52,24 @@ input,
   cursor: text;
 }
 
+html,
+body,
+#app,
+.desktop,
+.desktop *:not(.notepad-page) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.notepad-page {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+img {
+  -webkit-user-drag: none;
+}
+
 .desktop,
 .desktop-layout,
 .desktop-window,

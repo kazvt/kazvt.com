@@ -58,3 +58,24 @@ closeButton.addEventListener("click", (event) => {
 });
 
 taskButton.addEventListener("click", restoreWindow);
+
+
+function isEditableTarget(target) {
+  return Boolean(target.closest && target.closest(".notepad-page"));
+}
+
+document.addEventListener("selectstart", (event) => {
+  if (!isEditableTarget(event.target)) event.preventDefault();
+});
+
+document.addEventListener("dragstart", (event) => {
+  if (!isEditableTarget(event.target)) event.preventDefault();
+});
+
+document.addEventListener("drop", (event) => {
+  if (!isEditableTarget(event.target)) event.preventDefault();
+});
+
+document.addEventListener("dragover", (event) => {
+  if (!isEditableTarget(event.target)) event.preventDefault();
+});
