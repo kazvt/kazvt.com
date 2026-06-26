@@ -1,29 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="A Windows XP-inspired anime homepage built with XP.css." />
-    <title>XP Anime Homepage</title>
-    <link rel="stylesheet" href="https://unpkg.com/xp.css" />
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Notepad</title>
+    <link rel="stylesheet" href="https://unpkg.com/xp.css">
+    <link rel="stylesheet" href="assets/css/app.css">
   </head>
-
   <body>
-    <main class="desktop-shell checkerboard" aria-label="Windows XP style homepage">
-      <section class="desktop-stage" aria-label="Homepage content">
-        <div id="notepad-root"></div>
-        <div id="mascot-root"></div>
-      </section>
-
-      <footer class="taskbar" aria-label="Decorative XP taskbar">
-        <button class="start-button" type="button">start</button>
-        <span class="taskbar-app">greeting.txt - Notepad</span>
-        <span class="taskbar-clock" id="taskbar-clock">--:--</span>
-      </footer>
-    </main>
-
-    <script src="assets/js/components.js"></script>
-    <script src="assets/js/main.js"></script>
+    <main id="app" class="desktop" aria-label="Windows XP styled homepage"></main>
+    <script type="module" src="assets/js/app.js"></script>
   </body>
 </html>
