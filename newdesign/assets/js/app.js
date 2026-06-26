@@ -3,6 +3,7 @@ import { createArt } from "./components/art.js";
 import { makeDraggable, makeResizable, keepInsideViewport, maximizeElement } from "./components/draggable.js";
 import { createNotepad } from "./components/notepad.js";
 import { createTaskbar } from "./components/taskbar.js";
+import { startMusic } from "./components/music.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
@@ -59,23 +60,39 @@ closeButton.addEventListener("click", (event) => {
 
 taskButton.addEventListener("click", restoreWindow);
 
+async function loadMusicRepositoryConfig() {
+  try {
+    const module = await import("./data/music-repo.js");
+    return module.musicRepository || {};
+  } catch {
+    return {};
+  }
+}
+
+loadMusicRepositoryConfig().then((musicRepository) => {
+  startMusic({ ...home.music, ...musicRepository });
+});
 
 function isEditableTarget(target) {
   return Boolean(target.closest && target.closest(".notepad-page"));
 }
 
-document.addEventListener("selectstart", (event) => {
-  if (!isEditableTarget(event.target)) event.preventDefault();
+function clearPageSelection() {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount) selection.removeAllRanges();
+}
+
+function preventSelectionOutsideEditor(event) {
+  if (isEditableTarget(event.target)) return;
+  event.preventDefault();
+  clearPageSelection();
+}
+
+["mousedown", "touchstart", "selectstart", "dragstart", "drop", "dragover"].forEach((eventName) => {
+  document.addEventListener(eventName, preventSelectionOutsideEditor, { capture: true });
 });
 
-document.addEventListener("dragstart", (event) => {
-  if (!isEditableTarget(event.target)) event.preventDefault();
-});
-
-document.addEventListener("drop", (event) => {
-  if (!isEditableTarget(event.target)) event.preventDefault();
-});
-
-document.addEventListener("dragover", (event) => {
-  if (!isEditableTarget(event.target)) event.preventDefault();
+document.addEventListener("selectionchange", () => {
+  if (document.activeElement && document.activeElement.classList.contains("notepad-page")) return;
+  clearPageSelection();
 });

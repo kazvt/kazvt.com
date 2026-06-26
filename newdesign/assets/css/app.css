@@ -41,29 +41,39 @@ body {
   background-size: var(--desktop-cell) var(--desktop-cell);
 }
 
-body,
-body :not(textarea):not(input):not([contenteditable="true"]) {
-  cursor: default;
-}
-
-textarea,
-input,
-[contenteditable="true"] {
-  cursor: text;
-}
-
 html,
 body,
 #app,
-.desktop,
-.desktop *:not(.notepad-page) {
-  -webkit-user-select: none;
-  user-select: none;
+body *:not(.notepad-page) {
+  cursor: default !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+::selection {
+  background: transparent;
+  color: inherit;
+}
+
+::-moz-selection {
+  background: transparent;
+  color: inherit;
 }
 
 .notepad-page {
-  -webkit-user-select: text;
-  user-select: text;
+  cursor: text !important;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+.notepad-page::selection {
+  background: Highlight;
+  color: HighlightText;
+}
+
+.notepad-page::-moz-selection {
+  background: Highlight;
+  color: HighlightText;
 }
 
 img {
@@ -218,8 +228,8 @@ img {
   background: #fff;
   color: #111;
   font-family: var(--font-notepad);
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.5;
   white-space: pre-wrap;
 }
 
@@ -394,7 +404,7 @@ img {
 
   .notepad-page {
     min-height: 310px;
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .status-bar-field:nth-child(2) {
