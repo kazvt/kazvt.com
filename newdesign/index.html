@@ -4,11 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome - Notepad</title>
+    <script>
+      tailwind.config = {
+        corePlugins: {
+          preflight: false
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/xp.css">
     <link rel="stylesheet" href="assets/css/app.css">
   </head>
-  <body>
-    <main id="app" class="desktop" aria-label="Windows XP styled homepage"></main>
+  <body class="min-h-screen overflow-hidden">
+    <main id="app" class="desktop relative min-h-screen" aria-label="Windows XP styled homepage"></main>
     <script type="module" src="assets/js/app.js"></script>
   </body>
 </html>

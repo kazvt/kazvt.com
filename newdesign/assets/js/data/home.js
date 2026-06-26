@@ -11,22 +11,26 @@ export const home = {
   },
   taskbar: {
     start: {
-      label: "start",
-      icon: "assets/img/start-icon.png"
+      label: "Start",
+      icon: "assets/img/xp/start_btn_normal.png"
     },
     activeApp: {
       title: "welcome.txt - Notepad",
-      icon: "assets/img/notepad-icon.png"
+      icon: "https://win32.run/images/xp/icons/Notepad.png"
     },
     tray: {
-      time: "12:00 PM",
+      time: "12:00 AM",
       icons: [
         {
-          src: "assets/img/network-icon.png",
-          alt: "Network status"
+          src: "https://win32.run/images/xp/icons/TourXP.png",
+          alt: "Windows XP tour"
         },
         {
-          src: "assets/img/speaker-icon.png",
+          src: "https://win32.run/images/xp/icons/SecurityError.png",
+          alt: "Security alert"
+        },
+        {
+          src: "https://win32.run/images/xp/icons/Volume.png",
           alt: "Volume"
         }
       ]

@@ -5,6 +5,8 @@ export function node(tag, options = {}, children = []) {
     if (key === "className") element.className = value;
     else if (key === "text") element.textContent = value;
     else if (key === "html") element.innerHTML = value;
+    else if (key === "style" && typeof value === "string") element.setAttribute("style", value);
+    else if (key === "style") Object.assign(element.style, value);
     else if (key === "dataset") Object.entries(value).forEach(([dataKey, dataValue]) => element.dataset[dataKey] = dataValue);
     else if (key in element) element[key] = value;
     else element.setAttribute(key, value === true ? "" : value);
