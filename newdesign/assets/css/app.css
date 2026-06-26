@@ -1,9 +1,8 @@
 :root {
   --desktop-cell: 24px;
   --desktop-light: rgba(255, 255, 255, 0.72);
-  --desktop-shadow: rgba(0, 0, 0, 0.24);
-  --font-ui: Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
-  --font-notepad: "Lucida Console", "Courier New", monospace;
+  --font-ui: "Pixelated MS Sans Serif", "MS Sans Serif", Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
+  --font-notepad: var(--font-ui);
   --asset-start-button: url("../img/xp/start_btn_normal.png");
   --asset-notepad-icon: url("https://win32.run/images/xp/icons/Notepad.png");
   --asset-tray-tour: url("https://win32.run/images/xp/icons/TourXP.png");
@@ -16,6 +15,7 @@
   --xp-tray-gradient: 180deg, #16c3ff 0%, #13a8ee 10%, #0b8ddd 45%, #0b83d1 70%, #0c98e8 100%;
   --xp-task-shadow: rgb(0 0 0 / 30%) -1px 0 inset, rgb(255 255 255 / 20%) 1px 1px 1px inset;
   --xp-task-shadow-active: rgb(0 0 0 / 20%) 0 0 1px 1px inset, rgb(0 0 0 / 70%) 1px 0 1px inset;
+  --window-drop-shadow: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.32));
 }
 
 html,
@@ -23,9 +23,17 @@ body {
   min-height: 100%;
 }
 
+html,
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-ui);
+}
+
 body {
   margin: 0;
-  font-family: var(--font-ui);
   font-size: 11px;
   background-color: #d6d6d6;
   background-image: linear-gradient(45deg, var(--desktop-light) 25%, transparent 25%), linear-gradient(-45deg, var(--desktop-light) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--desktop-light) 75%), linear-gradient(-45deg, transparent 75%, var(--desktop-light) 75%);
@@ -38,6 +46,7 @@ body {
 .desktop-window,
 .desktop-art,
 .desktop-art__image,
+.window-resize-handle,
 .notepad-menu,
 .notepad-menu *,
 .notepad-page,
@@ -63,7 +72,42 @@ body {
   top: clamp(18px, 16vh, 150px);
   z-index: 5;
   width: min(620px, calc(100vw - 36px));
+  filter: var(--window-drop-shadow);
   touch-action: none;
+}
+
+.desktop-window.is-dragging,
+.desktop-window.is-resizing {
+  z-index: 10;
+}
+
+.desktop-window.is-minimized {
+  display: none;
+}
+
+.desktop-window.is-maximized {
+  filter: none;
+}
+
+.desktop-window > .window {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-window .window-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.desktop-window .title-bar,
+.desktop-window .title-bar *,
+.desktop-window .title-bar *::before,
+.desktop-window .title-bar *::after {
+  box-sizing: content-box;
 }
 
 .desktop-art {
@@ -87,17 +131,15 @@ body {
   filter: drop-shadow(10px 16px 10px rgba(0, 0, 0, 0.24));
 }
 
-.desktop-window > .window {
-  width: 100%;
-}
-
-.desktop-window .title-bar {
-  cursor: move;
-  user-select: none;
-}
-
-.desktop-window .title-bar-controls {
-  cursor: default;
+.window-resize-handle {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  z-index: 8;
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
+  touch-action: none;
 }
 
 .notepad-menu {
@@ -108,7 +150,6 @@ body {
   padding: 1px 3px 0;
   background: var(--surface);
   border-bottom: 1px solid #d8d2bd;
-  font-family: var(--font-ui);
   font-size: 11px;
 }
 
@@ -128,6 +169,7 @@ body {
 .notepad-page {
   width: 100%;
   min-height: clamp(260px, 42vh, 440px);
+  flex: 1 1 auto;
   margin: 0;
   padding: 9px 10px;
   resize: none;
@@ -164,10 +206,12 @@ body {
 }
 
 .taskbar [role="button"],
+.taskbar [role="button"]:hover,
 .taskbar [role="button"]:focus,
 .taskbar [role="button"]:focus-visible,
 .taskbar [role="button"]:active {
   outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .taskbar [role="button"] * {
@@ -188,20 +232,15 @@ body {
   box-shadow: none;
 }
 
-.taskbar__start,
-.taskbar__task {
-  -webkit-tap-highlight-color: transparent;
-  outline: none;
-  user-select: none;
-}
-
-.taskbar__start:focus,
-.taskbar__start:focus-visible,
+.taskbar__start:hover,
 .taskbar__start:active,
-.taskbar__task:focus,
-.taskbar__task:focus-visible,
-.taskbar__task:active {
+.taskbar__start:focus,
+.taskbar__start:focus-visible {
+  background-color: transparent;
+  background-image: var(--asset-start-button);
+  box-shadow: none;
   outline: none;
+  filter: none;
 }
 
 .taskbar__task {
@@ -218,9 +257,16 @@ body {
   text-shadow: 1px 1px rgba(0, 0, 0, 0.55);
 }
 
-.taskbar__task.is-active {
+.taskbar__task.is-active,
+.taskbar__task:hover,
+.taskbar__task:active,
+.taskbar__task:focus,
+.taskbar__task:focus-visible {
+  background-color: transparent;
   background-image: linear-gradient(var(--xp-task-tile-active));
   box-shadow: var(--xp-task-shadow-active);
+  outline: none;
+  filter: none;
 }
 
 .taskbar__task-icon,

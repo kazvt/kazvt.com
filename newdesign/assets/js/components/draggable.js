@@ -7,7 +7,7 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function getBounds(element) {
+function getMoveBounds(element) {
   const width = element.offsetWidth;
   const height = element.offsetHeight;
   const taskbarHeight = getTaskbarHeight();
@@ -19,20 +19,44 @@ function getBounds(element) {
   };
 }
 
+function getResizeBounds(element) {
+  const rect = element.getBoundingClientRect();
+  const taskbarHeight = getTaskbarHeight();
+  return {
+    maxWidth: Math.max(0, window.innerWidth - rect.left),
+    maxHeight: Math.max(0, window.innerHeight - taskbarHeight - rect.top)
+  };
+}
+
 function placeElement(element, x, y) {
-  const bounds = getBounds(element);
+  const bounds = getMoveBounds(element);
   element.style.left = `${clamp(x, bounds.minX, bounds.maxX)}px`;
   element.style.top = `${clamp(y, bounds.minY, bounds.maxY)}px`;
 }
 
+function sizeElement(element, width, height) {
+  const bounds = getResizeBounds(element);
+  const minWidth = Number(element.dataset.minWidth || element.offsetWidth / 2);
+  const minHeight = Number(element.dataset.minHeight || element.offsetHeight);
+  element.style.width = `${clamp(width, minWidth, bounds.maxWidth)}px`;
+  element.style.height = `${clamp(height, minHeight, bounds.maxHeight)}px`;
+}
+
 export function keepInsideViewport(element) {
+  if (element.classList.contains("is-maximized")) return;
   const rect = element.getBoundingClientRect();
+  const bounds = getResizeBounds(element);
+  const minWidth = Number(element.dataset.minWidth || element.offsetWidth / 2);
+  const minHeight = Number(element.dataset.minHeight || element.offsetHeight);
+  element.style.width = `${clamp(element.offsetWidth, minWidth, bounds.maxWidth)}px`;
+  element.style.height = `${clamp(element.offsetHeight, minHeight, bounds.maxHeight)}px`;
   placeElement(element, rect.left, rect.top);
 }
 
 export function makeDraggable(element, handle) {
   let drag = null;
   const start = (event) => {
+    if (element.classList.contains("is-maximized")) return;
     if (event.button !== undefined && event.button !== 0) return;
     if (event.target.closest(".title-bar-controls")) return;
     const rect = element.getBoundingClientRect();
@@ -61,5 +85,75 @@ export function makeDraggable(element, handle) {
   window.addEventListener("pointercancel", stop);
   window.addEventListener("resize", () => keepInsideViewport(element));
   window.addEventListener("load", () => keepInsideViewport(element));
+  keepInsideViewport(element);
+}
+
+export function makeResizable(element) {
+  const handle = document.createElement("div");
+  handle.className = "window-resize-handle";
+  handle.setAttribute("aria-hidden", "true");
+  element.append(handle);
+  let resize = null;
+  const initMinimums = () => {
+    if (element.dataset.minWidth && element.dataset.minHeight) return;
+    element.dataset.minWidth = String(Math.max(240, Math.round(element.offsetWidth / 2)));
+    element.dataset.minHeight = String(Math.round(element.offsetHeight));
+    element.style.minWidth = `${element.dataset.minWidth}px`;
+    element.style.minHeight = `${element.dataset.minHeight}px`;
+  };
+  const start = (event) => {
+    if (element.classList.contains("is-maximized")) return;
+    if (event.button !== undefined && event.button !== 0) return;
+    initMinimums();
+    resize = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startWidth: element.offsetWidth,
+      startHeight: element.offsetHeight
+    };
+    element.classList.add("is-resizing");
+    event.preventDefault();
+  };
+  const move = (event) => {
+    if (!resize) return;
+    if (event.pointerId !== undefined && resize.id !== undefined && event.pointerId !== resize.id) return;
+    sizeElement(element, resize.startWidth + event.clientX - resize.startX, resize.startHeight + event.clientY - resize.startY);
+    event.preventDefault();
+  };
+  const stop = () => {
+    if (!resize) return;
+    resize = null;
+    element.classList.remove("is-resizing");
+    keepInsideViewport(element);
+  };
+  handle.addEventListener("pointerdown", start);
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", stop);
+  window.addEventListener("pointercancel", stop);
+  window.addEventListener("load", initMinimums);
+  window.addEventListener("resize", () => keepInsideViewport(element));
+  requestAnimationFrame(initMinimums);
+}
+
+export function maximizeElement(element) {
+  if (!element.classList.contains("is-maximized")) {
+    const rect = element.getBoundingClientRect();
+    element.dataset.restoreLeft = String(rect.left);
+    element.dataset.restoreTop = String(rect.top);
+    element.dataset.restoreWidth = String(element.offsetWidth);
+    element.dataset.restoreHeight = String(element.offsetHeight);
+    element.classList.add("is-maximized");
+    element.style.left = "0px";
+    element.style.top = "0px";
+    element.style.width = `${window.innerWidth}px`;
+    element.style.height = `${window.innerHeight - getTaskbarHeight()}px`;
+    return;
+  }
+  element.classList.remove("is-maximized");
+  element.style.left = `${element.dataset.restoreLeft || 0}px`;
+  element.style.top = `${element.dataset.restoreTop || 0}px`;
+  element.style.width = `${element.dataset.restoreWidth || element.offsetWidth}px`;
+  element.style.height = `${element.dataset.restoreHeight || element.offsetHeight}px`;
   keepInsideViewport(element);
 }

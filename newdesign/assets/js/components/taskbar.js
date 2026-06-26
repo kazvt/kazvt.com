@@ -16,10 +16,11 @@ function startClock(clock) {
 
 function createStartButton(label) {
   return createElement("div", {
-    className: "taskbar__start h-[30px] w-[100px] shrink-0 cursor-pointer",
+    className: "taskbar__start h-[30px] w-[100px] shrink-0 cursor-default",
     title: label,
     role: "button",
-    "aria-label": label
+    "aria-label": label,
+    dataset: { taskbarControl: "start" }
   });
 }
 
@@ -28,7 +29,8 @@ function createTaskButton(title) {
     className: "taskbar__task is-active inline-flex h-[24px] w-[220px] min-w-[150px] max-w-[34vw] items-center gap-1 overflow-hidden rounded-[2px] px-[7px] py-0 text-[11px] font-bold leading-none",
     title,
     role: "button",
-    "aria-label": title
+    "aria-label": title,
+    dataset: { taskbarControl: "notepad" }
   }, [
     createElement("span", { className: "taskbar__task-icon", "aria-hidden": "true" }),
     createElement("span", { className: "truncate", text: title })
@@ -44,6 +46,13 @@ function createTrayIcon(icon) {
   });
 }
 
+function stopTaskbarSelection(taskbar) {
+  taskbar.querySelectorAll("[role='button']").forEach((control) => {
+    control.addEventListener("pointerdown", (event) => event.preventDefault());
+    control.addEventListener("mousedown", (event) => event.preventDefault());
+  });
+}
+
 export function createTaskbar({ startLabel, activeTitle, trayIcons }) {
   const clock = createElement("time", { className: "taskbar__clock px-1 text-[11px] leading-[30px] text-white" });
   const taskbar = createElement("footer", { className: "taskbar fixed bottom-0 left-0 right-0 z-20 flex h-[30px] w-full flex-row items-center", role: "contentinfo", "aria-label": "Windows XP taskbar" }, [
@@ -55,5 +64,6 @@ export function createTaskbar({ startLabel, activeTitle, trayIcons }) {
     ])
   ]);
   startClock(clock);
+  stopTaskbarSelection(taskbar);
   return taskbar;
 }
