@@ -2924,6 +2924,72 @@
             }
         }
 
+
+        /* Top bar vertical centering pass: keep every header control away from the bottom edge. */
+        .top {
+            align-items: center !important;
+            align-content: center !important;
+            padding-top: clamp(4px, 0.72dvh, 8px) !important;
+            padding-bottom: clamp(4px, 0.72dvh, 8px) !important;
+        }
+
+        .top > .brand-wrap,
+        .top > .shape-fader,
+        .top > .top-center,
+        .top > .top-param-controls,
+        .top > .status {
+            align-self: center !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            position: relative;
+            top: clamp(-3px, -0.35dvh, -1px);
+        }
+
+        .top > .shape-fader,
+        .top > .top-center,
+        .top > .top-param-controls {
+            min-height: 0 !important;
+        }
+
+        .top-param-controls {
+            display: grid !important;
+            align-items: center !important;
+            align-content: center !important;
+            height: clamp(30px, 5.45dvh, 40px) !important;
+            min-height: 0 !important;
+        }
+
+        .top-param-controls .poly-fader,
+        .top-param-controls .shape-extra-control {
+            align-self: center !important;
+            min-height: 0 !important;
+            height: clamp(28px, 5dvh, 36px) !important;
+        }
+
+        .top-param-controls .poly-fader input[type="range"],
+        .top-param-controls .shape-extra-control input[type="range"] {
+            margin-top: clamp(5px, 0.95dvh, 7px) !important;
+        }
+
+        @media (max-width: 720px), (max-height: 620px) {
+            .top {
+                padding-top: clamp(3px, 0.65dvh, 6px) !important;
+                padding-bottom: clamp(3px, 0.65dvh, 6px) !important;
+            }
+
+            .top > .brand-wrap,
+            .top > .shape-fader,
+            .top > .top-center,
+            .top > .top-param-controls,
+            .top > .status {
+                top: -1px;
+            }
+
+            .top-param-controls {
+                height: clamp(26px, 5.2dvh, 34px) !important;
+            }
+        }
+
     </style>
 </head>
 
@@ -3653,8 +3719,8 @@
 
         initializeSceneShapesFromSession(savedSession);
 
-        faces = ensureShapeFaces(currentShapeId);
-        currentFace = getShapeStore(currentShapeId).currentFace;
+        faces = currentShapeId ? ensureShapeFaces(currentShapeId) : [];
+        currentFace = currentShapeId ? getShapeStore(currentShapeId).currentFace : 0;
 
         function getSceneShape(id = currentShapeId) {
             return sceneShapes.find((shape) => shape.id === id) || null;
@@ -3723,7 +3789,7 @@
                 });
             }
 
-            if (!normalized.length) {
+            if (!normalized.length && !entries) {
                 const def = shapeDefById(currentShapeId);
                 normalized.push({
                     id: def.id,
@@ -3735,15 +3801,20 @@
 
             sceneShapes = normalized;
             let requestedActive = session?.currentShapeId === "donut" ? "doughnut" : session?.currentShapeId;
-            if (!sceneShapes.some((shape) => shape.id === requestedActive)) {
+            if (sceneShapes.length && !sceneShapes.some((shape) => shape.id === requestedActive)) {
                 const byType = sceneShapes.find((shape) => shape.shapeId === requestedActive);
                 requestedActive = byType?.id || sceneShapes[0].id;
             }
-            activeSceneShapeId = requestedActive;
-            currentShapeId = activeSceneShapeId;
-            const activeType = getShapeTypeId(currentShapeId);
-            const activeIndex = SHAPE_DEFS.findIndex((shape) => shape.id === activeType);
-            currentShapeIndex = activeIndex >= 0 ? activeIndex : 0;
+            if (sceneShapes.length) {
+                activeSceneShapeId = requestedActive;
+                currentShapeId = activeSceneShapeId;
+                const activeType = getShapeTypeId(currentShapeId);
+                const activeIndex = SHAPE_DEFS.findIndex((shape) => shape.id === activeType);
+                currentShapeIndex = activeIndex >= 0 ? activeIndex : currentShapeIndex;
+            } else {
+                activeSceneShapeId = "";
+                currentShapeId = "";
+            }
             sceneShapes.forEach((shape, index) => {
                 if (!shape.name) shape.name = nextShapeInstanceName(shape.shapeId);
                 const transform = getStoredShapeTransform(shape.id);
@@ -4031,8 +4102,9 @@
 
         function updateShapeExtraControls() {
             if (!shapeExtraControls || !shapeExtraControlList) return;
-            const def = getCurrentShapeDef();
-            const options = shapeOptionDefinitions(def);
+            const activeShape = getSceneShape(currentShapeId);
+            const def = activeShape ? getCurrentShapeDef() : null;
+            const options = activeShape ? shapeOptionDefinitions(def) : [];
             shapeExtraControlList.innerHTML = "";
             shapeExtraControls.hidden = options.length === 0;
             options.forEach((key) => {
@@ -4072,9 +4144,15 @@
         }
 
         function updatePolyControl() {
-            const def = getCurrentShapeDef();
-            const supported = Boolean(def.lowPoly);
+            const activeShape = getSceneShape(currentShapeId);
+            const def = activeShape ? getCurrentShapeDef() : null;
+            const supported = Boolean(activeShape && def?.lowPoly);
             polyFader.hidden = !supported;
+            if (!supported) {
+                updateShapeExtraControls();
+                updateTopFaderLayout();
+                return;
+            }
             const level = getCurrentPolyLevel();
             polySlider.value = String(level);
             updateRangeProgress(polySlider);
@@ -5939,7 +6017,19 @@
 
         function loadFaceIntoEditor(updateList = true) {
             const face = faces[currentFace];
-            if (!face) return;
+            if (!face) {
+                paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
+                photoLayerSelected = false;
+                updatePhotoGuidePointerEvents();
+                drawCanvasGuide();
+                if (activeFaceTitle) activeFaceTitle.textContent = "NO SHAPES";
+                updateTilingControl();
+                updateMapModeControl();
+                if (updateList) renderFaceList();
+                updateUndoRedo();
+                updateGifLayerLockUi();
+                return;
+            }
 
             if (tool === "move") ensureMoveCanvasPhotoLayer();
             paintCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
@@ -5995,6 +6085,7 @@
         }
 
         function switchFace(index, flashPreview = false) {
+            if (!currentShapeId || !faces.length) return;
             if (index === currentFace) {
                 loadFaceIntoEditor(true);
                 if (flashPreview) flashSelectedMaterial(index);
@@ -6027,6 +6118,12 @@
                 summary.title = "selected shape / total shapes in view";
                 const countLabel = `${sceneShapes.length} SHAPE${sceneShapes.length === 1 ? "" : "S"}`;
                 summary.textContent = `${activeShape.name || def.label} (${countLabel})`;
+                faceList.append(summary);
+            } else {
+                const summary = document.createElement("div");
+                summary.className = "shape-instance-summary empty";
+                summary.title = "no selected shape";
+                summary.textContent = "NO SHAPES (0 SHAPES)";
                 faceList.append(summary);
             }
 
@@ -6232,19 +6329,18 @@
         function updateRemoveShapeButton() {
             if (!removeShapeBtn) return;
             const activeShape = getSceneShape(currentShapeId);
-            const canRemove = Boolean(activeShape && sceneShapes.length > 1);
+            const canRemove = Boolean(activeShape);
             removeShapeBtn.disabled = !canRemove;
             removeShapeBtn.setAttribute("aria-disabled", String(!canRemove));
             removeShapeBtn.title = canRemove
                 ? `Remove ${activeShape.name || getCurrentShapeDef().label} from the view`
-                : "Add another shape before removing this one";
+                : "No shape selected to remove";
         }
 
         function removeActiveSceneShape() {
             const activeShape = getSceneShape(currentShapeId);
-            if (!activeShape) return false;
-            if (sceneShapes.length <= 1) {
-                setStatus("KEEP ONE SHAPE");
+            if (!activeShape) {
+                setStatus("NO SHAPE");
                 updateRemoveShapeButton();
                 return false;
             }
@@ -6268,12 +6364,21 @@
             delete shapePolyLevels[removedId];
             delete shapeOptions[removedId];
 
-            currentShapeId = nextShape?.id || sceneShapes[0]?.id || currentShapeId;
-            activeSceneShapeId = currentShapeId;
-            const activeIndex = shapeIndexById(currentShapeId);
-            if (activeIndex >= 0) currentShapeIndex = activeIndex;
-            faces = ensureShapeFaces(currentShapeId);
-            currentFace = Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace));
+            if (nextShape) {
+                currentShapeId = nextShape.id;
+                activeSceneShapeId = currentShapeId;
+                const activeIndex = shapeIndexById(currentShapeId);
+                if (activeIndex >= 0) currentShapeIndex = activeIndex;
+                faces = ensureShapeFaces(currentShapeId);
+                currentFace = Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace));
+            } else {
+                currentShapeId = "";
+                activeSceneShapeId = "";
+                faces = [];
+                currentFace = 0;
+                photoLayerSelected = false;
+                transformHandleDrag = null;
+            }
             buildShapeMesh();
             updateShapeReadout();
             loadFaceIntoEditor(true);
@@ -6314,6 +6419,10 @@
             updateShapeExtraControls();
             if (activeShape) {
                 statusEl.title = `Editing ${activeShape.name || activeDef.label}`;
+                if (activeFaceTitle && !faces[currentFace]) activeFaceTitle.textContent = activeShape.name || activeDef.label;
+            } else {
+                statusEl.title = "No shapes in view";
+                if (activeFaceTitle) activeFaceTitle.textContent = "NO SHAPES";
             }
             markShapeIconDirty();
         }
@@ -8766,6 +8875,7 @@
         shapeSlider.addEventListener("input", () => selectAddShapeIndex(Number(shapeSlider.value)));
 
         polySlider.addEventListener("input", () => {
+            if (!currentShapeId) return;
             shapePolyLevels[currentShapeId] = Number(polySlider.value);
             updatePolyControl();
             rebuildShapeMeshWithoutMovingView();
@@ -11210,9 +11320,14 @@
                 }
             });
 
-            const currentStore = getShapeStore(currentShapeId);
-            faces = currentStore.faces;
-            currentFace = Math.max(0, Math.min(faces.length - 1, currentStore.currentFace));
+            if (currentShapeId) {
+                const currentStore = getShapeStore(currentShapeId);
+                faces = currentStore.faces;
+                currentFace = Math.max(0, Math.min(faces.length - 1, currentStore.currentFace));
+            } else {
+                faces = [];
+                currentFace = 0;
+            }
         }
 
         function boot() {
