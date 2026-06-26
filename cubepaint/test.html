@@ -2990,6 +2990,193 @@
             }
         }
 
+
+
+        /* Scene strip: tiny click-to-select shape dock plus add/delete controls. */
+        .top {
+            grid-template-columns: max-content minmax(92px, 150px) minmax(54px, 220px) minmax(76px, 170px) minmax(120px, 1fr) max-content !important;
+        }
+
+        .shape-fader {
+            grid-column: 2 !important;
+            max-width: 150px !important;
+        }
+
+        .shape-cycle-current {
+            grid-template-columns: 22px minmax(0, 1fr) !important;
+            gap: 3px !important;
+            padding: 0 4px !important;
+        }
+
+        .shape-cycle-current::after {
+            display: none !important;
+        }
+
+        .shape-icon-canvas {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .scene-shape-strip {
+            grid-column: 3 !important;
+            grid-row: 1 !important;
+            align-self: center !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            position: relative;
+            top: clamp(-3px, -0.35dvh, -1px);
+            min-width: 0;
+            max-width: 100%;
+            min-height: 28px;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(18px, 24px);
+            justify-content: start;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 3px;
+            overflow: hidden;
+            background: rgba(255, 246, 216, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 246, 216, 0.14);
+        }
+
+        .scene-shape-chip,
+        .scene-shape-add,
+        .scene-shape-delete {
+            width: 100%;
+            height: 22px;
+            min-width: 0;
+            border: 1px solid rgba(255, 246, 216, 0.32);
+            background: rgba(42, 7, 12, 0.72);
+            color: var(--paper);
+            display: grid;
+            place-items: center;
+            padding: 0;
+            cursor: pointer;
+            font: inherit;
+            font-size: 11px;
+            font-weight: 900;
+            line-height: 1;
+            box-shadow: none;
+            opacity: 0.86;
+        }
+
+        .scene-shape-chip:hover,
+        .scene-shape-add:hover,
+        .scene-shape-delete:hover {
+            opacity: 1;
+            border-color: var(--paper);
+            background: var(--ink);
+        }
+
+        .scene-shape-chip.active {
+            background: var(--paper);
+            color: var(--ink);
+            border-color: var(--paper);
+            opacity: 1;
+        }
+
+        .scene-shape-add {
+            background: var(--accent);
+            border-color: var(--paper);
+            font-size: 15px;
+        }
+
+        .scene-shape-delete {
+            background: transparent;
+            color: rgba(255, 246, 216, 0.78);
+            font-size: 14px;
+        }
+
+        .scene-shape-empty {
+            width: 100%;
+            height: 22px;
+            display: grid;
+            place-items: center;
+            color: rgba(255, 246, 216, 0.58);
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+
+        .top-center.selected-shape-control {
+            grid-column: 4 !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+            justify-items: center !important;
+        }
+
+        .selected-shape-remove {
+            display: none !important;
+        }
+
+        .top-param-controls {
+            grid-column: 5 !important;
+        }
+
+        .status {
+            grid-column: 6 !important;
+        }
+
+        @media (max-width: 1160px) {
+            .top {
+                grid-template-columns: minmax(48px, 0.62fr) minmax(82px, 120px) minmax(48px, 180px) minmax(58px, 0.68fr) minmax(80px, 1fr) minmax(28px, auto) !important;
+            }
+
+            .shape-fader {
+                max-width: 120px !important;
+            }
+
+            .scene-shape-strip {
+                grid-auto-columns: minmax(17px, 22px);
+                min-height: 25px;
+            }
+
+            .scene-shape-chip,
+            .scene-shape-add,
+            .scene-shape-delete {
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .top {
+                grid-template-columns: minmax(32px, 0.52fr) minmax(70px, 100px) minmax(42px, 128px) minmax(44px, 0.62fr) minmax(58px, 1fr) minmax(22px, auto) !important;
+            }
+
+            .shape-fader {
+                max-width: 100px !important;
+            }
+
+            .shape-cycle-current {
+                grid-template-columns: 16px minmax(0, 1fr) !important;
+            }
+
+            .shape-icon-canvas {
+                width: 16px !important;
+                height: 16px !important;
+            }
+
+            .scene-shape-strip {
+                grid-auto-columns: minmax(15px, 19px);
+                gap: 2px;
+                padding: 1px 2px;
+                min-height: 22px;
+            }
+
+            .scene-shape-chip,
+            .scene-shape-add,
+            .scene-shape-delete {
+                height: 18px;
+                font-size: 9px;
+            }
+
+            .scene-shape-add {
+                font-size: 13px;
+            }
+        }
+
     </style>
 </head>
 
@@ -3010,6 +3197,7 @@
                 <div class="shape-select-menu" id="shapeSelectMenu" role="listbox" hidden></div>
                 <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
+            <div class="scene-shape-strip" id="sceneShapeStrip" aria-label="shapes in view"></div>
             <div class="top-center selected-shape-control">
                 <span id="activeFaceTitle">FRONT</span>
                 <button class="selected-shape-remove" id="removeShapeBtn" type="button" title="Remove selected shape" aria-label="Remove selected shape">REMOVE</button>
@@ -3323,7 +3511,7 @@
         const DEFAULT_SHAPE_SPACING = 2.35;
         const TRANSFORM_HANDLE_LENGTH = 1.72;
         const TRANSFORM_HANDLE_RADIUS = 1.22;
-        const TRANSFORM_HANDLE_COLORS = { x: 0xff4d4d, y: 0x5dff70, z: 0x5da5ff };
+        const TRANSFORM_HANDLE_COLORS = { x: 0xff4d4d, y: 0x5dff70, z: 0x5da5ff, screen: 0xfff6d8, xz: 0xf0c85b };
         const SHAPE_OPTION_DEFAULTS = {
             corner: 0,
             thickness: 16,
@@ -3470,6 +3658,7 @@
         const statusEl = document.getElementById("status");
         const activeFaceTitle = document.getElementById("activeFaceTitle");
         const removeShapeBtn = document.getElementById("removeShapeBtn");
+        const sceneShapeStrip = document.getElementById("sceneShapeStrip");
         const brushReadout = document.getElementById("brushReadout");
         const faceList = document.getElementById("faceList");
         const previewDebug = document.getElementById("previewDebug");
@@ -4448,6 +4637,38 @@
             camera.rotation.order = "YXZ";
             camera.rotation.set(cameraVerticalOrbit, cameraHorizontalOrbit, 0, "YXZ");
             camera.updateProjectionMatrix();
+        }
+
+        function focusActiveShapeInView() {
+            const runtime = sceneShapeRuntime.get(currentShapeId);
+            if (!runtime?.root || !camera) {
+                setStatus("NO SHAPE");
+                return false;
+            }
+            const box = new THREE.Box3().setFromObject(runtime.root);
+            if (box.isEmpty()) {
+                setStatus("NO SHAPE");
+                return false;
+            }
+            const center = new THREE.Vector3();
+            const size = new THREE.Vector3();
+            box.getCenter(center);
+            box.getSize(size);
+            const radius = Math.max(0.75, size.length() * 0.5);
+            let direction = warudoCameraPosition.clone().sub(center);
+            if (direction.lengthSq() < 0.0001) direction.copy(CAMERA_BASE_VECTOR);
+            direction.normalize();
+            const distance = Math.max(2.4, Math.min(18, radius * 3.1));
+            warudoCameraPosition.copy(center).add(direction.multiplyScalar(distance));
+            cameraDistance = distance;
+            cameraPanOffset.copy(center);
+            setWarudoLookAt(center);
+            applyCameraDistance();
+            syncTransformControls();
+            updateDebugInfo();
+            setStatus("FRAME SHAPE");
+            scheduleSave();
+            return true;
         }
 
         function resizeRenderer() {
@@ -6316,14 +6537,82 @@
             if (shapePrevBtn) {
                 shapePrevBtn.disabled = atStart;
                 shapePrevBtn.setAttribute("aria-disabled", String(atStart));
-                shapePrevBtn.title = atStart ? "first add shape" : "previous add shape";
+                shapePrevBtn.title = atStart ? "first shape type" : "previous shape type";
             }
 
             if (shapeNextBtn) {
                 shapeNextBtn.disabled = atEnd;
                 shapeNextBtn.setAttribute("aria-disabled", String(atEnd));
-                shapeNextBtn.title = atEnd ? "last add shape" : "next add shape";
+                shapeNextBtn.title = atEnd ? "last shape type" : "next shape type";
             }
+        }
+
+        function shapeMiniSymbol(shapeOrDef) {
+            const raw = typeof shapeOrDef === "string" ? shapeOrDef : (shapeOrDef?.shapeId || shapeOrDef?.id || "cube");
+            const type = raw === "donut" ? "doughnut" : raw;
+            if (["sphere", "capsule", "doughnut"].includes(type)) return "●";
+            if (["cylinder", "brick", "book"].includes(type)) return "▰";
+            if (["cone", "pyramid", "tetrahedron"].includes(type)) return "▲";
+            if (["diamond"].includes(type)) return "◆";
+            return "■";
+        }
+
+        function renderSceneShapeStrip() {
+            if (!sceneShapeStrip) return;
+            sceneShapeStrip.innerHTML = "";
+
+            const maxChips = 8;
+            const visibleShapes = sceneShapes.slice(Math.max(0, sceneShapes.length - maxChips));
+            if (!visibleShapes.length) {
+                const empty = document.createElement("div");
+                empty.className = "scene-shape-empty";
+                empty.textContent = "EMPTY";
+                sceneShapeStrip.append(empty);
+            }
+
+            visibleShapes.forEach((shape) => {
+                const chip = document.createElement("button");
+                chip.type = "button";
+                chip.className = `scene-shape-chip ${shape.id === currentShapeId ? "active" : ""}`;
+                chip.title = `Select ${shape.name || shapeDefById(shape.shapeId).label}`;
+                chip.setAttribute("aria-label", chip.title);
+                chip.textContent = shapeMiniSymbol(shape);
+                chip.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    activateSceneShape(shape.id, { flash: true });
+                });
+                sceneShapeStrip.append(chip);
+            });
+
+            if (getSceneShape(currentShapeId)) {
+                const del = document.createElement("button");
+                del.type = "button";
+                del.className = "scene-shape-delete";
+                del.title = "Remove selected shape";
+                del.setAttribute("aria-label", "Remove selected shape");
+                del.textContent = "×";
+                del.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    removeActiveSceneShape();
+                });
+                sceneShapeStrip.append(del);
+            }
+
+            const add = document.createElement("button");
+            add.type = "button";
+            add.className = "scene-shape-add";
+            const addDef = getSelectorShapeDef();
+            add.title = `Add ${addDef.label} to view`;
+            add.setAttribute("aria-label", add.title);
+            add.textContent = "+";
+            add.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                addSceneShapeByIndex(currentShapeIndex);
+            });
+            sceneShapeStrip.append(add);
         }
 
         function updateRemoveShapeButton() {
@@ -6380,6 +6669,7 @@
                 transformHandleDrag = null;
             }
             buildShapeMesh();
+            if (renderer && scene && camera) renderer.render(scene, camera);
             updateShapeReadout();
             loadFaceIntoEditor(true);
             setStatus(`REMOVED ${removedName}`);
@@ -6408,13 +6698,14 @@
             const addDef = getSelectorShapeDef();
             const activeDef = getCurrentShapeDef();
             const activeShape = getSceneShape(currentShapeId);
-            shapeNameReadout.textContent = `ADD ${addDef.label}`;
-            shapeSelectToggle.title = `add ${addDef.label.toLowerCase()} to the view`;
+            shapeNameReadout.textContent = addDef.label;
+            shapeSelectToggle.title = `${addDef.label} is the shape type added by the + button`;
             shapeSlider.value = String(currentShapeIndex);
             updateRangeProgress(shapeSlider);
             renderShapeDropdown();
             updateShapeCycleButtons();
             updateRemoveShapeButton();
+            renderSceneShapeStrip();
             updatePolyControl();
             updateShapeExtraControls();
             if (activeShape) {
@@ -6460,9 +6751,10 @@
             faces = ensureShapeFaces(currentShapeId);
             currentFace = Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace));
             buildShapeMesh();
+            if (renderer && scene && camera) renderer.render(scene, camera);
             updateShapeReadout();
             loadFaceIntoEditor(true);
-            setStatus(`ADD ${def.label}`);
+            setStatus(`+ ${def.label}`);
             scheduleSave();
         }
 
@@ -7732,6 +8024,29 @@
             transformHandleRoot.add(group);
         }
 
+        function addMovePlaneHandle(axis) {
+            const group = new THREE.Group();
+            group.userData.mode = "move";
+            group.userData.axis = axis;
+            group.userData.transformPlaneGroup = true;
+            const material = makeHandleMaterial(axis, axis === "screen" ? 0.24 : 0.28);
+            material.side = THREE.DoubleSide;
+            const edgeMaterial = makeHandleMaterial(axis, 0.78);
+            const size = axis === "screen" ? 0.44 : 0.5;
+            const plane = markTransformHandle(new THREE.Mesh(new THREE.PlaneGeometry(size, size), material), "move", axis);
+            const hit = markTransformHandle(new THREE.Mesh(new THREE.PlaneGeometry(size * 1.35, size * 1.35), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false, side: THREE.DoubleSide })), "move", axis);
+            const edge = markTransformHandle(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(size, size)), edgeMaterial), "move", axis);
+            if (axis === "xz") {
+                group.rotation.x = -Math.PI / 2;
+                group.position.set(0, -0.42, 0);
+            } else {
+                group.userData.billboardToCamera = true;
+                group.position.set(0, 0, 0.02);
+            }
+            group.add(plane, hit, edge);
+            transformHandleRoot.add(group);
+        }
+
         function addRotateHandle(axis) {
             const material = makeHandleMaterial(axis, 0.78);
             const torus = markTransformHandle(new THREE.Mesh(new THREE.TorusGeometry(TRANSFORM_HANDLE_RADIUS, 0.018, 8, 96), material), "rotate", axis);
@@ -7759,6 +8074,8 @@
             addMoveHandle("x", new THREE.Vector3(1, 0, 0));
             addMoveHandle("y", new THREE.Vector3(0, 1, 0));
             addMoveHandle("z", new THREE.Vector3(0, 0, 1));
+            addMovePlaneHandle("screen");
+            addMovePlaneHandle("xz");
             addRotateHandle("x");
             addRotateHandle("y");
             addRotateHandle("z");
@@ -7791,6 +8108,9 @@
                 const distance = camera ? Math.max(2, camera.position.distanceTo(shapeRoot.position)) : DEFAULT_CAMERA_DISTANCE;
                 const scale = Math.max(0.75, Math.min(2.8, distance / DEFAULT_CAMERA_DISTANCE));
                 root.scale.setScalar(scale * 0.7);
+                root.children.forEach((child) => {
+                    if (child.userData?.billboardToCamera && camera) child.quaternion.copy(camera.quaternion);
+                });
                 updateTransformControlsMode();
             }
         }
@@ -7798,7 +8118,8 @@
         function transformAxisVector(axis) {
             if (axis === "x") return new THREE.Vector3(1, 0, 0);
             if (axis === "y") return new THREE.Vector3(0, 1, 0);
-            return new THREE.Vector3(0, 0, 1);
+            if (axis === "z") return new THREE.Vector3(0, 0, 1);
+            return null;
         }
 
         function worldToScreen(point) {
@@ -7829,14 +8150,17 @@
             const mode = handle.userData.mode || transformMode;
             const rootScreen = worldToScreen(shapeRoot.position);
             const axisVector = transformAxisVector(axis);
-            const axisScreenEnd = worldToScreen(shapeRoot.position.clone().add(axisVector));
-            const screenAxis = {
-                x: axisScreenEnd.x - rootScreen.x,
-                y: axisScreenEnd.y - rootScreen.y
-            };
-            const screenAxisLen = Math.hypot(screenAxis.x, screenAxis.y) || 1;
-            screenAxis.x /= screenAxisLen;
-            screenAxis.y /= screenAxisLen;
+            let screenAxis = { x: 1, y: 0 };
+            if (axisVector) {
+                const axisScreenEnd = worldToScreen(shapeRoot.position.clone().add(axisVector));
+                screenAxis = {
+                    x: axisScreenEnd.x - rootScreen.x,
+                    y: axisScreenEnd.y - rootScreen.y
+                };
+                const screenAxisLen = Math.hypot(screenAxis.x, screenAxis.y) || 1;
+                screenAxis.x /= screenAxisLen;
+                screenAxis.y /= screenAxisLen;
+            }
             const pointerAngle = Math.atan2(event.clientY - rootScreen.y, event.clientX - rootScreen.x);
             transformHandleDrag = {
                 pointerId: event.pointerId,
@@ -7863,13 +8187,36 @@
             if (drag.mode === "move") {
                 const dx = event.clientX - drag.startPointer.x;
                 const dy = event.clientY - drag.startPointer.y;
-                const pixels = dx * drag.screenAxis.x + dy * drag.screenAxis.y;
                 const distance = camera ? Math.max(1, camera.position.distanceTo(shapeRoot.position)) : DEFAULT_CAMERA_DISTANCE;
-                const worldDelta = pixels * 0.0065 * Math.max(0.75, distance / DEFAULT_CAMERA_DISTANCE);
-                const next = drag.startPosition.clone().add(drag.axisVector.clone().multiplyScalar(worldDelta));
+                const worldScale = 0.0065 * Math.max(0.75, distance / DEFAULT_CAMERA_DISTANCE);
+                let next = drag.startPosition.clone();
+
+                if (drag.axis === "screen") {
+                    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+                    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+                    next.add(right.multiplyScalar(dx * worldScale));
+                    next.add(up.multiplyScalar(-dy * worldScale));
+                } else if (drag.axis === "xz") {
+                    const right = getWarudoRightVector();
+                    const forward = getWarudoForwardVector(false);
+                    forward.y = 0;
+                    if (forward.lengthSq() < 0.0001) forward.set(0, 0, -1);
+                    forward.normalize();
+                    next.add(right.multiplyScalar(dx * worldScale));
+                    next.add(forward.multiplyScalar(-dy * worldScale));
+                    next.y = drag.startPosition.y;
+                } else {
+                    const pixels = dx * drag.screenAxis.x + dy * drag.screenAxis.y;
+                    const worldDelta = pixels * worldScale;
+                    next.add(drag.axisVector.clone().multiplyScalar(worldDelta));
+                }
+
                 if (transformSnapActive()) {
                     const step = 0.25;
-                    next[drag.axis] = Math.round(next[drag.axis] / step) * step;
+                    const axes = drag.axis === "screen" ? ["x", "y", "z"] : (drag.axis === "xz" ? ["x", "z"] : [drag.axis]);
+                    axes.forEach((axisName) => {
+                        next[axisName] = Math.round(next[axisName] / step) * step;
+                    });
                 }
                 shapeRoot.position.copy(next);
             } else {
@@ -8394,7 +8741,7 @@
         }
 
         function startPreviewDrag(event) {
-            if (!webglAvailable || !renderer || !sceneShapeRuntime.size) return;
+            if (!webglAvailable || !renderer) return;
             stage.focus?.();
             previewMoved = false;
             previewPointerStart = { x: event.clientX, y: event.clientY };
@@ -8442,7 +8789,7 @@
         }
 
         function movePreviewDrag(event) {
-            if (!previewDragging || !sceneShapeRuntime.size) return;
+            if (!previewDragging) return;
             if (previewDragging === "transform") {
                 event.preventDefault();
                 updateTransformHandleDrag(event);
@@ -8863,7 +9210,8 @@
         shapeSelectToggle?.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();
-            addSceneShapeByIndex(currentShapeIndex);
+            cycleShape(1);
+            setStatus(getSelectorShapeDef().label);
         });
 
         removeShapeBtn?.addEventListener("click", (event) => {
@@ -10527,13 +10875,13 @@
 
             if (!mod && !event.altKey && !event.shiftKey && !isSliderTarget(event.target) && event.key === "ArrowLeft") {
                 event.preventDefault();
-                if (cycleShape(-1)) setStatus(`ADD ${getSelectorShapeDef().label}`);
+                if (cycleShape(-1)) setStatus(getSelectorShapeDef().label);
                 return;
             }
 
             if (!mod && !event.altKey && !event.shiftKey && !isSliderTarget(event.target) && event.key === "ArrowRight") {
                 event.preventDefault();
-                if (cycleShape(1)) setStatus(`ADD ${getSelectorShapeDef().label}`);
+                if (cycleShape(1)) setStatus(getSelectorShapeDef().label);
                 return;
             }
 
@@ -10569,6 +10917,12 @@
             if (mod && key === "v") {
                 event.preventDefault();
                 pasteToCurrentFace();
+                return;
+            }
+
+            if (!mod && !event.altKey && key === "f") {
+                event.preventDefault();
+                focusActiveShapeInView();
                 return;
             }
 
@@ -10644,26 +10998,31 @@
             const dt = Math.min((now - lastTime) / 1000, 0.05);
             lastTime = now;
 
-            if (webglAvailable && renderer && scene && camera && sceneShapeRuntime.size) {
-                const xSpeed = readSpeedSlider("xSpeed");
-                const ySpeed = readSpeedSlider("ySpeed");
-                const previewInterval = 1000 / Math.max(1, getGifFpsValue());
-                if (!previewFpsTickTime) previewFpsTickTime = now;
-                const elapsed = now - previewFpsTickTime;
+            if (webglAvailable && renderer && scene && camera) {
+                if (sceneShapeRuntime.size) {
+                    const xSpeed = readSpeedSlider("xSpeed");
+                    const ySpeed = readSpeedSlider("ySpeed");
+                    const previewInterval = 1000 / Math.max(1, getGifFpsValue());
+                    if (!previewFpsTickTime) previewFpsTickTime = now;
+                    const elapsed = now - previewFpsTickTime;
 
-                if (elapsed >= previewInterval || elapsed < 0) {
-                    const tickDt = Math.min(elapsed / 1000, 0.25);
-                    sceneShapeRuntime.forEach((runtime) => {
-                        if (!runtime?.mesh) return;
-                        runtime.mesh.rotation.y += tickDt * xSpeed;
-                        runtime.mesh.rotation.x += tickDt * ySpeed;
-                        applyVertexWobbleToMesh(runtime.mesh, now);
-                    });
-                    previewFpsTickTime = now - (elapsed % previewInterval);
+                    if (elapsed >= previewInterval || elapsed < 0) {
+                        const tickDt = Math.min(elapsed / 1000, 0.25);
+                        sceneShapeRuntime.forEach((runtime) => {
+                            if (!runtime?.mesh) return;
+                            runtime.mesh.rotation.y += tickDt * xSpeed;
+                            runtime.mesh.rotation.x += tickDt * ySpeed;
+                            applyVertexWobbleToMesh(runtime.mesh, now);
+                        });
+                        previewFpsTickTime = now - (elapsed % previewInterval);
+                    }
+
+                    syncTransformControls();
+                    updateDebugInfo();
+                } else {
+                    if (transformHandleRoot) transformHandleRoot.visible = false;
+                    previewFpsTickTime = 0;
                 }
-
-                syncTransformControls();
-                updateDebugInfo();
                 renderer.render(scene, camera);
             }
 
