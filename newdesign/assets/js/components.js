@@ -32,13 +32,8 @@ const XPHomepage = (() => {
     </div>
   `;
 
-  const makeNotepadWindow = ({ title, greetingLines, actions = [] }) => {
+  const makeNotepadWindow = ({ title, greetingLines }) => {
     const lines = Array.isArray(greetingLines) ? greetingLines.join('\n') : greetingLines;
-    const actionMarkup = actions.length
-      ? `<div class="notepad-actions">${actions
-          .map((action) => `<button type="button" data-action="${escapeHTML(action.id)}">${escapeHTML(action.label)}</button>`)
-          .join('')}</div>`
-      : '';
 
     return `
       <article class="window xp-notepad" role="region" aria-label="${escapeHTML(title)}">
@@ -46,7 +41,6 @@ const XPHomepage = (() => {
         <div class="window-body">
           ${makeMenuBar()}
           <pre class="notepad-paper" id="notepad-paper">${escapeHTML(lines)}</pre>
-          ${actionMarkup}
           ${makeStatusBar()}
         </div>
       </article>
