@@ -1,7 +1,7 @@
-import { node } from "./dom.js";
+import { createElement } from "./dom.js";
 
 export function createArt({ src, alt }) {
-  return node("figure", { className: "desktop__art-wrap" }, [
-    node("img", { className: "desktop__art", src, alt, decoding: "async" })
+  return createElement("figure", { className: "desktop-art" }, [
+    createElement("img", { className: "desktop-art__image", src, alt, decoding: "async" })
   ]);
 }

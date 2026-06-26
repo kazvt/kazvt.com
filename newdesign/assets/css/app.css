@@ -2,15 +2,19 @@
   --desktop-cell: 24px;
   --desktop-light: rgba(255, 255, 255, 0.72);
   --desktop-shadow: rgba(0, 0, 0, 0.24);
-  --desktop-font: Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
-  --caption-font: "Trebuchet MS", Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
-  --palette-caption-font: Verdana, Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
-  --xp-gradient: rgb(31, 47, 134) 0px, rgb(49, 101, 196) 3%, rgb(54, 130, 229) 6%, rgb(68, 144, 230) 10%, rgb(56, 131, 229) 12%, rgb(43, 113, 224) 15%, rgb(38, 99, 218) 18%, rgb(35, 91, 214) 20%, rgb(34, 88, 213) 23%, rgb(33, 87, 214) 38%, rgb(36, 93, 219) 54%, rgb(37, 98, 223) 86%, rgb(36, 95, 220) 89%, rgb(33, 88, 212) 92%, rgb(29, 78, 192) 95%, rgb(25, 65, 165) 98%;
-  --titlebar-gradient: 180deg, #0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 96%, #003dd7;
-  --titlebar-gradient-inactive: rgb(118, 151, 231) 0%, rgb(126, 158, 227) 3%, rgb(148, 175, 232) 6%, rgb(151, 180, 233) 8%, rgb(130, 165, 228) 14%, rgb(124, 159, 226) 17%, rgb(121, 150, 222) 25%, rgb(123, 153, 225) 56%, rgb(130, 169, 233) 81%, rgb(128, 165, 231) 89%, rgb(123, 150, 225) 94%, rgb(122, 147, 223) 97%, rgb(171, 186, 227) 100%;
-  --tile-box-shadow: rgb(0 0 0 / 30%) -1px 0px inset, rgb(255 255 255 / 20%) 1px 1px 1px inset;
-  --tile-box-shadow-focus: rgb(0 0 0 / 20%) 0px 0px 1px 1px inset, rgb(0 0 0 / 70%) 1px 0px 1px inset;
-  --tray-gradient: 180deg, #16c3ff 0%, #13a8ee 10%, #0b8ddd 45%, #0b83d1 70%, #0c98e8 100%;
+  --font-ui: Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
+  --font-notepad: "Lucida Console", "Courier New", monospace;
+  --asset-start-button: url("../img/xp/start_btn_normal.png");
+  --asset-notepad-icon: url("https://win32.run/images/xp/icons/Notepad.png");
+  --asset-tray-tour: url("https://win32.run/images/xp/icons/TourXP.png");
+  --asset-tray-security: url("https://win32.run/images/xp/icons/SecurityError.png");
+  --asset-tray-volume: url("https://win32.run/images/xp/icons/Volume.png");
+  --xp-taskbar-gradient: rgb(31, 47, 134) 0px, rgb(49, 101, 196) 3%, rgb(54, 130, 229) 6%, rgb(68, 144, 230) 10%, rgb(56, 131, 229) 12%, rgb(43, 113, 224) 15%, rgb(38, 99, 218) 18%, rgb(35, 91, 214) 20%, rgb(34, 88, 213) 23%, rgb(33, 87, 214) 38%, rgb(36, 93, 219) 54%, rgb(37, 98, 223) 86%, rgb(36, 95, 220) 89%, rgb(33, 88, 212) 92%, rgb(29, 78, 192) 95%, rgb(25, 65, 165) 98%;
+  --xp-task-tile: 180deg, #6da7f4 0%, #4088eb 5%, #2d6fda 38%, #1d5ac3 76%, #194aa6 100%;
+  --xp-task-tile-active: 180deg, #255abf 0%, #1f58bc 40%, #194ca5 80%, #153c86 100%;
+  --xp-tray-gradient: 180deg, #16c3ff 0%, #13a8ee 10%, #0b8ddd 45%, #0b83d1 70%, #0c98e8 100%;
+  --xp-task-shadow: rgb(0 0 0 / 30%) -1px 0 inset, rgb(255 255 255 / 20%) 1px 1px 1px inset;
+  --xp-task-shadow-active: rgb(0 0 0 / 20%) 0 0 1px 1px inset, rgb(0 0 0 / 70%) 1px 0 1px inset;
 }
 
 html,
@@ -20,7 +24,7 @@ body {
 
 body {
   margin: 0;
-  font-family: var(--desktop-font);
+  font-family: var(--font-ui);
   font-size: 11px;
   background-color: #d6d6d6;
   background-image: linear-gradient(45deg, var(--desktop-light) 25%, transparent 25%), linear-gradient(-45deg, var(--desktop-light) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--desktop-light) 75%), linear-gradient(-45deg, transparent 75%, var(--desktop-light) 75%);
@@ -28,36 +32,35 @@ body {
   background-size: var(--desktop-cell) var(--desktop-cell);
 }
 
-.desktop__window-wrap,
-.desktop__art-wrap,
-.desktop__art,
+.desktop-layout,
+.desktop-window,
+.desktop-art,
+.desktop-art__image,
 .notepad-menu,
-.notepad-menu__item,
+.notepad-menu *,
 .notepad-page,
-.taskbar-shell,
-.taskbar-shell *,
-.taskbar-shell *::before,
-.taskbar-shell *::after {
+.taskbar,
+.taskbar * {
   box-sizing: border-box;
 }
 
-.desktop {
+.desktop-layout {
   display: grid;
-  grid-template-columns: minmax(20px, 1fr) minmax(300px, 620px) minmax(190px, 360px) minmax(20px, 1fr);
+  grid-template-columns: minmax(18px, 1fr) minmax(300px, 620px) minmax(190px, 360px) minmax(18px, 1fr);
   align-items: center;
   gap: clamp(16px, 4vw, 58px);
+  min-height: 100vh;
   padding: clamp(18px, 4vw, 46px) clamp(18px, 4vw, 46px) 58px;
-  isolation: isolate;
 }
 
-.desktop__window-wrap {
+.desktop-window {
   grid-column: 2;
   justify-self: center;
   width: min(100%, 620px);
   filter: drop-shadow(9px 14px 13px var(--desktop-shadow));
 }
 
-.desktop__art-wrap {
+.desktop-art {
   grid-column: 3;
   align-self: end;
   justify-self: center;
@@ -66,19 +69,15 @@ body {
   margin: 0;
   padding: 0;
   pointer-events: none;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
 }
 
-.desktop__art {
+.desktop-art__image {
   display: block;
   width: 100%;
   height: auto;
-  image-rendering: auto;
-  filter: drop-shadow(10px 16px 10px rgba(0, 0, 0, 0.24));
   background: transparent;
   border: 0;
+  filter: drop-shadow(10px 16px 10px rgba(0, 0, 0, 0.24));
 }
 
 .notepad-window {
@@ -88,13 +87,12 @@ body {
 .notepad-menu {
   display: flex;
   align-items: center;
-  gap: 0;
   height: 19px;
   margin: -2px -2px 3px;
   padding: 1px 3px 0;
   background: var(--surface);
   border-bottom: 1px solid #d8d2bd;
-  font-family: var(--desktop-font);
+  font-family: var(--font-ui);
   font-size: 11px;
 }
 
@@ -123,7 +121,7 @@ body {
   box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
   background: #fff;
   color: #111;
-  font-family: "Lucida Console", "Courier New", monospace;
+  font-family: var(--font-notepad);
   font-size: 13px;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -133,74 +131,99 @@ body {
   margin-top: 3px;
 }
 
-.status-bar-field {
-  font-family: var(--palette-caption-font);
-  font-weight: 700;
-  font-size: 8pt;
-  white-space: nowrap;
-}
-
-.taskbar-shell {
-  background-image: linear-gradient(var(--xp-gradient));
+.taskbar {
+  background-image: linear-gradient(var(--xp-taskbar-gradient));
   border-top: 1px solid #5f9cff;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.38), 0 -1px 4px rgba(0, 0, 0, 0.24);
-  font-family: var(--desktop-font);
+  font-family: var(--font-ui);
 }
 
-.taskbar-start {
-  background-image: var(--start-button-image);
+.taskbar__start {
+  background-image: var(--asset-start-button);
   background-position: left top;
   background-repeat: no-repeat;
   background-size: 100px 30px;
   border: 0;
 }
 
-.taskbar-start:active {
+.taskbar__start:active {
   filter: brightness(0.92);
 }
 
-.taskbar-app {
+.taskbar__task {
   border: 1px solid rgba(0, 35, 119, 0.72);
-  background-image: linear-gradient(180deg, #6da7f4 0%, #4088eb 5%, #2d6fda 38%, #1d5ac3 76%, #194aa6 100%);
-  box-shadow: var(--tile-box-shadow);
+  background-image: linear-gradient(var(--xp-task-tile));
+  box-shadow: var(--xp-task-shadow);
   color: #fff;
   text-align: left;
   text-shadow: 1px 1px rgba(0, 0, 0, 0.55);
 }
 
-.taskbar-app:active,
-.taskbar-app.is-active {
-  background-image: linear-gradient(180deg, #255abf 0%, #1f58bc 40%, #194ca5 80%, #153c86 100%);
-  box-shadow: var(--tile-box-shadow-focus);
+.taskbar__task.is-active {
+  background-image: linear-gradient(var(--xp-task-tile-active));
+  box-shadow: var(--xp-task-shadow-active);
 }
 
-.taskbar-tray {
-  background-image: linear-gradient(var(--tray-gradient));
+.taskbar__task-icon,
+.taskbar__tray-icon {
+  display: block;
+  flex: 0 0 auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.taskbar__task-icon {
+  width: 16px;
+  height: 16px;
+  background-image: var(--asset-notepad-icon);
+}
+
+.taskbar__tray {
+  background-image: linear-gradient(var(--xp-tray-gradient));
   border-left: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow: inset 1px 0 rgba(255, 255, 255, 0.35), inset 0 1px rgba(255, 255, 255, 0.38);
 }
 
-.taskbar-clock {
+.taskbar__tray-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.taskbar__tray-icon--tour {
+  background-image: var(--asset-tray-tour);
+}
+
+.taskbar__tray-icon--security {
+  background-image: var(--asset-tray-security);
+}
+
+.taskbar__tray-icon--volume {
+  background-image: var(--asset-tray-volume);
+}
+
+.taskbar__clock {
   text-shadow: 1px 1px rgba(0, 0, 0, 0.45);
 }
 
 @media (max-width: 840px) {
-  .desktop {
+  .desktop-layout {
     grid-template-columns: 1fr;
     align-items: end;
     gap: 18px;
   }
 
-  .desktop__window-wrap,
-  .desktop__art-wrap {
+  .desktop-window,
+  .desktop-art {
     grid-column: 1;
   }
 
-  .desktop__window-wrap {
+  .desktop-window {
     order: 1;
   }
 
-  .desktop__art-wrap {
+  .desktop-art {
     order: 2;
     width: min(56vw, 260px);
     justify-self: end;
@@ -208,22 +231,23 @@ body {
 }
 
 @media (max-width: 560px) {
-  .taskbar-app {
+  .taskbar__task {
     width: 142px;
     min-width: 0;
   }
 
-  .taskbar-tray {
+  .taskbar__tray {
     min-width: 84px;
   }
 
-  .taskbar-tray img:nth-child(-n + 2) {
+  .taskbar__tray-icon--tour,
+  .taskbar__tray-icon--security {
     display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .desktop {
+  .desktop-layout {
     padding: 12px 12px 50px;
   }
 
