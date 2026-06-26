@@ -2820,6 +2820,110 @@
             }
         }
 
+
+        /* Multi-shape selection/readout polish. */
+        .top-center.selected-shape-control {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            align-items: center !important;
+            gap: clamp(4px, 0.65vw, 7px) !important;
+            padding: 3px clamp(4px, 0.7vw, 8px) !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+
+        #activeFaceTitle {
+            display: block;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .selected-shape-remove {
+            height: clamp(18px, 3.2dvh, 24px);
+            min-width: clamp(38px, 5.8vw, 58px);
+            border: 1px solid currentColor;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-size: clamp(7px, 0.8vw, 9px);
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            line-height: 1;
+            padding: 0 clamp(3px, 0.5vw, 6px);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+        }
+
+        .selected-shape-remove:hover:not(:disabled) {
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        .selected-shape-remove:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .shape-instance-summary {
+            min-width: 0;
+            padding: clamp(2px, 0.45dvh, 4px) clamp(5px, 0.75vw, 8px);
+            border-bottom: 2px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            font-size: clamp(8px, 1vw, 11px);
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .face-list > .shape-instance-summary + .face-card {
+            margin-top: 2px;
+        }
+
+        /* Give the compact canvas action row a grid gutter even at small heights or zoom levels. */
+        .toolbar {
+            padding-bottom: clamp(7px, 1.05dvh, 12px) !important;
+        }
+
+        .toolbar > .copy-paste {
+            padding-bottom: clamp(3px, 0.65dvh, 7px) !important;
+        }
+
+        @media (max-width: 720px), (max-height: 680px) {
+            .toolbar {
+                padding: clamp(5px, 0.9dvh, 8px) !important;
+                padding-bottom: clamp(8px, 1.25dvh, 13px) !important;
+            }
+
+            .toolbar > .copy-paste {
+                gap: clamp(4px, 0.9vw, 6px) !important;
+                padding-bottom: clamp(4px, 0.8dvh, 8px) !important;
+            }
+
+            .toolbar > .copy-paste .btn,
+            .toolbar > .copy-paste .file-btn {
+                height: clamp(28px, 4.9dvh, 36px) !important;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .selected-shape-remove {
+                min-width: 34px;
+                font-size: 0;
+            }
+
+            .selected-shape-remove::after {
+                content: "DEL";
+                font-size: 8px;
+            }
+        }
+
     </style>
 </head>
 
@@ -2840,7 +2944,10 @@
                 <div class="shape-select-menu" id="shapeSelectMenu" role="listbox" hidden></div>
                 <input id="shapeSlider" type="hidden" min="0" max="0" step="1" value="0" aria-label="shape selector" />
             </div>
-            <div class="top-center" id="activeFaceTitle">FRONT</div>
+            <div class="top-center selected-shape-control">
+                <span id="activeFaceTitle">FRONT</span>
+                <button class="selected-shape-remove" id="removeShapeBtn" type="button" title="Remove selected shape" aria-label="Remove selected shape">REMOVE</button>
+            </div>
             <div class="top-param-controls" id="topParamControls">
                 <div class="poly-fader" id="polyFader" title="POLY: STD" hidden>
                     <span class="top-control-readout">POLY: <strong id="polyReadout">STD</strong></span>
@@ -3296,6 +3403,7 @@
         const toolbar = document.querySelector(".toolbar");
         const statusEl = document.getElementById("status");
         const activeFaceTitle = document.getElementById("activeFaceTitle");
+        const removeShapeBtn = document.getElementById("removeShapeBtn");
         const brushReadout = document.getElementById("brushReadout");
         const faceList = document.getElementById("faceList");
         const previewDebug = document.getElementById("previewDebug");
@@ -4994,36 +5102,102 @@
             return Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, solved));
         }
 
+        function solvePhotoAspectScaleSnap(width, height, edge, target, makeCandidate, driverDimension, aspectRatio) {
+            const useHeightDriver = driverDimension === "height";
+            const base = useHeightDriver ? height : width;
+            const step = Math.max(0.5, Math.abs(base) * 0.002);
+            const safeAspect = Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : Math.max(1, width) / Math.max(1, height);
+            const makeAspectSize = (driver) => {
+                if (useHeightDriver) {
+                    const nextH = Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, driver));
+                    return {
+                        width: Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, nextH * safeAspect)),
+                        height: nextH
+                    };
+                }
+                const nextW = Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, driver));
+                return {
+                    width: nextW,
+                    height: Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, nextW / safeAspect))
+                };
+            };
+            const bounds0 = photoLayerBounds(makeCandidate(width, height));
+            const size1 = makeAspectSize(base + step);
+            const bounds1 = photoLayerBounds(makeCandidate(size1.width, size1.height));
+            const derivative = (bounds1[edge] - bounds0[edge]) / step;
+            if (!Number.isFinite(derivative) || Math.abs(derivative) < 0.0001) return { width, height };
+            const solved = makeAspectSize(base + (target - bounds0[edge]) / derivative);
+            if (!Number.isFinite(solved.width) || !Number.isFinite(solved.height)) return { width, height };
+            return solved;
+        }
+
         function snapPhotoScaleToCanvas(width, height, options) {
             if (!options?.enabled) return { width, height };
             const makeCandidate = options.makeCandidate;
+            const canWidth = Boolean(options.horizontal);
+            const canHeight = Boolean(options.vertical);
+            const keepAspect = Boolean(options.keepAspect);
+            const aspectRatio = options.aspectRatio || width / Math.max(1, height);
             let snappedW = width;
             let snappedH = height;
-            const pickEdgeSnap = (bounds, dimension) => {
-                const axes = dimension === "width"
-                    ? [{ edge: "minX", target: 0 }, { edge: "maxX", target: FACE_SIZE }]
-                    : [{ edge: "minY", target: 0 }, { edge: "maxY", target: FACE_SIZE }];
-                return axes
-                    .map((candidate) => ({ ...candidate, distance: Math.abs(bounds[candidate.edge] - candidate.target) }))
-                    .filter((candidate) => Number.isFinite(candidate.distance) && candidate.distance <= PHOTO_CANVAS_EDGE_SNAP)
-                    .sort((a, b) => a.distance - b.distance)[0] || null;
+            const edgeTargets = [
+                { edge: "minX", target: 0 },
+                { edge: "maxX", target: FACE_SIZE },
+                { edge: "minY", target: 0 },
+                { edge: "maxY", target: FACE_SIZE }
+            ];
+            const distanceFor = (candidateW, candidateH, snap) => {
+                const bounds = photoLayerBounds(makeCandidate(candidateW, candidateH));
+                return Math.abs(bounds[snap.edge] - snap.target);
+            };
+            const nearbySnaps = (candidateW, candidateH) => {
+                const bounds = photoLayerBounds(makeCandidate(candidateW, candidateH));
+                return edgeTargets
+                    .map((snap) => ({ ...snap, distance: Math.abs(bounds[snap.edge] - snap.target) }))
+                    .filter((snap) => Number.isFinite(snap.distance) && snap.distance <= PHOTO_CANVAS_EDGE_SNAP)
+                    .sort((a, b) => a.distance - b.distance);
+            };
+            const applySnap = (snap) => {
+                const choices = [];
+                const currentDistance = distanceFor(snappedW, snappedH, snap);
+                if (keepAspect && (canWidth || canHeight)) {
+                    const solved = solvePhotoAspectScaleSnap(
+                        snappedW,
+                        snappedH,
+                        snap.edge,
+                        snap.target,
+                        makeCandidate,
+                        canWidth ? "width" : "height",
+                        aspectRatio
+                    );
+                    choices.push({ ...solved, distance: distanceFor(solved.width, solved.height, snap) });
+                } else {
+                    if (canWidth) {
+                        const solvedW = solvePhotoScaleSnapDimension(snappedW, snappedH, "width", snap.edge, snap.target, makeCandidate);
+                        choices.push({ width: solvedW, height: snappedH, distance: distanceFor(solvedW, snappedH, snap) });
+                    }
+                    if (canHeight) {
+                        const solvedH = solvePhotoScaleSnapDimension(snappedW, snappedH, "height", snap.edge, snap.target, makeCandidate);
+                        choices.push({ width: snappedW, height: solvedH, distance: distanceFor(snappedW, solvedH, snap) });
+                    }
+                }
+                const best = choices
+                    .filter((choice) => Number.isFinite(choice.width) && Number.isFinite(choice.height) && Number.isFinite(choice.distance))
+                    .sort((a, b) => (a.distance - b.distance) || (Math.abs(a.width - snappedW) + Math.abs(a.height - snappedH)) - (Math.abs(b.width - snappedW) + Math.abs(b.height - snappedH)))[0];
+                if (best && best.distance < currentDistance && best.distance <= PHOTO_CANVAS_EDGE_SNAP) {
+                    snappedW = Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, best.width));
+                    snappedH = Math.max(PHOTO_CANVAS_MIN_SIZE, Math.min(PHOTO_CANVAS_MAX_SIZE, best.height));
+                    return true;
+                }
+                return false;
             };
 
-            for (let pass = 0; pass < 2; pass++) {
-                const bounds = photoLayerBounds(makeCandidate(snappedW, snappedH));
-                if (options.horizontal) {
-                    const horizontalSnap = pickEdgeSnap(bounds, "width");
-                    if (horizontalSnap) {
-                        snappedW = solvePhotoScaleSnapDimension(snappedW, snappedH, "width", horizontalSnap.edge, horizontalSnap.target, makeCandidate);
-                    }
-                }
-                const nextBounds = photoLayerBounds(makeCandidate(snappedW, snappedH));
-                if (options.vertical) {
-                    const verticalSnap = pickEdgeSnap(nextBounds, "height");
-                    if (verticalSnap) {
-                        snappedH = solvePhotoScaleSnapDimension(snappedW, snappedH, "height", verticalSnap.edge, verticalSnap.target, makeCandidate);
-                    }
-                }
+            for (let pass = 0; pass < 3; pass++) {
+                const snaps = nearbySnaps(snappedW, snappedH);
+                if (!snaps.length) break;
+                let changed = false;
+                for (const snap of snaps) changed = applySnap(snap) || changed;
+                if (!changed) break;
             }
             return { width: snappedW, height: snappedH };
         }
@@ -5073,7 +5247,7 @@
             if (photoTransformDrag.mode === "move") {
                 layer.x = start.x + dx;
                 layer.y = start.y + dy;
-                snapPhotoLayerPositionToCanvas(layer, !event.shiftKey);
+                snapPhotoLayerPositionToCanvas(layer, !event.ctrlKey);
             } else if (photoTransformDrag.mode === "anchor") {
                 const local = photoWorldToLocal(start, point.x, point.y);
                 const snapped = snapPhotoAnchor(start, local.x, local.y, !event.shiftKey);
@@ -5186,9 +5360,11 @@
                     warpStart
                 );
                 const snappedSize = snapPhotoScaleToCanvas(nextW, nextH, {
-                    enabled: !event.shiftKey,
+                    enabled: !event.ctrlKey,
                     horizontal,
                     vertical,
+                    keepAspect: event.shiftKey,
+                    aspectRatio: start.width / Math.max(1, start.height),
                     makeCandidate
                 });
                 const candidate = makeCandidate(snappedSize.width, snappedSize.height);
@@ -5846,34 +6022,12 @@
             const def = getCurrentShapeDef();
             const activeShape = getSceneShape(currentShapeId);
             if (activeShape) {
-                const shapeCard = document.createElement("div");
-                shapeCard.className = "face-card active shape-instance-card";
-                shapeCard.title = "active shape instance";
-                const icon = document.createElement("canvas");
-                icon.width = 96;
-                icon.height = 96;
-                icon.style.imageRendering = "pixelated";
-                const iconCtx = icon.getContext("2d");
-                iconCtx.fillStyle = "#140306";
-                iconCtx.fillRect(0, 0, 96, 96);
-                iconCtx.fillStyle = "#fff6d8";
-                iconCtx.font = "900 18px monospace";
-                iconCtx.textAlign = "center";
-                iconCtx.textBaseline = "middle";
-                iconCtx.fillText(def.label.slice(0, 3), 48, 48);
-                const meta = document.createElement("div");
-                const name = document.createElement("div");
-                name.className = "face-name";
-                name.textContent = activeShape.name || def.label;
-                const file = document.createElement("div");
-                file.className = "face-file";
-                file.textContent = `${sceneShapes.length} SHAPE${sceneShapes.length === 1 ? "" : "S"} IN VIEW`;
-                const tile = document.createElement("div");
-                tile.className = "face-tile";
-                tile.textContent = "PER-SHAPE LAYERS BELOW";
-                meta.append(name, file, tile);
-                shapeCard.append(icon, meta);
-                faceList.append(shapeCard);
+                const summary = document.createElement("div");
+                summary.className = "shape-instance-summary";
+                summary.title = "selected shape / total shapes in view";
+                const countLabel = `${sceneShapes.length} SHAPE${sceneShapes.length === 1 ? "" : "S"}`;
+                summary.textContent = `${activeShape.name || def.label} (${countLabel})`;
+                faceList.append(summary);
             }
 
             faces.forEach((face, index) => {
@@ -6075,6 +6229,60 @@
             }
         }
 
+        function updateRemoveShapeButton() {
+            if (!removeShapeBtn) return;
+            const activeShape = getSceneShape(currentShapeId);
+            const canRemove = Boolean(activeShape && sceneShapes.length > 1);
+            removeShapeBtn.disabled = !canRemove;
+            removeShapeBtn.setAttribute("aria-disabled", String(!canRemove));
+            removeShapeBtn.title = canRemove
+                ? `Remove ${activeShape.name || getCurrentShapeDef().label} from the view`
+                : "Add another shape before removing this one";
+        }
+
+        function removeActiveSceneShape() {
+            const activeShape = getSceneShape(currentShapeId);
+            if (!activeShape) return false;
+            if (sceneShapes.length <= 1) {
+                setStatus("KEEP ONE SHAPE");
+                updateRemoveShapeButton();
+                return false;
+            }
+
+            saveEditorToFace(true, false);
+            saveCurrentShapeContext();
+            const removeIndex = sceneShapes.findIndex((shape) => shape.id === currentShapeId);
+            const removedId = currentShapeId;
+            const removedName = activeShape.name || getCurrentShapeDef().label;
+            const nextShape = sceneShapes[removeIndex + 1] || sceneShapes[removeIndex - 1] || sceneShapes.find((shape) => shape.id !== removedId);
+            sceneShapes = sceneShapes.filter((shape) => shape.id !== removedId);
+
+            const runtime = sceneShapeRuntime.get(removedId);
+            if (runtime) {
+                disposeRuntime(runtime);
+                sceneShapeRuntime.delete(removedId);
+            }
+            delete shapeStore[removedId];
+            delete shapeTransforms[removedId];
+            delete shapeRotations[removedId];
+            delete shapePolyLevels[removedId];
+            delete shapeOptions[removedId];
+
+            currentShapeId = nextShape?.id || sceneShapes[0]?.id || currentShapeId;
+            activeSceneShapeId = currentShapeId;
+            const activeIndex = shapeIndexById(currentShapeId);
+            if (activeIndex >= 0) currentShapeIndex = activeIndex;
+            faces = ensureShapeFaces(currentShapeId);
+            currentFace = Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace));
+            buildShapeMesh();
+            updateShapeReadout();
+            loadFaceIntoEditor(true);
+            setStatus(`REMOVED ${removedName}`);
+            updateDebugInfo();
+            scheduleSave();
+            return true;
+        }
+
         function selectAddShapeIndex(nextIndex) {
             const total = SHAPE_DEFS.length;
             if (!total) return false;
@@ -6101,6 +6309,7 @@
             updateRangeProgress(shapeSlider);
             renderShapeDropdown();
             updateShapeCycleButtons();
+            updateRemoveShapeButton();
             updatePolyControl();
             updateShapeExtraControls();
             if (activeShape) {
@@ -8546,6 +8755,12 @@
             event.preventDefault();
             event.stopPropagation();
             addSceneShapeByIndex(currentShapeIndex);
+        });
+
+        removeShapeBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            removeActiveSceneShape();
         });
 
         shapeSlider.addEventListener("input", () => selectAddShapeIndex(Number(shapeSlider.value)));
