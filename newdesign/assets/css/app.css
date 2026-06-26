@@ -9,6 +9,7 @@
   --asset-tray-tour: url("https://win32.run/images/xp/icons/TourXP.png");
   --asset-tray-security: url("https://win32.run/images/xp/icons/SecurityError.png");
   --asset-tray-volume: url("https://win32.run/images/xp/icons/Volume.png");
+  --taskbar-height: 30px;
   --xp-taskbar-gradient: rgb(31, 47, 134) 0px, rgb(49, 101, 196) 3%, rgb(54, 130, 229) 6%, rgb(68, 144, 230) 10%, rgb(56, 131, 229) 12%, rgb(43, 113, 224) 15%, rgb(38, 99, 218) 18%, rgb(35, 91, 214) 20%, rgb(34, 88, 213) 23%, rgb(33, 87, 214) 38%, rgb(36, 93, 219) 54%, rgb(37, 98, 223) 86%, rgb(36, 95, 220) 89%, rgb(33, 88, 212) 92%, rgb(29, 78, 192) 95%, rgb(25, 65, 165) 98%;
   --xp-task-tile: 180deg, #6da7f4 0%, #4088eb 5%, #2d6fda 38%, #1d5ac3 76%, #194aa6 100%;
   --xp-task-tile-active: 180deg, #255abf 0%, #1f58bc 40%, #194ca5 80%, #153c86 100%;
@@ -32,6 +33,7 @@ body {
   background-size: var(--desktop-cell) var(--desktop-cell);
 }
 
+.desktop,
 .desktop-layout,
 .desktop-window,
 .desktop-art,
@@ -44,26 +46,36 @@ body {
   box-sizing: border-box;
 }
 
-.desktop-layout {
-  display: grid;
-  grid-template-columns: minmax(18px, 1fr) minmax(300px, 620px) minmax(190px, 360px) minmax(18px, 1fr);
-  align-items: center;
-  gap: clamp(16px, 4vw, 58px);
+.desktop {
   min-height: 100vh;
-  padding: clamp(18px, 4vw, 46px) clamp(18px, 4vw, 46px) 58px;
+  overflow: hidden;
+}
+
+.desktop-layout {
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: calc(var(--taskbar-height) + 12px);
 }
 
 .desktop-window {
-  grid-column: 2;
-  justify-self: center;
-  width: min(100%, 620px);
+  position: absolute;
+  left: clamp(18px, 20vw, 340px);
+  top: clamp(18px, 16vh, 150px);
+  z-index: 5;
+  width: min(620px, calc(100vw - 36px));
   filter: drop-shadow(9px 14px 13px var(--desktop-shadow));
+  touch-action: none;
+}
+
+.desktop-window.is-dragging {
+  filter: drop-shadow(12px 18px 15px rgba(0, 0, 0, 0.3));
 }
 
 .desktop-art {
-  grid-column: 3;
-  align-self: end;
-  justify-self: center;
+  position: absolute;
+  right: clamp(16px, 7vw, 96px);
+  bottom: calc(var(--taskbar-height) + 8px);
+  z-index: 2;
   width: min(32vw, 340px);
   min-width: 190px;
   margin: 0;
@@ -139,18 +151,43 @@ body {
 }
 
 .taskbar__start {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background-color: transparent;
   background-image: var(--asset-start-button);
   background-position: left top;
   background-repeat: no-repeat;
   background-size: 100px 30px;
   border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  appearance: none;
 }
 
-.taskbar__start:active {
-  filter: brightness(0.92);
+.taskbar__start,
+.taskbar__task {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.taskbar__start:focus,
+.taskbar__start:focus-visible,
+.taskbar__task:focus,
+.taskbar__task:focus-visible {
+  outline: 0;
+}
+
+.taskbar__start:active,
+.taskbar__task:active {
+  outline: 0;
 }
 
 .taskbar__task {
+  min-width: 0;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: transparent;
   border: 1px solid rgba(0, 35, 119, 0.72);
   background-image: linear-gradient(var(--xp-task-tile));
   box-shadow: var(--xp-task-shadow);
@@ -208,25 +245,15 @@ body {
 }
 
 @media (max-width: 840px) {
-  .desktop-layout {
-    grid-template-columns: 1fr;
-    align-items: end;
-    gap: 18px;
-  }
-
-  .desktop-window,
-  .desktop-art {
-    grid-column: 1;
-  }
-
   .desktop-window {
-    order: 1;
+    left: 18px;
+    top: 28px;
+    width: calc(100vw - 36px);
   }
 
   .desktop-art {
-    order: 2;
+    right: 16px;
     width: min(56vw, 260px);
-    justify-self: end;
   }
 }
 

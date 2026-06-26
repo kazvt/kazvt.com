@@ -16,7 +16,7 @@ function startClock(clock) {
 
 function createStartButton(label) {
   return createElement("button", {
-    className: "taskbar__start h-[30px] w-[100px] shrink-0 cursor-pointer hover:brightness-110",
+    className: "taskbar__start h-[30px] w-[100px] shrink-0 cursor-pointer",
     type: "button",
     title: label,
     "aria-label": label
