@@ -41,6 +41,17 @@ body {
   background-size: var(--desktop-cell) var(--desktop-cell);
 }
 
+body,
+body :not(textarea):not(input):not([contenteditable="true"]) {
+  cursor: default;
+}
+
+textarea,
+input,
+[contenteditable="true"] {
+  cursor: text;
+}
+
 .desktop,
 .desktop-layout,
 .desktop-window,
@@ -110,6 +121,13 @@ body {
   box-sizing: content-box;
 }
 
+.desktop-window .title-bar,
+.desktop-window .title-bar-text {
+  font-family: var(--font-ui);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .desktop-art {
   position: absolute;
   right: clamp(16px, 7vw, 96px);
@@ -138,7 +156,7 @@ body {
   z-index: 8;
   width: 15px;
   height: 15px;
-  cursor: nwse-resize;
+  cursor: nwse-resize !important;
   touch-action: none;
 }
 
@@ -151,6 +169,8 @@ body {
   background: var(--surface);
   border-bottom: 1px solid #d8d2bd;
   font-size: 11px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .notepad-menu__item {
@@ -187,6 +207,14 @@ body {
 
 .status-bar {
   margin-top: 3px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.notepad-status .status-bar-field {
+  flex-grow: 0;
+  margin-left: auto;
+  min-width: 96px;
 }
 
 .taskbar {
