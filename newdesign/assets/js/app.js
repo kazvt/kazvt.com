@@ -4,6 +4,7 @@ import { makeDraggable, makeResizable, keepInsideViewport, maximizeElement } fro
 import { createNotepad } from "./components/notepad.js";
 import { createTaskbar } from "./components/taskbar.js";
 import { startMusic } from "./components/music.js";
+import { bindVolumeControl } from "./components/volume.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
@@ -79,6 +80,7 @@ titleBar.addEventListener("dblclick", (event) => {
 });
 
 taskButton.addEventListener("click", toggleTaskbarWindow);
+windowHost.addEventListener("windowstatechange", setMaximizeButtonLabel);
 
 async function loadMusicRepositoryConfig() {
   try {
@@ -89,8 +91,9 @@ async function loadMusicRepositoryConfig() {
   }
 }
 
-loadMusicRepositoryConfig().then((musicRepository) => {
-  startMusic({ ...home.music, ...musicRepository });
+loadMusicRepositoryConfig().then(async (musicRepository) => {
+  const music = await startMusic({ ...home.music, ...musicRepository });
+  bindVolumeControl(taskbar, music);
 });
 
 function isEditableTarget(target) {

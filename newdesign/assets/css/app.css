@@ -422,3 +422,93 @@ img {
     display: none;
   }
 }
+
+.desktop-window.is-maximized .window-resize-handle {
+  display: none;
+}
+
+.volume-popup {
+  position: fixed;
+  z-index: 60;
+  width: 160px;
+  height: 288px;
+  padding: 18px 12px 12px;
+  background: #ece9d8;
+  border: 1px solid #ffffff;
+  box-shadow: inset -1px -1px #aca899, inset 1px 1px #ffffff, 2px 2px 3px rgba(0, 0, 0, 0.34);
+  color: #000;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.volume-popup.is-hidden {
+  display: none;
+}
+
+.volume-popup__title {
+  text-align: center;
+  line-height: 1;
+}
+
+.volume-popup__slider-space {
+  position: relative;
+  height: 158px;
+  margin: 14px auto 12px;
+  width: 44px;
+}
+
+.volume-popup__slider-space::before {
+  content: "";
+  position: absolute;
+  left: 21px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: #ffffff;
+  box-shadow: 1px 0 #aca899;
+}
+
+.volume-popup__slider {
+  position: absolute;
+  left: -43px;
+  top: 68px;
+  width: 130px;
+  height: 22px;
+  margin: 0;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  accent-color: #22b14c;
+}
+
+.volume-popup__mute {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 5px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.volume-popup__mute-input {
+  width: 26px;
+  height: 26px;
+}
+
+.volume-popup input,
+.volume-popup label,
+.volume-popup span,
+.volume-popup div {
+  cursor: default !important;
+}
+
+.taskbar__tray-icon[role="button"],
+.taskbar__tray-icon[role="button"]:hover,
+.taskbar__tray-icon[role="button"]:focus,
+.taskbar__tray-icon[role="button"]:focus-visible,
+.taskbar__tray-icon[role="button"]:active {
+  outline: none;
+  box-shadow: none;
+  filter: none;
+}

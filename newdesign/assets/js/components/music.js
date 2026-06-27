@@ -4,6 +4,10 @@ function cleanPath(value) {
   return String(value || "").trim().replace(/^\/+|\/+$/g, "");
 }
 
+function clampVolume(value) {
+  return Math.min(Math.max(Number.isFinite(value) ? value : 0.5, 0), 1);
+}
+
 function hasMusicExtension(path) {
   const lower = String(path || "").toLowerCase().split("?")[0].split("#")[0];
   return musicExtensions.some((extension) => lower.endsWith(extension));
@@ -47,7 +51,6 @@ function candidateGithubPaths(config) {
   if (!host.endsWith(".github.io") && parts.length) add(`${parts.join("/")}/assets/music`);
   add("assets/music");
   if (host.endsWith(".github.io") && parts.length > 1) add(`${parts.join("/")}/assets/music`);
-  if (!host.endsWith(".github.io") && parts.length) add("assets/music");
   return paths;
 }
 
@@ -121,12 +124,47 @@ function bindUnlock(play) {
 }
 
 export async function startMusic(config = {}) {
-  const files = await resolveMusicFiles(config);
-  if (!files.length) return null;
-  const audio = document.createElement("audio");
+  const state = {
+    volume: clampVolume(Number(config.volume)),
+    muted: false
+  };
+  let audio = null;
   let currentIndex = -1;
+  let unlockWaiting = false;
+  const files = await resolveMusicFiles(config);
+
+  const controller = {
+    get audio() {
+      return audio;
+    },
+    get files() {
+      return files;
+    },
+    getVolume() {
+      return state.volume;
+    },
+    setVolume(value) {
+      state.volume = clampVolume(Number(value));
+      if (audio) audio.volume = state.volume;
+    },
+    getMuted() {
+      return state.muted;
+    },
+    setMuted(value) {
+      state.muted = Boolean(value);
+      if (audio) audio.muted = state.muted;
+    },
+    play() {
+      return play();
+    }
+  };
+
+  if (!files.length) return controller;
+
+  audio = document.createElement("audio");
   audio.preload = "auto";
-  audio.volume = Number.isFinite(config.volume) ? config.volume : 0.45;
+  audio.volume = state.volume;
+  audio.muted = state.muted;
   audio.hidden = true;
   audio.setAttribute("aria-hidden", "true");
   document.body.append(audio);
@@ -136,14 +174,19 @@ export async function startMusic(config = {}) {
     audio.src = assetUrl(files[currentIndex]);
   };
 
-  const play = async () => {
+  async function play() {
+    if (!audio) return;
     if (!audio.src) choose();
     try {
       await audio.play();
+      unlockWaiting = false;
     } catch {
-      bindUnlock(play);
+      if (!unlockWaiting) {
+        unlockWaiting = true;
+        bindUnlock(play);
+      }
     }
-  };
+  }
 
   audio.addEventListener("ended", () => {
     choose();
@@ -152,5 +195,5 @@ export async function startMusic(config = {}) {
 
   choose();
   play();
-  return audio;
+  return controller;
 }

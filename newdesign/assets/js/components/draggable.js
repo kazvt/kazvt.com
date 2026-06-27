@@ -66,6 +66,19 @@ function initMinimums(element) {
   element.style.minHeight = `${element.dataset.minHeight}px`;
 }
 
+function restoreMaximizedForDrag(element, event) {
+  if (!element.classList.contains("is-maximized")) return;
+  const maximizedRect = element.getBoundingClientRect();
+  const width = Number(element.dataset.restoreWidth || Math.min(620, window.innerWidth));
+  const height = Number(element.dataset.restoreHeight || element.dataset.minHeight || element.offsetHeight);
+  const ratioX = clamp((event.clientX - maximizedRect.left) / Math.max(1, maximizedRect.width), 0.08, 0.92);
+  element.classList.remove("is-maximized");
+  element.style.width = `${width}px`;
+  element.style.height = `${height}px`;
+  placeElement(element, event.clientX - width * ratioX, Math.max(0, event.clientY - 10));
+  element.dispatchEvent(new CustomEvent("windowstatechange", { bubbles: true }));
+}
+
 export function keepInsideViewport(element) {
   if (element.classList.contains("is-maximized")) return;
   const rect = element.getBoundingClientRect();
@@ -80,9 +93,9 @@ export function keepInsideViewport(element) {
 export function makeDraggable(element, handle) {
   let drag = null;
   const start = (event) => {
-    if (element.classList.contains("is-maximized")) return;
     if (event.button !== undefined && event.button !== 0) return;
     if (event.target.closest(".title-bar-controls")) return;
+    restoreMaximizedForDrag(element, event);
     const rect = element.getBoundingClientRect();
     drag = {
       id: event.pointerId,
@@ -170,6 +183,7 @@ export function maximizeElement(element) {
     element.style.top = "0px";
     element.style.width = `${window.innerWidth}px`;
     element.style.height = `${window.innerHeight - getTaskbarHeight()}px`;
+    element.dispatchEvent(new CustomEvent("windowstatechange", { bubbles: true }));
     return true;
   }
   element.classList.remove("is-maximized");
@@ -178,5 +192,6 @@ export function maximizeElement(element) {
   element.style.width = `${element.dataset.restoreWidth || element.offsetWidth}px`;
   element.style.height = `${element.dataset.restoreHeight || element.offsetHeight}px`;
   keepInsideViewport(element);
+  element.dispatchEvent(new CustomEvent("windowstatechange", { bubbles: true }));
   return false;
 }

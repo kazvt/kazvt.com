@@ -38,11 +38,14 @@ function createTaskButton(title) {
 }
 
 function createTrayIcon(icon) {
+  const role = icon.id === "volume" ? "button" : "img";
   return createElement("span", {
     className: ["taskbar__tray-icon", `taskbar__tray-icon--${icon.id}`].join(" "),
     title: icon.label,
     "aria-label": icon.label,
-    role: "img"
+    role,
+    tabindex: icon.id === "volume" ? "0" : undefined,
+    dataset: { trayIcon: icon.id }
   });
 }
 
