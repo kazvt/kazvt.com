@@ -6,9 +6,7 @@ window.tailwind.config = {
   theme: {
     extend: {
       fontFamily: {
-        xp: ["Pixelated MS Sans Serif", "MS Sans Serif", "Tahoma", "Microsoft Sans Serif", "Arial", "sans-serif"],
-        caption: ["Pixelated MS Sans Serif", "MS Sans Serif", "Tahoma", "Microsoft Sans Serif", "Arial", "sans-serif"],
-        notepad: ["Pixelated MS Sans Serif", "MS Sans Serif", "Tahoma", "Microsoft Sans Serif", "Arial", "sans-serif"]
+        xp: ['Pixelated MS Sans Serif', 'MS Sans Serif', 'Tahoma', 'Microsoft Sans Serif', 'Arial', 'sans-serif']
       }
     }
   }
