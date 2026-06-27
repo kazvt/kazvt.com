@@ -17,7 +17,7 @@ export const secrets = {
   },
   randomGifs: {
     path: "newdesign/assets/randomGifs",
-    spawnEveryMs: 5000,
+    spawnEveryMs: 500,
     initialDelayMs: 1200,
     maxOnScreen: 10,
     minHeight: 150,
