@@ -115,7 +115,6 @@ export function keepInsideViewport(element) {
 }
 
 export function makeDraggable(element, handle) {
-  const frameMs = getMotionFrameMs();
   let drag = null;
   const startActiveDrag = (event) => {
     const rect = element.getBoundingClientRect();
@@ -167,7 +166,8 @@ export function makeDraggable(element, handle) {
     drag.latestX = latest.clientX;
     drag.latestY = latest.clientY;
     const now = performance.now();
-    if (now - drag.lastFrameTime >= frameMs) {
+    const frameMs = getMotionFrameMs();
+    if (frameMs <= 0 || now - drag.lastFrameTime >= frameMs) {
       drag.lastFrameTime = now;
       placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
     }
@@ -192,7 +192,6 @@ export function makeDraggable(element, handle) {
 }
 
 export function makeResizable(element) {
-  const frameMs = getMotionFrameMs();
   const handle = document.createElement("div");
   handle.className = "window-resize-handle";
   handle.setAttribute("aria-hidden", "true");
@@ -224,7 +223,8 @@ export function makeResizable(element) {
     resize.latestX = event.clientX;
     resize.latestY = event.clientY;
     const now = performance.now();
-    if (now - resize.lastFrameTime >= frameMs) {
+    const frameMs = getMotionFrameMs();
+    if (frameMs <= 0 || now - resize.lastFrameTime >= frameMs) {
       resize.lastFrameTime = now;
       sizeElement(element, resize.startWidth + event.clientX - resize.startX, resize.startHeight + event.clientY - resize.startY);
     }

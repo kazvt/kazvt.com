@@ -10,14 +10,18 @@ import { createSiteTitle } from "./components/site-title.js";
 import { createImageMarquee } from "./components/image-marquee.js";
 import { createRandomGifs } from "./components/random-gifs.js";
 import { animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig } from "./components/private-config.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretMotionConfig } from "./components/private-config.js";
+import { setMotionFps } from "./components/motion.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
+const secrets = await loadSecrets();
+const motionConfig = getSecretMotionConfig(secrets);
+const siteFps = setMotionFps(motionConfig.fps || (home.motion && home.motion.fps) || 24);
 const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });
 const randomGifsHost = createElement("div", { className: "random-gifs-mount" });
-const edgePeek = createEdgePeek(home.edgePeek);
+const edgePeek = createEdgePeek({ ...home.edgePeek, fps: siteFps, ...(motionConfig.edgePeek || {}), ...(secrets.edgePeek || {}) });
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
 
@@ -117,14 +121,14 @@ titleBar.addEventListener("dblclick", (event) => {
 taskButton.addEventListener("click", toggleTaskbarWindow);
 windowHost.addEventListener("windowstatechange", setMaximizeButtonLabel);
 
-loadSecrets().then((secrets) => {
-  const resolvedTitle = getSecretTitle(secrets);
-  siteTitle.setTitle(resolvedTitle);
-  document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
-  startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
-  createImageMarquee({ ...home.imageMarquee, ...getSecretMarqueeConfig(secrets) }).then((marquee) => marqueeHost.replaceChildren(marquee));
-  createRandomGifs({ ...home.randomGifs, ...getSecretRandomGifsConfig(secrets) }).then((gifs) => randomGifsHost.replaceChildren(gifs));
-});
+const resolvedTitle = getSecretTitle(secrets);
+const marqueeConfig = getSecretMarqueeConfig(secrets);
+const randomGifsConfig = getSecretRandomGifsConfig(secrets);
+siteTitle.setTitle(resolvedTitle);
+document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
+startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
+createImageMarquee({ ...home.imageMarquee, fps: siteFps, ...marqueeConfig }).then((marquee) => marqueeHost.replaceChildren(marquee));
+createRandomGifs({ ...home.randomGifs, fps: siteFps, ...randomGifsConfig }).then((gifs) => randomGifsHost.replaceChildren(gifs));
 
 function isEditableTarget(target) {
   return Boolean(target.closest && target.closest(".notepad-page"));

@@ -1,5 +1,5 @@
 import { createElement } from "./dom.js";
-import { getMotionFrameCount } from "./motion.js";
+import { getMotionFrameCount, isMotionStepped } from "./motion.js";
 
 function randomBetween(min, max) {
   if (max <= min) return Math.round((min + max) / 2);
@@ -87,6 +87,7 @@ export function createEdgePeek(options = {}) {
   let initialTimer = null;
   element.style.setProperty("--peek-duration", `${settings.motionMs}ms`);
   element.style.setProperty("--peek-frames", String(getMotionFrameCount(settings.motionMs, settings.fps)));
+  element.style.setProperty("--peek-timing", isMotionStepped(settings.fps) ? `steps(${getMotionFrameCount(settings.motionMs, settings.fps)}, end)` : "linear");
   const hide = () => {
     element.classList.remove("is-visible");
     window.clearTimeout(hideTimer);

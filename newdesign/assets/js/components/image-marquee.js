@@ -1,5 +1,5 @@
 import { createElement } from "./dom.js";
-import { getMotionFrameCount, getMotionFps } from "./motion.js";
+import { getMotionFrameCount, getMotionFps, isMotionStepped } from "./motion.js";
 
 const imageExtensions = [".gif", ".png"];
 
@@ -124,6 +124,26 @@ async function resolveMarqueeFiles(config) {
   return [];
 }
 
+function finiteNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function clampPercent(value, fallback) {
+  return Math.min(100, Math.max(0, finiteNumber(value, fallback)));
+}
+
+function normalizeDirection(value) {
+  return String(value || "horizontal").toLowerCase() === "vertical" ? "vertical" : "horizontal";
+}
+
+function gapPixels(config, height) {
+  const explicit = config.gaps ?? config.gap ?? config.gapWidth;
+  if (explicit === true) return Math.max(0, finiteNumber(height, 0));
+  if (explicit === false || explicit === null || explicit === undefined || explicit === "") return 0;
+  return Math.max(0, finiteNumber(explicit, 0));
+}
+
 function buildGap() {
   return createElement("span", { className: "image-marquee__gap", "aria-hidden": "true" });
 }
@@ -131,7 +151,8 @@ function buildGap() {
 function buildSequence(files, config) {
   const sequence = [];
   const repeat = Math.max(Number(config.repeat) || 36, 12);
-  const hasGaps = config.gaps === true || config.gap === true;
+  const height = Number(config.height) || Number(config.size) || 34;
+  const gap = gapPixels(config, height);
   for (let index = 0; index < repeat; index += 1) {
     files.forEach((file) => {
       sequence.push(createElement("img", {
@@ -142,24 +163,51 @@ function buildSequence(files, config) {
         decoding: "async",
         draggable: "false"
       }));
-      if (hasGaps) sequence.push(buildGap());
+      if (gap > 0) sequence.push(buildGap());
     });
   }
   return sequence;
 }
 
-export async function createImageMarquee(config = {}) {
-  const marquee = createElement("section", { className: "image-marquee is-hidden", "aria-hidden": "true" });
+function marqueeDefinitions(config) {
+  const list = Array.isArray(config) ? config : Array.isArray(config.marquees) ? config.marquees : Array.isArray(config.items) ? config.items : Array.isArray(config.entries) ? config.entries : [];
+  if (!list.length) return [config];
+  const parent = Array.isArray(config) ? {} : { ...config };
+  delete parent.marquees;
+  delete parent.items;
+  delete parent.entries;
+  if (parent.manifest === "assets/marquee/manifest.json") delete parent.manifest;
+  return list.filter((item) => item && typeof item === "object").map((item) => ({ ...parent, ...item }));
+}
+
+function applyLayout(marquee, config, direction) {
+  const height = Number(config.height) || Number(config.size) || 34;
+  const blinkMs = Number(config.blinkMs);
   const speedSeconds = Number(config.speedSeconds) || 24;
   const fps = getMotionFps(config.fps);
+  const gap = gapPixels(config, height);
   marquee.style.setProperty("--marquee-speed", `${speedSeconds}s`);
   marquee.style.setProperty("--marquee-frames", String(getMotionFrameCount(speedSeconds * 1000, fps)));
-  const blinkMs = Number(config.blinkMs);
-  const height = Number(config.height) || 34;
+  marquee.style.setProperty("--marquee-timing", isMotionStepped(fps) ? `steps(${getMotionFrameCount(speedSeconds * 1000, fps)}, end)` : "linear");
   marquee.style.setProperty("--marquee-blink", `${Number.isFinite(blinkMs) ? blinkMs : 1000}ms`);
   marquee.style.setProperty("--marquee-height", `${height}px`);
-  marquee.style.setProperty("--marquee-gap", `${Number(config.gapWidth) || height}px`);
+  marquee.style.setProperty("--marquee-gap", `${gap}px`);
   if (blinkMs === 0) marquee.classList.add("image-marquee--no-blink");
+  if (direction === "vertical") {
+    const x = clampPercent(config.x ?? config.X, 0);
+    marquee.style.left = `${x}%`;
+    marquee.style.transform = `translateX(-${x}%)`;
+  } else {
+    const y = clampPercent(config.y ?? config.Y, 100);
+    marquee.style.top = `${y}%`;
+    marquee.style.transform = `translateY(-${y}%)`;
+  }
+}
+
+async function createSingleImageMarquee(config = {}) {
+  const direction = normalizeDirection(config.direction);
+  const marquee = createElement("section", { className: `image-marquee image-marquee--${direction} is-hidden`, "aria-hidden": "true" });
+  applyLayout(marquee, config, direction);
   const files = await resolveMarqueeFiles(config);
   if (!files.length) return marquee;
   const first = createElement("div", { className: "image-marquee__track" }, buildSequence(files, config));
@@ -167,4 +215,11 @@ export async function createImageMarquee(config = {}) {
   marquee.append(createElement("div", { className: "image-marquee__belt" }, [first, second]));
   marquee.classList.remove("is-hidden");
   return marquee;
+}
+
+export async function createImageMarquee(config = {}) {
+  const host = createElement("div", { className: "image-marquees" });
+  const marquees = await Promise.all(marqueeDefinitions(config).map((item) => createSingleImageMarquee(item)));
+  host.replaceChildren(...marquees);
+  return host;
 }

@@ -219,7 +219,7 @@ function runSpriteAnimation(sprite, intro, direction, settings, remove) {
     ...config,
     update() {
       const now = performance.now();
-      if (now - lastFrame < frameMs) return;
+      if (frameMs > 0 && now - lastFrame < frameMs) return;
       lastFrame = now;
       applySpriteTransform(sprite, state);
     },

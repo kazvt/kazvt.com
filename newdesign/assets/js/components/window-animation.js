@@ -69,7 +69,7 @@ function animateState(element, from, to, origin, easing, rotationKeyframes, done
     easing,
     update() {
       const now = performance.now();
-      if (now - lastFrame < frameMs) return;
+      if (frameMs > 0 && now - lastFrame < frameMs) return;
       lastFrame = now;
       applyTransform(element, state);
     },

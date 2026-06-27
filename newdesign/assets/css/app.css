@@ -692,7 +692,7 @@ img {
   pointer-events: none;
   visibility: hidden;
   opacity: 1;
-  transition: transform var(--peek-duration, 750ms) steps(var(--peek-frames, 18), end), visibility 0ms linear var(--peek-duration, 750ms);
+  transition: transform var(--peek-duration, 750ms) var(--peek-timing, steps(var(--peek-frames, 18), end)), visibility 0ms linear var(--peek-duration, 750ms);
   will-change: transform;
   -webkit-user-select: none;
   user-select: none;
@@ -700,7 +700,7 @@ img {
 
 .edge-peek.is-visible {
   visibility: visible;
-  transition: transform var(--peek-duration, 750ms) steps(var(--peek-frames, 18), end), visibility 0ms linear 0ms;
+  transition: transform var(--peek-duration, 750ms) var(--peek-timing, steps(var(--peek-frames, 18), end)), visibility 0ms linear 0ms;
   transform: translate3d(0, 0, 0);
 }
 
@@ -840,7 +840,8 @@ img {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--taskbar-height) + 7px);
+  top: 0;
+  bottom: var(--taskbar-height);
   z-index: 8;
   pointer-events: none;
   overflow: hidden;
@@ -849,12 +850,27 @@ img {
   user-select: none;
 }
 
+.image-marquees {
+  display: contents;
+}
+
 .image-marquee {
-  width: 100%;
-  height: var(--marquee-height, 34px);
+  position: absolute;
   overflow: hidden;
   visibility: visible;
   animation: image-marquee-flash var(--marquee-blink, 1000ms) steps(1, end) infinite;
+}
+
+.image-marquee--horizontal {
+  left: 0;
+  width: 100%;
+  height: var(--marquee-height, 34px);
+}
+
+.image-marquee--vertical {
+  top: 0;
+  width: var(--marquee-height, 34px);
+  height: 100%;
 }
 
 .image-marquee--no-blink {
@@ -867,43 +883,92 @@ img {
 
 .image-marquee__belt {
   display: flex;
+  animation-duration: var(--marquee-speed, 24s);
+  animation-timing-function: var(--marquee-timing, steps(var(--marquee-frames, 576), end));
+  animation-iteration-count: infinite;
+}
+
+.image-marquee--horizontal .image-marquee__belt {
   width: max-content;
   height: 100%;
-  animation: image-marquee-scroll var(--marquee-speed, 24s) steps(var(--marquee-frames, 576), end) infinite;
+  flex-direction: row;
+  animation-name: image-marquee-scroll-x;
+}
+
+.image-marquee--vertical .image-marquee__belt {
+  width: 100%;
+  height: max-content;
+  flex-direction: column;
+  animation-name: image-marquee-scroll-y;
 }
 
 .image-marquee__track {
   display: flex;
   flex: 0 0 auto;
-  height: 100%;
   align-items: center;
+}
+
+.image-marquee--horizontal .image-marquee__track {
+  height: 100%;
+  flex-direction: row;
+}
+
+.image-marquee--vertical .image-marquee__track {
+  width: 100%;
+  flex-direction: column;
 }
 
 .image-marquee__image {
   display: block;
   flex: 0 0 auto;
-  width: auto;
-  height: 100%;
   max-width: none;
   image-rendering: auto;
   border: 0;
   background: transparent;
 }
 
+.image-marquee--horizontal .image-marquee__image {
+  width: auto;
+  height: 100%;
+}
+
+.image-marquee--vertical .image-marquee__image {
+  width: 100%;
+  height: auto;
+}
+
 .image-marquee__gap {
   display: block;
-  flex: 0 0 var(--marquee-gap, var(--marquee-height, 34px));
-  width: var(--marquee-gap, var(--marquee-height, 34px));
+  flex: 0 0 var(--marquee-gap, 0px);
+}
+
+.image-marquee--horizontal .image-marquee__gap {
+  width: var(--marquee-gap, 0px);
   height: var(--marquee-height, 34px);
 }
 
-@keyframes image-marquee-scroll {
+.image-marquee--vertical .image-marquee__gap {
+  width: var(--marquee-height, 34px);
+  height: var(--marquee-gap, 0px);
+}
+
+@keyframes image-marquee-scroll-x {
   from {
     transform: translateX(0);
   }
 
   to {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes image-marquee-scroll-y {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
   }
 }
 

@@ -52,7 +52,9 @@ export function getSecretMarqueeConfig(secrets) {
   const marquee = secrets.marquee || secrets.imageMarquee || secrets.gifMarquee || secrets.badgeMarquee || {};
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
-  return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), marquee, rootRepository, rootBranch);
+  const shared = mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), rootRepository, rootBranch);
+  if (Array.isArray(marquee)) return mergeObjects(shared, { marquees: marquee });
+  return mergeObjects(shared, marquee);
 }
 
 export function getSecretRandomGifsConfig(secrets) {
@@ -61,4 +63,10 @@ export function getSecretRandomGifsConfig(secrets) {
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch);
+}
+
+export function getSecretMotionConfig(secrets) {
+  const motion = secrets.motion || secrets.animation || secrets.animations || {};
+  const fps = motion.fps || secrets.fps || secrets.motionFps || secrets.siteFps || secrets.siteMotionFps || "";
+  return mergeObjects(motion, fps ? { fps } : {});
 }

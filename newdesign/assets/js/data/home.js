@@ -12,6 +12,9 @@ export const home = {
   music: {
     volume: 0.5
   },
+  motion: {
+    fps: 24
+  },
   edgePeek: {
     src: "assets/img/osaka.gif",
     alt: "Osaka peeking from the desktop edge",
@@ -23,10 +26,12 @@ export const home = {
   imageMarquee: {
     manifest: "assets/marquee/manifest.json",
     path: "assets/marquee",
+    direction: "horizontal",
+    y: 100,
     blinkMs: 1000,
     speedSeconds: 24,
     height: 34,
-    gaps: false,
+    gaps: 0,
     fps: 24
   },
   randomGifs: {
