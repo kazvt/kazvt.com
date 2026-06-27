@@ -1011,10 +1011,19 @@ img {
   position: absolute;
   width: auto;
   height: 86px;
-  transform: scale(0) rotate(0deg);
+  transform: rotate(0deg);
   transform-origin: 50% 50%;
   will-change: transform;
   pointer-events: none;
+}
+
+.random-gifs__squash {
+  display: block;
+  width: auto;
+  height: 100%;
+  transform: scale(0, 0);
+  transform-origin: 50% 50%;
+  will-change: transform;
 }
 
 .random-gifs__image {

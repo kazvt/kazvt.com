@@ -73,6 +73,10 @@ export function getSecretRandomGifsConfig(secrets) {
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch, githubApiFrom(secrets, randomGifs));
 }
 
+export function getSecretCursorSparklesConfig(secrets) {
+  return secrets.cursorSparkles || secrets.sparkleCursor || secrets.cursorTrail || secrets.cursorEffects || {};
+}
+
 export function getSecretMotionConfig(secrets) {
   const motion = secrets.motion || secrets.animation || secrets.animations || {};
   const fps = motion.fps || secrets.fps || secrets.motionFps || secrets.siteFps || secrets.siteMotionFps || "";

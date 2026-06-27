@@ -9,8 +9,9 @@ import { createEdgePeek } from "./components/edge-peek.js";
 import { createSiteTitle } from "./components/site-title.js";
 import { createImageMarquee } from "./components/image-marquee.js";
 import { createRandomGifs } from "./components/random-gifs.js";
+import { startCursorSparkles } from "./components/cursor-sparkles.js";
 import { animateWindowClose, animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretMotionConfig } from "./components/private-config.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig } from "./components/private-config.js";
 import { setMotionFps } from "./components/motion.js";
 import { home } from "./data/home.js";
 
@@ -134,6 +135,7 @@ document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : ho
 startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
 createImageMarquee({ ...home.imageMarquee, fps: siteFps, ...marqueeConfig }).then((marquee) => marqueeHost.replaceChildren(marquee));
 createRandomGifs({ ...home.randomGifs, fps: siteFps, ...randomGifsConfig }).then((gifs) => randomGifsHost.replaceChildren(gifs));
+startCursorSparkles({ ...home.cursorSparkles, ...getSecretCursorSparklesConfig(secrets) });
 
 function isEditableTarget(target) {
   return Boolean(target.closest && target.closest(".notepad-page"));

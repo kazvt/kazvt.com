@@ -142,7 +142,9 @@ function applySpriteTransform(sprite, state) {
   const scaleX = finiteNumber(state.sx, 1).toFixed(4);
   const scaleY = finiteNumber(state.sy, 1).toFixed(4);
   const rotation = finiteNumber(state.r, 0).toFixed(3);
-  sprite.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
+  const squash = sprite.firstElementChild;
+  sprite.style.transform = `rotate(${rotation}deg)`;
+  if (squash) squash.style.transform = `scale(${scaleX}, ${scaleY})`;
 }
 
 function ms(value) {
@@ -151,20 +153,20 @@ function ms(value) {
 
 function introScaleX(settleInMs) {
   const keys = [
-    { value: 0.14, duration: 0 },
-    { value: 0.74, duration: 210, easing: "easeOutCubic" },
-    { value: 1.32, duration: 230, easing: "easeOutBack" },
-    { value: 0.84, duration: 170, easing: "easeInOutSine" },
-    { value: 1.12, duration: 190, easing: "easeOutQuad" },
-    { value: 0.98, duration: 200, easing: "easeInOutSine" }
+    { value: 0.16, duration: 0 },
+    { value: 1.34, duration: 190, easing: "easeOutCubic" },
+    { value: 0.82, duration: 170, easing: "easeInOutSine" },
+    { value: 1.17, duration: 160, easing: "easeOutSine" },
+    { value: 0.94, duration: 150, easing: "easeInOutSine" },
+    { value: 1.07, duration: 140, easing: "easeOutQuad" }
   ];
   if (settleInMs > 0) keys.push(
-    { value: 1.065, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
-    { value: 0.962, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
-    { value: 1.032, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" },
-    { value: 0.986, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
-    { value: 1.01, duration: ms(settleInMs * 0.14), easing: "easeOutSine" },
-    { value: 1, duration: ms(settleInMs * 0.12), easing: "easeOutQuad" }
+    { value: 0.968, duration: ms(settleInMs * 0.14), easing: "easeInOutSine" },
+    { value: 1.034, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
+    { value: 0.984, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
+    { value: 1.014, duration: ms(settleInMs * 0.18), easing: "easeOutQuad" },
+    { value: 0.995, duration: ms(settleInMs * 0.16), easing: "easeInOutSine" },
+    { value: 1, duration: ms(settleInMs * 0.18), easing: "easeOutQuad" }
   );
   else keys.push({ value: 1, duration: 1, easing: "linear" });
   return keys;
@@ -172,20 +174,20 @@ function introScaleX(settleInMs) {
 
 function introScaleY(settleInMs) {
   const keys = [
-    { value: 0.06, duration: 0 },
-    { value: 1.38, duration: 210, easing: "easeOutCubic" },
-    { value: 0.68, duration: 230, easing: "easeOutBack" },
-    { value: 1.18, duration: 170, easing: "easeInOutSine" },
-    { value: 0.92, duration: 190, easing: "easeOutQuad" },
-    { value: 1.02, duration: 200, easing: "easeInOutSine" }
+    { value: 0.12, duration: 0 },
+    { value: 0.76, duration: 190, easing: "easeOutCubic" },
+    { value: 1.28, duration: 170, easing: "easeInOutSine" },
+    { value: 0.88, duration: 160, easing: "easeOutSine" },
+    { value: 1.13, duration: 150, easing: "easeInOutSine" },
+    { value: 0.97, duration: 140, easing: "easeOutQuad" }
   ];
   if (settleInMs > 0) keys.push(
-    { value: 0.946, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
-    { value: 1.042, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
-    { value: 0.972, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" },
-    { value: 1.014, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
-    { value: 0.993, duration: ms(settleInMs * 0.14), easing: "easeOutSine" },
-    { value: 1, duration: ms(settleInMs * 0.12), easing: "easeOutQuad" }
+    { value: 1.026, duration: ms(settleInMs * 0.14), easing: "easeInOutSine" },
+    { value: 0.972, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
+    { value: 1.015, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
+    { value: 0.988, duration: ms(settleInMs * 0.18), easing: "easeOutQuad" },
+    { value: 1.004, duration: ms(settleInMs * 0.16), easing: "easeInOutSine" },
+    { value: 1, duration: ms(settleInMs * 0.18), easing: "easeOutQuad" }
   );
   else keys.push({ value: 1, duration: 1, easing: "linear" });
   return keys;
@@ -193,20 +195,16 @@ function introScaleY(settleInMs) {
 
 function introRotation(direction, settleInMs) {
   const keys = [
-    { value: direction * -20, duration: 0 },
-    { value: direction * 18, duration: 210, easing: "easeOutCubic" },
-    { value: direction * -14, duration: 230, easing: "easeOutBack" },
-    { value: direction * 9, duration: 170, easing: "easeInOutSine" },
-    { value: direction * -5.5, duration: 190, easing: "easeOutQuad" },
-    { value: direction * 3.5, duration: 200, easing: "easeInOutSine" }
+    { value: direction * -4.5, duration: 0 },
+    { value: direction * 3.2, duration: 210, easing: "easeOutCubic" },
+    { value: direction * -2.2, duration: 220, easing: "easeInOutSine" },
+    { value: direction * 1.2, duration: 200, easing: "easeOutQuad" }
   ];
   if (settleInMs > 0) keys.push(
-    { value: direction * -3.2, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
-    { value: direction * 2.1, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
-    { value: direction * -1.35, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" },
-    { value: direction * 0.75, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
-    { value: direction * -0.25, duration: ms(settleInMs * 0.14), easing: "easeOutSine" },
-    { value: 0, duration: ms(settleInMs * 0.12), easing: "easeOutQuad" }
+    { value: direction * -0.7, duration: ms(settleInMs * 0.22), easing: "easeInOutSine" },
+    { value: direction * 0.35, duration: ms(settleInMs * 0.22), easing: "easeOutSine" },
+    { value: direction * -0.14, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
+    { value: 0, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" }
   );
   else keys.push({ value: 0, duration: 1, easing: "linear" });
   return keys;
@@ -215,17 +213,17 @@ function introRotation(direction, settleInMs) {
 function outroScaleX(settleOutMs) {
   const keys = [];
   if (settleOutMs > 0) keys.push(
-    { value: 1.08, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
+    { value: 0.94, duration: ms(settleOutMs * 0.16), easing: "easeInOutSine" },
+    { value: 1.12, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
     { value: 0.9, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: 1.16, duration: ms(settleOutMs * 0.22), easing: "easeOutQuad" },
-    { value: 0.96, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: 1.05, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
-    { value: 1, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
+    { value: 1.07, duration: ms(settleOutMs * 0.16), easing: "easeOutQuad" },
+    { value: 0.98, duration: ms(settleOutMs * 0.14), easing: "easeInOutSine" },
+    { value: 1, duration: ms(settleOutMs * 0.18), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: 0.72, duration: 180, easing: "easeInSine" },
-    { value: 1.12, duration: 180, easing: "easeOutQuad" },
-    { value: 0.08, duration: 640, easing: "easeInBack" }
+    { value: 1.24, duration: 170, easing: "easeOutSine" },
+    { value: 0.72, duration: 170, easing: "easeInOutSine" },
+    { value: 0.06, duration: 660, easing: "easeInBack" }
   );
   return keys;
 }
@@ -233,17 +231,17 @@ function outroScaleX(settleOutMs) {
 function outroScaleY(settleOutMs) {
   const keys = [];
   if (settleOutMs > 0) keys.push(
-    { value: 0.93, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
-    { value: 1.12, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: 0.84, duration: ms(settleOutMs * 0.22), easing: "easeOutQuad" },
-    { value: 1.04, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: 0.97, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
-    { value: 1, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
+    { value: 1.07, duration: ms(settleOutMs * 0.16), easing: "easeInOutSine" },
+    { value: 0.9, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
+    { value: 1.16, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: 0.95, duration: ms(settleOutMs * 0.16), easing: "easeOutQuad" },
+    { value: 1.02, duration: ms(settleOutMs * 0.14), easing: "easeInOutSine" },
+    { value: 1, duration: ms(settleOutMs * 0.18), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: 1.28, duration: 180, easing: "easeInSine" },
-    { value: 0.78, duration: 180, easing: "easeOutQuad" },
-    { value: 0.04, duration: 640, easing: "easeInBack" }
+    { value: 0.78, duration: 170, easing: "easeOutSine" },
+    { value: 1.32, duration: 170, easing: "easeInOutSine" },
+    { value: 0.05, duration: 660, easing: "easeInBack" }
   );
   return keys;
 }
@@ -251,17 +249,15 @@ function outroScaleY(settleOutMs) {
 function outroRotation(direction, settleOutMs) {
   const keys = [];
   if (settleOutMs > 0) keys.push(
-    { value: direction * 4, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
-    { value: direction * -5.8, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: direction * 7.8, duration: ms(settleOutMs * 0.22), easing: "easeOutQuad" },
-    { value: direction * -3.6, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: direction * 1.8, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
-    { value: 0, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
+    { value: direction * 0.8, duration: ms(settleOutMs * 0.2), easing: "easeInOutSine" },
+    { value: direction * -1.1, duration: ms(settleOutMs * 0.22), easing: "easeOutSine" },
+    { value: direction * 0.7, duration: ms(settleOutMs * 0.2), easing: "easeInOutSine" },
+    { value: 0, duration: ms(settleOutMs * 0.2), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: direction * -10, duration: 180, easing: "easeInSine" },
-    { value: direction * 14, duration: 180, easing: "easeOutQuad" },
-    { value: direction * 31, duration: 640, easing: "easeInBack" }
+    { value: direction * -2.8, duration: 170, easing: "easeOutSine" },
+    { value: direction * 2.2, duration: 170, easing: "easeInOutSine" },
+    { value: direction * 0.6, duration: 660, easing: "easeInBack" }
   );
   return keys;
 }
@@ -277,27 +273,62 @@ function workspaceHeight() {
   return window.innerHeight - (Number.isFinite(taskbar) ? taskbar : 30);
 }
 
-function placeSprite(sprite, image, height) {
+const quadrants = [
+  { x: 0.25, y: 0.25 },
+  { x: 0.75, y: 0.25 },
+  { x: 0.75, y: 0.75 },
+  { x: 0.25, y: 0.75 }
+];
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function randomBias() {
+  return (Math.random() + Math.random()) / 2 * 2 - 1;
+}
+
+function safeCenterRange(axisSize, spriteSize, margin) {
+  const half = spriteSize / 2;
+  const min = margin + half;
+  const max = axisSize - margin - half;
+  if (max < min) return { min: axisSize / 2, max: axisSize / 2 };
+  return { min, max };
+}
+
+function placeSprite(sprite, image, height, settings) {
   const dimensions = imageDimensions(image, height);
-  const margin = 12;
-  const maxLeft = Math.max(margin, window.innerWidth - dimensions.width - margin);
-  const maxTop = Math.max(margin, workspaceHeight() - dimensions.height - margin);
-  sprite.style.left = `${randomBetween(margin, maxLeft)}px`;
-  sprite.style.top = `${randomBetween(margin, maxTop)}px`;
+  const margin = Math.max(0, settingNumber(settings.margin, 12));
+  const width = window.innerWidth;
+  const heightLimit = workspaceHeight();
+  const quadrant = quadrants[settings.nextQuadrant % quadrants.length];
+  settings.nextQuadrant = (settings.nextQuadrant + 1) % quadrants.length;
+  const deadzone = clamp(settingNumber(settings.deadzonePercent, 30), 0, 98);
+  const spread = clamp(settingNumber(settings.quadrantSpreadPercent, 100 - deadzone), 2, 100) / 100;
+  const radiusX = width * 0.25 * spread;
+  const radiusY = heightLimit * 0.25 * spread;
+  const rangeX = safeCenterRange(width, dimensions.width, margin);
+  const rangeY = safeCenterRange(heightLimit, dimensions.height, margin);
+  const centerX = width * quadrant.x;
+  const centerY = heightLimit * quadrant.y;
+  const spriteCenterX = clamp(centerX + randomBias() * radiusX, rangeX.min, rangeX.max);
+  const spriteCenterY = clamp(centerY + randomBias() * radiusY, rangeY.min, rangeY.max);
+  sprite.style.left = `${Math.round(spriteCenterX - dimensions.width / 2)}px`;
+  sprite.style.top = `${Math.round(spriteCenterY - dimensions.height / 2)}px`;
 }
 
 function runSpriteAnimation(sprite, intro, direction, settings, remove) {
   const anime = window.anime;
   if (!anime) {
     if (intro) {
-      sprite.style.transform = "scale(1, 1) rotate(0deg)";
+      applySpriteTransform(sprite, { sx: 1, sy: 1, r: 0 });
       window.setTimeout(() => runSpriteAnimation(sprite, false, direction, settings, remove), settings.holdMs);
     } else {
       remove();
     }
     return;
   }
-  const state = intro ? { sx: 0.14, sy: 0.06, r: direction * -20 } : { sx: 1, sy: 1, r: 0 };
+  const state = intro ? { sx: 0.16, sy: 0.12, r: direction * -4.5 } : { sx: 1, sy: 1, r: 0 };
   const frameMs = getMotionFrameMs(settings.fps);
   let lastFrame = 0;
   sprite.style.transformOrigin = "50% 50%";
@@ -342,7 +373,11 @@ export async function createRandomGifs(config = {}) {
     holdMs: Math.max(0, settingNumber(config.holdMs, 1300)),
     settleInMs: Math.max(0, settingNumber(config.settleInMs ?? config.settleIn ?? config.introSettleMs ?? config.enterSettleMs, 2400)),
     settleOutMs: Math.max(0, settingNumber(config.settleOutMs ?? config.settleOut ?? config.outroSettleMs ?? config.exitSettleMs, 2200)),
-    fps: settingNumber(config.fps, 24)
+    fps: settingNumber(config.fps, 24),
+    deadzonePercent: settingNumber(config.deadzonePercent ?? config.deadzone ?? config.quadrantDeadzonePercent, 30),
+    quadrantSpreadPercent: config.quadrantSpreadPercent ?? config.spreadPercent ?? config.spawnSpreadPercent,
+    margin: settingNumber(config.margin ?? config.edgeMargin, 12),
+    nextQuadrant: 0
   };
   let active = 0;
   let nextIndex = 0;
@@ -363,7 +398,8 @@ export async function createRandomGifs(config = {}) {
       decoding: "async",
       draggable: "false"
     });
-    const sprite = createElement("div", { className: "random-gifs__sprite" }, [image]);
+    const squash = createElement("div", { className: "random-gifs__squash" }, [image]);
+    const sprite = createElement("div", { className: "random-gifs__sprite" }, [squash]);
     sprite.style.height = `${height}px`;
     sprite.style.visibility = "hidden";
     let started = false;
@@ -375,7 +411,7 @@ export async function createRandomGifs(config = {}) {
       if (started) return;
       started = true;
       if (!host.isConnected) return remove();
-      placeSprite(sprite, image, height);
+      placeSprite(sprite, image, height, settings);
       sprite.style.visibility = "visible";
       runSpriteAnimation(sprite, true, direction, settings, remove);
     };

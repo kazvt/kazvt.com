@@ -248,18 +248,28 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
   const anime = window.anime;
   const horizontal = finiteNumber(deltaX, 0);
   const vertical = finiteNumber(deltaY, 0);
-  const targetRotation = clamp(horizontal * 0.42 + vertical * 0.1, -7.5, 7.5);
-  const speed = Math.min(1, Math.hypot(horizontal, vertical) / 32);
-  const targetScaleX = 1 + speed * 0.026;
-  const targetScaleY = 1 - speed * 0.014;
+  const now = performance.now();
+  const existing = dragAnimations.get(element) || {
+    state: { r: 0, sx: 1, sy: 1, tx: 0, ty: 0, o: 1 },
+    last: 0,
+    filteredX: 0,
+    filteredY: 0
+  };
+  existing.filteredX = existing.filteredX * 0.72 + horizontal * 0.28;
+  existing.filteredY = existing.filteredY * 0.72 + vertical * 0.28;
+  const pullX = existing.filteredX;
+  const pullY = existing.filteredY;
+  const targetRotation = clamp(pullX * 0.2, -3.4, 3.4);
+  const horizontalPull = Math.min(1, Math.abs(pullX) / 32);
+  const verticalPull = Math.min(1, Math.abs(pullY) / 32);
+  const targetScaleX = clamp(1 + horizontalPull * 0.012 - verticalPull * 0.018, 0.976, 1.016);
+  const targetScaleY = clamp(1 - horizontalPull * 0.007 + verticalPull * 0.018, 0.986, 1.02);
   if (!anime) {
     element.style.transformOrigin = "50% 12px";
     element.style.transform = `rotate(${targetRotation.toFixed(3)}deg) scale(${targetScaleX.toFixed(4)}, ${targetScaleY.toFixed(4)})`;
     return;
   }
-  const now = performance.now();
-  const existing = dragAnimations.get(element) || { state: { r: 0, sx: 1, sy: 1, tx: 0, ty: 0, o: 1 }, last: 0 };
-  if (now - existing.last < 72) return;
+  if (now - existing.last < 86) return;
   if (existing.animation && existing.animation.pause) existing.animation.pause();
   anime.remove(existing.state);
   existing.last = now;
@@ -270,8 +280,8 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
     r: targetRotation,
     sx: targetScaleX,
     sy: targetScaleY,
-    duration: 260,
-    easing: "easeOutElastic(1.08, .42)",
+    duration: 230,
+    easing: "easeOutCubic",
     update() {
       applyTransform(element, existing.state);
     }
