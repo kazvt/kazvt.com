@@ -672,7 +672,7 @@ img {
   position: fixed;
   left: var(--peek-anchor-x, 50vw);
   top: var(--peek-anchor-y, 50vh);
-  z-index: 3;
+  z-index: 18;
   width: 0;
   height: 0;
   pointer-events: none;

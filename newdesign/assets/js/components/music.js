@@ -154,16 +154,36 @@ function randomIndex(length, currentIndex) {
   return next;
 }
 
-function bindUnlock(play) {
-  let done = false;
-  const events = ["pointerdown", "mousedown", "touchstart", "keydown", "click"];
-  const unlock = () => {
-    if (done) return;
-    done = true;
+function createUnlockBinder(play, isPlaying) {
+  const events = ["pointerdown", "mousedown", "mouseup", "touchstart", "touchend", "keydown", "click"];
+  let listening = false;
+  const stop = () => {
+    if (!listening) return;
+    listening = false;
     events.forEach((eventName) => document.removeEventListener(eventName, unlock, true));
-    play();
   };
-  events.forEach((eventName) => document.addEventListener(eventName, unlock, { capture: true, once: true }));
+  const unlock = () => {
+    if (isPlaying()) {
+      stop();
+      return;
+    }
+    const result = play();
+    if (result && typeof result.then === "function") {
+      result.finally(() => {
+        if (isPlaying()) stop();
+      });
+    } else if (isPlaying()) {
+      stop();
+    }
+  };
+  return {
+    start() {
+      if (listening || isPlaying()) return;
+      listening = true;
+      events.forEach((eventName) => document.addEventListener(eventName, unlock, true));
+    },
+    stop
+  };
 }
 
 function createPlayer(state) {
@@ -237,6 +257,7 @@ export async function startMusic(config = {}) {
   let unlockWaiting = false;
   let transitionRunning = false;
   let firstPlayDone = false;
+  let unlockBinder = null;
   const files = await resolveMusicFiles(config);
   const choiceCookie = cookieName(config);
 
@@ -271,6 +292,8 @@ export async function startMusic(config = {}) {
 
   current = createPlayer(state);
   standby = createPlayer(state);
+  unlockBinder = createUnlockBinder(play, () => Boolean(firstPlayDone && current && !current.audio.paused));
+  unlockBinder.start();
 
   function rememberChoice(index) {
     if (files[index]) setCookieValue(choiceCookie, musicKey(files[index]));
@@ -307,12 +330,11 @@ export async function startMusic(config = {}) {
     try {
       await player.audio.play();
       unlockWaiting = false;
+      if (unlockBinder && firstPlayDone) unlockBinder.stop();
       return true;
     } catch {
-      if (!unlockWaiting) {
-        unlockWaiting = true;
-        bindUnlock(retry);
-      }
+      unlockWaiting = true;
+      if (unlockBinder) unlockBinder.start();
       return false;
     }
   }
@@ -327,6 +349,7 @@ export async function startMusic(config = {}) {
     if (!didPlay) return;
     if (!firstPlayDone) {
       firstPlayDone = true;
+      if (unlockBinder) unlockBinder.stop();
       await fadePlayer(current, state, 1, firstFadeMs);
     } else {
       setPlayerFade(current, state, 1);
