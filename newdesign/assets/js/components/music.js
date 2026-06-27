@@ -1,3 +1,5 @@
+import { githubApiBlocked, githubApiEnabled, loadGithubContents } from "./github-contents.js";
+
 const musicExtensions = [".mp3", ".wav"];
 const firstFadeMs = 2000;
 const transitionFadeMs = 6000;
@@ -108,20 +110,17 @@ async function loadManifest(path) {
 }
 
 async function loadGithubPath(repository, branch, path) {
-  const ref = branch ? `?ref=${encodeURIComponent(branch)}` : "";
-  const endpoint = `https://api.github.com/repos/${repository}/contents/${path}${ref}`;
-  const response = await fetch(endpoint, { headers: { Accept: "application/vnd.github+json" }, cache: "no-store" });
-  if (!response.ok) return [];
-  const data = await response.json();
-  if (!Array.isArray(data)) return [];
+  const data = await loadGithubContents(repository, branch, path);
   return data.filter((item) => item && item.type === "file" && hasMusicExtension(item.name)).map((item) => `assets/music/${item.name}`);
 }
 
 async function loadGithubFiles(config) {
+  if (!githubApiEnabled(config)) return [];
   const repository = inferRepository(config.repository);
   if (!repository) return [];
   const branch = cleanPath(config.branch);
   for (const path of candidateGithubPaths(config)) {
+    if (githubApiBlocked()) return [];
     const files = await loadGithubPath(repository, branch, path).catch(() => []);
     if (files.length) return files;
   }

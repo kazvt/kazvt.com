@@ -9,7 +9,7 @@ import { createEdgePeek } from "./components/edge-peek.js";
 import { createSiteTitle } from "./components/site-title.js";
 import { createImageMarquee } from "./components/image-marquee.js";
 import { createRandomGifs } from "./components/random-gifs.js";
-import { animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
+import { animateWindowClose, animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
 import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretMotionConfig } from "./components/private-config.js";
 import { setMotionFps } from "./components/motion.js";
 import { home } from "./data/home.js";
@@ -77,8 +77,13 @@ function minimizeWindow() {
 
 function closeWindow() {
   if (windowAnimationBusy) return;
-  windowHost.classList.add("is-minimized");
-  taskButton.hidden = true;
+  windowAnimationBusy = true;
+  taskButton.classList.remove("is-active");
+  animateWindowClose(windowHost, () => {
+    windowHost.classList.add("is-minimized");
+    taskButton.hidden = true;
+    finishWindowAnimation();
+  });
 }
 
 function toggleMaximize() {

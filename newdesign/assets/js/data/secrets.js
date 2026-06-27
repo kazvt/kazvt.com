@@ -39,6 +39,8 @@ export const secrets = {
     maxOnScreen: 25,
     minHeight: 150,
     maxHeight: 250,
-    holdMs: 0
+    holdMs: 0,
+    settleInMs: 1000,
+    settleOutMs: 700
   }
 };

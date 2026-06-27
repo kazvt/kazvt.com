@@ -27,6 +27,14 @@ function branchFrom(...items) {
   return {};
 }
 
+function githubApiFrom(...items) {
+  for (const item of items) {
+    if (item && Object.prototype.hasOwnProperty.call(item, "githubApi")) return { githubApi: item.githubApi };
+    if (item && Object.prototype.hasOwnProperty.call(item, "useGithubApi")) return { useGithubApi: item.useGithubApi };
+  }
+  return {};
+}
+
 export async function loadSecrets() {
   try {
     return objectFromModule(await import("../data/secrets.js"));
@@ -44,7 +52,7 @@ export function getSecretMusicConfig(secrets) {
   const musicRepository = secrets.musicRepository || {};
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
-  return mergeObjects(musicRepository, music, rootRepository, rootBranch);
+  return mergeObjects(musicRepository, music, rootRepository, rootBranch, githubApiFrom(secrets, music));
 }
 
 export function getSecretMarqueeConfig(secrets) {
@@ -52,7 +60,7 @@ export function getSecretMarqueeConfig(secrets) {
   const marquee = secrets.marquee || secrets.imageMarquee || secrets.gifMarquee || secrets.badgeMarquee || {};
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
-  const shared = mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), rootRepository, rootBranch);
+  const shared = mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), rootRepository, rootBranch, githubApiFrom(secrets, marquee));
   if (Array.isArray(marquee)) return mergeObjects(shared, { marquees: marquee });
   return mergeObjects(shared, marquee);
 }
@@ -62,7 +70,7 @@ export function getSecretRandomGifsConfig(secrets) {
   const randomGifs = secrets.randomGifs || secrets.randomGif || secrets.desktopGifs || secrets.wallpaperGifs || {};
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
-  return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch);
+  return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch, githubApiFrom(secrets, randomGifs));
 }
 
 export function getSecretMotionConfig(secrets) {

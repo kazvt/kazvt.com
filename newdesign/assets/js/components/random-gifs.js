@@ -1,4 +1,5 @@
 import { createElement } from "./dom.js";
+import { githubApiBlocked, githubApiEnabled, loadGithubContents } from "./github-contents.js";
 import { getMotionFrameMs } from "./motion.js";
 
 const imageExtensions = [".gif", ".png"];
@@ -20,10 +21,6 @@ function uniqueFiles(files) {
 function randomBetween(min, max) {
   if (max <= min) return Math.round((min + max) / 2);
   return Math.round(min + Math.random() * (max - min));
-}
-
-function pick(items) {
-  return items[Math.floor(Math.random() * items.length)];
 }
 
 function basePathParts() {
@@ -89,20 +86,17 @@ async function loadManifest(path) {
 }
 
 async function loadGithubPath(repository, branch, path) {
-  const ref = branch ? `?ref=${encodeURIComponent(branch)}` : "";
-  const endpoint = `https://api.github.com/repos/${repository}/contents/${path}${ref}`;
-  const response = await fetch(endpoint, { headers: { Accept: "application/vnd.github+json" }, cache: "no-store" });
-  if (!response.ok) return [];
-  const data = await response.json();
-  if (!Array.isArray(data)) return [];
+  const data = await loadGithubContents(repository, branch, path);
   return data.filter((item) => item && item.type === "file" && hasImageExtension(item.name)).map((item) => item.name);
 }
 
 async function loadGithubFiles(config) {
+  if (!githubApiEnabled(config)) return [];
   const repository = inferRepository(config.repository);
   if (!repository) return [];
   const branch = cleanPath(config.branch);
   for (const path of candidateGithubPaths(config)) {
+    if (githubApiBlocked()) return [];
     const files = await loadGithubPath(repository, branch, path).catch(() => []);
     if (files.length) return files;
   }
@@ -139,10 +133,137 @@ function finiteNumber(value, fallback) {
   return Number.isFinite(number) ? number : fallback;
 }
 
+function settingNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
 function applySpriteTransform(sprite, state) {
-  const scale = finiteNumber(state.s, 1).toFixed(4);
+  const scaleX = finiteNumber(state.sx, 1).toFixed(4);
+  const scaleY = finiteNumber(state.sy, 1).toFixed(4);
   const rotation = finiteNumber(state.r, 0).toFixed(3);
-  sprite.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+  sprite.style.transform = `scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`;
+}
+
+function ms(value) {
+  return Math.max(1, Math.round(value));
+}
+
+function introScaleX(settleInMs) {
+  const keys = [
+    { value: 0.14, duration: 0 },
+    { value: 0.74, duration: 210, easing: "easeOutCubic" },
+    { value: 1.32, duration: 230, easing: "easeOutBack" },
+    { value: 0.84, duration: 170, easing: "easeInOutSine" },
+    { value: 1.12, duration: 190, easing: "easeOutQuad" },
+    { value: 0.98, duration: 200, easing: "easeInOutSine" }
+  ];
+  if (settleInMs > 0) keys.push(
+    { value: 1.065, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
+    { value: 0.962, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
+    { value: 1.032, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" },
+    { value: 0.986, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
+    { value: 1.01, duration: ms(settleInMs * 0.14), easing: "easeOutSine" },
+    { value: 1, duration: ms(settleInMs * 0.12), easing: "easeOutQuad" }
+  );
+  else keys.push({ value: 1, duration: 1, easing: "linear" });
+  return keys;
+}
+
+function introScaleY(settleInMs) {
+  const keys = [
+    { value: 0.06, duration: 0 },
+    { value: 1.38, duration: 210, easing: "easeOutCubic" },
+    { value: 0.68, duration: 230, easing: "easeOutBack" },
+    { value: 1.18, duration: 170, easing: "easeInOutSine" },
+    { value: 0.92, duration: 190, easing: "easeOutQuad" },
+    { value: 1.02, duration: 200, easing: "easeInOutSine" }
+  ];
+  if (settleInMs > 0) keys.push(
+    { value: 0.946, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
+    { value: 1.042, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
+    { value: 0.972, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" },
+    { value: 1.014, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
+    { value: 0.993, duration: ms(settleInMs * 0.14), easing: "easeOutSine" },
+    { value: 1, duration: ms(settleInMs * 0.12), easing: "easeOutQuad" }
+  );
+  else keys.push({ value: 1, duration: 1, easing: "linear" });
+  return keys;
+}
+
+function introRotation(direction, settleInMs) {
+  const keys = [
+    { value: direction * -20, duration: 0 },
+    { value: direction * 18, duration: 210, easing: "easeOutCubic" },
+    { value: direction * -14, duration: 230, easing: "easeOutBack" },
+    { value: direction * 9, duration: 170, easing: "easeInOutSine" },
+    { value: direction * -5.5, duration: 190, easing: "easeOutQuad" },
+    { value: direction * 3.5, duration: 200, easing: "easeInOutSine" }
+  ];
+  if (settleInMs > 0) keys.push(
+    { value: direction * -3.2, duration: ms(settleInMs * 0.16), easing: "easeOutSine" },
+    { value: direction * 2.1, duration: ms(settleInMs * 0.18), easing: "easeInOutSine" },
+    { value: direction * -1.35, duration: ms(settleInMs * 0.2), easing: "easeOutQuad" },
+    { value: direction * 0.75, duration: ms(settleInMs * 0.2), easing: "easeInOutSine" },
+    { value: direction * -0.25, duration: ms(settleInMs * 0.14), easing: "easeOutSine" },
+    { value: 0, duration: ms(settleInMs * 0.12), easing: "easeOutQuad" }
+  );
+  else keys.push({ value: 0, duration: 1, easing: "linear" });
+  return keys;
+}
+
+function outroScaleX(settleOutMs) {
+  const keys = [];
+  if (settleOutMs > 0) keys.push(
+    { value: 1.08, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
+    { value: 0.9, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: 1.16, duration: ms(settleOutMs * 0.22), easing: "easeOutQuad" },
+    { value: 0.96, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: 1.05, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
+    { value: 1, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
+  );
+  keys.push(
+    { value: 0.72, duration: 180, easing: "easeInSine" },
+    { value: 1.12, duration: 180, easing: "easeOutQuad" },
+    { value: 0.08, duration: 640, easing: "easeInBack" }
+  );
+  return keys;
+}
+
+function outroScaleY(settleOutMs) {
+  const keys = [];
+  if (settleOutMs > 0) keys.push(
+    { value: 0.93, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
+    { value: 1.12, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: 0.84, duration: ms(settleOutMs * 0.22), easing: "easeOutQuad" },
+    { value: 1.04, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: 0.97, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
+    { value: 1, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
+  );
+  keys.push(
+    { value: 1.28, duration: 180, easing: "easeInSine" },
+    { value: 0.78, duration: 180, easing: "easeOutQuad" },
+    { value: 0.04, duration: 640, easing: "easeInBack" }
+  );
+  return keys;
+}
+
+function outroRotation(direction, settleOutMs) {
+  const keys = [];
+  if (settleOutMs > 0) keys.push(
+    { value: direction * 4, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
+    { value: direction * -5.8, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: direction * 7.8, duration: ms(settleOutMs * 0.22), easing: "easeOutQuad" },
+    { value: direction * -3.6, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
+    { value: direction * 1.8, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
+    { value: 0, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
+  );
+  keys.push(
+    { value: direction * -10, duration: 180, easing: "easeInSine" },
+    { value: direction * 14, duration: 180, easing: "easeOutQuad" },
+    { value: direction * 31, duration: 640, easing: "easeInBack" }
+  );
+  return keys;
 }
 
 function imageDimensions(image, height) {
@@ -169,54 +290,30 @@ function runSpriteAnimation(sprite, intro, direction, settings, remove) {
   const anime = window.anime;
   if (!anime) {
     if (intro) {
-      sprite.style.transform = "scale(1) rotate(0deg)";
+      sprite.style.transform = "scale(1, 1) rotate(0deg)";
       window.setTimeout(() => runSpriteAnimation(sprite, false, direction, settings, remove), settings.holdMs);
     } else {
       remove();
     }
     return;
   }
-  const state = intro ? { s: 0, r: direction * -22 } : { s: 1, r: 0 };
+  const state = intro ? { sx: 0.14, sy: 0.06, r: direction * -20 } : { sx: 1, sy: 1, r: 0 };
   const frameMs = getMotionFrameMs(settings.fps);
   let lastFrame = 0;
   sprite.style.transformOrigin = "50% 50%";
   applySpriteTransform(sprite, state);
-  const config = intro ? {
-    s: [
-      { value: 1.16, duration: windowDuration, easing: "easeOutElastic(1.35, .52)" },
-      { value: 0.9, duration: 520, easing: "easeInOutSine" },
-      { value: 1.08, duration: 660, easing: "easeOutElastic(1.08, .58)" },
-      { value: 0.965, duration: 620, easing: "easeInOutSine" },
-      { value: 1.025, duration: 600, easing: "easeOutElastic(1, .62)" },
-      { value: 1, duration: 600, easing: "easeOutQuad" }
-    ],
-    r: [
-      { value: direction * 17, duration: windowDuration, easing: "easeOutElastic(1.22, .48)" },
-      { value: direction * -9, duration: 520, easing: "easeInOutSine" },
-      { value: direction * 5.2, duration: 660, easing: "easeOutElastic(1, .56)" },
-      { value: direction * -2.8, duration: 620, easing: "easeInOutSine" },
-      { value: direction * 1.2, duration: 600, easing: "easeOutQuad" },
-      { value: 0, duration: 600, easing: "easeOutQuad" }
-    ]
+  const animationConfig = intro ? {
+    sx: introScaleX(settings.settleInMs),
+    sy: introScaleY(settings.settleInMs),
+    r: introRotation(direction, settings.settleInMs)
   } : {
-    s: [
-      { value: 1.09, duration: 520, easing: "easeOutQuad" },
-      { value: 0.94, duration: 560, easing: "easeInOutSine" },
-      { value: 1.06, duration: 560, easing: "easeOutQuad" },
-      { value: 0.98, duration: 460, easing: "easeInOutSine" },
-      { value: 0, duration: windowDuration, easing: "easeInOutElastic(1.1, .6)" }
-    ],
-    r: [
-      { value: direction * -7, duration: 520, easing: "easeOutQuad" },
-      { value: direction * 9, duration: 560, easing: "easeInOutSine" },
-      { value: direction * -5, duration: 560, easing: "easeOutQuad" },
-      { value: direction * 3, duration: 460, easing: "easeInOutSine" },
-      { value: direction * 24, duration: windowDuration, easing: "easeInOutElastic(1.05, .58)" }
-    ]
+    sx: outroScaleX(settings.settleOutMs),
+    sy: outroScaleY(settings.settleOutMs),
+    r: outroRotation(direction, settings.settleOutMs)
   };
   anime({
     targets: state,
-    ...config,
+    ...animationConfig,
     update() {
       const now = performance.now();
       if (frameMs > 0 && now - lastFrame < frameMs) return;
@@ -234,16 +331,26 @@ export async function createRandomGifs(config = {}) {
   const host = createElement("section", { className: "random-gifs-host", "aria-hidden": "true" });
   const files = await resolveRandomFiles(config);
   if (!files.length) return host;
+  const minHeight = Math.max(12, settingNumber(config.minHeight, 46));
+  const maxHeight = Math.max(minHeight, settingNumber(config.maxHeight, 116));
   const settings = {
-    spawnEveryMs: Math.max(1500, Number(config.spawnEveryMs) || Number(config.intervalMs) || 8500),
-    initialDelayMs: Math.max(0, Number(config.initialDelayMs) || 1200),
-    maxOnScreen: Math.max(1, Number(config.maxOnScreen) || 3),
-    minHeight: Math.max(12, Number(config.minHeight) || 46),
-    maxHeight: Math.max(12, Number(config.maxHeight) || 116),
-    holdMs: Math.max(0, Number(config.holdMs) || 1300),
-    fps: Number(config.fps) || 24
+    spawnEveryMs: Math.max(100, settingNumber(config.spawnEveryMs ?? config.intervalMs, 8500)),
+    initialDelayMs: Math.max(0, settingNumber(config.initialDelayMs, 1200)),
+    maxOnScreen: Math.max(1, settingNumber(config.maxOnScreen, 3)),
+    minHeight,
+    maxHeight,
+    holdMs: Math.max(0, settingNumber(config.holdMs, 1300)),
+    settleInMs: Math.max(0, settingNumber(config.settleInMs ?? config.settleIn ?? config.introSettleMs ?? config.enterSettleMs, 2400)),
+    settleOutMs: Math.max(0, settingNumber(config.settleOutMs ?? config.settleOut ?? config.outroSettleMs ?? config.exitSettleMs, 2200)),
+    fps: settingNumber(config.fps, 24)
   };
   let active = 0;
+  let nextIndex = 0;
+  const nextFile = () => {
+    const file = files[nextIndex % files.length];
+    nextIndex = (nextIndex + 1) % files.length;
+    return file;
+  };
   const spawn = () => {
     if (!host.isConnected || active >= settings.maxOnScreen) return;
     active += 1;
@@ -251,7 +358,7 @@ export async function createRandomGifs(config = {}) {
     const direction = Math.random() < 0.5 ? -1 : 1;
     const image = createElement("img", {
       className: "random-gifs__image",
-      src: assetUrl(pick(files), config),
+      src: assetUrl(nextFile(), config),
       alt: "",
       decoding: "async",
       draggable: "false"

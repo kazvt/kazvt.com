@@ -2,14 +2,19 @@ import { getMotionFrameMs } from "./motion.js";
 
 const duration = 1000;
 const activeAnimations = new WeakMap();
+const dragAnimations = new WeakMap();
 
 function identity() {
-  return { tx: 0, ty: 0, sx: 1, sy: 1, r: 0 };
+  return { tx: 0, ty: 0, sx: 1, sy: 1, r: 0, o: 1 };
 }
 
 function finiteNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 function applyTransform(element, state) {
@@ -18,7 +23,9 @@ function applyTransform(element, state) {
   const rotation = finiteNumber(state.r, 0).toFixed(3);
   const sx = finiteNumber(state.sx, 1).toFixed(4);
   const sy = finiteNumber(state.sy, 1).toFixed(4);
+  const opacity = finiteNumber(state.o, 1).toFixed(4);
   element.style.transform = `translate(${tx}px, ${ty}px) rotate(${rotation}deg) scale(${sx}, ${sy})`;
+  element.style.opacity = opacity;
 }
 
 function clearAnimation(element) {
@@ -30,12 +37,30 @@ function clearAnimation(element) {
   }
 }
 
+function clearDragAnimation(element) {
+  const existing = dragAnimations.get(element);
+  if (existing) {
+    if (existing.animation && existing.animation.pause) existing.animation.pause();
+    if (window.anime && existing.state) window.anime.remove(existing.state);
+    dragAnimations.delete(element);
+  }
+}
+
 function finishAnimation(element, done) {
   element.classList.remove("is-window-animating");
   element.style.transform = "";
   element.style.transformOrigin = "";
+  element.style.opacity = "";
   activeAnimations.delete(element);
   if (done) done();
+}
+
+function finishDrag(element) {
+  element.classList.remove("is-drag-jiggling");
+  element.style.transform = "";
+  element.style.transformOrigin = "";
+  element.style.opacity = "";
+  dragAnimations.delete(element);
 }
 
 function rotationForTravel(transform) {
@@ -45,7 +70,8 @@ function rotationForTravel(transform) {
   return sign || 1;
 }
 
-function animateState(element, from, to, origin, easing, rotationKeyframes, done) {
+function animateState(element, from, to, origin, easing, keyframes, done) {
+  clearDragAnimation(element);
   clearAnimation(element);
   const anime = window.anime;
   if (!anime) {
@@ -53,6 +79,7 @@ function animateState(element, from, to, origin, easing, rotationKeyframes, done
     return null;
   }
   const state = { ...identity(), ...from };
+  const target = { ...identity(), ...to };
   const frameMs = getMotionFrameMs();
   let lastFrame = 0;
   element.classList.add("is-window-animating");
@@ -60,11 +87,12 @@ function animateState(element, from, to, origin, easing, rotationKeyframes, done
   applyTransform(element, state);
   const animation = anime({
     targets: state,
-    tx: to.tx,
-    ty: to.ty,
-    sx: to.sx,
-    sy: to.sy,
-    r: rotationKeyframes || to.r,
+    tx: keyframes && keyframes.tx ? keyframes.tx : target.tx,
+    ty: keyframes && keyframes.ty ? keyframes.ty : target.ty,
+    sx: keyframes && keyframes.sx ? keyframes.sx : target.sx,
+    sy: keyframes && keyframes.sy ? keyframes.sy : target.sy,
+    r: keyframes && keyframes.r ? keyframes.r : target.r,
+    o: keyframes && keyframes.o ? keyframes.o : target.o,
     duration,
     easing,
     update() {
@@ -74,7 +102,7 @@ function animateState(element, from, to, origin, easing, rotationKeyframes, done
       applyTransform(element, state);
     },
     complete() {
-      applyTransform(element, to);
+      applyTransform(element, target);
       finishAnimation(element, done);
     }
   });
@@ -96,48 +124,198 @@ function getTaskbarTransform(element, taskButton) {
     ty: toCenterY - fromCenterY,
     sx,
     sy,
-    r: 0
+    r: 0,
+    o: 1
+  };
+}
+
+function travelStretch(transform) {
+  const distance = Math.hypot(finiteNumber(transform.tx, 0), finiteNumber(transform.ty, 0));
+  const amount = clamp(distance / 1200, 0.035, 0.125);
+  return {
+    sx: 1 + amount,
+    sy: 1 - amount * 0.44
   };
 }
 
 export function animateWindowFlip(element, beforeRect, done) {
   const afterRect = element.getBoundingClientRect();
   const goingBigger = afterRect.width * afterRect.height >= beforeRect.width * beforeRect.height;
-  const tilt = goingBigger ? -2.8 : 2.8;
+  const tilt = goingBigger ? -3.6 : 3.6;
   const from = {
     tx: beforeRect.left - afterRect.left,
     ty: beforeRect.top - afterRect.top,
     sx: beforeRect.width / Math.max(1, afterRect.width),
     sy: beforeRect.height / Math.max(1, afterRect.height),
-    r: tilt
+    r: tilt,
+    o: 1
   };
-  animateState(element, from, identity(), "top left", "easeOutElastic(1.18, .58)", [
-    { value: tilt, duration: 0 },
-    { value: tilt * -0.62, duration: 300, easing: "easeOutQuad" },
-    { value: tilt * 0.32, duration: 260, easing: "easeInOutSine" },
-    { value: 0, duration: 440, easing: "easeOutElastic(1.05, .52)" }
-  ], done);
+  animateState(element, from, identity(), "top left", "easeOutElastic(1.28, .55)", {
+    r: [
+      { value: tilt, duration: 0 },
+      { value: tilt * -0.82, duration: 320, easing: "easeOutQuad" },
+      { value: tilt * 0.45, duration: 260, easing: "easeInOutSine" },
+      { value: tilt * -0.16, duration: 220, easing: "easeOutQuad" },
+      { value: 0, duration: 200, easing: "easeOutElastic(1.12, .48)" }
+    ]
+  }, done);
 }
 
 export function animateWindowMinimize(element, taskButton, done) {
   const target = getTaskbarTransform(element, taskButton);
-  const tilt = rotationForTravel(target) * 7.5;
-  animateState(element, identity(), target, "center center", "easeInOutElastic(1.08, .62)", [
-    { value: 0, duration: 0 },
-    { value: tilt, duration: 260, easing: "easeOutQuad" },
-    { value: tilt * -0.42, duration: 270, easing: "easeInOutSine" },
-    { value: 0, duration: 470, easing: "easeOutElastic(1.08, .55)" }
-  ], done);
+  const tilt = rotationForTravel(target) * 8.5;
+  const stretch = travelStretch(target);
+  animateState(element, identity(), target, "center center", "easeInOutElastic(1.16, .58)", {
+    sx: [
+      { value: stretch.sx, duration: 190, easing: "easeOutQuad" },
+      { value: 0.86, duration: 180, easing: "easeInOutSine" },
+      { value: target.sx, duration: 630, easing: "easeInOutElastic(1.12, .56)" }
+    ],
+    sy: [
+      { value: stretch.sy, duration: 190, easing: "easeOutQuad" },
+      { value: 1.08, duration: 180, easing: "easeInOutSine" },
+      { value: target.sy, duration: 630, easing: "easeInOutElastic(1.12, .56)" }
+    ],
+    r: [
+      { value: 0, duration: 0 },
+      { value: tilt, duration: 260, easing: "easeOutQuad" },
+      { value: tilt * -0.55, duration: 260, easing: "easeInOutSine" },
+      { value: tilt * 0.22, duration: 220, easing: "easeOutQuad" },
+      { value: 0, duration: 260, easing: "easeOutElastic(1.08, .5)" }
+    ]
+  }, done);
 }
 
 export function animateWindowRestoreFromTaskbar(element, taskButton, done) {
   const start = getTaskbarTransform(element, taskButton);
-  const tilt = rotationForTravel(start) * -8;
+  const tilt = rotationForTravel(start) * -8.5;
   start.r = tilt;
-  animateState(element, start, identity(), "center center", "easeOutElastic(1.22, .56)", [
-    { value: tilt, duration: 0 },
-    { value: tilt * -0.56, duration: 320, easing: "easeOutQuad" },
-    { value: tilt * 0.25, duration: 260, easing: "easeInOutSine" },
-    { value: 0, duration: 420, easing: "easeOutElastic(1.12, .52)" }
-  ], done);
+  const stretch = travelStretch(start);
+  animateState(element, start, identity(), "center center", "easeOutElastic(1.28, .54)", {
+    sx: [
+      { value: start.sx, duration: 0 },
+      { value: stretch.sx, duration: 300, easing: "easeOutQuad" },
+      { value: 0.96, duration: 240, easing: "easeInOutSine" },
+      { value: 1.025, duration: 220, easing: "easeOutQuad" },
+      { value: 1, duration: 240, easing: "easeOutElastic(1.06, .5)" }
+    ],
+    sy: [
+      { value: start.sy, duration: 0 },
+      { value: stretch.sy, duration: 300, easing: "easeOutQuad" },
+      { value: 1.035, duration: 240, easing: "easeInOutSine" },
+      { value: 0.99, duration: 220, easing: "easeOutQuad" },
+      { value: 1, duration: 240, easing: "easeOutElastic(1.06, .5)" }
+    ],
+    r: [
+      { value: tilt, duration: 0 },
+      { value: tilt * -0.68, duration: 320, easing: "easeOutQuad" },
+      { value: tilt * 0.32, duration: 260, easing: "easeInOutSine" },
+      { value: tilt * -0.12, duration: 200, easing: "easeOutQuad" },
+      { value: 0, duration: 220, easing: "easeOutElastic(1.12, .48)" }
+    ]
+  }, done);
+}
+
+export function animateWindowClose(element, done) {
+  animateState(element, identity(), { tx: 0, ty: 0, sx: 0.72, sy: 0.72, r: 0, o: 0 }, "center center", "easeInOutElastic(1.14, .56)", {
+    sx: [
+      { value: 1.055, duration: 170, easing: "easeOutQuad" },
+      { value: 0.94, duration: 180, easing: "easeInOutSine" },
+      { value: 1.025, duration: 170, easing: "easeOutQuad" },
+      { value: 0.72, duration: 480, easing: "easeInBack" }
+    ],
+    sy: [
+      { value: 0.965, duration: 170, easing: "easeOutQuad" },
+      { value: 1.045, duration: 180, easing: "easeInOutSine" },
+      { value: 0.985, duration: 170, easing: "easeOutQuad" },
+      { value: 0.72, duration: 480, easing: "easeInBack" }
+    ],
+    r: [
+      { value: -3.2, duration: 160, easing: "easeOutQuad" },
+      { value: 2.4, duration: 170, easing: "easeInOutSine" },
+      { value: -1.2, duration: 160, easing: "easeOutQuad" },
+      { value: 0, duration: 510, easing: "easeOutElastic(1.05, .5)" }
+    ],
+    o: [
+      { value: 1, duration: 520, easing: "linear" },
+      { value: 0, duration: 480, easing: "easeInQuad" }
+    ]
+  }, done);
+}
+
+export function animateWindowDragJiggle(element, deltaX, deltaY) {
+  if (element.classList.contains("is-window-animating")) return;
+  const anime = window.anime;
+  const horizontal = finiteNumber(deltaX, 0);
+  const vertical = finiteNumber(deltaY, 0);
+  const targetRotation = clamp(horizontal * 0.42 + vertical * 0.1, -7.5, 7.5);
+  const speed = Math.min(1, Math.hypot(horizontal, vertical) / 32);
+  const targetScaleX = 1 + speed * 0.026;
+  const targetScaleY = 1 - speed * 0.014;
+  if (!anime) {
+    element.style.transformOrigin = "50% 12px";
+    element.style.transform = `rotate(${targetRotation.toFixed(3)}deg) scale(${targetScaleX.toFixed(4)}, ${targetScaleY.toFixed(4)})`;
+    return;
+  }
+  const now = performance.now();
+  const existing = dragAnimations.get(element) || { state: { r: 0, sx: 1, sy: 1, tx: 0, ty: 0, o: 1 }, last: 0 };
+  if (now - existing.last < 72) return;
+  if (existing.animation && existing.animation.pause) existing.animation.pause();
+  anime.remove(existing.state);
+  existing.last = now;
+  element.classList.add("is-drag-jiggling");
+  element.style.transformOrigin = "50% 12px";
+  existing.animation = anime({
+    targets: existing.state,
+    r: targetRotation,
+    sx: targetScaleX,
+    sy: targetScaleY,
+    duration: 260,
+    easing: "easeOutElastic(1.08, .42)",
+    update() {
+      applyTransform(element, existing.state);
+    }
+  });
+  dragAnimations.set(element, existing);
+}
+
+export function settleWindowDragJiggle(element) {
+  const anime = window.anime;
+  const existing = dragAnimations.get(element);
+  if (!anime || !existing) {
+    finishDrag(element);
+    return;
+  }
+  if (existing.animation && existing.animation.pause) existing.animation.pause();
+  anime.remove(existing.state);
+  existing.animation = anime({
+    targets: existing.state,
+    r: [
+      { value: existing.state.r * -0.38, duration: 180, easing: "easeOutQuad" },
+      { value: existing.state.r * 0.16, duration: 170, easing: "easeInOutSine" },
+      { value: 0, duration: 430, easing: "easeOutElastic(1.1, .46)" }
+    ],
+    sx: [
+      { value: 0.992, duration: 180, easing: "easeOutQuad" },
+      { value: 1.006, duration: 170, easing: "easeInOutSine" },
+      { value: 1, duration: 430, easing: "easeOutElastic(1.05, .5)" }
+    ],
+    sy: [
+      { value: 1.006, duration: 180, easing: "easeOutQuad" },
+      { value: 0.996, duration: 170, easing: "easeInOutSine" },
+      { value: 1, duration: 430, easing: "easeOutElastic(1.05, .5)" }
+    ],
+    tx: 0,
+    ty: 0,
+    o: 1,
+    duration: 780,
+    easing: "linear",
+    update() {
+      applyTransform(element, existing.state);
+    },
+    complete() {
+      finishDrag(element);
+    }
+  });
+  dragAnimations.set(element, existing);
 }

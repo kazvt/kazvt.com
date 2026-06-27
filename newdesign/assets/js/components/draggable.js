@@ -1,4 +1,5 @@
 import { getMotionFrameMs } from "./motion.js";
+import { animateWindowDragJiggle, settleWindowDragJiggle } from "./window-animation.js";
 
 function getTaskbarHeight() {
   const taskbar = document.querySelector(".taskbar");
@@ -125,12 +126,15 @@ export function makeDraggable(element, handle) {
       offsetY: event.clientY - rect.top,
       lastFrameTime: 0,
       latestX: event.clientX,
-      latestY: event.clientY
+      latestY: event.clientY,
+      previousX: event.clientX,
+      previousY: event.clientY
     };
     element.classList.add("is-dragging");
     document.body.classList.add("is-window-dragging");
   };
   const start = (event) => {
+    if (element.classList.contains("is-window-animating")) return;
     if (event.button !== undefined && event.button !== 0) return;
     if (event.target.closest(".title-bar-controls")) return;
     setPointerCapture(handle, event);
@@ -170,6 +174,9 @@ export function makeDraggable(element, handle) {
     if (frameMs <= 0 || now - drag.lastFrameTime >= frameMs) {
       drag.lastFrameTime = now;
       placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
+      animateWindowDragJiggle(element, latest.clientX - drag.previousX, latest.clientY - drag.previousY);
+      drag.previousX = latest.clientX;
+      drag.previousY = latest.clientY;
     }
     event.preventDefault();
   };
@@ -180,6 +187,7 @@ export function makeDraggable(element, handle) {
     drag = null;
     element.classList.remove("is-dragging");
     document.body.classList.remove("is-window-dragging");
+    settleWindowDragJiggle(element);
   };
   handle.addEventListener("pointerdown", start);
   window.addEventListener("pointermove", move);

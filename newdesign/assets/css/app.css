@@ -189,11 +189,15 @@ img {
 
 .desktop-window.is-window-animating {
   z-index: 45;
-  will-change: transform;
+  will-change: transform, opacity;
+}
+
+.desktop-window.is-drag-jiggling {
+  will-change: left, top, transform;
 }
 
 .desktop-window.is-dragging {
-  will-change: left, top;
+  will-change: left, top, transform;
 }
 
 .desktop-window.is-resizing {
