@@ -70,5 +70,18 @@ export const secrets = {
     dragColors: ["#ffffff", "#ffff00", "#ff00ff", "#00ffff", "#ff9900"],
     dragSymbols: ["✦", "✧", "★"],
     dragLayers: 2
+  },
+  peekGifs: {
+    path: "newdesign/assets/peekGifs",
+    spawnEveryMs: 2500,
+    initialDelayMs: 400,
+    visibleMs: 3000,
+    motionMs: 750,
+    minWidth: 104,
+    maxWidth: 178,
+    maxOnScreen: 4,
+    maxImagesPerEdge: 1,
+    gap: 28,
+    edges: ["top", "right", "bottom", "left"]
   }
 };

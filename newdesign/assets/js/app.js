@@ -11,7 +11,7 @@ import { createImageMarquee } from "./components/image-marquee.js";
 import { createRandomGifs } from "./components/random-gifs.js";
 import { startCursorSparkles } from "./components/cursor-sparkles.js";
 import { animateWindowClose, animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig } from "./components/private-config.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretPeekGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig } from "./components/private-config.js";
 import { setMotionFps } from "./components/motion.js";
 import { home } from "./data/home.js";
 
@@ -22,7 +22,7 @@ const siteFps = setMotionFps(motionConfig.fps || (home.motion && home.motion.fps
 const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });
 const randomGifsHost = createElement("div", { className: "random-gifs-mount" });
-const edgePeek = createEdgePeek({ ...home.edgePeek, fps: siteFps, ...(motionConfig.edgePeek || {}), ...(secrets.edgePeek || {}) });
+const edgePeek = await createEdgePeek({ ...home.edgePeek, fps: siteFps, ...(motionConfig.edgePeek || {}), ...getSecretPeekGifsConfig(secrets) });
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
 

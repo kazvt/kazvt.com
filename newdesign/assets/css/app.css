@@ -694,9 +694,21 @@ img {
 
 .edge-peek {
   position: fixed;
-  left: var(--peek-anchor-x, 50vw);
-  top: var(--peek-anchor-y, 50vh);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: var(--taskbar-height);
   z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.edge-peek__sprite {
+  position: absolute;
+  left: 50vw;
+  top: 50vh;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -704,11 +716,9 @@ img {
   opacity: 1;
   transition: transform var(--peek-duration, 750ms) var(--peek-timing, steps(var(--peek-frames, 18), end)), visibility 0ms linear var(--peek-duration, 750ms);
   will-change: transform;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
-.edge-peek.is-visible {
+.edge-peek__sprite.is-visible {
   visibility: visible;
   transition: transform var(--peek-duration, 750ms) var(--peek-timing, steps(var(--peek-frames, 18), end)), visibility 0ms linear 0ms;
   transform: translate3d(0, 0, 0);
@@ -719,43 +729,44 @@ img {
   left: 0;
   bottom: 0;
   display: block;
-  width: clamp(104px, 13vw, 178px);
+  width: var(--peek-width, clamp(104px, 13vw, 178px));
   height: auto;
+  max-width: none;
   transform: translateX(-50%) rotate(0deg);
   transform-origin: 50% 100%;
   filter: drop-shadow(6px 9px 6px rgba(0, 0, 0, 0.22));
   -webkit-user-drag: none;
 }
 
-.edge-peek[data-edge="top"] {
+.edge-peek__sprite[data-edge="top"] {
   transform: translate3d(0, calc(var(--peek-distance, 180px) * -1), 0);
 }
 
-.edge-peek[data-edge="top"] .edge-peek__image {
+.edge-peek__sprite[data-edge="top"] .edge-peek__image {
   transform: translateX(-50%) rotate(180deg);
 }
 
-.edge-peek[data-edge="right"] {
+.edge-peek__sprite[data-edge="right"] {
   transform: translate3d(var(--peek-distance, 180px), 0, 0);
 }
 
-.edge-peek[data-edge="right"] .edge-peek__image {
+.edge-peek__sprite[data-edge="right"] .edge-peek__image {
   transform: translateX(-50%) rotate(-90deg);
 }
 
-.edge-peek[data-edge="bottom"] {
+.edge-peek__sprite[data-edge="bottom"] {
   transform: translate3d(0, var(--peek-distance, 180px), 0);
 }
 
-.edge-peek[data-edge="bottom"] .edge-peek__image {
+.edge-peek__sprite[data-edge="bottom"] .edge-peek__image {
   transform: translateX(-50%) rotate(0deg);
 }
 
-.edge-peek[data-edge="left"] {
+.edge-peek__sprite[data-edge="left"] {
   transform: translate3d(calc(var(--peek-distance, 180px) * -1), 0, 0);
 }
 
-.edge-peek[data-edge="left"] .edge-peek__image {
+.edge-peek__sprite[data-edge="left"] .edge-peek__image {
   transform: translateX(-50%) rotate(90deg);
 }
 

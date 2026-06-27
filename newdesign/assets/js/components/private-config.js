@@ -73,6 +73,16 @@ export function getSecretRandomGifsConfig(secrets) {
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch, githubApiFrom(secrets, randomGifs));
 }
 
+
+export function getSecretPeekGifsConfig(secrets) {
+  const music = secrets.music || {};
+  const edgePeek = secrets.edgePeek || {};
+  const peekGifs = secrets.peekGifs || secrets.peekGif || secrets.edgePeekGifs || secrets.edgeGifs || {};
+  const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
+  const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
+  return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), edgePeek, peekGifs, rootRepository, rootBranch, githubApiFrom(secrets, edgePeek, peekGifs));
+}
+
 export function getSecretCursorSparklesConfig(secrets) {
   return secrets.cursorSparkles || secrets.sparkleCursor || secrets.cursorTrail || secrets.cursorEffects || {};
 }
