@@ -1,4 +1,5 @@
 export const home = {
+  siteTitle: "Old Internet Windows XP",
   art: {
     src: "assets/img/art.png",
     alt: "Anime character standing beside the welcome window"

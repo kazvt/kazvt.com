@@ -6,14 +6,18 @@ import { createTaskbar } from "./components/taskbar.js";
 import { startMusic } from "./components/music.js";
 import { bindVolumeControl } from "./components/volume.js";
 import { createEdgePeek } from "./components/edge-peek.js";
+import { createSiteTitle } from "./components/site-title.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig } from "./components/private-config.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
+const siteTitle = createSiteTitle(home.siteTitle);
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
 
 mount(app, [
   createElement("div", { className: "desktop-layout" }, [
+    siteTitle.element,
     windowHost,
     createArt(home.art),
     createEdgePeek(home.edgePeek)
@@ -84,17 +88,11 @@ titleBar.addEventListener("dblclick", (event) => {
 taskButton.addEventListener("click", toggleTaskbarWindow);
 windowHost.addEventListener("windowstatechange", setMaximizeButtonLabel);
 
-async function loadMusicRepositoryConfig() {
-  try {
-    const module = await import("./data/music-repo.js");
-    return module.musicRepository || {};
-  } catch {
-    return {};
-  }
-}
-
-loadMusicRepositoryConfig().then(async (musicRepository) => {
-  const music = await startMusic({ ...home.music, ...musicRepository });
+loadSecrets().then(async (secrets) => {
+  const resolvedTitle = getSecretTitle(secrets) || home.siteTitle;
+  siteTitle.setTitle(resolvedTitle);
+  document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
+  const music = await startMusic({ ...home.music, ...getSecretMusicConfig(secrets) });
   bindVolumeControl(taskbar, music);
 });
 
