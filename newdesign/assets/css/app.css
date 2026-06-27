@@ -75,7 +75,7 @@ body *:not(.notepad-page),
 
 .desktop-window .title-bar,
 .desktop-window .title-bar-text {
-  cursor: var(--cursor-move), move !important;
+  cursor: var(--cursor-default), default !important;
 }
 
 .desktop-window .title-bar-controls,
@@ -93,7 +93,7 @@ body *:not(.notepad-page),
 
 body.is-window-dragging,
 body.is-window-dragging * {
-  cursor: var(--cursor-move), move !important;
+  cursor: var(--cursor-default), default !important;
 }
 
 body.is-window-resizing,
@@ -112,7 +112,7 @@ body.is-window-resizing * {
 }
 
 .notepad-page {
-  cursor: var(--cursor-text), text !important;
+  cursor: text !important;
   -webkit-user-select: text !important;
   user-select: text !important;
 }
@@ -236,10 +236,16 @@ img {
   right: 0;
   bottom: 0;
   z-index: 30;
-  width: 22px;
-  height: 22px;
+  width: 34px;
+  height: 34px;
   cursor: var(--cursor-nwse), nwse-resize !important;
   touch-action: none;
+}
+
+.window-resize-handle,
+.window-resize-handle::before,
+.window-resize-handle::after {
+  cursor: var(--cursor-nwse), nwse-resize !important;
 }
 
 .window-resize-handle::after {
@@ -491,14 +497,18 @@ img {
   display: none;
 }
 
- .volume-popup {
+.volume-popup {
   position: fixed;
   z-index: 60;
   width: 112px;
+  min-width: 112px;
+  height: 174px;
   color: #000;
+  background: var(--surface);
+  border: 1px solid #8a867a;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #716f64, 2px 3px 4px rgba(0, 0, 0, 0.24);
   font-family: var(--font-ui);
   font-size: 11px;
-  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, 0.28));
   -webkit-user-select: none;
   user-select: none;
 }
@@ -514,41 +524,52 @@ img {
   display: none;
 }
 
-.volume-popup .window-body,
 .volume-popup__body {
-  margin: 4px;
-}
-
-.volume-popup__body {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .volume-popup__title {
-  margin: 10px 0 6px;
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  margin: 0;
   text-align: center;
   line-height: 14px;
 }
 
 .volume-popup__slider-row {
-  height: 112px;
-  margin: 0 0 7px;
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  height: 96px;
+  margin: 0;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .volume-popup__slider {
-  height: 112px;
+  height: 96px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .volume-popup__range {
-  width: 112px;
+  width: 96px;
 }
 
 .volume-popup__mute {
-  height: 24px;
-  margin: 0 0 2px 8px;
+  position: absolute;
+  left: 12px;
+  bottom: 13px;
+  height: 18px;
+  margin: 0;
+  display: flex;
   align-items: center;
 }
 

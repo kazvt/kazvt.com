@@ -23,8 +23,8 @@ function createVolumePopup(initialVolume, initialMuted) {
     type: "checkbox",
     checked: Boolean(initialMuted)
   });
-  const popup = createElement("section", { className: "window volume-popup is-hidden", role: "dialog", "aria-label": "Volume Control" }, [
-    createElement("div", { className: "window-body volume-popup__body" }, [
+  const popup = createElement("section", { className: "volume-popup is-hidden", role: "dialog", "aria-label": "Volume Control" }, [
+    createElement("div", { className: "volume-popup__body" }, [
       createElement("p", { className: "volume-popup__title", text: "Volume" }),
       createElement("div", { className: "field-row volume-popup__slider-row" }, [
         createElement("div", { className: "is-vertical volume-popup__slider" }, [slider])
