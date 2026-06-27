@@ -255,21 +255,21 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
     filteredX: 0,
     filteredY: 0
   };
-  existing.filteredX = existing.filteredX * 0.72 + horizontal * 0.28;
-  existing.filteredY = existing.filteredY * 0.72 + vertical * 0.28;
+  existing.filteredX = existing.filteredX * 0.78 + horizontal * 0.22;
+  existing.filteredY = existing.filteredY * 0.82 + vertical * 0.18;
   const pullX = existing.filteredX;
   const pullY = existing.filteredY;
-  const targetRotation = clamp(pullX * 0.2, -3.4, 3.4);
-  const horizontalPull = Math.min(1, Math.abs(pullX) / 32);
-  const verticalPull = Math.min(1, Math.abs(pullY) / 32);
-  const targetScaleX = clamp(1 + horizontalPull * 0.012 - verticalPull * 0.018, 0.976, 1.016);
-  const targetScaleY = clamp(1 - horizontalPull * 0.007 + verticalPull * 0.018, 0.986, 1.02);
+  const targetRotation = clamp(pullX * 0.17, -2.6, 2.6);
+  const horizontalPull = Math.min(1, Math.abs(pullX) / 34);
+  const verticalPull = Math.min(1, Math.sqrt(Math.abs(pullY) / 36));
+  const targetScaleX = clamp(1 + horizontalPull * 0.01 - verticalPull * 0.3, 0.7, 1.012);
+  const targetScaleY = clamp(1 - horizontalPull * 0.006 + verticalPull * 0.12, 0.988, 1.12);
   if (!anime) {
     element.style.transformOrigin = "50% 12px";
     element.style.transform = `rotate(${targetRotation.toFixed(3)}deg) scale(${targetScaleX.toFixed(4)}, ${targetScaleY.toFixed(4)})`;
     return;
   }
-  if (now - existing.last < 86) return;
+  if (now - existing.last < 34) return;
   if (existing.animation && existing.animation.pause) existing.animation.pause();
   anime.remove(existing.state);
   existing.last = now;
@@ -280,7 +280,7 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
     r: targetRotation,
     sx: targetScaleX,
     sy: targetScaleY,
-    duration: 230,
+    duration: 320,
     easing: "easeOutCubic",
     update() {
       applyTransform(element, existing.state);
