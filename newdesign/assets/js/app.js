@@ -7,17 +7,20 @@ import { startMusic } from "./components/music.js";
 import { bindVolumeControl } from "./components/volume.js";
 import { createEdgePeek } from "./components/edge-peek.js";
 import { createSiteTitle } from "./components/site-title.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig } from "./components/private-config.js";
+import { createImageMarquee } from "./components/image-marquee.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig } from "./components/private-config.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
 const siteTitle = createSiteTitle(home.siteTitle);
+const marqueeHost = createElement("div", { className: "image-marquee-host" });
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
 
 mount(app, [
   createElement("div", { className: "desktop-layout" }, [
     siteTitle.element,
+    marqueeHost,
     windowHost,
     createArt(home.art),
     createEdgePeek(home.edgePeek)
@@ -94,6 +97,8 @@ loadSecrets().then(async (secrets) => {
   document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
   const music = await startMusic({ ...home.music, ...getSecretMusicConfig(secrets) });
   bindVolumeControl(taskbar, music);
+  const marquee = await createImageMarquee({ ...home.imageMarquee, ...getSecretMarqueeConfig(secrets) });
+  marqueeHost.replaceChildren(marquee);
 });
 
 function isEditableTarget(target) {

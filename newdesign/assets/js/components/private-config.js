@@ -32,3 +32,10 @@ export function getSecretMusicConfig(secrets) {
   const branch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(musicRepository, music, repository, branch);
 }
+
+export function getSecretMarqueeConfig(secrets) {
+  const marquee = secrets.marquee || secrets.imageMarquee || secrets.gifMarquee || secrets.badgeMarquee || {};
+  const repository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
+  const branch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
+  return mergeObjects(repository, branch, marquee);
+}

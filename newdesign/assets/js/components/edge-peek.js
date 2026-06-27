@@ -79,6 +79,7 @@ export function createEdgePeek(options = {}) {
     ariaHidden: "true"
   }, [image]);
   let active = false;
+  let available = true;
   let hideTimer = null;
   const hide = () => {
     element.classList.remove("is-visible");
@@ -88,7 +89,7 @@ export function createEdgePeek(options = {}) {
     }, 780);
   };
   const pop = () => {
-    if (!element.isConnected || active) return;
+    if (!element.isConnected || active || !available) return;
     active = true;
     const edge = pickEdge();
     element.classList.remove("is-visible");
@@ -100,7 +101,17 @@ export function createEdgePeek(options = {}) {
       hideTimer = window.setTimeout(hide, settings.visibleMs);
     });
   };
-  image.addEventListener("error", () => element.remove());
+  const startInitialPeek = () => window.setTimeout(pop, settings.initialDelayMs || 1200);
+  image.addEventListener("load", () => {
+    available = true;
+  });
+  image.addEventListener("error", () => {
+    available = false;
+    active = false;
+    element.classList.remove("is-visible");
+  });
+  if (image.complete && image.naturalWidth > 0) startInitialPeek();
+  else image.addEventListener("load", startInitialPeek, { once: true });
   window.setInterval(pop, settings.intervalMs);
   return element;
 }

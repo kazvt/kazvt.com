@@ -25,7 +25,7 @@ function bindStatus(editor, fields) {
 }
 
 export function createNotepad({ title, menus, text }) {
-  const editor = createElement("textarea", { className: "notepad-page", spellcheck: false, value: text, "aria-label": "Welcome note" });
+  const editor = createElement("textarea", { className: "notepad-page", spellcheck: false, readOnly: true, value: text, "aria-label": "Welcome note" });
   const status = createStatusBar(["Ln 1, Col 1", "Lines 1", "Windows XP", "UTF-8"]);
   status.classList.add("notepad-status");
   const statusFields = status.querySelectorAll(".status-bar-field");

@@ -19,6 +19,13 @@ export const home = {
     intervalMs: 10000,
     visibleMs: 3000
   },
+  imageMarquee: {
+    manifest: "assets/marquee/manifest.json",
+    path: "assets/marquee",
+    blinkMs: 1000,
+    speedSeconds: 24,
+    height: 34
+  },
   taskbar: {
     startLabel: "Start",
     activeTitle: "welcome.txt - Notepad",
