@@ -9,19 +9,34 @@ export const secrets = {
     path: "newdesign/assets/music"
   },
   marquee: {
-    path: "newdesign/assets/marquee",
-    blinkMs: 0,
-    speedSeconds: 24,
-    height: 34,
-    gaps: 15
+    marquees: [
+      {
+        path: "newdesign/assets/marquee",
+        direction: "horizontal",
+        y: 100,
+        blinkMs: 0,
+        speedSeconds: 24,
+        height: 34,
+        gaps: 15
+      },
+      {
+        path: "newdesign/assets/marquee",
+        direction: "vertical",
+        x: 0,
+        blinkMs: 1000,
+        speedSeconds: 18,
+        height: 34,
+        gaps: 8
+      }
+    ]
   },
   randomGifs: {
     path: "newdesign/assets/randomGifs",
     spawnEveryMs: 500,
     initialDelayMs: 1200,
     maxOnScreen: 10,
-    minHeight: 150,
-    maxHeight: 250,
+    minHeight: 250,
+    maxHeight: 450,
     holdMs: 0
   }
 };
