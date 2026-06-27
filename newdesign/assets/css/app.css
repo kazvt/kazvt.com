@@ -22,7 +22,6 @@
   --cursor-nwse: url("../cursors/default_size2.cur");
   --cursor-ew: url("../cursors/default_size3.cur");
   --cursor-ns: url("../cursors/default_size4.cur");
-  --cursor-text: url("../cursors/default_ibeam.cur");
   --cursor-no: url("../cursors/default_no.cur");
 }
 
@@ -111,8 +110,12 @@ body.is-window-resizing * {
   color: inherit;
 }
 
-.notepad-page {
+.notepad-page,
+.notepad-page:hover,
+.notepad-page:focus,
+.notepad-page:active {
   cursor: text !important;
+  caret-color: #111;
   -webkit-user-select: text !important;
   user-select: text !important;
 }
@@ -164,11 +167,21 @@ img {
   width: min(620px, calc(100vw - 36px));
   filter: var(--window-drop-shadow);
   touch-action: none;
+  transition: none !important;
 }
 
 .desktop-window.is-dragging,
 .desktop-window.is-resizing {
   z-index: 10;
+  transition: none !important;
+}
+
+.desktop-window.is-dragging {
+  will-change: left, top;
+}
+
+.desktop-window.is-resizing {
+  will-change: width, height;
 }
 
 .desktop-window.is-minimized {

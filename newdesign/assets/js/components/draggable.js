@@ -30,8 +30,10 @@ function getResizeBounds(element) {
 
 function placeElement(element, x, y) {
   const bounds = getMoveBounds(element);
-  element.style.left = `${clamp(x, bounds.minX, bounds.maxX)}px`;
-  element.style.top = `${clamp(y, bounds.minY, bounds.maxY)}px`;
+  const left = Math.round(clamp(x, bounds.minX, bounds.maxX));
+  const top = Math.round(clamp(y, bounds.minY, bounds.maxY));
+  element.style.left = `${left}px`;
+  element.style.top = `${top}px`;
 }
 
 function sizeElement(element, width, height) {
@@ -92,25 +94,51 @@ export function keepInsideViewport(element) {
 
 export function makeDraggable(element, handle) {
   let drag = null;
-  const start = (event) => {
-    if (event.button !== undefined && event.button !== 0) return;
-    if (event.target.closest(".title-bar-controls")) return;
-    restoreMaximizedForDrag(element, event);
+  const startActiveDrag = (event) => {
     const rect = element.getBoundingClientRect();
     drag = {
       id: event.pointerId,
+      mode: "active",
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top
     };
-    setPointerCapture(handle, event);
     element.classList.add("is-dragging");
     document.body.classList.add("is-window-dragging");
+  };
+  const start = (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+    if (event.target.closest(".title-bar-controls")) return;
+    setPointerCapture(handle, event);
+    if (element.classList.contains("is-maximized")) {
+      drag = {
+        id: event.pointerId,
+        mode: "pending-maximized",
+        startX: event.clientX,
+        startY: event.clientY,
+        startTime: performance.now()
+      };
+      event.preventDefault();
+      return;
+    }
+    startActiveDrag(event);
     event.preventDefault();
   };
   const move = (event) => {
     if (!drag) return;
-    if (event.pointerId !== undefined && drag.id !== undefined && event.pointerId !== drag.id) return;
-    placeElement(element, event.clientX - drag.offsetX, event.clientY - drag.offsetY);
+    const points = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : [event];
+    const latest = points[points.length - 1] || event;
+    if (latest.pointerId !== undefined && drag.id !== undefined && latest.pointerId !== drag.id) return;
+    if (drag.mode === "pending-maximized") {
+      const elapsed = performance.now() - drag.startTime;
+      const distance = Math.hypot(latest.clientX - drag.startX, latest.clientY - drag.startY);
+      if (elapsed < 1000 || distance < 8) {
+        event.preventDefault();
+        return;
+      }
+      restoreMaximizedForDrag(element, latest);
+      startActiveDrag(latest);
+    }
+    placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
     event.preventDefault();
   };
   const stop = () => {
@@ -122,6 +150,7 @@ export function makeDraggable(element, handle) {
   };
   handle.addEventListener("pointerdown", start);
   window.addEventListener("pointermove", move);
+  if ("onpointerrawupdate" in window) window.addEventListener("pointerrawupdate", move);
   window.addEventListener("pointerup", stop);
   window.addEventListener("pointercancel", stop);
   window.addEventListener("resize", () => keepInsideViewport(element));
@@ -168,6 +197,7 @@ export function makeResizable(element) {
   };
   handle.addEventListener("pointerdown", start);
   window.addEventListener("pointermove", move);
+  if ("onpointerrawupdate" in window) window.addEventListener("pointerrawupdate", move);
   window.addEventListener("pointerup", stop);
   window.addEventListener("pointercancel", stop);
   window.addEventListener("load", () => initMinimums(element));
