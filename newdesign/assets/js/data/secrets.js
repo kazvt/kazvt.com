@@ -61,7 +61,17 @@ export const secrets = {
     maxHeight: 250,
     holdMs: 0,
     settleInMs: 1000,
-    settleOutMs: 700
+    settleOutMs: 700,
+    shadows: [
+      { x: 15, y: 15, blur: 0, color: "#000000" },
+      { x: 10, y: 10, blur: 0, color: "#ff00ff" },
+      {
+        layers: [
+          { x: 15, y: 15, blur: 0, color: "#000000" },
+          { x: 22, y: 22, blur: 0, color: "#00ffff" }
+        ]
+      }
+    ]
   },
   cursorSparkles: {
     enabled: true,

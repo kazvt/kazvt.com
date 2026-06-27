@@ -138,6 +138,45 @@ function settingNumber(value, fallback) {
   return Number.isFinite(number) ? number : fallback;
 }
 
+
+function cssNumber(value, fallback) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Number.isInteger(number) ? String(number) : String(Number(number.toFixed(3)));
+}
+
+function normalizeShadowLayer(layer, fallback = {}) {
+  if (typeof layer === "string") {
+    const trimmed = layer.trim();
+    if (!trimmed) return "";
+    if (trimmed === "none" || trimmed.startsWith("drop-shadow(")) return trimmed;
+    return "";
+  }
+  if (!layer || typeof layer !== "object") return "";
+  const x = cssNumber(layer.x ?? layer.offsetX ?? layer.dx ?? layer.right ?? fallback.x, 15);
+  const y = cssNumber(layer.y ?? layer.offsetY ?? layer.dy ?? layer.down ?? fallback.y, 15);
+  const blur = cssNumber(layer.blur ?? layer.blurRadius ?? fallback.blur, 0);
+  const color = String(layer.color ?? layer.colour ?? fallback.color ?? "#000").trim() || "#000";
+  return `drop-shadow(${x}px ${y}px ${blur}px ${color})`;
+}
+
+function normalizeShadowPreset(preset) {
+  if (Array.isArray(preset)) return preset.map((layer) => normalizeShadowLayer(layer)).filter(Boolean).join(" ");
+  if (preset && typeof preset === "object" && Array.isArray(preset.layers)) return preset.layers.map((layer) => normalizeShadowLayer(layer, preset)).filter(Boolean).join(" ");
+  return normalizeShadowLayer(preset);
+}
+
+function normalizeShadowCycle(config) {
+  const value = config.shadows ?? config.shadowCycle ?? config.hardShadows ?? config.dropShadows ?? config.shadow;
+  if (Array.isArray(value)) {
+    const shadows = value.map(normalizeShadowPreset).filter(Boolean);
+    if (shadows.length) return shadows;
+  }
+  const single = normalizeShadowPreset(value);
+  if (single) return [single];
+  return ["drop-shadow(15px 15px 0 #000)"];
+}
+
 function applySpriteTransform(sprite, state) {
   const scaleX = finiteNumber(state.sx, 1).toFixed(4);
   const scaleY = finiteNumber(state.sy, 1).toFixed(4);
@@ -377,7 +416,9 @@ export async function createRandomGifs(config = {}) {
     deadzonePercent: settingNumber(config.deadzonePercent ?? config.deadzone ?? config.quadrantDeadzonePercent, 30),
     quadrantSpreadPercent: config.quadrantSpreadPercent ?? config.spreadPercent ?? config.spawnSpreadPercent,
     margin: settingNumber(config.margin ?? config.edgeMargin, 12),
-    nextQuadrant: 0
+    nextQuadrant: 0,
+    shadows: normalizeShadowCycle(config),
+    nextShadow: 0
   };
   let active = 0;
   let nextIndex = 0;
@@ -385,6 +426,11 @@ export async function createRandomGifs(config = {}) {
     const file = files[nextIndex % files.length];
     nextIndex = (nextIndex + 1) % files.length;
     return file;
+  };
+  const nextShadow = () => {
+    const shadow = settings.shadows[settings.nextShadow % settings.shadows.length];
+    settings.nextShadow = (settings.nextShadow + 1) % settings.shadows.length;
+    return shadow;
   };
   const spawn = () => {
     if (!host.isConnected || active >= settings.maxOnScreen) return;
@@ -398,6 +444,7 @@ export async function createRandomGifs(config = {}) {
       decoding: "async",
       draggable: "false"
     });
+    image.style.filter = nextShadow();
     const squash = createElement("div", { className: "random-gifs__squash" }, [image]);
     const sprite = createElement("div", { className: "random-gifs__sprite" }, [squash]);
     sprite.style.height = `${height}px`;

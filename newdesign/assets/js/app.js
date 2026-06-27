@@ -135,7 +135,7 @@ document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : ho
 startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
 createImageMarquee({ ...home.imageMarquee, fps: siteFps, ...marqueeConfig }).then((marquee) => marqueeHost.replaceChildren(marquee));
 createRandomGifs({ ...home.randomGifs, fps: siteFps, ...randomGifsConfig }).then((gifs) => randomGifsHost.replaceChildren(gifs));
-startCursorSparkles({ ...home.cursorSparkles, ...getSecretCursorSparklesConfig(secrets) });
+startCursorSparkles({ ...home.cursorSparkles, fps: siteFps, ...getSecretCursorSparklesConfig(secrets) });
 
 function isEditableTarget(target) {
   return Boolean(target.closest && target.closest(".notepad-page"));

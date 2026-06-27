@@ -1045,6 +1045,13 @@ img {
   image-rendering: auto;
   border: 0;
   background: transparent;
-  filter: drop-shadow(15px 15px 0 #000);
+  filter: var(--random-gif-shadow, drop-shadow(15px 15px 0 #000));
   -webkit-user-drag: none;
+}
+
+.cursor-sparkles-canvas {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483646 !important;
+  pointer-events: none !important;
 }
