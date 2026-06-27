@@ -3,6 +3,8 @@ export const secrets = {
   motion: {
     fps: 60
   },
+  repository: "kazvt/kazvt.com",
+  branch: "main",
   music: {
     repository: "kazvt/kazvt.com",
     branch: "main",
@@ -36,7 +38,7 @@ export const secrets = {
     path: "newdesign/assets/randomGifs",
     spawnEveryMs: 500,
     initialDelayMs: 1200,
-    maxOnScreen: 10,
+    maxOnScreen: 25,
     minHeight: 150,
     maxHeight: 250,
     holdMs: 0
