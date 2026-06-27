@@ -46,6 +46,23 @@ function clearDragAnimation(element) {
   }
 }
 
+function makeFrameStepper() {
+  const frameMs = getMotionFrameMs();
+  let lastFrame = 0;
+  return () => {
+    if (frameMs <= 0) return true;
+    const now = performance.now();
+    if (now - lastFrame < frameMs) return false;
+    lastFrame = now;
+    return true;
+  };
+}
+
+function renderStepped(stepper, element, state) {
+  if (!stepper()) return;
+  applyTransform(element, state);
+}
+
 function finishAnimation(element, done) {
   element.classList.remove("is-window-animating");
   element.style.transform = "";
@@ -80,8 +97,7 @@ function animateState(element, from, to, origin, easing, keyframes, done) {
   }
   const state = { ...identity(), ...from };
   const target = { ...identity(), ...to };
-  const frameMs = getMotionFrameMs();
-  let lastFrame = 0;
+  const stepper = makeFrameStepper();
   element.classList.add("is-window-animating");
   element.style.transformOrigin = origin;
   applyTransform(element, state);
@@ -96,10 +112,7 @@ function animateState(element, from, to, origin, easing, keyframes, done) {
     duration,
     easing,
     update() {
-      const now = performance.now();
-      if (frameMs > 0 && now - lastFrame < frameMs) return;
-      lastFrame = now;
-      applyTransform(element, state);
+      renderStepped(stepper, element, state);
     },
     complete() {
       applyTransform(element, target);
@@ -245,27 +258,32 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
   const horizontal = finiteNumber(deltaX, 0);
   const vertical = finiteNumber(deltaY, 0);
   const now = performance.now();
+  const frameMs = getMotionFrameMs();
   const existing = dragAnimations.get(element) || {
     state: { r: 0, sx: 1, sy: 1, tx: 0, ty: 0, o: 1 },
     last: 0,
     filteredX: 0,
-    filteredY: 0
+    filteredY: 0,
+    stepper: makeFrameStepper()
   };
   existing.filteredX = existing.filteredX * 0.78 + horizontal * 0.22;
-  existing.filteredY = existing.filteredY * 0.82 + vertical * 0.18;
+  existing.filteredY = existing.filteredY * 0.78 + vertical * 0.22;
   const pullX = existing.filteredX;
   const pullY = existing.filteredY;
-  const targetRotation = clamp(pullX * 0.17, -2.6, 2.6);
-  const horizontalPull = Math.min(1, Math.abs(pullX) / 34);
-  const verticalPull = Math.min(1, Math.sqrt(Math.abs(pullY) / 36));
-  const targetScaleX = clamp(1 + horizontalPull * 0.01 - verticalPull * 0.3, 0.7, 1.012);
-  const targetScaleY = clamp(1 - horizontalPull * 0.006 + verticalPull * 0.12, 0.988, 1.12);
+  const absX = Math.abs(pullX);
+  const absY = Math.abs(pullY);
+  const dominantHorizontal = absX >= absY;
+  const horizontalPull = dominantHorizontal ? Math.min(1, Math.sqrt(absX / 38)) : 0;
+  const verticalPull = dominantHorizontal ? 0 : Math.min(1, Math.sqrt(absY / 38));
+  const targetRotation = dominantHorizontal ? clamp(pullX * 0.14, -2.2, 2.2) : 0;
+  const targetScaleX = dominantHorizontal ? clamp(1 + horizontalPull * 0.2, 1, 1.2) : clamp(1 - verticalPull * 0.2, 0.8, 1);
+  const targetScaleY = dominantHorizontal ? clamp(1 - horizontalPull * 0.05, 0.95, 1) : clamp(1 + verticalPull * 0.08, 1, 1.08);
   if (!anime) {
     element.style.transformOrigin = "50% 12px";
     element.style.transform = `rotate(${targetRotation.toFixed(3)}deg) scale(${targetScaleX.toFixed(4)}, ${targetScaleY.toFixed(4)})`;
     return;
   }
-  if (now - existing.last < 34) return;
+  if (frameMs > 0 && now - existing.last < frameMs) return;
   if (existing.animation && existing.animation.pause) existing.animation.pause();
   anime.remove(existing.state);
   existing.last = now;
@@ -279,7 +297,7 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
     duration: 320,
     easing: "easeOutCubic",
     update() {
-      applyTransform(element, existing.state);
+      renderStepped(existing.stepper, element, existing.state);
     }
   });
   dragAnimations.set(element, existing);
@@ -294,6 +312,7 @@ export function settleWindowDragJiggle(element) {
   }
   if (existing.animation && existing.animation.pause) existing.animation.pause();
   anime.remove(existing.state);
+  existing.stepper = makeFrameStepper();
   existing.animation = anime({
     targets: existing.state,
     r: [
@@ -317,7 +336,7 @@ export function settleWindowDragJiggle(element) {
     duration: 780,
     easing: "linear",
     update() {
-      applyTransform(element, existing.state);
+      renderStepped(existing.stepper, element, existing.state);
     },
     complete() {
       finishDrag(element);

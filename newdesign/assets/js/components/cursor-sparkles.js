@@ -126,34 +126,78 @@ function patchEventListeners() {
   };
 }
 
-function styleCursorLayers() {
+function styleCanvas(canvas, mode) {
+  canvas.classList.add("cursor-sparkles-canvas");
+  if (mode) canvas.dataset.cursorSparklesMode = mode;
+  canvas.style.position = "fixed";
+  canvas.style.inset = "0";
+  canvas.style.zIndex = "2147483646";
+  canvas.style.pointerEvents = "none";
+}
+
+function styleCursorLayers(mode = "") {
   document.querySelectorAll("canvas").forEach((canvas) => {
-    if (canvas.classList.contains("cursor-sparkles-canvas")) return;
     const style = getComputedStyle(canvas);
-    if (style.position === "fixed" || style.position === "absolute") {
-      canvas.classList.add("cursor-sparkles-canvas");
-      canvas.style.position = "fixed";
-      canvas.style.inset = "0";
-      canvas.style.zIndex = "2147483646";
-      canvas.style.pointerEvents = "none";
-    }
+    if (canvas.classList.contains("cursor-sparkles-canvas") || style.position === "fixed" || style.position === "absolute") styleCanvas(canvas, canvas.dataset.cursorSparklesMode || mode);
   });
 }
 
-function makeEffect(Constructor, settings, index = 0, fps = 60) {
+function makeEffect(Constructor, settings, index = 0, fps = 60, mode = "move") {
   activeFps = normalizeFps(fps, 60);
   patchEventListeners();
+  const before = new Set(document.querySelectorAll("canvas"));
   captureConstructedListeners = true;
   try {
     const effect = new Constructor({
       colors: settings.colors,
       fairySymbol: pick(settings.symbols, index)
     });
-    styleCursorLayers();
-    return effect;
+    const canvases = [...document.querySelectorAll("canvas")].filter((canvas) => !before.has(canvas));
+    canvases.forEach((canvas) => styleCanvas(canvas, mode));
+    styleCursorLayers(mode);
+    return { effect, canvases };
   } finally {
     captureConstructedListeners = false;
   }
+}
+
+function destroyEffect(instance) {
+  if (!instance) return;
+  if (instance.effect && instance.effect.destroy) instance.effect.destroy();
+  if (Array.isArray(instance.canvases)) instance.canvases.forEach((canvas) => canvas.remove());
+}
+
+function destroyEffects(effects) {
+  effects.forEach(destroyEffect);
+}
+
+function nestedValue(settings, groupName, names) {
+  const group = settings[groupName] || {};
+  for (const name of names) {
+    if (group[name] !== undefined) return group[name];
+  }
+  for (const name of names) {
+    const prefixed = `${groupName}${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+    if (settings[prefixed] !== undefined) return settings[prefixed];
+  }
+  return undefined;
+}
+
+function modeSettings(settings, mode, fallbacks = {}) {
+  const fallbackColors = fallbacks.colors || ["#ffffff"];
+  const fallbackSymbols = fallbacks.symbols || ["✦"];
+  const colors = nestedValue(settings, mode, ["colors", "colours"]);
+  const symbols = nestedValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
+  const layers = nestedValue(settings, mode, ["layers", "layerCount", "intensity", "amount", "count"]);
+  return {
+    colors: normalizeList(colors, fallbackColors),
+    symbols: normalizeList(symbols, fallbackSymbols),
+    layers
+  };
+}
+
+function createEffects(Constructor, settings, mode, count, fps) {
+  return Array.from({ length: count }, (_, index) => makeEffect(Constructor, settings, index, fps, mode));
 }
 
 export async function startCursorSparkles(options = {}) {
@@ -161,6 +205,7 @@ export async function startCursorSparkles(options = {}) {
     enabled: true,
     colors: ["#ffff00", "#ff66ff", "#66ffff", "#ffffff", "#00ff66"],
     symbols: ["✦"],
+    moveLayers: 1,
     dragColors: ["#ffffff", "#ffff00", "#ff00ff", "#00ffff", "#ff9900"],
     dragSymbols: ["✦", "✧", "★"],
     dragLayers: 2,
@@ -171,28 +216,40 @@ export async function startCursorSparkles(options = {}) {
   try {
     const { fairyDustCursor } = await import(moduleUrl);
     const fps = normalizeFps(settings.fps, 60);
-    const base = makeEffect(fairyDustCursor, {
+    const moveSettings = modeSettings({ ...settings, move: settings.move || settings.normal || settings.idle || {} }, "move", {
       colors: normalizeList(settings.colors, ["#ffffff"]),
       symbols: normalizeList(settings.symbols || settings.fairySymbol, ["✦"])
-    }, 0, fps);
-    const dragSettings = {
+    });
+    const dragSettings = modeSettings({ ...settings, drag: settings.drag || settings.dragging || settings.down || {} }, "drag", {
       colors: normalizeList(settings.dragColors, normalizeList(settings.colors, ["#ffffff"])),
       symbols: normalizeList(settings.dragSymbols || settings.dragSymbol, ["✦", "✧"])
-    };
-    const dragLayerCount = normalizeCount(settings.dragLayers, 2, 6);
+    });
+    const moveLayerCount = normalizeCount(moveSettings.layers ?? settings.moveLayers ?? settings.layers, 1, 8);
+    const dragLayerCount = normalizeCount(dragSettings.layers ?? settings.dragLayers, 2, 10);
+    let dragging = false;
+    let moveEffects = createEffects(fairyDustCursor, moveSettings, "move", moveLayerCount, fps);
     let dragEffects = [];
     const startDrag = () => {
-      if (dragEffects.length || dragLayerCount <= 0) return;
-      dragEffects = Array.from({ length: dragLayerCount }, (_, index) => makeEffect(fairyDustCursor, dragSettings, index, fps));
-      styleCursorLayers();
+      if (dragging) return;
+      dragging = true;
+      destroyEffects(moveEffects);
+      moveEffects = [];
+      if (dragLayerCount > 0) dragEffects = createEffects(fairyDustCursor, dragSettings, "drag", dragLayerCount, fps);
+      styleCursorLayers("drag");
     };
     const stopDrag = () => {
-      dragEffects.forEach((effect) => effect.destroy && effect.destroy());
+      if (!dragging) return;
+      dragging = false;
+      destroyEffects(dragEffects);
       dragEffects = [];
+      if (moveLayerCount > 0) moveEffects = createEffects(fairyDustCursor, moveSettings, "move", moveLayerCount, fps);
+      styleCursorLayers("move");
     };
     const destroy = () => {
-      stopDrag();
-      base.destroy && base.destroy();
+      destroyEffects(dragEffects);
+      destroyEffects(moveEffects);
+      dragEffects = [];
+      moveEffects = [];
       document.removeEventListener("pointerdown", startDrag, true);
       document.removeEventListener("dragstart", startDrag, true);
       window.removeEventListener("pointerup", stopDrag, true);
@@ -208,7 +265,7 @@ export async function startCursorSparkles(options = {}) {
     window.addEventListener("blur", stopDrag, true);
     document.addEventListener("drop", stopDrag, true);
     document.addEventListener("dragend", stopDrag, true);
-    window.setTimeout(styleCursorLayers, 0);
+    window.setTimeout(() => styleCursorLayers("move"), 0);
     return { destroy };
   } catch {
     return null;

@@ -47,11 +47,16 @@ export const home = {
   },
   cursorSparkles: {
     enabled: true,
-    colors: ["#ffff00", "#ff66ff", "#66ffff", "#ffffff", "#00ff66"],
-    symbols: ["✦"],
-    dragColors: ["#ffffff", "#ffff00", "#ff00ff", "#00ffff", "#ff9900"],
-    dragSymbols: ["✦", "✧", "★"],
-    dragLayers: 2
+    move: {
+      colors: ["#ffff00", "#ff66ff", "#66ffff", "#ffffff", "#00ff66"],
+      symbols: ["✦"],
+      layers: 1
+    },
+    drag: {
+      colors: ["#ffffff", "#ffff00", "#ff00ff", "#00ffff", "#ff9900"],
+      symbols: ["✦", "✧", "★"],
+      layers: 2
+    }
   },
   taskbar: {
     startLabel: "Start",
