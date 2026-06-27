@@ -1,5 +1,8 @@
 export const secrets = {
   title: "i'm monkey",
+  motion: {
+    fps: 60
+  },
   music: {
     repository: "kazvt/kazvt.com",
     branch: "main",
