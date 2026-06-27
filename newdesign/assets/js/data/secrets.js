@@ -17,7 +17,8 @@ export const secrets = {
         blinkMs: 0,
         speedSeconds: 24,
         height: 34,
-        gaps: 15
+        gaps: 15,
+        z: 0
       },
       {
         path: "newdesign/assets/marquee",
@@ -26,7 +27,8 @@ export const secrets = {
         blinkMs: 0,
         speedSeconds: 18,
         height: 34,
-        gaps: 8
+        gaps: 8,
+        z: 1
       }
     ]
   },
