@@ -23,7 +23,7 @@ export const secrets = {
         path: "newdesign/assets/marquee",
         direction: "vertical",
         x: 0,
-        blinkMs: 1000,
+        blinkMs: 0,
         speedSeconds: 18,
         height: 34,
         gaps: 8
