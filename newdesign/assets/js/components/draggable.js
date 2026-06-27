@@ -151,7 +151,7 @@ export function makeDraggable(element, handle) {
     if (drag.mode === "pending-maximized") {
       const elapsed = performance.now() - drag.startTime;
       const distance = Math.hypot(latest.clientX - drag.startX, latest.clientY - drag.startY);
-      if (elapsed < 1000 || distance < 8) {
+      if (elapsed < 300 || distance < 8) {
         event.preventDefault();
         return;
       }

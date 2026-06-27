@@ -23,6 +23,43 @@ function uniqueFiles(files) {
   return [...new Set(files.map(cleanPath).filter(hasMusicExtension))];
 }
 
+function cookieName(config) {
+  return cleanPath(config.cookieName || "xp_music_choice") || "xp_music_choice";
+}
+
+function volumeCookieName(config) {
+  return cleanPath(config.volumeCookieName || "xp_music_volume") || "xp_music_volume";
+}
+
+function getCookieValue(name) {
+  const prefix = `${encodeURIComponent(name)}=`;
+  return document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(prefix))?.slice(prefix.length) || "";
+}
+
+function setCookieValue(name, value) {
+  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=31536000; Path=/; SameSite=Lax`;
+}
+
+function savedVolume(config) {
+  const cookie = getCookieValue(volumeCookieName(config));
+  if (cookie !== "") return clampVolume(Number(decodeURIComponent(cookie)));
+  return clampVolume(Number(config.volume));
+}
+
+function rememberVolume(config, value) {
+  setCookieValue(volumeCookieName(config), String(clampVolume(Number(value))));
+}
+
+function musicKey(file) {
+  let value = String(file || "").trim();
+  try {
+    if (/^https?:\/\//i.test(value)) value = new URL(value).pathname;
+  } catch {}
+  value = decodeURIComponent(value).replace(/^\/+/, "");
+  value = value.replace(/^.*?assets\/music\//, "");
+  return cleanPath(value).toLowerCase();
+}
+
 function assetUrl(file) {
   if (/^https?:\/\//i.test(file)) return file;
   const name = file.replace(/^assets\/music\//, "").split("/").map(encodeURIComponent).join("/");
@@ -191,7 +228,7 @@ function fadePlayer(player, state, to, duration) {
 
 export async function startMusic(config = {}) {
   const state = {
-    volume: clampVolume(Number(config.volume)),
+    volume: savedVolume(config),
     muted: false
   };
   let current = null;
@@ -201,6 +238,7 @@ export async function startMusic(config = {}) {
   let transitionRunning = false;
   let firstPlayDone = false;
   const files = await resolveMusicFiles(config);
+  const choiceCookie = cookieName(config);
 
   const controller = {
     get audio() {
@@ -214,6 +252,7 @@ export async function startMusic(config = {}) {
     },
     setVolume(value) {
       state.volume = clampVolume(Number(value));
+      rememberVolume(config, state.volume);
       [current, standby].filter(Boolean).forEach((player) => applyPlayerVolume(player, state));
     },
     getMuted() {
@@ -232,6 +271,21 @@ export async function startMusic(config = {}) {
 
   current = createPlayer(state);
   standby = createPlayer(state);
+
+  function rememberChoice(index) {
+    if (files[index]) setCookieValue(choiceCookie, musicKey(files[index]));
+  }
+
+  function rememberedIndex() {
+    const remembered = decodeURIComponent(getCookieValue(choiceCookie) || "").toLowerCase();
+    if (!remembered) return -1;
+    return files.findIndex((file) => musicKey(file) === remembered);
+  }
+
+  function chooseInitialIndex() {
+    const remembered = rememberedIndex();
+    return remembered >= 0 ? remembered : randomIndex(files.length, currentIndex);
+  }
 
   function loadPlayer(player, index) {
     cancelFade(player);
@@ -265,8 +319,9 @@ export async function startMusic(config = {}) {
 
   async function startFirstTrack() {
     if (!current.audio.src) {
-      currentIndex = randomIndex(files.length, currentIndex);
+      currentIndex = chooseInitialIndex();
       loadPlayer(current, currentIndex);
+      rememberChoice(currentIndex);
     }
     const didPlay = await safePlay(current, play);
     if (!didPlay) return;
@@ -300,6 +355,7 @@ export async function startMusic(config = {}) {
     current = incoming;
     standby = outgoing;
     currentIndex = nextIndex;
+    rememberChoice(currentIndex);
     transitionRunning = false;
   }
 
