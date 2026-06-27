@@ -5,21 +5,18 @@ function clampPercent(value) {
 }
 
 function createVolumePopup(initialVolume, initialMuted) {
-  const slider = createElement("div", {
-    className: "volume-popup__fader",
-    role: "slider",
-    tabindex: "0",
-    "aria-label": "Volume",
-    "aria-orientation": "vertical",
-    "aria-valuemin": "0",
-    "aria-valuemax": "100",
-    "aria-valuenow": String(clampPercent(initialVolume * 100))
-  }, [
-    createElement("div", { className: "volume-popup__track", "aria-hidden": "true" }, [
-      createElement("span", { className: "volume-popup__thumb" })
-    ])
-  ]);
+  const volumeId = `volume-${Math.random().toString(36).slice(2)}`;
   const muteId = `mute-${Math.random().toString(36).slice(2)}`;
+  const slider = createElement("input", {
+    className: "has-box-indicator volume-popup__range",
+    id: volumeId,
+    type: "range",
+    min: "0",
+    max: "100",
+    step: "1",
+    value: String(clampPercent(initialVolume * 100)),
+    "aria-label": "Volume"
+  });
   const mute = createElement("input", {
     className: "volume-popup__mute-input",
     id: muteId,
@@ -29,7 +26,9 @@ function createVolumePopup(initialVolume, initialMuted) {
   const popup = createElement("section", { className: "window volume-popup is-hidden", role: "dialog", "aria-label": "Volume Control" }, [
     createElement("div", { className: "window-body volume-popup__body" }, [
       createElement("p", { className: "volume-popup__title", text: "Volume" }),
-      slider,
+      createElement("div", { className: "field-row volume-popup__slider-row" }, [
+        createElement("div", { className: "is-vertical volume-popup__slider" }, [slider])
+      ]),
       createElement("div", { className: "field-row volume-popup__mute" }, [
         mute,
         createElement("label", { htmlFor: muteId, text: "Mute" })
@@ -41,57 +40,10 @@ function createVolumePopup(initialVolume, initialMuted) {
 
 function positionPopup(popup, anchor) {
   const rect = anchor.getBoundingClientRect();
-  const width = popup.offsetWidth || 126;
-  const left = Math.min(Math.max(2, rect.left - width + 44), window.innerWidth - width - 2);
+  const width = popup.offsetWidth || 112;
+  const left = Math.min(Math.max(2, rect.left - width + 38), window.innerWidth - width - 2);
   popup.style.left = `${left}px`;
   popup.style.bottom = "var(--taskbar-height)";
-}
-
-function setFaderValue(slider, percent) {
-  const value = clampPercent(percent);
-  slider.dataset.value = String(value);
-  slider.setAttribute("aria-valuenow", String(value));
-  slider.style.setProperty("--volume-value", String(value));
-}
-
-function faderPercentFromPointer(slider, event) {
-  const track = slider.querySelector(".volume-popup__track");
-  const rect = track.getBoundingClientRect();
-  const position = (event.clientY - rect.top) / rect.height;
-  return clampPercent((1 - position) * 100);
-}
-
-function bindFader(slider, callback) {
-  const commit = (value) => {
-    setFaderValue(slider, value);
-    callback(clampPercent(value));
-  };
-  slider.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-    slider.setPointerCapture(event.pointerId);
-    commit(faderPercentFromPointer(slider, event));
-  });
-  slider.addEventListener("pointermove", (event) => {
-    if (!slider.hasPointerCapture(event.pointerId)) return;
-    event.preventDefault();
-    commit(faderPercentFromPointer(slider, event));
-  });
-  slider.addEventListener("keydown", (event) => {
-    const current = clampPercent(slider.dataset.value);
-    const keys = {
-      ArrowUp: current + 5,
-      ArrowRight: current + 5,
-      ArrowDown: current - 5,
-      ArrowLeft: current - 5,
-      PageUp: current + 10,
-      PageDown: current - 10,
-      Home: 0,
-      End: 100
-    };
-    if (!(event.key in keys)) return;
-    event.preventDefault();
-    commit(keys[event.key]);
-  });
 }
 
 export function bindVolumeControl(taskbar, music) {
@@ -100,9 +52,9 @@ export function bindVolumeControl(taskbar, music) {
   const { popup, slider, mute } = createVolumePopup(music ? music.getVolume() : 0.5, music ? music.getMuted() : false);
   document.body.append(popup);
 
-  const applyVolume = (percent) => {
+  const applyVolume = () => {
     if (!music) return;
-    music.setVolume(percent / 100);
+    music.setVolume(clampPercent(slider.value) / 100);
   };
 
   const applyMute = () => {
@@ -125,8 +77,9 @@ export function bindVolumeControl(taskbar, music) {
     else close();
   };
 
-  setFaderValue(slider, music ? music.getVolume() * 100 : 50);
-  bindFader(slider, applyVolume);
+  slider.value = String(clampPercent(music ? music.getVolume() * 100 : 50));
+  slider.addEventListener("input", applyVolume);
+  slider.addEventListener("change", applyVolume);
   mute.addEventListener("change", applyMute);
   icon.addEventListener("pointerdown", (event) => event.preventDefault());
   icon.addEventListener("click", (event) => {
@@ -146,7 +99,7 @@ export function bindVolumeControl(taskbar, music) {
   window.addEventListener("resize", () => {
     if (!popup.classList.contains("is-hidden")) positionPopup(popup, icon);
   });
-  applyVolume(clampPercent(slider.dataset.value));
+  applyVolume();
   applyMute();
   return popup;
 }
