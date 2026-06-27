@@ -89,6 +89,12 @@ function initMinimums(element) {
 function restoreMaximizedForDrag(element, event) {
   if (!element.classList.contains("is-maximized")) return;
   const maximizedRect = element.getBoundingClientRect();
+  const beforeRect = {
+    left: maximizedRect.left,
+    top: maximizedRect.top,
+    width: maximizedRect.width,
+    height: maximizedRect.height
+  };
   const width = Number(element.dataset.restoreWidth || Math.min(620, window.innerWidth));
   const height = Number(element.dataset.restoreHeight || element.dataset.minHeight || element.offsetHeight);
   const ratioX = clamp((event.clientX - maximizedRect.left) / Math.max(1, maximizedRect.width), 0.08, 0.92);
@@ -97,6 +103,7 @@ function restoreMaximizedForDrag(element, event) {
   element.style.height = `${height}px`;
   placeElement(element, event.clientX - width * ratioX, Math.max(0, event.clientY - 10));
   element.dispatchEvent(new CustomEvent("windowstatechange", { bubbles: true }));
+  element.dispatchEvent(new CustomEvent("windowdragrestore", { bubbles: true, detail: { beforeRect } }));
 }
 
 export function keepInsideViewport(element) {

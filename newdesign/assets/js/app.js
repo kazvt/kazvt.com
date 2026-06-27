@@ -126,6 +126,10 @@ titleBar.addEventListener("dblclick", (event) => {
 
 taskButton.addEventListener("click", toggleTaskbarWindow);
 windowHost.addEventListener("windowstatechange", setMaximizeButtonLabel);
+windowHost.addEventListener("windowdragrestore", (event) => {
+  const beforeRect = event.detail && event.detail.beforeRect;
+  if (beforeRect) animateWindowFlip(windowHost, beforeRect);
+});
 
 const resolvedTitle = getSecretTitle(secrets);
 const marqueeConfig = getSecretMarqueeConfig(secrets);

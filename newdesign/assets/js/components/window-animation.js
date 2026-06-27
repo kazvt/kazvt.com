@@ -217,7 +217,7 @@ export function animateWindowRestoreFromTaskbar(element, taskButton, done) {
 }
 
 export function animateWindowClose(element, done) {
-  animateState(element, identity(), { tx: 0, ty: 0, sx: 0.72, sy: 0.72, r: 0, o: 0 }, "center center", "easeInOutElastic(1.14, .56)", {
+  animateState(element, identity(), { tx: 0, ty: 0, sx: 0.72, sy: 0.72, r: 0, o: 1 }, "center center", "easeInOutElastic(1.14, .56)", {
     sx: [
       { value: 1.055, duration: 170, easing: "easeOutQuad" },
       { value: 0.94, duration: 180, easing: "easeInOutSine" },
@@ -235,10 +235,6 @@ export function animateWindowClose(element, done) {
       { value: 2.4, duration: 170, easing: "easeInOutSine" },
       { value: -1.2, duration: 160, easing: "easeOutQuad" },
       { value: 0, duration: 510, easing: "easeOutElastic(1.05, .5)" }
-    ],
-    o: [
-      { value: 1, duration: 520, easing: "linear" },
-      { value: 0, duration: 480, easing: "easeInQuad" }
     ]
   }, done);
 }
@@ -293,7 +289,7 @@ export function settleWindowDragJiggle(element) {
   const anime = window.anime;
   const existing = dragAnimations.get(element);
   if (!anime || !existing) {
-    finishDrag(element);
+    if (!element.classList.contains("is-window-animating")) finishDrag(element);
     return;
   }
   if (existing.animation && existing.animation.pause) existing.animation.pause();
