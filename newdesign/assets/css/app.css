@@ -193,6 +193,19 @@ img {
   min-height: 0;
 }
 
+.desktop-window > .window > .title-bar,
+.desktop-window > .window > .title-bar *,
+.desktop-window > .window > .title-bar *::before,
+.desktop-window > .window > .title-bar *::after {
+  box-sizing: content-box;
+}
+
+.desktop-window > .window > .title-bar {
+  min-height: 21px;
+  padding: 3px 2px 3px 3px;
+  flex: 0 0 auto;
+}
+
 .desktop-window .title-bar-text {
   font-family: var(--font-ui);
 }
@@ -303,7 +316,7 @@ img {
 }
 
 .notepad-status .status-bar-field:first-child {
-  margin-left: auto;
+  margin-right: auto;
   min-width: 110px;
 }
 
