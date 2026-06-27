@@ -23,9 +23,25 @@ function getResizeBounds(element) {
   const rect = element.getBoundingClientRect();
   const taskbarHeight = getTaskbarHeight();
   return {
-    maxWidth: Math.max(0, window.innerWidth - rect.left),
-    maxHeight: Math.max(0, window.innerHeight - taskbarHeight - rect.top)
+    maxWidth: Math.max(120, window.innerWidth - rect.left),
+    maxHeight: Math.max(120, window.innerHeight - taskbarHeight - rect.top)
   };
+}
+
+function getMinimums(element, bounds = getResizeBounds(element)) {
+  const baseWidth = Number(element.dataset.minWidth || element.offsetWidth / 2);
+  const baseHeight = Number(element.dataset.minHeight || element.offsetHeight);
+  return {
+    minWidth: Math.min(baseWidth, bounds.maxWidth),
+    minHeight: Math.min(baseHeight, bounds.maxHeight)
+  };
+}
+
+function applyMinimums(element, bounds = getResizeBounds(element)) {
+  const minimums = getMinimums(element, bounds);
+  element.style.minWidth = `${minimums.minWidth}px`;
+  element.style.minHeight = `${minimums.minHeight}px`;
+  return minimums;
 }
 
 function placeElement(element, x, y) {
@@ -38,10 +54,9 @@ function placeElement(element, x, y) {
 
 function sizeElement(element, width, height) {
   const bounds = getResizeBounds(element);
-  const minWidth = Number(element.dataset.minWidth || element.offsetWidth / 2);
-  const minHeight = Number(element.dataset.minHeight || element.offsetHeight);
-  element.style.width = `${clamp(width, minWidth, bounds.maxWidth)}px`;
-  element.style.height = `${clamp(height, minHeight, bounds.maxHeight)}px`;
+  const minimums = applyMinimums(element, bounds);
+  element.style.width = `${clamp(width, minimums.minWidth, bounds.maxWidth)}px`;
+  element.style.height = `${clamp(height, minimums.minHeight, bounds.maxHeight)}px`;
 }
 
 function setPointerCapture(target, event) {
@@ -61,11 +76,11 @@ function releasePointerCapture(target, id) {
 }
 
 function initMinimums(element) {
-  if (element.dataset.minWidth && element.dataset.minHeight) return;
-  element.dataset.minWidth = String(Math.round(element.offsetWidth / 2));
-  element.dataset.minHeight = String(Math.round(element.offsetHeight));
-  element.style.minWidth = `${element.dataset.minWidth}px`;
-  element.style.minHeight = `${element.dataset.minHeight}px`;
+  if (!element.dataset.minWidth || !element.dataset.minHeight) {
+    element.dataset.minWidth = String(Math.round(element.offsetWidth / 2));
+    element.dataset.minHeight = String(Math.round(element.offsetHeight));
+  }
+  applyMinimums(element);
 }
 
 function restoreMaximizedForDrag(element, event) {
@@ -82,13 +97,18 @@ function restoreMaximizedForDrag(element, event) {
 }
 
 export function keepInsideViewport(element) {
-  if (element.classList.contains("is-maximized")) return;
+  if (element.classList.contains("is-maximized")) {
+    element.style.left = "0px";
+    element.style.top = "0px";
+    element.style.width = `${window.innerWidth}px`;
+    element.style.height = `${window.innerHeight - getTaskbarHeight()}px`;
+    return;
+  }
   const rect = element.getBoundingClientRect();
   const bounds = getResizeBounds(element);
-  const minWidth = Number(element.dataset.minWidth || element.offsetWidth / 2);
-  const minHeight = Number(element.dataset.minHeight || element.offsetHeight);
-  element.style.width = `${clamp(element.offsetWidth, minWidth, bounds.maxWidth)}px`;
-  element.style.height = `${clamp(element.offsetHeight, minHeight, bounds.maxHeight)}px`;
+  const minimums = applyMinimums(element, bounds);
+  element.style.width = `${clamp(element.offsetWidth, minimums.minWidth, bounds.maxWidth)}px`;
+  element.style.height = `${clamp(element.offsetHeight, minimums.minHeight, bounds.maxHeight)}px`;
   placeElement(element, rect.left, rect.top);
 }
 

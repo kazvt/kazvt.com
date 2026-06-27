@@ -12,6 +12,12 @@ export const home = {
   music: {
     volume: 0.5
   },
+  edgePeek: {
+    src: "assets/img/osaka.gif",
+    alt: "Osaka peeking from the desktop edge",
+    intervalMs: 10000,
+    visibleMs: 3000
+  },
   taskbar: {
     startLabel: "Start",
     activeTitle: "welcome.txt - Notepad",

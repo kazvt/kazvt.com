@@ -1,6 +1,8 @@
 :root {
   --desktop-cell: 24px;
-  --desktop-light: rgba(255, 255, 255, 0.72);
+  --desktop-light: #f3f3f3;
+  --desktop-dark: #d6d6d6;
+  --desktop-checkerboard: url("../img/checkerboard.png");
   --font-ui: "Pixelated MS Sans Serif", "MS Sans Serif", Tahoma, "Microsoft Sans Serif", Arial, sans-serif;
   --font-notepad: var(--font-ui);
   --asset-start-button: url("../img/xp/start_btn_normal.png");
@@ -42,9 +44,10 @@ select {
 body {
   margin: 0;
   font-size: 11px;
-  background-color: #d6d6d6;
-  background-image: linear-gradient(45deg, var(--desktop-light) 25%, transparent 25%), linear-gradient(-45deg, var(--desktop-light) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--desktop-light) 75%), linear-gradient(-45deg, transparent 75%, var(--desktop-light) 75%);
-  background-position: 0 0, 0 calc(var(--desktop-cell) / 2), calc(var(--desktop-cell) / 2) calc(var(--desktop-cell) / -2), calc(var(--desktop-cell) / -2) 0;
+  background-color: var(--desktop-dark);
+  background-image: var(--desktop-checkerboard);
+  background-position: 0 0;
+  background-repeat: repeat;
   background-size: var(--desktop-cell) var(--desktop-cell);
 }
 
@@ -165,9 +168,12 @@ img {
   top: clamp(18px, 16vh, 150px);
   z-index: 5;
   width: min(620px, calc(100vw - 36px));
+  height: min(510px, calc(100vh - var(--taskbar-height) - 36px));
   filter: var(--window-drop-shadow);
   touch-action: none;
   transition: none !important;
+  min-width: 310px;
+  min-height: 340px;
 }
 
 .desktop-window.is-dragging,
@@ -197,6 +203,8 @@ img {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .desktop-window .window-body {
@@ -204,6 +212,7 @@ img {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
 .desktop-window > .window > .title-bar,
@@ -275,6 +284,7 @@ img {
 .notepad-menu {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   height: 19px;
   margin: -2px -2px 3px;
   padding: 1px 3px 0;
@@ -300,8 +310,10 @@ img {
 
 .notepad-page {
   width: 100%;
-  min-height: clamp(260px, 42vh, 440px);
-  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  max-height: 100%;
+  flex: 1 1 0;
   margin: 0;
   padding: 9px 10px;
   resize: none;
@@ -315,6 +327,7 @@ img {
   font-size: 16px;
   line-height: 1.5;
   white-space: pre-wrap;
+  overflow: auto;
 }
 
 .status-bar {
@@ -407,11 +420,22 @@ img {
   text-shadow: 1px 1px rgba(0, 0, 0, 0.55);
 }
 
-.taskbar__task.is-active,
 .taskbar__task:hover,
 .taskbar__task:active,
 .taskbar__task:focus,
 .taskbar__task:focus-visible {
+  background-color: transparent;
+  background-image: linear-gradient(var(--xp-task-tile));
+  box-shadow: var(--xp-task-shadow);
+  outline: none;
+  filter: none;
+}
+
+.taskbar__task.is-active,
+.taskbar__task.is-active:hover,
+.taskbar__task.is-active:active,
+.taskbar__task.is-active:focus,
+.taskbar__task.is-active:focus-visible {
   background-color: transparent;
   background-image: linear-gradient(var(--xp-task-tile-active));
   box-shadow: var(--xp-task-shadow-active);
@@ -497,7 +521,6 @@ img {
   }
 
   .notepad-page {
-    min-height: 310px;
     font-size: 15px;
   }
 
@@ -627,4 +650,68 @@ img {
   outline: none;
   box-shadow: none;
   filter: none;
+}
+
+.edge-peek {
+  position: fixed;
+  z-index: 1;
+  width: clamp(104px, 13vw, 178px);
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 720ms cubic-bezier(0.22, 0.86, 0.28, 1), opacity 280ms linear;
+  will-change: transform, opacity;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.edge-peek__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(6px 9px 6px rgba(0, 0, 0, 0.22));
+  -webkit-user-drag: none;
+}
+
+.edge-peek[data-edge="top"] {
+  top: 0;
+  left: var(--peek-x, 50vw);
+  transform: translate(-50%, -110%);
+}
+
+.edge-peek[data-edge="top"].is-visible {
+  opacity: 1;
+  transform: translate(-50%, -12%);
+}
+
+.edge-peek[data-edge="right"] {
+  right: 0;
+  top: var(--peek-y, 50vh);
+  transform: translate(110%, -50%);
+}
+
+.edge-peek[data-edge="right"].is-visible {
+  opacity: 1;
+  transform: translate(12%, -50%);
+}
+
+.edge-peek[data-edge="bottom"] {
+  bottom: var(--taskbar-height);
+  left: var(--peek-x, 50vw);
+  transform: translate(-50%, 110%);
+}
+
+.edge-peek[data-edge="bottom"].is-visible {
+  opacity: 1;
+  transform: translate(-50%, 12%);
+}
+
+.edge-peek[data-edge="left"] {
+  left: 0;
+  top: var(--peek-y, 50vh);
+  transform: translate(-110%, -50%);
+}
+
+.edge-peek[data-edge="left"].is-visible {
+  opacity: 1;
+  transform: translate(-12%, -50%);
 }

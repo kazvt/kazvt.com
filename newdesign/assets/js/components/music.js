@@ -1,4 +1,6 @@
 const musicExtensions = [".mp3", ".wav"];
+const firstFadeMs = 2000;
+const transitionFadeMs = 6000;
 
 function cleanPath(value) {
   return String(value || "").trim().replace(/^\/+|\/+$/g, "");
@@ -6,6 +8,10 @@ function cleanPath(value) {
 
 function clampVolume(value) {
   return Math.min(Math.max(Number.isFinite(value) ? value : 0.5, 0), 1);
+}
+
+function clampUnit(value) {
+  return Math.min(Math.max(Number(value) || 0, 0), 1);
 }
 
 function hasMusicExtension(path) {
@@ -123,19 +129,82 @@ function bindUnlock(play) {
   events.forEach((eventName) => document.addEventListener(eventName, unlock, { capture: true, once: true }));
 }
 
+function createPlayer(state) {
+  const audio = document.createElement("audio");
+  const player = {
+    audio,
+    fade: 0,
+    frame: 0,
+    token: 0
+  };
+  audio.preload = "auto";
+  audio.volume = 0;
+  audio.muted = state.muted;
+  audio.hidden = true;
+  audio.setAttribute("aria-hidden", "true");
+  document.body.append(audio);
+  return player;
+}
+
+function applyPlayerVolume(player, state) {
+  player.audio.volume = clampVolume(state.volume * player.fade);
+  player.audio.muted = state.muted;
+}
+
+function setPlayerFade(player, state, value) {
+  player.fade = clampUnit(value);
+  applyPlayerVolume(player, state);
+}
+
+function cancelFade(player) {
+  player.token += 1;
+  if (player.frame) cancelAnimationFrame(player.frame);
+  player.frame = 0;
+}
+
+function fadePlayer(player, state, to, duration) {
+  cancelFade(player);
+  const token = player.token;
+  const from = player.fade;
+  const target = clampUnit(to);
+  const length = Math.max(0, Number(duration) || 0);
+  if (!length) {
+    setPlayerFade(player, state, target);
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const start = performance.now();
+    const tick = (now) => {
+      if (player.token !== token) return resolve();
+      const progress = Math.min((now - start) / length, 1);
+      setPlayerFade(player, state, from + (target - from) * progress);
+      if (progress < 1) {
+        player.frame = requestAnimationFrame(tick);
+      } else {
+        player.frame = 0;
+        resolve();
+      }
+    };
+    player.frame = requestAnimationFrame(tick);
+  });
+}
+
 export async function startMusic(config = {}) {
   const state = {
     volume: clampVolume(Number(config.volume)),
     muted: false
   };
-  let audio = null;
+  let current = null;
+  let standby = null;
   let currentIndex = -1;
   let unlockWaiting = false;
+  let transitionRunning = false;
+  let firstPlayDone = false;
   const files = await resolveMusicFiles(config);
 
   const controller = {
     get audio() {
-      return audio;
+      return current ? current.audio : null;
     },
     get files() {
       return files;
@@ -145,14 +214,14 @@ export async function startMusic(config = {}) {
     },
     setVolume(value) {
       state.volume = clampVolume(Number(value));
-      if (audio) audio.volume = state.volume;
+      [current, standby].filter(Boolean).forEach((player) => applyPlayerVolume(player, state));
     },
     getMuted() {
       return state.muted;
     },
     setMuted(value) {
       state.muted = Boolean(value);
-      if (audio) audio.muted = state.muted;
+      [current, standby].filter(Boolean).forEach((player) => applyPlayerVolume(player, state));
     },
     play() {
       return play();
@@ -161,39 +230,100 @@ export async function startMusic(config = {}) {
 
   if (!files.length) return controller;
 
-  audio = document.createElement("audio");
-  audio.preload = "auto";
-  audio.volume = state.volume;
-  audio.muted = state.muted;
-  audio.hidden = true;
-  audio.setAttribute("aria-hidden", "true");
-  document.body.append(audio);
+  current = createPlayer(state);
+  standby = createPlayer(state);
 
-  const choose = () => {
-    currentIndex = randomIndex(files.length, currentIndex);
-    audio.src = assetUrl(files[currentIndex]);
-  };
+  function loadPlayer(player, index) {
+    cancelFade(player);
+    player.audio.pause();
+    player.audio.removeAttribute("src");
+    player.audio.load();
+    player.audio.src = assetUrl(files[index]);
+    player.audio.currentTime = 0;
+    setPlayerFade(player, state, 0);
+  }
 
-  async function play() {
-    if (!audio) return;
-    if (!audio.src) choose();
+  function prepareNextPlayer() {
+    const nextIndex = randomIndex(files.length, currentIndex);
+    loadPlayer(standby, nextIndex);
+    return nextIndex;
+  }
+
+  async function safePlay(player, retry) {
     try {
-      await audio.play();
+      await player.audio.play();
       unlockWaiting = false;
+      return true;
     } catch {
       if (!unlockWaiting) {
         unlockWaiting = true;
-        bindUnlock(play);
+        bindUnlock(retry);
       }
+      return false;
     }
   }
 
-  audio.addEventListener("ended", () => {
-    choose();
-    play();
+  async function startFirstTrack() {
+    if (!current.audio.src) {
+      currentIndex = randomIndex(files.length, currentIndex);
+      loadPlayer(current, currentIndex);
+    }
+    const didPlay = await safePlay(current, play);
+    if (!didPlay) return;
+    if (!firstPlayDone) {
+      firstPlayDone = true;
+      await fadePlayer(current, state, 1, firstFadeMs);
+    } else {
+      setPlayerFade(current, state, 1);
+    }
+  }
+
+  async function transitionToNext(useFade) {
+    if (transitionRunning || !current) return;
+    transitionRunning = true;
+    const outgoing = current;
+    const incoming = standby;
+    const nextIndex = prepareNextPlayer();
+    const didPlay = await safePlay(incoming, () => transitionToNext(useFade));
+    if (!didPlay) {
+      transitionRunning = false;
+      return;
+    }
+    const duration = useFade ? transitionFadeMs : transitionFadeMs;
+    await Promise.all([
+      useFade ? fadePlayer(outgoing, state, 0, duration) : Promise.resolve(setPlayerFade(outgoing, state, 0)),
+      fadePlayer(incoming, state, 1, duration)
+    ]);
+    outgoing.audio.pause();
+    outgoing.audio.removeAttribute("src");
+    outgoing.audio.load();
+    current = incoming;
+    standby = outgoing;
+    currentIndex = nextIndex;
+    transitionRunning = false;
+  }
+
+  function shouldBeginTransition(player) {
+    if (player !== current || transitionRunning || !firstPlayDone) return false;
+    const duration = player.audio.duration;
+    if (!Number.isFinite(duration) || duration <= transitionFadeMs / 1000 + 0.5) return false;
+    return duration - player.audio.currentTime <= transitionFadeMs / 1000;
+  }
+
+  [current, standby].forEach((player) => {
+    player.audio.addEventListener("timeupdate", () => {
+      if (shouldBeginTransition(player)) transitionToNext(true);
+    });
+    player.audio.addEventListener("ended", () => {
+      if (player === current && !transitionRunning) transitionToNext(false);
+    });
   });
 
-  choose();
+  async function play() {
+    if (!current) return;
+    if (!firstPlayDone || !current.audio.src || current.audio.paused) await startFirstTrack();
+  }
+
   play();
   return controller;
 }

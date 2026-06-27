@@ -5,6 +5,7 @@ import { createNotepad } from "./components/notepad.js";
 import { createTaskbar } from "./components/taskbar.js";
 import { startMusic } from "./components/music.js";
 import { bindVolumeControl } from "./components/volume.js";
+import { createEdgePeek } from "./components/edge-peek.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
@@ -14,7 +15,8 @@ const taskbar = createTaskbar(home.taskbar);
 mount(app, [
   createElement("div", { className: "desktop-layout" }, [
     windowHost,
-    createArt(home.art)
+    createArt(home.art),
+    createEdgePeek(home.edgePeek)
   ]),
   taskbar
 ]);
