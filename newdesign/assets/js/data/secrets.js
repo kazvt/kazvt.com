@@ -17,11 +17,11 @@ export const secrets = {
   },
   randomGifs: {
     path: "newdesign/assets/randomGifs",
-    spawnEveryMs: 8500,
+    spawnEveryMs: 5000,
     initialDelayMs: 1200,
-    maxOnScreen: 3,
-    minHeight: 46,
-    maxHeight: 116,
-    holdMs: 3000
+    maxOnScreen: 10,
+    minHeight: 150,
+    maxHeight: 250,
+    holdMs: 1000
   }
 };
