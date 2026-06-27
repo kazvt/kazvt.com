@@ -10,7 +10,7 @@ export const secrets = {
     blinkMs: 0,
     speedSeconds: 24,
     height: 34,
-    gaps: true
+    gaps: false
   },
   randomGifs: {
     path: "newdesign/assets/randomGifs",
