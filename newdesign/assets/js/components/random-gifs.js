@@ -142,39 +142,52 @@ function settingNumber(value, fallback) {
 function cssNumber(value, fallback) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
-  return Number.isInteger(number) ? String(number) : String(Number(number.toFixed(3)));
+  return Number(number.toFixed(3));
 }
 
 function normalizeShadowLayer(layer, fallback = {}) {
   if (typeof layer === "string") {
     const trimmed = layer.trim();
-    if (!trimmed) return "";
-    if (trimmed === "none" || trimmed.startsWith("drop-shadow(")) return trimmed;
-    return "";
+    if (!trimmed || trimmed === "none") return null;
+    return null;
   }
-  if (!layer || typeof layer !== "object") return "";
+  if (!layer || typeof layer !== "object") return null;
   const x = cssNumber(layer.x ?? layer.offsetX ?? layer.dx ?? layer.right ?? fallback.x, 15);
   const y = cssNumber(layer.y ?? layer.offsetY ?? layer.dy ?? layer.down ?? fallback.y, 15);
   const blur = cssNumber(layer.blur ?? layer.blurRadius ?? fallback.blur, 0);
   const color = String(layer.color ?? layer.colour ?? fallback.color ?? "#000").trim() || "#000";
-  return `drop-shadow(${x}px ${y}px ${blur}px ${color})`;
+  return { x, y, blur, color };
 }
 
 function normalizeShadowPreset(preset) {
-  if (Array.isArray(preset)) return preset.map((layer) => normalizeShadowLayer(layer)).filter(Boolean).join(" ");
-  if (preset && typeof preset === "object" && Array.isArray(preset.layers)) return preset.layers.map((layer) => normalizeShadowLayer(layer, preset)).filter(Boolean).join(" ");
-  return normalizeShadowLayer(preset);
+  const layers = Array.isArray(preset)
+    ? preset.map((layer) => normalizeShadowLayer(layer)).filter(Boolean)
+    : preset && typeof preset === "object" && Array.isArray(preset.layers)
+      ? preset.layers.map((layer) => normalizeShadowLayer(layer, preset)).filter(Boolean)
+      : [normalizeShadowLayer(preset)].filter(Boolean);
+  return layers;
 }
 
 function normalizeShadowCycle(config) {
   const value = config.shadows ?? config.shadowCycle ?? config.hardShadows ?? config.dropShadows ?? config.shadow;
   if (Array.isArray(value)) {
-    const shadows = value.map(normalizeShadowPreset).filter(Boolean);
+    const shadows = value.map(normalizeShadowPreset).filter((layers) => layers.length);
     if (shadows.length) return shadows;
   }
   const single = normalizeShadowPreset(value);
-  if (single) return [single];
-  return ["drop-shadow(15px 15px 0 #000)"];
+  if (single.length) return [single];
+  return [[{ x: 15, y: 15, blur: 0, color: "#000" }]];
+}
+
+function createShadowLayer(src, layer) {
+  const element = createElement("span", { className: "random-gifs__shadow" });
+  const url = `url("${String(src).replaceAll('"', "%22")}")`;
+  element.style.webkitMaskImage = url;
+  element.style.maskImage = url;
+  element.style.backgroundColor = layer.color;
+  element.style.transform = `translate(${layer.x}px, ${layer.y}px)`;
+  if (layer.blur > 0) element.style.filter = `blur(${layer.blur}px)`;
+  return element;
 }
 
 function applySpriteTransform(sprite, state) {
@@ -437,15 +450,16 @@ export async function createRandomGifs(config = {}) {
     active += 1;
     const height = randomBetween(settings.minHeight, settings.maxHeight);
     const direction = Math.random() < 0.5 ? -1 : 1;
+    const source = assetUrl(nextFile(), config);
     const image = createElement("img", {
       className: "random-gifs__image",
-      src: assetUrl(nextFile(), config),
+      src: source,
       alt: "",
       decoding: "async",
       draggable: "false"
     });
-    image.style.filter = nextShadow();
-    const squash = createElement("div", { className: "random-gifs__squash" }, [image]);
+    const shadowLayers = nextShadow().map((layer) => createShadowLayer(source, layer));
+    const squash = createElement("div", { className: "random-gifs__squash" }, [...shadowLayers, image]);
     const sprite = createElement("div", { className: "random-gifs__sprite" }, [squash]);
     sprite.style.height = `${height}px`;
     sprite.style.visibility = "hidden";
