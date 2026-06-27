@@ -8,13 +8,15 @@ import { bindVolumeControl } from "./components/volume.js";
 import { createEdgePeek } from "./components/edge-peek.js";
 import { createSiteTitle } from "./components/site-title.js";
 import { createImageMarquee } from "./components/image-marquee.js";
+import { createRandomGifs } from "./components/random-gifs.js";
 import { animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig } from "./components/private-config.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig } from "./components/private-config.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
 const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });
+const randomGifsHost = createElement("div", { className: "random-gifs-mount" });
 const edgePeek = createEdgePeek(home.edgePeek);
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
@@ -26,6 +28,7 @@ mount(app, [
     createArt(home.art)
   ]),
   marqueeHost,
+  randomGifsHost,
   edgePeek,
   taskbar
 ]);
@@ -120,6 +123,7 @@ loadSecrets().then((secrets) => {
   document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
   startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
   createImageMarquee({ ...home.imageMarquee, ...getSecretMarqueeConfig(secrets) }).then((marquee) => marqueeHost.replaceChildren(marquee));
+  createRandomGifs({ ...home.randomGifs, ...getSecretRandomGifsConfig(secrets) }).then((gifs) => randomGifsHost.replaceChildren(gifs));
 });
 
 function isEditableTarget(target) {

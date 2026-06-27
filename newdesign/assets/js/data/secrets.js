@@ -12,8 +12,13 @@ export const secrets = {
     height: 34,
     gaps: true
   },
-  randomGifs:
-  {
-    path: "newdesign/assets/randomGifs"
+  randomGifs: {
+    path: "newdesign/assets/randomGifs",
+    spawnEveryMs: 8500,
+    initialDelayMs: 1200,
+    maxOnScreen: 3,
+    minHeight: 46,
+    maxHeight: 116,
+    holdMs: 3000
   }
 };

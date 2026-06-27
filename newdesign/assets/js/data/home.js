@@ -26,6 +26,18 @@ export const home = {
     blinkMs: 1000,
     speedSeconds: 24,
     height: 34,
+    gaps: false,
+    fps: 24
+  },
+  randomGifs: {
+    manifest: "assets/randomGifs/manifest.json",
+    path: "assets/randomGifs",
+    spawnEveryMs: 8500,
+    initialDelayMs: 1200,
+    maxOnScreen: 3,
+    minHeight: 46,
+    maxHeight: 116,
+    holdMs: 1300,
     fps: 24
   },
   taskbar: {

@@ -11,6 +11,7 @@ function createVolumePopup(initialVolume, initialMuted) {
     className: "has-box-indicator volume-popup__range",
     id: volumeId,
     type: "range",
+    orient: "vertical",
     min: "0",
     max: "100",
     step: "1",

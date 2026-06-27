@@ -124,9 +124,14 @@ async function resolveMarqueeFiles(config) {
   return [];
 }
 
+function buildGap() {
+  return createElement("span", { className: "image-marquee__gap", "aria-hidden": "true" });
+}
+
 function buildSequence(files, config) {
   const sequence = [];
   const repeat = Math.max(Number(config.repeat) || 36, 12);
+  const hasGaps = config.gaps === true || config.gap === true;
   for (let index = 0; index < repeat; index += 1) {
     files.forEach((file) => {
       sequence.push(createElement("img", {
@@ -137,6 +142,7 @@ function buildSequence(files, config) {
         decoding: "async",
         draggable: "false"
       }));
+      if (hasGaps) sequence.push(buildGap());
     });
   }
   return sequence;
@@ -148,8 +154,12 @@ export async function createImageMarquee(config = {}) {
   const fps = getMotionFps(config.fps);
   marquee.style.setProperty("--marquee-speed", `${speedSeconds}s`);
   marquee.style.setProperty("--marquee-frames", String(getMotionFrameCount(speedSeconds * 1000, fps)));
-  marquee.style.setProperty("--marquee-blink", `${Number(config.blinkMs) || 1000}ms`);
-  marquee.style.setProperty("--marquee-height", `${Number(config.height) || 34}px`);
+  const blinkMs = Number(config.blinkMs);
+  const height = Number(config.height) || 34;
+  marquee.style.setProperty("--marquee-blink", `${Number.isFinite(blinkMs) ? blinkMs : 1000}ms`);
+  marquee.style.setProperty("--marquee-height", `${height}px`);
+  marquee.style.setProperty("--marquee-gap", `${Number(config.gapWidth) || height}px`);
+  if (blinkMs === 0) marquee.classList.add("image-marquee--no-blink");
   const files = await resolveMarqueeFiles(config);
   if (!files.length) return marquee;
   const first = createElement("div", { className: "image-marquee__track" }, buildSequence(files, config));

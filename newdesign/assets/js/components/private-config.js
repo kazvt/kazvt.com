@@ -54,3 +54,11 @@ export function getSecretMarqueeConfig(secrets) {
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), marquee, rootRepository, rootBranch);
 }
+
+export function getSecretRandomGifsConfig(secrets) {
+  const music = secrets.music || {};
+  const randomGifs = secrets.randomGifs || secrets.randomGif || secrets.desktopGifs || secrets.wallpaperGifs || {};
+  const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
+  const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
+  return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch);
+}

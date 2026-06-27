@@ -171,7 +171,7 @@ img {
   position: absolute;
   left: clamp(18px, 20vw, 340px);
   top: clamp(18px, 16vh, 150px);
-  z-index: 5;
+  z-index: 30;
   width: min(620px, calc(100vw - 36px));
   height: min(510px, calc(100vh - var(--taskbar-height) - 36px));
   filter: var(--window-drop-shadow);
@@ -183,12 +183,12 @@ img {
 
 .desktop-window.is-dragging,
 .desktop-window.is-resizing {
-  z-index: 10;
+  z-index: 40;
   transition: none !important;
 }
 
 .desktop-window.is-window-animating {
-  z-index: 12;
+  z-index: 45;
   will-change: transform;
 }
 
@@ -367,6 +367,7 @@ img {
 }
 
 .taskbar {
+  z-index: 70;
   background-image: linear-gradient(var(--xp-taskbar-gradient));
   border-top: 1px solid #5f9cff;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.38), 0 -1px 4px rgba(0, 0, 0, 0.24);
@@ -549,7 +550,7 @@ img {
 
 .volume-popup {
   position: fixed;
-  z-index: 60;
+  z-index: 90;
   width: 112px;
   min-width: 112px;
   height: 176px;
@@ -586,7 +587,7 @@ img {
 
 .volume-popup__title {
   position: absolute;
-  top: 9px;
+  top: 14px;
   left: 0;
   right: 0;
   margin: 0;
@@ -596,37 +597,40 @@ img {
 
 .volume-popup__slider-row {
   position: absolute;
-  top: 37px;
+  top: 47px;
   left: 0;
   right: 0;
-  height: 106px;
+  height: 102px;
   margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
   overflow: visible;
 }
 
 .volume-popup__slider.is-vertical {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  right: auto;
   display: block !important;
-  width: 24px;
-  height: 106px;
-  min-width: 24px;
-  margin: 0 auto;
-  transform: none !important;
+  width: 28px;
+  height: 102px;
+  min-width: 28px;
+  margin: 0;
+  transform: translateX(-50%) !important;
   overflow: visible;
 }
 
-.volume-popup__range {
+.volume-popup__slider.is-vertical .volume-popup__range {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 106px !important;
-  min-width: 106px !important;
-  max-width: 106px !important;
+  display: block !important;
+  width: 92px !important;
+  min-width: 92px !important;
+  max-width: 92px !important;
   height: auto;
   margin: 0 !important;
+  padding: 0 !important;
   transform: translate(-50%, -50%) rotate(-90deg) !important;
   transform-origin: 50% 50%;
 }
@@ -634,7 +638,7 @@ img {
 .volume-popup__mute {
   position: absolute;
   left: 14px;
-  bottom: 12px;
+  bottom: 8px;
   height: 18px;
   margin: 0;
   display: flex;
@@ -682,7 +686,7 @@ img {
   position: fixed;
   left: var(--peek-anchor-x, 50vw);
   top: var(--peek-anchor-y, 50vh);
-  z-index: 19;
+  z-index: 14;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -837,7 +841,7 @@ img {
   left: 0;
   right: 0;
   bottom: calc(var(--taskbar-height) + 7px);
-  z-index: 12;
+  z-index: 8;
   pointer-events: none;
   overflow: hidden;
   height: auto;
@@ -851,6 +855,10 @@ img {
   overflow: hidden;
   visibility: visible;
   animation: image-marquee-flash var(--marquee-blink, 1000ms) steps(1, end) infinite;
+}
+
+.image-marquee--no-blink {
+  animation: none;
 }
 
 .image-marquee.is-hidden {
@@ -882,6 +890,13 @@ img {
   background: transparent;
 }
 
+.image-marquee__gap {
+  display: block;
+  flex: 0 0 var(--marquee-gap, var(--marquee-height, 34px));
+  width: var(--marquee-gap, var(--marquee-height, 34px));
+  height: var(--marquee-height, 34px);
+}
+
 @keyframes image-marquee-scroll {
   from {
     transform: translateX(0);
@@ -900,4 +915,40 @@ img {
   50%, 100% {
     visibility: hidden;
   }
+}
+
+.random-gifs-mount,
+.random-gifs-host {
+  position: fixed;
+  inset: 0;
+  z-index: 13;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.random-gifs-host {
+  z-index: auto;
+}
+
+.random-gifs__sprite {
+  position: absolute;
+  width: auto;
+  height: 86px;
+  transform: scale(0) rotate(0deg);
+  transform-origin: 50% 50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.random-gifs__image {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: none;
+  image-rendering: auto;
+  border: 0;
+  background: transparent;
+  -webkit-user-drag: none;
 }
