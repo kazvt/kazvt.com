@@ -89,6 +89,8 @@ function initMinimums(element) {
 function restoreMaximizedForDrag(element, event) {
   if (!element.classList.contains("is-maximized")) return;
   const maximizedRect = element.getBoundingClientRect();
+  const titleBar = element.querySelector(".title-bar");
+  const titleRect = titleBar ? titleBar.getBoundingClientRect() : maximizedRect;
   const beforeRect = {
     left: maximizedRect.left,
     top: maximizedRect.top,
@@ -97,11 +99,12 @@ function restoreMaximizedForDrag(element, event) {
   };
   const width = Number(element.dataset.restoreWidth || Math.min(620, window.innerWidth));
   const height = Number(element.dataset.restoreHeight || element.dataset.minHeight || element.offsetHeight);
-  const ratioX = clamp((event.clientX - maximizedRect.left) / Math.max(1, maximizedRect.width), 0.08, 0.92);
+  const ratioX = clamp((event.clientX - titleRect.left) / Math.max(1, titleRect.width), 0.03, 0.97);
+  const offsetY = clamp(event.clientY - titleRect.top, 0, Math.max(1, titleRect.height));
   element.classList.remove("is-maximized");
   element.style.width = `${width}px`;
   element.style.height = `${height}px`;
-  placeElement(element, event.clientX - width * ratioX, Math.max(0, event.clientY - 10));
+  placeElement(element, event.clientX - width * ratioX, event.clientY - offsetY);
   element.dispatchEvent(new CustomEvent("windowstatechange", { bubbles: true }));
   element.dispatchEvent(new CustomEvent("windowdragrestore", { bubbles: true, detail: { beforeRect } }));
 }

@@ -771,13 +771,13 @@ img {
 
 .edge-peek__image {
   position: absolute;
-  left: 0;
+  left: calc(var(--peek-width, 140px) * -0.5);
   bottom: 0;
   display: block;
   width: var(--peek-width, clamp(104px, 13vw, 178px));
   height: auto;
   max-width: none;
-  transform: translateX(-50%) rotate(0deg);
+  transform: rotate(0deg);
   transform-origin: 50% 100%;
   filter: drop-shadow(6px 9px 6px rgba(0, 0, 0, 0.22));
   -webkit-user-drag: none;
@@ -788,7 +788,7 @@ img {
 }
 
 .edge-peek__sprite[data-edge="top"] .edge-peek__image {
-  transform: translateX(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .edge-peek__sprite[data-edge="right"] {
@@ -796,7 +796,7 @@ img {
 }
 
 .edge-peek__sprite[data-edge="right"] .edge-peek__image {
-  transform: translateX(-50%) rotate(-90deg);
+  transform: rotate(-90deg);
 }
 
 .edge-peek__sprite[data-edge="bottom"] {
@@ -804,7 +804,7 @@ img {
 }
 
 .edge-peek__sprite[data-edge="bottom"] .edge-peek__image {
-  transform: translateX(-50%) rotate(0deg);
+  transform: rotate(0deg);
 }
 
 .edge-peek__sprite[data-edge="left"] {
@@ -812,7 +812,7 @@ img {
 }
 
 .edge-peek__sprite[data-edge="left"] .edge-peek__image {
-  transform: translateX(-50%) rotate(90deg);
+  transform: rotate(90deg);
 }
 
 .old-web-title {

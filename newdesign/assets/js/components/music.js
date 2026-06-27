@@ -155,31 +155,37 @@ function randomIndex(length, currentIndex) {
 
 function createUnlockBinder(play, isPlaying) {
   const events = ["pointerdown", "mousedown", "mouseup", "touchstart", "touchend", "keydown", "click"];
+  const targets = () => [window, document, document.documentElement, document.body].filter(Boolean);
   let listening = false;
+  let attempting = false;
   const stop = () => {
     if (!listening) return;
     listening = false;
-    events.forEach((eventName) => document.removeEventListener(eventName, unlock, true));
+    targets().forEach((target) => events.forEach((eventName) => target.removeEventListener(eventName, unlock, true)));
   };
   const unlock = () => {
+    if (attempting) return;
     if (isPlaying()) {
       stop();
       return;
     }
+    attempting = true;
     const result = play();
     if (result && typeof result.then === "function") {
       result.finally(() => {
+        attempting = false;
         if (isPlaying()) stop();
       });
-    } else if (isPlaying()) {
-      stop();
+    } else {
+      attempting = false;
+      if (isPlaying()) stop();
     }
   };
   return {
     start() {
       if (listening || isPlaying()) return;
       listening = true;
-      events.forEach((eventName) => document.addEventListener(eventName, unlock, true));
+      targets().forEach((target) => events.forEach((eventName) => target.addEventListener(eventName, unlock, { capture: true, passive: true })));
     },
     stop
   };

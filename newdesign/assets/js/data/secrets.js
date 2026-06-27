@@ -79,7 +79,7 @@ export const secrets = {
     symbols: ["✦", "K", "A", "Z"],
     dragColors: ["#D42C00", "#FD9855", "#FFFFFF", "#D161A2", "#A20161"],
     dragSymbols: ["✦", "✧", "★", "K", "A", "Z"],
-    dragLayers: 2
+    dragLayers: 5
   },
   peekGifs: {
     path: "newdesign/assets/peekGifs",

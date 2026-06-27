@@ -136,7 +136,16 @@ const marqueeConfig = getSecretMarqueeConfig(secrets);
 const randomGifsConfig = getSecretRandomGifsConfig(secrets);
 siteTitle.setTitle(resolvedTitle);
 document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
-startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
+let musicController = null;
+const pageMusicEvents = ["pointerdown", "mousedown", "mouseup", "touchstart", "touchend", "keydown", "click"];
+const pageMusicUnlock = () => {
+  if (musicController) musicController.play();
+};
+pageMusicEvents.forEach((eventName) => window.addEventListener(eventName, pageMusicUnlock, { capture: true, passive: true }));
+startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => {
+  musicController = music;
+  bindVolumeControl(taskbar, music);
+});
 createImageMarquee({ ...home.imageMarquee, fps: siteFps, ...marqueeConfig }).then((marquee) => marqueeHost.replaceChildren(marquee));
 createRandomGifs({ ...home.randomGifs, fps: siteFps, ...randomGifsConfig }).then((gifs) => randomGifsHost.replaceChildren(gifs));
 startCursorSparkles({ ...home.cursorSparkles, fps: siteFps, ...getSecretCursorSparklesConfig(secrets) });
