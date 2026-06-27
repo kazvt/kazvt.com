@@ -1,4 +1,5 @@
 import { createElement } from "./dom.js";
+import { getMotionFrameCount, getMotionFps } from "./motion.js";
 
 const imageExtensions = [".gif", ".png"];
 
@@ -124,7 +125,10 @@ function buildSequence(files, config) {
 
 export async function createImageMarquee(config = {}) {
   const marquee = createElement("section", { className: "image-marquee is-hidden", "aria-hidden": "true" });
-  marquee.style.setProperty("--marquee-speed", `${Number(config.speedSeconds) || 24}s`);
+  const speedSeconds = Number(config.speedSeconds) || 24;
+  const fps = getMotionFps(config.fps);
+  marquee.style.setProperty("--marquee-speed", `${speedSeconds}s`);
+  marquee.style.setProperty("--marquee-frames", String(getMotionFrameCount(speedSeconds * 1000, fps)));
   marquee.style.setProperty("--marquee-blink", `${Number(config.blinkMs) || 1000}ms`);
   marquee.style.setProperty("--marquee-height", `${Number(config.height) || 34}px`);
   const files = await resolveMarqueeFiles(config);

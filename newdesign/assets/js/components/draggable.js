@@ -1,3 +1,5 @@
+import { getMotionFrameMs } from "./motion.js";
+
 function getTaskbarHeight() {
   const taskbar = document.querySelector(".taskbar");
   return taskbar ? taskbar.getBoundingClientRect().height : 30;
@@ -113,6 +115,7 @@ export function keepInsideViewport(element) {
 }
 
 export function makeDraggable(element, handle) {
+  const frameMs = getMotionFrameMs();
   let drag = null;
   const startActiveDrag = (event) => {
     const rect = element.getBoundingClientRect();
@@ -120,7 +123,10 @@ export function makeDraggable(element, handle) {
       id: event.pointerId,
       mode: "active",
       offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top
+      offsetY: event.clientY - rect.top,
+      lastFrameTime: 0,
+      latestX: event.clientX,
+      latestY: event.clientY
     };
     element.classList.add("is-dragging");
     document.body.classList.add("is-window-dragging");
@@ -158,11 +164,18 @@ export function makeDraggable(element, handle) {
       restoreMaximizedForDrag(element, latest);
       startActiveDrag(latest);
     }
-    placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
+    drag.latestX = latest.clientX;
+    drag.latestY = latest.clientY;
+    const now = performance.now();
+    if (now - drag.lastFrameTime >= frameMs) {
+      drag.lastFrameTime = now;
+      placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
+    }
     event.preventDefault();
   };
   const stop = () => {
     if (!drag) return;
+    if (drag.mode === "active") placeElement(element, drag.latestX - drag.offsetX, drag.latestY - drag.offsetY);
     releasePointerCapture(handle, drag.id);
     drag = null;
     element.classList.remove("is-dragging");
@@ -179,6 +192,7 @@ export function makeDraggable(element, handle) {
 }
 
 export function makeResizable(element) {
+  const frameMs = getMotionFrameMs();
   const handle = document.createElement("div");
   handle.className = "window-resize-handle";
   handle.setAttribute("aria-hidden", "true");
@@ -193,7 +207,10 @@ export function makeResizable(element) {
       startX: event.clientX,
       startY: event.clientY,
       startWidth: element.offsetWidth,
-      startHeight: element.offsetHeight
+      startHeight: element.offsetHeight,
+      latestX: event.clientX,
+      latestY: event.clientY,
+      lastFrameTime: 0
     };
     setPointerCapture(handle, event);
     element.classList.add("is-resizing");
@@ -204,11 +221,18 @@ export function makeResizable(element) {
   const move = (event) => {
     if (!resize) return;
     if (event.pointerId !== undefined && resize.id !== undefined && event.pointerId !== resize.id) return;
-    sizeElement(element, resize.startWidth + event.clientX - resize.startX, resize.startHeight + event.clientY - resize.startY);
+    resize.latestX = event.clientX;
+    resize.latestY = event.clientY;
+    const now = performance.now();
+    if (now - resize.lastFrameTime >= frameMs) {
+      resize.lastFrameTime = now;
+      sizeElement(element, resize.startWidth + event.clientX - resize.startX, resize.startHeight + event.clientY - resize.startY);
+    }
     event.preventDefault();
   };
   const stop = () => {
     if (!resize) return;
+    sizeElement(element, resize.startWidth + resize.latestX - resize.startX, resize.startHeight + resize.latestY - resize.startY);
     releasePointerCapture(handle, resize.id);
     resize = null;
     element.classList.remove("is-resizing");

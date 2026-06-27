@@ -1,5 +1,4 @@
 export const home = {
-  siteTitle: "Old Internet Windows XP",
   art: {
     src: "assets/img/art.png",
     alt: "Anime character standing beside the welcome window"
@@ -17,14 +16,17 @@ export const home = {
     src: "assets/img/osaka.gif",
     alt: "Osaka peeking from the desktop edge",
     intervalMs: 10000,
-    visibleMs: 3000
+    visibleMs: 3000,
+    motionMs: 750,
+    fps: 24
   },
   imageMarquee: {
     manifest: "assets/marquee/manifest.json",
     path: "assets/marquee",
     blinkMs: 1000,
     speedSeconds: 24,
-    height: 34
+    height: 34,
+    fps: 24
   },
   taskbar: {
     startLabel: "Start",

@@ -12,7 +12,7 @@ import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConf
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
-const siteTitle = createSiteTitle(home.siteTitle);
+const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
@@ -92,7 +92,7 @@ taskButton.addEventListener("click", toggleTaskbarWindow);
 windowHost.addEventListener("windowstatechange", setMaximizeButtonLabel);
 
 loadSecrets().then(async (secrets) => {
-  const resolvedTitle = getSecretTitle(secrets) || home.siteTitle;
+  const resolvedTitle = getSecretTitle(secrets);
   siteTitle.setTitle(resolvedTitle);
   document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
   const music = await startMusic({ ...home.music, ...getSecretMusicConfig(secrets) });

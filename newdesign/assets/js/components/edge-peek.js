@@ -1,4 +1,5 @@
 import { createElement } from "./dom.js";
+import { getMotionFrameCount } from "./motion.js";
 
 function randomBetween(min, max) {
   if (max <= min) return Math.round((min + max) / 2);
@@ -65,6 +66,8 @@ export function createEdgePeek(options = {}) {
     alt: "Osaka peeking from the desktop edge",
     intervalMs: 10000,
     visibleMs: 3000,
+    motionMs: 750,
+    fps: 24,
     ...options
   };
   const image = createElement("img", {
@@ -81,12 +84,14 @@ export function createEdgePeek(options = {}) {
   let active = false;
   let available = true;
   let hideTimer = null;
+  element.style.setProperty("--peek-duration", `${settings.motionMs}ms`);
+  element.style.setProperty("--peek-frames", String(getMotionFrameCount(settings.motionMs, settings.fps)));
   const hide = () => {
     element.classList.remove("is-visible");
     window.clearTimeout(hideTimer);
     hideTimer = window.setTimeout(() => {
       active = false;
-    }, 780);
+    }, settings.motionMs);
   };
   const pop = () => {
     if (!element.isConnected || active || !available) return;

@@ -35,9 +35,9 @@ function createStar(side) {
   return svg;
 }
 
-export function createSiteTitle(initialTitle) {
-  const text = createElement("span", { className: "old-web-title__text", dataset: { siteTitleText: "true" }, text: initialTitle || "Welcome" });
-  const element = createElement("section", { className: "old-web-title", "aria-label": "Website title" }, [
+export function createSiteTitle() {
+  const text = createElement("span", { className: "old-web-title__text", dataset: { siteTitleText: "true" } });
+  const element = createElement("section", { className: "old-web-title", "aria-label": "Website title", hidden: true }, [
     createStar("left"),
     text,
     createStar("right")
@@ -45,9 +45,10 @@ export function createSiteTitle(initialTitle) {
   return {
     element,
     setTitle(value) {
-      const title = String(value || "").trim() || "Welcome";
+      const title = String(value || "").trim();
       text.textContent = title;
-      element.setAttribute("aria-label", title);
+      element.hidden = !title;
+      element.setAttribute("aria-label", title || "Website title");
     }
   };
 }

@@ -11,6 +11,10 @@
   --asset-tray-security: url("https://win32.run/images/xp/icons/SecurityError.png");
   --asset-tray-volume: url("https://win32.run/images/xp/icons/Volume.png");
   --taskbar-height: 30px;
+  --site-motion-fps: 24;
+  --site-motion-frame-ms: 41.6667ms;
+  --peek-duration: 750ms;
+  --peek-frames: 18;
   --xp-taskbar-gradient: rgb(31, 47, 134) 0px, rgb(49, 101, 196) 3%, rgb(54, 130, 229) 6%, rgb(68, 144, 230) 10%, rgb(56, 131, 229) 12%, rgb(43, 113, 224) 15%, rgb(38, 99, 218) 18%, rgb(35, 91, 214) 20%, rgb(34, 88, 213) 23%, rgb(33, 87, 214) 38%, rgb(36, 93, 219) 54%, rgb(37, 98, 223) 86%, rgb(36, 95, 220) 89%, rgb(33, 88, 212) 92%, rgb(29, 78, 192) 95%, rgb(25, 65, 165) 98%;
   --xp-task-tile: 180deg, #6da7f4 0%, #4088eb 5%, #2d6fda 38%, #1d5ac3 76%, #194aa6 100%;
   --xp-task-tile-active: 180deg, #255abf 0%, #1f58bc 40%, #194ca5 80%, #153c86 100%;
@@ -43,6 +47,7 @@ select {
 
 body {
   margin: 0;
+  scroll-behavior: auto;
   font-size: 11px;
   background-color: var(--desktop-dark);
   background-image: var(--desktop-checkerboard);
@@ -678,7 +683,7 @@ img {
   pointer-events: none;
   visibility: hidden;
   opacity: 1;
-  transition: transform 720ms cubic-bezier(0.22, 0.86, 0.28, 1), visibility 0ms linear 720ms;
+  transition: transform var(--peek-duration, 750ms) steps(var(--peek-frames, 18), end), visibility 0ms linear var(--peek-duration, 750ms);
   will-change: transform;
   -webkit-user-select: none;
   user-select: none;
@@ -686,7 +691,7 @@ img {
 
 .edge-peek.is-visible {
   visibility: visible;
-  transition: transform 720ms cubic-bezier(0.22, 0.86, 0.28, 1), visibility 0ms linear 0ms;
+  transition: transform var(--peek-duration, 750ms) steps(var(--peek-frames, 18), end), visibility 0ms linear 0ms;
   transform: translate3d(0, 0, 0);
 }
 
@@ -851,7 +856,7 @@ img {
   display: flex;
   width: max-content;
   height: 100%;
-  animation: image-marquee-scroll var(--marquee-speed, 24s) linear infinite;
+  animation: image-marquee-scroll var(--marquee-speed, 24s) steps(var(--marquee-frames, 576), end) infinite;
 }
 
 .image-marquee__track {
