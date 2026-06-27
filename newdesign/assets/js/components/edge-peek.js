@@ -33,7 +33,7 @@ function getEdgeMetrics(image) {
   };
 }
 
-function setAnchorPosition(element, image, edge) {
+function setEdgePosition(element, image, edge) {
   const margin = 10;
   const taskbarHeight = getTaskbarHeight();
   const workspaceHeight = Math.max(0, window.innerHeight - taskbarHeight);
@@ -68,6 +68,7 @@ export function createEdgePeek(options = {}) {
     visibleMs: 3000,
     motionMs: 750,
     fps: 24,
+    initialDelayMs: 300,
     ...options
   };
   const image = createElement("img", {
@@ -82,8 +83,8 @@ export function createEdgePeek(options = {}) {
     ariaHidden: "true"
   }, [image]);
   let active = false;
-  let available = true;
   let hideTimer = null;
+  let initialTimer = null;
   element.style.setProperty("--peek-duration", `${settings.motionMs}ms`);
   element.style.setProperty("--peek-frames", String(getMotionFrameCount(settings.motionMs, settings.fps)));
   const hide = () => {
@@ -94,29 +95,28 @@ export function createEdgePeek(options = {}) {
     }, settings.motionMs);
   };
   const pop = () => {
-    if (!element.isConnected || active || !available) return;
+    if (!element.isConnected || active) return;
     active = true;
     const edge = pickEdge();
     element.classList.remove("is-visible");
     element.dataset.edge = edge;
-    setAnchorPosition(element, image, edge);
+    setEdgePosition(element, image, edge);
     window.requestAnimationFrame(() => {
       element.classList.add("is-visible");
       window.clearTimeout(hideTimer);
       hideTimer = window.setTimeout(hide, settings.visibleMs);
     });
   };
-  const startInitialPeek = () => window.setTimeout(pop, settings.initialDelayMs || 1200);
-  image.addEventListener("load", () => {
-    available = true;
-  });
+  const startInitialPeek = () => {
+    window.clearTimeout(initialTimer);
+    initialTimer = window.setTimeout(pop, settings.initialDelayMs);
+  };
+  image.addEventListener("load", startInitialPeek, { once: true });
   image.addEventListener("error", () => {
-    available = false;
     active = false;
     element.classList.remove("is-visible");
   });
-  if (image.complete && image.naturalWidth > 0) startInitialPeek();
-  else image.addEventListener("load", startInitialPeek, { once: true });
+  startInitialPeek();
   window.setInterval(pop, settings.intervalMs);
   return element;
 }

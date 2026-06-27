@@ -187,6 +187,11 @@ img {
   transition: none !important;
 }
 
+.desktop-window.is-window-animating {
+  z-index: 12;
+  will-change: transform;
+}
+
 .desktop-window.is-dragging {
   will-change: left, top;
 }
@@ -677,7 +682,7 @@ img {
   position: fixed;
   left: var(--peek-anchor-x, 50vw);
   top: var(--peek-anchor-y, 50vh);
-  z-index: 18;
+  z-index: 19;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -832,7 +837,7 @@ img {
   left: 0;
   right: 0;
   bottom: calc(var(--taskbar-height) + 7px);
-  z-index: 2;
+  z-index: 12;
   pointer-events: none;
   overflow: hidden;
   height: auto;

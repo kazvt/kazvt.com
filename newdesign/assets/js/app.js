@@ -8,23 +8,25 @@ import { bindVolumeControl } from "./components/volume.js";
 import { createEdgePeek } from "./components/edge-peek.js";
 import { createSiteTitle } from "./components/site-title.js";
 import { createImageMarquee } from "./components/image-marquee.js";
+import { animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
 import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig } from "./components/private-config.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
 const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });
+const edgePeek = createEdgePeek(home.edgePeek);
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
 const taskbar = createTaskbar(home.taskbar);
 
 mount(app, [
   createElement("div", { className: "desktop-layout" }, [
     siteTitle.element,
-    marqueeHost,
     windowHost,
-    createArt(home.art),
-    createEdgePeek(home.edgePeek)
+    createArt(home.art)
   ]),
+  marqueeHost,
+  edgePeek,
   taskbar
 ]);
 
@@ -38,26 +40,47 @@ function setMaximizeButtonLabel() {
   maximizeButton.setAttribute("aria-label", windowHost.classList.contains("is-maximized") ? "Restore" : "Maximize");
 }
 
+let windowAnimationBusy = false;
+
+function finishWindowAnimation() {
+  windowAnimationBusy = false;
+}
+
 function restoreWindow() {
+  if (windowAnimationBusy) return;
+  const wasMinimized = windowHost.classList.contains("is-minimized");
   windowHost.classList.remove("is-minimized");
   taskButton.classList.add("is-active");
   keepInsideViewport(windowHost);
   setMaximizeButtonLabel();
+  if (!wasMinimized) return;
+  windowAnimationBusy = true;
+  animateWindowRestoreFromTaskbar(windowHost, taskButton, finishWindowAnimation);
 }
 
 function minimizeWindow() {
-  windowHost.classList.add("is-minimized");
+  if (windowAnimationBusy || windowHost.classList.contains("is-minimized")) return;
+  windowAnimationBusy = true;
   taskButton.classList.remove("is-active");
+  animateWindowMinimize(windowHost, taskButton, () => {
+    windowHost.classList.add("is-minimized");
+    finishWindowAnimation();
+  });
 }
 
 function closeWindow() {
+  if (windowAnimationBusy) return;
   windowHost.classList.add("is-minimized");
   taskButton.hidden = true;
 }
 
 function toggleMaximize() {
+  if (windowAnimationBusy || windowHost.classList.contains("is-minimized")) return;
+  windowAnimationBusy = true;
+  const beforeRect = windowHost.getBoundingClientRect();
   maximizeElement(windowHost);
   setMaximizeButtonLabel();
+  animateWindowFlip(windowHost, beforeRect, finishWindowAnimation);
 }
 
 function toggleTaskbarWindow() {
@@ -91,14 +114,12 @@ titleBar.addEventListener("dblclick", (event) => {
 taskButton.addEventListener("click", toggleTaskbarWindow);
 windowHost.addEventListener("windowstatechange", setMaximizeButtonLabel);
 
-loadSecrets().then(async (secrets) => {
+loadSecrets().then((secrets) => {
   const resolvedTitle = getSecretTitle(secrets);
   siteTitle.setTitle(resolvedTitle);
   document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
-  const music = await startMusic({ ...home.music, ...getSecretMusicConfig(secrets) });
-  bindVolumeControl(taskbar, music);
-  const marquee = await createImageMarquee({ ...home.imageMarquee, ...getSecretMarqueeConfig(secrets) });
-  marqueeHost.replaceChildren(marquee);
+  startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => bindVolumeControl(taskbar, music));
+  createImageMarquee({ ...home.imageMarquee, ...getSecretMarqueeConfig(secrets) }).then((marquee) => marqueeHost.replaceChildren(marquee));
 });
 
 function isEditableTarget(target) {

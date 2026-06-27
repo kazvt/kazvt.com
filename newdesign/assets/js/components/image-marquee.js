@@ -16,16 +16,29 @@ function uniqueFiles(files) {
   return [...new Set((files || []).map(cleanPath).filter(hasImageExtension))];
 }
 
-function assetUrl(file, config) {
-  if (/^https?:\/\//i.test(file)) return file;
-  const base = cleanPath(config.assetBase || "assets/marquee");
-  const normalized = cleanPath(file);
-  const name = normalized.startsWith(`${base}/`) ? normalized.slice(base.length + 1) : normalized.replace(/^assets\/marquee\//, "");
-  return new URL(`${base}/${name.split("/").map(encodeURIComponent).join("/")}`, document.baseURI).href;
-}
-
 function basePathParts() {
   return new URL(".", document.baseURI).pathname.split("/").filter(Boolean);
+}
+
+function browserFolderFromPath(path) {
+  const cleaned = cleanPath(path);
+  if (!cleaned) return "assets/marquee";
+  const parts = basePathParts();
+  if (parts.length && cleaned === parts.join("/")) return "assets/marquee";
+  if (parts.length && cleaned.startsWith(`${parts.join("/")}/`)) return cleaned.slice(parts.join("/").length + 1) || "assets/marquee";
+  return cleaned;
+}
+
+function publicFolder(config) {
+  return cleanPath(config.publicPath || config.assetBase || config.urlPath || config.webPath || config.browserPath || config.folderPublicPath) || browserFolderFromPath(config.path || config.githubPath || config.marqueePath || config.imagePath || config.folder || "assets/marquee");
+}
+
+function assetUrl(file, config) {
+  if (/^https?:\/\//i.test(file)) return file;
+  const base = publicFolder(config);
+  const normalized = cleanPath(file);
+  const stripped = normalized.startsWith(`${base}/`) ? normalized.slice(base.length + 1) : normalized.replace(/^assets\/marquee\//, "");
+  return new URL(`${base}/${stripped.split("/").map(encodeURIComponent).join("/")}`, document.baseURI).href;
 }
 
 function inferRepository(repository) {
@@ -41,7 +54,7 @@ function inferRepository(repository) {
 
 function candidateGithubPaths(config) {
   const paths = [];
-  const explicitPath = cleanPath(config.path || config.githubPath || config.marqueePath || config.imagePath);
+  const explicitPath = cleanPath(config.path || config.githubPath || config.marqueePath || config.imagePath || config.folder);
   const add = (path) => {
     const cleaned = cleanPath(path);
     if (cleaned && !paths.includes(cleaned)) paths.push(cleaned);
@@ -72,7 +85,7 @@ async function loadGithubPath(repository, branch, path) {
   if (!response.ok) return [];
   const data = await response.json();
   if (!Array.isArray(data)) return [];
-  return data.filter((item) => item && item.type === "file" && hasImageExtension(item.name)).map((item) => `assets/marquee/${item.name}`);
+  return data.filter((item) => item && item.type === "file" && hasImageExtension(item.name)).map((item) => item.name);
 }
 
 async function loadGithubFiles(config) {
@@ -94,14 +107,20 @@ async function loadDirectoryFiles(path) {
   return [...doc.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")).filter(hasImageExtension).map((href) => new URL(href, new URL(path, document.baseURI)).href);
 }
 
+function manifestPath(config) {
+  if (config.manifest === false || config.manifest === null) return "";
+  if (typeof config.manifest === "string" && config.manifest.trim()) return config.manifest;
+  return `${publicFolder(config)}/manifest.json`;
+}
+
 async function resolveMarqueeFiles(config) {
   const listed = uniqueFiles(config.files || []);
   if (listed.length) return listed;
-  const manifest = uniqueFiles(await loadManifest(config.manifest || "assets/marquee/manifest.json").catch(() => []));
+  const manifest = uniqueFiles(await loadManifest(manifestPath(config)).catch(() => []));
   if (manifest.length) return manifest;
   const github = uniqueFiles(await loadGithubFiles(config).catch(() => []));
   if (github.length) return github;
-  if (config.directoryListing === true) return uniqueFiles(await loadDirectoryFiles(config.directory || "assets/marquee/").catch(() => []));
+  if (config.directoryListing === true) return uniqueFiles(await loadDirectoryFiles(config.directory || `${publicFolder(config)}/`).catch(() => []));
   return [];
 }
 

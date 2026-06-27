@@ -13,6 +13,20 @@ function mergeObjects(...items) {
   }, {});
 }
 
+function repositoryFrom(...items) {
+  for (const item of items) {
+    if (item && typeof item.repository === "string" && item.repository.trim()) return { repository: item.repository };
+  }
+  return {};
+}
+
+function branchFrom(...items) {
+  for (const item of items) {
+    if (item && typeof item.branch === "string" && item.branch.trim()) return { branch: item.branch };
+  }
+  return {};
+}
+
 export async function loadSecrets() {
   try {
     return objectFromModule(await import("../data/secrets.js"));
@@ -28,14 +42,15 @@ export function getSecretTitle(secrets) {
 export function getSecretMusicConfig(secrets) {
   const music = secrets.music || {};
   const musicRepository = secrets.musicRepository || {};
-  const repository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
-  const branch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
-  return mergeObjects(musicRepository, music, repository, branch);
+  const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
+  const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
+  return mergeObjects(musicRepository, music, rootRepository, rootBranch);
 }
 
 export function getSecretMarqueeConfig(secrets) {
+  const music = secrets.music || {};
   const marquee = secrets.marquee || secrets.imageMarquee || secrets.gifMarquee || secrets.badgeMarquee || {};
-  const repository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
-  const branch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
-  return mergeObjects(repository, branch, marquee);
+  const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
+  const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
+  return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), marquee, rootRepository, rootBranch);
 }
