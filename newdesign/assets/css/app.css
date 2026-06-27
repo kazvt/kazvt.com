@@ -16,6 +16,14 @@
   --xp-task-shadow: rgb(0 0 0 / 30%) -1px 0 inset, rgb(255 255 255 / 20%) 1px 1px 1px inset;
   --xp-task-shadow-active: rgb(0 0 0 / 20%) 0 0 1px 1px inset, rgb(0 0 0 / 70%) 1px 0 1px inset;
   --window-drop-shadow: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.32));
+  --cursor-default: url("../cursors/default_arrow.cur");
+  --cursor-link: url("../cursors/default_link.cur");
+  --cursor-move: url("../cursors/default_move.cur");
+  --cursor-nwse: url("../cursors/default_size2.cur");
+  --cursor-ew: url("../cursors/default_size3.cur");
+  --cursor-ns: url("../cursors/default_size4.cur");
+  --cursor-text: url("../cursors/default_ibeam.cur");
+  --cursor-no: url("../cursors/default_no.cur");
 }
 
 html,
@@ -43,11 +51,54 @@ body {
 
 html,
 body,
+#app {
+  cursor: var(--cursor-default), default;
+}
+
+body,
 #app,
 body *:not(.notepad-page) {
-  cursor: default !important;
   -webkit-user-select: none !important;
   user-select: none !important;
+}
+
+body *:not(.notepad-page),
+.notepad-menu,
+.notepad-menu *,
+.status-bar,
+.status-bar *,
+.title-bar-text,
+.taskbar,
+.taskbar * {
+  cursor: var(--cursor-default), default !important;
+}
+
+.desktop-window .title-bar,
+.desktop-window .title-bar-text {
+  cursor: var(--cursor-move), move !important;
+}
+
+.desktop-window .title-bar-controls,
+.desktop-window .title-bar-controls *,
+.desktop-window .title-bar-controls button {
+  cursor: var(--cursor-default), default !important;
+}
+
+.taskbar [role="button"],
+.taskbar [role="button"]:hover,
+.taskbar [role="button"]:focus,
+.taskbar [role="button"]:active {
+  cursor: var(--cursor-link), pointer !important;
+}
+
+body.is-window-dragging,
+body.is-window-dragging * {
+  cursor: var(--cursor-move), move !important;
+}
+
+body.is-window-resizing,
+body.is-window-resizing * {
+  cursor: var(--cursor-nwse), nwse-resize !important;
 }
 
 ::selection {
@@ -61,7 +112,7 @@ body *:not(.notepad-page) {
 }
 
 .notepad-page {
-  cursor: text !important;
+  cursor: var(--cursor-text), text !important;
   -webkit-user-select: text !important;
   user-select: text !important;
 }
@@ -174,7 +225,7 @@ img {
   z-index: 30;
   width: 22px;
   height: 22px;
-  cursor: nwse-resize !important;
+  cursor: var(--cursor-nwse), nwse-resize !important;
   touch-action: none;
 }
 
@@ -511,4 +562,10 @@ img {
   outline: none;
   box-shadow: none;
   filter: none;
+}
+
+.volume-popup__slider,
+.volume-popup__slider::-webkit-slider-thumb,
+.volume-popup__slider::-moz-range-thumb {
+  cursor: var(--cursor-ns), ns-resize !important;
 }

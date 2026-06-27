@@ -104,6 +104,7 @@ export function makeDraggable(element, handle) {
     };
     setPointerCapture(handle, event);
     element.classList.add("is-dragging");
+    document.body.classList.add("is-window-dragging");
     event.preventDefault();
   };
   const move = (event) => {
@@ -117,6 +118,7 @@ export function makeDraggable(element, handle) {
     releasePointerCapture(handle, drag.id);
     drag = null;
     element.classList.remove("is-dragging");
+    document.body.classList.remove("is-window-dragging");
   };
   handle.addEventListener("pointerdown", start);
   window.addEventListener("pointermove", move);
@@ -146,6 +148,7 @@ export function makeResizable(element) {
     };
     setPointerCapture(handle, event);
     element.classList.add("is-resizing");
+    document.body.classList.add("is-window-resizing");
     event.preventDefault();
     event.stopPropagation();
   };
@@ -160,6 +163,7 @@ export function makeResizable(element) {
     releasePointerCapture(handle, resize.id);
     resize = null;
     element.classList.remove("is-resizing");
+    document.body.classList.remove("is-window-resizing");
     keepInsideViewport(element);
   };
   handle.addEventListener("pointerdown", start);
