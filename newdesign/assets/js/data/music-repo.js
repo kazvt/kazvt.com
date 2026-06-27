@@ -1,4 +1,4 @@
 export const musicRepository = {
-  repository: "",
+  repository: "kazvt/kazvt.com",
   branch: ""
 };
