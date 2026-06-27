@@ -1,3 +1,8 @@
 {
-  "files": ["data.gif", "wumpa.gif"]
+  "files": [
+    ".gitkeep",
+    "data.gif",
+    "manifest.json.tmp",
+    "wumpa.gif"
+  ]
 }
