@@ -3,8 +3,6 @@ export const secrets = {
   motion: {
     fps: 60
   },
-  repository: "kazvt/kazvt.com",
-  branch: "main",
   music: {
     repository: "kazvt/kazvt.com",
     branch: "main",
