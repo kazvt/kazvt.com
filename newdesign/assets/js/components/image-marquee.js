@@ -144,6 +144,12 @@ function gapPixels(config, height) {
   return Math.max(0, finiteNumber(explicit, 0));
 }
 
+function relativeZ(config) {
+  const value = config.z ?? config.relativeZ ?? config.relative_z ?? config["relative-z"] ?? config.layer ?? 0;
+  const number = finiteNumber(value, 0);
+  return Math.max(0, Math.round(10000 + number));
+}
+
 function buildGap() {
   return createElement("span", { className: "image-marquee__gap", "aria-hidden": "true" });
 }
@@ -192,6 +198,7 @@ function applyLayout(marquee, config, direction) {
   marquee.style.setProperty("--marquee-blink", `${Number.isFinite(blinkMs) ? blinkMs : 1000}ms`);
   marquee.style.setProperty("--marquee-height", `${height}px`);
   marquee.style.setProperty("--marquee-gap", `${gap}px`);
+  marquee.style.zIndex = String(relativeZ(config));
   if (blinkMs === 0) marquee.classList.add("image-marquee--no-blink");
   if (direction === "vertical") {
     const x = clampPercent(config.x ?? config.X, 0);

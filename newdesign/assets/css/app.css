@@ -246,7 +246,7 @@ img {
   position: absolute;
   right: clamp(16px, 7vw, 96px);
   bottom: calc(var(--taskbar-height) + 8px);
-  z-index: 2;
+  z-index: 20;
   width: min(32vw, 340px);
   min-width: 190px;
   margin: 0;
@@ -623,16 +623,22 @@ img {
 .volume-popup__slider.is-vertical .volume-popup__range {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 0;
   display: block !important;
-  width: 92px !important;
-  min-width: 92px !important;
-  max-width: 92px !important;
-  height: auto;
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 102px !important;
+  min-height: 102px !important;
+  max-height: 102px !important;
   margin: 0 !important;
   padding: 0 !important;
-  transform: translate(-50%, -50%) rotate(-90deg) !important;
+  transform: translateX(-50%) !important;
   transform-origin: 50% 50%;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  appearance: slider-vertical;
+  -webkit-appearance: slider-vertical;
 }
 
 .volume-popup__mute {
@@ -686,7 +692,7 @@ img {
   position: fixed;
   left: var(--peek-anchor-x, 50vw);
   top: var(--peek-anchor-y, 50vh);
-  z-index: 14;
+  z-index: 6;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -753,7 +759,7 @@ img {
   position: absolute;
   top: 16px;
   left: 50%;
-  z-index: 4;
+  z-index: 24;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -842,7 +848,7 @@ img {
   right: 0;
   top: 0;
   bottom: var(--taskbar-height);
-  z-index: 8;
+  z-index: 4;
   pointer-events: none;
   overflow: hidden;
   height: auto;
@@ -986,7 +992,7 @@ img {
 .random-gifs-host {
   position: fixed;
   inset: 0;
-  z-index: 13;
+  z-index: 1;
   pointer-events: none;
   overflow: hidden;
   -webkit-user-select: none;
