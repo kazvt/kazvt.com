@@ -551,16 +551,9 @@ img {
   box-shadow: inset 1px 1px #fff, inset -1px -1px #716f64, 2px 3px 4px rgba(0, 0, 0, 0.24) !important;
   font-family: var(--font-ui);
   font-size: 11px;
-  overflow: hidden;
+  overflow: visible;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.volume-popup,
-.volume-popup *,
-.volume-popup *::before,
-.volume-popup *::after {
-  box-sizing: content-box;
 }
 
 .volume-popup.is-hidden {
@@ -578,11 +571,12 @@ img {
   width: 100%;
   height: 100%;
   padding: 0;
+  overflow: visible;
 }
 
 .volume-popup__title {
   position: absolute;
-  top: 10px;
+  top: 9px;
   left: 0;
   right: 0;
   margin: 0;
@@ -595,31 +589,42 @@ img {
   top: 37px;
   left: 0;
   right: 0;
-  height: 105px;
+  height: 106px;
   margin: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: visible;
 }
 
-.volume-popup__slider {
-  width: 104px;
-  height: 104px;
+.volume-popup__slider.is-vertical {
+  position: relative;
+  display: block !important;
+  width: 24px;
+  height: 106px;
+  min-width: 24px;
   margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  transform: none !important;
+  overflow: visible;
 }
 
 .volume-popup__range {
-  width: 104px;
-  margin: 0 auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 106px !important;
+  min-width: 106px !important;
+  max-width: 106px !important;
+  height: auto;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) rotate(-90deg) !important;
+  transform-origin: 50% 50%;
 }
 
 .volume-popup__mute {
   position: absolute;
   left: 14px;
-  bottom: 13px;
+  bottom: 12px;
   height: 18px;
   margin: 0;
   display: flex;
@@ -650,6 +655,7 @@ img {
 .volume-popup__mute label:hover {
   cursor: var(--cursor-default), default !important;
 }
+
 
 .taskbar__tray-icon[role="button"],
 .taskbar__tray-icon[role="button"]:hover,
