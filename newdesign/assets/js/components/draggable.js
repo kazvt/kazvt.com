@@ -42,6 +42,30 @@ function sizeElement(element, width, height) {
   element.style.height = `${clamp(height, minHeight, bounds.maxHeight)}px`;
 }
 
+function setPointerCapture(target, event) {
+  if (target.setPointerCapture && event.pointerId !== undefined) {
+    try {
+      target.setPointerCapture(event.pointerId);
+    } catch {}
+  }
+}
+
+function releasePointerCapture(target, id) {
+  if (target.releasePointerCapture && id !== undefined) {
+    try {
+      target.releasePointerCapture(id);
+    } catch {}
+  }
+}
+
+function initMinimums(element) {
+  if (element.dataset.minWidth && element.dataset.minHeight) return;
+  element.dataset.minWidth = String(Math.round(element.offsetWidth / 2));
+  element.dataset.minHeight = String(Math.round(element.offsetHeight));
+  element.style.minWidth = `${element.dataset.minWidth}px`;
+  element.style.minHeight = `${element.dataset.minHeight}px`;
+}
+
 export function keepInsideViewport(element) {
   if (element.classList.contains("is-maximized")) return;
   const rect = element.getBoundingClientRect();
@@ -65,6 +89,7 @@ export function makeDraggable(element, handle) {
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top
     };
+    setPointerCapture(handle, event);
     element.classList.add("is-dragging");
     event.preventDefault();
   };
@@ -76,6 +101,7 @@ export function makeDraggable(element, handle) {
   };
   const stop = () => {
     if (!drag) return;
+    releasePointerCapture(handle, drag.id);
     drag = null;
     element.classList.remove("is-dragging");
   };
@@ -94,17 +120,10 @@ export function makeResizable(element) {
   handle.setAttribute("aria-hidden", "true");
   element.append(handle);
   let resize = null;
-  const initMinimums = () => {
-    if (element.dataset.minWidth && element.dataset.minHeight) return;
-    element.dataset.minWidth = String(Math.max(240, Math.round(element.offsetWidth / 2)));
-    element.dataset.minHeight = String(Math.round(element.offsetHeight));
-    element.style.minWidth = `${element.dataset.minWidth}px`;
-    element.style.minHeight = `${element.dataset.minHeight}px`;
-  };
   const start = (event) => {
     if (element.classList.contains("is-maximized")) return;
     if (event.button !== undefined && event.button !== 0) return;
-    initMinimums();
+    initMinimums(element);
     resize = {
       id: event.pointerId,
       startX: event.clientX,
@@ -112,8 +131,10 @@ export function makeResizable(element) {
       startWidth: element.offsetWidth,
       startHeight: element.offsetHeight
     };
+    setPointerCapture(handle, event);
     element.classList.add("is-resizing");
     event.preventDefault();
+    event.stopPropagation();
   };
   const move = (event) => {
     if (!resize) return;
@@ -123,6 +144,7 @@ export function makeResizable(element) {
   };
   const stop = () => {
     if (!resize) return;
+    releasePointerCapture(handle, resize.id);
     resize = null;
     element.classList.remove("is-resizing");
     keepInsideViewport(element);
@@ -131,9 +153,9 @@ export function makeResizable(element) {
   window.addEventListener("pointermove", move);
   window.addEventListener("pointerup", stop);
   window.addEventListener("pointercancel", stop);
-  window.addEventListener("load", initMinimums);
+  window.addEventListener("load", () => initMinimums(element));
   window.addEventListener("resize", () => keepInsideViewport(element));
-  requestAnimationFrame(initMinimums);
+  requestAnimationFrame(() => initMinimums(element));
 }
 
 export function maximizeElement(element) {
@@ -148,7 +170,7 @@ export function maximizeElement(element) {
     element.style.top = "0px";
     element.style.width = `${window.innerWidth}px`;
     element.style.height = `${window.innerHeight - getTaskbarHeight()}px`;
-    return;
+    return true;
   }
   element.classList.remove("is-maximized");
   element.style.left = `${element.dataset.restoreLeft || 0}px`;
@@ -156,4 +178,5 @@ export function maximizeElement(element) {
   element.style.width = `${element.dataset.restoreWidth || element.offsetWidth}px`;
   element.style.height = `${element.dataset.restoreHeight || element.offsetHeight}px`;
   keepInsideViewport(element);
+  return false;
 }

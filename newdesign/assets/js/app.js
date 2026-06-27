@@ -24,10 +24,15 @@ const maximizeButton = windowHost.querySelector("button[aria-label='Maximize']")
 const closeButton = windowHost.querySelector("button[aria-label='Close']");
 const taskButton = taskbar.querySelector("[data-taskbar-control='notepad']");
 
+function setMaximizeButtonLabel() {
+  maximizeButton.setAttribute("aria-label", windowHost.classList.contains("is-maximized") ? "Restore" : "Maximize");
+}
+
 function restoreWindow() {
   windowHost.classList.remove("is-minimized");
   taskButton.classList.add("is-active");
   keepInsideViewport(windowHost);
+  setMaximizeButtonLabel();
 }
 
 function minimizeWindow() {
@@ -40,6 +45,16 @@ function closeWindow() {
   taskButton.hidden = true;
 }
 
+function toggleMaximize() {
+  maximizeElement(windowHost);
+  setMaximizeButtonLabel();
+}
+
+function toggleTaskbarWindow() {
+  if (windowHost.classList.contains("is-minimized")) restoreWindow();
+  else minimizeWindow();
+}
+
 makeDraggable(windowHost, titleBar);
 makeResizable(windowHost);
 
@@ -50,7 +65,7 @@ minimizeButton.addEventListener("click", (event) => {
 
 maximizeButton.addEventListener("click", (event) => {
   event.stopPropagation();
-  maximizeElement(windowHost);
+  toggleMaximize();
 });
 
 closeButton.addEventListener("click", (event) => {
@@ -58,7 +73,12 @@ closeButton.addEventListener("click", (event) => {
   closeWindow();
 });
 
-taskButton.addEventListener("click", restoreWindow);
+titleBar.addEventListener("dblclick", (event) => {
+  if (event.target.closest(".title-bar-controls")) return;
+  toggleMaximize();
+});
+
+taskButton.addEventListener("click", toggleTaskbarWindow);
 
 async function loadMusicRepositoryConfig() {
   try {
@@ -88,8 +108,15 @@ function preventSelectionOutsideEditor(event) {
   clearPageSelection();
 }
 
-["mousedown", "touchstart", "selectstart", "dragstart", "drop", "dragover"].forEach((eventName) => {
+["selectstart", "dragstart"].forEach((eventName) => {
   document.addEventListener(eventName, preventSelectionOutsideEditor, { capture: true });
+});
+
+["dragover", "drop"].forEach((eventName) => {
+  document.addEventListener(eventName, (event) => {
+    if (isEditableTarget(event.target)) return;
+    event.preventDefault();
+  }, { capture: true });
 });
 
 document.addEventListener("selectionchange", () => {

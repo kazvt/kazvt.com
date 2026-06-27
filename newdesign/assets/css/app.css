@@ -142,18 +142,8 @@ img {
   min-height: 0;
 }
 
-.desktop-window .title-bar,
-.desktop-window .title-bar *,
-.desktop-window .title-bar *::before,
-.desktop-window .title-bar *::after {
-  box-sizing: content-box;
-}
-
-.desktop-window .title-bar,
 .desktop-window .title-bar-text {
   font-family: var(--font-ui);
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 .desktop-art {
@@ -179,13 +169,24 @@ img {
 
 .window-resize-handle {
   position: absolute;
-  right: 2px;
-  bottom: 2px;
-  z-index: 8;
-  width: 15px;
-  height: 15px;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  width: 22px;
+  height: 22px;
   cursor: nwse-resize !important;
   touch-action: none;
+}
+
+.window-resize-handle::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  background-image: linear-gradient(135deg, transparent 0 42%, #878787 43% 49%, transparent 50% 64%, #878787 65% 71%, transparent 72% 100%);
+  opacity: 0.72;
 }
 
 .notepad-menu {
@@ -239,10 +240,20 @@ img {
   user-select: none;
 }
 
+.notepad-status {
+  display: flex;
+  gap: 1px;
+}
+
 .notepad-status .status-bar-field {
   flex-grow: 0;
+  min-width: 74px;
+  white-space: nowrap;
+}
+
+.notepad-status .status-bar-field:first-child {
   margin-left: auto;
-  min-width: 96px;
+  min-width: 110px;
 }
 
 .taskbar {
@@ -407,7 +418,7 @@ img {
     font-size: 15px;
   }
 
-  .status-bar-field:nth-child(2) {
+  .status-bar-field:nth-child(3) {
     display: none;
   }
 }
