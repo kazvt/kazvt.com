@@ -7,8 +7,13 @@ export const secrets = {
   },
   marquee: {
     path: "newdesign/assets/marquee",
-    blinkMs: 1000,
+    blinkMs: 0,
     speedSeconds: 24,
-    height: 34
+    height: 34,
+    gaps: true
+  },
+  randomGifs:
+  {
+    path: "newdesign/assets/randomGifs"
   }
 };
