@@ -37,8 +37,8 @@ export const secrets = {
     spawnEveryMs: 500,
     initialDelayMs: 1200,
     maxOnScreen: 10,
-    minHeight: 250,
-    maxHeight: 450,
+    minHeight: 150,
+    maxHeight: 250,
     holdMs: 0
   }
 };
