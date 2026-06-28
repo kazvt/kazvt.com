@@ -5,3 +5,5 @@ Cassidy.txt
 OuterHeavenAngel.txt
 Aaroboe.txt
 Schuy.txt
+Lyra.txt
+Brianne.txt
