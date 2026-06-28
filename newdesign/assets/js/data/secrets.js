@@ -73,5 +73,16 @@ export const secrets = {
     maxImagesPerEdge: 1,
     gap: 28,
     edges: ["top", "right", "bottom", "left"]
+  },
+  musicVisualizer: {
+    enabled: true,
+    style: "wmp-bars",
+    edge: "top",
+    size: 76,
+    length: "100%",
+    x: 50,
+    y: 50,
+    fftSize: 512,
+    smoothing: 0.72
   }
 };

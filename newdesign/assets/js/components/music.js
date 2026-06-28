@@ -199,6 +199,7 @@ function createPlayer(state) {
     frame: 0,
     token: 0
   };
+  audio.crossOrigin = "anonymous";
   audio.preload = "auto";
   audio.volume = 0;
   audio.muted = state.muted;
@@ -263,8 +264,44 @@ export async function startMusic(config = {}) {
   let transitionRunning = false;
   let firstPlayDone = false;
   let unlockBinder = null;
+  let audioContext = null;
+  let analyser = null;
+  let analyserConnected = false;
+  const mediaSources = new WeakMap();
   const files = await resolveMusicFiles(config);
   const choiceCookie = cookieName(config);
+
+  function ensurePlayerSource(player) {
+    if (!audioContext || !analyser || !player || !player.audio || mediaSources.has(player.audio)) return;
+    const source = audioContext.createMediaElementSource(player.audio);
+    source.connect(analyser);
+    mediaSources.set(player.audio, source);
+  }
+
+  function ensureAnalyser(settings = {}) {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!analyser) {
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = Math.max(32, Math.min(32768, Number(settings.fftSize) || 512));
+      analyser.smoothingTimeConstant = Math.min(Math.max(Number(settings.smoothing) || 0.72, 0), 0.99);
+    } else {
+      if (settings.fftSize) analyser.fftSize = Math.max(32, Math.min(32768, Number(settings.fftSize) || analyser.fftSize));
+      if (settings.smoothing !== undefined) analyser.smoothingTimeConstant = Math.min(Math.max(Number(settings.smoothing) || 0, 0), 0.99);
+    }
+    if (!analyserConnected) {
+      analyser.connect(audioContext.destination);
+      analyserConnected = true;
+    }
+    [current, standby].filter(Boolean).forEach(ensurePlayerSource);
+    return {
+      context: audioContext,
+      analyser,
+      resume() {
+        if (audioContext && audioContext.state !== "running") return audioContext.resume().catch(() => {});
+        return Promise.resolve();
+      }
+    };
+  }
 
   const controller = {
     get audio() {
@@ -290,6 +327,13 @@ export async function startMusic(config = {}) {
     },
     play() {
       return play();
+    },
+    createAnalyser(settings) {
+      return ensureAnalyser(settings);
+    },
+    resumeAudioContext() {
+      if (audioContext && audioContext.state !== "running") return audioContext.resume().catch(() => {});
+      return Promise.resolve();
     }
   };
 

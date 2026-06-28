@@ -9,9 +9,10 @@ import { createEdgePeek } from "./components/edge-peek.js";
 import { createSiteTitle } from "./components/site-title.js";
 import { createImageMarquee } from "./components/image-marquee.js";
 import { createRandomGifs } from "./components/random-gifs.js";
+import { createMusicVisualizer } from "./components/music-visualizer.js";
 import { startCursorSparkles } from "./components/cursor-sparkles.js";
 import { animateWindowClose, animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretPeekGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig } from "./components/private-config.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretPeekGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig, getSecretMusicVisualizerConfig } from "./components/private-config.js";
 import { setMotionFps } from "./components/motion.js";
 import { home } from "./data/home.js";
 
@@ -21,6 +22,7 @@ const motionConfig = getSecretMotionConfig(secrets);
 const siteFps = setMotionFps(motionConfig.fps || (home.motion && home.motion.fps) || 24);
 const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });
+const musicVisualizerHost = createElement("div", { className: "music-visualizer-mount" });
 const randomGifsHost = createElement("div", { className: "random-gifs-mount" });
 const edgePeek = await createEdgePeek({ ...home.edgePeek, fps: siteFps, ...(motionConfig.edgePeek || {}), ...getSecretPeekGifsConfig(secrets) });
 const windowHost = createElement("div", { className: "desktop-window" }, [createNotepad(home.notepad)]);
@@ -33,6 +35,7 @@ mount(app, [
     createArt(home.art)
   ]),
   marqueeHost,
+  musicVisualizerHost,
   randomGifsHost,
   edgePeek,
   taskbar
@@ -134,6 +137,7 @@ windowHost.addEventListener("windowdragrestore", (event) => {
 const resolvedTitle = getSecretTitle(secrets);
 const marqueeConfig = getSecretMarqueeConfig(secrets);
 const randomGifsConfig = getSecretRandomGifsConfig(secrets);
+const musicVisualizerConfig = getSecretMusicVisualizerConfig(secrets);
 siteTitle.setTitle(resolvedTitle);
 document.title = resolvedTitle ? `${resolvedTitle} - ${home.notepad.title}` : home.notepad.title;
 let musicController = null;
@@ -145,6 +149,8 @@ pageMusicEvents.forEach((eventName) => window.addEventListener(eventName, pageMu
 startMusic({ ...home.music, ...getSecretMusicConfig(secrets) }).then((music) => {
   musicController = music;
   bindVolumeControl(taskbar, music);
+  const visualizer = createMusicVisualizer({ ...home.musicVisualizer, fps: siteFps, ...musicVisualizerConfig }, music);
+  if (visualizer) musicVisualizerHost.replaceChildren(visualizer);
 });
 createImageMarquee({ ...home.imageMarquee, fps: siteFps, ...marqueeConfig }).then((marquee) => marqueeHost.replaceChildren(marquee));
 createRandomGifs({ ...home.randomGifs, fps: siteFps, ...randomGifsConfig }).then((gifs) => randomGifsHost.replaceChildren(gifs));

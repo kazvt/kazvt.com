@@ -92,3 +92,7 @@ export function getSecretMotionConfig(secrets) {
   const fps = motion.fps || secrets.fps || secrets.motionFps || secrets.siteFps || secrets.siteMotionFps || "";
   return mergeObjects(motion, fps ? { fps } : {});
 }
+
+export function getSecretMusicVisualizerConfig(secrets) {
+  return secrets.musicVisualizer || secrets.musicVisualiser || secrets.visualizer || secrets.visualiser || secrets.audioVisualizer || secrets.audioVisualiser || {};
+}

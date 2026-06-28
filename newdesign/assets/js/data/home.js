@@ -45,6 +45,14 @@ export const home = {
     holdMs: 1300,
     fps: 24
   },
+  musicVisualizer: {
+    enabled: false,
+    style: "wmp-bars",
+    edge: "bottom",
+    size: 76,
+    length: "100%",
+    fps: 24
+  },
   cursorSparkles: {
     enabled: true,
     move: {
