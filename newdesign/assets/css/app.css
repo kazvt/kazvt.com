@@ -763,6 +763,10 @@ img {
   will-change: transform;
 }
 
+.edge-peek__sprite.is-preparing {
+  transition: none !important;
+}
+
 .edge-peek__sprite.is-visible {
   visibility: visible;
   transition: transform var(--peek-duration, 750ms) var(--peek-timing, steps(var(--peek-frames, 18), end)), visibility 0ms linear 0ms;

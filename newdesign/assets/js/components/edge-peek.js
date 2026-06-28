@@ -320,10 +320,15 @@ export async function createEdgePeek(options = {}) {
       slot = { position, half: metrics.tangentSize / 2 };
       settings.activeByEdge[edge].push(slot);
       sprite.dataset.edge = edge;
+      sprite.classList.add("is-preparing");
       setSpritePosition(sprite, edge, position, metrics);
+      sprite.getBoundingClientRect();
       window.requestAnimationFrame(() => {
-        sprite.classList.add("is-visible");
-        window.setTimeout(hide, settings.visibleMs);
+        window.requestAnimationFrame(() => {
+          sprite.classList.remove("is-preparing");
+          sprite.classList.add("is-visible");
+          window.setTimeout(hide, settings.visibleMs);
+        });
       });
     };
     image.addEventListener("load", begin, { once: true });

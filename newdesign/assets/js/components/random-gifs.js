@@ -273,9 +273,10 @@ function outroScaleX(settleOutMs) {
     { value: 1, duration: ms(settleOutMs * 0.18), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: 1.24, duration: 170, easing: "easeOutSine" },
-    { value: 0.72, duration: 170, easing: "easeInOutSine" },
-    { value: 0.06, duration: 660, easing: "easeInBack" }
+    { value: 1.32, duration: 170, easing: "easeOutSine" },
+    { value: 0.84, duration: 120, easing: "easeInOutSine" },
+    { value: 1.48, duration: 120, easing: "easeOutQuad" },
+    { value: 0, duration: 590, easing: "easeInCubic" }
   );
   return keys;
 }
@@ -291,9 +292,10 @@ function outroScaleY(settleOutMs) {
     { value: 1, duration: ms(settleOutMs * 0.18), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: 0.78, duration: 170, easing: "easeOutSine" },
-    { value: 1.32, duration: 170, easing: "easeInOutSine" },
-    { value: 0.05, duration: 660, easing: "easeInBack" }
+    { value: 0.66, duration: 170, easing: "easeOutSine" },
+    { value: 1.54, duration: 120, easing: "easeInOutSine" },
+    { value: 0.045, duration: 120, easing: "easeOutQuad" },
+    { value: 0.018, duration: 590, easing: "easeInCubic" }
   );
   return keys;
 }
@@ -435,10 +437,17 @@ export async function createRandomGifs(config = {}) {
   };
   let active = 0;
   let nextIndex = 0;
-  const nextFile = () => {
-    const file = files[nextIndex % files.length];
-    nextIndex = (nextIndex + 1) % files.length;
-    return file;
+  const activeSources = new Set();
+  const nextSource = () => {
+    let fallback = "";
+    for (let attempt = 0; attempt < files.length; attempt += 1) {
+      const file = files[nextIndex % files.length];
+      nextIndex = (nextIndex + 1) % files.length;
+      const source = assetUrl(file, config);
+      if (!fallback) fallback = source;
+      if (!activeSources.has(source) || activeSources.size >= files.length) return source;
+    }
+    return fallback || assetUrl(files[0], config);
   };
   const nextShadow = () => {
     const shadow = settings.shadows[settings.nextShadow % settings.shadows.length];
@@ -450,7 +459,8 @@ export async function createRandomGifs(config = {}) {
     active += 1;
     const height = randomBetween(settings.minHeight, settings.maxHeight);
     const direction = Math.random() < 0.5 ? -1 : 1;
-    const source = assetUrl(nextFile(), config);
+    const source = nextSource();
+    activeSources.add(source);
     const image = createElement("img", {
       className: "random-gifs__image",
       src: source,
@@ -465,6 +475,7 @@ export async function createRandomGifs(config = {}) {
     sprite.style.visibility = "hidden";
     let started = false;
     const remove = () => {
+      activeSources.delete(source);
       sprite.remove();
       active = Math.max(0, active - 1);
     };
