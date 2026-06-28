@@ -83,6 +83,8 @@ export const secrets = {
     x: 50,
     y: 50,
     fftSize: 512,
-    smoothing: 0.3
+    smoothing: 0.3,
+    background: false,
+    frequencyRange: [20, 8000]
   }
 };
