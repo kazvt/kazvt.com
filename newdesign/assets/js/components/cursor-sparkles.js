@@ -218,6 +218,21 @@ function createEffects(Constructor, settings, mode, count, fps) {
   return Array.from({ length: count }, (_, index) => makeEffect(Constructor, settings, index, fps, mode));
 }
 
+function eventPoint(event) {
+  const point = event.touches && event.touches[0] ? event.touches[0] : event.changedTouches && event.changedTouches[0] ? event.changedTouches[0] : event;
+  return { x: Number(point.clientX) || 0, y: Number(point.clientY) || 0 };
+}
+
+function isPrimaryPointer(event) {
+  if (event.button !== undefined && event.button !== 0) return false;
+  if (event.buttons !== undefined && event.type !== "pointerdown" && event.type !== "mousedown" && event.buttons < 1) return false;
+  return true;
+}
+
+function isDragTarget(target) {
+  return Boolean(target && target.closest && target.closest(".title-bar, .window-resize-handle, .volume-popup__range, input[type='range'], [draggable='true']"));
+}
+
 export async function startCursorSparkles(options = {}) {
   const settings = {
     enabled: true,
@@ -245,9 +260,11 @@ export async function startCursorSparkles(options = {}) {
     const moveLayerCount = normalizeCount(moveSettings.layers ?? settings.moveLayers ?? settings.layers, 1, 8);
     const dragLayerCount = normalizeCount(dragSettings.layers ?? settings.dragLayers, 2, 10);
     let dragging = false;
+    let pending = null;
     let moveEffects = createEffects(fairyDustCursor, moveSettings, "move", moveLayerCount, fps);
     let dragEffects = [];
     const startDrag = () => {
+      pending = null;
       if (dragging) return;
       dragging = true;
       destroyEffects(moveEffects);
@@ -255,7 +272,24 @@ export async function startCursorSparkles(options = {}) {
       if (dragLayerCount > 0) dragEffects = createEffects(fairyDustCursor, dragSettings, "drag", dragLayerCount, fps);
       styleCursorLayers("drag");
     };
+    const beginGesture = (event) => {
+      if (!isPrimaryPointer(event)) return;
+      const point = eventPoint(event);
+      pending = { x: point.x, y: point.y };
+      if (isDragTarget(event.target)) startDrag();
+    };
+    const moveGesture = (event) => {
+      if (dragging) return;
+      if (!pending) {
+        if (event.buttons === undefined || event.buttons < 1) return;
+        beginGesture(event);
+        return;
+      }
+      const point = eventPoint(event);
+      if (Math.hypot(point.x - pending.x, point.y - pending.y) >= 2) startDrag();
+    };
     const stopDrag = () => {
+      pending = null;
       if (!dragging) return;
       dragging = false;
       destroyEffects(dragEffects);
@@ -268,18 +302,34 @@ export async function startCursorSparkles(options = {}) {
       destroyEffects(moveEffects);
       dragEffects = [];
       moveEffects = [];
-      document.removeEventListener("pointerdown", startDrag, true);
+      document.removeEventListener("pointerdown", beginGesture, true);
+      document.removeEventListener("mousedown", beginGesture, true);
+      document.removeEventListener("touchstart", beginGesture, true);
+      document.removeEventListener("pointermove", moveGesture, true);
+      document.removeEventListener("mousemove", moveGesture, true);
+      document.removeEventListener("touchmove", moveGesture, true);
       document.removeEventListener("dragstart", startDrag, true);
       window.removeEventListener("pointerup", stopDrag, true);
       window.removeEventListener("pointercancel", stopDrag, true);
+      window.removeEventListener("mouseup", stopDrag, true);
+      window.removeEventListener("touchend", stopDrag, true);
+      window.removeEventListener("touchcancel", stopDrag, true);
       window.removeEventListener("blur", stopDrag, true);
       document.removeEventListener("drop", stopDrag, true);
       document.removeEventListener("dragend", stopDrag, true);
     };
-    document.addEventListener("pointerdown", startDrag, true);
+    document.addEventListener("pointerdown", beginGesture, true);
+    document.addEventListener("mousedown", beginGesture, true);
+    document.addEventListener("touchstart", beginGesture, true);
+    document.addEventListener("pointermove", moveGesture, true);
+    document.addEventListener("mousemove", moveGesture, true);
+    document.addEventListener("touchmove", moveGesture, true);
     document.addEventListener("dragstart", startDrag, true);
     window.addEventListener("pointerup", stopDrag, true);
     window.addEventListener("pointercancel", stopDrag, true);
+    window.addEventListener("mouseup", stopDrag, true);
+    window.addEventListener("touchend", stopDrag, true);
+    window.addEventListener("touchcancel", stopDrag, true);
     window.addEventListener("blur", stopDrag, true);
     document.addEventListener("drop", stopDrag, true);
     document.addEventListener("dragend", stopDrag, true);

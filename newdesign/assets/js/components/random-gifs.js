@@ -265,18 +265,20 @@ function introRotation(direction, settleInMs) {
 function outroScaleX(settleOutMs) {
   const keys = [];
   if (settleOutMs > 0) keys.push(
-    { value: 0.94, duration: ms(settleOutMs * 0.16), easing: "easeInOutSine" },
-    { value: 1.12, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
-    { value: 0.9, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: 1.07, duration: ms(settleOutMs * 0.16), easing: "easeOutQuad" },
-    { value: 0.98, duration: ms(settleOutMs * 0.14), easing: "easeInOutSine" },
-    { value: 1, duration: ms(settleOutMs * 0.18), easing: "easeOutQuad" }
+    { value: 0.88, duration: ms(settleOutMs * 0.13), easing: "easeOutSine" },
+    { value: 1.22, duration: ms(settleOutMs * 0.14), easing: "easeInOutSine" },
+    { value: 0.82, duration: ms(settleOutMs * 0.13), easing: "easeOutQuad" },
+    { value: 1.16, duration: ms(settleOutMs * 0.12), easing: "easeInOutSine" },
+    { value: 0.94, duration: ms(settleOutMs * 0.1), easing: "easeOutSine" },
+    { value: 1.06, duration: ms(settleOutMs * 0.1), easing: "easeInOutSine" },
+    { value: 1, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: 1.32, duration: 170, easing: "easeOutSine" },
-    { value: 0.84, duration: 120, easing: "easeInOutSine" },
-    { value: 1.48, duration: 120, easing: "easeOutQuad" },
-    { value: 0, duration: 590, easing: "easeInCubic" }
+    { value: 1.24, duration: 135, easing: "easeOutCubic" },
+    { value: 0.76, duration: 115, easing: "easeInOutSine" },
+    { value: 1.42, duration: 125, easing: "easeOutBack" },
+    { value: 0.18, duration: 255, easing: "easeInBack" },
+    { value: 0, duration: 370, easing: "easeInExpo" }
   );
   return keys;
 }
@@ -284,18 +286,20 @@ function outroScaleX(settleOutMs) {
 function outroScaleY(settleOutMs) {
   const keys = [];
   if (settleOutMs > 0) keys.push(
-    { value: 1.07, duration: ms(settleOutMs * 0.16), easing: "easeInOutSine" },
-    { value: 0.9, duration: ms(settleOutMs * 0.18), easing: "easeOutSine" },
-    { value: 1.16, duration: ms(settleOutMs * 0.18), easing: "easeInOutSine" },
-    { value: 0.95, duration: ms(settleOutMs * 0.16), easing: "easeOutQuad" },
-    { value: 1.02, duration: ms(settleOutMs * 0.14), easing: "easeInOutSine" },
-    { value: 1, duration: ms(settleOutMs * 0.18), easing: "easeOutQuad" }
+    { value: 1.16, duration: ms(settleOutMs * 0.13), easing: "easeOutSine" },
+    { value: 0.82, duration: ms(settleOutMs * 0.14), easing: "easeInOutSine" },
+    { value: 1.22, duration: ms(settleOutMs * 0.13), easing: "easeOutQuad" },
+    { value: 0.9, duration: ms(settleOutMs * 0.12), easing: "easeInOutSine" },
+    { value: 1.07, duration: ms(settleOutMs * 0.1), easing: "easeOutSine" },
+    { value: 0.97, duration: ms(settleOutMs * 0.1), easing: "easeInOutSine" },
+    { value: 1, duration: ms(settleOutMs * 0.1), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: 0.66, duration: 170, easing: "easeOutSine" },
-    { value: 1.54, duration: 120, easing: "easeInOutSine" },
-    { value: 0.045, duration: 120, easing: "easeOutQuad" },
-    { value: 0.018, duration: 590, easing: "easeInCubic" }
+    { value: 0.76, duration: 135, easing: "easeOutCubic" },
+    { value: 1.34, duration: 115, easing: "easeInOutSine" },
+    { value: 0.42, duration: 125, easing: "easeOutBack" },
+    { value: 0.08, duration: 255, easing: "easeInBack" },
+    { value: 0.02, duration: 370, easing: "easeInExpo" }
   );
   return keys;
 }
@@ -303,15 +307,17 @@ function outroScaleY(settleOutMs) {
 function outroRotation(direction, settleOutMs) {
   const keys = [];
   if (settleOutMs > 0) keys.push(
-    { value: direction * 0.8, duration: ms(settleOutMs * 0.2), easing: "easeInOutSine" },
-    { value: direction * -1.1, duration: ms(settleOutMs * 0.22), easing: "easeOutSine" },
-    { value: direction * 0.7, duration: ms(settleOutMs * 0.2), easing: "easeInOutSine" },
-    { value: 0, duration: ms(settleOutMs * 0.2), easing: "easeOutQuad" }
+    { value: direction * 1.4, duration: ms(settleOutMs * 0.14), easing: "easeOutSine" },
+    { value: direction * -1.8, duration: ms(settleOutMs * 0.16), easing: "easeInOutSine" },
+    { value: direction * 1.1, duration: ms(settleOutMs * 0.14), easing: "easeOutQuad" },
+    { value: direction * -0.55, duration: ms(settleOutMs * 0.12), easing: "easeInOutSine" },
+    { value: 0, duration: ms(settleOutMs * 0.12), easing: "easeOutQuad" }
   );
   keys.push(
-    { value: direction * -2.8, duration: 170, easing: "easeOutSine" },
-    { value: direction * 2.2, duration: 170, easing: "easeInOutSine" },
-    { value: direction * 0.6, duration: 660, easing: "easeInBack" }
+    { value: direction * -1.6, duration: 135, easing: "easeOutCubic" },
+    { value: direction * 1.2, duration: 135, easing: "easeInOutSine" },
+    { value: direction * -0.45, duration: 220, easing: "easeOutQuad" },
+    { value: 0, duration: 510, easing: "easeInBack" }
   );
   return keys;
 }
