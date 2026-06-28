@@ -77,7 +77,7 @@ export const secrets = {
   musicVisualizer: {
     enabled: true,
     // winamp, avs, scope, bars
-    style: "winamp-avs",
+    style: "bars",
     edge: "top",
     size: 76,
     length: "100%",
