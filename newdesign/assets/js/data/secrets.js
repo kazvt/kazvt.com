@@ -47,8 +47,8 @@ export const secrets = {
       { x: 10, y: 10, blur: 0, color: "#ff00ff" },
       {
         layers: [
-          { x: 15, y: 15, blur: 0, color: "#000000" },
-          { x: 22, y: 22, blur: 0, color: "#00ffff" }
+          { x: 15, y: 15, blur: 0, color: "#00ffff" },
+          { x: 22, y: 22, blur: 0, color: "#000000" }
         ]
       }
     ]

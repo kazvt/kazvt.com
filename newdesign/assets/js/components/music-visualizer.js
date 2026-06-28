@@ -36,8 +36,11 @@ function setupCanvas(canvas, element, edge, thickness, length, x, y) {
   const horizontal = isHorizontal(edge);
   const resolvedThickness = Math.max(18, Number(thickness) || 76);
   const resolvedLength = length === "auto" || length === "edge" || length === "100%" ? (horizontal ? viewportWidth : viewportHeight) : Math.max(40, Number(length) || (horizontal ? viewportWidth : viewportHeight));
-  const cssWidth = horizontal ? Math.min(resolvedLength, viewportWidth) : resolvedThickness;
-  const cssHeight = horizontal ? resolvedThickness : Math.min(resolvedLength, viewportHeight);
+  const edgeLength = Math.min(resolvedLength, horizontal ? viewportWidth : viewportHeight);
+  const cssWidth = horizontal ? edgeLength : resolvedThickness;
+  const cssHeight = horizontal ? resolvedThickness : edgeLength;
+  const drawWidth = horizontal ? cssWidth : cssHeight;
+  const drawHeight = horizontal ? cssHeight : cssWidth;
   element.style.width = `${cssWidth}px`;
   element.style.height = `${cssHeight}px`;
   element.style.left = "auto";
@@ -65,9 +68,15 @@ function setupCanvas(canvas, element, edge, thickness, length, x, y) {
   canvas.width = Math.max(1, Math.round(cssWidth * ratio));
   canvas.height = Math.max(1, Math.round(cssHeight * ratio));
   const context = canvas.getContext("2d", { alpha: true });
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
   context.imageSmoothingEnabled = false;
-  return { width: cssWidth, height: cssHeight, context };
+  return { width: drawWidth, height: drawHeight, context, ratio };
+}
+
+function orientContext(context, ratio, edge, width, height) {
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  if (edge === "top") context.transform(1, 0, 0, -1, 0, height);
+  if (edge === "left") context.transform(0, 1, -1, 0, height, 0);
+  if (edge === "right") context.transform(0, 1, 1, 0, 0, 0);
 }
 
 function clearFrame(context, width, height, options) {
@@ -218,6 +227,7 @@ export function createMusicVisualizer(config = {}, music) {
       audio.analyser.getByteFrequencyData(frequencyData);
       audio.analyser.getByteTimeDomainData(timeData);
       if (!layout) resize();
+      orientContext(layout.context, layout.ratio, edge, layout.width, layout.height);
       if (visualStyle === "wmp-bars") drawWmpBars(layout.context, layout.width, layout.height, frequencyData, settings);
       if (visualStyle === "wmp-scope") drawWmpScope(layout.context, layout.width, layout.height, timeData, settings);
       if (visualStyle === "winamp-avs") drawWinampAvs(layout.context, layout.width, layout.height, frequencyData, timeData, settings);
