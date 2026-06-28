@@ -102,13 +102,15 @@ export const secrets = {
     {
       id: "scope-top",
       enabled: true,
-      edge: "top",
+      edge: "bottom",
       style: "scope",
       width: "100%",
       height: "10%",
       z: 6,
-      background: true,
-      frequencyRange: [20, 15000]
+      smoothing: 0.1,
+      fftSize: 1024,
+      background: false,
+      frequencyRange: [20, 6000]
     }
   ]
 };
