@@ -243,7 +243,33 @@ img {
 }
 
 .desktop-window .title-bar-text {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
   font-family: var(--font-ui);
+}
+
+.title-bar-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.title-bar-icon--notepad {
+  background-image: var(--asset-notepad-icon);
+}
+
+.title-bar-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .desktop-art {
@@ -1154,6 +1180,16 @@ img {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
+}
+
+.music-visualizer--transparent {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.music-visualizer--transparent .music-visualizer__label {
+  display: none;
 }
 
 .music-visualizer__label {

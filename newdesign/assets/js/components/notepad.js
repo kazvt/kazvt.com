@@ -32,6 +32,7 @@ export function createNotepad({ title, menus, text }) {
   const windowElement = createWindow({
     title,
     controls: ["Minimize", "Maximize", "Close"],
+    icon: "notepad",
     body: [
       createElement("nav", { className: "notepad-menu", role: "menubar", "aria-label": "Notepad menu" }, menus.map((item) => createElement("span", { className: "notepad-menu__item", role: "menuitem", text: item }))),
       editor

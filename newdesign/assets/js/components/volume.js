@@ -1,7 +1,17 @@
 import { createElement } from "./dom.js";
 
-function clampPercent(value) {
-  return Math.min(Math.max(Math.round(Number(value) || 0), 0), 100);
+const volumePanelMax = 30;
+
+function clampPanelVolume(value) {
+  return Math.min(Math.max(Math.round(Number(value) || 0), 0), volumePanelMax);
+}
+
+function panelToAudioVolume(value) {
+  return clampPanelVolume(value) / volumePanelMax;
+}
+
+function audioToPanelVolume(value) {
+  return clampPanelVolume((Number(value) || 0) * volumePanelMax);
 }
 
 function createVolumePopup(initialVolume, initialMuted) {
@@ -13,9 +23,9 @@ function createVolumePopup(initialVolume, initialMuted) {
     type: "range",
     orient: "vertical",
     min: "0",
-    max: "100",
+    max: String(volumePanelMax),
     step: "1",
-    value: String(clampPercent(initialVolume * 100)),
+    value: String(audioToPanelVolume(initialVolume)),
     "aria-label": "Volume"
   });
   const mute = createElement("input", {
@@ -55,7 +65,7 @@ export function bindVolumeControl(taskbar, music) {
 
   const applyVolume = () => {
     if (!music) return;
-    music.setVolume(clampPercent(slider.value) / 100);
+    music.setVolume(panelToAudioVolume(slider.value));
   };
 
   const applyMute = () => {
@@ -78,7 +88,7 @@ export function bindVolumeControl(taskbar, music) {
     else close();
   };
 
-  slider.value = String(clampPercent(music ? music.getVolume() * 100 : 50));
+  slider.value = String(audioToPanelVolume(music ? music.getVolume() : 0.5));
   slider.addEventListener("input", applyVolume);
   slider.addEventListener("change", applyVolume);
   mute.addEventListener("change", applyMute);
