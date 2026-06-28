@@ -76,13 +76,13 @@ export const secrets = {
   },
   musicVisualizer: {
     enabled: true,
-    style: "wmp-bars",
+    style: "winamp-avs",
     edge: "top",
     size: 76,
     length: "100%",
     x: 50,
     y: 50,
     fftSize: 512,
-    smoothing: 0.72
+    smoothing: 0.3
   }
 };
