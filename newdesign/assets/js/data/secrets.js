@@ -89,12 +89,12 @@ export const secrets = {
       frequencyRange: [20, 500]
     },
     {
-      id: "avs-bottom",
+      id: "avs-top",
       enabled: true,
-      edge: "bottom",
+      edge: "top",
       style: "bars",
       width: "100%",
-      height: "20%",
+      height: "25%",
       z: 3,
       background: false,
       frequencyRange: [20, 8000]
