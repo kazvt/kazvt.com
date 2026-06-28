@@ -7,14 +7,15 @@ const XPHomepage = (() => {
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
 
-  const makeTitleBar = ({ title = 'untitled - Notepad', controls = ['Minimize', 'Maximize', 'Close'] } = {}) => {
+  const makeTitleBar = ({ title = 'untitled - Notepad', controls = ['Minimize', 'Maximize', 'Close'], icon = null } = {}) => {
     const controlButtons = controls
       .map((label) => `<button aria-label="${escapeHTML(label)}"></button>`)
       .join('');
+    const titleIcon = icon ? `<span class="title-bar-icon title-bar-icon--${escapeHTML(icon)}" aria-hidden="true"></span>` : '';
 
     return `
       <div class="title-bar">
-        <div class="title-bar-text">${escapeHTML(title)}</div>
+        <div class="title-bar-text">${titleIcon}<span class="title-bar-label">${escapeHTML(title)}</span></div>
         <div class="title-bar-controls">${controlButtons}</div>
       </div>
     `;
@@ -37,7 +38,7 @@ const XPHomepage = (() => {
 
     return `
       <article class="window xp-notepad" role="region" aria-label="${escapeHTML(title)}">
-        ${makeTitleBar({ title })}
+        ${makeTitleBar({ title, icon: 'notepad' })}
         <div class="window-body">
           ${makeMenuBar()}
           <pre class="notepad-paper" id="notepad-paper">${escapeHTML(lines)}</pre>
