@@ -1,4 +1,3 @@
-const moduleUrl = "https://cdn.jsdelivr.net/npm/cursor-effects@1.0.18/dist/esm.js";
 const moveEvents = new Set(["mousemove", "pointermove", "touchmove"]);
 const listenerMap = new WeakMap();
 let nativeAdd = null;
@@ -17,6 +16,177 @@ function normalizeCount(value, fallback, max) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
   return Math.max(0, Math.min(max, Math.round(number)));
+}
+
+function normalizeSize(value, fallback = 21) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return fallback;
+  return Math.max(1, Math.min(128, number));
+}
+
+function localFairyDustCursor(options = {}) {
+  const possibleColors = normalizeList(options.colors, ["#D61C59", "#E7D84B", "#1B8798"]);
+  const hasWrapperEl = options.element;
+  const element = hasWrapperEl || document.body;
+  const particles = [];
+  const canvImages = [];
+  const cursor = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  const lastPos = { x: cursor.x, y: cursor.y };
+  const char = options.fairySymbol || "*";
+  const size = normalizeSize(options.size ?? options.sparkleSize ?? options.particleSize ?? options.fontSize ?? options.fairySize, 21);
+  const amount = normalizeCount(options.amount ?? options.intensity ?? options.particleCount ?? options.particles ?? options.density, 1, 24);
+  const font = String(options.font || `${size}px ${options.fontFamily || "serif"}`);
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  let canvas = null;
+  let context = null;
+  let animationFrame = 0;
+  let alive = false;
+
+  const drawParticles = () => {
+    if (!context) return;
+    if (particles.length) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      for (let index = 0; index < particles.length; index += 1) particles[index].update(context);
+      for (let index = particles.length - 1; index >= 0; index -= 1) {
+        if (particles[index].lifeSpan < 0) particles.splice(index, 1);
+      }
+    } else {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  const loop = () => {
+    drawParticles();
+    animationFrame = window.requestAnimationFrame(loop);
+  };
+
+  const updateCanvasSize = () => {
+    width = hasWrapperEl ? element.clientWidth : window.innerWidth;
+    height = hasWrapperEl ? element.clientHeight : window.innerHeight;
+    if (canvas) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+  };
+
+  const addParticle = (x, y) => {
+    if (!canvImages.length || amount <= 0) return;
+    for (let index = 0; index < amount; index += 1) particles.push(new Particle(x, y, canvImages[Math.floor(Math.random() * canvImages.length)]));
+  };
+
+  const pointFromEvent = (event) => {
+    if (hasWrapperEl) {
+      const rect = element.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+    return { x: event.clientX, y: event.clientY };
+  };
+
+  const onMouseMove = (event) => {
+    window.requestAnimationFrame(() => {
+      const point = pointFromEvent(event);
+      cursor.x = point.x;
+      cursor.y = point.y;
+      const distance = Math.hypot(cursor.x - lastPos.x, cursor.y - lastPos.y);
+      if (distance > 1.5) {
+        addParticle(cursor.x, cursor.y);
+        lastPos.x = cursor.x;
+        lastPos.y = cursor.y;
+      }
+    });
+  };
+
+  const onTouchMove = (event) => {
+    for (let index = 0; index < event.touches.length; index += 1) {
+      const touch = event.touches[index];
+      const point = pointFromEvent(touch);
+      addParticle(point.x, point.y);
+    }
+  };
+
+  const createImages = () => {
+    const measureCanvas = document.createElement("canvas");
+    const measureContext = measureCanvas.getContext("2d");
+    measureContext.font = font;
+    measureContext.textBaseline = "middle";
+    measureContext.textAlign = "center";
+    possibleColors.forEach((color) => {
+      const measurements = measureContext.measureText(char);
+      const imageCanvas = document.createElement("canvas");
+      const imageContext = imageCanvas.getContext("2d");
+      const imageWidth = Math.max(1, Math.ceil(measurements.width || size));
+      const imageHeight = Math.max(1, Math.ceil((measurements.actualBoundingBoxAscent || size * 0.75) + (measurements.actualBoundingBoxDescent || size * 0.25)));
+      imageCanvas.width = imageWidth;
+      imageCanvas.height = imageHeight;
+      imageContext.fillStyle = color;
+      imageContext.textAlign = "center";
+      imageContext.font = font;
+      imageContext.textBaseline = "middle";
+      imageContext.fillText(char, imageWidth / 2, (measurements.actualBoundingBoxAscent || imageHeight / 2));
+      canvImages.push(imageCanvas);
+    });
+  };
+
+  const init = () => {
+    if (prefersReducedMotion.matches || alive) return false;
+    alive = true;
+    canvas = document.createElement("canvas");
+    context = canvas.getContext("2d");
+    canvas.style.top = "0px";
+    canvas.style.left = "0px";
+    canvas.style.pointerEvents = "none";
+    canvas.style.zIndex = options.zIndex || "9999999999";
+    canvas.style.position = hasWrapperEl ? "absolute" : "fixed";
+    element.appendChild(canvas);
+    updateCanvasSize();
+    createImages();
+    element.addEventListener("mousemove", onMouseMove);
+    element.addEventListener("touchmove", onTouchMove, { passive: true });
+    element.addEventListener("touchstart", onTouchMove, { passive: true });
+    window.addEventListener("resize", updateCanvasSize);
+    loop();
+    return true;
+  };
+
+  const destroy = () => {
+    alive = false;
+    if (canvas) canvas.remove();
+    window.cancelAnimationFrame(animationFrame);
+    element.removeEventListener("mousemove", onMouseMove);
+    element.removeEventListener("touchmove", onTouchMove);
+    element.removeEventListener("touchstart", onTouchMove);
+    window.removeEventListener("resize", updateCanvasSize);
+  };
+
+  prefersReducedMotion.onchange = () => {
+    if (prefersReducedMotion.matches) destroy();
+    else init();
+  };
+
+  function Particle(x, y, canvasItem) {
+    const lifeSpan = Math.floor(Math.random() * 30 + 60);
+    this.initialLifeSpan = lifeSpan;
+    this.lifeSpan = lifeSpan;
+    this.velocity = {
+      x: (Math.random() < 0.5 ? -1 : 1) * (Math.random() / 2),
+      y: Math.random() * 0.7 + 0.9
+    };
+    this.position = { x, y };
+    this.canv = canvasItem;
+    this.update = function updateParticle(ctx) {
+      this.position.x += this.velocity.x;
+      this.position.y += this.velocity.y;
+      this.lifeSpan -= 1;
+      this.velocity.y += 0.02;
+      const scale = Math.max(this.lifeSpan / this.initialLifeSpan, 0);
+      ctx.drawImage(this.canv, this.position.x - this.canv.width / 2 * scale, this.position.y - this.canv.height / 2, this.canv.width * scale, this.canv.height * scale);
+    };
+  }
+
+  init();
+  return { destroy };
 }
 
 function normalizeFps(value, fallback = 60) {
@@ -150,7 +320,11 @@ function makeEffect(Constructor, settings, index = 0, fps = 60, mode = "move") {
   try {
     const effect = new Constructor({
       colors: settings.colors,
-      fairySymbol: pick(settings.symbols, index)
+      fairySymbol: pick(settings.symbols, index),
+      size: settings.size,
+      amount: settings.amount,
+      font: settings.font,
+      fontFamily: settings.fontFamily
     });
     const canvases = [...document.querySelectorAll("canvas")].filter((canvas) => !before.has(canvas));
     canvases.forEach((canvas) => styleCanvas(canvas, mode));
@@ -204,12 +378,24 @@ function modeSettings(settings, mode, fallbacks = {}) {
   const fallbackSymbols = fallbacks.symbols || ["✦"];
   const nestedColors = nestedValue(settings, mode, ["colors", "colours"]);
   const nestedSymbols = nestedValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
+  const nestedSize = nestedValue(settings, mode, ["size", "sparkleSize", "particleSize", "fontSize", "fairySize"]);
+  const nestedAmount = nestedValue(settings, mode, ["amount", "intensity", "particleCount", "particles", "density", "sparkleAmount", "sparkleIntensity"]);
+  const nestedFont = nestedValue(settings, mode, ["font"]);
+  const nestedFontFamily = nestedValue(settings, mode, ["fontFamily", "family"]);
   const topColors = topLevelModeValue(settings, mode, ["colors", "colours"]);
   const topSymbols = topLevelModeValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
-  const layers = nestedValue(settings, mode, ["layers", "layerCount", "intensity", "amount", "count"]);
+  const topSize = topLevelModeValue(settings, mode, ["size", "sparkleSize", "particleSize", "fontSize", "fairySize"]);
+  const topAmount = topLevelModeValue(settings, mode, ["amount", "intensity", "particleCount", "particles", "density", "sparkleAmount", "sparkleIntensity"]);
+  const topFont = topLevelModeValue(settings, mode, ["font"]);
+  const topFontFamily = topLevelModeValue(settings, mode, ["fontFamily", "family"]);
+  const layers = nestedValue(settings, mode, ["layers", "layerCount", "count"]);
   return {
     colors: normalizeList(firstValue(topColors, nestedColors), fallbackColors),
     symbols: normalizeList(firstValue(topSymbols, nestedSymbols), fallbackSymbols),
+    size: normalizeSize(firstValue(topSize, nestedSize, fallbacks.size, settings.size ?? settings.sparkleSize ?? settings.particleSize ?? settings.fontSize ?? settings.fairySize), 21),
+    amount: normalizeCount(firstValue(topAmount, nestedAmount, fallbacks.amount, settings.amount ?? settings.intensity ?? settings.particleCount ?? settings.particles ?? settings.density ?? settings.sparkleAmount ?? settings.sparkleIntensity), 1, 24),
+    font: firstValue(topFont, nestedFont, settings.font),
+    fontFamily: firstValue(topFontFamily, nestedFontFamily, settings.fontFamily),
     layers
   };
 }
@@ -247,7 +433,7 @@ export async function startCursorSparkles(options = {}) {
   };
   if (settings.enabled === false) return null;
   try {
-    const { fairyDustCursor } = await import(moduleUrl);
+    const fairyDustCursor = localFairyDustCursor;
     const fps = normalizeFps(settings.fps, 60);
     const moveSettings = modeSettings({ ...settings, move: settings.move || settings.normal || settings.idle || {} }, "move", {
       colors: normalizeList(settings.colors, ["#ffffff"]),
@@ -267,8 +453,6 @@ export async function startCursorSparkles(options = {}) {
       pending = null;
       if (dragging) return;
       dragging = true;
-      destroyEffects(moveEffects);
-      moveEffects = [];
       if (dragLayerCount > 0) dragEffects = createEffects(fairyDustCursor, dragSettings, "drag", dragLayerCount, fps);
       styleCursorLayers("drag");
     };
@@ -294,7 +478,7 @@ export async function startCursorSparkles(options = {}) {
       dragging = false;
       destroyEffects(dragEffects);
       dragEffects = [];
-      if (moveLayerCount > 0) moveEffects = createEffects(fairyDustCursor, moveSettings, "move", moveLayerCount, fps);
+      if (!moveEffects.length && moveLayerCount > 0) moveEffects = createEffects(fairyDustCursor, moveSettings, "move", moveLayerCount, fps);
       styleCursorLayers("move");
     };
     const destroy = () => {

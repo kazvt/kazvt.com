@@ -54,7 +54,56 @@ function showBackground(settings) {
 }
 
 function backgroundColor(settings, fallback) {
-  return typeof settings.background === "string" && !isOffWord(settings.background) && !isOnWord(settings.background) ? settings.background : fallback;
+  const direct = colorValue(settings.background);
+  return direct || colorSetting(settings, ["background", "backgroundColor", "bg", "fill"], fallback);
+}
+
+
+function plainObject(value) {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function mergePalette(target, source) {
+  if (!plainObject(source)) return target;
+  Object.entries(source).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") target[key] = value;
+  });
+  return target;
+}
+
+function stylePaletteKeys(style) {
+  if (style === "wmp-bars") return ["bars", "wmpBars", "wmp_bars", "wmp-bars"];
+  if (style === "wmp-scope") return ["scope", "wmpScope", "wmp_scope", "wmp-scope"];
+  if (style === "winamp-avs") return ["avs", "winamp", "winampAvs", "winampAVS", "winamp_avs", "winamp-avs"];
+  return [];
+}
+
+function resolvePalette(settings, style) {
+  const palette = {};
+  const containers = [settings.colors, settings.colours, settings.palette];
+  containers.forEach((container) => mergePalette(palette, container));
+  stylePaletteKeys(style).forEach((key) => {
+    mergePalette(palette, settings[key]);
+    containers.forEach((container) => mergePalette(palette, plainObject(container) ? container[key] : null));
+  });
+  return palette;
+}
+
+function colorValue(value) {
+  return typeof value === "string" && value.trim() && !isOffWord(value) && !isOnWord(value) ? value.trim() : "";
+}
+
+function colorSetting(settings, keys, fallback) {
+  for (const key of keys) {
+    const direct = colorValue(settings[key]);
+    if (direct) return direct;
+  }
+  const palette = settings.palette || {};
+  for (const key of keys) {
+    const nested = colorValue(palette[key]);
+    if (nested) return nested;
+  }
+  return fallback;
 }
 
 function firstNumber(...values) {
@@ -189,10 +238,10 @@ function clearFrame(context, width, height, options) {
   if (!options.showBackground) return;
   context.fillStyle = backgroundColor(options, "#000034");
   context.fillRect(0, 0, width, height);
-  context.strokeStyle = options.border || "#b9b9b9";
+  context.strokeStyle = colorSetting(options, ["border", "borderColor", "outline", "outlineColor"], "#b9b9b9");
   context.lineWidth = 1;
   context.strokeRect(0.5, 0.5, Math.max(0, width - 1), Math.max(0, height - 1));
-  context.strokeStyle = "#4b4b4b";
+  context.strokeStyle = colorSetting(options, ["innerBorder", "innerBorderColor", "inner", "innerColor", "shadowBorder", "shadowBorderColor"], "#4b4b4b");
   context.strokeRect(2.5, 2.5, Math.max(0, width - 5), Math.max(0, height - 5));
 }
 
@@ -212,9 +261,9 @@ function drawWmpBars(context, width, height, data, options) {
     const x = padding + index * (barWidth + gap);
     for (let row = 0; row < blocks; row += 1) {
       const y = padding + innerHeight - (row + 1) * block;
-      if (row > 9) context.fillStyle = "#ff3333";
-      else if (row > 6) context.fillStyle = "#ffff00";
-      else context.fillStyle = "#00ff66";
+      if (row > 9) context.fillStyle = colorSetting(options, ["high", "highColor", "treble", "trebleColor", "barHigh", "barHighColor", "top", "topColor"], "#ff3333");
+      else if (row > 6) context.fillStyle = colorSetting(options, ["mid", "midColor", "middle", "middleColor", "barMid", "barMidColor"], "#ffff00");
+      else context.fillStyle = colorSetting(options, ["low", "lowColor", "bass", "bassColor", "barLow", "barLowColor", "bottom", "bottomColor"], "#00ff66");
       context.fillRect(x, y, barWidth, Math.max(1, block - 1));
     }
   }
@@ -224,7 +273,7 @@ function drawWmpScope(context, width, height, data, options) {
   clearFrame(context, width, height, { ...options, background: backgroundColor(options, "#000000") });
   const padding = 8;
   const mid = height / 2;
-  context.strokeStyle = "#002e00";
+  context.strokeStyle = colorSetting(options, ["grid", "gridColor", "scopeGrid", "scopeGridColor"], "#002e00");
   context.lineWidth = 1;
   for (let x = padding; x < width - padding; x += 12) {
     context.beginPath();
@@ -238,7 +287,7 @@ function drawWmpScope(context, width, height, data, options) {
     context.lineTo(width - padding, y + 0.5);
     context.stroke();
   }
-  context.strokeStyle = options.line || "#00ff00";
+  context.strokeStyle = colorSetting(options, ["line", "lineColor", "scopeLine", "scopeLineColor", "wave", "waveColor"], "#00ff00");
   context.lineWidth = 2;
   context.beginPath();
   for (let index = 0; index < data.length; index += 1) {
@@ -256,7 +305,7 @@ function drawWinampAvs(context, width, height, frequency, time, options) {
   const midX = width / 2;
   const midY = height / 2;
   const points = Math.max(24, Math.min(96, Math.floor(width / 7)));
-  context.strokeStyle = "#ff00ff";
+  context.strokeStyle = colorSetting(options, ["waveA", "waveAColor", "wave1", "wave1Color", "primary", "primaryColor", "lineA", "lineAColor"], "#ff00ff");
   context.lineWidth = 2;
   context.beginPath();
   for (let index = 0; index < points; index += 1) {
@@ -269,7 +318,7 @@ function drawWinampAvs(context, width, height, frequency, time, options) {
     else context.lineTo(x, y);
   }
   context.stroke();
-  context.strokeStyle = "#00ffff";
+  context.strokeStyle = colorSetting(options, ["waveB", "waveBColor", "wave2", "wave2Color", "secondary", "secondaryColor", "lineB", "lineBColor"], "#00ffff");
   context.beginPath();
   for (let index = 0; index < points; index += 1) {
     const t = index / (points - 1);
@@ -287,7 +336,7 @@ function drawWinampAvs(context, width, height, frequency, time, options) {
     const f = frequency[Math.floor(t * frequency.length)] / 255;
     const barHeight = Math.max(2, f * height * 0.44);
     const x = Math.round(midX + (index - bars / 2) * 11);
-    context.fillStyle = index % 2 ? "#ffff00" : "#ff6600";
+    context.fillStyle = index % 2 ? colorSetting(options, ["barA", "barAColor", "bar1", "bar1Color", "centerA", "centerAColor"], "#ffff00") : colorSetting(options, ["barB", "barBColor", "bar2", "bar2Color", "centerB", "centerBColor"], "#ff6600");
     context.fillRect(x, midY - barHeight / 2, 5, barHeight);
   }
 }
@@ -327,6 +376,7 @@ function createSingleMusicVisualizer(config = {}, music) {
   if (!settings.enabled || !music || typeof music.createAnalyser !== "function") return null;
   const edge = pickEdge(settings.edge);
   const visualStyle = pickStyle(settings.style || settings.type || settings.mode || settings.preset);
+  settings.palette = resolvePalette(settings, visualStyle);
   settings.showBackground = showBackground(settings);
   const canvas = createElement("canvas", { className: "music-visualizer__canvas", ariaHidden: "true" });
   const labelText = settings.name || settings.title || visualStyle.replace(/-/g, " ");

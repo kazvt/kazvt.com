@@ -55,11 +55,19 @@ export const secrets = {
   },
   cursorSparkles: {
     enabled: true,
-    colors: ["#5BCEFA", "#F5A9B8", "#ffffff", "#F5A9B8", "#5BCEFA"],
-    symbols: ["✦", "K", "A", "Z"],
-    dragColors: ["#D42C00", "#FD9855", "#FFFFFF", "#D161A2", "#A20161"],
-    dragSymbols: ["✦", "✧", "★", "K", "A", "Z"],
-    dragLayers: 5
+    amount: 3,
+    move: {
+      size: 22,
+      amount: 1,
+      colors: ["#5BCEFA", "#F5A9B8", "#ffffff", "#F5A9B8", "#5BCEFA"],
+      symbols: ["✦"]
+    },
+    drag: {
+      size: 34,
+      intensity: 4,
+      colors: ["#D42C00", "#FD9855", "#FFFFFF", "#D161A2", "#A20161"],
+      symbols: ["✦", "✧", "★"]
+    }
   },
   peekGifs: {
     path: "newdesign/assets/peekGifs",
