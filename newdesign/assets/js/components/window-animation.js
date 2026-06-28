@@ -252,7 +252,7 @@ export function animateWindowClose(element, done) {
   }, done);
 }
 
-export function animateWindowDragJiggle(element, deltaX, deltaY) {
+export function animateWindowDragJiggle(element, deltaX, deltaY, edgeState = {}) {
   if (element.classList.contains("is-window-animating")) return;
   const anime = window.anime;
   const horizontal = finiteNumber(deltaX, 0);
@@ -264,22 +264,40 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
     last: 0,
     filteredX: 0,
     filteredY: 0,
+    dominant: "horizontal",
     stepper: makeFrameStepper()
   };
-  existing.filteredX = existing.filteredX * 0.78 + horizontal * 0.22;
-  existing.filteredY = existing.filteredY * 0.78 + vertical * 0.22;
+  existing.filteredX = existing.filteredX * 0.84 + horizontal * 0.16;
+  existing.filteredY = existing.filteredY * 0.84 + vertical * 0.16;
   const pullX = existing.filteredX;
   const pullY = existing.filteredY;
   const absX = Math.abs(pullX);
   const absY = Math.abs(pullY);
-  const dominantHorizontal = absX >= absY;
+  if (absX > absY * 1.22) existing.dominant = "horizontal";
+  if (absY > absX * 1.22) existing.dominant = "vertical";
+  const dominantHorizontal = existing.dominant === "horizontal";
   const horizontalPull = dominantHorizontal ? Math.min(1, Math.sqrt(absX / 38)) : 0;
   const verticalPull = dominantHorizontal ? 0 : Math.min(1, Math.sqrt(absY / 38));
-  const targetRotation = dominantHorizontal ? clamp(pullX * 0.14, -2.2, 2.2) : 0;
-  const targetScaleX = dominantHorizontal ? clamp(1 + horizontalPull * 0.2, 1, 1.2) : clamp(1 - verticalPull * 0.2, 0.8, 1);
-  const targetScaleY = dominantHorizontal ? clamp(1 - horizontalPull * 0.05, 0.95, 1) : clamp(1 + verticalPull * 0.08, 1, 1.08);
+  const targetRotation = dominantHorizontal ? clamp(pullX * 0.12, -2, 2) : 0;
+  const horizontalEdgePush = dominantHorizontal && edgeState.horizontalPush;
+  const verticalEdgePush = !dominantHorizontal && edgeState.verticalPush;
+  const targetScaleX = dominantHorizontal
+    ? (horizontalEdgePush ? clamp(1 - horizontalPull * 0.2, 0.8, 1) : clamp(1 + horizontalPull * 0.2, 1, 1.2))
+    : (verticalEdgePush ? clamp(1 + verticalPull * 0.2, 1, 1.2) : clamp(1 - verticalPull * 0.2, 0.8, 1));
+  const targetScaleY = dominantHorizontal
+    ? (horizontalEdgePush ? clamp(1 + horizontalPull * 0.08, 1, 1.08) : clamp(1 - horizontalPull * 0.05, 0.95, 1))
+    : (verticalEdgePush ? clamp(1 - verticalPull * 0.05, 0.95, 1) : clamp(1 + verticalPull * 0.08, 1, 1.08));
+  const origin = edgeState.leftPush
+    ? "0% 12px"
+    : edgeState.rightPush
+      ? "100% 12px"
+      : edgeState.topPush
+        ? "50% 0%"
+        : edgeState.bottomPush
+          ? "50% 100%"
+          : "50% 12px";
   if (!anime) {
-    element.style.transformOrigin = "50% 12px";
+    element.style.transformOrigin = origin;
     element.style.transform = `rotate(${targetRotation.toFixed(3)}deg) scale(${targetScaleX.toFixed(4)}, ${targetScaleY.toFixed(4)})`;
     return;
   }
@@ -288,13 +306,13 @@ export function animateWindowDragJiggle(element, deltaX, deltaY) {
   anime.remove(existing.state);
   existing.last = now;
   element.classList.add("is-drag-jiggling");
-  element.style.transformOrigin = "50% 12px";
+  element.style.transformOrigin = origin;
   existing.animation = anime({
     targets: existing.state,
     r: targetRotation,
     sx: targetScaleX,
     sy: targetScaleY,
-    duration: 320,
+    duration: 360,
     easing: "easeOutCubic",
     update() {
       renderStepped(existing.stepper, element, existing.state);

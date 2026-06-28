@@ -183,15 +183,33 @@ function nestedValue(settings, groupName, names) {
   return undefined;
 }
 
+function firstValue(...items) {
+  for (const item of items) {
+    if (item !== undefined && item !== null && item !== "") return item;
+  }
+  return undefined;
+}
+
+function topLevelModeValue(settings, mode, names) {
+  for (const name of names) {
+    if (mode === "move" && settings[name] !== undefined) return settings[name];
+    const prefixed = `${mode}${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+    if (settings[prefixed] !== undefined) return settings[prefixed];
+  }
+  return undefined;
+}
+
 function modeSettings(settings, mode, fallbacks = {}) {
   const fallbackColors = fallbacks.colors || ["#ffffff"];
   const fallbackSymbols = fallbacks.symbols || ["✦"];
-  const colors = nestedValue(settings, mode, ["colors", "colours"]);
-  const symbols = nestedValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
+  const nestedColors = nestedValue(settings, mode, ["colors", "colours"]);
+  const nestedSymbols = nestedValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
+  const topColors = topLevelModeValue(settings, mode, ["colors", "colours"]);
+  const topSymbols = topLevelModeValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
   const layers = nestedValue(settings, mode, ["layers", "layerCount", "intensity", "amount", "count"]);
   return {
-    colors: normalizeList(colors, fallbackColors),
-    symbols: normalizeList(symbols, fallbackSymbols),
+    colors: normalizeList(firstValue(topColors, nestedColors), fallbackColors),
+    symbols: normalizeList(firstValue(topSymbols, nestedSymbols), fallbackSymbols),
     layers
   };
 }

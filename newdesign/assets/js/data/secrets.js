@@ -23,16 +23,6 @@ export const secrets = {
       {
         path: "newdesign/assets/marquee",
         direction: "vertical",
-        x: 0,
-        blinkMs: 0,
-        speedSeconds: 18,
-        height: 34,
-        gaps: 15,
-        z: 1
-      },
-      {
-        path: "newdesign/assets/marquee",
-        direction: "vertical",
         x: 100,
         blinkMs: 0,
         speedSeconds: 18,
@@ -40,16 +30,6 @@ export const secrets = {
         gaps: 15,
         z: 2
       },
-      {
-        path: "newdesign/assets/marquee",
-        direction: "horizontal",
-        y: 0,
-        blinkMs: 0,
-        speedSeconds: 18,
-        height: 34,
-        gaps: 15,
-        z: 3
-      }
     ]
   },
   randomGifs: {

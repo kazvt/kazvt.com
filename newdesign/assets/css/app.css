@@ -371,7 +371,7 @@ img {
 }
 
 .taskbar {
-  z-index: 70;
+  z-index: 2147483000;
   background-image: linear-gradient(var(--xp-taskbar-gradient));
   border-top: 1px solid #5f9cff;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.38), 0 -1px 4px rgba(0, 0, 0, 0.24);
@@ -554,7 +554,7 @@ img {
 
 .volume-popup {
   position: fixed;
-  z-index: 90;
+  z-index: 2147482990;
   width: 112px;
   min-width: 112px;
   height: 176px;

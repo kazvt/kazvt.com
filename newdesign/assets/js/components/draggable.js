@@ -53,6 +53,36 @@ function placeElement(element, x, y) {
   const top = Math.round(clamp(y, bounds.minY, bounds.maxY));
   element.style.left = `${left}px`;
   element.style.top = `${top}px`;
+  return {
+    desiredX: x,
+    desiredY: y,
+    left,
+    top,
+    bounds,
+    blockedLeft: x < bounds.minX,
+    blockedRight: x > bounds.maxX,
+    blockedTop: y < bounds.minY,
+    blockedBottom: y > bounds.maxY,
+    atLeft: left <= bounds.minX + 1,
+    atRight: left >= bounds.maxX - 1,
+    atTop: top <= bounds.minY + 1,
+    atBottom: top >= bounds.maxY - 1
+  };
+}
+
+function getDragEdgeState(placement, deltaX, deltaY) {
+  const leftPush = placement.blockedLeft || (placement.atLeft && deltaX < 0);
+  const rightPush = placement.blockedRight || (placement.atRight && deltaX > 0);
+  const topPush = placement.blockedTop || (placement.atTop && deltaY < 0);
+  const bottomPush = placement.blockedBottom || (placement.atBottom && deltaY > 0);
+  return {
+    leftPush,
+    rightPush,
+    topPush,
+    bottomPush,
+    horizontalPush: leftPush || rightPush,
+    verticalPush: topPush || bottomPush
+  };
 }
 
 function sizeElement(element, width, height) {
@@ -183,8 +213,10 @@ export function makeDraggable(element, handle) {
     const frameMs = getMotionFrameMs();
     if (frameMs <= 0 || now - drag.lastFrameTime >= frameMs) {
       drag.lastFrameTime = now;
-      placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
-      animateWindowDragJiggle(element, latest.clientX - drag.previousX, latest.clientY - drag.previousY);
+      const deltaX = latest.clientX - drag.previousX;
+      const deltaY = latest.clientY - drag.previousY;
+      const placement = placeElement(element, latest.clientX - drag.offsetX, latest.clientY - drag.offsetY);
+      animateWindowDragJiggle(element, deltaX, deltaY, getDragEdgeState(placement, deltaX, deltaY));
       drag.previousX = latest.clientX;
       drag.previousY = latest.clientY;
     }
