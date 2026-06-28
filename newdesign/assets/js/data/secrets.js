@@ -97,7 +97,7 @@ export const secrets = {
       height: "25%",
       z: 3,
       background: false,
-      frequencyRange: [20, 8000]
+      frequencyRange: [20, 6000]
     },
     {
       id: "scope-top",
