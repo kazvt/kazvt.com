@@ -93,6 +93,27 @@ export function getSecretMotionConfig(secrets) {
   return mergeObjects(motion, fps ? { fps } : {});
 }
 
+function hasOwnValue(object, key) {
+  return object && typeof object === "object" && Object.prototype.hasOwnProperty.call(object, key) && object[key] !== undefined && object[key] !== null && object[key] !== "";
+}
+
+function firstOwnValue(object, keys) {
+  for (const key of keys) {
+    if (hasOwnValue(object, key)) return object[key];
+  }
+  return undefined;
+}
+
+function hasVisualizerList(config) {
+  return Boolean(config && typeof config === "object" && !Array.isArray(config) && firstOwnValue(config, ["visualizers", "visualisers", "items", "entries", "layers", "list"]));
+}
+
 export function getSecretMusicVisualizerConfig(secrets) {
-  return secrets.musicVisualizer || secrets.musicVisualiser || secrets.visualizer || secrets.visualiser || secrets.audioVisualizer || secrets.audioVisualiser || {};
+  const multiple = firstOwnValue(secrets, ["musicVisualizers", "musicVisualisers", "visualizers", "visualisers", "audioVisualizers", "audioVisualisers"]);
+  if (Array.isArray(multiple)) return { enabled: true, visualizers: multiple };
+  if (multiple && typeof multiple === "object") return hasVisualizerList(multiple) && !hasOwnValue(multiple, "enabled") ? { enabled: true, ...multiple } : multiple;
+  const single = firstOwnValue(secrets, ["musicVisualizer", "musicVisualiser", "visualizer", "visualiser", "audioVisualizer", "audioVisualiser"]);
+  if (Array.isArray(single)) return { enabled: true, visualizers: single };
+  if (single && typeof single === "object") return hasVisualizerList(single) && !hasOwnValue(single, "enabled") ? { enabled: true, ...single } : single;
+  return {};
 }

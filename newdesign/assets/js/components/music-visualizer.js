@@ -99,6 +99,17 @@ function percent(value, fallback) {
   return clamp(value === undefined ? fallback : value, 0, 100);
 }
 
+function finiteNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function relativeZ(config) {
+  const value = config.z ?? config.zIndex ?? config.relativeZ ?? config.relative_z ?? config["relative-z"] ?? config.layer ?? config.stack ?? 0;
+  const number = finiteNumber(value, 0);
+  return Math.max(0, Math.round(10000 + number));
+}
+
 function isHorizontal(edge) {
   return edge === "top" || edge === "bottom";
 }
@@ -281,7 +292,25 @@ function drawWinampAvs(context, width, height, frequency, time, options) {
   }
 }
 
-export function createMusicVisualizer(config = {}, music) {
+function visualizerListFrom(config) {
+  if (Array.isArray(config)) return config;
+  if (!config || typeof config !== "object") return [];
+  const keys = ["visualizers", "visualisers", "items", "entries", "layers", "list"];
+  for (const key of keys) {
+    if (Array.isArray(config[key])) return config[key];
+  }
+  return [];
+}
+
+function visualizerDefinitions(config) {
+  const list = visualizerListFrom(config);
+  if (!list.length) return [config];
+  const parent = Array.isArray(config) ? {} : { ...config };
+  ["visualizers", "visualisers", "items", "entries", "layers", "list"].forEach((key) => delete parent[key]);
+  return list.filter((item) => item && typeof item === "object").map((item) => ({ ...parent, ...item }));
+}
+
+function createSingleMusicVisualizer(config = {}, music) {
   const settings = {
     enabled: false,
     style: "wmp-bars",
@@ -300,9 +329,13 @@ export function createMusicVisualizer(config = {}, music) {
   const visualStyle = pickStyle(settings.style || settings.type || settings.mode || settings.preset);
   settings.showBackground = showBackground(settings);
   const canvas = createElement("canvas", { className: "music-visualizer__canvas", ariaHidden: "true" });
-  const label = createElement("div", { className: "music-visualizer__label", text: visualStyle.replace(/-/g, " ") });
+  const labelText = settings.name || settings.title || visualStyle.replace(/-/g, " ");
+  const label = createElement("div", { className: "music-visualizer__label", text: labelText });
   const backgroundClass = settings.showBackground ? "" : " music-visualizer--transparent";
-  const element = createElement("div", { className: `music-visualizer music-visualizer--${edge} music-visualizer--${visualStyle}${backgroundClass}`, ariaHidden: "true" }, [canvas, label]);
+  const customClass = settings.className ? ` ${settings.className}` : "";
+  const element = createElement("div", { className: `music-visualizer music-visualizer--${edge} music-visualizer--${visualStyle}${backgroundClass}${customClass}`, ariaHidden: "true" }, [canvas, label]);
+  if (settings.id || settings.name) element.dataset.visualizer = String(settings.id || settings.name);
+  element.style.zIndex = String(relativeZ(settings));
   let frame = null;
   let stopped = false;
   let lastFrame = 0;
@@ -342,4 +375,16 @@ export function createMusicVisualizer(config = {}, music) {
     events.forEach((name) => window.removeEventListener(name, resume, true));
   };
   return element;
+}
+
+export function createMusicVisualizer(config = {}, music) {
+  const definitions = visualizerDefinitions(config);
+  const visualizers = definitions.map((item) => createSingleMusicVisualizer(item, music)).filter(Boolean);
+  if (!visualizers.length) return null;
+  if (visualizers.length === 1) return visualizers[0];
+  const host = createElement("div", { className: "music-visualizers", ariaHidden: "true" }, visualizers);
+  host.destroy = () => visualizers.forEach((visualizer) => {
+    if (typeof visualizer.destroy === "function") visualizer.destroy();
+  });
+  return host;
 }

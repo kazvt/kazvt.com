@@ -74,18 +74,42 @@ export const secrets = {
     gap: 28,
     edges: ["top", "right", "bottom", "left"]
   },
-  musicVisualizer: {
-    enabled: true,
-    // winamp, avs, scope, bars
-    style: "bars",
-    edge: "top",
-    size: 76,
-    length: "100%",
-    x: 50,
-    y: 50,
-    fftSize: 1024,
-    smoothing: 0.1,
-    background: false,
-    frequencyRange: [20, 8000]
-  }
+  // bars, scope, avs
+  musicVisualizers: [
+    {
+      id: "bass-left",
+      enabled: true,
+      edge: "left",
+      style: "bars",
+      width: "8%",
+      height: "80%",
+      y: 50,
+      z: 0,
+      background: false,
+      frequencyRange: [20, 500]
+    },
+    {
+      id: "avs-bottom",
+      enabled: true,
+      edge: "bottom",
+      style: "avs",
+      width: "100%",
+      height: "16%",
+      x: 50,
+      z: 3,
+      background: false,
+      frequencyRange: [20, 8000]
+    },
+    {
+      id: "scope-top",
+      enabled: true,
+      edge: "top",
+      style: "scope",
+      width: "100%",
+      height: "10%",
+      z: 6,
+      background: true,
+      frequencyRange: [20, 15000]
+    }
+  ]
 };
