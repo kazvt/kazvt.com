@@ -92,6 +92,7 @@ export const secrets = {
       width: "15%",
       height: "100%",
       y: 0,
+      smoothing: 0.1,
       z: 0,
       background: false,
       frequencyRange: [20, 500]
@@ -103,6 +104,7 @@ export const secrets = {
       style: "bars",
       width: "100%",
       height: "25%",
+      smoothing: 0.1,
       z: 3,
       background: false,
       frequencyRange: [20, 6000]
