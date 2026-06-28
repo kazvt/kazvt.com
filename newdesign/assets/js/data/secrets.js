@@ -76,14 +76,15 @@ export const secrets = {
   },
   musicVisualizer: {
     enabled: true,
+    // winamp, avs, scope, bars
     style: "winamp-avs",
     edge: "top",
     size: 76,
     length: "100%",
     x: 50,
     y: 50,
-    fftSize: 512,
-    smoothing: 0.3,
+    fftSize: 1024,
+    smoothing: 0.1,
     background: false,
     frequencyRange: [20, 8000]
   }
