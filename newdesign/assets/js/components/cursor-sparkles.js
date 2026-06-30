@@ -24,6 +24,12 @@ function normalizeSize(value, fallback = 21) {
   return Math.max(1, Math.min(128, number));
 }
 
+function normalizeRange(value, fallback, min, max) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(min, Math.min(max, number));
+}
+
 function localFairyDustCursor(options = {}) {
   const possibleColors = normalizeList(options.colors, ["#D61C59", "#E7D84B", "#1B8798"]);
   const hasWrapperEl = options.element;
@@ -36,6 +42,8 @@ function localFairyDustCursor(options = {}) {
   const size = normalizeSize(options.size ?? options.sparkleSize ?? options.particleSize ?? options.fontSize ?? options.fairySize, 21);
   const amount = normalizeCount(options.amount ?? options.intensity ?? options.particleCount ?? options.particles ?? options.density, 1, 24);
   const font = String(options.font || `${size}px ${options.fontFamily || "serif"}`);
+  const shadowBlur = normalizeRange(options.shadowBlur ?? options.blur ?? options.glowBlur, Math.max(1.2, size * 0.16), 0, 48);
+  const shadowColor = options.shadowColor || options.shadow || options.glowColor || "rgba(0, 0, 0, 0.42)";
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let width = window.innerWidth;
   let height = window.innerHeight;
@@ -116,15 +124,22 @@ function localFairyDustCursor(options = {}) {
       const measurements = measureContext.measureText(char);
       const imageCanvas = document.createElement("canvas");
       const imageContext = imageCanvas.getContext("2d");
-      const imageWidth = Math.max(1, Math.ceil(measurements.width || size));
-      const imageHeight = Math.max(1, Math.ceil((measurements.actualBoundingBoxAscent || size * 0.75) + (measurements.actualBoundingBoxDescent || size * 0.25)));
+      const textWidth = Math.max(1, Math.ceil(measurements.width || size));
+      const textHeight = Math.max(1, Math.ceil((measurements.actualBoundingBoxAscent || size * 0.75) + (measurements.actualBoundingBoxDescent || size * 0.25)));
+      const padding = Math.ceil(shadowBlur * 2 + size * 0.04);
+      const imageWidth = textWidth + padding * 2;
+      const imageHeight = textHeight + padding * 2;
       imageCanvas.width = imageWidth;
       imageCanvas.height = imageHeight;
       imageContext.fillStyle = color;
       imageContext.textAlign = "center";
       imageContext.font = font;
-      imageContext.textBaseline = "middle";
-      imageContext.fillText(char, imageWidth / 2, (measurements.actualBoundingBoxAscent || imageHeight / 2));
+      imageContext.textBaseline = "alphabetic";
+      imageContext.shadowColor = shadowColor;
+      imageContext.shadowBlur = shadowBlur;
+      imageContext.shadowOffsetX = 0;
+      imageContext.shadowOffsetY = 0;
+      imageContext.fillText(char, imageWidth / 2, padding + (measurements.actualBoundingBoxAscent || size * 0.75));
       canvImages.push(imageCanvas);
     });
   };
@@ -324,7 +339,9 @@ function makeEffect(Constructor, settings, index = 0, fps = 60, mode = "move") {
       size: settings.size,
       amount: settings.amount,
       font: settings.font,
-      fontFamily: settings.fontFamily
+      fontFamily: settings.fontFamily,
+      shadowBlur: settings.shadowBlur,
+      shadowColor: settings.shadowColor
     });
     const canvases = [...document.querySelectorAll("canvas")].filter((canvas) => !before.has(canvas));
     canvases.forEach((canvas) => styleCanvas(canvas, mode));
@@ -382,12 +399,16 @@ function modeSettings(settings, mode, fallbacks = {}) {
   const nestedAmount = nestedValue(settings, mode, ["amount", "intensity", "particleCount", "particles", "density", "sparkleAmount", "sparkleIntensity"]);
   const nestedFont = nestedValue(settings, mode, ["font"]);
   const nestedFontFamily = nestedValue(settings, mode, ["fontFamily", "family"]);
+  const nestedShadowBlur = nestedValue(settings, mode, ["shadowBlur", "blur", "glowBlur"]);
+  const nestedShadowColor = nestedValue(settings, mode, ["shadowColor", "shadow", "glowColor"]);
   const topColors = topLevelModeValue(settings, mode, ["colors", "colours"]);
   const topSymbols = topLevelModeValue(settings, mode, ["symbols", "fairySymbols", "fairySymbol"]);
   const topSize = topLevelModeValue(settings, mode, ["size", "sparkleSize", "particleSize", "fontSize", "fairySize"]);
   const topAmount = topLevelModeValue(settings, mode, ["amount", "intensity", "particleCount", "particles", "density", "sparkleAmount", "sparkleIntensity"]);
   const topFont = topLevelModeValue(settings, mode, ["font"]);
   const topFontFamily = topLevelModeValue(settings, mode, ["fontFamily", "family"]);
+  const topShadowBlur = topLevelModeValue(settings, mode, ["shadowBlur", "blur", "glowBlur"]);
+  const topShadowColor = topLevelModeValue(settings, mode, ["shadowColor", "shadow", "glowColor"]);
   const layers = nestedValue(settings, mode, ["layers", "layerCount", "count"]);
   return {
     colors: normalizeList(firstValue(nestedColors, topColors), fallbackColors),
@@ -396,6 +417,8 @@ function modeSettings(settings, mode, fallbacks = {}) {
     amount: normalizeCount(firstValue(nestedAmount, topAmount, fallbacks.amount, settings.amount ?? settings.intensity ?? settings.particleCount ?? settings.particles ?? settings.density ?? settings.sparkleAmount ?? settings.sparkleIntensity), 1, 24),
     font: firstValue(nestedFont, topFont, settings.font),
     fontFamily: firstValue(nestedFontFamily, topFontFamily, settings.fontFamily),
+    shadowBlur: firstValue(nestedShadowBlur, topShadowBlur, settings.shadowBlur ?? settings.blur ?? settings.glowBlur),
+    shadowColor: firstValue(nestedShadowColor, topShadowColor, settings.shadowColor ?? settings.shadow ?? settings.glowColor),
     layers
   };
 }

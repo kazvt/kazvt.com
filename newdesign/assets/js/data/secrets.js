@@ -34,9 +34,9 @@ export const secrets = {
   },
   randomGifs: {
     path: "newdesign/assets/randomGifs",
-    spawnEveryMs: 500,
+    spawnEveryMs: 250,
     initialDelayMs: 1200,
-    maxOnScreen: 25,
+    maxOnScreen: 35,
     minHeight: 150,
     maxHeight: 250,
     holdMs: 0,
@@ -45,16 +45,18 @@ export const secrets = {
     shadows: [
       { x: 15, y: 15, blur: 0, color: "#000000" },
       { x: 10, y: 10, blur: 0, color: "#ff00ff" },
+      { x: 10, y: 10, blur: 0, color: "#15ff00" },
+      { x: 10, y: 10, blur: 0, color: "#0011ff" },
       {
         layers: [
-          { x: 15, y: 15, blur: 0, color: "#00ffff" },
-          { x: 22, y: 22, blur: 0, color: "#000000" }
+          { x: 25, y: 25, blur: 0, color: "#000000" },
+          { x: 15, y: 15, blur: 0, color: "#00ffff" }
         ]
       }
     ]
   },
-  
-  
+
+
   cursorSparkles: {
     enabled: true,
     amount: 3,
@@ -112,12 +114,12 @@ export const secrets = {
       frequencyRange: [20, 6000]
     },
     {
-      id: "scope-top",
+      id: "scope-bottom",
       enabled: true,
       edge: "bottom",
       style: "scope",
       width: "100%",
-      height: "10%",
+      height: "13%",
       z: 6,
       smoothing: 0.1,
       fftSize: 1024,
