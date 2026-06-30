@@ -390,12 +390,12 @@ function modeSettings(settings, mode, fallbacks = {}) {
   const topFontFamily = topLevelModeValue(settings, mode, ["fontFamily", "family"]);
   const layers = nestedValue(settings, mode, ["layers", "layerCount", "count"]);
   return {
-    colors: normalizeList(firstValue(topColors, nestedColors), fallbackColors),
-    symbols: normalizeList(firstValue(topSymbols, nestedSymbols), fallbackSymbols),
-    size: normalizeSize(firstValue(topSize, nestedSize, fallbacks.size, settings.size ?? settings.sparkleSize ?? settings.particleSize ?? settings.fontSize ?? settings.fairySize), 21),
-    amount: normalizeCount(firstValue(topAmount, nestedAmount, fallbacks.amount, settings.amount ?? settings.intensity ?? settings.particleCount ?? settings.particles ?? settings.density ?? settings.sparkleAmount ?? settings.sparkleIntensity), 1, 24),
-    font: firstValue(topFont, nestedFont, settings.font),
-    fontFamily: firstValue(topFontFamily, nestedFontFamily, settings.fontFamily),
+    colors: normalizeList(firstValue(nestedColors, topColors), fallbackColors),
+    symbols: normalizeList(firstValue(nestedSymbols, topSymbols), fallbackSymbols),
+    size: normalizeSize(firstValue(nestedSize, topSize, fallbacks.size, settings.size ?? settings.sparkleSize ?? settings.particleSize ?? settings.fontSize ?? settings.fairySize), 21),
+    amount: normalizeCount(firstValue(nestedAmount, topAmount, fallbacks.amount, settings.amount ?? settings.intensity ?? settings.particleCount ?? settings.particles ?? settings.density ?? settings.sparkleAmount ?? settings.sparkleIntensity), 1, 24),
+    font: firstValue(nestedFont, topFont, settings.font),
+    fontFamily: firstValue(nestedFontFamily, topFontFamily, settings.fontFamily),
     layers
   };
 }
