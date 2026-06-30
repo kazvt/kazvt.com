@@ -141,7 +141,9 @@ export const secrets = {
       background: false,
       frequencyRange: [20, 7000],
       colors: {
-        line: "#D42C00",
+        low: "#D42C00",
+        mid: "#D42C00",
+        high: "#D42C00",
         grid: "rgba(0,0,0,0)",
         border: "#b9b9b9",
         innerBorder: "#4b4b4b"
@@ -160,7 +162,9 @@ export const secrets = {
       background: false,
       frequencyRange: [20, 6500],
       colors: {
-        line: "#FD9855",
+        low: "#FD9855",
+        mid: "#FD9855",
+        high: "#FD9855",
         grid: "rgba(0,0,0,0)",
         border: "#b9b9b9",
         innerBorder: "#4b4b4b"
@@ -179,7 +183,9 @@ export const secrets = {
       background: false,
       frequencyRange: [20, 6000],
       colors: {
-        line: "#FFFFFF",
+        low: "#FFFFFF",
+        mid: "#FFFFFF",
+        high: "#FFFFFF",
         grid: "rgba(0,0,0,0)",
         border: "#b9b9b9",
         innerBorder: "#4b4b4b"
@@ -198,7 +204,9 @@ export const secrets = {
       background: false,
       frequencyRange: [20, 5500],
       colors: {
-        line: "#D161A2",
+        low: "#D161A2",
+        mid: "#D161A2",
+        high: "#D161A2",
         grid: "rgba(0,0,0,0)",
         border: "#b9b9b9",
         innerBorder: "#4b4b4b"
@@ -217,7 +225,9 @@ export const secrets = {
       background: false,
       frequencyRange: [20, 5000],
       colors: {
-        line: "#A20161",
+        low: "#A20161",
+        mid: "#A20161",
+        high: "#A20161",
         grid: "rgba(0,0,0,0)",
         border: "#b9b9b9",
         innerBorder: "#4b4b4b"
