@@ -44,13 +44,18 @@ export const secrets = {
     settleOutMs: 700,
     shadows: [
       { x: 15, y: 15, blur: 0, color: "#000000" },
-      { x: 10, y: 10, blur: 0, color: "#ff00ff" },
-      { x: 10, y: 10, blur: 0, color: "#15ff00" },
-      { x: 10, y: 10, blur: 0, color: "#0011ff" },
+      { x: 10, y: 10, blur: 0, color: "#FFFFFF" },
+      { x: 10, y: 10, blur: 0, color: "#A20161" },
+      { x: 10, y: 10, blur: 0, color: "#D161A2" },
+      { x: 10, y: 10, blur: 0, color: "#D42C00" },
+      { x: 10, y: 10, blur: 0, color: "#FD9855" },
+      { x: 10, y: 10, blur: 0, color: "#5BCEFA" },
+      { x: 10, y: 10, blur: 0, color: "#F5A9B8" },
       {
         layers: [
-          { x: 25, y: 25, blur: 0, color: "#000000" },
-          { x: 15, y: 15, blur: 0, color: "#00ffff" }
+          { x: 30, y: 30, blur: 0, color: "#000000" },
+          { x: 20, y: 20, blur: 0, color: "#5BCEFA" }
+          { x: 10, y: 10, blur: 0, color: "#F5A9B8" }
         ]
       }
     ]
