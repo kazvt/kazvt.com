@@ -1174,12 +1174,13 @@ img {
   z-index: 2;
   pointer-events: none;
   overflow: hidden;
-  background: #000034;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-right: 2px solid #404040;
-  border-bottom: 2px solid #404040;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #000;
+  box-sizing: border-box;
+  background: var(--music-visualizer-background, #000034);
+  border-top: 2px solid var(--music-visualizer-frame-light, #fff);
+  border-left: 2px solid var(--music-visualizer-frame-light, #fff);
+  border-right: 2px solid var(--music-visualizer-frame-dark, #404040);
+  border-bottom: 2px solid var(--music-visualizer-frame-dark, #404040);
+  box-shadow: inset 1px 1px 0 var(--music-visualizer-frame-mid, #808080), inset -1px -1px 0 var(--music-visualizer-frame-shadow, #000);
   image-rendering: pixelated;
 }
 
@@ -1205,9 +1206,9 @@ img {
   left: 4px;
   top: 3px;
   padding: 1px 3px;
-  color: #fff;
-  background: #000;
-  border: 1px solid #808080;
+  color: var(--music-visualizer-label-text, #fff);
+  background: var(--music-visualizer-label-background, #000);
+  border: 1px solid var(--music-visualizer-label-border, #808080);
   font-family: var(--font-ui);
   font-size: 10px;
   line-height: 1;

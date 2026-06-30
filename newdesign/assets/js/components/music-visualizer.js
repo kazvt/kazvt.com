@@ -106,6 +106,26 @@ function colorSetting(settings, keys, fallback) {
   return fallback;
 }
 
+function maybeColorSetting(settings, keys) {
+  return colorSetting(settings, keys, "");
+}
+
+function setCssColor(element, name, value) {
+  const color = colorValue(value);
+  if (color) element.style.setProperty(name, color);
+}
+
+function applyFrameColors(element, settings) {
+  setCssColor(element, "--music-visualizer-background", maybeColorSetting(settings, ["frameBackground", "frameBackgroundColor", "chromeBackground", "chromeBackgroundColor", "windowBackground", "windowBackgroundColor", "background", "backgroundColor", "bg", "fill"]));
+  setCssColor(element, "--music-visualizer-frame-light", maybeColorSetting(settings, ["frameLight", "frameLightColor", "light", "lightColor", "highlight", "highlightColor", "bevelLight", "bevelLightColor", "topLeft", "topLeftColor"]));
+  setCssColor(element, "--music-visualizer-frame-dark", maybeColorSetting(settings, ["frameDark", "frameDarkColor", "dark", "darkColor", "shadow", "shadowColor", "bevelDark", "bevelDarkColor", "bottomRight", "bottomRightColor"]));
+  setCssColor(element, "--music-visualizer-frame-mid", maybeColorSetting(settings, ["frameMid", "frameMidColor", "midFrame", "midFrameColor", "bevelMid", "bevelMidColor", "innerHighlight", "innerHighlightColor"]));
+  setCssColor(element, "--music-visualizer-frame-shadow", maybeColorSetting(settings, ["frameShadow", "frameShadowColor", "deepShadow", "deepShadowColor", "outerShadow", "outerShadowColor"]));
+  setCssColor(element, "--music-visualizer-label-text", maybeColorSetting(settings, ["labelText", "labelTextColor", "labelColor", "text", "textColor"]));
+  setCssColor(element, "--music-visualizer-label-background", maybeColorSetting(settings, ["labelBackground", "labelBackgroundColor", "labelBg"]));
+  setCssColor(element, "--music-visualizer-label-border", maybeColorSetting(settings, ["labelBorder", "labelBorderColor"]));
+}
+
 function firstNumber(...values) {
   for (const value of values) {
     if (value === undefined || value === null || value === "") continue;
@@ -247,7 +267,7 @@ function clearFrame(context, width, height, options) {
 
 function drawWmpBars(context, width, height, data, options) {
   clearFrame(context, width, height, options);
-  const padding = 7;
+  const padding = options.showBackground ? 7 : 0;
   const innerWidth = Math.max(1, width - padding * 2);
   const innerHeight = Math.max(1, height - padding * 2);
   const count = Math.max(8, Math.min(64, Math.floor(innerWidth / 8)));
@@ -271,21 +291,24 @@ function drawWmpBars(context, width, height, data, options) {
 
 function drawWmpScope(context, width, height, data, options) {
   clearFrame(context, width, height, { ...options, background: backgroundColor(options, "#000000") });
-  const padding = 8;
+  const padding = options.showBackground ? 8 : 0;
   const mid = height / 2;
-  context.strokeStyle = colorSetting(options, ["grid", "gridColor", "scopeGrid", "scopeGridColor"], "#002e00");
-  context.lineWidth = 1;
-  for (let x = padding; x < width - padding; x += 12) {
-    context.beginPath();
-    context.moveTo(x + 0.5, padding);
-    context.lineTo(x + 0.5, height - padding);
-    context.stroke();
-  }
-  for (let y = padding; y < height - padding; y += 10) {
-    context.beginPath();
-    context.moveTo(padding, y + 0.5);
-    context.lineTo(width - padding, y + 0.5);
-    context.stroke();
+  const gridVisible = options.showBackground && booleanSetting(options.gridEnabled ?? options.showGrid ?? options.gridVisible ?? options.hasGrid, true);
+  if (gridVisible) {
+    context.strokeStyle = colorSetting(options, ["grid", "gridColor", "scopeGrid", "scopeGridColor"], "#002e00");
+    context.lineWidth = 1;
+    for (let x = padding; x < width - padding; x += 12) {
+      context.beginPath();
+      context.moveTo(x + 0.5, padding);
+      context.lineTo(x + 0.5, height - padding);
+      context.stroke();
+    }
+    for (let y = padding; y < height - padding; y += 10) {
+      context.beginPath();
+      context.moveTo(padding, y + 0.5);
+      context.lineTo(width - padding, y + 0.5);
+      context.stroke();
+    }
   }
   context.strokeStyle = colorSetting(options, ["line", "lineColor", "scopeLine", "scopeLineColor", "wave", "waveColor"], "#00ff00");
   context.lineWidth = 2;
@@ -384,6 +407,7 @@ function createSingleMusicVisualizer(config = {}, music) {
   const backgroundClass = settings.showBackground ? "" : " music-visualizer--transparent";
   const customClass = settings.className ? ` ${settings.className}` : "";
   const element = createElement("div", { className: `music-visualizer music-visualizer--${edge} music-visualizer--${visualStyle}${backgroundClass}${customClass}`, ariaHidden: "true" }, [canvas, label]);
+  applyFrameColors(element, settings);
   if (settings.id || settings.name) element.dataset.visualizer = String(settings.id || settings.name);
   element.style.zIndex = String(relativeZ(settings));
   let frame = null;

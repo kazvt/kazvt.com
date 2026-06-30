@@ -99,7 +99,15 @@ export const secrets = {
       smoothing: 0.1,
       z: 0,
       background: false,
-      frequencyRange: [20, 500]
+      frequencyRange: [20, 500],
+      colors: {
+        waveA: "#F5A9B8",
+        waveB: "#5BCEFA",
+        barA: "#F5A9B8",
+        barB: "#5BCEFA",
+        border: "#ffffff",
+        innerBorder: "#4b4b4b"
+      }
     },
     {
       id: "avs-top",
@@ -111,20 +119,109 @@ export const secrets = {
       smoothing: 0.1,
       z: 3,
       background: false,
-      frequencyRange: [20, 6000]
+      frequencyRange: [20, 6000],
+      colors: {
+        low: "#5BCEFA",
+        mid: "#F5A9B8",
+        high: "#ffffff",
+        border: "#b9b9b9",
+        innerBorder: "#4b4b4b"
+      }
     },
     {
       id: "scope-bottom",
       enabled: true,
       edge: "bottom",
-      style: "scope",
+      style: "avs",
       width: "100%",
-      height: "13%",
+      height: "30%",
       z: 6,
       smoothing: 0.1,
       fftSize: 1024,
       background: false,
-      frequencyRange: [20, 6000]
+      frequencyRange: [20, 7000],
+      colors: {
+        line: "#D42C00",
+        grid: "rgba(0,0,0,0)",
+        border: "#b9b9b9",
+        innerBorder: "#4b4b4b"
+      }
+    },
+    {
+      id: "scope-bottom2",
+      enabled: true,
+      edge: "bottom",
+      style: "avs",
+      width: "100%",
+      height: "28%",
+      z: 6,
+      smoothing: 0.1,
+      fftSize: 1024,
+      background: false,
+      frequencyRange: [20, 6500],
+      colors: {
+        line: "#FD9855",
+        grid: "rgba(0,0,0,0)",
+        border: "#b9b9b9",
+        innerBorder: "#4b4b4b"
+      }
+    },
+    {
+      id: "scope-bottom3",
+      enabled: true,
+      edge: "bottom",
+      style: "avs",
+      width: "100%",
+      height: "26%",
+      z: 6,
+      smoothing: 0.1,
+      fftSize: 1024,
+      background: false,
+      frequencyRange: [20, 6000],
+      colors: {
+        line: "#FFFFFF",
+        grid: "rgba(0,0,0,0)",
+        border: "#b9b9b9",
+        innerBorder: "#4b4b4b"
+      }
+    },
+    {
+      id: "scope-bottom4",
+      enabled: true,
+      edge: "bottom",
+      style: "avs",
+      width: "100%",
+      height: "24%",
+      z: 6,
+      smoothing: 0.1,
+      fftSize: 1024,
+      background: false,
+      frequencyRange: [20, 5500],
+      colors: {
+        line: "#D161A2",
+        grid: "rgba(0,0,0,0)",
+        border: "#b9b9b9",
+        innerBorder: "#4b4b4b"
+      }
+    },
+    {
+      id: "scope-bottom5",
+      enabled: true,
+      edge: "bottom",
+      style: "avs",
+      width: "100%",
+      height: "22%",
+      z: 6,
+      smoothing: 0.1,
+      fftSize: 1024,
+      background: false,
+      frequencyRange: [20, 5000],
+      colors: {
+        line: "#A20161",
+        grid: "rgba(0,0,0,0)",
+        border: "#b9b9b9",
+        innerBorder: "#4b4b4b"
+      }
     }
   ]
 };
