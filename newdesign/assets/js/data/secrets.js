@@ -54,6 +54,7 @@ export const secrets = {
     ]
   },
   
+  
   cursorSparkles: {
     enabled: true,
     amount: 3,
