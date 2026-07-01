@@ -13,6 +13,12 @@ function mergeObjects(...items) {
   }, {});
 }
 
+function asFilesConfig(value) {
+  if (Array.isArray(value)) return { files: value };
+  if (typeof value === "string" && value.trim()) return { files: value };
+  return value || {};
+}
+
 function repositoryFrom(...items) {
   for (const item of items) {
     if (item && typeof item.repository === "string" && item.repository.trim()) return { repository: item.repository };
@@ -67,7 +73,7 @@ export function getSecretMarqueeConfig(secrets) {
 
 export function getSecretRandomGifsConfig(secrets) {
   const music = secrets.music || {};
-  const randomGifs = secrets.randomGifs || secrets.randomGif || secrets.desktopGifs || secrets.wallpaperGifs || {};
+  const randomGifs = asFilesConfig(secrets.randomGifs || secrets.randomGif || secrets.desktopGifs || secrets.wallpaperGifs || {});
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch, githubApiFrom(secrets, randomGifs));
@@ -76,8 +82,8 @@ export function getSecretRandomGifsConfig(secrets) {
 
 export function getSecretPeekGifsConfig(secrets) {
   const music = secrets.music || {};
-  const edgePeek = secrets.edgePeek || {};
-  const peekGifs = secrets.peekGifs || secrets.peekGif || secrets.edgePeekGifs || secrets.edgeGifs || {};
+  const edgePeek = asFilesConfig(secrets.edgePeek || {});
+  const peekGifs = asFilesConfig(secrets.peekGifs || secrets.peekGif || secrets.edgePeekGifs || secrets.edgeGifs || {});
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), edgePeek, peekGifs, rootRepository, rootBranch, githubApiFrom(secrets, edgePeek, peekGifs));

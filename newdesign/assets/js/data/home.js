@@ -16,7 +16,7 @@ export const home = {
     fps: 24
   },
   edgePeek: {
-    src: "assets/img/osaka.gif",
+    src: "assets/peekGifs/osaka.gif",
     alt: "Osaka peeking from the desktop edge",
     intervalMs: 10000,
     visibleMs: 3000,
