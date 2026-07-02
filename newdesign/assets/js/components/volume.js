@@ -1,18 +1,18 @@
 import { createElement } from "./dom.js";
 
 const volumePanelMax = 100;
-const volumeInternalMax = 10;
+const volumeInternalMax = 5;
 
 function clampPanelVolume(value) {
   return Math.min(Math.max(Math.round(Number(value) || 0), 0), volumePanelMax);
 }
 
 function panelToInternalVolume(value) {
-  return Math.min(Math.max(clampPanelVolume(value) / 10, 0), volumeInternalMax);
+  return Math.min(Math.max(clampPanelVolume(value) / 20, 0), volumeInternalMax);
 }
 
 function internalToPanelVolume(value) {
-  return clampPanelVolume((Number(value) || 0) * 10);
+  return clampPanelVolume((Number(value) || 0) * 20);
 }
 
 function createVolumePopup(initialVolume, initialMuted) {
