@@ -11,14 +11,16 @@ import { createImageMarquee } from "./components/image-marquee.js";
 import { createRandomGifs } from "./components/random-gifs.js";
 import { createMusicVisualizer } from "./components/music-visualizer.js";
 import { startCursorSparkles } from "./components/cursor-sparkles.js";
+import { applyTextSelectionTheme } from "./components/text-selection.js";
 import { animateWindowClose, animateWindowFlip, animateWindowMinimize, animateWindowRestoreFromTaskbar } from "./components/window-animation.js";
-import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretPeekGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig, getSecretMusicVisualizerConfig } from "./components/private-config.js";
+import { loadSecrets, getSecretTitle, getSecretMusicConfig, getSecretMarqueeConfig, getSecretRandomGifsConfig, getSecretPeekGifsConfig, getSecretMotionConfig, getSecretCursorSparklesConfig, getSecretMusicVisualizerConfig, getSecretTextSelectionConfig } from "./components/private-config.js";
 import { setMotionFps } from "./components/motion.js";
 import { home } from "./data/home.js";
 
 const app = document.querySelector("#app");
 const secrets = await loadSecrets();
 const motionConfig = getSecretMotionConfig(secrets);
+applyTextSelectionTheme({ ...(home.textSelection || {}), ...getSecretTextSelectionConfig(secrets) });
 const siteFps = setMotionFps(motionConfig.fps || (home.motion && home.motion.fps) || 24);
 const siteTitle = createSiteTitle();
 const marqueeHost = createElement("div", { className: "image-marquee-host" });

@@ -238,5 +238,9 @@ export const secrets = {
         innerBorder: "#4b4b4b"
       }
     }
-  ]
+  ],
+  textSelection: {
+    direction: "90deg",
+    colors: ["#5BCEFA", "#F5A9B8", "#ffffff", "#F5A9B8", "#5BCEFA"]
+  }
 };

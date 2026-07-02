@@ -22,6 +22,10 @@
   --xp-task-shadow: rgb(0 0 0 / 30%) -1px 0 inset, rgb(255 255 255 / 20%) 1px 1px 1px inset;
   --xp-task-shadow-active: rgb(0 0 0 / 20%) 0 0 1px 1px inset, rgb(0 0 0 / 70%) 1px 0 1px inset;
   --window-drop-shadow: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.32));
+  --text-selection-gradient: linear-gradient(90deg, #5BCEFA, #F5A9B8, #ffffff, #F5A9B8, #5BCEFA);
+  --text-selection-opacity: 1;
+  --text-selection-color: inherit;
+  --text-selection-fallback: rgba(91, 206, 250, 0.55);
   --cursor-default: url("../cursors/default_arrow.cur");
   --cursor-link: url("../cursors/default_link.cur");
   --cursor-move: url("../cursors/default_move.cur");
@@ -129,13 +133,13 @@ body.is-window-resizing * {
 }
 
 .notepad-page::selection {
-  background: Highlight;
-  color: HighlightText;
+  background: transparent;
+  color: var(--text-selection-color);
 }
 
 .notepad-page::-moz-selection {
-  background: Highlight;
-  color: HighlightText;
+  background: transparent;
+  color: var(--text-selection-color);
 }
 
 img {
@@ -150,6 +154,8 @@ img {
 .window-resize-handle,
 .notepad-menu,
 .notepad-menu *,
+.notepad-selection-box,
+.notepad-selection-mirror,
 .notepad-page,
 .taskbar,
 .taskbar * {
@@ -348,20 +354,34 @@ img {
   text-decoration: underline;
 }
 
-.notepad-page {
+.notepad-selection-box {
+  position: relative;
   width: 100%;
-  height: auto;
   min-height: 0;
   max-height: 100%;
   flex: 1 1 0;
+  margin: 0;
+  overflow: hidden;
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
+  background: #fff;
+}
+
+.notepad-page {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
   margin: 0;
   padding: 9px 10px;
   resize: none;
   border: 0;
   border-radius: 0;
   outline: none;
-  box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
-  background: #fff;
+  box-shadow: none;
+  background: transparent;
   color: #111;
   font-family: var(--font-notepad);
   font-size: 16px;
@@ -372,6 +392,41 @@ img {
   -moz-osx-font-smoothing: unset;
   font-smooth: never;
   text-rendering: optimizeSpeed;
+}
+
+.notepad-selection-mirror {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  margin: 0;
+  border: 0 solid transparent;
+  color: transparent;
+  background: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.notepad-selection-spacer {
+  color: transparent;
+}
+
+.notepad-selection-highlight {
+  color: transparent;
+  background-color: var(--text-selection-fallback);
+  background-image: var(--text-selection-gradient);
+  background-attachment: fixed;
+  background-position: 0 0;
+  background-size: 100vw 100vh;
+  opacity: var(--text-selection-opacity);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .status-bar {

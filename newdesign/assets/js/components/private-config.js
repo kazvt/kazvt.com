@@ -123,3 +123,7 @@ export function getSecretMusicVisualizerConfig(secrets) {
   if (single && typeof single === "object") return hasVisualizerList(single) && !hasOwnValue(single, "enabled") ? { enabled: true, ...single } : single;
   return {};
 }
+
+export function getSecretTextSelectionConfig(secrets) {
+  return secrets.textSelection || secrets.selection || secrets.selectionGradient || secrets.highlightSelection || secrets.textHighlight || {};
+}

@@ -53,6 +53,11 @@ export const home = {
     length: "100%",
     fps: 24
   },
+  textSelection: {
+    direction: "90deg",
+    colors: ["#5BCEFA", "#F5A9B8", "#ffffff", "#F5A9B8", "#5BCEFA"],
+    opacity: 1
+  },
   cursorSparkles: {
     enabled: true,
     move: {
