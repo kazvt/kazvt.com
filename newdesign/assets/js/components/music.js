@@ -165,11 +165,13 @@ async function resolveMusicFiles(config) {
   return [];
 }
 
-function randomIndex(length, currentIndex) {
+function randomIndex(length) {
+  return length ? Math.floor(Math.random() * length) : 0;
+}
+
+function nextSequentialIndex(length, currentIndex) {
   if (length < 2) return 0;
-  let next = Math.floor(Math.random() * length);
-  while (next === currentIndex) next = Math.floor(Math.random() * length);
-  return next;
+  return (Math.max(Number(currentIndex) || 0, 0) + 1) % length;
 }
 
 function createUnlockBinder(play, isPlaying) {
@@ -364,10 +366,11 @@ export async function startMusic(config = {}) {
   unlockBinder.start();
 
   function rememberChoice(index) {
-    if (files[index]) setCookieValue(choiceCookie, musicKey(files[index]));
+    if (files[index] && config.rememberChoice === true) setCookieValue(choiceCookie, musicKey(files[index]));
   }
 
   function rememberedIndex() {
+    if (config.rememberChoice !== true) return -1;
     const remembered = decodeURIComponent(getCookieValue(choiceCookie) || "").toLowerCase();
     if (!remembered) return -1;
     return files.findIndex((file) => musicKey(file) === remembered);
@@ -375,7 +378,7 @@ export async function startMusic(config = {}) {
 
   function chooseInitialIndex() {
     const remembered = rememberedIndex();
-    return remembered >= 0 ? remembered : randomIndex(files.length, currentIndex);
+    return remembered >= 0 ? remembered : randomIndex(files.length);
   }
 
   function loadPlayer(player, index) {
@@ -389,7 +392,7 @@ export async function startMusic(config = {}) {
   }
 
   function prepareNextPlayer() {
-    const nextIndex = randomIndex(files.length, currentIndex);
+    const nextIndex = nextSequentialIndex(files.length, currentIndex);
     loadPlayer(standby, nextIndex);
     return nextIndex;
   }

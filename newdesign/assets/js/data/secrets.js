@@ -6,7 +6,8 @@ export const secrets = {
   music: {
     repository: "kazvt/kazvt.com",
     branch: "main",
-    path: "newdesign/assets/music"
+    path: "newdesign/assets/music",
+    rememberChoice: true
   },
   marquee: {
     marquees: [
