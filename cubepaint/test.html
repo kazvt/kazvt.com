@@ -444,6 +444,11 @@
             z-index: 2;
         }
 
+        #paintCanvas:focus,
+        #guideCanvas:focus {
+            outline: none;
+        }
+
         .toolbar {
             border-top: 3px solid var(--line);
             background: var(--paper);
@@ -708,6 +713,60 @@
             gap: 5px;
             align-items: start;
         }
+
+        .transparent-color-btn {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            min-height: 28px;
+            border: 2px solid var(--line);
+            background:
+                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+                var(--checker2);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--ink);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .transparent-color-btn::after {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            border-top: 3px solid var(--accent);
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+
+        .transparent-color-btn:hover,
+        .transparent-color-btn.active {
+            outline: 2px solid var(--paper);
+            outline-offset: -5px;
+        }
+
+        .transparent-color-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--ink);
+        }
+
+        .color-picker-chip.transparent,
+        .color-swatch.transparent,
+        .history-swatch.transparent,
+        .quick-swatch.transparent {
+            background:
+                linear-gradient(45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker1) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker1) 75%),
+                var(--checker2) !important;
+            background-size: 10px 10px !important;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0 !important;
+        }
+
 
         .history-swatch {
             width: 100%;
@@ -3017,6 +3076,19 @@
             height: 20px !important;
         }
 
+        .shape-type-mini-icon {
+            width: 20px !important;
+            height: 20px !important;
+            display: grid;
+            place-items: center;
+            justify-self: start;
+            font-size: 15px;
+            line-height: 1;
+            font-weight: 900;
+            color: currentColor;
+            pointer-events: none;
+        }
+
         .scene-shape-strip {
             grid-column: 3 !important;
             grid-row: 1 !important;
@@ -3100,6 +3172,10 @@
             white-space: nowrap;
         }
 
+        .scene-shape-strip[data-empty="true"] {
+            grid-auto-columns: minmax(18px, 24px);
+        }
+
         .top-center.selected-shape-control {
             grid-column: 4 !important;
             grid-template-columns: minmax(0, 1fr) !important;
@@ -3177,7 +3253,161 @@
             }
         }
 
-    </style>
+    
+
+        /* Canvas action-row refinement: undo/redo live with copy/paste, plus compact image transform menus. */
+        .toolbar > .tools {
+            grid-template-columns: repeat(6, minmax(28px, 1fr)) !important;
+        }
+
+        .toolbar > .copy-paste {
+            grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+            align-items: stretch !important;
+        }
+
+        .toolbar > .copy-paste .compact-action-select {
+            width: 100% !important;
+            height: clamp(28px, 4.7dvh, 38px) !important;
+            min-width: 0 !important;
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            color: var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
+            font-weight: 900;
+            font-size: clamp(8px, 0.95vw, 11px) !important;
+            letter-spacing: 0.02em;
+            padding: 0 clamp(2px, 0.45vw, 6px) !important;
+            cursor: pointer;
+            text-align: center;
+            text-align-last: center;
+        }
+
+        .toolbar > .copy-paste .compact-action-select:hover {
+            background: var(--paper);
+        }
+
+        .toolbar > .copy-paste .icon-action-btn svg {
+            width: clamp(14px, 2.3dvh, 19px) !important;
+            height: clamp(14px, 2.3dvh, 19px) !important;
+        }
+
+        .export-grid {
+            grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 1fr) minmax(34px, 0.45fr) minmax(42px, 0.52fr) minmax(58px, 0.7fr) minmax(38px, 0.45fr) !important;
+        }
+
+        .export-format-field {
+            align-self: stretch;
+            min-width: 0;
+        }
+
+        #exportFormat {
+            height: 30px;
+            min-width: 0;
+            padding: 0 3px;
+            font-size: 8px;
+            letter-spacing: 0.02em;
+        }
+
+        @media (max-width: 720px), (max-height: 680px) {
+            .toolbar > .copy-paste {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: clamp(4px, 0.9vw, 7px) !important;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .toolbar > .tools {
+                grid-template-columns: repeat(6, minmax(24px, 1fr)) !important;
+            }
+            .toolbar > .copy-paste {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            }
+            .toolbar > .copy-paste .compact-action-select {
+                font-size: clamp(7px, 1.8vw, 9px) !important;
+                padding-left: 1px !important;
+                padding-right: 1px !important;
+            }
+        }
+
+        .view-preset-grid,
+        .lighting-control-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: clamp(3px, 0.6vw, 6px);
+            align-items: stretch;
+            min-width: 0;
+        }
+
+        .view-preset-btn {
+            height: clamp(24px, 4dvh, 32px) !important;
+            min-width: 0 !important;
+            padding: 0 3px !important;
+            font-size: clamp(7px, 0.95vw, 10px) !important;
+            letter-spacing: 0.02em;
+        }
+
+        .lighting-control-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .light-field {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 4px;
+            align-items: center;
+            min-width: 0;
+            font-size: clamp(7px, 0.9vw, 9px);
+            font-weight: 900;
+        }
+
+        .light-field input[type="range"] {
+            height: clamp(18px, 3.4dvh, 22px) !important;
+            min-width: 0;
+            --slider-track: var(--paper3);
+            --slider-fill: var(--ink);
+            --slider-thumb: var(--paper);
+        }
+
+        @media (max-width: 720px), (max-height: 680px) {
+            .view-preset-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .lighting-control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        /* Project save/open controls for editable .cubepaint files. */
+        .project-import-btn {
+            width: 100% !important;
+            height: 30px !important;
+            min-width: 0 !important;
+            padding: 0 4px !important;
+            font-size: 8px !important;
+            letter-spacing: 0.02em;
+            text-align: center;
+        }
+
+        .export-grid.project-export-enabled {
+            grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.92fr) minmax(34px, 0.42fr) minmax(40px, 0.5fr) minmax(58px, 0.66fr) minmax(36px, 0.42fr) minmax(44px, 0.52fr) !important;
+        }
+
+        @media (max-width: 720px), (max-height: 680px) {
+            .export-grid.project-export-enabled {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .project-import-btn {
+                height: clamp(22px, 5.5dvh, 32px) !important;
+                font-size: 8px !important;
+            }
+        }
+
+</style>
 </head>
 
 <body>
@@ -3190,7 +3420,7 @@
             <div class="shape-fader shape-cycle" id="shapeSelect" title="shape selector">
                 <button class="shape-cycle-btn" id="shapePrevBtn" type="button" aria-label="previous shape">‹</button>
                 <button class="shape-cycle-current" id="shapeSelectToggle" type="button" aria-label="current shape">
-                    <canvas class="shape-icon-canvas" id="shapeIconCanvas" width="32" height="32" aria-hidden="true"></canvas>
+                    <span class="shape-type-mini-icon" id="shapeTypeMiniIcon" aria-hidden="true">■</span>
                     <span id="shapeNameReadout">CUBE</span>
                 </button>
                 <button class="shape-cycle-btn" id="shapeNextBtn" type="button" aria-label="next shape">›</button>
@@ -3282,20 +3512,6 @@
                                     <path d="M18.5 10.5L20 12l-1.5 1.5" />
                                 </svg>
                             </button>
-
-                            <button class="btn" id="undoBtn" title="undo">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M9 14 4 9l5-5" />
-                                    <path d="M4 9h10.5A5.5 5.5 0 0 1 20 14.5v0A5.5 5.5 0 0 1 14.5 20H11" />
-                                </svg>
-                            </button>
-
-                            <button class="btn" id="redoBtn" title="redo">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="m15 14 5-5-5-5" />
-                                    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
-                                </svg>
-                            </button>
                         </div>
 
                         <div class="controls">
@@ -3324,6 +3540,7 @@
                                                 <span>COLOR</span>
                                                 <div id="colorHexReadout">#140306</div>
                                             </div>
+                                            <button class="transparent-color-btn" id="transparentColorBtn" type="button" title="transparent paint/fill" aria-label="transparent paint/fill"></button>
                                             <button class="picker-sampler-btn" id="colorEyeDropperBtn" type="button" title="pick color from canvas or view">PICK</button>
                                             <div class="color-history" id="colorHistory" aria-label="color history">
                                             </div>
@@ -3349,8 +3566,32 @@
                         </div>
 
                         <div class="copy-paste">
+                            <button class="btn icon-action-btn" id="undoBtn" title="undo">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M9 14 4 9l5-5" />
+                                    <path d="M4 9h10.5A5.5 5.5 0 0 1 20 14.5v0A5.5 5.5 0 0 1 14.5 20H11" />
+                                </svg>
+                            </button>
+                            <button class="btn icon-action-btn" id="redoBtn" title="redo">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="m15 14 5-5-5-5" />
+                                    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
+                                </svg>
+                            </button>
                             <button class="btn copy-shortcut-btn" id="copyBtn"><span class="copy-main">COPY</span><span class="copy-shortcut">CTRL+C</span></button>
                             <button class="btn copy-shortcut-btn" id="pasteBtn"><span class="copy-main">PASTE</span><span class="copy-shortcut">CTRL+V</span></button>
+
+                            <select class="compact-action-select" id="flipImageSelect" title="flip active canvas image" aria-label="flip active canvas image">
+                                <option value="">FLIP</option>
+                                <option value="horizontal">HORIZ</option>
+                                <option value="vertical">VERT</option>
+                            </select>
+                            <select class="compact-action-select" id="rotateImageSelect" title="rotate active canvas image" aria-label="rotate active canvas image">
+                                <option value="">ROTATE</option>
+                                <option value="cw90">90° CW</option>
+                                <option value="r180">180°</option>
+                                <option value="ccw90">90° CCW</option>
+                            </select>
 
                             <label class="file-btn" for="imageUpload" title="upload">
                                 <svg viewBox="0 0 24 24">
@@ -3384,7 +3625,20 @@
                     </div>
 
                     <div class="export">
-                        <div class="export-grid">
+                        <div class="view-preset-grid" id="viewPresetGrid" aria-label="camera presets">
+                            <button class="btn view-preset-btn" type="button" data-view-preset="eastWest" title="east / west view">E/W</button>
+                            <button class="btn view-preset-btn" type="button" data-view-preset="northSouth" title="north / south view">N/S</button>
+                            <button class="btn view-preset-btn" type="button" data-view-preset="upDown" title="up / down view">U/D</button>
+                            <button class="btn view-preset-btn" type="button" data-view-preset="iso" title="isometric view">ISO</button>
+                            <button class="btn view-preset-btn" type="button" data-view-preset="fit" title="zoom extents / center shapes">FIT</button>
+                            <button class="btn view-preset-btn" type="button" data-view-preset="flat" title="toggle flat FOV">FLAT</button>
+                        </div>
+                        <div class="lighting-control-grid" id="lightingControlGrid" aria-label="lighting controls">
+                            <label class="light-field" title="light intensity"><span>LIGHT</span><input id="lightIntensity" type="range" min="0" max="200" step="5" value="100" aria-label="light intensity" /><strong id="lightIntensityReadout">100%</strong></label>
+                            <label class="light-field" title="light direction"><span>DIR</span><input id="lightAzimuth" type="range" min="-180" max="180" step="5" value="140" aria-label="light direction" /><strong id="lightAzimuthReadout">140°</strong></label>
+                            <label class="light-field" title="light height"><span>UP</span><input id="lightHeight" type="range" min="-80" max="80" step="5" value="35" aria-label="light height" /><strong id="lightHeightReadout">35°</strong></label>
+                        </div>
+                        <div class="export-grid project-export-enabled">
                             <div class="field speed-stack" title="speed preview">
                                 <div class="speed-field x-speed-field" title="X speed preview">
                                     <span class="field-label" title="X speed preview">XS:</span>
@@ -3441,13 +3695,25 @@
 
                             <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
 
-                            <button class="btn accent" id="exportGifBtn" title="export gif">
+                            <div class="field export-format-field" title="export format">
+                                <span class="field-label">TYPE</span>
+                                <select id="exportFormat" title="export format" aria-label="export format">
+                                    <option value="gif">GIF</option>
+                                    <option value="webm">WEBM</option>
+                                    <option value="png">PNG</option>
+                                    <option value="cubepaint">PROJECT</option>
+                                </select>
+                            </div>
+
+                            <button class="btn accent" id="exportGifBtn" title="export selected format">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M12 3v12" />
                                     <path d="M7 10l5 5 5-5" />
                                     <path d="M5 21h14" />
                                 </svg>
                             </button>
+                            <label class="file-btn project-import-btn" for="projectUpload" title="open .cubepaint project">OPEN</label>
+                            <input id="projectUpload" type="file" accept=".cubepaint,application/json" />
                         </div>
 
                         <div id="result"><div class="view-control-hint">LEFT = SELECT | RIGHT = LOOK | MIDDLE = PAN | WASD = MOVE | SHFT = SPRINT | QE = HEIGHT</div></div>
@@ -3650,6 +3916,8 @@
         guideCanvas.style.height = `${100 + (PHOTO_OVERLAY_PAD * 2 / FACE_SIZE) * 100}%`;
         guideCtx.imageSmoothingEnabled = false;
         guideCanvas.style.imageRendering = "pixelated";
+        paintCanvas.tabIndex = 0;
+        guideCanvas.tabIndex = -1;
 
         const stage = document.getElementById("cubeStage");
         const canvasWrap = document.querySelector(".canvas-wrap");
@@ -3670,6 +3938,7 @@
         const shapeNextBtn = document.getElementById("shapeNextBtn");
         const shapeNameReadout = document.getElementById("shapeNameReadout");
         const shapeIconCanvas = document.getElementById("shapeIconCanvas");
+        const shapeTypeMiniIcon = document.getElementById("shapeTypeMiniIcon");
         const topParamControls = document.getElementById("topParamControls");
         const polyFader = document.getElementById("polyFader");
         const polySlider = document.getElementById("polySlider");
@@ -3827,6 +4096,11 @@
         let ambientLight = null;
         let keyLight = null;
         let fillLight = null;
+        let brushTransparent = false;
+        let lightIntensity = 1;
+        let lightAzimuth = THREE.MathUtils.degToRad(140);
+        let lightHeight = THREE.MathUtils.degToRad(35);
+        let viewPresetFlip = { eastWest: false, northSouth: false, upDown: false };
 
         let didRandomizeInitialShape = false;
 
@@ -3848,12 +4122,21 @@
         const savedCurrentSceneShape = savedSceneShapesList?.find?.((item) => item?.id === savedCurrentShapeId || item?.shapeId === savedCurrentShapeId);
         const savedCurrentShapeTypeId = (savedCurrentSceneShape?.shapeId === "donut" ? "doughnut" : savedCurrentSceneShape?.shapeId) || savedCurrentShapeId;
         if (!savedCurrentShapeTypeId) {
-            currentShapeIndex = randomInitialShapeIndex();
-            currentShapeId = SHAPE_DEFS[currentShapeIndex].id;
-            didRandomizeInitialShape = true;
+            currentShapeIndex = 0;
+            currentShapeId = SHAPE_DEFS[currentShapeIndex]?.id || "cube";
+            didRandomizeInitialShape = false;
         }
         if (savedSession?.settings?.shadingEnabled != null) {
             shadingEnabled = savedSession.settings.shadingEnabled === true || savedSession.settings.shadingEnabled === "true";
+        }
+        if (savedSession?.settings?.lightIntensity != null) {
+            lightIntensity = Math.max(0, Math.min(2, Number(savedSession.settings.lightIntensity) || 0));
+        }
+        if (savedSession?.settings?.lightAzimuth != null) {
+            lightAzimuth = THREE.MathUtils.degToRad(Math.max(-180, Math.min(180, Number(savedSession.settings.lightAzimuth) || 0)));
+        }
+        if (savedSession?.settings?.lightHeight != null) {
+            lightHeight = THREE.MathUtils.degToRad(Math.max(-80, Math.min(80, Number(savedSession.settings.lightHeight) || 0)));
         }
         if (savedSession?.settings?.bgAlpha != null) {
             bgAlpha = Math.max(0, Math.min(1, Number(savedSession.settings.bgAlpha)));
@@ -3887,6 +4170,9 @@
                     Number(savedSession.camera.position.z) || DEFAULT_WARUDO_CAMERA_POSITION.z
                 );
                 warudoCameraHasSavedPose = true;
+            }
+            if (savedSession.camera.fov != null) {
+                window.__cubePaintSavedCameraFov = Math.max(8, Math.min(50, Number(savedSession.camera.fov) || 35));
             }
         }
         if (savedSession && savedSession.shapeRotations) {
@@ -3979,7 +4265,7 @@
             }
 
             if (!normalized.length && !entries) {
-                const def = shapeDefById(currentShapeId);
+                const def = shapeDefById(currentShapeId || "cube");
                 normalized.push({
                     id: def.id,
                     shapeId: def.id,
@@ -3988,8 +4274,20 @@
                 });
             }
 
-            sceneShapes = normalized;
             let requestedActive = session?.currentShapeId === "donut" ? "doughnut" : session?.currentShapeId;
+            const looksLikeAutoAllShapes = normalized.length >= SHAPE_DEFS.length
+                && SHAPE_DEFS.every((def) => normalized.some((shape) => shape.shapeId === def.id))
+                && normalized.every((shape) => !String(shape.id || "").includes("_"));
+            if (looksLikeAutoAllShapes) {
+                const activeType = requestedActive && shapeDefById(requestedActive)?.id;
+                const keep = normalized.find((shape) => shape.id === requestedActive)
+                    || normalized.find((shape) => shape.shapeId === activeType)
+                    || normalized.find((shape) => shape.shapeId === "cube")
+                    || normalized[0];
+                normalized.splice(0, normalized.length, keep);
+            }
+
+            sceneShapes = normalized;
             if (sceneShapes.length && !sceneShapes.some((shape) => shape.id === requestedActive)) {
                 const byType = sceneShapes.find((shape) => shape.shapeId === requestedActive);
                 requestedActive = byType?.id || sceneShapes[0].id;
@@ -4671,6 +4969,83 @@
             return true;
         }
 
+        function getSceneBounds(selectedOnly = false) {
+            const targets = [];
+            if (selectedOnly && sceneShapeRuntime.get(currentShapeId)?.root) {
+                targets.push(sceneShapeRuntime.get(currentShapeId).root);
+            } else {
+                sceneShapeRuntime.forEach((runtime) => {
+                    if (runtime?.root) targets.push(runtime.root);
+                });
+            }
+            const box = new THREE.Box3();
+            targets.forEach((target) => box.expandByObject(target));
+            if (!targets.length || box.isEmpty()) {
+                box.min.set(-0.6, -0.6, -0.6);
+                box.max.set(0.6, 0.6, 0.6);
+            }
+            const center = new THREE.Vector3();
+            const size = new THREE.Vector3();
+            box.getCenter(center);
+            box.getSize(size);
+            return { box, center, radius: Math.max(0.85, size.length() * 0.5) };
+        }
+
+        function frameBoundsFromDirection(direction, label = "VIEW", selectedOnly = false) {
+            if (!camera) return false;
+            const bounds = getSceneBounds(selectedOnly);
+            const dir = direction.clone();
+            if (dir.lengthSq() < 0.0001) dir.copy(CAMERA_BASE_VECTOR);
+            dir.normalize();
+            const fov = Math.max(8, Number(camera.fov) || 35) * Math.PI / 180;
+            const distance = Math.max(2.2, Math.min(28, bounds.radius / Math.max(0.08, Math.sin(fov / 2)) * 1.18));
+            warudoCameraPosition.copy(bounds.center).add(dir.multiplyScalar(distance));
+            cameraDistance = distance;
+            cameraPanOffset.copy(bounds.center);
+            setWarudoLookAt(bounds.center);
+            applyCameraDistance();
+            syncTransformControls();
+            updateDebugInfo();
+            setStatus(label);
+            scheduleSave();
+            return true;
+        }
+
+        function useCameraPreset(preset) {
+            if (!camera) return;
+            if (preset === "fit") {
+                frameBoundsFromDirection(warudoCameraPosition.clone().sub(cameraPanOffset), "FIT", false);
+                return;
+            }
+            if (preset === "flat") {
+                camera.fov = camera.fov <= 10 ? 35 : 8;
+                camera.updateProjectionMatrix();
+                frameBoundsFromDirection(warudoCameraPosition.clone().sub(cameraPanOffset), camera.fov <= 10 ? "FLAT" : "FOV", false);
+                return;
+            }
+            if (preset === "iso") {
+                frameBoundsFromDirection(new THREE.Vector3(3.4, 2.4, 4.4), "ISO", false);
+                return;
+            }
+            if (preset === "eastWest") {
+                const useWest = viewPresetFlip.eastWest;
+                viewPresetFlip.eastWest = !viewPresetFlip.eastWest;
+                frameBoundsFromDirection(new THREE.Vector3(useWest ? -1 : 1, 0, 0), useWest ? "WEST" : "EAST", false);
+                return;
+            }
+            if (preset === "northSouth") {
+                const useNorth = viewPresetFlip.northSouth;
+                viewPresetFlip.northSouth = !viewPresetFlip.northSouth;
+                frameBoundsFromDirection(new THREE.Vector3(0, 0, useNorth ? -1 : 1), useNorth ? "NORTH" : "SOUTH", false);
+                return;
+            }
+            if (preset === "upDown") {
+                const useDown = viewPresetFlip.upDown;
+                viewPresetFlip.upDown = !viewPresetFlip.upDown;
+                frameBoundsFromDirection(new THREE.Vector3(0.001, useDown ? -1 : 1, 0.001), useDown ? "DOWN" : "UP", false);
+            }
+        }
+
         function resizeRenderer() {
             resizePaintArea();
             drawCanvasGuide();
@@ -4754,6 +5129,8 @@
                 rotation: Number(layer.rotation) || 0,
                 skewX: Number(layer.skewX) || 0,
                 skewY: Number(layer.skewY) || 0,
+                flipX: Boolean(layer.flipX),
+                flipY: Boolean(layer.flipY),
                 anchorX: Number(layer.anchorX) || 0,
                 anchorY: Number(layer.anchorY) || 0,
                 warp: normalizePhotoWarp(layer)
@@ -4763,7 +5140,7 @@
         function serializePhotoLayer(layer, options = {}) {
             const cloned = clonePhotoLayer(layer, false);
             if (!cloned) return null;
-            if (!options.compact && layer.sourceDataUrl && layer.sourceDataUrl.length < 900000) {
+            if (layer.sourceDataUrl && (options.includeSourceDataUrls || options.project || (!options.compact && layer.sourceDataUrl.length < 900000))) {
                 cloned.sourceDataUrl = layer.sourceDataUrl;
             } else {
                 cloned.sourceDataUrl = null;
@@ -4973,9 +5350,19 @@
             ctx.save();
             const matrix = photoLayerMatrix(layer);
             ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+            if (layer.flipX || layer.flipY) {
+                ctx.scale(layer.flipX ? -1 : 1, layer.flipY ? -1 : 1);
+            }
             ctx.imageSmoothingEnabled = false;
             ctx.drawImage(image, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
             ctx.restore();
+        }
+
+        function photoLayerSourcePoint(layer, image, u, v) {
+            return {
+                x: (layer?.flipX ? 1 - u : u) * image.width,
+                y: (layer?.flipY ? 1 - v : v) * image.height
+            };
         }
 
         function photoTriangleMatrix(s0, s1, s2, d0, d1, d2) {
@@ -5031,10 +5418,10 @@
                     const d10 = photoLocalToWorld(layer, l10.x, l10.y);
                     const d01 = photoLocalToWorld(layer, l01.x, l01.y);
                     const d11 = photoLocalToWorld(layer, l11.x, l11.y);
-                    const s00 = { x: u0 * image.width, y: v0 * image.height };
-                    const s10 = { x: u1 * image.width, y: v0 * image.height };
-                    const s01 = { x: u0 * image.width, y: v1 * image.height };
-                    const s11 = { x: u1 * image.width, y: v1 * image.height };
+                    const s00 = photoLayerSourcePoint(layer, image, u0, v0);
+                    const s10 = photoLayerSourcePoint(layer, image, u1, v0);
+                    const s01 = photoLayerSourcePoint(layer, image, u0, v1);
+                    const s11 = photoLayerSourcePoint(layer, image, u1, v1);
                     photoDrawTriangle(ctx, image, s00, s01, s11, d00, d01, d11);
                     photoDrawTriangle(ctx, image, s00, s11, s10, d00, d11, d10);
                 }
@@ -5066,8 +5453,6 @@
             if (!face?.imageLayer?.image) return false;
             const ctx = targetCtx || face.canvas.getContext("2d", { willReadFrequently: true });
             ctx.clearRect(0, 0, FACE_SIZE, FACE_SIZE);
-            ctx.fillStyle = BLANK_FILL;
-            ctx.fillRect(0, 0, FACE_SIZE, FACE_SIZE);
             renderPhotoLayerToContext(face.imageLayer, ctx);
             face.hasArt = true;
             face.changed = true;
@@ -5121,6 +5506,8 @@
                 rotation: 0,
                 skewX: 0,
                 skewY: 0,
+                flipX: false,
+                flipY: false,
                 anchorX: 0,
                 anchorY: 0,
                 warp: normalizePhotoWarp(null)
@@ -5147,6 +5534,101 @@
             renderFaceList();
             drawCanvasGuide();
             if (persist && !loadingSession) scheduleSave();
+            return true;
+        }
+
+        function stretchCurrentPhotoLayerToCanvas() {
+            const face = faces[currentFace];
+            const layer = face?.imageLayer;
+            if (!layer?.image) {
+                setStatus("NO IMAGE");
+                return false;
+            }
+
+            pushUndo(currentFace);
+            layer.x = FACE_SIZE / 2;
+            layer.y = FACE_SIZE / 2;
+            layer.width = FACE_SIZE;
+            layer.height = FACE_SIZE;
+            layer.rotation = 0;
+            layer.skewX = 0;
+            layer.skewY = 0;
+            layer.flipX = false;
+            layer.flipY = false;
+            layer.anchorX = 0;
+            layer.anchorY = 0;
+            layer.warp = normalizePhotoWarp(null);
+            photoLayerSelected = true;
+            face.hasArt = true;
+            face.changed = true;
+            markFaceImageDirty(face);
+            updatePhotoGuidePointerEvents();
+            refreshCurrentPhotoLayer(true);
+            updateUndoRedo();
+            setStatus("STRETCH");
+            return true;
+        }
+
+        function ensurePhotoLayerForImageAction() {
+            const face = faces[currentFace];
+            if (!face) {
+                setStatus("NO FACE");
+                return false;
+            }
+            if (face.imageLayer?.image) return true;
+            if (!face.hasArt || isCanvasBlank(face.canvas)) {
+                setStatus("NO IMAGE");
+                return false;
+            }
+            return ensureMoveCanvasPhotoLayer();
+        }
+
+        function flipCurrentPhotoLayer(axis) {
+            const face = faces[currentFace];
+            if (!face) return false;
+            pushUndo(currentFace);
+            if (!ensurePhotoLayerForImageAction()) {
+                updateUndoRedo();
+                return false;
+            }
+            const layer = face.imageLayer;
+            if (!layer?.image) return false;
+            if (axis === "vertical") {
+                layer.flipY = !layer.flipY;
+                setStatus("FLIP V");
+            } else {
+                layer.flipX = !layer.flipX;
+                setStatus("FLIP H");
+            }
+            photoLayerSelected = true;
+            face.hasArt = true;
+            face.changed = true;
+            markFaceImageDirty(face);
+            updatePhotoGuidePointerEvents();
+            refreshCurrentPhotoLayer(true);
+            updateUndoRedo();
+            return true;
+        }
+
+        function rotateCurrentPhotoLayer(angleRadians, label = "ROTATE") {
+            const face = faces[currentFace];
+            if (!face) return false;
+            pushUndo(currentFace);
+            if (!ensurePhotoLayerForImageAction()) {
+                updateUndoRedo();
+                return false;
+            }
+            const layer = face.imageLayer;
+            if (!layer?.image) return false;
+            layer.rotation = (Number(layer.rotation) || 0) + angleRadians;
+            photoLayerSelected = true;
+            face.hasArt = true;
+            face.changed = true;
+            markFaceImageDirty(face);
+            updatePhotoGuidePointerEvents();
+            refreshCurrentPhotoLayer(true);
+            updateUndoRedo();
+            setStatus(label);
             return true;
         }
 
@@ -5705,6 +6187,8 @@
                 rotation: 0,
                 skewX: 0,
                 skewY: 0,
+                flipX: false,
+                flipY: false,
                 anchorX: 0,
                 anchorY: 0,
                 warp: normalizePhotoWarp(null)
@@ -5924,6 +6408,8 @@
                     rotation: 0,
                     skewX: 0,
                     skewY: 0,
+                    flipX: false,
+                    flipY: false,
                     anchorX: 0,
                     anchorY: 0,
                     warp: normalizePhotoWarp(null)
@@ -6564,10 +7050,9 @@
             const maxChips = 8;
             const visibleShapes = sceneShapes.slice(Math.max(0, sceneShapes.length - maxChips));
             if (!visibleShapes.length) {
-                const empty = document.createElement("div");
-                empty.className = "scene-shape-empty";
-                empty.textContent = "EMPTY";
-                sceneShapeStrip.append(empty);
+                sceneShapeStrip.setAttribute("data-empty", "true");
+            } else {
+                sceneShapeStrip.removeAttribute("data-empty");
             }
 
             visibleShapes.forEach((shape) => {
@@ -6699,6 +7184,7 @@
             const activeDef = getCurrentShapeDef();
             const activeShape = getSceneShape(currentShapeId);
             shapeNameReadout.textContent = addDef.label;
+            if (shapeTypeMiniIcon) shapeTypeMiniIcon.textContent = shapeMiniSymbol(addDef);
             shapeSelectToggle.title = `${addDef.label} is the shape type added by the + button`;
             shapeSlider.value = String(currentShapeIndex);
             updateRangeProgress(shapeSlider);
@@ -7413,6 +7899,28 @@
             geometry.userData.wobbleApplied = false;
         }
 
+        function restoreBaseGeometryPositions(geometry, force = false) {
+            if (!geometry?.attributes?.position || !geometry.userData?.basePositions) return false;
+            if (!force && !geometry.userData.wobbleApplied) return false;
+            const attr = geometry.attributes.position;
+            attr.array.set(geometry.userData.basePositions);
+            attr.needsUpdate = true;
+            geometry.computeVertexNormals();
+            geometry.computeBoundingBox?.();
+            geometry.computeBoundingSphere?.();
+            geometry.userData.wobbleApplied = false;
+            return true;
+        }
+
+        function resetAllVertexWobbleMeshes(force = true) {
+            sceneShapeRuntime.forEach((runtime) => {
+                restoreBaseGeometryPositions(runtime?.mesh?.geometry, force);
+            });
+            if (shapeMesh && !sceneShapeRuntime.size) {
+                restoreBaseGeometryPositions(shapeMesh.geometry, force);
+            }
+        }
+
         function applyVertexWobbleToMesh(mesh, timeMs = performance.now()) {
             if (!mesh?.geometry?.attributes?.position) return;
             const geometry = mesh.geometry;
@@ -7426,12 +7934,7 @@
             
             const amount = Math.pow(sliderAmount, 2.2);
             if (amount <= 0.001) {
-                if (geometry.userData.wobbleApplied) {
-                    attr.array.set(base);
-                    attr.needsUpdate = true;
-                    if (shadingEnabled) geometry.computeVertexNormals();
-                    geometry.userData.wobbleApplied = false;
-                }
+                restoreBaseGeometryPositions(geometry, false);
                 return;
             }
 
@@ -7520,8 +8023,9 @@
             vertexWobbleAmount = Math.max(0, Math.min(1, Number(amount) || 0));
             vertexWobbleEnabled = vertexWobbleAmount > 0.001;
             updateWobbleButton();
-            if (!vertexWobbleEnabled && shapeMesh) {
-                applyVertexWobbleToMesh(shapeMesh, performance.now());
+            if (!vertexWobbleEnabled) {
+                resetAllVertexWobbleMeshes(true);
+                if (renderer && scene && camera) renderer.render(scene, camera);
             }
             updatePreviewAliasing();
             resizeRenderer();
@@ -7880,15 +8384,16 @@
 
             if (!ambientLight || !keyLight || !fillLight) return;
 
-            if (shadingEnabled) {
-                ambientLight.intensity = 0.22;
-                keyLight.intensity = 2.25;
-                fillLight.intensity = 0.08;
-            } else {
-                ambientLight.intensity = 0;
-                keyLight.intensity = 0;
-                fillLight.intensity = 0;
-            }
+            const intensity = shadingEnabled ? Math.max(0, Math.min(2, lightIntensity)) : 0;
+            ambientLight.intensity = 0.22 * intensity;
+            keyLight.intensity = 2.25 * intensity;
+            fillLight.intensity = 0.08 * intensity;
+
+            const keyRadius = 6;
+            const keyY = Math.sin(lightHeight) * keyRadius;
+            const groundRadius = Math.max(0.3, Math.cos(lightHeight) * keyRadius);
+            keyLight.position.set(Math.cos(lightAzimuth) * groundRadius, keyY, Math.sin(lightAzimuth) * groundRadius);
+            fillLight.position.set(-Math.cos(lightAzimuth) * 4, Math.max(0.5, keyY * 0.35), -Math.sin(lightAzimuth) * 4);
 
             ambientLight.visible = true;
             keyLight.visible = true;
@@ -7928,12 +8433,16 @@
         }
 
         function addShadingLightsToScene(targetScene) {
-            const ambient = new THREE.AmbientLight(0xffffff, shadingEnabled ? 0.22 : 0);
-            const key = new THREE.DirectionalLight(0xffffff, shadingEnabled ? 2.25 : 0);
-            const fill = new THREE.DirectionalLight(0xffffff, shadingEnabled ? 0.08 : 0);
+            const intensity = shadingEnabled ? Math.max(0, Math.min(2, lightIntensity)) : 0;
+            const ambient = new THREE.AmbientLight(0xffffff, 0.22 * intensity);
+            const key = new THREE.DirectionalLight(0xffffff, 2.25 * intensity);
+            const fill = new THREE.DirectionalLight(0xffffff, 0.08 * intensity);
 
-            key.position.set(-5, 3, 4);
-            fill.position.set(4, 1, -3);
+            const keyRadius = 6;
+            const keyY = Math.sin(lightHeight) * keyRadius;
+            const groundRadius = Math.max(0.3, Math.cos(lightHeight) * keyRadius);
+            key.position.set(Math.cos(lightAzimuth) * groundRadius, keyY, Math.sin(lightAzimuth) * groundRadius);
+            fill.position.set(-Math.cos(lightAzimuth) * 4, Math.max(0.5, keyY * 0.35), -Math.sin(lightAzimuth) * 4);
             targetScene.add(ambient, key, fill);
         }
 
@@ -7944,6 +8453,41 @@
             btn.classList.toggle("active", shadingEnabled);
             btn.textContent = shadingEnabled ? "LIT" : "SHADE";
             btn.title = shadingEnabled ? "shading on" : "shading off";
+        }
+
+        function updateLightingControls() {
+            const intensityInput = document.getElementById("lightIntensity");
+            const azimuthInput = document.getElementById("lightAzimuth");
+            const heightInput = document.getElementById("lightHeight");
+            const intensityReadout = document.getElementById("lightIntensityReadout");
+            const azimuthReadout = document.getElementById("lightAzimuthReadout");
+            const heightReadout = document.getElementById("lightHeightReadout");
+            const intensityPct = Math.round(Math.max(0, Math.min(2, lightIntensity)) * 100);
+            const azimuthDeg = Math.round(THREE.MathUtils.radToDeg(lightAzimuth));
+            const heightDeg = Math.round(THREE.MathUtils.radToDeg(lightHeight));
+            if (intensityInput && document.activeElement !== intensityInput) intensityInput.value = String(intensityPct);
+            if (azimuthInput && document.activeElement !== azimuthInput) azimuthInput.value = String(azimuthDeg);
+            if (heightInput && document.activeElement !== heightInput) heightInput.value = String(heightDeg);
+            if (intensityReadout) intensityReadout.textContent = `${intensityPct}%`;
+            if (azimuthReadout) azimuthReadout.textContent = `${azimuthDeg}°`;
+            if (heightReadout) heightReadout.textContent = `${heightDeg}°`;
+        }
+
+        function setLightingFromControls(persist = true) {
+            const intensityInput = document.getElementById("lightIntensity");
+            const azimuthInput = document.getElementById("lightAzimuth");
+            const heightInput = document.getElementById("lightHeight");
+            if (intensityInput) lightIntensity = Math.max(0, Math.min(2, Number(intensityInput.value) / 100));
+            if (azimuthInput) lightAzimuth = THREE.MathUtils.degToRad(Math.max(-180, Math.min(180, Number(azimuthInput.value) || 0)));
+            if (heightInput) lightHeight = THREE.MathUtils.degToRad(Math.max(-80, Math.min(80, Number(heightInput.value) || 0)));
+            updateLightingControls();
+            if (!shadingEnabled && lightIntensity > 0) shadingEnabled = true;
+            updateShadingButton();
+            updateLightingControls();
+            updateShadingLights();
+            rebuildMaterialsForShading();
+            setStatus("LIGHT");
+            if (persist && !loadingSession) scheduleSave();
         }
 
         function rebuildMaterialsForShading() {
@@ -8323,13 +8867,9 @@
         }
 
         function renderShapeIcon(now = performance.now()) {
-            if (!ensureShapeIconRenderer()) return;
-            if (shapeIconDirty || !shapeIconMesh) updateShapeIconMesh();
-            if (!shapeIconMesh || !shapeIconScene || !shapeIconCamera) return;
-            const time = now * 0.001;
-            shapeIconMesh.rotation.y = time * 1.35;
-            shapeIconMesh.rotation.x = 0.18 + Math.sin(time * 0.85) * 0.08;
-            shapeIconRenderer.render(shapeIconScene, shapeIconCamera);
+            // Shape selector now uses the same tiny flat symbols as the scene strip.
+            // Keep the old renderer helpers available, but do not draw a rotating 3D thumbnail.
+            if (shapeIconCanvas) shapeIconCanvas.hidden = true;
         }
 
         function buildSingleShapeMesh(sceneShape) {
@@ -8387,6 +8927,7 @@
 
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+            if (window.__cubePaintSavedCameraFov) camera.fov = window.__cubePaintSavedCameraFov;
             if (!warudoCameraHasSavedPose) {
                 warudoCameraPosition.copy(DEFAULT_WARUDO_CAMERA_POSITION);
                 setWarudoLookAt(cameraPanOffset);
@@ -8897,6 +9438,46 @@
                 updateTransformSnapping();
             }
         });
+
+        let canvasShortcutArmed = false;
+
+        function isTextEntryTarget(target) {
+            const tag = target?.tagName?.toLowerCase();
+            return Boolean(target?.isContentEditable || ["input", "textarea", "select"].includes(tag));
+        }
+
+        function canvasKeyboardShortcutActive(event) {
+            if (event.ctrlKey || event.metaKey || event.altKey) return false;
+            if (isTextEntryTarget(event.target)) return false;
+            return canvasShortcutArmed && document.activeElement === paintCanvas;
+        }
+
+        function focusPaintCanvasForShortcuts() {
+            canvasShortcutArmed = true;
+            try {
+                paintCanvas.focus({ preventScroll: true });
+            } catch (error) {
+                paintCanvas.focus();
+            }
+        }
+
+        document.addEventListener("pointerdown", (event) => {
+            if (!event.target?.closest?.(".canvas-stack")) {
+                canvasShortcutArmed = false;
+            }
+        }, true);
+
+        paintCanvas.addEventListener("blur", () => {
+            canvasShortcutArmed = false;
+        });
+
+        window.addEventListener("keydown", (event) => {
+            if (event.repeat || event.key.toLowerCase() !== "a") return;
+            if (!canvasKeyboardShortcutActive(event)) return;
+            event.preventDefault();
+            event.stopPropagation();
+            stretchCurrentPhotoLayerToCanvas();
+        });
         document.getElementById("pencilBtn").addEventListener("click", () => setTool("pencil"));
         document.getElementById("eraserBtn").addEventListener("click", () => setTool("eraser"));
         document.getElementById("shapeToolBtn").addEventListener("click", useShapeToolButton);
@@ -9246,6 +9827,12 @@
 
         document.getElementById("resetViewBtn").addEventListener("click", resetView);
         document.getElementById("stageResetViewBtn")?.addEventListener("click", resetView);
+        document.querySelectorAll("[data-view-preset]").forEach((button) => {
+            button.addEventListener("click", () => useCameraPreset(button.dataset.viewPreset));
+        });
+        ["lightIntensity", "lightAzimuth", "lightHeight"].forEach((id) => {
+            document.getElementById(id)?.addEventListener("input", () => setLightingFromControls(true));
+        });
 
         brushSize.addEventListener("input", () => {
             brushReadout.textContent = `${brushSize.value}PX`;
@@ -9471,17 +10058,56 @@
             });
         }
 
+        function activeBrushIsTransparent() {
+            return Boolean(brushTransparent);
+        }
+
+        function transparentSwatchBackground() {
+            return "linear-gradient(45deg, var(--checker1) 25%, transparent 25%), linear-gradient(-45deg, var(--checker1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--checker1) 75%), linear-gradient(-45deg, transparent 75%, var(--checker1) 75%), var(--checker2)";
+        }
+
+        function updateTransparentColorVisuals() {
+            const btn = document.getElementById("transparentColorBtn");
+            if (btn) btn.classList.toggle("active", activeBrushIsTransparent());
+            colorPickerChip.classList.toggle("transparent", activeBrushIsTransparent());
+            colorSwatch.classList.toggle("transparent", activeBrushIsTransparent());
+            if (activeBrushIsTransparent()) {
+                colorHexReadout.textContent = "TRANSPARENT";
+                colorToggleText.textContent = "TRANSPARENT";
+                colorPickerChip.style.background = "";
+                colorSwatch.style.background = "";
+            }
+        }
+
+        function setTransparentBrushColor(commit = true) {
+            brushTransparent = true;
+            alphaIndex = ALPHA_STEPS - 1;
+            colorHexReadout.textContent = "TRANSPARENT";
+            colorToggleText.textContent = "TRANSPARENT";
+            colorPickerChip.classList.add("transparent");
+            colorSwatch.classList.add("transparent");
+            drawHueSlider();
+            drawColorSquare();
+            renderColorHistory();
+            updateTransparentColorVisuals();
+            if (commit) scheduleSave();
+        }
+
         function applyBrushColor(hex) {
             const normalized = normalizeHex(hex);
+            brushTransparent = false;
             alphaIndex = 0;
             brushColor.value = normalized;
             colorHexReadout.textContent = normalized;
             colorToggleText.textContent = normalized;
+            colorSwatch.classList.remove("transparent");
+            colorPickerChip.classList.remove("transparent");
             colorSwatch.style.background = normalized;
             colorPickerChip.style.background = normalized;
             drawHueSlider();
             drawColorSquare();
             renderColorHistory();
+            updateTransparentColorVisuals();
         }
 
         function setBrushColorFromIndices() {
@@ -9524,6 +10150,7 @@
         function colorEntryIsActive(entry) {
             const normalized = normalizeColorHistoryEntry(entry);
             return Boolean(normalized)
+                && !activeBrushIsTransparent()
                 && normalizeHex(brushColor.value) === normalized.hex;
         }
 
@@ -9609,6 +10236,11 @@
             alphaIndex = 0;
             applyBrushColor(brushColor.value);
         }
+
+        document.getElementById("transparentColorBtn")?.addEventListener("click", () => {
+            setTransparentBrushColor(true);
+            setStatus("TRANSPARENT");
+        });
 
         colorSquare.addEventListener("pointerdown", (event) => {
             draggingSquare = true;
@@ -10105,7 +10737,7 @@
 
             ctx.save();
 
-            if (!erase) {
+            if (!erase && !activeBrushIsTransparent()) {
                 ctx.globalCompositeOperation = "source-over";
                 ctx.fillStyle = normalizeHex(brushColor.value);
             }
@@ -10128,7 +10760,7 @@
 
                 if (width <= 0) continue;
 
-                if (erase) {
+                if (erase || activeBrushIsTransparent()) {
                     ctx.clearRect(x0, y, width, 1);
                 } else {
                     ctx.fillRect(x0, y, width, 1);
@@ -10301,6 +10933,11 @@
             return { r: rgb.r, g: rgb.g, b: rgb.b, a: 255 };
         }
 
+        function colorFromActiveBrush() {
+            if (activeBrushIsTransparent()) return { r: 0, g: 0, b: 0, a: 0 };
+            return colorFromHex(brushColor.value);
+        }
+
         function colorsEqual(a, b) {
             return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a;
         }
@@ -10324,7 +10961,7 @@
                 b: data[startIndex + 2],
                 a: data[startIndex + 3]
             };
-            const replacement = colorFromHex(brushColor.value);
+            const replacement = colorFromActiveBrush();
 
             if (colorsEqual(target, replacement)) {
                 setStatus("SAME");
@@ -10372,10 +11009,11 @@
             paintCtx.putImageData(imageData, 0, 0);
             faces[currentFace].sourceName = "fill";
             faces[currentFace].changed = true;
-            setStatus("FILL");
+            setStatus(activeBrushIsTransparent() ? "FILL CLEAR" : "FILL");
         }
 
         function handlePhotoGuidePointerDown(event) {
+            focusPaintCanvasForShortcuts();
             if (!photoLayerSelected) return;
             const point = canvasPoint(event);
             const hit = photoHitTest(point);
@@ -10407,6 +11045,7 @@
         guideCanvas.addEventListener("pointercancel", stopDrawing);
 
         paintCanvas.addEventListener("pointerdown", (event) => {
+            focusPaintCanvasForShortcuts();
             const point = canvasPoint(event);
             const face = faces[currentFace];
             const photoHit = photoHitTest(point);
@@ -10819,6 +11458,20 @@
 
         document.getElementById("copyBtn").addEventListener("click", copyCurrentFace);
         document.getElementById("pasteBtn").addEventListener("click", pasteToCurrentFace);
+        document.getElementById("flipImageSelect")?.addEventListener("change", (event) => {
+            const value = event.currentTarget.value;
+            if (value) flipCurrentPhotoLayer(value);
+            event.currentTarget.value = "";
+            event.currentTarget.blur();
+        });
+        document.getElementById("rotateImageSelect")?.addEventListener("change", (event) => {
+            const value = event.currentTarget.value;
+            if (value === "cw90") rotateCurrentPhotoLayer(Math.PI / 2, "ROT 90");
+            else if (value === "ccw90") rotateCurrentPhotoLayer(-Math.PI / 2, "ROT -90");
+            else if (value === "r180") rotateCurrentPhotoLayer(Math.PI, "ROT 180");
+            event.currentTarget.value = "";
+            event.currentTarget.blur();
+        });
 
         markGifLockableControls();
         toolbar.addEventListener("pointerdown", blockGifLockedInteraction, true);
@@ -11126,7 +11779,343 @@
             appendViewControlHint(result);
         }
 
+
+        function projectFileName() {
+            const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+            return `cubepaint-${stamp}.cubepaint`;
+        }
+
+        function makeProjectPayload() {
+            saveEditorToFace(false, false);
+            const payload = makeSessionPayload({
+                imageType: "image/png",
+                imageQuality: null,
+                compact: false,
+                includeSourceDataUrls: true,
+                project: true
+            });
+            payload.fileType = "cubepaint";
+            payload.projectVersion = 1;
+            payload.savedWith = "CubePaint";
+            payload.lossless = true;
+            return payload;
+        }
+
+        async function exportProjectFile() {
+            const exportBtn = document.getElementById("exportGifBtn");
+            if (exportBtn) exportBtn.disabled = true;
+            showSaveOverlay("SAVING PROJECT");
+            setStatus("PROJECT");
+            try {
+                const payload = makeProjectPayload();
+                const json = JSON.stringify(payload);
+                const blob = new Blob([json], { type: "application/x-cubepaint+json" });
+                downloadBlob(blob, projectFileName());
+                setStatus(`${(blob.size / 1024 / 1024).toFixed(2)}MB PROJECT`);
+            } catch (error) {
+                setStatus("PROJECT ERR");
+                console.warn("CubePaint project export failed:", error);
+            } finally {
+                hideSaveOverlay();
+                if (exportBtn) exportBtn.disabled = false;
+            }
+        }
+
+        function normalizeProjectPayload(payload) {
+            const data = payload?.project || payload?.cubepaint || payload;
+            if (!data || typeof data !== "object") throw new Error("Project file is empty or invalid");
+            const looksLikeCubePaint = data.fileType === "cubepaint"
+                || data.savedWith === "CubePaint"
+                || Array.isArray(data.sceneShapes)
+                || data.shapes;
+            if (!looksLikeCubePaint) throw new Error("Not a CubePaint project");
+            if (!data.shapes && !Array.isArray(data.sceneShapes)) throw new Error("CubePaint project is missing editable scene data");
+            return data;
+        }
+
+        function stopAllAnimations() {
+            Object.values(shapeStore || {}).forEach((store) => {
+                store?.faces?.forEach((face) => stopFaceAnimation(face));
+            });
+        }
+
+        function applyProjectPayload(payload) {
+            const session = normalizeProjectPayload(payload);
+            if (saveTimer) {
+                clearTimeout(saveTimer);
+                saveTimer = null;
+            }
+            if (idleSaveHandle && "cancelIdleCallback" in window) {
+                cancelIdleCallback(idleSaveHandle);
+                idleSaveHandle = null;
+            }
+
+            loadingSession = true;
+            try {
+                stopPhotoAnts();
+                stopAllAnimations();
+                disposeCurrentMesh();
+
+                shapeStore = {};
+                shapeRotations = session.shapeRotations || {};
+                shapeTransforms = session.shapeTransforms || {};
+                shapePolyLevels = session.shapePolyLevels || {};
+                shapeOptions = session.shapeOptions || {};
+                sceneShapes = [];
+                activeSceneShapeId = "";
+                currentShapeId = session.currentShapeId === "donut" ? "doughnut" : (session.currentShapeId || "");
+                photoLayerSelected = false;
+                localStorageImageSaveDisabled = false;
+                preferCompactSession = false;
+
+                initializeSceneShapesFromSession(session);
+                faces = currentShapeId ? ensureShapeFaces(currentShapeId) : [];
+                currentFace = currentShapeId ? Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace)) : 0;
+
+                restoreInputsFromSession(session);
+                restoreShapesFromSession(session);
+
+                updateShapeSelectorWidth();
+                updateShapeReadout();
+                buildShapeMesh();
+                rebuildAllTextures();
+                renderFaceList();
+                loadFaceIntoEditor(false);
+                updateUndoRedo();
+                resizeRenderer();
+                renderColorHistory();
+                setBgColorHex(bgColor.value, false);
+                updateBgPickerVisuals();
+                updateWobbleButton();
+                updateLightingControls();
+                updateShapeExtraControls();
+                updateSpeedReadout();
+                initializeRangeProgress();
+                if (renderer && scene && camera) renderer.render(scene, camera);
+            } finally {
+                loadingSession = false;
+            }
+            saveSession();
+            setStatus("PROJECT OPENED");
+        }
+
+        function importProjectFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const text = String(reader.result || "");
+                    const payload = JSON.parse(text);
+                    applyProjectPayload(payload);
+                } catch (error) {
+                    setStatus("OPEN ERR");
+                    console.warn("CubePaint project import failed:", error);
+                }
+            };
+            reader.onerror = () => {
+                setStatus("OPEN ERR");
+                console.warn("CubePaint project import read failed:", reader.error);
+            };
+            setStatus("OPENING PROJECT");
+            reader.readAsText(file);
+        }
+
+        function drawCurrentViewToCanvas(targetCanvas) {
+            if (!renderer || !scene || !camera || !targetCanvas) return false;
+            const exportViewSize = getExportViewSize();
+            targetCanvas.width = exportViewSize.width;
+            targetCanvas.height = exportViewSize.height;
+            const ctx = targetCanvas.getContext("2d", { willReadFrequently: true });
+            ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+            if (bgAlpha > 0.001) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, Math.min(1, bgAlpha));
+                ctx.fillStyle = normalizeHex(bgColor.value, "#140306");
+                ctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+                ctx.restore();
+            }
+            renderer.render(scene, camera);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(renderer.domElement, 0, 0, targetCanvas.width, targetCanvas.height);
+            return true;
+        }
+
+        async function exportPngView() {
+            if (!webglAvailable || !renderer || !scene || !camera || !sceneShapeRuntime.size) {
+                setStatus("NO WEBGL");
+                return;
+            }
+            saveEditorToFace(true);
+            const exportBtn = document.getElementById("exportGifBtn");
+            exportBtn.disabled = true;
+            showSaveOverlay("SAVING PNG");
+            setStatus("PNG");
+            try {
+                const canvas = document.createElement("canvas");
+                drawCurrentViewToCanvas(canvas);
+                const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+                if (!blob) throw new Error("PNG encode failed");
+                downloadBlob(blob, "cubepaint.png");
+                setStatus(`${(blob.size / 1024 / 1024).toFixed(2)}MB`);
+            } catch (error) {
+                setStatus("PNG ERR");
+                console.warn("CubePaint PNG export failed:", error);
+            } finally {
+                hideSaveOverlay();
+                exportBtn.disabled = false;
+            }
+        }
+
+        function bestWebmMimeType() {
+            if (typeof MediaRecorder === "undefined") return "";
+            const candidates = [
+                "video/webm;codecs=vp9",
+                "video/webm;codecs=vp8",
+                "video/webm"
+            ];
+            return candidates.find((type) => MediaRecorder.isTypeSupported?.(type)) || "video/webm";
+        }
+
+        async function exportWebmView() {
+            if (!webglAvailable || !renderer || !scene || !camera || !sceneShapeRuntime.size) {
+                setStatus("NO WEBGL");
+                return;
+            }
+            if (typeof MediaRecorder === "undefined") {
+                setStatus("WEBM?");
+                return;
+            }
+
+            saveEditorToFace(true);
+            const exportBtn = document.getElementById("exportGifBtn");
+            exportBtn.disabled = true;
+            showSaveOverlay("SAVING WEBM");
+            setStatus("RENDER");
+
+            const frameCanvas = document.createElement("canvas");
+            drawCurrentViewToCanvas(frameCanvas);
+            const fps = getGifFpsValue();
+            const delay = Math.round(1000 / fps);
+            const exportXSpeed = readSpeedSlider("xSpeed");
+            const exportYSpeed = readSpeedSlider("ySpeed");
+            const exportMaxSpeed = Math.max(exportXSpeed, exportYSpeed);
+            const exportShouldSpin = exportMaxSpeed > 0.001;
+            const fullTurnSeconds = exportShouldSpin ? (Math.PI * 2) / exportMaxSpeed : 0;
+            const seamlessLoopSeconds = exportShouldSpin ? Math.max(1.2, Math.min(12, fullTurnSeconds)) : 0;
+            const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : staticExportFrameCount();
+            const runtimes = [...sceneShapeRuntime.values()].filter((runtime) => runtime?.mesh);
+            const baseRotations = runtimes.map((runtime) => runtime.mesh.rotation.clone());
+            const exportXRotationSpan = exportShouldSpin && exportXSpeed > 0.001 ? Math.PI * 2 : 0;
+            const exportYRotationSpan = exportShouldSpin && exportYSpeed > 0.001 ? Math.PI * 2 : 0;
+
+            const stream = frameCanvas.captureStream?.(0);
+            const track = stream?.getVideoTracks?.()[0];
+            if (!stream || !track) {
+                hideSaveOverlay();
+                exportBtn.disabled = false;
+                setStatus("WEBM?");
+                return;
+            }
+
+            const chunks = [];
+            const mimeType = bestWebmMimeType();
+            let recorder;
+            try {
+                recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+            } catch (error) {
+                hideSaveOverlay();
+                exportBtn.disabled = false;
+                setStatus("WEBM?");
+                console.warn("CubePaint WebM recorder failed:", error);
+                return;
+            }
+
+            recorder.ondataavailable = (event) => {
+                if (event.data?.size) chunks.push(event.data);
+            };
+            const finished = new Promise((resolve, reject) => {
+                recorder.onstop = resolve;
+                recorder.onerror = () => reject(recorder.error || new Error("WebM recorder failed"));
+            });
+
+            try {
+                recorder.start();
+                for (let i = 0; i < frames; i++) {
+                    const t = exportShouldSpin ? i / frames : 0;
+                    const animatedChanged = updateAnimatedFacesForExport(i * delay);
+                    runtimes.forEach((runtime, runtimeIndex) => {
+                        runtime.mesh.rotation.copy(baseRotations[runtimeIndex]);
+                        runtime.mesh.rotation.y += t * exportXRotationSpan;
+                        runtime.mesh.rotation.x += t * exportYRotationSpan;
+                        if (animatedChanged) {
+                            runtime.textures?.forEach((texture) => {
+                                texture.needsUpdate = true;
+                            });
+                        }
+                        applyVertexWobbleToMesh(runtime.mesh, i * delay);
+                    });
+                    drawCurrentViewToCanvas(frameCanvas);
+                    track.requestFrame?.();
+                    if (i % 8 === 0) setStatus(`${i + 1}/${frames}`);
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                }
+                recorder.stop();
+                await finished;
+                const blob = new Blob(chunks, { type: mimeType || "video/webm" });
+                downloadBlob(blob, "cubepaint.webm");
+                setStatus(`${(blob.size / 1024 / 1024).toFixed(2)}MB`);
+            } catch (error) {
+                try { if (recorder.state !== "inactive") recorder.stop(); } catch (_) {}
+                setStatus("WEBM ERR");
+                console.warn("CubePaint WebM export failed:", error);
+            } finally {
+                runtimes.forEach((runtime, runtimeIndex) => {
+                    runtime.mesh.rotation.copy(baseRotations[runtimeIndex]);
+                    if (!vertexWobbleEnabled) restoreBaseGeometryPositions(runtime.mesh.geometry, true);
+                });
+                track.stop?.();
+                hideSaveOverlay();
+                exportBtn.disabled = false;
+                renderer.render(scene, camera);
+            }
+        }
+
+        function updateExportFormatControl() {
+            const select = document.getElementById("exportFormat");
+            const btn = document.getElementById("exportGifBtn");
+            if (!select || !btn) return;
+            const label = (select.options[select.selectedIndex]?.text || select.value || "GIF").toUpperCase();
+            btn.title = `export ${label.toLowerCase()}`;
+            btn.setAttribute("aria-label", `export ${label.toLowerCase()}`);
+        }
+
+        document.getElementById("exportFormat")?.addEventListener("change", () => {
+            updateExportFormatControl();
+            scheduleSave();
+        });
+        updateExportFormatControl();
+
+        document.getElementById("projectUpload")?.addEventListener("change", (event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            importProjectFile(file);
+        });
+
         document.getElementById("exportGifBtn").addEventListener("click", async () => {
+            const selectedExportFormat = document.getElementById("exportFormat")?.value || "gif";
+            if (selectedExportFormat === "cubepaint") {
+                await exportProjectFile();
+                return;
+            }
+            if (selectedExportFormat === "webm") {
+                await exportWebmView();
+                return;
+            }
+            if (selectedExportFormat === "png") {
+                await exportPngView();
+                return;
+            }
+
             if (!webglAvailable || !renderer || !scene || !camera || !sceneShapeRuntime.size) {
                 setStatus("NO WEBGL");
                 return;
@@ -11371,7 +12360,8 @@
                 hueIndex,
                 satIndex,
                 valueIndex,
-                alphaIndex: 0,
+                alphaIndex: activeBrushIsTransparent() ? ALPHA_STEPS - 1 : 0,
+                brushTransparent: activeBrushIsTransparent(),
                 colorHistory: colorHistory.map(normalizeColorHistoryEntry).filter(Boolean),
                 settings: {
                     xSpeed: document.getElementById("xSpeed")?.value ?? "0.6",
@@ -11380,11 +12370,15 @@
                     gifFrames: DEFAULT_GIF_FRAMES,
                     gifFpsIndex: Math.max(0, Math.min(GIF_FPS_PRESETS.length - 1, Math.round(Number(document.getElementById("gifFps")?.value ?? DEFAULT_GIF_FPS_INDEX)))),
                     gifFps: getGifFpsValue(),
+                    exportFormat: document.getElementById("exportFormat")?.value || "gif",
                     bgColor: bgColor.value,
                     bgAlpha,
                     bgAlphaIndex,
                     bgTransparent: bgAlpha <= 0.001,
                     shadingEnabled,
+                    lightIntensity,
+                    lightAzimuth: THREE.MathUtils.radToDeg(lightAzimuth),
+                    lightHeight: THREE.MathUtils.radToDeg(lightHeight),
                     vertexWobbleEnabled,
                     vertexWobbleAmount
                 },
@@ -11396,7 +12390,8 @@
                         x: warudoCameraPosition.x,
                         y: warudoCameraPosition.y,
                         z: warudoCameraPosition.z
-                    }
+                    },
+                    fov: camera?.fov || 35
                 },
                 shapeRotations,
                 shapeTransforms,
@@ -11532,6 +12527,11 @@
                     });
                     document.getElementById("gifFps").value = String(closest);
                 }
+                if (session.settings.exportFormat != null && document.getElementById("exportFormat")) {
+                    const format = ["gif", "webm", "png", "cubepaint"].includes(String(session.settings.exportFormat)) ? String(session.settings.exportFormat) : "gif";
+                    document.getElementById("exportFormat").value = format;
+                    updateExportFormatControl();
+                }
                 if (session.settings.bgColor != null) applyBgColor(session.settings.bgColor, false);
                 if (session.settings.bgAlphaIndex != null) {
                     bgAlphaIndex = Math.max(0, Math.min(ALPHA_STEPS - 1, Math.round(Number(session.settings.bgAlphaIndex) || 0)));
@@ -11543,6 +12543,16 @@
                     bgAlpha = (session.settings.bgTransparent === true || session.settings.bgTransparent === "true") ? 0 : 1;
                     bgAlphaIndex = bgAlpha === 0 ? ALPHA_STEPS - 1 : 0;
                 }
+                if (session.settings.lightIntensity != null) {
+                    lightIntensity = Math.max(0, Math.min(2, Number(session.settings.lightIntensity) || 0));
+                }
+                if (session.settings.lightAzimuth != null) {
+                    lightAzimuth = THREE.MathUtils.degToRad(Math.max(-180, Math.min(180, Number(session.settings.lightAzimuth) || 0)));
+                }
+                if (session.settings.lightHeight != null) {
+                    lightHeight = THREE.MathUtils.degToRad(Math.max(-80, Math.min(80, Number(session.settings.lightHeight) || 0)));
+                }
+                updateLightingControls();
                 if (session.settings.vertexWobbleAmount != null) {
                     vertexWobbleAmount = Math.max(0, Math.min(1, Number(session.settings.vertexWobbleAmount) || 0));
                     vertexWobbleEnabled = vertexWobbleAmount > 0.001;
@@ -11660,11 +12670,6 @@
                 const shapeId = shapeKey === "donut" ? "doughnut" : shapeKey;
                 const def = shapeDefById(savedShape?.shapeId || shapeId);
                 if (!def) return;
-                if (!getSceneShape(shapeId) && (savedShape?.shapeId || findShapeDef(shapeId))) {
-                    if (!sceneShapes.some((shape) => shape.id === shapeId)) {
-                        sceneShapes.push({ id: shapeId, shapeId: def.id, name: savedShape?.name || def.label, visible: true });
-                    }
-                }
                 const store = getShapeStore(shapeId);
                 if (Number.isInteger(savedShape.currentFace)) {
                     store.currentFace = Math.max(0, Math.min(store.faces.length - 1, savedShape.currentFace));
@@ -11705,6 +12710,7 @@
             setBgColorHex(bgColor.value, false);
             updateBgPickerVisuals();
             updateWobbleButton();
+            updateLightingControls();
             updateShapeExtraControls();
             updateSpeedReadout();
             initializeRangeProgress();
