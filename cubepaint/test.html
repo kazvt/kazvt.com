@@ -3379,6 +3379,158 @@
         }
 
 
+
+
+        /* Compact bottom dropdown controls: keep the export bar clean while preserving full settings. */
+        .compact-export {
+            position: relative;
+            overflow: visible !important;
+            gap: clamp(4px, 0.65dvh, 7px) !important;
+        }
+
+        .compact-bottom-controls.export-grid.project-export-enabled {
+            grid-template-columns: minmax(44px, 0.72fr) minmax(52px, 0.82fr) minmax(58px, 0.92fr) minmax(40px, 0.62fr) minmax(58px, 0.92fr) minmax(34px, 0.46fr) minmax(44px, 0.58fr) !important;
+            align-items: stretch !important;
+            overflow: visible !important;
+        }
+
+        .bottom-dropdown {
+            position: relative;
+            min-width: 0;
+            overflow: visible;
+            align-self: stretch;
+        }
+
+        .bottom-dropdown > summary {
+            list-style: none;
+        }
+
+        .bottom-dropdown > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .bottom-dropdown-summary {
+            width: 100% !important;
+            height: 30px !important;
+            min-height: 0 !important;
+            min-width: 0 !important;
+            padding: 0 4px !important;
+            font-size: 8px !important;
+            letter-spacing: 0.035em;
+            user-select: none;
+        }
+
+        .bottom-dropdown[open] > .bottom-dropdown-summary {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .bottom-dropdown-panel {
+            position: absolute;
+            left: 0;
+            bottom: calc(100% + 8px);
+            z-index: 80;
+            width: min(360px, calc(100vw - 24px));
+            max-width: calc(100vw - 24px);
+            border: 2px solid var(--line);
+            background: var(--paper2);
+            box-shadow: 0 5px 0 var(--ink);
+            padding: 7px;
+            display: grid;
+            gap: 7px;
+        }
+
+        .shade-dropdown .bottom-dropdown-panel,
+        .motion-dropdown .bottom-dropdown-panel {
+            width: min(430px, calc(100vw - 24px));
+        }
+
+        .bg-dropdown .bottom-dropdown-panel {
+            width: min(306px, calc(100vw - 24px));
+        }
+
+        .bg-dropdown .bottom-dropdown-panel {
+            right: 0;
+            left: auto;
+        }
+
+        .compact-export .view-preset-grid.bottom-dropdown-panel {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .shade-panel #shadingBtn {
+            height: 30px !important;
+            width: 100%;
+        }
+
+        .shade-panel .lighting-control-grid,
+        .motion-panel {
+            grid-template-columns: 1fr;
+            gap: 7px;
+        }
+
+        .shade-panel .light-field,
+        .motion-panel .speed-field,
+        .motion-panel .fps-field,
+        .motion-panel .psx-field {
+            min-height: 24px;
+        }
+
+        .motion-panel .speed-stack {
+            grid-template-rows: repeat(2, minmax(22px, auto)) !important;
+            gap: 5px !important;
+            overflow: visible !important;
+        }
+
+        .compact-export .bg-field {
+            overflow: visible !important;
+        }
+
+        .compact-export .bg-picker-shell,
+        .compact-export .bg-picker-toggle {
+            width: 100%;
+        }
+
+        .compact-export .bg-picker-panel {
+            right: auto !important;
+            left: 0 !important;
+            bottom: calc(100% + 8px) !important;
+            transform: none !important;
+            z-index: 100;
+        }
+
+        .compact-bottom-controls .export-format-field,
+        .compact-bottom-controls #exportGifBtn,
+        .compact-bottom-controls .project-import-btn {
+            height: 30px !important;
+            align-self: stretch !important;
+        }
+
+        @media (max-width: 720px), (max-height: 680px) {
+            .compact-bottom-controls.export-grid.project-export-enabled {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            }
+
+            .view-dropdown .bottom-dropdown-panel,
+            .shade-dropdown .bottom-dropdown-panel,
+            .motion-dropdown .bottom-dropdown-panel {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .compact-bottom-controls.export-grid.project-export-enabled {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            }
+
+            .bottom-dropdown-summary,
+            .project-import-btn,
+            #exportFormat {
+                font-size: 7px !important;
+            }
+        }
+
         /* Project save/open controls for editable .cubepaint files. */
         .project-import-btn {
             width: 100% !important;
@@ -3636,76 +3788,95 @@
                         </div>
                     </div>
 
-                    <div class="export">
-                        <div class="view-preset-grid" id="viewPresetGrid" aria-label="camera presets">
-                            <button class="btn view-preset-btn" type="button" data-view-preset="eastWest" title="east / west view">E/W</button>
-                            <button class="btn view-preset-btn" type="button" data-view-preset="northSouth" title="north / south view">N/S</button>
-                            <button class="btn view-preset-btn" type="button" data-view-preset="upDown" title="up / down view">U/D</button>
-                            <button class="btn view-preset-btn" type="button" data-view-preset="iso" title="isometric view">ISO</button>
-                            <button class="btn view-preset-btn" type="button" data-view-preset="fit" title="zoom extents / center shapes">FIT</button>
-                            <button class="btn view-preset-btn" type="button" data-view-preset="flat" title="toggle flat FOV">FLAT</button>
-                        </div>
-                        <div class="lighting-control-grid" id="lightingControlGrid" aria-label="lighting controls">
-                            <label class="light-field" title="light intensity"><span>LIGHT</span><input id="lightIntensity" type="range" min="0" max="200" step="5" value="100" aria-label="light intensity" /><strong id="lightIntensityReadout">100%</strong></label>
-                            <label class="light-field" title="light direction"><span>DIR</span><input id="lightAzimuth" type="range" min="-180" max="180" step="5" value="140" aria-label="light direction" /><strong id="lightAzimuthReadout">140°</strong></label>
-                            <label class="light-field" title="light height"><span>UP</span><input id="lightHeight" type="range" min="-80" max="80" step="5" value="35" aria-label="light height" /><strong id="lightHeightReadout">35°</strong></label>
-                        </div>
-                        <div class="export-grid project-export-enabled">
-                            <div class="field speed-stack" title="speed preview">
-                                <div class="speed-field x-speed-field" title="X speed preview">
-                                    <span class="field-label" title="X speed preview">XS:</span>
-                                    <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X speed preview" aria-label="X speed preview" />
+                    <div class="export compact-export">
+                        <div class="export-grid project-export-enabled compact-bottom-controls">
+                            <details class="bottom-dropdown view-dropdown">
+                                <summary class="btn bottom-dropdown-summary" title="camera presets and view fit">VIEW</summary>
+                                <div class="bottom-dropdown-panel view-preset-grid" id="viewPresetGrid" aria-label="camera presets">
+                                    <button class="btn view-preset-btn" type="button" data-view-preset="eastWest" title="east / west view">E/W</button>
+                                    <button class="btn view-preset-btn" type="button" data-view-preset="northSouth" title="north / south view">N/S</button>
+                                    <button class="btn view-preset-btn" type="button" data-view-preset="upDown" title="up / down view">U/D</button>
+                                    <button class="btn view-preset-btn" type="button" data-view-preset="iso" title="isometric view">ISO</button>
+                                    <button class="btn view-preset-btn" type="button" data-view-preset="fit" title="zoom extents / center shapes">FIT</button>
+                                    <button class="btn view-preset-btn" type="button" data-view-preset="flat" title="toggle flat FOV">FLAT</button>
                                 </div>
-                                <div class="speed-field y-speed-field" title="Y speed preview">
-                                    <span class="field-label" title="Y speed preview">YS:</span>
-                                    <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y speed preview" aria-label="Y speed preview" />
-                                </div>
-                            </div>
+                            </details>
 
-                            <input id="gifSize" type="hidden" value="512" />
-                            <input id="gifFrames" type="hidden" value="72" />
-
-                            <div class="field fps-field" title="FPS preview">
-                                <span class="field-label">FPS: <strong id="gifFpsReadout">CLASSIC</strong></span>
-                                <input id="gifFps" type="range" min="0" max="4" step="1" value="2" title="FPS preview" aria-label="FPS preview" />
-                            </div>
-
-                            <div class="field psx-field" title="PSX aliasing">
-                                <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
-                                <input id="psxWobble" type="range" min="0" max="4" step="1" value="1" title="PSX aliasing" aria-label="PSX aliasing" />
-                            </div>
-
-                            <div class="field bg-field">
-                                <span>BG</span>
-                                <div class="bg-picker-shell" id="bgPickerShell">
-                                    <button class="bg-picker-toggle" id="bgPickerToggle" type="button" title="background color and transparency">
-                                        <span id="bgColorToggleText">BG</span>
-                                        <span class="bg-picker-chip" id="bgPickerChip" hidden></span>
-                                        <strong id="bgAlphaReadout" hidden>OPAQUE</strong>
-                                    </button>
-                                    <div class="bg-picker-panel" id="bgPickerPanel">
-                                        <div class="bg-picker-main">
-                                            <canvas id="bgColorSquare" width="112" height="112" title="background saturation and brightness"></canvas>
-                                            <canvas id="bgHueSlider" width="22" height="112" title="background hue"></canvas>
-                                            <canvas id="bgAlphaSlider" width="22" height="112" title="background opacity"></canvas>
-                                            <div class="bg-picker-meta">
-                                                <div class="bg-swatch" id="bgSwatch"></div>
-                                                <div class="color-readout">
-                                                    <span>BG</span>
-                                                    <div id="bgColorHexReadout">#140306</div>
-                                                    <div class="alpha-readout" id="bgOpacityReadout">ALPHA 100%</div>
-                                                </div>
-                                                <button class="picker-sampler-btn" id="bgEyeDropperBtn" type="button" title="pick background color from canvas or view">PICK</button>
-                                            </div>
-                                        </div>
+                            <details class="bottom-dropdown shade-dropdown">
+                                <summary class="btn bottom-dropdown-summary" title="shading and lighting controls">SHADE</summary>
+                                <div class="bottom-dropdown-panel shade-panel">
+                                    <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
+                                    <div class="lighting-control-grid" id="lightingControlGrid" aria-label="lighting controls">
+                                        <label class="light-field" title="light intensity"><span>LIGHT</span><input id="lightIntensity" type="range" min="0" max="200" step="5" value="100" aria-label="light intensity" /><strong id="lightIntensityReadout">100%</strong></label>
+                                        <label class="light-field" title="light direction"><span>DIR</span><input id="lightAzimuth" type="range" min="-180" max="180" step="5" value="140" aria-label="light direction" /><strong id="lightAzimuthReadout">140°</strong></label>
+                                        <label class="light-field" title="light height"><span>UP</span><input id="lightHeight" type="range" min="-80" max="80" step="5" value="35" aria-label="light height" /><strong id="lightHeightReadout">35°</strong></label>
                                     </div>
                                 </div>
-                                <input id="bgColor" type="hidden" value="#140306" />
-                            </div>
+                            </details>
+
+                            <details class="bottom-dropdown motion-dropdown">
+                                <summary class="btn bottom-dropdown-summary" title="animation, FPS, and PSX settings">MOTION</summary>
+                                <div class="bottom-dropdown-panel motion-panel">
+                                    <div class="field speed-stack" title="speed preview">
+                                        <div class="speed-field x-speed-field" title="X speed preview">
+                                            <span class="field-label" title="X speed preview">XS:</span>
+                                            <input id="xSpeed" type="range" min="0" max="3" step="0.05" value="0.6" title="X speed preview" aria-label="X speed preview" />
+                                        </div>
+                                        <div class="speed-field y-speed-field" title="Y speed preview">
+                                            <span class="field-label" title="Y speed preview">YS:</span>
+                                            <input id="ySpeed" type="range" min="0" max="3" step="0.05" value="0" title="Y speed preview" aria-label="Y speed preview" />
+                                        </div>
+                                    </div>
+
+                                    <input id="gifSize" type="hidden" value="512" />
+                                    <input id="gifFrames" type="hidden" value="72" />
+
+                                    <div class="field fps-field" title="FPS preview">
+                                        <span class="field-label">FPS: <strong id="gifFpsReadout">CLASSIC</strong></span>
+                                        <input id="gifFps" type="range" min="0" max="4" step="1" value="2" title="FPS preview" aria-label="FPS preview" />
+                                    </div>
+
+                                    <div class="field psx-field" title="PSX aliasing">
+                                        <span class="field-label">PSX: <strong id="psxWobbleReadout">OFF</strong></span>
+                                        <input id="psxWobble" type="range" min="0" max="4" step="1" value="1" title="PSX aliasing" aria-label="PSX aliasing" />
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details class="bottom-dropdown bg-dropdown">
+                                <summary class="btn bottom-dropdown-summary" title="background color and transparency">BG</summary>
+                                <div class="bottom-dropdown-panel bg-panel">
+                                    <div class="field bg-field">
+                                        <span>BG</span>
+                                        <div class="bg-picker-shell" id="bgPickerShell">
+                                            <button class="bg-picker-toggle" id="bgPickerToggle" type="button" title="background color and transparency">
+                                                <span id="bgColorToggleText">BG</span>
+                                                <span class="bg-picker-chip" id="bgPickerChip" hidden></span>
+                                                <strong id="bgAlphaReadout" hidden>OPAQUE</strong>
+                                            </button>
+                                            <div class="bg-picker-panel" id="bgPickerPanel">
+                                                <div class="bg-picker-main">
+                                                    <canvas id="bgColorSquare" width="112" height="112" title="background saturation and brightness"></canvas>
+                                                    <canvas id="bgHueSlider" width="22" height="112" title="background hue"></canvas>
+                                                    <canvas id="bgAlphaSlider" width="22" height="112" title="background opacity"></canvas>
+                                                    <div class="bg-picker-meta">
+                                                        <div class="bg-swatch" id="bgSwatch"></div>
+                                                        <div class="color-readout">
+                                                            <span>BG</span>
+                                                            <div id="bgColorHexReadout">#140306</div>
+                                                            <div class="alpha-readout" id="bgOpacityReadout">ALPHA 100%</div>
+                                                        </div>
+                                                        <button class="picker-sampler-btn" id="bgEyeDropperBtn" type="button" title="pick background color from canvas or view">PICK</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input id="bgColor" type="hidden" value="#140306" />
+                                    </div>
+                                </div>
+                            </details>
 
                             <button class="btn" id="resetViewBtn" title="reset view" hidden>RESET VIEW</button>
-
-                            <button class="btn" id="shadingBtn" title="toggle shading">SHADE</button>
 
                             <div class="field export-format-field" title="export format">
                                 <span class="field-label">TYPE</span>
@@ -12279,6 +12450,20 @@
             scheduleSave();
         });
         updateExportFormatControl();
+
+        const bottomDropdowns = Array.from(document.querySelectorAll(".bottom-dropdown"));
+        bottomDropdowns.forEach((dropdown) => {
+            dropdown.addEventListener("toggle", () => {
+                if (!dropdown.open) return;
+                bottomDropdowns.forEach((other) => {
+                    if (other !== dropdown) other.open = false;
+                });
+            });
+        });
+        window.addEventListener("pointerdown", (event) => {
+            if (event.target.closest(".bottom-dropdown")) return;
+            bottomDropdowns.forEach((dropdown) => { dropdown.open = false; });
+        }, { passive: true });
 
         document.getElementById("projectUpload")?.addEventListener("change", (event) => {
             const file = event.target.files?.[0];
