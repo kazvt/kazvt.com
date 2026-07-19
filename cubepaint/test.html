@@ -3407,6 +3407,18 @@
             }
         }
 
+
+        /* Canvas interaction hardening: prevent browser/DOM dragging while painting. */
+        .canvas-stack,
+        .canvas-stack canvas,
+        #paintCanvas,
+        #guideCanvas {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+        }
+
 </style>
 </head>
 
@@ -3716,7 +3728,7 @@
                             <input id="projectUpload" type="file" accept=".cubepaint,application/json" />
                         </div>
 
-                        <div id="result"><div class="view-control-hint">LEFT = SELECT | RIGHT = LOOK | MIDDLE = PAN | WASD = MOVE | SHFT = SPRINT | QE = HEIGHT</div></div>
+                        <div id="result"><div class="view-control-hint">LEFT = SELECT | F = FOCUS | W/E/R/S = GIZMOS | RIGHT = LOOK | WASD+QE = FLY</div></div>
                     </div>
                 </div>
             </section>
@@ -3777,7 +3789,7 @@
         const DEFAULT_SHAPE_SPACING = 2.35;
         const TRANSFORM_HANDLE_LENGTH = 1.72;
         const TRANSFORM_HANDLE_RADIUS = 1.22;
-        const TRANSFORM_HANDLE_COLORS = { x: 0xff4d4d, y: 0x5dff70, z: 0x5da5ff, screen: 0xfff6d8, xz: 0xf0c85b };
+        const TRANSFORM_HANDLE_COLORS = { x: 0xff4d4d, y: 0x5dff70, z: 0x5da5ff, screen: 0xfff6d8, xz: 0xf0c85b, uniform: 0xfff6d8 };
         const SHAPE_OPTION_DEFAULTS = {
             corner: 0,
             thickness: 16,
@@ -4019,6 +4031,7 @@
         let draggingBgSquare = false;
         let draggingBgHue = false;
         let draggingBgAlpha = false;
+        let colorPickerRedrawPending = false;
         let customColorPickMode = null;
         let shapeStart = null;
         let shapeSnapshot = null;
@@ -4309,7 +4322,8 @@
                     const centered = index - (sceneShapes.length - 1) / 2;
                     shapeTransforms[shape.id] = {
                         position: { x: centered * DEFAULT_SHAPE_SPACING, y: 0, z: 0 },
-                        rotation: { x: transform.rotation.x, y: transform.rotation.y, z: transform.rotation.z }
+                        rotation: { x: transform.rotation.x, y: transform.rotation.y, z: transform.rotation.z },
+                        scale: { x: transform.scale.x, y: transform.scale.y, z: transform.scale.z }
                     };
                 }
                 getShapeStore(shape.id);
@@ -4502,6 +4516,11 @@
                         x: shapeRoot.rotation.x,
                         y: shapeRoot.rotation.y,
                         z: shapeRoot.rotation.z
+                    },
+                    scale: {
+                        x: shapeRoot.scale.x,
+                        y: shapeRoot.scale.y,
+                        z: shapeRoot.scale.z
                     }
                 };
                 shapeRotations[currentShapeId] = { ...shapeTransforms[currentShapeId].rotation };
@@ -4511,6 +4530,10 @@
         function getStoredShapeTransform(id) {
             const transform = shapeTransforms[id] || {};
             const legacyRotation = shapeRotations[id] || {};
+            const scaleValue = (value) => {
+                const next = Number(value);
+                return Number.isFinite(next) && next > 0.001 ? next : 1;
+            };
             return {
                 position: {
                     x: Number(transform.position?.x) || 0,
@@ -4521,6 +4544,11 @@
                     x: Number(transform.rotation?.x ?? legacyRotation.x) || 0,
                     y: Number(transform.rotation?.y ?? legacyRotation.y) || 0,
                     z: Number(transform.rotation?.z ?? legacyRotation.z) || 0
+                },
+                scale: {
+                    x: scaleValue(transform.scale?.x),
+                    y: scaleValue(transform.scale?.y),
+                    z: scaleValue(transform.scale?.z)
                 }
             };
         }
@@ -4530,6 +4558,7 @@
             const transform = getStoredShapeTransform(id);
             target.position.set(transform.position.x, transform.position.y, transform.position.z);
             target.rotation.set(transform.rotation.x, transform.rotation.y, transform.rotation.z);
+            target.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
         }
 
         function shapeOptionDefinitions(def = getCurrentShapeDef()) {
@@ -7212,7 +7241,8 @@
             const row = Math.floor(count / 7);
             shapeTransforms[id] = {
                 position: { x: column * DEFAULT_SHAPE_SPACING, y: 0, z: row * -DEFAULT_SHAPE_SPACING },
-                rotation: { ...transform.rotation }
+                rotation: { ...transform.rotation },
+                scale: { ...transform.scale }
             };
         }
 
@@ -7388,13 +7418,13 @@
             const face = faces[materialIndex];
             const profile = getFaceFitProfile(def, face);
 
-            if (face?.mapMode === "fit" && profile?.kind === "triangle") {
-                addInnerGuideTriangleFace(data, materialIndex, apex, baseLeft, baseRight, profile);
+            if (soft?.amount > 0.001) {
+                addSoftCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, soft.amount, soft.bounds, face?.mapMode === "fit" ? profile : null);
                 return;
             }
 
-            if (soft?.amount > 0.001) {
-                addSoftCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, soft.amount, soft.bounds);
+            if (face?.mapMode === "fit" && profile?.kind === "triangle") {
+                addInnerGuideTriangleFace(data, materialIndex, apex, baseLeft, baseRight, profile);
                 return;
             }
 
@@ -7554,14 +7584,34 @@
             return softenPolyPoint(point, amount, bounds);
         }
 
-        function addSoftCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, amount, bounds) {
+        function mapTriangleProfileUv(profile, u, v) {
+            if (profile?.kind !== "triangle" || !profile.points || profile.points.length < 3) {
+                return { u, v: 1 - v };
+            }
+            const apex = profile.points[0];
+            const right = profile.points[1];
+            const left = profile.points[2];
+            const baseX = left[0] + (right[0] - left[0]) * clamp01(u);
+            const baseY = left[1] + (right[1] - left[1]) * clamp01(u);
+            const canvasX = apex[0] + (baseX - apex[0]) * clamp01(v);
+            const canvasY = apex[1] + (baseY - apex[1]) * clamp01(v);
+            return {
+                u: canvasX / FACE_SIZE,
+                v: 1 - (canvasY / FACE_SIZE)
+            };
+        }
+
+        function addSoftCanvasTriangleFace(data, materialIndex, apex, baseLeft, baseRight, amount, bounds, profile = null) {
             const steps = amount <= 0.001 ? 1 : Math.max(4, Math.min(8, 4 + Math.round(amount * 4)));
             const start = data.positions.length / 3;
 
             if (steps <= 1) {
-                pushMappedVertex(data, apex, 0.5, 1);
-                pushMappedVertex(data, baseLeft, 0, 0);
-                pushMappedVertex(data, baseRight, 1, 0);
+                const apexUv = mapTriangleProfileUv(profile, 0.5, 0);
+                const leftUv = mapTriangleProfileUv(profile, 0, 1);
+                const rightUv = mapTriangleProfileUv(profile, 1, 1);
+                pushMappedVertex(data, apex, apexUv.u, apexUv.v);
+                pushMappedVertex(data, baseLeft, leftUv.u, leftUv.v);
+                pushMappedVertex(data, baseRight, rightUv.u, rightUv.v);
                 data.groups.push({ start, count: (data.positions.length / 3) - start, materialIndex });
                 return;
             }
@@ -7577,12 +7627,16 @@
                     const p01 = warpedSoftTrianglePoint(apex, baseLeft, baseRight, u0, v1, amount, bounds);
                     const p11 = warpedSoftTrianglePoint(apex, baseLeft, baseRight, u1, v1, amount, bounds);
 
-                    pushMappedVertex(data, p00, u0, 1 - v0);
-                    pushMappedVertex(data, p01, u0, 1 - v1);
-                    pushMappedVertex(data, p11, u1, 1 - v1);
-                    pushMappedVertex(data, p00, u0, 1 - v0);
-                    pushMappedVertex(data, p11, u1, 1 - v1);
-                    pushMappedVertex(data, p10, u1, 1 - v0);
+                    const uv00 = mapTriangleProfileUv(profile, u0, v0);
+                    const uv01 = mapTriangleProfileUv(profile, u0, v1);
+                    const uv11 = mapTriangleProfileUv(profile, u1, v1);
+                    const uv10 = mapTriangleProfileUv(profile, u1, v0);
+                    pushMappedVertex(data, p00, uv00.u, uv00.v);
+                    pushMappedVertex(data, p01, uv01.u, uv01.v);
+                    pushMappedVertex(data, p11, uv11.u, uv11.v);
+                    pushMappedVertex(data, p00, uv00.u, uv00.v);
+                    pushMappedVertex(data, p11, uv11.u, uv11.v);
+                    pushMappedVertex(data, p10, uv10.u, uv10.v);
                 }
             }
 
@@ -8523,7 +8577,8 @@
         function updateTransformModeReadout() {
             if (!shapeRoot) return;
             const snapText = transformSnapActive() ? " + SNAP" : "";
-            setStatus(`${transformMode === "rotate" ? "ROTATE" : "MOVE"}${snapText}`);
+            const label = transformMode === "rotate" ? "ROTATE" : (transformMode === "scale" ? "SCALE" : "MOVE");
+            setStatus(`${label}${snapText}`);
         }
 
         function makeHandleMaterial(axis, opacity = 0.95) {
@@ -8591,6 +8646,36 @@
             transformHandleRoot.add(group);
         }
 
+        function addScaleHandle(axis, direction = null) {
+            const group = new THREE.Group();
+            group.userData.mode = "scale";
+            group.userData.axis = axis;
+            const material = makeHandleMaterial(axis, axis === "uniform" ? 0.92 : 0.96);
+            const hitMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false });
+            if (axis === "uniform") {
+                const box = markTransformHandle(new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.24), material), "scale", axis);
+                const hit = markTransformHandle(new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.48, 0.48), hitMaterial), "scale", axis);
+                group.add(box, hit);
+            } else {
+                const lineGeometry = new THREE.CylinderGeometry(0.014, 0.014, TRANSFORM_HANDLE_LENGTH * 0.78, 6);
+                const lineMesh = markTransformHandle(new THREE.Mesh(lineGeometry, material), "scale", axis);
+                lineMesh.position.copy(direction.clone().multiplyScalar((TRANSFORM_HANDLE_LENGTH * 0.78) / 2));
+                const boxMesh = markTransformHandle(new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), material.clone()), "scale", axis);
+                boxMesh.position.copy(direction.clone().multiplyScalar(TRANSFORM_HANDLE_LENGTH * 0.88));
+                const hitMesh = markTransformHandle(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, TRANSFORM_HANDLE_LENGTH, 8), hitMaterial), "scale", axis);
+                hitMesh.position.copy(direction.clone().multiplyScalar(TRANSFORM_HANDLE_LENGTH / 2));
+                if (axis === "x") {
+                    lineMesh.rotation.z = -Math.PI / 2;
+                    hitMesh.rotation.z = -Math.PI / 2;
+                } else if (axis === "z") {
+                    lineMesh.rotation.x = Math.PI / 2;
+                    hitMesh.rotation.x = Math.PI / 2;
+                }
+                group.add(lineMesh, boxMesh, hitMesh);
+            }
+            transformHandleRoot.add(group);
+        }
+
         function addRotateHandle(axis) {
             const material = makeHandleMaterial(axis, 0.78);
             const torus = markTransformHandle(new THREE.Mesh(new THREE.TorusGeometry(TRANSFORM_HANDLE_RADIUS, 0.018, 8, 96), material), "rotate", axis);
@@ -8620,6 +8705,10 @@
             addMoveHandle("z", new THREE.Vector3(0, 0, 1));
             addMovePlaneHandle("screen");
             addMovePlaneHandle("xz");
+            addScaleHandle("uniform");
+            addScaleHandle("x", new THREE.Vector3(1, 0, 0));
+            addScaleHandle("y", new THREE.Vector3(0, 1, 0));
+            addScaleHandle("z", new THREE.Vector3(0, 0, 1));
             addRotateHandle("x");
             addRotateHandle("y");
             addRotateHandle("z");
@@ -8636,7 +8725,7 @@
         }
 
         function setTransformMode(next = transformMode) {
-            transformMode = next === "rotate" ? "rotate" : "move";
+            transformMode = next === "rotate" ? "rotate" : (next === "scale" ? "scale" : "move");
             ensureTransformControls();
             updateTransformControlsMode();
             updateTransformModeReadout();
@@ -8716,6 +8805,7 @@
                 centerScreen: rootScreen,
                 startPosition: shapeRoot.position.clone(),
                 startRotation: shapeRoot.rotation.clone(),
+                startScale: shapeRoot.scale.clone(),
                 startAngle: pointerAngle
             };
             renderer.domElement.setPointerCapture(event.pointerId);
@@ -8763,6 +8853,35 @@
                     });
                 }
                 shapeRoot.position.copy(next);
+            } else if (drag.mode === "scale") {
+                const dx = event.clientX - drag.startPointer.x;
+                const dy = event.clientY - drag.startPointer.y;
+                let pixels;
+                if (drag.axis === "uniform") {
+                    pixels = dx - dy;
+                } else {
+                    pixels = dx * drag.screenAxis.x + dy * drag.screenAxis.y;
+                }
+                let factor = Math.exp(pixels * 0.0085);
+                if (!Number.isFinite(factor)) factor = 1;
+                const nextScale = drag.startScale.clone();
+                const clampScale = (value) => Math.max(0.08, Math.min(12, value));
+                if (drag.axis === "uniform") {
+                    nextScale.x = clampScale(drag.startScale.x * factor);
+                    nextScale.y = clampScale(drag.startScale.y * factor);
+                    nextScale.z = clampScale(drag.startScale.z * factor);
+                } else if (["x", "y", "z"].includes(drag.axis)) {
+                    nextScale[drag.axis] = clampScale(drag.startScale[drag.axis] * factor);
+                }
+                if (transformSnapActive()) {
+                    const step = 0.25;
+                    ["x", "y", "z"].forEach((axisName) => {
+                        if (drag.axis === "uniform" || drag.axis === axisName) {
+                            nextScale[axisName] = Math.max(0.08, Math.round(nextScale[axisName] / step) * step);
+                        }
+                    });
+                }
+                shapeRoot.scale.copy(nextScale);
             } else {
                 const angle = Math.atan2(event.clientY - drag.centerScreen.y, event.clientX - drag.centerScreen.x);
                 let delta = angle - drag.startAngle;
@@ -10093,8 +10212,10 @@
             if (commit) scheduleSave();
         }
 
-        function applyBrushColor(hex) {
+        function applyBrushColor(hex, options = {}) {
             const normalized = normalizeHex(hex);
+            const redraw = options.redraw !== false;
+            const refreshHistory = options.renderHistory !== false;
             brushTransparent = false;
             alphaIndex = 0;
             brushColor.value = normalized;
@@ -10104,10 +10225,22 @@
             colorPickerChip.classList.remove("transparent");
             colorSwatch.style.background = normalized;
             colorPickerChip.style.background = normalized;
-            drawHueSlider();
-            drawColorSquare();
-            renderColorHistory();
+            if (redraw) {
+                drawHueSlider();
+                drawColorSquare();
+            }
+            if (refreshHistory) renderColorHistory();
             updateTransparentColorVisuals();
+        }
+
+        function scheduleColorPickerRedraw() {
+            if (colorPickerRedrawPending) return;
+            colorPickerRedrawPending = true;
+            requestAnimationFrame(() => {
+                colorPickerRedrawPending = false;
+                drawHueSlider();
+                drawColorSquare();
+            });
         }
 
         function setBrushColorFromIndices() {
@@ -10116,7 +10249,8 @@
                 quantizedSaturation(satIndex),
                 quantizedValue(valueIndex)
             );
-            applyBrushColor(rgbToHex(rgb));
+            applyBrushColor(rgbToHex(rgb), { redraw: false, renderHistory: false });
+            scheduleColorPickerRedraw();
         }
 
         function setBrushColorHex(hex, commit = false) {
@@ -10234,7 +10368,8 @@
         function updateAlphaFromEvent(event) {
             
             alphaIndex = 0;
-            applyBrushColor(brushColor.value);
+            applyBrushColor(brushColor.value, { redraw: false, renderHistory: false });
+            scheduleColorPickerRedraw();
         }
 
         document.getElementById("transparentColorBtn")?.addEventListener("click", () => {
@@ -10911,11 +11046,43 @@
             saveEditorToFace(false);
         }
 
-        function previewShape(point) {
+        const LINE_SNAP_DEGREES = [0, 15, 22.5, 30, 45, 60, 67.5, 75, 90];
+
+        function snapLinePointToPreferredAngles(startPoint, endPoint) {
+            if (!startPoint || !endPoint) return endPoint;
+            const dx = endPoint.x - startPoint.x;
+            const dy = endPoint.y - startPoint.y;
+            const length = Math.hypot(dx, dy);
+            if (length < 0.0001) return endPoint;
+            const rawAngle = Math.atan2(dy, dx);
+            let bestAngle = rawAngle;
+            let bestDiff = Infinity;
+            for (let quadrant = -2; quadrant <= 2; quadrant++) {
+                const base = quadrant * Math.PI / 2;
+                for (const degrees of LINE_SNAP_DEGREES) {
+                    for (const sign of [-1, 1]) {
+                        const candidate = base + sign * THREE.MathUtils.degToRad(degrees);
+                        let diff = Math.abs(rawAngle - candidate);
+                        diff = Math.min(diff, Math.PI * 2 - diff);
+                        if (diff < bestDiff) {
+                            bestDiff = diff;
+                            bestAngle = candidate;
+                        }
+                    }
+                }
+            }
+            return {
+                x: startPoint.x + Math.cos(bestAngle) * length,
+                y: startPoint.y + Math.sin(bestAngle) * length
+            };
+        }
+
+        function previewShape(point, event = null) {
             paintCtx.putImageData(shapeSnapshot, 0, 0);
 
             if (tool === "line") {
-                drawLinePixels(paintCtx, shapeStart, point, false);
+                const lineEnd = event?.shiftKey ? snapLinePointToPreferredAngles(shapeStart, point) : point;
+                drawLinePixels(paintCtx, shapeStart, lineEnd, false);
             }
             if (tool === "rect") {
                 drawRectPixels(paintCtx, shapeStart, point);
@@ -11039,6 +11206,18 @@
             guideCanvas.style.cursor = photoCursorForHit(hit, event);
         }
 
+
+        function preventCanvasNativeDrag(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        }
+        [paintCanvas, guideCanvas].forEach((canvasEl) => {
+            canvasEl.draggable = false;
+            canvasEl.addEventListener("dragstart", preventCanvasNativeDrag);
+            canvasEl.addEventListener("selectstart", preventCanvasNativeDrag);
+        });
+
         guideCanvas.addEventListener("pointerdown", handlePhotoGuidePointerDown);
         guideCanvas.addEventListener("pointermove", handlePhotoGuidePointerMove);
         guideCanvas.addEventListener("pointerup", stopDrawing);
@@ -11101,7 +11280,7 @@
             if (!drawing) return;
 
             if (["line", "rect", "circle"].includes(tool)) {
-                previewShape(point);
+                previewShape(point, event);
             } else {
                 strokeTo(point);
             }
@@ -11595,6 +11774,12 @@
             if (!mod && key === "r") {
                 event.preventDefault();
                 setTransformMode("rotate");
+                return;
+            }
+
+            if (!mod && key === "s") {
+                event.preventDefault();
+                setTransformMode("scale");
                 return;
             }
 
@@ -12183,6 +12368,7 @@
                 if (runtime?.root) {
                     exportRoot.position.copy(runtime.root.position);
                     exportRoot.rotation.copy(runtime.root.rotation);
+                    exportRoot.scale.copy(runtime.root.scale);
                 }
                 if (runtime?.mesh) {
                     exportMesh.rotation.copy(runtime.mesh.rotation);
