@@ -17,8 +17,7 @@
 
 🟣 twitch: https://www.twitch.tv/kazvt
 🔴 yt: https://www.youtube.com/@kazvt
-🟢 kick: https://kick.com/kazvt
-🔵 tumblr: https://www.tumblr.com/kazvt" id="og-description">
+🟢 kick: https://kick.com/kazvt" id="og-description">
   <meta property="og:image" content="https://kazvt.com/icon.gif" id="og-image">
   <meta property="og:url" content="https://kazvt.com">
   <meta property="og:type" content="website">
@@ -30,8 +29,7 @@
 
 🟣 twitch: https://www.twitch.tv/kazvt
 🔴 yt: https://www.youtube.com/@kazvt
-🟢 kick: https://kick.com/kazvt
-🔵 tumblr: https://www.tumblr.com/kazvt" id="twitter-description">
+🟢 kick: https://kick.com/kazvt" id="twitter-description">
   <meta name="twitter:image" content="https://kazvt.com/icon.gif" id="twitter-image">
 
   <meta name="theme-color" content="#33FF33" id="theme-color">
@@ -124,10 +122,6 @@
 
     #lillie-alert .alert-close:hover {
       opacity: 1;
-    }
-
-    .social-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     }
   </style>
 </head>
@@ -353,19 +347,6 @@
             <span class="btn-social-label">BSKY</span>
           </a>
 
-          <a href="https://www.tumblr.com/kazvt" target="_blank" rel="noopener noreferrer" class="btn-social">
-            <span class="corner-bl"></span>
-            <span class="corner-br"></span>
-            <div class="btn-social-icon">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M14.2 21.5c-3.7 0-5.1-2.7-5.1-5.1V10H6.8V7.2c2.4-.9 3.7-2.9 3.9-5.2h2.8v4.7h3.8V10h-3.8v5.6c0 1.7.9 2.3 2.1 2.3.7 0 1.4-.2 1.9-.5v3.3c-.8.5-2 .8-3.3.8z"
-                  fill="#33FF33" />
-              </svg>
-            </div>
-            <span class="btn-social-label">TUMBLR</span>
-          </a>
-
           <a href="https://discord.com/invite/huzMpfJZ4J" target="_blank" rel="noopener noreferrer" class="btn-social">
             <span class="corner-bl"></span>
             <span class="corner-br"></span>
@@ -453,9 +434,8 @@
       var twitchLine = (twitchOn ? '🟣 twitch (live)' : '🟣 twitch') + ': https://www.twitch.tv/kazvt'
       var youtubeLine = (youtubeOn ? '🔴 yt (live)' : '🔴 yt') + ': https://www.youtube.com/@kazvt'
       var kickLine = (kickOn ? '🟢 kick (live)' : '🟢 kick') + ': https://kick.com/kazvt'
-      var tumblrLine = '🔵 tumblr: https://www.tumblr.com/kazvt'
 
-      var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine + '\n' + tumblrLine
+      var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine
       document.getElementById('og-description').setAttribute('content', desc)
       document.getElementById('twitter-description').setAttribute('content', desc)
 
