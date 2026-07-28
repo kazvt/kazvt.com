@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kazvt!!</title>
+
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <meta property="og:title" content="kazvt" id="og-title">
+  <meta property="og:description" content="i am a monke called kaz, she/her, i play retro games :)
+
+🟣 twitch: https://www.twitch.tv/kazvt
+🔴 yt: https://www.youtube.com/@kazvt
+🟢 kick: https://kick.com/kazvt
+🔵 tumblr: https://www.tumblr.com/kazvt" id="og-description">
+  <meta property="og:image" content="https://kazvt.com/icon.gif" id="og-image">
+  <meta property="og:url" content="https://kazvt.com">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="kazvt">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="kazvt" id="twitter-title">
+  <meta name="twitter:description" content="i am a monke called kaz, she/her, i play retro games :)
+
+🟣 twitch: https://www.twitch.tv/kazvt
+🔴 yt: https://www.youtube.com/@kazvt
+🟢 kick: https://kick.com/kazvt
+🔵 tumblr: https://www.tumblr.com/kazvt" id="twitter-description">
+  <meta name="twitter:image" content="https://kazvt.com/icon.gif" id="twitter-image">
+
+  <meta name="theme-color" content="#33FF33" id="theme-color">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          screens: { 'xs': '375px' },
+        },
+      },
+    }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    #lillie-alert {
+      position: fixed;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 9999;
+      width: 160px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      line-height: 1.6;
+      color: #33FF33;
+      border: 1px solid #33FF33;
+      background: rgba(0, 0, 0, 0.88);
+      padding: 10px 10px 12px;
+      box-shadow: 0 0 10px rgba(51, 255, 51, 0.25), inset 0 0 8px rgba(0, 0, 0, 0.6);
+      text-align: left;
+    }
+
+    #lillie-alert .alert-header {
+      color: #ff55ff;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #ff55ff44;
+      padding-bottom: 6px;
+      text-shadow: 0 0 6px #ff55ff88;
+    }
+
+    #lillie-alert .alert-body {
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    #lillie-alert .alert-body strong {
+      color: #ff55ff;
+      font-style: normal;
+    }
+
+    #lillie-alert a.alert-link {
+      display: block;
+      margin-top: 8px;
+      color: #000;
+      background: #ff55ff;
+      text-align: center;
+      padding: 5px 4px;
+      text-decoration: none;
+      font-size: 7px;
+      letter-spacing: 0.03em;
+      transition: background 0.15s;
+    }
+
+    #lillie-alert a.alert-link:hover {
+      background: #ff88ff;
+    }
+
+    #lillie-alert .alert-close {
+      position: absolute;
+      top: 6px;
+      right: 7px;
+      background: none;
+      border: none;
+      color: #33FF33;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      cursor: pointer;
+      opacity: 0.6;
+      padding: 0;
+    }
+
+    #lillie-alert .alert-close:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <aside id="lillie-alert" role="complementary" aria-label="Important notice">
+    <button class="alert-close" onclick="document.getElementById('lillie-alert').style.display='none'"
+      aria-label="Dismiss">✕</button>
+    <div class="alert-header">⚠ IMPORTANT</div>
+    <div class="alert-body">
+      please check out <strong>lillie's</strong> video on his suspension
+      <br><br>
+      if you care about the safety of trans people on twitch
+    </div>
+    <a class="alert-link" href="https://www.youtube.com/watch?v=v3QGLXoGrW0" target="_blank" rel="noopener noreferrer">▶
+      WATCH VIDEO</a>
+  </aside>
+
+  <div class="fixed inset-0 bg-vignette"></div>
+  <div class="crt-overlay fixed inset-0 z-[100]"></div>
+  <div class="crt-flicker fixed inset-0 z-[99]"></div>
+
+  <div class="relative z-10 w-full max-w-[680px] mx-auto px-1 sm:px-5 py-1 sm:py-10">
+
+    <div class="crt-bezel">
+      <div id="crtScreen" class="crt-screen">
+
+        <div class="sys-ready">
+          &gt; SYSTEM READY<span class="inline-block w-2 h-3 bg-[#33FF33] animate-blink ml-1"></span>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title text-glow">█ MONKE LINKS █</h1>
+          <div class="page-subtitle text-glow-sm">&gt;&gt; SELECT A PLATFORM &lt;&lt;</div>
+        </div>
+
+        <div class="game-bar">
+          <a target="_blank" href="https://lillie.garden/imgs/smeemy.jpg" class="game-bar-start">[ START ]</a>
+          <div class="game-bar-lives">LIVES: ■ ■ ■</div>
+        </div>
+
+        <div class="platform-links">
+
+          <a href="https://www.twitch.tv/kazvt" target="_blank" rel="noopener noreferrer" data-platform="twitch"
+            class="btn-platform is-loading">
+            <div class="btn-platform-left">
+              <div class="btn-platform-icon">
+                <svg width="24" height="24" viewBox="50 -30 400 550" fill="#33FF33" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M80,32,48,112V416h96v64h64l64-64h80L464,304V32ZM416,288l-64,64H256l-64,64V352H112V80H416Z" />
+                  <rect x="320" y="143" width="48" height="129" />
+                  <rect x="208" y="143" width="48" height="129" />
+                </svg>
+              </div>
+              <span class="btn-platform-label">▶ TWITCH</span>
+            </div>
+            <div class="btn-platform-right">
+              <div class="status-box">
+                <span class="pip pip-loading" aria-hidden="true"></span>
+                <span class="status-text loading-dots"></span>
+              </div>
+              <span class="enter-hint">ENTER ↵</span>
+            </div>
+          </a>
+
+          <a href="https://www.youtube.com/@kazvt" target="_blank" rel="noopener noreferrer" data-platform="youtube"
+            class="btn-platform is-loading">
+            <div class="btn-platform-left">
+              <div class="btn-platform-icon">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="5" width="20" height="14" rx="0" stroke="#33FF33" stroke-width="3.5"
+                    mask="url(#yt-corners)" />
+                  <path d="M9.5 9l7 3-7 3v-6z" fill="#33FF33" mask="url(#yt-play)" />
+                  <mask id="yt-corners">
+                    <rect x="0" y="0" width="24" height="24" fill="white" />
+                    <rect x="0.2" y="3.2" width="2.5" height="2.5" fill="black" />
+                    <rect x="21.3" y="3.2" width="2.5" height="2.5" fill="black" />
+                    <rect x="0.2" y="18.3" width="2.5" height="2.5" fill="black" />
+                    <rect x="21.3" y="18.3" width="2.5" height="2.5" fill="black" />
+                  </mask>
+                  <mask id="yt-play">
+                    <rect x="0" y="0" width="24" height="24" fill="white" />
+                  </mask>
+                </svg>
+              </div>
+              <span class="btn-platform-label">▶ YOUTUBE</span>
+            </div>
+            <div class="btn-platform-right">
+              <div class="status-box">
+                <span class="pip pip-loading" aria-hidden="true"></span>
+                <span class="status-text loading-dots"></span>
+              </div>
+              <span class="enter-hint">ENTER ↵</span>
+            </div>
+          </a>
+
+          <a href="https://kick.com/kazvt" target="_blank" rel="noopener noreferrer" data-platform="kick"
+            class="btn-platform is-loading">
+            <div class="btn-platform-left">
+              <div class="btn-platform-icon">
+                <svg width="24" height="24" viewBox="-100 -100 700 700" xmlns="http://www.w3.org/2000/svg"
+                  fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2">
+                  <path
+                    d="M37 .036h164.448v113.621h54.71v-56.82h54.731V.036h164.448v170.777h-54.73v56.82h-54.711v56.8h54.71v56.82h54.73V512.03H310.89v-56.82h-54.73v-56.8h-54.711v113.62H37V.036z"
+                    fill="#53fc18" />
+                </svg>
+              </div>
+              <span class="btn-platform-label">▶ KICK</span>
+            </div>
+            <div class="btn-platform-right">
+              <div class="status-box">
+                <span class="pip pip-loading" aria-hidden="true"></span>
+                <span class="status-text loading-dots"></span>
+              </div>
+              <span class="enter-hint">ENTER ↵</span>
+            </div>
+          </a>
+
+        </div>
+
+        <div id="streamInfoBlock" class="stream-info-block">
+          <div class="stream-info-label">▲ NOW_STREAMING ▲</div>
+          <div class="mt-1"><span class="opacity-60">▶ TITLE:</span> <span id="streamTitle"></span></div>
+          <div><span class="opacity-60">▶ CATEGORY:</span> <span id="streamCategory"></span></div>
+        </div>
+
+        <div class="bio-section-wrap">
+          <div id="bioSection" onclick="openBioDrawer()">
+
+            <div class="bio-header">
+              <div class="bio-header-left">
+                <div class="bio-dots">
+                  <span class="bio-dot"></span>
+                  <span class="bio-dot"></span>
+                  <span class="bio-dot"></span>
+                </div>
+                <span class="bio-title">[ USER_INFO.DAT ]</span>
+              </div>
+              <div class="flex items-center gap-[6px]">
+                <span id="bioHint" class="bio-toggle-hint">EXPAND</span>
+                <span id="bioArrow">▼</span>
+              </div>
+            </div>
+
+            <div id="bioContent">
+              <div>
+                <div class="pb-2 relative">
+
+                  <div class="absolute top-0 right-0" style="animation: slideIn 0.4s ease-out;">
+                    <div class="bio-avatar-frame">
+                      <div class="bio-avatar-scanlines"></div>
+                      <span
+                        class="absolute -top-px -left-px  w-1.5 h-1.5 border-t border-l border-current opacity-70"></span>
+                      <span
+                        class="absolute -top-px -right-px w-1.5 h-1.5 border-t border-r border-current opacity-70"></span>
+                      <span
+                        class="absolute -bottom-px -left-px  w-1.5 h-1.5 border-b border-l border-current opacity-70"></span>
+                      <span
+                        class="absolute -bottom-px -right-px w-1.5 h-1.5 border-b border-r border-current opacity-70"></span>
+                      <img src="favicon.svg" alt="kazvt avatar" class="bio-avatar-img" />
+                      <div class="bio-avatar-caption">PROFILE.IMG</div>
+                    </div>
+                  </div>
+
+                  <div style="padding-right: 68px;">
+                    <div class="bio-row" style="animation: slideIn 0.4s ease-out;">
+                      <span class="bio-row-arrow">▶</span>
+                      <span><span class="bio-key">USER:</span> kazvt</span>
+                    </div>
+                    <div class="bio-row" style="animation: slideIn 0.5s ease-out;">
+                      <span class="bio-row-arrow">▶</span>
+                      <span><span class="bio-key">PRONOUNS:</span> she/her</span>
+                    </div>
+                    <div class="bio-row" style="animation: slideIn 0.6s ease-out;">
+                      <span class="bio-row-arrow">▶</span>
+                      <span><span class="bio-key">ACTIVITY:</span> playing retro games</span>
+                    </div>
+                  </div>
+
+                  <div class="bio-row mt-2" style="animation: slideIn 0.7s ease-out;">
+                    <span class="bio-row-arrow">▶</span>
+                    <div class="flex-1">
+                      <div class="bio-key mb-1">BIO:</div>
+                      <div class="text-justify leading-relaxed opacity-85">
+                        hey! i'm kaz, a monke girl who loves retro gaming and streaming. i play classic games from the
+                        1980s to the late 2000s, i love classic shooters, platformers, and i yap quite a bit. i also
+                        programme a lot of my own tools. come hang out and watch me try not to lose my mind at old jank!
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="social-grid">
+
+          <a href="https://twitter.com/monkevt" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"
+                  fill="#33FF33" />
+              </svg>
+            </div>
+            <span class="btn-social-label">TWITTER</span>
+          </a>
+
+          <a href="https://bsky.app/profile/kazvt.com" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
+              <svg width="24" height="24" viewBox="-100 -150 800 800">
+                <path
+                  d="m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z"
+                  fill="#33FF33" />
+              </svg>
+            </div>
+            <span class="btn-social-label">BSKY</span>
+          </a>
+
+          <a href="https://www.tumblr.com/kazvt" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M14.2 21.5c-3.7 0-5.1-2.7-5.1-5.1V10H6.8V7.2c2.4-.9 3.7-2.9 3.9-5.2h2.8v4.7h3.8V10h-3.8v5.6c0 1.7.9 2.3 2.1 2.3.7 0 1.4-.2 1.9-.5v3.3c-.8.5-2 .8-3.3.8z"
+                  fill="#33FF33" />
+              </svg>
+            </div>
+            <span class="btn-social-label">TUMBLR</span>
+          </a>
+
+          <a href="https://discord.com/invite/huzMpfJZ4J" target="_blank" rel="noopener noreferrer" class="btn-social">
+            <span class="corner-bl"></span>
+            <span class="corner-br"></span>
+            <div class="btn-social-icon">
+              <svg class="w-4 h-4" width="24" height="24" viewBox="1 0 22 22" fill="none">
+                <path
+                  d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"
+                  fill="#33FF33" />
+              </svg>
+            </div>
+            <span class="btn-social-label">DISCORD</span>
+          </a>
+
+        </div>
+
+        <footer class="site-footer">
+          <div id="paletteTrigger" onclick="togglePalette()">
+            <span class="palette-trigger-label">[ SYS_DISPLAY ]</span>
+            <span id="paletteArrow">▼</span>
+          </div>
+          <div class="footer-copy">
+            KAZVT.COM © <span id="year"></span> /// PRESS START
+          </div>
+        </footer>
+
+      </div>
+    </div>
+
+    <div id="palettePanel">
+      <div class="palette-inner">
+        <div class="palette-header">
+          <span class="palette-header-label">▶ SYS_DISPLAY // HUE_ROTATE</span>
+          <div class="palette-header-right">
+            <span id="hueReadout">000°</span>
+            <button onclick="togglePalette()" class="palette-close-btn">✕ CLOSE</button>
+          </div>
+        </div>
+        <input id="paletteKnob" type="range" min="0" max="359" value="0" step="1" oninput="applyHue(this.value)" />
+        <div class="palette-range-labels">
+          <span>green</span><span>cyan</span><span>magenta</span><span>red</span><span>orange</span><span>green</span>
+        </div>
+        <button onclick="resetHue()" class="palette-reset-btn">[ RESET TO GREEN ]</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function openBioDrawer() {
+      var drawer = document.getElementById('bioContent')
+      var chevron = document.getElementById('bioArrow')
+      var hintLabel = document.getElementById('bioHint')
+      var isOpen = drawer.style.gridTemplateRows === '1fr'
+      if (isOpen) {
+        drawer.style.gridTemplateRows = '0fr'
+        chevron.textContent = '▼'
+        chevron.style.transform = ''
+        hintLabel.textContent = 'EXPAND'
+      } else {
+        drawer.style.gridTemplateRows = '1fr'
+        chevron.textContent = '▲'
+        chevron.style.transform = 'rotate(180deg)'
+        hintLabel.textContent = 'COLLAPSE'
+      }
+    }
+
+    document.getElementById('year').textContent = new Date().getFullYear()
+
+    var PAGE_TITLE = 'kazvt!!'
+
+    function setTabLiveIndicator(anyoneLive) {
+      document.title = anyoneLive ? '🔴 ' + PAGE_TITLE : PAGE_TITLE
+    }
+
+    function patchEmbedMeta(platformStates) {
+      var twitchOn = platformStates.twitch === 'live'
+      var youtubeOn = platformStates.youtube === 'live'
+      var kickOn = platformStates.kick === 'live'
+      var anyLive = twitchOn || youtubeOn || kickOn
+
+      var titleForEmbed = anyLive ? 'kazvt (live rn!)' : 'kazvt'
+      document.getElementById('og-title').setAttribute('content', titleForEmbed)
+      document.getElementById('twitter-title').setAttribute('content', titleForEmbed)
+
+      var twitchLine = (twitchOn ? '🟣 twitch (live)' : '🟣 twitch') + ': https://www.twitch.tv/kazvt'
+      var youtubeLine = (youtubeOn ? '🔴 yt (live)' : '🔴 yt') + ': https://www.youtube.com/@kazvt'
+      var kickLine = (kickOn ? '🟢 kick (live)' : '🟢 kick') + ': https://kick.com/kazvt'
+      var tumblrLine = '🔵 tumblr: https://www.tumblr.com/kazvt'
+
+      var desc = 'i am a monke called kaz, she/her, i play retro games :)\n\n' + twitchLine + '\n' + youtubeLine + '\n' + kickLine + '\n' + tumblrLine
+      document.getElementById('og-description').setAttribute('content', desc)
+      document.getElementById('twitter-description').setAttribute('content', desc)
+
+      document.getElementById('theme-color').setAttribute('content', anyLive ? '#33FF33' : '#0a0a0a')
+      document.getElementById('og-image').setAttribute('content', 'https://kazvt.com/icon.gif')
+      document.getElementById('twitter-image').setAttribute('content', 'https://kazvt.com/icon.gif')
+    }
+
+    async function fetchPlatformStatuses() {
+      var result = {}
+      try {
+        var resp = await fetch('./status.txt', { cache: 'no-store' })
+        if (!resp.ok) throw new Error('status fetch failed: ' + resp.status)
+        var raw = await resp.text()
+        raw.split(/\r?\n/).forEach(function (row) {
+          var trimmed = row.trim()
+          if (!trimmed || trimmed[0] === '#') return
+          var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(live|offline|testing)\s*$/i)
+          if (match) result[match[1].toLowerCase()] = match[2].toLowerCase()
+        })
+      } catch (err) {
+        console.warn('couldnt load status.txt, assuming offline', err)
+      }
+      return result
+    }
+
+    async function fetchCurrentStreamInfo() {
+      var info = {}
+      try {
+        var resp = await fetch('./last_stream_info.txt', { cache: 'no-store' })
+        if (!resp.ok) throw new Error('stream info fetch bombed: ' + resp.status)
+        var raw = await resp.text()
+        raw.split(/\r?\n/).forEach(function (row) {
+          var trimmed = row.trim()
+          if (!trimmed || trimmed[0] === '#') return
+          var match = trimmed.match(/^([a-z0-9_-]+)\s*:\s*(.+)$/i)
+          if (match) info[match[1].toLowerCase()] = match[2].trim()
+        })
+      } catch (err) {
+        console.warn('couldnt load stream info', err)
+      }
+      return info
+    }
+
+    function renderStreamInfoBox(anyActuallyLive, info) {
+      var box = document.getElementById('streamInfoBlock')
+      var hasContent = info.title || info.category
+      if (!anyActuallyLive || !hasContent) {
+        box.classList.remove('visible')
+        return
+      }
+      document.getElementById('streamTitle').textContent = (info.title || '???').toUpperCase()
+      document.getElementById('streamCategory').textContent = (info.category || '???').toUpperCase()
+      box.classList.add('visible')
+    }
+
+    function paintPlatformBtn(platform, liveState) {
+      var btn = document.querySelector('[data-platform="' + platform + '"]')
+      if (!btn) return
+
+      var label = btn.querySelector('.status-text')
+      var pip = btn.querySelector('.status-box [aria-hidden="true"]')
+
+      btn.classList.remove('is-live', 'is-offline', 'is-testing', 'is-loading')
+      pip.classList.remove('pip-live', 'pip-offline', 'pip-testing', 'pip-loading')
+
+      if (platform === 'youtube') {
+        btn.href = liveState === 'live'
+          ? 'https://www.youtube.com/@kazvt/live'
+          : 'https://www.youtube.com/@kazvt'
+      }
+
+      if (liveState === 'live') {
+        btn.classList.add('is-live')
+        pip.classList.add('pip-live')
+        if (label) {
+          label.textContent = 'LIVE'
+          label.classList.remove('loading-dots', 'status-text-testing')
+          label.classList.add('status-text-live')
+        }
+      } else if (liveState === 'testing') {
+        btn.classList.add('is-testing')
+        pip.classList.add('pip-testing')
+        if (label) {
+          label.textContent = 'TESTING'
+          label.classList.remove('loading-dots', 'status-text-live')
+          label.classList.add('status-text-testing')
+        }
+      } else {
+        btn.classList.add('is-offline')
+        pip.classList.add('pip-offline')
+        if (label) {
+          label.textContent = 'OFFLINE'
+          label.classList.remove('loading-dots', 'status-text-live', 'status-text-testing')
+        }
+      }
+    }
+
+    function reorderPlatformButtons(statuses) {
+      var container = document.querySelector('.platform-links')
+      var buttons = Array.from(container.querySelectorAll('[data-platform]'))
+
+      var states = buttons.map(function(btn) {
+        return statuses[btn.dataset.platform] || 'offline'
+      })
+
+      var firstState = states[0]
+      var allSame = states.every(function(s) { return s === firstState })
+
+      if (allSame) return
+
+      var priority = { live: 0, testing: 1, offline: 2 }
+
+      buttons.sort(function(a, b) {
+        var pa = priority[statuses[a.dataset.platform] || 'offline']
+        var pb = priority[statuses[b.dataset.platform] || 'offline']
+        return pa - pb
+      })
+
+      buttons.forEach(function(btn) {
+        container.appendChild(btn)
+      })
+    }
+
+    async function pollAndRender() {
+      var results = await Promise.all([
+        fetchPlatformStatuses(),
+        fetchCurrentStreamInfo()
+      ])
+      var statuses = results[0]
+      var streamInfo = results[1]
+
+      var twitch = statuses.twitch || 'offline'
+      var youtube = statuses.youtube || 'offline'
+      var kick = statuses.kick || 'offline'
+
+      paintPlatformBtn('twitch', twitch)
+      paintPlatformBtn('youtube', youtube)
+      paintPlatformBtn('kick', kick)
+
+      reorderPlatformButtons(statuses)
+
+      var anyActuallyLive = twitch === 'live' || youtube === 'live' || kick === 'live'
+      setTabLiveIndicator(anyActuallyLive)
+      patchEmbedMeta(statuses)
+      renderStreamInfoBox(anyActuallyLive, streamInfo)
+    }
+
+    var paletteOpen = false
+
+    function togglePalette() {
+      var panel = document.getElementById('palettePanel')
+      var arrow = document.getElementById('paletteArrow')
+      var trigger = document.getElementById('paletteTrigger')
+      paletteOpen = !paletteOpen
+      panel.style.transform = paletteOpen ? 'translateY(0)' : 'translateY(100%)'
+      arrow.style.transform = paletteOpen ? 'rotate(180deg)' : ''
+      trigger.style.opacity = paletteOpen ? '0.65' : ''
+    }
+
+    function applyHue(deg) {
+      deg = parseInt(deg, 10)
+
+      var sat = 1.0
+      if (deg >= 160 && deg <= 280) {
+        var centre = 220
+        var halfWidth = 70
+        var dist = Math.abs(deg - centre)
+        var t = Math.max(0, 1 - dist / halfWidth)
+        t = t * t * (3 - 2 * t)
+        sat = 1.0 - (0.50 * t)
+      }
+
+      var satStr = 'saturate(' + sat.toFixed(3) + ')'
+      document.getElementById('crtScreen').style.filter = deg === 0
+        ? ''
+        : 'hue-rotate(' + deg + 'deg) ' + satStr
+
+      document.getElementById('hueReadout').textContent = String(deg).padStart(3, '0') + '°'
+      document.getElementById('paletteKnob').value = deg
+      try { localStorage.setItem('kazvt_hue', deg) } catch (e) { }
+    }
+
+    function resetHue() { applyHue(0) }
+
+    ;(function () {
+      var saved = 0
+      try { saved = parseInt(localStorage.getItem('kazvt_hue') || '0', 10) } catch (e) { }
+      if (saved && saved !== 0) applyHue(saved)
+    })()
+
+    pollAndRender()
+    setInterval(pollAndRender, 3000)
+  </script>
+
+</body>
+
+</html>
