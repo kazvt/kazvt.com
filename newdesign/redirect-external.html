@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="1.5; url=./">
+    <link rel="canonical" href="./">
+    <title>Redirecting...</title>
+    <link rel="stylesheet" href="redirect-kit/redirect.css">
+    <script>
+      window.REDIRECT_SETTINGS = {
+        target: "./",
+        delay: 1.5,
+        title: "Redirecting...",
+        heading: "Preparing your shortcut",
+        message: "Windows XP is opening the destination. Click the link if it does not continue automatically.",
+        linkLabel: "Redirecting...",
+        buttonLabel: "Open now"
+      };
+    </script>
+  </head>
+  <body data-redirect-root>
+    <main class="xp-redirect-desktop" aria-label="Windows XP styled redirect page">
+      <section class="xp-redirect-window" role="status" aria-live="polite">
+        <div class="xp-title-bar">
+          <div class="xp-title-text" data-redirect-title>Redirecting...</div>
+          <div class="xp-title-controls" aria-hidden="true">
+            <span>_</span>
+            <span>□</span>
+            <span>×</span>
+          </div>
+        </div>
+        <div class="xp-window-body">
+          <div class="xp-content">
+            <div class="xp-icon" aria-hidden="true"></div>
+            <div>
+              <h1 class="xp-heading" data-redirect-heading>Preparing your shortcut</h1>
+              <p class="xp-message" data-redirect-message>Windows XP is opening the destination. Click the link if it does not continue automatically.</p>
+              <a class="xp-link" data-redirect-link data-redirect-now href="./">Redirecting...</a>
+              <div class="xp-progress-wrap" aria-hidden="true">
+                <div class="xp-progress" data-redirect-progress></div>
+              </div>
+              <div class="xp-actions">
+                <a class="xp-button" data-redirect-button data-redirect-now href="./" role="button">Open now</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <nav class="xp-taskbar" aria-label="Windows XP redirect taskbar">
+        <button class="xp-start" type="button">start</button>
+        <span class="xp-task" data-redirect-task>Redirecting...</span>
+        <span class="xp-clock">please wait</span>
+      </nav>
+    </main>
+    <script src="redirect-kit/redirect.js"></script>
+  </body>
+</html>
