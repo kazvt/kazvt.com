@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>kazvt</title>
+    <meta
+      name="description"
+      content="kazvt's drawn, DS-art-program-inspired old web personal site with links and live status."
+    >
+    <meta name="theme-color" content="#ff9d16">
+    <meta property="og:title" content="kazvt">
+    <meta property="og:description" content="A scribbly old-web link page for kazvt.">
+    <meta property="og:image" content="assets/kazvt-transparent.gif">
+    <link rel="icon" href="assets/kazvt-transparent.gif">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <svg class="boil-filters" aria-hidden="true" focusable="false">
+      <filter id="boil-a">
+        <feTurbulence baseFrequency="0.012 0.034" numOctaves="2" seed="4" />
+        <feDisplacementMap in="SourceGraphic" scale="4" />
+      </filter>
+      <filter id="boil-b">
+        <feTurbulence baseFrequency="0.018 0.026" numOctaves="2" seed="9" />
+        <feDisplacementMap in="SourceGraphic" scale="6" />
+      </filter>
+      <filter id="boil-c">
+        <feTurbulence baseFrequency="0.015 0.04" numOctaves="2" seed="15" />
+        <feDisplacementMap in="SourceGraphic" scale="5" />
+      </filter>
+    </svg>
+
+    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" aria-label="kazvt personal site">
+      <header class="site-header text-center grid justify-items-center gap-2">
+        <p class="tiny-status">best viewed on desktop</p>
+        <a class="logo-home" href="#top" aria-label="kazvt home">
+          <img class="site-logo" src="assets/kazvt-transparent.gif" alt="kazvt">
+        </a>
+        <p class="tagline">retro streams, old games, links, live status</p>
+      </header>
+
+      <nav class="oldweb-nav scribble-box" aria-label="Main links">
+        <a href="#links">links</a>
+        <a href="#profile">profile</a>
+        <a href="#guestbook">guestbook</a>
+        <a href="#paint">paint</a>
+        <a href="#badges">badges</a>
+      </nav>
+
+      <div class="marquee scribble-box" aria-label="Site notice">
+        <span>welcome to kazvt.com!! links, streams, tiny web magic!!</span>
+      </div>
+
+      <section class="web-grid grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-3.5 items-start">
+        <aside class="sidebar scribble-box">
+          <h2>palette</h2>
+          <div class="palette big-palette" aria-label="Color palette">
+            <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#ff432f 0 25%, #ff9f18 0 50%, #ffe45c 0 75%, #48cfff 0)" aria-label="Use warm arcade palette" aria-pressed="true"><span></span></button>
+            <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#01030b 0 25%, #00d9ff 0 50%, #ff006e 0 75%, #faff00 0)" aria-label="Use neon arcade palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#17210b 0 25%, #cfd66b 0 50%, #315c18 0 75%, #f1ff75 0)" aria-label="Use LCD palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#fff200 0 25%, #ff00a8 0 50%, #003bff 0 75%, #180026 0)" aria-label="Use pop poster palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#17120f 0 25%, #f8f1df 0 50%, #d40000 0 75%, #7a6f60 0)" aria-label="Use zine palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#020617 0 25%, #00d18f 0 50%, #ff4e5f 0 75%, #f6ff7a 0)" aria-label="Use deep sea palette" aria-pressed="false"><span></span></button>
+          </div>
+        </aside>
+
+        <div id="app" class="content-stack"></div>
+
+        <aside class="sidebar scribble-box">
+          <h2>kaz radio</h2>
+          <div id="music-player" class="music-player"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="site.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#17120e">
+  <title>WILDxHUNT</title>
+</head>
+<body>
+<div id="qs-game">
+  <style>
+    #qs-game{
+      --wood-dark:#261a11;
+      --wood:#5b4028;
+      --wood-light:#876642;
+      --iron:#222525;
+      --iron-light:#555a55;
+      --panel:rgba(18,20,17,.92);
+      --panel-soft:rgba(33,34,27,.86);
+      --parchment:#cbbb91;
+      --parchment-light:#e1d3aa;
+      --ink:#e4d6ad;
+      --muted:#b3aa90;
+      --gold:#d6b66e;
+      --green:#81956f;
+      --red:#9b4b3e;
+      color:var(--ink);
+      padding:18px;
+      background:
+        radial-gradient(ellipse at 50% 8%,rgba(133,143,107,.22),transparent 38%),
+        linear-gradient(rgba(10,14,12,.30),rgba(4,6,5,.86)),
+        repeating-linear-gradient(118deg,#182019 0 22px,#151a15 22px 44px,#101510 44px 68px);
+      font:12px/1.35 Tahoma,Verdana,Arial,sans-serif;
+      image-rendering:auto;
+    }
+    #qs-game *{box-sizing:border-box}
+    #qs-game .shell{
+      position:relative;
+      width:min(1040px,100%);
+      margin:0 auto;
+      overflow:hidden;
+      border:3px solid #120d08;
+      border-radius:2px;
+      background:#161914;
+      box-shadow:
+        0 0 0 1px #8c7148,
+        0 0 0 4px #352719,
+        0 12px 30px #000b,
+        inset 0 0 0 1px #9b7a4d;
+    }
+    #qs-game .shell:before,
+    #qs-game .shell:after{
+      content:"";
+      position:absolute;
+      z-index:8;
+      width:8px;height:8px;
+      top:5px;
+      border:1px solid #17120c;
+      border-radius:50%;
+      background:radial-gradient(circle at 35% 35%,#c0a16d 0 18%,#66513a 34%,#221912 72%);
+      box-shadow:0 0 0 1px #98764b;
+      pointer-events:none;
+    }
+    #qs-game .shell:before{left:6px}
+    #qs-game .shell:after{right:6px}
+    #qs-game .masthead{
+      position:relative;
+      min-height:72px;
+      padding:13px 150px 10px;
+      border-bottom:1px solid #0a0805;
+      background:
+        linear-gradient(90deg,transparent 0 10%,rgba(255,255,255,.05) 10.4%,transparent 11%),
+        repeating-linear-gradient(7deg,rgba(255,255,255,.025) 0 2px,transparent 2px 7px),
+        linear-gradient(#6d4b2d,#3a281a 48%,#21160f 52%,#4d3521);
+      text-align:center;
+      box-shadow:inset 0 1px #a07c4d,inset 0 -2px #80603d;
+    }
+    #qs-game .masthead:before{
+      content:"HUNTER CLIENT";
+      position:absolute;
+      left:18px;top:20px;
+      padding:5px 9px;
+      border:1px solid #17110b;
+      background:linear-gradient(#454b45,#202420);
+      box-shadow:inset 0 1px #717871,0 1px #a47e4c;
+      color:#c6bea5;
+      font-size:9px;
+      letter-spacing:.16em;
+    }
+    #qs-game .masthead:after{
+      content:"BUILD 0.9";
+      position:absolute;
+      right:18px;top:22px;
+      color:#bcae8c;
+      font:9px/1.2 "Courier New",monospace;
+      letter-spacing:.08em;
+      text-shadow:0 1px #000;
+    }
+    #qs-game .masthead h1{
+      margin:0;
+      color:#e0c382;
+      font:700 28px/1 Georgia,"Times New Roman",serif;
+      letter-spacing:.22em;
+      text-shadow:0 2px #120d08,1px 0 #120d08,-1px 0 #120d08,0 0 8px #000;
+    }
+    #qs-game .masthead p{
+      margin:7px 0 0;
+      color:#b9ad8e;
+      font:10px/1 Tahoma,Verdana,sans-serif;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+    #qs-game .status{
+      display:grid;
+      grid-template-columns:1.35fr repeat(5,1fr);
+      gap:3px;
+      padding:4px 5px 5px;
+      border-top:1px solid #8e7046;
+      border-bottom:1px solid #0b0906;
+      background:linear-gradient(#322418,#1c150f);
+      box-shadow:inset 0 -1px #685038;
+    }
+    #qs-game .status div{
+      min-width:0;
+      padding:4px 7px 5px;
+      border:1px solid #11130f;
+      background:linear-gradient(#343b35,#1b1f1b);
+      box-shadow:inset 0 1px #5e675e,inset 1px 0 #444b44,0 1px #6e5334;
+      text-align:left;
+    }
+    #qs-game .status small{
+      display:block;
+      color:#948d77;
+      font-size:8px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    #qs-game .status b{
+      display:block;
+      overflow:hidden;
+      color:#ddd1ae;
+      font-size:11px;
+      font-weight:normal;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      text-shadow:0 1px #000;
+    }
+    #qs-game .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1.62fr) minmax(245px,.72fr);
+      min-height:590px;
+      background:
+        radial-gradient(circle at 30% 20%,rgba(103,126,88,.18),transparent 32%),
+        linear-gradient(145deg,#22291f,#11150f 70%);
+    }
+    #qs-game main{
+      min-height:590px;
+      padding:13px;
+      border-right:1px solid #0d0b08;
+      background:
+        linear-gradient(rgba(11,15,12,.38),rgba(11,14,11,.72)),
+        radial-gradient(ellipse at 55% 25%,#46543d 0,#273127 38%,#141a15 78%);
+      box-shadow:inset -1px 0 #61482d;
+    }
+    #qs-game main>section{
+      min-height:520px;
+      padding:12px;
+      border:1px solid #0d0e0c;
+      background:rgba(16,18,15,.74);
+      box-shadow:inset 0 0 0 1px #4a4f42,0 0 0 1px #704f30;
+    }
+    #qs-game aside{
+      padding:9px;
+      border-left:1px solid #765535;
+      background:
+        repeating-linear-gradient(4deg,rgba(255,255,255,.02) 0 2px,transparent 2px 8px),
+        linear-gradient(#2b2017,#17120e);
+    }
+    #qs-game h2{
+      margin:-12px -12px 11px;
+      padding:7px 10px 6px;
+      border-bottom:1px solid #0b0c09;
+      background:linear-gradient(#555b52,#292e29 45%,#1d211d 55%,#343a34);
+      box-shadow:inset 0 1px #747c72,inset 0 -1px #111,0 1px #6b4f32;
+      color:#e1d6b6;
+      font:700 13px/1 Georgia,"Times New Roman",serif;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      text-shadow:0 1px #000;
+    }
+    #qs-game h3{
+      margin:0 0 7px;
+      padding:4px 6px;
+      border:1px solid #15130f;
+      background:linear-gradient(#60452d,#332418);
+      box-shadow:inset 0 1px #886742,inset 0 -1px #17100b;
+      color:#d8c59b;
+      font:700 10px/1.2 Tahoma,Verdana,sans-serif;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      text-shadow:0 1px #000;
+    }
+    #qs-game h4{color:#ddc893;text-shadow:0 1px #000}
+    #qs-game p{margin:6px 0}
+    #qs-game .muted{color:var(--muted);font-size:11px}
+    #qs-game .panel{
+      margin-bottom:9px;
+      padding:7px;
+      border:1px solid #0e0f0d;
+      background:linear-gradient(rgba(46,49,41,.92),rgba(24,27,23,.92));
+      box-shadow:inset 0 0 0 1px #565a4e,0 1px #6e5032;
+    }
+    #qs-game button{
+      min-height:25px;
+      border:1px solid #0b0c0a;
+      border-radius:1px;
+      padding:4px 9px;
+      background:linear-gradient(#565d56 0,#343a34 46%,#242824 52%,#3a403a 100%);
+      color:#ddd3b7;
+      font:11px/1.1 Tahoma,Verdana,sans-serif;
+      text-shadow:0 1px #000;
+      cursor:pointer;
+      box-shadow:inset 0 1px #747c74,inset 1px 0 #5a625a,inset -1px 0 #252925,0 1px #8a6741;
+    }
+    #qs-game button:hover{background:linear-gradient(#697168,#414841 46%,#2b302b 52%,#484f48);color:#fff1c6}
+    #qs-game button:active{padding-top:5px;padding-bottom:3px;background:linear-gradient(#222622,#3e453e);box-shadow:inset 0 2px 4px #000}
+    #qs-game button:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.8)}
+    #qs-game button.primary{
+      border-color:#21180f;
+      background:linear-gradient(#96744a,#654a2f 47%,#44301f 53%,#725234);
+      color:#fff0bd;
+      font-weight:bold;
+      box-shadow:inset 0 1px #c39a61,inset 1px 0 #8d6a44,0 1px #111;
+    }
+    #qs-game button.primary:hover{background:linear-gradient(#ad8956,#765537 48%,#513923 53%,#805d3a)}
+    #qs-game button.danger{background:linear-gradient(#79493e,#4c2d28 50%,#35201d 52%,#5b3530);color:#f0cbc1}
+    #qs-game .row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+    #qs-game .cards{
+      display:flex;
+      flex-wrap:wrap;
+      gap:9px;
+      min-height:133px;
+      margin:10px 0;
+      padding:9px;
+      border:1px solid #0d0e0c;
+      background:linear-gradient(rgba(20,43,29,.88),rgba(11,27,18,.94));
+      box-shadow:inset 0 0 18px #0009,inset 0 0 0 1px #37543d,0 1px #765535;
+    }
+    #qs-game .card{
+      position:relative;
+      width:78px;
+      height:112px;
+      padding:6px;
+      border:1px solid #17140f;
+      border-radius:3px;
+      background:
+        repeating-linear-gradient(45deg,rgba(94,76,42,.035) 0 2px,transparent 2px 5px),
+        linear-gradient(#f2e8c9,#cfc096);
+      box-shadow:inset 0 0 0 2px #f7edcf,inset 0 0 0 3px #83765d,2px 3px 3px #0008;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      color:#202018;
+      font-family:Georgia,"Times New Roman",serif;
+      user-select:none;
+    }
+    #qs-game .card:after{content:"";position:absolute;inset:4px;border:1px solid rgba(92,77,49,.28);pointer-events:none}
+    #qs-game .card.red{color:#8f2926}
+    #qs-game .card.black{color:#1d211d}
+    #qs-game .card.pick{cursor:pointer}
+    #qs-game .card.pick:hover{top:-2px;filter:brightness(1.06)}
+    #qs-game .card.selected{top:-5px;outline:2px solid #e4c578;box-shadow:0 0 0 1px #21170d,0 0 8px #e3ba5c,2px 5px 4px #0009}
+    #qs-game .corner{z-index:1;font-weight:bold;line-height:.86}
+    #qs-game .bottom{align-self:flex-end;transform:rotate(180deg)}
+    #qs-game .big-suit{z-index:1;text-align:center;font-size:31px;text-shadow:0 1px #fff8}
+    #qs-game .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+    #qs-game .slot{
+      min-height:62px;
+      padding:6px;
+      border:1px solid #11130f;
+      background:linear-gradient(#30352f,#1a1e1a);
+      box-shadow:inset 0 0 0 1px #4f554d,0 1px #6d5031;
+      color:#c9bea0;
+      text-align:center;
+    }
+    #qs-game button.slot{width:100%}
+    #qs-game .slot strong{display:block;color:#978b70;font-size:8px;letter-spacing:.11em;text-transform:uppercase}
+    #qs-game .slot span{display:block;margin-top:8px;color:#e5d5a9;font:700 15px Georgia,"Times New Roman",serif;text-shadow:0 1px #000}
+    #qs-game .slot.ready{background:linear-gradient(#3e493b,#222a21);box-shadow:inset 0 0 0 1px #66725f,0 1px #84613b}
+    #qs-game label{color:#c7bda1;font-size:10px}
+    #qs-game input,
+    #qs-game select{
+      width:100%;
+      margin-top:4px;
+      border:1px solid #0c0d0b !important;
+      border-radius:0;
+      padding:5px 6px !important;
+      background:#171a17 !important;
+      color:#e0d5b7 !important;
+      font:11px Tahoma,Verdana,sans-serif !important;
+      box-shadow:inset 1px 1px 3px #000,0 1px #50564e;
+    }
+    #qs-game input[type="range"]{padding:0 !important;accent-color:#a98552}
+    #qs-game .two{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    #qs-game .bounties{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}
+    #qs-game .bounty{
+      min-height:158px;
+      padding:8px;
+      border:1px solid #312519;
+      background:
+        repeating-linear-gradient(0deg,rgba(89,66,31,.04) 0 1px,transparent 1px 4px),
+        linear-gradient(#d4c79e,#aa986e);
+      box-shadow:inset 0 0 0 1px #eee0b8,2px 3px 3px #0008;
+      color:#2e281d;
+    }
+    #qs-game .bounty h4{margin:0 0 5px;padding-bottom:4px;border-bottom:1px solid #75684d;color:#33291b;font:700 13px Georgia,"Times New Roman",serif;text-shadow:0 1px #f5e9c7}
+    #qs-game .bounty .muted{color:#554b39}
+    #qs-game .stars{color:#72551d;text-shadow:0 1px #f5e0a7}
+    #qs-game .field{
+      position:relative;
+      margin-top:9px;
+      padding:12px;
+      border:1px solid #0b0d0a;
+      background:
+        radial-gradient(ellipse at 50% 100%,rgba(98,106,62,.65),transparent 40%),
+        linear-gradient(165deg,transparent 0 55%,rgba(10,15,9,.7) 56%),
+        radial-gradient(circle at 73% 25%,#65705a 0 3%,transparent 4%),
+        linear-gradient(#4c5a50 0 35%,#263327 36% 70%,#121a12 71%);
+      box-shadow:inset 0 0 24px #000b,inset 0 0 0 1px #5a6557,0 1px #765334;
+      color:#e9dfc2;
+    }
+    #qs-game .field:before{content:"HUNT AREA";position:absolute;left:8px;top:6px;color:#a89f83;font-size:8px;letter-spacing:.12em}
+    #qs-game .fighters{display:grid;grid-template-columns:1fr 88px 1fr;gap:9px;align-items:center;margin-top:11px}
+    #qs-game .fighter{
+      min-height:157px;
+      padding:8px;
+      border:1px solid #10120e;
+      background:rgba(13,16,13,.84);
+      box-shadow:inset 0 0 0 1px #4c5148,0 1px #89704b;
+    }
+    #qs-game .fighter h4{margin:0 0 7px;padding:4px 5px;border-bottom:1px solid #5d543e;background:#282d27;color:#dcc99c;font-size:11px;text-transform:uppercase}
+    #qs-game .distance{text-align:center;min-width:72px;padding:8px 3px;border:1px solid #14140f;background:rgba(20,20,15,.82);box-shadow:inset 0 0 0 1px #5b5746}
+    #qs-game .distance span{color:#968b70;font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+    #qs-game .distance b{display:block;color:#e2c57d;font:700 30px Georgia,"Times New Roman",serif;text-shadow:0 2px #000}
+    #qs-game .distance small{color:#bcb294;font-size:9px}
+    #qs-game .meter{margin:7px 0}
+    #qs-game .meter-label{display:flex;justify-content:space-between;color:#c6bda3;font-size:9px}
+    #qs-game .track{height:11px;border:1px solid #090a08;background:#111;box-shadow:inset 1px 1px 3px #000,0 1px #4c5149}
+    #qs-game .fill{height:100%;background:linear-gradient(#a76050,#6f342c);box-shadow:inset 0 1px #d2846f}
+    #qs-game .fill.armor{background:linear-gradient(#8d9b91,#4e5a52);box-shadow:inset 0 1px #b9c1b9}
+    #qs-game .facts{display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:9px}
+    #qs-game .facts span{padding:3px 4px;border:1px solid #353a33;background:#1b1f1b}
+    #qs-game .badge{
+      display:inline-block;
+      margin:2px;
+      padding:2px 5px;
+      border:1px solid #15140f;
+      background:linear-gradient(#5d5038,#342c20);
+      box-shadow:inset 0 1px #8b7650;
+      color:#e0d0a7;
+      font-size:9px;
+      text-shadow:0 1px #000;
+    }
+    #qs-game ul{margin:0;padding-left:16px;color:#cbbf9f;font-size:10px}
+    #qs-game li{margin:3px 0}
+    #qs-game .log{
+      height:247px;
+      overflow:auto;
+      padding:7px;
+      border:1px solid #080907;
+      background:rgba(5,8,6,.92);
+      box-shadow:inset 1px 1px 5px #000,0 1px #555044;
+      color:#aaa88e;
+      font:10px/1.35 "Courier New",monospace;
+      scrollbar-color:#67553b #10120f;
+      scrollbar-width:thin;
+    }
+    #qs-game .log p{margin:0 0 4px}
+    #qs-game .log p:before{color:#7e8c72}
+    #qs-game .good{color:#93af7f}
+    #qs-game .bad{color:#bd7465}
+    #qs-game .hidden{display:none!important}
+    #qs-game ::selection{background:#8c7046;color:#fff2c8}
+    @media(max-width:820px){
+      #qs-game{padding:8px}
+      #qs-game .masthead{padding-inline:115px}
+      #qs-game .layout{grid-template-columns:1fr}
+      #qs-game main{border-right:0;box-shadow:none}
+      #qs-game aside{border-top:2px solid #0d0b08;border-left:0;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+      #qs-game aside .panel:last-of-type{grid-column:1/-1}
+      #qs-game .status{grid-template-columns:repeat(3,1fr)}
+      #qs-game .bounties{grid-template-columns:1fr}
+    }
+    @media(max-width:560px){
+      #qs-game .masthead{padding:13px 12px 10px}
+      #qs-game .masthead:before,#qs-game .masthead:after{display:none}
+      #qs-game .masthead h1{font-size:22px}
+      #qs-game .slots{grid-template-columns:repeat(2,1fr)}
+      #qs-game .fighters{grid-template-columns:1fr}
+      #qs-game .distance{border-block:1px solid #6d6047}
+      #qs-game .two{grid-template-columns:1fr}
+      #qs-game aside{grid-template-columns:1fr}
+      #qs-game aside .panel:last-of-type{grid-column:auto}
+      #qs-game .card{width:70px;height:103px}
+    }
+  </style>
+
+  <style id="wildhunt-rift-styles">
+    #qs-game .masthead:before{display:none}
+    #qs-game .masthead{display:flex;align-items:center;justify-content:center}
+    #qs-game .masthead h1{white-space:nowrap}
+    #qs-game .masthead:after{content:"BUILD 0.9"}
+
+    #qs-game .rift-table{
+      position:relative;
+      flex:0 0 84px;
+      min-height:84px;
+      overflow:hidden;
+      border:1px solid #0d0b08;
+      background:
+        radial-gradient(ellipse at 50% 72%,rgba(93,116,78,.38),transparent 48%),
+        repeating-linear-gradient(102deg,rgba(255,255,255,.025) 0 2px,transparent 2px 8px),
+        linear-gradient(#263025,#111710);
+      box-shadow:inset 0 0 0 1px #4f5949,0 1px #745333;
+      isolation:isolate;
+    }
+    #qs-game .rift-table:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      background:linear-gradient(90deg,rgba(0,0,0,.38),transparent 18% 82%,rgba(0,0,0,.38));
+      pointer-events:none;
+    }
+    #qs-game .rift-table-head{
+      position:absolute;
+      z-index:8;
+      top:4px;
+      left:6px;
+      right:6px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      color:#d7c9a7;
+      text-shadow:0 1px #000;
+      pointer-events:none;
+    }
+    #qs-game .rift-table-head strong{
+      color:#d8b6e7;
+      font:700 8px/1 Tahoma,Verdana,sans-serif;
+      letter-spacing:.13em;
+    }
+    #qs-game .rift-table-head span{
+      color:#bcae94;
+      font:8px/1 "Courier New",monospace;
+      white-space:nowrap;
+    }
+    #qs-game .rift-stage{position:absolute;inset:17px 0 0}
+    #qs-game .table-wormhole{
+      position:absolute;
+      z-index:1;
+      left:50%;
+      bottom:1px;
+      width:94px;
+      height:34px;
+      border:1px solid #180e1c;
+      border-radius:50%;
+      opacity:.12;
+      overflow:hidden;
+      transform:translateX(-50%) scale(.18,.08);
+      background:
+        radial-gradient(ellipse at center,#030204 0 22%,#2a1232 32%,transparent 36%),
+        conic-gradient(from 20deg,#1a101e,#9a5fc1,#211126,#d7a4eb,#25132b,#74508d,#1a101e);
+      box-shadow:inset 0 0 9px #030204,0 0 0 1px #6d4b77,0 0 10px rgba(173,111,205,.58);
+      transition:opacity .2s ease,transform .28s ease;
+      pointer-events:none;
+    }
+    #qs-game .table-wormhole:before{
+      content:"";
+      position:absolute;
+      inset:5px 14px;
+      border-radius:50%;
+      border:1px dashed rgba(244,208,255,.6);
+      animation:rift-turn 1.35s linear infinite reverse;
+    }
+    #qs-game .table-wormhole:after{
+      content:"";
+      position:absolute;
+      inset:10px 26px;
+      border-radius:50%;
+      background:#040205;
+      box-shadow:0 0 6px #d297ef;
+    }
+    #qs-game .table-deck{
+      position:absolute;
+      z-index:4;
+      left:50%;
+      top:7px;
+      width:48px;
+      height:58px;
+      transform:translateX(-50%) rotate(-2deg);
+      filter:drop-shadow(4px 5px 2px rgba(0,0,0,.58));
+      transition:transform .18s ease;
+    }
+    #qs-game .deck-card-back{
+      position:absolute;
+      left:0;
+      bottom:0;
+      width:46px;
+      height:56px;
+      border:1px solid #080609;
+      border-radius:2px;
+      background:
+        linear-gradient(45deg,transparent 43%,rgba(235,209,244,.32) 44% 47%,transparent 48% 52%,rgba(235,209,244,.32) 53% 56%,transparent 57%),
+        linear-gradient(-45deg,transparent 43%,rgba(235,209,244,.22) 44% 47%,transparent 48% 52%,rgba(235,209,244,.22) 53% 56%,transparent 57%),
+        #5b386d;
+      background-size:9px 9px;
+      box-shadow:inset 0 0 0 2px #b788c9,inset 0 0 0 4px #2d1737,1px 1px #050405;
+      transform:translate(calc(var(--i)*.8px),calc(var(--i)*-1.55px));
+      animation-delay:calc(var(--i)*.055s);
+    }
+    #qs-game .deck-card-back.top:after{
+      content:"✦";
+      position:absolute;
+      inset:7px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(232,199,243,.45);
+      color:#d8a8ea;
+      font:16px/1 Georgia,serif;
+      text-shadow:0 1px #170c1b;
+    }
+    #qs-game .rift-fly-card{
+      position:absolute;
+      z-index:7;
+      left:50%;
+      top:8px;
+      width:46px;
+      height:56px;
+      margin-left:-23px;
+      border:1px solid #080609;
+      border-radius:2px;
+      opacity:0;
+      background:repeating-linear-gradient(45deg,#32203b 0 3px,#80589a 3px 6px);
+      box-shadow:inset 0 0 0 2px #bd8fd0,2px 2px #050405;
+      pointer-events:none;
+    }
+    #qs-game .rift-state{
+      position:absolute;
+      z-index:8;
+      left:6px;
+      bottom:4px;
+      padding:1px 4px;
+      border:1px solid rgba(13,10,8,.8);
+      background:rgba(13,15,12,.78);
+      color:#958d78;
+      font:7px/1.15 "Courier New",monospace;
+      letter-spacing:.04em;
+      text-shadow:0 1px #000;
+      pointer-events:none;
+    }
+    #qs-game .rift-table.low .rift-table-head span,#qs-game .rift-table.low .rift-state{color:#e0b26e}
+    #qs-game .rift-table.drawing .table-deck{transform:translateX(-50%) rotate(-2deg) translateY(2px)}
+    #qs-game .rift-table.drawing .rift-fly-card{animation:card-draw-away .34s ease-out both}
+    #qs-game .rift-table.refilling .table-wormhole{
+      opacity:1;
+      transform:translateX(-50%) scale(1);
+      animation:rift-surge .42s ease-in-out infinite alternate;
+    }
+    #qs-game .rift-table.refilling .deck-card-back{animation:card-rise .5s cubic-bezier(.15,.78,.25,1) both}
+    #qs-game .rift-table.refilling .rift-state{color:#deb8ea}
+    #qs-game .rift-table.spawning .table-wormhole{
+      opacity:.9;
+      transform:translateX(-50%) scale(.92);
+      animation:rift-spawn .18s linear 5;
+    }
+    #qs-game .enemy-fighter{position:relative;isolation:isolate}
+    #qs-game .enemy-fighter:before{content:"";position:absolute;z-index:-1;inset:8% 12%;border-radius:50%;opacity:0;background:conic-gradient(#23132b,#9a5fc1,#201026,#d6a0e8,#23132b);filter:blur(1px);pointer-events:none}
+    #qs-game .enemy-fighter.rift-arrival{animation:monster-arrival .65s cubic-bezier(.2,.9,.25,1)}
+    #qs-game .enemy-fighter.rift-arrival:before{animation:arrival-portal .8s ease-out}
+    @keyframes rift-turn{to{transform:rotate(360deg)}}
+    @keyframes rift-surge{from{filter:brightness(1);box-shadow:inset 0 0 9px #030204,0 0 0 1px #6d4b77,0 0 8px rgba(173,111,205,.5)}to{filter:brightness(1.65);box-shadow:inset 0 0 11px #030204,0 0 0 1px #b68ac2,0 0 18px rgba(196,126,224,.9)}}
+    @keyframes rift-spawn{0%,100%{filter:brightness(1)}50%{filter:brightness(1.85)}}
+    @keyframes card-rise{from{opacity:0;transform:translate(calc(var(--i)*.8px),38px) scale(.7) rotate(-12deg)}to{opacity:1;transform:translate(calc(var(--i)*.8px),calc(var(--i)*-1.55px))}}
+    @keyframes card-draw-away{0%{opacity:1;transform:translate(0,0) rotateY(0) rotate(-2deg)}55%{opacity:1;transform:translate(42px,-12px) rotateY(80deg) rotate(8deg)}100%{opacity:0;transform:translate(82px,-24px) rotateY(180deg) rotate(16deg)}}
+    @keyframes monster-arrival{0%{opacity:0;transform:scale(.35) translateY(-14px)}65%{opacity:1;transform:scale(1.06) translateY(1px)}100%{transform:none}}
+    @keyframes arrival-portal{0%{opacity:0;transform:scale(.15) rotate(0)}35%{opacity:.86;transform:scale(1.15) rotate(110deg)}100%{opacity:0;transform:scale(.25) rotate(240deg)}}
+    @media(max-height:560px){
+      #qs-game .rift-table{flex-basis:70px;min-height:70px}
+      #qs-game .rift-stage{inset:15px 0 0;transform:scale(.82);transform-origin:50% 0}
+      #qs-game .rift-state{bottom:2px}
+    }
+  </style>
+
+  <style id="wildhunt-viewport-overrides">
+    html,body{
+      width:100%;
+      height:100%;
+      margin:0!important;
+      padding:0!important;
+      overflow:hidden!important;
+      background:#080b08;
+    }
+    body{min-width:0;min-height:0}
+    #qs-game{
+      width:100vw;
+      height:100vh;
+      height:100dvh;
+      min-width:0;
+      min-height:0;
+      margin:0;
+      padding:0;
+      overflow:hidden;
+      font-size:clamp(9px,1.25vmin,12px);
+    }
+    #qs-game .shell{
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+      margin:0;
+      border:0;
+      border-radius:0;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:50px 37px minmax(0,1fr);
+      box-shadow:inset 0 0 0 2px #151009,inset 0 0 0 3px #8c7148;
+    }
+    #qs-game .shell:before,#qs-game .shell:after{top:4px}
+    #qs-game .masthead{
+      min-height:0;
+      height:50px;
+      padding:8px 150px 5px;
+      align-items:center;
+      justify-content:center;
+    }
+    #qs-game .masthead h1{font-size:clamp(20px,4vmin,30px)}
+    #qs-game .masthead p{display:none!important}
+    #qs-game .masthead:before{top:14px}
+    #qs-game .masthead:after{top:17px}
+    #qs-game .status{
+      min-height:0;
+      height:37px;
+      grid-template-columns:1.35fr repeat(5,minmax(0,1fr));
+      gap:2px;
+      padding:3px 4px;
+      overflow:hidden;
+    }
+    #qs-game .status div{padding:2px 5px 3px}
+    #qs-game .status small{font-size:clamp(6px,.85vmin,8px)}
+    #qs-game .status b{font-size:clamp(8px,1.15vmin,11px)}
+    #qs-game .layout{
+      width:100%;
+      height:100%;
+      min-height:0;
+      overflow:hidden;
+      grid-template-columns:minmax(0,1.68fr) minmax(215px,.62fr);
+    }
+    #qs-game main{
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+      padding:7px;
+      overflow:hidden;
+    }
+    #qs-game main>section{
+      width:100%;
+      height:100%;
+      min-height:0;
+      padding:7px;
+      overflow:hidden;
+    }
+    #qs-game aside{
+      height:100%;
+      min-height:0;
+      overflow:hidden;
+      padding:6px;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+    }
+    #qs-game aside .panel{margin:0;flex:0 0 auto}
+    #qs-game aside .panel:nth-of-type(3){min-height:0;flex:1 1 auto;display:flex;flex-direction:column}
+    #qs-game aside .panel:nth-of-type(3) h3{flex:0 0 auto}
+    #qs-game .log{
+      height:auto;
+      min-height:0;
+      flex:1 1 auto;
+      overflow:hidden;
+      padding:5px;
+      font-size:clamp(8px,1vmin,10px);
+    }
+    #qs-game h2{margin:-7px -7px 6px;padding:5px 8px 4px;font-size:clamp(10px,1.5vmin,13px)}
+    #qs-game h3{margin-bottom:5px;padding:3px 5px;font-size:clamp(8px,1.15vmin,10px)}
+    #qs-game p{margin:3px 0}
+    #qs-game .muted{font-size:clamp(8px,1.15vmin,11px)}
+    #qs-game .panel{margin-bottom:5px;padding:5px}
+    #qs-game button{min-height:22px;padding:3px 7px;font-size:clamp(8px,1.15vmin,11px)}
+    #qs-game button:active{padding-top:4px;padding-bottom:2px}
+    #qs-game .row{gap:4px;margin-top:5px}
+    #qs-game .cards{
+      min-height:0;
+      height:clamp(78px,16.5vmin,114px);
+      margin:5px 0;
+      padding:5px;
+      gap:clamp(3px,.8vw,8px);
+      flex-wrap:nowrap;
+      align-items:center;
+      justify-content:flex-start;
+      overflow:hidden;
+    }
+    #qs-game .card{
+      position:relative;
+      flex:0 0 auto;
+      width:clamp(48px,7.6vmin,66px);
+      height:auto;
+      aspect-ratio:5/7;
+      padding:0;
+      border:1px solid #050505;
+      border-radius:0;
+      background:#fdfdfb;
+      box-shadow:1px 1px 0 #050505,2px 2px 0 rgba(0,0,0,.3);
+      color:#050505!important;
+      display:block;
+      font-family:"Times New Roman",Times,serif;
+      overflow:hidden;
+    }
+    #qs-game .card:after{display:none}
+    #qs-game .card.red,#qs-game .card.black{color:#050505!important}
+    #qs-game .card.pick:hover{top:-2px;filter:none;background:#fff}
+    #qs-game .card.selected{
+      top:-3px;
+      outline:2px solid #d3aa58;
+      box-shadow:0 0 0 1px #151009,0 0 0 3px rgba(211,170,88,.42),2px 4px 0 rgba(0,0,0,.5);
+    }
+    #qs-game .corner{
+      position:absolute;
+      z-index:3;
+      top:2px;
+      left:3px;
+      width:11px;
+      color:#050505;
+      font:bold clamp(7px,1.15vmin,10px)/.74 "Times New Roman",Times,serif;
+      text-align:left;
+      letter-spacing:-.04em;
+    }
+    #qs-game .corner.bottom{
+      top:auto;
+      left:auto;
+      right:3px;
+      bottom:2px;
+      align-self:auto;
+      transform:rotate(180deg);
+    }
+    #qs-game .big-suit{display:none}
+    #qs-game .pip-field{
+      position:absolute;
+      inset:13px 8px;
+      display:grid;
+      grid-template-rows:repeat(5,1fr);
+      align-items:center;
+      pointer-events:none;
+    }
+    #qs-game .pip-row{
+      display:flex;
+      min-height:0;
+      align-items:center;
+      justify-content:space-between;
+    }
+    #qs-game .pip-row.one{justify-content:center}
+    #qs-game .pip{
+      display:block;
+      color:#050505;
+      font:normal clamp(13px,2.65vmin,24px)/.68 "Times New Roman",Times,serif;
+      text-shadow:none;
+    }
+    #qs-game .pip-row.lower .pip{transform:rotate(180deg)}
+    #qs-game .face-mark{
+      position:absolute;
+      inset:14px 9px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#050505;
+      font:bold clamp(22px,4.2vmin,38px)/1 "Times New Roman",Times,serif;
+    }
+    #qs-game .face-mark i{
+      position:absolute;
+      right:1px;
+      bottom:1px;
+      font-style:normal;
+      font-size:.48em;
+    }
+    #qs-game .slots{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+    #qs-game .slot{min-height:48px;padding:4px}
+    #qs-game .slot strong{font-size:clamp(6px,.85vmin,8px)}
+    #qs-game .slot span{margin-top:4px;font-size:clamp(10px,1.7vmin,15px)}
+    #qs-game .two{gap:5px}
+    #qs-game .bounties{gap:5px;margin-top:5px}
+    #qs-game .bounty{min-height:128px;padding:6px}
+    #qs-game .bounty h4{font-size:clamp(10px,1.45vmin,13px)}
+    #qs-game .field{margin-top:5px;padding:7px}
+    #qs-game .fighters{grid-template-columns:1fr 72px 1fr;gap:6px;margin-top:8px}
+    #qs-game .fighter{min-height:126px;padding:5px}
+    #qs-game .distance{min-width:0;padding:5px 2px}
+    #qs-game .distance b{font-size:clamp(21px,4.5vmin,30px)}
+    #qs-game .meter{margin:4px 0}
+    #qs-game .track{height:9px}
+    #qs-game .facts{gap:2px;font-size:clamp(7px,.95vmin,9px)}
+    #qs-game ul{font-size:clamp(8px,1.05vmin,10px)}
+    #qs-game input,#qs-game select{margin-top:2px;padding:3px 5px!important;font-size:clamp(8px,1.1vmin,11px)!important}
+    #qs-game #pack{min-width:0;overflow:hidden}
+    #qs-game #pack li{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    #qs-game main>section{transform-origin:top left}
+
+    @media(max-width:760px){
+      #qs-game .shell{grid-template-rows:44px 34px minmax(0,1fr)}
+      #qs-game .masthead{height:44px;padding:6px 10px}
+      #qs-game .masthead:before,#qs-game .masthead:after{display:none}
+      #qs-game .layout{
+        grid-template-columns:1fr;
+        grid-template-rows:minmax(0,1fr) 132px;
+      }
+      #qs-game main{border-right:0;border-bottom:1px solid #0d0b08;box-shadow:inset 0 -1px #61482d}
+      #qs-game aside{
+        border-left:0;
+        border-top:1px solid #765535;
+        display:grid;
+        grid-template-columns:112px minmax(0,.8fr) minmax(0,.8fr) minmax(0,1.45fr) auto;
+        gap:4px;
+        padding:4px;
+      }
+      #qs-game .rift-table{height:100%;min-height:0;flex:none}
+      #qs-game .rift-table-head{left:4px;right:4px}
+      #qs-game .rift-table-head strong{font-size:7px;letter-spacing:.05em}
+      #qs-game .rift-table-head span{font-size:7px}
+      #qs-game .rift-stage{inset:15px 0 0;transform:scale(.72);transform-origin:50% 0}
+      #qs-game .rift-state{display:none}
+      #qs-game aside .panel,#qs-game aside .panel:last-of-type{min-height:0;grid-column:auto;margin:0;overflow:hidden}
+      #qs-game aside .panel:nth-of-type(3){display:flex;min-width:0}
+      #qs-game aside>button{height:100%;min-width:54px}
+      #qs-game .bounties{grid-template-columns:repeat(3,minmax(0,1fr))}
+      #qs-game .slots{grid-template-columns:repeat(5,minmax(0,1fr))}
+      #qs-game .fighters{grid-template-columns:1fr 64px 1fr}
+    }
+    @media(max-width:430px){
+      #qs-game .shell{grid-template-rows:40px 31px minmax(0,1fr)}
+      #qs-game .masthead{height:40px}
+      #qs-game .masthead h1{font-size:19px;letter-spacing:.14em}
+      #qs-game .status{height:31px;padding:2px;grid-template-columns:repeat(6,minmax(0,1fr))}
+      #qs-game .status div{padding:1px 2px}
+      #qs-game .layout{grid-template-rows:minmax(0,1fr) 112px}
+      #qs-game main{padding:3px}
+      #qs-game main>section{padding:4px}
+      #qs-game h2{margin:-4px -4px 4px;padding:4px 5px 3px}
+      #qs-game .cards{height:70px;padding:3px;gap:3px}
+      #qs-game .card{width:44px}
+      #qs-game .pip-field{inset:10px 6px}
+      #qs-game .slot{min-height:40px;padding:2px}
+      #qs-game .slot span{margin-top:2px}
+      #qs-game .bounty{min-height:105px;padding:4px}
+      #qs-game .bounty .muted{font-size:7px}
+      #qs-game .bounty button{padding-inline:3px}
+      #qs-game .field{padding:4px}
+      #qs-game .fighter{min-height:105px;padding:3px}
+      #qs-game .fighters{grid-template-columns:1fr 48px 1fr;gap:3px}
+      #qs-game .facts span{padding:2px}
+      #qs-game aside{grid-template-columns:72px minmax(0,.62fr) minmax(0,.62fr) minmax(0,1.25fr) 45px;padding:3px}
+      #qs-game aside .panel{padding:3px}
+      #qs-game .rift-table-head strong{display:none}
+      #qs-game .rift-table-head{justify-content:center}
+      #qs-game .rift-stage{transform:scale(.62);transform-origin:50% 0}
+      #qs-game aside h3{margin:-3px -3px 3px;padding:2px 3px}
+    }
+    @media(max-height:560px){
+      #qs-game .shell{grid-template-rows:38px 30px minmax(0,1fr)}
+      #qs-game .masthead{height:38px;padding-block:4px}
+      #qs-game .masthead h1{font-size:19px}
+      #qs-game .masthead:before,#qs-game .masthead:after{display:none}
+      #qs-game .status{height:30px;padding:2px}
+      #qs-game .layout{grid-template-columns:minmax(0,1.72fr) minmax(190px,.58fr);grid-template-rows:1fr}
+      #qs-game main{padding:3px}
+      #qs-game main>section{padding:4px}
+      #qs-game h2{margin:-4px -4px 3px;padding:3px 5px}
+      #qs-game .cards{height:68px;margin:3px 0;padding:3px}
+      #qs-game .card{width:43px}
+      #qs-game .slot{min-height:38px;padding:2px}
+      #qs-game .slot span{margin-top:1px}
+      #qs-game .panel{padding:3px;margin-bottom:3px}
+      #qs-game .bounty{min-height:96px;padding:4px}
+      #qs-game .field{padding:3px;margin-top:3px}
+      #qs-game .fighters{margin-top:5px}
+      #qs-game .fighter{min-height:96px;padding:3px}
+      #qs-game aside{display:flex;padding:3px}
+    }
+    @media(max-width:760px) and (max-height:560px){
+      #qs-game .layout{grid-template-columns:minmax(0,1.68fr) minmax(175px,.58fr);grid-template-rows:1fr}
+      #qs-game aside{display:flex;border-left:1px solid #765535;border-top:0}
+      #qs-game .rift-table{height:auto;min-height:70px;flex:0 0 70px}
+    }
+
+    #qs-game .party-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;min-width:0}
+    #qs-game .hunter-mini{min-width:0;padding:5px;border:1px solid #11130f;background:linear-gradient(#343b35,#1b1f1b);box-shadow:inset 0 0 0 1px #555e55,0 1px #6e5334;opacity:.82}
+    #qs-game .hunter-mini.active{opacity:1;outline:2px solid #d3aa58;outline-offset:-2px;background:linear-gradient(#4d544b,#242a24)}
+    #qs-game .hunter-mini.fainted{opacity:.35;filter:grayscale(1)}
+    #qs-game .hunter-mini h4{margin:0 0 3px;padding:2px 3px;border-bottom:1px solid #5d543e;background:#282d27;color:#dcc99c;font-size:clamp(7px,1vmin,10px);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #qs-game .hunter-mini .meter{margin:2px 0}
+    #qs-game .hunter-mini .track{height:6px}
+    #qs-game .hunter-mini .facts{font-size:clamp(6px,.82vmin,8px)}
+    #qs-game .hunter-mini .facts span{padding:2px}
+    #qs-game .monster-counter{margin:-2px 0 4px;color:#d3b66f;font:9px/1.2 "Courier New",monospace;text-transform:uppercase;letter-spacing:.06em}
+    #qs-game .party-summary{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+    #qs-game .party-summary .badge{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #qs-game .level-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+    #qs-game .level-hunter{padding:5px;border:1px solid #11130f;background:linear-gradient(rgba(46,49,41,.92),rgba(24,27,23,.92));box-shadow:inset 0 0 0 1px #565a4e,0 1px #6e5032}
+    #qs-game .level-hunter h3{margin:-5px -5px 5px}
+    #qs-game .level-hunter button{width:100%;margin-top:3px}
+    @media(max-width:760px){#qs-game .party-fight-layout{grid-template-columns:minmax(0,1.3fr) 55px minmax(0,.9fr)}#qs-game .party-grid{gap:3px}#qs-game .hunter-mini{padding:3px}#qs-game .level-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}}
+    @media(max-width:430px){#qs-game .party-fight-layout{grid-template-columns:minmax(0,1.35fr) 42px minmax(0,.85fr)}#qs-game .hunter-mini h4{font-size:6px}#qs-game .monster-counter{font-size:7px}}
+
+    #qs-game .town-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:0 0 5px}
+    #qs-game .town-tabs button.active{outline:1px solid #c49b5a;outline-offset:-2px;color:#fff0bd;background:linear-gradient(#80623f,#4d3825 48%,#302217 52%,#62472e)}
+    #qs-game .town-pane{min-height:0;overflow:hidden}
+    #qs-game .shop-head{display:grid;grid-template-columns:minmax(145px,.62fr) minmax(0,1.38fr);gap:5px}
+    #qs-game .equipped-readout{min-height:42px;padding:5px;border:1px solid #10120e;background:#171b17;box-shadow:inset 0 0 0 1px #4f554d;color:#cfc4a5;font-size:clamp(7px,1.05vmin,10px)}
+    #qs-game .equipped-readout b{color:#e5ce96}
+    #qs-game .shop-filters{display:flex;gap:4px;margin-top:5px}
+    #qs-game .shop-filters button.active{color:#fff0bd;box-shadow:inset 0 0 0 1px #c59a59,0 1px #8a6741}
+    #qs-game .gear-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:5px}
+    #qs-game .gear-card{min-width:0;min-height:154px;padding:6px;border:1px solid #15120e;background:linear-gradient(#333831,#1d211d);box-shadow:inset 0 0 0 1px #565c52,0 1px #735333;display:flex;flex-direction:column}
+    #qs-game .gear-card header{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px;align-items:start;padding-bottom:4px;border-bottom:1px solid #5c543e}
+    #qs-game .gear-card h4{min-width:0;margin:0;color:#ddc893;font:700 clamp(9px,1.25vmin,12px)/1.08 Georgia,"Times New Roman",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #qs-game .gear-mark{min-width:27px;padding:2px 3px;border:1px solid #050505;background:#f8f8f4;color:#050505;font:bold 12px/1 "Times New Roman",serif;text-align:center;box-shadow:1px 1px #000}
+    #qs-game .gear-type{margin-top:3px;color:#958c75;font:7px/1 Tahoma,Verdana,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+    #qs-game .gear-card p{flex:1 1 auto;margin:5px 0;color:#c2b99d;font-size:clamp(7px,1.05vmin,10px)}
+    #qs-game .gear-stats{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
+    #qs-game .gear-stats span{padding:2px 4px;border:1px solid #3c4039;background:#151815;color:#d6c9a8;font-size:clamp(7px,.95vmin,9px)}
+    #qs-game .gear-card button{width:100%;margin-top:auto}
+    #qs-game .encounter-note{padding:4px 6px;border:1px solid #392a1c;background:linear-gradient(#6b4c30,#342419);color:#dfcc9e;font-size:clamp(7px,1.05vmin,10px)}
+    #qs-game .bounties.encounter-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+    #qs-game .bounties.encounter-list .bounty{min-height:177px;padding:6px;display:flex;flex-direction:column}
+    #qs-game .bounties.encounter-list .bounty h4{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #qs-game .bounty-region{display:block;margin-top:2px;color:#67583f;font:7px/1 Tahoma,Verdana,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+    #qs-game .contract-facts{margin:4px 0;padding:4px;border:1px solid #81704f;background:rgba(255,248,220,.25);font-size:clamp(7px,1vmin,9px)}
+    #qs-game .contract-facts div{margin:2px 0}
+    #qs-game .contract-facts b{color:#352818}
+    #qs-game .bounties.encounter-list .bounty button{width:100%;margin-top:auto}
+    #qs-game .gear-line{margin:2px 0 3px;color:#a99f84;font-size:clamp(6px,.82vmin,8px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    @media(max-width:760px){#qs-game .gear-grid,#qs-game .bounties.encounter-list{grid-template-columns:repeat(4,minmax(0,1fr))}#qs-game .gear-card{min-height:132px;padding:4px}#qs-game .bounties.encounter-list .bounty{min-height:150px;padding:4px}.shop-head{gap:3px}}
+    @media(max-width:520px){#qs-game .shop-head{grid-template-columns:minmax(105px,.58fr) minmax(0,1.42fr)}#qs-game .gear-card p,#qs-game .bounties.encounter-list .bounty>p{font-size:6px}#qs-game .gear-card{min-height:119px}#qs-game .bounties.encounter-list .bounty{min-height:135px}#qs-game .contract-facts{padding:2px}}
+    @media(max-height:560px){#qs-game .gear-card{min-height:112px;padding:3px}#qs-game .gear-card p{margin:2px 0}#qs-game .gear-grid{gap:3px;margin-top:3px}#qs-game .bounties.encounter-list{gap:3px}#qs-game .bounties.encounter-list .bounty{min-height:116px;padding:3px}#qs-game .contract-facts{margin:2px 0;padding:2px}.encounter-note{padding:2px 4px}}
+  </style>
+
+  <style id="wildhunt-zoom-fit">
+    /* Desktop browser zoom can make the CSS viewport look like a tiny landscape
+       screen. In that case the entire client is laid out on a larger logical
+       stage and uniformly scaled back into the exact visible viewport. */
+    #qs-game.zoom-fit{position:relative;font-size:12px}
+    #qs-game.zoom-fit .shell{
+      position:absolute;
+      left:0;
+      top:0;
+      margin:0;
+      transform-origin:0 0;
+      grid-template-rows:50px 37px minmax(0,1fr);
+    }
+    #qs-game.zoom-fit .masthead{
+      height:50px;
+      min-height:0;
+      padding:8px 90px 5px;
+    }
+    #qs-game.zoom-fit .masthead h1{font-size:30px;letter-spacing:.22em}
+    #qs-game.zoom-fit .masthead:after{display:block;top:17px}
+    #qs-game.zoom-fit .status{
+      height:37px;
+      grid-template-columns:1.35fr repeat(5,minmax(0,1fr));
+      gap:2px;
+      padding:3px 4px;
+    }
+    #qs-game.zoom-fit .status div{padding:2px 5px 3px}
+    #qs-game.zoom-fit .status small{font-size:8px}
+    #qs-game.zoom-fit .status b{font-size:11px}
+    #qs-game.zoom-fit .layout{
+      grid-template-columns:minmax(0,1.68fr) minmax(230px,.62fr);
+      grid-template-rows:minmax(0,1fr);
+    }
+    #qs-game.zoom-fit main{
+      padding:7px;
+      border-right:1px solid #0d0b08;
+      border-bottom:0;
+      box-shadow:inset -1px 0 #61482d;
+    }
+    #qs-game.zoom-fit main>section{padding:7px}
+    #qs-game.zoom-fit aside{
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      padding:6px;
+      border-left:1px solid #765535;
+      border-top:0;
+    }
+    #qs-game.zoom-fit .rift-table{height:auto;flex:0 0 84px;min-height:84px}
+    #qs-game.zoom-fit aside .panel,
+    #qs-game.zoom-fit aside .panel:last-of-type{
+      min-height:0;
+      grid-column:auto;
+      margin:0;
+      overflow:hidden;
+    }
+    #qs-game.zoom-fit aside .panel:nth-of-type(3){display:flex;min-width:0;flex:1 1 auto}
+    #qs-game.zoom-fit aside>button{width:auto;height:auto;min-width:0;min-height:22px;flex:0 0 auto}
+    #qs-game.zoom-fit .log{font-size:10px}
+    #qs-game.zoom-fit h2{margin:-7px -7px 6px;padding:5px 8px 4px;font-size:13px}
+    #qs-game.zoom-fit h3{margin-bottom:5px;padding:3px 5px;font-size:10px}
+    #qs-game.zoom-fit .muted{font-size:11px}
+    #qs-game.zoom-fit button{min-height:22px;padding:3px 7px;font-size:11px}
+    #qs-game.zoom-fit .cards{height:114px;margin:5px 0;padding:5px;gap:8px}
+    #qs-game.zoom-fit .card{width:66px}
+    #qs-game.zoom-fit .corner{font-size:10px}
+    #qs-game.zoom-fit .pip{font-size:24px}
+    #qs-game.zoom-fit .face-mark{font-size:38px}
+    #qs-game.zoom-fit .slots{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+    #qs-game.zoom-fit .slot{min-height:48px;padding:4px}
+    #qs-game.zoom-fit .slot strong{font-size:8px}
+    #qs-game.zoom-fit .slot span{margin-top:4px;font-size:15px}
+    #qs-game.zoom-fit .two{grid-template-columns:1fr 1fr;gap:5px}
+    #qs-game.zoom-fit .bounties{grid-template-columns:repeat(3,minmax(0,1fr))}
+    #qs-game.zoom-fit .fighters{grid-template-columns:1fr 72px 1fr;gap:6px;margin-top:8px}
+    #qs-game.zoom-fit .party-fight-layout{grid-template-columns:minmax(0,1.3fr) 72px minmax(0,.9fr)}
+    #qs-game.zoom-fit .party-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+    #qs-game.zoom-fit .hunter-mini{padding:5px}
+    #qs-game.zoom-fit .hunter-mini h4{font-size:10px}
+    #qs-game.zoom-fit .monster-counter{font-size:9px}
+    #qs-game.zoom-fit .level-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+    #qs-game.zoom-fit .shop-head{grid-template-columns:minmax(145px,.62fr) minmax(0,1.38fr);gap:5px}
+    #qs-game.zoom-fit .gear-grid,
+    #qs-game.zoom-fit .bounties.encounter-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+    #qs-game.zoom-fit .gear-card{min-height:132px;padding:4px}
+    #qs-game.zoom-fit .gear-card p{font-size:10px}
+    #qs-game.zoom-fit .bounties.encounter-list .bounty{min-height:150px;padding:4px}
+    #qs-game.zoom-fit .bounties.encounter-list .bounty>p{font-size:10px}
+    #qs-game.zoom-fit .contract-facts{padding:4px;font-size:9px}
+
+    @media(max-width:760px) and (max-height:560px){
+      #qs-game:not(.zoom-fit) aside>button{height:auto;min-height:22px;flex:0 0 auto}
+    }
+  </style>
+
+  <section class="shell">
+    <header class="masthead">
+      <h1>WILDxHUNT</h1>
+    </header>
+    <div class="status" aria-live="polite">
+      <div><small>Phase</small><b id="s-phase">Creation</b></div><div><small>Gold</small><b id="s-gold">0</b></div><div><small>Quarry</small><b id="s-quarry">0</b></div><div><small>Meals</small><b id="s-meals">0</b></div><div><small>Level</small><b id="s-level">1</b></div><div><small>XP</small><b id="s-xp">0 / 5</b></div>
+    </div>
+    <div class="layout">
+      <main>
+        <section id="creation">
+          <h2 id="creation-title">Create hunter 1 of 4</h2><p id="creation-copy" class="muted">Each hunter draws five independent cards. Assign four to Health, Armor, Speed, and Weapon; the leftover becomes free shared quarry. Any card can appear on every draw, including repeats.</p>
+          <div class="row"><button id="draw" class="primary">Draw five cards</button><button id="redraw" disabled>Draw again</button></div>
+          <div id="hand" class="cards"></div><div id="slots" class="slots"></div>
+          <div id="weapon-box" class="panel hidden" style="margin-top:12px"><h3>Weapon balance</h3><p class="muted">Set range; the remainder becomes damage.</p><label>Range <input id="weapon-range" type="range" min="0" value="0"></label><p><b id="weapon-readout"></b></p></div>
+          <div class="row"><button id="finish" class="primary" disabled>Finish hunter</button></div>
+        </section>
+
+        <section id="town" class="hidden">
+          <h2>Town</h2>
+          <div class="town-tabs" aria-label="Town services"><button class="active" data-town-tab="shop">Gear shop</button><button data-town-tab="bounties">Bounty encounters</button><button data-town-tab="market">Market & meals</button></div>
+
+          <div id="town-shop" class="town-pane">
+            <div class="shop-head">
+              <label>Shopping for<select id="shop-hunter"></select></label>
+              <div id="shop-equipped" class="equipped-readout"></div>
+            </div>
+            <div class="shop-filters"><button class="active" data-shop-kind="weapon">Weapons</button><button data-shop-kind="armor">Armor</button></div>
+            <div id="shop-items" class="gear-grid"></div>
+          </div>
+
+          <div id="town-bounties" class="town-pane hidden">
+            <p class="encounter-note"><b>Bounties are encounters.</b> Each notice is one complete fight with a fixed target roster. Targets arrive through the rift in waves; the party does not return to camp until the encounter is cleared or abandoned.</p>
+            <div id="bounties" class="bounties encounter-list"></div>
+          </div>
+
+          <div id="town-market" class="town-pane hidden">
+            <p class="muted">Health, exhaustion, and temporary speed penalties recover in town.</p>
+            <div class="row"><button id="meal">Craft meal (1 quarry)</button></div>
+            <div class="panel" style="margin-top:8px"><h3>Quarry market</h3><p class="muted">Sell one quarry card for gold equal to its card value. Selling a card never removes that result from future rift draws.</p><div class="two"><label>Quarry card<select id="sell-quarry"></select></label><div style="display:flex;align-items:end"><button id="sell" style="width:100%">Sell quarry</button></div></div></div>
+          </div>
+        </section>
+
+        <section id="camp" class="hidden">
+          <h2>Camp</h2><p id="camp-text" class="muted"></p>
+          <div class="panel"><h3>Tracking</h3><p class="muted">Reveal one non-health stat for free. Spend shared quarry for another clue.</p><div id="clues"></div><div class="row"><button id="track">Study tracks</button><button id="track-more">Spend quarry</button></div></div>
+          <div class="row"><button id="fight" class="primary">Approach monster</button><button id="abandon" class="danger">Abandon bounty</button></div>
+        </section>
+
+        <section id="combat" class="hidden">
+          <h2>Combat</h2><p class="muted">You control all four hunters through one bounty encounter. Each target arrives as a rift wave; surviving hunter states carry into the next wave.</p>
+          <div class="field"><div class="fighters party-fight-layout">
+            <div id="party-combat" class="party-grid" aria-live="polite"></div>
+            <div class="distance"><span>Active distance</span><b id="dist">0</b><small id="engaged">Out of range</small></div>
+            <article class="fighter enemy-fighter"><h4 id="e-name">Monster</h4><div id="e-count" class="monster-counter">0 targets remain</div><div class="meter"><div class="meter-label"><span>Health</span><span id="e-hp-t"></span></div><div class="track"><div id="e-hp" class="fill"></div></div></div><div class="meter"><div class="meter-label"><span>Armor</span><span id="e-ar-t"></span></div><div class="track"><div id="e-ar" class="fill armor"></div></div></div><div class="facts"><span>Speed <b id="e-sp">?</b></span><span>Range <b id="e-ra">?</b></span><span>Damage <b id="e-da">?</b></span><span>Trait <b id="e-tr">?</b></span></div></article>
+          </div></div>
+          <div class="panel" style="margin-top:11px"><h3 id="turn-heading">Hunter turn</h3><label>Movement amount <input id="move-n" type="number" min="1" value="1"></label><div class="row"><button id="closer">Move closer</button><button id="away">Move away</button><button id="attack" class="primary">Attack</button><button id="full">Full block</button><button id="partial">Partial block</button><button id="eat">Eat meal</button><button id="rest">End turn</button></div><p id="turn-note" class="muted"></p></div>
+          <div class="row"><button id="flee" class="danger">Run and abandon bounty</button></div>
+        </section>
+
+        <section id="level" class="hidden"><h2>Level up</h2><p class="muted">Choose one hunter and one permanent +1 stat increase.</p><div id="level-buttons" class="level-grid"></div></section>
+      </main>
+      <aside>
+        <section id="rift-widget" class="rift-table" aria-label="Rift deck: an infinite card source visualized as a temporary face-down stack">
+          <div class="rift-table-head"><strong>RIFT DECK</strong><span id="rift-count">12 / 12 cards</span></div>
+          <div class="rift-stage" aria-hidden="true">
+            <div id="wormhole" class="table-wormhole"></div>
+            <div id="rift-deck" class="table-deck"></div>
+            <i class="rift-fly-card"></i>
+          </div>
+          <div id="rift-state" class="rift-state">STABLE</div>
+        </section>
+        <div class="panel"><h3>Character</h3><div id="character" class="muted">No hunter created.</div></div>
+        <div class="panel"><h3>Pack</h3><ul id="pack"><li>Empty</li></ul></div>
+        <div class="panel"><h3>Game log</h3><div id="log" class="log" aria-live="polite"></div></div>
+        <button id="new">New game</button>
+      </aside>
+    </div>
+  </section>
+
+  <script>
+  (()=>{
+    const $=id=>document.getElementById(id), stats=['health','armor','speed','weapon'], PARTY_SIZE=4;
+    const suits=[['Spades','♠','black'],['Hearts','♥','red'],['Diamonds','♦','red'],['Clubs','♣','black']], ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const gearCatalog=[
+      {id:'coopers-sword',kind:'weapon',name:"Cooper's Sword",form:'Sword',rank:'9',suit:'Spades',symbol:'♠',price:8,range:4,damage:5,description:'A plain broad sword made for cramped cellars and close pursuit. Dependable, cheap, and easy to read at a glance.'},
+      {id:'fen-pike',kind:'weapon',name:'Fen Pike',form:'Polearm',rank:'J',suit:'Clubs',symbol:'♣',price:11,range:7,damage:4,description:'A tarred ash shaft with a narrow iron head. Keeps mire-things at a respectful distance.'},
+      {id:'riftglass-bow',kind:'weapon',name:'Riftglass Bow',form:'Bow',rank:'Q',suit:'Diamonds',symbol:'♦',price:13,range:10,damage:2,description:'Its translucent limbs hum when a wormhole opens. Low stopping power, excellent reach.'},
+      {id:'boar-cleaver',kind:'weapon',name:'Boar-Cleaver',form:'Great blade',rank:'K',suit:'Hearts',symbol:'♥',price:15,range:2,damage:11,description:'A brutal orchard blade with enough weight to split tusk, bark, or badly placed armor.'},
+      {id:'boiled-hide',kind:'armor',name:'Boiled Hide Coat',form:'Light armor',rank:'4',suit:'Clubs',symbol:'♣',price:6,durability:4,weight:2,description:'Layered hide and waxed canvas. It will not stop everything, but it barely slows a hunter.'},
+      {id:'pilgrims-ringmail',kind:'armor',name:"Pilgrim's Ringmail",form:'Mail armor',rank:'7',suit:'Spades',symbol:'♠',price:10,durability:7,weight:3,description:'Blackened rings sewn beneath a travel coat. Built for long roads and sudden teeth.'},
+      {id:'glassback-cuirass',kind:'armor',name:'Glassback Cuirass',form:'Plate armor',rank:'9',suit:'Diamonds',symbol:'♦',price:13,durability:9,weight:3,description:'Scorpion shell laminated over iron ribs. Hard, bright, and unsettlingly warm near a rift.'},
+      {id:'warden-plate',kind:'armor',name:'Warden Plate',form:'Heavy armor',rank:'K',suit:'Hearts',symbol:'♥',price:17,durability:13,weight:4,description:'Old breach-warden plate restored one rivet at a time. Expensive, exhausting, and extremely difficult to break.'}
+    ];
+    const bounties=[
+      {id:'tannery',title:'Teeth in the Tannery',stars:1,region:'Cooper Row',description:'Workers hear scratching beneath stretched hides. Clear the building before the night shift returns.',condition:'Cramped aisles: targets begin 2 distance closer.',distanceMod:-2,reward:1,targets:[{name:'Rift Gnawer',count:4,trait:'Skittish',hp:-8,speed:2,range:-1}]},
+      {id:'mire-lanterns',title:'Lanterns in the Mire',stars:1,region:'Low Fen Road',description:'Four lights have followed travelers through the reeds. The lights have teeth and know the road home.',condition:'Knee-deep mud: every hunter has -1 speed.',partySpeedMod:-1,reward:1,targets:[{name:'Mire Hound',count:4,trait:'Venomous',hp:-5}]},
+      {id:'glassback',title:'The Glassback Brood',stars:2,region:'Kiln Ravine',description:'A brood has nested in warm brick waste. Break the lesser shells before the matron reaches town.',condition:'Shell cover: every target begins with +1 armor.',enemyArmorMod:1,reward:2,targets:[{name:'Ash Scorpion',count:4,trait:'Piercing',hp:-4},{name:'Glassback Matron',count:1,trait:'Heavy',hp:7,armor:2,attacks:2}]},
+      {id:'black-bell',title:'The Bell Beneath Black Fen',stars:2,region:'Flooded Chapel',description:'The chapel bell rings underwater. Every toll pulls another pale hunter from the reeds.',condition:'Open water: targets begin 2 distance farther away.',distanceMod:2,reward:2,targets:[{name:'Drowned Claw',count:5,trait:'Piercing'},{name:'Bell Maw',count:1,trait:'Venomous',hp:5,damage:1,attacks:2}]},
+      {id:'red-orchard',title:'Tusks in the Red Orchard',stars:3,region:'Red Orchard',description:'Something has uprooted whole rows of fruit trees. The smaller shapes are only the outriders.',condition:'Downhill charge: every target deals +1 damage.',enemyDamageMod:1,reward:3,targets:[{name:'Bristle Whelp',count:4,trait:'Skittish',hp:-5},{name:'Ironback Boar',count:1,trait:'Heavy',hp:11,armor:3,attacks:2}]},
+      {id:'hollow-antler',title:'The Hollow Antler',stars:3,region:'Briarwood Verge',description:'A white antler appears between trees where no deer stands. Those who follow it return thorn-filled.',condition:'Hooking briars: every hunter has -2 speed.',partySpeedMod:-2,reward:3,targets:[{name:'Briar Runner',count:5,trait:'Skittish',speed:2},{name:'Hollow Stag',count:1,trait:'Piercing',hp:9,damage:1,attacks:2}]},
+      {id:'saint-orra',title:'Breach at Saint Orra',stars:4,region:'Saint Orra Gate',description:'The old ward has failed. Mixed predators are spilling from the same wound in impossible numbers.',condition:'Rift pressure: every target has +2 speed.',enemySpeedMod:2,reward:4,targets:[{name:'Rift Hound',count:3,trait:'Venomous'},{name:'Ash Scorpion',count:3,trait:'Piercing'},{name:'Breach Warden',count:1,trait:'Heavy',hp:12,armor:3,attacks:3}]},
+      {id:'briar-king',title:'The King Under Briars',stars:5,region:'Crownless Wood',description:'The oldest rift-beast has begun growing a forest around itself. Cut through its court and end the crown.',condition:'Living fortress: every target begins with +2 armor.',enemyArmorMod:2,reward:5,targets:[{name:'Thornborn Courtier',count:6,trait:'Piercing',hp:2},{name:'Briar King',count:1,trait:'Heavy',hp:18,armor:5,damage:2,attacks:3}]}
+    ];
+    const names=['Mire Hound','Ash Scorpion','Briar Troll','Cave Raptor','Ironback Boar'], traits=['Piercing','Skittish','Heavy','Venomous'];
+    let cardSerial=0;
+    const RIFT_CAPACITY=12,RIFT_THRESHOLD=3;
+    const S={party:[],createIndex:0,hand:[],chosen:null,draftStats:{},gold:0,quarry:[],meals:[],level:1,xp:0,need:5,bounty:null,targets:[],targetIndex:0,left:0,enemy:null,clues:[],freeTrack:false,battle:null,returnTo:null,townTab:'shop',shopKind:'weapon',rift:{cards:RIFT_CAPACITY,refilling:false,spawning:false,drawing:false}};
+    const val=c=>ranks.indexOf(c.rank)+1, text=c=>c.rank+c.symbol, cap=(n,a,b)=>Math.max(a,Math.min(b,n));
+    const weight=n=>n>=10?4:n>=7?3:n>=4?2:1, regen=n=>n<5?4:n<7?3:n<10?2:n<13?1:0;
+    function renderRift(){
+      const w=$('rift-widget'),deck=$('rift-deck'),count=$('rift-count'),state=$('rift-state');
+      if(!w||!deck||!count||!state)return;
+      w.classList.toggle('low',S.rift.cards<=RIFT_THRESHOLD);
+      w.classList.toggle('refilling',S.rift.refilling);
+      w.classList.toggle('spawning',S.rift.spawning);
+      w.classList.toggle('drawing',S.rift.drawing);
+      count.textContent=S.rift.refilling?'REFILL':`${S.rift.cards}/${RIFT_CAPACITY}`;
+      state.textContent=S.rift.refilling?'RIFT OPEN — MANIFESTING':S.rift.spawning?'MONSTER BREACH':S.rift.cards<=RIFT_THRESHOLD?'LOW — RIFT IMMINENT':'STABLE';
+      const visible=S.rift.cards?Math.max(1,Math.ceil(S.rift.cards/2)):0;
+      deck.innerHTML=Array.from({length:visible},(_,i)=>`<i class="deck-card-back ${i===visible-1?'top':''}" style="--i:${i}"></i>`).join('');
+    }
+    function refillRift(){
+      if(S.rift.refilling)return;
+      S.rift.refilling=true;renderRift();
+      note('The manifested stack is running low. The wormhole opens wider.');
+      setTimeout(()=>{S.rift.cards=RIFT_CAPACITY;S.rift.refilling=false;renderRift();note('The wormhole refills the card reserve. The source beyond it remains infinite.','good')},620);
+    }
+    let riftDrawTimer=0;
+    function spendManifestedCard(){
+      S.rift.cards=Math.max(0,S.rift.cards-1);
+      S.rift.drawing=true;
+      renderRift();
+      clearTimeout(riftDrawTimer);
+      riftDrawTimer=setTimeout(()=>{S.rift.drawing=false;renderRift()},360);
+      if(S.rift.cards<=RIFT_THRESHOLD)refillRift();
+    }
+    function signalMonster(){
+      S.rift.spawning=true;renderRift();
+      setTimeout(()=>{S.rift.spawning=false;renderRift()},820);
+    }
+    function draw(){
+      spendManifestedCard();
+      const s=suits[Math.floor(Math.random()*suits.length)],r=ranks[Math.floor(Math.random()*ranks.length)];
+      return{id:++cardSerial,suit:s[0],symbol:s[1],color:s[2],rank:r};
+    }
+    function note(t,k=''){let p=document.createElement('p'),log=$('log');p.className=k;p.textContent='› '+t;log.appendChild(p);while(log.children.length>12)log.firstElementChild.remove()}
+    let fitFrame=0,viewportFrame=0;
+    function fitActive(){
+      cancelAnimationFrame(fitFrame);
+      fitFrame=requestAnimationFrame(()=>{
+        const main=document.querySelector('#qs-game main'),sec=main&&[...main.children].find(x=>!x.classList.contains('hidden'));
+        if(!main||!sec)return;
+        sec.style.transform='none';sec.style.width='100%';sec.style.height='100%';
+        const sx=main.clientWidth/Math.max(main.clientWidth,sec.scrollWidth),sy=main.clientHeight/Math.max(main.clientHeight,sec.scrollHeight),scale=Math.min(1,sx,sy);
+        if(scale<.999){sec.style.width=(100/scale)+'%';sec.style.height=(100/scale)+'%';sec.style.transform=`scale(${scale})`}
+      });
+    }
+    function fitViewport(){
+      cancelAnimationFrame(viewportFrame);
+      viewportFrame=requestAnimationFrame(()=>{
+        const game=$('qs-game'),shell=game&&game.querySelector('.shell');
+        if(!game||!shell)return;
+        const viewport=window.visualViewport,vw=Math.max(1,viewport?viewport.width:window.innerWidth),vh=Math.max(1,viewport?viewport.height:window.innerHeight);
+        const landscape=vw>vh*1.2;
+        const minLogicalWidth=1000,minLogicalHeight=560;
+        const stageScale=landscape?Math.min(1,vw/minLogicalWidth,vh/minLogicalHeight):1;
+        const useStage=stageScale<.999;
+        game.classList.toggle('zoom-fit',useStage);
+        if(useStage){
+          const logicalWidth=vw/stageScale,logicalHeight=vh/stageScale;
+          shell.style.width=`${logicalWidth}px`;
+          shell.style.height=`${logicalHeight}px`;
+          shell.style.transform=`scale(${stageScale})`;
+        }else{
+          shell.style.width='100%';
+          shell.style.height='100%';
+          shell.style.transform='none';
+        }
+        fitActive();
+      });
+    }
+    function show(id){['creation','town','camp','combat','level'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('s-phase').textContent=id[0].toUpperCase()+id.slice(1);ui();fitActive()}
+    function pipFace(c){
+      let n=val(c);
+      if(n>10)return `<div class="face-mark"><span>${c.rank}</span><i>${c.symbol}</i></div>`;
+      const rows={1:[0,0,1,0,0],2:[1,0,0,0,1],3:[1,0,1,0,1],4:[2,0,0,0,2],5:[2,0,1,0,2],6:[2,0,2,0,2],7:[2,1,2,0,2],8:[2,1,2,1,2],9:[2,2,1,2,2],10:[2,2,2,2,2]}[n];
+      return `<div class="pip-field">${rows.map((count,i)=>`<div class="pip-row ${count===1?'one':''} ${i>2?'lower':''}">${Array.from({length:count},()=>`<span class="pip">${c.symbol}</span>`).join('')}</div>`).join('')}</div>`;
+    }
+    function card(c,pick=false){
+      let d=document.createElement('div');
+      d.className=`card ${c.color} ${pick?'pick':''}`;
+      d.setAttribute('aria-label',`${c.rank} of ${c.suit}`);
+      d.innerHTML=`<div class="corner">${c.rank}<br>${c.symbol}</div>${pipFace(c)}<div class="corner bottom">${c.rank}<br>${c.symbol}</div>`;
+      if(pick){
+        d.tabIndex=0;
+        const choose=()=>{S.chosen=c.id;creation()};
+        d.onclick=choose;
+        d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose()}};
+      }
+      return d;
+    }
+    const hunterName=i=>`Hunter ${i+1}`;
+    function creation(){
+      $('creation-title').textContent=`Create hunter ${S.createIndex+1} of ${PARTY_SIZE}`;
+      $('creation-copy').textContent=`${S.party.length} of ${PARTY_SIZE} hunters ready. Draws are independent and never deplete: any card can appear every time, including identical repeats. Assign four cards; the leftover becomes shared quarry.`;
+      let used=Object.values(S.draftStats).filter(Boolean),left=S.hand.filter(c=>!used.some(x=>x.id===c.id)),h=$('hand');
+      h.innerHTML='';
+      left.forEach(c=>{let d=card(c,true);if(c.id===S.chosen)d.classList.add('selected');h.appendChild(d)});
+      let box=$('slots');box.innerHTML='';
+      stats.forEach(stat=>{
+        let b=document.createElement('button'),c=S.draftStats[stat];
+        b.className='slot '+(c?'ready':'');b.innerHTML=`<strong>${stat}</strong><span>${c?text(c):'—'}</span>`;
+        b.onclick=()=>{if(S.chosen){let n=S.hand.find(x=>x.id===S.chosen),old=S.draftStats[stat];S.draftStats[stat]=n;S.chosen=old?old.id:null}else if(c){S.chosen=c.id;delete S.draftStats[stat]}creation()};
+        box.appendChild(b);
+      });
+      let done=stats.every(stat=>S.draftStats[stat])&&left.length===1,q=document.createElement('div');
+      q.className='slot '+(done?'ready':'');q.innerHTML=`<strong>free quarry</strong><span>${done?text(left[0]):'leftover card'}</span>`;box.appendChild(q);
+      $('weapon-box').classList.toggle('hidden',!done);$('finish').disabled=!done;
+      $('finish').textContent=S.createIndex===PARTY_SIZE-1?'Finish party':'Finish hunter';
+      if(done){let n=val(S.draftStats.weapon);$('weapon-range').max=n;if(+$('weapon-range').value>n)$('weapon-range').value=Math.floor(n/2);weaponRead()}
+      ui();
+    }
+    function weaponRead(){if(!S.draftStats.weapon)return;let n=val(S.draftStats.weapon),r=+$('weapon-range').value;$('weapon-readout').textContent=`${r} range / ${n-r} damage (total ${n})`}
+    const statValue=(p,s)=>val(p.stats[s])+p.bonus[s], maxHp=p=>statValue(p,'health'), maxAr=p=>(p.armorGear?.baseDurability??val(p.stats.armor))+p.bonus.armor, baseSp=p=>statValue(p,'speed');
+    const weaponRange=p=>p.weapon.baseRange??p.weapon.range??0, weaponDamage=p=>(p.weapon.baseDamage??p.weapon.damage??0)+p.bonus.weapon, armorWeight=p=>p.armorGear?.weight??weight(p.armorGear?.baseDurability??val(p.stats.armor));
+    const gearCard=i=>{let s=suits.find(x=>x[0]===i.suit);return{id:++cardSerial,suit:i.suit,symbol:i.symbol,color:s?.[2]||'black',rank:i.rank}};
+    const expandTargets=b=>b.targets.flatMap(t=>Array.from({length:t.count},()=>({...t,count:undefined})));
+    function ui(){
+      $('s-gold').textContent=S.gold;$('s-quarry').textContent=S.quarry.length;$('s-meals').textContent=S.meals.length;$('s-level').textContent=S.level;$('s-xp').textContent=`${S.xp} / ${S.need}`;
+      $('meal').disabled=!S.quarry.length;$('track-more').disabled=!S.quarry.length;
+      let sel=$('sell-quarry');if(sel){sel.innerHTML=S.quarry.map((q,i)=>`<option value="${i}">${text(q)} — ${val(q)} gold</option>`).join('');$('sell').disabled=!S.quarry.length}
+      character();pack();
+      if(!$('town').classList.contains('hidden'))renderShop();
+    }
+    function character(){
+      if(!S.party.length){$('character').textContent=`No hunters completed. Creating ${S.createIndex+1} of ${PARTY_SIZE}.`;return}
+      $('character').innerHTML='<div class="party-summary">'+S.party.map((p,i)=>`<span class="badge" title="${p.weapon.name} / ${p.armorGear.name}">${hunterName(i)}: H${maxHp(p)} A${maxAr(p)} S${baseSp(p)} • ${weaponRange(p)}R/${weaponDamage(p)}D</span>`).join('')+'</div>';
+    }
+    function pack(){let a=[];if(S.quarry.length)a.push('Quarry: '+S.quarry.map(text).join(', '));if(S.meals.length)a.push('Meals: '+S.meals.map(x=>x+' hp').join(', '));if(S.bounty)a.push(`Encounter — ${S.bounty.title}: ${S.left} target${S.left===1?'':'s'} left`);$('pack').innerHTML=(a.length?a:['Empty']).map(x=>`<li>${x}</li>`).join('')}
+    function setTownTab(tab){S.townTab=tab;['shop','bounties','market'].forEach(x=>$('town-'+x).classList.toggle('hidden',x!==tab));document.querySelectorAll('#qs-game [data-town-tab]').forEach(b=>b.classList.toggle('active',b.dataset.townTab===tab));fitActive()}
+    function renderShop(){
+      const hs=$('shop-hunter');if(!hs)return;
+      const previous=hs.value;hs.innerHTML=S.party.map((_,i)=>`<option value="${i}">${hunterName(i)}</option>`).join('');if(previous!==''&&S.party[+previous])hs.value=previous;
+      const i=+hs.value||0,p=S.party[i];
+      if(!p){$('shop-equipped').textContent='Finish the four hunters before shopping.';$('shop-items').innerHTML='';return}
+      $('shop-equipped').innerHTML=`<b>${hunterName(i)} currently carries</b><br>${p.weapon.name} — ${weaponRange(p)} range / ${weaponDamage(p)} damage<br>${p.armorGear.name} — ${maxAr(p)} durability / ${armorWeight(p)} weight`;
+      document.querySelectorAll('#qs-game [data-shop-kind]').forEach(b=>b.classList.toggle('active',b.dataset.shopKind===S.shopKind));
+      const box=$('shop-items');box.innerHTML='';
+      gearCatalog.filter(g=>g.kind===S.shopKind).forEach(g=>{
+        const d=document.createElement('article');d.className='gear-card';
+        const stats=g.kind==='weapon'?`<span>${g.range} range</span><span>${g.damage} damage</span>`:`<span>${g.durability} durability</span><span>${g.weight} weight</span>`;
+        d.innerHTML=`<header><span class="gear-mark">${g.rank}${g.symbol}</span><div><h4>${g.name}</h4><div class="gear-type">${g.form} • ${g.kind}</div></div></header><p>${g.description}</p><div class="gear-stats">${stats}<span>${g.price} gold</span></div><button class="primary" ${S.gold<g.price?'disabled':''}>Buy & equip — ${g.price}g</button>`;
+        d.querySelector('button').onclick=()=>buyGear(g.id);box.appendChild(d);
+      });
+    }
+    function buyGear(id){
+      const g=gearCatalog.find(x=>x.id===id),i=+$('shop-hunter').value||0,p=S.party[i];if(!g||!p||S.gold<g.price)return;
+      S.gold-=g.price;
+      if(g.kind==='weapon'){p.stats.weapon=gearCard(g);p.weapon={name:g.name,description:g.description,suit:g.suit,rank:g.rank,baseRange:g.range,baseDamage:g.damage}}
+      else{p.stats.armor=gearCard(g);p.armorGear={name:g.name,description:g.description,suit:g.suit,rank:g.rank,baseDurability:g.durability,weight:g.weight}}
+      note(`${hunterName(i)} buys and equips ${g.name} for ${g.price} gold.`,'good');ui();renderShop();
+    }
+    function targetSummary(b){return b.targets.map(t=>`${t.count}× ${t.name}`).join(', ')}
+    function renderBounties(){
+      const box=$('bounties');box.innerHTML='';
+      bounties.forEach(b=>{let d=document.createElement('article');d.className='bounty';d.innerHTML=`<h4>${b.title}<span class="bounty-region">${b.region}</span></h4><div class="stars">${'★'.repeat(b.stars)}${'☆'.repeat(5-b.stars)}</div><p class="muted">${b.description}</p><div class="contract-facts"><div><b>Targets:</b> ${targetSummary(b)}</div><div><b>Field rule:</b> ${b.condition}</div><div><b>Completion:</b> ${b.reward} bonus quarry</div></div><button class="primary">Accept encounter</button>`;d.querySelector('button').onclick=()=>accept(b);box.appendChild(d)});
+    }
+    function town(){
+      S.bounty=null;S.targets=[];S.targetIndex=0;S.enemy=null;S.battle=null;show('town');renderBounties();renderShop();setTownTab(S.townTab);note('Returned to town. The four-hunter party fully recovers.');
+    }
+    function accept(b){S.bounty=b;S.targets=expandTargets(b);S.targetIndex=0;S.left=S.targets.length;note(`Accepted ${b.title}: one encounter containing ${S.left} rift target${S.left===1?'':'s'}.`);camp()}
+    function monster(spec={}){
+      let h=draw(),a=draw(),s=draw(),w=draw(),t=spec.trait||traits[Math.floor(Math.random()*traits.length)],stars=S.bounty.stars;
+      let r=Math.max(1,Math.floor(val(w)/2)+(spec.range||0)),d=Math.max(1,val(w)-Math.max(1,Math.floor(val(w)/2))+stars-1+(spec.damage||0)+(S.bounty.enemyDamageMod||0));
+      let hp=Math.max(5,val(h)*2+PARTY_SIZE*2+stars*3+(spec.hp||0)),armor=Math.max(0,Math.floor(val(a)/2)+stars+(spec.armor||0)+(S.bounty.enemyArmorMod||0));
+      let speed=Math.max(1,val(s)+(spec.speed||0)+(S.bounty.enemySpeedMod||0)-(t==='Heavy'?1:0));
+      if(t==='Heavy'){hp+=5;armor+=1}
+      return{name:spec.name||names[Math.floor(Math.random()*names.length)],hp,maxHp:hp,armor,maxArmor:armor,speed,range:r,damage:d,trait:t,attacks:spec.attacks||Math.min(3,1+Math.floor((stars-1)/2))};
+    }
+    function camp(){S.enemy=monster(S.targets[S.targetIndex]);signalMonster();S.clues=[];S.freeTrack=false;$('camp-text').textContent=`${S.bounty.title} is one encounter with ${S.left} target${S.left===1?'':'s'}. ${S.bounty.condition} The party may track once before entering.`;clues();show('camp');note(`Tracks identify the first arrival as ${S.enemy.name}. No camp break occurs between encounter waves.`)}
+    function clues(){$('clues').innerHTML=S.clues.length?S.clues.map(k=>`<span class="badge">${k}: ${S.enemy[k.toLowerCase()]}</span>`).join(''):'<span class="muted">No clues revealed.</span>';$('track').disabled=S.freeTrack}
+    function reveal(){let pool=['Armor','Speed','Range','Damage','Trait'].filter(x=>!S.clues.includes(x));if(!pool.length)return;let k=pool[Math.floor(Math.random()*pool.length)];S.clues.push(k);clues();note(`Tracking reveals ${k}: ${S.enemy[k.toLowerCase()]}.`,'good')}
+    function fight(){
+      const members=S.party.map(p=>({hp:maxHp(p),armor:maxAr(p),armorMax:maxAr(p),pen:0,distance:Math.max(0,S.enemy.speed+(S.bounty.distanceMod||0)),moved:false,acted:false,block:'none',fainted:false}));
+      S.battle={members,order:[],turnPos:0,round:1};newRoundOrder();show('combat');const foe=document.querySelector('#qs-game .enemy-fighter');foe.classList.remove('rift-arrival');void foe.offsetWidth;foe.classList.add('rift-arrival');setTimeout(()=>foe.classList.remove('rift-arrival'),850);note(`The wormhole releases ${S.enemy.name}, wave 1 of ${S.targets.length}. The bounty and encounter are the same fight.`);combat();
+    }
+    function speedFor(i){let p=S.party[i],m=S.battle.members[i];return Math.max(0,baseSp(p)-m.pen+(S.bounty?.partySpeedMod||0))}
+    function newRoundOrder(){S.battle.order=S.party.map((_,i)=>i).filter(i=>!S.battle.members[i].fainted).sort((a,b)=>speedFor(b)-speedFor(a)||a-b);S.battle.turnPos=0}
+    function activeIndex(){return S.battle.order[S.battle.turnPos]}
+    function activeMember(){return S.battle.members[activeIndex()]}
+    function renderHunterMini(p,m,i,active){
+      const pct=(n,max)=>max?cap(n/max*100,0,100):0;
+      return `<article class="hunter-mini ${active?'active':''} ${m.fainted?'fainted':''}"><h4>${hunterName(i)}${m.fainted?' — fainted':''}</h4><div class="gear-line">${p.weapon.name} / ${p.armorGear.name}</div><div class="meter"><div class="meter-label"><span>HP</span><span>${m.hp}/${maxHp(p)}</span></div><div class="track"><div class="fill" style="width:${pct(m.hp,maxHp(p))}%"></div></div></div><div class="meter"><div class="meter-label"><span>Armor</span><span>${m.armor}/${m.armorMax}</span></div><div class="track"><div class="fill armor" style="width:${pct(m.armor,m.armorMax)}%"></div></div></div><div class="facts"><span>Spd <b>${speedFor(i)}</b></span><span>Dist <b>${m.distance}</b></span><span>Rng <b>${weaponRange(p)}</b></span><span>Dmg <b>${weaponDamage(p)}</b></span></div></article>`;
+    }
+    function combat(){
+      let b=S.battle,e=S.enemy,ai=activeIndex(),m=activeMember(),p=S.party[ai],pct=(n,max)=>max?cap(n/max*100,0,100):0;
+      $('party-combat').innerHTML=S.party.map((p2,i)=>renderHunterMini(p2,b.members[i],i,i===ai)).join('');
+      $('dist').textContent=m?m.distance:'—';$('engaged').textContent=!m?'No hunter':m.distance<=weaponRange(p)?'Your weapon engaged':m.distance<=e.range?'Enemy engaged':'Out of range';
+      $('e-name').textContent=e.name;$('e-count').textContent=`Wave ${S.targetIndex+1}/${S.targets.length} • ${S.left} target${S.left===1?'':'s'} remain • ${e.attacks} attack${e.attacks===1?'':'s'}/round`;
+      $('e-hp-t').textContent=`${e.hp} / ${e.maxHp}`;$('e-hp').style.width=pct(e.hp,e.maxHp)+'%';$('e-ar-t').textContent=`${e.armor} / ${e.maxArmor}`;$('e-ar').style.width=pct(e.armor,e.maxArmor)+'%';
+      ['Speed','Range','Damage','Trait'].forEach(k=>$("e-"+({Speed:'sp',Range:'ra',Damage:'da',Trait:'tr'}[k])).textContent=S.clues.includes(k)?e[k.toLowerCase()]:'?');
+      $('turn-heading').textContent=m?`${hunterName(ai)} turn`:'Party turn';
+      const unavailable=!m||m.fainted;
+      $('closer').disabled=unavailable||m.moved||!speedFor(ai);$('away').disabled=unavailable||m.moved||!speedFor(ai);$('attack').disabled=unavailable||m.acted;$('full').disabled=unavailable||m.acted||!m.armor;$('partial').disabled=unavailable||m.acted||m.moved||!m.armor;$('eat').disabled=unavailable||m.acted||!S.meals.length;
+      $('turn-note').textContent=m?`Round ${b.round}. ${hunterName(ai)} has ${speedFor(ai)} movement. ${b.order.length-b.turnPos} hunter turn${b.order.length-b.turnPos===1?'':'s'} remain before the monster phase.`:'';
+      ui();
+    }
+    function move(dir){let i=activeIndex(),m=activeMember(),n=Math.min(Math.max(1,+$('move-n').value||1),speedFor(i));if(!n||m.moved)return;m.distance=dir<0?Math.max(0,m.distance-n):m.distance+n;m.moved=true;note(`${hunterName(i)} ${dir<0?'closes':'opens'} distance by ${n}.`);combat()}
+    function attack(){let i=activeIndex(),m=activeMember(),p=S.party[i],e=S.enemy;if(m.acted)return;if(m.distance>weaponRange(p)){note(`${hunterName(i)} cannot reach the monster.`,'bad');return}let d=weaponDamage(p),st=Math.min(e.armor,d);e.armor-=st;d-=st;e.hp=Math.max(0,e.hp-d);m.acted=true;note(`${hunterName(i)} attacks: ${st} stopped by armor, ${d} dealt to health.`,'good');if(!e.hp){victory();return}endHunterTurn()}
+    function block(type){let i=activeIndex(),m=activeMember();if(m.acted||!m.armor)return;m.block=type;m.acted=true;if(type==='partial')m.moved=true;note(`${hunterName(i)} prepares a ${type} block.`);endHunterTurn()}
+    function eat(){let i=activeIndex(),m=activeMember(),p=S.party[i];if(m.acted||!S.meals.length)return;let n=S.meals.shift(),before=m.hp;m.hp=Math.min(maxHp(p)+4,m.hp+n);m.acted=true;note(`${hunterName(i)} eats a meal and restores ${m.hp-before} health.`,'good');endHunterTurn()}
+    function endHunterTurn(){let i=activeIndex(),m=activeMember();m.pen=Math.min(armorWeight(S.party[i]),m.pen+1);S.battle.turnPos++;if(S.battle.turnPos<S.battle.order.length){combat();return}setTimeout(enemyPhase,130)}
+    function enemyAttack(targetIndex){
+      let m=S.battle.members[targetIndex],p=S.party[targetIndex],e=S.enemy,d=e.damage;
+      if(e.trait==='Piercing'&&m.armor)d++;if(e.trait==='Venomous'&&!m.armor)d++;
+      if(m.block==='full'&&m.armor){m.armor=Math.max(0,m.armor-2);d=0;note(`${hunterName(targetIndex)} fully deflects the attack; armor loses 2 durability.`,'good')}
+      else if(m.block==='partial'&&m.armor){m.armor=Math.max(0,m.armor-1);m.hp=Math.max(0,m.hp-1);d=0;note(`${hunterName(targetIndex)} partially blocks, losing 1 armor and 1 health.`)}
+      if(d){let st=Math.min(m.armor,d);m.armor-=st;d-=st;m.hp=Math.max(0,m.hp-d);note(`${e.name} hits ${hunterName(targetIndex)}: ${st} stopped, ${d} health damage.`,'bad')}
+      if(!m.hp&&!m.fainted){m.fainted=true;note(`${hunterName(targetIndex)} faints and can no longer act.`,'bad')}
+    }
+    function enemyPhase(){
+      let b=S.battle,e=S.enemy;
+      for(let a=0;a<e.attacks;a++){
+        const living=b.members.map((m,i)=>!m.fainted?i:null).filter(i=>i!==null);if(!living.length)break;
+        const target=living[Math.floor(Math.random()*living.length)],m=b.members[target];
+        if(m.distance>e.range){let n=Math.min(e.speed,m.distance-e.range);m.distance-=n;note(`${e.name} advances ${n} toward ${hunterName(target)}.`)}
+        if(m.distance<=e.range)enemyAttack(target);else note(`${e.name} cannot reach ${hunterName(target)} this attack.`);
+      }
+      const living=b.members.filter(m=>!m.fainted);
+      if(!living.length){note('All four hunters have fainted. The party is eaten and the bounty is lost.','bad');setTimeout(town,180);return}
+      if(e.trait==='Skittish'){living.forEach(m=>m.distance++);note(`${e.name} darts back from the party.`)}
+      b.members.forEach((m,i)=>{if(m.fainted)return;let r=regen(maxHp(S.party[i])),before=m.hp;m.hp=Math.min(maxHp(S.party[i]),m.hp+r);if(m.hp>before)note(`${hunterName(i)} recovers ${m.hp-before} health.`,'good');m.moved=false;m.acted=false;m.block='none'});
+      b.round++;newRoundOrder();combat();
+    }
+    function nextWave(){
+      S.targetIndex++;S.enemy=monster(S.targets[S.targetIndex]);signalMonster();
+      S.battle.members.forEach(m=>{if(!m.fainted){m.distance=Math.max(0,S.enemy.speed+(S.bounty.distanceMod||0));m.moved=false;m.acted=false;m.block='none'}});S.battle.round++;newRoundOrder();
+      const foe=document.querySelector('#qs-game .enemy-fighter');foe.classList.remove('rift-arrival');void foe.offsetWidth;foe.classList.add('rift-arrival');setTimeout(()=>foe.classList.remove('rift-arrival'),850);
+      note(`${S.enemy.name} arrives through the wormhole — wave ${S.targetIndex+1} of ${S.targets.length}. The encounter continues without returning to camp.`);combat();
+    }
+    function victory(){note(`${S.enemy.name} is defeated by the party.`,'good');S.left--;let q=draw();S.quarry.push(q);S.xp++;note(`Recovered ${text(q)} quarry and gained 1 shared experience. This draw did not remove that card from future draws.`,'good');if(S.xp>=S.need){S.returnTo=S.left?'nextWave':'reward';level()}else if(S.left)nextWave();else reward()}
+    function reward(){let n=S.bounty.reward;for(let i=0;i<n;i++)S.quarry.push(draw());note(`${S.bounty.title} cleared: the encounter is complete and awards ${n} bonus quarry.`,'good');town()}
+    function level(){
+      show('level');let box=$('level-buttons');box.innerHTML='';
+      S.party.forEach((p,i)=>{let col=document.createElement('div');col.className='level-hunter';col.innerHTML=`<h3>${hunterName(i)}</h3>`;stats.forEach(stat=>{let b=document.createElement('button');b.className='primary';b.textContent=`+1 ${stat}`;b.onclick=()=>{S.xp-=S.need;S.need++;S.level++;p.bonus[stat]++;note(`Level ${S.level}: ${hunterName(i)} gains +1 ${stat}.`,'good');S.returnTo==='nextWave'?nextWave():reward()};col.appendChild(b)});box.appendChild(col)});
+    }
+    function reset(){
+      Object.assign(S,{party:[],createIndex:0,hand:[],chosen:null,draftStats:{},gold:0,quarry:[],meals:[],level:1,xp:0,need:5,bounty:null,targets:[],targetIndex:0,left:0,enemy:null,clues:[],freeTrack:false,battle:null,returnTo:null,townTab:'shop',shopKind:'weapon',rift:{cards:RIFT_CAPACITY,refilling:false,spawning:false,drawing:false}});
+      cardSerial=0;$('log').innerHTML='';renderRift();$('draw').disabled=false;$('redraw').disabled=true;$('finish').disabled=true;$('hand').innerHTML='';$('weapon-range').value=0;creation();show('creation');note('You begin with 0 gold and control four hunters. The wormhole manifests cards as needed; every draw is still independent and can repeat forever.');
+    }
+    $('draw').onclick=()=>{S.hand=Array.from({length:5},draw);S.draftStats={};S.chosen=null;$('draw').disabled=true;$('redraw').disabled=false;creation();note(`${hunterName(S.createIndex)} draws five independent cards: ${S.hand.map(text).join(', ')}.`)};
+    $('redraw').onclick=()=>{S.hand=[];S.draftStats={};S.chosen=null;$('draw').disabled=false;$('redraw').disabled=true;creation();note(`${hunterName(S.createIndex)} releases that draw. Those exact cards can still appear again.`)};
+    $('weapon-range').oninput=weaponRead;
+    $('finish').onclick=()=>{let n=val(S.draftStats.weapon),r=+$('weapon-range').value,q=S.hand.find(c=>!Object.values(S.draftStats).some(x=>x&&x.id===c.id)),p={stats:{...S.draftStats},bonus:{health:0,armor:0,speed:0,weapon:0},weapon:{name:'Rift-issued Hunting Weapon',description:'A plain weapon shaped by the hunter’s assigned weapon card.',suit:S.draftStats.weapon.suit,rank:S.draftStats.weapon.rank,baseRange:r,baseDamage:n-r},armorGear:{name:'Rift-worn Field Armor',description:'Basic field armor shaped by the hunter’s assigned armor card.',suit:S.draftStats.armor.suit,rank:S.draftStats.armor.rank,baseDurability:val(S.draftStats.armor),weight:weight(val(S.draftStats.armor))}};S.party.push(p);S.quarry.push(q);note(`${hunterName(S.createIndex)} completed; ${text(q)} enters the shared quarry pack.`,'good');S.createIndex++;S.hand=[];S.draftStats={};S.chosen=null;$('weapon-range').value=0;if(S.createIndex<PARTY_SIZE){$('draw').disabled=false;$('redraw').disabled=true;creation()}else{note('All four hunters are ready. The party starts with 0 gold and four free quarry cards.','good');town()}};
+    $('sell').onclick=()=>{if(!S.quarry.length)return;let i=+$('sell-quarry').value,q=S.quarry.splice(i,1)[0],g=val(q);S.gold+=g;note(`Sold ${text(q)} quarry for ${g} gold. Future draws can still produce ${text(q)}.`,'good');ui()};
+    $('meal').onclick=()=>{if(!S.quarry.length)return;let q=S.quarry.pop(),c=draw(),n=Math.ceil((val(q)+val(c))/2);S.meals.push(n);note(`Crafted a ${n}-health meal using ${text(q)} and an independent ${text(c)} draw.`,'good');ui()};
+    document.querySelectorAll('#qs-game [data-town-tab]').forEach(b=>b.addEventListener('click',()=>setTownTab(b.dataset.townTab)));
+    document.querySelectorAll('#qs-game [data-shop-kind]').forEach(b=>b.addEventListener('click',()=>{S.shopKind=b.dataset.shopKind;renderShop();fitActive()}));
+    $('shop-hunter').addEventListener('change',renderShop);
+    $('track').onclick=()=>{S.freeTrack=true;reveal();clues()};
+    $('track-more').onclick=()=>{if(S.quarry.length){let q=S.quarry.pop();note(`Spent ${text(q)} quarry on deeper tracking.`);reveal();ui()}};
+    $('fight').onclick=fight;$('abandon').onclick=town;$('closer').onclick=()=>move(-1);$('away').onclick=()=>move(1);$('attack').onclick=attack;$('full').onclick=()=>block('full');$('partial').onclick=()=>block('partial');$('eat').onclick=eat;
+    $('rest').onclick=()=>{let m=activeMember();if(m&&!m.acted){m.acted=true;note(`${hunterName(activeIndex())} holds position.`);endHunterTurn()}};
+    $('flee').onclick=()=>{note('The four hunters flee and abandon the encounter.','bad');town()};$('new').onclick=reset;
+    window.addEventListener('resize',fitViewport,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',fitViewport,{passive:true});new MutationObserver(fitActive).observe(document.querySelector('#qs-game main'),{subtree:true,childList:true,characterData:true});fitViewport();reset();
+  })();
+  </script>
+</div>
+
+</body>
+</html>
