@@ -297,15 +297,27 @@ async function initializeArtCarousel() {
   const files = await loadManifest("kazArt/manifest.json", imageExtensions);
   const artFiles = files.length ? files : ["../assets/kazvt-transparent.gif"];
   let index = Math.floor(Math.random() * artFiles.length);
+  const failedFiles = new Set();
 
   function artUrl(file) {
-    return file.startsWith("../") ? file.slice(3) : `kazArt/${encodeURIComponent(file)}`;
+    if (/^(https?:|data:|blob:)/i.test(file)) return file;
+    if (file.startsWith("../")) return file.slice(3);
+    const cleanFile = file.replace(/^\.?\//, "");
+    return `kazArt/${cleanFile.split("/").map(encodeURIComponent).join("/")}`;
   }
 
-  function displayArt(file) {
+  function displayArt(file, attempts = 0) {
     const image = new Image();
     image.alt = "kazvt art";
     image.className = "art-image slide-enter";
+    image.onerror = () => {
+      failedFiles.add(file);
+      const nextFile = artFiles.find((candidate) => !failedFiles.has(candidate));
+      if (nextFile && attempts < artFiles.length) {
+        index = artFiles.indexOf(nextFile);
+        displayArt(nextFile, attempts + 1);
+      }
+    };
     image.onload = () => {
       const wide = image.naturalWidth > image.naturalHeight;
       const square = image.naturalWidth === image.naturalHeight;
