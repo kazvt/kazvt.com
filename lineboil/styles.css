@@ -21,11 +21,8 @@
   --bg-alt: #11153a;
   --banner: #302135;
   --banner-text: #fff9dc;
-  --wallpaper:
-    radial-gradient(circle at 2px 2px, #fff3c7 0 1px, transparent 1.5px) 0 0 / 18px 18px,
-    radial-gradient(circle at 10px 7px, #ff72bf 0 1px, transparent 1.5px) 0 0 / 34px 34px,
-    radial-gradient(circle at 18px 14px, #48cfff 0 1px, transparent 1.5px) 0 0 / 46px 46px,
-    repeating-linear-gradient(45deg, #07081b 0 10px, #11153a 10px 20px);
+  --wallpaper-image: url("assets/wallpapers/warm-starfield.png");
+  --wallpaper-size: 96px 96px;
 }
 
 * {
@@ -43,8 +40,9 @@ body {
   margin: 0;
   color: var(--ink);
   background-color: var(--bg);
-  background: var(--wallpaper);
+  background-image: var(--wallpaper-image);
   background-repeat: repeat;
+  background-size: var(--wallpaper-size);
   font-family: "Trebuchet MS", "Comic Sans MS", "Arial Rounded MT Bold", Arial, sans-serif;
   letter-spacing: 0;
 }
@@ -72,11 +70,8 @@ body[data-theme="p2"] {
   --bg-alt: #1d2b53;
   --banner: #1d2b53;
   --banner-text: #fff1e8;
-  --wallpaper:
-    radial-gradient(circle at 3px 3px, #fff1e8 0 1px, transparent 1.5px) 0 0 / 22px 22px,
-    radial-gradient(circle at 14px 18px, #ffec27 0 1px, transparent 1.5px) 0 0 / 38px 38px,
-    repeating-linear-gradient(90deg, rgba(41, 173, 255, 0.22) 0 2px, transparent 2px 18px),
-    repeating-linear-gradient(0deg, #000000 0 18px, #1d2b53 18px 36px);
+  --wallpaper-image: url("assets/wallpapers/pico-space.png");
+  --wallpaper-size: 96px 96px;
 }
 
 body[data-theme="p3"] {
@@ -102,11 +97,8 @@ body[data-theme="p3"] {
   --bg-alt: #081820;
   --banner: #081820;
   --banner-text: #e0f8d0;
-  --wallpaper:
-    repeating-linear-gradient(0deg, rgba(8, 24, 32, 0.28) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(90deg, rgba(8, 24, 32, 0.22) 0 1px, transparent 1px 7px),
-    radial-gradient(circle at 8px 8px, #88c070 0 2px, transparent 2.5px) 0 0 / 24px 24px,
-    #346856;
+  --wallpaper-image: url("assets/wallpapers/gameboy-dither.png");
+  --wallpaper-size: 64px 64px;
 }
 
 body[data-theme="p4"] {
@@ -132,10 +124,8 @@ body[data-theme="p4"] {
   --bg-alt: #29366f;
   --banner: #1a1c2c;
   --banner-text: #f4f4f4;
-  --wallpaper:
-    radial-gradient(circle at 4px 4px, #73eff7 0 2px, transparent 2.5px) 0 0 / 28px 28px,
-    radial-gradient(circle at 18px 18px, #ffcd75 0 2px, transparent 2.5px) 0 0 / 28px 28px,
-    repeating-linear-gradient(45deg, #5d275d 0 12px, #29366f 12px 24px);
+  --wallpaper-image: url("assets/wallpapers/sweetie-confetti.png");
+  --wallpaper-size: 96px 96px;
 }
 
 body[data-theme="p5"] {
@@ -161,9 +151,8 @@ body[data-theme="p5"] {
   --bg-alt: #584563;
   --banner: #3e2137;
   --banner-text: #f5edba;
-  --wallpaper:
-    radial-gradient(circle at 5px 5px, rgba(245, 237, 186, 0.34) 0 1px, transparent 1.5px) 0 0 / 10px 10px,
-    repeating-linear-gradient(135deg, #3e2137 0 8px, #584563 8px 16px, #9a6348 16px 18px, #584563 18px 26px);
+  --wallpaper-image: url("assets/wallpapers/na16-paper.png");
+  --wallpaper-size: 80px 80px;
 }
 
 body[data-theme="p6"] {
@@ -189,11 +178,8 @@ body[data-theme="p6"] {
   --bg-alt: #1a1932;
   --banner: #0e071b;
   --banner-text: #ffffff;
-  --wallpaper:
-    radial-gradient(circle at 3px 3px, #ffeb57 0 1px, transparent 1.5px) 0 0 / 19px 19px,
-    radial-gradient(circle at 15px 13px, #94fdff 0 1px, transparent 1.5px) 0 0 / 31px 31px,
-    repeating-linear-gradient(90deg, rgba(148, 253, 255, 0.14) 0 1px, transparent 1px 16px),
-    repeating-linear-gradient(0deg, #0e071b 0 16px, #1a1932 16px 32px);
+  --wallpaper-image: url("assets/wallpapers/endesga-deep-stars.png");
+  --wallpaper-size: 96px 96px;
 }
 
 a {
