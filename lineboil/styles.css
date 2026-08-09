@@ -612,29 +612,34 @@ code {
   right: 8px;
   z-index: 2;
   display: grid;
-  grid-template-columns: 18px auto;
-  gap: 5px;
+  grid-template-columns: 13px auto;
+  gap: 3px;
   align-items: center;
-  padding: 3px 6px 3px 4px;
-  border: 3px solid var(--ink);
-  background: var(--paper);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--ink);
   font-size: 0.72rem;
   font-weight: 900;
   line-height: 1;
   text-transform: lowercase;
-  clip-path: polygon(0 5px, 6px 0, 100% 3px, calc(100% - 4px) 100%, 4px calc(100% - 2px));
+  clip-path: none;
+  text-shadow:
+    1px 0 0 var(--paper),
+    -1px 0 0 var(--paper),
+    0 1px 0 var(--paper),
+    0 -1px 0 var(--paper);
 }
 
 .crayon-pip {
   display: block;
-  width: 18px;
-  height: 18px;
-  border: 3px solid var(--ink);
+  width: 13px;
+  height: 13px;
+  border: 0;
   background:
     radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.72) 0 10%, transparent 18%),
     repeating-linear-gradient(-35deg, var(--pip-color) 0 3px, var(--pip-scratch) 3px 5px, var(--pip-color) 5px 8px);
-  clip-path: polygon(2px 5px, 6px 0, 17px 3px, 18px 14px, 13px 18px, 1px 15px);
+  clip-path: polygon(1px 4px, 4px 0, 12px 2px, 13px 10px, 9px 13px, 0 11px);
   animation: blockBoil 330ms steps(2, end) infinite;
 }
 
