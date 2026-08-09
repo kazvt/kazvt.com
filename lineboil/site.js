@@ -733,7 +733,7 @@ async function initializeMusicPlayer() {
   const visualContext = visualizer.getContext("2d");
   const visualizerBinCrop = 0.58;
   const visualizerBarCount = 12;
-  const visualizerTrebleTilt = 0.85;
+  const visualizerTrebleTilt = 0.35;
 
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
