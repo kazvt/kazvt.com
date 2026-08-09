@@ -80,6 +80,10 @@ const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avi
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
 
+function normalizeStatus(status) {
+  return status === "online" ? "live" : status;
+}
+
 const profileFacts = [
   ["name", "kazvt"],
   ["pronouns", "she/her"],
@@ -728,6 +732,7 @@ async function initializeMusicPlayer() {
   const visualizer = el("canvas", { width: "150", height: "44", className: "visualizer", ariaLabel: "Music visualizer" });
   const visualContext = visualizer.getContext("2d");
   const visualizerBinCrop = 0.58;
+  const visualizerBarCount = 12;
 
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
@@ -765,9 +770,9 @@ async function initializeMusicPlayer() {
 
     if (!analyser || audio.paused) {
       visualContext.fillStyle = "#6cff7a";
-      for (let x = 5; x < width; x += 12) {
-        const bar = 4 + ((x / 12) % 4) * 4;
-        visualContext.fillRect(x, height - bar - 5, 7, bar);
+      for (let x = 6; x < width; x += 14) {
+        const bar = 5 + ((x / 14) % 4) * 4;
+        visualContext.fillRect(x, height - bar - 5, 9, bar);
       }
       window.requestAnimationFrame(drawVisualizer);
       return;
@@ -776,12 +781,16 @@ async function initializeMusicPlayer() {
     const data = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(data);
     const activeBins = data.slice(0, Math.max(1, Math.ceil(data.length * visualizerBinCrop)));
-    const barWidth = width / activeBins.length;
-    activeBins.forEach((value, bar) => {
+    const bars = Math.min(visualizerBarCount, activeBins.length);
+    const barWidth = width / bars;
+    for (let bar = 0; bar < bars; bar += 1) {
+      const start = Math.floor((bar / bars) * activeBins.length);
+      const end = Math.max(start + 1, Math.floor(((bar + 1) / bars) * activeBins.length));
+      const value = activeBins.slice(start, end).reduce((sum, bin) => sum + bin, 0) / (end - start);
       const barHeight = Math.max(3, (value / 255) * (height - 8));
       visualContext.fillStyle = bar % 2 ? "#48cfff" : "#6cff7a";
-      visualContext.fillRect(bar * barWidth + 1, height - barHeight - 4, Math.max(3, barWidth - 2), barHeight);
-    });
+      visualContext.fillRect(bar * barWidth + 2, height - barHeight - 4, Math.max(5, barWidth - 4), barHeight);
+    }
     window.requestAnimationFrame(drawVisualizer);
   }
 
@@ -837,7 +846,7 @@ function render(statusOverrides = {}) {
   const app = document.querySelector("#app");
   const links = streamLinks.map((link) => ({
     ...link,
-    status: statusOverrides[link.key] || link.status,
+    status: normalizeStatus(statusOverrides[link.key] || link.status),
   }));
 
   updateSidebar(links);

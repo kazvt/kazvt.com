@@ -644,18 +644,25 @@ code {
 }
 
 .sticker-status-corner.live {
-  --pip-color: var(--green);
-  --pip-scratch: #baffbc;
-}
-
-.sticker-status-corner.offline {
   --pip-color: var(--red);
   --pip-scratch: #ffb0a8;
 }
 
+.sticker-status-corner.offline {
+  --pip-color: #858585;
+  --pip-scratch: #cfcfcf;
+}
+
 .sticker-status-corner.testing {
-  --pip-color: var(--orange);
-  --pip-scratch: var(--yellow);
+  --pip-color: var(--yellow);
+  --pip-scratch: #fff6a8;
+}
+
+.sticker-status-corner.live .crayon-pip,
+.sticker-status-corner.testing .crayon-pip {
+  animation:
+    blockBoil 330ms steps(2, end) infinite,
+    pipBlink 760ms steps(1, end) infinite;
 }
 
 .sticker:nth-child(2n) {
@@ -1158,6 +1165,13 @@ code {
   0% { transform: translate(0, 0); }
   50% { transform: translate(1px, -1px); }
   100% { transform: translate(-1px, 1px); }
+}
+
+@keyframes pipBlink {
+  0% { opacity: 1; }
+  49% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 @keyframes liveStickerBoil {
