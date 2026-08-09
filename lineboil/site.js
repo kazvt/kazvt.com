@@ -733,6 +733,7 @@ async function initializeMusicPlayer() {
   const visualContext = visualizer.getContext("2d");
   const visualizerBinCrop = 0.58;
   const visualizerBarCount = 12;
+  const visualizerTrebleTilt = 0.85;
 
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
@@ -786,7 +787,13 @@ async function initializeMusicPlayer() {
     for (let bar = 0; bar < bars; bar += 1) {
       const start = Math.floor((bar / bars) * activeBins.length);
       const end = Math.max(start + 1, Math.floor(((bar + 1) / bars) * activeBins.length));
-      const value = activeBins.slice(start, end).reduce((sum, bin) => sum + bin, 0) / (end - start);
+      let weightedTotal = 0;
+      for (let bin = start; bin < end; bin += 1) {
+        const position = activeBins.length > 1 ? bin / (activeBins.length - 1) : 0;
+        const weight = 1 - visualizerTrebleTilt / 2 + position * visualizerTrebleTilt;
+        weightedTotal += Math.min(255, activeBins[bin] * weight);
+      }
+      const value = weightedTotal / (end - start);
       const barHeight = Math.max(3, (value / 255) * (height - 8));
       visualContext.fillStyle = bar % 2 ? "#48cfff" : "#6cff7a";
       visualContext.fillRect(bar * barWidth + 2, height - barHeight - 4, Math.max(5, barWidth - 4), barHeight);
