@@ -84,6 +84,20 @@ function normalizeStatus(status) {
   return status === "online" ? "live" : status;
 }
 
+function initializeCurrentUrl() {
+  const node = document.querySelector("[data-current-url]");
+  if (!node) return;
+
+  const updateUrl = () => {
+    node.textContent = window.location.href;
+  };
+
+  updateUrl();
+  window.addEventListener("hashchange", updateUrl);
+  window.addEventListener("popstate", updateUrl);
+  document.addEventListener("click", () => window.setTimeout(updateUrl, 0));
+}
+
 const profileFacts = [
   ["name", "kazvt"],
   ["pronouns", "she/her"],
@@ -861,7 +875,7 @@ function render(statusOverrides = {}) {
     panel({
       id: "links",
       title: "where to find me",
-      stamp: "live pips",
+      stamp: "links",
       children: [el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker))],
     }),
     profilePanel(),
@@ -891,4 +905,5 @@ async function loadStatus() {
 }
 
 initializeSiteTools();
+initializeCurrentUrl();
 loadStatus().then(render);
