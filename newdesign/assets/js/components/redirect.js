@@ -18,20 +18,6 @@ function getRedirectConfig(secrets) {
   return firstValue(secrets.redirect, secrets.redirectPage, secrets.passingPage, secrets.temporaryRedirect, secrets.forwardingPage, {}) || {};
 }
 
-function getDatasetConfig() {
-  const root = document.querySelector("[data-redirect-root]") || document.body;
-  const data = root ? root.dataset : {};
-  return {
-    target: firstValue(data.target, data.url, data.href, data.to),
-    delay: firstValue(data.delay, data.seconds, data.wait),
-    title: data.title,
-    heading: data.heading,
-    message: data.message,
-    linkLabel: data.linkLabel,
-    buttonLabel: data.buttonLabel
-  };
-}
-
 function paramsFromLocation() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -56,7 +42,7 @@ function safeTarget(value) {
   const raw = String(value || "").trim() || "./";
   try {
     const url = new URL(raw, window.location.href);
-    if (["http:", "https:", "mailto:", "tel:", "file:"].includes(url.protocol)) return url.href;
+    if (["http:", "https:", "mailto:"].includes(url.protocol)) return url.href;
   } catch {}
   return "./";
 }
@@ -107,7 +93,7 @@ function redirectTo(target) {
 
 async function initRedirect() {
   const secrets = await loadSecrets();
-  const config = { ...fallback, ...getRedirectConfig(secrets), ...getDatasetConfig(), ...paramsFromLocation() };
+  const config = { ...fallback, ...getRedirectConfig(secrets), ...paramsFromLocation() };
   const target = safeTarget(firstValue(config.target, config.url, config.href, config.to));
   const delay = safeDelay(config.delay);
   document.title = config.title || fallback.title;

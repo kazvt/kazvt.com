@@ -1,27 +1,27 @@
 :root {
-  --cream: #fff1e8;
-  --paper: #fffbea;
-  --paper-alt: #f8ffdf;
-  --ink: #302135;
-  --orange: #ff9f18;
-  --red: #ff432f;
-  --yellow: #ffe45c;
-  --green: #50d85f;
-  --blue: #48cfff;
-  --pink: #ff72bf;
-  --purple: #9279ff;
-  --on-yellow: #302135;
-  --on-green: #102516;
-  --on-blue: #102035;
-  --on-pink: #302135;
-  --on-red: #000000;
-  --on-orange: #302135;
-  --shadow: rgba(47, 29, 49, 0.28);
-  --bg: #07081b;
-  --bg-alt: #11153a;
-  --banner: #302135;
-  --banner-text: #fff9dc;
-  --wallpaper-image: url("assets/wallpapers/theme-starry-sky.png");
+  --cream: #FFEA88;
+  --paper: #FFEA88;
+  --paper-alt: #FFEA88;
+  --ink: #4D6787;
+  --orange: #FFEA88;
+  --red: #F599C6;
+  --yellow: #FFEA88;
+  --green: #7DCCAD;
+  --blue: #4D6787;
+  --pink: #F599C6;
+  --purple: #4D6787;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #ffffff;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #4D6787 42%, transparent);
+  --bg: #4D6787;
+  --bg-alt: #F599C6;
+  --banner: #4D6787;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-01-pastel-stars.png");
   --wallpaper-size: 96px 96px;
 }
 
@@ -48,137 +48,407 @@ body {
 }
 
 body[data-theme="p2"] {
-  --cream: #fff1e8;
-  --paper: #fff1e8;
-  --paper-alt: #c2c3c7;
-  --ink: #1d2b53;
-  --orange: #ffa300;
-  --red: #ff004d;
-  --yellow: #ffec27;
-  --green: #00e436;
-  --blue: #29adff;
-  --pink: #ff77a8;
-  --purple: #83769c;
-  --on-yellow: #1d2b53;
-  --on-green: #1d2b53;
-  --on-blue: #1d2b53;
-  --on-pink: #1d2b53;
-  --on-red: #000000;
-  --on-orange: #1d2b53;
-  --shadow: rgba(29, 43, 83, 0.36);
-  --bg: #000000;
-  --bg-alt: #1d2b53;
-  --banner: #1d2b53;
-  --banner-text: #fff1e8;
-  --wallpaper-image: url("assets/wallpapers/theme-arcade-checker.png");
+  --cream: #F1E5A1;
+  --paper: #F1E5A1;
+  --paper-alt: #F1E5A1;
+  --ink: #8B2626;
+  --orange: #EF6905;
+  --red: #8B2626;
+  --yellow: #EF6905;
+  --green: #F1E5A1;
+  --blue: #486C2F;
+  --pink: #8B2626;
+  --purple: #486C2F;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #ffffff;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #8B2626 42%, transparent);
+  --bg: #8B2626;
+  --bg-alt: #486C2F;
+  --banner: #8B2626;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-02-campfire-checker.png");
   --wallpaper-size: 64px 64px;
 }
 
 body[data-theme="p3"] {
-  --cream: #e0f8d0;
-  --paper: #e0f8d0;
-  --paper-alt: #88c070;
-  --ink: #081820;
-  --orange: #e0f8d0;
-  --red: #346856;
-  --yellow: #e0f8d0;
-  --green: #88c070;
-  --blue: #88c070;
-  --pink: #e0f8d0;
-  --purple: #346856;
-  --on-yellow: #081820;
-  --on-green: #081820;
-  --on-blue: #081820;
-  --on-pink: #081820;
-  --on-red: #e0f8d0;
-  --on-orange: #081820;
-  --shadow: rgba(8, 24, 32, 0.42);
-  --bg: #346856;
-  --bg-alt: #081820;
-  --banner: #081820;
-  --banner-text: #e0f8d0;
-  --wallpaper-image: url("assets/wallpapers/theme-lcd-grid.png");
-  --wallpaper-size: 64px 64px;
+  --cream: #F7EAE0;
+  --paper: #F7EAE0;
+  --paper-alt: #F9D2BA;
+  --ink: #5E3122;
+  --orange: #F7EAE0;
+  --red: #1D4533;
+  --yellow: #F7EAE0;
+  --green: #F9D2BA;
+  --blue: #5E3122;
+  --pink: #1D4533;
+  --purple: #5E3122;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #ffffff;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #5E3122 42%, transparent);
+  --bg: #5E3122;
+  --bg-alt: #1D4533;
+  --banner: #5E3122;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-03-forest-vines.png");
+  --wallpaper-size: 96px 96px;
 }
 
 body[data-theme="p4"] {
-  --cream: #f4f4f4;
-  --paper: #f4f4f4;
-  --paper-alt: #94b0c2;
-  --ink: #1a1c2c;
-  --orange: #ef7d57;
-  --red: #b13e53;
-  --yellow: #ffcd75;
-  --green: #a7f070;
-  --blue: #73eff7;
-  --pink: #ffcd75;
-  --purple: #5d275d;
-  --on-yellow: #1a1c2c;
-  --on-green: #1a1c2c;
-  --on-blue: #1a1c2c;
-  --on-pink: #1a1c2c;
-  --on-red: #f4f4f4;
-  --on-orange: #1a1c2c;
-  --shadow: rgba(26, 28, 44, 0.42);
-  --bg: #5d275d;
-  --bg-alt: #29366f;
-  --banner: #1a1c2c;
-  --banner-text: #f4f4f4;
-  --wallpaper-image: url("assets/wallpapers/theme-pop-checker.png");
-  --wallpaper-size: 72px 72px;
+  --cream: #D8FFC5;
+  --paper: #D8FFC5;
+  --paper-alt: #C4F7CA;
+  --ink: #111111;
+  --orange: #92EEFF;
+  --red: #30AFFF;
+  --yellow: #92EEFF;
+  --green: #D8FFC5;
+  --blue: #C4F7CA;
+  --pink: #30AFFF;
+  --purple: #C4F7CA;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #000000;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #30AFFF 42%, transparent);
+  --bg: #30AFFF;
+  --bg-alt: #92EEFF;
+  --banner: #30AFFF;
+  --banner-text: #111111;
+  --wallpaper-image: url("assets/wallpapers/pal-04-ocean-bubbles.png");
+  --wallpaper-size: 96px 96px;
 }
 
 body[data-theme="p5"] {
-  --cream: #f5edba;
-  --paper: #f5edba;
-  --paper-alt: #d79b7d;
-  --ink: #1f0e1c;
-  --orange: #e4943a;
-  --red: #9d303b;
-  --yellow: #c0c741;
-  --green: #7ec4c1;
-  --blue: #8c8fae;
-  --pink: #d26471;
-  --purple: #70377f;
-  --on-yellow: #1f0e1c;
-  --on-green: #1f0e1c;
-  --on-blue: #1f0e1c;
-  --on-pink: #1f0e1c;
-  --on-red: #f5edba;
-  --on-orange: #1f0e1c;
-  --shadow: rgba(31, 14, 28, 0.46);
-  --bg: #3e2137;
-  --bg-alt: #584563;
-  --banner: #3e2137;
-  --banner-text: #f5edba;
-  --wallpaper-image: url("assets/wallpapers/theme-scrapbook-paper.png");
+  --cream: #FAF7BB;
+  --paper: #FAF7BB;
+  --paper-alt: #D99B21;
+  --ink: #133458;
+  --orange: #838921;
+  --red: #133458;
+  --yellow: #838921;
+  --green: #D99B21;
+  --blue: #FAF7BB;
+  --pink: #133458;
+  --purple: #FAF7BB;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #133458 42%, transparent);
+  --bg: #133458;
+  --bg-alt: #838921;
+  --banner: #133458;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-05-night-map.png");
   --wallpaper-size: 96px 96px;
 }
 
 body[data-theme="p6"] {
-  --cream: #ffffff;
-  --paper: #ffffff;
-  --paper-alt: #c7cfdd;
-  --ink: #131313;
-  --orange: #ffa214;
-  --red: #ea323c;
-  --yellow: #ffeb57;
-  --green: #99e65f;
-  --blue: #94fdff;
-  --pink: #f389f5;
-  --purple: #657392;
-  --on-yellow: #131313;
-  --on-green: #131313;
-  --on-blue: #131313;
-  --on-pink: #131313;
-  --on-red: #000000;
-  --on-orange: #131313;
-  --shadow: rgba(19, 19, 19, 0.44);
-  --bg: #0e071b;
-  --bg-alt: #1a1932;
-  --banner: #0e071b;
+  --cream: #FEF2A0;
+  --paper: #FEF2A0;
+  --paper-alt: #F3CD97;
+  --ink: #111111;
+  --orange: #F3CD97;
+  --red: #FEF2A0;
+  --yellow: #F3CD97;
+  --green: #E98B50;
+  --blue: #BC4F4F;
+  --pink: #FEF2A0;
+  --purple: #BC4F4F;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #ffffff;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #BC4F4F 42%, transparent);
+  --bg: #BC4F4F;
+  --bg-alt: #E98B50;
+  --banner: #BC4F4F;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/theme-ocean-waves.png");
+  --wallpaper-image: url("assets/wallpapers/pal-06-desert-gingham.png");
+  --wallpaper-size: 64px 64px;
+}
+
+body[data-theme="p7"] {
+  --cream: #FCF2E5;
+  --paper: #FCF2E5;
+  --paper-alt: #FCF2E5;
+  --ink: #524646;
+  --orange: #A8A492;
+  --red: #524646;
+  --yellow: #A8A492;
+  --green: #FCF2E5;
+  --blue: #EC5B38;
+  --pink: #524646;
+  --purple: #EC5B38;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #524646 42%, transparent);
+  --bg: #524646;
+  --bg-alt: #EC5B38;
+  --banner: #524646;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-07-newsprint-bricks.png");
+  --wallpaper-size: 96px 96px;
+}
+
+body[data-theme="p8"] {
+  --cream: #E8F5E9;
+  --paper: #E8F5E9;
+  --paper-alt: #A5D6A7;
+  --ink: #1B5E20;
+  --orange: #A5D6A7;
+  --red: #E8F5E9;
+  --yellow: #A5D6A7;
+  --green: #66BB6A;
+  --blue: #1B5E20;
+  --pink: #E8F5E9;
+  --purple: #1B5E20;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #ffffff;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #1B5E20 42%, transparent);
+  --bg: #1B5E20;
+  --bg-alt: #66BB6A;
+  --banner: #1B5E20;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-08-garden-vines.png");
+  --wallpaper-size: 96px 96px;
+}
+
+body[data-theme="p9"] {
+  --cream: #E3F2FD;
+  --paper: #E3F2FD;
+  --paper-alt: #90CAF9;
+  --ink: #0D47A1;
+  --orange: #90CAF9;
+  --red: #E3F2FD;
+  --yellow: #90CAF9;
+  --green: #2196F3;
+  --blue: #0D47A1;
+  --pink: #E3F2FD;
+  --purple: #0D47A1;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #ffffff;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #0D47A1 42%, transparent);
+  --bg: #0D47A1;
+  --bg-alt: #2196F3;
+  --banner: #0D47A1;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-09-sky-clouds.png");
+  --wallpaper-size: 96px 96px;
+}
+
+body[data-theme="p10"] {
+  --cream: #F6D8BD;
+  --paper: #F6D8BD;
+  --paper-alt: #F39399;
+  --ink: #5D3140;
+  --orange: #CF4173;
+  --red: #5D3140;
+  --yellow: #CF4173;
+  --green: #F39399;
+  --blue: #F6D8BD;
+  --pink: #5D3140;
+  --purple: #F6D8BD;
+  --on-yellow: #ffffff;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #ffffff;
+  --shadow: color-mix(in srgb, #5D3140 42%, transparent);
+  --bg: #5D3140;
+  --bg-alt: #CF4173;
+  --banner: #5D3140;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-10-rose-curtain.png");
+  --wallpaper-size: 80px 80px;
+}
+
+body[data-theme="p11"] {
+  --cream: #98E8DE;
+  --paper: #98E8DE;
+  --paper-alt: #98E8DE;
+  --ink: #4E1F6E;
+  --orange: #3E3E75;
+  --red: #4E1F6E;
+  --yellow: #3E3E75;
+  --green: #45A9A9;
+  --blue: #98E8DE;
+  --pink: #4E1F6E;
+  --purple: #98E8DE;
+  --on-yellow: #ffffff;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #ffffff;
+  --shadow: color-mix(in srgb, #4E1F6E 42%, transparent);
+  --bg: #4E1F6E;
+  --bg-alt: #3E3E75;
+  --banner: #4E1F6E;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-11-deep-circuit.png");
+  --wallpaper-size: 96px 96px;
+}
+
+body[data-theme="p12"] {
+  --cream: #FFB900;
+  --paper: #FFB900;
+  --paper-alt: #FFB900;
+  --ink: #111111;
+  --orange: #FFB900;
+  --red: #D10056;
+  --yellow: #FFB900;
+  --green: #FFB900;
+  --blue: #007DCC;
+  --pink: #B2054C;
+  --purple: #B2054C;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #000000;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #B2054C 42%, transparent);
+  --bg: #B2054C;
+  --bg-alt: #D10056;
+  --banner: #B2054C;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-12-arcade-marquee.png");
+  --wallpaper-size: 80px 80px;
+}
+
+body[data-theme="p13"] {
+  --cream: #FFDD9C;
+  --paper: #FFDD9C;
+  --paper-alt: #F9B637;
+  --ink: #111111;
+  --orange: #FB6C00;
+  --red: #E73F1E;
+  --yellow: #FB6C00;
+  --green: #F9B637;
+  --blue: #FFDD9C;
+  --pink: #E73F1E;
+  --purple: #FFDD9C;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #E73F1E 42%, transparent);
+  --bg: #E73F1E;
+  --bg-alt: #FB6C00;
+  --banner: #E73F1E;
+  --banner-text: #111111;
+  --wallpaper-image: url("assets/wallpapers/pal-13-fire-stripes.png");
+  --wallpaper-size: 64px 64px;
+}
+
+body[data-theme="p14"] {
+  --cream: #FFF449;
+  --paper: #FFF449;
+  --paper-alt: #FED24F;
+  --ink: #111111;
+  --orange: #FFF449;
+  --red: #FED24F;
+  --yellow: #FFF449;
+  --green: #B2D959;
+  --blue: #7EC151;
+  --pink: #FED24F;
+  --purple: #7EC151;
+  --on-yellow: #111111;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #7EC151 42%, transparent);
+  --bg: #7EC151;
+  --bg-alt: #B2D959;
+  --banner: #7EC151;
+  --banner-text: #111111;
+  --wallpaper-image: url("assets/wallpapers/pal-14-meadow-dots.png");
+  --wallpaper-size: 96px 96px;
+}
+
+body[data-theme="p15"] {
+  --cream: #F8B2B2;
+  --paper: #F8B2B2;
+  --paper-alt: #F8B2B2;
+  --ink: #403D88;
+  --orange: #AF719D;
+  --red: #F8B2B2;
+  --yellow: #AF719D;
+  --green: #8B639B;
+  --blue: #403D88;
+  --pink: #F8B2B2;
+  --purple: #403D88;
+  --on-yellow: #111111;
+  --on-green: #ffffff;
+  --on-blue: #ffffff;
+  --on-pink: #111111;
+  --on-red: #111111;
+  --on-orange: #111111;
+  --shadow: color-mix(in srgb, #403D88 42%, transparent);
+  --bg: #403D88;
+  --bg-alt: #8B639B;
+  --banner: #403D88;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-15-dream-checker.png");
+  --wallpaper-size: 72px 72px;
+}
+
+body[data-theme="p16"] {
+  --cream: #E1E100;
+  --paper: #E1E100;
+  --paper-alt: #90B800;
+  --ink: #063B00;
+  --orange: #266210;
+  --red: #063B00;
+  --yellow: #266210;
+  --green: #90B800;
+  --blue: #E1E100;
+  --pink: #063B00;
+  --purple: #E1E100;
+  --on-yellow: #ffffff;
+  --on-green: #111111;
+  --on-blue: #111111;
+  --on-pink: #ffffff;
+  --on-red: #ffffff;
+  --on-orange: #ffffff;
+  --shadow: color-mix(in srgb, #063B00 42%, transparent);
+  --bg: #063B00;
+  --bg-alt: #266210;
+  --banner: #063B00;
+  --banner-text: #ffffff;
+  --wallpaper-image: url("assets/wallpapers/pal-16-swamp-terminal.png");
   --wallpaper-size: 96px 96px;
 }
 
@@ -379,7 +649,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 .tool-list button:focus-visible,
 .sticker:hover,
 .sticker:focus-visible {
-  outline: 4px dashed var(--red);
+  outline: 4px dashed var(--ink);
   outline-offset: 3px;
   transform: translate(-2px, -3px) rotate(0deg);
 }
@@ -440,7 +710,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 code {
   padding: 1px 4px;
   border: 2px solid var(--ink);
-  background: #fff;
+  background: var(--paper);
 }
 
 .tool-list {
@@ -521,15 +791,18 @@ code {
   padding: 10px 12px;
   border: 4px solid var(--ink);
   background: var(--orange);
+  color: var(--on-orange);
   clip-path: polygon(0 8px, 12px 0, 100% 5px, calc(100% - 7px) 100%, 5px calc(100% - 4px));
 }
 
 .panel:nth-child(2n) .panel-head {
   background: var(--blue);
+  color: var(--on-blue);
 }
 
 .panel:nth-child(3n) .panel-head {
   background: var(--pink);
+  color: var(--on-pink);
 }
 
 .panel-stamp {
@@ -579,24 +852,24 @@ code {
 
 .sticker.is-live {
   background:
-    repeating-linear-gradient(-12deg, rgba(80, 216, 95, 0.42) 0 7px, rgba(80, 216, 95, 0.12) 7px 14px, transparent 14px 20px),
+    repeating-linear-gradient(-12deg, rgba(231, 63, 30, 0.32) 0 7px, rgba(231, 63, 30, 0.1) 7px 14px, transparent 14px 20px),
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.72) 0 8%, transparent 14%),
-    #d9ffd6;
+    var(--paper);
   box-shadow:
     6px 6px 0 var(--shadow),
-    0 0 0 5px rgba(80, 216, 95, 0.34),
-    0 0 18px rgba(80, 216, 95, 0.42);
+    0 0 0 5px rgba(231, 63, 30, 0.3),
+    0 0 18px rgba(231, 63, 30, 0.38);
   animation: liveStickerBoil 430ms steps(2, end) infinite;
 }
 
 .sticker.is-testing {
   background:
-    repeating-linear-gradient(-12deg, rgba(255, 159, 24, 0.44) 0 7px, rgba(255, 228, 92, 0.24) 7px 14px, transparent 14px 20px),
+    repeating-linear-gradient(-12deg, rgba(255, 244, 73, 0.42) 0 7px, rgba(255, 244, 73, 0.14) 7px 14px, transparent 14px 20px),
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.72) 0 8%, transparent 14%),
-    #fff0a3;
+    var(--paper);
   box-shadow:
     6px 6px 0 var(--shadow),
-    0 0 0 5px rgba(255, 159, 24, 0.32);
+    0 0 0 5px rgba(255, 244, 73, 0.34);
   animation: liveStickerBoil 520ms steps(2, end) infinite;
 }
 
@@ -644,7 +917,7 @@ code {
 }
 
 .sticker-status-corner.live {
-  --pip-color: var(--red);
+  --pip-color: #e73f1e;
   --pip-scratch: #ffb0a8;
 }
 
@@ -654,7 +927,7 @@ code {
 }
 
 .sticker-status-corner.testing {
-  --pip-color: var(--yellow);
+  --pip-color: #fff449;
   --pip-scratch: #fff6a8;
 }
 
@@ -679,7 +952,7 @@ code {
   height: 52px;
   place-items: center;
   border: 3px solid var(--ink);
-  background: #fff;
+  background: var(--paper);
   clip-path: polygon(0 9px, 8px 0, 100% 4px, calc(100% - 8px) 100%, 7px calc(100% - 3px));
 }
 
@@ -697,24 +970,32 @@ code {
 }
 
 .mini-logo .logo-fill {
-  fill: #fff;
-  stroke: #fff;
+  fill: var(--banner-text);
+  stroke: var(--banner-text);
   stroke-width: 2;
   stroke-linejoin: round;
 }
 
 .mini-logo .logo-mark {
   fill: none;
-  stroke: #fff;
+  stroke: var(--banner-text);
   stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .mini-logo-youtube .logo-bg { fill: var(--red); }
+.mini-logo-youtube .logo-fill,
+.mini-logo-youtube .logo-mark { fill: var(--on-red); stroke: var(--on-red); }
 .mini-logo-twitch .logo-bg { fill: var(--purple); }
+.mini-logo-twitch .logo-fill,
+.mini-logo-twitch .logo-mark { fill: var(--on-blue); stroke: var(--on-blue); }
 .mini-logo-kick .logo-bg { fill: var(--green); }
+.mini-logo-kick .logo-fill,
+.mini-logo-kick .logo-mark { fill: var(--on-green); stroke: var(--on-green); }
 .mini-logo-twitter .logo-bg { fill: var(--blue); }
+.mini-logo-twitter .logo-fill,
+.mini-logo-twitter .logo-mark { fill: var(--on-blue); stroke: var(--on-blue); }
 .mini-logo-bsky .logo-bg { fill: #77c9ff; }
 .mini-logo-tumblr .logo-bg { fill: #7c8fd4; }
 .mini-logo-discord .logo-bg { fill: #8d73ff; }
@@ -742,19 +1023,20 @@ code {
   align-content: center;
   justify-items: center;
   padding: 14px;
-  background: #fff;
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .status-card.live {
-  background: #baffbc;
+  background: var(--paper);
 }
 
 .status-card.testing {
-  background: #fff0a3;
+  background: var(--paper);
 }
 
 .status-card.offline {
-  background: #eee6f4;
+  background: var(--paper);
 }
 
 .status-light {
@@ -766,11 +1048,13 @@ code {
 }
 
 .live .status-light {
-  background: var(--green);
+  background: #e73f1e;
+  animation: pipBlink 760ms steps(1, end) infinite;
 }
 
 .testing .status-light {
-  background: var(--yellow);
+  background: #fff449;
+  animation: pipBlink 760ms steps(1, end) infinite;
 }
 
 .status-word {
