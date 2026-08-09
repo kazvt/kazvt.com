@@ -727,6 +727,7 @@ async function initializeMusicPlayer() {
   const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: "0.8", ariaLabel: "Volume" });
   const visualizer = el("canvas", { width: "150", height: "44", className: "visualizer", ariaLabel: "Music visualizer" });
   const visualContext = visualizer.getContext("2d");
+  const visualizerBinCrop = 0.58;
 
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
@@ -774,8 +775,9 @@ async function initializeMusicPlayer() {
 
     const data = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(data);
-    const barWidth = width / data.length;
-    data.forEach((value, bar) => {
+    const activeBins = data.slice(0, Math.max(1, Math.ceil(data.length * visualizerBinCrop)));
+    const barWidth = width / activeBins.length;
+    activeBins.forEach((value, bar) => {
       const barHeight = Math.max(3, (value / 255) * (height - 8));
       visualContext.fillStyle = bar % 2 ? "#48cfff" : "#6cff7a";
       visualContext.fillRect(bar * barWidth + 1, height - barHeight - 4, Math.max(3, barWidth - 2), barHeight);
