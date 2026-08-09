@@ -71,7 +71,7 @@ body[data-theme="p2"] {
   --banner: #8B2626;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/45-degree-fabric-light.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 630px 630px;
 }
 
 body[data-theme="p3"] {
@@ -98,7 +98,7 @@ body[data-theme="p3"] {
   --banner: #5E3122;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/cream-dust.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 200px 200px;
 }
 
 body[data-theme="p4"] {
@@ -125,7 +125,7 @@ body[data-theme="p4"] {
   --banner: #30AFFF;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/brushed-alum.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 800px 800px;
 }
 
 body[data-theme="p5"] {
@@ -152,7 +152,7 @@ body[data-theme="p5"] {
   --banner: #133458;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/cartographer.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 750px 749px;
 }
 
 body[data-theme="p6"] {
@@ -179,7 +179,7 @@ body[data-theme="p6"] {
   --banner: #BC4F4F;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/beige-paper.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 400px 400px;
 }
 
 body[data-theme="p7"] {
@@ -341,7 +341,7 @@ body[data-theme="p12"] {
   --banner: #B2054C;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/checkered-pattern.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 216px 216px;
 }
 
 body[data-theme="p13"] {
@@ -368,7 +368,7 @@ body[data-theme="p13"] {
   --banner: #E73F1E;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/fake-luxury.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 128px 208px;
 }
 
 body[data-theme="p14"] {
@@ -395,7 +395,7 @@ body[data-theme="p14"] {
   --banner: #7EC151;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/bo-play.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 168px 88px;
 }
 
 body[data-theme="p15"] {
@@ -422,7 +422,7 @@ body[data-theme="p15"] {
   --banner: #403D88;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/dark-mosaic.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 600px 590px;
 }
 
 body[data-theme="p16"] {
@@ -449,7 +449,7 @@ body[data-theme="p16"] {
   --banner: #063B00;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/dark-geometric.png");
-  --wallpaper-size: auto;
+  --wallpaper-size: 210px 210px;
 }
 
 a {

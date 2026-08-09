@@ -748,6 +748,7 @@ async function initializeMusicPlayer() {
   const visualizerBinCrop = 0.58;
   const visualizerBarCount = 12;
   const visualizerTrebleTilt = 0.35;
+  const visualizerPeakBias = 0.72;
 
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
@@ -771,7 +772,10 @@ async function initializeMusicPlayer() {
     if (!AudioContext) return;
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
-    analyser.fftSize = 64;
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.06;
+    analyser.minDecibels = -84;
+    analyser.maxDecibels = -12;
     source = audioContext.createMediaElementSource(audio);
     source.connect(analyser);
     analyser.connect(audioContext.destination);
@@ -802,13 +806,17 @@ async function initializeMusicPlayer() {
       const start = Math.floor((bar / bars) * activeBins.length);
       const end = Math.max(start + 1, Math.floor(((bar + 1) / bars) * activeBins.length));
       let weightedTotal = 0;
+      let weightedPeak = 0;
       for (let bin = start; bin < end; bin += 1) {
         const position = activeBins.length > 1 ? bin / (activeBins.length - 1) : 0;
         const weight = 1 - visualizerTrebleTilt / 2 + position * visualizerTrebleTilt;
-        weightedTotal += Math.min(255, activeBins[bin] * weight);
+        const weightedValue = Math.min(255, activeBins[bin] * weight);
+        weightedTotal += weightedValue;
+        weightedPeak = Math.max(weightedPeak, weightedValue);
       }
-      const value = weightedTotal / (end - start);
-      const barHeight = Math.max(3, (value / 255) * (height - 8));
+      const average = weightedTotal / (end - start);
+      const value = weightedPeak * visualizerPeakBias + average * (1 - visualizerPeakBias);
+      const barHeight = Math.max(3, Math.pow(value / 255, 0.72) * (height - 8));
       visualContext.fillStyle = bar % 2 ? "#48cfff" : "#6cff7a";
       visualContext.fillRect(bar * barWidth + 2, height - barHeight - 4, Math.max(5, barWidth - 4), barHeight);
     }
