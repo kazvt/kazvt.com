@@ -21,7 +21,7 @@
   --bg-alt: #11153a;
   --banner: #302135;
   --banner-text: #fff9dc;
-  --wallpaper-image: url("assets/wallpapers/warm-starfield.png");
+  --wallpaper-image: url("assets/wallpapers/theme-starry-sky.png");
   --wallpaper-size: 96px 96px;
 }
 
@@ -70,8 +70,8 @@ body[data-theme="p2"] {
   --bg-alt: #1d2b53;
   --banner: #1d2b53;
   --banner-text: #fff1e8;
-  --wallpaper-image: url("assets/wallpapers/pico-space.png");
-  --wallpaper-size: 96px 96px;
+  --wallpaper-image: url("assets/wallpapers/theme-arcade-checker.png");
+  --wallpaper-size: 64px 64px;
 }
 
 body[data-theme="p3"] {
@@ -97,7 +97,7 @@ body[data-theme="p3"] {
   --bg-alt: #081820;
   --banner: #081820;
   --banner-text: #e0f8d0;
-  --wallpaper-image: url("assets/wallpapers/gameboy-dither.png");
+  --wallpaper-image: url("assets/wallpapers/theme-lcd-grid.png");
   --wallpaper-size: 64px 64px;
 }
 
@@ -124,8 +124,8 @@ body[data-theme="p4"] {
   --bg-alt: #29366f;
   --banner: #1a1c2c;
   --banner-text: #f4f4f4;
-  --wallpaper-image: url("assets/wallpapers/sweetie-confetti.png");
-  --wallpaper-size: 96px 96px;
+  --wallpaper-image: url("assets/wallpapers/theme-pop-checker.png");
+  --wallpaper-size: 72px 72px;
 }
 
 body[data-theme="p5"] {
@@ -151,8 +151,8 @@ body[data-theme="p5"] {
   --bg-alt: #584563;
   --banner: #3e2137;
   --banner-text: #f5edba;
-  --wallpaper-image: url("assets/wallpapers/na16-paper.png");
-  --wallpaper-size: 80px 80px;
+  --wallpaper-image: url("assets/wallpapers/theme-scrapbook-paper.png");
+  --wallpaper-size: 96px 96px;
 }
 
 body[data-theme="p6"] {
@@ -178,7 +178,7 @@ body[data-theme="p6"] {
   --bg-alt: #1a1932;
   --banner: #0e071b;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/endesga-deep-stars.png");
+  --wallpaper-image: url("assets/wallpapers/theme-ocean-waves.png");
   --wallpaper-size: 96px 96px;
 }
 
