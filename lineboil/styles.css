@@ -98,7 +98,7 @@ body[data-theme="p3"] {
   --banner: #5E3122;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/cream-dust.png");
-  --wallpaper-size: 200px 200px;
+  --wallpaper-size: 100px 100px;
 }
 
 body[data-theme="p4"] {
@@ -151,8 +151,8 @@ body[data-theme="p5"] {
   --bg-alt: #838921;
   --banner: #133458;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/cartographer.png");
-  --wallpaper-size: 750px 749px;
+  --wallpaper-image: url("assets/wallpapers/subtle-patterns/textured-paper.png");
+  --wallpaper-size: auto;
 }
 
 body[data-theme="p6"] {
@@ -368,7 +368,7 @@ body[data-theme="p13"] {
   --banner: #E73F1E;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/fake-luxury.png");
-  --wallpaper-size: 128px 208px;
+  --wallpaper-size: 64px 104px;
 }
 
 body[data-theme="p14"] {
@@ -395,7 +395,7 @@ body[data-theme="p14"] {
   --banner: #7EC151;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/bo-play.png");
-  --wallpaper-size: 168px 88px;
+  --wallpaper-size: 84px 44px;
 }
 
 body[data-theme="p15"] {
@@ -448,8 +448,8 @@ body[data-theme="p16"] {
   --bg-alt: #266210;
   --banner: #063B00;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/dark-geometric.png");
-  --wallpaper-size: 210px 210px;
+  --wallpaper-image: url("assets/wallpapers/subtle-patterns/white-paperboard.png");
+  --wallpaper-size: auto;
 }
 
 a {
