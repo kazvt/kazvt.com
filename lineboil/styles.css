@@ -3,7 +3,7 @@
   --paper: #FFEA88;
   --paper-alt: #FFEA88;
   --ink: #4D6787;
-  --orange: #FFEA88;
+  --orange: #F599C6;
   --red: #F599C6;
   --yellow: #FFEA88;
   --green: #7DCCAD;
@@ -15,7 +15,7 @@
   --on-blue: #ffffff;
   --on-pink: #111111;
   --on-red: #111111;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #4D6787 42%, transparent);
   --bg: #4D6787;
   --bg-alt: #F599C6;
@@ -54,7 +54,7 @@ body[data-theme="p2"] {
   --ink: #8B2626;
   --orange: #EF6905;
   --red: #8B2626;
-  --yellow: #EF6905;
+  --yellow: #F1E5A1;
   --green: #F1E5A1;
   --blue: #486C2F;
   --pink: #8B2626;
@@ -79,7 +79,7 @@ body[data-theme="p3"] {
   --paper: #F7EAE0;
   --paper-alt: #F9D2BA;
   --ink: #5E3122;
-  --orange: #F7EAE0;
+  --orange: #5E3122;
   --red: #1D4533;
   --yellow: #F7EAE0;
   --green: #F9D2BA;
@@ -91,7 +91,7 @@ body[data-theme="p3"] {
   --on-blue: #ffffff;
   --on-pink: #ffffff;
   --on-red: #ffffff;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #5E3122 42%, transparent);
   --bg: #5E3122;
   --bg-alt: #1D4533;
@@ -106,9 +106,9 @@ body[data-theme="p4"] {
   --paper: #D8FFC5;
   --paper-alt: #C4F7CA;
   --ink: #111111;
-  --orange: #92EEFF;
+  --orange: #30AFFF;
   --red: #30AFFF;
-  --yellow: #92EEFF;
+  --yellow: #D8FFC5;
   --green: #D8FFC5;
   --blue: #C4F7CA;
   --pink: #30AFFF;
@@ -133,9 +133,9 @@ body[data-theme="p5"] {
   --paper: #FAF7BB;
   --paper-alt: #D99B21;
   --ink: #133458;
-  --orange: #838921;
+  --orange: #D99B21;
   --red: #133458;
-  --yellow: #838921;
+  --yellow: #FAF7BB;
   --green: #D99B21;
   --blue: #FAF7BB;
   --pink: #133458;
@@ -160,9 +160,9 @@ body[data-theme="p6"] {
   --paper: #FEF2A0;
   --paper-alt: #F3CD97;
   --ink: #111111;
-  --orange: #F3CD97;
+  --orange: #E98B50;
   --red: #FEF2A0;
-  --yellow: #F3CD97;
+  --yellow: #FEF2A0;
   --green: #E98B50;
   --blue: #BC4F4F;
   --pink: #FEF2A0;
@@ -187,9 +187,9 @@ body[data-theme="p7"] {
   --paper: #FCF2E5;
   --paper-alt: #FCF2E5;
   --ink: #524646;
-  --orange: #A8A492;
+  --orange: #EC5B38;
   --red: #524646;
-  --yellow: #A8A492;
+  --yellow: #FCF2E5;
   --green: #FCF2E5;
   --blue: #EC5B38;
   --pink: #524646;
@@ -214,9 +214,9 @@ body[data-theme="p8"] {
   --paper: #E8F5E9;
   --paper-alt: #A5D6A7;
   --ink: #1B5E20;
-  --orange: #A5D6A7;
+  --orange: #1B5E20;
   --red: #E8F5E9;
-  --yellow: #A5D6A7;
+  --yellow: #E8F5E9;
   --green: #66BB6A;
   --blue: #1B5E20;
   --pink: #E8F5E9;
@@ -226,7 +226,7 @@ body[data-theme="p8"] {
   --on-blue: #ffffff;
   --on-pink: #111111;
   --on-red: #111111;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #1B5E20 42%, transparent);
   --bg: #1B5E20;
   --bg-alt: #66BB6A;
@@ -241,9 +241,9 @@ body[data-theme="p9"] {
   --paper: #E3F2FD;
   --paper-alt: #90CAF9;
   --ink: #0D47A1;
-  --orange: #90CAF9;
+  --orange: #0D47A1;
   --red: #E3F2FD;
-  --yellow: #90CAF9;
+  --yellow: #E3F2FD;
   --green: #2196F3;
   --blue: #0D47A1;
   --pink: #E3F2FD;
@@ -253,7 +253,7 @@ body[data-theme="p9"] {
   --on-blue: #ffffff;
   --on-pink: #111111;
   --on-red: #111111;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #0D47A1 42%, transparent);
   --bg: #0D47A1;
   --bg-alt: #2196F3;
@@ -270,17 +270,17 @@ body[data-theme="p10"] {
   --ink: #5D3140;
   --orange: #CF4173;
   --red: #5D3140;
-  --yellow: #CF4173;
+  --yellow: #F6D8BD;
   --green: #F39399;
   --blue: #F6D8BD;
   --pink: #5D3140;
   --purple: #F6D8BD;
-  --on-yellow: #ffffff;
+  --on-yellow: #111111;
   --on-green: #111111;
   --on-blue: #111111;
   --on-pink: #ffffff;
   --on-red: #ffffff;
-  --on-orange: #ffffff;
+  --on-orange: #111111;
   --shadow: color-mix(in srgb, #5D3140 42%, transparent);
   --bg: #5D3140;
   --bg-alt: #CF4173;
@@ -295,14 +295,14 @@ body[data-theme="p11"] {
   --paper: #98E8DE;
   --paper-alt: #98E8DE;
   --ink: #4E1F6E;
-  --orange: #3E3E75;
+  --orange: #4E1F6E;
   --red: #4E1F6E;
-  --yellow: #3E3E75;
+  --yellow: #98E8DE;
   --green: #45A9A9;
   --blue: #98E8DE;
   --pink: #4E1F6E;
   --purple: #98E8DE;
-  --on-yellow: #ffffff;
+  --on-yellow: #111111;
   --on-green: #111111;
   --on-blue: #111111;
   --on-pink: #ffffff;
@@ -322,7 +322,7 @@ body[data-theme="p12"] {
   --paper: #FFB900;
   --paper-alt: #FFB900;
   --ink: #111111;
-  --orange: #FFB900;
+  --orange: #D10056;
   --red: #D10056;
   --yellow: #FFB900;
   --green: #FFB900;
@@ -334,7 +334,7 @@ body[data-theme="p12"] {
   --on-blue: #000000;
   --on-pink: #ffffff;
   --on-red: #ffffff;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #B2054C 42%, transparent);
   --bg: #B2054C;
   --bg-alt: #D10056;
@@ -349,9 +349,9 @@ body[data-theme="p13"] {
   --paper: #FFDD9C;
   --paper-alt: #F9B637;
   --ink: #111111;
-  --orange: #FB6C00;
+  --orange: #E73F1E;
   --red: #E73F1E;
-  --yellow: #FB6C00;
+  --yellow: #FFDD9C;
   --green: #F9B637;
   --blue: #FFDD9C;
   --pink: #E73F1E;
@@ -376,7 +376,7 @@ body[data-theme="p14"] {
   --paper: #FFF449;
   --paper-alt: #FED24F;
   --ink: #111111;
-  --orange: #FFF449;
+  --orange: #7EC151;
   --red: #FED24F;
   --yellow: #FFF449;
   --green: #B2D959;
@@ -403,9 +403,9 @@ body[data-theme="p15"] {
   --paper: #F8B2B2;
   --paper-alt: #F8B2B2;
   --ink: #403D88;
-  --orange: #AF719D;
+  --orange: #403D88;
   --red: #F8B2B2;
-  --yellow: #AF719D;
+  --yellow: #F8B2B2;
   --green: #8B639B;
   --blue: #403D88;
   --pink: #F8B2B2;
@@ -415,7 +415,7 @@ body[data-theme="p15"] {
   --on-blue: #ffffff;
   --on-pink: #111111;
   --on-red: #111111;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #403D88 42%, transparent);
   --bg: #403D88;
   --bg-alt: #8B639B;
@@ -430,14 +430,14 @@ body[data-theme="p16"] {
   --paper: #E1E100;
   --paper-alt: #90B800;
   --ink: #063B00;
-  --orange: #266210;
+  --orange: #063B00;
   --red: #063B00;
-  --yellow: #266210;
+  --yellow: #E1E100;
   --green: #90B800;
   --blue: #E1E100;
   --pink: #063B00;
   --purple: #E1E100;
-  --on-yellow: #ffffff;
+  --on-yellow: #111111;
   --on-green: #111111;
   --on-blue: #111111;
   --on-pink: #ffffff;
@@ -838,9 +838,7 @@ code {
   align-content: center;
   justify-items: center;
   padding: 14px;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.7) 0 8%, transparent 14%),
-    var(--paper);
+  background: var(--paper);
   color: var(--ink);
   text-align: center;
   text-decoration: none;
@@ -855,7 +853,6 @@ code {
 .sticker.is-live {
   background:
     repeating-linear-gradient(-12deg, rgba(231, 63, 30, 0.32) 0 7px, rgba(231, 63, 30, 0.1) 7px 14px, transparent 14px 20px),
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.72) 0 8%, transparent 14%),
     var(--paper);
   box-shadow:
     6px 6px 0 var(--shadow),
@@ -867,7 +864,6 @@ code {
 .sticker.is-testing {
   background:
     repeating-linear-gradient(-12deg, rgba(255, 244, 73, 0.42) 0 7px, rgba(255, 244, 73, 0.14) 7px 14px, transparent 14px 20px),
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.72) 0 8%, transparent 14%),
     var(--paper);
   box-shadow:
     6px 6px 0 var(--shadow),
@@ -876,17 +872,13 @@ code {
 }
 
 .sticker.is-offline {
-  background:
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.7) 0 8%, transparent 14%),
-    var(--paper);
+  background: var(--paper);
 }
 
 .sticker:hover,
 .sticker:focus-visible {
   --sticker-lift: -6px;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.78) 0 8%, transparent 14%),
-    var(--sticker-hover, var(--yellow));
+  background: var(--sticker-hover, var(--yellow));
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
 }
@@ -895,7 +887,6 @@ code {
 .sticker.is-live:focus-visible {
   background:
     repeating-linear-gradient(-12deg, rgba(231, 63, 30, 0.32) 0 7px, rgba(231, 63, 30, 0.1) 7px 14px, transparent 14px 20px),
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.78) 0 8%, transparent 14%),
     var(--sticker-hover, var(--yellow));
 }
 
@@ -903,7 +894,6 @@ code {
 .sticker.is-testing:focus-visible {
   background:
     repeating-linear-gradient(-12deg, rgba(255, 244, 73, 0.42) 0 7px, rgba(255, 244, 73, 0.14) 7px 14px, transparent 14px 20px),
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.78) 0 8%, transparent 14%),
     var(--sticker-hover, var(--yellow));
 }
 
