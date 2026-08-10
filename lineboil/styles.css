@@ -98,7 +98,7 @@ body[data-theme="p3"] {
   --banner: #5E3122;
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/cream-dust.png");
-  --wallpaper-size: 100px 100px;
+  --wallpaper-size: 50px 50px;
 }
 
 body[data-theme="p4"] {
@@ -368,7 +368,7 @@ body[data-theme="p13"] {
   --banner: #E73F1E;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/fake-luxury.png");
-  --wallpaper-size: 64px 104px;
+  --wallpaper-size: 32px 52px;
 }
 
 body[data-theme="p14"] {
@@ -395,7 +395,7 @@ body[data-theme="p14"] {
   --banner: #7EC151;
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/bo-play.png");
-  --wallpaper-size: 84px 44px;
+  --wallpaper-size: 42px 22px;
 }
 
 body[data-theme="p15"] {
@@ -649,11 +649,14 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 .oldweb-nav a:focus-visible,
 .tool-list button:hover,
 .tool-list button:focus-visible {
-  background: var(--orange);
-  color: var(--on-orange);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(5px) rotate(0deg);
+  transform: translateY(20px) rotate(0deg);
 }
 
 .marquee {
@@ -731,6 +734,16 @@ code {
   color: var(--on-green);
 }
 
+.tool-list button[aria-pressed="true"]:hover,
+.tool-list button[aria-pressed="true"]:focus-visible {
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--banner-text);
+  transform: translateY(20px) rotate(0deg);
+}
+
 .palette {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -752,11 +765,14 @@ code {
 
 .palette button:hover,
 .palette button:focus-visible {
-  background: var(--orange);
-  color: var(--on-orange);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(5px);
+  transform: translateY(20px);
   animation: none;
 }
 
@@ -890,35 +906,40 @@ code {
 
 .sticker:hover,
 .sticker:focus-visible {
-  --sticker-lift: 5px;
-  background: var(--orange);
-  color: var(--on-orange);
+  --sticker-lift: 20px;
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
 }
 
 .sticker.is-live:hover,
 .sticker.is-live:focus-visible {
-  background:
-    repeating-linear-gradient(-12deg, rgba(231, 63, 30, 0.32) 0 7px, rgba(231, 63, 30, 0.1) 7px 14px, transparent 14px 20px),
-    var(--orange);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
 }
 
 .sticker.is-testing:hover,
 .sticker.is-testing:focus-visible {
-  background:
-    repeating-linear-gradient(-12deg, rgba(255, 244, 73, 0.42) 0 7px, rgba(255, 244, 73, 0.14) 7px 14px, transparent 14px 20px),
-    var(--orange);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
 }
 
 .sticker:hover .sticker-status-corner,
 .sticker:focus-visible .sticker-status-corner {
-  color: var(--on-orange);
+  color: var(--banner-text);
   text-shadow:
-    1px 0 0 var(--orange),
-    -1px 0 0 var(--orange),
-    0 1px 0 var(--orange),
-    0 -1px 0 var(--orange);
+    1px 0 0 var(--bg),
+    -1px 0 0 var(--bg),
+    0 1px 0 var(--bg),
+    0 -1px 0 var(--bg);
 }
 
 .sticker-status-corner {
@@ -1301,11 +1322,14 @@ code {
 
 .music-button:hover,
 .music-button:focus-visible {
-  background: var(--orange);
-  color: var(--on-orange);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(5px);
+  transform: translateY(20px);
 }
 
 .music-player input[type="range"] {
@@ -1428,11 +1452,14 @@ code {
 
 .paint-controls button:hover,
 .paint-controls button:focus-visible {
-  background: var(--orange);
-  color: var(--on-orange);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(5px);
+  transform: translateY(20px);
 }
 
 .page-footer {
