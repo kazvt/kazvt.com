@@ -15,7 +15,7 @@
   --on-blue: #ffffff;
   --on-pink: #111111;
   --on-red: #111111;
-  --on-orange: #ffffff;
+  --on-orange: #111111;
   --shadow: color-mix(in srgb, #4D6787 42%, transparent);
   --bg: #4D6787;
   --bg-alt: #F599C6;
@@ -280,7 +280,7 @@ body[data-theme="p10"] {
   --on-blue: #111111;
   --on-pink: #ffffff;
   --on-red: #ffffff;
-  --on-orange: #111111;
+  --on-orange: #ffffff;
   --shadow: color-mix(in srgb, #5D3140 42%, transparent);
   --bg: #5D3140;
   --bg-alt: #CF4173;
