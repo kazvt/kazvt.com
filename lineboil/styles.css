@@ -649,9 +649,11 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 .oldweb-nav a:focus-visible,
 .tool-list button:hover,
 .tool-list button:focus-visible {
+  background: var(--orange);
+  color: var(--on-orange);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translate(-2px, -3px) rotate(0deg);
+  transform: translateY(5px) rotate(0deg);
 }
 
 .marquee {
@@ -745,6 +747,17 @@ code {
   box-shadow: 2px 2px 0 var(--shadow);
   clip-path: polygon(0 8px, 8px 0, 100% 5px, calc(100% - 4px) 100%, 5px calc(100% - 3px));
   animation: blockBoil 500ms steps(2, end) infinite;
+  transition: none;
+}
+
+.palette button:hover,
+.palette button:focus-visible {
+  background: var(--orange);
+  color: var(--on-orange);
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+  transform: translateY(5px);
+  animation: none;
 }
 
 .big-palette button {
@@ -877,8 +890,9 @@ code {
 
 .sticker:hover,
 .sticker:focus-visible {
-  --sticker-lift: -6px;
-  background: var(--sticker-hover, var(--yellow));
+  --sticker-lift: 5px;
+  background: var(--orange);
+  color: var(--on-orange);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
 }
@@ -887,23 +901,24 @@ code {
 .sticker.is-live:focus-visible {
   background:
     repeating-linear-gradient(-12deg, rgba(231, 63, 30, 0.32) 0 7px, rgba(231, 63, 30, 0.1) 7px 14px, transparent 14px 20px),
-    var(--sticker-hover, var(--yellow));
+    var(--orange);
 }
 
 .sticker.is-testing:hover,
 .sticker.is-testing:focus-visible {
   background:
     repeating-linear-gradient(-12deg, rgba(255, 244, 73, 0.42) 0 7px, rgba(255, 244, 73, 0.14) 7px 14px, transparent 14px 20px),
-    var(--sticker-hover, var(--yellow));
+    var(--orange);
 }
 
 .sticker:hover .sticker-status-corner,
 .sticker:focus-visible .sticker-status-corner {
+  color: var(--on-orange);
   text-shadow:
-    1px 0 0 var(--sticker-hover, var(--yellow)),
-    -1px 0 0 var(--sticker-hover, var(--yellow)),
-    0 1px 0 var(--sticker-hover, var(--yellow)),
-    0 -1px 0 var(--sticker-hover, var(--yellow));
+    1px 0 0 var(--orange),
+    -1px 0 0 var(--orange),
+    0 1px 0 var(--orange),
+    0 -1px 0 var(--orange);
 }
 
 .sticker-status-corner {
@@ -1281,6 +1296,16 @@ code {
   color: var(--on-yellow);
   font-weight: 900;
   box-shadow: 2px 2px 0 var(--shadow);
+  transition: none;
+}
+
+.music-button:hover,
+.music-button:focus-visible {
+  background: var(--orange);
+  color: var(--on-orange);
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+  transform: translateY(5px);
 }
 
 .music-player input[type="range"] {
@@ -1393,11 +1418,21 @@ code {
   font-weight: 900;
   box-shadow: 3px 3px 0 var(--shadow);
   clip-path: polygon(0 6px, 7px 0, 100% 4px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
+  transition: none;
 }
 
 .paint-controls button[aria-pressed="true"] {
   background: var(--yellow);
   color: var(--on-yellow);
+}
+
+.paint-controls button:hover,
+.paint-controls button:focus-visible {
+  background: var(--orange);
+  color: var(--on-orange);
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+  transform: translateY(5px);
 }
 
 .page-footer {
