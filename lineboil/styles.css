@@ -656,7 +656,6 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(20px) rotate(0deg);
 }
 
 .marquee {
@@ -741,7 +740,6 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--banner-text);
-  transform: translateY(20px) rotate(0deg);
 }
 
 .palette {
@@ -772,7 +770,6 @@ code {
   color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(20px);
   animation: none;
 }
 
@@ -906,7 +903,7 @@ code {
 
 .sticker:hover,
 .sticker:focus-visible {
-  --sticker-lift: 20px;
+  --sticker-lift: 10px;
   background-color: var(--bg);
   background-image: var(--wallpaper-image);
   background-repeat: repeat;
@@ -1329,7 +1326,6 @@ code {
   color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(20px);
 }
 
 .music-player input[type="range"] {
@@ -1459,7 +1455,6 @@ code {
   color: var(--banner-text);
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
-  transform: translateY(20px);
 }
 
 .page-footer {
