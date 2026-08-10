@@ -648,9 +648,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 .oldweb-nav a:hover,
 .oldweb-nav a:focus-visible,
 .tool-list button:hover,
-.tool-list button:focus-visible,
-.sticker:hover,
-.sticker:focus-visible {
+.tool-list button:focus-visible {
   outline: 4px dashed var(--ink);
   outline-offset: 3px;
   transform: translate(-2px, -3px) rotate(0deg);
@@ -832,6 +830,7 @@ code {
 }
 
 .sticker {
+  --sticker-lift: 0px;
   position: relative;
   display: grid;
   min-height: 138px;
@@ -845,7 +844,8 @@ code {
   color: var(--ink);
   text-align: center;
   text-decoration: none;
-  transform: rotate(var(--tilt, -1deg));
+  transform: translateY(var(--sticker-lift)) rotate(var(--tilt, -1deg));
+  transition: none;
 }
 
 .sticker.has-status {
@@ -879,6 +879,41 @@ code {
   background:
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.7) 0 8%, transparent 14%),
     var(--paper);
+}
+
+.sticker:hover,
+.sticker:focus-visible {
+  --sticker-lift: -6px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.78) 0 8%, transparent 14%),
+    var(--sticker-hover, var(--yellow));
+  outline: 4px dashed var(--ink);
+  outline-offset: 3px;
+}
+
+.sticker.is-live:hover,
+.sticker.is-live:focus-visible {
+  background:
+    repeating-linear-gradient(-12deg, rgba(231, 63, 30, 0.32) 0 7px, rgba(231, 63, 30, 0.1) 7px 14px, transparent 14px 20px),
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.78) 0 8%, transparent 14%),
+    var(--sticker-hover, var(--yellow));
+}
+
+.sticker.is-testing:hover,
+.sticker.is-testing:focus-visible {
+  background:
+    repeating-linear-gradient(-12deg, rgba(255, 244, 73, 0.42) 0 7px, rgba(255, 244, 73, 0.14) 7px 14px, transparent 14px 20px),
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.78) 0 8%, transparent 14%),
+    var(--sticker-hover, var(--yellow));
+}
+
+.sticker:hover .sticker-status-corner,
+.sticker:focus-visible .sticker-status-corner {
+  text-shadow:
+    1px 0 0 var(--sticker-hover, var(--yellow)),
+    -1px 0 0 var(--sticker-hover, var(--yellow)),
+    0 1px 0 var(--sticker-hover, var(--yellow)),
+    0 -1px 0 var(--sticker-hover, var(--yellow));
 }
 
 .sticker-status-corner {
@@ -1468,15 +1503,15 @@ code {
 
 @keyframes liveStickerBoil {
   0% {
-    transform: rotate(var(--tilt, -1deg)) translate(0, 0);
+    transform: translateY(var(--sticker-lift, 0px)) rotate(var(--tilt, -1deg)) translate(0, 0);
     filter: saturate(1.04);
   }
   50% {
-    transform: rotate(calc(var(--tilt, -1deg) + 0.4deg)) translate(1px, -1px);
+    transform: translateY(var(--sticker-lift, 0px)) rotate(calc(var(--tilt, -1deg) + 0.4deg)) translate(1px, -1px);
     filter: saturate(1.16);
   }
   100% {
-    transform: rotate(calc(var(--tilt, -1deg) - 0.3deg)) translate(-1px, 1px);
+    transform: translateY(var(--sticker-lift, 0px)) rotate(calc(var(--tilt, -1deg) - 0.3deg)) translate(-1px, 1px);
     filter: saturate(1.08);
   }
 }

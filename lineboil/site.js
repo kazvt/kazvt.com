@@ -8,6 +8,7 @@ const streamLinks = [
     note: "streaming",
     status: "offline",
     color: "#d9c5ff",
+    hoverColor: "#b991ff",
   },
   {
     key: "youtube",
@@ -18,6 +19,7 @@ const streamLinks = [
     note: "streaming & archive",
     status: "offline",
     color: "#ffc6b7",
+    hoverColor: "#ff9b83",
   },
   {
     key: "kick",
@@ -27,6 +29,7 @@ const streamLinks = [
     note: "streaming",
     status: "offline",
     color: "#c8ffc9",
+    hoverColor: "#90ff91",
   },
 ];
 
@@ -38,6 +41,7 @@ const socialLinks = [
     icon: "twitter",
     note: "short thoughts",
     color: "#c9f0ff",
+    hoverColor: "#91ddff",
   },
   {
     key: "bsky",
@@ -46,6 +50,7 @@ const socialLinks = [
     icon: "bsky",
     note: "sky posting",
     color: "#bde8ff",
+    hoverColor: "#82d0ff",
   },
   {
     key: "tumblr",
@@ -54,6 +59,7 @@ const socialLinks = [
     icon: "tumblr",
     note: "old-web nest",
     color: "#d8d4ff",
+    hoverColor: "#bdb5ff",
   },
   {
     key: "discord",
@@ -62,6 +68,7 @@ const socialLinks = [
     icon: "discord",
     note: "community room",
     color: "#ffc7ee",
+    hoverColor: "#ff9ddd",
   },
 ];
 
@@ -202,7 +209,7 @@ function sticker(link, extraClass = "") {
       href: link.status === "live" && link.liveHref ? link.liveHref : link.href,
       target: "_blank",
       rel: "noopener noreferrer",
-      style: { "--paper": link.color },
+      style: { "--paper": link.color, "--sticker-hover": link.hoverColor || "var(--yellow)" },
     },
     [
       hasStatus
