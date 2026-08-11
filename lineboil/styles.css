@@ -1155,6 +1155,8 @@ code {
 }
 
 .art-frame {
+  --zoom-x: 50%;
+  --zoom-y: 50%;
   position: relative;
   width: 100%;
   aspect-ratio: 1;
@@ -1174,6 +1176,7 @@ code {
   max-height: none;
   transform: translate(-50%, -50%);
   transition: transform 420ms steps(3, end), opacity 420ms steps(3, end), scale 180ms steps(2, end);
+  transform-origin: var(--zoom-x) var(--zoom-y);
   image-rendering: auto;
   scale: 1;
 }

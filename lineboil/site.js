@@ -371,6 +371,20 @@ async function initializeArtCarousel() {
   const caption = document.querySelector("#kaz-art-caption");
   if (!frame) return;
 
+  const updateZoomFocus = (event) => {
+    const bounds = frame.getBoundingClientRect();
+    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+    frame.style.setProperty("--zoom-x", `${Math.min(88, Math.max(12, x))}%`);
+    frame.style.setProperty("--zoom-y", `${Math.min(88, Math.max(12, y))}%`);
+  };
+
+  frame.addEventListener("pointermove", updateZoomFocus);
+  frame.addEventListener("pointerleave", () => {
+    frame.style.setProperty("--zoom-x", "50%");
+    frame.style.setProperty("--zoom-y", "50%");
+  });
+
   const files = await loadManifest("kazArt/manifest.json", imageExtensions);
   const artFiles = files.length ? files : ["../assets/kazvt-transparent.gif"];
   let index = Math.floor(Math.random() * artFiles.length);
