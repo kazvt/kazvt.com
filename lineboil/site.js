@@ -36,7 +36,7 @@ const socialLinks = [
     label: "Twitter",
     href: "https://twitter.com/monkevt",
     icon: "twitter",
-    note: "short thoughts",
+    note: "",
     color: "#c9f0ff",
   },
   {
@@ -44,7 +44,7 @@ const socialLinks = [
     label: "BSky",
     href: "https://bsky.app/profile/kazvt.com",
     icon: "bsky",
-    note: "sky posting",
+    note: "",
     color: "#bde8ff",
   },
   {
@@ -52,7 +52,7 @@ const socialLinks = [
     label: "Tumblr",
     href: "https://www.tumblr.com/kazvt",
     icon: "tumblr",
-    note: "old-web nest",
+    note: "",
     color: "#d8d4ff",
   },
   {
@@ -60,7 +60,7 @@ const socialLinks = [
     label: "Discord",
     href: "https://discord.com/invite/huzMpfJZ4J",
     icon: "discord",
-    note: "community room",
+    note: "",
     color: "#ffc7ee",
   },
 ];
@@ -80,6 +80,20 @@ const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avi
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
 
+async function loadTextLines(file) {
+  try {
+    const response = await fetch(file, { cache: "no-store" });
+    if (!response.ok) return [];
+    const text = await response.text();
+    return text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 function normalizeStatus(status) {
   return status === "online" ? "live" : status;
 }
@@ -89,13 +103,60 @@ function initializeCurrentUrl() {
   if (!node) return;
 
   const updateUrl = () => {
-    node.textContent = window.location.href.replace(/^https?:\/\//i, "");
+    node.textContent = window.location.href.replace(/^https?:\/\//i, "").replace(/\/$/, "");
   };
 
   updateUrl();
   window.addEventListener("hashchange", updateUrl);
   window.addEventListener("popstate", updateUrl);
   document.addEventListener("click", () => window.setTimeout(updateUrl, 0));
+}
+
+async function initializeMarquee() {
+  const node = document.querySelector("[data-marquee-text]");
+  if (!node) return;
+
+  const lines = await loadTextLines("marquee_announcements.txt");
+  if (!lines.length) return;
+
+  let index = Math.floor(Math.random() * lines.length);
+  const showLine = () => {
+    node.textContent = lines[index];
+  };
+
+  showLine();
+  node.style.animation = "none";
+  node.offsetHeight;
+  node.style.animation = "";
+
+  node.addEventListener("animationiteration", (event) => {
+    if (event.animationName !== "marquee") return;
+    index = (index + 1) % lines.length;
+    showLine();
+  });
+}
+
+async function initializeSocialDescriptions() {
+  const lines = await loadTextLines("social_descriptions.txt");
+  if (!lines.length) return;
+
+  const descriptions = new Map();
+  lines.forEach((line) => {
+    const separator = line.indexOf("=");
+    if (separator === -1) return;
+    const key = line.slice(0, separator).trim();
+    const value = line.slice(separator + 1).trim();
+    if (key && value) descriptions.set(key, value);
+  });
+
+  socialLinks.forEach((link) => {
+    const description = descriptions.get(link.key);
+    if (!description) return;
+    link.note = description;
+    document.querySelectorAll(`[data-social-note="${link.key}"]`).forEach((node) => {
+      node.textContent = description;
+    });
+  });
 }
 
 const profileFacts = [
@@ -213,7 +274,7 @@ function sticker(link, extraClass = "") {
         : "",
       el("span", { className: "sticker-glyph", ariaHidden: "true" }, [platformIcon(link.icon || link.key)]),
       el("span", { className: "sticker-label" }, [link.label]),
-      el("span", { className: "sticker-note" }, [link.note]),
+      el("span", { className: "sticker-note", "data-social-note": hasStatus ? undefined : link.key }, [link.note]),
     ],
   );
 }
@@ -260,7 +321,6 @@ function guestbookPanel() {
       el("div", { className: "guestbook-lines" }, [
         el("p", {}, ["name: kazvt visitor"]),
         el("p", {}, ["message: thanks for visiting kazvt dot com!!"]),
-        el("p", {}, ["mood: caught between a save file and a snack break"]),
       ]),
     ],
   });
@@ -275,7 +335,6 @@ function oldWebPanel() {
       el("div", { className: "web-corner" }, [
         el("p", { className: "construction-sign" }, ["under construction forever"]),
         el("p", {}, ["webring: ", el("a", { href: "#links" }, ["prev"]), " / ", el("a", { href: "#badges" }, ["random"]), " / ", el("a", { href: "#guestbook" }, ["next"])]),
-        el("p", {}, ["site mood: orange soda, old save files, and a browser tab from 2007"]),
       ]),
     ],
   });
@@ -900,6 +959,7 @@ function render(statusOverrides = {}) {
   initializeDrawingPad();
   initializeArtCarousel();
   initializeMusicPlayer();
+  initializeSocialDescriptions();
 }
 
 async function loadStatus() {
@@ -914,4 +974,5 @@ async function loadStatus() {
 
 initializeSiteTools();
 initializeCurrentUrl();
+initializeMarquee();
 loadStatus().then(render);
