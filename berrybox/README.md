@@ -1,27 +1,21 @@
 # Berrybox
 
-Static browser game screen for one host and members.
+Browser game for one host and members with room-code joining.
 
 ## Run
 
 ```powershell
 cd E:\sites\kazvt.com-1\berrybox
-python -m http.server 8765 --bind 127.0.0.1
+node server.js
 ```
 
-Member screen:
+Open:
 
 ```text
 http://127.0.0.1:8765/
 ```
 
-Host screen:
-
-```text
-http://127.0.0.1:8765/?role=host
-```
-
-The default role can also be changed in `settings.json` with `game.defaultRole`.
+The first browser in a room becomes the host. Opening the bare URL creates a room code and adds it to the address bar. Share that link with players.
 
 ## Images
 

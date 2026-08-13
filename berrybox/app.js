@@ -26,6 +26,9 @@
       safePadding: 42
     },
     network: {
+      signalingPath: "/signal",
+      roomParam: "room",
+      joinTimeoutMs: 3200,
       iceServers: [],
       iceCandidateTimeoutMs: 7000,
       channelChunkSize: 12000
@@ -96,6 +99,14 @@
     selectedFont: "",
     logs: [],
     editor: null,
+    signaling: {
+      socket: null,
+      createdHere: false,
+      connected: false,
+      assigned: false,
+      reconnectTimer: null
+    },
+    connectionLabel: "Finding room",
     hostBroadcastTimer: null,
     localAutosaveTimer: null,
     tickTimer: null,
@@ -122,6 +133,7 @@
   function cacheDom() {
     const ids = [
       "appShell", "gameTitle", "gameTagline", "roleChip", "secureChip", "roomChip",
+      "connectionChip", "roomCodeLabel", "copyRoomBtn", "roomHint",
       "hostControlsSection",
       "reloadSettingsBtn", "playerNameInput", "hostModeBtn", "joinModeBtn", "hostBox",
       "joinBox", "roomSecretInput", "copySecretBtn", "createInviteBtn", "inviteOutput",
@@ -148,6 +160,7 @@
       localStorage.setItem("berrybox.playerName", dom.playerNameInput.value.trim());
       updateOwnPlayerName();
     });
+    bind(dom.copyRoomBtn, "click", () => copyRoomLink());
 
     bind(dom.hostModeBtn, "click", () => beginHostMode());
     bind(dom.joinModeBtn, "click", beginJoinMode);
@@ -323,12 +336,53 @@
 
   async function bootConfiguredRole() {
     if (runtime.role) return;
-    const role = configuredRole();
-    if (role === "host") {
-      await beginHostMode({ silent: true });
+    const roomSetup = ensureRoomInUrl();
+    runtime.roomId = roomSetup.roomId;
+    runtime.roomSecret = roomSetup.roomSecret;
+    runtime.signaling.createdHere = roomSetup.createdHere;
+    updateConnectionLabel("Finding room");
+    renderAll();
+
+    const signaled = await connectSignaling(roomSetup);
+    if (signaled || runtime.role) return;
+
+    if (roomSetup.createdHere || configuredRole() === "host") {
+      await beginHostMode({ roomId: roomSetup.roomId, roomSecret: roomSetup.roomSecret });
+      updateConnectionLabel("Room ready");
     } else {
-      beginMemberMode();
+      await beginMemberMode({ roomId: roomSetup.roomId, roomSecret: roomSetup.roomSecret });
+      updateConnectionLabel("Looking for host");
     }
+  }
+
+  function ensureRoomInUrl() {
+    const param = roomParamName();
+    const url = new URL(window.location.href);
+    let roomId = sanitizeRoomCode(url.searchParams.get(param));
+    const createdHere = !roomId;
+    if (!roomId) {
+      roomId = makeRoomCode();
+      url.searchParams.set(param, roomId);
+      window.history.replaceState({}, "", url.toString());
+    }
+    return {
+      roomId,
+      roomSecret: roomSecretFor(roomId),
+      createdHere
+    };
+  }
+
+  function roomParamName() {
+    const configured = String(settings.network.roomParam || "room").replace(/[^a-z0-9_-]/gi, "");
+    return configured || "room";
+  }
+
+  function roomSecretFor(roomId) {
+    return `room:${sanitizeRoomCode(roomId)}`;
+  }
+
+  function sanitizeRoomCode(value) {
+    return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
   }
 
   function configuredRole() {
@@ -340,11 +394,14 @@
     return String(settings.game.defaultRole || "member").toLowerCase() === "host" ? "host" : "member";
   }
 
-  function beginMemberMode() {
+  async function beginMemberMode(options = {}) {
+    if (!ensureSecureReady()) return;
     closeAllPeers();
     runtime.role = "client";
-    runtime.myId = `member-${uid(10)}`;
-    runtime.roomId = settings.game.roomCode || "LIVE";
+    runtime.myId = runtime.myId || `member-${uid(10)}`;
+    runtime.roomId = sanitizeRoomCode(options.roomId || runtime.roomId || settings.game.roomCode || "LIVE");
+    runtime.roomSecret = options.roomSecret || runtime.roomSecret || roomSecretFor(runtime.roomId);
+    runtime.encryptionKey = await deriveRoomKey(runtime.roomSecret, runtime.roomId);
     runtime.game = createGameState();
     runtime.game.phase = "lobby";
     runtime.game.roomId = runtime.roomId;
@@ -356,6 +413,295 @@
       connected: false
     });
     logActivity("Member screen ready.");
+    renderAll();
+  }
+
+  function connectSignaling() {
+    const path = String(settings.network.signalingPath || "").trim();
+    if (!path || typeof WebSocket === "undefined") return Promise.resolve(false);
+
+    return new Promise((resolve) => {
+      let settled = false;
+      let socket;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        resolve(value);
+      };
+      const timeoutId = window.setTimeout(() => finish(false), Math.max(900, numberOr(settings.network.joinTimeoutMs, 3200)));
+
+      try {
+        socket = new WebSocket(signalingUrl(path));
+      } catch (error) {
+        finish(false);
+        return;
+      }
+
+      runtime.signaling.socket = socket;
+      socket.addEventListener("open", () => {
+        runtime.signaling.connected = true;
+        updateConnectionLabel("Finding room");
+        sendSignal({
+          type: "join",
+          peerId: ensurePeerId(),
+          name: getPlayerName()
+        });
+      });
+      socket.addEventListener("message", (event) => {
+        let message;
+        try {
+          message = JSON.parse(event.data);
+        } catch (error) {
+          return;
+        }
+        if (message.type === "role") {
+          handleSignalMessage(message)
+            .then(() => finish(Boolean(runtime.role)))
+            .catch(() => finish(false));
+          return;
+        }
+        void handleSignalMessage(message);
+      });
+      socket.addEventListener("close", () => {
+        runtime.signaling.connected = false;
+        if (runtime.signaling.socket === socket) runtime.signaling.socket = null;
+        if (!runtime.role) updateConnectionLabel("Room link offline");
+        else if (runtime.role === "host") updateConnectionLabel("Room ready");
+        else if (!hasOpenPeer()) updateConnectionLabel("Looking for host");
+        finish(false);
+        renderAll();
+      });
+      socket.addEventListener("error", () => {
+        updateConnectionLabel("Room link offline");
+        finish(false);
+      });
+    });
+  }
+
+  function signalingUrl(path) {
+    const url = new URL(path, window.location.href);
+    if (url.protocol === "http:") url.protocol = "ws:";
+    if (url.protocol === "https:") url.protocol = "wss:";
+    return url.toString();
+  }
+
+  async function handleSignalMessage(message) {
+    if (!message || typeof message.type !== "string") return;
+    const messageRoom = sanitizeRoomCode(message.roomId || runtime.roomId);
+    if (messageRoom && runtime.roomId && messageRoom !== runtime.roomId) return;
+
+    if (message.type === "role") {
+      runtime.signaling.assigned = true;
+      runtime.roomId = messageRoom || runtime.roomId;
+      runtime.roomSecret = roomSecretFor(runtime.roomId);
+      if (message.role === "host") {
+        await beginHostMode({ roomId: runtime.roomId, roomSecret: runtime.roomSecret });
+        updateConnectionLabel("Room ready");
+      } else {
+        await beginMemberMode({ roomId: runtime.roomId, roomSecret: runtime.roomSecret });
+        updateConnectionLabel("Looking for host");
+      }
+      return;
+    }
+
+    if (message.type === "member-joined" && runtime.role === "host") {
+      await createSignaledOffer(message.peerId, message.name);
+      return;
+    }
+
+    if (message.type === "offer" && runtime.role === "client") {
+      await acceptSignaledOffer(message);
+      return;
+    }
+
+    if (message.type === "answer" && runtime.role === "host") {
+      await acceptSignaledAnswer(message);
+      return;
+    }
+
+    if (message.type === "peer-left" && runtime.role === "host") {
+      markPeerGone(message.peerId);
+      return;
+    }
+
+    if (message.type === "host-left" && runtime.role === "client") {
+      updateConnectionLabel("Looking for host");
+      logActivity("Host left the room.");
+      closeAllPeers();
+      renderAll();
+    }
+  }
+
+  function sendSignal(message) {
+    const socket = runtime.signaling.socket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return false;
+    socket.send(JSON.stringify({
+      ...message,
+      roomId: runtime.roomId,
+      from: runtime.myId
+    }));
+    return true;
+  }
+
+  async function createSignaledOffer(peerId, playerName) {
+    if (runtime.role !== "host" || !ensureSecureReady()) return;
+    const targetId = String(peerId || "").trim();
+    if (!targetId || targetId === runtime.myId) return;
+
+    const oldPeer = runtime.pending.get(targetId) || runtime.peers.get(targetId);
+    if (oldPeer) oldPeer.pc?.close();
+    runtime.pending.delete(targetId);
+    runtime.peers.delete(targetId);
+
+    const pc = createPeerConnection();
+    const peer = {
+      id: targetId,
+      seatId: targetId,
+      pc,
+      channel: null,
+      connected: false,
+      receiveChunks: new Map(),
+      outboundName: cleanPlayerName(playerName || "Player")
+    };
+    const channel = pc.createDataChannel(CHANNEL_NAME, { ordered: true });
+    setupDataChannel(peer, channel);
+    runtime.pending.set(targetId, peer);
+    addOrUpdatePlayer({
+      id: targetId,
+      name: peer.outboundName,
+      score: runtime.game.scores[targetId] || 0,
+      host: false,
+      connected: false
+    });
+
+    try {
+      await pc.setLocalDescription(await pc.createOffer());
+      await waitForIceComplete(pc);
+      sendSignal({
+        type: "offer",
+        to: targetId,
+        hostId: runtime.myId,
+        seatId: targetId,
+        title: settings.game.title,
+        sdp: pc.localDescription
+      });
+      logActivity(`Invite sent to ${peer.outboundName}.`);
+    } catch (error) {
+      runtime.pending.delete(targetId);
+      peer.pc.close();
+      setPlayerConnected(targetId, false);
+      logActivity("Invite failed.");
+    }
+    renderAll();
+  }
+
+  async function acceptSignaledOffer(message) {
+    if (!ensureSecureReady()) return;
+    const hostId = String(message.from || message.hostId || "host").trim();
+    if (!hostId || !message.sdp) return;
+
+    closeAllPeers();
+    runtime.role = "client";
+    runtime.game.phase = "connecting";
+    const pc = createPeerConnection();
+    const peer = {
+      id: hostId,
+      seatId: message.seatId || hostId,
+      pc,
+      channel: null,
+      connected: false,
+      receiveChunks: new Map(),
+      host: true
+    };
+    pc.addEventListener("datachannel", (event) => setupDataChannel(peer, event.channel));
+    runtime.peers.set(peer.id, peer);
+
+    try {
+      await pc.setRemoteDescription(message.sdp);
+      await pc.setLocalDescription(await pc.createAnswer());
+      await waitForIceComplete(pc);
+      sendSignal({
+        type: "answer",
+        to: hostId,
+        hostId,
+        seatId: message.seatId || runtime.myId,
+        playerId: runtime.myId,
+        playerName: getPlayerName(),
+        sdp: pc.localDescription
+      });
+      updateConnectionLabel("Joining room");
+      logActivity("Answer sent.");
+      renderAll();
+    } catch (error) {
+      updateConnectionLabel("Could not join");
+      showToast("Could not join the room.");
+      logActivity("Connection setup failed.");
+    }
+  }
+
+  async function acceptSignaledAnswer(message) {
+    const peerId = String(message.from || message.playerId || message.seatId || "").trim();
+    const peer = runtime.pending.get(peerId) || runtime.pending.get(message.seatId);
+    if (runtime.role !== "host" || !peer || !message.sdp) return;
+    try {
+      await peer.pc.setRemoteDescription(message.sdp);
+      peer.id = peerId || peer.id;
+      peer.outboundName = cleanPlayerName(message.playerName || peer.outboundName || "Player");
+      runtime.pending.delete(peer.seatId);
+      runtime.pending.delete(peer.id);
+      runtime.peers.set(peer.id, peer);
+      logActivity(`${peer.outboundName} joined.`);
+      renderAll();
+    } catch (error) {
+      peer.pc?.close();
+      runtime.pending.delete(peer.seatId);
+      runtime.pending.delete(peer.id);
+      logActivity("Could not accept player.");
+    }
+  }
+
+  function markPeerGone(peerId) {
+    const id = String(peerId || "");
+    if (!id) return;
+    const peer = runtime.peers.get(id) || runtime.pending.get(id);
+    peer?.pc?.close();
+    runtime.peers.delete(id);
+    runtime.pending.delete(id);
+    setPlayerConnected(id, false);
+    renderAll();
+  }
+
+  function hasOpenPeer() {
+    return Array.from(runtime.peers.values()).some((peer) => peer.connected);
+  }
+
+  function ensurePeerId(prefix = "peer") {
+    if (!runtime.myId) runtime.myId = `${prefix}-${uid(10)}`;
+    return runtime.myId;
+  }
+
+  function updateConnectionLabel(label) {
+    runtime.connectionLabel = label || "";
+    if (dom.connectionChip) dom.connectionChip.textContent = runtime.connectionLabel || "Room";
+  }
+
+  function roomInviteUrl() {
+    const url = new URL(window.location.href);
+    const param = roomParamName();
+    url.searchParams.delete("role");
+    url.searchParams.delete("view");
+    url.searchParams.delete("host");
+    url.searchParams.delete("member");
+    url.searchParams.delete("player");
+    url.searchParams.set(param, runtime.roomId || makeRoomCode());
+    url.hash = "";
+    return url.toString();
+  }
+
+  function copyRoomLink() {
+    if (!runtime.roomId) return;
+    copyText(roomInviteUrl(), "Invite link copied.");
   }
 
   async function loadImageManifest() {
@@ -536,7 +882,7 @@
     }
   }
 
-  async function beginHostMode() {
+  async function beginHostMode(options = {}) {
     runtime.modeView = "host";
     dom.hostBox?.classList.remove("hidden");
     dom.joinBox?.classList.add("hidden");
@@ -544,9 +890,9 @@
     if (!ensureSecureReady()) return;
     closeAllPeers();
     runtime.role = "host";
-    runtime.myId = `host-${uid(10)}`;
-    runtime.roomId = makeRoomCode();
-    runtime.roomSecret = makeRoomSecret();
+    runtime.myId = runtime.myId || `host-${uid(10)}`;
+    runtime.roomId = sanitizeRoomCode(options.roomId || runtime.roomId) || makeRoomCode();
+    runtime.roomSecret = options.roomSecret || runtime.roomSecret || roomSecretFor(runtime.roomId);
     runtime.encryptionKey = await deriveRoomKey(runtime.roomSecret, runtime.roomId);
     runtime.pending.clear();
     runtime.peers.clear();
@@ -738,6 +1084,9 @@
           playerId: runtime.myId,
           name: getPlayerName()
         });
+        updateConnectionLabel("Joined room");
+      } else if (runtime.role === "host") {
+        updateConnectionLabel("Room ready");
       }
       logActivity(runtime.role === "host" ? "Peer connected." : "Connected to host.");
       renderAll();
@@ -746,6 +1095,7 @@
     channel.addEventListener("close", () => {
       peer.connected = false;
       if (runtime.role === "host") setPlayerConnected(peer.id, false);
+      if (runtime.role === "client" && !hasOpenPeer()) updateConnectionLabel("Looking for host");
       logActivity("Peer disconnected.");
       renderAll();
     });
@@ -1640,6 +1990,23 @@
       dom.roleChip.classList.toggle("good", Boolean(runtime.role));
     }
     if (dom.roomChip) dom.roomChip.textContent = runtime.roomId ? `Room ${runtime.roomId}` : "Room --";
+    if (dom.connectionChip) {
+      const label = runtime.connectionLabel || "Finding room";
+      const isBad = /offline|could not/i.test(label);
+      dom.connectionChip.textContent = label;
+      dom.connectionChip.classList.toggle("bad", isBad);
+    }
+    if (dom.roomCodeLabel) dom.roomCodeLabel.textContent = runtime.roomId || "------";
+    if (dom.copyRoomBtn) dom.copyRoomBtn.disabled = !runtime.roomId;
+    if (dom.roomHint) {
+      if (runtime.role === "host") {
+        dom.roomHint.textContent = "Share the link with players.";
+      } else if (runtime.role === "client" && hasOpenPeer()) {
+        dom.roomHint.textContent = "You are in the room.";
+      } else {
+        dom.roomHint.textContent = "Waiting for the host.";
+      }
+    }
     const showHostBox = runtime.role === "host" || (!runtime.role && runtime.modeView === "host");
     const showJoinBox = runtime.role === "client" || (!runtime.role && runtime.modeView === "join");
     dom.hostBox?.classList.toggle("hidden", !showHostBox);
@@ -2221,7 +2588,7 @@
 
   function makeRoomCode() {
     const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    const bytes = crypto.getRandomValues(new Uint8Array(6));
+    const bytes = crypto.getRandomValues(new Uint8Array(8));
     return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("");
   }
 
