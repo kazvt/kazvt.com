@@ -594,7 +594,12 @@ select:focus {
 .canvas-column {
   display: grid;
   gap: 10px;
+  width: 100%;
   min-width: 0;
+}
+
+.editor-panel.hidden + .canvas-column {
+  grid-column: 1 / -1;
 }
 
 .editor-panel {
@@ -653,6 +658,7 @@ select:focus {
 .stage-frame {
   display: grid;
   place-items: center;
+  width: 100%;
   min-height: min(68vh, 720px);
   overflow: hidden;
   background:
