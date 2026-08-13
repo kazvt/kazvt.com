@@ -1143,7 +1143,36 @@
 
 </body>
 </html>
-eed+(S.bounty.distanceMod||0));m.moved=false;m.acted=false;m.block='none'}});S.battle.round++;newRoundOrder();
+} distance by ${n}.`);combat()}
+    function attack(){let i=activeIndex(),m=activeMember(),p=S.party[i],e=S.enemy;if(m.acted)return;if(m.distance>weaponRange(p)){note(`${hunterName(i)} cannot reach the monster.`,'bad');return}let d=weaponDamage(p),st=Math.min(e.armor,d);e.armor-=st;d-=st;e.hp=Math.max(0,e.hp-d);m.acted=true;note(`${hunterName(i)} attacks: ${st} stopped by armor, ${d} dealt to health.`,'good');if(!e.hp){victory();return}endHunterTurn()}
+    function block(type){let i=activeIndex(),m=activeMember();if(m.acted||!m.armor)return;m.block=type;m.acted=true;if(type==='partial')m.moved=true;note(`${hunterName(i)} prepares a ${type} block.`);endHunterTurn()}
+    function eat(){let i=activeIndex(),m=activeMember(),p=S.party[i];if(m.acted||!S.meals.length)return;let n=S.meals.shift(),before=m.hp;m.hp=Math.min(maxHp(p)+4,m.hp+n);m.acted=true;note(`${hunterName(i)} eats a meal and restores ${m.hp-before} health.`,'good');endHunterTurn()}
+    function endHunterTurn(){let i=activeIndex(),m=activeMember();m.pen=Math.min(armorWeight(S.party[i]),m.pen+1);S.battle.turnPos++;if(S.battle.turnPos<S.battle.order.length){combat();return}setTimeout(enemyPhase,130)}
+    function enemyAttack(targetIndex){
+      let m=S.battle.members[targetIndex],p=S.party[targetIndex],e=S.enemy,d=e.damage;
+      if(e.trait==='Piercing'&&m.armor)d++;if(e.trait==='Venomous'&&!m.armor)d++;
+      if(m.block==='full'&&m.armor){m.armor=Math.max(0,m.armor-2);d=0;note(`${hunterName(targetIndex)} fully deflects the attack; armor loses 2 durability.`,'good')}
+      else if(m.block==='partial'&&m.armor){m.armor=Math.max(0,m.armor-1);m.hp=Math.max(0,m.hp-1);d=0;note(`${hunterName(targetIndex)} partially blocks, losing 1 armor and 1 health.`)}
+      if(d){let st=Math.min(m.armor,d);m.armor-=st;d-=st;m.hp=Math.max(0,m.hp-d);note(`${e.name} hits ${hunterName(targetIndex)}: ${st} stopped, ${d} health damage.`,'bad')}
+      if(!m.hp&&!m.fainted){m.fainted=true;note(`${hunterName(targetIndex)} faints and can no longer act.`,'bad')}
+    }
+    function enemyPhase(){
+      let b=S.battle,e=S.enemy;
+      for(let a=0;a<e.attacks;a++){
+        const living=b.members.map((m,i)=>!m.fainted?i:null).filter(i=>i!==null);if(!living.length)break;
+        const target=living[Math.floor(Math.random()*living.length)],m=b.members[target];
+        if(m.distance>e.range){let n=Math.min(e.speed,m.distance-e.range);m.distance-=n;note(`${e.name} advances ${n} toward ${hunterName(target)}.`)}
+        if(m.distance<=e.range)enemyAttack(target);else note(`${e.name} cannot reach ${hunterName(target)} this attack.`);
+      }
+      const living=b.members.filter(m=>!m.fainted);
+      if(!living.length){note('All four hunters have fainted. The party is eaten and the bounty is lost.','bad');setTimeout(town,180);return}
+      if(e.trait==='Skittish'){living.forEach(m=>m.distance++);note(`${e.name} darts back from the party.`)}
+      b.members.forEach((m,i)=>{if(m.fainted)return;let r=regen(maxHp(S.party[i])),before=m.hp;m.hp=Math.min(maxHp(S.party[i]),m.hp+r);if(m.hp>before)note(`${hunterName(i)} recovers ${m.hp-before} health.`,'good');m.moved=false;m.acted=false;m.block='none'});
+      b.round++;newRoundOrder();combat();
+    }
+    function nextWave(){
+      S.targetIndex++;S.enemy=monster(S.targets[S.targetIndex]);signalMonster();
+      S.battle.members.forEach(m=>{if(!m.fainted){m.distance=Math.max(0,S.enemy.speed+(S.bounty.distanceMod||0));m.moved=false;m.acted=false;m.block='none'}});S.battle.round++;newRoundOrder();
       const foe=document.querySelector('#qs-game .enemy-fighter');foe.classList.remove('rift-arrival');void foe.offsetWidth;foe.classList.add('rift-arrival');setTimeout(()=>foe.classList.remove('rift-arrival'),850);
       note(`${S.enemy.name} arrives through the wormhole — wave ${S.targetIndex+1} of ${S.targets.length}. The encounter continues without returning to camp.`);combat();
     }
@@ -1154,7 +1183,7 @@ eed+(S.bounty.distanceMod||0));m.moved=false;m.acted=false;m.block='none'}});S.b
       S.party.forEach((p,i)=>{let col=document.createElement('div');col.className='level-hunter';col.innerHTML=`<h3>${hunterName(i)}</h3>`;stats.forEach(stat=>{let b=document.createElement('button');b.className='primary';b.textContent=`+1 ${stat}`;b.onclick=()=>{S.xp-=S.need;S.need++;S.level++;p.bonus[stat]++;note(`Level ${S.level}: ${hunterName(i)} gains +1 ${stat}.`,'good');S.returnTo==='nextWave'?nextWave():reward()};col.appendChild(b)});box.appendChild(col)});
     }
     function reset(){
-      Object.assign(S,{party:[],createIndex:0,hand:[],chosen:null,draftStats:{},gold:0,quarry:[],meals:[],level:1,xp:0,need:5,bounty:null,targets:[],targetIndex:0,left:0,enemy:null,clues:[],freeTrack:false,battle:null,returnTo:null,townTab:'shop',shopKind:'weapon',rift:{cards:RIFT_CAPACITY,refilling:false,spawning:false}});
+      Object.assign(S,{party:[],createIndex:0,hand:[],chosen:null,draftStats:{},gold:0,quarry:[],meals:[],level:1,xp:0,need:5,bounty:null,targets:[],targetIndex:0,left:0,enemy:null,clues:[],freeTrack:false,battle:null,returnTo:null,townTab:'shop',shopKind:'weapon',rift:{cards:RIFT_CAPACITY,refilling:false,spawning:false,drawing:false}});
       cardSerial=0;$('log').innerHTML='';renderRift();$('draw').disabled=false;$('redraw').disabled=true;$('finish').disabled=true;$('hand').innerHTML='';$('weapon-range').value=0;creation();show('creation');note('You begin with 0 gold and control four hunters. The wormhole manifests cards as needed; every draw is still independent and can repeat forever.');
     }
     $('draw').onclick=()=>{S.hand=Array.from({length:5},draw);S.draftStats={};S.chosen=null;$('draw').disabled=true;$('redraw').disabled=false;creation();note(`${hunterName(S.createIndex)} draws five independent cards: ${S.hand.map(text).join(', ')}.`)};

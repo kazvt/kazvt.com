@@ -1,0 +1,85 @@
+{
+  "game": {
+    "title": "Berrybox",
+    "tagline": "Draw, caption, vote, crown the winner.",
+    "rounds": 3,
+    "drawingSeconds": 150,
+    "votingSeconds": 45,
+    "autoAdvance": true,
+    "allowHostAsPlayer": true,
+    "imagePickMode": "cycle",
+    "defaultRole": "member"
+  },
+  "canvas": {
+    "width": 1280,
+    "height": 720,
+    "backgroundFit": "contain",
+    "safePadding": 42
+  },
+  "network": {
+    "iceServers": [
+      {
+        "urls": "stun:stun.l.google.com:19302"
+      }
+    ],
+    "iceCandidateTimeoutMs": 7000,
+    "channelChunkSize": 12000
+  },
+  "security": {
+    "requireSecureContext": true,
+    "requireAppEncryption": true,
+    "pbkdf2Iterations": 180000,
+    "roomSecretWords": 4
+  },
+  "assets": {
+    "imagesManifest": "./assets/images/manifest.json",
+    "fontsManifest": "./assets/fonts/manifest.json",
+    "acceptedImageTypes": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/gif",
+      "image/svg+xml"
+    ],
+    "acceptedFontTypes": [
+      "font/ttf",
+      "font/otf",
+      "font/woff",
+      "font/woff2",
+      "application/x-font-ttf",
+      "application/x-font-otf",
+      "application/font-woff",
+      "application/font-woff2"
+    ]
+  },
+  "editor": {
+    "defaultTool": "brush",
+    "defaultBrushSize": 18,
+    "defaultTextSize": 58,
+    "defaultFont": "Impact",
+    "palette": [
+      "#ffffff",
+      "#171717",
+      "#ff3f5f",
+      "#ffcf33",
+      "#00c2ff",
+      "#31d07f",
+      "#a86cff",
+      "#ff7a1a"
+    ],
+    "maxStrokes": 260,
+    "maxPointsPerStroke": 900,
+    "maxTextBoxes": 24,
+    "maxTextLength": 360
+  },
+  "scoring": {
+    "votesPerPlayer": 1,
+    "allowSelfVote": false,
+    "points": {
+      "first": 700,
+      "second": 300,
+      "participation": 75,
+      "perVote": 100
+    }
+  }
+}

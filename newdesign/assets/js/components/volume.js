@@ -1,18 +1,7 @@
 import { createElement } from "./dom.js";
 
-const volumePanelMax = 100;
-const volumeInternalMax = 5;
-
-function clampPanelVolume(value) {
-  return Math.min(Math.max(Math.round(Number(value) || 0), 0), volumePanelMax);
-}
-
-function panelToInternalVolume(value) {
-  return Math.min(Math.max(clampPanelVolume(value) / 20, 0), volumeInternalMax);
-}
-
-function internalToPanelVolume(value) {
-  return clampPanelVolume((Number(value) || 0) * 20);
+function clampPercent(value) {
+  return Math.min(Math.max(Math.round(Number(value) || 0), 0), 100);
 }
 
 function createVolumePopup(initialVolume, initialMuted) {
@@ -24,9 +13,9 @@ function createVolumePopup(initialVolume, initialMuted) {
     type: "range",
     orient: "vertical",
     min: "0",
-    max: String(volumePanelMax),
+    max: "100",
     step: "1",
-    value: String(internalToPanelVolume(initialVolume)),
+    value: String(clampPercent(initialVolume * 100)),
     "aria-label": "Volume"
   });
   const mute = createElement("input", {
@@ -61,12 +50,12 @@ function positionPopup(popup, anchor) {
 export function bindVolumeControl(taskbar, music) {
   const icon = taskbar.querySelector("[data-tray-icon='volume']");
   if (!icon) return null;
-  const { popup, slider, mute } = createVolumePopup(music ? music.getVolume() : 5, music ? music.getMuted() : false);
+  const { popup, slider, mute } = createVolumePopup(music ? music.getVolume() : 0.5, music ? music.getMuted() : false);
   document.body.append(popup);
 
   const applyVolume = () => {
     if (!music) return;
-    music.setVolume(panelToInternalVolume(slider.value));
+    music.setVolume(clampPercent(slider.value) / 100);
   };
 
   const applyMute = () => {
@@ -89,7 +78,7 @@ export function bindVolumeControl(taskbar, music) {
     else close();
   };
 
-  slider.value = String(internalToPanelVolume(music ? music.getVolume() : 5));
+  slider.value = String(clampPercent(music ? music.getVolume() * 100 : 50));
   slider.addEventListener("input", applyVolume);
   slider.addEventListener("change", applyVolume);
   mute.addEventListener("change", applyMute);

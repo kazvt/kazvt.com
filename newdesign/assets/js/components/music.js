@@ -9,26 +9,7 @@ function cleanPath(value) {
 }
 
 function clampVolume(value) {
-  return Math.min(Math.max(Number.isFinite(value) ? value : 5, 0), 10);
-}
-
-function normalizeVolume(value) {
-  if (typeof value === "string" && value.startsWith("x10:")) return clampVolume(Number(value.slice(4)));
-  const number = Number(value);
-  if (!Number.isFinite(number)) return 5;
-  return clampVolume(number);
-}
-
-function normalizeStoredVolume(value) {
-  if (typeof value === "string" && value.startsWith("x10:")) return normalizeVolume(value);
-  const number = Number(value);
-  if (!Number.isFinite(number)) return 5;
-  if (number > 0 && number <= 1) return clampVolume(number * 10);
-  return clampVolume(number);
-}
-
-function volumeToAudio(value) {
-  return clampUnit(clampVolume(Number(value)) / 10);
+  return Math.min(Math.max(Number.isFinite(value) ? value : 0.5, 0), 1);
 }
 
 function clampUnit(value) {
@@ -63,12 +44,12 @@ function setCookieValue(name, value) {
 
 function savedVolume(config) {
   const cookie = getCookieValue(volumeCookieName(config));
-  if (cookie !== "") return normalizeStoredVolume(decodeURIComponent(cookie));
-  return normalizeVolume(config.volume);
+  if (cookie !== "") return clampVolume(Number(decodeURIComponent(cookie)));
+  return clampVolume(Number(config.volume));
 }
 
 function rememberVolume(config, value) {
-  setCookieValue(volumeCookieName(config), `x10:${clampVolume(Number(value))}`);
+  setCookieValue(volumeCookieName(config), String(clampVolume(Number(value))));
 }
 
 function musicKey(file) {
@@ -165,13 +146,11 @@ async function resolveMusicFiles(config) {
   return [];
 }
 
-function randomIndex(length) {
-  return length ? Math.floor(Math.random() * length) : 0;
-}
-
-function nextSequentialIndex(length, currentIndex) {
+function randomIndex(length, currentIndex) {
   if (length < 2) return 0;
-  return (Math.max(Number(currentIndex) || 0, 0) + 1) % length;
+  let next = Math.floor(Math.random() * length);
+  while (next === currentIndex) next = Math.floor(Math.random() * length);
+  return next;
 }
 
 function createUnlockBinder(play, isPlaying) {
@@ -231,7 +210,7 @@ function createPlayer(state) {
 }
 
 function applyPlayerVolume(player, state) {
-  player.audio.volume = volumeToAudio(state.volume * player.fade);
+  player.audio.volume = clampVolume(state.volume * player.fade);
   player.audio.muted = state.muted;
 }
 
@@ -366,11 +345,10 @@ export async function startMusic(config = {}) {
   unlockBinder.start();
 
   function rememberChoice(index) {
-    if (files[index] && config.rememberChoice === true) setCookieValue(choiceCookie, musicKey(files[index]));
+    if (files[index]) setCookieValue(choiceCookie, musicKey(files[index]));
   }
 
   function rememberedIndex() {
-    if (config.rememberChoice !== true) return -1;
     const remembered = decodeURIComponent(getCookieValue(choiceCookie) || "").toLowerCase();
     if (!remembered) return -1;
     return files.findIndex((file) => musicKey(file) === remembered);
@@ -378,7 +356,7 @@ export async function startMusic(config = {}) {
 
   function chooseInitialIndex() {
     const remembered = rememberedIndex();
-    return remembered >= 0 ? remembered : randomIndex(files.length);
+    return remembered >= 0 ? remembered : randomIndex(files.length, currentIndex);
   }
 
   function loadPlayer(player, index) {
@@ -392,7 +370,7 @@ export async function startMusic(config = {}) {
   }
 
   function prepareNextPlayer() {
-    const nextIndex = nextSequentialIndex(files.length, currentIndex);
+    const nextIndex = randomIndex(files.length, currentIndex);
     loadPlayer(standby, nextIndex);
     return nextIndex;
   }

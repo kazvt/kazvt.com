@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171717">
+    <title>Berrybox</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <svg class="fx-filters" aria-hidden="true" focusable="false">
+      <filter id="jitter-a">
+        <feTurbulence baseFrequency="0.012 0.034" numOctaves="2" seed="4"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" scale="3"></feDisplacementMap>
+      </filter>
+      <filter id="jitter-b">
+        <feTurbulence baseFrequency="0.018 0.026" numOctaves="2" seed="9"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" scale="5"></feDisplacementMap>
+      </filter>
+      <filter id="jitter-c">
+        <feTurbulence baseFrequency="0.015 0.04" numOctaves="2" seed="15"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" scale="4"></feDisplacementMap>
+      </filter>
+    </svg>
+    <div class="app-shell" id="appShell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">BB</div>
+          <div>
+            <h1 id="gameTitle">Berrybox</h1>
+            <p id="gameTagline">Draw, caption, vote, crown the winner.</p>
+          </div>
+        </div>
+        <div class="status-rail" aria-live="polite">
+          <span class="status-chip" id="roleChip">Member</span>
+          <span class="status-chip" id="secureChip">Ready</span>
+        </div>
+      </header>
+
+      <main class="main-grid clean-game-grid">
+        <section class="play-panel">
+          <div class="phase-strip">
+            <div>
+              <span class="eyebrow">Round <span id="roundLabel">0</span></span>
+              <h2 id="phaseLabel">Lobby</h2>
+            </div>
+            <div class="timer-block">
+              <span id="timerLabel">--:--</span>
+              <div class="timer-track" aria-hidden="true"><span id="timerFill"></span></div>
+            </div>
+          </div>
+
+          <div class="stage-frame" id="stageFrame">
+            <canvas id="artCanvas" width="1280" height="720" aria-label="Drawing surface"></canvas>
+            <textarea id="textInput" class="canvas-text-input hidden" maxlength="360" spellcheck="true" aria-label="Edit text"></textarea>
+            <div id="textBubble" class="text-bubble hidden" aria-label="Text controls">
+              <button id="textSizeDownBtn" class="mini-button" type="button" title="Smaller text">A-</button>
+              <input id="textSizeInput" class="bubble-size" type="range" min="16" max="160" value="58" aria-label="Text size">
+              <button id="textSizeUpBtn" class="mini-button" type="button" title="Bigger text">A+</button>
+              <button id="alignLeftBtn" class="mini-button" type="button" title="Align left">Left</button>
+              <button id="alignCenterBtn" class="mini-button" type="button" title="Align center">Mid</button>
+              <button id="alignRightBtn" class="mini-button" type="button" title="Align right">Right</button>
+              <button id="deleteTextBtn" class="mini-button danger-mini" type="button" title="Delete text">Delete</button>
+            </div>
+            <div class="empty-stage" id="emptyStage">
+              <h2>Ready room</h2>
+              <p id="emptyStageText">Waiting for the host.</p>
+            </div>
+            <div class="gallery hidden" id="gallery"></div>
+          </div>
+
+          <div class="editor-panel" id="editorPanel">
+            <div class="tool-row">
+              <button class="tool-button active" data-tool="brush" type="button">Brush</button>
+              <button class="tool-button" data-tool="text" type="button">Text</button>
+              <button class="tool-button" data-tool="eraser" type="button">Erase</button>
+              <button id="undoBtn" class="ghost-button" type="button">Undo</button>
+              <button id="clearBtn" class="danger-button" type="button">Clear</button>
+              <button id="submitBtn" class="primary-button push-right" type="button">Submit</button>
+            </div>
+
+            <div class="tool-row compact-controls">
+              <label class="inline-control" for="colorInput">Color <input id="colorInput" type="color" value="#ffffff"></label>
+              <label class="inline-control" for="sizeInput">Brush <input id="sizeInput" type="range" min="2" max="72" value="18"></label>
+              <label class="inline-control" for="globalTextSizeInput">Text <input id="globalTextSizeInput" type="range" min="16" max="160" value="58"></label>
+            </div>
+
+            <div class="font-preview-row" id="fontPreviewRow"></div>
+          </div>
+        </section>
+
+        <aside class="panel side-panel">
+          <section class="section profile-section">
+            <div class="section-heading">
+              <h2>Member</h2>
+            </div>
+            <label class="field-label" for="playerNameInput">Display name</label>
+            <input id="playerNameInput" class="text-input" autocomplete="nickname" maxlength="28" placeholder="Player">
+          </section>
+
+          <section class="section host-controls-section" id="hostControlsSection">
+            <div class="section-heading">
+              <h2>Host</h2>
+            </div>
+            <div class="stacked-actions">
+              <button id="startRoundBtn" class="primary-button full" type="button">Start round</button>
+              <button id="nextRoundBtn" class="secondary-button full" type="button">Next round</button>
+              <button id="finishVotingBtn" class="secondary-button full" type="button">Close voting</button>
+              <button id="resetMatchBtn" class="danger-button full" type="button">Reset match</button>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-heading">
+              <h2>Players</h2>
+              <span id="playerCountLabel" class="count-chip">0</span>
+            </div>
+            <div id="playerList" class="player-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

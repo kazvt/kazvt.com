@@ -14,16 +14,8 @@ function hasImageExtension(path) {
   return imageExtensions.some((extension) => lower.endsWith(extension));
 }
 
-function listValues(value) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string") return value.split(/[\n,|]+/);
-  if (typeof value === "object") return value.files || value.images || value.gifs || value.entries || value.items || [];
-  return [];
-}
-
 function uniqueFiles(files) {
-  return [...new Set(listValues(files).map(cleanPath).filter(hasImageExtension))];
+  return [...new Set((files || []).map(cleanPath).filter(hasImageExtension))];
 }
 
 function basePathParts() {
@@ -129,18 +121,14 @@ function hasDiscoveryConfig(config) {
 }
 
 async function resolvePeekFiles(config) {
-  const listed = uniqueFiles(config.files || config.images || config.gifs || config.entries || config.items || config.list || []);
+  if (!hasDiscoveryConfig(config) && hasImageExtension(config.src)) return [config.src];
+  const listed = uniqueFiles(config.files || config.images || config.gifs || config.entries || []);
   if (listed.length) return listed;
   const manifest = uniqueFiles(await loadManifest(manifestPath(config)).catch(() => []));
   if (manifest.length) return manifest;
   const github = uniqueFiles(await loadGithubFiles(config).catch(() => []));
   if (github.length) return github;
-  if (config.directoryListing === true) {
-    const directory = uniqueFiles(await loadDirectoryFiles(config.directory || `${publicFolder(config)}/`).catch(() => []));
-    if (directory.length) return directory;
-  }
-  const src = uniqueFiles(config.src || config.source || config.image || config.gif || config.url);
-  if (src.length) return src;
+  if (config.directoryListing === true) return uniqueFiles(await loadDirectoryFiles(config.directory || `${publicFolder(config)}/`).catch(() => []));
   return [];
 }
 

@@ -116,21 +116,11 @@ function initMinimums(element) {
   applyMinimums(element);
 }
 
-function getAnchoredTitleBarOffset(element, event, anchor) {
-  const elementRect = element.getBoundingClientRect();
-  const titleBar = element.querySelector(".title-bar");
-  const titleRect = titleBar ? titleBar.getBoundingClientRect() : elementRect;
-  const ratioX = clamp(anchor && Number.isFinite(anchor.ratioX) ? anchor.ratioX : (event.clientX - titleRect.left) / Math.max(1, titleRect.width), 0, 1);
-  const offsetY = clamp(anchor && Number.isFinite(anchor.offsetY) ? anchor.offsetY : event.clientY - titleRect.top, 0, Math.max(1, titleRect.height));
-  return {
-    offsetX: titleRect.left - elementRect.left + titleRect.width * ratioX,
-    offsetY: titleRect.top - elementRect.top + offsetY
-  };
-}
-
-function restoreMaximizedForDrag(element, event, anchor) {
-  if (!element.classList.contains("is-maximized")) return null;
+function restoreMaximizedForDrag(element, event) {
+  if (!element.classList.contains("is-maximized")) return;
   const maximizedRect = element.getBoundingClientRect();
+  const titleBar = element.querySelector(".title-bar");
+  const titleRect = titleBar ? titleBar.getBoundingClientRect() : maximizedRect;
   const beforeRect = {
     left: maximizedRect.left,
     top: maximizedRect.top,
@@ -139,19 +129,14 @@ function restoreMaximizedForDrag(element, event, anchor) {
   };
   const width = Number(element.dataset.restoreWidth || Math.min(620, window.innerWidth));
   const height = Number(element.dataset.restoreHeight || element.dataset.minHeight || element.offsetHeight);
+  const ratioX = clamp((event.clientX - titleRect.left) / Math.max(1, titleRect.width), 0.03, 0.97);
+  const offsetY = clamp(event.clientY - titleRect.top, 0, Math.max(1, titleRect.height));
   element.classList.remove("is-maximized");
   element.style.width = `${width}px`;
   element.style.height = `${height}px`;
-  const anchoredOffset = getAnchoredTitleBarOffset(element, event, anchor);
-  placeElement(element, event.clientX - anchoredOffset.offsetX, event.clientY - anchoredOffset.offsetY);
-  const restoredRect = element.getBoundingClientRect();
-  const activeOffset = {
-    offsetX: event.clientX - restoredRect.left,
-    offsetY: event.clientY - restoredRect.top
-  };
+  placeElement(element, event.clientX - width * ratioX, event.clientY - offsetY);
   element.dispatchEvent(new CustomEvent("windowstatechange", { bubbles: true }));
-  element.dispatchEvent(new CustomEvent("windowdragrestore", { bubbles: true, detail: { beforeRect, drag: true, skipAnimation: true } }));
-  return activeOffset;
+  element.dispatchEvent(new CustomEvent("windowdragrestore", { bubbles: true, detail: { beforeRect } }));
 }
 
 export function keepInsideViewport(element) {
@@ -172,13 +157,13 @@ export function keepInsideViewport(element) {
 
 export function makeDraggable(element, handle) {
   let drag = null;
-  const startActiveDrag = (event, anchoredOffset = null) => {
+  const startActiveDrag = (event) => {
     const rect = element.getBoundingClientRect();
     drag = {
       id: event.pointerId,
       mode: "active",
-      offsetX: anchoredOffset && Number.isFinite(anchoredOffset.offsetX) ? anchoredOffset.offsetX : event.clientX - rect.left,
-      offsetY: anchoredOffset && Number.isFinite(anchoredOffset.offsetY) ? anchoredOffset.offsetY : event.clientY - rect.top,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
       lastFrameTime: 0,
       latestX: event.clientX,
       latestY: event.clientY,
@@ -194,19 +179,12 @@ export function makeDraggable(element, handle) {
     if (event.target.closest(".title-bar-controls")) return;
     setPointerCapture(handle, event);
     if (element.classList.contains("is-maximized")) {
-      const maximizedRect = element.getBoundingClientRect();
-      const titleBar = element.querySelector(".title-bar");
-      const titleRect = titleBar ? titleBar.getBoundingClientRect() : maximizedRect;
       drag = {
         id: event.pointerId,
         mode: "pending-maximized",
         startX: event.clientX,
         startY: event.clientY,
-        startTime: performance.now(),
-        restoreAnchor: {
-          ratioX: clamp((event.clientX - titleRect.left) / Math.max(1, titleRect.width), 0, 1),
-          offsetY: clamp(event.clientY - titleRect.top, 0, Math.max(1, titleRect.height))
-        }
+        startTime: performance.now()
       };
       event.preventDefault();
       return;
@@ -226,9 +204,8 @@ export function makeDraggable(element, handle) {
         event.preventDefault();
         return;
       }
-      const anchor = drag.restoreAnchor;
-      const restoredOffset = restoreMaximizedForDrag(element, latest, anchor);
-      startActiveDrag(latest, restoredOffset);
+      restoreMaximizedForDrag(element, latest);
+      startActiveDrag(latest);
     }
     drag.latestX = latest.clientX;
     drag.latestY = latest.clientY;

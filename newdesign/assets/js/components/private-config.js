@@ -13,12 +13,6 @@ function mergeObjects(...items) {
   }, {});
 }
 
-function asFilesConfig(value) {
-  if (Array.isArray(value)) return { files: value };
-  if (typeof value === "string" && value.trim()) return { files: value };
-  return value || {};
-}
-
 function repositoryFrom(...items) {
   for (const item of items) {
     if (item && typeof item.repository === "string" && item.repository.trim()) return { repository: item.repository };
@@ -73,7 +67,7 @@ export function getSecretMarqueeConfig(secrets) {
 
 export function getSecretRandomGifsConfig(secrets) {
   const music = secrets.music || {};
-  const randomGifs = asFilesConfig(secrets.randomGifs || secrets.randomGif || secrets.desktopGifs || secrets.wallpaperGifs || {});
+  const randomGifs = secrets.randomGifs || secrets.randomGif || secrets.desktopGifs || secrets.wallpaperGifs || {};
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), randomGifs, rootRepository, rootBranch, githubApiFrom(secrets, randomGifs));
@@ -82,8 +76,8 @@ export function getSecretRandomGifsConfig(secrets) {
 
 export function getSecretPeekGifsConfig(secrets) {
   const music = secrets.music || {};
-  const edgePeek = asFilesConfig(secrets.edgePeek || {});
-  const peekGifs = asFilesConfig(secrets.peekGifs || secrets.peekGif || secrets.edgePeekGifs || secrets.edgeGifs || {});
+  const edgePeek = secrets.edgePeek || {};
+  const peekGifs = secrets.peekGifs || secrets.peekGif || secrets.edgePeekGifs || secrets.edgeGifs || {};
   const rootRepository = typeof secrets.repository === "string" ? { repository: secrets.repository } : {};
   const rootBranch = typeof secrets.branch === "string" ? { branch: secrets.branch } : {};
   return mergeObjects(repositoryFrom(music, rootRepository), branchFrom(music, rootBranch), edgePeek, peekGifs, rootRepository, rootBranch, githubApiFrom(secrets, edgePeek, peekGifs));
@@ -99,31 +93,6 @@ export function getSecretMotionConfig(secrets) {
   return mergeObjects(motion, fps ? { fps } : {});
 }
 
-function hasOwnValue(object, key) {
-  return object && typeof object === "object" && Object.prototype.hasOwnProperty.call(object, key) && object[key] !== undefined && object[key] !== null && object[key] !== "";
-}
-
-function firstOwnValue(object, keys) {
-  for (const key of keys) {
-    if (hasOwnValue(object, key)) return object[key];
-  }
-  return undefined;
-}
-
-function hasVisualizerList(config) {
-  return Boolean(config && typeof config === "object" && !Array.isArray(config) && firstOwnValue(config, ["visualizers", "visualisers", "items", "entries", "layers", "list"]));
-}
-
 export function getSecretMusicVisualizerConfig(secrets) {
-  const multiple = firstOwnValue(secrets, ["musicVisualizers", "musicVisualisers", "visualizers", "visualisers", "audioVisualizers", "audioVisualisers"]);
-  if (Array.isArray(multiple)) return { enabled: true, visualizers: multiple };
-  if (multiple && typeof multiple === "object") return hasVisualizerList(multiple) && !hasOwnValue(multiple, "enabled") ? { enabled: true, ...multiple } : multiple;
-  const single = firstOwnValue(secrets, ["musicVisualizer", "musicVisualiser", "visualizer", "visualiser", "audioVisualizer", "audioVisualiser"]);
-  if (Array.isArray(single)) return { enabled: true, visualizers: single };
-  if (single && typeof single === "object") return hasVisualizerList(single) && !hasOwnValue(single, "enabled") ? { enabled: true, ...single } : single;
-  return {};
-}
-
-export function getSecretTextSelectionConfig(secrets) {
-  return secrets.textSelection || secrets.selection || secrets.selectionGradient || secrets.highlightSelection || secrets.textHighlight || {};
+  return secrets.musicVisualizer || secrets.musicVisualiser || secrets.visualizer || secrets.visualiser || secrets.audioVisualizer || secrets.audioVisualiser || {};
 }

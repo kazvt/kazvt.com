@@ -21,200 +21,23 @@ function pickEdge(value) {
   return edges.includes(value) ? value : "bottom";
 }
 
-function normalizedWord(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function isOffWord(value) {
-  return ["0", "false", "no", "off", "none", "transparent", "hidden", "disabled"].includes(normalizedWord(value));
-}
-
-function isOnWord(value) {
-  return ["1", "true", "yes", "on", "solid", "visible", "enabled"].includes(normalizedWord(value));
-}
-
-function booleanSetting(value, fallback) {
-  if (value === undefined || value === null || value === "") return fallback;
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value !== 0;
-  if (isOffWord(value)) return false;
-  if (isOnWord(value)) return true;
-  return Boolean(value);
-}
-
-function showBackground(settings) {
-  if (settings.noBackground !== undefined) return !booleanSetting(settings.noBackground, false);
-  if (settings.withoutBackground !== undefined) return !booleanSetting(settings.withoutBackground, false);
-  const keys = ["showBackground", "backgroundEnabled", "backgroundVisible", "hasBackground", "chrome", "frame"];
-  for (const key of keys) {
-    if (settings[key] !== undefined) return booleanSetting(settings[key], true);
-  }
-  if (settings.background !== undefined && (typeof settings.background === "boolean" || typeof settings.background === "number" || isOffWord(settings.background) || isOnWord(settings.background))) return booleanSetting(settings.background, true);
-  return true;
-}
-
-function backgroundColor(settings, fallback) {
-  const direct = colorValue(settings.background);
-  return direct || colorSetting(settings, ["background", "backgroundColor", "bg", "fill"], fallback);
-}
-
-
-function plainObject(value) {
-  return Boolean(value && typeof value === "object" && !Array.isArray(value));
-}
-
-function mergePalette(target, source) {
-  if (!plainObject(source)) return target;
-  Object.entries(source).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") target[key] = value;
-  });
-  return target;
-}
-
-function stylePaletteKeys(style) {
-  if (style === "wmp-bars") return ["bars", "wmpBars", "wmp_bars", "wmp-bars"];
-  if (style === "wmp-scope") return ["scope", "wmpScope", "wmp_scope", "wmp-scope"];
-  if (style === "winamp-avs") return ["avs", "winamp", "winampAvs", "winampAVS", "winamp_avs", "winamp-avs"];
-  return [];
-}
-
-function resolvePalette(settings, style) {
-  const palette = {};
-  const containers = [settings.colors, settings.colours, settings.palette];
-  containers.forEach((container) => mergePalette(palette, container));
-  stylePaletteKeys(style).forEach((key) => {
-    mergePalette(palette, settings[key]);
-    containers.forEach((container) => mergePalette(palette, plainObject(container) ? container[key] : null));
-  });
-  return palette;
-}
-
-function colorValue(value) {
-  return typeof value === "string" && value.trim() && !isOffWord(value) && !isOnWord(value) ? value.trim() : "";
-}
-
-function colorSetting(settings, keys, fallback) {
-  for (const key of keys) {
-    const direct = colorValue(settings[key]);
-    if (direct) return direct;
-  }
-  const palette = settings.palette || {};
-  for (const key of keys) {
-    const nested = colorValue(palette[key]);
-    if (nested) return nested;
-  }
-  return fallback;
-}
-
-function maybeColorSetting(settings, keys) {
-  return colorSetting(settings, keys, "");
-}
-
-function setCssColor(element, name, value) {
-  const color = colorValue(value);
-  if (color) element.style.setProperty(name, color);
-}
-
-function applyFrameColors(element, settings) {
-  setCssColor(element, "--music-visualizer-background", maybeColorSetting(settings, ["frameBackground", "frameBackgroundColor", "chromeBackground", "chromeBackgroundColor", "windowBackground", "windowBackgroundColor", "background", "backgroundColor", "bg", "fill"]));
-  setCssColor(element, "--music-visualizer-frame-light", maybeColorSetting(settings, ["frameLight", "frameLightColor", "light", "lightColor", "highlight", "highlightColor", "bevelLight", "bevelLightColor", "topLeft", "topLeftColor"]));
-  setCssColor(element, "--music-visualizer-frame-dark", maybeColorSetting(settings, ["frameDark", "frameDarkColor", "dark", "darkColor", "shadow", "shadowColor", "bevelDark", "bevelDarkColor", "bottomRight", "bottomRightColor"]));
-  setCssColor(element, "--music-visualizer-frame-mid", maybeColorSetting(settings, ["frameMid", "frameMidColor", "midFrame", "midFrameColor", "bevelMid", "bevelMidColor", "innerHighlight", "innerHighlightColor"]));
-  setCssColor(element, "--music-visualizer-frame-shadow", maybeColorSetting(settings, ["frameShadow", "frameShadowColor", "deepShadow", "deepShadowColor", "outerShadow", "outerShadowColor"]));
-  setCssColor(element, "--music-visualizer-label-text", maybeColorSetting(settings, ["labelText", "labelTextColor", "labelColor", "text", "textColor"]));
-  setCssColor(element, "--music-visualizer-label-background", maybeColorSetting(settings, ["labelBackground", "labelBackgroundColor", "labelBg"]));
-  setCssColor(element, "--music-visualizer-label-border", maybeColorSetting(settings, ["labelBorder", "labelBorderColor"]));
-}
-
-function firstNumber(...values) {
-  for (const value of values) {
-    if (value === undefined || value === null || value === "") continue;
-    const number = Number(value);
-    if (Number.isFinite(number)) return number;
-  }
-  return undefined;
-}
-
-function rangePart(range, keys) {
-  if (!range || typeof range !== "object" || Array.isArray(range)) return undefined;
-  for (const key of keys) {
-    if (range[key] !== undefined) return range[key];
-  }
-  return undefined;
-}
-
-function frequencyRange(settings, audio, dataLength) {
-  if (!dataLength || !audio || !audio.context || !audio.analyser) return null;
-  const range = settings.frequencyRange || settings.frequencies || settings.frequencyBand || settings.frequencyLimits || settings.captureFrequencies;
-  const rangeMin = Array.isArray(range) ? range[0] : rangePart(range, ["min", "minimum", "from", "start", "low", "lowHz", "minHz", "minFrequency", "minFrequencyHz"]);
-  const rangeMax = Array.isArray(range) ? range[1] : rangePart(range, ["max", "maximum", "to", "end", "high", "highHz", "maxHz", "maxFrequency", "maxFrequencyHz"]);
-  const minHz = Math.max(0, firstNumber(settings.minFrequencyHz, settings.minFrequency, settings.frequencyMinHz, settings.frequencyMin, settings.lowFrequencyHz, settings.lowFrequency, settings.lowHz, rangeMin) ?? 0);
-  const nyquist = audio.context.sampleRate / 2;
-  const maxHz = Math.min(nyquist, firstNumber(settings.maxFrequencyHz, settings.maxFrequency, settings.frequencyMaxHz, settings.frequencyMax, settings.highFrequencyHz, settings.highFrequency, settings.highHz, rangeMax) ?? nyquist);
-  if (!(maxHz > minHz) || minHz <= 0 && maxHz >= nyquist) return null;
-  const binWidth = nyquist / dataLength;
-  const start = Math.max(0, Math.min(dataLength - 1, Math.floor(minHz / binWidth)));
-  const end = Math.max(start + 1, Math.min(dataLength, Math.ceil(maxHz / binWidth)));
-  return { start, end, minHz, maxHz };
-}
-
-function limitedFrequencyData(data, settings, audio) {
-  const range = frequencyRange(settings, audio, data.length);
-  if (!range) return data;
-  return data.subarray(range.start, range.end);
-}
-
 function percent(value, fallback) {
   return clamp(value === undefined ? fallback : value, 0, 100);
-}
-
-function finiteNumber(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
-}
-
-function relativeZ(config) {
-  const value = config.z ?? config.zIndex ?? config.relativeZ ?? config.relative_z ?? config["relative-z"] ?? config.layer ?? config.stack ?? 0;
-  const number = finiteNumber(value, 0);
-  return Math.max(0, Math.round(10000 + number));
 }
 
 function isHorizontal(edge) {
   return edge === "top" || edge === "bottom";
 }
 
-function hasSetting(value) {
-  return value !== undefined && value !== null && value !== "";
-}
-
-function percentSize(value, total, minimum, fallback) {
-  if (!hasSetting(value)) return fallback;
-  const raw = typeof value === "string" ? value.trim().replace(/%$/, "") : value;
-  const number = Number(raw);
-  if (!Number.isFinite(number)) return fallback;
-  const percentage = number > 0 && number <= 1 ? number * 100 : number;
-  return Math.max(minimum, total * (clamp(percentage, 0, 100) / 100));
-}
-
-function legacyLength(value, fallback) {
-  if (value === "auto" || value === "edge" || value === "100%") return fallback;
-  return Math.max(40, Number(value) || fallback);
-}
-
-function setupCanvas(canvas, element, edge, settings, x, y) {
+function setupCanvas(canvas, element, edge, thickness, length, x, y) {
   const ratio = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
   const viewportWidth = window.innerWidth;
   const viewportHeight = Math.max(0, window.innerHeight - 30);
   const horizontal = isHorizontal(edge);
-  const resolvedThickness = Math.max(18, Number(settings.size) || 76);
-  const edgeBase = horizontal ? viewportWidth : viewportHeight;
-  const edgeLength = Math.min(legacyLength(settings.length, edgeBase), edgeBase);
-  const fallbackWidth = horizontal ? edgeLength : resolvedThickness;
-  const fallbackHeight = horizontal ? resolvedThickness : edgeLength;
-  const cssWidth = percentSize(settings.width, viewportWidth, 18, fallbackWidth);
-  const cssHeight = percentSize(settings.height, viewportHeight, 18, fallbackHeight);
-  const drawWidth = horizontal ? cssWidth : cssHeight;
-  const drawHeight = horizontal ? cssHeight : cssWidth;
+  const resolvedThickness = Math.max(18, Number(thickness) || 76);
+  const resolvedLength = length === "auto" || length === "edge" || length === "100%" ? (horizontal ? viewportWidth : viewportHeight) : Math.max(40, Number(length) || (horizontal ? viewportWidth : viewportHeight));
+  const cssWidth = horizontal ? Math.min(resolvedLength, viewportWidth) : resolvedThickness;
+  const cssHeight = horizontal ? resolvedThickness : Math.min(resolvedLength, viewportHeight);
   element.style.width = `${cssWidth}px`;
   element.style.height = `${cssHeight}px`;
   element.style.left = "auto";
@@ -242,32 +65,25 @@ function setupCanvas(canvas, element, edge, settings, x, y) {
   canvas.width = Math.max(1, Math.round(cssWidth * ratio));
   canvas.height = Math.max(1, Math.round(cssHeight * ratio));
   const context = canvas.getContext("2d", { alpha: true });
-  context.imageSmoothingEnabled = false;
-  return { width: drawWidth, height: drawHeight, context, ratio };
-}
-
-function orientContext(context, ratio, edge, width, height) {
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
-  if (edge === "top") context.transform(1, 0, 0, -1, 0, height);
-  if (edge === "left") context.transform(0, 1, -1, 0, height, 0);
-  if (edge === "right") context.transform(0, 1, 1, 0, 0, 0);
+  context.imageSmoothingEnabled = false;
+  return { width: cssWidth, height: cssHeight, context };
 }
 
 function clearFrame(context, width, height, options) {
   context.clearRect(0, 0, width, height);
-  if (!options.showBackground) return;
-  context.fillStyle = backgroundColor(options, "#000034");
+  context.fillStyle = options.background || "#000034";
   context.fillRect(0, 0, width, height);
-  context.strokeStyle = colorSetting(options, ["border", "borderColor", "outline", "outlineColor"], "#b9b9b9");
+  context.strokeStyle = options.border || "#b9b9b9";
   context.lineWidth = 1;
   context.strokeRect(0.5, 0.5, Math.max(0, width - 1), Math.max(0, height - 1));
-  context.strokeStyle = colorSetting(options, ["innerBorder", "innerBorderColor", "inner", "innerColor", "shadowBorder", "shadowBorderColor"], "#4b4b4b");
+  context.strokeStyle = "#4b4b4b";
   context.strokeRect(2.5, 2.5, Math.max(0, width - 5), Math.max(0, height - 5));
 }
 
 function drawWmpBars(context, width, height, data, options) {
   clearFrame(context, width, height, options);
-  const padding = options.showBackground ? 7 : 0;
+  const padding = 7;
   const innerWidth = Math.max(1, width - padding * 2);
   const innerHeight = Math.max(1, height - padding * 2);
   const count = Math.max(8, Math.min(64, Math.floor(innerWidth / 8)));
@@ -281,36 +97,33 @@ function drawWmpBars(context, width, height, data, options) {
     const x = padding + index * (barWidth + gap);
     for (let row = 0; row < blocks; row += 1) {
       const y = padding + innerHeight - (row + 1) * block;
-      if (row > 9) context.fillStyle = colorSetting(options, ["high", "highColor", "treble", "trebleColor", "barHigh", "barHighColor", "top", "topColor"], "#ff3333");
-      else if (row > 6) context.fillStyle = colorSetting(options, ["mid", "midColor", "middle", "middleColor", "barMid", "barMidColor"], "#ffff00");
-      else context.fillStyle = colorSetting(options, ["low", "lowColor", "bass", "bassColor", "barLow", "barLowColor", "bottom", "bottomColor"], "#00ff66");
+      if (row > 9) context.fillStyle = "#ff3333";
+      else if (row > 6) context.fillStyle = "#ffff00";
+      else context.fillStyle = "#00ff66";
       context.fillRect(x, y, barWidth, Math.max(1, block - 1));
     }
   }
 }
 
 function drawWmpScope(context, width, height, data, options) {
-  clearFrame(context, width, height, { ...options, background: backgroundColor(options, "#000000") });
-  const padding = options.showBackground ? 8 : 0;
+  clearFrame(context, width, height, { ...options, background: options.background || "#000000" });
+  const padding = 8;
   const mid = height / 2;
-  const gridVisible = options.showBackground && booleanSetting(options.gridEnabled ?? options.showGrid ?? options.gridVisible ?? options.hasGrid, true);
-  if (gridVisible) {
-    context.strokeStyle = colorSetting(options, ["grid", "gridColor", "scopeGrid", "scopeGridColor"], "#002e00");
-    context.lineWidth = 1;
-    for (let x = padding; x < width - padding; x += 12) {
-      context.beginPath();
-      context.moveTo(x + 0.5, padding);
-      context.lineTo(x + 0.5, height - padding);
-      context.stroke();
-    }
-    for (let y = padding; y < height - padding; y += 10) {
-      context.beginPath();
-      context.moveTo(padding, y + 0.5);
-      context.lineTo(width - padding, y + 0.5);
-      context.stroke();
-    }
+  context.strokeStyle = "#002e00";
+  context.lineWidth = 1;
+  for (let x = padding; x < width - padding; x += 12) {
+    context.beginPath();
+    context.moveTo(x + 0.5, padding);
+    context.lineTo(x + 0.5, height - padding);
+    context.stroke();
   }
-  context.strokeStyle = colorSetting(options, ["line", "lineColor", "scopeLine", "scopeLineColor", "wave", "waveColor"], "#00ff00");
+  for (let y = padding; y < height - padding; y += 10) {
+    context.beginPath();
+    context.moveTo(padding, y + 0.5);
+    context.lineTo(width - padding, y + 0.5);
+    context.stroke();
+  }
+  context.strokeStyle = options.line || "#00ff00";
   context.lineWidth = 2;
   context.beginPath();
   for (let index = 0; index < data.length; index += 1) {
@@ -324,11 +137,11 @@ function drawWmpScope(context, width, height, data, options) {
 }
 
 function drawWinampAvs(context, width, height, frequency, time, options) {
-  clearFrame(context, width, height, { ...options, background: backgroundColor(options, "#080015") });
+  clearFrame(context, width, height, { ...options, background: options.background || "#080015" });
   const midX = width / 2;
   const midY = height / 2;
   const points = Math.max(24, Math.min(96, Math.floor(width / 7)));
-  context.strokeStyle = colorSetting(options, ["waveA", "waveAColor", "wave1", "wave1Color", "primary", "primaryColor", "lineA", "lineAColor"], "#ff00ff");
+  context.strokeStyle = "#ff00ff";
   context.lineWidth = 2;
   context.beginPath();
   for (let index = 0; index < points; index += 1) {
@@ -341,7 +154,7 @@ function drawWinampAvs(context, width, height, frequency, time, options) {
     else context.lineTo(x, y);
   }
   context.stroke();
-  context.strokeStyle = colorSetting(options, ["waveB", "waveBColor", "wave2", "wave2Color", "secondary", "secondaryColor", "lineB", "lineBColor"], "#00ffff");
+  context.strokeStyle = "#00ffff";
   context.beginPath();
   for (let index = 0; index < points; index += 1) {
     const t = index / (points - 1);
@@ -359,30 +172,12 @@ function drawWinampAvs(context, width, height, frequency, time, options) {
     const f = frequency[Math.floor(t * frequency.length)] / 255;
     const barHeight = Math.max(2, f * height * 0.44);
     const x = Math.round(midX + (index - bars / 2) * 11);
-    context.fillStyle = index % 2 ? colorSetting(options, ["barA", "barAColor", "bar1", "bar1Color", "centerA", "centerAColor"], "#ffff00") : colorSetting(options, ["barB", "barBColor", "bar2", "bar2Color", "centerB", "centerBColor"], "#ff6600");
+    context.fillStyle = index % 2 ? "#ffff00" : "#ff6600";
     context.fillRect(x, midY - barHeight / 2, 5, barHeight);
   }
 }
 
-function visualizerListFrom(config) {
-  if (Array.isArray(config)) return config;
-  if (!config || typeof config !== "object") return [];
-  const keys = ["visualizers", "visualisers", "items", "entries", "layers", "list"];
-  for (const key of keys) {
-    if (Array.isArray(config[key])) return config[key];
-  }
-  return [];
-}
-
-function visualizerDefinitions(config) {
-  const list = visualizerListFrom(config);
-  if (!list.length) return [config];
-  const parent = Array.isArray(config) ? {} : { ...config };
-  ["visualizers", "visualisers", "items", "entries", "layers", "list"].forEach((key) => delete parent[key]);
-  return list.filter((item) => item && typeof item === "object").map((item) => ({ ...parent, ...item }));
-}
-
-function createSingleMusicVisualizer(config = {}, music) {
+export function createMusicVisualizer(config = {}, music) {
   const settings = {
     enabled: false,
     style: "wmp-bars",
@@ -399,17 +194,9 @@ function createSingleMusicVisualizer(config = {}, music) {
   if (!settings.enabled || !music || typeof music.createAnalyser !== "function") return null;
   const edge = pickEdge(settings.edge);
   const visualStyle = pickStyle(settings.style || settings.type || settings.mode || settings.preset);
-  settings.palette = resolvePalette(settings, visualStyle);
-  settings.showBackground = showBackground(settings);
   const canvas = createElement("canvas", { className: "music-visualizer__canvas", ariaHidden: "true" });
-  const labelText = settings.name || settings.title || visualStyle.replace(/-/g, " ");
-  const label = createElement("div", { className: "music-visualizer__label", text: labelText });
-  const backgroundClass = settings.showBackground ? "" : " music-visualizer--transparent";
-  const customClass = settings.className ? ` ${settings.className}` : "";
-  const element = createElement("div", { className: `music-visualizer music-visualizer--${edge} music-visualizer--${visualStyle}${backgroundClass}${customClass}`, ariaHidden: "true" }, [canvas, label]);
-  applyFrameColors(element, settings);
-  if (settings.id || settings.name) element.dataset.visualizer = String(settings.id || settings.name);
-  element.style.zIndex = String(relativeZ(settings));
+  const label = createElement("div", { className: "music-visualizer__label", text: visualStyle.replace(/-/g, " ") });
+  const element = createElement("div", { className: `music-visualizer music-visualizer--${edge} music-visualizer--${visualStyle}`, ariaHidden: "true" }, [canvas, label]);
   let frame = null;
   let stopped = false;
   let lastFrame = 0;
@@ -421,7 +208,7 @@ function createSingleMusicVisualizer(config = {}, music) {
   const resume = () => audio.resume();
   events.forEach((name) => window.addEventListener(name, resume, { capture: true, passive: true }));
   const resize = () => {
-    layout = setupCanvas(canvas, element, edge, settings, percent(settings.x, 50), percent(settings.y, 50));
+    layout = setupCanvas(canvas, element, edge, settings.size, settings.length, percent(settings.x, 50), percent(settings.y, 50));
   };
   const render = (now) => {
     if (stopped) return;
@@ -430,12 +217,10 @@ function createSingleMusicVisualizer(config = {}, music) {
       lastFrame = now;
       audio.analyser.getByteFrequencyData(frequencyData);
       audio.analyser.getByteTimeDomainData(timeData);
-      const capturedFrequencyData = limitedFrequencyData(frequencyData, settings, audio);
       if (!layout) resize();
-      orientContext(layout.context, layout.ratio, edge, layout.width, layout.height);
-      if (visualStyle === "wmp-bars") drawWmpBars(layout.context, layout.width, layout.height, capturedFrequencyData, settings);
+      if (visualStyle === "wmp-bars") drawWmpBars(layout.context, layout.width, layout.height, frequencyData, settings);
       if (visualStyle === "wmp-scope") drawWmpScope(layout.context, layout.width, layout.height, timeData, settings);
-      if (visualStyle === "winamp-avs") drawWinampAvs(layout.context, layout.width, layout.height, capturedFrequencyData, timeData, settings);
+      if (visualStyle === "winamp-avs") drawWinampAvs(layout.context, layout.width, layout.height, frequencyData, timeData, settings);
     }
     frame = requestAnimationFrame(render);
   };
@@ -449,16 +234,4 @@ function createSingleMusicVisualizer(config = {}, music) {
     events.forEach((name) => window.removeEventListener(name, resume, true));
   };
   return element;
-}
-
-export function createMusicVisualizer(config = {}, music) {
-  const definitions = visualizerDefinitions(config);
-  const visualizers = definitions.map((item) => createSingleMusicVisualizer(item, music)).filter(Boolean);
-  if (!visualizers.length) return null;
-  if (visualizers.length === 1) return visualizers[0];
-  const host = createElement("div", { className: "music-visualizers", ariaHidden: "true" }, visualizers);
-  host.destroy = () => visualizers.forEach((visualizer) => {
-    if (typeof visualizer.destroy === "function") visualizer.destroy();
-  });
-  return host;
 }

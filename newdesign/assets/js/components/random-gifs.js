@@ -393,15 +393,18 @@ function runSpriteAnimation(sprite, intro, direction, settings, remove) {
   let lastFrame = 0;
   sprite.style.transformOrigin = "50% 50%";
   applySpriteTransform(sprite, state);
-  const animationConfig = {
+  const animationConfig = intro ? {
     sx: introScaleX(settings.settleInMs),
     sy: introScaleY(settings.settleInMs),
     r: introRotation(direction, settings.settleInMs)
+  } : {
+    sx: outroScaleX(settings.settleOutMs),
+    sy: outroScaleY(settings.settleOutMs),
+    r: outroRotation(direction, settings.settleOutMs)
   };
   anime({
     targets: state,
     ...animationConfig,
-    direction: intro ? "normal" : "reverse",
     update() {
       const now = performance.now();
       if (frameMs > 0 && now - lastFrame < frameMs) return;

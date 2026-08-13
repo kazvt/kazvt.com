@@ -10,13 +10,13 @@ export const home = {
     text: "Hello, visitor!\n\nWelcome to my little corner of the old internet.\n\nThis page is built like a Windows XP desktop, with the Notepad window structure handled by XP.css.\n\nThe character on the right is loaded from assets/img/art.png, so you can swap that file whenever you want.\n\nEnjoy your stay."
   },
   music: {
-    volume: 5
+    volume: 0.5
   },
   motion: {
     fps: 24
   },
   edgePeek: {
-    src: "assets/peekGifs/osaka.gif",
+    src: "assets/img/osaka.gif",
     alt: "Osaka peeking from the desktop edge",
     intervalMs: 10000,
     visibleMs: 3000,
@@ -52,11 +52,6 @@ export const home = {
     size: 76,
     length: "100%",
     fps: 24
-  },
-  textSelection: {
-    direction: "90deg",
-    colors: ["#5BCEFA", "#F5A9B8", "#ffffff", "#F5A9B8", "#5BCEFA"],
-    opacity: 1
   },
   cursorSparkles: {
     enabled: true,

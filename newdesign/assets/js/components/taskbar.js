@@ -58,7 +58,7 @@ function stopTaskbarSelection(taskbar) {
 
 export function createTaskbar({ startLabel, activeTitle, trayIcons }) {
   const clock = createElement("time", { className: "taskbar__clock px-1 text-[11px] leading-[30px] text-white" });
-  const taskbar = createElement("footer", { className: "taskbar fixed bottom-0 left-0 right-0 flex h-[30px] w-full flex-row items-center", role: "contentinfo", "aria-label": "Windows XP taskbar" }, [
+  const taskbar = createElement("footer", { className: "taskbar fixed bottom-0 left-0 right-0 z-20 flex h-[30px] w-full flex-row items-center", role: "contentinfo", "aria-label": "Windows XP taskbar" }, [
     createStartButton(startLabel),
     createElement("div", { className: "flex h-full grow flex-row items-center overflow-hidden pt-1" }, [createTaskButton(activeTitle)]),
     createElement("div", { className: "taskbar__tray flex h-full max-w-[200px] shrink-0 flex-row items-center justify-end px-2 text-white" }, [
