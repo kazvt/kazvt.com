@@ -23,6 +23,10 @@
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/paper-fibers.png");
   --wallpaper-size: auto;
+  --click-hover-outline-width: 4px;
+  --click-hover-outline-style: dashed;
+  --click-hover-outline-color: var(--ink);
+  --click-hover-outline-offset: 3px;
 }
 
 * {
@@ -654,8 +658,6 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--banner-text);
-  outline: 4px dashed var(--ink);
-  outline-offset: 3px;
 }
 
 .marquee {
@@ -718,6 +720,11 @@ code {
   background: var(--paper);
 }
 
+:where(a[href], button, input[type="range"], .visualizer):where(:hover, :focus-visible) {
+  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color);
+  outline-offset: var(--click-hover-outline-offset);
+}
+
 .tool-list {
   display: grid;
   gap: 8px;
@@ -765,8 +772,8 @@ code {
 }
 
 .big-palette button[aria-pressed="true"] {
-  outline: 4px dashed var(--ink);
-  outline-offset: 3px;
+  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color);
+  outline-offset: var(--click-hover-outline-offset);
 }
 
 .big-palette span {
@@ -896,8 +903,6 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--banner-text);
-  outline: 4px dashed var(--ink);
-  outline-offset: 3px;
 }
 
 .sticker.is-live:hover,
@@ -1052,6 +1057,31 @@ code {
 .mini-logo-discord .logo-bg { fill: #8d73ff; }
 .mini-logo-discord .logo-fill,
 .mini-logo-discord .logo-mark { fill: #ffffff; stroke: #ffffff; }
+
+.wife-combo {
+  position: relative;
+  display: grid;
+  width: 52px;
+  height: 46px;
+  place-items: center;
+}
+
+.wife-combo img {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(2px 2px 0 #111111);
+}
+
+.wife-combo img:first-child {
+  z-index: 2;
+  transform: translate(-7px, -2px) rotate(-7deg);
+}
+
+.wife-combo img:last-child {
+  transform: translate(8px, 4px) rotate(8deg);
+}
 
 .sticker-label,
 .status-card strong {
@@ -1320,8 +1350,6 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--banner-text);
-  outline: 4px dashed var(--ink);
-  outline-offset: 3px;
 }
 
 .music-player input[type="range"] {
@@ -1341,6 +1369,7 @@ code {
   height: 44px;
   border: 3px solid var(--ink);
   background: var(--banner);
+  cursor: pointer;
   image-rendering: pixelated;
 }
 
@@ -1449,8 +1478,6 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--banner-text);
-  outline: 4px dashed var(--ink);
-  outline-offset: 3px;
 }
 
 .page-footer {

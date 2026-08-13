@@ -10,6 +10,15 @@ const streamLinks = [
     color: "#d9c5ff",
   },
   {
+    key: "kick",
+    label: "Kick",
+    href: "https://kick.com/kazvt",
+    icon: "kick",
+    note: "streaming",
+    status: "offline",
+    color: "#c8ffc9",
+  },
+  {
     key: "youtube",
     label: "YouTube",
     href: "https://www.youtube.com/@kazvt",
@@ -19,33 +28,16 @@ const streamLinks = [
     status: "offline",
     color: "#ffc6b7",
   },
-  {
-    key: "kick",
-    label: "Kick",
-    href: "https://kick.com/kazvt",
-    icon: "kick",
-    note: "streaming",
-    status: "offline",
-    color: "#c8ffc9",
-  },
 ];
 
 const socialLinks = [
   {
-    key: "twitter",
-    label: "Twitter",
-    href: "https://twitter.com/monkevt",
-    icon: "twitter",
+    key: "discord",
+    label: "Discord",
+    href: "https://discord.com/invite/huzMpfJZ4J",
+    icon: "discord",
     note: "",
-    color: "#c9f0ff",
-  },
-  {
-    key: "bsky",
-    label: "BSky",
-    href: "https://bsky.app/profile/kazvt.com",
-    icon: "bsky",
-    note: "",
-    color: "#bde8ff",
+    color: "#ffc7ee",
   },
   {
     key: "tumblr",
@@ -56,12 +48,28 @@ const socialLinks = [
     color: "#d8d4ff",
   },
   {
-    key: "discord",
-    label: "Discord",
-    href: "https://discord.com/invite/huzMpfJZ4J",
-    icon: "discord",
+    key: "bsky",
+    label: "BSky",
+    href: "https://bsky.app/profile/kazvt.com",
+    icon: "bsky",
     note: "",
-    color: "#ffc7ee",
+    color: "#bde8ff",
+  },
+  {
+    key: "twitter",
+    label: "Twitter",
+    href: "https://twitter.com/monkevt",
+    icon: "twitter",
+    note: "",
+    color: "#c9f0ff",
+  },
+  {
+    key: "wife",
+    label: "my wife",
+    href: "assets/wife/ramberry.webp",
+    images: ["assets/wife/kazberry.webp", "assets/wife/ramberry.webp"],
+    note: "",
+    color: "#ffd7ef",
   },
 ];
 
@@ -103,7 +111,7 @@ function initializeCurrentUrl() {
   if (!node) return;
 
   const updateUrl = () => {
-    node.textContent = window.location.href.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+    node.textContent = window.location.href.replace(/^https?:\/\//i, "");
   };
 
   updateUrl();
@@ -227,6 +235,20 @@ function platformIcon(name) {
   return svg;
 }
 
+function wifeIcon(images) {
+  return el(
+    "span",
+    { className: "wife-combo", ariaHidden: "true" },
+    images.map((src) =>
+      el("img", {
+        src,
+        alt: "",
+        loading: "lazy",
+      }),
+    ),
+  );
+}
+
 function fileExtension(file) {
   const dot = file.lastIndexOf(".");
   return dot >= 0 ? file.slice(dot).toLowerCase() : "";
@@ -272,7 +294,7 @@ function sticker(link, extraClass = "") {
             el("span", { className: "sticker-status-word" }, [status]),
           ])
         : "",
-      el("span", { className: "sticker-glyph", ariaHidden: "true" }, [platformIcon(link.icon || link.key)]),
+      el("span", { className: "sticker-glyph", ariaHidden: "true" }, [link.images ? wifeIcon(link.images) : platformIcon(link.icon || link.key)]),
       el("span", { className: "sticker-label" }, [link.label]),
       el("span", { className: "sticker-note", "data-social-note": hasStatus ? undefined : link.key }, [link.note]),
     ],
@@ -816,12 +838,23 @@ async function initializeMusicPlayer() {
   const next = el("button", { type: "button", className: "music-button", ariaLabel: "Next track" }, [">>"]);
   const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: "Track position" });
   const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: "0.8", ariaLabel: "Volume" });
-  const visualizer = el("canvas", { width: "150", height: "44", className: "visualizer", ariaLabel: "Music visualizer" });
+  const visualizer = el("canvas", {
+    width: "150",
+    height: "44",
+    className: "visualizer",
+    role: "button",
+    tabindex: "0",
+    title: "Switch visualizer mode",
+    ariaLabel: "Music visualizer: bars mode. Click to switch.",
+  });
   const visualContext = visualizer.getContext("2d");
   const visualizerBinCrop = 0.58;
   const visualizerBarCount = 12;
   const visualizerTrebleTilt = 0.35;
   const visualizerPeakBias = 0.72;
+  const visualizerModes = ["bars", "scope", "burst"];
+  const visualizerLevels = Array(visualizerBarCount).fill(0);
+  let visualizerMode = visualizerModes[0];
 
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
@@ -854,27 +887,35 @@ async function initializeMusicPlayer() {
     analyser.connect(audioContext.destination);
   }
 
-  function drawVisualizer() {
-    const width = visualizer.width;
-    const height = visualizer.height;
+  function updateVisualizerLabel() {
+    visualizer.setAttribute("aria-label", `Music visualizer: ${visualizerMode} mode. Click to switch.`);
+    visualizer.title = `visualizer: ${visualizerMode}`;
+  }
+
+  function cycleVisualizerMode() {
+    const nextMode = (visualizerModes.indexOf(visualizerMode) + 1) % visualizerModes.length;
+    visualizerMode = visualizerModes[nextMode];
+    updateVisualizerLabel();
+  }
+
+  function clearVisualizer(width, height) {
     visualContext.fillStyle = "#16111a";
     visualContext.fillRect(0, 0, width, height);
+  }
 
-    if (!analyser || audio.paused) {
-      visualContext.fillStyle = "#6cff7a";
-      for (let x = 6; x < width; x += 14) {
-        const bar = 5 + ((x / 14) % 4) * 4;
-        visualContext.fillRect(x, height - bar - 5, 9, bar);
-      }
-      window.requestAnimationFrame(drawVisualizer);
-      return;
+  function drawIdleVisualizer(width, height) {
+    visualContext.fillStyle = "#6cff7a";
+    for (let x = 6; x < width; x += 14) {
+      const bar = 5 + ((x / 14) % 4) * 4;
+      visualContext.fillRect(x, height - bar - 5, 9, bar);
     }
+  }
 
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(data);
+  function getVisualizerLevels(data) {
     const activeBins = data.slice(0, Math.max(1, Math.ceil(data.length * visualizerBinCrop)));
     const bars = Math.min(visualizerBarCount, activeBins.length);
-    const barWidth = width / bars;
+    const levels = [];
+
     for (let bar = 0; bar < bars; bar += 1) {
       const start = Math.floor((bar / bars) * activeBins.length);
       const end = Math.max(start + 1, Math.floor(((bar + 1) / bars) * activeBins.length));
@@ -889,10 +930,100 @@ async function initializeMusicPlayer() {
       }
       const average = weightedTotal / (end - start);
       const value = weightedPeak * visualizerPeakBias + average * (1 - visualizerPeakBias);
+
+      const previous = visualizerLevels[bar] || 0;
+      const position = bars > 1 ? bar / (bars - 1) : 0;
+      const followUp = 0.96 - position * 0.32;
+      const followDown = 0.9 - position * 0.5;
+      const follow = value > previous ? followUp : followDown;
+      const smoothed = previous + (value - previous) * follow;
+      visualizerLevels[bar] = smoothed;
+      levels.push(smoothed);
+    }
+
+    return levels;
+  }
+
+  function drawBarVisualizer(levels, width, height) {
+    const barWidth = width / levels.length;
+    levels.forEach((value, bar) => {
       const barHeight = Math.max(3, Math.pow(value / 255, 0.72) * (height - 8));
       visualContext.fillStyle = bar % 2 ? "#48cfff" : "#6cff7a";
       visualContext.fillRect(bar * barWidth + 2, height - barHeight - 4, Math.max(5, barWidth - 4), barHeight);
+    });
+  }
+
+  function drawScopeVisualizer(waveform, width, height) {
+    const step = 4;
+    const mid = Math.round(height / 2);
+    visualContext.strokeStyle = "#48cfff";
+    visualContext.lineWidth = 3;
+    visualContext.beginPath();
+
+    for (let x = 0; x <= width; x += step) {
+      const index = Math.min(waveform.length - 1, Math.floor((x / width) * waveform.length));
+      const wave = (waveform[index] - 128) / 128;
+      const y = Math.round(mid + wave * (height * 0.42));
+      if (x === 0) visualContext.moveTo(x, y);
+      else visualContext.lineTo(x, y);
     }
+
+    visualContext.stroke();
+    visualContext.strokeStyle = "#6cff7a";
+    visualContext.lineWidth = 2;
+    visualContext.beginPath();
+    for (let x = 0; x <= width; x += step * 2) {
+      const index = Math.min(waveform.length - 1, Math.floor((x / width) * waveform.length));
+      const wave = (waveform[index] - 128) / 128;
+      const y = Math.round(mid - wave * (height * 0.3));
+      if (x === 0) visualContext.moveTo(x, y);
+      else visualContext.lineTo(x, y);
+    }
+    visualContext.stroke();
+  }
+
+  function drawBurstVisualizer(levels, width, height) {
+    const centerY = Math.round(height / 2);
+    const slotWidth = width / levels.length;
+
+    levels.forEach((value, index) => {
+      const strength = Math.pow(value / 255, 0.82);
+      const barHeight = Math.max(4, strength * (height - 10));
+      const x = Math.round(index * slotWidth + 2);
+      const y = Math.round(centerY - barHeight / 2);
+      visualContext.fillStyle = index % 2 ? "#6cff7a" : "#48cfff";
+      visualContext.fillRect(x, y, Math.max(5, slotWidth - 5), Math.round(barHeight));
+      if (strength > 0.42) {
+        visualContext.fillStyle = "#ffef5d";
+        visualContext.fillRect(x + 1, Math.max(3, y - 3), Math.max(3, slotWidth - 7), 2);
+      }
+    });
+  }
+
+  function drawVisualizer() {
+    const width = visualizer.width;
+    const height = visualizer.height;
+    clearVisualizer(width, height);
+
+    if (!analyser || audio.paused) {
+      drawIdleVisualizer(width, height);
+      window.requestAnimationFrame(drawVisualizer);
+      return;
+    }
+
+    if (visualizerMode === "scope") {
+      const waveform = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(waveform);
+      drawScopeVisualizer(waveform, width, height);
+      window.requestAnimationFrame(drawVisualizer);
+      return;
+    }
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+    const levels = getVisualizerLevels(data);
+    if (visualizerMode === "burst") drawBurstVisualizer(levels, width, height);
+    else drawBarVisualizer(levels, width, height);
     window.requestAnimationFrame(drawVisualizer);
   }
 
@@ -931,8 +1062,15 @@ async function initializeMusicPlayer() {
   volume.addEventListener("input", () => {
     audio.volume = Number(volume.value);
   });
+  visualizer.addEventListener("click", cycleVisualizerMode);
+  visualizer.addEventListener("keydown", (event) => {
+    if (!["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    cycleVisualizerMode();
+  });
 
   audio.volume = Number(volume.value);
+  updateVisualizerLabel();
   mount.replaceChildren(
     title,
     el("div", { className: "music-controls" }, [prev, play, next]),
