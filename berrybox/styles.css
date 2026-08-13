@@ -17,7 +17,6 @@
   --line: #28335e;
   --shadow: rgba(40, 51, 94, 0.44);
   --soft-shadow: rgba(17, 17, 17, 0.18);
-  --wallpaper: url("./assets/ui/checkered-pattern.png");
   --paper-texture: url("./assets/ui/paper-fibers.png");
   --square-texture: url("./assets/ui/bright-squares.png");
   --metal-texture: url("./assets/ui/brushed-alum.png");
@@ -39,12 +38,15 @@ html {
 body {
   margin: 0;
   color: var(--ink);
-  background-color: var(--blue);
+  overflow-x: hidden;
+  background-color: #3f5675;
   background-image:
-    radial-gradient(circle at 12px 12px, rgba(255, 255, 255, 0.36) 0 3px, transparent 4px),
-    var(--wallpaper);
+    linear-gradient(45deg, transparent 47%, rgba(255, 234, 136, 0.62) 48%, rgba(255, 234, 136, 0.62) 52%, transparent 53%),
+    linear-gradient(-45deg, transparent 47%, rgba(48, 175, 255, 0.42) 48%, rgba(48, 175, 255, 0.42) 52%, transparent 53%),
+    linear-gradient(90deg, rgba(245, 153, 198, 0.2), rgba(125, 204, 173, 0.18));
   background-repeat: repeat;
-  background-size: 28px 28px, 216px 216px;
+  background-size: 72px 72px, 72px 72px, 100% 100%;
+  animation: diamondGridScroll 18s linear infinite;
   font-family: "Trebuchet MS", "Comic Sans MS", "Arial Rounded MT Bold", Arial, sans-serif;
   letter-spacing: 0;
 }
@@ -197,20 +199,26 @@ textarea:disabled {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
+  width: 70px;
+  height: 70px;
   border: 4px solid var(--ink-2);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0 28%, transparent 30%),
-    conic-gradient(var(--pink) 0 25%, var(--paper) 0 50%, var(--green) 0 75%, var(--blue) 0);
-  color: var(--ink-2);
-  font-family: Impact, "Arial Black", sans-serif;
-  font-size: 1.35rem;
-  font-weight: 900;
-  line-height: 1;
-  image-rendering: pixelated;
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.72) 0 13%, transparent 14%),
+    linear-gradient(135deg, var(--hot), var(--sky) 54%, var(--green));
   box-shadow: 4px 4px 0 var(--shadow);
   transform: rotate(-2deg);
+  overflow: hidden;
+}
+
+.brand-mark img {
+  display: block;
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  filter:
+    drop-shadow(2px 2px 0 rgba(17, 17, 17, 0.5))
+    drop-shadow(-1px 1px 0 rgba(255, 234, 136, 0.52));
+  pointer-events: none;
 }
 
 .brand-block h1 {
@@ -1109,6 +1117,11 @@ input[type="range"] {
   font-weight: 900;
 }
 
+@keyframes diamondGridScroll {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 72px 72px, -72px 72px, 0 0; }
+}
+
 @keyframes panelJitter {
   0% { filter: url("#jitter-a"); }
   45% { filter: url("#jitter-b"); }
@@ -1221,6 +1234,10 @@ input[type="range"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+
   *,
   *::before,
   *::after {
