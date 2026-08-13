@@ -12,6 +12,7 @@
       title: "Berrybox",
       tagline: "Draw, caption, vote, crown the winner.",
       rounds: 3,
+      maxRounds: 25,
       drawingSeconds: 150,
       votingSeconds: 45,
       autoAdvance: true,
@@ -141,9 +142,9 @@
       "makeAnswerBtn", "joinAnswerOutput", "copyAnswerBtn", "startRoundBtn", "nextRoundBtn",
       "finishVotingBtn", "resetMatchBtn", "roundLabel", "phaseLabel", "timerLabel",
       "timerFill", "stageFrame", "artCanvas", "emptyStage", "emptyStageText", "gallery",
-      "editorPanel", "undoBtn", "deleteTextBtn", "clearBtn", "submitBtn", "colorInput",
-      "sizeInput", "textSizeInput", "textSizeDownBtn", "textSizeUpBtn", "alignLeftBtn",
-      "alignCenterBtn", "alignRightBtn", "globalTextSizeInput", "fontPreviewRow", "textInput", "textBubble",
+      "editorPanel", "canvasOptionsBar", "undoBtn", "deleteTextBtn", "clearBtn", "submitBtn", "colorInput",
+      "textColorInput", "sizeInput", "textSizeInput", "textSizeDownBtn", "textSizeUpBtn", "alignLeftBtn",
+      "alignCenterBtn", "alignRightBtn", "globalTextSizeInput", "fontPreviewRow", "bubbleFontPreviewRow", "textInput", "textBubble",
       "playerCountLabel", "playerList", "imageCountLabel", "imageDrop", "imageFileInput",
       "imageLibrary", "fontCountLabel", "fontDrop", "fontFileInput", "activityLog"
     ];
@@ -191,6 +192,14 @@
     });
     bind(dom.colorInput, "input", () => {
       runtime.editor.color = dom.colorInput.value;
+      if (dom.textColorInput) dom.textColorInput.value = dom.colorInput.value;
+      if (runtime.editor.tool === "text" || document.activeElement === dom.textInput) {
+        updateSelectedTextBox({ color: runtime.editor.color });
+      }
+    });
+    bind(dom.textColorInput, "input", () => {
+      runtime.editor.color = dom.textColorInput.value;
+      if (dom.colorInput) dom.colorInput.value = dom.textColorInput.value;
       updateSelectedTextBox({ color: runtime.editor.color });
     });
     bind(dom.sizeInput, "input", () => {
@@ -234,7 +243,9 @@
     bind(dom.undoBtn, "click", undo);
     bind(dom.deleteTextBtn, "click", deleteSelectedText);
     bind(dom.clearBtn, "click", clearEditor);
-    bind(dom.submitBtn, "click", () => submitLocalContribution(true));
+    bind(dom.submitBtn, "click", () => {
+      void submitLocalContribution(true);
+    });
 
     bind(dom.artCanvas, "pointerdown", onCanvasPointerDown);
     bind(dom.artCanvas, "pointermove", onCanvasPointerMove);
@@ -268,6 +279,7 @@
     applySettingsToShell();
     await Promise.all([loadImageManifest(), loadFontManifest()]);
     if (!runtime.selectedImageId && runtime.assets.images[0]) runtime.selectedImageId = runtime.assets.images[0].id;
+    syncRoundCountWithImages();
     if (previousCanvas.width !== settings.canvas.width || previousCanvas.height !== settings.canvas.height) {
       resizeCanvasFromSettings();
       resetEditorForRound();
@@ -300,6 +312,7 @@
     runtime.editor.font = runtime.selectedFont || settings.editor.defaultFont || "Impact";
     runtime.editor.color = normalizeColor(settings.editor.palette?.[0], "#ffffff");
     if (dom.colorInput) dom.colorInput.value = runtime.editor.color;
+    if (dom.textColorInput) dom.textColorInput.value = runtime.editor.color;
     if (dom.sizeInput) dom.sizeInput.value = String(runtime.editor.brushSize);
     if (dom.textSizeInput) dom.textSizeInput.value = String(runtime.editor.textSize);
     if (dom.globalTextSizeInput) dom.globalTextSizeInput.value = String(runtime.editor.textSize);
@@ -1310,7 +1323,7 @@
       phase: "lobby",
       roomId: runtime.roomId || "",
       roundIndex: 0,
-      totalRounds: Math.max(1, Math.floor(numberOr(settings.game.rounds, 3))),
+      totalRounds: roundCountForLoadedImages(),
       currentImage: null,
       phaseStartedAt: 0,
       phaseEndsAt: 0,
@@ -1326,6 +1339,18 @@
         votesPerPlayer: numberOr(settings.scoring.votesPerPlayer, 1)
       }
     };
+  }
+
+  function roundCountForLoadedImages() {
+    const maxRounds = clamp(Math.floor(numberOr(settings.game.maxRounds, 25)), 1, 25);
+    const imageCount = runtime.assets.images.length || Math.floor(numberOr(settings.game.rounds, 1));
+    return clamp(imageCount || 1, 1, maxRounds);
+  }
+
+  function syncRoundCountWithImages() {
+    if (!runtime.game) return;
+    runtime.game.totalRounds = roundCountForLoadedImages();
+    runtime.game.roundIndex = Math.min(runtime.game.roundIndex, runtime.game.totalRounds);
   }
 
   function resetMatch() {
@@ -1347,6 +1372,7 @@
 
   function startRound() {
     if (runtime.role !== "host") return;
+    syncRoundCountWithImages();
     if (runtime.game.roundIndex >= runtime.game.totalRounds) {
       runtime.game.phase = "final";
       runtime.game.phaseStartedAt = Date.now();
@@ -1587,6 +1613,8 @@
     dom.toolButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.tool === runtime.editor.tool);
     });
+    if (dom.canvasOptionsBar) dom.canvasOptionsBar.dataset.tool = runtime.editor.tool;
+    if (runtime.editor.tool !== "text") hideTextOverlay();
   }
 
   function onCanvasPointerDown(event) {
@@ -1796,6 +1824,7 @@
     if (dom.textInput) dom.textInput.value = box?.text || "";
     if (box) {
       if (dom.colorInput) dom.colorInput.value = normalizeColor(box.color, runtime.editor.color);
+      if (dom.textColorInput) dom.textColorInput.value = normalizeColor(box.color, runtime.editor.color);
       if (dom.textSizeInput) dom.textSizeInput.value = String(box.size);
       if (dom.globalTextSizeInput) dom.globalTextSizeInput.value = String(box.size);
       if (runtime.assets.fonts.some((font) => font.name === box.font)) runtime.selectedFont = box.font;
@@ -1842,14 +1871,18 @@
       fontSize: `${Math.max(12, box.size * rect.scaleX)}px`,
       textAlign: box.align || "center"
     });
-    Object.assign(dom.textBubble.style, {
-      left: `${Math.max(8, Math.min(rect.left, dom.stageFrame.clientWidth - dom.textBubble.offsetWidth - 8))}px`,
-      top: `${Math.max(8, rect.top - 50)}px`
-    });
     dom.textInput.value = box.text || "";
     dom.textInput.classList.remove("hidden");
     dom.textBubble.classList.remove("hidden");
     setAlignButtonState(box.align || "center");
+    dom.textBubble.style.visibility = "hidden";
+    const bubbleWidth = dom.textBubble.offsetWidth;
+    const bubbleHeight = dom.textBubble.offsetHeight;
+    Object.assign(dom.textBubble.style, {
+      left: `${Math.max(8, Math.min(rect.left, dom.stageFrame.clientWidth - bubbleWidth - 8))}px`,
+      top: `${Math.max(8, rect.top - bubbleHeight - 12)}px`,
+      visibility: ""
+    });
     if (options.focus) {
       window.setTimeout(() => {
         dom.textInput.focus();
@@ -1895,12 +1928,25 @@
 
   function scheduleAutosave() {
     if (!canEdit()) return;
+    markLocalContributionDirty();
     clearTimeout(runtime.localAutosaveTimer);
     runtime.localAutosaveTimer = window.setTimeout(() => submitLocalContribution(false), 700);
   }
 
-  function submitLocalContribution(submitted) {
-    if (runtime.game.phase !== "drawing" || !runtime.myId) return;
+  function markLocalContributionDirty() {
+    const contribution = runtime.game.contributions?.[runtime.myId];
+    if (!contribution?.submitted) return;
+    contribution.submitted = false;
+    renderSession();
+  }
+
+  async function submitLocalContribution(submitted) {
+    if (runtime.game.phase !== "drawing" || !runtime.myId) return false;
+    const box = getSelectedTextBox();
+    if (box && dom.textInput && document.activeElement === dom.textInput) {
+      box.text = dom.textInput.value.slice(0, numberOr(settings.editor.maxTextLength, 360));
+      fitTextBoxToContent(box);
+    }
     const contribution = sanitizeContribution({
       playerId: runtime.myId,
       playerName: getPlayerNameById(runtime.myId) || getPlayerName(),
@@ -1913,13 +1959,25 @@
     }, runtime.myId);
     runtime.game.contributions[runtime.myId] = contribution;
     if (runtime.role === "host") {
-      if (submitted) logActivity("Your submission is in.");
+      if (submitted) {
+        logActivity("Your submission is in.");
+        showToast("Submitted.");
+      }
       scheduleBroadcastState();
       renderAll();
+      return true;
     } else {
       const host = getHostPeer();
-      sendToPeer(host, { type: "CONTRIBUTION", contribution });
-      if (submitted) logActivity("Submission sent.");
+      const sent = await sendToPeer(host, { type: "CONTRIBUTION", contribution });
+      if (submitted && sent) {
+        logActivity("Submission sent.");
+        showToast("Submitted.");
+      } else if (submitted && !sent) {
+        showToast("Still connecting to the host.");
+        logActivity("Submission could not be sent yet.");
+      }
+      renderAll();
+      return sent;
     }
   }
 
@@ -2022,6 +2080,12 @@
     if (dom.createInviteBtn) dom.createInviteBtn.disabled = runtime.role !== "host";
     if (dom.acceptAnswerBtn) dom.acceptAnswerBtn.disabled = runtime.role !== "host";
     if (dom.makeAnswerBtn) dom.makeAnswerBtn.disabled = !runtime.securityReady;
+    if (dom.submitBtn) {
+      const submitted = Boolean(runtime.game.contributions?.[runtime.myId]?.submitted);
+      dom.submitBtn.disabled = !canEdit();
+      dom.submitBtn.textContent = submitted ? "Submitted" : "Submit";
+      dom.submitBtn.classList.toggle("submitted", submitted);
+    }
   }
 
   function renderPhase() {
@@ -2039,6 +2103,7 @@
     const hasCanvasPhase = runtime.game.phase === "drawing";
     const hasGalleryPhase = ["voting", "results", "final"].includes(runtime.game.phase);
     dom.editorPanel.classList.toggle("hidden", !hasCanvasPhase);
+    dom.canvasOptionsBar?.classList.toggle("hidden", !hasCanvasPhase);
     dom.emptyStage.classList.toggle("hidden", hasCanvasPhase || hasGalleryPhase);
     dom.gallery.classList.toggle("hidden", !hasGalleryPhase);
     if (!hasCanvasPhase) hideTextOverlay();
@@ -2141,41 +2206,51 @@
 
   function renderEditorControls() {
     if (!runtime.editor) return;
+    dom.toolButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.tool === runtime.editor.tool);
+    });
     if (dom.colorInput) dom.colorInput.value = normalizeColor(dom.colorInput.value || runtime.editor.color, runtime.editor.color);
+    if (dom.textColorInput) dom.textColorInput.value = normalizeColor(dom.textColorInput.value || runtime.editor.color, runtime.editor.color);
     if (dom.sizeInput) dom.sizeInput.value = String(runtime.editor.brushSize);
     if (dom.textSizeInput) dom.textSizeInput.value = String(runtime.editor.textSize);
     if (dom.globalTextSizeInput) dom.globalTextSizeInput.value = String(runtime.editor.textSize);
+    if (dom.canvasOptionsBar) dom.canvasOptionsBar.dataset.tool = runtime.editor.tool;
     renderFontControls();
   }
 
   function renderFontControls() {
     const current = runtime.selectedFont || runtime.editor.font || "";
     if (dom.fontCountLabel) dom.fontCountLabel.textContent = String(runtime.assets.fonts.length);
-    if (!dom.fontPreviewRow) return;
-    dom.fontPreviewRow.textContent = "";
+    const rows = [dom.fontPreviewRow, dom.bubbleFontPreviewRow].filter(Boolean);
+    if (!rows.length) return;
+    rows.forEach((row) => {
+      row.textContent = "";
+    });
     if (!runtime.assets.fonts.length) {
       const empty = document.createElement("div");
       empty.className = "font-empty";
       empty.textContent = "No fonts loaded";
-      dom.fontPreviewRow.append(empty);
+      rows.forEach((row) => row.append(empty.cloneNode(true)));
       return;
     }
-    runtime.assets.fonts.forEach((font) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "font-preview";
-      button.classList.toggle("active", font.name === current);
-      button.style.fontFamily = fontFamilyValue(font.name);
-      button.addEventListener("click", () => {
-        selectFont(font.name);
+    rows.forEach((row) => {
+      runtime.assets.fonts.forEach((font) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "font-preview";
+        button.classList.toggle("active", font.name === current);
+        button.style.fontFamily = fontFamilyValue(font.name);
+        button.addEventListener("click", () => {
+          selectFont(font.name);
+        });
+        const name = document.createElement("span");
+        name.textContent = font.name;
+        const sample = document.createElement("span");
+        sample.className = "sample";
+        sample.textContent = "Aa 123";
+        button.append(name, sample);
+        row.append(button);
       });
-      const name = document.createElement("span");
-      name.textContent = font.name;
-      const sample = document.createElement("span");
-      sample.className = "sample";
-      sample.textContent = "Aa 123";
-      button.append(name, sample);
-      dom.fontPreviewRow.append(button);
     });
   }
 

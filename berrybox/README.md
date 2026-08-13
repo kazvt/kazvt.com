@@ -45,4 +45,4 @@ Put fonts in `assets/fonts/` and list them in `assets/fonts/manifest.json`. A st
 
 ## Settings
 
-Edit `settings.json` for title, timers, round count, scoring, canvas size, image order, palette, and editor defaults.
+Edit `settings.json` for title, timers, scoring, canvas size, image order, palette, and editor defaults. Match length follows the number of listed images, capped by `game.maxRounds` up to 25.

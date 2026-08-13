@@ -52,42 +52,49 @@
             </div>
           </div>
 
-          <div class="stage-frame" id="stageFrame">
-            <canvas id="artCanvas" width="1280" height="720" aria-label="Drawing surface"></canvas>
-            <textarea id="textInput" class="canvas-text-input hidden" maxlength="360" spellcheck="true" aria-label="Edit text"></textarea>
-            <div id="textBubble" class="text-bubble hidden" aria-label="Text controls">
-              <button id="textSizeDownBtn" class="mini-button" type="button" title="Smaller text">A-</button>
-              <input id="textSizeInput" class="bubble-size" type="range" min="16" max="160" value="58" aria-label="Text size">
-              <button id="textSizeUpBtn" class="mini-button" type="button" title="Bigger text">A+</button>
-              <button id="alignLeftBtn" class="mini-button" type="button" title="Align left">Left</button>
-              <button id="alignCenterBtn" class="mini-button" type="button" title="Align center">Mid</button>
-              <button id="alignRightBtn" class="mini-button" type="button" title="Align right">Right</button>
-              <button id="deleteTextBtn" class="mini-button danger-mini" type="button" title="Delete text">Delete</button>
-            </div>
-            <div class="empty-stage" id="emptyStage">
-              <h2>Ready room</h2>
-              <p id="emptyStageText">Waiting for the host.</p>
-            </div>
-            <div class="gallery hidden" id="gallery"></div>
-          </div>
-
-          <div class="editor-panel" id="editorPanel">
-            <div class="tool-row">
-              <button class="tool-button active" data-tool="brush" type="button">Brush</button>
-              <button class="tool-button" data-tool="text" type="button">Text</button>
-              <button class="tool-button" data-tool="eraser" type="button">Erase</button>
-              <button id="undoBtn" class="ghost-button" type="button">Undo</button>
-              <button id="clearBtn" class="danger-button" type="button">Clear</button>
-              <button id="submitBtn" class="primary-button push-right" type="button">Submit</button>
+          <div class="canvas-workspace">
+            <div class="editor-panel" id="editorPanel">
+              <div class="tool-rail" aria-label="Editor tools">
+                <button class="tool-button active" data-tool="brush" type="button">Brush</button>
+                <button class="tool-button" data-tool="text" type="button">Text</button>
+                <button class="tool-button" data-tool="eraser" type="button">Erase</button>
+                <button id="undoBtn" class="ghost-button" type="button">Undo</button>
+                <button id="clearBtn" class="danger-button" type="button">Clear</button>
+                <button id="submitBtn" class="primary-button submit-tool" type="button">Submit</button>
+              </div>
             </div>
 
-            <div class="tool-row compact-controls">
-              <label class="inline-control" for="colorInput">Color <input id="colorInput" type="color" value="#ffffff"></label>
-              <label class="inline-control" for="sizeInput">Brush <input id="sizeInput" type="range" min="2" max="72" value="18"></label>
-              <label class="inline-control" for="globalTextSizeInput">Text <input id="globalTextSizeInput" type="range" min="16" max="160" value="58"></label>
-            </div>
+            <div class="canvas-column">
+              <div class="canvas-options-bar" id="canvasOptionsBar" data-tool="brush">
+                <div class="options-strip">
+                  <label class="inline-control color-option" for="colorInput">Color <input id="colorInput" type="color" value="#ffffff"></label>
+                  <label class="inline-control brush-option" for="sizeInput">Size <input id="sizeInput" type="range" min="2" max="72" value="18"></label>
+                  <label class="inline-control text-option" for="globalTextSizeInput">Text <input id="globalTextSizeInput" type="range" min="16" max="160" value="58"></label>
+                </div>
+                <div class="font-preview-row text-option" id="fontPreviewRow"></div>
+              </div>
 
-            <div class="font-preview-row" id="fontPreviewRow"></div>
+              <div class="stage-frame" id="stageFrame">
+                <canvas id="artCanvas" width="1280" height="720" aria-label="Drawing surface"></canvas>
+                <textarea id="textInput" class="canvas-text-input hidden" maxlength="360" spellcheck="true" aria-label="Edit text"></textarea>
+                <div id="textBubble" class="text-bubble hidden" aria-label="Text controls">
+                  <label class="bubble-control" for="textColorInput">Color <input id="textColorInput" type="color" value="#ffffff"></label>
+                  <button id="textSizeDownBtn" class="mini-button" type="button" title="Smaller text">A-</button>
+                  <input id="textSizeInput" class="bubble-size" type="range" min="16" max="160" value="58" aria-label="Text size">
+                  <button id="textSizeUpBtn" class="mini-button" type="button" title="Bigger text">A+</button>
+                  <button id="alignLeftBtn" class="mini-button" type="button" title="Align left">Left</button>
+                  <button id="alignCenterBtn" class="mini-button" type="button" title="Align center">Mid</button>
+                  <button id="alignRightBtn" class="mini-button" type="button" title="Align right">Right</button>
+                  <button id="deleteTextBtn" class="mini-button danger-mini" type="button" title="Delete text">Delete</button>
+                  <div class="bubble-font-row" id="bubbleFontPreviewRow"></div>
+                </div>
+                <div class="empty-stage" id="emptyStage">
+                  <h2>Ready room</h2>
+                  <p id="emptyStageText">Waiting for the host.</p>
+                </div>
+                <div class="gallery hidden" id="gallery"></div>
+              </div>
+            </div>
           </div>
         </section>
 

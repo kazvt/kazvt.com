@@ -3,6 +3,7 @@
     "title": "Berrybox",
     "tagline": "Draw, caption, vote, crown the winner.",
     "rounds": 3,
+    "maxRounds": 25,
     "drawingSeconds": 150,
     "votingSeconds": 45,
     "autoAdvance": true,

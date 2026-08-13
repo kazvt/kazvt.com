@@ -103,6 +103,7 @@ textarea:disabled {
 .section,
 .phase-strip,
 .editor-panel,
+.canvas-options-bar,
 .stage-frame {
   position: relative;
   border: 4px solid var(--line);
@@ -128,11 +129,13 @@ textarea:disabled {
 .section::before,
 .phase-strip::before,
 .editor-panel::before,
+.canvas-options-bar::before,
 .stage-frame::before,
 .topbar::after,
 .section::after,
 .phase-strip::after,
 .editor-panel::after,
+.canvas-options-bar::after,
 .stage-frame::after {
   content: "";
   position: absolute;
@@ -157,6 +160,7 @@ textarea:disabled {
 .section::after,
 .phase-strip::after,
 .editor-panel::after,
+.canvas-options-bar::after,
 .stage-frame::after {
   inset: -2px;
   opacity: 0.2;
@@ -166,7 +170,8 @@ textarea:disabled {
 .topbar,
 .section,
 .phase-strip,
-.editor-panel {
+.editor-panel,
+.canvas-options-bar {
   animation: panelJitter 520ms steps(2, end) infinite;
 }
 
@@ -571,6 +576,72 @@ select:focus {
     linear-gradient(90deg, var(--green), var(--paper), var(--red));
 }
 
+.canvas-workspace {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.canvas-column {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.editor-panel {
+  align-self: start;
+  padding: 10px;
+  background:
+    var(--metal-texture),
+    var(--paper-2);
+}
+
+.tool-rail {
+  display: grid;
+  gap: 8px;
+}
+
+.tool-rail button {
+  width: 100%;
+  min-height: 52px;
+  padding-inline: 6px;
+}
+
+.submit-tool {
+  margin-top: 6px;
+  min-height: 58px;
+}
+
+.submit-tool.submitted {
+  background: var(--lime);
+}
+
+.canvas-options-bar {
+  min-height: 66px;
+  padding: 9px;
+  background:
+    var(--metal-texture),
+    var(--paper-2);
+}
+
+.options-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.canvas-options-bar[data-tool="brush"] .text-option,
+.canvas-options-bar[data-tool="eraser"] .text-option,
+.canvas-options-bar[data-tool="eraser"] .color-option {
+  display: none;
+}
+
+.canvas-options-bar[data-tool="text"] .brush-option {
+  display: none;
+}
+
 .stage-frame {
   display: grid;
   place-items: center;
@@ -627,11 +698,11 @@ select:focus {
 .text-bubble {
   position: absolute;
   z-index: 9;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(8, auto);
   align-items: center;
   gap: 5px;
-  max-width: min(96%, 560px);
+  max-width: min(96%, 680px);
   padding: 6px;
   border: 3px solid var(--ink-2);
   background:
@@ -639,6 +710,21 @@ select:focus {
     var(--paper);
   box-shadow: 5px 5px 0 var(--shadow);
   clip-path: polygon(0 8px, 9px 0, 100% 4px, calc(100% - 6px) 100%, 5px calc(100% - 3px));
+}
+
+.bubble-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 3px 6px;
+  border: 3px solid var(--ink-2);
+  background: var(--cream);
+  color: var(--ink-2);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 var(--shadow);
 }
 
 .mini-button {
@@ -665,6 +751,25 @@ select:focus {
 .bubble-size {
   width: 112px;
   accent-color: var(--hot);
+}
+
+.bubble-font-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 5px;
+  max-height: 116px;
+  overflow: auto;
+}
+
+.bubble-font-row .font-preview {
+  min-height: 36px;
+  padding: 4px 6px;
+  font-size: 0.74rem;
+}
+
+.bubble-font-row .font-preview .sample {
+  font-size: 0.98rem;
 }
 
 .empty-stage {
@@ -1059,6 +1164,38 @@ input[type="range"] {
 
   .side-panel {
     display: flex;
+  }
+
+  .canvas-workspace {
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .editor-panel {
+    padding: 7px;
+  }
+
+  .tool-rail {
+    gap: 6px;
+  }
+
+  .tool-rail button {
+    min-height: 46px;
+    padding-inline: 4px;
+    font-size: 0.72rem;
+  }
+
+  .options-strip {
+    align-items: stretch;
+  }
+
+  .inline-control {
+    flex: 1 1 132px;
+  }
+
+  .text-bubble {
+    grid-template-columns: repeat(4, auto);
+    max-width: calc(100% - 16px);
   }
 
   .stage-frame {
