@@ -720,11 +720,6 @@ code {
   background: var(--paper);
 }
 
-:where(a[href], button, input[type="range"], .visualizer):where(:hover, :focus-visible) {
-  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color);
-  outline-offset: var(--click-hover-outline-offset);
-}
-
 .tool-list {
   display: grid;
   gap: 8px;
@@ -1632,4 +1627,43 @@ code {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
   }
+}
+
+:is(
+  a[href],
+  button,
+  input:not([type="hidden"]),
+  select,
+  textarea,
+  label[for],
+  summary,
+  [role="button"],
+  [role="link"],
+  [tabindex]:not([tabindex="-1"]),
+  .visualizer
+):not(:disabled):not([aria-disabled="true"]):where(:hover, :focus, :focus-visible) {
+  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
+  outline-offset: var(--click-hover-outline-offset) !important;
+}
+
+:is(
+  a[href],
+  button,
+  input[type="button"],
+  input[type="checkbox"],
+  input[type="color"],
+  input[type="file"],
+  input[type="radio"],
+  input[type="range"],
+  input[type="reset"],
+  input[type="submit"],
+  label[for],
+  select,
+  summary,
+  [role="button"],
+  [role="link"],
+  [tabindex]:not([tabindex="-1"]),
+  .visualizer
+):not(:disabled):not([aria-disabled="true"]) {
+  cursor: pointer;
 }
