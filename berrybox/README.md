@@ -1,4 +1,4 @@
-# Berrybox
+# berrybox
 
 Browser game for one host and members with room-code joining.
 
@@ -16,6 +16,8 @@ http://127.0.0.1:8765/
 ```
 
 The first browser in a room becomes the host. Opening the bare URL creates a room code and adds it to the address bar. Share that link with players.
+
+GitHub Pages uses the browser-side room path in `settings.json` with `network.signalingMode` set to `peerjs`. The game still sends play data browser-to-browser; PeerJS is only used so browsers can find each other from static hosting. `server.js` is only for local/custom server hosting.
 
 ## Images
 

@@ -9,7 +9,7 @@
 
   const DEFAULT_SETTINGS = {
     game: {
-      title: "Berrybox",
+      title: "berrybox",
       tagline: "Draw, caption, vote, crown the winner.",
       rounds: 3,
       maxRounds: 25,
@@ -27,10 +27,20 @@
       safePadding: 42
     },
     network: {
+      signalingMode: "peerjs",
+      peerJs: {
+        scope: "berrybox",
+        debug: 0,
+        useSettingsIceServers: false
+      },
       signalingPath: "/signal",
       roomParam: "room",
       joinTimeoutMs: 3200,
-      iceServers: [],
+      iceServers: [
+        {
+          urls: "stun:stun.l.google.com:19302"
+        }
+      ],
       iceCandidateTimeoutMs: 7000,
       channelChunkSize: 12000
     },
@@ -106,6 +116,11 @@
       connected: false,
       assigned: false,
       reconnectTimer: null
+    },
+    peerJs: {
+      instance: null,
+      hostPeerId: "",
+      mode: ""
     },
     connectionLabel: "Finding room",
     hostBroadcastTimer: null,
@@ -301,9 +316,9 @@
   }
 
   function applySettingsToShell() {
-    if (dom.gameTitle) dom.gameTitle.textContent = settings.game.title || "Berrybox";
+    if (dom.gameTitle) dom.gameTitle.textContent = settings.game.title || "berrybox";
     if (dom.gameTagline) dom.gameTagline.textContent = settings.game.tagline || "";
-    document.title = settings.game.title || "Berrybox";
+    document.title = settings.game.title || "berrybox";
     resizeCanvasFromSettings();
     runtime.selectedFont = runtime.selectedFont || "";
     runtime.editor.tool = settings.editor.defaultTool || "brush";
@@ -429,7 +444,122 @@
     renderAll();
   }
 
-  function connectSignaling() {
+  async function connectSignaling() {
+    const mode = String(settings.network.signalingMode || "peerjs").toLowerCase();
+    if (mode === "peerjs") return connectPeerJsSignaling();
+    if (mode === "websocket") return connectWebSocketSignaling();
+    return await connectPeerJsSignaling() || connectWebSocketSignaling();
+  }
+
+  function connectPeerJsSignaling() {
+    if (typeof Peer === "undefined") {
+      updateConnectionLabel("Room link offline");
+      return Promise.resolve(false);
+    }
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const hostPeerId = roomHostPeerId(runtime.roomId);
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        resolve(value);
+      };
+      const timeoutId = window.setTimeout(() => {
+        if (!runtime.role) {
+          destroyPeerJsInstance();
+          updateConnectionLabel("Room link offline");
+        }
+        finish(Boolean(runtime.role));
+      }, Math.max(1800, numberOr(settings.network.joinTimeoutMs, 3200)));
+
+      destroyPeerJsInstance();
+      runtime.peerJs.hostPeerId = hostPeerId;
+      runtime.peerJs.mode = "host-check";
+      updateConnectionLabel("Finding room");
+
+      let peer;
+      try {
+        peer = new Peer(hostPeerId, peerJsOptions());
+      } catch (error) {
+        finish(false);
+        return;
+      }
+
+      runtime.peerJs.instance = peer;
+      peer.on("open", async (id) => {
+        runtime.peerJs.mode = "host";
+        runtime.myId = id;
+        await beginHostMode({ roomId: runtime.roomId, roomSecret: runtime.roomSecret });
+        updateConnectionLabel("Room ready");
+        finish(true);
+      });
+      peer.on("connection", (connection) => {
+        acceptPeerJsHostConnection(connection);
+      });
+      peer.on("disconnected", () => {
+        if (runtime.role === "host") updateConnectionLabel("Room link offline");
+      });
+      peer.on("error", (error) => {
+        if (isPeerIdTakenError(error)) {
+          window.clearTimeout(timeoutId);
+          peer.destroy();
+          if (runtime.peerJs.instance === peer) runtime.peerJs.instance = null;
+          void connectPeerJsMember(hostPeerId).then(finish);
+          return;
+        }
+        updateConnectionLabel("Room link offline");
+        finish(false);
+      });
+    });
+  }
+
+  function connectPeerJsMember(hostPeerId) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        resolve(value);
+      };
+      const timeoutId = window.setTimeout(() => finish(Boolean(runtime.role)), Math.max(1800, numberOr(settings.network.joinTimeoutMs, 3200)));
+
+      runtime.peerJs.mode = "member";
+      updateConnectionLabel("Looking for host");
+
+      let peer;
+      try {
+        peer = new Peer(peerJsOptions());
+      } catch (error) {
+        finish(false);
+        return;
+      }
+
+      runtime.peerJs.instance = peer;
+      peer.on("open", async (id) => {
+        runtime.myId = id;
+        await beginMemberMode({ roomId: runtime.roomId, roomSecret: runtime.roomSecret });
+        const connection = peer.connect(hostPeerId, {
+          reliable: true,
+          metadata: {
+            roomId: runtime.roomId,
+            name: getPlayerName()
+          }
+        });
+        acceptPeerJsMemberConnection(connection, hostPeerId);
+        updateConnectionLabel("Joining room");
+        finish(true);
+      });
+      peer.on("error", () => {
+        updateConnectionLabel("Looking for host");
+        finish(Boolean(runtime.role));
+      });
+    });
+  }
+
+  function connectWebSocketSignaling() {
     const path = String(settings.network.signalingPath || "").trim();
     if (!path || typeof WebSocket === "undefined") return Promise.resolve(false);
 
@@ -497,6 +627,139 @@
     if (url.protocol === "http:") url.protocol = "ws:";
     if (url.protocol === "https:") url.protocol = "wss:";
     return url.toString();
+  }
+
+  function peerJsOptions() {
+    const configured = settings.network.peerJs || {};
+    const options = {
+      debug: clamp(Math.floor(numberOr(configured.debug, 0)), 0, 3)
+    };
+    if (configured.useSettingsIceServers) {
+      options.config = {
+        iceServers: settings.network.iceServers || [],
+        sdpSemantics: "unified-plan"
+      };
+    }
+    ["host", "path", "key"].forEach((key) => {
+      if (configured[key]) options[key] = configured[key];
+    });
+    if (configured.port) options.port = Number(configured.port);
+    if (typeof configured.secure === "boolean") options.secure = configured.secure;
+    return options;
+  }
+
+  function roomHostPeerId(roomId) {
+    const configured = settings.network.peerJs || {};
+    const scope = peerIdPart(configured.scope || `${window.location.host}${window.location.pathname}`) || "berrybox";
+    return `bbx-${scope}-${sanitizeRoomCode(roomId).toLowerCase()}-host`.slice(0, 120);
+  }
+
+  function peerIdPart(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+  }
+
+  function isPeerIdTakenError(error) {
+    const type = String(error?.type || "").toLowerCase();
+    const message = String(error?.message || "").toLowerCase();
+    return type === "unavailable-id" || message.includes("unavailable-id") || message.includes("is taken");
+  }
+
+  function acceptPeerJsHostConnection(connection) {
+    if (runtime.role !== "host") {
+      connection.close();
+      return;
+    }
+    const roomId = sanitizeRoomCode(connection.metadata?.roomId || runtime.roomId);
+    if (roomId !== runtime.roomId) {
+      connection.close();
+      return;
+    }
+
+    const peer = {
+      id: connection.peer,
+      seatId: connection.peer,
+      pc: null,
+      conn: connection,
+      channel: null,
+      connected: false,
+      receiveChunks: new Map(),
+      outboundName: cleanPlayerName(connection.metadata?.name || "Player")
+    };
+    runtime.peers.set(peer.id, peer);
+    addOrUpdatePlayer({
+      id: peer.id,
+      name: peer.outboundName,
+      score: runtime.game.scores[peer.id] || 0,
+      host: false,
+      connected: false
+    });
+    setupPeerJsDataConnection(peer, connection);
+    renderAll();
+  }
+
+  function acceptPeerJsMemberConnection(connection, hostPeerId) {
+    const peer = {
+      id: hostPeerId,
+      seatId: hostPeerId,
+      pc: null,
+      conn: connection,
+      channel: null,
+      connected: false,
+      receiveChunks: new Map(),
+      host: true
+    };
+    runtime.peers.set(peer.id, peer);
+    setupPeerJsDataConnection(peer, connection);
+    renderAll();
+  }
+
+  function setupPeerJsDataConnection(peer, connection) {
+    const channel = {
+      get readyState() {
+        return connection.open ? "open" : "closed";
+      },
+      send(data) {
+        connection.send(data);
+      },
+      close() {
+        connection.close();
+      }
+    };
+    peer.conn = connection;
+    peer.channel = channel;
+
+    const onOpen = () => {
+      peer.connected = true;
+      if (runtime.role === "client") {
+        sendToPeer(peer, {
+          type: "HELLO",
+          playerId: runtime.myId,
+          name: getPlayerName()
+        });
+        updateConnectionLabel("Joined room");
+      } else if (runtime.role === "host") {
+        updateConnectionLabel("Room ready");
+      }
+      logActivity(runtime.role === "host" ? "Peer connected." : "Connected to host.");
+      renderAll();
+    };
+
+    connection.on("open", onOpen);
+    connection.on("data", (data) => receivePackedMessage(peer, data));
+    connection.on("close", () => {
+      peer.connected = false;
+      if (runtime.role === "host") setPlayerConnected(peer.id, false);
+      if (runtime.role === "client" && !hasOpenPeer()) updateConnectionLabel("Looking for host");
+      logActivity("Peer disconnected.");
+      renderAll();
+    });
+    connection.on("error", () => {
+      peer.connected = false;
+      if (runtime.role === "client" && !hasOpenPeer()) updateConnectionLabel("Looking for host");
+      logActivity("Peer channel error.");
+      renderAll();
+    });
+    if (connection.open) window.setTimeout(onOpen, 0);
   }
 
   async function handleSignalMessage(message) {
@@ -2680,10 +2943,23 @@
   }
 
   function closeAllPeers() {
-    for (const peer of runtime.peers.values()) peer.pc?.close();
-    for (const peer of runtime.pending.values()) peer.pc?.close();
+    for (const peer of runtime.peers.values()) closePeerConnection(peer);
+    for (const peer of runtime.pending.values()) closePeerConnection(peer);
     runtime.peers.clear();
     runtime.pending.clear();
+  }
+
+  function closePeerConnection(peer) {
+    peer?.pc?.close();
+    peer?.conn?.close();
+  }
+
+  function destroyPeerJsInstance() {
+    if (runtime.peerJs.instance) {
+      runtime.peerJs.instance.destroy();
+      runtime.peerJs.instance = null;
+    }
+    runtime.peerJs.mode = "";
   }
 
   function getHostPeer() {

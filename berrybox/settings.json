@@ -1,6 +1,6 @@
 {
   "game": {
-    "title": "Berrybox",
+    "title": "berrybox",
     "tagline": "Draw, caption, vote, crown the winner.",
     "rounds": 3,
     "maxRounds": 25,
@@ -18,6 +18,12 @@
     "safePadding": 42
   },
   "network": {
+    "signalingMode": "peerjs",
+    "peerJs": {
+      "scope": "berrybox",
+      "debug": 0,
+      "useSettingsIceServers": false
+    },
     "signalingPath": "/signal",
     "roomParam": "room",
     "joinTimeoutMs": 3200,

@@ -49,6 +49,7 @@ body {
   background-size: var(--wallpaper-size);
   font-family: "Trebuchet MS", "Comic Sans MS", "Arial Rounded MT Bold", Arial, sans-serif;
   letter-spacing: 0;
+  cursor: var(--cursor-default, auto);
 }
 
 body > canvas {
@@ -460,6 +461,167 @@ body[data-theme="p16"] {
   --wallpaper-size: auto;
 }
 
+body,
+body[data-theme="p1"] {
+  --cursor-default: url("assets/cursors/p01-win-95-98/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p01-win-95-98/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p01-win-95-98/text.cur"), text;
+  --cursor-help: url("assets/cursors/p01-win-95-98/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p01-win-95-98/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p01-win-95-98/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p01-win-95-98/move.cur"), move;
+}
+
+body[data-theme="p2"] {
+  --cursor-default: url("assets/cursors/p02-black-pluses/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p02-black-pluses/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p02-black-pluses/text.cur"), text;
+  --cursor-help: url("assets/cursors/p02-black-pluses/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p02-black-pluses/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p02-black-pluses/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p02-black-pluses/move.cur"), move;
+}
+
+body[data-theme="p3"] {
+  --cursor-default: url("assets/cursors/p03-windows-7-full-collection/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p03-windows-7-full-collection/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p03-windows-7-full-collection/text.cur"), text;
+  --cursor-help: url("assets/cursors/p03-windows-7-full-collection/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p03-windows-7-full-collection/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p03-windows-7-full-collection/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p03-windows-7-full-collection/move.cur"), move;
+}
+
+body[data-theme="p4"] {
+  --cursor-default: url("assets/cursors/p04-future-1/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p04-future-1/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p04-future-1/text.cur"), text;
+  --cursor-help: url("assets/cursors/p04-future-1/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p04-future-1/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p04-future-1/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p04-future-1/move.cur"), move;
+}
+
+body[data-theme="p5"] {
+  --cursor-default: url("assets/cursors/p05-missing-texture/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p05-missing-texture/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p05-missing-texture/text.cur"), text;
+  --cursor-help: url("assets/cursors/p05-missing-texture/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p05-missing-texture/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p05-missing-texture/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p05-missing-texture/move.cur"), move;
+}
+
+body[data-theme="p6"] {
+  --cursor-default: url("assets/cursors/p06-left-handed-mouse-pointers/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p06-left-handed-mouse-pointers/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p06-left-handed-mouse-pointers/text.cur"), text;
+  --cursor-help: url("assets/cursors/p06-left-handed-mouse-pointers/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p06-left-handed-mouse-pointers/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p06-left-handed-mouse-pointers/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p06-left-handed-mouse-pointers/move.cur"), move;
+}
+
+body[data-theme="p7"] {
+  --cursor-default: url("assets/cursors/p07-retro-2000s-1/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p07-retro-2000s-1/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p07-retro-2000s-1/text.cur"), text;
+  --cursor-help: url("assets/cursors/p07-retro-2000s-1/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p07-retro-2000s-1/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p07-retro-2000s-1/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p07-retro-2000s-1/move.cur"), move;
+}
+
+body[data-theme="p8"] {
+  --cursor-default: url("assets/cursors/p08-modern-windows-xp/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p08-modern-windows-xp/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p08-modern-windows-xp/text.cur"), text;
+  --cursor-help: url("assets/cursors/p08-modern-windows-xp/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p08-modern-windows-xp/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p08-modern-windows-xp/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p08-modern-windows-xp/move.cur"), move;
+}
+
+body[data-theme="p9"] {
+  --cursor-default: url("assets/cursors/p09-retro-wave/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p09-retro-wave/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p09-retro-wave/text.cur"), text;
+  --cursor-help: url("assets/cursors/p09-retro-wave/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p09-retro-wave/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p09-retro-wave/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p09-retro-wave/move.cur"), move;
+}
+
+body[data-theme="p10"] {
+  --cursor-default: url("assets/cursors/p10-red-and-black-1/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p10-red-and-black-1/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p10-red-and-black-1/text.cur"), text;
+  --cursor-help: url("assets/cursors/p10-red-and-black-1/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p10-red-and-black-1/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p10-red-and-black-1/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p10-red-and-black-1/move.cur"), move;
+}
+
+body[data-theme="p11"] {
+  --cursor-default: url("assets/cursors/p11-retro-3/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p11-retro-3/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p11-retro-3/text.cur"), text;
+  --cursor-help: url("assets/cursors/p11-retro-3/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p11-retro-3/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p11-retro-3/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p11-retro-3/move.cur"), move;
+}
+
+body[data-theme="p12"] {
+  --cursor-default: url("assets/cursors/p12-mini-black/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p12-mini-black/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p12-mini-black/text.cur"), text;
+  --cursor-help: url("assets/cursors/p12-mini-black/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p12-mini-black/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p12-mini-black/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p12-mini-black/move.cur"), move;
+}
+
+body[data-theme="p13"] {
+  --cursor-default: url("assets/cursors/p13-100-dpi-windows-default/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p13-100-dpi-windows-default/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p13-100-dpi-windows-default/text.cur"), text;
+  --cursor-help: url("assets/cursors/p13-100-dpi-windows-default/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p13-100-dpi-windows-default/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p13-100-dpi-windows-default/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p13-100-dpi-windows-default/move.cur"), move;
+}
+
+body[data-theme="p14"] {
+  --cursor-default: url("assets/cursors/p14-read-desc-windows-ease-of-access/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p14-read-desc-windows-ease-of-access/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p14-read-desc-windows-ease-of-access/text.cur"), text;
+  --cursor-help: url("assets/cursors/p14-read-desc-windows-ease-of-access/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p14-read-desc-windows-ease-of-access/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p14-read-desc-windows-ease-of-access/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p14-read-desc-windows-ease-of-access/move.cur"), move;
+}
+
+body[data-theme="p15"] {
+  --cursor-default: url("assets/cursors/p15-retro-90s-pointers/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p15-retro-90s-pointers/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p15-retro-90s-pointers/text.cur"), text;
+  --cursor-help: url("assets/cursors/p15-retro-90s-pointers/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p15-retro-90s-pointers/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p15-retro-90s-pointers/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p15-retro-90s-pointers/move.cur"), move;
+}
+
+body[data-theme="p16"] {
+  --cursor-default: url("assets/cursors/p16-black-and-purple/normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/p16-black-and-purple/pointer.cur"), pointer;
+  --cursor-text: url("assets/cursors/p16-black-and-purple/text.cur"), text;
+  --cursor-help: url("assets/cursors/p16-black-and-purple/help.cur"), help;
+  --cursor-busy: url("assets/cursors/p16-black-and-purple/busy.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/p16-black-and-purple/not-allowed.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/p16-black-and-purple/move.cur"), move;
+}
+
 a {
   color: inherit;
 }
@@ -470,7 +632,7 @@ input {
 }
 
 button {
-  cursor: pointer;
+  cursor: var(--cursor-pointer, pointer);
 }
 
 .boil-filters {
@@ -624,7 +786,8 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   .guide-choice,
   .guide-step,
   .music-controls button,
-  .paint-tools button
+  .paint-controls button,
+  .paint-zone canvas
 ):where(:hover, :focus, :focus-visible, :focus-within) {
   border-style: dashed !important;
   outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
@@ -1438,6 +1601,7 @@ code {
   display: grid;
   width: 68px;
   height: 46px;
+  overflow: visible;
   place-items: center;
 }
 
@@ -1445,6 +1609,7 @@ code {
   position: absolute;
   width: 34px;
   height: 34px;
+  overflow: visible;
   object-fit: contain;
   filter: drop-shadow(2px 2px 0 #111111);
 }
@@ -1461,6 +1626,17 @@ code {
 .sticker-wife {
   overflow: visible;
   isolation: isolate;
+  clip-path: none;
+}
+
+.sticker-wife,
+.sticker-wife * {
+  overflow: visible;
+}
+
+.sticker-wife .sticker-glyph {
+  overflow: visible;
+  clip-path: none;
 }
 
 .sticker-wife:hover .wife-combo img:first-child,
@@ -1474,6 +1650,7 @@ code {
 }
 
 .wife-kiss-stamp,
+.wife-kiss-fixed-text,
 .wife-kiss-particle {
   position: absolute;
   left: 50%;
@@ -1487,18 +1664,39 @@ code {
   height: 34px;
   background: url("assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
   filter: drop-shadow(2px 2px 0 var(--ink));
-  animation: wifeKissStamp 1000ms ease-out forwards !important;
+  animation: wifeKissStamp 1200ms ease-out forwards !important;
+}
+
+.wife-kiss-fixed-text {
+  top: 57%;
+  color: #ffe9f6;
+  font-family: "Trebuchet MS", "Comic Sans MS", Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.6px var(--ink);
+  paint-order: stroke fill;
+  text-shadow:
+    2px 2px 0 #ff3f94,
+    4px 4px 0 rgba(0, 0, 0, 0.34);
+  transform: translate(-50%, -50%);
+  animation: wifeKissFixedText 1750ms ease-out forwards !important;
 }
 
 .wife-kiss-particle {
   color: #ff3f94;
   font-family: "Trebuchet MS", "Comic Sans MS", Arial, sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 900;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.2px var(--ink);
+  paint-order: stroke fill;
   text-shadow:
-    1px 1px 0 #ffffff,
-    2px 2px 0 var(--ink);
-  animation: wifeKissParticle 1000ms ease-out forwards !important;
+    2px 2px 0 #ffffff,
+    3px 3px 0 #ffb6df,
+    4px 4px 0 rgba(0, 0, 0, 0.32);
+  animation: wifeKissParticle 1850ms ease-out forwards !important;
 }
 
 .wife-kiss-particle.is-kiss {
@@ -2073,6 +2271,25 @@ code {
   }
 }
 
+@keyframes wifeKissFixedText {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.78);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+}
+
 @keyframes wifeKissParticle {
   0% {
     opacity: 0;
@@ -2160,6 +2377,24 @@ code {
 }
 
 :is(
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="url"],
+  input:not([type]),
+  textarea,
+  [contenteditable="true"]
+) {
+  cursor: var(--cursor-text, text);
+}
+
+:is(:disabled, [aria-disabled="true"]) {
+  cursor: var(--cursor-not-allowed, not-allowed);
+}
+
+:is(
   a[href],
   button,
   input[type="button"],
@@ -2178,5 +2413,9 @@ code {
   [tabindex]:not([tabindex="-1"]),
   .visualizer
 ):not(:disabled):not([aria-disabled="true"]) {
-  cursor: pointer;
+  cursor: var(--cursor-pointer, pointer);
+}
+
+.paint-zone canvas {
+  cursor: var(--cursor-move, crosshair);
 }

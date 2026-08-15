@@ -81,7 +81,7 @@ server.on("upgrade", (request, socket) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Berrybox room server listening at http://${HOST}:${PORT}`);
+  console.log(`berrybox room server listening at http://${HOST}:${PORT}`);
 });
 
 function serveStatic(urlPath, response) {
