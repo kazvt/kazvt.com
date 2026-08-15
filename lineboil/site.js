@@ -644,7 +644,7 @@ function parseKeyValueLines(lines) {
     const separator = line.indexOf("=");
     if (separator === -1) return;
     const key = line.slice(0, separator).trim();
-    const value = line.slice(separator + 1).trim();
+    const value = line.slice(separator + 1).trim().replaceAll("\\n", "\n");
     if (key && value) values.set(key, value);
   });
   return values;
@@ -661,7 +661,7 @@ function selectedLanguageFromManifest(languages) {
   let selectedName = languages[0].name;
 
   try {
-    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const stored = sessionStorage.getItem(LANGUAGE_STORAGE_KEY);
     const match = languages.find((language) => language.name === stored || language.code === stored);
     if (match) selectedName = match.name;
   } catch {}
@@ -855,7 +855,6 @@ async function initializeMarquee() {
     .sort(([left], [right]) => Number(left.split(".").pop()) - Number(right.split(".").pop()))
     .map(([, value]) => value);
 
-  if (!lines.length) lines = await loadTextLines("marquee_announcements.txt");
   if (!lines.length) return;
 
   let index = Math.floor(Math.random() * lines.length);
@@ -969,9 +968,17 @@ function inlineNoteNodes(text) {
   const tokenPattern = /(\[\[[^\]]+\]\]|\[[^\]]+\])/g;
   let cursor = 0;
   let match = tokenPattern.exec(source);
+  const pushText = (value) => {
+    String(value)
+      .split("\n")
+      .forEach((part, index) => {
+        if (index > 0) nodes.push(el("br", { className: "inline-break" }));
+        if (part) nodes.push(part);
+      });
+  };
 
   while (match) {
-    if (match.index > cursor) nodes.push(source.slice(cursor, match.index));
+    if (match.index > cursor) pushText(source.slice(cursor, match.index));
 
     const token = match[0];
     const emoteFile = activeEmotes.get(token);
@@ -983,17 +990,27 @@ function inlineNoteNodes(text) {
     match = tokenPattern.exec(source);
   }
 
-  if (cursor < source.length) nodes.push(source.slice(cursor));
+  if (cursor < source.length) pushText(source.slice(cursor));
   return nodes;
 }
 
-function setInlineNote(node, text) {
+function markSoftLoaded(node) {
+  if (!node || !node.isConnected) return;
+
+  node.classList.remove("is-soft-loaded");
+  void node.offsetWidth;
+  node.classList.add("is-soft-loaded");
+}
+
+function setInlineNote(node, text, { animate = true } = {}) {
   if (node instanceof SVGElement) {
     node.textContent = String(text || "");
+    if (animate) markSoftLoaded(node);
     return;
   }
 
   node.replaceChildren(...inlineNoteNodes(text));
+  if (animate) markSoftLoaded(node);
 }
 
 function platformIcon(name) {
@@ -1708,6 +1725,7 @@ async function initializeEmbeddedGuide() {
     if (details.dataset.loaded) return;
     details.dataset.loaded = "true";
     slot.replaceChildren(el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]));
+    markSoftLoaded(slot);
 
     try {
       const response = await fetch("multistream-guide.html", { cache: "no-store" });
@@ -1723,9 +1741,11 @@ async function initializeEmbeddedGuide() {
       });
       slot.replaceChildren(fragment);
       applyLanguageText(slot);
+      markSoftLoaded(slot);
     } catch {
       details.dataset.loaded = "";
       slot.replaceChildren(el("p", { className: "embedded-guide-error", "data-i18n": "guide.load_error" }, [translatedText("guide.load_error", "the guide could not load here. use the multistream guide page from the nav.")]));
+      markSoftLoaded(slot);
     }
   };
 
@@ -1764,7 +1784,7 @@ async function mountLanguageSelector() {
     const button = event.target.closest("[data-language-name]");
     if (!button) return;
     try {
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, button.getAttribute("data-language-name") || DEFAULT_LANGUAGE_NAME);
+      sessionStorage.setItem(LANGUAGE_STORAGE_KEY, button.getAttribute("data-language-name") || DEFAULT_LANGUAGE_NAME);
     } catch {}
     window.location.reload();
   });
@@ -2347,6 +2367,7 @@ async function initializeMusicPlayer() {
     el("label", { className: "volume-label" }, [el("span", { "data-i18n": "music.volume" }, ["vol"]), volume]),
     visualizer,
   );
+  markSoftLoaded(mount);
   loadTrack(0);
   drawVisualizer();
 }
@@ -2379,6 +2400,7 @@ async function render(statusOverrides = {}) {
       createVisitCounter({ key: "kazvt-home-visits", label: translatedText("footer.counter", "you are visitor") }),
     ]),
   );
+  markSoftLoaded(app);
 
   initializeDrawingPad();
   initializeArtCarousel();
