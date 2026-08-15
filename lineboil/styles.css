@@ -429,6 +429,12 @@ body[data-theme="p14"] {
   --stamp-text: #111111;
 }
 
+
+/* Palette 14: keep Links-section card text readable on hover. */
+body[data-theme="p14"] #links .sticker:hover {
+  --hover-text: #ffffff;
+}
+
 body[data-theme="p15"] {
   --cream: #F8B2B2;
   --paper: #F8B2B2;
