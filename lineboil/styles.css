@@ -26,7 +26,7 @@
   --click-hover-outline-width: 4px;
   --click-hover-outline-style: dashed;
   --click-hover-outline-color: var(--ink);
-  --click-hover-outline-offset: 3px;
+  --click-hover-outline-offset: 7px;
   --hover-surface: var(--banner);
   --hover-text: var(--banner-text);
   --stamp-bg: var(--paper);
@@ -472,162 +472,210 @@ body[data-theme="p16"] {
 body,
 body[data-theme="p1"] {
   --cursor-default: url("assets/cursors/rw-picked/mini-games/3DArrow.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/mini-games/PacMan.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/mini-games/3DArrowShadow.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/mini-games/TicTacToe.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/mini-games/Cards.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/mini-games/TicTacToeShadow.ani"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/mini-games/CardsShadow.ani"), move;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Hand.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Help Cursor.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/wii/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Precizion Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p2"] {
   --cursor-default: url("assets/cursors/rw-picked/fireblaze/fireblaze_normalselect.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/fireblaze/fireblaze_linkselect.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/fireblaze/fireblaze_handwritingselect.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/fireblaze/fireblaze_backgroundbusyselect.ani"), help;
+  --cursor-pointer: url("assets/cursors/rw-picked/wii-red/wii-pointer-red.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-gant/Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/mario-gant/Help Select.cur"), help;
   --cursor-busy: url("assets/cursors/rw-picked/fireblaze/fireblaze_busyselect.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/fireblaze/fireblaze_busyselect.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/fireblaze/fireblaze_backgroundbusyselect.ani"), move;
+  --cursor-precision: url("assets/cursors/rw-picked/mario-gant/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-gant/Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/mario-gant/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-gant/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-gant/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p3"] {
-  --cursor-default: url("assets/cursors/rw-picked/fate-hand/Fate.ani"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/fate-hand/FateSelect.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/fate-hand/Fate Text.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/fate-hand/Fate Help.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/fate-hand/Fate wait.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/fate-hand/Fate Stop.ani"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/fate-hand/Fate grab.ani"), move;
+  --cursor-default: url("assets/cursors/rw-picked/legend-of-zelda/Master Sword.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/pokemon/Pokémon PC Box Hand.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/wii-yellow/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/legend-of-zelda/Bow and Arrow.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/legend-of-zelda/Hylian Shield.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot-OoT.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot_Horiz.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot_Vert.cur"), ns-resize;
 }
 
 body[data-theme="p4"] {
   --cursor-default: url("assets/cursors/rw-picked/blupoint/BluPointmed.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/blupoint/BluPointLink.cur"), pointer;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Link Select.cur"), pointer;
   --cursor-text: url("assets/cursors/rw-picked/blupoint/BluPointText2.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/blupoint/BluPointHelpmed.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/blupoint/BluPointBusy.ani"), wait;
+  --cursor-busy: url("assets/cursors/rw-picked/blupoint/BluPointPrecision.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/blupoint/BluPointPrecision.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/blupoint/BluPointUnavailiable.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/blupoint/BluPointMove1.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/blupoint/BluPointHorResize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/blupoint/BluPointVertResize.cur"), ns-resize;
 }
 
 body[data-theme="p5"] {
   --cursor-default: url("assets/cursors/rw-picked/legend-of-zelda/Master Sword.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/legend-of-zelda/Triforce.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/legend-of-zelda/Navi.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/legend-of-zelda/Bomb.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/legend-of-zelda/Hylian Shield.cur"), not-allowed;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-gant/Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/n64/N64 text.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/n64/hourglass.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/legend-of-zelda/Clawshot-cross.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/legend-of-zelda/Mirror_Shield_OoT.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot-OoT.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot_Horiz.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot_Vert.cur"), ns-resize;
 }
 
 body[data-theme="p6"] {
-  --cursor-default: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrown.cur.ani"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrownlink.cur.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrownpen.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/GuitarBrownhelp.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/GuitarBrownbusy.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/GuitarBrownno.cur.ani"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrownmove.cur.ani"), move;
+  --cursor-default: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Normal Select.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/wii-yellow/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Precision.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p7"] {
   --cursor-default: url("assets/cursors/rw-picked/doom-ii/Doom Guy - Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/doom-ii/Skull - Link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/doom-ii/Text Select.ani"), text;
+  --cursor-pointer: url("assets/cursors/rw-picked/dr-mario/Dr Mario Link.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Text Select.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/doom-ii/Pistol - Quakestion Mark (Help Select).cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/doom-ii/Busy - Barrel Explosion.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/doom-ii/Unavailable.ani"), not-allowed;
+  --cursor-busy: url("assets/cursors/rw-picked/doom-ii/Shotgun - Normal.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/doom-ii/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/doom-ii/Skull - Normal.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/doom-ii/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/doom-ii/Resize - H.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/doom-ii/Resize - V.cur"), ns-resize;
 }
 
 body[data-theme="p8"] {
   --cursor-default: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leaf.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafLinkXl.cur"), pointer;
+  --cursor-pointer: url("assets/cursors/rw-picked/pokemon/Pokémon PC Box Hand.cur"), pointer;
   --cursor-text: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafText.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leafhelp.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafBusy.ani"), wait;
+  --cursor-busy: url("assets/cursors/rw-picked/glow/Glow - working in backround.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/Leafpen.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafUnavailiable.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafMove.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/pokemon/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/pokemon/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p9"] {
   --cursor-default: url("assets/cursors/rw-picked/dove/Dove Cursor.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/dove/link select.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/dove/text select.ani"), text;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/blupoint/BluPointText2.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/dove/Help Select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/dove/Busy.ani"), wait;
+  --cursor-busy: url("assets/cursors/rw-picked/glow/Glow - working in backround.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/blupoint/BluPointPrecision.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/dove/unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/dove/move.ani"), move;
+  --cursor-move: url("assets/cursors/rw-picked/blupoint/BluPointMove2.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/blupoint/BluPointHorResize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/blupoint/BluPointVertResize.cur"), ns-resize;
 }
 
 body[data-theme="p10"] {
-  --cursor-default: url("assets/cursors/rw-picked/vdcset/Normal Select.ani"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/vdcset/Help.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/vdcset/Text.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/vdcset/Help.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/vdcset/Busy.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/vdcset/Unavailable.ani"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/vdcset/Move.ani"), move;
+  --cursor-default: url("assets/cursors/rw-picked/wii-red/wii-pointer-red.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Hand.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-gant/Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/wii-red/wii-help.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/wii-red/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/mario-gant/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-gant/Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/wii-red/wii-move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-gant/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-gant/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p11"] {
-  --cursor-default: url("assets/cursors/rw-picked/halo/halo select.ani.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/halo/plasma.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/halo/halo type.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/halo/loading .ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/halo/halo loading.ani"), wait;
+  --cursor-default: url("assets/cursors/rw-picked/advanced/Gun Cursor Advanced.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/blupoint/BluPointText2.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/advanced/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/glow/Glow - working in backround.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/advanced/Gun Cursor Advanced.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/advanced/No.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/advanced/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/advanced/Horizontal.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/advanced/Vertical.cur"), ns-resize;
 }
 
 body[data-theme="p12"] {
-  --cursor-default: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow.ani"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_Alt.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_type.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_help.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_busy.ani"), wait;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_unavailable.ani"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_MoveArrow.ani"), move;
+  --cursor-default: url("assets/cursors/rw-picked/mario-gant/Normal Select.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-gant/Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-gant/Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/mario-gant/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/wii/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/mario-gant/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-gant/Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/mario-gant/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-gant/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-gant/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p13"] {
-  --cursor-default: url("assets/cursors/rw-picked/sonic/Sonic Normal.ani"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/sonic/Sonic Link.ani"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/sonic/Sonic Text.ani"), text;
+  --cursor-default: url("assets/cursors/rw-picked/sonic/Sonic Person.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Text Select.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/sonic/Sonic Help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/sonic/Sonic Busy.ani"), wait;
+  --cursor-busy: url("assets/cursors/rw-picked/wii-yellow/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/sonic/Sonic Precision.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/sonic/Sonic Unavaible.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/sonic/Sonic Move.ani"), move;
+  --cursor-move: url("assets/cursors/rw-picked/sonic/Sonic Location.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p14"] {
   --cursor-default: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leaf.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafLinkXl.cur"), pointer;
+  --cursor-pointer: url("assets/cursors/rw-picked/pokemon/Pokémon PC Box Hand.cur"), pointer;
   --cursor-text: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafText.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leafhelp.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeavesCluster.ani"), wait;
+  --cursor-busy: url("assets/cursors/rw-picked/wii-yellow/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/Leafpen.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafUnavailiable.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafMove.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/pokemon/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/pokemon/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p15"] {
   --cursor-default: url("assets/cursors/rw-picked/n64/N64.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/n64/N64 link select.cur"), pointer;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-gant/Link Select.cur"), pointer;
   --cursor-text: url("assets/cursors/rw-picked/n64/N64 text.cur"), text;
   --cursor-help: url("assets/cursors/rw-picked/n64/help select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/n64/hourglass.ani"), wait;
+  --cursor-busy: url("assets/cursors/rw-picked/n64/hourglass.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/n64/presision.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/n64/unaivalable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/n64/presision.cur"), move;
+  --cursor-move: url("assets/cursors/rw-picked/n64/N64.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/n64/horizontal resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/n64/vertical resize.cur"), ns-resize;
 }
 
 body[data-theme="p16"] {
   --cursor-default: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/RSlogosword.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/DDScurserlinkselect.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/advanced/Text.ani"), text;
-  --cursor-help: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/ddscurserhelp.ani"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/Damage2632.ani"), wait;
+  --cursor-pointer: url("assets/cursors/rw-picked/mario-gant/Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/blupoint/BluPointText2.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/advanced/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/glow/Glow - working in backround.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/advanced/Gun Cursor Advanced.cur"), crosshair;
   --cursor-not-allowed: url("assets/cursors/rw-picked/advanced/No.cur"), not-allowed;
   --cursor-move: url("assets/cursors/rw-picked/advanced/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/advanced/Horizontal.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/advanced/Vertical.cur"), ns-resize;
 }
 
 a {
@@ -873,7 +921,6 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   .paint-controls button,
   .paint-zone canvas
 ):hover {
-  border-style: dashed !important;
   outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
   outline-offset: var(--click-hover-outline-offset) !important;
 }
@@ -944,8 +991,9 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
 }
 
 .oldweb-nav a[aria-current="page"] {
-  outline: var(--click-hover-outline-width) solid var(--click-hover-outline-color);
-  outline-offset: var(--click-hover-outline-offset);
+  box-shadow:
+    3px 3px 0 var(--shadow),
+    0 0 0 4px var(--click-hover-outline-color);
 }
 
 .oldweb-nav a.nav-multistream {
@@ -1096,12 +1144,9 @@ code {
 }
 
 .big-palette button[aria-pressed="true"] {
-  outline: var(--click-hover-outline-width) solid var(--click-hover-outline-color);
-  outline-offset: var(--click-hover-outline-offset);
-}
-
-.big-palette button[aria-pressed="true"]:hover {
-  outline-style: dashed;
+  box-shadow:
+    2px 2px 0 var(--shadow),
+    0 0 0 4px var(--click-hover-outline-color);
 }
 
 .big-palette span {
@@ -2683,5 +2728,5 @@ code {
 }
 
 .paint-zone canvas {
-  cursor: var(--cursor-move, crosshair);
+  cursor: var(--cursor-precision, crosshair);
 }

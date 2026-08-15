@@ -21,3 +21,16 @@ Each extracted pack keeps its original `readme.txt` where provided. Source pages
 - https://www.rw-designer.com/cursor-set/n64
 - https://www.rw-designer.com/cursor-set/sonic
 - https://www.rw-designer.com/cursor-set/doom-ii
+- https://www.rw-designer.com/cursor-set/wii
+- https://www.rw-designer.com/cursor-set/wii-yellow
+- https://www.rw-designer.com/cursor-set/wii-red
+- https://www.rw-designer.com/cursor-set/wii-cursor-by-stefano-tinaglia
+- https://www.rw-designer.com/cursor-set/mario-paint-1
+- https://www.rw-designer.com/cursor-set/mario-64-2020
+- https://www.rw-designer.com/cursor-set/mario-gant
+- https://www.rw-designer.com/cursor-set/mario-maker-2
+- https://www.rw-designer.com/cursor-set/pokemon
+- https://www.rw-designer.com/cursor-set/pokemon-x-and-y
+- https://www.rw-designer.com/cursor-set/dr-mario
+- https://www.rw-designer.com/cursor-set/magic-key
+- https://www.rw-designer.com/cursor-set/sims1

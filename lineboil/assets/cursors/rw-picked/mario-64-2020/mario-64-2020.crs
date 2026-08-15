@@ -1,0 +1,45 @@
+﻿[Arrow]
+Path=Mario 64 Normal Select.cur
+
+[AppStarting]
+Path=Mario 64 working in background.ani
+
+[Wait]
+Path=Mario 64 Busy.ani
+
+[Help]
+Path=Mario 64 Help Select.cur
+
+[IBeam]
+Path=Mario 64 Text Select.cur
+
+[No]
+Path=Mario 64 Unavailable.cur
+
+[SizeAll]
+Path=Mario 64 Move.cur
+
+[SizeNWSE]
+Path=Mario 64 Diagonal Resize 1.cur
+
+[SizeNESW]
+Path=Mario 64 Diagonal Resize 2.cur
+
+[SizeWE]
+Path=Mario 64 Horizontal Resize.cur
+
+[UpArrow]
+Path=Mario 64 Alternate Select.cur
+
+[SizeNS]
+Path=Mario 64 Vertical Resize.cur
+
+[Hand]
+Path=Mario 64 Link Select.cur
+
+[NWPen]
+Path=Mario 64 Handwriting.cur
+
+[Crosshair]
+Path=Mario 64 Precision.cur
+

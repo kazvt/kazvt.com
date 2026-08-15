@@ -1,0 +1,30 @@
+﻿[Crosshair]
+Path=Cursor Sims Plus.cur
+
+[Help]
+Path=Cursor Sims Question.cur
+
+[UpArrow]
+Path=Cursor Sims S.cur
+
+[SizeAll]
+Path=Cursor Sims move.cur
+
+[AppStarting]
+Path=Cursor Sims Hover.cur
+
+[Person]
+Path=Cursor Sims person.cur
+
+[Hand]
+Path=Cursor Sims Click.cur
+
+[No]
+Path=Cursor Sims Nope.cur
+
+[Arrow]
+Path=Cursor Sims Normal.cur
+
+[Wait]
+Path=Cursor Sims Foot.cur
+
