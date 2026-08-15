@@ -616,6 +616,33 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   animation-delay: 180ms;
 }
 
+:is(
+  .oldweb-nav a,
+  .tool-list button,
+  .palette button,
+  .sticker,
+  .guide-choice,
+  .guide-step,
+  .music-controls button,
+  .paint-tools button
+):where(:hover, :focus, :focus-visible, :focus-within) {
+  border-style: dashed !important;
+  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
+  outline-offset: var(--click-hover-outline-offset) !important;
+}
+
+.sticker:where(:hover, :focus-visible)::before {
+  border-style: dashed;
+  border-width: 3px;
+  opacity: 0.72;
+}
+
+.sticker:where(:hover, :focus-visible)::after {
+  border-style: dashed;
+  border-width: 2px;
+  opacity: 0.48;
+}
+
 .oldweb-nav {
   display: flex;
   flex-wrap: wrap;
@@ -1057,6 +1084,15 @@ code {
   text-underline-offset: 3px;
 }
 
+.guide-map a:hover .link-text,
+.guide-map a:focus .link-text,
+.guide-map a:focus-visible .link-text {
+  stroke: var(--click-hover-outline-color);
+  stroke-width: 0.7px;
+  paint-order: stroke fill;
+  text-decoration-style: dashed;
+}
+
 .guide-map .node-svg,
 .guide-map .badge,
 .guide-mobile-ladder .guide-step,
@@ -1076,6 +1112,14 @@ code {
 .guide-mobile-ladder .guide-choice:focus-within {
   scale: 1.05;
   filter: saturate(1.08) drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent));
+}
+
+.guide-map .node-svg:hover .shape,
+.guide-map .node-svg:focus-within .shape,
+.guide-map .badge:hover .badge-shape,
+.guide-map .badge:focus-within .badge-shape {
+  stroke-dasharray: 10 6;
+  stroke-width: 5;
 }
 
 .guide-mobile-ladder {
@@ -2112,6 +2156,7 @@ code {
 ):not(:disabled):not([aria-disabled="true"]):where(:hover, :focus, :focus-visible) {
   outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
   outline-offset: var(--click-hover-outline-offset) !important;
+  text-decoration-style: dashed;
 }
 
 :is(
