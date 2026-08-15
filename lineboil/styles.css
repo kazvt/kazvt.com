@@ -998,7 +998,7 @@ code {
 .guide-mobile-ladder .guide-step:focus-within,
 .guide-mobile-ladder .guide-choice:hover,
 .guide-mobile-ladder .guide-choice:focus-within {
-  scale: 1.05;
+  scale: 1.01;
   filter: saturate(1.08) drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent));
 }
 
