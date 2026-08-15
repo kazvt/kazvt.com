@@ -27,6 +27,10 @@
   --click-hover-outline-style: dashed;
   --click-hover-outline-color: var(--ink);
   --click-hover-outline-offset: 3px;
+  --hover-surface: var(--banner);
+  --hover-text: var(--banner-text);
+  --stamp-bg: var(--paper);
+  --stamp-text: var(--ink);
 }
 
 * {
@@ -81,6 +85,10 @@ body[data-theme="p2"] {
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/45-degree-fabric-light.png");
   --wallpaper-size: 630px 630px;
+  --hover-surface: #486C2F;
+  --hover-text: #ffffff;
+  --stamp-bg: #486C2F;
+  --stamp-text: #ffffff;
 }
 
 body[data-theme="p3"] {
@@ -405,6 +413,10 @@ body[data-theme="p14"] {
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/bo-play.png");
   --wallpaper-size: 42px 22px;
+  --hover-surface: #336d18;
+  --hover-text: #ffffff;
+  --stamp-bg: #336d18;
+  --stamp-text: #ffffff;
 }
 
 body[data-theme="p15"] {
@@ -643,6 +655,8 @@ button {
 }
 
 .site-wrap {
+  position: relative;
+  z-index: 1;
   width: min(1060px, calc(100% - 24px));
   margin: 0 auto;
   padding: clamp(12px, 3vw, 34px) 0 42px;
@@ -695,22 +709,94 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   box-shadow: 4px 4px 0 var(--shadow);
 }
 
+.logo-row {
+  display: grid;
+  grid-template-columns: minmax(34px, 72px) minmax(180px, 540px) minmax(34px, 72px);
+  gap: clamp(6px, 2vw, 18px);
+  align-items: center;
+  justify-content: center;
+  width: min(720px, 96vw);
+  margin: clamp(6px, 2vw, 18px) auto 0;
+  perspective: 900px;
+}
+
 .logo-home {
   display: block;
-  width: min(540px, 92vw);
-  margin: clamp(6px, 2vw, 18px) auto 0;
+  width: 100%;
   text-decoration: none;
+  outline: none !important;
+}
+
+.logo-home:hover,
+.logo-home:focus,
+.logo-home:focus-visible,
+.logo-home:active {
+  border-style: none;
+  outline: none !important;
+}
+
+.logo-flip-card {
+  position: relative;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 620ms steps(5, end);
+}
+
+.logo-home:hover .logo-flip-card {
+  transform: rotateY(180deg);
 }
 
 .site-logo {
   display: block;
   width: 100%;
   height: auto;
+  backface-visibility: hidden;
   image-rendering: pixelated;
   filter:
     drop-shadow(7px 8px 0 rgba(13, 8, 16, 0.82))
     drop-shadow(2px 2px 0 rgba(13, 8, 16, 0.94));
   animation: logoBoil 430ms steps(2, end) infinite;
+}
+
+.logo-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  animation:
+    logoBoil 430ms steps(2, end) infinite,
+    logoHueShift 3400ms linear infinite;
+}
+
+.logo-wumpa {
+  display: grid;
+  width: clamp(34px, 8vw, 58px);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  filter: drop-shadow(2px 3px 0 var(--shadow));
+  image-rendering: pixelated;
+  transition: transform 180ms steps(3, end), filter 180ms steps(3, end);
+}
+
+.logo-wumpa:hover {
+  transform: scale(1.12) rotate(-5deg);
+  filter: drop-shadow(3px 4px 0 var(--shadow)) saturate(1.18);
+}
+
+.logo-wumpa-right:hover {
+  transform: scale(1.12) rotate(5deg);
+}
+
+.logo-wumpa img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-wumpa.is-eaten {
+  visibility: hidden;
 }
 
 .site-header h1 {
@@ -728,8 +814,10 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 .tagline {
   max-width: 42rem;
   margin: 0;
+  color: var(--banner-text);
   font-size: clamp(1rem, 2.5vw, 1.24rem);
   font-weight: 900;
+  text-shadow: 2px 2px 0 color-mix(in srgb, var(--ink) 68%, transparent);
 }
 
 .scribble-box {
@@ -788,29 +876,28 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   .music-controls button,
   .paint-controls button,
   .paint-zone canvas
-):where(:hover, :focus, :focus-visible, :focus-within) {
+):hover {
   border-style: dashed !important;
   outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
   outline-offset: var(--click-hover-outline-offset) !important;
 }
 
-.sticker:where(:hover, :focus-visible)::before {
+.sticker:hover::before {
   border-style: dashed;
   border-width: 3px;
   opacity: 0.72;
 }
 
-.sticker:where(:hover, :focus-visible)::after {
+.sticker:hover::after {
   border-style: dashed;
   border-width: 2px;
   opacity: 0.48;
 }
 
 .oldweb-nav {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 7px;
-  justify-content: center;
   margin: 0 auto 12px;
   padding: 10px;
   background:
@@ -820,43 +907,55 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 
 .oldweb-nav a,
 .tool-list button {
-  min-height: 38px;
-  padding: 7px 13px;
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 5px 8px;
   border: 3px solid var(--ink);
   background: var(--yellow);
   color: var(--on-yellow);
+  font-size: clamp(0.72rem, 1.38vw, 0.95rem);
   font-weight: 900;
+  line-height: 0.92;
+  overflow-wrap: anywhere;
+  text-align: center;
   text-decoration: none;
   box-shadow: 3px 3px 0 var(--shadow);
   clip-path: polygon(0 6px, 7px 0, 100% 4px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
 }
 
-.oldweb-nav a:nth-child(2n) {
+.oldweb-nav a:nth-child(1),
+.oldweb-nav a:nth-child(6) {
+  background: var(--yellow);
+  color: var(--on-yellow);
+  transform: rotate(-0.45deg);
+}
+
+.oldweb-nav a:nth-child(2),
+.oldweb-nav a:nth-child(5) {
   background: var(--blue);
   color: var(--on-blue);
   transform: rotate(0.8deg);
 }
 
-.oldweb-nav a:nth-child(3n) {
+.oldweb-nav a:nth-child(3),
+.oldweb-nav a:nth-child(4) {
   background: var(--pink);
   color: var(--on-pink);
   transform: rotate(-0.7deg);
 }
 
 .oldweb-nav a[aria-current="page"] {
-  background: var(--green);
-  color: var(--on-green);
-  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color);
+  outline: var(--click-hover-outline-width) solid var(--click-hover-outline-color);
   outline-offset: var(--click-hover-outline-offset);
 }
 
 .oldweb-nav a.nav-multistream {
-  display: inline-grid;
-  height: 38px;
   align-content: center;
   justify-items: center;
-  padding: 4px 11px;
-  font-size: 0.76rem;
+  font-size: clamp(0.62rem, 1.05vw, 0.82rem);
   line-height: 0.92;
 }
 
@@ -865,14 +964,9 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 }
 
 .oldweb-nav a:hover,
-.oldweb-nav a:focus-visible,
-.tool-list button:hover,
-.tool-list button:focus-visible {
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
-  color: var(--banner-text);
+.tool-list button:hover {
+  background: var(--hover-surface);
+  color: var(--hover-text);
 }
 
 .marquee {
@@ -951,13 +1045,9 @@ code {
   color: var(--on-green);
 }
 
-.tool-list button[aria-pressed="true"]:hover,
-.tool-list button[aria-pressed="true"]:focus-visible {
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
-  color: var(--banner-text);
+.tool-list button[aria-pressed="true"]:hover {
+  background: var(--hover-surface);
+  color: var(--hover-text);
 }
 
 .palette {
@@ -1004,7 +1094,7 @@ code {
 }
 
 .big-palette button[aria-pressed="true"] {
-  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color);
+  outline: var(--click-hover-outline-width) solid var(--click-hover-outline-color);
   outline-offset: var(--click-hover-outline-offset);
 }
 
@@ -1091,7 +1181,8 @@ code {
   flex: 0 0 auto;
   padding: 4px 8px;
   border: 3px solid var(--ink);
-  background: var(--paper);
+  background: var(--stamp-bg);
+  color: var(--stamp-text);
   font-size: 0.82rem;
   font-weight: 900;
   transform: rotate(2deg);
@@ -1120,22 +1211,25 @@ code {
   background-size: 18px 18px;
 }
 
-.guide-page #multistream-guide {
-  animation-duration: 900ms;
+.guide-page #multistream-guide,
+.panel.guide-embed-panel {
+  animation-duration: 1800ms;
 }
 
-.guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong) {
-  animation-duration: 1100ms;
+.guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong),
+.guide-embed-panel :is(h1, h2, p, a, span, text, tspan, strong) {
+  animation-duration: 2200ms;
 }
 
-.guide-map-frame :is(a, span, text, tspan) {
+.guide-map-frame :is(a, span, text, tspan),
+.guide-embed-panel .guide-map-frame :is(a, span, text, tspan) {
   animation: none !important;
 }
 
 .guide-map-frame::before,
 .guide-map-frame::after {
-  opacity: 0.14;
-  animation-duration: 1200ms;
+  opacity: 0.08;
+  animation-duration: 2400ms;
 }
 
 .guide-map {
@@ -1239,17 +1333,15 @@ code {
 
 .guide-map .link-text,
 .guide-link {
-  color: #17613f;
-  fill: #17613f;
+  color: #24784f;
+  fill: #24784f;
   font-weight: 900;
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
 
-.guide-map a:hover .link-text,
-.guide-map a:focus .link-text,
-.guide-map a:focus-visible .link-text {
+.guide-map a:hover .link-text {
   stroke: var(--click-hover-outline-color);
   stroke-width: 0.7px;
   paint-order: stroke fill;
@@ -1266,21 +1358,15 @@ code {
 }
 
 .guide-map .node-svg:hover,
-.guide-map .node-svg:focus-within,
 .guide-map .badge:hover,
-.guide-map .badge:focus-within,
 .guide-mobile-ladder .guide-step:hover,
-.guide-mobile-ladder .guide-step:focus-within,
-.guide-mobile-ladder .guide-choice:hover,
-.guide-mobile-ladder .guide-choice:focus-within {
+.guide-mobile-ladder .guide-choice:hover {
   scale: 1.05;
   filter: saturate(1.08) drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent));
 }
 
 .guide-map .node-svg:hover .shape,
-.guide-map .node-svg:focus-within .shape,
-.guide-map .badge:hover .badge-shape,
-.guide-map .badge:focus-within .badge-shape {
+.guide-map .badge:hover .badge-shape {
   stroke-dasharray: 10 6;
   stroke-width: 5;
 }
@@ -1433,40 +1519,27 @@ code {
   background: var(--paper);
 }
 
-.sticker:hover,
-.sticker:focus-visible {
+.sticker:hover {
   --sticker-lift: 10px;
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
-  color: var(--banner-text);
+  background: var(--hover-surface);
+  color: var(--hover-text);
 }
 
-.sticker.is-live:hover,
-.sticker.is-live:focus-visible {
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
+.sticker.is-live:hover {
+  background: var(--hover-surface);
 }
 
-.sticker.is-testing:hover,
-.sticker.is-testing:focus-visible {
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
+.sticker.is-testing:hover {
+  background: var(--hover-surface);
 }
 
-.sticker:hover .sticker-status-corner,
-.sticker:focus-visible .sticker-status-corner {
-  color: var(--banner-text);
+.sticker:hover .sticker-status-corner {
+  color: var(--hover-text);
   text-shadow:
-    1px 0 0 var(--bg),
-    -1px 0 0 var(--bg),
-    0 1px 0 var(--bg),
-    0 -1px 0 var(--bg);
+    1px 0 0 var(--hover-surface),
+    -1px 0 0 var(--hover-surface),
+    0 1px 0 var(--hover-surface),
+    0 -1px 0 var(--hover-surface);
 }
 
 .sticker-status-corner {
@@ -1639,13 +1712,11 @@ code {
   clip-path: none;
 }
 
-.sticker-wife:hover .wife-combo img:first-child,
-.sticker-wife:focus-visible .wife-combo img:first-child {
+.sticker-wife:hover .wife-combo img:first-child {
   animation: wifeKissLeft 760ms ease-in-out;
 }
 
-.sticker-wife:hover .wife-combo img:last-child,
-.sticker-wife:focus-visible .wife-combo img:last-child {
+.sticker-wife:hover .wife-combo img:last-child {
   animation: wifeKissRight 760ms ease-in-out;
 }
 
@@ -1979,13 +2050,9 @@ code {
   transition: none;
 }
 
-.music-button:hover,
-.music-button:focus-visible {
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
-  color: var(--banner-text);
+.music-button:hover {
+  background: var(--hover-surface);
+  color: var(--hover-text);
 }
 
 .music-player input[type="range"] {
@@ -2107,13 +2174,151 @@ code {
   color: var(--on-yellow);
 }
 
-.paint-controls button:hover,
-.paint-controls button:focus-visible {
-  background-color: var(--bg);
-  background-image: var(--wallpaper-image);
-  background-repeat: repeat;
-  background-size: var(--wallpaper-size);
-  color: var(--banner-text);
+.paint-controls button:hover {
+  background: var(--hover-surface);
+  color: var(--hover-text);
+}
+
+.guide-disclosure {
+  scroll-margin-top: 18px;
+}
+
+.guide-disclosure > summary {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: center;
+  margin: -4px -4px 14px;
+  padding: 10px 12px;
+  border: 4px solid var(--ink);
+  background: var(--orange);
+  color: var(--on-orange);
+  font-size: clamp(1rem, 2vw, 1.32rem);
+  font-weight: 900;
+  text-align: center;
+  list-style: none;
+  clip-path: polygon(0 8px, 12px 0, 100% 5px, calc(100% - 7px) 100%, 5px calc(100% - 4px));
+}
+
+.guide-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-disclosure > summary::before,
+.guide-disclosure > summary::after {
+  content: ">>";
+  margin-inline: 10px;
+  color: currentColor;
+}
+
+.guide-disclosure[open] > summary::before,
+.guide-disclosure[open] > summary::after {
+  content: "vv";
+}
+
+.embedded-guide-slot {
+  display: grid;
+  min-height: 12rem;
+  gap: 12px;
+}
+
+.embedded-guide-loading,
+.embedded-guide-error {
+  margin: 0;
+  padding: 12px;
+  border: 3px solid var(--ink);
+  background: var(--stamp-bg);
+  color: var(--stamp-text);
+  font-weight: 900;
+}
+
+.wumpa-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wumpa-fruit {
+  position: absolute;
+  display: grid;
+  width: var(--wumpa-size, 28px);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  pointer-events: auto;
+  filter: drop-shadow(2px 3px 0 var(--shadow));
+  animation: wumpaPeek var(--wumpa-life, 2200ms) steps(12, end) forwards;
+}
+
+.wumpa-fruit:hover,
+.wumpa-fruit:focus,
+.wumpa-fruit:focus-visible,
+.wumpa-fruit:active,
+.logo-wumpa:hover,
+.logo-wumpa:focus,
+.logo-wumpa:focus-visible,
+.logo-wumpa:active {
+  outline: none !important;
+}
+
+.wumpa-fruit img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.wumpa-fruit.is-eaten {
+  animation: wumpaEat 420ms steps(6, end) forwards !important;
+}
+
+.wumpa-counter,
+.wumpa-toast {
+  position: fixed;
+  z-index: 30;
+  border: 4px solid var(--ink);
+  background:
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--yellow) 35%, transparent) 0 7px, transparent 7px 14px),
+    var(--hover-surface);
+  color: var(--hover-text);
+  font-weight: 900;
+  box-shadow: 5px 5px 0 var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-14px) scale(0.9);
+  transition:
+    opacity 180ms steps(3, end),
+    transform 180ms steps(3, end);
+}
+
+.wumpa-counter {
+  top: 12px;
+  right: 12px;
+  padding: 7px 10px;
+  font-size: 0.95rem;
+}
+
+.wumpa-toast {
+  top: 54px;
+  left: 50%;
+  max-width: min(92vw, 31rem);
+  padding: 9px 12px;
+  text-align: center;
+  transform: translate(-50%, -14px) scale(0.9);
+}
+
+.wumpa-counter.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.wumpa-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
 }
 
 .page-footer {
@@ -2186,6 +2391,24 @@ code {
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(2px, -2px) scale(1.006) skewX(-0.4deg); }
   100% { transform: translate(-2px, 1px) scale(0.998) skewX(0.4deg); }
+}
+
+@keyframes logoHueShift {
+  0% { filter: hue-rotate(0deg) saturate(1.35) drop-shadow(7px 8px 0 rgba(13, 8, 16, 0.82)); }
+  100% { filter: hue-rotate(360deg) saturate(1.35) drop-shadow(7px 8px 0 rgba(13, 8, 16, 0.82)); }
+}
+
+@keyframes wumpaPeek {
+  0% { opacity: 0; transform: translate(var(--from-x, 0px), var(--from-y, 0px)) rotate(-12deg) scale(0.75); }
+  18% { opacity: 1; transform: translate(0, 0) rotate(4deg) scale(1); }
+  78% { opacity: 1; transform: translate(0, 0) rotate(-3deg) scale(1); }
+  100% { opacity: 0; transform: translate(var(--from-x, 0px), var(--from-y, 0px)) rotate(12deg) scale(0.72); }
+}
+
+@keyframes wumpaEat {
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  60% { opacity: 1; transform: scale(1.35) rotate(18deg); }
+  100% { opacity: 0; transform: scale(0.12) rotate(45deg); }
 }
 
 @keyframes outlineBoil {
@@ -2316,6 +2539,10 @@ code {
     grid-template-columns: 1fr;
   }
 
+  .oldweb-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .sidebar {
     position: static;
   }
@@ -2345,6 +2572,10 @@ code {
   .guide-mobile-ladder {
     display: grid;
   }
+
+  .oldweb-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2370,7 +2601,7 @@ code {
   [role="link"],
   [tabindex]:not([tabindex="-1"]),
   .visualizer
-):not(:disabled):not([aria-disabled="true"]):where(:hover, :focus, :focus-visible) {
+):not(.logo-home):not(.logo-wumpa):not(.wumpa-fruit):not(:disabled):not([aria-disabled="true"]):hover {
   outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
   outline-offset: var(--click-hover-outline-offset) !important;
   text-decoration-style: dashed;

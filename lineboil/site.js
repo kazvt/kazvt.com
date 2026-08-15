@@ -66,7 +66,7 @@ const socialLinks = [
   {
     key: "wife",
     label: "my wife",
-    href: "assets/wife/ramberry.webp",
+    href: "https://lillie.garden/",
     images: ["assets/wife/kazberry.webp", "assets/wife/ramberry.webp"],
     note: "",
     color: "#ffd7ef",
@@ -89,6 +89,12 @@ const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
 const WIFE_KISS_SOUND_SRC = "assets/wife/wifey%20kissy.mp3";
+const FRUIT_SOUND_SRC = "assets/fruit.mp3";
+const LANGUAGE_STORAGE_KEY = "kazvt-language";
+const DEFAULT_LANGUAGE_NAME = "english";
+const DEFAULT_LANGUAGE_CODE = "en";
+const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
+const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
 
 const cursorThemes = {
   p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
@@ -112,6 +118,9 @@ const cursorThemes = {
 let activeCursorEffect = null;
 let activeCursorTheme = "";
 let mwahAudio = null;
+let fruitAudio = null;
+let siteVolume = 0.8;
+let activeLanguageText = new Map();
 
 function getMwahAudio() {
   if (mwahAudio) return mwahAudio;
@@ -120,6 +129,23 @@ function getMwahAudio() {
   mwahAudio.preload = "auto";
   mwahAudio.load();
   return mwahAudio;
+}
+
+function getFruitAudio() {
+  if (fruitAudio) return fruitAudio;
+
+  fruitAudio = new Audio(FRUIT_SOUND_SRC);
+  fruitAudio.preload = "auto";
+  fruitAudio.load();
+  return fruitAudio;
+}
+
+function playSiteSound(sourceAudio, volumeScale = 1) {
+  try {
+    const audio = sourceAudio.cloneNode();
+    audio.volume = Math.max(0, Math.min(1, siteVolume * volumeScale));
+    audio.play().catch(() => {});
+  } catch {}
 }
 
 function svgTrailCursorImage(fill, stroke, shape = "diamond") {
@@ -601,10 +627,52 @@ async function loadTextLines(file) {
     return text
       .split(/\r?\n/)
       .map((line) => line.trim())
-      .filter(Boolean);
+      .filter((line) => line && !line.startsWith("#"));
   } catch {
     return [];
   }
+}
+
+function parseKeyValueLines(lines) {
+  const values = new Map();
+  lines.forEach((line) => {
+    line.split(",").forEach((chunk) => {
+      const separator = chunk.indexOf("=");
+      if (separator === -1) return;
+      const key = chunk.slice(0, separator).trim();
+      const value = chunk.slice(separator + 1).trim();
+      if (key && value) values.set(key, value);
+    });
+  });
+  return values;
+}
+
+async function loadLanguageManifest() {
+  const values = parseKeyValueLines(await loadTextLines("languages.txt"));
+  const languages = [...values.entries()].map(([name, code]) => ({ name, code }));
+  return languages.length ? languages : [{ name: DEFAULT_LANGUAGE_NAME, code: DEFAULT_LANGUAGE_CODE }];
+}
+
+async function loadActiveLanguageText() {
+  const languages = await loadLanguageManifest();
+  let selectedName = languages[0].name;
+
+  try {
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const match = languages.find((language) => language.name === stored || language.code === stored);
+    if (match) selectedName = match.name;
+  } catch {}
+
+  const language = languages.find((item) => item.name === selectedName) || languages[0];
+  const lines = await loadTextLines(`${language.name}.txt`);
+  const text = parseKeyValueLines(lines);
+  activeLanguageText = text;
+  document.documentElement.lang = language.code || DEFAULT_LANGUAGE_CODE;
+  return text;
+}
+
+function translatedText(key, fallback = "") {
+  return activeLanguageText.get(key) || fallback;
 }
 
 function normalizeStatus(status) {
@@ -733,20 +801,16 @@ async function initializeMarquee() {
   });
 }
 
-async function initializeSocialDescriptions() {
-  const lines = await loadTextLines("social_descriptions.txt");
-  if (!lines.length) return;
+async function initializeLanguageText() {
+  const descriptions = await loadActiveLanguageText();
 
-  const descriptions = new Map();
-  lines.forEach((line) => {
-    const separator = line.indexOf("=");
-    if (separator === -1) return;
-    const key = line.slice(0, separator).trim();
-    const value = line.slice(separator + 1).trim();
-    if (key && value) descriptions.set(key, value);
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.getAttribute("data-i18n");
+    const value = descriptions.get(key);
+    if (value) setInlineNote(node, value);
   });
 
-  socialLinks.forEach((link) => {
+  [...streamLinks, ...socialLinks].forEach((link) => {
     const description = descriptions.get(link.key);
     if (!description) return;
     link.note = description;
@@ -899,17 +963,13 @@ function sticker(link, extraClass = "") {
         : "",
       el("span", { className: "sticker-glyph", ariaHidden: "true" }, [link.images ? wifeIcon(link.images) : platformIcon(link.icon || link.key)]),
       el("span", { className: "sticker-label" }, [link.label]),
-      el("span", { className: "sticker-note", "data-social-note": hasStatus ? undefined : link.key }, inlineNoteNodes(link.note)),
+      el("span", { className: "sticker-note", "data-social-note": link.key }, inlineNoteNodes(link.note)),
     ],
   );
 }
 
 function playMwahSound() {
-  try {
-    const audio = getMwahAudio().cloneNode();
-    audio.volume = 0.85;
-    audio.play().catch(() => {});
-  } catch {}
+  playSiteSound(getMwahAudio(), 0.85);
 }
 
 function spawnWifeKissEffect(sticker) {
@@ -1173,6 +1233,239 @@ function createVisitCounter({ key = "kazvt-page-visits", label = "visits" } = {}
       digits.split("").map((digit) => el("i", {}, [digit])),
     ),
   ]);
+}
+
+function readSessionJson(key, fallback) {
+  try {
+    const value = sessionStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeSessionJson(key, value) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Session storage is decorative here; the fruit game still works without it.
+  }
+}
+
+function getWumpaCount() {
+  try {
+    return Number(sessionStorage.getItem(WUMPA_STORAGE_KEY) || "0") || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function setWumpaCount(count) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  try {
+    sessionStorage.setItem(WUMPA_STORAGE_KEY, String(safeCount));
+  } catch {
+    // Ignore storage failures; the visible counter can still update.
+  }
+
+  document.querySelectorAll("[data-wumpa-count]").forEach((node) => {
+    node.textContent = String(safeCount);
+  });
+}
+
+let wumpaCounterTimer = 0;
+let wumpaToastTimer = 0;
+
+function showWumpaCounter() {
+  const counter = document.querySelector(".wumpa-counter");
+  if (!counter) return;
+
+  counter.classList.add("is-visible");
+  window.clearTimeout(wumpaCounterTimer);
+  wumpaCounterTimer = window.setTimeout(() => {
+    counter.classList.remove("is-visible");
+  }, 3000);
+}
+
+function showWumpaToast(message) {
+  const toast = document.querySelector(".wumpa-toast");
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.classList.add("is-visible");
+  window.clearTimeout(wumpaToastTimer);
+  wumpaToastTimer = window.setTimeout(() => {
+    toast.classList.remove("is-visible");
+  }, 3000);
+}
+
+function addWumpa(amount, message) {
+  setWumpaCount(getWumpaCount() + amount);
+  showWumpaCounter();
+  if (message) showWumpaToast(message);
+}
+
+function playFruitSound() {
+  playSiteSound(getFruitAudio(), 0.95);
+}
+
+function logoWumpaState() {
+  return readSessionJson(WUMPA_LOGO_STORAGE_KEY, {
+    left: { hits: 0, eaten: false },
+    right: { hits: 0, eaten: false },
+  });
+}
+
+function saveLogoWumpaState(state) {
+  writeSessionJson(WUMPA_LOGO_STORAGE_KEY, state);
+}
+
+function initializeLogoWumpas() {
+  const buttons = [...document.querySelectorAll("[data-logo-wumpa]")];
+  if (!buttons.length) return;
+
+  const state = logoWumpaState();
+  buttons.forEach((button) => {
+    const side = button.getAttribute("data-logo-wumpa") || "left";
+    state[side] ||= { hits: 0, eaten: false };
+
+    if (state[side].eaten) {
+      button.classList.add("is-eaten");
+      button.setAttribute("aria-hidden", "true");
+      return;
+    }
+
+    button.setAttribute("aria-label", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`);
+    button.addEventListener("click", () => {
+      if (state[side].eaten) return;
+
+      playFruitSound();
+      state[side].hits += 1;
+      button.setAttribute("aria-label", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`);
+
+      if (state[side].hits >= 20) {
+        state[side].eaten = true;
+        button.classList.add("is-eaten");
+        button.setAttribute("aria-hidden", "true");
+        addWumpa(100, "You just permanently ate this wumpa fruit. It'll never appear back.");
+      } else {
+        showWumpaToast(`${side} wumpa: ${state[side].hits}/20`);
+      }
+
+      saveLogoWumpaState(state);
+    });
+  });
+
+  saveLogoWumpaState(state);
+}
+
+function spawnRandomWumpa(layer) {
+  const existing = layer.querySelectorAll(".wumpa-fruit").length;
+  if (existing > 2) return;
+
+  const size = 22 + Math.round(Math.random() * 12);
+  const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: "eat wumpa fruit" }, [
+    el("img", { src: "assets/wumpa.gif", alt: "" }),
+  ]);
+  const side = randomFrom(["left", "right", "top", "bottom"]);
+  const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  const height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+  fruit.style.setProperty("--wumpa-size", `${size}px`);
+  fruit.style.setProperty("--wumpa-life", "2200ms");
+
+  if (side === "left" || side === "right") {
+    fruit.style.top = `${20 + Math.random() * Math.max(40, height - 80)}px`;
+    fruit.style.left = side === "left" ? "5px" : `${Math.max(5, width - size - 5)}px`;
+    fruit.style.setProperty("--from-x", side === "left" ? `-${size + 12}px` : `${size + 12}px`);
+    fruit.style.setProperty("--from-y", "0px");
+  } else {
+    fruit.style.left = `${20 + Math.random() * Math.max(40, width - 80)}px`;
+    fruit.style.top = side === "top" ? "5px" : `${Math.max(5, height - size - 5)}px`;
+    fruit.style.setProperty("--from-x", "0px");
+    fruit.style.setProperty("--from-y", side === "top" ? `-${size + 12}px` : `${size + 12}px`);
+  }
+
+  fruit.addEventListener("click", () => {
+    if (fruit.classList.contains("is-eaten")) return;
+    playFruitSound();
+    fruit.classList.add("is-eaten");
+    addWumpa(1);
+    window.setTimeout(() => fruit.remove(), 430);
+  });
+
+  layer.append(fruit);
+  window.setTimeout(() => fruit.remove(), 2300);
+}
+
+function initializeWumpaGame() {
+  setWumpaCount(getWumpaCount());
+  initializeLogoWumpas();
+
+  const layer = document.querySelector(".wumpa-layer");
+  if (!layer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  let alive = true;
+  const queueSpawn = () => {
+    if (!alive) return;
+    window.setTimeout(() => {
+      if (!alive) return;
+      spawnRandomWumpa(layer);
+      queueSpawn();
+    }, 2800 + Math.random() * 3600);
+  };
+
+  queueSpawn();
+  window.addEventListener("pagehide", () => {
+    alive = false;
+  });
+}
+
+function multistreamGuidePanel() {
+  return el("details", { id: "multistream-guide-home", className: "panel guide-disclosure guide-embed-panel scribble-box", "data-embedded-guide": "true" }, [
+    el("summary", { "data-i18n": "guide.summary" }, ["multistream setup guide"]),
+    el("div", { className: "panel-body" }, [
+      el("div", { className: "embedded-guide-slot" }, [
+        el("p", { className: "embedded-guide-loading" }, ["open this to load the guide"]),
+      ]),
+    ]),
+  ]);
+}
+
+async function initializeEmbeddedGuide() {
+  const details = document.querySelector("[data-embedded-guide]");
+  if (!details) return;
+
+  const slot = details.querySelector(".embedded-guide-slot");
+  if (!slot) return;
+
+  const loadGuide = async () => {
+    if (details.dataset.loaded) return;
+    details.dataset.loaded = "true";
+    slot.replaceChildren(el("p", { className: "embedded-guide-loading" }, ["loading guide..."]));
+
+    try {
+      const response = await fetch("multistream-guide.html", { cache: "no-store" });
+      if (!response.ok) throw new Error("guide fetch failed");
+      const html = await response.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const body = doc.querySelector(".guide-panel .panel-body");
+      if (!body) throw new Error("guide body missing");
+
+      const fragment = document.createDocumentFragment();
+      [...body.children].forEach((child) => {
+        fragment.append(document.importNode(child, true));
+      });
+      slot.replaceChildren(fragment);
+    } catch {
+      details.dataset.loaded = "";
+      slot.replaceChildren(el("p", { className: "embedded-guide-error" }, ["the guide could not load here. use the multistream guide page from the nav."]));
+    }
+  };
+
+  details.addEventListener("toggle", () => {
+    if (details.open) loadGuide();
+  });
 }
 
 function initializeSiteTools() {
@@ -1716,7 +2009,8 @@ async function initializeMusicPlayer() {
     }
   });
   volume.addEventListener("input", () => {
-    audio.volume = Number(volume.value);
+    siteVolume = Number(volume.value);
+    audio.volume = siteVolume;
   });
   visualizer.addEventListener("click", cycleVisualizerMode);
   visualizer.addEventListener("keydown", (event) => {
@@ -1725,7 +2019,8 @@ async function initializeMusicPlayer() {
     cycleVisualizerMode();
   });
 
-  audio.volume = Number(volume.value);
+  siteVolume = Number(volume.value);
+  audio.volume = siteVolume;
   updateVisualizerLabel();
   mount.replaceChildren(
     title,
@@ -1753,6 +2048,7 @@ function render(statusOverrides = {}) {
       stamp: "links",
       children: [el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker))],
     }),
+    multistreamGuidePanel(),
     profilePanel(),
     oldWebPanel(),
     guestbookPanel(),
@@ -1767,8 +2063,10 @@ function render(statusOverrides = {}) {
   initializeDrawingPad();
   initializeArtCarousel();
   initializeMusicPlayer();
-  initializeSocialDescriptions();
+  initializeLanguageText();
   initializeWifeStickerEffects();
+  initializeEmbeddedGuide();
+  initializeWumpaGame();
   if (document.body.dataset.theme === "p16") updateCursorEffect("p16", { force: true });
 }
 
@@ -1790,4 +2088,6 @@ if (document.body.dataset.page === "home" && document.querySelector("#app")) {
   loadStatus().then(render);
 } else {
   initializeMusicPlayer();
+  initializeLanguageText();
+  initializeWumpaGame();
 }
