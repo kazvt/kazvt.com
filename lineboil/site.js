@@ -74,14 +74,14 @@ const socialLinks = [
 ];
 
 const buttonBadges = [
-  { label: "believe it!", file: "believe-it.png" },
-  { label: "moon prism", file: "moon-prism.png" },
-  { label: "waku waku", file: "waku-waku.png" },
-  { label: "gotta blast", file: "gotta-blast.png" },
-  { label: "plus ultra", file: "plus-ultra.png" },
-  { label: "snack break", file: "snack-break.png" },
-  { label: "space cowboy", file: "space-cowboy.png" },
-  { label: "power up!", file: "power-up.png" },
+  { key: "believe", label: "believe it!", file: "believe-it.png" },
+  { key: "moon", label: "moon prism", file: "moon-prism.png" },
+  { key: "waku", label: "waku waku", file: "waku-waku.png" },
+  { key: "blast", label: "gotta blast", file: "gotta-blast.png" },
+  { key: "ultra", label: "plus ultra", file: "plus-ultra.png" },
+  { key: "snack", label: "snack break", file: "snack-break.png" },
+  { key: "cowboy", label: "space cowboy", file: "space-cowboy.png" },
+  { key: "power", label: "power up!", file: "power-up.png" },
 ];
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"]);
@@ -96,6 +96,8 @@ const DEFAULT_LANGUAGE_NAME = "english";
 const DEFAULT_LANGUAGE_CODE = "en";
 const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
 const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
+const WUMPA_LOGO_RECOVER_KEY = "kazvt-logo-wumpa-recover-clicks";
+const EMOTE_FILE = "emotes.txt";
 
 const cursorThemes = {
   p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
@@ -122,6 +124,7 @@ let mwahAudio = null;
 let fruitAudio = null;
 let siteVolume = 0.2;
 let activeLanguageText = new Map();
+let activeEmotes = new Map();
 
 function getMwahAudio() {
   if (mwahAudio) return mwahAudio;
@@ -653,8 +656,7 @@ async function loadLanguageManifest() {
   return languages.length ? languages : [{ name: DEFAULT_LANGUAGE_NAME, code: DEFAULT_LANGUAGE_CODE }];
 }
 
-async function loadActiveLanguageText() {
-  const languages = await loadLanguageManifest();
+function selectedLanguageFromManifest(languages) {
   let selectedName = languages[0].name;
 
   try {
@@ -663,7 +665,17 @@ async function loadActiveLanguageText() {
     if (match) selectedName = match.name;
   } catch {}
 
-  const language = languages.find((item) => item.name === selectedName) || languages[0];
+  return languages.find((item) => item.name === selectedName) || languages[0];
+}
+
+async function loadActiveEmotes() {
+  activeEmotes = parseKeyValueLines(await loadTextLines(EMOTE_FILE));
+  return activeEmotes;
+}
+
+async function loadActiveLanguageText() {
+  const languages = await loadLanguageManifest();
+  const language = selectedLanguageFromManifest(languages);
   const lines = await loadTextLines(`${language.name}.txt`);
   const text = parseKeyValueLines(lines);
   activeLanguageText = text;
@@ -673,6 +685,49 @@ async function loadActiveLanguageText() {
 
 function translatedText(key, fallback = "") {
   return activeLanguageText.get(key) || fallback;
+}
+
+function translatedList(key, fallback = []) {
+  const value = activeLanguageText.get(key);
+  if (!value) return fallback;
+  return value.split("|").map((item) => item.trim()).filter(Boolean);
+}
+
+function translateTemplate(key, fallback = "", values = {}) {
+  let text = translatedText(key, fallback);
+  Object.entries(values).forEach(([name, value]) => {
+    text = text.replaceAll(`{${name}}`, String(value));
+  });
+  return text;
+}
+
+function mediaPath(file) {
+  if (/^(https?:|data:|blob:|\/)/i.test(file)) return file;
+  if (file.includes("/")) return file;
+  return `assets/${file}`;
+}
+
+function emoteNode(token, file) {
+  const src = mediaPath(file);
+  const extension = fileExtension(file);
+  if ([".mp4", ".webm", ".mov", ".m4v", ".ogv"].includes(extension)) {
+    return el("video", {
+      className: "inline-emote",
+      src,
+      ariaLabel: token,
+      autoplay: "",
+      muted: "",
+      loop: "",
+      playsinline: "",
+    });
+  }
+
+  return el("img", {
+    className: "inline-emote",
+    src,
+    alt: token,
+    loading: "lazy",
+  });
 }
 
 function normalizeStatus(status) {
@@ -718,13 +773,24 @@ function anyStreamLive() {
 
 function cursorThemeConfig(theme) {
   const config = cursorThemes[theme] || cursorThemes.p1;
-  if (theme !== "p16") return config;
+  const options = { ...(config.options || {}) };
+
+  if (options.glyphs) options.glyphs = translatedList(`cursor.${theme}.glyphs`, options.glyphs);
+  if (options.characters) options.characters = translatedList(`cursor.${theme}.characters`, options.characters);
+  if (options.glyph) options.glyph = translatedText(`cursor.${theme}.glyph`, options.glyph);
+  if (options.text) options.text = translatedText(`cursor.${theme}.text`, options.text);
+
+  if (theme !== "p16") {
+    return { ...config, options };
+  }
 
   return {
     ...config,
     options: {
-      ...config.options,
-      text: anyStreamLive() ? "kazvt is LIVE" : "kazvt is OFFLINE",
+      ...options,
+      text: anyStreamLive()
+        ? translatedText("cursor.p16.live", "kazvt is LIVE")
+        : translatedText("cursor.p16.offline", "kazvt is OFFLINE"),
     },
   };
 }
@@ -781,12 +847,19 @@ async function initializeMarquee() {
   const node = document.querySelector("[data-marquee-text]");
   if (!node) return;
 
-  const lines = await loadTextLines("marquee_announcements.txt");
+  await loadActiveEmotes();
+  if (!activeLanguageText.size) await loadActiveLanguageText();
+  let lines = [...activeLanguageText.entries()]
+    .filter(([key]) => /^marquee\.\d+$/.test(key))
+    .sort(([left], [right]) => Number(left.split(".").pop()) - Number(right.split(".").pop()))
+    .map(([, value]) => value);
+
+  if (!lines.length) lines = await loadTextLines("marquee_announcements.txt");
   if (!lines.length) return;
 
   let index = Math.floor(Math.random() * lines.length);
   const showLine = () => {
-    node.textContent = lines[index];
+    setInlineNote(node, lines[index]);
   };
 
   showLine();
@@ -802,15 +875,42 @@ async function initializeMarquee() {
 }
 
 async function initializeLanguageText() {
+  await loadActiveEmotes();
   const descriptions = await loadActiveLanguageText();
 
   applyLanguageText(document, descriptions);
 }
 
 function applyLanguageText(root, descriptions = activeLanguageText) {
+  const page = document.body.dataset.page || "home";
+  document.title = translatedText(`title.${page}`, document.title);
+
+  const metaDescription = document.querySelector('meta[name="description"]');
+  const description = descriptions.get(`meta.${page}.description`);
+  if (metaDescription && description) metaDescription.setAttribute("content", description);
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  if (ogTitle) ogTitle.setAttribute("content", translatedText(`title.${page}`, document.title));
+  if (ogDescription && description) ogDescription.setAttribute("content", description);
+
   root.querySelectorAll("[data-i18n]").forEach((node) => {
     const key = node.getAttribute("data-i18n");
     const value = descriptions.get(key);
+    if (value) setInlineNote(node, value);
+  });
+
+  ["aria-label", "title", "alt", "placeholder"].forEach((attribute) => {
+    const dataAttribute = `data-i18n-${attribute}`;
+    root.querySelectorAll(`[${dataAttribute}]`).forEach((node) => {
+      const key = node.getAttribute(dataAttribute);
+      const value = descriptions.get(key);
+      if (value) node.setAttribute(attribute, value);
+    });
+  });
+
+  root.querySelectorAll("[data-status-word]").forEach((node) => {
+    const status = node.getAttribute("data-status-word");
+    const value = descriptions.get(`status.${status}`);
     if (value) setInlineNote(node, value);
   });
 
@@ -863,16 +963,35 @@ function el(tag, attrs = {}, children = []) {
 }
 
 function inlineNoteNodes(text) {
-  return String(text || "")
-    .split(/(\[[^\]]+\])/g)
-    .filter(Boolean)
-    .map((part) => {
-      if (!part.startsWith("[") || !part.endsWith("]")) return part;
-      return el("span", { className: "note-small" }, [part]);
-    });
+  const source = String(text || "");
+  const nodes = [];
+  const tokenPattern = /(\[\[[^\]]+\]\]|\[[^\]]+\])/g;
+  let cursor = 0;
+  let match = tokenPattern.exec(source);
+
+  while (match) {
+    if (match.index > cursor) nodes.push(source.slice(cursor, match.index));
+
+    const token = match[0];
+    const emoteFile = activeEmotes.get(token);
+    if (emoteFile) nodes.push(emoteNode(token, emoteFile));
+    else if (token.startsWith("[[") && token.endsWith("]]")) nodes.push(token);
+    else nodes.push(el("span", { className: "note-small" }, [token]));
+
+    cursor = match.index + token.length;
+    match = tokenPattern.exec(source);
+  }
+
+  if (cursor < source.length) nodes.push(source.slice(cursor));
+  return nodes;
 }
 
 function setInlineNote(node, text) {
+  if (node instanceof SVGElement) {
+    node.textContent = String(text || "");
+    return;
+  }
+
   node.replaceChildren(...inlineNoteNodes(text));
 }
 
@@ -968,9 +1087,9 @@ function sticker(link, extraClass = "") {
     },
     [
       hasStatus
-        ? el("span", { className: `sticker-status-corner ${status}`, ariaLabel: `${link.label} is ${status}` }, [
+        ? el("span", { className: `sticker-status-corner ${status}`, ariaLabel: translateTemplate("status.aria", "{label} is {status}", { label: link.label, status: translatedText(`status.${status}`, status) }) }, [
             el("span", { className: "crayon-pip", ariaHidden: "true" }),
-            el("span", { className: "sticker-status-word" }, [status]),
+            el("span", { className: "sticker-status-word", "data-status-word": status }, [translatedText(`status.${status}`, status)]),
           ])
         : "",
       el("span", { className: "sticker-glyph", ariaHidden: "true" }, [link.images ? wifeIcon(link.images) : platformIcon(link.icon || link.key)]),
@@ -988,13 +1107,16 @@ function spawnWifeKissEffect(sticker) {
   if (!sticker) return;
 
   const stamp = el("span", { className: "wife-kiss-stamp", ariaHidden: "true" });
-  const fixedText = el("span", { className: "wife-kiss-fixed-text", ariaHidden: "true" }, ["mwah !!!"]);
+  const fixedText = el("span", { className: "wife-kiss-fixed-text", ariaHidden: "true" }, [
+    translatedText("wife.kiss_fixed", "mwah !!!"),
+  ]);
   sticker.append(stamp);
   sticker.append(fixedText);
   window.setTimeout(() => stamp.remove(), 1250);
   window.setTimeout(() => fixedText.remove(), 1850);
 
   const particleCount = 26;
+  const kissParticles = translatedList("wife.kiss_particles", ["\u2665", "\u2661", "<3", "xoxo", "mwah"]);
   for (let index = 0; index < particleCount; index += 1) {
     const isKiss = index % 4 === 0;
     const angle = Math.random() * Math.PI * 2;
@@ -1002,7 +1124,7 @@ function spawnWifeKissEffect(sticker) {
     const particle = el(
       "span",
       { className: `wife-kiss-particle ${isKiss ? "is-kiss" : "is-heart"}`, ariaHidden: "true" },
-      [isKiss ? "" : randomFrom(["\u2665", "\u2661", "<3", "xoxo", "mwah"])],
+      [isKiss ? "" : randomFrom(kissParticles)],
     );
 
     particle.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
@@ -1031,8 +1153,10 @@ function statusCard(link) {
   return el("article", { className: `status-card scribble-box ${link.status}` }, [
     el("span", { className: "status-light", ariaHidden: "true" }),
     el("strong", {}, [link.label]),
-    el("span", { className: "status-word" }, [link.status]),
-    el("p", {}, [link.status === "live" ? "paint is wet, stream is on" : "drying out for now"]),
+    el("span", { className: "status-word", "data-status-word": link.status }, [translatedText(`status.${link.status}`, link.status)]),
+    el("p", { "data-i18n": link.status === "live" ? "status.live_copy" : "status.offline_copy" }, [
+      translatedText(link.status === "live" ? "status.live_copy" : "status.offline_copy", link.status === "live" ? "paint is wet, stream is on" : "drying out for now"),
+    ]),
   ]);
 }
 
@@ -1052,7 +1176,7 @@ function profilePanel() {
       el("div", { className: "profile-layout" }, [
         el("figure", { className: "portrait art-carousel scribble-box" }, [
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
-            el("img", { src: "assets/kazvt-transparent.gif", alt: "kazvt art" }),
+            el("img", { src: "assets/kazvt-transparent.gif", alt: translatedText("art.alt", "kazvt art"), "data-i18n-alt": "art.alt" }),
           ]),
           el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, ["art window"]),
         ]),
@@ -1120,9 +1244,9 @@ function badgesPanel() {
               href: `assets/buttons/${badge.file}`,
               download: badge.file,
               className: "badge-link",
-              title: `Download ${badge.label}`,
+              title: translateTemplate("badge.download_title", "download {label}", { label: translatedText(`badge.${badge.key}`, badge.label) }),
             },
-            [el("img", { src: `assets/buttons/${badge.file}`, alt: badge.label, width: "88", height: "31" })],
+            [el("img", { src: `assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`, badge.label), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
           ),
         ),
       ),
@@ -1198,7 +1322,7 @@ async function initializeArtCarousel() {
           image.classList.remove("slide-enter");
         });
       }, 240);
-      if (caption) caption.textContent = file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+      if (caption) caption.textContent = file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || translatedText("art.default_caption", "art window");
     };
     image.src = artUrl(file);
   }
@@ -1220,10 +1344,10 @@ function paintPanel() {
     children: [
       el("div", { className: "paint-app" }, [
         el("div", { className: "paint-zone scribble-box" }, [
-          el("canvas", { id: "doodle-canvas", width: "720", height: "360", ariaLabel: "Draw here" }),
+          el("canvas", { id: "doodle-canvas", width: "720", height: "360", ariaLabel: translatedText("paint.canvas_aria", "draw here"), "data-i18n-aria-label": "paint.canvas_aria" }),
           el("p", { className: "paint-caption", "data-i18n": "paint.caption" }, ["draw here, then save your doodle"]),
         ]),
-        el("div", { className: "paint-controls scribble-box", ariaLabel: "Doodle pad tools" }, [
+        el("div", { className: "paint-controls scribble-box", ariaLabel: translatedText("paint.tools_aria", "doodle pad tools"), "data-i18n-aria-label": "paint.tools_aria" }, [
           el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true", "data-i18n": "paint.red" }, ["red"]),
           el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false", "data-i18n": "paint.blue" }, ["blue"]),
           el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false", "data-i18n": "paint.green" }, ["green"]),
@@ -1239,7 +1363,10 @@ function paintPanel() {
 function updateSidebar(links) {
   links.forEach((link) => {
     const node = document.querySelector(`#side-${link.key}`);
-    if (node) node.textContent = link.status;
+    if (node) {
+      node.setAttribute("data-status-word", link.status);
+      setInlineNote(node, translatedText(`status.${link.status}`, link.status));
+    }
   });
 }
 
@@ -1255,7 +1382,7 @@ function createVisitCounter({ key = "kazvt-page-visits", label = "visits" } = {}
 
   const digits = String(count).padStart(6, "0").slice(-6);
 
-  return el("div", { className: "visit-counter", ariaLabel: `${label}: ${count}` }, [
+  return el("div", { className: "visit-counter", ariaLabel: translateTemplate("footer.counter_aria", "{label}: {count}", { label, count }) }, [
     el("span", { className: "counter-label", "data-i18n": "footer.counter" }, [label]),
     el(
       "span",
@@ -1321,7 +1448,7 @@ function showWumpaToast(message) {
   const toast = document.querySelector(".wumpa-toast");
   if (!toast) return;
 
-  toast.textContent = message;
+  setInlineNote(toast, message);
   toast.classList.add("is-visible");
   window.clearTimeout(wumpaToastTimer);
   wumpaToastTimer = window.setTimeout(() => {
@@ -1337,6 +1464,36 @@ function addWumpa(amount, message) {
 
 function playFruitSound() {
   playSiteSound(getFruitAudio(), 0.95);
+}
+
+function playCrazyRecoverySound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const context = new AudioContext();
+    const master = context.createGain();
+    master.gain.value = Math.max(0, Math.min(1, siteVolume * 0.42));
+    master.connect(context.destination);
+
+    const notes = [196, 247, 330, 494, 659, 880, 1175, 988, 784, 523];
+    notes.forEach((frequency, index) => {
+      const start = context.currentTime + index * 0.055;
+      const osc = context.createOscillator();
+      const gain = context.createGain();
+      osc.type = index % 2 ? "square" : "sawtooth";
+      osc.frequency.setValueAtTime(frequency, start);
+      osc.frequency.exponentialRampToValueAtTime(frequency * (index % 3 === 0 ? 1.8 : 0.72), start + 0.16);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.22, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(start);
+      osc.stop(start + 0.24);
+    });
+
+    window.setTimeout(() => context.close().catch(() => {}), 1100);
+  } catch {}
 }
 
 function logoWumpaState() {
@@ -1365,21 +1522,21 @@ function initializeLogoWumpas() {
       return;
     }
 
-    button.setAttribute("aria-label", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`);
+    button.setAttribute("aria-label", translateTemplate("wumpa.logo.progress_aria", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`, { side, count: state[side].hits, total: 20 }));
     button.addEventListener("click", () => {
       if (state[side].eaten) return;
 
       playFruitSound();
       state[side].hits += 1;
-      button.setAttribute("aria-label", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`);
+      button.setAttribute("aria-label", translateTemplate("wumpa.logo.progress_aria", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`, { side, count: state[side].hits, total: 20 }));
 
       if (state[side].hits >= 20) {
         state[side].eaten = true;
         button.classList.add("is-eaten");
         button.setAttribute("aria-hidden", "true");
-        addWumpa(100, "You just permanently ate this wumpa fruit. It'll never appear back.");
+        addWumpa(100, translatedText("wumpa.logo.eaten_toast", "You just permanently ate this wumpa fruit. It'll never appear back."));
       } else {
-        showWumpaToast(`${side} wumpa: ${state[side].hits}/20`);
+        showWumpaToast(translateTemplate("wumpa.logo.bite_toast", "{side} wumpa: {count}/{total}", { side, count: state[side].hits, total: 20 }));
       }
 
       saveLogoWumpaState(state);
@@ -1390,12 +1547,55 @@ function initializeLogoWumpas() {
   document.body.classList.add("wumpa-ready");
 }
 
+function initializeLogoRecovery() {
+  const logo = document.querySelector(".logo-home");
+  if (!logo) return;
+
+  logo.addEventListener("click", (event) => {
+    const state = logoWumpaState();
+    const canRecover = Boolean(state.left?.eaten || state.right?.eaten);
+    if (!canRecover) return;
+
+    event.preventDefault();
+    let clicks = 0;
+    try {
+      clicks = Number(sessionStorage.getItem(WUMPA_LOGO_RECOVER_KEY) || "0") || 0;
+      sessionStorage.setItem(WUMPA_LOGO_RECOVER_KEY, String(clicks + 1));
+    } catch {
+      clicks += 1;
+    }
+
+    if (clicks + 1 < 100) return;
+
+    const recovered = {
+      left: { hits: 0, eaten: false },
+      right: { hits: 0, eaten: false },
+    };
+    saveLogoWumpaState(recovered);
+    try {
+      sessionStorage.setItem(WUMPA_LOGO_RECOVER_KEY, "0");
+    } catch {}
+
+    document.querySelectorAll("[data-logo-wumpa]").forEach((button) => {
+      const side = button.getAttribute("data-logo-wumpa") || "left";
+      button.classList.remove("is-eaten");
+      button.classList.add("is-recovered");
+      button.removeAttribute("aria-hidden");
+      button.setAttribute("aria-label", translateTemplate("wumpa.logo.progress_aria", `eat ${side} wumpa fruit, 0 of 20 bites`, { side, count: 0, total: 20 }));
+      window.setTimeout(() => button.classList.remove("is-recovered"), 1800);
+    });
+
+    playCrazyRecoverySound();
+    showWumpaToast(translatedText("wumpa.logo.recover_toast", "Okay, you caught me. There is actually a way to recover those wumpa. Don't tell anyone."));
+  });
+}
+
 function spawnRandomWumpa(layer) {
   const existing = layer.querySelectorAll(".wumpa-fruit").length;
   if (existing > 2) return;
 
   const size = 28;
-  const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: "eat wumpa fruit" }, [
+  const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: translatedText("wumpa.random_aria", "eat wumpa fruit"), "data-i18n-aria-label": "wumpa.random_aria" }, [
     el("img", { src: "assets/wumpa.gif", alt: "" }),
   ]);
   const side = randomFrom(["left", "right"]);
@@ -1425,6 +1625,7 @@ function spawnRandomWumpa(layer) {
 function initializeWumpaGame() {
   setWumpaCount(getWumpaCount());
   initializeLogoWumpas();
+  initializeLogoRecovery();
 
   const layer = document.querySelector(".wumpa-layer");
   if (!layer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -1450,7 +1651,7 @@ function multistreamGuidePanel() {
     el("summary", { "data-i18n": "guide.summary" }, ["multistream setup guide"]),
     el("div", { className: "panel-body" }, [
       el("div", { className: "embedded-guide-slot" }, [
-        el("p", { className: "embedded-guide-loading" }, ["open this to load the guide"]),
+        el("p", { className: "embedded-guide-loading", "data-i18n": "guide.open_to_load" }, [translatedText("guide.open_to_load", "open this to load the guide")]),
       ]),
     ]),
   ]);
@@ -1466,7 +1667,7 @@ async function initializeEmbeddedGuide() {
   const loadGuide = async () => {
     if (details.dataset.loaded) return;
     details.dataset.loaded = "true";
-    slot.replaceChildren(el("p", { className: "embedded-guide-loading" }, ["loading guide..."]));
+    slot.replaceChildren(el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]));
 
     try {
       const response = await fetch("multistream-guide.html", { cache: "no-store" });
@@ -1484,13 +1685,53 @@ async function initializeEmbeddedGuide() {
       applyLanguageText(slot);
     } catch {
       details.dataset.loaded = "";
-      slot.replaceChildren(el("p", { className: "embedded-guide-error" }, ["the guide could not load here. use the multistream guide page from the nav."]));
+      slot.replaceChildren(el("p", { className: "embedded-guide-error", "data-i18n": "guide.load_error" }, [translatedText("guide.load_error", "the guide could not load here. use the multistream guide page from the nav.")]));
     }
   };
 
   details.addEventListener("toggle", () => {
     if (details.open) loadGuide();
   });
+}
+
+async function mountLanguageSelector() {
+  if (document.querySelector(".language-dock")) return;
+
+  const languages = await loadLanguageManifest();
+  const selected = selectedLanguageFromManifest(languages);
+  const dock = el("section", { className: "language-dock scribble-box", ariaLabel: translatedText("language.aria", "language selector") }, [
+    el("span", { className: "language-title" }, [translatedText("language.title", "language")]),
+    el(
+      "div",
+      { className: "language-options" },
+      languages.map((language) =>
+        el(
+          "button",
+          {
+            type: "button",
+            className: "language-button",
+            ariaPressed: String(language.name === selected.name),
+            "data-language-name": language.name,
+            "data-language-code": language.code,
+          },
+          [translatedText(`language.${language.name}`, language.name)],
+        ),
+      ),
+    ),
+  ]);
+
+  dock.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-language-name]");
+    if (!button) return;
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, button.getAttribute("data-language-name") || DEFAULT_LANGUAGE_NAME);
+    } catch {}
+    window.location.reload();
+  });
+
+  const siteWrap = document.querySelector(".site-wrap");
+  if (siteWrap) siteWrap.insertAdjacentElement("afterend", dock);
+  else document.body.append(dock);
 }
 
 function initializeSiteTools() {
@@ -1512,7 +1753,7 @@ function initializeSiteTools() {
       const active = document.body.dataset.boil !== "calm";
       document.body.dataset.boil = active ? "calm" : "extra";
       boilButton.setAttribute("aria-pressed", String(!active));
-      boilButton.textContent = active ? "steady mode" : "extra wobble";
+      setInlineNote(boilButton, active ? translatedText("boil.steady", "steady mode") : translatedText("boil.extra", "extra wobble"));
     });
   }
 }
@@ -1715,7 +1956,7 @@ function initializeDrawingPad() {
   async function saveAnimatedGif(button) {
     const previousText = button.textContent;
     button.disabled = true;
-    button.textContent = "making gif";
+    setInlineNote(button, translatedText("paint.making", "making gif"));
     await new Promise((resolve) => window.setTimeout(resolve, 20));
 
     const exportCanvas = document.createElement("canvas");
@@ -1740,7 +1981,7 @@ function initializeDrawingPad() {
     window.setTimeout(() => URL.revokeObjectURL(url), 1500);
 
     button.disabled = false;
-    button.textContent = previousText;
+    setInlineNote(button, previousText);
   }
 
   function startStroke(event) {
@@ -1808,9 +2049,9 @@ async function initializeMusicPlayer() {
   let source = null;
   const title = el("p", { className: "track-title" }, [""]);
   const play = el("button", { type: "button", className: "music-button", "data-i18n": "music.play" }, ["play"]);
-  const prev = el("button", { type: "button", className: "music-button", ariaLabel: "Previous track" }, ["<<"]);
-  const next = el("button", { type: "button", className: "music-button", ariaLabel: "Next track" }, [">>"]);
-  const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: "Track position" });
+  const prev = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.previous", "previous track"), "data-i18n-aria-label": "music.previous" }, ["<<"]);
+  const next = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.next", "next track"), "data-i18n-aria-label": "music.next" }, [">>"]);
+  const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: translatedText("music.seek", "track position"), "data-i18n-aria-label": "music.seek" });
   const storedVolume = (() => {
     try {
       const value = Number(sessionStorage.getItem(VOLUME_STORAGE_KEY));
@@ -1819,15 +2060,15 @@ async function initializeMusicPlayer() {
       return 0.2;
     }
   })();
-  const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: String(storedVolume), ariaLabel: "Volume" });
+  const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: String(storedVolume), ariaLabel: translatedText("music.volume", "vol"), "data-i18n-aria-label": "music.volume" });
   const visualizer = el("canvas", {
     width: "150",
     height: "44",
     className: "visualizer",
     role: "button",
     tabindex: "0",
-    title: "Switch visualizer mode",
-    ariaLabel: "Music visualizer: bars mode. Click to switch.",
+    title: translateTemplate("music.visualizer_title", "visualizer: {mode}", { mode: "bars" }),
+    ariaLabel: translateTemplate("music.visualizer", "music visualizer: {mode} mode. click to switch.", { mode: "bars" }),
   });
   const visualContext = visualizer.getContext("2d");
   const visualizerBinCrop = 0.58;
@@ -1870,8 +2111,8 @@ async function initializeMusicPlayer() {
   }
 
   function updateVisualizerLabel() {
-    visualizer.setAttribute("aria-label", `Music visualizer: ${visualizerMode} mode. Click to switch.`);
-    visualizer.title = `visualizer: ${visualizerMode}`;
+    visualizer.setAttribute("aria-label", translateTemplate("music.visualizer", "music visualizer: {mode} mode. click to switch.", { mode: visualizerMode }));
+    visualizer.title = translateTemplate("music.visualizer_title", "visualizer: {mode}", { mode: visualizerMode });
   }
 
   function cycleVisualizerMode() {
@@ -2030,7 +2271,7 @@ async function initializeMusicPlayer() {
   });
   audio.addEventListener("ended", () => loadTrack(index + 1, true));
   audio.addEventListener("error", () => {
-    title.textContent = `${niceTitle(tracks[index])} - tape not found`;
+    title.textContent = translateTemplate("music.error", "{track} - tape not found", { track: niceTitle(tracks[index]) });
   });
   audio.addEventListener("timeupdate", () => {
     if (Number.isFinite(audio.duration) && audio.duration > 0) {
@@ -2070,7 +2311,7 @@ async function initializeMusicPlayer() {
   drawVisualizer();
 }
 
-function render(statusOverrides = {}) {
+async function render(statusOverrides = {}) {
   const app = document.querySelector("#app");
   const links = streamLinks.map((link) => ({
     ...link,
@@ -2101,8 +2342,8 @@ function render(statusOverrides = {}) {
 
   initializeDrawingPad();
   initializeArtCarousel();
-  initializeMusicPlayer();
-  initializeLanguageText();
+  await initializeMusicPlayer();
+  applyLanguageText(document);
   initializeWifeStickerEffects();
   initializeEmbeddedGuide();
   initializeWumpaGame();
@@ -2119,14 +2360,23 @@ async function loadStatus() {
   }
 }
 
-initializeSiteTools();
-initializeCurrentUrl();
-initializeMarquee();
+async function bootSite() {
+  await loadActiveEmotes();
+  await loadActiveLanguageText();
+  initializeSiteTools();
+  initializeCurrentUrl();
+  await initializeMarquee();
 
-if (document.body.dataset.page === "home" && document.querySelector("#app")) {
-  loadStatus().then(render);
-} else {
-  initializeMusicPlayer();
-  initializeLanguageText();
-  initializeWumpaGame();
+  if (document.body.dataset.page === "home" && document.querySelector("#app")) {
+    await render(await loadStatus());
+  } else {
+    await initializeMusicPlayer();
+    applyLanguageText(document);
+    initializeWumpaGame();
+  }
+
+  mountLanguageSelector();
+  updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
 }
+
+bootSite();

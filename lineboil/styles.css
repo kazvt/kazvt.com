@@ -27,6 +27,7 @@
   --click-hover-outline-style: dashed;
   --click-hover-outline-color: var(--ink);
   --click-hover-outline-offset: 7px;
+  --click-hover-outline-inset: -8px;
   --hover-surface: var(--banner);
   --hover-text: var(--banner-text);
   --stamp-bg: var(--paper);
@@ -837,10 +838,19 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  animation:
+    blockBoil 430ms steps(2, end) infinite,
+    wumpaFloat 1100ms ease-in-out infinite;
 }
 
 .logo-wumpa.is-eaten {
   visibility: hidden;
+}
+
+.logo-wumpa.is-recovered {
+  animation:
+    wumpaRecover 1600ms steps(18, end),
+    blockBoil 140ms steps(2, end) infinite;
 }
 
 .site-header h1 {
@@ -1864,6 +1874,16 @@ code {
   vertical-align: 0.08em;
 }
 
+.inline-emote {
+  display: inline-block;
+  width: 1.35em;
+  height: 1.35em;
+  margin-inline: 0.08em;
+  vertical-align: -0.28em;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .sticker-note .note-small {
   margin-left: 3px;
 }
@@ -2335,7 +2355,9 @@ code {
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  animation: blockBoil 430ms steps(2, end) infinite;
+  animation:
+    blockBoil 430ms steps(2, end) infinite,
+    wumpaFloat 980ms ease-in-out infinite;
 }
 
 .wumpa-fruit.is-eaten {
@@ -2385,6 +2407,70 @@ code {
 .wumpa-toast.is-visible {
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
+}
+
+.language-dock {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(1060px, calc(100% - 24px));
+  gap: 9px;
+  margin: -22px auto 34px;
+  padding: 10px;
+  background:
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--pink) 18%, transparent) 0 8px, transparent 8px 16px),
+    var(--paper);
+  color: var(--ink);
+}
+
+.language-title {
+  justify-self: start;
+  padding: 4px 8px;
+  border: 3px solid var(--ink);
+  background: var(--banner);
+  color: var(--banner-text);
+  font-size: 0.85rem;
+  font-weight: 900;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.language-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.language-button {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--on-yellow);
+  font-weight: 900;
+  box-shadow: 3px 3px 0 var(--shadow);
+  clip-path: polygon(0 6px, 7px 0, 100% 4px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
+}
+
+.language-button[aria-pressed="true"] {
+  background: var(--green);
+  color: var(--on-green);
+  box-shadow:
+    3px 3px 0 var(--shadow),
+    0 0 0 4px var(--click-hover-outline-color);
+}
+
+:is(
+  .oldweb-nav a,
+  .tool-list button,
+  .palette button,
+  .sticker,
+  .guide-choice,
+  .guide-step,
+  .music-controls button,
+  .paint-controls button,
+  .language-button
+):hover {
+  outline-offset: var(--click-hover-outline-inset) !important;
 }
 
 .page-footer {
@@ -2489,6 +2575,21 @@ code {
   0% { opacity: 1; transform: scale(1) rotate(0deg); }
   60% { opacity: 1; transform: scale(1.35) rotate(18deg); }
   100% { opacity: 0; transform: scale(0.12) rotate(45deg); }
+}
+
+@keyframes wumpaFloat {
+  0% { translate: 0 -3px; }
+  50% { translate: 0 5px; }
+  100% { translate: 0 -3px; }
+}
+
+@keyframes wumpaRecover {
+  0% { opacity: 0; transform: translateY(-120px) rotate(-720deg) scale(0.1); filter: hue-rotate(0deg) saturate(2.2); }
+  18% { opacity: 1; transform: translateY(30px) rotate(320deg) scale(1.8); filter: hue-rotate(120deg) saturate(2.4); }
+  38% { transform: translateY(-28px) rotate(-220deg) scale(0.72); filter: hue-rotate(240deg) saturate(2.6); }
+  62% { transform: translateY(16px) rotate(130deg) scale(1.36); filter: hue-rotate(40deg) saturate(2.1); }
+  82% { transform: translateY(-8px) rotate(-40deg) scale(0.92); filter: hue-rotate(300deg) saturate(1.8); }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); filter: hue-rotate(0deg) saturate(1); }
 }
 
 @keyframes outlineBoil {
@@ -2683,7 +2784,7 @@ code {
   .visualizer
 ):not(.logo-home):not(.logo-wumpa):not(.wumpa-fruit):not(:disabled):not([aria-disabled="true"]):hover {
   outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
-  outline-offset: var(--click-hover-outline-offset) !important;
+  outline-offset: var(--click-hover-outline-inset) !important;
   text-decoration-style: dashed;
 }
 
