@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>multistream guide | kazvt</title>
+    <meta
+      name="description"
+      content="kazvt's old-web multistreaming setup guide for OBS plugins, cloud multistreaming, or a VPS relay."
+    >
+    <meta name="theme-color" content="#ff9d16">
+    <meta property="og:title" content="multistream guide | kazvt">
+    <meta property="og:description" content="a yes/no old-web map for choosing a multistreaming setup.">
+    <meta property="og:image" content="assets/kazvt-transparent.gif">
+    <link rel="icon" href="assets/kazvt-transparent.gif">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="guide-page" data-page="guide">
+    <svg class="boil-filters" aria-hidden="true" focusable="false">
+      <filter id="boil-a">
+        <feTurbulence baseFrequency="0.012 0.034" numOctaves="2" seed="4" />
+        <feDisplacementMap in="SourceGraphic" scale="4" />
+      </filter>
+      <filter id="boil-b">
+        <feTurbulence baseFrequency="0.018 0.026" numOctaves="2" seed="9" />
+        <feDisplacementMap in="SourceGraphic" scale="6" />
+      </filter>
+      <filter id="boil-c">
+        <feTurbulence baseFrequency="0.015 0.04" numOctaves="2" seed="15" />
+        <feDisplacementMap in="SourceGraphic" scale="5" />
+      </filter>
+    </svg>
+
+    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" aria-label="kazvt multistream guide">
+      <header class="site-header text-center grid justify-items-center gap-2">
+        <p class="tiny-status" data-current-url></p>
+        <a class="logo-home" href="index.html" aria-label="kazvt home">
+          <img class="site-logo" src="assets/kazvt-transparent.gif" alt="kazvt">
+        </a>
+        <p class="tagline">retro streams, old games, links, live status</p>
+      </header>
+
+      <nav class="oldweb-nav scribble-box" aria-label="main links">
+        <a href="index.html#links">links</a>
+        <a href="index.html#profile">profile</a>
+        <a href="index.html#guestbook">guestbook</a>
+        <a href="multistream-guide.html" aria-current="page">multistream guide</a>
+        <a href="index.html#paint">paint</a>
+        <a href="index.html#badges">badges</a>
+      </nav>
+
+      <div class="marquee scribble-box" aria-label="site notice">
+        <span data-marquee-text></span>
+      </div>
+
+      <section class="web-grid grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-3.5 items-start">
+        <aside class="sidebar scribble-box">
+          <h2>palette</h2>
+          <div class="palette big-palette" aria-label="color palette">
+            <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" aria-label="use pastel stars palette" aria-pressed="true"><span></span></button>
+            <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" aria-label="use campfire checker palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" aria-label="use forest vines palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" aria-label="use ocean bubbles palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" aria-label="use night map palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" aria-label="use desert gingham palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" aria-label="use newsprint bricks palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" aria-label="use garden vines palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" aria-label="use sky clouds palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" aria-label="use rose curtain palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" aria-label="use deep circuit palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" aria-label="use arcade marquee palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" aria-label="use fire stripes palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" aria-label="use meadow dots palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" aria-label="use dream checker palette" aria-pressed="false"><span></span></button>
+            <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" aria-label="use swamp terminal palette" aria-pressed="false"><span></span></button>
+          </div>
+        </aside>
+
+        <div class="content-stack">
+          <section class="panel guide-panel scribble-box">
+            <header class="panel-head">
+              <span class="panel-title">multistream setup guide</span>
+              <span class="panel-stamp">author: kazvt</span>
+            </header>
+            <div class="panel-body">
+              <div class="guide-lede">
+                <p>pick the first thing that applies, then follow the Yes or No path. this page keeps the lineboil chrome, but it has its own URL for easy sharing.</p>
+              </div>
+
+              <div class="guide-map-frame scribble-box">
+                <svg class="guide-map" viewBox="0 0 1200 1210" role="img" aria-labelledby="guide-map-title guide-map-desc">
+                  <title id="guide-map-title">multistreaming setup decision tree</title>
+                  <desc id="guide-map-desc">a Yes or No flowchart that starts with commercial music, then recommends OBS plugins, a VPS setup, meld, or restream.</desc>
+                  <defs>
+                    <marker id="guide-arrow" viewBox="0 0 16 16" refX="14" refY="8" markerWidth="54" markerHeight="54" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+                      <path class="arrow-head" d="M2 2 L14 8 L2 14 Z"></path>
+                    </marker>
+                  </defs>
+
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M600 150 V175 H275 V250"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M600 150 V175 H925 V250"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M275 380 V400 H165 V465"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M275 380 V400 H535 V465"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M535 607 V635 H365 V705"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M535 607 V635 H725 V705"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M725 863 V895 H590 V970"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M725 863 V895 H960 V970"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M925 380 V400 H850 V465"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M925 380 V400 H1045 V620"></path>
+                  <path class="wire return" marker-end="url(#guide-arrow)" d="M1110 1054 H1184 V316 H1080"></path>
+
+                  <g class="badge yes" transform="translate(413 163)">
+                    <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
+                    <text x="36" y="17" text-anchor="middle">Yes</text>
+                  </g>
+                  <g class="badge no" transform="translate(753 163)">
+                    <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
+                    <text x="31" y="17" text-anchor="middle">No</text>
+                  </g>
+                  <g class="badge yes" transform="translate(190 388)">
+                    <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
+                    <text x="36" y="17" text-anchor="middle">Yes</text>
+                  </g>
+                  <g class="badge no" transform="translate(410 388)">
+                    <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
+                    <text x="31" y="17" text-anchor="middle">No</text>
+                  </g>
+                  <g class="badge yes" transform="translate(434 623)">
+                    <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
+                    <text x="36" y="17" text-anchor="middle">Yes</text>
+                  </g>
+                  <g class="badge no" transform="translate(615 623)">
+                    <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
+                    <text x="31" y="17" text-anchor="middle">No</text>
+                  </g>
+                  <g class="badge yes" transform="translate(635 883)">
+                    <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
+                    <text x="36" y="17" text-anchor="middle">Yes</text>
+                  </g>
+                  <g class="badge no" transform="translate(830 883)">
+                    <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
+                    <text x="31" y="17" text-anchor="middle">No</text>
+                  </g>
+                  <g class="badge yes" transform="translate(800 388)">
+                    <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
+                    <text x="36" y="17" text-anchor="middle">Yes</text>
+                  </g>
+                  <g class="badge no" transform="translate(975 388)">
+                    <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
+                    <text x="31" y="17" text-anchor="middle">No</text>
+                  </g>
+
+                  <g class="node-svg decision" transform="translate(435 20)">
+                    <polygon class="shape" points="0 14 15 0 318 5 330 0 324 116 311 130 10 125 0 130"></polygon>
+                    <text class="node-title" x="22" y="34">will your stream include</text>
+                    <text class="node-title" x="22" y="58">commercial music?</text>
+                    <text class="node-copy" x="22" y="86"><a href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer"><tspan class="link-text">spotify</tspan></a><tspan>, </tspan><a href="https://music.apple.com/" target="_blank" rel="noopener noreferrer"><tspan class="link-text">apple music</tspan></a><tspan>, label tracks,</tspan></text>
+                    <text class="node-copy" x="22" y="108">or songs you cannot stream legally.</text>
+                  </g>
+
+                  <g class="node-svg decision" transform="translate(120 250)">
+                    <polygon class="shape" points="0 14 15 0 298 5 310 0 304 116 291 130 10 125 0 130"></polygon>
+                    <text class="node-title" x="20" y="34">can your PC + upload</text>
+                    <text class="node-title" x="20" y="58">handle extra streams?</text>
+                    <text class="node-copy" x="20" y="86">each added destination can use</text>
+                    <text class="node-copy" x="20" y="108">more bitrate, GPU &amp; CPU.</text>
+                  </g>
+
+                  <g class="node-svg decision" transform="translate(770 250)">
+                    <polygon class="shape" points="0 14 15 0 298 5 310 0 304 116 291 130 10 125 0 130"></polygon>
+                    <text class="node-title" x="20" y="34">need more than</text>
+                    <text class="node-title" x="20" y="58">2 destinations?</text>
+                    <text class="node-copy" x="20" y="86">if the music is stream-safe,</text>
+                    <text class="node-copy" x="20" y="108">this is the main choice.</text>
+                  </g>
+
+                  <g class="node-svg action-green" transform="translate(10 465)">
+                    <polygon class="shape" points="0 14 15 0 298 5 310 0 304 128 291 142 10 137 0 142"></polygon>
+                    <a href="https://obsproject.com/" target="_blank" rel="noopener noreferrer">
+                      <text class="node-title link-text" x="20" y="34">use local OBS multistreaming</text>
+                    </a>
+                    <text class="node-copy" x="20" y="68"><a href="https://github.com/sorayuki/obs-multi-rtmp" target="_blank" rel="noopener noreferrer"><tspan class="link-text">OBS multi RTMP</tspan></a><tspan> or </tspan><a href="https://aitum.tv/" target="_blank" rel="noopener noreferrer"><tspan class="link-text">aitum for OBS</tspan></a><tspan>.</tspan></text>
+                    <text class="node-copy" x="20" y="94">best when your machine &amp;</text>
+                    <text class="node-copy" x="20" y="116">upload speed have room.</text>
+                  </g>
+
+                  <g class="node-svg decision" transform="translate(370 465)">
+                    <polygon class="shape" points="0 14 15 0 318 5 330 0 324 128 311 142 10 137 0 142"></polygon>
+                    <text class="node-title" x="20" y="34">can you maintain</text>
+                    <text class="node-title" x="20" y="58">a VPS relay?</text>
+                    <text class="node-copy" x="20" y="86"><tspan>servers, ports, RTMP/</tspan><a href="https://ffmpeg.org/" target="_blank" rel="noopener noreferrer"><tspan class="link-text">FFmpeg</tspan></a><tspan> config,</tspan></text>
+                    <text class="node-copy" x="20" y="110">&amp; troubleshooting.</text>
+                  </g>
+
+                  <g class="node-svg action-blue" transform="translate(740 465)">
+                    <polygon class="shape" points="0 14 15 0 208 5 220 0 214 118 201 132 10 127 0 132"></polygon>
+                    <a href="https://multi.meldstudio.co/" target="_blank" rel="noopener noreferrer">
+                      <text class="node-title link-text" x="20" y="34">use meld</text>
+                      <text class="node-title link-text" x="20" y="58">multistreaming</text>
+                    </a>
+                    <text class="node-copy" x="20" y="88">good for several</text>
+                    <text class="node-copy" x="20" y="110">destinations.</text>
+                  </g>
+
+                  <g class="node-svg action-blue" transform="translate(935 620)">
+                    <polygon class="shape" points="0 14 15 0 208 5 220 0 214 118 201 132 10 127 0 132"></polygon>
+                    <a href="https://restream.io/" target="_blank" rel="noopener noreferrer">
+                      <text class="node-title link-text" x="20" y="34">use restream.io</text>
+                    </a>
+                    <text class="node-copy" x="20" y="68">fast cloud setup</text>
+                    <text class="node-copy" x="20" y="90">for one or two</text>
+                    <text class="node-copy" x="20" y="112">destinations.</text>
+                  </g>
+
+                  <g class="node-svg action-purple" transform="translate(210 705)">
+                    <polygon class="shape" points="0 14 15 0 298 5 310 0 304 144 291 158 10 153 0 158"></polygon>
+                    <text class="node-title" x="20" y="34">build a custom VPS relay</text>
+                    <text class="node-copy" x="20" y="68">rent a VPS &amp; run the repo</text>
+                    <text class="node-copy" x="20" y="92">or setup yourself.</text>
+                    <a href="https://github.com/kazvt/vps_streaming" target="_blank" rel="noopener noreferrer">
+                      <text class="tiny-copy link-text" x="20" y="122">github.com/kazvt/vps_streaming</text>
+                    </a>
+                  </g>
+
+                  <g class="node-svg decision" transform="translate(570 705)">
+                    <polygon class="shape" points="0 14 15 0 298 5 310 0 304 144 291 158 10 153 0 158"></polygon>
+                    <text class="node-title" x="20" y="34">want someone to</text>
+                    <text class="node-title" x="20" y="58">set it up for you?</text>
+                    <text class="node-copy" x="20" y="92">choose this if you want the</text>
+                    <text class="node-copy" x="20" y="116">server route without learning it.</text>
+                  </g>
+
+                  <g class="node-svg action-orange" transform="translate(440 970)">
+                    <polygon class="shape" points="0 14 15 0 288 5 300 0 294 202 281 216 10 211 0 216"></polygon>
+                    <text class="node-title" x="20" y="34">done-for-you VPS setup</text>
+                    <text class="node-copy" x="20" y="70">one-time setup: i provision</text>
+                    <text class="node-copy" x="20" y="94">the server &amp; give you</text>
+                    <text class="node-copy" x="20" y="118"><tspan>one simple </tspan><a href="https://obsproject.com/" target="_blank" rel="noopener noreferrer"><tspan class="link-text">OBS</tspan></a><tspan> endpoint.</tspan></text>
+                    <text class="micro-copy" x="20" y="144">i will usually ask for payment</text>
+                    <text class="micro-copy" x="20" y="158">for my time setting it up.</text>
+                    <text class="micro-copy" x="20" y="172">you will also need a monthly/yearly</text>
+                    <text class="micro-copy" x="20" y="186">server subscription; that part is</text>
+                    <text class="micro-copy" x="20" y="200">between you &amp; the provider.</text>
+                  </g>
+
+                  <g class="node-svg action-pink" transform="translate(810 970)">
+                    <polygon class="shape" points="0 14 15 0 288 5 300 0 294 154 281 168 10 163 0 168"></polygon>
+                    <text class="node-title" x="20" y="34">switch to safe music</text>
+                    <text class="node-copy" x="20" y="70">use licensed, royalty-free,</text>
+                    <text class="node-copy" x="20" y="94">or non-commercial tracks.</text>
+                    <text class="node-copy" x="20" y="124">then rejoin the cloud path.</text>
+                  </g>
+
+                  <text class="tiny-copy" x="966" y="878">rejoin cloud path</text>
+                  <text class="tiny-copy" x="966" y="900">after safe music</text>
+                </svg>
+              </div>
+
+              <div class="guide-mobile-ladder" aria-label="mobile multistreaming setup path">
+                <article class="guide-step">
+                  <h3>1. commercial music?</h3>
+                  <p><a class="guide-link" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer">spotify</a>, <a class="guide-link" href="https://music.apple.com/" target="_blank" rel="noopener noreferrer">apple music</a>, label tracks, or songs you cannot stream legally.</p>
+                </article>
+                <span class="guide-choice">Yes: commercial path</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step">
+                  <h3>2a. PC + upload can handle it?</h3>
+                  <p>each added destination can use more bitrate, GPU &amp; CPU.</p>
+                </article>
+                <span class="guide-choice">Yes: stop here</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step action">
+                  <h3><a class="guide-link" href="https://obsproject.com/" target="_blank" rel="noopener noreferrer">use local OBS multistreaming</a></h3>
+                  <p><a class="guide-link" href="https://github.com/sorayuki/obs-multi-rtmp" target="_blank" rel="noopener noreferrer">OBS multi RTMP</a> or <a class="guide-link" href="https://aitum.tv/" target="_blank" rel="noopener noreferrer">aitum for OBS</a>.</p>
+                </article>
+                <span class="guide-choice no">No: keep going</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step">
+                  <h3>3a. can you maintain a VPS?</h3>
+                  <p>servers, ports, RTMP/<a class="guide-link" href="https://ffmpeg.org/" target="_blank" rel="noopener noreferrer">FFmpeg</a> config, &amp; troubleshooting.</p>
+                </article>
+                <span class="guide-choice">Yes: stop here</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step vps">
+                  <h3>build a custom VPS relay</h3>
+                  <p>rent a VPS &amp; run the repo yourself: <a class="guide-link" href="https://github.com/kazvt/vps_streaming" target="_blank" rel="noopener noreferrer">github.com/kazvt/vps_streaming</a></p>
+                </article>
+                <span class="guide-choice no">No: keep going</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step">
+                  <h3>4a. want setup done for you?</h3>
+                  <p>use this if you want the VPS route without learning the server side.</p>
+                </article>
+                <span class="guide-choice">Yes: stop here</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step done">
+                  <h3>done-for-you VPS setup</h3>
+                  <p>one-time setup: i provision the server &amp; give you one simple <a class="guide-link" href="https://obsproject.com/" target="_blank" rel="noopener noreferrer">OBS</a> endpoint.</p>
+                  <p>i will usually ask for payment for my time setting it up. you will also need a monthly/yearly server subscription; that part is between you &amp; the provider.</p>
+                </article>
+                <span class="guide-choice no">No: switch music</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step safe">
+                  <h3>switch to safe music</h3>
+                  <p>use licensed, royalty-free, or non-commercial tracks. then rejoin.</p>
+                </article>
+                <span class="guide-choice no">No, or switched to safe music</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step">
+                  <h3>2b. more than 2 destinations?</h3>
+                  <p>if the music is stream-safe, this is the main choice.</p>
+                </article>
+                <span class="guide-choice">Yes: stop here</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step action">
+                  <h3><a class="guide-link" href="https://multi.meldstudio.co/" target="_blank" rel="noopener noreferrer">use meld multistreaming</a></h3>
+                  <p>good for a straightforward workflow across several destinations.</p>
+                </article>
+                <span class="guide-choice no">No: stop here</span>
+                <div class="guide-arrow">v</div>
+                <article class="guide-step action">
+                  <h3><a class="guide-link" href="https://restream.io/" target="_blank" rel="noopener noreferrer">use restream.io</a></h3>
+                  <p>fast cloud setup when you only need one or two destinations.</p>
+                </article>
+              </div>
+
+              <p class="guide-note">simple rule: commercial music points you toward local <a class="guide-link" href="https://obsproject.com/" target="_blank" rel="noopener noreferrer">OBS</a> plugins or a private <a class="guide-link" href="https://github.com/kazvt/vps_streaming" target="_blank" rel="noopener noreferrer">VPS relay</a>. safe/licensed music makes cloud multistreaming the easy route.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="sidebar scribble-box">
+          <h2>kaz radio</h2>
+          <div id="music-player" class="music-player"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="assets/vendor/cursor-effects/browser.js"></script>
+    <script src="site.js"></script>
+  </body>
+</html>

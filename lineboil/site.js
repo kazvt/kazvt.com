@@ -87,6 +87,29 @@ const buttonBadges = [
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"]);
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
+const THEME_STORAGE_KEY = "kazvt-theme";
+
+const cursorThemes = {
+  p1: { effect: "fairyDustCursor", options: { colors: ["#F599C6", "#FFEA88", "#7DCCAD"] } },
+  p2: { effect: "characterCursor", options: { characters: ["*", "+", "!"], colors: ["#EF6905", "#F1E5A1", "#486C2F"], font: "18px monospace" } },
+  p3: { effect: "fairyDustCursor", options: { colors: ["#1D4533", "#F9D2BA", "#5E3122"] } },
+  p4: { effect: "bubbleCursor", options: { fillColor: "#D8FFC5", strokeColor: "#30AFFF" } },
+  p5: { effect: "followingDotCursor", options: { color: "#FAF7BBcc" } },
+  p6: { effect: "characterCursor", options: { characters: [".", "*", "+"], colors: ["#FEF2A0", "#E98B50", "#BC4F4F"], font: "18px monospace" } },
+  p7: { effect: "textFlag", options: { text: "kazvt", color: "#FCF2E5", font: "monospace", textSize: 12 } },
+  p8: { effect: "fairyDustCursor", options: { colors: ["#E8F5E9", "#A5D6A7", "#1B5E20"] } },
+  p9: { effect: "bubbleCursor", options: { fillColor: "#E3F2FD", strokeColor: "#0D47A1" } },
+  p10: { effect: "fairyDustCursor", options: { colors: ["#F6D8BD", "#F39399", "#CF4173"] } },
+  p11: { effect: "characterCursor", options: { characters: ["0", "1", "+", "="], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "16px monospace" } },
+  p12: { effect: "rainbowCursor", options: { colors: ["#007DCC", "#FFB900", "#D10056", "#B2054C"], length: 14, size: 3 } },
+  p13: { effect: "characterCursor", options: { characters: ["*", "x", "+"], colors: ["#E73F1E", "#FB6C00", "#F9B637"], font: "18px monospace" } },
+  p14: { effect: "fairyDustCursor", options: { colors: ["#FED24F", "#FFF449", "#7EC151"] } },
+  p15: { effect: "fairyDustCursor", options: { colors: ["#F8B2B2", "#AF719D", "#403D88"] } },
+  p16: { effect: "textFlag", options: { text: "> system online", color: "#E1E100", font: "monospace", textSize: 12 } },
+};
+
+let activeCursorEffect = null;
+let activeCursorTheme = "";
 
 async function loadTextLines(file) {
   try {
@@ -104,6 +127,72 @@ async function loadTextLines(file) {
 
 function normalizeStatus(status) {
   return status === "online" ? "live" : status;
+}
+
+function availableTheme(themeButtons) {
+  const themes = new Set(themeButtons.map((button) => button.getAttribute("data-tool-theme")).filter(Boolean));
+  return themes.size ? themes : new Set(Object.keys(cursorThemes));
+}
+
+function storedTheme(themeButtons) {
+  const themes = availableTheme(themeButtons);
+  try {
+    const theme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (theme && themes.has(theme)) return theme;
+  } catch {}
+  return document.body.dataset.theme && themes.has(document.body.dataset.theme) ? document.body.dataset.theme : "p1";
+}
+
+function destroyCursorEffect() {
+  if (!activeCursorEffect || typeof activeCursorEffect.destroy !== "function") return;
+
+  try {
+    activeCursorEffect.destroy();
+  } catch {}
+  activeCursorEffect = null;
+}
+
+function updateThemeMetaColor() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) return;
+
+  window.requestAnimationFrame(() => {
+    const bg = getComputedStyle(document.body).getPropertyValue("--bg").trim();
+    if (bg) meta.setAttribute("content", bg);
+  });
+}
+
+function updateCursorEffect(theme) {
+  if (activeCursorTheme === theme && activeCursorEffect) return;
+  activeCursorTheme = theme;
+  destroyCursorEffect();
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (reducedMotion.matches || !window.cursoreffects) return;
+
+  const config = cursorThemes[theme] || cursorThemes.p1;
+  const CursorEffect = window.cursoreffects[config.effect] || window.cursoreffects.fairyDustCursor;
+  if (!CursorEffect) return;
+
+  try {
+    activeCursorEffect = new CursorEffect(config.options || {});
+  } catch {
+    activeCursorEffect = null;
+  }
+}
+
+function applySiteTheme(theme, themeButtons, { persist = true } = {}) {
+  document.body.dataset.theme = theme;
+  themeButtons.forEach((item) => item.setAttribute("aria-pressed", String(item.getAttribute("data-tool-theme") === theme)));
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {}
+  }
+
+  updateThemeMetaColor();
+  updateCursorEffect(theme);
 }
 
 function initializeCurrentUrl() {
@@ -524,12 +613,14 @@ function createVisitCounter({ key = "kazvt-page-visits", label = "visits" } = {}
 function initializeSiteTools() {
   const themeButtons = [...document.querySelectorAll("[data-tool-theme]")];
   const boilButton = document.querySelector("[data-tool-boil]");
+  const initialTheme = storedTheme(themeButtons);
+
+  applySiteTheme(initialTheme, themeButtons, { persist: false });
 
   themeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const theme = button.getAttribute("data-tool-theme");
-      document.body.dataset.theme = theme || "p1";
-      themeButtons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+      applySiteTheme(theme || "p1", themeButtons);
     });
   });
 
@@ -1127,4 +1218,9 @@ async function loadStatus() {
 initializeSiteTools();
 initializeCurrentUrl();
 initializeMarquee();
-loadStatus().then(render);
+
+if (document.body.dataset.page === "home" && document.querySelector("#app")) {
+  loadStatus().then(render);
+} else {
+  initializeMusicPlayer();
+}

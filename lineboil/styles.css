@@ -51,6 +51,10 @@ body {
   letter-spacing: 0;
 }
 
+body > canvas {
+  z-index: 2147483647;
+}
+
 body[data-theme="p2"] {
   --cream: #F1E5A1;
   --paper: #F1E5A1;
@@ -649,6 +653,13 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   transform: rotate(-0.7deg);
 }
 
+.oldweb-nav a[aria-current="page"] {
+  background: var(--green);
+  color: var(--on-green);
+  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color);
+  outline-offset: var(--click-hover-outline-offset);
+}
+
 .oldweb-nav a:hover,
 .oldweb-nav a:focus-visible,
 .tool-list button:hover,
@@ -788,6 +799,14 @@ code {
   gap: 14px;
 }
 
+.guide-page .site-wrap {
+  width: min(1320px, calc(100% - 24px));
+}
+
+.guide-page .web-grid {
+  grid-template-columns: 160px minmax(0, 1fr) 160px;
+}
+
 .panel {
   scroll-margin-top: 18px;
   background:
@@ -828,6 +847,247 @@ code {
   font-size: 0.82rem;
   font-weight: 900;
   transform: rotate(2deg);
+}
+
+.guide-lede {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.guide-lede p {
+  margin: 0;
+}
+
+.guide-map-frame {
+  overflow: visible;
+  padding: 10px;
+  border: 3px solid var(--ink);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--blue) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(0deg, color-mix(in srgb, var(--pink) 13%, transparent) 1px, transparent 1px),
+    var(--paper-alt);
+  background-size: 18px 18px;
+}
+
+.guide-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.guide-map text {
+  font-family: "Trebuchet MS", "Comic Sans MS", "Arial Rounded MT Bold", Arial, sans-serif;
+  fill: var(--ink);
+}
+
+.guide-map .shape {
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linejoin: round;
+  filter: drop-shadow(6px 6px 0 var(--shadow));
+}
+
+.guide-map .decision .shape {
+  fill: var(--paper);
+}
+
+.guide-map .action-green .shape {
+  fill: color-mix(in srgb, var(--green) 24%, var(--paper) 76%);
+}
+
+.guide-map .action-blue .shape {
+  fill: color-mix(in srgb, var(--blue) 16%, var(--paper) 84%);
+}
+
+.guide-map .action-purple .shape {
+  fill: color-mix(in srgb, var(--purple) 17%, var(--paper) 83%);
+}
+
+.guide-map .action-pink .shape {
+  fill: color-mix(in srgb, var(--pink) 26%, var(--paper) 74%);
+}
+
+.guide-map .action-orange .shape {
+  fill: color-mix(in srgb, var(--orange) 18%, var(--paper) 82%);
+}
+
+.guide-map .node-title {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.guide-map .node-copy {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.guide-map .tiny-copy {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.guide-map .micro-copy {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.guide-map .wire {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.guide-map .wire.return {
+  stroke-dasharray: 12 10;
+}
+
+.guide-map .arrow-head {
+  fill: var(--ink);
+}
+
+.guide-map .badge-shape {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.guide-map .badge text {
+  fill: #111111;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.guide-map .badge.yes .badge-shape {
+  fill: var(--green);
+}
+
+.guide-map .badge.no .badge-shape {
+  fill: var(--pink);
+}
+
+.guide-map .link-text,
+.guide-link {
+  color: #17613f;
+  fill: #17613f;
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.guide-map .node-svg,
+.guide-map .badge,
+.guide-mobile-ladder .guide-step,
+.guide-mobile-ladder .guide-choice {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: scale 140ms ease, filter 140ms ease;
+}
+
+.guide-map .node-svg:hover,
+.guide-map .node-svg:focus-within,
+.guide-map .badge:hover,
+.guide-map .badge:focus-within,
+.guide-mobile-ladder .guide-step:hover,
+.guide-mobile-ladder .guide-step:focus-within,
+.guide-mobile-ladder .guide-choice:hover,
+.guide-mobile-ladder .guide-choice:focus-within {
+  scale: 1.05;
+  filter: saturate(1.08) drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent));
+}
+
+.guide-mobile-ladder {
+  display: none;
+  gap: 12px;
+}
+
+.guide-step,
+.guide-choice {
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--shadow);
+  clip-path: polygon(0 9px, 9px 0, 100% 4px, calc(100% - 7px) 100%, 6px calc(100% - 3px));
+}
+
+.guide-step {
+  padding: 12px;
+  background: var(--paper);
+}
+
+.guide-step h3,
+.guide-step p {
+  margin: 0;
+}
+
+.guide-step h3 {
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.guide-step p {
+  margin-top: 7px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.guide-step.action {
+  background: color-mix(in srgb, var(--blue) 16%, var(--paper) 84%);
+}
+
+.guide-step.safe {
+  background: color-mix(in srgb, var(--pink) 24%, var(--paper) 76%);
+}
+
+.guide-step.vps {
+  background: color-mix(in srgb, var(--purple) 17%, var(--paper) 83%);
+}
+
+.guide-step.done {
+  background: color-mix(in srgb, var(--orange) 18%, var(--paper) 82%);
+}
+
+.guide-choice {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 9px;
+  background: var(--green);
+  color: var(--on-green);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.guide-choice.no {
+  background: var(--pink);
+  color: var(--on-pink);
+}
+
+.guide-arrow {
+  display: grid;
+  min-height: 30px;
+  place-items: center;
+  color: var(--ink);
+  font-size: 1.65rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.guide-note {
+  margin-top: 12px;
+  padding: 10px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--on-yellow);
+  font-weight: 900;
+  text-align: center;
+  box-shadow: 3px 3px 0 var(--shadow);
 }
 
 .sticker-grid,
@@ -1619,12 +1879,33 @@ code {
   }
 }
 
+@media (max-width: 1180px) {
+  .guide-page .web-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-page .content-stack {
+    order: -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .guide-map-frame {
+    display: none;
+  }
+
+  .guide-mobile-ladder {
+    display: grid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
     scroll-behavior: auto !important;
   }
 }
