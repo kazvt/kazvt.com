@@ -85,10 +85,8 @@ body[data-theme="p2"] {
   --banner-text: #ffffff;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/45-degree-fabric-light.png");
   --wallpaper-size: 630px 630px;
-  --hover-surface: #486C2F;
   --hover-text: #ffffff;
-  --stamp-bg: #486C2F;
-  --stamp-text: #ffffff;
+  --stamp-text: #111111;
 }
 
 body[data-theme="p3"] {
@@ -413,10 +411,8 @@ body[data-theme="p14"] {
   --banner-text: #111111;
   --wallpaper-image: url("assets/wallpapers/subtle-patterns/bo-play.png");
   --wallpaper-size: 42px 22px;
-  --hover-surface: #336d18;
-  --hover-text: #ffffff;
-  --stamp-bg: #336d18;
-  --stamp-text: #ffffff;
+  --hover-text: #111111;
+  --stamp-text: #111111;
 }
 
 body[data-theme="p15"] {
@@ -475,163 +471,163 @@ body[data-theme="p16"] {
 
 body,
 body[data-theme="p1"] {
-  --cursor-default: url("assets/cursors/p01-win-95-98/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p01-win-95-98/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p01-win-95-98/text.cur"), text;
-  --cursor-help: url("assets/cursors/p01-win-95-98/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p01-win-95-98/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p01-win-95-98/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p01-win-95-98/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/mini-games/3DArrow.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/mini-games/PacMan.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/mini-games/3DArrowShadow.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/mini-games/TicTacToe.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/mini-games/Cards.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/mini-games/TicTacToeShadow.ani"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/mini-games/CardsShadow.ani"), move;
 }
 
 body[data-theme="p2"] {
-  --cursor-default: url("assets/cursors/p02-black-pluses/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p02-black-pluses/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p02-black-pluses/text.cur"), text;
-  --cursor-help: url("assets/cursors/p02-black-pluses/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p02-black-pluses/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p02-black-pluses/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p02-black-pluses/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/fireblaze/fireblaze_normalselect.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/fireblaze/fireblaze_linkselect.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/fireblaze/fireblaze_handwritingselect.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/fireblaze/fireblaze_backgroundbusyselect.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/fireblaze/fireblaze_busyselect.cur"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/fireblaze/fireblaze_busyselect.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/fireblaze/fireblaze_backgroundbusyselect.ani"), move;
 }
 
 body[data-theme="p3"] {
-  --cursor-default: url("assets/cursors/p03-windows-7-full-collection/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p03-windows-7-full-collection/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p03-windows-7-full-collection/text.cur"), text;
-  --cursor-help: url("assets/cursors/p03-windows-7-full-collection/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p03-windows-7-full-collection/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p03-windows-7-full-collection/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p03-windows-7-full-collection/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/fate-hand/Fate.ani"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/fate-hand/FateSelect.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/fate-hand/Fate Text.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/fate-hand/Fate Help.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/fate-hand/Fate wait.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/fate-hand/Fate Stop.ani"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/fate-hand/Fate grab.ani"), move;
 }
 
 body[data-theme="p4"] {
-  --cursor-default: url("assets/cursors/p04-future-1/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p04-future-1/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p04-future-1/text.cur"), text;
-  --cursor-help: url("assets/cursors/p04-future-1/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p04-future-1/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p04-future-1/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p04-future-1/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/blupoint/BluPointmed.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/blupoint/BluPointLink.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/blupoint/BluPointText2.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/blupoint/BluPointHelpmed.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/blupoint/BluPointBusy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/blupoint/BluPointUnavailiable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/blupoint/BluPointMove1.cur"), move;
 }
 
 body[data-theme="p5"] {
-  --cursor-default: url("assets/cursors/p05-missing-texture/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p05-missing-texture/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p05-missing-texture/text.cur"), text;
-  --cursor-help: url("assets/cursors/p05-missing-texture/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p05-missing-texture/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p05-missing-texture/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p05-missing-texture/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/legend-of-zelda/Master Sword.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/legend-of-zelda/Triforce.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/legend-of-zelda/Navi.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/legend-of-zelda/Bomb.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/legend-of-zelda/Hylian Shield.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot-OoT.cur"), move;
 }
 
 body[data-theme="p6"] {
-  --cursor-default: url("assets/cursors/p06-left-handed-mouse-pointers/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p06-left-handed-mouse-pointers/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p06-left-handed-mouse-pointers/text.cur"), text;
-  --cursor-help: url("assets/cursors/p06-left-handed-mouse-pointers/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p06-left-handed-mouse-pointers/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p06-left-handed-mouse-pointers/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p06-left-handed-mouse-pointers/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrown.cur.ani"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrownlink.cur.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrownpen.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/GuitarBrownhelp.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/GuitarBrownbusy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/GuitarBrownno.cur.ani"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/guitar-angus-young-gibson-sg/guitarbrownmove.cur.ani"), move;
 }
 
 body[data-theme="p7"] {
-  --cursor-default: url("assets/cursors/p07-retro-2000s-1/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p07-retro-2000s-1/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p07-retro-2000s-1/text.cur"), text;
-  --cursor-help: url("assets/cursors/p07-retro-2000s-1/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p07-retro-2000s-1/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p07-retro-2000s-1/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p07-retro-2000s-1/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/doom-ii/Doom Guy - Normal.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/doom-ii/Skull - Link.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/doom-ii/Text Select.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/doom-ii/Pistol - Quakestion Mark (Help Select).cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/doom-ii/Busy - Barrel Explosion.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/doom-ii/Unavailable.ani"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/doom-ii/Move.cur"), move;
 }
 
 body[data-theme="p8"] {
-  --cursor-default: url("assets/cursors/p08-modern-windows-xp/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p08-modern-windows-xp/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p08-modern-windows-xp/text.cur"), text;
-  --cursor-help: url("assets/cursors/p08-modern-windows-xp/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p08-modern-windows-xp/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p08-modern-windows-xp/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p08-modern-windows-xp/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leaf.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafLinkXl.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafText.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leafhelp.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafBusy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafUnavailiable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafMove.cur"), move;
 }
 
 body[data-theme="p9"] {
-  --cursor-default: url("assets/cursors/p09-retro-wave/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p09-retro-wave/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p09-retro-wave/text.cur"), text;
-  --cursor-help: url("assets/cursors/p09-retro-wave/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p09-retro-wave/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p09-retro-wave/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p09-retro-wave/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/dove/Dove Cursor.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/dove/link select.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/dove/text select.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/dove/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/dove/Busy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/dove/unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/dove/move.ani"), move;
 }
 
 body[data-theme="p10"] {
-  --cursor-default: url("assets/cursors/p10-red-and-black-1/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p10-red-and-black-1/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p10-red-and-black-1/text.cur"), text;
-  --cursor-help: url("assets/cursors/p10-red-and-black-1/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p10-red-and-black-1/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p10-red-and-black-1/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p10-red-and-black-1/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/vdcset/Normal Select.ani"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/vdcset/Help.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/vdcset/Text.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/vdcset/Help.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/vdcset/Busy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/vdcset/Unavailable.ani"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/vdcset/Move.ani"), move;
 }
 
 body[data-theme="p11"] {
-  --cursor-default: url("assets/cursors/p11-retro-3/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p11-retro-3/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p11-retro-3/text.cur"), text;
-  --cursor-help: url("assets/cursors/p11-retro-3/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p11-retro-3/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p11-retro-3/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p11-retro-3/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/halo/halo select.ani.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/halo/plasma.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/halo/halo type.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/halo/loading .ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/halo/halo loading.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/advanced/No.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/advanced/Move.cur"), move;
 }
 
 body[data-theme="p12"] {
-  --cursor-default: url("assets/cursors/p12-mini-black/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p12-mini-black/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p12-mini-black/text.cur"), text;
-  --cursor-help: url("assets/cursors/p12-mini-black/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p12-mini-black/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p12-mini-black/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p12-mini-black/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow.ani"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_Alt.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_type.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_help.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_busy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_unavailable.ani"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/flashy-colorful-rainbows/Rainbow_MoveArrow.ani"), move;
 }
 
 body[data-theme="p13"] {
-  --cursor-default: url("assets/cursors/p13-100-dpi-windows-default/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p13-100-dpi-windows-default/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p13-100-dpi-windows-default/text.cur"), text;
-  --cursor-help: url("assets/cursors/p13-100-dpi-windows-default/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p13-100-dpi-windows-default/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p13-100-dpi-windows-default/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p13-100-dpi-windows-default/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/sonic/Sonic Normal.ani"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/sonic/Sonic Link.ani"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/sonic/Sonic Text.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/sonic/Sonic Help.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/sonic/Sonic Busy.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/sonic/Sonic Unavaible.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/sonic/Sonic Move.ani"), move;
 }
 
 body[data-theme="p14"] {
-  --cursor-default: url("assets/cursors/p14-read-desc-windows-ease-of-access/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p14-read-desc-windows-ease-of-access/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p14-read-desc-windows-ease-of-access/text.cur"), text;
-  --cursor-help: url("assets/cursors/p14-read-desc-windows-ease-of-access/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p14-read-desc-windows-ease-of-access/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p14-read-desc-windows-ease-of-access/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p14-read-desc-windows-ease-of-access/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leaf.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafLinkXl.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafText.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/leafhelp.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeavesCluster.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafUnavailiable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/froggleleafthemeisaproductoffrog/LeafMove.cur"), move;
 }
 
 body[data-theme="p15"] {
-  --cursor-default: url("assets/cursors/p15-retro-90s-pointers/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p15-retro-90s-pointers/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p15-retro-90s-pointers/text.cur"), text;
-  --cursor-help: url("assets/cursors/p15-retro-90s-pointers/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p15-retro-90s-pointers/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p15-retro-90s-pointers/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p15-retro-90s-pointers/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/n64/N64.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/n64/N64 link select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/n64/N64 text.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/n64/help select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/n64/hourglass.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/n64/unaivalable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/n64/presision.cur"), move;
 }
 
 body[data-theme="p16"] {
-  --cursor-default: url("assets/cursors/p16-black-and-purple/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/p16-black-and-purple/pointer.cur"), pointer;
-  --cursor-text: url("assets/cursors/p16-black-and-purple/text.cur"), text;
-  --cursor-help: url("assets/cursors/p16-black-and-purple/help.cur"), help;
-  --cursor-busy: url("assets/cursors/p16-black-and-purple/busy.cur"), wait;
-  --cursor-not-allowed: url("assets/cursors/p16-black-and-purple/not-allowed.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/p16-black-and-purple/move.cur"), move;
+  --cursor-default: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/RSlogosword.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/DDScurserlinkselect.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/advanced/Text.ani"), text;
+  --cursor-help: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/ddscurserhelp.ani"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/runescape-jagex-animated-dragon-/Damage2632.ani"), wait;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/advanced/No.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/advanced/Move.cur"), move;
 }
 
 a {
@@ -743,7 +739,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 }
 
 .logo-home:hover .logo-flip-card {
-  transform: rotateY(180deg);
+  animation: logoHoverTilt 1000ms steps(8, end);
 }
 
 .site-logo {
@@ -759,17 +755,13 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 }
 
 .logo-back {
-  position: absolute;
-  inset: 0;
-  transform: rotateY(180deg);
-  animation:
-    logoBoil 430ms steps(2, end) infinite,
-    logoHueShift 3400ms linear infinite;
+  display: none;
 }
 
 .logo-wumpa {
   display: grid;
-  width: clamp(34px, 8vw, 58px);
+  visibility: hidden;
+  width: clamp(48px, 10vw, 82px);
   aspect-ratio: 1;
   place-items: center;
   border: 0;
@@ -778,6 +770,10 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   filter: drop-shadow(2px 3px 0 var(--shadow));
   image-rendering: pixelated;
   transition: transform 180ms steps(3, end), filter 180ms steps(3, end);
+}
+
+body.wumpa-ready .logo-wumpa:not(.is-eaten) {
+  visibility: visible;
 }
 
 .logo-wumpa:hover {
@@ -965,7 +961,10 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 
 .oldweb-nav a:hover,
 .tool-list button:hover {
-  background: var(--hover-surface);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
   color: var(--hover-text);
 }
 
@@ -1046,7 +1045,10 @@ code {
 }
 
 .tool-list button[aria-pressed="true"]:hover {
-  background: var(--hover-surface);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
   color: var(--hover-text);
 }
 
@@ -1096,6 +1098,10 @@ code {
 .big-palette button[aria-pressed="true"] {
   outline: var(--click-hover-outline-width) solid var(--click-hover-outline-color);
   outline-offset: var(--click-hover-outline-offset);
+}
+
+.big-palette button[aria-pressed="true"]:hover {
+  outline-style: dashed;
 }
 
 .big-palette span {
@@ -1181,7 +1187,7 @@ code {
   flex: 0 0 auto;
   padding: 4px 8px;
   border: 3px solid var(--ink);
-  background: var(--stamp-bg);
+  background: var(--paper);
   color: var(--stamp-text);
   font-size: 0.82rem;
   font-weight: 900;
@@ -1213,12 +1219,14 @@ code {
 
 .guide-page #multistream-guide,
 .panel.guide-embed-panel {
-  animation-duration: 1800ms;
+  animation-name: guidePanelBoil;
+  animation-duration: 460ms;
 }
 
 .guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong),
 .guide-embed-panel :is(h1, h2, p, a, span, text, tspan, strong) {
-  animation-duration: 2200ms;
+  animation-name: guideTextBoil;
+  animation-duration: 480ms;
 }
 
 .guide-map-frame :is(a, span, text, tspan),
@@ -1361,8 +1369,8 @@ code {
 .guide-map .badge:hover,
 .guide-mobile-ladder .guide-step:hover,
 .guide-mobile-ladder .guide-choice:hover {
-  scale: 1.05;
-  filter: saturate(1.08) drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent));
+  scale: 1.001;
+  filter: saturate(1.03) drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 16%, transparent));
 }
 
 .guide-map .node-svg:hover .shape,
@@ -1521,25 +1529,34 @@ code {
 
 .sticker:hover {
   --sticker-lift: 10px;
-  background: var(--hover-surface);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
   color: var(--hover-text);
 }
 
 .sticker.is-live:hover {
-  background: var(--hover-surface);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
 }
 
 .sticker.is-testing:hover {
-  background: var(--hover-surface);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
 }
 
 .sticker:hover .sticker-status-corner {
   color: var(--hover-text);
   text-shadow:
-    1px 0 0 var(--hover-surface),
-    -1px 0 0 var(--hover-surface),
-    0 1px 0 var(--hover-surface),
-    0 -1px 0 var(--hover-surface);
+    1px 0 0 var(--bg),
+    -1px 0 0 var(--bg),
+    0 1px 0 var(--bg),
+    0 -1px 0 var(--bg);
 }
 
 .sticker-status-corner {
@@ -2175,7 +2192,10 @@ code {
 }
 
 .paint-controls button:hover {
-  background: var(--hover-surface);
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
   color: var(--hover-text);
 }
 
@@ -2235,7 +2255,7 @@ code {
 .wumpa-layer {
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -2251,7 +2271,7 @@ code {
   padding: 0;
   pointer-events: auto;
   filter: drop-shadow(2px 3px 0 var(--shadow));
-  animation: wumpaPeek var(--wumpa-life, 2200ms) steps(12, end) forwards;
+  animation: wumpaPeek var(--wumpa-life, 3200ms) steps(14, end) forwards;
 }
 
 .wumpa-fruit:hover,
@@ -2270,6 +2290,7 @@ code {
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
+  animation: blockBoil 430ms steps(2, end) infinite;
 }
 
 .wumpa-fruit.is-eaten {
@@ -2283,7 +2304,7 @@ code {
   border: 4px solid var(--ink);
   background:
     repeating-linear-gradient(90deg, color-mix(in srgb, var(--yellow) 35%, transparent) 0 7px, transparent 7px 14px),
-    var(--hover-surface);
+    var(--banner);
   color: var(--hover-text);
   font-weight: 900;
   box-shadow: 5px 5px 0 var(--shadow);
@@ -2387,15 +2408,29 @@ code {
   100% { transform: translate(-0.8px, 0.6px) rotate(0.16deg); }
 }
 
+@keyframes guideTextBoil {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(0.12px, -0.14px) rotate(-0.035deg); }
+  100% { transform: translate(-0.14px, 0.1px) rotate(0.03deg); }
+}
+
+@keyframes guidePanelBoil {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(0.2px, -0.18px) rotate(-0.025deg); }
+  100% { transform: translate(-0.16px, 0.12px) rotate(0.02deg); }
+}
+
 @keyframes logoBoil {
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(2px, -2px) scale(1.006) skewX(-0.4deg); }
   100% { transform: translate(-2px, 1px) scale(0.998) skewX(0.4deg); }
 }
 
-@keyframes logoHueShift {
-  0% { filter: hue-rotate(0deg) saturate(1.35) drop-shadow(7px 8px 0 rgba(13, 8, 16, 0.82)); }
-  100% { filter: hue-rotate(360deg) saturate(1.35) drop-shadow(7px 8px 0 rgba(13, 8, 16, 0.82)); }
+@keyframes logoHoverTilt {
+  0% { transform: translateY(0) rotateY(0deg) rotateZ(0deg); }
+  38% { transform: translateY(20px) rotateY(16deg) rotateZ(-1deg); }
+  68% { transform: translateY(14px) rotateY(-9deg) rotateZ(0.6deg); }
+  100% { transform: translateY(0) rotateY(0deg) rotateZ(0deg); }
 }
 
 @keyframes wumpaPeek {

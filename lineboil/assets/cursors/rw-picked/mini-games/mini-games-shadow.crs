@@ -1,0 +1,12 @@
+﻿[Arrow]
+Path=3DArrowShadow.cur
+
+[Help]
+Path=CardsShadow.ani
+
+[Wait]
+Path=TicTacToeShadow.ani
+
+[AppStarting]
+Path=PacManShadow.ani
+

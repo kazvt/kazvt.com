@@ -88,6 +88,7 @@ const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avi
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
+const VOLUME_STORAGE_KEY = "kazvt-volume";
 const WIFE_KISS_SOUND_SRC = "assets/wife/wifey%20kissy.mp3";
 const FRUIT_SOUND_SRC = "assets/fruit.mp3";
 const LANGUAGE_STORAGE_KEY = "kazvt-language";
@@ -98,20 +99,20 @@ const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
 
 const cursorThemes = {
   p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
-  p2: { effect: "lineboilCenteredTrailCursor", options: { particles: 18, rate: 0.34, size: 12, image: svgTrailCursorImage("#EF6905", "#8B2626", "spark") } },
+  p2: { effect: "lineboilGlyphCursor", options: { glyphs: ["!", "!!", "*"], colors: ["#EF6905", "#F1E5A1", "#486C2F"], sizes: [13, 18, 24], spawn: 2, scatter: 0.42, gravity: 0.006, life: 96, spin: 0.03 } },
   p3: { effect: "lineboilGlyphCursor", options: { glyphs: ["+"], colors: ["#1D4533", "#F9D2BA", "#5E3122"], sizes: [9, 15, 22, 30], spawn: 1, scatter: 0.55, gravity: -0.005, life: 68, spin: 0.08 } },
-  p4: { effect: "lineboilBubbleCursor", options: { colors: ["#D8FFC5", "#92EEFF", "#30AFFF"], strokeColor: "#30AFFF", minSize: 12, maxSize: 36, spawn: 2, life: 95 } },
-  p5: { effect: "ghostCursor", options: { image: svgTrailCursorImage("#FAF7BB", "#133458", "ghost"), randomDelay: true, minDelay: 10, maxDelay: 30, lifeSpan: 48 } },
-  p6: { effect: "lineboilCenteredTrailCursor", options: { particles: 16, rate: 0.28, size: 9, image: svgTrailCursorImage("#FEF2A0", "#BC4F4F", "stripe") } },
+  p4: { effect: "lineboilBubbleCursor", options: { colors: ["#D8FFC5", "#92EEFF", "#30AFFF"], strokeColor: "#30AFFF", minSize: 10, maxSize: 32, spawn: 2, life: 95 } },
+  p5: { effect: "lineboilGlyphCursor", options: { glyphs: ["✦", "◆", "map"], colors: ["#FAF7BB", "#D99B21", "#133458"], sizes: [12, 18, 24], spawn: 1, scatter: 0.24, gravity: -0.004, life: 92, spin: 0.02 } },
+  p6: { effect: "lineboilGlyphCursor", options: { glyphs: ["///", "!!!", ">>"], colors: ["#FEF2A0", "#F3CD97", "#BC4F4F"], sizes: [16, 22, 27], spawn: 1, scatter: 0.32, gravity: 0.004, life: 104, spin: 0.018 } },
   p7: { effect: "lineboilFlagCursor", options: { text: "kazvt!!!", color: "#FCF2E5", strokeColor: "#EC5B38", shadowColor: "#524646", font: "900 24px Trebuchet MS, Comic Sans MS, Arial", gap: 16, wobble: 1.5 } },
   p8: { effect: "lineboilSpringyGlyphCursor", options: { glyph: "✿", color: "#E8F5E9", strokeColor: "#1B5E20", font: "900 18px Trebuchet MS, Comic Sans MS, Arial", links: 7 } },
   p9: { effect: "lineboilBubbleCursor", options: { colors: ["#E3F2FD", "#90CAF9", "#2196F3"], strokeColor: "#0D47A1", minSize: 3, maxSize: 18, spawn: 2, life: 82 } },
-  p10: { effect: "lineboilGlyphCursor", options: { glyphs: ["♥", "♡"], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [12, 18, 26], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
-  p11: { effect: "characterCursor", options: { characters: ["0", "1", "."], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "24px monospace", characterLifeSpanFunction: () => Math.floor(55 + Math.random() * 30), initialCharacterVelocityFunction: () => ({ x: (Math.random() - 0.5) * 1.1, y: (Math.random() - 0.5) * 1.1 }), characterVelocityChangeFunctions: { x_func: () => (Math.random() - 0.5) / 90, y_func: () => (Math.random() - 0.5) / 90 }, characterScalingFunction: (age, life) => Math.max((life - age) / life, 0) } },
-  p12: { effect: "rainbowCursor", options: { colors: ["#007DCC", "#FFB900", "#D10056", "#B2054C"], length: 14, size: 5 } },
-  p13: { effect: "rainbowCursor", options: { colors: ["#E73F1E", "#FB6C00", "#F9B637", "#FFDD9C"], length: 8, size: 5 } },
+  p10: { effect: "lineboilGlyphCursor", options: { glyphs: ["♥", "♡"], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [14, 21, 30], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
+  p11: { effect: "characterCursor", options: { characters: ["0", "1", "."], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "27px monospace", characterLifeSpanFunction: () => Math.floor(55 + Math.random() * 30), initialCharacterVelocityFunction: () => ({ x: (Math.random() - 0.5) * 1.1, y: (Math.random() - 0.5) * 1.1 }), characterVelocityChangeFunctions: { x_func: () => (Math.random() - 0.5) / 90, y_func: () => (Math.random() - 0.5) / 90 }, characterScalingFunction: (age, life) => Math.max((life - age) / life, 0) } },
+  p12: { effect: "rainbowCursor", options: { colors: ["#007DCC", "#FFB900", "#D10056", "#B2054C"], length: 26, size: 5 } },
+  p13: { effect: "rainbowCursor", options: { colors: ["#E73F1E", "#FB6C00", "#F9B637", "#FFDD9C"], length: 24, size: 5 } },
   p14: { effect: "rainbowCursor", options: { colors: ["#FED24F", "#FFF449", "#B2D959", "#7EC151"], length: 28, size: 5 } },
-  p15: { effect: "lineboilGlyphCursor", options: { glyphs: ["■", "□"], colors: ["#F8B2B2", "#AF719D", "#8B639B", "#403D88"], sizes: [9, 13, 20, 25], spawn: 1, scatter: 0.28, gravity: 0.01, life: 74, spin: 0.012 } },
+  p15: { effect: "lineboilGlyphCursor", options: { glyphs: ["■", "□"], colors: ["#F8B2B2", "#AF719D", "#8B639B", "#403D88"], sizes: [11, 16, 23, 29], spawn: 1, scatter: 0.28, gravity: 0.01, life: 74, spin: 0.012 } },
   p16: { effect: "lineboilFlagCursor", options: { text: "kazvt is OFFLINE", color: "#E1E100", strokeColor: "#063B00", shadowColor: "#90B800", font: "900 17px Courier New, monospace", gap: 12, wobble: 0.75 } },
 };
 
@@ -119,7 +120,7 @@ let activeCursorEffect = null;
 let activeCursorTheme = "";
 let mwahAudio = null;
 let fruitAudio = null;
-let siteVolume = 0.8;
+let siteVolume = 0.2;
 let activeLanguageText = new Map();
 
 function getMwahAudio() {
@@ -636,19 +637,18 @@ async function loadTextLines(file) {
 function parseKeyValueLines(lines) {
   const values = new Map();
   lines.forEach((line) => {
-    line.split(",").forEach((chunk) => {
-      const separator = chunk.indexOf("=");
-      if (separator === -1) return;
-      const key = chunk.slice(0, separator).trim();
-      const value = chunk.slice(separator + 1).trim();
-      if (key && value) values.set(key, value);
-    });
+    const separator = line.indexOf("=");
+    if (separator === -1) return;
+    const key = line.slice(0, separator).trim();
+    const value = line.slice(separator + 1).trim();
+    if (key && value) values.set(key, value);
   });
   return values;
 }
 
 async function loadLanguageManifest() {
-  const values = parseKeyValueLines(await loadTextLines("languages.txt"));
+  const lines = await loadTextLines("languages.txt");
+  const values = parseKeyValueLines(lines.flatMap((line) => line.split(",")));
   const languages = [...values.entries()].map(([name, code]) => ({ name, code }));
   return languages.length ? languages : [{ name: DEFAULT_LANGUAGE_NAME, code: DEFAULT_LANGUAGE_CODE }];
 }
@@ -804,13 +804,25 @@ async function initializeMarquee() {
 async function initializeLanguageText() {
   const descriptions = await loadActiveLanguageText();
 
-  document.querySelectorAll("[data-i18n]").forEach((node) => {
+  applyLanguageText(document, descriptions);
+}
+
+function applyLanguageText(root, descriptions = activeLanguageText) {
+  root.querySelectorAll("[data-i18n]").forEach((node) => {
     const key = node.getAttribute("data-i18n");
     const value = descriptions.get(key);
     if (value) setInlineNote(node, value);
   });
 
   [...streamLinks, ...socialLinks].forEach((link) => {
+    const label = descriptions.get(`${link.key}.label`);
+    if (label) {
+      link.label = label;
+      document.querySelectorAll(`[data-social-label="${link.key}"]`).forEach((node) => {
+        setInlineNote(node, label);
+      });
+    }
+
     const description = descriptions.get(link.key);
     if (!description) return;
     link.note = description;
@@ -821,13 +833,13 @@ async function initializeLanguageText() {
 }
 
 const profileFacts = [
-  ["name", "kazvt"],
-  ["pronouns", "she/her"],
-  ["mode", "retro games and streams"],
+  ["profile.fact.name", "name", "kazvt"],
+  ["profile.fact.pronouns", "pronouns", "she/her"],
+  ["profile.fact.mode", "mode", "retro games & streams", "profile.fact.mode_value"],
 ];
 
 const bio =
-  "hey! i'm kaz, a monke girl who loves retro gaming and streaming. i play classic games from the 1980s to the late 2000s, i love classic shooters, platformers, and i yap quite a bit. i also programme a lot of my own tools. come hang out and watch me try not to lose my mind at old jank!";
+  "hey! i'm kaz, a monke girl who loves retro gaming & streaming. i play classic games from the 1980s to the late 2000s, i love classic shooters, platformers, & i yap quite a bit. i also programme a lot of my own tools. come hang out & watch me try not to lose my mind at old jank!";
 
 function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
@@ -932,11 +944,11 @@ async function loadManifest(path, allowedExtensions) {
   }
 }
 
-function panel({ id, title, stamp, children }) {
+function panel({ id, title, stamp, titleKey, stampKey, children }) {
   return el("section", { id, className: "panel scribble-box" }, [
     el("header", { className: "panel-head" }, [
-      el("span", { className: "panel-title" }, [title]),
-      el("span", { className: "panel-stamp" }, [stamp]),
+      el("span", { className: "panel-title", "data-i18n": titleKey }, [title]),
+      el("span", { className: "panel-stamp", "data-i18n": stampKey }, [stamp]),
     ]),
     el("div", { className: "panel-body" }, children),
   ]);
@@ -962,7 +974,7 @@ function sticker(link, extraClass = "") {
           ])
         : "",
       el("span", { className: "sticker-glyph", ariaHidden: "true" }, [link.images ? wifeIcon(link.images) : platformIcon(link.icon || link.key)]),
-      el("span", { className: "sticker-label" }, [link.label]),
+      el("span", { className: "sticker-label", "data-social-label": link.key }, [link.label]),
       el("span", { className: "sticker-note", "data-social-note": link.key }, inlineNoteNodes(link.note)),
     ],
   );
@@ -1026,23 +1038,25 @@ function statusCard(link) {
 
 function profilePanel() {
   const facts = el("dl", { className: "profile-facts" });
-  profileFacts.forEach(([key, value]) => {
-    facts.append(el("div", {}, [el("dt", {}, [key]), el("dd", {}, [value])]));
+  profileFacts.forEach(([key, label, value, valueKey]) => {
+    facts.append(el("div", {}, [el("dt", { "data-i18n": key }, [label]), el("dd", { "data-i18n": valueKey }, [value])]));
   });
 
   return panel({
     id: "profile",
     title: "about kaz",
     stamp: "profile.gif",
+    titleKey: "panel.profile.title",
+    stampKey: "panel.profile.stamp",
     children: [
       el("div", { className: "profile-layout" }, [
         el("figure", { className: "portrait art-carousel scribble-box" }, [
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
             el("img", { src: "assets/kazvt-transparent.gif", alt: "kazvt art" }),
           ]),
-          el("figcaption", { id: "kaz-art-caption" }, ["art window"]),
+          el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, ["art window"]),
         ]),
-        el("div", { className: "profile-copy" }, [facts, el("p", {}, [bio])]),
+        el("div", { className: "profile-copy" }, [facts, el("p", { "data-i18n": "profile.bio" }, [bio])]),
       ]),
     ],
   });
@@ -1053,10 +1067,12 @@ function guestbookPanel() {
     id: "guestbook",
     title: "guestbook",
     stamp: "sign here",
+    titleKey: "panel.guestbook.title",
+    stampKey: "panel.guestbook.stamp",
     children: [
       el("div", { className: "guestbook-lines" }, [
-        el("p", {}, ["name: kazvt visitor"]),
-        el("p", {}, ["message: thanks for visiting kazvt dot com!!"]),
+        el("p", { "data-i18n": "guestbook.name" }, ["name: kazvt visitor"]),
+        el("p", { "data-i18n": "guestbook.message" }, ["message: thanks for visiting kazvt dot com!!"]),
       ]),
     ],
   });
@@ -1067,10 +1083,20 @@ function oldWebPanel() {
     id: "webcorner",
     title: "web corner",
     stamp: "always open",
+    titleKey: "panel.webcorner.title",
+    stampKey: "panel.webcorner.stamp",
     children: [
       el("div", { className: "web-corner" }, [
-        el("p", { className: "construction-sign" }, ["under construction forever"]),
-        el("p", {}, ["webring: ", el("a", { href: "#links" }, ["prev"]), " / ", el("a", { href: "#badges" }, ["random"]), " / ", el("a", { href: "#guestbook" }, ["next"])]),
+        el("p", { className: "construction-sign", "data-i18n": "webcorner.construction" }, ["under construction forever"]),
+        el("p", {}, [
+          el("span", { "data-i18n": "webcorner.webring" }, ["webring:"]),
+          " ",
+          el("a", { href: "#links", "data-i18n": "webcorner.prev" }, ["prev"]),
+          " / ",
+          el("a", { href: "#badges", "data-i18n": "webcorner.random" }, ["random"]),
+          " / ",
+          el("a", { href: "#guestbook", "data-i18n": "webcorner.next" }, ["next"]),
+        ]),
       ]),
     ],
   });
@@ -1081,6 +1107,8 @@ function badgesPanel() {
     id: "badges",
     title: "88x31 stash",
     stamp: "take one",
+    titleKey: "panel.badges.title",
+    stampKey: "panel.badges.stamp",
     children: [
       el(
         "div",
@@ -1187,19 +1215,21 @@ function paintPanel() {
     id: "paint",
     title: "doodle pad",
     stamp: "stylus.exe",
+    titleKey: "panel.paint.title",
+    stampKey: "panel.paint.stamp",
     children: [
       el("div", { className: "paint-app" }, [
         el("div", { className: "paint-zone scribble-box" }, [
           el("canvas", { id: "doodle-canvas", width: "720", height: "360", ariaLabel: "Draw here" }),
-          el("p", { className: "paint-caption" }, ["draw here, then save your doodle"]),
+          el("p", { className: "paint-caption", "data-i18n": "paint.caption" }, ["draw here, then save your doodle"]),
         ]),
         el("div", { className: "paint-controls scribble-box", ariaLabel: "Doodle pad tools" }, [
-          el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true" }, ["red"]),
-          el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false" }, ["blue"]),
-          el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false" }, ["green"]),
-          el("button", { type: "button", "data-brush": "#302135", ariaPressed: "false" }, ["ink"]),
-          el("button", { type: "button", "data-clear": "true" }, ["clear"]),
-          el("button", { type: "button", "data-save": "true" }, ["save gif"]),
+          el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true", "data-i18n": "paint.red" }, ["red"]),
+          el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false", "data-i18n": "paint.blue" }, ["blue"]),
+          el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false", "data-i18n": "paint.green" }, ["green"]),
+          el("button", { type: "button", "data-brush": "#302135", ariaPressed: "false", "data-i18n": "paint.ink" }, ["ink"]),
+          el("button", { type: "button", "data-clear": "true", "data-i18n": "paint.clear" }, ["clear"]),
+          el("button", { type: "button", "data-save": "true", "data-i18n": "paint.save" }, ["save gif"]),
         ]),
       ]),
     ],
@@ -1226,7 +1256,7 @@ function createVisitCounter({ key = "kazvt-page-visits", label = "visits" } = {}
   const digits = String(count).padStart(6, "0").slice(-6);
 
   return el("div", { className: "visit-counter", ariaLabel: `${label}: ${count}` }, [
-    el("span", { className: "counter-label" }, [label]),
+    el("span", { className: "counter-label", "data-i18n": "footer.counter" }, [label]),
     el(
       "span",
       { className: "counter-digits", ariaHidden: "true" },
@@ -1357,34 +1387,28 @@ function initializeLogoWumpas() {
   });
 
   saveLogoWumpaState(state);
+  document.body.classList.add("wumpa-ready");
 }
 
 function spawnRandomWumpa(layer) {
   const existing = layer.querySelectorAll(".wumpa-fruit").length;
   if (existing > 2) return;
 
-  const size = 22 + Math.round(Math.random() * 12);
+  const size = 28;
   const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: "eat wumpa fruit" }, [
     el("img", { src: "assets/wumpa.gif", alt: "" }),
   ]);
-  const side = randomFrom(["left", "right", "top", "bottom"]);
+  const side = randomFrom(["left", "right"]);
   const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   const height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
   fruit.style.setProperty("--wumpa-size", `${size}px`);
-  fruit.style.setProperty("--wumpa-life", "2200ms");
+  fruit.style.setProperty("--wumpa-life", "3200ms");
 
-  if (side === "left" || side === "right") {
-    fruit.style.top = `${20 + Math.random() * Math.max(40, height - 80)}px`;
-    fruit.style.left = side === "left" ? "5px" : `${Math.max(5, width - size - 5)}px`;
-    fruit.style.setProperty("--from-x", side === "left" ? `-${size + 12}px` : `${size + 12}px`);
-    fruit.style.setProperty("--from-y", "0px");
-  } else {
-    fruit.style.left = `${20 + Math.random() * Math.max(40, width - 80)}px`;
-    fruit.style.top = side === "top" ? "5px" : `${Math.max(5, height - size - 5)}px`;
-    fruit.style.setProperty("--from-x", "0px");
-    fruit.style.setProperty("--from-y", side === "top" ? `-${size + 12}px` : `${size + 12}px`);
-  }
+  fruit.style.top = `${20 + Math.random() * Math.max(40, height - 80)}px`;
+  fruit.style.left = side === "left" ? "6px" : `${Math.max(6, width - size - 6)}px`;
+  fruit.style.setProperty("--from-x", side === "left" ? `-${size + 14}px` : `${size + 14}px`);
+  fruit.style.setProperty("--from-y", "0px");
 
   fruit.addEventListener("click", () => {
     if (fruit.classList.contains("is-eaten")) return;
@@ -1395,7 +1419,7 @@ function spawnRandomWumpa(layer) {
   });
 
   layer.append(fruit);
-  window.setTimeout(() => fruit.remove(), 2300);
+  window.setTimeout(() => fruit.remove(), 3300);
 }
 
 function initializeWumpaGame() {
@@ -1457,6 +1481,7 @@ async function initializeEmbeddedGuide() {
         fragment.append(document.importNode(child, true));
       });
       slot.replaceChildren(fragment);
+      applyLanguageText(slot);
     } catch {
       details.dataset.loaded = "";
       slot.replaceChildren(el("p", { className: "embedded-guide-error" }, ["the guide could not load here. use the multistream guide page from the nav."]));
@@ -1771,7 +1796,7 @@ async function initializeMusicPlayer() {
 
   const tracks = await loadManifest("music/manifest.json", audioExtensions);
   if (!tracks.length) {
-    mount.replaceChildren(el("p", { className: "small-copy" }, ["radio is quiet for now"]));
+    mount.replaceChildren(el("p", { className: "small-copy", "data-i18n": "music.empty" }, ["radio is quiet for now"]));
     return;
   }
 
@@ -1782,11 +1807,19 @@ async function initializeMusicPlayer() {
   let analyser = null;
   let source = null;
   const title = el("p", { className: "track-title" }, [""]);
-  const play = el("button", { type: "button", className: "music-button" }, ["play"]);
+  const play = el("button", { type: "button", className: "music-button", "data-i18n": "music.play" }, ["play"]);
   const prev = el("button", { type: "button", className: "music-button", ariaLabel: "Previous track" }, ["<<"]);
   const next = el("button", { type: "button", className: "music-button", ariaLabel: "Next track" }, [">>"]);
   const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: "Track position" });
-  const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: "0.8", ariaLabel: "Volume" });
+  const storedVolume = (() => {
+    try {
+      const value = Number(sessionStorage.getItem(VOLUME_STORAGE_KEY));
+      return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.2;
+    } catch {
+      return 0.2;
+    }
+  })();
+  const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: String(storedVolume), ariaLabel: "Volume" });
   const visualizer = el("canvas", {
     width: "150",
     height: "44",
@@ -1861,7 +1894,8 @@ async function initializeMusicPlayer() {
   }
 
   function getVisualizerLevels(data) {
-    const activeBins = data.slice(0, Math.max(1, Math.ceil(data.length * visualizerBinCrop)));
+    const normalized = Array.from(data, (value) => Math.min(255, value / Math.max(siteVolume, 0.08)));
+    const activeBins = normalized.slice(0, Math.max(1, Math.ceil(normalized.length * visualizerBinCrop)));
     const bars = Math.min(visualizerBarCount, activeBins.length);
     const levels = [];
 
@@ -1911,7 +1945,7 @@ async function initializeMusicPlayer() {
 
     for (let x = 0; x <= width; x += step) {
       const index = Math.min(waveform.length - 1, Math.floor((x / width) * waveform.length));
-      const wave = (waveform[index] - 128) / 128;
+      const wave = Math.max(-1, Math.min(1, ((waveform[index] - 128) / 128) / Math.max(siteVolume, 0.08)));
       const y = Math.round(mid + wave * (height * 0.42));
       if (x === 0) visualContext.moveTo(x, y);
       else visualContext.lineTo(x, y);
@@ -1923,7 +1957,7 @@ async function initializeMusicPlayer() {
     visualContext.beginPath();
     for (let x = 0; x <= width; x += step * 2) {
       const index = Math.min(waveform.length - 1, Math.floor((x / width) * waveform.length));
-      const wave = (waveform[index] - 128) / 128;
+      const wave = Math.max(-1, Math.min(1, ((waveform[index] - 128) / 128) / Math.max(siteVolume, 0.08)));
       const y = Math.round(mid - wave * (height * 0.3));
       if (x === 0) visualContext.moveTo(x, y);
       else visualContext.lineTo(x, y);
@@ -1989,10 +2023,10 @@ async function initializeMusicPlayer() {
   prev.addEventListener("click", () => loadTrack(index - 1, !audio.paused));
   next.addEventListener("click", () => loadTrack(index + 1, !audio.paused));
   audio.addEventListener("play", () => {
-    play.textContent = "pause";
+    setInlineNote(play, translatedText("music.pause", "pause"));
   });
   audio.addEventListener("pause", () => {
-    play.textContent = "play";
+    setInlineNote(play, translatedText("music.play", "play"));
   });
   audio.addEventListener("ended", () => loadTrack(index + 1, true));
   audio.addEventListener("error", () => {
@@ -2011,6 +2045,9 @@ async function initializeMusicPlayer() {
   volume.addEventListener("input", () => {
     siteVolume = Number(volume.value);
     audio.volume = siteVolume;
+    try {
+      sessionStorage.setItem(VOLUME_STORAGE_KEY, String(siteVolume));
+    } catch {}
   });
   visualizer.addEventListener("click", cycleVisualizerMode);
   visualizer.addEventListener("keydown", (event) => {
@@ -2026,7 +2063,7 @@ async function initializeMusicPlayer() {
     title,
     el("div", { className: "music-controls" }, [prev, play, next]),
     seek,
-    el("label", { className: "volume-label" }, ["vol", volume]),
+    el("label", { className: "volume-label" }, [el("span", { "data-i18n": "music.volume" }, ["vol"]), volume]),
     visualizer,
   );
   loadTrack(0);
@@ -2046,6 +2083,8 @@ function render(statusOverrides = {}) {
       id: "links",
       title: "where to find me",
       stamp: "links",
+      titleKey: "panel.links.title",
+      stampKey: "panel.links.stamp",
       children: [el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker))],
     }),
     multistreamGuidePanel(),
@@ -2055,8 +2094,8 @@ function render(statusOverrides = {}) {
     paintPanel(),
     badgesPanel(),
     el("footer", { className: "page-footer scribble-box" }, [
-      el("span", {}, ["kazvt.com / press start / come back soon"]),
-      createVisitCounter({ key: "kazvt-home-visits", label: "you are visitor" }),
+      el("span", { "data-i18n": "footer.message" }, ["kazvt.com / press start / come back soon"]),
+      createVisitCounter({ key: "kazvt-home-visits", label: translatedText("footer.counter", "you are visitor") }),
     ]),
   );
 

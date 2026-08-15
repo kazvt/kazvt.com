@@ -1,0 +1,30 @@
+﻿[AppStarting]
+Path=Fate Bakground.ani
+
+[SizeAll]
+Path=Fate grab.ani
+
+[Help]
+Path=Fate Help.ani
+
+[Crosshair]
+Path=Fate Precise.ani
+
+[No]
+Path=Fate Stop.ani
+
+[IBeam]
+Path=Fate Text.ani
+
+[Wait]
+Path=Fate wait.ani
+
+[Arrow]
+Path=Fate.ani
+
+[NWPen]
+Path=Fatepen.ani
+
+[Hand]
+Path=FateSelect.ani
+
