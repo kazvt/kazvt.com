@@ -2139,6 +2139,19 @@ async function initializeMusicPlayer() {
   const visualizerLevels = Array(visualizerBarCount).fill(0);
   let visualizerMode = visualizerModes[0];
 
+  function cssVar(name, fallback) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
+  }
+
+  function visualizerColors() {
+    return {
+      bg: cssVar("--banner", "#16111a"),
+      primary: cssVar("--green", "#6cff7a"),
+      secondary: cssVar("--blue", "#48cfff"),
+      accent: cssVar("--yellow", "#ffef5d"),
+    };
+  }
+
   function trackUrl(file) {
     return `music/${encodeURIComponent(file)}`;
   }
@@ -2182,12 +2195,12 @@ async function initializeMusicPlayer() {
   }
 
   function clearVisualizer(width, height) {
-    visualContext.fillStyle = "#16111a";
+    visualContext.fillStyle = visualizerColors().bg;
     visualContext.fillRect(0, 0, width, height);
   }
 
   function drawIdleVisualizer(width, height) {
-    visualContext.fillStyle = "#6cff7a";
+    visualContext.fillStyle = visualizerColors().primary;
     for (let x = 6; x < width; x += 14) {
       const bar = 5 + ((x / 14) % 4) * 4;
       visualContext.fillRect(x, height - bar - 5, 9, bar);
@@ -2230,17 +2243,19 @@ async function initializeMusicPlayer() {
 
   function drawBarVisualizer(levels, width, height) {
     const barWidth = width / levels.length;
+    const colors = visualizerColors();
     levels.forEach((value, bar) => {
       const barHeight = Math.max(3, Math.pow(value / 255, 0.72) * (height - 8));
-      visualContext.fillStyle = bar % 2 ? "#48cfff" : "#6cff7a";
+      visualContext.fillStyle = bar % 2 ? colors.secondary : colors.primary;
       visualContext.fillRect(bar * barWidth + 2, height - barHeight - 4, Math.max(5, barWidth - 4), barHeight);
     });
   }
 
   function drawScopeVisualizer(waveform, width, height) {
+    const colors = visualizerColors();
     const step = 4;
     const mid = Math.round(height / 2);
-    visualContext.strokeStyle = "#48cfff";
+    visualContext.strokeStyle = colors.secondary;
     visualContext.lineWidth = 3;
     visualContext.beginPath();
 
@@ -2253,7 +2268,7 @@ async function initializeMusicPlayer() {
     }
 
     visualContext.stroke();
-    visualContext.strokeStyle = "#6cff7a";
+    visualContext.strokeStyle = colors.primary;
     visualContext.lineWidth = 2;
     visualContext.beginPath();
     for (let x = 0; x <= width; x += step * 2) {
@@ -2269,16 +2284,17 @@ async function initializeMusicPlayer() {
   function drawBurstVisualizer(levels, width, height) {
     const centerY = Math.round(height / 2);
     const slotWidth = width / levels.length;
+    const colors = visualizerColors();
 
     levels.forEach((value, index) => {
       const strength = Math.pow(value / 255, 0.82);
       const barHeight = Math.max(4, strength * (height - 10));
       const x = Math.round(index * slotWidth + 2);
       const y = Math.round(centerY - barHeight / 2);
-      visualContext.fillStyle = index % 2 ? "#6cff7a" : "#48cfff";
+      visualContext.fillStyle = index % 2 ? colors.primary : colors.secondary;
       visualContext.fillRect(x, y, Math.max(5, slotWidth - 5), Math.round(barHeight));
       if (strength > 0.42) {
-        visualContext.fillStyle = "#ffef5d";
+        visualContext.fillStyle = colors.accent;
         visualContext.fillRect(x + 1, Math.max(3, y - 3), Math.max(3, slotWidth - 7), 2);
       }
     });

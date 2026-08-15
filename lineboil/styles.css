@@ -485,29 +485,29 @@ body[data-theme="p16"] {
 
 body,
 body[data-theme="p1"] {
-  --cursor-default: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Select Hand.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Hand.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Alt. Select.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Help Cursor.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Alt but better cyan.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Precizion Select.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-paint-1/Mario Paint Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Normal Select.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Busy.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p2"] {
-  --cursor-default: url("assets/cursors/rw-picked/minecraft-9/Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/minecraft-9/Link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/minecraft-9/Text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/minecraft-9/Help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/minecraft-9/Alternate.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/minecraft-9/Precision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/minecraft-9/Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/minecraft-9/Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/minecraft-9/Horizontal.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/minecraft-9/Vertical.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/fallout-1/normal cursor.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/fallout-1/link select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/fallout-1/text.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/fallout-1/ALTERNATE SELECT.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/fallout-1/busy.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/fallout-1/RIGHT.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/fallout-1/UNABAVIBLE.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/fallout-1/MOVE.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/fallout-1/RESIZE1.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/fallout-1/RESIZE 2.cur"), ns-resize;
 }
 
 body[data-theme="p3"] {
@@ -537,29 +537,29 @@ body[data-theme="p4"] {
 }
 
 body[data-theme="p5"] {
-  --cursor-default: url("assets/cursors/rw-picked/dark-souls-iii/Dark souls 3.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/dark-souls-iii/Darksign (Link).cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/dark-souls-iii/Spells (Text).cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/dark-souls-iii/Dark souls 3 (Help).cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/dark-souls-iii/Rings.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/dark-souls-iii/Sword of Avowal (Precision).cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/dark-souls-iii/Dark souls 3 (Unavailable).cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/dark-souls-iii/Dark souls 3 (Move).cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/dark-souls-iii/Dark souls 3 (Horizontal).cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/dark-souls-iii/Dark souls 3 (Vertical).cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/undertale-theme/Undertale Normal Cursor.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/undertale-theme/Undertale Link Cursor.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/undertale-theme/Undertale Text Cursor.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/undertale-theme/Undertale Help Cursor.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/undertale-theme/Undertale Working Cursor.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/undertale-theme/Undertale Precision Set.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/undertale-theme/Undertale Unavailable Cursor.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/undertale-theme/Undertale Move Cursor.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/undertale-theme/Undertale Horizontal Cursor.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/undertale-theme/Undertale Vertical Cursor.cur"), ns-resize;
 }
 
 body[data-theme="p6"] {
-  --cursor-default: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Normal Select.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Link Select.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Text Select.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Help Select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Alternate Select.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Precision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/mario-64-2020/Mario 64 Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/stardew-valley/Normal Selects.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/stardew-valley/Alt Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/stardew-valley/Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/stardew-valley/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/stardew-valley/Busy.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/stardew-valley/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/stardew-valley/Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/stardew-valley/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/stardew-valley/Horizontal .cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/stardew-valley/Vertical.cur"), ns-resize;
 }
 
 body[data-theme="p7"] {
@@ -589,42 +589,42 @@ body[data-theme="p8"] {
 }
 
 body[data-theme="p9"] {
-  --cursor-default: url("assets/cursors/rw-picked/subnautica/Subnautica Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/subnautica/Subnautica Link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/subnautica/Subnautica Text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/subnautica/Subnautica Help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/subnautica/Subnautica Alternate.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/subnautica/Subnautica Normal.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/subnautica/Subnautica Alternate.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/subnautica/Subnautica Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/subnautica/Subnautica Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/subnautica/Subnautica Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_black.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_white.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_text.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_help.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_alt.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_precision_1.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_move_arrow.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_horizontal_arrows.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_vertical_arrows.cur"), ns-resize;
 }
 
 body[data-theme="p10"] {
-  --cursor-default: url("assets/cursors/rw-picked/angrybirds/Castle Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/angrybirds/Mighty Eagle Link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/angrybirds/Yellow Text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/angrybirds/Pig Alter.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/angrybirds/Castle Normal.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/angrybirds/Black Precision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/angrybirds/Pig Alter.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/angrybirds/Piggy Bank Pen.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/angrybirds/AngryBirdsEW.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/angrybirds/AngryBirdsEW.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/cookie-clicker-classic/Cookie.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/cookie-clicker-classic/Mouse.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/cookie-clicker-classic/Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/cookie-clicker-classic/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/cookie-clicker-classic/Chancemaker.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/cookie-clicker-classic/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/cookie-clicker-classic/Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/cookie-clicker-classic/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/cookie-clicker-classic/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/cookie-clicker-classic/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p11"] {
-  --cursor-default: url("assets/cursors/rw-picked/sussy-baka-amogus/normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/sussy-baka-amogus/link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/sussy-baka-amogus/text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/sussy-baka-amogus/help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/sussy-baka-amogus/busy.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/sussy-baka-amogus/precision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/sussy-baka-amogus/unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/sussy-baka-amogus/move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/sussy-baka-amogus/diagonal 1.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/sussy-baka-amogus/diagonal 2.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/lethal-company/Normal Select.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/lethal-company/Link Select.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/lethal-company/Text Select.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/lethal-company/Help Select.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/lethal-company/Busy.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/lethal-company/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/lethal-company/Unavailable.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/lethal-company/Move.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/lethal-company/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/lethal-company/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p12"] {
@@ -654,16 +654,16 @@ body[data-theme="p13"] {
 }
 
 body[data-theme="p14"] {
-  --cursor-default: url("assets/cursors/rw-picked/sims1/Cursor Sims Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/sims1/Cursor Sims Hover.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/sims1/Cursor Sims S.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/sims1/Cursor Sims Question.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/sims1/Cursor Sims Plus.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/sims1/Cursor Sims Locat.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/sims1/Cursor Sims Nope.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/sims1/Cursor Sims move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/sims1/Cursor Simsleft.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/sims1/Cursor Sims Downwards.cur"), ns-resize;
+  --cursor-default: url("assets/cursors/rw-picked/shovel-knight/SK_1.cur"), auto;
+  --cursor-pointer: url("assets/cursors/rw-picked/shovel-knight/SK_15.cur"), pointer;
+  --cursor-text: url("assets/cursors/rw-picked/shovel-knight/SK_6.cur"), text;
+  --cursor-help: url("assets/cursors/rw-picked/shovel-knight/SK_2.cur"), help;
+  --cursor-busy: url("assets/cursors/rw-picked/shovel-knight/SK_4.cur"), wait;
+  --cursor-precision: url("assets/cursors/rw-picked/shovel-knight/SK_5.cur"), crosshair;
+  --cursor-not-allowed: url("assets/cursors/rw-picked/shovel-knight/SK_7.cur"), not-allowed;
+  --cursor-move: url("assets/cursors/rw-picked/shovel-knight/SK_12.cur"), move;
+  --cursor-ew-resize: url("assets/cursors/rw-picked/shovel-knight/SK_9.cur"), ew-resize;
+  --cursor-ns-resize: url("assets/cursors/rw-picked/shovel-knight/SK_8.cur"), ns-resize;
 }
 
 body[data-theme="p15"] {
@@ -2034,7 +2034,7 @@ code {
   justify-items: center;
   margin: 0;
   padding: 12px;
-  background: #fff4b6;
+  background: var(--paper);
   text-align: center;
 }
 
@@ -2268,7 +2268,7 @@ code {
   gap: 8px;
   padding: 12px;
   border: 3px dashed var(--ink);
-  background: rgba(255, 255, 255, 0.56);
+  background: color-mix(in srgb, var(--paper) 72%, var(--banner) 28%);
 }
 
 .guestbook-lines p {
@@ -2604,13 +2604,13 @@ code {
   height: 34px;
   place-items: center;
   border: 2px solid var(--banner-text);
-  background: #050407;
-  color: #6cff7a;
+  background: color-mix(in srgb, var(--banner) 72%, #000000 28%);
+  color: color-mix(in srgb, var(--green) 84%, var(--banner-text) 16%);
   font-family: "Courier New", monospace;
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 900;
-  text-shadow: 0 0 6px #6cff7a;
+  text-shadow: 0 0 6px color-mix(in srgb, var(--green) 68%, transparent);
 }
 
 @keyframes wholeBoil {
