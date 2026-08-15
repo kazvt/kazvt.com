@@ -1,0 +1,36 @@
+﻿[Arrow]
+Path=Ultimate Gaming Mouse Normal select cursor.cur
+
+[Help]
+Path=Ultimate Gaming Mouse Help Select.cur
+
+[AppStarting]
+Path=Ultiamate Gaming Mouse Working in background.ani
+
+[Crosshair]
+Path=Ultimate Gaming Mouse Precision Select.cur
+
+[IBeam]
+Path=Ultimate Gaming Mouse Text Select.cur
+
+[NWPen]
+Path=Ultimate Gaming Mouse Handwriting.cur
+
+[No]
+Path=Ultimate Gaming Mouse Unavailable.cur
+
+[SizeNS]
+Path=Ultimate Gaming Mouse Verticle Resize.cur
+
+[SizeWE]
+Path=Ultimate Gaming Mouse Horizontal Resize.cur
+
+[SizeNWSE]
+Path=Ultimate Gaming Mouse Diagonal 1.cur
+
+[SizeNESW]
+Path=Ultimate Gaming Mouse Diagonal 2cursor.cur
+
+[SizeAll]
+Path=Ultimate Gaming Mouse Move .cur
+
