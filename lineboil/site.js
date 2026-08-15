@@ -97,6 +97,7 @@ const DEFAULT_LANGUAGE_CODE = "en";
 const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
 const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
 const WUMPA_LOGO_RECOVER_KEY = "kazvt-logo-wumpa-recover-clicks";
+const KISSY_STORAGE_KEY = "kazvt-kissy-count";
 const EMOTE_FILE = "emotes.txt";
 
 const cursorThemes = {
@@ -1137,12 +1138,51 @@ function spawnWifeKissEffect(sticker) {
   }
 }
 
+function getKissyCount() {
+  try {
+    return Number(sessionStorage.getItem(KISSY_STORAGE_KEY) || "0") || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function setKissyCount(count) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  try {
+    sessionStorage.setItem(KISSY_STORAGE_KEY, String(safeCount));
+  } catch {}
+
+  document.querySelectorAll("[data-kissy-count]").forEach((node) => {
+    node.textContent = String(safeCount);
+  });
+}
+
+let kissyCounterTimer = 0;
+
+function showKissyCounter() {
+  const counter = document.querySelector(".kissy-counter");
+  if (!counter) return;
+
+  counter.classList.add("is-visible");
+  window.clearTimeout(kissyCounterTimer);
+  kissyCounterTimer = window.setTimeout(() => {
+    counter.classList.remove("is-visible");
+  }, 3000);
+}
+
+function addKissy() {
+  setKissyCount(getKissyCount() + 1);
+  showKissyCounter();
+}
+
 function initializeWifeStickerEffects() {
   getMwahAudio();
+  setKissyCount(getKissyCount());
   document.querySelectorAll(".sticker-wife").forEach((sticker) => {
     if (sticker.dataset.kissReady) return;
     sticker.dataset.kissReady = "true";
     sticker.addEventListener("pointerenter", () => {
+      addKissy();
       playMwahSound();
       spawnWifeKissEffect(sticker);
     });

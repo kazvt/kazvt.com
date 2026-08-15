@@ -123,6 +123,7 @@ paint.canvas_aria=draw here
 paint.tools_aria=doodle pad tools
 paint.making=making gif
 wumpa.counter_label=wumpa:
+kissy.counter_label=kissy:
 wumpa.toast_aria=wumpa message
 wumpa.random_aria=eat wumpa fruit
 wumpa.logo.left_aria=eat left wumpa fruit
