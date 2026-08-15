@@ -660,6 +660,20 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   outline-offset: var(--click-hover-outline-offset);
 }
 
+.oldweb-nav a.nav-multistream {
+  display: inline-grid;
+  height: 38px;
+  align-content: center;
+  justify-items: center;
+  padding: 4px 11px;
+  font-size: 0.76rem;
+  line-height: 0.92;
+}
+
+.oldweb-nav a.nav-multistream span {
+  display: block;
+}
+
 .oldweb-nav a:hover,
 .oldweb-nav a:focus-visible,
 .tool-list button:hover,
@@ -758,12 +772,14 @@ code {
 
 .palette {
   display: grid;
+  counter-reset: palette-choice;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin-top: 14px;
 }
 
 .palette button {
+  position: relative;
   aspect-ratio: 1;
   border: 3px solid var(--ink);
   background: var(--swatch);
@@ -771,6 +787,26 @@ code {
   clip-path: polygon(0 8px, 8px 0, 100% 5px, calc(100% - 4px) 100%, 5px calc(100% - 3px));
   animation: blockBoil 500ms steps(2, end) infinite;
   transition: none;
+}
+
+.palette button::before {
+  counter-increment: palette-choice;
+  content: counter(palette-choice);
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  display: grid;
+  min-width: 1.1em;
+  height: 1.1em;
+  place-items: center;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 1px 1px 0 var(--shadow);
+  z-index: 1;
 }
 
 .big-palette button {
@@ -805,6 +841,28 @@ code {
 
 .guide-page .web-grid {
   grid-template-columns: 160px minmax(0, 1fr) 160px;
+}
+
+.guide-page .palette {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.guide-page .big-palette button {
+  min-height: 0;
+}
+
+.guide-page .big-palette span {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.guide-page .palette button::before {
+  top: 2px;
+  left: 2px;
+  border-width: 1px;
+  font-size: 0.5rem;
 }
 
 .panel {
@@ -870,6 +928,24 @@ code {
     linear-gradient(0deg, color-mix(in srgb, var(--pink) 13%, transparent) 1px, transparent 1px),
     var(--paper-alt);
   background-size: 18px 18px;
+}
+
+.guide-page #multistream-guide {
+  animation-duration: 900ms;
+}
+
+.guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong) {
+  animation-duration: 1100ms;
+}
+
+.guide-map-frame :is(a, span, text, tspan) {
+  animation: none !important;
+}
+
+.guide-map-frame::before,
+.guide-map-frame::after {
+  opacity: 0.14;
+  animation-duration: 1200ms;
 }
 
 .guide-map {
@@ -998,7 +1074,7 @@ code {
 .guide-mobile-ladder .guide-step:focus-within,
 .guide-mobile-ladder .guide-choice:hover,
 .guide-mobile-ladder .guide-choice:focus-within {
-  scale: 1.01;
+  scale: 1.05;
   filter: saturate(1.08) drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent));
 }
 
@@ -1316,7 +1392,7 @@ code {
 .wife-combo {
   position: relative;
   display: grid;
-  width: 52px;
+  width: 68px;
   height: 46px;
   place-items: center;
 }
@@ -1331,11 +1407,62 @@ code {
 
 .wife-combo img:first-child {
   z-index: 2;
-  transform: translate(-7px, -2px) rotate(-7deg);
+  transform: translate(-16px, 0) rotate(-5deg);
 }
 
 .wife-combo img:last-child {
-  transform: translate(8px, 4px) rotate(8deg);
+  transform: translate(16px, 0) rotate(5deg);
+}
+
+.sticker-wife {
+  overflow: visible;
+  isolation: isolate;
+}
+
+.sticker-wife:hover .wife-combo img:first-child,
+.sticker-wife:focus-visible .wife-combo img:first-child {
+  animation: wifeKissLeft 760ms ease-in-out;
+}
+
+.sticker-wife:hover .wife-combo img:last-child,
+.sticker-wife:focus-visible .wife-combo img:last-child {
+  animation: wifeKissRight 760ms ease-in-out;
+}
+
+.wife-kiss-stamp,
+.wife-kiss-particle {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.wife-kiss-stamp {
+  width: 34px;
+  height: 34px;
+  background: url("assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
+  filter: drop-shadow(2px 2px 0 var(--ink));
+  animation: wifeKissStamp 1000ms ease-out forwards !important;
+}
+
+.wife-kiss-particle {
+  color: #ff3f94;
+  font-family: "Trebuchet MS", "Comic Sans MS", Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-shadow:
+    1px 1px 0 #ffffff,
+    2px 2px 0 var(--ink);
+  animation: wifeKissParticle 1000ms ease-out forwards !important;
+}
+
+.wife-kiss-particle.is-kiss {
+  width: 22px;
+  height: 22px;
+  background: url("assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
+  color: transparent;
+  text-shadow: none;
 }
 
 .sticker-label,
@@ -1352,6 +1479,18 @@ code {
   font-size: clamp(0.9rem, 1.9vw, 1rem);
   font-weight: 800;
   line-height: 1.45;
+}
+
+.note-small {
+  display: inline-block;
+  font-size: 0.72em;
+  line-height: 1;
+  opacity: 0.88;
+  vertical-align: 0.08em;
+}
+
+.sticker-note .note-small {
+  margin-left: 3px;
 }
 
 .status-card {
@@ -1855,6 +1994,54 @@ code {
   0% { transform: translate(0, 0); }
   50% { transform: translate(3px, -2px); }
   100% { transform: translate(-2px, 2px); }
+}
+
+@keyframes wifeKissLeft {
+  0% { transform: translate(-16px, 0) rotate(-5deg) scale(1); }
+  45% { transform: translate(-4px, -1px) rotate(2deg) scale(1.08); }
+  70% { transform: translate(-7px, 0) rotate(-1deg) scale(1.04); }
+  100% { transform: translate(-16px, 0) rotate(-5deg) scale(1); }
+}
+
+@keyframes wifeKissRight {
+  0% { transform: translate(16px, 0) rotate(5deg) scale(1); }
+  45% { transform: translate(4px, -1px) rotate(-2deg) scale(1.08); }
+  70% { transform: translate(7px, 0) rotate(1deg) scale(1.04); }
+  100% { transform: translate(16px, 0) rotate(5deg) scale(1); }
+}
+
+@keyframes wifeKissStamp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-12deg) scale(0.25);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-9deg) scale(1.16);
+  }
+  72% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-4deg) scale(0.92);
+  }
+}
+
+@keyframes wifeKissParticle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.2);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, -50px))) rotate(var(--rot, 18deg)) scale(var(--scale, 1));
+  }
 }
 
 @keyframes marquee {

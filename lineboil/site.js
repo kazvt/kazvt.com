@@ -90,26 +90,316 @@ const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
 
 const cursorThemes = {
-  p1: { effect: "fairyDustCursor", options: { colors: ["#F599C6", "#FFEA88", "#7DCCAD"] } },
-  p2: { effect: "characterCursor", options: { characters: ["*", "+", "!"], colors: ["#EF6905", "#F1E5A1", "#486C2F"], font: "18px monospace" } },
-  p3: { effect: "fairyDustCursor", options: { colors: ["#1D4533", "#F9D2BA", "#5E3122"] } },
-  p4: { effect: "bubbleCursor", options: { fillColor: "#D8FFC5", strokeColor: "#30AFFF" } },
+  p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
+  p2: { effect: "lineboilGlyphCursor", options: { glyphs: ["!", "*"], colors: ["#EF6905", "#F1E5A1", "#486C2F"], sizes: [7, 9, 11, 13], spawn: 1, scatter: 0.45, gravity: 0.02, life: 42 } },
+  p3: { effect: "lineboilGlyphCursor", options: { glyphs: ["+"], colors: ["#1D4533", "#F9D2BA", "#5E3122"], sizes: [9, 15, 22, 30], spawn: 1, scatter: 0.55, gravity: -0.005, life: 68, spin: 0.08 } },
+  p4: { effect: "bubbleCursor", options: {} },
   p5: { effect: "followingDotCursor", options: { color: "#FAF7BBcc" } },
-  p6: { effect: "characterCursor", options: { characters: [".", "*", "+"], colors: ["#FEF2A0", "#E98B50", "#BC4F4F"], font: "18px monospace" } },
-  p7: { effect: "textFlag", options: { text: "kazvt", color: "#FCF2E5", font: "monospace", textSize: 12 } },
-  p8: { effect: "fairyDustCursor", options: { colors: ["#E8F5E9", "#A5D6A7", "#1B5E20"] } },
-  p9: { effect: "bubbleCursor", options: { fillColor: "#E3F2FD", strokeColor: "#0D47A1" } },
-  p10: { effect: "fairyDustCursor", options: { colors: ["#F6D8BD", "#F39399", "#CF4173"] } },
-  p11: { effect: "characterCursor", options: { characters: ["0", "1", "+", "="], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "16px monospace" } },
+  p6: { effect: "trailingCursor", options: { particles: 20, rate: 0.26, baseImageSrc: svgTrailCursorImage("#FEF2A0", "#BC4F4F", "diamond") } },
+  p7: { effect: "lineboilFlagCursor", options: { text: "kazvt!!!", color: "#FCF2E5", strokeColor: "#EC5B38", shadowColor: "#524646", font: "900 24px Trebuchet MS, Comic Sans MS, Arial", gap: 16, wobble: 1.5 } },
+  p8: { effect: "springyEmojiCursor", options: { emoji: "✿" } },
+  p9: { effect: "lineboilBubbleCursor", options: { colors: ["#E3F2FD", "#90CAF9", "#2196F3"], strokeColor: "#0D47A1", minSize: 3, maxSize: 18, spawn: 2, life: 82 } },
+  p10: { effect: "lineboilGlyphCursor", options: { glyphs: ["♥", "♡"], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [10, 16, 24], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
+  p11: { effect: "characterCursor", options: { characters: ["0", "1", "."], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "11px monospace", characterLifeSpanFunction: () => Math.floor(40 + Math.random() * 25), initialCharacterVelocityFunction: () => ({ x: (Math.random() - 0.5) * 0.9, y: (Math.random() - 0.5) * 0.9 }), characterVelocityChangeFunctions: { x_func: () => (Math.random() - 0.5) / 80, y_func: () => (Math.random() - 0.5) / 80 }, characterScalingFunction: (age, life) => Math.max((life - age) / life, 0) } },
   p12: { effect: "rainbowCursor", options: { colors: ["#007DCC", "#FFB900", "#D10056", "#B2054C"], length: 14, size: 3 } },
-  p13: { effect: "characterCursor", options: { characters: ["*", "x", "+"], colors: ["#E73F1E", "#FB6C00", "#F9B637"], font: "18px monospace" } },
-  p14: { effect: "fairyDustCursor", options: { colors: ["#FED24F", "#FFF449", "#7EC151"] } },
-  p15: { effect: "fairyDustCursor", options: { colors: ["#F8B2B2", "#AF719D", "#403D88"] } },
-  p16: { effect: "textFlag", options: { text: "> system online", color: "#E1E100", font: "monospace", textSize: 12 } },
+  p13: { effect: "rainbowCursor", options: { colors: ["#E73F1E", "#FB6C00", "#F9B637", "#FFDD9C"], length: 8, size: 5 } },
+  p14: { effect: "rainbowCursor", options: { colors: ["#FED24F", "#FFF449", "#B2D959", "#7EC151"], length: 28, size: 2 } },
+  p15: { effect: "lineboilGlyphCursor", options: { glyphs: ["■", "□"], colors: ["#F8B2B2", "#AF719D", "#8B639B", "#403D88"], sizes: [8, 12, 18, 23], spawn: 1, scatter: 0.28, gravity: 0.01, life: 74, spin: 0.012 } },
+  p16: { effect: "lineboilFlagCursor", options: { text: "<<< kazvt.exe online >>>", color: "#E1E100", strokeColor: "#063B00", shadowColor: "#90B800", font: "900 15px Courier New, monospace", gap: 11, wobble: 0.75 } },
 };
 
 let activeCursorEffect = null;
 let activeCursorTheme = "";
+let mwahAudioContext = null;
+
+function svgTrailCursorImage(fill, stroke, shape = "diamond") {
+  const path =
+    shape === "diamond"
+      ? '<path d="M12 1 L23 12 L12 23 L1 12 Z"/>'
+      : '<path d="M12 2 C18 2 22 7 22 12 C22 19 12 23 12 23 C12 23 2 19 2 12 C2 7 6 2 12 2 Z"/>';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="${fill}" stroke="${stroke}" stroke-width="3" stroke-linejoin="round">${path}</g></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+function setupCursorCanvas() {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  canvas.style.position = "fixed";
+  canvas.style.inset = "0";
+  canvas.style.pointerEvents = "none";
+  canvas.style.zIndex = "2147483647";
+  document.body.appendChild(canvas);
+
+  const resize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+
+  resize();
+  window.addEventListener("resize", resize);
+
+  return { canvas, context, resize };
+}
+
+function randomFrom(values) {
+  return values[Math.floor(Math.random() * values.length)];
+}
+
+function createLineboilGlyphCursor(options = {}) {
+  const { canvas, context, resize } = setupCursorCanvas();
+  const glyphs = options.glyphs || ["*"];
+  const colors = options.colors || ["#F599C6", "#FFEA88", "#7DCCAD"];
+  const sizes = options.sizes || [10, 16, 22];
+  const spawnCount = options.spawn || 1;
+  const scatter = options.scatter ?? 0.55;
+  const gravity = options.gravity ?? 0.01;
+  const spin = options.spin ?? 0.045;
+  const lifeBase = options.life || 58;
+  const particles = [];
+  let animationFrame = 0;
+  let lastSpawn = 0;
+
+  const spawn = (x, y) => {
+    for (let index = 0; index < spawnCount; index += 1) {
+      const size = randomFrom(sizes);
+      const life = lifeBase + Math.floor(Math.random() * 24);
+      particles.push({
+        glyph: randomFrom(glyphs),
+        color: randomFrom(colors),
+        size,
+        x,
+        y,
+        vx: (Math.random() - 0.5) * scatter * 4,
+        vy: (Math.random() - 0.7) * scatter * 4,
+        rotation: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * spin,
+        life,
+        initialLife: life,
+      });
+    }
+  };
+
+  const move = (event) => {
+    if (event.timeStamp - lastSpawn < 22) return;
+    lastSpawn = event.timeStamp;
+    spawn(event.clientX, event.clientY);
+  };
+
+  const touch = (event) => {
+    [...event.touches].forEach((point) => spawn(point.clientX, point.clientY));
+  };
+
+  const draw = () => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (let index = particles.length - 1; index >= 0; index -= 1) {
+      const particle = particles[index];
+      particle.life -= 1;
+      if (particle.life <= 0) {
+        particles.splice(index, 1);
+        continue;
+      }
+
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      particle.vy += gravity;
+      particle.rotation += particle.spin;
+      const alpha = Math.max(particle.life / particle.initialLife, 0);
+      const scale = 0.45 + alpha * 0.75;
+
+      context.save();
+      context.globalAlpha = alpha;
+      context.translate(particle.x, particle.y);
+      context.rotate(particle.rotation);
+      context.scale(scale, scale);
+      context.font = `900 ${particle.size}px "Trebuchet MS", "Comic Sans MS", monospace`;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.lineWidth = Math.max(1, particle.size / 12);
+      context.strokeStyle = "#111111";
+      context.fillStyle = particle.color;
+      context.strokeText(particle.glyph, 0, 0);
+      context.fillText(particle.glyph, 0, 0);
+      context.restore();
+    }
+    animationFrame = window.requestAnimationFrame(draw);
+  };
+
+  document.body.addEventListener("mousemove", move);
+  document.body.addEventListener("touchmove", touch, { passive: true });
+  document.body.addEventListener("touchstart", touch, { passive: true });
+  draw();
+
+  return {
+    destroy() {
+      window.cancelAnimationFrame(animationFrame);
+      document.body.removeEventListener("mousemove", move);
+      document.body.removeEventListener("touchmove", touch);
+      document.body.removeEventListener("touchstart", touch);
+      window.removeEventListener("resize", resize);
+      canvas.remove();
+    },
+  };
+}
+
+function createLineboilFlagCursor(options = {}) {
+  const { canvas, context, resize } = setupCursorCanvas();
+  const text = ` ${options.text || "kazvt"}`;
+  const letters = Array.from(text).map((letter) => ({
+    letter,
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  }));
+  const target = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  const color = options.color || "#FCF2E5";
+  const strokeColor = options.strokeColor || "#111111";
+  const shadowColor = options.shadowColor || "#F599C6";
+  const font = options.font || '900 20px "Trebuchet MS", "Comic Sans MS", sans-serif';
+  const gap = options.gap || 14;
+  const wobble = options.wobble || 1;
+  let phase = 0;
+  let animationFrame = 0;
+
+  const move = (event) => {
+    target.x = event.clientX;
+    target.y = event.clientY;
+  };
+
+  const draw = () => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    phase += 0.14;
+
+    letters[0].x += (target.x - letters[0].x) / 5;
+    letters[0].y += (target.y - letters[0].y) / 5;
+
+    for (let index = 1; index < letters.length; index += 1) {
+      letters[index].x += (letters[index - 1].x + gap - letters[index].x) / 2.6;
+      letters[index].y += (letters[index - 1].y + Math.sin(phase + index * 0.4) * wobble - letters[index].y) / 2.6;
+    }
+
+    context.font = font;
+    context.textBaseline = "middle";
+    context.textAlign = "center";
+    context.lineWidth = 4;
+    context.shadowColor = shadowColor;
+    context.shadowBlur = 0;
+    context.shadowOffsetX = 3;
+    context.shadowOffsetY = 3;
+
+    for (let index = letters.length - 1; index >= 0; index -= 1) {
+      const item = letters[index];
+      const lift = Math.sin(phase + index) * wobble;
+      context.save();
+      context.translate(item.x, item.y + lift);
+      context.rotate(Math.sin(phase * 0.5 + index) * 0.08);
+      context.strokeStyle = strokeColor;
+      context.fillStyle = color;
+      context.strokeText(item.letter, 0, 0);
+      context.fillText(item.letter, 0, 0);
+      context.restore();
+    }
+
+    animationFrame = window.requestAnimationFrame(draw);
+  };
+
+  document.body.addEventListener("mousemove", move);
+  draw();
+
+  return {
+    destroy() {
+      window.cancelAnimationFrame(animationFrame);
+      document.body.removeEventListener("mousemove", move);
+      window.removeEventListener("resize", resize);
+      canvas.remove();
+    },
+  };
+}
+
+function createLineboilBubbleCursor(options = {}) {
+  const { canvas, context, resize } = setupCursorCanvas();
+  const bubbles = [];
+  const colors = options.colors || ["#E3F2FD", "#90CAF9", "#2196F3"];
+  const strokeColor = options.strokeColor || "#0D47A1";
+  const minSize = options.minSize || 3;
+  const maxSize = options.maxSize || 16;
+  const spawnCount = options.spawn || 1;
+  const lifeBase = options.life || 80;
+  let animationFrame = 0;
+
+  const spawn = (x, y) => {
+    for (let index = 0; index < spawnCount; index += 1) {
+      const radius = minSize + Math.random() * (maxSize - minSize);
+      const life = lifeBase + Math.floor(Math.random() * 35);
+      bubbles.push({
+        x,
+        y,
+        radius,
+        color: randomFrom(colors),
+        vx: (Math.random() - 0.5) * 1.4,
+        vy: -0.4 - Math.random() * 1.7,
+        life,
+        initialLife: life,
+      });
+    }
+  };
+
+  const move = (event) => spawn(event.clientX, event.clientY);
+  const touch = (event) => [...event.touches].forEach((point) => spawn(point.clientX, point.clientY));
+
+  const draw = () => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (let index = bubbles.length - 1; index >= 0; index -= 1) {
+      const bubble = bubbles[index];
+      bubble.life -= 1;
+      if (bubble.life <= 0) {
+        bubbles.splice(index, 1);
+        continue;
+      }
+
+      bubble.x += bubble.vx;
+      bubble.y += bubble.vy;
+      bubble.vx += (Math.random() - 0.5) * 0.04;
+      const alpha = Math.max(bubble.life / bubble.initialLife, 0);
+      const grow = 1 + (1 - alpha) * 0.9;
+
+      context.save();
+      context.globalAlpha = alpha * 0.9;
+      context.fillStyle = bubble.color;
+      context.strokeStyle = strokeColor;
+      context.lineWidth = Math.max(1.5, bubble.radius / 4);
+      context.beginPath();
+      context.arc(bubble.x, bubble.y, bubble.radius * grow, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+      context.restore();
+    }
+    animationFrame = window.requestAnimationFrame(draw);
+  };
+
+  document.body.addEventListener("mousemove", move);
+  document.body.addEventListener("touchmove", touch, { passive: true });
+  document.body.addEventListener("touchstart", touch, { passive: true });
+  draw();
+
+  return {
+    destroy() {
+      window.cancelAnimationFrame(animationFrame);
+      document.body.removeEventListener("mousemove", move);
+      document.body.removeEventListener("touchmove", touch);
+      document.body.removeEventListener("touchstart", touch);
+      window.removeEventListener("resize", resize);
+      canvas.remove();
+    },
+  };
+}
+
+function installLineboilCursorEffects() {
+  if (!window.cursoreffects || window.cursoreffects.lineboilGlyphCursor) return;
+
+  window.cursoreffects.lineboilGlyphCursor = createLineboilGlyphCursor;
+  window.cursoreffects.lineboilFlagCursor = createLineboilFlagCursor;
+  window.cursoreffects.lineboilBubbleCursor = createLineboilBubbleCursor;
+}
 
 async function loadTextLines(file) {
   try {
@@ -170,6 +460,7 @@ function updateCursorEffect(theme) {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (reducedMotion.matches || !window.cursoreffects) return;
 
+  installLineboilCursorEffects();
   const config = cursorThemes[theme] || cursorThemes.p1;
   const CursorEffect = window.cursoreffects[config.effect] || window.cursoreffects.fairyDustCursor;
   if (!CursorEffect) return;
@@ -251,7 +542,7 @@ async function initializeSocialDescriptions() {
     if (!description) return;
     link.note = description;
     document.querySelectorAll(`[data-social-note="${link.key}"]`).forEach((node) => {
-      node.textContent = description;
+      setInlineNote(node, description);
     });
   });
 }
@@ -284,6 +575,20 @@ function el(tag, attrs = {}, children = []) {
   });
 
   return node;
+}
+
+function inlineNoteNodes(text) {
+  return String(text || "")
+    .split(/(\[[^\]]+\])/g)
+    .filter(Boolean)
+    .map((part) => {
+      if (!part.startsWith("[") || !part.endsWith("]")) return part;
+      return el("span", { className: "note-small" }, [part]);
+    });
+}
+
+function setInlineNote(node, text) {
+  node.replaceChildren(...inlineNoteNodes(text));
 }
 
 function platformIcon(name) {
@@ -370,7 +675,7 @@ function sticker(link, extraClass = "") {
   return el(
     "a",
     {
-      className: `sticker scribble-box ${hasStatus ? `has-status is-${status}` : ""} ${extraClass}`,
+      className: `sticker scribble-box sticker-${link.key} ${hasStatus ? `has-status is-${status}` : ""} ${extraClass}`,
       href: link.status === "live" && link.liveHref ? link.liveHref : link.href,
       target: "_blank",
       rel: "noopener noreferrer",
@@ -385,9 +690,84 @@ function sticker(link, extraClass = "") {
         : "",
       el("span", { className: "sticker-glyph", ariaHidden: "true" }, [link.images ? wifeIcon(link.images) : platformIcon(link.icon || link.key)]),
       el("span", { className: "sticker-label" }, [link.label]),
-      el("span", { className: "sticker-note", "data-social-note": hasStatus ? undefined : link.key }, [link.note]),
+      el("span", { className: "sticker-note", "data-social-note": hasStatus ? undefined : link.key }, inlineNoteNodes(link.note)),
     ],
   );
+}
+
+function playMwahSound() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+
+  try {
+    mwahAudioContext ||= new AudioContext();
+    if (mwahAudioContext.state === "suspended") mwahAudioContext.resume();
+
+    const now = mwahAudioContext.currentTime;
+    const gain = mwahAudioContext.createGain();
+    const low = mwahAudioContext.createOscillator();
+    const chirp = mwahAudioContext.createOscillator();
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.23);
+
+    low.type = "sine";
+    low.frequency.setValueAtTime(260, now);
+    low.frequency.exponentialRampToValueAtTime(155, now + 0.2);
+
+    chirp.type = "triangle";
+    chirp.frequency.setValueAtTime(720, now + 0.04);
+    chirp.frequency.exponentialRampToValueAtTime(380, now + 0.2);
+
+    low.connect(gain);
+    chirp.connect(gain);
+    gain.connect(mwahAudioContext.destination);
+
+    low.start(now);
+    chirp.start(now + 0.035);
+    low.stop(now + 0.24);
+    chirp.stop(now + 0.24);
+  } catch {}
+}
+
+function spawnWifeKissEffect(sticker) {
+  if (!sticker) return;
+
+  const stamp = el("span", { className: "wife-kiss-stamp", ariaHidden: "true" });
+  sticker.append(stamp);
+  window.setTimeout(() => stamp.remove(), 1050);
+
+  const particleCount = 26;
+  for (let index = 0; index < particleCount; index += 1) {
+    const isKiss = index % 4 === 0;
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 24 + Math.random() * 62;
+    const particle = el(
+      "span",
+      { className: `wife-kiss-particle ${isKiss ? "is-kiss" : "is-heart"}`, ariaHidden: "true" },
+      [isKiss ? "" : randomFrom(["\u2665", "\u2661", "<3", "xoxo", "mwah"])],
+    );
+
+    particle.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
+    particle.style.setProperty("--ty", `${Math.sin(angle) * distance - 14}px`);
+    particle.style.setProperty("--rot", `${Math.random() * 90 - 45}deg`);
+    particle.style.setProperty("--scale", `${0.7 + Math.random() * 0.75}`);
+    particle.style.animationDelay = `${Math.random() * 90}ms`;
+    sticker.append(particle);
+    window.setTimeout(() => particle.remove(), 1150);
+  }
+}
+
+function initializeWifeStickerEffects() {
+  document.querySelectorAll(".sticker-wife").forEach((sticker) => {
+    if (sticker.dataset.kissReady) return;
+    sticker.dataset.kissReady = "true";
+    sticker.addEventListener("pointerenter", () => {
+      playMwahSound();
+      spawnWifeKissEffect(sticker);
+    });
+  });
 }
 
 function statusCard(link) {
@@ -1203,6 +1583,7 @@ function render(statusOverrides = {}) {
   initializeArtCarousel();
   initializeMusicPlayer();
   initializeSocialDescriptions();
+  initializeWifeStickerEffects();
 }
 
 async function loadStatus() {
