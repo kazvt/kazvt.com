@@ -429,10 +429,26 @@ body[data-theme="p14"] {
   --stamp-text: #111111;
 }
 
+/* Palette 14: every textured interactive hover uses white text for contrast. */
+body[data-theme="p14"] :is(
+  .oldweb-nav a,
+  .sticker,
+  .tool-list button,
+  .music-button,
+  .paint-controls button,
+  .language-button,
+  .readability-toggle,
+  .guide-disclosure > summary
+):hover {
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: #ffffff;
+}
 
-/* Palette 14: keep Links-section card text readable on hover. */
-body[data-theme="p14"] #links .sticker:hover {
-  --hover-text: #ffffff;
+body[data-theme="p14"] .sticker:hover .sticker-status-corner {
+  color: #ffffff;
 }
 
 body[data-theme="p15"] {
@@ -2371,6 +2387,19 @@ code {
   text-align: center;
   list-style: none;
   clip-path: polygon(0 8px, 12px 0, 100% 5px, calc(100% - 7px) 100%, 5px calc(100% - 4px));
+  transform-origin: center;
+  transition: transform 150ms ease-out;
+}
+
+.guide-disclosure > summary:hover {
+  position: relative;
+  z-index: 2;
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--hover-text);
+  transform: scale(1.05);
 }
 
 .guide-disclosure > summary::-webkit-details-marker {
@@ -2380,12 +2409,31 @@ code {
 .guide-disclosure > summary::before,
 .guide-disclosure > summary::after {
   content: ">>";
+  display: inline-block;
   margin-inline: 10px;
   color: currentColor;
+  animation: guideArrowPulse 820ms steps(2, end) infinite alternate;
+}
+
+.guide-disclosure > summary::before {
+  --guide-arrow-x: -3px;
+  --guide-arrow-y: 0;
+}
+
+.guide-disclosure > summary::after {
+  --guide-arrow-x: 3px;
+  --guide-arrow-y: 0;
+}
+
+@keyframes guideArrowPulse {
+  from { transform: translate(0, 0); }
+  to { transform: translate(var(--guide-arrow-x), var(--guide-arrow-y)); }
 }
 
 .guide-disclosure[open] > summary::before,
 .guide-disclosure[open] > summary::after {
+  --guide-arrow-x: 0;
+  --guide-arrow-y: 3px;
   content: "vv";
 }
 

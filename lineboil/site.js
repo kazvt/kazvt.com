@@ -105,13 +105,13 @@ const cursorThemes = {
   p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
   p2: { effect: "lineboilGlyphCursor", options: { glyphs: ["!", "!!", "*"], colors: ["#EF6905", "#F1E5A1", "#486C2F"], sizes: [13, 18, 24], spawn: 2, scatter: 0.42, gravity: 0.006, life: 96, spin: 0.03 } },
   p3: { effect: "lineboilGlyphCursor", options: { glyphs: ["+"], colors: ["#1D4533", "#F9D2BA", "#5E3122"], sizes: [9, 15, 22, 30], spawn: 1, scatter: 0.55, gravity: -0.005, life: 68, spin: 0.08 } },
-  p4: { effect: "lineboilBubbleCursor", options: { colors: ["#D8FFC5", "#92EEFF", "#30AFFF"], strokeColor: "#30AFFF", minSize: 10, maxSize: 32, spawn: 2, life: 95 } },
-  p5: { effect: "lineboilGlyphCursor", options: { glyphs: ["✦", "◆", "map"], colors: ["#FAF7BB", "#D99B21", "#133458"], sizes: [12, 18, 24], spawn: 1, scatter: 0.24, gravity: -0.004, life: 92, spin: 0.02 } },
+  p4: { effect: "lineboilBubbleCursor", options: { colors: ["#D8FFC5", "#92EEFF", "#30AFFF"], strokeColor: "#30AFFF", minSize: 6, maxSize: 20, spawn: 2, life: 95 } },
+  p5: { effect: "lineboilGlyphCursor", options: { glyphs: ["✦", "◆", "kaz"], colors: ["#FAF7BB", "#D99B21", "#133458"], sizes: [12, 18, 24], spawn: 1, scatter: 0.24, gravity: -0.004, life: 92, spin: 0.02 } },
   p6: { effect: "lineboilGlyphCursor", options: { glyphs: ["///", "!!!", ">>"], colors: ["#FEF2A0", "#F3CD97", "#BC4F4F"], sizes: [16, 22, 27], spawn: 1, scatter: 0.32, gravity: 0.004, life: 104, spin: 0.018 } },
   p7: { effect: "lineboilFlagCursor", options: { text: "kazvt!!!", color: "#FCF2E5", strokeColor: "#EC5B38", shadowColor: "#524646", font: "900 24px Trebuchet MS, Comic Sans MS, Arial", gap: 16, wobble: 1.5 } },
   p8: { effect: "lineboilSpringyGlyphCursor", options: { glyph: "✿", color: "#E8F5E9", strokeColor: "#1B5E20", font: "900 18px Trebuchet MS, Comic Sans MS, Arial", links: 7 } },
   p9: { effect: "lineboilBubbleCursor", options: { colors: ["#E3F2FD", "#90CAF9", "#2196F3"], strokeColor: "#0D47A1", minSize: 3, maxSize: 18, spawn: 2, life: 82 } },
-  p10: { effect: "lineboilGlyphCursor", options: { glyphs: ["♥", "♡"], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [14, 21, 30], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
+  p10: { effect: "lineboilGlyphCursor", options: { glyphs: ["♥", "♡"], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [16, 24, 34], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
   p11: { effect: "characterCursor", options: { characters: ["0", "1", "."], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "27px monospace", characterLifeSpanFunction: () => Math.floor(55 + Math.random() * 30), initialCharacterVelocityFunction: () => ({ x: (Math.random() - 0.5) * 1.1, y: (Math.random() - 0.5) * 1.1 }), characterVelocityChangeFunctions: { x_func: () => (Math.random() - 0.5) / 90, y_func: () => (Math.random() - 0.5) / 90 }, characterScalingFunction: (age, life) => Math.max((life - age) / life, 0) } },
   p12: { effect: "rainbowCursor", options: { colors: ["#007DCC", "#FFB900", "#D10056", "#B2054C"], length: 26, size: 5 } },
   p13: { effect: "rainbowCursor", options: { colors: ["#E73F1E", "#FB6C00", "#F9B637", "#FFDD9C"], length: 24, size: 5 } },
@@ -2255,6 +2255,20 @@ async function initializeMusicPlayer() {
   }
 
   function drawIdleVisualizer(width, height) {
+    if (visualizerMode === "scope") {
+      const waveform = Uint8Array.from({ length: 64 }, (_, index) => {
+        const wave = Math.sin(index * 0.5) * 24 + Math.sin(index * 0.17) * 10;
+        return Math.round(128 + wave);
+      });
+      drawScopeVisualizer(waveform, width, height);
+      return;
+    }
+
+    if (visualizerMode === "burst") {
+      drawBurstVisualizer([48, 78, 118, 158, 112, 182, 146, 96, 168, 122, 82, 52], width, height);
+      return;
+    }
+
     visualContext.fillStyle = visualizerColors().primary;
     for (let x = 6; x < width; x += 14) {
       const bar = 5 + ((x / 14) % 4) * 4;
