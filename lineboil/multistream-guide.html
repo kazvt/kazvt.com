@@ -68,22 +68,54 @@
         <aside class="sidebar scribble-box">
           <h2 data-i18n="sidebar.palette">palette</h2>
           <div class="palette big-palette" aria-label="color palette" data-i18n-aria-label="palette.aria">
-            <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" aria-label="use pastel stars palette" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
-            <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" aria-label="use campfire checker palette" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" aria-label="use forest vines palette" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" aria-label="use ocean bubbles palette" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" aria-label="use night map palette" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" aria-label="use desert gingham palette" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" aria-label="use newsprint bricks palette" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" aria-label="use garden vines palette" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" aria-label="use sky clouds palette" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" aria-label="use rose curtain palette" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" aria-label="use deep circuit palette" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" aria-label="use arcade marquee palette" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" aria-label="use fire stripes palette" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" aria-label="use meadow dots palette" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" aria-label="use dream checker palette" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
-            <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" aria-label="use swamp terminal palette" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" aria-label="use pastel stars palette" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" aria-label="use campfire checker palette" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" aria-label="use forest vines palette" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" aria-label="use ocean bubbles palette" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" aria-label="use night map palette" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" aria-label="use desert gingham palette" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" aria-label="use newsprint bricks palette" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" aria-label="use garden vines palette" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" aria-label="use sky clouds palette" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" aria-label="use rose curtain palette" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" aria-label="use deep circuit palette" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" aria-label="use arcade marquee palette" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" aria-label="use fire stripes palette" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" aria-label="use meadow dots palette" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" aria-label="use dream checker palette" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" aria-label="use swamp terminal palette" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
+            </div>
           </div>
         </aside>
 
@@ -94,10 +126,6 @@
               <span class="panel-stamp" data-i18n="guide.panel_stamp">author: kazvt</span>
             </header>
             <div class="panel-body">
-              <div class="guide-lede">
-                <p data-i18n="guide.lede">pick the first thing that applies, then follow the Yes or No path. you can still share the guide with its own URL whenever you need it.</p>
-              </div>
-
               <div class="guide-map-frame scribble-box">
                 <svg class="guide-map" viewBox="0 0 1200 1435" role="img" aria-labelledby="guide-map-title guide-map-desc">
                   <title id="guide-map-title" data-i18n="guide.svg_title">multistreaming setup decision tree</title>
@@ -108,8 +136,8 @@
                     </marker>
                   </defs>
 
-                  <path class="wire" marker-end="url(#guide-arrow)" d="M600 150 V175 H265 V250"></path>
-                  <path class="wire" marker-end="url(#guide-arrow)" d="M600 150 V175 H925 V250"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M600 168 V193 H265 V250"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M600 168 V193 H925 V250"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M265 380 V465"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M420 315 H440"></path>
                   <path class="wire return" marker-end="url(#guide-arrow)" d="M740 315 H770"></path>
@@ -123,11 +151,11 @@
                   <path class="wire" marker-end="url(#guide-arrow)" d="M925 380 V400 H1045 V620"></path>
                   <path class="wire return" marker-end="url(#guide-arrow)" d="M1110 1269 H1184 V316 H1080"></path>
 
-                  <g class="badge yes" transform="translate(413 163)">
+                  <g class="badge yes" transform="translate(413 181)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
                     <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
                   </g>
-                  <g class="badge no" transform="translate(753 163)">
+                  <g class="badge no" transform="translate(753 181)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
                     <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
                   </g>
@@ -173,12 +201,13 @@
                   </g>
 
                   <g class="node-svg decision" transform="translate(435 20)">
-                    <polygon class="shape" points="0 14 15 0 318 5 330 0 324 116 311 130 10 125 0 130"></polygon>
+                    <polygon class="shape" points="0 14 15 0 318 5 330 0 324 134 311 148 10 143 0 148"></polygon>
                     <text class="node-title" x="22" y="34" data-i18n="guide.root.1">will your stream include</text>
                     <text class="node-title" x="22" y="58" data-i18n="guide.root.2">commercial music?</text>
                     <a href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="22" y="86" data-i18n="guide.root.3">spotify</text></a>
                     <a href="https://music.apple.com/" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="84" y="86" data-i18n="guide.root.4">apple music</text></a>
-                    <text class="node-copy" x="22" y="108" data-i18n="guide.root.5">label tracks, or songs you cannot stream legally.</text>
+                    <text class="node-copy" x="22" y="110" data-i18n="guide.root.5">label tracks,</text>
+                    <text class="node-copy" x="22" y="132" data-i18n="guide.root.6">or songs you cannot stream legally.</text>
                   </g>
 
                   <g class="node-svg decision" transform="translate(110 250)">
@@ -294,7 +323,7 @@
                     <text class="node-copy" x="20" y="124" data-i18n="guide.safe.4">then rejoin the cloud path.</text>
                   </g>
 
-                  <text class="tiny-copy" x="766" y="300" data-i18n="guide.rejoin.2">if VOD muting is okay</text>
+                  <text class="tiny-copy path-note" x="755" y="238" text-anchor="end" data-i18n="guide.rejoin.2">if VOD muting is okay</text>
                   <text class="tiny-copy" x="966" y="1093" data-i18n="guide.rejoin.1">rejoin cloud path</text>
                   <text class="tiny-copy" x="966" y="1115" data-i18n="guide.rejoin.3">after safe music</text>
                 </svg>

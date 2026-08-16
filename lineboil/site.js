@@ -819,7 +819,11 @@ function updateCursorEffect(theme, { force = false } = {}) {
 
 function applySiteTheme(theme, themeButtons, { persist = true } = {}) {
   document.body.dataset.theme = theme;
-  themeButtons.forEach((item) => item.setAttribute("aria-pressed", String(item.getAttribute("data-tool-theme") === theme)));
+  themeButtons.forEach((item) => {
+    const isSelected = item.getAttribute("data-tool-theme") === theme;
+    item.setAttribute("aria-pressed", String(isSelected));
+    item.closest(".palette-choice")?.classList.toggle("is-selected", isSelected);
+  });
 
   if (persist) {
     try {
@@ -1733,25 +1737,25 @@ function createMultistreamGuideModal() {
   }, [
     el("div", { className: "multistream-guide-window" }, [
       el("header", { className: "guide-window-bar" }, [
-        el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
+        el("div", { className: "guide-window-heading" }, [
+          el("span", { className: "guide-window-kicker", ariaHidden: "true" }, ["pathfinder.exe"]),
+          el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
+        ]),
         el("div", { className: "guide-window-controls", ariaLabel: "guide window controls" }, [
-          el("button", { type: "button", className: "guide-window-button", "data-guide-zoom": "out", ariaLabel: "zoom guide out", title: "zoom out" }, ["-"]),
-          el("input", { type: "range", className: "guide-zoom-slider", "data-guide-zoom-slider": "true", min: "50", max: "300", step: "1", value: "100", ariaLabel: "guide zoom", title: "zoom guide" }),
-          el("span", { className: "guide-zoom-readout", ariaLive: "polite" }, ["100%"]),
-          el("button", { type: "button", className: "guide-window-button", "data-guide-zoom": "in", ariaLabel: "zoom guide in", title: "zoom in" }, ["+"]),
+          el("span", { className: "guide-window-stamp", ariaHidden: "true" }, ["YES / NO MAP"]),
           el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: "close multistream guide", title: "close" }, ["X"]),
         ]),
       ]),
-      el("div", { className: "guide-zoom-viewport", "data-guide-viewport": "true" }, [
-        el("div", { className: "guide-zoom-content", "data-guide-content": "true" }, [
+      el("div", { className: "guide-modal-viewport", "data-guide-viewport": "true" }, [
+        el("div", { className: "guide-modal-content" }, [
           el("div", { className: "embedded-guide-slot", "data-guide-slot": "true" }, [
             el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]),
           ]),
         ]),
       ]),
       el("footer", { className: "guide-window-status" }, [
-        el("span", {}, ["mouse wheel / touch to scroll"]),
-        el("span", {}, ["zoom with slider / - +"]),
+        el("span", {}, ["scroll to follow the paths"]),
+        el("span", {}, ["underlined nodes open their tools"]),
       ]),
     ]),
   ]);
@@ -1768,50 +1772,11 @@ async function initializeMultistreamGuideModal() {
   }
 
   const viewport = modal.querySelector("[data-guide-viewport]");
-  const content = modal.querySelector("[data-guide-content]");
   const slot = modal.querySelector("[data-guide-slot]");
-  const readout = modal.querySelector(".guide-zoom-readout");
-  const slider = modal.querySelector("[data-guide-zoom-slider]");
-  if (!viewport || !content || !slot || !readout || !slider) return;
+  if (!viewport || !slot) return;
 
-  const minZoom = 0.5;
-  const maxZoom = 3;
-  let zoom = 1;
   let lastTrigger = null;
   let loaded = modal.dataset.loaded === "true";
-
-  const updateZoomReadout = () => {
-    const percent = Math.round(zoom * 100);
-    readout.textContent = `${percent}%`;
-    slider.value = String(percent);
-  };
-
-  const setZoom = (nextZoom, anchorClientX, anchorClientY) => {
-    const clamped = Math.min(maxZoom, Math.max(minZoom, nextZoom));
-    if (Math.abs(clamped - zoom) < 0.0001) return;
-
-    const rect = viewport.getBoundingClientRect();
-    const localX = Number.isFinite(anchorClientX) ? anchorClientX - rect.left : viewport.clientWidth / 2;
-    const localY = Number.isFinite(anchorClientY) ? anchorClientY - rect.top : viewport.clientHeight / 2;
-    const contentX = (viewport.scrollLeft + localX) / zoom;
-    const contentY = (viewport.scrollTop + localY) / zoom;
-
-    zoom = clamped;
-    content.style.setProperty("--guide-zoom", String(zoom));
-    updateZoomReadout();
-
-    window.requestAnimationFrame(() => {
-      viewport.scrollLeft = contentX * zoom - localX;
-      viewport.scrollTop = contentY * zoom - localY;
-    });
-  };
-
-  const resetZoom = () => {
-    zoom = 1;
-    content.style.setProperty("--guide-zoom", "1");
-    updateZoomReadout();
-    viewport.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  };
 
   const loadGuide = async () => {
     if (loaded) return;
@@ -1852,7 +1817,7 @@ async function initializeMultistreamGuideModal() {
     document.body.classList.add("guide-modal-open");
     if (typeof modal.showModal === "function") modal.showModal();
     else modal.setAttribute("open", "");
-    resetZoom();
+    viewport.scrollTo({ top: 0, left: 0, behavior: "auto" });
     await loadGuide();
     modal.querySelector("[data-guide-close]")?.focus({ preventScroll: true });
   };
@@ -1879,20 +1844,6 @@ async function initializeMultistreamGuideModal() {
   modal.addEventListener("cancel", () => {
     document.body.classList.remove("guide-modal-open");
   });
-
-  modal.querySelectorAll("[data-guide-zoom]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const action = button.getAttribute("data-guide-zoom");
-      if (action === "in") setZoom(zoom * 1.16);
-      else if (action === "out") setZoom(zoom / 1.16);
-    });
-  });
-
-  slider.addEventListener("input", () => {
-    setZoom(Number(slider.value) / 100);
-  });
-
-  updateZoomReadout();
 }
 
 async function mountLanguageSelector() {

@@ -1316,18 +1316,6 @@ code {
   transform: rotate(2deg);
 }
 
-.guide-lede {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 12px;
-  font-weight: 900;
-  line-height: 1.45;
-}
-
-.guide-lede p {
-  margin: 0;
-}
-
 .guide-map-frame {
   overflow: visible;
   padding: 10px;
@@ -1484,21 +1472,30 @@ code {
 .guide-mobile-ladder .guide-choice {
   transform-box: fill-box;
   transform-origin: center;
-  transition: scale 140ms ease, filter 140ms ease;
+  transition: filter 140ms ease;
 }
 
 .guide-map .node-svg:hover,
 .guide-map .badge:hover,
 .guide-mobile-ladder .guide-step:hover,
 .guide-mobile-ladder .guide-choice:hover {
-  scale: 1.001;
-  filter: saturate(1.03) drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 16%, transparent));
+  filter: saturate(1.06) drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 16%, transparent));
 }
 
+/* Keep SVG node geometry locked in place on hover. The old scale/stroke jump could
+   visually crowd text against neighboring paths, especially in the top branch. */
 .guide-map .node-svg:hover .shape,
 .guide-map .badge:hover .badge-shape {
   stroke-dasharray: 10 6;
-  stroke-width: 5;
+  stroke-width: 4px;
+  animation: guideNodeDashBoil 360ms steps(2, end) infinite;
+}
+
+.guide-map .path-note {
+  paint-order: stroke fill;
+  stroke: var(--paper-alt);
+  stroke-width: 8px;
+  stroke-linejoin: round;
 }
 
 .guide-mobile-ladder {
@@ -2425,46 +2422,106 @@ body.guide-modal-open {
 .multistream-guide-modal {
   width: calc(100vw - 24px);
   height: calc(100dvh - 24px);
-  max-width: none;
-  max-height: none;
+  max-width: 1240px;
+  max-height: 980px;
   margin: auto;
   padding: 0;
   overflow: hidden;
   border: 4px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 9px 9px 0 color-mix(in srgb, var(--ink) 45%, transparent);
+  box-shadow:
+    9px 9px 0 color-mix(in srgb, var(--ink) 45%, transparent),
+    15px 15px 0 color-mix(in srgb, var(--pink) 17%, transparent);
   clip-path: polygon(0 7px, 11px 0, calc(100% - 8px) 3px, 100% 12px, calc(100% - 4px) calc(100% - 8px), calc(100% - 13px) 100%, 8px calc(100% - 3px), 0 calc(100% - 12px));
 }
 
 .multistream-guide-modal::backdrop {
-  background: color-mix(in srgb, var(--bg) 76%, transparent);
-  backdrop-filter: blur(1px);
+  background:
+    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--pink) 13%, transparent) 0 2px, transparent 3px),
+    color-mix(in srgb, var(--bg) 78%, transparent);
+  background-size: 18px 18px, auto;
+  backdrop-filter: blur(2px) saturate(0.82);
 }
 
 .multistream-guide-window {
+  position: relative;
   display: grid;
   width: 100%;
   height: 100%;
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  isolation: isolate;
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--blue) 10%, transparent) 1px, transparent 1px),
     linear-gradient(0deg, color-mix(in srgb, var(--pink) 10%, transparent) 1px, transparent 1px),
     var(--paper);
   background-size: 18px 18px;
+  animation: modalWindowBoil 520ms steps(2, end) infinite;
+}
+
+.multistream-guide-window::before,
+.multistream-guide-window::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 5px;
+  pointer-events: none;
+  border: 2px solid color-mix(in srgb, var(--ink) 72%, transparent);
+  clip-path: polygon(0 10px, 8px 0, calc(100% - 12px) 3px, 100% 8px, calc(100% - 4px) calc(100% - 10px), calc(100% - 14px) 100%, 7px calc(100% - 3px), 0 calc(100% - 11px));
+  opacity: 0.32;
+  animation: outlineBoil 390ms steps(2, end) infinite;
+}
+
+.multistream-guide-window::after {
+  inset: 9px 7px 7px 9px;
+  border-style: dashed;
+  opacity: 0.18;
+  animation-delay: 170ms;
 }
 
 .guide-window-bar {
+  position: relative;
+  z-index: 2;
   display: flex;
   min-width: 0;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 8px 7px 12px;
+  padding: 8px 9px 9px 13px;
   border-bottom: 4px solid var(--ink);
-  background: var(--banner);
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, var(--paper) 12%, transparent) 9px 11px),
+    var(--banner);
   color: var(--banner-text);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--shadow) 45%, transparent);
+}
+
+.guide-window-heading {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+}
+
+.guide-window-kicker,
+.guide-window-stamp {
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  padding: 3px 6px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: rotate(-1deg);
+}
+
+.guide-window-stamp {
+  background: var(--paper);
+  color: var(--ink);
+  transform: rotate(1.2deg);
 }
 
 .guide-window-title {
@@ -2479,24 +2536,24 @@ body.guide-modal-open {
 .guide-window-controls {
   display: flex;
   flex: 0 0 auto;
-  gap: 5px;
+  gap: 7px;
   align-items: center;
 }
 
 .guide-window-button {
   display: grid;
-  min-width: 34px;
-  min-height: 32px;
+  min-width: 38px;
+  min-height: 34px;
   place-items: center;
   padding: 2px 7px;
   border: 3px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 900;
   line-height: 1;
-  box-shadow: 2px 2px 0 var(--shadow);
+  box-shadow: 3px 3px 0 var(--shadow);
   clip-path: polygon(0 5px, 5px 0, 100% 2px, calc(100% - 3px) 100%, 3px calc(100% - 2px));
 }
 
@@ -2507,40 +2564,20 @@ body.guide-modal-open {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--hover-text);
+  animation: blockBoil 260ms steps(2, end) infinite;
 }
 
 .guide-window-close {
-  min-width: 38px;
+  min-width: 40px;
   background: var(--pink);
   color: var(--on-pink);
   font-family: "Courier New", Courier, monospace;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
 }
 
-.guide-zoom-slider {
-  width: clamp(96px, 16vw, 190px);
-  min-width: 72px;
-  margin: 0 2px;
-  accent-color: var(--ink);
-  cursor: var(--cursor-pointer, pointer);
-}
-
-.guide-zoom-readout {
-  display: grid;
-  min-width: 52px;
-  min-height: 30px;
-  place-items: center;
-  padding-inline: 4px;
-  border: 2px solid color-mix(in srgb, var(--ink) 70%, transparent);
-  background: var(--paper);
-  color: var(--ink);
-  font-size: 0.74rem;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.guide-zoom-viewport {
+.guide-modal-viewport {
   position: relative;
+  z-index: 1;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
@@ -2549,13 +2586,10 @@ body.guide-modal-open {
   touch-action: auto;
 }
 
-.guide-zoom-content {
-  --guide-zoom: 1;
+.guide-modal-content {
   width: 100%;
   min-height: 100%;
-  padding: 12px;
-  zoom: var(--guide-zoom);
-  transform-origin: 0 0;
+  padding: 14px;
 }
 
 .multistream-guide-modal .embedded-guide-slot {
@@ -2563,7 +2597,6 @@ body.guide-modal-open {
   min-height: 100%;
 }
 
-.multistream-guide-modal .guide-lede,
 .multistream-guide-modal .guide-note {
   max-width: 1180px;
   margin-inline: auto;
@@ -2572,19 +2605,29 @@ body.guide-modal-open {
 .multistream-guide-modal .guide-map-frame,
 .multistream-guide-modal .guide-mobile-ladder {
   width: 100%;
-  max-width: none;
+  max-width: 1180px;
   margin-inline: auto;
 }
 
+.multistream-guide-modal .guide-map-frame {
+  box-shadow:
+    6px 6px 0 var(--shadow),
+    -3px -3px 0 color-mix(in srgb, var(--blue) 18%, transparent);
+}
+
 .guide-window-status {
+  position: relative;
+  z-index: 2;
   display: flex;
-  min-height: 28px;
+  min-height: 30px;
   gap: 8px 18px;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 10px;
+  padding: 6px 11px;
   border-top: 3px solid var(--ink);
-  background: var(--paper-alt);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 14px, color-mix(in srgb, var(--blue) 8%, transparent) 14px 15px),
+    var(--paper-alt);
   color: var(--ink);
   font-size: 0.7rem;
   font-weight: 900;
@@ -2593,6 +2636,7 @@ body.guide-modal-open {
 
 .embedded-guide-slot {
   display: grid;
+  width: 100%;
   min-height: 12rem;
   gap: 12px;
 }
@@ -2851,6 +2895,18 @@ body.guide-modal-open {
   100% { transform: translate(-0.16px, 0.12px) rotate(0.02deg); }
 }
 
+
+@keyframes guideNodeDashBoil {
+  0% { stroke-dashoffset: 0; }
+  50% { stroke-dashoffset: -5; }
+  100% { stroke-dashoffset: -10; }
+}
+
+@keyframes modalWindowBoil {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(0.35px, -0.3px) rotate(-0.015deg); }
+  100% { transform: translate(-0.3px, 0.28px) rotate(0.014deg); }
+}
 @keyframes logoBoil {
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(2px, -2px) scale(1.006) skewX(-0.4deg); }
@@ -3087,17 +3143,15 @@ body.guide-modal-open {
   }
 
   .multistream-guide-modal .guide-map-frame {
-    display: block;
-  }
-
-  .multistream-guide-modal .guide-mobile-ladder {
     display: none;
   }
 
-  .multistream-guide-modal .guide-zoom-content {
-    width: 100%;
-    min-width: 0;
-    padding: 8px;
+  .multistream-guide-modal .guide-mobile-ladder {
+    display: grid;
+  }
+
+  .multistream-guide-modal .guide-modal-content {
+    padding: 9px;
   }
 
   .guide-window-bar {
@@ -3109,23 +3163,22 @@ body.guide-modal-open {
     font-size: 0.82rem;
   }
 
+  .guide-window-kicker {
+    display: none;
+  }
+
+  .guide-window-stamp {
+    font-size: 0.56rem;
+  }
+
   .guide-window-controls {
-    gap: 3px;
+    gap: 4px;
   }
 
   .guide-window-button {
     min-width: 31px;
     min-height: 30px;
     padding-inline: 5px;
-  }
-
-  .guide-zoom-slider {
-    width: clamp(70px, 22vw, 120px);
-  }
-
-  .guide-zoom-readout {
-    min-width: 44px;
-    font-size: 0.66rem;
   }
 
   .guide-window-status {
@@ -3211,7 +3264,7 @@ body.guide-modal-open {
 }
 
 
-/* Mia feedback pass: clearer palette state, compact mobile controls, and lighter animation. */
+/* Feedback pass: clearer palette state, compact mobile controls, and tuned boil motion. */
 .big-palette button[aria-pressed="true"]::before {
   background: var(--ink);
   color: var(--paper);
@@ -3219,7 +3272,7 @@ body.guide-modal-open {
   box-shadow: 0 0 0 2px var(--ink);
 }
 
-/* The original filter/text cadence repainted very often. Keep the boil, but at a calmer rate. */
+/* Keep the desktop boil readable without repainting at the original aggressive cadence. */
 .site-header,
 .oldweb-nav,
 .marquee,
@@ -3241,14 +3294,14 @@ body.guide-modal-open {
 
 @keyframes mobileTextBoil {
   0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(1px, -1px) rotate(-0.16deg); }
-  100% { transform: translate(-1px, 1px) rotate(0.14deg); }
+  50% { transform: translate(1.45px, -1.3px) rotate(-0.24deg); }
+  100% { transform: translate(-1.35px, 1.15px) rotate(0.22deg); }
 }
 
 @keyframes mobileSectionBoil {
-  0% { transform: translate(0, 0); }
-  50% { transform: translate(0.45px, -0.45px); }
-  100% { transform: translate(-0.45px, 0.45px); }
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(1.1px, -1px) rotate(-0.055deg); }
+  100% { transform: translate(-1px, 0.9px) rotate(0.05deg); }
 }
 
 @media (max-width: 880px) {
@@ -3298,18 +3351,110 @@ body.guide-modal-open {
   .panel:not(#badges),
   .page-footer {
     animation-name: mobileSectionBoil;
-    animation-duration: 1050ms;
+    animation-duration: 620ms;
     animation-timing-function: steps(2, end);
     filter: none !important;
   }
 
   .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
     animation-name: mobileTextBoil;
-    animation-duration: 760ms;
+    animation-duration: 510ms;
     animation-timing-function: steps(2, end);
   }
 
   .site-logo {
-    animation-duration: 760ms;
+    animation-duration: 540ms;
+  }
+
+  .scribble-box::before,
+  .scribble-box::after,
+  .multistream-guide-window::before,
+  .multistream-guide-window::after {
+    animation-duration: 300ms;
+  }
+
+  .multistream-guide-modal :is(h1, h2, h3, p, a, button, span, strong) {
+    animation-name: mobileTextBoil;
+    animation-duration: 520ms;
+    animation-timing-function: steps(2, end);
+  }
+}
+
+
+/* Persistent palette selection ring: mirrors link-button hover outlines, with a real air gap. */
+.palette-choice {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  isolation: isolate;
+}
+
+.palette-choice > button {
+  width: 100%;
+  height: auto;
+}
+
+.palette.big-palette {
+  gap: 18px;
+}
+
+.palette-choice::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  z-index: 4;
+  pointer-events: none;
+  border: 3px dashed transparent;
+  opacity: 0;
+  clip-path: polygon(
+    2px 7px,
+    8px 1px,
+    calc(100% - 7px) 0,
+    100% 6px,
+    calc(100% - 2px) calc(100% - 8px),
+    calc(100% - 9px) 100%,
+    7px calc(100% - 1px),
+    0 calc(100% - 7px)
+  );
+}
+
+.palette-choice.is-selected {
+  z-index: 5;
+}
+
+.palette-choice.is-selected::after,
+.palette-choice:has(> button[aria-pressed="true"])::after {
+  border-color: var(--click-hover-outline-color);
+  opacity: 1;
+  animation: paletteSelectionBoil 520ms steps(2, end) infinite;
+}
+
+/* The wrapper owns the persistent ring so the button's rough clip-path cannot clip it. */
+.big-palette .palette-choice.is-selected > button[aria-pressed="true"],
+.big-palette .palette-choice.is-selected > button[aria-pressed="true"]:hover {
+  outline: none !important;
+}
+
+@keyframes paletteSelectionBoil {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(1px, -1px) rotate(-0.35deg); }
+  100% { transform: translate(-1px, 1px) rotate(0.3deg); }
+}
+
+@media (max-width: 880px) {
+  .palette.big-palette {
+    gap: 10px;
+  }
+
+  .palette-choice::after {
+    inset: -5px;
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palette-choice.is-selected::after,
+  .palette-choice:has(> button[aria-pressed="true"])::after {
+    animation: none;
   }
 }
