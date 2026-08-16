@@ -88,7 +88,6 @@ const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avi
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
-const READABILITY_STORAGE_KEY = "kazvt-readable";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
 const WIFE_KISS_SOUND_SRC = "assets/wife/wifey%20kissy.mp3";
 const FRUIT_SOUND_SRC = "assets/fruit.mp3";
@@ -874,6 +873,18 @@ async function initializeMarquee() {
     index = (index + 1) % lines.length;
     showLine();
   });
+
+  const marqueeBar = node.closest(".marquee");
+  const setMarqueePlaybackRate = (rate) => {
+    node.getAnimations().forEach((animation) => {
+      if ("animationName" in animation && animation.animationName !== "marquee") return;
+      if (typeof animation.updatePlaybackRate === "function") animation.updatePlaybackRate(rate);
+      else animation.playbackRate = rate;
+    });
+  };
+
+  marqueeBar?.addEventListener("mouseenter", () => setMarqueePlaybackRate(0.25));
+  marqueeBar?.addEventListener("mouseleave", () => setMarqueePlaybackRate(1));
 }
 
 async function initializeLanguageText() {
@@ -1725,7 +1736,8 @@ function createMultistreamGuideModal() {
         el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
         el("div", { className: "guide-window-controls", ariaLabel: "guide window controls" }, [
           el("button", { type: "button", className: "guide-window-button", "data-guide-zoom": "out", ariaLabel: "zoom guide out", title: "zoom out" }, ["-"]),
-          el("button", { type: "button", className: "guide-window-button guide-zoom-readout", "data-guide-zoom": "reset", ariaLabel: "reset guide zoom", title: "reset zoom" }, ["100%"]),
+          el("input", { type: "range", className: "guide-zoom-slider", "data-guide-zoom-slider": "true", min: "50", max: "300", step: "1", value: "100", ariaLabel: "guide zoom", title: "zoom guide" }),
+          el("span", { className: "guide-zoom-readout", ariaLive: "polite" }, ["100%"]),
           el("button", { type: "button", className: "guide-window-button", "data-guide-zoom": "in", ariaLabel: "zoom guide in", title: "zoom in" }, ["+"]),
           el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: "close multistream guide", title: "close" }, ["X"]),
         ]),
@@ -1738,8 +1750,8 @@ function createMultistreamGuideModal() {
         ]),
       ]),
       el("footer", { className: "guide-window-status" }, [
-        el("span", {}, ["mouse wheel / pinch to zoom"]),
-        el("span", {}, ["drag to move"]),
+        el("span", {}, ["mouse wheel / touch to scroll"]),
+        el("span", {}, ["zoom with slider / - +"]),
       ]),
     ]),
   ]);
@@ -1759,19 +1771,19 @@ async function initializeMultistreamGuideModal() {
   const content = modal.querySelector("[data-guide-content]");
   const slot = modal.querySelector("[data-guide-slot]");
   const readout = modal.querySelector(".guide-zoom-readout");
-  if (!viewport || !content || !slot || !readout) return;
+  const slider = modal.querySelector("[data-guide-zoom-slider]");
+  if (!viewport || !content || !slot || !readout || !slider) return;
 
   const minZoom = 0.5;
   const maxZoom = 3;
   let zoom = 1;
   let lastTrigger = null;
   let loaded = modal.dataset.loaded === "true";
-  const pointers = new Map();
-  let mouseDrag = null;
-  let touchGesture = null;
 
   const updateZoomReadout = () => {
-    readout.textContent = `${Math.round(zoom * 100)}%`;
+    const percent = Math.round(zoom * 100);
+    readout.textContent = `${percent}%`;
+    slider.value = String(percent);
   };
 
   const setZoom = (nextZoom, anchorClientX, anchorClientY) => {
@@ -1795,11 +1807,8 @@ async function initializeMultistreamGuideModal() {
   };
 
   const resetZoom = () => {
-    const mobileFit = viewport.clientWidth > 0 && viewport.clientWidth < 760
-      ? Math.min(1, Math.max(minZoom, (viewport.clientWidth - 12) / 720))
-      : 1;
-    zoom = mobileFit;
-    content.style.setProperty("--guide-zoom", String(zoom));
+    zoom = 1;
+    content.style.setProperty("--guide-zoom", "1");
     updateZoomReadout();
     viewport.scrollTo({ top: 0, left: 0, behavior: "auto" });
   };
@@ -1865,10 +1874,6 @@ async function initializeMultistreamGuideModal() {
   modal.querySelector("[data-guide-close]")?.addEventListener("click", closeGuide);
   modal.addEventListener("close", () => {
     document.body.classList.remove("guide-modal-open");
-    pointers.clear();
-    mouseDrag = null;
-    touchGesture = null;
-    viewport.classList.remove("is-dragging");
     if (lastTrigger instanceof HTMLElement) lastTrigger.focus({ preventScroll: true });
   });
   modal.addEventListener("cancel", () => {
@@ -1880,107 +1885,13 @@ async function initializeMultistreamGuideModal() {
       const action = button.getAttribute("data-guide-zoom");
       if (action === "in") setZoom(zoom * 1.16);
       else if (action === "out") setZoom(zoom / 1.16);
-      else resetZoom();
     });
   });
 
-  viewport.addEventListener("wheel", (event) => {
-    event.preventDefault();
-    const factor = Math.exp(-event.deltaY * 0.0017);
-    setZoom(zoom * factor, event.clientX, event.clientY);
-  }, { passive: false });
-
-  const touchSnapshot = () => {
-    const active = [...pointers.values()].filter((point) => point.type === "touch").slice(0, 2);
-    if (active.length < 2) return null;
-    const [a, b] = active;
-    return {
-      centerX: (a.x + b.x) / 2,
-      centerY: (a.y + b.y) / 2,
-      distance: Math.hypot(a.x - b.x, a.y - b.y),
-    };
-  };
-
-  viewport.addEventListener("pointerdown", (event) => {
-    if (event.pointerType === "touch") {
-      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, type: "touch" });
-      viewport.setPointerCapture?.(event.pointerId);
-      const pair = touchSnapshot();
-      if (pair) {
-        const rect = viewport.getBoundingClientRect();
-        touchGesture = {
-          ...pair,
-          zoom,
-          contentX: (viewport.scrollLeft + pair.centerX - rect.left) / zoom,
-          contentY: (viewport.scrollTop + pair.centerY - rect.top) / zoom,
-        };
-      }
-      return;
-    }
-
-    if (event.pointerType === "mouse" && event.button === 0 && !event.target.closest("a, button, input, select, textarea")) {
-      mouseDrag = { id: event.pointerId, x: event.clientX, y: event.clientY };
-      viewport.setPointerCapture?.(event.pointerId);
-      viewport.classList.add("is-dragging");
-    }
+  slider.addEventListener("input", () => {
+    setZoom(Number(slider.value) / 100);
   });
 
-  viewport.addEventListener("pointermove", (event) => {
-    if (event.pointerType === "mouse" && mouseDrag?.id === event.pointerId) {
-      event.preventDefault();
-      viewport.scrollLeft -= event.clientX - mouseDrag.x;
-      viewport.scrollTop -= event.clientY - mouseDrag.y;
-      mouseDrag.x = event.clientX;
-      mouseDrag.y = event.clientY;
-      return;
-    }
-
-    if (event.pointerType !== "touch" || !pointers.has(event.pointerId)) return;
-    event.preventDefault();
-    const previous = pointers.get(event.pointerId);
-    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, type: "touch" });
-    const pair = touchSnapshot();
-
-    if (pair) {
-      if (!touchGesture || touchGesture.distance <= 0) {
-        const rect = viewport.getBoundingClientRect();
-        touchGesture = {
-          ...pair,
-          zoom,
-          contentX: (viewport.scrollLeft + pair.centerX - rect.left) / zoom,
-          contentY: (viewport.scrollTop + pair.centerY - rect.top) / zoom,
-        };
-      }
-
-      const nextZoom = Math.min(maxZoom, Math.max(minZoom, touchGesture.zoom * (pair.distance / touchGesture.distance)));
-      const rect = viewport.getBoundingClientRect();
-      zoom = nextZoom;
-      content.style.setProperty("--guide-zoom", String(zoom));
-      updateZoomReadout();
-      viewport.scrollLeft = touchGesture.contentX * zoom - (pair.centerX - rect.left);
-      viewport.scrollTop = touchGesture.contentY * zoom - (pair.centerY - rect.top);
-      return;
-    }
-
-    touchGesture = null;
-    if (previous) {
-      viewport.scrollLeft -= event.clientX - previous.x;
-      viewport.scrollTop -= event.clientY - previous.y;
-    }
-  }, { passive: false });
-
-  const releasePointer = (event) => {
-    pointers.delete(event.pointerId);
-    if (mouseDrag?.id === event.pointerId) {
-      mouseDrag = null;
-      viewport.classList.remove("is-dragging");
-    }
-    const pair = touchSnapshot();
-    if (!pair) touchGesture = null;
-  };
-
-  viewport.addEventListener("pointerup", releasePointer);
-  viewport.addEventListener("pointercancel", releasePointer);
   updateZoomReadout();
 }
 
@@ -2027,7 +1938,6 @@ async function mountLanguageSelector() {
 function initializeSiteTools() {
   const themeButtons = [...document.querySelectorAll("[data-tool-theme]")];
   const boilButton = document.querySelector("[data-tool-boil]");
-  const readabilityButton = document.querySelector("[data-tool-readable]");
   const initialTheme = storedTheme(themeButtons);
 
   applySiteTheme(initialTheme, themeButtons, { persist: false });
@@ -2038,31 +1948,6 @@ function initializeSiteTools() {
       applySiteTheme(theme || "p1", themeButtons);
     });
   });
-
-  if (readabilityButton) {
-    let readable = false;
-    try {
-      readable = localStorage.getItem(READABILITY_STORAGE_KEY) === "true";
-    } catch {}
-
-    const applyReadability = (enabled, persist = true) => {
-      document.body.dataset.readable = String(enabled);
-      readabilityButton.setAttribute("aria-pressed", String(enabled));
-      readabilityButton.textContent = enabled ? "wobbly text" : "steady text";
-      readabilityButton.setAttribute("aria-label", enabled ? "turn animated text back on" : "make text steady and easier to read");
-      if (persist) {
-        try {
-          localStorage.setItem(READABILITY_STORAGE_KEY, String(enabled));
-        } catch {}
-      }
-    };
-
-    applyReadability(readable, false);
-    readabilityButton.addEventListener("click", () => {
-      readable = document.body.dataset.readable !== "true";
-      applyReadability(readable);
-    });
-  }
 
   if (boilButton) {
     boilButton.addEventListener("click", () => {

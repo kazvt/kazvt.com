@@ -437,7 +437,6 @@ body[data-theme="p14"] :is(
   .music-button,
   .paint-controls button,
   .language-button,
-  .readability-toggle,
   .guide-launch-button,
   .guide-window-button
 ):hover {
@@ -1221,9 +1220,10 @@ code {
 }
 
 .big-palette button[aria-pressed="true"] {
-  box-shadow:
-    2px 2px 0 var(--shadow),
-    0 0 0 4px var(--click-hover-outline-color);
+  z-index: 2;
+  outline: var(--click-hover-outline-width) var(--click-hover-outline-style) var(--click-hover-outline-color) !important;
+  outline-offset: var(--click-hover-outline-offset) !important;
+  box-shadow: 3px 3px 0 var(--shadow);
 }
 
 .big-palette span {
@@ -2517,9 +2517,26 @@ body.guide-modal-open {
   font-size: 1.05rem;
 }
 
+.guide-zoom-slider {
+  width: clamp(96px, 16vw, 190px);
+  min-width: 72px;
+  margin: 0 2px;
+  accent-color: var(--ink);
+  cursor: var(--cursor-pointer, pointer);
+}
+
 .guide-zoom-readout {
-  min-width: 58px;
+  display: grid;
+  min-width: 52px;
+  min-height: 30px;
+  place-items: center;
+  padding-inline: 4px;
+  border: 2px solid color-mix(in srgb, var(--ink) 70%, transparent);
+  background: var(--paper);
+  color: var(--ink);
   font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .guide-zoom-viewport {
@@ -2529,13 +2546,7 @@ body.guide-modal-open {
   overscroll-behavior: contain;
   scrollbar-color: var(--ink) var(--paper-alt);
   scrollbar-width: auto;
-  touch-action: none;
-  cursor: grab;
-}
-
-.guide-zoom-viewport.is-dragging {
-  cursor: grabbing;
-  user-select: none;
+  touch-action: auto;
 }
 
 .guide-zoom-content {
@@ -2560,7 +2571,8 @@ body.guide-modal-open {
 
 .multistream-guide-modal .guide-map-frame,
 .multistream-guide-modal .guide-mobile-ladder {
-  max-width: 1280px;
+  width: 100%;
+  max-width: none;
   margin-inline: auto;
 }
 
@@ -3083,7 +3095,8 @@ body.guide-modal-open {
   }
 
   .multistream-guide-modal .guide-zoom-content {
-    min-width: 720px;
+    width: 100%;
+    min-width: 0;
     padding: 8px;
   }
 
@@ -3106,8 +3119,12 @@ body.guide-modal-open {
     padding-inline: 5px;
   }
 
+  .guide-zoom-slider {
+    width: clamp(70px, 22vw, 120px);
+  }
+
   .guide-zoom-readout {
-    min-width: 48px;
+    min-width: 44px;
     font-size: 0.66rem;
   }
 
@@ -3202,23 +3219,6 @@ body.guide-modal-open {
   box-shadow: 0 0 0 2px var(--ink);
 }
 
-.readability-toggle {
-  width: 100%;
-  min-height: 36px;
-  margin-top: 10px;
-  border: 3px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 900;
-  box-shadow: 3px 3px 0 var(--shadow);
-}
-
-.readability-toggle[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--paper);
-}
-
 /* The original filter/text cadence repainted very often. Keep the boil, but at a calmer rate. */
 .site-header,
 .oldweb-nav,
@@ -3237,27 +3237,6 @@ body.guide-modal-open {
 .content-stack > .panel {
   content-visibility: auto;
   contain-intrinsic-size: auto 560px;
-}
-
-/* Dyslexia/readability option: stop moving text and marquee without flattening the visual design. */
-body[data-readable="true"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel:not(#badges), .page-footer),
-body[data-readable="true"] .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption),
-body[data-readable="true"] .site-logo {
-  animation: none !important;
-  filter: none !important;
-}
-
-body[data-readable="true"] .marquee span {
-  animation: none !important;
-  min-width: 0;
-  padding-left: 0;
-  white-space: normal;
-}
-
-body[data-readable="true"] :is(p, li, dd, figcaption, .small-copy) {
-  line-height: 1.55;
-  letter-spacing: 0.015em;
-  word-spacing: 0.055em;
 }
 
 @keyframes mobileTextBoil {
@@ -3307,11 +3286,6 @@ body[data-readable="true"] :is(p, li, dd, figcaption, .small-copy) {
     width: 12px;
     height: 12px;
     border-width: 2px;
-  }
-
-  .readability-toggle {
-    min-height: 32px;
-    margin-top: 8px;
   }
 }
 
