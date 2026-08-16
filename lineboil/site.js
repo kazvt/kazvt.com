@@ -88,6 +88,7 @@ const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avi
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
+const READABILITY_STORAGE_KEY = "kazvt-readable";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
 const WIFE_KISS_SOUND_SRC = "assets/wife/wifey%20kissy.mp3";
 const FRUIT_SOUND_SRC = "assets/fruit.mp3";
@@ -802,7 +803,8 @@ function updateCursorEffect(theme, { force = false } = {}) {
   destroyCursorEffect();
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (reducedMotion.matches || !window.cursoreffects) return;
+  const touchOnly = window.matchMedia("(hover: none) and (pointer: coarse)").matches && navigator.maxTouchPoints > 0;
+  if (reducedMotion.matches || touchOnly || !window.cursoreffects) return;
 
   installLineboilCursorEffects();
   const config = cursorThemeConfig(theme);
@@ -1797,6 +1799,7 @@ async function mountLanguageSelector() {
 function initializeSiteTools() {
   const themeButtons = [...document.querySelectorAll("[data-tool-theme]")];
   const boilButton = document.querySelector("[data-tool-boil]");
+  const readabilityButton = document.querySelector("[data-tool-readable]");
   const initialTheme = storedTheme(themeButtons);
 
   applySiteTheme(initialTheme, themeButtons, { persist: false });
@@ -1807,6 +1810,31 @@ function initializeSiteTools() {
       applySiteTheme(theme || "p1", themeButtons);
     });
   });
+
+  if (readabilityButton) {
+    let readable = false;
+    try {
+      readable = localStorage.getItem(READABILITY_STORAGE_KEY) === "true";
+    } catch {}
+
+    const applyReadability = (enabled, persist = true) => {
+      document.body.dataset.readable = String(enabled);
+      readabilityButton.setAttribute("aria-pressed", String(enabled));
+      readabilityButton.textContent = enabled ? "wobbly text" : "steady text";
+      readabilityButton.setAttribute("aria-label", enabled ? "turn animated text back on" : "make text steady and easier to read");
+      if (persist) {
+        try {
+          localStorage.setItem(READABILITY_STORAGE_KEY, String(enabled));
+        } catch {}
+      }
+    };
+
+    applyReadability(readable, false);
+    readabilityButton.addEventListener("click", () => {
+      readable = document.body.dataset.readable !== "true";
+      applyReadability(readable);
+    });
+  }
 
   if (boilButton) {
     boilButton.addEventListener("click", () => {
@@ -2088,7 +2116,33 @@ function initializeDrawingPad() {
   });
 
   redraw();
-  window.setInterval(redraw, 280);
+  let redrawTimer = 0;
+  const startRedrawTimer = () => {
+    if (redrawTimer || document.hidden) return;
+    redrawTimer = window.setInterval(redraw, 360);
+  };
+  const stopRedrawTimer = () => {
+    if (!redrawTimer) return;
+    window.clearInterval(redrawTimer);
+    redrawTimer = 0;
+  };
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) startRedrawTimer();
+      else stopRedrawTimer();
+    }, { rootMargin: "120px" });
+    observer.observe(canvas);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopRedrawTimer();
+      else {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.bottom >= -120 && rect.top <= window.innerHeight + 120) startRedrawTimer();
+      }
+    });
+  } else {
+    startRedrawTimer();
+  }
 }
 
 async function initializeMusicPlayer() {
@@ -2192,6 +2246,7 @@ async function initializeMusicPlayer() {
     const nextMode = (visualizerModes.indexOf(visualizerMode) + 1) % visualizerModes.length;
     visualizerMode = visualizerModes[nextMode];
     updateVisualizerLabel();
+    drawVisualizerFrame();
   }
 
   function clearVisualizer(width, height) {
@@ -2300,14 +2355,16 @@ async function initializeMusicPlayer() {
     });
   }
 
-  function drawVisualizer() {
+  let visualizerTimer = 0;
+  const visualizerFrameMs = Math.round(1000 / 24);
+
+  function drawVisualizerFrame() {
     const width = visualizer.width;
     const height = visualizer.height;
     clearVisualizer(width, height);
 
     if (!analyser || audio.paused) {
       drawIdleVisualizer(width, height);
-      window.requestAnimationFrame(drawVisualizer);
       return;
     }
 
@@ -2315,7 +2372,6 @@ async function initializeMusicPlayer() {
       const waveform = new Uint8Array(analyser.fftSize);
       analyser.getByteTimeDomainData(waveform);
       drawScopeVisualizer(waveform, width, height);
-      window.requestAnimationFrame(drawVisualizer);
       return;
     }
 
@@ -2324,7 +2380,29 @@ async function initializeMusicPlayer() {
     const levels = getVisualizerLevels(data);
     if (visualizerMode === "burst") drawBurstVisualizer(levels, width, height);
     else drawBarVisualizer(levels, width, height);
-    window.requestAnimationFrame(drawVisualizer);
+  }
+
+  function stopVisualizerLoop({ drawIdle = true } = {}) {
+    if (visualizerTimer) window.clearTimeout(visualizerTimer);
+    visualizerTimer = 0;
+    if (drawIdle) drawVisualizerFrame();
+  }
+
+  function visualizerLoop() {
+    visualizerTimer = 0;
+    if (audio.paused || document.hidden) {
+      drawVisualizerFrame();
+      return;
+    }
+
+    drawVisualizerFrame();
+    visualizerTimer = window.setTimeout(visualizerLoop, visualizerFrameMs);
+  }
+
+  function startVisualizerLoop() {
+    if (visualizerTimer || audio.paused || document.hidden) return;
+    drawVisualizerFrame();
+    visualizerTimer = window.setTimeout(visualizerLoop, visualizerFrameMs);
   }
 
   play.addEventListener("click", async () => {
@@ -2341,9 +2419,11 @@ async function initializeMusicPlayer() {
   next.addEventListener("click", () => loadTrack(index + 1, !audio.paused));
   audio.addEventListener("play", () => {
     setInlineNote(play, translatedText("music.pause", "pause"));
+    startVisualizerLoop();
   });
   audio.addEventListener("pause", () => {
     setInlineNote(play, translatedText("music.play", "play"));
+    stopVisualizerLoop();
   });
   audio.addEventListener("ended", () => loadTrack(index + 1, true));
   audio.addEventListener("error", () => {
@@ -2376,6 +2456,11 @@ async function initializeMusicPlayer() {
   siteVolume = Number(volume.value);
   audio.volume = siteVolume;
   updateVisualizerLabel();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopVisualizerLoop({ drawIdle: false });
+    else if (!audio.paused) startVisualizerLoop();
+    else drawVisualizerFrame();
+  });
   mount.replaceChildren(
     title,
     el("div", { className: "music-controls" }, [prev, play, next]),
@@ -2385,7 +2470,7 @@ async function initializeMusicPlayer() {
   );
   markSoftLoaded(mount);
   loadTrack(0);
-  drawVisualizer();
+  drawVisualizerFrame();
 }
 
 async function render(statusOverrides = {}) {

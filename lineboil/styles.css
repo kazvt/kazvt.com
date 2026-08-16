@@ -2956,3 +2956,150 @@ code {
 .paint-zone canvas {
   cursor: var(--cursor-precision, crosshair);
 }
+
+
+/* Mia feedback pass: clearer palette state, compact mobile controls, and lighter animation. */
+.big-palette button[aria-pressed="true"]::before {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--paper);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.readability-toggle {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 10px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 900;
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+
+.readability-toggle[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* The original filter/text cadence repainted very often. Keep the boil, but at a calmer rate. */
+.site-header,
+.oldweb-nav,
+.marquee,
+.sidebar,
+.panel:not(#badges),
+.page-footer {
+  animation-duration: 760ms;
+}
+
+.site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
+  animation-duration: 720ms;
+}
+
+/* Let modern browsers skip painting long off-screen panels. */
+.content-stack > .panel {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 560px;
+}
+
+/* Dyslexia/readability option: stop moving text and marquee without flattening the visual design. */
+body[data-readable="true"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel:not(#badges), .page-footer),
+body[data-readable="true"] .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption),
+body[data-readable="true"] .site-logo {
+  animation: none !important;
+  filter: none !important;
+}
+
+body[data-readable="true"] .marquee span {
+  animation: none !important;
+  min-width: 0;
+  padding-left: 0;
+  white-space: normal;
+}
+
+body[data-readable="true"] :is(p, li, dd, figcaption, .small-copy) {
+  line-height: 1.55;
+  letter-spacing: 0.015em;
+  word-spacing: 0.055em;
+}
+
+@keyframes mobileTextBoil {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(1px, -1px) rotate(-0.16deg); }
+  100% { transform: translate(-1px, 1px) rotate(0.14deg); }
+}
+
+@keyframes mobileSectionBoil {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(0.45px, -0.45px); }
+  100% { transform: translate(-0.45px, 0.45px); }
+}
+
+@media (max-width: 880px) {
+  /* Keep radio near the palette instead of below the entire page. */
+  .web-grid > .sidebar:first-of-type { order: 0; }
+  .web-grid > .sidebar:last-of-type { order: 1; }
+  .web-grid > #app { order: 2; }
+
+  /* 16 palettes become two compact rows instead of huge two-column squares. */
+  .palette.big-palette {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 9px;
+  }
+
+  .big-palette button {
+    min-height: 0;
+    aspect-ratio: 1;
+    border-width: 2px;
+    box-shadow: 2px 2px 0 var(--shadow);
+    animation: none;
+  }
+
+  .palette button::before {
+    top: 2px;
+    left: 2px;
+    min-width: 1.15em;
+    height: 1.15em;
+    border-width: 1px;
+    font-size: 0.52rem;
+    box-shadow: none;
+  }
+
+  .big-palette span {
+    width: 12px;
+    height: 12px;
+    border-width: 2px;
+  }
+
+  .readability-toggle {
+    min-height: 32px;
+    margin-top: 8px;
+  }
+}
+
+/* Android/touch fallback: SVG filter boil is costly/unreliable, so use a visible transform boil instead. */
+@media (max-width: 600px), (hover: none) and (pointer: coarse) {
+  .site-header,
+  .oldweb-nav,
+  .marquee,
+  .sidebar,
+  .panel:not(#badges),
+  .page-footer {
+    animation-name: mobileSectionBoil;
+    animation-duration: 1050ms;
+    animation-timing-function: steps(2, end);
+    filter: none !important;
+  }
+
+  .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
+    animation-name: mobileTextBoil;
+    animation-duration: 760ms;
+    animation-timing-function: steps(2, end);
+  }
+
+  .site-logo {
+    animation-duration: 760ms;
+  }
+}
