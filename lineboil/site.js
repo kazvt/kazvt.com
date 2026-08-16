@@ -99,8 +99,7 @@ const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
 const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
 const WUMPA_LOGO_RECOVER_KEY = "kazvt-logo-wumpa-recover-clicks";
 const KISSY_STORAGE_KEY = "kazvt-kissy-count";
-const EMOTE_MANIFEST = "assets/emotes/manifest.json";
-const emoteExtensions = new Set([...imageExtensions, ".mp4", ".webm", ".mov", ".m4v", ".ogv"]);
+const EMOTE_FILE = "emotes.txt";
 
 const cursorThemes = {
   p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
@@ -672,15 +671,7 @@ function selectedLanguageFromManifest(languages) {
 }
 
 async function loadActiveEmotes() {
-  const files = await loadManifest(EMOTE_MANIFEST, emoteExtensions);
-  const emotes = new Map();
-
-  files.forEach((file) => {
-    const token = file.replace(/\.[^.]+$/, "");
-    emotes.set(token, `assets/emotes/${file}`);
-  });
-
-  activeEmotes = emotes;
+  activeEmotes = parseKeyValueLines(await loadTextLines(EMOTE_FILE));
   return activeEmotes;
 }
 
@@ -992,8 +983,7 @@ function inlineNoteNodes(text) {
     if (match.index > cursor) pushText(source.slice(cursor, match.index));
 
     const token = match[0];
-    const emoteKey = token.startsWith("[[") && token.endsWith("]]") ? token.slice(2, -2) : token.slice(1, -1);
-    const emoteFile = activeEmotes.get(emoteKey);
+    const emoteFile = activeEmotes.get(token);
     if (emoteFile) nodes.push(emoteNode(token, emoteFile));
     else if (token.startsWith("[[") && token.endsWith("]]")) nodes.push(token);
     else nodes.push(el("span", { className: "note-small" }, [token]));
@@ -1716,26 +1706,106 @@ function initializeWumpaGame() {
 }
 
 function multistreamGuidePanel() {
-  return el("details", { id: "multistream-guide-home", className: "panel guide-disclosure guide-embed-panel scribble-box", "data-embedded-guide": "true" }, [
-    el("summary", { "data-i18n": "guide.summary" }, ["multistream setup guide"]),
-    el("div", { className: "panel-body" }, [
-      el("div", { className: "embedded-guide-slot" }, [
-        el("p", { className: "embedded-guide-loading", "data-i18n": "guide.open_to_load" }, [translatedText("guide.open_to_load", "open this to load the guide")]),
+  return el("section", { id: "multistream-guide-home", className: "panel guide-launch-panel scribble-box" }, [
+    el("button", { type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
+      el("span", { className: "guide-launch-kicker" }, [">> open window <<"]),
+      el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, ["multistream setup guide"]),
+    ]),
+  ]);
+}
+
+function createMultistreamGuideModal() {
+  return el("dialog", {
+    className: "multistream-guide-modal",
+    "data-multistream-guide-modal": "true",
+    ariaLabelledby: "multistream-guide-modal-title",
+  }, [
+    el("div", { className: "multistream-guide-window" }, [
+      el("header", { className: "guide-window-bar" }, [
+        el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
+        el("div", { className: "guide-window-controls", ariaLabel: "guide window controls" }, [
+          el("button", { type: "button", className: "guide-window-button", "data-guide-zoom": "out", ariaLabel: "zoom guide out", title: "zoom out" }, ["-"]),
+          el("button", { type: "button", className: "guide-window-button guide-zoom-readout", "data-guide-zoom": "reset", ariaLabel: "reset guide zoom", title: "reset zoom" }, ["100%"]),
+          el("button", { type: "button", className: "guide-window-button", "data-guide-zoom": "in", ariaLabel: "zoom guide in", title: "zoom in" }, ["+"]),
+          el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: "close multistream guide", title: "close" }, ["X"]),
+        ]),
+      ]),
+      el("div", { className: "guide-zoom-viewport", "data-guide-viewport": "true" }, [
+        el("div", { className: "guide-zoom-content", "data-guide-content": "true" }, [
+          el("div", { className: "embedded-guide-slot", "data-guide-slot": "true" }, [
+            el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]),
+          ]),
+        ]),
+      ]),
+      el("footer", { className: "guide-window-status" }, [
+        el("span", {}, ["mouse wheel / pinch to zoom"]),
+        el("span", {}, ["drag to move"]),
       ]),
     ]),
   ]);
 }
 
-async function initializeEmbeddedGuide() {
-  const details = document.querySelector("[data-embedded-guide]");
-  if (!details) return;
+async function initializeMultistreamGuideModal() {
+  if (document.body.dataset.page !== "home") return;
 
-  const slot = details.querySelector(".embedded-guide-slot");
-  if (!slot) return;
+  let modal = document.querySelector("[data-multistream-guide-modal]");
+  if (!modal) {
+    modal = createMultistreamGuideModal();
+    document.body.append(modal);
+    applyLanguageText(modal);
+  }
+
+  const viewport = modal.querySelector("[data-guide-viewport]");
+  const content = modal.querySelector("[data-guide-content]");
+  const slot = modal.querySelector("[data-guide-slot]");
+  const readout = modal.querySelector(".guide-zoom-readout");
+  if (!viewport || !content || !slot || !readout) return;
+
+  const minZoom = 0.5;
+  const maxZoom = 3;
+  let zoom = 1;
+  let lastTrigger = null;
+  let loaded = modal.dataset.loaded === "true";
+  const pointers = new Map();
+  let mouseDrag = null;
+  let touchGesture = null;
+
+  const updateZoomReadout = () => {
+    readout.textContent = `${Math.round(zoom * 100)}%`;
+  };
+
+  const setZoom = (nextZoom, anchorClientX, anchorClientY) => {
+    const clamped = Math.min(maxZoom, Math.max(minZoom, nextZoom));
+    if (Math.abs(clamped - zoom) < 0.0001) return;
+
+    const rect = viewport.getBoundingClientRect();
+    const localX = Number.isFinite(anchorClientX) ? anchorClientX - rect.left : viewport.clientWidth / 2;
+    const localY = Number.isFinite(anchorClientY) ? anchorClientY - rect.top : viewport.clientHeight / 2;
+    const contentX = (viewport.scrollLeft + localX) / zoom;
+    const contentY = (viewport.scrollTop + localY) / zoom;
+
+    zoom = clamped;
+    content.style.setProperty("--guide-zoom", String(zoom));
+    updateZoomReadout();
+
+    window.requestAnimationFrame(() => {
+      viewport.scrollLeft = contentX * zoom - localX;
+      viewport.scrollTop = contentY * zoom - localY;
+    });
+  };
+
+  const resetZoom = () => {
+    const mobileFit = viewport.clientWidth > 0 && viewport.clientWidth < 760
+      ? Math.min(1, Math.max(minZoom, (viewport.clientWidth - 12) / 720))
+      : 1;
+    zoom = mobileFit;
+    content.style.setProperty("--guide-zoom", String(zoom));
+    updateZoomReadout();
+    viewport.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  };
 
   const loadGuide = async () => {
-    if (details.dataset.loaded) return;
-    details.dataset.loaded = "true";
+    if (loaded) return;
     slot.replaceChildren(el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]));
     markSoftLoaded(slot);
 
@@ -1748,22 +1818,170 @@ async function initializeEmbeddedGuide() {
       if (!body) throw new Error("guide body missing");
 
       const fragment = document.createDocumentFragment();
-      [...body.children].forEach((child) => {
-        fragment.append(document.importNode(child, true));
-      });
+      [...body.children].forEach((child) => fragment.append(document.importNode(child, true)));
       slot.replaceChildren(fragment);
       applyLanguageText(slot);
       markSoftLoaded(slot);
+      loaded = true;
+      modal.dataset.loaded = "true";
     } catch {
-      details.dataset.loaded = "";
-      slot.replaceChildren(el("p", { className: "embedded-guide-error", "data-i18n": "guide.load_error" }, [translatedText("guide.load_error", "the guide could not load here. use the multistream guide page from the nav.")]));
+      const fallback = el("a", { className: "guide-link", href: "multistream-guide.html" }, ["open the standalone multistream guide"]);
+      slot.replaceChildren(
+        el("p", { className: "embedded-guide-error" }, [
+          translatedText("guide.load_error", "the guide could not load in this window. "),
+          " ",
+          fallback,
+          ".",
+        ]),
+      );
       markSoftLoaded(slot);
     }
   };
 
-  details.addEventListener("toggle", () => {
-    if (details.open) loadGuide();
+  const openGuide = async (trigger) => {
+    lastTrigger = trigger || document.activeElement;
+    document.body.classList.add("guide-modal-open");
+    if (typeof modal.showModal === "function") modal.showModal();
+    else modal.setAttribute("open", "");
+    resetZoom();
+    await loadGuide();
+    modal.querySelector("[data-guide-close]")?.focus({ preventScroll: true });
+  };
+
+  const closeGuide = () => {
+    if (typeof modal.close === "function" && modal.open) modal.close();
+    else modal.removeAttribute("open");
+  };
+
+  document.querySelectorAll("[data-open-multistream-guide]").forEach((trigger) => {
+    if (trigger.dataset.guideModalBound === "true") return;
+    trigger.dataset.guideModalBound = "true";
+    trigger.addEventListener("click", (event) => {
+      event.preventDefault();
+      openGuide(trigger);
+    });
   });
+
+  modal.querySelector("[data-guide-close]")?.addEventListener("click", closeGuide);
+  modal.addEventListener("close", () => {
+    document.body.classList.remove("guide-modal-open");
+    pointers.clear();
+    mouseDrag = null;
+    touchGesture = null;
+    viewport.classList.remove("is-dragging");
+    if (lastTrigger instanceof HTMLElement) lastTrigger.focus({ preventScroll: true });
+  });
+  modal.addEventListener("cancel", () => {
+    document.body.classList.remove("guide-modal-open");
+  });
+
+  modal.querySelectorAll("[data-guide-zoom]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const action = button.getAttribute("data-guide-zoom");
+      if (action === "in") setZoom(zoom * 1.16);
+      else if (action === "out") setZoom(zoom / 1.16);
+      else resetZoom();
+    });
+  });
+
+  viewport.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const factor = Math.exp(-event.deltaY * 0.0017);
+    setZoom(zoom * factor, event.clientX, event.clientY);
+  }, { passive: false });
+
+  const touchSnapshot = () => {
+    const active = [...pointers.values()].filter((point) => point.type === "touch").slice(0, 2);
+    if (active.length < 2) return null;
+    const [a, b] = active;
+    return {
+      centerX: (a.x + b.x) / 2,
+      centerY: (a.y + b.y) / 2,
+      distance: Math.hypot(a.x - b.x, a.y - b.y),
+    };
+  };
+
+  viewport.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "touch") {
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, type: "touch" });
+      viewport.setPointerCapture?.(event.pointerId);
+      const pair = touchSnapshot();
+      if (pair) {
+        const rect = viewport.getBoundingClientRect();
+        touchGesture = {
+          ...pair,
+          zoom,
+          contentX: (viewport.scrollLeft + pair.centerX - rect.left) / zoom,
+          contentY: (viewport.scrollTop + pair.centerY - rect.top) / zoom,
+        };
+      }
+      return;
+    }
+
+    if (event.pointerType === "mouse" && event.button === 0 && !event.target.closest("a, button, input, select, textarea")) {
+      mouseDrag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      viewport.setPointerCapture?.(event.pointerId);
+      viewport.classList.add("is-dragging");
+    }
+  });
+
+  viewport.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "mouse" && mouseDrag?.id === event.pointerId) {
+      event.preventDefault();
+      viewport.scrollLeft -= event.clientX - mouseDrag.x;
+      viewport.scrollTop -= event.clientY - mouseDrag.y;
+      mouseDrag.x = event.clientX;
+      mouseDrag.y = event.clientY;
+      return;
+    }
+
+    if (event.pointerType !== "touch" || !pointers.has(event.pointerId)) return;
+    event.preventDefault();
+    const previous = pointers.get(event.pointerId);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, type: "touch" });
+    const pair = touchSnapshot();
+
+    if (pair) {
+      if (!touchGesture || touchGesture.distance <= 0) {
+        const rect = viewport.getBoundingClientRect();
+        touchGesture = {
+          ...pair,
+          zoom,
+          contentX: (viewport.scrollLeft + pair.centerX - rect.left) / zoom,
+          contentY: (viewport.scrollTop + pair.centerY - rect.top) / zoom,
+        };
+      }
+
+      const nextZoom = Math.min(maxZoom, Math.max(minZoom, touchGesture.zoom * (pair.distance / touchGesture.distance)));
+      const rect = viewport.getBoundingClientRect();
+      zoom = nextZoom;
+      content.style.setProperty("--guide-zoom", String(zoom));
+      updateZoomReadout();
+      viewport.scrollLeft = touchGesture.contentX * zoom - (pair.centerX - rect.left);
+      viewport.scrollTop = touchGesture.contentY * zoom - (pair.centerY - rect.top);
+      return;
+    }
+
+    touchGesture = null;
+    if (previous) {
+      viewport.scrollLeft -= event.clientX - previous.x;
+      viewport.scrollTop -= event.clientY - previous.y;
+    }
+  }, { passive: false });
+
+  const releasePointer = (event) => {
+    pointers.delete(event.pointerId);
+    if (mouseDrag?.id === event.pointerId) {
+      mouseDrag = null;
+      viewport.classList.remove("is-dragging");
+    }
+    const pair = touchSnapshot();
+    if (!pair) touchGesture = null;
+  };
+
+  viewport.addEventListener("pointerup", releasePointer);
+  viewport.addEventListener("pointercancel", releasePointer);
+  updateZoomReadout();
 }
 
 async function mountLanguageSelector() {
@@ -2532,7 +2750,7 @@ async function render(statusOverrides = {}) {
   await initializeMusicPlayer();
   applyLanguageText(document);
   initializeWifeStickerEffects();
-  initializeEmbeddedGuide();
+  initializeMultistreamGuideModal();
   initializeWumpaGame();
   if (document.body.dataset.theme === "p16") updateCursorEffect("p16", { force: true });
 }

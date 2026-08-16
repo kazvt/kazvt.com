@@ -438,7 +438,8 @@ body[data-theme="p14"] :is(
   .paint-controls button,
   .language-button,
   .readability-toggle,
-  .guide-disclosure > summary
+  .guide-launch-button,
+  .guide-window-button
 ):hover {
   background-color: var(--bg);
   background-image: var(--wallpaper-image);
@@ -742,7 +743,9 @@ button {
   .sticker *,
   .music-player,
   .music-player *,
-  .guide-disclosure > summary,
+  .guide-launch-button,
+  .guide-window-controls,
+  .guide-window-controls *,
   .tool-list,
   .tool-list *,
   .paint-controls,
@@ -1337,19 +1340,19 @@ code {
 }
 
 .guide-page #multistream-guide,
-.panel.guide-embed-panel {
+.multistream-guide-modal .embedded-guide-slot {
   animation-name: guidePanelBoil;
   animation-duration: 460ms;
 }
 
 .guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong),
-.guide-embed-panel :is(h1, h2, p, a, span, text, tspan, strong) {
+.multistream-guide-modal :is(h1, h2, p, a, span, text, tspan, strong) {
   animation-name: guideTextBoil;
   animation-duration: 480ms;
 }
 
 .guide-map-frame :is(a, span, text, tspan),
-.guide-embed-panel .guide-map-frame :is(a, span, text, tspan) {
+.multistream-guide-modal .guide-map-frame :is(a, span, text, tspan) {
   animation: none !important;
 }
 
@@ -2368,30 +2371,33 @@ code {
   color: var(--hover-text);
 }
 
-.guide-disclosure {
+.guide-launch-panel {
+  padding: 0;
   scroll-margin-top: 18px;
+  overflow: visible;
 }
 
-.guide-disclosure > summary {
-  display: flex;
-  min-height: 58px;
-  align-items: center;
-  justify-content: center;
-  margin: -4px -4px 14px;
-  padding: 10px 12px;
+.guide-launch-button {
+  display: grid;
+  width: 100%;
+  min-height: 78px;
+  gap: 4px;
+  place-items: center;
+  padding: 12px 16px;
   border: 4px solid var(--ink);
   background: var(--orange);
   color: var(--on-orange);
-  font-size: clamp(1rem, 2vw, 1.32rem);
+  font: inherit;
   font-weight: 900;
   text-align: center;
-  list-style: none;
+  box-shadow: 6px 6px 0 var(--shadow);
   clip-path: polygon(0 8px, 12px 0, 100% 5px, calc(100% - 7px) 100%, 5px calc(100% - 4px));
   transform-origin: center;
   transition: transform 150ms ease-out;
 }
 
-.guide-disclosure > summary:hover {
+.guide-launch-button:hover,
+.guide-launch-button:focus-visible {
   position: relative;
   z-index: 2;
   background-color: var(--bg);
@@ -2399,42 +2405,178 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--hover-text);
-  transform: scale(1.05);
+  transform: scale(1.025) rotate(-0.2deg);
 }
 
-.guide-disclosure > summary::-webkit-details-marker {
-  display: none;
+.guide-launch-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 
-.guide-disclosure > summary::before,
-.guide-disclosure > summary::after {
-  content: ">>";
-  display: inline-block;
-  margin-inline: 10px;
-  color: currentColor;
-  animation: guideArrowPulse 820ms steps(2, end) infinite alternate;
+.guide-launch-title {
+  font-size: clamp(1.05rem, 2vw, 1.38rem);
 }
 
-.guide-disclosure > summary::before {
-  --guide-arrow-x: -3px;
-  --guide-arrow-y: 0;
+body.guide-modal-open {
+  overflow: hidden;
 }
 
-.guide-disclosure > summary::after {
-  --guide-arrow-x: 3px;
-  --guide-arrow-y: 0;
+.multistream-guide-modal {
+  width: calc(100vw - 24px);
+  height: calc(100dvh - 24px);
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 9px 9px 0 color-mix(in srgb, var(--ink) 45%, transparent);
+  clip-path: polygon(0 7px, 11px 0, calc(100% - 8px) 3px, 100% 12px, calc(100% - 4px) calc(100% - 8px), calc(100% - 13px) 100%, 8px calc(100% - 3px), 0 calc(100% - 12px));
 }
 
-@keyframes guideArrowPulse {
-  from { transform: translate(0, 0); }
-  to { transform: translate(var(--guide-arrow-x), var(--guide-arrow-y)); }
+.multistream-guide-modal::backdrop {
+  background: color-mix(in srgb, var(--bg) 76%, transparent);
+  backdrop-filter: blur(1px);
 }
 
-.guide-disclosure[open] > summary::before,
-.guide-disclosure[open] > summary::after {
-  --guide-arrow-x: 0;
-  --guide-arrow-y: 3px;
-  content: "vv";
+.multistream-guide-window {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--blue) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(0deg, color-mix(in srgb, var(--pink) 10%, transparent) 1px, transparent 1px),
+    var(--paper);
+  background-size: 18px 18px;
+}
+
+.guide-window-bar {
+  display: flex;
+  min-width: 0;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 8px 7px 12px;
+  border-bottom: 4px solid var(--ink);
+  background: var(--banner);
+  color: var(--banner-text);
+}
+
+.guide-window-title {
+  min-width: 0;
+  overflow: hidden;
+  font-size: clamp(0.92rem, 2vw, 1.14rem);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guide-window-controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 5px;
+  align-items: center;
+}
+
+.guide-window-button {
+  display: grid;
+  min-width: 34px;
+  min-height: 32px;
+  place-items: center;
+  padding: 2px 7px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 2px 2px 0 var(--shadow);
+  clip-path: polygon(0 5px, 5px 0, 100% 2px, calc(100% - 3px) 100%, 3px calc(100% - 2px));
+}
+
+.guide-window-button:hover,
+.guide-window-button:focus-visible {
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--hover-text);
+}
+
+.guide-window-close {
+  min-width: 38px;
+  background: var(--pink);
+  color: var(--on-pink);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.05rem;
+}
+
+.guide-zoom-readout {
+  min-width: 58px;
+  font-size: 0.74rem;
+}
+
+.guide-zoom-viewport {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--ink) var(--paper-alt);
+  scrollbar-width: auto;
+  touch-action: none;
+  cursor: grab;
+}
+
+.guide-zoom-viewport.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.guide-zoom-content {
+  --guide-zoom: 1;
+  width: 100%;
+  min-height: 100%;
+  padding: 12px;
+  zoom: var(--guide-zoom);
+  transform-origin: 0 0;
+}
+
+.multistream-guide-modal .embedded-guide-slot {
+  width: 100%;
+  min-height: 100%;
+}
+
+.multistream-guide-modal .guide-lede,
+.multistream-guide-modal .guide-note {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.multistream-guide-modal .guide-map-frame,
+.multistream-guide-modal .guide-mobile-ladder {
+  max-width: 1280px;
+  margin-inline: auto;
+}
+
+.guide-window-status {
+  display: flex;
+  min-height: 28px;
+  gap: 8px 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-top: 3px solid var(--ink);
+  background: var(--paper-alt);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: lowercase;
 }
 
 .embedded-guide-slot {
@@ -2925,6 +3067,52 @@ code {
 
   .guide-mobile-ladder {
     display: grid;
+  }
+
+  .multistream-guide-modal {
+    width: calc(100vw - 10px);
+    height: calc(100dvh - 10px);
+  }
+
+  .multistream-guide-modal .guide-map-frame {
+    display: block;
+  }
+
+  .multistream-guide-modal .guide-mobile-ladder {
+    display: none;
+  }
+
+  .multistream-guide-modal .guide-zoom-content {
+    min-width: 720px;
+    padding: 8px;
+  }
+
+  .guide-window-bar {
+    gap: 5px;
+    padding-inline: 7px;
+  }
+
+  .guide-window-title {
+    font-size: 0.82rem;
+  }
+
+  .guide-window-controls {
+    gap: 3px;
+  }
+
+  .guide-window-button {
+    min-width: 31px;
+    min-height: 30px;
+    padding-inline: 5px;
+  }
+
+  .guide-zoom-readout {
+    min-width: 48px;
+    font-size: 0.66rem;
+  }
+
+  .guide-window-status {
+    font-size: 0.62rem;
   }
 
   .oldweb-nav {
