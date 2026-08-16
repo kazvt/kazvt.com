@@ -99,7 +99,8 @@ const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
 const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
 const WUMPA_LOGO_RECOVER_KEY = "kazvt-logo-wumpa-recover-clicks";
 const KISSY_STORAGE_KEY = "kazvt-kissy-count";
-const EMOTE_FILE = "emotes.txt";
+const EMOTE_MANIFEST = "assets/emotes/manifest.json";
+const emoteExtensions = new Set([...imageExtensions, ".mp4", ".webm", ".mov", ".m4v", ".ogv"]);
 
 const cursorThemes = {
   p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
@@ -671,7 +672,15 @@ function selectedLanguageFromManifest(languages) {
 }
 
 async function loadActiveEmotes() {
-  activeEmotes = parseKeyValueLines(await loadTextLines(EMOTE_FILE));
+  const files = await loadManifest(EMOTE_MANIFEST, emoteExtensions);
+  const emotes = new Map();
+
+  files.forEach((file) => {
+    const token = file.replace(/\.[^.]+$/, "");
+    emotes.set(token, `assets/emotes/${file}`);
+  });
+
+  activeEmotes = emotes;
   return activeEmotes;
 }
 
@@ -983,7 +992,8 @@ function inlineNoteNodes(text) {
     if (match.index > cursor) pushText(source.slice(cursor, match.index));
 
     const token = match[0];
-    const emoteFile = activeEmotes.get(token);
+    const emoteKey = token.startsWith("[[") && token.endsWith("]]") ? token.slice(2, -2) : token.slice(1, -1);
+    const emoteFile = activeEmotes.get(emoteKey);
     if (emoteFile) nodes.push(emoteNode(token, emoteFile));
     else if (token.startsWith("[[") && token.endsWith("]]")) nodes.push(token);
     else nodes.push(el("span", { className: "note-small" }, [token]));
