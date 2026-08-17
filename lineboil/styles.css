@@ -2426,6 +2426,16 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   visibility: hidden;
 }
 
+/* The multistream modal is intentionally completely static. Keep the site's
+   hand-drawn lineboil motion outside the guide so its flowchart stays steady
+   while reading and scrolling. */
+.multistream-guide-modal,
+.multistream-guide-modal *,
+.multistream-guide-modal *::before,
+.multistream-guide-modal *::after {
+  animation: none !important;
+}
+
 .multistream-guide-modal {
   width: calc(100vw - 24px);
   height: calc(100dvh - 24px);
