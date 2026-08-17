@@ -1738,7 +1738,7 @@ function createMultistreamGuideModal() {
     el("div", { className: "multistream-guide-window" }, [
       el("header", { className: "guide-window-bar" }, [
         el("div", { className: "guide-window-heading" }, [
-          el("span", { className: "guide-window-kicker", ariaHidden: "true" }, ["pathfinder.exe"]),
+          el("span", { className: "guide-window-kicker", ariaHidden: "true" }, ["author: kazvt"]),
           el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
         ]),
         el("div", { className: "guide-window-controls", ariaLabel: "guide window controls" }, [

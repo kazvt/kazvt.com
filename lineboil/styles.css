@@ -2419,6 +2419,13 @@ body.guide-modal-open {
   overflow: hidden;
 }
 
+/* Keep page-level range/slider controls out of sight while the guide owns the
+   top layer. This prevents the homepage controls from visually bleeding around
+   the dialog edges. */
+body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
+  visibility: hidden;
+}
+
 .multistream-guide-modal {
   width: calc(100vw - 24px);
   height: calc(100dvh - 24px);
@@ -2518,6 +2525,10 @@ body.guide-modal-open {
   transform: rotate(-1deg);
 }
 
+.guide-window-kicker {
+  text-transform: none;
+}
+
 .guide-window-stamp {
   background: var(--paper);
   color: var(--ink);
@@ -2578,12 +2589,21 @@ body.guide-modal-open {
 .guide-modal-viewport {
   position: relative;
   z-index: 1;
+  min-width: 0;
   min-height: 0;
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-color: var(--ink) var(--paper-alt);
-  scrollbar-width: auto;
-  touch-action: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-y;
+}
+
+.guide-modal-viewport::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .guide-modal-content {
@@ -2613,6 +2633,12 @@ body.guide-modal-open {
   box-shadow:
     6px 6px 0 var(--shadow),
     -3px -3px 0 color-mix(in srgb, var(--blue) 18%, transparent);
+}
+
+/* Let wheel/touch gestures that start directly over a node keep scrolling the
+   modal instead of behaving like a separate zoom/pan surface. */
+.multistream-guide-modal :is(.guide-map-frame, .guide-map, .guide-map .node-svg, .guide-map a) {
+  touch-action: pan-y;
 }
 
 .guide-window-status {
