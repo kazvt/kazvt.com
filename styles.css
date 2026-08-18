@@ -3757,3 +3757,8 @@ html.touch-device .guide-page .web-grid {
 html.touch-device .guide-page .content-stack {
   order: -1;
 }
+
+/* Palette 16: text on the solid --pink surface must always stay white. */
+body[data-theme="p16"] .guide-map .badge.no text {
+  fill: var(--on-pink);
+}
