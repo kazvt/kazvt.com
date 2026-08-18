@@ -1430,6 +1430,148 @@ code {
   font-size: 18px;
 }
 
+/* Recommended guide choice: Font Awesome star + old-web tooltip.
+   This lives in shared CSS so the standalone guide and recycled home modal match. */
+.guide-map .guide-recommend-mark {
+  cursor: var(--cursor-help, help);
+  outline: none;
+}
+
+.guide-map .guide-recommend-star-back {
+  fill: color-mix(in srgb, var(--yellow) 88%, var(--paper) 12%);
+  stroke: var(--ink);
+  stroke-width: 3px;
+  filter: drop-shadow(3px 3px 0 var(--shadow));
+  transition: transform 140ms steps(2, end), filter 140ms ease;
+}
+
+.guide-map .guide-recommend-star-icon {
+  fill: var(--ink);
+  overflow: visible;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--paper) 78%, transparent));
+  transition: transform 140ms steps(2, end), fill 140ms ease;
+}
+
+.guide-map .guide-recommend-tooltip {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 90ms linear, visibility 90ms linear;
+}
+
+.guide-map .guide-recommend-tooltip polygon {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 3px;
+  filter: drop-shadow(3px 3px 0 var(--shadow));
+}
+
+.guide-map .guide-recommend-tooltip text {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.guide-map .guide-recommend-mark:hover .guide-recommend-star-back,
+.guide-map .guide-recommend-mark:focus .guide-recommend-star-back,
+.guide-map .guide-recommend-mark:focus-visible .guide-recommend-star-back {
+  transform: rotate(-7deg) scale(1.12);
+  filter: drop-shadow(5px 5px 0 var(--shadow));
+}
+
+.guide-map .guide-recommend-mark:hover .guide-recommend-star-icon,
+.guide-map .guide-recommend-mark:focus .guide-recommend-star-icon,
+.guide-map .guide-recommend-mark:focus-visible .guide-recommend-star-icon {
+  fill: var(--pink);
+  transform: rotate(12deg) scale(1.13);
+}
+
+.guide-map .guide-recommend-mark:hover .guide-recommend-tooltip,
+.guide-map .guide-recommend-mark:focus .guide-recommend-tooltip,
+.guide-map .guide-recommend-mark:focus-visible .guide-recommend-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.guide-step-recommended {
+  position: relative;
+}
+
+.guide-mobile-recommend {
+  position: absolute;
+  z-index: 3;
+  top: 7px;
+  right: 8px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--yellow) 88%, var(--paper) 12%);
+  box-shadow: 3px 3px 0 var(--shadow);
+  cursor: var(--cursor-help, help);
+  outline: none;
+  transition: transform 120ms steps(2, end), box-shadow 120ms ease;
+}
+
+.guide-mobile-recommend > svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--ink);
+  overflow: visible;
+  transition: transform 120ms steps(2, end), fill 120ms ease;
+}
+
+.guide-mobile-recommend-tooltip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  width: max-content;
+  max-width: 120px;
+  padding: 5px 8px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--shadow);
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(3px) rotate(1deg);
+  transition: opacity 90ms linear, visibility 90ms linear, transform 120ms steps(2, end);
+}
+
+.guide-mobile-recommend:hover,
+.guide-mobile-recommend:focus,
+.guide-mobile-recommend:focus-visible {
+  transform: rotate(-6deg) scale(1.08);
+  box-shadow: 5px 5px 0 var(--shadow);
+}
+
+.guide-mobile-recommend:hover > svg,
+.guide-mobile-recommend:focus > svg,
+.guide-mobile-recommend:focus-visible > svg {
+  fill: var(--pink);
+  transform: rotate(14deg) scale(1.1);
+}
+
+.guide-mobile-recommend:hover .guide-mobile-recommend-tooltip,
+.guide-mobile-recommend:focus .guide-mobile-recommend-tooltip,
+.guide-mobile-recommend:focus-visible .guide-mobile-recommend-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0) rotate(-1deg);
+}
+
+.guide-step-recommended h3 {
+  padding-right: 38px;
+}
+
 .guide-map .node-copy {
   font-size: 15px;
   font-weight: 800;

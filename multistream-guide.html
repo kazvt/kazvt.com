@@ -137,13 +137,17 @@
                     <marker id="guide-arrow" viewBox="0 0 16 16" refX="14" refY="8" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
                       <path class="arrow-head" d="M2 2 L14 8 L2 14 Z"></path>
                     </marker>
+                    <!-- Font Awesome Free solid star by Fonticons, Inc. (CC BY 4.0): https://fontawesome.com/license/free -->
+                    <symbol id="guide-fa-star" viewBox="0 0 576 512">
+                      <path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.5 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.1 12.9 31.3s23 8.1 33.7 2.4L288.1 439l128.3 69.4c10.7 5.8 23.8 4.9 33.7-2.4s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"></path>
+                    </symbol>
                   </defs>
 
                   <path class="wire" marker-end="url(#guide-arrow)" d="M600 168 V193 H190 V250"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M600 168 V193 H980 V250"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M190 418 V440 H265 V515"></path>
-                  <path class="wire" marker-end="url(#guide-arrow)" d="M345 388 H448"></path>
-                  <path class="wire dashed" marker-end="url(#guide-arrow)" d="M697 335 H825"></path>
+                  <path class="wire" marker-end="url(#guide-arrow)" d="M345 388 H460"></path>
+                  <path class="wire dashed" marker-end="url(#guide-arrow)" d="M709 335 H825"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M265 645 V670 H165 V730"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M265 645 V670 H535 V730"></path>
                   <path class="wire" marker-end="url(#guide-arrow)" d="M535 872 V900 H365 V970"></path>
@@ -231,7 +235,7 @@
                     <text class="node-copy" x="20" y="108" data-i18n="guide.cloud.4">or if muted Twitch VODs are okay.</text>
                   </g>
 
-                  <g class="node-svg action-pink twitch-kick-node" transform="translate(445 315)">
+                  <g class="node-svg action-pink twitch-kick-node" transform="translate(457 315)">
                     <polygon class="shape" points="0 14 15 0 244 5 256 0 250 156 237 170 10 165 0 170"></polygon>
                     <text class="node-title" x="20" y="34" data-i18n="guide.twitch_kick.1">stream to Twitch &amp; Kick</text>
                     <text class="node-copy" x="20" y="66" data-i18n="guide.twitch_kick.2">Kick VODs stay intact.</text>
@@ -275,8 +279,18 @@
                     <text class="node-copy" x="20" y="110" data-i18n="guide.vps.7">config, &amp; troubleshooting.</text>
                   </g>
 
-                  <g class="node-svg action-blue" transform="translate(740 465)">
+                  <g class="node-svg action-blue recommended-node" transform="translate(740 465)">
                     <polygon class="shape" points="0 14 15 0 208 5 220 0 214 130 201 144 10 139 0 144"></polygon>
+                    <g class="guide-recommend-mark" transform="translate(190 18)" tabindex="0" role="img" aria-label="Best choice" data-i18n-aria-label="guide.best_choice">
+                      <circle class="guide-recommend-star-back" cx="0" cy="0" r="18"></circle>
+                      <svg class="guide-recommend-star-icon" x="-11" y="-10" width="22" height="20" viewBox="0 0 576 512" aria-hidden="true" focusable="false">
+                        <use href="#guide-fa-star"></use>
+                      </svg>
+                      <g class="guide-recommend-tooltip" transform="translate(-96 -47)" aria-hidden="true">
+                        <polygon points="0 5 7 0 91 2 98 8 94 29 85 34 8 32 0 35"></polygon>
+                        <text x="49" y="22" text-anchor="middle" data-i18n="guide.best_choice">Best choice</text>
+                      </g>
+                    </g>
                     <a href="https://multi.meldstudio.co/" target="_blank" rel="noopener noreferrer">
                       <text class="node-title link-text" x="20" y="34" data-i18n="guide.meld.1">use meld</text>
                       <text class="node-title link-text" x="20" y="58" data-i18n="guide.meld.2">multistreaming</text>
@@ -412,7 +426,11 @@
                 </article>
                 <span class="guide-choice" data-i18n="guide.mobile.pc_yes">Yes: stop here</span>
                 <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
-                <article class="guide-step action">
+                <article class="guide-step action guide-step-recommended">
+                  <span class="guide-mobile-recommend" tabindex="0" role="img" aria-label="Best choice" data-i18n-aria-label="guide.best_choice">
+                    <svg viewBox="0 0 576 512" aria-hidden="true" focusable="false"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.5 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.1 12.9 31.3s23 8.1 33.7 2.4L288.1 439l128.3 69.4c10.7 5.8 23.8 4.9 33.7-2.4s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"></path></svg>
+                    <span class="guide-mobile-recommend-tooltip" data-i18n="guide.best_choice">Best choice</span>
+                  </span>
                   <h3><a class="guide-link" href="https://multi.meldstudio.co/" target="_blank" rel="noopener noreferrer" data-i18n="guide.mobile.meld_title">use meld multistreaming</a></h3>
                   <p data-i18n="guide.mobile.meld_copy">good for a straightforward workflow across several destinations. free &amp; no watermark.</p>
                 </article>
@@ -424,7 +442,7 @@
                 </article>
               </div>
 
-              <p class="guide-note" data-i18n="guide.note">tl;dr - if you care about commercial music, either be ok with Twitch VODs being muted and not streaming to YouTube, or use OBS plugins or setup your own server/VPS. if you do copyright-free music, use Restream.io or Meld Multi.</p>
+              <p class="guide-note"><span data-i18n="guide.note.1">tl;dr - if you care about commercial music, either be ok with Twitch VODs being muted and not streaming to YouTube, or use </span><a class="guide-link" href="https://github.com/sorayuki/obs-multi-rtmp" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.obs_plugins">OBS plugins</a><span data-i18n="guide.note.2"> or setup your own server/VPS. if you do copyright-free music, use </span><a class="guide-link" href="https://restream.io/" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.restream">Restream.io</a><span data-i18n="guide.note.3"> or </span><a class="guide-link" href="https://multi.meldstudio.co/" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.meld">Meld Multi</a><span data-i18n="guide.period">.</span></p>
             </div>
           </section>
         </div>

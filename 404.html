@@ -481,7 +481,8 @@
         position: relative;
         z-index: 7;
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 245px);
+        justify-content: center;
         gap: 11px;
         width: min(500px, 100%);
         margin: 20px auto 0;
@@ -827,7 +828,6 @@
               <span data-i18n="error.scribble.6">×</span><span data-i18n="error.scribble.7">?</span><span data-i18n="error.scribble.8">↯</span><span data-i18n="error.scribble.9">404</span><span data-i18n="error.scribble.10">+</span>
             </div>
             <div class="error-actions">
-              <a class="error-button error-home" href="/" data-i18n="error.home">← back to kazvt.com</a>
               <a class="error-button error-back" href="/" data-go-back data-i18n="error.back">go back ↩</a>
             </div>
           </section>
