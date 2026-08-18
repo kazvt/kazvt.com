@@ -42,12 +42,20 @@
 
 html {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   scroll-behavior: smooth;
   background: var(--cream);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   margin: 0;
   color: var(--ink);
   background-color: var(--bg);
@@ -783,6 +791,7 @@ button {
   position: relative;
   z-index: 1;
   width: min(1060px, calc(100% - 24px));
+  max-width: calc(100% - 24px);
   margin: 0 auto;
   padding: clamp(12px, 3vw, 34px) 0 42px;
 }
@@ -846,6 +855,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   align-items: center;
   justify-content: center;
   width: min(720px, 96vw);
+  max-width: 100%;
   margin: clamp(6px, 2vw, 18px) auto 0;
   perspective: 900px;
 }
@@ -3365,6 +3375,36 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 }
 
+/* Mobile paint/layout stability: do not virtualize animated panels.
+   content-visibility + continuously animated/filtering descendants can be
+   clipped or rasterized at a stale viewport scale in Android Chromium after
+   scrolling. Keep the mobile document at one stable layout width instead. */
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .site-wrap,
+  .web-grid,
+  .content-stack,
+  .web-grid > *,
+  .content-stack > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .web-grid,
+  .content-stack,
+  .web-grid > *,
+  .content-stack > * {
+    width: 100%;
+  }
+
+  .content-stack > .panel {
+    content-visibility: visible;
+  }
+
+  .sidebar {
+    transform: none;
+  }
+}
+
 @media (max-width: 1180px) {
   .guide-page .web-grid {
     grid-template-columns: 1fr;
@@ -3585,7 +3625,6 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
     aspect-ratio: 1;
     border-width: 2px;
     box-shadow: 2px 2px 0 var(--shadow);
-    animation: none;
   }
 
   .palette button::before {
@@ -3602,43 +3641,10 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 }
 
-/* Android/touch fallback: SVG filter boil is costly/unreliable, so use a visible transform boil instead. */
-@media (max-width: 600px), (hover: none) and (pointer: coarse) {
-  .site-header,
-  .oldweb-nav,
-  .marquee,
-  .sidebar,
-  .panel:not(#badges),
-  .page-footer {
-    animation-name: mobileSectionBoil;
-    animation-duration: 620ms;
-    animation-timing-function: steps(2, end);
-    filter: none !important;
-  }
+/* On phones/touch devices, keep the same lineboil animation used on desktop.
+   The old transform-only fallback could leave stale compositor layers after
+   Chrome's mobile toolbar/visual viewport changed size while scrolling. */
 
-  .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
-    animation-name: mobileTextBoil;
-    animation-duration: 510ms;
-    animation-timing-function: steps(2, end);
-  }
-
-  .site-logo {
-    animation-duration: 540ms;
-  }
-
-  .scribble-box::before,
-  .scribble-box::after,
-  .multistream-guide-window::before,
-  .multistream-guide-window::after {
-    animation-duration: 300ms;
-  }
-
-  .multistream-guide-modal :is(h1, h2, h3, p, a, button, span, strong) {
-    animation-name: mobileTextBoil;
-    animation-duration: 520ms;
-    animation-timing-function: steps(2, end);
-  }
-}
 
 
 /* Persistent palette selection ring: mirrors link-button hover outlines, with a real air gap. */
@@ -3716,5 +3722,15 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   .palette-choice.is-selected::after,
   .palette-choice:has(> button[aria-pressed="true"])::after {
     animation: none;
+  }
+}
+
+/* Keep the off-screen rendering optimization desktop-only. On mobile this must
+   come after the generic content-visibility rule above so Android never swaps
+   animated panels into/out of layout containment while the user scrolls. */
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .content-stack > .panel {
+    content-visibility: visible;
+    contain-intrinsic-size: none;
   }
 }
