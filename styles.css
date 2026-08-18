@@ -21,7 +21,7 @@
   --bg-alt: #F599C6;
   --banner: #4D6787;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/paper-fibers.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/paper-fibers.png");
   --wallpaper-size: auto;
   --click-hover-outline-width: 4px;
   --click-hover-outline-style: dashed;
@@ -97,7 +97,7 @@ body[data-theme="p2"] {
   --bg-alt: #486C2F;
   --banner: #8B2626;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/45-degree-fabric-light.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/45-degree-fabric-light.png");
   --wallpaper-size: 630px 630px;
   --hover-text: #ffffff;
   --stamp-text: #111111;
@@ -126,7 +126,7 @@ body[data-theme="p3"] {
   --bg-alt: #1D4533;
   --banner: #5E3122;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/cream-dust.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/cream-dust.png");
   --wallpaper-size: 50px 50px;
 }
 
@@ -153,7 +153,7 @@ body[data-theme="p4"] {
   --bg-alt: #92EEFF;
   --banner: #30AFFF;
   --banner-text: #111111;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/brushed-alum.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/brushed-alum.png");
   --wallpaper-size: 800px 800px;
 }
 
@@ -180,7 +180,7 @@ body[data-theme="p5"] {
   --bg-alt: #838921;
   --banner: #133458;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/textured-paper.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/textured-paper.png");
   --wallpaper-size: auto;
 }
 
@@ -207,7 +207,7 @@ body[data-theme="p6"] {
   --bg-alt: #E98B50;
   --banner: #BC4F4F;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/beige-paper.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/beige-paper.png");
   --wallpaper-size: 400px 400px;
 }
 
@@ -234,7 +234,7 @@ body[data-theme="p7"] {
   --bg-alt: #EC5B38;
   --banner: #524646;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/brick-wall.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/brick-wall.png");
   --wallpaper-size: auto;
 }
 
@@ -261,7 +261,7 @@ body[data-theme="p8"] {
   --bg-alt: #66BB6A;
   --banner: #1B5E20;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/back-pattern.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/back-pattern.png");
   --wallpaper-size: auto;
 }
 
@@ -288,7 +288,7 @@ body[data-theme="p9"] {
   --bg-alt: #2196F3;
   --banner: #0D47A1;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/bright-squares.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/bright-squares.png");
   --wallpaper-size: auto;
 }
 
@@ -315,7 +315,7 @@ body[data-theme="p10"] {
   --bg-alt: #CF4173;
   --banner: #5D3140;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/argyle.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/argyle.png");
   --wallpaper-size: auto;
 }
 
@@ -342,7 +342,7 @@ body[data-theme="p11"] {
   --bg-alt: #3E3E75;
   --banner: #4E1F6E;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/cubes.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/cubes.png");
   --wallpaper-size: auto;
 }
 
@@ -369,7 +369,7 @@ body[data-theme="p12"] {
   --bg-alt: #D10056;
   --banner: #B2054C;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/checkered-pattern.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/checkered-pattern.png");
   --wallpaper-size: 216px 216px;
 }
 
@@ -396,7 +396,7 @@ body[data-theme="p13"] {
   --bg-alt: #FB6C00;
   --banner: #E73F1E;
   --banner-text: #111111;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/fake-luxury.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/fake-luxury.png");
   --wallpaper-size: 32px 52px;
 }
 
@@ -423,7 +423,7 @@ body[data-theme="p14"] {
   --bg-alt: #B2D959;
   --banner: #7EC151;
   --banner-text: #111111;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/bo-play.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/bo-play.png");
   --wallpaper-size: 42px 22px;
   --hover-text: #111111;
   --stamp-text: #111111;
@@ -474,7 +474,7 @@ body[data-theme="p15"] {
   --bg-alt: #8B639B;
   --banner: #403D88;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/dark-mosaic.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/dark-mosaic.png");
   --wallpaper-size: 600px 590px;
 }
 
@@ -501,217 +501,217 @@ body[data-theme="p16"] {
   --bg-alt: #266210;
   --banner: #063B00;
   --banner-text: #ffffff;
-  --wallpaper-image: url("assets/wallpapers/subtle-patterns/white-paperboard.png");
+  --wallpaper-image: url("zzz_assets/wallpapers/subtle-patterns/white-paperboard.png");
   --wallpaper-size: auto;
 }
 
 body,
 body[data-theme="p1"] {
-  --cursor-default: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Normal Select.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Link Select.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Text Select.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Help Select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Busy.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/paper-mario-64/Paper Mario Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Normal Select.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Link Select.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Text Select.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Help Select.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Busy.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Unavailable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/paper-mario-64/Paper Mario Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p2"] {
-  --cursor-default: url("assets/cursors/rw-picked/fallout-1/normal cursor.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/fallout-1/link select.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/fallout-1/text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/fallout-1/ALTERNATE SELECT.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/fallout-1/busy.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/fallout-1/RIGHT.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/fallout-1/UNABAVIBLE.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/fallout-1/MOVE.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/fallout-1/RESIZE1.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/fallout-1/RESIZE 2.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/fallout-1/normal cursor.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/fallout-1/link select.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/fallout-1/text.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/fallout-1/ALTERNATE SELECT.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/fallout-1/busy.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/fallout-1/RIGHT.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/fallout-1/UNABAVIBLE.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/fallout-1/MOVE.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/fallout-1/RESIZE1.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/fallout-1/RESIZE 2.cur"), ns-resize;
 }
 
 body[data-theme="p3"] {
-  --cursor-default: url("assets/cursors/rw-picked/legend-of-zelda/Master Sword.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/legend-of-zelda/Dominion-Rod.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/legend-of-zelda/Triforce.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/legend-of-zelda/Bow and Arrow.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/legend-of-zelda/Hylian Shield.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot-OoT.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot_Horiz.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/legend-of-zelda/Hookshot_Vert.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Master Sword.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Dominion-Rod.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Ocarina.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Triforce.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Bow and Arrow.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Hylian Shield.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Hookshot-OoT.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Hookshot_Horiz.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/legend-of-zelda/Hookshot_Vert.cur"), ns-resize;
 }
 
 body[data-theme="p4"] {
-  --cursor-default: url("assets/cursors/rw-picked/dreamsettler/Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/dreamsettler/Link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/dreamsettler/Text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/dreamsettler/Download.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/dreamsettler/Busy.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/dreamsettler/Download.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/dreamsettler/Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/dreamsettler/Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/dreamsettler/Horizontal.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/dreamsettler/Vertical.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/dreamsettler/Normal.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/dreamsettler/Link.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/dreamsettler/Text.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/dreamsettler/Download.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/dreamsettler/Busy.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/dreamsettler/Download.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/dreamsettler/Unavailable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/dreamsettler/Move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/dreamsettler/Horizontal.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/dreamsettler/Vertical.cur"), ns-resize;
 }
 
 body[data-theme="p5"] {
-  --cursor-default: url("assets/cursors/rw-picked/undertale-theme/Undertale Normal Cursor.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/undertale-theme/Undertale Link Cursor.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/undertale-theme/Undertale Text Cursor.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/undertale-theme/Undertale Help Cursor.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/undertale-theme/Undertale Working Cursor.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/undertale-theme/Undertale Precision Set.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/undertale-theme/Undertale Unavailable Cursor.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/undertale-theme/Undertale Move Cursor.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/undertale-theme/Undertale Horizontal Cursor.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/undertale-theme/Undertale Vertical Cursor.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Normal Cursor.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Link Cursor.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Text Cursor.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Help Cursor.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Working Cursor.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Precision Set.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Unavailable Cursor.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Move Cursor.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Horizontal Cursor.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Vertical Cursor.cur"), ns-resize;
 }
 
 body[data-theme="p6"] {
-  --cursor-default: url("assets/cursors/rw-picked/stardew-valley/Normal Selects.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/stardew-valley/Alt Select.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/stardew-valley/Text Select.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/stardew-valley/Help Select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/stardew-valley/Busy.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/stardew-valley/Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/stardew-valley/Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/stardew-valley/Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/stardew-valley/Horizontal .cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/stardew-valley/Vertical.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/stardew-valley/Normal Selects.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/stardew-valley/Alt Select.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/stardew-valley/Text Select.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/stardew-valley/Help Select.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/stardew-valley/Busy.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/stardew-valley/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/stardew-valley/Unavailable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/stardew-valley/Move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/stardew-valley/Horizontal .cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/stardew-valley/Vertical.cur"), ns-resize;
 }
 
 body[data-theme="p7"] {
-  --cursor-default: url("assets/cursors/rw-picked/doom-ii/Doom Guy - Normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/doom-ii/Skull - Link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/doom-ii/Pen.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/doom-ii/Pistol - Quakestion Mark (Help Select).cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/doom-ii/Shotgun - Normal.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/doom-ii/Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/doom-ii/Skull - Normal.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/doom-ii/Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/doom-ii/Resize - H.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/doom-ii/Resize - V.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/doom-ii/Doom Guy - Normal.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/doom-ii/Skull - Link.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/doom-ii/Pen.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/doom-ii/Pistol - Quakestion Mark (Help Select).cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/doom-ii/Shotgun - Normal.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/doom-ii/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/doom-ii/Skull - Normal.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/doom-ii/Move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/doom-ii/Resize - H.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/doom-ii/Resize - V.cur"), ns-resize;
 }
 
 body[data-theme="p8"] {
-  --cursor-default: url("assets/cursors/rw-picked/pokemon-x-and-y/chespin.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/pokemon-x-and-y/froakie.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/pokemon-x-and-y/klefki.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/pokemon-x-and-y/florges.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/pokemon-x-and-y/sylveon.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/pokemon-x-and-y/honedge.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/pokemon-x-and-y/malamar.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/pokemon-x-and-y/talonflame.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/pokemon-x-and-y/xerneas.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/pokemon-x-and-y/zygarde.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/chespin.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/froakie.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/klefki.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/florges.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/sylveon.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/honedge.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/malamar.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/talonflame.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/xerneas.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/pokemon-x-and-y/zygarde.cur"), ns-resize;
 }
 
 body[data-theme="p9"] {
-  --cursor-default: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_black.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_white.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_alt.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_precision_1.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_move_arrow.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_horizontal_arrows.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_vertical_arrows.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_black.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_white.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_text.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_help.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_alt.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_precision_1.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_unavailable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_move_arrow.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_horizontal_arrows.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_vertical_arrows.cur"), ns-resize;
 }
 
 body[data-theme="p10"] {
-  --cursor-default: url("assets/cursors/rw-picked/cookie-clicker-classic/Cookie.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/cookie-clicker-classic/Mouse.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/cookie-clicker-classic/Text Select.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/cookie-clicker-classic/Help Select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/cookie-clicker-classic/Chancemaker.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/cookie-clicker-classic/Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/cookie-clicker-classic/Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/cookie-clicker-classic/Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/cookie-clicker-classic/Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/cookie-clicker-classic/Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Cookie.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Mouse.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Text Select.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Help Select.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Chancemaker.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Unavailable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/cookie-clicker-classic/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p11"] {
-  --cursor-default: url("assets/cursors/rw-picked/lethal-company/Normal Select.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/lethal-company/Link Select.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/lethal-company/Text Select.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/lethal-company/Help Select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/lethal-company/Busy.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/lethal-company/Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/lethal-company/Unavailable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/lethal-company/Move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/lethal-company/Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/lethal-company/Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/lethal-company/Normal Select.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/lethal-company/Link Select.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/lethal-company/Text Select.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/lethal-company/Help Select.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/lethal-company/Busy.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/lethal-company/Precision Select.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/lethal-company/Unavailable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/lethal-company/Move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/lethal-company/Horizontal Resize.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/lethal-company/Vertical Resize.cur"), ns-resize;
 }
 
 body[data-theme="p12"] {
-  --cursor-default: url("assets/cursors/rw-picked/wii/wii-pointer.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/wii/wii-open.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/wii/wii-pointer-blue.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/wii/wii-help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/wii/wii-loading-cd.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/wii/wii-grab.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/wii/wii-pointer-reverse.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/wii/wii-move.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/wii/wii-open-ccw.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/wii/wii-grab-ccw.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/wii/wii-pointer.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/wii/wii-open.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/wii/wii-pointer-blue.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/wii/wii-help.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/wii/wii-loading-cd.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/wii/wii-grab.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/wii/wii-pointer-reverse.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/wii/wii-move.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/wii/wii-open-ccw.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/wii/wii-grab-ccw.cur"), ns-resize;
 }
 
 body[data-theme="p13"] {
-  --cursor-default: url("assets/cursors/rw-picked/sonic/Sonic Person.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/sonic/Sonic Alternate.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/sonic/Sonic Handwriting.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/sonic/Sonic Help.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/sonic/Sonic Location.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/sonic/Sonic Precision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/sonic/Sonic Unavaible.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/sonic/Sonic Location.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/sonic/Sonic Diagonal 1.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/sonic/Sonic Diagonal 2.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/sonic/Sonic Person.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/sonic/Sonic Alternate.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/sonic/Sonic Handwriting.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/sonic/Sonic Help.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/sonic/Sonic Location.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/sonic/Sonic Precision.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/sonic/Sonic Unavaible.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/sonic/Sonic Location.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/sonic/Sonic Diagonal 1.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/sonic/Sonic Diagonal 2.cur"), ns-resize;
 }
 
 body[data-theme="p14"] {
-  --cursor-default: url("assets/cursors/rw-picked/shovel-knight/SK_1.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/shovel-knight/SK_15.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/shovel-knight/SK_6.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/shovel-knight/SK_2.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/shovel-knight/SK_4.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/shovel-knight/SK_5.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/shovel-knight/SK_7.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/shovel-knight/SK_12.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/shovel-knight/SK_9.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/shovel-knight/SK_8.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_1.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_15.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_6.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_2.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_4.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_5.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_7.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_12.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_9.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_8.cur"), ns-resize;
 }
 
 body[data-theme="p15"] {
-  --cursor-default: url("assets/cursors/rw-picked/n64/N64.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/n64/N64 link select.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/n64/N64 text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/n64/help select.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/n64/hourglass.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/n64/presision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/n64/unaivalable.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/n64/N64.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/n64/horizontal resize.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/n64/vertical resize.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/n64/N64.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/n64/N64 link select.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/n64/N64 text.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/n64/help select.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/n64/hourglass.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/n64/presision.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/n64/unaivalable.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/n64/N64.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/n64/horizontal resize.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/n64/vertical resize.cur"), ns-resize;
 }
 
 body[data-theme="p16"] {
-  --cursor-default: url("assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), auto;
-  --cursor-pointer: url("assets/cursors/rw-picked/skyrim/Skyrim-link.cur"), pointer;
-  --cursor-text: url("assets/cursors/rw-picked/skyrim/Skyrim-text.cur"), text;
-  --cursor-help: url("assets/cursors/rw-picked/skyrim/Skyrim-hand.cur"), help;
-  --cursor-busy: url("assets/cursors/rw-picked/skyrim/Skyrim-alter.cur"), wait;
-  --cursor-precision: url("assets/cursors/rw-picked/skyrim/Skyrim-precision.cur"), crosshair;
-  --cursor-not-allowed: url("assets/cursors/rw-picked/skyrim/Skyrim-unav.cur"), not-allowed;
-  --cursor-move: url("assets/cursors/rw-picked/skyrim/Skyrim-alter.cur"), move;
-  --cursor-ew-resize: url("assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), ew-resize;
-  --cursor-ns-resize: url("assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), auto;
+  --cursor-pointer: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-link.cur"), pointer;
+  --cursor-text: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-text.cur"), text;
+  --cursor-help: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-hand.cur"), help;
+  --cursor-busy: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-alter.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-precision.cur"), crosshair;
+  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-unav.cur"), not-allowed;
+  --cursor-move: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-alter.cur"), move;
+  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), ew-resize;
+  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), ns-resize;
 }
 
 a {
@@ -1243,6 +1243,14 @@ code {
   gap: 14px;
 }
 
+
+/* Briefly mark the destination reached by an in-page navigation jump so it is
+   immediately obvious which panel/button the nav just brought into view. */
+.scroll-target-flash {
+  outline: 6px dashed var(--yellow);
+  outline-offset: 5px;
+}
+
 .guide-page .site-wrap {
   width: min(1320px, calc(100% - 24px));
 }
@@ -1421,7 +1429,8 @@ code {
   stroke-linejoin: round;
 }
 
-.guide-map .wire.return {
+.guide-map .wire.return,
+.guide-map .wire.dashed {
   stroke-dasharray: 12 10;
 }
 
@@ -1885,7 +1894,7 @@ code {
 .wife-kiss-stamp {
   width: 34px;
   height: 34px;
-  background: url("assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
+  background: url("zzz_assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
   filter: drop-shadow(2px 2px 0 var(--ink));
   animation: wifeKissStamp 1200ms ease-out forwards !important;
 }
@@ -1925,7 +1934,7 @@ code {
 .wife-kiss-particle.is-kiss {
   width: 22px;
   height: 22px;
-  background: url("assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
+  background: url("zzz_assets/vendor/twemoji/1f48b.svg") center / contain no-repeat;
   color: transparent;
   text-shadow: none;
 }

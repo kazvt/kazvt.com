@@ -67,7 +67,7 @@ const socialLinks = [
     key: "wife",
     label: "my wife",
     href: "https://lillie.garden/",
-    images: ["assets/wife/kazberry.webp", "assets/wife/ramberry.webp"],
+    images: ["zzz_assets/wife/kazberry.webp", "zzz_assets/wife/ramberry.webp"],
     note: "",
     color: "#ffd7ef",
   },
@@ -89,8 +89,8 @@ const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
-const WIFE_KISS_SOUND_SRC = "assets/sounds/wifey-kissy.mp3";
-const FRUIT_SOUND_SRC = "assets/sounds/fruit.mp3";
+const WIFE_KISS_SOUND_SRC = "zzz_assets/sounds/wifey-kissy.mp3";
+const FRUIT_SOUND_SRC = "zzz_assets/sounds/fruit.mp3";
 const LANGUAGE_STORAGE_KEY = "kazvt-language";
 const DEFAULT_LANGUAGE_NAME = "english";
 const DEFAULT_LANGUAGE_CODE = "en";
@@ -705,7 +705,7 @@ function translateTemplate(key, fallback = "", values = {}) {
 function mediaPath(file) {
   if (/^(https?:|data:|blob:|\/)/i.test(file)) return file;
   if (file.includes("/")) return file;
-  return `assets/${file}`;
+  return `zzz_assets/${file}`;
 }
 
 function emoteNode(token, file) {
@@ -1250,7 +1250,7 @@ function profilePanel() {
       el("div", { className: "profile-layout" }, [
         el("figure", { className: "portrait art-carousel scribble-box" }, [
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
-            el("img", { src: "assets/kazvt-transparent.gif", alt: translatedText("art.alt", "kazvt art"), "data-i18n-alt": "art.alt" }),
+            el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt", "kazvt art"), "data-i18n-alt": "art.alt" }),
           ]),
           el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, ["art window"]),
         ]),
@@ -1315,12 +1315,12 @@ function badgesPanel() {
           el(
             "a",
             {
-              href: `assets/buttons/${badge.file}`,
+              href: `zzz_assets/buttons/${badge.file}`,
               download: badge.file,
               className: "badge-link",
               title: translateTemplate("badge.download_title", "download {label}", { label: translatedText(`badge.${badge.key}`, badge.label) }),
             },
-            [el("img", { src: `assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`, badge.label), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
+            [el("img", { src: `zzz_assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`, badge.label), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
           ),
         ),
       ),
@@ -1347,8 +1347,8 @@ async function initializeArtCarousel() {
     frame.style.setProperty("--zoom-y", "50%");
   });
 
-  const files = await loadManifest("kazArt/manifest.json", imageExtensions);
-  const artFiles = files.length ? files : ["../assets/kazvt-transparent.gif"];
+  const files = await loadManifest("zzz_kazArt/manifest.json", imageExtensions);
+  const artFiles = files.length ? files : ["../zzz_assets/kazvt-transparent.gif"];
   let index = Math.floor(Math.random() * artFiles.length);
   const failedFiles = new Set();
 
@@ -1356,7 +1356,7 @@ async function initializeArtCarousel() {
     if (/^(https?:|data:|blob:)/i.test(file)) return file;
     if (file.startsWith("../")) return file.slice(3);
     const cleanFile = file.replace(/^\.?\//, "");
-    return `kazArt/${cleanFile.split("/").map(encodeURIComponent).join("/")}`;
+    return `zzz_kazArt/${cleanFile.split("/").map(encodeURIComponent).join("/")}`;
   }
 
   function displayArt(file, attempts = 0) {
@@ -1670,7 +1670,7 @@ function spawnRandomWumpa(layer) {
 
   const size = 28;
   const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: translatedText("wumpa.random_aria", "eat wumpa fruit"), "data-i18n-aria-label": "wumpa.random_aria" }, [
-    el("img", { src: "assets/wumpa.gif", alt: "" }),
+    el("img", { src: "zzz_assets/wumpa.gif", alt: "" }),
   ]);
   const side = randomFrom(["left", "right"]);
   const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -1718,6 +1718,96 @@ function initializeWumpaGame() {
   window.addEventListener("pagehide", () => {
     alive = false;
   });
+}
+
+let scrollTargetHighlightTimer = 0;
+let scrollTargetHighlightFrame = 0;
+
+function findSamePageHashTarget(hash) {
+  if (!hash || hash === "#") return null;
+  const rawId = hash.slice(1);
+  let id = rawId;
+  try {
+    id = decodeURIComponent(rawId);
+  } catch {}
+  return document.getElementById(id);
+}
+
+function flashScrollTarget(target) {
+  if (!(target instanceof HTMLElement)) return;
+
+  document.querySelectorAll(".scroll-target-flash").forEach((element) => {
+    element.classList.remove("scroll-target-flash");
+  });
+  window.clearTimeout(scrollTargetHighlightTimer);
+
+  // Re-adding the class after a layout read makes repeat clicks flash again.
+  target.classList.remove("scroll-target-flash");
+  void target.offsetWidth;
+  target.classList.add("scroll-target-flash");
+
+  scrollTargetHighlightTimer = window.setTimeout(() => {
+    target.classList.remove("scroll-target-flash");
+  }, 1800);
+}
+
+function flashHashTargetAfterScroll(hash) {
+  const target = findSamePageHashTarget(hash);
+  if (!target) return;
+  const highlightTarget = target.querySelector?.("[data-open-multistream-guide]") || target;
+
+  window.cancelAnimationFrame(scrollTargetHighlightFrame);
+  const startedAt = performance.now();
+  let previousY = window.scrollY;
+  let steadyFrames = 0;
+
+  const waitForScroll = (now) => {
+    const currentY = window.scrollY;
+    if (Math.abs(currentY - previousY) < 0.75) steadyFrames += 1;
+    else steadyFrames = 0;
+    previousY = currentY;
+
+    if (steadyFrames >= 5 || now - startedAt >= 1400) {
+      flashScrollTarget(highlightTarget);
+      return;
+    }
+
+    scrollTargetHighlightFrame = window.requestAnimationFrame(waitForScroll);
+  };
+
+  scrollTargetHighlightFrame = window.requestAnimationFrame(waitForScroll);
+}
+
+function initializeScrollTargetHighlights() {
+  if (document.documentElement.dataset.scrollTargetHighlightsBound === "true") return;
+  document.documentElement.dataset.scrollTargetHighlightsBound = "true";
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest('a[href*="#"]');
+    if (!link) return;
+
+    let url;
+    try {
+      url = new URL(link.href, window.location.href);
+    } catch {
+      return;
+    }
+
+    const samePage = url.origin === window.location.origin
+      && url.pathname === window.location.pathname
+      && url.search === window.location.search;
+    if (!samePage || !url.hash) return;
+
+    // Let the browser perform the native smooth hash scroll first, then flash
+    // the destination once the motion has settled.
+    window.setTimeout(() => flashHashTargetAfterScroll(url.hash), 0);
+  });
+
+  window.addEventListener("hashchange", () => flashHashTargetAfterScroll(window.location.hash));
+
+  if (window.location.hash) {
+    window.setTimeout(() => flashHashTargetAfterScroll(window.location.hash), 0);
+  }
 }
 
 function multistreamGuidePanel() {
@@ -1837,6 +1927,9 @@ async function initializeMultistreamGuideModal() {
   });
 
   modal.querySelector("[data-guide-close]")?.addEventListener("click", closeGuide);
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeGuide();
+  });
   modal.addEventListener("close", () => {
     document.body.classList.remove("guide-modal-open");
     if (lastTrigger instanceof HTMLElement) lastTrigger.focus({ preventScroll: true });
@@ -2213,7 +2306,7 @@ async function initializeMusicPlayer() {
   const mount = document.querySelector("#music-player");
   if (!mount) return;
 
-  const tracks = await loadManifest("music/manifest.json", audioExtensions);
+  const tracks = await loadManifest("zzz_music/manifest.json", audioExtensions);
   if (!tracks.length) {
     mount.replaceChildren(el("p", { className: "small-copy", "data-i18n": "music.empty" }, ["radio is quiet for now"]));
     return;
@@ -2271,7 +2364,7 @@ async function initializeMusicPlayer() {
   }
 
   function trackUrl(file) {
-    return `music/${encodeURIComponent(file)}`;
+    return `zzz_music/${encodeURIComponent(file)}`;
   }
 
   function niceTitle(file) {
@@ -2616,6 +2709,7 @@ async function bootSite() {
     initializeWumpaGame();
   }
 
+  initializeScrollTargetHighlights();
   mountLanguageSelector();
   updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
 }
