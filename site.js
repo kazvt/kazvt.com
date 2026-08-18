@@ -834,11 +834,38 @@ function applySiteTheme(theme, themeButtons, { persist = true } = {}) {
 }
 
 function initializeCurrentUrl() {
-  const node = document.querySelector("[data-current-url]");
-  if (!node) return;
+  const header = document.querySelector(".site-header");
+  if (!header) return;
+
+  let node = null;
 
   const updateUrl = () => {
-    node.textContent = window.location.href.replace(/^https?:\/\//i, "");
+    const hasUrlDetail = window.location.pathname !== "/"
+      || Boolean(window.location.search)
+      || Boolean(window.location.hash);
+
+    if (!hasUrlDetail) {
+      node?.remove();
+      node = null;
+      return;
+    }
+
+    const label = `${window.location.host}${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+    if (!node) {
+      node = document.createElement("p");
+      node.className = "tiny-status current-url-spawn";
+      node.dataset.currentUrl = "";
+      node.textContent = label;
+      header.prepend(node);
+
+      node.addEventListener("animationend", () => {
+        node?.classList.remove("current-url-spawn");
+      }, { once: true });
+      return;
+    }
+
+    node.textContent = label;
   };
 
   updateUrl();
@@ -948,8 +975,8 @@ function applyLanguageText(root, descriptions = activeLanguageText) {
 }
 
 const profileFacts = [
-  ["profile.fact.name", "name", "kazvt"],
-  ["profile.fact.pronouns", "pronouns", "she/her"],
+  ["profile.fact.name", "name", "kazvt", "profile.fact.name_value"],
+  ["profile.fact.pronouns", "pronouns", "she/her", "profile.fact.pronouns_value"],
   ["profile.fact.mode", "mode", "retro games & streams", "profile.fact.mode_value"],
 ];
 
@@ -1099,8 +1126,8 @@ async function loadManifest(path, allowedExtensions) {
 function panel({ id, title, stamp, titleKey, stampKey, children }) {
   return el("section", { id, className: "panel scribble-box" }, [
     el("header", { className: "panel-head" }, [
-      el("span", { className: "panel-title", "data-i18n": titleKey }, [title]),
-      el("span", { className: "panel-stamp", "data-i18n": stampKey }, [stamp]),
+      el("span", { className: "panel-title", "data-i18n": titleKey }, [translatedText(titleKey, title)]),
+      el("span", { className: "panel-stamp", "data-i18n": stampKey }, [translatedText(stampKey, stamp)]),
     ]),
     el("div", { className: "panel-body" }, children),
   ]);
@@ -1235,7 +1262,10 @@ function statusCard(link) {
 function profilePanel() {
   const facts = el("dl", { className: "profile-facts" });
   profileFacts.forEach(([key, label, value, valueKey]) => {
-    facts.append(el("div", {}, [el("dt", { "data-i18n": key }, [label]), el("dd", { "data-i18n": valueKey }, [value])]));
+    facts.append(el("div", {}, [
+      el("dt", { "data-i18n": key }, [translatedText(key, label)]),
+      el("dd", { "data-i18n": valueKey }, [translatedText(valueKey, value)]),
+    ]));
   });
 
   return panel({
@@ -1250,9 +1280,9 @@ function profilePanel() {
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
             el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt", "kazvt art"), "data-i18n-alt": "art.alt" }),
           ]),
-          el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, ["art window"]),
+          el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, [translatedText("profile.art_caption", "art window")]),
         ]),
-        el("div", { className: "profile-copy" }, [facts, el("p", { "data-i18n": "profile.bio" }, [bio])]),
+        el("div", { className: "profile-copy" }, [facts, el("p", { "data-i18n": "profile.bio" }, [translatedText("profile.bio", bio)])]),
       ]),
     ],
   });
@@ -1267,8 +1297,8 @@ function guestbookPanel() {
     stampKey: "panel.guestbook.stamp",
     children: [
       el("div", { className: "guestbook-lines" }, [
-        el("p", { "data-i18n": "guestbook.name" }, ["name: kazvt visitor"]),
-        el("p", { "data-i18n": "guestbook.message" }, ["message: thanks for visiting kazvt dot com!!"]),
+        el("p", { "data-i18n": "guestbook.name" }, [translatedText("guestbook.name", "name: kazvt visitor")]),
+        el("p", { "data-i18n": "guestbook.message" }, [translatedText("guestbook.message", "message: thanks for visiting kazvt dot com!!")]),
       ]),
     ],
   });
@@ -1283,15 +1313,19 @@ function oldWebPanel() {
     stampKey: "panel.webcorner.stamp",
     children: [
       el("div", { className: "web-corner" }, [
-        el("p", { className: "construction-sign", "data-i18n": "webcorner.construction" }, ["under construction forever"]),
+        el("p", { className: "construction-sign", "data-i18n": "webcorner.construction" }, [translatedText("webcorner.construction", "under construction forever")]),
         el("p", {}, [
-          el("span", { "data-i18n": "webcorner.webring" }, ["webring:"]),
+          el("span", { "data-i18n": "webcorner.webring" }, [translatedText("webcorner.webring", "webring:")]),
           " ",
-          el("a", { href: "#links", "data-i18n": "webcorner.prev" }, ["prev"]),
-          " / ",
-          el("a", { href: "#badges", "data-i18n": "webcorner.random" }, ["random"]),
-          " / ",
-          el("a", { href: "#guestbook", "data-i18n": "webcorner.next" }, ["next"]),
+          el("a", { href: "#links", "data-i18n": "webcorner.prev" }, [translatedText("webcorner.prev", "prev")]),
+          " ",
+          el("span", { "data-i18n": "webcorner.separator" }, [translatedText("webcorner.separator", "/")]),
+          " ",
+          el("a", { href: "#badges", "data-i18n": "webcorner.random" }, [translatedText("webcorner.random", "random")]),
+          " ",
+          el("span", { "data-i18n": "webcorner.separator" }, [translatedText("webcorner.separator", "/")]),
+          " ",
+          el("a", { href: "#guestbook", "data-i18n": "webcorner.next" }, [translatedText("webcorner.next", "next")]),
         ]),
       ]),
     ],
@@ -1359,7 +1393,7 @@ async function initializeArtCarousel() {
 
   function displayArt(file, attempts = 0) {
     const image = new Image();
-    image.alt = "kazvt art";
+    image.alt = translatedText("art.alt", "kazvt art");
     image.className = "art-image slide-enter";
     image.onerror = () => {
       failedFiles.add(file);
@@ -1417,15 +1451,15 @@ function paintPanel() {
       el("div", { className: "paint-app" }, [
         el("div", { className: "paint-zone scribble-box" }, [
           el("canvas", { id: "doodle-canvas", width: "720", height: "360", ariaLabel: translatedText("paint.canvas_aria", "draw here"), "data-i18n-aria-label": "paint.canvas_aria" }),
-          el("p", { className: "paint-caption", "data-i18n": "paint.caption" }, ["draw here, then save your doodle"]),
+          el("p", { className: "paint-caption", "data-i18n": "paint.caption" }, [translatedText("paint.caption", "draw here, then save your doodle")]),
         ]),
         el("div", { className: "paint-controls scribble-box", ariaLabel: translatedText("paint.tools_aria", "doodle pad tools"), "data-i18n-aria-label": "paint.tools_aria" }, [
-          el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true", "data-i18n": "paint.red" }, ["red"]),
-          el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false", "data-i18n": "paint.blue" }, ["blue"]),
-          el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false", "data-i18n": "paint.green" }, ["green"]),
-          el("button", { type: "button", "data-brush": "#302135", ariaPressed: "false", "data-i18n": "paint.ink" }, ["ink"]),
-          el("button", { type: "button", "data-clear": "true", "data-i18n": "paint.clear" }, ["clear"]),
-          el("button", { type: "button", "data-save": "true", "data-i18n": "paint.save" }, ["save gif"]),
+          el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true", "data-i18n": "paint.red" }, [translatedText("paint.red", "red")]),
+          el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false", "data-i18n": "paint.blue" }, [translatedText("paint.blue", "blue")]),
+          el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false", "data-i18n": "paint.green" }, [translatedText("paint.green", "green")]),
+          el("button", { type: "button", "data-brush": "#302135", ariaPressed: "false", "data-i18n": "paint.ink" }, [translatedText("paint.ink", "ink")]),
+          el("button", { type: "button", "data-clear": "true", "data-i18n": "paint.clear" }, [translatedText("paint.clear", "clear")]),
+          el("button", { type: "button", "data-save": "true", "data-i18n": "paint.save" }, [translatedText("paint.save", "save gif")]),
         ]),
       ]),
     ],
@@ -1766,8 +1800,8 @@ function initializeScrollTargetHighlights() {
 function multistreamGuidePanel() {
   return el("section", { id: "multistream-guide-home", className: "panel guide-launch-panel scribble-box" }, [
     el("button", { type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
-      el("span", { className: "guide-launch-kicker" }, [">> open window <<"]),
-      el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, ["multistream setup guide"]),
+      el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker", ">> open window <<")]),
+      el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary", "multistream setup guide")]),
     ]),
   ]);
 }
@@ -1781,12 +1815,12 @@ function createMultistreamGuideModal() {
     el("div", { className: "multistream-guide-window" }, [
       el("header", { className: "guide-window-bar" }, [
         el("div", { className: "guide-window-heading" }, [
-          el("span", { className: "guide-window-kicker", ariaHidden: "true" }, ["author: kazvt"]),
-          el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
+          el("span", { className: "guide-window-kicker", ariaHidden: "true", "data-i18n": "guide.window.kicker" }, [translatedText("guide.window.kicker", "author: kazvt")]),
+          el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, [translatedText("guide.panel_title", "multistream setup guide")]),
         ]),
-        el("div", { className: "guide-window-controls", ariaLabel: "guide window controls" }, [
-          el("span", { className: "guide-window-stamp", ariaHidden: "true" }, ["YES / NO MAP"]),
-          el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: "close multistream guide", title: "close" }, ["X"]),
+        el("div", { className: "guide-window-controls", ariaLabel: translatedText("guide.window.controls_aria", "guide window controls"), "data-i18n-aria-label": "guide.window.controls_aria" }, [
+          el("span", { className: "guide-window-stamp", ariaHidden: "true", "data-i18n": "guide.window.map_stamp" }, [translatedText("guide.window.map_stamp", "YES / NO MAP")]),
+          el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: translatedText("guide.window.close_aria", "close multistream guide"), "data-i18n-aria-label": "guide.window.close_aria", title: translatedText("guide.window.close_title", "close"), "data-i18n-title": "guide.window.close_title" }, [translatedText("guide.window.close_symbol", "X")]),
         ]),
       ]),
       el("div", { className: "guide-modal-viewport", "data-guide-viewport": "true" }, [
@@ -1797,8 +1831,8 @@ function createMultistreamGuideModal() {
         ]),
       ]),
       el("footer", { className: "guide-window-status" }, [
-        el("span", {}, ["scroll to follow the paths"]),
-        el("span", {}, ["underlined nodes open their tools"]),
+        el("span", { "data-i18n": "guide.window.status_scroll" }, [translatedText("guide.window.status_scroll", "scroll to follow the paths")]),
+        el("span", { "data-i18n": "guide.window.status_tools" }, [translatedText("guide.window.status_tools", "underlined nodes open their tools")]),
       ]),
     ]),
   ]);
@@ -2261,7 +2295,7 @@ async function initializeMusicPlayer() {
 
   const tracks = await loadManifest("zzz_music/manifest.json", audioExtensions);
   if (!tracks.length) {
-    mount.replaceChildren(el("p", { className: "small-copy", "data-i18n": "music.empty" }, ["radio is quiet for now"]));
+    mount.replaceChildren(el("p", { className: "small-copy", "data-i18n": "music.empty" }, [translatedText("music.empty", "radio is quiet for now")]));
     return;
   }
 
@@ -2272,9 +2306,9 @@ async function initializeMusicPlayer() {
   let analyser = null;
   let source = null;
   const title = el("p", { className: "track-title" }, [""]);
-  const play = el("button", { type: "button", className: "music-button", "data-i18n": "music.play" }, ["play"]);
-  const prev = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.previous", "previous track"), "data-i18n-aria-label": "music.previous" }, ["<<"]);
-  const next = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.next", "next track"), "data-i18n-aria-label": "music.next" }, [">>"]);
+  const play = el("button", { type: "button", className: "music-button", "data-i18n": "music.play" }, [translatedText("music.play", "play")]);
+  const prev = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.previous", "previous track"), "data-i18n-aria-label": "music.previous", "data-i18n": "music.previous_symbol" }, [translatedText("music.previous_symbol", "<<")]);
+  const next = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.next", "next track"), "data-i18n-aria-label": "music.next", "data-i18n": "music.next_symbol" }, [translatedText("music.next_symbol", ">>")]);
   const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: translatedText("music.seek", "track position"), "data-i18n-aria-label": "music.seek" });
   const storedVolume = (() => {
     try {
@@ -2589,7 +2623,7 @@ async function initializeMusicPlayer() {
     title,
     el("div", { className: "music-controls" }, [prev, play, next]),
     seek,
-    el("label", { className: "volume-label" }, [el("span", { "data-i18n": "music.volume" }, ["vol"]), volume]),
+    el("label", { className: "volume-label" }, [el("span", { "data-i18n": "music.volume" }, [translatedText("music.volume", "vol")]), volume]),
     visualizer,
   );
   markSoftLoaded(mount);
@@ -2621,7 +2655,7 @@ async function render(statusOverrides = {}) {
     paintPanel(),
     badgesPanel(),
     el("footer", { className: "page-footer scribble-box" }, [
-      el("span", { "data-i18n": "footer.message" }, ["kazvt.com / press start / come back soon"]),
+      el("span", { "data-i18n": "footer.message" }, [translatedText("footer.message", "kazvt.com / press start / come back soon")]),
       createVisitCounter({ key: "kazvt-home-visits", label: translatedText("footer.counter", "you are visitor") }),
     ]),
   );
@@ -2650,6 +2684,7 @@ async function loadStatus() {
 async function bootSite() {
   await loadActiveEmotes();
   await loadActiveLanguageText();
+  applyLanguageText(document);
   initializeSiteTools();
   initializeCurrentUrl();
   await initializeMarquee();

@@ -818,6 +818,11 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   box-shadow: 4px 4px 0 var(--shadow);
 }
 
+.tiny-status.current-url-spawn {
+  transform-origin: center;
+  animation: currentUrlSpawn 420ms steps(7, end) both !important;
+}
+
 .logo-row {
   display: grid;
   grid-template-columns: minmax(34px, 72px) minmax(180px, 540px) minmax(34px, 72px);
@@ -2912,6 +2917,42 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   font-style: normal;
   font-weight: 900;
   text-shadow: 0 0 6px color-mix(in srgb, var(--green) 68%, transparent);
+}
+
+@keyframes currentUrlSpawn {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.48) rotate(-5deg);
+    filter: url("#boil-c");
+    clip-path: inset(48% 48% 48% 48%);
+    box-shadow: 0 0 0 var(--shadow);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.08) rotate(1.8deg);
+    filter: url("#boil-a");
+    clip-path: inset(8% 3% 8% 3%);
+    box-shadow: 7px 7px 0 var(--shadow);
+  }
+  58% {
+    transform: translateY(-3px) scale(0.97) rotate(-2deg);
+    filter: url("#boil-b");
+    clip-path: inset(0);
+    box-shadow: 3px 5px 0 var(--shadow);
+  }
+  82% {
+    transform: translateY(1px) scale(1.025) rotate(0.4deg);
+    filter: url("#boil-c");
+    clip-path: inset(0);
+    box-shadow: 5px 3px 0 var(--shadow);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(-1deg);
+    filter: none;
+    clip-path: inset(0);
+    box-shadow: 4px 4px 0 var(--shadow);
+  }
 }
 
 @keyframes wholeBoil {
