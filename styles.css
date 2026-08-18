@@ -1406,6 +1406,10 @@ code {
   font-weight: 900;
 }
 
+.guide-map .twitch-kick-node .node-title {
+  font-size: 18px;
+}
+
 .guide-map .node-copy {
   font-size: 15px;
   font-weight: 800;

@@ -3,99 +3,167 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>404 — kazvt</title>
+    <base href="/">
+    <title>404 - kazvt</title>
     <meta name="description" content="That kazvt page could not be found.">
-    <meta name="theme-color" content="#4D6787">
     <meta name="robots" content="noindex">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="stylesheet" href="/styles.css">
+    <meta name="theme-color" content="#ff9d16">
+    <meta property="og:title" content="404 - kazvt">
+    <meta property="og:description" content="lost page on kazvt.com">
+    <meta property="og:image" content="zzz_assets/kazvt-transparent.gif">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="stylesheet" href="styles.css">
     <style>
-      body[data-page="404"] {
-        display: grid;
-        min-height: 100vh;
-        align-items: center;
+      body[data-page="404"] .error-content-stack {
+        min-width: 0;
       }
 
-      .error-wrap {
-        width: min(820px, calc(100% - 24px));
-        padding-block: clamp(18px, 5vw, 48px);
-      }
-
-      .error-header {
-        margin-bottom: 14px;
-      }
-
-      .error-logo {
-        width: min(430px, 84vw);
-      }
-
-      .error-card {
+      body[data-page="404"] .error-card {
         position: relative;
+        isolation: isolate;
         overflow: visible;
-        padding: clamp(18px, 5vw, 38px);
+        min-height: 520px;
+        padding: clamp(20px, 4vw, 34px) clamp(15px, 4vw, 30px) 24px;
         background:
-          linear-gradient(90deg, color-mix(in srgb, var(--blue) 14%, transparent) 1px, transparent 1px),
+          radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--yellow) 42%, transparent) 0 9px, transparent 10px),
+          radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--pink) 38%, transparent) 0 7px, transparent 8px),
+          linear-gradient(90deg, color-mix(in srgb, var(--blue) 16%, transparent) 1px, transparent 1px),
           linear-gradient(0deg, color-mix(in srgb, var(--pink) 14%, transparent) 1px, transparent 1px),
           var(--paper);
-        background-size: 18px 18px;
+        background-size: auto, auto, 18px 18px, 18px 18px, auto;
         text-align: center;
+        animation: sectionBoil 330ms steps(2, end) infinite;
+      }
+
+      body[data-page="404"] .error-card::before,
+      body[data-page="404"] .error-card::after {
+        animation-duration: 270ms;
+      }
+
+      body[data-page="404"] .error-card::after {
+        opacity: 0.42;
+      }
+
+      .error-stamp,
+      .error-chip {
+        position: absolute;
+        z-index: 4;
+        border: 3px solid var(--ink);
+        color: var(--ink);
+        font-weight: 1000;
+        box-shadow: 3px 3px 0 var(--shadow);
+        clip-path: polygon(0 5px, 6px 0, 100% 3px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
       }
 
       .error-stamp {
-        position: absolute;
-        top: -18px;
-        right: clamp(14px, 4vw, 34px);
-        padding: 7px 11px;
-        border: 3px solid var(--ink);
+        top: 8px;
+        right: clamp(10px, 3vw, 24px);
+        padding: 7px 10px;
         background: var(--orange);
         color: var(--on-orange);
-        font-size: clamp(0.72rem, 2vw, 0.9rem);
-        font-weight: 900;
+        font-size: clamp(0.68rem, 2vw, 0.86rem);
         transform: rotate(3deg);
-        box-shadow: 3px 3px 0 var(--shadow);
+      }
+
+      .error-chip {
+        padding: 5px 8px;
+        font-size: clamp(0.56rem, 1.6vw, 0.72rem);
+        letter-spacing: 0.03em;
+      }
+
+      .error-chip-a {
+        top: 72px;
+        left: 7px;
+        background: var(--yellow);
+        color: var(--on-yellow);
+        transform: rotate(-7deg);
+      }
+
+      .error-chip-b {
+        top: 132px;
+        right: 7px;
+        background: var(--green);
+        color: var(--on-green);
+        transform: rotate(6deg);
+      }
+
+      .error-code-wrap {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: min(100%, 520px);
+        min-height: clamp(138px, 22vw, 210px);
+        margin: 0 auto;
+      }
+
+      .error-code,
+      .error-code-shadow {
+        grid-area: 1 / 1;
+        margin: 0;
+        font-size: clamp(6rem, 22vw, 11.5rem);
+        font-weight: 1000;
+        line-height: 0.78;
+        letter-spacing: -0.085em;
+      }
+
+      .error-code-shadow {
+        color: var(--blue);
+        opacity: 0.64;
+        transform: translate(8px, 9px) rotate(1deg);
+        -webkit-text-stroke: 4px var(--ink);
+        paint-order: stroke fill;
       }
 
       .error-code {
-        margin: 0;
-        color: var(--ink);
-        font-size: clamp(5rem, 24vw, 11rem);
-        font-weight: 1000;
-        line-height: 0.82;
-        letter-spacing: -0.08em;
-        text-shadow:
-          4px 4px 0 var(--paper-alt),
-          8px 8px 0 var(--shadow);
+        position: relative;
+        z-index: 2;
+        color: var(--pink);
+        -webkit-text-stroke: 4px var(--ink);
+        paint-order: stroke fill;
+        text-shadow: 6px 6px 0 var(--yellow);
+        transform: rotate(-1.2deg);
       }
 
       .error-face {
+        position: relative;
+        z-index: 3;
         display: block;
-        width: clamp(86px, 18vw, 142px);
+        width: clamp(72px, 14vw, 116px);
         height: auto;
-        margin: -4px auto 4px;
+        margin: -28px auto 2px;
         image-rendering: pixelated;
         filter: drop-shadow(4px 5px 0 var(--shadow));
-        transform: rotate(-4deg);
+        transform: rotate(-5deg);
       }
 
       .error-title {
-        margin: 6px 0 0;
-        font-size: clamp(1.35rem, 5vw, 2.35rem);
-        line-height: 1;
+        position: relative;
+        z-index: 3;
+        margin: 8px 0 0;
+        color: var(--ink);
+        font-size: clamp(1.35rem, 4.3vw, 2.15rem);
+        font-weight: 1000;
+        line-height: 1.02;
+        text-shadow: 3px 3px 0 color-mix(in srgb, var(--yellow) 70%, transparent);
       }
 
       .error-copy {
-        max-width: 37rem;
+        position: relative;
+        z-index: 3;
+        max-width: 36rem;
         margin: 12px auto 0;
-        font-size: clamp(0.95rem, 2.5vw, 1.08rem);
-        font-weight: 800;
-        line-height: 1.45;
+        font-size: clamp(0.92rem, 2.2vw, 1.05rem);
+        font-weight: 850;
+        line-height: 1.42;
       }
 
       .error-path {
+        position: relative;
+        z-index: 3;
         display: block;
         width: fit-content;
         max-width: 100%;
@@ -104,110 +172,269 @@
         border: 3px solid var(--ink);
         background: var(--paper-alt);
         color: var(--ink);
-        font-size: clamp(0.76rem, 2vw, 0.9rem);
+        font-size: clamp(0.72rem, 1.8vw, 0.88rem);
         font-weight: 900;
         overflow-wrap: anywhere;
         box-shadow: 3px 3px 0 var(--shadow);
-        transform: rotate(-0.6deg);
+        transform: rotate(-0.8deg);
       }
+
+      .error-scribbles {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        overflow: hidden;
+        font-weight: 1000;
+      }
+
+      .error-scribbles span {
+        position: absolute;
+        color: var(--purple);
+        opacity: 0.5;
+        font-size: clamp(1rem, 3vw, 1.8rem);
+        text-shadow: 2px 2px 0 var(--paper);
+      }
+
+      .error-scribbles span:nth-child(1) { left: 8%; top: 42%; transform: rotate(-12deg); }
+      .error-scribbles span:nth-child(2) { right: 8%; top: 49%; color: var(--orange); transform: rotate(10deg); }
+      .error-scribbles span:nth-child(3) { left: 13%; bottom: 12%; color: var(--green); transform: rotate(8deg); }
+      .error-scribbles span:nth-child(4) { right: 12%; bottom: 16%; color: var(--blue); transform: rotate(-9deg); }
+      .error-scribbles span:nth-child(5) { left: 48%; top: 7%; color: var(--yellow); transform: rotate(5deg); }
 
       .error-actions {
+        position: relative;
+        z-index: 4;
+        display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
         width: min(500px, 100%);
-        margin: 22px auto 0;
-        background:
-          repeating-linear-gradient(-45deg, color-mix(in srgb, var(--orange) 20%, transparent) 0 8px, transparent 8px 16px),
-          var(--paper);
+        margin: 18px auto 0;
       }
 
-      .error-actions a {
-        font-size: clamp(0.84rem, 2.4vw, 1rem);
+      .error-button {
+        display: grid;
+        min-height: 48px;
+        place-items: center;
+        padding: 9px 10px;
+        border: 3px solid var(--ink);
+        color: var(--ink);
+        font-weight: 1000;
+        line-height: 1.1;
+        text-decoration: none;
+        box-shadow: 3px 3px 0 var(--shadow);
+        clip-path: polygon(0 6px, 7px 0, 100% 4px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
       }
 
-      .error-actions a:first-child {
+      .error-home {
         background: var(--yellow);
         color: var(--on-yellow);
+        transform: rotate(-0.7deg);
       }
 
-      .error-actions a:last-child {
+      .error-back {
         background: var(--blue);
         color: var(--on-blue);
+        transform: rotate(0.7deg);
       }
 
-      .error-actions a:hover,
-      .error-actions a:focus-visible {
+      .error-button:hover,
+      .error-button:focus-visible {
         background-color: var(--bg);
         background-image: var(--wallpaper-image);
         background-repeat: repeat;
         background-size: var(--wallpaper-size);
         color: var(--hover-text);
+        outline: 4px solid var(--click-hover-outline-color);
+        outline-offset: 2px;
       }
 
-      .error-palette-note {
-        margin: 15px 0 0;
-        color: var(--banner-text);
-        font-size: 0.8rem;
+      .error-hint {
+        position: relative;
+        z-index: 3;
+        margin: 14px auto 0;
+        color: var(--ink);
+        font-size: 0.76rem;
         font-weight: 900;
-        text-align: center;
-        text-shadow: 2px 2px 0 color-mix(in srgb, var(--ink) 60%, transparent);
+        opacity: 0.78;
       }
 
-      @media (max-width: 480px) {
-        .error-actions {
-          grid-template-columns: 1fr;
+      body[data-boil="calm"] .error-card {
+        animation-duration: 720ms;
+      }
+
+      @media (max-width: 880px) {
+        body[data-page="404"] .web-grid > #app { order: 0; }
+        body[data-page="404"] .web-grid > .sidebar:first-of-type { order: 1; }
+        body[data-page="404"] .web-grid > .sidebar:last-of-type { order: 2; }
+      }
+
+      @media (max-width: 720px) {
+        body[data-page="404"] .error-card {
+          min-height: 0;
+          padding-top: 44px;
         }
 
-        .error-card {
-          padding-inline: 14px;
+        .error-chip-a,
+        .error-chip-b {
+          position: static;
+          display: inline-block;
+          margin: 0 3px 8px;
+        }
+
+        .error-actions {
+          grid-template-columns: 1fr;
         }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        body[data-page="404"] .site-wrap :is(h1, h2, p, a, span, strong),
-        body[data-page="404"] :is(.site-header, .scribble-box) {
+        body[data-page="404"] .error-card,
+        body[data-page="404"] .error-card::before,
+        body[data-page="404"] .error-card::after {
           animation: none !important;
         }
       }
     </style>
   </head>
   <body data-page="404">
-    <script>
-      (() => {
-        const validTheme = /^p(?:[1-9]|1[0-6])$/;
-        let theme = "p1";
-        try {
-          const saved = localStorage.getItem("kazvt-theme") || sessionStorage.getItem("kazvt-theme");
-          if (saved && validTheme.test(saved)) theme = saved;
-        } catch (_) {}
-        document.body.dataset.theme = theme;
-      })();
-    </script>
+    <svg class="boil-filters" aria-hidden="true" focusable="false">
+      <filter id="boil-a">
+        <feTurbulence baseFrequency="0.012 0.034" numOctaves="2" seed="4" />
+        <feDisplacementMap in="SourceGraphic" scale="4" />
+      </filter>
+      <filter id="boil-b">
+        <feTurbulence baseFrequency="0.018 0.026" numOctaves="2" seed="9" />
+        <feDisplacementMap in="SourceGraphic" scale="6" />
+      </filter>
+      <filter id="boil-c">
+        <feTurbulence baseFrequency="0.015 0.04" numOctaves="2" seed="15" />
+        <feDisplacementMap in="SourceGraphic" scale="5" />
+      </filter>
+    </svg>
 
-    <main class="site-wrap error-wrap boil-stage" aria-labelledby="error-title">
-      <header class="site-header error-header">
-        <a class="logo-home" href="/" aria-label="kazvt home">
-          <img class="site-logo error-logo" src="/zzz_assets/kazvt-transparent.gif" alt="kazvt">
-        </a>
-        <p class="tagline">retro streams, old games, links, live status</p>
+    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" aria-label="kazvt personal site" data-i18n-aria-label="site.main_aria">
+      <header class="site-header text-center grid justify-items-center gap-2">
+        <p class="tiny-status" data-current-url></p>
+        <div class="logo-row">
+          <button class="logo-wumpa logo-wumpa-left" type="button" data-logo-wumpa="left" aria-label="eat left wumpa fruit" data-i18n-aria-label="wumpa.logo.left_aria">
+            <img src="zzz_assets/wumpa.gif" alt="">
+          </button>
+          <a class="logo-home" href="/" aria-label="kazvt home" data-i18n-aria-label="logo.aria">
+            <span class="logo-flip-card">
+              <img class="site-logo logo-front" src="zzz_assets/kazvt-transparent.gif" alt="kazvt" data-i18n-alt="logo.image_alt">
+              <img class="site-logo logo-back" src="zzz_assets/kazvt-transparent.gif" alt="">
+            </span>
+          </a>
+          <button class="logo-wumpa logo-wumpa-right" type="button" data-logo-wumpa="right" aria-label="eat right wumpa fruit" data-i18n-aria-label="wumpa.logo.right_aria">
+            <img src="zzz_assets/wumpa.gif" alt="">
+          </button>
+        </div>
+        <p class="tagline" data-i18n="site.tagline">retro streams, old games, links, live status</p>
       </header>
 
-      <section class="scribble-box error-card" aria-describedby="error-copy">
-        <span class="error-stamp">lost page!!</span>
-        <p class="error-code" aria-hidden="true">404</p>
-        <img class="error-face" src="/web-app-manifest-192x192.png" alt="">
-        <h1 class="error-title" id="error-title">this page fell out of the cartridge</h1>
-        <p class="error-copy" id="error-copy">
-          whatever was supposed to be here is missing, moved, or hiding behind the couch.
-        </p>
-        <code class="error-path" data-error-path>/404</code>
+      <nav class="oldweb-nav scribble-box" aria-label="main links" data-i18n-aria-label="nav.aria">
+        <a href="/#links" data-i18n="nav.links">links</a>
+        <a href="/#profile" data-i18n="nav.profile">profile</a>
+        <a class="nav-multistream" href="/#multistream-guide-home"><span data-i18n="nav.multistream_top">multistream</span><span data-i18n="nav.multistream_bottom">guide</span></a>
+        <a href="/#guestbook" data-i18n="nav.guestbook">guestbook</a>
+        <a href="/#paint" data-i18n="nav.paint">paint</a>
+        <a href="/#badges" data-i18n="nav.badges">badges</a>
+      </nav>
 
-        <nav class="oldweb-nav scribble-box error-actions" aria-label="404 page actions">
-          <a href="/">← back to kazvt.com</a>
-          <a href="/" data-go-back>go back ↩</a>
-        </nav>
+      <div class="marquee scribble-box" aria-label="site notice" data-i18n-aria-label="marquee.aria">
+        <span data-marquee-text></span>
+      </div>
+
+      <section class="web-grid grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-3.5 items-start">
+        <aside class="sidebar scribble-box">
+          <h2 data-i18n="sidebar.palette">palette</h2>
+          <div class="palette big-palette" aria-label="color palette" data-i18n-aria-label="palette.aria">
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" aria-label="use pastel stars palette" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" aria-label="use campfire checker palette" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" aria-label="use forest vines palette" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" aria-label="use ocean bubbles palette" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" aria-label="use night map palette" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" aria-label="use desert gingham palette" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" aria-label="use newsprint bricks palette" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" aria-label="use garden vines palette" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" aria-label="use sky clouds palette" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" aria-label="use rose curtain palette" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" aria-label="use deep circuit palette" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" aria-label="use arcade marquee palette" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" aria-label="use fire stripes palette" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" aria-label="use meadow dots palette" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" aria-label="use dream checker palette" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
+            </div>
+            <div class="palette-choice">
+              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" aria-label="use swamp terminal palette" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
+            </div>
+          </div>
+        </aside>
+
+        <div id="app" class="content-stack error-content-stack">
+          <section class="panel scribble-box error-card" aria-labelledby="error-title" aria-describedby="error-copy">
+            <span class="error-stamp">LOST PAGE!!</span>
+            <span class="error-chip error-chip-a" aria-hidden="true">NO SAVE DATA</span>
+            <span class="error-chip error-chip-b" aria-hidden="true">TRY ANOTHER PATH</span>
+            <div class="error-code-wrap" aria-hidden="true">
+              <span class="error-code-shadow">404</span>
+              <p class="error-code">404</p>
+            </div>
+            <img class="error-face" src="web-app-manifest-192x192.png" alt="">
+            <h1 class="error-title" id="error-title">this page fell out of the cartridge</h1>
+            <p class="error-copy" id="error-copy">whatever was supposed to be here is missing, moved, or hiding behind the couch.</p>
+            <code class="error-path" data-error-path>/404</code>
+            <div class="error-scribbles" aria-hidden="true">
+              <span>✦</span><span>///</span><span>★</span><span>!!!</span><span>✿</span>
+            </div>
+            <div class="error-actions">
+              <a class="error-button error-home" href="/">← back to kazvt.com</a>
+              <a class="error-button error-back" href="/" data-go-back>go back ↩</a>
+            </div>
+            <p class="error-hint">the rest of the site still works — palette, radio, navbar, cursor chaos and all.</p>
+          </section>
+        </div>
+
+        <aside class="sidebar scribble-box">
+          <h2 data-i18n="sidebar.radio">kaz radio</h2>
+          <div id="music-player" class="music-player"></div>
+        </aside>
       </section>
-
     </main>
+
+    <div class="wumpa-layer" aria-hidden="true"></div>
+    <div class="wumpa-counter" role="status" aria-live="polite"><span data-i18n="wumpa.counter_label">wumpa:</span> <span data-wumpa-count>0</span></div>
+    <div class="kissy-counter" role="status" aria-live="polite"><span data-i18n="kissy.counter_label">kissy:</span> <span data-kissy-count>0</span></div>
+    <div class="wumpa-toast" role="status" aria-live="polite" data-i18n-aria-label="wumpa.toast_aria"></div>
 
     <script>
       (() => {
@@ -223,13 +450,9 @@
             }
           });
         }
-
-        const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) {
-          const bg = getComputedStyle(document.body).getPropertyValue("--bg").trim();
-          if (bg) meta.setAttribute("content", bg);
-        }
       })();
     </script>
+    <script src="zzz_assets/vendor/cursor-effects/browser.js"></script>
+    <script src="site.js"></script>
   </body>
 </html>

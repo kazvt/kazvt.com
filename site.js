@@ -95,8 +95,6 @@ const LANGUAGE_STORAGE_KEY = "kazvt-language";
 const DEFAULT_LANGUAGE_NAME = "english";
 const DEFAULT_LANGUAGE_CODE = "en";
 const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
-const WUMPA_LOGO_STORAGE_KEY = "kazvt-logo-wumpa";
-const WUMPA_LOGO_RECOVER_KEY = "kazvt-logo-wumpa-recover-clicks";
 const KISSY_STORAGE_KEY = "kazvt-kissy-count";
 const EMOTE_FILE = "emotes.txt";
 
@@ -1466,23 +1464,6 @@ function createVisitCounter({ key = "kazvt-page-visits", label = "visits" } = {}
   ]);
 }
 
-function readSessionJson(key, fallback) {
-  try {
-    const value = sessionStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeSessionJson(key, value) {
-  try {
-    sessionStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Session storage is decorative here; the fruit game still works without it.
-  }
-}
-
 function getWumpaCount() {
   try {
     return Number(sessionStorage.getItem(WUMPA_STORAGE_KEY) || "0") || 0;
@@ -1570,15 +1551,14 @@ function playCrazyRecoverySound() {
   } catch {}
 }
 
-function logoWumpaState() {
-  return readSessionJson(WUMPA_LOGO_STORAGE_KEY, {
-    left: { hits: 0, eaten: false },
-    right: { hits: 0, eaten: false },
-  });
-}
+const logoWumpaRuntimeState = {
+  left: { hits: 0, eaten: false },
+  right: { hits: 0, eaten: false },
+};
+let logoWumpaRecoverClicks = 0;
 
-function saveLogoWumpaState(state) {
-  writeSessionJson(WUMPA_LOGO_STORAGE_KEY, state);
+function logoWumpaState() {
+  return logoWumpaRuntimeState;
 }
 
 function initializeLogoWumpas() {
@@ -1590,34 +1570,21 @@ function initializeLogoWumpas() {
     const side = button.getAttribute("data-logo-wumpa") || "left";
     state[side] ||= { hits: 0, eaten: false };
 
-    if (state[side].eaten) {
-      button.classList.add("is-eaten");
-      button.setAttribute("aria-hidden", "true");
-      return;
-    }
-
-    button.setAttribute("aria-label", translateTemplate("wumpa.logo.progress_aria", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`, { side, count: state[side].hits, total: 20 }));
     button.addEventListener("click", () => {
       if (state[side].eaten) return;
 
       playFruitSound();
       state[side].hits += 1;
-      button.setAttribute("aria-label", translateTemplate("wumpa.logo.progress_aria", `eat ${side} wumpa fruit, ${state[side].hits} of 20 bites`, { side, count: state[side].hits, total: 20 }));
 
       if (state[side].hits >= 20) {
         state[side].eaten = true;
         button.classList.add("is-eaten");
         button.setAttribute("aria-hidden", "true");
-        addWumpa(100, translatedText("wumpa.logo.eaten_toast", "You just permanently ate this wumpa fruit. It'll never appear back."));
-      } else {
-        showWumpaToast(translateTemplate("wumpa.logo.bite_toast", "{side} wumpa: {count}/{total}", { side, count: state[side].hits, total: 20 }));
+        showWumpaToast(translatedText("wumpa.logo.eaten_toast", "you collected the wumpa fruit! nice!!!"));
       }
-
-      saveLogoWumpaState(state);
     });
   });
 
-  saveLogoWumpaState(state);
   document.body.classList.add("wumpa-ready");
 }
 
@@ -1631,31 +1598,17 @@ function initializeLogoRecovery() {
     if (!canRecover) return;
 
     event.preventDefault();
-    let clicks = 0;
-    try {
-      clicks = Number(sessionStorage.getItem(WUMPA_LOGO_RECOVER_KEY) || "0") || 0;
-      sessionStorage.setItem(WUMPA_LOGO_RECOVER_KEY, String(clicks + 1));
-    } catch {
-      clicks += 1;
-    }
+    logoWumpaRecoverClicks += 1;
+    if (logoWumpaRecoverClicks < 100) return;
 
-    if (clicks + 1 < 100) return;
-
-    const recovered = {
-      left: { hits: 0, eaten: false },
-      right: { hits: 0, eaten: false },
-    };
-    saveLogoWumpaState(recovered);
-    try {
-      sessionStorage.setItem(WUMPA_LOGO_RECOVER_KEY, "0");
-    } catch {}
+    state.left = { hits: 0, eaten: false };
+    state.right = { hits: 0, eaten: false };
+    logoWumpaRecoverClicks = 0;
 
     document.querySelectorAll("[data-logo-wumpa]").forEach((button) => {
-      const side = button.getAttribute("data-logo-wumpa") || "left";
       button.classList.remove("is-eaten");
       button.classList.add("is-recovered");
       button.removeAttribute("aria-hidden");
-      button.setAttribute("aria-label", translateTemplate("wumpa.logo.progress_aria", `eat ${side} wumpa fruit, 0 of 20 bites`, { side, count: 0, total: 20 }));
       window.setTimeout(() => button.classList.remove("is-recovered"), 1800);
     });
 
