@@ -1,0 +1,42 @@
+﻿[No]
+Path=Locked heart.cur
+
+[Wait]
+Path=Crystal hearts.ani
+
+[SizeNS]
+Path=Vertical crystal hearts.ani
+
+[SizeWE]
+Path=Horizontal crystal hearts.ani
+
+[SizeNWSE]
+Path=diagonal crystal hearts.ani
+
+[SizeNESW]
+Path=Diagonal 2 crystal hearts.ani
+
+[UpArrow]
+Path=alternate magic key.cur
+
+[Help]
+Path=Help magic key.cur
+
+[SizeAll]
+Path=Move crystal hearts.ani
+
+[IBeam]
+Path=Text crystal hearts.ani
+
+[AppStarting]
+Path=Working magic key.ani
+
+[NWPen]
+Path=Crystal heart.cur
+
+[Hand]
+Path=Link magic key.ani
+
+[Arrow]
+Path=Magic key.ani
+

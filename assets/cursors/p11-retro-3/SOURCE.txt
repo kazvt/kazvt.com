@@ -1,0 +1,4 @@
+name=Retro
+source=https://www.rw-designer.com/cursor-set/retro-3
+download=https://www.rw-designer.com/cursor-downloadset/retro-3
+license=Release to Public Domain (as stated on the source cursor-set page)

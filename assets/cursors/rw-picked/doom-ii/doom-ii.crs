@@ -1,0 +1,39 @@
+﻿[NWPen]
+Path=Pen.cur
+
+[SizeAll]
+Path=Move.cur
+
+[Arrow]
+Path=Doom Guy - Normal.cur
+
+[Hand]
+Path=Doom Guy - Link.ani
+
+[Person]
+Path=Precision Select.cur
+
+[SizeNWSE]
+Path=Resize - D1.cur
+
+[SizeNESW]
+Path=Resize - D2.cur
+
+[SizeWE]
+Path=Resize - H.cur
+
+[Help]
+Path=Pistol - Quakestion Mark (Help Select).cur
+
+[SizeNS]
+Path=Resize - V.cur
+
+[Wait]
+Path=Busy - Armor.ani
+
+[IBeam]
+Path=Text Select.ani
+
+[No]
+Path=Unavailable.ani
+

@@ -1,0 +1,12 @@
+﻿[IBeam]
+Path=Cool_Text.ani
+
+[Arrow]
+Path=arrow.ani
+
+[Wait]
+Path=strobe.ani
+
+[Crosshair]
+Path=wand.ani
+

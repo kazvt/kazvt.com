@@ -1,0 +1,4 @@
+name=Original Windows 95/98
+source=https://www.rw-designer.com/cursor-set/win-95-98
+download=https://www.rw-designer.com/cursor-downloadset/win-95-98
+license=Release to Public Domain (as stated on the source cursor-set page)

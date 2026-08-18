@@ -1,0 +1,4 @@
+name=Future
+source=https://www.rw-designer.com/cursor-set/future-1
+download=https://www.rw-designer.com/cursor-downloadset/future-1
+license=Release to Public Domain (as stated on the source cursor-set page)
