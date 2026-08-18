@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>404 — kazvt</title>
+    <meta name="description" content="That kazvt page could not be found.">
+    <meta name="theme-color" content="#4D6787">
+    <meta name="robots" content="noindex">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+      body[data-page="404"] {
+        display: grid;
+        min-height: 100vh;
+        align-items: center;
+      }
+
+      .error-wrap {
+        width: min(820px, calc(100% - 24px));
+        padding-block: clamp(18px, 5vw, 48px);
+      }
+
+      .error-header {
+        margin-bottom: 14px;
+      }
+
+      .error-logo {
+        width: min(430px, 84vw);
+      }
+
+      .error-card {
+        position: relative;
+        overflow: visible;
+        padding: clamp(18px, 5vw, 38px);
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--blue) 14%, transparent) 1px, transparent 1px),
+          linear-gradient(0deg, color-mix(in srgb, var(--pink) 14%, transparent) 1px, transparent 1px),
+          var(--paper);
+        background-size: 18px 18px;
+        text-align: center;
+      }
+
+      .error-stamp {
+        position: absolute;
+        top: -18px;
+        right: clamp(14px, 4vw, 34px);
+        padding: 7px 11px;
+        border: 3px solid var(--ink);
+        background: var(--orange);
+        color: var(--on-orange);
+        font-size: clamp(0.72rem, 2vw, 0.9rem);
+        font-weight: 900;
+        transform: rotate(3deg);
+        box-shadow: 3px 3px 0 var(--shadow);
+      }
+
+      .error-code {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(5rem, 24vw, 11rem);
+        font-weight: 1000;
+        line-height: 0.82;
+        letter-spacing: -0.08em;
+        text-shadow:
+          4px 4px 0 var(--paper-alt),
+          8px 8px 0 var(--shadow);
+      }
+
+      .error-face {
+        display: block;
+        width: clamp(86px, 18vw, 142px);
+        height: auto;
+        margin: -4px auto 4px;
+        image-rendering: pixelated;
+        filter: drop-shadow(4px 5px 0 var(--shadow));
+        transform: rotate(-4deg);
+      }
+
+      .error-title {
+        margin: 6px 0 0;
+        font-size: clamp(1.35rem, 5vw, 2.35rem);
+        line-height: 1;
+      }
+
+      .error-copy {
+        max-width: 37rem;
+        margin: 12px auto 0;
+        font-size: clamp(0.95rem, 2.5vw, 1.08rem);
+        font-weight: 800;
+        line-height: 1.45;
+      }
+
+      .error-path {
+        display: block;
+        width: fit-content;
+        max-width: 100%;
+        margin: 13px auto 0;
+        padding: 6px 9px;
+        border: 3px solid var(--ink);
+        background: var(--paper-alt);
+        color: var(--ink);
+        font-size: clamp(0.76rem, 2vw, 0.9rem);
+        font-weight: 900;
+        overflow-wrap: anywhere;
+        box-shadow: 3px 3px 0 var(--shadow);
+        transform: rotate(-0.6deg);
+      }
+
+      .error-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(500px, 100%);
+        margin: 22px auto 0;
+        background:
+          repeating-linear-gradient(-45deg, color-mix(in srgb, var(--orange) 20%, transparent) 0 8px, transparent 8px 16px),
+          var(--paper);
+      }
+
+      .error-actions a {
+        font-size: clamp(0.84rem, 2.4vw, 1rem);
+      }
+
+      .error-actions a:first-child {
+        background: var(--yellow);
+        color: var(--on-yellow);
+      }
+
+      .error-actions a:last-child {
+        background: var(--blue);
+        color: var(--on-blue);
+      }
+
+      .error-actions a:hover,
+      .error-actions a:focus-visible {
+        background-color: var(--bg);
+        background-image: var(--wallpaper-image);
+        background-repeat: repeat;
+        background-size: var(--wallpaper-size);
+        color: var(--hover-text);
+      }
+
+      .error-palette-note {
+        margin: 15px 0 0;
+        color: var(--banner-text);
+        font-size: 0.8rem;
+        font-weight: 900;
+        text-align: center;
+        text-shadow: 2px 2px 0 color-mix(in srgb, var(--ink) 60%, transparent);
+      }
+
+      @media (max-width: 480px) {
+        .error-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .error-card {
+          padding-inline: 14px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        body[data-page="404"] .site-wrap :is(h1, h2, p, a, span, strong),
+        body[data-page="404"] :is(.site-header, .scribble-box) {
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="404">
+    <script>
+      (() => {
+        const validTheme = /^p(?:[1-9]|1[0-6])$/;
+        let theme = "p1";
+        try {
+          const saved = localStorage.getItem("kazvt-theme") || sessionStorage.getItem("kazvt-theme");
+          if (saved && validTheme.test(saved)) theme = saved;
+        } catch (_) {}
+        document.body.dataset.theme = theme;
+      })();
+    </script>
+
+    <main class="site-wrap error-wrap boil-stage" aria-labelledby="error-title">
+      <header class="site-header error-header">
+        <a class="logo-home" href="/" aria-label="kazvt home">
+          <img class="site-logo error-logo" src="/zzz_assets/kazvt-transparent.gif" alt="kazvt">
+        </a>
+        <p class="tagline">retro streams, old games, links, live status</p>
+      </header>
+
+      <section class="scribble-box error-card" aria-describedby="error-copy">
+        <span class="error-stamp">lost page!!</span>
+        <p class="error-code" aria-hidden="true">404</p>
+        <img class="error-face" src="/web-app-manifest-192x192.png" alt="">
+        <h1 class="error-title" id="error-title">this page fell out of the cartridge</h1>
+        <p class="error-copy" id="error-copy">
+          whatever was supposed to be here is missing, moved, or hiding behind the couch.
+        </p>
+        <code class="error-path" data-error-path>/404</code>
+
+        <nav class="oldweb-nav scribble-box error-actions" aria-label="404 page actions">
+          <a href="/">← back to kazvt.com</a>
+          <a href="/" data-go-back>go back ↩</a>
+        </nav>
+      </section>
+
+    </main>
+
+    <script>
+      (() => {
+        const path = document.querySelector("[data-error-path]");
+        if (path) path.textContent = location.pathname + location.search + location.hash;
+
+        const back = document.querySelector("[data-go-back]");
+        if (back) {
+          back.addEventListener("click", (event) => {
+            if (history.length > 1) {
+              event.preventDefault();
+              history.back();
+            }
+          });
+        }
+
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          const bg = getComputedStyle(document.body).getPropertyValue("--bg").trim();
+          if (bg) meta.setAttribute("content", bg);
+        }
+      })();
+    </script>
+  </body>
+</html>
