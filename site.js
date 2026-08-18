@@ -97,6 +97,13 @@ const DEFAULT_LANGUAGE_NAME = "english";
 const DEFAULT_LANGUAGE_CODE = "en";
 const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
 const KISSY_STORAGE_KEY = "kazvt-kissy-count";
+
+// Global hit counter. The site is static, so browser JavaScript cannot write a
+// counter file back to the web host. This public counter service provides the
+// shared state instead; the cached value is display-only and is never locally
+// incremented.
+const VISIT_COUNTER_ENDPOINT = "https://countapi.mileshilliard.com/api/v1/hit/kazvt_com_global_visitors_v1";
+const VISIT_COUNTER_CACHE_KEY = "kazvt-global-visits-last";
 const EMOTE_FILE = "emotes.txt";
 
 const cursorThemes = {
@@ -759,11 +766,21 @@ function destroyCursorEffect() {
 
 function updateThemeMetaColor() {
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (!meta) return;
 
   window.requestAnimationFrame(() => {
-    const bg = getComputedStyle(document.body).getPropertyValue("--bg").trim();
-    if (bg) meta.setAttribute("content", bg);
+    const bodyStyle = getComputedStyle(document.body);
+    const bg = bodyStyle.getPropertyValue("--bg").trim();
+    const wallpaper = bodyStyle.getPropertyValue("--wallpaper-image").trim();
+    const wallpaperSize = bodyStyle.getPropertyValue("--wallpaper-size").trim();
+
+    if (meta && bg) meta.setAttribute("content", bg);
+
+    // During pinch zoom Chrome can reveal the root canvas around the body's
+    // layout viewport. Keep that canvas visually identical to the body.
+    if (bg) document.documentElement.style.backgroundColor = bg;
+    if (wallpaper) document.documentElement.style.backgroundImage = wallpaper;
+    document.documentElement.style.backgroundRepeat = "repeat";
+    if (wallpaperSize) document.documentElement.style.backgroundSize = wallpaperSize;
   });
 }
 
@@ -1477,26 +1494,78 @@ function updateSidebar(links) {
   });
 }
 
-function createVisitCounter({ key = "kazvt-page-visits", label = "visits" } = {}) {
-  let count = 1;
-
+function readCachedVisitCount() {
   try {
-    count = Number(localStorage.getItem(key) || "0") + 1;
-    localStorage.setItem(key, String(count));
+    const value = Number(localStorage.getItem(VISIT_COUNTER_CACHE_KEY) || "0");
+    return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
   } catch {
-    count = 1;
+    return 0;
+  }
+}
+
+function writeCachedVisitCount(count) {
+  try {
+    localStorage.setItem(VISIT_COUNTER_CACHE_KEY, String(count));
+  } catch {
+    // The global counter still works even if local storage is blocked.
+  }
+}
+
+function setVisitCounterValue(counter, count, label) {
+  const safeCount = Math.max(0, Math.floor(Number(count) || 0));
+  const digits = String(safeCount).padStart(6, "0").slice(-6);
+  const digitBox = counter.querySelector(".counter-digits");
+
+  if (digitBox) {
+    digitBox.replaceChildren(...digits.split("").map((digit) => el("i", {}, [digit])));
   }
 
-  const digits = String(count).padStart(6, "0").slice(-6);
+  counter.setAttribute(
+    "aria-label",
+    translateTemplate("footer.counter_aria", "{label}: {count}", { label, count: safeCount }),
+  );
+}
 
-  return el("div", { className: "visit-counter", ariaLabel: translateTemplate("footer.counter_aria", "{label}: {count}", { label, count }) }, [
+function createVisitCounter({ label = "visits" } = {}) {
+  const cachedCount = readCachedVisitCount();
+  const counter = el("div", {
+    className: "visit-counter",
+    ariaLabel: translateTemplate("footer.counter_aria", "{label}: {count}", { label, count: cachedCount }),
+  }, [
     el("span", { className: "counter-label", "data-i18n": "footer.counter" }, [label]),
     el(
       "span",
       { className: "counter-digits", ariaHidden: "true" },
-      digits.split("").map((digit) => el("i", {}, [digit])),
+      String(cachedCount).padStart(6, "0").slice(-6).split("").map((digit) => el("i", {}, [digit])),
     ),
   ]);
+
+  // Increment the shared counter once for this page load. Every device reads
+  // and updates the same remote value. If the service is temporarily offline,
+  // keep the last successfully seen global value instead of inventing a local
+  // per-device increment.
+  fetch(VISIT_COUNTER_ENDPOINT, {
+    cache: "no-store",
+    mode: "cors",
+    referrerPolicy: "no-referrer",
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error(`visitor counter returned ${response.status}`);
+      return response.json();
+    })
+    .then((data) => {
+      const count = Number(data?.value);
+      if (!Number.isFinite(count) || count < 0) throw new Error("visitor counter returned an invalid value");
+      const safeCount = Math.floor(count);
+      writeCachedVisitCount(safeCount);
+      setVisitCounterValue(counter, safeCount, label);
+      counter.dataset.counterStatus = "global";
+    })
+    .catch(() => {
+      counter.dataset.counterStatus = "cached";
+    });
+
+  return counter;
 }
 
 function getWumpaCount() {
@@ -2659,7 +2728,7 @@ async function render(statusOverrides = {}) {
     badgesPanel(),
     el("footer", { className: "page-footer scribble-box" }, [
       el("span", { "data-i18n": "footer.message" }, [translatedText("footer.message", "kazvt.com / press start / come back soon")]),
-      createVisitCounter({ key: "kazvt-home-visits", label: translatedText("footer.counter", "you are visitor") }),
+      createVisitCounter({ label: translatedText("footer.counter", "you are visitor") }),
     ]),
   );
   markSoftLoaded(app);

@@ -45,8 +45,14 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   scroll-behavior: smooth;
-  background: var(--cream);
+  /* The root canvas is visible around the layout while mobile Chrome is pinch-zoomed.
+     Match it to the site's wallpaper instead of exposing the cream page color. */
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -56,6 +62,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   margin: 0;
   color: var(--ink);
   background-color: var(--bg);
@@ -3400,9 +3407,6 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
     content-visibility: visible;
   }
 
-  .sidebar {
-    transform: none;
-  }
 }
 
 @media (max-width: 1180px) {
@@ -3589,22 +3593,13 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   animation-duration: 720ms;
 }
 
-/* Let modern browsers skip painting long off-screen panels. */
-.content-stack > .panel {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 560px;
-}
-
-@keyframes mobileTextBoil {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(1.45px, -1.3px) rotate(-0.24deg); }
-  100% { transform: translate(-1.35px, 1.15px) rotate(0.22deg); }
-}
-
-@keyframes mobileSectionBoil {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(1.1px, -1px) rotate(-0.055deg); }
-  100% { transform: translate(-1px, 0.9px) rotate(0.05deg); }
+/* Only virtualize long panels on desktop. Android Chromium can otherwise
+   re-rasterize an off-screen animated panel at the wrong pinch-zoom scale. */
+@media (min-width: 881px) and (hover: hover) and (pointer: fine) {
+  .content-stack > .panel {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 560px;
+  }
 }
 
 @media (max-width: 880px) {
@@ -3641,10 +3636,64 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 }
 
-/* On phones/touch devices, keep the same lineboil animation used on desktop.
-   The old transform-only fallback could leave stale compositor layers after
-   Chrome's mobile toolbar/visual viewport changed size while scrolling. */
+/* Mobile-safe lineboil -------------------------------------------------------
+   Desktop keeps the SVG turbulence/displacement filters. Those filters force
+   large elements into rasterized compositing surfaces and Android Chromium can
+   keep one of those surfaces at a stale scale after pinch-zoom + scrolling.
 
+   On touch/mobile we keep the hand-drawn boil motion, but perform it with tiny
+   relative paint offsets instead of SVG filters or transform animations on the
+   large panels. Relative offsets do not change document flow and avoid the
+   persistent filtered/composited surfaces that caused the split-scale page. */
+@keyframes mobileSectionLineboil {
+  0%, 100% { left: 0; top: 0; }
+  34% { left: 1px; top: -1px; }
+  67% { left: -1px; top: 1px; }
+}
+
+@keyframes mobileTextLineboil {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0.7px -0.7px; }
+}
+
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .site-header,
+  .oldweb-nav,
+  .marquee,
+  .sidebar,
+  .panel:not(#badges),
+  .page-footer {
+    position: relative;
+    left: 0;
+    top: 0;
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
+    animation: mobileSectionLineboil 760ms steps(2, end) infinite !important;
+  }
+
+  .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
+    will-change: auto !important;
+    animation-name: mobileTextLineboil !important;
+    animation-duration: 720ms !important;
+    animation-timing-function: steps(2, end) !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  /* One-shot header URL animation also uses the desktop SVG boil in its
+     keyframes. Force the filter off on touch devices. */
+  .tiny-status.current-url-spawn {
+    filter: none !important;
+  }
+
+  /* The moving marquee owns its translate animation; don't replace it with
+     text jitter or it would stop scrolling. */
+  .marquee > span {
+    translate: none;
+    animation: marquee 14s linear infinite !important;
+    will-change: transform;
+  }
+}
 
 
 /* Persistent palette selection ring: mirrors link-button hover outlines, with a real air gap. */
@@ -3733,4 +3782,73 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
     content-visibility: visible;
     contain-intrinsic-size: none;
   }
+}
+
+
+/* Stable touch layout -------------------------------------------------------
+   Android Chrome's Page Zoom can change the CSS viewport width without the
+   device becoming a desktop. The early <head> bootstrap adds .touch-device so
+   these phone rules do not switch off just because the user zooms out. */
+html.touch-device .web-grid,
+html.touch-device .profile-layout {
+  grid-template-columns: 1fr;
+}
+
+html.touch-device .oldweb-nav {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+html.touch-device .sidebar {
+  position: relative;
+}
+
+html.touch-device .sticker-grid,
+html.touch-device .status-grid,
+html.touch-device .paint-app {
+  grid-template-columns: 1fr;
+}
+
+html.touch-device .web-grid > .sidebar:first-of-type { order: 0; }
+html.touch-device .web-grid > .sidebar:last-of-type { order: 1; }
+html.touch-device .web-grid > #app { order: 2; }
+
+html.touch-device .palette.big-palette {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 9px;
+}
+
+html.touch-device .big-palette button {
+  min-height: 0;
+  aspect-ratio: 1;
+  border-width: 2px;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+html.touch-device .palette button::before {
+  top: 2px;
+  left: 2px;
+  border-width: 1px;
+  box-shadow: none;
+}
+
+html.touch-device .big-palette span {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+html.touch-device .palette-choice::after {
+  inset: -5px;
+  border-width: 2px;
+}
+
+/* Keep guide pages in their mobile/single-column presentation on touch
+   devices too, regardless of page zoom. */
+html.touch-device .guide-page .web-grid {
+  grid-template-columns: 1fr;
+}
+
+html.touch-device .guide-page .content-stack {
+  order: -1;
 }
