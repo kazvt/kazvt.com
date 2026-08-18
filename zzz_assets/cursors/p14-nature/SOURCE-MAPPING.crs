@@ -1,0 +1,45 @@
+﻿[UpArrow]
+Path=Nature Alt Select.cur
+
+[Wait]
+Path=Nature Busy.ani
+
+[SizeNWSE]
+Path=Nature Diagonal 1.ani
+
+[SizeNESW]
+Path=Nature Diagonal 2.ani
+
+[NWPen]
+Path=Nature Handwriting.cur
+
+[Help]
+Path=Nature Help.ani
+
+[SizeWE]
+Path=Nature Horizontal.ani
+
+[Hand]
+Path=Nature Link Select.cur
+
+[SizeAll]
+Path=Nature Move.cur
+
+[Arrow]
+Path=Nature Normal.cur
+
+[Crosshair]
+Path=Nature Select.cur
+
+[IBeam]
+Path=Nature Text.cur
+
+[No]
+Path=Nature Unavailable.cur
+
+[SizeNS]
+Path=Nature Vertical.ani
+
+[AppStarting]
+Path=Nature Working.ani
+

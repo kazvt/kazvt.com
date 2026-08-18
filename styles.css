@@ -574,31 +574,7 @@ body[data-theme="p4"] {
   --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/dreamsettler/Vertical.cur"), ns-resize;
 }
 
-body[data-theme="p5"] {
-  --cursor-default: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Normal Cursor.cur"), auto;
-  --cursor-pointer: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Link Cursor.cur"), pointer;
-  --cursor-text: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Text Cursor.cur"), text;
-  --cursor-help: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Help Cursor.cur"), help;
-  --cursor-busy: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Working Cursor.cur"), wait;
-  --cursor-precision: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Precision Set.cur"), crosshair;
-  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Unavailable Cursor.cur"), not-allowed;
-  --cursor-move: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Move Cursor.cur"), move;
-  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Horizontal Cursor.cur"), ew-resize;
-  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/undertale-theme/Undertale Vertical Cursor.cur"), ns-resize;
-}
 
-body[data-theme="p6"] {
-  --cursor-default: url("zzz_assets/cursors/rw-picked/stardew-valley/Normal Selects.cur"), auto;
-  --cursor-pointer: url("zzz_assets/cursors/rw-picked/stardew-valley/Alt Select.cur"), pointer;
-  --cursor-text: url("zzz_assets/cursors/rw-picked/stardew-valley/Text Select.cur"), text;
-  --cursor-help: url("zzz_assets/cursors/rw-picked/stardew-valley/Help Select.cur"), help;
-  --cursor-busy: url("zzz_assets/cursors/rw-picked/stardew-valley/Busy.cur"), wait;
-  --cursor-precision: url("zzz_assets/cursors/rw-picked/stardew-valley/Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/stardew-valley/Unavailable.cur"), not-allowed;
-  --cursor-move: url("zzz_assets/cursors/rw-picked/stardew-valley/Move.cur"), move;
-  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/stardew-valley/Horizontal .cur"), ew-resize;
-  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/stardew-valley/Vertical.cur"), ns-resize;
-}
 
 body[data-theme="p7"] {
   --cursor-default: url("zzz_assets/cursors/rw-picked/doom-ii/Doom Guy - Normal.cur"), auto;
@@ -683,31 +659,7 @@ body[data-theme="p12"] {
   --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/wii/wii-grab-ccw.cur"), ns-resize;
 }
 
-body[data-theme="p13"] {
-  --cursor-default: url("zzz_assets/cursors/rw-picked/sonic/Sonic Person.cur"), auto;
-  --cursor-pointer: url("zzz_assets/cursors/rw-picked/sonic/Sonic Alternate.cur"), pointer;
-  --cursor-text: url("zzz_assets/cursors/rw-picked/sonic/Sonic Handwriting.cur"), text;
-  --cursor-help: url("zzz_assets/cursors/rw-picked/sonic/Sonic Help.cur"), help;
-  --cursor-busy: url("zzz_assets/cursors/rw-picked/sonic/Sonic Location.cur"), wait;
-  --cursor-precision: url("zzz_assets/cursors/rw-picked/sonic/Sonic Precision.cur"), crosshair;
-  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/sonic/Sonic Unavaible.cur"), not-allowed;
-  --cursor-move: url("zzz_assets/cursors/rw-picked/sonic/Sonic Location.cur"), move;
-  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/sonic/Sonic Diagonal 1.cur"), ew-resize;
-  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/sonic/Sonic Diagonal 2.cur"), ns-resize;
-}
 
-body[data-theme="p14"] {
-  --cursor-default: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_1.cur"), auto;
-  --cursor-pointer: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_15.cur"), pointer;
-  --cursor-text: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_6.cur"), text;
-  --cursor-help: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_2.cur"), help;
-  --cursor-busy: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_4.cur"), wait;
-  --cursor-precision: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_5.cur"), crosshair;
-  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_7.cur"), not-allowed;
-  --cursor-move: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_12.cur"), move;
-  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_9.cur"), ew-resize;
-  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/shovel-knight/SK_8.cur"), ns-resize;
-}
 
 body[data-theme="p15"] {
   --cursor-default: url("zzz_assets/cursors/rw-picked/n64/N64.cur"), auto;
@@ -816,11 +768,12 @@ body[data-boil="calm"] .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd
 .marquee,
 .sidebar,
 .panel:not(#badges),
-.page-footer {
+.page-footer,
+.language-dock {
   animation: sectionBoil 460ms steps(2, end) infinite;
 }
 
-body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel:not(#badges), .page-footer) {
+body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel:not(#badges), .page-footer, .language-dock) {
   animation-duration: 860ms;
 }
 
@@ -2980,56 +2933,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   transform: translate(-50%, 0) scale(1);
 }
 
-.language-dock {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  width: min(1060px, calc(100% - 24px));
-  gap: 9px;
-  margin: -22px auto 34px;
-  padding: 10px;
-  background:
-    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--pink) 18%, transparent) 0 8px, transparent 8px 16px),
-    var(--paper);
-  color: var(--ink);
-}
-
-.language-title {
-  justify-self: start;
-  padding: 4px 8px;
-  border: 3px solid var(--ink);
-  background: var(--banner);
-  color: var(--banner-text);
-  font-size: 0.85rem;
-  font-weight: 900;
-  box-shadow: 2px 2px 0 var(--shadow);
-}
-
-.language-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  overflow: visible;
-}
-
-.language-button {
-  min-height: 36px;
-  padding: 6px 10px;
-  border: 3px solid var(--ink);
-  background: var(--yellow);
-  color: var(--on-yellow);
-  font-weight: 900;
-  box-shadow: 3px 3px 0 var(--shadow);
-  clip-path: polygon(0 6px, 7px 0, 100% 4px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
-}
-
-.language-button[aria-pressed="true"] {
-  background: var(--green);
-  color: var(--on-green);
-  box-shadow:
-    3px 3px 0 var(--shadow),
-    0 0 0 4px var(--click-hover-outline-color);
-}
+/* Language selector component styles live in /shared/language-dock.css. */
 
 :is(
   .oldweb-nav a,
@@ -3662,7 +3566,8 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   .marquee,
   .sidebar,
   .panel:not(#badges),
-  .page-footer {
+  .page-footer,
+  .language-dock {
     position: relative;
     left: 0;
     top: 0;

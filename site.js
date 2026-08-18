@@ -1,9 +1,43 @@
+const EDITABLE_LINKS = window.KAZVT_LINKS || {};
+
+function editableLink(key, field, fallback) {
+  const value = EDITABLE_LINKS?.[key]?.[field];
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function shortPathForDestination(destination) {
+  try {
+    const target = new URL(destination, window.location.href);
+    for (const entry of Object.values(EDITABLE_LINKS)) {
+      if (!entry || !entry.url || !entry.shortPath) continue;
+      const configured = new URL(entry.url, window.location.href);
+      if (configured.href === target.href) {
+        const cleanPath = String(entry.shortPath).trim().replace(/^\/+|\/+$/g, "");
+        if (cleanPath) return `/${cleanPath}/`;
+      }
+    }
+  } catch {}
+  return "";
+}
+
+function outboundHref(destination) {
+  try {
+    const url = new URL(destination, window.location.href);
+    if ((url.protocol === "http:" || url.protocol === "https:") && url.origin !== window.location.origin) {
+      const shortPath = shortPathForDestination(url.href);
+      if (shortPath) return shortPath;
+      return `redirect.html?to=${encodeURIComponent(url.href)}`;
+    }
+  } catch {}
+  return destination;
+}
+
 const streamLinks = [
   {
     key: "twitch",
-    label: "Twitch",
-    href: "https://www.twitch.tv/kazvt",
-    liveHref: "https://www.twitch.tv/kazvt",
+    label: editableLink("twitch", "label", "Twitch"),
+    href: editableLink("twitch", "url", "https://www.twitch.tv/kazvt"),
+    liveHref: editableLink("twitch", "liveUrl", "https://www.twitch.tv/kazvt"),
     icon: "twitch",
     note: "streaming",
     status: "offline",
@@ -11,8 +45,8 @@ const streamLinks = [
   },
   {
     key: "kick",
-    label: "Kick",
-    href: "https://kick.com/kazvt",
+    label: editableLink("kick", "label", "Kick"),
+    href: editableLink("kick", "url", "https://kick.com/kazvt"),
     icon: "kick",
     note: "streaming",
     status: "offline",
@@ -20,9 +54,9 @@ const streamLinks = [
   },
   {
     key: "youtube",
-    label: "YouTube",
-    href: "https://www.youtube.com/@kazvt",
-    liveHref: "https://www.youtube.com/@kazvt/live",
+    label: editableLink("youtube", "label", "YouTube"),
+    href: editableLink("youtube", "url", "https://www.youtube.com/@kazvt"),
+    liveHref: editableLink("youtube", "liveUrl", "https://www.youtube.com/@kazvt/live"),
     icon: "youtube",
     note: "streaming & archive",
     status: "offline",
@@ -33,40 +67,40 @@ const streamLinks = [
 const socialLinks = [
   {
     key: "discord",
-    label: "Discord",
-    href: "https://discord.com/invite/huzMpfJZ4J",
+    label: editableLink("discord", "label", "Discord"),
+    href: editableLink("discord", "url", "https://discord.com/invite/huzMpfJZ4J"),
     icon: "discord",
     note: "",
     color: "#ffc7ee",
   },
   {
     key: "tumblr",
-    label: "Tumblr",
-    href: "https://www.tumblr.com/kazvt",
+    label: editableLink("tumblr", "label", "Tumblr"),
+    href: editableLink("tumblr", "url", "https://www.tumblr.com/kazvt"),
     icon: "tumblr",
     note: "",
     color: "#d8d4ff",
   },
   {
     key: "bsky",
-    label: "BSky",
-    href: "https://bsky.app/profile/kazvt.com",
+    label: editableLink("bsky", "label", "BSky"),
+    href: editableLink("bsky", "url", "https://bsky.app/profile/kazvt.com"),
     icon: "bsky",
     note: "",
     color: "#bde8ff",
   },
   {
     key: "twitter",
-    label: "Twitter",
-    href: "https://twitter.com/monkevt",
+    label: editableLink("twitter", "label", "Twitter"),
+    href: editableLink("twitter", "url", "https://twitter.com/monkevt"),
     icon: "twitter",
     note: "",
     color: "#c9f0ff",
   },
   {
     key: "wife",
-    label: "my wife",
-    href: "https://lillie.garden/",
+    label: editableLink("wife", "label", "my wife"),
+    href: editableLink("wife", "url", "https://lillie.garden/"),
     images: ["zzz_assets/wife/kazberry.webp", "zzz_assets/wife/ramberry.webp"],
     note: "",
     color: "#ffd7ef",
@@ -1158,7 +1192,7 @@ function sticker(link, extraClass = "") {
     "a",
     {
       className: `sticker scribble-box sticker-${link.key} ${hasStatus ? `has-status is-${status}` : ""} ${extraClass}`,
-      href: link.status === "live" && link.liveHref ? link.liveHref : link.href,
+      href: outboundHref(link.status === "live" && link.liveHref ? link.liveHref : link.href),
       target: "_blank",
       rel: "noopener noreferrer",
       style: { "--paper": link.color },
@@ -1997,43 +2031,7 @@ async function initializeMultistreamGuideModal() {
 }
 
 async function mountLanguageSelector() {
-  if (document.querySelector(".language-dock")) return;
-
-  const languages = await loadLanguageManifest();
-  const selected = selectedLanguageFromManifest(languages);
-  const dock = el("section", { className: "language-dock scribble-box", ariaLabel: translatedText("language.aria", "language selector") }, [
-    el("span", { className: "language-title" }, [translatedText("language.title", "language")]),
-    el(
-      "div",
-      { className: "language-options" },
-      languages.map((language) =>
-        el(
-          "button",
-          {
-            type: "button",
-            className: "language-button",
-            ariaPressed: String(language.name === selected.name),
-            "data-language-name": language.name,
-            "data-language-code": language.code,
-          },
-          [translatedText(`language.${language.name}`, language.name)],
-        ),
-      ),
-    ),
-  ]);
-
-  dock.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-language-name]");
-    if (!button) return;
-    try {
-      sessionStorage.setItem(LANGUAGE_STORAGE_KEY, button.getAttribute("data-language-name") || DEFAULT_LANGUAGE_NAME);
-    } catch {}
-    window.location.reload();
-  });
-
-  const siteWrap = document.querySelector(".site-wrap");
-  if (siteWrap) siteWrap.insertAdjacentElement("afterend", dock);
-  else document.body.append(dock);
+  return window.KazvtLanguageDock?.mount?.();
 }
 
 function initializeSiteTools() {

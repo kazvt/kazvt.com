@@ -1,0 +1,138 @@
+/* Shared cursor packs for palettes 5, 6, 13, and 14.
+   Keep these here so the same pack is used on the main site, 404/guide pages,
+   redirects, and any future short-link folders. All ANI sources were converted
+   to a single browser-compatible .cur frame. */
+
+body[data-theme="p5"],
+html[data-theme="p5"] body {
+  --cursor-default: url("/zzz_assets/cursors/p05-spongebob/default.cur"), auto;
+  --cursor-pointer: url("/zzz_assets/cursors/p05-spongebob/pointer.cur"), pointer;
+  --cursor-text: url("/zzz_assets/cursors/p05-spongebob/text.cur"), text;
+  --cursor-help: url("/zzz_assets/cursors/p05-spongebob/help.cur"), help;
+  --cursor-busy: url("/zzz_assets/cursors/p05-spongebob/busy.cur"), wait;
+  --cursor-progress: url("/zzz_assets/cursors/p05-spongebob/progress.cur"), progress;
+  --cursor-precision: url("/zzz_assets/cursors/p05-spongebob/precision.cur"), crosshair;
+  --cursor-not-allowed: url("/zzz_assets/cursors/p05-spongebob/not-allowed.cur"), not-allowed;
+  --cursor-move: url("/zzz_assets/cursors/p05-spongebob/move.cur"), move;
+  --cursor-ew-resize: url("/zzz_assets/cursors/p05-spongebob/resize.cur"), ew-resize;
+  --cursor-ns-resize: url("/zzz_assets/cursors/p05-spongebob/resize.cur"), ns-resize;
+  --cursor-nwse-resize: url("/zzz_assets/cursors/p05-spongebob/resize.cur"), nwse-resize;
+  --cursor-nesw-resize: url("/zzz_assets/cursors/p05-spongebob/resize.cur"), nesw-resize;
+  --cursor-handwriting: url("/zzz_assets/cursors/p05-spongebob/handwriting.cur"), text;
+  --cursor-alternate: url("/zzz_assets/cursors/p05-spongebob/alternate.cur"), default;
+}
+
+body[data-theme="p6"],
+html[data-theme="p6"] body {
+  --cursor-default: url("/zzz_assets/cursors/p06-pizza/default.cur"), auto;
+  --cursor-pointer: url("/zzz_assets/cursors/p06-pizza/pointer.cur"), pointer;
+  --cursor-text: url("/zzz_assets/cursors/p06-pizza/text.cur"), text;
+  --cursor-help: url("/zzz_assets/cursors/p06-pizza/help.cur"), help;
+  --cursor-busy: url("/zzz_assets/cursors/p06-pizza/busy.cur"), wait;
+  --cursor-progress: url("/zzz_assets/cursors/p06-pizza/progress.cur"), progress;
+  --cursor-precision: url("/zzz_assets/cursors/p06-pizza/precision.cur"), crosshair;
+  --cursor-not-allowed: url("/zzz_assets/cursors/p06-pizza/not-allowed.cur"), not-allowed;
+  --cursor-move: url("/zzz_assets/cursors/p06-pizza/move.cur"), move;
+  --cursor-ew-resize: url("/zzz_assets/cursors/p06-pizza/ew-resize.cur"), ew-resize;
+  --cursor-ns-resize: url("/zzz_assets/cursors/p06-pizza/ns-resize.cur"), ns-resize;
+  --cursor-nwse-resize: url("/zzz_assets/cursors/p06-pizza/nwse-resize.cur"), nwse-resize;
+  --cursor-nesw-resize: url("/zzz_assets/cursors/p06-pizza/nesw-resize.cur"), nesw-resize;
+  --cursor-handwriting: url("/zzz_assets/cursors/p06-pizza/handwriting.cur"), text;
+  --cursor-alternate: url("/zzz_assets/cursors/p06-pizza/alternate.cur"), default;
+}
+
+body[data-theme="p13"],
+html[data-theme="p13"] body {
+  --cursor-default: url("/zzz_assets/cursors/p13-tails-pocket-adventure/default.cur"), auto;
+  --cursor-pointer: url("/zzz_assets/cursors/p13-tails-pocket-adventure/pointer.cur"), pointer;
+  --cursor-text: url("/zzz_assets/cursors/p13-tails-pocket-adventure/text.cur"), text;
+  --cursor-help: url("/zzz_assets/cursors/p13-tails-pocket-adventure/help.cur"), help;
+  --cursor-busy: url("/zzz_assets/cursors/p13-tails-pocket-adventure/busy.cur"), wait;
+  --cursor-progress: url("/zzz_assets/cursors/p13-tails-pocket-adventure/progress.cur"), progress;
+  --cursor-precision: url("/zzz_assets/cursors/p13-tails-pocket-adventure/precision.cur"), crosshair;
+  --cursor-not-allowed: url("/zzz_assets/cursors/p13-tails-pocket-adventure/not-allowed.cur"), not-allowed;
+  --cursor-move: url("/zzz_assets/cursors/p13-tails-pocket-adventure/move.cur"), move;
+  --cursor-ew-resize: url("/zzz_assets/cursors/p13-tails-pocket-adventure/ew-resize.cur"), ew-resize;
+  --cursor-ns-resize: url("/zzz_assets/cursors/p13-tails-pocket-adventure/ns-resize.cur"), ns-resize;
+  --cursor-nwse-resize: url("/zzz_assets/cursors/p13-tails-pocket-adventure/nwse-resize.cur"), nwse-resize;
+  --cursor-nesw-resize: url("/zzz_assets/cursors/p13-tails-pocket-adventure/nesw-resize.cur"), nesw-resize;
+  --cursor-handwriting: url("/zzz_assets/cursors/p13-tails-pocket-adventure/handwriting.cur"), text;
+  --cursor-alternate: url("/zzz_assets/cursors/p13-tails-pocket-adventure/alternate.cur"), default;
+}
+
+body[data-theme="p14"],
+html[data-theme="p14"] body {
+  --cursor-default: url("/zzz_assets/cursors/p14-nature/default.cur"), auto;
+  --cursor-pointer: url("/zzz_assets/cursors/p14-nature/pointer.cur"), pointer;
+  --cursor-text: url("/zzz_assets/cursors/p14-nature/text.cur"), text;
+  --cursor-help: url("/zzz_assets/cursors/p14-nature/help.cur"), help;
+  --cursor-busy: url("/zzz_assets/cursors/p14-nature/busy.cur"), wait;
+  --cursor-progress: url("/zzz_assets/cursors/p14-nature/progress.cur"), progress;
+  --cursor-precision: url("/zzz_assets/cursors/p14-nature/precision.cur"), crosshair;
+  --cursor-not-allowed: url("/zzz_assets/cursors/p14-nature/not-allowed.cur"), not-allowed;
+  --cursor-move: url("/zzz_assets/cursors/p14-nature/move.cur"), move;
+  --cursor-ew-resize: url("/zzz_assets/cursors/p14-nature/ew-resize.cur"), ew-resize;
+  --cursor-ns-resize: url("/zzz_assets/cursors/p14-nature/ns-resize.cur"), ns-resize;
+  --cursor-nwse-resize: url("/zzz_assets/cursors/p14-nature/nwse-resize.cur"), nwse-resize;
+  --cursor-nesw-resize: url("/zzz_assets/cursors/p14-nature/nesw-resize.cur"), nesw-resize;
+  --cursor-handwriting: url("/zzz_assets/cursors/p14-nature/handwriting.cur"), text;
+  --cursor-alternate: url("/zzz_assets/cursors/p14-nature/alternate.cur"), default;
+}
+
+/* Small shared semantic layer so those packs also work on lightweight pages
+   that do not load the full main stylesheet (such as redirect pages). */
+body {
+  cursor: var(--cursor-default, auto);
+}
+
+:is(
+  a[href],
+  button,
+  input[type="button"],
+  input[type="checkbox"],
+  input[type="color"],
+  input[type="file"],
+  input[type="radio"],
+  input[type="range"],
+  input[type="reset"],
+  input[type="submit"],
+  label[for],
+  select,
+  summary,
+  [role="button"],
+  [role="link"]
+):not(:disabled):not([aria-disabled="true"]) {
+  cursor: var(--cursor-pointer, pointer);
+}
+
+:is(
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="url"],
+  input:not([type]),
+  textarea,
+  [contenteditable="true"]
+) {
+  cursor: var(--cursor-text, text);
+}
+
+:is(:disabled, [aria-disabled="true"]) {
+  cursor: var(--cursor-not-allowed, not-allowed);
+}
+
+:is([aria-busy="true"], [data-cursor-role="progress"]) {
+  cursor: var(--cursor-progress, progress) !important;
+}
+[data-cursor-role="wait"] { cursor: var(--cursor-busy, wait) !important; }
+[data-cursor-role="help"] { cursor: var(--cursor-help, help) !important; }
+[data-cursor-role="precision"] { cursor: var(--cursor-precision, crosshair) !important; }
+[data-cursor-role="handwriting"] { cursor: var(--cursor-handwriting, text) !important; }
+[data-cursor-role="alternate"] { cursor: var(--cursor-alternate, default) !important; }
+[data-cursor-role="move"] { cursor: var(--cursor-move, move) !important; }
+[data-cursor-role="ns-resize"] { cursor: var(--cursor-ns-resize, ns-resize) !important; }
+[data-cursor-role="ew-resize"] { cursor: var(--cursor-ew-resize, ew-resize) !important; }
+[data-cursor-role="nwse-resize"] { cursor: var(--cursor-nwse-resize, nwse-resize) !important; }
+[data-cursor-role="nesw-resize"] { cursor: var(--cursor-nesw-resize, nesw-resize) !important; }
