@@ -89,6 +89,7 @@ const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
+const DEFAULT_SITE_VOLUME = 0.2;
 const WIFE_KISS_SOUND_SRC = "zzz_assets/sounds/wifey-kissy.mp3";
 const FRUIT_SOUND_SRC = "zzz_assets/sounds/fruit.mp3";
 const LANGUAGE_STORAGE_KEY = "kazvt-language";
@@ -121,7 +122,7 @@ let activeCursorEffect = null;
 let activeCursorTheme = "";
 let mwahAudio = null;
 let fruitAudio = null;
-let siteVolume = 0.2;
+let siteVolume = DEFAULT_SITE_VOLUME;
 let activeLanguageText = new Map();
 let activeEmotes = new Map();
 
@@ -2312,10 +2313,12 @@ async function initializeMusicPlayer() {
   const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: translatedText("music.seek", "track position"), "data-i18n-aria-label": "music.seek" });
   const storedVolume = (() => {
     try {
-      const value = Number(sessionStorage.getItem(VOLUME_STORAGE_KEY));
-      return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.2;
+      const stored = sessionStorage.getItem(VOLUME_STORAGE_KEY);
+      if (stored === null || stored.trim() === "") return DEFAULT_SITE_VOLUME;
+      const value = Number(stored);
+      return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : DEFAULT_SITE_VOLUME;
     } catch {
-      return 0.2;
+      return DEFAULT_SITE_VOLUME;
     }
   })();
   const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: String(storedVolume), ariaLabel: translatedText("music.volume", "vol"), "data-i18n-aria-label": "music.volume" });
