@@ -33,6 +33,7 @@
   --hover-text: var(--banner-text);
   --stamp-bg: var(--paper);
   --stamp-text: var(--ink);
+  --palette-number-size: 0.72rem;
 }
 
 * {
@@ -611,16 +612,21 @@ body[data-theme="p8"] {
 }
 
 body[data-theme="p9"] {
-  --cursor-default: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_black.cur"), auto;
-  --cursor-pointer: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_white.cur"), pointer;
-  --cursor-text: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_text.cur"), text;
-  --cursor-help: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_help.cur"), help;
-  --cursor-busy: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_pointer_alt.cur"), wait;
-  --cursor-precision: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_precision_1.cur"), crosshair;
-  --cursor-not-allowed: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_unavailable.cur"), not-allowed;
-  --cursor-move: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_move_arrow.cur"), move;
-  --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_horizontal_arrows.cur"), ew-resize;
-  --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/ftl-themed-comprehensive/FTL_vertical_arrows.cur"), ns-resize;
+  --cursor-default: url("zzz_assets/cursors/p09-minecraft-blue-diamond/normal.cur"), auto;
+  --cursor-help: url("zzz_assets/cursors/p09-minecraft-blue-diamond/help.cur"), help;
+  --cursor-progress: url("zzz_assets/cursors/p09-minecraft-blue-diamond/working-in-background.cur"), progress;
+  --cursor-busy: url("zzz_assets/cursors/p09-minecraft-blue-diamond/busy.cur"), wait;
+  --cursor-precision: url("zzz_assets/cursors/p09-minecraft-blue-diamond/precision.cur"), crosshair;
+  --cursor-text: url("zzz_assets/cursors/p09-minecraft-blue-diamond/text.cur"), text;
+  --cursor-handwriting: url("zzz_assets/cursors/p09-minecraft-blue-diamond/handwriting.cur"), text;
+  --cursor-not-allowed: url("zzz_assets/cursors/p09-minecraft-blue-diamond/not-allowed.cur"), not-allowed;
+  --cursor-ns-resize: url("zzz_assets/cursors/p09-minecraft-blue-diamond/ns-resize.cur"), ns-resize;
+  --cursor-ew-resize: url("zzz_assets/cursors/p09-minecraft-blue-diamond/ew-resize.cur"), ew-resize;
+  --cursor-nwse-resize: url("zzz_assets/cursors/p09-minecraft-blue-diamond/nwse-resize.cur"), nwse-resize;
+  --cursor-nesw-resize: url("zzz_assets/cursors/p09-minecraft-blue-diamond/nesw-resize.cur"), nesw-resize;
+  --cursor-move: url("zzz_assets/cursors/p09-minecraft-blue-diamond/move.cur"), move;
+  --cursor-alternate: url("zzz_assets/cursors/p09-minecraft-blue-diamond/alternate.cur"), default;
+  --cursor-pointer: url("zzz_assets/cursors/p09-minecraft-blue-diamond/pointer.cur"), pointer;
 }
 
 body[data-theme="p10"] {
@@ -712,6 +718,16 @@ body[data-theme="p16"] {
   --cursor-move: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-alter.cur"), move;
   --cursor-ew-resize: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), ew-resize;
   --cursor-ns-resize: url("zzz_assets/cursors/rw-picked/skyrim/Skyrim-normal.cur"), ns-resize;
+}
+
+
+/* Shared semantic cursor roles. Themes can override any role once; palette 9 supplies the full Minecraft set. */
+body {
+  --cursor-progress: var(--cursor-busy, progress);
+  --cursor-handwriting: var(--cursor-text, text);
+  --cursor-alternate: var(--cursor-default, default);
+  --cursor-nwse-resize: var(--cursor-ew-resize, nwse-resize);
+  --cursor-nesw-resize: var(--cursor-ew-resize, nesw-resize);
 }
 
 a {
@@ -1207,13 +1223,13 @@ code {
   top: 3px;
   left: 4px;
   display: grid;
-  min-width: 1.1em;
-  height: 1.1em;
+  min-width: 1.35em;
+  height: 1.35em;
   place-items: center;
   border: 2px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
-  font-size: 0.58rem;
+  font-size: var(--palette-number-size);
   font-weight: 900;
   line-height: 1;
   box-shadow: 1px 1px 0 var(--shadow);
@@ -1283,7 +1299,6 @@ code {
   top: 2px;
   left: 2px;
   border-width: 1px;
-  font-size: 0.5rem;
 }
 
 .panel {
@@ -2275,7 +2290,7 @@ code {
   height: 44px;
   border: 3px solid var(--ink);
   background: var(--banner);
-  cursor: pointer;
+  cursor: var(--cursor-pointer, pointer);
   image-rendering: pixelated;
 }
 
@@ -2337,7 +2352,7 @@ code {
   width: 100%;
   height: 320px;
   touch-action: none;
-  cursor: crosshair;
+  cursor: var(--cursor-precision, crosshair);
 }
 
 .paint-caption {
@@ -3354,6 +3369,22 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 }
 
 
+/* Semantic cursor-role hooks. These keep full cursor packs reusable without page-specific CSS. */
+:is([aria-busy="true"], [data-cursor-role="progress"]) {
+  cursor: var(--cursor-progress, progress) !important;
+}
+[data-cursor-role="wait"] { cursor: var(--cursor-busy, wait) !important; }
+[data-cursor-role="help"] { cursor: var(--cursor-help, help) !important; }
+[data-cursor-role="precision"] { cursor: var(--cursor-precision, crosshair) !important; }
+[data-cursor-role="handwriting"] { cursor: var(--cursor-handwriting, text) !important; }
+[data-cursor-role="alternate"] { cursor: var(--cursor-alternate, default) !important; }
+[data-cursor-role="move"] { cursor: var(--cursor-move, move) !important; }
+[data-cursor-role="ns-resize"] { cursor: var(--cursor-ns-resize, ns-resize) !important; }
+[data-cursor-role="ew-resize"] { cursor: var(--cursor-ew-resize, ew-resize) !important; }
+[data-cursor-role="nwse-resize"] { cursor: var(--cursor-nwse-resize, nwse-resize) !important; }
+[data-cursor-role="nesw-resize"] { cursor: var(--cursor-nesw-resize, nesw-resize) !important; }
+
+
 /* Feedback pass: clearer palette state, compact mobile controls, and tuned boil motion. */
 .big-palette button[aria-pressed="true"]::before {
   background: var(--ink);
@@ -3418,10 +3449,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   .palette button::before {
     top: 2px;
     left: 2px;
-    min-width: 1.15em;
-    height: 1.15em;
     border-width: 1px;
-    font-size: 0.52rem;
     box-shadow: none;
   }
 
