@@ -270,6 +270,11 @@ marquee.7=i bought them and they were mine
 marquee.8=smeemo do you even love me?
 marquee.9=I SCREAM FOR ICE CREAM!!!!!!!!!!!!!!!!!!!
 marquee.10=fun fagt: kaz is actually allergic to bananas. fuck my monkey life
+marquee.11=you saved me... why? monke_from_kung_fu_panda
+marquee.12=monke oogway2
+marquee.13=why? monke_from_kung_fu_panda
+marquee.14=monke, you have shown me monke oogway1
+marquee.15=mmmm... monke oogway2
 
 title.404=404 - kazvt
 meta.404.description=that kazvt page could not be found.
