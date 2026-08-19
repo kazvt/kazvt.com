@@ -2465,6 +2465,107 @@
       display:none !important;
     }
 
+  
+    /* ===== fixed master dock / scrolling stems only ===== */
+    .mixer-bank{
+      isolation:isolate;
+      background:
+        radial-gradient(circle at 16% 20%,rgba(255,255,255,.012) 0 1px,transparent 1.2px) 0 0/13px 17px,
+        linear-gradient(180deg,#202024,#18181c);
+    }
+
+    .mixer-bank .scroll-wrap{
+      position:relative;
+      z-index:1;
+      height:100%;
+      scrollbar-gutter:stable;
+      overscroll-behavior:contain;
+      touch-action:pan-x;
+      border:1px solid #0f0f12;
+      border-right:0;
+      border-radius:4px 0 0 4px;
+      background:
+        radial-gradient(circle at 17% 18%,rgba(255,255,255,.012) 0 1px,transparent 1.2px) 0 0/13px 17px,
+        linear-gradient(180deg,#202024,#18181c);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.012),
+        inset 0 -1px 0 rgba(0,0,0,.30);
+    }
+
+    .channel-grid{
+      height:100%;
+      min-height:0;
+      border:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      overflow:hidden;
+      justify-content:start;
+    }
+
+    .master-dock{
+      position:relative;
+      z-index:5;
+      align-self:stretch;
+      border:1px solid #09090b;
+      border-left:2px solid #08080a;
+      border-radius:0 4px 4px 0;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.018),transparent 8%),
+        linear-gradient(180deg,#29292d,#1b1b1f);
+      box-shadow:
+        -5px 0 10px rgba(0,0,0,.34),
+        inset 1px 0 0 rgba(255,255,255,.025),
+        inset 0 1px 0 rgba(255,255,255,.018);
+    }
+
+    .master-dock .master-strip{
+      width:100%;
+      height:100%;
+      border-left:0 !important;
+      border-right:0 !important;
+    }
+
+    /* Scrollbar ends before the master, emphasizing that the master never moves. */
+    .mixer-bank .scroll-wrap::-webkit-scrollbar{
+      height:8px;
+    }
+
+    @media(max-width:520px){
+      .master-dock{
+        width:104px !important;
+        min-width:104px !important;
+        max-width:104px !important;
+      }
+    }
+
+  
+    /* LED semantics:
+       OFF    = muted
+       RED    = track is active / not muted
+       YELLOW = track is soloed (takes priority over red) */
+
+    .mute-led.is-solo{
+      background:
+        radial-gradient(circle at 50% 48%,rgba(255,210,72,.46) 0 40%,#3a2b08 43% 64%,#4b4330 67% 78%,#0b0a0c 81% 100%);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.06),
+        0 1px 1px rgba(0,0,0,.86),
+        0 0 0 1px #3b3323,
+        0 0 7px rgba(255,207,52,.78),
+        0 0 14px rgba(255,182,26,.30);
+    }
+
+    .mute-led.is-solo .mute-led__lens{
+      background:
+        radial-gradient(circle at 31% 24%,#fff8cb 0 9%,rgba(255,250,205,.66) 10% 14%,transparent 16%),
+        radial-gradient(circle at 48% 52%,#ffe05e 0 30%,#f6c72c 48%,#b57a07 72%,#5d3b03 100%);
+      box-shadow:
+        0 0 4px rgba(255,220,70,.96),
+        0 0 7px rgba(255,185,26,.52),
+        inset 0 -1px 2px rgba(95,57,0,.34),
+        inset 0 1px 1px rgba(255,255,235,.34);
+    }
+
   </style>
 </head>
 
@@ -2557,8 +2658,12 @@
         <div id="loadReadout" class="transport-state">READY</div>
       </div>
 
-      <div class="scroll-wrap relative z-[1] mt-2 min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden pb-1.5">
-        <div id="channelGrid" class="channel-grid"></div>
+      <div class="mixer-bank relative z-[1] mt-2 flex min-h-0 min-w-0 flex-1 overflow-hidden pb-1.5">
+        <div class="scroll-wrap min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
+          <div id="channelGrid" class="channel-grid"></div>
+        </div>
+
+        <div id="masterDock" class="master-dock relative z-[4] h-full w-[116px] min-w-[116px] max-w-[116px] flex-none overflow-hidden"></div>
       </div>
 
       <div class="footer-note">wifey mixer // i <3 you</div>
@@ -2570,6 +2675,7 @@
   const AUDIO_EXT_RE = /\.(mp3|wav|m4a|aac|ogg|opus|flac|webm)$/i;
 
   const grid = document.getElementById("channelGrid");
+  const masterDock = document.getElementById("masterDock");
   const trackReadout = document.getElementById("trackReadout");
   const masterReadout = document.getElementById("masterReadout");
   const hardwareReadout = document.getElementById("hardwareReadout");
@@ -2619,6 +2725,15 @@
   let cycleZeroContextTime = 0;
   let scheduledThroughCycle = 0;
   const SCHEDULE_AHEAD_CYCLES = 32;
+
+  // Decoded AudioBuffers are shared between current playback and background
+  // preload jobs. This removes repeat network/decode waits on playlist changes.
+  const decodedBufferCache = new Map();
+  const decodedBufferPromises = new Map();
+  const backgroundPlaylistJobs = new Map();
+  const MAX_DECODED_STEMS = 48;
+  const BACKGROUND_DECODE_CONCURRENCY = 2;
+  let queuedShuffleIndex = null;
 
   const PERSIST_KEY = "wifey-mix8-persistent-v1";
 
@@ -3453,8 +3568,8 @@
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
         <div class="channel-header">
           <div class="channel-name" title="${title}">${String(index+1).padStart(2,"0")} ${title}</div>
-          <span class="mute-led${state.mute ? " is-on" : ""}" data-mute-led
-                title="${state.mute ? "Muted" : "Not muted"}" aria-hidden="true">
+          <span class="mute-led${state.solo ? " is-solo" : (!state.mute ? " is-on" : "")}" data-mute-led
+                title="${state.solo ? "Solo" : (state.mute ? "Muted" : "Active")}" aria-hidden="true">
             <span class="mute-led__lens"></span>
           </span>
         </div>
@@ -3535,29 +3650,37 @@
   function updateGridGeometry(stemCount) {
     const stripMin = 112;
     const stripMax = 148;
-    const masterWidth = 116;
 
-    // A channel strip may never become wider than ~12.5% of the visible mixer,
-    // and is also hard-capped at 148px. With only a few stems the entire bank
-    // therefore stays compact instead of stretching across the chassis.
+    // The master strip is no longer part of this grid. This grid contains stems
+    // only, so horizontal scrolling can never move the master control surface.
     const scrollerWidth = horizontalScroller?.clientWidth || window.innerWidth || 1200;
     const stripPercentCap = scrollerWidth * 0.125;
     const stripWidth = Math.max(stripMin,Math.min(stripMax,stripPercentCap));
 
-    const naturalWidth = stemCount*stripWidth + masterWidth;
-    const minimumScrollableWidth = stemCount*stripMin + masterWidth;
+    if (!stemCount) {
+      grid.style.gridTemplateColumns = "0px";
+      grid.style.minWidth = "0px";
+      grid.style.width = "0px";
+      grid.style.maxWidth = "none";
+      return;
+    }
+
+    const naturalWidth = stemCount*stripWidth;
+    const minimumScrollableWidth = stemCount*stripMin;
 
     grid.style.setProperty("--stem-strip-width",`${stripWidth}px`);
     grid.style.gridTemplateColumns =
-      `repeat(${stemCount}, minmax(${stripMin}px, var(--stem-strip-width))) ${masterWidth}px`;
+      `repeat(${stemCount}, minmax(${stripMin}px, var(--stem-strip-width)))`;
 
     grid.style.minWidth = `${minimumScrollableWidth}px`;
     grid.style.width = `${Math.max(minimumScrollableWidth,naturalWidth)}px`;
-    grid.style.maxWidth = "100%";
+    grid.style.maxWidth = "none";
   }
 
   function renderMixer(playlist) {
     grid.innerHTML = "";
+    masterDock.innerHTML = "";
+
     const stems = playlist?.stems || [];
     updateGridGeometry(stems.length);
 
@@ -3565,7 +3688,9 @@
       const state = defaultStemState(stem);
       grid.insertAdjacentHTML("beforeend",channelMarkup(stem,index,state));
     });
-    grid.insertAdjacentHTML("beforeend",masterMarkup());
+
+    // Master is a physically separate, fixed dock at the far-right chassis edge.
+    masterDock.insertAdjacentHTML("beforeend",masterMarkup());
 
     bindControlSurface();
     showSystemReadout(
@@ -3593,15 +3718,169 @@
     });
   }
 
-  async function loadStemBuffer(channel,generation) {
-    try {
-      const response = await fetch(channel.stem.src,{cache:"force-cache"});
+
+  function stemCacheKey(stem) {
+    return String(stem?.key || stem?.displayPath || stem?.src || stem?.name || "");
+  }
+
+  function touchDecodedBuffer(key,buffer) {
+    if (!key || !buffer) return buffer;
+
+    if (decodedBufferCache.has(key)) decodedBufferCache.delete(key);
+    decodedBufferCache.set(key,buffer);
+    pruneDecodedBufferCache();
+    return buffer;
+  }
+
+  function pruneDecodedBufferCache() {
+    if (decodedBufferCache.size <= MAX_DECODED_STEMS) return;
+
+    const protectedKeys = new Set(
+      (currentPlaylist?.stems || []).map(stemCacheKey)
+    );
+
+    for (const key of [...decodedBufferCache.keys()]) {
+      if (decodedBufferCache.size <= MAX_DECODED_STEMS) break;
+      if (protectedKeys.has(key)) continue;
+      decodedBufferCache.delete(key);
+    }
+  }
+
+  async function getDecodedStemBuffer(stem) {
+    ensureAudioGraph();
+
+    const key = stemCacheKey(stem);
+    if (!key) throw new Error("Stem has no cache key.");
+
+    if (decodedBufferCache.has(key)) {
+      return touchDecodedBuffer(key,decodedBufferCache.get(key));
+    }
+
+    if (decodedBufferPromises.has(key)) {
+      return decodedBufferPromises.get(key);
+    }
+
+    const promise = (async()=>{
+      const response = await fetch(stem.src,{cache:"force-cache"});
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const bytes = await response.arrayBuffer();
-      if (generation !== loadGeneration) return channel;
-
       const buffer = await decodeAudioDataCompat(audioCtx,bytes);
+      return touchDecodedBuffer(key,buffer);
+    })();
+
+    decodedBufferPromises.set(key,promise);
+
+    try {
+      return await promise;
+    } finally {
+      decodedBufferPromises.delete(key);
+    }
+  }
+
+  function idleTask(callback) {
+    if ("requestIdleCallback" in window) {
+      return window.requestIdleCallback(callback,{timeout:1400});
+    }
+    return window.setTimeout(()=>callback({didTimeout:true,timeRemaining:()=>0}),90);
+  }
+
+  async function preloadPlaylist(index) {
+    if (!playlists.length) return;
+
+    const normalized = (Number(index)+playlists.length)%playlists.length;
+    if (normalized === currentPlaylistIndex) return;
+
+    const playlist = playlists[normalized];
+    if (!playlist?.stems?.length) return;
+
+    const jobKey = String(playlist.id || normalized);
+    if (backgroundPlaylistJobs.has(jobKey)) {
+      return backgroundPlaylistJobs.get(jobKey);
+    }
+
+    const job = new Promise(resolve=>{
+      idleTask(async()=>{
+        const queue = playlist.stems.filter(stem=>{
+          const key = stemCacheKey(stem);
+          return key && !decodedBufferCache.has(key);
+        });
+
+        let cursor = 0;
+
+        async function worker() {
+          while (cursor < queue.length) {
+            const stem = queue[cursor++];
+            try {
+              await getDecodedStemBuffer(stem);
+            } catch (error) {
+              // Background preload failures should never interrupt current playback.
+              console.warn("Background stem preload skipped:",stem?.displayPath || stem?.name,error);
+            }
+
+            // Yield between decodes so UI/audio work stays responsive.
+            await new Promise(done=>setTimeout(done,0));
+          }
+        }
+
+        const workers = Array.from(
+          {length:Math.min(BACKGROUND_DECODE_CONCURRENCY,Math.max(1,queue.length))},
+          ()=>worker()
+        );
+
+        await Promise.allSettled(workers);
+        resolve();
+      });
+    });
+
+    backgroundPlaylistJobs.set(jobKey,job);
+
+    try {
+      await job;
+    } finally {
+      backgroundPlaylistJobs.delete(jobKey);
+    }
+  }
+
+  function chooseQueuedShuffleIndex() {
+    if (playlists.length <= 1) {
+      queuedShuffleIndex = 0;
+      return queuedShuffleIndex;
+    }
+
+    let pick = Math.floor(Math.random()*(playlists.length-1));
+    if (pick >= currentPlaylistIndex) pick += 1;
+    queuedShuffleIndex = pick;
+    return pick;
+  }
+
+  function scheduleBackgroundPreload() {
+    if (!playlists.length || playlists.length <= 1) return;
+
+    const nextIndex = (currentPlaylistIndex+1)%playlists.length;
+    const previousIndex = (currentPlaylistIndex-1+playlists.length)%playlists.length;
+
+    // Sequential/manual navigation gets the next song first.
+    preloadPlaylist(nextIndex);
+
+    // Previous is also cheap insurance for manual navigation.
+    if (previousIndex !== nextIndex) {
+      idleTask(()=>preloadPlaylist(previousIndex));
+    }
+
+    // In SHUFFLE mode, choose the actual future shuffle target now, then decode
+    // that exact song in advance instead of waiting until the transition.
+    if (playlistMode === "shuffle") {
+      const shuffleIndex = chooseQueuedShuffleIndex();
+      if (shuffleIndex !== nextIndex && shuffleIndex !== previousIndex) {
+        idleTask(()=>preloadPlaylist(shuffleIndex));
+      }
+    }
+  }
+
+  async function loadStemBuffer(channel,generation) {
+    try {
+      const buffer = await getDecodedStemBuffer(channel.stem);
       if (generation !== loadGeneration) return channel;
 
       channel.buffer = buffer;
@@ -3674,6 +3953,10 @@
       } else {
         loadReadout.textContent = channels.some(c=>c.error) ? "PARTIAL" : "READY";
       }
+
+      // Current song gets full priority. Once it is decoded, prepare likely
+      // next/previous/shuffle destinations quietly in the background.
+      scheduleBackgroundPreload();
     });
   }
 
@@ -3810,8 +4093,15 @@
 
     const muteLed = channel.el.querySelector("[data-mute-led]");
     if (muteLed) {
-      muteLed.classList.toggle("is-on",!!channel.state.mute);
-      muteLed.title = channel.state.mute ? "Muted" : "Not muted";
+      const isSolo = !!channel.state.solo;
+      const isAudible = !channel.state.mute;
+
+      muteLed.classList.toggle("is-on",isAudible && !isSolo);
+      muteLed.classList.toggle("is-solo",isSolo);
+
+      muteLed.title = isSolo
+        ? "Solo"
+        : (isAudible ? "Active / not muted" : "Muted");
     }
 
     if (soloBtn) {
@@ -3889,16 +4179,27 @@
       playlistMode === "loop" ? "LOOP" :
       playlistMode === "shuffle" ? "SHUFFLE" :
       "SEQ";
+
+    queuedShuffleIndex=null;
+    scheduleBackgroundPreload();
   }
 
   function getShuffledPlaylistIndex() {
     const count = playlists.length;
     if (count <= 1) return 0;
 
-    // Pick any song except the current one.
-    let pick = Math.floor(Math.random()*(count-1));
-    if (pick >= currentPlaylistIndex) pick += 1;
-    return pick;
+    if (
+      Number.isInteger(queuedShuffleIndex) &&
+      queuedShuffleIndex >= 0 &&
+      queuedShuffleIndex < count &&
+      queuedShuffleIndex !== currentPlaylistIndex
+    ) {
+      const pick = queuedShuffleIndex;
+      queuedShuffleIndex = null;
+      return pick;
+    }
+
+    return chooseQueuedShuffleIndex();
   }
 
   async function advanceAtSongEnd() {
@@ -3980,7 +4281,7 @@
   }
 
   function bindControlSurface() {
-    grid.querySelectorAll(".knob-range").forEach(input=>{
+    mixerSurface.querySelectorAll(".knob-range").forEach(input=>{
       const owner=input.dataset.owner;
       const control=input.dataset.control;
       bindRelativeVerticalControl(input,value=>{
@@ -3998,7 +4299,7 @@
       });
     });
 
-    grid.querySelectorAll(".fader").forEach(input=>{
+    mixerSurface.querySelectorAll(".fader").forEach(input=>{
       const owner=input.dataset.owner;
       bindFader(input,value=>{
         if (input.dataset.master === "1" || owner === "master") {
@@ -4015,7 +4316,7 @@
       });
     });
 
-    grid.querySelectorAll("[data-btn-channel]").forEach(btn=>{
+    mixerSurface.querySelectorAll("[data-btn-channel]").forEach(btn=>{
       btn.addEventListener("click",()=>{
         const channel=channels[Number(btn.dataset.btnChannel)];
         if (!channel) return;
@@ -4314,6 +4615,7 @@
 
     currentPlaylistIndex=normalized;
     currentPlaylist=playlists[normalized];
+    queuedShuffleIndex=null;
     playlistSelect.value=String(normalized);
     trackReadout.textContent=`${normalized+1}/${playlists.length}`;
 
@@ -4449,7 +4751,8 @@
       trackReadout.textContent="0/0";
       loadReadout.textContent="NO TRACKS";
       updateGridGeometry(0);
-      grid.innerHTML=masterMarkup();
+      grid.innerHTML="";
+      masterDock.innerHTML=masterMarkup();
       bindControlSurface();
       return;
     }
