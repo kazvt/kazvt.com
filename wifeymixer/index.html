@@ -4094,6 +4094,91 @@
       .channel-instrument-icon i{font-size:6px}
     }
 
+  
+    /* ===== duration monitor: properly illuminated hardware module ===== */
+    .time-hardware-display{
+      background:
+        radial-gradient(
+          ellipse at 50% 55%,
+          rgba(255,119,18,.105) 0%,
+          rgba(130,47,4,.11) 42%,
+          transparent 74%
+        ),
+        linear-gradient(180deg,#100805 0%,#070302 100%) !important;
+      box-shadow:
+        0 2px 0 #060608,
+        0 0 0 1px #353037,
+        0 0 8px rgba(221,104,17,.16),
+        0 0 15px rgba(176,70,8,.055),
+        inset 0 2px 7px rgba(0,0,0,.98),
+        inset 0 0 17px rgba(255,113,17,.075),
+        inset 0 -1px 0 rgba(255,188,92,.025) !important;
+    }
+
+    .time-hardware-display::after{
+      background:
+        radial-gradient(
+          ellipse at 50% 54%,
+          rgba(255,151,50,.095) 0%,
+          rgba(255,105,17,.050) 33%,
+          rgba(111,36,3,.026) 57%,
+          transparent 76%
+        ) !important;
+      box-shadow:
+        inset 0 0 13px rgba(255,126,24,.048),
+        0 0 5px rgba(255,104,14,.028) !important;
+    }
+
+    .time-hardware-display__glass{
+      opacity:.34 !important;
+      background:
+        linear-gradient(
+          111deg,
+          rgba(255,242,216,.048) 0%,
+          rgba(255,227,187,.014) 20%,
+          transparent 34% 74%,
+          rgba(255,171,63,.016) 100%
+        ),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,143,36,.010) 0 1px,
+          transparent 1px 3px
+        ) !important;
+    }
+
+    .time-segments .seg-shape{
+      fill:#2a1306 !important;
+      stroke:#361708 !important;
+      opacity:.54 !important;
+    }
+
+    .time-segments .seg-shape.on{
+      fill:#ff9b26 !important;
+      stroke:#ffd89f !important;
+      opacity:1 !important;
+      filter:
+        drop-shadow(0 0 .55px rgba(255,239,199,.88))
+        drop-shadow(0 0 1.55px rgba(255,153,45,.82))
+        drop-shadow(0 0 3.4px rgba(255,105,13,.34))
+        drop-shadow(0 0 5.5px rgba(221,77,5,.11)) !important;
+    }
+
+    .time-segments .seven-colon-svg circle{
+      fill:#ff9b26 !important;
+      stroke:#ffd89f !important;
+      filter:
+        drop-shadow(0 0 .55px rgba(255,237,196,.86))
+        drop-shadow(0 0 1.8px rgba(255,143,34,.76))
+        drop-shadow(0 0 4px rgba(255,94,9,.20)) !important;
+    }
+
+    .time-module__legend{
+      color:#75604d !important;
+      text-shadow:
+        0 1px #000,
+        0 0 2px rgba(255,129,28,.06) !important;
+    }
+
   </style>
 </head>
 
@@ -4489,6 +4574,18 @@
   let megaLowpass = null;
   let megaDrive = null;
 
+  // Megaphone loudness compensation.
+  // Compare pre-FX RMS with post-FX/pre-comp RMS, then smoothly trim the wet path.
+  let megaDryAnalyser = null;
+  let megaWetAnalyser = null;
+  let megaDryMeterData = null;
+  let megaWetMeterData = null;
+  let megaCompGain = null;
+  let megaCompDb = -7.0;
+  const MEGA_COMP_MIN_DB = -15;
+  const MEGA_COMP_MAX_DB = 0;
+  const MEGA_PERCEPTUAL_BIAS_DB = -1.2;
+
   const masterState = {
     tone: Number(persistentPrefs.masterState?.tone ?? 100),
     pan: Number(persistentPrefs.masterState?.pan ?? 50),
@@ -4821,7 +4918,7 @@
     "S":["a1","a2","c","d1","d2","f","g1","g2"],
     "T":["a1","a2","j","k"],
     "U":["b","c","d1","d2","e","f"],
-    "V":["e","f","l","m"],
+    "V":["h","i"],
     "W":["b","c","e","f","l","m"],
     "X":["h","i","l","m"],
     "Y":["h","i","k"],
@@ -5370,6 +5467,12 @@
     savePersistentPrefs();
 
     ensureAudioGraph();
+
+    if (megaphoneEnabled && megaCompGain) {
+      megaCompDb = -7.0;
+      setParam(megaCompGain.gain,dbToGain(megaCompDb),.025);
+    }
+
     applyMegaphoneState(false);
     syncMegaphoneButton();
 
@@ -5408,8 +5511,24 @@
 
     // Megaphone parallel path:
     // high-pass -> resonant 1.05 kHz peak -> low-pass -> mild speaker saturation.
+    // Both dry and effected signals are metered so the wet path can be
+    // automatically loudness-compensated instead of jumping in level.
     megaphoneDry = audioCtx.createGain();
     megaphoneWet = audioCtx.createGain();
+
+    megaDryAnalyser = audioCtx.createAnalyser();
+    megaDryAnalyser.fftSize = 512;
+    megaDryAnalyser.smoothingTimeConstant = .88;
+    megaDryMeterData = new Float32Array(megaDryAnalyser.fftSize);
+
+    megaWetAnalyser = audioCtx.createAnalyser();
+    megaWetAnalyser.fftSize = 512;
+    megaWetAnalyser.smoothingTimeConstant = .88;
+    megaWetMeterData = new Float32Array(megaWetAnalyser.fftSize);
+
+    megaCompGain = audioCtx.createGain();
+    megaCompDb = -7.0;
+    megaCompGain.gain.value = dbToGain(megaCompDb);
 
     megaHighpass = audioCtx.createBiquadFilter();
     megaHighpass.type = "highpass";
@@ -5437,15 +5556,21 @@
     masterBus.connect(masterTone);
     masterTone.connect(masterPan);
 
-    // Dry and megaphone paths recombine before the master fader.
-    masterPan.connect(megaphoneDry);
+    // Dry reference meter is inline before the dry selector gain.
+    masterPan.connect(megaDryAnalyser);
+    megaDryAnalyser.connect(megaphoneDry);
     megaphoneDry.connect(masterGain);
 
     masterPan.connect(megaHighpass);
     megaHighpass.connect(megaResonance);
     megaResonance.connect(megaLowpass);
     megaLowpass.connect(megaDrive);
-    megaDrive.connect(megaphoneWet);
+
+    // Wet meter measures BEFORE compensation, then compensation trims the
+    // effected signal before the wet selector gain.
+    megaDrive.connect(megaWetAnalyser);
+    megaWetAnalyser.connect(megaCompGain);
+    megaCompGain.connect(megaphoneWet);
     megaphoneWet.connect(masterGain);
 
     masterGain.connect(masterAnalyser);
@@ -6822,6 +6947,73 @@
     return Math.max(0,Math.min(100,((db+54)/54)*100));
   }
 
+  function analyserRmsFloat(analyser,data) {
+    if (!analyser || !data) return 0;
+
+    if (typeof analyser.getFloatTimeDomainData === "function") {
+      analyser.getFloatTimeDomainData(data);
+      let sum = 0;
+      for (let i=0;i<data.length;i++) {
+        const sample = data[i];
+        sum += sample*sample;
+      }
+      return Math.sqrt(sum/data.length);
+    }
+
+    // Extremely old-browser fallback.
+    const bytes = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(bytes);
+    let sum = 0;
+    for (let i=0;i<bytes.length;i++) {
+      const sample = (bytes[i]-128)/128;
+      sum += sample*sample;
+    }
+    return Math.sqrt(sum/bytes.length);
+  }
+
+  function updateMegaphoneGainCompensation() {
+    if (
+      !megaphoneEnabled ||
+      !audioCtx ||
+      !megaCompGain ||
+      !megaDryAnalyser ||
+      !megaWetAnalyser
+    ) return;
+
+    const dryRms = analyserRmsFloat(megaDryAnalyser,megaDryMeterData);
+    const wetRms = analyserRmsFloat(megaWetAnalyser,megaWetMeterData);
+
+    // Ignore silence / near-silence so the gain doesn't chase noise.
+    if (dryRms < .0012 || wetRms < .0012) return;
+
+    // Level-match RMS, then trim another 1.2 dB because the concentrated
+    // mid-band of a megaphone is perceptually more forward at equal RMS.
+    let targetDb =
+      20*Math.log10(dryRms/wetRms) +
+      MEGA_PERCEPTUAL_BIAS_DB;
+
+    targetDb = Math.max(
+      MEGA_COMP_MIN_DB,
+      Math.min(MEGA_COMP_MAX_DB,targetDb)
+    );
+
+    // Faster when attenuation must increase (protects against sudden loudness),
+    // slower when releasing attenuation so it does not audibly pump.
+    const coefficient = targetDb < megaCompDb ? .075 : .018;
+    megaCompDb += (targetDb-megaCompDb)*coefficient;
+
+    const targetGain = dbToGain(megaCompDb);
+    const now = audioCtx.currentTime;
+
+    try {
+      megaCompGain.gain.cancelScheduledValues(now);
+      megaCompGain.gain.setTargetAtTime(targetGain,now,.09);
+    } catch (_) {
+      megaCompGain.gain.value = targetGain;
+    }
+  }
+
+
   function animationLoop(timestamp) {
     for (const channel of channels) {
       const level=analyserLevel(channel.analyser,channel.meterData);
@@ -6861,6 +7053,8 @@
       if (left) left.style.height=`${level}%`;
       if (right) right.style.height=`${Math.max(0,level*.97)}%`;
     }
+
+    updateMegaphoneGainCompensation();
 
     if (isPlaying) {
       lastKnownPosition=getPosition();
