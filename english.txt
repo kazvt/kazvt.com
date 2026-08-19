@@ -275,9 +275,15 @@ marquee.12=why? monkey_from_kung_fu_panda
 marquee.13=monke... oogway2
 marquee.14=why...? monkey_from_kung_fu_panda
 marquee.15=monke... oogway1
-marquee.16=monkey_from_kung_fu_panda
+marquee.16=monkey_from_kung_fu_panda ......
 marquee.17=you have shown me monke... oogway1
 marquee.18=mmmm... monke oogway2
+marquee.19=monkey_from_kung_fu_panda ......
+marquee.20=+erin [erin]
+marquee.21=+erin [erin]
+marquee.22=+erin [erin]
+marquee.23=+erin [erin]
+marquee.24=+erin [erin]
 
 title.404=404 - kazvt
 meta.404.description=that kazvt page could not be found.
