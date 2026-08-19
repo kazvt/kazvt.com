@@ -976,6 +976,195 @@
       .transport-readout{font-size:7px}
     }
 
+  
+    /* ===== amber hardware parameter readout ===== */
+    .casio-readout{
+      position:relative;
+      width:clamp(184px,24vw,310px);
+      height:clamp(44px,6.6vh,57px);
+      min-width:0;
+      overflow:hidden;
+      border:1px solid #080706;
+      border-radius:3px;
+      padding:5px 9px 5px;
+      color:#2a1707;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(82,37,4,.045) 0 1px,
+          transparent 1px 3px
+        ),
+        radial-gradient(ellipse at 50% 35%,rgba(255,205,112,.36),transparent 61%),
+        linear-gradient(180deg,#e89a3e 0%,#d9852d 48%,#bc681e 100%);
+      box-shadow:
+        0 2px 0 #08080a,
+        0 0 0 2px #343035,
+        0 0 0 3px #111014,
+        inset 0 1px 0 rgba(255,224,171,.34),
+        inset 0 0 13px rgba(91,35,2,.34),
+        inset 0 -5px 9px rgba(72,27,1,.14);
+      font-family:"Courier New",ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-variant-numeric:tabular-nums;
+      text-shadow:0 1px 0 rgba(255,197,101,.18);
+      isolation:isolate;
+    }
+
+    .casio-readout::before{
+      content:"";
+      position:absolute;
+      inset:-3px;
+      z-index:-2;
+      border-radius:5px;
+      background:
+        linear-gradient(180deg,#2b292b,#151417);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.04),
+        inset 0 -1px 0 #050506;
+    }
+
+    .casio-readout::after{
+      content:"";
+      position:absolute;
+      left:5px;
+      right:5px;
+      bottom:3px;
+      height:1px;
+      pointer-events:none;
+      background:rgba(56,22,1,.26);
+      box-shadow:0 -1px rgba(255,189,85,.11);
+    }
+
+    .casio-readout__glass{
+      position:absolute;
+      inset:0;
+      z-index:4;
+      pointer-events:none;
+      background:
+        linear-gradient(110deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.035) 20%,transparent 43%),
+        radial-gradient(ellipse at 76% 0%,rgba(255,235,194,.13),transparent 38%);
+      mix-blend-mode:screen;
+      opacity:.62;
+    }
+
+    .casio-readout__ghost{
+      position:absolute;
+      right:8px;
+      bottom:2px;
+      z-index:0;
+      color:rgba(61,27,3,.055);
+      font-family:"Courier New",ui-monospace,monospace;
+      font-size:clamp(23px,4.2vh,35px);
+      font-weight:900;
+      letter-spacing:-.09em;
+      line-height:1;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .casio-readout__top,
+    .casio-readout__main{
+      position:relative;
+      z-index:2;
+      min-width:0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .casio-readout__top{
+      gap:8px;
+      height:34%;
+      overflow:hidden;
+      border-bottom:1px solid rgba(71,28,2,.19);
+      font-size:clamp(6px,1.05vh,8px);
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.075em;
+      text-transform:uppercase;
+      color:rgba(54,25,5,.76);
+    }
+
+    #controlReadoutOwner{
+      min-width:0;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+
+    .casio-readout__track{
+      flex:none;
+      white-space:nowrap;
+      opacity:.72;
+    }
+
+    .casio-readout__main{
+      height:66%;
+      gap:7px;
+      align-items:flex-end;
+      padding-bottom:1px;
+    }
+
+    .casio-readout__label{
+      flex:0 1 auto;
+      min-width:0;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      padding-bottom:2px;
+      font-size:clamp(7px,1.2vh,10px);
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:rgba(48,21,3,.78);
+    }
+
+    .casio-readout__value{
+      flex:none;
+      white-space:nowrap;
+      font-family:"Courier New",ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:clamp(15px,3.2vh,25px);
+      font-weight:900;
+      line-height:.9;
+      letter-spacing:-.055em;
+      color:#241205;
+      text-shadow:
+        .35px 0 #241205,
+        0 1px rgba(255,202,117,.18);
+    }
+
+    .casio-readout.is-active{
+      box-shadow:
+        0 2px 0 #08080a,
+        0 0 0 2px #343035,
+        0 0 0 3px #111014,
+        0 0 10px rgba(225,132,43,.20),
+        inset 0 1px 0 rgba(255,224,171,.38),
+        inset 0 0 14px rgba(91,35,2,.29),
+        inset 0 -5px 9px rgba(72,27,1,.14);
+    }
+
+    @media(max-width:640px){
+      .casio-readout{
+        width:clamp(156px,45vw,220px);
+        padding-left:7px;
+        padding-right:7px;
+      }
+      .casio-readout__value{font-size:clamp(14px,3vh,20px)}
+    }
+
+    @media(max-height:500px){
+      .casio-readout{
+        height:38px;
+        width:clamp(168px,27vw,255px);
+        padding-top:3px;
+        padding-bottom:3px;
+      }
+      .casio-readout__top{font-size:6px}
+      .casio-readout__label{font-size:6px}
+      .casio-readout__value{font-size:15px}
+    }
+
   </style>
 </head>
 
@@ -998,18 +1187,27 @@
           </div>
         </div>
 
-        <div class="flex flex-none items-end gap-2 text-right sm:gap-3">
-          <div class="status-block">
-            <small>Track</small>
-            <strong id="trackReadout">--</strong>
+        <div class="flex min-w-0 flex-none items-end gap-2 sm:gap-3">
+          <div id="hardwareReadout" class="casio-readout" role="status" aria-live="polite" aria-atomic="true">
+            <div class="casio-readout__glass"></div>
+            <div class="casio-readout__ghost" aria-hidden="true">888888888</div>
+
+            <div class="casio-readout__top">
+              <span id="controlReadoutOwner">WIFEY MIX-8</span>
+              <span class="casio-readout__track">TRK <b id="trackReadout">--</b></span>
+            </div>
+
+            <div class="casio-readout__main">
+              <span id="controlReadoutLabel" class="casio-readout__label">READY</span>
+              <strong id="controlReadoutValue" class="casio-readout__value">0.0 dB</strong>
+            </div>
+
+            <span id="masterReadout" class="sr-only">-0.9 dB</span>
           </div>
-          <div class="status-block">
-            <small>Master</small>
-            <strong id="masterReadout">-0.9 dB</strong>
-          </div>
-          <div class="hidden h-5 w-px bg-[#35353a] shadow-[1px_0_0_#0b0b0d] sm:block"></div>
-          <div class="hidden text-left text-[6px] font-extrabold uppercase leading-[1.25] tracking-[0.13em] text-[#66635e] md:block">
-            SER. BG-08<br>REV 02
+
+          <div class="hidden h-7 w-px bg-[#35353a] shadow-[1px_0_0_#0b0b0d] sm:block"></div>
+          <div class="hidden text-left text-[6px] font-extrabold uppercase leading-[1.25] tracking-[0.13em] text-[#66635e] lg:block">
+            SER. WF-08<br>REV 03
           </div>
         </div>
       </header>
@@ -1045,6 +1243,10 @@
   const grid = document.getElementById("channelGrid");
   const trackReadout = document.getElementById("trackReadout");
   const masterReadout = document.getElementById("masterReadout");
+  const hardwareReadout = document.getElementById("hardwareReadout");
+  const controlReadoutOwner = document.getElementById("controlReadoutOwner");
+  const controlReadoutLabel = document.getElementById("controlReadoutLabel");
+  const controlReadoutValue = document.getElementById("controlReadoutValue");
   const playlistSelect = document.getElementById("playlistSelect");
   const prevTrackBtn = document.getElementById("prevTrackBtn");
   const playPauseBtn = document.getElementById("playPauseBtn");
@@ -1200,6 +1402,71 @@
     if (!Number.isFinite(db)) return "-∞ dB";
     const rounded = Math.abs(db) < .05 ? 0 : db;
     return `${rounded >= 0 ? "+" : ""}${rounded.toFixed(1)} dB`;
+  }
+
+  function formatPanReadout(value) {
+    const p = panValue(value);
+    if (Math.abs(p) < .02) return "CENTER";
+    return `${p < 0 ? "L" : "R"} ${String(Math.round(Math.abs(p)*100)).padStart(2,"0")}`;
+  }
+
+  function formatToneReadout(value) {
+    const hz = Math.round(1800 + Math.pow(Number(value)/100,2.1)*18200);
+    return hz >= 1000 ? `${(hz/1000).toFixed(hz >= 10000 ? 1 : 2)} kHz` : `${hz} Hz`;
+  }
+
+  function getControlOwnerName(input) {
+    const strip = input.closest(".channel");
+    const raw = strip?.querySelector(".channel-name")?.textContent?.trim() || "WIFEY";
+    return raw.replace(/^\d+\s+/, "").trim() || "WIFEY";
+  }
+
+  function describeTouchedControl(input,value=Number(input.value)) {
+    const owner = getControlOwnerName(input);
+    const control = input.dataset.control;
+    const isMasterFader = input.classList.contains("fader") &&
+      (input.dataset.master === "1" || input.dataset.owner === "master");
+
+    if (input.classList.contains("fader")) {
+      return {
+        owner,
+        label:isMasterFader ? "MASTER LEVEL" : "LEVEL",
+        value:formatDb(faderValueToDb(value))
+      };
+    }
+
+    if (control === "trim") {
+      return {owner,label:"TRIM",value:formatDb(trimValueToDb(value))};
+    }
+    if (control === "pan") {
+      return {owner,label:"PAN",value:formatPanReadout(value)};
+    }
+    if (control === "room") {
+      return {owner,label:"ROOM SEND",value:`${Math.round(value)} %`};
+    }
+    if (control === "tone") {
+      return {owner,label:"TONE",value:formatToneReadout(value)};
+    }
+
+    return {owner,label:String(control || "CONTROL").toUpperCase(),value:`${Math.round(value)} %`};
+  }
+
+  function showTouchedControl(input,value=Number(input.value)) {
+    if (!hardwareReadout || !input) return;
+    const info = describeTouchedControl(input,value);
+    controlReadoutOwner.textContent = info.owner;
+    controlReadoutLabel.textContent = info.label;
+    controlReadoutValue.textContent = info.value;
+    hardwareReadout.classList.remove("is-active");
+    void hardwareReadout.offsetWidth;
+    hardwareReadout.classList.add("is-active");
+  }
+
+  function showSystemReadout(owner="WIFEY MIX-8",label="READY",value="") {
+    if (!hardwareReadout) return;
+    controlReadoutOwner.textContent = owner;
+    controlReadoutLabel.textContent = label;
+    controlReadoutValue.textContent = value || "READY";
   }
 
   function formatTime(seconds) {
@@ -1409,6 +1676,11 @@
     grid.insertAdjacentHTML("beforeend",masterMarkup());
 
     bindControlSurface();
+    showSystemReadout(
+      playlist?.title ? String(playlist.title).toUpperCase() : "WIFEY MIX-8",
+      "READY",
+      stems.length ? `${stems.length} STEM${stems.length === 1 ? "" : "S"}` : "NO STEMS"
+    );
   }
 
   function setupAudioForRenderedChannels(playlist,generation) {
@@ -1521,6 +1793,7 @@
       if (event.button !== undefined && event.button !== 0) return;
       event.preventDefault(); event.stopPropagation();
       pointerId=event.pointerId; startY=event.clientY; startValue=Number(input.value);
+      showTouchedControl(input,startValue);
       wrap.setPointerCapture?.(event.pointerId);
     });
     wrap.addEventListener("pointermove",event=>{
@@ -1528,7 +1801,9 @@
       event.preventDefault(); event.stopPropagation();
       const sensitivity=event.shiftKey ? .18 : .72;
       input.value=Math.round(Math.max(0,Math.min(100,startValue-(event.clientY-startY)*sensitivity)));
-      setKnobRotation(input); onValue(Number(input.value));
+      setKnobRotation(input);
+      showTouchedControl(input,Number(input.value));
+      onValue(Number(input.value));
     });
     const finish=event=>{
       if (pointerId !== event.pointerId) return;
@@ -1538,7 +1813,11 @@
     };
     wrap.addEventListener("pointerup",finish);
     wrap.addEventListener("pointercancel",finish);
-    input.addEventListener("input",()=>{ setKnobRotation(input); onValue(Number(input.value)); });
+    input.addEventListener("input",()=>{
+      setKnobRotation(input);
+      showTouchedControl(input,Number(input.value));
+      onValue(Number(input.value));
+    });
   }
 
   function syncFader(input) {
@@ -1558,6 +1837,7 @@
       if (event.button !== undefined && event.button !== 0) return;
       event.preventDefault(); event.stopPropagation();
       pointerId=event.pointerId; startY=event.clientY; startValue=Number(input.value);
+      showTouchedControl(input,startValue);
       bay.setPointerCapture?.(event.pointerId);
     });
     bay.addEventListener("pointermove",event=>{
@@ -1566,7 +1846,9 @@
       const usable=Math.max(36,bay.clientHeight-22);
       const next=startValue+((startY-event.clientY)/usable)*100;
       input.value=Math.round(Math.max(0,Math.min(100,next)));
-      syncFader(input); onValue(Number(input.value));
+      syncFader(input);
+      showTouchedControl(input,Number(input.value));
+      onValue(Number(input.value));
     });
     const finish=event=>{
       if (pointerId !== event.pointerId) return;
@@ -1576,7 +1858,11 @@
     };
     bay.addEventListener("pointerup",finish);
     bay.addEventListener("pointercancel",finish);
-    input.addEventListener("input",()=>{ syncFader(input); onValue(Number(input.value)); });
+    input.addEventListener("input",()=>{
+      syncFader(input);
+      showTouchedControl(input,Number(input.value));
+      onValue(Number(input.value));
+    });
   }
 
   function bindControlSurface() {
