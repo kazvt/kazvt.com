@@ -2185,6 +2185,286 @@
       }
     }
 
+  
+    /* ===== genuine seven-segment amber LED module ===== */
+    .seven-screen{
+      --led:#ff9d2e;
+      --led-hot:#ffd18a;
+      --led-off:rgba(91,42,9,.18);
+      --digit-w:clamp(6px,.72vw,10px);
+      --digit-h:calc(var(--digit-w) * 1.82);
+      --seg:calc(var(--digit-w) * .22);
+
+      position:relative;
+      width:clamp(190px,26vw,326px);
+      height:clamp(48px,7.2vh,63px);
+      min-width:0;
+      overflow:hidden;
+      border:1px solid #050404;
+      border-radius:3px;
+      background:#0c0805;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #353137,
+        0 0 0 3px #101014,
+        inset 0 2px 7px rgba(0,0,0,.94),
+        inset 0 -1px 0 rgba(255,190,96,.025);
+      isolation:isolate;
+    }
+
+    .seven-screen__bezel{
+      position:absolute;
+      inset:3px;
+      z-index:0;
+      border:1px solid #1d130c;
+      border-radius:1px;
+      background:
+        radial-gradient(ellipse at 50% 35%,rgba(92,39,7,.14),transparent 68%),
+        linear-gradient(180deg,#140c07,#090604);
+      box-shadow:
+        inset 0 1px 5px #000,
+        inset 0 0 0 1px rgba(255,164,61,.018);
+    }
+
+    .seven-screen__glass{
+      position:absolute;
+      inset:4px;
+      z-index:5;
+      pointer-events:none;
+      border-radius:1px;
+      background:
+        linear-gradient(112deg,rgba(255,233,196,.065),transparent 22% 69%,rgba(255,179,79,.025)),
+        repeating-linear-gradient(to bottom,rgba(255,143,36,.018) 0 1px,transparent 1px 3px);
+      box-shadow:
+        inset 0 0 12px rgba(0,0,0,.46);
+      opacity:.75;
+    }
+
+    .seven-screen__display{
+      position:absolute;
+      inset:6px 8px;
+      z-index:2;
+      display:grid;
+      grid-template-rows:minmax(0,.72fr) minmax(0,1.28fr);
+      gap:3px;
+      overflow:hidden;
+    }
+
+    .seven-screen__top,
+    .seven-screen__main{
+      display:flex;
+      min-width:0;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      overflow:hidden;
+    }
+
+    .seven-screen__top{
+      padding-bottom:2px;
+      border-bottom:1px solid rgba(255,126,30,.085);
+      opacity:.72;
+    }
+
+    .seven-screen__main{
+      align-items:flex-end;
+    }
+
+    .seven-text{
+      display:flex;
+      align-items:center;
+      gap:1px;
+      min-width:0;
+      height:100%;
+      overflow:hidden;
+      white-space:nowrap;
+    }
+
+    .seven-text--owner,
+    .seven-text--label{
+      justify-content:flex-start;
+      flex:1 1 auto;
+    }
+
+    .seven-text--track,
+    .seven-text--value{
+      justify-content:flex-end;
+      flex:0 0 auto;
+    }
+
+    .seven-screen__top{
+      --digit-w:clamp(4.4px,.49vw,6.7px);
+    }
+
+    .seven-screen__main{
+      --digit-w:clamp(6.1px,.72vw,10.2px);
+    }
+
+    .seven-char{
+      position:relative;
+      flex:0 0 var(--digit-w);
+      width:var(--digit-w);
+      height:var(--digit-h);
+      filter:drop-shadow(0 0 1px rgba(255,120,18,.09));
+    }
+
+    .seven-char--space{
+      opacity:0;
+    }
+
+    .seven-seg{
+      position:absolute;
+      display:block;
+      opacity:1;
+      background:var(--led-off);
+      transition:
+        background .035s linear,
+        box-shadow .035s linear,
+        filter .035s linear;
+    }
+
+    .seven-seg.on{
+      background:
+        linear-gradient(
+          180deg,
+          var(--led-hot) 0%,
+          var(--led) 28%,
+          #e77617 100%
+        );
+      box-shadow:
+        0 0 2px rgba(255,160,44,.92),
+        0 0 5px rgba(255,117,17,.54),
+        inset 0 0 1px rgba(255,247,215,.48);
+      filter:saturate(1.1) brightness(1.08);
+    }
+
+    /* a / g / d */
+    .seven-seg.a,
+    .seven-seg.g,
+    .seven-seg.d{
+      left:var(--seg);
+      width:calc(100% - var(--seg) * 2);
+      height:var(--seg);
+      clip-path:polygon(
+        calc(var(--seg) * .5) 0,
+        calc(100% - var(--seg) * .5) 0,
+        100% 50%,
+        calc(100% - var(--seg) * .5) 100%,
+        calc(var(--seg) * .5) 100%,
+        0 50%
+      );
+    }
+
+    .seven-seg.a{top:0}
+    .seven-seg.g{top:calc(50% - var(--seg) / 2)}
+    .seven-seg.d{bottom:0}
+
+    /* f / b / e / c */
+    .seven-seg.f,
+    .seven-seg.b,
+    .seven-seg.e,
+    .seven-seg.c{
+      width:var(--seg);
+      height:calc(50% - var(--seg) * .72);
+      clip-path:polygon(
+        50% 0,
+        100% calc(var(--seg) * .55),
+        100% calc(100% - var(--seg) * .55),
+        50% 100%,
+        0 calc(100% - var(--seg) * .55),
+        0 calc(var(--seg) * .55)
+      );
+    }
+
+    .seven-seg.f{left:0;top:calc(var(--seg) * .42)}
+    .seven-seg.b{right:0;top:calc(var(--seg) * .42)}
+    .seven-seg.e{left:0;bottom:calc(var(--seg) * .42)}
+    .seven-seg.c{right:0;bottom:calc(var(--seg) * .42)}
+
+    .seven-dot{
+      position:absolute;
+      right:calc(var(--seg) * -.15);
+      bottom:0;
+      width:calc(var(--seg) * .68);
+      height:calc(var(--seg) * .68);
+      border-radius:50%;
+      background:var(--led-off);
+    }
+
+    .seven-dot.on{
+      background:var(--led-hot);
+      box-shadow:
+        0 0 2px rgba(255,163,49,.95),
+        0 0 5px rgba(255,113,17,.55);
+    }
+
+    .seven-colon{
+      position:absolute;
+      right:calc(var(--seg) * -.2);
+      top:32%;
+      width:calc(var(--seg) * .55);
+      height:calc(var(--seg) * .55);
+      border-radius:50%;
+      background:var(--led-hot);
+      box-shadow:0 0 3px rgba(255,129,22,.55);
+    }
+
+    .seven-colon::after{
+      content:"";
+      position:absolute;
+      left:0;
+      top:calc(var(--seg) * 1.9);
+      width:100%;
+      height:100%;
+      border-radius:inherit;
+      background:inherit;
+      box-shadow:inherit;
+    }
+
+    .seven-screen.is-active{
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #353137,
+        0 0 0 3px #101014,
+        0 0 9px rgba(225,113,23,.12),
+        inset 0 2px 7px rgba(0,0,0,.94);
+    }
+
+    @media(max-width:640px){
+      .seven-screen{
+        width:clamp(174px,48vw,230px);
+        --digit-w:clamp(5.4px,1.45vw,8.4px);
+      }
+      .seven-screen__display{inset-left:6px;inset-right:6px}
+      .seven-screen__main{gap:5px}
+    }
+
+    @media(max-height:500px){
+      .seven-screen{
+        width:clamp(176px,29vw,258px);
+        height:40px;
+      }
+      .seven-screen__display{
+        inset:4px 7px;
+        gap:2px;
+      }
+      .seven-screen__top{
+        --digit-w:4.5px;
+      }
+      .seven-screen__main{
+        --digit-w:6.3px;
+      }
+    }
+
+  
+    .seven-screen .casio-readout__top,
+    .seven-screen .casio-readout__main,
+    .seven-screen .casio-readout__value,
+    .seven-screen .casio-readout__label,
+    .seven-screen .casio-readout__ghost{
+      display:none !important;
+    }
+
   </style>
 </head>
 
@@ -2208,20 +2488,26 @@
         </div>
 
         <div class="flex min-w-0 flex-none items-end gap-2 sm:gap-3">
-          <div id="hardwareReadout" class="casio-readout" role="status" aria-live="polite" aria-atomic="true">
-            <div class="casio-readout__glass"></div>
-            <div class="casio-readout__ghost" aria-hidden="true">888888888</div>
+          <div id="hardwareReadout" class="seven-screen" role="status" aria-live="polite" aria-atomic="true">
+            <div class="seven-screen__bezel" aria-hidden="true"></div>
+            <div class="seven-screen__glass" aria-hidden="true"></div>
 
-            <div class="casio-readout__top">
-              <span id="controlReadoutOwner">WIFEY MIX-8</span>
-              <span class="casio-readout__track">TRK <b id="trackReadout">--</b></span>
+            <div class="seven-screen__display" aria-hidden="true">
+              <div class="seven-screen__top">
+                <div id="sevenOwner" class="seven-text seven-text--owner"></div>
+                <div id="sevenTrack" class="seven-text seven-text--track"></div>
+              </div>
+
+              <div class="seven-screen__main">
+                <div id="sevenLabel" class="seven-text seven-text--label"></div>
+                <div id="sevenValue" class="seven-text seven-text--value"></div>
+              </div>
             </div>
 
-            <div class="casio-readout__main">
-              <span id="controlReadoutLabel" class="casio-readout__label">READY</span>
-              <strong id="controlReadoutValue" class="casio-readout__value">0.0 dB</strong>
-            </div>
-
+            <span id="controlReadoutOwner" class="sr-only">WIFEY MIX-8</span>
+            <span id="controlReadoutLabel" class="sr-only">READY</span>
+            <span id="controlReadoutValue" class="sr-only">0.0 dB</span>
+            <span id="trackReadout" class="sr-only">--</span>
             <span id="masterReadout" class="sr-only">-0.9 dB</span>
           </div>
 
@@ -2290,6 +2576,10 @@
   const controlReadoutOwner = document.getElementById("controlReadoutOwner");
   const controlReadoutLabel = document.getElementById("controlReadoutLabel");
   const controlReadoutValue = document.getElementById("controlReadoutValue");
+  const sevenOwner = document.getElementById("sevenOwner");
+  const sevenTrack = document.getElementById("sevenTrack");
+  const sevenLabel = document.getElementById("sevenLabel");
+  const sevenValue = document.getElementById("sevenValue");
   const playlistSelect = document.getElementById("playlistSelect");
   const prevTrackBtn = document.getElementById("prevTrackBtn");
   const playPauseBtn = document.getElementById("playPauseBtn");
@@ -2302,6 +2592,9 @@
   const loadReadout = document.getElementById("loadReadout");
   const mixerSurface = document.querySelector(".mixer");
   const horizontalScroller = document.querySelector(".scroll-wrap");
+
+  const trackReadoutObserver = new MutationObserver(syncSevenSegmentTrack);
+  trackReadoutObserver.observe(trackReadout,{childList:true,subtree:true,characterData:true});
 
   const audioRack = document.createElement("div");
   audioRack.hidden = true;
@@ -2577,12 +2870,254 @@
     return {owner,label:String(control || "CONTROL").toUpperCase(),value:`${Math.round(value)} %`};
   }
 
+  /*
+   * Genuine 7-segment renderer.
+   *
+   * Each character is composed from segments a..g. Letters use the standard
+   * seven-segment approximations found on calculators / test equipment.
+   * Unsupported letters are intentionally approximated rather than silently
+   * falling back to a normal font.
+   */
+  const SEVEN_SEGMENT_MAP = {
+    "0":"abcdef",
+    "1":"bc",
+    "2":"abdeg",
+    "3":"abcdg",
+    "4":"bcfg",
+    "5":"acdfg",
+    "6":"acdefg",
+    "7":"abc",
+    "8":"abcdefg",
+    "9":"abcdfg",
+
+    "A":"abcefg",
+    "B":"cdefg",
+    "C":"adef",
+    "D":"bcdeg",
+    "E":"adefg",
+    "F":"aefg",
+    "G":"acdef",
+    "H":"bcefg",
+    "I":"bc",
+    "J":"bcde",
+    "K":"bcefg",
+    "L":"def",
+    "M":"ceg",
+    "N":"ceg",
+    "O":"abcdef",
+    "P":"abefg",
+    "Q":"abcfg",
+    "R":"eg",
+    "S":"acdfg",
+    "T":"defg",
+    "U":"bcdef",
+    "V":"cde",
+    "W":"bcdef",
+    "X":"bcefg",
+    "Y":"bcdfg",
+    "Z":"abdeg",
+
+    "-":"g",
+    "_":"d",
+    "=":"dg",
+    " ":""
+  };
+
+  const sevenTypeTimers = new WeakMap();
+
+  function normalizeSevenSegmentText(value) {
+    return String(value ?? "")
+      .toUpperCase()
+      .replace(/∞/g,"8")
+      .replace(/KHZ/g,"KHZ")
+      .replace(/DB/g,"DB")
+      .replace(/[<>]/g,"-");
+  }
+
+  function makeSevenSegmentCharacter(character) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "seven-char";
+
+    const char = String(character || " ").toUpperCase();
+
+    if (char === " ") wrapper.classList.add("seven-char--space");
+
+    // Punctuation with its own LED geometry.
+    if (char === ":") {
+      const colon = document.createElement("span");
+      colon.className = "seven-colon";
+      wrapper.appendChild(colon);
+      return wrapper;
+    }
+
+    const active = new Set((SEVEN_SEGMENT_MAP[char] || "").split(""));
+
+    for (const segmentName of ["a","b","c","d","e","f","g"]) {
+      const segment = document.createElement("span");
+      segment.className = `seven-seg ${segmentName}${active.has(segmentName) ? " on" : ""}`;
+      wrapper.appendChild(segment);
+    }
+
+    return wrapper;
+  }
+
+  function splitSevenSegmentTokens(text) {
+    const tokens = [];
+
+    for (const char of normalizeSevenSegmentText(text)) {
+      if ((char === "." || char === ",") && tokens.length) {
+        tokens[tokens.length-1].dot = true;
+        continue;
+      }
+
+      tokens.push({char,dot:false});
+    }
+
+    return tokens;
+  }
+
+  function sevenSegmentWrite(target,text,{
+    maxChars=14,
+    align="left"
+  }={}) {
+    if (!target) return;
+
+    const oldTimer = sevenTypeTimers.get(target);
+    if (oldTimer) {
+      clearTimeout(oldTimer);
+      sevenTypeTimers.delete(target);
+    }
+
+    let tokens = splitSevenSegmentTokens(text);
+
+    if (tokens.length > maxChars) {
+      tokens = align === "right"
+        ? tokens.slice(-maxChars)
+        : tokens.slice(0,maxChars);
+    }
+
+    target.replaceChildren();
+
+    for (const token of tokens) {
+      const charNode = makeSevenSegmentCharacter(token.char);
+
+      if (token.dot) {
+        const dot = document.createElement("span");
+        dot.className = "seven-dot on";
+        charNode.appendChild(dot);
+      }
+
+      target.appendChild(charNode);
+    }
+  }
+
+  /*
+   * Public dynamic typing function requested for the hardware display.
+   *
+   * Long strings scroll through the fixed seven-segment bank as they type,
+   * exactly like a small piece of old electronic equipment with limited digits.
+   *
+   * Example:
+   *   typeSevenSegment(sevenLabel, "PLAYLIST MODE", {maxChars:14});
+   */
+  function typeSevenSegment(target,text,{
+    maxChars=14,
+    speed=34,
+    align="left",
+    onDone=null
+  }={}) {
+    if (!target) return;
+
+    const previous = sevenTypeTimers.get(target);
+    if (previous) clearTimeout(previous);
+
+    const tokens = splitSevenSegmentTokens(text);
+    let index = 0;
+
+    const tick = ()=>{
+      index += 1;
+      const visible = tokens.slice(0,index);
+      const windowed = visible.length > maxChars
+        ? visible.slice(visible.length-maxChars)
+        : visible;
+
+      const output = windowed
+        .map(token=>token.char + (token.dot ? "." : ""))
+        .join("");
+
+      sevenSegmentWrite(target,output,{maxChars,align});
+
+      if (index < tokens.length) {
+        const timer = setTimeout(tick,speed);
+        sevenTypeTimers.set(target,timer);
+      } else {
+        sevenTypeTimers.delete(target);
+        if (typeof onDone === "function") onDone();
+      }
+    };
+
+    target.replaceChildren();
+    if (!tokens.length) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+
+    tick();
+  }
+
+  // Expose the writer for any future mixer message / plugin.
+  window.typeSevenSegment = typeSevenSegment;
+  window.writeSevenSegment = sevenSegmentWrite;
+
+  function syncSevenSegmentTrack() {
+    const trackText = trackReadout?.textContent || "--";
+    sevenSegmentWrite(sevenTrack,`T${trackText.replace("/","-")}`,{
+      maxChars:7,
+      align:"right"
+    });
+  }
+
+  function setSevenSegmentScreen({
+    owner="WIFEY MIX-8",
+    label="READY",
+    value="",
+    animate=false
+  }={}) {
+    controlReadoutOwner.textContent = owner;
+    controlReadoutLabel.textContent = label;
+    controlReadoutValue.textContent = value || "READY";
+
+    sevenSegmentWrite(sevenOwner,owner,{maxChars:12,align:"left"});
+    syncSevenSegmentTrack();
+
+    if (animate) {
+      typeSevenSegment(sevenLabel,label,{
+        maxChars:15,
+        speed:30,
+        align:"left"
+      });
+    } else {
+      sevenSegmentWrite(sevenLabel,label,{maxChars:15,align:"left"});
+    }
+
+    sevenSegmentWrite(sevenValue,value || "READY",{
+      maxChars:10,
+      align:"right"
+    });
+  }
+
   function showTouchedControl(input,value=Number(input.value)) {
     if (!hardwareReadout || !input) return;
     const info = describeTouchedControl(input,value);
-    controlReadoutOwner.textContent = info.owner;
-    controlReadoutLabel.textContent = info.label;
-    controlReadoutValue.textContent = info.value;
+
+    // Parameter changes must feel instantaneous, not wait for a typing animation.
+    setSevenSegmentScreen({
+      owner:info.owner,
+      label:info.label,
+      value:info.value,
+      animate:false
+    });
+
     hardwareReadout.classList.remove("is-active");
     void hardwareReadout.offsetWidth;
     hardwareReadout.classList.add("is-active");
@@ -2590,9 +3125,14 @@
 
   function showSystemReadout(owner="WIFEY MIX-8",label="READY",value="") {
     if (!hardwareReadout) return;
-    controlReadoutOwner.textContent = owner;
-    controlReadoutLabel.textContent = label;
-    controlReadoutValue.textContent = value || "READY";
+
+    // System / mode messages use the dynamic seven-segment typing function.
+    setSevenSegmentScreen({
+      owner,
+      label,
+      value:value || "READY",
+      animate:true
+    });
   }
 
   function formatTime(seconds) {
@@ -3892,6 +4432,12 @@
   },{passive:true});
 
   (async function init() {
+    setSevenSegmentScreen({
+      owner:"WIFEY MIX-8",
+      label:"BOOT",
+      value:"READY",
+      animate:true
+    });
     updateRandomizerButton();
     updatePlaylistModeButton(false);
     loadReadout.textContent="INIT";
