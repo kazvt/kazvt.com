@@ -4179,6 +4179,28 @@
         0 0 2px rgba(255,129,28,.06) !important;
     }
 
+  
+    /* ===== hardware focus cues for keyboard / wheel ownership ===== */
+    .fader-bay:focus-within{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.028),
+        inset 0 -1px 0 rgba(0,0,0,.72),
+        inset 4px 0 6px rgba(0,0,0,.24),
+        inset -4px 0 6px rgba(0,0,0,.24),
+        0 0 0 1px #3c3935,
+        0 0 4px rgba(190,146,75,.12),
+        0 2px 2px rgba(0,0,0,.45) !important;
+    }
+
+    .knob-wrap:focus-within::before{
+      box-shadow:
+        inset 0 2px 3px rgba(0,0,0,.82),
+        inset 0 -1px 0 rgba(255,255,255,.022),
+        0 0 0 1px rgba(177,143,82,.20),
+        0 0 4px rgba(184,138,66,.10),
+        0 2px 3px rgba(0,0,0,.76) !important;
+    }
+
   </style>
 </head>
 
@@ -5711,7 +5733,7 @@
             <div class="knob-cap"></div>
             <div class="knob-tick"></div>
           </div>
-          <input class="knob-range" type="range" min="0" max="100" value="${value}"
+          <input class="knob-range" type="range" min="0" max="100" step="0.25" value="${value}"
                  aria-label="${escapeHtml(ariaPrefix)} ${safeLabel}" data-owner="${index}" data-control="${control}">
         </div>
       </div>`;
@@ -6182,6 +6204,7 @@
       if (event.button !== undefined && event.button !== 0) return;
       event.preventDefault(); event.stopPropagation();
       pointerId=event.pointerId; startY=event.clientY; startValue=Number(input.value);
+      try { input.focus({preventScroll:true}); } catch (_) { input.focus(); }
       showTouchedControl(input,startValue);
       wrap.setPointerCapture?.(event.pointerId);
     });
@@ -6226,6 +6249,7 @@
       if (event.button !== undefined && event.button !== 0) return;
       event.preventDefault(); event.stopPropagation();
       pointerId=event.pointerId; startY=event.clientY; startValue=Number(input.value);
+      try { input.focus({preventScroll:true}); } catch (_) { input.focus(); }
       showTouchedControl(input,startValue);
       bay.setPointerCapture?.(event.pointerId);
     });
@@ -7094,6 +7118,133 @@
   nextTrackBtn.addEventListener("click",()=>nextPlaylist());
   randomizerBtn?.addEventListener("click",toggleRandomizer);
   playlistModeBtn?.addEventListener("click",cyclePlaylistMode);
+
+
+  /* ==========================================================
+     HARDWARE KEYBOARD / FOCUS CONTROL
+     Space / Enter : play-pause
+     Left / Right  : seek -/+ 5 seconds
+     Up / Down     : focused fader, otherwise MASTER fader
+     Focused knob  : mouse wheel, 0.25-unit precision
+     ========================================================== */
+
+  const KEYBOARD_SEEK_SECONDS = 5;
+  const KEYBOARD_FADER_STEP = 1;
+  const KNOB_WHEEL_STEP = .25;
+
+  function clampControlValue(input,value) {
+    const min = Number(input?.min ?? 0);
+    const max = Number(input?.max ?? 100);
+    return Math.max(min,Math.min(max,Number(value) || 0));
+  }
+
+  function setRangeFromShortcut(input,nextValue) {
+    if (!input) return false;
+
+    input.value = String(clampControlValue(input,nextValue));
+    input.dispatchEvent(new Event("input",{bubbles:true}));
+    return true;
+  }
+
+  function getMasterFaderInput() {
+    return mixerSurface.querySelector(
+      '.fader[data-master="1"], .fader[data-owner="master"]'
+    );
+  }
+
+  function getKeyboardFaderTarget() {
+    const focused = document.activeElement;
+
+    // A touched/focused channel fader owns the arrows until it loses focus.
+    if (focused?.matches?.(".fader")) return focused;
+
+    // No focused fader = arrows always fall back to MASTER.
+    return getMasterFaderInput();
+  }
+
+  function nudgeFaderFromKeyboard(direction) {
+    const input = getKeyboardFaderTarget();
+    if (!input) return;
+
+    const next = Number(input.value) + direction*KEYBOARD_FADER_STEP;
+    setRangeFromShortcut(input,next);
+  }
+
+  function seekFromKeyboard(direction) {
+    if (!playlistDuration) return;
+    const next = getPosition() + direction*KEYBOARD_SEEK_SECONDS;
+    seekAll(next);
+  }
+
+  function isGlobalTransportModifier(event) {
+    return event.ctrlKey || event.metaKey || event.altKey;
+  }
+
+  document.addEventListener("keydown",event=>{
+    if (isGlobalTransportModifier(event)) return;
+
+    const key = event.key;
+
+    if ((key === " " || key === "Enter") && !event.repeat) {
+      // Space / Enter is a dedicated transport switch throughout the mixer.
+      event.preventDefault();
+      event.stopPropagation();
+      togglePlayback();
+      return;
+    }
+
+    if (key === "ArrowLeft" || key === "ArrowRight") {
+      event.preventDefault();
+      event.stopPropagation();
+      seekFromKeyboard(key === "ArrowRight" ? 1 : -1);
+      return;
+    }
+
+    if (key === "ArrowUp" || key === "ArrowDown") {
+      event.preventDefault();
+      event.stopPropagation();
+      nudgeFaderFromKeyboard(key === "ArrowUp" ? 1 : -1);
+    }
+  },true);
+
+  // Clicking away from a knob/fader explicitly releases its hardware focus.
+  // Once a fader is blurred, Up/Down returns to the master fader.
+  document.addEventListener("pointerdown",event=>{
+    const focused = document.activeElement;
+    if (!focused?.matches?.(".fader,.knob-range")) return;
+
+    const sameControl =
+      event.target.closest?.(".fader-bay") === focused.closest(".fader-bay") ||
+      event.target.closest?.(".knob-wrap") === focused.closest(".knob-wrap");
+
+    if (!sameControl) focused.blur();
+  },true);
+
+  // A focused knob owns the mouse wheel even though the native range is hidden.
+  // Changes occur in whole segment-like hardware ticks, not inertial scrolling.
+  document.addEventListener("wheel",event=>{
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    const input = document.activeElement;
+    if (!input?.matches?.(".knob-range")) return;
+
+    const delta =
+      Math.abs(event.deltaY) >= Math.abs(event.deltaX)
+        ? event.deltaY
+        : event.deltaX;
+
+    if (!delta) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Wheel up = increase, wheel down = decrease.
+    const direction = delta < 0 ? 1 : -1;
+    const fineStep = event.shiftKey ? KNOB_WHEEL_STEP*.25 : KNOB_WHEEL_STEP;
+    const next = Number(input.value) + direction*fineStep;
+
+    setRangeFromShortcut(input,next);
+  },{capture:true,passive:false});
 
   seekRange.addEventListener("pointerdown",()=>{isSeeking=true;});
   seekRange.addEventListener("input",()=>{
