@@ -1090,13 +1090,28 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   font-weight: 900;
 }
 
-.marquee span {
-  display: inline-block;
-  min-width: 100%;
-  padding-left: 100%;
+.marquee > span[data-marquee-text] {
+  display: flex;
+  width: max-content;
+  min-width: 0;
+  padding-left: 0;
   white-space: nowrap;
-  animation: marquee 14s linear infinite !important;
+  animation: marquee var(--marquee-duration, 32s) linear infinite !important;
   will-change: transform;
+}
+
+.marquee-sequence {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.marquee-piece {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  margin-right: clamp(38px, 4.5vw, 64px);
+  white-space: nowrap;
 }
 
 .web-grid {
@@ -3159,7 +3174,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 
 @keyframes marquee {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
+  100% { transform: translateX(-50%); }
 }
 
 @keyframes softTextIn {
@@ -3517,9 +3532,9 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 
   /* The moving marquee owns its translate animation; don't replace it with
      text jitter or it would stop scrolling. */
-  .marquee > span {
+  .marquee > span[data-marquee-text] {
     translate: none;
-    animation: marquee 14s linear infinite !important;
+    animation: marquee var(--marquee-duration, 32s) linear infinite !important;
     will-change: transform;
   }
 }

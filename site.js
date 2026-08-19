@@ -932,28 +932,44 @@ async function initializeMarquee() {
 
   await loadActiveEmotes();
   if (!activeLanguageText.size) await loadActiveLanguageText();
-  let lines = [...activeLanguageText.entries()]
+  const lines = [...activeLanguageText.entries()]
     .filter(([key]) => /^marquee\.\d+$/.test(key))
     .sort(([left], [right]) => Number(left.split(".").pop()) - Number(right.split(".").pop()))
     .map(([, value]) => value);
 
   if (!lines.length) return;
 
-  let index = Math.floor(Math.random() * lines.length);
-  const showLine = () => {
-    setInlineNote(node, lines[index]);
+  // Keep the starting message varied while preserving a continuous conveyor.
+  const startIndex = Math.floor(Math.random() * lines.length);
+  const orderedLines = [...lines.slice(startIndex), ...lines.slice(0, startIndex)];
+
+  const makeSequence = (duplicate = false) => {
+    const sequence = el("span", { className: "marquee-sequence" });
+    if (duplicate) sequence.setAttribute("aria-hidden", "true");
+
+    orderedLines.forEach((line) => {
+      const piece = el("span", { className: "marquee-piece", ariaHidden: "true" });
+      setInlineNote(piece, line, { animate: false });
+      sequence.append(piece);
+    });
+
+    return sequence;
   };
 
-  showLine();
+  const firstSequence = makeSequence(false);
+  const secondSequence = makeSequence(true);
+  node.replaceChildren(firstSequence, secondSequence);
+
+  // Match the old marquee's general travel speed, but base the loop duration
+  // on the actual content width so spacing stays consistent for short/long text.
+  const sequenceWidth = firstSequence.getBoundingClientRect().width;
+  const pixelsPerSecond = 92;
+  const duration = Math.max(18, sequenceWidth / pixelsPerSecond);
+  node.style.setProperty("--marquee-duration", `${duration.toFixed(2)}s`);
+
   node.style.animation = "none";
   node.offsetHeight;
   node.style.animation = "";
-
-  node.addEventListener("animationiteration", (event) => {
-    if (event.animationName !== "marquee") return;
-    index = (index + 1) % lines.length;
-    showLine();
-  });
 
   const marqueeBar = node.closest(".marquee");
   const setMarqueePlaybackRate = (rate) => {
