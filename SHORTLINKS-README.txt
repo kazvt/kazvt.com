@@ -1,57 +1,55 @@
 KAZVT CLEAN SHORTLINKS — QUICK EDIT GUIDE
 ==========================================
 
-THE ONE FILE YOU USUALLY EDIT
------------------------------
-Open: links.js
+THE ONE REDIRECT CONFIG FILE
+----------------------------
+Edit: /links.js
 
-Each entry has:
-  url              = where it redirects
-  redirectText     = custom text shown during the 1-second transition
-  destinationText  = the smaller destination label
-  delayMs          = redirect delay in milliseconds (1000 = 1 second)
-  shortPath         = optional clean URL path used by the main-site button
+Each redirect entry supports:
+  url            = destination URL
+  liveUrl        = optional separate live destination
+  shortPath      = clean kazvt.com path, e.g. "yt" -> kazvt.com/yt/
+  liveShortPath  = optional clean path for liveUrl
+  logo           = image shown by that redirect page
+  delayMs        = redirect delay in milliseconds
 
-INCLUDED EXAMPLE
+If logo is omitted, the default redirect logo from KAZVT_REDIRECT_DEFAULTS is
+used. All user-visible redirect wording is in the active language .txt file,
+not links.js.
+
+CURRENT EXAMPLES
 ----------------
-kazvt.com/bsky
+kazvt.com/yt/
+kazvt.com/bsky/
+kazvt.com/spotify/
+kazvt.com/obs/
 
-The folder is:
-  /bsky/index.html
+GENERATING CLEAN PATH FOLDERS
+-----------------------------
+After adding/removing a shortPath in links.js, run:
 
-It automatically reads the "bsky" entry from links.js and then redirects to
-that entry's url after its delayMs. The bsky index.html itself contains no
-profile URL, so you never have to edit the same link in two places.
+  node zzz_redirect/build-shortlinks.mjs
 
-HOW TO ADD kazvt.com/twitch LATER
----------------------------------
-1. Copy the entire /bsky/ folder.
-2. Rename the copy to /twitch/.
-3. In links.js, edit the existing twitch entry's url/text as desired.
-4. If you want the Twitch button on the main site to use kazvt.com/twitch too,
-   add this inside the twitch entry:
+That generator reads links.js and creates the matching /word/index.html pages
+from /zzz_redirect/template.html. The included GitHub Actions workflow runs the
+same generator automatically when links.js or the redirect template changes.
 
-     shortPath: "twitch"
+SHARED REDIRECT FILES
+---------------------
+/links.js                         = every redirect destination/path/logo/timing
+/zzz_redirect/template.html       = redirect page HTML template
+/zzz_redirect/redirect.css        = redirect style + animation
+/zzz_redirect/redirect.js         = redirect routing logic
+/zzz_redirect/build-shortlinks.mjs= clean-folder generator
+/redirect.html                    = legacy generic redirect compatibility page
 
-No edits to /twitch/index.html are needed.
-
-SHARED FILES
+FOLDER NAMES
 ------------
-/redirect/redirect.css   = shared themed graphics and animation
-/redirect/redirect.js    = shared redirect logic
-/links.js                = your destinations + per-link text/timing
-/redirect.html           = generic redirect for miscellaneous outside links
-/bsky/index.html          = example clean shortlink folder
+Shared site files use /zzz_shared/.
+Redirect system files use /zzz_redirect/.
 
-The redirect transition has no confirmation/cancel UI. It loads lightweight
-local assets, shows the themed KAZVT animation, and redirects automatically.
-
-SHARED LANGUAGE SELECTOR
-------------------------
-Every page, including /bsky/, loads the same selector from:
-  /shared/language-dock.js
-  /shared/language-dock.css
-
-Edit /languages.txt to change the language list globally. The selector keeps
-its lineboil effect on desktop and phone without using the mobile-problematic
-large SVG displacement filter.
+LANGUAGE TEXT
+-------------
+All visible redirect labels/status messages/titles live in the language files,
+currently /english.txt. Redirect pages load the same root i18n/language selector
+used by the main site.

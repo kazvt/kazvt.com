@@ -9,10 +9,16 @@ function shortPathForDestination(destination) {
   try {
     const target = new URL(destination, window.location.href);
     for (const entry of Object.values(EDITABLE_LINKS)) {
-      if (!entry || !entry.url || !entry.shortPath) continue;
-      const configured = new URL(entry.url, window.location.href);
-      if (configured.href === target.href) {
-        const cleanPath = String(entry.shortPath).trim().replace(/^\/+|\/+$/g, "");
+      if (!entry) continue;
+      const candidates = [
+        [entry.url, entry.shortPath],
+        [entry.liveUrl, entry.liveShortPath],
+      ];
+      for (const [configuredUrl, configuredPath] of candidates) {
+        if (!configuredUrl || !configuredPath) continue;
+        const configured = new URL(configuredUrl, window.location.href);
+        if (configured.href !== target.href) continue;
+        const cleanPath = String(configuredPath).trim().replace(/^\/+|\/+$/g, "");
         if (cleanPath) return `/${cleanPath}/`;
       }
     }
@@ -26,7 +32,7 @@ function outboundHref(destination) {
     if ((url.protocol === "http:" || url.protocol === "https:") && url.origin !== window.location.origin) {
       const shortPath = shortPathForDestination(url.href);
       if (shortPath) return shortPath;
-      return `redirect.html?to=${encodeURIComponent(url.href)}`;
+      return url.href;
     }
   } catch {}
   return destination;
@@ -130,6 +136,7 @@ const LANGUAGE_STORAGE_KEY = "kazvt-language";
 const DEFAULT_LANGUAGE_NAME = "english";
 const DEFAULT_LANGUAGE_CODE = "en";
 const WUMPA_STORAGE_KEY = "kazvt-wumpa-count";
+const LOGO_WUMPA_EATEN_STORAGE_PREFIX = "kazvt-logo-wumpa-eaten-";
 const KISSY_STORAGE_KEY = "kazvt-kissy-count";
 
 // Global hit counter. The site is static, so browser JavaScript cannot write a
@@ -723,8 +730,62 @@ function selectedLanguageFromManifest(languages) {
   return languages.find((item) => item.name === selectedName) || languages[0];
 }
 
+function emoteTokenFromFilename(file) {
+  const clean = String(file || "").split(/[\/]/).pop() || "";
+  const dot = clean.lastIndexOf(".");
+  return (dot > 0 ? clean.slice(0, dot) : clean).trim();
+}
+
+async function discoverEmoteFiles() {
+  const files = new Set();
+
+  try {
+    const response = await fetch("zzz_assets/emotes/manifest.json", { cache: "no-store" });
+    if (response.ok) {
+      const manifest = await response.json();
+      (manifest.files || []).forEach((file) => {
+        if (typeof file === "string" && file.trim()) files.add(file.trim());
+      });
+    }
+  } catch {}
+
+  // Servers that expose a directory index can work without a manifest at all.
+  // GitHub Pages does not expose indexes, so the included workflow keeps the
+  // manifest in sync automatically whenever emote files are pushed.
+  try {
+    const response = await fetch("zzz_assets/emotes/", { cache: "no-store" });
+    if (response.ok && /text\/html/i.test(response.headers.get("content-type") || "")) {
+      const html = await response.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      doc.querySelectorAll("a[href]").forEach((anchor) => {
+        const href = anchor.getAttribute("href") || "";
+        if (!href || href.endsWith("/") || href.startsWith("?") || href.startsWith("#")) return;
+        try {
+          const url = new URL(href, response.url);
+          const file = decodeURIComponent(url.pathname.split("/").pop() || "");
+          if (file && file !== "manifest.json") files.add(file);
+        } catch {}
+      });
+    }
+  } catch {}
+
+  return [...files];
+}
+
 async function loadActiveEmotes() {
-  activeEmotes = parseKeyValueLines(await loadTextLines(EMOTE_FILE));
+  const aliases = parseKeyValueLines(await loadTextLines(EMOTE_FILE));
+  const discovered = await discoverEmoteFiles();
+  activeEmotes = new Map(aliases);
+
+  discovered.forEach((file) => {
+    const token = emoteTokenFromFilename(file);
+    if (!token) return;
+    const path = `zzz_assets/emotes/${file.split("/").map(encodeURIComponent).join("/")}`;
+    // The filename stem is the token. Brackets/parentheses only matter when
+    // they are literally present in the filename; bare names work bare.
+    activeEmotes.set(token, path);
+  });
+
   return activeEmotes;
 }
 
@@ -912,6 +973,7 @@ function applySiteTheme(theme, themeButtons, { persist = true } = {}) {
 
   updateThemeMetaColor();
   updateCursorEffect(theme);
+  window.dispatchEvent(new CustomEvent("kazvt:themechange", { detail: { theme } }));
 }
 
 function initializeCurrentUrl() {
@@ -1125,32 +1187,68 @@ function el(tag, attrs = {}, children = []) {
   return node;
 }
 
+function isBareEmoteToken(token) {
+  return /^[\p{L}\p{N}_-]+$/u.test(token);
+}
+
+function isEmoteBoundary(source, index) {
+  if (index < 0 || index >= source.length) return true;
+  return !/[\p{L}\p{N}_-]/u.test(source[index]);
+}
+
+function nextEmoteMatch(source, fromIndex) {
+  let best = null;
+  for (const [token, file] of activeEmotes.entries()) {
+    if (!token) continue;
+    let index = source.indexOf(token, fromIndex);
+    while (index !== -1) {
+      const bare = isBareEmoteToken(token);
+      const beforeOkay = !bare || isEmoteBoundary(source, index - 1);
+      const afterOkay = !bare || isEmoteBoundary(source, index + token.length);
+      if (beforeOkay && afterOkay) break;
+      index = source.indexOf(token, index + 1);
+    }
+    if (index === -1) continue;
+    if (!best || index < best.index || (index === best.index && token.length > best.token.length)) {
+      best = { index, token, file };
+    }
+  }
+  return best;
+}
+
 function inlineNoteNodes(text) {
   const source = String(text || "");
   const nodes = [];
-  const tokenPattern = /(\[\[[^\]]+\]\]|\[[^\]]+\])/g;
   let cursor = 0;
-  let match = tokenPattern.exec(source);
+
   const pushText = (value) => {
     String(value)
       .split("\n")
-      .forEach((part, index) => {
-        if (index > 0) nodes.push(el("br", { className: "inline-break" }));
-        if (part) nodes.push(part);
+      .forEach((part, lineIndex) => {
+        if (lineIndex > 0) nodes.push(el("br", { className: "inline-break" }));
+        if (!part) return;
+
+        const bracketPattern = /(\[\[[^\]]+\]\]|\[[^\]]+\])/g;
+        let partCursor = 0;
+        let bracketMatch = bracketPattern.exec(part);
+        while (bracketMatch) {
+          if (bracketMatch.index > partCursor) nodes.push(part.slice(partCursor, bracketMatch.index));
+          const token = bracketMatch[0];
+          if (token.startsWith("[[") && token.endsWith("]]")) nodes.push(token);
+          else nodes.push(el("span", { className: "note-small" }, [token]));
+          partCursor = bracketMatch.index + token.length;
+          bracketMatch = bracketPattern.exec(part);
+        }
+        if (partCursor < part.length) nodes.push(part.slice(partCursor));
       });
   };
 
-  while (match) {
+  while (cursor < source.length) {
+    const match = nextEmoteMatch(source, cursor);
+    if (!match) break;
     if (match.index > cursor) pushText(source.slice(cursor, match.index));
-
-    const token = match[0];
-    const emoteFile = activeEmotes.get(token);
-    if (emoteFile) nodes.push(emoteNode(token, emoteFile));
-    else if (token.startsWith("[[") && token.endsWith("]]")) nodes.push(token);
-    else nodes.push(el("span", { className: "note-small" }, [token]));
-
-    cursor = match.index + token.length;
-    match = tokenPattern.exec(source);
+    nodes.push(emoteNode(match.token, match.file));
+    cursor = match.index + match.token.length;
   }
 
   if (cursor < source.length) pushText(source.slice(cursor));
@@ -1673,9 +1771,7 @@ function setWumpaCount(count) {
   const safeCount = Math.max(0, Number(count) || 0);
   try {
     sessionStorage.setItem(WUMPA_STORAGE_KEY, String(safeCount));
-  } catch {
-    // Ignore storage failures; the visible counter can still update.
-  }
+  } catch {}
 
   document.querySelectorAll("[data-wumpa-count]").forEach((node) => {
     node.textContent = String(safeCount);
@@ -1758,6 +1854,22 @@ function logoWumpaState() {
   return logoWumpaRuntimeState;
 }
 
+function storedLogoWumpaEaten(side) {
+  try {
+    return localStorage.getItem(`${LOGO_WUMPA_EATEN_STORAGE_PREFIX}${side}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setStoredLogoWumpaEaten(side, eaten) {
+  try {
+    const key = `${LOGO_WUMPA_EATEN_STORAGE_PREFIX}${side}`;
+    if (eaten) localStorage.setItem(key, "1");
+    else localStorage.removeItem(key);
+  } catch {}
+}
+
 function initializeLogoWumpas() {
   const buttons = [...document.querySelectorAll("[data-logo-wumpa]")];
   if (!buttons.length) return;
@@ -1766,19 +1878,25 @@ function initializeLogoWumpas() {
   buttons.forEach((button) => {
     const side = button.getAttribute("data-logo-wumpa") || "left";
     state[side] ||= { hits: 0, eaten: false };
+    if (storedLogoWumpaEaten(side)) {
+      state[side].eaten = true;
+      setStoredLogoWumpaEaten(side, true);
+      button.classList.add("is-eaten");
+      button.setAttribute("aria-hidden", "true");
+    }
 
     button.addEventListener("click", () => {
       if (state[side].eaten) return;
 
-      playFruitSound();
       state[side].hits += 1;
+      if (state[side].hits < 20) return;
 
-      if (state[side].hits >= 20) {
-        state[side].eaten = true;
-        button.classList.add("is-eaten");
-        button.setAttribute("aria-hidden", "true");
-        showWumpaToast(translatedText("wumpa.logo.eaten_toast"));
-      }
+      state[side].eaten = true;
+      setStoredLogoWumpaEaten(side, true);
+      button.classList.add("is-eaten");
+      button.setAttribute("aria-hidden", "true");
+      playFruitSound();
+      addWumpa(100, translatedText("wumpa.logo.eaten_toast"));
     });
   });
 
@@ -1800,6 +1918,8 @@ function initializeLogoRecovery() {
 
     state.left = { hits: 0, eaten: false };
     state.right = { hits: 0, eaten: false };
+    setStoredLogoWumpaEaten("left", false);
+    setStoredLogoWumpaEaten("right", false);
     logoWumpaRecoverClicks = 0;
 
     document.querySelectorAll("[data-logo-wumpa]").forEach((button) => {
@@ -2476,10 +2596,10 @@ async function initializeMusicPlayer() {
 
   function visualizerColors() {
     return {
-      bg: cssVar("--banner", "#16111a"),
-      primary: cssVar("--green", "#6cff7a"),
-      secondary: cssVar("--blue", "#48cfff"),
-      accent: cssVar("--yellow", "#ffef5d"),
+      bg: cssVar("--visualizer-bg", cssVar("--banner", "#16111a")),
+      primary: cssVar("--visualizer-primary", cssVar("--green", "#6cff7a")),
+      secondary: cssVar("--visualizer-secondary", cssVar("--blue", "#48cfff")),
+      accent: cssVar("--visualizer-accent", cssVar("--yellow", "#ffef5d")),
     };
   }
 
@@ -2752,6 +2872,7 @@ async function initializeMusicPlayer() {
     else if (!audio.paused) startVisualizerLoop();
     else drawVisualizerFrame();
   });
+  window.addEventListener("kazvt:themechange", () => drawVisualizerFrame());
   mount.replaceChildren(
     title,
     el("div", { className: "music-controls" }, [prev, play, next]),

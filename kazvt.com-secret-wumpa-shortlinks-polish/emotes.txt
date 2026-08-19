@@ -1,4 +1,0 @@
-[wumpa]=wumpa.gif
-[fruit]=wumpa.gif
-[[kaz]]=kazvt-transparent.gif
-[kaz]=kazvt-transparent.gif

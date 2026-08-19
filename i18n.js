@@ -11,7 +11,8 @@
 
   async function loadTextLines(file) {
     try {
-      const response = await fetch(file, { cache: "no-store" });
+      const url = /^(?:https?:|data:|blob:|\/)/i.test(file) ? file : `/${file}`;
+      const response = await fetch(url, { cache: "no-store" });
       if (!response.ok) return [];
       const text = await response.text();
       return text

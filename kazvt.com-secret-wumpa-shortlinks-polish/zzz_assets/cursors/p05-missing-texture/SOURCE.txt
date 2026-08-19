@@ -1,4 +1,0 @@
-name=Missing Texture
-source=https://www.rw-designer.com/cursor-set/missing-texture
-download=https://www.rw-designer.com/cursor-downloadset/missing-texture
-license=Release to Public Domain (as stated on the source cursor-set page)

@@ -1,4 +1,0 @@
-name=Windows 7 Full Collection
-source=https://www.rw-designer.com/cursor-set/windows-7-full-collection
-download=https://www.rw-designer.com/cursor-downloadset/windows-7-full-collection
-license=Release to Public Domain (as stated on the source cursor-set page)

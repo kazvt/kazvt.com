@@ -1,63 +1,99 @@
 (() => {
+  "use strict";
+
   const config = window.KAZVT_LINKS || {};
-  const hostNode = document.querySelector("[data-redirect-host]");
-  const statusNode = document.querySelector("[data-redirect-status]");
+  const defaults = window.KAZVT_REDIRECT_DEFAULTS || {};
 
-  const parts = location.pathname.split("/").filter(Boolean);
-  let slug = parts.at(-1) || "";
-  if (/^index\.html?$/i.test(slug)) slug = parts.at(-2) || "";
-  slug = decodeURIComponent(slug).toLowerCase();
+  function cleanPath(value) {
+    return String(value || "").trim().replace(/^\/+|\/+$/g, "").toLowerCase();
+  }
 
-  const params = new URLSearchParams(location.search);
-  const rawTarget = params.get("to");
-  const entry = config[slug] || null;
+  function currentSlug() {
+    const parts = location.pathname.split("/").filter(Boolean);
+    let slug = parts.at(-1) || "";
+    if (/^index\.html?$/i.test(slug)) slug = parts.at(-2) || "";
+    return cleanPath(decodeURIComponent(slug));
+  }
 
-  let target = null;
-  let redirectText = "warping through the old web...";
-  let destinationText = "loading destination";
-  let delayMs = 1000;
-
-  // Clean shortlink mode, e.g. /bsky/ -> KAZVT_LINKS.bsky.url
-  if (entry && entry.url) {
-    try {
-      const candidate = new URL(entry.url, location.origin);
-      if (candidate.protocol === "http:" || candidate.protocol === "https:") {
-        target = candidate;
-        redirectText = entry.redirectText || `opening ${entry.label || slug}...`;
-        destinationText = entry.destinationText || candidate.hostname.replace(/^www\./, "");
-        const configuredDelay = Number(entry.delayMs);
-        if (Number.isFinite(configuredDelay)) delayMs = Math.min(10000, Math.max(0, configuredDelay));
+  function configuredRoute(slug) {
+    for (const [key, entry] of Object.entries(config)) {
+      if (!entry) continue;
+      if (cleanPath(entry.shortPath || key) === slug && entry.url) {
+        return { key, entry, rawTarget: entry.url };
       }
-    } catch {}
-  }
-
-  // Generic outbound-link mode, used by redirect.html?to=https://...
-  if (!target && rawTarget) {
-    try {
-      const candidate = new URL(rawTarget);
-      if ((candidate.protocol === "http:" || candidate.protocol === "https:") && candidate.origin !== location.origin) {
-        target = candidate;
-        destinationText = candidate.hostname.replace(/^www\./, "");
+      if (entry.liveUrl && cleanPath(entry.liveShortPath) === slug) {
+        return { key, entry, rawTarget: entry.liveUrl };
       }
-    } catch {}
+    }
+    return null;
   }
 
-  document.documentElement.style.setProperty("--redirect-delay", `${delayMs}ms`);
-
-  if (!target) {
-    if (statusNode) statusNode.textContent = "lost link! zipping back home...";
-    if (hostNode) hostNode.textContent = "kazvt.com";
-    setTimeout(() => location.replace("/"), Math.min(delayMs, 1000));
-    return;
+  function legacyRoute() {
+    const rawTarget = new URLSearchParams(location.search).get("to");
+    return rawTarget ? { key: "", entry: {}, rawTarget } : null;
   }
 
-  if (statusNode) statusNode.textContent = redirectText;
-  if (hostNode) {
-    hostNode.textContent = destinationText;
-    hostNode.title = target.href;
+  function safeTarget(rawTarget) {
+    try {
+      const candidate = new URL(rawTarget, location.origin);
+      if (candidate.protocol !== "http:" && candidate.protocol !== "https:") return null;
+      return candidate;
+    } catch {
+      return null;
+    }
   }
-  document.title = `opening ${destinationText}... | kazvt`;
 
-  // No confirmation screen: the transition simply completes and leaves.
-  setTimeout(() => location.replace(target.href), delayMs);
+  async function start() {
+    const i18n = window.KazvtI18n;
+    if (!i18n) return;
+    await i18n.ready;
+
+    const statusNode = document.querySelector("[data-redirect-status]");
+    const hostNode = document.querySelector("[data-redirect-host]");
+    const logoNode = document.querySelector("[data-redirect-logo]");
+    const route = configuredRoute(currentSlug()) || legacyRoute();
+    const target = route ? safeTarget(route.rawTarget) : null;
+
+    if (!target) {
+      if (statusNode) statusNode.textContent = i18n.t("redirect.invalid");
+      if (hostNode) hostNode.textContent = i18n.t("redirect.invalid_destination");
+      document.title = i18n.t("title.redirect");
+      return;
+    }
+
+    const key = route?.key || "";
+    const entry = route?.entry || {};
+    const statusKey = key && i18n.t(`redirect.${key}.status`) ? `redirect.${key}.status` : "redirect.status.generic";
+    const destinationKey = key && i18n.t(`redirect.${key}.destination`) ? `redirect.${key}.destination` : "";
+    const destinationText = destinationKey
+      ? i18n.t(destinationKey)
+      : target.hostname.replace(/^www\./i, "");
+
+    if (statusNode) statusNode.textContent = i18n.t(statusKey);
+    if (hostNode) {
+      hostNode.textContent = destinationText || i18n.format("redirect.destination.generic", { host: target.host });
+      hostNode.title = target.href;
+    }
+
+    if (logoNode) {
+      const fallbackLogo = defaults.logo || "/zzz_assets/kazvt-transparent.gif";
+      const configuredLogo = typeof entry.logo === "string" && entry.logo.trim() ? entry.logo.trim() : fallbackLogo;
+      logoNode.src = configuredLogo;
+      logoNode.addEventListener("error", () => {
+        if (logoNode.src.endsWith(fallbackLogo)) return;
+        logoNode.src = fallbackLogo;
+      }, { once: true });
+    }
+
+    const delayCandidate = Number(entry.delayMs ?? defaults.delayMs ?? 1000);
+    const delayMs = Number.isFinite(delayCandidate) ? Math.min(10000, Math.max(0, delayCandidate)) : 1000;
+    document.documentElement.style.setProperty("--redirect-delay", `${delayMs}ms`);
+
+    const title = i18n.format("redirect.title_to", { destination: destinationText });
+    document.title = title || i18n.t("title.redirect");
+
+    window.setTimeout(() => window.location.replace(target.href), delayMs);
+  }
+
+  start();
 })();

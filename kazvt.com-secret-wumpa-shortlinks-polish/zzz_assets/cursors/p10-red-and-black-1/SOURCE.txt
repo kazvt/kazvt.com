@@ -1,4 +1,0 @@
-name=Red And Black
-source=https://www.rw-designer.com/cursor-set/red-and-black-1
-download=https://www.rw-designer.com/cursor-downloadset/red-and-black-1
-license=Release to Public Domain (as stated on the source cursor-set page)

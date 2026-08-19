@@ -1,4 +1,0 @@
-name=Black Pluses
-source=https://www.rw-designer.com/cursor-set/black-pluses
-download=https://www.rw-designer.com/cursor-downloadset/black-pluses
-license=Release to Public Domain (as stated on the source cursor-set page)

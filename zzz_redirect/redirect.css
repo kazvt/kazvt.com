@@ -729,3 +729,197 @@ body.redirect-page {
   }
   .redirect-meter::after { animation-timing-function: linear; }
 }
+
+/* Patch: denser 404-style redirect container labels + layered motion. */
+.redirect-shell {
+  overflow: visible;
+  box-shadow:
+    8px 8px 0 var(--ink),
+    14px 14px 0 color-mix(in srgb, var(--pink) 42%, transparent),
+    -8px 11px 0 color-mix(in srgb, var(--blue) 34%, transparent),
+    20px 22px 0 color-mix(in srgb, #000 18%, transparent);
+  animation: redirect-shell-pulse 1350ms steps(6, end) infinite;
+}
+
+.redirect-shell::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  z-index: -2;
+  border: 3px dashed color-mix(in srgb, var(--ink) 50%, transparent);
+  transform: rotate(.6deg);
+  pointer-events: none;
+  animation: redirect-frame-wobble 520ms steps(2, end) infinite;
+}
+
+.redirect-label-cloud {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+
+.redirect-chip {
+  position: absolute;
+  display: block;
+  padding: 5px 8px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--on-yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: clamp(.52rem, 1.7vw, .72rem);
+  font-weight: 1000;
+  letter-spacing: .035em;
+  white-space: nowrap;
+  clip-path: polygon(0 5px, 6px 0, 100% 3px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
+  animation: redirect-chip-boil 680ms steps(4, end) infinite;
+}
+
+.redirect-chip-a { top: 66px; left: -18px; transform: rotate(-7deg); }
+.redirect-chip-b { top: 112px; right: -22px; background: var(--green); color: var(--on-green); transform: rotate(6deg); animation-delay: -90ms; }
+.redirect-chip-c { top: 38%; left: -24px; background: var(--pink); color: var(--on-pink); transform: rotate(5deg); animation-delay: -180ms; }
+.redirect-chip-d { top: 45%; right: -26px; background: var(--blue); color: var(--on-blue); transform: rotate(-6deg); animation-delay: -270ms; }
+.redirect-chip-e { bottom: 125px; left: -14px; background: var(--orange); color: var(--on-orange); transform: rotate(-4deg); animation-delay: -360ms; }
+.redirect-chip-f { bottom: 104px; right: -18px; transform: rotate(5deg); animation-delay: -450ms; }
+.redirect-chip-g { bottom: 48px; left: 8px; background: var(--green); color: var(--on-green); transform: rotate(3deg); animation-delay: -540ms; }
+.redirect-chip-h { bottom: 42px; right: 8px; background: var(--pink); color: var(--on-pink); transform: rotate(-3deg); animation-delay: -610ms; }
+
+.redirect-stage {
+  box-shadow:
+    inset 0 0 0 6px color-mix(in srgb, var(--paper) 48%, transparent),
+    inset 0 0 0 9px color-mix(in srgb, var(--ink) 17%, transparent);
+}
+
+.redirect-logo-wrap {
+  width: min(58%, 300px);
+  aspect-ratio: 1.75 / 1;
+  box-shadow:
+    7px 7px 0 var(--blue),
+    -5px -5px 0 color-mix(in srgb, var(--pink) 70%, transparent);
+}
+
+.redirect-logo {
+  width: min(88%, 220px);
+  height: min(78%, 145px);
+  object-fit: contain;
+  filter: drop-shadow(4px 4px 0 color-mix(in srgb, #000 26%, transparent));
+  animation: redirect-logo-pop 560ms steps(3, end) infinite;
+}
+
+.redirect-manifest-stamp {
+  position: absolute;
+  right: 12px;
+  bottom: 11px;
+  z-index: 5;
+  width: clamp(46px, 12vw, 68px);
+  aspect-ratio: 1;
+  padding: 4px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(7deg);
+  animation: redirect-manifest-bob 780ms steps(4, end) infinite;
+}
+
+.redirect-manifest-stamp img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.redirect-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.redirect-sparks i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  clip-path: polygon(50% 0, 62% 37%, 100% 50%, 62% 63%, 50% 100%, 38% 63%, 0 50%, 38% 37%);
+  animation: redirect-spark-spin 520ms steps(4, end) infinite;
+}
+
+.redirect-sparks i:nth-child(1) { left: 18%; top: 12%; }
+.redirect-sparks i:nth-child(2) { right: 17%; top: 15%; background: var(--green); animation-delay: -110ms; }
+.redirect-sparks i:nth-child(3) { left: 22%; bottom: 15%; background: var(--pink); animation-delay: -220ms; }
+.redirect-sparks i:nth-child(4) { right: 22%; bottom: 18%; background: var(--orange); animation-delay: -330ms; }
+.redirect-sparks i:nth-child(5) { left: 48%; top: 8%; background: var(--blue); animation-delay: -430ms; }
+
+.redirect-copy {
+  position: relative;
+  overflow: hidden;
+}
+
+.redirect-copy::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, white 26%, transparent), transparent);
+  transform: skewX(-18deg) translateX(-180%);
+  animation: redirect-copy-scan 880ms steps(8, end) infinite;
+  pointer-events: none;
+}
+
+@keyframes redirect-shell-pulse {
+  0%, 100% { translate: 0 0; }
+  33% { translate: 1px -1px; }
+  66% { translate: -1px 1px; }
+}
+
+@keyframes redirect-frame-wobble {
+  0%, 100% { transform: rotate(.6deg) translate(0, 0); }
+  50% { transform: rotate(-.6deg) translate(1px, -1px); }
+}
+
+@keyframes redirect-chip-boil {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 1px -1px; }
+}
+
+@keyframes redirect-logo-pop {
+  0%, 100% { transform: scale(1) rotate(0); }
+  50% { transform: scale(1.035) rotate(.8deg); }
+}
+
+@keyframes redirect-manifest-bob {
+  0%, 100% { transform: rotate(7deg) translateY(0); }
+  50% { transform: rotate(4deg) translateY(-4px); }
+}
+
+@keyframes redirect-spark-spin {
+  0% { transform: rotate(0deg) scale(.8); }
+  50% { transform: rotate(45deg) scale(1.18); }
+  100% { transform: rotate(90deg) scale(.8); }
+}
+
+@keyframes redirect-copy-scan {
+  to { transform: skewX(-18deg) translateX(520%); }
+}
+
+@media (max-width: 640px) {
+  .redirect-chip { font-size: .5rem; padding: 4px 6px; border-width: 2px; }
+  .redirect-chip-a, .redirect-chip-c, .redirect-chip-e { left: -7px; }
+  .redirect-chip-b, .redirect-chip-d, .redirect-chip-f { right: -7px; }
+  .redirect-chip-g { left: 2px; }
+  .redirect-chip-h { right: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .redirect-shell,
+  .redirect-shell::after,
+  .redirect-chip,
+  .redirect-logo,
+  .redirect-manifest-stamp,
+  .redirect-sparks i,
+  .redirect-copy::after {
+    animation: none !important;
+  }
+}

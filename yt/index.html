@@ -1,10 +1,81 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="">
   <head>
-    <meta http-equiv="refresh" content="0; url=https://www.youtube.com/@kazvt?sub_confirmation=1">
-    <link rel="canonical" href="https://www.youtube.com/@kazvt?sub_confirmation=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#ff9d16">
+    <title></title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="manifest" data-i18n-manifest>
+    <script>
+      (() => {
+        let theme = "p1";
+        try {
+          const saved = localStorage.getItem("kazvt-theme");
+          if (/^p(?:[1-9]|1[0-6])$/.test(saved || "")) theme = saved;
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <script>
+      (() => {
+        let lineboil = "on";
+        try {
+          if (localStorage.getItem("kazvt-lineboil") === "off") lineboil = "off";
+        } catch {}
+        document.documentElement.dataset.lineboil = lineboil;
+      })();
+    </script>
+    <link rel="stylesheet" href="/zzz_redirect/redirect.css">
+    <link rel="stylesheet" href="/zzz_shared/cursor-packs.css">
+    <link rel="stylesheet" href="/zzz_shared/language-dock.css">
+    <link rel="stylesheet" href="/lineboil-control.css">
   </head>
-  <body>
-    <a href="https://www.youtube.com/@kazvt?sub_confirmation=1">Redirecting...</a>
+  <body class="redirect-page" data-page="redirect">
+    <main class="redirect-shell" aria-live="polite">
+      <div class="redirect-label-cloud" aria-hidden="true">
+        <span class="redirect-chip redirect-chip-a" data-i18n="redirect.label.speed"></span>
+        <span class="redirect-chip redirect-chip-b" data-i18n="redirect.label.outbound"></span>
+        <span class="redirect-chip redirect-chip-c" data-i18n="redirect.label.portal"></span>
+        <span class="redirect-chip redirect-chip-d" data-i18n="redirect.label.signal"></span>
+        <span class="redirect-chip redirect-chip-e" data-i18n="redirect.label.no_return"></span>
+        <span class="redirect-chip redirect-chip-f" data-i18n="redirect.label.loading"></span>
+        <span class="redirect-chip redirect-chip-g" data-i18n="redirect.label.hyperlink"></span>
+        <span class="redirect-chip redirect-chip-h" data-i18n="redirect.label.good_luck"></span>
+      </div>
+
+      <div class="redirect-tape">
+        <span data-i18n="redirect.banner"></span>
+        <small data-i18n="redirect.site"></small>
+      </div>
+
+      <div class="redirect-stage" aria-hidden="true">
+        <div class="redirect-speedlines"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="redirect-dots"><b></b><b></b><b></b><b></b></div>
+        <div class="redirect-sparks"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="redirect-logo-wrap">
+          <img class="redirect-logo" data-redirect-logo src="/zzz_assets/kazvt-transparent.gif" alt="" fetchpriority="high" decoding="async">
+        </div>
+        <div class="redirect-manifest-stamp">
+          <img src="/web-app-manifest-192x192.png" alt="" decoding="async">
+        </div>
+      </div>
+
+      <div class="redirect-copy">
+        <strong data-redirect-status data-i18n="redirect.status.generic"></strong>
+        <span class="redirect-host" data-redirect-host data-i18n="redirect.loading_destination"></span>
+      </div>
+      <div class="redirect-meter" aria-hidden="true"></div>
+    </main>
+
+    <script src="/i18n.js"></script>
+    <script src="/language-dock.js"></script>
+    <script src="/lineboil-control.js"></script>
+    <script src="/links.js"></script>
+    <script src="/zzz_redirect/redirect.js"></script>
   </body>
 </html>

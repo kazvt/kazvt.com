@@ -1,4 +1,0 @@
-name=Modern Windows XP
-source=https://www.rw-designer.com/cursor-set/modern-windows-xp
-download=https://www.rw-designer.com/cursor-downloadset/modern-windows-xp
-license=Release to Public Domain (as stated on the source cursor-set page)

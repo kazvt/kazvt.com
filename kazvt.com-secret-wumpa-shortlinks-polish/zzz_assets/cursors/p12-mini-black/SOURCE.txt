@@ -1,4 +1,0 @@
-name=Mini Black
-source=https://www.rw-designer.com/cursor-set/mini-black
-download=https://www.rw-designer.com/cursor-downloadset/mini-black
-license=Release to Public Domain (as stated on the source cursor-set page)

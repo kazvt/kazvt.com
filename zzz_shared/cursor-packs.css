@@ -1,8 +1,8 @@
 /*
  * KAZVT shared cursor pack mappings.
  * Cursor assets use root-relative /zzz_assets/... URLs on purpose.
- * This prevents a stylesheet served from /shared/ from resolving assets as
- * /shared/zzz_assets/... and falling back to the operating-system cursor.
+ * This prevents a stylesheet served from /zzz_shared/ from resolving assets as
+ * /zzz_shared/zzz_assets/... and falling back to the operating-system cursor.
  */
 
 body,

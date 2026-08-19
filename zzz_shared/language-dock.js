@@ -59,23 +59,15 @@
        files return from the same host. */
     const dock = document.createElement("section");
     dock.className = CONFIG.mountClass;
-    dock.setAttribute("aria-label", "language selector");
+    dock.setAttribute("aria-label", "");
 
     const title = document.createElement("span");
     title.className = "language-title";
-    title.textContent = "language";
+    title.textContent = "";
 
     const options = document.createElement("div");
     options.className = "language-options";
 
-    const fallbackButton = document.createElement("button");
-    fallbackButton.type = "button";
-    fallbackButton.className = "language-button";
-    fallbackButton.dataset.languageName = CONFIG.defaultName;
-    fallbackButton.dataset.languageCode = CONFIG.defaultCode;
-    fallbackButton.setAttribute("aria-pressed", "true");
-    fallbackButton.textContent = CONFIG.defaultName;
-    options.append(fallbackButton);
 
     dock.append(title, options);
 
@@ -97,8 +89,8 @@
     const labels = parseKeyValue(await fetchText(`/${selected.name}.txt`));
 
     document.documentElement.lang = selected.code || CONFIG.defaultCode;
-    dock.setAttribute("aria-label", labels.get("language.aria") || "language selector");
-    title.textContent = labels.get("language.title") || "language";
+    dock.setAttribute("aria-label", labels.get("language.aria") || "");
+    title.textContent = labels.get("language.title") || "";
     options.replaceChildren();
 
     languages.forEach((language) => {
@@ -108,7 +100,7 @@
       button.dataset.languageName = language.name;
       button.dataset.languageCode = language.code;
       button.setAttribute("aria-pressed", String(language.name === selected.name));
-      button.textContent = labels.get(`language.${language.name}`) || language.name;
+      button.textContent = labels.get(`language.${language.name}`) || "";
       options.append(button);
     });
 

@@ -1,48 +1,54 @@
 KAZVT — CENTRAL EDITING MAP
 ===========================
 
-LINKS / SHORT URLS
-------------------
+LINKS / CLEAN REDIRECT URLS
+---------------------------
 Edit: /links.js
 
-That is the single place for profile URLs, redirect messages, destination
-labels, delays, and optional clean short paths. Copy /bsky/ to make another
-shortlink folder; the copied index.html does not contain a destination URL.
+That is the single redirect config for destination URLs, clean short paths,
+per-redirect logos, live variants, and redirect delay. Visible redirect wording
+stays in the active language file.
 
-LANGUAGES
----------
-Edit: /languages.txt
+After changing shortPath/liveShortPath, run:
+  node zzz_redirect/build-shortlinks.mjs
 
-Each line is:
+The included GitHub workflow also regenerates the folders automatically on
+push.
+
+LANGUAGES / ALL USER-FACING TEXT
+--------------------------------
+Edit: /languages.txt for the language list.
+Edit: /english.txt for the current English UI copy.
+
+Each language manifest line is:
   language-file-name=html-language-code
 
-Example:
-  english=en
+Shared language selector styles are in:
+  /zzz_shared/language-dock.css
 
-The selector is injected everywhere by:
-  /shared/language-dock.js
+Root i18n / selector behavior is in:
+  /i18n.js
+  /language-dock.js
 
-Its appearance + phone-safe lineboil are in:
-  /shared/language-dock.css
+EMOTES
+------
+Drop emote files into:
+  /zzz_assets/emotes/
 
-Actual translated site text stays in the matching language file, for example:
-  /english.txt
+The filename stem is the token, regardless of file extension. Examples:
+  oogway1.png     -> oogway1
+  [wumpa].gif     -> [wumpa]
+  (example).webp  -> (example)
 
-Because every page loads the same shared selector component, changing the
-manifest or the shared selector files changes it everywhere, including 404,
-multistream guide, generic redirect, and clean shortlink folders.
+Brackets/parentheses are only required when they are literally part of the
+filename. /scripts/build-emote-manifest.py updates the folder manifest, and the
+included GitHub workflow runs it automatically when emote files change. Runtime
+code also discovers directory listings on hosts that expose them.
 
-CURSOR PACKS
-------------
+CURSOR / SHARED FILES
+---------------------
 Shared palette cursor mappings are in:
-  /shared/cursor-packs.css
+  /zzz_shared/cursor-packs.css
 
-New packs requested in this build:
-  Palette 5  -> /zzz_assets/cursors/p05-spongebob/
-  Palette 6  -> /zzz_assets/cursors/p06-pizza/
-  Palette 13 -> /zzz_assets/cursors/p13-tails-pocket-adventure/
-  Palette 14 -> /zzz_assets/cursors/p14-nature/
-
-Animated .ani source cursors were converted to a single static .cur frame for
-browser compatibility. Semantic filenames such as default.cur, pointer.cur,
-text.cur, busy.cur, etc. make later swaps easy.
+Redirect system files are in:
+  /zzz_redirect/
