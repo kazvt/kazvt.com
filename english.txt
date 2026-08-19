@@ -270,6 +270,14 @@ marquee.7=i bought them and they were mine
 marquee.8=smeemo do you even love me?
 marquee.9=I SCREAM FOR ICE CREAM!!!!!!!!!!!!!!!!!!!
 marquee.10=fun fagt: kaz is actually allergic to bananas. fuck my monkey life
+marquee.11=you saved me... monkey_from_kung_fu_panda
+marquee.12=why? monkey_from_kung_fu_panda
+marquee.13=monke... oogway2
+marquee.14=why...? monkey_from_kung_fu_panda
+marquee.15=monke... oogway1
+marquee.16=monkey_from_kung_fu_panda
+marquee.17=you have shown me monke... oogway1
+marquee.18=mmmm... monke oogway2
 
 title.404=404 - kazvt
 meta.404.description=that kazvt page could not be found.
@@ -315,3 +323,48 @@ guide.window.status_scroll=scroll to follow the paths
 guide.window.status_tools=underlined nodes open their tools
 music.previous_symbol=<<
 music.next_symbol=>>
+
+# Global dynamic UI controls
+lineboil.on=LINEBOIL: ON
+lineboil.off=LINEBOIL: OFF
+lineboil.disable_aria=disable lineboil animation
+lineboil.enable_aria=enable lineboil animation
+
+# Redirect page
+title.redirect=opening link... | kazvt
+redirect.banner=>> opening outside link <<
+redirect.site=kazvt.com
+redirect.status.generic=warping through the old web...
+redirect.destination.generic={host}
+redirect.loading_destination=loading destination
+redirect.invalid=that outside link could not be opened.
+redirect.invalid_destination=invalid destination
+redirect.twitch.status=tuning into twitch...
+redirect.twitch.destination=twitch.tv
+redirect.kick.status=kicking open the next page...
+redirect.kick.destination=kick.com
+redirect.youtube.status=loading the video portal...
+redirect.youtube.destination=youtube.com
+redirect.discord.status=connecting to the discord...
+redirect.discord.destination=discord.com
+redirect.tumblr.status=tumbling into the next page...
+redirect.tumblr.destination=tumblr.com
+redirect.bsky.status=opening the blue sky...
+redirect.bsky.destination=bsky.app
+redirect.twitter.status=flying over to twitter...
+redirect.twitter.destination=twitter.com
+redirect.wife.status=visiting the garden...
+redirect.wife.destination=lillie.garden
+
+guide.load_standalone=open the standalone multistream guide
+music.mode.bars=bars
+music.mode.scope=scope
+music.mode.burst=burst
+meta.home.og_description=kazvt\ni am a monke called kaz, she/her, i play retro games :)\n\n🟣 twitch: https://www.twitch.tv/kazvt\n🔴 yt: https://www.youtube.com/@kazvt\n🟢 kick: https://kick.com/kazvt
+meta.guide.og_description=a yes/no old-web map for choosing a multistreaming setup.
+meta.404.og_description=lost page on kazvt.com
+
+# Browser / install UI
+manifest.name=kazvt
+manifest.short_name=kazvt
+manifest.description=kazvt old-web homepage and stream hub.

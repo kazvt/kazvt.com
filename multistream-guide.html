@@ -1,22 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>multistream guide | kazvt</title>
-    <meta
-      name="description"
-      content="kazvt's old-web multistreaming setup guide for OBS plugins, cloud multistreaming, or a VPS relay."
-    >
+    <title></title>
+    <meta name="description" data-i18n-content="meta.guide.description">
     <meta name="theme-color" content="#ff9d16">
-    <meta property="og:title" content="multistream guide | kazvt">
-    <meta property="og:description" content="a yes/no old-web map for choosing a multistreaming setup.">
+    <meta property="og:title" data-i18n-content="title.guide">
+    <meta property="og:description" data-i18n-content="meta.guide.og_description">
     <meta property="og:image" content="zzz_assets/kazvt-transparent.gif">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.ico">
-    <link rel="manifest" href="site.webmanifest">
+    <link rel="manifest" data-i18n-manifest>
     <script>
       // Keep phone/touch layout rules stable even when Android Chrome's page
       // zoom changes the CSS viewport width enough to cross a breakpoint.
@@ -24,9 +21,19 @@
         document.documentElement.classList.add("touch-device");
       }
     </script>
+    <script>
+      (() => {
+        let lineboil = "on";
+        try {
+          if (localStorage.getItem("kazvt-lineboil") === "off") lineboil = "off";
+        } catch {}
+        document.documentElement.dataset.lineboil = lineboil;
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="/shared/cursor-packs.css">
     <link rel="stylesheet" href="/shared/language-dock.css">
+    <link rel="stylesheet" href="/lineboil-control.css">
   </head>
   <body class="guide-page" data-page="guide">
     <svg class="boil-filters" aria-hidden="true" focusable="false">
@@ -44,89 +51,89 @@
       </filter>
     </svg>
 
-    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" aria-label="kazvt multistream guide" data-i18n-aria-label="guide.main_aria">
+    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" data-i18n-aria-label="guide.main_aria">
       <header class="site-header text-center grid justify-items-center gap-2">
         <div class="logo-row">
-          <button class="logo-wumpa logo-wumpa-left" type="button" data-logo-wumpa="left" aria-label="eat left wumpa fruit" data-i18n-aria-label="wumpa.logo.left_aria">
+          <button class="logo-wumpa logo-wumpa-left" type="button" data-logo-wumpa="left" data-i18n-aria-label="wumpa.logo.left_aria">
             <img src="zzz_assets/wumpa.gif" alt="">
           </button>
-          <a class="logo-home" href="index.html" aria-label="kazvt home" data-i18n-aria-label="logo.aria">
+          <a class="logo-home" href="index.html" data-i18n-aria-label="logo.aria">
             <span class="logo-flip-card">
-              <img class="site-logo logo-front" src="zzz_assets/kazvt-transparent.gif" alt="kazvt" data-i18n-alt="logo.image_alt">
+              <img class="site-logo logo-front" src="zzz_assets/kazvt-transparent.gif" data-i18n-alt="logo.image_alt">
               <img class="site-logo logo-back" src="zzz_assets/kazvt-transparent.gif" alt="">
             </span>
           </a>
-          <button class="logo-wumpa logo-wumpa-right" type="button" data-logo-wumpa="right" aria-label="eat right wumpa fruit" data-i18n-aria-label="wumpa.logo.right_aria">
+          <button class="logo-wumpa logo-wumpa-right" type="button" data-logo-wumpa="right" data-i18n-aria-label="wumpa.logo.right_aria">
             <img src="zzz_assets/wumpa.gif" alt="">
           </button>
         </div>
-        <p class="tagline" data-i18n="site.tagline">retro streams, old games, links, live status</p>
+        <p class="tagline" data-i18n="site.tagline"></p>
       </header>
 
-      <nav class="oldweb-nav scribble-box" aria-label="main links" data-i18n-aria-label="nav.aria">
-        <a href="index.html#links" data-i18n="nav.links">links</a>
-        <a href="index.html#profile" data-i18n="nav.profile">profile</a>
-        <a class="nav-multistream" href="index.html#multistream-guide-home"><span data-i18n="nav.multistream_top">multistream</span><span data-i18n="nav.multistream_bottom">guide</span></a>
-        <a href="index.html#guestbook" data-i18n="nav.guestbook">guestbook</a>
-        <a href="index.html#paint" data-i18n="nav.paint">paint</a>
-        <a href="index.html#badges" data-i18n="nav.badges">badges</a>
+      <nav class="oldweb-nav scribble-box" data-i18n-aria-label="nav.aria">
+        <a href="index.html#links" data-i18n="nav.links"></a>
+        <a href="index.html#profile" data-i18n="nav.profile"></a>
+        <a class="nav-multistream" href="index.html#multistream-guide-home"><span data-i18n="nav.multistream_top"></span><span data-i18n="nav.multistream_bottom"></span></a>
+        <a href="index.html#guestbook" data-i18n="nav.guestbook"></a>
+        <a href="index.html#paint" data-i18n="nav.paint"></a>
+        <a href="index.html#badges" data-i18n="nav.badges"></a>
       </nav>
 
-      <div class="marquee scribble-box" aria-label="site notice" data-i18n-aria-label="marquee.aria">
+      <div class="marquee scribble-box" data-i18n-aria-label="marquee.aria">
         <span data-marquee-text></span>
       </div>
 
       <section class="web-grid grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-3.5 items-start">
         <aside class="sidebar scribble-box">
-          <h2 data-i18n="sidebar.palette">palette</h2>
-          <div class="palette big-palette" aria-label="color palette" data-i18n-aria-label="palette.aria">
+          <h2 data-i18n="sidebar.palette"></h2>
+          <div class="palette big-palette" data-i18n-aria-label="palette.aria">
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" aria-label="use pastel stars palette" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
+              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" aria-label="use campfire checker palette" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" aria-label="use forest vines palette" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" aria-label="use ocean bubbles palette" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" aria-label="use night map palette" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" aria-label="use desert gingham palette" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" aria-label="use newsprint bricks palette" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" aria-label="use garden vines palette" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" aria-label="use sky clouds palette" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" aria-label="use rose curtain palette" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" aria-label="use deep circuit palette" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" aria-label="use arcade marquee palette" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" aria-label="use fire stripes palette" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" aria-label="use meadow dots palette" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" aria-label="use dream checker palette" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" aria-label="use swamp terminal palette" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
             </div>
           </div>
         </aside>
@@ -134,13 +141,13 @@
         <div class="content-stack">
           <section class="panel guide-panel scribble-box">
             <header class="panel-head">
-              <span class="panel-title" data-i18n="guide.panel_title">multistream setup guide</span>
-              <span class="panel-stamp" data-i18n="guide.panel_stamp">author: kazvt</span>
+              <span class="panel-title" data-i18n="guide.panel_title"></span>
+              <span class="panel-stamp" data-i18n="guide.panel_stamp"></span>
             </header>
             <div class="panel-body">
               <div class="guide-map-frame scribble-box">
-                <svg class="guide-map" viewBox="0 0 1200 1480" role="img" aria-label="multistream setup guide" data-i18n-aria-label="guide.panel_title" aria-describedby="guide-map-desc">
-                  <desc id="guide-map-desc" data-i18n="guide.svg_desc">a Yes or No flowchart that starts with commercial music, then recommends OBS plugins, a VPS setup, meld, or restream.</desc>
+                <svg class="guide-map" viewBox="0 0 1200 1480" role="img" data-i18n-aria-label="guide.panel_title" aria-describedby="guide-map-desc">
+                  <desc id="guide-map-desc" data-i18n="guide.svg_desc"></desc>
                   <defs>
                     <marker id="guide-arrow" viewBox="0 0 16 16" refX="14" refY="8" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
                       <path class="arrow-head" d="M2 2 L14 8 L2 14 Z"></path>
@@ -168,303 +175,305 @@
 
                   <g class="badge yes" transform="translate(413 181)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
-                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
+                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes"></text>
                   </g>
                   <g class="badge no" transform="translate(753 181)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
-                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
+                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no"></text>
                   </g>
                   <g class="badge yes" transform="translate(205 425)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
-                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
+                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes"></text>
                   </g>
                   <g class="badge no" transform="translate(365 376)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
-                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
+                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no"></text>
                   </g>
                   <g class="badge yes" transform="translate(190 658)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
-                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
+                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes"></text>
                   </g>
                   <g class="badge no" transform="translate(410 658)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
-                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
+                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no"></text>
                   </g>
                   <g class="badge yes" transform="translate(434 888)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
-                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
+                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes"></text>
                   </g>
                   <g class="badge no" transform="translate(615 888)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
-                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
+                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no"></text>
                   </g>
                   <g class="badge yes" transform="translate(635 1148)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
-                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
+                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes"></text>
                   </g>
                   <g class="badge no" transform="translate(830 1148)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
-                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
+                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no"></text>
                   </g>
                   <g class="badge yes" transform="translate(870 388)">
                     <polygon class="badge-shape" points="0 8 8 0 65 2 72 8 64 24 8 24"></polygon>
-                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes">Yes</text>
+                    <text x="36" y="17" text-anchor="middle" data-i18n="guide.yes"></text>
                   </g>
                   <g class="badge no" transform="translate(995 388)">
                     <polygon class="badge-shape" points="0 8 8 0 55 2 62 8 54 24 8 24"></polygon>
-                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no">No</text>
+                    <text x="31" y="17" text-anchor="middle" data-i18n="guide.no"></text>
                   </g>
 
                   <g class="node-svg decision" transform="translate(435 20)">
                     <polygon class="shape" points="0 14 15 0 318 5 330 0 324 134 311 148 10 143 0 148"></polygon>
-                    <text class="node-title" x="22" y="34" data-i18n="guide.root.1">will your stream include</text>
-                    <text class="node-title" x="22" y="58" data-i18n="guide.root.2">commercial music?</text>
-                    <a href="redirect.html?to=https%3A%2F%2Fopen.spotify.com%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="22" y="86" data-i18n="guide.root.3">spotify</text></a>
-                    <a href="redirect.html?to=https%3A%2F%2Fmusic.apple.com%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="84" y="86" data-i18n="guide.root.4">apple music</text></a>
-                    <text class="node-copy" x="22" y="110" data-i18n="guide.root.5">label tracks,</text>
-                    <text class="node-copy" x="22" y="132" data-i18n="guide.root.6">or songs you cannot stream legally.</text>
+                    <text class="node-title" x="22" y="34" data-i18n="guide.root.1"></text>
+                    <text class="node-title" x="22" y="58" data-i18n="guide.root.2"></text>
+                    <a href="redirect.html?to=https%3A%2F%2Fopen.spotify.com%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="22" y="86" data-i18n="guide.root.3"></text></a>
+                    <a href="redirect.html?to=https%3A%2F%2Fmusic.apple.com%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="84" y="86" data-i18n="guide.root.4"></text></a>
+                    <text class="node-copy" x="22" y="110" data-i18n="guide.root.5"></text>
+                    <text class="node-copy" x="22" y="132" data-i18n="guide.root.6"></text>
                   </g>
 
                   <g class="node-svg decision" transform="translate(35 250)">
                     <polygon class="shape" points="0 14 15 0 298 5 310 0 304 154 291 168 10 163 0 168"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.vod.1">do you care about</text>
-                    <text class="node-title" x="20" y="58" data-i18n="guide.vod.2">muted Twitch VODs?</text>
-                    <text class="node-copy" x="20" y="86" data-i18n="guide.vod.3">if yes, then we'll do</text>
-                    <text class="node-copy" x="20" y="108" data-i18n="guide.vod.4">music separation.</text>
-                    <text class="node-copy" x="20" y="132" data-i18n="guide.vod.5">if no, then just don't</text>
-                    <text class="node-copy" x="20" y="154" data-i18n="guide.vod.6">stream to youtube</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.vod.1"></text>
+                    <text class="node-title" x="20" y="58" data-i18n="guide.vod.2"></text>
+                    <text class="node-copy" x="20" y="86" data-i18n="guide.vod.3"></text>
+                    <text class="node-copy" x="20" y="108" data-i18n="guide.vod.4"></text>
+                    <text class="node-copy" x="20" y="132" data-i18n="guide.vod.5"></text>
+                    <text class="node-copy" x="20" y="154" data-i18n="guide.vod.6"></text>
                   </g>
 
                   <g class="node-svg decision" transform="translate(825 250)">
                     <polygon class="shape" points="0 14 15 0 298 5 310 0 304 116 291 130 10 125 0 130"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.cloud.1">need more than</text>
-                    <text class="node-title" x="20" y="58" data-i18n="guide.cloud.2">2 destinations?</text>
-                    <text class="node-copy" x="20" y="86" data-i18n="guide.cloud.3">use this path for stream-safe music</text>
-                    <text class="node-copy" x="20" y="108" data-i18n="guide.cloud.4">or if muted Twitch VODs are okay.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.cloud.1"></text>
+                    <text class="node-title" x="20" y="58" data-i18n="guide.cloud.2"></text>
+                    <text class="node-copy" x="20" y="86" data-i18n="guide.cloud.3"></text>
+                    <text class="node-copy" x="20" y="108" data-i18n="guide.cloud.4"></text>
                   </g>
 
                   <g class="node-svg action-pink twitch-kick-node" transform="translate(457 315)">
                     <polygon class="shape" points="0 14 15 0 244 5 256 0 250 156 237 170 10 165 0 170"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.twitch_kick.1">stream to Twitch &amp; Kick</text>
-                    <text class="node-copy" x="20" y="66" data-i18n="guide.twitch_kick.2">Kick VODs stay intact.</text>
-                    <text class="node-copy" x="20" y="88" data-i18n="guide.twitch_kick.3">Twitch VODs may mute,</text>
-                    <text class="node-copy" x="20" y="110" data-i18n="guide.twitch_kick.4">but live streams are fine.</text>
-                    <text class="node-copy" x="20" y="132" data-i18n="guide.twitch_kick.5">YouTube is where</text>
-                    <text class="node-copy" x="20" y="154" data-i18n="guide.twitch_kick.6">strikes happen.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.twitch_kick.1"></text>
+                    <text class="node-copy" x="20" y="66" data-i18n="guide.twitch_kick.2"></text>
+                    <text class="node-copy" x="20" y="88" data-i18n="guide.twitch_kick.3"></text>
+                    <text class="node-copy" x="20" y="110" data-i18n="guide.twitch_kick.4"></text>
+                    <text class="node-copy" x="20" y="132" data-i18n="guide.twitch_kick.5"></text>
+                    <text class="node-copy" x="20" y="154" data-i18n="guide.twitch_kick.6"></text>
                   </g>
 
                   <g class="node-svg decision" transform="translate(110 515)">
                     <polygon class="shape" points="0 14 15 0 298 5 310 0 304 116 291 130 10 125 0 130"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.pc.1">can your PC + upload</text>
-                    <text class="node-title" x="20" y="58" data-i18n="guide.pc.2">handle extra streams?</text>
-                    <text class="node-copy" x="20" y="86" data-i18n="guide.pc.3">each added destination can use</text>
-                    <text class="node-copy" x="20" y="108" data-i18n="guide.pc.4">more bitrate, GPU &amp; CPU.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.pc.1"></text>
+                    <text class="node-title" x="20" y="58" data-i18n="guide.pc.2"></text>
+                    <text class="node-copy" x="20" y="86" data-i18n="guide.pc.3"></text>
+                    <text class="node-copy" x="20" y="108" data-i18n="guide.pc.4"></text>
                   </g>
 
                   <g class="node-svg action-green" transform="translate(10 730)">
                     <polygon class="shape" points="0 14 15 0 298 5 310 0 304 128 291 142 10 137 0 142"></polygon>
                     <a href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer">
-                      <text class="node-title link-text" x="20" y="34" data-i18n="guide.local.1">use local OBS multistreaming</text>
+                      <text class="node-title link-text" x="20" y="34" data-i18n="guide.local.1"></text>
                     </a>
                     <a href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fsorayuki%2Fobs-multi-rtmp" target="_blank" rel="noopener noreferrer">
-                      <text class="node-copy link-text" x="20" y="68" data-i18n="guide.local.2">OBS multi RTMP</text>
+                      <text class="node-copy link-text" x="20" y="68" data-i18n="guide.local.2"></text>
                     </a>
-                    <text class="node-copy" x="137" y="68" data-i18n="guide.or">or</text>
+                    <text class="node-copy" x="137" y="68" data-i18n="guide.or"></text>
                     <a href="redirect.html?to=https%3A%2F%2Faitum.tv%2F" target="_blank" rel="noopener noreferrer">
-                      <text class="node-copy link-text" x="158" y="68" data-i18n="guide.local.3">aitum for OBS</text>
+                      <text class="node-copy link-text" x="158" y="68" data-i18n="guide.local.3"></text>
                     </a>
-                    <text class="node-copy" x="260" y="68" data-i18n="guide.period">.</text>
-                    <text class="node-copy" x="20" y="94" data-i18n="guide.local.4">best when your machine &amp;</text>
-                    <text class="node-copy" x="20" y="116" data-i18n="guide.local.5">upload speed have room.</text>
+                    <text class="node-copy" x="260" y="68" data-i18n="guide.period"></text>
+                    <text class="node-copy" x="20" y="94" data-i18n="guide.local.4"></text>
+                    <text class="node-copy" x="20" y="116" data-i18n="guide.local.5"></text>
                   </g>
 
                   <g class="node-svg decision" transform="translate(370 730)">
                     <polygon class="shape" points="0 14 15 0 318 5 330 0 324 128 311 142 10 137 0 142"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.vps.1">can you maintain</text>
-                    <text class="node-title" x="20" y="58" data-i18n="guide.vps.2">a VPS relay?</text>
-                    <text class="node-copy" x="20" y="86" data-i18n="guide.vps.3">servers, ports, RTMP/</text>
-                    <a href="redirect.html?to=https%3A%2F%2Fffmpeg.org%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="188" y="86" data-i18n="guide.vps.4">FFmpeg</text></a>
-                    <text class="node-copy" x="20" y="110" data-i18n="guide.vps.7">config, &amp; troubleshooting.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.vps.1"></text>
+                    <text class="node-title" x="20" y="58" data-i18n="guide.vps.2"></text>
+                    <text class="node-copy" x="20" y="86" data-i18n="guide.vps.3"></text>
+                    <a href="redirect.html?to=https%3A%2F%2Fffmpeg.org%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="188" y="86" data-i18n="guide.vps.4"></text></a>
+                    <text class="node-copy" x="20" y="110" data-i18n="guide.vps.7"></text>
                   </g>
 
                   <g class="node-svg action-blue recommended-node" transform="translate(740 465)">
                     <polygon class="shape" points="0 14 15 0 208 5 220 0 214 130 201 144 10 139 0 144"></polygon>
-                    <g class="guide-recommend-mark" transform="translate(190 18)" role="img" aria-label="Best Choice" data-i18n-aria-label="guide.best_choice">
-                      <title data-i18n="guide.best_choice">Best Choice</title>
+                    <g class="guide-recommend-mark" transform="translate(190 18)" role="img" data-i18n-aria-label="guide.best_choice">
+                      <title data-i18n="guide.best_choice"></title>
                       <circle class="guide-recommend-star-back" cx="0" cy="0" r="18"></circle>
                       <svg class="guide-recommend-star-icon" x="-11" y="-10" width="22" height="20" viewBox="0 0 576 512" aria-hidden="true" focusable="false">
                         <use href="#guide-fa-star"></use>
                       </svg>
                     </g>
                     <a href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer">
-                      <text class="node-title link-text" x="20" y="34" data-i18n="guide.meld.1">use meld</text>
-                      <text class="node-title link-text" x="20" y="58" data-i18n="guide.meld.2">multistreaming</text>
+                      <text class="node-title link-text" x="20" y="34" data-i18n="guide.meld.1"></text>
+                      <text class="node-title link-text" x="20" y="58" data-i18n="guide.meld.2"></text>
                     </a>
-                    <text class="node-copy" x="20" y="88" data-i18n="guide.meld.3">good for several</text>
-                    <text class="node-copy" x="20" y="110" data-i18n="guide.meld.4">destinations.</text>
-                    <text class="node-copy" x="20" y="128" data-i18n="guide.meld.5">free &amp; no watermark.</text>
+                    <text class="node-copy" x="20" y="88" data-i18n="guide.meld.3"></text>
+                    <text class="node-copy" x="20" y="110" data-i18n="guide.meld.4"></text>
+                    <text class="node-copy" x="20" y="128" data-i18n="guide.meld.5"></text>
                   </g>
 
                   <g class="node-svg action-blue" transform="translate(935 620)">
                     <polygon class="shape" points="0 14 15 0 208 5 220 0 214 142 201 156 10 151 0 156"></polygon>
                     <a href="redirect.html?to=https%3A%2F%2Frestream.io%2F" target="_blank" rel="noopener noreferrer">
-                      <text class="node-title link-text" x="20" y="34" data-i18n="guide.restream.1">use restream.io</text>
+                      <text class="node-title link-text" x="20" y="34" data-i18n="guide.restream.1"></text>
                     </a>
-                    <text class="node-copy" x="20" y="68" data-i18n="guide.restream.2">fast cloud setup</text>
-                    <text class="node-copy" x="20" y="90" data-i18n="guide.restream.3">for one or two</text>
-                    <text class="node-copy" x="20" y="112" data-i18n="guide.restream.4">destinations.</text>
-                    <text class="node-copy" x="20" y="136" data-i18n="guide.restream.5">free &amp; no watermark.</text>
+                    <text class="node-copy" x="20" y="68" data-i18n="guide.restream.2"></text>
+                    <text class="node-copy" x="20" y="90" data-i18n="guide.restream.3"></text>
+                    <text class="node-copy" x="20" y="112" data-i18n="guide.restream.4"></text>
+                    <text class="node-copy" x="20" y="136" data-i18n="guide.restream.5"></text>
                   </g>
 
                   <g class="node-svg action-purple" transform="translate(210 970)">
                     <polygon class="shape" points="0 14 15 0 298 5 310 0 304 144 291 158 10 153 0 158"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.vps_build.1">build a custom VPS relay</text>
-                    <text class="node-copy" x="20" y="68" data-i18n="guide.vps_build.2">rent a VPS &amp; run the repo</text>
-                    <text class="node-copy" x="20" y="92" data-i18n="guide.vps_build.3">or setup yourself.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.vps_build.1"></text>
+                    <text class="node-copy" x="20" y="68" data-i18n="guide.vps_build.2"></text>
+                    <text class="node-copy" x="20" y="92" data-i18n="guide.vps_build.3"></text>
                     <a href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fkazvt%2Fvps_streaming" target="_blank" rel="noopener noreferrer">
-                      <text class="tiny-copy link-text" x="20" y="122" data-i18n="guide.vps_build.repo">github.com/kazvt/vps_streaming</text>
+                      <text class="tiny-copy link-text" x="20" y="122" data-i18n="guide.vps_build.repo"></text>
                     </a>
                   </g>
 
                   <g class="node-svg decision" transform="translate(570 970)">
                     <polygon class="shape" points="0 14 15 0 298 5 310 0 304 144 291 158 10 153 0 158"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.done_question.1">want someone to</text>
-                    <text class="node-title" x="20" y="58" data-i18n="guide.done_question.2">set it up for you?</text>
-                    <text class="node-copy" x="20" y="92" data-i18n="guide.done_question.3">choose this if you want the</text>
-                    <text class="node-copy" x="20" y="116" data-i18n="guide.done_question.4">server route without learning it.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.done_question.1"></text>
+                    <text class="node-title" x="20" y="58" data-i18n="guide.done_question.2"></text>
+                    <text class="node-copy" x="20" y="92" data-i18n="guide.done_question.3"></text>
+                    <text class="node-copy" x="20" y="116" data-i18n="guide.done_question.4"></text>
                   </g>
 
                   <g class="node-svg action-orange" transform="translate(440 1235)">
                     <polygon class="shape" points="0 14 15 0 288 5 300 0 294 202 281 216 10 211 0 216"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.done.1">done-for-you VPS setup</text>
-                    <text class="node-copy" x="20" y="70" data-i18n="guide.done.2">one-time setup: i provision</text>
-                    <text class="node-copy" x="20" y="94" data-i18n="guide.done.3">the server &amp; give you</text>
-                    <text class="node-copy" x="20" y="118" data-i18n="guide.done.4">one simple</text>
-                    <a href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="102" y="118" data-i18n="guide.done.5">OBS</text></a>
-                    <text class="node-copy" x="140" y="118" data-i18n="guide.done.6">endpoint.</text>
-                    <text class="micro-copy" x="20" y="144" data-i18n="guide.done.7">i will usually ask for payment</text>
-                    <text class="micro-copy" x="20" y="158" data-i18n="guide.done.8">for my time setting it up.</text>
-                    <text class="micro-copy" x="20" y="172" data-i18n="guide.done.9">you will also need a monthly/yearly</text>
-                    <text class="micro-copy" x="20" y="186" data-i18n="guide.done.10">server subscription; that part is</text>
-                    <text class="micro-copy" x="20" y="200" data-i18n="guide.done.11">between you &amp; the provider.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.done.1"></text>
+                    <text class="node-copy" x="20" y="70" data-i18n="guide.done.2"></text>
+                    <text class="node-copy" x="20" y="94" data-i18n="guide.done.3"></text>
+                    <text class="node-copy" x="20" y="118" data-i18n="guide.done.4"></text>
+                    <a href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer"><text class="node-copy link-text" x="102" y="118" data-i18n="guide.done.5"></text></a>
+                    <text class="node-copy" x="140" y="118" data-i18n="guide.done.6"></text>
+                    <text class="micro-copy" x="20" y="144" data-i18n="guide.done.7"></text>
+                    <text class="micro-copy" x="20" y="158" data-i18n="guide.done.8"></text>
+                    <text class="micro-copy" x="20" y="172" data-i18n="guide.done.9"></text>
+                    <text class="micro-copy" x="20" y="186" data-i18n="guide.done.10"></text>
+                    <text class="micro-copy" x="20" y="200" data-i18n="guide.done.11"></text>
                   </g>
 
                   <g class="node-svg action-pink" transform="translate(810 1235)">
                     <polygon class="shape" points="0 14 15 0 288 5 300 0 294 154 281 168 10 163 0 168"></polygon>
-                    <text class="node-title" x="20" y="34" data-i18n="guide.safe.1">switch to safe music</text>
-                    <text class="node-copy" x="20" y="70" data-i18n="guide.safe.2">use licensed, royalty-free,</text>
-                    <text class="node-copy" x="20" y="94" data-i18n="guide.safe.3">or non-commercial tracks.</text>
-                    <text class="node-copy" x="20" y="124" data-i18n="guide.safe.4">then rejoin the cloud path.</text>
+                    <text class="node-title" x="20" y="34" data-i18n="guide.safe.1"></text>
+                    <text class="node-copy" x="20" y="70" data-i18n="guide.safe.2"></text>
+                    <text class="node-copy" x="20" y="94" data-i18n="guide.safe.3"></text>
+                    <text class="node-copy" x="20" y="124" data-i18n="guide.safe.4"></text>
                   </g>
 
-                  <text class="micro-copy path-note" x="760" y="313" text-anchor="middle" data-i18n="guide.rejoin.2">if VOD muting is okay</text>
-                  <text class="tiny-copy" x="966" y="1143" data-i18n="guide.rejoin.1">rejoin cloud path</text>
-                  <text class="tiny-copy" x="966" y="1165" data-i18n="guide.rejoin.3">after safe music</text>
+                  <text class="micro-copy path-note" x="760" y="313" text-anchor="middle" data-i18n="guide.rejoin.2"></text>
+                  <text class="tiny-copy" x="966" y="1143" data-i18n="guide.rejoin.1"></text>
+                  <text class="tiny-copy" x="966" y="1165" data-i18n="guide.rejoin.3"></text>
                 </svg>
               </div>
 
-              <div class="guide-mobile-ladder" aria-label="mobile multistreaming setup path" data-i18n-aria-label="guide.mobile.aria">
+              <div class="guide-mobile-ladder" data-i18n-aria-label="guide.mobile.aria">
                 <article class="guide-step">
-                  <h3 data-i18n="guide.mobile.root">1. commercial music?</h3>
-                  <p><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fopen.spotify.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.root.3">spotify</a><span data-i18n="guide.comma">,</span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmusic.apple.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.root.4">apple music</a><span data-i18n="guide.comma">,</span> <span data-i18n="guide.mobile.root_copy">label tracks, or songs you cannot stream legally.</span></p>
+                  <h3 data-i18n="guide.mobile.root"></h3>
+                  <p><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fopen.spotify.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.root.3"></a><span data-i18n="guide.comma"></span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmusic.apple.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.root.4"></a><span data-i18n="guide.comma"></span> <span data-i18n="guide.mobile.root_copy"></span></p>
                 </article>
-                <span class="guide-choice" data-i18n="guide.mobile.commercial_yes">Yes: commercial path</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice" data-i18n="guide.mobile.commercial_yes"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step">
-                  <h3 data-i18n="guide.mobile.vod">2a. care about muted Twitch VODs?</h3>
-                  <p data-i18n="guide.mobile.vod_copy">if yes, then we'll do music separation. if no, then just don't stream to youtube.</p>
+                  <h3 data-i18n="guide.mobile.vod"></h3>
+                  <p data-i18n="guide.mobile.vod_copy"></p>
                 </article>
-                <span class="guide-choice no" data-i18n="guide.mobile.cloud_join">No, safe music, or muted VODs are okay</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice no" data-i18n="guide.mobile.cloud_join"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step action">
-                  <h3 data-i18n="guide.twitch_kick.1">stream to Twitch &amp; Kick</h3>
-                  <p><span data-i18n="guide.twitch_kick.2">Kick VODs stay intact.</span> <span data-i18n="guide.twitch_kick.3">Twitch VODs may mute,</span> <span data-i18n="guide.twitch_kick.4">but live streams are fine.</span> <span data-i18n="guide.twitch_kick.5">YouTube is where</span> <span data-i18n="guide.twitch_kick.6">strikes happen.</span></p>
+                  <h3 data-i18n="guide.twitch_kick.1"></h3>
+                  <p><span data-i18n="guide.twitch_kick.2"></span> <span data-i18n="guide.twitch_kick.3"></span> <span data-i18n="guide.twitch_kick.4"></span> <span data-i18n="guide.twitch_kick.5"></span> <span data-i18n="guide.twitch_kick.6"></span></p>
                 </article>
-                <span class="guide-choice" data-i18n="guide.yes">Yes</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice" data-i18n="guide.yes"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step">
-                  <h3 data-i18n="guide.mobile.pc">3a. PC + upload can handle it?</h3>
-                  <p data-i18n="guide.pc.4">more bitrate, GPU &amp; CPU.</p>
+                  <h3 data-i18n="guide.mobile.pc"></h3>
+                  <p data-i18n="guide.pc.4"></p>
                 </article>
-                <span class="guide-choice" data-i18n="guide.mobile.pc_yes">Yes: stop here</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice" data-i18n="guide.mobile.pc_yes"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step action">
-                  <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.local.1">use local OBS multistreaming</a></h3>
-                  <p><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fsorayuki%2Fobs-multi-rtmp" target="_blank" rel="noopener noreferrer" data-i18n="guide.local.2">OBS multi RTMP</a> <span data-i18n="guide.or">or</span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Faitum.tv%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.local.3">aitum for OBS</a><span data-i18n="guide.period">.</span></p>
+                  <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.local.1"></a></h3>
+                  <p><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fsorayuki%2Fobs-multi-rtmp" target="_blank" rel="noopener noreferrer" data-i18n="guide.local.2"></a> <span data-i18n="guide.or"></span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Faitum.tv%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.local.3"></a><span data-i18n="guide.period"></span></p>
                 </article>
-                <span class="guide-choice no" data-i18n="guide.mobile.keep_going">No: keep going</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice no" data-i18n="guide.mobile.keep_going"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step">
-                  <h3 data-i18n="guide.mobile.vps">4a. can you maintain a VPS?</h3>
-                  <p><span data-i18n="guide.vps.3">servers, ports, RTMP/</span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fffmpeg.org%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.vps.4">FFmpeg</a> <span data-i18n="guide.vps.5">config,</span> <span data-i18n="guide.vps.6">&amp; troubleshooting.</span></p>
+                  <h3 data-i18n="guide.mobile.vps"></h3>
+                  <p><span data-i18n="guide.vps.3"></span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fffmpeg.org%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.vps.4"></a> <span data-i18n="guide.vps.5"></span> <span data-i18n="guide.vps.6"></span></p>
                 </article>
-                <span class="guide-choice" data-i18n="guide.mobile.pc_yes">Yes: stop here</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice" data-i18n="guide.mobile.pc_yes"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step vps">
-                  <h3 data-i18n="guide.vps_build.1">build a custom VPS relay</h3>
-                  <p><span data-i18n="guide.vps_build.2">rent a VPS &amp; run the repo</span><span data-i18n="guide.colon">:</span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fkazvt%2Fvps_streaming" target="_blank" rel="noopener noreferrer" data-i18n="guide.vps_build.repo">github.com/kazvt/vps_streaming</a></p>
+                  <h3 data-i18n="guide.vps_build.1"></h3>
+                  <p><span data-i18n="guide.vps_build.2"></span><span data-i18n="guide.colon"></span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fkazvt%2Fvps_streaming" target="_blank" rel="noopener noreferrer" data-i18n="guide.vps_build.repo"></a></p>
                 </article>
-                <span class="guide-choice no" data-i18n="guide.mobile.keep_going">No: keep going</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice no" data-i18n="guide.mobile.keep_going"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step">
-                  <h3 data-i18n="guide.mobile.done_question">5a. want setup done for you?</h3>
-                  <p data-i18n="guide.mobile.done_question_copy">use this if you want the VPS route without learning the server side.</p>
+                  <h3 data-i18n="guide.mobile.done_question"></h3>
+                  <p data-i18n="guide.mobile.done_question_copy"></p>
                 </article>
-                <span class="guide-choice" data-i18n="guide.mobile.pc_yes">Yes: stop here</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice" data-i18n="guide.mobile.pc_yes"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step done">
-                  <h3 data-i18n="guide.done.1">done-for-you VPS setup</h3>
-                  <p><span data-i18n="guide.done.2">one-time setup: i provision</span> <span data-i18n="guide.done.3">the server &amp; give you</span> <span data-i18n="guide.done.4">one simple</span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.done.5">OBS</a> <span data-i18n="guide.done.6">endpoint.</span></p>
-                  <p><span data-i18n="guide.done.7">i will usually ask for payment</span> <span data-i18n="guide.done.8">for my time setting it up.</span> <span data-i18n="guide.done.9">you will also need a monthly/yearly</span> <span data-i18n="guide.done.10">server subscription; that part is</span> <span data-i18n="guide.done.11">between you &amp; the provider.</span></p>
+                  <h3 data-i18n="guide.done.1"></h3>
+                  <p><span data-i18n="guide.done.2"></span> <span data-i18n="guide.done.3"></span> <span data-i18n="guide.done.4"></span> <a class="guide-link" href="redirect.html?to=https%3A%2F%2Fobsproject.com%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.done.5"></a> <span data-i18n="guide.done.6"></span></p>
+                  <p><span data-i18n="guide.done.7"></span> <span data-i18n="guide.done.8"></span> <span data-i18n="guide.done.9"></span> <span data-i18n="guide.done.10"></span> <span data-i18n="guide.done.11"></span></p>
                 </article>
-                <span class="guide-choice no" data-i18n="guide.mobile.switch_music">No: switch music</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice no" data-i18n="guide.mobile.switch_music"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step safe">
-                  <h3 data-i18n="guide.safe.1">switch to safe music</h3>
-                  <p data-i18n="guide.mobile.safe_copy">use licensed, royalty-free, or non-commercial tracks. then rejoin.</p>
+                  <h3 data-i18n="guide.safe.1"></h3>
+                  <p data-i18n="guide.mobile.safe_copy"></p>
                 </article>
-                <span class="guide-choice no" data-i18n="guide.mobile.cloud_join">No, safe music, or muted VODs are okay</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice no" data-i18n="guide.mobile.cloud_join"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step">
-                  <h3 data-i18n="guide.mobile.cloud">2b. more than 2 destinations?</h3>
-                  <p data-i18n="guide.mobile.cloud_copy">use this path for stream-safe music or if muted Twitch VODs are okay.</p>
+                  <h3 data-i18n="guide.mobile.cloud"></h3>
+                  <p data-i18n="guide.mobile.cloud_copy"></p>
                 </article>
-                <span class="guide-choice" data-i18n="guide.mobile.pc_yes">Yes: stop here</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice" data-i18n="guide.mobile.pc_yes"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step action guide-step-recommended">
-                  <span class="guide-mobile-recommend" role="img" aria-label="Best Choice" data-i18n-aria-label="guide.best_choice" title="Best Choice" data-i18n-title="guide.best_choice">
+                  <span class="guide-mobile-recommend" role="img" data-i18n-aria-label="guide.best_choice" data-i18n-title="guide.best_choice">
                     <svg viewBox="0 0 576 512" aria-hidden="true" focusable="false"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.5 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.1 12.9 31.3s23 8.1 33.7 2.4L288.1 439l128.3 69.4c10.7 5.8 23.8 4.9 33.7-2.4s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"></path></svg>
                   </span>
-                  <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.mobile.meld_title">use meld multistreaming</a></h3>
-                  <p data-i18n="guide.mobile.meld_copy">good for a straightforward workflow across several destinations. free &amp; no watermark.</p>
+                  <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.mobile.meld_title"></a></h3>
+                  <p data-i18n="guide.mobile.meld_copy"></p>
                 </article>
-                <span class="guide-choice no" data-i18n="guide.mobile.no_stop">No: stop here</span>
-                <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
+                <span class="guide-choice no" data-i18n="guide.mobile.no_stop"></span>
+                <div class="guide-arrow" data-i18n="guide.mobile.arrow"></div>
                 <article class="guide-step action">
-                  <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Frestream.io%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.restream.1">use restream.io</a></h3>
-                  <p data-i18n="guide.mobile.restream_copy">fast cloud setup when you only need one or two destinations. free &amp; no watermark.</p>
+                  <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Frestream.io%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.restream.1"></a></h3>
+                  <p data-i18n="guide.mobile.restream_copy"></p>
                 </article>
               </div>
 
-              <p class="guide-note"><span data-i18n="guide.note.1">tl;dr - if you care about commercial music, either be ok with Twitch VODs being muted and not streaming to YouTube, or use </span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fsorayuki%2Fobs-multi-rtmp" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.obs_plugins">OBS plugins</a><span data-i18n="guide.note.2"> or setup your own server/VPS. if you do copyright-free music, use </span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Frestream.io%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.restream">Restream.io</a><span data-i18n="guide.note.3"> or </span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.meld">Meld Multi</a><span data-i18n="guide.period">.</span></p>
+              <p class="guide-note"><span data-i18n="guide.note.1"></span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fgithub.com%2Fsorayuki%2Fobs-multi-rtmp" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.obs_plugins"></a><span data-i18n="guide.note.2"></span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Frestream.io%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.restream"></a><span data-i18n="guide.note.3"></span><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.note.meld"></a><span data-i18n="guide.period"></span></p>
             </div>
           </section>
         </div>
 
         <aside class="sidebar scribble-box">
-          <h2 data-i18n="sidebar.radio">kaz radio</h2>
+          <h2 data-i18n="sidebar.radio"></h2>
           <div id="music-player" class="music-player"></div>
         </aside>
       </section>
     </main>
 
     <div class="wumpa-layer" aria-hidden="true"></div>
-    <div class="wumpa-counter" role="status" aria-live="polite"><span data-i18n="wumpa.counter_label">wumpa:</span> <span data-wumpa-count>0</span></div>
-    <div class="kissy-counter" role="status" aria-live="polite"><span data-i18n="kissy.counter_label">kissy:</span> <span data-kissy-count>0</span></div>
+    <div class="wumpa-counter" role="status" aria-live="polite"><span data-i18n="wumpa.counter_label"></span> <span data-wumpa-count></span></div>
+    <div class="kissy-counter" role="status" aria-live="polite"><span data-i18n="kissy.counter_label"></span> <span data-kissy-count></span></div>
     <div class="wumpa-toast" role="status" aria-live="polite" data-i18n-aria-label="wumpa.toast_aria"></div>
 
     <script src="zzz_assets/vendor/cursor-effects/browser.js"></script>
-    <script src="/shared/language-dock.js"></script>
+    <script src="/i18n.js"></script>
+    <script src="/language-dock.js"></script>
+    <script src="/lineboil-control.js"></script>
     <script src="site.js"></script>
   </body>
 </html>

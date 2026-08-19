@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#ff9d16">
-    <title>opening link... | kazvt</title>
+    <title></title>
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <script>
       (() => {
@@ -17,15 +17,25 @@
         document.documentElement.dataset.theme = theme;
       })();
     </script>
+    <script>
+      (() => {
+        let lineboil = "on";
+        try {
+          if (localStorage.getItem("kazvt-lineboil") === "off") lineboil = "off";
+        } catch {}
+        document.documentElement.dataset.lineboil = lineboil;
+      })();
+    </script>
     <link rel="stylesheet" href="/redirect/redirect.css">
     <link rel="stylesheet" href="/shared/cursor-packs.css">
     <link rel="stylesheet" href="/shared/language-dock.css">
+    <link rel="stylesheet" href="/lineboil-control.css">
   </head>
-  <body class="redirect-page">
+  <body class="redirect-page" data-page="redirect">
     <main class="redirect-shell" aria-live="polite">
       <div class="redirect-tape">
-        <span>&gt;&gt; opening outside link &lt;&lt;</span>
-        <small>kazvt.com</small>
+        <span data-i18n="redirect.banner"></span>
+        <small data-i18n="redirect.site"></small>
       </div>
 
       <div class="redirect-stage" aria-hidden="true">
@@ -37,16 +47,15 @@
       </div>
 
       <div class="redirect-copy">
-        <strong data-redirect-status>warping through the old web...</strong>
-        <span class="redirect-host" data-redirect-host>loading destination</span>
+        <strong data-redirect-status data-i18n="redirect.status.generic"></strong>
+        <span class="redirect-host" data-redirect-host data-i18n="redirect.loading_destination"></span>
       </div>
       <div class="redirect-meter" aria-hidden="true"></div>
     </main>
-
-    <noscript><div class="redirect-noscript">javascript is needed for automatic redirects.</div></noscript>
-
-    <script src="/shared/language-dock.js"></script>
+<script src="/i18n.js"></script>
+    <script src="/language-dock.js"></script>
+    <script src="/lineboil-control.js"></script>
     <script src="/links.js"></script>
-    <script src="/redirect/redirect.js"></script>
+    <script src="/redirect.js"></script>
   </body>
 </html>

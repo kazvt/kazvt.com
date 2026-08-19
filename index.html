@@ -1,27 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>kazvt</title>
-    <meta
-      name="description"
-      content="kazvt's personal site with links and live status."
-    >
+    <title></title>
+    <meta name="description" data-i18n-content="meta.home.description">
     <meta name="theme-color" content="#ff9d16">
-    <meta property="og:title" content="kazvt">
-    <meta property="og:description" content="kazvt
-i am a monke called kaz, she/her, i play retro games :)
-
-🟣 twitch: https://www.twitch.tv/kazvt
-🔴 yt: https://www.youtube.com/@kazvt
-🟢 kick: https://kick.com/kazvt">
+    <meta property="og:title" data-i18n-content="title.home">
+    <meta property="og:description" data-i18n-content="meta.home.og_description">
     <meta property="og:image" content="zzz_assets/kazvt-transparent.gif">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.ico">
-    <link rel="manifest" href="site.webmanifest">
+    <link rel="manifest" data-i18n-manifest>
     <script>
       // Keep phone/touch layout rules stable even when Android Chrome's page
       // zoom changes the CSS viewport width enough to cross a breakpoint.
@@ -29,9 +21,19 @@ i am a monke called kaz, she/her, i play retro games :)
         document.documentElement.classList.add("touch-device");
       }
     </script>
+    <script>
+      (() => {
+        let lineboil = "on";
+        try {
+          if (localStorage.getItem("kazvt-lineboil") === "off") lineboil = "off";
+        } catch {}
+        document.documentElement.dataset.lineboil = lineboil;
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="/shared/cursor-packs.css">
     <link rel="stylesheet" href="/shared/language-dock.css">
+    <link rel="stylesheet" href="/lineboil-control.css">
   </head>
   <body data-page="home">
     <svg class="boil-filters" aria-hidden="true" focusable="false">
@@ -49,89 +51,89 @@ i am a monke called kaz, she/her, i play retro games :)
       </filter>
     </svg>
 
-    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" aria-label="kazvt personal site" data-i18n-aria-label="site.main_aria">
+    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" data-i18n-aria-label="site.main_aria">
       <header class="site-header text-center grid justify-items-center gap-2">
         <div class="logo-row">
-          <button class="logo-wumpa logo-wumpa-left" type="button" data-logo-wumpa="left" aria-label="eat left wumpa fruit" data-i18n-aria-label="wumpa.logo.left_aria">
+          <button class="logo-wumpa logo-wumpa-left" type="button" data-logo-wumpa="left" data-i18n-aria-label="wumpa.logo.left_aria">
             <img src="zzz_assets/wumpa.gif" alt="">
           </button>
-          <a class="logo-home" href="#top" aria-label="kazvt home" data-i18n-aria-label="logo.aria">
+          <a class="logo-home" href="#top" data-i18n-aria-label="logo.aria">
             <span class="logo-flip-card">
-              <img class="site-logo logo-front" src="zzz_assets/kazvt-transparent.gif" alt="kazvt" data-i18n-alt="logo.image_alt">
+              <img class="site-logo logo-front" src="zzz_assets/kazvt-transparent.gif" data-i18n-alt="logo.image_alt">
               <img class="site-logo logo-back" src="zzz_assets/kazvt-transparent.gif" alt="">
             </span>
           </a>
-          <button class="logo-wumpa logo-wumpa-right" type="button" data-logo-wumpa="right" aria-label="eat right wumpa fruit" data-i18n-aria-label="wumpa.logo.right_aria">
+          <button class="logo-wumpa logo-wumpa-right" type="button" data-logo-wumpa="right" data-i18n-aria-label="wumpa.logo.right_aria">
             <img src="zzz_assets/wumpa.gif" alt="">
           </button>
         </div>
-        <p class="tagline" data-i18n="site.tagline">retro streams, old games, links, live status</p>
+        <p class="tagline" data-i18n="site.tagline"></p>
       </header>
 
-      <nav class="oldweb-nav scribble-box" aria-label="main links" data-i18n-aria-label="nav.aria">
-        <a href="#links" data-i18n="nav.links">links</a>
-        <a href="#profile" data-i18n="nav.profile">profile</a>
-        <a class="nav-multistream" href="#multistream-guide-home"><span data-i18n="nav.multistream_top">multistream</span><span data-i18n="nav.multistream_bottom">guide</span></a>
-        <a href="#guestbook" data-i18n="nav.guestbook">guestbook</a>
-        <a href="#paint" data-i18n="nav.paint">paint</a>
-        <a href="#badges" data-i18n="nav.badges">badges</a>
+      <nav class="oldweb-nav scribble-box" data-i18n-aria-label="nav.aria">
+        <a href="#links" data-i18n="nav.links"></a>
+        <a href="#profile" data-i18n="nav.profile"></a>
+        <a class="nav-multistream" href="#multistream-guide-home"><span data-i18n="nav.multistream_top"></span><span data-i18n="nav.multistream_bottom"></span></a>
+        <a href="#guestbook" data-i18n="nav.guestbook"></a>
+        <a href="#paint" data-i18n="nav.paint"></a>
+        <a href="#badges" data-i18n="nav.badges"></a>
       </nav>
 
-      <div class="marquee scribble-box" aria-label="site notice" data-i18n-aria-label="marquee.aria">
+      <div class="marquee scribble-box" data-i18n-aria-label="marquee.aria">
         <span data-marquee-text></span>
       </div>
 
       <section class="web-grid grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-3.5 items-start">
         <aside class="sidebar scribble-box">
-          <h2 data-i18n="sidebar.palette">palette</h2>
-          <div class="palette big-palette" aria-label="color palette" data-i18n-aria-label="palette.aria">
+          <h2 data-i18n="sidebar.palette"></h2>
+          <div class="palette big-palette" data-i18n-aria-label="palette.aria">
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" aria-label="use pastel stars palette" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
+              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" aria-label="use campfire checker palette" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" aria-label="use forest vines palette" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" aria-label="use ocean bubbles palette" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" aria-label="use night map palette" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" aria-label="use desert gingham palette" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" aria-label="use newsprint bricks palette" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" aria-label="use garden vines palette" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" aria-label="use sky clouds palette" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" aria-label="use rose curtain palette" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" aria-label="use deep circuit palette" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" aria-label="use arcade marquee palette" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" aria-label="use fire stripes palette" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" aria-label="use meadow dots palette" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" aria-label="use dream checker palette" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" aria-label="use swamp terminal palette" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
             </div>
           </div>
         </aside>
@@ -139,20 +141,22 @@ i am a monke called kaz, she/her, i play retro games :)
         <div id="app" class="content-stack"></div>
 
         <aside class="sidebar scribble-box">
-          <h2 data-i18n="sidebar.radio">kaz radio</h2>
+          <h2 data-i18n="sidebar.radio"></h2>
           <div id="music-player" class="music-player"></div>
         </aside>
       </section>
     </main>
 
     <div class="wumpa-layer" aria-hidden="true"></div>
-    <div class="wumpa-counter" role="status" aria-live="polite"><span data-i18n="wumpa.counter_label">wumpa:</span> <span data-wumpa-count>0</span></div>
-    <div class="kissy-counter" role="status" aria-live="polite"><span data-i18n="kissy.counter_label">kissy:</span> <span data-kissy-count>0</span></div>
+    <div class="wumpa-counter" role="status" aria-live="polite"><span data-i18n="wumpa.counter_label"></span> <span data-wumpa-count></span></div>
+    <div class="kissy-counter" role="status" aria-live="polite"><span data-i18n="kissy.counter_label"></span> <span data-kissy-count></span></div>
     <div class="wumpa-toast" role="status" aria-live="polite" data-i18n-aria-label="wumpa.toast_aria"></div>
 
     <script src="zzz_assets/vendor/cursor-effects/browser.js"></script>
     <script src="links.js"></script>
-    <script src="/shared/language-dock.js"></script>
+    <script src="/i18n.js"></script>
+    <script src="/language-dock.js"></script>
+    <script src="/lineboil-control.js"></script>
     <script src="site.js"></script>
   </body>
 </html>

@@ -1104,6 +1104,8 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   display: flex;
   flex: none;
   align-items: center;
+  /* The site-wide span boil used to move each whole conveyor copy in sync. */
+  animation: none !important;
 }
 
 .marquee-piece {
@@ -1112,7 +1114,23 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   align-items: center;
   margin-right: clamp(38px, 4.5vw, 64px);
   white-space: nowrap;
+  animation-duration: var(--marquee-piece-boil-duration, 480ms) !important;
+  animation-timing-function: steps(2, end) !important;
+  animation-delay: var(--marquee-piece-boil-delay, 0ms) !important;
+  animation-iteration-count: infinite !important;
+  animation-direction: var(--marquee-piece-boil-direction, normal) !important;
 }
+
+/* Keep each message as one independently boiling unit instead of stacking the
+   same site-wide text animation onto any small spans inside that message. */
+.marquee-piece > span {
+  animation: none !important;
+}
+
+.marquee-piece-boil-a { animation-name: marqueePieceBoilA !important; }
+.marquee-piece-boil-b { animation-name: marqueePieceBoilB !important; }
+.marquee-piece-boil-c { animation-name: marqueePieceBoilC !important; }
+.marquee-piece-boil-d { animation-name: marqueePieceBoilD !important; }
 
 .web-grid {
   display: grid;
@@ -2459,6 +2477,9 @@ code {
 }
 
 .guide-launch-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   width: 100%;
   min-height: 78px;
@@ -2474,25 +2495,78 @@ code {
   box-shadow: 6px 6px 0 var(--shadow);
   clip-path: polygon(0 8px, 12px 0, 100% 5px, calc(100% - 7px) 100%, 5px calc(100% - 4px));
   transform-origin: center;
-  transition: transform 150ms ease-out;
+  animation: guideLaunchBreath 1900ms steps(8, end) infinite;
+  transition: transform 150ms ease-out, box-shadow 150ms steps(2, end);
+}
+
+/* Idle click cue: a jittery dashed registration frame, like the 404 page. */
+.guide-launch-button::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 6px;
+  border: 2px dashed color-mix(in srgb, currentColor 46%, transparent);
+  pointer-events: none;
+  animation: guideLaunchFramePulse 1350ms steps(6, end) infinite;
+}
+
+/* Redirect-style speed streak that periodically crosses the CTA. */
+.guide-launch-button::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -55%;
+  bottom: -55%;
+  left: -34%;
+  width: 25%;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 5px,
+      color-mix(in srgb, currentColor 34%, transparent) 5px 8px,
+      transparent 8px 13px
+    );
+  transform: skewX(-18deg);
+  animation: guideLaunchSweep 2500ms steps(16, end) infinite;
 }
 
 .guide-launch-button:hover,
 .guide-launch-button:focus-visible {
-  position: relative;
   z-index: 2;
+  animation: none;
   background-color: var(--bg);
   background-image: var(--wallpaper-image);
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--hover-text);
-  transform: scale(1.025) rotate(-0.2deg);
+  transform: translate(-1px, -2px) scale(1.035) rotate(-0.2deg);
+  box-shadow: 8px 9px 0 var(--shadow);
+}
+
+.guide-launch-button:hover::after,
+.guide-launch-button:focus-visible::after {
+  opacity: 0.3;
+  animation-duration: 850ms;
+}
+
+.guide-launch-button:active {
+  transform: translate(2px, 3px) scale(0.985) rotate(0.15deg);
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+
+.guide-launch-kicker,
+.guide-launch-title {
+  position: relative;
+  z-index: 1;
 }
 
 .guide-launch-kicker {
   font-size: 0.72rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+  animation: guideLaunchKicker 980ms steps(4, end) infinite;
 }
 
 .guide-launch-title {
@@ -2510,16 +2584,8 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   visibility: hidden;
 }
 
-/* The multistream modal is intentionally completely static. Keep the site's
-   hand-drawn lineboil motion outside the guide so its flowchart stays steady
-   while reading and scrolling. */
-.multistream-guide-modal,
-.multistream-guide-modal *,
-.multistream-guide-modal *::before,
-.multistream-guide-modal *::after {
-  animation: none !important;
-}
-
+/* The multistream modal participates in the site's lineboil system. The
+   persistent LINEBOIL control is the single global way to pause that motion. */
 .multistream-guide-modal {
   width: calc(100vw - 24px);
   height: calc(100dvh - 24px);
@@ -2988,6 +3054,60 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   0% { transform: translate(0, 0) rotate(0deg); }
   50% { transform: translate(0.7px, -0.8px) rotate(-0.18deg); }
   100% { transform: translate(-0.8px, 0.6px) rotate(0.16deg); }
+}
+
+@keyframes marqueePieceBoilA {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(0.65px, -0.75px) rotate(-0.16deg); }
+  100% { transform: translate(-0.7px, 0.5px) rotate(0.13deg); }
+}
+
+@keyframes marqueePieceBoilB {
+  0% { transform: translate(-0.35px, 0.45px) rotate(0.08deg); }
+  50% { transform: translate(0.75px, 0.35px) rotate(0.15deg); }
+  100% { transform: translate(-0.45px, -0.7px) rotate(-0.14deg); }
+}
+
+@keyframes marqueePieceBoilC {
+  0% { transform: translate(0.4px, -0.25px) rotate(-0.1deg); }
+  50% { transform: translate(-0.65px, 0.7px) rotate(0.14deg); }
+  100% { transform: translate(0.6px, 0.2px) rotate(-0.12deg); }
+}
+
+@keyframes marqueePieceBoilD {
+  0% { transform: translate(-0.55px, -0.15px) rotate(0.12deg); }
+  50% { transform: translate(0.35px, -0.7px) rotate(-0.13deg); }
+  100% { transform: translate(0.7px, 0.55px) rotate(0.1deg); }
+}
+
+@keyframes guideLaunchBreath {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  18% { transform: scale(1.012) rotate(-0.12deg); }
+  36% { transform: scale(0.998) rotate(0.08deg); }
+  54% { transform: scale(1.018) rotate(-0.08deg); }
+  72% { transform: scale(1.004) rotate(0.1deg); }
+  86% { transform: scale(1.01) rotate(-0.04deg); }
+}
+
+@keyframes guideLaunchFramePulse {
+  0%, 100% { opacity: 0.3; transform: translate(0, 0); }
+  24% { opacity: 0.58; transform: translate(1px, -1px); }
+  48% { opacity: 0.36; transform: translate(-1px, 1px); }
+  70% { opacity: 0.72; transform: translate(1px, 0); }
+  84% { opacity: 0.38; transform: translate(0, 1px); }
+}
+
+@keyframes guideLaunchSweep {
+  0%, 58% { left: -34%; opacity: 0; }
+  61% { opacity: 0.08; }
+  72% { opacity: 0.28; }
+  83% { left: 112%; opacity: 0.14; }
+  84%, 100% { left: 112%; opacity: 0; }
+}
+
+@keyframes guideLaunchKicker {
+  0%, 100% { translate: 0 0; letter-spacing: 0.09em; }
+  50% { translate: 0 -1px; letter-spacing: 0.12em; }
 }
 
 @keyframes guideTextBoil {

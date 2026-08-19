@@ -35,30 +35,30 @@ function outboundHref(destination) {
 const streamLinks = [
   {
     key: "twitch",
-    label: editableLink("twitch", "label", "Twitch"),
+    label: "",
     href: editableLink("twitch", "url", "https://www.twitch.tv/kazvt"),
     liveHref: editableLink("twitch", "liveUrl", "https://www.twitch.tv/kazvt"),
     icon: "twitch",
-    note: "streaming",
+    note: "",
     status: "offline",
     color: "#d9c5ff",
   },
   {
     key: "kick",
-    label: editableLink("kick", "label", "Kick"),
+    label: "",
     href: editableLink("kick", "url", "https://kick.com/kazvt"),
     icon: "kick",
-    note: "streaming",
+    note: "",
     status: "offline",
     color: "#c8ffc9",
   },
   {
     key: "youtube",
-    label: editableLink("youtube", "label", "YouTube"),
+    label: "",
     href: editableLink("youtube", "url", "https://www.youtube.com/@kazvt"),
     liveHref: editableLink("youtube", "liveUrl", "https://www.youtube.com/@kazvt/live"),
     icon: "youtube",
-    note: "streaming & archive",
+    note: "",
     status: "offline",
     color: "#ffc6b7",
   },
@@ -67,7 +67,7 @@ const streamLinks = [
 const socialLinks = [
   {
     key: "discord",
-    label: editableLink("discord", "label", "Discord"),
+    label: "",
     href: editableLink("discord", "url", "https://discord.com/invite/huzMpfJZ4J"),
     icon: "discord",
     note: "",
@@ -75,7 +75,7 @@ const socialLinks = [
   },
   {
     key: "tumblr",
-    label: editableLink("tumblr", "label", "Tumblr"),
+    label: "",
     href: editableLink("tumblr", "url", "https://www.tumblr.com/kazvt"),
     icon: "tumblr",
     note: "",
@@ -83,7 +83,7 @@ const socialLinks = [
   },
   {
     key: "bsky",
-    label: editableLink("bsky", "label", "BSky"),
+    label: "",
     href: editableLink("bsky", "url", "https://bsky.app/profile/kazvt.com"),
     icon: "bsky",
     note: "",
@@ -91,7 +91,7 @@ const socialLinks = [
   },
   {
     key: "twitter",
-    label: editableLink("twitter", "label", "Twitter"),
+    label: "",
     href: editableLink("twitter", "url", "https://twitter.com/monkevt"),
     icon: "twitter",
     note: "",
@@ -99,7 +99,7 @@ const socialLinks = [
   },
   {
     key: "wife",
-    label: editableLink("wife", "label", "my wife"),
+    label: "",
     href: editableLink("wife", "url", "https://lillie.garden/"),
     images: ["zzz_assets/wife/kazberry.webp", "zzz_assets/wife/ramberry.webp"],
     note: "",
@@ -108,14 +108,14 @@ const socialLinks = [
 ];
 
 const buttonBadges = [
-  { key: "believe", label: "believe it!", file: "believe-it.png" },
-  { key: "moon", label: "moon prism", file: "moon-prism.png" },
-  { key: "waku", label: "waku waku", file: "waku-waku.png" },
-  { key: "blast", label: "gotta blast", file: "gotta-blast.png" },
-  { key: "ultra", label: "plus ultra", file: "plus-ultra.png" },
-  { key: "snack", label: "snack break", file: "snack-break.png" },
-  { key: "cowboy", label: "space cowboy", file: "space-cowboy.png" },
-  { key: "power", label: "power up!", file: "power-up.png" },
+  { key: "believe", file: "believe-it.png" },
+  { key: "moon", file: "moon-prism.png" },
+  { key: "waku", file: "waku-waku.png" },
+  { key: "blast", file: "gotta-blast.png" },
+  { key: "ultra", file: "plus-ultra.png" },
+  { key: "snack", file: "snack-break.png" },
+  { key: "cowboy", file: "space-cowboy.png" },
+  { key: "power", file: "power-up.png" },
 ];
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"]);
@@ -141,22 +141,22 @@ const VISIT_COUNTER_CACHE_KEY = "kazvt-global-visits-last";
 const EMOTE_FILE = "emotes.txt";
 
 const cursorThemes = {
-  p1: { effect: "lineboilGlyphCursor", options: { glyphs: ["*"], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
-  p2: { effect: "lineboilGlyphCursor", options: { glyphs: ["!", "!!", "*"], colors: ["#EF6905", "#F1E5A1", "#486C2F"], sizes: [13, 18, 24], spawn: 2, scatter: 0.42, gravity: 0.006, life: 96, spin: 0.03 } },
-  p3: { effect: "lineboilGlyphCursor", options: { glyphs: ["+"], colors: ["#1D4533", "#F9D2BA", "#5E3122"], sizes: [9, 15, 22, 30], spawn: 1, scatter: 0.55, gravity: -0.005, life: 68, spin: 0.08 } },
+  p1: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#F599C6", "#FFEA88", "#7DCCAD"], sizes: [8, 13, 19, 27], spawn: 2, scatter: 0.85, gravity: 0.015, life: 58 } },
+  p2: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#EF6905", "#F1E5A1", "#486C2F"], sizes: [13, 18, 24], spawn: 2, scatter: 0.42, gravity: 0.006, life: 96, spin: 0.03 } },
+  p3: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#1D4533", "#F9D2BA", "#5E3122"], sizes: [9, 15, 22, 30], spawn: 1, scatter: 0.55, gravity: -0.005, life: 68, spin: 0.08 } },
   p4: { effect: "lineboilBubbleCursor", options: { colors: ["#D8FFC5", "#92EEFF", "#30AFFF"], strokeColor: "#30AFFF", minSize: 6, maxSize: 20, spawn: 2, life: 95 } },
-  p5: { effect: "lineboilGlyphCursor", options: { glyphs: ["✦", "◆", "kaz"], colors: ["#FAF7BB", "#D99B21", "#133458"], sizes: [12, 18, 24], spawn: 1, scatter: 0.24, gravity: -0.004, life: 92, spin: 0.02 } },
-  p6: { effect: "lineboilGlyphCursor", options: { glyphs: ["///", "!!!", ">>"], colors: ["#FEF2A0", "#F3CD97", "#BC4F4F"], sizes: [16, 22, 27], spawn: 1, scatter: 0.32, gravity: 0.004, life: 104, spin: 0.018 } },
-  p7: { effect: "lineboilFlagCursor", options: { text: "kazvt!!!", color: "#FCF2E5", strokeColor: "#EC5B38", shadowColor: "#524646", font: "900 24px Trebuchet MS, Comic Sans MS, Arial", gap: 16, wobble: 1.5 } },
-  p8: { effect: "lineboilSpringyGlyphCursor", options: { glyph: "✿", color: "#E8F5E9", strokeColor: "#1B5E20", font: "900 18px Trebuchet MS, Comic Sans MS, Arial", links: 7 } },
+  p5: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#FAF7BB", "#D99B21", "#133458"], sizes: [12, 18, 24], spawn: 1, scatter: 0.24, gravity: -0.004, life: 92, spin: 0.02 } },
+  p6: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#FEF2A0", "#F3CD97", "#BC4F4F"], sizes: [16, 22, 27], spawn: 1, scatter: 0.32, gravity: 0.004, life: 104, spin: 0.018 } },
+  p7: { effect: "lineboilFlagCursor", options: { text: "", color: "#FCF2E5", strokeColor: "#EC5B38", shadowColor: "#524646", font: "900 24px Trebuchet MS, Comic Sans MS, Arial", gap: 16, wobble: 1.5 } },
+  p8: { effect: "lineboilSpringyGlyphCursor", options: { glyph: "", color: "#E8F5E9", strokeColor: "#1B5E20", font: "900 18px Trebuchet MS, Comic Sans MS, Arial", links: 7 } },
   p9: { effect: "lineboilBubbleCursor", options: { colors: ["#E3F2FD", "#90CAF9", "#2196F3"], strokeColor: "#0D47A1", minSize: 3, maxSize: 18, spawn: 2, life: 82 } },
-  p10: { effect: "lineboilGlyphCursor", options: { glyphs: ["♥", "♡"], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [16, 24, 34], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
-  p11: { effect: "characterCursor", options: { characters: ["0", "1", "."], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "27px monospace", characterLifeSpanFunction: () => Math.floor(55 + Math.random() * 30), initialCharacterVelocityFunction: () => ({ x: (Math.random() - 0.5) * 1.1, y: (Math.random() - 0.5) * 1.1 }), characterVelocityChangeFunctions: { x_func: () => (Math.random() - 0.5) / 90, y_func: () => (Math.random() - 0.5) / 90 }, characterScalingFunction: (age, life) => Math.max((life - age) / life, 0) } },
+  p10: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#F6D8BD", "#F39399", "#CF4173"], sizes: [16, 24, 34], spawn: 1, scatter: 0.35, gravity: -0.012, life: 72, spin: 0.035 } },
+  p11: { effect: "characterCursor", options: { characters: [], colors: ["#98E8DE", "#45A9A9", "#4E1F6E"], font: "27px monospace", characterLifeSpanFunction: () => Math.floor(55 + Math.random() * 30), initialCharacterVelocityFunction: () => ({ x: (Math.random() - 0.5) * 1.1, y: (Math.random() - 0.5) * 1.1 }), characterVelocityChangeFunctions: { x_func: () => (Math.random() - 0.5) / 90, y_func: () => (Math.random() - 0.5) / 90 }, characterScalingFunction: (age, life) => Math.max((life - age) / life, 0) } },
   p12: { effect: "rainbowCursor", options: { colors: ["#007DCC", "#FFB900", "#D10056", "#B2054C"], length: 26, size: 5 } },
   p13: { effect: "rainbowCursor", options: { colors: ["#E73F1E", "#FB6C00", "#F9B637", "#FFDD9C"], length: 24, size: 5 } },
   p14: { effect: "rainbowCursor", options: { colors: ["#FED24F", "#FFF449", "#B2D959", "#7EC151"], length: 28, size: 5 } },
-  p15: { effect: "lineboilGlyphCursor", options: { glyphs: ["■", "□"], colors: ["#F8B2B2", "#AF719D", "#8B639B", "#403D88"], sizes: [11, 16, 23, 29], spawn: 1, scatter: 0.28, gravity: 0.01, life: 74, spin: 0.012 } },
-  p16: { effect: "lineboilFlagCursor", options: { text: "kazvt is OFFLINE", color: "#E1E100", strokeColor: "#063B00", shadowColor: "#90B800", font: "900 17px Courier New, monospace", gap: 12, wobble: 0.75 } },
+  p15: { effect: "lineboilGlyphCursor", options: { glyphs: [], colors: ["#F8B2B2", "#AF719D", "#8B639B", "#403D88"], sizes: [11, 16, 23, 29], spawn: 1, scatter: 0.28, gravity: 0.01, life: 74, spin: 0.012 } },
+  p16: { effect: "lineboilFlagCursor", options: { text: "", color: "#E1E100", strokeColor: "#063B00", shadowColor: "#90B800", font: "900 17px Courier New, monospace", gap: 12, wobble: 0.75 } },
 };
 
 let activeCursorEffect = null;
@@ -206,6 +206,19 @@ function svgTrailCursorImage(fill, stroke, shape = "diamond") {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+function activeCursorLayerHost() {
+  return document.querySelector("dialog[data-multistream-guide-modal][open]") || document.body;
+}
+
+function promoteCursorCanvas(canvas) {
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  canvas.dataset.cursorEffectLayer = "true";
+  canvas.style.pointerEvents = "none";
+  canvas.style.zIndex = "2147483647";
+  const host = activeCursorLayerHost();
+  if (canvas.parentElement !== host) host.appendChild(canvas);
+}
+
 function setupCursorCanvas() {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
@@ -214,7 +227,8 @@ function setupCursorCanvas() {
   canvas.style.inset = "0";
   canvas.style.pointerEvents = "none";
   canvas.style.zIndex = "2147483647";
-  document.body.appendChild(canvas);
+  activeCursorLayerHost().appendChild(canvas);
+  canvas.dataset.cursorEffectLayer = "true";
 
   const resize = () => {
     canvas.width = window.innerWidth;
@@ -233,7 +247,7 @@ function randomFrom(values) {
 
 function createLineboilGlyphCursor(options = {}) {
   const { canvas, context, resize } = setupCursorCanvas();
-  const glyphs = options.glyphs || ["*"];
+  const glyphs = options.glyphs?.length ? options.glyphs : [""];
   const colors = options.colors || ["#F599C6", "#FFEA88", "#7DCCAD"];
   const sizes = options.sizes || [10, 16, 22];
   const spawnCount = options.spawn || 1;
@@ -329,7 +343,7 @@ function createLineboilGlyphCursor(options = {}) {
 
 function createLineboilFlagCursor(options = {}) {
   const { canvas, context, resize } = setupCursorCanvas();
-  const text = ` ${options.text || "kazvt"}`;
+  const text = ` ${options.text || ""}`;
   const letters = Array.from(text).map((letter) => ({
     letter,
     x: window.innerWidth / 2,
@@ -569,7 +583,7 @@ function createLineboilCenteredTrailCursor(options = {}) {
 
 function createLineboilSpringyGlyphCursor(options = {}) {
   const { canvas, context, resize } = setupCursorCanvas();
-  const glyph = options.glyph || "✿";
+  const glyph = options.glyph || "";
   const links = options.links || 7;
   const color = options.color || "#ffffff";
   const strokeColor = options.strokeColor || "#111111";
@@ -715,27 +729,31 @@ async function loadActiveEmotes() {
 }
 
 async function loadActiveLanguageText() {
+  if (window.KazvtI18n) {
+    await window.KazvtI18n.ready;
+    activeLanguageText = new Map(window.KazvtI18n.entries());
+    document.documentElement.lang = window.KazvtI18n.language.code || DEFAULT_LANGUAGE_CODE;
+    return activeLanguageText;
+  }
+
   const languages = await loadLanguageManifest();
   const language = selectedLanguageFromManifest(languages);
-  const lines = await loadTextLines(`${language.name}.txt`);
-  const text = parseKeyValueLines(lines);
-  activeLanguageText = text;
+  activeLanguageText = parseKeyValueLines(await loadTextLines(`${language.name}.txt`));
   document.documentElement.lang = language.code || DEFAULT_LANGUAGE_CODE;
-  return text;
+  return activeLanguageText;
 }
 
-function translatedText(key, fallback = "") {
-  return activeLanguageText.get(key) || fallback;
+function translatedText(key) {
+  return activeLanguageText.get(key) || window.KazvtI18n?.t?.(key) || "";
 }
 
-function translatedList(key, fallback = []) {
-  const value = activeLanguageText.get(key);
-  if (!value) return fallback;
-  return value.split("|").map((item) => item.trim()).filter(Boolean);
+function translatedList(key) {
+  const value = translatedText(key);
+  return value ? value.split("|").map((item) => item.trim()).filter(Boolean) : [];
 }
 
-function translateTemplate(key, fallback = "", values = {}) {
-  let text = translatedText(key, fallback);
+function translateTemplate(key, values = {}) {
+  let text = translatedText(key);
   Object.entries(values).forEach(([name, value]) => {
     text = text.replaceAll(`{${name}}`, String(value));
   });
@@ -826,10 +844,14 @@ function cursorThemeConfig(theme) {
   const config = cursorThemes[theme] || cursorThemes.p1;
   const options = { ...(config.options || {}) };
 
-  if (options.glyphs) options.glyphs = translatedList(`cursor.${theme}.glyphs`, options.glyphs);
-  if (options.characters) options.characters = translatedList(`cursor.${theme}.characters`, options.characters);
-  if (options.glyph) options.glyph = translatedText(`cursor.${theme}.glyph`, options.glyph);
-  if (options.text) options.text = translatedText(`cursor.${theme}.text`, options.text);
+  const glyphs = translatedList(`cursor.${theme}.glyphs`);
+  const characters = translatedList(`cursor.${theme}.characters`);
+  const glyph = translatedText(`cursor.${theme}.glyph`);
+  const text = translatedText(`cursor.${theme}.text`);
+  if (glyphs.length) options.glyphs = glyphs;
+  if (characters.length) options.characters = characters;
+  if (glyph) options.glyph = glyph;
+  if (text) options.text = text;
 
   if (theme !== "p16") {
     return { ...config, options };
@@ -840,8 +862,8 @@ function cursorThemeConfig(theme) {
     options: {
       ...options,
       text: anyStreamLive()
-        ? translatedText("cursor.p16.live", "kazvt is LIVE")
-        : translatedText("cursor.p16.offline", "kazvt is OFFLINE"),
+        ? translatedText("cursor.p16.live")
+        : translatedText("cursor.p16.offline"),
     },
   };
 }
@@ -861,7 +883,14 @@ function updateCursorEffect(theme, { force = false } = {}) {
   if (!CursorEffect) return;
 
   try {
+    const canvasesBefore = new Set(document.querySelectorAll("canvas"));
     activeCursorEffect = new CursorEffect(config.options || {});
+    // Native dialogs occupy the browser top layer. Promote only the canvas
+    // created by the active cursor effect into that same layer so it remains
+    // visible over the multistream modal for every palette.
+    document.querySelectorAll("canvas").forEach((canvas) => {
+      if (!canvasesBefore.has(canvas)) promoteCursorCanvas(canvas);
+    });
   } catch {
     activeCursorEffect = null;
   }
@@ -943,12 +972,38 @@ async function initializeMarquee() {
   const startIndex = Math.floor(Math.random() * lines.length);
   const orderedLines = [...lines.slice(startIndex), ...lines.slice(0, startIndex)];
 
+  // Give every message its own line-boil rhythm. The same profile is reused
+  // for the duplicate conveyor copy so the marquee can loop without a visible
+  // style jump at the seam, while neighboring messages stay de-synchronized.
+  const variants = ["a", "b", "c", "d"];
+  let previousVariant = "";
+  const boilProfiles = orderedLines.map(() => {
+    const duration = 390 + Math.floor(Math.random() * 270);
+    const phase = Math.floor(Math.random() * duration);
+    const availableVariants = variants.filter((variant) => variant !== previousVariant);
+    const variant = availableVariants[Math.floor(Math.random() * availableVariants.length)];
+    previousVariant = variant;
+    return {
+      variant,
+      duration,
+      phase,
+      reverse: Math.random() < 0.5,
+    };
+  });
+
   const makeSequence = (duplicate = false) => {
     const sequence = el("span", { className: "marquee-sequence" });
     if (duplicate) sequence.setAttribute("aria-hidden", "true");
 
-    orderedLines.forEach((line) => {
-      const piece = el("span", { className: "marquee-piece", ariaHidden: "true" });
+    orderedLines.forEach((line, index) => {
+      const profile = boilProfiles[index];
+      const piece = el("span", {
+        className: `marquee-piece marquee-piece-boil-${profile.variant}`,
+        ariaHidden: "true",
+      });
+      piece.style.setProperty("--marquee-piece-boil-duration", `${profile.duration}ms`);
+      piece.style.setProperty("--marquee-piece-boil-delay", `-${profile.phase}ms`);
+      piece.style.setProperty("--marquee-piece-boil-direction", profile.reverse ? "reverse" : "normal");
       setInlineNote(piece, line, { animate: false });
       sequence.append(piece);
     });
@@ -993,15 +1048,16 @@ async function initializeLanguageText() {
 
 function applyLanguageText(root, descriptions = activeLanguageText) {
   const page = document.body.dataset.page || "home";
-  document.title = translatedText(`title.${page}`, document.title);
+  document.title = translatedText(`title.${page}`);
 
   const metaDescription = document.querySelector('meta[name="description"]');
   const description = descriptions.get(`meta.${page}.description`);
   if (metaDescription && description) metaDescription.setAttribute("content", description);
   const ogTitle = document.querySelector('meta[property="og:title"]');
   const ogDescription = document.querySelector('meta[property="og:description"]');
-  if (ogTitle) ogTitle.setAttribute("content", translatedText(`title.${page}`, document.title));
-  if (ogDescription && description) ogDescription.setAttribute("content", description);
+  const socialDescription = descriptions.get(`meta.${page}.og_description`) || description;
+  if (ogTitle) ogTitle.setAttribute("content", translatedText(`title.${page}`));
+  if (ogDescription && socialDescription) ogDescription.setAttribute("content", socialDescription);
 
   root.querySelectorAll("[data-i18n]").forEach((node) => {
     const key = node.getAttribute("data-i18n");
@@ -1043,13 +1099,10 @@ function applyLanguageText(root, descriptions = activeLanguageText) {
 }
 
 const profileFacts = [
-  ["profile.fact.name", "name", "kazvt", "profile.fact.name_value"],
-  ["profile.fact.pronouns", "pronouns", "she/her", "profile.fact.pronouns_value"],
-  ["profile.fact.mode", "mode", "retro games & streams", "profile.fact.mode_value"],
+  ["profile.fact.name", "profile.fact.name_value"],
+  ["profile.fact.pronouns", "profile.fact.pronouns_value"],
+  ["profile.fact.mode", "profile.fact.mode_value"],
 ];
-
-const bio =
-  "hey! i'm kaz, a monke girl who loves retro gaming & streaming. i play classic games from the 1980s to the late 2000s, i love classic shooters, platformers, & i yap quite a bit. i also programme a lot of my own tools. come hang out & watch me try not to lose my mind at old jank!";
 
 function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
@@ -1191,11 +1244,11 @@ async function loadManifest(path, allowedExtensions) {
   }
 }
 
-function panel({ id, title, stamp, titleKey, stampKey, children }) {
+function panel({ id, titleKey, stampKey, children }) {
   return el("section", { id, className: "panel scribble-box" }, [
     el("header", { className: "panel-head" }, [
-      el("span", { className: "panel-title", "data-i18n": titleKey }, [translatedText(titleKey, title)]),
-      el("span", { className: "panel-stamp", "data-i18n": stampKey }, [translatedText(stampKey, stamp)]),
+      el("span", { className: "panel-title", "data-i18n": titleKey }, [translatedText(titleKey)]),
+      el("span", { className: "panel-stamp", "data-i18n": stampKey }, [translatedText(stampKey)]),
     ]),
     el("div", { className: "panel-body" }, children),
   ]);
@@ -1215,9 +1268,9 @@ function sticker(link, extraClass = "") {
     },
     [
       hasStatus
-        ? el("span", { className: `sticker-status-corner ${status}`, ariaLabel: translateTemplate("status.aria", "{label} is {status}", { label: link.label, status: translatedText(`status.${status}`, status) }) }, [
+        ? el("span", { className: `sticker-status-corner ${status}`, ariaLabel: translateTemplate("status.aria", { label: link.label, status: translatedText(`status.${status}`) }) }, [
             el("span", { className: "crayon-pip", ariaHidden: "true" }),
-            el("span", { className: "sticker-status-word", "data-status-word": status }, [translatedText(`status.${status}`, status)]),
+            el("span", { className: "sticker-status-word", "data-status-word": status }, [translatedText(`status.${status}`)]),
           ])
         : "",
       el("span", { className: "sticker-glyph", ariaHidden: "true" }, [link.images ? wifeIcon(link.images) : platformIcon(link.icon || link.key)]),
@@ -1236,7 +1289,7 @@ function spawnWifeKissEffect(sticker) {
 
   const stamp = el("span", { className: "wife-kiss-stamp", ariaHidden: "true" });
   const fixedText = el("span", { className: "wife-kiss-fixed-text", ariaHidden: "true" }, [
-    translatedText("wife.kiss_fixed", "mwah !!!"),
+    translatedText("wife.kiss_fixed"),
   ]);
   sticker.append(stamp);
   sticker.append(fixedText);
@@ -1244,7 +1297,7 @@ function spawnWifeKissEffect(sticker) {
   window.setTimeout(() => fixedText.remove(), 1850);
 
   const particleCount = 26;
-  const kissParticles = translatedList("wife.kiss_particles", ["\u2665", "\u2661", "<3", "xoxo", "mwah"]);
+  const kissParticles = translatedList("wife.kiss_particles");
   for (let index = 0; index < particleCount; index += 1) {
     const isKiss = index % 4 === 0;
     const angle = Math.random() * Math.PI * 2;
@@ -1320,37 +1373,35 @@ function statusCard(link) {
   return el("article", { className: `status-card scribble-box ${link.status}` }, [
     el("span", { className: "status-light", ariaHidden: "true" }),
     el("strong", {}, [link.label]),
-    el("span", { className: "status-word", "data-status-word": link.status }, [translatedText(`status.${link.status}`, link.status)]),
+    el("span", { className: "status-word", "data-status-word": link.status }, [translatedText(`status.${link.status}`)]),
     el("p", { "data-i18n": link.status === "live" ? "status.live_copy" : "status.offline_copy" }, [
-      translatedText(link.status === "live" ? "status.live_copy" : "status.offline_copy", link.status === "live" ? "paint is wet, stream is on" : "drying out for now"),
+      translatedText(link.status === "live" ? "status.live_copy" : "status.offline_copy"),
     ]),
   ]);
 }
 
 function profilePanel() {
   const facts = el("dl", { className: "profile-facts" });
-  profileFacts.forEach(([key, label, value, valueKey]) => {
+  profileFacts.forEach(([key, valueKey]) => {
     facts.append(el("div", {}, [
-      el("dt", { "data-i18n": key }, [translatedText(key, label)]),
-      el("dd", { "data-i18n": valueKey }, [translatedText(valueKey, value)]),
+      el("dt", { "data-i18n": key }, [translatedText(key)]),
+      el("dd", { "data-i18n": valueKey }, [translatedText(valueKey)]),
     ]));
   });
 
   return panel({
     id: "profile",
-    title: "about kaz",
-    stamp: "profile.gif",
     titleKey: "panel.profile.title",
     stampKey: "panel.profile.stamp",
     children: [
       el("div", { className: "profile-layout" }, [
         el("figure", { className: "portrait art-carousel scribble-box" }, [
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
-            el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt", "kazvt art"), "data-i18n-alt": "art.alt" }),
+            el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt"), "data-i18n-alt": "art.alt" }),
           ]),
-          el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, [translatedText("profile.art_caption", "art window")]),
+          el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, [translatedText("profile.art_caption")]),
         ]),
-        el("div", { className: "profile-copy" }, [facts, el("p", { "data-i18n": "profile.bio" }, [translatedText("profile.bio", bio)])]),
+        el("div", { className: "profile-copy" }, [facts, el("p", { "data-i18n": "profile.bio" }, [translatedText("profile.bio")])]),
       ]),
     ],
   });
@@ -1359,14 +1410,12 @@ function profilePanel() {
 function guestbookPanel() {
   return panel({
     id: "guestbook",
-    title: "guestbook",
-    stamp: "sign here",
     titleKey: "panel.guestbook.title",
     stampKey: "panel.guestbook.stamp",
     children: [
       el("div", { className: "guestbook-lines" }, [
-        el("p", { "data-i18n": "guestbook.name" }, [translatedText("guestbook.name", "name: kazvt visitor")]),
-        el("p", { "data-i18n": "guestbook.message" }, [translatedText("guestbook.message", "message: thanks for visiting kazvt dot com!!")]),
+        el("p", { "data-i18n": "guestbook.name" }, [translatedText("guestbook.name")]),
+        el("p", { "data-i18n": "guestbook.message" }, [translatedText("guestbook.message")]),
       ]),
     ],
   });
@@ -1375,25 +1424,23 @@ function guestbookPanel() {
 function oldWebPanel() {
   return panel({
     id: "webcorner",
-    title: "web corner",
-    stamp: "always open",
     titleKey: "panel.webcorner.title",
     stampKey: "panel.webcorner.stamp",
     children: [
       el("div", { className: "web-corner" }, [
-        el("p", { className: "construction-sign", "data-i18n": "webcorner.construction" }, [translatedText("webcorner.construction", "under construction forever")]),
+        el("p", { className: "construction-sign", "data-i18n": "webcorner.construction" }, [translatedText("webcorner.construction")]),
         el("p", {}, [
-          el("span", { "data-i18n": "webcorner.webring" }, [translatedText("webcorner.webring", "webring:")]),
+          el("span", { "data-i18n": "webcorner.webring" }, [translatedText("webcorner.webring")]),
           " ",
-          el("a", { href: "#links", "data-i18n": "webcorner.prev" }, [translatedText("webcorner.prev", "prev")]),
+          el("a", { href: "#links", "data-i18n": "webcorner.prev" }, [translatedText("webcorner.prev")]),
           " ",
-          el("span", { "data-i18n": "webcorner.separator" }, [translatedText("webcorner.separator", "/")]),
+          el("span", { "data-i18n": "webcorner.separator" }, [translatedText("webcorner.separator")]),
           " ",
-          el("a", { href: "#badges", "data-i18n": "webcorner.random" }, [translatedText("webcorner.random", "random")]),
+          el("a", { href: "#badges", "data-i18n": "webcorner.random" }, [translatedText("webcorner.random")]),
           " ",
-          el("span", { "data-i18n": "webcorner.separator" }, [translatedText("webcorner.separator", "/")]),
+          el("span", { "data-i18n": "webcorner.separator" }, [translatedText("webcorner.separator")]),
           " ",
-          el("a", { href: "#guestbook", "data-i18n": "webcorner.next" }, [translatedText("webcorner.next", "next")]),
+          el("a", { href: "#guestbook", "data-i18n": "webcorner.next" }, [translatedText("webcorner.next")]),
         ]),
       ]),
     ],
@@ -1403,8 +1450,6 @@ function oldWebPanel() {
 function badgesPanel() {
   return panel({
     id: "badges",
-    title: "88x31 stash",
-    stamp: "take one",
     titleKey: "panel.badges.title",
     stampKey: "panel.badges.stamp",
     children: [
@@ -1418,9 +1463,9 @@ function badgesPanel() {
               href: `zzz_assets/buttons/${badge.file}`,
               download: badge.file,
               className: "badge-link",
-              title: translateTemplate("badge.download_title", "download {label}", { label: translatedText(`badge.${badge.key}`, badge.label) }),
+              title: translateTemplate("badge.download_title", { label: translatedText(`badge.${badge.key}`) }),
             },
-            [el("img", { src: `zzz_assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`, badge.label), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
+            [el("img", { src: `zzz_assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
           ),
         ),
       ),
@@ -1461,7 +1506,7 @@ async function initializeArtCarousel() {
 
   function displayArt(file, attempts = 0) {
     const image = new Image();
-    image.alt = translatedText("art.alt", "kazvt art");
+    image.alt = translatedText("art.alt");
     image.className = "art-image slide-enter";
     image.onerror = () => {
       failedFiles.add(file);
@@ -1496,7 +1541,7 @@ async function initializeArtCarousel() {
           image.classList.remove("slide-enter");
         });
       }, 240);
-      if (caption) caption.textContent = file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || translatedText("art.default_caption", "art window");
+      if (caption) caption.textContent = file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || translatedText("art.default_caption");
     };
     image.src = artUrl(file);
   }
@@ -1511,23 +1556,21 @@ async function initializeArtCarousel() {
 function paintPanel() {
   return panel({
     id: "paint",
-    title: "doodle pad",
-    stamp: "stylus.exe",
     titleKey: "panel.paint.title",
     stampKey: "panel.paint.stamp",
     children: [
       el("div", { className: "paint-app" }, [
         el("div", { className: "paint-zone scribble-box" }, [
-          el("canvas", { id: "doodle-canvas", width: "720", height: "360", ariaLabel: translatedText("paint.canvas_aria", "draw here"), "data-i18n-aria-label": "paint.canvas_aria" }),
-          el("p", { className: "paint-caption", "data-i18n": "paint.caption" }, [translatedText("paint.caption", "draw here, then save your doodle")]),
+          el("canvas", { id: "doodle-canvas", width: "720", height: "360", ariaLabel: translatedText("paint.canvas_aria"), "data-i18n-aria-label": "paint.canvas_aria" }),
+          el("p", { className: "paint-caption", "data-i18n": "paint.caption" }, [translatedText("paint.caption")]),
         ]),
-        el("div", { className: "paint-controls scribble-box", ariaLabel: translatedText("paint.tools_aria", "doodle pad tools"), "data-i18n-aria-label": "paint.tools_aria" }, [
-          el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true", "data-i18n": "paint.red" }, [translatedText("paint.red", "red")]),
-          el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false", "data-i18n": "paint.blue" }, [translatedText("paint.blue", "blue")]),
-          el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false", "data-i18n": "paint.green" }, [translatedText("paint.green", "green")]),
-          el("button", { type: "button", "data-brush": "#302135", ariaPressed: "false", "data-i18n": "paint.ink" }, [translatedText("paint.ink", "ink")]),
-          el("button", { type: "button", "data-clear": "true", "data-i18n": "paint.clear" }, [translatedText("paint.clear", "clear")]),
-          el("button", { type: "button", "data-save": "true", "data-i18n": "paint.save" }, [translatedText("paint.save", "save gif")]),
+        el("div", { className: "paint-controls scribble-box", ariaLabel: translatedText("paint.tools_aria"), "data-i18n-aria-label": "paint.tools_aria" }, [
+          el("button", { type: "button", "data-brush": "#ff432f", ariaPressed: "true", "data-i18n": "paint.red" }, [translatedText("paint.red")]),
+          el("button", { type: "button", "data-brush": "#48cfff", ariaPressed: "false", "data-i18n": "paint.blue" }, [translatedText("paint.blue")]),
+          el("button", { type: "button", "data-brush": "#50d85f", ariaPressed: "false", "data-i18n": "paint.green" }, [translatedText("paint.green")]),
+          el("button", { type: "button", "data-brush": "#302135", ariaPressed: "false", "data-i18n": "paint.ink" }, [translatedText("paint.ink")]),
+          el("button", { type: "button", "data-clear": "true", "data-i18n": "paint.clear" }, [translatedText("paint.clear")]),
+          el("button", { type: "button", "data-save": "true", "data-i18n": "paint.save" }, [translatedText("paint.save")]),
         ]),
       ]),
     ],
@@ -1539,7 +1582,7 @@ function updateSidebar(links) {
     const node = document.querySelector(`#side-${link.key}`);
     if (node) {
       node.setAttribute("data-status-word", link.status);
-      setInlineNote(node, translatedText(`status.${link.status}`, link.status));
+      setInlineNote(node, translatedText(`status.${link.status}`));
     }
   });
 }
@@ -1572,15 +1615,15 @@ function setVisitCounterValue(counter, count, label) {
 
   counter.setAttribute(
     "aria-label",
-    translateTemplate("footer.counter_aria", "{label}: {count}", { label, count: safeCount }),
+    translateTemplate("footer.counter_aria", { label, count: safeCount }),
   );
 }
 
-function createVisitCounter({ label = "visits" } = {}) {
+function createVisitCounter({ label = "" } = {}) {
   const cachedCount = readCachedVisitCount();
   const counter = el("div", {
     className: "visit-counter",
-    ariaLabel: translateTemplate("footer.counter_aria", "{label}: {count}", { label, count: cachedCount }),
+    ariaLabel: translateTemplate("footer.counter_aria", { label, count: cachedCount }),
   }, [
     el("span", { className: "counter-label", "data-i18n": "footer.counter" }, [label]),
     el(
@@ -1734,7 +1777,7 @@ function initializeLogoWumpas() {
         state[side].eaten = true;
         button.classList.add("is-eaten");
         button.setAttribute("aria-hidden", "true");
-        showWumpaToast(translatedText("wumpa.logo.eaten_toast", "you collected the wumpa fruit! nice!!!"));
+        showWumpaToast(translatedText("wumpa.logo.eaten_toast"));
       }
     });
   });
@@ -1767,7 +1810,7 @@ function initializeLogoRecovery() {
     });
 
     playCrazyRecoverySound();
-    showWumpaToast(translatedText("wumpa.logo.recover_toast", "Okay, you caught me. There is actually a way to recover those wumpa. Don't tell anyone."));
+    showWumpaToast(translatedText("wumpa.logo.recover_toast"));
   });
 }
 
@@ -1776,7 +1819,7 @@ function spawnRandomWumpa(layer) {
   if (existing > 2) return;
 
   const size = 28;
-  const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: translatedText("wumpa.random_aria", "eat wumpa fruit"), "data-i18n-aria-label": "wumpa.random_aria" }, [
+  const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: translatedText("wumpa.random_aria"), "data-i18n-aria-label": "wumpa.random_aria" }, [
     el("img", { src: "zzz_assets/wumpa.gif", alt: "" }),
   ]);
   const side = randomFrom(["left", "right"]);
@@ -1920,8 +1963,8 @@ function initializeScrollTargetHighlights() {
 function multistreamGuidePanel() {
   return el("section", { id: "multistream-guide-home", className: "panel guide-launch-panel scribble-box" }, [
     el("button", { type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
-      el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker", ">> open window <<")]),
-      el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary", "multistream setup guide")]),
+      el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker")]),
+      el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary")]),
     ]),
   ]);
 }
@@ -1935,24 +1978,24 @@ function createMultistreamGuideModal() {
     el("div", { className: "multistream-guide-window" }, [
       el("header", { className: "guide-window-bar" }, [
         el("div", { className: "guide-window-heading" }, [
-          el("span", { className: "guide-window-kicker", ariaHidden: "true", "data-i18n": "guide.window.kicker" }, [translatedText("guide.window.kicker", "author: kazvt")]),
-          el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, [translatedText("guide.panel_title", "multistream setup guide")]),
+          el("span", { className: "guide-window-kicker", ariaHidden: "true", "data-i18n": "guide.window.kicker" }, [translatedText("guide.window.kicker")]),
+          el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, [translatedText("guide.panel_title")]),
         ]),
-        el("div", { className: "guide-window-controls", ariaLabel: translatedText("guide.window.controls_aria", "guide window controls"), "data-i18n-aria-label": "guide.window.controls_aria" }, [
-          el("span", { className: "guide-window-stamp", ariaHidden: "true", "data-i18n": "guide.window.map_stamp" }, [translatedText("guide.window.map_stamp", "YES / NO MAP")]),
-          el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: translatedText("guide.window.close_aria", "close multistream guide"), "data-i18n-aria-label": "guide.window.close_aria", title: translatedText("guide.window.close_title", "close"), "data-i18n-title": "guide.window.close_title" }, [translatedText("guide.window.close_symbol", "X")]),
+        el("div", { className: "guide-window-controls", ariaLabel: translatedText("guide.window.controls_aria"), "data-i18n-aria-label": "guide.window.controls_aria" }, [
+          el("span", { className: "guide-window-stamp", ariaHidden: "true", "data-i18n": "guide.window.map_stamp" }, [translatedText("guide.window.map_stamp")]),
+          el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: translatedText("guide.window.close_aria"), "data-i18n-aria-label": "guide.window.close_aria", title: translatedText("guide.window.close_title"), "data-i18n-title": "guide.window.close_title" }, [translatedText("guide.window.close_symbol")]),
         ]),
       ]),
       el("div", { className: "guide-modal-viewport", "data-guide-viewport": "true" }, [
         el("div", { className: "guide-modal-content" }, [
           el("div", { className: "embedded-guide-slot", "data-guide-slot": "true" }, [
-            el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]),
+            el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading")]),
           ]),
         ]),
       ]),
       el("footer", { className: "guide-window-status" }, [
-        el("span", { "data-i18n": "guide.window.status_scroll" }, [translatedText("guide.window.status_scroll", "scroll to follow the paths")]),
-        el("span", { "data-i18n": "guide.window.status_tools" }, [translatedText("guide.window.status_tools", "underlined nodes open their tools")]),
+        el("span", { "data-i18n": "guide.window.status_scroll" }, [translatedText("guide.window.status_scroll")]),
+        el("span", { "data-i18n": "guide.window.status_tools" }, [translatedText("guide.window.status_tools")]),
       ]),
     ]),
   ]);
@@ -1977,7 +2020,7 @@ async function initializeMultistreamGuideModal() {
 
   const loadGuide = async () => {
     if (loaded) return;
-    slot.replaceChildren(el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading", "loading guide...")]));
+    slot.replaceChildren(el("p", { className: "embedded-guide-loading", "data-i18n": "guide.loading" }, [translatedText("guide.loading")]));
     markSoftLoaded(slot);
 
     try {
@@ -1996,13 +2039,13 @@ async function initializeMultistreamGuideModal() {
       loaded = true;
       modal.dataset.loaded = "true";
     } catch {
-      const fallback = el("a", { className: "guide-link", href: "multistream-guide.html" }, ["open the standalone multistream guide"]);
+      const fallback = el("a", { className: "guide-link", href: "multistream-guide.html", "data-i18n": "guide.load_standalone" }, [translatedText("guide.load_standalone")]);
       slot.replaceChildren(
         el("p", { className: "embedded-guide-error" }, [
-          translatedText("guide.load_error", "the guide could not load in this window. "),
+          translatedText("guide.load_error"),
           " ",
           fallback,
-          ".",
+          translatedText("guide.period"),
         ]),
       );
       markSoftLoaded(slot);
@@ -2014,6 +2057,8 @@ async function initializeMultistreamGuideModal() {
     document.body.classList.add("guide-modal-open");
     if (typeof modal.showModal === "function") modal.showModal();
     else modal.setAttribute("open", "");
+    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    window.KazvtLineboil?.sync?.();
     viewport.scrollTo({ top: 0, left: 0, behavior: "auto" });
     await loadGuide();
     modal.querySelector("[data-guide-close]")?.focus({ preventScroll: true });
@@ -2039,6 +2084,8 @@ async function initializeMultistreamGuideModal() {
   });
   modal.addEventListener("close", () => {
     document.body.classList.remove("guide-modal-open");
+    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    window.KazvtLineboil?.sync?.();
     if (lastTrigger instanceof HTMLElement) lastTrigger.focus({ preventScroll: true });
   });
   modal.addEventListener("cancel", () => {
@@ -2069,7 +2116,7 @@ function initializeSiteTools() {
       const active = document.body.dataset.boil !== "calm";
       document.body.dataset.boil = active ? "calm" : "extra";
       boilButton.setAttribute("aria-pressed", String(!active));
-      setInlineNote(boilButton, active ? translatedText("boil.steady", "steady mode") : translatedText("boil.extra", "extra wobble"));
+      setInlineNote(boilButton, active ? translatedText("boil.steady") : translatedText("boil.extra"));
     });
   }
 }
@@ -2272,7 +2319,7 @@ function initializeDrawingPad() {
   async function saveAnimatedGif(button) {
     const previousText = button.textContent;
     button.disabled = true;
-    setInlineNote(button, translatedText("paint.making", "making gif"));
+    setInlineNote(button, translatedText("paint.making"));
     await new Promise((resolve) => window.setTimeout(resolve, 20));
 
     const exportCanvas = document.createElement("canvas");
@@ -2379,7 +2426,7 @@ async function initializeMusicPlayer() {
 
   const tracks = await loadManifest("zzz_music/manifest.json", audioExtensions);
   if (!tracks.length) {
-    mount.replaceChildren(el("p", { className: "small-copy", "data-i18n": "music.empty" }, [translatedText("music.empty", "radio is quiet for now")]));
+    mount.replaceChildren(el("p", { className: "small-copy", "data-i18n": "music.empty" }, [translatedText("music.empty")]));
     return;
   }
 
@@ -2390,10 +2437,10 @@ async function initializeMusicPlayer() {
   let analyser = null;
   let source = null;
   const title = el("p", { className: "track-title" }, [""]);
-  const play = el("button", { type: "button", className: "music-button", "data-i18n": "music.play" }, [translatedText("music.play", "play")]);
-  const prev = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.previous", "previous track"), "data-i18n-aria-label": "music.previous", "data-i18n": "music.previous_symbol" }, [translatedText("music.previous_symbol", "<<")]);
-  const next = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.next", "next track"), "data-i18n-aria-label": "music.next", "data-i18n": "music.next_symbol" }, [translatedText("music.next_symbol", ">>")]);
-  const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: translatedText("music.seek", "track position"), "data-i18n-aria-label": "music.seek" });
+  const play = el("button", { type: "button", className: "music-button", "data-i18n": "music.play" }, [translatedText("music.play")]);
+  const prev = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.previous"), "data-i18n-aria-label": "music.previous", "data-i18n": "music.previous_symbol" }, [translatedText("music.previous_symbol")]);
+  const next = el("button", { type: "button", className: "music-button", ariaLabel: translatedText("music.next"), "data-i18n-aria-label": "music.next", "data-i18n": "music.next_symbol" }, [translatedText("music.next_symbol")]);
+  const seek = el("input", { type: "range", min: "0", max: "1000", value: "0", ariaLabel: translatedText("music.seek"), "data-i18n-aria-label": "music.seek" });
   const storedVolume = (() => {
     try {
       const stored = sessionStorage.getItem(VOLUME_STORAGE_KEY);
@@ -2404,15 +2451,15 @@ async function initializeMusicPlayer() {
       return DEFAULT_SITE_VOLUME;
     }
   })();
-  const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: String(storedVolume), ariaLabel: translatedText("music.volume", "vol"), "data-i18n-aria-label": "music.volume" });
+  const volume = el("input", { type: "range", min: "0", max: "1", step: "0.01", value: String(storedVolume), ariaLabel: translatedText("music.volume"), "data-i18n-aria-label": "music.volume" });
   const visualizer = el("canvas", {
     width: "150",
     height: "44",
     className: "visualizer",
     role: "button",
     tabindex: "0",
-    title: translateTemplate("music.visualizer_title", "visualizer: {mode}", { mode: "bars" }),
-    ariaLabel: translateTemplate("music.visualizer", "music visualizer: {mode} mode. click to switch.", { mode: "bars" }),
+    title: translateTemplate("music.visualizer_title", { mode: translatedText("music.mode.bars") }),
+    ariaLabel: translateTemplate("music.visualizer", { mode: translatedText("music.mode.bars") }),
   });
   const visualContext = visualizer.getContext("2d");
   const visualizerBinCrop = 0.58;
@@ -2468,8 +2515,8 @@ async function initializeMusicPlayer() {
   }
 
   function updateVisualizerLabel() {
-    visualizer.setAttribute("aria-label", translateTemplate("music.visualizer", "music visualizer: {mode} mode. click to switch.", { mode: visualizerMode }));
-    visualizer.title = translateTemplate("music.visualizer_title", "visualizer: {mode}", { mode: visualizerMode });
+    visualizer.setAttribute("aria-label", translateTemplate("music.visualizer", { mode: translatedText(`music.mode.${visualizerMode}`) }));
+    visualizer.title = translateTemplate("music.visualizer_title", { mode: translatedText(`music.mode.${visualizerMode}`) });
   }
 
   function cycleVisualizerMode() {
@@ -2662,16 +2709,16 @@ async function initializeMusicPlayer() {
   prev.addEventListener("click", () => loadTrack(index - 1, !audio.paused));
   next.addEventListener("click", () => loadTrack(index + 1, !audio.paused));
   audio.addEventListener("play", () => {
-    setInlineNote(play, translatedText("music.pause", "pause"));
+    setInlineNote(play, translatedText("music.pause"));
     startVisualizerLoop();
   });
   audio.addEventListener("pause", () => {
-    setInlineNote(play, translatedText("music.play", "play"));
+    setInlineNote(play, translatedText("music.play"));
     stopVisualizerLoop();
   });
   audio.addEventListener("ended", () => loadTrack(index + 1, true));
   audio.addEventListener("error", () => {
-    title.textContent = translateTemplate("music.error", "{track} - tape not found", { track: niceTitle(tracks[index]) });
+    title.textContent = translateTemplate("music.error", { track: niceTitle(tracks[index]) });
   });
   audio.addEventListener("timeupdate", () => {
     if (Number.isFinite(audio.duration) && audio.duration > 0) {
@@ -2709,7 +2756,7 @@ async function initializeMusicPlayer() {
     title,
     el("div", { className: "music-controls" }, [prev, play, next]),
     seek,
-    el("label", { className: "volume-label" }, [el("span", { "data-i18n": "music.volume" }, [translatedText("music.volume", "vol")]), volume]),
+    el("label", { className: "volume-label" }, [el("span", { "data-i18n": "music.volume" }, [translatedText("music.volume")]), volume]),
     visualizer,
   );
   markSoftLoaded(mount);
@@ -2728,8 +2775,6 @@ async function render(statusOverrides = {}) {
   app.replaceChildren(
     panel({
       id: "links",
-      title: "where to find me",
-      stamp: "links",
       titleKey: "panel.links.title",
       stampKey: "panel.links.stamp",
       children: [el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker))],
@@ -2741,8 +2786,8 @@ async function render(statusOverrides = {}) {
     paintPanel(),
     badgesPanel(),
     el("footer", { className: "page-footer scribble-box" }, [
-      el("span", { "data-i18n": "footer.message" }, [translatedText("footer.message", "kazvt.com / press start / come back soon")]),
-      createVisitCounter({ label: translatedText("footer.counter", "you are visitor") }),
+      el("span", { "data-i18n": "footer.message" }, [translatedText("footer.message")]),
+      createVisitCounter({ label: translatedText("footer.counter") }),
     ]),
   );
   markSoftLoaded(app);
