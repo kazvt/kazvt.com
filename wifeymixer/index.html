@@ -3169,6 +3169,457 @@
       .fader-scale-left,.fader-scale-right{opacity:.35 !important}
     }
 
+  
+    /* =====================================================================
+       REAL HARDWARE DISPLAY LIGHT
+       Light is contained by smoked acrylic and bleeds softly into the bezel,
+       rather than looking like a CSS neon outer-glow.
+       ===================================================================== */
+
+    .seven-screen{
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #353137,
+        0 0 0 3px #101014,
+        0 0 8px rgba(216,104,19,.11),
+        inset 0 2px 8px rgba(0,0,0,.95),
+        inset 0 0 16px rgba(255,110,18,.045),
+        inset 0 -1px 0 rgba(255,190,96,.026) !important;
+    }
+
+    .seven-screen__bezel::after{
+      content:"";
+      position:absolute;
+      inset:5px 7px;
+      border-radius:4px;
+      pointer-events:none;
+      background:
+        radial-gradient(ellipse at 50% 50%,rgba(255,126,27,.055),transparent 67%);
+      box-shadow:
+        inset 0 0 11px rgba(255,126,27,.035);
+    }
+
+    .seven-screen.is-active{
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #353137,
+        0 0 0 3px #101014,
+        0 0 9px rgba(224,112,23,.15),
+        inset 0 2px 8px rgba(0,0,0,.95),
+        inset 0 0 18px rgba(255,119,20,.065) !important;
+    }
+
+    /* =====================================================================
+       MINI ELAPSED / TOTAL SEVEN-SEGMENT TIME MODULE
+       Looks like a separate countersunk OEM timing module.
+       ===================================================================== */
+
+    .time-hardware-display{
+      position:relative;
+      flex:0 0 auto;
+      align-items:stretch;
+      gap:5px;
+      height:27px;
+      min-width:142px;
+      padding:3px 7px 3px;
+      overflow:hidden;
+      border:1px solid #050405;
+      border-radius:2px;
+      background:
+        radial-gradient(ellipse at 50% 45%,rgba(102,42,7,.10),transparent 69%),
+        linear-gradient(180deg,#120b07,#080503);
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 1px #353037,
+        0 0 6px rgba(215,102,18,.09),
+        inset 0 2px 5px rgba(0,0,0,.94),
+        inset 0 0 9px rgba(255,113,19,.038);
+      isolation:isolate;
+    }
+
+    .time-hardware-display::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      z-index:-2;
+      border-radius:3px;
+      background:linear-gradient(180deg,#333034,#18171a);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.035),
+        inset 0 -1px 0 rgba(0,0,0,.76);
+    }
+
+    .time-hardware-display__glass{
+      position:absolute;
+      inset:1px;
+      z-index:5;
+      pointer-events:none;
+      border-radius:1px;
+      background:
+        linear-gradient(111deg,rgba(255,235,202,.052),transparent 20% 72%,rgba(255,173,65,.018)),
+        repeating-linear-gradient(to bottom,rgba(255,145,39,.012) 0 1px,transparent 1px 3px);
+      box-shadow:
+        inset 0 0 8px rgba(0,0,0,.42);
+      opacity:.58;
+    }
+
+    .time-module{
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-rows:6px minmax(0,1fr);
+      min-width:0;
+      align-items:end;
+    }
+
+    .time-module__legend{
+      color:#66574a;
+      font-family:Arial,sans-serif;
+      font-size:4.5px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.13em;
+      text-align:center;
+      text-transform:uppercase;
+      text-shadow:0 1px #000;
+    }
+
+    .time-segments{
+      --digit-height:14px;
+      height:15px;
+      gap:1.3px !important;
+      justify-content:center !important;
+      overflow:visible !important;
+    }
+
+    .time-segments .seven-char{
+      filter:drop-shadow(0 0 .7px rgba(255,108,15,.13)) !important;
+    }
+
+    .time-module-divider{
+      position:relative;
+      z-index:2;
+      width:1px;
+      margin:2px 0;
+      background:
+        linear-gradient(180deg,transparent,#352216 18%,#352216 82%,transparent);
+      box-shadow:1px 0 0 rgba(255,177,79,.022);
+    }
+
+    /* =====================================================================
+       MECHANICAL PLAYLIST PROGRAM SELECTOR
+       No faux LCD / seven-seg here: engraved legends, aged ABS window,
+       spring-loaded arrow cap, and a real-looking selector drawer.
+       ===================================================================== */
+
+    .playlist-slot{
+      position:relative;
+      height:27px !important;
+      overflow:visible !important;
+      border:1px solid #08080a !important;
+      border-radius:2px !important;
+      background:
+        radial-gradient(circle at 13% 31%,rgba(255,255,255,.025) 0 .7px,transparent 1px) 0 0/13px 17px,
+        linear-gradient(180deg,#252429,#17171b) !important;
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,.62),
+        0 0 0 1px #343238,
+        0 2px 0 #08080a !important;
+    }
+
+    .playlist-slot::before{
+      display:none !important;
+    }
+
+    .playlist-selector-button{
+      position:absolute;
+      inset:2px;
+      width:calc(100% - 4px);
+      height:calc(100% - 4px);
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) 23px;
+      align-items:center;
+      gap:5px;
+      padding:0 0 0 6px;
+      overflow:hidden;
+      border:1px solid #0b0b0d;
+      border-radius:1px;
+      color:#292621;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.14),transparent 17%),
+        radial-gradient(ellipse at 31% 18%,rgba(255,255,255,.08),transparent 33%),
+        linear-gradient(180deg,#b6ae9c 0%,#958d7e 70%,#736c60 100%);
+      box-shadow:
+        0 1px 0 #060607,
+        inset 0 1px 0 rgba(255,255,255,.20),
+        inset 0 -2px 2px rgba(52,46,38,.24);
+      cursor:pointer;
+      text-align:left;
+    }
+
+    .playlist-selector-button::before{
+      content:"";
+      position:absolute;
+      inset:2px 26px 2px 3px;
+      pointer-events:none;
+      border:1px solid rgba(48,43,36,.20);
+      box-shadow:
+        inset 0 1px rgba(255,255,255,.10),
+        inset 0 -1px rgba(0,0,0,.12);
+    }
+
+    .playlist-selector-button::after{
+      content:"";
+      position:absolute;
+      left:3px;
+      right:26px;
+      top:3px;
+      bottom:3px;
+      pointer-events:none;
+      background:
+        linear-gradient(104deg,transparent 0 19%,rgba(255,255,255,.045) 19.3% 19.8%,transparent 20.1%),
+        linear-gradient(79deg,transparent 0 72%,rgba(0,0,0,.075) 72.2% 72.7%,transparent 73%);
+      opacity:.58;
+    }
+
+    .playlist-selector-legend{
+      position:relative;
+      z-index:2;
+      color:#5d574e;
+      font-size:5px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.10em;
+      text-shadow:0 1px rgba(255,255,255,.12);
+    }
+
+    .playlist-selector-label{
+      position:relative;
+      z-index:2;
+      min-width:0;
+      overflow:hidden;
+      color:#25221d;
+      font-family:"Arial Narrow",Arial,sans-serif;
+      font-size:7px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.035em;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      text-shadow:0 1px rgba(255,255,255,.15);
+    }
+
+    .playlist-selector-lever{
+      position:relative;
+      z-index:3;
+      display:grid;
+      place-items:center;
+      align-self:stretch;
+      color:#bcb6aa;
+      background:
+        linear-gradient(180deg,#4d4b50,#302f34 72%,#222126);
+      border-left:1px solid #161519;
+      box-shadow:
+        inset 1px 0 rgba(255,255,255,.025),
+        inset 0 1px rgba(255,255,255,.07),
+        inset 0 -2px 2px rgba(0,0,0,.29);
+      text-shadow:0 1px #000;
+    }
+
+    .playlist-selector-lever i{
+      font-size:8px;
+      transition:transform .12s ease;
+    }
+
+    .playlist-selector-button.is-open .playlist-selector-lever i{
+      transform:rotate(180deg);
+    }
+
+    .playlist-selector-button:active{
+      transform:translateY(1px);
+      box-shadow:
+        inset 0 2px 4px rgba(50,43,35,.26),
+        0 0 0 1px #141316;
+    }
+
+    .playlist-selector-button:disabled{
+      cursor:default;
+      filter:brightness(.70);
+    }
+
+    .playlist-hardware-menu{
+      position:absolute;
+      z-index:80;
+      left:0;
+      top:calc(100% + 5px);
+      width:min(360px,max(100%,220px));
+      max-height:min(42vh,310px);
+      overflow:auto;
+      padding:6px;
+      border:1px solid #070708;
+      border-radius:2px;
+      background:
+        radial-gradient(circle at 14% 18%,rgba(255,255,255,.022) 0 .7px,transparent 1px) 0 0/13px 17px,
+        linear-gradient(180deg,#2a292d,#19191d);
+      box-shadow:
+        0 8px 15px rgba(0,0,0,.62),
+        0 0 0 2px #38353a,
+        inset 0 1px 0 rgba(255,255,255,.035),
+        inset 0 -2px 4px rgba(0,0,0,.35);
+    }
+
+    .playlist-hardware-menu::before,
+    .playlist-hardware-menu::after{
+      content:"";
+      position:absolute;
+      top:4px;
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 35% 30%,#8a8780 0 12%,#4f4d4e 17% 45%,#17171a 51% 100%);
+      border:1px solid #08080a;
+      opacity:.67;
+    }
+
+    .playlist-hardware-menu::before{left:4px}
+    .playlist-hardware-menu::after{right:4px}
+
+    .playlist-hardware-option{
+      position:relative;
+      width:100%;
+      min-height:34px;
+      display:grid;
+      grid-template-columns:10px 24px minmax(0,1fr);
+      align-items:center;
+      gap:7px;
+      margin:0 0 4px;
+      padding:5px 8px;
+      border:1px solid #0b0b0d;
+      border-radius:1px;
+      color:#b7b1a5;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.025),transparent),
+        linear-gradient(180deg,#3b393e,#28272c);
+      box-shadow:
+        0 1px 0 #09090a,
+        inset 0 1px rgba(255,255,255,.035),
+        inset 0 -1px rgba(0,0,0,.28);
+      cursor:pointer;
+      text-align:left;
+    }
+
+    .playlist-hardware-option:last-child{margin-bottom:0}
+
+    .playlist-hardware-option:hover,
+    .playlist-hardware-option:focus-visible{
+      outline:none;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.045),transparent),
+        linear-gradient(180deg,#4a474c,#302f34);
+    }
+
+    .playlist-hardware-option.is-selected{
+      color:#251a0d;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.13),transparent 18%),
+        linear-gradient(180deg,#c0a77e,#94774f 72%,#6b5436);
+      box-shadow:
+        0 1px 0 #08080a,
+        inset 0 1px rgba(255,244,217,.14),
+        inset 0 -2px 2px rgba(72,49,22,.22);
+    }
+
+    .playlist-hardware-option__lamp{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:#21170d;
+      border:1px solid #090706;
+      box-shadow:
+        inset 0 1px 1px #000,
+        0 0 0 1px #39312a;
+    }
+
+    .playlist-hardware-option.is-selected .playlist-hardware-option__lamp{
+      background:#f3a13d;
+      box-shadow:
+        0 0 4px rgba(255,149,48,.72),
+        inset 0 1px rgba(255,238,196,.48),
+        0 0 0 1px #5b3b19;
+    }
+
+    .playlist-hardware-option__number{
+      color:#777168;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.03em;
+    }
+
+    .playlist-hardware-option.is-selected .playlist-hardware-option__number{
+      color:#4e3922;
+    }
+
+    .playlist-hardware-option__copy{
+      min-width:0;
+      display:grid;
+      gap:2px;
+    }
+
+    .playlist-hardware-option__copy strong{
+      overflow:hidden;
+      font-family:"Arial Narrow",Arial,sans-serif;
+      font-size:8px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.035em;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+
+    .playlist-hardware-option__copy small{
+      color:#706b63;
+      font-size:5px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.10em;
+    }
+
+    .playlist-hardware-option.is-selected .playlist-hardware-option__copy small{
+      color:#5c4933;
+    }
+
+    @media(max-width:900px){
+      .time-hardware-display{
+        min-width:128px;
+        padding-left:5px;
+        padding-right:5px;
+        gap:4px;
+      }
+      .time-segments{--digit-height:12.5px}
+    }
+
+    @media(max-height:500px){
+      .playlist-slot{height:23px !important}
+      .playlist-selector-label{font-size:6px}
+      .time-hardware-display{
+        height:23px;
+        min-width:120px;
+        padding-top:2px;
+        padding-bottom:2px;
+      }
+      .time-module{
+        grid-template-rows:5px minmax(0,1fr);
+      }
+      .time-module__legend{font-size:4px}
+      .time-segments{
+        --digit-height:11px;
+        height:12px;
+      }
+    }
+
   </style>
 </head>
 
@@ -3223,7 +3674,7 @@
       </header>
 
 
-      <div class="transport-rack relative z-[2] mt-1 flex flex-none items-center gap-1.5 overflow-hidden px-2 py-1">
+      <div class="transport-rack relative z-[12] mt-1 flex flex-none items-center gap-1.5 overflow-visible px-2 py-1">
         <button id="prevTrackBtn" class="transport-btn transport-btn--nav" type="button" title="Previous folder" aria-label="Previous folder">
           <i class="fa-solid fa-backward-step" aria-hidden="true"></i>
         </button>
@@ -3250,14 +3701,41 @@
         </button>
 
         <div class="playlist-slot min-w-0 flex-1">
-          <select id="playlistSelect" class="transport-select min-w-0 w-full" aria-label="Playlist folder"></select>
+          <select id="playlistSelect" class="sr-only" aria-label="Playlist folder"></select>
+
+          <button id="playlistSelectorButton" class="playlist-selector-button" type="button"
+                  aria-haspopup="listbox" aria-expanded="false" aria-controls="playlistMenu">
+            <span class="playlist-selector-legend">PROGRAM</span>
+            <span id="playlistSelectorLabel" class="playlist-selector-label">NO PROGRAM</span>
+            <span class="playlist-selector-lever" aria-hidden="true">
+              <i class="fa-solid fa-caret-down"></i>
+            </span>
+          </button>
+
+          <div id="playlistMenu" class="playlist-hardware-menu" role="listbox" hidden></div>
         </div>
 
         <div class="transport-fader-wrap hidden min-w-0 flex-1 sm:block">
           <input id="seekRange" class="transport-seek w-full" type="range" min="0" max="1000" value="0" aria-label="Song position">
         </div>
 
-        <div id="timeReadout" class="transport-readout hidden md:block">00:00 / 00:00</div>
+        <div class="time-hardware-display hidden md:flex" role="group" aria-label="Elapsed and total song time">
+          <div class="time-hardware-display__glass" aria-hidden="true"></div>
+
+          <div class="time-module">
+            <span class="time-module__legend">ELAP</span>
+            <div id="timeCurrentSegments" class="seven-text time-segments" aria-hidden="true"></div>
+          </div>
+
+          <span class="time-module-divider" aria-hidden="true"></span>
+
+          <div class="time-module">
+            <span class="time-module__legend">TOTAL</span>
+            <div id="timeTotalSegments" class="seven-text time-segments" aria-hidden="true"></div>
+          </div>
+
+          <span id="timeReadout" class="sr-only">00:00 / 00:00</span>
+        </div>
         <div id="loadReadout" class="transport-state">READY</div>
       </div>
 
@@ -3290,6 +3768,9 @@
   const sevenLabel = document.getElementById("sevenLabel");
   const sevenValue = document.getElementById("sevenValue");
   const playlistSelect = document.getElementById("playlistSelect");
+  const playlistSelectorButton = document.getElementById("playlistSelectorButton");
+  const playlistSelectorLabel = document.getElementById("playlistSelectorLabel");
+  const playlistMenu = document.getElementById("playlistMenu");
   const prevTrackBtn = document.getElementById("prevTrackBtn");
   const playPauseBtn = document.getElementById("playPauseBtn");
   const stopBtn = document.getElementById("stopBtn");
@@ -3298,6 +3779,8 @@
   const playlistModeBtn = document.getElementById("playlistModeBtn");
   const seekRange = document.getElementById("seekRange");
   const timeReadout = document.getElementById("timeReadout");
+  const timeCurrentSegments = document.getElementById("timeCurrentSegments");
+  const timeTotalSegments = document.getElementById("timeTotalSegments");
   const loadReadout = document.getElementById("loadReadout");
   const mixerSurface = document.querySelector(".mixer");
   const horizontalScroller = document.querySelector(".scroll-wrap");
@@ -5275,6 +5758,7 @@
     currentPlaylist=playlists[normalized];
     queuedShuffleIndex=null;
     playlistSelect.value=String(normalized);
+    syncPlaylistSelector();
     trackReadout.textContent=`${normalized+1}/${playlists.length}`;
 
     playlistDuration=0;
@@ -5292,6 +5776,85 @@
     if (autoplay) await playCurrent();
   }
 
+  function playlistDisplayName(playlist,index) {
+    if (!playlist) return "NO PROGRAM";
+    const trackNo = String(index+1).padStart(2,"0");
+    return `${trackNo}  ${String(playlist.title || "UNTITLED").toUpperCase()}`;
+  }
+
+  function syncPlaylistSelector() {
+    const playlist = playlists[currentPlaylistIndex];
+    playlistSelectorLabel.textContent = playlistDisplayName(playlist,currentPlaylistIndex);
+    playlistSelectorButton.disabled = !playlists.length;
+
+    playlistMenu.querySelectorAll("[data-playlist-index]").forEach(button=>{
+      const active = Number(button.dataset.playlistIndex) === currentPlaylistIndex;
+      button.classList.toggle("is-selected",active);
+      button.setAttribute("aria-selected",String(active));
+    });
+  }
+
+  function rebuildPlaylistHardwareMenu() {
+    playlistMenu.replaceChildren();
+
+    playlists.forEach((playlist,index)=>{
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "playlist-hardware-option";
+      button.dataset.playlistIndex = String(index);
+      button.setAttribute("role","option");
+
+      const lamp = document.createElement("span");
+      lamp.className = "playlist-hardware-option__lamp";
+      lamp.setAttribute("aria-hidden","true");
+
+      const number = document.createElement("span");
+      number.className = "playlist-hardware-option__number";
+      number.textContent = String(index+1).padStart(2,"0");
+
+      const copy = document.createElement("span");
+      copy.className = "playlist-hardware-option__copy";
+
+      const title = document.createElement("strong");
+      title.textContent = String(playlist.title || "UNTITLED").toUpperCase();
+
+      const meta = document.createElement("small");
+      meta.textContent = `${playlist.stems.length} STEM${playlist.stems.length === 1 ? "" : "S"}`;
+
+      copy.append(title,meta);
+      button.append(lamp,number,copy);
+
+      button.addEventListener("click",()=>{
+        playlistSelect.value = String(index);
+        closePlaylistHardwareMenu();
+        playlistSelect.dispatchEvent(new Event("change",{bubbles:true}));
+      });
+
+      playlistMenu.appendChild(button);
+    });
+
+    syncPlaylistSelector();
+  }
+
+  function openPlaylistHardwareMenu() {
+    if (!playlists.length) return;
+    playlistMenu.hidden = false;
+    playlistSelectorButton.classList.add("is-open");
+    playlistSelectorButton.setAttribute("aria-expanded","true");
+    syncPlaylistSelector();
+  }
+
+  function closePlaylistHardwareMenu() {
+    playlistMenu.hidden = true;
+    playlistSelectorButton.classList.remove("is-open");
+    playlistSelectorButton.setAttribute("aria-expanded","false");
+  }
+
+  function togglePlaylistHardwareMenu() {
+    if (playlistMenu.hidden) openPlaylistHardwareMenu();
+    else closePlaylistHardwareMenu();
+  }
+
   function populatePlaylistSelect() {
     playlistSelect.innerHTML="";
     playlists.forEach((playlist,index)=>{
@@ -5300,6 +5863,8 @@
       option.textContent=`${playlist.title} · ${playlist.stems.length} stems`;
       playlistSelect.appendChild(option);
     });
+
+    rebuildPlaylistHardwareMenu();
   }
 
   async function previousPlaylist() {
@@ -5320,7 +5885,15 @@
     const position=getPosition();
     if (!isSeeking && playlistDuration>0) seekRange.value=String(Math.round((position/playlistDuration)*1000));
     else if (!isSeeking && !playlistDuration) seekRange.value="0";
-    timeReadout.textContent=`${formatTime(position)} / ${formatTime(playlistDuration)}`;
+
+    const elapsedText = formatTime(position);
+    const totalText = formatTime(playlistDuration);
+
+    timeReadout.textContent=`${elapsedText} / ${totalText}`;
+
+    // Same genuine seven-segment renderer as the main hardware monitor.
+    sevenSegmentWrite(timeCurrentSegments,elapsedText,{maxChars:5,align:"right"});
+    sevenSegmentWrite(timeTotalSegments,totalText,{maxChars:5,align:"right"});
   }
 
   function analyserLevel(analyser,data) {
@@ -5355,6 +5928,25 @@
     updateTransportDisplay();
     requestAnimationFrame(animationLoop);
   }
+
+  playlistSelectorButton?.addEventListener("click",event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    togglePlaylistHardwareMenu();
+  });
+
+  document.addEventListener("pointerdown",event=>{
+    if (playlistMenu.hidden) return;
+    if (playlistMenu.contains(event.target) || playlistSelectorButton.contains(event.target)) return;
+    closePlaylistHardwareMenu();
+  });
+
+  document.addEventListener("keydown",event=>{
+    if (event.key === "Escape" && !playlistMenu.hidden) {
+      closePlaylistHardwareMenu();
+      playlistSelectorButton.focus();
+    }
+  });
 
   playlistSelect.addEventListener("change",()=>{
     playlistAdvanceInProgress=false;
