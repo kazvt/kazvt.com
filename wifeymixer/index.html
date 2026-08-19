@@ -4201,6 +4201,168 @@
         0 2px 3px rgba(0,0,0,.76) !important;
     }
 
+  
+    /* ==============================================================
+       ANALOGUE INSTRUMENT ICON KEYS
+       Deterministic Font Awesome instrument icons sit behind a smoked,
+       translucent blue-grey key cap. The internal lamp follows the
+       channel's real post-fader signal level.
+       ============================================================== */
+
+    .channel-instrument-icon{
+      --icon-drive:0;
+      position:relative !important;
+      isolation:isolate;
+      flex:0 0 auto !important;
+      display:grid !important;
+      place-items:center !important;
+      width:24px !important;
+      height:22px !important;
+      overflow:visible !important;
+      border:1px solid #07090b !important;
+      border-radius:3px !important;
+      color:
+        rgb(
+          calc(150 + var(--icon-drive) * 50),
+          calc(180 + var(--icon-drive) * 48),
+          calc(194 + var(--icon-drive) * 48)
+        ) !important;
+      background:
+        radial-gradient(
+          ellipse at 48% 53%,
+          rgba(112,178,205,calc(.055 + var(--icon-drive) * .15)) 0%,
+          rgba(65,117,139,calc(.040 + var(--icon-drive) * .10)) 42%,
+          transparent 72%
+        ),
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.065) 0%,
+          rgba(255,255,255,.012) 18%,
+          transparent 32%
+        ),
+        linear-gradient(
+          180deg,
+          #3b4145 0%,
+          #292f33 52%,
+          #1c2125 78%,
+          #14181b 100%
+        ) !important;
+      box-shadow:
+        0 2px 0 #07080a,
+        0 0 0 1px #33383c,
+        0 0 calc(2px + var(--icon-drive) * 5px)
+          rgba(90,171,207,calc(.035 + var(--icon-drive) * .15)),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -3px 4px rgba(0,0,0,.42),
+        inset 2px 0 3px rgba(255,255,255,.012),
+        inset -2px 0 3px rgba(0,0,0,.18) !important;
+      text-shadow:
+        0 1px 0 #050607,
+        0 0 calc(1px + var(--icon-drive) * 3px)
+          rgba(128,204,234,calc(.12 + var(--icon-drive) * .46)) !important;
+      opacity:1 !important;
+      filter:
+        brightness(calc(.88 + var(--icon-drive) * .30))
+        saturate(calc(.90 + var(--icon-drive) * .18));
+      transition:none !important;
+    }
+
+    /* Bezel / switch body behind the translucent cap. */
+    .channel-instrument-icon::before{
+      content:"";
+      position:absolute;
+      z-index:-2;
+      inset:-3px;
+      border-radius:4px;
+      pointer-events:none;
+      border:1px solid #08090a;
+      background:
+        radial-gradient(circle at 23% 24%,rgba(255,255,255,.035) 0 1px,transparent 1.3px),
+        linear-gradient(180deg,#24272a,#111315);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.028),
+        inset 0 -1px 0 rgba(0,0,0,.76),
+        0 1px 2px rgba(0,0,0,.78);
+    }
+
+    /* Internal blue lamp pool, deliberately dim at idle. */
+    .channel-instrument-icon::after{
+      content:"";
+      position:absolute !important;
+      z-index:0;
+      inset:3px !important;
+      border:0 !important;
+      border-radius:2px;
+      pointer-events:none;
+      background:
+        radial-gradient(
+          ellipse at 50% 58%,
+          rgba(151,220,245,calc(.075 + var(--icon-drive) * .30)) 0%,
+          rgba(87,168,201,calc(.040 + var(--icon-drive) * .19)) 43%,
+          transparent 76%
+        ),
+        linear-gradient(
+          180deg,
+          rgba(216,236,241,.04),
+          transparent 38%
+        ) !important;
+      box-shadow:
+        inset 0 1px 1px rgba(229,244,247,.055),
+        inset 0 -2px 3px rgba(0,0,0,.18),
+        0 0 calc(1px + var(--icon-drive) * 4px)
+          rgba(104,187,220,calc(.025 + var(--icon-drive) * .16)) !important;
+    }
+
+    .channel-instrument-icon i{
+      position:relative !important;
+      z-index:2 !important;
+      font-size:11px !important;
+      line-height:1 !important;
+      width:16px;
+      text-align:center;
+      color:inherit !important;
+      filter:
+        drop-shadow(0 1px 0 rgba(0,0,0,.92))
+        drop-shadow(
+          0 0 calc(.4px + var(--icon-drive) * 1.8px)
+          rgba(137,213,240,calc(.12 + var(--icon-drive) * .40))
+        ) !important;
+    }
+
+    /* Finger polish / age on the physical key cap. */
+    .channel:nth-child(3n+1) .channel-instrument-icon{
+      filter:
+        brightness(calc(.86 + var(--icon-drive) * .30))
+        saturate(calc(.89 + var(--icon-drive) * .18));
+    }
+
+    .channel:nth-child(4n) .channel-instrument-icon::after{
+      opacity:.91;
+    }
+
+    @media(max-height:500px){
+      .channel-ident{gap:4px !important}
+      .channel-instrument-icon{
+        width:20px !important;
+        height:18px !important;
+      }
+      .channel-instrument-icon i{
+        font-size:9px !important;
+        width:14px;
+      }
+    }
+
+    @media(max-height:410px){
+      .channel-instrument-icon{
+        width:18px !important;
+        height:16px !important;
+      }
+      .channel-instrument-icon i{
+        font-size:8px !important;
+        width:12px;
+      }
+    }
+
   </style>
 </head>
 
@@ -6126,7 +6288,9 @@
         meterL:stripEls[index]?.querySelector("[data-meter-l]"),
         meterR:stripEls[index]?.querySelector("[data-meter-r]"),
         statusLed:stripEls[index]?.querySelector("[data-mute-led]"),
+        instrumentLamp:stripEls[index]?.querySelector("[data-instrument-icon]"),
         ledDrive:0,
+        iconDrive:0,
         ready:false,error:false
       };
 
@@ -7066,6 +7230,27 @@
         channel.statusLed.style.setProperty(
           "--led-drive",
           channel.ledDrive.toFixed(3)
+        );
+      }
+
+      if (channel.instrumentLamp) {
+        // The deterministic instrument badge is a dim blue illuminated
+        // hardware key. Real post-fader signal lifts its lamp brightness.
+        const target = Math.max(0,Math.min(1,Math.pow(level/100,.64)));
+
+        if (target > channel.iconDrive) {
+          // Fairly quick attack, but not as abrupt as the signal-status LED.
+          channel.iconDrive += (target-channel.iconDrive)*.58;
+        } else {
+          // Slow optical decay makes the lamp feel physical rather than digital.
+          channel.iconDrive = channel.iconDrive*.90 + target*.10;
+        }
+
+        if (channel.iconDrive < .003) channel.iconDrive = 0;
+
+        channel.instrumentLamp.style.setProperty(
+          "--icon-drive",
+          channel.iconDrive.toFixed(3)
         );
       }
     }
