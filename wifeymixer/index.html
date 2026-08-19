@@ -1533,6 +1533,567 @@
       .transport-readout{padding-top:5px}
     }
 
+  
+    /* ===== persistent randomizer + per-stem lock hardware ===== */
+
+    .stem-action-buttons{
+      grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+      gap:clamp(3px,.45vw,5px) !important;
+      padding-left:1px;
+      padding-right:1px;
+    }
+
+    .stem-action-buttons .hw-button{
+      min-width:0;
+      padding-left:2px;
+      padding-right:2px;
+      font-size:clamp(5px,.55vw,7px);
+    }
+
+    .master-action-buttons{
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    }
+
+    .hw-button[data-action="lock"]{
+      display:grid;
+      place-items:center;
+      color:#a7a298 !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.06),transparent 17%),
+        linear-gradient(180deg,#535158 0%,#38373d 72%,#29282e 100%) !important;
+      border-color:#111014 !important;
+      box-shadow:
+        0 2px 0 #08080a,
+        0 0 0 2px #2b292e,
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 -2px 2px rgba(0,0,0,.28) !important;
+    }
+
+    .hw-button[data-action="lock"] i{
+      font-size:clamp(6px,.75vw,9px);
+      filter:drop-shadow(0 1px 0 #000);
+    }
+
+    .hw-button[data-action="lock"].active{
+      color:#2a1908 !important;
+      background:
+        linear-gradient(180deg,rgba(255,244,211,.18),transparent 17%),
+        linear-gradient(180deg,#d4a15d 0%,#ac7337 72%,#825023 100%) !important;
+      border-color:#33200d !important;
+      box-shadow:
+        0 1px 0 #08080a,
+        0 0 0 2px #33291d,
+        inset 0 2px 3px rgba(80,42,10,.20),
+        inset 0 0 0 1px rgba(255,226,178,.10) !important;
+    }
+
+    .transport-btn--randomizer{
+      position:relative;
+      width:clamp(39px,4.2vw,51px) !important;
+      min-width:clamp(39px,4.2vw,51px) !important;
+      grid-template-columns:auto auto;
+      gap:3px;
+      padding:0 5px !important;
+      color:#bcb6aa !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.07),transparent 18%),
+        linear-gradient(180deg,#57545a,#37353b 72%,#27262c) !important;
+      border-color:#111014 !important;
+    }
+
+    .transport-btn--randomizer::before{
+      content:"";
+      position:absolute;
+      top:3px;
+      right:3px;
+      width:4px;
+      height:4px;
+      border-radius:50%;
+      background:#3f2713;
+      border:1px solid #160d06;
+      box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+      transition:background .12s ease,box-shadow .12s ease;
+    }
+
+    .transport-btn--randomizer i{
+      font-size:9px;
+    }
+
+    .transport-rnd-label{
+      position:relative;
+      z-index:1;
+      font-size:6px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.07em;
+    }
+
+    .transport-btn--randomizer.active{
+      color:#281908 !important;
+      background:
+        linear-gradient(180deg,rgba(255,244,210,.18),transparent 18%),
+        linear-gradient(180deg,#d29b50,#ad6e31 72%,#7d471f) !important;
+      border-color:#35200d !important;
+      filter:saturate(.92) brightness(1.02);
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #33291e,
+        inset 0 1px 0 rgba(255,236,195,.18),
+        inset 0 -2px 2px rgba(76,39,8,.25) !important;
+    }
+
+    .transport-btn--randomizer.active::before{
+      background:#ffc168;
+      box-shadow:
+        0 0 5px rgba(255,174,72,.74),
+        inset 0 1px 0 rgba(255,246,219,.5);
+    }
+
+    @media(max-height:500px){
+      .stem-action-buttons{gap:2px !important}
+      .transport-rnd-label{display:none}
+      .transport-btn--randomizer{
+        width:27px !important;
+        min-width:27px !important;
+        padding:0 !important;
+        grid-template-columns:1fr;
+      }
+    }
+
+  
+    /* ===== high-contrast amber calculator display ===== */
+    .casio-readout{
+      color:#160a02 !important;
+      background:
+        repeating-linear-gradient(to bottom,rgba(76,31,2,.035) 0 1px,transparent 1px 3px),
+        radial-gradient(ellipse at 48% 32%,rgba(255,225,155,.48),transparent 64%),
+        linear-gradient(180deg,#f0ad55 0%,#df9137 47%,#c97323 100%) !important;
+      box-shadow:
+        0 2px 0 #08080a,
+        0 0 0 2px #343035,
+        0 0 0 3px #111014,
+        inset 0 1px 0 rgba(255,237,194,.52),
+        inset 0 0 11px rgba(93,36,2,.23),
+        inset 0 -4px 8px rgba(72,27,1,.11) !important;
+    }
+
+    .casio-readout__top{
+      color:#241003 !important;
+      opacity:1 !important;
+      border-bottom-color:rgba(42,17,1,.28) !important;
+      text-shadow:none !important;
+    }
+
+    .casio-readout__label{
+      color:#241003 !important;
+      opacity:1 !important;
+      text-shadow:none !important;
+      font-weight:900 !important;
+    }
+
+    .casio-readout__value{
+      color:#100702 !important;
+      font-size:clamp(17px,3.45vh,28px) !important;
+      font-weight:900 !important;
+      letter-spacing:-.065em !important;
+      -webkit-text-stroke:.22px #100702;
+      text-shadow:
+        .45px 0 #100702,
+        0 .45px #100702,
+        0 1px rgba(255,220,151,.12) !important;
+      filter:contrast(1.22);
+    }
+
+    .casio-readout__ghost{
+      color:rgba(53,20,1,.075) !important;
+    }
+
+    .casio-readout__glass{
+      opacity:.38 !important;
+    }
+
+  
+    /* ===== physical red MUTE indicator LED ===== */
+
+    .channel-header{
+      position:relative;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:5px;
+      min-width:0;
+    }
+
+    .channel-header .channel-name{
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    .mute-led{
+      position:relative;
+      flex:0 0 auto;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 50% 48%,#2a1013 0 42%,#0d090a 45% 66%,#393238 69% 78%,#0b0a0c 81% 100%);
+      border:1px solid #070708;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.025),
+        0 1px 1px rgba(0,0,0,.88),
+        0 0 0 1px #2e2a2e;
+      transition:filter .10s ease,box-shadow .10s ease;
+    }
+
+    .mute-led__lens{
+      width:5px;
+      height:5px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 34% 26%,rgba(255,255,255,.10) 0 12%,transparent 15%),
+        radial-gradient(circle at 50% 55%,#4c151a 0 36%,#261013 66%,#11090a 100%);
+      box-shadow:
+        inset 0 -1px 2px rgba(0,0,0,.55),
+        inset 0 1px 1px rgba(255,255,255,.035);
+    }
+
+    .mute-led.is-on{
+      background:
+        radial-gradient(circle at 50% 48%,rgba(255,70,75,.42) 0 40%,#350b0e 43% 64%,#49343a 67% 78%,#0b0a0c 81% 100%);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.055),
+        0 1px 1px rgba(0,0,0,.86),
+        0 0 0 1px #33292e,
+        0 0 7px rgba(255,36,45,.72),
+        0 0 13px rgba(255,36,45,.28);
+    }
+
+    .mute-led.is-on .mute-led__lens{
+      background:
+        radial-gradient(circle at 31% 24%,#ffd2cf 0 9%,rgba(255,235,230,.62) 10% 14%,transparent 16%),
+        radial-gradient(circle at 48% 52%,#ff5960 0 30%,#ed202b 48%,#9f0710 72%,#4f0509 100%);
+      box-shadow:
+        0 0 4px rgba(255,50,58,.92),
+        inset 0 -1px 2px rgba(90,0,5,.38),
+        inset 0 1px 1px rgba(255,245,238,.30);
+    }
+
+    /* ===== global megaphone output switch ===== */
+
+    .master-action-buttons{
+      grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    }
+
+    .megaphone-btn{
+      color:#bab4a8 !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.07),transparent 18%),
+        linear-gradient(180deg,#57535a,#38363d 72%,#28272d) !important;
+      border-color:#111014 !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #29272d,
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 -2px 2px rgba(0,0,0,.29) !important;
+    }
+
+    .megaphone-btn i{
+      font-size:clamp(7px,.8vw,10px);
+      filter:drop-shadow(0 1px 0 #000);
+    }
+
+    .megaphone-btn.active{
+      color:#2b1808 !important;
+      background:
+        linear-gradient(180deg,rgba(255,245,214,.18),transparent 18%),
+        linear-gradient(180deg,#d9a05b,#b77735 72%,#895022) !important;
+      border-color:#35200d !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #34291d,
+        0 0 7px rgba(220,132,44,.20),
+        inset 0 2px 3px rgba(86,44,10,.18),
+        inset 0 1px 0 rgba(255,232,190,.16) !important;
+    }
+
+    @media(max-height:500px){
+      .mute-led{
+        width:8px;
+        height:8px;
+      }
+      .mute-led__lens{
+        width:4px;
+        height:4px;
+      }
+      .master-action-buttons{gap:2px !important}
+    }
+
+  
+    /* ===== translucent backlit mixer buttons =====
+       Inactive caps look like smoked/tinted plastic.
+       Active caps illuminate from *inside* the switch body, like old mixer hardware. */
+
+    .hw-button,
+    .transport-btn{
+      isolation:isolate;
+      overflow:visible;
+      transition:
+        transform .07s ease,
+        filter .10s ease,
+        box-shadow .10s ease,
+        background .10s ease,
+        color .10s ease;
+    }
+
+    .hw-button::before,
+    .master-play-btn::before,
+    .master-stop-btn::before{
+      content:"";
+      position:absolute;
+      z-index:0;
+      pointer-events:none;
+      inset:2px;
+      border-radius:1px;
+      opacity:.12;
+      background:
+        radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.42),transparent 58%),
+        linear-gradient(180deg,rgba(255,255,255,.14),transparent 35%);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.12),
+        inset 0 -2px 3px rgba(0,0,0,.22);
+      transition:opacity .10s ease,filter .10s ease,box-shadow .10s ease;
+    }
+
+    .hw-button i,
+    .master-play-btn i,
+    .master-stop-btn i{
+      position:relative;
+      z-index:2;
+    }
+
+    /* MUTE: dark amber lens while off, warm incandescent orange while on. */
+    .hw-button[data-action="mute"]{
+      color:#6c4724 !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.045),transparent 20%),
+        linear-gradient(180deg,#694622,#513317 68%,#37220f) !important;
+      border-color:#201307 !important;
+      text-shadow:0 1px 0 rgba(0,0,0,.72) !important;
+      box-shadow:
+        0 2px 0 #070708,
+        0 0 0 2px #29231d,
+        inset 0 2px 4px rgba(0,0,0,.34),
+        inset 0 -1px 0 rgba(255,194,116,.045) !important;
+    }
+
+    .hw-button[data-action="mute"].active{
+      color:#2b1604 !important;
+      transform:translateY(1px);
+      filter:saturate(1.08) brightness(1.08) !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#ffc16a 0%,#f29a3f 42%,transparent 72%),
+        linear-gradient(180deg,#f6ad56 0%,#da7d27 67%,#a95615 100%) !important;
+      text-shadow:
+        0 1px 0 rgba(255,220,162,.35),
+        0 0 3px rgba(255,188,91,.28) !important;
+      box-shadow:
+        0 1px 0 #070708,
+        0 0 0 2px #3c2815,
+        0 0 7px rgba(255,139,38,.78),
+        0 0 15px rgba(255,119,22,.30),
+        inset 0 0 8px rgba(255,220,146,.72),
+        inset 0 -3px 4px rgba(123,48,3,.26) !important;
+    }
+
+    .hw-button[data-action="mute"].active::before{
+      opacity:.92;
+      background:
+        radial-gradient(ellipse at 50% 54%,rgba(255,240,188,.92),rgba(255,164,56,.36) 52%,transparent 76%);
+      box-shadow:
+        inset 0 1px 1px rgba(255,251,226,.58),
+        inset 0 -2px 3px rgba(119,43,0,.15),
+        0 0 5px rgba(255,188,86,.48);
+    }
+
+    /* SOLO: smoked ruby when off, saturated red lamp when active. */
+    .hw-button[data-action="solo"]{
+      color:#8b5458 !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.04),transparent 20%),
+        linear-gradient(180deg,#642f35,#4d2026 68%,#321318) !important;
+      border-color:#250b10 !important;
+      text-shadow:0 1px 0 rgba(0,0,0,.76) !important;
+      box-shadow:
+        0 2px 0 #070708,
+        0 0 0 2px #2b2023,
+        inset 0 2px 4px rgba(0,0,0,.38),
+        inset 0 -1px 0 rgba(255,155,165,.035) !important;
+    }
+
+    .hw-button[data-action="solo"].active{
+      color:#fff0ec !important;
+      transform:translateY(1px);
+      filter:saturate(1.12) brightness(1.06) !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#ff787d 0%,#e73b46 42%,transparent 74%),
+        linear-gradient(180deg,#df525d 0%,#b62635 68%,#781521 100%) !important;
+      text-shadow:
+        0 1px 0 rgba(76,0,8,.75),
+        0 0 4px rgba(255,214,210,.42) !important;
+      box-shadow:
+        0 1px 0 #070708,
+        0 0 0 2px #3a1c21,
+        0 0 7px rgba(255,50,62,.80),
+        0 0 15px rgba(255,28,43,.29),
+        inset 0 0 8px rgba(255,168,167,.68),
+        inset 0 -3px 4px rgba(91,4,13,.28) !important;
+    }
+
+    .hw-button[data-action="solo"].active::before{
+      opacity:.90;
+      background:
+        radial-gradient(ellipse at 50% 54%,rgba(255,224,218,.84),rgba(255,67,73,.34) 51%,transparent 76%);
+      box-shadow:
+        inset 0 1px 1px rgba(255,248,243,.50),
+        inset 0 -2px 3px rgba(104,0,8,.16),
+        0 0 5px rgba(255,73,78,.48);
+    }
+
+    /* LOCK: old amber status lamp behind the translucent key. */
+    .hw-button[data-action="lock"]{
+      color:#77726b !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.035),transparent 20%),
+        linear-gradient(180deg,#47454b,#323137 70%,#25242a) !important;
+    }
+
+    .hw-button[data-action="lock"].active{
+      color:#2a1705 !important;
+      transform:translateY(1px);
+      background:
+        radial-gradient(ellipse at 50% 52%,#ffd27c 0%,#d9983e 45%,transparent 74%),
+        linear-gradient(180deg,#dca454,#b37331 70%,#81501f) !important;
+      box-shadow:
+        0 1px 0 #070708,
+        0 0 0 2px #382a19,
+        0 0 7px rgba(232,152,56,.54),
+        inset 0 0 7px rgba(255,223,155,.54),
+        inset 0 -3px 4px rgba(92,48,7,.24) !important;
+    }
+
+    .hw-button[data-action="lock"].active::before{
+      opacity:.82;
+      background:radial-gradient(ellipse at 50% 54%,rgba(255,241,193,.75),rgba(225,145,48,.28) 54%,transparent 77%);
+    }
+
+    /* Main PLAY switch: dark green plastic until actually playing. */
+    .transport-btn--play,
+    .master-play-btn{
+      color:#66765b !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.035),transparent 18%),
+        linear-gradient(180deg,#425039,#303c2a 72%,#222c1e) !important;
+      border-color:#131b10 !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #252a23,
+        inset 0 2px 4px rgba(0,0,0,.34) !important;
+    }
+
+    .transport-btn--play.playing,
+    .master-play-btn.active{
+      color:#13200e !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#d4ed9c 0%,#91b76b 44%,transparent 74%),
+        linear-gradient(180deg,#a9c881,#789b59 70%,#526d3e) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #293323,
+        0 0 8px rgba(157,202,100,.62),
+        inset 0 0 8px rgba(230,255,190,.57),
+        inset 0 -3px 4px rgba(41,77,26,.24) !important;
+      text-shadow:0 1px rgba(239,255,219,.25) !important;
+    }
+
+    .master-play-btn.active::before{
+      opacity:.86;
+      background:radial-gradient(ellipse at 50% 54%,rgba(241,255,205,.79),rgba(145,189,94,.25) 55%,transparent 76%);
+    }
+
+    /* STOP is a momentary red illuminated switch while physically pressed. */
+    .transport-btn--stop,
+    .master-stop-btn{
+      color:#88565a !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.035),transparent 18%),
+        linear-gradient(180deg,#582c31,#412025 72%,#2c1519) !important;
+      border-color:#210a0e !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #292023,
+        inset 0 2px 4px rgba(0,0,0,.35) !important;
+    }
+
+    .transport-btn--stop:active,
+    .master-stop-btn:active{
+      color:#fff0ec !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#ff7d80 0%,#d9404c 44%,transparent 74%),
+        linear-gradient(180deg,#d84b57,#a72431 70%,#73131d) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #381b20,
+        0 0 7px rgba(255,53,66,.68),
+        inset 0 0 8px rgba(255,174,172,.55) !important;
+    }
+
+    /* Randomizer + megaphone are amber backlit latching switches. */
+    .transport-btn--randomizer.active,
+    .megaphone-btn.active{
+      color:#291605 !important;
+      filter:saturate(1.08) brightness(1.06) !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#ffd37d 0%,#e49a42 43%,transparent 74%),
+        linear-gradient(180deg,#e6aa59,#bc7530 70%,#85491d) !important;
+      text-shadow:0 1px rgba(255,231,188,.28) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #392918,
+        0 0 8px rgba(238,145,44,.65),
+        0 0 14px rgba(232,116,28,.21),
+        inset 0 0 8px rgba(255,224,157,.58),
+        inset 0 -3px 4px rgba(92,44,5,.23) !important;
+    }
+
+    .megaphone-btn.active::before{
+      opacity:.86;
+      background:radial-gradient(ellipse at 50% 54%,rgba(255,242,200,.80),rgba(232,144,44,.28) 54%,transparent 77%);
+    }
+
+    /* Grey transport navigation gets a brief warm-white lamp flash when pressed. */
+    .transport-btn--nav:active{
+      color:#171611 !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#f0e7ce 0%,#aaa38f 45%,transparent 74%),
+        linear-gradient(180deg,#b8b09c,#847e70 72%,#625e54) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #35322c,
+        0 0 6px rgba(239,221,180,.34),
+        inset 0 0 7px rgba(255,247,222,.48) !important;
+    }
+
+    /* Pressed caps sit fractionally deeper in their bezels. */
+    .hw-button.active,
+    .transport-btn.playing,
+    .transport-btn--randomizer.active,
+    .megaphone-btn.active{
+      transform:translateY(1px);
+    }
+
   </style>
 </head>
 
@@ -1595,6 +2156,13 @@
           <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
         </button>
 
+        <button id="randomizerBtn" class="transport-btn transport-btn--randomizer" type="button"
+                title="Randomizer: randomly mute unlocked stems now and at every loop"
+                aria-label="Randomizer" aria-pressed="false">
+          <i class="fa-solid fa-dice" aria-hidden="true"></i>
+          <span class="transport-rnd-label">RND</span>
+        </button>
+
         <div class="playlist-slot min-w-0 flex-1">
           <select id="playlistSelect" class="transport-select min-w-0 w-full" aria-label="Playlist folder"></select>
         </div>
@@ -1631,6 +2199,7 @@
   const playPauseBtn = document.getElementById("playPauseBtn");
   const stopBtn = document.getElementById("stopBtn");
   const nextTrackBtn = document.getElementById("nextTrackBtn");
+  const randomizerBtn = document.getElementById("randomizerBtn");
   const seekRange = document.getElementById("seekRange");
   const timeReadout = document.getElementById("timeReadout");
   const loadReadout = document.getElementById("loadReadout");
@@ -1650,10 +2219,73 @@
   let isSeeking = false;
   let playlistDuration = 0;
   let lastKnownPosition = 0;
-  let endedHandled = false;
   let localObjectUrls = [];
   let loadGeneration = 0;
-  let lastDriftSync = 0;
+  let loopCount = 0;
+
+  // Playback is driven by ONE Web Audio clock on every device.
+  // All stems are decoded into AudioBuffers and scheduled against the same
+  // AudioContext timestamp, rather than starting separate HTMLAudioElements.
+  let cycleZeroContextTime = 0;
+  let scheduledThroughCycle = 0;
+  const SCHEDULE_AHEAD_CYCLES = 32;
+
+  const PERSIST_KEY = "wifey-mix8-persistent-v1";
+
+  function loadPersistentPrefs() {
+    try {
+      const raw = localStorage.getItem(PERSIST_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return {
+        randomizerEnabled: !!parsed.randomizerEnabled,
+        megaphoneEnabled: !!parsed.megaphoneEnabled,
+        lockedStemIds: parsed.lockedStemIds && typeof parsed.lockedStemIds === "object"
+          ? parsed.lockedStemIds
+          : {},
+        stemStates: parsed.stemStates && typeof parsed.stemStates === "object"
+          ? parsed.stemStates
+          : {},
+        masterState: parsed.masterState && typeof parsed.masterState === "object"
+          ? parsed.masterState
+          : null
+      };
+    } catch (_) {
+      return {
+        randomizerEnabled:false,
+        megaphoneEnabled:false,
+        lockedStemIds:{},
+        stemStates:{},
+        masterState:null
+      };
+    }
+  }
+
+  const persistentPrefs = loadPersistentPrefs();
+  let randomizerEnabled = !!persistentPrefs.randomizerEnabled;
+  let megaphoneEnabled = !!persistentPrefs.megaphoneEnabled;
+
+  function savePersistentPrefs() {
+    try {
+      localStorage.setItem(PERSIST_KEY, JSON.stringify(persistentPrefs));
+    } catch (_) {}
+  }
+
+  function persistentStemId(stem) {
+    return String(stem?.displayPath || stem?.key || stem?.name || "");
+  }
+
+  function isStemLocked(stem) {
+    const id = persistentStemId(stem);
+    return !!(id && persistentPrefs.lockedStemIds[id]);
+  }
+
+  function setStemLocked(stem,locked) {
+    const id = persistentStemId(stem);
+    if (!id) return;
+    if (locked) persistentPrefs.lockedStemIds[id] = true;
+    else delete persistentPrefs.lockedStemIds[id];
+    savePersistentPrefs();
+  }
 
   let audioCtx = null;
   let masterBus = null;
@@ -1665,7 +2297,21 @@
   let reverb = null;
   let fxReturn = null;
 
-  const masterState = { tone:100, pan:50, room:35, level:80 };
+  // Global megaphone parallel path.
+  let megaphoneDry = null;
+  let megaphoneWet = null;
+  let megaHighpass = null;
+  let megaResonance = null;
+  let megaLowpass = null;
+  let megaDrive = null;
+
+  const masterState = {
+    tone: Number(persistentPrefs.masterState?.tone ?? 100),
+    pan: Number(persistentPrefs.masterState?.pan ?? 50),
+    room: Number(persistentPrefs.masterState?.room ?? 35),
+    level: Number(persistentPrefs.masterState?.level ?? 80)
+  };
+
   const savedStemState = new Map();
 
   function escapeHtml(value) {
@@ -1866,17 +2512,90 @@
     return impulse;
   }
 
+
+  function createMegaphoneCurve(amount=7.5) {
+    const samples = 2048;
+    const curve = new Float32Array(samples);
+    const drive = Math.max(1,Number(amount)||1);
+
+    for (let i=0;i<samples;i++) {
+      const x = (i*2)/(samples-1)-1;
+      // Mild asymmetric loudspeaker-like saturation.
+      const shaped = Math.tanh(x*drive) / Math.tanh(drive);
+      curve[i] = shaped * (x < 0 ? .94 : 1);
+    }
+
+    return curve;
+  }
+
+  function setCrossfadeGain(param,value,immediate=false) {
+    if (!audioCtx || !param) return;
+    const now = audioCtx.currentTime;
+    const target = Number(value) || 0;
+
+    try {
+      param.cancelScheduledValues(now);
+      if (immediate) {
+        param.setValueAtTime(target,now);
+        return;
+      }
+
+      const current = Number.isFinite(param.value) ? param.value : target;
+      param.setValueAtTime(current,now);
+      param.linearRampToValueAtTime(target,now+.018);
+    } catch (_) {
+      param.value = target;
+    }
+  }
+
+  function applyMegaphoneState(immediate=false) {
+    if (!audioCtx || !megaphoneDry || !megaphoneWet) return;
+    setCrossfadeGain(megaphoneDry.gain,megaphoneEnabled ? 0 : 1,immediate);
+    setCrossfadeGain(megaphoneWet.gain,megaphoneEnabled ? 1 : 0,immediate);
+  }
+
+  function syncMegaphoneButton() {
+    const button = document.getElementById("megaphoneBtn");
+    if (!button) return;
+
+    button.classList.toggle("active",megaphoneEnabled);
+    button.setAttribute("aria-pressed",String(megaphoneEnabled));
+    button.title = megaphoneEnabled ? "Megaphone effect ON" : "Megaphone effect OFF";
+    button.setAttribute("aria-label",button.title);
+  }
+
+  function toggleMegaphone() {
+    megaphoneEnabled = !megaphoneEnabled;
+    persistentPrefs.megaphoneEnabled = megaphoneEnabled;
+    savePersistentPrefs();
+
+    ensureAudioGraph();
+    applyMegaphoneState(false);
+    syncMegaphoneButton();
+
+    showSystemReadout(
+      "MASTER",
+      "MEGAPHONE",
+      megaphoneEnabled ? "ON · 1.05 kHz" : "OFF"
+    );
+  }
+
   function ensureAudioGraph() {
     if (audioCtx) return audioCtx;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) throw new Error("Web Audio is not supported in this browser.");
-    audioCtx = new AudioContextClass();
+    try {
+      audioCtx = new AudioContextClass({latencyHint:"interactive"});
+    } catch (_) {
+      audioCtx = new AudioContextClass();
+    }
 
     masterBus = audioCtx.createGain();
     masterTone = audioCtx.createBiquadFilter();
     masterTone.type = "lowpass";
     masterTone.Q.value = .12;
     masterPan = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createGain();
+
     masterGain = audioCtx.createGain();
     masterAnalyser = audioCtx.createAnalyser();
     masterAnalyser.fftSize = 256;
@@ -1887,25 +2606,75 @@
     reverb.buffer = createImpulse(audioCtx);
     fxReturn = audioCtx.createGain();
 
+    // Megaphone parallel path:
+    // high-pass -> resonant 1.05 kHz peak -> low-pass -> mild speaker saturation.
+    megaphoneDry = audioCtx.createGain();
+    megaphoneWet = audioCtx.createGain();
+
+    megaHighpass = audioCtx.createBiquadFilter();
+    megaHighpass.type = "highpass";
+    megaHighpass.frequency.value = 360;
+    megaHighpass.Q.value = .78;
+
+    megaResonance = audioCtx.createBiquadFilter();
+    megaResonance.type = "peaking";
+    megaResonance.frequency.value = 1050;
+    megaResonance.Q.value = 2.15;
+    megaResonance.gain.value = 7.5;
+
+    megaLowpass = audioCtx.createBiquadFilter();
+    megaLowpass.type = "lowpass";
+    megaLowpass.frequency.value = 3550;
+    megaLowpass.Q.value = .92;
+
+    megaDrive = audioCtx.createWaveShaper();
+    megaDrive.curve = createMegaphoneCurve(7.5);
+    if ("oversample" in megaDrive) megaDrive.oversample = "2x";
+
     reverb.connect(fxReturn);
     fxReturn.connect(masterBus);
+
     masterBus.connect(masterTone);
     masterTone.connect(masterPan);
-    masterPan.connect(masterGain);
+
+    // Dry and megaphone paths recombine before the master fader.
+    masterPan.connect(megaphoneDry);
+    megaphoneDry.connect(masterGain);
+
+    masterPan.connect(megaHighpass);
+    megaHighpass.connect(megaResonance);
+    megaResonance.connect(megaLowpass);
+    megaLowpass.connect(megaDrive);
+    megaDrive.connect(megaphoneWet);
+    megaphoneWet.connect(masterGain);
+
     masterGain.connect(masterAnalyser);
     masterAnalyser.connect(audioCtx.destination);
 
     applyMasterState();
+    applyMegaphoneState(true);
     return audioCtx;
   }
 
   function setParam(param,value,time=.012) {
     if (!audioCtx || !param) return;
     const now = audioCtx.currentTime;
+    const safeValue = Number.isFinite(Number(value)) ? Number(value) : 0;
+
     try {
       param.cancelScheduledValues(now);
-      param.setTargetAtTime(value,now,time);
-    } catch (_) { param.value = value; }
+
+      // Important for master/channel faders: zero must be a real zero.
+      // setTargetAtTime(0) only approaches zero asymptotically.
+      if (Math.abs(safeValue) <= 1e-7) {
+        param.setValueAtTime(0,now);
+        return;
+      }
+
+      param.setTargetAtTime(safeValue,now,time);
+    } catch (_) {
+      param.value = safeValue;
+    }
   }
 
   function applyMasterState() {
@@ -1920,26 +2689,88 @@
   }
 
   function defaultStemState(stem) {
+    const id = persistentStemId(stem);
+    const persisted = id ? persistentPrefs.stemStates?.[id] : null;
     const remembered = savedStemState.get(stem.key);
-    return remembered ? {...remembered} : { trim:50, pan:50, room:18, level:80, mute:false, solo:false };
+
+    const source = remembered || persisted;
+    const state = source
+      ? {
+          trim:Number(source.trim ?? 50),
+          pan:Number(source.pan ?? 50),
+          room:Number(source.room ?? 18),
+          level:Number(source.level ?? 80),
+          mute:!!source.mute,
+          solo:!!source.solo
+        }
+      : { trim:50, pan:50, room:18, level:80, mute:false, solo:false };
+
+    state.locked = isStemLocked(stem);
+    return state;
   }
 
   function saveChannelState(channel) {
     if (!channel?.stem?.key) return;
-    savedStemState.set(channel.stem.key,{...channel.state});
+
+    const snapshot = {
+      trim:Number(channel.state.trim),
+      pan:Number(channel.state.pan),
+      room:Number(channel.state.room),
+      level:Number(channel.state.level),
+      mute:!!channel.state.mute,
+      solo:!!channel.state.solo
+    };
+
+    savedStemState.set(channel.stem.key,snapshot);
+
+    const id = persistentStemId(channel.stem);
+    if (id) {
+      persistentPrefs.stemStates[id] = snapshot;
+      savePersistentPrefs();
+    }
+  }
+
+  function saveMasterState() {
+    persistentPrefs.masterState = {
+      tone:Number(masterState.tone),
+      pan:Number(masterState.pan),
+      room:Number(masterState.room),
+      level:Number(masterState.level)
+    };
+    persistentPrefs.megaphoneEnabled = !!megaphoneEnabled;
+    savePersistentPrefs();
+  }
+
+  function stopChannelSources(channel,when=null) {
+    if (!channel?.sources) return;
+    const stopAt = when ?? (audioCtx?.currentTime || 0);
+
+    for (const source of [...channel.sources]) {
+      try { source.onended = null; } catch (_) {}
+      try { source.stop(stopAt); } catch (_) {}
+      try { source.disconnect(); } catch (_) {}
+    }
+
+    channel.sources.clear();
+  }
+
+  function stopAllScheduledSources() {
+    for (const channel of channels) stopChannelSources(channel);
   }
 
   function cleanupChannels() {
+    stopAllScheduledSources();
+
     for (const channel of channels) {
-      try { channel.audio.pause(); } catch (_) {}
       saveChannelState(channel);
-      for (const node of [channel.source,channel.trim,channel.pan,channel.fader,channel.send,channel.analyser]) {
+
+      for (const node of [channel.trim,channel.pan,channel.fader,channel.send,channel.analyser]) {
         try { node?.disconnect(); } catch (_) {}
       }
-      channel.audio.removeAttribute("src");
-      try { channel.audio.load(); } catch (_) {}
-      channel.audio.remove();
+
+      channel.buffer = null;
     }
+
     channels = [];
     audioRack.replaceChildren();
   }
@@ -1977,7 +2808,13 @@
     const title = escapeHtml(stem.name);
     return `
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
-        <div class="channel-name" title="${title}">${String(index+1).padStart(2,"0")} ${title}</div>
+        <div class="channel-header">
+          <div class="channel-name" title="${title}">${String(index+1).padStart(2,"0")} ${title}</div>
+          <span class="mute-led${state.mute ? " is-on" : ""}" data-mute-led
+                title="${state.mute ? "Muted" : "Not muted"}" aria-hidden="true">
+            <span class="mute-led__lens"></span>
+          </span>
+        </div>
 
         <div class="controls-zone min-h-0 grid grid-rows-[minmax(0,1fr)_auto_auto]">
           <div class="knob-stack">
@@ -1991,9 +2828,16 @@
             <div class="meter-col"><div class="meter-fill" data-meter-r></div></div>
           </div>
 
-          <div class="buttons">
-            <button class="hw-button${state.mute ? " active" : ""}" data-action="mute" data-btn-channel="${index}" aria-pressed="${state.mute}">MUTE</button>
-            <button class="hw-button${state.solo ? " active" : ""}" data-action="solo" data-btn-channel="${index}" aria-pressed="${state.solo}">SOLO</button>
+          <div class="buttons stem-action-buttons">
+            <button class="hw-button${state.mute ? " active" : ""}" data-action="mute" data-btn-channel="${index}"
+                    aria-pressed="${state.mute}" title="Mute ${title}">MUTE</button>
+            <button class="hw-button${state.solo ? " active" : ""}" data-action="solo" data-btn-channel="${index}"
+                    aria-pressed="${state.solo}" title="Solo ${title}">SOLO</button>
+            <button class="hw-button lock-button${state.locked ? " active" : ""}" data-action="lock" data-btn-channel="${index}"
+                    aria-pressed="${state.locked}" title="${state.locked ? "Unlock" : "Lock"} ${title} from randomizer"
+                    aria-label="${state.locked ? "Unlock" : "Lock"} ${title} from randomizer">
+              <i class="fa-solid ${state.locked ? "fa-lock" : "fa-lock-open"}" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
 
@@ -2020,9 +2864,22 @@
             <div class="meter-col"><div class="meter-fill master-meter" data-master-meter-r></div></div>
           </div>
 
-          <div class="buttons">
-            <button id="masterPlayBtn" class="hw-button master-play-btn w-full" type="button" title="Play" aria-label="Play"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
-            <button id="masterStopBtn" class="hw-button master-stop-btn w-full" type="button" title="Stop" aria-label="Stop"><i class="fa-solid fa-square" aria-hidden="true"></i></button>
+          <div class="buttons master-action-buttons">
+            <button id="masterPlayBtn" class="hw-button master-play-btn w-full" type="button"
+                    title="Play" aria-label="Play">
+              <i class="fa-solid fa-play" aria-hidden="true"></i>
+            </button>
+
+            <button id="masterStopBtn" class="hw-button master-stop-btn w-full" type="button"
+                    title="Stop" aria-label="Stop">
+              <i class="fa-solid fa-square" aria-hidden="true"></i>
+            </button>
+
+            <button id="megaphoneBtn" class="hw-button megaphone-btn${megaphoneEnabled ? " active" : ""} w-full"
+                    type="button" title="Megaphone effect" aria-label="Megaphone effect"
+                    aria-pressed="${megaphoneEnabled}">
+              <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
 
@@ -2060,29 +2917,68 @@
     );
   }
 
+  function decodeAudioDataCompat(ctx,arrayBuffer) {
+    const copy = arrayBuffer.slice(0);
+
+    // Promise form is standard now. Callback fallback keeps older Safari/WebKit happy.
+    try {
+      const maybePromise = ctx.decodeAudioData(copy);
+      if (maybePromise && typeof maybePromise.then === "function") return maybePromise;
+    } catch (_) {}
+
+    return new Promise((resolve,reject)=>{
+      try {
+        ctx.decodeAudioData(copy,resolve,reject);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  async function loadStemBuffer(channel,generation) {
+    try {
+      const response = await fetch(channel.stem.src,{cache:"force-cache"});
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const bytes = await response.arrayBuffer();
+      if (generation !== loadGeneration) return channel;
+
+      const buffer = await decodeAudioDataCompat(audioCtx,bytes);
+      if (generation !== loadGeneration) return channel;
+
+      channel.buffer = buffer;
+      channel.ready = true;
+      channel.error = false;
+      updatePlaylistDuration();
+      return channel;
+    } catch (error) {
+      channel.error = true;
+      channel.ready = true;
+      channel.el?.classList.add("channel-error");
+      loadReadout.textContent = "AUDIO ERR";
+      console.error(`Could not decode stem: ${channel.stem?.displayPath || channel.stem?.name}`,error);
+      return channel;
+    }
+  }
+
   function setupAudioForRenderedChannels(playlist,generation) {
     ensureAudioGraph();
     const stripEls = [...grid.querySelectorAll("[data-channel]")];
+
     channels = playlist.stems.map((stem,index)=>{
       const state = defaultStemState(stem);
-      const audio = new Audio();
-      audio.preload = "auto";
-      audio.playsInline = true;
-      audio.src = stem.src;
-      audio.dataset.stem = stem.name;
-      audioRack.appendChild(audio);
 
-      const source = audioCtx.createMediaElementSource(audio);
       const trim = audioCtx.createGain();
       const pan = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createGain();
       const fader = audioCtx.createGain();
       const send = audioCtx.createGain();
       const analyser = audioCtx.createAnalyser();
+
       analyser.fftSize = 256;
       analyser.smoothingTimeConstant = .68;
+
       const meterData = new Uint8Array(analyser.fftSize);
 
-      source.connect(trim);
       trim.connect(pan);
       pan.connect(fader);
       fader.connect(masterBus);
@@ -2091,36 +2987,35 @@
       fader.connect(analyser);
 
       const channel = {
-        stem,index,state,audio,source,trim,pan,fader,send,analyser,meterData,
+        stem,index,state,buffer:null,sources:new Set(),
+        trim,pan,fader,send,analyser,meterData,
         el:stripEls[index],
         meterL:stripEls[index]?.querySelector("[data-meter-l]"),
         meterR:stripEls[index]?.querySelector("[data-meter-r]"),
         ready:false,error:false
       };
 
-      const readyPromise = new Promise(resolve=>{
-        const finish=()=>{ channel.ready=true; updatePlaylistDuration(); resolve(channel); };
-        audio.addEventListener("loadedmetadata",finish,{once:true});
-        audio.addEventListener("durationchange",updatePlaylistDuration);
-        audio.addEventListener("error",()=>{
-          channel.error=true;
-          channel.el?.classList.add("channel-error");
-          loadReadout.textContent="AUDIO ERR";
-          resolve(channel);
-        },{once:true});
-      });
-      channel.readyPromise = readyPromise;
-      audio.addEventListener("ended",checkPlaylistEnded);
-      audio.load();
+      channel.readyPromise = loadStemBuffer(channel,generation);
       return channel;
     });
 
-    channels.forEach(applyChannelState);
+    channels.forEach(channel=>{
+      applyChannelState(channel);
+      syncStemActionButtons(channel);
+    });
     updateSoloRouting();
+
     Promise.allSettled(channels.map(c=>c.readyPromise)).then(()=>{
       if (generation !== loadGeneration) return;
+
       updatePlaylistDuration();
-      loadReadout.textContent = channels.some(c=>c.error) ? "PARTIAL" : "READY";
+
+      if (randomizerEnabled) {
+        randomizeTrackMutes("load");
+        loadReadout.textContent = channels.some(c=>c.error) ? "RND PART" : "RND ON";
+      } else {
+        loadReadout.textContent = channels.some(c=>c.error) ? "PARTIAL" : "READY";
+      }
     });
   }
 
@@ -2242,6 +3137,101 @@
     });
   }
 
+
+  function syncStemActionButtons(channel) {
+    if (!channel?.el) return;
+
+    const muteBtn = channel.el.querySelector('[data-action="mute"]');
+    const soloBtn = channel.el.querySelector('[data-action="solo"]');
+    const lockBtn = channel.el.querySelector('[data-action="lock"]');
+
+    if (muteBtn) {
+      muteBtn.classList.toggle("active",!!channel.state.mute);
+      muteBtn.setAttribute("aria-pressed",String(!!channel.state.mute));
+    }
+
+    const muteLed = channel.el.querySelector("[data-mute-led]");
+    if (muteLed) {
+      muteLed.classList.toggle("is-on",!!channel.state.mute);
+      muteLed.title = channel.state.mute ? "Muted" : "Not muted";
+    }
+
+    if (soloBtn) {
+      soloBtn.classList.toggle("active",!!channel.state.solo);
+      soloBtn.setAttribute("aria-pressed",String(!!channel.state.solo));
+    }
+
+    if (lockBtn) {
+      lockBtn.classList.toggle("active",!!channel.state.locked);
+      lockBtn.setAttribute("aria-pressed",String(!!channel.state.locked));
+      lockBtn.title = `${channel.state.locked ? "Unlock" : "Lock"} ${channel.stem.name} from randomizer`;
+      lockBtn.setAttribute("aria-label",lockBtn.title);
+      lockBtn.innerHTML = `<i class="fa-solid ${channel.state.locked ? "fa-lock" : "fa-lock-open"}" aria-hidden="true"></i>`;
+    }
+  }
+
+  function updateRandomizerButton() {
+    if (!randomizerBtn) return;
+    randomizerBtn.classList.toggle("active",randomizerEnabled);
+    randomizerBtn.setAttribute("aria-pressed",String(randomizerEnabled));
+    randomizerBtn.title = randomizerEnabled
+      ? "Randomizer ON — unlocked stems will randomize again at the next loop"
+      : "Randomizer OFF — click to randomize unlocked stems and enable it";
+  }
+
+  function randomizeTrackMutes(reason="manual") {
+    if (!channels.length) return;
+
+    const unlocked = channels.filter(channel=>!channel.state.locked && !channel.error);
+    if (!unlocked.length) {
+      showSystemReadout("RANDOMIZER","ALL STEMS LOCKED","HOLD");
+      return;
+    }
+
+    // About half the unlocked arrangement is muted per pass.
+    // Locked strips retain their exact current mute state.
+    for (const channel of unlocked) {
+      channel.state.mute = Math.random() < .47;
+    }
+
+    // Avoid an accidental fully-silent random pass whenever an unlocked stem exists.
+    const anyAudible = channels.some(channel=>!channel.error && !channel.state.mute);
+    if (!anyAudible) {
+      const keep = unlocked[Math.floor(Math.random()*unlocked.length)];
+      if (keep) keep.state.mute = false;
+    }
+
+    for (const channel of channels) {
+      syncStemActionButtons(channel);
+      saveChannelState(channel);
+    }
+
+    updateSoloRouting();
+
+    const mutedCount = channels.filter(channel=>channel.state.mute).length;
+    const lockedCount = channels.filter(channel=>channel.state.locked).length;
+    showSystemReadout(
+      currentPlaylist?.title ? String(currentPlaylist.title).toUpperCase() : "RANDOMIZER",
+      reason === "loop" ? `LOOP ${loopCount} · RANDOMIZED` : "RANDOMIZED",
+      `${mutedCount} MUTE · ${lockedCount} LOCK`
+    );
+  }
+
+  function toggleRandomizer() {
+    randomizerEnabled = !randomizerEnabled;
+    persistentPrefs.randomizerEnabled = randomizerEnabled;
+    savePersistentPrefs();
+    updateRandomizerButton();
+
+    if (randomizerEnabled) {
+      randomizeTrackMutes("manual");
+      loadReadout.textContent = "RND ON";
+    } else {
+      showSystemReadout("RANDOMIZER","OFF","HOLD");
+      loadReadout.textContent = "RND OFF";
+    }
+  }
+
   function bindControlSurface() {
     grid.querySelectorAll(".knob-range").forEach(input=>{
       const owner=input.dataset.owner;
@@ -2250,6 +3240,7 @@
         if (owner === "master") {
           masterState[control]=value;
           applyMasterState();
+          saveMasterState();
           return;
         }
         const channel=channels[Number(owner)];
@@ -2264,7 +3255,10 @@
       const owner=input.dataset.owner;
       bindFader(input,value=>{
         if (input.dataset.master === "1" || owner === "master") {
-          masterState.level=value; applyMasterState(); return;
+          masterState.level=value;
+          applyMasterState();
+          saveMasterState();
+          return;
         }
         const channel=channels[Number(owner)];
         if (!channel) return;
@@ -2279,9 +3273,22 @@
         const channel=channels[Number(btn.dataset.btnChannel)];
         if (!channel) return;
         const action=btn.dataset.action;
+
+        if (action === "lock") {
+          channel.state.locked = !channel.state.locked;
+          setStemLocked(channel.stem,channel.state.locked);
+          saveChannelState(channel);
+          syncStemActionButtons(channel);
+          showSystemReadout(
+            String(channel.stem.name).toUpperCase(),
+            channel.state.locked ? "RANDOM LOCK" : "RANDOM UNLOCK",
+            channel.state.locked ? "HOLD" : "FREE"
+          );
+          return;
+        }
+
         channel.state[action]=!channel.state[action];
-        btn.classList.toggle("active",channel.state[action]);
-        btn.setAttribute("aria-pressed",String(channel.state[action]));
+        syncStemActionButtons(channel);
         saveChannelState(channel);
         updateSoloRouting();
       });
@@ -2289,75 +3296,224 @@
 
     document.getElementById("masterPlayBtn")?.addEventListener("click",togglePlayback);
     document.getElementById("masterStopBtn")?.addEventListener("click",stopCurrent);
+    document.getElementById("megaphoneBtn")?.addEventListener("click",toggleMegaphone);
+    syncMegaphoneButton();
   }
 
   function updatePlaylistDuration() {
     playlistDuration = channels.reduce((max,channel)=>{
-      const duration=channel.audio.duration;
+      const duration = channel.buffer?.duration;
       return Number.isFinite(duration) ? Math.max(max,duration) : max;
     },0);
+
     updateTransportDisplay();
   }
 
+  function createScheduledSource(channel,when,offset=0) {
+    if (!audioCtx || !channel?.buffer || channel.error) return null;
+
+    const duration = channel.buffer.duration;
+    if (!Number.isFinite(duration) || offset >= duration-.0005) return null;
+
+    const source = audioCtx.createBufferSource();
+    source.buffer = channel.buffer;
+    source.connect(channel.trim);
+    channel.sources.add(source);
+
+    source.onended = ()=>{
+      channel.sources.delete(source);
+      try { source.disconnect(); } catch (_) {}
+    };
+
+    try {
+      source.start(when,Math.max(0,offset));
+      return source;
+    } catch (error) {
+      channel.sources.delete(source);
+      try { source.disconnect(); } catch (_) {}
+      console.error("Could not schedule stem",channel.stem?.name,error);
+      return null;
+    }
+  }
+
+  function scheduleCycle(cycleIndex) {
+    if (!audioCtx || !playlistDuration || cycleIndex < 1) return;
+
+    const when = cycleZeroContextTime + cycleIndex*playlistDuration;
+
+    for (const channel of channels) {
+      createScheduledSource(channel,when,0);
+    }
+
+    scheduledThroughCycle = Math.max(scheduledThroughCycle,cycleIndex);
+  }
+
+  function ensureScheduleHorizon(currentCycle=0) {
+    if (!isPlaying || !playlistDuration || !audioCtx) return;
+
+    const target = currentCycle + SCHEDULE_AHEAD_CYCLES;
+    for (let cycle=scheduledThroughCycle+1; cycle<=target; cycle++) {
+      scheduleCycle(cycle);
+    }
+  }
+
+  function startClockedPlaybackAt(position) {
+    if (!audioCtx || !playlistDuration) return false;
+
+    const target = Math.max(0,Math.min(playlistDuration,Number(position)||0));
+    stopAllScheduledSources();
+
+    // A small shared lead-in lets every source be scheduled before the exact same
+    // AudioContext timestamp. No stem receives its own independent start clock.
+    const startAt = audioCtx.currentTime + .045;
+    cycleZeroContextTime = startAt - target;
+    lastKnownPosition = target;
+    loopCount = 0;
+    scheduledThroughCycle = 0;
+
+    let scheduled = 0;
+    for (const channel of channels) {
+      if (createScheduledSource(channel,startAt,target)) scheduled += 1;
+    }
+
+    if (!scheduled && target >= playlistDuration-.001) {
+      cycleZeroContextTime = startAt;
+      lastKnownPosition = 0;
+      for (const channel of channels) {
+        if (createScheduledSource(channel,startAt,0)) scheduled += 1;
+      }
+    }
+
+    isPlaying = scheduled > 0;
+    if (isPlaying) ensureScheduleHorizon(0);
+    return isPlaying;
+  }
+
+  function getAbsoluteCyclePosition() {
+    if (!isPlaying || !audioCtx || !playlistDuration) return lastKnownPosition || 0;
+
+    const elapsed = audioCtx.currentTime - cycleZeroContextTime;
+    if (elapsed <= 0) return Math.max(0,lastKnownPosition || 0);
+
+    return elapsed;
+  }
+
   function getPosition() {
-    const reference=channels.find(c=>!c.error && Number.isFinite(c.audio.currentTime));
-    if (reference) return reference.audio.currentTime || 0;
-    return lastKnownPosition || 0;
+    if (!playlistDuration) return 0;
+    if (!isPlaying || !audioCtx) {
+      return Math.max(0,Math.min(playlistDuration,lastKnownPosition || 0));
+    }
+
+    const absolute = getAbsoluteCyclePosition();
+    const wrapped = absolute % playlistDuration;
+    return Math.max(0,Math.min(playlistDuration,wrapped));
+  }
+
+  function updateLoopScheduler() {
+    if (!isPlaying || !audioCtx || !playlistDuration) return;
+
+    const absolute = getAbsoluteCyclePosition();
+    const currentCycle = Math.max(0,Math.floor(absolute/playlistDuration));
+
+    ensureScheduleHorizon(currentCycle);
+
+    if (currentCycle > loopCount) {
+      loopCount = currentCycle;
+
+      if (randomizerEnabled) randomizeTrackMutes("loop");
+      loadReadout.textContent = randomizerEnabled ? "RND LOOP" : "LOOP";
+    }
   }
 
   function seekAll(seconds) {
-    const target=Math.max(0,Math.min(playlistDuration || Number.MAX_SAFE_INTEGER,Number(seconds)||0));
-    lastKnownPosition=target;
-    endedHandled=false;
-    for (const channel of channels) {
-      try {
-        if (channel.audio.readyState >= 1) channel.audio.currentTime=Math.min(target,Number.isFinite(channel.audio.duration)?channel.audio.duration:target);
-      } catch (_) {}
+    const target = Math.max(0,Math.min(playlistDuration || Number.MAX_SAFE_INTEGER,Number(seconds)||0));
+
+    if (isPlaying && audioCtx && playlistDuration) {
+      startClockedPlaybackAt(target);
+    } else {
+      lastKnownPosition = target;
     }
+
     updateTransportDisplay();
   }
 
   async function resumeAudioContext() {
     ensureAudioGraph();
+
     if (audioCtx.state === "suspended") await audioCtx.resume();
+
+    // Some WebKit versions briefly remain "interrupted". A second resume after
+    // the user gesture is safe and improves laptop/iOS reliability.
+    if (audioCtx.state !== "running" && typeof audioCtx.resume === "function") {
+      try { await audioCtx.resume(); } catch (_) {}
+    }
+  }
+
+
+  function showAudioEngineStatus() {
+    if (!audioCtx) return;
+    const rate = Math.round(audioCtx.sampleRate || 0);
+    showSystemReadout(
+      currentPlaylist?.title ? String(currentPlaylist.title).toUpperCase() : "WIFEY MIX-8",
+      "AUDIO CLOCK",
+      rate ? `${(rate/1000).toFixed(1)} kHz` : "READY"
+    );
   }
 
   async function playCurrent() {
     if (!currentPlaylist || !channels.length) return;
-    try { await resumeAudioContext(); } catch (error) { loadReadout.textContent="NO AUDIO"; return; }
-    loadReadout.textContent="LOADING";
-    await Promise.allSettled(channels.map(c=>c.readyPromise));
-    let position=getPosition();
-    if (playlistDuration && position >= playlistDuration-.08) { position=0; seekAll(0); }
-    for (const channel of channels) {
-      if (channel.error) continue;
-      try {
-        if (channel.audio.readyState >= 1 && Math.abs(channel.audio.currentTime-position)>.04) channel.audio.currentTime=position;
-      } catch (_) {}
+
+    try {
+      await resumeAudioContext();
+    } catch (error) {
+      loadReadout.textContent = "NO AUDIO";
+      return;
     }
-    const results=await Promise.allSettled(channels.filter(c=>!c.error).map(c=>c.audio.play()));
-    isPlaying=results.some(r=>r.status==="fulfilled");
-    endedHandled=false;
+
+    loadReadout.textContent = "LOADING";
+    await Promise.allSettled(channels.map(c=>c.readyPromise));
+    updatePlaylistDuration();
+
+    if (!playlistDuration) {
+      loadReadout.textContent = "NO AUDIO";
+      return;
+    }
+
+    let position = Math.max(0,Math.min(playlistDuration,lastKnownPosition || 0));
+    if (position >= playlistDuration-.03) position = 0;
+
+    startClockedPlaybackAt(position);
     updatePlaybackButtons();
-    loadReadout.textContent=isPlaying?"PLAYING":"READY";
+    loadReadout.textContent = isPlaying ? "PLAYING" : "READY";
+    if (isPlaying) showAudioEngineStatus();
   }
 
   function pauseCurrent() {
-    lastKnownPosition=getPosition();
-    channels.forEach(c=>{ try { c.audio.pause(); } catch (_) {} });
-    isPlaying=false;
+    if (!isPlaying) return;
+
+    lastKnownPosition = getPosition();
+    stopAllScheduledSources();
+    isPlaying = false;
+
     updatePlaybackButtons();
-    loadReadout.textContent="PAUSED";
+    updateTransportDisplay();
+    loadReadout.textContent = "PAUSED";
   }
 
-  function togglePlayback() { isPlaying ? pauseCurrent() : playCurrent(); }
+  function togglePlayback() {
+    isPlaying ? pauseCurrent() : playCurrent();
+  }
 
   function stopCurrent() {
-    channels.forEach(c=>{ try { c.audio.pause(); } catch (_) {} });
-    isPlaying=false;
-    seekAll(0);
+    stopAllScheduledSources();
+    isPlaying = false;
+    lastKnownPosition = 0;
+    loopCount = 0;
+    scheduledThroughCycle = 0;
+
     updatePlaybackButtons();
-    loadReadout.textContent="STOPPED";
+    updateTransportDisplay();
+    loadReadout.textContent = "STOPPED";
   }
 
   function updatePlaybackButtons() {
@@ -2381,22 +3537,32 @@
 
   async function changePlaylist(index,autoplay=false) {
     if (!playlists.length) return;
+
     const normalized=(Number(index)+playlists.length)%playlists.length;
     const generation=++loadGeneration;
-    channels.forEach(c=>{ try { c.audio.pause(); } catch (_) {} });
+
+    stopAllScheduledSources();
     isPlaying=false;
     updatePlaybackButtons();
     cleanupChannels();
+
     currentPlaylistIndex=normalized;
     currentPlaylist=playlists[normalized];
     playlistSelect.value=String(normalized);
     trackReadout.textContent=`${normalized+1}/${playlists.length}`;
-    playlistDuration=0; lastKnownPosition=0; endedHandled=false;
+
+    playlistDuration=0;
+    lastKnownPosition=0;
+    loopCount=0;
+    scheduledThroughCycle=0;
+    cycleZeroContextTime=0;
+
     loadReadout.textContent="LOADING";
     renderMixer(currentPlaylist);
     setupAudioForRenderedChannels(currentPlaylist,generation);
     horizontalScroller.scrollLeft=0;
     updateTransportDisplay();
+
     if (autoplay) await playCurrent();
   }
 
@@ -2418,17 +3584,6 @@
   async function nextPlaylist(forceAutoplay=null) {
     const shouldPlay=forceAutoplay===null ? isPlaying : forceAutoplay;
     await changePlaylist(currentPlaylistIndex+1,shouldPlay);
-  }
-
-  function checkPlaylistEnded() {
-    if (!isPlaying || endedHandled || !channels.length) return;
-    const allDone=channels.filter(c=>!c.error).every(c=>c.audio.ended || (playlistDuration && c.audio.currentTime>=Math.min(c.audio.duration||playlistDuration,playlistDuration)-.08));
-    if (!allDone) return;
-    endedHandled=true;
-    isPlaying=false;
-    updatePlaybackButtons();
-    if (playlists.length>1) nextPlaylist(true);
-    else { seekAll(0); loadReadout.textContent="ENDED"; }
   }
 
   function updateTransportDisplay() {
@@ -2465,18 +3620,7 @@
 
     if (isPlaying) {
       lastKnownPosition=getPosition();
-      if (timestamp-lastDriftSync>500) {
-        lastDriftSync=timestamp;
-        const ref=channels.find(c=>!c.error && !c.audio.ended)?.audio;
-        if (ref) {
-          const t=ref.currentTime;
-          for (const channel of channels) {
-            if (channel.error || channel.audio===ref || channel.audio.ended || channel.audio.readyState<1) continue;
-            if (Math.abs(channel.audio.currentTime-t)>.12) { try { channel.audio.currentTime=t; } catch (_) {} }
-          }
-        }
-      }
-      checkPlaylistEnded();
+      updateLoopScheduler();
     }
     updateTransportDisplay();
     requestAnimationFrame(animationLoop);
@@ -2487,6 +3631,7 @@
   playPauseBtn.addEventListener("click",togglePlayback);
   stopBtn.addEventListener("click",stopCurrent);
   nextTrackBtn.addEventListener("click",()=>nextPlaylist());
+  randomizerBtn?.addEventListener("click",toggleRandomizer);
 
   seekRange.addEventListener("pointerdown",()=>{isSeeking=true;});
   seekRange.addEventListener("input",()=>{
@@ -2509,6 +3654,7 @@
   window.addEventListener("beforeunload",revokeLocalObjectUrls);
 
   (async function init() {
+    updateRandomizerButton();
     loadReadout.textContent="INIT";
     const manifest=await getManifest();
     bundledPlaylists=buildPlaylistsFromManifest(manifest);
