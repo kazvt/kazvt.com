@@ -3863,6 +3863,165 @@
         drop-shadow(0 0 2px rgba(255,119,19,.60)) !important;
     }
 
+  
+    /* ==============================================================
+       AUDIO-REACTIVE STRIP STATUS LAMPS
+       Red = unmuted, yellow = solo, dark = muted.
+       Real incoming signal modulates lamp intensity.
+       ============================================================== */
+
+    .mute-led{
+      --led-drive:0;
+      transition:none !important;
+    }
+
+    .mute-led.is-on,
+    .mute-led.is-solo{
+      filter:
+        brightness(calc(.72 + var(--led-drive) * .72))
+        saturate(calc(.92 + var(--led-drive) * .30));
+    }
+
+    /* RED signal / active lamp */
+    .mute-led.is-on{
+      background:
+        radial-gradient(
+          circle at 50% 48%,
+          rgba(255,68,72,calc(.20 + var(--led-drive) * .32)) 0 40%,
+          #310b0e 43% 64%,
+          #47353a 67% 78%,
+          #0a090b 81% 100%
+        ) !important;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.045),
+        0 1px 1px rgba(0,0,0,.88),
+        0 0 0 1px #30272c,
+        0 0 calc(3px + var(--led-drive) * 7px)
+          rgba(255,35,43,calc(.24 + var(--led-drive) * .55)),
+        0 0 calc(7px + var(--led-drive) * 10px)
+          rgba(255,28,38,calc(.08 + var(--led-drive) * .22)) !important;
+    }
+
+    .mute-led.is-on .mute-led__lens{
+      background:
+        radial-gradient(
+          circle at 31% 24%,
+          rgba(255,232,226,calc(.32 + var(--led-drive) * .58)) 0 9%,
+          rgba(255,220,214,calc(.17 + var(--led-drive) * .42)) 10% 14%,
+          transparent 16%
+        ),
+        radial-gradient(
+          circle at 48% 52%,
+          #ff4c54 0 28%,
+          #d91825 48%,
+          #8b0710 72%,
+          #47050a 100%
+        ) !important;
+      box-shadow:
+        0 0 calc(2px + var(--led-drive) * 4px)
+          rgba(255,47,56,calc(.38 + var(--led-drive) * .55)),
+        inset 0 -1px 2px rgba(77,0,5,.40),
+        inset 0 1px 1px rgba(255,245,238,calc(.12 + var(--led-drive) * .22)) !important;
+    }
+
+    /* YELLOW SOLO lamp */
+    .mute-led.is-solo{
+      background:
+        radial-gradient(
+          circle at 50% 48%,
+          rgba(255,207,61,calc(.22 + var(--led-drive) * .35)) 0 40%,
+          #352806 43% 64%,
+          #493f2a 67% 78%,
+          #0a0908 81% 100%
+        ) !important;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.05),
+        0 1px 1px rgba(0,0,0,.88),
+        0 0 0 1px #342e21,
+        0 0 calc(3px + var(--led-drive) * 7px)
+          rgba(255,206,44,calc(.26 + var(--led-drive) * .56)),
+        0 0 calc(7px + var(--led-drive) * 10px)
+          rgba(255,174,18,calc(.08 + var(--led-drive) * .23)) !important;
+    }
+
+    .mute-led.is-solo .mute-led__lens{
+      background:
+        radial-gradient(
+          circle at 31% 24%,
+          rgba(255,252,207,calc(.38 + var(--led-drive) * .55)) 0 9%,
+          rgba(255,247,190,calc(.18 + var(--led-drive) * .42)) 10% 14%,
+          transparent 16%
+        ),
+        radial-gradient(
+          circle at 48% 52%,
+          #ffdc4e 0 29%,
+          #e9b91f 49%,
+          #a66e05 72%,
+          #583703 100%
+        ) !important;
+      box-shadow:
+        0 0 calc(2px + var(--led-drive) * 4px)
+          rgba(255,218,56,calc(.40 + var(--led-drive) * .54)),
+        inset 0 -1px 2px rgba(82,50,0,.37),
+        inset 0 1px 1px rgba(255,255,235,calc(.13 + var(--led-drive) * .23)) !important;
+    }
+
+    /* ==============================================================
+       DARKER PHYSICAL DIVIDERS BETWEEN CHANNEL STRIPS
+       Like the narrow black seams / gaps between modular mixer strips.
+       ============================================================== */
+
+    .channel{
+      border-left:1px solid #09090b !important;
+      border-right:2px solid #060608 !important;
+      box-shadow:
+        inset 1px 0 0 rgba(255,255,255,.010),
+        inset -1px 0 0 rgba(0,0,0,.78),
+        1px 0 0 #111115 !important;
+    }
+
+    .channel + .channel{
+      border-left-color:#0a0a0c !important;
+    }
+
+    .channel-grid > .channel::after{
+      content:"";
+      position:absolute;
+      z-index:8;
+      pointer-events:none;
+      top:0;
+      bottom:0;
+      right:0;
+      width:1px;
+      background:#020203;
+      box-shadow:
+        -1px 0 0 rgba(0,0,0,.42),
+        1px 0 0 rgba(58,57,61,.10);
+      opacity:.96;
+    }
+
+    .master-dock{
+      border-left:3px solid #050507 !important;
+      box-shadow:
+        -4px 0 8px rgba(0,0,0,.48),
+        inset 1px 0 0 rgba(255,255,255,.018),
+        inset 0 1px 0 rgba(255,255,255,.018) !important;
+    }
+
+  
+    /* ===== stepped segmented marquee: never smooth-scroll the glyph bank ===== */
+    .alpha-text,
+    .alpha16-char,
+    .alpha16-svg{
+      scroll-behavior:auto !important;
+      transform:none !important;
+      animation:none !important;
+    }
+
+    .alpha16-char{
+      transition:none !important;
+    }
+
   </style>
 </head>
 
@@ -4604,50 +4763,89 @@
 
   function typeAlpha16(target,text,{
     maxChars=18,
-    speed=25,
+    settle=2400,
+    step=650,
+    endHold=1900,
+    loop=true,
     align="left",
     onDone=null
   }={}) {
     if (!target) return;
 
     const previous = alpha16TypeTimers.get(target);
-    if (previous) clearTimeout(previous);
+    if (previous) {
+      clearTimeout(previous);
+      alpha16TypeTimers.delete(target);
+    }
 
     const chars = [...normalizeAlpha16Text(text)];
-    let index = 0;
-
-    const tick = ()=>{
-      index += 1;
-
-      const typed = chars.slice(0,index);
-      const visible = typed.length > maxChars
-        ? typed.slice(typed.length-maxChars)
-        : typed;
-
-      alpha16Write(target,visible.join(""),{maxChars,align});
-
-      if (index < chars.length) {
-        const timer = setTimeout(tick,speed);
-        alpha16TypeTimers.set(target,timer);
-      } else {
-        alpha16TypeTimers.delete(target);
-        if (typeof onDone === "function") onDone();
-      }
-    };
-
-    target.replaceChildren();
 
     if (!chars.length) {
+      target.replaceChildren();
       if (typeof onDone === "function") onDone();
       return;
     }
 
-    tick();
+    // If the complete message fits, do not animate it at all.
+    // Hardware should be calm when it has enough character positions.
+    if (chars.length <= maxChars) {
+      alpha16Write(target,chars.join(""),{maxChars,align});
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+
+    const maxOffset = chars.length-maxChars;
+    let offset = 0;
+
+    const renderWindow = ()=>{
+      const windowChars = chars.slice(offset,offset+maxChars);
+      alpha16Write(target,windowChars.join(""),{
+        maxChars,
+        align:"left"
+      });
+    };
+
+    const schedule = (fn,delay)=>{
+      const timer = setTimeout(fn,delay);
+      alpha16TypeTimers.set(target,timer);
+    };
+
+    const advanceOneCell = ()=>{
+      // One whole segmented character position at a time.
+      // No transform, no sub-pixel movement, no smooth marquee.
+      offset += 1;
+      renderWindow();
+
+      if (offset < maxOffset) {
+        schedule(advanceOneCell,step);
+        return;
+      }
+
+      if (!loop) {
+        alpha16TypeTimers.delete(target);
+        if (typeof onDone === "function") onDone();
+        return;
+      }
+
+      // Let the last part be read, then snap back to the literal beginning.
+      schedule(()=>{
+        offset = 0;
+        renderWindow();
+        schedule(advanceOneCell,settle);
+      },endHold);
+    };
+
+    // Always present the literal beginning first and leave it alone long enough
+    // to read before the first stepped movement.
+    renderWindow();
+    schedule(advanceOneCell,settle);
   }
 
   window.alpha16Write = alpha16Write;
   window.typeAlpha16 = typeAlpha16;
   window.typeHardwareDisplay = typeAlpha16;
+  // Long text defaults to: 2.4s initial hold, 650ms per whole-character step,
+  // 1.9s end hold, then a hard reset to the beginning.
 
   window.testHardwareDisplay = function(text="BOOT") {
     setSevenSegmentScreen({
@@ -4838,24 +5036,46 @@
     controlReadoutLabel.textContent = label;
     controlReadoutValue.textContent = value || "READY";
 
-    // Proper 16-segment alphanumeric modules for every field in this monitor.
-    alpha16Write(sevenOwner,owner,{maxChars:17,align:"left"});
+    // Long names/messages use a slow, whole-character segmented marquee.
+    // Short text simply stays put.
+    typeAlpha16(sevenOwner,owner,{
+      maxChars:17,
+      settle:2600,
+      step:700,
+      endHold:2000,
+      loop:true,
+      align:"left"
+    });
+
     syncSevenSegmentTrack();
 
-    if (animate) {
-      typeAlpha16(sevenLabel,label,{
-        maxChars:18,
-        speed:23,
+    typeAlpha16(sevenLabel,label,{
+      maxChars:18,
+      settle:2400,
+      step:650,
+      endHold:1900,
+      loop:true,
+      align:"left"
+    });
+
+    const displayValue = value || "READY";
+    const normalizedValue = normalizeAlpha16Text(displayValue);
+
+    if ([...normalizedValue].length > 13) {
+      typeAlpha16(sevenValue,displayValue,{
+        maxChars:13,
+        settle:2400,
+        step:650,
+        endHold:1900,
+        loop:true,
         align:"left"
       });
     } else {
-      alpha16Write(sevenLabel,label,{maxChars:18,align:"left"});
+      alpha16Write(sevenValue,displayValue,{
+        maxChars:13,
+        align:"right"
+      });
     }
-
-    alpha16Write(sevenValue,value || "READY",{
-      maxChars:13,
-      align:"right"
-    });
   }
 
   function showTouchedControl(input,value=Number(input.value)) {
@@ -5566,6 +5786,8 @@
         el:stripEls[index],
         meterL:stripEls[index]?.querySelector("[data-meter-l]"),
         meterR:stripEls[index]?.querySelector("[data-meter-r]"),
+        statusLed:stripEls[index]?.querySelector("[data-mute-led]"),
+        ledDrive:0,
         ready:false,error:false
       };
 
@@ -5728,7 +5950,7 @@
       muteBtn.setAttribute("aria-pressed",String(!!channel.state.mute));
     }
 
-    const muteLed = channel.el.querySelector("[data-mute-led]");
+    const muteLed = channel.statusLed || channel.el.querySelector("[data-mute-led]");
     if (muteLed) {
       const isSolo = !!channel.state.solo;
       const isAudible = !channel.state.mute;
@@ -5736,9 +5958,14 @@
       muteLed.classList.toggle("is-on",isAudible && !isSolo);
       muteLed.classList.toggle("is-solo",isSolo);
 
+      if (!isAudible && !isSolo) {
+        channel.ledDrive = 0;
+        muteLed.style.setProperty("--led-drive","0");
+      }
+
       muteLed.title = isSolo
-        ? "Solo"
-        : (isAudible ? "Active / not muted" : "Muted");
+        ? "Solo / signal activity"
+        : (isAudible ? "Active / signal activity" : "Muted");
     }
 
     if (soloBtn) {
@@ -6406,9 +6633,35 @@
   function animationLoop(timestamp) {
     for (const channel of channels) {
       const level=analyserLevel(channel.analyser,channel.meterData);
+
       if (channel.meterL) channel.meterL.style.height=`${level}%`;
       if (channel.meterR) channel.meterR.style.height=`${Math.max(0,level*.96)}%`;
+
+      if (channel.statusLed) {
+        const lampEnabled = !channel.state.mute || channel.state.solo;
+
+        if (!lampEnabled) {
+          channel.ledDrive = 0;
+        } else {
+          // Convert the meter's 0..100 range into an activity drive that still
+          // responds nicely to quieter material. Attack is immediate; decay is
+          // deliberately slower like a real signal/presence lamp circuit.
+          const target = Math.max(0,Math.min(1,Math.pow(level/100,.58)));
+
+          if (target > channel.ledDrive) {
+            channel.ledDrive = target;
+          } else {
+            channel.ledDrive = channel.ledDrive*.84 + target*.16;
+          }
+        }
+
+        channel.statusLed.style.setProperty(
+          "--led-drive",
+          channel.ledDrive.toFixed(3)
+        );
+      }
     }
+
     if (masterAnalyser) {
       const level=analyserLevel(masterAnalyser,masterMeterData);
       const left=document.querySelector("[data-master-meter-l]");
@@ -6421,6 +6674,7 @@
       lastKnownPosition=getPosition();
       updateLoopScheduler();
     }
+
     updateTransportDisplay();
     requestAnimationFrame(animationLoop);
   }
