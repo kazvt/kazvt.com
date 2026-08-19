@@ -1,0 +1,45 @@
+﻿[UpArrow]
+Path=Nice and Tan Alt.cur
+
+[Wait]
+Path=Nice and Tan Busy.ani
+
+[SizeNWSE]
+Path=Nice and Tan Diagonal 1.cur
+
+[SizeNESW]
+Path=Nice and Tan Diagonal 2.cur
+
+[NWPen]
+Path=Nice and Tan Handwriting.ani
+
+[Help]
+Path=Nice and Tan Help.cur
+
+[SizeWE]
+Path=Nice and Tan Horizontal.cur
+
+[Hand]
+Path=Nice and Tan Link.cur
+
+[SizeAll]
+Path=Nice and Tan Move.cur
+
+[Arrow]
+Path=Nice and Tan Normal.cur
+
+[Crosshair]
+Path=Nice and Tan Precision.cur
+
+[IBeam]
+Path=Nice and Tan Text.cur
+
+[No]
+Path=Nice and Tan Unavailable.cur
+
+[SizeNS]
+Path=Nice and Tan Vertical.cur
+
+[AppStarting]
+Path=Nice and Tan Background.ani
+

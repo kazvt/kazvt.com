@@ -1,0 +1,4 @@
+name=Retro Wave
+source=https://www.rw-designer.com/cursor-set/retro-wave
+download=https://www.rw-designer.com/cursor-downloadset/retro-wave
+license=Release to Public Domain (as stated on the source cursor-set page)

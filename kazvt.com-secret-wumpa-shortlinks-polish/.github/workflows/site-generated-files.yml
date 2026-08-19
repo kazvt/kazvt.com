@@ -1,0 +1,43 @@
+name: Refresh generated site files
+
+on:
+  push:
+    paths:
+      - "links.js"
+      - "zzz_redirect/template.html"
+      - "zzz_redirect/build-shortlinks.mjs"
+      - "zzz_assets/emotes/**"
+      - "scripts/build-emote-manifest.py"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Regenerate shortlinks and emote manifest
+        run: |
+          node zzz_redirect/build-shortlinks.mjs
+          python scripts/build-emote-manifest.py
+      - name: Commit generated files when needed
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: refresh generated site files"
+          git push

@@ -1,0 +1,24 @@
+﻿[AppStarting]
+Path=bowser jr.ani
+
+[Wait]
+Path=busy big mario spinning.ani
+
+[SizeWE]
+Path=horizontal resize thwomp.ani
+
+[Hand]
+Path=magikoopa link select.cur
+
+[Arrow]
+Path=normal select big mario.cur
+
+[IBeam]
+Path=text select link.ani
+
+[No]
+Path=unavailable thwomp.cur
+
+[SizeNS]
+Path=vertical resize big mario .ani
+

@@ -1,0 +1,39 @@
+﻿[Wait]
+Path=hourglass.ani
+
+[Arrow]
+Path=N64.cur
+
+[Help]
+Path=help select.cur
+
+[Hand]
+Path=N64 link select.cur
+
+[IBeam]
+Path=N64 text.cur
+
+[No]
+Path=unaivalable.cur
+
+[NWPen]
+Path=handwriting.cur
+
+[AppStarting]
+Path=working in background.ani
+
+[SizeNWSE]
+Path=diagonal resize 1.cur
+
+[SizeNESW]
+Path=diagonal resize 2.cur
+
+[SizeWE]
+Path=horizontal resize.cur
+
+[Crosshair]
+Path=presision.cur
+
+[SizeNS]
+Path=vertical resize.cur
+

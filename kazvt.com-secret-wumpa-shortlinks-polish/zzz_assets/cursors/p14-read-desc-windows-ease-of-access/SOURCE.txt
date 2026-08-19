@@ -1,0 +1,4 @@
+name=Windows Ease of Access
+source=https://www.rw-designer.com/cursor-set/read-desc-windows-ease-of-access
+download=https://www.rw-designer.com/cursor-downloadset/read-desc-windows-ease-of-access
+license=Release to Public Domain (as stated on the source cursor-set page)

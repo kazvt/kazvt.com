@@ -1,0 +1,4 @@
+name=Retro PC
+source=https://www.rw-designer.com/cursor-set/retro-90s-pointers
+download=https://www.rw-designer.com/cursor-downloadset/retro-90s-pointers
+license=Release to Public Domain (as stated on the source cursor-set page)

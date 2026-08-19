@@ -1,0 +1,4 @@
+name=Left Handed Mouse Pointers
+source=https://www.rw-designer.com/cursor-set/left-handed-mouse-pointers
+download=https://www.rw-designer.com/cursor-downloadset/left-handed-mouse-pointers
+license=Release to Public Domain (as stated on the source cursor-set page)

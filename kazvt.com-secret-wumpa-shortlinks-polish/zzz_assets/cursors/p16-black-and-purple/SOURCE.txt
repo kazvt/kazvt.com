@@ -1,0 +1,4 @@
+name=Black-n-Purple
+source=https://www.rw-designer.com/cursor-set/black-and-purple
+download=https://www.rw-designer.com/cursor-downloadset/black-and-purple
+license=Release to Public Domain (as stated on the source cursor-set page)

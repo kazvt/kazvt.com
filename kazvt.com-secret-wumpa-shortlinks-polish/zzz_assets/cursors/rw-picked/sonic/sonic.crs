@@ -1,0 +1,51 @@
+﻿[Help]
+Path=Sonic Help.cur
+
+[AppStarting]
+Path=Sonic Working.ani
+
+[Wait]
+Path=Sonic Busy.ani
+
+[Crosshair]
+Path=Sonic Precision.cur
+
+[IBeam]
+Path=Sonic Text.ani
+
+[NWPen]
+Path=Sonic Handwriting.cur
+
+[No]
+Path=Sonic Unavaible.cur
+
+[SizeNS]
+Path=Sonic Vertical.ani
+
+[Arrow]
+Path=Sonic Normal.ani
+
+[SizeWE]
+Path=Sonic Horizontal.ani
+
+[SizeNWSE]
+Path=Sonic Diagonal 1.cur
+
+[SizeNESW]
+Path=Sonic Diagonal 2.cur
+
+[SizeAll]
+Path=Sonic Move.ani
+
+[UpArrow]
+Path=Sonic Alternate.cur
+
+[Hand]
+Path=Sonic Link.ani
+
+[Pin]
+Path=Sonic Location.cur
+
+[Person]
+Path=Sonic Person.cur
+
