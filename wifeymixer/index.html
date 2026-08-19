@@ -3620,6 +3620,191 @@
       }
     }
 
+  
+    /* ===== readable 14-segment alphanumeric main monitor ===== */
+    .seven-screen{
+      width:clamp(244px,31vw,390px) !important;
+      height:clamp(56px,8.2vh,72px) !important;
+      background:#080503 !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #343036,
+        0 0 0 3px #101014,
+        0 0 7px rgba(219,104,18,.08),
+        inset 0 2px 9px rgba(0,0,0,.97),
+        inset 0 0 13px rgba(255,112,18,.025) !important;
+    }
+
+    .seven-screen__display{
+      inset:7px 10px !important;
+      grid-template-rows:minmax(0,.74fr) minmax(0,1.26fr) !important;
+      gap:5px !important;
+    }
+
+    .seven-screen__top,
+    .seven-screen__main{
+      min-width:0;
+      gap:10px !important;
+      overflow:hidden;
+    }
+
+    .seven-screen__top{
+      border-bottom:1px solid rgba(255,127,29,.075) !important;
+      opacity:1 !important;
+    }
+
+    .alpha-text{
+      display:flex;
+      align-items:center;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      gap:clamp(1.5px,.15vw,2.5px) !important;
+    }
+
+    .seven-text--owner,
+    .seven-text--label{
+      justify-content:flex-start !important;
+      flex:1 1 auto !important;
+    }
+
+    .seven-text--track,
+    .seven-text--value{
+      justify-content:flex-end !important;
+      flex:0 0 auto !important;
+    }
+
+    .seven-screen__top .alpha-text{
+      --alpha14-h:clamp(12px,2.0vh,17px);
+    }
+
+    .seven-screen__main .alpha-text{
+      --alpha14-h:clamp(18px,3.2vh,27px);
+    }
+
+    .alpha14-char{
+      position:relative;
+      display:inline-block;
+      flex:0 0 calc(var(--alpha14-h) * .50);
+      width:calc(var(--alpha14-h) * .50);
+      height:var(--alpha14-h);
+    }
+
+    .alpha14-char--space{
+      flex-basis:calc(var(--alpha14-h) * .33);
+      width:calc(var(--alpha14-h) * .33);
+    }
+
+    .alpha14-svg{
+      display:block;
+      width:100%;
+      height:100%;
+      overflow:visible;
+    }
+
+    .alpha14-seg{
+      fill:#1b0e06;
+      stroke:#2b1509;
+      stroke-width:.42;
+      vector-effect:non-scaling-stroke;
+      opacity:.40;
+      transition:fill .04s linear,stroke .04s linear,opacity .04s linear,filter .04s linear;
+    }
+
+    .alpha14-seg.on,
+    .alpha14-dot.on{
+      fill:#ff9b28;
+      stroke:#ffd49a;
+      opacity:1;
+      filter:
+        drop-shadow(0 0 .45px rgba(255,225,171,.72))
+        drop-shadow(0 0 1.2px rgba(255,135,29,.60))
+        drop-shadow(0 0 2.6px rgba(255,101,13,.16));
+    }
+
+    .alpha14-dot{
+      fill:#ff9b28;
+      stroke:#ffd49a;
+      stroke-width:.42;
+    }
+
+    .seven-text--value{
+      padding-left:5px;
+      border-left:1px solid rgba(255,126,25,.075);
+    }
+
+    .seven-screen__glass{
+      opacity:.24 !important;
+      background:
+        linear-gradient(111deg,rgba(255,239,211,.038),transparent 20% 76%,rgba(255,172,65,.012)),
+        repeating-linear-gradient(to bottom,rgba(255,143,36,.008) 0 1px,transparent 1px 3px) !important;
+    }
+
+    .seven-screen__bezel::after{
+      background:radial-gradient(ellipse at 50% 50%,rgba(255,126,27,.025),transparent 72%) !important;
+      box-shadow:inset 0 0 9px rgba(255,126,27,.018) !important;
+    }
+
+    .seven-screen.is-active{
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #343036,
+        0 0 0 3px #101014,
+        0 0 8px rgba(224,112,23,.105),
+        inset 0 2px 9px rgba(0,0,0,.97),
+        inset 0 0 15px rgba(255,119,20,.035) !important;
+    }
+
+    /* Elapsed/total stays seven-segment but gets more breathing room. */
+    .time-hardware-display{
+      min-width:154px !important;
+      height:29px !important;
+      padding-left:8px !important;
+      padding-right:8px !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 1px #353037,
+        0 0 5px rgba(215,102,18,.06),
+        inset 0 2px 6px rgba(0,0,0,.96),
+        inset 0 0 8px rgba(255,113,19,.025) !important;
+    }
+
+    .time-segments{
+      --digit-height:15px !important;
+      gap:2px !important;
+    }
+
+    .time-hardware-display__glass{
+      opacity:.35 !important;
+    }
+
+    @media(max-width:760px){
+      .seven-screen{
+        width:clamp(210px,55vw,300px) !important;
+      }
+      .seven-screen__top .alpha-text{--alpha14-h:10.5px}
+      .seven-screen__main .alpha-text{--alpha14-h:16.5px}
+      .alpha-text{gap:1.3px !important}
+    }
+
+    @media(max-height:500px){
+      .seven-screen{
+        width:clamp(205px,34vw,300px) !important;
+        height:43px !important;
+      }
+      .seven-screen__display{
+        inset:5px 8px !important;
+        gap:2px !important;
+      }
+      .seven-screen__top .alpha-text{--alpha14-h:9px}
+      .seven-screen__main .alpha-text{--alpha14-h:14px}
+      .time-hardware-display{
+        min-width:130px !important;
+        height:23px !important;
+      }
+      .time-segments{--digit-height:11px !important}
+    }
+
   </style>
 </head>
 
@@ -3649,13 +3834,13 @@
 
             <div class="seven-screen__display" aria-hidden="true">
               <div class="seven-screen__top">
-                <div id="sevenOwner" class="seven-text seven-text--owner"></div>
-                <div id="sevenTrack" class="seven-text seven-text--track"></div>
+                <div id="sevenOwner" class="seven-text seven-text--owner alpha-text"></div>
+                <div id="sevenTrack" class="seven-text seven-text--track alpha-text"></div>
               </div>
 
               <div class="seven-screen__main">
-                <div id="sevenLabel" class="seven-text seven-text--label"></div>
-                <div id="sevenValue" class="seven-text seven-text--value"></div>
+                <div id="sevenLabel" class="seven-text seven-text--label alpha-text"></div>
+                <div id="sevenValue" class="seven-text seven-text--value alpha-text"></div>
               </div>
             </div>
 
@@ -4164,6 +4349,247 @@
     g:"7.1,46.3 42.2,46.3 44.7,48.8 6.0,48.8"
   };
 
+  /*
+   * 14-SEGMENT ALPHANUMERIC DISPLAY
+   * Main monitor = 14 segments for readable words.
+   * Elapsed/total time module stays genuine 7-segment because it is numeric.
+   */
+  const ALPHA14_POINTS = {
+    a:"9,4 41,4 46,9 41,14 9,14 4,9",
+    b:"42,11 47,16 45,43 41,47 37,43 39,17",
+    c:"41,53 45,57 43,84 38,89 34,84 36,58",
+    d:"9,86 41,86 46,91 41,96 9,96 4,91",
+    e:"4,53 8,57 6,84 2,89 0,84 2,58",
+    f:"5,11 10,16 8,43 4,47 0,43 2,17",
+
+    g1:"8,45 23,45 27,50 23,55 8,55 3,50",
+    g2:"27,45 42,45 47,50 42,55 27,55 23,50",
+
+    h:"10,15 15,17 24,43 21,46 17,43 7,19",
+    i:"40,15 44,19 33,43 29,46 26,43 36,17",
+
+    j:"23,14 28,14 28,43 25,47 22,43 22,16",
+    k:"23,53 28,57 28,86 23,86 22,57 22,55",
+
+    l:"8,82 13,80 23,57 27,59 27,64 16,88",
+    m:"38,82 43,87 32,60 28,57 26,62 34,84"
+  };
+
+  const ALPHA14_MAP = {
+    "0":["a","b","c","d","e","f"],
+    "1":["b","c"],
+    "2":["a","b","g1","g2","e","d"],
+    "3":["a","b","c","d","g1","g2"],
+    "4":["f","g1","g2","b","c"],
+    "5":["a","f","g1","g2","c","d"],
+    "6":["a","f","e","d","c","g1","g2"],
+    "7":["a","b","c"],
+    "8":["a","b","c","d","e","f","g1","g2"],
+    "9":["a","b","c","d","f","g1","g2"],
+
+    "A":["a","b","c","e","f","g1","g2"],
+    "B":["a","b","c","d","g1","g2","j","k"],
+    "C":["a","d","e","f"],
+    "D":["a","b","c","d","j","k"],
+    "E":["a","d","e","f","g1","g2"],
+    "F":["a","e","f","g1","g2"],
+    "G":["a","c","d","e","f","g2"],
+    "H":["b","c","e","f","g1","g2"],
+    "I":["a","d","j","k"],
+    "J":["b","c","d","e"],
+    "K":["e","f","g1","h","l"],
+    "L":["d","e","f"],
+    "M":["b","c","e","f","h","i"],
+    "N":["b","c","e","f","h","m"],
+    "O":["a","b","c","d","e","f"],
+    "P":["a","b","e","f","g1","g2"],
+    "Q":["a","b","c","d","e","f","m"],
+    "R":["a","b","e","f","g1","g2","m"],
+    "S":["a","c","d","f","g1","g2"],
+    "T":["a","j","k"],
+    "U":["b","c","d","e","f"],
+    "V":["e","f","l","m"],
+    "W":["b","c","e","f","l","m"],
+    "X":["h","i","l","m"],
+    "Y":["h","i","k"],
+    "Z":["a","d","i","l"],
+
+    "-":["g1","g2"],
+    "_":["d"],
+    "=":["g1","g2","d"],
+    "/":["i","l"],
+    " ": []
+  };
+
+  const alpha14TypeTimers = new WeakMap();
+
+  function normalizeAlpha14Text(value) {
+    return String(value ?? "")
+      .toUpperCase()
+      .replace(/-∞/g,"-INF")
+      .replace(/∞/g,"INF")
+      .replace(/%/g," PCT")
+      .replace(/[^0-9A-Z +.,:/=_-]/g," ");
+  }
+
+  function makeAlpha14Character(character) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "alpha14-char";
+
+    const char = String(character || " ").toUpperCase();
+    if (char === " ") wrapper.classList.add("alpha14-char--space");
+
+    const svg = document.createElementNS(SEVEN_SVG_NS,"svg");
+    svg.setAttribute("class","alpha14-svg");
+    svg.setAttribute("viewBox","0 0 50 100");
+    svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+    svg.setAttribute("focusable","false");
+    svg.setAttribute("aria-hidden","true");
+
+    if (char === ":") {
+      for (const cy of [35,65]) {
+        const dot = document.createElementNS(SEVEN_SVG_NS,"circle");
+        dot.setAttribute("class","alpha14-dot on");
+        dot.setAttribute("cx","25");
+        dot.setAttribute("cy",String(cy));
+        dot.setAttribute("r","3.5");
+        svg.appendChild(dot);
+      }
+      wrapper.appendChild(svg);
+      return wrapper;
+    }
+
+    if (char === ".") {
+      const dot = document.createElementNS(SEVEN_SVG_NS,"circle");
+      dot.setAttribute("class","alpha14-dot on");
+      dot.setAttribute("cx","44");
+      dot.setAttribute("cy","92");
+      dot.setAttribute("r","3.6");
+      svg.appendChild(dot);
+      wrapper.appendChild(svg);
+      return wrapper;
+    }
+
+    if (char === ",") {
+      const comma = document.createElementNS(SEVEN_SVG_NS,"polygon");
+      comma.setAttribute("class","alpha14-seg on");
+      comma.setAttribute("points","40,88 47,88 43,99 39,99");
+      svg.appendChild(comma);
+      wrapper.appendChild(svg);
+      return wrapper;
+    }
+
+    if (char === "+") {
+      for (const segmentName of ["g1","g2","j","k"]) {
+        const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
+        polygon.setAttribute("points",ALPHA14_POINTS[segmentName]);
+        polygon.setAttribute("class",`alpha14-seg ${segmentName} on`);
+        svg.appendChild(polygon);
+      }
+      wrapper.appendChild(svg);
+      return wrapper;
+    }
+
+    const active = new Set(ALPHA14_MAP[char] || []);
+
+    for (const segmentName of [
+      "a","b","c","d","e","f",
+      "g1","g2","h","i","j","k","l","m"
+    ]) {
+      const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
+      polygon.setAttribute("points",ALPHA14_POINTS[segmentName]);
+      polygon.setAttribute(
+        "class",
+        `alpha14-seg ${segmentName}${active.has(segmentName) ? " on" : ""}`
+      );
+      svg.appendChild(polygon);
+    }
+
+    wrapper.appendChild(svg);
+    return wrapper;
+  }
+
+  function alpha14Write(target,text,{maxChars=18,align="left"}={}) {
+    if (!target) return;
+
+    const previous = alpha14TypeTimers.get(target);
+    if (previous) {
+      clearTimeout(previous);
+      alpha14TypeTimers.delete(target);
+    }
+
+    let chars = [...normalizeAlpha14Text(text)];
+
+    if (chars.length > maxChars) {
+      chars = align === "right"
+        ? chars.slice(-maxChars)
+        : chars.slice(0,maxChars);
+    }
+
+    target.replaceChildren();
+
+    for (const char of chars) {
+      target.appendChild(makeAlpha14Character(char));
+    }
+  }
+
+  function typeAlpha14(target,text,{
+    maxChars=18,
+    speed=25,
+    align="left",
+    onDone=null
+  }={}) {
+    if (!target) return;
+
+    const previous = alpha14TypeTimers.get(target);
+    if (previous) clearTimeout(previous);
+
+    const chars = [...normalizeAlpha14Text(text)];
+    let index = 0;
+
+    const tick = ()=>{
+      index += 1;
+
+      const typed = chars.slice(0,index);
+      const visible = typed.length > maxChars
+        ? typed.slice(typed.length-maxChars)
+        : typed;
+
+      alpha14Write(target,visible.join(""),{maxChars,align});
+
+      if (index < chars.length) {
+        const timer = setTimeout(tick,speed);
+        alpha14TypeTimers.set(target,timer);
+      } else {
+        alpha14TypeTimers.delete(target);
+        if (typeof onDone === "function") onDone();
+      }
+    };
+
+    target.replaceChildren();
+
+    if (!chars.length) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+
+    tick();
+  }
+
+  window.alpha14Write = alpha14Write;
+  window.typeAlpha14 = typeAlpha14;
+  window.typeHardwareDisplay = typeAlpha14;
+
+  window.testHardwareDisplay = function(text="BOOT") {
+    setSevenSegmentScreen({
+      owner:"WIFEY MIX-8",
+      label:String(text),
+      value:"READY",
+      animate:true
+    });
+  };
+
+
   function makeSevenSegmentCharacter(character) {
     const wrapper = document.createElement("span");
     wrapper.className = "seven-char";
@@ -4327,8 +4753,8 @@
 
   function syncSevenSegmentTrack() {
     const trackText = trackReadout?.textContent || "--";
-    sevenSegmentWrite(sevenTrack,`T${trackText.replace("/","-")}`,{
-      maxChars:7,
+    alpha14Write(sevenTrack,`TRK ${trackText.replace("/","-")}`,{
+      maxChars:9,
       align:"right"
     });
   }
@@ -4343,21 +4769,22 @@
     controlReadoutLabel.textContent = label;
     controlReadoutValue.textContent = value || "READY";
 
-    sevenSegmentWrite(sevenOwner,owner,{maxChars:12,align:"left"});
+    // Proper 14-segment alphanumeric modules for every field in this monitor.
+    alpha14Write(sevenOwner,owner,{maxChars:17,align:"left"});
     syncSevenSegmentTrack();
 
     if (animate) {
-      typeSevenSegment(sevenLabel,label,{
-        maxChars:15,
-        speed:30,
+      typeAlpha14(sevenLabel,label,{
+        maxChars:18,
+        speed:23,
         align:"left"
       });
     } else {
-      sevenSegmentWrite(sevenLabel,label,{maxChars:15,align:"left"});
+      alpha14Write(sevenLabel,label,{maxChars:18,align:"left"});
     }
 
-    sevenSegmentWrite(sevenValue,value || "READY",{
-      maxChars:10,
+    alpha14Write(sevenValue,value || "READY",{
+      maxChars:13,
       align:"right"
     });
   }
