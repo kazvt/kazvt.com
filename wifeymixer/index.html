@@ -4022,6 +4022,78 @@
       transition:none !important;
     }
 
+  
+    /* ===== predictive instrument pictogram in each channel strip ===== */
+    .channel-ident{
+      display:flex;
+      align-items:center;
+      gap:5px;
+      min-width:0;
+      flex:1 1 auto;
+    }
+
+    .channel-instrument-icon{
+      position:relative;
+      flex:0 0 auto;
+      display:grid;
+      place-items:center;
+      width:17px;
+      height:16px;
+      overflow:hidden;
+      border:1px solid #08080a;
+      border-radius:2px;
+      color:#b6afa0;
+      background:
+        radial-gradient(circle at 35% 25%,rgba(255,255,255,.045) 0 5%,transparent 7%),
+        linear-gradient(180deg,#343237,#222126 72%,#18171b);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.035),
+        inset 0 -2px 2px rgba(0,0,0,.33),
+        0 1px 0 rgba(0,0,0,.82),
+        0 0 0 1px #2b292e;
+      text-shadow:0 1px #000;
+      opacity:.93;
+    }
+
+    .channel-instrument-icon::after{
+      content:"";
+      position:absolute;
+      inset:2px;
+      pointer-events:none;
+      border-top:1px solid rgba(255,255,255,.025);
+      border-bottom:1px solid rgba(0,0,0,.18);
+    }
+
+    .channel-instrument-icon i{
+      position:relative;
+      z-index:2;
+      font-size:8px;
+      line-height:1;
+      filter:drop-shadow(0 1px 0 #060607);
+    }
+
+    .channel-name{
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    @media(max-height:500px){
+      .channel-ident{gap:3px}
+      .channel-instrument-icon{
+        width:14px;
+        height:13px;
+      }
+      .channel-instrument-icon i{font-size:7px}
+    }
+
+    @media(max-height:410px){
+      .channel-instrument-icon{
+        width:12px;
+        height:11px;
+      }
+      .channel-instrument-icon i{font-size:6px}
+    }
+
   </style>
 </head>
 
@@ -4154,7 +4226,7 @@
   </main>
 
 <script>
-  const EMBEDDED_MANIFEST = {"files":["index.html","lillie_track_6/bass.mp3","lillie_track_6/drums.mp3","lillie_track_6/guitar.mp3","lillie_track_6/strings.mp3","lillie_track_6/vibes.mp3","lillie_track_6/yamaha synth.mp3"]};
+  const EMBEDDED_MANIFEST = {"files":["index.html","instrument-icons.json","lillie_track_6/bass.mp3","lillie_track_6/drums.mp3","lillie_track_6/guitar.mp3","lillie_track_6/strings.mp3","lillie_track_6/vibes.mp3","lillie_track_6/yamaha synth.mp3"]};
   const AUDIO_EXT_RE = /\.(mp3|wav|m4a|aac|ogg|opus|flac|webm)$/i;
 
   const grid = document.getElementById("channelGrid");
@@ -4193,6 +4265,119 @@
   const audioRack = document.createElement("div");
   audioRack.hidden = true;
   document.body.appendChild(audioRack);
+
+  // Predictive instrument icons are deliberately data-driven.
+  // The large alias table lives in instrument-icons.json and is loaded once at boot.
+  let instrumentIconAliases = [];
+  let instrumentIconFallback = "fa-wave-square";
+
+  const BASIC_INSTRUMENT_ICON_FALLBACKS = [
+    {text:"guitar",icon:"fa-guitar",category:"guitar"},
+    {text:"gtr",icon:"fa-guitar",category:"guitar"},
+    {text:"bass",icon:"fa-guitar",category:"bass"},
+    {text:"drum",icon:"fa-drum",category:"drums"},
+    {text:"drums",icon:"fa-drum",category:"drums"},
+    {text:"vox",icon:"fa-microphone",category:"lead-vocal"},
+    {text:"vocal",icon:"fa-microphone",category:"lead-vocal"},
+    {text:"piano",icon:"fa-keyboard",category:"piano"},
+    {text:"keys",icon:"fa-keyboard",category:"keys"},
+    {text:"synth",icon:"fa-wave-square",category:"synth"},
+    {text:"strings",icon:"fa-music",category:"strings"},
+    {text:"vibes",icon:"fa-bell",category:"mallets"}
+  ];
+
+  function normalizeInstrumentAlias(value) {
+    return String(value ?? "")
+      .toLowerCase()
+      .replace(/\.[a-z0-9]{2,5}$/i,"")
+      .replace(/[_.\-]+/g," ")
+      .replace(/[^a-z0-9+ ]+/g," ")
+      .replace(/\s+/g," ")
+      .trim();
+  }
+
+  function safeFontAwesomeIcon(value) {
+    const icon = String(value || "");
+    return /^fa-[a-z0-9-]+$/.test(icon) ? icon : instrumentIconFallback;
+  }
+
+  function compileInstrumentIconAliases(rows) {
+    return (Array.isArray(rows) ? rows : [])
+      .map((row,index)=>{
+        const text = normalizeInstrumentAlias(row?.text);
+        return {
+          text,
+          compact:text.replace(/\s+/g,""),
+          icon:safeFontAwesomeIcon(row?.icon),
+          category:String(row?.category || "audio"),
+          index
+        };
+      })
+      .filter(row=>row.text)
+      .sort((a,b)=>b.text.length-a.text.length || a.index-b.index);
+  }
+
+  async function loadInstrumentIconMap() {
+    try {
+      const response = await fetch("instrument-icons.json",{cache:"force-cache"});
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      instrumentIconFallback = safeFontAwesomeIcon(data?.fallbackIcon || "fa-wave-square");
+      instrumentIconAliases = compileInstrumentIconAliases(data?.aliases);
+      if (!instrumentIconAliases.length) throw new Error("No instrument aliases found");
+      return true;
+    } catch (error) {
+      console.warn("Instrument icon map could not be loaded; using compact fallback map.",error);
+      instrumentIconFallback = "fa-wave-square";
+      instrumentIconAliases = compileInstrumentIconAliases(BASIC_INSTRUMENT_ICON_FALLBACKS);
+      return false;
+    }
+  }
+
+  function predictInstrumentIcon(stemName) {
+    const name = normalizeInstrumentAlias(stemName);
+    const compactName = name.replace(/\s+/g,"");
+    const padded = ` ${name} `;
+    const tokens = new Set(name.split(" ").filter(Boolean));
+
+    let best = null;
+    let bestScore = -Infinity;
+
+    for (const rule of instrumentIconAliases) {
+      const alias = rule.text;
+      const aliasCompact = rule.compact;
+      const simpleLength = aliasCompact.length;
+      let score = -Infinity;
+
+      if (name === alias) {
+        score = 100000 + alias.length;
+      } else if (compactName === aliasCompact && simpleLength >= 3) {
+        score = 95000 + alias.length;
+      } else if (padded.includes(` ${alias} `)) {
+        score = 80000 + alias.length*20;
+      } else if (!alias.includes(" ") && tokens.has(alias)) {
+        score = 78000 + alias.length*20;
+      } else if (simpleLength >= 4 && name.includes(alias)) {
+        score = 50000 + alias.length*20;
+      } else if (simpleLength >= 5 && compactName.includes(aliasCompact)) {
+        score = 42000 + alias.length*20;
+      }
+
+      // Very short studio abbreviations (HH, PN, SN...) only qualify as whole tokens.
+      if (simpleLength <= 2 && !(name === alias || tokens.has(alias))) continue;
+
+      if (score > bestScore) {
+        bestScore = score;
+        best = rule;
+      }
+    }
+
+    return best || {
+      text:"",
+      icon:instrumentIconFallback,
+      category:"audio"
+    };
+  }
 
   let playlists = [];
   let bundledPlaylists = [];
@@ -5421,10 +5606,17 @@
 
   function channelMarkup(stem,index,state) {
     const title = escapeHtml(stem.name);
+    const iconMatch = predictInstrumentIcon(stem.name);
     return `
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
         <div class="channel-header">
-          <div class="channel-name" title="${title}">${String(index+1).padStart(2,"0")} ${title}</div>
+          <div class="channel-ident">
+            <span class="channel-instrument-icon" data-instrument-icon
+                  title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}" aria-hidden="true">
+              <i class="fa-solid ${escapeHtml(iconMatch.icon)}"></i>
+            </span>
+            <div class="channel-name" title="${title}">${String(index+1).padStart(2,"0")} ${title}</div>
+          </div>
           <span class="mute-led${state.solo ? " is-solo" : (!state.mute ? " is-on" : "")}" data-mute-led
                 title="${state.solo ? "Solo" : (state.mute ? "Muted" : "Active")}" aria-hidden="true">
             <span class="mute-led__lens"></span>
@@ -6734,6 +6926,8 @@
   },{passive:true});
 
   (async function init() {
+    await loadInstrumentIconMap();
+
     setSevenSegmentScreen({
       owner:"WIFEY MIX-8",
       label:"BOOT",
