@@ -2566,6 +2566,140 @@
         inset 0 1px 1px rgba(255,255,235,.34);
     }
 
+  
+    /* ===== industrial 0.56-inch-style seven-segment geometry =====
+       Proportions mirror common instrument modules:
+       digit envelope ~0.563 W:H, long tapered horizontals, subtly
+       slanted verticals, consistent center gaps, tight bank spacing. */
+
+    .seven-screen{
+      --led-on:#ff9a26;
+      --led-core:#ffd28b;
+      --led-edge:#dc6d12;
+      --led-off:#261307;
+      --led-off-edge:#321a0b;
+    }
+
+    .seven-screen__bezel{
+      background:
+        radial-gradient(ellipse at 50% 30%,rgba(88,37,7,.10),transparent 70%),
+        linear-gradient(180deg,#130c08,#080503) !important;
+    }
+
+    .seven-screen__display{
+      inset:6px 8px !important;
+      gap:3px !important;
+    }
+
+    .seven-screen__top{
+      --digit-height:clamp(10px,1.65vh,14px);
+      gap:7px !important;
+    }
+
+    .seven-screen__main{
+      --digit-height:clamp(18px,3.35vh,28px);
+      gap:6px !important;
+      align-items:center !important;
+    }
+
+    .seven-text{
+      gap:clamp(1px,.11vw,2px) !important;
+    }
+
+    .seven-char{
+      position:relative;
+      display:inline-block;
+      flex:0 0 calc(var(--digit-height) * .563);
+      width:calc(var(--digit-height) * .563);
+      height:var(--digit-height);
+      filter:none !important;
+    }
+
+    .seven-char--space{
+      opacity:1 !important;
+    }
+
+    .seven-svg{
+      display:block;
+      width:100%;
+      height:100%;
+      overflow:visible;
+    }
+
+    .seven-svg .seg-shape{
+      fill:var(--led-off);
+      stroke:var(--led-off-edge);
+      stroke-width:.55;
+      vector-effect:non-scaling-stroke;
+      transition:
+        fill .045s linear,
+        stroke .045s linear,
+        filter .045s linear,
+        opacity .045s linear;
+      opacity:.72;
+    }
+
+    .seven-svg .seg-shape.on{
+      fill:var(--led-on);
+      stroke:var(--led-core);
+      opacity:1;
+      filter:
+        drop-shadow(0 0 .65px rgba(255,217,151,.72))
+        drop-shadow(0 0 1.7px rgba(255,127,22,.72))
+        drop-shadow(0 0 3.6px rgba(255,101,12,.26));
+    }
+
+    .seven-svg .seg-highlight{
+      fill:rgba(255,245,214,.26);
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .seven-svg .seg-highlight.on{
+      opacity:.55;
+    }
+
+    .seven-decimal{
+      position:absolute;
+      right:-8%;
+      bottom:2.5%;
+      width:16%;
+      aspect-ratio:1;
+      border-radius:50%;
+      background:var(--led-on);
+      box-shadow:
+        0 0 1px rgba(255,231,184,.76),
+        0 0 3px rgba(255,126,19,.68);
+    }
+
+    .seven-colon-svg circle{
+      fill:var(--led-on);
+      stroke:var(--led-core);
+      stroke-width:.45;
+      filter:drop-shadow(0 0 2px rgba(255,120,18,.62));
+    }
+
+    /* The real module look is dim segments behind smoked glass,
+       not bright ghost strokes everywhere. */
+    .seven-screen__glass{
+      opacity:.48 !important;
+      background:
+        linear-gradient(111deg,rgba(255,239,211,.055),transparent 22% 73%,rgba(255,172,65,.018)),
+        repeating-linear-gradient(to bottom,rgba(255,143,36,.012) 0 1px,transparent 1px 3px) !important;
+    }
+
+    @media(max-width:640px){
+      .seven-screen__top{--digit-height:10px}
+      .seven-screen__main{--digit-height:clamp(17px,5vw,23px)}
+      .seven-text{gap:1px !important}
+    }
+
+    @media(max-height:500px){
+      .seven-screen__top{--digit-height:9px}
+      .seven-screen__main{--digit-height:17px}
+      .seven-screen__display{inset:4px 7px !important}
+    }
+
   </style>
 </head>
 
@@ -3015,9 +3149,9 @@
     "H":"bcefg",
     "I":"bc",
     "J":"bcde",
-    "K":"bcefg",
+    "K":"efg",
     "L":"def",
-    "M":"ceg",
+    "M":"ace",
     "N":"ceg",
     "O":"abcdef",
     "P":"abefg",
@@ -3027,7 +3161,7 @@
     "T":"defg",
     "U":"bcdef",
     "V":"cde",
-    "W":"bcdef",
+    "W":"bdf",
     "X":"bcefg",
     "Y":"bcdfg",
     "Z":"abdeg",
@@ -3043,36 +3177,91 @@
   function normalizeSevenSegmentText(value) {
     return String(value ?? "")
       .toUpperCase()
-      .replace(/∞/g,"8")
-      .replace(/KHZ/g,"KHZ")
-      .replace(/DB/g,"DB")
-      .replace(/[<>]/g,"-");
+      .replace(/-∞/g,"-INF")
+      .replace(/∞/g,"INF")
+      .replace(/%/g,"PCT")
+      .replace(/\+/g,"")
+      .replace(/\//g,"-")
+      .replace(/[<>]/g,"-")
+      .replace(/[^0-9A-Z .,:=_-]/g," ");
   }
+
+  const SEVEN_SVG_NS = "http://www.w3.org/2000/svg";
+
+  // Normalized 56.3 x 100 geometry, matching the ~8.0 x 14.22 mm
+  // visible digit envelope of common 0.56-inch industrial modules.
+  // Vertical bars lean gently inward; horizontal bars use symmetric
+  // chamfered ends instead of the previous chunky CSS hexagons.
+  const INDUSTRIAL_SEGMENT_POINTS = {
+    a:"8.0,4.2 45.0,4.2 50.1,9.1 45.1,14.0 8.0,14.0 3.1,9.1",
+    b:"46.0,11.3 51.2,16.0 49.6,42.1 44.4,47.0 39.9,42.2 41.3,16.9",
+    c:"43.9,53.0 49.1,57.8 47.5,83.9 42.3,88.8 37.9,84.0 39.3,57.9",
+    d:"6.1,86.0 42.2,86.0 47.2,90.9 42.2,95.8 6.1,95.8 1.2,90.9",
+    e:"2.0,53.0 7.1,57.8 5.5,83.9 .4,88.8 0,84.0 1.2,57.9",
+    f:"4.1,11.3 9.2,16.0 7.7,42.1 2.5,47.0 0,42.2 1.4,16.9",
+    g:"6.1,45.1 43.5,45.1 48.5,50.0 43.5,54.9 6.1,54.9 1.2,50.0"
+  };
+
+  const INDUSTRIAL_HIGHLIGHT_POINTS = {
+    a:"9.1,5.4 43.8,5.4 46.2,7.7 8.0,7.7",
+    b:"47.0,13.8 49.3,16.3 47.9,39.9 46.5,41.3",
+    c:"44.8,55.4 47.1,58.0 45.7,81.7 44.3,83.1",
+    d:"7.1,87.2 40.9,87.2 43.4,89.7 6.1,89.7",
+    e:"3.0,55.4 5.3,58.0 3.9,81.7 2.5,83.1",
+    f:"5.1,13.8 7.4,16.3 6.0,39.9 4.6,41.3",
+    g:"7.1,46.3 42.2,46.3 44.7,48.8 6.0,48.8"
+  };
 
   function makeSevenSegmentCharacter(character) {
     const wrapper = document.createElement("span");
     wrapper.className = "seven-char";
 
     const char = String(character || " ").toUpperCase();
-
     if (char === " ") wrapper.classList.add("seven-char--space");
 
-    // Punctuation with its own LED geometry.
+    const svg = document.createElementNS(SEVEN_SVG_NS,"svg");
+    svg.setAttribute("class","seven-svg");
+    svg.setAttribute("viewBox","0 0 56.3 100");
+    svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+    svg.setAttribute("focusable","false");
+    svg.setAttribute("aria-hidden","true");
+
     if (char === ":") {
-      const colon = document.createElement("span");
-      colon.className = "seven-colon";
-      wrapper.appendChild(colon);
+      svg.classList.add("seven-colon-svg");
+
+      for (const cy of [35,65]) {
+        const dot = document.createElementNS(SEVEN_SVG_NS,"circle");
+        dot.setAttribute("cx","28.15");
+        dot.setAttribute("cy",String(cy));
+        dot.setAttribute("r","4.0");
+        svg.appendChild(dot);
+      }
+
+      wrapper.appendChild(svg);
       return wrapper;
     }
 
     const active = new Set((SEVEN_SEGMENT_MAP[char] || "").split(""));
 
     for (const segmentName of ["a","b","c","d","e","f","g"]) {
-      const segment = document.createElement("span");
-      segment.className = `seven-seg ${segmentName}${active.has(segmentName) ? " on" : ""}`;
-      wrapper.appendChild(segment);
+      const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
+      polygon.setAttribute("points",INDUSTRIAL_SEGMENT_POINTS[segmentName]);
+      polygon.setAttribute(
+        "class",
+        `seg-shape ${segmentName}${active.has(segmentName) ? " on" : ""}`
+      );
+      svg.appendChild(polygon);
+
+      const highlight = document.createElementNS(SEVEN_SVG_NS,"polygon");
+      highlight.setAttribute("points",INDUSTRIAL_HIGHLIGHT_POINTS[segmentName]);
+      highlight.setAttribute(
+        "class",
+        `seg-highlight${active.has(segmentName) ? " on" : ""}`
+      );
+      svg.appendChild(highlight);
     }
 
+    wrapper.appendChild(svg);
     return wrapper;
   }
 
@@ -3118,7 +3307,7 @@
 
       if (token.dot) {
         const dot = document.createElement("span");
-        dot.className = "seven-dot on";
+        dot.className = "seven-decimal";
         charNode.appendChild(dot);
       }
 
