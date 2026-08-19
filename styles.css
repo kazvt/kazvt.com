@@ -2125,7 +2125,7 @@ code {
   display: inline-block;
   width: 1.35em;
   height: 1.35em;
-  margin-inline: 0.08em;
+  margin-inline: calc(0.08em + 2px);
   vertical-align: -0.28em;
   object-fit: contain;
   image-rendering: pixelated;

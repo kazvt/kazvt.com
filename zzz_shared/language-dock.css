@@ -163,3 +163,188 @@ body.redirect-page .language-dock {
     animation: none !important;
   }
 }
+
+/* Site-integrated language controls -----------------------------------------
+   The main site mounts a compact toggle plus .language-option buttons. Keep
+   their hand-cut old-web shape, textured hover, and state colors tied to the
+   active palette instead of falling back to browser-default buttons. */
+.language-dock {
+  --language-chip-bg: color-mix(in srgb, var(--paper, #ffea88) 82%, var(--pink, #f599c6));
+  --language-chip-corner: var(--pink, #f599c6);
+  --language-hover-bg: var(--bg, var(--ink, #111));
+  --language-hover-text: var(--hover-text, var(--banner-text, #fff));
+}
+
+/* The local dock script uses this direct child as the open/close control. */
+.language-dock > .language-button {
+  display: inline-flex;
+  min-width: 132px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  isolation: isolate;
+  overflow: hidden;
+  padding-inline: 10px 8px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--pink, #f599c6) 15%, transparent) 0 6px,
+      transparent 6px 12px
+    ),
+    var(--yellow, var(--paper, #ffea88));
+  color: var(--on-yellow, #111);
+}
+
+.language-dock > .language-button::before {
+  content: "";
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  background: var(--pink, #f599c6);
+  box-shadow: 2px 2px 0 color-mix(in srgb, currentColor 32%, transparent);
+  transform: rotate(-5deg);
+}
+
+.language-dock > .language-button::after {
+  content: "+";
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 22px;
+  place-items: center;
+  border: 2px solid currentColor;
+  background: color-mix(in srgb, var(--green, #7dccad) 76%, var(--paper, #ffea88));
+  font-size: 1rem;
+  line-height: 1;
+  box-shadow: 2px 2px 0 color-mix(in srgb, currentColor 28%, transparent);
+  transform: rotate(2deg);
+}
+
+.language-dock > .language-button[aria-expanded="true"]::after {
+  content: "−";
+  background: var(--green, #7dccad);
+  color: var(--on-green, #111);
+}
+
+.language-dock > .language-button:hover,
+.language-dock > .language-button:focus-visible,
+.language-option:hover,
+.language-option:focus-visible {
+  background-color: var(--language-hover-bg);
+  background-image: var(--wallpaper-image, none);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size, auto);
+  color: var(--language-hover-text);
+}
+
+.language-options:not([hidden]) {
+  position: relative;
+  padding: 10px 4px 4px;
+  border-top: 3px dashed color-mix(in srgb, var(--ink, #111) 62%, transparent);
+}
+
+.language-option {
+  position: relative;
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 28px 6px 10px;
+  border: 3px solid var(--ink, #111);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 8px,
+      color-mix(in srgb, var(--language-chip-corner) 11%, transparent) 8px 10px,
+      transparent 10px 18px
+    ),
+    var(--language-chip-bg);
+  color: var(--ink, #111);
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: .025em;
+  box-shadow: 3px 3px 0 var(--shadow, rgba(0,0,0,.25));
+  clip-path: polygon(
+    0 7px,
+    7px 0,
+    calc(100% - 8px) 2px,
+    100% 9px,
+    calc(100% - 4px) 100%,
+    5px calc(100% - 2px)
+  );
+  animation: languageDockButtonBoil 680ms steps(2, end) infinite;
+}
+
+.language-option::before {
+  content: "";
+  flex: 0 0 11px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid currentColor;
+  background: var(--paper-alt, var(--paper, #ffea88));
+  box-shadow: 1px 1px 0 color-mix(in srgb, currentColor 28%, transparent);
+  transform: rotate(5deg);
+}
+
+.language-option::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 20px;
+  height: 20px;
+  border-left: 2px solid var(--ink, #111);
+  border-bottom: 2px solid var(--ink, #111);
+  background: var(--language-chip-corner);
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  pointer-events: none;
+}
+
+.language-option:hover,
+.language-option:focus-visible {
+  z-index: 2;
+  outline: var(--click-hover-outline-width, 4px) var(--click-hover-outline-style, dashed) var(--click-hover-outline-color, var(--ink, #111));
+  outline-offset: var(--click-hover-outline-offset, 7px);
+}
+
+.language-option[aria-pressed="true"] {
+  background: var(--green, #7dccad);
+  color: var(--on-green, #111);
+  box-shadow:
+    3px 3px 0 var(--shadow, rgba(0,0,0,.25)),
+    0 0 0 4px var(--click-hover-outline-color, var(--ink, #111));
+}
+
+.language-option[aria-pressed="true"]::before {
+  background: var(--banner, var(--ink, #111));
+  border-color: currentColor;
+}
+
+.language-option[aria-pressed="true"]::after {
+  background: var(--pink, #f599c6);
+}
+
+/* Palette 14 already gives the rest of the site's textured hovers white text. */
+body[data-theme="p14"] .language-option:hover,
+body[data-theme="p14"] .language-option:focus-visible {
+  color: #fff;
+}
+
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .language-options:not([hidden]) {
+    gap: 7px;
+    padding-top: 9px;
+  }
+
+  .language-option {
+    min-height: 36px;
+    padding: 5px 26px 5px 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-option {
+    animation: none !important;
+  }
+}

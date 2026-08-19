@@ -835,6 +835,7 @@ function emoteNode(token, file) {
       className: "inline-emote",
       src,
       ariaLabel: token,
+      title: token,
       autoplay: "",
       muted: "",
       loop: "",
@@ -846,6 +847,7 @@ function emoteNode(token, file) {
     className: "inline-emote",
     src,
     alt: token,
+    title: token,
     loading: "lazy",
   });
 }
