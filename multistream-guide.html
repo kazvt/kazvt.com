@@ -139,8 +139,7 @@
             </header>
             <div class="panel-body">
               <div class="guide-map-frame scribble-box">
-                <svg class="guide-map" viewBox="0 0 1200 1480" role="img" aria-labelledby="guide-map-title guide-map-desc">
-                  <title id="guide-map-title" data-i18n="guide.svg_title">multistreaming setup decision tree</title>
+                <svg class="guide-map" viewBox="0 0 1200 1480" role="img" aria-label="multistream setup guide" data-i18n-aria-label="guide.panel_title" aria-describedby="guide-map-desc">
                   <desc id="guide-map-desc" data-i18n="guide.svg_desc">a Yes or No flowchart that starts with commercial music, then recommends OBS plugins, a VPS setup, meld, or restream.</desc>
                   <defs>
                     <marker id="guide-arrow" viewBox="0 0 16 16" refX="14" refY="8" markerWidth="40" markerHeight="40" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
@@ -290,15 +289,12 @@
 
                   <g class="node-svg action-blue recommended-node" transform="translate(740 465)">
                     <polygon class="shape" points="0 14 15 0 208 5 220 0 214 130 201 144 10 139 0 144"></polygon>
-                    <g class="guide-recommend-mark" transform="translate(190 18)" tabindex="0" role="img" aria-label="Best choice" data-i18n-aria-label="guide.best_choice">
+                    <g class="guide-recommend-mark" transform="translate(190 18)" role="img" aria-label="Best Choice" data-i18n-aria-label="guide.best_choice">
+                      <title data-i18n="guide.best_choice">Best Choice</title>
                       <circle class="guide-recommend-star-back" cx="0" cy="0" r="18"></circle>
                       <svg class="guide-recommend-star-icon" x="-11" y="-10" width="22" height="20" viewBox="0 0 576 512" aria-hidden="true" focusable="false">
                         <use href="#guide-fa-star"></use>
                       </svg>
-                      <g class="guide-recommend-tooltip" transform="translate(-96 -47)" aria-hidden="true">
-                        <polygon points="0 5 7 0 91 2 98 8 94 29 85 34 8 32 0 35"></polygon>
-                        <text x="49" y="22" text-anchor="middle" data-i18n="guide.best_choice">Best choice</text>
-                      </g>
                     </g>
                     <a href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer">
                       <text class="node-title link-text" x="20" y="34" data-i18n="guide.meld.1">use meld</text>
@@ -436,9 +432,8 @@
                 <span class="guide-choice" data-i18n="guide.mobile.pc_yes">Yes: stop here</span>
                 <div class="guide-arrow" data-i18n="guide.mobile.arrow">v</div>
                 <article class="guide-step action guide-step-recommended">
-                  <span class="guide-mobile-recommend" tabindex="0" role="img" aria-label="Best choice" data-i18n-aria-label="guide.best_choice">
+                  <span class="guide-mobile-recommend" role="img" aria-label="Best Choice" data-i18n-aria-label="guide.best_choice" title="Best Choice" data-i18n-title="guide.best_choice">
                     <svg viewBox="0 0 576 512" aria-hidden="true" focusable="false"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.5 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.1 12.9 31.3s23 8.1 33.7 2.4L288.1 439l128.3 69.4c10.7 5.8 23.8 4.9 33.7-2.4s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"></path></svg>
-                    <span class="guide-mobile-recommend-tooltip" data-i18n="guide.best_choice">Best choice</span>
                   </span>
                   <h3><a class="guide-link" href="redirect.html?to=https%3A%2F%2Fmulti.meldstudio.co%2F" target="_blank" rel="noopener noreferrer" data-i18n="guide.mobile.meld_title">use meld multistreaming</a></h3>
                   <p data-i18n="guide.mobile.meld_copy">good for a straightforward workflow across several destinations. free &amp; no watermark.</p>
