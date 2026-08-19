@@ -191,11 +191,13 @@
     .channel-grid{
       display:grid;
       grid-template-columns:116px;
-      width:100%;
+      width:max-content;
+      max-width:100%;
       min-width:0;
       height:100%;
       min-height:0;
       overflow:hidden;
+      justify-content:start;
       border:1px solid #0f0f12;
       border-radius:4px;
       background:#18181c;
@@ -2094,6 +2096,95 @@
       transform:translateY(1px);
     }
 
+  
+    /* Compact strip bank: individual stems never balloon when there are only a few. */
+    .scroll-wrap{
+      background:
+        radial-gradient(circle at 17% 18%,rgba(255,255,255,.012) 0 1px,transparent 1.2px) 0 0/13px 17px,
+        linear-gradient(180deg,#202024,#18181c);
+    }
+
+    .channel-grid{
+      flex:none;
+      align-self:stretch;
+    }
+
+    @media(max-width:900px){
+      .channel-grid{
+        max-width:none;
+      }
+    }
+
+  
+    /* ===== playlist mode rotary-style selector button ===== */
+    .transport-btn--playlist-mode{
+      width:clamp(30px,3.3vw,38px) !important;
+      min-width:clamp(30px,3.3vw,38px) !important;
+      padding:0 !important;
+      color:#b7b0a3 !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.055),transparent 18%),
+        linear-gradient(180deg,#504d53,#343238 72%,#26252a) !important;
+      border-color:#111014 !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 2px #28262b,
+        inset 0 1px 0 rgba(255,255,255,.07),
+        inset 0 -2px 2px rgba(0,0,0,.29) !important;
+    }
+
+    .transport-btn--playlist-mode i{
+      font-size:10px;
+      transition:transform .12s ease,filter .12s ease;
+    }
+
+    .transport-btn--playlist-mode[data-mode="loop"]{
+      color:#2a1705 !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#ffd37c 0%,#dc9840 44%,transparent 73%),
+        linear-gradient(180deg,#daa151,#ad6b2d 70%,#7c451b) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #382819,
+        0 0 6px rgba(230,142,43,.38),
+        inset 0 0 7px rgba(255,224,156,.48) !important;
+    }
+
+    .transport-btn--playlist-mode[data-mode="shuffle"]{
+      color:#15200f !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#d5eba1 0%,#93b96e 44%,transparent 73%),
+        linear-gradient(180deg,#9ebf78,#6f9553 70%,#506b3c) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #293423,
+        0 0 6px rgba(149,196,99,.34),
+        inset 0 0 7px rgba(228,255,193,.44) !important;
+    }
+
+    .transport-btn--playlist-mode[data-mode="sequential"]{
+      color:#23140a !important;
+      background:
+        radial-gradient(ellipse at 50% 52%,#f3d7ae 0%,#c5a06f 44%,transparent 73%),
+        linear-gradient(180deg,#c7aa82,#947650 70%,#6a5337) !important;
+      box-shadow:
+        0 1px 0 #070709,
+        0 0 0 2px #332b22,
+        0 0 6px rgba(207,167,110,.26),
+        inset 0 0 7px rgba(255,238,204,.40) !important;
+    }
+
+    .transport-btn--playlist-mode:active{
+      transform:translateY(1px);
+    }
+
+    @media(max-height:500px){
+      .transport-btn--playlist-mode{
+        width:27px !important;
+        min-width:27px !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -2163,6 +2254,11 @@
           <span class="transport-rnd-label">RND</span>
         </button>
 
+        <button id="playlistModeBtn" class="transport-btn transport-btn--playlist-mode" type="button"
+                aria-label="Playlist mode" title="Playlist mode">
+          <i class="fa-solid fa-repeat" aria-hidden="true"></i>
+        </button>
+
         <div class="playlist-slot min-w-0 flex-1">
           <select id="playlistSelect" class="transport-select min-w-0 w-full" aria-label="Playlist folder"></select>
         </div>
@@ -2200,6 +2296,7 @@
   const stopBtn = document.getElementById("stopBtn");
   const nextTrackBtn = document.getElementById("nextTrackBtn");
   const randomizerBtn = document.getElementById("randomizerBtn");
+  const playlistModeBtn = document.getElementById("playlistModeBtn");
   const seekRange = document.getElementById("seekRange");
   const timeReadout = document.getElementById("timeReadout");
   const loadReadout = document.getElementById("loadReadout");
@@ -2239,6 +2336,9 @@
       return {
         randomizerEnabled: !!parsed.randomizerEnabled,
         megaphoneEnabled: !!parsed.megaphoneEnabled,
+        playlistMode: ["loop","shuffle","sequential"].includes(parsed.playlistMode)
+          ? parsed.playlistMode
+          : "loop",
         lockedStemIds: parsed.lockedStemIds && typeof parsed.lockedStemIds === "object"
           ? parsed.lockedStemIds
           : {},
@@ -2253,6 +2353,7 @@
       return {
         randomizerEnabled:false,
         megaphoneEnabled:false,
+        playlistMode:"loop",
         lockedStemIds:{},
         stemStates:{},
         masterState:null
@@ -2263,6 +2364,8 @@
   const persistentPrefs = loadPersistentPrefs();
   let randomizerEnabled = !!persistentPrefs.randomizerEnabled;
   let megaphoneEnabled = !!persistentPrefs.megaphoneEnabled;
+  let playlistMode = persistentPrefs.playlistMode || "loop";
+  let playlistAdvanceInProgress = false;
 
   function savePersistentPrefs() {
     try {
@@ -2891,11 +2994,26 @@
 
   function updateGridGeometry(stemCount) {
     const stripMin = 112;
+    const stripMax = 148;
     const masterWidth = 116;
-    const minWidth = Math.max(masterWidth,stemCount*stripMin+masterWidth);
-    grid.style.gridTemplateColumns = `repeat(${stemCount},minmax(${stripMin}px,1fr)) ${masterWidth}px`;
-    grid.style.minWidth = `${minWidth}px`;
-    grid.style.width = `max(100%, ${minWidth}px)`;
+
+    // A channel strip may never become wider than ~12.5% of the visible mixer,
+    // and is also hard-capped at 148px. With only a few stems the entire bank
+    // therefore stays compact instead of stretching across the chassis.
+    const scrollerWidth = horizontalScroller?.clientWidth || window.innerWidth || 1200;
+    const stripPercentCap = scrollerWidth * 0.125;
+    const stripWidth = Math.max(stripMin,Math.min(stripMax,stripPercentCap));
+
+    const naturalWidth = stemCount*stripWidth + masterWidth;
+    const minimumScrollableWidth = stemCount*stripMin + masterWidth;
+
+    grid.style.setProperty("--stem-strip-width",`${stripWidth}px`);
+    grid.style.gridTemplateColumns =
+      `repeat(${stemCount}, minmax(${stripMin}px, var(--stem-strip-width))) ${masterWidth}px`;
+
+    grid.style.minWidth = `${minimumScrollableWidth}px`;
+    grid.style.width = `${Math.max(minimumScrollableWidth,naturalWidth)}px`;
+    grid.style.maxWidth = "100%";
   }
 
   function renderMixer(playlist) {
@@ -3170,6 +3288,95 @@
     }
   }
 
+
+  const PLAYLIST_MODES = ["loop","shuffle","sequential"];
+
+  const PLAYLIST_MODE_UI = {
+    loop:{
+      icon:"fa-repeat",
+      name:"LOOPING",
+      description:"CURRENT SONG REPEATS"
+    },
+    shuffle:{
+      icon:"fa-shuffle",
+      name:"SHUFFLE",
+      description:"RANDOM SONG AT END"
+    },
+    sequential:{
+      icon:"fa-list-ol",
+      name:"SEQUENTIAL",
+      description:"NEXT SONG · WRAP"
+    }
+  };
+
+  function updatePlaylistModeButton(showOnMonitor=false) {
+    if (!playlistModeBtn) return;
+
+    const mode = PLAYLIST_MODE_UI[playlistMode] || PLAYLIST_MODE_UI.loop;
+    playlistModeBtn.innerHTML = `<i class="fa-solid ${mode.icon}" aria-hidden="true"></i>`;
+    playlistModeBtn.dataset.mode = playlistMode;
+    playlistModeBtn.setAttribute("aria-label",`Playlist mode: ${mode.name}`);
+    playlistModeBtn.title = `Playlist mode: ${mode.name}`;
+
+    if (showOnMonitor) {
+      showSystemReadout(
+        "PLAYLIST MODE",
+        mode.description,
+        mode.name
+      );
+    }
+  }
+
+  function cyclePlaylistMode() {
+    const currentPosition = getPosition();
+    const wasPlaying = isPlaying;
+
+    const currentIndex = Math.max(0,PLAYLIST_MODES.indexOf(playlistMode));
+    playlistMode = PLAYLIST_MODES[(currentIndex+1)%PLAYLIST_MODES.length];
+
+    persistentPrefs.playlistMode = playlistMode;
+    savePersistentPrefs();
+    updatePlaylistModeButton(true);
+
+    // Reschedule the current arrangement so old pre-scheduled loop cycles
+    // cannot survive a change from LOOPING to SHUFFLE/SEQUENTIAL.
+    if (wasPlaying && playlistDuration) {
+      startClockedPlaybackAt(currentPosition);
+      updatePlaybackButtons();
+    }
+
+    loadReadout.textContent =
+      playlistMode === "loop" ? "LOOP" :
+      playlistMode === "shuffle" ? "SHUFFLE" :
+      "SEQ";
+  }
+
+  function getShuffledPlaylistIndex() {
+    const count = playlists.length;
+    if (count <= 1) return 0;
+
+    // Pick any song except the current one.
+    let pick = Math.floor(Math.random()*(count-1));
+    if (pick >= currentPlaylistIndex) pick += 1;
+    return pick;
+  }
+
+  async function advanceAtSongEnd() {
+    if (playlistAdvanceInProgress || !playlists.length) return;
+    playlistAdvanceInProgress = true;
+
+    try {
+      if (playlistMode === "shuffle") {
+        await changePlaylist(getShuffledPlaylistIndex(),true);
+      } else if (playlistMode === "sequential") {
+        // changePlaylist normalizes the index, so the last song wraps to the first.
+        await changePlaylist(currentPlaylistIndex+1,true);
+      }
+    } finally {
+      playlistAdvanceInProgress = false;
+    }
+  }
+
   function updateRandomizerButton() {
     if (!randomizerBtn) return;
     randomizerBtn.classList.toggle("active",randomizerEnabled);
@@ -3349,7 +3556,7 @@
   }
 
   function ensureScheduleHorizon(currentCycle=0) {
-    if (!isPlaying || !playlistDuration || !audioCtx) return;
+    if (!isPlaying || !playlistDuration || !audioCtx || playlistMode !== "loop") return;
 
     const target = currentCycle + SCHEDULE_AHEAD_CYCLES;
     for (let cycle=scheduledThroughCycle+1; cycle<=target; cycle++) {
@@ -3405,23 +3612,42 @@
     }
 
     const absolute = getAbsoluteCyclePosition();
-    const wrapped = absolute % playlistDuration;
-    return Math.max(0,Math.min(playlistDuration,wrapped));
+
+    if (playlistMode === "loop") {
+      const wrapped = absolute % playlistDuration;
+      return Math.max(0,Math.min(playlistDuration,wrapped));
+    }
+
+    return Math.max(0,Math.min(playlistDuration,absolute));
   }
 
   function updateLoopScheduler() {
     if (!isPlaying || !audioCtx || !playlistDuration) return;
 
     const absolute = getAbsoluteCyclePosition();
-    const currentCycle = Math.max(0,Math.floor(absolute/playlistDuration));
 
-    ensureScheduleHorizon(currentCycle);
+    if (playlistMode === "loop") {
+      const currentCycle = Math.max(0,Math.floor(absolute/playlistDuration));
+      ensureScheduleHorizon(currentCycle);
 
-    if (currentCycle > loopCount) {
-      loopCount = currentCycle;
+      if (currentCycle > loopCount) {
+        loopCount = currentCycle;
 
-      if (randomizerEnabled) randomizeTrackMutes("loop");
-      loadReadout.textContent = randomizerEnabled ? "RND LOOP" : "LOOP";
+        if (randomizerEnabled) randomizeTrackMutes("loop");
+        loadReadout.textContent = randomizerEnabled ? "RND LOOP" : "LOOP";
+      }
+
+      return;
+    }
+
+    // SHUFFLE and SEQUENTIAL wait until the *longest stem* has fully ended.
+    // Then we change songs; no shorter stem is allowed to trigger a transition.
+    if (absolute >= playlistDuration-.012) {
+      isPlaying = false;
+      stopAllScheduledSources();
+      updatePlaybackButtons();
+      lastKnownPosition = playlistDuration;
+      advanceAtSongEnd();
     }
   }
 
@@ -3577,12 +3803,16 @@
   }
 
   async function previousPlaylist() {
+    playlistAdvanceInProgress=false;
     const shouldPlay=isPlaying;
+    // Normalized indexing wraps first -> last in every playlist mode.
     await changePlaylist(currentPlaylistIndex-1,shouldPlay);
   }
 
   async function nextPlaylist(forceAutoplay=null) {
+    playlistAdvanceInProgress=false;
     const shouldPlay=forceAutoplay===null ? isPlaying : forceAutoplay;
+    // Normalized indexing wraps last -> first in every playlist mode.
     await changePlaylist(currentPlaylistIndex+1,shouldPlay);
   }
 
@@ -3626,12 +3856,16 @@
     requestAnimationFrame(animationLoop);
   }
 
-  playlistSelect.addEventListener("change",()=>changePlaylist(Number(playlistSelect.value),isPlaying));
+  playlistSelect.addEventListener("change",()=>{
+    playlistAdvanceInProgress=false;
+    changePlaylist(Number(playlistSelect.value),isPlaying);
+  });
   prevTrackBtn.addEventListener("click",previousPlaylist);
   playPauseBtn.addEventListener("click",togglePlayback);
   stopBtn.addEventListener("click",stopCurrent);
   nextTrackBtn.addEventListener("click",()=>nextPlaylist());
   randomizerBtn?.addEventListener("click",toggleRandomizer);
+  playlistModeBtn?.addEventListener("click",cyclePlaylistMode);
 
   seekRange.addEventListener("pointerdown",()=>{isSeeking=true;});
   seekRange.addEventListener("input",()=>{
@@ -3653,8 +3887,13 @@
 
   window.addEventListener("beforeunload",revokeLocalObjectUrls);
 
+  window.addEventListener("resize",()=>{
+    if (currentPlaylist) updateGridGeometry(currentPlaylist.stems.length);
+  },{passive:true});
+
   (async function init() {
     updateRandomizerButton();
+    updatePlaylistModeButton(false);
     loadReadout.textContent="INIT";
     const manifest=await getManifest();
     bundledPlaylists=buildPlaylistsFromManifest(manifest);
