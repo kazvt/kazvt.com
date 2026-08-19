@@ -3621,7 +3621,7 @@
     }
 
   
-    /* ===== readable 14-segment alphanumeric main monitor ===== */
+    /* ===== readable 16-segment alphanumeric main monitor ===== */
     .seven-screen{
       width:clamp(244px,31vw,390px) !important;
       height:clamp(56px,8.2vh,72px) !important;
@@ -3675,34 +3675,34 @@
     }
 
     .seven-screen__top .alpha-text{
-      --alpha14-h:clamp(12px,2.0vh,17px);
+      --alpha16-h:clamp(12px,2.0vh,17px);
     }
 
     .seven-screen__main .alpha-text{
-      --alpha14-h:clamp(18px,3.2vh,27px);
+      --alpha16-h:clamp(18px,3.2vh,27px);
     }
 
-    .alpha14-char{
+    .alpha16-char{
       position:relative;
       display:inline-block;
-      flex:0 0 calc(var(--alpha14-h) * .50);
-      width:calc(var(--alpha14-h) * .50);
-      height:var(--alpha14-h);
+      flex:0 0 calc(var(--alpha16-h) * .54);
+      width:calc(var(--alpha16-h) * .54);
+      height:var(--alpha16-h);
     }
 
-    .alpha14-char--space{
-      flex-basis:calc(var(--alpha14-h) * .33);
-      width:calc(var(--alpha14-h) * .33);
+    .alpha16-char--space{
+      flex-basis:calc(var(--alpha16-h) * .33);
+      width:calc(var(--alpha16-h) * .33);
     }
 
-    .alpha14-svg{
+    .alpha16-svg{
       display:block;
       width:100%;
       height:100%;
       overflow:visible;
     }
 
-    .alpha14-seg{
+    .alpha16-seg{
       fill:#1b0e06;
       stroke:#2b1509;
       stroke-width:.42;
@@ -3711,8 +3711,8 @@
       transition:fill .04s linear,stroke .04s linear,opacity .04s linear,filter .04s linear;
     }
 
-    .alpha14-seg.on,
-    .alpha14-dot.on{
+    .alpha16-seg.on,
+    .alpha16-dot.on{
       fill:#ff9b28;
       stroke:#ffd49a;
       opacity:1;
@@ -3722,7 +3722,7 @@
         drop-shadow(0 0 2.6px rgba(255,101,13,.16));
     }
 
-    .alpha14-dot{
+    .alpha16-dot{
       fill:#ff9b28;
       stroke:#ffd49a;
       stroke-width:.42;
@@ -3782,8 +3782,8 @@
       .seven-screen{
         width:clamp(210px,55vw,300px) !important;
       }
-      .seven-screen__top .alpha-text{--alpha14-h:10.5px}
-      .seven-screen__main .alpha-text{--alpha14-h:16.5px}
+      .seven-screen__top .alpha-text{--alpha16-h:10.5px}
+      .seven-screen__main .alpha-text{--alpha16-h:16.5px}
       .alpha-text{gap:1.3px !important}
     }
 
@@ -3796,13 +3796,71 @@
         inset:5px 8px !important;
         gap:2px !important;
       }
-      .seven-screen__top .alpha-text{--alpha14-h:9px}
-      .seven-screen__main .alpha-text{--alpha14-h:14px}
+      .seven-screen__top .alpha-text{--alpha16-h:9px}
+      .seven-screen__main .alpha-text{--alpha16-h:14px}
       .time-hardware-display{
         min-width:130px !important;
         height:23px !important;
       }
       .time-segments{--digit-height:11px !important}
+    }
+
+  
+    /* ===== elapsed / total hardware display: same believable amber glow ===== */
+    .time-hardware-display{
+      background:
+        radial-gradient(ellipse at 50% 48%,rgba(124,51,8,.15),transparent 70%),
+        linear-gradient(180deg,#120a06,#070403) !important;
+      box-shadow:
+        0 2px 0 #070709,
+        0 0 0 1px #353037,
+        0 0 8px rgba(220,106,18,.13),
+        inset 0 2px 7px rgba(0,0,0,.97),
+        inset 0 0 15px rgba(255,115,18,.055),
+        inset 0 -1px 0 rgba(255,184,85,.018) !important;
+    }
+
+    .time-hardware-display::after{
+      content:"";
+      position:absolute;
+      inset:3px 6px;
+      z-index:1;
+      pointer-events:none;
+      border-radius:4px;
+      background:
+        radial-gradient(
+          ellipse at 50% 56%,
+          rgba(255,132,28,.070) 0%,
+          rgba(255,104,15,.035) 38%,
+          transparent 72%
+        );
+      box-shadow:
+        inset 0 0 10px rgba(255,122,20,.035);
+    }
+
+    .time-hardware-display__glass{
+      opacity:.29 !important;
+      background:
+        linear-gradient(111deg,rgba(255,239,211,.036),transparent 21% 76%,rgba(255,170,62,.011)),
+        repeating-linear-gradient(to bottom,rgba(255,143,36,.007) 0 1px,transparent 1px 3px) !important;
+    }
+
+    .time-segments .seg-shape{
+      opacity:.48 !important;
+    }
+
+    .time-segments .seg-shape.on{
+      opacity:1 !important;
+      filter:
+        drop-shadow(0 0 .45px rgba(255,224,169,.72))
+        drop-shadow(0 0 1.35px rgba(255,136,29,.67))
+        drop-shadow(0 0 2.9px rgba(255,103,13,.20)) !important;
+    }
+
+    .time-segments .seven-colon-svg circle{
+      filter:
+        drop-shadow(0 0 .5px rgba(255,222,163,.72))
+        drop-shadow(0 0 2px rgba(255,119,19,.60)) !important;
     }
 
   </style>
@@ -4350,80 +4408,91 @@
   };
 
   /*
-   * 14-SEGMENT ALPHANUMERIC DISPLAY
-   * Main monitor = 14 segments for readable words.
+   * 16-SEGMENT ALPHANUMERIC DISPLAY
+   * Main monitor = 16 segments for readable words.
    * Elapsed/total time module stays genuine 7-segment because it is numeric.
    */
-  const ALPHA14_POINTS = {
-    a:"9,4 41,4 46,9 41,14 9,14 4,9",
-    b:"42,11 47,16 45,43 41,47 37,43 39,17",
-    c:"41,53 45,57 43,84 38,89 34,84 36,58",
-    d:"9,86 41,86 46,91 41,96 9,96 4,91",
-    e:"4,53 8,57 6,84 2,89 0,84 2,58",
+  const ALPHA16_POINTS = {
+    /* split top bar */
+    a1:"7,4 23,4 27,9 23,14 7,14 2,9",
+    a2:"27,4 43,4 48,9 43,14 27,14 23,9",
+
+    /* outer verticals */
+    b:"44,11 49,16 47,43 43,47 39,43 41,17",
+    c:"43,53 47,57 45,84 40,89 36,84 38,58",
+    e:"3,53 8,57 6,84 1,89 0,84 2,58",
     f:"5,11 10,16 8,43 4,47 0,43 2,17",
 
-    g1:"8,45 23,45 27,50 23,55 8,55 3,50",
-    g2:"27,45 42,45 47,50 42,55 27,55 23,50",
+    /* split bottom bar */
+    d1:"7,86 23,86 27,91 23,96 7,96 2,91",
+    d2:"27,86 43,86 48,91 43,96 27,96 23,91",
 
+    /* split centre bar */
+    g1:"7,45 23,45 27,50 23,55 7,55 2,50",
+    g2:"27,45 43,45 48,50 43,55 27,55 23,50",
+
+    /* upper diagonals */
     h:"10,15 15,17 24,43 21,46 17,43 7,19",
     i:"40,15 44,19 33,43 29,46 26,43 36,17",
 
+    /* centre vertical pair */
     j:"23,14 28,14 28,43 25,47 22,43 22,16",
     k:"23,53 28,57 28,86 23,86 22,57 22,55",
 
+    /* lower diagonals */
     l:"8,82 13,80 23,57 27,59 27,64 16,88",
     m:"38,82 43,87 32,60 28,57 26,62 34,84"
   };
 
-  const ALPHA14_MAP = {
-    "0":["a","b","c","d","e","f"],
+  const ALPHA16_MAP = {
+    "0":["a1","a2","b","c","d1","d2","e","f"],
     "1":["b","c"],
-    "2":["a","b","g1","g2","e","d"],
-    "3":["a","b","c","d","g1","g2"],
+    "2":["a1","a2","b","g1","g2","e","d1","d2"],
+    "3":["a1","a2","b","c","d1","d2","g1","g2"],
     "4":["f","g1","g2","b","c"],
-    "5":["a","f","g1","g2","c","d"],
-    "6":["a","f","e","d","c","g1","g2"],
-    "7":["a","b","c"],
-    "8":["a","b","c","d","e","f","g1","g2"],
-    "9":["a","b","c","d","f","g1","g2"],
+    "5":["a1","a2","f","g1","g2","c","d1","d2"],
+    "6":["a1","a2","f","e","d1","d2","c","g1","g2"],
+    "7":["a1","a2","b","c"],
+    "8":["a1","a2","b","c","d1","d2","e","f","g1","g2"],
+    "9":["a1","a2","b","c","d1","d2","f","g1","g2"],
 
-    "A":["a","b","c","e","f","g1","g2"],
-    "B":["a","b","c","d","g1","g2","j","k"],
-    "C":["a","d","e","f"],
-    "D":["a","b","c","d","j","k"],
-    "E":["a","d","e","f","g1","g2"],
-    "F":["a","e","f","g1","g2"],
-    "G":["a","c","d","e","f","g2"],
+    "A":["a1","a2","b","c","e","f","g1","g2"],
+    "B":["a1","a2","b","c","d1","d2","g1","g2","j","k"],
+    "C":["a1","a2","d1","d2","e","f"],
+    "D":["a1","a2","b","c","d1","d2","j","k"],
+    "E":["a1","a2","d1","d2","e","f","g1","g2"],
+    "F":["a1","a2","e","f","g1","g2"],
+    "G":["a1","a2","c","d1","d2","e","f","g2"],
     "H":["b","c","e","f","g1","g2"],
-    "I":["a","d","j","k"],
-    "J":["b","c","d","e"],
-    "K":["e","f","g1","h","l"],
-    "L":["d","e","f"],
+    "I":["a1","a2","d1","d2","j","k"],
+    "J":["b","c","d1","d2","e"],
+    "K":["e","f","i","m"],
+    "L":["d1","d2","e","f"],
     "M":["b","c","e","f","h","i"],
     "N":["b","c","e","f","h","m"],
-    "O":["a","b","c","d","e","f"],
-    "P":["a","b","e","f","g1","g2"],
-    "Q":["a","b","c","d","e","f","m"],
-    "R":["a","b","e","f","g1","g2","m"],
-    "S":["a","c","d","f","g1","g2"],
-    "T":["a","j","k"],
-    "U":["b","c","d","e","f"],
+    "O":["a1","a2","b","c","d1","d2","e","f"],
+    "P":["a1","a2","b","e","f","g1","g2"],
+    "Q":["a1","a2","b","c","d1","d2","e","f","m"],
+    "R":["a1","a2","b","e","f","g1","g2","m"],
+    "S":["a1","a2","c","d1","d2","f","g1","g2"],
+    "T":["a1","a2","j","k"],
+    "U":["b","c","d1","d2","e","f"],
     "V":["e","f","l","m"],
     "W":["b","c","e","f","l","m"],
     "X":["h","i","l","m"],
     "Y":["h","i","k"],
-    "Z":["a","d","i","l"],
+    "Z":["a1","a2","d1","d2","i","l"],
 
     "-":["g1","g2"],
-    "_":["d"],
-    "=":["g1","g2","d"],
+    "_":["d1","d2"],
+    "=":["g1","g2","d1","d2"],
     "/":["i","l"],
     " ": []
   };
 
-  const alpha14TypeTimers = new WeakMap();
+  const alpha16TypeTimers = new WeakMap();
 
-  function normalizeAlpha14Text(value) {
+  function normalizeAlpha16Text(value) {
     return String(value ?? "")
       .toUpperCase()
       .replace(/-∞/g,"-INF")
@@ -4432,15 +4501,15 @@
       .replace(/[^0-9A-Z +.,:/=_-]/g," ");
   }
 
-  function makeAlpha14Character(character) {
+  function makeAlpha16Character(character) {
     const wrapper = document.createElement("span");
-    wrapper.className = "alpha14-char";
+    wrapper.className = "alpha16-char";
 
     const char = String(character || " ").toUpperCase();
-    if (char === " ") wrapper.classList.add("alpha14-char--space");
+    if (char === " ") wrapper.classList.add("alpha16-char--space");
 
     const svg = document.createElementNS(SEVEN_SVG_NS,"svg");
-    svg.setAttribute("class","alpha14-svg");
+    svg.setAttribute("class","alpha16-svg");
     svg.setAttribute("viewBox","0 0 50 100");
     svg.setAttribute("preserveAspectRatio","xMidYMid meet");
     svg.setAttribute("focusable","false");
@@ -4449,7 +4518,7 @@
     if (char === ":") {
       for (const cy of [35,65]) {
         const dot = document.createElementNS(SEVEN_SVG_NS,"circle");
-        dot.setAttribute("class","alpha14-dot on");
+        dot.setAttribute("class","alpha16-dot on");
         dot.setAttribute("cx","25");
         dot.setAttribute("cy",String(cy));
         dot.setAttribute("r","3.5");
@@ -4461,7 +4530,7 @@
 
     if (char === ".") {
       const dot = document.createElementNS(SEVEN_SVG_NS,"circle");
-      dot.setAttribute("class","alpha14-dot on");
+      dot.setAttribute("class","alpha16-dot on");
       dot.setAttribute("cx","44");
       dot.setAttribute("cy","92");
       dot.setAttribute("r","3.6");
@@ -4472,7 +4541,7 @@
 
     if (char === ",") {
       const comma = document.createElementNS(SEVEN_SVG_NS,"polygon");
-      comma.setAttribute("class","alpha14-seg on");
+      comma.setAttribute("class","alpha16-seg on");
       comma.setAttribute("points","40,88 47,88 43,99 39,99");
       svg.appendChild(comma);
       wrapper.appendChild(svg);
@@ -4482,25 +4551,25 @@
     if (char === "+") {
       for (const segmentName of ["g1","g2","j","k"]) {
         const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
-        polygon.setAttribute("points",ALPHA14_POINTS[segmentName]);
-        polygon.setAttribute("class",`alpha14-seg ${segmentName} on`);
+        polygon.setAttribute("points",ALPHA16_POINTS[segmentName]);
+        polygon.setAttribute("class",`alpha16-seg ${segmentName} on`);
         svg.appendChild(polygon);
       }
       wrapper.appendChild(svg);
       return wrapper;
     }
 
-    const active = new Set(ALPHA14_MAP[char] || []);
+    const active = new Set(ALPHA16_MAP[char] || []);
 
     for (const segmentName of [
-      "a","b","c","d","e","f",
+      "a1","a2","b","c","d1","d2","e","f",
       "g1","g2","h","i","j","k","l","m"
     ]) {
       const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
-      polygon.setAttribute("points",ALPHA14_POINTS[segmentName]);
+      polygon.setAttribute("points",ALPHA16_POINTS[segmentName]);
       polygon.setAttribute(
         "class",
-        `alpha14-seg ${segmentName}${active.has(segmentName) ? " on" : ""}`
+        `alpha16-seg ${segmentName}${active.has(segmentName) ? " on" : ""}`
       );
       svg.appendChild(polygon);
     }
@@ -4509,16 +4578,16 @@
     return wrapper;
   }
 
-  function alpha14Write(target,text,{maxChars=18,align="left"}={}) {
+  function alpha16Write(target,text,{maxChars=18,align="left"}={}) {
     if (!target) return;
 
-    const previous = alpha14TypeTimers.get(target);
+    const previous = alpha16TypeTimers.get(target);
     if (previous) {
       clearTimeout(previous);
-      alpha14TypeTimers.delete(target);
+      alpha16TypeTimers.delete(target);
     }
 
-    let chars = [...normalizeAlpha14Text(text)];
+    let chars = [...normalizeAlpha16Text(text)];
 
     if (chars.length > maxChars) {
       chars = align === "right"
@@ -4529,11 +4598,11 @@
     target.replaceChildren();
 
     for (const char of chars) {
-      target.appendChild(makeAlpha14Character(char));
+      target.appendChild(makeAlpha16Character(char));
     }
   }
 
-  function typeAlpha14(target,text,{
+  function typeAlpha16(target,text,{
     maxChars=18,
     speed=25,
     align="left",
@@ -4541,10 +4610,10 @@
   }={}) {
     if (!target) return;
 
-    const previous = alpha14TypeTimers.get(target);
+    const previous = alpha16TypeTimers.get(target);
     if (previous) clearTimeout(previous);
 
-    const chars = [...normalizeAlpha14Text(text)];
+    const chars = [...normalizeAlpha16Text(text)];
     let index = 0;
 
     const tick = ()=>{
@@ -4555,13 +4624,13 @@
         ? typed.slice(typed.length-maxChars)
         : typed;
 
-      alpha14Write(target,visible.join(""),{maxChars,align});
+      alpha16Write(target,visible.join(""),{maxChars,align});
 
       if (index < chars.length) {
         const timer = setTimeout(tick,speed);
-        alpha14TypeTimers.set(target,timer);
+        alpha16TypeTimers.set(target,timer);
       } else {
-        alpha14TypeTimers.delete(target);
+        alpha16TypeTimers.delete(target);
         if (typeof onDone === "function") onDone();
       }
     };
@@ -4576,9 +4645,9 @@
     tick();
   }
 
-  window.alpha14Write = alpha14Write;
-  window.typeAlpha14 = typeAlpha14;
-  window.typeHardwareDisplay = typeAlpha14;
+  window.alpha16Write = alpha16Write;
+  window.typeAlpha16 = typeAlpha16;
+  window.typeHardwareDisplay = typeAlpha16;
 
   window.testHardwareDisplay = function(text="BOOT") {
     setSevenSegmentScreen({
@@ -4753,7 +4822,7 @@
 
   function syncSevenSegmentTrack() {
     const trackText = trackReadout?.textContent || "--";
-    alpha14Write(sevenTrack,`TRK ${trackText.replace("/","-")}`,{
+    alpha16Write(sevenTrack,`TRK ${trackText.replace("/","-")}`,{
       maxChars:9,
       align:"right"
     });
@@ -4769,21 +4838,21 @@
     controlReadoutLabel.textContent = label;
     controlReadoutValue.textContent = value || "READY";
 
-    // Proper 14-segment alphanumeric modules for every field in this monitor.
-    alpha14Write(sevenOwner,owner,{maxChars:17,align:"left"});
+    // Proper 16-segment alphanumeric modules for every field in this monitor.
+    alpha16Write(sevenOwner,owner,{maxChars:17,align:"left"});
     syncSevenSegmentTrack();
 
     if (animate) {
-      typeAlpha14(sevenLabel,label,{
+      typeAlpha16(sevenLabel,label,{
         maxChars:18,
         speed:23,
         align:"left"
       });
     } else {
-      alpha14Write(sevenLabel,label,{maxChars:18,align:"left"});
+      alpha16Write(sevenLabel,label,{maxChars:18,align:"left"});
     }
 
-    alpha14Write(sevenValue,value || "READY",{
+    alpha16Write(sevenValue,value || "READY",{
       maxChars:13,
       align:"right"
     });
