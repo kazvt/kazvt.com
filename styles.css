@@ -3003,6 +3003,12 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   transform: translate(-50%, 0) scale(1);
 }
 
+/* Toast visibility must never be held open by the generic text-load
+   animation, whose fill mode preserves its final opacity. */
+.wumpa-toast.is-soft-loaded {
+  animation: none !important;
+}
+
 /* Language selector component styles live in /zzz_shared/language-dock.css. */
 
 :is(

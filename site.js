@@ -1780,6 +1780,7 @@ function setWumpaCount(count) {
 
 let wumpaCounterTimer = 0;
 let wumpaToastTimer = 0;
+let wumpaToastGeneration = 0;
 
 function showWumpaCounter() {
   const counter = document.querySelector(".wumpa-counter");
@@ -1796,11 +1797,20 @@ function showWumpaToast(message) {
   const toast = document.querySelector(".wumpa-toast");
   if (!toast) return;
 
-  setInlineNote(toast, message);
+  // Toast visibility is controlled only by the is-visible class. The generic
+  // soft-text animation uses animation-fill-mode: both and can otherwise keep
+  // opacity at 1 after the toast's hide timer has fired.
+  toast.classList.remove("is-soft-loaded");
+  setInlineNote(toast, message, { animate: false });
+
+  const generation = ++wumpaToastGeneration;
   toast.classList.add("is-visible");
   window.clearTimeout(wumpaToastTimer);
   wumpaToastTimer = window.setTimeout(() => {
-    toast.classList.remove("is-visible");
+    // Ignore an obsolete callback if a newer notification has already reused
+    // this same toast element.
+    if (generation !== wumpaToastGeneration) return;
+    toast.classList.remove("is-visible", "is-soft-loaded");
   }, 3000);
 }
 
