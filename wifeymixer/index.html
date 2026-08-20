@@ -4229,33 +4229,27 @@
         ) !important;
       background:
         radial-gradient(
-          ellipse at 48% 53%,
-          rgba(112,178,205,calc(.055 + var(--icon-drive) * .15)) 0%,
-          rgba(65,117,139,calc(.040 + var(--icon-drive) * .10)) 42%,
-          transparent 72%
+          ellipse at 50% 55%,
+          rgba(126,193,219,calc(.085 + var(--icon-drive) * .18)) 0%,
+          rgba(72,139,166,calc(.060 + var(--icon-drive) * .13)) 50%,
+          rgba(29,58,70,calc(.030 + var(--icon-drive) * .07)) 100%
         ),
         linear-gradient(
           180deg,
-          rgba(255,255,255,.065) 0%,
-          rgba(255,255,255,.012) 18%,
-          transparent 32%
-        ),
-        linear-gradient(
-          180deg,
-          #3b4145 0%,
-          #292f33 52%,
-          #1c2125 78%,
-          #14181b 100%
+          rgba(237,246,249,.105) 0%,
+          rgba(179,203,213,.045) 20%,
+          rgba(48,61,69,.54) 58%,
+          rgba(24,32,37,.64) 100%
         ) !important;
       box-shadow:
-        0 2px 0 #07080a,
-        0 0 0 1px #33383c,
-        0 0 calc(2px + var(--icon-drive) * 5px)
-          rgba(90,171,207,calc(.035 + var(--icon-drive) * .15)),
-        inset 0 1px 0 rgba(255,255,255,.09),
-        inset 0 -3px 4px rgba(0,0,0,.42),
-        inset 2px 0 3px rgba(255,255,255,.012),
-        inset -2px 0 3px rgba(0,0,0,.18) !important;
+        0 2px 0 rgba(5,7,9,.76),
+        0 0 0 1px rgba(61,72,79,.92),
+        0 0 calc(3px + var(--icon-drive) * 6px)
+          rgba(90,171,207,calc(.045 + var(--icon-drive) * .18)),
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -2px 4px rgba(0,0,0,.28),
+        inset 2px 0 3px rgba(255,255,255,.018),
+        inset -2px 0 3px rgba(0,0,0,.10) !important;
       text-shadow:
         0 1px 0 #050607,
         0 0 calc(1px + var(--icon-drive) * 3px)
@@ -4277,8 +4271,8 @@
       pointer-events:none;
       border:1px solid #08090a;
       background:
-        radial-gradient(circle at 23% 24%,rgba(255,255,255,.035) 0 1px,transparent 1.3px),
-        linear-gradient(180deg,#24272a,#111315);
+        radial-gradient(circle at 23% 24%,rgba(255,255,255,.045) 0 1px,transparent 1.3px),
+        linear-gradient(180deg,#30383d,#1d2529);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.028),
         inset 0 -1px 0 rgba(0,0,0,.76),
@@ -4290,27 +4284,29 @@
       content:"";
       position:absolute !important;
       z-index:0;
-      inset:3px !important;
+      inset:1px !important;
       border:0 !important;
       border-radius:2px;
       pointer-events:none;
       background:
         radial-gradient(
-          ellipse at 50% 58%,
-          rgba(151,220,245,calc(.075 + var(--icon-drive) * .30)) 0%,
-          rgba(87,168,201,calc(.040 + var(--icon-drive) * .19)) 43%,
-          transparent 76%
+          ellipse at 50% 56%,
+          rgba(151,220,245,calc(.060 + var(--icon-drive) * .20)) 0%,
+          rgba(87,168,201,calc(.045 + var(--icon-drive) * .14)) 52%,
+          rgba(64,133,160,calc(.018 + var(--icon-drive) * .055)) 78%,
+          transparent 100%
         ),
         linear-gradient(
           180deg,
-          rgba(216,236,241,.04),
-          transparent 38%
+          rgba(216,236,241,.055),
+          rgba(98,166,193,calc(.012 + var(--icon-drive) * .035)) 68%,
+          transparent 100%
         ) !important;
       box-shadow:
-        inset 0 1px 1px rgba(229,244,247,.055),
-        inset 0 -2px 3px rgba(0,0,0,.18),
-        0 0 calc(1px + var(--icon-drive) * 4px)
-          rgba(104,187,220,calc(.025 + var(--icon-drive) * .16)) !important;
+        inset 0 1px 1px rgba(229,244,247,.065),
+        inset 0 -2px 3px rgba(0,0,0,.12),
+        0 0 calc(2px + var(--icon-drive) * 5px)
+          rgba(104,187,220,calc(.030 + var(--icon-drive) * .14)) !important;
     }
 
     .channel-instrument-icon i{
@@ -4324,8 +4320,8 @@
       filter:
         drop-shadow(0 1px 0 rgba(0,0,0,.92))
         drop-shadow(
-          0 0 calc(.4px + var(--icon-drive) * 1.8px)
-          rgba(137,213,240,calc(.12 + var(--icon-drive) * .40))
+          0 0 calc(.6px + var(--icon-drive) * 2.2px)
+          rgba(145,220,246,calc(.15 + var(--icon-drive) * .46))
         ) !important;
     }
 
@@ -4667,6 +4663,65 @@
     }
   }
 
+  // Musical-role ordering for channel strips. Lower numbers appear farther left.
+  // The first four broad groups intentionally follow the mixer's core hierarchy:
+  // drums -> bass -> guitar -> keys. Less foundational material moves rightward.
+  const STEM_ROLE_PRIORITY = new Map([
+    ["drums",0],
+    ["kick",1],
+    ["snare",2],
+    ["hihat",3],
+    ["toms",4],
+    ["cymbals",5],
+
+    ["bass",10],
+    ["sub-808",11],
+
+    ["guitar",20],
+    ["plucked-strings",21],
+
+    ["piano",30],
+    ["keys",31],
+    ["rhodes",32],
+    ["wurli",33],
+    ["organ",34],
+
+    ["lead-vocal",40],
+
+    ["synth",50],
+    ["pads",51],
+
+    ["strings",60],
+    ["brass",61],
+    ["woodwinds",62],
+    ["mallets",63],
+    ["percussion",64],
+
+    ["backing-vocals",70],
+    ["spoken-vocal",71],
+
+    ["loops-samples",80],
+    ["radio-lofi",90],
+    ["fx",91],
+    ["ambience-room",92],
+
+    ["click-guide",100],
+    ["mix-master",110],
+    ["audio",120]
+  ]);
+
+  function stemRolePriority(stem) {
+    const category = predictInstrumentIcon(stem?.name || stem?.displayPath || "").category;
+    return STEM_ROLE_PRIORITY.get(category) ?? STEM_ROLE_PRIORITY.get("audio");
+  }
+
+  function sortStemsByMusicalRole(stems) {
+    return (Array.isArray(stems) ? stems : [])
+      .map((stem,sourceIndex)=>({stem,sourceIndex,priority:stemRolePriority(stem)}))
+      .sort((a,b)=>a.priority-b.priority || a.sourceIndex-b.sourceIndex)
+      .map(entry=>entry.stem);
+  }
+
   function predictInstrumentIcon(stemName) {
     const name = normalizeInstrumentAlias(stemName);
     const compactName = name.replace(/\s+/g,"");
@@ -4885,7 +4940,7 @@
       id:`bundle:${folder}`,
       folder,
       title:prettifyFolder(folder),
-      stems,
+      stems:sortStemsByMusicalRole(stems),
       source:"bundled",
       order:index
     }));
@@ -4913,7 +4968,7 @@
       id:`local:${folder}:${index}`,
       folder,
       title:prettifyFolder(folder),
-      stems,
+      stems:sortStemsByMusicalRole(stems),
       source:"local",
       order:index
     }));
