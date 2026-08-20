@@ -6090,6 +6090,161 @@
       /* No interpolation between physical detents. */
       transition:none !important;
     }
+
+
+    /* ==============================================================
+       PATCH: LARGE ENGRAVED VIBE AXIS LEGENDS
+       Keep the XY surface square, but make the four poles read like
+       silk-screened / engraved console legends rather than UI badges.
+       ============================================================== */
+    .vibe-module{
+      grid-template-columns:24px minmax(0,1fr) 24px !important;
+      grid-template-rows:auto auto minmax(0,1fr) auto !important;
+      column-gap:5px !important;
+      row-gap:3px !important;
+      padding:5px 4px 5px !important;
+    }
+
+    .vibe-module__title{
+      grid-column:1 / -1 !important;
+      grid-row:1 !important;
+      margin:0 0 1px !important;
+      font-family:"Archivo Black",system-ui,sans-serif !important;
+      font-size:7px !important;
+      line-height:1 !important;
+      font-weight:400 !important;
+      letter-spacing:.13em !important;
+      color:#8f9293 !important;
+      text-shadow:
+        0 -1px 0 rgba(0,0,0,.88),
+        0 1px 0 rgba(218,220,221,.055) !important;
+      opacity:.94 !important;
+    }
+
+    .vibe-axis-label{
+      position:relative !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      min-width:0 !important;
+      padding:0 !important;
+      border:0 !important;
+      border-radius:0 !important;
+      background:none !important;
+      box-shadow:none !important;
+      font-family:"Archivo Black",system-ui,sans-serif !important;
+      font-size:clamp(7px,.76vw,9px) !important;
+      line-height:1.02 !important;
+      font-weight:400 !important;
+      letter-spacing:.075em !important;
+      color:#a0a3a4 !important;
+      text-transform:uppercase !important;
+      text-shadow:
+        0 -1px 0 rgba(0,0,0,.96),
+        0 1px 0 rgba(225,227,228,.075) !important;
+      opacity:.96 !important;
+      filter:none !important;
+      transform:none !important;
+      white-space:nowrap !important;
+    }
+
+    /* Short etched rule either side of the horizontal legends. */
+    .vibe-axis-label--high::before,
+    .vibe-axis-label--high::after,
+    .vibe-axis-label--low::before,
+    .vibe-axis-label--low::after{
+      content:"";
+      width:12px;
+      height:1px;
+      flex:0 1 12px;
+      margin:0 4px;
+      background:linear-gradient(90deg,transparent,#55595b 48%,#17191b 52%,transparent);
+      opacity:.66;
+    }
+
+    .vibe-axis-label--high{
+      grid-column:2 !important;
+      grid-row:2 !important;
+      align-self:end !important;
+      justify-self:stretch !important;
+      margin:0 !important;
+      text-align:center !important;
+    }
+    .vibe-axis-label--high br,
+    .vibe-axis-label--low br{display:none !important}
+
+    .vibe-axis-label--low{
+      grid-column:2 !important;
+      grid-row:4 !important;
+      align-self:start !important;
+      justify-self:stretch !important;
+      margin:0 !important;
+      text-align:center !important;
+    }
+
+    .vibe-axis-label--simple,
+    .vibe-axis-label--complex{
+      grid-row:3 !important;
+      align-self:stretch !important;
+      justify-self:stretch !important;
+      writing-mode:vertical-rl !important;
+      text-orientation:mixed !important;
+      white-space:normal !important;
+      letter-spacing:.09em !important;
+      font-size:clamp(7px,.72vw,8px) !important;
+    }
+    .vibe-axis-label--simple{
+      grid-column:1 !important;
+      transform:rotate(180deg) !important;
+    }
+    .vibe-axis-label--complex{
+      grid-column:3 !important;
+      transform:none !important;
+    }
+
+    .vibe-axis-label--simple::before,
+    .vibe-axis-label--complex::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:6px;
+      bottom:6px;
+      width:1px;
+      transform:translateX(-50%);
+      background:linear-gradient(180deg,transparent,#55595b 15%,#181a1c 50%,#55595b 85%,transparent);
+      opacity:.34;
+      z-index:-1;
+    }
+
+    .vibe-pad-shell{
+      grid-column:2 !important;
+      grid-row:3 !important;
+      /* remain mathematically square regardless of label growth */
+      aspect-ratio:1 / 1 !important;
+    }
+
+    /* Keep engraving readable before sacrificing pad size. */
+    @media(max-width:860px){
+      .vibe-module{grid-template-columns:22px minmax(0,1fr) 22px !important;column-gap:4px !important}
+      .vibe-axis-label{font-size:7px !important}
+    }
+    @media(max-width:600px){
+      .vibe-module{grid-template-columns:20px minmax(0,1fr) 20px !important;column-gap:3px !important}
+      .vibe-axis-label{font-size:7px !important;letter-spacing:.055em !important}
+      .vibe-module__title{font-size:6px !important}
+    }
+    @media(max-height:650px){
+      .vibe-module{grid-template-columns:20px minmax(0,1fr) 20px !important;row-gap:2px !important;padding-top:2px !important;padding-bottom:2px !important}
+      .vibe-axis-label{font-size:7px !important}
+    }
+    @media(max-height:500px){
+      .vibe-module{grid-template-columns:18px minmax(0,1fr) 18px !important;row-gap:1px !important;padding-top:1px !important;padding-bottom:1px !important}
+      .vibe-axis-label{font-size:6px !important;line-height:1 !important;letter-spacing:.045em !important}
+      .vibe-module__title{display:none !important}
+      .vibe-axis-label--high::before,.vibe-axis-label--high::after,
+      .vibe-axis-label--low::before,.vibe-axis-label--low::after{margin:0 2px;width:7px;flex-basis:7px}
+    }
+
 </style>
 </head>
 
@@ -6582,44 +6737,111 @@
     {name:"PERCUSSION",role:"percussion",soundfontSlot:"percussion"}
   ];
 
-  // Local SoundFont bank supplied with the mixer.  The path is intentionally
-  // relative to index.html so a deployed folder can simply contain:
-  //   index.html + sf2-procedural.js + soundfonts/SF64.sf2
-  const PROCEDURAL_SF2_URL = "soundfonts/SF64.sf2";
-  let proceduralSoundFont = null;
-  let proceduralSoundFontPromise = null;
-  let proceduralSoundFontError = null;
+  // Two local SoundFont banks form one procedural instrument rack.
+  // Paths stay relative to index.html so the deployed folder remains portable.
+  const PROCEDURAL_SF2_SOURCES = Object.freeze({
+    sf64:{url:"soundfonts/SF64.sf2",label:"SF64"},
+    rush:{url:"soundfonts/Gotta Rush.sf2",label:"GOTTA RUSH"}
+  });
+  const proceduralSoundFonts = new Map();
+  const proceduralSoundFontErrors = new Map();
+  let proceduralSoundFontsPromise = null;
 
-  // Curated subset of SF64.  Keeping the palette narrow makes the seed feel
-  // like one coherent instrument rack instead of randomly browsing 100+ presets.
+  function sfVoice(source,bank,program,name,options={}){return Object.freeze({source,bank,program,name,...options})}
+
+  // SF64 is the neutral / rounder half of the rack.
   const SF64_VOICES = Object.freeze({
-    drumsGeneral:{bank:128,program:0,name:"General Percussion"},
-    drumsPower:{bank:128,program:16,name:"Powerful Percussion"},
+    drumsGeneral:sfVoice("sf64",128,0,"General Percussion"),
+    drumsPower:sfVoice("sf64",128,16,"Powerful Percussion"),
+    bassAcoustic:sfVoice("sf64",0,32,"Acoustic Bass"),
+    bassFinger:sfVoice("sf64",0,33,"Electric Bass (F)"),
+    bassPick:sfVoice("sf64",0,34,"Electric Bass (P)"),
+    bassFretless:sfVoice("sf64",0,35,"Fretless Bass"),
+    bassSlap:sfVoice("sf64",0,36,"Slap Bass"),
+    bassSynth1:sfVoice("sf64",0,38,"Synth Bass 1"),
+    bassSynth2:sfVoice("sf64",0,39,"Synth Bass 2"),
+    keysGrand:sfVoice("sf64",0,0,"Grand Piano"),
+    keysHonky:sfVoice("sf64",0,3,"Honky-Tonk"),
+    keysEP1:sfVoice("sf64",0,4,"Electric Piano 1"),
+    keysEP2:sfVoice("sf64",0,5,"Electric Piano 2"),
+    keysClav:sfVoice("sf64",0,7,"Clav"),
+    keysPercOrgan:sfVoice("sf64",0,17,"Percussive Organ"),
+    keysRockOrgan:sfVoice("sf64",0,18,"Rock Organ"),
+    leadSquare:sfVoice("sf64",0,80,"Lead 1 (Square)"),
+    leadSaw:sfVoice("sf64",0,81,"Lead 2 (Sawtooth)"),
+    leadCalliope:sfVoice("sf64",0,82,"Lead 3 (Callope)"),
+    leadCharang:sfVoice("sf64",0,84,"Lead 5 (Charang)"),
+    leadBase:sfVoice("sf64",0,87,"Lead 8 (Lead + Base)"),
+    percussionGeneral:sfVoice("sf64",128,0,"General Percussion"),
+    percussionPower:sfVoice("sf64",128,16,"Powerful Percussion")
+  });
 
-    bassAcoustic:{bank:0,program:32,name:"Acoustic Bass"},
-    bassFinger:{bank:0,program:33,name:"Electric Bass (F)"},
-    bassPick:{bank:0,program:34,name:"Electric Bass (P)"},
-    bassFretless:{bank:0,program:35,name:"Fretless Bass"},
-    bassSlap:{bank:0,program:36,name:"Slap Bass"},
-    bassSynth1:{bank:0,program:38,name:"Synth Bass 1"},
-    bassSynth2:{bank:0,program:39,name:"Synth Bass 2"},
+  // Gotta Rush is the character half. These presets were curated from the
+  // actual bank. Many bank-128 entries are partial drum layers, so only kits
+  // verified against the generator's MIDI notes are allowed here.
+  const RUSH_VOICES = Object.freeze({
+    drumsNewDay1:sfVoice("rush",128,0,"A New Day Drums 1"),
+    drumsNewDay2:sfVoice("rush",128,1,"A New Day Drums 2"),
+    drumsNewDay5:sfVoice("rush",128,4,"A New Day Drums 5"),
+    drumsNewDay6:sfVoice("rush",128,5,"A New Day Drums 6"),
+    drumsAltitude4:sfVoice("rush",128,9,"Alt. Limit Drums 4"),
+    drumsMirage3:sfVoice("rush",128,38,"Mirage Road Drums 3"),
+    bassNewDay:sfVoice("rush",0,44,"A New Day Bass"),
+    bassAltitude1:sfVoice("rush",0,45,"Alt. Limit Bass 1"),
+    bassAltitude2:sfVoice("rush",0,46,"Alt. Limit Bass 2"),
+    bassDeadLine1:sfVoice("rush",0,47,"Dead Line Bass 1"),
+    bassDeadLine2:sfVoice("rush",0,48,"Dead Line Bass 2"),
+    bassEggman:sfVoice("rush",0,49,"Eggman Boss Bass"),
+    bassException:sfVoice("rush",0,50,"Exception Bass"),
+    bassHugeCrisis:sfVoice("rush",0,52,"Huge Crisis Bass"),
+    bassMirage:sfVoice("rush",0,55,"Mirage Road Bass"),
+    bassNightCarnival:sfVoice("rush",0,56,"Night Carnival Bass"),
+    bassRival:sfVoice("rush",0,57,"Rival Boss Bass"),
+    bassSynth1:sfVoice("rush",0,58,"Synth Bass 1"),
+    bassSynth2:sfVoice("rush",0,59,"Synth Bass 2"),
+    bassSynth3:sfVoice("rush",0,60,"Synth Bass 3"),
+    keysEnding:sfVoice("rush",0,1,"Ending Piano"),
+    keysLeafStorm:sfVoice("rush",0,2,"Leaf Storm Piano"),
+    keysRival:sfVoice("rush",0,3,"Rival Boss Piano"),
+    keysEP1:sfVoice("rush",0,4,"E. Piano 1"),
+    keysEP2:sfVoice("rush",0,5,"E. Piano 2"),
+    keysNewDayOrgan:sfVoice("rush",0,6,"A New Day Organ"),
+    keysLeafOrgan:sfVoice("rush",0,9,"Leaf Storm Organ"),
+    keysOrgan1:sfVoice("rush",0,10,"Organ 1"),
+    keysOrgan2:sfVoice("rush",0,11,"Organ 2"),
+    // Restricted-range Rush leads are still useful: the renderer octave-wraps
+    // generated melody notes into these verified playable bands.
+    leadNewDay1:sfVoice("rush",0,126,"A New Day Synth 1",{range:[60,75]}),
+    leadNewDay2:sfVoice("rush",0,127,"A New Day Synth 2"),
+    leadAltitude1:sfVoice("rush",1,0,"Alt. Limit Synth 1"),
+    leadAltitude2:sfVoice("rush",1,1,"Alt. Limit Synth 2"),
+    leadDeadLine2:sfVoice("rush",1,4,"Dead Line Synth 2",{range:[72,84]}),
+    leadDeadLine3:sfVoice("rush",1,5,"Dead Line Synth 3",{range:[60,87]}),
+    leadEggmanSaw:sfVoice("rush",1,6,"Eggman Boss Saw",{range:[72,87]}),
+    leadException2:sfVoice("rush",1,9,"Exception Synth 2"),
+    leadHuge2:sfVoice("rush",1,13,"Huge Crisis Synth 2",{range:[0,89]}),
+    leadHuge3A:sfVoice("rush",1,14,"Huge Crisis Synth 3A"),
+    leadHuge3B:sfVoice("rush",1,15,"Huge Crisis Synth 3B"),
+    leadMirage4:sfVoice("rush",1,19,"Mirage Road Synth 4",{range:[48,87]}),
+    leadSine1:sfVoice("rush",1,21,"Sine Wave 1"),
+    leadSine2:sfVoice("rush",1,22,"Sine Wave 2"),
+    leadSaw1:sfVoice("rush",1,23,"Saw Wave 1"),
+    leadSaw2:sfVoice("rush",1,24,"Saw Wave 2"),
+    leadSaw3:sfVoice("rush",1,25,"Saw Wave 3"),
+    leadPad:sfVoice("rush",1,26,"Synth Pad"),
+    // These auxiliary banks were verified specifically for MIDI 54 tambourine
+    // and MIDI 82 shaker. Mirage 3 also doubles as a complete core drum kit.
+    percussionDeadLine2:sfVoice("rush",128,12,"Dead Line Drums 2"),
+    percussionMirage2:sfVoice("rush",128,37,"Mirage Road Drums 2"),
+    percussionMirage:sfVoice("rush",128,38,"Mirage Road Drums 3")
+  });
 
-    keysGrand:{bank:0,program:0,name:"Grand Piano"},
-    keysHonky:{bank:0,program:3,name:"Honky-Tonk"},
-    keysEP1:{bank:0,program:4,name:"Electric Piano 1"},
-    keysEP2:{bank:0,program:5,name:"Electric Piano 2"},
-    keysClav:{bank:0,program:7,name:"Clav"},
-    keysPercOrgan:{bank:0,program:17,name:"Percussive Organ"},
-    keysRockOrgan:{bank:0,program:18,name:"Rock Organ"},
-
-    leadSquare:{bank:0,program:80,name:"Lead 1 (Square)"},
-    leadSaw:{bank:0,program:81,name:"Lead 2 (Sawtooth)"},
-    leadCalliope:{bank:0,program:82,name:"Lead 3 (Callope)"},
-    leadCharang:{bank:0,program:84,name:"Lead 5 (Charang)"},
-    leadBase:{bank:0,program:87,name:"Lead 8 (Lead + Base)"},
-
-    percussionGeneral:{bank:128,program:0,name:"General Percussion"},
-    percussionPower:{bank:128,program:16,name:"Powerful Percussion"}
+  const PROCEDURAL_ROLE_FALLBACKS = Object.freeze({
+    drums:[RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsGeneral,SF64_VOICES.drumsPower],
+    bass:[RUSH_VOICES.bassNewDay,SF64_VOICES.bassFinger,SF64_VOICES.bassSynth1],
+    keys:[RUSH_VOICES.keysEP1,SF64_VOICES.keysGrand,SF64_VOICES.keysEP1],
+    melody:[RUSH_VOICES.leadSine1,SF64_VOICES.leadSquare,SF64_VOICES.leadSaw],
+    percussion:[RUSH_VOICES.percussionMirage,SF64_VOICES.percussionGeneral]
   });
 
   function savePersistentPrefs() {
@@ -6777,7 +6999,7 @@
   /* ==============================================================
      DETERMINISTIC PROCEDURAL MUSIC ENGINE
      Tonal handles theory. The built-in buffer renderer is only a bench-synth
-     fallback until user-supplied SoundFonts are mapped to soundfontSlot.
+     fallback if neither local SoundFont palette is available.
      ============================================================== */
   function clamp01(value){return Math.max(0,Math.min(1,Number(value)||0))}
   function normalizeProceduralSeed(value){const n=Math.trunc(Number(value)||1);return ((n-1)%9999+9999)%9999+1}
@@ -6824,51 +7046,66 @@
 
   function chooseFrom(rng,items){return items[Math.max(0,Math.min(items.length-1,Math.floor(rng()*items.length)))]}
   function chooseProceduralSf2Voices({seed,energy,complexity}){
-    // Instrument choice belongs to the seed/VIBE identity, not the loop variation.
-    // That means successive loops can phrase differently without changing the band.
-    const rng=mulberry32((seedHash(seed,energy,complexity)^0x53463634)>>>0);
+    // SF64 stays round/neutral; Gotta Rush adds more animated character.
+    // The VIBE axes bias the rack and the seed makes the result repeatable.
+    const rng=mulberry32((seedHash(seed,energy,complexity)^0x47525441)>>>0);
 
     let bassPool;
-    if(energy<.34) bassPool=[SF64_VOICES.bassAcoustic,SF64_VOICES.bassFinger,SF64_VOICES.bassFretless];
-    else if(energy<.70) bassPool=[SF64_VOICES.bassFinger,SF64_VOICES.bassPick,SF64_VOICES.bassFretless,SF64_VOICES.bassAcoustic];
-    else bassPool=[SF64_VOICES.bassSynth1,SF64_VOICES.bassSynth2,SF64_VOICES.bassSlap,SF64_VOICES.bassPick];
+    if(energy<.28) bassPool=[SF64_VOICES.bassAcoustic,SF64_VOICES.bassFinger,SF64_VOICES.bassFretless,RUSH_VOICES.bassNewDay,RUSH_VOICES.bassMirage];
+    else if(energy<.66) bassPool=[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,SF64_VOICES.bassFinger,SF64_VOICES.bassPick,SF64_VOICES.bassFretless];
+    else bassPool=[RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3,SF64_VOICES.bassSynth1,SF64_VOICES.bassSynth2,SF64_VOICES.bassSlap];
 
     let keysPool;
-    if(energy<.34) keysPool=[SF64_VOICES.keysGrand,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2];
-    else if(complexity<.48) keysPool=[SF64_VOICES.keysEP1,SF64_VOICES.keysEP2,SF64_VOICES.keysGrand,SF64_VOICES.keysHonky];
-    else keysPool=[SF64_VOICES.keysEP2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan,SF64_VOICES.keysGrand];
+    if(energy<.30) keysPool=[RUSH_VOICES.keysEnding,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,SF64_VOICES.keysGrand,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2];
+    else if(complexity<.48) keysPool=[RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2,SF64_VOICES.keysGrand];
+    else keysPool=[RUSH_VOICES.keysRival,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan,SF64_VOICES.keysEP2];
 
     let leadPool;
-    if(energy<.33) leadPool=[SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope,SF64_VOICES.leadCharang];
-    else if(energy<.72) leadPool=[SF64_VOICES.leadSquare,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadCalliope];
-    else leadPool=[SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase,SF64_VOICES.leadSquare];
+    if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
+    else if(energy<.68) leadPool=[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSaw1,SF64_VOICES.leadSquare,SF64_VOICES.leadCharang];
+    else leadPool=[RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase];
 
-    return{
-      drums:energy>.68?SF64_VOICES.drumsPower:SF64_VOICES.drumsGeneral,
-      bass:chooseFrom(rng,bassPool),
-      keys:chooseFrom(rng,keysPool),
-      melody:chooseFrom(rng,leadPool),
-      percussion:energy>.82&&complexity>.56?SF64_VOICES.percussionPower:SF64_VOICES.percussionGeneral
-    };
+    let drumsPool;
+    if(energy<.32) drumsPool=[SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5];
+    else if(energy<.68) drumsPool=[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,SF64_VOICES.drumsGeneral];
+    else drumsPool=[RUSH_VOICES.drumsMirage3,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsPower];
+
+    const percussionPool=(energy>.45||complexity>.48)
+      ?[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral]
+      :[SF64_VOICES.percussionGeneral,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage];
+    return{drums:chooseFrom(rng,drumsPool),bass:chooseFrom(rng,bassPool),keys:chooseFrom(rng,keysPool),melody:chooseFrom(rng,leadPool),percussion:chooseFrom(rng,percussionPool)};
   }
 
-  async function ensureProceduralSoundFont(){
-    if(proceduralSoundFont)return proceduralSoundFont;
-    if(proceduralSoundFontPromise)return proceduralSoundFontPromise;
-    proceduralSoundFontPromise=(async()=>{
+  async function ensureProceduralSoundFonts(){
+    if(proceduralSoundFontsPromise)return proceduralSoundFontsPromise;
+    proceduralSoundFontsPromise=(async()=>{
       if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
       loadReadout.textContent="SF2 LOAD";
-      const bank=await WifeySF2.load(PROCEDURAL_SF2_URL,{cache:"force-cache"});
-      proceduralSoundFont=bank;
-      proceduralSoundFontError=null;
-      return bank;
-    })().catch(error=>{
-      proceduralSoundFontError=error;
-      proceduralSoundFontPromise=null;
-      console.warn("SF64 unavailable; procedural mode is using the bench-synth fallback.",error);
-      return null;
-    });
-    return proceduralSoundFontPromise;
+      await Promise.all(Object.entries(PROCEDURAL_SF2_SOURCES).map(async([id,source])=>{
+        try{
+          const bank=await WifeySF2.load(source.url,{cache:"force-cache"});
+          proceduralSoundFonts.set(id,bank);
+          proceduralSoundFontErrors.delete(id);
+        }catch(error){
+          proceduralSoundFontErrors.set(id,error);
+          console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
+        }
+      }));
+      if(!proceduralSoundFonts.size)console.warn("No local SoundFont loaded; procedural mode is using the bench-synth fallback.");
+      return proceduralSoundFonts;
+    })().catch(error=>{console.warn("Procedural SoundFont rack unavailable; using the bench-synth fallback.",error);return proceduralSoundFonts});
+    return proceduralSoundFontsPromise;
+  }
+
+  function resolveProceduralSf2Voice(role,preferred){
+    const candidates=[preferred,...(PROCEDURAL_ROLE_FALLBACKS[role]||[])].filter(Boolean),seen=new Set();
+    for(const voice of candidates){
+      const key=`${voice.source}:${voice.bank}:${voice.program}`;
+      if(seen.has(key))continue; seen.add(key);
+      const bank=proceduralSoundFonts.get(voice.source);
+      if(bank?.getPreset(voice.bank,voice.program))return{voice,bank};
+    }
+    return null;
   }
 
   function createProceduralProgram(seed,energy,complexity){
@@ -6969,62 +7206,45 @@
   function softLimitProceduralBuffer(target){for(const data of[target.left,target.right])for(let i=0;i<data.length;i++)data[i]=Math.tanh(data[i]*1.18)*.86}
   const PROCEDURAL_RENDER_TAIL = .42; // let physical-style decays ring across the bar line
 
+  function fitMidiToSf2Voice(midi,voice){
+    let fitted=Math.max(0,Math.min(127,Math.round(Number(midi)||0)));
+    const range=voice?.range;
+    if(!Array.isArray(range)||range.length<2)return fitted;
+    const low=Math.max(0,Math.min(127,Math.round(range[0]))),high=Math.max(low,Math.min(127,Math.round(range[1])));
+    // A range spanning at least one octave contains every pitch class, so
+    // octave wrapping preserves the generated melody while respecting a
+    // song-specific Rush preset's real playable zone.
+    if(high-low<11)return null;
+    while(fitted<low)fitted+=12;
+    while(fitted>high)fitted-=12;
+    return fitted>=low&&fitted<=high?fitted:null;
+  }
+
   function renderProceduralSf2StemBuffer(program,stem){
-    if(!proceduralSoundFont)return null;
-    const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL);
-    const role=stem.role;
-    const voice=stem.sf2Voice||program.sf2Voices?.[role];
-    if(!voice||!proceduralSoundFont.getPreset(voice.bank,voice.program))return null;
-    const variationSalt=(program.loopVariation||0)*4099;
-    const rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity));
+    if(!proceduralSoundFonts.size)return null;
+    const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL),role=stem.role;
+    const resolved=resolveProceduralSf2Voice(role,stem.sf2Voice||program.sf2Voices?.[role]);
+    if(!resolved)return null;
+    const {voice,bank}=resolved; stem.resolvedSf2Voice=voice;
+    const variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity));
     let rendered=false;
     const play=(midi,time,duration,velocity,amp,pan=0)=>{
-      rendered=proceduralSoundFont.renderNote(target,{bank:voice.bank,program:voice.program,midi,velocity,start:time,duration,amp,pan})||rendered;
+      const fittedMidi=fitMidiToSf2Voice(midi,voice);
+      if(fittedMidi===null)return;
+      rendered=bank.renderNote(target,{bank:voice.bank,program:voice.program,midi:fittedMidi,velocity,start:time,duration,amp,pan})||rendered;
     };
-
     if(role==="keys"){
-      for(const event of program.chordEvents){
-        const baseOctave=program.complexity>.65?3:4;
-        let previousMidi=-Infinity;
-        const finalChord=event.time>=program.duration-program.barDuration-.001;
-        const noteDuration=finalChord?Math.max(event.duration,program.duration-event.time+.10):event.duration;
-        event.notes.forEach((note,idx)=>{
-          let midi=noteNameToMidi(note,baseOctave);
-          while(midi<=previousMidi)midi+=12;
-          previousMidi=midi;
-          const velocity=Math.round(68+program.energy*22+rng()*10);
-          play(midi,event.time+.008*idx,noteDuration,velocity,.31*(event.ampScale||1),(idx-(event.notes.length-1)/2)*.11);
-        });
-      }
+      for(const event of program.chordEvents){const baseOctave=program.complexity>.65?3:4;let previousMidi=-Infinity;const finalChord=event.time>=program.duration-program.barDuration-.001,noteDuration=finalChord?Math.max(event.duration,program.duration-event.time+.10):event.duration;event.notes.forEach((note,idx)=>{let midi=noteNameToMidi(note,baseOctave);while(midi<=previousMidi)midi+=12;previousMidi=midi;play(midi,event.time+.008*idx,noteDuration,Math.round(68+program.energy*22+rng()*10),.31*(event.ampScale||1),(idx-(event.notes.length-1)/2)*.11)})}
     }else if(role==="bass"){
-      for(const event of program.bassEvents){
-        play(noteNameToMidi(event.note,event.octave||2),event.time,event.duration,Math.round(78+program.energy*34+rng()*8),.58*(event.ampScale||1),-.04);
-      }
+      for(const event of program.bassEvents)play(noteNameToMidi(event.note,event.octave||2),event.time,event.duration,Math.round(78+program.energy*34+rng()*8),.58*(event.ampScale||1),-.04);
     }else if(role==="melody"){
-      for(const event of program.melodyEvents){
-        play(noteNameToMidi(event.note,event.octave),event.time,event.duration,Math.round(70+program.energy*38+rng()*12),(.43+.10*program.energy)*(event.ampScale||1),.06);
-      }
+      for(const event of program.melodyEvents)play(noteNameToMidi(event.note,event.octave),event.time,event.duration,Math.round(70+program.energy*38+rng()*12),(.43+.10*program.energy)*(event.ampScale||1),.06);
     }else if(role==="drums"){
-      for(const event of program.drumEvents){
-        const velocity=Math.round(Math.max(35,Math.min(127,52+event.amp*74)));
-        if(event.type==="kick")play(36,event.time,.18,velocity,.82,0);
-        else if(event.type==="snare")play(rng()>.28?38:40,event.time,.20,velocity,.76,0);
-        else{
-          const openHat=program.energy>.66&&rng()<.13;
-          play(openHat?46:42,event.time,openHat?.28:.09,velocity,.50,.12);
-        }
-      }
+      for(const event of program.drumEvents){const velocity=Math.round(Math.max(35,Math.min(127,52+event.amp*74)));if(event.type==="kick")play(36,event.time,.18,velocity,.82,0);else if(event.type==="snare")play(rng()>.28?38:40,event.time,.20,velocity,.76,0);else{const openHat=program.energy>.66&&rng()<.13;play(openHat?46:42,event.time,openHat?.28:.09,velocity,.50,.12)}}
     }else if(role==="percussion"){
-      for(const event of program.percussionEvents){
-        const velocity=Math.round(Math.max(34,Math.min(127,55+event.amp*90)));
-        // SF64's percussion kit maps tambourine to GM note 54 and shaker to 82.
-        play(event.type==="tamb"?54:82,event.time,event.type==="tamb"?.18:.11,velocity,event.type==="tamb"?.62:.54,event.type==="tamb"?-.15:.18);
-      }
+      for(const event of program.percussionEvents){const velocity=Math.round(Math.max(34,Math.min(127,55+event.amp*90)));play(event.type==="tamb"?54:82,event.time,event.type==="tamb"?.18:.11,velocity,event.type==="tamb"?.62:.54,event.type==="tamb"?-.15:.18)}
     }
-
-    if(!rendered)return null;
-    softLimitProceduralBuffer(target);
-    return target.buffer;
+    if(!rendered)return null; softLimitProceduralBuffer(target); return target.buffer;
   }
 
   function renderProceduralStemBuffer(program,stem){
@@ -7059,14 +7279,14 @@
   function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
   async function setupProceduralAudioForRenderedChannels(playlist,generation){
     ensureAudioGraph();
-    await ensureProceduralSoundFont();
+    await ensureProceduralSoundFonts();
     if(generation!==loadGeneration)return false;
     const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;
     channels=playlist.stems.map((stem,index)=>createProceduralChannel(stem,index,defaultStemState(stem),els[index],renderProceduralStemBuffer(program,stem)));
     channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});
     updateSoloRouting();
     updatePlaylistDuration();
-    loadReadout.textContent=proceduralSoundFont?"SF64 READY":"PROC READY";
+    loadReadout.textContent=proceduralSoundFonts.size>1?"DUAL SF2":proceduralSoundFonts.size?"SF2 READY":"PROC READY";
     updateProceduralReadouts(program);
     return true;
   }
@@ -7261,9 +7481,9 @@
   };
 
   /*
-   * 19-SEGMENT ALPHANUMERIC DISPLAY
-   * Main monitor = 19 segments for readable words. Two full-span
-   * diagonal arms plus a dedicated continuous K stem keep angular letters full-size
+   * 21-SEGMENT ALPHANUMERIC DISPLAY
+   * Main monitor = 21 available segments for readable words. Two full-span
+   * diagonal arms plus a dedicated continuous K stem and dedicated full-height V legs keep angular letters full-size
    * without shortening K’s left vertical stroke.
    * Elapsed/total time module stays genuine 7-segment because it is numeric.
    * Legacy alpha16 function/class names are retained to avoid needless churn.
@@ -7305,7 +7525,12 @@
     n:"4,45 8,47 43,15 47,19 12,52 7,55 3,52",
     o:"3,48 7,45 12,48 46,82 42,87 8,54 4,55",
     /* full-height K stem: no centre interruption */
-    p:"5,11 10,16 7,84 2,89 0,84 2,17"
+    p:"5,11 10,16 7,84 2,89 0,84 2,17",
+
+    /* dedicated full-height V legs. The old V reused only the upper diagonals
+       h/i, which made it tiny and visually pinned to the top of the cell. */
+    q:"4,13 10,14 28,87 25,96 20,88 5,20",
+    r:"40,14 46,13 45,20 30,88 25,96 22,87"
   };
 
   const ALPHA16_MAP = {
@@ -7341,7 +7566,7 @@
     "S":["a1","a2","c","d1","d2","f","g1","g2"],
     "T":["a1","a2","j","k"],
     "U":["b","c","d1","d2","e","f"],
-    "V":["h","i"],
+    "V":["q","r"],
     "W":["b","c","e","f","l","m"],
     "X":["h","i","l","m"],
     "Y":["h","i","k"],
@@ -7425,10 +7650,13 @@
 
     const active = new Set(ALPHA16_MAP[char] || []);
 
-    for (const segmentName of [
+    const segmentNames = [
       "a1","a2","b","c","d1","d2","e","f",
-      "g1","g2","h","i","j","k","l","m","n","o","p"
-    ]) {
+      "g1","g2","h","i","j","k","l","m","n","o","p",
+      ...(char === "V" ? ["q","r"] : [])
+    ];
+
+    for (const segmentName of segmentNames) {
       const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
       polygon.setAttribute("points",ALPHA16_POINTS[segmentName]);
       polygon.setAttribute(

@@ -1,0 +1,1512 @@
+{
+  "sourceFile": "Gotta Rush.sf2",
+  "relativeUrl": "soundfonts/Gotta Rush.sf2",
+  "metadata": {
+    "version": "2.1",
+    "INAM": "Sonic Rush Soundfont.sf2",
+    "isng": "EMU8000",
+    "ISFT": "Awave Studio v10.6"
+  },
+  "counts": {
+    "presets": 221,
+    "instruments": 221,
+    "samples": 1012
+  },
+  "integrationNotes": {
+    "strategy": "Hybrid deterministic procedural rack with SF64. VIBE biases sound choice; loop variations retain the same selected rack.",
+    "drumSafety": "Only verified full-kit presets are selected for DRUMS because many bank-128 programs are partial layers.",
+    "percussionMapping": {
+      "tambourine": 54,
+      "shaker": 82
+    },
+    "generatorRanges": {
+      "bass": "MIDI 36-48",
+      "keys": "MIDI 48-84",
+      "melody": "MIDI 60-96"
+    },
+    "selectionRule": "Seed + snapped VIBE choose a stable instrument rack. Loop variations change performance, never the chosen rack.",
+    "restrictedLeadPolicy": "Song-specific synth presets with at least a full octave of coverage are octave-wrapped into their verified range so notes do not disappear.",
+    "excludedAutomaticPresets": [
+      "Altitude Limit Piano (only MIDI 0-39; too low for generated chord voicings)",
+      "Dead Line Synth 1 (MIDI 72-79; less than a full octave)",
+      "Eggman Boss Synth (MIDI 72-80; less than a full octave)",
+      "Final Zone Bass (does not cover the generator bass range consistently)"
+    ]
+  },
+  "recommended": {
+    "drums": [
+      {
+        "bank": 128,
+        "program": 0,
+        "name": "A New Day Drums 1",
+        "use": "low/mid energy; verified core kit",
+        "coverage": [
+          36,
+          38,
+          40,
+          42,
+          46
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 1,
+        "name": "A New Day Drums 2",
+        "use": "low/mid alternate; verified core kit",
+        "coverage": [
+          36,
+          38,
+          40,
+          42,
+          46
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 4,
+        "name": "A New Day Drums 5",
+        "use": "low/mid alternate; verified core kit",
+        "coverage": [
+          36,
+          38,
+          40,
+          42,
+          46
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 5,
+        "name": "A New Day Drums 6",
+        "use": "mid/high energy; verified core kit",
+        "coverage": [
+          36,
+          38,
+          40,
+          42,
+          46
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 9,
+        "name": "Alt. Limit Drums 4",
+        "use": "mid/high alternate; verified core kit",
+        "coverage": [
+          36,
+          38,
+          40,
+          42,
+          46
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 38,
+        "name": "Mirage Road Drums 3",
+        "use": "high energy; core kit + auxiliary percussion",
+        "coverage": [
+          36,
+          38,
+          40,
+          42,
+          46,
+          54,
+          82
+        ]
+      }
+    ],
+    "percussion": [
+      {
+        "bank": 128,
+        "program": 12,
+        "name": "Dead Line Drums 2",
+        "use": "auxiliary percussion palette",
+        "coverage": [
+          54,
+          82
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 37,
+        "name": "Mirage Road Drums 2",
+        "use": "auxiliary percussion palette",
+        "coverage": [
+          54,
+          82
+        ]
+      },
+      {
+        "bank": 128,
+        "program": 38,
+        "name": "Mirage Road Drums 3",
+        "use": "auxiliary percussion + full drum fallback",
+        "coverage": [
+          54,
+          82
+        ]
+      }
+    ],
+    "bass": [
+      {
+        "bank": 0,
+        "program": 44,
+        "name": "A New Day Bass"
+      },
+      {
+        "bank": 0,
+        "program": 45,
+        "name": "Alt. Limit Bass 1"
+      },
+      {
+        "bank": 0,
+        "program": 46,
+        "name": "Alt. Limit Bass 2"
+      },
+      {
+        "bank": 0,
+        "program": 47,
+        "name": "Dead Line Bass 1"
+      },
+      {
+        "bank": 0,
+        "program": 48,
+        "name": "Dead Line Bass 2"
+      },
+      {
+        "bank": 0,
+        "program": 49,
+        "name": "Eggman Boss Bass"
+      },
+      {
+        "bank": 0,
+        "program": 50,
+        "name": "Exception Bass"
+      },
+      {
+        "bank": 0,
+        "program": 52,
+        "name": "Huge Crisis Bass"
+      },
+      {
+        "bank": 0,
+        "program": 55,
+        "name": "Mirage Road Bass"
+      },
+      {
+        "bank": 0,
+        "program": 56,
+        "name": "Night Carnival Bass"
+      },
+      {
+        "bank": 0,
+        "program": 57,
+        "name": "Rival Boss Bass"
+      },
+      {
+        "bank": 0,
+        "program": 58,
+        "name": "Synth Bass 1"
+      },
+      {
+        "bank": 0,
+        "program": 59,
+        "name": "Synth Bass 2"
+      },
+      {
+        "bank": 0,
+        "program": 60,
+        "name": "Synth Bass 3"
+      }
+    ],
+    "keys": [
+      {
+        "bank": 0,
+        "program": 1,
+        "name": "Ending Piano"
+      },
+      {
+        "bank": 0,
+        "program": 2,
+        "name": "Leaf Storm Piano"
+      },
+      {
+        "bank": 0,
+        "program": 3,
+        "name": "Rival Boss Piano"
+      },
+      {
+        "bank": 0,
+        "program": 4,
+        "name": "E. Piano 1"
+      },
+      {
+        "bank": 0,
+        "program": 5,
+        "name": "E. Piano 2"
+      },
+      {
+        "bank": 0,
+        "program": 6,
+        "name": "A New Day Organ"
+      },
+      {
+        "bank": 0,
+        "program": 9,
+        "name": "Leaf Storm Organ"
+      },
+      {
+        "bank": 0,
+        "program": 10,
+        "name": "Organ 1"
+      },
+      {
+        "bank": 0,
+        "program": 11,
+        "name": "Organ 2"
+      }
+    ],
+    "melody": [
+      {
+        "bank": 0,
+        "program": 126,
+        "name": "A New Day Synth 1",
+        "use": "soft character lead; octave-fitted",
+        "playableRange": [
+          60,
+          75
+        ]
+      },
+      {
+        "bank": 0,
+        "program": 127,
+        "name": "A New Day Synth 2",
+        "use": "general character lead"
+      },
+      {
+        "bank": 1,
+        "program": 0,
+        "name": "Alt. Limit Synth 1",
+        "use": "general character lead"
+      },
+      {
+        "bank": 1,
+        "program": 1,
+        "name": "Alt. Limit Synth 2",
+        "use": "general character lead"
+      },
+      {
+        "bank": 1,
+        "program": 4,
+        "name": "Dead Line Synth 2",
+        "use": "mid/high character lead; octave-fitted",
+        "playableRange": [
+          72,
+          84
+        ]
+      },
+      {
+        "bank": 1,
+        "program": 5,
+        "name": "Dead Line Synth 3",
+        "use": "high-energy character lead; octave-fitted",
+        "playableRange": [
+          60,
+          87
+        ]
+      },
+      {
+        "bank": 1,
+        "program": 6,
+        "name": "Eggman Boss Saw",
+        "use": "high-energy saw; octave-fitted",
+        "playableRange": [
+          72,
+          87
+        ]
+      },
+      {
+        "bank": 1,
+        "program": 9,
+        "name": "Exception Synth 2",
+        "use": "general character lead"
+      },
+      {
+        "bank": 1,
+        "program": 13,
+        "name": "Huge Crisis Synth 2",
+        "use": "high-energy lead; octave-fitted",
+        "playableRange": [
+          0,
+          89
+        ]
+      },
+      {
+        "bank": 1,
+        "program": 14,
+        "name": "Huge Crisis Synth 3A",
+        "use": "high-energy lead"
+      },
+      {
+        "bank": 1,
+        "program": 15,
+        "name": "Huge Crisis Synth 3B",
+        "use": "high-energy lead"
+      },
+      {
+        "bank": 1,
+        "program": 19,
+        "name": "Mirage Road Synth 4",
+        "use": "mid-energy lead; octave-fitted",
+        "playableRange": [
+          48,
+          87
+        ]
+      },
+      {
+        "bank": 1,
+        "program": 21,
+        "name": "Sine Wave 1",
+        "use": "soft/simple"
+      },
+      {
+        "bank": 1,
+        "program": 22,
+        "name": "Sine Wave 2",
+        "use": "soft/simple"
+      },
+      {
+        "bank": 1,
+        "program": 23,
+        "name": "Saw Wave 1",
+        "use": "mid-energy"
+      },
+      {
+        "bank": 1,
+        "program": 24,
+        "name": "Saw Wave 2",
+        "use": "high-energy"
+      },
+      {
+        "bank": 1,
+        "program": 25,
+        "name": "Saw Wave 3",
+        "use": "high-energy"
+      },
+      {
+        "bank": 1,
+        "program": 26,
+        "name": "Synth Pad",
+        "use": "low-energy/complex texture"
+      }
+    ]
+  },
+  "presets": [
+    {
+      "name": "Altitude Limit Piano",
+      "bank": 0,
+      "program": 0
+    },
+    {
+      "name": "Ending Piano",
+      "bank": 0,
+      "program": 1
+    },
+    {
+      "name": "Leaf Storm Piano",
+      "bank": 0,
+      "program": 2
+    },
+    {
+      "name": "Rival Boss Piano",
+      "bank": 0,
+      "program": 3
+    },
+    {
+      "name": "E. Piano 1",
+      "bank": 0,
+      "program": 4
+    },
+    {
+      "name": "E. Piano 2",
+      "bank": 0,
+      "program": 5
+    },
+    {
+      "name": "A New Day Organ",
+      "bank": 0,
+      "program": 6
+    },
+    {
+      "name": "Final Zone Organ 1",
+      "bank": 0,
+      "program": 7
+    },
+    {
+      "name": "Final Zone Organ 2",
+      "bank": 0,
+      "program": 8
+    },
+    {
+      "name": "Leaf Storm Organ",
+      "bank": 0,
+      "program": 9
+    },
+    {
+      "name": "Organ 1",
+      "bank": 0,
+      "program": 10
+    },
+    {
+      "name": "Organ 2",
+      "bank": 0,
+      "program": 11
+    },
+    {
+      "name": "A New Day Guitar 1",
+      "bank": 0,
+      "program": 12
+    },
+    {
+      "name": "A New Day Guitar 2",
+      "bank": 0,
+      "program": 13
+    },
+    {
+      "name": "A New Day Guitar 3",
+      "bank": 0,
+      "program": 14
+    },
+    {
+      "name": "Alt. Limit Guitar 1",
+      "bank": 0,
+      "program": 15
+    },
+    {
+      "name": "Alt. Limit Guitar 2",
+      "bank": 0,
+      "program": 16
+    },
+    {
+      "name": "Alt. Limit Guitar 3",
+      "bank": 0,
+      "program": 17
+    },
+    {
+      "name": "Alt. Limit Guitar 4",
+      "bank": 0,
+      "program": 18
+    },
+    {
+      "name": "Dead Line Guitar 1A",
+      "bank": 0,
+      "program": 19
+    },
+    {
+      "name": "Dead Line Guitar 1B",
+      "bank": 0,
+      "program": 20
+    },
+    {
+      "name": "Dead Line Guitar 2",
+      "bank": 0,
+      "program": 21
+    },
+    {
+      "name": "Eggman Boss Guitar",
+      "bank": 0,
+      "program": 22
+    },
+    {
+      "name": "Ending Guitar",
+      "bank": 0,
+      "program": 23
+    },
+    {
+      "name": "Exception Guitar",
+      "bank": 0,
+      "program": 24
+    },
+    {
+      "name": "Final Zone Guitar 1",
+      "bank": 0,
+      "program": 25
+    },
+    {
+      "name": "Final Zone Guitar 2",
+      "bank": 0,
+      "program": 26
+    },
+    {
+      "name": "Leaf Storm Guit. 1",
+      "bank": 0,
+      "program": 27
+    },
+    {
+      "name": "Leaf Storm Guit. 2A",
+      "bank": 0,
+      "program": 28
+    },
+    {
+      "name": "Leaf Storm Guit. 2B",
+      "bank": 0,
+      "program": 29
+    },
+    {
+      "name": "Leaf Storm Guit. 3A",
+      "bank": 0,
+      "program": 30
+    },
+    {
+      "name": "Leaf Storm Guit. 3B",
+      "bank": 0,
+      "program": 31
+    },
+    {
+      "name": "Mirage Road Guitar 1",
+      "bank": 0,
+      "program": 32
+    },
+    {
+      "name": "Mirage Road Guitar 2",
+      "bank": 0,
+      "program": 33
+    },
+    {
+      "name": "N. Carniv. Guitar 1",
+      "bank": 0,
+      "program": 34
+    },
+    {
+      "name": "N. Carniv. Guitar 2",
+      "bank": 0,
+      "program": 35
+    },
+    {
+      "name": "Rival Boss Guitar 1",
+      "bank": 0,
+      "program": 36
+    },
+    {
+      "name": "Rival Boss Guitar 2",
+      "bank": 0,
+      "program": 37
+    },
+    {
+      "name": "Water Palace Guit. 1",
+      "bank": 0,
+      "program": 38
+    },
+    {
+      "name": "Water Palace Guit. 2",
+      "bank": 0,
+      "program": 39
+    },
+    {
+      "name": "Water Palace Guit. 3",
+      "bank": 0,
+      "program": 40
+    },
+    {
+      "name": "Water Palace Guit. 4",
+      "bank": 0,
+      "program": 41
+    },
+    {
+      "name": "Clean Guitar",
+      "bank": 0,
+      "program": 42
+    },
+    {
+      "name": "Dist. Guitar SFX",
+      "bank": 0,
+      "program": 43
+    },
+    {
+      "name": "A New Day Bass",
+      "bank": 0,
+      "program": 44
+    },
+    {
+      "name": "Alt. Limit Bass 1",
+      "bank": 0,
+      "program": 45
+    },
+    {
+      "name": "Alt. Limit Bass 2",
+      "bank": 0,
+      "program": 46
+    },
+    {
+      "name": "Dead Line Bass 1",
+      "bank": 0,
+      "program": 47
+    },
+    {
+      "name": "Dead Line Bass 2",
+      "bank": 0,
+      "program": 48
+    },
+    {
+      "name": "Eggman Boss Bass",
+      "bank": 0,
+      "program": 49
+    },
+    {
+      "name": "Exception Bass",
+      "bank": 0,
+      "program": 50
+    },
+    {
+      "name": "Final Zone Bass",
+      "bank": 0,
+      "program": 51
+    },
+    {
+      "name": "Huge Crisis Bass",
+      "bank": 0,
+      "program": 52
+    },
+    {
+      "name": "Leaf Storm Brass 1A",
+      "bank": 0,
+      "program": 53
+    },
+    {
+      "name": "Leaf Storm Brass 1B",
+      "bank": 0,
+      "program": 54
+    },
+    {
+      "name": "Mirage Road Bass",
+      "bank": 0,
+      "program": 55
+    },
+    {
+      "name": "Night Carnival Bass",
+      "bank": 0,
+      "program": 56
+    },
+    {
+      "name": "Rival Boss Bass",
+      "bank": 0,
+      "program": 57
+    },
+    {
+      "name": "Synth Bass 1",
+      "bank": 0,
+      "program": 58
+    },
+    {
+      "name": "Synth Bass 2",
+      "bank": 0,
+      "program": 59
+    },
+    {
+      "name": "Synth Bass 3",
+      "bank": 0,
+      "program": 60
+    },
+    {
+      "name": "Dead Line Strings",
+      "bank": 0,
+      "program": 61
+    },
+    {
+      "name": "Ending Strings 1",
+      "bank": 0,
+      "program": 62
+    },
+    {
+      "name": "Ending Strings 2",
+      "bank": 0,
+      "program": 63
+    },
+    {
+      "name": "Exception Strings 1",
+      "bank": 0,
+      "program": 64
+    },
+    {
+      "name": "Exception Strings 2",
+      "bank": 0,
+      "program": 65
+    },
+    {
+      "name": "Exception Strings 3",
+      "bank": 0,
+      "program": 66
+    },
+    {
+      "name": "Exception Violin",
+      "bank": 0,
+      "program": 67
+    },
+    {
+      "name": "Final Zone Strings",
+      "bank": 0,
+      "program": 68
+    },
+    {
+      "name": "Leaf Storm Strings",
+      "bank": 0,
+      "program": 69
+    },
+    {
+      "name": "Mirage Road Strings",
+      "bank": 0,
+      "program": 70
+    },
+    {
+      "name": "Mirage Road Violin",
+      "bank": 0,
+      "program": 71
+    },
+    {
+      "name": "A New Day Vocals",
+      "bank": 0,
+      "program": 72
+    },
+    {
+      "name": "Alt. Limit Vocals",
+      "bank": 0,
+      "program": 73
+    },
+    {
+      "name": "Dead Line Vocals",
+      "bank": 0,
+      "program": 74
+    },
+    {
+      "name": "Eggman Boss Vocals 1",
+      "bank": 0,
+      "program": 75
+    },
+    {
+      "name": "Eggman Boss Vocals 2",
+      "bank": 0,
+      "program": 76
+    },
+    {
+      "name": "Ending Vocals 1",
+      "bank": 0,
+      "program": 77
+    },
+    {
+      "name": "Ending Vocals 2",
+      "bank": 0,
+      "program": 78
+    },
+    {
+      "name": "Exception Choir",
+      "bank": 0,
+      "program": 79
+    },
+    {
+      "name": "Exception Vocals 1",
+      "bank": 0,
+      "program": 80
+    },
+    {
+      "name": "Exception Vocals 2",
+      "bank": 0,
+      "program": 81
+    },
+    {
+      "name": "Bomb. Barbara Vocals",
+      "bank": 0,
+      "program": 82
+    },
+    {
+      "name": "Huge Crisis Vocals 1",
+      "bank": 0,
+      "program": 83
+    },
+    {
+      "name": "Huge Crisis Vocals 2",
+      "bank": 0,
+      "program": 84
+    },
+    {
+      "name": "Leaf Storm Vocals",
+      "bank": 0,
+      "program": 85
+    },
+    {
+      "name": "Mirage Road Vocals 1",
+      "bank": 0,
+      "program": 86
+    },
+    {
+      "name": "Mirage Road Vocals 2",
+      "bank": 0,
+      "program": 87
+    },
+    {
+      "name": "New Record Vocals",
+      "bank": 0,
+      "program": 88
+    },
+    {
+      "name": "N. Carniv. Vocals 1",
+      "bank": 0,
+      "program": 89
+    },
+    {
+      "name": "N. Carniv. Vocals 2",
+      "bank": 0,
+      "program": 90
+    },
+    {
+      "name": "Rival Boss Vocals 1",
+      "bank": 0,
+      "program": 91
+    },
+    {
+      "name": "Rival Boss Vocals 2",
+      "bank": 0,
+      "program": 92
+    },
+    {
+      "name": "Rival Boss Vocals 3",
+      "bank": 0,
+      "program": 93
+    },
+    {
+      "name": "Water Palace Vocals",
+      "bank": 0,
+      "program": 94
+    },
+    {
+      "name": "Vocals",
+      "bank": 0,
+      "program": 95
+    },
+    {
+      "name": "Altitude Limit Hit 1",
+      "bank": 0,
+      "program": 96
+    },
+    {
+      "name": "Altitude Limit Hit 2",
+      "bank": 0,
+      "program": 97
+    },
+    {
+      "name": "Eggman Boss Hit 1",
+      "bank": 0,
+      "program": 98
+    },
+    {
+      "name": "Eggman Boss Hit 2",
+      "bank": 0,
+      "program": 99
+    },
+    {
+      "name": "Eggman Boss Hit 3",
+      "bank": 0,
+      "program": 100
+    },
+    {
+      "name": "Mirage Road Hit",
+      "bank": 0,
+      "program": 101
+    },
+    {
+      "name": "Orchestra Hit 1",
+      "bank": 0,
+      "program": 102
+    },
+    {
+      "name": "Orchestra Hit 2",
+      "bank": 0,
+      "program": 103
+    },
+    {
+      "name": "A New Day Brass 1A",
+      "bank": 0,
+      "program": 104
+    },
+    {
+      "name": "A New Day Brass 1B",
+      "bank": 0,
+      "program": 105
+    },
+    {
+      "name": "Huge Crisis Brass",
+      "bank": 0,
+      "program": 106
+    },
+    {
+      "name": "Leaf Storm Brass 1A",
+      "bank": 0,
+      "program": 107
+    },
+    {
+      "name": "Leaf Storm Brass 1B",
+      "bank": 0,
+      "program": 108
+    },
+    {
+      "name": "N. Carniv. Brass 1",
+      "bank": 0,
+      "program": 109
+    },
+    {
+      "name": "N. Carniv. Brass 2",
+      "bank": 0,
+      "program": 110
+    },
+    {
+      "name": "Rival Boss Brass 1A",
+      "bank": 0,
+      "program": 111
+    },
+    {
+      "name": "Rival Boss Brass 1B",
+      "bank": 0,
+      "program": 112
+    },
+    {
+      "name": "Water Palace Brass 1",
+      "bank": 0,
+      "program": 113
+    },
+    {
+      "name": "Water Palace Brass 2",
+      "bank": 0,
+      "program": 114
+    },
+    {
+      "name": "Water Palace Brass 3",
+      "bank": 0,
+      "program": 115
+    },
+    {
+      "name": "Brass Section 1",
+      "bank": 0,
+      "program": 116
+    },
+    {
+      "name": "Brass Section 2",
+      "bank": 0,
+      "program": 117
+    },
+    {
+      "name": "Brass Section 3",
+      "bank": 0,
+      "program": 118
+    },
+    {
+      "name": "Brass Section 4",
+      "bank": 0,
+      "program": 119
+    },
+    {
+      "name": "Synth Brass",
+      "bank": 0,
+      "program": 120
+    },
+    {
+      "name": "Alto Sax",
+      "bank": 0,
+      "program": 121
+    },
+    {
+      "name": "Rival Boss Sax",
+      "bank": 0,
+      "program": 122
+    },
+    {
+      "name": "Flute Flutter",
+      "bank": 0,
+      "program": 123
+    },
+    {
+      "name": "N. Carniv. Whistle 1",
+      "bank": 0,
+      "program": 124
+    },
+    {
+      "name": "N. Carniv. Whistle 2",
+      "bank": 0,
+      "program": 125
+    },
+    {
+      "name": "A New Day Synth 1",
+      "bank": 0,
+      "program": 126
+    },
+    {
+      "name": "A New Day Synth 2",
+      "bank": 0,
+      "program": 127
+    },
+    {
+      "name": "Alt. Limit Synth 1",
+      "bank": 1,
+      "program": 0
+    },
+    {
+      "name": "Alt. Limit Synth 2",
+      "bank": 1,
+      "program": 1
+    },
+    {
+      "name": "Altitude Limit Synth",
+      "bank": 1,
+      "program": 2
+    },
+    {
+      "name": "Dead Line Synth 1",
+      "bank": 1,
+      "program": 3
+    },
+    {
+      "name": "Dead Line Synth 2",
+      "bank": 1,
+      "program": 4
+    },
+    {
+      "name": "Dead Line Synth 3",
+      "bank": 1,
+      "program": 5
+    },
+    {
+      "name": "Eggman Boss Saw",
+      "bank": 1,
+      "program": 6
+    },
+    {
+      "name": "Eggman Boss Synth",
+      "bank": 1,
+      "program": 7
+    },
+    {
+      "name": "Exception Synth 1",
+      "bank": 1,
+      "program": 8
+    },
+    {
+      "name": "Exception Synth 2",
+      "bank": 1,
+      "program": 9
+    },
+    {
+      "name": "Final Zone Synth 1",
+      "bank": 1,
+      "program": 10
+    },
+    {
+      "name": "Final Zone Synth 2",
+      "bank": 1,
+      "program": 11
+    },
+    {
+      "name": "Huge Crisis Synth 1",
+      "bank": 1,
+      "program": 12
+    },
+    {
+      "name": "Huge Crisis Synth 2",
+      "bank": 1,
+      "program": 13
+    },
+    {
+      "name": "Huge Crisis Synth 3A",
+      "bank": 1,
+      "program": 14
+    },
+    {
+      "name": "Huge Crisis Synth 3B",
+      "bank": 1,
+      "program": 15
+    },
+    {
+      "name": "Mirage Road Synth 1",
+      "bank": 1,
+      "program": 16
+    },
+    {
+      "name": "Mirage Road Synth 2",
+      "bank": 1,
+      "program": 17
+    },
+    {
+      "name": "Mirage Road Synth 3",
+      "bank": 1,
+      "program": 18
+    },
+    {
+      "name": "Mirage Road Synth 4",
+      "bank": 1,
+      "program": 19
+    },
+    {
+      "name": "Water Palace Synth",
+      "bank": 1,
+      "program": 20
+    },
+    {
+      "name": "Sine Wave 1",
+      "bank": 1,
+      "program": 21
+    },
+    {
+      "name": "Sine Wave 2",
+      "bank": 1,
+      "program": 22
+    },
+    {
+      "name": "Saw Wave 1",
+      "bank": 1,
+      "program": 23
+    },
+    {
+      "name": "Saw Wave 2",
+      "bank": 1,
+      "program": 24
+    },
+    {
+      "name": "Saw Wave 3",
+      "bank": 1,
+      "program": 25
+    },
+    {
+      "name": "Synth Pad",
+      "bank": 1,
+      "program": 26
+    },
+    {
+      "name": "Mirage Road Sitar",
+      "bank": 1,
+      "program": 27
+    },
+    {
+      "name": "Chimes",
+      "bank": 1,
+      "program": 28
+    },
+    {
+      "name": "Drum Tap",
+      "bank": 1,
+      "program": 29
+    },
+    {
+      "name": "Huge Crisis Guiro",
+      "bank": 1,
+      "program": 30
+    },
+    {
+      "name": "Night Carnival Toms",
+      "bank": 1,
+      "program": 31
+    },
+    {
+      "name": "Snap",
+      "bank": 1,
+      "program": 32
+    },
+    {
+      "name": "Dead Line Bell",
+      "bank": 1,
+      "program": 33
+    },
+    {
+      "name": "Final Zone Alarm",
+      "bank": 1,
+      "program": 34
+    },
+    {
+      "name": "Bomber Barbara Beep",
+      "bank": 1,
+      "program": 35
+    },
+    {
+      "name": "Huge Crisis Drops",
+      "bank": 1,
+      "program": 36
+    },
+    {
+      "name": "Tire Screech",
+      "bank": 1,
+      "program": 37
+    },
+    {
+      "name": "Leaf Storm Scream",
+      "bank": 1,
+      "program": 38
+    },
+    {
+      "name": "N. Carniv. Scratch",
+      "bank": 1,
+      "program": 39
+    },
+    {
+      "name": "Whoosh",
+      "bank": 1,
+      "program": 40
+    },
+    {
+      "name": "A New Day Drums 1",
+      "bank": 128,
+      "program": 0
+    },
+    {
+      "name": "A New Day Drums 2",
+      "bank": 128,
+      "program": 1
+    },
+    {
+      "name": "A New Day Drums 3",
+      "bank": 128,
+      "program": 2
+    },
+    {
+      "name": "A New Day Drums 4",
+      "bank": 128,
+      "program": 3
+    },
+    {
+      "name": "A New Day Drums 5",
+      "bank": 128,
+      "program": 4
+    },
+    {
+      "name": "A New Day Drums 6",
+      "bank": 128,
+      "program": 5
+    },
+    {
+      "name": "Alt. Limit Drums 1",
+      "bank": 128,
+      "program": 6
+    },
+    {
+      "name": "Alt. Limit Drums 2",
+      "bank": 128,
+      "program": 7
+    },
+    {
+      "name": "Alt. Limit Drums 3",
+      "bank": 128,
+      "program": 8
+    },
+    {
+      "name": "Alt. Limit Drums 4",
+      "bank": 128,
+      "program": 9
+    },
+    {
+      "name": "Alt. Limit Drums 5",
+      "bank": 128,
+      "program": 10
+    },
+    {
+      "name": "Dead Line Drums 1",
+      "bank": 128,
+      "program": 11
+    },
+    {
+      "name": "Dead Line Drums 2",
+      "bank": 128,
+      "program": 12
+    },
+    {
+      "name": "Dead Line Drums 3",
+      "bank": 128,
+      "program": 13
+    },
+    {
+      "name": "Dead Line Drums 4",
+      "bank": 128,
+      "program": 14
+    },
+    {
+      "name": "Dead Line Drums 5",
+      "bank": 128,
+      "program": 15
+    },
+    {
+      "name": "Eggman Boss Drums 1",
+      "bank": 128,
+      "program": 16
+    },
+    {
+      "name": "Eggman Boss Drums 2",
+      "bank": 128,
+      "program": 17
+    },
+    {
+      "name": "Eggman Boss Drums 3",
+      "bank": 128,
+      "program": 18
+    },
+    {
+      "name": "Eggman Boss Drums 4",
+      "bank": 128,
+      "program": 19
+    },
+    {
+      "name": "Ending Drums",
+      "bank": 128,
+      "program": 20
+    },
+    {
+      "name": "Exception Drums 1A",
+      "bank": 128,
+      "program": 21
+    },
+    {
+      "name": "Exception Drums 1B",
+      "bank": 128,
+      "program": 22
+    },
+    {
+      "name": "Exception Drums 1C",
+      "bank": 128,
+      "program": 23
+    },
+    {
+      "name": "Exception Drums 2",
+      "bank": 128,
+      "program": 24
+    },
+    {
+      "name": "Exception Drums 3",
+      "bank": 128,
+      "program": 25
+    },
+    {
+      "name": "Final Zone Drums 1",
+      "bank": 128,
+      "program": 26
+    },
+    {
+      "name": "Final Zone Drums 2",
+      "bank": 128,
+      "program": 27
+    },
+    {
+      "name": "Final Zone Drums 3",
+      "bank": 128,
+      "program": 28
+    },
+    {
+      "name": "Huge Crisis Drums 1",
+      "bank": 128,
+      "program": 29
+    },
+    {
+      "name": "Huge Crisis Drums 2",
+      "bank": 128,
+      "program": 30
+    },
+    {
+      "name": "Huge Crisis Drums 3",
+      "bank": 128,
+      "program": 31
+    },
+    {
+      "name": "Huge Crisis Drums 4",
+      "bank": 128,
+      "program": 32
+    },
+    {
+      "name": "Leaf Storm Drums 1",
+      "bank": 128,
+      "program": 33
+    },
+    {
+      "name": "Leaf Storm Drums 2",
+      "bank": 128,
+      "program": 34
+    },
+    {
+      "name": "Leaf Storm Drums 3",
+      "bank": 128,
+      "program": 35
+    },
+    {
+      "name": "Mirage Road Drums 1",
+      "bank": 128,
+      "program": 36
+    },
+    {
+      "name": "Mirage Road Drums 2",
+      "bank": 128,
+      "program": 37
+    },
+    {
+      "name": "Mirage Road Drums 3",
+      "bank": 128,
+      "program": 38
+    },
+    {
+      "name": "N. Carniv. Drums 1",
+      "bank": 128,
+      "program": 39
+    },
+    {
+      "name": "N. Carniv. Drums 2",
+      "bank": 128,
+      "program": 40
+    },
+    {
+      "name": "N. Carniv. Drums 3",
+      "bank": 128,
+      "program": 41
+    },
+    {
+      "name": "N. Carniv. Drums 4",
+      "bank": 128,
+      "program": 42
+    },
+    {
+      "name": "N. Carniv. Drums 5",
+      "bank": 128,
+      "program": 43
+    },
+    {
+      "name": "N. Carniv. Drums 6",
+      "bank": 128,
+      "program": 44
+    },
+    {
+      "name": "Rival Boss Drums 1",
+      "bank": 128,
+      "program": 45
+    },
+    {
+      "name": "Rival Boss Drums 2",
+      "bank": 128,
+      "program": 46
+    },
+    {
+      "name": "Rival Boss Drums 3",
+      "bank": 128,
+      "program": 47
+    },
+    {
+      "name": "Rival Boss Drums 4",
+      "bank": 128,
+      "program": 48
+    },
+    {
+      "name": "Rival Boss Drums 5",
+      "bank": 128,
+      "program": 49
+    },
+    {
+      "name": "Water Palace Drums 1",
+      "bank": 128,
+      "program": 50
+    },
+    {
+      "name": "Water Palace Drums 2",
+      "bank": 128,
+      "program": 51
+    }
+  ]
+}
