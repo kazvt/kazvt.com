@@ -7435,7 +7435,8 @@
           : {},
         masterState: parsed.masterState && typeof parsed.masterState === "object"
           ? parsed.masterState
-          : null
+          : null,
+        reverbDefaultsVersion: Math.max(0,Number(parsed.reverbDefaultsVersion)||0)
       };
     } catch (_) {
       return {
@@ -7454,7 +7455,8 @@
         proceduralStripVoices:{},
         lockedStemIds:{},
         stemStates:{},
-        masterState:null
+        masterState:null,
+        reverbDefaultsVersion:0
       };
     }
   }
@@ -7465,7 +7467,24 @@
   const HARDWARE_SNAP_PERCENT = 2.5;
   const VIBE_SNAP_UNIT = HARDWARE_SNAP_PERCENT/100;
 
+  const REVERB_DEFAULTS_VERSION = 2;
   const persistentPrefs = loadPersistentPrefs();
+
+  // Reverb v2 starts dry. Migrate the old non-zero ROOM defaults once without
+  // disturbing any of the user's other mixer/procedural preferences. After this
+  // marker is written, newly chosen ROOM values persist normally.
+  if ((Number(persistentPrefs.reverbDefaultsVersion)||0) < REVERB_DEFAULTS_VERSION) {
+    persistentPrefs.masterState = {
+      ...(persistentPrefs.masterState && typeof persistentPrefs.masterState === "object" ? persistentPrefs.masterState : {}),
+      room:0
+    };
+    for (const state of Object.values(persistentPrefs.stemStates || {})) {
+      if (state && typeof state === "object") state.room = 0;
+    }
+    persistentPrefs.reverbDefaultsVersion = REVERB_DEFAULTS_VERSION;
+    try { localStorage.setItem(PERSIST_KEY, JSON.stringify(persistentPrefs)); } catch (_) {}
+  }
+
   let randomizerEnabled = !!persistentPrefs.randomizerEnabled;
   let megaphoneEnabled = !!persistentPrefs.megaphoneEnabled;
   let playlistMode = persistentPrefs.playlistMode || "loop";
@@ -8039,7 +8058,7 @@
   const masterState = {
     tone: Number(persistentPrefs.masterState?.tone ?? 100),
     pan: Number(persistentPrefs.masterState?.pan ?? 50),
-    room: Number(persistentPrefs.masterState?.room ?? 35),
+    room: Number(persistentPrefs.masterState?.room ?? 0),
     level: Number(persistentPrefs.masterState?.level ?? 80)
   };
 
@@ -9024,7 +9043,18 @@
 
   function trimValueToDb(value) { return ((Number(value)-50)/50)*12; }
   function panValue(value) { return Math.max(-1,Math.min(1,(Number(value)-50)/50)); }
-  function roomValue(value) { const n=Number(value)/100; return n*n*.9; }
+  function roomValue(value,masterValue=null) {
+    // Hardware-style send law: still restrained near zero, but substantially
+    // more audible through the middle of the knob than the old squared curve.
+    // Master ROOM behaves like a global room send rather than a second wet
+    // multiplier, so either control can create space on its own.
+    const channelNorm=Math.max(0,Math.min(1,(Number(value)||0)/100));
+    const masterNorm=Math.max(0,Math.min(1,(Number(masterValue ?? masterState.room)||0)/100));
+    const channelSend=Math.pow(channelNorm,1.28);
+    const globalSend=Math.pow(masterNorm,1.18)*.72;
+    const combined=1-(1-channelSend)*(1-globalSend);
+    return Math.min(1.05,combined*1.05);
+  }
 
   function formatDb(db) {
     if (!Number.isFinite(db)) return "-∞ dB";
@@ -9745,7 +9775,7 @@
     return `${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
   }
 
-  function createImpulse(ctx, seconds=1.7, decay=2.6) {
+  function createImpulse(ctx, seconds=2.15, decay=2.15) {
     const length = Math.max(1,Math.floor(ctx.sampleRate*seconds));
     const impulse = ctx.createBuffer(2,length,ctx.sampleRate);
     for (let channel=0; channel<2; channel++) {
@@ -9957,7 +9987,13 @@
     const frequency = 1800 + Math.pow(toneNorm,2.1)*18200;
     setParam(masterTone.frequency,frequency,.025);
     if (masterPan?.pan) setParam(masterPan.pan,panValue(masterState.pan));
-    setParam(fxReturn.gain,(Number(masterState.room)/100)*.72);
+    // A fixed, healthy wet return makes each channel ROOM send immediately
+    // useful. Master ROOM is folded into every send by roomValue(), so 0/0 is
+    // fully dry while either control can add reverb independently.
+    setParam(fxReturn.gain,.9);
+    for (const channel of channels) {
+      if (channel?.send?.gain) setParam(channel.send.gain,roomValue(channel.state?.room,masterState.room),.018);
+    }
     setParam(masterGain.gain,faderValueToGain(masterState.level));
     masterReadout.textContent = formatDb(faderValueToDb(masterState.level));
   }
@@ -9972,12 +10008,12 @@
       ? {
           trim:Number(source.trim ?? 50),
           pan:Number(source.pan ?? 50),
-          room:Number(source.room ?? 18),
+          room:Number(source.room ?? 0),
           level:Number(source.level ?? 80),
           mute:!!source.mute,
           solo:!!source.solo
         }
-      : { trim:50, pan:50, room:18, level:80, mute:false, solo:false };
+      : { trim:50, pan:50, room:0, level:80, mute:false, solo:false };
 
     state.locked = isStemLocked(stem);
     return state;
@@ -10050,8 +10086,8 @@
     audioRack.replaceChildren();
   }
 
-  const CHANNEL_CONTROL_DEFAULTS = Object.freeze({trim:50,pan:50,room:18,level:80});
-  const MASTER_CONTROL_DEFAULTS = Object.freeze({tone:100,pan:50,room:35,level:80});
+  const CHANNEL_CONTROL_DEFAULTS = Object.freeze({trim:50,pan:50,room:0,level:80});
+  const MASTER_CONTROL_DEFAULTS = Object.freeze({tone:100,pan:50,room:0,level:80});
 
   function snapHardwarePercent(value) {
     const clamped = Math.max(0,Math.min(100,Number(value)||0));
@@ -10555,7 +10591,7 @@
     if (!audioCtx || !channel) return;
     setParam(channel.trim.gain,dbToGain(trimValueToDb(channel.state.trim)));
     if (channel.pan?.pan) setParam(channel.pan.pan,panValue(channel.state.pan));
-    setParam(channel.send.gain,roomValue(channel.state.room));
+    setParam(channel.send.gain,roomValue(channel.state.room,masterState.room),.018);
     updateChannelEffectiveLevel(channel);
   }
 
