@@ -5827,6 +5827,219 @@
       .proc-info-cell--gauge{padding-bottom:8px !important}.proc-info-cell--gauge::after{left:3px;right:3px;bottom:2px;height:3px}.proc-info-cell--gauge strong::after{bottom:1px;height:6px}
     }
 
+  
+
+    /* ==============================================================
+       PATCH: COOLER WEATHERED KNOBS + CRISP TOP TRACK BANK
+       Keep the worn matte hardware character, but remove the yellow/brown
+       cast. The tiny track-name glyphs use a tighter bloom so their segments
+       stay legible instead of smearing together.
+       ============================================================== */
+
+    /* Cooler charcoal knob plastics: faded grey, not yellowed bakelite. */
+    .knob-wrap{
+      filter:drop-shadow(0 1px 1px rgba(18,19,20,.44)) !important;
+    }
+
+    .knob-wrap::before{
+      border-color:#343537 !important;
+      background:
+        radial-gradient(circle at 18% 66%,rgba(156,158,158,.055) 0 1.2%,transparent 1.8%),
+        radial-gradient(circle at 73% 23%,rgba(205,207,205,.028) 0 1%,transparent 1.6%),
+        radial-gradient(circle at 61% 78%,rgba(70,72,74,.12) 0 3%,transparent 8%),
+        radial-gradient(circle,#303133 0 56%,#4a4b4d 57% 60%,#38393b 61% 69%,#292a2c 70% 100%) !important;
+      box-shadow:
+        inset 0 2px 3px rgba(17,18,19,.44),
+        inset 0 -1px 0 rgba(220,222,218,.018),
+        0 1px 0 rgba(185,187,184,.025),
+        0 2px 2px rgba(16,17,18,.40) !important;
+    }
+
+    .knob{
+      border-color:#303133 !important;
+      background:
+        radial-gradient(circle at 24% 28%,rgba(177,179,177,.035) 0 .8%,transparent 1.5%),
+        radial-gradient(circle at 69% 61%,rgba(61,63,66,.15) 0 7%,transparent 22%),
+        radial-gradient(circle at 42% 76%,rgba(126,128,129,.035) 0 5%,transparent 18%),
+        repeating-conic-gradient(
+          from 2deg,
+          #464749 0 2.3deg,
+          #393a3c 2.3deg 4.5deg,
+          #414244 4.5deg 5.8deg,
+          #343537 5.8deg 7.4deg
+        ) !important;
+      box-shadow:
+        0 2px 2px rgba(17,18,19,.50),
+        0 0 0 1px #55575a,
+        inset 1px 1px 0 rgba(210,212,210,.018),
+        inset -1px -2px 2px rgba(25,26,28,.20) !important;
+    }
+
+    .knob::before{
+      background:
+        radial-gradient(ellipse at 29% 24%,rgba(186,188,186,.028),transparent 34%),
+        radial-gradient(ellipse at 71% 71%,rgba(67,69,72,.15),transparent 42%),
+        linear-gradient(121deg,transparent 0 39%,rgba(150,153,153,.018) 40% 42%,transparent 43% 100%) !important;
+      box-shadow:inset 0 0 0 1px rgba(62,64,66,.20) !important;
+      opacity:.78 !important;
+    }
+
+    .knob::after{
+      background:
+        radial-gradient(circle at 21% 61%,rgba(198,200,196,.075) 0 .55px,transparent .85px),
+        radial-gradient(circle at 72% 34%,rgba(62,64,67,.21) 0 .7px,transparent 1px),
+        radial-gradient(circle at 57% 81%,rgba(185,187,184,.050) 0 .55px,transparent .9px),
+        linear-gradient(17deg,transparent 0 56%,rgba(165,168,166,.030) 56.4% 57.1%,transparent 57.5% 100%) !important;
+      opacity:.58 !important;
+    }
+
+    .knob-cap{
+      border-color:#333436 !important;
+      background:
+        radial-gradient(circle at 22% 64%,rgba(116,119,120,.055) 0 4%,transparent 17%),
+        radial-gradient(circle at 69% 29%,rgba(193,195,192,.025) 0 4%,transparent 18%),
+        radial-gradient(circle at 48% 47%,#505153 0 5%,#444547 34%,#393a3c 69%,#303133 100%) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(214,216,212,.014),
+        inset 0 -2px 2px rgba(27,28,30,.18),
+        0 0 0 1px rgba(102,104,106,.28) !important;
+    }
+
+    .knob-cap::before{
+      background:
+        conic-gradient(
+          from 198deg,
+          transparent 0 15deg,
+          rgba(185,188,185,.040) 16deg 23deg,
+          transparent 24deg 117deg,
+          rgba(70,72,75,.13) 118deg 151deg,
+          transparent 152deg 264deg,
+          rgba(177,180,177,.026) 265deg 273deg,
+          transparent 274deg 360deg
+        ) !important;
+    }
+
+    .knob-tick{
+      background:linear-gradient(90deg,#727477 0%,#aaa9a5 39%,#c1c0bb 52%,#91918e 73%,#66686b 100%) !important;
+      box-shadow:0 1px 0 rgba(27,28,30,.58) !important;
+    }
+
+    .knob-mark{
+      background:linear-gradient(180deg,#858789,#5f6164) !important;
+      box-shadow:0 1px 0 rgba(25,26,28,.62) !important;
+    }
+
+    /* Remove the residual sepia/yellow variation from the old ageing pass. */
+    .channel:nth-child(3n+1) .knob{filter:brightness(.94) saturate(.55) !important}
+    .channel:nth-child(3n+2) .knob{filter:brightness(1.02) saturate(.50) !important}
+    .channel:nth-child(4n) .knob{filter:brightness(.975) saturate(.48) !important}
+    .channel:nth-child(5n+2) .knob-cap{filter:brightness(1.03) saturate(.50) !important}
+    .channel:nth-child(5n+4) .knob-cap{filter:brightness(.95) saturate(.48) !important}
+
+    /* The small top-right track bank needs less bloom than the large main bank. */
+    .seven-text--track .alpha16-seg{
+      fill:#150a04 !important;
+      stroke:#241006 !important;
+      opacity:.22 !important;
+      stroke-width:.34 !important;
+    }
+
+    .seven-text--track .alpha16-seg.on,
+    .seven-text--track .alpha16-dot.on{
+      fill:#ff9826 !important;
+      stroke:#ffc47a !important;
+      opacity:1 !important;
+      filter:
+        drop-shadow(0 0 .28px rgba(255,231,191,.76))
+        drop-shadow(0 0 .85px rgba(255,151,45,.52))
+        drop-shadow(0 0 1.8px rgba(255,102,16,.14)) !important;
+    }
+
+    .seven-text--track .alpha16-svg{
+      shape-rendering:geometricPrecision;
+    }
+
+
+    /* ==============================================================
+       PATCH: NEUTRAL GRAPHITE PROCEDURAL HARDWARE
+       Keep the sidecar old, rubbed and physical, but remove the yellowed
+       phenolic/cream cast so it belongs with the black/grey mixer chassis.
+       ============================================================== */
+    .procedural-deck{
+      border-color:#0a0b0d !important;
+      background:
+        radial-gradient(circle at 17% 13%,rgba(210,212,214,.026) 0 .7px,transparent 1px) 0 0/11px 13px,
+        radial-gradient(circle at 79% 72%,rgba(0,0,0,.12) 0 .8px,transparent 1.1px) 0 0/15px 17px,
+        linear-gradient(180deg,#2d2f32 0%,#232427 54%,#1b1c1f 100%) !important;
+      box-shadow:
+        inset 1px 0 0 rgba(214,216,218,.025),
+        inset -2px 0 4px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(220,222,224,.018),
+        0 0 0 1px #383a3d !important;
+    }
+    .procedural-deck::before{border-color:rgba(205,208,210,.018) !important;border-bottom-color:rgba(0,0,0,.42) !important}
+    .proc-sidecar-head{border-bottom-color:#101113 !important;box-shadow:0 1px 0 rgba(195,198,200,.025) !important}
+    .proc-sidecar-head__maker{color:#b8b9b7 !important;text-shadow:0 1px 0 #101113 !important}
+    .proc-sidecar-head__model,.proc-engrave,.proc-seed-caption,.vibe-module__title,.vibe-axis-label,.proc-sidecar-foot{color:#777a7c !important;text-shadow:0 1px 0 #101113 !important}
+
+    .proc-seed-module{
+      border-color:#17191c !important;
+      background:
+        linear-gradient(180deg,rgba(218,220,221,.028),transparent 19%),
+        linear-gradient(180deg,#3a3c40,#303236 68%,#292b2e) !important;
+      box-shadow:inset 0 1px 0 rgba(220,222,224,.035),inset 0 -2px 3px rgba(0,0,0,.36),0 0 0 1px #24262a !important;
+    }
+    .proc-seed-window{
+      border-color:#242629 !important;
+      color:#242527 !important;
+      background:
+        radial-gradient(circle at 18% 30%,rgba(35,36,38,.07) 0 .7px,transparent 1px) 0 0/13px 11px,
+        linear-gradient(98deg,rgba(255,255,255,.08),transparent 23% 73%,rgba(20,21,23,.07)),
+        linear-gradient(180deg,#a1a29f,#898b89) !important;
+      box-shadow:inset 0 2px 3px rgba(22,23,25,.26),inset 0 -1px 0 rgba(225,227,225,.09),0 1px 0 rgba(210,212,214,.025) !important;
+      text-shadow:0 1px 0 rgba(225,227,225,.12) !important;
+    }
+
+    .vibe-module{border-top-color:rgba(205,208,210,.025) !important}
+    .vibe-pad-shell{
+      border-color:#121417 !important;
+      background:
+        radial-gradient(circle at 20% 22%,rgba(205,208,210,.025) 0 .7px,transparent 1px) 0 0/10px 13px,
+        linear-gradient(180deg,#2e3133,#202326) !important;
+      box-shadow:inset 0 4px 8px rgba(0,0,0,.70),inset 3px 0 5px rgba(0,0,0,.33),inset -3px 0 5px rgba(0,0,0,.33),0 0 0 1px #44474a,0 1px 0 rgba(214,216,218,.025) !important;
+    }
+    .vibe-pad{
+      border-color:#2a2d30 !important;
+      background:
+        linear-gradient(90deg,transparent 49.45%,rgba(166,172,174,.12) 49.7% 50.3%,transparent 50.55%),
+        linear-gradient(0deg,transparent 49.45%,rgba(166,172,174,.12) 49.7% 50.3%,transparent 50.55%),
+        repeating-linear-gradient(90deg,rgba(155,161,163,.04) 0 1px,transparent 1px 16.666%),
+        repeating-linear-gradient(0deg,rgba(155,161,163,.04) 0 1px,transparent 1px 16.666%),
+        radial-gradient(circle at 29% 23%,rgba(108,128,126,.055),transparent 42%),
+        linear-gradient(180deg,#24292b,#191d1f) !important;
+    }
+
+    .proc-info-module{
+      border-color:#17191c !important;
+      background:
+        radial-gradient(circle at 15% 18%,rgba(211,213,214,.025) 0 .65px,transparent 1px) 0 0/9px 11px,
+        linear-gradient(180deg,#36383c,#292b2f) !important;
+      box-shadow:inset 0 1px 0 rgba(220,222,224,.028),inset 0 -2px 4px rgba(0,0,0,.40),0 0 0 1px #24262a !important;
+    }
+    .proc-info-cell{
+      border-color:#686b6e !important;
+      background:
+        radial-gradient(circle at 18% 27%,rgba(28,30,32,.07) 0 .7px,transparent 1.1px) 0 0/11px 13px,
+        linear-gradient(99deg,rgba(255,255,255,.07),transparent 22% 76%,rgba(20,21,23,.06)),
+        linear-gradient(180deg,#999b99,#818381) !important;
+      box-shadow:inset 0 1px 0 rgba(231,233,231,.11),inset 0 -2px 3px rgba(24,25,27,.20),0 1px 1px rgba(0,0,0,.36) !important;
+    }
+    .proc-info-cell::before{background:#505255 !important;box-shadow:0 0 0 1px rgba(25,26,28,.30),inset 0 1px 0 rgba(221,223,224,.12) !important}
+    .proc-info-cell small{color:#46484b !important;text-shadow:0 1px 0 rgba(222,224,223,.10) !important}
+    .proc-info-cell strong{color:#242629 !important;text-shadow:0 1px 0 rgba(225,227,226,.11) !important}
+    .proc-info-cell--gauge::after{border-top-color:rgba(48,50,53,.50) !important;background:repeating-linear-gradient(90deg,#55585b 0 1px,transparent 1px 12.5%) !important}
+    .proc-info-cell--gauge strong::after{background:#6a403c !important;box-shadow:0 1px 0 rgba(216,218,218,.07),0 0 0 1px rgba(42,31,31,.16) !important}
+
   </style>
 </head>
 
@@ -6607,7 +6820,33 @@
   function addKick(target,start,amp=.8){const sr=target.sampleRate,from=Math.floor(start*sr),len=Math.floor(sr*.34);let phase=0;for(let n=0;n<len&&from+n<target.left.length;n++){const t=n/sr,freq=42+96*Math.exp(-t*18);phase+=2*Math.PI*freq/sr;addSampleStereo(target,from+n,Math.sin(phase)*Math.exp(-t*13)*amp*.62,0)}}
   function addNoiseBurst(target,start,duration,amp=.3,kind="snare",pan=0,rng=Math.random){const sr=target.sampleRate,from=Math.floor(start*sr),len=Math.floor(sr*duration);let prev=0;for(let n=0;n<len&&from+n<target.left.length;n++){const t=n/sr,white=rng()*2-1;let shaped;if(kind==="hat"||kind==="shaker"){shaped=white-prev*.82;prev=white}else shaped=white*.72+Math.sin(2*Math.PI*185*t)*.28;const decay=kind==="hat"?38:kind==="shaker"?25:13;addSampleStereo(target,from+n,shaped*Math.exp(-t*decay)*amp,pan)}}
   function softLimitProceduralBuffer(target){for(const data of[target.left,target.right])for(let i=0;i<data.length;i++)data[i]=Math.tanh(data[i]*1.18)*.86}
-  function renderProceduralStemBuffer(program,stem){const target=createProceduralStereoBuffer(program.duration),variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity)),role=stem.role;if(role==="keys"){for(const event of program.chordEvents){const baseOctave=program.complexity>.65?3:4;let previousMidi=-Infinity;event.notes.forEach((note,idx)=>{let midi=noteNameToMidi(note,baseOctave);while(midi<=previousMidi)midi+=12;previousMidi=midi;addSynthNote(target,event.time+.01*idx,event.duration,midi,.075*(event.ampScale||1),"keys",(idx-(event.notes.length-1)/2)*.12)})}}else if(role==="bass"){for(const event of program.bassEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave||2),.25*(event.ampScale||1),"bass",-.04)}else if(role==="melody"){for(const event of program.melodyEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave),(.13+.05*program.energy)*(event.ampScale||1),"synth",.06)}else if(role==="drums"){for(const event of program.drumEvents){if(event.type==="kick")addKick(target,event.time,event.amp);else if(event.type==="snare")addNoiseBurst(target,event.time,.24,event.amp*.48,"snare",0,rng);else addNoiseBurst(target,event.time,.075,event.amp,"hat",.14,rng)}}else if(role==="percussion"){for(const event of program.percussionEvents){if(event.type==="tamb"){addNoiseBurst(target,event.time,.15,event.amp,"hat",-.18,rng);addSynthNote(target,event.time,.12,96,event.amp*.11,"synth",-.12)}else addNoiseBurst(target,event.time,.095,event.amp,"shaker",.20,rng)}}softLimitProceduralBuffer(target);return target.buffer}
+  const PROCEDURAL_RENDER_TAIL = .42; // let physical-style decays ring across the bar line
+  function renderProceduralStemBuffer(program,stem){
+    // IMPORTANT: the rendered buffer is intentionally longer than the musical loop.
+    // The transport/scheduler still loops at program.duration, but the extra tail lets
+    // the previous variation's cymbals, fills and synth releases overlap naturally
+    // into the next downbeat instead of being hard-cut at the buffer boundary.
+    const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL),variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity)),role=stem.role;
+    if(role==="keys"){
+      for(const event of program.chordEvents){
+        const baseOctave=program.complexity>.65?3:4;
+        let previousMidi=-Infinity;
+        // The final chord gets a tiny overhang so its release crosses the loop seam.
+        const finalChord=event.time>=program.duration-program.barDuration-.001;
+        const noteDuration=finalChord?Math.max(event.duration,program.duration-event.time+.10):event.duration;
+        event.notes.forEach((note,idx)=>{let midi=noteNameToMidi(note,baseOctave);while(midi<=previousMidi)midi+=12;previousMidi=midi;addSynthNote(target,event.time+.01*idx,noteDuration,midi,.075*(event.ampScale||1),"keys",(idx-(event.notes.length-1)/2)*.12)});
+      }
+    }else if(role==="bass"){
+      for(const event of program.bassEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave||2),.25*(event.ampScale||1),"bass",-.04);
+    }else if(role==="melody"){
+      for(const event of program.melodyEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave),(.13+.05*program.energy)*(event.ampScale||1),"synth",.06);
+    }else if(role==="drums"){
+      for(const event of program.drumEvents){if(event.type==="kick")addKick(target,event.time,event.amp);else if(event.type==="snare")addNoiseBurst(target,event.time,.24,event.amp*.48,"snare",0,rng);else addNoiseBurst(target,event.time,.075,event.amp,"hat",.14,rng)}
+    }else if(role==="percussion"){
+      for(const event of program.percussionEvents){if(event.type==="tamb"){addNoiseBurst(target,event.time,.15,event.amp,"hat",-.18,rng);addSynthNote(target,event.time,.12,96,event.amp*.11,"synth",-.12)}else addNoiseBurst(target,event.time,.095,event.amp,"shaker",.20,rng)}
+    }
+    softLimitProceduralBuffer(target);return target.buffer;
+  }
 
   function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
   function setupProceduralAudioForRenderedChannels(playlist,generation){ensureAudioGraph();const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;channels=playlist.stems.map((stem,index)=>createProceduralChannel(stem,index,defaultStemState(stem),els[index],renderProceduralStemBuffer(program,stem)));channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});updateSoloRouting();updatePlaylistDuration();loadReadout.textContent="PROC READY";if(generation===loadGeneration)updateProceduralReadouts(program)}
@@ -7670,32 +7909,54 @@
     audioRack.replaceChildren();
   }
 
+  const CHANNEL_CONTROL_DEFAULTS = Object.freeze({trim:50,pan:50,room:18,level:80});
+  const MASTER_CONTROL_DEFAULTS = Object.freeze({tone:100,pan:50,room:35,level:80});
+
+  function hardwareControlDefault(owner,control) {
+    const table = owner === "master" ? MASTER_CONTROL_DEFAULTS : CHANNEL_CONTROL_DEFAULTS;
+    return Number(table[control] ?? 50);
+  }
+
+  function resetHardwareRange(input) {
+    if (!input) return false;
+    const owner = input.dataset.owner === "master" || input.dataset.master === "1" ? "master" : "channel";
+    const control = input.classList.contains("fader") ? "level" : input.dataset.control;
+    const fallback = Number(input.dataset.default ?? input.defaultValue ?? input.value);
+    const next = Number.isFinite(hardwareControlDefault(owner,control))
+      ? hardwareControlDefault(owner,control)
+      : fallback;
+    input.value = String(next);
+    input.dispatchEvent(new Event("input",{bubbles:true}));
+    return true;
+  }
+
   function knobMarkup(label,value,index,control,ariaPrefix="Channel") {
     const safeLabel = escapeHtml(label);
     return `
       <div class="knob-block">
         <div class="tiny-label">${safeLabel}</div>
-        <div class="knob-wrap" title="Drag up to increase • drag down to decrease • Shift = fine adjustment">
+        <div class="knob-wrap" title="Drag up/down • Shift = fine • Double-click = reset">
           <i class="knob-mark m1"></i><i class="knob-mark m2"></i><i class="knob-mark m3"></i><i class="knob-mark m4"></i><i class="knob-mark m5"></i>
           <div class="knob" aria-hidden="true">
             <div class="knob-cap"></div>
             <div class="knob-tick"></div>
           </div>
           <input class="knob-range" type="range" min="0" max="100" step="0.25" value="${value}"
-                 aria-label="${escapeHtml(ariaPrefix)} ${safeLabel}" data-owner="${index}" data-control="${control}">
+                 aria-label="${escapeHtml(ariaPrefix)} ${safeLabel}" data-owner="${index}" data-control="${control}"
+                 data-default="${hardwareControlDefault(index === "master" ? "master" : "channel",control)}">
         </div>
       </div>`;
   }
 
   function faderMarkup(value,label,index,master=false) {
     return `
-      <div class="fader-bay h-full min-h-0 self-stretch">
+      <div class="fader-bay h-full min-h-0 self-stretch" title="Drag up/down • Double-click = reset">
         <div class="fader-slot"></div>
         <div class="fader-scale-left"></div>
         <div class="fader-scale-right"></div>
         <div class="fader-thumb"></div>
         <input class="fader" type="range" min="0" max="100" value="${value}"
-               aria-label="${escapeHtml(label)}" data-owner="${index}" data-master="${master ? "1" : "0"}">
+               aria-label="${escapeHtml(label)}" data-owner="${index}" data-master="${master ? "1" : "0"}" data-default="80">
       </div>`;
   }
 
@@ -8165,9 +8426,20 @@
     setKnobRotation(input);
     if (!wrap) return;
     let startY=0,startValue=0,pointerId=null;
+    let lastPressTime=-Infinity,lastPressX=0,lastPressY=0;
     wrap.addEventListener("pointerdown",event=>{
       if (event.button !== undefined && event.button !== 0) return;
+      const now=performance.now();
+      const isDoublePress = now-lastPressTime <= 420 && Math.hypot(event.clientX-lastPressX,event.clientY-lastPressY) <= 10;
+      lastPressTime=now; lastPressX=event.clientX; lastPressY=event.clientY;
       event.preventDefault(); event.stopPropagation();
+      if (isDoublePress) {
+        lastPressTime=-Infinity;
+        pointerId=null;
+        resetHardwareRange(input);
+        try { input.focus({preventScroll:true}); } catch (_) { input.focus(); }
+        return;
+      }
       pointerId=event.pointerId; startY=event.clientY; startValue=Number(input.value);
       try { input.focus({preventScroll:true}); } catch (_) { input.focus(); }
       showTouchedControl(input,startValue);
@@ -8210,9 +8482,20 @@
     const bay=input.closest(".fader-bay");
     if (!bay) return;
     let startY=0,startValue=0,pointerId=null;
+    let lastPressTime=-Infinity,lastPressX=0,lastPressY=0;
     bay.addEventListener("pointerdown",event=>{
       if (event.button !== undefined && event.button !== 0) return;
+      const now=performance.now();
+      const isDoublePress = now-lastPressTime <= 420 && Math.hypot(event.clientX-lastPressX,event.clientY-lastPressY) <= 10;
+      lastPressTime=now; lastPressX=event.clientX; lastPressY=event.clientY;
       event.preventDefault(); event.stopPropagation();
+      if (isDoublePress) {
+        lastPressTime=-Infinity;
+        pointerId=null;
+        resetHardwareRange(input);
+        try { input.focus({preventScroll:true}); } catch (_) { input.focus(); }
+        return;
+      }
       pointerId=event.pointerId; startY=event.clientY; startValue=Number(input.value);
       try { input.focus({preventScroll:true}); } catch (_) { input.focus(); }
       showTouchedControl(input,startValue);
@@ -8520,10 +8803,17 @@
   }
 
   function updatePlaylistDuration() {
-    playlistDuration = channels.reduce((max,channel)=>{
-      const duration = channel.buffer?.duration;
-      return Number.isFinite(duration) ? Math.max(max,duration) : max;
-    },0);
+    // Procedural buffers include a short decay tail, but the musical bar/seed
+    // length must remain the exact clock boundary. Never let the tail extend
+    // the transport or the next variation would start late and sound like a skip.
+    if (appMode === "procedural" && currentProceduralProgram?.duration) {
+      playlistDuration = currentProceduralProgram.duration;
+    } else {
+      playlistDuration = channels.reduce((max,channel)=>{
+        const duration = channel.buffer?.duration;
+        return Number.isFinite(duration) ? Math.max(max,duration) : max;
+      },0);
+    }
 
     updateTransportDisplay();
   }
