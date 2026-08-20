@@ -572,7 +572,7 @@ body.redirect-page {
   background: color-mix(in srgb, var(--paper) 89%, white);
   box-shadow: 7px 7px 0 var(--blue);
   transform: rotate(-1deg);
-  animation: redirect-jitter 360ms steps(2, end) infinite;
+  animation: redirect-logo-card-boil 460ms steps(2, end) infinite;
 }
 
 .redirect-logo {
@@ -705,9 +705,9 @@ body.redirect-page {
   100% { transform: rotate(-1deg) scale(.98); }
 }
 
-@keyframes redirect-jitter {
+@keyframes redirect-logo-card-boil {
   0%, 100% { transform: translate(0, 0) rotate(-1deg); }
-  50% { transform: translate(2px, -1px) rotate(.8deg); }
+  50% { transform: translate(1px, -1px) rotate(-0.35deg); }
 }
 
 @keyframes redirect-pop {
@@ -738,7 +738,7 @@ body.redirect-page {
     14px 14px 0 color-mix(in srgb, var(--pink) 42%, transparent),
     -8px 11px 0 color-mix(in srgb, var(--blue) 34%, transparent),
     20px 22px 0 color-mix(in srgb, #000 18%, transparent);
-  animation: redirect-shell-pulse 1350ms steps(6, end) infinite;
+  animation: redirect-shell-boil 760ms steps(2, end) infinite;
 }
 
 .redirect-shell::after {
@@ -749,7 +749,7 @@ body.redirect-page {
   border: 3px dashed color-mix(in srgb, var(--ink) 50%, transparent);
   transform: rotate(.6deg);
   pointer-events: none;
-  animation: redirect-frame-wobble 520ms steps(2, end) infinite;
+  animation: redirect-frame-boil 520ms steps(2, end) infinite;
 }
 
 .redirect-label-cloud {
@@ -803,7 +803,27 @@ body.redirect-page {
   height: min(78%, 145px);
   object-fit: contain;
   filter: drop-shadow(4px 4px 0 color-mix(in srgb, #000 26%, transparent));
-  animation: redirect-logo-pop 560ms steps(3, end) infinite;
+  animation: redirect-logo-boil 480ms steps(2, end) infinite;
+}
+
+.redirect-logo-wrap::before,
+.redirect-logo-wrap::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  inset: 5px;
+  border: 2px solid color-mix(in srgb, var(--ink) 70%, transparent);
+  clip-path: polygon(0 7px, 8px 0, calc(100% - 10px) 2px, 100% 8px, calc(100% - 3px) calc(100% - 8px), calc(100% - 12px) 100%, 7px calc(100% - 2px), 0 calc(100% - 9px));
+  opacity: .3;
+  animation: redirect-logo-outline-boil 410ms steps(2, end) infinite;
+}
+
+.redirect-logo-wrap::after {
+  inset: 9px 7px 7px 9px;
+  border-style: dashed;
+  opacity: .18;
+  animation-delay: -170ms;
 }
 
 .redirect-manifest-stamp {
@@ -868,13 +888,13 @@ body.redirect-page {
   pointer-events: none;
 }
 
-@keyframes redirect-shell-pulse {
+@keyframes redirect-shell-boil {
   0%, 100% { translate: 0 0; }
   33% { translate: 1px -1px; }
   66% { translate: -1px 1px; }
 }
 
-@keyframes redirect-frame-wobble {
+@keyframes redirect-frame-boil {
   0%, 100% { transform: rotate(.6deg) translate(0, 0); }
   50% { transform: rotate(-.6deg) translate(1px, -1px); }
 }
@@ -884,9 +904,14 @@ body.redirect-page {
   50% { translate: 1px -1px; }
 }
 
-@keyframes redirect-logo-pop {
-  0%, 100% { transform: scale(1) rotate(0); }
-  50% { transform: scale(1.035) rotate(.8deg); }
+@keyframes redirect-logo-boil {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(1px, -1px) scale(1.008) rotate(-0.18deg); }
+}
+
+@keyframes redirect-logo-outline-boil {
+  0%, 100% { transform: translate(1px, -1px) rotate(0deg); }
+  50% { transform: translate(-1px, 1px) rotate(.16deg); }
 }
 
 @keyframes redirect-manifest-bob {
@@ -922,4 +947,21 @@ body.redirect-page {
   .redirect-copy::after {
     animation: none !important;
   }
+}
+
+
+/* Site-wide LINEBOIL toggle: redirect sketch motion follows the same saved setting as home. */
+html[data-lineboil="off"] .redirect-shell,
+html[data-lineboil="off"] .redirect-shell::after,
+html[data-lineboil="off"] .redirect-chip,
+html[data-lineboil="off"] .redirect-logo-wrap,
+html[data-lineboil="off"] .redirect-logo,
+html[data-lineboil="off"] .redirect-logo-wrap::before,
+html[data-lineboil="off"] .redirect-logo-wrap::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .redirect-logo-wrap::before,
+  .redirect-logo-wrap::after { animation: none !important; }
 }

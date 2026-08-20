@@ -1429,10 +1429,7 @@ code {
 }
 
 /* The modal inherits the exact same section + text boil cadence as the main site. */
-.multistream-guide-modal 
-
-
-.embedded-guide-slot {
+.multistream-guide-modal .embedded-guide-slot {
   animation: none;
 }
 
@@ -1672,7 +1669,8 @@ code {
 .guide-map .badge:hover .badge-shape {
   stroke-dasharray: 10 6;
   stroke-width: 4px;
-  animation: guideNodeDashBoil 360ms steps(2, end) infinite;
+  /* One full 16-unit dash period per loop = no visible reset seam. */
+  animation: guideNodeDashBoil 720ms linear infinite;
 }
 
 .guide-map .recommended-node:has(.guide-recommend-mark:hover) {
@@ -2296,9 +2294,6 @@ code {
   image-rendering: auto;
 }
 
-/* Deliberately no pointer/hover zoom here. The artwork only uses its slow
-   camera pan; the VIEW BIG button is the explicit way to inspect details. */
-
 .art-image:not(.is-wide):not(.is-tall) {
   width: 100%;
   height: 100%;
@@ -2340,42 +2335,39 @@ code {
 }
 
 .art-carousel-controls {
-  display: flex;
+  display: grid;
   width: 100%;
-  gap: 7px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px;
   align-items: center;
-  justify-content: center;
 }
 
 .art-carousel-button {
   min-height: 31px;
-  padding: 3px 8px;
-  border: 3px solid var(--ink);
-  background: var(--yellow);
-  color: var(--on-yellow);
+  padding: 4px 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper-alt);
+  color: var(--ink);
   font: inherit;
-  font-size: 0.72rem;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.68rem;
   font-weight: 900;
   line-height: 1;
+  text-transform: lowercase;
   box-shadow: 2px 2px 0 var(--shadow);
   clip-path: polygon(0 4px, 5px 0, 100% 2px, calc(100% - 3px) 100%, 3px calc(100% - 2px));
-  cursor: var(--cursor-pointer, pointer);
 }
 
-.art-nav-button {
-  width: 34px;
-  min-width: 34px;
-  padding-inline: 0;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 1.15rem;
+.art-carousel-step {
+  min-width: 48px;
+  white-space: nowrap;
 }
 
-.art-view-button {
+.art-carousel-view {
   min-width: 0;
-  flex: 1 1 auto;
-  background: color-mix(in srgb, var(--blue) 18%, var(--paper) 82%);
-  color: var(--ink);
-  letter-spacing: 0.035em;
+  background: var(--yellow);
+  color: var(--on-yellow);
+  letter-spacing: 0.02em;
 }
 
 .art-carousel-button:hover,
@@ -2385,12 +2377,86 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--hover-text);
-  animation: blockBoil 300ms steps(2, end) infinite;
+  animation: blockBoil 260ms steps(2, end) infinite;
 }
 
 .art-carousel-button:active {
   translate: 1px 1px;
   box-shadow: 1px 1px 0 var(--shadow);
+}
+
+.art-viewer-modal {
+  max-width: 1120px;
+  max-height: 920px;
+}
+
+.art-viewer-viewport {
+  overflow: hidden;
+}
+
+.art-viewer-content {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+}
+
+.art-viewer-figure {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  background:
+    radial-gradient(circle at 8px 8px, color-mix(in srgb, var(--ink) 13%, transparent) 0 2px, transparent 3px),
+    var(--paper-alt);
+  background-size: 18px 18px;
+}
+
+.art-viewer-image-stage {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  background:
+    linear-gradient(45deg, color-mix(in srgb, var(--blue) 8%, transparent) 25%, transparent 25% 75%, color-mix(in srgb, var(--pink) 8%, transparent) 75%),
+    var(--paper);
+  background-size: 22px 22px;
+  box-shadow:
+    inset 0 0 0 3px color-mix(in srgb, var(--paper) 70%, transparent),
+    5px 5px 0 color-mix(in srgb, var(--shadow) 75%, transparent);
+}
+
+.art-viewer-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 32%, transparent));
+}
+
+.art-viewer-caption {
+  margin: 0;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--on-yellow);
+  font-family: "Courier New", Courier, monospace;
+  font-size: clamp(0.78rem, 1.6vw, 1rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 3px 3px 0 var(--shadow);
+  clip-path: polygon(0 5px, 7px 0, calc(100% - 9px) 2px, 100% 7px, calc(100% - 4px) 100%, 5px calc(100% - 2px));
 }
 
 .web-corner {
@@ -3313,9 +3379,8 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 
 
 @keyframes guideNodeDashBoil {
-  0% { stroke-dashoffset: 0; }
-  50% { stroke-dashoffset: -5; }
-  100% { stroke-dashoffset: -10; }
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -16; }
 }
 
 @keyframes modalWindowBoil {
@@ -3595,6 +3660,29 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 
   .multistream-guide-modal .guide-modal-content {
     padding: 9px;
+  }
+
+  .art-viewer-modal .guide-modal-content {
+    padding: 7px;
+  }
+
+  .art-viewer-figure {
+    gap: 7px;
+    padding: 7px;
+  }
+
+  .art-viewer-caption {
+    padding: 7px 9px;
+    font-size: 0.75rem;
+  }
+
+  .art-carousel-button {
+    min-height: 42px;
+    padding-inline: 7px;
+  }
+
+  .art-carousel-step {
+    min-width: 46px;
   }
 
   .guide-window-bar {
@@ -4175,158 +4263,262 @@ body[data-theme="p16"] .guide-map .badge.no text {
   }
 }
 
-/* About-me single-image viewer ------------------------------------------------
-   Reuses the multistream window shell so it gets the exact same top-layer,
-   lineboil, titlebar and theme behavior, while maximizing only the current art. */
-.art-viewer-modal {
-  max-width: 1180px;
-  max-height: 960px;
-}
 
-.art-viewer-viewport {
-  overflow: hidden;
-}
-
-.art-viewer-content {
-  display: grid;
-  height: 100%;
-  min-height: 0;
-  padding: clamp(10px, 2vw, 18px);
-}
-
-.art-viewer-stage {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: 12px;
-  margin: 0;
-}
-
-.art-viewer-image-wrap {
-  position: relative;
-  display: grid;
-  min-width: 0;
-  min-height: 0;
-  place-items: center;
-  overflow: hidden;
-  padding: clamp(8px, 1.5vw, 14px);
-  border: 4px solid var(--ink);
+/* Palette attraction refresh v2 ------------------------------------------------
+   Treat the theme picker like a featured interactive toy, not a settings grid. */
+.palette-sidebar {
+  isolation: isolate;
   background:
-    radial-gradient(circle at 9px 9px, color-mix(in srgb, var(--ink) 18%, transparent) 0 2px, transparent 3px),
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 8%, transparent), color-mix(in srgb, var(--pink) 8%, transparent)),
-    var(--paper-alt);
-  background-size: 18px 18px, auto, auto;
-  box-shadow:
-    7px 7px 0 var(--shadow),
-    -3px -3px 0 color-mix(in srgb, var(--blue) 18%, transparent);
-  clip-path: polygon(0 8px, 10px 0, calc(100% - 7px) 3px, 100% 11px, calc(100% - 4px) calc(100% - 8px), calc(100% - 12px) 100%, 8px calc(100% - 3px), 0 calc(100% - 11px));
-  animation: sectionBoil 760ms steps(2, end) infinite;
+    radial-gradient(circle at 12px 12px, color-mix(in srgb, var(--yellow) 78%, transparent) 0 3px, transparent 3.5px),
+    radial-gradient(circle at calc(100% - 14px) 22px, color-mix(in srgb, var(--pink) 48%, transparent) 0 4px, transparent 4.5px),
+    linear-gradient(145deg, color-mix(in srgb, var(--paper-alt) 82%, var(--yellow) 18%), var(--paper-alt));
+  background-size: 38px 38px, 52px 52px, auto;
 }
 
-.art-viewer-image-wrap::before,
-.art-viewer-image-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  pointer-events: none;
-  border: 2px solid color-mix(in srgb, var(--ink) 50%, transparent);
-  opacity: 0.24;
-  clip-path: polygon(0 7px, 8px 0, calc(100% - 9px) 2px, 100% 7px, calc(100% - 4px) calc(100% - 7px), calc(100% - 10px) 100%, 6px calc(100% - 2px), 0 calc(100% - 9px));
-  animation: outlineBoil 390ms steps(2, end) infinite;
-}
-
-.art-viewer-image-wrap::after {
-  inset: 10px 8px 8px 10px;
-  border-style: dashed;
-  opacity: 0.13;
-  animation-delay: 170ms;
-}
-
-.art-viewer-image {
+.palette-sidebar > h2 {
   position: relative;
-  z-index: 1;
-  display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  image-rendering: auto;
-  filter: drop-shadow(6px 7px 0 color-mix(in srgb, var(--ink) 44%, transparent));
-}
-
-.art-viewer-caption {
-  justify-self: center;
-  max-width: min(100%, 52rem);
-  margin: 0;
-  padding: 8px 13px;
+  z-index: 2;
+  width: fit-content;
+  margin-inline: auto;
+  padding: 5px 12px 4px;
   border: 3px solid var(--ink);
   background: var(--yellow);
-  color: var(--on-yellow);
-  font-weight: 900;
-  line-height: 1.2;
-  text-align: center;
+  color: var(--ink);
   box-shadow: 3px 3px 0 var(--shadow);
-  clip-path: polygon(0 4px, 7px 0, calc(100% - 5px) 2px, 100% 7px, calc(100% - 4px) 100%, 5px calc(100% - 2px));
+  clip-path: polygon(0 5px, 7px 0, 100% 3px, calc(100% - 3px) 100%, 4px calc(100% - 2px));
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow: 1px 1px 0 color-mix(in srgb, var(--paper) 68%, transparent);
 }
 
-@media (max-width: 560px) {
-  .art-carousel-controls {
-    gap: 5px;
+.palette-sidebar > h2::before,
+.palette-sidebar > h2::after {
+  position: absolute;
+  top: 50%;
+  color: var(--pink);
+  font-size: 0.82em;
+  line-height: 1;
+  text-shadow: 1px 1px 0 var(--ink);
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.palette-sidebar > h2::before { content: "✦"; left: -16px; rotate: -10deg; }
+.palette-sidebar > h2::after { content: "✦"; right: -16px; rotate: 12deg; }
+
+.palette-invite {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  margin: 10px 0 5px;
+  padding: 10px 12px 12px;
+  overflow: visible;
+  border: 3px solid var(--ink);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--yellow) 78%, var(--paper) 22%), color-mix(in srgb, var(--pink) 20%, var(--paper) 80%));
+  color: var(--ink);
+  box-shadow: 4px 5px 0 var(--shadow);
+  clip-path: polygon(0 6px, 8px 0, calc(100% - 5px) 2px, 100% 8px, calc(100% - 2px) calc(100% - 6px), calc(100% - 8px) 100%, 5px calc(100% - 2px), 0 calc(100% - 7px));
+  text-align: center;
+  text-transform: none;
+}
+
+.palette-invite::before {
+  content: "★";
+  position: absolute;
+  top: -10px;
+  right: -7px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--pink);
+  color: var(--on-pink, #fff);
+  font: 900 0.7rem/1 monospace;
+  box-shadow: 2px 2px 0 var(--shadow);
+  rotate: 9deg;
+  animation: paletteInviteSticker 1500ms steps(2, end) infinite;
+}
+
+.palette-invite::after {
+  content: "↓  ↓  ↓";
+  display: block;
+  margin: 2px 0 -7px;
+  color: var(--ink);
+  font: 1000 0.82rem/1 monospace;
+  letter-spacing: 0.14em;
+  text-shadow: 1px 1px 0 var(--paper);
+  animation: paletteInviteArrows 900ms steps(2, end) infinite;
+}
+
+.palette-invite-lead,
+.palette-invite-action {
+  display: block;
+}
+
+.palette-invite-lead {
+  font: 1000 0.93rem/1 "Courier New", Courier, monospace;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 var(--paper);
+}
+
+.palette-invite-action {
+  max-width: 21ch;
+  margin-inline: auto;
+  font: 900 0.71rem/1.22 "Courier New", Courier, monospace;
+  letter-spacing: 0.015em;
+}
+
+.palette.big-palette {
+  position: relative;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 13px;
+  overflow: visible;
+  border: 3px solid var(--ink);
+  background:
+    radial-gradient(circle at 8px 8px, color-mix(in srgb, var(--ink) 13%, transparent) 0 1.3px, transparent 1.7px) 0 0 / 16px 16px,
+    color-mix(in srgb, var(--paper) 82%, var(--yellow) 18%);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--paper-alt) 75%, transparent), 3px 4px 0 var(--shadow);
+  clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 2px, 100% 9px, calc(100% - 3px) calc(100% - 7px), calc(100% - 10px) 100%, 7px calc(100% - 2px), 0 calc(100% - 9px));
+}
+
+.palette-choice > button {
+  overflow: hidden;
+  border-width: 3px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  filter: saturate(1.03) contrast(1.02);
+}
+
+/* Give every swatch a little glossy arcade-button depth without hiding its colors. */
+.palette-choice > button {
+  background-image:
+    linear-gradient(145deg, rgba(255,255,255,0.42) 0 12%, transparent 12% 50%, rgba(0,0,0,0.09) 78% 100%),
+    var(--swatch);
+}
+
+.palette-choice > button::before {
+  font-weight: 1000;
+}
+
+.palette-choice:not(.is-selected) > button::after {
+  right: 4px;
+  bottom: 4px;
+  background: var(--yellow);
+  transform: rotate(-7deg);
+}
+
+.palette-choice:nth-child(even):not(.is-selected) > button::after {
+  transform: rotate(8deg);
+}
+
+.palette-choice.is-selected::after,
+.palette-choice:has(> button[aria-pressed="true"])::after {
+  border-style: solid dashed dashed solid;
+  border-color: var(--pink);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--yellow) 65%, transparent);
+}
+
+.big-palette .palette-choice.is-selected > button,
+.big-palette .palette-choice:has(> button[aria-pressed="true"]) > button {
+  filter: saturate(1.14) contrast(1.04);
+  box-shadow: 5px 6px 0 var(--shadow);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .palette-choice > button {
+    transition: translate 130ms ease, scale 130ms ease, filter 130ms ease, box-shadow 130ms ease;
   }
 
-  .art-carousel-button {
-    min-height: 34px;
+  .palette-choice > button:hover,
+  .palette-choice > button:focus-visible {
+    z-index: 6;
+    translate: 0 -4px;
+    scale: 1.055;
+    filter: saturate(1.22) contrast(1.06);
+    box-shadow: 7px 9px 0 var(--shadow);
   }
 
-  .art-view-button {
-    font-size: 0.67rem;
+  .palette-choice:nth-child(even) > button:hover,
+  .palette-choice:nth-child(even) > button:focus-visible {
+    rotate: 0.7deg;
   }
 
-  .art-viewer-modal {
-    width: calc(100vw - 12px);
-    height: calc(100dvh - 12px);
+  .palette-choice:nth-child(odd) > button:hover,
+  .palette-choice:nth-child(odd) > button:focus-visible {
+    rotate: -0.7deg;
+  }
+}
+
+@keyframes paletteInviteSticker {
+  0%, 100% { translate: 0 0; rotate: 9deg; }
+  50% { translate: 1px -2px; rotate: 15deg; }
+}
+
+@keyframes paletteInviteArrows {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 2px; }
+}
+
+/* Keep the compact phone layout attractive without making the swatches tiny. */
+@media (max-width: 880px) {
+  .palette-sidebar {
+    padding-bottom: 16px;
   }
 
-  .art-viewer-content {
-    padding: 8px;
+  .palette-invite {
+    width: min(420px, calc(100% - 16px));
+    margin-inline: auto;
+    padding-inline: 15px;
   }
 
-  .art-viewer-stage {
+  .palette-invite-action {
+    max-width: none;
+  }
+
+  .palette.big-palette,
+  html.touch-device .palette.big-palette {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: clamp(6px, 1.8vw, 10px);
+    padding: 10px;
+  }
+
+  .palette-choice:not(.is-selected) > button::after {
+    right: 2px;
+    bottom: 2px;
+    width: 1.15em;
+    height: 1.15em;
+    border-width: 1px;
+    font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 470px) {
+  .palette.big-palette,
+  html.touch-device .palette.big-palette {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 9px;
   }
 
-  .art-viewer-caption {
-    width: 100%;
-    padding: 7px 9px;
-  }
-}
-
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
-  .art-viewer-image-wrap {
-    animation: none !important;
-    transform: none !important;
+  .big-palette button,
+  html.touch-device .big-palette button {
+    min-height: 48px;
   }
 
-  .art-viewer-image {
-    transform: none !important;
-  }
-
-  .art-carousel-button:hover,
-  .art-carousel-button:focus-visible {
-    animation: none !important;
+  .big-palette span,
+  html.touch-device .big-palette span {
+    width: 18px;
+    height: 18px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .art-image,
-  .art-viewer-image-wrap,
-  .art-viewer-image-wrap::before,
-  .art-viewer-image-wrap::after,
-  .art-carousel-button {
+  .palette-invite::before,
+  .palette-invite::after {
     animation: none !important;
-    transition: none !important;
   }
 }

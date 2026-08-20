@@ -77,15 +77,39 @@
     return button;
   }
 
+  function renderPaletteInvite(invite) {
+    const text = window.KazvtI18n?.t("palette.invite") || "pick a vibe! ✦ tap / click a color → remix the whole site!";
+    if (invite.dataset.renderedPaletteInvite === text) return;
+
+    const parts = text.split(/\s*✦\s*/, 2);
+    const leadText = parts.length > 1 ? parts[0].trim() : "pick a vibe!";
+    const actionText = parts.length > 1 ? parts[1].trim() : text;
+    const lead = document.createElement("span");
+    const action = document.createElement("span");
+    lead.className = "palette-invite-lead";
+    action.className = "palette-invite-action";
+    lead.textContent = leadText;
+    action.textContent = actionText;
+
+    invite.removeAttribute("data-i18n");
+    invite.setAttribute("aria-label", text);
+    invite.replaceChildren(lead, action);
+    invite.dataset.renderedPaletteInvite = text;
+  }
+
+  function refreshPaletteInvites() {
+    document.querySelectorAll(".palette-invite").forEach(renderPaletteInvite);
+  }
+
   function ensureControls() {
     document.querySelectorAll(".big-palette").forEach((palette) => {
-      if (!palette.parentElement?.querySelector(":scope > .palette-invite")) {
-        const invite = document.createElement("p");
+      let invite = palette.parentElement?.querySelector(":scope > .palette-invite");
+      if (!invite) {
+        invite = document.createElement("p");
         invite.className = "palette-invite";
-        invite.dataset.i18n = "palette.invite";
-        invite.textContent = window.KazvtI18n?.t("palette.invite") || "pick a vibe — tap / click a color to remix the whole site!";
         palette.insertAdjacentElement("beforebegin", invite);
       }
+      renderPaletteInvite(invite);
       if (!palette.parentElement?.querySelector(":scope > .lineboil-toggle-sidebar")) {
         palette.insertAdjacentElement("afterend", createToggle("lineboil-toggle-sidebar"));
       }
@@ -128,7 +152,10 @@
     ensureControls();
     syncAnimations();
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["open"] });
-    window.addEventListener("kazvt:languagechange", syncButtons);
+    window.addEventListener("kazvt:languagechange", () => {
+      syncButtons();
+      refreshPaletteInvites();
+    });
   }
 
   window.KazvtLineboil = {

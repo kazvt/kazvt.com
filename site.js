@@ -215,7 +215,7 @@ function svgTrailCursorImage(fill, stroke, shape = "diamond") {
 }
 
 function activeCursorLayerHost() {
-  return document.querySelector("dialog[data-art-viewer-modal][open], dialog[data-multistream-guide-modal][open]") || document.body;
+  return document.querySelector("dialog[data-kazvt-modal][open], dialog[data-multistream-guide-modal][open]") || document.body;
 }
 
 function promoteCursorCanvas(canvas) {
@@ -1579,10 +1579,10 @@ function profilePanel() {
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
             el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt"), "data-i18n-alt": "art.alt" }),
           ]),
-          el("div", { className: "art-carousel-controls", ariaLabel: "Slideshow controls" }, [
-            el("button", { type: "button", className: "art-carousel-button art-nav-button", "data-art-prev": "true", ariaLabel: "Previous image", title: "Previous image" }, ["‹"]),
-            el("button", { type: "button", className: "art-carousel-button art-view-button", "data-art-view": "true", ariaHaspopup: "dialog", ariaLabel: "View this image larger", title: "View this image larger" }, ["VIEW BIG ↗"]),
-            el("button", { type: "button", className: "art-carousel-button art-nav-button", "data-art-next": "true", ariaLabel: "Next image", title: "Next image" }, ["›"]),
+          el("div", { className: "art-carousel-controls", ariaLabel: translatedText("art.controls_aria"), "data-i18n-aria-label": "art.controls_aria" }, [
+            el("button", { type: "button", className: "art-carousel-button art-carousel-step", "data-art-prev": "true", ariaLabel: translatedText("art.previous"), "data-i18n-aria-label": "art.previous", title: translatedText("art.previous"), "data-i18n-title": "art.previous" }, ["← ", el("span", { "data-i18n": "art.prev_short" }, [translatedText("art.prev_short")])]),
+            el("button", { type: "button", className: "art-carousel-button art-carousel-view", "data-art-view": "true", ariaHaspopup: "dialog", ariaLabel: translatedText("art.view_aria"), "data-i18n-aria-label": "art.view_aria", title: translatedText("art.view_title"), "data-i18n-title": "art.view_title" }, [el("span", { ariaHidden: "true" }, ["▣"]), " ", el("span", { "data-i18n": "art.view" }, [translatedText("art.view")])]),
+            el("button", { type: "button", className: "art-carousel-button art-carousel-step", "data-art-next": "true", ariaLabel: translatedText("art.next"), "data-i18n-aria-label": "art.next", title: translatedText("art.next"), "data-i18n-title": "art.next" }, [el("span", { "data-i18n": "art.next_short" }, [translatedText("art.next_short")]), " →"]),
           ]),
           el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, [translatedText("profile.art_caption")]),
         ]),
@@ -1658,6 +1658,42 @@ function badgesPanel() {
   });
 }
 
+function createArtViewerModal() {
+  return el("dialog", {
+    className: "multistream-guide-modal art-viewer-modal",
+    "data-art-viewer-modal": "true",
+    "data-kazvt-modal": "true",
+    ariaLabelledby: "art-viewer-modal-title",
+  }, [
+    el("div", { className: "multistream-guide-window art-viewer-window" }, [
+      el("header", { className: "guide-window-bar" }, [
+        el("div", { className: "guide-window-heading" }, [
+          el("span", { className: "guide-window-kicker", ariaHidden: "true", "data-i18n": "art.viewer.kicker" }, [translatedText("art.viewer.kicker")]),
+          el("span", { id: "art-viewer-modal-title", className: "guide-window-title", "data-i18n": "art.viewer.title" }, [translatedText("art.viewer.title")]),
+        ]),
+        el("div", { className: "guide-window-controls", ariaLabel: translatedText("art.viewer.controls_aria"), "data-i18n-aria-label": "art.viewer.controls_aria" }, [
+          el("span", { className: "guide-window-stamp", ariaHidden: "true", "data-i18n": "art.viewer.stamp" }, [translatedText("art.viewer.stamp")]),
+          el("button", { type: "button", className: "guide-window-button guide-window-close", "data-art-viewer-close": "true", ariaLabel: translatedText("art.viewer.close_aria"), "data-i18n-aria-label": "art.viewer.close_aria", title: translatedText("art.viewer.close_title"), "data-i18n-title": "art.viewer.close_title" }, ["×"]),
+        ]),
+      ]),
+      el("div", { className: "guide-modal-viewport art-viewer-viewport" }, [
+        el("div", { className: "guide-modal-content art-viewer-content" }, [
+          el("figure", { className: "art-viewer-figure scribble-box" }, [
+            el("div", { className: "art-viewer-image-stage" }, [
+              el("img", { className: "art-viewer-image", "data-art-viewer-image": "true", src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt") }),
+            ]),
+            el("figcaption", { className: "art-viewer-caption", "data-art-viewer-caption": "true" }, [translatedText("profile.art_caption")]),
+          ]),
+        ]),
+      ]),
+      el("footer", { className: "guide-window-status" }, [
+        el("span", { "data-i18n": "art.viewer.status_left" }, [translatedText("art.viewer.status_left")]),
+        el("span", { "data-i18n": "art.viewer.status_right" }, [translatedText("art.viewer.status_right")]),
+      ]),
+    ]),
+  ]);
+}
+
 async function initializeArtCarousel() {
   const frame = document.querySelector("#kaz-art-frame");
   const caption = document.querySelector("#kaz-art-caption");
@@ -1669,13 +1705,19 @@ async function initializeArtCarousel() {
   const files = await loadManifest("zzz_kazArt/manifest.json", imageExtensions);
   const artFiles = files.length ? files : ["../zzz_assets/kazvt-transparent.gif"];
   let index = Math.floor(Math.random() * artFiles.length);
-  let currentFile = artFiles[index];
-  let currentCaption = "";
   let autoTimer = 0;
-  let autoDueAt = 0;
-  let viewerPausedRemaining = 0;
   let displayToken = 0;
+  let lastViewerTrigger = null;
   const failedFiles = new Set();
+
+  let viewerModal = document.querySelector("[data-art-viewer-modal]");
+  if (!viewerModal) {
+    viewerModal = createArtViewerModal();
+    document.body.append(viewerModal);
+    applyLanguageText(viewerModal);
+  }
+  const viewerImage = viewerModal.querySelector("[data-art-viewer-image]");
+  const viewerCaption = viewerModal.querySelector("[data-art-viewer-caption]");
 
   function artUrl(file) {
     if (/^(https?:|data:|blob:)/i.test(file)) return file;
@@ -1688,41 +1730,34 @@ async function initializeArtCarousel() {
     return file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || translatedText("art.default_caption");
   }
 
-  function clearAutoTimer() {
-    if (autoTimer) window.clearTimeout(autoTimer);
-    autoTimer = 0;
-    autoDueAt = 0;
-  }
-
-  function scheduleAuto(delay = ART_ROTATION_MS) {
-    clearAutoTimer();
-    const safeDelay = Math.max(0, Number(delay) || 0);
-    autoDueAt = performance.now() + safeDelay;
+  function scheduleAutomaticAdvance(delay = ART_ROTATION_MS) {
+    window.clearTimeout(autoTimer);
     autoTimer = window.setTimeout(() => {
-      autoTimer = 0;
-      autoDueAt = 0;
-      moveTo(index + 1, { manual: false });
-    }, safeDelay);
+      index = (index + 1) % artFiles.length;
+      displayArt(artFiles[index], { panDuration: ART_ROTATION_MS });
+      scheduleAutomaticAdvance(ART_ROTATION_MS);
+    }, delay);
   }
 
-  function displayArt(file, { panDuration = ART_ROTATION_MS } = {}, attempts = 0) {
+  function holdAutomaticAdvance() {
+    scheduleAutomaticAdvance(ART_MANUAL_HOLD_MS);
+  }
+
+  function displayArt(file, { panDuration = ART_ROTATION_MS, attempts = 0 } = {}) {
     const token = ++displayToken;
     const image = new Image();
     image.alt = translatedText("art.alt");
     image.className = "art-image slide-enter";
     image.style.setProperty("--art-pan-duration", `${panDuration}ms`);
-
     image.onerror = () => {
       if (token !== displayToken) return;
       failedFiles.add(file);
       const nextFile = artFiles.find((candidate) => !failedFiles.has(candidate));
       if (nextFile && attempts < artFiles.length) {
         index = artFiles.indexOf(nextFile);
-        currentFile = nextFile;
-        displayArt(nextFile, { panDuration }, attempts + 1);
+        displayArt(nextFile, { panDuration, attempts: attempts + 1 });
       }
     };
-
     image.onload = () => {
       if (token !== displayToken) return;
       const wide = image.naturalWidth > image.naturalHeight;
@@ -1730,7 +1765,6 @@ async function initializeArtCarousel() {
       image.classList.toggle("is-wide", wide);
       image.classList.toggle("is-tall", !wide && !square);
       frame.querySelector(".art-image")?.classList.add("slide-exit");
-
       window.setTimeout(() => {
         if (token !== displayToken) return;
         frame.replaceChildren(image);
@@ -1752,122 +1786,57 @@ async function initializeArtCarousel() {
           image.classList.remove("slide-enter");
         });
       }, 240);
-
-      currentFile = file;
-      currentCaption = artCaption(file);
-      if (caption) caption.textContent = currentCaption;
+      if (caption) caption.textContent = artCaption(file);
     };
-
     image.src = artUrl(file);
   }
 
-  function moveTo(nextIndex, { manual = false } = {}) {
-    const count = artFiles.length;
-    index = ((nextIndex % count) + count) % count;
-    currentFile = artFiles[index];
-
-    if (manual) {
-      displayArt(currentFile, { panDuration: ART_MANUAL_HOLD_MS });
-      scheduleAuto(ART_MANUAL_HOLD_MS);
-    } else {
-      displayArt(currentFile, { panDuration: ART_ROTATION_MS });
-      scheduleAuto(ART_ROTATION_MS);
-    }
+  function manuallyStep(direction) {
+    index = (index + direction + artFiles.length) % artFiles.length;
+    displayArt(artFiles[index], { panDuration: ART_MANUAL_HOLD_MS });
+    holdAutomaticAdvance();
   }
-
-  function createArtViewerModal() {
-    return el("dialog", {
-      className: "multistream-guide-modal art-viewer-modal",
-      "data-art-viewer-modal": "true",
-      ariaLabelledby: "art-viewer-modal-title",
-    }, [
-      el("div", { className: "multistream-guide-window art-viewer-window" }, [
-        el("header", { className: "guide-window-bar" }, [
-          el("div", { className: "guide-window-heading" }, [
-            el("span", { className: "guide-window-kicker", ariaHidden: "true" }, ["kaz_art.exe"]),
-            el("span", { id: "art-viewer-modal-title", className: "guide-window-title" }, ["CURRENT SLIDE // BIG VIEW"]),
-          ]),
-          el("div", { className: "guide-window-controls", ariaLabel: "Image viewer controls" }, [
-            el("span", { className: "guide-window-stamp", ariaHidden: "true" }, ["LOOK CLOSER"]),
-            el("button", { type: "button", className: "guide-window-button guide-window-close", "data-art-viewer-close": "true", ariaLabel: "Close image viewer", title: "Close image viewer" }, ["×"]),
-          ]),
-        ]),
-        el("div", { className: "guide-modal-viewport art-viewer-viewport" }, [
-          el("div", { className: "guide-modal-content art-viewer-content" }, [
-            el("figure", { className: "art-viewer-stage" }, [
-              el("div", { className: "art-viewer-image-wrap" }, [
-                el("img", { className: "art-viewer-image", "data-art-viewer-image": "true", alt: translatedText("art.alt") }),
-              ]),
-              el("figcaption", { className: "art-viewer-caption", "data-art-viewer-caption": "true" }, [""]),
-            ]),
-          ]),
-        ]),
-        el("footer", { className: "guide-window-status" }, [
-          el("span", {}, ["one image only // slideshow stays put while you look"]),
-          el("span", {}, ["ESC or × to close"]),
-        ]),
-      ]),
-    ]);
-  }
-
-  let viewer = document.querySelector("[data-art-viewer-modal]");
-  if (!viewer) {
-    viewer = createArtViewerModal();
-    document.body.append(viewer);
-    window.KazvtLineboil?.sync?.();
-  }
-
-  const viewerImage = viewer.querySelector("[data-art-viewer-image]");
-  const viewerCaption = viewer.querySelector("[data-art-viewer-caption]");
-  let lastViewerTrigger = null;
 
   function openViewer(trigger) {
+    const currentImage = frame.querySelector(".art-image, img");
+    if (!currentImage || !viewerImage || !viewerCaption) return;
     lastViewerTrigger = trigger || document.activeElement;
-    viewerPausedRemaining = autoTimer && autoDueAt
-      ? Math.max(0, autoDueAt - performance.now())
-      : ART_ROTATION_MS;
-    clearAutoTimer();
-
-    if (viewerImage) {
-      viewerImage.src = artUrl(currentFile);
-      viewerImage.alt = currentCaption || translatedText("art.alt");
-    }
-    if (viewerCaption) viewerCaption.textContent = currentCaption || artCaption(currentFile);
-
+    viewerImage.src = currentImage.currentSrc || currentImage.src;
+    viewerImage.alt = currentImage.alt || translatedText("art.alt");
+    viewerCaption.textContent = caption?.textContent || translatedText("art.default_caption");
+    holdAutomaticAdvance();
     document.body.classList.add("guide-modal-open");
-    if (typeof viewer.showModal === "function") viewer.showModal();
-    else viewer.setAttribute("open", "");
+    if (typeof viewerModal.showModal === "function") viewerModal.showModal();
+    else viewerModal.setAttribute("open", "");
     updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
     window.KazvtLineboil?.sync?.();
-    viewer.querySelector("[data-art-viewer-close]")?.focus({ preventScroll: true });
+    viewerModal.querySelector("[data-art-viewer-close]")?.focus({ preventScroll: true });
   }
 
   function closeViewer() {
-    if (typeof viewer.close === "function" && viewer.open) viewer.close();
-    else viewer.removeAttribute("open");
+    if (typeof viewerModal.close === "function" && viewerModal.open) viewerModal.close();
+    else viewerModal.removeAttribute("open");
   }
 
-  previousButton?.addEventListener("click", () => moveTo(index - 1, { manual: true }));
-  nextButton?.addEventListener("click", () => moveTo(index + 1, { manual: true }));
+  previousButton?.addEventListener("click", () => manuallyStep(-1));
+  nextButton?.addEventListener("click", () => manuallyStep(1));
   viewButton?.addEventListener("click", () => openViewer(viewButton));
-  viewer.querySelector("[data-art-viewer-close]")?.addEventListener("click", closeViewer);
-  viewer.addEventListener("click", (event) => {
-    if (event.target === viewer) closeViewer();
+  viewerModal.querySelector("[data-art-viewer-close]")?.addEventListener("click", closeViewer);
+  viewerModal.addEventListener("click", (event) => {
+    if (event.target === viewerModal) closeViewer();
   });
-  viewer.addEventListener("close", () => {
+  viewerModal.addEventListener("close", () => {
     document.body.classList.remove("guide-modal-open");
     updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
     window.KazvtLineboil?.sync?.();
-    scheduleAuto(viewerPausedRemaining || ART_ROTATION_MS);
-    viewerPausedRemaining = 0;
     if (lastViewerTrigger instanceof HTMLElement) lastViewerTrigger.focus({ preventScroll: true });
   });
-  viewer.addEventListener("cancel", () => {
+  viewerModal.addEventListener("cancel", () => {
     document.body.classList.remove("guide-modal-open");
   });
 
-  displayArt(currentFile, { panDuration: ART_ROTATION_MS });
-  scheduleAuto(ART_ROTATION_MS);
+  displayArt(artFiles[index]);
+  scheduleAutomaticAdvance(ART_ROTATION_MS);
 }
 
 function paintPanel() {
