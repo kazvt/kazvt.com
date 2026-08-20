@@ -6556,6 +6556,12 @@
     }
   }
 
+  // Hardware detents must exist before persisted procedural values are normalized.
+  // Keep these constants above the first snapProceduralUnit() call to avoid
+  // the lexical-const temporal dead zone during page initialization.
+  const HARDWARE_SNAP_PERCENT = 2.5;
+  const VIBE_SNAP_UNIT = HARDWARE_SNAP_PERCENT/100;
+
   const persistentPrefs = loadPersistentPrefs();
   let randomizerEnabled = !!persistentPrefs.randomizerEnabled;
   let megaphoneEnabled = !!persistentPrefs.megaphoneEnabled;
@@ -8125,8 +8131,6 @@
 
   const CHANNEL_CONTROL_DEFAULTS = Object.freeze({trim:50,pan:50,room:18,level:80});
   const MASTER_CONTROL_DEFAULTS = Object.freeze({tone:100,pan:50,room:35,level:80});
-  const HARDWARE_SNAP_PERCENT = 2.5;
-  const VIBE_SNAP_UNIT = HARDWARE_SNAP_PERCENT/100;
 
   function snapHardwarePercent(value) {
     const clamped = Math.max(0,Math.min(100,Number(value)||0));
