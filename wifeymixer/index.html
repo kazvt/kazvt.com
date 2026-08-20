@@ -6680,6 +6680,68 @@
       .channel-name.is-overflowing .channel-name__marquee{animation:none !important}
     }
 
+
+    /* ==============================================================
+       PATCH: STRIP DISPLAY LEGIBILITY + SLIGHTLY STRONGER TOP-RIGHT MONITOR
+       Preserve the tiny smoked-glass look while protecting edge glyphs.
+       ============================================================== */
+    .channel-name{
+      padding-left:6px !important;
+      padding-right:6px !important;
+      font-size:clamp(6.6px,.80vw,8.2px) !important;
+      font-weight:800 !important;
+      letter-spacing:.055em !important;
+      color:#ffab42 !important;
+      text-shadow:
+        0 0 1px rgba(255,231,190,.88),
+        0 0 2.4px rgba(255,171,72,.70),
+        0 0 4.2px rgba(255,119,22,.34),
+        0 1px 0 #1b0801 !important;
+    }
+    .channel-name::after{
+      inset:1px !important;
+      width:auto !important;
+      background:linear-gradient(
+        90deg,
+        rgba(8,5,4,.30) 0,
+        rgba(8,5,4,.10) 2px,
+        transparent 4px,
+        transparent calc(100% - 4px),
+        rgba(8,5,4,.10) calc(100% - 2px),
+        rgba(8,5,4,.30) 100%
+      ) !important;
+    }
+    .channel-name__marquee{
+      padding-left:1px;
+      padding-right:1px;
+    }
+    .mixer.is-procedural [data-channel] .channel-name{
+      font-size:clamp(6.4px,.75vw,7.7px) !important;
+      letter-spacing:.035em !important;
+    }
+    @media(max-height:500px){
+      .channel-name{padding-left:4px !important;padding-right:4px !important;font-size:6.15px !important}
+    }
+    @media(max-height:410px){
+      .channel-name{padding-left:4px !important;padding-right:4px !important;font-size:5.55px !important}
+    }
+
+    /* The upper-right TRACK bank was visually lighter than the larger lower
+       readout. Add only a fraction more segment body and amber bloom. */
+    .seven-text--track .alpha16-seg,
+    .seven-text--track .alpha16-dot{
+      stroke-width:.56 !important;
+    }
+    .seven-text--track .alpha16-seg.on,
+    .seven-text--track .alpha16-dot.on{
+      fill:#ffa238 !important;
+      stroke:#ffe0b2 !important;
+      filter:
+        drop-shadow(0 0 .55px rgba(255,235,198,.82))
+        drop-shadow(0 0 1.55px rgba(255,151,48,.72))
+        drop-shadow(0 0 3.0px rgba(255,103,14,.22)) !important;
+    }
+
 </style>
 </head>
 
@@ -8388,7 +8450,9 @@
     const available=Math.max(0,nameEl.clientWidth-(parseFloat(box.paddingLeft)||0)-(parseFloat(box.paddingRight)||0));
     const overflow=Math.ceil(inner.scrollWidth-available);
     if(overflow>2){
-      const travel=overflow+9;
+      // Stop just past the true overflow edge. The old +9px overshoot made
+      // the terminal glyph feel cropped against the smoked-glass window.
+      const travel=overflow+2;
       const duration=Math.max(4.8,Math.min(10.5,4.2+(travel/18)));
       nameEl.style.setProperty("--strip-title-distance",`${travel}px`);
       nameEl.style.setProperty("--strip-title-duration",`${duration.toFixed(2)}s`);
