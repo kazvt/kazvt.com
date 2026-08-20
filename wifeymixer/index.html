@@ -6245,6 +6245,188 @@
       .vibe-axis-label--low::before,.vibe-axis-label--low::after{margin:0 2px;width:7px;flex-basis:7px}
     }
 
+
+
+    /* ==============================================================
+       PATCH: PHYSICAL PROCEDURAL RECALL PANEL
+       Direct controls are miniature horizontal console faders feeding
+       smoked LCD windows. The X/Y programmer remains available, but every
+       musical dimension can now be recalled without touching that surface.
+       ============================================================== */
+    .procedural-deck{
+      --proc-sidecar-width:clamp(270px,24vw,330px) !important;
+      grid-template-rows:auto auto minmax(112px,.72fr) minmax(224px,1.28fr) auto !important;
+      gap:5px !important;
+    }
+    .proc-direct-module{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+      grid-auto-rows:minmax(54px,auto) !important;
+      align-content:start !important;
+      gap:5px !important;
+      padding:6px !important;
+      overflow:auto hidden !important;
+      scrollbar-width:none;
+    }
+    .proc-direct-module::-webkit-scrollbar{display:none}
+    .proc-direct-head{
+      grid-column:1/-1;
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:8px;
+      padding:0 2px 2px;
+      border-bottom:1px solid #15171a;
+      font-family:"Archivo Black",system-ui,sans-serif;
+      font-size:7px;
+      letter-spacing:.12em;
+      color:#9a9d9e;
+      text-shadow:0 -1px 0 #090a0b,0 1px 0 rgba(255,255,255,.035);
+    }
+    .proc-direct-head small{
+      font-family:"Inter",system-ui,sans-serif;
+      font-size:5px;
+      font-weight:800;
+      letter-spacing:.08em;
+      color:#666a6c;
+      white-space:nowrap;
+    }
+    .proc-hw-control{
+      position:relative;
+      display:grid;
+      grid-template-rows:auto 20px 18px;
+      gap:3px;
+      min-width:0;
+      padding:5px 6px 6px;
+      border:1px solid #111316;
+      border-radius:2px;
+      background:
+        radial-gradient(circle at 19% 22%,rgba(220,222,224,.026) 0 .65px,transparent 1px) 0 0/9px 10px,
+        linear-gradient(180deg,#3a3d40,#292c2f 70%,#232528);
+      box-shadow:inset 0 1px 0 rgba(230,232,233,.038),inset 0 -2px 3px rgba(0,0,0,.44),0 0 0 1px #3a3d40;
+      cursor:default;
+      user-select:none;
+    }
+    .proc-hw-control--wide{grid-column:1/-1;grid-template-columns:1fr;grid-template-rows:auto 21px 18px 8px}
+    .proc-hw-control__legend{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      min-width:0;
+      font-family:"Archivo Black",system-ui,sans-serif;
+      font-size:5.5px;
+      line-height:1;
+      letter-spacing:.11em;
+      color:#85898b;
+      text-shadow:0 -1px 0 #0c0d0f;
+    }
+    .proc-lock-lamp,.proc-live-lamp,.proc-source-lamp{
+      flex:none;
+      width:5px;height:5px;border-radius:50%;
+      border:1px solid #101113;
+      background:#292b2d;
+      box-shadow:inset 0 1px 1px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.035);
+    }
+    .proc-lock-lamp.active,.proc-live-lamp,.proc-source-lamp{
+      background:#8f3e32;
+      box-shadow:0 0 3px rgba(189,77,55,.35),inset 0 1px 0 rgba(255,197,165,.22);
+    }
+    .proc-mini-screen{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:0;
+      overflow:hidden;
+      padding:2px 5px 1px;
+      border:1px solid #1c2020;
+      border-radius:1px;
+      background:
+        linear-gradient(100deg,rgba(255,255,255,.06),transparent 24% 75%,rgba(0,0,0,.08)),
+        linear-gradient(180deg,#8d9690,#747c77);
+      box-shadow:inset 0 2px 4px rgba(19,23,22,.38),inset 0 -1px 0 rgba(219,227,221,.08),0 1px 0 rgba(255,255,255,.025);
+      font-family:"Archivo Black",system-ui,sans-serif;
+      font-size:9px;
+      line-height:1;
+      letter-spacing:.055em;
+      color:#202523;
+      text-shadow:0 1px 0 rgba(218,226,220,.11);
+      white-space:nowrap;
+      cursor:default;
+    }
+    .proc-mini-screen--chords{font-size:7px;letter-spacing:.015em}
+    .proc-mini-screen--source{font-size:9px;text-transform:none;letter-spacing:.03em}
+    .proc-mini-fader{
+      position:relative;
+      display:block;
+      height:18px;
+      padding:0 7px;
+      border:1px solid #16181a;
+      border-radius:2px;
+      background:
+        repeating-linear-gradient(90deg,transparent 0 calc(12.5% - 1px),rgba(151,154,156,.18) calc(12.5% - 1px) 12.5%),
+        linear-gradient(180deg,#1c1e20,#292b2e 48%,#101113 50%,#202225);
+      box-shadow:inset 0 2px 4px rgba(0,0,0,.68),0 1px 0 rgba(222,224,226,.025);
+    }
+    .proc-mini-fader--two{
+      background:
+        linear-gradient(90deg,transparent 7%,rgba(151,154,156,.25) 7% 8%,transparent 8% 92%,rgba(151,154,156,.25) 92% 93%,transparent 93%),
+        linear-gradient(180deg,#1c1e20,#292b2e 48%,#101113 50%,#202225);
+    }
+    .proc-mini-fader input[type="range"]{
+      -webkit-appearance:none;
+      appearance:none;
+      position:absolute;
+      inset:0 5px;
+      width:calc(100% - 10px);
+      height:100%;
+      margin:0;
+      background:transparent;
+      cursor:ew-resize;
+      outline:none;
+    }
+    .proc-mini-fader input[type="range"]::-webkit-slider-runnable-track{height:2px;background:#08090a;border-top:1px solid #000;border-bottom:1px solid #4c4f51}
+    .proc-mini-fader input[type="range"]::-moz-range-track{height:2px;background:#08090a;border-top:1px solid #000;border-bottom:1px solid #4c4f51}
+    .proc-mini-fader input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:13px;height:16px;margin-top:-7px;
+      border:1px solid #171719;border-radius:2px;
+      background:
+        repeating-linear-gradient(to bottom,#77797a 0 2px,#595b5d 2px 4px,#424446 4px 5px),
+        linear-gradient(180deg,#777a7c,#404345);
+      box-shadow:0 2px 2px rgba(0,0,0,.72),inset 0 1px 0 rgba(230,232,233,.09),0 0 0 1px #303234;
+    }
+    .proc-mini-fader input[type="range"]::-moz-range-thumb{
+      width:13px;height:16px;
+      border:1px solid #171719;border-radius:2px;
+      background:repeating-linear-gradient(to bottom,#77797a 0 2px,#595b5d 2px 4px,#424446 4px 5px);
+      box-shadow:0 2px 2px rgba(0,0,0,.72),inset 0 1px 0 rgba(230,232,233,.09),0 0 0 1px #303234;
+    }
+    .proc-mini-fader input[type="range"]:focus-visible::-webkit-slider-thumb{outline:1px solid #a4a7a8;outline-offset:2px}
+    .proc-source-scale{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;text-align:center;font-size:4.8px;line-height:1;color:#65696b;letter-spacing:.025em}
+    .proc-source-scale b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    @media(max-width:980px){
+      .procedural-deck{--proc-sidecar-width:clamp(244px,31vw,288px) !important}
+      .proc-direct-head small{display:none}
+      .proc-hw-control{padding-left:4px;padding-right:4px}
+    }
+    @media(max-height:620px){
+      .procedural-deck{grid-template-rows:auto auto minmax(84px,.55fr) minmax(190px,1.45fr) auto !important}
+      .proc-direct-module{grid-auto-rows:minmax(48px,auto) !important;gap:3px !important;padding:4px !important}
+      .proc-hw-control{grid-template-rows:auto 17px 15px;padding:3px 4px 4px;gap:2px}
+      .proc-hw-control--wide{grid-template-rows:auto 18px 15px 7px}
+      .proc-mini-screen{font-size:8px}
+      .proc-mini-fader{height:15px}
+      .proc-mini-fader input[type="range"]::-webkit-slider-thumb{height:13px;margin-top:-6px}
+      .proc-mini-fader input[type="range"]::-moz-range-thumb{height:13px}
+    }
+    @media(max-height:470px){
+      .vibe-module{display:none !important}
+      .procedural-deck{grid-template-rows:auto auto minmax(0,1fr) auto !important}
+      .proc-direct-module{grid-row:3 !important}
+    }
+
 </style>
 </head>
 
@@ -6263,7 +6445,7 @@
           <div class="brand">WIFEY <span>MIX-8</span></div>
           <div class="subbrand">compact analogue stem mixer</div>
           <div class="mt-1 hidden text-[6px] font-bold uppercase tracking-[0.16em] text-[#625f59] sm:block">
-            STEM PLAYBACK CONSOLE · DYNAMIC CHANNELS · WEB AUDIO
+            I &lt;3 MY WIFE MORE THAN LIFE ITSELF, THAT'S WHY THIS TOOL EXISTS
           </div>
         </div>
 
@@ -6402,12 +6584,54 @@
             </div>
           </div>
 
-          <div class="proc-info-module" aria-label="Procedural program settings">
-            <div class="proc-info-cell proc-info-cell--key"><small>KEY / MODE</small><strong id="proceduralKeyReadout">C MAJ</strong></div>
-            <div class="proc-info-cell proc-info-cell--tempo"><small>TEMPO</small><strong id="proceduralTempoReadout">104 BPM</strong></div>
-            <div class="proc-info-cell proc-info-cell--gauge proc-info-cell--energy"><small>ENERGY</small><strong id="proceduralEnergyReadout">52</strong></div>
-            <div class="proc-info-cell proc-info-cell--gauge proc-info-cell--complex"><small>COMPLEXITY</small><strong id="proceduralComplexityReadout">46</strong></div>
-            <div class="proc-info-cell proc-info-cell--wide proc-info-cell--chords"><small>CHORD PROGRAM</small><strong id="proceduralChordReadout">I · V · VI · IV</strong></div>
+          <div class="proc-info-module proc-direct-module" aria-label="Procedural direct program settings">
+            <div class="proc-direct-head">
+              <span>DIRECT PROGRAM</span>
+              <small>MOVE = HOLD · DBL DISPLAY = SEED AUTO</small>
+            </div>
+
+            <label class="proc-hw-control" data-proc-control="key">
+              <span class="proc-hw-control__legend">KEY <i class="proc-lock-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralKeyReadout" class="proc-mini-screen">C</span>
+              <span class="proc-mini-fader"><input id="proceduralKeyControl" type="range" min="0" max="11" step="1" value="0" aria-label="Procedural key"></span>
+            </label>
+
+            <label class="proc-hw-control" data-proc-control="mode">
+              <span class="proc-hw-control__legend">MODE <i class="proc-lock-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralModeReadout" class="proc-mini-screen">MAJOR</span>
+              <span class="proc-mini-fader proc-mini-fader--two"><input id="proceduralModeControl" type="range" min="0" max="1" step="1" value="0" aria-label="Procedural mode"></span>
+            </label>
+
+            <label class="proc-hw-control" data-proc-control="tempo">
+              <span class="proc-hw-control__legend">TEMPO <i class="proc-lock-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralTempoReadout" class="proc-mini-screen">104 BPM</span>
+              <span class="proc-mini-fader"><input id="proceduralTempoControl" type="range" min="60" max="180" step="1" value="104" aria-label="Procedural tempo in BPM"></span>
+            </label>
+
+            <label class="proc-hw-control" data-proc-control="chords">
+              <span class="proc-hw-control__legend">CHORD PROGRAM <i class="proc-lock-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralChordReadout" class="proc-mini-screen proc-mini-screen--chords">I · V · VI · IV</span>
+              <span class="proc-mini-fader"><input id="proceduralChordControl" type="range" min="0" max="9" step="1" value="0" aria-label="Procedural chord program"></span>
+            </label>
+
+            <label class="proc-hw-control" data-proc-control="energy">
+              <span class="proc-hw-control__legend">ENERGY <i class="proc-live-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralEnergyReadout" class="proc-mini-screen">52</span>
+              <span class="proc-mini-fader"><input id="proceduralEnergyControl" type="range" min="0" max="100" step="2.5" value="52.5" aria-label="Procedural energy"></span>
+            </label>
+
+            <label class="proc-hw-control" data-proc-control="complexity">
+              <span class="proc-hw-control__legend">COMPLEXITY <i class="proc-live-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralComplexityReadout" class="proc-mini-screen">45</span>
+              <span class="proc-mini-fader"><input id="proceduralComplexityControl" type="range" min="0" max="100" step="2.5" value="45" aria-label="Procedural complexity"></span>
+            </label>
+
+            <label class="proc-hw-control proc-hw-control--wide" data-proc-control="soundfont">
+              <span class="proc-hw-control__legend">SOUNDFONT RACK <i class="proc-source-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralSoundFontReadout" class="proc-mini-screen proc-mini-screen--source">AUTO RACK</span>
+              <span class="proc-mini-fader proc-mini-fader--source"><input id="proceduralSoundFontControl" type="range" min="0" max="3" step="1" value="0" aria-label="Procedural SoundFont: Auto rack, SF64, Gotta Rush, or Genies"></span>
+              <span class="proc-source-scale" aria-hidden="true"><b>AUTO</b><b>SF64</b><b>Gotta Rush</b><b>Genies</b></span>
+            </label>
           </div>
 
           <div class="proc-sidecar-foot"><span>GENERATOR BUS</span><span>WF-PG/01</span></div>
@@ -6451,10 +6675,19 @@
   const proceduralSeedReadout = document.getElementById("proceduralSeedReadout");
   const proceduralVibePad = document.getElementById("proceduralVibePad");
   const proceduralKeyReadout = document.getElementById("proceduralKeyReadout");
+  const proceduralModeReadout = document.getElementById("proceduralModeReadout");
   const proceduralTempoReadout = document.getElementById("proceduralTempoReadout");
   const proceduralEnergyReadout = document.getElementById("proceduralEnergyReadout");
   const proceduralComplexityReadout = document.getElementById("proceduralComplexityReadout");
   const proceduralChordReadout = document.getElementById("proceduralChordReadout");
+  const proceduralSoundFontReadout = document.getElementById("proceduralSoundFontReadout");
+  const proceduralKeyControl = document.getElementById("proceduralKeyControl");
+  const proceduralModeControl = document.getElementById("proceduralModeControl");
+  const proceduralTempoControl = document.getElementById("proceduralTempoControl");
+  const proceduralEnergyControl = document.getElementById("proceduralEnergyControl");
+  const proceduralComplexityControl = document.getElementById("proceduralComplexityControl");
+  const proceduralChordControl = document.getElementById("proceduralChordControl");
+  const proceduralSoundFontControl = document.getElementById("proceduralSoundFontControl");
   const seekRange = document.getElementById("seekRange");
   const timeReadout = document.getElementById("timeReadout");
   const timeCurrentSegments = document.getElementById("timeCurrentSegments");
@@ -6686,6 +6919,11 @@
         proceduralSeed: Math.max(1,Math.min(9999,Number(parsed.proceduralSeed)||1)),
         proceduralEnergy: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralEnergy)) ? Number(parsed.proceduralEnergy) : .52)),
         proceduralComplexity: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralComplexity)) ? Number(parsed.proceduralComplexity) : .46)),
+        proceduralTonicOverride: typeof parsed.proceduralTonicOverride === "string" ? parsed.proceduralTonicOverride : null,
+        proceduralModeOverride: ["major","minor"].includes(parsed.proceduralModeOverride) ? parsed.proceduralModeOverride : null,
+        proceduralTempoOverride: parsed.proceduralTempoOverride != null && Number.isFinite(Number(parsed.proceduralTempoOverride)) ? Math.max(60,Math.min(180,Math.round(Number(parsed.proceduralTempoOverride)))) : null,
+        proceduralChordOverride: parsed.proceduralChordOverride != null && Number.isInteger(Number(parsed.proceduralChordOverride)) ? Math.max(0,Math.min(9,Number(parsed.proceduralChordOverride))) : null,
+        proceduralSoundFont: ["auto","sf64","rush","genies"].includes(parsed.proceduralSoundFont) ? parsed.proceduralSoundFont : "auto",
         lockedStemIds: parsed.lockedStemIds && typeof parsed.lockedStemIds === "object"
           ? parsed.lockedStemIds
           : {},
@@ -6704,6 +6942,11 @@
         proceduralSeed:1,
         proceduralEnergy:.52,
         proceduralComplexity:.46,
+        proceduralTonicOverride:null,
+        proceduralModeOverride:null,
+        proceduralTempoOverride:null,
+        proceduralChordOverride:null,
+        proceduralSoundFont:"auto",
         lockedStemIds:{},
         stemStates:{},
         masterState:null
@@ -6727,6 +6970,27 @@
   let proceduralSeed = Math.max(1,Math.min(9999,Number(persistentPrefs.proceduralSeed)||1));
   let proceduralEnergy = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralEnergy)) ? Number(persistentPrefs.proceduralEnergy) : .52);
   let proceduralComplexity = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralComplexity)) ? Number(persistentPrefs.proceduralComplexity) : .46);
+  const PROCEDURAL_KEYS = Object.freeze(["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"]);
+  const PROCEDURAL_MODES = Object.freeze(["major","minor"]);
+  const PROCEDURAL_CHORD_PROGRAMS = Object.freeze([
+    Object.freeze({label:"I · V · VI · IV",degrees:[1,5,6,4]}),
+    Object.freeze({label:"I · IV · V · I",degrees:[1,4,5,1]}),
+    Object.freeze({label:"VI · IV · I · V",degrees:[6,4,1,5]}),
+    Object.freeze({label:"I · VI · II · V",degrees:[1,6,2,5]}),
+    Object.freeze({label:"I · III · IV · V",degrees:[1,3,4,5]}),
+    Object.freeze({label:"I · VI · III · VII",degrees:[1,6,3,7]}),
+    Object.freeze({label:"I · IV · VI · V",degrees:[1,4,6,5]}),
+    Object.freeze({label:"I · VII · VI · VII",degrees:[1,7,6,7]}),
+    Object.freeze({label:"VI · VII · I · I",degrees:[6,7,1,1]}),
+    Object.freeze({label:"I · III · VII · VI",degrees:[1,3,7,6]})
+  ]);
+  const proceduralOverrides = {
+    tonic: PROCEDURAL_KEYS.includes(persistentPrefs.proceduralTonicOverride) ? persistentPrefs.proceduralTonicOverride : null,
+    mode: PROCEDURAL_MODES.includes(persistentPrefs.proceduralModeOverride) ? persistentPrefs.proceduralModeOverride : null,
+    bpm: persistentPrefs.proceduralTempoOverride != null && Number.isFinite(Number(persistentPrefs.proceduralTempoOverride)) ? Math.max(60,Math.min(180,Math.round(Number(persistentPrefs.proceduralTempoOverride)))) : null,
+    chordIndex: persistentPrefs.proceduralChordOverride != null && Number.isInteger(Number(persistentPrefs.proceduralChordOverride)) ? Math.max(0,Math.min(PROCEDURAL_CHORD_PROGRAMS.length-1,Number(persistentPrefs.proceduralChordOverride))) : null
+  };
+  let proceduralSoundFontMode = ["auto","sf64","rush","genies"].includes(persistentPrefs.proceduralSoundFont) ? persistentPrefs.proceduralSoundFont : "auto";
   let currentProceduralProgram = null;
   let proceduralRegenerateTimer = null;
   const PROCEDURAL_TRACKS = [
@@ -6840,6 +7104,23 @@
     percussionDeadLine2:sfVoice("rush",128,12,"Dead Line Drums 2"),
     percussionMirage2:sfVoice("rush",128,37,"Mirage Road Drums 2"),
     percussionMirage:sfVoice("rush",128,38,"Mirage Road Drums 3")
+  });
+
+  const PROCEDURAL_SOURCE_ROLE_POOLS = Object.freeze({
+    sf64:Object.freeze({
+      drums:[SF64_VOICES.drumsGeneral,SF64_VOICES.drumsPower],
+      bass:[SF64_VOICES.bassAcoustic,SF64_VOICES.bassFinger,SF64_VOICES.bassPick,SF64_VOICES.bassFretless,SF64_VOICES.bassSlap,SF64_VOICES.bassSynth1,SF64_VOICES.bassSynth2],
+      keys:[SF64_VOICES.keysGrand,SF64_VOICES.keysHonky,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan],
+      melody:[SF64_VOICES.leadSquare,SF64_VOICES.leadSaw,SF64_VOICES.leadCalliope,SF64_VOICES.leadCharang,SF64_VOICES.leadBase],
+      percussion:[SF64_VOICES.percussionGeneral,SF64_VOICES.percussionPower]
+    }),
+    rush:Object.freeze({
+      drums:[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
+      bass:[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3],
+      keys:[RUSH_VOICES.keysEnding,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysRival,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2],
+      melody:[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadException2,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw1,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
+      percussion:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage]
+    })
   });
 
   const PROCEDURAL_ROLE_FALLBACKS = Object.freeze({
@@ -7259,7 +7540,29 @@
     return proceduralSoundFontsPromise;
   }
 
+  function proceduralSoundFontDisplayName(sourceId=proceduralSoundFontMode){
+    if(sourceId==="auto")return "AUTO RACK";
+    const source=PROCEDURAL_SF2_SOURCES[sourceId];
+    return source?.url ? stripExtension(basename(source.url)) : String(sourceId||"AUTO");
+  }
+
+  function chooseProceduralVoiceForSource(role,sourceId,program,preferred){
+    if(sourceId==="genies")return chooseGeniesVoice(role,program);
+    const pool=PROCEDURAL_SOURCE_ROLE_POOLS[sourceId]?.[role]||[];
+    if(!pool.length)return null;
+    const sourceSalt={sf64:0x53463634,rush:0x52555348}[sourceId]||0x53463231;
+    const roleSalt=GENIES_ROLE_SALTS[role]||0x57494645;
+    const rng=mulberry32((seedHash(program?.seed||1,program?.energy||0,program?.complexity||0)^sourceSalt^roleSalt)>>>0);
+    const candidates=preferred?.source===sourceId?[preferred,...pool]:pool;
+    return chooseFrom(rng,candidates);
+  }
+
   function resolveProceduralSf2Voice(role,preferred,program){
+    if(proceduralSoundFontMode!=="auto"){
+      const forced=chooseProceduralVoiceForSource(role,proceduralSoundFontMode,program,preferred);
+      const bank=forced?proceduralSoundFonts.get(proceduralSoundFontMode):null;
+      return forced&&bank?.getPreset(forced.bank,forced.program)?{voice:forced,bank}:null;
+    }
     const genies=chooseGeniesVoice(role,program);
     const salt=(GENIES_ROLE_SALTS[role]||0x47454e49)^0x57494645;
     const rng=program?mulberry32((seedHash(program.seed,program.energy,program.complexity)^salt)>>>0):null;
@@ -7278,17 +7581,28 @@
 
   function createProceduralProgram(seed,energy,complexity){
     seed=normalizeProceduralSeed(seed);energy=clamp01(energy);complexity=clamp01(complexity);
-    const rng=mulberry32(seedHash(seed,energy,complexity)),tonics=["C","D","Eb","E","F","G","A","Bb"],tonic=tonics[Math.floor(rng()*tonics.length)],mode=rng()<(.48+complexity*.10)?"minor":"major",scale=getProceduralScale(tonic,mode);
-    const bpm=Math.round(74+energy*68+(rng()-.5)*8),bars=complexity>.72?8:4,beat=60/bpm,barDuration=beat*4,duration=bars*barDuration;
+    const rng=mulberry32(seedHash(seed,energy,complexity));
+    const autoTonics=["C","D","Eb","E","F","G","A","Bb"];
+    const seededTonic=autoTonics[Math.floor(rng()*autoTonics.length)];
+    const seededMode=rng()<(.48+complexity*.10)?"minor":"major";
+    const seededBpm=Math.round(74+energy*68+(rng()-.5)*8);
+    const tonic=PROCEDURAL_KEYS.includes(proceduralOverrides.tonic)?proceduralOverrides.tonic:seededTonic;
+    const mode=PROCEDURAL_MODES.includes(proceduralOverrides.mode)?proceduralOverrides.mode:seededMode;
+    const bpm=Number.isFinite(proceduralOverrides.bpm)?proceduralOverrides.bpm:seededBpm;
+    const scale=getProceduralScale(tonic,mode);
+    const bars=complexity>.72?8:4,beat=60/bpm,barDuration=beat*4,duration=bars*barDuration;
     const majorProgressions=[[1,5,6,4],[1,4,5,1],[6,4,1,5],[1,6,2,5],[1,3,4,5]],minorProgressions=[[1,6,3,7],[1,4,6,5],[1,7,6,7],[6,7,1,1],[1,3,7,6]],pool=mode==="minor"?minorProgressions:majorProgressions;
-    let progression=pool[Math.floor(rng()*pool.length)].slice();if(complexity>.80&&rng()>.45)progression=[...progression.slice(0,3),2,5];
+    const seededProgression=pool[Math.floor(rng()*pool.length)].slice();
+    const manualChord=Number.isInteger(proceduralOverrides.chordIndex)?PROCEDURAL_CHORD_PROGRAMS[proceduralOverrides.chordIndex]:null;
+    let progression=manualChord?manualChord.degrees.slice():seededProgression;
+    if(!manualChord&&complexity>.80&&rng()>.45)progression=[...progression.slice(0,3),2,5];
     const chordEvents=[];for(let bar=0;bar<bars;bar++){const degree=progression[bar%progression.length],root=scale[(degree-1+7)%7],chord=degreeChord(tonic,mode,scale,degree,complexity,rng);chordEvents.push({time:bar*barDuration,duration:barDuration*.94,degree,root,notes:chord.notes,symbol:chord.symbol})}
     const bassEvents=[];for(let bar=0;bar<bars;bar++){const chord=chordEvents[bar],root=chord.root,subdivision=energy>.66?.5:1,steps=Math.round(4/subdivision);for(let step=0;step<steps;step++){if(step&&complexity<.28&&rng()>.62)continue;let note=root;if(complexity>.55&&step===steps-1&&rng()>.35)note=scale[(scale.indexOf(root)+6)%7];else if(complexity>.72&&rng()>.78)note=chord.notes[Math.floor(rng()*Math.min(3,chord.notes.length))];bassEvents.push({time:bar*barDuration+step*subdivision*beat,duration:beat*subdivision*.78,note})}}
     const melodyEvents=[],melodyStep=complexity>.76?.25:complexity>.38?.5:1,melodySteps=Math.round((bars*4)/melodyStep);let lastDegree=Math.floor(rng()*5)+1;
     for(let step=0;step<melodySteps;step++){const bar=Math.floor((step*melodyStep)/4),chord=chordEvents[Math.min(chordEvents.length-1,bar)],restChance=.54-energy*.28-complexity*.12;if(rng()<restChance)continue;const chordIndexes=chord.notes.map(n=>Math.max(0,scale.indexOf(n)));if(rng()<.58&&chordIndexes.length)lastDegree=chordIndexes[Math.floor(rng()*chordIndexes.length)];else{const motion=rng()<.5?-1:1,leap=complexity>.68&&rng()>.78?2:1;lastDegree=(lastDegree+motion*leap+7)%7}const sync=complexity>.48&&rng()>.72?melodyStep*.5:0;melodyEvents.push({time:Math.min(duration-.04,(step*melodyStep+sync)*beat),duration:beat*melodyStep*(complexity>.70?.72:.84),note:scale[lastDegree%7],octave:rng()>.78?5:4})}
     const drumEvents=[];for(let bar=0;bar<bars;bar++){const barStart=bar*barDuration;for(let b=0;b<4;b++){const t=barStart+b*beat;if(b===0||b===2||(energy>.72&&b===3&&rng()>.55))drumEvents.push({type:"kick",time:t,amp:.80});if(b===1||b===3)drumEvents.push({type:"snare",time:t,amp:.66+energy*.18})}const hatStep=energy>.62||complexity>.58?.5:1;for(let h=0;h<4/hatStep;h++){const t=barStart+h*hatStep*beat,off=h%2===1;if(!off||energy>.28||rng()>.4)drumEvents.push({type:"hat",time:t,amp:off?.20+.18*energy:.14+.12*energy})}if(complexity>.72&&rng()>.42)drumEvents.push({type:"kick",time:barStart+3.5*beat,amp:.58})}
     const percussionEvents=[],shakeStep=energy>.58?.5:1;for(let t=0,step=0;t<duration-.02;t+=shakeStep*beat,step++){if(rng()<(.28+energy*.48))percussionEvents.push({type:"shaker",time:t,amp:.12+.18*energy});if(step%Math.round(4/shakeStep)===Math.round(1/shakeStep)&&rng()<(.35+complexity*.35))percussionEvents.push({type:"tamb",time:t,amp:.18+.20*energy})}
-    const program={seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" · ")};
+    const program={seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" · "),manual:{tonic:proceduralOverrides.tonic!==null,mode:proceduralOverrides.mode!==null,bpm:proceduralOverrides.bpm!==null,chords:proceduralOverrides.chordIndex!==null}};
     program.sf2Voices=chooseProceduralSf2Voices(program);
     return program;
   }
@@ -7455,35 +7769,113 @@
     channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});
     updateSoloRouting();
     updatePlaylistDuration();
-    loadReadout.textContent=proceduralSoundFonts.size>=3?"TRI SF2":proceduralSoundFonts.size===2?"DUAL SF2":proceduralSoundFonts.size?"SF2 READY":"PROC READY";
+    if(proceduralSoundFontMode==="auto")loadReadout.textContent=proceduralSoundFonts.size>=3?"TRI SF2":proceduralSoundFonts.size===2?"DUAL SF2":proceduralSoundFonts.size?"SF2 READY":"PROC READY";
+    else loadReadout.textContent=proceduralSoundFonts.has(proceduralSoundFontMode)?`${proceduralSoundFontDisplayName()} READY`:`${proceduralSoundFontDisplayName()} MISS`;
     updateProceduralReadouts(program);
     return true;
+  }
+
+  function setProcManualLamp(controlName,manual){
+    proceduralDeck?.querySelector(`[data-proc-control="${controlName}"] .proc-lock-lamp`)?.classList.toggle("active",!!manual);
   }
 
   function updateProceduralReadouts(program=currentProceduralProgram){
     if(!program)return;
     const energy=Number(formatSteppedPercent01(program.energy));
     const complexity=Number(formatSteppedPercent01(program.complexity));
+    const keyIndex=Math.max(0,PROCEDURAL_KEYS.indexOf(program.tonic));
+    const modeIndex=program.mode==="minor"?1:0;
+    const chordIndex=Number.isInteger(proceduralOverrides.chordIndex)?proceduralOverrides.chordIndex:Math.max(0,PROCEDURAL_CHORD_PROGRAMS.findIndex(item=>item.label===program.chordLabel));
+    const sourceIndex=Math.max(0,["auto","sf64","rush","genies"].indexOf(proceduralSoundFontMode));
     proceduralSeedReadout.textContent=String(program.seed).padStart(4,"0");
-    proceduralKeyReadout.textContent=`${program.tonic.toUpperCase()} ${program.mode==="minor"?"MIN":"MAJ"}`;
+    proceduralKeyReadout.textContent=program.tonic;
+    proceduralModeReadout.textContent=program.mode==="minor"?"MINOR":"MAJOR";
     proceduralTempoReadout.textContent=`${program.bpm} BPM`;
     proceduralEnergyReadout.textContent=String(energy);
     proceduralComplexityReadout.textContent=String(complexity);
     proceduralChordReadout.textContent=program.chordLabel;
-    proceduralEnergyReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${energy}%`);
-    proceduralComplexityReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${complexity}%`);
+    proceduralSoundFontReadout.textContent=proceduralSoundFontDisplayName();
+    if(proceduralKeyControl)proceduralKeyControl.value=String(keyIndex);
+    if(proceduralModeControl)proceduralModeControl.value=String(modeIndex);
+    if(proceduralTempoControl)proceduralTempoControl.value=String(program.bpm);
+    if(proceduralEnergyControl)proceduralEnergyControl.value=String(energy);
+    if(proceduralComplexityControl)proceduralComplexityControl.value=String(complexity);
+    if(proceduralChordControl)proceduralChordControl.value=String(chordIndex>=0?chordIndex:0);
+    if(proceduralSoundFontControl)proceduralSoundFontControl.value=String(sourceIndex);
+    setProcManualLamp("key",proceduralOverrides.tonic!==null);
+    setProcManualLamp("mode",proceduralOverrides.mode!==null);
+    setProcManualLamp("tempo",proceduralOverrides.bpm!==null);
+    setProcManualLamp("chords",proceduralOverrides.chordIndex!==null);
     proceduralDeck?.style.setProperty("--vibe-x",`${program.complexity*100}%`);
     proceduralDeck?.style.setProperty("--vibe-y",`${(1-program.energy)*100}%`);
     proceduralVibePad?.setAttribute("aria-valuetext",`Energy ${energy}, complexity ${complexity}`);
   }
+
   function syncProceduralModeUi(showMonitor=false){const active=appMode==="procedural";mixerSurface.classList.toggle("is-procedural",active);proceduralModeBtn?.classList.toggle("active",active);proceduralModeBtn?.setAttribute("aria-pressed",String(active));if(proceduralDeck){proceduralDeck.hidden=!active;proceduralDeck.classList.toggle("hidden",!active);proceduralDeck.classList.toggle("flex",active)}prevTrackBtn.title=active?"Previous procedural seed":"Previous folder";prevTrackBtn.setAttribute("aria-label",prevTrackBtn.title);nextTrackBtn.title=active?"Next procedural seed":"Next folder";nextTrackBtn.setAttribute("aria-label",nextTrackBtn.title);if(active&&currentProceduralProgram)updateProceduralReadouts(currentProceduralProgram);if(showMonitor)showSystemReadout(active?"PROCEDURAL MODE":"PLAYLIST MODE",active?"SEED GENERATOR":"TRACK PROGRAM",active?`SEED ${String(proceduralSeed).padStart(4,"0")}`:"RESTORED")}
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,"VIBE PROGRAM",`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+
+  function saveProceduralHardwarePrefs(){
+    persistentPrefs.proceduralEnergy=proceduralEnergy;
+    persistentPrefs.proceduralComplexity=proceduralComplexity;
+    persistentPrefs.proceduralTonicOverride=proceduralOverrides.tonic;
+    persistentPrefs.proceduralModeOverride=proceduralOverrides.mode;
+    persistentPrefs.proceduralTempoOverride=proceduralOverrides.bpm;
+    persistentPrefs.proceduralChordOverride=proceduralOverrides.chordIndex;
+    persistentPrefs.proceduralSoundFont=proceduralSoundFontMode;
+    savePersistentPrefs();
+  }
+
+  function regenerateProceduralHardware({preservePosition=true}={}){
+    saveProceduralHardwarePrefs();
+    if(appMode!=="procedural")return;
+    const shouldPlay=isPlaying;
+    clearTimeout(proceduralRegenerateTimer);
+    proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition}),25);
+  }
+
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
   async function stepProceduralSeed(delta){const shouldPlay=isPlaying;await loadProceduralSeed(proceduralSeed+delta,shouldPlay)}
-  function setProceduralVibeFromPoint(clientX,clientY,{commit=false}={}){if(!proceduralVibePad)return;const rect=proceduralVibePad.getBoundingClientRect();if(!rect.width||!rect.height)return;proceduralComplexity=snapProceduralUnit((clientX-rect.left)/rect.width);proceduralEnergy=snapProceduralUnit(1-(clientY-rect.top)/rect.height);proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);const liveEnergy=formatSteppedPercent01(proceduralEnergy),liveComplexity=formatSteppedPercent01(proceduralComplexity);proceduralEnergyReadout.textContent=liveEnergy;proceduralComplexityReadout.textContent=liveComplexity;proceduralEnergyReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${proceduralEnergy*100}%`);proceduralComplexityReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${proceduralComplexity*100}%`);proceduralVibePad.setAttribute("aria-valuetext",`Energy ${liveEnergy}, complexity ${liveComplexity}`);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;if(commit){savePersistentPrefs();const shouldPlay=isPlaying;clearTimeout(proceduralRegenerateTimer);proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true}),20)}}
-  function nudgeProceduralVibe(dx,dy){proceduralComplexity=snapProceduralUnit(proceduralComplexity+dx);proceduralEnergy=snapProceduralUnit(proceduralEnergy+dy);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const shouldPlay=isPlaying;loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true})}
+  function setProceduralVibeFromPoint(clientX,clientY,{commit=false}={}){if(!proceduralVibePad)return;const rect=proceduralVibePad.getBoundingClientRect();if(!rect.width||!rect.height)return;proceduralComplexity=snapProceduralUnit((clientX-rect.left)/rect.width);proceduralEnergy=snapProceduralUnit(1-(clientY-rect.top)/rect.height);proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);const liveEnergy=formatSteppedPercent01(proceduralEnergy),liveComplexity=formatSteppedPercent01(proceduralComplexity);proceduralEnergyReadout.textContent=liveEnergy;proceduralComplexityReadout.textContent=liveComplexity;if(proceduralEnergyControl)proceduralEnergyControl.value=liveEnergy;if(proceduralComplexityControl)proceduralComplexityControl.value=liveComplexity;proceduralVibePad.setAttribute("aria-valuetext",`Energy ${liveEnergy}, complexity ${liveComplexity}`);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;if(commit)regenerateProceduralHardware({preservePosition:true})}
+  function nudgeProceduralVibe(dx,dy){proceduralComplexity=snapProceduralUnit(proceduralComplexity+dx);proceduralEnergy=snapProceduralUnit(proceduralEnergy+dy);regenerateProceduralHardware({preservePosition:true})}
+
+  function previewProceduralHardwareControl(kind,rawValue){
+    const value=Number(rawValue);
+    if(kind==="key")proceduralKeyReadout.textContent=PROCEDURAL_KEYS[Math.max(0,Math.min(PROCEDURAL_KEYS.length-1,Math.round(value)))];
+    else if(kind==="mode")proceduralModeReadout.textContent=value>=.5?"MINOR":"MAJOR";
+    else if(kind==="tempo")proceduralTempoReadout.textContent=`${Math.round(value)} BPM`;
+    else if(kind==="chords")proceduralChordReadout.textContent=PROCEDURAL_CHORD_PROGRAMS[Math.max(0,Math.min(PROCEDURAL_CHORD_PROGRAMS.length-1,Math.round(value)))]?.label||"I · V · VI · IV";
+    else if(kind==="soundfont")proceduralSoundFontReadout.textContent=proceduralSoundFontDisplayName(["auto","sf64","rush","genies"][Math.max(0,Math.min(3,Math.round(value)))]) ;
+    else if(kind==="energy"){proceduralEnergy=snapProceduralUnit(value/100);proceduralEnergyReadout.textContent=formatSteppedPercent01(proceduralEnergy);proceduralDeck?.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`)}
+    else if(kind==="complexity"){proceduralComplexity=snapProceduralUnit(value/100);proceduralComplexityReadout.textContent=formatSteppedPercent01(proceduralComplexity);proceduralDeck?.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`)}
+  }
+
+  function commitProceduralHardwareControl(kind,rawValue){
+    const value=Number(rawValue);
+    if(kind==="key")proceduralOverrides.tonic=PROCEDURAL_KEYS[Math.max(0,Math.min(PROCEDURAL_KEYS.length-1,Math.round(value)))];
+    else if(kind==="mode")proceduralOverrides.mode=value>=.5?"minor":"major";
+    else if(kind==="tempo")proceduralOverrides.bpm=Math.max(60,Math.min(180,Math.round(value)));
+    else if(kind==="chords")proceduralOverrides.chordIndex=Math.max(0,Math.min(PROCEDURAL_CHORD_PROGRAMS.length-1,Math.round(value)));
+    else if(kind==="soundfont")proceduralSoundFontMode=["auto","sf64","rush","genies"][Math.max(0,Math.min(3,Math.round(value)))];
+    else if(kind==="energy")proceduralEnergy=snapProceduralUnit(value/100);
+    else if(kind==="complexity")proceduralComplexity=snapProceduralUnit(value/100);
+    regenerateProceduralHardware({preservePosition:true});
+  }
+
+  function resetProceduralOverride(kind){
+    if(kind==="key")proceduralOverrides.tonic=null;
+    else if(kind==="mode")proceduralOverrides.mode=null;
+    else if(kind==="tempo")proceduralOverrides.bpm=null;
+    else if(kind==="chords")proceduralOverrides.chordIndex=null;
+    else return;
+    regenerateProceduralHardware({preservePosition:true});
+    if(appMode!=="procedural"){
+      const preview=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);
+      updateProceduralReadouts(preview);
+    }
+  }
+
 
   function dbToGain(db) { return Math.pow(10,db/20); }
 
@@ -10098,6 +10490,34 @@
       else if(event.key==="ArrowUp"){event.preventDefault();nudgeProceduralVibe(0,step)}
       else if(event.key==="ArrowDown"){event.preventDefault();nudgeProceduralVibe(0,-step)}
     });
+  }
+
+
+  const proceduralHardwareControls = [
+    ["key",proceduralKeyControl,proceduralKeyReadout],
+    ["mode",proceduralModeControl,proceduralModeReadout],
+    ["tempo",proceduralTempoControl,proceduralTempoReadout],
+    ["chords",proceduralChordControl,proceduralChordReadout],
+    ["energy",proceduralEnergyControl,proceduralEnergyReadout],
+    ["complexity",proceduralComplexityControl,proceduralComplexityReadout],
+    ["soundfont",proceduralSoundFontControl,proceduralSoundFontReadout]
+  ];
+  for(const [kind,input,screen] of proceduralHardwareControls){
+    if(!input)continue;
+    input.addEventListener("input",()=>previewProceduralHardwareControl(kind,input.value));
+    input.addEventListener("change",()=>commitProceduralHardwareControl(kind,input.value));
+    input.addEventListener("wheel",event=>{
+      event.preventDefault();
+      const step=Number(input.step)||1,min=Number(input.min)||0,max=Number(input.max)||100;
+      const next=Math.max(min,Math.min(max,Number(input.value)+(event.deltaY<0?step:-step)));
+      input.value=String(next);
+      previewProceduralHardwareControl(kind,next);
+      commitProceduralHardwareControl(kind,next);
+    },{passive:false});
+    if(["key","mode","tempo","chords"].includes(kind)&&screen){
+      screen.title="Double-click to return this parameter to seed auto";
+      screen.addEventListener("dblclick",event=>{event.preventDefault();resetProceduralOverride(kind)});
+    }
   }
 
 
