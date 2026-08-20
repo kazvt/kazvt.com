@@ -4705,6 +4705,258 @@
       .playlist-hardware-option__copy small{font-size:6px !important}
     }
 
+
+    /* ===== PATCH: full-height side-mounted stereo meter rails =====
+       The old stereo meter row beneath the knobs has been removed. Each
+       channel now has a separate L/R ladder mounted beside the full knob bank,
+       like narrow edge meters built into a vintage modular console strip. */
+    .controls-zone{
+      grid-template-rows:minmax(0,1fr) auto !important;
+      gap:clamp(5px,.72vh,8px) !important;
+    }
+
+    .knob-meter-rack{
+      position:relative;
+      width:100%;
+      height:100%;
+      min-height:0;
+      grid-template-columns:
+        clamp(9px,1.05vw,12px)
+        minmax(0,1fr)
+        clamp(9px,1.05vw,12px) !important;
+      column-gap:clamp(3px,.36vw,5px) !important;
+      align-items:stretch;
+      padding:2px 0 1px;
+    }
+
+    /* Subtle stamped chassis bed joining knobs and meter rails physically. */
+    .knob-meter-rack::before{
+      content:"";
+      position:absolute;
+      inset:0 -2px;
+      z-index:0;
+      pointer-events:none;
+      border-top:1px solid rgba(255,255,255,.018);
+      border-bottom:1px solid rgba(0,0,0,.30);
+      background:
+        radial-gradient(circle at 14% 9%,rgba(228,217,193,.018) 0 .7px,transparent .95px) 0 0/12px 15px,
+        linear-gradient(90deg,rgba(0,0,0,.09),transparent 14% 86%,rgba(0,0,0,.11));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.012),
+        inset 0 -1px 0 rgba(0,0,0,.20);
+      opacity:.82;
+    }
+
+    .knob-meter-rack > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .knob-meter-rack .knob-stack{
+      height:100%;
+      min-width:0;
+      min-height:0;
+    }
+
+    .side-meter{
+      --meter-side-gap:2px;
+      position:relative;
+      display:flex;
+      width:100%;
+      height:100%;
+      min-height:0;
+      padding:clamp(5px,.8vh,8px) 2px clamp(4px,.65vh,7px);
+      align-items:stretch;
+      justify-content:center;
+      overflow:visible;
+      border:1px solid #080709;
+      border-radius:2px;
+      background:
+        linear-gradient(101deg,rgba(255,255,255,.028),transparent 24% 72%,rgba(255,255,255,.008)),
+        radial-gradient(circle at 44% 14%,rgba(212,200,174,.022) 0 .7px,transparent 1px) 0 0/9px 13px,
+        linear-gradient(90deg,#17171a 0%,#0b0b0d 28%,#060607 51%,#0c0c0e 72%,#17171a 100%);
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,.93),
+        inset 1px 0 0 rgba(255,255,255,.022),
+        inset -1px 0 0 rgba(0,0,0,.70),
+        0 0 0 1px #343238,
+        0 1px 1px rgba(0,0,0,.72);
+    }
+
+    /* Narrow metal retainer / slightly worn acrylic face. */
+    .side-meter::before{
+      content:"";
+      position:absolute;
+      inset:2px 1px;
+      z-index:4;
+      pointer-events:none;
+      border-radius:1px;
+      background:
+        linear-gradient(103deg,transparent 0 31%,rgba(255,255,255,.030) 31.3% 31.8%,transparent 32.1% 100%),
+        linear-gradient(78deg,transparent 0 68%,rgba(255,255,255,.016) 68.2% 68.6%,transparent 68.9% 100%);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.012);
+      opacity:.72;
+    }
+
+    /* Calibration notches sit on the outside edge of each meter, like
+       silk-screen marks on the channel face rather than pixels in a widget. */
+    .side-meter::after{
+      content:"";
+      position:absolute;
+      top:clamp(9px,1.25vh,13px);
+      bottom:clamp(7px,1vh,11px);
+      width:3px;
+      z-index:5;
+      pointer-events:none;
+      background:repeating-linear-gradient(
+        to bottom,
+        rgba(190,183,165,.34) 0 1px,
+        transparent 1px clamp(8px,1.8vh,13px)
+      );
+      filter:drop-shadow(0 1px 0 #050506);
+      opacity:.60;
+    }
+
+    .side-meter--left::after{left:-4px}
+    .side-meter--right::after{right:-4px}
+
+    .side-meter-letter{
+      position:absolute;
+      top:1px;
+      left:50%;
+      z-index:7;
+      transform:translateX(-50%);
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:clamp(5px,.62vh,7px);
+      line-height:1;
+      font-weight:900;
+      letter-spacing:0;
+      color:#9b968a;
+      text-shadow:0 1px 0 #050506;
+      opacity:.86;
+      pointer-events:none;
+    }
+
+    .side-meter .meter-col{
+      position:relative;
+      width:100% !important;
+      height:100% !important;
+      min-height:0 !important;
+      margin:0;
+      overflow:hidden;
+      border:1px solid #030304 !important;
+      border-radius:0 !important;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(89,106,65,.10) 0 4px,
+          #020303 4px 6px
+        ) !important;
+      box-shadow:
+        inset 0 0 5px #000,
+        inset 1px 0 0 rgba(255,255,255,.012),
+        0 0 0 1px rgba(82,78,68,.14) !important;
+    }
+
+    .side-meter .meter-col::before{
+      background:linear-gradient(
+        to top,
+        rgba(75,112,58,.12) 0 68%,
+        rgba(156,119,39,.12) 68% 86%,
+        rgba(143,47,43,.15) 86% 100%
+      ) !important;
+    }
+
+    .side-meter .meter-col::after{
+      z-index:3 !important;
+      background:repeating-linear-gradient(
+        to bottom,
+        transparent 0 4px,
+        rgba(0,0,0,.94) 4px 6px
+      ) !important;
+    }
+
+    .side-meter .meter-fill{
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:2;
+      background:linear-gradient(
+        to top,
+        #4c8a43 0 68%,
+        #ae8932 68% 86%,
+        #ad3d3b 86% 100%
+      ) !important;
+      filter:saturate(.86) brightness(.91) !important;
+      box-shadow:
+        0 0 3px rgba(74,145,65,.33),
+        0 0 6px rgba(74,145,65,.09) !important;
+      transition:height .055s linear !important;
+    }
+
+    /* Slightly heavier meter retainers on the fixed master strip. */
+    .master-strip .side-meter{
+      background:
+        linear-gradient(101deg,rgba(255,255,255,.030),transparent 24% 72%,rgba(255,255,255,.008)),
+        radial-gradient(circle at 44% 14%,rgba(212,200,174,.022) 0 .7px,transparent 1px) 0 0/9px 13px,
+        linear-gradient(90deg,#1a191c 0%,#0c0b0e 28%,#050506 51%,#0c0b0e 72%,#1a191c 100%);
+      box-shadow:
+        inset 0 2px 5px rgba(0,0,0,.95),
+        inset 1px 0 0 rgba(255,255,255,.024),
+        0 0 0 1px #3b383e,
+        0 1px 1px rgba(0,0,0,.78);
+    }
+
+    /* The legacy below-knob meter no longer exists in channel/master markup. */
+    .controls-zone > .meter{display:none !important}
+
+    /* Responsive pressure relief: preserve full-height meters while narrowing
+       their metal housings and the gaps before shrinking the actual knobs. */
+    @media(max-width:760px){
+      .knob-meter-rack{
+        grid-template-columns:8px minmax(0,1fr) 8px !important;
+        column-gap:3px !important;
+      }
+      .side-meter{padding-left:1px;padding-right:1px}
+      .side-meter--left::after{left:-3px}
+      .side-meter--right::after{right:-3px}
+    }
+
+    @media(max-height:650px){
+      .knob-meter-rack{padding-top:1px;padding-bottom:0}
+      .side-meter{padding-top:5px;padding-bottom:4px}
+    }
+
+    @media(max-height:500px){
+      .controls-zone{gap:2px !important}
+      .knob-meter-rack{
+        grid-template-columns:7px minmax(0,1fr) 7px !important;
+        column-gap:2px !important;
+        padding:0;
+      }
+      .side-meter{
+        padding:4px 1px 3px;
+        border-radius:1px;
+      }
+      .side-meter-letter{font-size:5px}
+      .side-meter::after{
+        top:7px;
+        bottom:5px;
+        background:repeating-linear-gradient(to bottom,rgba(190,183,165,.28) 0 1px,transparent 1px 8px);
+      }
+    }
+
+    @media(max-height:410px){
+      .knob-meter-rack{
+        grid-template-columns:6px minmax(0,1fr) 6px !important;
+        column-gap:2px !important;
+      }
+      .side-meter{padding:3px 0 2px}
+      .side-meter-letter{display:none}
+      .side-meter--left::after{left:-2px}
+      .side-meter--right::after{right:-2px}
+    }
+
   </style>
 </head>
 
@@ -6347,16 +6599,23 @@
           </span>
         </div>
 
-        <div class="controls-zone min-h-0 grid grid-rows-[minmax(0,1fr)_auto_auto]">
-          <div class="knob-stack">
-            ${knobMarkup("TRIM",state.trim,index,"trim")}
-            ${knobMarkup("PAN",state.pan,index,"pan")}
-            ${knobMarkup("ROOM",state.room,index,"room")}
-          </div>
+        <div class="controls-zone min-h-0 grid grid-rows-[minmax(0,1fr)_auto]">
+          <div class="knob-meter-rack min-h-0 grid h-full grid-cols-[clamp(8px,1vw,11px)_minmax(0,1fr)_clamp(8px,1vw,11px)] items-stretch gap-1">
+            <div class="side-meter side-meter--left relative h-full min-h-0" aria-label="${title} left output meter">
+              <span class="side-meter-letter" aria-hidden="true">L</span>
+              <div class="meter-col h-full"><div class="meter-fill" data-meter-l></div></div>
+            </div>
 
-          <div class="meter" aria-label="${title} output meter">
-            <div class="meter-col"><div class="meter-fill" data-meter-l></div></div>
-            <div class="meter-col"><div class="meter-fill" data-meter-r></div></div>
+            <div class="knob-stack min-w-0">
+              ${knobMarkup("TRIM",state.trim,index,"trim")}
+              ${knobMarkup("PAN",state.pan,index,"pan")}
+              ${knobMarkup("ROOM",state.room,index,"room")}
+            </div>
+
+            <div class="side-meter side-meter--right relative h-full min-h-0" aria-label="${title} right output meter">
+              <span class="side-meter-letter" aria-hidden="true">R</span>
+              <div class="meter-col h-full"><div class="meter-fill" data-meter-r></div></div>
+            </div>
           </div>
 
           <div class="buttons stem-action-buttons">
@@ -6383,16 +6642,23 @@
       <aside class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)] master-strip">
         <div class="channel-name text-center !text-[#d9d7cf]">MASTER</div>
 
-        <div class="controls-zone min-h-0 grid grid-rows-[minmax(0,1fr)_auto_auto]">
-          <div class="knob-stack">
-            ${knobMarkup("TONE",masterState.tone,"master","tone","Master")}
-            ${knobMarkup("PAN",masterState.pan,"master","pan","Master")}
-            ${knobMarkup("ROOM",masterState.room,"master","room","Master")}
-          </div>
+        <div class="controls-zone min-h-0 grid grid-rows-[minmax(0,1fr)_auto]">
+          <div class="knob-meter-rack min-h-0 grid h-full grid-cols-[clamp(8px,1vw,11px)_minmax(0,1fr)_clamp(8px,1vw,11px)] items-stretch gap-1">
+            <div class="side-meter side-meter--left relative h-full min-h-0" aria-label="Master left output meter">
+              <span class="side-meter-letter" aria-hidden="true">L</span>
+              <div class="meter-col h-full"><div class="meter-fill master-meter" data-master-meter-l></div></div>
+            </div>
 
-          <div class="meter" aria-label="Master output meter">
-            <div class="meter-col"><div class="meter-fill master-meter" data-master-meter-l></div></div>
-            <div class="meter-col"><div class="meter-fill master-meter" data-master-meter-r></div></div>
+            <div class="knob-stack min-w-0">
+              ${knobMarkup("TONE",masterState.tone,"master","tone","Master")}
+              ${knobMarkup("PAN",masterState.pan,"master","pan","Master")}
+              ${knobMarkup("ROOM",masterState.room,"master","room","Master")}
+            </div>
+
+            <div class="side-meter side-meter--right relative h-full min-h-0" aria-label="Master right output meter">
+              <span class="side-meter-letter" aria-hidden="true">R</span>
+              <div class="meter-col h-full"><div class="meter-fill master-meter" data-master-meter-r></div></div>
+            </div>
           </div>
 
           <div class="buttons master-action-buttons">
