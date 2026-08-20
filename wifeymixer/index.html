@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
+  <script src="sf2-procedural.js"></script>
 
   <style>
     :root{
@@ -6526,6 +6527,46 @@
     {name:"PERCUSSION",role:"percussion",soundfontSlot:"percussion"}
   ];
 
+  // Local SoundFont bank supplied with the mixer.  The path is intentionally
+  // relative to index.html so a deployed folder can simply contain:
+  //   index.html + sf2-procedural.js + soundfonts/SF64.sf2
+  const PROCEDURAL_SF2_URL = "soundfonts/SF64.sf2";
+  let proceduralSoundFont = null;
+  let proceduralSoundFontPromise = null;
+  let proceduralSoundFontError = null;
+
+  // Curated subset of SF64.  Keeping the palette narrow makes the seed feel
+  // like one coherent instrument rack instead of randomly browsing 100+ presets.
+  const SF64_VOICES = Object.freeze({
+    drumsGeneral:{bank:128,program:0,name:"General Percussion"},
+    drumsPower:{bank:128,program:16,name:"Powerful Percussion"},
+
+    bassAcoustic:{bank:0,program:32,name:"Acoustic Bass"},
+    bassFinger:{bank:0,program:33,name:"Electric Bass (F)"},
+    bassPick:{bank:0,program:34,name:"Electric Bass (P)"},
+    bassFretless:{bank:0,program:35,name:"Fretless Bass"},
+    bassSlap:{bank:0,program:36,name:"Slap Bass"},
+    bassSynth1:{bank:0,program:38,name:"Synth Bass 1"},
+    bassSynth2:{bank:0,program:39,name:"Synth Bass 2"},
+
+    keysGrand:{bank:0,program:0,name:"Grand Piano"},
+    keysHonky:{bank:0,program:3,name:"Honky-Tonk"},
+    keysEP1:{bank:0,program:4,name:"Electric Piano 1"},
+    keysEP2:{bank:0,program:5,name:"Electric Piano 2"},
+    keysClav:{bank:0,program:7,name:"Clav"},
+    keysPercOrgan:{bank:0,program:17,name:"Percussive Organ"},
+    keysRockOrgan:{bank:0,program:18,name:"Rock Organ"},
+
+    leadSquare:{bank:0,program:80,name:"Lead 1 (Square)"},
+    leadSaw:{bank:0,program:81,name:"Lead 2 (Sawtooth)"},
+    leadCalliope:{bank:0,program:82,name:"Lead 3 (Callope)"},
+    leadCharang:{bank:0,program:84,name:"Lead 5 (Charang)"},
+    leadBase:{bank:0,program:87,name:"Lead 8 (Lead + Base)"},
+
+    percussionGeneral:{bank:128,program:0,name:"General Percussion"},
+    percussionPower:{bank:128,program:16,name:"Powerful Percussion"}
+  });
+
   function savePersistentPrefs() {
     try {
       localStorage.setItem(PERSIST_KEY, JSON.stringify(persistentPrefs));
@@ -6726,6 +6767,55 @@
   }
   function romanDegree(degree){return["I","II","III","IV","V","VI","VII"][Math.max(0,Math.min(6,degree-1))]}
 
+  function chooseFrom(rng,items){return items[Math.max(0,Math.min(items.length-1,Math.floor(rng()*items.length)))]}
+  function chooseProceduralSf2Voices({seed,energy,complexity}){
+    // Instrument choice belongs to the seed/VIBE identity, not the loop variation.
+    // That means successive loops can phrase differently without changing the band.
+    const rng=mulberry32((seedHash(seed,energy,complexity)^0x53463634)>>>0);
+
+    let bassPool;
+    if(energy<.34) bassPool=[SF64_VOICES.bassAcoustic,SF64_VOICES.bassFinger,SF64_VOICES.bassFretless];
+    else if(energy<.70) bassPool=[SF64_VOICES.bassFinger,SF64_VOICES.bassPick,SF64_VOICES.bassFretless,SF64_VOICES.bassAcoustic];
+    else bassPool=[SF64_VOICES.bassSynth1,SF64_VOICES.bassSynth2,SF64_VOICES.bassSlap,SF64_VOICES.bassPick];
+
+    let keysPool;
+    if(energy<.34) keysPool=[SF64_VOICES.keysGrand,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2];
+    else if(complexity<.48) keysPool=[SF64_VOICES.keysEP1,SF64_VOICES.keysEP2,SF64_VOICES.keysGrand,SF64_VOICES.keysHonky];
+    else keysPool=[SF64_VOICES.keysEP2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan,SF64_VOICES.keysGrand];
+
+    let leadPool;
+    if(energy<.33) leadPool=[SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope,SF64_VOICES.leadCharang];
+    else if(energy<.72) leadPool=[SF64_VOICES.leadSquare,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadCalliope];
+    else leadPool=[SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase,SF64_VOICES.leadSquare];
+
+    return{
+      drums:energy>.68?SF64_VOICES.drumsPower:SF64_VOICES.drumsGeneral,
+      bass:chooseFrom(rng,bassPool),
+      keys:chooseFrom(rng,keysPool),
+      melody:chooseFrom(rng,leadPool),
+      percussion:energy>.82&&complexity>.56?SF64_VOICES.percussionPower:SF64_VOICES.percussionGeneral
+    };
+  }
+
+  async function ensureProceduralSoundFont(){
+    if(proceduralSoundFont)return proceduralSoundFont;
+    if(proceduralSoundFontPromise)return proceduralSoundFontPromise;
+    proceduralSoundFontPromise=(async()=>{
+      if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
+      loadReadout.textContent="SF2 LOAD";
+      const bank=await WifeySF2.load(PROCEDURAL_SF2_URL,{cache:"force-cache"});
+      proceduralSoundFont=bank;
+      proceduralSoundFontError=null;
+      return bank;
+    })().catch(error=>{
+      proceduralSoundFontError=error;
+      proceduralSoundFontPromise=null;
+      console.warn("SF64 unavailable; procedural mode is using the bench-synth fallback.",error);
+      return null;
+    });
+    return proceduralSoundFontPromise;
+  }
+
   function createProceduralProgram(seed,energy,complexity){
     seed=normalizeProceduralSeed(seed);energy=clamp01(energy);complexity=clamp01(complexity);
     const rng=mulberry32(seedHash(seed,energy,complexity)),tonics=["C","D","Eb","E","F","G","A","Bb"],tonic=tonics[Math.floor(rng()*tonics.length)],mode=rng()<(.48+complexity*.10)?"minor":"major",scale=getProceduralScale(tonic,mode);
@@ -6738,7 +6828,9 @@
     for(let step=0;step<melodySteps;step++){const bar=Math.floor((step*melodyStep)/4),chord=chordEvents[Math.min(chordEvents.length-1,bar)],restChance=.54-energy*.28-complexity*.12;if(rng()<restChance)continue;const chordIndexes=chord.notes.map(n=>Math.max(0,scale.indexOf(n)));if(rng()<.58&&chordIndexes.length)lastDegree=chordIndexes[Math.floor(rng()*chordIndexes.length)];else{const motion=rng()<.5?-1:1,leap=complexity>.68&&rng()>.78?2:1;lastDegree=(lastDegree+motion*leap+7)%7}const sync=complexity>.48&&rng()>.72?melodyStep*.5:0;melodyEvents.push({time:Math.min(duration-.04,(step*melodyStep+sync)*beat),duration:beat*melodyStep*(complexity>.70?.72:.84),note:scale[lastDegree%7],octave:rng()>.78?5:4})}
     const drumEvents=[];for(let bar=0;bar<bars;bar++){const barStart=bar*barDuration;for(let b=0;b<4;b++){const t=barStart+b*beat;if(b===0||b===2||(energy>.72&&b===3&&rng()>.55))drumEvents.push({type:"kick",time:t,amp:.80});if(b===1||b===3)drumEvents.push({type:"snare",time:t,amp:.66+energy*.18})}const hatStep=energy>.62||complexity>.58?.5:1;for(let h=0;h<4/hatStep;h++){const t=barStart+h*hatStep*beat,off=h%2===1;if(!off||energy>.28||rng()>.4)drumEvents.push({type:"hat",time:t,amp:off?.20+.18*energy:.14+.12*energy})}if(complexity>.72&&rng()>.42)drumEvents.push({type:"kick",time:barStart+3.5*beat,amp:.58})}
     const percussionEvents=[],shakeStep=energy>.58?.5:1;for(let t=0,step=0;t<duration-.02;t+=shakeStep*beat,step++){if(rng()<(.28+energy*.48))percussionEvents.push({type:"shaker",time:t,amp:.12+.18*energy});if(step%Math.round(4/shakeStep)===Math.round(1/shakeStep)&&rng()<(.35+complexity*.35))percussionEvents.push({type:"tamb",time:t,amp:.18+.20*energy})}
-    return{seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" · ")};
+    const program={seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" · ")};
+    program.sf2Voices=chooseProceduralSf2Voices(program);
+    return program;
   }
 
   /* Every repeat gets a deterministic "band played it again" variation.
@@ -6812,7 +6904,7 @@
     return varied;
   }
 
-  function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,proceduralOrder:index}))}}
+  function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,sf2Voice:program.sf2Voices?.[track.role]||null,proceduralOrder:index}))}}
   function midiFrequency(midi){return 440*Math.pow(2,(midi-69)/12)}
   function createProceduralStereoBuffer(duration){const sampleRate=Math.max(22050,Math.min(32000,audioCtx?.sampleRate||32000)),length=Math.max(1,Math.ceil(duration*sampleRate)),buffer=audioCtx.createBuffer(2,length,sampleRate);return{buffer,left:buffer.getChannelData(0),right:buffer.getChannelData(1),sampleRate}}
   function addSampleStereo(target,index,value,pan=0){if(index<0||index>=target.left.length)return;const p=Math.max(-1,Math.min(1,pan)),l=Math.sqrt((1-p)*.5),r=Math.sqrt((1+p)*.5);target.left[index]+=value*l;target.right[index]+=value*r}
@@ -6821,7 +6913,68 @@
   function addNoiseBurst(target,start,duration,amp=.3,kind="snare",pan=0,rng=Math.random){const sr=target.sampleRate,from=Math.floor(start*sr),len=Math.floor(sr*duration);let prev=0;for(let n=0;n<len&&from+n<target.left.length;n++){const t=n/sr,white=rng()*2-1;let shaped;if(kind==="hat"||kind==="shaker"){shaped=white-prev*.82;prev=white}else shaped=white*.72+Math.sin(2*Math.PI*185*t)*.28;const decay=kind==="hat"?38:kind==="shaker"?25:13;addSampleStereo(target,from+n,shaped*Math.exp(-t*decay)*amp,pan)}}
   function softLimitProceduralBuffer(target){for(const data of[target.left,target.right])for(let i=0;i<data.length;i++)data[i]=Math.tanh(data[i]*1.18)*.86}
   const PROCEDURAL_RENDER_TAIL = .42; // let physical-style decays ring across the bar line
+
+  function renderProceduralSf2StemBuffer(program,stem){
+    if(!proceduralSoundFont)return null;
+    const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL);
+    const role=stem.role;
+    const voice=stem.sf2Voice||program.sf2Voices?.[role];
+    if(!voice||!proceduralSoundFont.getPreset(voice.bank,voice.program))return null;
+    const variationSalt=(program.loopVariation||0)*4099;
+    const rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity));
+    let rendered=false;
+    const play=(midi,time,duration,velocity,amp,pan=0)=>{
+      rendered=proceduralSoundFont.renderNote(target,{bank:voice.bank,program:voice.program,midi,velocity,start:time,duration,amp,pan})||rendered;
+    };
+
+    if(role==="keys"){
+      for(const event of program.chordEvents){
+        const baseOctave=program.complexity>.65?3:4;
+        let previousMidi=-Infinity;
+        const finalChord=event.time>=program.duration-program.barDuration-.001;
+        const noteDuration=finalChord?Math.max(event.duration,program.duration-event.time+.10):event.duration;
+        event.notes.forEach((note,idx)=>{
+          let midi=noteNameToMidi(note,baseOctave);
+          while(midi<=previousMidi)midi+=12;
+          previousMidi=midi;
+          const velocity=Math.round(68+program.energy*22+rng()*10);
+          play(midi,event.time+.008*idx,noteDuration,velocity,.31*(event.ampScale||1),(idx-(event.notes.length-1)/2)*.11);
+        });
+      }
+    }else if(role==="bass"){
+      for(const event of program.bassEvents){
+        play(noteNameToMidi(event.note,event.octave||2),event.time,event.duration,Math.round(78+program.energy*34+rng()*8),.58*(event.ampScale||1),-.04);
+      }
+    }else if(role==="melody"){
+      for(const event of program.melodyEvents){
+        play(noteNameToMidi(event.note,event.octave),event.time,event.duration,Math.round(70+program.energy*38+rng()*12),(.43+.10*program.energy)*(event.ampScale||1),.06);
+      }
+    }else if(role==="drums"){
+      for(const event of program.drumEvents){
+        const velocity=Math.round(Math.max(35,Math.min(127,52+event.amp*74)));
+        if(event.type==="kick")play(36,event.time,.18,velocity,.82,0);
+        else if(event.type==="snare")play(rng()>.28?38:40,event.time,.20,velocity,.76,0);
+        else{
+          const openHat=program.energy>.66&&rng()<.13;
+          play(openHat?46:42,event.time,openHat?.28:.09,velocity,.50,.12);
+        }
+      }
+    }else if(role==="percussion"){
+      for(const event of program.percussionEvents){
+        const velocity=Math.round(Math.max(34,Math.min(127,55+event.amp*90)));
+        // SF64's percussion kit maps tambourine to GM note 54 and shaker to 82.
+        play(event.type==="tamb"?54:82,event.time,event.type==="tamb"?.18:.11,velocity,event.type==="tamb"?.62:.54,event.type==="tamb"?-.15:.18);
+      }
+    }
+
+    if(!rendered)return null;
+    softLimitProceduralBuffer(target);
+    return target.buffer;
+  }
+
   function renderProceduralStemBuffer(program,stem){
+    const sf2Buffer=renderProceduralSf2StemBuffer(program,stem);
+    if(sf2Buffer)return sf2Buffer;
     // IMPORTANT: the rendered buffer is intentionally longer than the musical loop.
     // The transport/scheduler still loops at program.duration, but the extra tail lets
     // the previous variation's cymbals, fills and synth releases overlap naturally
@@ -6849,7 +7002,19 @@
   }
 
   function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
-  function setupProceduralAudioForRenderedChannels(playlist,generation){ensureAudioGraph();const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;channels=playlist.stems.map((stem,index)=>createProceduralChannel(stem,index,defaultStemState(stem),els[index],renderProceduralStemBuffer(program,stem)));channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});updateSoloRouting();updatePlaylistDuration();loadReadout.textContent="PROC READY";if(generation===loadGeneration)updateProceduralReadouts(program)}
+  async function setupProceduralAudioForRenderedChannels(playlist,generation){
+    ensureAudioGraph();
+    await ensureProceduralSoundFont();
+    if(generation!==loadGeneration)return false;
+    const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;
+    channels=playlist.stems.map((stem,index)=>createProceduralChannel(stem,index,defaultStemState(stem),els[index],renderProceduralStemBuffer(program,stem)));
+    channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});
+    updateSoloRouting();
+    updatePlaylistDuration();
+    loadReadout.textContent=proceduralSoundFont?"SF64 READY":"PROC READY";
+    updateProceduralReadouts(program);
+    return true;
+  }
 
   function updateProceduralReadouts(program=currentProceduralProgram){
     if(!program)return;
@@ -6868,7 +7033,7 @@
     proceduralVibePad?.setAttribute("aria-valuetext",`Energy ${energy}, complexity ${complexity}`);
   }
   function syncProceduralModeUi(showMonitor=false){const active=appMode==="procedural";mixerSurface.classList.toggle("is-procedural",active);proceduralModeBtn?.classList.toggle("active",active);proceduralModeBtn?.setAttribute("aria-pressed",String(active));if(proceduralDeck){proceduralDeck.hidden=!active;proceduralDeck.classList.toggle("hidden",!active);proceduralDeck.classList.toggle("flex",active)}prevTrackBtn.title=active?"Previous procedural seed":"Previous folder";prevTrackBtn.setAttribute("aria-label",prevTrackBtn.title);nextTrackBtn.title=active?"Next procedural seed":"Next folder";nextTrackBtn.setAttribute("aria-label",nextTrackBtn.title);if(active&&currentProceduralProgram)updateProceduralReadouts(currentProceduralProgram);if(showMonitor)showSystemReadout(active?"PROCEDURAL MODE":"PLAYLIST MODE",active?"SEED GENERATOR":"TRACK PROGRAM",active?`SEED ${String(proceduralSeed).padStart(4,"0")}`:"RESTORED")}
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);setupProceduralAudioForRenderedChannels(currentPlaylist,generation);horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,"VIBE PROGRAM",`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,"VIBE PROGRAM",`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}

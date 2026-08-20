@@ -1,0 +1,748 @@
+{
+  "sourceFile": "SF64.sf2",
+  "relativeUrl": "soundfonts/SF64.sf2",
+  "metadata": {
+    "version": "2.1",
+    "isng": "EMU8000",
+    "INAM": "SM64SF",
+    "ICRD": "Sat May 14 14:16:44 2016",
+    "IENG": "Pablo's Corner",
+    "ICOP": "Pablo's Corner/Nintendo",
+    "ICMT": "Ripped from Super Mario 64 and Super Mario 64 DS.\n\nMade by Pablo's Corner.\n\nhttp://bit.ly/PablosCornerYT",
+    "ISFT": "Polyphone"
+  },
+  "counts": {
+    "presets": 114,
+    "instruments": 48,
+    "samples": 104
+  },
+  "recommended": {
+    "drums": [
+      {
+        "bank": 128,
+        "program": 0,
+        "name": "General Percussion",
+        "use": "lower/mid energy"
+      },
+      {
+        "bank": 128,
+        "program": 16,
+        "name": "Powerful Percussion",
+        "use": "high energy"
+      }
+    ],
+    "bass": [
+      {
+        "bank": 0,
+        "program": 32,
+        "name": "Acoustic Bass",
+        "use": "low energy / organic"
+      },
+      {
+        "bank": 0,
+        "program": 33,
+        "name": "Electric Bass (F)",
+        "use": "mid energy / rounded"
+      },
+      {
+        "bank": 0,
+        "program": 34,
+        "name": "Electric Bass (P)",
+        "use": "mid energy / articulate"
+      },
+      {
+        "bank": 0,
+        "program": 35,
+        "name": "Fretless Bass",
+        "use": "low-mid energy / fluid"
+      },
+      {
+        "bank": 0,
+        "program": 36,
+        "name": "Slap Bass",
+        "use": "high energy / punch"
+      },
+      {
+        "bank": 0,
+        "program": 38,
+        "name": "Synth Bass 1",
+        "use": "high energy / synthetic"
+      },
+      {
+        "bank": 0,
+        "program": 39,
+        "name": "Synth Bass 2",
+        "use": "high energy / synthetic alternate"
+      }
+    ],
+    "keys": [
+      {
+        "bank": 0,
+        "program": 0,
+        "name": "Grand Piano",
+        "use": "low energy / foundational"
+      },
+      {
+        "bank": 0,
+        "program": 3,
+        "name": "Honky-Tonk",
+        "use": "mid energy / character"
+      },
+      {
+        "bank": 0,
+        "program": 4,
+        "name": "Electric Piano 1",
+        "use": "low-mid energy / soft"
+      },
+      {
+        "bank": 0,
+        "program": 5,
+        "name": "Electric Piano 2",
+        "use": "mid energy / brighter"
+      },
+      {
+        "bank": 0,
+        "program": 7,
+        "name": "Clav",
+        "use": "high complexity / rhythmic"
+      },
+      {
+        "bank": 0,
+        "program": 17,
+        "name": "Percussive Organ",
+        "use": "high complexity / sustained"
+      },
+      {
+        "bank": 0,
+        "program": 18,
+        "name": "Rock Organ",
+        "use": "higher energy / sustained"
+      }
+    ],
+    "melody": [
+      {
+        "bank": 0,
+        "program": 80,
+        "name": "Lead 1 (Square)",
+        "use": "soft-mid energy lead"
+      },
+      {
+        "bank": 0,
+        "program": 81,
+        "name": "Lead 2 (Sawtooth)",
+        "use": "higher energy lead"
+      },
+      {
+        "bank": 0,
+        "program": 82,
+        "name": "Lead 3 (Callope)",
+        "use": "lower energy / rounded lead"
+      },
+      {
+        "bank": 0,
+        "program": 84,
+        "name": "Lead 5 (Charang)",
+        "use": "mid-high energy / character"
+      },
+      {
+        "bank": 0,
+        "program": 87,
+        "name": "Lead 8 (Lead + Base)",
+        "use": "high energy / thick lead"
+      }
+    ],
+    "percussion": [
+      {
+        "bank": 128,
+        "program": 0,
+        "name": "General Percussion",
+        "midiNotes": {
+          "tambourine": 54,
+          "shaker": 82
+        }
+      },
+      {
+        "bank": 128,
+        "program": 16,
+        "name": "Powerful Percussion",
+        "midiNotes": {
+          "tambourine": 54,
+          "shaker": 82
+        },
+        "use": "high energy alternate"
+      }
+    ]
+  },
+  "presets": [
+    {
+      "name": "Slap Bass",
+      "bank": 0,
+      "program": 36
+    },
+    {
+      "name": "Electric Guitar (C)",
+      "bank": 0,
+      "program": 27
+    },
+    {
+      "name": "Electric Piano 1",
+      "bank": 0,
+      "program": 4
+    },
+    {
+      "name": "Strings 1",
+      "bank": 0,
+      "program": 48
+    },
+    {
+      "name": "French Horn",
+      "bank": 0,
+      "program": 60
+    },
+    {
+      "name": "Pan Flute",
+      "bank": 0,
+      "program": 75
+    },
+    {
+      "name": "Accordion",
+      "bank": 0,
+      "program": 21
+    },
+    {
+      "name": "Grand Piano",
+      "bank": 0,
+      "program": 0
+    },
+    {
+      "name": "General Percussion",
+      "bank": 128,
+      "program": 0
+    },
+    {
+      "name": "Steel Drums",
+      "bank": 0,
+      "program": 114
+    },
+    {
+      "name": "Percussive Organ",
+      "bank": 0,
+      "program": 17
+    },
+    {
+      "name": "Electric Bass (F)",
+      "bank": 0,
+      "program": 33
+    },
+    {
+      "name": "Electric Bass (P)",
+      "bank": 0,
+      "program": 34
+    },
+    {
+      "name": "Banjo",
+      "bank": 0,
+      "program": 105
+    },
+    {
+      "name": "Fiddle",
+      "bank": 0,
+      "program": 110
+    },
+    {
+      "name": "Whistle",
+      "bank": 0,
+      "program": 78
+    },
+    {
+      "name": "Acoustic Bass",
+      "bank": 0,
+      "program": 32
+    },
+    {
+      "name": "Rock Organ",
+      "bank": 0,
+      "program": 18
+    },
+    {
+      "name": "Brass Section",
+      "bank": 0,
+      "program": 61
+    },
+    {
+      "name": "Electric Piano 2",
+      "bank": 0,
+      "program": 5
+    },
+    {
+      "name": "Voice Oohs",
+      "bank": 0,
+      "program": 53
+    },
+    {
+      "name": "Strings 2",
+      "bank": 0,
+      "program": 49
+    },
+    {
+      "name": "Orchestra Hit",
+      "bank": 0,
+      "program": 55
+    },
+    {
+      "name": "Synth Bass 1",
+      "bank": 0,
+      "program": 38
+    },
+    {
+      "name": "Synth Bass 2",
+      "bank": 0,
+      "program": 39
+    },
+    {
+      "name": "Lead 1 (Square)",
+      "bank": 0,
+      "program": 80
+    },
+    {
+      "name": "Vibraphone",
+      "bank": 0,
+      "program": 11
+    },
+    {
+      "name": "Marimba",
+      "bank": 0,
+      "program": 12
+    },
+    {
+      "name": "Xylophone",
+      "bank": 0,
+      "program": 13
+    },
+    {
+      "name": "Choir Aahs",
+      "bank": 0,
+      "program": 52
+    },
+    {
+      "name": "Sitar",
+      "bank": 0,
+      "program": 104
+    },
+    {
+      "name": "Pungi",
+      "bank": 0,
+      "program": 107
+    },
+    {
+      "name": "Timpani",
+      "bank": 0,
+      "program": 47
+    },
+    {
+      "name": "Pizzicato Strings",
+      "bank": 0,
+      "program": 45
+    },
+    {
+      "name": "Flute",
+      "bank": 0,
+      "program": 73
+    },
+    {
+      "name": "Fretless Bass",
+      "bank": 0,
+      "program": 35
+    },
+    {
+      "name": "Contrabass",
+      "bank": 0,
+      "program": 43
+    },
+    {
+      "name": "Music Box",
+      "bank": 0,
+      "program": 10
+    },
+    {
+      "name": "Trombone",
+      "bank": 0,
+      "program": 57
+    },
+    {
+      "name": "Trumpet",
+      "bank": 0,
+      "program": 56
+    },
+    {
+      "name": "Church Organ",
+      "bank": 0,
+      "program": 19
+    },
+    {
+      "name": "Lead 5 (Charang)",
+      "bank": 0,
+      "program": 84
+    },
+    {
+      "name": "Distortion Guitar",
+      "bank": 0,
+      "program": 30
+    },
+    {
+      "name": "Overdrive Guitar",
+      "bank": 0,
+      "program": 29
+    },
+    {
+      "name": "Acoustic Guitar (N)",
+      "bank": 0,
+      "program": 24
+    },
+    {
+      "name": "Seashore",
+      "bank": 0,
+      "program": 122
+    },
+    {
+      "name": "Acoustic Guitar (S)",
+      "bank": 0,
+      "program": 25
+    },
+    {
+      "name": "Synth Strings 1",
+      "bank": 0,
+      "program": 50
+    },
+    {
+      "name": "Synth Strings 2",
+      "bank": 0,
+      "program": 51
+    },
+    {
+      "name": "Tuba",
+      "bank": 0,
+      "program": 58
+    },
+    {
+      "name": "Synth Brass 1",
+      "bank": 0,
+      "program": 62
+    },
+    {
+      "name": "Synth Brass 2",
+      "bank": 0,
+      "program": 63
+    },
+    {
+      "name": "Soprano Sax",
+      "bank": 0,
+      "program": 64
+    },
+    {
+      "name": "Alto Sax",
+      "bank": 0,
+      "program": 65
+    },
+    {
+      "name": "Tenor Sax",
+      "bank": 0,
+      "program": 66
+    },
+    {
+      "name": "Baritone Sax",
+      "bank": 0,
+      "program": 67
+    },
+    {
+      "name": "Drawback Organ",
+      "bank": 0,
+      "program": 16
+    },
+    {
+      "name": "Reed Organ",
+      "bank": 0,
+      "program": 20
+    },
+    {
+      "name": "Recorder",
+      "bank": 0,
+      "program": 74
+    },
+    {
+      "name": "Blown Bottle",
+      "bank": 0,
+      "program": 76
+    },
+    {
+      "name": "Bassoon",
+      "bank": 0,
+      "program": 70
+    },
+    {
+      "name": "Clarinet",
+      "bank": 0,
+      "program": 71
+    },
+    {
+      "name": "Harmonica",
+      "bank": 0,
+      "program": 22
+    },
+    {
+      "name": "Lead 2 (Sawtooth)",
+      "bank": 0,
+      "program": 81
+    },
+    {
+      "name": "Bright Acoustic Pian",
+      "bank": 0,
+      "program": 1
+    },
+    {
+      "name": "Electric Grand",
+      "bank": 0,
+      "program": 2
+    },
+    {
+      "name": "Honky-Tonk",
+      "bank": 0,
+      "program": 3
+    },
+    {
+      "name": "Tinkle Bell",
+      "bank": 0,
+      "program": 112
+    },
+    {
+      "name": "Dulcimer",
+      "bank": 0,
+      "program": 15
+    },
+    {
+      "name": "Harpsichord",
+      "bank": 0,
+      "program": 6
+    },
+    {
+      "name": "Violin",
+      "bank": 0,
+      "program": 40
+    },
+    {
+      "name": "Viola",
+      "bank": 0,
+      "program": 41
+    },
+    {
+      "name": "Electric Guitar (J)",
+      "bank": 0,
+      "program": 26
+    },
+    {
+      "name": "Muted Trumpet",
+      "bank": 0,
+      "program": 59
+    },
+    {
+      "name": "Lead 8 (Lead + Base)",
+      "bank": 0,
+      "program": 87
+    },
+    {
+      "name": "Slap Bass 2",
+      "bank": 0,
+      "program": 37
+    },
+    {
+      "name": "Celesta",
+      "bank": 0,
+      "program": 8
+    },
+    {
+      "name": "FX 3 (crystal)",
+      "bank": 0,
+      "program": 98
+    },
+    {
+      "name": "English Horn",
+      "bank": 0,
+      "program": 69
+    },
+    {
+      "name": "Ocarina",
+      "bank": 0,
+      "program": 79
+    },
+    {
+      "name": "Electric Guitar (M)",
+      "bank": 0,
+      "program": 28
+    },
+    {
+      "name": "Tremolo Strings",
+      "bank": 0,
+      "program": 44
+    },
+    {
+      "name": "FX 5 (Brightness)",
+      "bank": 0,
+      "program": 100
+    },
+    {
+      "name": "Pad 5 (bowed)",
+      "bank": 0,
+      "program": 92
+    },
+    {
+      "name": "Pad 6 (metallic)",
+      "bank": 0,
+      "program": 93
+    },
+    {
+      "name": "Pad 1 (new age)",
+      "bank": 0,
+      "program": 88
+    },
+    {
+      "name": "Orchestrial Strings",
+      "bank": 0,
+      "program": 46
+    },
+    {
+      "name": "Powerful Percussion",
+      "bank": 128,
+      "program": 16
+    },
+    {
+      "name": "Synth Voice",
+      "bank": 0,
+      "program": 54
+    },
+    {
+      "name": "Lead 3 (Callope)",
+      "bank": 0,
+      "program": 82
+    },
+    {
+      "name": "Piccolo",
+      "bank": 0,
+      "program": 72
+    },
+    {
+      "name": "Glockenspiel",
+      "bank": 0,
+      "program": 9
+    },
+    {
+      "name": "Kalimba",
+      "bank": 0,
+      "program": 108
+    },
+    {
+      "name": "Skakuhachi",
+      "bank": 0,
+      "program": 77
+    },
+    {
+      "name": "Oboe",
+      "bank": 0,
+      "program": 68
+    },
+    {
+      "name": "FX 4 (Atmosphere)",
+      "bank": 0,
+      "program": 99
+    },
+    {
+      "name": "Agogo",
+      "bank": 0,
+      "program": 113
+    },
+    {
+      "name": "Pad 4 (choir)",
+      "bank": 0,
+      "program": 91
+    },
+    {
+      "name": "Clav",
+      "bank": 0,
+      "program": 7
+    },
+    {
+      "name": "FX 1 (rain)",
+      "bank": 0,
+      "program": 96
+    },
+    {
+      "name": "Synth Drum",
+      "bank": 0,
+      "program": 118
+    },
+    {
+      "name": "Tubular Bells",
+      "bank": 0,
+      "program": 14
+    },
+    {
+      "name": "FX 7 (echoes)",
+      "bank": 0,
+      "program": 102
+    },
+    {
+      "name": "Pad 3 (polysynth)",
+      "bank": 0,
+      "program": 90
+    },
+    {
+      "name": "Taiko Drum",
+      "bank": 0,
+      "program": 116
+    },
+    {
+      "name": "Pad 2 (warm)",
+      "bank": 0,
+      "program": 89
+    },
+    {
+      "name": "Pad 7 (halo)",
+      "bank": 0,
+      "program": 94
+    },
+    {
+      "name": "Reverse Cymbal",
+      "bank": 0,
+      "program": 119
+    },
+    {
+      "name": "Tango Accordion",
+      "bank": 0,
+      "program": 23
+    },
+    {
+      "name": "Gunshot",
+      "bank": 0,
+      "program": 127
+    },
+    {
+      "name": "Shamisen",
+      "bank": 0,
+      "program": 106
+    },
+    {
+      "name": "Lead 6 (voice)",
+      "bank": 0,
+      "program": 85
+    },
+    {
+      "name": "Cello",
+      "bank": 0,
+      "program": 42
+    },
+    {
+      "name": "FX 8 (Sci-Fi)",
+      "bank": 0,
+      "program": 103
+    }
+  ]
+}
