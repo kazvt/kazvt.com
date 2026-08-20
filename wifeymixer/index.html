@@ -7034,6 +7034,9 @@
   let currentProceduralProgram = null;
   const proceduralLoopProgramCache = new Map();
   let proceduralRegenerateTimer = null;
+  let proceduralVibeMorphTimer = null;
+  let proceduralVibeMorphRevision = 0;
+  const PROCEDURAL_VIBE_CROSSFADE = .065;
   const PROCEDURAL_TRACKS = [
     {name:"DRUMS",role:"drums",soundfontSlot:"drums"},
     {name:"BASS",role:"bass",soundfontSlot:"bass"},
@@ -7180,6 +7183,7 @@
   const GENIES_ROLE_SALTS=Object.freeze({drums:0x4452554d,bass:0x42415353,keys:0x4b455953,melody:0x4c454144,percussion:0x50455243});
   const GENIES_WARM_WORDS=/\b(warm|vintage|analog|analogue|tape|mellow|soft|round|rhodes|wurli|wurlitzer|electric\s*piano|e\.?p\.?|organ|clav|strings?|pad|choir)\b/i;
   const GENIES_EDGE_WORDS=/\b(bright|hard|attack|saw|square|lead|brass|sync|acid|dist|drive|metal)\b/i;
+  const GENIES_IMPACT_WORDS=/\b(crash|cymbal|ride|splash|china|gong|impact|hit|explosion|orchestra\s*hit|fx)\b/i;
   const GENIES_ROLE_WORDS=Object.freeze({
     bass:/\b(bass|sub|contrabass|upright)\b/i,
     keys:/\b(piano|keys?|rhodes|wurli|wurlitzer|e\.?p\.?|organ|clav|harpsi|celesta|vibes?|marimba|strings?|pad|choir)\b/i,
@@ -7248,6 +7252,7 @@
       const descriptor=`${name} ${layerWords.join(" ")}`.trim();
       const warm=GENIES_WARM_WORDS.test(descriptor)?1:0;
       const edge=GENIES_EDGE_WORDS.test(descriptor)?1:0;
+      const impact=GENIES_IMPACT_WORDS.test(descriptor)?1:0;
       const drumish=preset.bank>=128||GENIES_ROLE_WORDS.drums.test(descriptor)||GENIES_ROLE_WORDS.percussion.test(descriptor);
 
       // Melodic parts need a continuous octave so generated pitch classes can
@@ -7256,7 +7261,7 @@
         for(const role of ["bass","keys","melody"]){
           const score=geniesRoleScore(role,preset,range,bank,descriptor);
           if(score<3)continue;
-          roles[role].push(sfVoice("genies",preset.bank,preset.program,preset.name,{range:[range.low,range.high],adaptiveScore:score,warmth:warm,edge,gainTrim:geniesLayerTrim(bank,preset,range)}));
+          roles[role].push(sfVoice("genies",preset.bank,preset.program,preset.name,{range:[range.low,range.high],adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range)}));
         }
       }
 
@@ -7266,11 +7271,11 @@
       const drumCoverage=[has(36),has(38)||has(40),has(42),has(46)].filter(Boolean).length;
       if(drumish&&drumCoverage>=3){
         const score=geniesRoleScore("drums",preset,range,bank,descriptor)+drumCoverage;
-        roles.drums.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,gainTrim:geniesLayerTrim(bank,preset,range)}));
+        roles.drums.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range)}));
       }
       if(drumish&&has(54)&&has(82)){
         const score=geniesRoleScore("percussion",preset,range,bank,descriptor)+4;
-        roles.percussion.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,gainTrim:geniesLayerTrim(bank,preset,range)}));
+        roles.percussion.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range)}));
       }
     }
     for(const [role,voices] of Object.entries(roles)){
@@ -7292,11 +7297,18 @@
     const voices=proceduralGeniesVoices.get(role)||[];
     if(!voices.length||!program)return null;
     const salt=GENIES_ROLE_SALTS[role]||0x47454e49;
-    const rng=mulberry32((seedHash(program.seed,program.energy,program.complexity)^salt)>>>0);
+    // Stable draw per seed: moving the pad changes weights, not the random ticket.
+    const rng=mulberry32((seedIdentityHash(program.seed)^salt)>>>0);
+    const intensity=clamp01(program.energy*.72+program.complexity*.28);
+    // Genies percussion mapping contains some very large crash-like hits. Keep
+    // those out of the chill/simple corner entirely; the analogue bench handles
+    // that corner, while Genies percussion opens up as the pad moves up/right.
+    if((role==="drums"||role==="percussion") && intensity<.46 && program.energy<.54)return null;
     const scored=voices.map(voice=>{
       let weight=Math.max(.5,Number(voice.adaptiveScore)||1);
       if(voice.warmth)weight*=.92+(1-program.energy)*.62;
-      if(voice.edge)weight*=.88+program.energy*.58+program.complexity*.16;
+      if(voice.edge)weight*=.78+program.energy*.68+program.complexity*.22;
+      if(voice.impact)weight*=.035+Math.pow(intensity,3)*2.15;
       if(role==="keys")weight*=1.08+(1-program.energy)*.18;
       if(role==="melody")weight*=.95+program.complexity*.22;
       return{voice,weight};
@@ -7309,11 +7321,12 @@
 
   function geniesRoleChance(role,program){
     if(!program)return 0;
+    const intensity=clamp01(program.energy*.72+program.complexity*.28);
     if(role==="keys")return .48+(1-program.energy)*.16+program.complexity*.06;
     if(role==="bass")return .32+(1-program.energy)*.14+program.complexity*.08;
-    if(role==="melody")return .36+program.complexity*.20+program.energy*.05;
-    if(role==="drums")return .16+program.energy*.18;
-    if(role==="percussion")return .18+program.complexity*.20;
+    if(role==="melody")return .34+program.complexity*.20+program.energy*.07;
+    if(role==="drums")return intensity<.46?.015:.05+Math.pow(intensity,2)*.34;
+    if(role==="percussion")return intensity<.50?0:.025+Math.pow(intensity,2.25)*.42;
     return .25;
   }
 
@@ -7477,7 +7490,10 @@
   function clamp01(value){return Math.max(0,Math.min(1,Number(value)||0))}
   function normalizeProceduralSeed(value){const n=Math.trunc(Number(value)||1);return ((n-1)%9999+9999)%9999+1}
   function mulberry32(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-  function seedHash(seed,energy,complexity){const e=Math.round(clamp01(energy)*1000),c=Math.round(clamp01(complexity)*1000);return((normalizeProceduralSeed(seed)*2654435761)^(e*2246822519)^(c*3266489917))>>>0}
+  function seedIdentityHash(seed){return (normalizeProceduralSeed(seed)*2654435761)>>>0}
+  // Keep XY movement out of the core random identity. Energy/complexity should
+  // shape one band's performance instead of silently reseeding the whole band.
+  function seedHash(seed,energy,complexity){const e=Math.round(clamp01(energy)*1000),c=Math.round(clamp01(complexity)*1000);return(seedIdentityHash(seed)^(e*2246822519)^(c*3266489917))>>>0}
   const FALLBACK_SCALE_INTERVALS={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]};
   const NOTE_PC={C:0,"C#":1,DB:1,D:2,"D#":3,EB:3,E:4,F:5,"F#":6,GB:6,G:7,"G#":8,AB:8,A:9,"A#":10,BB:10,B:11};
   function noteNameToMidi(noteName,octave=4){const raw=String(noteName||"C").trim();if(window.Tonal?.Note?.midi){const midi=Tonal.Note.midi(`${raw}${octave}`);if(Number.isFinite(midi))return midi}const pc=NOTE_PC[raw.toUpperCase()]??0;return 12*(octave+1)+pc}
@@ -7521,7 +7537,7 @@
   function chooseProceduralSf2Voices({seed,energy,complexity}){
     // SF64 stays round/neutral; Gotta Rush adds more animated character.
     // The VIBE axes bias the rack and the seed makes the result repeatable.
-    const rng=mulberry32((seedHash(seed,energy,complexity)^0x47525441)>>>0);
+    const rng=mulberry32((seedIdentityHash(seed)^0x47525441)>>>0);
 
     let bassPool;
     if(energy<.28) bassPool=[SF64_VOICES.bassAcoustic,SF64_VOICES.bassFinger,SF64_VOICES.bassFretless,RUSH_VOICES.bassNewDay,RUSH_VOICES.bassMirage];
@@ -7593,7 +7609,7 @@
     if(!pool.length)return null;
     const sourceSalt={sf64:0x53463634,rush:0x52555348}[sourceId]||0x53463231;
     const roleSalt=GENIES_ROLE_SALTS[role]||0x57494645;
-    const rng=mulberry32((seedHash(program?.seed||1,program?.energy||0,program?.complexity||0)^sourceSalt^roleSalt)>>>0);
+    const rng=mulberry32((seedIdentityHash(program?.seed||1)^sourceSalt^roleSalt)>>>0);
     const candidates=preferred?.source===sourceId?[preferred,...pool]:pool;
     return chooseFrom(rng,candidates);
   }
@@ -7606,7 +7622,7 @@
     }
     const genies=chooseGeniesVoice(role,program);
     const salt=(GENIES_ROLE_SALTS[role]||0x47454e49)^0x57494645;
-    const rng=program?mulberry32((seedHash(program.seed,program.energy,program.complexity)^salt)>>>0):null;
+    const rng=program?mulberry32((seedIdentityHash(program.seed)^salt)>>>0):null;
     const favorGenies=!!(genies&&rng&&rng()<geniesRoleChance(role,program));
     const candidates=(favorGenies
       ?[genies,preferred,...(PROCEDURAL_ROLE_FALLBACKS[role]||[])]
@@ -7622,27 +7638,35 @@
 
   function createProceduralProgram(seed,energy,complexity){
     seed=normalizeProceduralSeed(seed);energy=clamp01(energy);complexity=clamp01(complexity);
-    const rng=mulberry32(seedHash(seed,energy,complexity));
+    // Separate deterministic lanes keep XY movement musically continuous: a
+    // density change in drums no longer advances the random stream that chose
+    // the melody, chords, or instruments.
+    const identity=seedIdentityHash(seed);
+    const rngHarmony=mulberry32((identity^0x4841524d)>>>0);
+    const rngBass=mulberry32((identity^0x42415353)>>>0);
+    const rngMelody=mulberry32((identity^0x4d454c4f)>>>0);
+    const rngDrums=mulberry32((identity^0x4452554d)>>>0);
+    const rngPerc=mulberry32((identity^0x50455243)>>>0);
     const autoTonics=["C","D","Eb","E","F","G","A","Bb"];
-    const seededTonic=autoTonics[Math.floor(rng()*autoTonics.length)];
-    const seededMode=rng()<(.48+complexity*.10)?"minor":"major";
-    const seededBpm=Math.round(74+energy*68+(rng()-.5)*8);
+    const seededTonic=autoTonics[Math.floor(rngHarmony()*autoTonics.length)];
+    const seededMode=rngHarmony()<(.48+complexity*.10)?"minor":"major";
+    const seededBpm=Math.round(74+energy*68+(rngHarmony()-.5)*8);
     const tonic=PROCEDURAL_KEYS.includes(proceduralOverrides.tonic)?proceduralOverrides.tonic:seededTonic;
     const mode=PROCEDURAL_MODES.includes(proceduralOverrides.mode)?proceduralOverrides.mode:seededMode;
     const bpm=Number.isFinite(proceduralOverrides.bpm)?proceduralOverrides.bpm:seededBpm;
     const scale=getProceduralScale(tonic,mode);
     const bars=complexity>.72?8:4,beat=60/bpm,barDuration=beat*4,duration=bars*barDuration;
     const majorProgressions=[[1,5,6,4],[1,4,5,1],[6,4,1,5],[1,6,2,5],[1,3,4,5]],minorProgressions=[[1,6,3,7],[1,4,6,5],[1,7,6,7],[6,7,1,1],[1,3,7,6]],pool=mode==="minor"?minorProgressions:majorProgressions;
-    const seededProgression=pool[Math.floor(rng()*pool.length)].slice();
+    const seededProgression=pool[Math.floor(rngHarmony()*pool.length)].slice();
     const manualChord=Number.isInteger(proceduralOverrides.chordIndex)?PROCEDURAL_CHORD_PROGRAMS[proceduralOverrides.chordIndex]:null;
     let progression=manualChord?manualChord.degrees.slice():seededProgression;
-    if(!manualChord&&complexity>.80&&rng()>.45)progression=[...progression.slice(0,3),2,5];
-    const chordEvents=[];for(let bar=0;bar<bars;bar++){const degree=progression[bar%progression.length],root=scale[(degree-1+7)%7],chord=degreeChord(tonic,mode,scale,degree,complexity,rng);chordEvents.push({time:bar*barDuration,duration:barDuration*.94,degree,root,notes:chord.notes,symbol:chord.symbol})}
-    const bassEvents=[];for(let bar=0;bar<bars;bar++){const chord=chordEvents[bar],root=chord.root,subdivision=energy>.66?.5:1,steps=Math.round(4/subdivision);for(let step=0;step<steps;step++){if(step&&complexity<.28&&rng()>.62)continue;let note=root;if(complexity>.55&&step===steps-1&&rng()>.35)note=scale[(scale.indexOf(root)+6)%7];else if(complexity>.72&&rng()>.78)note=chord.notes[Math.floor(rng()*Math.min(3,chord.notes.length))];bassEvents.push({time:bar*barDuration+step*subdivision*beat,duration:beat*subdivision*.78,note})}}
-    const melodyEvents=[],melodyStep=complexity>.76?.25:complexity>.38?.5:1,melodySteps=Math.round((bars*4)/melodyStep);let lastDegree=Math.floor(rng()*5)+1;
-    for(let step=0;step<melodySteps;step++){const bar=Math.floor((step*melodyStep)/4),chord=chordEvents[Math.min(chordEvents.length-1,bar)],restChance=.54-energy*.28-complexity*.12;if(rng()<restChance)continue;const chordIndexes=chord.notes.map(n=>Math.max(0,scale.indexOf(n)));if(rng()<.58&&chordIndexes.length)lastDegree=chordIndexes[Math.floor(rng()*chordIndexes.length)];else{const motion=rng()<.5?-1:1,leap=complexity>.68&&rng()>.78?2:1;lastDegree=(lastDegree+motion*leap+7)%7}const sync=complexity>.48&&rng()>.72?melodyStep*.5:0;melodyEvents.push({time:Math.min(duration-.04,(step*melodyStep+sync)*beat),duration:beat*melodyStep*(complexity>.70?.72:.84),note:scale[lastDegree%7],octave:rng()>.78?5:4})}
-    const drumEvents=[];for(let bar=0;bar<bars;bar++){const barStart=bar*barDuration;for(let b=0;b<4;b++){const t=barStart+b*beat;if(b===0||b===2||(energy>.72&&b===3&&rng()>.55))drumEvents.push({type:"kick",time:t,amp:.80});if(b===1||b===3)drumEvents.push({type:"snare",time:t,amp:.66+energy*.18})}const hatStep=energy>.62||complexity>.58?.5:1;for(let h=0;h<4/hatStep;h++){const t=barStart+h*hatStep*beat,off=h%2===1;if(!off||energy>.28||rng()>.4)drumEvents.push({type:"hat",time:t,amp:off?.20+.18*energy:.14+.12*energy})}if(complexity>.72&&rng()>.42)drumEvents.push({type:"kick",time:barStart+3.5*beat,amp:.58})}
-    const percussionEvents=[],shakeStep=energy>.58?.5:1;for(let t=0,step=0;t<duration-.02;t+=shakeStep*beat,step++){if(rng()<(.28+energy*.48))percussionEvents.push({type:"shaker",time:t,amp:.12+.18*energy});if(step%Math.round(4/shakeStep)===Math.round(1/shakeStep)&&rng()<(.35+complexity*.35))percussionEvents.push({type:"tamb",time:t,amp:.18+.20*energy})}
+    if(!manualChord&&complexity>.80&&rngHarmony()>.45)progression=[...progression.slice(0,3),2,5];
+    const chordEvents=[];for(let bar=0;bar<bars;bar++){const degree=progression[bar%progression.length],root=scale[(degree-1+7)%7],chord=degreeChord(tonic,mode,scale,degree,complexity,rngHarmony);chordEvents.push({time:bar*barDuration,duration:barDuration*.94,degree,root,notes:chord.notes,symbol:chord.symbol})}
+    const bassEvents=[];for(let bar=0;bar<bars;bar++){const chord=chordEvents[bar],root=chord.root,subdivision=energy>.66?.5:1,steps=Math.round(4/subdivision);for(let step=0;step<steps;step++){if(step&&complexity<.28&&rngBass()>.62)continue;let note=root;if(complexity>.55&&step===steps-1&&rngBass()>.35)note=scale[(scale.indexOf(root)+6)%7];else if(complexity>.72&&rngBass()>.78)note=chord.notes[Math.floor(rngBass()*Math.min(3,chord.notes.length))];bassEvents.push({time:bar*barDuration+step*subdivision*beat,duration:beat*subdivision*.78,note})}}
+    const melodyEvents=[],melodyStep=complexity>.76?.25:complexity>.38?.5:1,melodySteps=Math.round((bars*4)/melodyStep);let lastDegree=Math.floor(rngMelody()*5)+1;
+    for(let step=0;step<melodySteps;step++){const bar=Math.floor((step*melodyStep)/4),chord=chordEvents[Math.min(chordEvents.length-1,bar)],restChance=.54-energy*.28-complexity*.12;if(rngMelody()<restChance)continue;const chordIndexes=chord.notes.map(n=>Math.max(0,scale.indexOf(n)));if(rngMelody()<.58&&chordIndexes.length)lastDegree=chordIndexes[Math.floor(rngMelody()*chordIndexes.length)];else{const motion=rngMelody()<.5?-1:1,leap=complexity>.68&&rngMelody()>.78?2:1;lastDegree=(lastDegree+motion*leap+7)%7}const sync=complexity>.48&&rngMelody()>.72?melodyStep*.5:0;melodyEvents.push({time:Math.min(duration-.04,(step*melodyStep+sync)*beat),duration:beat*melodyStep*(complexity>.70?.72:.84),note:scale[lastDegree%7],octave:rngMelody()>.78?5:4})}
+    const drumEvents=[];for(let bar=0;bar<bars;bar++){const barStart=bar*barDuration;for(let b=0;b<4;b++){const t=barStart+b*beat;if(b===0||b===2||(energy>.72&&b===3&&rngDrums()>.55))drumEvents.push({type:"kick",time:t,amp:.80});if(b===1||b===3)drumEvents.push({type:"snare",time:t,amp:.66+energy*.18})}const hatStep=energy>.62||complexity>.58?.5:1;for(let h=0;h<4/hatStep;h++){const t=barStart+h*hatStep*beat,off=h%2===1;if(!off||energy>.28||rngDrums()>.4)drumEvents.push({type:"hat",time:t,amp:off?.20+.18*energy:.14+.12*energy})}if(complexity>.72&&rngDrums()>.42)drumEvents.push({type:"kick",time:barStart+3.5*beat,amp:.58})}
+    const percussionEvents=[],shakeStep=energy>.58?.5:1;for(let t=0,step=0;t<duration-.02;t+=shakeStep*beat,step++){if(rngPerc()<(.28+energy*.48))percussionEvents.push({type:"shaker",time:t,amp:.12+.18*energy});if(step%Math.round(4/shakeStep)===Math.round(1/shakeStep)&&rngPerc()<(.35+complexity*.35))percussionEvents.push({type:"tamb",time:t,amp:.18+.20*energy})}
     const program={seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" · "),manual:{tonic:proceduralOverrides.tonic!==null,mode:proceduralOverrides.mode!==null,bpm:proceduralOverrides.bpm!==null,chords:proceduralOverrides.chordIndex!==null}};
     program.sf2Voices=chooseProceduralSf2Voices(program);
     return program;
@@ -7658,7 +7682,7 @@
     const depth=clamp01(Number(variance));
     if(!variation||depth<=0)return previousProgram;
 
-    const rng=mulberry32((seedHash(previousProgram.seed,previousProgram.energy,previousProgram.complexity)^(variation*0x9E3779B9)^Math.round(depth*1000)*0x45d9f3b)>>>0);
+    const rng=mulberry32((seedIdentityHash(previousProgram.seed)^(variation*0x9E3779B9)^Math.round(depth*1000)*0x45d9f3b)>>>0);
     const scale=previousProgram.scale.slice();
     const varied={...previousProgram,loopVariation:variation,loopVariance:depth};
     const complexity=previousProgram.complexity,energy=previousProgram.energy;
@@ -7806,7 +7830,7 @@
     const resolved=resolveProceduralSf2Voice(role,stem.sf2Voice||program.sf2Voices?.[role],program);
     if(!resolved)return null;
     const {voice,bank}=resolved; stem.resolvedSf2Voice=voice;
-    const variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity));
+    const variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedIdentityHash(program.seed+stem.proceduralOrder*101+variationSalt));
     let rendered=false;
     const play=(midi,time,duration,velocity,amp,pan=0)=>{
       const fittedMidi=fitMidiToSf2Voice(midi,voice);
@@ -7835,7 +7859,7 @@
     // The transport/scheduler still loops at program.duration, but the extra tail lets
     // the previous variation's cymbals, fills and synth releases overlap naturally
     // into the next downbeat instead of being hard-cut at the buffer boundary.
-    const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL),variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity)),role=stem.role;
+    const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL),variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedIdentityHash(program.seed+stem.proceduralOrder*101+variationSalt)),role=stem.role;
     if(role==="keys"){
       for(const event of program.chordEvents){
         const baseOctave=program.complexity>.65?3:4;
@@ -7922,8 +7946,8 @@
 
   function updateProceduralReadouts(program=currentProceduralProgram){
     if(!program)return;
-    const energy=Number(formatSteppedPercent01(program.energy));
-    const complexity=Number(formatSteppedPercent01(program.complexity));
+    const energy=formatLiveVibePercent01(program.energy);
+    const complexity=formatLiveVibePercent01(program.complexity);
     const keyIndex=Math.max(0,PROCEDURAL_KEYS.indexOf(program.tonic));
     const modeIndex=program.mode==="minor"?1:0;
     const chordIndex=Number.isInteger(proceduralOverrides.chordIndex)?proceduralOverrides.chordIndex:Math.max(0,PROCEDURAL_CHORD_PROGRAMS.findIndex(item=>item.label===program.chordLabel));
@@ -7940,8 +7964,8 @@
     if(proceduralKeyControl)proceduralKeyControl.value=String(keyIndex);
     if(proceduralModeControl)proceduralModeControl.value=String(modeIndex);
     if(proceduralTempoControl)proceduralTempoControl.value=String(program.bpm);
-    if(proceduralEnergyControl)proceduralEnergyControl.value=String(energy);
-    if(proceduralComplexityControl)proceduralComplexityControl.value=String(complexity);
+    if(proceduralEnergyControl)proceduralEnergyControl.value=String(Number(program.energy*100).toFixed(1));
+    if(proceduralComplexityControl)proceduralComplexityControl.value=String(Number(program.complexity*100).toFixed(1));
     if(proceduralVarianceControl)proceduralVarianceControl.value=String(formatSteppedPercent01(proceduralLoopVariance));
     if(proceduralChordControl)proceduralChordControl.value=String(chordIndex>=0?chordIndex:0);
     if(proceduralSoundFontControl)proceduralSoundFontControl.value=String(sourceIndex);
@@ -7976,13 +8000,132 @@
     proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition}),25);
   }
 
+  function retireSourcesForProceduralMorph(channel,when,fade=PROCEDURAL_VIBE_CROSSFADE){
+    if(!channel?.sources||!audioCtx)return;
+    for(const source of [...channel.sources]){
+      try{
+        const gain=source._wifeyGain?.gain;
+        const sourceStart=Number(source._wifeyStart)||0;
+        if(sourceStart>when+fade){source.stop(when);continue}
+        if(gain){
+          gain.cancelScheduledValues(when);
+          gain.setValueAtTime(Math.max(.0001,Number(gain.value)||1),when);
+          gain.linearRampToValueAtTime(0,when+fade);
+          source.stop(when+fade+.012);
+        }else source.stop(when);
+      }catch(_){try{source.stop(when)}catch(__){}}
+    }
+  }
+
+  function applyProceduralVibeMorph(){
+    clearTimeout(proceduralVibeMorphTimer);
+    proceduralVibeMorphTimer=null;
+    const revision=++proceduralVibeMorphRevision;
+    saveProceduralHardwarePrefs();
+    if(appMode!=="procedural")return;
+
+    // When stopped there is nothing to protect: a normal rebuild is cheaper.
+    if(!isPlaying||!audioCtx||!currentProceduralProgram||!channels.length){
+      regenerateProceduralHardware({preservePosition:true});
+      return;
+    }
+
+    const oldProgram=currentProceduralProgram;
+    let nextProgram;
+    let nextPlaylist;
+    let prepared;
+    try{
+      // Rendering happens BEFORE any live source is touched. Web Audio keeps the
+      // current loop running on its audio thread while the next take is prepared.
+      nextProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);
+      nextPlaylist=makeProceduralPlaylist(nextProgram);
+      prepared=channels.map((channel,index)=>{
+        const stem=nextPlaylist.stems[index]||nextPlaylist.stems.find(item=>item.role===channel.stem?.role);
+        return {channel,stem,buffer:renderProceduralStemBuffer(nextProgram,stem)};
+      });
+    }catch(error){
+      console.warn("Could not prepare live VIBE morph; leaving current loop untouched.",error);
+      loadReadout.textContent="XY HELD";
+      return;
+    }
+    if(revision!==proceduralVibeMorphRevision)return;
+
+    // Re-read position after rendering so the replacement lands where the ear
+    // actually is now, not where it was when rendering began. Map by bar phase
+    // so a BPM or 4/8-bar structural change still lands on the same musical beat.
+    const oldPosition=getPosition();
+    const oldBarDuration=Math.max(.001,oldProgram.barDuration||oldProgram.duration||1);
+    const barPosition=oldPosition/oldBarDuration;
+    const barIndex=Math.floor(barPosition);
+    const barFraction=barPosition-barIndex;
+    const newBar=Math.max(0,barIndex%Math.max(1,nextProgram.bars||1));
+    const newPosition=Math.max(0,Math.min(nextProgram.duration-.02,(newBar+barFraction)*nextProgram.barDuration));
+    const swapAt=audioCtx.currentTime+.028;
+
+    for(const {channel} of prepared)retireSourcesForProceduralMorph(channel,swapAt);
+
+    currentProceduralProgram=nextProgram;
+    currentPlaylist=nextPlaylist;
+    playlistDuration=nextProgram.duration;
+    lastKnownPosition=newPosition;
+    loopCount=0;
+    scheduledThroughCycle=0;
+    cycleZeroContextTime=swapAt-newPosition;
+    resetProceduralLoopProgramCache();
+
+    let started=0;
+    for(const {channel,stem,buffer} of prepared){
+      channel.stem=stem;
+      channel.buffer=buffer;
+      if(createScheduledSource(channel,swapAt,newPosition,buffer,{fadeIn:PROCEDURAL_VIBE_CROSSFADE,startGain:1}))started++;
+    }
+    isPlaying=started>0;
+    if(isPlaying)ensureScheduleHorizon(0);
+    syncProceduralChannelInstrumentLabels();
+    updateProceduralReadouts(nextProgram);
+    updateTransportDisplay();
+    updatePlaybackButtons();
+    loadReadout.textContent=isPlaying?"XY LIVE":"XY READY";
+  }
+
+  function requestProceduralVibeMorph(delay=105){
+    // Do not touch localStorage on every pointermove; persist only when the
+    // debounced/live morph actually runs. This keeps the pad interaction light.
+    clearTimeout(proceduralVibeMorphTimer);
+    proceduralVibeMorphTimer=setTimeout(applyProceduralVibeMorph,Math.max(0,Number(delay)||0));
+  }
+
   async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
   async function stepProceduralSeed(delta){const shouldPlay=isPlaying;await loadProceduralSeed(proceduralSeed+delta,shouldPlay)}
-  function setProceduralVibeFromPoint(clientX,clientY,{commit=false}={}){if(!proceduralVibePad)return;const rect=proceduralVibePad.getBoundingClientRect();if(!rect.width||!rect.height)return;proceduralComplexity=snapProceduralUnit((clientX-rect.left)/rect.width);proceduralEnergy=snapProceduralUnit(1-(clientY-rect.top)/rect.height);proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);const liveEnergy=formatSteppedPercent01(proceduralEnergy),liveComplexity=formatSteppedPercent01(proceduralComplexity);proceduralEnergyReadout.textContent=liveEnergy;proceduralComplexityReadout.textContent=liveComplexity;if(proceduralEnergyControl)proceduralEnergyControl.value=liveEnergy;if(proceduralComplexityControl)proceduralComplexityControl.value=liveComplexity;proceduralVibePad.setAttribute("aria-valuetext",`Energy ${liveEnergy}, complexity ${liveComplexity}`);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;if(commit)regenerateProceduralHardware({preservePosition:true})}
-  function nudgeProceduralVibe(dx,dy){proceduralComplexity=snapProceduralUnit(proceduralComplexity+dx);proceduralEnergy=snapProceduralUnit(proceduralEnergy+dy);regenerateProceduralHardware({preservePosition:true})}
+  function setProceduralVibeFromPoint(clientX,clientY,{commit=false,live=false}={}){
+    if(!proceduralVibePad)return;
+    const rect=proceduralVibePad.getBoundingClientRect();
+    if(!rect.width||!rect.height)return;
+    // The pad itself is continuous; the separate hardware faders retain their
+    // physical 2.5% detents. This removes the little stair-steps while dragging.
+    proceduralComplexity=smoothProceduralUnit((clientX-rect.left)/rect.width);
+    proceduralEnergy=smoothProceduralUnit(1-(clientY-rect.top)/rect.height);
+    proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);
+    proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);
+    const liveEnergy=formatLiveVibePercent01(proceduralEnergy),liveComplexity=formatLiveVibePercent01(proceduralComplexity);
+    proceduralEnergyReadout.textContent=liveEnergy;
+    proceduralComplexityReadout.textContent=liveComplexity;
+    if(proceduralEnergyControl)proceduralEnergyControl.value=String(proceduralEnergy*100);
+    if(proceduralComplexityControl)proceduralComplexityControl.value=String(proceduralComplexity*100);
+    proceduralVibePad.setAttribute("aria-valuetext",`Energy ${liveEnergy}, complexity ${liveComplexity}`);
+    persistentPrefs.proceduralEnergy=proceduralEnergy;
+    persistentPrefs.proceduralComplexity=proceduralComplexity;
+    if(commit)requestProceduralVibeMorph(0);
+    else if(live)requestProceduralVibeMorph(115);
+  }
+  function nudgeProceduralVibe(dx,dy){
+    proceduralComplexity=snapProceduralUnit(proceduralComplexity+dx);
+    proceduralEnergy=snapProceduralUnit(proceduralEnergy+dy);
+    requestProceduralVibeMorph(0);
+  }
 
   function previewProceduralHardwareControl(kind,rawValue){
     const value=Number(rawValue);
@@ -8006,7 +8149,8 @@
     else if(kind==="energy")proceduralEnergy=snapProceduralUnit(value/100);
     else if(kind==="complexity")proceduralComplexity=snapProceduralUnit(value/100);
     else if(kind==="variance")proceduralLoopVariance=snapProceduralUnit(value/100);
-    regenerateProceduralHardware({preservePosition:true});
+    if(kind==="energy"||kind==="complexity")requestProceduralVibeMorph(0);
+    else regenerateProceduralHardware({preservePosition:true});
   }
 
   function resetProceduralOverride(kind){
@@ -9038,6 +9182,7 @@
       try { source.onended = null; } catch (_) {}
       try { source.stop(stopAt); } catch (_) {}
       try { source.disconnect(); } catch (_) {}
+      try { source._wifeyGain?.disconnect(); } catch (_) {}
     }
 
     channel.sources.clear();
@@ -9080,6 +9225,15 @@
   function formatSteppedPercent01(value) {
     const pct = snapProceduralUnit(value)*100;
     return Number.isInteger(pct) ? String(pct) : pct.toFixed(1);
+  }
+
+  function smoothProceduralUnit(value) {
+    return Number(clamp01(value).toFixed(4));
+  }
+
+  function formatLiveVibePercent01(value) {
+    const pct=smoothProceduralUnit(value)*100;
+    return Math.abs(pct-Math.round(pct))<.001?String(Math.round(pct)):pct.toFixed(1);
   }
 
   function hardwareControlDefault(owner,control) {
@@ -9988,7 +10142,7 @@
     updateTransportDisplay();
   }
 
-  function createScheduledSource(channel,when,offset=0,bufferOverride=null) {
+  function createScheduledSource(channel,when,offset=0,bufferOverride=null,options={}) {
     const playbackBuffer = bufferOverride || channel?.buffer;
     if (!audioCtx || !playbackBuffer || channel.error) return null;
 
@@ -9996,13 +10150,23 @@
     if (!Number.isFinite(duration) || offset >= duration-.0005) return null;
 
     const source = audioCtx.createBufferSource();
+    const sourceGain = audioCtx.createGain();
+    const fadeIn=Math.max(0,Number(options.fadeIn)||0);
+    const startGain=Number.isFinite(Number(options.startGain))?Number(options.startGain):1;
     source.buffer = playbackBuffer;
-    source.connect(channel.trim);
+    source.connect(sourceGain);
+    sourceGain.connect(channel.trim);
+    source._wifeyGain=sourceGain;
+    source._wifeyStart=when;
+    const gainAt=Math.max(audioCtx.currentTime,Number(when)||audioCtx.currentTime);
+    sourceGain.gain.setValueAtTime(fadeIn>0?0:startGain,gainAt);
+    if(fadeIn>0)sourceGain.gain.linearRampToValueAtTime(startGain,gainAt+fadeIn);
     channel.sources.add(source);
 
     source.onended = ()=>{
       channel.sources.delete(source);
       try { source.disconnect(); } catch (_) {}
+      try { sourceGain.disconnect(); } catch (_) {}
     };
 
     try {
@@ -10011,6 +10175,7 @@
     } catch (error) {
       channel.sources.delete(source);
       try { source.disconnect(); } catch (_) {}
+      try { sourceGain.disconnect(); } catch (_) {}
       console.error("Could not schedule stem",channel.stem?.name,error);
       return null;
     }
@@ -10613,12 +10778,12 @@
       event.preventDefault();
       vibePointerId=event.pointerId;
       proceduralVibePad.setPointerCapture?.(event.pointerId);
-      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:false});
+      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:false,live:true});
     });
     proceduralVibePad.addEventListener("pointermove",event=>{
       if (vibePointerId!==event.pointerId) return;
       event.preventDefault();
-      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:false});
+      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:false,live:true});
     });
     const finishVibe=event=>{
       if (vibePointerId!==event.pointerId) return;
