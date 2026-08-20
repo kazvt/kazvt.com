@@ -6560,6 +6560,107 @@
       .proc-direct-module{grid-row:3 !important}
     }
 
+
+    /* ==============================================================
+       PATCH: STRIP TITLE PHOSPHOR SCREENS + SMART AUTO-SCROLL
+       Tiny non-segmented amber text displays. Only genuinely clipped
+       titles move; short labels remain perfectly still.
+       ============================================================== */
+    .channel-name{
+      position:relative !important;
+      display:block !important;
+      min-width:0 !important;
+      height:clamp(14px,2.05vh,18px) !important;
+      padding:3px 4px 2px !important;
+      overflow:hidden !important;
+      text-overflow:clip !important;
+      white-space:nowrap !important;
+      border:1px solid #090705 !important;
+      border-radius:2px !important;
+      font-family:"Courier New",ui-monospace,SFMono-Regular,Menlo,monospace !important;
+      font-size:clamp(6.4px,.78vw,8px) !important;
+      line-height:1 !important;
+      font-weight:700 !important;
+      letter-spacing:.07em !important;
+      text-transform:uppercase !important;
+      color:#ff9d2e !important;
+      opacity:1 !important;
+      filter:none !important;
+      background:
+        radial-gradient(ellipse at 48% 52%,rgba(255,126,26,.052),transparent 72%),
+        linear-gradient(180deg,#120905 0%,#080504 52%,#060302 100%) !important;
+      box-shadow:
+        inset 0 1px 4px rgba(0,0,0,.96),
+        inset 0 0 7px rgba(255,112,18,.055),
+        0 1px 0 rgba(255,255,255,.025),
+        0 0 0 1px #30221a,
+        0 0 5px rgba(219,104,18,.075) !important;
+      text-shadow:
+        0 0 2px rgba(255,188,105,.78),
+        0 0 4px rgba(255,126,28,.46),
+        0 1px 0 #1b0801 !important;
+      isolation:isolate;
+    }
+    .channel-name::before{
+      content:"";
+      position:absolute;
+      z-index:2;
+      inset:0;
+      pointer-events:none;
+      border-radius:1px;
+      background:
+        linear-gradient(180deg,rgba(255,218,169,.035),transparent 34%,rgba(0,0,0,.10) 100%),
+        repeating-linear-gradient(0deg,rgba(255,151,55,.012) 0 1px,transparent 1px 3px);
+      box-shadow:inset 0 1px 0 rgba(255,204,139,.035);
+    }
+    .channel-name::after{
+      content:"";
+      position:absolute;
+      z-index:3;
+      pointer-events:none;
+      top:1px;
+      bottom:1px;
+      left:1px;
+      width:6px;
+      background:linear-gradient(90deg,#080504 12%,rgba(8,5,4,.72) 48%,transparent);
+    }
+    .channel-name__marquee{
+      position:relative;
+      z-index:1;
+      display:inline-block;
+      min-width:max-content;
+      transform:translate3d(0,0,0);
+      will-change:transform;
+    }
+    .channel-name.is-overflowing .channel-name__marquee{
+      animation:strip-title-phosphor-scroll var(--strip-title-duration,6s) ease-in-out .85s infinite alternate;
+    }
+    @keyframes strip-title-phosphor-scroll{
+      0%,18%{transform:translate3d(0,0,0)}
+      82%,100%{transform:translate3d(calc(-1 * var(--strip-title-distance,0px)),0,0)}
+    }
+    .channel-header .channel-name{
+      flex:1 1 auto !important;
+    }
+    .mixer.is-procedural [data-channel] .channel-name{
+      font-size:clamp(6.2px,.72vw,7.5px) !important;
+      letter-spacing:.045em !important;
+    }
+    .master-strip > .channel-name{
+      margin-left:1px;
+      margin-right:1px;
+      color:#ffad43 !important;
+    }
+    @media(max-height:500px){
+      .channel-name{height:13px !important;padding:2px 3px 1px !important;font-size:6px !important}
+    }
+    @media(max-height:410px){
+      .channel-name{height:11px !important;padding:1px 3px !important;font-size:5.4px !important}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .channel-name.is-overflowing .channel-name__marquee{animation:none !important}
+    }
+
 </style>
 </head>
 
@@ -7299,16 +7400,22 @@
   const PROCEDURAL_HOT_WORDS=/\b(dead\s*line|leaf\s*storm|storm|rock|slap|saw(?:tooth)?|charang|metal|dist(?:ortion)?|drive|acid|rave|attack)\b/i;
   const PROCEDURAL_LIVELY_WORDS=/\b(night\s*carnival|carnival|alt(?:itude|\.\s*limit)|exception|clav|honky(?:-tonk)?|percussive)\b/i;
   const PROCEDURAL_CALM_WORDS=/\b(soft|mellow|warm|round|dream|dreamy|gentle|smooth|ambient|ending|new\s*day|sine|pad|rhodes|wurli|wurlitzer|electric\s*piano|e\.?\s*piano|acoustic|fretless)\b/i;
+  // The title "A New Day" sounds gentle, but Rush programs 128:0 and 128:1
+  // are audibly forceful drum kits. Give the concrete instrument meaning
+  // precedence over the song-title wording so they can never inherit CALM.
+  const PROCEDURAL_RUSH_HARD_NEW_DAY_DRUMS=/\ba\s*new\s*day\s*drums?\s*(?:1|2)\b/i;
 
   function proceduralVibeSemantics(text){
     const name=String(text||"");
+    const hardNewDayDrums=PROCEDURAL_RUSH_HARD_NEW_DAY_DRUMS.test(name);
     let minEnergy=0,minIntensity=0,minComplexity=0,heat=0,calm=0,impact=0;
     if(PROCEDURAL_IMPACT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.62);minIntensity=Math.max(minIntensity,.58);heat=Math.max(heat,1);impact=1}
     if(PROCEDURAL_EXTREME_WORDS.test(name)){minEnergy=Math.max(minEnergy,.56);minIntensity=Math.max(minIntensity,.54);heat=Math.max(heat,.92)}
     if(PROCEDURAL_HOT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.40);minIntensity=Math.max(minIntensity,.40);heat=Math.max(heat,.68)}
     if(PROCEDURAL_LIVELY_WORDS.test(name)){minEnergy=Math.max(minEnergy,.29);minIntensity=Math.max(minIntensity,.34);heat=Math.max(heat,.38)}
+    if(hardNewDayDrums){minEnergy=Math.max(minEnergy,.58);minIntensity=Math.max(minIntensity,.50);heat=Math.max(heat,.88)}
     if(/\b(percussive|clav|charang|arpegg?|sequence|seq)\b/i.test(name))minComplexity=Math.max(minComplexity,.24);
-    if(PROCEDURAL_CALM_WORDS.test(name))calm=1;
+    if(PROCEDURAL_CALM_WORDS.test(name)&&!hardNewDayDrums)calm=1;
     return Object.freeze({minEnergy,minIntensity,minComplexity,heat,calm,impact});
   }
 
@@ -7338,8 +7445,11 @@
       // The auxiliary drum presets are musically useful but not guaranteed to
       // be shaker-only. Silence/fallback is preferable to a surprise crash.
       if(role==="percussion"&&energy<.44)return false;
+      // These two kits are much harder than their friendly song title implies.
+      if(role==="drums"&&(voice===RUSH_VOICES.drumsNewDay1||voice===RUSH_VOICES.drumsNewDay2))
+        return energy>=.58 && intensity>=.50;
       if(role==="drums"&&energy<.34)
-        return voice===RUSH_VOICES.drumsNewDay1||voice===RUSH_VOICES.drumsNewDay2||voice===RUSH_VOICES.drumsNewDay5;
+        return voice===RUSH_VOICES.drumsNewDay5;
       if(role==="bass"&&energy<.32)
         return voice===RUSH_VOICES.bassNewDay||voice===RUSH_VOICES.bassMirage;
       if(role==="keys"&&intensity<.36)
@@ -7781,7 +7891,7 @@
     else leadPool=[RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase];
 
     let drumsPool;
-    if(energy<.32) drumsPool=[SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5];
+    if(energy<.32) drumsPool=[SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay5];
     else if(energy<.68) drumsPool=[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,SF64_VOICES.drumsGeneral];
     else drumsPool=[RUSH_VOICES.drumsMirage3,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsPower];
 
@@ -8115,6 +8225,67 @@
     percussion:"BENCH PERCUSSION"
   });
 
+  let channelTitleResizeObserver=null;
+
+  function ensureChannelNameMarquee(nameEl){
+    if(!nameEl)return null;
+    let inner=nameEl.querySelector(":scope > .channel-name__marquee");
+    if(!inner){
+      inner=document.createElement("span");
+      inner.className="channel-name__marquee";
+      inner.textContent=nameEl.textContent||"";
+      nameEl.textContent="";
+      nameEl.appendChild(inner);
+    }
+    return inner;
+  }
+
+  function updateChannelNameMarquee(nameEl){
+    const inner=ensureChannelNameMarquee(nameEl);
+    if(!inner)return;
+    nameEl.classList.remove("is-overflowing");
+    nameEl.style.removeProperty("--strip-title-distance");
+    nameEl.style.removeProperty("--strip-title-duration");
+    if(nameEl.clientWidth<=0)return;
+    const box=getComputedStyle(nameEl);
+    const available=Math.max(0,nameEl.clientWidth-(parseFloat(box.paddingLeft)||0)-(parseFloat(box.paddingRight)||0));
+    const overflow=Math.ceil(inner.scrollWidth-available);
+    if(overflow>2){
+      const travel=overflow+9;
+      const duration=Math.max(4.8,Math.min(10.5,4.2+(travel/18)));
+      nameEl.style.setProperty("--strip-title-distance",`${travel}px`);
+      nameEl.style.setProperty("--strip-title-duration",`${duration.toFixed(2)}s`);
+      // Force a fresh animation when a procedural patch name changes.
+      void nameEl.offsetWidth;
+      nameEl.classList.add("is-overflowing");
+    }
+  }
+
+  function setChannelNameLabel(nameEl,label){
+    if(!nameEl)return;
+    const text=String(label||"");
+    const inner=ensureChannelNameMarquee(nameEl);
+    if(inner)inner.textContent=text;
+    nameEl.title=text;
+    requestAnimationFrame(()=>updateChannelNameMarquee(nameEl));
+  }
+
+  function bindChannelNameMarquees(){
+    if(channelTitleResizeObserver){
+      channelTitleResizeObserver.disconnect();
+      channelTitleResizeObserver=null;
+    }
+    const displays=[...document.querySelectorAll(".channel-name")];
+    displays.forEach(updateChannelNameMarquee);
+    if(typeof ResizeObserver==="function"){
+      channelTitleResizeObserver=new ResizeObserver(entries=>{
+        for(const entry of entries)updateChannelNameMarquee(entry.target);
+      });
+      displays.forEach(el=>channelTitleResizeObserver.observe(el));
+    }
+    requestAnimationFrame(()=>displays.forEach(updateChannelNameMarquee));
+  }
+
   function proceduralStemInstrumentName(stem){
     return String(stem?.resolvedSf2Voice?.name||PROCEDURAL_FALLBACK_INSTRUMENT_NAMES[stem?.role]||"BENCH INSTRUMENT");
   }
@@ -8127,8 +8298,7 @@
       if(nameEl){
         // In procedural mode the strip tape names the actual sounding patch,
         // not the generic role. The fixed pictogram still carries role identity.
-        nameEl.textContent=label;
-        nameEl.title=label;
+        setChannelNameLabel(nameEl,label);
       }
       // Keep the original role pictogram exactly as-is; only explain what the
       // fixed symbol is currently controlling when a user hovers it.
@@ -9527,7 +9697,7 @@
                   title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}" aria-hidden="true">
               <i class="fa-solid ${escapeHtml(iconMatch.icon)}"></i>
             </span>
-            <div class="channel-name" title="${title}">${String(index+1).padStart(2,"0")} ${title}</div>
+            <div class="channel-name" title="${title}" data-channel-name><span class="channel-name__marquee">${String(index+1).padStart(2,"0")} ${title}</span></div>
           </div>
           <span class="mute-led${state.solo ? " is-solo" : (!state.mute ? " is-on" : "")}" data-mute-led
                 title="${state.solo ? "Solo" : (state.mute ? "Muted" : "Active")}" aria-hidden="true">
@@ -9576,7 +9746,7 @@
   function masterMarkup() {
     return `
       <aside class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)] master-strip">
-        <div class="channel-name text-center !text-[#d9d7cf]">MASTER</div>
+        <div class="channel-name text-center !text-[#d9d7cf]" data-channel-name><span class="channel-name__marquee">MASTER</span></div>
 
         <div class="controls-zone min-h-0 grid grid-rows-[minmax(0,1fr)_auto]">
           <div class="knob-meter-rack min-h-0 grid h-full grid-cols-[clamp(8px,1vw,11px)_minmax(0,1fr)_clamp(8px,1vw,11px)] items-stretch gap-1">
@@ -9668,6 +9838,7 @@
     masterDock.insertAdjacentHTML("beforeend",masterMarkup());
 
     bindControlSurface();
+    bindChannelNameMarquees();
     showSystemReadout(
       playlist?.title ? String(playlist.title).toUpperCase() : "WIFEY MIX-8",
       "READY",
@@ -11070,12 +11241,11 @@
   /* ==========================================================
      HARDWARE KEYBOARD / FOCUS CONTROL
      Space / Enter : play-pause
-     Left / Right  : seek -/+ 5 seconds
+     Left / Right  : previous / next song (procedural: previous / next seed)
      Up / Down     : focused fader, otherwise MASTER fader
      Focused knob  : mouse wheel, 2.5% hardware detents
      ========================================================== */
 
-  const KEYBOARD_SEEK_SECONDS = 5;
   const KEYBOARD_FADER_STEP = HARDWARE_SNAP_PERCENT;
   const KNOB_WHEEL_STEP = HARDWARE_SNAP_PERCENT;
 
@@ -11104,10 +11274,10 @@
   function getKeyboardFaderTarget() {
     const focused = document.activeElement;
 
-    // A touched/focused channel fader owns the arrows until it loses focus.
+    // A touched/focused channel fader owns Up/Down until it loses focus.
     if (focused?.matches?.(".fader")) return focused;
 
-    // No focused fader = arrows always fall back to MASTER.
+    // No focused fader = Up/Down falls back to MASTER.
     return getMasterFaderInput();
   }
 
@@ -11119,10 +11289,9 @@
     setRangeFromShortcut(input,next);
   }
 
-  function seekFromKeyboard(direction) {
-    if (!playlistDuration) return;
-    const next = getPosition() + direction*KEYBOARD_SEEK_SECONDS;
-    seekAll(next);
+  function changeSongFromKeyboard(direction) {
+    if (direction < 0) return previousPlaylist();
+    return nextPlaylist();
   }
 
   function isGlobalTransportModifier(event) {
@@ -11145,7 +11314,8 @@
     if (key === "ArrowLeft" || key === "ArrowRight") {
       event.preventDefault();
       event.stopPropagation();
-      seekFromKeyboard(key === "ArrowRight" ? 1 : -1);
+      if (event.repeat) return;
+      changeSongFromKeyboard(key === "ArrowRight" ? 1 : -1);
       return;
     }
 
@@ -11218,6 +11388,7 @@
 
   window.addEventListener("resize",()=>{
     if (currentPlaylist) updateGridGeometry(currentPlaylist.stems.length);
+    requestAnimationFrame(()=>document.querySelectorAll(".channel-name").forEach(updateChannelNameMarquee));
   },{passive:true});
 
   (async function init() {
