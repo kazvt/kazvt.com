@@ -4423,6 +4423,130 @@
         drop-shadow(0 0 4.8px rgba(255,96,10,.25)) !important;
     }
 
+
+
+    /* =====================================================================
+       PATCH: MATTE VINTAGE KNOBS
+       More worn, less polished, more like handled analogue hardware.
+       ===================================================================== */
+    .knob-wrap{
+      filter:drop-shadow(0 1px 1px rgba(0,0,0,.60)) !important;
+    }
+
+    .knob-wrap::before{
+      border-color:#09090a !important;
+      background:
+        radial-gradient(circle at 26% 68%,rgba(119,105,86,.07) 0 1.1%,transparent 1.7%),
+        radial-gradient(circle at 72% 30%,rgba(207,197,174,.035) 0 1%,transparent 1.6%),
+        radial-gradient(circle at 61% 77%,rgba(0,0,0,.16) 0 1.4%,transparent 2.1%),
+        radial-gradient(circle at 50% 50%,transparent 0 55%,rgba(151,140,119,.055) 55.5% 57.5%,transparent 58%),
+        radial-gradient(circle,#0e0e11 0 57%,#34322f 58.5% 61%,#141316 62% 69%,#08080a 70% 100%) !important;
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,.86),
+        inset 0 -1px 0 rgba(255,255,255,.012),
+        0 1px 0 rgba(255,255,255,.012),
+        0 2px 3px rgba(0,0,0,.68) !important;
+    }
+
+    .knob{
+      border-color:#0a0909 !important;
+      background:
+        radial-gradient(circle at 22% 34%,rgba(145,126,99,.055) 0 1.2%,transparent 1.8%),
+        radial-gradient(circle at 72% 64%,rgba(0,0,0,.24) 0 1.1%,transparent 1.8%),
+        radial-gradient(circle at 48% 17%,rgba(214,204,181,.025) 0 1%,transparent 1.6%),
+        repeating-conic-gradient(
+          from 1deg,
+          #272628 0 2.2deg,
+          #1b1a1c 2.2deg 4.4deg,
+          #222123 4.4deg 5.8deg,
+          #171618 5.8deg 7.2deg
+        ) !important;
+      box-shadow:
+        0 2px 2px rgba(0,0,0,.88),
+        0 0 0 1px #302e31,
+        inset 1px 1px 0 rgba(255,255,255,.014),
+        inset -1px -2px 3px rgba(0,0,0,.48) !important;
+      filter:saturate(.72) contrast(.94) !important;
+    }
+
+    /* Scuffs, ingrained grime and uneven finger wear. */
+    .knob::before{
+      inset:5% !important;
+      background:
+        linear-gradient(116deg,transparent 0 42%,rgba(190,175,146,.025) 43% 44%,transparent 45% 100%),
+        linear-gradient(31deg,transparent 0 67%,rgba(0,0,0,.12) 68% 69.5%,transparent 70.5% 100%),
+        radial-gradient(ellipse at 34% 25%,rgba(193,181,154,.028),transparent 27%),
+        radial-gradient(ellipse at 68% 76%,rgba(0,0,0,.25),transparent 43%),
+        radial-gradient(circle at 18% 61%,rgba(166,145,112,.055) 0 1.2%,transparent 1.8%),
+        radial-gradient(circle at 76% 39%,rgba(220,211,189,.025) 0 1%,transparent 1.6%) !important;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.18) !important;
+      mix-blend-mode:normal !important;
+      opacity:.92 !important;
+    }
+
+    .knob::after{
+      inset:3% !important;
+      background:
+        repeating-conic-gradient(
+          from 3deg,
+          transparent 0 10deg,
+          rgba(195,179,147,.015) 10.2deg 10.8deg,
+          transparent 11deg 19deg,
+          rgba(0,0,0,.045) 19.3deg 20deg,
+          transparent 20.2deg 31deg
+        ),
+        radial-gradient(ellipse at 48% 49%,transparent 0 70%,rgba(177,158,126,.055) 73%,transparent 79%) !important;
+      opacity:.76 !important;
+    }
+
+    .knob-cap{
+      border-color:rgba(0,0,0,.72) !important;
+      background:
+        radial-gradient(circle at 24% 63%,rgba(134,113,82,.055) 0 1.3%,transparent 2%),
+        radial-gradient(circle at 72% 29%,rgba(210,199,174,.022) 0 1%,transparent 1.7%),
+        radial-gradient(circle at 61% 74%,rgba(0,0,0,.20) 0 11%,transparent 35%),
+        radial-gradient(circle at 47% 43%,#302f31 0 8%,#29282a 35%,#1d1c1e 72%,#151416 100%) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.012),
+        inset 0 -2px 3px rgba(0,0,0,.38),
+        0 0 0 1px rgba(55,51,49,.28) !important;
+      filter:saturate(.72) brightness(.94) !important;
+    }
+
+    .knob-cap::before{
+      inset:5% !important;
+      background:
+        conic-gradient(
+          from 202deg,
+          transparent 0 13deg,
+          rgba(170,150,116,.055) 14deg 20deg,
+          transparent 21deg 111deg,
+          rgba(0,0,0,.18) 112deg 154deg,
+          transparent 155deg 264deg,
+          rgba(190,177,150,.025) 265deg 271deg,
+          transparent 272deg 360deg
+        ),
+        radial-gradient(circle at 30% 69%,rgba(139,116,83,.05) 0 1.2%,transparent 2%) !important;
+      opacity:.9 !important;
+    }
+
+    .knob-tick{
+      background:
+        linear-gradient(90deg,#777166 0%,#b8af9d 30%,#d0c7b4 48%,#9d9586 72%,#625e56 100%) !important;
+      box-shadow:
+        0 1px 0 rgba(0,0,0,.9),
+        0 0 1px rgba(205,193,169,.10) !important;
+      opacity:.78 !important;
+      filter:saturate(.68) !important;
+    }
+
+    /* Small material variation makes repeated controls feel physically individual. */
+    .channel:nth-child(5n+1) .knob{filter:saturate(.68) brightness(.93) contrast(.96) !important}
+    .channel:nth-child(5n+2) .knob{filter:saturate(.75) brightness(.97) contrast(.93) !important}
+    .channel:nth-child(5n+3) .knob{filter:saturate(.66) brightness(.95) contrast(.98) !important}
+    .channel:nth-child(5n+4) .knob-cap{filter:saturate(.67) brightness(.91) !important}
+    .channel:nth-child(7n) .knob-cap{filter:saturate(.76) brightness(.96) contrast(.94) !important}
+
   </style>
 </head>
 
@@ -5152,9 +5276,12 @@
   };
 
   /*
-   * 16-SEGMENT ALPHANUMERIC DISPLAY
-   * Main monitor = 16 segments for readable words.
+   * 18-SEGMENT ALPHANUMERIC DISPLAY
+   * Main monitor = 18 segments for readable words. The two extra full-span
+   * diagonal arms give angular letters (especially K) a full-size hardware
+   * silhouette instead of the sparse/disconnected 16-segment approximation.
    * Elapsed/total time module stays genuine 7-segment because it is numeric.
+   * Legacy alpha16 function/class names are retained to avoid needless churn.
    */
   const ALPHA16_POINTS = {
     /* split top bar */
@@ -5185,7 +5312,13 @@
 
     /* lower diagonals */
     l:"8,82 13,80 23,57 27,59 27,64 16,88",
-    m:"38,82 43,87 32,60 28,57 26,62 34,84"
+    m:"38,82 43,87 32,60 28,57 26,62 34,84",
+
+    /* extra full-span diagonals for angular glyphs such as K.
+       These meet the left stem at the centre so K fills the same visual
+       envelope as the other capitals instead of looking like a tiny >. */
+    n:"4,45 8,47 43,15 47,19 12,52 7,55 3,52",
+    o:"3,48 7,45 12,48 46,82 42,87 8,54 4,55"
   };
 
   const ALPHA16_MAP = {
@@ -5210,7 +5343,7 @@
     "H":["b","c","e","f","g1","g2"],
     "I":["a1","a2","d1","d2","j","k"],
     "J":["b","c","d1","d2","e"],
-    "K":["e","f","i","m"],
+    "K":["e","f","n","o"],
     "L":["d1","d2","e","f"],
     "M":["b","c","e","f","h","i"],
     "N":["b","c","e","f","h","m"],
@@ -5307,7 +5440,7 @@
 
     for (const segmentName of [
       "a1","a2","b","c","d1","d2","e","f",
-      "g1","g2","h","i","j","k","l","m"
+      "g1","g2","h","i","j","k","l","m","n","o"
     ]) {
       const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
       polygon.setAttribute("points",ALPHA16_POINTS[segmentName]);
