@@ -7866,24 +7866,13 @@
   const PROCEDURAL_SF2_SOURCES = Object.freeze({
     sf64:{url:"soundfonts/SF64.sf2",label:"SF64"},
     rush:{url:"soundfonts/Gotta Rush.sf2",label:"GOTTA RUSH"},
-    genies:{url:"soundfonts/Genies.SF2",aliases:["soundfonts/Genies.sf2"],label:"GENIES",adaptive:true}
+    genies:{url:"soundfonts/Genies.sf2",aliases:["soundfonts/Genies.SF2"],label:"GENIES",adaptive:true}
   });
   const proceduralSoundFonts = new Map();
   const proceduralSoundFontErrors = new Map();
   const proceduralGeniesVoices = new Map();
   let proceduralGeniesProfile = null;
   let proceduralSoundFontsPromise = null;
-  const proceduralSoundFontSourcePromises = new Map();
-  const SOUNDFONT_LOAD_TIMEOUT_MS = 30000;
-  const STEM_LOAD_TIMEOUT_MS = 60000;
-
-  function promiseWithTimeout(promise,ms,label){
-    let timer=null;
-    const timeout=new Promise((_,reject)=>{
-      timer=setTimeout(()=>reject(new Error(`${label||"Operation"} timed out after ${Math.round(ms/1000)}s`)),ms);
-    });
-    return Promise.race([Promise.resolve(promise),timeout]).finally(()=>{if(timer!==null)clearTimeout(timer)});
-  }
 
   function sfVoice(source,bank,program,name,options={}){return Object.freeze({source,bank,program,name,...options})}
 
@@ -8488,12 +8477,59 @@
     localObjectUrls = [];
   }
 
+  const ASSET_FETCH_TIMEOUT_MS = 30000;
+  const SOUNDFONT_FETCH_TIMEOUT_MS = 45000;
+
+  function resolveAssetUrl(src) {
+    const raw = String(src || "").trim();
+    if (!raw) throw new Error("Asset URL is empty.");
+    const url = new URL(raw, document.baseURI);
+
+    // A deployed HTTPS page can never fetch file:// resources. Resolve every
+    // bundled relative path against the deployed page and fail loudly if an
+    // old/local path accidentally leaks into saved data or a manifest.
+    if (location.protocol !== "file:" && url.protocol === "file:") {
+      throw new Error(`Blocked local file URL from web page: ${raw}`);
+    }
+    return url.href;
+  }
+
+  async function fetchAsset(src, options = {}, timeoutMs = ASSET_FETCH_TIMEOUT_MS) {
+    const url = resolveAssetUrl(src);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), Math.max(1000, Number(timeoutMs) || ASSET_FETCH_TIMEOUT_MS));
+    try {
+      const response = await fetch(url, {...options, signal: controller.signal});
+      if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+      return response;
+    } catch (error) {
+      if (error?.name === "AbortError") throw new Error(`Timed out loading ${url}`);
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function withTimeout(promise, timeoutMs, label = "operation") {
+    let timer = 0;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`${label} timed out`)), Math.max(1000, Number(timeoutMs) || ASSET_FETCH_TIMEOUT_MS));
+    });
+    try {
+      return await Promise.race([promise, timeout]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function getManifest() {
     try {
-      const response = await fetch("manifest.json",{cache:"no-store"});
-      if (response.ok) return await response.json();
-    } catch (_) {}
-    return EMBEDDED_MANIFEST;
+      const response = await fetchAsset("manifest.json",{cache:"no-store"},10000);
+      return await response.json();
+    } catch (error) {
+      console.warn("manifest.json unavailable; using embedded manifest.", error);
+      return EMBEDDED_MANIFEST;
+    }
   }
 
 
@@ -8716,8 +8752,7 @@
     if(midiSequenceCache.has(key))return midiSequenceCache.get(key);
     if(midiSequencePromises.has(key))return midiSequencePromises.get(key);
     const promise=(async()=>{
-      const response=await fetch(stem.src,{cache:"force-cache"});
-      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      const response=await fetchAsset(stem.src,{cache:"force-cache"});
       const sequence=parseMidiSequence(await response.arrayBuffer());
       midiSequenceCache.set(key,sequence);
       stem.midiSequence=sequence;
@@ -8865,9 +8900,7 @@
   async function getRenderedMidiStemBuffer(stem){
     ensureAudioGraph();
     const sequence=await getMidiSequence(stem);
-    // Playlist MIDI only needs one usable bank before it can render. Loading the
-    // entire SoundFont rack must never hold already-decodable MP3 stems hostage.
-    await ensureAnyProceduralSoundFont();
+    await ensureMidiSoundFontReady();
     const voice=resolveMidiStemVoice(stem,sequence);
     if(!voice)throw new Error("No local SoundFont preset is available for this MIDI stem");
     stem.midiVoice=voice;
@@ -9023,14 +9056,17 @@
     return{drums:chooseFrom(rng,drumsPool),bass:chooseFrom(rng,bassPool),keys:chooseFrom(rng,keysPool),melody:chooseFrom(rng,leadPool),percussion:chooseFrom(rng,percussionPool)};
   }
 
+  const proceduralSoundFontSourcePromises = new Map();
+
   async function loadProceduralSoundFontSource(source){
     const urls=[source.url,...(source.aliases||[])].filter(Boolean);
     let lastError=null;
     for(const url of urls){
       try{
-        return await promiseWithTimeout(
-          WifeySF2.load(url,{cache:"force-cache"}),
-          SOUNDFONT_LOAD_TIMEOUT_MS,
+        const resolved=resolveAssetUrl(url);
+        return await withTimeout(
+          WifeySF2.load(resolved,{cache:"force-cache"}),
+          SOUNDFONT_FETCH_TIMEOUT_MS,
           `${source.label||"SoundFont"} load`
         );
       }catch(error){lastError=error}
@@ -9038,37 +9074,49 @@
     throw lastError||new Error(`Could not load ${source.label||"SoundFont"}`);
   }
 
-  function ensureProceduralSoundFontSource(id,source){
-    if(proceduralSoundFonts.has(id))return Promise.resolve(proceduralSoundFonts.get(id));
+  async function ensureProceduralSoundFontSource(id){
+    id=String(id||"");
+    if(proceduralSoundFonts.has(id))return proceduralSoundFonts.get(id);
     if(proceduralSoundFontSourcePromises.has(id))return proceduralSoundFontSourcePromises.get(id);
-    const promise=loadProceduralSoundFontSource(source).then(bank=>{
-      proceduralSoundFonts.set(id,bank);
-      proceduralSoundFontErrors.delete(id);
-      if(id==="genies")inspectGeniesBank(bank);
-      return bank;
-    }).catch(error=>{
-      proceduralSoundFontErrors.set(id,error);
-      console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
-      throw error;
-    }).finally(()=>proceduralSoundFontSourcePromises.delete(id));
+    const source=PROCEDURAL_SF2_SOURCES[id];
+    if(!source)throw new Error(`Unknown SoundFont source: ${id}`);
+    const promise=(async()=>{
+      try{
+        const bank=await loadProceduralSoundFontSource(source);
+        proceduralSoundFonts.set(id,bank);
+        proceduralSoundFontErrors.delete(id);
+        if(id==="genies")inspectGeniesBank(bank);
+        return bank;
+      }catch(error){
+        proceduralSoundFontErrors.set(id,error);
+        console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
+        throw error;
+      }finally{
+        proceduralSoundFontSourcePromises.delete(id);
+      }
+    })();
     proceduralSoundFontSourcePromises.set(id,promise);
     return promise;
   }
 
-  async function ensureAnyProceduralSoundFont(){
-    if(proceduralSoundFonts.size)return proceduralSoundFonts;
+  async function ensureMidiSoundFontReady(){
     if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
-    const jobs=Object.entries(PROCEDURAL_SF2_SOURCES).map(([id,source])=>ensureProceduralSoundFontSource(id,source));
-    await new Promise((resolve,reject)=>{
-      let remaining=jobs.length,lastError=null;
-      if(!remaining){reject(new Error("No SoundFont sources configured"));return}
-      jobs.forEach(job=>Promise.resolve(job).then(resolve,error=>{
-        lastError=error;
-        remaining-=1;
-        if(!remaining)reject(lastError||new Error("No SoundFont bank could be loaded"));
-      }));
-    });
-    return proceduralSoundFonts;
+    // MIDI playback only needs one usable bank to start. Previously it waited
+    // for every procedural bank, so one slow/missing SF2 could hold the entire
+    // playlist on LOADING AUDIO forever. Respect a forced rack selection first.
+    const preferred=proceduralSoundFontMode!=="auto"?proceduralSoundFontMode:"sf64";
+    const order=[preferred,...PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>id!==preferred)];
+    let lastError=null;
+    for(const id of order){
+      try{
+        await ensureProceduralSoundFontSource(id);
+        // Load the remaining palettes opportunistically for patch cycling, but
+        // never block transport on them.
+        idleTask(()=>Promise.allSettled(order.filter(other=>other!==id).map(other=>ensureProceduralSoundFontSource(other))));
+        return proceduralSoundFonts;
+      }catch(error){lastError=error}
+    }
+    throw lastError||new Error("No local SoundFont is available for MIDI playback");
   }
 
   async function ensureProceduralSoundFonts(){
@@ -9077,8 +9125,7 @@
       if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
       loadReadout.textContent="SF2 LOAD";
       if(appMode==="procedural")showSystemReadout("PROCEDURAL MODE","LOADING SOUNDFONTS","PLEASE WAIT");
-      const jobs=Object.entries(PROCEDURAL_SF2_SOURCES).map(([id,source])=>ensureProceduralSoundFontSource(id,source));
-      await Promise.allSettled(jobs);
+      await Promise.allSettled(Object.keys(PROCEDURAL_SF2_SOURCES).map(id=>ensureProceduralSoundFontSource(id)));
       if(!proceduralSoundFonts.size)console.warn("No local SoundFont loaded; procedural mode is using the bench-synth fallback.");
       return proceduralSoundFonts;
     })().catch(error=>{console.warn("Procedural SoundFont rack unavailable; using the bench-synth fallback.",error);return proceduralSoundFonts});
@@ -11215,9 +11262,7 @@
     }
 
     const promise = (async()=>{
-      const response = await fetch(stem.src,{cache:"force-cache"});
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+      const response = await fetchAsset(stem.src,{cache:"force-cache"});
       const bytes = await response.arrayBuffer();
       const buffer = await decodeAudioDataCompat(audioCtx,bytes);
       return touchDecodedBuffer(key,buffer);
@@ -11333,30 +11378,9 @@
     }
   }
 
-  function joinLateReadyChannel(channel,generation){
-    if(generation!==loadGeneration||!isPlaying||!audioCtx||!playlistDuration||!channel?.buffer||channel.error)return;
-    const absolute=getAbsoluteCyclePosition();
-    const currentCycle=Math.max(0,Math.floor(absolute/playlistDuration));
-    const position=Math.max(0,absolute-currentCycle*playlistDuration);
-    const offset=Math.min(position,Math.max(0,channel.buffer.duration-.001));
-    createScheduledSource(channel,audioCtx.currentTime+.025,offset,channel.buffer,{fadeIn:.018,startGain:1});
-
-    // scheduleCycle() may already have advanced the loop horizon while this stem
-    // was still decoding. Fill those future cycles so the late stem stays synced.
-    if(appMode!=="procedural"&&playlistMode==="loop"){
-      for(let cycle=currentCycle+1;cycle<=scheduledThroughCycle;cycle++){
-        createScheduledSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,channel.buffer);
-      }
-    }
-  }
-
   async function loadStemBuffer(channel,generation) {
     try {
-      const buffer = await promiseWithTimeout(
-        getDecodedStemBuffer(channel.stem),
-        STEM_LOAD_TIMEOUT_MS,
-        `${channel.stem?.mediaType === "midi" ? "MIDI" : "Audio"} stem ${channel.stem?.name || "load"}`
-      );
+      const buffer = await getDecodedStemBuffer(channel.stem);
       if (generation !== loadGeneration) return channel;
 
       channel.buffer = buffer;
@@ -11364,10 +11388,8 @@
       channel.error = false;
       if (channel.stem?.mediaType === "midi") syncMidiChannelInstrumentLabel(channel);
       updatePlaylistDuration();
-      joinLateReadyChannel(channel,generation);
       return channel;
     } catch (error) {
-      if (generation !== loadGeneration) return channel;
       channel.error = true;
       channel.ready = true;
       channel.el?.classList.add("channel-error");
@@ -12074,14 +12096,32 @@
   async function resumeAudioContext() {
     ensureAudioGraph();
 
-    if (audioCtx.state === "suspended") await audioCtx.resume();
+    if (audioCtx.state !== "running" && typeof audioCtx.resume === "function") {
+      await audioCtx.resume();
+    }
 
     // Some WebKit versions briefly remain "interrupted". A second resume after
     // the user gesture is safe and improves laptop/iOS reliability.
     if (audioCtx.state !== "running" && typeof audioCtx.resume === "function") {
       try { await audioCtx.resume(); } catch (_) {}
     }
+
+    if (audioCtx.state !== "running") {
+      throw new Error(`AudioContext did not start (state: ${audioCtx.state})`);
+    }
   }
+
+  function unlockAudioFromGesture() {
+    // setupAudioForRenderedChannels may create the context during boot so stems
+    // can decode early. Resume it at the earliest real gesture, before the
+    // subsequent click handler reaches playCurrent().
+    if (!audioCtx || audioCtx.state === "running" || typeof audioCtx.resume !== "function") return;
+    audioCtx.resume().catch(()=>{});
+  }
+
+  window.addEventListener("pointerdown",unlockAudioFromGesture,{capture:true,passive:true});
+  window.addEventListener("touchstart",unlockAudioFromGesture,{capture:true,passive:true});
+  window.addEventListener("keydown",unlockAudioFromGesture,{capture:true});
 
 
   function showAudioEngineStatus() {
@@ -12094,54 +12134,35 @@
     );
   }
 
-  function waitForFirstPlayableChannel(generation){
-    const playable=()=>generation===loadGeneration&&channels.find(channel=>channel?.buffer&&!channel.error);
-    const readyNow=playable();
-    if(readyNow)return Promise.resolve(readyNow);
-
-    return new Promise(resolve=>{
-      let settled=0,finished=false;
-      const finish=value=>{if(finished)return;finished=true;resolve(value||null)};
-      const timer=setTimeout(()=>finish(playable()),STEM_LOAD_TIMEOUT_MS);
-      channels.forEach(channel=>{
-        Promise.resolve(channel.readyPromise).then(()=>{
-          if(finished)return;
-          const ready=playable();
-          if(ready){clearTimeout(timer);finish(ready);return}
-          settled+=1;
-          if(settled>=channels.length){clearTimeout(timer);finish(null)}
-        },()=>{
-          settled+=1;
-          if(settled>=channels.length){clearTimeout(timer);finish(playable())}
-        });
-      });
-    });
-  }
-
   async function playCurrent() {
     if (!currentPlaylist || !channels.length) return;
-    const generation=loadGeneration;
 
     try {
       await resumeAudioContext();
     } catch (error) {
       loadReadout.textContent = "NO AUDIO";
+      console.error("Could not start Web Audio after user gesture.", error);
+      showSystemReadout(
+        String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),
+        "AUDIO CONTEXT BLOCKED",
+        "CLICK PLAY AGAIN"
+      );
       return;
     }
 
     loadReadout.textContent = "LOADING";
     showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),"LOADING AUDIO","PLEASE WAIT");
-
-    // Do not wait for every stem. A MIDI/SF2 render can be much slower than an
-    // MP3 decode; start as soon as one playable channel is ready, then let the
-    // remaining channels join the same AudioContext clock via loadStemBuffer().
-    const firstPlayable=await waitForFirstPlayableChannel(generation);
-    if(generation!==loadGeneration)return;
+    await Promise.allSettled(channels.map(c=>c.readyPromise));
     updatePlaylistDuration();
 
-    if (!firstPlayable || !playlistDuration) {
-      loadReadout.textContent = channels.some(c=>c.error) ? "LOAD ERR" : "NO AUDIO";
-      showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),"AUDIO UNAVAILABLE","CHECK CONSOLE");
+    const playableChannels=channels.filter(c=>c.buffer&&!c.error);
+    if (!playlistDuration || !playableChannels.length) {
+      loadReadout.textContent = "NO AUDIO";
+      showSystemReadout(
+        String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),
+        "AUDIO LOAD FAILED",
+        "CHECK CONSOLE"
+      );
       return;
     }
 
