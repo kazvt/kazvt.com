@@ -31,9 +31,6 @@
     "soundfonts/Gotta Rush.sf2",
     "soundfonts/Gotta-Rush-presets.json",
     "soundfonts/SF64-presets.json",
-    "soundfonts/SF64.sf2",
-    "wifeymixer_audio_midi_retry_fixed/index.html",
-    "wifeymixer_audio_midi_retry_fixed/instrument-icons.json",
-    "wifeymixer_audio_midi_retry_fixed/sf2-procedural.js"
+    "soundfonts/SF64.sf2"
   ]
 }
