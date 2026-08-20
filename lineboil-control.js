@@ -79,6 +79,13 @@
 
   function ensureControls() {
     document.querySelectorAll(".big-palette").forEach((palette) => {
+      if (!palette.parentElement?.querySelector(":scope > .palette-invite")) {
+        const invite = document.createElement("p");
+        invite.className = "palette-invite";
+        invite.dataset.i18n = "palette.invite";
+        invite.textContent = window.KazvtI18n?.t("palette.invite") || "pick a vibe — tap / click a color to remix the whole site!";
+        palette.insertAdjacentElement("beforebegin", invite);
+      }
       if (!palette.parentElement?.querySelector(":scope > .lineboil-toggle-sidebar")) {
         palette.insertAdjacentElement("afterend", createToggle("lineboil-toggle-sidebar"));
       }

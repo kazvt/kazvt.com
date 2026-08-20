@@ -127,6 +127,7 @@ const buttonBadges = [
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"]);
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
+const ART_MANUAL_HOLD_MS = 20000;
 const THEME_STORAGE_KEY = "kazvt-theme";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
 const DEFAULT_SITE_VOLUME = 0.2;
@@ -214,7 +215,7 @@ function svgTrailCursorImage(fill, stroke, shape = "diamond") {
 }
 
 function activeCursorLayerHost() {
-  return document.querySelector("dialog[data-multistream-guide-modal][open]") || document.body;
+  return document.querySelector("dialog[data-art-viewer-modal][open], dialog[data-multistream-guide-modal][open]") || document.body;
 }
 
 function promoteCursorCanvas(canvas) {
@@ -931,6 +932,85 @@ function cursorThemeConfig(theme) {
   };
 }
 
+let limitedGraphicsAcceleration = null;
+
+function hasLimitedGraphicsAcceleration() {
+  if (limitedGraphicsAcceleration !== null) return limitedGraphicsAcceleration;
+
+  // Browsers do not expose their "hardware acceleration" setting directly.
+  // A strict WebGL context is the safest useful proxy: it fails when the
+  // browser reports a major graphics performance caveat. We also identify
+  // common software renderers when renderer information is available.
+  const makeContext = (strict) => {
+    try {
+      const canvas = document.createElement("canvas");
+      const options = {
+        alpha: false,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        preserveDrawingBuffer: false,
+        failIfMajorPerformanceCaveat: strict,
+        powerPreference: "low-power",
+      };
+      return canvas.getContext("webgl2", options) || canvas.getContext("webgl", options);
+    } catch {
+      return null;
+    }
+  };
+
+  const strictContext = makeContext(true);
+  const fallbackContext = strictContext || makeContext(false);
+  let softwareRenderer = false;
+
+  if (fallbackContext) {
+    try {
+      const debugInfo = fallbackContext.getExtension("WEBGL_debug_renderer_info");
+      const renderer = String(debugInfo
+        ? fallbackContext.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+        : fallbackContext.getParameter(fallbackContext.RENDERER)
+      ).toLowerCase();
+      softwareRenderer = /swiftshader|llvmpipe|softpipe|software|basic render|mesa offscreen/.test(renderer);
+    } catch {}
+  }
+
+  limitedGraphicsAcceleration = !strictContext || !fallbackContext || softwareRenderer;
+  document.documentElement.dataset.cursorGraphics = limitedGraphicsAcceleration ? "limited" : "accelerated";
+  return limitedGraphicsAcceleration;
+}
+
+function lightenCursorConfig(config) {
+  if (!hasLimitedGraphicsAcceleration()) return config;
+
+  const options = { ...(config.options || {}) };
+  if (Number.isFinite(options.spawn)) options.spawn = Math.max(1, Math.min(1, options.spawn));
+  if (Number.isFinite(options.life)) options.life = Math.max(28, Math.round(options.life * 0.58));
+  if (Number.isFinite(options.scatter)) options.scatter *= 0.58;
+  if (Number.isFinite(options.spin)) options.spin *= 0.5;
+  if (Number.isFinite(options.minSize)) options.minSize = Math.max(2, Math.round(options.minSize * 0.72));
+  if (Number.isFinite(options.maxSize)) options.maxSize = Math.max(options.minSize || 2, Math.round(options.maxSize * 0.72));
+  if (Number.isFinite(options.length)) options.length = Math.max(10, Math.round(options.length * 0.5));
+  if (Number.isFinite(options.size)) options.size = Math.max(2, Math.round(options.size * 0.72));
+  if (Number.isFinite(options.links)) options.links = Math.max(3, Math.round(options.links * 0.6));
+  if (Number.isFinite(options.gap)) options.gap = Math.max(9, Math.round(options.gap * 1.35));
+  if (Number.isFinite(options.wobble)) options.wobble *= 0.45;
+  if (Array.isArray(options.sizes)) options.sizes = options.sizes.map((size) => Math.max(6, Math.round(size * 0.72)));
+
+  if (typeof options.characterLifeSpanFunction === "function") {
+    const originalLifeSpan = options.characterLifeSpanFunction;
+    options.characterLifeSpanFunction = (...args) => Math.max(24, Math.round(originalLifeSpan(...args) * 0.55));
+  }
+  if (typeof options.initialCharacterVelocityFunction === "function") {
+    const originalVelocity = options.initialCharacterVelocityFunction;
+    options.initialCharacterVelocityFunction = (...args) => {
+      const velocity = originalVelocity(...args) || { x: 0, y: 0 };
+      return { x: (velocity.x || 0) * 0.55, y: (velocity.y || 0) * 0.55 };
+    };
+  }
+
+  return { ...config, options };
+}
+
 function updateCursorEffect(theme, { force = false } = {}) {
   if (!force && activeCursorTheme === theme && activeCursorEffect) return;
   activeCursorTheme = theme;
@@ -941,7 +1021,7 @@ function updateCursorEffect(theme, { force = false } = {}) {
   if (reducedMotion.matches || touchOnly || !window.cursoreffects) return;
 
   installLineboilCursorEffects();
-  const config = cursorThemeConfig(theme);
+  const config = lightenCursorConfig(cursorThemeConfig(theme));
   const CursorEffect = window.cursoreffects[config.effect] || window.cursoreffects.fairyDustCursor;
   if (!CursorEffect) return;
 
@@ -1499,6 +1579,11 @@ function profilePanel() {
           el("div", { className: "art-frame", id: "kaz-art-frame", ariaLive: "polite" }, [
             el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt"), "data-i18n-alt": "art.alt" }),
           ]),
+          el("div", { className: "art-carousel-controls", ariaLabel: "Slideshow controls" }, [
+            el("button", { type: "button", className: "art-carousel-button art-nav-button", "data-art-prev": "true", ariaLabel: "Previous image", title: "Previous image" }, ["‹"]),
+            el("button", { type: "button", className: "art-carousel-button art-view-button", "data-art-view": "true", ariaHaspopup: "dialog", ariaLabel: "View this image larger", title: "View this image larger" }, ["VIEW BIG ↗"]),
+            el("button", { type: "button", className: "art-carousel-button art-nav-button", "data-art-next": "true", ariaLabel: "Next image", title: "Next image" }, ["›"]),
+          ]),
           el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, [translatedText("profile.art_caption")]),
         ]),
         el("div", { className: "profile-copy" }, [facts, el("p", { "data-i18n": "profile.bio" }, [translatedText("profile.bio")])]),
@@ -1576,25 +1661,20 @@ function badgesPanel() {
 async function initializeArtCarousel() {
   const frame = document.querySelector("#kaz-art-frame");
   const caption = document.querySelector("#kaz-art-caption");
+  const previousButton = document.querySelector("[data-art-prev]");
+  const nextButton = document.querySelector("[data-art-next]");
+  const viewButton = document.querySelector("[data-art-view]");
   if (!frame) return;
-
-  const updateZoomFocus = (event) => {
-    const bounds = frame.getBoundingClientRect();
-    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-    frame.style.setProperty("--zoom-x", `${Math.min(88, Math.max(12, x))}%`);
-    frame.style.setProperty("--zoom-y", `${Math.min(88, Math.max(12, y))}%`);
-  };
-
-  frame.addEventListener("pointermove", updateZoomFocus);
-  frame.addEventListener("pointerleave", () => {
-    frame.style.setProperty("--zoom-x", "50%");
-    frame.style.setProperty("--zoom-y", "50%");
-  });
 
   const files = await loadManifest("zzz_kazArt/manifest.json", imageExtensions);
   const artFiles = files.length ? files : ["../zzz_assets/kazvt-transparent.gif"];
   let index = Math.floor(Math.random() * artFiles.length);
+  let currentFile = artFiles[index];
+  let currentCaption = "";
+  let autoTimer = 0;
+  let autoDueAt = 0;
+  let viewerPausedRemaining = 0;
+  let displayToken = 0;
   const failedFiles = new Set();
 
   function artUrl(file) {
@@ -1604,27 +1684,58 @@ async function initializeArtCarousel() {
     return `zzz_kazArt/${cleanFile.split("/").map(encodeURIComponent).join("/")}`;
   }
 
-  function displayArt(file, attempts = 0) {
+  function artCaption(file) {
+    return file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || translatedText("art.default_caption");
+  }
+
+  function clearAutoTimer() {
+    if (autoTimer) window.clearTimeout(autoTimer);
+    autoTimer = 0;
+    autoDueAt = 0;
+  }
+
+  function scheduleAuto(delay = ART_ROTATION_MS) {
+    clearAutoTimer();
+    const safeDelay = Math.max(0, Number(delay) || 0);
+    autoDueAt = performance.now() + safeDelay;
+    autoTimer = window.setTimeout(() => {
+      autoTimer = 0;
+      autoDueAt = 0;
+      moveTo(index + 1, { manual: false });
+    }, safeDelay);
+  }
+
+  function displayArt(file, { panDuration = ART_ROTATION_MS } = {}, attempts = 0) {
+    const token = ++displayToken;
     const image = new Image();
     image.alt = translatedText("art.alt");
     image.className = "art-image slide-enter";
+    image.style.setProperty("--art-pan-duration", `${panDuration}ms`);
+
     image.onerror = () => {
+      if (token !== displayToken) return;
       failedFiles.add(file);
       const nextFile = artFiles.find((candidate) => !failedFiles.has(candidate));
       if (nextFile && attempts < artFiles.length) {
         index = artFiles.indexOf(nextFile);
-        displayArt(nextFile, attempts + 1);
+        currentFile = nextFile;
+        displayArt(nextFile, { panDuration }, attempts + 1);
       }
     };
+
     image.onload = () => {
+      if (token !== displayToken) return;
       const wide = image.naturalWidth > image.naturalHeight;
       const square = image.naturalWidth === image.naturalHeight;
       image.classList.toggle("is-wide", wide);
       image.classList.toggle("is-tall", !wide && !square);
       frame.querySelector(".art-image")?.classList.add("slide-exit");
+
       window.setTimeout(() => {
+        if (token !== displayToken) return;
         frame.replaceChildren(image);
         window.requestAnimationFrame(() => {
+          if (token !== displayToken) return;
           const frameBox = frame.getBoundingClientRect();
           const imageBox = image.getBoundingClientRect();
           const reverse = Math.random() > 0.5;
@@ -1641,16 +1752,122 @@ async function initializeArtCarousel() {
           image.classList.remove("slide-enter");
         });
       }, 240);
-      if (caption) caption.textContent = file.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") || translatedText("art.default_caption");
+
+      currentFile = file;
+      currentCaption = artCaption(file);
+      if (caption) caption.textContent = currentCaption;
     };
+
     image.src = artUrl(file);
   }
 
-  displayArt(artFiles[index]);
-  window.setInterval(() => {
-    index = (index + 1) % artFiles.length;
-    displayArt(artFiles[index]);
-  }, ART_ROTATION_MS);
+  function moveTo(nextIndex, { manual = false } = {}) {
+    const count = artFiles.length;
+    index = ((nextIndex % count) + count) % count;
+    currentFile = artFiles[index];
+
+    if (manual) {
+      displayArt(currentFile, { panDuration: ART_MANUAL_HOLD_MS });
+      scheduleAuto(ART_MANUAL_HOLD_MS);
+    } else {
+      displayArt(currentFile, { panDuration: ART_ROTATION_MS });
+      scheduleAuto(ART_ROTATION_MS);
+    }
+  }
+
+  function createArtViewerModal() {
+    return el("dialog", {
+      className: "multistream-guide-modal art-viewer-modal",
+      "data-art-viewer-modal": "true",
+      ariaLabelledby: "art-viewer-modal-title",
+    }, [
+      el("div", { className: "multistream-guide-window art-viewer-window" }, [
+        el("header", { className: "guide-window-bar" }, [
+          el("div", { className: "guide-window-heading" }, [
+            el("span", { className: "guide-window-kicker", ariaHidden: "true" }, ["kaz_art.exe"]),
+            el("span", { id: "art-viewer-modal-title", className: "guide-window-title" }, ["CURRENT SLIDE // BIG VIEW"]),
+          ]),
+          el("div", { className: "guide-window-controls", ariaLabel: "Image viewer controls" }, [
+            el("span", { className: "guide-window-stamp", ariaHidden: "true" }, ["LOOK CLOSER"]),
+            el("button", { type: "button", className: "guide-window-button guide-window-close", "data-art-viewer-close": "true", ariaLabel: "Close image viewer", title: "Close image viewer" }, ["×"]),
+          ]),
+        ]),
+        el("div", { className: "guide-modal-viewport art-viewer-viewport" }, [
+          el("div", { className: "guide-modal-content art-viewer-content" }, [
+            el("figure", { className: "art-viewer-stage" }, [
+              el("div", { className: "art-viewer-image-wrap" }, [
+                el("img", { className: "art-viewer-image", "data-art-viewer-image": "true", alt: translatedText("art.alt") }),
+              ]),
+              el("figcaption", { className: "art-viewer-caption", "data-art-viewer-caption": "true" }, [""]),
+            ]),
+          ]),
+        ]),
+        el("footer", { className: "guide-window-status" }, [
+          el("span", {}, ["one image only // slideshow stays put while you look"]),
+          el("span", {}, ["ESC or × to close"]),
+        ]),
+      ]),
+    ]);
+  }
+
+  let viewer = document.querySelector("[data-art-viewer-modal]");
+  if (!viewer) {
+    viewer = createArtViewerModal();
+    document.body.append(viewer);
+    window.KazvtLineboil?.sync?.();
+  }
+
+  const viewerImage = viewer.querySelector("[data-art-viewer-image]");
+  const viewerCaption = viewer.querySelector("[data-art-viewer-caption]");
+  let lastViewerTrigger = null;
+
+  function openViewer(trigger) {
+    lastViewerTrigger = trigger || document.activeElement;
+    viewerPausedRemaining = autoTimer && autoDueAt
+      ? Math.max(0, autoDueAt - performance.now())
+      : ART_ROTATION_MS;
+    clearAutoTimer();
+
+    if (viewerImage) {
+      viewerImage.src = artUrl(currentFile);
+      viewerImage.alt = currentCaption || translatedText("art.alt");
+    }
+    if (viewerCaption) viewerCaption.textContent = currentCaption || artCaption(currentFile);
+
+    document.body.classList.add("guide-modal-open");
+    if (typeof viewer.showModal === "function") viewer.showModal();
+    else viewer.setAttribute("open", "");
+    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    window.KazvtLineboil?.sync?.();
+    viewer.querySelector("[data-art-viewer-close]")?.focus({ preventScroll: true });
+  }
+
+  function closeViewer() {
+    if (typeof viewer.close === "function" && viewer.open) viewer.close();
+    else viewer.removeAttribute("open");
+  }
+
+  previousButton?.addEventListener("click", () => moveTo(index - 1, { manual: true }));
+  nextButton?.addEventListener("click", () => moveTo(index + 1, { manual: true }));
+  viewButton?.addEventListener("click", () => openViewer(viewButton));
+  viewer.querySelector("[data-art-viewer-close]")?.addEventListener("click", closeViewer);
+  viewer.addEventListener("click", (event) => {
+    if (event.target === viewer) closeViewer();
+  });
+  viewer.addEventListener("close", () => {
+    document.body.classList.remove("guide-modal-open");
+    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    window.KazvtLineboil?.sync?.();
+    scheduleAuto(viewerPausedRemaining || ART_ROTATION_MS);
+    viewerPausedRemaining = 0;
+    if (lastViewerTrigger instanceof HTMLElement) lastViewerTrigger.focus({ preventScroll: true });
+  });
+  viewer.addEventListener("cancel", () => {
+    document.body.classList.remove("guide-modal-open");
+  });
+
+  displayArt(currentFile, { panDuration: ART_ROTATION_MS });
+  scheduleAuto(ART_ROTATION_MS);
 }
 
 function paintPanel() {
@@ -2097,6 +2314,7 @@ function multistreamGuidePanel() {
     el("button", { type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
       el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker")]),
       el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary")]),
+      el("span", { className: "guide-launch-pointer", ariaHidden: "true", "data-i18n": "guide.launch_pointer" }, [translatedText("guide.launch_pointer")]),
     ]),
   ]);
 }

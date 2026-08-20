@@ -1423,16 +1423,27 @@ code {
   background-size: 18px 18px;
 }
 
-.guide-page #multistream-guide,
-.multistream-guide-modal .embedded-guide-slot {
+.guide-page #multistream-guide {
   animation-name: guidePanelBoil;
   animation-duration: 460ms;
 }
 
-.guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong),
-.multistream-guide-modal :is(h1, h2, p, a, span, text, tspan, strong) {
+/* The modal inherits the exact same section + text boil cadence as the main site. */
+.multistream-guide-modal 
+
+
+.embedded-guide-slot {
+  animation: none;
+}
+
+.guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong) {
   animation-name: guideTextBoil;
   animation-duration: 480ms;
+}
+
+.multistream-guide-modal :is(h1, h2, p, a, span, text, tspan, strong) {
+  animation: textBoil 720ms steps(2, end) infinite;
+  text-rendering: geometricPrecision;
 }
 
 .guide-map-frame :is(a, span, text, tspan),
@@ -1548,6 +1559,26 @@ code {
 
 .guide-step-recommended h3 {
   padding-right: 38px;
+}
+
+.guide-inline-recommend {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  margin-left: 7px;
+  place-items: center;
+  vertical-align: -6px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--yellow) 88%, var(--paper) 12%);
+  box-shadow: 2px 2px 0 var(--shadow);
+  cursor: var(--cursor-default, default);
+}
+
+.guide-inline-recommend > svg {
+  width: 13px;
+  height: 13px;
+  fill: var(--ink);
 }
 
 .guide-map .node-copy {
@@ -2243,8 +2274,6 @@ code {
 }
 
 .art-frame {
-  --zoom-x: 50%;
-  --zoom-y: 50%;
   position: relative;
   width: 100%;
   aspect-ratio: 1;
@@ -2263,16 +2292,12 @@ code {
   max-width: none;
   max-height: none;
   transform: translate(-50%, -50%);
-  transition: transform 420ms steps(3, end), opacity 420ms steps(3, end), scale 180ms steps(2, end);
-  transform-origin: var(--zoom-x) var(--zoom-y);
+  transition: transform 420ms steps(3, end), opacity 420ms steps(3, end);
   image-rendering: auto;
-  scale: 1;
 }
 
-.art-frame:hover .art-image,
-.art-frame:focus-within .art-image {
-  scale: 1.15;
-}
+/* Deliberately no pointer/hover zoom here. The artwork only uses its slow
+   camera pan; the VIEW BIG button is the explicit way to inspect details. */
 
 .art-image:not(.is-wide):not(.is-tall) {
   width: 100%;
@@ -2285,7 +2310,7 @@ code {
   height: auto;
   top: 0;
   transform: translateX(-50%);
-  animation: artPanY 8000ms linear forwards;
+  animation: artPanY var(--art-pan-duration, 8000ms) linear forwards;
 }
 
 .art-image.is-wide {
@@ -2293,7 +2318,7 @@ code {
   height: 100%;
   left: 0;
   transform: translateY(-50%);
-  animation: artPanX 8000ms linear forwards;
+  animation: artPanX var(--art-pan-duration, 8000ms) linear forwards;
 }
 
 .art-image.slide-enter {
@@ -2312,6 +2337,60 @@ code {
 
 .art-image.is-tall.slide-exit {
   transform: translateX(-160%) rotate(-2deg);
+}
+
+.art-carousel-controls {
+  display: flex;
+  width: 100%;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-carousel-button {
+  min-height: 31px;
+  padding: 3px 8px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--on-yellow);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 2px 2px 0 var(--shadow);
+  clip-path: polygon(0 4px, 5px 0, 100% 2px, calc(100% - 3px) 100%, 3px calc(100% - 2px));
+  cursor: var(--cursor-pointer, pointer);
+}
+
+.art-nav-button {
+  width: 34px;
+  min-width: 34px;
+  padding-inline: 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.15rem;
+}
+
+.art-view-button {
+  min-width: 0;
+  flex: 1 1 auto;
+  background: color-mix(in srgb, var(--blue) 18%, var(--paper) 82%);
+  color: var(--ink);
+  letter-spacing: 0.035em;
+}
+
+.art-carousel-button:hover,
+.art-carousel-button:focus-visible {
+  background-color: var(--bg);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat;
+  background-size: var(--wallpaper-size);
+  color: var(--hover-text);
+  animation: blockBoil 300ms steps(2, end) infinite;
+}
+
+.art-carousel-button:active {
+  translate: 1px 1px;
+  box-shadow: 1px 1px 0 var(--shadow);
 }
 
 .web-corner {
@@ -2547,8 +2626,8 @@ code {
   overflow: hidden;
   display: grid;
   width: 100%;
-  min-height: 78px;
-  gap: 4px;
+  min-height: 108px;
+  gap: 5px;
   place-items: center;
   padding: 12px 16px;
   border: 4px solid var(--ink);
@@ -2557,10 +2636,15 @@ code {
   font: inherit;
   font-weight: 900;
   text-align: center;
-  box-shadow: 6px 6px 0 var(--shadow);
+  box-shadow: 7px 7px 0 var(--shadow), 0 0 0 3px color-mix(in srgb, var(--paper) 72%, transparent);
+  outline: 3px dashed currentColor;
+  outline-offset: 5px;
   clip-path: polygon(0 8px, 12px 0, 100% 5px, calc(100% - 7px) 100%, 5px calc(100% - 4px));
   transform-origin: center;
-  animation: guideLaunchBreath 1900ms steps(8, end) infinite;
+  cursor: var(--cursor-pointer, pointer);
+  animation:
+    guideLaunchBreath 1250ms steps(8, end) infinite,
+    guideLaunchAttention 1450ms ease-in-out infinite;
   transition: transform 150ms ease-out, box-shadow 150ms steps(2, end);
 }
 
@@ -2600,7 +2684,9 @@ code {
 .guide-launch-button:hover,
 .guide-launch-button:focus-visible {
   z-index: 2;
-  animation: none;
+  animation:
+    guideLaunchBreath 760ms steps(8, end) infinite,
+    guideLaunchAttention 900ms ease-in-out infinite;
   background-color: var(--bg);
   background-image: var(--wallpaper-image);
   background-repeat: repeat;
@@ -2635,7 +2721,24 @@ code {
 }
 
 .guide-launch-title {
-  font-size: clamp(1.05rem, 2vw, 1.38rem);
+  font-size: clamp(1.18rem, 2.25vw, 1.55rem);
+  letter-spacing: 0.025em;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
+}
+
+.guide-launch-pointer {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 3px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: clamp(0.78rem, 1.7vw, 0.94rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  animation: guideLaunchPointerBounce 620ms steps(2, end) infinite;
 }
 
 body.guide-modal-open {
@@ -2689,7 +2792,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
     linear-gradient(0deg, color-mix(in srgb, var(--pink) 10%, transparent) 1px, transparent 1px),
     var(--paper);
   background-size: 18px 18px;
-  animation: modalWindowBoil 520ms steps(2, end) infinite;
+  animation: sectionBoil 760ms steps(2, end) infinite;
 }
 
 .multistream-guide-window::before,
@@ -3149,6 +3252,21 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   0% { transform: translate(-0.55px, -0.15px) rotate(0.12deg); }
   50% { transform: translate(0.35px, -0.7px) rotate(-0.13deg); }
   100% { transform: translate(0.7px, 0.55px) rotate(0.1deg); }
+}
+
+@keyframes guideLaunchAttention {
+  0%, 100% { box-shadow: 7px 7px 0 var(--shadow), 0 0 0 3px color-mix(in srgb, var(--paper) 72%, transparent); }
+  50% { box-shadow: 10px 10px 0 var(--shadow), 0 0 0 6px color-mix(in srgb, var(--yellow) 58%, transparent); }
+}
+
+@keyframes guideLaunchPointerBounce {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 4px; }
+}
+
+@keyframes paletteInviteSpark {
+  0%, 100% { opacity: 0.58; scale: 0.92; }
+  50% { opacity: 1; scale: 1.12; }
 }
 
 @keyframes guideLaunchBreath {
@@ -3731,6 +3849,63 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 }
 
 
+
+.palette-invite {
+  margin: 9px 0 0;
+  padding: 7px 9px;
+  border: 2px dashed var(--ink);
+  background: color-mix(in srgb, var(--yellow) 48%, var(--paper) 52%);
+  color: var(--ink);
+  font: 900 0.76rem/1.2 "Courier New", Courier, monospace;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.palette.big-palette {
+  padding: 10px;
+  border: 2px dashed color-mix(in srgb, var(--ink) 58%, transparent);
+  background: color-mix(in srgb, var(--paper-alt) 42%, transparent);
+}
+
+.palette-choice:not(.is-selected) > button::after {
+  content: "✦";
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  z-index: 2;
+  display: grid;
+  width: 1.35em;
+  height: 1.35em;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 1px 1px 0 var(--shadow);
+  animation: paletteInviteSpark 1200ms steps(2, end) infinite;
+}
+
+.palette-choice:nth-child(3n + 2):not(.is-selected) > button::after { animation-delay: -400ms; }
+.palette-choice:nth-child(3n):not(.is-selected) > button::after { animation-delay: -800ms; }
+
+.palette-choice > button:hover,
+.palette-choice > button:focus-visible {
+  outline-width: 4px !important;
+  outline-style: dashed !important;
+  outline-color: var(--click-hover-outline-color) !important;
+  outline-offset: 5px !important;
+  box-shadow: 6px 7px 0 var(--shadow);
+}
+
+.palette-choice > button:active {
+  translate: 2px 2px;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
 /* Persistent palette selection ring: mirrors link-button hover outlines, with a real air gap. */
 .palette-choice {
   position: relative;
@@ -3891,4 +4066,267 @@ html.touch-device .guide-page .content-stack {
 /* Palette 16: text on the solid --pink surface must always stay white. */
 body[data-theme="p16"] .guide-map .badge.no text {
   fill: var(--on-pink);
+}
+
+
+/* Mobile readability pass ---------------------------------------------------
+   Keep layout/text physically stable on touch devices. The lineboil look is
+   retained in decorative outline layers instead of moving whole reading boxes. */
+@keyframes mobileOutlineBoil {
+  0%, 100% { transform: translate(0.45px, -0.35px) rotate(0deg); }
+  50% { transform: translate(-0.45px, 0.4px) rotate(0.08deg); }
+}
+
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .site-header,
+  .oldweb-nav,
+  .marquee,
+  .sidebar,
+  .panel:not(#badges),
+  .page-footer,
+  .language-dock,
+  .multistream-guide-window,
+  .guide-mobile-ladder .guide-step,
+  .guide-mobile-ladder .guide-choice {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+    translate: none !important;
+    left: 0 !important;
+    top: 0 !important;
+    will-change: auto !important;
+  }
+
+  .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption),
+  .multistream-guide-modal :is(h1, h2, p, a, span, text, tspan, strong) {
+    animation: none !important;
+    transform: none !important;
+    translate: none !important;
+    will-change: auto !important;
+  }
+
+  .scribble-box::before,
+  .scribble-box::after,
+  .multistream-guide-window::before,
+  .multistream-guide-window::after {
+    animation-name: mobileOutlineBoil !important;
+    animation-duration: 1050ms !important;
+    animation-timing-function: steps(2, end) !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .palette button,
+  .palette-choice::after,
+  .palette-choice:not(.is-selected) > button::after {
+    animation-duration: 1500ms;
+  }
+
+  .palette button {
+    animation: none !important;
+    touch-action: manipulation;
+  }
+
+  .palette-choice > button:active {
+    translate: 1px 1px;
+  }
+
+  /* CTA remains obviously alive without moving the entire box while reading. */
+  .guide-launch-button,
+  .guide-launch-button:hover,
+  .guide-launch-button:focus-visible {
+    animation: guideLaunchAttention 1450ms ease-in-out infinite !important;
+    transform: none !important;
+  }
+
+  .guide-launch-pointer {
+    animation: guideLaunchPointerBounce 720ms steps(2, end) infinite !important;
+  }
+}
+
+/* Keep the CTA alive on mobile after the generic stable-text rule above. */
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .site-wrap .guide-launch-button,
+  .site-wrap .guide-launch-button:hover,
+  .site-wrap .guide-launch-button:focus-visible {
+    animation: guideLaunchAttention 1450ms ease-in-out infinite !important;
+    transform: none !important;
+  }
+
+  .site-wrap .guide-launch-pointer {
+    animation: guideLaunchPointerBounce 720ms steps(2, end) infinite !important;
+  }
+}
+
+/* Accessibility preference always wins over attention/lineboil animations. */
+@media (prefers-reduced-motion: reduce) {
+  .guide-launch-button,
+  .guide-launch-button::before,
+  .guide-launch-button::after,
+  .guide-launch-pointer,
+  .palette-choice::after,
+  .palette-choice > button::after,
+  .scribble-box::before,
+  .scribble-box::after,
+  .multistream-guide-window,
+  .multistream-guide-window::before,
+  .multistream-guide-window::after,
+  .multistream-guide-modal :is(h1, h2, p, a, span, text, tspan, strong) {
+    animation: none !important;
+  }
+}
+
+/* About-me single-image viewer ------------------------------------------------
+   Reuses the multistream window shell so it gets the exact same top-layer,
+   lineboil, titlebar and theme behavior, while maximizing only the current art. */
+.art-viewer-modal {
+  max-width: 1180px;
+  max-height: 960px;
+}
+
+.art-viewer-viewport {
+  overflow: hidden;
+}
+
+.art-viewer-content {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  padding: clamp(10px, 2vw, 18px);
+}
+
+.art-viewer-stage {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+  margin: 0;
+}
+
+.art-viewer-image-wrap {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+  padding: clamp(8px, 1.5vw, 14px);
+  border: 4px solid var(--ink);
+  background:
+    radial-gradient(circle at 9px 9px, color-mix(in srgb, var(--ink) 18%, transparent) 0 2px, transparent 3px),
+    linear-gradient(135deg, color-mix(in srgb, var(--blue) 8%, transparent), color-mix(in srgb, var(--pink) 8%, transparent)),
+    var(--paper-alt);
+  background-size: 18px 18px, auto, auto;
+  box-shadow:
+    7px 7px 0 var(--shadow),
+    -3px -3px 0 color-mix(in srgb, var(--blue) 18%, transparent);
+  clip-path: polygon(0 8px, 10px 0, calc(100% - 7px) 3px, 100% 11px, calc(100% - 4px) calc(100% - 8px), calc(100% - 12px) 100%, 8px calc(100% - 3px), 0 calc(100% - 11px));
+  animation: sectionBoil 760ms steps(2, end) infinite;
+}
+
+.art-viewer-image-wrap::before,
+.art-viewer-image-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+  border: 2px solid color-mix(in srgb, var(--ink) 50%, transparent);
+  opacity: 0.24;
+  clip-path: polygon(0 7px, 8px 0, calc(100% - 9px) 2px, 100% 7px, calc(100% - 4px) calc(100% - 7px), calc(100% - 10px) 100%, 6px calc(100% - 2px), 0 calc(100% - 9px));
+  animation: outlineBoil 390ms steps(2, end) infinite;
+}
+
+.art-viewer-image-wrap::after {
+  inset: 10px 8px 8px 10px;
+  border-style: dashed;
+  opacity: 0.13;
+  animation-delay: 170ms;
+}
+
+.art-viewer-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(6px 7px 0 color-mix(in srgb, var(--ink) 44%, transparent));
+}
+
+.art-viewer-caption {
+  justify-self: center;
+  max-width: min(100%, 52rem);
+  margin: 0;
+  padding: 8px 13px;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  color: var(--on-yellow);
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 3px 3px 0 var(--shadow);
+  clip-path: polygon(0 4px, 7px 0, calc(100% - 5px) 2px, 100% 7px, calc(100% - 4px) 100%, 5px calc(100% - 2px));
+}
+
+@media (max-width: 560px) {
+  .art-carousel-controls {
+    gap: 5px;
+  }
+
+  .art-carousel-button {
+    min-height: 34px;
+  }
+
+  .art-view-button {
+    font-size: 0.67rem;
+  }
+
+  .art-viewer-modal {
+    width: calc(100vw - 12px);
+    height: calc(100dvh - 12px);
+  }
+
+  .art-viewer-content {
+    padding: 8px;
+  }
+
+  .art-viewer-stage {
+    gap: 9px;
+  }
+
+  .art-viewer-caption {
+    width: 100%;
+    padding: 7px 9px;
+  }
+}
+
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .art-viewer-image-wrap {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .art-viewer-image {
+    transform: none !important;
+  }
+
+  .art-carousel-button:hover,
+  .art-carousel-button:focus-visible {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-image,
+  .art-viewer-image-wrap,
+  .art-viewer-image-wrap::before,
+  .art-viewer-image-wrap::after,
+  .art-carousel-button {
+    animation: none !important;
+    transition: none !important;
+  }
 }

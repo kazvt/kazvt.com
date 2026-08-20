@@ -56,7 +56,8 @@ html[data-lineboil="off"] :is(
   .sidebar,
   .panel:not(#badges),
   .page-footer,
-  .language-dock
+  .language-dock,
+  .multistream-guide-window
 ) { filter: none !important; }
 
 /* The conveyor keeps scrolling; only each message's tiny independent jitter is
