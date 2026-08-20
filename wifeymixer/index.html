@@ -4424,128 +4424,286 @@
     }
 
 
-
-    /* =====================================================================
-       PATCH: MATTE VINTAGE KNOBS
-       More worn, less polished, more like handled analogue hardware.
-       ===================================================================== */
-    .knob-wrap{
-      filter:drop-shadow(0 1px 1px rgba(0,0,0,.60)) !important;
+    /* ===== PATCH: larger physical vintage track/program selector =====
+       The track chooser is treated as a mechanical program drawer rather
+       than a browser-style dropdown: larger engraved legends, a broad
+       bakelite/painted-metal cap and chunky removable program cards. */
+    .transport-rack{
+      min-height:43px !important;
+      padding-top:4px !important;
+      padding-bottom:4px !important;
+      align-items:center !important;
     }
 
-    .knob-wrap::before{
-      border-color:#09090a !important;
+    .playlist-slot{
+      height:35px !important;
+      min-height:35px !important;
+      overflow:visible !important;
+      border:1px solid #070709 !important;
+      border-radius:3px !important;
       background:
-        radial-gradient(circle at 26% 68%,rgba(119,105,86,.07) 0 1.1%,transparent 1.7%),
-        radial-gradient(circle at 72% 30%,rgba(207,197,174,.035) 0 1%,transparent 1.6%),
-        radial-gradient(circle at 61% 77%,rgba(0,0,0,.16) 0 1.4%,transparent 2.1%),
-        radial-gradient(circle at 50% 50%,transparent 0 55%,rgba(151,140,119,.055) 55.5% 57.5%,transparent 58%),
-        radial-gradient(circle,#0e0e11 0 57%,#34322f 58.5% 61%,#141316 62% 69%,#08080a 70% 100%) !important;
+        radial-gradient(circle at 8px 8px,#6e6b66 0 1px,#302f31 1.3px 2.4px,#0b0b0d 2.6px 3.5px,transparent 3.7px),
+        radial-gradient(circle at calc(100% - 8px) 8px,#6e6b66 0 1px,#302f31 1.3px 2.4px,#0b0b0d 2.6px 3.5px,transparent 3.7px),
+        radial-gradient(circle at 18% 32%,rgba(255,255,255,.025) 0 .8px,transparent 1.1px) 0 0/15px 18px,
+        linear-gradient(180deg,#28272b 0%,#19191d 100%) !important;
       box-shadow:
-        inset 0 2px 4px rgba(0,0,0,.86),
-        inset 0 -1px 0 rgba(255,255,255,.012),
-        0 1px 0 rgba(255,255,255,.012),
-        0 2px 3px rgba(0,0,0,.68) !important;
+        inset 0 3px 6px rgba(0,0,0,.70),
+        inset 0 -1px 0 rgba(255,255,255,.018),
+        0 0 0 1px #3a383d,
+        0 2px 0 #070709 !important;
     }
 
-    .knob{
-      border-color:#0a0909 !important;
+    .playlist-selector-button{
+      inset:3px 4px !important;
+      width:calc(100% - 8px) !important;
+      height:calc(100% - 6px) !important;
+      grid-template-columns:auto minmax(0,1fr) 31px !important;
+      gap:8px !important;
+      padding:0 0 0 9px !important;
+      border:1px solid #17130e !important;
+      border-radius:2px !important;
+      color:#29241d !important;
       background:
-        radial-gradient(circle at 22% 34%,rgba(145,126,99,.055) 0 1.2%,transparent 1.8%),
-        radial-gradient(circle at 72% 64%,rgba(0,0,0,.24) 0 1.1%,transparent 1.8%),
-        radial-gradient(circle at 48% 17%,rgba(214,204,181,.025) 0 1%,transparent 1.6%),
-        repeating-conic-gradient(
-          from 1deg,
-          #272628 0 2.2deg,
-          #1b1a1c 2.2deg 4.4deg,
-          #222123 4.4deg 5.8deg,
-          #171618 5.8deg 7.2deg
-        ) !important;
+        radial-gradient(ellipse at 26% 12%,rgba(255,255,255,.105),transparent 32%),
+        radial-gradient(circle at 72% 72%,rgba(76,55,31,.055) 0 .7px,transparent 1px) 0 0/13px 15px,
+        linear-gradient(180deg,rgba(255,255,255,.10),transparent 18%),
+        linear-gradient(180deg,#c1b8a4 0%,#a69c88 55%,#817766 100%) !important;
       box-shadow:
-        0 2px 2px rgba(0,0,0,.88),
-        0 0 0 1px #302e31,
-        inset 1px 1px 0 rgba(255,255,255,.014),
-        inset -1px -2px 3px rgba(0,0,0,.48) !important;
-      filter:saturate(.72) contrast(.94) !important;
+        0 2px 0 #080707,
+        0 0 0 1px #403b33,
+        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 -3px 3px rgba(57,45,31,.22),
+        inset 2px 0 3px rgba(255,255,255,.035) !important;
     }
 
-    /* Scuffs, ingrained grime and uneven finger wear. */
-    .knob::before{
-      inset:5% !important;
-      background:
-        linear-gradient(116deg,transparent 0 42%,rgba(190,175,146,.025) 43% 44%,transparent 45% 100%),
-        linear-gradient(31deg,transparent 0 67%,rgba(0,0,0,.12) 68% 69.5%,transparent 70.5% 100%),
-        radial-gradient(ellipse at 34% 25%,rgba(193,181,154,.028),transparent 27%),
-        radial-gradient(ellipse at 68% 76%,rgba(0,0,0,.25),transparent 43%),
-        radial-gradient(circle at 18% 61%,rgba(166,145,112,.055) 0 1.2%,transparent 1.8%),
-        radial-gradient(circle at 76% 39%,rgba(220,211,189,.025) 0 1%,transparent 1.6%) !important;
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,.18) !important;
-      mix-blend-mode:normal !important;
-      opacity:.92 !important;
-    }
-
-    .knob::after{
-      inset:3% !important;
-      background:
-        repeating-conic-gradient(
-          from 3deg,
-          transparent 0 10deg,
-          rgba(195,179,147,.015) 10.2deg 10.8deg,
-          transparent 11deg 19deg,
-          rgba(0,0,0,.045) 19.3deg 20deg,
-          transparent 20.2deg 31deg
-        ),
-        radial-gradient(ellipse at 48% 49%,transparent 0 70%,rgba(177,158,126,.055) 73%,transparent 79%) !important;
-      opacity:.76 !important;
-    }
-
-    .knob-cap{
-      border-color:rgba(0,0,0,.72) !important;
-      background:
-        radial-gradient(circle at 24% 63%,rgba(134,113,82,.055) 0 1.3%,transparent 2%),
-        radial-gradient(circle at 72% 29%,rgba(210,199,174,.022) 0 1%,transparent 1.7%),
-        radial-gradient(circle at 61% 74%,rgba(0,0,0,.20) 0 11%,transparent 35%),
-        radial-gradient(circle at 47% 43%,#302f31 0 8%,#29282a 35%,#1d1c1e 72%,#151416 100%) !important;
+    .playlist-selector-button::before{
+      inset:3px 35px 3px 4px !important;
+      border:1px solid rgba(55,47,37,.24) !important;
+      border-radius:1px;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.012),
-        inset 0 -2px 3px rgba(0,0,0,.38),
-        0 0 0 1px rgba(55,51,49,.28) !important;
-      filter:saturate(.72) brightness(.94) !important;
+        inset 0 1px rgba(255,255,255,.13),
+        inset 0 -1px rgba(0,0,0,.16),
+        0 0 0 1px rgba(255,255,255,.025) !important;
     }
 
-    .knob-cap::before{
-      inset:5% !important;
+    .playlist-selector-button::after{
+      left:5px !important;
+      right:36px !important;
+      top:4px !important;
+      bottom:4px !important;
       background:
-        conic-gradient(
-          from 202deg,
-          transparent 0 13deg,
-          rgba(170,150,116,.055) 14deg 20deg,
-          transparent 21deg 111deg,
-          rgba(0,0,0,.18) 112deg 154deg,
-          transparent 155deg 264deg,
-          rgba(190,177,150,.025) 265deg 271deg,
-          transparent 272deg 360deg
-        ),
-        radial-gradient(circle at 30% 69%,rgba(139,116,83,.05) 0 1.2%,transparent 2%) !important;
-      opacity:.9 !important;
+        linear-gradient(101deg,transparent 0 12%,rgba(255,255,255,.055) 12.4% 12.8%,transparent 13.1%),
+        linear-gradient(82deg,transparent 0 61%,rgba(45,34,23,.07) 61.3% 61.8%,transparent 62.1%),
+        radial-gradient(ellipse at 62% 100%,rgba(86,61,34,.08),transparent 39%) !important;
+      opacity:.68 !important;
     }
 
-    .knob-tick{
+    .playlist-selector-legend{
+      color:#5f5548 !important;
+      font-family:Arial,sans-serif !important;
+      font-size:6.5px !important;
+      line-height:1 !important;
+      font-weight:900 !important;
+      letter-spacing:.12em !important;
+      text-transform:uppercase;
+      text-shadow:
+        0 1px rgba(255,255,255,.16),
+        0 -1px rgba(63,50,35,.12) !important;
+      white-space:nowrap;
+    }
+
+    .playlist-selector-label{
+      color:#221e18 !important;
+      font-family:"Arial Narrow",Arial,sans-serif !important;
+      font-size:10px !important;
+      line-height:1 !important;
+      font-weight:900 !important;
+      letter-spacing:.045em !important;
+      text-shadow:
+        0 1px rgba(255,255,255,.20),
+        0 -1px rgba(77,58,36,.10) !important;
+    }
+
+    .playlist-selector-lever{
+      color:#d0cbc0 !important;
       background:
-        linear-gradient(90deg,#777166 0%,#b8af9d 30%,#d0c7b4 48%,#9d9586 72%,#625e56 100%) !important;
+        repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
+        linear-gradient(180deg,#555359 0%,#3b393f 56%,#242328 100%) !important;
+      border-left:1px solid #171519 !important;
       box-shadow:
-        0 1px 0 rgba(0,0,0,.9),
-        0 0 1px rgba(205,193,169,.10) !important;
-      opacity:.78 !important;
-      filter:saturate(.68) !important;
+        inset 1px 0 rgba(255,255,255,.035),
+        inset 0 1px rgba(255,255,255,.10),
+        inset 0 -3px 3px rgba(0,0,0,.34),
+        -1px 0 rgba(73,65,55,.16) !important;
     }
 
-    /* Small material variation makes repeated controls feel physically individual. */
-    .channel:nth-child(5n+1) .knob{filter:saturate(.68) brightness(.93) contrast(.96) !important}
-    .channel:nth-child(5n+2) .knob{filter:saturate(.75) brightness(.97) contrast(.93) !important}
-    .channel:nth-child(5n+3) .knob{filter:saturate(.66) brightness(.95) contrast(.98) !important}
-    .channel:nth-child(5n+4) .knob-cap{filter:saturate(.67) brightness(.91) !important}
-    .channel:nth-child(7n) .knob-cap{filter:saturate(.76) brightness(.96) contrast(.94) !important}
+    .playlist-selector-lever i{
+      font-size:11px !important;
+      filter:drop-shadow(0 1px 0 #09090a);
+    }
+
+    .playlist-hardware-menu{
+      top:calc(100% + 7px) !important;
+      width:min(480px,max(100%,310px)) !important;
+      max-height:min(50vh,390px) !important;
+      padding:11px 9px 9px !important;
+      border:1px solid #070708 !important;
+      border-radius:3px !important;
+      background:
+        radial-gradient(circle at 7px 7px,#7b7770 0 1px,#403e3e 1.3px 2.5px,#111114 2.8px 3.7px,transparent 3.9px),
+        radial-gradient(circle at calc(100% - 7px) 7px,#7b7770 0 1px,#403e3e 1.3px 2.5px,#111114 2.8px 3.7px,transparent 3.9px),
+        radial-gradient(circle at 18% 17%,rgba(255,255,255,.021) 0 .8px,transparent 1.1px) 0 0/14px 17px,
+        linear-gradient(180deg,#302e32 0%,#201f23 53%,#18181b 100%) !important;
+      box-shadow:
+        0 11px 22px rgba(0,0,0,.67),
+        0 0 0 2px #403d42,
+        0 0 0 3px #0c0c0e,
+        inset 0 2px 0 rgba(255,255,255,.04),
+        inset 0 -4px 7px rgba(0,0,0,.38) !important;
+      scrollbar-color:#777064 #17171a;
+    }
+
+    .playlist-hardware-menu::before,
+    .playlist-hardware-menu::after{
+      top:4px !important;
+      width:7px !important;
+      height:7px !important;
+      opacity:.82 !important;
+    }
+
+    .playlist-hardware-option{
+      min-height:46px !important;
+      grid-template-columns:12px 31px minmax(0,1fr) !important;
+      gap:9px !important;
+      margin-bottom:6px !important;
+      padding:7px 10px !important;
+      border:1px solid #15120e !important;
+      border-radius:2px !important;
+      color:#29241d !important;
+      background:
+        radial-gradient(circle at 82% 35%,rgba(76,55,31,.045) 0 .65px,transparent .95px) 0 0/14px 17px,
+        linear-gradient(180deg,rgba(255,255,255,.10),transparent 18%),
+        linear-gradient(180deg,#b7ae9b 0%,#99907f 68%,#776e5e 100%) !important;
+      box-shadow:
+        0 2px 0 #080708,
+        0 0 0 1px #3a352e,
+        inset 0 1px rgba(255,255,255,.18),
+        inset 0 -2px 2px rgba(58,46,32,.19) !important;
+    }
+
+    .playlist-hardware-option:hover,
+    .playlist-hardware-option:focus-visible{
+      background:
+        radial-gradient(circle at 82% 35%,rgba(76,55,31,.04) 0 .65px,transparent .95px) 0 0/14px 17px,
+        linear-gradient(180deg,rgba(255,255,255,.15),transparent 20%),
+        linear-gradient(180deg,#c5bba5 0%,#a59b87 68%,#817663 100%) !important;
+      box-shadow:
+        0 2px 0 #080708,
+        0 0 0 1px #4a4338,
+        inset 0 1px rgba(255,255,255,.22),
+        inset 0 -2px 2px rgba(58,46,32,.17) !important;
+    }
+
+    .playlist-hardware-option.is-selected{
+      color:#24190d !important;
+      transform:translateY(1px);
+      background:
+        radial-gradient(ellipse at 20% 50%,rgba(255,176,72,.11),transparent 36%),
+        linear-gradient(180deg,rgba(255,255,255,.14),transparent 18%),
+        linear-gradient(180deg,#c5aa7d 0%,#a28256 68%,#795c38 100%) !important;
+      box-shadow:
+        0 1px 0 #070708,
+        0 0 0 1px #4c3822,
+        inset 0 2px 4px rgba(70,47,21,.17),
+        inset 0 1px rgba(255,244,217,.15) !important;
+    }
+
+    .playlist-hardware-option__lamp{
+      width:8px !important;
+      height:8px !important;
+      background:#241a10 !important;
+      border:1px solid #080706 !important;
+      box-shadow:
+        inset 0 2px 2px #000,
+        0 0 0 1px #4a4035 !important;
+    }
+
+    .playlist-hardware-option.is-selected .playlist-hardware-option__lamp{
+      background:#ee9a38 !important;
+      box-shadow:
+        0 0 2px rgba(255,181,84,.80),
+        0 0 6px rgba(255,141,37,.48),
+        inset 0 1px rgba(255,239,198,.52),
+        0 0 0 1px #68451e !important;
+    }
+
+    .playlist-hardware-option__number{
+      color:#5d554b !important;
+      font-family:Arial,sans-serif !important;
+      font-size:10px !important;
+      line-height:1 !important;
+      font-weight:900 !important;
+      letter-spacing:.05em !important;
+      text-shadow:0 1px rgba(255,255,255,.12);
+    }
+
+    .playlist-hardware-option.is-selected .playlist-hardware-option__number{
+      color:#4a3520 !important;
+    }
+
+    .playlist-hardware-option__copy{
+      gap:4px !important;
+    }
+
+    .playlist-hardware-option__copy strong{
+      color:inherit;
+      font-family:"Arial Narrow",Arial,sans-serif !important;
+      font-size:10.5px !important;
+      line-height:1.05 !important;
+      font-weight:900 !important;
+      letter-spacing:.04em !important;
+      text-shadow:0 1px rgba(255,255,255,.14);
+    }
+
+    .playlist-hardware-option__copy small{
+      color:#625b51 !important;
+      font-family:Arial,sans-serif !important;
+      font-size:6.5px !important;
+      line-height:1 !important;
+      font-weight:900 !important;
+      letter-spacing:.12em !important;
+      text-transform:uppercase;
+      text-shadow:0 1px rgba(255,255,255,.09);
+    }
+
+    .playlist-hardware-option.is-selected .playlist-hardware-option__copy small{
+      color:#5c4933 !important;
+    }
+
+    @media(max-width:700px){
+      .transport-rack{min-height:39px !important}
+      .playlist-slot{height:33px !important;min-height:33px !important}
+      .playlist-selector-button{
+        grid-template-columns:auto minmax(0,1fr) 28px !important;
+        gap:5px !important;
+        padding-left:6px !important;
+      }
+      .playlist-selector-legend{font-size:5.5px !important}
+      .playlist-selector-label{font-size:8.5px !important}
+      .playlist-hardware-menu{width:min(92vw,420px) !important}
+      .playlist-hardware-option{min-height:43px !important}
+      .playlist-hardware-option__copy strong{font-size:9.5px !important}
+    }
+
+    @media(max-height:500px){
+      .transport-rack{min-height:36px !important;padding-top:2px !important;padding-bottom:2px !important}
+      .playlist-slot{height:31px !important;min-height:31px !important}
+      .playlist-selector-label{font-size:8.5px !important}
+      .playlist-selector-legend{font-size:5.5px !important}
+      .playlist-hardware-option{min-height:40px !important;padding-top:6px !important;padding-bottom:6px !important}
+      .playlist-hardware-option__copy strong{font-size:9px !important}
+      .playlist-hardware-option__copy small{font-size:6px !important}
+    }
 
   </style>
 </head>
@@ -4632,7 +4790,7 @@
 
           <button id="playlistSelectorButton" class="playlist-selector-button" type="button"
                   aria-haspopup="listbox" aria-expanded="false" aria-controls="playlistMenu">
-            <span class="playlist-selector-legend">PROGRAM</span>
+            <span class="playlist-selector-legend">TRACK PROGRAM</span>
             <span id="playlistSelectorLabel" class="playlist-selector-label">NO PROGRAM</span>
             <span class="playlist-selector-lever" aria-hidden="true">
               <i class="fa-solid fa-caret-down"></i>
