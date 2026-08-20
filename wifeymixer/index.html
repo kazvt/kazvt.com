@@ -6737,14 +6737,20 @@
     {name:"PERCUSSION",role:"percussion",soundfontSlot:"percussion"}
   ];
 
-  // Two local SoundFont banks form one procedural instrument rack.
+  // Three local SoundFont banks form one procedural instrument rack. SF64 is the
+  // neutral bench, Gotta Rush is the curated character bank, and Genies is an
+  // adaptive palette: its real presets are inspected after load so unknown or
+  // oddly-mapped programs cannot punch holes in a generated arrangement.
   // Paths stay relative to index.html so the deployed folder remains portable.
   const PROCEDURAL_SF2_SOURCES = Object.freeze({
     sf64:{url:"soundfonts/SF64.sf2",label:"SF64"},
-    rush:{url:"soundfonts/Gotta Rush.sf2",label:"GOTTA RUSH"}
+    rush:{url:"soundfonts/Gotta Rush.sf2",label:"GOTTA RUSH"},
+    genies:{url:"soundfonts/Genies.sf2",aliases:["soundfonts/Genies.SF2"],label:"GENIES",adaptive:true}
   });
   const proceduralSoundFonts = new Map();
   const proceduralSoundFontErrors = new Map();
+  const proceduralGeniesVoices = new Map();
+  let proceduralGeniesProfile = null;
   let proceduralSoundFontsPromise = null;
 
   function sfVoice(source,bank,program,name,options={}){return Object.freeze({source,bank,program,name,...options})}
@@ -6843,6 +6849,151 @@
     melody:[RUSH_VOICES.leadSine1,SF64_VOICES.leadSquare,SF64_VOICES.leadSaw],
     percussion:[RUSH_VOICES.percussionMirage,SF64_VOICES.percussionGeneral]
   });
+
+  // GENIES ADAPTIVE PALETTE -------------------------------------------------
+  // This bank is intentionally *not* hard-coded by preset number. On load we
+  // inspect its actual playable zones and names, then build safe role pools.
+  // That makes this patch tolerant of a different Genies revision while still
+  // keeping deterministic seed playback and the vintage/analogue bias.
+  const GENIES_ROLE_SALTS=Object.freeze({drums:0x4452554d,bass:0x42415353,keys:0x4b455953,melody:0x4c454144,percussion:0x50455243});
+  const GENIES_WARM_WORDS=/\b(warm|vintage|analog|analogue|tape|mellow|soft|round|rhodes|wurli|wurlitzer|electric\s*piano|e\.?p\.?|organ|clav|strings?|pad|choir)\b/i;
+  const GENIES_EDGE_WORDS=/\b(bright|hard|attack|saw|square|lead|brass|sync|acid|dist|drive|metal)\b/i;
+  const GENIES_ROLE_WORDS=Object.freeze({
+    bass:/\b(bass|sub|contrabass|upright)\b/i,
+    keys:/\b(piano|keys?|rhodes|wurli|wurlitzer|e\.?p\.?|organ|clav|harpsi|celesta|vibes?|marimba|strings?|pad|choir)\b/i,
+    melody:/\b(lead|synth|solo|flute|reed|sax|trumpet|brass|guitar|pluck|bell|voice|vox|whistle|ocarina|strings?|pad)\b/i,
+    drums:/\b(drum|kit|kick|snare|cymbal|tom)\b/i,
+    percussion:/\b(percussion|perc|tamb|shaker|conga|bongo|timbale|cowbell|agogo|maraca)\b/i
+  });
+
+  function longestPlayableRun(bank,preset){
+    let best=null,start=null,last=null,total=0;
+    for(let midi=0;midi<128;midi++){
+      const on=!!bank.resolveLayers(preset.bank,preset.program,midi,96).length;
+      if(on){total++;if(start===null)start=midi;last=midi}
+      if((!on||midi===127)&&start!==null){const end=on&&midi===127?midi:last,len=end-start+1;if(!best||len>best.length)best={low:start,high:end,length:len};start=null;last=null}
+    }
+    return best?{...best,total}:null;
+  }
+
+  function geniesLayerTrim(bank,preset,range){
+    if(!range)return 1;
+    const probes=[range.low,Math.round((range.low+range.high)/2),range.high];
+    let peakStack=1;
+    for(const midi of probes){
+      const layers=bank.resolveLayers(preset.bank,preset.program,midi,100);
+      let stack=0;
+      for(const layer of layers)stack+=Math.pow(10,-Math.max(0,Number(layer.attenuation)||0)/200);
+      peakStack=Math.max(peakStack,stack);
+    }
+    // Multi-layer banks can arrive much hotter than the curated pair. Only trim;
+    // never boost an already quiet preset. The mixer's own fader/trim remains king.
+    return Math.max(.58,Math.min(1,1/Math.sqrt(peakStack)));
+  }
+
+  function geniesRoleScore(role,preset,range,bank,descriptor=""){
+    const name=String(descriptor||preset.name||"");
+    const gm=preset.bank===0?preset.program:-1;
+    const drumBank=preset.bank>=128;
+    let score=GENIES_ROLE_WORDS[role]?.test(name)?7:0;
+    if(role==="bass"&&gm>=32&&gm<=39)score+=6;
+    if(role==="keys"&&((gm>=0&&gm<=23)||(gm>=48&&gm<=55)||(gm>=88&&gm<=95)))score+=4;
+    if(role==="melody"&&((gm>=24&&gm<=31)||(gm>=40&&gm<=87)||(gm>=96&&gm<=103)))score+=3;
+    if((role==="drums"||role==="percussion")&&drumBank)score+=5;
+    if(role!=="drums"&&role!=="percussion"&&drumBank)score-=12;
+    if(role!=="bass"&&GENIES_ROLE_WORDS.bass.test(name))score-=5;
+    if(role!=="drums"&&GENIES_ROLE_WORDS.drums.test(name))score-=7;
+    if(role!=="percussion"&&GENIES_ROLE_WORDS.percussion.test(name))score-=4;
+    if(range?.length>=24)score+=2;else if(range?.length>=12)score+=1;
+    return score;
+  }
+
+  function inspectGeniesBank(bank){
+    proceduralGeniesVoices.clear();
+    const roles={drums:[],bass:[],keys:[],melody:[],percussion:[]};
+    const presets=bank.getPresetList?.()||[];
+    for(const preset of presets){
+      const range=longestPlayableRun(bank,preset);
+      const name=String(preset.name||"");
+      const probeNotes=range?[range.low,Math.round((range.low+range.high)/2),range.high]:[36,60,82];
+      const layerWords=[];
+      for(const midi of probeNotes){
+        for(const layer of bank.resolveLayers(preset.bank,preset.program,midi,96).slice(0,6)){
+          if(layer.instrumentName)layerWords.push(layer.instrumentName);
+          if(layer.sample?.name)layerWords.push(layer.sample.name);
+        }
+      }
+      const descriptor=`${name} ${layerWords.join(" ")}`.trim();
+      const warm=GENIES_WARM_WORDS.test(descriptor)?1:0;
+      const edge=GENIES_EDGE_WORDS.test(descriptor)?1:0;
+      const drumish=preset.bank>=128||GENIES_ROLE_WORDS.drums.test(descriptor)||GENIES_ROLE_WORDS.percussion.test(descriptor);
+
+      // Melodic parts need a continuous octave so generated pitch classes can
+      // be octave-wrapped without changing the composition.
+      if(range?.length>=12){
+        for(const role of ["bass","keys","melody"]){
+          const score=geniesRoleScore(role,preset,range,bank,descriptor);
+          if(score<3)continue;
+          roles[role].push(sfVoice("genies",preset.bank,preset.program,preset.name,{range:[range.low,range.high],adaptiveScore:score,warmth:warm,edge,gainTrim:geniesLayerTrim(bank,preset,range)}));
+        }
+      }
+
+      // Drum/percussion routing is stricter than name matching: only include a
+      // preset when it really exposes the exact MIDI notes our generator uses.
+      const has=midi=>!!bank.resolveLayers(preset.bank,preset.program,midi,100).length;
+      const drumCoverage=[has(36),has(38)||has(40),has(42),has(46)].filter(Boolean).length;
+      if(drumish&&drumCoverage>=3){
+        const score=geniesRoleScore("drums",preset,range,bank,descriptor)+drumCoverage;
+        roles.drums.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,gainTrim:geniesLayerTrim(bank,preset,range)}));
+      }
+      if(drumish&&has(54)&&has(82)){
+        const score=geniesRoleScore("percussion",preset,range,bank,descriptor)+4;
+        roles.percussion.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,gainTrim:geniesLayerTrim(bank,preset,range)}));
+      }
+    }
+    for(const [role,voices] of Object.entries(roles)){
+      voices.sort((a,b)=>(b.adaptiveScore||0)-(a.adaptiveScore||0)||a.bank-b.bank||a.program-b.program);
+      proceduralGeniesVoices.set(role,voices.slice(0,28));
+    }
+    proceduralGeniesProfile={
+      bankName:bank.info?.INAM||bank.info?.isng||"Genies",
+      version:bank.info?.version||"",
+      presets:presets.length,
+      roles:Object.fromEntries([...proceduralGeniesVoices].map(([role,voices])=>[role,voices.length]))
+    };
+    globalThis.WifeyGeniesProfile=proceduralGeniesProfile;
+    console.info("GENIES adaptive SoundFont profile",proceduralGeniesProfile);
+    return proceduralGeniesProfile;
+  }
+
+  function chooseGeniesVoice(role,program){
+    const voices=proceduralGeniesVoices.get(role)||[];
+    if(!voices.length||!program)return null;
+    const salt=GENIES_ROLE_SALTS[role]||0x47454e49;
+    const rng=mulberry32((seedHash(program.seed,program.energy,program.complexity)^salt)>>>0);
+    const scored=voices.map(voice=>{
+      let weight=Math.max(.5,Number(voice.adaptiveScore)||1);
+      if(voice.warmth)weight*=.92+(1-program.energy)*.62;
+      if(voice.edge)weight*=.88+program.energy*.58+program.complexity*.16;
+      if(role==="keys")weight*=1.08+(1-program.energy)*.18;
+      if(role==="melody")weight*=.95+program.complexity*.22;
+      return{voice,weight};
+    });
+    const total=scored.reduce((sum,item)=>sum+item.weight,0);
+    let pick=rng()*total;
+    for(const item of scored){pick-=item.weight;if(pick<=0)return item.voice}
+    return scored.at(-1)?.voice||null;
+  }
+
+  function geniesRoleChance(role,program){
+    if(!program)return 0;
+    if(role==="keys")return .48+(1-program.energy)*.16+program.complexity*.06;
+    if(role==="bass")return .32+(1-program.energy)*.14+program.complexity*.08;
+    if(role==="melody")return .36+program.complexity*.20+program.energy*.05;
+    if(role==="drums")return .16+program.energy*.18;
+    if(role==="percussion")return .18+program.complexity*.20;
+    return .25;
+  }
 
   function savePersistentPrefs() {
     try {
@@ -6999,7 +7150,7 @@
   /* ==============================================================
      DETERMINISTIC PROCEDURAL MUSIC ENGINE
      Tonal handles theory. The built-in buffer renderer is only a bench-synth
-     fallback if neither local SoundFont palette is available.
+     fallback if no local SoundFont palette is available.
      ============================================================== */
   function clamp01(value){return Math.max(0,Math.min(1,Number(value)||0))}
   function normalizeProceduralSeed(value){const n=Math.trunc(Number(value)||1);return ((n-1)%9999+9999)%9999+1}
@@ -7076,6 +7227,16 @@
     return{drums:chooseFrom(rng,drumsPool),bass:chooseFrom(rng,bassPool),keys:chooseFrom(rng,keysPool),melody:chooseFrom(rng,leadPool),percussion:chooseFrom(rng,percussionPool)};
   }
 
+  async function loadProceduralSoundFontSource(source){
+    const urls=[source.url,...(source.aliases||[])].filter(Boolean);
+    let lastError=null;
+    for(const url of urls){
+      try{return await WifeySF2.load(url,{cache:"force-cache"})}
+      catch(error){lastError=error}
+    }
+    throw lastError||new Error(`Could not load ${source.label||"SoundFont"}`);
+  }
+
   async function ensureProceduralSoundFonts(){
     if(proceduralSoundFontsPromise)return proceduralSoundFontsPromise;
     proceduralSoundFontsPromise=(async()=>{
@@ -7083,9 +7244,10 @@
       loadReadout.textContent="SF2 LOAD";
       await Promise.all(Object.entries(PROCEDURAL_SF2_SOURCES).map(async([id,source])=>{
         try{
-          const bank=await WifeySF2.load(source.url,{cache:"force-cache"});
+          const bank=await loadProceduralSoundFontSource(source);
           proceduralSoundFonts.set(id,bank);
           proceduralSoundFontErrors.delete(id);
+          if(id==="genies")inspectGeniesBank(bank);
         }catch(error){
           proceduralSoundFontErrors.set(id,error);
           console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
@@ -7097,8 +7259,14 @@
     return proceduralSoundFontsPromise;
   }
 
-  function resolveProceduralSf2Voice(role,preferred){
-    const candidates=[preferred,...(PROCEDURAL_ROLE_FALLBACKS[role]||[])].filter(Boolean),seen=new Set();
+  function resolveProceduralSf2Voice(role,preferred,program){
+    const genies=chooseGeniesVoice(role,program);
+    const salt=(GENIES_ROLE_SALTS[role]||0x47454e49)^0x57494645;
+    const rng=program?mulberry32((seedHash(program.seed,program.energy,program.complexity)^salt)>>>0):null;
+    const favorGenies=!!(genies&&rng&&rng()<geniesRoleChance(role,program));
+    const candidates=(favorGenies
+      ?[genies,preferred,...(PROCEDURAL_ROLE_FALLBACKS[role]||[])]
+      :[preferred,...(PROCEDURAL_ROLE_FALLBACKS[role]||[]),genies]).filter(Boolean),seen=new Set();
     for(const voice of candidates){
       const key=`${voice.source}:${voice.bank}:${voice.program}`;
       if(seen.has(key))continue; seen.add(key);
@@ -7223,7 +7391,7 @@
   function renderProceduralSf2StemBuffer(program,stem){
     if(!proceduralSoundFonts.size)return null;
     const target=createProceduralStereoBuffer(program.duration+PROCEDURAL_RENDER_TAIL),role=stem.role;
-    const resolved=resolveProceduralSf2Voice(role,stem.sf2Voice||program.sf2Voices?.[role]);
+    const resolved=resolveProceduralSf2Voice(role,stem.sf2Voice||program.sf2Voices?.[role],program);
     if(!resolved)return null;
     const {voice,bank}=resolved; stem.resolvedSf2Voice=voice;
     const variationSalt=(program.loopVariation||0)*4099,rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101+variationSalt,program.energy,program.complexity));
@@ -7231,7 +7399,8 @@
     const play=(midi,time,duration,velocity,amp,pan=0)=>{
       const fittedMidi=fitMidiToSf2Voice(midi,voice);
       if(fittedMidi===null)return;
-      rendered=bank.renderNote(target,{bank:voice.bank,program:voice.program,midi:fittedMidi,velocity,start:time,duration,amp,pan})||rendered;
+      const normalizedAmp=amp*(Number.isFinite(Number(voice.gainTrim))?Number(voice.gainTrim):1);
+      rendered=bank.renderNote(target,{bank:voice.bank,program:voice.program,midi:fittedMidi,velocity,start:time,duration,amp:normalizedAmp,pan})||rendered;
     };
     if(role==="keys"){
       for(const event of program.chordEvents){const baseOctave=program.complexity>.65?3:4;let previousMidi=-Infinity;const finalChord=event.time>=program.duration-program.barDuration-.001,noteDuration=finalChord?Math.max(event.duration,program.duration-event.time+.10):event.duration;event.notes.forEach((note,idx)=>{let midi=noteNameToMidi(note,baseOctave);while(midi<=previousMidi)midi+=12;previousMidi=midi;play(midi,event.time+.008*idx,noteDuration,Math.round(68+program.energy*22+rng()*10),.31*(event.ampScale||1),(idx-(event.notes.length-1)/2)*.11)})}
@@ -7286,7 +7455,7 @@
     channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});
     updateSoloRouting();
     updatePlaylistDuration();
-    loadReadout.textContent=proceduralSoundFonts.size>1?"DUAL SF2":proceduralSoundFonts.size?"SF2 READY":"PROC READY";
+    loadReadout.textContent=proceduralSoundFonts.size>=3?"TRI SF2":proceduralSoundFonts.size===2?"DUAL SF2":proceduralSoundFonts.size?"SF2 READY":"PROC READY";
     updateProceduralReadouts(program);
     return true;
   }
