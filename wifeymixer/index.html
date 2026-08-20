@@ -6842,6 +6842,68 @@
         ) !important;
     }
 
+
+
+    /* ==============================================================
+       PATCH: MICRO DISPLAY READABILITY — TALLER STRIP GLASS
+       A restrained 1–2px vertical lift plus a fractional glyph boost.
+       ============================================================== */
+    .channel-name{
+      height:clamp(16px,2.22vh,20px) !important;
+      padding-top:3px !important;
+      padding-bottom:3px !important;
+      font-size:clamp(7px,.84vw,8.6px) !important;
+      font-weight:850 !important;
+      line-height:1.04 !important;
+      letter-spacing:.045em !important;
+      color:#ffb04b !important;
+      text-shadow:
+        0 0 1px rgba(255,239,205,.94),
+        0 0 2.6px rgba(255,177,76,.76),
+        0 0 4.8px rgba(255,119,22,.38),
+        0 1px 0 #1b0801 !important;
+    }
+    .channel-name__marquee{
+      top:.15px;
+    }
+    .mixer.is-procedural [data-channel] .channel-name{
+      font-size:clamp(6.8px,.79vw,8.1px) !important;
+      letter-spacing:.03em !important;
+    }
+    .master-strip > .channel-name{
+      height:clamp(17px,2.34vh,21px) !important;
+      padding-top:3px !important;
+      padding-bottom:3px !important;
+      font-size:clamp(7.4px,.89vw,9px) !important;
+      font-weight:900 !important;
+      letter-spacing:.07em !important;
+      color:#ffb655 !important;
+      text-shadow:
+        0 0 1px rgba(255,244,219,.98),
+        0 0 2.8px rgba(255,183,85,.82),
+        0 0 5.2px rgba(255,119,22,.42),
+        0 1px 0 #1b0801 !important;
+    }
+    @media(max-height:500px){
+      .channel-name{
+        height:14px !important;
+        padding-top:2px !important;
+        padding-bottom:2px !important;
+        font-size:6.4px !important;
+      }
+      .mixer.is-procedural [data-channel] .channel-name{font-size:6.25px !important}
+      .master-strip > .channel-name{height:15px !important;font-size:6.75px !important}
+    }
+    @media(max-height:410px){
+      .channel-name{
+        height:12px !important;
+        padding-top:1px !important;
+        padding-bottom:1px !important;
+        font-size:5.8px !important;
+      }
+      .mixer.is-procedural [data-channel] .channel-name{font-size:5.7px !important}
+      .master-strip > .channel-name{height:13px !important;font-size:6.05px !important}
+    }
 </style>
 </head>
 
