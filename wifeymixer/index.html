@@ -6904,6 +6904,163 @@
       .mixer.is-procedural [data-channel] .channel-name{font-size:5.7px !important}
       .master-strip > .channel-name{height:13px !important;font-size:6.05px !important}
     }
+
+
+    /* ==============================================================
+       PATCH: NO-SCROLL PROCEDURAL PROGRAM PANEL
+       Keep every direct setting below the X/Y pad visible at once.
+       This intentionally overrides the older scrollable service-rack patch.
+       ============================================================== */
+    .procedural-deck{
+      grid-template-rows:auto auto minmax(82px,.48fr) minmax(0,1.52fr) auto !important;
+      gap:4px !important;
+    }
+    .proc-direct-module{
+      min-height:0 !important;
+      max-height:none !important;
+      height:100% !important;
+      overflow:hidden !important;
+      overscroll-behavior:none !important;
+      scrollbar-gutter:auto !important;
+      scrollbar-width:none !important;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+      grid-auto-rows:max-content !important;
+      align-content:start !important;
+      gap:2px !important;
+      padding:3px !important;
+    }
+    .proc-direct-module::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important}
+    .proc-direct-head{
+      position:static !important;
+      top:auto !important;
+      z-index:auto !important;
+      margin:0 !important;
+      padding:3px 4px 2px !important;
+      min-height:0 !important;
+      font-size:6px !important;
+      line-height:1 !important;
+      box-shadow:none !important;
+    }
+    .proc-direct-head small{display:none !important}
+    .proc-scroll-hint{display:none !important}
+    .proc-section-title{
+      min-height:0 !important;
+      margin:1px 0 0 !important;
+      gap:4px !important;
+      font-size:4.5px !important;
+      line-height:1 !important;
+      letter-spacing:.12em !important;
+    }
+    .proc-hw-control{
+      min-height:0 !important;
+      grid-template-rows:6px 15px 13px !important;
+      gap:1px !important;
+      padding:2px 3px 3px !important;
+    }
+    .proc-hw-control--wide{
+      min-height:0 !important;
+      grid-template-rows:6px 15px 13px 6px !important;
+      gap:1px !important;
+      padding:2px 3px 3px !important;
+    }
+    .proc-hw-control__legend{
+      font-size:4.75px !important;
+      line-height:1 !important;
+      letter-spacing:.08em !important;
+    }
+    .proc-lock-lamp,.proc-live-lamp,.proc-source-lamp{
+      width:4px !important;
+      height:4px !important;
+    }
+    .proc-mini-screen{
+      min-height:15px !important;
+      height:15px !important;
+      padding:1px 3px !important;
+      font-size:7.5px !important;
+      line-height:1 !important;
+    }
+    .proc-mini-screen--chords{font-size:6px !important}
+    .proc-mini-screen--source{font-size:7px !important}
+    .proc-mini-fader{
+      height:13px !important;
+      padding:0 5px !important;
+    }
+    .proc-mini-fader input[type="range"]{
+      inset:0 4px !important;
+      width:calc(100% - 8px) !important;
+    }
+    .proc-mini-fader input[type="range"]::-webkit-slider-thumb{
+      width:10px !important;
+      height:11px !important;
+      margin-top:-5px !important;
+    }
+    .proc-mini-fader input[type="range"]::-moz-range-thumb{
+      width:10px !important;
+      height:11px !important;
+    }
+    .proc-source-scale{
+      gap:1px !important;
+      font-size:3.9px !important;
+      line-height:1 !important;
+    }
+
+    @media(max-height:620px){
+      .procedural-deck{
+        grid-template-rows:auto auto minmax(68px,.40fr) minmax(0,1.60fr) auto !important;
+        gap:3px !important;
+        padding-top:4px !important;
+        padding-bottom:4px !important;
+      }
+      .proc-sidecar-head{padding-top:0 !important;padding-bottom:2px !important}
+      .proc-sidecar-head__model{display:none !important}
+      .proc-seed-module{padding-top:3px !important;padding-bottom:3px !important}
+      .proc-seed-caption{display:none !important}
+      .proc-seed-window{min-height:20px !important;margin-top:2px !important;font-size:11px !important}
+      .vibe-module{padding-top:1px !important;padding-bottom:1px !important;row-gap:1px !important}
+      .vibe-module__title{display:none !important}
+      .vibe-pad-shell{width:min(100%,86px) !important;padding:3px !important}
+      .proc-direct-module{gap:1px !important;padding:2px !important}
+      .proc-direct-head{padding:2px 3px 1px !important;font-size:5px !important}
+      .proc-section-title{font-size:4px !important;margin:0 !important}
+      .proc-hw-control{grid-template-rows:5px 13px 11px !important;padding:1px 2px 2px !important}
+      .proc-hw-control--wide{grid-template-rows:5px 13px 11px 5px !important;padding:1px 2px 2px !important}
+      .proc-hw-control__legend{font-size:4.2px !important}
+      .proc-mini-screen{min-height:13px !important;height:13px !important;font-size:6.5px !important}
+      .proc-mini-screen--chords{font-size:5.4px !important}
+      .proc-mini-screen--source{font-size:6px !important}
+      .proc-mini-fader{height:11px !important}
+      .proc-mini-fader input[type="range"]::-webkit-slider-thumb{height:9px !important;margin-top:-4px !important}
+      .proc-mini-fader input[type="range"]::-moz-range-thumb{height:9px !important}
+      .proc-source-scale{font-size:3.5px !important}
+    }
+
+    @media(max-height:470px){
+      .vibe-module{display:grid !important}
+      .procedural-deck{
+        grid-template-rows:auto auto 58px minmax(0,1fr) !important;
+        gap:2px !important;
+        padding:3px !important;
+      }
+      .proc-sidecar-foot{display:none !important}
+      .proc-seed-module{padding:2px 3px !important}
+      .proc-engrave{font-size:4px !important}
+      .proc-seed-window{min-height:16px !important;height:16px !important;margin-top:1px !important;font-size:9px !important}
+      .vibe-pad-shell{width:min(100%,54px) !important;padding:2px !important}
+      .vibe-axis-label{font-size:3.7px !important}
+      .proc-direct-head{display:none !important}
+      .proc-section-title{font-size:3.6px !important}
+      .proc-hw-control{grid-template-rows:4px 11px 9px !important;padding:1px !important}
+      .proc-hw-control--wide{grid-template-rows:4px 11px 9px 4px !important;padding:1px !important}
+      .proc-hw-control__legend{font-size:3.8px !important}
+      .proc-mini-screen{min-height:11px !important;height:11px !important;padding:0 2px !important;font-size:5.7px !important}
+      .proc-mini-screen--chords{font-size:4.7px !important}
+      .proc-mini-screen--source{font-size:5.2px !important}
+      .proc-mini-fader{height:9px !important}
+      .proc-mini-fader input[type="range"]::-webkit-slider-thumb{width:8px !important;height:7px !important;margin-top:-3px !important}
+      .proc-mini-fader input[type="range"]::-moz-range-thumb{width:8px !important;height:7px !important}
+      .proc-source-scale{font-size:3px !important}
+    }
+
 </style>
 </head>
 
