@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
 
   <style>
     :root{
@@ -4957,6 +4958,122 @@
       .side-meter--right::after{right:-2px}
     }
 
+
+
+    /* ==============================================================
+       PROCEDURAL MODE — physical seed generator + vintage X/Y VIBE pad
+       Four hardware poles on two continuous axes:
+       SIMPLE <-> COMPLEX and LOW <-> HIGH ENERGY.
+       ============================================================== */
+    .transport-btn--procedural{
+      position:relative;
+      width:34px;
+      min-width:34px !important;
+      color:#a9b6b2 !important;
+      background:
+        radial-gradient(circle at 28% 20%,rgba(255,255,255,.055),transparent 24%),
+        linear-gradient(180deg,#4b4c4b 0%,#343534 54%,#272827 100%) !important;
+      border-color:#111313 !important;
+      box-shadow:
+        0 2px 0 #080909,
+        0 0 0 2px #2b2c2b,
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 -2px 3px rgba(0,0,0,.32) !important;
+    }
+    .transport-btn--procedural::before{
+      content:"";position:absolute;inset:3px;border-radius:1px;pointer-events:none;
+      border:1px solid rgba(212,225,219,.025);box-shadow:inset 0 0 4px rgba(0,0,0,.28);
+    }
+    .transport-btn--procedural i{position:relative;z-index:2;font-size:11px;text-shadow:0 1px 0 rgba(0,0,0,.92)}
+    .transport-btn--procedural.active{
+      color:#c7eef1 !important;
+      background:
+        radial-gradient(circle at 50% 56%,rgba(92,183,194,.21),transparent 64%),
+        linear-gradient(180deg,#4d5553 0%,#34413f 55%,#25302f 100%) !important;
+      box-shadow:
+        0 1px 0 #070808,0 0 0 2px #25302f,
+        inset 0 2px 4px rgba(0,0,0,.34),inset 0 0 12px rgba(72,178,191,.13),
+        0 0 7px rgba(90,201,214,.11) !important;
+      text-shadow:0 0 5px rgba(124,222,231,.34);
+    }
+
+    .procedural-deck{
+      --vibe-x:46%;--vibe-y:48%;
+      min-height:clamp(92px,15vh,136px);max-height:clamp(92px,15vh,136px);
+      padding:6px 8px;border:1px solid #08090a;border-radius:4px;
+      background:
+        radial-gradient(circle at 20% 18%,rgba(229,219,194,.025) 0 .7px,transparent 1px) 0 0/10px 13px,
+        radial-gradient(circle at 75% 68%,rgba(0,0,0,.08) 0 .8px,transparent 1.1px) 0 0/15px 17px,
+        linear-gradient(180deg,#2b2b2b 0%,#202121 42%,#181919 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.045),inset 0 -2px 3px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.018),0 0 0 1px #313231;
+      isolation:isolate;
+    }
+    .procedural-deck::before{content:"";position:absolute;inset:3px;z-index:-1;pointer-events:none;border:1px solid rgba(255,255,255,.018);border-bottom-color:rgba(0,0,0,.36);border-radius:2px}
+    .procedural-deck__screw{position:absolute;width:8px;height:8px;border-radius:50%;border:1px solid #0a0a0b;background:radial-gradient(circle at 34% 30%,#77756f 0 10%,#454542 35%,#1d1e1d 73%,#0d0e0e 100%);box-shadow:0 1px 1px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);opacity:.8}
+    .procedural-deck__screw::after{content:"";position:absolute;left:1px;right:1px;top:3px;height:1px;background:#141515;transform:rotate(-18deg)}
+    .procedural-deck__screw.s1{left:4px;top:4px}.procedural-deck__screw.s2{right:4px;top:4px}.procedural-deck__screw.s3{left:4px;bottom:4px}.procedural-deck__screw.s4{right:4px;bottom:4px}
+
+    .proc-seed-module,.proc-info-module{
+      position:relative;align-self:stretch;min-width:0;padding:7px 8px 6px;border:1px solid #0c0d0d;border-radius:3px;
+      background:linear-gradient(105deg,rgba(255,255,255,.024),transparent 28% 74%,rgba(0,0,0,.10)),linear-gradient(180deg,#363634,#292a29 56%,#222321);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.045),inset 0 -2px 4px rgba(0,0,0,.38),0 0 0 1px #121313;
+    }
+    .proc-engrave{display:block;font-size:7px;line-height:1;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#8b8980;text-shadow:0 1px 0 #080909}
+    .proc-seed-window{
+      margin-top:7px;min-height:31px;display:flex;align-items:center;justify-content:center;padding:3px 6px;border:1px solid #070909;border-radius:2px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(15px,2.1vh,20px);font-weight:800;letter-spacing:.10em;color:#b8d4c4;
+      background:linear-gradient(105deg,rgba(255,255,255,.035),transparent 24% 72%,rgba(255,255,255,.01)),#101513;
+      box-shadow:inset 0 3px 6px rgba(0,0,0,.82),inset 0 0 10px rgba(77,142,112,.055),0 1px 0 rgba(255,255,255,.025);
+      text-shadow:0 0 4px rgba(135,214,174,.20),0 1px 0 #000;
+    }
+    .proc-seed-caption{margin-top:5px;font-size:6px;line-height:1.25;font-weight:800;letter-spacing:.10em;text-transform:uppercase;color:#686760}
+
+    .vibe-module{position:relative;min-width:160px;align-self:stretch;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto;gap:2px 6px;padding:3px 2px}
+    .vibe-module__title{grid-column:1/-1;text-align:center;font-family:"Archivo Black",system-ui,sans-serif;font-size:9px;line-height:1;letter-spacing:.12em;color:#aaa69a;text-shadow:0 1px 0 #050606}
+    .vibe-axis-label{z-index:3;font-size:6px;line-height:1;font-weight:800;letter-spacing:.10em;color:#77756d;text-transform:uppercase;text-shadow:0 1px 0 #060707;user-select:none;pointer-events:none}
+    .vibe-axis-label--high{grid-column:2;grid-row:1;align-self:end;justify-self:end;margin-right:8px}
+    .vibe-axis-label--low{grid-column:2;grid-row:3;align-self:start;justify-self:end;margin-right:8px}
+    .vibe-axis-label--simple{grid-column:1;grid-row:2;align-self:center;writing-mode:vertical-rl;transform:rotate(180deg)}
+    .vibe-axis-label--complex{grid-column:3;grid-row:2;align-self:center;writing-mode:vertical-rl}
+    .vibe-pad-shell{grid-column:2;grid-row:2;min-width:0;min-height:0;padding:5px;border:1px solid #070808;border-radius:4px;background:linear-gradient(180deg,#141615,#0c0e0d);box-shadow:inset 0 3px 7px rgba(0,0,0,.92),inset 3px 0 5px rgba(0,0,0,.48),inset -3px 0 5px rgba(0,0,0,.48),0 0 0 1px #363735,0 1px 0 rgba(255,255,255,.035)}
+    .vibe-pad{
+      position:relative;width:100%;height:100%;min-height:54px;overflow:hidden;touch-action:none;cursor:crosshair;outline:none;border:1px solid #222724;border-radius:2px;
+      background:linear-gradient(90deg,transparent 49.5%,rgba(138,151,137,.12) 50%,transparent 50.5%),linear-gradient(0deg,transparent 49.5%,rgba(138,151,137,.12) 50%,transparent 50.5%),repeating-linear-gradient(90deg,rgba(154,157,143,.035) 0 1px,transparent 1px 16.66%),repeating-linear-gradient(0deg,rgba(154,157,143,.035) 0 1px,transparent 1px 25%),radial-gradient(ellipse at 35% 28%,rgba(105,130,116,.08),transparent 45%),linear-gradient(180deg,#1b211e,#121714);
+      box-shadow:inset 0 0 13px rgba(0,0,0,.72),inset 0 1px 0 rgba(201,213,199,.025);
+    }
+    .vibe-pad::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.72;background:radial-gradient(circle at 12% 22%,rgba(226,215,187,.045) 0 .7px,transparent 1px) 0 0/13px 11px,linear-gradient(112deg,transparent 0 29%,rgba(255,255,255,.018) 29.2% 29.5%,transparent 29.7% 100%),linear-gradient(76deg,transparent 0 72%,rgba(0,0,0,.12) 72.1% 72.5%,transparent 72.8% 100%)}
+    .vibe-pad::after{content:"";position:absolute;left:var(--vibe-x);top:var(--vibe-y);width:46px;height:46px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(83,160,154,.13),rgba(65,133,129,.055) 40%,transparent 72%);filter:blur(4px)}
+    .vibe-puck{
+      position:absolute;z-index:4;left:var(--vibe-x);top:var(--vibe-y);width:clamp(19px,2.5vh,25px);height:clamp(19px,2.5vh,25px);transform:translate(-50%,-50%);border:1px solid #090a0a;border-radius:50%;pointer-events:none;
+      background:radial-gradient(circle at 35% 28%,rgba(224,218,197,.14) 0 8%,transparent 10%),radial-gradient(circle at 42% 38%,#555953 0 10%,#3c403b 36%,#242824 72%,#151815 100%);
+      box-shadow:0 3px 4px rgba(0,0,0,.78),0 0 0 1px #565a54,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 3px rgba(0,0,0,.42),0 0 7px rgba(99,190,181,.11);
+    }
+    .vibe-puck::before,.vibe-puck::after{content:"";position:absolute;left:50%;top:50%;background:#9d9b8f;opacity:.5;box-shadow:0 1px 0 #090a0a}
+    .vibe-puck::before{width:9px;height:1px;transform:translate(-50%,-50%)}.vibe-puck::after{width:1px;height:9px;transform:translate(-50%,-50%)}
+    .vibe-pad:focus-visible{box-shadow:inset 0 0 13px rgba(0,0,0,.72),0 0 0 1px rgba(139,205,194,.34)}
+
+    .proc-info-module{display:grid;grid-template-columns:1fr 1fr;align-content:center;gap:4px 7px}
+    .proc-info-cell{min-width:0;padding:3px 4px;border-top:1px solid rgba(255,255,255,.018);border-bottom:1px solid rgba(0,0,0,.28)}
+    .proc-info-cell small{display:block;font-size:6px;line-height:1;font-weight:800;letter-spacing:.12em;color:#6e6d66;text-transform:uppercase}
+    .proc-info-cell strong{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9px;line-height:1.15;color:#c0c8b9;text-shadow:0 0 3px rgba(165,196,162,.10),0 1px 0 #080909}
+    .proc-info-cell--wide{grid-column:1/-1}
+
+    .mixer.is-procedural .playlist-slot,.mixer.is-procedural .transport-btn--playlist-mode{display:none !important}
+    .mixer.is-procedural .transport-fader-wrap{flex:0 1 260px !important}
+
+    @media(max-width:760px){
+      .procedural-deck{padding-left:6px;padding-right:6px}.proc-info-module{display:none}.proc-seed-module{width:82px;min-width:82px;padding-left:6px;padding-right:6px}.vibe-module{min-width:0}.mixer.is-procedural .transport-fader-wrap{display:none !important}
+    }
+    @media(max-width:470px){
+      .procedural-deck{gap:5px !important}.proc-seed-module{width:68px;min-width:68px}.proc-seed-window{font-size:13px;letter-spacing:.04em;padding-left:2px;padding-right:2px}.proc-seed-caption{display:none}.vibe-axis-label{font-size:5px}.vibe-module{gap:1px 3px}.vibe-pad-shell{padding:3px}
+    }
+    @media(max-height:650px){
+      .procedural-deck{min-height:82px;max-height:82px;padding-top:4px;padding-bottom:4px}.proc-seed-module,.proc-info-module{padding-top:5px;padding-bottom:4px}.proc-seed-window{margin-top:4px;min-height:24px;font-size:14px}.vibe-pad{min-height:40px}.vibe-puck{width:18px;height:18px}
+    }
+    @media(max-height:500px){
+      .procedural-deck{min-height:66px;max-height:66px;padding:3px 6px}.proc-engrave,.proc-seed-caption,.vibe-module__title{display:none}.proc-seed-window{margin-top:0;min-height:100%;font-size:12px}.proc-info-module{padding:3px 5px}.proc-info-cell{padding:1px 3px}.proc-info-cell small{font-size:5px}.proc-info-cell strong{font-size:7px;margin-top:1px}.vibe-pad{min-height:35px}
+    }
+
   </style>
 </head>
 
@@ -5037,6 +5154,11 @@
           <i class="fa-solid fa-repeat" aria-hidden="true"></i>
         </button>
 
+        <button id="proceduralModeBtn" class="transport-btn transport-btn--procedural" type="button"
+                aria-label="Procedural mode" title="Procedural mode" aria-pressed="false">
+          <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+        </button>
+
         <div class="playlist-slot min-w-0 flex-1">
           <select id="playlistSelect" class="sr-only" aria-label="Playlist folder"></select>
 
@@ -5076,6 +5198,23 @@
         <div id="loadReadout" class="transport-state">READY</div>
       </div>
 
+      <section id="proceduralDeck" class="procedural-deck relative z-[10] mt-1 hidden flex-none items-stretch gap-2 sm:gap-3" hidden aria-label="Procedural generator VIBE controls">
+        <span class="procedural-deck__screw s1" aria-hidden="true"></span><span class="procedural-deck__screw s2" aria-hidden="true"></span><span class="procedural-deck__screw s3" aria-hidden="true"></span><span class="procedural-deck__screw s4" aria-hidden="true"></span>
+        <div class="proc-seed-module w-[92px] flex-none sm:w-[108px]">
+          <span class="proc-engrave">PROC SEED</span><div id="proceduralSeedReadout" class="proc-seed-window">0001</div><div class="proc-seed-caption">PREV / NEXT<br>RECALL STATE</div>
+        </div>
+        <div class="vibe-module min-w-0 flex-1">
+          <div class="vibe-module__title">VIBE · ANALOGUE X/Y PROGRAMMER</div>
+          <span class="vibe-axis-label vibe-axis-label--high">HIGH ENERGY</span><span class="vibe-axis-label vibe-axis-label--low">LOW ENERGY</span><span class="vibe-axis-label vibe-axis-label--simple">SIMPLE</span><span class="vibe-axis-label vibe-axis-label--complex">COMPLEX</span>
+          <div class="vibe-pad-shell"><div id="proceduralVibePad" class="vibe-pad" role="application" tabindex="0" aria-label="Procedural VIBE pad. Horizontal controls complexity. Vertical controls energy."><span id="proceduralVibePuck" class="vibe-puck" aria-hidden="true"></span></div></div>
+        </div>
+        <div class="proc-info-module w-[178px] flex-none lg:w-[210px]">
+          <div class="proc-info-cell"><small>KEY</small><strong id="proceduralKeyReadout">C MAJ</strong></div><div class="proc-info-cell"><small>TEMPO</small><strong id="proceduralTempoReadout">104 BPM</strong></div>
+          <div class="proc-info-cell"><small>ENERGY</small><strong id="proceduralEnergyReadout">52</strong></div><div class="proc-info-cell"><small>COMPLEX</small><strong id="proceduralComplexityReadout">46</strong></div>
+          <div class="proc-info-cell proc-info-cell--wide"><small>CHORD PROGRAM</small><strong id="proceduralChordReadout">I · V · VI · IV</strong></div>
+        </div>
+      </section>
+
       <div class="mixer-bank relative z-[1] mt-2 flex min-h-0 min-w-0 flex-1 overflow-hidden pb-1.5">
         <div class="scroll-wrap min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden">
           <div id="channelGrid" class="channel-grid"></div>
@@ -5114,6 +5253,15 @@
   const nextTrackBtn = document.getElementById("nextTrackBtn");
   const randomizerBtn = document.getElementById("randomizerBtn");
   const playlistModeBtn = document.getElementById("playlistModeBtn");
+  const proceduralModeBtn = document.getElementById("proceduralModeBtn");
+  const proceduralDeck = document.getElementById("proceduralDeck");
+  const proceduralSeedReadout = document.getElementById("proceduralSeedReadout");
+  const proceduralVibePad = document.getElementById("proceduralVibePad");
+  const proceduralKeyReadout = document.getElementById("proceduralKeyReadout");
+  const proceduralTempoReadout = document.getElementById("proceduralTempoReadout");
+  const proceduralEnergyReadout = document.getElementById("proceduralEnergyReadout");
+  const proceduralComplexityReadout = document.getElementById("proceduralComplexityReadout");
+  const proceduralChordReadout = document.getElementById("proceduralChordReadout");
   const seekRange = document.getElementById("seekRange");
   const timeReadout = document.getElementById("timeReadout");
   const timeCurrentSegments = document.getElementById("timeCurrentSegments");
@@ -5342,6 +5490,9 @@
         playlistMode: ["loop","shuffle","sequential"].includes(parsed.playlistMode)
           ? parsed.playlistMode
           : "loop",
+        proceduralSeed: Math.max(1,Math.min(9999,Number(parsed.proceduralSeed)||1)),
+        proceduralEnergy: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralEnergy)) ? Number(parsed.proceduralEnergy) : .52)),
+        proceduralComplexity: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralComplexity)) ? Number(parsed.proceduralComplexity) : .46)),
         lockedStemIds: parsed.lockedStemIds && typeof parsed.lockedStemIds === "object"
           ? parsed.lockedStemIds
           : {},
@@ -5357,6 +5508,9 @@
         randomizerEnabled:false,
         megaphoneEnabled:false,
         playlistMode:"loop",
+        proceduralSeed:1,
+        proceduralEnergy:.52,
+        proceduralComplexity:.46,
         lockedStemIds:{},
         stemStates:{},
         masterState:null
@@ -5369,6 +5523,20 @@
   let megaphoneEnabled = !!persistentPrefs.megaphoneEnabled;
   let playlistMode = persistentPrefs.playlistMode || "loop";
   let playlistAdvanceInProgress = false;
+  let appMode = "playlist";
+  let playlistResumeIndex = 0;
+  let proceduralSeed = Math.max(1,Math.min(9999,Number(persistentPrefs.proceduralSeed)||1));
+  let proceduralEnergy = Math.max(0,Math.min(1,Number.isFinite(Number(persistentPrefs.proceduralEnergy)) ? Number(persistentPrefs.proceduralEnergy) : .52));
+  let proceduralComplexity = Math.max(0,Math.min(1,Number.isFinite(Number(persistentPrefs.proceduralComplexity)) ? Number(persistentPrefs.proceduralComplexity) : .46));
+  let currentProceduralProgram = null;
+  let proceduralRegenerateTimer = null;
+  const PROCEDURAL_TRACKS = [
+    {name:"DRUMS",role:"drums",soundfontSlot:"drums"},
+    {name:"BASS",role:"bass",soundfontSlot:"bass"},
+    {name:"KEYS CHORDS",role:"keys",soundfontSlot:"keys"},
+    {name:"MELODY SYNTH",role:"melody",soundfontSlot:"melody-synth"},
+    {name:"PERCUSSION",role:"percussion",soundfontSlot:"percussion"}
+  ];
 
   function savePersistentPrefs() {
     try {
@@ -5520,6 +5688,93 @@
     } catch (_) {}
     return EMBEDDED_MANIFEST;
   }
+
+
+  /* ==============================================================
+     DETERMINISTIC PROCEDURAL MUSIC ENGINE
+     Tonal handles theory. The built-in buffer renderer is only a bench-synth
+     fallback until user-supplied SoundFonts are mapped to soundfontSlot.
+     ============================================================== */
+  function clamp01(value){return Math.max(0,Math.min(1,Number(value)||0))}
+  function normalizeProceduralSeed(value){const n=Math.trunc(Number(value)||1);return ((n-1)%9999+9999)%9999+1}
+  function mulberry32(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function seedHash(seed,energy,complexity){const e=Math.round(clamp01(energy)*1000),c=Math.round(clamp01(complexity)*1000);return((normalizeProceduralSeed(seed)*2654435761)^(e*2246822519)^(c*3266489917))>>>0}
+  const FALLBACK_SCALE_INTERVALS={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]};
+  const NOTE_PC={C:0,"C#":1,DB:1,D:2,"D#":3,EB:3,E:4,F:5,"F#":6,GB:6,G:7,"G#":8,AB:8,A:9,"A#":10,BB:10,B:11};
+  function noteNameToMidi(noteName,octave=4){const raw=String(noteName||"C").trim();if(window.Tonal?.Note?.midi){const midi=Tonal.Note.midi(`${raw}${octave}`);if(Number.isFinite(midi))return midi}const pc=NOTE_PC[raw.toUpperCase()]??0;return 12*(octave+1)+pc}
+  function getProceduralScale(tonic,mode){if(window.Tonal?.Scale?.get){const notes=Tonal.Scale.get(`${tonic} ${mode}`).notes;if(Array.isArray(notes)&&notes.length>=7)return notes.slice(0,7)}const names=["C","C#","D","Eb","E","F","F#","G","Ab","A","Bb","B"],root=NOTE_PC[String(tonic).toUpperCase()]??0;return FALLBACK_SCALE_INTERVALS[mode].map(i=>names[(root+i)%12])}
+  function degreeChord(tonic,mode,scale,degree,complexity,rng){
+    const base=(degree-1+7)%7;
+    let notes=[];
+    let symbol="";
+
+    // Prefer Tonal's actual diatonic key/chord dictionaries. At low complexity
+    // use the key's triad; at higher complexity use its diatonic seventh chord.
+    if(window.Tonal?.Key && window.Tonal?.Chord){
+      try{
+        const keyData=mode==="minor" ? Tonal.Key.minorKey(tonic)?.natural : Tonal.Key.majorKey(tonic);
+        const bank=complexity>.38 ? keyData?.chords : keyData?.triads;
+        symbol=String(bank?.[base]||"");
+        const tonalNotes=symbol ? Tonal.Chord.get(symbol)?.notes : [];
+        if(Array.isArray(tonalNotes)&&tonalNotes.length) notes=tonalNotes.slice();
+      }catch(_){}
+    }
+
+    // Offline/CDN fallback keeps seed playback deterministic even if Tonal is
+    // temporarily unavailable. Very high complexity adds the diatonic 9th.
+    if(!notes.length){
+      const count=complexity>.38?4:3;
+      for(let i=0;i<count;i++) notes.push(scale[(base+i*2)%7]);
+    }
+    if(complexity>.78){
+      const ninth=scale[(base+1)%7];
+      if(ninth&&!notes.includes(ninth)) notes.push(ninth);
+    }
+    if(complexity>.62&&rng()>.58){
+      const inversion=1+Math.floor(rng()*Math.min(2,notes.length-1));
+      for(let i=0;i<inversion;i++) notes.push(notes.shift());
+    }
+    return{notes,symbol};
+  }
+  function romanDegree(degree){return["I","II","III","IV","V","VI","VII"][Math.max(0,Math.min(6,degree-1))]}
+
+  function createProceduralProgram(seed,energy,complexity){
+    seed=normalizeProceduralSeed(seed);energy=clamp01(energy);complexity=clamp01(complexity);
+    const rng=mulberry32(seedHash(seed,energy,complexity)),tonics=["C","D","Eb","E","F","G","A","Bb"],tonic=tonics[Math.floor(rng()*tonics.length)],mode=rng()<(.48+complexity*.10)?"minor":"major",scale=getProceduralScale(tonic,mode);
+    const bpm=Math.round(74+energy*68+(rng()-.5)*8),bars=complexity>.72?8:4,beat=60/bpm,barDuration=beat*4,duration=bars*barDuration;
+    const majorProgressions=[[1,5,6,4],[1,4,5,1],[6,4,1,5],[1,6,2,5],[1,3,4,5]],minorProgressions=[[1,6,3,7],[1,4,6,5],[1,7,6,7],[6,7,1,1],[1,3,7,6]],pool=mode==="minor"?minorProgressions:majorProgressions;
+    let progression=pool[Math.floor(rng()*pool.length)].slice();if(complexity>.80&&rng()>.45)progression=[...progression.slice(0,3),2,5];
+    const chordEvents=[];for(let bar=0;bar<bars;bar++){const degree=progression[bar%progression.length],root=scale[(degree-1+7)%7],chord=degreeChord(tonic,mode,scale,degree,complexity,rng);chordEvents.push({time:bar*barDuration,duration:barDuration*.94,degree,root,notes:chord.notes,symbol:chord.symbol})}
+    const bassEvents=[];for(let bar=0;bar<bars;bar++){const chord=chordEvents[bar],root=chord.root,subdivision=energy>.66?.5:1,steps=Math.round(4/subdivision);for(let step=0;step<steps;step++){if(step&&complexity<.28&&rng()>.62)continue;let note=root;if(complexity>.55&&step===steps-1&&rng()>.35)note=scale[(scale.indexOf(root)+6)%7];else if(complexity>.72&&rng()>.78)note=chord.notes[Math.floor(rng()*Math.min(3,chord.notes.length))];bassEvents.push({time:bar*barDuration+step*subdivision*beat,duration:beat*subdivision*.78,note})}}
+    const melodyEvents=[],melodyStep=complexity>.76?.25:complexity>.38?.5:1,melodySteps=Math.round((bars*4)/melodyStep);let lastDegree=Math.floor(rng()*5)+1;
+    for(let step=0;step<melodySteps;step++){const bar=Math.floor((step*melodyStep)/4),chord=chordEvents[Math.min(chordEvents.length-1,bar)],restChance=.54-energy*.28-complexity*.12;if(rng()<restChance)continue;const chordIndexes=chord.notes.map(n=>Math.max(0,scale.indexOf(n)));if(rng()<.58&&chordIndexes.length)lastDegree=chordIndexes[Math.floor(rng()*chordIndexes.length)];else{const motion=rng()<.5?-1:1,leap=complexity>.68&&rng()>.78?2:1;lastDegree=(lastDegree+motion*leap+7)%7}const sync=complexity>.48&&rng()>.72?melodyStep*.5:0;melodyEvents.push({time:Math.min(duration-.04,(step*melodyStep+sync)*beat),duration:beat*melodyStep*(complexity>.70?.72:.84),note:scale[lastDegree%7],octave:rng()>.78?5:4})}
+    const drumEvents=[];for(let bar=0;bar<bars;bar++){const barStart=bar*barDuration;for(let b=0;b<4;b++){const t=barStart+b*beat;if(b===0||b===2||(energy>.72&&b===3&&rng()>.55))drumEvents.push({type:"kick",time:t,amp:.80});if(b===1||b===3)drumEvents.push({type:"snare",time:t,amp:.66+energy*.18})}const hatStep=energy>.62||complexity>.58?.5:1;for(let h=0;h<4/hatStep;h++){const t=barStart+h*hatStep*beat,off=h%2===1;if(!off||energy>.28||rng()>.4)drumEvents.push({type:"hat",time:t,amp:off?.20+.18*energy:.14+.12*energy})}if(complexity>.72&&rng()>.42)drumEvents.push({type:"kick",time:barStart+3.5*beat,amp:.58})}
+    const percussionEvents=[],shakeStep=energy>.58?.5:1;for(let t=0,step=0;t<duration-.02;t+=shakeStep*beat,step++){if(rng()<(.28+energy*.48))percussionEvents.push({type:"shaker",time:t,amp:.12+.18*energy});if(step%Math.round(4/shakeStep)===Math.round(1/shakeStep)&&rng()<(.35+complexity*.35))percussionEvents.push({type:"tamb",time:t,amp:.18+.20*energy})}
+    return{seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" · ")};
+  }
+
+  function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,proceduralOrder:index}))}}
+  function midiFrequency(midi){return 440*Math.pow(2,(midi-69)/12)}
+  function createProceduralStereoBuffer(duration){const sampleRate=Math.max(22050,Math.min(32000,audioCtx?.sampleRate||32000)),length=Math.max(1,Math.ceil(duration*sampleRate)),buffer=audioCtx.createBuffer(2,length,sampleRate);return{buffer,left:buffer.getChannelData(0),right:buffer.getChannelData(1),sampleRate}}
+  function addSampleStereo(target,index,value,pan=0){if(index<0||index>=target.left.length)return;const p=Math.max(-1,Math.min(1,pan)),l=Math.sqrt((1-p)*.5),r=Math.sqrt((1+p)*.5);target.left[index]+=value*l;target.right[index]+=value*r}
+  function addSynthNote(target,start,duration,midi,amp=.16,timbre="synth",pan=0){const sr=target.sampleRate,from=Math.max(0,Math.floor(start*sr)),samples=Math.max(1,Math.floor(duration*sr)),end=Math.min(target.left.length,from+samples),f=midiFrequency(midi),attack=Math.max(8,Math.floor(sr*Math.min(.025,duration*.18))),release=Math.max(16,Math.floor(sr*Math.min(.12,duration*.35)));for(let i=from;i<end;i++){const n=i-from,t=n/sr,remain=end-i,env=Math.min(1,n/attack,remain/release),phase=2*Math.PI*f*t;let wave=0;if(timbre==="bass")wave=Math.sin(phase)*.74+Math.sin(phase*2)*.18+Math.sin(phase*.5)*.08;else if(timbre==="keys"){wave=Math.sin(phase)*.62+Math.sin(phase*2)*.20+Math.sin(phase*3)*.08;wave*=Math.exp(-t/Math.max(.35,duration*.85))}else wave=Math.sin(phase)*.48+Math.sin(phase*2)*.23+Math.sin(phase*3)*.10+Math.sin(phase*4)*.04;addSampleStereo(target,i,wave*env*amp,pan)}}
+  function addKick(target,start,amp=.8){const sr=target.sampleRate,from=Math.floor(start*sr),len=Math.floor(sr*.34);let phase=0;for(let n=0;n<len&&from+n<target.left.length;n++){const t=n/sr,freq=42+96*Math.exp(-t*18);phase+=2*Math.PI*freq/sr;addSampleStereo(target,from+n,Math.sin(phase)*Math.exp(-t*13)*amp*.62,0)}}
+  function addNoiseBurst(target,start,duration,amp=.3,kind="snare",pan=0,rng=Math.random){const sr=target.sampleRate,from=Math.floor(start*sr),len=Math.floor(sr*duration);let prev=0;for(let n=0;n<len&&from+n<target.left.length;n++){const t=n/sr,white=rng()*2-1;let shaped;if(kind==="hat"||kind==="shaker"){shaped=white-prev*.82;prev=white}else shaped=white*.72+Math.sin(2*Math.PI*185*t)*.28;const decay=kind==="hat"?38:kind==="shaker"?25:13;addSampleStereo(target,from+n,shaped*Math.exp(-t*decay)*amp,pan)}}
+  function softLimitProceduralBuffer(target){for(const data of[target.left,target.right])for(let i=0;i<data.length;i++)data[i]=Math.tanh(data[i]*1.18)*.86}
+  function renderProceduralStemBuffer(program,stem){const target=createProceduralStereoBuffer(program.duration),rng=mulberry32(seedHash(program.seed+stem.proceduralOrder*101,program.energy,program.complexity)),role=stem.role;if(role==="keys"){for(const event of program.chordEvents){const baseOctave=program.complexity>.65?3:4;event.notes.forEach((note,idx)=>addSynthNote(target,event.time+.01*idx,event.duration,noteNameToMidi(note,baseOctave+(idx>=3?1:0)),.075,"keys",(idx-(event.notes.length-1)/2)*.12))}}else if(role==="bass"){for(const event of program.bassEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,2),.25,"bass",-.04)}else if(role==="melody"){for(const event of program.melodyEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave),.13+.05*program.energy,"synth",.06)}else if(role==="drums"){for(const event of program.drumEvents){if(event.type==="kick")addKick(target,event.time,event.amp);else if(event.type==="snare")addNoiseBurst(target,event.time,.24,event.amp*.48,"snare",0,rng);else addNoiseBurst(target,event.time,.075,event.amp,"hat",.14,rng)}}else if(role==="percussion"){for(const event of program.percussionEvents){if(event.type==="tamb"){addNoiseBurst(target,event.time,.15,event.amp,"hat",-.18,rng);addSynthNote(target,event.time,.12,96,event.amp*.11,"synth",-.12)}else addNoiseBurst(target,event.time,.095,event.amp,"shaker",.20,rng)}}softLimitProceduralBuffer(target);return target.buffer}
+
+  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
+  function setupProceduralAudioForRenderedChannels(playlist,generation){ensureAudioGraph();const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;channels=playlist.stems.map((stem,index)=>createProceduralChannel(stem,index,defaultStemState(stem),els[index],renderProceduralStemBuffer(program,stem)));channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});updateSoloRouting();updatePlaylistDuration();loadReadout.textContent="PROC READY";if(generation===loadGeneration)updateProceduralReadouts(program)}
+
+  function updateProceduralReadouts(program=currentProceduralProgram){if(!program)return;proceduralSeedReadout.textContent=String(program.seed).padStart(4,"0");proceduralKeyReadout.textContent=`${program.tonic.toUpperCase()} ${program.mode==="minor"?"MIN":"MAJ"}`;proceduralTempoReadout.textContent=`${program.bpm} BPM`;proceduralEnergyReadout.textContent=String(Math.round(program.energy*100));proceduralComplexityReadout.textContent=String(Math.round(program.complexity*100));proceduralChordReadout.textContent=program.chordLabel;proceduralDeck?.style.setProperty("--vibe-x",`${program.complexity*100}%`);proceduralDeck?.style.setProperty("--vibe-y",`${(1-program.energy)*100}%`);proceduralVibePad?.setAttribute("aria-valuetext",`Energy ${Math.round(program.energy*100)}, complexity ${Math.round(program.complexity*100)}`)}
+  function syncProceduralModeUi(showMonitor=false){const active=appMode==="procedural";mixerSurface.classList.toggle("is-procedural",active);proceduralModeBtn?.classList.toggle("active",active);proceduralModeBtn?.setAttribute("aria-pressed",String(active));if(proceduralDeck){proceduralDeck.hidden=!active;proceduralDeck.classList.toggle("hidden",!active);proceduralDeck.classList.toggle("flex",active)}prevTrackBtn.title=active?"Previous procedural seed":"Previous folder";prevTrackBtn.setAttribute("aria-label",prevTrackBtn.title);nextTrackBtn.title=active?"Next procedural seed":"Next folder";nextTrackBtn.setAttribute("aria-label",nextTrackBtn.title);if(active&&currentProceduralProgram)updateProceduralReadouts(currentProceduralProgram);if(showMonitor)showSystemReadout(active?"PROCEDURAL MODE":"PLAYLIST MODE",active?"SEED GENERATOR":"TRACK PROGRAM",active?`SEED ${String(proceduralSeed).padStart(4,"0")}`:"RESTORED")}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);setupProceduralAudioForRenderedChannels(currentPlaylist,generation);horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,"VIBE PROGRAM",`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+  async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
+  async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
+  async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
+  async function stepProceduralSeed(delta){const shouldPlay=isPlaying;await loadProceduralSeed(proceduralSeed+delta,shouldPlay)}
+  function setProceduralVibeFromPoint(clientX,clientY,{commit=false}={}){if(!proceduralVibePad)return;const rect=proceduralVibePad.getBoundingClientRect();if(!rect.width||!rect.height)return;proceduralComplexity=clamp01((clientX-rect.left)/rect.width);proceduralEnergy=clamp01(1-(clientY-rect.top)/rect.height);proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);proceduralEnergyReadout.textContent=String(Math.round(proceduralEnergy*100));proceduralComplexityReadout.textContent=String(Math.round(proceduralComplexity*100));proceduralVibePad.setAttribute("aria-valuetext",`Energy ${Math.round(proceduralEnergy*100)}, complexity ${Math.round(proceduralComplexity*100)}`);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;if(commit){savePersistentPrefs();const shouldPlay=isPlaying;clearTimeout(proceduralRegenerateTimer);proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true}),20)}}
+  function nudgeProceduralVibe(dx,dy){proceduralComplexity=clamp01(proceduralComplexity+dx);proceduralEnergy=clamp01(proceduralEnergy+dy);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const shouldPlay=isPlaying;loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true})}
 
   function dbToGain(db) { return Math.pow(10,db/20); }
 
@@ -5686,10 +5941,10 @@
   };
 
   /*
-   * 18-SEGMENT ALPHANUMERIC DISPLAY
-   * Main monitor = 18 segments for readable words. The two extra full-span
-   * diagonal arms give angular letters (especially K) a full-size hardware
-   * silhouette instead of the sparse/disconnected 16-segment approximation.
+   * 19-SEGMENT ALPHANUMERIC DISPLAY
+   * Main monitor = 19 segments for readable words. Two full-span
+   * diagonal arms plus a dedicated continuous K stem keep angular letters full-size
+   * without shortening K’s left vertical stroke.
    * Elapsed/total time module stays genuine 7-segment because it is numeric.
    * Legacy alpha16 function/class names are retained to avoid needless churn.
    */
@@ -5728,7 +5983,9 @@
        These meet the left stem at the centre so K fills the same visual
        envelope as the other capitals instead of looking like a tiny >. */
     n:"4,45 8,47 43,15 47,19 12,52 7,55 3,52",
-    o:"3,48 7,45 12,48 46,82 42,87 8,54 4,55"
+    o:"3,48 7,45 12,48 46,82 42,87 8,54 4,55",
+    /* full-height K stem: no centre interruption */
+    p:"5,11 10,16 7,84 2,89 0,84 2,17"
   };
 
   const ALPHA16_MAP = {
@@ -5753,7 +6010,7 @@
     "H":["b","c","e","f","g1","g2"],
     "I":["a1","a2","d1","d2","j","k"],
     "J":["b","c","d1","d2","e"],
-    "K":["e","f","n","o"],
+    "K":["p","n","o"],
     "L":["d1","d2","e","f"],
     "M":["b","c","e","f","h","i"],
     "N":["b","c","e","f","h","m"],
@@ -5850,7 +6107,7 @@
 
     for (const segmentName of [
       "a1","a2","b","c","d1","d2","e","f",
-      "g1","g2","h","i","j","k","l","m","n","o"
+      "g1","g2","h","i","j","k","l","m","n","o","p"
     ]) {
       const polygon = document.createElementNS(SEVEN_SVG_NS,"polygon");
       polygon.setAttribute("points",ALPHA16_POINTS[segmentName]);
@@ -6148,7 +6405,8 @@
 
   function syncSevenSegmentTrack() {
     const trackText = trackReadout?.textContent || "--";
-    alpha16Write(sevenTrack,`TRK ${trackText.replace("/","-")}`,{
+    const prefix = appMode === "procedural" ? "" : "TRK ";
+    alpha16Write(sevenTrack,`${prefix}${trackText.replace("/","-")}`,{
       maxChars:9,
       align:"right"
     });
@@ -6894,6 +7152,7 @@
   }
 
   function scheduleBackgroundPreload() {
+    if (appMode === "procedural") return;
     if (!playlists.length || playlists.length <= 1) return;
 
     const nextIndex = (currentPlaylistIndex+1)%playlists.length;
@@ -7208,6 +7467,7 @@
   }
 
   function cyclePlaylistMode() {
+    if (appMode === "procedural") return;
     const currentPosition = getPosition();
     const wasPlaying = isPlaying;
 
@@ -7447,7 +7707,7 @@
   }
 
   function ensureScheduleHorizon(currentCycle=0) {
-    if (!isPlaying || !playlistDuration || !audioCtx || playlistMode !== "loop") return;
+    if (!isPlaying || !playlistDuration || !audioCtx || (appMode !== "procedural" && playlistMode !== "loop")) return;
 
     const target = currentCycle + SCHEDULE_AHEAD_CYCLES;
     for (let cycle=scheduledThroughCycle+1; cycle<=target; cycle++) {
@@ -7504,7 +7764,7 @@
 
     const absolute = getAbsoluteCyclePosition();
 
-    if (playlistMode === "loop") {
+    if (appMode === "procedural" || playlistMode === "loop") {
       const wrapped = absolute % playlistDuration;
       return Math.max(0,Math.min(playlistDuration,wrapped));
     }
@@ -7517,7 +7777,7 @@
 
     const absolute = getAbsoluteCyclePosition();
 
-    if (playlistMode === "loop") {
+    if (appMode === "procedural" || playlistMode === "loop") {
       const currentCycle = Math.max(0,Math.floor(absolute/playlistDuration));
       ensureScheduleHorizon(currentCycle);
 
@@ -7654,6 +7914,8 @@
 
   async function changePlaylist(index,autoplay=false) {
     if (!playlists.length) return;
+    appMode = "playlist";
+    syncProceduralModeUi(false);
 
     const normalized=(Number(index)+playlists.length)%playlists.length;
     const generation=++loadGeneration;
@@ -7692,6 +7954,7 @@
   }
 
   function syncPlaylistSelector() {
+    if (appMode === "procedural") return;
     const playlist = playlists[currentPlaylistIndex];
     playlistSelectorLabel.textContent = playlistDisplayName(playlist,currentPlaylistIndex);
     playlistSelectorButton.disabled = !playlists.length;
@@ -7746,7 +8009,7 @@
   }
 
   function openPlaylistHardwareMenu() {
-    if (!playlists.length) return;
+    if (appMode === "procedural" || !playlists.length) return;
     playlistMenu.hidden = false;
     playlistSelectorButton.classList.add("is-open");
     playlistSelectorButton.setAttribute("aria-expanded","true");
@@ -7777,6 +8040,7 @@
   }
 
   async function previousPlaylist() {
+    if (appMode === "procedural") return stepProceduralSeed(-1);
     playlistAdvanceInProgress=false;
     const shouldPlay=isPlaying;
     // Normalized indexing wraps first -> last in every playlist mode.
@@ -7784,6 +8048,7 @@
   }
 
   async function nextPlaylist(forceAutoplay=null) {
+    if (appMode === "procedural") return stepProceduralSeed(1);
     playlistAdvanceInProgress=false;
     const shouldPlay=forceAutoplay===null ? isPlaying : forceAutoplay;
     // Normalized indexing wraps last -> first in every playlist mode.
@@ -7984,6 +8249,39 @@
   nextTrackBtn.addEventListener("click",()=>nextPlaylist());
   randomizerBtn?.addEventListener("click",toggleRandomizer);
   playlistModeBtn?.addEventListener("click",cyclePlaylistMode);
+  proceduralModeBtn?.addEventListener("click",toggleProceduralMode);
+
+  if (proceduralVibePad) {
+    let vibePointerId=null;
+    proceduralVibePad.addEventListener("pointerdown",event=>{
+      if (event.button !== undefined && event.button !== 0) return;
+      event.preventDefault();
+      vibePointerId=event.pointerId;
+      proceduralVibePad.setPointerCapture?.(event.pointerId);
+      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:false});
+    });
+    proceduralVibePad.addEventListener("pointermove",event=>{
+      if (vibePointerId!==event.pointerId) return;
+      event.preventDefault();
+      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:false});
+    });
+    const finishVibe=event=>{
+      if (vibePointerId!==event.pointerId) return;
+      event.preventDefault();
+      setProceduralVibeFromPoint(event.clientX,event.clientY,{commit:true});
+      try { proceduralVibePad.releasePointerCapture?.(event.pointerId); } catch (_) {}
+      vibePointerId=null;
+    };
+    proceduralVibePad.addEventListener("pointerup",finishVibe);
+    proceduralVibePad.addEventListener("pointercancel",event=>{if(vibePointerId===event.pointerId)vibePointerId=null});
+    proceduralVibePad.addEventListener("keydown",event=>{
+      const step=event.shiftKey ? .02 : .05;
+      if(event.key==="ArrowLeft"){event.preventDefault();nudgeProceduralVibe(-step,0)}
+      else if(event.key==="ArrowRight"){event.preventDefault();nudgeProceduralVibe(step,0)}
+      else if(event.key==="ArrowUp"){event.preventDefault();nudgeProceduralVibe(0,step)}
+      else if(event.key==="ArrowDown"){event.preventDefault();nudgeProceduralVibe(0,-step)}
+    });
+  }
 
 
   /* ==========================================================
@@ -8147,6 +8445,9 @@
     });
     updateRandomizerButton();
     updatePlaylistModeButton(false);
+    syncProceduralModeUi(false);
+    currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);
+    updateProceduralReadouts(currentProceduralProgram);
     loadReadout.textContent="INIT";
     const manifest=await getManifest();
     bundledPlaylists=buildPlaylistsFromManifest(manifest);
