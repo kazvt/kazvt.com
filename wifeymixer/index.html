@@ -4960,6 +4960,34 @@
     }
 
 
+    /* ===== PATCH: protected top clearance for side stereo meters =====
+       Real console meter rails stop below the channel ID/icon hardware instead
+       of disappearing underneath it. Keep a permanent dead-metal shoulder at
+       the top of every strip so no badge, lamp or icon can overlap the ladder. */
+    .knob-meter-rack{
+      --side-meter-top-clearance:clamp(12px,1.75vh,18px);
+    }
+    .mixer.is-procedural [data-channel] .channel-name{
+      font-size:6.7px !important;
+      letter-spacing:.055em !important;
+    }
+
+    .knob-meter-rack > .side-meter{
+      align-self:end !important;
+      height:calc(100% - var(--side-meter-top-clearance)) !important;
+      max-height:calc(100% - var(--side-meter-top-clearance)) !important;
+      margin-top:var(--side-meter-top-clearance) !important;
+    }
+    @media(max-height:650px){
+      .knob-meter-rack{--side-meter-top-clearance:10px}
+    }
+    @media(max-height:500px){
+      .knob-meter-rack{--side-meter-top-clearance:8px}
+    }
+    @media(max-height:410px){
+      .knob-meter-rack{--side-meter-top-clearance:6px}
+    }
+
 
     /* ==============================================================
        PROCEDURAL MODE — physical seed generator + vintage X/Y VIBE pad
@@ -6626,6 +6654,13 @@
               <span class="proc-mini-fader"><input id="proceduralComplexityControl" type="range" min="0" max="100" step="2.5" value="45" aria-label="Procedural complexity"></span>
             </label>
 
+            <label class="proc-hw-control proc-hw-control--wide" data-proc-control="variance" title="0% repeats the previous loop exactly. Higher settings let each new loop mutate farther from the loop before it.">
+              <span class="proc-hw-control__legend">LOOP VARIANCE <i class="proc-live-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralVarianceReadout" class="proc-mini-screen">35%</span>
+              <span class="proc-mini-fader"><input id="proceduralVarianceControl" type="range" min="0" max="100" step="2.5" value="35" aria-label="Procedural loop variance. Zero repeats the previous loop exactly; one hundred allows radical variation."></span>
+              <span class="proc-source-scale proc-variance-scale" aria-hidden="true"><b>REPEAT</b><b>SUBTLE</b><b>EVOLVE</b><b>RADICAL</b></span>
+            </label>
+
             <label class="proc-hw-control proc-hw-control--wide" data-proc-control="soundfont">
               <span class="proc-hw-control__legend">SOUNDFONT RACK <i class="proc-source-lamp" aria-hidden="true"></i></span>
               <span id="proceduralSoundFontReadout" class="proc-mini-screen proc-mini-screen--source">AUTO RACK</span>
@@ -6679,6 +6714,7 @@
   const proceduralTempoReadout = document.getElementById("proceduralTempoReadout");
   const proceduralEnergyReadout = document.getElementById("proceduralEnergyReadout");
   const proceduralComplexityReadout = document.getElementById("proceduralComplexityReadout");
+  const proceduralVarianceReadout = document.getElementById("proceduralVarianceReadout");
   const proceduralChordReadout = document.getElementById("proceduralChordReadout");
   const proceduralSoundFontReadout = document.getElementById("proceduralSoundFontReadout");
   const proceduralKeyControl = document.getElementById("proceduralKeyControl");
@@ -6686,6 +6722,7 @@
   const proceduralTempoControl = document.getElementById("proceduralTempoControl");
   const proceduralEnergyControl = document.getElementById("proceduralEnergyControl");
   const proceduralComplexityControl = document.getElementById("proceduralComplexityControl");
+  const proceduralVarianceControl = document.getElementById("proceduralVarianceControl");
   const proceduralChordControl = document.getElementById("proceduralChordControl");
   const proceduralSoundFontControl = document.getElementById("proceduralSoundFontControl");
   const seekRange = document.getElementById("seekRange");
@@ -6919,6 +6956,7 @@
         proceduralSeed: Math.max(1,Math.min(9999,Number(parsed.proceduralSeed)||1)),
         proceduralEnergy: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralEnergy)) ? Number(parsed.proceduralEnergy) : .52)),
         proceduralComplexity: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralComplexity)) ? Number(parsed.proceduralComplexity) : .46)),
+        proceduralLoopVariance: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralLoopVariance)) ? Number(parsed.proceduralLoopVariance) : .35)),
         proceduralTonicOverride: typeof parsed.proceduralTonicOverride === "string" ? parsed.proceduralTonicOverride : null,
         proceduralModeOverride: ["major","minor"].includes(parsed.proceduralModeOverride) ? parsed.proceduralModeOverride : null,
         proceduralTempoOverride: parsed.proceduralTempoOverride != null && Number.isFinite(Number(parsed.proceduralTempoOverride)) ? Math.max(60,Math.min(180,Math.round(Number(parsed.proceduralTempoOverride)))) : null,
@@ -6942,6 +6980,7 @@
         proceduralSeed:1,
         proceduralEnergy:.52,
         proceduralComplexity:.46,
+        proceduralLoopVariance:.35,
         proceduralTonicOverride:null,
         proceduralModeOverride:null,
         proceduralTempoOverride:null,
@@ -6970,6 +7009,7 @@
   let proceduralSeed = Math.max(1,Math.min(9999,Number(persistentPrefs.proceduralSeed)||1));
   let proceduralEnergy = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralEnergy)) ? Number(persistentPrefs.proceduralEnergy) : .52);
   let proceduralComplexity = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralComplexity)) ? Number(persistentPrefs.proceduralComplexity) : .46);
+  let proceduralLoopVariance = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralLoopVariance)) ? Number(persistentPrefs.proceduralLoopVariance) : .35);
   const PROCEDURAL_KEYS = Object.freeze(["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"]);
   const PROCEDURAL_MODES = Object.freeze(["major","minor"]);
   const PROCEDURAL_CHORD_PROGRAMS = Object.freeze([
@@ -6992,6 +7032,7 @@
   };
   let proceduralSoundFontMode = ["auto","sf64","rush","genies"].includes(persistentPrefs.proceduralSoundFont) ? persistentPrefs.proceduralSoundFont : "auto";
   let currentProceduralProgram = null;
+  const proceduralLoopProgramCache = new Map();
   let proceduralRegenerateTimer = null;
   const PROCEDURAL_TRACKS = [
     {name:"DRUMS",role:"drums",soundfontSlot:"drums"},
@@ -7607,75 +7648,132 @@
     return program;
   }
 
-  /* Every repeat gets a deterministic "band played it again" variation.
-     The seed identity, key, tempo, bar count and chord PROGRAM stay fixed;
-     only performance details move a little from loop to loop. */
-  function createProceduralLoopVariation(baseProgram,loopIndex){
+  /* Each repeat evolves from the loop immediately before it, like the same band
+     playing another take rather than reseeding a totally unrelated pattern.
+     LOOP VARIANCE is the mutation depth: 0 is sample-for-sample identical to the
+     previous loop; 100 permits larger rhythmic, voicing and note-performance moves.
+     Key, mode, tempo, bar count, chord PROGRAM and selected instruments remain fixed. */
+  function createProceduralLoopVariation(previousProgram,loopIndex,variance=proceduralLoopVariance){
     const variation=Math.max(0,Math.trunc(Number(loopIndex)||0));
-    if(!variation)return baseProgram;
+    const depth=clamp01(Number(variance));
+    if(!variation||depth<=0)return previousProgram;
 
-    const rng=mulberry32((seedHash(baseProgram.seed,baseProgram.energy,baseProgram.complexity)^(variation*0x9E3779B9))>>>0);
-    const scale=baseProgram.scale.slice();
-    const varied={...baseProgram,loopVariation:variation};
+    const rng=mulberry32((seedHash(previousProgram.seed,previousProgram.energy,previousProgram.complexity)^(variation*0x9E3779B9)^Math.round(depth*1000)*0x45d9f3b)>>>0);
+    const scale=previousProgram.scale.slice();
+    const varied={...previousProgram,loopVariation:variation,loopVariance:depth};
+    const complexity=previousProgram.complexity,energy=previousProgram.energy;
 
-    varied.chordEvents=baseProgram.chordEvents.map((event,index)=>{
+    varied.chordEvents=previousProgram.chordEvents.map((event,index)=>{
       const notes=event.notes.slice();
-      // Gentle voicing movement: mostly the same chord, occasionally a real inversion.
-      if(notes.length>2&&rng()<(.18+baseProgram.complexity*.18)){
-        const rotations=rng()<.78?1:Math.min(2,notes.length-1);
+      const inversionChance=depth*(.12+complexity*.40);
+      if(notes.length>2&&rng()<inversionChance){
+        const maxRotations=depth>.72?Math.min(2,notes.length-1):1;
+        const rotations=maxRotations>1&&rng()<depth*.55?2:1;
         for(let i=0;i<rotations;i++)notes.push(notes.shift());
       }
-      const durationScale=rng()<.18 ? (.78+rng()*.14) : (.94+rng()*.05);
-      return {...event,notes,duration:Math.min(baseProgram.barDuration*.96,event.duration*durationScale),ampScale:.94+rng()*.12,index};
+      const durationWobble=.015+depth*.18;
+      const durationScale=1+(rng()*2-1)*durationWobble;
+      const ampWobble=.025+depth*.16;
+      return {...event,notes,duration:Math.max(previousProgram.beat*.35,Math.min(previousProgram.barDuration*.97,event.duration*durationScale)),ampScale:(event.ampScale||1)*(1+(rng()*2-1)*ampWobble),index};
     });
 
-    varied.bassEvents=baseProgram.bassEvents.map(event=>{
+    varied.bassEvents=previousProgram.bassEvents.map(event=>{
       let note=event.note;
-      const posInBar=event.time%baseProgram.barDuration;
-      // Approach notes mostly happen at the end of a bar so the bass still anchors the harmony.
-      if(posInBar>baseProgram.barDuration-baseProgram.beat*.78&&rng()<(.18+baseProgram.complexity*.22)){
+      const posInBar=event.time%previousProgram.barDuration;
+      const approachWindow=previousProgram.barDuration-previousProgram.beat*(.65+depth*.45);
+      if(posInBar>approachWindow&&rng()<depth*(.13+complexity*.38)){
         const degree=Math.max(0,scale.indexOf(note));
-        note=scale[(degree+(rng()<.72?6:1))%7];
+        const motion=depth>.72&&rng()<.28?(rng()<.5?5:2):(rng()<.72?6:1);
+        note=scale[(degree+motion)%7];
+      }else if(depth>.76&&rng()<depth*.07){
+        const degree=Math.max(0,scale.indexOf(note));
+        note=scale[(degree+(rng()<.5?2:5))%7];
       }
-      const octave=rng()<(.05+baseProgram.energy*.07)?3:2;
-      return {...event,note,octave,ampScale:.93+rng()*.13,duration:event.duration*(.92+rng()*.10)};
+      const octave=(event.octave||2)+(rng()<depth*(.035+energy*.13)?(rng()<.68?1:-1):0);
+      const timingNudge=rng()<depth*.12?(rng()<.5?-1:1)*previousProgram.beat*(.015+.055*depth):0;
+      return {...event,note,octave:Math.max(1,Math.min(3,octave)),time:Math.max(0,Math.min(previousProgram.duration-.04,event.time+timingNudge)),ampScale:(event.ampScale||1)*(1+(rng()*2-1)*(.035+.17*depth)),duration:event.duration*(1+(rng()*2-1)*(.025+.13*depth))};
     });
 
-    varied.melodyEvents=baseProgram.melodyEvents
-      .filter(()=>rng()>(.025+baseProgram.complexity*.035))
+    varied.melodyEvents=previousProgram.melodyEvents
+      .filter(event=>!event.variationAdded||rng()>depth*.50)
       .map(event=>{
         let note=event.note;
-        if(rng()<(.10+baseProgram.complexity*.10)){
+        const rest=event.variationAdded?!!event.rest:(rng()<depth*(.015+complexity*.16)?!event.rest:!!event.rest);
+        if(rng()<depth*(.08+complexity*.48)){
           const degree=Math.max(0,scale.indexOf(note));
-          note=scale[(degree+(rng()<.5?6:1))%7];
+          const leap=depth>.68&&rng()<depth*.38?(rng()<.5?2:5):(rng()<.5?6:1);
+          note=scale[(degree+leap)%7];
         }
-        const octave=Math.max(3,Math.min(5,event.octave+(rng()<.06?(rng()<.5?-1:1):0)));
-        const microNudge=baseProgram.complexity>.45&&rng()<.12 ? (rng()<.5?-1:1)*baseProgram.beat*.045 : 0;
-        return {...event,note,octave,time:Math.max(0,Math.min(baseProgram.duration-.04,event.time+microNudge)),duration:event.duration*(.88+rng()*.18),ampScale:.90+rng()*.18};
+        const octave=Math.max(3,Math.min(5,event.octave+(rng()<depth*(.035+energy*.17)?(rng()<.5?-1:1):0)));
+        const nudgeChance=depth*(.08+complexity*.22);
+        const microNudge=rng()<nudgeChance?(rng()<.5?-1:1)*previousProgram.beat*(.018+.10*depth):0;
+        return {...event,rest,note,octave,time:Math.max(0,Math.min(previousProgram.duration-.04,event.time+microNudge)),duration:event.duration*(1+(rng()*2-1)*(.045+.22*depth)),ampScale:(event.ampScale||1)*(1+(rng()*2-1)*(.05+.20*depth))};
       });
-
-    varied.drumEvents=baseProgram.drumEvents
-      .filter(event=>event.type!=="hat"||rng()>(.045+baseProgram.complexity*.035))
-      .map(event=>({...event,amp:event.amp*(.90+rng()*.18)}));
-    // Small turnaround fill rather than a wholesale drum-pattern rewrite.
-    const lastBar=(baseProgram.bars-1)*baseProgram.barDuration;
-    if(rng()<(.45+baseProgram.energy*.30)){
-      varied.drumEvents.push({type:rng()<.62?"kick":"hat",time:lastBar+3.5*baseProgram.beat,amp:.28+.28*baseProgram.energy});
+    // At high variance, create occasional passing/answer notes rather than only
+    // deleting or moving the existing phrase. This keeps radical settings lively.
+    if(depth>.58&&varied.melodyEvents.length){
+      const additions=Math.min(3,Math.floor(depth*4));
+      for(let i=0;i<additions;i++){
+        if(rng()>depth*.68)continue;
+        const source=varied.melodyEvents[Math.floor(rng()*varied.melodyEvents.length)];
+        const degree=Math.max(0,scale.indexOf(source.note));
+        const direction=rng()<.5?1:6;
+        if(varied.melodyEvents.length<48)varied.melodyEvents.push({...source,variationAdded:true,rest:false,note:scale[(degree+direction)%7],time:Math.max(0,Math.min(previousProgram.duration-.04,source.time+previousProgram.beat*(rng()<.5?.25:.5))),duration:Math.max(previousProgram.beat*.10,source.duration*(.42+.26*rng())),ampScale:(source.ampScale||1)*(.72+.16*rng())});
+      }
     }
-    if(baseProgram.complexity>.48&&rng()<.46){
-      varied.drumEvents.push({type:"hat",time:lastBar+3.75*baseProgram.beat,amp:.16+.14*baseProgram.energy});
+    varied.melodyEvents.sort((a,b)=>a.time-b.time);
+
+    varied.drumEvents=previousProgram.drumEvents
+      .filter(event=>!event.variationAdded||rng()>depth*.58)
+      .map(event=>{
+        const timingNudge=event.type==="hat"&&rng()<depth*.18?(rng()<.5?-1:1)*previousProgram.beat*(.012+.045*depth):0;
+        const rest=event.type==="hat"&&rng()<depth*(.02+complexity*.12)?!event.rest:!!event.rest;
+        return {...event,rest,time:Math.max(0,Math.min(previousProgram.duration-.025,event.time+timingNudge)),amp:event.amp*(1+(rng()*2-1)*(.04+.22*depth))};
+      });
+    const lastBar=(previousProgram.bars-1)*previousProgram.barDuration;
+    if(rng()<depth*(.24+energy*.60)){
+      const fillHits=depth>.78?3:depth>.48?2:1;
+      for(let i=0;i<fillHits;i++){
+        const step=3.25+i*(.75/Math.max(1,fillHits-1));
+        if(varied.drumEvents.length<64)varied.drumEvents.push({variationAdded:true,rest:false,type:rng()<(.48+.24*depth)?"kick":"hat",time:Math.min(previousProgram.duration-.025,lastBar+step*previousProgram.beat),amp:.20+(.18+.25*depth)*energy});
+      }
+    }
+    if(complexity>.42&&rng()<depth*(.18+complexity*.38)){
+      if(varied.drumEvents.length<64)varied.drumEvents.push({variationAdded:true,rest:false,type:rng()<.38?"snare":"hat",time:lastBar+3.75*previousProgram.beat,amp:.14+.24*energy});
     }
     varied.drumEvents.sort((a,b)=>a.time-b.time);
 
-    varied.percussionEvents=baseProgram.percussionEvents
-      .filter(()=>rng()>(.07+baseProgram.complexity*.035))
-      .map(event=>({...event,amp:event.amp*(.86+rng()*.24),time:Math.max(0,Math.min(baseProgram.duration-.03,event.time+(rng()<.10?(rng()<.5?-1:1)*baseProgram.beat*.035:0)))}));
-    if(rng()<(.34+baseProgram.energy*.26)){
-      varied.percussionEvents.push({type:rng()<.52?"tamb":"shaker",time:lastBar+3*baseProgram.beat,amp:.14+.16*baseProgram.energy});
+    varied.percussionEvents=previousProgram.percussionEvents
+      .filter(event=>!event.variationAdded||rng()>depth*.54)
+      .map(event=>{
+        const rest=rng()<depth*(.035+complexity*.15)?!event.rest:!!event.rest;
+        return {...event,rest,amp:event.amp*(1+(rng()*2-1)*(.06+.28*depth)),time:Math.max(0,Math.min(previousProgram.duration-.03,event.time+(rng()<depth*.25?(rng()<.5?-1:1)*previousProgram.beat*(.015+.07*depth):0)))};
+      });
+    if(rng()<depth*(.20+energy*.50)){
+      const extraCount=depth>.78?2:1;
+      for(let i=0;i<extraCount;i++)if(varied.percussionEvents.length<56)varied.percussionEvents.push({variationAdded:true,rest:false,type:rng()<.52?"tamb":"shaker",time:Math.min(previousProgram.duration-.03,lastBar+(2.5+rng()*1.35)*previousProgram.beat),amp:.12+.12*energy+.12*depth});
     }
     varied.percussionEvents.sort((a,b)=>a.time-b.time);
 
     return varied;
+  }
+
+  function resetProceduralLoopProgramCache(){
+    proceduralLoopProgramCache.clear();
+    if(currentProceduralProgram)proceduralLoopProgramCache.set(0,currentProceduralProgram);
+  }
+
+  function getProceduralLoopProgram(loopIndex){
+    const target=Math.max(0,Math.trunc(Number(loopIndex)||0));
+    if(!currentProceduralProgram||target===0||proceduralLoopVariance<=0)return currentProceduralProgram;
+    if(proceduralLoopProgramCache.has(target))return proceduralLoopProgramCache.get(target);
+    if(!proceduralLoopProgramCache.has(0))proceduralLoopProgramCache.set(0,currentProceduralProgram);
+    for(let i=1;i<=target;i++){
+      if(proceduralLoopProgramCache.has(i))continue;
+      const previous=proceduralLoopProgramCache.get(i-1)||currentProceduralProgram;
+      proceduralLoopProgramCache.set(i,createProceduralLoopVariation(previous,i,proceduralLoopVariance));
+    }
+    return proceduralLoopProgramCache.get(target)||currentProceduralProgram;
   }
 
   function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,sf2Voice:program.sf2Voices?.[track.role]||null,proceduralOrder:index}))}}
@@ -7721,11 +7819,11 @@
     }else if(role==="bass"){
       for(const event of program.bassEvents)play(noteNameToMidi(event.note,event.octave||2),event.time,event.duration,Math.round(78+program.energy*34+rng()*8),.58*(event.ampScale||1),-.04);
     }else if(role==="melody"){
-      for(const event of program.melodyEvents)play(noteNameToMidi(event.note,event.octave),event.time,event.duration,Math.round(70+program.energy*38+rng()*12),(.43+.10*program.energy)*(event.ampScale||1),.06);
+      for(const event of program.melodyEvents){if(event.rest)continue;play(noteNameToMidi(event.note,event.octave),event.time,event.duration,Math.round(70+program.energy*38+rng()*12),(.43+.10*program.energy)*(event.ampScale||1),.06)}
     }else if(role==="drums"){
-      for(const event of program.drumEvents){const velocity=Math.round(Math.max(35,Math.min(127,52+event.amp*74)));if(event.type==="kick")play(36,event.time,.18,velocity,.82,0);else if(event.type==="snare")play(rng()>.28?38:40,event.time,.20,velocity,.76,0);else{const openHat=program.energy>.66&&rng()<.13;play(openHat?46:42,event.time,openHat?.28:.09,velocity,.50,.12)}}
+      for(const event of program.drumEvents){if(event.rest)continue;const velocity=Math.round(Math.max(35,Math.min(127,52+event.amp*74)));if(event.type==="kick")play(36,event.time,.18,velocity,.82,0);else if(event.type==="snare")play(rng()>.28?38:40,event.time,.20,velocity,.76,0);else{const openHat=program.energy>.66&&rng()<.13;play(openHat?46:42,event.time,openHat?.28:.09,velocity,.50,.12)}}
     }else if(role==="percussion"){
-      for(const event of program.percussionEvents){const velocity=Math.round(Math.max(34,Math.min(127,55+event.amp*90)));play(event.type==="tamb"?54:82,event.time,event.type==="tamb"?.18:.11,velocity,event.type==="tamb"?.62:.54,event.type==="tamb"?-.15:.18)}
+      for(const event of program.percussionEvents){if(event.rest)continue;const velocity=Math.round(Math.max(34,Math.min(127,55+event.amp*90)));play(event.type==="tamb"?54:82,event.time,event.type==="tamb"?.18:.11,velocity,event.type==="tamb"?.62:.54,event.type==="tamb"?-.15:.18)}
     }
     if(!rendered)return null; softLimitProceduralBuffer(target); return target.buffer;
   }
@@ -7750,13 +7848,55 @@
     }else if(role==="bass"){
       for(const event of program.bassEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave||2),.25*(event.ampScale||1),"bass",-.04);
     }else if(role==="melody"){
-      for(const event of program.melodyEvents)addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave),(.13+.05*program.energy)*(event.ampScale||1),"synth",.06);
+      for(const event of program.melodyEvents){if(event.rest)continue;addSynthNote(target,event.time,event.duration,noteNameToMidi(event.note,event.octave),(.13+.05*program.energy)*(event.ampScale||1),"synth",.06)}
     }else if(role==="drums"){
-      for(const event of program.drumEvents){if(event.type==="kick")addKick(target,event.time,event.amp);else if(event.type==="snare")addNoiseBurst(target,event.time,.24,event.amp*.48,"snare",0,rng);else addNoiseBurst(target,event.time,.075,event.amp,"hat",.14,rng)}
+      for(const event of program.drumEvents){if(event.rest)continue;if(event.type==="kick")addKick(target,event.time,event.amp);else if(event.type==="snare")addNoiseBurst(target,event.time,.24,event.amp*.48,"snare",0,rng);else addNoiseBurst(target,event.time,.075,event.amp,"hat",.14,rng)}
     }else if(role==="percussion"){
-      for(const event of program.percussionEvents){if(event.type==="tamb"){addNoiseBurst(target,event.time,.15,event.amp,"hat",-.18,rng);addSynthNote(target,event.time,.12,96,event.amp*.11,"synth",-.12)}else addNoiseBurst(target,event.time,.095,event.amp,"shaker",.20,rng)}
+      for(const event of program.percussionEvents){if(event.rest)continue;if(event.type==="tamb"){addNoiseBurst(target,event.time,.15,event.amp,"hat",-.18,rng);addSynthNote(target,event.time,.12,96,event.amp*.11,"synth",-.12)}else addNoiseBurst(target,event.time,.095,event.amp,"shaker",.20,rng)}
     }
     softLimitProceduralBuffer(target);return target.buffer;
+  }
+
+  const PROCEDURAL_FALLBACK_INSTRUMENT_NAMES=Object.freeze({
+    drums:"BENCH DRUM KIT",
+    bass:"ANALOGUE BENCH BASS",
+    keys:"ANALOGUE BENCH KEYS",
+    melody:"ANALOGUE BENCH SYNTH",
+    percussion:"BENCH PERCUSSION"
+  });
+
+  function proceduralStemInstrumentName(stem){
+    return String(stem?.resolvedSf2Voice?.name||PROCEDURAL_FALLBACK_INSTRUMENT_NAMES[stem?.role]||"BENCH INSTRUMENT");
+  }
+
+  function syncProceduralChannelInstrumentLabels(){
+    if(appMode!=="procedural")return;
+    for(const channel of channels){
+      const label=proceduralStemInstrumentName(channel.stem);
+      const nameEl=channel.el?.querySelector(".channel-name");
+      if(nameEl){
+        // In procedural mode the strip tape names the actual sounding patch,
+        // not the generic role. The fixed pictogram still carries role identity.
+        nameEl.textContent=label;
+        nameEl.title=label;
+      }
+      // Keep the original role pictogram exactly as-is; only explain what the
+      // fixed symbol is currently controlling when a user hovers it.
+      const iconEl=channel.el?.querySelector("[data-instrument-icon]");
+      if(iconEl)iconEl.title=`${label} · ${channel.stem.role.toUpperCase()} ROLE`;
+      channel.stem.displayInstrumentName=label;
+      channel.el?.querySelectorAll("[data-action]").forEach(button=>{
+        const action=String(button.dataset.action||"").toUpperCase();
+        if(action==="MUTE"||action==="SOLO")button.title=`${action[0]}${action.slice(1).toLowerCase()} ${label}`;
+        else if(action==="LOCK"){button.title=`${channel.state.locked?"Unlock":"Lock"} ${label} from randomizer`;button.setAttribute("aria-label",button.title)}
+      });
+      const fader=channel.el?.querySelector(".fader");
+      if(fader)fader.setAttribute("aria-label",`${label} level`);
+      channel.el?.querySelectorAll(".side-meter").forEach(meter=>{
+        const side=meter.classList.contains("side-meter--left")?"left":"right";
+        meter.setAttribute("aria-label",`${label} ${side} output meter`);
+      });
+    }
   }
 
   function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
@@ -7767,6 +7907,7 @@
     const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;
     channels=playlist.stems.map((stem,index)=>createProceduralChannel(stem,index,defaultStemState(stem),els[index],renderProceduralStemBuffer(program,stem)));
     channels.forEach(channel=>{applyChannelState(channel);syncStemActionButtons(channel)});
+    syncProceduralChannelInstrumentLabels();
     updateSoloRouting();
     updatePlaylistDuration();
     if(proceduralSoundFontMode==="auto")loadReadout.textContent=proceduralSoundFonts.size>=3?"TRI SF2":proceduralSoundFonts.size===2?"DUAL SF2":proceduralSoundFonts.size?"SF2 READY":"PROC READY";
@@ -7793,6 +7934,7 @@
     proceduralTempoReadout.textContent=`${program.bpm} BPM`;
     proceduralEnergyReadout.textContent=String(energy);
     proceduralComplexityReadout.textContent=String(complexity);
+    proceduralVarianceReadout.textContent=`${formatSteppedPercent01(proceduralLoopVariance)}%`;
     proceduralChordReadout.textContent=program.chordLabel;
     proceduralSoundFontReadout.textContent=proceduralSoundFontDisplayName();
     if(proceduralKeyControl)proceduralKeyControl.value=String(keyIndex);
@@ -7800,6 +7942,7 @@
     if(proceduralTempoControl)proceduralTempoControl.value=String(program.bpm);
     if(proceduralEnergyControl)proceduralEnergyControl.value=String(energy);
     if(proceduralComplexityControl)proceduralComplexityControl.value=String(complexity);
+    if(proceduralVarianceControl)proceduralVarianceControl.value=String(formatSteppedPercent01(proceduralLoopVariance));
     if(proceduralChordControl)proceduralChordControl.value=String(chordIndex>=0?chordIndex:0);
     if(proceduralSoundFontControl)proceduralSoundFontControl.value=String(sourceIndex);
     setProcManualLamp("key",proceduralOverrides.tonic!==null);
@@ -7816,6 +7959,7 @@
   function saveProceduralHardwarePrefs(){
     persistentPrefs.proceduralEnergy=proceduralEnergy;
     persistentPrefs.proceduralComplexity=proceduralComplexity;
+    persistentPrefs.proceduralLoopVariance=proceduralLoopVariance;
     persistentPrefs.proceduralTonicOverride=proceduralOverrides.tonic;
     persistentPrefs.proceduralModeOverride=proceduralOverrides.mode;
     persistentPrefs.proceduralTempoOverride=proceduralOverrides.bpm;
@@ -7832,7 +7976,7 @@
     proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition}),25);
   }
 
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
@@ -7849,6 +7993,7 @@
     else if(kind==="soundfont")proceduralSoundFontReadout.textContent=proceduralSoundFontDisplayName(["auto","sf64","rush","genies"][Math.max(0,Math.min(3,Math.round(value)))]) ;
     else if(kind==="energy"){proceduralEnergy=snapProceduralUnit(value/100);proceduralEnergyReadout.textContent=formatSteppedPercent01(proceduralEnergy);proceduralDeck?.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`)}
     else if(kind==="complexity"){proceduralComplexity=snapProceduralUnit(value/100);proceduralComplexityReadout.textContent=formatSteppedPercent01(proceduralComplexity);proceduralDeck?.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`)}
+    else if(kind==="variance"){proceduralLoopVariance=snapProceduralUnit(value/100);proceduralVarianceReadout.textContent=`${formatSteppedPercent01(proceduralLoopVariance)}%`}
   }
 
   function commitProceduralHardwareControl(kind,rawValue){
@@ -7860,6 +8005,7 @@
     else if(kind==="soundfont")proceduralSoundFontMode=["auto","sf64","rush","genies"][Math.max(0,Math.min(3,Math.round(value)))];
     else if(kind==="energy")proceduralEnergy=snapProceduralUnit(value/100);
     else if(kind==="complexity")proceduralComplexity=snapProceduralUnit(value/100);
+    else if(kind==="variance")proceduralLoopVariance=snapProceduralUnit(value/100);
     regenerateProceduralHardware({preservePosition:true});
   }
 
@@ -9806,7 +9952,7 @@
           saveChannelState(channel);
           syncStemActionButtons(channel);
           showSystemReadout(
-            String(channel.stem.name).toUpperCase(),
+            String(channel.stem.displayInstrumentName||channel.stem.name).toUpperCase(),
             channel.state.locked ? "RANDOM LOCK" : "RANDOM UNLOCK",
             channel.state.locked ? "HOLD" : "FREE"
           );
@@ -9876,7 +10022,7 @@
     const when = cycleZeroContextTime + cycleIndex*playlistDuration;
 
     if (appMode === "procedural" && currentProceduralProgram) {
-      const loopProgram = createProceduralLoopVariation(currentProceduralProgram,cycleIndex);
+      const loopProgram = getProceduralLoopProgram(cycleIndex);
       for (const channel of channels) {
         const variantBuffer = renderProceduralStemBuffer(loopProgram,channel.stem);
         createScheduledSource(channel,when,0,variantBuffer);
@@ -9974,7 +10120,7 @@
 
         if (randomizerEnabled) randomizeTrackMutes("loop");
         loadReadout.textContent = appMode === "procedural"
-          ? `VAR ${String(loopCount).padStart(2,"0")}`
+          ? (proceduralLoopVariance<=0 ? `HOLD ${String(loopCount).padStart(2,"0")}` : `VAR ${String(loopCount).padStart(2,"0")}`)
           : (randomizerEnabled ? "RND LOOP" : "LOOP");
       }
 
@@ -10500,6 +10646,7 @@
     ["chords",proceduralChordControl,proceduralChordReadout],
     ["energy",proceduralEnergyControl,proceduralEnergyReadout],
     ["complexity",proceduralComplexityControl,proceduralComplexityReadout],
+    ["variance",proceduralVarianceControl,proceduralVarianceReadout],
     ["soundfont",proceduralSoundFontControl,proceduralSoundFontReadout]
   ];
   for(const [kind,input,screen] of proceduralHardwareControls){
