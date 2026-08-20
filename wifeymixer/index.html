@@ -6455,6 +6455,111 @@
       .proc-direct-module{grid-row:3 !important}
     }
 
+
+    /* ==============================================================
+       PATCH: PROCEDURAL SERVICE RACK / SCROLLABLE HARDWARE PANEL
+       The direct controls are a real vertically scrollable sub-rack. Keep the
+       X/Y plate visible, but let the settings bank own its remaining height.
+       ============================================================== */
+    .procedural-deck{
+      grid-template-rows:auto auto minmax(104px,.62fr) minmax(0,1.38fr) auto !important;
+      min-height:0 !important;
+    }
+    .proc-direct-module{
+      min-height:0 !important;
+      max-height:100% !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      overscroll-behavior:contain;
+      scrollbar-gutter:stable;
+      scrollbar-width:thin;
+      scrollbar-color:#55595b #1a1c1e;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+      grid-auto-rows:max-content !important;
+      align-content:start !important;
+      gap:6px !important;
+      padding:0 7px 8px 6px !important;
+      border:1px solid #17191b !important;
+      border-radius:2px !important;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.015),transparent 18% 82%,rgba(0,0,0,.08)),
+        linear-gradient(180deg,#303337,#272a2d 64%,#222426) !important;
+      box-shadow:inset 0 1px 0 rgba(230,232,233,.025),inset 0 -3px 6px rgba(0,0,0,.34) !important;
+    }
+    .proc-direct-module::-webkit-scrollbar{display:block !important;width:8px}
+    .proc-direct-module::-webkit-scrollbar-track{
+      background:#181a1c;border-left:1px solid #0d0e0f;box-shadow:inset 1px 0 2px rgba(0,0,0,.65)
+    }
+    .proc-direct-module::-webkit-scrollbar-thumb{
+      border:1px solid #17191b;border-radius:1px;
+      background:repeating-linear-gradient(to bottom,#666a6c 0 2px,#484c4e 2px 4px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08)
+    }
+    .proc-direct-head{
+      position:sticky !important;
+      top:0 !important;
+      z-index:6 !important;
+      margin:0 -7px 0 -6px !important;
+      padding:7px 9px 6px !important;
+      background:linear-gradient(180deg,#3a3d40,#2d3033) !important;
+      border-bottom:1px solid #121416 !important;
+      box-shadow:0 2px 4px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03) !important;
+    }
+    .proc-section-title{
+      grid-column:1/-1;
+      display:flex;
+      align-items:center;
+      gap:7px;
+      margin:2px 0 -1px;
+      min-width:0;
+      font-family:"Archivo Black",system-ui,sans-serif;
+      font-size:5.5px;
+      line-height:1;
+      letter-spacing:.15em;
+      color:#73777a;
+      text-shadow:0 -1px 0 #0c0d0f;
+    }
+    .proc-section-title::before,.proc-section-title::after{
+      content:"";height:1px;flex:1 1 auto;background:linear-gradient(90deg,transparent,#4b4f51 45%,#141618 46% 100%);opacity:.7
+    }
+    .proc-section-title::after{transform:scaleX(-1)}
+    .proc-hw-control{
+      min-height:55px !important;
+      grid-template-rows:auto 21px 19px !important;
+      gap:4px !important;
+      padding:6px 7px 7px !important;
+    }
+    .proc-hw-control--wide{grid-template-rows:auto 22px 19px 9px !important}
+    .proc-mini-screen{font-size:9px !important;min-height:21px}
+    .proc-mini-fader{height:19px !important}
+    .proc-scroll-hint{
+      grid-column:1/-1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      padding:2px 0 0;
+      font-size:5px;
+      font-weight:900;
+      letter-spacing:.12em;
+      color:#5d6264;
+      text-transform:uppercase;
+    }
+    .proc-scroll-hint::before{content:"↕";font-size:8px;color:#818587}
+    @media(max-width:760px){
+      .procedural-deck{--proc-sidecar-width:clamp(250px,38vw,300px) !important}
+    }
+    @media(max-height:620px){
+      .procedural-deck{grid-template-rows:auto auto minmax(78px,.48fr) minmax(0,1.52fr) auto !important}
+      .proc-direct-module{padding-bottom:6px !important;gap:5px !important}
+      .proc-hw-control{min-height:50px !important;grid-template-rows:auto 18px 16px !important;padding:4px 6px 5px !important}
+      .proc-hw-control--wide{grid-template-rows:auto 19px 16px 8px !important}
+    }
+    @media(max-height:470px){
+      .procedural-deck{grid-template-rows:auto auto minmax(0,1fr) auto !important}
+      .proc-direct-module{grid-row:3 !important}
+    }
+
 </style>
 </head>
 
@@ -6618,6 +6723,9 @@
               <small>MOVE = HOLD · DBL DISPLAY = SEED AUTO</small>
             </div>
 
+            <div class="proc-scroll-hint" aria-hidden="true">scroll settings rack</div>
+            <div class="proc-section-title" aria-hidden="true">SONG PROGRAM</div>
+
             <label class="proc-hw-control" data-proc-control="key">
               <span class="proc-hw-control__legend">KEY <i class="proc-lock-lamp" aria-hidden="true"></i></span>
               <span id="proceduralKeyReadout" class="proc-mini-screen">C</span>
@@ -6642,6 +6750,8 @@
               <span class="proc-mini-fader"><input id="proceduralChordControl" type="range" min="0" max="9" step="1" value="0" aria-label="Procedural chord program"></span>
             </label>
 
+            <div class="proc-section-title" aria-hidden="true">PERFORMANCE</div>
+
             <label class="proc-hw-control" data-proc-control="energy">
               <span class="proc-hw-control__legend">ENERGY <i class="proc-live-lamp" aria-hidden="true"></i></span>
               <span id="proceduralEnergyReadout" class="proc-mini-screen">52</span>
@@ -6660,6 +6770,8 @@
               <span class="proc-mini-fader"><input id="proceduralVarianceControl" type="range" min="0" max="100" step="2.5" value="35" aria-label="Procedural loop variance. Zero repeats the previous loop exactly; one hundred allows radical variation."></span>
               <span class="proc-source-scale proc-variance-scale" aria-hidden="true"><b>REPEAT</b><b>SUBTLE</b><b>EVOLVE</b><b>RADICAL</b></span>
             </label>
+
+            <div class="proc-section-title" aria-hidden="true">TONE SOURCE</div>
 
             <label class="proc-hw-control proc-hw-control--wide" data-proc-control="soundfont">
               <span class="proc-hw-control__legend">SOUNDFONT RACK <i class="proc-source-lamp" aria-hidden="true"></i></span>
@@ -7036,7 +7148,7 @@
   let proceduralRegenerateTimer = null;
   let proceduralVibeMorphTimer = null;
   let proceduralVibeMorphRevision = 0;
-  const PROCEDURAL_VIBE_CROSSFADE = .065;
+  const PROCEDURAL_VIBE_CROSSFADE = .024;
   const PROCEDURAL_TRACKS = [
     {name:"DRUMS",role:"drums",soundfontSlot:"drums"},
     {name:"BASS",role:"bass",soundfontSlot:"bass"},
@@ -7175,6 +7287,116 @@
     percussion:[RUSH_VOICES.percussionMirage,SF64_VOICES.percussionGeneral]
   });
 
+  // SEMANTIC VIBE GUARD -----------------------------------------------------
+  // A bank choice selects a palette; it never gives a preset permission to
+  // contradict the XY mood.  We classify *names* as well as known program
+  // numbers so new/unknown presets inherit sane placement automatically.
+  // Energy is deliberately the hard gate for aggressive language. Complexity
+  // may make a chill part busier, but it must not smuggle "Power", "Boss",
+  // "Crash", "Huge Crisis", etc. into the low-energy band.
+  const PROCEDURAL_IMPACT_WORDS=/\b(crash|cymbal|splash|china|gong|impact|explosion|orchestra\s*hit|power(?:ful)?(?:\s+percussion)?|thunder|slam)\b/i;
+  const PROCEDURAL_EXTREME_WORDS=/\b(huge\s*crisis|boss|rival\s*boss|eggman\s*boss|aggressive|brutal|heavy|hard)\b/i;
+  const PROCEDURAL_HOT_WORDS=/\b(dead\s*line|leaf\s*storm|storm|rock|slap|saw(?:tooth)?|charang|metal|dist(?:ortion)?|drive|acid|rave|attack)\b/i;
+  const PROCEDURAL_LIVELY_WORDS=/\b(night\s*carnival|carnival|alt(?:itude|\.\s*limit)|exception|clav|honky(?:-tonk)?|percussive)\b/i;
+  const PROCEDURAL_CALM_WORDS=/\b(soft|mellow|warm|round|dream|dreamy|gentle|smooth|ambient|ending|new\s*day|sine|pad|rhodes|wurli|wurlitzer|electric\s*piano|e\.?\s*piano|acoustic|fretless)\b/i;
+
+  function proceduralVibeSemantics(text){
+    const name=String(text||"");
+    let minEnergy=0,minIntensity=0,minComplexity=0,heat=0,calm=0,impact=0;
+    if(PROCEDURAL_IMPACT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.62);minIntensity=Math.max(minIntensity,.58);heat=Math.max(heat,1);impact=1}
+    if(PROCEDURAL_EXTREME_WORDS.test(name)){minEnergy=Math.max(minEnergy,.56);minIntensity=Math.max(minIntensity,.54);heat=Math.max(heat,.92)}
+    if(PROCEDURAL_HOT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.40);minIntensity=Math.max(minIntensity,.40);heat=Math.max(heat,.68)}
+    if(PROCEDURAL_LIVELY_WORDS.test(name)){minEnergy=Math.max(minEnergy,.29);minIntensity=Math.max(minIntensity,.34);heat=Math.max(heat,.38)}
+    if(/\b(percussive|clav|charang|arpegg?|sequence|seq)\b/i.test(name))minComplexity=Math.max(minComplexity,.24);
+    if(PROCEDURAL_CALM_WORDS.test(name))calm=1;
+    return Object.freeze({minEnergy,minIntensity,minComplexity,heat,calm,impact});
+  }
+
+  function curatedVoiceFitsVibe(role,voice,program){
+    if(!voice||!program)return true;
+    const energy=clamp01(program.energy),complexity=clamp01(program.complexity);
+    const intensity=energy*.72+complexity*.28;
+    const vibe=voice.vibe||proceduralVibeSemantics(voice.name);
+
+    if(energy+1e-6<vibe.minEnergy||intensity+1e-6<vibe.minIntensity||complexity+1e-6<vibe.minComplexity)return false;
+
+    // Known bank semantics that are stronger than their generic names.
+    if(voice===SF64_VOICES.drumsPower||voice===SF64_VOICES.percussionPower)
+      return energy>=.62 && intensity>=.58;
+
+    if(voice.source==="sf64"){
+      if(role==="bass"&&voice===SF64_VOICES.bassSlap)return energy>=.42;
+      if(role==="bass"&&(voice===SF64_VOICES.bassSynth1||voice===SF64_VOICES.bassSynth2))return energy>=.30;
+      if(role==="keys"&&voice===SF64_VOICES.keysRockOrgan)return energy>=.42;
+      if(role==="keys"&&(voice===SF64_VOICES.keysClav||voice===SF64_VOICES.keysPercOrgan||voice===SF64_VOICES.keysHonky))return intensity>=.38;
+      if(role==="melody"&&voice===SF64_VOICES.leadSaw)return energy>=.42;
+      if(role==="melody"&&voice===SF64_VOICES.leadCharang)return energy>=.58&&intensity>=.56;
+      if(role==="melody"&&voice===SF64_VOICES.leadBase)return intensity>=.48&&energy>=.38;
+    }
+
+    if(voice.source==="rush"){
+      // The auxiliary drum presets are musically useful but not guaranteed to
+      // be shaker-only. Silence/fallback is preferable to a surprise crash.
+      if(role==="percussion"&&energy<.44)return false;
+      if(role==="drums"&&energy<.34)
+        return voice===RUSH_VOICES.drumsNewDay1||voice===RUSH_VOICES.drumsNewDay2||voice===RUSH_VOICES.drumsNewDay5;
+      if(role==="bass"&&energy<.32)
+        return voice===RUSH_VOICES.bassNewDay||voice===RUSH_VOICES.bassMirage;
+      if(role==="keys"&&intensity<.36)
+        return voice===RUSH_VOICES.keysEnding||voice===RUSH_VOICES.keysEP1||voice===RUSH_VOICES.keysEP2;
+      if(role==="melody"&&intensity<.36)
+        return voice===RUSH_VOICES.leadSine1||voice===RUSH_VOICES.leadSine2||voice===RUSH_VOICES.leadPad||voice===RUSH_VOICES.leadNewDay1||voice===RUSH_VOICES.leadNewDay2;
+    }
+    return true;
+  }
+
+  function curatedVoiceVibeWeight(voice,program){
+    if(!voice||!program)return 1;
+    const energy=clamp01(program.energy),complexity=clamp01(program.complexity);
+    const intensity=energy*.72+complexity*.28;
+    const vibe=voice.vibe||proceduralVibeSemantics(voice.name);
+    let weight=1;
+    // Calm-labelled material wins ties in the low-energy zone. Hot material is
+    // still available once its floor is crossed, but grows naturally as the
+    // pad moves upward instead of immediately dominating at the threshold.
+    if(vibe.calm)weight*=1.02+(1-energy)*.78;
+    if(vibe.heat)weight*=.42+Math.max(0,intensity-vibe.minIntensity)*1.65+energy*.44;
+    if(vibe.impact)weight*=.18+Math.pow(energy,2.2)*1.35;
+    return Math.max(.02,weight);
+  }
+
+  function curatedSourceCandidates(role,sourceId,program,preferred){
+    const pool=PROCEDURAL_SOURCE_ROLE_POOLS[sourceId]?.[role]||[];
+    const candidates=[];
+    if(preferred?.source===sourceId)candidates.push(preferred);
+    candidates.push(...pool);
+    const seen=new Set();
+    return candidates.filter(voice=>{
+      const key=`${voice.source}:${voice.bank}:${voice.program}`;
+      if(seen.has(key)||!curatedVoiceFitsVibe(role,voice,program))return false;
+      seen.add(key);return true;
+    });
+  }
+
+  function chooseWeightedVoice(rng,voices,program){
+    if(!voices.length)return null;
+    const weighted=voices.map(voice=>({voice,weight:curatedVoiceVibeWeight(voice,program)}));
+    const total=weighted.reduce((sum,item)=>sum+item.weight,0);
+    let pick=rng()*total;
+    for(const item of weighted){pick-=item.weight;if(pick<=0)return item.voice}
+    return weighted.at(-1)?.voice||null;
+  }
+
+  function buildCuratedVibeAudit(){
+    const rows=[];
+    for(const [source,roles] of Object.entries(PROCEDURAL_SOURCE_ROLE_POOLS))for(const [role,voices] of Object.entries(roles))for(const voice of voices){
+      const vibe=proceduralVibeSemantics(voice.name);
+      rows.push({source,role,name:voice.name,minEnergy:vibe.minEnergy,minIntensity:vibe.minIntensity,minComplexity:vibe.minComplexity,calm:!!vibe.calm,impact:!!vibe.impact});
+    }
+    return rows;
+  }
+  globalThis.WifeyVibeAudit=buildCuratedVibeAudit();
+
   // GENIES ADAPTIVE PALETTE -------------------------------------------------
   // This bank is intentionally *not* hard-coded by preset number. On load we
   // inspect its actual playable zones and names, then build safe role pools.
@@ -7261,7 +7483,7 @@
         for(const role of ["bass","keys","melody"]){
           const score=geniesRoleScore(role,preset,range,bank,descriptor);
           if(score<3)continue;
-          roles[role].push(sfVoice("genies",preset.bank,preset.program,preset.name,{range:[range.low,range.high],adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range)}));
+          roles[role].push(sfVoice("genies",preset.bank,preset.program,preset.name,{range:[range.low,range.high],adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range),vibe:proceduralVibeSemantics(descriptor)}));
         }
       }
 
@@ -7271,11 +7493,11 @@
       const drumCoverage=[has(36),has(38)||has(40),has(42),has(46)].filter(Boolean).length;
       if(drumish&&drumCoverage>=3){
         const score=geniesRoleScore("drums",preset,range,bank,descriptor)+drumCoverage;
-        roles.drums.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range)}));
+        roles.drums.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range),vibe:proceduralVibeSemantics(descriptor)}));
       }
       if(drumish&&has(54)&&has(82)){
         const score=geniesRoleScore("percussion",preset,range,bank,descriptor)+4;
-        roles.percussion.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range)}));
+        roles.percussion.push(sfVoice("genies",preset.bank,preset.program,preset.name,{adaptiveScore:score,warmth:warm,edge,impact,gainTrim:geniesLayerTrim(bank,preset,range),vibe:proceduralVibeSemantics(descriptor)}));
       }
     }
     for(const [role,voices] of Object.entries(roles)){
@@ -7303,17 +7525,21 @@
     // Genies percussion mapping contains some very large crash-like hits. Keep
     // those out of the chill/simple corner entirely; the analogue bench handles
     // that corner, while Genies percussion opens up as the pad moves up/right.
-    if((role==="drums"||role==="percussion") && intensity<.46 && program.energy<.54)return null;
+    if((role==="drums"||role==="percussion") && program.energy<.42)return null;
+    if((role==="drums"||role==="percussion") && intensity<.50 && program.energy<.56)return null;
     const scored=voices.map(voice=>{
+      const vibe=voice.vibe||proceduralVibeSemantics(voice.name);
+      if(program.energy+1e-6<vibe.minEnergy||intensity+1e-6<vibe.minIntensity||program.complexity+1e-6<vibe.minComplexity)return{voice,weight:0};
       let weight=Math.max(.5,Number(voice.adaptiveScore)||1);
-      if(voice.warmth)weight*=.92+(1-program.energy)*.62;
-      if(voice.edge)weight*=.78+program.energy*.68+program.complexity*.22;
-      if(voice.impact)weight*=.035+Math.pow(intensity,3)*2.15;
+      if(voice.warmth||vibe.calm)weight*=.94+(1-program.energy)*.72;
+      if(voice.edge||vibe.heat)weight*=.54+program.energy*.72+program.complexity*.20;
+      if(voice.impact||vibe.impact)weight*=.04+Math.pow(program.energy,3.0)*2.15;
       if(role==="keys")weight*=1.08+(1-program.energy)*.18;
       if(role==="melody")weight*=.95+program.complexity*.22;
       return{voice,weight};
     });
     const total=scored.reduce((sum,item)=>sum+item.weight,0);
+    if(total<=0)return null;
     let pick=rng()*total;
     for(const item of scored){pick-=item.weight;if(pick<=0)return item.voice}
     return scored.at(-1)?.voice||null;
@@ -7551,7 +7777,7 @@
 
     let leadPool;
     if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
-    else if(energy<.68) leadPool=[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSaw1,SF64_VOICES.leadSquare,SF64_VOICES.leadCharang];
+    else if(energy<.68) leadPool=[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSaw1,SF64_VOICES.leadSquare];
     else leadPool=[RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase];
 
     let drumsPool;
@@ -7580,6 +7806,7 @@
     proceduralSoundFontsPromise=(async()=>{
       if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
       loadReadout.textContent="SF2 LOAD";
+      if(appMode==="procedural")showSystemReadout("PROCEDURAL MODE","LOADING SOUNDFONTS","PLEASE WAIT");
       await Promise.all(Object.entries(PROCEDURAL_SF2_SOURCES).map(async([id,source])=>{
         try{
           const bank=await loadProceduralSoundFontSource(source);
@@ -7605,13 +7832,12 @@
 
   function chooseProceduralVoiceForSource(role,sourceId,program,preferred){
     if(sourceId==="genies")return chooseGeniesVoice(role,program);
-    const pool=PROCEDURAL_SOURCE_ROLE_POOLS[sourceId]?.[role]||[];
-    if(!pool.length)return null;
+    const candidates=curatedSourceCandidates(role,sourceId,program,preferred);
+    if(!candidates.length)return null;
     const sourceSalt={sf64:0x53463634,rush:0x52555348}[sourceId]||0x53463231;
     const roleSalt=GENIES_ROLE_SALTS[role]||0x57494645;
     const rng=mulberry32((seedIdentityHash(program?.seed||1)^sourceSalt^roleSalt)>>>0);
-    const candidates=preferred?.source===sourceId?[preferred,...pool]:pool;
-    return chooseFrom(rng,candidates);
+    return chooseWeightedVoice(rng,candidates,program);
   }
 
   function resolveProceduralSf2Voice(role,preferred,program){
@@ -7630,6 +7856,7 @@
     for(const voice of candidates){
       const key=`${voice.source}:${voice.bank}:${voice.program}`;
       if(seen.has(key))continue; seen.add(key);
+      if(voice.source!=="genies"&&!curatedVoiceFitsVibe(role,voice,program))continue;
       const bank=proceduralSoundFonts.get(voice.source);
       if(bank?.getPreset(voice.bank,voice.program))return{voice,bank};
     }
@@ -7714,7 +7941,7 @@
         note=scale[(degree+(rng()<.5?2:5))%7];
       }
       const octave=(event.octave||2)+(rng()<depth*(.035+energy*.13)?(rng()<.68?1:-1):0);
-      const timingNudge=rng()<depth*.12?(rng()<.5?-1:1)*previousProgram.beat*(.015+.055*depth):0;
+      const timingNudge=0; // keep bass locked to the master clock; variance changes notes/dynamics, not tempo feel
       return {...event,note,octave:Math.max(1,Math.min(3,octave)),time:Math.max(0,Math.min(previousProgram.duration-.04,event.time+timingNudge)),ampScale:(event.ampScale||1)*(1+(rng()*2-1)*(.035+.17*depth)),duration:event.duration*(1+(rng()*2-1)*(.025+.13*depth))};
     });
 
@@ -7729,8 +7956,7 @@
           note=scale[(degree+leap)%7];
         }
         const octave=Math.max(3,Math.min(5,event.octave+(rng()<depth*(.035+energy*.17)?(rng()<.5?-1:1):0)));
-        const nudgeChance=depth*(.08+complexity*.22);
-        const microNudge=rng()<nudgeChance?(rng()<.5?-1:1)*previousProgram.beat*(.018+.10*depth):0;
+        const microNudge=0; // melody variation stays grid-locked to avoid momentary timing wobble
         return {...event,rest,note,octave,time:Math.max(0,Math.min(previousProgram.duration-.04,event.time+microNudge)),duration:event.duration*(1+(rng()*2-1)*(.045+.22*depth)),ampScale:(event.ampScale||1)*(1+(rng()*2-1)*(.05+.20*depth))};
       });
     // At high variance, create occasional passing/answer notes rather than only
@@ -7750,7 +7976,7 @@
     varied.drumEvents=previousProgram.drumEvents
       .filter(event=>!event.variationAdded||rng()>depth*.58)
       .map(event=>{
-        const timingNudge=event.type==="hat"&&rng()<depth*.18?(rng()<.5?-1:1)*previousProgram.beat*(.012+.045*depth):0;
+        const timingNudge=0; // drum clock is never humanized by moving hit timestamps
         const rest=event.type==="hat"&&rng()<depth*(.02+complexity*.12)?!event.rest:!!event.rest;
         return {...event,rest,time:Math.max(0,Math.min(previousProgram.duration-.025,event.time+timingNudge)),amp:event.amp*(1+(rng()*2-1)*(.04+.22*depth))};
       });
@@ -7771,11 +7997,11 @@
       .filter(event=>!event.variationAdded||rng()>depth*.54)
       .map(event=>{
         const rest=rng()<depth*(.035+complexity*.15)?!event.rest:!!event.rest;
-        return {...event,rest,amp:event.amp*(1+(rng()*2-1)*(.06+.28*depth)),time:Math.max(0,Math.min(previousProgram.duration-.03,event.time+(rng()<depth*.25?(rng()<.5?-1:1)*previousProgram.beat*(.015+.07*depth):0)))};
+        return {...event,rest,amp:event.amp*(1+(rng()*2-1)*(.06+.28*depth)),time:event.time};
       });
     if(rng()<depth*(.20+energy*.50)){
       const extraCount=depth>.78?2:1;
-      for(let i=0;i<extraCount;i++)if(varied.percussionEvents.length<56)varied.percussionEvents.push({variationAdded:true,rest:false,type:rng()<.52?"tamb":"shaker",time:Math.min(previousProgram.duration-.03,lastBar+(2.5+rng()*1.35)*previousProgram.beat),amp:.12+.12*energy+.12*depth});
+      for(let i=0;i<extraCount;i++)if(varied.percussionEvents.length<56){const rawTime=lastBar+(2.5+rng()*1.35)*previousProgram.beat,grid=previousProgram.beat*.25,clockedTime=Math.round(rawTime/grid)*grid;varied.percussionEvents.push({variationAdded:true,rest:false,type:rng()<.52?"tamb":"shaker",time:Math.min(previousProgram.duration-.03,clockedTime),amp:.12+.12*energy+.12*depth})}
     }
     varied.percussionEvents.sort((a,b)=>a.time-b.time);
 
@@ -8023,6 +8249,7 @@
     const revision=++proceduralVibeMorphRevision;
     saveProceduralHardwarePrefs();
     if(appMode!=="procedural")return;
+    loadReadout.textContent="XY LOAD";
 
     // When stopped there is nothing to protect: a normal rebuild is cheaper.
     if(!isPlaying||!audioCtx||!currentProceduralProgram||!channels.length){
@@ -8050,17 +8277,22 @@
     }
     if(revision!==proceduralVibeMorphRevision)return;
 
-    // Re-read position after rendering so the replacement lands where the ear
-    // actually is now, not where it was when rendering began. Map by bar phase
-    // so a BPM or 4/8-bar structural change still lands on the same musical beat.
-    const oldPosition=getPosition();
+    // Quantize the live replacement to the next sixteenth-note boundary. The old
+    // take keeps playing until that exact AudioContext clock time, so an XY edit
+    // cannot create a tiny off-grid flam/hesitation. This is still effectively
+    // immediate (<= 1/4 beat) but it respects the groove.
+    const now=audioCtx.currentTime;
+    const absoluteNow=getAbsoluteCyclePosition();
+    const morphQuantum=Math.max(.02,(oldProgram.beat||.5)*.25);
+    const absoluteSwap=Math.ceil((absoluteNow+.018)/morphQuantum)*morphQuantum;
+    const swapAt=Math.max(now+.018,cycleZeroContextTime+absoluteSwap);
+    const oldPositionAtSwap=((absoluteSwap%oldProgram.duration)+oldProgram.duration)%oldProgram.duration;
     const oldBarDuration=Math.max(.001,oldProgram.barDuration||oldProgram.duration||1);
-    const barPosition=oldPosition/oldBarDuration;
+    const barPosition=oldPositionAtSwap/oldBarDuration;
     const barIndex=Math.floor(barPosition);
     const barFraction=barPosition-barIndex;
     const newBar=Math.max(0,barIndex%Math.max(1,nextProgram.bars||1));
     const newPosition=Math.max(0,Math.min(nextProgram.duration-.02,(newBar+barFraction)*nextProgram.barDuration));
-    const swapAt=audioCtx.currentTime+.028;
 
     for(const {channel} of prepared)retireSourcesForProceduralMorph(channel,swapAt);
 
@@ -8095,7 +8327,7 @@
     proceduralVibeMorphTimer=setTimeout(applyProceduralVibeMorph,Math.max(0,Number(delay)||0));
   }
 
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
@@ -10349,6 +10581,7 @@
     }
 
     loadReadout.textContent = "LOADING";
+    showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),"LOADING AUDIO","PLEASE WAIT");
     await Promise.allSettled(channels.map(c=>c.readyPromise));
     updatePlaylistDuration();
 
@@ -10440,6 +10673,7 @@
     cycleZeroContextTime=0;
 
     loadReadout.textContent="LOADING";
+    showSystemReadout(String(currentPlaylist?.title||"PLAYLIST").toUpperCase(),"LOADING AUDIO","PLEASE WAIT");
     renderMixer(currentPlaylist);
     setupAudioForRenderedChannels(currentPlaylist,generation);
     horizontalScroller.scrollLeft=0;
