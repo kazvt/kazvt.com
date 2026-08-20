@@ -6041,7 +6041,56 @@
     .proc-info-cell--gauge::after{border-top-color:rgba(48,50,53,.50) !important;background:repeating-linear-gradient(90deg,#55585b 0 1px,transparent 1px 12.5%) !important}
     .proc-info-cell--gauge strong::after{background:#6a403c !important;box-shadow:0 1px 0 rgba(216,218,218,.07),0 0 0 1px rgba(42,31,31,.16) !important}
 
-  </style>
+  
+
+    /* ===== PATCH: stepped hardware motion + fixed-region segmented meters ===== */
+    .side-meter .meter-col{
+      /* Unlit ladder is neutral smoked hardware; colour only appears when lit. */
+      background:
+        repeating-linear-gradient(to top,rgba(128,132,126,.045) 0 4px,#020303 4px 6px) !important;
+    }
+
+    .side-meter .meter-col::before{
+      background:
+        linear-gradient(to top,rgba(116,121,115,.035),rgba(116,121,115,.018)) !important;
+      opacity:.70 !important;
+    }
+
+    .side-meter .meter-col::after{
+      /* Segment shutters are referenced from the bottom, same as meter rise. */
+      background:repeating-linear-gradient(
+        to top,
+        transparent 0 4px,
+        rgba(0,0,0,.95) 4px 6px
+      ) !important;
+    }
+
+    .side-meter .meter-fill,
+    .master-strip .side-meter .meter-fill{
+      /* Full-height fixed colour zoning. JS reveals it one lamp at a time. */
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      --meter-lit:0px;
+      clip-path:inset(calc(100% - var(--meter-lit)) 0 0 0);
+      transition:none !important;
+      background:linear-gradient(
+        to top,
+        #4c8a43 0 68%,
+        #ae8932 68% 86%,
+        #ad3d3b 86% 100%
+      ) !important;
+      transform:none !important;
+      will-change:clip-path;
+    }
+
+    .knob-tick,
+    .fader-thumb,
+    .vibe-puck{
+      /* No interpolation between physical detents. */
+      transition:none !important;
+    }
+</style>
 </head>
 
 <body>
@@ -6142,7 +6191,7 @@
         </div>
 
         <div class="transport-fader-wrap hidden min-w-0 flex-1 sm:block">
-          <input id="seekRange" class="transport-seek w-full" type="range" min="0" max="1000" value="0" aria-label="Song position">
+          <input id="seekRange" class="transport-seek w-full" type="range" min="0" max="1000" step="25" value="0" aria-label="Song position">
         </div>
 
         <div class="time-hardware-display hidden md:flex" role="group" aria-label="Elapsed and total song time">
@@ -6515,8 +6564,8 @@
   let appMode = "playlist";
   let playlistResumeIndex = 0;
   let proceduralSeed = Math.max(1,Math.min(9999,Number(persistentPrefs.proceduralSeed)||1));
-  let proceduralEnergy = Math.max(0,Math.min(1,Number.isFinite(Number(persistentPrefs.proceduralEnergy)) ? Number(persistentPrefs.proceduralEnergy) : .52));
-  let proceduralComplexity = Math.max(0,Math.min(1,Number.isFinite(Number(persistentPrefs.proceduralComplexity)) ? Number(persistentPrefs.proceduralComplexity) : .46));
+  let proceduralEnergy = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralEnergy)) ? Number(persistentPrefs.proceduralEnergy) : .52);
+  let proceduralComplexity = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralComplexity)) ? Number(persistentPrefs.proceduralComplexity) : .46);
   let currentProceduralProgram = null;
   let proceduralRegenerateTimer = null;
   const PROCEDURAL_TRACKS = [
@@ -7018,8 +7067,8 @@
 
   function updateProceduralReadouts(program=currentProceduralProgram){
     if(!program)return;
-    const energy=Math.round(program.energy*100);
-    const complexity=Math.round(program.complexity*100);
+    const energy=Number(formatSteppedPercent01(program.energy));
+    const complexity=Number(formatSteppedPercent01(program.complexity));
     proceduralSeedReadout.textContent=String(program.seed).padStart(4,"0");
     proceduralKeyReadout.textContent=`${program.tonic.toUpperCase()} ${program.mode==="minor"?"MIN":"MAJ"}`;
     proceduralTempoReadout.textContent=`${program.bpm} BPM`;
@@ -7038,8 +7087,8 @@
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
   async function stepProceduralSeed(delta){const shouldPlay=isPlaying;await loadProceduralSeed(proceduralSeed+delta,shouldPlay)}
-  function setProceduralVibeFromPoint(clientX,clientY,{commit=false}={}){if(!proceduralVibePad)return;const rect=proceduralVibePad.getBoundingClientRect();if(!rect.width||!rect.height)return;proceduralComplexity=clamp01((clientX-rect.left)/rect.width);proceduralEnergy=clamp01(1-(clientY-rect.top)/rect.height);proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);const liveEnergy=Math.round(proceduralEnergy*100),liveComplexity=Math.round(proceduralComplexity*100);proceduralEnergyReadout.textContent=String(liveEnergy);proceduralComplexityReadout.textContent=String(liveComplexity);proceduralEnergyReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${liveEnergy}%`);proceduralComplexityReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${liveComplexity}%`);proceduralVibePad.setAttribute("aria-valuetext",`Energy ${liveEnergy}, complexity ${liveComplexity}`);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;if(commit){savePersistentPrefs();const shouldPlay=isPlaying;clearTimeout(proceduralRegenerateTimer);proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true}),20)}}
-  function nudgeProceduralVibe(dx,dy){proceduralComplexity=clamp01(proceduralComplexity+dx);proceduralEnergy=clamp01(proceduralEnergy+dy);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const shouldPlay=isPlaying;loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true})}
+  function setProceduralVibeFromPoint(clientX,clientY,{commit=false}={}){if(!proceduralVibePad)return;const rect=proceduralVibePad.getBoundingClientRect();if(!rect.width||!rect.height)return;proceduralComplexity=snapProceduralUnit((clientX-rect.left)/rect.width);proceduralEnergy=snapProceduralUnit(1-(clientY-rect.top)/rect.height);proceduralDeck.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`);proceduralDeck.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`);const liveEnergy=formatSteppedPercent01(proceduralEnergy),liveComplexity=formatSteppedPercent01(proceduralComplexity);proceduralEnergyReadout.textContent=liveEnergy;proceduralComplexityReadout.textContent=liveComplexity;proceduralEnergyReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${proceduralEnergy*100}%`);proceduralComplexityReadout.closest(".proc-info-cell")?.style.setProperty("--gauge-x",`${proceduralComplexity*100}%`);proceduralVibePad.setAttribute("aria-valuetext",`Energy ${liveEnergy}, complexity ${liveComplexity}`);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;if(commit){savePersistentPrefs();const shouldPlay=isPlaying;clearTimeout(proceduralRegenerateTimer);proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true}),20)}}
+  function nudgeProceduralVibe(dx,dy){proceduralComplexity=snapProceduralUnit(proceduralComplexity+dx);proceduralEnergy=snapProceduralUnit(proceduralEnergy+dy);persistentPrefs.proceduralEnergy=proceduralEnergy;persistentPrefs.proceduralComplexity=proceduralComplexity;savePersistentPrefs();const shouldPlay=isPlaying;loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition:true})}
 
   function dbToGain(db) { return Math.pow(10,db/20); }
 
@@ -8076,6 +8125,23 @@
 
   const CHANNEL_CONTROL_DEFAULTS = Object.freeze({trim:50,pan:50,room:18,level:80});
   const MASTER_CONTROL_DEFAULTS = Object.freeze({tone:100,pan:50,room:35,level:80});
+  const HARDWARE_SNAP_PERCENT = 2.5;
+  const VIBE_SNAP_UNIT = HARDWARE_SNAP_PERCENT/100;
+
+  function snapHardwarePercent(value) {
+    const clamped = Math.max(0,Math.min(100,Number(value)||0));
+    return Number((Math.round(clamped/HARDWARE_SNAP_PERCENT)*HARDWARE_SNAP_PERCENT).toFixed(3));
+  }
+
+  function snapProceduralUnit(value) {
+    const clamped = Math.max(0,Math.min(1,Number(value)||0));
+    return Number((Math.round(clamped/VIBE_SNAP_UNIT)*VIBE_SNAP_UNIT).toFixed(4));
+  }
+
+  function formatSteppedPercent01(value) {
+    const pct = snapProceduralUnit(value)*100;
+    return Number.isInteger(pct) ? String(pct) : pct.toFixed(1);
+  }
 
   function hardwareControlDefault(owner,control) {
     const table = owner === "master" ? MASTER_CONTROL_DEFAULTS : CHANNEL_CONTROL_DEFAULTS;
@@ -8106,7 +8172,7 @@
             <div class="knob-cap"></div>
             <div class="knob-tick"></div>
           </div>
-          <input class="knob-range" type="range" min="0" max="100" step="0.25" value="${value}"
+          <input class="knob-range" type="range" min="0" max="100" step="2.5" value="${value}"
                  aria-label="${escapeHtml(ariaPrefix)} ${safeLabel}" data-owner="${index}" data-control="${control}"
                  data-default="${hardwareControlDefault(index === "master" ? "master" : "channel",control)}">
         </div>
@@ -8120,7 +8186,7 @@
         <div class="fader-scale-left"></div>
         <div class="fader-scale-right"></div>
         <div class="fader-thumb"></div>
-        <input class="fader" type="range" min="0" max="100" value="${value}"
+        <input class="fader" type="range" min="0" max="100" step="2.5" value="${value}"
                aria-label="${escapeHtml(label)}" data-owner="${index}" data-master="${master ? "1" : "0"}" data-default="80">
       </div>`;
   }
@@ -8614,7 +8680,7 @@
       if (pointerId !== event.pointerId) return;
       event.preventDefault(); event.stopPropagation();
       const sensitivity=event.shiftKey ? .18 : .72;
-      input.value=Math.round(Math.max(0,Math.min(100,startValue-(event.clientY-startY)*sensitivity)));
+      input.value=String(snapHardwarePercent(startValue-(event.clientY-startY)*sensitivity));
       setKnobRotation(input);
       showTouchedControl(input,Number(input.value));
       onValue(Number(input.value));
@@ -8671,7 +8737,7 @@
       event.preventDefault(); event.stopPropagation();
       const usable=Math.max(36,bay.clientHeight-22);
       const next=startValue+((startY-event.clientY)/usable)*100;
-      input.value=Math.round(Math.max(0,Math.min(100,next)));
+      input.value=String(snapHardwarePercent(next));
       syncFader(input);
       showTouchedControl(input,Number(input.value));
       onValue(Number(input.value));
@@ -9388,7 +9454,7 @@
 
   function updateTransportDisplay() {
     const position=getPosition();
-    if (!isSeeking && playlistDuration>0) seekRange.value=String(Math.round((position/playlistDuration)*1000));
+    if (!isSeeking && playlistDuration>0) seekRange.value=String(Math.round(((position/playlistDuration)*1000)/25)*25);
     else if (!isSeeking && !playlistDuration) seekRange.value="0";
 
     const elapsedText = formatTime(position);
@@ -9479,12 +9545,31 @@
   }
 
 
+  const METER_SEGMENT_PITCH_PX = 6;
+
+  function setSegmentedMeterLevel(fill,rawLevel) {
+    if (!fill) return;
+    const level=Math.max(0,Math.min(100,Number(rawLevel)||0));
+    const rail=fill.parentElement;
+    const railHeight=Math.max(1,rail?.clientHeight||1);
+    const rawPx=(level/100)*railHeight;
+    // Always round DOWN to a real lamp boundary so a colour region never
+    // lights before the measured signal has actually reached that region.
+    const litPx=level>=100
+      ? railHeight
+      : Math.max(0,Math.floor(rawPx/METER_SEGMENT_PITCH_PX)*METER_SEGMENT_PITCH_PX);
+    const key=String(Math.round(litPx*10)/10);
+    if (fill.dataset.meterLitPx===key) return;
+    fill.dataset.meterLitPx=key;
+    fill.style.setProperty("--meter-lit",`${litPx}px`);
+  }
+
   function animationLoop(timestamp) {
     for (const channel of channels) {
       const level=analyserLevel(channel.analyser,channel.meterData);
 
-      if (channel.meterL) channel.meterL.style.height=`${level}%`;
-      if (channel.meterR) channel.meterR.style.height=`${Math.max(0,level*.96)}%`;
+      setSegmentedMeterLevel(channel.meterL,level);
+      setSegmentedMeterLevel(channel.meterR,Math.max(0,level*.96));
 
       if (channel.statusLed) {
         const lampEnabled = !channel.state.mute || channel.state.solo;
@@ -9536,8 +9621,8 @@
       const level=analyserLevel(masterAnalyser,masterMeterData);
       const left=document.querySelector("[data-master-meter-l]");
       const right=document.querySelector("[data-master-meter-r]");
-      if (left) left.style.height=`${level}%`;
-      if (right) right.style.height=`${Math.max(0,level*.97)}%`;
+      setSegmentedMeterLevel(left,level);
+      setSegmentedMeterLevel(right,Math.max(0,level*.97));
     }
 
     updateMegaphoneGainCompensation();
@@ -9606,7 +9691,7 @@
     proceduralVibePad.addEventListener("pointerup",finishVibe);
     proceduralVibePad.addEventListener("pointercancel",event=>{if(vibePointerId===event.pointerId)vibePointerId=null});
     proceduralVibePad.addEventListener("keydown",event=>{
-      const step=event.shiftKey ? .02 : .05;
+      const step=VIBE_SNAP_UNIT;
       if(event.key==="ArrowLeft"){event.preventDefault();nudgeProceduralVibe(-step,0)}
       else if(event.key==="ArrowRight"){event.preventDefault();nudgeProceduralVibe(step,0)}
       else if(event.key==="ArrowUp"){event.preventDefault();nudgeProceduralVibe(0,step)}
@@ -9620,12 +9705,12 @@
      Space / Enter : play-pause
      Left / Right  : seek -/+ 5 seconds
      Up / Down     : focused fader, otherwise MASTER fader
-     Focused knob  : mouse wheel, 0.25-unit precision
+     Focused knob  : mouse wheel, 2.5% hardware detents
      ========================================================== */
 
   const KEYBOARD_SEEK_SECONDS = 5;
-  const KEYBOARD_FADER_STEP = 1;
-  const KNOB_WHEEL_STEP = .25;
+  const KEYBOARD_FADER_STEP = HARDWARE_SNAP_PERCENT;
+  const KNOB_WHEEL_STEP = HARDWARE_SNAP_PERCENT;
 
   function clampControlValue(input,value) {
     const min = Number(input?.min ?? 0);
@@ -9636,7 +9721,9 @@
   function setRangeFromShortcut(input,nextValue) {
     if (!input) return false;
 
-    input.value = String(clampControlValue(input,nextValue));
+    const clamped = clampControlValue(input,nextValue);
+    const stepped = input.matches?.(".fader,.knob-range") ? snapHardwarePercent(clamped) : clamped;
+    input.value = String(stepped);
     input.dispatchEvent(new Event("input",{bubbles:true}));
     return true;
   }
@@ -9735,8 +9822,7 @@
 
     // Wheel up = increase, wheel down = decrease.
     const direction = delta < 0 ? 1 : -1;
-    const fineStep = event.shiftKey ? KNOB_WHEEL_STEP*.25 : KNOB_WHEEL_STEP;
-    const next = Number(input.value) + direction*fineStep;
+    const next = Number(input.value) + direction*KNOB_WHEEL_STEP;
 
     setRangeFromShortcut(input,next);
   },{capture:true,passive:false});
@@ -9744,7 +9830,9 @@
   seekRange.addEventListener("pointerdown",()=>{isSeeking=true;});
   seekRange.addEventListener("input",()=>{
     if (!playlistDuration) return;
-    const target=(Number(seekRange.value)/1000)*playlistDuration;
+    const stepped=Math.max(0,Math.min(1000,Math.round(Number(seekRange.value)/25)*25));
+    seekRange.value=String(stepped);
+    const target=(stepped/1000)*playlistDuration;
     seekAll(target);
   });
   seekRange.addEventListener("change",()=>{isSeeking=false;});
