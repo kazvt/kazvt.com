@@ -5265,7 +5265,186 @@
       }
     }
 
-  </style>
+  
+
+    /* ==============================================================
+       FADER CAP AGE + DEEP FINGER VALLEY PASS
+       Physical console caps: raised shoulders, concave center trough.
+       ============================================================== */
+
+    .fader-thumb{
+      width:35px !important;
+      height:26px !important;
+      overflow:hidden;
+      border:1px solid #353238 !important;
+      border-top-color:#4a4649 !important;
+      border-bottom-color:#191719 !important;
+      border-radius:4px 4px 5px 5px !important;
+      background:
+        /* rubbed grime / handling mottling */
+        radial-gradient(circle at 18% 22%,rgba(204,191,164,.075) 0 .7px,transparent 1.1px) 0 0/8px 9px,
+        radial-gradient(circle at 78% 74%,rgba(37,31,29,.15) 0 .8px,transparent 1.2px) 0 0/11px 13px,
+        /* tiny horizontal mould wear */
+        repeating-linear-gradient(90deg,rgba(219,209,186,.020) 0 1px,transparent 1px 7px),
+        /* LOWER raised shoulder */
+        linear-gradient(
+          to bottom,
+          transparent 0 69%,
+          rgba(183,174,156,.09) 70%,
+          #686367 73%,
+          #767074 81%,
+          #555155 92%,
+          #3f3b3f 100%
+        ),
+        /* UPPER raised shoulder */
+        linear-gradient(
+          to bottom,
+          #777176 0%,
+          #696469 8%,
+          #5a565a 20%,
+          rgba(129,121,119,.16) 29%,
+          transparent 31% 100%
+        ),
+        /* broad concave finger valley */
+        radial-gradient(
+          ellipse 72% 58% at 50% 50%,
+          #39363a 0 28%,
+          #403c40 39%,
+          #4b474b 55%,
+          rgba(110,103,103,.34) 67%,
+          transparent 72%
+        ),
+        linear-gradient(180deg,#625d61 0%,#464247 48%,#5b565b 100%) !important;
+      box-shadow:
+        0 3px 2px rgba(0,0,0,.72),
+        0 0 0 1px rgba(22,20,22,.72),
+        /* raised upper and lower lips, kept matte */
+        inset 0 3px 2px rgba(190,181,163,.075),
+        inset 0 -4px 3px rgba(25,22,23,.34),
+        /* central trough sinks into the cap */
+        inset 0 7px 8px -8px rgba(212,201,179,.12),
+        inset 0 -7px 8px -8px rgba(0,0,0,.68),
+        inset 2px 0 2px rgba(210,198,174,.018),
+        inset -2px 0 3px rgba(29,25,27,.22) !important;
+    }
+
+    /* The old bright center index line becomes a worn locating notch
+       sitting down in the valley instead of a polished stripe. */
+    .fader-thumb::before{
+      left:4px !important;
+      right:4px !important;
+      top:50% !important;
+      height:7px !important;
+      transform:translateY(-50%) !important;
+      border-top:1px solid rgba(24,21,23,.58);
+      border-bottom:1px solid rgba(181,171,151,.055);
+      border-radius:45% !important;
+      background:
+        radial-gradient(ellipse at 31% 42%,rgba(211,196,165,.050),transparent 24%),
+        radial-gradient(ellipse at 72% 62%,rgba(0,0,0,.16),transparent 31%),
+        linear-gradient(
+          180deg,
+          rgba(31,28,31,.64) 0%,
+          rgba(47,43,47,.74) 37%,
+          rgba(64,59,63,.72) 54%,
+          rgba(35,31,34,.67) 100%
+        ) !important;
+      box-shadow:
+        inset 0 2px 3px rgba(0,0,0,.54),
+        inset 0 -1px 1px rgba(176,164,142,.045),
+        0 -1px 0 rgba(140,132,119,.035) !important;
+      opacity:1 !important;
+    }
+
+    .fader-thumb::after{
+      inset:2px !important;
+      border-radius:3px !important;
+      background:
+        /* irregular rubbed edge and old scratches */
+        linear-gradient(104deg,transparent 0 18%,rgba(224,211,181,.035) 18.5% 19%,transparent 19.5% 62%,rgba(0,0,0,.12) 62.5% 63.2%,transparent 64%),
+        linear-gradient(77deg,transparent 0 72%,rgba(208,194,168,.028) 72.4% 73%,transparent 73.5%),
+        radial-gradient(ellipse at 48% 10%,rgba(218,205,180,.05),transparent 38%),
+        radial-gradient(ellipse at 49% 92%,rgba(0,0,0,.18),transparent 44%) !important;
+      box-shadow:inset 0 0 0 1px rgba(230,219,194,.012);
+    }
+
+    /* Small natural variation from channel to channel; all remain matte. */
+    .channel:nth-child(2n) .fader-thumb{
+      filter:brightness(.96) saturate(.83) !important;
+    }
+    .channel:nth-child(3n+1) .fader-thumb{
+      filter:brightness(1.015) saturate(.77) !important;
+    }
+    .channel:nth-child(5n) .fader-thumb{
+      filter:brightness(.985) contrast(.97) saturate(.80) !important;
+    }
+
+    .master-strip .fader-thumb{
+      background:
+        radial-gradient(circle at 18% 22%,rgba(215,202,174,.075) 0 .7px,transparent 1.1px) 0 0/8px 9px,
+        radial-gradient(circle at 78% 74%,rgba(37,31,29,.14) 0 .8px,transparent 1.2px) 0 0/11px 13px,
+        repeating-linear-gradient(90deg,rgba(225,214,189,.020) 0 1px,transparent 1px 7px),
+        linear-gradient(to bottom,transparent 0 69%,rgba(191,181,161,.10) 70%,#716b6e 73%,#7c7578 81%,#5c5659 92%,#433e41 100%),
+        linear-gradient(to bottom,#80797c 0%,#716a6e 8%,#625c60 20%,rgba(140,131,126,.17) 29%,transparent 31% 100%),
+        radial-gradient(ellipse 72% 58% at 50% 50%,#3c383b 0 28%,#443f43 39%,#504b4f 55%,rgba(119,111,108,.34) 67%,transparent 72%),
+        linear-gradient(180deg,#696367 0%,#4a464a 48%,#615b60 100%) !important;
+    }
+
+    /* ---------- transport / playback position thumb: weathered hardware ---------- */
+    .transport-seek::-webkit-slider-thumb{
+      width:22px !important;
+      height:16px !important;
+      margin-top:-6px !important;
+      border:1px solid #343136 !important;
+      border-top-color:#4b4748 !important;
+      border-bottom-color:#171618 !important;
+      border-radius:3px !important;
+      background:
+        radial-gradient(circle at 23% 31%,rgba(221,207,177,.085) 0 .65px,transparent 1px) 0 0/7px 8px,
+        radial-gradient(circle at 76% 71%,rgba(31,27,28,.17) 0 .75px,transparent 1.05px) 0 0/9px 11px,
+        linear-gradient(108deg,transparent 0 25%,rgba(215,202,176,.04) 25.5% 26%,transparent 26.5% 71%,rgba(0,0,0,.13) 71.5% 72%,transparent 72.5%),
+        repeating-linear-gradient(to bottom,#666166 0 2px,#5a555a 2px 4px,#4b474c 4px 5px),
+        linear-gradient(180deg,#6b6669,#484449) !important;
+      box-shadow:
+        0 2px 1px rgba(0,0,0,.73),
+        0 0 0 1px rgba(30,27,29,.72),
+        inset 0 1px 0 rgba(211,199,174,.065),
+        inset 0 -2px 2px rgba(24,21,22,.32) !important;
+      filter:saturate(.72) contrast(.96);
+    }
+
+    .transport-seek::-moz-range-thumb{
+      width:22px !important;
+      height:16px !important;
+      border:1px solid #343136 !important;
+      border-top-color:#4b4748 !important;
+      border-bottom-color:#171618 !important;
+      border-radius:3px !important;
+      background:
+        radial-gradient(circle at 23% 31%,rgba(221,207,177,.085) 0 .65px,transparent 1px) 0 0/7px 8px,
+        radial-gradient(circle at 76% 71%,rgba(31,27,28,.17) 0 .75px,transparent 1.05px) 0 0/9px 11px,
+        linear-gradient(108deg,transparent 0 25%,rgba(215,202,176,.04) 25.5% 26%,transparent 26.5% 71%,rgba(0,0,0,.13) 71.5% 72%,transparent 72.5%),
+        repeating-linear-gradient(to bottom,#666166 0 2px,#5a555a 2px 4px,#4b474c 4px 5px),
+        linear-gradient(180deg,#6b6669,#484449) !important;
+      box-shadow:
+        0 2px 1px rgba(0,0,0,.73),
+        0 0 0 1px rgba(30,27,29,.72),
+        inset 0 1px 0 rgba(211,199,174,.065),
+        inset 0 -2px 2px rgba(24,21,22,.32) !important;
+      filter:saturate(.72) contrast(.96);
+    }
+
+    /* Keep the physical valley legible when compact-height rules shrink caps. */
+    @media(max-height:500px){
+      .fader-thumb{width:31px !important;height:20px !important}
+      .fader-thumb::before{height:6px !important}
+    }
+    @media(max-height:410px){
+      .fader-thumb{width:28px !important;height:17px !important}
+      .fader-thumb::before{height:5px !important}
+    }
+
+</style>
 </head>
 
 <body>
