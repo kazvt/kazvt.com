@@ -26,6 +26,7 @@
   font-family: "Kazvt Comrade";
   src: url("../zzz_assets/fonts/COMRADE.ttf") format("truetype");
   font-display: swap;
+  size-adjust: 150%;
 }
 
 @font-face {
