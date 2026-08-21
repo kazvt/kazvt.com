@@ -7062,6 +7062,183 @@
       .proc-source-scale{font-size:3px !important}
     }
 
+
+
+    /* ==============================================================
+       PATCH: BLACK VINTAGE BAKELITE / PHENOLIC ROTARY KNOBS
+       Purely visual. The existing range inputs and knob JS are untouched.
+       ============================================================== */
+    .knob-wrap{
+      /* Keep the control's hit target, but make the hardware itself a touch
+         leaner so it reads like a tall old pot cap rather than a flat UI dial. */
+      filter:drop-shadow(0 1px 0 rgba(255,255,255,.018));
+    }
+
+    .knob-wrap::before{
+      inset:3% !important;
+      border:1px solid #070708 !important;
+      background:
+        radial-gradient(circle,
+          #080809 0 57%,
+          #1a1a1b 58% 60%,
+          #050506 61% 67%,
+          #111112 68% 72%,
+          #050506 73% 100%) !important;
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,.95),
+        inset 0 -1px 0 rgba(255,255,255,.025),
+        0 2px 2px rgba(0,0,0,.72) !important;
+    }
+
+    .knob{
+      /* Closely spaced raised perimeter flutes: old moulded radio/console knob,
+         not a modern soft-touch encoder. */
+      inset:11% !important;
+      border:1px solid #020203 !important;
+      border-radius:50% !important;
+      background:
+        radial-gradient(circle at 50% 48%,
+          transparent 0 57%,
+          rgba(255,255,255,.018) 58% 59%,
+          rgba(0,0,0,.56) 60% 66%,
+          transparent 67%),
+        repeating-conic-gradient(
+          from -1deg,
+          #050506 0 2.25deg,
+          #171718 2.25deg 4.2deg,
+          #09090a 4.2deg 5.45deg,
+          #202021 5.45deg 6.65deg,
+          #070708 6.65deg 8deg
+        ) !important;
+      box-shadow:
+        0 5px 2px -2px rgba(0,0,0,.92),
+        0 2px 0 #030304,
+        0 0 0 1px #222224,
+        inset 0 1px 0 rgba(255,255,255,.035),
+        inset 0 -3px 4px rgba(0,0,0,.68) !important;
+      filter:none !important;
+    }
+
+    .knob::before{
+      /* Slightly smoother top shoulder inside the raised grip. */
+      content:"" !important;
+      position:absolute !important;
+      inset:13% !important;
+      border-radius:50% !important;
+      background:
+        radial-gradient(ellipse at 35% 24%,rgba(255,255,255,.032),transparent 31%),
+        radial-gradient(circle at 50% 54%,#181819 0 49%,#0e0e0f 73%,#070708 100%) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        inset 0 -4px 6px rgba(0,0,0,.58),
+        0 0 0 1px rgba(0,0,0,.80) !important;
+      mix-blend-mode:normal !important;
+      opacity:1 !important;
+    }
+
+    .knob::after{
+      /* Very restrained mould wear on the high ribs. */
+      content:"" !important;
+      position:absolute !important;
+      inset:2% !important;
+      border-radius:50% !important;
+      background:
+        repeating-conic-gradient(
+          from 1deg,
+          rgba(255,255,255,.025) 0 .45deg,
+          transparent .45deg 7.95deg
+        ) !important;
+      opacity:.48 !important;
+      pointer-events:none !important;
+    }
+
+    .knob-cap{
+      /* Matte black phenolic face. The centre is intentionally dished rather
+         than glossy/convex. */
+      inset:20% !important;
+      border:1px solid #050506 !important;
+      border-radius:50% !important;
+      background:
+        radial-gradient(ellipse at 35% 23%,rgba(255,255,255,.026),transparent 25%),
+        radial-gradient(circle at 50% 48%,#171718 0 42%,#101011 66%,#09090a 100%) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        inset 0 -3px 5px rgba(0,0,0,.62),
+        0 0 0 1px rgba(35,35,36,.52) !important;
+      filter:none !important;
+    }
+
+    .knob-cap::before{
+      /* Real finger/thumb rest: a shallow concave dish in the knob face. */
+      content:"" !important;
+      position:absolute !important;
+      inset:20% !important;
+      border-radius:50% !important;
+      background:
+        radial-gradient(ellipse at 42% 34%,
+          #171718 0 12%,
+          #101011 38%,
+          #080809 73%,
+          #050506 100%) !important;
+      box-shadow:
+        inset 2px 3px 5px rgba(0,0,0,.94),
+        inset -1px -1px 2px rgba(255,255,255,.035),
+        0 1px 0 rgba(255,255,255,.018) !important;
+      opacity:1 !important;
+    }
+
+    .knob-cap::after{
+      content:"";
+      position:absolute;
+      left:29%;
+      top:25%;
+      width:28%;
+      height:18%;
+      border-radius:50%;
+      background:radial-gradient(ellipse,rgba(255,255,255,.026),transparent 72%);
+      pointer-events:none;
+      opacity:.72;
+    }
+
+    .knob-tick{
+      /* The pointer is CUT INTO the moulding. No paint: a thin, long recessed
+         groove with one tiny edge catch to make the slot readable. */
+      top:3% !important;
+      left:50% !important;
+      width:2px !important;
+      height:39% !important;
+      margin-left:-1px !important;
+      border:0 !important;
+      border-radius:0 0 1px 1px !important;
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,.055) 0 18%,
+          #030304 24% 72%,
+          rgba(255,255,255,.018) 78% 100%) !important;
+      box-shadow:
+        inset 1px 0 0 rgba(255,255,255,.018),
+        inset -1px 0 0 rgba(0,0,0,.85),
+        0 1px 1px rgba(0,0,0,.52) !important;
+      opacity:1 !important;
+      transform-origin:50% 120.5% !important;
+    }
+
+    .knob-mark{
+      /* Old panel calibration dimples/ticks, not luminous UI dots. */
+      width:1px !important;
+      height:3px !important;
+      border-radius:0 !important;
+      background:#555557 !important;
+      box-shadow:1px 1px 0 rgba(0,0,0,.82) !important;
+      opacity:.52 !important;
+    }
+
+    /* Disable the earlier per-channel colour/age variations on the pots so all
+       of the hardware stays convincingly black. */
+    .channel:nth-child(n) .knob,
+    .channel:nth-child(n) .knob-cap{
+      filter:none !important;
+    }
 </style>
 </head>
 
