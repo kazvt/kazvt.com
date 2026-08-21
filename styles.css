@@ -1,4 +1,47 @@
+@font-face {
+  font-family: "Kazvt Digiwrite";
+  src: url("zzz_assets/fonts/DIGIWRITE.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kazvt Classic MMO";
+  src: url("zzz_assets/fonts/CLASSIC MMO.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kazvt Tangled";
+  src: url("zzz_assets/fonts/TANGLED.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kazvt Sweet";
+  src: url("zzz_assets/fonts/SWEET.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kazvt Comrade";
+  src: url("zzz_assets/fonts/COMRADE.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kazvt Handwrite";
+  src: url("zzz_assets/fonts/HANDWRITE.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kazvt Aero";
+  src: url("zzz_assets/fonts/AERO.ttf") format("truetype");
+  font-display: swap;
+}
+
 :root {
+  --site-font: "Comic Sans MS", "Comic Sans", cursive;
   --cream: #FFEA88;
   --paper: #FFEA88;
   --paper-alt: #FFEA88;
@@ -40,6 +83,18 @@
   --visualizer-accent: #7DCCAD;
 }
 
+/* Palette typography ---------------------------------------------------------
+   Custom fonts are loaded from zzz_assets/fonts. Palettes not listed here use
+   Comic Sans MS via --site-font. */
+body[data-theme="p1"] { --site-font: "Kazvt Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p2"] { --site-font: "Kazvt Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p3"] { --site-font: "Kazvt Tangled", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p6"] { --site-font: "Kazvt Sweet", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p7"] { --site-font: "Kazvt Comrade", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p10"] { --site-font: "Kazvt Handwrite", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p12"] { --site-font: "Kazvt Aero", "Comic Sans MS", "Comic Sans", cursive; }
+
+
 * {
   box-sizing: border-box;
 }
@@ -73,7 +128,7 @@ body {
   background-image: var(--wallpaper-image);
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
-  font-family: "Trebuchet MS", "Comic Sans MS", "Arial Rounded MT Bold", Arial, sans-serif;
+  font-family: var(--site-font);
   letter-spacing: 0;
   cursor: var(--cursor-default, auto);
 }
@@ -1462,7 +1517,7 @@ code {
 }
 
 .guide-map text {
-  font-family: "Trebuchet MS", "Comic Sans MS", "Arial Rounded MT Bold", Arial, sans-serif;
+  font-family: var(--site-font);
   fill: var(--ink);
 }
 
@@ -2089,7 +2144,7 @@ code {
 .wife-kiss-fixed-text {
   top: 57%;
   color: #ffe9f6;
-  font-family: "Trebuchet MS", "Comic Sans MS", Arial, sans-serif;
+  font-family: var(--site-font);
   font-size: 1rem;
   font-weight: 900;
   letter-spacing: 0;
@@ -2105,7 +2160,7 @@ code {
 
 .wife-kiss-particle {
   color: #ff3f94;
-  font-family: "Trebuchet MS", "Comic Sans MS", Arial, sans-serif;
+  font-family: var(--site-font);
   font-size: 0.9rem;
   font-weight: 900;
   white-space: nowrap;
@@ -2497,7 +2552,7 @@ code {
   border: 3px solid var(--ink);
   background: var(--yellow);
   color: var(--on-yellow);
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--site-font);
   font-size: clamp(0.78rem, 1.6vw, 1rem);
   font-weight: 900;
   line-height: 1.2;
@@ -2847,7 +2902,7 @@ code {
   z-index: 1;
   display: block;
   margin-top: 3px;
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--site-font);
   font-size: clamp(0.78rem, 1.7vw, 0.94rem);
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -2958,7 +3013,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   flex: 0 0 auto;
   border: 2px solid currentColor;
   padding: 3px 6px;
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--site-font);
   font-size: 0.64rem;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -3024,7 +3079,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   min-width: 40px;
   background: var(--pink);
   color: var(--on-pink);
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--site-font);
   font-size: 1.08rem;
 }
 
@@ -3283,7 +3338,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   border: 2px solid var(--banner-text);
   background: color-mix(in srgb, var(--banner) 72%, #000000 28%);
   color: color-mix(in srgb, var(--green) 84%, var(--banner-text) 16%);
-  font-family: "Courier New", monospace;
+  font-family: var(--site-font);
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 900;
