@@ -9210,6 +9210,20 @@
   function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,sf2Voice:program.sf2Voices?.[track.role]||null,proceduralOrder:index}))}}
   function midiFrequency(midi){return 440*Math.pow(2,(midi-69)/12)}
   function createProceduralStereoBuffer(duration){const sampleRate=Math.max(22050,Math.min(32000,audioCtx?.sampleRate||32000)),length=Math.max(1,Math.ceil(duration*sampleRate)),buffer=audioCtx.createBuffer(2,length,sampleRate);return{buffer,left:buffer.getChannelData(0),right:buffer.getChannelData(1),sampleRate}}
+
+  // Exact, non-destructive Sonic Drums lift. Web Audio buffers are Float32, so
+  // applying +6 dB here does not hard-clip the underlying 16-bit SF2 samples.
+  // The boost is applied only after the MIDI/procedural render protection stage;
+  // ordinary audio-file playback never passes through this helper.
+  const SONIC_DRUMS_RENDER_GAIN = Math.pow(10,6/20);
+  function applyRenderedBufferGain(target,gain){
+    const g=Number(gain);
+    if(!Number.isFinite(g)||g===1)return;
+    for(const data of [target?.left,target?.right]){
+      if(!data)continue;
+      for(let i=0;i<data.length;i++)data[i]*=g;
+    }
+  }
   function addSampleStereo(target,index,value,pan=0){if(index<0||index>=target.left.length)return;const p=Math.max(-1,Math.min(1,pan)),l=Math.sqrt((1-p)*.5),r=Math.sqrt((1+p)*.5);target.left[index]+=value*l;target.right[index]+=value*r}
   function addSynthNote(target,start,duration,midi,amp=.16,timbre="synth",pan=0){const sr=target.sampleRate,from=Math.max(0,Math.floor(start*sr)),samples=Math.max(1,Math.floor(duration*sr)),end=Math.min(target.left.length,from+samples),f=midiFrequency(midi),attack=Math.max(8,Math.floor(sr*Math.min(.025,duration*.18))),release=Math.max(16,Math.floor(sr*Math.min(.12,duration*.35)));for(let i=from;i<end;i++){const n=i-from,t=n/sr,remain=end-i,env=Math.min(1,n/attack,remain/release),phase=2*Math.PI*f*t;let wave=0;if(timbre==="bass")wave=Math.sin(phase)*.74+Math.sin(phase*2)*.18+Math.sin(phase*.5)*.08;else if(timbre==="keys"){wave=Math.sin(phase)*.62+Math.sin(phase*2)*.20+Math.sin(phase*3)*.08;wave*=Math.exp(-t/Math.max(.35,duration*.85))}else wave=Math.sin(phase)*.48+Math.sin(phase*2)*.23+Math.sin(phase*3)*.10+Math.sin(phase*4)*.04;addSampleStereo(target,i,wave*env*amp,pan)}}
   function addKick(target,start,amp=.8){const sr=target.sampleRate,from=Math.floor(start*sr),len=Math.floor(sr*.34);let phase=0;for(let n=0;n<len&&from+n<target.left.length;n++){const t=n/sr,freq=42+96*Math.exp(-t*18);phase+=2*Math.PI*freq/sr;addSampleStereo(target,from+n,Math.sin(phase)*Math.exp(-t*13)*amp*.62,0)}}
@@ -9257,7 +9271,10 @@
     }else if(role==="percussion"){
       for(const event of program.percussionEvents){if(event.rest)continue;const velocity=Math.round(Math.max(34,Math.min(127,55+event.amp*90)));play(event.type==="tamb"?54:82,event.time,event.type==="tamb"?.18:.11,velocity,event.type==="tamb"?.62:.54,event.type==="tamb"?-.15:.18)}
     }
-    if(!rendered)return null; softLimitProceduralBuffer(target); return target.buffer;
+    if(!rendered)return null;
+    softLimitProceduralBuffer(target);
+    if(voice.source==="casino")applyRenderedBufferGain(target,SONIC_DRUMS_RENDER_GAIN);
+    return target.buffer;
   }
 
   function renderProceduralStemBuffer(program,stem){
@@ -11335,6 +11352,7 @@
     }
     if(!rendered)return null;
     attenuateTargetIfNeeded(target,.94);
+    if(isSonicDrums)applyRenderedBufferGain(target,SONIC_DRUMS_RENDER_GAIN);
     stem.midiSoundFont=voice.source;
     stem.midiSoundFontName=proceduralSoundFontDisplayName(voice.source);
     stem.midiVoiceName=voice.name;
