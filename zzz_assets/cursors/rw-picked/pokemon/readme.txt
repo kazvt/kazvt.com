@@ -1,4 +1,4 @@
-﻿=== Pokémon Cursor Set ===
+﻿=== Pokemon Cursor Set ===
 
 By: Contra99
 
