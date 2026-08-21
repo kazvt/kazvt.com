@@ -1394,6 +1394,35 @@ function platformIcon(name) {
   return svg;
 }
 
+function artCarouselIcon(kind) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 64 64");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  svg.classList.add("art-control-icon", `art-control-icon-${kind}`);
+
+  const icons = {
+    previous: `
+      <path class="art-icon-fill" d="M38 10 L12 31 L38 54 L38 42 L54 42 L54 22 L38 22 Z" />
+      <path class="art-icon-scratch" d="M39 12 L15 31 L39 51 M15 28 L11 31 L15 35 M39 23 L53 24 M39 41 L53 40" />
+    `,
+    next: `
+      <path class="art-icon-fill" d="M26 10 L52 31 L26 54 L26 42 L10 42 L10 22 L26 22 Z" />
+      <path class="art-icon-scratch" d="M25 12 L49 31 L25 51 M49 28 L53 31 L49 35 M25 23 L11 24 M25 41 L11 40" />
+    `,
+    view: `
+      <path class="art-icon-frame" d="M10 15 L52 12 L55 49 L12 52 Z" />
+      <path class="art-icon-fill art-icon-sun" d="M40 20 C44 19 47 22 47 26 C47 30 44 32 40 31 C36 31 34 28 35 24 C35 22 37 20 40 20 Z" />
+      <path class="art-icon-fill" d="M15 45 L25 31 L32 38 L38 32 L51 46 Z" />
+      <path class="art-icon-scratch" d="M12 17 L50 14 M14 49 L53 47 M18 43 L25 34 L31 40 M34 39 L39 35 L48 44" />
+    `,
+  };
+
+  svg.innerHTML = icons[kind] || icons.view;
+  return svg;
+}
+
 function wifeIcon(images) {
   return el(
     "span",
@@ -1580,9 +1609,9 @@ function profilePanel() {
             el("img", { src: "zzz_assets/kazvt-transparent.gif", alt: translatedText("art.alt"), "data-i18n-alt": "art.alt" }),
           ]),
           el("div", { className: "art-carousel-controls", ariaLabel: translatedText("art.controls_aria"), "data-i18n-aria-label": "art.controls_aria" }, [
-            el("button", { type: "button", className: "art-carousel-button art-carousel-step", "data-art-prev": "true", ariaLabel: translatedText("art.previous"), "data-i18n-aria-label": "art.previous", title: translatedText("art.previous"), "data-i18n-title": "art.previous" }, ["← ", el("span", { "data-i18n": "art.prev_short" }, [translatedText("art.prev_short")])]),
-            el("button", { type: "button", className: "art-carousel-button art-carousel-view", "data-art-view": "true", ariaHaspopup: "dialog", ariaLabel: translatedText("art.view_aria"), "data-i18n-aria-label": "art.view_aria", title: translatedText("art.view_title"), "data-i18n-title": "art.view_title" }, [el("span", { ariaHidden: "true" }, ["▣"]), " ", el("span", { "data-i18n": "art.view" }, [translatedText("art.view")])]),
-            el("button", { type: "button", className: "art-carousel-button art-carousel-step", "data-art-next": "true", ariaLabel: translatedText("art.next"), "data-i18n-aria-label": "art.next", title: translatedText("art.next"), "data-i18n-title": "art.next" }, [el("span", { "data-i18n": "art.next_short" }, [translatedText("art.next_short")]), " →"]),
+            el("button", { type: "button", className: "art-carousel-button art-carousel-step", "data-art-prev": "true", ariaLabel: translatedText("art.previous"), "data-i18n-aria-label": "art.previous", title: translatedText("art.previous"), "data-i18n-title": "art.previous" }, [artCarouselIcon("previous")]),
+            el("button", { type: "button", className: "art-carousel-button art-carousel-view", "data-art-view": "true", ariaHaspopup: "dialog", ariaLabel: translatedText("art.view_aria"), "data-i18n-aria-label": "art.view_aria", title: translatedText("art.view_title"), "data-i18n-title": "art.view_title" }, [artCarouselIcon("view")]),
+            el("button", { type: "button", className: "art-carousel-button art-carousel-step", "data-art-next": "true", ariaLabel: translatedText("art.next"), "data-i18n-aria-label": "art.next", title: translatedText("art.next"), "data-i18n-title": "art.next" }, [artCarouselIcon("next")]),
           ]),
           el("figcaption", { id: "kaz-art-caption", "data-i18n": "profile.art_caption" }, [translatedText("profile.art_caption")]),
         ]),

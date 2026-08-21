@@ -2337,37 +2337,84 @@ code {
 .art-carousel-controls {
   display: grid;
   width: 100%;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 6px;
+  grid-template-columns: repeat(3, 44px);
+  gap: 8px;
   align-items: center;
+  justify-content: center;
 }
 
 .art-carousel-button {
-  min-height: 31px;
-  padding: 4px 8px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 5px;
+  place-items: center;
   border: 2px solid var(--ink);
   background: var(--paper-alt);
   color: var(--ink);
   font: inherit;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 0.68rem;
-  font-weight: 900;
   line-height: 1;
-  text-transform: lowercase;
   box-shadow: 2px 2px 0 var(--shadow);
   clip-path: polygon(0 4px, 5px 0, 100% 2px, calc(100% - 3px) 100%, 3px calc(100% - 2px));
 }
 
 .art-carousel-step {
-  min-width: 48px;
   white-space: nowrap;
 }
 
 .art-carousel-view {
-  min-width: 0;
   background: var(--yellow);
   color: var(--on-yellow);
-  letter-spacing: 0.02em;
+}
+
+.art-control-icon {
+  display: block;
+  width: 31px;
+  height: 31px;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--shadow) 58%, transparent));
+  transform: rotate(-1deg);
+}
+
+.art-control-icon-next {
+  transform: rotate(1.2deg);
+}
+
+.art-control-icon-view {
+  width: 32px;
+  height: 32px;
+  transform: rotate(-0.8deg);
+}
+
+.art-control-icon .art-icon-fill {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.art-control-icon .art-icon-frame {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.art-control-icon .art-icon-scratch {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.48;
+}
+
+.art-control-icon-view .art-icon-sun {
+  stroke-width: 1.5;
 }
 
 .art-carousel-button:hover,
@@ -3677,12 +3724,15 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 
   .art-carousel-button {
-    min-height: 42px;
-    padding-inline: 7px;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    padding: 6px;
   }
 
-  .art-carousel-step {
-    min-width: 46px;
+  .art-carousel-controls {
+    grid-template-columns: repeat(3, 46px);
   }
 
   .guide-window-bar {
@@ -4675,4 +4725,28 @@ html.touch-device .big-palette .palette-cursor-preview {
     animation: none !important;
     scale: 1 !important;
   }
+}
+
+/* Palette geometry refinement -------------------------------------------------
+   Give the desktop palette rail enough horizontal room for true square swatches,
+   and make the persistent selected marker a crisp zero-radius dashed rectangle. */
+@media (min-width: 881px) {
+  .web-grid {
+    grid-template-columns: 210px minmax(0, 1fr) 180px;
+  }
+}
+
+.palette.big-palette .palette-choice > button {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+}
+
+.palette-choice::after,
+.palette-choice.is-selected::after,
+.palette-choice:has(> button[aria-pressed="true"])::after {
+  border-radius: 0 !important;
+  clip-path: none !important;
 }
