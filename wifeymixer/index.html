@@ -4362,19 +4362,18 @@
       }
     }
 
-    /* Procedural strips and playlist MIDI strips use this same physical key as
-       their per-strip SoundFont patch selector. Plain audio stems stay inert. */
-    .channel-instrument-icon[role="button"]{
+    /* In procedural mode this physical key is also the per-strip patch selector. */
+    .is-procedural .channel-instrument-icon{
       cursor:pointer;
       user-select:none;
     }
-    .channel-instrument-icon[role="button"]:hover,
-    .channel-instrument-icon[role="button"]:focus-visible{
+    .is-procedural .channel-instrument-icon:hover,
+    .is-procedural .channel-instrument-icon:focus-visible{
       filter:brightness(1.12) saturate(1.08) !important;
       outline:1px solid rgba(255,145,42,.42);
       outline-offset:2px;
     }
-    .channel-instrument-icon[role="button"].has-strip-voice::before{
+    .is-procedural .channel-instrument-icon.has-strip-voice::before{
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.035),
         inset 0 -1px 0 rgba(0,0,0,.76),
@@ -7062,27 +7061,6 @@
       .proc-source-scale{font-size:3px !important}
     }
 
-
-    /* Independent loop clocks: compact half-width interval controls in the direct rack. */
-    .proc-hw-control--interval{
-      grid-template-rows:5px 12px 9px !important;
-      gap:0 !important;
-      padding:1px 2px 2px !important;
-    }
-    .proc-hw-control--interval .proc-mini-screen{min-height:12px !important;height:12px !important;font-size:6.5px !important;letter-spacing:.02em !important;padding:0 2px !important}
-    .proc-hw-control--interval .proc-mini-fader{height:9px !important}
-    .proc-hw-control--interval .proc-mini-fader input[type="range"]::-webkit-slider-thumb{height:8px !important;margin-top:-3px !important}
-    .proc-hw-control--interval .proc-mini-fader input[type="range"]::-moz-range-thumb{height:8px !important}
-    @media (max-height:620px){
-      .proc-hw-control--interval{grid-template-rows:4px 10px 7px !important;padding:1px !important}
-      .proc-hw-control--interval .proc-mini-screen{min-height:10px !important;height:10px !important;font-size:5.6px !important}
-      .proc-hw-control--interval .proc-mini-fader{height:7px !important}
-    }
-    @media (max-height:470px){
-      .proc-hw-control--interval{grid-template-rows:4px 9px 6px !important}
-      .proc-hw-control--interval .proc-mini-screen{min-height:9px !important;height:9px !important;font-size:5px !important}
-      .proc-hw-control--interval .proc-mini-fader{height:6px !important}
-    }
 </style>
 </head>
 
@@ -7152,7 +7130,7 @@
         </button>
 
         <button id="randomizerBtn" class="transport-btn transport-btn--randomizer" type="button"
-                title="Randomizer: randomly mute unlocked stems now, then at your chosen loop interval"
+                title="Randomizer: randomly mute unlocked stems now and at every loop"
                 aria-label="Randomizer" aria-pressed="false">
           <i class="fa-solid fa-dice" aria-hidden="true"></i>
           <span class="transport-rnd-label">RND</span>
@@ -7287,18 +7265,6 @@
               <span class="proc-mini-fader"><input id="proceduralComplexityControl" type="range" min="0" max="100" step="2.5" value="45" aria-label="Procedural complexity"></span>
             </label>
 
-            <label class="proc-hw-control proc-hw-control--interval" data-proc-control="randomEvery" title="How many completed loops pass between Randomizer mute changes. Example: 16 changes the unlocked stem mutes on loops 16, 32, 48…">
-              <span class="proc-hw-control__legend">RND EVERY <i class="proc-live-lamp" aria-hidden="true"></i></span>
-              <span id="randomizerLoopIntervalReadout" class="proc-mini-screen">1 LOOP</span>
-              <span class="proc-mini-fader"><input id="randomizerLoopIntervalControl" type="range" min="1" max="64" step="1" value="1" aria-label="Randomizer interval in loops"></span>
-            </label>
-
-            <label class="proc-hw-control proc-hw-control--interval" data-proc-control="varianceEvery" title="How many completed loops pass before Loop Variance creates a new note variation. Example: 8 keeps each variation for 8 loops, then changes it on loops 8, 16, 24…">
-              <span class="proc-hw-control__legend">VAR EVERY <i class="proc-live-lamp" aria-hidden="true"></i></span>
-              <span id="proceduralVarianceIntervalReadout" class="proc-mini-screen">1 LOOP</span>
-              <span class="proc-mini-fader"><input id="proceduralVarianceIntervalControl" type="range" min="1" max="64" step="1" value="1" aria-label="Loop Variance interval in loops"></span>
-            </label>
-
             <label class="proc-hw-control proc-hw-control--wide" data-proc-control="variance" title="0% repeats the previous loop exactly. Higher settings let each new loop mutate farther from the loop before it.">
               <span class="proc-hw-control__legend">LOOP VARIANCE <i class="proc-live-lamp" aria-hidden="true"></i></span>
               <span id="proceduralVarianceReadout" class="proc-mini-screen">35%</span>
@@ -7329,7 +7295,6 @@
 <script>
   const EMBEDDED_MANIFEST = {"files":["index.html","instrument-icons.json","lillie_track_6/bass.mp3","lillie_track_6/drums.mp3","lillie_track_6/guitar.mp3","lillie_track_6/strings.mp3","lillie_track_6/vibes.mp3","lillie_track_6/yamaha synth.mp3"]};
   const AUDIO_EXT_RE = /\.(mp3|wav|m4a|aac|ogg|opus|flac|webm)$/i;
-  const MIDI_EXT_RE = /\.(mid|midi)$/i;
 
   const grid = document.getElementById("channelGrid");
   const masterDock = document.getElementById("masterDock");
@@ -7363,8 +7328,6 @@
   const proceduralEnergyReadout = document.getElementById("proceduralEnergyReadout");
   const proceduralComplexityReadout = document.getElementById("proceduralComplexityReadout");
   const proceduralVarianceReadout = document.getElementById("proceduralVarianceReadout");
-  const randomizerLoopIntervalReadout = document.getElementById("randomizerLoopIntervalReadout");
-  const proceduralVarianceIntervalReadout = document.getElementById("proceduralVarianceIntervalReadout");
   const proceduralChordReadout = document.getElementById("proceduralChordReadout");
   const proceduralSoundFontReadout = document.getElementById("proceduralSoundFontReadout");
   const proceduralKeyControl = document.getElementById("proceduralKeyControl");
@@ -7373,8 +7336,6 @@
   const proceduralEnergyControl = document.getElementById("proceduralEnergyControl");
   const proceduralComplexityControl = document.getElementById("proceduralComplexityControl");
   const proceduralVarianceControl = document.getElementById("proceduralVarianceControl");
-  const randomizerLoopIntervalControl = document.getElementById("randomizerLoopIntervalControl");
-  const proceduralVarianceIntervalControl = document.getElementById("proceduralVarianceIntervalControl");
   const proceduralChordControl = document.getElementById("proceduralChordControl");
   const proceduralSoundFontControl = document.getElementById("proceduralSoundFontControl");
   const seekRange = document.getElementById("seekRange");
@@ -7615,8 +7576,6 @@
         proceduralEnergy: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralEnergy)) ? Number(parsed.proceduralEnergy) : .52)),
         proceduralComplexity: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralComplexity)) ? Number(parsed.proceduralComplexity) : .46)),
         proceduralLoopVariance: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralLoopVariance)) ? Number(parsed.proceduralLoopVariance) : .35)),
-        randomizerLoopInterval: Math.max(1,Math.min(64,Math.round(Number(parsed.randomizerLoopInterval)||1))),
-        proceduralVarianceInterval: Math.max(1,Math.min(64,Math.round(Number(parsed.proceduralVarianceInterval)||1))),
         proceduralTonicOverride: typeof parsed.proceduralTonicOverride === "string" ? parsed.proceduralTonicOverride : null,
         proceduralModeOverride: ["major","minor"].includes(parsed.proceduralModeOverride) ? parsed.proceduralModeOverride : null,
         proceduralTempoOverride: parsed.proceduralTempoOverride != null && Number.isFinite(Number(parsed.proceduralTempoOverride)) ? Math.max(60,Math.min(180,Math.round(Number(parsed.proceduralTempoOverride)))) : null,
@@ -7624,9 +7583,6 @@
         proceduralSoundFont: ["auto","sf64","rush","genies"].includes(parsed.proceduralSoundFont) ? parsed.proceduralSoundFont : "auto",
         proceduralStripVoices: parsed.proceduralStripVoices && typeof parsed.proceduralStripVoices === "object"
           ? parsed.proceduralStripVoices
-          : {},
-        midiStripVoices: parsed.midiStripVoices && typeof parsed.midiStripVoices === "object"
-          ? parsed.midiStripVoices
           : {},
         lockedStemIds: parsed.lockedStemIds && typeof parsed.lockedStemIds === "object"
           ? parsed.lockedStemIds
@@ -7648,15 +7604,12 @@
         proceduralEnergy:.52,
         proceduralComplexity:.46,
         proceduralLoopVariance:.35,
-        randomizerLoopInterval:1,
-        proceduralVarianceInterval:1,
         proceduralTonicOverride:null,
         proceduralModeOverride:null,
         proceduralTempoOverride:null,
         proceduralChordOverride:null,
         proceduralSoundFont:"auto",
         proceduralStripVoices:{},
-        midiStripVoices:{},
         lockedStemIds:{},
         stemStates:{},
         masterState:null,
@@ -7699,8 +7652,6 @@
   let proceduralEnergy = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralEnergy)) ? Number(persistentPrefs.proceduralEnergy) : .52);
   let proceduralComplexity = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralComplexity)) ? Number(persistentPrefs.proceduralComplexity) : .46);
   let proceduralLoopVariance = snapProceduralUnit(Number.isFinite(Number(persistentPrefs.proceduralLoopVariance)) ? Number(persistentPrefs.proceduralLoopVariance) : .35);
-  let randomizerLoopInterval = Math.max(1,Math.min(64,Math.round(Number(persistentPrefs.randomizerLoopInterval)||1)));
-  let proceduralVarianceInterval = Math.max(1,Math.min(64,Math.round(Number(persistentPrefs.proceduralVarianceInterval)||1)));
   const PROCEDURAL_KEYS = Object.freeze(["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"]);
   const PROCEDURAL_MODES = Object.freeze(["major","minor"]);
   const PROCEDURAL_CHORD_PROGRAMS = Object.freeze([
@@ -8297,8 +8248,7 @@
   function buildPlaylistsFromManifest(manifest) {
     const groups = new Map();
     for (const file of (manifest?.files || [])) {
-      const isMidi = MIDI_EXT_RE.test(file);
-      if (!(AUDIO_EXT_RE.test(file) || isMidi)) continue;
+      if (!AUDIO_EXT_RE.test(file)) continue;
       const folder = parentFolder(file);
       if (!groups.has(folder)) groups.set(folder, []);
       groups.get(folder).push({
@@ -8306,8 +8256,7 @@
         name:stripExtension(basename(file)),
         src:file,
         displayPath:file,
-        kind:"url",
-        mediaType:isMidi ? "midi" : "audio"
+        kind:"url"
       });
     }
     return [...groups.entries()].map(([folder,stems],index)=>({
@@ -8325,8 +8274,7 @@
     const groups = new Map();
     for (const file of [...fileList]) {
       const rel = file.webkitRelativePath || file.name;
-      const isMidi = MIDI_EXT_RE.test(rel) || /audio\/(midi|x-midi)/i.test(file.type || "");
-      if (!(file.type?.startsWith("audio/") || AUDIO_EXT_RE.test(rel) || isMidi)) continue;
+      if (!(file.type?.startsWith("audio/") || AUDIO_EXT_RE.test(rel))) continue;
       const folder = parentFolder(rel);
       if (!groups.has(folder)) groups.set(folder, []);
       const objectUrl = URL.createObjectURL(file);
@@ -8336,8 +8284,7 @@
         name:stripExtension(file.name),
         src:objectUrl,
         displayPath:rel,
-        kind:"object-url",
-        mediaType:isMidi ? "midi" : "audio"
+        kind:"object-url"
       });
     }
     return [...groups.entries()].map(([folder,stems],index)=>({
@@ -8361,447 +8308,6 @@
       if (response.ok) return await response.json();
     } catch (_) {}
     return EMBEDDED_MANIFEST;
-  }
-
-
-  /* ==============================================================
-     PLAYLIST MIDI + SOUNDFONT ENGINE
-     MIDI stems are rendered through the same local SF2 rack as procedural
-     mode, then enter the normal playlist strip signal path as AudioBuffers.
-     ============================================================== */
-  const MIDI_RENDER_TAIL = .65;
-  const MIDI_MAX_RENDER_NOTES = 24000;
-  const midiSequenceCache = new Map();
-  const midiSequencePromises = new Map();
-  const midiBufferPromises = new Map();
-
-  function midiReadFourCC(view,offset){
-    return String.fromCharCode(view.getUint8(offset),view.getUint8(offset+1),view.getUint8(offset+2),view.getUint8(offset+3));
-  }
-
-  function midiReadVarLen(view,state,end){
-    let value=0,guard=0;
-    while(state.pos<end&&guard++<4){
-      const byte=view.getUint8(state.pos++);
-      value=(value<<7)|(byte&0x7f);
-      if(!(byte&0x80))break;
-    }
-    return value>>>0;
-  }
-
-  function midiBuildTempoMap(tempoEvents,division){
-    if(division&0x8000){
-      const smpteByte=(division>>8)&0xff;
-      const fps=Math.max(1,256-smpteByte);
-      const ticksPerFrame=Math.max(1,division&0xff);
-      const secondsPerTick=1/(fps*ticksPerFrame);
-      return {smpte:true,secondsPerTick,events:[]};
-    }
-    const ppq=Math.max(1,division&0x7fff);
-    const sorted=[...tempoEvents].sort((a,b)=>a.tick-b.tick||a.order-b.order);
-    const collapsed=[];
-    for(const event of sorted){
-      if(collapsed.length&&collapsed[collapsed.length-1].tick===event.tick)collapsed[collapsed.length-1]=event;
-      else collapsed.push(event);
-    }
-    if(!collapsed.length||collapsed[0].tick!==0)collapsed.unshift({tick:0,usPerQuarter:500000,order:-1});
-    let seconds=0;
-    for(let i=0;i<collapsed.length;i++){
-      const event=collapsed[i];
-      if(i){
-        const prev=collapsed[i-1];
-        seconds+=(event.tick-prev.tick)*(prev.usPerQuarter/1000000)/ppq;
-      }
-      event.seconds=seconds;
-    }
-    return {smpte:false,ppq,events:collapsed};
-  }
-
-  function midiTickToSeconds(tick,map){
-    tick=Math.max(0,Number(tick)||0);
-    if(map.smpte)return tick*map.secondsPerTick;
-    const events=map.events;
-    let lo=0,hi=events.length-1,best=0;
-    while(lo<=hi){
-      const mid=(lo+hi)>>1;
-      if(events[mid].tick<=tick){best=mid;lo=mid+1}else hi=mid-1;
-    }
-    const event=events[best];
-    return event.seconds+(tick-event.tick)*(event.usPerQuarter/1000000)/map.ppq;
-  }
-
-  function parseMidiSequence(arrayBuffer){
-    const view=new DataView(arrayBuffer);
-    if(view.byteLength<14||midiReadFourCC(view,0)!=="MThd")throw new Error("Not a Standard MIDI File");
-    const headerLength=view.getUint32(4,false);
-    if(headerLength<6||8+headerLength>view.byteLength)throw new Error("Invalid MIDI header");
-    const format=view.getUint16(8,false);
-    const trackCount=view.getUint16(10,false);
-    const division=view.getUint16(12,false);
-    let pos=8+headerLength;
-    const rawNotes=[];
-    const tempoEvents=[];
-    const trackNames=[];
-    let maxTick=0,tempoOrder=0,percussionNotes=0,melodicNotes=0,programChangeCount=0;
-    const programWeights=new Map();
-
-    for(let trackIndex=0;trackIndex<trackCount&&pos+8<=view.byteLength;trackIndex++){
-      if(midiReadFourCC(view,pos)!=="MTrk")throw new Error(`Missing MIDI track ${trackIndex+1}`);
-      const length=view.getUint32(pos+4,false);
-      const end=Math.min(view.byteLength,pos+8+length);
-      const state={pos:pos+8};
-      let tick=0,runningStatus=0;
-      const channels=Array.from({length:16},()=>({program:0,bankMsb:0,bankLsb:0,pan:64}));
-      const openNotes=new Map();
-
-      const closeNote=(channel,note,endTick)=>{
-        const key=`${channel}:${note}`;
-        const stack=openNotes.get(key);
-        if(!stack?.length)return;
-        const started=stack.shift();
-        if(!stack.length)openNotes.delete(key);
-        const stop=Math.max(started.tick+1,endTick);
-        rawNotes.push({...started,endTick:stop});
-        maxTick=Math.max(maxTick,stop);
-        const weight=Math.max(1,stop-started.tick);
-        if(channel===9)percussionNotes+=weight;
-        else{
-          melodicNotes+=weight;
-          const pkey=`${started.bank}:${started.program}`;
-          programWeights.set(pkey,(programWeights.get(pkey)||0)+weight);
-        }
-      };
-
-      while(state.pos<end){
-        tick+=midiReadVarLen(view,state,end);
-        maxTick=Math.max(maxTick,tick);
-        if(state.pos>=end)break;
-        let status=view.getUint8(state.pos++);
-        let firstData=null;
-        if(status<0x80){
-          if(!runningStatus)throw new Error("MIDI running status without status byte");
-          firstData=status;
-          status=runningStatus;
-        }else if(status<0xf0)runningStatus=status;
-        else runningStatus=0;
-
-        if(status===0xff){
-          if(state.pos>=end)break;
-          const type=view.getUint8(state.pos++);
-          const size=midiReadVarLen(view,state,end);
-          const dataStart=state.pos;
-          const dataEnd=Math.min(end,dataStart+size);
-          if(type===0x51&&size===3&&dataStart+2<dataEnd){
-            const us=(view.getUint8(dataStart)<<16)|(view.getUint8(dataStart+1)<<8)|view.getUint8(dataStart+2);
-            if(us>0)tempoEvents.push({tick,usPerQuarter:us,order:tempoOrder++});
-          }else if(type===0x03&&size>0){
-            let name="";
-            for(let i=dataStart;i<dataEnd;i++)name+=String.fromCharCode(view.getUint8(i));
-            if(name.trim())trackNames.push(name.trim());
-          }
-          state.pos=dataEnd;
-          if(type===0x2f)break;
-          continue;
-        }
-
-        if(status===0xf0||status===0xf7){
-          const size=midiReadVarLen(view,state,end);
-          state.pos=Math.min(end,state.pos+size);
-          continue;
-        }
-        if(status>=0xf0){
-          const systemLength=(status===0xf1||status===0xf3)?1:status===0xf2?2:0;
-          state.pos=Math.min(end,state.pos+systemLength-(firstData!==null?1:0));
-          continue;
-        }
-
-        const command=status&0xf0,channel=status&0x0f;
-        const data1=firstData!==null?firstData:(state.pos<end?view.getUint8(state.pos++):0);
-        const oneByte=command===0xc0||command===0xd0;
-        const data2=oneByte?0:(state.pos<end?view.getUint8(state.pos++):0);
-        const ch=channels[channel];
-
-        if(command===0x90&&data2>0){
-          const key=`${channel}:${data1}`;
-          if(!openNotes.has(key))openNotes.set(key,[]);
-          const bank=channel===9?128:((ch.bankMsb<<7)|ch.bankLsb);
-          openNotes.get(key).push({tick,channel,midi:data1,velocity:data2,program:ch.program,bank,pan:(ch.pan-64)/63});
-        }else if(command===0x80||(command===0x90&&data2===0)){
-          closeNote(channel,data1,tick);
-        }else if(command===0xc0){
-          ch.program=data1&0x7f;
-          programChangeCount++;
-        }else if(command===0xb0){
-          if(data1===0)ch.bankMsb=data2&0x7f;
-          else if(data1===32)ch.bankLsb=data2&0x7f;
-          else if(data1===10)ch.pan=data2&0x7f;
-          else if(data1===123||data1===120){
-            for(const [key,stack] of [...openNotes]){
-              if(!key.startsWith(`${channel}:`))continue;
-              while(stack.length){
-                const note=Number(key.split(":")[1]);
-                closeNote(channel,note,tick);
-              }
-            }
-          }
-        }
-      }
-
-      for(const [key,stack] of [...openNotes]){
-        const [channelText,noteText]=key.split(":");
-        while(stack.length)closeNote(Number(channelText),Number(noteText),Math.max(tick,maxTick));
-      }
-      pos=end;
-    }
-
-    const tempoMap=midiBuildTempoMap(tempoEvents,division);
-    const notes=rawNotes.map(note=>{
-      const start=midiTickToSeconds(note.tick,tempoMap);
-      const end=midiTickToSeconds(note.endTick,tempoMap);
-      return {...note,start,duration:Math.max(.025,end-start)};
-    }).sort((a,b)=>a.start-b.start||a.channel-b.channel||a.midi-b.midi);
-    const timelineEnd=midiTickToSeconds(maxTick,tempoMap);
-    const noteEnd=notes.reduce((max,note)=>Math.max(max,note.start+note.duration),0);
-    const duration=Math.max(.08,timelineEnd,noteEnd);
-    let primaryProgram=0,primaryBank=0,bestWeight=-1;
-    for(const [key,weight] of programWeights){
-      if(weight<=bestWeight)continue;
-      bestWeight=weight;
-      const [bank,program]=key.split(":").map(Number);
-      primaryBank=bank;primaryProgram=program;
-    }
-    return {
-      format,trackCount,division,notes,duration,
-      percussionRatio:(percussionNotes+melodicNotes)>0?percussionNotes/(percussionNotes+melodicNotes):0,
-      primaryBank,primaryProgram,hasProgramChange:programChangeCount>0,trackNames
-    };
-  }
-
-  async function getMidiSequence(stem){
-    const key=String(stem?.key||stem?.src||stem?.displayPath||"");
-    if(stem?.midiSequence)return stem.midiSequence;
-    if(midiSequenceCache.has(key))return midiSequenceCache.get(key);
-    if(midiSequencePromises.has(key))return midiSequencePromises.get(key);
-    const promise=(async()=>{
-      const response=await fetch(stem.src,{cache:"force-cache"});
-      if(!response.ok)throw new Error(`HTTP ${response.status}`);
-      const sequence=parseMidiSequence(await response.arrayBuffer());
-      midiSequenceCache.set(key,sequence);
-      stem.midiSequence=sequence;
-      return sequence;
-    })();
-    midiSequencePromises.set(key,promise);
-    try{return await promise}finally{midiSequencePromises.delete(key)}
-  }
-
-  function midiVoiceRef(voice){
-    if(!voice?.source||!Number.isFinite(Number(voice.bank))||!Number.isFinite(Number(voice.program)))return null;
-    return {source:String(voice.source),bank:Number(voice.bank),program:Number(voice.program),name:String(voice.name||"")};
-  }
-
-  function midiVoiceKey(voice){return voice?`${voice.source}:${Number(voice.bank)}:${Number(voice.program)}`:""}
-
-  function restoreMidiVoiceRef(ref){
-    if(!ref?.source)return null;
-    const bank=proceduralSoundFonts.get(String(ref.source));
-    if(!bank?.getPreset(Number(ref.bank),Number(ref.program)))return null;
-    const preset=bank.getPreset(Number(ref.bank),Number(ref.program));
-    return {source:String(ref.source),bank:Number(ref.bank),program:Number(ref.program),name:String(preset?.name||ref.name||"MIDI PATCH")};
-  }
-
-  function midiStripVoicePreference(stem){
-    const id=persistentStemId(stem);
-    return restoreMidiVoiceRef(id?persistentPrefs.midiStripVoices?.[id]:null);
-  }
-
-  function setMidiStripVoicePreference(stem,voice){
-    const id=persistentStemId(stem);
-    if(!id)return;
-    if(!persistentPrefs.midiStripVoices||typeof persistentPrefs.midiStripVoices!=="object")persistentPrefs.midiStripVoices={};
-    const ref=midiVoiceRef(voice);
-    if(ref)persistentPrefs.midiStripVoices[id]=ref;
-    else delete persistentPrefs.midiStripVoices[id];
-    savePersistentPrefs();
-  }
-
-  function midiStemWantsPercussion(stem,sequence){
-    const category=predictInstrumentIcon(stem?.name||stem?.displayPath||"").category;
-    return sequence?.percussionRatio>=.55||["drums","kick","snare","hihat","toms","cymbals","percussion"].includes(category);
-  }
-
-  function midiPresetList(sourceId,percussion){
-    const bank=proceduralSoundFonts.get(sourceId);
-    if(!bank)return [];
-    const presets=bank.getPresetList?.()||[];
-    const preferred=presets.filter(p=>percussion?Number(p.bank)>=128:Number(p.bank)<128);
-    const source=preferred.length?preferred:presets;
-    return source.map(p=>({source:sourceId,bank:Number(p.bank),program:Number(p.program),name:String(p.name||`PROGRAM ${Number(p.program)+1}`)}));
-  }
-
-  function midiVoiceCanRenderSequence(voice,sequence){
-    const bank=voice?proceduralSoundFonts.get(voice.source):null;
-    const notes=sequence?.notes||[];
-    if(!bank)return false;
-    if(!notes.length)return !!bank.getPreset(voice.bank,voice.program);
-    const stride=Math.max(1,Math.floor(notes.length/10));
-    const sample=[];
-    for(let i=0;i<notes.length&&sample.length<10;i+=stride)sample.push(notes[i]);
-    let playable=0;
-    for(const note of sample){
-      if(bank.resolveLayers(voice.bank,voice.program,note.midi,note.velocity).length)playable++;
-    }
-    return playable>=Math.max(1,Math.ceil(sample.length*.4));
-  }
-
-  function midiVoiceCandidates(stem,sequence){
-    const percussion=midiStemWantsPercussion(stem,sequence);
-    const sourceOrder=PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>proceduralSoundFonts.has(id));
-    const all=sourceOrder.flatMap(id=>midiPresetList(id,percussion));
-    const playable=all.filter(voice=>midiVoiceCanRenderSequence(voice,sequence));
-    return playable.length?playable:all;
-  }
-
-  function midiRecommendedProgram(category){
-    if(["bass","sub-808"].includes(category))return 33;
-    if(["guitar","plucked-strings"].includes(category))return 24;
-    if(["piano","keys","rhodes","wurli"].includes(category))return 0;
-    if(category==="organ")return 16;
-    if(category==="strings")return 48;
-    if(category==="brass")return 56;
-    if(category==="woodwinds")return 73;
-    if(category==="mallets")return 11;
-    if(["synth","pads"].includes(category))return 80;
-    return null;
-  }
-
-  function resolveMidiStemVoice(stem,sequence){
-    const remembered=midiStripVoicePreference(stem);
-    if(remembered)return remembered;
-    const percussion=midiStemWantsPercussion(stem,sequence);
-    const loaded=PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>proceduralSoundFonts.has(id));
-    if(!loaded.length)return null;
-    const preferredSource=proceduralSoundFontMode!=="auto"&&loaded.includes(proceduralSoundFontMode)?proceduralSoundFontMode:loaded[0];
-    const sourceOrder=[preferredSource,...loaded.filter(id=>id!==preferredSource)];
-    const category=predictInstrumentIcon(stem?.name||stem?.displayPath||"").category;
-    const recommended=midiRecommendedProgram(category);
-    const desiredProgram=percussion?0:(sequence?.hasProgramChange?Number(sequence.primaryProgram):(recommended??0));
-    const desiredBank=percussion?128:(sequence?.hasProgramChange?Number(sequence.primaryBank)||0:0);
-    for(const sourceId of sourceOrder){
-      const bank=proceduralSoundFonts.get(sourceId);
-      if(!bank)continue;
-      const exact=bank.getPreset(desiredBank,desiredProgram)||(!percussion?bank.getPreset(0,desiredProgram):null);
-      if(exact){
-        const exactVoice={source:sourceId,bank:Number(exact.bank),program:Number(exact.program),name:String(exact.name||`PROGRAM ${desiredProgram+1}`)};
-        if(midiVoiceCanRenderSequence(exactVoice,sequence))return exactVoice;
-      }
-      const candidates=midiPresetList(sourceId,percussion).filter(voice=>midiVoiceCanRenderSequence(voice,sequence));
-      if(candidates.length)return candidates[0];
-    }
-    return null;
-  }
-
-  function nextMidiStripVoice(stem,sequence,current){
-    const candidates=midiVoiceCandidates(stem,sequence);
-    if(!candidates.length)return null;
-    const key=midiVoiceKey(current);
-    const index=candidates.findIndex(voice=>midiVoiceKey(voice)===key);
-    return candidates[(index+1+candidates.length)%candidates.length];
-  }
-
-  function renderMidiStemBuffer(stem,sequence,voice){
-    ensureAudioGraph();
-    const bank=voice?proceduralSoundFonts.get(voice.source):null;
-    if(!bank)throw new Error("No SoundFont bank is available for MIDI playback");
-    const target=createProceduralStereoBuffer(sequence.duration+MIDI_RENDER_TAIL);
-    let rendered=0;
-    const notes=sequence.notes.slice(0,MIDI_MAX_RENDER_NOTES);
-    for(const note of notes){
-      const ok=bank.renderNote(target,{
-        bank:voice.bank,program:voice.program,midi:note.midi,velocity:note.velocity,
-        start:note.start,duration:note.duration,amp:.58,pan:Math.max(-1,Math.min(1,Number(note.pan)||0))
-      });
-      if(ok)rendered++;
-    }
-    if(!rendered&&notes.length)throw new Error(`SoundFont preset ${voice.name||voice.program} has no playable layers for this MIDI stem`);
-    softLimitProceduralBuffer(target);
-    stem.midiVoice=voice;
-    stem.midiSequence=sequence;
-    return target.buffer;
-  }
-
-  async function getRenderedMidiStemBuffer(stem){
-    ensureAudioGraph();
-    const sequence=await getMidiSequence(stem);
-    await ensureProceduralSoundFonts();
-    const voice=resolveMidiStemVoice(stem,sequence);
-    if(!voice)throw new Error("No local SoundFont preset is available for this MIDI stem");
-    stem.midiVoice=voice;
-    const base=String(stem?.key||stem?.displayPath||stem?.src||stem?.name||"");
-    const key=`midi:${base}:${midiVoiceKey(voice)}`;
-    if(decodedBufferCache.has(key))return touchDecodedBuffer(key,decodedBufferCache.get(key));
-    if(midiBufferPromises.has(key))return midiBufferPromises.get(key);
-    const promise=Promise.resolve().then(()=>touchDecodedBuffer(key,renderMidiStemBuffer(stem,sequence,voice)));
-    midiBufferPromises.set(key,promise);
-    try{return await promise}finally{midiBufferPromises.delete(key)}
-  }
-
-  function syncMidiChannelInstrumentLabel(channel){
-    if(appMode!=="playlist"||channel?.stem?.mediaType!=="midi")return;
-    const stem=channel.stem,voice=stem.midiVoice;
-    const source=voice?.source?proceduralSoundFontDisplayName(voice.source):"SF2";
-    const patch=String(voice?.name||"MIDI · LOADING");
-    const nameEl=channel.el?.querySelector(".channel-name");
-    if(nameEl)setChannelNameLabel(nameEl,`${String(channel.index+1).padStart(2,"0")} ${stem.name} · ${patch}`);
-    const iconEl=channel.el?.querySelector("[data-instrument-icon]");
-    if(iconEl){
-      iconEl.title=`${patch} · ${source} · click: next SoundFont patch`;
-      iconEl.setAttribute("aria-label",`${stem.name} MIDI instrument: ${patch}, ${source}. Click for next SoundFont patch.`);
-      iconEl.classList.add("has-strip-voice");
-    }
-    stem.displayInstrumentName=patch;
-    const fader=channel.el?.querySelector(".fader");
-    if(fader)fader.setAttribute("aria-label",`${stem.name} · ${patch} level`);
-  }
-
-  function hotSwapMidiStripInstrument(channel,newBuffer){
-    if(!channel||appMode!=="playlist"||channel.stem?.mediaType!=="midi")return;
-    channel.buffer=newBuffer;
-    syncMidiChannelInstrumentLabel(channel);
-    updatePlaylistDuration();
-    if(!isPlaying||!audioCtx||!playlistDuration)return;
-    const now=audioCtx.currentTime,position=getPosition(),fade=.018;
-    stopChannelSources(channel);
-    createScheduledSource(channel,now+.022,Math.min(position,Math.max(0,newBuffer.duration-.001)),newBuffer,{fadeIn:fade,startGain:1});
-    if(playlistMode==="loop"){
-      const absolute=getAbsoluteCyclePosition();
-      const currentCycle=Math.max(0,Math.floor(absolute/playlistDuration));
-      for(let cycle=currentCycle+1;cycle<=scheduledThroughCycle;cycle++){
-        createScheduledSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,newBuffer);
-      }
-    }
-  }
-
-  async function cycleMidiStripInstrument(channel){
-    if(!channel||appMode!=="playlist"||channel.stem?.mediaType!=="midi")return;
-    try{
-      await resumeAudioContext();
-      await ensureProceduralSoundFonts();
-      const sequence=channel.stem.midiSequence||await getMidiSequence(channel.stem);
-      const current=channel.stem.midiVoice||resolveMidiStemVoice(channel.stem,sequence);
-      const next=nextMidiStripVoice(channel.stem,sequence,current);
-      if(!next){showSystemReadout(channel.stem.name.toUpperCase(),"NO SF2 PATCH","HOLD");return}
-      setMidiStripVoicePreference(channel.stem,next);
-      channel.stem.midiVoice=next;
-      loadReadout.textContent="MIDI SF2";
-      const buffer=renderMidiStemBuffer(channel.stem,sequence,next);
-      touchDecodedBuffer(`midi:${String(channel.stem.key||channel.stem.displayPath)}:${midiVoiceKey(next)}`,buffer);
-      hotSwapMidiStripInstrument(channel,buffer);
-      showSystemReadout(channel.stem.name.toUpperCase(),proceduralSoundFontDisplayName(next.source).toUpperCase(),String(next.name||"PATCH").toUpperCase());
-    }catch(error){
-      loadReadout.textContent="MIDI ERR";
-      console.error("Could not change MIDI SoundFont patch",error);
-      showSystemReadout(channel.stem.name.toUpperCase(),"MIDI PATCH ERROR","CHECK SF2");
-    }
   }
 
 
@@ -9162,18 +8668,14 @@
   function getProceduralLoopProgram(loopIndex){
     const target=Math.max(0,Math.trunc(Number(loopIndex)||0));
     if(!currentProceduralProgram||target===0||proceduralLoopVariance<=0)return currentProceduralProgram;
-    const interval=Math.max(1,Math.trunc(Number(proceduralVarianceInterval)||1));
-    const variationStage=Math.floor(target/interval);
-    if(variationStage<=0)return currentProceduralProgram;
-    if(proceduralLoopProgramCache.has(variationStage))return proceduralLoopProgramCache.get(variationStage);
+    if(proceduralLoopProgramCache.has(target))return proceduralLoopProgramCache.get(target);
     if(!proceduralLoopProgramCache.has(0))proceduralLoopProgramCache.set(0,currentProceduralProgram);
-    for(let stage=1;stage<=variationStage;stage++){
-      if(proceduralLoopProgramCache.has(stage))continue;
-      const previous=proceduralLoopProgramCache.get(stage-1)||currentProceduralProgram;
-      const boundaryLoop=stage*interval;
-      proceduralLoopProgramCache.set(stage,createProceduralLoopVariation(previous,boundaryLoop,proceduralLoopVariance));
+    for(let i=1;i<=target;i++){
+      if(proceduralLoopProgramCache.has(i))continue;
+      const previous=proceduralLoopProgramCache.get(i-1)||currentProceduralProgram;
+      proceduralLoopProgramCache.set(i,createProceduralLoopVariation(previous,i,proceduralLoopVariance));
     }
-    return proceduralLoopProgramCache.get(variationStage)||currentProceduralProgram;
+    return proceduralLoopProgramCache.get(target)||currentProceduralProgram;
   }
 
   function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,sf2Voice:program.sf2Voices?.[track.role]||null,proceduralOrder:index}))}}
@@ -9462,8 +8964,6 @@
     proceduralEnergyReadout.textContent=String(energy);
     proceduralComplexityReadout.textContent=String(complexity);
     proceduralVarianceReadout.textContent=`${formatSteppedPercent01(proceduralLoopVariance)}%`;
-    if(randomizerLoopIntervalReadout)randomizerLoopIntervalReadout.textContent=`${randomizerLoopInterval} LOOP${randomizerLoopInterval===1?"":"S"}`;
-    if(proceduralVarianceIntervalReadout)proceduralVarianceIntervalReadout.textContent=`${proceduralVarianceInterval} LOOP${proceduralVarianceInterval===1?"":"S"}`;
     proceduralChordReadout.textContent=program.chordLabel;
     proceduralSoundFontReadout.textContent=proceduralSoundFontDisplayName();
     if(proceduralKeyControl)proceduralKeyControl.value=String(keyIndex);
@@ -9472,8 +8972,6 @@
     if(proceduralEnergyControl)proceduralEnergyControl.value=String(Number(program.energy*100).toFixed(1));
     if(proceduralComplexityControl)proceduralComplexityControl.value=String(Number(program.complexity*100).toFixed(1));
     if(proceduralVarianceControl)proceduralVarianceControl.value=String(formatSteppedPercent01(proceduralLoopVariance));
-    if(randomizerLoopIntervalControl)randomizerLoopIntervalControl.value=String(randomizerLoopInterval);
-    if(proceduralVarianceIntervalControl)proceduralVarianceIntervalControl.value=String(proceduralVarianceInterval);
     if(proceduralChordControl)proceduralChordControl.value=String(chordIndex>=0?chordIndex:0);
     if(proceduralSoundFontControl)proceduralSoundFontControl.value=String(sourceIndex);
     setProcManualLamp("key",proceduralOverrides.tonic!==null);
@@ -9491,8 +8989,6 @@
     persistentPrefs.proceduralEnergy=proceduralEnergy;
     persistentPrefs.proceduralComplexity=proceduralComplexity;
     persistentPrefs.proceduralLoopVariance=proceduralLoopVariance;
-    persistentPrefs.randomizerLoopInterval=randomizerLoopInterval;
-    persistentPrefs.proceduralVarianceInterval=proceduralVarianceInterval;
     persistentPrefs.proceduralTonicOverride=proceduralOverrides.tonic;
     persistentPrefs.proceduralModeOverride=proceduralOverrides.mode;
     persistentPrefs.proceduralTempoOverride=proceduralOverrides.bpm;
@@ -9652,8 +9148,6 @@
     else if(kind==="energy"){proceduralEnergy=snapProceduralUnit(value/100);proceduralEnergyReadout.textContent=formatSteppedPercent01(proceduralEnergy);proceduralDeck?.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`)}
     else if(kind==="complexity"){proceduralComplexity=snapProceduralUnit(value/100);proceduralComplexityReadout.textContent=formatSteppedPercent01(proceduralComplexity);proceduralDeck?.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`)}
     else if(kind==="variance"){proceduralLoopVariance=snapProceduralUnit(value/100);proceduralVarianceReadout.textContent=`${formatSteppedPercent01(proceduralLoopVariance)}%`}
-    else if(kind==="randomEvery"){randomizerLoopInterval=Math.max(1,Math.min(64,Math.round(value)));if(randomizerLoopIntervalReadout)randomizerLoopIntervalReadout.textContent=`${randomizerLoopInterval} LOOP${randomizerLoopInterval===1?"":"S"}`}
-    else if(kind==="varianceEvery"){proceduralVarianceInterval=Math.max(1,Math.min(64,Math.round(value)));if(proceduralVarianceIntervalReadout)proceduralVarianceIntervalReadout.textContent=`${proceduralVarianceInterval} LOOP${proceduralVarianceInterval===1?"":"S"}`}
   }
 
   function commitProceduralHardwareControl(kind,rawValue){
@@ -9672,10 +9166,7 @@
     else if(kind==="energy")proceduralEnergy=snapProceduralUnit(value/100);
     else if(kind==="complexity")proceduralComplexity=snapProceduralUnit(value/100);
     else if(kind==="variance")proceduralLoopVariance=snapProceduralUnit(value/100);
-    else if(kind==="randomEvery")randomizerLoopInterval=Math.max(1,Math.min(64,Math.round(value)));
-    else if(kind==="varianceEvery")proceduralVarianceInterval=Math.max(1,Math.min(64,Math.round(value)));
     if(kind==="energy"||kind==="complexity")requestProceduralVibeMorph(0);
-    else if(kind==="randomEvery"){saveProceduralHardwarePrefs();updateRandomizerButton();}
     else regenerateProceduralHardware({preservePosition:true});
   }
 
@@ -10830,14 +10321,13 @@
   function channelMarkup(stem,index,state) {
     const title = escapeHtml(stem.name);
     const iconMatch = predictInstrumentIcon(stem.name);
-    const instrumentInteractive = appMode==="procedural" || stem.mediaType==="midi";
     return `
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
         <div class="channel-header">
           <div class="channel-ident">
             <span class="channel-instrument-icon" data-instrument-icon data-instrument-channel="${index}"
-                  title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}${stem.mediaType==="midi"?" · MIDI SF2 selector":""}" role="${instrumentInteractive?"button":"img"}" tabindex="${instrumentInteractive?"0":"-1"}"
-                  aria-label="${instrumentInteractive?`${title} instrument selector`:title}">
+                  title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}" role="${appMode==="procedural"?"button":"img"}" tabindex="${appMode==="procedural"?"0":"-1"}"
+                  aria-label="${appMode==="procedural"?`${title} instrument selector`:title}">
               <i class="fa-solid ${escapeHtml(iconMatch.icon)}"></i>
             </span>
             <div class="channel-name" title="${title}" data-channel-name><span class="channel-name__marquee">${String(index+1).padStart(2,"0")} ${title}</span></div>
@@ -11037,7 +10527,6 @@
 
   async function getDecodedStemBuffer(stem) {
     ensureAudioGraph();
-    if (stem?.mediaType === "midi") return getRenderedMidiStemBuffer(stem);
 
     const key = stemCacheKey(stem);
     if (!key) throw new Error("Stem has no cache key.");
@@ -11177,15 +10666,14 @@
       channel.buffer = buffer;
       channel.ready = true;
       channel.error = false;
-      if (channel.stem?.mediaType === "midi") syncMidiChannelInstrumentLabel(channel);
       updatePlaylistDuration();
       return channel;
     } catch (error) {
       channel.error = true;
       channel.ready = true;
       channel.el?.classList.add("channel-error");
-      loadReadout.textContent = channel.stem?.mediaType === "midi" ? "MIDI ERR" : "AUDIO ERR";
-      console.error(`Could not prepare stem: ${channel.stem?.displayPath || channel.stem?.name}`,error);
+      loadReadout.textContent = "AUDIO ERR";
+      console.error(`Could not decode stem: ${channel.stem?.displayPath || channel.stem?.name}`,error);
       return channel;
     }
   }
@@ -11549,7 +11037,7 @@
     randomizerBtn.classList.toggle("active",randomizerEnabled);
     randomizerBtn.setAttribute("aria-pressed",String(randomizerEnabled));
     randomizerBtn.title = randomizerEnabled
-      ? `Randomizer ON — unlocked stems randomize every ${randomizerLoopInterval} loop${randomizerLoopInterval===1?"":"s"}`
+      ? "Randomizer ON — unlocked stems will randomize again at the next loop"
       : "Randomizer OFF — click to randomize unlocked stems and enable it";
   }
 
@@ -11644,14 +11132,11 @@
 
     mixerSurface.querySelectorAll("[data-instrument-channel]").forEach(icon=>{
       const activate=event=>{
-        const channel=channels[Number(icon.dataset.instrumentChannel)];
-        const procedural=appMode==="procedural";
-        const playlistMidi=appMode==="playlist"&&channel?.stem?.mediaType==="midi";
-        if(!(procedural||playlistMidi))return;
+        if(appMode!=="procedural")return;
         event.preventDefault();
         event.stopPropagation();
-        if(procedural)cycleProceduralStripInstrument(channel);
-        else cycleMidiStripInstrument(channel);
+        const channel=channels[Number(icon.dataset.instrumentChannel)];
+        if(channel)cycleProceduralStripInstrument(channel);
       };
       icon.addEventListener("click",activate);
       icon.addEventListener("keydown",event=>{
@@ -11700,8 +11185,7 @@
       playlistDuration = currentProceduralProgram.duration;
     } else {
       playlistDuration = channels.reduce((max,channel)=>{
-        const midiDuration = channel.stem?.mediaType === "midi" ? channel.stem?.midiSequence?.duration : null;
-        const duration = Number.isFinite(Number(midiDuration)) ? Number(midiDuration) : channel.buffer?.duration;
+        const duration = channel.buffer?.duration;
         return Number.isFinite(duration) ? Math.max(max,duration) : max;
       },0);
     }
@@ -11850,12 +11334,10 @@
       if (currentCycle > loopCount) {
         loopCount = currentCycle;
 
-        const randomizerDue=randomizerEnabled && loopCount%Math.max(1,randomizerLoopInterval)===0;
-        const varianceDue=appMode === "procedural" && proceduralLoopVariance>0 && loopCount%Math.max(1,proceduralVarianceInterval)===0;
-        if (randomizerDue) randomizeTrackMutes("loop");
+        if (randomizerEnabled) randomizeTrackMutes("loop");
         loadReadout.textContent = appMode === "procedural"
-          ? (varianceDue ? `VAR ${String(loopCount).padStart(2,"0")}` : (randomizerDue ? `RND ${String(loopCount).padStart(2,"0")}` : `HOLD ${String(loopCount).padStart(2,"0")}`))
-          : (randomizerDue ? "RND LOOP" : "LOOP");
+          ? (proceduralLoopVariance<=0 ? `HOLD ${String(loopCount).padStart(2,"0")}` : `VAR ${String(loopCount).padStart(2,"0")}`)
+          : (randomizerEnabled ? "RND LOOP" : "LOOP");
       }
 
       return;
@@ -12063,8 +11545,7 @@
       title.textContent = String(playlist.title || "UNTITLED").toUpperCase();
 
       const meta = document.createElement("small");
-      const midiCount = playlist.stems.filter(stem=>stem.mediaType==="midi").length;
-      meta.textContent = `${playlist.stems.length} STEM${playlist.stems.length === 1 ? "" : "S"}${midiCount ? ` · ${midiCount} MIDI` : ""}`;
+      meta.textContent = `${playlist.stems.length} STEM${playlist.stems.length === 1 ? "" : "S"}`;
 
       copy.append(title,meta);
       button.append(lamp,number,copy);
@@ -12418,8 +11899,6 @@
     ["energy",proceduralEnergyControl,proceduralEnergyReadout],
     ["complexity",proceduralComplexityControl,proceduralComplexityReadout],
     ["variance",proceduralVarianceControl,proceduralVarianceReadout],
-    ["randomEvery",randomizerLoopIntervalControl,randomizerLoopIntervalReadout],
-    ["varianceEvery",proceduralVarianceIntervalControl,proceduralVarianceIntervalReadout],
     ["soundfont",proceduralSoundFontControl,proceduralSoundFontReadout]
   ];
   for(const [kind,input,screen] of proceduralHardwareControls){
@@ -12556,7 +12035,6 @@
         : event.deltaX;
 
     if (!delta) return;
-    
 
     event.preventDefault();
     event.stopPropagation();
