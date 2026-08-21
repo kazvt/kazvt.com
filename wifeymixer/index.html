@@ -11337,7 +11337,9 @@
 
   function updateChannelEffectiveLevel(channel) {
     const anySolo = channels.some(c=>c.state.solo);
-    const shouldSound = !channel.state.mute && (!anySolo || channel.state.solo);
+    // SOLO has priority over MUTE: a muted strip becomes audible while soloed,
+    // but its latched mute state is preserved and takes effect again when solo clears.
+    const shouldSound = anySolo ? !!channel.state.solo : !channel.state.mute;
     const gain = shouldSound ? faderValueToGain(channel.state.level) : 0;
     setParam(channel.fader.gain,gain,.008);
   }
