@@ -23,9 +23,10 @@
     </script>
     <script>
       (() => {
-        let lineboil = "on";
+        let lineboil = "off";
         try {
-          if (localStorage.getItem("kazvt-lineboil") === "off") lineboil = "off";
+          const storedLineboil = localStorage.getItem("kazvt-lineboil");
+          if (storedLineboil === "on" || storedLineboil === "off") lineboil = storedLineboil;
         } catch {}
         document.documentElement.dataset.lineboil = lineboil;
       })();
@@ -88,52 +89,52 @@
           <h2 data-i18n="sidebar.palette"></h2>
           <div class="palette big-palette" data-i18n-aria-label="palette.aria">
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" data-i18n-aria-label="palette.p1" aria-pressed="true"><span></span></button>
+              <button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" data-i18n-aria-label="palette.p1" aria-pressed="true"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p1.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" data-i18n-aria-label="palette.p2" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" data-i18n-aria-label="palette.p2" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p2.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" data-i18n-aria-label="palette.p3" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" data-i18n-aria-label="palette.p3" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p3.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" data-i18n-aria-label="palette.p4" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" data-i18n-aria-label="palette.p4" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p4.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" data-i18n-aria-label="palette.p5" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" data-i18n-aria-label="palette.p5" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p5.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" data-i18n-aria-label="palette.p6" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" data-i18n-aria-label="palette.p6" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p6.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" data-i18n-aria-label="palette.p7" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" data-i18n-aria-label="palette.p7" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p7.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" data-i18n-aria-label="palette.p8" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" data-i18n-aria-label="palette.p8" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p8.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" data-i18n-aria-label="palette.p9" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" data-i18n-aria-label="palette.p9" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p9.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" data-i18n-aria-label="palette.p10" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" data-i18n-aria-label="palette.p10" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p10.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" data-i18n-aria-label="palette.p11" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" data-i18n-aria-label="palette.p11" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p11.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" data-i18n-aria-label="palette.p12" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" data-i18n-aria-label="palette.p12" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p12.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" data-i18n-aria-label="palette.p13" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" data-i18n-aria-label="palette.p13" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p13.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" data-i18n-aria-label="palette.p14" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" data-i18n-aria-label="palette.p14" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p14.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" data-i18n-aria-label="palette.p15" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" data-i18n-aria-label="palette.p15" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p15.png" alt="" aria-hidden="true"><span></span></button>
             </div>
             <div class="palette-choice">
-              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" data-i18n-aria-label="palette.p16" aria-pressed="false"><span></span></button>
+              <button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" data-i18n-aria-label="palette.p16" aria-pressed="false"><img class="palette-cursor-preview" src="zzz_assets/cursor-previews/p16.png" alt="" aria-hidden="true"><span></span></button>
             </div>
           </div>
         </aside>

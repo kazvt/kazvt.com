@@ -7,8 +7,8 @@
   let syncQueued = false;
 
   function storedEnabled() {
-    try { return localStorage.getItem(STORAGE_KEY) !== "off"; }
-    catch { return true; }
+    try { return localStorage.getItem(STORAGE_KEY) === "on"; }
+    catch { return false; }
   }
 
   function isEnabled() {

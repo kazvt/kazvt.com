@@ -25,9 +25,10 @@
     </script>
     <script>
       (() => {
-        let lineboil = "on";
+        let lineboil = "off";
         try {
-          if (localStorage.getItem("kazvt-lineboil") === "off") lineboil = "off";
+          const storedLineboil = localStorage.getItem("kazvt-lineboil");
+          if (storedLineboil === "on" || storedLineboil === "off") lineboil = storedLineboil;
         } catch {}
         document.documentElement.dataset.lineboil = lineboil;
       })();

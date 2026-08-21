@@ -2219,6 +2219,15 @@ function flashScrollTarget(target) {
   }, 1800);
 }
 
+function scrollHashTargetIntoView(hash, { flash = true } = {}) {
+  const target = findSamePageHashTarget(hash);
+  if (!target) return false;
+
+  target.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
+  if (flash) flashHashTargetAfterScroll(hash);
+  return true;
+}
+
 function flashHashTargetAfterScroll(hash) {
   const target = findSamePageHashTarget(hash);
   if (!target) return;
@@ -2271,10 +2280,12 @@ function initializeScrollTargetHighlights() {
     window.setTimeout(() => flashHashTargetAfterScroll(url.hash), 0);
   });
 
-  window.addEventListener("hashchange", () => flashHashTargetAfterScroll(window.location.hash));
+  window.addEventListener("hashchange", () => {
+    window.setTimeout(() => scrollHashTargetIntoView(window.location.hash), 0);
+  });
 
   if (window.location.hash) {
-    window.setTimeout(() => flashHashTargetAfterScroll(window.location.hash), 0);
+    window.setTimeout(() => scrollHashTargetIntoView(window.location.hash), 0);
   }
 }
 
@@ -3133,6 +3144,8 @@ async function loadStatus() {
 }
 
 async function bootSite() {
+  const initialHash = window.location.hash;
+
   await loadActiveEmotes();
   await loadActiveLanguageText();
   applyLanguageText(document);
@@ -3149,6 +3162,19 @@ async function bootSite() {
   }
 
   initializeScrollTargetHighlights();
+
+  // The homepage panels (including #multistream-guide-home) are rendered above,
+  // after the browser's native initial hash jump would normally have happened.
+  // Re-run the jump after render so shared direct links land correctly on load.
+  if (initialHash && window.location.hash === initialHash) {
+    window.requestAnimationFrame(() => {
+      scrollHashTargetIntoView(initialHash);
+      window.requestAnimationFrame(() => {
+        if (window.location.hash === initialHash) scrollHashTargetIntoView(initialHash, { flash: false });
+      });
+    });
+  }
+
   mountLanguageSelector();
   updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
 }

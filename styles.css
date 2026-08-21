@@ -4522,3 +4522,157 @@ body[data-theme="p16"] .guide-map .badge.no text {
     animation: none !important;
   }
 }
+
+
+/* Multistream CTA attraction pass: fast double-beat pulse + hand-drawn horizontal streaks. */
+.guide-launch-button {
+  animation:
+    guideLaunchHeartbeat 1680ms linear infinite,
+    guideLaunchAttention 1320ms ease-in-out infinite;
+  will-change: scale, box-shadow;
+}
+
+.guide-launch-button::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: -78%;
+  width: 74%;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(90deg, transparent 0 2%, currentColor 2% 18%, transparent 18% 23%, currentColor 23% 61%, transparent 61% 67%, currentColor 67% 92%, transparent 92%) 0 24% / 100% 3px no-repeat,
+    linear-gradient(90deg, transparent 0 8%, currentColor 8% 38%, transparent 38% 43%, currentColor 43% 78%, transparent 78%) 0 43% / 92% 2px no-repeat,
+    linear-gradient(90deg, transparent 0 3%, currentColor 3% 27%, transparent 27% 34%, currentColor 34% 70%, transparent 70% 76%, currentColor 76% 96%, transparent 96%) 0 61% / 108% 3px no-repeat,
+    linear-gradient(90deg, transparent 0 12%, currentColor 12% 48%, transparent 48% 55%, currentColor 55% 88%, transparent 88%) 0 78% / 88% 2px no-repeat;
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--ink) 28%, transparent));
+  transform: skewX(-10deg) rotate(-0.7deg);
+  animation: guideLaunchScribblePass 1180ms steps(18, end) infinite;
+}
+
+.guide-launch-button:hover,
+.guide-launch-button:focus-visible {
+  animation:
+    guideLaunchHeartbeat 1120ms linear infinite,
+    guideLaunchAttention 820ms ease-in-out infinite;
+}
+
+.guide-launch-button:hover::after,
+.guide-launch-button:focus-visible::after {
+  animation-duration: 690ms;
+}
+
+@keyframes guideLaunchHeartbeat {
+  0%, 47%, 100% {
+    scale: 1;
+  }
+  52% {
+    scale: 1.012;
+    animation-timing-function: cubic-bezier(0.12, 0.72, 0.18, 1);
+  }
+  57% {
+    scale: 1.105;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.24);
+  }
+  62% {
+    scale: 1.018;
+    animation-timing-function: cubic-bezier(0.12, 0.72, 0.18, 1);
+  }
+  67% {
+    scale: 1.068;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.24);
+  }
+  74% {
+    scale: 1;
+  }
+}
+
+@keyframes guideLaunchScribblePass {
+  0%, 8% {
+    left: -78%;
+    opacity: 0;
+    transform: translateY(0) skewX(-10deg) rotate(-0.7deg);
+  }
+  12% {
+    opacity: 0.16;
+  }
+  28% {
+    opacity: 0.42;
+    transform: translateY(-2px) skewX(-8deg) rotate(0.5deg);
+  }
+  49% {
+    opacity: 0.54;
+    transform: translateY(1px) skewX(-12deg) rotate(-0.35deg);
+  }
+  72% {
+    opacity: 0.33;
+    transform: translateY(-1px) skewX(-9deg) rotate(0.7deg);
+  }
+  88% {
+    left: 112%;
+    opacity: 0.1;
+  }
+  89%, 100% {
+    left: 112%;
+    opacity: 0;
+  }
+}
+
+/* Cursor artwork previews use the default cursor from each palette's real .cur pack. */
+.big-palette .palette-cursor-preview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  display: block;
+  width: min(34px, 48%);
+  height: min(34px, 48%);
+  margin: 0;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  filter:
+    drop-shadow(1px 0 0 color-mix(in srgb, var(--paper) 88%, transparent))
+    drop-shadow(-1px 0 0 color-mix(in srgb, var(--paper) 88%, transparent))
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--paper) 88%, transparent))
+    drop-shadow(0 -1px 0 color-mix(in srgb, var(--paper) 88%, transparent));
+}
+
+.big-palette .palette-choice > button > span {
+  opacity: 0.72;
+}
+
+.guide-page .big-palette .palette-cursor-preview,
+html.touch-device .big-palette .palette-cursor-preview {
+  width: min(18px, 52%);
+  height: min(18px, 52%);
+}
+
+/* Mobile keeps the stable box, but the independent scale property still gives the CTA its heartbeat. */
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .site-wrap .guide-launch-button,
+  .site-wrap .guide-launch-button:hover,
+  .site-wrap .guide-launch-button:focus-visible {
+    animation:
+      guideLaunchHeartbeat 1680ms linear infinite,
+      guideLaunchAttention 1320ms ease-in-out infinite !important;
+    transform: none !important;
+    will-change: scale, box-shadow;
+  }
+
+  .site-wrap .guide-launch-button:hover,
+  .site-wrap .guide-launch-button:focus-visible {
+    animation-duration: 1120ms, 820ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-launch-button,
+  .guide-launch-button::after {
+    animation: none !important;
+    scale: 1 !important;
+  }
+}
