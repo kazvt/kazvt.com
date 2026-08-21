@@ -8122,6 +8122,7 @@
   const proceduralSoundFonts = new Map();
   const proceduralSoundFontErrors = new Map();
   const proceduralGeniesVoices = new Map();
+  const proceduralGeniesExcludedVoiceKeys = new Set();
   let proceduralGeniesProfile = null;
   let proceduralSoundFontsPromise = null;
 
@@ -8380,6 +8381,10 @@
   const GENIES_EDGE_WORDS=/\b(bright|hard|attack|saw|square|lead|brass|sync|acid|dist|drive|metal)\b/i;
   const GENIES_IMPACT_WORDS=/\b(crash|cymbal|ride|splash|china|gong|impact|hit|explosion|orchestra\s*hit|fx)\b/i;
   const GENIES_FLUTE_WORDS=/\b(flute|piccolo)\b/i;
+  // These Genies guitar patches are intentionally hidden from every selectable
+  // pool. Match names rather than preset numbers so this survives SF2 revisions.
+  const GENIES_EXCLUDED_GUITARS=/\b(?:steel\s+guitar\s*1|nylon\s+guitar|jazz\s+guitar|clean\s+guitar|dist(?:ortion)?\.?\s+guitar\s*(?:1|2))\b/i;
+  function isExcludedGeniesGuitar(value){return GENIES_EXCLUDED_GUITARS.test(String(value||""))}
   const GENIES_ROLE_WORDS=Object.freeze({
     bass:/\b(bass|sub|contrabass|upright)\b/i,
     keys:/\b(piano|keys?|rhodes|wurli|wurlitzer|e\.?p\.?|organ|clav|harpsi|celesta|vibes?|marimba|strings?|pad|choir)\b/i,
@@ -8432,6 +8437,7 @@
 
   function inspectGeniesBank(bank){
     proceduralGeniesVoices.clear();
+    proceduralGeniesExcludedVoiceKeys.clear();
     const roles={drums:[],bass:[],keys:[],melody:[],percussion:[]};
     const presets=bank.getPresetList?.()||[];
     for(const preset of presets){
@@ -8446,6 +8452,10 @@
         }
       }
       const descriptor=`${name} ${layerWords.join(" ")}`.trim();
+      if(isExcludedGeniesGuitar(descriptor)){
+        proceduralGeniesExcludedVoiceKeys.add(`genies:${Number(preset.bank)}:${Number(preset.program)}`);
+        continue;
+      }
       const warm=GENIES_WARM_WORDS.test(descriptor)?1:0;
       const edge=GENIES_EDGE_WORDS.test(descriptor)?1:0;
       const impact=GENIES_IMPACT_WORDS.test(descriptor)?1:0;
@@ -8931,13 +8941,15 @@
   function midiStemDisplayLabel(stem){
     const role=midiStemRole(stem);
     const voice=midiSelectedVoiceForStem(stem);
-    const soundfontName=stem?.midiSoundFontName||proceduralSoundFontDisplayName(voice?.source);
-    const instrument=stem?.midiVoiceName||voice?.name||"";
+    // Selection metadata is authoritative. A previously rendered/cached patch may
+    // leave midiVoiceName/midiSoundFontName stale, especially when cycling backward.
+    const soundfontName=voice?.source?proceduralSoundFontDisplayName(voice.source):(stem?.midiSoundFontName||"");
+    const instrument=voice?.name||stem?.midiVoiceName||"";
     return soundFontStripLabel({...voice,name:instrument},role,{soundfontName});
   }
 
   function proceduralStemDisplayLabel(stem){
-    const voice=stem?.resolvedSf2Voice||stem?.sf2Voice||null;
+    const voice=proceduralStripVoicePreference(stem?.role)||stem?.resolvedSf2Voice||stem?.sf2Voice||null;
     if(!voice)return `${PROCEDURAL_FALLBACK_INSTRUMENT_NAMES?.[stem?.role]||"ANALOGUE BENCH"} (${trackCategoryLabel(stem?.role)})`;
     return soundFontStripLabel(voice,stem?.role);
   }
@@ -9511,6 +9523,9 @@
       return;
     }
     setProceduralStripVoicePreference(role,next);
+    // Update the strip display from the selected patch immediately in both
+    // directions; audio rendering/swap can complete independently afterward.
+    syncProceduralChannelInstrumentLabels();
     hotSwapProceduralStripInstrument(channel);
     showSystemReadout(
       role.toUpperCase(),
@@ -9569,6 +9584,9 @@
       return;
     }
     setMidiStemVoicePreference(channel.stem,next);
+    // Do not wait for render/cache lookup to rename the strip. This keeps
+    // right-click (previous) behavior identical to left-click (next).
+    syncMidiChannelInstrumentLabels();
     await hotSwapMidiStripInstrument(channel);
     showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),proceduralSoundFontDisplayName(next.source).toUpperCase(),String(next.name||"PATCH").toUpperCase());
   }
@@ -11275,6 +11293,7 @@
   function midiStoredVoiceForStem(stem){
     const ref=persistentPrefs.midiStemVoices?.[midiStemVoicePreferenceKey(stem)];
     if(!ref?.source)return null;
+    if(String(ref.source)==="genies"&&(isExcludedGeniesGuitar(ref.name)||proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(ref.bank)||0}:${Number(ref.program)||0}`)))return null;
     return sfVoice(String(ref.source),Number(ref.bank)||0,Number(ref.program)||0,String(ref.name||"Patch"));
   }
 
@@ -11293,7 +11312,9 @@
     if(role==="bass")return SF64_VOICES.bassFinger;
     // Lead default is a proper synth lead from the curated rack.
     if(role==="melody")return SF64_VOICES.leadSaw;
-    if(role==="guitar")return sfVoice("genies",0,27,"Clean Guitar");
+    // Clean Guitar is deliberately excluded from Genies; use the remaining GM
+    // muted-guitar slot as the safe pre-load default instead.
+    if(role==="guitar")return sfVoice("genies",0,28,"Muted Guitar");
     if(role==="strings")return sfVoice("genies",0,48,"Strings 6");
     return sfVoice("genies",0,4,"E. Piano 1");
   }
@@ -11313,6 +11334,7 @@
     if(!range)return [];
     return bank.getPresetList()
       .filter(p=>p.bank===0&&p.program>=range[0]&&p.program<=range[1])
+      .filter(p=>sourceId!=="genies"||(!isExcludedGeniesGuitar(p.name)&&!proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(p.bank)}:${Number(p.program)}`)))
       .map(p=>sfVoice(sourceId,p.bank,p.program,p.name));
   }
 
