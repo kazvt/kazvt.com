@@ -2353,8 +2353,8 @@ function initializeScrollTargetHighlights() {
 }
 
 function multistreamGuidePanel() {
-  return el("section", { id: "multistream", className: "panel guide-launch-panel scribble-box" }, [
-    el("button", { type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
+  return el("section", { id: "multistream-panel", className: "panel guide-launch-panel scribble-box" }, [
+    el("button", { id: "multistream", type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
       el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker")]),
       el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary")]),
       el("span", { className: "guide-launch-pointer", ariaHidden: "true", "data-i18n": "guide.launch_pointer" }, [translatedText("guide.launch_pointer")]),

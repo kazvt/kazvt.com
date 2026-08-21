@@ -2736,6 +2736,7 @@ code {
 .guide-launch-button {
   position: relative;
   isolation: isolate;
+  scroll-margin-top: 18px;
   overflow: hidden;
   display: grid;
   width: 100%;
