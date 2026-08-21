@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
   <script src="sf2-procedural.js"></script>
+  <script src="midi-support.js"></script>
 
   <style>
     :root{
@@ -7295,6 +7296,7 @@
 <script>
   const EMBEDDED_MANIFEST = {"files":["index.html","instrument-icons.json","lillie_track_6/bass.mp3","lillie_track_6/drums.mp3","lillie_track_6/guitar.mp3","lillie_track_6/strings.mp3","lillie_track_6/vibes.mp3","lillie_track_6/yamaha synth.mp3"]};
   const AUDIO_EXT_RE = /\.(mp3|wav|m4a|aac|ogg|opus|flac|webm)$/i;
+  const MIDI_EXT_RE = /\.(mid|midi)$/i;
 
   const grid = document.getElementById("channelGrid");
   const masterDock = document.getElementById("masterDock");
@@ -8192,25 +8194,28 @@
   let reverb = null;
   let fxReturn = null;
 
-  // Global megaphone parallel path.
+  // Global telephone-effect parallel path.
+  // Legacy “megaphone” variable names are retained for saved-state compatibility.
   let megaphoneDry = null;
   let megaphoneWet = null;
   let megaHighpass = null;
   let megaResonance = null;
   let megaLowpass = null;
-  let megaDrive = null;
+  let megaLimiter = null;
 
-  // Megaphone loudness compensation.
-  // Compare pre-FX RMS with post-FX/pre-comp RMS, then smoothly trim the wet path.
+  // Telephone loudness compensation.
+  // Compare pre-filter RMS with filtered/pre-comp RMS and smoothly apply makeup gain.
+  // Unlike the previous implementation this can add gain because a telephone bandpass
+  // intentionally removes substantial low/high-frequency energy.
   let megaDryAnalyser = null;
   let megaWetAnalyser = null;
   let megaDryMeterData = null;
   let megaWetMeterData = null;
   let megaCompGain = null;
-  let megaCompDb = -7.0;
-  const MEGA_COMP_MIN_DB = -15;
-  const MEGA_COMP_MAX_DB = 0;
-  const MEGA_PERCEPTUAL_BIAS_DB = -1.2;
+  let megaCompDb = 4.0;
+  const MEGA_COMP_MIN_DB = -6;
+  const MEGA_COMP_MAX_DB = 10;
+  const MEGA_PERCEPTUAL_BIAS_DB = -1.0;
 
   const masterState = {
     tone: Number(persistentPrefs.masterState?.tone ?? 100),
@@ -8248,7 +8253,9 @@
   function buildPlaylistsFromManifest(manifest) {
     const groups = new Map();
     for (const file of (manifest?.files || [])) {
-      if (!AUDIO_EXT_RE.test(file)) continue;
+      const isAudio=AUDIO_EXT_RE.test(file);
+      const isMidi=MIDI_EXT_RE.test(file);
+      if (!isAudio && !isMidi) continue;
       const folder = parentFolder(file);
       if (!groups.has(folder)) groups.set(folder, []);
       groups.get(folder).push({
@@ -8256,7 +8263,7 @@
         name:stripExtension(basename(file)),
         src:file,
         displayPath:file,
-        kind:"url"
+        kind:isMidi?"midi-url":"url"
       });
     }
     return [...groups.entries()].map(([folder,stems],index)=>({
@@ -8274,7 +8281,9 @@
     const groups = new Map();
     for (const file of [...fileList]) {
       const rel = file.webkitRelativePath || file.name;
-      if (!(file.type?.startsWith("audio/") || AUDIO_EXT_RE.test(rel))) continue;
+      const isMidi=MIDI_EXT_RE.test(rel);
+      const isAudio=file.type?.startsWith("audio/") || AUDIO_EXT_RE.test(rel);
+      if (!isAudio && !isMidi) continue;
       const folder = parentFolder(rel);
       if (!groups.has(folder)) groups.set(folder, []);
       const objectUrl = URL.createObjectURL(file);
@@ -8284,7 +8293,7 @@
         name:stripExtension(file.name),
         src:objectUrl,
         displayPath:rel,
-        kind:"object-url"
+        kind:isMidi?"midi-object-url":"object-url"
       });
     }
     return [...groups.entries()].map(([folder,stems],index)=>({
@@ -9946,21 +9955,6 @@
   }
 
 
-  function createMegaphoneCurve(amount=7.5) {
-    const samples = 2048;
-    const curve = new Float32Array(samples);
-    const drive = Math.max(1,Number(amount)||1);
-
-    for (let i=0;i<samples;i++) {
-      const x = (i*2)/(samples-1)-1;
-      // Mild asymmetric loudspeaker-like saturation.
-      const shaped = Math.tanh(x*drive) / Math.tanh(drive);
-      curve[i] = shaped * (x < 0 ? .94 : 1);
-    }
-
-    return curve;
-  }
-
   function setCrossfadeGain(param,value,immediate=false) {
     if (!audioCtx || !param) return;
     const now = audioCtx.currentTime;
@@ -9993,7 +9987,7 @@
 
     button.classList.toggle("active",megaphoneEnabled);
     button.setAttribute("aria-pressed",String(megaphoneEnabled));
-    button.title = megaphoneEnabled ? "Megaphone effect ON" : "Megaphone effect OFF";
+    button.title = megaphoneEnabled ? "Telephone effect ON" : "Telephone effect OFF";
     button.setAttribute("aria-label",button.title);
   }
 
@@ -10005,7 +9999,8 @@
     ensureAudioGraph();
 
     if (megaphoneEnabled && megaCompGain) {
-      megaCompDb = -7.0;
+      // Start near the expected makeup gain, then let the slow RMS matcher settle.
+      megaCompDb = 4.0;
       setParam(megaCompGain.gain,dbToGain(megaCompDb),.025);
     }
 
@@ -10014,8 +10009,8 @@
 
     showSystemReadout(
       "MASTER",
-      "MEGAPHONE",
-      megaphoneEnabled ? "ON · 1.05 kHz" : "OFF"
+      "TELEPHONE",
+      megaphoneEnabled ? "ON · 350–3.4 kHz" : "OFF"
     );
   }
 
@@ -10045,46 +10040,50 @@
     reverb.buffer = createImpulse(audioCtx);
     fxReturn = audioCtx.createGain();
 
-    // Megaphone parallel path:
-    // high-pass -> resonant 1.05 kHz peak -> low-pass -> mild speaker saturation.
-    // Both dry and effected signals are metered so the wet path can be
-    // automatically loudness-compensated instead of jumping in level.
+    // Clean telephone parallel path:
+    // 350 Hz high-pass -> gentle 1.6 kHz presence -> 3.4 kHz low-pass.
+    // There is deliberately NO waveshaper/saturation stage. A near-brickwall
+    // compressor after makeup gain only catches peaks that could clip when the
+    // filtered signal is level-matched to the full-band dry signal.
     megaphoneDry = audioCtx.createGain();
     megaphoneWet = audioCtx.createGain();
 
     megaDryAnalyser = audioCtx.createAnalyser();
-    megaDryAnalyser.fftSize = 512;
-    megaDryAnalyser.smoothingTimeConstant = .88;
+    megaDryAnalyser.fftSize = 1024;
+    megaDryAnalyser.smoothingTimeConstant = .92;
     megaDryMeterData = new Float32Array(megaDryAnalyser.fftSize);
 
     megaWetAnalyser = audioCtx.createAnalyser();
-    megaWetAnalyser.fftSize = 512;
-    megaWetAnalyser.smoothingTimeConstant = .88;
+    megaWetAnalyser.fftSize = 1024;
+    megaWetAnalyser.smoothingTimeConstant = .92;
     megaWetMeterData = new Float32Array(megaWetAnalyser.fftSize);
 
     megaCompGain = audioCtx.createGain();
-    megaCompDb = -7.0;
+    megaCompDb = 4.0;
     megaCompGain.gain.value = dbToGain(megaCompDb);
 
     megaHighpass = audioCtx.createBiquadFilter();
     megaHighpass.type = "highpass";
-    megaHighpass.frequency.value = 360;
-    megaHighpass.Q.value = .78;
+    megaHighpass.frequency.value = 350;
+    megaHighpass.Q.value = .707;
 
     megaResonance = audioCtx.createBiquadFilter();
     megaResonance.type = "peaking";
-    megaResonance.frequency.value = 1050;
-    megaResonance.Q.value = 2.15;
-    megaResonance.gain.value = 7.5;
+    megaResonance.frequency.value = 1600;
+    megaResonance.Q.value = .9;
+    megaResonance.gain.value = 2.0;
 
     megaLowpass = audioCtx.createBiquadFilter();
     megaLowpass.type = "lowpass";
-    megaLowpass.frequency.value = 3550;
-    megaLowpass.Q.value = .92;
+    megaLowpass.frequency.value = 3400;
+    megaLowpass.Q.value = .707;
 
-    megaDrive = audioCtx.createWaveShaper();
-    megaDrive.curve = createMegaphoneCurve(7.5);
-    if ("oversample" in megaDrive) megaDrive.oversample = "2x";
+    megaLimiter = audioCtx.createDynamicsCompressor();
+    megaLimiter.threshold.value = -1.5;
+    megaLimiter.knee.value = 0;
+    megaLimiter.ratio.value = 20;
+    megaLimiter.attack.value = .002;
+    megaLimiter.release.value = .07;
 
     reverb.connect(fxReturn);
     fxReturn.connect(masterBus);
@@ -10100,13 +10099,13 @@
     masterPan.connect(megaHighpass);
     megaHighpass.connect(megaResonance);
     megaResonance.connect(megaLowpass);
-    megaLowpass.connect(megaDrive);
 
-    // Wet meter measures BEFORE compensation, then compensation trims the
-    // effected signal before the wet selector gain.
-    megaDrive.connect(megaWetAnalyser);
+    // Wet meter measures BEFORE compensation. Makeup gain level-matches the
+    // telephone band, then the peak catcher protects the final output.
+    megaLowpass.connect(megaWetAnalyser);
     megaWetAnalyser.connect(megaCompGain);
-    megaCompGain.connect(megaphoneWet);
+    megaCompGain.connect(megaLimiter);
+    megaLimiter.connect(megaphoneWet);
     megaphoneWet.connect(masterGain);
 
     masterGain.connect(masterAnalyser);
@@ -10412,9 +10411,9 @@
             </button>
 
             <button id="megaphoneBtn" class="hw-button megaphone-btn${megaphoneEnabled ? " active" : ""} w-full"
-                    type="button" title="Megaphone effect" aria-label="Megaphone effect"
+                    type="button" title="Telephone effect" aria-label="Telephone effect"
                     aria-pressed="${megaphoneEnabled}">
-              <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -10557,6 +10556,47 @@
     }
   }
 
+  // MIDI is intentionally a parallel loading path. Audio stems continue through
+  // getDecodedStemBuffer() above without any change to fetch/decodeAudioData playback.
+  async function getMidiStemBuffer(stem) {
+    ensureAudioGraph();
+
+    const key = stemCacheKey(stem);
+    if (!key) throw new Error("MIDI stem has no cache key.");
+    if (!window.WifeyMIDI?.parse || !window.WifeyMIDI?.render) throw new Error("MIDI renderer did not load.");
+
+    if (decodedBufferCache.has(key)) {
+      return touchDecodedBuffer(key,decodedBufferCache.get(key));
+    }
+
+    if (decodedBufferPromises.has(key)) {
+      return decodedBufferPromises.get(key);
+    }
+
+    const promise = (async()=>{
+      const response = await fetch(stem.src,{cache:"force-cache"});
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const bytes = await response.arrayBuffer();
+      const parsed = WifeyMIDI.parse(bytes);
+      const buffer = WifeyMIDI.render(audioCtx,parsed);
+      stem.midiDuration = parsed.duration;
+      return touchDecodedBuffer(key,buffer);
+    })();
+
+    decodedBufferPromises.set(key,promise);
+    try {
+      return await promise;
+    } finally {
+      decodedBufferPromises.delete(key);
+    }
+  }
+
+  function getStemPlaybackBuffer(stem) {
+    return String(stem?.kind || "").startsWith("midi-")
+      ? getMidiStemBuffer(stem)
+      : getDecodedStemBuffer(stem);
+  }
+
   function idleTask(callback) {
     if ("requestIdleCallback" in window) {
       return window.requestIdleCallback(callback,{timeout:1400});
@@ -10591,7 +10631,7 @@
           while (cursor < queue.length) {
             const stem = queue[cursor++];
             try {
-              await getDecodedStemBuffer(stem);
+              await getStemPlaybackBuffer(stem);
             } catch (error) {
               // Background preload failures should never interrupt current playback.
               console.warn("Background stem preload skipped:",stem?.displayPath || stem?.name,error);
@@ -10660,7 +10700,7 @@
 
   async function loadStemBuffer(channel,generation) {
     try {
-      const buffer = await getDecodedStemBuffer(channel.stem);
+      const buffer = await getStemPlaybackBuffer(channel.stem);
       if (generation !== loadGeneration) return channel;
 
       channel.buffer = buffer;
@@ -10672,8 +10712,8 @@
       channel.error = true;
       channel.ready = true;
       channel.el?.classList.add("channel-error");
-      loadReadout.textContent = "AUDIO ERR";
-      console.error(`Could not decode stem: ${channel.stem?.displayPath || channel.stem?.name}`,error);
+      loadReadout.textContent = String(channel.stem?.kind || "").startsWith("midi-") ? "MIDI ERR" : "AUDIO ERR";
+      console.error(`Could not load stem: ${channel.stem?.displayPath || channel.stem?.name}`,error);
       return channel;
     }
   }
@@ -11185,7 +11225,10 @@
       playlistDuration = currentProceduralProgram.duration;
     } else {
       playlistDuration = channels.reduce((max,channel)=>{
-        const duration = channel.buffer?.duration;
+        const isMidi = String(channel?.stem?.kind || "").startsWith("midi-");
+        const duration = isMidi && Number.isFinite(Number(channel?.stem?.midiDuration))
+          ? Number(channel.stem.midiDuration)
+          : channel.buffer?.duration;
         return Number.isFinite(duration) ? Math.max(max,duration) : max;
       },0);
     }
@@ -11400,7 +11443,7 @@
     }
 
     loadReadout.textContent = "LOADING";
-    showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),"LOADING AUDIO","PLEASE WAIT");
+    showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),"LOADING STEMS","PLEASE WAIT");
     await Promise.allSettled(channels.map(c=>c.readyPromise));
     updatePlaylistDuration();
 
@@ -11492,7 +11535,7 @@
     cycleZeroContextTime=0;
 
     loadReadout.textContent="LOADING";
-    showSystemReadout(String(currentPlaylist?.title||"PLAYLIST").toUpperCase(),"LOADING AUDIO","PLEASE WAIT");
+    showSystemReadout(String(currentPlaylist?.title||"PLAYLIST").toUpperCase(),"LOADING STEMS","PLEASE WAIT");
     renderMixer(currentPlaylist);
     setupAudioForRenderedChannels(currentPlaylist,generation);
     horizontalScroller.scrollLeft=0;
@@ -11677,8 +11720,8 @@
     // Ignore silence / near-silence so the gain doesn't chase noise.
     if (dryRms < .0012 || wetRms < .0012) return;
 
-    // Level-match RMS, then trim another 1.2 dB because the concentrated
-    // mid-band of a megaphone is perceptually more forward at equal RMS.
+    // Level-match RMS. The small negative perceptual bias keeps the narrowed
+    // midrange from sounding subjectively louder even when its RMS is equal.
     let targetDb =
       20*Math.log10(dryRms/wetRms) +
       MEGA_PERCEPTUAL_BIAS_DB;
@@ -11688,9 +11731,10 @@
       Math.min(MEGA_COMP_MAX_DB,targetDb)
     );
 
-    // Faster when attenuation must increase (protects against sudden loudness),
-    // slower when releasing attenuation so it does not audibly pump.
-    const coefficient = targetDb < megaCompDb ? .075 : .018;
+    // Keep the compensation intentionally slow so it behaves like automatic
+    // makeup gain, not a compressor that pumps with every kick/snare hit.
+    // Attenuation reacts a little faster than added makeup gain.
+    const coefficient = targetDb < megaCompDb ? .045 : .010;
     megaCompDb += (targetDb-megaCompDb)*coefficient;
 
     const targetGain = dbToGain(megaCompDb);
@@ -11698,7 +11742,7 @@
 
     try {
       megaCompGain.gain.cancelScheduledValues(now);
-      megaCompGain.gain.setTargetAtTime(targetGain,now,.09);
+      megaCompGain.gain.setTargetAtTime(targetGain,now,.16);
     } catch (_) {
       megaCompGain.gain.value = targetGain;
     }
