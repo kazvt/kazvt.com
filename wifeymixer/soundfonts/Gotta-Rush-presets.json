@@ -8,7 +8,7 @@
     "ISFT": "Awave Studio v10.6"
   },
   "counts": {
-    "presets": 221,
+    "presets": 220,
     "instruments": 221,
     "samples": 1012
   },
@@ -277,12 +277,6 @@
           60,
           75
         ]
-      },
-      {
-        "bank": 0,
-        "program": 127,
-        "name": "A New Day Synth 2",
-        "use": "general character lead"
       },
       {
         "bank": 1,
@@ -1037,11 +1031,6 @@
       "name": "A New Day Synth 1",
       "bank": 0,
       "program": 126
-    },
-    {
-      "name": "A New Day Synth 2",
-      "bank": 0,
-      "program": 127
     },
     {
       "name": "Alt. Limit Synth 1",

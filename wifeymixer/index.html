@@ -7338,7 +7338,14 @@
     .top-tempo-module.is-manual .top-tempo-screen{color:#d49a64}
     @media(max-width:760px){.top-tempo-module{min-width:122px}.top-tempo-fader-wrap{width:52px;min-width:52px;padding-left:5px;padding-right:5px}.top-tempo-legend{display:none}}
     @media(max-width:560px){.top-tempo-random{display:none}.top-tempo-module{min-width:102px}.top-tempo-fader-wrap{width:46px;min-width:46px}}
-</style>
+
+    /* MIDI and procedural strip pictograms are the same physical patch-select key. */
+    .channel-instrument-icon.is-instrument-selector{cursor:pointer;pointer-events:auto}
+    .channel-instrument-icon.is-instrument-selector:hover,
+    .channel-instrument-icon.is-instrument-selector:focus-visible{filter:brightness(1.16);outline:none;box-shadow:0 0 0 1px rgba(180,171,139,.18),0 2px 5px rgba(0,0,0,.8)}
+    .channel-instrument-icon.is-instrument-selector.has-strip-voice::before{opacity:.92}
+
+  </style>
 </head>
 
 <body>
@@ -7563,8 +7570,8 @@
             <label class="proc-hw-control proc-hw-control--wide" data-proc-control="soundfont">
               <span class="proc-hw-control__legend">SOUNDFONT RACK <i class="proc-source-lamp" aria-hidden="true"></i></span>
               <span id="proceduralSoundFontReadout" class="proc-mini-screen proc-mini-screen--source">AUTO RACK</span>
-              <span class="proc-mini-fader proc-mini-fader--source"><input id="proceduralSoundFontControl" type="range" min="0" max="4" step="1" value="0" aria-label="Procedural SoundFont: Auto rack, SF64, Gotta Rush, Genies, or Casino Drums"></span>
-              <span class="proc-source-scale" aria-hidden="true"><b>AUTO</b><b>SF64</b><b>Gotta Rush</b><b>Genies</b><b>Casino</b></span>
+              <span class="proc-mini-fader proc-mini-fader--source"><input id="proceduralSoundFontControl" type="range" min="0" max="4" step="1" value="0" aria-label="Procedural SoundFont: Auto rack, SF64, Gotta Rush, Genies, or Sonic Drums"></span>
+              <span class="proc-source-scale" aria-hidden="true"><b>AUTO</b><b>SF64</b><b>Gotta Rush</b><b>Genies</b><b>Sonic</b></span>
             </label>
           </div>
 
@@ -7873,6 +7880,7 @@
         proceduralChordOverride: parsed.proceduralChordOverride != null && Number.isInteger(Number(parsed.proceduralChordOverride)) ? Math.max(0,Math.min(9,Number(parsed.proceduralChordOverride))) : null,
         proceduralSoundFont: ["auto","sf64","rush","genies","casino"].includes(parsed.proceduralSoundFont) ? parsed.proceduralSoundFont : "auto",
         midiTempoByPlaylist: parsed.midiTempoByPlaylist && typeof parsed.midiTempoByPlaylist === "object" ? parsed.midiTempoByPlaylist : {},
+        midiStemVoices: parsed.midiStemVoices && typeof parsed.midiStemVoices === "object" ? parsed.midiStemVoices : {},
         proceduralStripVoices: parsed.proceduralStripVoices && typeof parsed.proceduralStripVoices === "object"
           ? parsed.proceduralStripVoices
           : {},
@@ -7902,6 +7910,7 @@
         proceduralChordOverride:null,
         proceduralSoundFont:"auto",
         midiTempoByPlaylist:{},
+        midiStemVoices:{},
         proceduralStripVoices:{},
         lockedStemIds:{},
         stemStates:{},
@@ -7982,7 +7991,7 @@
 
   // Four local SoundFont banks form one procedural instrument rack. SF64 is the
   // neutral bench, Gotta Rush is the curated character bank, Genies is an
-  // adaptive palette, and Casino Drums is the relaxed sampled kit reserved for
+  // adaptive palette, and Sonic Drums is the relaxed sampled kit reserved for
   // chill/mid drum duties. Genies presets are inspected after load so unknown or
   // oddly-mapped programs cannot punch holes in a generated arrangement.
   // Paths stay relative to index.html so the deployed folder remains portable.
@@ -7990,7 +7999,7 @@
     sf64:{url:"soundfonts/SF64.sf2",label:"SF64"},
     rush:{url:"soundfonts/Gotta Rush.sf2",label:"GOTTA RUSH"},
     genies:{url:"soundfonts/Genies.sf2",aliases:["soundfonts/Genies.SF2"],label:"GENIES",adaptive:true},
-    casino:{url:"soundfonts/Casino Drums.sf2",label:"CASINO DRUMS",zones:["chill","mid"]}
+    casino:{url:"soundfonts/Sonic Drums.sf2",label:"SONIC DRUMS",zones:["chill","mid"]}
   });
   const proceduralSoundFonts = new Map();
   const proceduralSoundFontErrors = new Map();
@@ -8027,12 +8036,12 @@
     percussionPower:sfVoice("sf64",128,16,"Powerful Percussion")
   });
 
-  // Casino Drums is intentionally a CHILL + MID-zone kit. It never auto-enters
+  // Sonic Drums is intentionally a CHILL + MID-zone kit. It never auto-enters
   // the high-energy zone; the sparse sampled kit is most useful as a laid-back
   // physical drum palette. The source SF2 is bank 0 / program 0.
-  const CASINO_VOICES = Object.freeze({
-    drums:sfVoice("casino",0,0,"Casino Drums",{gainTrim:.84,vibeZone:"chill-mid"}),
-    percussion:sfVoice("casino",0,0,"Casino Drums",{gainTrim:.72,vibeZone:"chill-mid"})
+  const SONIC_VOICES = Object.freeze({
+    drums:sfVoice("casino",0,0,"Sonic Drums",{gainTrim:.94,vibeZone:"chill-mid"}),
+    percussion:sfVoice("casino",0,0,"Sonic Drums",{gainTrim:.82,vibeZone:"chill-mid"})
   });
 
   // Gotta Rush is the character half. These presets were curated from the
@@ -8071,7 +8080,6 @@
     // Restricted-range Rush leads are still useful: the renderer octave-wraps
     // generated melody notes into these verified playable bands.
     leadNewDay1:sfVoice("rush",0,126,"A New Day Synth 1",{range:[60,75]}),
-    leadNewDay2:sfVoice("rush",0,127,"A New Day Synth 2"),
     leadAltitude1:sfVoice("rush",1,0,"Alt. Limit Synth 1"),
     leadAltitude2:sfVoice("rush",1,1,"Alt. Limit Synth 2"),
     leadDeadLine2:sfVoice("rush",1,4,"Dead Line Synth 2",{range:[72,84]}),
@@ -8104,17 +8112,17 @@
       percussion:[SF64_VOICES.percussionGeneral,SF64_VOICES.percussionPower]
     }),
     casino:Object.freeze({
-      drums:[CASINO_VOICES.drums],
+      drums:[SONIC_VOICES.drums],
       bass:[],
       keys:[],
       melody:[],
-      percussion:[CASINO_VOICES.percussion]
+      percussion:[SONIC_VOICES.percussion]
     }),
     rush:Object.freeze({
       drums:[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
       bass:[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3],
       keys:[RUSH_VOICES.keysEnding,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysRival,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2],
-      melody:[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadException2,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw1,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
+      melody:[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadException2,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw1,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
       percussion:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage]
     })
   });
@@ -8169,7 +8177,7 @@
     const intensity=energy*.72+complexity*.28;
     const vibe=voice.vibe||proceduralVibeSemantics(voice.name);
 
-    // Casino Drums belongs in both CHILL and MID zones by design, but stays
+    // Sonic Drums belongs in both CHILL and MID zones by design, but stays
     // out of the high-energy rack where its relaxed transient character gets lost.
     if(voice.source==="casino")return (role==="drums"||role==="percussion") && energy<=.72 && intensity<=.78;
 
@@ -8723,18 +8731,18 @@
     else keysPool=[RUSH_VOICES.keysRival,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan,SF64_VOICES.keysEP2];
 
     let leadPool;
-    if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
-    else if(energy<.68) leadPool=[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadNewDay2,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSaw1,SF64_VOICES.leadSquare];
+    if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,RUSH_VOICES.leadNewDay1,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
+    else if(energy<.68) leadPool=[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSaw1,SF64_VOICES.leadSquare];
     else leadPool=[RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase];
 
     let drumsPool;
-    if(energy<.32) drumsPool=[CASINO_VOICES.drums,CASINO_VOICES.drums,SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay5];
-    else if(energy<.68) drumsPool=[CASINO_VOICES.drums,RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,SF64_VOICES.drumsGeneral];
+    if(energy<.32) drumsPool=[SONIC_VOICES.drums,SONIC_VOICES.drums,SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay5];
+    else if(energy<.68) drumsPool=[SONIC_VOICES.drums,RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,SF64_VOICES.drumsGeneral];
     else drumsPool=[RUSH_VOICES.drumsMirage3,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsPower];
 
     const percussionPool=(energy>.45||complexity>.48)
-      ?(energy<.72?[CASINO_VOICES.percussion,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral]:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral])
-      :[CASINO_VOICES.percussion,SF64_VOICES.percussionGeneral,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage];
+      ?(energy<.72?[SONIC_VOICES.percussion,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral]:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral])
+      :[SONIC_VOICES.percussion,SF64_VOICES.percussionGeneral,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage];
     return{drums:chooseFrom(rng,drumsPool),bass:chooseFrom(rng,bassPool),keys:chooseFrom(rng,keysPool),melody:chooseFrom(rng,leadPool),percussion:chooseFrom(rng,percussionPool)};
   }
 
@@ -8801,7 +8809,7 @@
 
   function midiStemDisplayLabel(stem){
     const role=midiStemRole(stem);
-    const voice=midiDefaultVoiceForStem(stem);
+    const voice=midiSelectedVoiceForStem(stem);
     const soundfontName=stem?.midiSoundFontName||proceduralSoundFontDisplayName(voice?.source);
     const instrument=stem?.midiVoiceName||voice?.name||"";
     return soundFontStripLabel({...voice,name:instrument},role,{soundfontName});
@@ -8835,40 +8843,51 @@
     return curatedVoiceFitsVibe(role,voice,program);
   }
 
-  function firstPlayableCycleVoice(role,sourceId,program,startAfter=-1){
-    if(!proceduralSoundFonts.has(sourceId))return null;
-    const bank=proceduralSoundFonts.get(sourceId);
-    const pool=proceduralRawRoleVoices(role,sourceId);
-    for(let i=Math.max(0,startAfter+1);i<pool.length;i++){
-      const voice=pool[i];
-      if(!proceduralCycleVoiceFits(role,voice,program))continue;
-      if(bank?.getPreset(voice.bank,voice.program))return voice;
+  // Shared parent -> child patch traversal used by BOTH procedural and MIDI.
+  // Child = each compatible instrument in the current SoundFont. Once the last
+  // child is reached, advance to the next parent SoundFont and start at its first
+  // compatible instrument. The final parent wraps back to the first.
+  function nextParentChildStripVoice(role,currentVoice,{poolForSource,acceptVoice=()=>true,preferredSource=null}={}){
+    const loadedOrder=PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>proceduralSoundFonts.has(id));
+    if(!loadedOrder.length||typeof poolForSource!=="function")return null;
+    const firstPlayable=(sourceId,startAfter=-1)=>{
+      const bank=proceduralSoundFonts.get(sourceId);
+      const pool=poolForSource(role,sourceId)||[];
+      for(let i=Math.max(0,startAfter+1);i<pool.length;i++){
+        const voice=pool[i];
+        if(!voice)continue;
+        if(!acceptVoice(voice))continue;
+        if(bank?.getPreset(voice.bank,voice.program))return voice;
+      }
+      return null;
+    };
+    let sourceIndex=currentVoice?loadedOrder.indexOf(currentVoice.source):-1;
+    if(sourceIndex<0){
+      const start=preferredSource&&loadedOrder.includes(preferredSource)?preferredSource:loadedOrder[0];
+      sourceIndex=loadedOrder.indexOf(start);
+      const first=firstPlayable(start,-1);
+      if(first)return first;
+    }else{
+      const pool=poolForSource(role,currentVoice.source)||[];
+      const currentKey=proceduralVoiceKey(currentVoice);
+      const currentIndex=pool.findIndex(voice=>proceduralVoiceKey(voice)===currentKey);
+      const sameParentNext=firstPlayable(currentVoice.source,currentIndex);
+      if(sameParentNext)return sameParentNext;
+    }
+    for(let step=1;step<=loadedOrder.length;step++){
+      const sourceId=loadedOrder[(sourceIndex+step+loadedOrder.length)%loadedOrder.length];
+      const first=firstPlayable(sourceId,-1);
+      if(first)return first;
     }
     return null;
   }
 
   function nextProceduralStripVoice(role,currentVoice,program){
-    const loadedOrder=PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>proceduralSoundFonts.has(id));
-    if(!loadedOrder.length)return null;
-    let sourceIndex=currentVoice?loadedOrder.indexOf(currentVoice.source):-1;
-    if(sourceIndex<0){
-      const preferredSource=proceduralSoundFontMode!=="auto"&&loadedOrder.includes(proceduralSoundFontMode)?proceduralSoundFontMode:loadedOrder[0];
-      sourceIndex=loadedOrder.indexOf(preferredSource);
-      const first=firstPlayableCycleVoice(role,preferredSource,program,-1);
-      if(first)return first;
-    }else{
-      const pool=proceduralRawRoleVoices(role,currentVoice.source);
-      const currentKey=proceduralVoiceKey(currentVoice);
-      const currentIndex=pool.findIndex(voice=>proceduralVoiceKey(voice)===currentKey);
-      const sameSourceNext=firstPlayableCycleVoice(role,currentVoice.source,program,currentIndex);
-      if(sameSourceNext)return sameSourceNext;
-    }
-    for(let step=1;step<=loadedOrder.length;step++){
-      const sourceId=loadedOrder[(sourceIndex+step+loadedOrder.length)%loadedOrder.length];
-      const first=firstPlayableCycleVoice(role,sourceId,program,-1);
-      if(first)return first;
-    }
-    return null;
+    return nextParentChildStripVoice(role,currentVoice,{
+      poolForSource:proceduralRawRoleVoices,
+      acceptVoice:voice=>proceduralCycleVoiceFits(role,voice,program),
+      preferredSource:proceduralSoundFontMode!=="auto"?proceduralSoundFontMode:null
+    });
   }
 
   function resolveProceduralSf2Voice(role,preferred,program){
@@ -8880,7 +8899,7 @@
       if(bank?.getPreset(stripVoice.bank,stripVoice.program))return{voice:stripVoice,bank};
     }
     if(proceduralSoundFontMode!=="auto"){
-      // Casino is a drum-only bank. When it is the selected rack source, drums
+      // Sonic Drums is a drum-only bank. When it is the selected rack source, drums
       // and percussion use it; tonal strips continue through AUTO instead of
       // disappearing or being forced into an invalid drum preset.
       const casinoTonalFallback=proceduralSoundFontMode==="casino" && role!=="drums" && role!=="percussion";
@@ -9273,8 +9292,10 @@
       if(nameEl)setChannelNameLabel(nameEl,label);
       const iconEl=channel.el?.querySelector("[data-instrument-icon]");
       if(iconEl){
-        iconEl.title=label;
-        iconEl.setAttribute("aria-label",label);
+        const pinned=!!midiExplicitVoiceForStem(channel.stem);
+        iconEl.title=pinned?`${label} · PINNED MIDI PATCH`:`${label} · click: next patch / next SoundFont`;
+        iconEl.setAttribute("aria-label",pinned?`${label}. Pinned MIDI patch.`:`${label}. Click for next instrument; after the final instrument, advance to the next SoundFont.`);
+        iconEl.classList.toggle("has-strip-voice",!!midiStoredVoiceForStem(channel.stem)||pinned);
       }
       channel.el?.querySelectorAll("[data-action]").forEach(button=>{
         const action=String(button.dataset.action||"").toUpperCase();
@@ -9344,6 +9365,58 @@
       proceduralSoundFontDisplayName(next.source).toUpperCase(),
       String(next.name||"PATCH").toUpperCase()
     );
+  }
+
+  async function hotSwapMidiStripInstrument(channel){
+    if(!channel||appMode!=="playlist"||!isMidiStem(channel.stem))return;
+    const revision=(channel.stem.midiPatchRevision||0)+1;
+    channel.stem.midiPatchRevision=revision;
+    loadReadout.textContent="MIDI PATCH";
+    try{
+      const buffer=await getMidiStemBuffer(channel.stem);
+      if(channel.stem.midiPatchRevision!==revision)return;
+      channel.buffer=buffer;
+      channel.ready=true;
+      channel.error=false;
+      updatePlaylistDuration();
+      syncMidiChannelInstrumentLabels();
+      if(!isPlaying||!audioCtx||!playlistDuration){loadReadout.textContent="MIDI READY";return}
+
+      const now=audioCtx.currentTime;
+      const fade=.018;
+      const swapAt=now+.025;
+      const absoluteSwap=getAbsoluteCyclePosition()+(swapAt-now);
+      const cycleIndex=Math.max(0,Math.floor(absoluteSwap/playlistDuration));
+      const cycleOffset=Math.max(0,Math.min(playlistDuration-.001,absoluteSwap-cycleIndex*playlistDuration));
+      retireSourcesForProceduralMorph(channel,swapAt,fade);
+      createScheduledSource(channel,swapAt,cycleOffset,buffer,{fadeIn:fade,startGain:1});
+      for(let cycle=cycleIndex+1;cycle<=scheduledThroughCycle;cycle++){
+        createScheduledSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,buffer);
+      }
+      loadReadout.textContent="MIDI READY";
+    }catch(error){
+      console.warn("Could not hot-swap MIDI patch",channel.stem?.displayPath||channel.stem?.name,error);
+      loadReadout.textContent="MIDI ERR";
+    }
+  }
+
+  async function cycleMidiStripInstrument(channel){
+    if(!channel||appMode!=="playlist"||!isMidiStem(channel.stem))return;
+    const pinned=midiExplicitVoiceForStem(channel.stem);
+    if(pinned){
+      showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"PINNED MIDI PATCH",`${proceduralSoundFontDisplayName(pinned.source).toUpperCase()} · ${String(pinned.name||"PATCH").toUpperCase()}`);
+      return;
+    }
+    await ensureProceduralSoundFonts();
+    const current=midiSelectedVoiceForStem(channel.stem);
+    const next=nextMidiStripVoice(channel.stem,current);
+    if(!next){
+      showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"NO COMPATIBLE PATCH","HOLD");
+      return;
+    }
+    setMidiStemVoicePreference(channel.stem,next);
+    await hotSwapMidiStripInstrument(channel);
+    showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),proceduralSoundFontDisplayName(next.source).toUpperCase(),String(next.name||"PATCH").toUpperCase());
   }
 
   function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
@@ -10780,13 +10853,14 @@
     const stripLabel=mixerStripDisplayLabel(stem);
     const title = escapeHtml(stripLabel);
     const iconMatch = predictInstrumentIcon(stem.name);
+    const instrumentSelectable=appMode==="procedural"||isMidiStem(stem);
     return `
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
         <div class="channel-header">
           <div class="channel-ident">
-            <span class="channel-instrument-icon" data-instrument-icon data-instrument-channel="${index}"
-                  title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}" role="${appMode==="procedural"?"button":"img"}" tabindex="${appMode==="procedural"?"0":"-1"}"
-                  aria-label="${appMode==="procedural"?`${title} instrument selector`:title}">
+            <span class="channel-instrument-icon${instrumentSelectable ? " is-instrument-selector" : ""}" data-instrument-icon data-instrument-channel="${index}"
+                  title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}" role="${instrumentSelectable?"button":"img"}" tabindex="${instrumentSelectable?"0":"-1"}"
+                  aria-label="${instrumentSelectable?`${title} instrument selector`:title}">
               <i class="fa-solid ${escapeHtml(iconMatch.icon)}"></i>
             </span>
             <div class="channel-name" title="${title}" data-channel-name><span class="channel-name__marquee">${String(index+1).padStart(2,"0")} ${title}</span></div>
@@ -11028,17 +11102,76 @@
     return "keys";
   }
 
+  function midiStemVoicePreferenceKey(stem){
+    return `${String(stem?.midiPlaylistKey||parentFolder(stem?.displayPath||"")||"midi")}::${String(stem?.displayPath||stem?.key||stem?.name||"track")}`;
+  }
+
+  function midiExplicitVoiceForStem(stem){
+    // Folder-authored assignments are stronger than generic MIDI defaults and
+    // user icon cycling. Add future song-specific assignments here.
+    const path=String(stem?.displayPath||"").replace(/\\/g,"/").toLowerCase();
+    if(!path.startsWith("midi_lillie_10/"))return null;
+    const role=midiStemRole(stem);
+    if(role==="drums")return SONIC_VOICES.drums;
+    if(role==="bass")return SF64_VOICES.bassFinger;
+    if(role==="keys")return sfVoice("genies",0,4,"E. Piano 1");
+    return null; // lead intentionally remains a normal cycle-able synth lead.
+  }
+
+  function midiStoredVoiceForStem(stem){
+    const ref=persistentPrefs.midiStemVoices?.[midiStemVoicePreferenceKey(stem)];
+    if(!ref?.source)return null;
+    return sfVoice(String(ref.source),Number(ref.bank)||0,Number(ref.program)||0,String(ref.name||"Patch"));
+  }
+
+  function setMidiStemVoicePreference(stem,voice){
+    if(!persistentPrefs.midiStemVoices||typeof persistentPrefs.midiStemVoices!=="object")persistentPrefs.midiStemVoices={};
+    const key=midiStemVoicePreferenceKey(stem);
+    const ref=proceduralVoiceRef(voice);
+    if(ref)persistentPrefs.midiStemVoices[key]=ref;
+    else delete persistentPrefs.midiStemVoices[key];
+    savePersistentPrefs();
+  }
+
   function midiDefaultVoiceForStem(stem){
     const role=midiStemRole(stem);
-    if(role==="drums"||role==="percussion")return role==="drums"?CASINO_VOICES.drums:CASINO_VOICES.percussion;
+    if(role==="drums"||role==="percussion")return role==="drums"?SONIC_VOICES.drums:SONIC_VOICES.percussion;
     if(role==="bass")return SF64_VOICES.bassFinger;
-    if(role==="melody")return RUSH_VOICES.leadNewDay2;
+    // Lead default is a proper synth lead from the curated rack.
+    if(role==="melody")return SF64_VOICES.leadSaw;
     if(role==="guitar")return sfVoice("genies",0,27,"Clean Guitar");
     if(role==="strings")return sfVoice("genies",0,48,"Strings 6");
     return sfVoice("genies",0,4,"E. Piano 1");
   }
 
-  function casinoMidiNote(midi){
+  function midiSelectedVoiceForStem(stem){
+    return midiExplicitVoiceForStem(stem)||midiStoredVoiceForStem(stem)||midiDefaultVoiceForStem(stem);
+  }
+
+  function midiRawRoleVoices(role,sourceId){
+    // The five procedural roles use exactly the same curated child lists.
+    if(["drums","percussion","bass","keys","melody"].includes(role))return proceduralRawRoleVoices(role,sourceId);
+    // Extra MIDI-only categories use their General-MIDI family ranges where a
+    // bank exposes them, preserving the same parent/child traversal model.
+    const bank=proceduralSoundFonts.get(sourceId);
+    if(!bank?.getPresetList)return [];
+    const range=role==="guitar"?[24,31]:role==="strings"?[40,55]:null;
+    if(!range)return [];
+    return bank.getPresetList()
+      .filter(p=>p.bank===0&&p.program>=range[0]&&p.program<=range[1])
+      .map(p=>sfVoice(sourceId,p.bank,p.program,p.name));
+  }
+
+  function nextMidiStripVoice(stem,currentVoice){
+    const role=midiStemRole(stem);
+    return nextParentChildStripVoice(role,currentVoice,{
+      poolForSource:midiRawRoleVoices,
+      acceptVoice:()=>true,
+      preferredSource:currentVoice?.source||null
+    });
+  }
+
+  function sonicMidiNote(midi){
     const n=Math.max(0,Math.min(127,Math.round(Number(midi)||0)));
     if(n===35||n===36)return 60;
     if(n===37||n===38||n===39||n===40)return 62;
@@ -11073,13 +11206,13 @@
     if(!bank?.getPreset(voice?.bank,voice?.program))return null;
     const target=createProceduralStereoBuffer(Math.max(.08,(parsed.duration||0)+.5));
     let rendered=false;
-    const isCasino=voice.source==="casino";
+    const isSonicDrums=voice.source==="casino";
     for(const note of parsed.notes||[]){
-      const midi=isCasino?casinoMidiNote(note.midi):Math.max(0,Math.min(127,Math.round(note.midi)));
+      const midi=isSonicDrums?sonicMidiNote(note.midi):Math.max(0,Math.min(127,Math.round(note.midi)));
       const pan=Math.max(-1,Math.min(1,((Number(note.pan)||64)-64)/63));
       const channelGain=Math.max(0,Math.min(1,((Number(note.volume)||100)/127)*((Number(note.expression)||127)/127)));
       const trim=Number.isFinite(Number(voice.gainTrim))?Number(voice.gainTrim):1;
-      const duration=isCasino?Math.max(.08,Math.min(.55,note.duration||.2)):Math.max(.02,note.duration||.1);
+      const duration=isSonicDrums?Math.max(.08,Math.min(.55,note.duration||.2)):Math.max(.02,note.duration||.1);
       rendered=bank.renderNote(target,{bank:voice.bank,program:voice.program,midi,velocity:Math.max(1,Math.min(127,Math.round(note.velocity||96))),start:note.start,duration,amp:.72*channelGain*trim,pan})||rendered;
     }
     if(!rendered)return null;
@@ -11105,7 +11238,7 @@
     const requestedTempo=Number.isFinite(Number(stem.midiTempoBpm))
       ?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(stem.midiTempoBpm))))
       :null;
-    const voice=midiDefaultVoiceForStem(stem);
+    const voice=midiSelectedVoiceForStem(stem);
     const key=`${baseKey}|midi:${requestedTempo??"native"}:${proceduralVoiceKey(voice)}`;
 
     if (decodedBufferCache.has(key)) return touchDecodedBuffer(key,decodedBufferCache.get(key));
@@ -11717,11 +11850,14 @@
 
     mixerSurface.querySelectorAll("[data-instrument-channel]").forEach(icon=>{
       const activate=event=>{
-        if(appMode!=="procedural")return;
+        const channel=channels[Number(icon.dataset.instrumentChannel)];
+        const canProcedural=appMode==="procedural";
+        const canMidi=appMode==="playlist"&&isMidiStem(channel?.stem);
+        if(!canProcedural&&!canMidi)return;
         event.preventDefault();
         event.stopPropagation();
-        const channel=channels[Number(icon.dataset.instrumentChannel)];
-        if(channel)cycleProceduralStripInstrument(channel);
+        if(canProcedural)cycleProceduralStripInstrument(channel);
+        else cycleMidiStripInstrument(channel);
       };
       icon.addEventListener("click",activate);
       icon.addEventListener("keydown",event=>{
