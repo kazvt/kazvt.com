@@ -12,7 +12,7 @@
     "ISFT": "Polyphone"
   },
   "counts": {
-    "presets": 114,
+    "presets": 113,
     "instruments": 48,
     "samples": 104
   },
@@ -137,12 +137,6 @@
         "program": 82,
         "name": "Lead 3 (Callope)",
         "use": "lower energy / rounded lead"
-      },
-      {
-        "bank": 0,
-        "program": 84,
-        "name": "Lead 5 (Charang)",
-        "use": "mid-high energy / character"
       },
       {
         "bank": 0,
@@ -378,11 +372,6 @@
       "name": "Church Organ",
       "bank": 0,
       "program": 19
-    },
-    {
-      "name": "Lead 5 (Charang)",
-      "bank": 0,
-      "program": 84
     },
     {
       "name": "Distortion Guitar",

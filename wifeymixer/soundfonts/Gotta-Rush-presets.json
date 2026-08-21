@@ -8,7 +8,7 @@
     "ISFT": "Awave Studio v10.6"
   },
   "counts": {
-    "presets": 220,
+    "presets": 207,
     "instruments": 221,
     "samples": 1012
   },
@@ -28,8 +28,6 @@
     "restrictedLeadPolicy": "Song-specific synth presets with at least a full octave of coverage are octave-wrapped into their verified range so notes do not disappear.",
     "excludedAutomaticPresets": [
       "Altitude Limit Piano (only MIDI 0-39; too low for generated chord voicings)",
-      "Dead Line Synth 1 (MIDI 72-79; less than a full octave)",
-      "Eggman Boss Synth (MIDI 72-80; less than a full octave)",
       "Final Zone Bass (does not cover the generator bass range consistently)"
     ]
   },
@@ -269,64 +267,6 @@
     ],
     "melody": [
       {
-        "bank": 0,
-        "program": 126,
-        "name": "A New Day Synth 1",
-        "use": "soft character lead; octave-fitted",
-        "playableRange": [
-          60,
-          75
-        ]
-      },
-      {
-        "bank": 1,
-        "program": 0,
-        "name": "Alt. Limit Synth 1",
-        "use": "general character lead"
-      },
-      {
-        "bank": 1,
-        "program": 1,
-        "name": "Alt. Limit Synth 2",
-        "use": "general character lead"
-      },
-      {
-        "bank": 1,
-        "program": 4,
-        "name": "Dead Line Synth 2",
-        "use": "mid/high character lead; octave-fitted",
-        "playableRange": [
-          72,
-          84
-        ]
-      },
-      {
-        "bank": 1,
-        "program": 5,
-        "name": "Dead Line Synth 3",
-        "use": "high-energy character lead; octave-fitted",
-        "playableRange": [
-          60,
-          87
-        ]
-      },
-      {
-        "bank": 1,
-        "program": 6,
-        "name": "Eggman Boss Saw",
-        "use": "high-energy saw; octave-fitted",
-        "playableRange": [
-          72,
-          87
-        ]
-      },
-      {
-        "bank": 1,
-        "program": 9,
-        "name": "Exception Synth 2",
-        "use": "general character lead"
-      },
-      {
         "bank": 1,
         "program": 13,
         "name": "Huge Crisis Synth 2",
@@ -334,28 +274,6 @@
         "playableRange": [
           0,
           89
-        ]
-      },
-      {
-        "bank": 1,
-        "program": 14,
-        "name": "Huge Crisis Synth 3A",
-        "use": "high-energy lead"
-      },
-      {
-        "bank": 1,
-        "program": 15,
-        "name": "Huge Crisis Synth 3B",
-        "use": "high-energy lead"
-      },
-      {
-        "bank": 1,
-        "program": 19,
-        "name": "Mirage Road Synth 4",
-        "use": "mid-energy lead; octave-fitted",
-        "playableRange": [
-          48,
-          87
         ]
       },
       {
@@ -369,12 +287,6 @@
         "program": 22,
         "name": "Sine Wave 2",
         "use": "soft/simple"
-      },
-      {
-        "bank": 1,
-        "program": 23,
-        "name": "Saw Wave 1",
-        "use": "mid-energy"
       },
       {
         "bank": 1,
@@ -1028,59 +940,14 @@
       "program": 125
     },
     {
-      "name": "A New Day Synth 1",
-      "bank": 0,
-      "program": 126
-    },
-    {
-      "name": "Alt. Limit Synth 1",
-      "bank": 1,
-      "program": 0
-    },
-    {
-      "name": "Alt. Limit Synth 2",
-      "bank": 1,
-      "program": 1
-    },
-    {
       "name": "Altitude Limit Synth",
       "bank": 1,
       "program": 2
     },
     {
-      "name": "Dead Line Synth 1",
-      "bank": 1,
-      "program": 3
-    },
-    {
-      "name": "Dead Line Synth 2",
-      "bank": 1,
-      "program": 4
-    },
-    {
-      "name": "Dead Line Synth 3",
-      "bank": 1,
-      "program": 5
-    },
-    {
-      "name": "Eggman Boss Saw",
-      "bank": 1,
-      "program": 6
-    },
-    {
-      "name": "Eggman Boss Synth",
-      "bank": 1,
-      "program": 7
-    },
-    {
       "name": "Exception Synth 1",
       "bank": 1,
       "program": 8
-    },
-    {
-      "name": "Exception Synth 2",
-      "bank": 1,
-      "program": 9
     },
     {
       "name": "Final Zone Synth 1",
@@ -1103,16 +970,6 @@
       "program": 13
     },
     {
-      "name": "Huge Crisis Synth 3A",
-      "bank": 1,
-      "program": 14
-    },
-    {
-      "name": "Huge Crisis Synth 3B",
-      "bank": 1,
-      "program": 15
-    },
-    {
       "name": "Mirage Road Synth 1",
       "bank": 1,
       "program": 16
@@ -1128,11 +985,6 @@
       "program": 18
     },
     {
-      "name": "Mirage Road Synth 4",
-      "bank": 1,
-      "program": 19
-    },
-    {
       "name": "Water Palace Synth",
       "bank": 1,
       "program": 20
@@ -1146,11 +998,6 @@
       "name": "Sine Wave 2",
       "bank": 1,
       "program": 22
-    },
-    {
-      "name": "Saw Wave 1",
-      "bank": 1,
-      "program": 23
     },
     {
       "name": "Saw Wave 2",
