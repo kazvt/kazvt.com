@@ -7083,6 +7083,127 @@
       .proc-hw-control--interval .proc-mini-screen{min-height:9px !important;height:9px !important;font-size:5px !important}
       .proc-hw-control--interval .proc-mini-fader{height:6px !important}
     }
+
+    /* ==============================================================
+       RESPONSIVE PROCEDURAL PANEL — compact, viewport-safe Tailwind-style
+       sizing. Direct settings always own the remaining height and can scroll
+       when a short viewport cannot physically show every control at once.
+       ============================================================== */
+    .procedural-deck{
+      --proc-sidecar-width:clamp(220px,23vw,288px) !important;
+      grid-template-rows:auto auto minmax(72px,.36fr) minmax(0,1.64fr) auto !important;
+      gap:3px !important;
+      padding:clamp(4px,.65vh,7px) clamp(4px,.55vw,7px) !important;
+    }
+    .proc-sidecar-head{padding:1px 10px 3px !important}
+    .proc-sidecar-head__maker{font-size:clamp(8px,1.05vh,11px) !important}
+    .proc-sidecar-head__model{margin-top:2px !important;font-size:5px !important}
+    .proc-seed-module{padding:3px 5px !important}
+    .proc-seed-window{min-height:20px !important;margin-top:2px !important;padding:1px 4px !important;font-size:clamp(10px,1.45vh,13px) !important}
+    .proc-seed-caption{margin-top:2px !important;font-size:4px !important}
+    .vibe-module{padding:2px !important;gap:2px 3px !important;grid-template-columns:15px minmax(0,1fr) 15px !important}
+    .vibe-module__title{font-size:5px !important}
+    .vibe-axis-label{font-size:5px !important}
+    .vibe-pad-shell{width:min(100%,92px) !important;padding:3px !important}
+
+    .proc-direct-module{
+      min-height:0 !important;
+      height:100% !important;
+      max-height:100% !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      overscroll-behavior:contain !important;
+      scrollbar-gutter:stable !important;
+      scrollbar-width:thin !important;
+      scrollbar-color:#55595b #1a1c1e !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      grid-auto-rows:max-content !important;
+      align-content:start !important;
+      gap:2px !important;
+      padding:2px 3px 4px !important;
+    }
+    .proc-direct-module::-webkit-scrollbar{display:block !important;width:6px !important;height:0 !important}
+    .proc-direct-module::-webkit-scrollbar-track{background:#181a1c !important}
+    .proc-direct-module::-webkit-scrollbar-thumb{background:#55595b !important;border:1px solid #25282a !important;border-radius:999px !important}
+    .proc-direct-head{
+      position:sticky !important;
+      top:0 !important;
+      z-index:8 !important;
+      margin:-2px -3px 0 !important;
+      padding:3px 5px 2px !important;
+      min-height:0 !important;
+      font-size:5px !important;
+      line-height:1 !important;
+      background:linear-gradient(180deg,#373a3d,#2b2e31) !important;
+      box-shadow:0 1px 3px rgba(0,0,0,.28) !important;
+    }
+    .proc-direct-head small,.proc-scroll-hint{display:none !important}
+    .proc-section-title{margin:0 !important;gap:4px !important;font-size:4px !important;line-height:1 !important}
+    .proc-hw-control{
+      min-height:0 !important;
+      grid-template-rows:5px 14px 12px !important;
+      gap:1px !important;
+      padding:2px 3px !important;
+    }
+    .proc-hw-control--wide{
+      grid-template-rows:5px 14px 12px 5px !important;
+      gap:1px !important;
+      padding:2px 3px !important;
+    }
+    .proc-hw-control--interval{grid-template-rows:5px 12px 9px !important;padding:1px 2px 2px !important}
+    .proc-hw-control__legend{font-size:4.4px !important;letter-spacing:.065em !important}
+    .proc-mini-screen{min-height:14px !important;height:14px !important;padding:1px 3px !important;font-size:6.8px !important}
+    .proc-mini-screen--chords{font-size:5.4px !important}
+    .proc-mini-screen--source{font-size:6.2px !important}
+    .proc-mini-fader{height:12px !important;padding:0 4px !important}
+    .proc-mini-fader input[type="range"]{inset:0 3px !important;width:calc(100% - 6px) !important}
+    .proc-mini-fader input[type="range"]::-webkit-slider-thumb{width:9px !important;height:10px !important;margin-top:-4px !important}
+    .proc-mini-fader input[type="range"]::-moz-range-thumb{width:9px !important;height:10px !important}
+    .proc-source-scale{font-size:3.5px !important;gap:1px !important}
+
+    @media(max-width:980px){
+      .procedural-deck{--proc-sidecar-width:clamp(210px,29vw,260px) !important}
+    }
+    @media(max-width:700px){
+      .procedural-deck{--proc-sidecar-width:clamp(190px,42vw,232px) !important;padding-left:4px !important;padding-right:4px !important}
+      .proc-sidecar-head__model,.proc-seed-caption{display:none !important}
+      .proc-hw-control__legend{font-size:4px !important;letter-spacing:.045em !important}
+      .proc-mini-screen{font-size:6.2px !important}
+      .proc-mini-screen--chords{font-size:4.9px !important}
+    }
+    @media(max-width:480px){
+      .procedural-deck{--proc-sidecar-width:clamp(172px,45vw,205px) !important;gap:2px !important;padding:3px !important}
+      .vibe-module{grid-template-columns:12px minmax(0,1fr) 12px !important}
+      .vibe-axis-label{font-size:4px !important}
+      .proc-direct-module{gap:1px !important;padding:1px 2px 3px !important}
+      .proc-hw-control,.proc-hw-control--wide{padding-left:2px !important;padding-right:2px !important}
+      .proc-source-scale{font-size:3px !important}
+    }
+    @media(max-height:650px){
+      .procedural-deck{grid-template-rows:auto auto 62px minmax(0,1fr) auto !important;gap:2px !important}
+      .proc-sidecar-head__model,.proc-seed-caption,.vibe-module__title{display:none !important}
+      .proc-seed-module{padding-top:2px !important;padding-bottom:2px !important}
+      .proc-seed-window{min-height:17px !important;height:17px !important;font-size:9px !important}
+      .vibe-pad-shell{width:min(100%,56px) !important;padding:2px !important}
+      .proc-sidecar-foot{font-size:4px !important}
+    }
+    @media(max-height:520px){
+      .procedural-deck{grid-template-rows:auto auto minmax(0,1fr) !important}
+      .vibe-module,.proc-sidecar-foot{display:none !important}
+      .proc-direct-head{position:sticky !important;display:flex !important}
+      .proc-hw-control{grid-template-rows:4px 12px 10px !important;padding:1px 2px !important}
+      .proc-hw-control--wide{grid-template-rows:4px 12px 10px 4px !important;padding:1px 2px !important}
+      .proc-hw-control__legend{font-size:3.8px !important}
+      .proc-mini-screen{min-height:12px !important;height:12px !important;font-size:5.8px !important}
+      .proc-mini-fader{height:10px !important}
+      .proc-source-scale{font-size:2.9px !important}
+    }
+    @media(max-height:400px){
+      .proc-sidecar-head{display:none !important}
+      .procedural-deck{grid-template-rows:auto minmax(0,1fr) !important;padding-top:2px !important;padding-bottom:2px !important}
+      .proc-direct-head{display:none !important}
+    }
+
 </style>
 </head>
 
@@ -7213,7 +7334,7 @@
           <div id="channelGrid" class="channel-grid"></div>
         </div>
 
-        <aside id="proceduralDeck" class="procedural-deck relative z-[6] hidden h-full w-[164px] flex-none sm:w-[184px] xl:w-[210px]" hidden aria-label="Procedural generator VIBE controls">
+        <aside id="proceduralDeck" class="procedural-deck relative z-[6] hidden h-full min-h-0 w-[clamp(188px,38vw,288px)] max-w-[48vw] flex-none overflow-hidden sm:w-[clamp(210px,31vw,270px)] xl:w-[288px]" hidden aria-label="Procedural generator VIBE controls">
           <span class="procedural-deck__screw s1" aria-hidden="true"></span><span class="procedural-deck__screw s2" aria-hidden="true"></span><span class="procedural-deck__screw s3" aria-hidden="true"></span><span class="procedural-deck__screw s4" aria-hidden="true"></span>
 
           <div class="proc-sidecar-head">
@@ -7240,7 +7361,7 @@
             </div>
           </div>
 
-          <div class="proc-info-module proc-direct-module" aria-label="Procedural direct program settings">
+          <div class="proc-info-module proc-direct-module min-h-0 overflow-x-hidden overflow-y-auto" aria-label="Procedural direct program settings">
             <div class="proc-direct-head">
               <span>DIRECT PROGRAM</span>
               <small>MOVE = HOLD · DBL DISPLAY = SEED AUTO</small>
@@ -7271,6 +7392,15 @@
               <span class="proc-hw-control__legend">CHORD PROGRAM <i class="proc-lock-lamp" aria-hidden="true"></i></span>
               <span id="proceduralChordReadout" class="proc-mini-screen proc-mini-screen--chords">I · V · VI · IV</span>
               <span class="proc-mini-fader"><input id="proceduralChordControl" type="range" min="0" max="9" step="1" value="0" aria-label="Procedural chord program"></span>
+            </label>
+
+            <div class="proc-section-title" aria-hidden="true">TONE SOURCE</div>
+
+            <label class="proc-hw-control proc-hw-control--wide" data-proc-control="soundfont">
+              <span class="proc-hw-control__legend">SOUNDFONT RACK <i class="proc-source-lamp" aria-hidden="true"></i></span>
+              <span id="proceduralSoundFontReadout" class="proc-mini-screen proc-mini-screen--source">AUTO RACK</span>
+              <span class="proc-mini-fader proc-mini-fader--source"><input id="proceduralSoundFontControl" type="range" min="0" max="3" step="1" value="0" aria-label="Procedural SoundFont: Auto rack, SF64, Gotta Rush, or Genies"></span>
+              <span class="proc-source-scale" aria-hidden="true"><b>AUTO</b><b>SF64</b><b>Gotta Rush</b><b>Genies</b></span>
             </label>
 
             <div class="proc-section-title" aria-hidden="true">PERFORMANCE</div>
@@ -7306,14 +7436,6 @@
               <span class="proc-source-scale proc-variance-scale" aria-hidden="true"><b>REPEAT</b><b>SUBTLE</b><b>EVOLVE</b><b>RADICAL</b></span>
             </label>
 
-            <div class="proc-section-title" aria-hidden="true">TONE SOURCE</div>
-
-            <label class="proc-hw-control proc-hw-control--wide" data-proc-control="soundfont">
-              <span class="proc-hw-control__legend">SOUNDFONT RACK <i class="proc-source-lamp" aria-hidden="true"></i></span>
-              <span id="proceduralSoundFontReadout" class="proc-mini-screen proc-mini-screen--source">AUTO RACK</span>
-              <span class="proc-mini-fader proc-mini-fader--source"><input id="proceduralSoundFontControl" type="range" min="0" max="3" step="1" value="0" aria-label="Procedural SoundFont: Auto rack, SF64, Gotta Rush, or Genies"></span>
-              <span class="proc-source-scale" aria-hidden="true"><b>AUTO</b><b>SF64</b><b>Gotta Rush</b><b>Genies</b></span>
-            </label>
           </div>
 
           <div class="proc-sidecar-foot"><span>GENERATOR BUS</span><span>WF-PG/01</span></div>
@@ -8297,8 +8419,9 @@
   function buildPlaylistsFromManifest(manifest) {
     const groups = new Map();
     for (const file of (manifest?.files || [])) {
-      const isMidi = MIDI_EXT_RE.test(file);
-      if (!(AUDIO_EXT_RE.test(file) || isMidi)) continue;
+      // Playlist mode is intentionally audio-only. MIDI files in the manifest
+      // are ignored so playback never waits for MIDI parsing/SoundFont renders.
+      if (!AUDIO_EXT_RE.test(file)) continue;
       const folder = parentFolder(file);
       if (!groups.has(folder)) groups.set(folder, []);
       groups.get(folder).push({
@@ -8307,7 +8430,7 @@
         src:file,
         displayPath:file,
         kind:"url",
-        mediaType:isMidi ? "midi" : "audio"
+        mediaType:"audio"
       });
     }
     return [...groups.entries()].map(([folder,stems],index)=>({
@@ -8325,8 +8448,9 @@
     const groups = new Map();
     for (const file of [...fileList]) {
       const rel = file.webkitRelativePath || file.name;
-      const isMidi = MIDI_EXT_RE.test(rel) || /audio\/(midi|x-midi)/i.test(file.type || "");
-      if (!(file.type?.startsWith("audio/") || AUDIO_EXT_RE.test(rel) || isMidi)) continue;
+      // Folder imports match bundled playlist behavior: regular audio only.
+      // MIDI files are skipped rather than routed through the SF2 renderer.
+      if (!(file.type?.startsWith("audio/") && !/audio\/(midi|x-midi)/i.test(file.type || "")) && !AUDIO_EXT_RE.test(rel)) continue;
       const folder = parentFolder(rel);
       if (!groups.has(folder)) groups.set(folder, []);
       const objectUrl = URL.createObjectURL(file);
@@ -8337,7 +8461,7 @@
         src:objectUrl,
         displayPath:rel,
         kind:"object-url",
-        mediaType:isMidi ? "midi" : "audio"
+        mediaType:"audio"
       });
     }
     return [...groups.entries()].map(([folder,stems],index)=>({
@@ -11037,7 +11161,11 @@
 
   async function getDecodedStemBuffer(stem) {
     ensureAudioGraph();
-    if (stem?.mediaType === "midi") return getRenderedMidiStemBuffer(stem);
+
+    // Defensive guard: playlist playback is audio-only in this build.
+    if (stem?.mediaType === "midi" || MIDI_EXT_RE.test(stem?.displayPath || stem?.src || "")) {
+      throw new Error("MIDI playlist stems are disabled in this audio-only build.");
+    }
 
     const key = stemCacheKey(stem);
     if (!key) throw new Error("Stem has no cache key.");
