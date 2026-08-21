@@ -1,48 +1,64 @@
 @font-face {
-  font-family: "Kazvt Digiwrite";
+  font-family: "KAZVT Digiwrite";
   src: url("zzz_assets/fonts/DIGIWRITE.ttf") format("truetype");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Kazvt Classic MMO";
+  font-family: "KAZVT Classic MMO";
   src: url("zzz_assets/fonts/CLASSIC MMO.ttf") format("truetype");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Kazvt Tangled";
+  font-family: "KAZVT Tangled";
   src: url("zzz_assets/fonts/TANGLED.otf") format("opentype");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Kazvt Sweet";
+  font-family: "KAZVT Sweet";
   src: url("zzz_assets/fonts/SWEET.otf") format("opentype");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Kazvt Comrade";
-  src: url("zzz_assets/fonts/COMRADE.ttf") format("truetype");
+  font-family: "KAZVT Lined Paper";
+  src: url("zzz_assets/fonts/LINED PAPER.ttf") format("truetype");
   font-display: swap;
-  size-adjust: 150%;
 }
 
 @font-face {
-  font-family: "Kazvt Handwrite";
+  font-family: "KAZVT East";
+  src: url("zzz_assets/fonts/EAST.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT Comrade";
+  src: url("zzz_assets/fonts/COMRADE.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT Veggie";
+  src: url("zzz_assets/fonts/VEGGIE.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT Handwrite";
   src: url("zzz_assets/fonts/HANDWRITE.ttf") format("truetype");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Kazvt Aero";
+  font-family: "KAZVT Aero";
   src: url("zzz_assets/fonts/AERO.ttf") format("truetype");
   font-display: swap;
 }
 
 :root {
-  --site-font: "Comic Sans MS", "Comic Sans", cursive;
   --cream: #FFEA88;
   --paper: #FFEA88;
   --paper-alt: #FFEA88;
@@ -82,19 +98,8 @@
   --visualizer-primary: #FFEA88;
   --visualizer-secondary: #F599C6;
   --visualizer-accent: #7DCCAD;
+  --site-font: "Comic Sans MS", "Comic Sans", cursive;
 }
-
-/* Palette typography ---------------------------------------------------------
-   Custom fonts are loaded from zzz_assets/fonts. Palettes not listed here use
-   Comic Sans MS via --site-font. */
-body[data-theme="p1"] { --site-font: "Kazvt Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p2"] { --site-font: "Kazvt Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p3"] { --site-font: "Kazvt Tangled", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p6"] { --site-font: "Kazvt Sweet", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p7"] { --site-font: "Kazvt Comrade", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p10"] { --site-font: "Kazvt Handwrite", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p12"] { --site-font: "Kazvt Aero", "Comic Sans MS", "Comic Sans", cursive; }
-
 
 * {
   box-sizing: border-box;
@@ -133,6 +138,19 @@ body {
   letter-spacing: 0;
   cursor: var(--cursor-default, auto);
 }
+
+
+/* Palette-specific typography. Unlisted palettes intentionally use Comic Sans MS. */
+body[data-theme="p1"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p2"] { --site-font: "KAZVT Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p3"] { --site-font: "KAZVT Tangled", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p5"] { --site-font: "KAZVT East", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p10"] { --site-font: "KAZVT Handwrite", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p12"] { --site-font: "KAZVT Aero", "Comic Sans MS", "Comic Sans", cursive; }
 
 ::selection {
   background: var(--selection-bg);
