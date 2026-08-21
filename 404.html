@@ -1,6 +1,19 @@
 <!doctype html>
 <html lang="">
   <head>
+  <script>
+    (() => {
+      const multistreamAliases = new Set([
+        "multistream", "multistreaming", "dualstream", "dualstreaming",
+        "multi-stream", "multi-streaming", "dual-stream", "dual-streaming",
+        "multi_stream", "multi_streaming", "dual_stream", "dual_streaming"
+      ]);
+      const requestedPath = location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
+      if (multistreamAliases.has(requestedPath)) {
+        location.replace("https://kazvt.com/#multistream");
+      }
+    })();
+  </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="/">
@@ -753,7 +766,7 @@
       <nav class="oldweb-nav scribble-box" data-i18n-aria-label="nav.aria">
         <a href="/#links" data-i18n="nav.links"></a>
         <a href="/#profile" data-i18n="nav.profile"></a>
-        <a class="nav-multistream" href="/#multistream-guide-home"><span data-i18n="nav.multistream_top"></span><span data-i18n="nav.multistream_bottom"></span></a>
+        <a class="nav-multistream" href="/#multistream"><span data-i18n="nav.multistream_top"></span><span data-i18n="nav.multistream_bottom"></span></a>
         <a href="/#guestbook" data-i18n="nav.guestbook"></a>
         <a href="/#paint" data-i18n="nav.paint"></a>
         <a href="/#badges" data-i18n="nav.badges"></a>

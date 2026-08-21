@@ -2232,9 +2232,23 @@ function initializeWumpaGame() {
 let scrollTargetHighlightTimer = 0;
 let scrollTargetHighlightFrame = 0;
 
-function findSamePageHashTarget(hash) {
-  if (!hash || hash === "#") return null;
+function canonicalSamePageHash(hash) {
+  if (!hash || hash === "#") return hash;
   const rawId = hash.slice(1);
+  let id = rawId;
+  try {
+    id = decodeURIComponent(rawId);
+  } catch {}
+
+  // Keep old shared links alive, but normalize them to the shorter canonical URL.
+  if (id === "multistream-guide-home") return "#multistream";
+  return hash;
+}
+
+function findSamePageHashTarget(hash) {
+  const canonicalHash = canonicalSamePageHash(hash);
+  if (!canonicalHash || canonicalHash === "#") return null;
+  const rawId = canonicalHash.slice(1);
   let id = rawId;
   try {
     id = decodeURIComponent(rawId);
@@ -2322,16 +2336,24 @@ function initializeScrollTargetHighlights() {
   });
 
   window.addEventListener("hashchange", () => {
-    window.setTimeout(() => scrollHashTargetIntoView(window.location.hash), 0);
+    const canonicalHash = canonicalSamePageHash(window.location.hash);
+    if (canonicalHash && canonicalHash !== window.location.hash) {
+      history.replaceState(null, "", `${window.location.pathname}${window.location.search}${canonicalHash}`);
+    }
+    window.setTimeout(() => scrollHashTargetIntoView(canonicalHash || window.location.hash), 0);
   });
 
   if (window.location.hash) {
-    window.setTimeout(() => scrollHashTargetIntoView(window.location.hash), 0);
+    const canonicalHash = canonicalSamePageHash(window.location.hash);
+    if (canonicalHash && canonicalHash !== window.location.hash) {
+      history.replaceState(null, "", `${window.location.pathname}${window.location.search}${canonicalHash}`);
+    }
+    window.setTimeout(() => scrollHashTargetIntoView(canonicalHash || window.location.hash), 0);
   }
 }
 
 function multistreamGuidePanel() {
-  return el("section", { id: "multistream-guide-home", className: "panel guide-launch-panel scribble-box" }, [
+  return el("section", { id: "multistream", className: "panel guide-launch-panel scribble-box" }, [
     el("button", { type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
       el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker")]),
       el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary")]),
@@ -3269,7 +3291,10 @@ function initializeLiveStreamTitle(statuses = {}, streamInfo = {}) {
 }
 
 async function bootSite() {
-  const initialHash = window.location.hash;
+  let initialHash = canonicalSamePageHash(window.location.hash);
+  if (initialHash && initialHash !== window.location.hash) {
+    history.replaceState(null, "", `${window.location.pathname}${window.location.search}${initialHash}`);
+  }
 
   await loadActiveEmotes();
   await loadActiveLanguageText();
@@ -3290,7 +3315,7 @@ async function bootSite() {
 
   initializeScrollTargetHighlights();
 
-  // The homepage panels (including #multistream-guide-home) are rendered above,
+  // The homepage panels (including #multistream) are rendered above,
   // after the browser's native initial hash jump would normally have happened.
   // Re-run the jump after render so shared direct links land correctly on load.
   if (initialHash && window.location.hash === initialHash) {
