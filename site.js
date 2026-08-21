@@ -712,6 +712,18 @@ function parseKeyValueLines(lines) {
   return values;
 }
 
+function parseColonKeyValueLines(lines) {
+  const values = {};
+  lines.forEach((line) => {
+    const separator = line.indexOf(":");
+    if (separator === -1) return;
+    const key = line.slice(0, separator).trim().toLowerCase();
+    const value = line.slice(separator + 1).trim();
+    if (key) values[key] = value;
+  });
+  return values;
+}
+
 async function loadLanguageManifest() {
   const lines = await loadTextLines("languages.txt");
   const values = parseKeyValueLines(lines.flatMap((line) => line.split(",")));
@@ -3163,13 +3175,97 @@ async function render(statusOverrides = {}) {
 }
 
 async function loadStatus() {
-  try {
-    const response = await fetch("status.json", { cache: "no-store" });
-    if (!response.ok) return {};
-    return response.json();
-  } catch {
-    return {};
-  }
+  return parseColonKeyValueLines(await loadTextLines("status.txt"));
+}
+
+async function loadLastStreamInfo() {
+  return parseColonKeyValueLines(await loadTextLines("last_stream_info.txt"));
+}
+
+function hasLivePlatform(statuses = {}) {
+  return streamLinks.some((link) => normalizeStatus(String(statuses[link.key] || "").trim().toLowerCase()) === "live");
+}
+
+function liveStreamMarqueePiece(title, profile) {
+  const piece = el("span", {
+    className: `marquee-piece marquee-piece-boil-${profile.variant}`,
+    ariaHidden: "true",
+  });
+  piece.style.setProperty("--marquee-piece-boil-duration", `${profile.duration}ms`);
+  piece.style.setProperty("--marquee-piece-boil-delay", `-${profile.phase}ms`);
+  piece.style.setProperty("--marquee-piece-boil-direction", profile.reverse ? "reverse" : "normal");
+  setInlineNote(piece, title, { animate: false });
+  return piece;
+}
+
+function initializeLiveStreamTitle(statuses = {}, streamInfo = {}) {
+  document.querySelector("[data-live-stream-title-shell]")?.remove();
+
+  const title = String(streamInfo.title || "").trim();
+  if (!title || !hasLivePlatform(statuses)) return;
+
+  const originalMarquee = document.querySelector(".marquee");
+  if (!originalMarquee) return;
+
+  const shell = el("div", {
+    className: "live-stream-title-shell live-stream-title-spawn",
+  });
+  shell.dataset.liveStreamTitleShell = "";
+
+  const bar = el("div", {
+    className: "marquee scribble-box live-stream-title-marquee",
+    ariaLabel: title,
+  });
+  const track = el("span");
+  track.dataset.liveStreamTitleTrack = "";
+  bar.append(track);
+  shell.append(bar);
+  originalMarquee.before(shell);
+
+  const variants = ["a", "b", "c", "d"];
+  const profile = {
+    variant: variants[Math.floor(Math.random() * variants.length)],
+    duration: 430 + Math.floor(Math.random() * 190),
+    phase: Math.floor(Math.random() * 430),
+    reverse: Math.random() < 0.5,
+  };
+
+  // Match the original marquee's repeat gap exactly. Fill one conveyor copy
+  // wide enough that short stream titles never leave a blank stretch onscreen.
+  const measuringPiece = liveStreamMarqueePiece(title, profile);
+  track.append(measuringPiece);
+  const pieceWidth = Math.max(1, measuringPiece.getBoundingClientRect().width);
+  const barWidth = Math.max(1, bar.getBoundingClientRect().width);
+  const repeatsPerSequence = Math.max(2, Math.ceil((barWidth * 1.25) / pieceWidth));
+  measuringPiece.remove();
+
+  const makeSequence = (duplicate = false) => {
+    const sequence = el("span", { className: "marquee-sequence" });
+    if (duplicate) sequence.setAttribute("aria-hidden", "true");
+    for (let index = 0; index < repeatsPerSequence; index += 1) {
+      sequence.append(liveStreamMarqueePiece(title, profile));
+    }
+    return sequence;
+  };
+
+  const firstSequence = makeSequence(false);
+  const secondSequence = makeSequence(true);
+  track.replaceChildren(firstSequence, secondSequence);
+
+  const sequenceWidth = firstSequence.getBoundingClientRect().width;
+  const pixelsPerSecond = 92;
+  track.style.setProperty("--marquee-duration", `${Math.max(1, sequenceWidth / pixelsPerSecond).toFixed(2)}s`);
+
+  const setPlaybackRate = (rate) => {
+    track.getAnimations().forEach((animation) => {
+      if ("animationName" in animation && animation.animationName !== "marquee") return;
+      if (typeof animation.updatePlaybackRate === "function") animation.updatePlaybackRate(rate);
+      else animation.playbackRate = rate;
+    });
+  };
+  bar.addEventListener("mouseenter", () => setPlaybackRate(0.25));
+  bar.addEventListener("mouseleave", () => setPlaybackRate(1));
+  shell.addEventListener("animationend", () => shell.classList.remove("live-stream-title-spawn"), { once: true });
 }
 
 async function bootSite() {
@@ -3183,7 +3279,9 @@ async function bootSite() {
   await initializeMarquee();
 
   if (document.body.dataset.page === "home" && document.querySelector("#app")) {
-    await render(await loadStatus());
+    const [status, streamInfo] = await Promise.all([loadStatus(), loadLastStreamInfo()]);
+    await render(status);
+    initializeLiveStreamTitle(status, streamInfo);
   } else {
     await initializeMusicPlayer();
     applyLanguageText(document);

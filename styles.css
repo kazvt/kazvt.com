@@ -4750,3 +4750,68 @@ html.touch-device .big-palette .palette-cursor-preview {
   border-radius: 0 !important;
   clip-path: none !important;
 }
+
+/* Live stream title ---------------------------------------------------------
+   Streamer.bot writes status.txt + last_stream_info.txt. When any configured
+   stream platform is online, site.js mounts this ticker immediately above the
+   normal site marquee and fills it with the current stream title. */
+.live-stream-title-shell {
+  overflow: clip;
+  transform-origin: 50% 0;
+}
+
+.live-stream-title-shell.live-stream-title-spawn {
+  animation: liveStreamTitleSpawn 560ms cubic-bezier(0.18, 1.52, 0.42, 1) both;
+}
+
+.live-stream-title-marquee {
+  margin-bottom: 9px;
+  background: color-mix(in srgb, var(--yellow) 64%, var(--banner) 36%);
+  color: var(--ink);
+}
+
+.marquee > span[data-live-stream-title-track] {
+  display: flex;
+  width: max-content;
+  min-width: 0;
+  padding-left: 0;
+  white-space: nowrap;
+  animation: marquee var(--marquee-duration, 18s) linear infinite !important;
+  will-change: transform;
+}
+
+@keyframes liveStreamTitleSpawn {
+  0% {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-13px) scaleY(0.08) scaleX(0.92);
+  }
+  42% {
+    max-height: 88px;
+    opacity: 1;
+    transform: translateY(3px) scaleY(1.12) scaleX(1.015);
+  }
+  70% {
+    max-height: 88px;
+    transform: translateY(-2px) scaleY(0.96) scaleX(0.995);
+  }
+  100% {
+    max-height: 88px;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+  .marquee > span[data-live-stream-title-track] {
+    translate: none;
+    animation: marquee var(--marquee-duration, 18s) linear infinite !important;
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-stream-title-shell.live-stream-title-spawn {
+    animation: none;
+  }
+}
