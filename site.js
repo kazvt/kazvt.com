@@ -3315,7 +3315,7 @@ async function bootSite() {
 
   initializeScrollTargetHighlights();
 
-  // The homepage panels (including #multistream) are rendered above,
+  // The homepage panels (including the #multistream launch button) are rendered above,
   // after the browser's native initial hash jump would normally have happened.
   // Re-run the jump after render so shared direct links land correctly on load.
   if (initialHash && window.location.hash === initialHash) {
