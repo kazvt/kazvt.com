@@ -7267,15 +7267,77 @@
       color:#c98658;text-shadow:0 0 4px rgba(198,92,47,.34);
       font-family:"Share Tech Mono",monospace;font-size:9px;font-weight:800;letter-spacing:.02em;white-space:nowrap;
     }
-    .top-tempo-range{width:58px;height:17px;accent-color:#777;cursor:pointer}
+    /* TEMPO uses the same miniature analogue fader hardware language as the
+       transport TIME / song-position fader: recessed rail, etched ticks and a
+       weathered metal cap. The control behavior/ID stays exactly the same. */
+    .top-tempo-fader-wrap{
+      position:relative;
+      display:flex;
+      align-items:center;
+      width:68px;
+      height:23px;
+      min-width:68px;
+      padding:0 7px;
+      border:1px solid #08080a;
+      border-radius:2px;
+      background:linear-gradient(180deg,#111114,#17171a);
+      box-shadow:inset 0 2px 4px rgba(0,0,0,.72),0 0 0 1px #303035;
+    }
+    .top-tempo-fader-wrap::before{
+      content:"";
+      position:absolute;
+      left:8px;right:8px;top:4px;bottom:4px;
+      pointer-events:none;
+      background:repeating-linear-gradient(90deg,rgba(87,86,90,.46) 0 1px,transparent 1px 10px);
+      opacity:.66;
+      mask:linear-gradient(180deg,#000 0 3px,transparent 3px calc(100% - 3px),#000 calc(100% - 3px));
+      -webkit-mask:linear-gradient(180deg,#000 0 3px,transparent 3px calc(100% - 3px),#000 calc(100% - 3px));
+    }
+    .top-tempo-range{
+      -webkit-appearance:none;appearance:none;
+      position:relative;z-index:1;
+      width:100%;height:21px;margin:0;
+      background:transparent;cursor:ew-resize;touch-action:none;
+      accent-color:transparent !important;outline:none;
+    }
+    .top-tempo-range::-webkit-slider-runnable-track{
+      height:5px;border:1px solid #050506;border-radius:0;
+      background:repeating-linear-gradient(90deg,#343439 0 1px,transparent 1px 12px),linear-gradient(#050506,#09090b);
+      box-shadow:inset 0 1px 2px #000;
+    }
+    .top-tempo-range::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:22px;height:16px;margin-top:-6px;
+      border:1px solid #343136;border-top-color:#4b4748;border-bottom-color:#171618;border-radius:3px;
+      background:
+        radial-gradient(circle at 23% 31%,rgba(221,207,177,.085) 0 .65px,transparent 1px) 0 0/7px 8px,
+        radial-gradient(circle at 76% 71%,rgba(31,27,28,.17) 0 .75px,transparent 1.05px) 0 0/9px 11px,
+        linear-gradient(108deg,transparent 0 25%,rgba(215,202,176,.04) 25.5% 26%,transparent 26.5% 71%,rgba(0,0,0,.13) 71.5% 72%,transparent 72.5%),
+        repeating-linear-gradient(to bottom,#666166 0 2px,#5a555a 2px 4px,#4b474c 4px 5px),
+        linear-gradient(180deg,#6b6669,#484449);
+      box-shadow:0 2px 1px rgba(0,0,0,.73),0 0 0 1px rgba(30,27,29,.72),inset 0 1px 0 rgba(211,199,174,.065),inset 0 -2px 2px rgba(24,21,22,.32);
+      filter:saturate(.72) contrast(.96);
+    }
+    .top-tempo-range::-moz-range-track{
+      height:5px;border:1px solid #050506;border-radius:0;
+      background:repeating-linear-gradient(90deg,#343439 0 1px,transparent 1px 12px),linear-gradient(#050506,#09090b);
+      box-shadow:inset 0 1px 2px #000;
+    }
+    .top-tempo-range::-moz-range-thumb{
+      width:22px;height:16px;
+      border:1px solid #343136;border-top-color:#4b4748;border-bottom-color:#171618;border-radius:3px;
+      background:repeating-linear-gradient(to bottom,#666166 0 2px,#5a555a 2px 4px,#4b474c 4px 5px),linear-gradient(180deg,#6b6669,#484449);
+      box-shadow:0 2px 1px rgba(0,0,0,.73),0 0 0 1px rgba(30,27,29,.72),inset 0 1px 0 rgba(211,199,174,.065),inset 0 -2px 2px rgba(24,21,22,.32);
+    }
+    .top-tempo-range:focus-visible::-webkit-slider-thumb{outline:1px solid #85817a;outline-offset:2px}
     .top-tempo-random{
       width:22px;height:21px;min-width:22px;padding:0;border:1px solid #050506;border-radius:2px;
       background:linear-gradient(180deg,#2e2e31,#121214);color:#77736b;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);font-size:8px;cursor:pointer
     }
     .top-tempo-random:active{transform:translateY(1px)}
     .top-tempo-module.is-manual .top-tempo-screen{color:#d49a64}
-    @media(max-width:760px){.top-tempo-module{min-width:105px}.top-tempo-range{width:34px}.top-tempo-legend{display:none}}
-    @media(max-width:560px){.top-tempo-random{display:none}.top-tempo-module{min-width:78px}.top-tempo-range{width:28px}}
+    @media(max-width:760px){.top-tempo-module{min-width:122px}.top-tempo-fader-wrap{width:52px;min-width:52px;padding-left:5px;padding-right:5px}.top-tempo-legend{display:none}}
+    @media(max-width:560px){.top-tempo-random{display:none}.top-tempo-module{min-width:102px}.top-tempo-fader-wrap{width:46px;min-width:46px}}
 </style>
 </head>
 
@@ -7364,7 +7426,7 @@
         <div id="topTempoModule" class="top-tempo-module" hidden aria-label="Tempo control">
           <span class="top-tempo-legend" aria-hidden="true">TEMPO</span>
           <span id="topTempoReadout" class="top-tempo-screen">104 BPM</span>
-          <input id="topTempoControl" class="top-tempo-range" type="range" min="60" max="180" step="1" value="104" aria-label="Tempo in BPM">
+          <span class="top-tempo-fader-wrap" title="Tempo · analogue fader"><input id="topTempoControl" class="top-tempo-range" type="range" min="60" max="180" step="1" value="104" aria-label="Tempo in BPM"></span>
           <button id="topTempoRandomBtn" class="top-tempo-random" type="button" title="Randomize MIDI tempo for this session" aria-label="Randomize MIDI tempo">
             <i class="fa-solid fa-dice" aria-hidden="true"></i>
           </button>
@@ -8715,6 +8777,48 @@
     return source?.url ? stripExtension(basename(source.url)) : String(sourceId||"AUTO");
   }
 
+  const TRACK_CATEGORY_LABELS=Object.freeze({
+    drums:"Drums",percussion:"Percussion",bass:"Bass",keys:"Keys",melody:"Melody",guitar:"Guitar",strings:"Strings"
+  });
+
+  function trackCategoryLabel(role){
+    const key=String(role||"").toLowerCase();
+    return TRACK_CATEGORY_LABELS[key]||key.replace(/(^|[-_\s]+)([a-z])/g,(_,space,ch)=>`${space?" ":""}${ch.toUpperCase()}`).trim()||"Track";
+  }
+
+  function samePatchAndSoundFontName(soundfont,instrument){
+    return String(soundfont||"").trim().toLocaleLowerCase()===String(instrument||"").trim().toLocaleLowerCase();
+  }
+
+  function soundFontStripLabel(voice,role,{soundfontName=""}={}){
+    const sourceName=String(soundfontName||proceduralSoundFontDisplayName(voice?.source)||"SoundFont").trim();
+    const instrument=String(voice?.name||"").trim();
+    const category=trackCategoryLabel(role);
+    return instrument&&!samePatchAndSoundFontName(sourceName,instrument)
+      ?`${sourceName} · ${instrument} (${category})`
+      :`${sourceName} (${category})`;
+  }
+
+  function midiStemDisplayLabel(stem){
+    const role=midiStemRole(stem);
+    const voice=midiDefaultVoiceForStem(stem);
+    const soundfontName=stem?.midiSoundFontName||proceduralSoundFontDisplayName(voice?.source);
+    const instrument=stem?.midiVoiceName||voice?.name||"";
+    return soundFontStripLabel({...voice,name:instrument},role,{soundfontName});
+  }
+
+  function proceduralStemDisplayLabel(stem){
+    const voice=stem?.resolvedSf2Voice||stem?.sf2Voice||null;
+    if(!voice)return `${PROCEDURAL_FALLBACK_INSTRUMENT_NAMES?.[stem?.role]||"ANALOGUE BENCH"} (${trackCategoryLabel(stem?.role)})`;
+    return soundFontStripLabel(voice,stem?.role);
+  }
+
+  function mixerStripDisplayLabel(stem){
+    if(String(stem?.kind||"").startsWith("midi-"))return midiStemDisplayLabel(stem);
+    if(stem?.kind==="procedural"||appMode==="procedural")return proceduralStemDisplayLabel(stem);
+    return String(stem?.name||"Track");
+  }
+
   function chooseProceduralVoiceForSource(role,sourceId,program,preferred){
     if(sourceId==="genies")return chooseGeniesVoice(role,program);
     const candidates=curatedSourceCandidates(role,sourceId,program,preferred);
@@ -9121,7 +9225,7 @@
   }
 
   function proceduralStemInstrumentName(stem){
-    return String(stem?.resolvedSf2Voice?.name||PROCEDURAL_FALLBACK_INSTRUMENT_NAMES[stem?.role]||"BENCH INSTRUMENT");
+    return proceduralStemDisplayLabel(stem);
   }
 
   function syncProceduralChannelInstrumentLabels(){
@@ -9138,15 +9242,40 @@
       // fixed symbol is currently controlling when a user hovers it.
       const iconEl=channel.el?.querySelector("[data-instrument-icon]");
       if(iconEl){
-        const voice=channel.stem?.resolvedSf2Voice;
-        const source=voice?.source?proceduralSoundFontDisplayName(voice.source):"ANALOGUE BENCH";
         const explicit=!!proceduralStripVoicePreference(channel.stem.role);
         const locked=!!channel.state?.locked;
-        iconEl.title=`${label} · ${source} · click: next patch${explicit?" · STRIP PATCH":""}${locked?" · LOCKED":""}`;
-        iconEl.setAttribute("aria-label",`${channel.stem.role} instrument: ${label}, ${source}. Click for next compatible patch.${locked?" Strip locked.":""}`);
+        iconEl.title=`${label} · click: next patch${explicit?" · STRIP PATCH":""}${locked?" · LOCKED":""}`;
+        iconEl.setAttribute("aria-label",`${label}. Click for next compatible patch.${locked?" Strip locked.":""}`);
         iconEl.classList.toggle("has-strip-voice",explicit);
       }
       channel.stem.displayInstrumentName=label;
+      channel.el?.querySelectorAll("[data-action]").forEach(button=>{
+        const action=String(button.dataset.action||"").toUpperCase();
+        if(action==="MUTE"||action==="SOLO")button.title=`${action[0]}${action.slice(1).toLowerCase()} ${label}`;
+        else if(action==="LOCK"){button.title=`${channel.state.locked?"Unlock":"Lock"} ${label} from randomizer`;button.setAttribute("aria-label",button.title)}
+      });
+      const fader=channel.el?.querySelector(".fader");
+      if(fader)fader.setAttribute("aria-label",`${label} level`);
+      channel.el?.querySelectorAll(".side-meter").forEach(meter=>{
+        const side=meter.classList.contains("side-meter--left")?"left":"right";
+        meter.setAttribute("aria-label",`${label} ${side} output meter`);
+      });
+    }
+  }
+
+  function syncMidiChannelInstrumentLabels(){
+    if(appMode!=="playlist"||!isPureMidiPlaylist(currentPlaylist))return;
+    for(const channel of channels){
+      if(!isMidiStem(channel.stem))continue;
+      const label=midiStemDisplayLabel(channel.stem);
+      channel.stem.displayInstrumentName=label;
+      const nameEl=channel.el?.querySelector(".channel-name");
+      if(nameEl)setChannelNameLabel(nameEl,label);
+      const iconEl=channel.el?.querySelector("[data-instrument-icon]");
+      if(iconEl){
+        iconEl.title=label;
+        iconEl.setAttribute("aria-label",label);
+      }
       channel.el?.querySelectorAll("[data-action]").forEach(button=>{
         const action=String(button.dataset.action||"").toUpperCase();
         if(action==="MUTE"||action==="SOLO")button.title=`${action[0]}${action.slice(1).toLowerCase()} ${label}`;
@@ -10648,7 +10777,8 @@
   }
 
   function channelMarkup(stem,index,state) {
-    const title = escapeHtml(stem.name);
+    const stripLabel=mixerStripDisplayLabel(stem);
+    const title = escapeHtml(stripLabel);
     const iconMatch = predictInstrumentIcon(stem.name);
     return `
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
@@ -10700,7 +10830,7 @@
         </div>
 
         <div class="fader-zone min-h-0 grid">
-          ${faderMarkup(state.level,`${stem.name} level`,index,false)}
+          ${faderMarkup(state.level,`${stripLabel} level`,index,false)}
         </div>
       </div>`;
   }
@@ -11119,6 +11249,7 @@
       channel.ready = true;
       channel.error = false;
       updatePlaylistDuration();
+      if(isMidiStem(channel.stem))syncMidiChannelInstrumentLabels();
       return channel;
     } catch (error) {
       channel.error = true;
