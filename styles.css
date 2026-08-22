@@ -4927,3 +4927,9 @@ html.touch-device .big-palette .palette-cursor-preview {
   box-sizing: border-box;
   margin: 0 0 12px;
 }
+
+/* Twitter bird is intentionally broader/larger than the other link doodles. */
+.sticker-glyph .mini-logo-twitter {
+  width: 52px;
+  height: 52px;
+}
