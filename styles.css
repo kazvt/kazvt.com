@@ -4828,8 +4828,8 @@ html.touch-device .big-palette .palette-cursor-preview {
 
 /* Live stream title ---------------------------------------------------------
    Streamer.bot writes status.txt + last_stream_info.txt. When any configured
-   stream platform is online, site.js mounts this ticker immediately above the
-   normal site marquee and fills it with the current stream title. */
+   stream platform is online, site.js mounts this ticker inside the Links panel
+   immediately above the stream-platform row and fills it with title/category. */
 .live-stream-title-shell {
   overflow: clip;
   transform-origin: 50% 0;
@@ -4889,4 +4889,41 @@ html.touch-device .big-palette .palette-cursor-preview {
   .live-stream-title-shell.live-stream-title-spawn {
     animation: none;
   }
+}
+
+/* Doodled social-link GIFs --------------------------------------------------
+   The link-card/redirect logos are transparent animated GIFs with their own
+   hand-drawn line boil, so keep the image itself clean and unboxed. */
+.sticker-glyph .mini-logo {
+  width: 46px;
+  height: 46px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Link descriptions should read like normal handwritten copy; bracketed
+   suspension counters remain emphatic. */
+.sticker-note {
+  font-weight: 400;
+}
+
+.sticker-note .note-small {
+  font-weight: 900;
+  opacity: 1;
+}
+
+/* The live title/category ticker now lives inside #links and spans the full
+   width directly above the Twitch / Kick / YouTube row. */
+.live-stream-title-host {
+  width: 100%;
+}
+
+.live-stream-title-host:empty {
+  display: none;
+}
+
+.live-stream-title-host .live-stream-title-marquee {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px;
 }

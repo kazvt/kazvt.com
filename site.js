@@ -1369,41 +1369,14 @@ function setInlineNote(node, text, { animate = true } = {}) {
 }
 
 function platformIcon(name) {
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 64 64");
-  svg.setAttribute("aria-hidden", "true");
-  svg.classList.add("mini-logo", `mini-logo-${name}`);
-
-  const icons = {
-    twitch: `
-      <path class="logo-bg" d="M12 10 H54 L50 43 L37 43 L29 52 L29 43 H18 Z" />
-      <path class="logo-mark" d="M25 23 V35 M39 23 V35" />
-    `,
-    youtube: `
-      <path class="logo-bg" d="M10 20 C11 14 15 13 32 13 C49 13 53 14 54 20 C56 28 56 36 54 44 C53 50 49 51 32 51 C15 51 11 50 10 44 C8 36 8 28 10 20 Z" />
-      <path class="logo-fill" d="M28 24 L42 32 L28 40 Z" />
-    `,
-    kick: `
-      <path class="logo-bg" d="M14 12 H30 V26 L42 12 H54 L41 29 L55 52 H42 L32 36 L30 39 V52 H14 Z" />
-    `,
-    twitter: `
-      <path class="logo-bg" d="M15 18 C23 25 30 26 37 20 C42 16 48 17 53 20 C50 21 48 23 47 26 C51 26 54 25 57 23 C55 27 52 30 49 32 C47 45 37 53 22 53 C16 53 11 51 7 48 C14 49 20 47 24 43 C18 42 15 39 13 34 C15 35 18 35 20 34 C14 31 12 27 12 21 C14 23 16 24 19 24 C16 21 15 19 15 18 Z" />
-    `,
-    bsky: `
-      <path class="logo-bg" d="M31 31 C22 17 11 10 8 15 C5 20 14 31 25 36 C14 36 7 41 10 48 C13 55 25 50 32 39 C39 50 51 55 54 48 C57 41 50 36 39 36 C50 31 59 20 56 15 C53 10 42 17 33 31 Z" />
-    `,
-    tumblr: `
-      <path class="logo-bg" d="M30 9 H42 V20 H52 V32 H42 V43 C42 47 45 49 50 47 L53 57 C49 59 45 60 40 60 C31 60 25 55 25 45 V32 H17 V22 C24 19 28 15 30 9 Z" />
-    `,
-    discord: `
-      <path class="logo-bg" d="M18 18 C25 14 39 14 46 18 L52 47 C45 52 38 54 32 54 C26 54 19 52 12 47 Z" />
-      <path class="logo-mark" d="M24 34 H24.5 M40 34 H40.5 M24 43 C29 46 35 46 40 43" />
-    `,
-  };
-
-  svg.innerHTML = icons[name] || icons.twitter;
-  return svg;
+  const img = el("img", {
+    className: `mini-logo mini-logo-${name}`,
+    src: `/zzz_assets/redirect-logos/${name}.gif`,
+    alt: "",
+    ariaHidden: "true",
+    decoding: "async",
+  });
+  return img;
 }
 
 function artCarouselIcon(kind) {
@@ -3171,7 +3144,10 @@ async function render(statusOverrides = {}) {
       id: "links",
       titleKey: "panel.links.title",
       stampKey: "panel.links.stamp",
-      children: [el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker))],
+      children: [
+        el("div", { className: "live-stream-title-host", "data-live-stream-title-host": "" }),
+        el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker)),
+      ],
     }),
     multistreamGuidePanel(),
     profilePanel(),
@@ -3224,11 +3200,13 @@ function initializeLiveStreamTitle(statuses = {}, streamInfo = {}) {
   document.querySelector("[data-live-stream-title-shell]")?.remove();
 
   const title = String(streamInfo.title || "").trim();
+  const category = String(streamInfo.category || "").trim();
   if (!title || !hasLivePlatform(statuses)) return;
 
-  const originalMarquee = document.querySelector(".marquee");
-  if (!originalMarquee) return;
+  const host = document.querySelector("[data-live-stream-title-host]");
+  if (!host) return;
 
+  const tickerText = category ? `${title}  ✦  ${category}` : title;
   const shell = el("div", {
     className: "live-stream-title-shell live-stream-title-spawn",
   });
@@ -3236,13 +3214,13 @@ function initializeLiveStreamTitle(statuses = {}, streamInfo = {}) {
 
   const bar = el("div", {
     className: "marquee scribble-box live-stream-title-marquee",
-    ariaLabel: title,
+    ariaLabel: tickerText,
   });
   const track = el("span");
   track.dataset.liveStreamTitleTrack = "";
   bar.append(track);
   shell.append(bar);
-  originalMarquee.before(shell);
+  host.replaceChildren(shell);
 
   const variants = ["a", "b", "c", "d"];
   const profile = {
@@ -3254,7 +3232,7 @@ function initializeLiveStreamTitle(statuses = {}, streamInfo = {}) {
 
   // Match the original marquee's repeat gap exactly. Fill one conveyor copy
   // wide enough that short stream titles never leave a blank stretch onscreen.
-  const measuringPiece = liveStreamMarqueePiece(title, profile);
+  const measuringPiece = liveStreamMarqueePiece(tickerText, profile);
   track.append(measuringPiece);
   const pieceWidth = Math.max(1, measuringPiece.getBoundingClientRect().width);
   const barWidth = Math.max(1, bar.getBoundingClientRect().width);
@@ -3265,7 +3243,7 @@ function initializeLiveStreamTitle(statuses = {}, streamInfo = {}) {
     const sequence = el("span", { className: "marquee-sequence" });
     if (duplicate) sequence.setAttribute("aria-hidden", "true");
     for (let index = 0; index < repeatsPerSequence; index += 1) {
-      sequence.append(liveStreamMarqueePiece(title, profile));
+      sequence.append(liveStreamMarqueePiece(tickerText, profile));
     }
     return sequence;
   };

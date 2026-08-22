@@ -21,13 +21,13 @@ window.KAZVT_LINKS = {
     liveUrl: "https://www.twitch.tv/kazvt",
     shortPath: "twitch",
     liveShortPath: "twitch",
-    logo: "/zzz_assets/redirect-logos/twitch.svg",
+    logo: "/zzz_assets/redirect-logos/twitch.gif",
     delayMs: 1000
   },
   kick: {
     url: "https://kick.com/kazvt",
     shortPath: "kick",
-    logo: "/zzz_assets/redirect-logos/kick.svg",
+    logo: "/zzz_assets/redirect-logos/kick.gif",
     delayMs: 1000
   },
   youtube: {
@@ -35,31 +35,31 @@ window.KAZVT_LINKS = {
     liveUrl: "https://www.youtube.com/@kazvt/live",
     shortPath: "yt",
     liveShortPath: "yt-live",
-    logo: "/zzz_assets/redirect-logos/youtube.svg",
+    logo: "/zzz_assets/redirect-logos/youtube.gif",
     delayMs: 1000
   },
   discord: {
     url: "https://discord.com/invite/huzMpfJZ4J",
     shortPath: "discord",
-    logo: "/zzz_assets/redirect-logos/discord.svg",
+    logo: "/zzz_assets/redirect-logos/discord.gif",
     delayMs: 1000
   },
   tumblr: {
     url: "https://www.tumblr.com/kazvt",
     shortPath: "tumblr",
-    logo: "/zzz_assets/redirect-logos/tumblr.svg",
+    logo: "/zzz_assets/redirect-logos/tumblr.gif",
     delayMs: 1000
   },
   bsky: {
     url: "https://bsky.app/profile/kazvt.com",
     shortPath: "bsky",
-    logo: "/zzz_assets/redirect-logos/bsky.svg",
+    logo: "/zzz_assets/redirect-logos/bsky.gif",
     delayMs: 1000
   },
   twitter: {
     url: "https://twitter.com/monkevt",
     shortPath: "twitter",
-    logo: "/zzz_assets/redirect-logos/twitter.svg",
+    logo: "/zzz_assets/redirect-logos/twitter.gif",
     delayMs: 1000
   },
   wife: {
