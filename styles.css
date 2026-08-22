@@ -3196,7 +3196,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 .wumpa-fruit {
   position: absolute;
   display: grid;
-  width: var(--wumpa-size, 34px);
+  width: var(--wumpa-size, 28px);
   aspect-ratio: 1;
   place-items: center;
   border: 0;
@@ -4197,10 +4197,9 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 
 
 /* Stable touch layout -------------------------------------------------------
-   Touch capability alone must not force desktop/laptop screens into the phone
-   layout. Keep .touch-device for interaction tweaks, but gate mobile layout
-   overrides behind the actual viewport breakpoint. */
-@media (max-width: 880px) {
+   Android Chrome's Page Zoom can change the CSS viewport width without the
+   device becoming a desktop. The early <head> bootstrap adds .touch-device so
+   these phone rules do not switch off just because the user zooms out. */
 html.touch-device .web-grid,
 html.touch-device .profile-layout {
   grid-template-columns: 1fr;
@@ -4255,15 +4254,14 @@ html.touch-device .palette-choice::after {
   border-width: 2px;
 }
 
-/* Keep guide pages in their mobile/single-column presentation only when the
-   viewport is genuinely narrow. */
+/* Keep guide pages in their mobile/single-column presentation on touch
+   devices too, regardless of page zoom. */
 html.touch-device .guide-page .web-grid {
   grid-template-columns: 1fr;
 }
 
 html.touch-device .guide-page .content-stack {
   order: -1;
-}
 }
 
 /* Palette 16: text on the solid --pink surface must always stay white. */

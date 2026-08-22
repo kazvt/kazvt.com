@@ -1494,39 +1494,19 @@ function spawnWifeKissEffect(sticker) {
   }
 }
 
-function readPerBrowserCounter(storageKey) {
-  try {
-    const persistentValue = localStorage.getItem(storageKey);
-    if (persistentValue !== null) return Math.max(0, Number(persistentValue) || 0);
-  } catch {}
-
-  // Migrate any count left over from older builds that stored it per tab.
-  try {
-    const sessionValue = sessionStorage.getItem(storageKey);
-    if (sessionValue !== null) {
-      const safeValue = Math.max(0, Number(sessionValue) || 0);
-      try { localStorage.setItem(storageKey, String(safeValue)); } catch {}
-      return safeValue;
-    }
-  } catch {}
-
-  return 0;
-}
-
-function writePerBrowserCounter(storageKey, count) {
-  const safeCount = Math.max(0, Number(count) || 0);
-  try { localStorage.setItem(storageKey, String(safeCount)); } catch {}
-  // Keep a tab-local fallback for privacy modes/browsers that block localStorage.
-  try { sessionStorage.setItem(storageKey, String(safeCount)); } catch {}
-  return safeCount;
-}
-
 function getKissyCount() {
-  return readPerBrowserCounter(KISSY_STORAGE_KEY);
+  try {
+    return Number(sessionStorage.getItem(KISSY_STORAGE_KEY) || "0") || 0;
+  } catch {
+    return 0;
+  }
 }
 
 function setKissyCount(count) {
-  const safeCount = writePerBrowserCounter(KISSY_STORAGE_KEY, count);
+  const safeCount = Math.max(0, Number(count) || 0);
+  try {
+    sessionStorage.setItem(KISSY_STORAGE_KEY, String(safeCount));
+  } catch {}
 
   document.querySelectorAll("[data-kissy-count]").forEach((node) => {
     node.textContent = String(safeCount);
@@ -1964,32 +1944,23 @@ function createVisitCounter({ label = "" } = {}) {
 }
 
 function getWumpaCount() {
-  return readPerBrowserCounter(WUMPA_STORAGE_KEY);
+  try {
+    return Number(sessionStorage.getItem(WUMPA_STORAGE_KEY) || "0") || 0;
+  } catch {
+    return 0;
+  }
 }
 
 function setWumpaCount(count) {
-  const safeCount = writePerBrowserCounter(WUMPA_STORAGE_KEY, count);
+  const safeCount = Math.max(0, Number(count) || 0);
+  try {
+    sessionStorage.setItem(WUMPA_STORAGE_KEY, String(safeCount));
+  } catch {}
 
   document.querySelectorAll("[data-wumpa-count]").forEach((node) => {
     node.textContent = String(safeCount);
   });
 }
-
-window.addEventListener("storage", (event) => {
-  if (event.storageArea !== localStorage) return;
-  if (event.key === KISSY_STORAGE_KEY) {
-    const safeCount = Math.max(0, Number(event.newValue) || 0);
-    document.querySelectorAll("[data-kissy-count]").forEach((node) => {
-      node.textContent = String(safeCount);
-    });
-  }
-  if (event.key === WUMPA_STORAGE_KEY) {
-    const safeCount = Math.max(0, Number(event.newValue) || 0);
-    document.querySelectorAll("[data-wumpa-count]").forEach((node) => {
-      node.textContent = String(safeCount);
-    });
-  }
-});
 
 let wumpaCounterTimer = 0;
 let wumpaToastTimer = 0;
@@ -2161,7 +2132,7 @@ function spawnRandomWumpa(layer) {
   const existing = layer.querySelectorAll(".wumpa-fruit").length;
   if (existing > 2) return;
 
-  const size = 34;
+  const size = 28;
   const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: translatedText("wumpa.random_aria"), "data-i18n-aria-label": "wumpa.random_aria" }, [
     el("img", { src: "zzz_assets/wumpa.gif", alt: "" }),
   ]);
