@@ -2132,7 +2132,7 @@ function spawnRandomWumpa(layer) {
   const existing = layer.querySelectorAll(".wumpa-fruit").length;
   if (existing > 2) return;
 
-  const size = 28;
+  const size = 34;
   const fruit = el("button", { className: "wumpa-fruit", type: "button", ariaLabel: translatedText("wumpa.random_aria"), "data-i18n-aria-label": "wumpa.random_aria" }, [
     el("img", { src: "zzz_assets/wumpa.gif", alt: "" }),
   ]);

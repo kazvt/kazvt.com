@@ -3196,7 +3196,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 .wumpa-fruit {
   position: absolute;
   display: grid;
-  width: var(--wumpa-size, 28px);
+  width: var(--wumpa-size, 34px);
   aspect-ratio: 1;
   place-items: center;
   border: 0;
@@ -4909,9 +4909,17 @@ html.touch-device .big-palette .palette-cursor-preview {
 }
 
 .live-stream-title-host .live-stream-title-marquee {
-  width: 100%;
+  width: min(86%, 620px);
+  max-width: calc(100% - 28px);
   box-sizing: border-box;
-  margin: 0 0 12px;
+  margin: 0 auto 12px;
+}
+
+@media (max-width: 620px) {
+  .live-stream-title-host .live-stream-title-marquee {
+    width: calc(100% - 18px);
+    max-width: none;
+  }
 }
 
 /* Twitter bird is intentionally broader/larger than the other link doodles. */
