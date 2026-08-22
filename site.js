@@ -1128,38 +1128,19 @@ async function initializeMarquee() {
   const startIndex = Math.floor(Math.random() * lines.length);
   const orderedLines = [...lines.slice(startIndex), ...lines.slice(0, startIndex)];
 
-  // Give every message its own line-boil rhythm. The same profile is reused
-  // for the duplicate conveyor copy so the marquee can loop without a visible
-  // style jump at the seam, while neighboring messages stay de-synchronized.
-  const variants = ["a", "b", "c", "d"];
-  let previousVariant = "";
-  const boilProfiles = orderedLines.map(() => {
-    const duration = 390 + Math.floor(Math.random() * 270);
-    const phase = Math.floor(Math.random() * duration);
-    const availableVariants = variants.filter((variant) => variant !== previousVariant);
-    const variant = availableVariants[Math.floor(Math.random() * availableVariants.length)];
-    previousVariant = variant;
-    return {
-      variant,
-      duration,
-      phase,
-      reverse: Math.random() < 0.5,
-    };
-  });
+  // The lineboil toggle now uses one page-level turbulence pass.
+  // Keep marquee messages visually static inside the moving conveyor so they
+  // do not spawn their own animation timelines.
 
   const makeSequence = (duplicate = false) => {
     const sequence = el("span", { className: "marquee-sequence" });
     if (duplicate) sequence.setAttribute("aria-hidden", "true");
 
-    orderedLines.forEach((line, index) => {
-      const profile = boilProfiles[index];
+    orderedLines.forEach((line) => {
       const piece = el("span", {
-        className: `marquee-piece marquee-piece-boil-${profile.variant}`,
+        className: "marquee-piece",
         ariaHidden: "true",
       });
-      piece.style.setProperty("--marquee-piece-boil-duration", `${profile.duration}ms`);
-      piece.style.setProperty("--marquee-piece-boil-delay", `-${profile.phase}ms`);
-      piece.style.setProperty("--marquee-piece-boil-direction", profile.reverse ? "reverse" : "normal");
       setInlineNote(piece, line, { animate: false });
       sequence.append(piece);
     });

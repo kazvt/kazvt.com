@@ -908,7 +908,7 @@ body[data-boil="calm"] .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd
 .panel:not(#badges),
 .page-footer,
 .language-dock {
-  animation: sectionBoil 460ms steps(2, end) infinite;
+  animation: none;
 }
 
 body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel:not(#badges), .page-footer, .language-dock) {
@@ -916,7 +916,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
 }
 
 .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
-  animation: textBoil 480ms steps(2, end) infinite;
+  animation: none;
   text-rendering: geometricPrecision;
 }
 
@@ -993,7 +993,7 @@ body[data-boil="calm"] :is(.site-header, .oldweb-nav, .marquee, .sidebar, .panel
   filter:
     drop-shadow(7px 8px 0 rgba(13, 8, 16, 0.82))
     drop-shadow(2px 2px 0 rgba(13, 8, 16, 0.94));
-  animation: logoBoil 430ms steps(2, end) infinite;
+  animation: none;
 }
 
 .logo-back {
@@ -1031,9 +1031,7 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  animation:
-    blockBoil 430ms steps(2, end) infinite,
-    wumpaFloat 1100ms ease-in-out infinite;
+  animation: wumpaFloat 1100ms ease-in-out infinite;
 }
 
 .logo-wumpa.is-eaten {
@@ -1041,9 +1039,7 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
 }
 
 .logo-wumpa.is-recovered {
-  animation:
-    wumpaRecover 1600ms steps(18, end),
-    blockBoil 140ms steps(2, end) infinite;
+  animation: wumpaRecover 1600ms steps(18, end);
 }
 
 .site-header h1 {
@@ -1103,7 +1099,7 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   );
   opacity: 0.42;
   transform: translate(2px, -1px);
-  animation: outlineBoil 410ms steps(2, end) infinite;
+  animation: none;
 }
 
 .scribble-box::after {
@@ -1253,11 +1249,6 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   align-items: center;
   margin-right: clamp(38px, 4.5vw, 64px);
   white-space: nowrap;
-  animation-duration: var(--marquee-piece-boil-duration, 480ms) !important;
-  animation-timing-function: steps(2, end) !important;
-  animation-delay: var(--marquee-piece-boil-delay, 0ms) !important;
-  animation-iteration-count: infinite !important;
-  animation-direction: var(--marquee-piece-boil-direction, normal) !important;
 }
 
 /* Keep each message as one independently boiling unit instead of stacking the
@@ -1266,10 +1257,10 @@ body.wumpa-ready .logo-wumpa:not(.is-eaten) {
   animation: none !important;
 }
 
-.marquee-piece-boil-a { animation-name: marqueePieceBoilA !important; }
-.marquee-piece-boil-b { animation-name: marqueePieceBoilB !important; }
-.marquee-piece-boil-c { animation-name: marqueePieceBoilC !important; }
-.marquee-piece-boil-d { animation-name: marqueePieceBoilD !important; }
+.marquee-piece-boil-a { animation-name: none !important; }
+.marquee-piece-boil-b { animation-name: none !important; }
+.marquee-piece-boil-c { animation-name: none !important; }
+.marquee-piece-boil-d { animation-name: none !important; }
 
 .web-grid {
   display: grid;
@@ -1354,7 +1345,7 @@ code {
   background: var(--swatch);
   box-shadow: 3px 3px 0 var(--shadow);
   clip-path: polygon(0 8px, 8px 0, 100% 5px, calc(100% - 4px) 100%, 5px calc(100% - 3px));
-  animation: blockBoil 500ms steps(2, end) infinite;
+  animation: none;
   transition: none;
 }
 
@@ -1498,7 +1489,7 @@ code {
 }
 
 .guide-page #multistream-guide {
-  animation-name: guidePanelBoil;
+  animation-name: none;
   animation-duration: 460ms;
 }
 
@@ -1508,12 +1499,12 @@ code {
 }
 
 .guide-page #multistream-guide :is(h1, h2, p, a, span, text, tspan, strong) {
-  animation-name: guideTextBoil;
+  animation-name: none;
   animation-duration: 480ms;
 }
 
 .multistream-guide-modal :is(h1, h2, p, a, span, text, tspan, strong) {
-  animation: textBoil 720ms steps(2, end) infinite;
+  animation: none;
   text-rendering: geometricPrecision;
 }
 
@@ -1744,7 +1735,7 @@ code {
   stroke-dasharray: 10 6;
   stroke-width: 4px;
   /* One full 16-unit dash period per loop = no visible reset seam. */
-  animation: guideNodeDashBoil 720ms linear infinite;
+  animation: none;
 }
 
 .guide-map .recommended-node:has(.guide-recommend-mark:hover) {
@@ -1904,7 +1895,7 @@ code {
     6px 6px 0 var(--shadow),
     0 0 0 5px rgba(231, 63, 30, 0.3),
     0 0 18px rgba(231, 63, 30, 0.38);
-  animation: liveStickerBoil 430ms steps(2, end) infinite;
+  animation: none;
 }
 
 .sticker.is-testing {
@@ -1914,7 +1905,7 @@ code {
   box-shadow:
     6px 6px 0 var(--shadow),
     0 0 0 5px rgba(255, 244, 73, 0.34);
-  animation: liveStickerBoil 520ms steps(2, end) infinite;
+  animation: none;
 }
 
 .sticker.is-live,
@@ -1992,7 +1983,7 @@ code {
     radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.72) 0 10%, transparent 18%),
     repeating-linear-gradient(-35deg, var(--pip-color) 0 3px, var(--pip-scratch) 3px 5px, var(--pip-color) 5px 8px);
   clip-path: polygon(1px 4px, 4px 0, 12px 2px, 13px 10px, 9px 13px, 0 11px);
-  animation: blockBoil 330ms steps(2, end) infinite;
+  animation: none;
 }
 
 .sticker-status-corner.live {
@@ -2012,9 +2003,7 @@ code {
 
 .sticker-status-corner.live .crayon-pip,
 .sticker-status-corner.testing .crayon-pip {
-  animation:
-    blockBoil 330ms steps(2, end) infinite,
-    pipBlink 760ms steps(1, end) infinite;
+  animation: pipBlink 760ms steps(1, end) infinite;
 }
 
 .sticker:nth-child(2n) {
@@ -2498,7 +2487,7 @@ code {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--hover-text);
-  animation: blockBoil 260ms steps(2, end) infinite;
+  animation: none;
 }
 
 .art-carousel-button:active {
@@ -2980,7 +2969,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
     linear-gradient(0deg, color-mix(in srgb, var(--pink) 10%, transparent) 1px, transparent 1px),
     var(--paper);
   background-size: 18px 18px;
-  animation: sectionBoil 760ms steps(2, end) infinite;
+  animation: none;
 }
 
 .multistream-guide-window::before,
@@ -2993,7 +2982,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   border: 2px solid color-mix(in srgb, var(--ink) 72%, transparent);
   clip-path: polygon(0 10px, 8px 0, calc(100% - 12px) 3px, 100% 8px, calc(100% - 4px) calc(100% - 10px), calc(100% - 14px) 100%, 7px calc(100% - 3px), 0 calc(100% - 11px));
   opacity: 0.32;
-  animation: outlineBoil 390ms steps(2, end) infinite;
+  animation: none;
 }
 
 .multistream-guide-window::after {
@@ -3091,7 +3080,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   background-repeat: repeat;
   background-size: var(--wallpaper-size);
   color: var(--hover-text);
-  animation: blockBoil 260ms steps(2, end) infinite;
+  animation: none;
 }
 
 .guide-window-close {
@@ -3231,9 +3220,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  animation:
-    blockBoil 430ms steps(2, end) infinite,
-    wumpaFloat 980ms ease-in-out infinite;
+  animation: wumpaFloat 980ms ease-in-out infinite;
 }
 
 .wumpa-fruit.is-eaten {
@@ -3368,26 +3355,26 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   0% {
     opacity: 0;
     transform: translateY(-18px) scale(0.48) rotate(-5deg);
-    filter: url("#boil-c");
+    filter: none;
     clip-path: inset(48% 48% 48% 48%);
     box-shadow: 0 0 0 var(--shadow);
   }
   28% {
     opacity: 1;
     transform: translateY(4px) scale(1.08) rotate(1.8deg);
-    filter: url("#boil-a");
+    filter: none;
     clip-path: inset(8% 3% 8% 3%);
     box-shadow: 7px 7px 0 var(--shadow);
   }
   58% {
     transform: translateY(-3px) scale(0.97) rotate(-2deg);
-    filter: url("#boil-b");
+    filter: none;
     clip-path: inset(0);
     box-shadow: 3px 5px 0 var(--shadow);
   }
   82% {
     transform: translateY(1px) scale(1.025) rotate(0.4deg);
-    filter: url("#boil-c");
+    filter: none;
     clip-path: inset(0);
     box-shadow: 5px 3px 0 var(--shadow);
   }
@@ -3401,15 +3388,15 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 }
 
 @keyframes wholeBoil {
-  0% { filter: url("#boil-a"); }
-  45% { filter: url("#boil-b"); }
-  100% { filter: url("#boil-c"); }
+  0% { filter: none; }
+  45% { filter: none; }
+  100% { filter: none; }
 }
 
 @keyframes sectionBoil {
-  0% { filter: url("#boil-a"); }
-  45% { filter: url("#boil-b"); }
-  100% { filter: url("#boil-c"); }
+  0% { filter: none; }
+  45% { filter: none; }
+  100% { filter: none; }
 }
 
 @keyframes textBoil {
@@ -4035,16 +4022,14 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
     filter: none !important;
     transform: none !important;
     will-change: auto !important;
-    animation: mobileSectionLineboil 760ms steps(2, end) infinite !important;
+    animation: none !important;
   }
 
   .site-wrap :is(h1, h2, p, a, button, span, strong, dt, dd, code, figcaption) {
     will-change: auto !important;
-    animation-name: mobileTextLineboil !important;
+    animation-name: none !important;
     animation-duration: 720ms !important;
-    animation-timing-function: steps(2, end) !important;
-    animation-iteration-count: infinite !important;
-  }
+      }
 
   /* One-shot header URL animation also uses the desktop SVG boil in its
      keyframes. Force the filter off on touch devices. */
@@ -4164,7 +4149,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 .palette-choice:has(> button[aria-pressed="true"])::after {
   border-color: var(--click-hover-outline-color);
   opacity: 1;
-  animation: paletteSelectionBoil 520ms steps(2, end) infinite;
+  animation: none;
 }
 
 /* The wrapper owns the persistent ring so the button's rough clip-path cannot clip it. */
@@ -4322,11 +4307,9 @@ body[data-theme="p16"] .guide-map .badge.no text {
   .scribble-box::after,
   .multistream-guide-window::before,
   .multistream-guide-window::after {
-    animation-name: mobileOutlineBoil !important;
+    animation-name: none !important;
     animation-duration: 1050ms !important;
-    animation-timing-function: steps(2, end) !important;
-    animation-iteration-count: infinite !important;
-  }
+      }
 
   .palette button,
   .palette-choice::after,

@@ -646,7 +646,7 @@ body.redirect-page {
   background: color-mix(in srgb, var(--paper) 89%, white);
   box-shadow: 7px 7px 0 var(--blue);
   transform: rotate(-1deg);
-  animation: redirect-logo-card-boil 460ms steps(2, end) infinite;
+  animation: none;
 }
 
 .redirect-logo {
@@ -812,7 +812,7 @@ body.redirect-page {
     14px 14px 0 color-mix(in srgb, var(--pink) 42%, transparent),
     -8px 11px 0 color-mix(in srgb, var(--blue) 34%, transparent),
     20px 22px 0 color-mix(in srgb, #000 18%, transparent);
-  animation: redirect-shell-boil 760ms steps(2, end) infinite;
+  animation: none;
 }
 
 .redirect-shell::after {
@@ -823,7 +823,7 @@ body.redirect-page {
   border: 3px dashed color-mix(in srgb, var(--ink) 50%, transparent);
   transform: rotate(.6deg);
   pointer-events: none;
-  animation: redirect-frame-boil 520ms steps(2, end) infinite;
+  animation: none;
 }
 
 .redirect-label-cloud {
@@ -846,7 +846,7 @@ body.redirect-page {
   letter-spacing: .035em;
   white-space: nowrap;
   clip-path: polygon(0 5px, 6px 0, 100% 3px, calc(100% - 5px) 100%, 4px calc(100% - 2px));
-  animation: redirect-chip-boil 680ms steps(4, end) infinite;
+  animation: none;
 }
 
 .redirect-chip-a { top: 66px; left: -18px; transform: rotate(-7deg); }
@@ -877,7 +877,7 @@ body.redirect-page {
   height: min(78%, 145px);
   object-fit: contain;
   filter: drop-shadow(4px 4px 0 color-mix(in srgb, #000 26%, transparent));
-  animation: redirect-logo-boil 480ms steps(2, end) infinite;
+  animation: none;
 }
 
 .redirect-logo-wrap::before,
@@ -890,7 +890,7 @@ body.redirect-page {
   border: 2px solid color-mix(in srgb, var(--ink) 70%, transparent);
   clip-path: polygon(0 7px, 8px 0, calc(100% - 10px) 2px, 100% 8px, calc(100% - 3px) calc(100% - 8px), calc(100% - 12px) 100%, 7px calc(100% - 2px), 0 calc(100% - 9px));
   opacity: .3;
-  animation: redirect-logo-outline-boil 410ms steps(2, end) infinite;
+  animation: none;
 }
 
 .redirect-logo-wrap::after {

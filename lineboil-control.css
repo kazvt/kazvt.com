@@ -47,22 +47,26 @@
   flex: 1 0 100%;
 }
 
-/* sectionBoil's first frame contains an SVG displacement filter. When OFF,
-   remove that filter so the page is actually steady rather than frozen wavy. */
-html[data-lineboil="off"] :is(
-  .site-header,
-  .oldweb-nav,
-  .marquee,
-  .sidebar,
-  .panel:not(#badges),
-  .page-footer,
-  .language-dock,
-  .multistream-guide-window
-) { filter: none !important; }
+/* One lineboil pass for the whole primary page surface.
+   The old design filtered/jittered many sections and text nodes independently.
+   Keeping exactly one SVG turbulence/displacement filter here gives the same
+   hand-drawn motion with a single composited filter surface. */
+html[data-lineboil="on"] [data-lineboil-surface] {
+  filter: url("#page-lineboil");
+  will-change: filter;
+}
 
-/* The conveyor keeps scrolling; only each message's tiny independent jitter is
-   neutralized. */
-html[data-lineboil="off"] .marquee-piece { transform: none !important; }
+html[data-lineboil="off"] [data-lineboil-surface] {
+  filter: none !important;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-lineboil="on"] [data-lineboil-surface] {
+    filter: none !important;
+    will-change: auto;
+  }
+}
 
 @media (max-width: 880px) {
   .lineboil-toggle { min-height: 38px; font-size: 0.8rem; }

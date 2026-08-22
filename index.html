@@ -48,21 +48,13 @@
   </head>
   <body data-page="home">
     <svg class="boil-filters" aria-hidden="true" focusable="false">
-      <filter id="boil-a">
-        <feTurbulence baseFrequency="0.012 0.034" numOctaves="2" seed="4" />
-        <feDisplacementMap in="SourceGraphic" scale="4" />
-      </filter>
-      <filter id="boil-b">
-        <feTurbulence baseFrequency="0.018 0.026" numOctaves="2" seed="9" />
-        <feDisplacementMap in="SourceGraphic" scale="6" />
-      </filter>
-      <filter id="boil-c">
-        <feTurbulence baseFrequency="0.015 0.04" numOctaves="2" seed="15" />
-        <feDisplacementMap in="SourceGraphic" scale="5" />
+      <filter id="page-lineboil" x="-3%" y="-3%" width="106%" height="106%" color-interpolation-filters="sRGB">
+        <feTurbulence id="page-lineboil-noise" type="fractalNoise" baseFrequency="0.010 0.022" numOctaves="1" seed="4" stitchTiles="stitch" result="pageLineboilNoise" />
+        <feDisplacementMap id="page-lineboil-displace" in="SourceGraphic" in2="pageLineboilNoise" scale="5" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
 
-    <main class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" data-i18n-aria-label="site.main_aria">
+    <main data-lineboil-surface class="site-wrap boil-stage w-[min(1060px,calc(100%_-_24px))] mx-auto px-0 pt-3 sm:pt-6 lg:pt-8 pb-10" data-i18n-aria-label="site.main_aria">
       <header class="site-header text-center grid justify-items-center gap-2">
         <div class="logo-row">
           <button class="logo-wumpa logo-wumpa-left" type="button" data-logo-wumpa="left" data-i18n-aria-label="wumpa.logo.left_aria">

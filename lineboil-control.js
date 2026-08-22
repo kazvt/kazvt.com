@@ -3,8 +3,16 @@
 
   const STORAGE_KEY = "kazvt-lineboil";
   const SELECTOR = "[data-tool-lineboil]";
-  const BOIL_NAME = /boil/i;
-  let syncQueued = false;
+  const SEEDS = [4, 11];
+  const DESKTOP_TICK_MS = 260;
+  const COARSE_TICK_MS = 360;
+
+  let boilTimer = 0;
+  let seedIndex = 0;
+  let controlsQueued = false;
+
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const coarsePointer = window.matchMedia?.("(hover: none) and (pointer: coarse)");
 
   function storedEnabled() {
     try { return localStorage.getItem(STORAGE_KEY) === "on"; }
@@ -13,6 +21,44 @@
 
   function isEnabled() {
     return document.documentElement.dataset.lineboil !== "off";
+  }
+
+  function noiseNode() {
+    return document.getElementById("page-lineboil-noise");
+  }
+
+  function shouldAnimate() {
+    return isEnabled() && !document.hidden && !reducedMotion?.matches && Boolean(noiseNode());
+  }
+
+  function stopBoilTimer() {
+    if (!boilTimer) return;
+    window.clearTimeout(boilTimer);
+    boilTimer = 0;
+  }
+
+  function scheduleBoilTick() {
+    stopBoilTimer();
+    if (!shouldAnimate()) return;
+    const delay = coarsePointer?.matches ? COARSE_TICK_MS : DESKTOP_TICK_MS;
+    boilTimer = window.setTimeout(tickBoil, delay);
+  }
+
+  function tickBoil() {
+    boilTimer = 0;
+    if (!shouldAnimate()) return;
+    seedIndex = (seedIndex + 1) % SEEDS.length;
+    noiseNode()?.setAttribute("seed", String(SEEDS[seedIndex]));
+    scheduleBoilTick();
+  }
+
+  function syncBoilEngine() {
+    const noise = noiseNode();
+    if (noise && !isEnabled()) {
+      seedIndex = 0;
+      noise.setAttribute("seed", String(SEEDS[0]));
+    }
+    scheduleBoilTick();
   }
 
   function syncButtons() {
@@ -28,36 +74,6 @@
     });
   }
 
-  function matchingAnimations() {
-    if (typeof document.getAnimations !== "function") return [];
-    return document.getAnimations({ subtree: true }).filter((animation) =>
-      BOIL_NAME.test(typeof animation.animationName === "string" ? animation.animationName : "")
-    );
-  }
-
-  function syncAnimations() {
-    const enabled = isEnabled();
-    matchingAnimations().forEach((animation) => {
-      try {
-        if (enabled) {
-          if (animation.playState === "paused") animation.play();
-        } else {
-          animation.pause();
-          animation.currentTime = 0;
-        }
-      } catch {}
-    });
-  }
-
-  function queueAnimationSync() {
-    if (syncQueued) return;
-    syncQueued = true;
-    requestAnimationFrame(() => {
-      syncQueued = false;
-      syncAnimations();
-    });
-  }
-
   function apply(enabled, { persist = true } = {}) {
     document.documentElement.dataset.lineboil = enabled ? "on" : "off";
     if (persist) {
@@ -65,7 +81,7 @@
       catch {}
     }
     syncButtons();
-    queueAnimationSync();
+    syncBoilEngine();
     window.dispatchEvent(new CustomEvent("kazvt:lineboilchange", { detail: { enabled } }));
   }
 
@@ -122,6 +138,15 @@
     syncButtons();
   }
 
+  function queueEnsureControls() {
+    if (controlsQueued) return;
+    controlsQueued = true;
+    queueMicrotask(() => {
+      controlsQueued = false;
+      ensureControls();
+    });
+  }
+
   document.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target) return;
@@ -129,19 +154,10 @@
     apply(!isEnabled());
   });
 
-  document.addEventListener("animationstart", (event) => {
-    if (!isEnabled() && BOIL_NAME.test(event.animationName || "")) queueAnimationSync();
-  }, true);
-
   const observer = new MutationObserver((records) => {
-    let ensure = false;
-    let resync = false;
-    for (const record of records) {
-      if (record.type === "childList") { ensure = true; resync = true; }
-      if (record.type === "attributes" && record.attributeName === "open") resync = true;
+    if (records.some((record) => record.type === "childList" && record.addedNodes.length)) {
+      queueEnsureControls();
     }
-    if (ensure) ensureControls();
-    if (resync && !isEnabled()) queueAnimationSync();
   });
 
   async function start() {
@@ -150,8 +166,12 @@
       document.documentElement.dataset.lineboil = storedEnabled() ? "on" : "off";
     }
     ensureControls();
-    syncAnimations();
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["open"] });
+    syncBoilEngine();
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener("visibilitychange", syncBoilEngine);
+    reducedMotion?.addEventListener?.("change", syncBoilEngine);
+    coarsePointer?.addEventListener?.("change", syncBoilEngine);
     window.addEventListener("kazvt:languagechange", () => {
       syncButtons();
       refreshPaletteInvites();
@@ -161,7 +181,7 @@
   window.KazvtLineboil = {
     get enabled() { return isEnabled(); },
     set enabled(value) { apply(Boolean(value)); },
-    sync() { ensureControls(); syncAnimations(); },
+    sync() { ensureControls(); syncBoilEngine(); },
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
