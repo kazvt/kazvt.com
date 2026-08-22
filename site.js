@@ -1053,6 +1053,7 @@ function updateCursorEffect(theme, { force = false } = {}) {
 
 function applySiteTheme(theme, themeButtons, { persist = true } = {}) {
   document.body.dataset.theme = theme;
+  document.documentElement.dataset.theme = theme;
   themeButtons.forEach((item) => {
     const isSelected = item.getAttribute("data-tool-theme") === theme;
     item.setAttribute("aria-pressed", String(isSelected));

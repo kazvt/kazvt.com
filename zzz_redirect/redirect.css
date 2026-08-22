@@ -105,6 +105,9 @@ html[data-theme="p2"] { --site-font: "KAZVT Classic MMO", "Comic Sans MS", "Comi
 html[data-theme="p3"] { --site-font: "KAZVT Tangled", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p5"] { --site-font: "KAZVT East", "Comic Sans MS", "Comic Sans", cursive; }
+
+/* Match the main site's Palette 5 typography scale. */
+html[data-theme="p5"] { font-size: 80%; }
 html[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
