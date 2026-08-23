@@ -9824,8 +9824,8 @@
         const stored=!!midiStoredVoiceForStem(channel.stem);
         const patchLocked=isInstrumentLockedForChannel(channel);
         const pinned=!!midiExplicitVoiceForStem(channel.stem)&&!stored&&!patchLocked;
-        iconEl.title=patchLocked?`${label} · PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")} · click: patch select`:pinned?`${label} · PINNED DEFAULT · click: patch select`:`${label} · click: patch select`;
-        iconEl.setAttribute("aria-label",patchLocked?`${label}. Instrument locked to this mixer strip across MIDI track changes and randomization. Click to open patch select and manage the lock.`:pinned?`${label}. Pinned MIDI default. Click to open exact SoundFont and instrument selection.`:`${label}. Click or right-click to open exact SoundFont and instrument selection.`);
+        iconEl.title=patchLocked?`${label} · PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")} · click: patch select · double-click: restore default`:pinned?`${label} · PINNED DEFAULT · click: patch select · double-click: restore default`:`${label} · click: patch select · double-click: restore default`;
+        iconEl.setAttribute("aria-label",patchLocked?`${label}. Instrument locked to this mixer strip across MIDI track changes and randomization. Click to open patch select. Double-click to restore this MIDI strip's original/default instrument while keeping the patch lock enabled.`:pinned?`${label}. Pinned MIDI default. Click to open exact SoundFont and instrument selection. Double-click to restore the original/default instrument.`:`${label}. Click or right-click to open exact SoundFont and instrument selection. Double-click to restore the original/default instrument.`);
         iconEl.classList.toggle("has-strip-voice",stored||pinned||patchLocked);
       }
       channel.el?.querySelectorAll("[data-action]").forEach(button=>{
@@ -10288,6 +10288,33 @@
       console.warn("Could not hot-swap MIDI patch",channel.stem?.displayPath||channel.stem?.name,error);
       loadReadout.textContent="MIDI ERR";
     }
+  }
+
+  async function resetMidiStripInstrumentToDefault(channel){
+    if(!channel||appMode!=="playlist"||!isMidiStem(channel.stem))return false;
+    // Restore the song-authored patch where one exists; otherwise use the
+    // strip-role default that the mixer would have selected on first load.
+    const voice=midiExplicitVoiceForStem(channel.stem)||midiDefaultVoiceForStem(channel.stem);
+    if(!voice){
+      showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"NO DEFAULT PATCH","PATCH SELECT");
+      return false;
+    }
+    await ensureProceduralSoundFontSource(voice.source,{quiet:true});
+    // A double-click is an explicit reset, so discard this MIDI file's manual
+    // override. Preserve an existing strip instrument-lock, but retarget that
+    // lock to the restored default so it cannot snap back to the custom voice.
+    const keepLocked=isInstrumentLockedForChannel(channel);
+    setMidiStemVoicePreference(channel.stem,null);
+    if(keepLocked)setInstrumentLockForChannel(channel,true,voice);
+    syncMidiChannelInstrumentLabels();
+    closeInstrumentPicker();
+    await hotSwapMidiStripInstrument(channel);
+    showSystemReadout(
+      trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),
+      "DEFAULT RESTORED",
+      String(voice.name||"PATCH").toUpperCase()
+    );
+    return true;
   }
 
   async function cycleMidiStripInstrument(channel,direction=1){
@@ -13192,6 +13219,14 @@
       };
       icon.addEventListener("click",openPicker);
       icon.addEventListener("contextmenu",openPicker);
+      icon.addEventListener("dblclick",async event=>{
+        const channel=channelForIcon();
+        if(!(appMode==="playlist"&&isMidiStem(channel?.stem)))return;
+        event.preventDefault();
+        event.stopPropagation();
+        closeInstrumentPicker();
+        await resetMidiStripInstrumentToDefault(channel);
+      });
       icon.addEventListener("keydown",event=>{
         if(event.key==="ArrowDown"||event.key==="Enter"||event.key===" ")openPicker(event);
       });
