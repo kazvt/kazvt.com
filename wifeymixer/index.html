@@ -8197,7 +8197,6 @@
     keysOrgan2:sfVoice("rush",0,11,"Organ 2"),
     // Restricted-range Rush leads are still useful: the renderer octave-wraps
     // generated melody notes into these verified playable bands.
-    leadHuge2:sfVoice("rush",1,13,"Huge Crisis Synth 2",{range:[0,89]}),
     leadSine1:sfVoice("rush",1,21,"Sine Wave 1"),
     leadSine2:sfVoice("rush",1,22,"Sine Wave 2"),
     leadSaw2:sfVoice("rush",1,24,"Saw Wave 2"),
@@ -8229,7 +8228,7 @@
       drums:[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
       bass:[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3],
       keys:[RUSH_VOICES.keysEnding,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysRival,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2],
-      melody:[RUSH_VOICES.leadHuge2,RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
+      melody:[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
       percussion:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage]
     })
   });
@@ -8863,8 +8862,8 @@
 
     let leadPool;
     if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
-    else if(energy<.68) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadSaw2,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
-    else leadPool=[RUSH_VOICES.leadHuge2,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadBase];
+    else if(energy<.68) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw2,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
+    else leadPool=[RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadBase];
 
     let drumsPool;
     if(energy<.32) drumsPool=[SONIC_VOICES.drums,SONIC_VOICES.drums,SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay5];

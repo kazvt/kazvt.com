@@ -8086,9 +8086,6 @@
     leadDeadLine3:sfVoice("rush",1,5,"Dead Line Synth 3",{range:[60,87]}),
     leadEggmanSaw:sfVoice("rush",1,6,"Eggman Boss Saw",{range:[72,87]}),
     leadException2:sfVoice("rush",1,9,"Exception Synth 2"),
-    leadHuge2:sfVoice("rush",1,13,"Huge Crisis Synth 2",{range:[0,89]}),
-    leadHuge3A:sfVoice("rush",1,14,"Huge Crisis Synth 3A"),
-    leadHuge3B:sfVoice("rush",1,15,"Huge Crisis Synth 3B"),
     leadMirage4:sfVoice("rush",1,19,"Mirage Road Synth 4",{range:[48,87]}),
     leadSine1:sfVoice("rush",1,21,"Sine Wave 1"),
     leadSine2:sfVoice("rush",1,22,"Sine Wave 2"),
@@ -8122,7 +8119,7 @@
       drums:[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
       bass:[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3],
       keys:[RUSH_VOICES.keysEnding,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysRival,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2],
-      melody:[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadException2,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw1,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
+      melody:[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadException2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw1,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
       percussion:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage]
     })
   });
@@ -8733,7 +8730,7 @@
     let leadPool;
     if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,RUSH_VOICES.leadNewDay1,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
     else if(energy<.68) leadPool=[RUSH_VOICES.leadNewDay1,RUSH_VOICES.leadAltitude1,RUSH_VOICES.leadAltitude2,RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadMirage4,RUSH_VOICES.leadSaw1,SF64_VOICES.leadSquare];
-    else leadPool=[RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadHuge2,RUSH_VOICES.leadHuge3A,RUSH_VOICES.leadHuge3B,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase];
+    else leadPool=[RUSH_VOICES.leadDeadLine2,RUSH_VOICES.leadDeadLine3,RUSH_VOICES.leadEggmanSaw,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadCharang,SF64_VOICES.leadBase];
 
     let drumsPool;
     if(energy<.32) drumsPool=[SONIC_VOICES.drums,SONIC_VOICES.drums,SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay5];

@@ -8,9 +8,9 @@
     "ISFT": "Awave Studio v10.6"
   },
   "counts": {
-    "presets": 207,
-    "instruments": 221,
-    "samples": 1012
+    "presets": 205,
+    "instruments": 217,
+    "samples": 993
   },
   "integrationNotes": {
     "strategy": "Hybrid deterministic procedural rack with SF64. VIBE biases sound choice; loop variations retain the same selected rack.",
@@ -266,16 +266,6 @@
       }
     ],
     "melody": [
-      {
-        "bank": 1,
-        "program": 13,
-        "name": "Huge Crisis Synth 2",
-        "use": "high-energy lead; octave-fitted",
-        "playableRange": [
-          0,
-          89
-        ]
-      },
       {
         "bank": 1,
         "program": 21,
@@ -958,16 +948,6 @@
       "name": "Final Zone Synth 2",
       "bank": 1,
       "program": 11
-    },
-    {
-      "name": "Huge Crisis Synth 1",
-      "bank": 1,
-      "program": 12
-    },
-    {
-      "name": "Huge Crisis Synth 2",
-      "bank": 1,
-      "program": 13
     },
     {
       "name": "Mirage Road Synth 1",
