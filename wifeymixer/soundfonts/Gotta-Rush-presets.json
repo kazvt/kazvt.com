@@ -8,9 +8,9 @@
     "ISFT": "Awave Studio v10.6"
   },
   "counts": {
-    "presets": 146,
-    "instruments": 146,
-    "samples": 631
+    "presets": 115,
+    "instruments": 115,
+    "samples": 467
   },
   "integrationNotes": {
     "strategy": "Hybrid deterministic procedural rack with SF64. VIBE biases sound choice; loop variations retain the same selected rack.",
@@ -114,11 +114,6 @@
         "bank": 0,
         "program": 56,
         "name": "Night Carnival Bass"
-      },
-      {
-        "bank": 0,
-        "program": 57,
-        "name": "Rival Boss Bass"
       },
       {
         "bank": 0,
@@ -278,16 +273,6 @@
       "program": 35
     },
     {
-      "name": "Rival Boss Guitar 1",
-      "bank": 0,
-      "program": 36
-    },
-    {
-      "name": "Rival Boss Guitar 2",
-      "bank": 0,
-      "program": 37
-    },
-    {
       "name": "Water Palace Guit. 1",
       "bank": 0,
       "program": 38
@@ -353,11 +338,6 @@
       "program": 56
     },
     {
-      "name": "Rival Boss Bass",
-      "bank": 0,
-      "program": 57
-    },
-    {
       "name": "Synth Bass 1",
       "bank": 0,
       "program": 58
@@ -418,109 +398,9 @@
       "program": 71
     },
     {
-      "name": "Alt. Limit Vocals",
-      "bank": 0,
-      "program": 73
-    },
-    {
-      "name": "Ending Vocals 1",
-      "bank": 0,
-      "program": 77
-    },
-    {
-      "name": "Ending Vocals 2",
-      "bank": 0,
-      "program": 78
-    },
-    {
       "name": "Exception Choir",
       "bank": 0,
       "program": 79
-    },
-    {
-      "name": "Exception Vocals 1",
-      "bank": 0,
-      "program": 80
-    },
-    {
-      "name": "Exception Vocals 2",
-      "bank": 0,
-      "program": 81
-    },
-    {
-      "name": "Bomb. Barbara Vocals",
-      "bank": 0,
-      "program": 82
-    },
-    {
-      "name": "Huge Crisis Vocals 1",
-      "bank": 0,
-      "program": 83
-    },
-    {
-      "name": "Huge Crisis Vocals 2",
-      "bank": 0,
-      "program": 84
-    },
-    {
-      "name": "Mirage Road Vocals 1",
-      "bank": 0,
-      "program": 86
-    },
-    {
-      "name": "Mirage Road Vocals 2",
-      "bank": 0,
-      "program": 87
-    },
-    {
-      "name": "New Record Vocals",
-      "bank": 0,
-      "program": 88
-    },
-    {
-      "name": "N. Carniv. Vocals 1",
-      "bank": 0,
-      "program": 89
-    },
-    {
-      "name": "N. Carniv. Vocals 2",
-      "bank": 0,
-      "program": 90
-    },
-    {
-      "name": "Rival Boss Vocals 1",
-      "bank": 0,
-      "program": 91
-    },
-    {
-      "name": "Rival Boss Vocals 2",
-      "bank": 0,
-      "program": 92
-    },
-    {
-      "name": "Rival Boss Vocals 3",
-      "bank": 0,
-      "program": 93
-    },
-    {
-      "name": "Water Palace Vocals",
-      "bank": 0,
-      "program": 94
-    },
-    {
-      "name": "Vocals",
-      "bank": 0,
-      "program": 95
-    },
-    {
-      "name": "Altitude Limit Hit 1",
-      "bank": 0,
-      "program": 96
-    },
-    {
-      "name": "Altitude Limit Hit 2",
-      "bank": 0,
-      "program": 97
     },
     {
       "name": "Mirage Road Hit",
@@ -551,16 +431,6 @@
       "name": "N. Carniv. Brass 2",
       "bank": 0,
       "program": 110
-    },
-    {
-      "name": "Rival Boss Brass 1A",
-      "bank": 0,
-      "program": 111
-    },
-    {
-      "name": "Rival Boss Brass 1B",
-      "bank": 0,
-      "program": 112
     },
     {
       "name": "Water Palace Brass 1",
@@ -606,11 +476,6 @@
       "name": "Alto Sax",
       "bank": 0,
       "program": 121
-    },
-    {
-      "name": "Rival Boss Sax",
-      "bank": 0,
-      "program": 122
     },
     {
       "name": "Flute Flutter",
@@ -886,31 +751,6 @@
       "name": "N. Carniv. Drums 6",
       "bank": 128,
       "program": 44
-    },
-    {
-      "name": "Rival Boss Drums 1",
-      "bank": 128,
-      "program": 45
-    },
-    {
-      "name": "Rival Boss Drums 2",
-      "bank": 128,
-      "program": 46
-    },
-    {
-      "name": "Rival Boss Drums 3",
-      "bank": 128,
-      "program": 47
-    },
-    {
-      "name": "Rival Boss Drums 4",
-      "bank": 128,
-      "program": 48
-    },
-    {
-      "name": "Rival Boss Drums 5",
-      "bank": 128,
-      "program": 49
     },
     {
       "name": "Water Palace Drums 1",
