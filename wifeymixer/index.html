@@ -8125,6 +8125,10 @@
   const proceduralGeniesExcludedVoiceKeys = new Set();
   let proceduralGeniesProfile = null;
   let proceduralSoundFontsPromise = null;
+  const proceduralSoundFontLoadPromises = new Map();
+  const midiParsedCache = new Map();
+  const midiParsedPromises = new Map();
+  let midiChoiceWarmupRevision = 0;
 
   function sfVoice(source,bank,program,name,options={}){return Object.freeze({source,bank,program,name,...options})}
 
@@ -8886,23 +8890,41 @@
     throw lastError||new Error(`Could not load ${source.label||"SoundFont"}`);
   }
 
+  async function ensureProceduralSoundFontSource(sourceId,{quiet=false}={}){
+    const id=String(sourceId||"");
+    if(proceduralSoundFonts.has(id))return proceduralSoundFonts.get(id);
+    if(proceduralSoundFontLoadPromises.has(id))return proceduralSoundFontLoadPromises.get(id);
+    const source=PROCEDURAL_SF2_SOURCES[id];
+    if(!source)return null;
+    if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
+
+    const promise=(async()=>{
+      if(!quiet)loadReadout.textContent=`${source.label||id} LOAD`;
+      try{
+        const bank=await loadProceduralSoundFontSource(source);
+        proceduralSoundFonts.set(id,bank);
+        proceduralSoundFontErrors.delete(id);
+        if(id==="genies")inspectGeniesBank(bank);
+        return bank;
+      }catch(error){
+        proceduralSoundFontErrors.set(id,error);
+        console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
+        return null;
+      }finally{
+        proceduralSoundFontLoadPromises.delete(id);
+      }
+    })();
+    proceduralSoundFontLoadPromises.set(id,promise);
+    return promise;
+  }
+
   async function ensureProceduralSoundFonts(){
     if(proceduralSoundFontsPromise)return proceduralSoundFontsPromise;
     proceduralSoundFontsPromise=(async()=>{
       if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
       loadReadout.textContent="SF2 LOAD";
       if(appMode==="procedural")showSystemReadout("PROCEDURAL MODE","LOADING SOUNDFONTS","PLEASE WAIT");
-      await Promise.all(Object.entries(PROCEDURAL_SF2_SOURCES).map(async([id,source])=>{
-        try{
-          const bank=await loadProceduralSoundFontSource(source);
-          proceduralSoundFonts.set(id,bank);
-          proceduralSoundFontErrors.delete(id);
-          if(id==="genies")inspectGeniesBank(bank);
-        }catch(error){
-          proceduralSoundFontErrors.set(id,error);
-          console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
-        }
-      }));
+      await Promise.all(PROCEDURAL_STRIP_SOURCE_ORDER.map(id=>ensureProceduralSoundFontSource(id,{quiet:true})));
       if(!proceduralSoundFonts.size)console.warn("No local SoundFont loaded; procedural mode is using the bench-synth fallback.");
       return proceduralSoundFonts;
     })().catch(error=>{console.warn("Procedural SoundFont rack unavailable; using the bench-synth fallback.",error);return proceduralSoundFonts});
@@ -9553,11 +9575,18 @@
       const fade=.018;
       const bpm=Number(channel.stem?.midiTempoBpm)||MIDI_DEFAULT_BPM;
       const quantum=Math.max(.02,(60/Math.max(1,bpm))*.25); // 16th-note hardware-style patch boundary
-      const swap=clockLockedPatchSwapPoint(.025,quantum);
+      // Give the audio thread a comfortable scheduling runway after a potentially
+      // expensive SoundFont render. The replacement offset is derived from the
+      // unchanged master transport clock, never from when the render finished.
+      const swap=clockLockedPatchSwapPoint(.085,quantum);
       if(!swap){loadReadout.textContent="MIDI READY";return}
       const {swapAt,cycleIndex,cycleOffset}=swap;
-      retireSourcesForProceduralMorph(channel,swapAt,fade);
-      createScheduledSource(channel,swapAt,cycleOffset,buffer,{fadeIn:fade,startGain:1});
+      const replacement=createScheduledSource(channel,swapAt,cycleOffset,buffer,{fadeIn:fade,startGain:1});
+      if(!replacement){loadReadout.textContent="MIDI READY";return}
+      // Only retire the old patch after the phase-locked replacement has been
+      // accepted by Web Audio. This prevents a failed/late swap from punching a
+      // hole in one MIDI strip while the rest of the mixer keeps running.
+      retireSourcesForProceduralMorph(channel,swapAt,fade,{exclude:replacement});
       for(let cycle=cycleIndex+1;cycle<=scheduledThroughCycle;cycle++){
         createScheduledSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,buffer);
       }
@@ -9575,8 +9604,8 @@
       showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"PINNED MIDI PATCH",`${proceduralSoundFontDisplayName(pinned.source).toUpperCase()} · ${String(pinned.name||"PATCH").toUpperCase()}`);
       return;
     }
-    await ensureProceduralSoundFonts();
     const current=midiSelectedVoiceForStem(channel.stem);
+    await ensureProceduralSoundFontSource(current?.source,{quiet:true});
     const next=midiStripVoiceAtDirection(channel.stem,current,direction);
     if(!next){
       showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"NO COMPATIBLE PATCH","HOLD");
@@ -9717,9 +9746,10 @@
     proceduralRegenerateTimer=setTimeout(()=>loadProceduralSeed(proceduralSeed,shouldPlay,{preservePosition}),25);
   }
 
-  function retireSourcesForProceduralMorph(channel,when,fade=PROCEDURAL_VIBE_CROSSFADE){
+  function retireSourcesForProceduralMorph(channel,when,fade=PROCEDURAL_VIBE_CROSSFADE,{exclude=null}={}){
     if(!channel?.sources||!audioCtx)return;
     for(const source of [...channel.sources]){
+      if(source===exclude)continue;
       try{
         const gain=source._wifeyGain?.gain;
         const sourceStart=Number(source._wifeyStart)||0;
@@ -11376,19 +11406,24 @@
     for(const data of [target.left,target.right])for(let i=0;i<data.length;i++)data[i]*=gain;
   }
 
-  function renderMidiWithSoundFont(parsed,stem,voice){
+  async function renderMidiWithSoundFont(parsed,stem,voice){
     const bank=proceduralSoundFonts.get(voice?.source);
     if(!bank?.getPreset(voice?.bank,voice?.program))return null;
     const target=createProceduralStereoBuffer(Math.max(.08,(parsed.duration||0)+.5));
     let rendered=false;
     const isSonicDrums=voice.source==="casino";
-    for(const note of parsed.notes||[]){
+    const notes=parsed.notes||[];
+    for(let index=0;index<notes.length;index++){
+      const note=notes[index];
       const midi=isSonicDrums?sonicMidiNote(note.midi):Math.max(0,Math.min(127,Math.round(note.midi)));
       const pan=Math.max(-1,Math.min(1,((Number(note.pan)||64)-64)/63));
       const channelGain=Math.max(0,Math.min(1,((Number(note.volume)||100)/127)*((Number(note.expression)||127)/127)));
       const trim=Number.isFinite(Number(voice.gainTrim))?Number(voice.gainTrim):1;
       const duration=isSonicDrums?Math.max(.08,Math.min(.55,note.duration||.2)):Math.max(.02,note.duration||.1);
       rendered=bank.renderNote(target,{bank:voice.bank,program:voice.program,midi,velocity:Math.max(1,Math.min(127,Math.round(note.velocity||96))),start:note.start,duration,amp:.72*channelGain*trim,pan})||rendered;
+      // Long MIDI files can contain thousands of notes. Yield periodically so a
+      // patch render cannot monopolize the main thread while another strip plays.
+      if(index>0&&index%96===0)await new Promise(done=>setTimeout(done,0));
     }
     if(!rendered)return null;
     attenuateTargetIfNeeded(target,.94);
@@ -11397,6 +11432,25 @@
     stem.midiSoundFontName=proceduralSoundFontDisplayName(voice.source);
     stem.midiVoiceName=voice.name;
     return target.buffer;
+  }
+
+  async function getParsedMidiForStem(stem,requestedTempo){
+    const baseKey=stemCacheKey(stem);
+    const key=`${baseKey}|parsed:${requestedTempo??"native"}`;
+    if(midiParsedCache.has(key))return midiParsedCache.get(key);
+    if(midiParsedPromises.has(key))return midiParsedPromises.get(key);
+    const promise=(async()=>{
+      const response=await fetch(stem.src,{cache:"force-cache"});
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      const bytes=await response.arrayBuffer();
+      const sourceParsed=WifeyMIDI.parse(bytes);
+      const parsed=scaleParsedMidiTempo(sourceParsed,requestedTempo);
+      midiParsedCache.set(key,parsed);
+      return parsed;
+    })();
+    midiParsedPromises.set(key,promise);
+    try{return await promise}
+    finally{midiParsedPromises.delete(key)}
   }
 
   // MIDI is intentionally a parallel loading path. Audio stems continue through
@@ -11421,13 +11475,14 @@
     if (decodedBufferPromises.has(key)) return decodedBufferPromises.get(key);
 
     const promise = (async()=>{
-      const response = await fetch(stem.src,{cache:"force-cache"});
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const bytes = await response.arrayBuffer();
-      const sourceParsed = WifeyMIDI.parse(bytes);
-      const parsed = scaleParsedMidiTempo(sourceParsed,requestedTempo);
-      await ensureProceduralSoundFonts();
-      const buffer = renderMidiWithSoundFont(parsed,stem,voice) || WifeyMIDI.render(audioCtx,parsed);
+      // Only the SoundFont actually selected for this strip is startup-critical.
+      // Other rack banks are warmed sequentially after playback begins.
+      const [,parsed]=await Promise.all([
+        ensureProceduralSoundFontSource(voice?.source,{quiet:true}),
+        getParsedMidiForStem(stem,requestedTempo)
+      ]);
+      const sfBuffer=await renderMidiWithSoundFont(parsed,stem,voice);
+      const buffer=sfBuffer||WifeyMIDI.render(audioCtx,parsed);
       stem.midiDuration = parsed.duration;
       stem.midiSourceBpm = parsed.sourceBpm;
       if(requestedTempo!==null)stem.midiTempoBpm = requestedTempo;
@@ -11446,6 +11501,39 @@
     return String(stem?.kind || "").startsWith("midi-")
       ? getMidiStemBuffer(stem)
       : getDecodedStemBuffer(stem);
+  }
+
+  function midiStartupSoundFontSources(playlist=currentPlaylist){
+    const sources=[];
+    const seen=new Set();
+    for(const stem of playlist?.stems||[]){
+      if(!isMidiStem(stem))continue;
+      const source=midiSelectedVoiceForStem(stem)?.source;
+      if(source&&!seen.has(source)){seen.add(source);sources.push(source)}
+    }
+    return sources;
+  }
+
+  function scheduleMidiChoiceSoundFontWarmup(playlist=currentPlaylist){
+    if(!isPlaying||appMode!=="playlist"||!playlist?.stems?.some(isMidiStem))return;
+    const revision=++midiChoiceWarmupRevision;
+    const startup=new Set(midiStartupSoundFontSources(playlist));
+    const queue=PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>!startup.has(id)&&!proceduralSoundFonts.has(id));
+    if(!queue.length){scheduleBackgroundPreload();return}
+    idleTask(async()=>{
+      for(const sourceId of queue){
+        if(revision!==midiChoiceWarmupRevision||!isPlaying||currentPlaylist!==playlist)return;
+        await ensureProceduralSoundFontSource(sourceId,{quiet:true});
+        // Load choices serially and yield between banks. Playback remains the
+        // priority and never waits on these optional rack additions.
+        await new Promise(done=>setTimeout(done,0));
+      }
+      if(revision===midiChoiceWarmupRevision&&isPlaying&&currentPlaylist===playlist){
+        // Only after the live song has its complete switchable rack do we spend
+        // idle time rendering likely next/previous playlist destinations.
+        scheduleBackgroundPreload();
+      }
+    });
   }
 
   function idleTask(callback) {
@@ -11630,9 +11718,10 @@
         loadReadout.textContent = channels.some(c=>c.error) ? "PARTIAL" : "READY";
       }
 
-      // Current song gets full priority. Once it is decoded, prepare likely
-      // next/previous/shuffle destinations quietly in the background.
-      scheduleBackgroundPreload();
+      // Audio playlists can keep the legacy next-song preload behavior. MIDI
+      // playlists defer all optional work until playback is actually running:
+      // first warm unused instrument banks serially, then prepare other songs.
+      if(!playlist.stems?.some(isMidiStem))scheduleBackgroundPreload();
     });
   }
 
@@ -12301,7 +12390,8 @@
     }
 
     loadReadout.textContent = "LOADING";
-    showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),"LOADING STEMS","PLEASE WAIT");
+    const midiLoad=currentPlaylist?.stems?.some(isMidiStem);
+    showSystemReadout(String(currentPlaylist?.title||"WIFEY MIX-8").toUpperCase(),midiLoad?"LOADING ACTIVE PATCHES":"LOADING STEMS","PLEASE WAIT");
     await Promise.allSettled(channels.map(c=>c.readyPromise));
     updatePlaylistDuration();
 
@@ -12316,12 +12406,16 @@
     startClockedPlaybackAt(position);
     updatePlaybackButtons();
     loadReadout.textContent = isPlaying ? "PLAYING" : "READY";
-    if (isPlaying) showAudioEngineStatus();
+    if (isPlaying) {
+      showAudioEngineStatus();
+      scheduleMidiChoiceSoundFontWarmup(currentPlaylist);
+    }
   }
 
   function pauseCurrent() {
     if (!isPlaying) return;
 
+    midiChoiceWarmupRevision++;
     lastKnownPosition = getPosition();
     stopAllScheduledSources();
     isPlaying = false;
@@ -12336,6 +12430,7 @@
   }
 
   function stopCurrent() {
+    midiChoiceWarmupRevision++;
     stopAllScheduledSources();
     isPlaying = false;
     lastKnownPosition = 0;
@@ -12373,6 +12468,7 @@
 
     const normalized=(Number(index)+playlists.length)%playlists.length;
     const generation=++loadGeneration;
+    midiChoiceWarmupRevision++;
 
     stopAllScheduledSources();
     isPlaying=false;
