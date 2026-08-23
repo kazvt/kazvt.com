@@ -7625,7 +7625,7 @@
       box-shadow:0 0 0 1px rgba(205,174,112,.28),0 0 9px rgba(179,117,56,.18),0 2px 5px rgba(0,0,0,.82);
     }
 
-    /* Compact press-and-hold SoundFont / instrument hierarchy. */
+    /* Compact SoundFont / instrument hierarchy. */
     .instrument-picker{
       position:fixed;z-index:2147483000;width:min(300px,calc(100vw - 16px));max-height:min(60vh,420px);box-sizing:border-box;
       overflow:hidden;border:1px solid #080807;border-radius:5px;color:#c8c0aa;
@@ -7644,11 +7644,11 @@
     .instrument-picker__title{font-size:10px;line-height:1.15;font-weight:900;letter-spacing:.12em;color:#e3bc7f;text-shadow:0 1px 0 #000,0 0 5px rgba(202,139,64,.25)}
     .instrument-picker__sub{margin-top:3px;font-size:8px;line-height:1.2;font-weight:700;letter-spacing:.045em;color:#aaa28f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 #000}
     .instrument-picker__close{flex:0 0 22px;width:22px;height:18px;padding:0;border:1px solid #080807;border-radius:2px;background:linear-gradient(#3a3832,#1c1b18);color:#817b6e;font:900 10px/1 monospace;box-shadow:inset 0 1px rgba(255,255,255,.05),0 1px 2px #050504;cursor:pointer}
-    .instrument-picker__head-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-width:80px;justify-content:flex-end}
-    .instrument-picker__lock,.instrument-picker__restrict{width:24px;height:18px;padding:0;display:grid;place-items:center;border:1px solid #111014;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 17%),linear-gradient(180deg,#535158 0%,#38373d 72%,#29282e 100%);color:#a7a298;box-shadow:0 2px 0 #08080a,0 0 0 1px #2b292e,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 2px rgba(0,0,0,.28);cursor:pointer}
-    .instrument-picker__lock i,.instrument-picker__restrict i{font-size:9px;filter:drop-shadow(0 1px 0 #000)}
-    .instrument-picker__lock:hover,.instrument-picker__lock:focus-visible,.instrument-picker__restrict:hover,.instrument-picker__restrict:focus-visible{outline:none;filter:brightness(1.12)}
-    .instrument-picker__lock.is-active,.instrument-picker__restrict.is-active{color:#2a1908;background:linear-gradient(180deg,rgba(255,244,211,.18),transparent 17%),linear-gradient(180deg,#d4a15d 0%,#ac7337 72%,#825023 100%);border-color:#33200d;box-shadow:0 1px 0 #08080a,0 0 0 1px #33291d,inset 0 2px 3px rgba(80,42,10,.20),inset 0 0 0 1px rgba(255,226,178,.10)}
+    .instrument-picker__head-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-width:51px;justify-content:flex-end}
+    .instrument-picker__lock{width:24px;height:18px;padding:0;display:grid;place-items:center;border:1px solid #111014;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 17%),linear-gradient(180deg,#535158 0%,#38373d 72%,#29282e 100%);color:#a7a298;box-shadow:0 2px 0 #08080a,0 0 0 1px #2b292e,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 2px rgba(0,0,0,.28);cursor:pointer}
+    .instrument-picker__lock i{font-size:9px;filter:drop-shadow(0 1px 0 #000)}
+    .instrument-picker__lock:hover,.instrument-picker__lock:focus-visible{outline:none;filter:brightness(1.12)}
+    .instrument-picker__lock.is-active{color:#2a1908;background:linear-gradient(180deg,rgba(255,244,211,.18),transparent 17%),linear-gradient(180deg,#d4a15d 0%,#ac7337 72%,#825023 100%);border-color:#33200d;box-shadow:0 1px 0 #08080a,0 0 0 1px #33291d,inset 0 2px 3px rgba(80,42,10,.20),inset 0 0 0 1px rgba(255,226,178,.10)}
     .instrument-picker__list{max-height:calc(min(60vh,420px) - 48px);overflow:auto;padding:5px;scrollbar-width:thin;scrollbar-color:#4a4438 #0d0d0b}
     .instrument-picker__group{margin:2px 0;border:1px solid #080807;border-radius:3px;overflow:hidden;background:#0e0e0c;box-shadow:inset 0 1px rgba(255,255,255,.025)}
     .instrument-picker__source{
@@ -7685,6 +7685,8 @@
     .instrument-picker__voice.is-mismatch:hover,.instrument-picker__voice.is-mismatch:focus-visible{opacity:.82;color:#a29b8d;filter:saturate(.72)}
     .instrument-picker__group.is-mismatch{opacity:.58;filter:saturate(.48)}
     .instrument-picker__group.is-mismatch.is-open,.instrument-picker__group.is-mismatch.has-current{opacity:.78}
+    .instrument-picker__group.is-first-mismatch{margin-top:8px}
+    .instrument-picker__voice.is-first-mismatch{margin-top:5px;box-shadow:inset 0 1px 0 rgba(145,132,106,.16)}
     .instrument-picker__empty{padding:9px 8px 9px 28px;color:#8b8578;font:800 8px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.055em;text-transform:uppercase;text-shadow:0 1px 0 #000}
     @media(max-width:560px){.instrument-picker{width:min(282px,calc(100vw - 12px));max-height:min(58vh,390px)}.instrument-picker__list{max-height:calc(min(58vh,390px) - 48px)}}
 
@@ -9893,15 +9895,11 @@
     syncProceduralChannelInstrumentLabels();
   }
 
-  const INSTRUMENT_PICKER_HOLD_MS=440;
   let instrumentPicker=null;
   let instrumentPickerChannel=null;
   let instrumentPickerAnchor=null;
   let instrumentPickerExpandedSource=null;
   let instrumentPickerLoadToken=0;
-  // Strict category browsing is intentionally session-ephemeral: it always
-  // returns to ON on a fresh page load and is never written to localStorage.
-  let instrumentPickerRestrictCategories=true;
 
   function instrumentPickerRole(channel){
     return appMode==="procedural"?String(channel?.stem?.role||""):midiStemRole(channel?.stem);
@@ -9961,12 +9959,23 @@
     return true;
   }
 
+  // Lightweight preset catalog generated from the packaged SF2 preset headers.
+  // It lets PATCH SELECT show and rank every patch immediately without forcing
+  // all SoundFont sample data to load up front.
+  const INSTRUMENT_PICKER_PRESET_CATALOG=Object.freeze({"sf64":[{"bank":0,"program":36,"name":"Slap Bass"},{"bank":0,"program":27,"name":"Electric Guitar (C)"},{"bank":0,"program":4,"name":"Electric Piano 1"},{"bank":0,"program":48,"name":"Strings 1"},{"bank":0,"program":60,"name":"French Horn"},{"bank":0,"program":75,"name":"Pan Flute"},{"bank":0,"program":21,"name":"Accordion"},{"bank":0,"program":0,"name":"Grand Piano"},{"bank":128,"program":0,"name":"General Percussion"},{"bank":0,"program":114,"name":"Steel Drums"},{"bank":0,"program":17,"name":"Percussive Organ"},{"bank":0,"program":33,"name":"Electric Bass (F)"},{"bank":0,"program":34,"name":"Electric Bass (P)"},{"bank":0,"program":105,"name":"Banjo"},{"bank":0,"program":110,"name":"Fiddle"},{"bank":0,"program":78,"name":"Whistle"},{"bank":0,"program":32,"name":"Acoustic Bass"},{"bank":0,"program":18,"name":"Rock Organ"},{"bank":0,"program":61,"name":"Brass Section"},{"bank":0,"program":5,"name":"Electric Piano 2"},{"bank":0,"program":53,"name":"Voice Oohs"},{"bank":0,"program":49,"name":"Strings 2"},{"bank":0,"program":55,"name":"Orchestra Hit"},{"bank":0,"program":38,"name":"Synth Bass 1"},{"bank":0,"program":39,"name":"Synth Bass 2"},{"bank":0,"program":80,"name":"Lead 1 (Square)"},{"bank":0,"program":11,"name":"Vibraphone"},{"bank":0,"program":12,"name":"Marimba"},{"bank":0,"program":13,"name":"Xylophone"},{"bank":0,"program":52,"name":"Choir Aahs"},{"bank":0,"program":104,"name":"Sitar"},{"bank":0,"program":107,"name":"Pungi"},{"bank":0,"program":47,"name":"Timpani"},{"bank":0,"program":45,"name":"Pizzicato Strings"},{"bank":0,"program":73,"name":"Flute"},{"bank":0,"program":35,"name":"Fretless Bass"},{"bank":0,"program":43,"name":"Contrabass"},{"bank":0,"program":10,"name":"Music Box"},{"bank":0,"program":57,"name":"Trombone"},{"bank":0,"program":56,"name":"Trumpet"},{"bank":0,"program":19,"name":"Church Organ"},{"bank":0,"program":30,"name":"Distortion Guitar"},{"bank":0,"program":29,"name":"Overdrive Guitar"},{"bank":0,"program":24,"name":"Acoustic Guitar (N)"},{"bank":0,"program":122,"name":"Seashore"},{"bank":0,"program":25,"name":"Acoustic Guitar (S)"},{"bank":0,"program":50,"name":"Synth Strings 1"},{"bank":0,"program":51,"name":"Synth Strings 2"},{"bank":0,"program":58,"name":"Tuba"},{"bank":0,"program":62,"name":"Synth Brass 1"},{"bank":0,"program":63,"name":"Synth Brass 2"},{"bank":0,"program":64,"name":"Soprano Sax"},{"bank":0,"program":65,"name":"Alto Sax"},{"bank":0,"program":66,"name":"Tenor Sax"},{"bank":0,"program":67,"name":"Baritone Sax"},{"bank":0,"program":16,"name":"Drawback Organ"},{"bank":0,"program":20,"name":"Reed Organ"},{"bank":0,"program":74,"name":"Recorder"},{"bank":0,"program":76,"name":"Blown Bottle"},{"bank":0,"program":70,"name":"Bassoon"},{"bank":0,"program":71,"name":"Clarinet"},{"bank":0,"program":22,"name":"Harmonica"},{"bank":0,"program":81,"name":"Lead 2 (Sawtooth)"},{"bank":0,"program":1,"name":"Bright Acoustic Pian"},{"bank":0,"program":2,"name":"Electric Grand"},{"bank":0,"program":3,"name":"Honky-Tonk"},{"bank":0,"program":112,"name":"Tinkle Bell"},{"bank":0,"program":15,"name":"Dulcimer"},{"bank":0,"program":6,"name":"Harpsichord"},{"bank":0,"program":40,"name":"Violin"},{"bank":0,"program":41,"name":"Viola"},{"bank":0,"program":26,"name":"Electric Guitar (J)"},{"bank":0,"program":59,"name":"Muted Trumpet"},{"bank":0,"program":87,"name":"Lead 8 (Lead + Base)"},{"bank":0,"program":37,"name":"Slap Bass 2"},{"bank":0,"program":8,"name":"Celesta"},{"bank":0,"program":98,"name":"FX 3 (crystal)"},{"bank":0,"program":69,"name":"English Horn"},{"bank":0,"program":79,"name":"Ocarina"},{"bank":0,"program":28,"name":"Electric Guitar (M)"},{"bank":0,"program":44,"name":"Tremolo Strings"},{"bank":0,"program":100,"name":"FX 5 (Brightness)"},{"bank":0,"program":92,"name":"Pad 5 (bowed)"},{"bank":0,"program":93,"name":"Pad 6 (metallic)"},{"bank":0,"program":88,"name":"Pad 1 (new age)"},{"bank":0,"program":46,"name":"Orchestrial Strings"},{"bank":128,"program":16,"name":"Powerful Percussion"},{"bank":0,"program":54,"name":"Synth Voice"},{"bank":0,"program":82,"name":"Lead 3 (Callope)"},{"bank":0,"program":72,"name":"Piccolo"},{"bank":0,"program":9,"name":"Glockenspiel"},{"bank":0,"program":108,"name":"Kalimba"},{"bank":0,"program":77,"name":"Skakuhachi"},{"bank":0,"program":68,"name":"Oboe"},{"bank":0,"program":99,"name":"FX 4 (Atmosphere)"},{"bank":0,"program":113,"name":"Agogo"},{"bank":0,"program":91,"name":"Pad 4 (choir)"},{"bank":0,"program":7,"name":"Clav"},{"bank":0,"program":96,"name":"FX 1 (rain)"},{"bank":0,"program":118,"name":"Synth Drum"},{"bank":0,"program":14,"name":"Tubular Bells"},{"bank":0,"program":102,"name":"FX 7 (echoes)"},{"bank":0,"program":90,"name":"Pad 3 (polysynth)"},{"bank":0,"program":116,"name":"Taiko Drum"},{"bank":0,"program":89,"name":"Pad 2 (warm)"},{"bank":0,"program":94,"name":"Pad 7 (halo)"},{"bank":0,"program":119,"name":"Reverse Cymbal"},{"bank":0,"program":23,"name":"Tango Accordion"},{"bank":0,"program":127,"name":"Gunshot"},{"bank":0,"program":106,"name":"Shamisen"},{"bank":0,"program":85,"name":"Lead 6 (voice)"},{"bank":0,"program":42,"name":"Cello"},{"bank":0,"program":103,"name":"FX 8 (Sci-Fi)"}],"rush":[{"bank":0,"program":0,"name":"Altitude Limit Piano"},{"bank":0,"program":4,"name":"E. Piano 1"},{"bank":0,"program":5,"name":"E. Piano 2"},{"bank":0,"program":10,"name":"Organ 1"},{"bank":0,"program":11,"name":"Organ 2"},{"bank":0,"program":15,"name":"Alt. Limit Guitar 1"},{"bank":0,"program":16,"name":"Alt. Limit Guitar 2"},{"bank":0,"program":17,"name":"Alt. Limit Guitar 3"},{"bank":0,"program":18,"name":"Alt. Limit Guitar 4"},{"bank":0,"program":23,"name":"Ending Guitar"},{"bank":0,"program":24,"name":"Exception Guitar"},{"bank":0,"program":25,"name":"Final Zone Guitar 1"},{"bank":0,"program":26,"name":"Final Zone Guitar 2"},{"bank":0,"program":32,"name":"Mirage Road Guitar 1"},{"bank":0,"program":33,"name":"Mirage Road Guitar 2"},{"bank":0,"program":34,"name":"N. Carniv. Guitar 1"},{"bank":0,"program":35,"name":"N. Carniv. Guitar 2"},{"bank":0,"program":36,"name":"Rival Boss Guitar 1"},{"bank":0,"program":37,"name":"Rival Boss Guitar 2"},{"bank":0,"program":38,"name":"Water Palace Guit. 1"},{"bank":0,"program":39,"name":"Water Palace Guit. 2"},{"bank":0,"program":40,"name":"Water Palace Guit. 3"},{"bank":0,"program":41,"name":"Water Palace Guit. 4"},{"bank":0,"program":42,"name":"Clean Guitar"},{"bank":0,"program":43,"name":"Dist. Guitar SFX"},{"bank":0,"program":45,"name":"Alt. Limit Bass 1"},{"bank":0,"program":46,"name":"Alt. Limit Bass 2"},{"bank":0,"program":50,"name":"Exception Bass"},{"bank":0,"program":51,"name":"Final Zone Bass"},{"bank":0,"program":52,"name":"Huge Crisis Bass"},{"bank":0,"program":55,"name":"Mirage Road Bass"},{"bank":0,"program":56,"name":"Night Carnival Bass"},{"bank":0,"program":57,"name":"Rival Boss Bass"},{"bank":0,"program":58,"name":"Synth Bass 1"},{"bank":0,"program":59,"name":"Synth Bass 2"},{"bank":0,"program":60,"name":"Synth Bass 3"},{"bank":0,"program":62,"name":"Ending Strings 1"},{"bank":0,"program":63,"name":"Ending Strings 2"},{"bank":0,"program":64,"name":"Exception Strings 1"},{"bank":0,"program":65,"name":"Exception Strings 2"},{"bank":0,"program":66,"name":"Exception Strings 3"},{"bank":0,"program":67,"name":"Exception Violin"},{"bank":0,"program":68,"name":"Final Zone Strings"},{"bank":0,"program":70,"name":"Mirage Road Strings"},{"bank":0,"program":71,"name":"Mirage Road Violin"},{"bank":0,"program":73,"name":"Alt. Limit Vocals"},{"bank":0,"program":77,"name":"Ending Vocals 1"},{"bank":0,"program":78,"name":"Ending Vocals 2"},{"bank":0,"program":79,"name":"Exception Choir"},{"bank":0,"program":80,"name":"Exception Vocals 1"},{"bank":0,"program":81,"name":"Exception Vocals 2"},{"bank":0,"program":82,"name":"Bomb. Barbara Vocals"},{"bank":0,"program":83,"name":"Huge Crisis Vocals 1"},{"bank":0,"program":84,"name":"Huge Crisis Vocals 2"},{"bank":0,"program":86,"name":"Mirage Road Vocals 1"},{"bank":0,"program":87,"name":"Mirage Road Vocals 2"},{"bank":0,"program":88,"name":"New Record Vocals"},{"bank":0,"program":89,"name":"N. Carniv. Vocals 1"},{"bank":0,"program":90,"name":"N. Carniv. Vocals 2"},{"bank":0,"program":91,"name":"Rival Boss Vocals 1"},{"bank":0,"program":92,"name":"Rival Boss Vocals 2"},{"bank":0,"program":93,"name":"Rival Boss Vocals 3"},{"bank":0,"program":94,"name":"Water Palace Vocals"},{"bank":0,"program":95,"name":"Vocals"},{"bank":0,"program":96,"name":"Altitude Limit Hit 1"},{"bank":0,"program":97,"name":"Altitude Limit Hit 2"},{"bank":0,"program":101,"name":"Mirage Road Hit"},{"bank":0,"program":102,"name":"Orchestra Hit 1"},{"bank":0,"program":103,"name":"Orchestra Hit 2"},{"bank":0,"program":106,"name":"Huge Crisis Brass"},{"bank":0,"program":109,"name":"N. Carniv. Brass 1"},{"bank":0,"program":110,"name":"N. Carniv. Brass 2"},{"bank":0,"program":111,"name":"Rival Boss Brass 1A"},{"bank":0,"program":112,"name":"Rival Boss Brass 1B"},{"bank":0,"program":113,"name":"Water Palace Brass 1"},{"bank":0,"program":114,"name":"Water Palace Brass 2"},{"bank":0,"program":115,"name":"Water Palace Brass 3"},{"bank":0,"program":116,"name":"Brass Section 1"},{"bank":0,"program":117,"name":"Brass Section 2"},{"bank":0,"program":118,"name":"Brass Section 3"},{"bank":0,"program":119,"name":"Brass Section 4"},{"bank":0,"program":120,"name":"Synth Brass"},{"bank":0,"program":121,"name":"Alto Sax"},{"bank":0,"program":122,"name":"Rival Boss Sax"},{"bank":0,"program":123,"name":"Flute Flutter"},{"bank":0,"program":124,"name":"N. Carniv. Whistle 1"},{"bank":0,"program":125,"name":"N. Carniv. Whistle 2"},{"bank":1,"program":2,"name":"Altitude Limit Synth"},{"bank":1,"program":8,"name":"Exception Synth 1"},{"bank":1,"program":10,"name":"Final Zone Synth 1"},{"bank":1,"program":11,"name":"Final Zone Synth 2"},{"bank":1,"program":16,"name":"Mirage Road Synth 1"},{"bank":1,"program":17,"name":"Mirage Road Synth 2"},{"bank":1,"program":18,"name":"Mirage Road Synth 3"},{"bank":1,"program":20,"name":"Water Palace Synth"},{"bank":1,"program":21,"name":"Sine Wave 1"},{"bank":1,"program":22,"name":"Sine Wave 2"},{"bank":1,"program":24,"name":"Saw Wave 2"},{"bank":1,"program":25,"name":"Saw Wave 3"},{"bank":1,"program":26,"name":"Synth Pad"},{"bank":1,"program":27,"name":"Mirage Road Sitar"},{"bank":1,"program":28,"name":"Chimes"},{"bank":1,"program":29,"name":"Drum Tap"},{"bank":1,"program":30,"name":"Huge Crisis Guiro"},{"bank":1,"program":31,"name":"Night Carnival Toms"},{"bank":1,"program":32,"name":"Snap"},{"bank":1,"program":34,"name":"Final Zone Alarm"},{"bank":1,"program":35,"name":"Bomber Barbara Beep"},{"bank":1,"program":36,"name":"Huge Crisis Drops"},{"bank":1,"program":37,"name":"Tire Screech"},{"bank":1,"program":39,"name":"N. Carniv. Scratch"},{"bank":1,"program":40,"name":"Whoosh"},{"bank":128,"program":6,"name":"Alt. Limit Drums 1"},{"bank":128,"program":7,"name":"Alt. Limit Drums 2"},{"bank":128,"program":8,"name":"Alt. Limit Drums 3"},{"bank":128,"program":9,"name":"Alt. Limit Drums 4"},{"bank":128,"program":10,"name":"Alt. Limit Drums 5"},{"bank":128,"program":20,"name":"Ending Drums"},{"bank":128,"program":21,"name":"Exception Drums 1A"},{"bank":128,"program":22,"name":"Exception Drums 1B"},{"bank":128,"program":23,"name":"Exception Drums 1C"},{"bank":128,"program":24,"name":"Exception Drums 2"},{"bank":128,"program":25,"name":"Exception Drums 3"},{"bank":128,"program":26,"name":"Final Zone Drums 1"},{"bank":128,"program":27,"name":"Final Zone Drums 2"},{"bank":128,"program":28,"name":"Final Zone Drums 3"},{"bank":128,"program":29,"name":"Huge Crisis Drums 1"},{"bank":128,"program":30,"name":"Huge Crisis Drums 2"},{"bank":128,"program":31,"name":"Huge Crisis Drums 3"},{"bank":128,"program":32,"name":"Huge Crisis Drums 4"},{"bank":128,"program":36,"name":"Mirage Road Drums 1"},{"bank":128,"program":37,"name":"Mirage Road Drums 2"},{"bank":128,"program":38,"name":"Mirage Road Drums 3"},{"bank":128,"program":39,"name":"N. Carniv. Drums 1"},{"bank":128,"program":40,"name":"N. Carniv. Drums 2"},{"bank":128,"program":41,"name":"N. Carniv. Drums 3"},{"bank":128,"program":42,"name":"N. Carniv. Drums 4"},{"bank":128,"program":43,"name":"N. Carniv. Drums 5"},{"bank":128,"program":44,"name":"N. Carniv. Drums 6"},{"bank":128,"program":45,"name":"Rival Boss Drums 1"},{"bank":128,"program":46,"name":"Rival Boss Drums 2"},{"bank":128,"program":47,"name":"Rival Boss Drums 3"},{"bank":128,"program":48,"name":"Rival Boss Drums 4"},{"bank":128,"program":49,"name":"Rival Boss Drums 5"},{"bank":128,"program":50,"name":"Water Palace Drums 1"},{"bank":128,"program":51,"name":"Water Palace Drums 2"}],"genies":[{"bank":128,"program":30,"name":"32X PWM"},{"bank":128,"program":24,"name":"Power"},{"bank":0,"program":61,"name":"Brass Section"},{"bank":0,"program":114,"name":"Steel Drum"},{"bank":0,"program":100,"name":"Brightness"},{"bank":128,"program":26,"name":"Dance"},{"bank":128,"program":16,"name":"Electric"},{"bank":0,"program":127,"name":"Sound Effects"},{"bank":0,"program":95,"name":"Sweep Pad 5"},{"bank":0,"program":94,"name":"Sweep Pad 4"},{"bank":0,"program":93,"name":"Sweep Pad 3"},{"bank":0,"program":92,"name":"Bowed Glass"},{"bank":0,"program":90,"name":"Sweep Pad 1"},{"bank":0,"program":69,"name":"Oboe 2"},{"bank":0,"program":26,"name":"Jazz Guitar"},{"bank":0,"program":19,"name":"Organ 4"},{"bank":0,"program":18,"name":"Organ 3"},{"bank":0,"program":16,"name":"Organ 1"},{"bank":0,"program":81,"name":"Sawtooth Wave"},{"bank":0,"program":83,"name":"Lead 2"},{"bank":0,"program":88,"name":"Brightness 1"},{"bank":0,"program":87,"name":"Unused 13"},{"bank":0,"program":86,"name":"Unused 12"},{"bank":0,"program":67,"name":"Unused 11"},{"bank":0,"program":66,"name":"Unused 10"},{"bank":0,"program":65,"name":"Unused 9"},{"bank":0,"program":64,"name":"Unused 8"},{"bank":0,"program":52,"name":"Choir"},{"bank":0,"program":28,"name":"Unused 5"},{"bank":0,"program":23,"name":"Unused 3"},{"bank":0,"program":22,"name":"Unused 2"},{"bank":0,"program":21,"name":"Unused 1"},{"bank":0,"program":31,"name":"Mute Guitar"},{"bank":0,"program":7,"name":"Clavinet"},{"bank":0,"program":79,"name":"Whistle 2"},{"bank":0,"program":78,"name":"Whistle 1"},{"bank":0,"program":77,"name":"Flute 6"},{"bank":0,"program":76,"name":"Flute 5"},{"bank":0,"program":75,"name":"Flute 4"},{"bank":0,"program":74,"name":"Flute 3"},{"bank":0,"program":73,"name":"Flute 2"},{"bank":0,"program":72,"name":"Flute 1"},{"bank":0,"program":71,"name":"Clarinet 4"},{"bank":0,"program":70,"name":"Clarinet 3"},{"bank":0,"program":68,"name":"Oboe 1"},{"bank":0,"program":46,"name":"Harp"},{"bank":0,"program":6,"name":"Harpsichord"},{"bank":0,"program":27,"name":"Clean Guitar"},{"bank":0,"program":25,"name":"Steel Guitar 1"},{"bank":0,"program":24,"name":"Nylon Guitar 1"},{"bank":0,"program":45,"name":"Pizz. Strings"},{"bank":0,"program":15,"name":"Chimes 5"},{"bank":0,"program":14,"name":"Bells"},{"bank":0,"program":10,"name":"Chimes 3"},{"bank":0,"program":9,"name":"Chimes 2"},{"bank":0,"program":8,"name":"Chimes 1"},{"bank":0,"program":48,"name":"Strings 6"},{"bank":0,"program":47,"name":"DAC Timpani"},{"bank":0,"program":55,"name":"Orchestra Hit"},{"bank":0,"program":54,"name":"Choir 3"},{"bank":0,"program":53,"name":"Choir 2"},{"bank":0,"program":91,"name":"Choir Pad"},{"bank":0,"program":89,"name":"Warm Pad"},{"bank":0,"program":84,"name":"Lead 3"},{"bank":0,"program":80,"name":"Square Wave"},{"bank":128,"program":0,"name":"Standard"},{"bank":0,"program":63,"name":"Synth Brass 2"},{"bank":0,"program":62,"name":"Synth Brass 1"},{"bank":0,"program":60,"name":"French Horn"},{"bank":0,"program":59,"name":"Mute Trumpet"},{"bank":0,"program":58,"name":"Tuba"},{"bank":0,"program":57,"name":"Trombone"},{"bank":0,"program":56,"name":"Trumpet"},{"bank":0,"program":39,"name":"Synth Bass 2"},{"bank":0,"program":38,"name":"Synth Bass 1"},{"bank":0,"program":37,"name":"Slap Bass 2"},{"bank":0,"program":36,"name":"Slap Bass 1"},{"bank":0,"program":35,"name":"Fretless Bass"},{"bank":0,"program":34,"name":"E. Bass 2"},{"bank":0,"program":33,"name":"E. Bass 1"},{"bank":0,"program":32,"name":"Acoustic Bass"},{"bank":0,"program":51,"name":"Strings 9"},{"bank":0,"program":50,"name":"Strings 8"},{"bank":0,"program":49,"name":"Strings 7"},{"bank":0,"program":44,"name":"Strings 5"},{"bank":0,"program":43,"name":"Strings 4"},{"bank":0,"program":42,"name":"Strings 3"},{"bank":0,"program":41,"name":"Strings 2"},{"bank":0,"program":40,"name":"Strings 1"},{"bank":0,"program":30,"name":"Dist. Guitar 2"},{"bank":0,"program":29,"name":"Dist. Guitar 1"},{"bank":0,"program":20,"name":"Organ 5"},{"bank":0,"program":17,"name":"Organ 2"},{"bank":0,"program":13,"name":"Xylophone"},{"bank":0,"program":11,"name":"Vibes 4"},{"bank":0,"program":5,"name":"E. Piano 2"},{"bank":0,"program":4,"name":"E. Piano 1"},{"bank":0,"program":3,"name":"piano 4"},{"bank":0,"program":2,"name":"Piano 3"},{"bank":0,"program":1,"name":"Piano 2"},{"bank":0,"program":0,"name":"Piano 1"}],"meow":[{"bank":0,"program":0,"name":"cat_meow_x"},{"bank":0,"program":1,"name":"MeowSynthCombo"}],"casino":[{"bank":0,"program":0,"name":"Sonic Drums"}]});
+
   function instrumentPickerVoices(channel,sourceId){
     const bank=proceduralSoundFonts.get(sourceId);
-    if(!bank?.getPresetList)return [];
+    // Merge the lightweight packaged catalog with the live parser list. The
+    // catalog guarantees newly-added presets (notably MeowSynthCombo) stay
+    // visible even if an older/cached parser view is missing a header.
+    const presetByKey=new Map();
+    for(const p of (INSTRUMENT_PICKER_PRESET_CATALOG[sourceId]||[]))presetByKey.set(`${Number(p.bank)}:${Number(p.program)}`,p);
+    if(bank?.getPresetList)for(const p of bank.getPresetList())presetByKey.set(`${Number(p.bank)}:${Number(p.program)}`,p);
+    const sourcePresets=[...presetByKey.values()];
     const current=instrumentPickerCurrentVoice(channel);
     const seen=new Set();
-    return bank.getPresetList()
+    return sourcePresets
       .filter(p=>Number.isFinite(Number(p.bank))&&Number.isFinite(Number(p.program))&&!/^EO[PI]$/i.test(String(p.name||"")))
       .filter(p=>sourceId!=="genies"||(!isExcludedGeniesGuitar(p.name)&&!proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(p.bank)}:${Number(p.program)}`)))
       .map(p=>{
@@ -9982,19 +9991,13 @@
       });
   }
 
-  const INSTRUMENT_PICKER_SOURCE_ROLES=Object.freeze({
-    sf64:Object.freeze(["drums","percussion","bass","keys","melody","guitar","strings"]),
-    rush:Object.freeze(["drums","percussion","bass","keys","melody","guitar","strings"]),
-    genies:Object.freeze(["drums","percussion","bass","keys","melody","guitar","strings"]),
-    meow:Object.freeze(["melody"]),
-    casino:Object.freeze(["drums","percussion"])
-  });
+  function instrumentPickerSourceEncouragementCount(channel,sourceId){
+    const role=instrumentPickerRole(channel);
+    return instrumentPickerVoices(channel,sourceId).reduce((count,voice)=>count+(soundFontVoiceMatchesRole(voice,role)?1:0),0);
+  }
 
   function instrumentPickerSourceMatchesRole(channel,sourceId){
-    const role=instrumentPickerRole(channel);
-    const bank=proceduralSoundFonts.get(sourceId);
-    if(bank)return instrumentPickerVoices(channel,sourceId).some(voice=>soundFontVoiceMatchesRole(voice,role));
-    return (INSTRUMENT_PICKER_SOURCE_ROLES[sourceId]||[]).includes(String(role||"").toLowerCase());
+    return instrumentPickerSourceEncouragementCount(channel,sourceId)>0;
   }
 
   function escapePickerText(value){
@@ -10007,33 +10010,55 @@
     const role=instrumentPickerRole(channel);
     const title=trackCategoryLabel(role).toUpperCase();
     const strip=String(channel?.stem?.name||"TRACK").toUpperCase();
-    const groups=PROCEDURAL_STRIP_SOURCE_ORDER.map(sourceId=>{
+
+    // Rank banks by how many correct-category patches they contain. Banks with
+    // zero matches stay visible, greyed, beneath the encouraged group. Exact
+    // encouragement ties resolve alphabetically by displayed SoundFont name.
+    const rankedSources=PROCEDURAL_STRIP_SOURCE_ORDER.map(sourceId=>({
+      sourceId,
+      encouragement:instrumentPickerSourceEncouragementCount(channel,sourceId),
+      label:proceduralSoundFontDisplayName(sourceId)
+    })).sort((a,b)=>{
+      const aGood=a.encouragement>0,bGood=b.encouragement>0;
+      if(aGood!==bGood)return aGood?-1:1;
+      if(aGood&&a.encouragement!==b.encouragement)return b.encouragement-a.encouragement;
+      return String(a.label).localeCompare(String(b.label),undefined,{sensitivity:"base"});
+    });
+
+    let hitDiscouragedBank=false;
+    const groups=rankedSources.map(({sourceId,encouragement})=>{
       const loaded=proceduralSoundFonts.has(sourceId);
       const loading=proceduralSoundFontLoadPromises.has(sourceId);
       const open=instrumentPickerExpandedSource===sourceId;
       const hasCurrent=current?.source===sourceId;
-      const sourceMatches=instrumentPickerSourceMatchesRole(channel,sourceId);
-      if(instrumentPickerRestrictCategories&&!sourceMatches)return "";
-      const allVoices=open&&loaded?instrumentPickerVoices(channel,sourceId):[];
-      const voices=instrumentPickerRestrictCategories?allVoices.filter(voice=>soundFontVoiceMatchesRole(voice,role)):allVoices;
-      const children=!open?"":(!loaded
-        ?`<div class="instrument-picker__children"><div class="instrument-picker__empty">${loading?"LOADING BANK…":"OPEN TO LOAD BANK"}</div></div>`
-        :`<div class="instrument-picker__children">${voices.length?voices.map(voice=>{
-            const selected=proceduralVoiceKey(voice)===proceduralVoiceKey(current);
-            const matches=soundFontVoiceMatchesRole(voice,role);
-            const icon=soundFontPatchIconMeta(voice);
-            const category=soundFontVoiceCategoryLabel(voice);
-            return `<button type="button" class="instrument-picker__voice${selected?" is-current":""}${matches?"":" is-mismatch"}" data-picker-voice data-source="${escapePickerText(sourceId)}" data-bank="${Number(voice.bank)}" data-program="${Number(voice.program)}" aria-pressed="${selected}" title="${escapePickerText(`${icon.label||voice.name||"Instrument"} · ${category}${matches?"":" · outside this strip category"}`)}"><span class="instrument-picker__voice-icon" aria-hidden="true"><i class="fa-solid ${safeFontAwesomeIcon(icon.icon||"fa-music")}"></i></span><span>${escapePickerText(voice.name||"PATCH")}</span><span class="instrument-picker__voice-category">${escapePickerText(category)}</span></button>`;
-          }).join(""):`<div class="instrument-picker__empty">NO ${escapePickerText(title)} PATCHES</div>`}</div>`);
-      return `<div class="instrument-picker__group${open?" is-open":""}${hasCurrent?" has-current":""}${loading?" is-loading":""}${sourceMatches?"":" is-mismatch"}">
+      const sourceMatches=encouragement>0;
+      const firstMismatch=!sourceMatches&&!hitDiscouragedBank;
+      if(!sourceMatches)hitDiscouragedBank=true;
+
+      const allVoices=open?instrumentPickerVoices(channel,sourceId):[];
+      const voices=allVoices.slice().sort((a,b)=>{
+        const aGood=soundFontVoiceMatchesRole(a,role),bGood=soundFontVoiceMatchesRole(b,role);
+        if(aGood!==bGood)return aGood?-1:1;
+        return String(a.name||"").localeCompare(String(b.name||""),undefined,{sensitivity:"base"});
+      });
+      let hitDiscouragedVoice=false;
+      const children=!open?"":`<div class="instrument-picker__children">${voices.length?voices.map(voice=>{
+        const selected=proceduralVoiceKey(voice)===proceduralVoiceKey(current);
+        const matches=soundFontVoiceMatchesRole(voice,role);
+        const firstVoiceMismatch=!matches&&!hitDiscouragedVoice;
+        if(!matches)hitDiscouragedVoice=true;
+        const icon=soundFontPatchIconMeta(voice);
+        const category=soundFontVoiceCategoryLabel(voice);
+        return `<button type="button" class="instrument-picker__voice${selected?" is-current":""}${matches?"":" is-mismatch"}${firstVoiceMismatch?" is-first-mismatch":""}" data-picker-voice data-source="${escapePickerText(sourceId)}" data-bank="${Number(voice.bank)}" data-program="${Number(voice.program)}" aria-pressed="${selected}" title="${escapePickerText(`${icon.label||voice.name||"Instrument"} · ${category}${matches?"":" · outside this strip category"}`)}"><span class="instrument-picker__voice-icon" aria-hidden="true"><i class="fa-solid ${safeFontAwesomeIcon(icon.icon||"fa-music")}"></i></span><span>${escapePickerText(voice.name||"PATCH")}</span><span class="instrument-picker__voice-category">${escapePickerText(category)}</span></button>`;
+      }).join(""):`<div class="instrument-picker__empty">NO PATCHES</div>`}</div>`;
+      return `<div class="instrument-picker__group${open?" is-open":""}${hasCurrent?" has-current":""}${loading?" is-loading":""}${sourceMatches?"":" is-mismatch"}${firstMismatch?" is-first-mismatch":""}">
         <button type="button" class="instrument-picker__source" data-picker-source="${escapePickerText(sourceId)}" aria-expanded="${open}">
           <span class="instrument-picker__lamp"></span>${soundFontIconMarkup(sourceId,"instrument-picker__source-icon")}<span class="instrument-picker__source-name">${escapePickerText(proceduralSoundFontDisplayName(sourceId))}</span><span class="instrument-picker__load">${loading?"LOAD":loaded?"SF2":"OPEN"}</span><span class="instrument-picker__chev">›</span>
         </button>${children}</div>`;
-    }).filter(Boolean).join("")||`<div class="instrument-picker__empty">NO ${escapePickerText(title)} SOUNDFONTS</div>`;
+    }).join("")||`<div class="instrument-picker__empty">NO SOUNDFONTS</div>`;
     const patchLocked=isInstrumentLockedForChannel(channel);
     const lockTitle=patchLocked?"Unlock this instrument from the strip":"Lock the current instrument to this strip";
-    const restrictTitle="Restrict to only correct categories";
-    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT · ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} · SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__restrict${instrumentPickerRestrictCategories?" is-active":""}" data-picker-restrict aria-pressed="${instrumentPickerRestrictCategories}" title="${restrictTitle}" aria-label="${restrictTitle}"><i class="fa-solid fa-list" aria-hidden="true"></i></button><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
+    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT · ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} · SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
   }
   function positionInstrumentPicker(){
     if(!instrumentPicker||!instrumentPickerAnchor?.isConnected)return;
@@ -10175,17 +10200,6 @@
     instrumentPicker.addEventListener("click",async event=>{
       const close=event.target.closest("[data-picker-close]");
       if(close){event.preventDefault();closeInstrumentPicker();return}
-      const restrictButton=event.target.closest("[data-picker-restrict]");
-      if(restrictButton){
-        event.preventDefault();
-        event.stopPropagation();
-        instrumentPickerRestrictCategories=!instrumentPickerRestrictCategories;
-        // If strict mode hides the currently expanded bank, collapse it so no
-        // stale children remain conceptually open behind the filtered list.
-        if(instrumentPickerRestrictCategories&&instrumentPickerExpandedSource&&!instrumentPickerSourceMatchesRole(channel,instrumentPickerExpandedSource))instrumentPickerExpandedSource=null;
-        refreshInstrumentPicker();
-        return;
-      }
       const lockButton=event.target.closest("[data-picker-lock]");
       if(lockButton){event.preventDefault();event.stopPropagation();toggleInstrumentPickerLock(channel);return}
       const sourceButton=event.target.closest("[data-picker-source]");
