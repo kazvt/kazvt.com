@@ -7999,6 +7999,7 @@
     sf64:{url:"soundfonts/SF64.sf2",label:"SF64"},
     rush:{url:"soundfonts/Gotta Rush.sf2",label:"GOTTA RUSH"},
     genies:{url:"soundfonts/Genies.sf2",aliases:["soundfonts/Genies.SF2"],label:"GENIES",adaptive:true},
+    meow:{url:"soundfonts/Meow.sf2",label:"MEOW"},
     casino:{url:"soundfonts/Sonic Drums.sf2",label:"SONIC DRUMS",zones:["chill","mid"]}
   });
   const proceduralSoundFonts = new Map();
@@ -8042,6 +8043,13 @@
   const SONIC_VOICES = Object.freeze({
     drums:sfVoice("casino",0,0,"Sonic Drums",{gainTrim:.94,vibeZone:"chill-mid"}),
     percussion:sfVoice("casino",0,0,"Sonic Drums",{gainTrim:.82,vibeZone:"chill-mid"})
+  });
+
+  // User-added single-preset SoundFont. Keep the actual preset name from the
+  // bank so the hierarchy reads MEOW -> cat_meow_x. It is pitched/tonal rather
+  // than a GM drum kit, so expose it to melodic strip families.
+  const MEOW_VOICES = Object.freeze({
+    cat:sfVoice("meow",0,0,"cat_meow_x",{gainTrim:.90})
   });
 
   // Gotta Rush is the character half. These presets were curated from the
@@ -8114,6 +8122,13 @@
       keys:[],
       melody:[],
       percussion:[SONIC_VOICES.percussion]
+    }),
+    meow:Object.freeze({
+      drums:[],
+      bass:[MEOW_VOICES.cat],
+      keys:[MEOW_VOICES.cat],
+      melody:[MEOW_VOICES.cat],
+      percussion:[]
     }),
     rush:Object.freeze({
       drums:[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
@@ -8453,7 +8468,7 @@
   // that musical role. The choice follows the role across seeds/loops. An
   // unlocked choice is relinquished when the global SoundFont selector moves;
   // a locked strip keeps its exact voice until the user cycles it again.
-  const PROCEDURAL_STRIP_SOURCE_ORDER=Object.freeze(["sf64","rush","genies","casino"]);
+  const PROCEDURAL_STRIP_SOURCE_ORDER=Object.freeze(["sf64","rush","genies","meow","casino"]);
 
   function proceduralVoiceRef(voice){
     if(!voice?.source||!Number.isFinite(Number(voice.bank))||!Number.isFinite(Number(voice.program)))return null;
@@ -8509,6 +8524,10 @@
   let masterAnalyser = null;
   let masterMeterData = null;
   let reverb = null;
+  let reverbPreDelay = null;
+  let reverbHighpass = null;
+  let reverbLowpass = null;
+  let reverbLimiter = null;
   let fxReturn = null;
 
   // Global telephone-effect parallel path.
@@ -8828,7 +8847,7 @@
     if(sourceId==="genies")return chooseGeniesVoice(role,program);
     const candidates=curatedSourceCandidates(role,sourceId,program,preferred);
     if(!candidates.length)return null;
-    const sourceSalt={sf64:0x53463634,rush:0x52555348,casino:0x43415349}[sourceId]||0x53463231;
+    const sourceSalt={sf64:0x53463634,rush:0x52555348,genies:0x47454e49,meow:0x4d454f57,casino:0x43415349}[sourceId]||0x53463231;
     const roleSalt=GENIES_ROLE_SALTS[role]||0x57494645;
     const rng=mulberry32((seedIdentityHash(program?.seed||1)^sourceSalt^roleSalt)>>>0);
     return chooseWeightedVoice(rng,candidates,program);
@@ -9416,7 +9435,7 @@
     showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),proceduralSoundFontDisplayName(next.source).toUpperCase(),String(next.name||"PATCH").toUpperCase());
   }
 
-  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverb);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
+  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverbPreDelay);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
   async function setupProceduralAudioForRenderedChannels(playlist,generation){
     ensureAudioGraph();
     await ensureProceduralSoundFonts();
@@ -9739,16 +9758,18 @@
   function trimValueToDb(value) { return ((Number(value)-50)/50)*12; }
   function panValue(value) { return Math.max(-1,Math.min(1,(Number(value)-50)/50)); }
   function roomValue(value,masterValue=null) {
-    // Hardware-style send law: still restrained near zero, but substantially
-    // more audible through the middle of the knob than the old squared curve.
-    // Master ROOM behaves like a global room send rather than a second wet
-    // multiplier, so either control can create space on its own.
+    // Deliberately bold analogue-style room send. The old curve kept the wet
+    // path too far below the dry signal, especially through the middle half of
+    // the knob. This law comes in earlier, then has extra headroom above unity
+    // so 70-100% can sound obviously drenched rather than merely "spacious".
     const channelNorm=Math.max(0,Math.min(1,(Number(value)||0)/100));
     const masterNorm=Math.max(0,Math.min(1,(Number(masterValue ?? masterState.room)||0)/100));
-    const channelSend=Math.pow(channelNorm,1.28);
-    const globalSend=Math.pow(masterNorm,1.18)*.72;
-    const combined=1-(1-channelSend)*(1-globalSend);
-    return Math.min(1.05,combined*1.05);
+    const channelSend=channelNorm <= 0 ? 0 : Math.pow(channelNorm,.78)*1.45;
+    const globalSend=masterNorm <= 0 ? 0 : Math.pow(masterNorm,.82)*1.15;
+    // Sum the local/global sends but soften the overlap so both knobs at max do
+    // not simply double the return level. Values above 1 are intentional.
+    const overlap=Math.min(channelSend,1)*Math.min(globalSend,1)*.38;
+    return Math.min(2.25,channelSend+globalSend-overlap);
   }
 
   function formatDb(db) {
@@ -10470,14 +10491,31 @@
     return `${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
   }
 
-  function createImpulse(ctx, seconds=2.15, decay=2.15) {
+  function createImpulse(ctx, seconds=3.65, decay=1.72) {
     const length = Math.max(1,Math.floor(ctx.sampleRate*seconds));
     const impulse = ctx.createBuffer(2,length,ctx.sampleRate);
+    const earlyReflections = [
+      [0,1.00],[31,.72],[47,.58],[73,.49],[101,.36],[137,.27],[181,.20]
+    ];
+
     for (let channel=0; channel<2; channel++) {
       const data = impulse.getChannelData(channel);
+      // Dense, slightly asymmetric stereo tail. The slow decay makes ROOM much
+      // more obvious without changing the dry path at all.
       for (let i=0;i<length;i++) {
-        const envelope = Math.pow(1-i/length,decay);
-        data[i] = (Math.random()*2-1)*envelope;
+        const t=i/length;
+        const envelope=Math.pow(1-t,decay);
+        const stereoDrift=.86 + .14*Math.sin((i/(ctx.sampleRate*.019)) + channel*1.7);
+        data[i]=(Math.random()*2-1)*envelope*stereoDrift;
+      }
+
+      // Add discrete early reflections so the effect reads as a physical room
+      // immediately, before the diffuse tail takes over. Offset the right side
+      // slightly to widen the image.
+      for (const [ms,gain] of earlyReflections) {
+        const offsetMs=ms + (channel ? 4.5 : 0);
+        const index=Math.min(length-1,Math.floor(ctx.sampleRate*offsetMs/1000));
+        data[index]+=gain;
       }
     }
     return impulse;
@@ -10565,8 +10603,32 @@
     masterAnalyser.smoothingTimeConstant = .72;
     masterMeterData = new Uint8Array(masterAnalyser.fftSize);
 
+    reverbPreDelay = audioCtx.createDelay(.12);
+    reverbPreDelay.delayTime.value = .028;
+
     reverb = audioCtx.createConvolver();
     reverb.buffer = createImpulse(audioCtx);
+
+    // Warm the synthetic tail like a compact hardware/plate return: remove
+    // rumble, shave the brittle top, and gently contain peaks when many strips
+    // feed the room at once.
+    reverbHighpass = audioCtx.createBiquadFilter();
+    reverbHighpass.type = "highpass";
+    reverbHighpass.frequency.value = 145;
+    reverbHighpass.Q.value = .55;
+
+    reverbLowpass = audioCtx.createBiquadFilter();
+    reverbLowpass.type = "lowpass";
+    reverbLowpass.frequency.value = 7600;
+    reverbLowpass.Q.value = .42;
+
+    reverbLimiter = audioCtx.createDynamicsCompressor();
+    reverbLimiter.threshold.value = -8;
+    reverbLimiter.knee.value = 10;
+    reverbLimiter.ratio.value = 3.2;
+    reverbLimiter.attack.value = .004;
+    reverbLimiter.release.value = .24;
+
     fxReturn = audioCtx.createGain();
 
     // Clean telephone parallel path:
@@ -10614,7 +10676,11 @@
     megaLimiter.attack.value = .002;
     megaLimiter.release.value = .07;
 
-    reverb.connect(fxReturn);
+    reverbPreDelay.connect(reverb);
+    reverb.connect(reverbHighpass);
+    reverbHighpass.connect(reverbLowpass);
+    reverbLowpass.connect(reverbLimiter);
+    reverbLimiter.connect(fxReturn);
     fxReturn.connect(masterBus);
 
     masterBus.connect(masterTone);
@@ -10672,10 +10738,11 @@
     const frequency = 1800 + Math.pow(toneNorm,2.1)*18200;
     setParam(masterTone.frequency,frequency,.025);
     if (masterPan?.pan) setParam(masterPan.pan,panValue(masterState.pan));
-    // A fixed, healthy wet return makes each channel ROOM send immediately
-    // useful. Master ROOM is folded into every send by roomValue(), so 0/0 is
-    // fully dry while either control can add reverb independently.
-    setParam(fxReturn.gain,.9);
+    // The dry path is untouched; ROOM strength comes entirely from the send
+    // and this dedicated wet return. A little extra return gain makes the new
+    // longer/pre-delayed room unmistakable while the wet compressor contains
+    // dense multi-strip peaks.
+    setParam(fxReturn.gain,1.12);
     for (const channel of channels) {
       if (channel?.send?.gain) setParam(channel.send.gain,roomValue(channel.state?.room,masterState.room),.018);
     }
@@ -11146,6 +11213,17 @@
   }
 
   function midiRawRoleVoices(role,sourceId){
+    // Meow.sf2 is intentionally a tiny novelty bank (one pitched preset at
+    // bank 0 / program 0), so GM family-number filtering would hide it from
+    // guitar/strings and the curated rack would hide it from other MIDI roles.
+    // Surface every real Meow preset to melodic MIDI strips instead.
+    if(sourceId==="meow"){
+      const bank=proceduralSoundFonts.get(sourceId);
+      if(!bank?.getPresetList||role==="drums"||role==="percussion")return [];
+      return bank.getPresetList()
+        .filter(p=>Number.isFinite(Number(p.bank))&&Number.isFinite(Number(p.program))&&!/^EO[PI]$/i.test(String(p.name||"")))
+        .map(p=>sfVoice(sourceId,Number(p.bank),Number(p.program),String(p.name||"Meow"),{gainTrim:.90}));
+    }
     // The five procedural roles use exactly the same curated child lists.
     if(["drums","percussion","bass","keys","melody"].includes(role))return proceduralRawRoleVoices(role,sourceId);
     // Extra MIDI-only categories use their General-MIDI family ranges where a
@@ -11413,7 +11491,7 @@
       pan.connect(fader);
       fader.connect(masterBus);
       fader.connect(send);
-      send.connect(reverb);
+      send.connect(reverbPreDelay);
       fader.connect(analyser);
 
       const channel = {
