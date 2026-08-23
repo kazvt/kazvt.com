@@ -8,9 +8,9 @@
     "ISFT": "Awave Studio v10.6"
   },
   "counts": {
-    "presets": 205,
-    "instruments": 217,
-    "samples": 993
+    "presets": 146,
+    "instruments": 146,
+    "samples": 631
   },
   "integrationNotes": {
     "strategy": "Hybrid deterministic procedural rack with SF64. VIBE biases sound choice; loop variations retain the same selected rack.",
@@ -33,58 +33,6 @@
   },
   "recommended": {
     "drums": [
-      {
-        "bank": 128,
-        "program": 0,
-        "name": "A New Day Drums 1",
-        "use": "low/mid energy; verified core kit",
-        "coverage": [
-          36,
-          38,
-          40,
-          42,
-          46
-        ]
-      },
-      {
-        "bank": 128,
-        "program": 1,
-        "name": "A New Day Drums 2",
-        "use": "low/mid alternate; verified core kit",
-        "coverage": [
-          36,
-          38,
-          40,
-          42,
-          46
-        ]
-      },
-      {
-        "bank": 128,
-        "program": 4,
-        "name": "A New Day Drums 5",
-        "use": "low/mid alternate; verified core kit",
-        "coverage": [
-          36,
-          38,
-          40,
-          42,
-          46
-        ]
-      },
-      {
-        "bank": 128,
-        "program": 5,
-        "name": "A New Day Drums 6",
-        "use": "mid/high energy; verified core kit",
-        "coverage": [
-          36,
-          38,
-          40,
-          42,
-          46
-        ]
-      },
       {
         "bank": 128,
         "program": 9,
@@ -117,16 +65,6 @@
     "percussion": [
       {
         "bank": 128,
-        "program": 12,
-        "name": "Dead Line Drums 2",
-        "use": "auxiliary percussion palette",
-        "coverage": [
-          54,
-          82
-        ]
-      },
-      {
-        "bank": 128,
         "program": 37,
         "name": "Mirage Road Drums 2",
         "use": "auxiliary percussion palette",
@@ -149,11 +87,6 @@
     "bass": [
       {
         "bank": 0,
-        "program": 44,
-        "name": "A New Day Bass"
-      },
-      {
-        "bank": 0,
         "program": 45,
         "name": "Alt. Limit Bass 1"
       },
@@ -161,21 +94,6 @@
         "bank": 0,
         "program": 46,
         "name": "Alt. Limit Bass 2"
-      },
-      {
-        "bank": 0,
-        "program": 47,
-        "name": "Dead Line Bass 1"
-      },
-      {
-        "bank": 0,
-        "program": 48,
-        "name": "Dead Line Bass 2"
-      },
-      {
-        "bank": 0,
-        "program": 49,
-        "name": "Eggman Boss Bass"
       },
       {
         "bank": 0,
@@ -221,21 +139,6 @@
     "keys": [
       {
         "bank": 0,
-        "program": 1,
-        "name": "Ending Piano"
-      },
-      {
-        "bank": 0,
-        "program": 2,
-        "name": "Leaf Storm Piano"
-      },
-      {
-        "bank": 0,
-        "program": 3,
-        "name": "Rival Boss Piano"
-      },
-      {
-        "bank": 0,
         "program": 4,
         "name": "E. Piano 1"
       },
@@ -243,16 +146,6 @@
         "bank": 0,
         "program": 5,
         "name": "E. Piano 2"
-      },
-      {
-        "bank": 0,
-        "program": 6,
-        "name": "A New Day Organ"
-      },
-      {
-        "bank": 0,
-        "program": 9,
-        "name": "Leaf Storm Organ"
       },
       {
         "bank": 0,
@@ -305,21 +198,6 @@
       "program": 0
     },
     {
-      "name": "Ending Piano",
-      "bank": 0,
-      "program": 1
-    },
-    {
-      "name": "Leaf Storm Piano",
-      "bank": 0,
-      "program": 2
-    },
-    {
-      "name": "Rival Boss Piano",
-      "bank": 0,
-      "program": 3
-    },
-    {
       "name": "E. Piano 1",
       "bank": 0,
       "program": 4
@@ -330,26 +208,6 @@
       "program": 5
     },
     {
-      "name": "A New Day Organ",
-      "bank": 0,
-      "program": 6
-    },
-    {
-      "name": "Final Zone Organ 1",
-      "bank": 0,
-      "program": 7
-    },
-    {
-      "name": "Final Zone Organ 2",
-      "bank": 0,
-      "program": 8
-    },
-    {
-      "name": "Leaf Storm Organ",
-      "bank": 0,
-      "program": 9
-    },
-    {
       "name": "Organ 1",
       "bank": 0,
       "program": 10
@@ -358,21 +216,6 @@
       "name": "Organ 2",
       "bank": 0,
       "program": 11
-    },
-    {
-      "name": "A New Day Guitar 1",
-      "bank": 0,
-      "program": 12
-    },
-    {
-      "name": "A New Day Guitar 2",
-      "bank": 0,
-      "program": 13
-    },
-    {
-      "name": "A New Day Guitar 3",
-      "bank": 0,
-      "program": 14
     },
     {
       "name": "Alt. Limit Guitar 1",
@@ -395,26 +238,6 @@
       "program": 18
     },
     {
-      "name": "Dead Line Guitar 1A",
-      "bank": 0,
-      "program": 19
-    },
-    {
-      "name": "Dead Line Guitar 1B",
-      "bank": 0,
-      "program": 20
-    },
-    {
-      "name": "Dead Line Guitar 2",
-      "bank": 0,
-      "program": 21
-    },
-    {
-      "name": "Eggman Boss Guitar",
-      "bank": 0,
-      "program": 22
-    },
-    {
       "name": "Ending Guitar",
       "bank": 0,
       "program": 23
@@ -433,31 +256,6 @@
       "name": "Final Zone Guitar 2",
       "bank": 0,
       "program": 26
-    },
-    {
-      "name": "Leaf Storm Guit. 1",
-      "bank": 0,
-      "program": 27
-    },
-    {
-      "name": "Leaf Storm Guit. 2A",
-      "bank": 0,
-      "program": 28
-    },
-    {
-      "name": "Leaf Storm Guit. 2B",
-      "bank": 0,
-      "program": 29
-    },
-    {
-      "name": "Leaf Storm Guit. 3A",
-      "bank": 0,
-      "program": 30
-    },
-    {
-      "name": "Leaf Storm Guit. 3B",
-      "bank": 0,
-      "program": 31
     },
     {
       "name": "Mirage Road Guitar 1",
@@ -520,11 +318,6 @@
       "program": 43
     },
     {
-      "name": "A New Day Bass",
-      "bank": 0,
-      "program": 44
-    },
-    {
       "name": "Alt. Limit Bass 1",
       "bank": 0,
       "program": 45
@@ -533,21 +326,6 @@
       "name": "Alt. Limit Bass 2",
       "bank": 0,
       "program": 46
-    },
-    {
-      "name": "Dead Line Bass 1",
-      "bank": 0,
-      "program": 47
-    },
-    {
-      "name": "Dead Line Bass 2",
-      "bank": 0,
-      "program": 48
-    },
-    {
-      "name": "Eggman Boss Bass",
-      "bank": 0,
-      "program": 49
     },
     {
       "name": "Exception Bass",
@@ -563,16 +341,6 @@
       "name": "Huge Crisis Bass",
       "bank": 0,
       "program": 52
-    },
-    {
-      "name": "Leaf Storm Brass 1A",
-      "bank": 0,
-      "program": 53
-    },
-    {
-      "name": "Leaf Storm Brass 1B",
-      "bank": 0,
-      "program": 54
     },
     {
       "name": "Mirage Road Bass",
@@ -603,11 +371,6 @@
       "name": "Synth Bass 3",
       "bank": 0,
       "program": 60
-    },
-    {
-      "name": "Dead Line Strings",
-      "bank": 0,
-      "program": 61
     },
     {
       "name": "Ending Strings 1",
@@ -645,11 +408,6 @@
       "program": 68
     },
     {
-      "name": "Leaf Storm Strings",
-      "bank": 0,
-      "program": 69
-    },
-    {
       "name": "Mirage Road Strings",
       "bank": 0,
       "program": 70
@@ -660,29 +418,9 @@
       "program": 71
     },
     {
-      "name": "A New Day Vocals",
-      "bank": 0,
-      "program": 72
-    },
-    {
       "name": "Alt. Limit Vocals",
       "bank": 0,
       "program": 73
-    },
-    {
-      "name": "Dead Line Vocals",
-      "bank": 0,
-      "program": 74
-    },
-    {
-      "name": "Eggman Boss Vocals 1",
-      "bank": 0,
-      "program": 75
-    },
-    {
-      "name": "Eggman Boss Vocals 2",
-      "bank": 0,
-      "program": 76
     },
     {
       "name": "Ending Vocals 1",
@@ -723,11 +461,6 @@
       "name": "Huge Crisis Vocals 2",
       "bank": 0,
       "program": 84
-    },
-    {
-      "name": "Leaf Storm Vocals",
-      "bank": 0,
-      "program": 85
     },
     {
       "name": "Mirage Road Vocals 1",
@@ -790,21 +523,6 @@
       "program": 97
     },
     {
-      "name": "Eggman Boss Hit 1",
-      "bank": 0,
-      "program": 98
-    },
-    {
-      "name": "Eggman Boss Hit 2",
-      "bank": 0,
-      "program": 99
-    },
-    {
-      "name": "Eggman Boss Hit 3",
-      "bank": 0,
-      "program": 100
-    },
-    {
       "name": "Mirage Road Hit",
       "bank": 0,
       "program": 101
@@ -820,29 +538,9 @@
       "program": 103
     },
     {
-      "name": "A New Day Brass 1A",
-      "bank": 0,
-      "program": 104
-    },
-    {
-      "name": "A New Day Brass 1B",
-      "bank": 0,
-      "program": 105
-    },
-    {
       "name": "Huge Crisis Brass",
       "bank": 0,
       "program": 106
-    },
-    {
-      "name": "Leaf Storm Brass 1A",
-      "bank": 0,
-      "program": 107
-    },
-    {
-      "name": "Leaf Storm Brass 1B",
-      "bank": 0,
-      "program": 108
     },
     {
       "name": "N. Carniv. Brass 1",
@@ -1025,11 +723,6 @@
       "program": 32
     },
     {
-      "name": "Dead Line Bell",
-      "bank": 1,
-      "program": 33
-    },
-    {
       "name": "Final Zone Alarm",
       "bank": 1,
       "program": 34
@@ -1050,11 +743,6 @@
       "program": 37
     },
     {
-      "name": "Leaf Storm Scream",
-      "bank": 1,
-      "program": 38
-    },
-    {
       "name": "N. Carniv. Scratch",
       "bank": 1,
       "program": 39
@@ -1063,36 +751,6 @@
       "name": "Whoosh",
       "bank": 1,
       "program": 40
-    },
-    {
-      "name": "A New Day Drums 1",
-      "bank": 128,
-      "program": 0
-    },
-    {
-      "name": "A New Day Drums 2",
-      "bank": 128,
-      "program": 1
-    },
-    {
-      "name": "A New Day Drums 3",
-      "bank": 128,
-      "program": 2
-    },
-    {
-      "name": "A New Day Drums 4",
-      "bank": 128,
-      "program": 3
-    },
-    {
-      "name": "A New Day Drums 5",
-      "bank": 128,
-      "program": 4
-    },
-    {
-      "name": "A New Day Drums 6",
-      "bank": 128,
-      "program": 5
     },
     {
       "name": "Alt. Limit Drums 1",
@@ -1118,51 +776,6 @@
       "name": "Alt. Limit Drums 5",
       "bank": 128,
       "program": 10
-    },
-    {
-      "name": "Dead Line Drums 1",
-      "bank": 128,
-      "program": 11
-    },
-    {
-      "name": "Dead Line Drums 2",
-      "bank": 128,
-      "program": 12
-    },
-    {
-      "name": "Dead Line Drums 3",
-      "bank": 128,
-      "program": 13
-    },
-    {
-      "name": "Dead Line Drums 4",
-      "bank": 128,
-      "program": 14
-    },
-    {
-      "name": "Dead Line Drums 5",
-      "bank": 128,
-      "program": 15
-    },
-    {
-      "name": "Eggman Boss Drums 1",
-      "bank": 128,
-      "program": 16
-    },
-    {
-      "name": "Eggman Boss Drums 2",
-      "bank": 128,
-      "program": 17
-    },
-    {
-      "name": "Eggman Boss Drums 3",
-      "bank": 128,
-      "program": 18
-    },
-    {
-      "name": "Eggman Boss Drums 4",
-      "bank": 128,
-      "program": 19
     },
     {
       "name": "Ending Drums",
@@ -1228,21 +841,6 @@
       "name": "Huge Crisis Drums 4",
       "bank": 128,
       "program": 32
-    },
-    {
-      "name": "Leaf Storm Drums 1",
-      "bank": 128,
-      "program": 33
-    },
-    {
-      "name": "Leaf Storm Drums 2",
-      "bank": 128,
-      "program": 34
-    },
-    {
-      "name": "Leaf Storm Drums 3",
-      "bank": 128,
-      "program": 35
     },
     {
       "name": "Mirage Road Drums 1",

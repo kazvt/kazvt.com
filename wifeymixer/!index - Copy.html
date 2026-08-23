@@ -4826,7 +4826,7 @@
     }
 
     /* Playlist media-type signposting: MIDI and hybrid programs use the same
-       near-black navy ink and keyboard glyph; audio-only programs use waveform. */
+       near-black navy ink and keyboard glyph; audio-only programs use a speaker glyph. */
     .playlist-selector-label{
       display:flex !important;
       align-items:center;
@@ -7644,11 +7644,11 @@
     .instrument-picker__title{font-size:10px;line-height:1.15;font-weight:900;letter-spacing:.12em;color:#e3bc7f;text-shadow:0 1px 0 #000,0 0 5px rgba(202,139,64,.25)}
     .instrument-picker__sub{margin-top:3px;font-size:8px;line-height:1.2;font-weight:700;letter-spacing:.045em;color:#aaa28f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 #000}
     .instrument-picker__close{flex:0 0 22px;width:22px;height:18px;padding:0;border:1px solid #080807;border-radius:2px;background:linear-gradient(#3a3832,#1c1b18);color:#817b6e;font:900 10px/1 monospace;box-shadow:inset 0 1px rgba(255,255,255,.05),0 1px 2px #050504;cursor:pointer}
-    .instrument-picker__head-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-width:51px;justify-content:flex-end}
-    .instrument-picker__lock{width:24px;height:18px;padding:0;display:grid;place-items:center;border:1px solid #111014;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 17%),linear-gradient(180deg,#535158 0%,#38373d 72%,#29282e 100%);color:#a7a298;box-shadow:0 2px 0 #08080a,0 0 0 1px #2b292e,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 2px rgba(0,0,0,.28);cursor:pointer}
-    .instrument-picker__lock i{font-size:9px;filter:drop-shadow(0 1px 0 #000)}
-    .instrument-picker__lock:hover,.instrument-picker__lock:focus-visible{outline:none;filter:brightness(1.12)}
-    .instrument-picker__lock.is-active{color:#2a1908;background:linear-gradient(180deg,rgba(255,244,211,.18),transparent 17%),linear-gradient(180deg,#d4a15d 0%,#ac7337 72%,#825023 100%);border-color:#33200d;box-shadow:0 1px 0 #08080a,0 0 0 1px #33291d,inset 0 2px 3px rgba(80,42,10,.20),inset 0 0 0 1px rgba(255,226,178,.10)}
+    .instrument-picker__head-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-width:80px;justify-content:flex-end}
+    .instrument-picker__lock,.instrument-picker__restrict{width:24px;height:18px;padding:0;display:grid;place-items:center;border:1px solid #111014;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 17%),linear-gradient(180deg,#535158 0%,#38373d 72%,#29282e 100%);color:#a7a298;box-shadow:0 2px 0 #08080a,0 0 0 1px #2b292e,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 2px rgba(0,0,0,.28);cursor:pointer}
+    .instrument-picker__lock i,.instrument-picker__restrict i{font-size:9px;filter:drop-shadow(0 1px 0 #000)}
+    .instrument-picker__lock:hover,.instrument-picker__lock:focus-visible,.instrument-picker__restrict:hover,.instrument-picker__restrict:focus-visible{outline:none;filter:brightness(1.12)}
+    .instrument-picker__lock.is-active,.instrument-picker__restrict.is-active{color:#2a1908;background:linear-gradient(180deg,rgba(255,244,211,.18),transparent 17%),linear-gradient(180deg,#d4a15d 0%,#ac7337 72%,#825023 100%);border-color:#33200d;box-shadow:0 1px 0 #08080a,0 0 0 1px #33291d,inset 0 2px 3px rgba(80,42,10,.20),inset 0 0 0 1px rgba(255,226,178,.10)}
     .instrument-picker__list{max-height:calc(min(60vh,420px) - 48px);overflow:auto;padding:5px;scrollbar-width:thin;scrollbar-color:#4a4438 #0d0d0b}
     .instrument-picker__group{margin:2px 0;border:1px solid #080807;border-radius:3px;overflow:hidden;background:#0e0e0c;box-shadow:inset 0 1px rgba(255,255,255,.025)}
     .instrument-picker__source{
@@ -7776,7 +7776,7 @@
         <div id="topTempoModule" class="top-tempo-module" hidden aria-label="Tempo control">
           <span class="top-tempo-legend" aria-hidden="true">TEMPO</span>
           <span id="topTempoReadout" class="top-tempo-screen">104 BPM</span>
-          <span class="top-tempo-fader-wrap" title="Tempo · analogue fader"><input id="topTempoControl" class="top-tempo-range" type="range" min="60" max="180" step="1" value="104" aria-label="Tempo in BPM"></span>
+          <span class="top-tempo-fader-wrap" title="Tempo · drag to change · double-click to reset to original tempo"><input id="topTempoControl" class="top-tempo-range" type="range" min="60" max="180" step="1" value="104" aria-label="Tempo in BPM"></span>
           <button id="topTempoRandomBtn" class="top-tempo-random" type="button" title="Randomize MIDI tempo for this session" aria-label="Randomize MIDI tempo">
             <i class="fa-solid fa-dice" aria-hidden="true"></i>
           </button>
@@ -8361,6 +8361,9 @@
   let midiChoiceWarmupRevision = 0;
 
   function sfVoice(source,bank,program,name,options={}){return Object.freeze({source,bank,program,name,...options})}
+  function sfVoiceSourceOptions(source,bank,program){
+    return String(source)==="meow"&&Number(bank)===0&&Number(program)===0?{gainTrim:.90}:{};
+  }
 
   // SF64 is the neutral / rounder half of the rack.
   const SF64_VOICES = Object.freeze({
@@ -8396,29 +8399,22 @@
     percussion:sfVoice("casino",0,0,"Sonic Drums",{gainTrim:.82,vibeZone:"chill-mid"})
   });
 
-  // User-added single-preset SoundFont. Keep the actual preset name from the
-  // bank so the hierarchy reads MEOW -> cat_meow_x. It is pitched/tonal rather
-  // than a GM drum kit, so expose it to melodic strip families.
+  // User-added Meow SoundFont. It now contains the original cat_meow_x plus
+  // a layered MeowSynthCombo preset. Both are pitched/tonal synth-family voices,
+  // so expose them to melodic strip families.
   const MEOW_VOICES = Object.freeze({
-    cat:sfVoice("meow",0,0,"cat_meow_x",{gainTrim:.90})
+    cat:sfVoice("meow",0,0,"cat_meow_x",sfVoiceSourceOptions("meow",0,0)),
+    combo:sfVoice("meow",0,1,"MeowSynthCombo",sfVoiceSourceOptions("meow",0,1))
   });
 
   // Gotta Rush is the character half. These presets were curated from the
   // actual bank. Many bank-128 entries are partial drum layers, so only kits
   // verified against the generator's MIDI notes are allowed here.
   const RUSH_VOICES = Object.freeze({
-    drumsNewDay1:sfVoice("rush",128,0,"A New Day Drums 1"),
-    drumsNewDay2:sfVoice("rush",128,1,"A New Day Drums 2"),
-    drumsNewDay5:sfVoice("rush",128,4,"A New Day Drums 5"),
-    drumsNewDay6:sfVoice("rush",128,5,"A New Day Drums 6"),
     drumsAltitude4:sfVoice("rush",128,9,"Alt. Limit Drums 4"),
     drumsMirage3:sfVoice("rush",128,38,"Mirage Road Drums 3"),
-    bassNewDay:sfVoice("rush",0,44,"A New Day Bass"),
     bassAltitude1:sfVoice("rush",0,45,"Alt. Limit Bass 1"),
     bassAltitude2:sfVoice("rush",0,46,"Alt. Limit Bass 2"),
-    bassDeadLine1:sfVoice("rush",0,47,"Dead Line Bass 1"),
-    bassDeadLine2:sfVoice("rush",0,48,"Dead Line Bass 2"),
-    bassEggman:sfVoice("rush",0,49,"Eggman Boss Bass"),
     bassException:sfVoice("rush",0,50,"Exception Bass"),
     bassHugeCrisis:sfVoice("rush",0,52,"Huge Crisis Bass"),
     bassMirage:sfVoice("rush",0,55,"Mirage Road Bass"),
@@ -8427,13 +8423,8 @@
     bassSynth1:sfVoice("rush",0,58,"Synth Bass 1"),
     bassSynth2:sfVoice("rush",0,59,"Synth Bass 2"),
     bassSynth3:sfVoice("rush",0,60,"Synth Bass 3"),
-    keysEnding:sfVoice("rush",0,1,"Ending Piano"),
-    keysLeafStorm:sfVoice("rush",0,2,"Leaf Storm Piano"),
-    keysRival:sfVoice("rush",0,3,"Rival Boss Piano"),
     keysEP1:sfVoice("rush",0,4,"E. Piano 1"),
     keysEP2:sfVoice("rush",0,5,"E. Piano 2"),
-    keysNewDayOrgan:sfVoice("rush",0,6,"A New Day Organ"),
-    keysLeafOrgan:sfVoice("rush",0,9,"Leaf Storm Organ"),
     keysOrgan1:sfVoice("rush",0,10,"Organ 1"),
     keysOrgan2:sfVoice("rush",0,11,"Organ 2"),
     // Restricted-range Rush leads are still useful: the renderer octave-wraps
@@ -8445,7 +8436,6 @@
     leadPad:sfVoice("rush",1,26,"Synth Pad"),
     // These auxiliary banks were verified specifically for MIDI 54 tambourine
     // and MIDI 82 shaker. Mirage 3 also doubles as a complete core drum kit.
-    percussionDeadLine2:sfVoice("rush",128,12,"Dead Line Drums 2"),
     percussionMirage2:sfVoice("rush",128,37,"Mirage Road Drums 2"),
     percussionMirage:sfVoice("rush",128,38,"Mirage Road Drums 3")
   });
@@ -8469,21 +8459,21 @@
       drums:[],
       bass:[],
       keys:[],
-      melody:[MEOW_VOICES.cat],
+      melody:[MEOW_VOICES.cat,MEOW_VOICES.combo],
       percussion:[]
     }),
     rush:Object.freeze({
-      drums:[RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
-      bass:[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3],
-      keys:[RUSH_VOICES.keysEnding,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysRival,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2],
+      drums:[RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3],
+      bass:[RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3],
+      keys:[RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2],
       melody:[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,RUSH_VOICES.leadPad],
-      percussion:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage]
+      percussion:[RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage]
     })
   });
 
   const PROCEDURAL_ROLE_FALLBACKS = Object.freeze({
     drums:[RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsGeneral,SF64_VOICES.drumsPower],
-    bass:[RUSH_VOICES.bassNewDay,SF64_VOICES.bassFinger,SF64_VOICES.bassSynth1],
+    bass:[RUSH_VOICES.bassMirage,SF64_VOICES.bassFinger,SF64_VOICES.bassSynth1],
     keys:[RUSH_VOICES.keysEP1,SF64_VOICES.keysGrand,SF64_VOICES.keysEP1],
     melody:[RUSH_VOICES.leadSine1,SF64_VOICES.leadSquare,SF64_VOICES.leadSaw],
     percussion:[RUSH_VOICES.percussionMirage,SF64_VOICES.percussionGeneral]
@@ -8501,24 +8491,14 @@
   const PROCEDURAL_HOT_WORDS=/\b(dead\s*line|leaf\s*storm|storm|rock|slap|saw(?:tooth)?|charang|metal|dist(?:ortion)?|drive|acid|rave|attack)\b/i;
   const PROCEDURAL_LIVELY_WORDS=/\b(night\s*carnival|carnival|alt(?:itude|\.\s*limit)|exception|clav|honky(?:-tonk)?|percussive)\b/i;
   const PROCEDURAL_CALM_WORDS=/\b(soft|mellow|warm|round|dream|dreamy|gentle|smooth|ambient|ending|new\s*day|sine|pad|rhodes|wurli|wurlitzer|electric\s*piano|e\.?\s*piano|acoustic|fretless)\b/i;
-  // The title "A New Day" sounds gentle, but Rush programs 128:0 and 128:1
-  // are audibly forceful drum kits. Give the concrete instrument meaning
-  // precedence over the song-title wording so they can never inherit CALM.
-  const PROCEDURAL_RUSH_HARD_NEW_DAY_DRUMS=/\ba\s*new\s*day\s*drums?\s*(?:1|2)\b/i;
-  // Despite the friendly song title, this Rush bass is audibly hard-edged.
-  // Treat the concrete instrument as authoritative so "New Day" cannot make it calm.
-  const PROCEDURAL_RUSH_HARD_NEW_DAY_BASS=/\ba\s*new\s*day\s*bass\b/i;
 
   function proceduralVibeSemantics(text){
     const name=String(text||"");
-    const hardNewDayDrums=PROCEDURAL_RUSH_HARD_NEW_DAY_DRUMS.test(name);
-    const hardNewDayBass=PROCEDURAL_RUSH_HARD_NEW_DAY_BASS.test(name);
     let minEnergy=0,minIntensity=0,minComplexity=0,heat=0,calm=0,impact=0;
     if(PROCEDURAL_IMPACT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.62);minIntensity=Math.max(minIntensity,.58);heat=Math.max(heat,1);impact=1}
     if(PROCEDURAL_EXTREME_WORDS.test(name)){minEnergy=Math.max(minEnergy,.56);minIntensity=Math.max(minIntensity,.54);heat=Math.max(heat,.92)}
     if(PROCEDURAL_HOT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.40);minIntensity=Math.max(minIntensity,.40);heat=Math.max(heat,.68)}
     if(PROCEDURAL_LIVELY_WORDS.test(name)){minEnergy=Math.max(minEnergy,.29);minIntensity=Math.max(minIntensity,.34);heat=Math.max(heat,.38)}
-    if(hardNewDayDrums){minEnergy=Math.max(minEnergy,.58);minIntensity=Math.max(minIntensity,.50);heat=Math.max(heat,.88)}
     if(hardNewDayBass){minEnergy=Math.max(minEnergy,.62);minIntensity=Math.max(minIntensity,.58);heat=Math.max(heat,.92)}
     if(/\b(percussive|clav|charang|arpegg?|sequence|seq)\b/i.test(name))minComplexity=Math.max(minComplexity,.24);
     if(PROCEDURAL_CALM_WORDS.test(name)&&!hardNewDayDrums&&!hardNewDayBass)calm=1;
@@ -8554,17 +8534,12 @@
       // The auxiliary drum presets are musically useful but not guaranteed to
       // be shaker-only. Silence/fallback is preferable to a surprise crash.
       if(role==="percussion"&&energy<.44)return false;
-      // These two kits are much harder than their friendly song title implies.
-      if(role==="drums"&&(voice===RUSH_VOICES.drumsNewDay1||voice===RUSH_VOICES.drumsNewDay2))
-        return energy>=.58 && intensity>=.50;
-      if(role==="bass"&&voice===RUSH_VOICES.bassNewDay)
-        return energy>=.62 && intensity>=.58;
       if(role==="drums"&&energy<.34)
-        return voice===RUSH_VOICES.drumsNewDay5;
+        return voice===RUSH_VOICES.drumsAltitude4;
       if(role==="bass"&&energy<.32)
         return voice===RUSH_VOICES.bassMirage;
       if(role==="keys"&&intensity<.36)
-        return voice===RUSH_VOICES.keysEnding||voice===RUSH_VOICES.keysEP1||voice===RUSH_VOICES.keysEP2;
+        return voice===RUSH_VOICES.keysEP1||voice===RUSH_VOICES.keysEP2;
       if(role==="melody"&&intensity<.36)
         return voice===RUSH_VOICES.leadSine1||voice===RUSH_VOICES.leadSine2||voice===RUSH_VOICES.leadPad;
     }
@@ -8858,12 +8833,12 @@
     // otherwise keep the reference so the selected bank can load on demand.
     const bank=proceduralSoundFonts.get(String(ref.source));
     if(bank&&!bank.getPreset(Number(ref.bank),Number(ref.program)))return null;
-    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"),String(ref.source)==="meow"?{gainTrim:.90}:{});
+    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"),sfVoiceSourceOptions(ref.source,ref.bank,ref.program));
   }
 
   function instrumentLockRefToVoice(ref){
     if(!ref?.source||!Number.isFinite(Number(ref.bank))||!Number.isFinite(Number(ref.program)))return null;
-    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"));
+    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"),sfVoiceSourceOptions(ref.source,ref.bank,ref.program));
   }
 
   function proceduralInstrumentLockKey(role){
@@ -9028,7 +9003,7 @@
       hasMidi,hasAudio,
       kind:hasMidi?(hasAudio?"hybrid":"midi"):"audio",
       midiClassified:hasMidi,
-      icon:hasMidi?"fa-keyboard":"fa-wave-square",
+      icon:hasMidi?"fa-keyboard":"fa-volume-high",
       label:hasMidi?(hasAudio?"HYBRID":"MIDI"):"AUDIO"
     };
   }
@@ -9195,12 +9170,12 @@
     let bassPool;
     if(energy<.28) bassPool=[SF64_VOICES.bassAcoustic,SF64_VOICES.bassFinger,SF64_VOICES.bassFretless,RUSH_VOICES.bassMirage];
     else if(energy<.66) bassPool=[RUSH_VOICES.bassAltitude1,RUSH_VOICES.bassAltitude2,RUSH_VOICES.bassMirage,RUSH_VOICES.bassNightCarnival,SF64_VOICES.bassFinger,SF64_VOICES.bassPick,SF64_VOICES.bassFretless];
-    else bassPool=[RUSH_VOICES.bassNewDay,RUSH_VOICES.bassDeadLine1,RUSH_VOICES.bassDeadLine2,RUSH_VOICES.bassEggman,RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3,SF64_VOICES.bassSynth1,SF64_VOICES.bassSynth2,SF64_VOICES.bassSlap];
+    else bassPool=[RUSH_VOICES.bassException,RUSH_VOICES.bassHugeCrisis,RUSH_VOICES.bassRival,RUSH_VOICES.bassSynth1,RUSH_VOICES.bassSynth2,RUSH_VOICES.bassSynth3,SF64_VOICES.bassSynth1,SF64_VOICES.bassSynth2,SF64_VOICES.bassSlap];
 
     let keysPool;
-    if(energy<.30) keysPool=[RUSH_VOICES.keysEnding,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,SF64_VOICES.keysGrand,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2];
-    else if(complexity<.48) keysPool=[RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysNewDayOrgan,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2,SF64_VOICES.keysGrand];
-    else keysPool=[RUSH_VOICES.keysRival,RUSH_VOICES.keysLeafStorm,RUSH_VOICES.keysNewDayOrgan,RUSH_VOICES.keysLeafOrgan,RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan,SF64_VOICES.keysEP2];
+    if(energy<.30) keysPool=[RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,SF64_VOICES.keysGrand,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2];
+    else if(complexity<.48) keysPool=[RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,RUSH_VOICES.keysOrgan1,SF64_VOICES.keysEP1,SF64_VOICES.keysEP2,SF64_VOICES.keysGrand];
+    else keysPool=[RUSH_VOICES.keysOrgan1,RUSH_VOICES.keysOrgan2,RUSH_VOICES.keysEP1,RUSH_VOICES.keysEP2,SF64_VOICES.keysClav,SF64_VOICES.keysPercOrgan,SF64_VOICES.keysRockOrgan,SF64_VOICES.keysEP2];
 
     let leadPool;
     if(energy<.28) leadPool=[RUSH_VOICES.leadSine1,RUSH_VOICES.leadSine2,RUSH_VOICES.leadPad,SF64_VOICES.leadSquare,SF64_VOICES.leadCalliope];
@@ -9208,13 +9183,13 @@
     else leadPool=[RUSH_VOICES.leadSaw2,RUSH_VOICES.leadSaw3,SF64_VOICES.leadSaw,SF64_VOICES.leadBase];
 
     let drumsPool;
-    if(energy<.32) drumsPool=[SONIC_VOICES.drums,SONIC_VOICES.drums,SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsNewDay5];
-    else if(energy<.68) drumsPool=[SONIC_VOICES.drums,RUSH_VOICES.drumsNewDay1,RUSH_VOICES.drumsNewDay2,RUSH_VOICES.drumsNewDay5,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsAltitude4,SF64_VOICES.drumsGeneral];
-    else drumsPool=[RUSH_VOICES.drumsMirage3,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsNewDay6,RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsPower];
+    if(energy<.32) drumsPool=[SONIC_VOICES.drums,SONIC_VOICES.drums,SF64_VOICES.drumsGeneral,RUSH_VOICES.drumsAltitude4];
+    else if(energy<.68) drumsPool=[SONIC_VOICES.drums,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsGeneral];
+    else drumsPool=[RUSH_VOICES.drumsMirage3,RUSH_VOICES.drumsAltitude4,RUSH_VOICES.drumsMirage3,SF64_VOICES.drumsPower];
 
     const percussionPool=(energy>.45||complexity>.48)
-      ?(energy<.72?[SONIC_VOICES.percussion,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral]:[RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral])
-      :[SONIC_VOICES.percussion,SF64_VOICES.percussionGeneral,RUSH_VOICES.percussionDeadLine2,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage];
+      ?(energy<.72?[SONIC_VOICES.percussion,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral]:[RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage,SF64_VOICES.percussionPower,SF64_VOICES.percussionGeneral])
+      :[SONIC_VOICES.percussion,SF64_VOICES.percussionGeneral,RUSH_VOICES.percussionMirage2,RUSH_VOICES.percussionMirage];
     return{drums:chooseFrom(rng,drumsPool),bass:chooseFrom(rng,bassPool),keys:chooseFrom(rng,keysPool),melody:chooseFrom(rng,leadPool),percussion:chooseFrom(rng,percussionPool)};
   }
 
@@ -9924,6 +9899,9 @@
   let instrumentPickerAnchor=null;
   let instrumentPickerExpandedSource=null;
   let instrumentPickerLoadToken=0;
+  // Strict category browsing is intentionally session-ephemeral: it always
+  // returns to ON on a fresh page load and is never written to localStorage.
+  let instrumentPickerRestrictCategories=true;
 
   function instrumentPickerRole(channel){
     return appMode==="procedural"?String(channel?.stem?.role||""):midiStemRole(channel?.stem);
@@ -9994,7 +9972,7 @@
       .map(p=>{
         const key=`${sourceId}:${Number(p.bank)}:${Number(p.program)}`;
         if(proceduralVoiceKey(current)===key)return current;
-        return sfVoice(sourceId,Number(p.bank),Number(p.program),String(p.name||"Patch"),sourceId==="meow"?{gainTrim:.90}:{});
+        return sfVoice(sourceId,Number(p.bank),Number(p.program),String(p.name||"Patch"),sfVoiceSourceOptions(sourceId,p.bank,p.program));
       })
       .filter(voice=>{
         const key=proceduralVoiceKey(voice);
@@ -10004,15 +9982,19 @@
       });
   }
 
+  const INSTRUMENT_PICKER_SOURCE_ROLES=Object.freeze({
+    sf64:Object.freeze(["drums","percussion","bass","keys","melody","guitar","strings"]),
+    rush:Object.freeze(["drums","percussion","bass","keys","melody","guitar","strings"]),
+    genies:Object.freeze(["drums","percussion","bass","keys","melody","guitar","strings"]),
+    meow:Object.freeze(["melody"]),
+    casino:Object.freeze(["drums","percussion"])
+  });
+
   function instrumentPickerSourceMatchesRole(channel,sourceId){
     const role=instrumentPickerRole(channel);
     const bank=proceduralSoundFonts.get(sourceId);
     if(bank)return instrumentPickerVoices(channel,sourceId).some(voice=>soundFontVoiceMatchesRole(voice,role));
-    if(sourceId==="meow")return role==="melody";
-    if(sourceId==="casino")return role==="drums"||role==="percussion";
-    // The larger melodic banks contain several GM families; only mark them
-    // discouraged after loading proves they have no category match.
-    return true;
+    return (INSTRUMENT_PICKER_SOURCE_ROLES[sourceId]||[]).includes(String(role||"").toLowerCase());
   }
 
   function escapePickerText(value){
@@ -10031,7 +10013,9 @@
       const open=instrumentPickerExpandedSource===sourceId;
       const hasCurrent=current?.source===sourceId;
       const sourceMatches=instrumentPickerSourceMatchesRole(channel,sourceId);
-      const voices=open&&loaded?instrumentPickerVoices(channel,sourceId):[];
+      if(instrumentPickerRestrictCategories&&!sourceMatches)return "";
+      const allVoices=open&&loaded?instrumentPickerVoices(channel,sourceId):[];
+      const voices=instrumentPickerRestrictCategories?allVoices.filter(voice=>soundFontVoiceMatchesRole(voice,role)):allVoices;
       const children=!open?"":(!loaded
         ?`<div class="instrument-picker__children"><div class="instrument-picker__empty">${loading?"LOADING BANK…":"OPEN TO LOAD BANK"}</div></div>`
         :`<div class="instrument-picker__children">${voices.length?voices.map(voice=>{
@@ -10045,12 +10029,12 @@
         <button type="button" class="instrument-picker__source" data-picker-source="${escapePickerText(sourceId)}" aria-expanded="${open}">
           <span class="instrument-picker__lamp"></span>${soundFontIconMarkup(sourceId,"instrument-picker__source-icon")}<span class="instrument-picker__source-name">${escapePickerText(proceduralSoundFontDisplayName(sourceId))}</span><span class="instrument-picker__load">${loading?"LOAD":loaded?"SF2":"OPEN"}</span><span class="instrument-picker__chev">›</span>
         </button>${children}</div>`;
-    }).join("");
+    }).filter(Boolean).join("")||`<div class="instrument-picker__empty">NO ${escapePickerText(title)} SOUNDFONTS</div>`;
     const patchLocked=isInstrumentLockedForChannel(channel);
     const lockTitle=patchLocked?"Unlock this instrument from the strip":"Lock the current instrument to this strip";
-    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT · ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} · SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
+    const restrictTitle="Restrict to only correct categories";
+    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT · ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} · SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__restrict${instrumentPickerRestrictCategories?" is-active":""}" data-picker-restrict aria-pressed="${instrumentPickerRestrictCategories}" title="${restrictTitle}" aria-label="${restrictTitle}"><i class="fa-solid fa-list" aria-hidden="true"></i></button><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
   }
-
   function positionInstrumentPicker(){
     if(!instrumentPicker||!instrumentPickerAnchor?.isConnected)return;
     const r=instrumentPickerAnchor.getBoundingClientRect();
@@ -10068,10 +10052,24 @@
     panel.style.top=`${Math.round(top)}px`;
   }
 
-  function refreshInstrumentPicker(){
+  function scrollInstrumentPickerToCurrent(){
+    if(!instrumentPicker)return;
+    const list=instrumentPicker.querySelector(".instrument-picker__list");
+    const current=instrumentPicker.querySelector(".instrument-picker__voice.is-current");
+    if(!list||!current)return;
+    const listRect=list.getBoundingClientRect();
+    const itemRect=current.getBoundingClientRect();
+    const desired=(itemRect.top-listRect.top)+list.scrollTop-(list.clientHeight-itemRect.height)/2;
+    list.scrollTop=Math.max(0,desired);
+  }
+
+  function refreshInstrumentPicker({scrollCurrent=false}={}){
     if(!instrumentPicker||!instrumentPickerChannel)return;
     instrumentPicker.innerHTML=instrumentPickerMarkup();
-    requestAnimationFrame(positionInstrumentPicker);
+    requestAnimationFrame(()=>{
+      positionInstrumentPicker();
+      if(scrollCurrent)requestAnimationFrame(scrollInstrumentPickerToCurrent);
+    });
   }
 
   function closeInstrumentPicker(){
@@ -10177,6 +10175,17 @@
     instrumentPicker.addEventListener("click",async event=>{
       const close=event.target.closest("[data-picker-close]");
       if(close){event.preventDefault();closeInstrumentPicker();return}
+      const restrictButton=event.target.closest("[data-picker-restrict]");
+      if(restrictButton){
+        event.preventDefault();
+        event.stopPropagation();
+        instrumentPickerRestrictCategories=!instrumentPickerRestrictCategories;
+        // If strict mode hides the currently expanded bank, collapse it so no
+        // stale children remain conceptually open behind the filtered list.
+        if(instrumentPickerRestrictCategories&&instrumentPickerExpandedSource&&!instrumentPickerSourceMatchesRole(channel,instrumentPickerExpandedSource))instrumentPickerExpandedSource=null;
+        refreshInstrumentPicker();
+        return;
+      }
       const lockButton=event.target.closest("[data-picker-lock]");
       if(lockButton){event.preventDefault();event.stopPropagation();toggleInstrumentPickerLock(channel);return}
       const sourceButton=event.target.closest("[data-picker-source]");
@@ -10192,7 +10201,7 @@
       }
     });
     document.body.appendChild(instrumentPicker);
-    refreshInstrumentPicker();
+    refreshInstrumentPicker({scrollCurrent:true});
     setTimeout(()=>{
       if(!instrumentPicker)return;
       document.addEventListener("pointerdown",instrumentPickerOutsidePointer,true);
@@ -10411,6 +10420,11 @@
     const next=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(bpm)||MIDI_DEFAULT_BPM)));
     const native=await ensurePlaylistNativeTempo(playlist);
     if(generation!==loadGeneration||playlist!==currentPlaylist)return;
+    const previousTempo=Math.round(Number(playlist.playbackTempoBpm||playlist.midiTempoBpm||native));
+    if(previousTempo===next){
+      syncTopTempoControl();
+      return;
+    }
     const oldDuration=playlistDuration;
     playlist.playbackTempoBpm=next;
     playlist.tempoManual=persist?true:!!playlist.tempoManual;
@@ -10431,8 +10445,9 @@
     loadReadout.textContent=playlistHasAudio(playlist)?"STRETCH":"MIDI TEMPO";
     showSystemReadout(String(playlist.title||"PLAYLIST").toUpperCase(),playlistHasAudio(playlist)?"TIME-STRETCHING AUDIO":"RENDERING MIDI",`${next} BPM`);
     const newBuffers=[];
-    // Render sequentially to keep the main thread/audio callback responsive;
-    // each WSOLA stem also yields every few frames.
+    // Render in strip order for deterministic swaps. Fast WSOLA now does far
+    // less correlation work and yields only occasionally, so this path completes
+    // much sooner without starving the live AudioContext.
     for(const channel of channels){
       if(generation!==loadGeneration||playlist!==currentPlaylist)return;
       try{
@@ -10449,6 +10464,35 @@
     syncTopTempoControl();
     loadReadout.textContent=isPlaying?"PLAYING":"READY";
     showSystemReadout(String(playlist.title||"PLAYLIST").toUpperCase(),playlistMediaProfile(playlist).kind==="hybrid"?"HYBRID TEMPO LOCKED":"TEMPO READY",`${next} BPM`);
+  }
+
+  async function resetTopTempoToNative(){
+    if(appMode==="procedural"){
+      proceduralOverrides.bpm=null;
+      persistentPrefs.proceduralTempoOverride=null;
+      savePersistentPrefs();
+      regenerateProceduralHardware({preservePosition:true});
+      syncTopTempoControl();
+      return;
+    }
+    if(appMode!=="playlist"||!currentPlaylist)return;
+    const playlist=currentPlaylist;
+    const native=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(await ensurePlaylistNativeTempo(playlist))));
+    // Reset means genuinely return to the authored/detected tempo, including
+    // clearing the legacy saved override used by pure-MIDI playlists.
+    playlist.tempoManual=false;
+    playlist.midiTempoManual=false;
+    if(isPureMidiPlaylist(playlist)&&persistentPrefs.midiTempoByPlaylist){
+      delete persistentPrefs.midiTempoByPlaylist[midiPlaylistPreferenceKey(playlist)];
+      savePersistentPrefs();
+    }
+    if(topTempoControl)topTempoControl.value=String(native);
+    previewTopTempo(native);
+    await applyPlaylistTempo(native,{persist:false});
+    playlist.tempoManual=false;
+    playlist.midiTempoManual=false;
+    syncTopTempoControl();
+    showSystemReadout(String(playlist.title||"PLAYLIST").toUpperCase(),"ORIGINAL TEMPO",`${native} BPM`);
   }
 
   function previewTopTempo(value){
@@ -12202,11 +12246,18 @@
     const input=Array.from({length:channels},(_,c)=>buffer.getChannelData(c));
     const out=Array.from({length:channels},(_,c)=>output.getChannelData(c));
     const windowSize=2048;
-    const overlap=1024;
+    const overlap=512;
     const synthHop=windowSize-overlap;
     const analysisHop=synthHop*ratio;
-    const searchRadius=256;
-    const correlationStride=8;
+    // Fast WSOLA: the old search tested ~64 candidate alignments with a dense
+    // correlation pass for every grain. A narrower search with sparse correlation
+    // preserves transient locking while cutting the hot-loop work by roughly an
+    // order of magnitude on long multitrack songs.
+    const searchRadius=128;
+    const candidateStep=16;
+    const correlationStride=32;
+    const fadeCurve=new Float32Array(overlap);
+    for(let i=0;i<overlap;i++)fadeCurve[i]=i/Math.max(1,overlap-1);
     let sourceStart=0;
     let outStart=0;
     const firstCount=Math.min(windowSize,outputLength,buffer.length);
@@ -12221,7 +12272,7 @@
       let bestScore=-Infinity;
       const reference=Math.max(0,Math.min(buffer.length-overlap,sourceStart+synthHop));
       const refData=input[0];
-      for(let candidate=minCandidate;candidate<=maxCandidate;candidate+=8){
+      for(let candidate=minCandidate;candidate<=maxCandidate;candidate+=candidateStep){
         let dot=0,a2=0,b2=0;
         for(let i=0;i<overlap;i+=correlationStride){
           const a=refData[reference+i]||0,b=refData[candidate+i]||0;
@@ -12234,7 +12285,7 @@
       for(let c=0;c<channels;c++){
         const src=input[c],dst=out[c];
         for(let i=0;i<overlapCount;i++){
-          const fade=i/Math.max(1,overlapCount-1);
+          const fade=overlapCount===overlap?fadeCurve[i]:i/Math.max(1,overlapCount-1);
           dst[nextOut+i]=dst[nextOut+i]*(1-fade)+(src[best+i]||0)*fade;
         }
         const tailStart=overlapCount;
@@ -12244,7 +12295,9 @@
       sourceStart=best;
       outStart=nextOut;
       frame++;
-      if(frame%24===0)await new Promise(done=>setTimeout(done,0));
+      // Yield occasionally rather than every few dozen grains. The previous
+      // cadence could spend seconds just waiting on timer clamping across stems.
+      if(frame%224===0)await new Promise(done=>setTimeout(done,0));
       if(best>=buffer.length-windowSize&&nextOut+windowSize>=outputLength)break;
     }
     return output;
@@ -12332,8 +12385,8 @@
   }
 
   function midiRawRoleVoices(role,sourceId){
-    // Meow.sf2 is intentionally a tiny novelty bank (one pitched preset at
-    // bank 0 / program 0), so GM family-number filtering would hide it from
+    // Meow.sf2 is intentionally a tiny novelty synth bank, so GM family-number
+    // filtering would hide its custom programs from
     // guitar/strings and the curated rack would hide it from other MIDI roles.
     // Surface every real Meow preset to melodic MIDI strips instead.
     if(sourceId==="meow"){
@@ -12341,7 +12394,7 @@
       if(!bank?.getPresetList||role!=="melody")return [];
       return bank.getPresetList()
         .filter(p=>Number.isFinite(Number(p.bank))&&Number.isFinite(Number(p.program))&&!/^EO[PI]$/i.test(String(p.name||"")))
-        .map(p=>sfVoice(sourceId,Number(p.bank),Number(p.program),String(p.name||"Meow"),{gainTrim:.90}));
+        .map(p=>sfVoice(sourceId,Number(p.bank),Number(p.program),String(p.name||"Meow"),sfVoiceSourceOptions(sourceId,p.bank,p.program)));
     }
     // The five procedural roles use exactly the same curated child lists.
     if(["drums","percussion","bass","keys","melody"].includes(role))return proceduralRawRoleVoices(role,sourceId);
@@ -14137,6 +14190,14 @@
     }
     await applyPlaylistTempo(bpm,{persist:true});
   });
+  if(topTempoControl){
+    topTempoControl.title="Tempo · drag to change · double-click to reset to original tempo";
+    topTempoControl.addEventListener("dblclick",async event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      await resetTopTempoToNative();
+    });
+  }
   topTempoRandomBtn?.addEventListener("click",async()=>{
     if(appMode!=="playlist"||!currentPlaylist)return;
     const choices=[72,76,80,84,88,92,96,100,104,108,112,116,120,124];
