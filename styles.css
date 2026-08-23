@@ -4898,10 +4898,28 @@ html.touch-device .big-palette .palette-cursor-preview {
   opacity: 1;
 }
 
-/* The live title/category ticker now lives inside #links and spans the full
-   width directly above the Twitch / Kick / YouTube row. */
+/* The live title/category ticker lives inside #links directly above the
+   stream-platform row. Keep the moving max-content track from contributing
+   intrinsic width to the panel: the ticker must shrink INSIDE the Links panel,
+   never make the panel/grid wider. */
+#links,
+#links .panel-body,
+.live-stream-title-host,
+.live-stream-title-shell,
+.live-stream-title-host .live-stream-title-marquee {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .live-stream-title-host {
   width: 100%;
+  overflow: hidden;
+  contain: inline-size;
+}
+
+.live-stream-title-shell {
+  width: 100%;
+  overflow: hidden;
 }
 
 .live-stream-title-host:empty {
@@ -4909,16 +4927,15 @@ html.touch-device .big-palette .palette-cursor-preview {
 }
 
 .live-stream-title-host .live-stream-title-marquee {
-  width: min(86%, 620px);
-  max-width: calc(100% - 28px);
+  width: min(64%, 400px);
   box-sizing: border-box;
+  overflow: hidden;
   margin: 0 auto 12px;
 }
 
 @media (max-width: 620px) {
   .live-stream-title-host .live-stream-title-marquee {
-    width: calc(100% - 18px);
-    max-width: none;
+    width: min(88%, 360px);
   }
 }
 
