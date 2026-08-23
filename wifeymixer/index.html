@@ -8501,9 +8501,8 @@
     if(PROCEDURAL_EXTREME_WORDS.test(name)){minEnergy=Math.max(minEnergy,.56);minIntensity=Math.max(minIntensity,.54);heat=Math.max(heat,.92)}
     if(PROCEDURAL_HOT_WORDS.test(name)){minEnergy=Math.max(minEnergy,.40);minIntensity=Math.max(minIntensity,.40);heat=Math.max(heat,.68)}
     if(PROCEDURAL_LIVELY_WORDS.test(name)){minEnergy=Math.max(minEnergy,.29);minIntensity=Math.max(minIntensity,.34);heat=Math.max(heat,.38)}
-    if(hardNewDayBass){minEnergy=Math.max(minEnergy,.62);minIntensity=Math.max(minIntensity,.58);heat=Math.max(heat,.92)}
     if(/\b(percussive|clav|charang|arpegg?|sequence|seq)\b/i.test(name))minComplexity=Math.max(minComplexity,.24);
-    if(PROCEDURAL_CALM_WORDS.test(name)&&!hardNewDayDrums&&!hardNewDayBass)calm=1;
+    if(PROCEDURAL_CALM_WORDS.test(name))calm=1;
     return Object.freeze({minEnergy,minIntensity,minComplexity,heat,calm,impact});
   }
 
