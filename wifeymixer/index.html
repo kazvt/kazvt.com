@@ -7485,6 +7485,11 @@
     .instrument-picker__title{font-size:10px;line-height:1.15;font-weight:900;letter-spacing:.12em;color:#e3bc7f;text-shadow:0 1px 0 #000,0 0 5px rgba(202,139,64,.25)}
     .instrument-picker__sub{margin-top:3px;font-size:8px;line-height:1.2;font-weight:700;letter-spacing:.045em;color:#aaa28f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 #000}
     .instrument-picker__close{width:20px;height:18px;padding:0;border:1px solid #080807;border-radius:2px;background:linear-gradient(#3a3832,#1c1b18);color:#817b6e;font:900 10px/1 monospace;box-shadow:inset 0 1px rgba(255,255,255,.05),0 1px 2px #050504;cursor:pointer}
+    .instrument-picker__head-actions{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+    .instrument-picker__lock{width:24px;height:18px;padding:0;display:grid;place-items:center;border:1px solid #111014;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 17%),linear-gradient(180deg,#535158 0%,#38373d 72%,#29282e 100%);color:#a7a298;box-shadow:0 2px 0 #08080a,0 0 0 1px #2b292e,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 2px rgba(0,0,0,.28);cursor:pointer}
+    .instrument-picker__lock i{font-size:9px;filter:drop-shadow(0 1px 0 #000)}
+    .instrument-picker__lock:hover,.instrument-picker__lock:focus-visible{outline:none;filter:brightness(1.12)}
+    .instrument-picker__lock.is-active{color:#2a1908;background:linear-gradient(180deg,rgba(255,244,211,.18),transparent 17%),linear-gradient(180deg,#d4a15d 0%,#ac7337 72%,#825023 100%);border-color:#33200d;box-shadow:0 1px 0 #08080a,0 0 0 1px #33291d,inset 0 2px 3px rgba(80,42,10,.20),inset 0 0 0 1px rgba(255,226,178,.10)}
     .instrument-picker__list{max-height:calc(min(60vh,420px) - 48px);overflow:auto;padding:5px;scrollbar-width:thin;scrollbar-color:#4a4438 #0d0d0b}
     .instrument-picker__group{margin:2px 0;border:1px solid #080807;border-radius:3px;overflow:hidden;background:#0e0e0c;box-shadow:inset 0 1px rgba(255,255,255,.025)}
     .instrument-picker__source{
@@ -8048,6 +8053,9 @@
         proceduralStripVoices: parsed.proceduralStripVoices && typeof parsed.proceduralStripVoices === "object"
           ? parsed.proceduralStripVoices
           : {},
+        instrumentLocks: parsed.instrumentLocks && typeof parsed.instrumentLocks === "object"
+          ? parsed.instrumentLocks
+          : {},
         lockedStemIds: parsed.lockedStemIds && typeof parsed.lockedStemIds === "object"
           ? parsed.lockedStemIds
           : {},
@@ -8076,6 +8084,7 @@
         midiTempoByPlaylist:{},
         midiStemVoices:{},
         proceduralStripVoices:{},
+        instrumentLocks:{},
         lockedStemIds:{},
         stemStates:{},
         masterState:null,
@@ -8673,7 +8682,63 @@
     return proceduralRawRoleVoices(role,ref.source).find(voice=>proceduralVoiceKey(voice)===key)||null;
   }
 
+  function instrumentLockRefToVoice(ref){
+    if(!ref?.source||!Number.isFinite(Number(ref.bank))||!Number.isFinite(Number(ref.program)))return null;
+    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"));
+  }
+
+  function proceduralInstrumentLockKey(role){
+    return role?`procedural:${String(role)}`:"";
+  }
+
+  function midiInstrumentLockKeyForStem(stem){
+    const index=Number(stem?.mixerStripIndex);
+    return Number.isInteger(index)&&index>=0?`midi-strip:${index}`:"";
+  }
+
+  function instrumentLockKeyForChannel(channel){
+    if(!channel)return "";
+    if(appMode==="procedural"||channel.stem?.kind==="procedural")return proceduralInstrumentLockKey(channel.stem?.role);
+    if(isMidiStem(channel.stem)){
+      const index=Number.isInteger(Number(channel.index))?Number(channel.index):Number(channel.stem?.mixerStripIndex);
+      return Number.isInteger(index)&&index>=0?`midi-strip:${index}`:"";
+    }
+    return "";
+  }
+
+  function proceduralInstrumentLockedVoiceForRole(role){
+    const key=proceduralInstrumentLockKey(role);
+    return key?restoreProceduralVoiceRef(role,persistentPrefs.instrumentLocks?.[key]):null;
+  }
+
+  function midiInstrumentLockedVoiceForStem(stem){
+    const key=midiInstrumentLockKeyForStem(stem);
+    return key?instrumentLockRefToVoice(persistentPrefs.instrumentLocks?.[key]):null;
+  }
+
+  function isInstrumentLockedForChannel(channel){
+    const key=instrumentLockKeyForChannel(channel);
+    return !!(key&&persistentPrefs.instrumentLocks?.[key]?.source);
+  }
+
+  function setInstrumentLockForChannel(channel,locked,voice=null){
+    const key=instrumentLockKeyForChannel(channel);
+    if(!key)return false;
+    if(!persistentPrefs.instrumentLocks||typeof persistentPrefs.instrumentLocks!=="object")persistentPrefs.instrumentLocks={};
+    if(locked){
+      const ref=proceduralVoiceRef(voice);
+      if(!ref)return false;
+      persistentPrefs.instrumentLocks[key]=ref;
+    }else{
+      delete persistentPrefs.instrumentLocks[key];
+    }
+    savePersistentPrefs();
+    return true;
+  }
+
   function proceduralStripVoicePreference(role){
+    const locked=proceduralInstrumentLockedVoiceForRole(role);
+    if(locked)return locked;
     const ref=persistentPrefs.proceduralStripVoices?.[role];
     return restoreProceduralVoiceRef(role,ref);
   }
@@ -8691,7 +8756,7 @@
     if(!prefs||typeof prefs!=="object")return;
     let changed=false;
     for(const role of Object.keys(prefs)){
-      if(!persistentPrefs.lockedStemIds?.[`procedural/${role}`]){
+      if(!persistentPrefs.instrumentLocks?.[proceduralInstrumentLockKey(role)]){
         delete prefs[role];
         changed=true;
       }
@@ -9497,8 +9562,9 @@
       if(iconEl){
         const explicit=!!proceduralStripVoicePreference(channel.stem.role);
         const locked=!!channel.state?.locked;
-        iconEl.title=`${label} · click: next · hold: exact patch · right-click: previous${explicit?" · STRIP PATCH":""}${locked?" · LOCKED":""}`;
-        iconEl.setAttribute("aria-label",`${label}. Click for next compatible patch; hold for exact SoundFont and instrument picker; right-click for previous patch.${locked?" Strip locked.":""}`);
+        const patchLocked=isInstrumentLockedForChannel(channel);
+        iconEl.title=`${label} · click: next · hold: exact patch · right-click: previous${explicit?" · STRIP PATCH":""}${patchLocked?" · PATCH LOCK":""}${locked?" · RANDOM LOCK":""}`;
+        iconEl.setAttribute("aria-label",`${label}. Click for next compatible patch; hold for exact SoundFont and instrument picker; right-click for previous patch.${patchLocked?" Instrument locked to this strip.":""}${locked?" Strip mute state locked from randomizer.":""}`);
         iconEl.classList.toggle("has-strip-voice",explicit);
       }
       channel.stem.displayInstrumentName=label;
@@ -9527,10 +9593,11 @@
       const iconEl=channel.el?.querySelector("[data-instrument-icon]");
       if(iconEl){
         const stored=!!midiStoredVoiceForStem(channel.stem);
-        const pinned=!!midiExplicitVoiceForStem(channel.stem)&&!stored;
-        iconEl.title=pinned?`${label} · PINNED DEFAULT · hold: choose exact patch`:`${label} · click: next · hold: exact patch · right-click: previous`;
-        iconEl.setAttribute("aria-label",pinned?`${label}. Pinned MIDI default. Hold to choose an exact SoundFont and instrument.`:`${label}. Click for next instrument; hold for exact SoundFont and instrument picker; right-click for previous. Crossing either end advances to the adjacent SoundFont.`);
-        iconEl.classList.toggle("has-strip-voice",stored||pinned);
+        const patchLocked=isInstrumentLockedForChannel(channel);
+        const pinned=!!midiExplicitVoiceForStem(channel.stem)&&!stored&&!patchLocked;
+        iconEl.title=patchLocked?`${label} · PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")} · hold: unlock or choose patch`:pinned?`${label} · PINNED DEFAULT · hold: choose exact patch`:`${label} · click: next · hold: exact patch · right-click: previous`;
+        iconEl.setAttribute("aria-label",patchLocked?`${label}. Instrument locked to this mixer strip across MIDI track changes and randomization. Hold to manage the patch lock.`:pinned?`${label}. Pinned MIDI default. Hold to choose an exact SoundFont and instrument.`:`${label}. Click for next instrument; hold for exact SoundFont and instrument picker; right-click for previous. Crossing either end advances to the adjacent SoundFont.`);
+        iconEl.classList.toggle("has-strip-voice",stored||pinned||patchLocked);
       }
       channel.el?.querySelectorAll("[data-action]").forEach(button=>{
         const action=String(button.dataset.action||"").toUpperCase();
@@ -9620,7 +9687,12 @@
     const role=instrumentPickerRole(channel);
     const bank=proceduralSoundFonts.get(sourceId);
     if(!role||!bank)return [];
-    const raw=appMode==="procedural"?proceduralRawRoleVoices(role,sourceId):midiRawRoleVoices(role,sourceId);
+    const raw=(appMode==="procedural"?proceduralRawRoleVoices(role,sourceId):midiRawRoleVoices(role,sourceId)).slice();
+    // A strip lock may intentionally carry a patch into a MIDI track whose new
+    // role/category would not normally list that patch. Keep the sounding locked
+    // voice visible in its SoundFont group so the picker always tells the truth.
+    const current=instrumentPickerCurrentVoice(channel);
+    if(current?.source===sourceId&&bank.getPreset(current.bank,current.program)&&!raw.some(voice=>proceduralVoiceKey(voice)===proceduralVoiceKey(current)))raw.unshift(current);
     const seen=new Set();
     return raw.filter(voice=>{
       if(!voice||voice.source!==sourceId)return false;
@@ -9658,7 +9730,9 @@
           <span class="instrument-picker__lamp"></span><span>${escapePickerText(proceduralSoundFontDisplayName(sourceId))}</span><span class="instrument-picker__load">${loading?"LOAD":loaded?"SF2":"OPEN"}</span><span class="instrument-picker__chev">›</span>
         </button>${children}</div>`;
     }).join("");
-    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT · ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} · SOUNDFONT → INSTRUMENT</div></div><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div><div class="instrument-picker__list">${groups}</div>`;
+    const patchLocked=isInstrumentLockedForChannel(channel);
+    const lockTitle=patchLocked?"Unlock this instrument from the strip":"Lock the current instrument to this strip";
+    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT · ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} · SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
   }
 
   function positionInstrumentPicker(){
@@ -9719,6 +9793,34 @@
     refreshInstrumentPicker();
   }
 
+  function toggleInstrumentPickerLock(channel){
+    if(!channel)return;
+    const wasLocked=isInstrumentLockedForChannel(channel);
+    const current=instrumentPickerCurrentVoice(channel);
+    if(wasLocked){
+      // Keep the currently sounding patch as this track's ordinary manual choice
+      // when the lock is released; only future track/default changes may replace it.
+      if(current&&appMode==="procedural")setProceduralStripVoicePreference(channel.stem?.role,current);
+      else if(current&&appMode==="playlist"&&isMidiStem(channel.stem))setMidiStemVoicePreference(channel.stem,current);
+      setInstrumentLockForChannel(channel,false);
+    }else{
+      if(!current)return;
+      setInstrumentLockForChannel(channel,true,current);
+      // Also remember the manual choice locally so unlocking never causes an
+      // immediate audible jump back to a song-authored default.
+      if(appMode==="procedural")setProceduralStripVoicePreference(channel.stem?.role,current);
+      else if(appMode==="playlist"&&isMidiStem(channel.stem))setMidiStemVoicePreference(channel.stem,current);
+    }
+    if(appMode==="procedural")syncProceduralChannelInstrumentLabels();
+    else syncMidiChannelInstrumentLabels();
+    showSystemReadout(
+      trackCategoryLabel(instrumentPickerRole(channel)).toUpperCase(),
+      wasLocked?"PATCH UNLOCKED":"PATCH LOCKED",
+      String(current?.name||"INSTRUMENT").toUpperCase()
+    );
+    refreshInstrumentPicker();
+  }
+
   async function selectExactStripVoice(channel,voice){
     if(!channel||!voice)return;
     await ensureProceduralSoundFontSource(voice.source,{quiet:true});
@@ -9728,6 +9830,7 @@
       const role=channel.stem?.role;
       if(!role)return;
       setProceduralStripVoicePreference(role,voice);
+      if(isInstrumentLockedForChannel(channel))setInstrumentLockForChannel(channel,true,voice);
       syncProceduralChannelInstrumentLabels();
       hotSwapProceduralStripInstrument(channel);
       showSystemReadout(role.toUpperCase(),proceduralSoundFontDisplayName(voice.source).toUpperCase(),String(voice.name||"PATCH").toUpperCase());
@@ -9735,6 +9838,7 @@
     }
     if(appMode==="playlist"&&isMidiStem(channel.stem)){
       setMidiStemVoicePreference(channel.stem,voice);
+      if(isInstrumentLockedForChannel(channel))setInstrumentLockForChannel(channel,true,voice);
       syncMidiChannelInstrumentLabels();
       showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),proceduralSoundFontDisplayName(voice.source).toUpperCase(),String(voice.name||"PATCH").toUpperCase());
       await hotSwapMidiStripInstrument(channel);
@@ -9757,6 +9861,8 @@
     instrumentPicker.addEventListener("click",async event=>{
       const close=event.target.closest("[data-picker-close]");
       if(close){event.preventDefault();closeInstrumentPicker();return}
+      const lockButton=event.target.closest("[data-picker-lock]");
+      if(lockButton){event.preventDefault();event.stopPropagation();toggleInstrumentPickerLock(channel);return}
       const sourceButton=event.target.closest("[data-picker-source]");
       if(sourceButton){event.preventDefault();await expandInstrumentPickerSource(sourceButton.dataset.pickerSource);return}
       const voiceButton=event.target.closest("[data-picker-voice]");
@@ -9792,6 +9898,7 @@
       return;
     }
     setProceduralStripVoicePreference(role,next);
+    if(isInstrumentLockedForChannel(channel))setInstrumentLockForChannel(channel,true,next);
     // Update the strip display from the selected patch immediately in both
     // directions; audio rendering/swap can complete independently afterward.
     syncProceduralChannelInstrumentLabels();
@@ -9848,7 +9955,7 @@
   async function cycleMidiStripInstrument(channel,direction=1){
     if(!channel||appMode!=="playlist"||!isMidiStem(channel.stem))return;
     const pinned=midiExplicitVoiceForStem(channel.stem);
-    if(pinned&&!midiStoredVoiceForStem(channel.stem)){
+    if(pinned&&!midiStoredVoiceForStem(channel.stem)&&!isInstrumentLockedForChannel(channel)){
       showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"PINNED MIDI DEFAULT","HOLD FOR EXACT PATCH");
       return;
     }
@@ -9860,6 +9967,7 @@
       return;
     }
     setMidiStemVoicePreference(channel.stem,next);
+    if(isInstrumentLockedForChannel(channel))setInstrumentLockForChannel(channel,true,next);
     // Do not wait for render/cache lookup to rename the strip. This keeps
     // right-click (previous) behavior identical to left-click (next).
     syncMidiChannelInstrumentLabels();
@@ -11493,6 +11601,9 @@
     updateGridGeometry(stems.length);
 
     stems.forEach((stem,index)=>{
+      // Instrument locks follow the physical mixer strip, not an individual MIDI file.
+      // Stamp the slot before labels/default-patch resolution happens.
+      stem.mixerStripIndex=index;
       const state = defaultStemState(stem);
       grid.insertAdjacentHTML("beforeend",channelMarkup(stem,index,state));
     });
@@ -11645,8 +11756,12 @@
   }
 
   function midiSelectedVoiceForStem(stem){
-    // An exact hold-menu choice is an explicit musician action and may override a
-    // song-authored default. Without a stored choice the authored assignment wins.
+    // A strip-position patch lock is absolute: it survives playlist/shuffle/MIDI
+    // track changes and wins over both per-file manual choices and authored defaults.
+    const locked=midiInstrumentLockedVoiceForStem(stem);
+    if(locked)return locked;
+    // Without a strip lock, an exact hold-menu choice may still override a
+    // song-authored default for this individual MIDI file.
     return midiStoredVoiceForStem(stem)||midiExplicitVoiceForStem(stem)||midiDefaultVoiceForStem(stem);
   }
 
@@ -11860,6 +11975,7 @@
 
     const playlist = playlists[normalized];
     if (!playlist?.stems?.length) return;
+    playlist.stems.forEach((stem,index)=>{stem.mixerStripIndex=index});
 
     const jobKey = String(playlist.id || normalized);
     if (backgroundPlaylistJobs.has(jobKey)) {
@@ -11972,6 +12088,7 @@
     const stripEls = [...grid.querySelectorAll("[data-channel]")];
 
     channels = playlist.stems.map((stem,index)=>{
+      stem.mixerStripIndex=index;
       const state = defaultStemState(stem);
 
       const trim = audioCtx.createGain();
