@@ -154,6 +154,10 @@
       this.samples=samples;
       this.info=info;
       this.presetMap=new Map(presets.map(p=>[`${p.bank}:${p.program}`,p]));
+      // Cache tiny leading-silence trims used by rendered MIDI. This is deliberately
+      // separate from the SoundFont envelope: we remove only dead PCM before the
+      // sample actually begins, never the authored attack/decay of the instrument.
+      this.tightOnsetCache=new Map();
     }
 
     getPreset(bank,program){return this.presetMap.get(`${bank}:${program}`)||null}
@@ -215,17 +219,43 @@
       return layers;
     }
 
-    renderNote(target,{bank=0,program=0,midi=60,velocity=100,start=0,duration=.5,amp=1,pan=0}={}){
+    renderNote(target,{bank=0,program=0,midi=60,velocity=100,start=0,duration=.5,amp=1,pan=0,tightOnset=false}={}){
       if(!target?.left||!target?.right||!target?.sampleRate) return false;
       midi=clamp(Math.round(midi),0,127);
       velocity=clamp(Math.round(velocity),1,127);
       const layers=this.resolveLayers(bank,program,midi,velocity);
       if(!layers.length) return false;
-      for(const layer of layers) this._renderLayer(target,layer,{midi,velocity,start,duration,amp,pan});
+      for(const layer of layers) this._renderLayer(target,layer,{midi,velocity,start,duration,amp,pan,tightOnset});
       return true;
     }
 
-    _renderLayer(target,layer,{midi,velocity,start,duration,amp,pan}){
+    _tightOnsetStart(layer){
+      const sampleRate=Math.max(1,Number(layer?.sample?.sampleRate)||44100);
+      const rawStart=Math.max(0,Math.floor(Number(layer?.start)||0));
+      const rawEnd=Math.min(this.smpl.length,Math.floor(Number(layer?.end)||rawStart+1));
+      const key=`${rawStart}:${rawEnd}:${sampleRate}`;
+      if(this.tightOnsetCache.has(key)) return this.tightOnsetCache.get(key);
+      // Only inspect the first 15 ms. A longer fade-in is articulation/envelope,
+      // not scheduler latency, and must remain intact.
+      const scanEnd=Math.min(rawEnd,rawStart+Math.max(8,Math.ceil(sampleRate*.015)));
+      let peak=0;
+      for(let i=rawStart;i<scanEnd;i++) peak=Math.max(peak,Math.abs(this.smpl[i]||0));
+      const threshold=Math.max(6,peak*.015);
+      let onset=rawStart;
+      if(peak>threshold){
+        for(let i=rawStart;i<scanEnd-2;i++){
+          const a=Math.abs(this.smpl[i]||0),b=Math.abs(this.smpl[i+1]||0),c=Math.abs(this.smpl[i+2]||0);
+          if(a>=threshold&&(b>=threshold*.55||c>=threshold*.55)){onset=i;break}
+        }
+      }
+      // Keep ~0.35 ms of pre-transient material so the trim cannot shave the
+      // leading edge off clicks, picks or drum attacks.
+      onset=Math.max(rawStart,onset-Math.ceil(sampleRate*.00035));
+      this.tightOnsetCache.set(key,onset);
+      return onset;
+    }
+
+    _renderLayer(target,layer,{midi,velocity,start,duration,amp,pan,tightOnset=false}){
       const sr=target.sampleRate;
       const outStart=Math.max(0,Math.floor(start*sr));
       if(outStart>=target.left.length) return;
@@ -243,7 +273,7 @@
       const sustain=clamp(layer.sustain,0,1);
       const release=clamp(layer.release,.015,6);
       const noteDuration=Math.max(.015,Number(duration)||.15);
-      const naturalSeconds=Math.max(.01,(layer.end-layer.start)/sample.sampleRate/Math.max(.0001,Math.pow(2,cents/1200)));
+      const naturalSeconds=Math.max(.01,(layer.end-(tightOnset?this._tightOnsetStart(layer):layer.start))/sample.sampleRate/Math.max(.0001,Math.pow(2,cents/1200)));
       const renderSeconds=looped?noteDuration+release+0.02:Math.min(naturalSeconds+0.02,Math.max(naturalSeconds,noteDuration+release));
       const maxOut=Math.min(target.left.length,outStart+Math.ceil(renderSeconds*sr));
       const velocityGain=Math.pow(velocity/127,1.35);
@@ -252,9 +282,10 @@
       const leftPan=Math.sqrt((1-combinedPan)*.5);
       const rightPan=Math.sqrt((1+combinedPan)*.5);
 
-      let srcPos=layer.start;
+      const sourceStart=tightOnset?this._tightOnsetStart(layer):layer.start;
+      let srcPos=sourceStart;
       const sampleEnd=Math.min(layer.end,this.smpl.length-1);
-      const loopStart=clamp(layer.loopStart,layer.start,sampleEnd-2);
+      const loopStart=clamp(layer.loopStart,sourceStart,sampleEnd-2);
       const loopEnd=clamp(layer.loopEnd,loopStart+2,sampleEnd);
 
       for(let outIndex=outStart;outIndex<maxOut;outIndex++){

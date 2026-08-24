@@ -13,6 +13,7 @@
   <script src="sf2-procedural.js"></script>
   <script src="midi-support.js"></script>
   <script src="soundfont-icons.js"></script>
+  <script src="filename-tag-rules.js"></script>
   <script src="auto-gain-references.js"></script>
 
   <style>
@@ -1597,16 +1598,18 @@
 
 
 
-    /* AUTO GAIN: pre-trim reference compensation, session-only and ON by default. */
-    .stem-action-buttons{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+    /* AUTO-GAIN COMPENSATION: dedicated lower-left channel key. */
+    .stem-action-buttons{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+    .fader-zone{position:relative}
     .hw-button[data-action="auto-gain"]{
-      display:flex;align-items:center;justify-content:center;gap:2px;
-      padding-left:1px !important;padding-right:1px !important;
+      position:absolute;z-index:12;left:2px;bottom:2px;
+      width:clamp(24px,2.45vw,29px);height:clamp(16px,2.25vh,19px);min-height:0;
+      padding:0 1px !important;display:grid;place-items:center;
+      font-size:clamp(5.5px,.58vw,7px) !important;line-height:1;letter-spacing:.055em;
       color:#747a76 !important;
       background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 18%),linear-gradient(180deg,#45494a,#303435 72%,#242728) !important;
     }
-    .hw-button[data-action="auto-gain"] i{font-size:clamp(5px,.58vw,7px);filter:drop-shadow(0 1px 0 #000)}
-    .hw-button[data-action="auto-gain"] span{font-size:clamp(4.1px,.43vw,5.6px);line-height:.92;letter-spacing:.02em;white-space:normal;text-align:center}
+    .hw-button[data-action="auto-gain"]::after{inset:2px 3px}
     .hw-button[data-action="auto-gain"].active{
       color:#142317 !important;
       background:radial-gradient(ellipse at 50% 50%,#b8d6a8 0%,#7f9f72 48%,transparent 76%),linear-gradient(180deg,#95aa89,#6d8263 72%,#50604a) !important;
@@ -8038,8 +8041,282 @@
     {text:"keys",icon:"fa-keyboard",category:"keys"},
     {text:"synth",icon:"fa-wave-square",category:"synth"},
     {text:"strings",icon:"fa-music",category:"strings"},
-    {text:"vibes",icon:"fa-bell",category:"mallets"}
+    {text:"vibes",icon:"fa-bell",category:"mallets"},
+    {text:"ear candy",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"earcandy",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"candy",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"flair",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"fx",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"sfx",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"riser",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"impact",icon:"fa-wand-magic-sparkles",category:"ear-candy"},
+    {text:"whoosh",icon:"fa-wand-magic-sparkles",category:"ear-candy"}
   ];
+
+
+  // -----------------------------------------------------------------------
+  // FILENAME / FOLDER CONFIG LANGUAGE
+  // The vocabulary lives in filename-tag-rules.js. This code only implements
+  // the generic parser, so adding an alias does not require editing index.html.
+  // -----------------------------------------------------------------------
+  const FILENAME_TAG_RULES = window.WIFEY_FILENAME_TAG_RULES || {version:0,tags:[],valueAliases:{}};
+  const FILENAME_TAG_SPECS = Array.isArray(FILENAME_TAG_RULES.tags) ? FILENAME_TAG_RULES.tags : [];
+  const FILENAME_TAG_VALUE_ALIASES = FILENAME_TAG_RULES.valueAliases || {};
+
+  function normalizeFilenameTagAlias(value){
+    return String(value ?? "").trim().toLowerCase().replace(/[\s_.-]+/g,"");
+  }
+
+  function normalizeFilenameTextValue(value){
+    return String(value ?? "")
+      .trim()
+      .replace(/^['"]|['"]$/g,"")
+      .replace(/[_]+/g," ")
+      .replace(/\s+/g," ")
+      .trim();
+  }
+
+  function filenameTagNumber(raw,spec){
+    const text=String(raw ?? "").trim().replace(/%$/," ").trim();
+    const value=Number(text);
+    if(!Number.isFinite(value))return null;
+    const min=Number(spec?.min),max=Number(spec?.max);
+    return Math.max(Number.isFinite(min)?min:-Infinity,Math.min(Number.isFinite(max)?max:Infinity,value));
+  }
+
+  function filenameTagInteger(raw,spec){
+    const value=filenameTagNumber(raw,spec);
+    return Number.isFinite(value)?Math.round(value):null;
+  }
+
+  function filenameTagBooleanValue(raw){
+    const text=String(raw ?? "").trim().toLowerCase();
+    if(["1","true","yes","on","enable","enabled","y"].includes(text))return true;
+    if(["0","false","no","off","disable","disabled","n"].includes(text))return false;
+    return null;
+  }
+
+  function filenameTagEnumValue(key,raw){
+    const table=FILENAME_TAG_VALUE_ALIASES?.[key];
+    if(!table||typeof table!=="object")return null;
+    const normalized=normalizeFilenameTagAlias(raw);
+    for(const [alias,value] of Object.entries(table)){
+      if(normalizeFilenameTagAlias(alias)===normalized)return value;
+    }
+    return null;
+  }
+
+  function filenameTagValue(spec,raw){
+    const valueText=normalizeFilenameTextValue(raw);
+    if(!valueText&&spec.type!=="boolean")return null;
+    if(spec.type==="boolean")return filenameTagBooleanValue(valueText);
+    if(spec.type==="number")return filenameTagNumber(valueText,spec);
+    if(spec.type==="integer")return filenameTagInteger(valueText,spec);
+    if(spec.type==="seconds")return filenameTagNumber(valueText.replace(/s(ec(onds?)?)?$/i,""),spec);
+    if(spec.type==="db")return filenameTagNumber(valueText.replace(/db$/i,""),spec);
+    if(spec.type==="stretch"){
+      if(/%$/.test(valueText)){
+        const pct=Number(valueText.slice(0,-1));
+        if(!Number.isFinite(pct))return null;
+        return filenameTagNumber(pct/100,spec);
+      }
+      return filenameTagNumber(valueText,spec);
+    }
+    if(spec.type==="pan"){
+      const lower=valueText.toLowerCase().replace(/\s+/g,"");
+      if(["c","center","centre","mid","middle"].includes(lower))return 50;
+      const side=lower.match(/^([lr])([0-9]+(?:\.[0-9]+)?)%?$/i);
+      if(side){
+        const amount=Math.max(0,Math.min(100,Number(side[2])));
+        return side[1].toLowerCase()==="l"?50-amount/2:50+amount/2;
+      }
+      return filenameTagNumber(lower,spec);
+    }
+    if(spec.type==="program"){
+      if(["native","embedded","gm","file"].includes(valueText.toLowerCase()))return "native";
+      const n=Number(valueText);
+      return Number.isInteger(n)&&n>=0&&n<=127?n:null;
+    }
+    if(spec.type==="enum")return filenameTagEnumValue(spec.key,valueText);
+    if(spec.type==="text"){
+      if(spec.key==="role")return filenameTagEnumValue("role",valueText);
+      if(spec.key==="instrument"){
+        const mapped=filenameTagEnumValue("instrument",valueText);
+        return normalizeFilenameTextValue(mapped || valueText.replace(/-/g," "));
+      }
+      return valueText;
+    }
+    return valueText;
+  }
+
+  function filenameTagSpecAliases(spec,joined=false){
+    const safelyJoinable=new Set(["number","integer","seconds","db","stretch","pan","program"]);
+    const values=joined
+      ?(Array.isArray(spec.joined)?spec.joined:(safelyJoinable.has(spec.type)?(spec.aliases||[]):[]))
+      :(spec.aliases||[]);
+    return values.map(alias=>String(alias).toLowerCase()).sort((a,b)=>b.length-a.length);
+  }
+
+  function filenameTagScopeAllows(spec,scope){
+    return !Array.isArray(spec.scope)||spec.scope.includes(scope);
+  }
+
+  // Match one compact unit, e.g. lvl72, room=18, sfgenies, mute, midi2.
+  // Non-boolean aliases with no value deliberately do NOT match.
+  function matchFilenameTagUnit(unit,scope,{allowSpaceValue=false}={}){
+    const raw=String(unit??"").trim();
+    if(!raw)return null;
+    const lower=raw.toLowerCase();
+
+    for(const spec of FILENAME_TAG_SPECS){
+      if(!filenameTagScopeAllows(spec,scope))continue;
+      for(const aliasRaw of (spec.falseAliases||[])){
+        const alias=String(aliasRaw).toLowerCase();
+        if(lower===alias)return{spec,key:spec.key,value:false,raw};
+        if(lower.startsWith(`${alias}=`)||lower.startsWith(`${alias}:`)){
+          const explicit=filenameTagBooleanValue(raw.slice(alias.length+1));
+          if(explicit!==null)return{spec,key:spec.key,value:!explicit,raw};
+        }
+      }
+
+      for(const alias of filenameTagSpecAliases(spec,false)){
+        if(lower===alias){
+          if(spec.type==="boolean")return{spec,key:spec.key,value:true,raw};
+          continue;
+        }
+        if(lower.startsWith(`${alias}=`)||lower.startsWith(`${alias}:`)){
+          const value=filenameTagValue(spec,raw.slice(alias.length+1));
+          if(value!==null)return{spec,key:spec.key,value,raw};
+        }
+        if(allowSpaceValue&&lower.startsWith(`${alias} `)){
+          const value=filenameTagValue(spec,raw.slice(alias.length+1));
+          if(value!==null)return{spec,key:spec.key,value,raw};
+        }
+      }
+
+      for(const alias of filenameTagSpecAliases(spec,true)){
+        if(!lower.startsWith(alias)||lower.length<=alias.length)continue;
+        let rest=raw.slice(alias.length);
+        // For textual aliases a separator dash is cosmetic; for numeric aliases
+        // a dash is a possible negative sign and must be preserved.
+        if(spec.type==="text"||spec.type==="enum"||spec.type==="program")rest=rest.replace(/^[-_:]+/,"");
+        else rest=rest.replace(/^[_:]+/,"");
+        const value=filenameTagValue(spec,rest);
+        if(value!==null)return{spec,key:spec.key,value,raw};
+      }
+    }
+    return null;
+  }
+
+  function parseFilenameTagString(rawName,scope="track"){
+    const source=String(rawName??"").trim();
+    const units=source.match(/\[[^\]]+\]|[^\s,;]+/g)||[];
+    const config={};
+    const clean=[];
+
+    const parseBracket=(content)=>{
+      const inner=String(content||"").trim();
+      const parts=inner.match(/[^\s,;]+/g)||[];
+      for(let i=0;i<parts.length;i++){
+        let match=matchFilenameTagUnit(parts[i],scope);
+        if(!match){
+          // Brackets also accept "alias value". Only consume a following token
+          // when together they form a valid setting.
+          if(i+1<parts.length){
+            match=matchFilenameTagUnit(`${parts[i]} ${parts[i+1]}`,scope,{allowSpaceValue:true});
+            if(match)i++;
+          }
+        }
+        if(match){
+          if(match.spec.consumeRemainder){
+            const words=[String(match.value??"")];
+            let j=i+1;
+            while(j<parts.length&&!matchFilenameTagUnit(parts[j],scope)){words.push(parts[j]);j++}
+            const combined=normalizeFilenameTextValue(words.join(" "));
+            const reparsed=combined?filenameTagValue(match.spec,combined):null;
+            if(combined)config[match.key]=reparsed??combined;
+            i=j-1;
+            continue;
+          }
+          config[match.key]=match.value;
+        }
+      }
+    };
+
+    for(let i=0;i<units.length;i++){
+      const unit=units[i];
+      if(/^\[[^\]]+\]$/.test(unit)){
+        parseBracket(unit.slice(1,-1));
+        continue; // recognized or not, bracket metadata never reaches the UI label.
+      }
+      const match=matchFilenameTagUnit(unit,scope);
+      if(!match){clean.push(unit);continue}
+      if(match.spec.consumeRemainder){
+        const words=[String(match.value??"")];
+        while(i+1<units.length){
+          const next=units[i+1];
+          if(/^\[[^\]]+\]$/.test(next)||matchFilenameTagUnit(next,scope))break;
+          words.push(next);i++;
+        }
+        const combined=normalizeFilenameTextValue(words.join(" "));
+        const reparsed=combined?filenameTagValue(match.spec,combined):null;
+        if(combined)config[match.key]=reparsed??combined;
+      }else config[match.key]=match.value;
+    }
+
+    const cleanName=normalizeFilenameTextValue(clean.join(" ").replace(/[_]+/g," "));
+    return{config,cleanName,explicitName:normalizeFilenameTextValue(config.name||"")};
+  }
+
+  function parseFolderFilenameMetadata(folderPath){
+    const raw=String(folderPath||"");
+    if(!raw||raw==="root")return{config:{},cleanPath:"root",title:"playlist",rawPath:raw||"root"};
+    const parts=raw.split("/").filter(Boolean);
+    const cleanParts=[];
+    const config={};
+    let deepestExplicit="";
+    for(const part of parts){
+      const parsed=parseFilenameTagString(part,"folder");
+      Object.assign(config,parsed.config);
+      const display=parsed.explicitName||parsed.cleanName||"playlist";
+      cleanParts.push(display);
+      if(parsed.explicitName)deepestExplicit=parsed.explicitName;
+    }
+    const cleanPath=cleanParts.join("/")||"root";
+    return{
+      config,
+      cleanPath,
+      title:deepestExplicit||prettifyFolder(cleanPath),
+      rawPath:raw
+    };
+  }
+
+  function filenameTrackConfig(stem){
+    return stem?.filenameConfig&&typeof stem.filenameConfig==="object"?stem.filenameConfig:{};
+  }
+
+  function applyFilenameConfigToStem(stem,config){
+    const cfg=config&&typeof config==="object"?{...config}:{};
+    stem.filenameConfig=cfg;
+    if(cfg.role)stem.defaultRole=cfg.role;
+    if(cfg.instrument)stem.defaultInstrument=cfg.instrument;
+    if(Number.isFinite(Number(cfg.level)))stem.defaultLevel=Number(cfg.level);
+    if(Number.isFinite(Number(cfg.pan)))stem.defaultPan=Number(cfg.pan);
+    if(Number.isFinite(Number(cfg.room)))stem.defaultRoom=Number(cfg.room);
+    if(Number.isFinite(Number(cfg.trim)))stem.defaultTrim=Number(cfg.trim);
+    return stem;
+  }
+
+  function buildTaggedStem({key,rawName,src,displayPath,kind,folderConfig={}}){
+    const parsed=parseFilenameTagString(stripExtension(rawName),"track");
+    const inherited={};
+    // Folder AGC is useful as a song-wide default, while ordinary track mixer
+    // values stay explicitly per-file as requested.
+    if(typeof folderConfig.agc==="boolean")inherited.agc=folderConfig.agc;
+    const config={...inherited,...parsed.config};
+    const name=parsed.explicitName||parsed.cleanName||stripExtension(rawName)||"Track";
+    return applyFilenameConfigToStem({key,name,src,displayPath,kind,rawName},config);
+  }
 
   function normalizeInstrumentAlias(value) {
     return String(value ?? "")
@@ -8128,23 +8405,46 @@
 
     ["loops-samples",80],
     ["radio-lofi",90],
-    ["fx",91],
-    ["ambience-room",92],
+    ["ear-candy",91],
+    ["fx",92],
+    ["ambience-room",93],
 
     ["click-guide",100],
     ["mix-master",110],
     ["audio",120]
   ]);
 
+  function predictStemInstrumentIcon(stem) {
+    const cfg=filenameTrackConfig(stem);
+    const role=String(cfg.role||stem?.defaultRole||"").trim();
+    if(role){
+      const exactRole=instrumentIconAliases.find(rule=>rule.category===role);
+      const predicted=predictInstrumentIcon(role);
+      return exactRole||{...predicted,category:role,text:predicted.text||role};
+    }
+    if(cfg.instrument||stem?.defaultInstrument){
+      const predicted=predictInstrumentIcon(cfg.instrument||stem.defaultInstrument);
+      if(predicted?.text)return predicted;
+    }
+    return predictInstrumentIcon(stem?.name || stem?.displayPath || "");
+  }
+
   function stemRolePriority(stem) {
-    const category = predictInstrumentIcon(stem?.name || stem?.displayPath || "").category;
+    const category = predictStemInstrumentIcon(stem).category;
     return STEM_ROLE_PRIORITY.get(category) ?? STEM_ROLE_PRIORITY.get("audio");
   }
 
   function sortStemsByMusicalRole(stems) {
     return (Array.isArray(stems) ? stems : [])
-      .map((stem,sourceIndex)=>({stem,sourceIndex,priority:stemRolePriority(stem)}))
-      .sort((a,b)=>a.priority-b.priority || a.sourceIndex-b.sourceIndex)
+      .map((stem,sourceIndex)=>{
+        const explicit=Number(filenameTrackConfig(stem).order);
+        return{stem,sourceIndex,hasExplicitOrder:Number.isFinite(explicit),explicitOrder:explicit,priority:stemRolePriority(stem)};
+      })
+      .sort((a,b)=>{
+        if(a.hasExplicitOrder!==b.hasExplicitOrder)return a.hasExplicitOrder?-1:1;
+        if(a.hasExplicitOrder&&b.hasExplicitOrder&&a.explicitOrder!==b.explicitOrder)return a.explicitOrder-b.explicitOrder;
+        return a.priority-b.priority||a.sourceIndex-b.sourceIndex;
+      })
       .map(entry=>entry.stem);
   }
 
@@ -8179,6 +8479,11 @@
 
       // Very short studio abbreviations (HH, PN, SN...) only qualify as whole tokens.
       if (simpleLength <= 2 && !(name === alias || tokens.has(alias))) continue;
+
+      // Ear-candy words are role-defining modifiers. If a stem is named
+      // "guitar fx" or "synth flair", FX/flair should describe the strip's
+      // category rather than losing to the longer source-instrument word.
+      if (score > -Infinity && rule.category === "ear-candy") score += 6000;
 
       if (score > bestScore) {
         bestScore = score;
@@ -8231,6 +8536,8 @@
       return {
         randomizerEnabled: !!parsed.randomizerEnabled,
         megaphoneEnabled: !!parsed.megaphoneEnabled,
+        megaphonePreferenceSet: Object.prototype.hasOwnProperty.call(parsed,"megaphoneEnabled"),
+        playlistModePreferenceSet: Object.prototype.hasOwnProperty.call(parsed,"playlistMode"),
         playlistMode: ["loop","shuffle","sequential"].includes(parsed.playlistMode)
           ? parsed.playlistMode
           : "loop",
@@ -8260,12 +8567,17 @@
         masterState: parsed.masterState && typeof parsed.masterState === "object"
           ? parsed.masterState
           : null,
+        masterOverrideFields: parsed.masterOverrideFields && typeof parsed.masterOverrideFields === "object"
+          ? parsed.masterOverrideFields
+          : Object.fromEntries(Object.keys(parsed.masterState&&typeof parsed.masterState==="object"?parsed.masterState:{}).map(key=>[key,true])),
         reverbDefaultsVersion: Math.max(0,Number(parsed.reverbDefaultsVersion)||0)
       };
     } catch (_) {
       return {
         randomizerEnabled:false,
         megaphoneEnabled:false,
+        megaphonePreferenceSet:false,
+        playlistModePreferenceSet:false,
         playlistMode:"loop",
         proceduralSeed:1,
         proceduralEnergy:.52,
@@ -8283,6 +8595,7 @@
         lockedStemIds:{},
         stemStates:{},
         masterState:null,
+        masterOverrideFields:{},
         reverbDefaultsVersion:0
       };
     }
@@ -8812,14 +9125,16 @@
 
   function isStemLocked(stem) {
     const id = persistentStemId(stem);
-    return !!(id && persistentPrefs.lockedStemIds[id]);
+    if(id&&Object.prototype.hasOwnProperty.call(persistentPrefs.lockedStemIds||{},id))return !!persistentPrefs.lockedStemIds[id];
+    return filenameTrackConfig(stem).lock===true;
   }
 
   function setStemLocked(stem,locked) {
     const id = persistentStemId(stem);
     if (!id) return;
-    if (locked) persistentPrefs.lockedStemIds[id] = true;
-    else delete persistentPrefs.lockedStemIds[id];
+    // Store false as well as true so an explicit user unlock can override a
+    // filename-authored `lock` default on future visits.
+    persistentPrefs.lockedStemIds[id] = !!locked;
     savePersistentPrefs();
   }
 
@@ -8886,12 +9201,20 @@
 
   function midiInstrumentLockedVoiceForStem(stem){
     const key=midiInstrumentLockKeyForStem(stem);
-    return key?instrumentLockRefToVoice(persistentPrefs.instrumentLocks?.[key]):null;
+    const stored=key?persistentPrefs.instrumentLocks?.[key]:null;
+    if(stored?.unlocked)return null;
+    const storedVoice=instrumentLockRefToVoice(stored);
+    if(storedVoice)return storedVoice;
+    if(filenameTrackConfig(stem).lockInstrument===true)return midiExplicitVoiceForStem(stem)||midiDefaultVoiceForStem(stem);
+    return null;
   }
 
   function isInstrumentLockedForChannel(channel){
     const key=instrumentLockKeyForChannel(channel);
-    return !!(key&&persistentPrefs.instrumentLocks?.[key]?.source);
+    const stored=key?persistentPrefs.instrumentLocks?.[key]:null;
+    if(stored?.unlocked)return false;
+    if(stored?.source)return true;
+    return !!(isMidiStem(channel?.stem)&&filenameTrackConfig(channel.stem).lockInstrument===true);
   }
 
   function setInstrumentLockForChannel(channel,locked,voice=null){
@@ -8902,6 +9225,10 @@
       const ref=proceduralVoiceRef(voice);
       if(!ref)return false;
       persistentPrefs.instrumentLocks[key]=ref;
+    }else if(isMidiStem(channel?.stem)&&filenameTrackConfig(channel.stem).lockInstrument===true){
+      // Keep an explicit user unlock so a filename-authored default lock does
+      // not reassert itself after refresh. User choice wins over authored default.
+      persistentPrefs.instrumentLocks[key]={unlocked:true};
     }else{
       delete persistentPrefs.instrumentLocks[key];
     }
@@ -8981,7 +9308,28 @@
     level: Number(persistentPrefs.masterState?.level ?? 80)
   };
 
+
+  function applyPlaylistFilenameDefaults(playlist){
+    const cfg=playlist?.filenameConfig||{};
+    const overrides=persistentPrefs.masterOverrideFields&&typeof persistentPrefs.masterOverrideFields==="object"?persistentPrefs.masterOverrideFields:{};
+    const applyField=(field,value)=>{
+      const n=Number(value);
+      if(!overrides[field]&&Number.isFinite(n))masterState[field]=Math.max(0,Math.min(100,n));
+    };
+    applyField("level",cfg.master);
+    applyField("pan",cfg.masterPan);
+    applyField("room",cfg.masterRoom);
+    applyField("tone",cfg.tone);
+    if(typeof cfg.megaphone==="boolean"&&!persistentPrefs.megaphonePreferenceSet)megaphoneEnabled=cfg.megaphone;
+    if(["loop","shuffle","sequential"].includes(cfg.mode)&&!persistentPrefs.playlistModePreferenceSet)playlistMode=cfg.mode;
+  }
+
   const savedStemState = new Map();
+  // AGC is intentionally session-only: filename default -> in-session user override -> refresh resets to filename default.
+  const savedStemAutoGain = new Map();
+  // First-rendered channel fader positions are kept only for this page load.
+  // They are the reset fallback when a stem/config does not provide an explicit default.
+  const pageLoadStemLevel = new Map();
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, char => ({
@@ -9037,8 +9385,11 @@
     playlist.contentMode=profile.kind;
     playlist.mediaProfile=profile;
     playlist.nativeTempoBpm=null;
-    playlist.playbackTempoBpm=null;
+    const authoredTempo=Number(playlist?.filenameConfig?.bpm);
+    playlist.filenameTempoBpm=Number.isFinite(authoredTempo)?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(authoredTempo))):null;
+    playlist.playbackTempoBpm=playlist.filenameTempoBpm;
     playlist.tempoManual=false;
+    playlist.tempoAuthored=playlist.filenameTempoBpm!==null;
     // Every stem keeps a back-reference so cached/preloaded audio can use that
     // playlist's tempo ratio without consulting whichever song is on screen.
     for(const stem of playlist.stems){
@@ -9050,69 +9401,106 @@
     // reference for pitch-preserving time-stretching after load.
     if(pureMidi){
       const saved=storedMidiTempoForPlaylist(playlist);
-      playlist.midiTempoBpm=saved??MIDI_DEFAULT_BPM;
+      playlist.midiTempoBpm=saved??playlist.filenameTempoBpm??MIDI_DEFAULT_BPM;
       playlist.playbackTempoBpm=playlist.midiTempoBpm;
       playlist.tempoManual=saved!==null;
       playlist.midiTempoManual=saved!==null;
       for(const stem of playlist.stems){if(isMidiStem(stem))stem.midiTempoBpm=playlist.midiTempoBpm}
+    }else if(playlist.filenameTempoBpm!==null&&profile.hasMidi){
+      // A folder-authored BPM is the shared hybrid target from the very first
+      // render: MIDI is re-rendered at it while audio is time-stretched to it.
+      playlist.midiTempoBpm=playlist.filenameTempoBpm;
+      for(const stem of playlist.stems){if(isMidiStem(stem))stem.midiTempoBpm=playlist.filenameTempoBpm}
     }
     return playlist;
   }
 
+  function taggedPlaylistGroupKey(groupValue,fallback){
+    const raw=normalizeFilenameTextValue(groupValue||fallback||"root")||"root";
+    return normalizeFilenameTagAlias(raw)||"root";
+  }
+
+  function addTaggedStemToGroup(groups,{stem,folderMeta,source,index}){
+    const cfg=filenameTrackConfig(stem);
+    if(cfg.ignore||folderMeta?.config?.ignore)return;
+    const groupValue=cfg.group||folderMeta?.config?.group||"";
+    const fallback=folderMeta?.cleanPath||"root";
+    const groupKey=taggedPlaylistGroupKey(groupValue,fallback);
+    if(!groups.has(groupKey)){
+      const title=normalizeFilenameTextValue(groupValue||folderMeta?.title||prettifyFolder(fallback))||"playlist";
+      groups.set(groupKey,{
+        id:`${source}:${groupKey}`,
+        folder:groupValue||fallback,
+        rawFolder:folderMeta?.rawPath||fallback,
+        title,
+        filenameConfig:{...(folderMeta?.config||{})},
+        stems:[],
+        source,
+        order:index
+      });
+    }
+    const group=groups.get(groupKey);
+    // When grp... joins files from different locations, the first group's folder
+    // defaults win. Track-level tags always remain local to their own file.
+    group.stems.push(stem);
+  }
+
+  function finalizeTaggedPlaylistGroups(groups){
+    return [...groups.values()]
+      .sort((a,b)=>a.order-b.order)
+      .map(group=>initializePlaylistMode({...group,stems:sortStemsByMusicalRole(group.stems)}));
+  }
+
   function buildPlaylistsFromManifest(manifest) {
     const groups = new Map();
+    let sourceIndex=0;
     for (const file of (manifest?.files || [])) {
       const isAudio=AUDIO_EXT_RE.test(file);
       const isMidi=MIDI_EXT_RE.test(file);
       if (!isAudio && !isMidi) continue;
-      const folder = parentFolder(file);
-      if (!groups.has(folder)) groups.set(folder, []);
-      groups.get(folder).push({
+      const rawFolder=parentFolder(file);
+      const folderMeta=parseFolderFilenameMetadata(rawFolder);
+      if(folderMeta.config.ignore)continue;
+      const stem=buildTaggedStem({
         key:`bundle:${file}`,
-        name:stripExtension(basename(file)),
+        rawName:basename(file),
         src:file,
         displayPath:file,
-        kind:isMidi?"midi-url":"url"
+        kind:isMidi?"midi-url":"url",
+        folderConfig:folderMeta.config
       });
+      addTaggedStemToGroup(groups,{stem,folderMeta,source:"bundled",index:sourceIndex++});
     }
-    return [...groups.entries()].map(([folder,stems],index)=>initializePlaylistMode({
-      id:`bundle:${folder}`,
-      folder,
-      title:prettifyFolder(folder),
-      stems:sortStemsByMusicalRole(stems),
-      source:"bundled",
-      order:index
-    }));
+    return finalizeTaggedPlaylistGroups(groups);
   }
 
   function buildPlaylistsFromFiles(fileList) {
     revokeLocalObjectUrls();
     const groups = new Map();
+    let sourceIndex=0;
     for (const file of [...fileList]) {
-      const rel = file.webkitRelativePath || file.name;
+      const rel = file._wifeyRelativePath || file.webkitRelativePath || file.name;
       const isMidi=MIDI_EXT_RE.test(rel);
       const isAudio=file.type?.startsWith("audio/") || AUDIO_EXT_RE.test(rel);
       if (!isAudio && !isMidi) continue;
-      const folder = parentFolder(rel);
-      if (!groups.has(folder)) groups.set(folder, []);
+      const rawFolder=parentFolder(rel);
+      const folderMeta=parseFolderFilenameMetadata(rawFolder);
+      if(folderMeta.config.ignore)continue;
+      const parsedPreview=parseFilenameTagString(stripExtension(file.name),"track");
+      if(parsedPreview.config.ignore)continue;
       const objectUrl = URL.createObjectURL(file);
       localObjectUrls.push(objectUrl);
-      groups.get(folder).push({
+      const stem=buildTaggedStem({
         key:`local:${rel}`,
-        name:stripExtension(file.name),
+        rawName:file.name,
         src:objectUrl,
         displayPath:rel,
-        kind:isMidi?"midi-object-url":"object-url"
+        kind:isMidi?"midi-object-url":"object-url",
+        folderConfig:folderMeta.config
       });
+      addTaggedStemToGroup(groups,{stem,folderMeta,source:"local",index:sourceIndex++});
     }
-    return [...groups.entries()].map(([folder,stems],index)=>initializePlaylistMode({
-      id:`local:${folder}:${index}`,
-      folder,
-      title:prettifyFolder(folder),
-      stems:sortStemsByMusicalRole(stems),
-      source:"local",
-      order:index
-    }));
+    return finalizeTaggedPlaylistGroups(groups);
   }
 
   function revokeLocalObjectUrls() {
@@ -9307,7 +9695,7 @@
   }
 
   const TRACK_CATEGORY_LABELS=Object.freeze({
-    drums:"Drums",percussion:"Percussion",bass:"Bass",keys:"Keys",melody:"Melody",guitar:"Guitar",strings:"Strings"
+    drums:"Drums",percussion:"Percussion",bass:"Bass",keys:"Keys",melody:"Melody",guitar:"Guitar",strings:"Strings","ear-candy":"Ear Candy"
   });
 
   function trackCategoryLabel(role){
@@ -9613,6 +10001,9 @@
   function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,sf2Voice:program.sf2Voices?.[track.role]||null,proceduralOrder:index}))}}
   function midiFrequency(midi){return 440*Math.pow(2,(midi-69)/12)}
   function createProceduralStereoBuffer(duration){const sampleRate=Math.max(22050,Math.min(32000,audioCtx?.sampleRate||32000)),length=Math.max(1,Math.ceil(duration*sampleRate)),buffer=audioCtx.createBuffer(2,length,sampleRate);return{buffer,left:buffer.getChannelData(0),right:buffer.getChannelData(1),sampleRate}}
+  // MIDI uses the AudioContext's native rate. Avoiding an intermediate 32 kHz
+  // render/resample stage keeps note onsets sample-locked to the master clock.
+  function createMidiStereoBuffer(duration){const sampleRate=Math.max(22050,Math.min(96000,Number(audioCtx?.sampleRate)||44100)),length=Math.max(1,Math.ceil(duration*sampleRate)),buffer=audioCtx.createBuffer(2,length,sampleRate);return{buffer,left:buffer.getChannelData(0),right:buffer.getChannelData(1),sampleRate}}
 
   // Exact, non-destructive Sonic Drums lift. Web Audio buffers are Float32, so
   // applying +6 dB here does not hard-clip the underlying 16-bit SF2 samples.
@@ -9807,8 +10198,8 @@
         const explicit=!!proceduralStripVoicePreference(channel.stem.role);
         const locked=!!channel.state?.locked;
         const patchLocked=isInstrumentLockedForChannel(channel);
-        iconEl.title=`${label} · click: patch select${explicit?" · STRIP PATCH":""}${patchLocked?" · PATCH LOCK":""}${locked?" · RANDOM LOCK":""}`;
-        iconEl.setAttribute("aria-label",`${label}. Click or right-click to open SoundFont and instrument patch select.${patchLocked?" Instrument locked to this strip.":""}${locked?" Strip mute state locked from randomizer.":""}`);
+        iconEl.title=`${label} · click: patch select · right-click: reset fader position${explicit?" · STRIP PATCH":""}${patchLocked?" · PATCH LOCK":""}${locked?" · RANDOM LOCK":""}`;
+        iconEl.setAttribute("aria-label",`${label}. Click to open SoundFont and instrument patch select. Right-click to reset this track's fader to its original position.${patchLocked?" Instrument locked to this strip.":""}${locked?" Strip mute state locked from randomizer.":""}`);
         iconEl.classList.toggle("has-strip-voice",explicit);
       }
       channel.stem.displayInstrumentName=label;
@@ -9816,7 +10207,7 @@
         const action=String(button.dataset.action||"").toUpperCase();
         if(action==="MUTE"||action==="SOLO")button.title=`${action[0]}${action.slice(1).toLowerCase()} ${label}`;
         else if(action==="LOCK"){button.title=`${channel.state.locked?"Unlock":"Lock"} ${label} from randomizer`;button.setAttribute("aria-label",button.title)}
-        else if(action==="AUTO-GAIN"){const enabled=channel.state.autoGain!==false;button.title=`Auto Gain ${enabled?"ON":"OFF"} · ${enabled?`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} dB compensation`:"unity"}`;button.setAttribute("aria-label",button.title)}
+        else if(action==="AUTO-GAIN"){const enabled=channel.state.autoGain!==false;button.title="AUTO-GAIN COMPENSATION";button.setAttribute("aria-label",`AUTO-GAIN COMPENSATION ${enabled?"ON":"OFF"}. ${enabled?`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} dB slow leveling`:"Unity gain"}.`)}
       });
       const fader=channel.el?.querySelector(".fader");
       if(fader)fader.setAttribute("aria-label",`${label} level`);
@@ -9842,16 +10233,17 @@
       if(iconEl){
         const stored=!!midiStoredVoiceForStem(channel.stem);
         const patchLocked=isInstrumentLockedForChannel(channel);
-        const pinned=!!midiExplicitVoiceForStem(channel.stem)&&!stored&&!patchLocked;
-        iconEl.title=patchLocked?`${label} · PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")} · click: patch select · double-click: restore default`:pinned?`${label} · PINNED DEFAULT · click: patch select · double-click: restore default`:`${label} · click: patch select · double-click: restore default`;
-        iconEl.setAttribute("aria-label",patchLocked?`${label}. Instrument locked to this mixer strip across MIDI track changes and randomization. Click to open patch select. Double-click to restore this MIDI strip's original/default instrument while keeping the patch lock enabled.`:pinned?`${label}. Pinned MIDI default. Click to open exact SoundFont and instrument selection. Double-click to restore the original/default instrument.`:`${label}. Click or right-click to open exact SoundFont and instrument selection. Double-click to restore the original/default instrument.`);
+        const authored=!!midiExplicitVoiceForStem(channel.stem);
+        const pinned=authored&&filenameTrackConfig(channel.stem).lockInstrument===true&&!stored&&!patchLocked;
+        iconEl.title=patchLocked?`${label} · PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")} · click: patch select · right-click: reset fader · double-click: restore default patch`:pinned?`${label} · PINNED DEFAULT · click: patch select · right-click: reset fader · double-click: restore default patch`:`${label} · click: patch select · right-click: reset fader · double-click: restore default patch`;
+        iconEl.setAttribute("aria-label",patchLocked?`${label}. Instrument locked to this mixer strip across MIDI track changes and randomization. Click to open patch select. Right-click to reset this track's fader to its original position. Double-click to restore this MIDI strip's original/default instrument while keeping the patch lock enabled.`:pinned?`${label}. Pinned MIDI default. Click to open exact SoundFont and instrument selection. Right-click to reset this track's fader to its original position. Double-click to restore the original/default instrument.`:`${label}. Click to open exact SoundFont and instrument selection. Right-click to reset this track's fader to its original position. Double-click to restore the original/default instrument.`);
         iconEl.classList.toggle("has-strip-voice",stored||pinned||patchLocked);
       }
       channel.el?.querySelectorAll("[data-action]").forEach(button=>{
         const action=String(button.dataset.action||"").toUpperCase();
         if(action==="MUTE"||action==="SOLO")button.title=`${action[0]}${action.slice(1).toLowerCase()} ${label}`;
         else if(action==="LOCK"){button.title=`${channel.state.locked?"Unlock":"Lock"} ${label} from randomizer`;button.setAttribute("aria-label",button.title)}
-        else if(action==="AUTO-GAIN"){const enabled=channel.state.autoGain!==false;button.title=`Auto Gain ${enabled?"ON":"OFF"} · ${enabled?`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} dB compensation`:"unity"}`;button.setAttribute("aria-label",button.title)}
+        else if(action==="AUTO-GAIN"){const enabled=channel.state.autoGain!==false;button.title="AUTO-GAIN COMPENSATION";button.setAttribute("aria-label",`AUTO-GAIN COMPENSATION ${enabled?"ON":"OFF"}. ${enabled?`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} dB slow leveling`:"Unity gain"}.`)}
       });
       const fader=channel.el?.querySelector(".fader");
       if(fader)fader.setAttribute("aria-label",`${label} level`);
@@ -9881,11 +10273,45 @@
     return{swapAt,absoluteSwap,cycleIndex,cycleOffset};
   }
 
+  async function clockLockedMidiPatchSwapPoint(channel,minLead=.05){
+    if(!channel||!audioCtx||!playlistDuration||!isMidiStem(channel.stem))return null;
+    const requestedTempo=Number.isFinite(Number(channel.stem.midiTempoBpm))
+      ?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(channel.stem.midiTempoBpm))))
+      :null;
+    let parsed=null;
+    try{parsed=await getParsedMidiForStem(channel.stem,requestedTempo)}catch(_){return clockLockedPatchSwapPoint(minLead,0)}
+    if(!isPlaying||!audioCtx||!playlistDuration)return null;
+    // Re-read the transport AFTER any cache/fetch work. The chosen boundary is
+    // always based on the live master clock, never on the time the click occurred.
+    const earliest=Math.max(getAbsoluteCyclePosition()+Math.max(.025,Number(minLead)||.05),audioCtx.currentTime+Math.max(.025,Number(minLead)||.05)-cycleZeroContextTime);
+    const cycle=Math.max(0,Math.floor(earliest/playlistDuration));
+    const within=earliest-cycle*playlistDuration;
+    const starts=[];
+    let last=-1;
+    for(const note of parsed?.notes||[]){
+      const t=Number(note?.start);
+      if(!Number.isFinite(t)||t<0||t>=playlistDuration-.0005)continue;
+      if(last<0||Math.abs(t-last)>.0005){starts.push(t);last=t}
+    }
+    if(!starts.length)return clockLockedPatchSwapPoint(minLead,0);
+    let targetCycle=cycle;
+    let noteStart=starts.find(t=>t>=within-.00025);
+    if(!Number.isFinite(noteStart)){
+      if(appMode!=="procedural"&&playlistMode!=="loop")return null;
+      targetCycle=cycle+1;
+      noteStart=starts[0];
+    }
+    const absoluteSwap=targetCycle*playlistDuration+noteStart;
+    const swapAt=cycleZeroContextTime+absoluteSwap;
+    if(swapAt<audioCtx.currentTime+.012)return clockLockedPatchSwapPoint(Math.max(.025,minLead),0);
+    return{swapAt,absoluteSwap,cycleIndex:targetCycle,cycleOffset:noteStart};
+  }
+
   function hotSwapProceduralStripInstrument(channel){
     if(!channel||appMode!=="procedural"||!currentProceduralProgram)return;
     const baseBuffer=renderProceduralStemBuffer(currentProceduralProgram,channel.stem);
     channel.buffer=baseBuffer;
-    setChannelAutoGainForBuffer(channel,baseBuffer);
+    primeChannelAutoGain(channel,baseBuffer);
     if(!isPlaying||!audioCtx||!playlistDuration){
       syncProceduralChannelInstrumentLabels();
       return;
@@ -9902,7 +10328,7 @@
     retireSourcesForProceduralMorph(channel,swapAt,fade);
     const liveProgram=getProceduralLoopProgram(cycleIndex)||currentProceduralProgram;
     const liveBuffer=renderProceduralStemBuffer(liveProgram,channel.stem);
-    createScheduledSource(channel,swapAt,cycleOffset,liveBuffer,{fadeIn:fade,startGain:1});
+    scheduleConfiguredChannelSource(channel,swapAt,cycleOffset,liveBuffer,{fadeIn:fade,startGain:1});
 
     // The scheduler may already have queued future loops for this channel using
     // the previous patch. RetireSources removed them; rebuild only this strip's
@@ -9910,7 +10336,7 @@
     for(let cycle=cycleIndex+1;cycle<=scheduledThroughCycle;cycle++){
       const loopProgram=getProceduralLoopProgram(cycle)||currentProceduralProgram;
       const variantBuffer=renderProceduralStemBuffer(loopProgram,channel.stem);
-      createScheduledSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,variantBuffer);
+      scheduleConfiguredChannelSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,variantBuffer);
     }
     syncProceduralChannelInstrumentLabels();
   }
@@ -10275,10 +10701,10 @@
     channel.stem.midiPatchRevision=revision;
     loadReadout.textContent="MIDI PATCH";
     try{
-      const buffer=await getMidiStemBuffer(channel.stem);
+      const buffer=await getConfiguredStemPlaybackBuffer(channel.stem,await getMidiStemBuffer(channel.stem));
       if(channel.stem.midiPatchRevision!==revision)return;
       channel.buffer=buffer;
-      setChannelAutoGainForBuffer(channel,buffer);
+      primeChannelAutoGain(channel,buffer);
       channel.ready=true;
       channel.error=false;
       // Patch choice cannot change song length. Recomputing playlistDuration here
@@ -10288,22 +10714,21 @@
       if(!isPlaying||!audioCtx||!playlistDuration){loadReadout.textContent="MIDI READY";return}
 
       const fade=.018;
-      const bpm=Number(channel.stem?.midiTempoBpm)||MIDI_DEFAULT_BPM;
-      const quantum=Math.max(.02,(60/Math.max(1,bpm))*.25); // 16th-note hardware-style patch boundary
-      // Give the audio thread a comfortable scheduling runway after a potentially
-      // expensive SoundFont render. The replacement offset is derived from the
-      // unchanged master transport clock, never from when the render finished.
-      const swap=clockLockedPatchSwapPoint(.085,quantum);
+      // Switch on the next ACTUAL MIDI note onset for this strip. An arbitrary
+      // 16th-note boundary can cut through a sustained note and make a new patch
+      // feel late even when its buffer offset is mathematically correct.
+      const swap=await clockLockedMidiPatchSwapPoint(channel,.055);
+      if(channel.stem.midiPatchRevision!==revision)return;
       if(!swap){loadReadout.textContent="MIDI READY";return}
       const {swapAt,cycleIndex,cycleOffset}=swap;
-      const replacement=createScheduledSource(channel,swapAt,cycleOffset,buffer,{fadeIn:fade,startGain:1});
+      const replacement=scheduleConfiguredChannelSource(channel,swapAt,cycleOffset,buffer,{fadeIn:fade,startGain:1});
       if(!replacement){loadReadout.textContent="MIDI READY";return}
       // Only retire the old patch after the phase-locked replacement has been
       // accepted by Web Audio. This prevents a failed/late swap from punching a
       // hole in one MIDI strip while the rest of the mixer keeps running.
       retireSourcesForProceduralMorph(channel,swapAt,fade,{exclude:replacement});
       for(let cycle=cycleIndex+1;cycle<=scheduledThroughCycle;cycle++){
-        createScheduledSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,buffer);
+        scheduleConfiguredChannelSource(channel,cycleZeroContextTime+cycle*playlistDuration,0,buffer);
       }
       loadReadout.textContent="MIDI READY";
     }catch(error){
@@ -10341,9 +10766,10 @@
 
   async function cycleMidiStripInstrument(channel,direction=1){
     if(!channel||appMode!=="playlist"||!isMidiStem(channel.stem))return;
-    const pinned=midiExplicitVoiceForStem(channel.stem);
-    if(pinned&&!midiStoredVoiceForStem(channel.stem)&&!isInstrumentLockedForChannel(channel)){
-      showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"PINNED MIDI DEFAULT","OPEN PATCH SELECT");
+    const authored=midiExplicitVoiceForStem(channel.stem);
+    const filenameLocked=filenameTrackConfig(channel.stem).lockInstrument===true;
+    if(authored&&filenameLocked&&!midiStoredVoiceForStem(channel.stem)&&!isInstrumentLockedForChannel(channel)){
+      showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),"LOCKED MIDI DEFAULT","OPEN PATCH SELECT");
       return;
     }
     const current=midiSelectedVoiceForStem(channel.stem);
@@ -10362,7 +10788,7 @@
     showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),proceduralSoundFontDisplayName(next.source).toUpperCase(),String(next.name||"PATCH").toUpperCase());
   }
 
-  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverbPreDelay);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,autoGainCompensation:1,autoGainDeltaDb:0,autoGainReferenceDb:null,autoGainCurrentDb:null,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
+  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverbPreDelay);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,autoGainCompensation:1,autoGainDeltaDb:0,autoGainBaseDeltaDb:0,autoGainDynamicDb:0,autoGainDynamicTargetDb:0,autoGainReferenceDb:null,autoGainCurrentReferenceDb:null,autoGainBufferAverageDb:null,autoGainCurrentDb:null,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
   async function setupProceduralAudioForRenderedChannels(playlist,generation){
     ensureAudioGraph();
     await ensureProceduralSoundFonts();
@@ -10443,7 +10869,7 @@
     const lead=.055,fade=.030;
     const currentPosition=getPosition();
     const oldSources=channels.map(channel=>[...channel.sources]);
-    channels.forEach((channel,index)=>{channel.buffer=newBuffers[index]||channel.buffer;setChannelAutoGainForBuffer(channel,channel.buffer);channel.ready=true;channel.error=false});
+    channels.forEach((channel,index)=>{channel.buffer=newBuffers[index]||channel.buffer;primeChannelAutoGain(channel,channel.buffer);channel.ready=true;channel.error=false});
     updatePlaylistDuration();
     const newDuration=playlistDuration;
     if(!newDuration)return;
@@ -10462,7 +10888,7 @@
     loopCount=0;
     scheduledThroughCycle=0;
     let scheduled=0;
-    channels.forEach(channel=>{if(createScheduledSource(channel,swapAt,newOffset,null,{fadeIn:fade}))scheduled++});
+    channels.forEach(channel=>{if(scheduleConfiguredChannelSource(channel,swapAt,newOffset,null,{fadeIn:fade}))scheduled++});
     oldSources.forEach(list=>list.forEach(source=>{
       try{
         const gain=source?._wifeyGain?.gain;
@@ -10513,9 +10939,10 @@
     for(const channel of channels){
       if(generation!==loadGeneration||playlist!==currentPlaylist)return;
       try{
-        newBuffers.push(isMidiStem(channel.stem)
+        const rawTempoBuffer=isMidiStem(channel.stem)
           ?await getMidiStemBuffer(channel.stem)
-          :await getTempoAdjustedAudioStemBuffer(channel.stem,native,next));
+          :await getTempoAdjustedAudioStemBuffer(channel.stem,native,next);
+        newBuffers.push(await getConfiguredStemPlaybackBuffer(channel.stem,rawTempoBuffer));
       }catch(error){
         console.warn("Tempo render failed; preserving current stem buffer",channel.stem?.displayPath||channel.stem?.name,error);
         newBuffers.push(channel.buffer);
@@ -10539,9 +10966,10 @@
     }
     if(appMode!=="playlist"||!currentPlaylist)return;
     const playlist=currentPlaylist;
-    const native=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(await ensurePlaylistNativeTempo(playlist))));
-    // Reset means genuinely return to the authored/detected tempo, including
-    // clearing the legacy saved override used by pure-MIDI playlists.
+    const detectedNative=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(await ensurePlaylistNativeTempo(playlist))));
+    const native=Number.isFinite(Number(playlist.filenameTempoBpm))?Number(playlist.filenameTempoBpm):detectedNative;
+    // Reset returns to the filename-authored BPM when present, otherwise the
+    // detected/embedded native tempo, while clearing legacy saved overrides.
     playlist.tempoManual=false;
     playlist.midiTempoManual=false;
     if(isPureMidiPlaylist(playlist)&&persistentPrefs.midiTempoByPlaylist){
@@ -10669,7 +11097,7 @@
     for(const {channel,stem,buffer} of prepared){
       channel.stem=stem;
       channel.buffer=buffer;
-      if(createScheduledSource(channel,swapAt,newPosition,buffer,{fadeIn:PROCEDURAL_VIBE_CROSSFADE,startGain:1}))started++;
+      if(scheduleConfiguredChannelSource(channel,swapAt,newPosition,buffer,{fadeIn:PROCEDURAL_VIBE_CROSSFADE,startGain:1}))started++;
     }
     isPlaying=started>0;
     if(isPlaying)ensureScheduleHorizon(0);
@@ -11585,6 +12013,7 @@
   function toggleMegaphone() {
     megaphoneEnabled = !megaphoneEnabled;
     persistentPrefs.megaphoneEnabled = megaphoneEnabled;
+    persistentPrefs.megaphonePreferenceSet = true;
     savePersistentPrefs();
 
     ensureAudioGraph();
@@ -11775,15 +12204,9 @@
   }
 
 
-  // ===== AUTO GAIN reference calibration =====
-  // AUTO GAIN is deliberately session-only and defaults ON for every strip.
-  // It lives before TRIM and the channel fader, so those hardware controls are
-  // always post-compensation. If a stem or voice needs a hand-authored target,
-  // set autoGainReferenceDb on that stem/voice or add a stable key here.
-  // Offline playlist scans live in auto-gain-references.js so calibration is
-  // easy to tune without touching mixer logic. Each entry can be either a
-  // legacy numeric dB value or { measuredDb, adjustDb }. The effective target
-  // is measuredDb + adjustDb. Runtime measurement remains the fallback.
+  // ===== AUTO-GAIN COMPENSATION / slow loudness levelling =====
+  // Static leveling uses the documented full-file RMS references. Dynamic
+  // movement is deliberately broad/slow so AGC does not behave like a compressor.
   const AUTO_GAIN_REFERENCE_OVERRIDES_DB = window.WIFEY_AUTO_GAIN_REFERENCES || {stems:{},voices:{}};
 
   function configuredAutoGainEntryDb(entry){
@@ -11794,10 +12217,28 @@
     const adjust=Number(entry.adjustDb);
     return measured+(Number.isFinite(adjust)?adjust:0);
   }
-  const AUTO_GAIN_MAX_BOOST_DB=18;
-  const AUTO_GAIN_MAX_CUT_DB=18;
+
+  function configuredAudioDatasetAverageDb(){
+    const values=Object.values(AUTO_GAIN_REFERENCE_OVERRIDES_DB.stems||{}).map(configuredAutoGainEntryDb).filter(Number.isFinite);
+    return values.length?values.reduce((sum,value)=>sum+value,0)/values.length:-30;
+  }
+
+  const AUTO_GAIN_DATASET_TARGET_DB=configuredAudioDatasetAverageDb();
+  const AUTO_GAIN_STATIC_STRENGTH=.82;
+  const AUTO_GAIN_MAX_BOOST_DB=12;
+  const AUTO_GAIN_MAX_CUT_DB=12;
+  const AUTO_GAIN_DYNAMIC_MAX_DB=2.5;
+  const AUTO_GAIN_DYNAMIC_STRENGTH=.42;
+  const AUTO_GAIN_DYNAMIC_DEADBAND_DB=1.15;
+  const AUTO_GAIN_DYNAMIC_WINDOW_SECONDS=10;
+  const AUTO_GAIN_DYNAMIC_INTERVAL_MS=900;
+  const AUTO_GAIN_DYNAMIC_CUT_SECONDS=5.5;
+  const AUTO_GAIN_DYNAMIC_LIFT_SECONDS=9.5;
   const autoGainReferenceDbCache=new Map();
   const autoGainReferencePromises=new Map();
+  const autoGainMidiVoiceNoteCache=new Map();
+  const autoGainMidiVoiceNotePromises=new Map();
+  let lastAutoGainDynamicPassMs=0;
 
   function audioBufferLevelDb(buffer){
     if(!buffer?.length||!buffer?.numberOfChannels)return -Infinity;
@@ -11806,178 +12247,278 @@
     let sum=0,count=0,peak=0;
     for(let ch=0;ch<buffer.numberOfChannels;ch++){
       const data=buffer.getChannelData(ch);
-      for(let i=0;i<data.length;i+=stride){
-        const x=Number(data[i])||0;
-        peak=Math.max(peak,Math.abs(x));
-        sum+=x*x; count++;
-      }
+      for(let i=0;i<data.length;i+=stride){const x=Number(data[i])||0;peak=Math.max(peak,Math.abs(x));sum+=x*x;count++}
     }
     if(!count||peak<1e-7)return -Infinity;
     return 20*Math.log10(Math.max(1e-9,Math.sqrt(sum/count)));
   }
 
-  function autoGainStemKey(stem){
-    return String(stem?.displayPath||stem?.src||stem?.key||stem?.name||"").replace(/\\/g,"/").toLowerCase();
+  function audioBufferWindowLevelDb(buffer,centerSeconds,windowSeconds=AUTO_GAIN_DYNAMIC_WINDOW_SECONDS){
+    if(!buffer?.length||!buffer?.numberOfChannels||!buffer?.sampleRate)return -Infinity;
+    const sr=buffer.sampleRate,duration=buffer.length/sr;
+    const window=Math.max(.5,Math.min(duration,Number(windowSeconds)||AUTO_GAIN_DYNAMIC_WINDOW_SECONDS));
+    const center=Math.max(0,Math.min(duration,Number(centerSeconds)||0));
+    let start=Math.max(0,center-window*.5),end=Math.min(duration,start+window);start=Math.max(0,end-window);
+    const a=Math.floor(start*sr),b=Math.min(buffer.length,Math.ceil(end*sr));if(b<=a)return -Infinity;
+    const stride=Math.max(1,Math.floor(((b-a)*buffer.numberOfChannels)/32000));
+    let sum=0,count=0,peak=0;
+    for(let ch=0;ch<buffer.numberOfChannels;ch++){
+      const data=buffer.getChannelData(ch);
+      for(let i=a;i<b;i+=stride){const x=Number(data[i])||0;peak=Math.max(peak,Math.abs(x));sum+=x*x;count++}
+    }
+    if(!count||peak<1e-7)return -Infinity;
+    return 20*Math.log10(Math.max(1e-9,Math.sqrt(sum/count)));
   }
 
-  function autoGainReferenceVoiceForStem(stem){
-    return isMidiStem(stem)?(midiExplicitVoiceForStem(stem)||midiDefaultVoiceForStem(stem)):null;
-  }
+  function autoGainStemKey(stem){return String(stem?.displayPath||stem?.src||stem?.key||stem?.name||"").replace(/\\/g,"/").toLowerCase()}
+  function autoGainReferenceVoiceForStem(stem){return isMidiStem(stem)?(midiExplicitVoiceForStem(stem)||midiDefaultVoiceForStem(stem)):null}
 
   function configuredAutoGainReferenceDb(stem,voice=null){
-    for(const value of [stem?.autoGainReferenceDb,voice?.autoGainReferenceDb]){
-      if(Number.isFinite(Number(value)))return Number(value);
-    }
-    const stemKey=autoGainStemKey(stem);
-    const stemConfigured=configuredAutoGainEntryDb(AUTO_GAIN_REFERENCE_OVERRIDES_DB.stems?.[stemKey]);
+    for(const value of [stem?.autoGainReferenceDb,voice?.autoGainReferenceDb])if(Number.isFinite(Number(value)))return Number(value);
+    const stemConfigured=configuredAutoGainEntryDb(AUTO_GAIN_REFERENCE_OVERRIDES_DB.stems?.[autoGainStemKey(stem)]);
     if(Number.isFinite(stemConfigured))return stemConfigured;
     const voiceKey=voice?proceduralVoiceKey(voice):"";
     const voiceConfigured=voiceKey?configuredAutoGainEntryDb(AUTO_GAIN_REFERENCE_OVERRIDES_DB.voices?.[voiceKey]):null;
-    if(Number.isFinite(voiceConfigured))return voiceConfigured;
+    return Number.isFinite(voiceConfigured)?voiceConfigured:null;
+  }
+
+  function nearestPlayableMidiNote(bank,voice,preferred=60){
+    if(!bank?.resolveLayers||!voice)return null;
+    const root=Math.max(0,Math.min(127,Math.round(Number(preferred)||60)));
+    for(let distance=0;distance<=127;distance++){
+      const below=root-distance,above=root+distance;
+      if(below>=0&&bank.resolveLayers(voice.bank,voice.program,below,96)?.length)return below;
+      if(distance&&above<=127&&bank.resolveLayers(voice.bank,voice.program,above,96)?.length)return above;
+      if(below<0&&above>127)break;
+    }
     return null;
   }
 
-  function syncLiveChannelAutoGain(channel,time=.018){
-    if(!audioCtx||!channel?.sources)return;
-    const target=channel.state?.autoGain===false?1:Math.max(.05,Math.min(7.95,Number(channel.autoGainCompensation)||1));
-    for(const source of channel.sources){
-      const param=source?._wifeyAutoGain?.gain;
-      if(param)setParam(param,target,time);
-    }
-  }
-
-  function setChannelAutoGainForBuffer(channel,buffer,{referenceDb=null}={}){
-    if(!channel||!buffer)return 1;
-    const currentDb=audioBufferLevelDb(buffer);
-    channel.autoGainCurrentDb=currentDb;
-    if(Number.isFinite(Number(referenceDb)))channel.autoGainReferenceDb=Number(referenceDb);
-    const ref=Number.isFinite(channel.autoGainReferenceDb)?Number(channel.autoGainReferenceDb):NaN;
-    let delta=0;
-    if(Number.isFinite(ref)&&Number.isFinite(currentDb)){
-      delta=Math.max(-AUTO_GAIN_MAX_CUT_DB,Math.min(AUTO_GAIN_MAX_BOOST_DB,ref-currentDb));
-    }
-    channel.autoGainDeltaDb=delta;
-    channel.autoGainCompensation=Math.pow(10,delta/20);
-    syncLiveChannelAutoGain(channel);
-    syncStemActionButtons(channel);
-    return channel.autoGainCompensation;
-  }
-
-  async function renderMidiAutoGainReferenceBuffer(stem,voice){
+  async function measureMidiVoiceReferenceNote(voice){
     if(!voice)return null;
-    const requestedTempo=Number.isFinite(Number(stem?.midiTempoBpm))
-      ?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(stem.midiTempoBpm))))
-      :null;
-    const [,parsed]=await Promise.all([
-      ensureProceduralSoundFontSource(voice.source,{quiet:true}),
-      getParsedMidiForStem(stem,requestedTempo)
-    ]);
-    const shadow={...stem};
-    return await renderMidiWithSoundFont(parsed,shadow,voice) || WifeyMIDI.render(audioCtx,parsed);
+    const key=proceduralVoiceKey(voice);if(!key)return null;
+    if(autoGainMidiVoiceNoteCache.has(key))return autoGainMidiVoiceNoteCache.get(key);
+    if(autoGainMidiVoiceNotePromises.has(key))return autoGainMidiVoiceNotePromises.get(key);
+    const promise=(async()=>{
+      const configured=configuredAutoGainEntryDb(AUTO_GAIN_REFERENCE_OVERRIDES_DB.voices?.[key]);
+      if(Number.isFinite(configured))return{db:configured,note:60,configured:true};
+      const bank=await ensureProceduralSoundFontSource(voice.source,{quiet:true});
+      if(!bank?.getPreset(voice.bank,voice.program))return null;
+      const note=nearestPlayableMidiNote(bank,voice,60);if(!Number.isFinite(note))return null;
+      const target=createProceduralStereoBuffer(2.6);
+      const trim=Number.isFinite(Number(voice.gainTrim))?Number(voice.gainTrim):1;
+      if(!bank.renderNote(target,{bank:voice.bank,program:voice.program,midi:note,velocity:96,start:.18,duration:1.35,amp:.72*trim,pan:0,tightOnset:true}))return null;
+      attenuateTargetIfNeeded(target,.94);
+      if(voice.source==="casino")applyRenderedBufferGain(target,SONIC_DRUMS_RENDER_GAIN);
+      const db=audioBufferLevelDb(target.buffer);return Number.isFinite(db)?{db,note,configured:false}:null;
+    })();
+    autoGainMidiVoiceNotePromises.set(key,promise);
+    try{const result=await promise;if(result)autoGainMidiVoiceNoteCache.set(key,result);return result}
+    finally{autoGainMidiVoiceNotePromises.delete(key)}
+  }
+
+  function syncLiveChannelAutoGain(channel,time=1.6){
+    if(!audioCtx||!channel?.sources)return;
+    const target=channel.state?.autoGain===false?1:Math.max(.05,Math.min(3.99,Number(channel.autoGainCompensation)||1));
+    for(const source of channel.sources){const param=source?._wifeyAutoGain?.gain;if(param)setParam(param,target,time)}
+  }
+
+  function applyChannelAutoGainCompensation(channel,time=1.6){
+    if(!channel)return 1;
+    const delta=Math.max(-AUTO_GAIN_MAX_CUT_DB,Math.min(AUTO_GAIN_MAX_BOOST_DB,(Number(channel.autoGainBaseDeltaDb)||0)+(Number(channel.autoGainDynamicDb)||0)));
+    channel.autoGainDeltaDb=delta;channel.autoGainCompensation=Math.pow(10,delta/20);syncLiveChannelAutoGain(channel,time);return channel.autoGainCompensation;
+  }
+
+  function setChannelAutoGainForBuffer(channel,buffer,{referenceDb=null,currentReferenceDb=null,targetDb=AUTO_GAIN_DATASET_TARGET_DB}={}){
+    if(!channel||!buffer)return 1;
+    const bufferDb=audioBufferLevelDb(buffer);channel.autoGainBufferAverageDb=bufferDb;channel.autoGainCurrentDb=bufferDb;
+    if(Number.isFinite(Number(referenceDb)))channel.autoGainReferenceDb=Number(referenceDb);
+    if(Number.isFinite(Number(currentReferenceDb)))channel.autoGainCurrentReferenceDb=Number(currentReferenceDb);
+    channel.autoGainTargetDb=Number.isFinite(Number(targetDb))?Number(targetDb):AUTO_GAIN_DATASET_TARGET_DB;
+    let sourceDb=Number(channel.autoGainCurrentReferenceDb);if(!Number.isFinite(sourceDb))sourceDb=Number(channel.autoGainReferenceDb);if(!Number.isFinite(sourceDb))sourceDb=bufferDb;
+    let baseDelta=Number.isFinite(sourceDb)?(channel.autoGainTargetDb-sourceDb)*AUTO_GAIN_STATIC_STRENGTH:0;
+    channel.autoGainBaseDeltaDb=Math.max(-AUTO_GAIN_MAX_CUT_DB,Math.min(AUTO_GAIN_MAX_BOOST_DB,baseDelta));
+    if(!Number.isFinite(Number(channel.autoGainDynamicDb)))channel.autoGainDynamicDb=0;
+    applyChannelAutoGainCompensation(channel,.9);syncStemActionButtons(channel);return channel.autoGainCompensation;
   }
 
   async function ensureChannelAutoGainReference(channel,currentBuffer=channel?.buffer){
-    if(!channel?.stem)return null;
-    const stem=channel.stem;
-    const refVoice=autoGainReferenceVoiceForStem(stem);
-    const configured=configuredAutoGainReferenceDb(stem,refVoice);
-    if(Number.isFinite(configured)){
-      channel.autoGainReferenceDb=configured;
-      setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:configured});
-      return configured;
+    if(!channel?.stem||!currentBuffer)return null;const stem=channel.stem;
+    if(isMidiStem(stem)){
+      const defaultVoice=autoGainReferenceVoiceForStem(stem),currentVoice=midiSelectedVoiceForStem(stem)||defaultVoice;
+      const [defaultMeasure,currentMeasure]=await Promise.all([measureMidiVoiceReferenceNote(defaultVoice),proceduralVoiceKey(currentVoice)===proceduralVoiceKey(defaultVoice)?measureMidiVoiceReferenceNote(defaultVoice):measureMidiVoiceReferenceNote(currentVoice)]);
+      if(!channels.includes(channel))return null;
+      const fallback=audioBufferLevelDb(currentBuffer),defaultDb=Number.isFinite(defaultMeasure?.db)?defaultMeasure.db:fallback,currentDb=Number.isFinite(currentMeasure?.db)?currentMeasure.db:defaultDb;
+      channel.autoGainMidiReferenceNote=Number.isFinite(defaultMeasure?.note)?defaultMeasure.note:null;channel.autoGainMidiCurrentNote=Number.isFinite(currentMeasure?.note)?currentMeasure.note:channel.autoGainMidiReferenceNote;
+      setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:defaultDb,currentReferenceDb:currentDb});return defaultDb;
     }
-    if(channel.procedural){
-      const ref=audioBufferLevelDb(currentBuffer);
-      const safe=Number.isFinite(ref)?ref:0;
-      channel.autoGainReferenceDb=safe;
-      setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:safe});
-      return safe;
-    }
-    const key=`${autoGainStemKey(stem)}|${refVoice?proceduralVoiceKey(refVoice):"audio-original"}`;
-    if(autoGainReferenceDbCache.has(key)){
-      const ref=autoGainReferenceDbCache.get(key);
-      channel.autoGainReferenceDb=ref;
-      setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:ref});
-      return ref;
-    }
-    if(autoGainReferencePromises.has(key)){
-      const ref=await autoGainReferencePromises.get(key);
-      if(channels.includes(channel)){
-        channel.autoGainReferenceDb=ref;
-        setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:ref});
-      }
-      return ref;
-    }
-    const promise=(async()=>{
-      let referenceBuffer=currentBuffer;
-      if(isMidiStem(stem)){
-        const currentVoice=midiSelectedVoiceForStem(stem);
-        if(refVoice&&proceduralVoiceKey(currentVoice)!==proceduralVoiceKey(refVoice)){
-          referenceBuffer=await renderMidiAutoGainReferenceBuffer(stem,refVoice);
-        }
-      }else{
-        // Always measure the untouched decoded source, never a stretched copy.
-        referenceBuffer=await getDecodedStemBuffer(stem);
-      }
-      const db=audioBufferLevelDb(referenceBuffer);
-      const safe=Number.isFinite(db)?db:audioBufferLevelDb(currentBuffer);
-      autoGainReferenceDbCache.set(key,Number.isFinite(safe)?safe:0);
-      return autoGainReferenceDbCache.get(key);
-    })();
+    const configured=configuredAutoGainReferenceDb(stem,null);
+    if(Number.isFinite(configured)){setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:configured,currentReferenceDb:configured});return configured}
+    if(channel.procedural){const ref=audioBufferLevelDb(currentBuffer),safe=Number.isFinite(ref)?ref:AUTO_GAIN_DATASET_TARGET_DB;setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:safe,currentReferenceDb:safe});return safe}
+    const key=`${autoGainStemKey(stem)}|runtime-original`;
+    if(autoGainReferenceDbCache.has(key)){const ref=autoGainReferenceDbCache.get(key);setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:ref,currentReferenceDb:ref});return ref}
+    if(autoGainReferencePromises.has(key)){const ref=await autoGainReferencePromises.get(key);if(channels.includes(channel))setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:ref,currentReferenceDb:ref});return ref}
+    const promise=(async()=>{let referenceBuffer=currentBuffer;try{referenceBuffer=await getDecodedStemBuffer(stem)}catch(_){}const db=audioBufferLevelDb(referenceBuffer),safe=Number.isFinite(db)?db:audioBufferLevelDb(currentBuffer);autoGainReferenceDbCache.set(key,Number.isFinite(safe)?safe:AUTO_GAIN_DATASET_TARGET_DB);return autoGainReferenceDbCache.get(key)})();
     autoGainReferencePromises.set(key,promise);
-    try{
-      const ref=await promise;
-      if(channels.includes(channel)){
-        channel.autoGainReferenceDb=ref;
-        setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:ref});
-      }
-      return ref;
-    }finally{autoGainReferencePromises.delete(key)}
+    try{const ref=await promise;if(channels.includes(channel))setChannelAutoGainForBuffer(channel,currentBuffer,{referenceDb:ref,currentReferenceDb:ref});return ref}
+    finally{autoGainReferencePromises.delete(key)}
   }
 
   function primeChannelAutoGain(channel,buffer){
     if(!channel||!buffer)return;
-    channel.autoGainCompensation=1;
-    channel.autoGainDeltaDb=0;
-    channel.autoGainCurrentDb=audioBufferLevelDb(buffer);
-    // Default/original buffers resolve instantly in the common path; saved
-    // custom MIDI patches may need one background reference render.
-    ensureChannelAutoGainReference(channel,buffer).catch(error=>console.warn("AUTO GAIN reference skipped",channel.stem?.displayPath||channel.stem?.name,error));
+    channel.autoGainCompensation=1;channel.autoGainDeltaDb=0;channel.autoGainBaseDeltaDb=0;channel.autoGainDynamicDb=0;channel.autoGainDynamicTargetDb=0;channel.autoGainDynamicLastMs=0;channel.autoGainReferenceDb=null;channel.autoGainCurrentReferenceDb=null;channel.autoGainBufferAverageDb=audioBufferLevelDb(buffer);channel.autoGainCurrentDb=channel.autoGainBufferAverageDb;
+    ensureChannelAutoGainReference(channel,buffer).catch(error=>console.warn("AGC reference skipped",channel.stem?.displayPath||channel.stem?.name,error));
+  }
+
+  function resetChannelAutoGainDynamics(channel,{apply=true}={}){if(!channel)return;channel.autoGainDynamicDb=0;channel.autoGainDynamicTargetDb=0;channel.autoGainDynamicLastMs=0;if(apply)applyChannelAutoGainCompensation(channel,.7)}
+  function resetAllAutoGainDynamics(){for(const channel of channels)resetChannelAutoGainDynamics(channel)}
+
+  function updateAutoGainDynamics(timestamp){
+    if(!isPlaying||!audioCtx)return;const nowMs=Number(timestamp)||performance.now();if(nowMs-lastAutoGainDynamicPassMs<AUTO_GAIN_DYNAMIC_INTERVAL_MS)return;lastAutoGainDynamicPassMs=nowMs;const position=getPosition();
+    for(const channel of channels){
+      if(!channel?.buffer||channel.error||channel.state?.autoGain===false)continue;
+      const cfg=filenameTrackConfig(channel.stem);
+      let bufferPosition=playlistFilenameTimelineOrigin(currentPlaylist)+position-configuredTrackTimelineStart(channel.stem);
+      if(cfg.loop===true&&cfg.oneShot!==true){
+        const ls=Math.max(0,Number(cfg.loopStart)||0),le=Number.isFinite(Number(cfg.loopEnd))?Math.min(channel.buffer.duration,Number(cfg.loopEnd)):channel.buffer.duration;
+        if(le>ls+.0005&&bufferPosition>=le)bufferPosition=ls+((bufferPosition-ls)%(le-ls));
+      }
+      const overallDb=Number(channel.autoGainBufferAverageDb),localDb=audioBufferWindowLevelDb(channel.buffer,Math.max(0,bufferPosition),AUTO_GAIN_DYNAMIC_WINDOW_SECONDS);if(!Number.isFinite(overallDb)||!Number.isFinite(localDb)||localDb<-72)continue;
+      const deviation=localDb-overallDb,excess=Math.max(0,Math.abs(deviation)-AUTO_GAIN_DYNAMIC_DEADBAND_DB);
+      let target=excess?(-Math.sign(deviation)*excess*AUTO_GAIN_DYNAMIC_STRENGTH):0;target=Math.max(-AUTO_GAIN_DYNAMIC_MAX_DB,Math.min(AUTO_GAIN_DYNAMIC_MAX_DB,target));channel.autoGainDynamicTargetDb=target;
+      const previous=Number(channel.autoGainDynamicDb)||0,last=Number(channel.autoGainDynamicLastMs)||nowMs-AUTO_GAIN_DYNAMIC_INTERVAL_MS,dt=Math.max(.15,Math.min(2.5,(nowMs-last)/1000));channel.autoGainDynamicLastMs=nowMs;
+      const tau=target<previous?AUTO_GAIN_DYNAMIC_CUT_SECONDS:AUTO_GAIN_DYNAMIC_LIFT_SECONDS,alpha=1-Math.exp(-dt/tau);let next=previous+(target-previous)*alpha;if(Math.abs(next)<.015&&Math.abs(target)<.015)next=0;channel.autoGainDynamicDb=next;if(Math.abs(next-previous)>.006)applyChannelAutoGainCompensation(channel,1.8);
+    }
   }
 
   function toggleChannelAutoGain(channel){
-    if(!channel)return;
-    channel.state.autoGain=channel.state.autoGain===false;
-    syncLiveChannelAutoGain(channel,.012);
-    syncStemActionButtons(channel);
-    showSystemReadout(
-      String(channel.stem?.displayInstrumentName||channel.stem?.name||"TRACK").toUpperCase(),
-      channel.state.autoGain===false?"AUTO GAIN OFF":"AUTO GAIN ON",
-      channel.state.autoGain===false?"UNITY":`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} DB`
-    );
+    if(!channel)return;channel.state.autoGain=channel.state.autoGain===false;
+    if(channel?.stem?.key)savedStemAutoGain.set(channel.stem.key,channel.state.autoGain);
+    if(channel.state.autoGain===false)resetChannelAutoGainDynamics(channel,{apply:false});applyChannelAutoGainCompensation(channel,.7);syncStemActionButtons(channel);
+    showSystemReadout(String(channel.stem?.displayInstrumentName||channel.stem?.name||"TRACK").toUpperCase(),channel.state.autoGain===false?"AGC OFF":"AGC ON",channel.state.autoGain===false?"UNITY":`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} DB`);
   }
 
   function defaultStemState(stem) {
     const id = persistentStemId(stem);
     const persisted = id ? persistentPrefs.stemStates?.[id] : null;
     const remembered = savedStemState.get(stem.key);
-
-    const source = remembered || persisted;
-    const state = source
-      ? {
-          trim:Number(source.trim ?? 50),
-          pan:Number(source.pan ?? 50),
-          room:Number(source.room ?? 0),
-          level:Number(source.level ?? 80),
-          mute:!!source.mute,
-          solo:!!source.solo
-        }
-      : { trim:50, pan:50, room:0, level:80, mute:false, solo:false };
+    const source = remembered || persisted || {};
+    const cfg=filenameTrackConfig(stem);
+    const numDefault=(sourceValue,configValue,fallback)=>{
+      const candidate=sourceValue??configValue;
+      const n=Number(candidate);
+      return Number.isFinite(n)?Math.max(0,Math.min(100,n)):fallback;
+    };
+    const boolDefault=(key,fallback=false)=>Object.prototype.hasOwnProperty.call(source,key)?!!source[key]:(typeof cfg[key]==="boolean"?cfg[key]:fallback);
+    const state = {
+      trim:numDefault(source.trim,cfg.trim,50),
+      pan:numDefault(source.pan,cfg.pan,50),
+      room:numDefault(source.room,cfg.room,0),
+      level:numDefault(source.level,cfg.level,80),
+      mute:boolDefault("mute",false),
+      solo:boolDefault("solo",false)
+    };
 
     state.locked = isStemLocked(stem);
-    // AUTO GAIN intentionally never persists: every page load starts ON.
-    state.autoGain = true;
+    // AUTO GAIN never enters localStorage. It does remember a click while this
+    // page remains open, exactly like the pre-existing session behavior.
+    state.autoGain = savedStemAutoGain.has(stem.key)
+      ? savedStemAutoGain.get(stem.key)!==false
+      : (typeof cfg.agc==="boolean"?cfg.agc:true);
     return state;
+  }
+
+  function configuredStemLevelDefault(stem) {
+    if (!stem || typeof stem !== "object") return null;
+
+    // Accept the common config shapes without requiring any one schema.
+    // "position" is treated as the channel fader position (0..100).
+    const candidates = [
+      stem.defaultLevel,
+      stem.defaultFader,
+      stem.defaultVolume,
+      stem.defaultPosition,
+      stem.defaults?.level,
+      stem.defaults?.fader,
+      stem.defaults?.volume,
+      stem.defaults?.position,
+      stem.default?.level,
+      stem.default?.fader,
+      stem.default?.volume,
+      stem.default?.position,
+      typeof stem.default === "number" ? stem.default : null,
+      stem.mixer?.defaultLevel,
+      stem.mixer?.defaultFader,
+      stem.mixer?.defaultVolume,
+      stem.mixer?.defaultPosition,
+      stem.mixer?.defaults?.level,
+      stem.mixer?.defaults?.fader,
+      stem.mixer?.defaults?.volume,
+      stem.mixer?.defaults?.position,
+      stem.mixer?.default?.level,
+      stem.mixer?.default?.fader,
+      stem.mixer?.default?.volume,
+      stem.mixer?.default?.position,
+      typeof stem.mixer?.default === "number" ? stem.mixer.default : null,
+      stem.config?.defaultLevel,
+      stem.config?.defaultFader,
+      stem.config?.defaultVolume,
+      stem.config?.defaultPosition,
+      stem.config?.defaults?.level,
+      stem.config?.defaults?.fader,
+      stem.config?.defaults?.volume,
+      stem.config?.defaults?.position,
+      stem.config?.default?.level,
+      stem.config?.default?.fader,
+      stem.config?.default?.volume,
+      stem.config?.default?.position,
+      typeof stem.config?.default === "number" ? stem.config.default : null
+    ];
+
+    for (const candidate of candidates) {
+      const value = Number(candidate);
+      if (Number.isFinite(value)) return Math.max(0,Math.min(100,value));
+    }
+    return null;
+  }
+
+  function rememberPageLoadStemLevel(stem,state) {
+    const id = persistentStemId(stem);
+    if (!id || pageLoadStemLevel.has(id)) return;
+    const value = Number(state?.level);
+    if (Number.isFinite(value)) pageLoadStemLevel.set(id,Math.max(0,Math.min(100,value)));
+  }
+
+  function originalStemLevel(stem,currentLevel=80) {
+    const configured = configuredStemLevelDefault(stem);
+    if (Number.isFinite(configured)) return configured;
+    const id = persistentStemId(stem);
+    const started = id ? Number(pageLoadStemLevel.get(id)) : NaN;
+    if (Number.isFinite(started)) return Math.max(0,Math.min(100,started));
+    const current = Number(currentLevel);
+    return Number.isFinite(current) ? Math.max(0,Math.min(100,current)) : 80;
+  }
+
+  function resetChannelToOriginalPosition(channel) {
+    if (!channel?.stem) return false;
+    const next = snapHardwarePercent(originalStemLevel(channel.stem,channel.state?.level));
+    const input = channel.el?.querySelector(".fader");
+
+    if (input) {
+      input.value = String(next);
+      input.dispatchEvent(new Event("input",{bubbles:true}));
+    } else {
+      channel.state.level = next;
+      saveChannelState(channel);
+      updateChannelEffectiveLevel(channel);
+    }
+
+    showSystemReadout(
+      String(channel.stem?.displayInstrumentName||channel.stem?.name||"TRACK").toUpperCase(),
+      "POSITION RESET",
+      `${Number(next).toFixed(Number.isInteger(next)?0:1)}%`
+    );
+    return true;
   }
 
   function saveChannelState(channel) {
@@ -12001,14 +12542,16 @@
     }
   }
 
-  function saveMasterState() {
+  function saveMasterState(changedField=null) {
     persistentPrefs.masterState = {
+      ...(persistentPrefs.masterState&&typeof persistentPrefs.masterState==="object"?persistentPrefs.masterState:{}),
       tone:Number(masterState.tone),
       pan:Number(masterState.pan),
       room:Number(masterState.room),
       level:Number(masterState.level)
     };
-    persistentPrefs.megaphoneEnabled = !!megaphoneEnabled;
+    if(!persistentPrefs.masterOverrideFields||typeof persistentPrefs.masterOverrideFields!=="object")persistentPrefs.masterOverrideFields={};
+    if(changedField)persistentPrefs.masterOverrideFields[String(changedField)]=true;
     savePersistentPrefs();
   }
 
@@ -12176,7 +12719,7 @@
   function channelMarkup(stem,index,state) {
     const stripLabel=mixerStripDisplayLabel(stem);
     const title = escapeHtml(stripLabel);
-    const iconMatch = predictInstrumentIcon(stem.name);
+    const iconMatch = predictStemInstrumentIcon(stem);
     const instrumentSelectable=appMode==="procedural"||isMidiStem(stem);
     return `
       <div class="channel min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,3fr)_minmax(0,2fr)]" data-channel="${index}">
@@ -12184,7 +12727,7 @@
         <div class="channel-header">
           <div class="channel-ident">
             <span class="channel-instrument-icon${instrumentSelectable ? " is-instrument-selector" : ""}" data-instrument-icon data-instrument-channel="${index}"
-                  title="${escapeHtml(iconMatch.category)} · matched ${escapeHtml(iconMatch.text || "fallback")}" role="${instrumentSelectable?"button":"img"}" tabindex="${instrumentSelectable?"0":"-1"}"
+                  title="${escapeHtml(iconMatch.category)} · right-click: reset fader position · matched ${escapeHtml(iconMatch.text || "fallback")}" role="${instrumentSelectable?"button":"img"}" tabindex="${instrumentSelectable?"0":"-1"}"
                   aria-label="${instrumentSelectable?`${title} instrument selector`:title}">
               <i class="fa-solid ${escapeHtml(iconMatch.icon)}"></i>
             </span>
@@ -12225,15 +12768,14 @@
                     aria-label="${state.locked ? "Unlock" : "Lock"} ${title} from randomizer">
               <i class="fa-solid ${state.locked ? "fa-lock" : "fa-lock-open"}" aria-hidden="true"></i>
             </button>
-            <button class="hw-button auto-gain-button${state.autoGain !== false ? " active" : ""}" data-action="auto-gain" data-btn-channel="${index}"
-                    aria-pressed="${state.autoGain !== false}" title="Auto Gain · compensate this strip back to its original/reference level">
-              <i class="fa-solid fa-sliders" aria-hidden="true"></i><span>AUTO GAIN</span>
-            </button>
           </div>
         </div>
 
         <div class="fader-zone min-h-0 grid">
           ${faderMarkup(state.level,`${stripLabel} level`,index,false)}
+          <button class="hw-button auto-gain-button${state.autoGain !== false ? " active" : ""}" data-action="auto-gain" data-btn-channel="${index}"
+                  aria-pressed="${state.autoGain !== false}" title="AUTO-GAIN COMPENSATION"
+                  aria-label="AUTO-GAIN COMPENSATION ${state.autoGain !== false ? "ON" : "OFF"}">AGC</button>
         </div>
       </div>`;
   }
@@ -12329,6 +12871,7 @@
       // Stamp the slot before labels/default-patch resolution happens.
       stem.mixerStripIndex=index;
       const state = defaultStemState(stem);
+      rememberPageLoadStemLevel(stem,state);
       grid.insertAdjacentHTML("beforeend",channelMarkup(stem,index,state));
     });
 
@@ -12555,6 +13098,72 @@
     return output;
   }
 
+  const filenameConfiguredBufferCache=new WeakMap();
+
+  function copyAudioBufferForFilenameConfig(buffer){
+    const out=audioCtx.createBuffer(Math.max(1,buffer.numberOfChannels||1),buffer.length,buffer.sampleRate);
+    for(let c=0;c<out.numberOfChannels;c++)out.getChannelData(c).set(buffer.getChannelData(Math.min(c,buffer.numberOfChannels-1)));
+    return out;
+  }
+
+  function resampleAudioBufferForPitch(buffer,factor){
+    const ratio=Math.max(.125,Math.min(8,Number(factor)||1));
+    if(Math.abs(ratio-1)<.0005)return buffer;
+    const channels=Math.max(1,buffer.numberOfChannels||1);
+    const length=Math.max(1,Math.round(buffer.length/ratio));
+    const out=audioCtx.createBuffer(channels,length,buffer.sampleRate);
+    for(let c=0;c<channels;c++){
+      const src=buffer.getChannelData(c),dst=out.getChannelData(c);
+      for(let i=0;i<length;i++){
+        const pos=i*ratio,lo=Math.floor(pos),hi=Math.min(src.length-1,lo+1),mix=pos-lo;
+        dst[i]=(src[lo]||0)*(1-mix)+(src[hi]||0)*mix;
+      }
+    }
+    return out;
+  }
+
+  async function timeStretchFlexible(buffer,tempoRatio){
+    let out=buffer,remaining=Math.max(.02,Math.min(50,Number(tempoRatio)||1));
+    while(remaining>3.001){out=await timeStretchAudioBuffer(out,3);remaining/=3}
+    while(remaining<.339){out=await timeStretchAudioBuffer(out,.34);remaining/=.34}
+    return Math.abs(remaining-1)<.002?out:timeStretchAudioBuffer(out,remaining);
+  }
+
+  async function getConfiguredStemPlaybackBuffer(stem,buffer){
+    if(!buffer)return buffer;
+    const cfg=filenameTrackConfig(stem);
+    const signature=JSON.stringify({reverse:cfg.reverse===true,mono:cfg.mono===true,swapLR:cfg.swapLR===true,phaseInvert:cfg.phaseInvert===true,pitch:Number(cfg.pitch)||0,stretch:Number(cfg.stretch)||1});
+    if(signature==='{"reverse":false,"mono":false,"swapLR":false,"phaseInvert":false,"pitch":0,"stretch":1}')return buffer;
+    let cache=filenameConfiguredBufferCache.get(buffer);
+    if(!cache){cache=new Map();filenameConfiguredBufferCache.set(buffer,cache)}
+    if(cache.has(signature))return cache.get(signature);
+    let out=buffer;
+    if(cfg.reverse===true||cfg.mono===true||cfg.swapLR===true||cfg.phaseInvert===true){
+      out=copyAudioBufferForFilenameConfig(out);
+      const channels=Math.max(1,out.numberOfChannels||1);
+      if(cfg.mono===true&&channels>1){
+        const mono=new Float32Array(out.length);
+        for(let c=0;c<channels;c++){const data=out.getChannelData(c);for(let i=0;i<mono.length;i++)mono[i]+=data[i]/channels}
+        for(let c=0;c<channels;c++)out.getChannelData(c).set(mono);
+      }
+      if(cfg.swapLR===true&&channels>1){
+        const left=out.getChannelData(0),right=out.getChannelData(1),tmp=new Float32Array(left);left.set(right);right.set(tmp);
+      }
+      if(cfg.phaseInvert===true)for(let c=0;c<channels;c++){const data=out.getChannelData(c);for(let i=0;i<data.length;i++)data[i]=-data[i]}
+      if(cfg.reverse===true)for(let c=0;c<channels;c++)out.getChannelData(c).reverse();
+    }
+    const pitch=Number(cfg.pitch)||0;
+    if(Math.abs(pitch)>.0005){
+      const factor=Math.pow(2,pitch/12);
+      out=resampleAudioBufferForPitch(out,factor);
+      out=await timeStretchFlexible(out,1/factor); // restore duration while preserving the new pitch
+    }
+    const stretch=Number(cfg.stretch)||1;
+    if(Math.abs(stretch-1)>.002)out=await timeStretchFlexible(out,1/stretch);
+    cache.set(signature,out);
+    return out;
+  }
+
   async function getTempoAdjustedAudioStemBuffer(stem,nativeBpm,targetBpm){
     const original=await getDecodedStemBuffer(stem);
     const native=Math.max(1,Number(nativeBpm)||MIDI_DEFAULT_BPM);
@@ -12569,7 +13178,26 @@
     try{return await promise}finally{decodedBufferPromises.delete(key)}
   }
 
+  function midiRoleFromTrackCategory(category){
+    const role=String(category||"").toLowerCase();
+    if(["drums","kick","snare","hihat","toms","cymbals"].includes(role))return "drums";
+    if(["percussion","mallets"].includes(role))return "percussion";
+    if(["bass","sub-808"].includes(role))return "bass";
+    if(["guitar","plucked-strings"].includes(role))return "guitar";
+    if(role==="strings")return "strings";
+    if(["piano","keys","rhodes","wurli","organ"].includes(role))return "keys";
+    if(["synth","pads","brass","woodwinds","lead-vocal","backing-vocals","spoken-vocal","ear-candy","fx"].includes(role))return "melody";
+    return null;
+  }
+
   function midiStemRole(stem){
+    const cfg=filenameTrackConfig(stem);
+    const explicit=midiRoleFromTrackCategory(cfg.role);
+    if(explicit)return explicit;
+    if(cfg.instrument){
+      const predicted=midiRoleFromTrackCategory(predictInstrumentIcon(cfg.instrument)?.category);
+      if(predicted)return predicted;
+    }
     const text=String(stem?.name||stem?.displayPath||"").toLowerCase();
     if(/drum|kit|beat/.test(text))return "drums";
     if(/perc|shaker|tamb|conga|bongo/.test(text))return "percussion";
@@ -12585,9 +13213,103 @@
     return `${String(stem?.midiPlaylistKey||parentFolder(stem?.displayPath||"")||"midi")}::${String(stem?.displayPath||stem?.key||stem?.name||"track")}`;
   }
 
+  function normalizedPatchSearchText(value){
+    return String(value??"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  }
+
+  function naturalMidiInstrumentHint(stem){
+    const text=normalizedPatchSearchText(stem?.name||stem?.displayPath||"");
+    if(!text)return"";
+    const tokens=new Set(text.split(/\s+/).filter(Boolean));
+    let best=null;
+    for(const [alias,value] of Object.entries(FILENAME_TAG_VALUE_ALIASES.instrument||{})){
+      const candidates=[normalizedPatchSearchText(alias),normalizedPatchSearchText(value)];
+      for(const candidate of candidates){
+        const words=candidate.split(/\s+/).filter(word=>word&&(!/^\d+$/.test(word)||tokens.has(word)));
+        if(!words.length||!words.every(word=>tokens.has(word)))continue;
+        const score=words.reduce((sum,word)=>sum+word.length,0)+words.length*20;
+        if(!best||score>best.score)best={score,value};
+      }
+    }
+    return best?String(best.value):"";
+  }
+
+  function filenameConfiguredMidiVoiceForStem(stem){
+    const cfg=filenameTrackConfig(stem);
+    const sourceId=cfg.soundfont&&PROCEDURAL_STRIP_SOURCE_ORDER.includes(cfg.soundfont)?cfg.soundfont:null;
+    const sources=sourceId?[sourceId]:PROCEDURAL_STRIP_SOURCE_ORDER;
+    const bankWanted=Number.isFinite(Number(cfg.bank))?Number(cfg.bank):null;
+    const programNative=String(cfg.program||"").toLowerCase()==="native";
+    const programWanted=!programNative&&Number.isFinite(Number(cfg.program))?Number(cfg.program):null;
+    const role=midiStemRole(stem);
+
+    function catalogVoice(source,preset){
+      if(!preset)return null;
+      if(source==="genies"&&(isExcludedGeniesGuitar(preset.name)||proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(preset.bank)||0}:${Number(preset.program)||0}`)))return null;
+      return sfVoice(source,Number(preset.bank)||0,Number(preset.program)||0,String(preset.name||"Patch"),sfVoiceSourceOptions(source,preset.bank,preset.program));
+    }
+
+    if(programWanted!==null){
+      for(const source of sources){
+        const presets=INSTRUMENT_PICKER_PRESET_CATALOG[source]||[];
+        const candidates=presets.filter(p=>Number(p.program)===programWanted&&(bankWanted===null||Number(p.bank)===bankWanted));
+        const preferred=candidates.find(p=>soundFontVoiceMatchesRole(catalogVoice(source,p),role))||candidates[0];
+        const voice=catalogVoice(source,preferred);
+        if(voice)return voice;
+      }
+    }
+
+    const instrumentHint=cfg.instrument||naturalMidiInstrumentHint(stem);
+    if(instrumentHint){
+      const wanted=normalizedPatchSearchText(instrumentHint);
+      const compact=wanted.replace(/\s+/g,"");
+      let best=null;
+      for(let sourceIndex=0;sourceIndex<sources.length;sourceIndex++){
+        const source=sources[sourceIndex];
+        for(const preset of INSTRUMENT_PICKER_PRESET_CATALOG[source]||[]){
+          if(bankWanted!==null&&Number(preset.bank)!==bankWanted)continue;
+          const voice=catalogVoice(source,preset);
+          if(!voice)continue;
+          const name=normalizedPatchSearchText(preset.name);
+          const nameCompact=name.replace(/\s+/g,"");
+          let score=0;
+          if(name===wanted)score=1000;
+          else if(nameCompact===compact)score=950;
+          else if(name.startsWith(wanted)||wanted.startsWith(name))score=760;
+          else if(name.includes(wanted)||wanted.includes(name))score=700;
+          else{
+            const terms=wanted.split(/\s+/).filter(Boolean);
+            if(terms.length&&terms.every(term=>name.includes(term)))score=600+terms.length*10;
+          }
+          if(!score)continue;
+          if(soundFontVoiceMatchesRole(voice,role))score+=80;
+          score-=sourceIndex*2;
+          if(!best||score>best.score)best={score,voice};
+        }
+      }
+      if(best)return best.voice;
+    }
+
+    // `sf...` by itself is still useful: choose a compatible default from that
+    // bank. `prgmnative` keeps the embedded MIDI program but can pair it with
+    // an authored SoundFont source.
+    if((sourceId||bankWanted!==null)&&!instrumentHint&&programWanted===null){
+      for(const source of sources){
+        const candidates=(INSTRUMENT_PICKER_PRESET_CATALOG[source]||[])
+          .filter(p=>bankWanted===null||Number(p.bank)===bankWanted)
+          .map(p=>catalogVoice(source,p))
+          .filter(Boolean);
+        const voice=candidates.find(item=>soundFontVoiceMatchesRole(item,role))||candidates[0]||null;
+        if(voice)return voice;
+      }
+    }
+    return null;
+  }
+
   function midiExplicitVoiceForStem(stem){
-    // Folder-authored assignments are stronger than generic MIDI defaults and
-    // user icon cycling. Add future song-specific assignments here.
+    const filenameVoice=filenameConfiguredMidiVoiceForStem(stem);
+    if(filenameVoice)return filenameVoice;
+    // Legacy folder-authored assignments remain as compatibility fallbacks.
     const path=String(stem?.displayPath||"").replace(/\\/g,"/").toLowerCase();
     // Requested authored defaults for the MIDI versions of track 3 / track 6.
     // Match both current and future folder naming variants without affecting audio stems.
@@ -12697,6 +13419,28 @@
     return {...parsed,sourceBpm,targetBpm:bpm,duration:(parsed.duration||0)*timeScale,notes:(parsed.notes||[]).map(note=>({...note,start:note.start*timeScale,duration:note.duration*timeScale}))};
   }
 
+  function applyFilenameMidiPerformanceConfig(parsed,stem){
+    const cfg=filenameTrackConfig(stem);
+    const trackWanted=Number.isFinite(Number(cfg.midiTrack))?Math.max(0,Number(cfg.midiTrack)-1):null;
+    const channelWanted=Number.isFinite(Number(cfg.channel))?Math.max(0,Number(cfg.channel)-1):null;
+    const transpose=(Number(cfg.transpose)||0)+(Number(cfg.octave)||0)*12;
+    const velocityFixed=Number.isFinite(Number(cfg.velocity))?Number(cfg.velocity):null;
+    const velocityScale=Number.isFinite(Number(cfg.velocityScale))?Number(cfg.velocityScale)/100:1;
+    const sourcePpq=parsed?.division?.type==="ppqn"?Number(parsed.division.ticksPerQuarter):null;
+    const authoredPpq=Number.isFinite(Number(cfg.ppq))?Number(cfg.ppq):null;
+    const ppqScale=sourcePpq&&authoredPpq?sourcePpq/authoredPpq:1;
+    let notes=(parsed?.notes||[]).filter(note=>{
+      if(trackWanted!==null&&Number(note.trackIndex)!==trackWanted)return false;
+      if(channelWanted!==null&&Number(note.channel)!==channelWanted)return false;
+      return true;
+    }).map(note=>{
+      const velocity=velocityFixed!==null?velocityFixed:(Number(note.velocity)||96)*velocityScale;
+      return{...note,start:(Number(note.start)||0)*ppqScale,duration:(Number(note.duration)||0)*ppqScale,midi:Math.max(0,Math.min(127,Math.round((Number(note.midi)||0)+transpose))),velocity:Math.max(1,Math.min(127,Math.round(velocity)))};
+    });
+    const noteEnd=notes.reduce((max,note)=>Math.max(max,(Number(note.start)||0)+(Number(note.duration)||0)),0);
+    return{...parsed,notes,duration:notes.length?Math.max(.01,noteEnd):Math.max(.01,Number(parsed?.duration)||.01),filenamePpq:Number.isFinite(Number(cfg.ppq))?Number(cfg.ppq):null};
+  }
+
   function attenuateTargetIfNeeded(target,ceiling=.94){
     let peak=0;
     for(const data of [target.left,target.right])for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));
@@ -12708,25 +13452,35 @@
   async function renderMidiWithSoundFont(parsed,stem,voice){
     const bank=proceduralSoundFonts.get(voice?.source);
     if(!bank?.getPreset(voice?.bank,voice?.program))return null;
-    const target=createProceduralStereoBuffer(Math.max(.08,(parsed.duration||0)+.5));
+    const target=createMidiStereoBuffer(Math.max(.08,(parsed.duration||0)+.5));
     let rendered=false;
-    const isSonicDrums=voice.source==="casino";
+    const cfg=filenameTrackConfig(stem);
+    const useSonicDrumMap=cfg.drumMap==="sonic"||(cfg.drumMap!=="gm"&&cfg.drumMap!=="native"&&voice.source==="casino");
+    const embeddedPrograms=String(cfg.program||"").toLowerCase()==="native";
     const notes=parsed.notes||[];
     for(let index=0;index<notes.length;index++){
       const note=notes[index];
-      const midi=isSonicDrums?sonicMidiNote(note.midi):Math.max(0,Math.min(127,Math.round(note.midi)));
+      const midi=useSonicDrumMap?sonicMidiNote(note.midi):Math.max(0,Math.min(127,Math.round(note.midi)));
       const pan=Math.max(-1,Math.min(1,((Number(note.pan)||64)-64)/63));
       const channelGain=Math.max(0,Math.min(1,((Number(note.volume)||100)/127)*((Number(note.expression)||127)/127)));
-      const trim=Number.isFinite(Number(voice.gainTrim))?Number(voice.gainTrim):1;
-      const duration=isSonicDrums?Math.max(.08,Math.min(.55,note.duration||.2)):Math.max(.02,note.duration||.1);
-      rendered=bank.renderNote(target,{bank:voice.bank,program:voice.program,midi,velocity:Math.max(1,Math.min(127,Math.round(note.velocity||96))),start:note.start,duration,amp:.72*channelGain*trim,pan})||rendered;
+      let renderBank=voice.bank,renderProgram=voice.program,trim=Number.isFinite(Number(voice.gainTrim))?Number(voice.gainTrim):1;
+      if(embeddedPrograms&&!useSonicDrumMap){
+        const nativeBank=Number.isFinite(Number(cfg.bank))?Number(cfg.bank):(Number(note.channel)===9?128:0);
+        const nativeProgram=Math.max(0,Math.min(127,Math.round(Number(note.program)||0)));
+        if(bank.getPreset(nativeBank,nativeProgram)){
+          renderBank=nativeBank;renderProgram=nativeProgram;
+          trim=Number.isFinite(Number(sfVoiceSourceOptions(voice.source,nativeBank,nativeProgram).gainTrim))?Number(sfVoiceSourceOptions(voice.source,nativeBank,nativeProgram).gainTrim):1;
+        }
+      }
+      const duration=useSonicDrumMap?Math.max(.08,Math.min(.55,note.duration||.2)):Math.max(.02,note.duration||.1);
+      rendered=bank.renderNote(target,{bank:renderBank,program:renderProgram,midi,velocity:Math.max(1,Math.min(127,Math.round(note.velocity||96))),start:note.start,duration,amp:.72*channelGain*trim,pan,tightOnset:true})||rendered;
       // Long MIDI files can contain thousands of notes. Yield periodically so a
       // patch render cannot monopolize the main thread while another strip plays.
       if(index>0&&index%96===0)await new Promise(done=>setTimeout(done,0));
     }
     if(!rendered)return null;
     attenuateTargetIfNeeded(target,.94);
-    if(isSonicDrums)applyRenderedBufferGain(target,SONIC_DRUMS_RENDER_GAIN);
+    if(useSonicDrumMap)applyRenderedBufferGain(target,SONIC_DRUMS_RENDER_GAIN);
     stem.midiSoundFont=voice.source;
     stem.midiSoundFontName=proceduralSoundFontDisplayName(voice.source);
     stem.midiVoiceName=voice.name;
@@ -12743,7 +13497,7 @@
       if(!response.ok)throw new Error(`HTTP ${response.status}`);
       const bytes=await response.arrayBuffer();
       const sourceParsed=WifeyMIDI.parse(bytes);
-      const parsed=scaleParsedMidiTempo(sourceParsed,requestedTempo);
+      const parsed=applyFilenameMidiPerformanceConfig(scaleParsedMidiTempo(sourceParsed,requestedTempo),stem);
       midiParsedCache.set(key,parsed);
       return parsed;
     })();
@@ -12796,14 +13550,16 @@
     }
   }
 
-  function getStemPlaybackBuffer(stem) {
-    if(String(stem?.kind || "").startsWith("midi-"))return getMidiStemBuffer(stem);
+  async function getStemPlaybackBuffer(stem) {
+    if(String(stem?.kind || "").startsWith("midi-"))return getConfiguredStemPlaybackBuffer(stem,await getMidiStemBuffer(stem));
     const playlist=stem?.playlistRef;
+    if(playlist?.filenameTempoBpm!==null&&!Number.isFinite(Number(playlist?.nativeTempoBpm)))await ensurePlaylistNativeTempo(playlist);
     const native=Number(playlist?.nativeTempoBpm);
     const target=Number(playlist?.playbackTempoBpm);
-    return Number.isFinite(native)&&Number.isFinite(target)
-      ?getTempoAdjustedAudioStemBuffer(stem,native,target)
-      :getDecodedStemBuffer(stem);
+    const buffer=Number.isFinite(native)&&Number.isFinite(target)
+      ?await getTempoAdjustedAudioStemBuffer(stem,native,target)
+      :await getDecodedStemBuffer(stem);
+    return getConfiguredStemPlaybackBuffer(stem,buffer);
   }
 
   function midiStartupSoundFontSources(playlist=currentPlaylist){
@@ -12999,7 +13755,7 @@
         instrumentLamp:stripEls[index]?.querySelector("[data-instrument-icon]"),
         ledDrive:0,
         iconDrive:0,
-        autoGainCompensation:1,autoGainDeltaDb:0,autoGainReferenceDb:null,autoGainCurrentDb:null,
+        autoGainCompensation:1,autoGainDeltaDb:0,autoGainBaseDeltaDb:0,autoGainDynamicDb:0,autoGainDynamicTargetDb:0,autoGainReferenceDb:null,autoGainCurrentReferenceDb:null,autoGainBufferAverageDb:null,autoGainCurrentDb:null,
         ready:false,error:false
       };
 
@@ -13011,6 +13767,8 @@
       applyChannelState(channel);
       syncStemActionButtons(channel);
     });
+    applyMasterState();
+    applyMegaphoneState(true);
     updateSoloRouting();
 
     Promise.allSettled(channels.map(c=>c.readyPromise)).then(async()=>{
@@ -13231,8 +13989,8 @@
       autoGainBtn.classList.toggle("active",enabled);
       autoGainBtn.setAttribute("aria-pressed",String(enabled));
       const delta=Number(channel.autoGainDeltaDb)||0;
-      autoGainBtn.title=`Auto Gain ${enabled?"ON":"OFF"} · ${enabled?`${delta>=0?"+":""}${delta.toFixed(1)} dB compensation`:"unity"} · pre-TRIM / pre-fader`;
-      autoGainBtn.setAttribute("aria-label",autoGainBtn.title);
+      autoGainBtn.title="AUTO-GAIN COMPENSATION";
+      autoGainBtn.setAttribute("aria-label",`AUTO-GAIN COMPENSATION ${enabled?"ON":"OFF"}. ${enabled?`${delta>=0?"+":""}${delta.toFixed(1)} dB slow leveling`:"Unity gain"}.`);
     }
   }
 
@@ -13284,6 +14042,7 @@
     playlistMode = PLAYLIST_MODES[(currentIndex+1)%PLAYLIST_MODES.length];
 
     persistentPrefs.playlistMode = playlistMode;
+    persistentPrefs.playlistModePreferenceSet = true;
     savePersistentPrefs();
     updatePlaylistModeButton(true);
 
@@ -13407,7 +14166,7 @@
         if (owner === "master") {
           masterState[control]=value;
           applyMasterState();
-          saveMasterState();
+          saveMasterState(control);
           return;
         }
         const channel=channels[Number(owner)];
@@ -13424,7 +14183,7 @@
         if (input.dataset.master === "1" || owner === "master") {
           masterState.level=value;
           applyMasterState();
-          saveMasterState();
+          saveMasterState("level");
           return;
         }
         const channel=channels[Number(owner)];
@@ -13446,7 +14205,14 @@
         openInstrumentPicker(channel,icon);
       };
       icon.addEventListener("click",openPicker);
-      icon.addEventListener("contextmenu",openPicker);
+      icon.addEventListener("contextmenu",event=>{
+        const channel=channelForIcon();
+        if(!channel)return;
+        event.preventDefault();
+        event.stopPropagation();
+        closeInstrumentPicker();
+        resetChannelToOriginalPosition(channel);
+      });
       icon.addEventListener("dblclick",async event=>{
         const channel=channelForIcon();
         if(!(appMode==="playlist"&&isMidiStem(channel?.stem)))return;
@@ -13498,6 +14264,34 @@
     syncMegaphoneButton();
   }
 
+  function playlistFilenameTimelineOrigin(playlist=currentPlaylist){
+    const value=Number(playlist?.filenameConfig?.loopStart);
+    return Number.isFinite(value)&&value>=0?value:0;
+  }
+
+  function configuredBarsDuration(config,playlist=currentPlaylist){
+    const bars=Number(config?.bars);
+    if(!Number.isFinite(bars)||bars<=0)return null;
+    const beats=Number.isFinite(Number(config?.beats))?Number(config.beats):4;
+    const bpm=Number(playlist?.playbackTempoBpm)||Number(playlist?.filenameTempoBpm)||MIDI_DEFAULT_BPM;
+    return bars*beats*60/Math.max(1,bpm);
+  }
+
+  function configuredTrackTimelineStart(stem){
+    const cfg=filenameTrackConfig(stem);
+    return (Number(cfg.start)||0)+(Number(cfg.offset)||0);
+  }
+
+  function configuredTrackTimelineEnd(stem,buffer,playlist=currentPlaylist){
+    const cfg=filenameTrackConfig(stem);
+    const start=configuredTrackTimelineStart(stem);
+    if(Number.isFinite(Number(cfg.end)))return Math.max(start,Number(cfg.end));
+    if(Number.isFinite(Number(cfg.length)))return start+Math.max(0,Number(cfg.length));
+    const barsDuration=configuredBarsDuration(cfg,playlist);
+    if(Number.isFinite(barsDuration))return start+barsDuration;
+    return start+Math.max(0,Number(buffer?.duration)||Number(stem?.midiDuration)||0);
+  }
+
   function updatePlaylistDuration() {
     // Procedural buffers include a short decay tail, but the musical bar/seed
     // length must remain the exact clock boundary. Never let the tail extend
@@ -13505,13 +14299,18 @@
     if (appMode === "procedural" && currentProceduralProgram?.duration) {
       playlistDuration = currentProceduralProgram.duration;
     } else {
-      playlistDuration = channels.reduce((max,channel)=>{
-        const isMidi = String(channel?.stem?.kind || "").startsWith("midi-");
-        const duration = isMidi && Number.isFinite(Number(channel?.stem?.midiDuration))
-          ? Number(channel.stem.midiDuration)
-          : channel.buffer?.duration;
-        return Number.isFinite(duration) ? Math.max(max,duration) : max;
-      },0);
+      const origin=playlistFilenameTimelineOrigin(currentPlaylist);
+      const folderCfg=currentPlaylist?.filenameConfig||{};
+      const explicitEnd=Number(folderCfg.loopEnd);
+      const barsDuration=configuredBarsDuration(folderCfg,currentPlaylist);
+      if(Number.isFinite(explicitEnd)&&explicitEnd>origin){
+        playlistDuration=explicitEnd-origin;
+      }else if(Number.isFinite(barsDuration)){
+        playlistDuration=barsDuration;
+      }else{
+        const naturalEnd=channels.reduce((max,channel)=>Math.max(max,configuredTrackTimelineEnd(channel.stem,channel.buffer,currentPlaylist)),origin);
+        playlistDuration=Math.max(0,naturalEnd-origin);
+      }
     }
 
     updateTransportDisplay();
@@ -13522,24 +14321,39 @@
     if (!audioCtx || !playbackBuffer || channel.error) return null;
 
     const duration = playbackBuffer.duration;
-    if (!Number.isFinite(duration) || offset >= duration-.0005) return null;
+    const loop=options.loop===true;
+    let sourceOffset=Math.max(0,Number(offset)||0);
+    const loopStart=Math.max(0,Math.min(duration-.0005,Number(options.loopStart)||0));
+    const loopEnd=Math.max(loopStart+.0005,Math.min(duration,Number(options.loopEnd)||duration));
+    if(loop&&sourceOffset>=loopEnd)sourceOffset=loopStart+((sourceOffset-loopStart)%Math.max(.0005,loopEnd-loopStart));
+    if (!Number.isFinite(duration) || (!loop&&sourceOffset >= duration-.0005)) return null;
 
     const source = audioCtx.createBufferSource();
     const sourceGain = audioCtx.createGain();
     const sourceAutoGain = audioCtx.createGain();
     const fadeIn=Math.max(0,Number(options.fadeIn)||0);
+    const fadeOut=Math.max(0,Number(options.fadeOut)||0);
+    const playDuration=Number.isFinite(Number(options.playDuration))?Math.max(.001,Number(options.playDuration)):null;
     const startGain=Number.isFinite(Number(options.startGain))?Number(options.startGain):1;
     source.buffer = playbackBuffer;
+    source.loop=loop;
+    if(loop){source.loopStart=loopStart;source.loopEnd=loopEnd}
     source.connect(sourceGain);
     sourceGain.connect(sourceAutoGain);
     sourceAutoGain.connect(channel.trim);
     source._wifeyGain=sourceGain;
     source._wifeyAutoGain=sourceAutoGain;
-    sourceAutoGain.gain.value=channel.state?.autoGain===false?1:Math.max(.05,Math.min(7.95,Number(channel.autoGainCompensation)||1));
+    sourceAutoGain.gain.value=channel.state?.autoGain===false?1:Math.max(.05,Math.min(3.99,Number(channel.autoGainCompensation)||1));
     source._wifeyStart=when;
     const gainAt=Math.max(audioCtx.currentTime,Number(when)||audioCtx.currentTime);
     sourceGain.gain.setValueAtTime(fadeIn>0?0:startGain,gainAt);
-    if(fadeIn>0)sourceGain.gain.linearRampToValueAtTime(startGain,gainAt+fadeIn);
+    if(fadeIn>0)sourceGain.gain.linearRampToValueAtTime(startGain,gainAt+Math.min(fadeIn,playDuration||fadeIn));
+    if(playDuration&&fadeOut>0){
+      const endAt=when+playDuration;
+      const fadeAt=Math.max(gainAt,endAt-Math.min(fadeOut,playDuration));
+      sourceGain.gain.setValueAtTime(startGain,fadeAt);
+      sourceGain.gain.linearRampToValueAtTime(0,endAt);
+    }
     channel.sources.add(source);
 
     source.onended = ()=>{
@@ -13550,7 +14364,12 @@
     };
 
     try {
-      source.start(when,Math.max(0,offset));
+      if(loop){
+        source.start(when,sourceOffset);
+        if(playDuration)source.stop(when+playDuration);
+      }else if(playDuration){
+        source.start(when,sourceOffset,Math.min(playDuration,Math.max(.001,duration-sourceOffset)));
+      }else source.start(when,sourceOffset);
       return source;
     } catch (error) {
       channel.sources.delete(source);
@@ -13562,6 +14381,49 @@
     }
   }
 
+  function scheduleConfiguredChannelSource(channel,when,transportPosition=0,bufferOverride=null,options={}){
+    if(appMode==="procedural")return createScheduledSource(channel,when,transportPosition,bufferOverride,options);
+    const playbackBuffer=bufferOverride||channel?.buffer;
+    if(!playbackBuffer)return null;
+    const cfg=filenameTrackConfig(channel?.stem);
+    const origin=playlistFilenameTimelineOrigin(currentPlaylist);
+    const displayPosition=Math.max(0,Number(transportPosition)||0);
+    let timelinePosition=origin+displayPosition;
+    const trackStart=configuredTrackTimelineStart(channel.stem);
+    let startWhen=when;
+    if(timelinePosition<trackStart){
+      startWhen+=trackStart-timelinePosition;
+      timelinePosition=trackStart;
+    }
+    let trackEnd=configuredTrackTimelineEnd(channel.stem,playbackBuffer,currentPlaylist);
+    const loopEnabled=cfg.loop===true&&cfg.oneShot!==true;
+    if(loopEnabled&&!Number.isFinite(Number(cfg.end))&&!Number.isFinite(Number(cfg.length))&&!Number.isFinite(Number(cfg.bars))){
+      trackEnd=origin+playlistDuration;
+    }
+    if(timelinePosition>=trackEnd-.0005)return null;
+    let bufferOffset=Math.max(0,timelinePosition-trackStart);
+    const loopStart=Math.max(0,Number(cfg.loopStart)||0);
+    const loopEnd=Number.isFinite(Number(cfg.loopEnd))?Math.min(playbackBuffer.duration,Number(cfg.loopEnd)):playbackBuffer.duration;
+    if(loopEnabled&&loopEnd>loopStart+.0005&&bufferOffset>=loopEnd)bufferOffset=loopStart+((bufferOffset-loopStart)%(loopEnd-loopStart));
+    const playlistEnd=origin+playlistDuration;
+    let playDuration=Math.max(0,Math.min(trackEnd,playlistEnd)-timelinePosition);
+    if(!loopEnabled)playDuration=Math.min(playDuration,Math.max(0,playbackBuffer.duration-bufferOffset));
+    if(playDuration<=.0005)return null;
+    const db=Number(cfg.gain);
+    const authoredGain=Number.isFinite(db)?Math.pow(10,db/20):1;
+    const startGain=(Number.isFinite(Number(options.startGain))?Number(options.startGain):1)*authoredGain;
+    return createScheduledSource(channel,startWhen,bufferOffset,playbackBuffer,{
+      ...options,
+      startGain,
+      fadeIn:Number.isFinite(Number(options.fadeIn))?Number(options.fadeIn):(Number(cfg.fadeIn)||0),
+      fadeOut:Number.isFinite(Number(options.fadeOut))?Number(options.fadeOut):(Number(cfg.fadeOut)||0),
+      playDuration,
+      loop:loopEnabled,
+      loopStart,
+      loopEnd
+    });
+  }
+
   function scheduleCycle(cycleIndex) {
     if (!audioCtx || !playlistDuration || cycleIndex < 1) return;
 
@@ -13571,11 +14433,11 @@
       const loopProgram = getProceduralLoopProgram(cycleIndex);
       for (const channel of channels) {
         const variantBuffer = renderProceduralStemBuffer(loopProgram,channel.stem);
-        createScheduledSource(channel,when,0,variantBuffer);
+        scheduleConfiguredChannelSource(channel,when,0,variantBuffer);
       }
     } else {
       for (const channel of channels) {
-        createScheduledSource(channel,when,0);
+        scheduleConfiguredChannelSource(channel,when,0);
       }
     }
 
@@ -13611,14 +14473,14 @@
 
     let scheduled = 0;
     for (const channel of channels) {
-      if (createScheduledSource(channel,startAt,target)) scheduled += 1;
+      if (scheduleConfiguredChannelSource(channel,startAt,target)) scheduled += 1;
     }
 
     if (!scheduled && target >= playlistDuration-.001) {
       cycleZeroContextTime = startAt;
       lastKnownPosition = 0;
       for (const channel of channels) {
-        if (createScheduledSource(channel,startAt,0)) scheduled += 1;
+        if (scheduleConfiguredChannelSource(channel,startAt,0)) scheduled += 1;
       }
     }
 
@@ -13686,6 +14548,7 @@
 
   function seekAll(seconds) {
     const target = Math.max(0,Math.min(playlistDuration || Number.MAX_SAFE_INTEGER,Number(seconds)||0));
+    resetAllAutoGainDynamics();
 
     if (isPlaying && audioCtx && playlistDuration) {
       startClockedPlaybackAt(target);
@@ -13771,6 +14634,7 @@
 
   function stopCurrent() {
     midiChoiceWarmupRevision++;
+    resetAllAutoGainDynamics();
     stopAllScheduledSources();
     isPlaying = false;
     lastKnownPosition = 0;
@@ -13817,6 +14681,8 @@
 
     currentPlaylistIndex=normalized;
     currentPlaylist=playlists[normalized];
+    applyPlaylistFilenameDefaults(currentPlaylist);
+    updatePlaylistModeButton(false);
     queuedShuffleIndex=null;
     syncTopTempoControl();
     playlistSelect.value=String(normalized);
@@ -14182,6 +15048,7 @@
     }
 
     updateMegaphoneGainCompensation();
+    updateAutoGainDynamics(timestamp);
 
     if (isPlaying) {
       lastKnownPosition=getPosition();
@@ -14491,6 +15358,70 @@
     let next=choices[Math.floor(Math.random()*choices.length)];
     if(next===Math.round(Number(currentPlaylist.playbackTempoBpm||currentPlaylist.midiTempoBpm||currentPlaylist.nativeTempoBpm)))next=choices[(choices.indexOf(next)+1)%choices.length];
     await applyPlaylistTempo(next,{persist:false});
+  });
+
+  async function droppedEntryFiles(entry,prefix=""){
+    if(!entry)return[];
+    if(entry.isFile){
+      const file=await new Promise((resolve,reject)=>entry.file(resolve,reject));
+      try{Object.defineProperty(file,"_wifeyRelativePath",{value:`${prefix}${file.name}`,configurable:true})}
+      catch(_){file._wifeyRelativePath=`${prefix}${file.name}`}
+      return[file];
+    }
+    if(!entry.isDirectory)return[];
+    const reader=entry.createReader();
+    const children=[];
+    while(true){
+      const batch=await new Promise((resolve,reject)=>reader.readEntries(resolve,reject));
+      if(!batch?.length)break;
+      children.push(...batch);
+    }
+    const nested=[];
+    for(const child of children)nested.push(...await droppedEntryFiles(child,`${prefix}${entry.name}/`));
+    return nested;
+  }
+
+  async function filesFromDataTransfer(dataTransfer){
+    const items=[...(dataTransfer?.items||[])];
+    const entries=items.map(item=>item.webkitGetAsEntry?.()).filter(Boolean);
+    if(entries.length){
+      const files=[];
+      for(const entry of entries)files.push(...await droppedEntryFiles(entry,""));
+      return files;
+    }
+    return[...(dataTransfer?.files||[])];
+  }
+
+  document.addEventListener("dragover",event=>{
+    const types=[...(event.dataTransfer?.types||[])];
+    if(!types.includes("Files"))return;
+    event.preventDefault();
+    if(event.dataTransfer)event.dataTransfer.dropEffect="copy";
+  });
+
+  document.addEventListener("drop",async event=>{
+    const types=[...(event.dataTransfer?.types||[])];
+    if(!types.includes("Files"))return;
+    event.preventDefault();
+    try{
+      stopCurrent();
+      loadReadout.textContent="IMPORT";
+      const files=await filesFromDataTransfer(event.dataTransfer);
+      const imported=buildPlaylistsFromFiles(files);
+      if(!imported.length){
+        loadReadout.textContent="NO AUDIO";
+        showSystemReadout("DROP IMPORT","NO AUDIO / MIDI FILES","IGNORED");
+        return;
+      }
+      playlists=imported;
+      populatePlaylistSelect();
+      await changePlaylist(0,imported[0]?.filenameConfig?.autoplay===true);
+      showSystemReadout("DROP IMPORT",`${imported.length} PLAYLIST${imported.length===1?"":"S"}`,`${files.length} FILE${files.length===1?"":"S"}`);
+    }catch(error){
+      console.error("Could not import dropped files",error);
+      loadReadout.textContent="DROP ERR";
+      showSystemReadout("DROP IMPORT","ERROR","CHECK FILES");
+    }
   });
 
   window.addEventListener("beforeunload",revokeLocalObjectUrls);

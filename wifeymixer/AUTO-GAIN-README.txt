@@ -1,26 +1,49 @@
-WIFEY MIX-8 — AUTO GAIN REFERENCE CALIBRATION
+WIFEY MIX-8 — AGC / AUTO-GAIN COMPENSATION
 
-The bundled MP3 playlist stems were scanned offline. Their measured full-file RMS levels are stored in:
+The bundled MP3 playlist stems were scanned offline. Their measured full-file RMS
+levels are stored in auto-gain-references.js.
 
-    auto-gain-references.js
+AUDIO FILES
+-----------
+AGC computes the arithmetic mean of all documented stem reference levels
+(measuredDb + adjustDb). That library mean is the common loudness anchor. Each
+audio strip receives a static pre-TRIM / pre-fader correction 82% of the way
+toward that mean, capped at +/-12 dB so role differences are not completely
+flattened.
 
-Each stem looks like:
+A second correction follows only broad changes inside a file:
+  * 10-second RMS analysis window
+  * about 0.9 seconds between updates
+  * 1.15 dB dead-band
+  * maximum dynamic correction +/-2.5 dB
+  * about 5.5-second reductions and 9.5-second lifts
 
-    "folder/stem.mp3": { measuredDb: -24.334, adjustDb: 0.0, peakDb: -5.223 }
+This is intentionally not compressor behavior. Short notes, drum hits, attacks
+and phrases do not directly drive gain; only sustained multi-second loudness
+changes produce a small, smooth correction.
 
-HOW TO TUNE A STEM LATER
-------------------------
-Do not change measuredDb unless you intentionally want to replace the scan result.
-Change adjustDb instead:
+MIDI FILES
+----------
+MIDI has no uploaded waveform reference. AGC finds the authored/default SoundFont
+instrument and measures middle C (MIDI note 60). If that preset has no playable
+layer on C, it searches outward semitone-by-semitone and uses the nearest playable
+note. The note is rendered at a fixed velocity/duration and its RMS becomes the
+MIDI reference. If a different patch is selected, that patch is measured the same
+way, so patch changes can be level-matched without analysing/compressing the MIDI
+performance itself.
 
-    adjustDb: +1.5   makes AUTO GAIN target that stem 1.5 dB louder
-    adjustDb: -2.0   makes AUTO GAIN target that stem 2.0 dB quieter
-    adjustDb:  0.0   uses the offline measured level exactly
+TUNING AUDIO REFERENCES
+-----------------------
+Do not change measuredDb unless replacing the scan. Change adjustDb instead:
 
-The mixer uses:
+    adjustDb: +1.5   treats that stem as 1.5 dB louder than the scan
+    adjustDb: -2.0   treats that stem as 2.0 dB quieter than the scan
+    adjustDb:  0.0   uses the measured level exactly
 
-    effectiveReferenceDb = measuredDb + adjustDb
+peakDb remains informational only.
 
-peakDb is included only as useful scan information and is not used by AUTO GAIN.
-
-AUTO GAIN remains pre-TRIM and pre-channel-fader. TRIM and the strip volume fader therefore still act after compensation. If a file is not listed, the mixer's existing runtime measurement remains the fallback.
+UI / SIGNAL ORDER
+-----------------
+AGC is before TRIM and before the channel fader. It is session-only and starts ON
+on every page load. The key is labelled "AGC" in the bottom-left of each channel's
+fader area. Hovering it shows exactly "AUTO-GAIN COMPENSATION".

@@ -5,6 +5,8 @@
 //   adjustDb: +1.5  => AUTO GAIN targets 1.5 dB louder than the scan
 //   adjustDb: -2.0  => AUTO GAIN targets 2.0 dB quieter than the scan
 // The effective reference used by the mixer is measuredDb + adjustDb.
+// AGC computes the library leveling anchor as the arithmetic mean of all
+// effective stem references below (currently about -30.1 dBFS).
 // peakDb is informational only and is not used for gain matching.
 window.WIFEY_AUTO_GAIN_REFERENCES = {
   scanMethod: "FFmpeg astats full-file RMS dBFS",
