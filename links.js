@@ -118,7 +118,7 @@ window.KAZVT_LINKS = {
     delayMs: 1000
   },
   vps_streaming: {
-    url: "https://github.com/kazvt/vps_streaming",
+    url: "https://github.com/kazvt/streamRIP-with-fallback-and-multistreaming",
     shortPath: "vps-streaming",
     logo: "/zzz_assets/redirect-logos/vps-streaming.svg",
     delayMs: 1000

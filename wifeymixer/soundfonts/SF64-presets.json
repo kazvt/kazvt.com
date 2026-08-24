@@ -12,7 +12,7 @@
     "ISFT": "Polyphone"
   },
   "counts": {
-    "presets": 113,
+    "presets": 112,
     "instruments": 48,
     "samples": 104
   },
@@ -389,11 +389,6 @@
       "program": 24
     },
     {
-      "name": "Seashore",
-      "bank": 0,
-      "program": 122
-    },
-    {
       "name": "Acoustic Guitar (S)",
       "bank": 0,
       "program": 25
@@ -549,7 +544,7 @@
       "program": 8
     },
     {
-      "name": "FX 3 (crystal)",
+      "name": "Crystal Synth",
       "bank": 0,
       "program": 98
     },
@@ -574,7 +569,7 @@
       "program": 44
     },
     {
-      "name": "FX 5 (Brightness)",
+      "name": "Brightness Synth",
       "bank": 0,
       "program": 100
     },
@@ -639,7 +634,7 @@
       "program": 68
     },
     {
-      "name": "FX 4 (Atmosphere)",
+      "name": "Atmosphere Synth",
       "bank": 0,
       "program": 99
     },
@@ -659,7 +654,7 @@
       "program": 7
     },
     {
-      "name": "FX 1 (rain)",
+      "name": "Rain Synth",
       "bank": 0,
       "program": 96
     },
@@ -674,7 +669,7 @@
       "program": 14
     },
     {
-      "name": "FX 7 (echoes)",
+      "name": "Echoes Synth",
       "bank": 0,
       "program": 102
     },
@@ -729,7 +724,7 @@
       "program": 42
     },
     {
-      "name": "FX 8 (Sci-Fi)",
+      "name": "Sci-Fi Synth",
       "bank": 0,
       "program": 103
     }

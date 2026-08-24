@@ -61,6 +61,8 @@
     "soundfonts/Meow.sf2",
     "soundfonts/SF64-presets.json",
     "soundfonts/SF64.sf2",
-    "soundfonts/Sonic Drums.sf2"
+    "soundfonts/Sonic Drums.sf2",
+    "strip-fx-compressor-worklet.js",
+    "strip-fx-engine.js"
   ]
 }

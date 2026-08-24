@@ -15,6 +15,7 @@
   <script src="soundfont-icons.js"></script>
   <script src="filename-tag-rules.js"></script>
   <script src="auto-gain-references.js"></script>
+  <script src="strip-fx-engine.js"></script>
 
   <style>
     :root{
@@ -1598,19 +1599,21 @@
 
 
 
-    /* AUTO-GAIN COMPENSATION: dedicated lower-left channel key. */
+    /* AUTO-GAIN COMPENSATION: compact vertical key on every strip, including MASTER. */
     .stem-action-buttons{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
     .fader-zone{position:relative}
-    .hw-button[data-action="auto-gain"]{
-      position:absolute;z-index:12;left:2px;bottom:2px;
+    .auto-gain-button{
+      position:absolute;z-index:12;left:2px;bottom:7px;
       width:clamp(24px,2.45vw,29px);height:clamp(16px,2.25vh,19px);min-height:0;
       padding:0 1px !important;display:grid;place-items:center;
       font-size:clamp(5.5px,.58vw,7px) !important;line-height:1;letter-spacing:.055em;
       color:#747a76 !important;
       background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 18%),linear-gradient(180deg,#45494a,#303435 72%,#242728) !important;
+      transform:rotate(-90deg);
+      transform-origin:center center;
     }
-    .hw-button[data-action="auto-gain"]::after{inset:2px 3px}
-    .hw-button[data-action="auto-gain"].active{
+    .auto-gain-button::after{inset:2px 3px}
+    .auto-gain-button.active{
       color:#142317 !important;
       background:radial-gradient(ellipse at 50% 50%,#b8d6a8 0%,#7f9f72 48%,transparent 76%),linear-gradient(180deg,#95aa89,#6d8263 72%,#50604a) !important;
       box-shadow:0 1px 0 #070708,0 0 0 2px #273026,0 0 6px rgba(154,190,139,.38),inset 0 0 5px rgba(227,245,215,.28) !important;
@@ -7701,16 +7704,104 @@
     .instrument-picker__voice.is-current .instrument-picker__voice-icon{color:#d99043;filter:drop-shadow(0 0 3px rgba(211,128,55,.34)) drop-shadow(0 1px 0 #000)}
 
     .instrument-picker__voice-category{font-size:7px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#776f62;white-space:nowrap}
-    .instrument-picker__voice.is-mismatch{color:#69665f;opacity:.54;filter:saturate(.45)}
-    .instrument-picker__voice.is-mismatch .instrument-picker__voice-icon{color:#5d5a54}
-    .instrument-picker__voice.is-mismatch .instrument-picker__voice-category{color:#5e5b55}
+    /* Discouraged choices stay available, but collapse vertically so the useful
+       category-matched patches dominate the menu length. Width is unchanged. */
+    .instrument-picker__voice.is-mismatch{
+      min-height:18px;grid-template-columns:14px minmax(0,1fr) auto;gap:4px;padding:1px 7px 1px 10px;
+      color:#69665f;opacity:.54;filter:saturate(.45);font-size:8.5px;line-height:1.05;letter-spacing:.01em
+    }
+    .instrument-picker__voice.is-mismatch .instrument-picker__voice-icon{width:14px;height:12px;color:#5d5a54;font-size:8px}
+    .instrument-picker__voice.is-mismatch .instrument-picker__voice-category{color:#5e5b55;font-size:6px;letter-spacing:.045em}
     .instrument-picker__voice.is-mismatch:hover,.instrument-picker__voice.is-mismatch:focus-visible{opacity:.82;color:#a29b8d;filter:saturate(.72)}
     .instrument-picker__group.is-mismatch{opacity:.58;filter:saturate(.48)}
+    .instrument-picker__group.is-mismatch .instrument-picker__source{
+      min-height:20px;grid-template-columns:6px 14px minmax(0,1fr) auto 8px;gap:4px;padding:2px 7px;
+      font-size:8.5px;line-height:1.05;letter-spacing:.045em
+    }
+    .instrument-picker__group.is-mismatch .instrument-picker__source-icon{width:14px;height:12px;font-size:9px}
+    .instrument-picker__group.is-mismatch .instrument-picker__source-icon .patch-icon__secondary{font-size:5px;transform:translate(5px,4px)}
+    .instrument-picker__group.is-mismatch .instrument-picker__lamp{width:4px;height:4px}
+    .instrument-picker__group.is-mismatch .instrument-picker__load{font-size:6.5px}
+    .instrument-picker__group.is-mismatch .instrument-picker__chev{font-size:9px}
     .instrument-picker__group.is-mismatch.is-open,.instrument-picker__group.is-mismatch.has-current{opacity:.78}
-    .instrument-picker__group.is-first-mismatch{margin-top:8px}
-    .instrument-picker__voice.is-first-mismatch{margin-top:5px;box-shadow:inset 0 1px 0 rgba(145,132,106,.16)}
+    .instrument-picker__group.is-first-mismatch{margin-top:5px}
+    .instrument-picker__voice.is-first-mismatch{margin-top:3px;box-shadow:inset 0 1px 0 rgba(145,132,106,.16)}
     .instrument-picker__empty{padding:9px 8px 9px 28px;color:#8b8578;font:800 8px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.055em;text-transform:uppercase;text-shadow:0 1px 0 #000}
     @media(max-width:560px){.instrument-picker{width:min(282px,calc(100vw - 12px));max-height:min(58vh,390px)}.instrument-picker__list{max-height:calc(min(58vh,390px) - 48px)}}
+
+
+
+    /* ===== PER-STRIP VINTAGE FX RACK ===== */
+    .strip-fx-button{
+      position:absolute;z-index:13;right:3px;bottom:7px;
+      width:clamp(25px,2.55vw,31px);height:clamp(18px,2.4vh,21px);min-height:0;
+      padding:0 2px !important;display:grid;place-items:center;
+      font-size:clamp(6px,.62vw,7.5px) !important;line-height:1;letter-spacing:.09em;font-weight:900;
+      color:#b6a98e !important;
+      border-color:#17130d !important;
+      background:
+        linear-gradient(180deg,rgba(255,242,211,.08),transparent 18%),
+        linear-gradient(180deg,#5c5549 0%,#403a31 68%,#2a2721 100%) !important;
+      box-shadow:0 2px 0 #080706,0 0 0 2px #302a21,inset 0 1px 0 rgba(255,244,216,.10),inset 0 -2px 2px rgba(0,0,0,.32) !important;
+    }
+    .strip-fx-button::before{
+      content:"";position:absolute;right:3px;top:3px;width:3px;height:3px;border-radius:50%;
+      background:#302514;border:1px solid #120d07;box-shadow:inset 0 1px 1px #050403;
+    }
+    .strip-fx-button.active{
+      color:#2a1a09 !important;
+      background:linear-gradient(180deg,#c9ad70,#a47a42 72%,#76512b) !important;
+      box-shadow:0 1px 0 #080706,0 0 0 2px #3b2d18,0 0 7px rgba(211,169,88,.35),inset 0 1px 0 rgba(255,239,190,.24) !important;
+    }
+    .strip-fx-button.active::before{background:#d7bb72;box-shadow:0 0 5px rgba(231,199,118,.75),inset 0 1px 1px rgba(255,255,255,.38)}
+
+    .strip-fx-panel{
+      position:fixed;z-index:120000;width:min(330px,calc(100vw - 16px));max-height:min(72vh,620px);overflow:auto;
+      padding:8px;border:1px solid #14110d;border-radius:5px;color:#d7d0bf;
+      background:
+        radial-gradient(circle at 18% 8%,rgba(216,181,111,.07),transparent 26%),
+        repeating-linear-gradient(92deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),
+        linear-gradient(180deg,#3a3731,#282620 72%,#201e19);
+      box-shadow:0 14px 34px rgba(0,0,0,.62),0 0 0 2px #514b40,inset 0 0 0 1px rgba(255,255,255,.035),inset 0 8px 18px rgba(255,239,199,.018);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      scrollbar-width:thin;
+    }
+    .strip-fx-panel[hidden]{display:none !important}
+    .strip-fx-panel__head{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:7px;padding:2px 3px 8px;border-bottom:1px solid rgba(0,0,0,.7);box-shadow:0 1px rgba(255,255,255,.035)}
+    .strip-fx-panel__badge{font-size:11px;font-weight:1000;letter-spacing:.16em;color:#d6b66f;text-shadow:0 1px #000}
+    .strip-fx-panel__track{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px;letter-spacing:.075em;color:#8e887b}
+    .strip-fx-panel__close{width:22px;height:18px;border:1px solid #15120e;border-radius:2px;background:#413d35;color:#aaa294;font-size:10px;line-height:1}
+    .strip-fx-list{display:grid;gap:4px;padding-top:6px}
+    .strip-fx-slot{border:1px solid #17140f;border-radius:3px;background:linear-gradient(180deg,#34312b,#292620);box-shadow:inset 0 1px rgba(255,255,255,.03),0 1px 0 rgba(255,255,255,.025)}
+    .strip-fx-slot.is-on{border-color:#4e3e22;box-shadow:inset 0 1px rgba(255,255,255,.04),0 0 5px rgba(194,151,73,.08)}
+    .strip-fx-main{display:grid;grid-template-columns:27px 48px 46px minmax(78px,1fr) 25px;align-items:center;gap:4px;padding:4px}
+    .strip-fx-power,.strip-fx-mode,.strip-fx-expand{
+      height:22px;min-width:0;border:1px solid #15120e;border-radius:2px;background:linear-gradient(180deg,#4b473f,#302d27);color:#a9a297;
+      box-shadow:0 1px 0 #0b0907,inset 0 1px rgba(255,255,255,.05);font:900 7px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;
+    }
+    .strip-fx-power{position:relative;color:#766f62;font-size:6px}
+    .strip-fx-power::before{content:"";display:block;margin:auto;width:6px;height:6px;border-radius:50%;background:#39251a;border:1px solid #160d08;box-shadow:inset 0 1px 1px #000}
+    .strip-fx-power[aria-pressed="true"]::before{background:#c79b4f;box-shadow:0 0 6px rgba(226,178,87,.75),inset 0 1px rgba(255,255,255,.35)}
+    .strip-fx-name{font-size:8px;font-weight:1000;letter-spacing:.08em;color:#d3cbbb;text-align:left;white-space:nowrap}
+    .strip-fx-name small{display:block;margin-top:2px;font-size:5px;color:#777166;letter-spacing:.05em;font-weight:700}
+    .strip-fx-mode{color:#d7bd7c}
+    .strip-fx-mode[data-mode="send"]{color:#9ab6aa}
+    .strip-fx-mix{display:grid;grid-template-columns:minmax(0,1fr) 27px;gap:4px;align-items:center}
+    .strip-fx-mix input,.strip-fx-param input{width:100%;height:12px;accent-color:#b58a4d;cursor:ew-resize}
+    .strip-fx-mix output,.strip-fx-param output{text-align:right;font-size:6px;color:#a9a294;white-space:nowrap}
+    .strip-fx-expand{font-size:8px;color:#958d80}
+    .strip-fx-expand[aria-expanded="true"]{color:#d1b46f;background:linear-gradient(180deg,#575044,#39332a)}
+    .strip-fx-params{display:grid;grid-template-columns:1fr 1fr;gap:4px 7px;padding:6px;border-top:1px solid rgba(0,0,0,.65);background:rgba(16,14,11,.22)}
+    .strip-fx-params[hidden]{display:none}
+    .strip-fx-param{display:grid;grid-template-columns:42px minmax(0,1fr) 45px;gap:4px;align-items:center;min-width:0}
+    .strip-fx-param label{font-size:5.5px;letter-spacing:.055em;color:#8f887c;white-space:nowrap}
+    .strip-fx-param output{font-size:5.5px;color:#b7af9f}
+    .strip-fx-foot{padding:6px 3px 1px;font-size:5.5px;line-height:1.35;letter-spacing:.04em;color:#68645c;text-align:center}
+    @media (max-width:600px){
+      .strip-fx-panel{width:min(310px,calc(100vw - 10px));padding:6px}
+      .strip-fx-main{grid-template-columns:25px 42px 43px minmax(66px,1fr) 23px;gap:3px;padding:3px}
+      .strip-fx-params{grid-template-columns:1fr}
+    }
 
   </style>
 </head>
@@ -9160,19 +9251,19 @@
   }
 
   function restoreProceduralVoiceRef(role,ref){
-    if(!ref?.source||!Number.isFinite(Number(ref.bank))||!Number.isFinite(Number(ref.program)))return null;
+    if(!ref?.source||!Number.isFinite(Number(ref.bank))||!Number.isFinite(Number(ref.program))||isExcludedSf64Preset(ref.source,ref.bank,ref.program,ref.name))return null;
     if(String(ref.source)==="genies"&&(isExcludedGeniesGuitar(ref.name)||proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(ref.bank)}:${Number(ref.program)}`)))return null;
     // Exact picker choices are intentionally allowed to cross category lines.
     // If the bank is already loaded, reject only genuinely missing presets;
     // otherwise keep the reference so the selected bank can load on demand.
     const bank=proceduralSoundFonts.get(String(ref.source));
     if(bank&&!bank.getPreset(Number(ref.bank),Number(ref.program)))return null;
-    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"),sfVoiceSourceOptions(ref.source,ref.bank,ref.program));
+    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),soundFontFriendlyPresetName(ref.source,ref.name),sfVoiceSourceOptions(ref.source,ref.bank,ref.program));
   }
 
   function instrumentLockRefToVoice(ref){
-    if(!ref?.source||!Number.isFinite(Number(ref.bank))||!Number.isFinite(Number(ref.program)))return null;
-    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),String(ref.name||"Patch"),sfVoiceSourceOptions(ref.source,ref.bank,ref.program));
+    if(!ref?.source||!Number.isFinite(Number(ref.bank))||!Number.isFinite(Number(ref.program))||isExcludedSf64Preset(ref.source,ref.bank,ref.program,ref.name))return null;
+    return sfVoice(String(ref.source),Number(ref.bank),Number(ref.program),soundFontFriendlyPresetName(ref.source,ref.name),sfVoiceSourceOptions(ref.source,ref.bank,ref.program));
   }
 
   function proceduralInstrumentLockKey(role){
@@ -9269,6 +9360,10 @@
   let masterTone = null;
   let masterPan = null;
   let masterGain = null;
+  let masterAutoGainInputAnalyser = null;
+  let masterAutoGainInputData = null;
+  let masterAutoGainGain = null;
+  let masterAutoGainLimiter = null;
   let masterAnalyser = null;
   let masterMeterData = null;
   let reverb = null;
@@ -9307,6 +9402,13 @@
     room: Number(persistentPrefs.masterState?.room ?? 0),
     level: Number(persistentPrefs.masterState?.level ?? 80)
   };
+
+  // MASTER AGC is deliberately session-only, just like strip AGC. It starts ON
+  // after every refresh so a newly dropped/opened mix is normalized immediately.
+  let masterAutoGainEnabled = true;
+  let masterAutoGainDb = 0;
+  let masterAutoGainTargetDb = 0;
+  let masterAutoGainLastMs = 0;
 
 
   function applyPlaylistFilenameDefaults(playlist){
@@ -10405,10 +10507,27 @@
     return true;
   }
 
+  function isExcludedSf64Preset(sourceId,bank,program,name=""){
+    if(String(sourceId)!=="sf64")return false;
+    return (Number(bank)===0&&Number(program)===122)||/^seashore$/i.test(String(name||"").trim());
+  }
+
+  function sf64FriendlyPresetName(name){
+    const raw=String(name||"Patch").trim()||"Patch";
+    const match=/^FX(?:\s+\d+)?\s*\(([^)]+)\)\s*$/i.exec(raw);
+    if(!match)return raw;
+    const inside=match[1].trim().replace(/\b[a-z]/g,ch=>ch.toUpperCase());
+    return `${inside||"FX"} Synth`;
+  }
+
+  function soundFontFriendlyPresetName(sourceId,name){
+    return String(sourceId)==="sf64"?sf64FriendlyPresetName(name):String(name||"Patch");
+  }
+
   // Lightweight preset catalog generated from the packaged SF2 preset headers.
   // It lets PATCH SELECT show and rank every patch immediately without forcing
   // all SoundFont sample data to load up front.
-  const INSTRUMENT_PICKER_PRESET_CATALOG=Object.freeze({"sf64":[{"bank":0,"program":36,"name":"Slap Bass"},{"bank":0,"program":27,"name":"Electric Guitar (C)"},{"bank":0,"program":4,"name":"Electric Piano 1"},{"bank":0,"program":48,"name":"Strings 1"},{"bank":0,"program":60,"name":"French Horn"},{"bank":0,"program":75,"name":"Pan Flute"},{"bank":0,"program":21,"name":"Accordion"},{"bank":0,"program":0,"name":"Grand Piano"},{"bank":128,"program":0,"name":"General Percussion"},{"bank":0,"program":114,"name":"Steel Drums"},{"bank":0,"program":17,"name":"Percussive Organ"},{"bank":0,"program":33,"name":"Electric Bass (F)"},{"bank":0,"program":34,"name":"Electric Bass (P)"},{"bank":0,"program":105,"name":"Banjo"},{"bank":0,"program":110,"name":"Fiddle"},{"bank":0,"program":78,"name":"Whistle"},{"bank":0,"program":32,"name":"Acoustic Bass"},{"bank":0,"program":18,"name":"Rock Organ"},{"bank":0,"program":61,"name":"Brass Section"},{"bank":0,"program":5,"name":"Electric Piano 2"},{"bank":0,"program":53,"name":"Voice Oohs"},{"bank":0,"program":49,"name":"Strings 2"},{"bank":0,"program":55,"name":"Orchestra Hit"},{"bank":0,"program":38,"name":"Synth Bass 1"},{"bank":0,"program":39,"name":"Synth Bass 2"},{"bank":0,"program":80,"name":"Lead 1 (Square)"},{"bank":0,"program":11,"name":"Vibraphone"},{"bank":0,"program":12,"name":"Marimba"},{"bank":0,"program":13,"name":"Xylophone"},{"bank":0,"program":52,"name":"Choir Aahs"},{"bank":0,"program":104,"name":"Sitar"},{"bank":0,"program":107,"name":"Pungi"},{"bank":0,"program":47,"name":"Timpani"},{"bank":0,"program":45,"name":"Pizzicato Strings"},{"bank":0,"program":73,"name":"Flute"},{"bank":0,"program":35,"name":"Fretless Bass"},{"bank":0,"program":43,"name":"Contrabass"},{"bank":0,"program":10,"name":"Music Box"},{"bank":0,"program":57,"name":"Trombone"},{"bank":0,"program":56,"name":"Trumpet"},{"bank":0,"program":19,"name":"Church Organ"},{"bank":0,"program":30,"name":"Distortion Guitar"},{"bank":0,"program":29,"name":"Overdrive Guitar"},{"bank":0,"program":24,"name":"Acoustic Guitar (N)"},{"bank":0,"program":122,"name":"Seashore"},{"bank":0,"program":25,"name":"Acoustic Guitar (S)"},{"bank":0,"program":50,"name":"Synth Strings 1"},{"bank":0,"program":51,"name":"Synth Strings 2"},{"bank":0,"program":58,"name":"Tuba"},{"bank":0,"program":62,"name":"Synth Brass 1"},{"bank":0,"program":63,"name":"Synth Brass 2"},{"bank":0,"program":64,"name":"Soprano Sax"},{"bank":0,"program":65,"name":"Alto Sax"},{"bank":0,"program":66,"name":"Tenor Sax"},{"bank":0,"program":67,"name":"Baritone Sax"},{"bank":0,"program":16,"name":"Drawback Organ"},{"bank":0,"program":20,"name":"Reed Organ"},{"bank":0,"program":74,"name":"Recorder"},{"bank":0,"program":76,"name":"Blown Bottle"},{"bank":0,"program":70,"name":"Bassoon"},{"bank":0,"program":71,"name":"Clarinet"},{"bank":0,"program":22,"name":"Harmonica"},{"bank":0,"program":81,"name":"Lead 2 (Sawtooth)"},{"bank":0,"program":1,"name":"Bright Acoustic Pian"},{"bank":0,"program":2,"name":"Electric Grand"},{"bank":0,"program":3,"name":"Honky-Tonk"},{"bank":0,"program":112,"name":"Tinkle Bell"},{"bank":0,"program":15,"name":"Dulcimer"},{"bank":0,"program":6,"name":"Harpsichord"},{"bank":0,"program":40,"name":"Violin"},{"bank":0,"program":41,"name":"Viola"},{"bank":0,"program":26,"name":"Electric Guitar (J)"},{"bank":0,"program":59,"name":"Muted Trumpet"},{"bank":0,"program":87,"name":"Lead 8 (Lead + Base)"},{"bank":0,"program":37,"name":"Slap Bass 2"},{"bank":0,"program":8,"name":"Celesta"},{"bank":0,"program":98,"name":"FX 3 (crystal)"},{"bank":0,"program":69,"name":"English Horn"},{"bank":0,"program":79,"name":"Ocarina"},{"bank":0,"program":28,"name":"Electric Guitar (M)"},{"bank":0,"program":44,"name":"Tremolo Strings"},{"bank":0,"program":100,"name":"FX 5 (Brightness)"},{"bank":0,"program":92,"name":"Pad 5 (bowed)"},{"bank":0,"program":93,"name":"Pad 6 (metallic)"},{"bank":0,"program":88,"name":"Pad 1 (new age)"},{"bank":0,"program":46,"name":"Orchestrial Strings"},{"bank":128,"program":16,"name":"Powerful Percussion"},{"bank":0,"program":54,"name":"Synth Voice"},{"bank":0,"program":82,"name":"Lead 3 (Callope)"},{"bank":0,"program":72,"name":"Piccolo"},{"bank":0,"program":9,"name":"Glockenspiel"},{"bank":0,"program":108,"name":"Kalimba"},{"bank":0,"program":77,"name":"Skakuhachi"},{"bank":0,"program":68,"name":"Oboe"},{"bank":0,"program":99,"name":"FX 4 (Atmosphere)"},{"bank":0,"program":113,"name":"Agogo"},{"bank":0,"program":91,"name":"Pad 4 (choir)"},{"bank":0,"program":7,"name":"Clav"},{"bank":0,"program":96,"name":"FX 1 (rain)"},{"bank":0,"program":118,"name":"Synth Drum"},{"bank":0,"program":14,"name":"Tubular Bells"},{"bank":0,"program":102,"name":"FX 7 (echoes)"},{"bank":0,"program":90,"name":"Pad 3 (polysynth)"},{"bank":0,"program":116,"name":"Taiko Drum"},{"bank":0,"program":89,"name":"Pad 2 (warm)"},{"bank":0,"program":94,"name":"Pad 7 (halo)"},{"bank":0,"program":119,"name":"Reverse Cymbal"},{"bank":0,"program":23,"name":"Tango Accordion"},{"bank":0,"program":127,"name":"Gunshot"},{"bank":0,"program":106,"name":"Shamisen"},{"bank":0,"program":85,"name":"Lead 6 (voice)"},{"bank":0,"program":42,"name":"Cello"},{"bank":0,"program":103,"name":"FX 8 (Sci-Fi)"}],"rush":[{"bank":0,"program":0,"name":"Altitude Limit Piano"},{"bank":0,"program":4,"name":"E. Piano 1"},{"bank":0,"program":5,"name":"E. Piano 2"},{"bank":0,"program":10,"name":"Organ 1"},{"bank":0,"program":11,"name":"Organ 2"},{"bank":0,"program":15,"name":"Alt. Limit Guitar 1"},{"bank":0,"program":16,"name":"Alt. Limit Guitar 2"},{"bank":0,"program":17,"name":"Alt. Limit Guitar 3"},{"bank":0,"program":18,"name":"Alt. Limit Guitar 4"},{"bank":0,"program":23,"name":"Ending Guitar"},{"bank":0,"program":24,"name":"Exception Guitar"},{"bank":0,"program":25,"name":"Final Zone Guitar 1"},{"bank":0,"program":26,"name":"Final Zone Guitar 2"},{"bank":0,"program":32,"name":"Mirage Road Guitar 1"},{"bank":0,"program":33,"name":"Mirage Road Guitar 2"},{"bank":0,"program":34,"name":"N. Carniv. Guitar 1"},{"bank":0,"program":35,"name":"N. Carniv. Guitar 2"},{"bank":0,"program":38,"name":"Water Palace Guit. 1"},{"bank":0,"program":39,"name":"Water Palace Guit. 2"},{"bank":0,"program":40,"name":"Water Palace Guit. 3"},{"bank":0,"program":41,"name":"Water Palace Guit. 4"},{"bank":0,"program":42,"name":"Clean Guitar"},{"bank":0,"program":43,"name":"Dist. Guitar SFX"},{"bank":0,"program":45,"name":"Alt. Limit Bass 1"},{"bank":0,"program":46,"name":"Alt. Limit Bass 2"},{"bank":0,"program":50,"name":"Exception Bass"},{"bank":0,"program":51,"name":"Final Zone Bass"},{"bank":0,"program":52,"name":"Huge Crisis Bass"},{"bank":0,"program":55,"name":"Mirage Road Bass"},{"bank":0,"program":56,"name":"Night Carnival Bass"},{"bank":0,"program":58,"name":"Synth Bass 1"},{"bank":0,"program":59,"name":"Synth Bass 2"},{"bank":0,"program":60,"name":"Synth Bass 3"},{"bank":0,"program":62,"name":"Ending Strings 1"},{"bank":0,"program":63,"name":"Ending Strings 2"},{"bank":0,"program":64,"name":"Exception Strings 1"},{"bank":0,"program":65,"name":"Exception Strings 2"},{"bank":0,"program":66,"name":"Exception Strings 3"},{"bank":0,"program":67,"name":"Exception Violin"},{"bank":0,"program":68,"name":"Final Zone Strings"},{"bank":0,"program":70,"name":"Mirage Road Strings"},{"bank":0,"program":71,"name":"Mirage Road Violin"},{"bank":0,"program":79,"name":"Exception Choir"},{"bank":0,"program":101,"name":"Mirage Road Hit"},{"bank":0,"program":102,"name":"Orchestra Hit 1"},{"bank":0,"program":103,"name":"Orchestra Hit 2"},{"bank":0,"program":106,"name":"Huge Crisis Brass"},{"bank":0,"program":109,"name":"N. Carniv. Brass 1"},{"bank":0,"program":110,"name":"N. Carniv. Brass 2"},{"bank":0,"program":113,"name":"Water Palace Brass 1"},{"bank":0,"program":114,"name":"Water Palace Brass 2"},{"bank":0,"program":115,"name":"Water Palace Brass 3"},{"bank":0,"program":116,"name":"Brass Section 1"},{"bank":0,"program":117,"name":"Brass Section 2"},{"bank":0,"program":118,"name":"Brass Section 3"},{"bank":0,"program":119,"name":"Brass Section 4"},{"bank":0,"program":120,"name":"Synth Brass"},{"bank":0,"program":121,"name":"Alto Sax"},{"bank":0,"program":123,"name":"Flute Flutter"},{"bank":0,"program":124,"name":"N. Carniv. Whistle 1"},{"bank":0,"program":125,"name":"N. Carniv. Whistle 2"},{"bank":1,"program":2,"name":"Altitude Limit Synth"},{"bank":1,"program":8,"name":"Exception Synth 1"},{"bank":1,"program":10,"name":"Final Zone Synth 1"},{"bank":1,"program":11,"name":"Final Zone Synth 2"},{"bank":1,"program":16,"name":"Mirage Road Synth 1"},{"bank":1,"program":17,"name":"Mirage Road Synth 2"},{"bank":1,"program":18,"name":"Mirage Road Synth 3"},{"bank":1,"program":20,"name":"Water Palace Synth"},{"bank":1,"program":21,"name":"Sine Wave 1"},{"bank":1,"program":22,"name":"Sine Wave 2"},{"bank":1,"program":24,"name":"Saw Wave 2"},{"bank":1,"program":25,"name":"Saw Wave 3"},{"bank":1,"program":26,"name":"Synth Pad"},{"bank":1,"program":27,"name":"Mirage Road Sitar"},{"bank":1,"program":28,"name":"Chimes"},{"bank":1,"program":29,"name":"Drum Tap"},{"bank":1,"program":30,"name":"Huge Crisis Guiro"},{"bank":1,"program":31,"name":"Night Carnival Toms"},{"bank":1,"program":32,"name":"Snap"},{"bank":1,"program":34,"name":"Final Zone Alarm"},{"bank":1,"program":35,"name":"Bomber Barbara Beep"},{"bank":1,"program":36,"name":"Huge Crisis Drops"},{"bank":1,"program":37,"name":"Tire Screech"},{"bank":1,"program":39,"name":"N. Carniv. Scratch"},{"bank":1,"program":40,"name":"Whoosh"},{"bank":128,"program":6,"name":"Alt. Limit Drums 1"},{"bank":128,"program":7,"name":"Alt. Limit Drums 2"},{"bank":128,"program":8,"name":"Alt. Limit Drums 3"},{"bank":128,"program":9,"name":"Alt. Limit Drums 4"},{"bank":128,"program":10,"name":"Alt. Limit Drums 5"},{"bank":128,"program":20,"name":"Ending Drums"},{"bank":128,"program":21,"name":"Exception Drums 1A"},{"bank":128,"program":22,"name":"Exception Drums 1B"},{"bank":128,"program":23,"name":"Exception Drums 1C"},{"bank":128,"program":24,"name":"Exception Drums 2"},{"bank":128,"program":25,"name":"Exception Drums 3"},{"bank":128,"program":26,"name":"Final Zone Drums 1"},{"bank":128,"program":27,"name":"Final Zone Drums 2"},{"bank":128,"program":28,"name":"Final Zone Drums 3"},{"bank":128,"program":29,"name":"Huge Crisis Drums 1"},{"bank":128,"program":30,"name":"Huge Crisis Drums 2"},{"bank":128,"program":31,"name":"Huge Crisis Drums 3"},{"bank":128,"program":32,"name":"Huge Crisis Drums 4"},{"bank":128,"program":36,"name":"Mirage Road Drums 1"},{"bank":128,"program":37,"name":"Mirage Road Drums 2"},{"bank":128,"program":38,"name":"Mirage Road Drums 3"},{"bank":128,"program":39,"name":"N. Carniv. Drums 1"},{"bank":128,"program":40,"name":"N. Carniv. Drums 2"},{"bank":128,"program":41,"name":"N. Carniv. Drums 3"},{"bank":128,"program":42,"name":"N. Carniv. Drums 4"},{"bank":128,"program":43,"name":"N. Carniv. Drums 5"},{"bank":128,"program":44,"name":"N. Carniv. Drums 6"},{"bank":128,"program":50,"name":"Water Palace Drums 1"},{"bank":128,"program":51,"name":"Water Palace Drums 2"}],"genies":[{"bank":128,"program":30,"name":"32X PWM"},{"bank":128,"program":24,"name":"Power"},{"bank":0,"program":61,"name":"Brass Section"},{"bank":0,"program":114,"name":"Steel Drum"},{"bank":0,"program":100,"name":"Brightness"},{"bank":128,"program":26,"name":"Dance"},{"bank":128,"program":16,"name":"Electric"},{"bank":0,"program":127,"name":"Sound Effects"},{"bank":0,"program":95,"name":"Sweep Pad 5"},{"bank":0,"program":94,"name":"Sweep Pad 4"},{"bank":0,"program":93,"name":"Sweep Pad 3"},{"bank":0,"program":92,"name":"Bowed Glass"},{"bank":0,"program":90,"name":"Sweep Pad 1"},{"bank":0,"program":69,"name":"Oboe 2"},{"bank":0,"program":26,"name":"Jazz Guitar"},{"bank":0,"program":19,"name":"Organ 4"},{"bank":0,"program":18,"name":"Organ 3"},{"bank":0,"program":16,"name":"Organ 1"},{"bank":0,"program":81,"name":"Sawtooth Wave"},{"bank":0,"program":83,"name":"Lead 2"},{"bank":0,"program":88,"name":"Brightness 1"},{"bank":0,"program":87,"name":"Unused 13"},{"bank":0,"program":86,"name":"Unused 12"},{"bank":0,"program":67,"name":"Unused 11"},{"bank":0,"program":66,"name":"Unused 10"},{"bank":0,"program":65,"name":"Unused 9"},{"bank":0,"program":64,"name":"Unused 8"},{"bank":0,"program":52,"name":"Choir"},{"bank":0,"program":28,"name":"Unused 5"},{"bank":0,"program":23,"name":"Unused 3"},{"bank":0,"program":22,"name":"Unused 2"},{"bank":0,"program":21,"name":"Unused 1"},{"bank":0,"program":31,"name":"Mute Guitar"},{"bank":0,"program":7,"name":"Clavinet"},{"bank":0,"program":79,"name":"Whistle 2"},{"bank":0,"program":78,"name":"Whistle 1"},{"bank":0,"program":77,"name":"Flute 6"},{"bank":0,"program":76,"name":"Flute 5"},{"bank":0,"program":75,"name":"Flute 4"},{"bank":0,"program":74,"name":"Flute 3"},{"bank":0,"program":73,"name":"Flute 2"},{"bank":0,"program":72,"name":"Flute 1"},{"bank":0,"program":71,"name":"Clarinet 4"},{"bank":0,"program":70,"name":"Clarinet 3"},{"bank":0,"program":68,"name":"Oboe 1"},{"bank":0,"program":46,"name":"Harp"},{"bank":0,"program":6,"name":"Harpsichord"},{"bank":0,"program":27,"name":"Clean Guitar"},{"bank":0,"program":25,"name":"Steel Guitar 1"},{"bank":0,"program":24,"name":"Nylon Guitar 1"},{"bank":0,"program":45,"name":"Pizz. Strings"},{"bank":0,"program":15,"name":"Chimes 5"},{"bank":0,"program":14,"name":"Bells"},{"bank":0,"program":10,"name":"Chimes 3"},{"bank":0,"program":9,"name":"Chimes 2"},{"bank":0,"program":8,"name":"Chimes 1"},{"bank":0,"program":48,"name":"Strings 6"},{"bank":0,"program":47,"name":"DAC Timpani"},{"bank":0,"program":55,"name":"Orchestra Hit"},{"bank":0,"program":54,"name":"Choir 3"},{"bank":0,"program":53,"name":"Choir 2"},{"bank":0,"program":91,"name":"Choir Pad"},{"bank":0,"program":89,"name":"Warm Pad"},{"bank":0,"program":84,"name":"Lead 3"},{"bank":0,"program":80,"name":"Square Wave"},{"bank":128,"program":0,"name":"Standard"},{"bank":0,"program":63,"name":"Synth Brass 2"},{"bank":0,"program":62,"name":"Synth Brass 1"},{"bank":0,"program":60,"name":"French Horn"},{"bank":0,"program":59,"name":"Mute Trumpet"},{"bank":0,"program":58,"name":"Tuba"},{"bank":0,"program":57,"name":"Trombone"},{"bank":0,"program":56,"name":"Trumpet"},{"bank":0,"program":39,"name":"Synth Bass 2"},{"bank":0,"program":38,"name":"Synth Bass 1"},{"bank":0,"program":37,"name":"Slap Bass 2"},{"bank":0,"program":36,"name":"Slap Bass 1"},{"bank":0,"program":35,"name":"Fretless Bass"},{"bank":0,"program":34,"name":"E. Bass 2"},{"bank":0,"program":33,"name":"E. Bass 1"},{"bank":0,"program":32,"name":"Acoustic Bass"},{"bank":0,"program":51,"name":"Strings 9"},{"bank":0,"program":50,"name":"Strings 8"},{"bank":0,"program":49,"name":"Strings 7"},{"bank":0,"program":44,"name":"Strings 5"},{"bank":0,"program":43,"name":"Strings 4"},{"bank":0,"program":42,"name":"Strings 3"},{"bank":0,"program":41,"name":"Strings 2"},{"bank":0,"program":40,"name":"Strings 1"},{"bank":0,"program":30,"name":"Dist. Guitar 2"},{"bank":0,"program":29,"name":"Dist. Guitar 1"},{"bank":0,"program":20,"name":"Organ 5"},{"bank":0,"program":17,"name":"Organ 2"},{"bank":0,"program":13,"name":"Xylophone"},{"bank":0,"program":11,"name":"Vibes 4"},{"bank":0,"program":5,"name":"E. Piano 2"},{"bank":0,"program":4,"name":"E. Piano 1"},{"bank":0,"program":3,"name":"piano 4"},{"bank":0,"program":2,"name":"Piano 3"},{"bank":0,"program":1,"name":"Piano 2"},{"bank":0,"program":0,"name":"Piano 1"}],"meow":[{"bank":0,"program":0,"name":"cat_meow_x"},{"bank":0,"program":1,"name":"MeowSynthCombo"}],"casino":[{"bank":0,"program":0,"name":"Sonic Drums"}]});
+  const INSTRUMENT_PICKER_PRESET_CATALOG=Object.freeze({"sf64":[{"bank":0,"program":36,"name":"Slap Bass"},{"bank":0,"program":27,"name":"Electric Guitar (C)"},{"bank":0,"program":4,"name":"Electric Piano 1"},{"bank":0,"program":48,"name":"Strings 1"},{"bank":0,"program":60,"name":"French Horn"},{"bank":0,"program":75,"name":"Pan Flute"},{"bank":0,"program":21,"name":"Accordion"},{"bank":0,"program":0,"name":"Grand Piano"},{"bank":128,"program":0,"name":"General Percussion"},{"bank":0,"program":114,"name":"Steel Drums"},{"bank":0,"program":17,"name":"Percussive Organ"},{"bank":0,"program":33,"name":"Electric Bass (F)"},{"bank":0,"program":34,"name":"Electric Bass (P)"},{"bank":0,"program":105,"name":"Banjo"},{"bank":0,"program":110,"name":"Fiddle"},{"bank":0,"program":78,"name":"Whistle"},{"bank":0,"program":32,"name":"Acoustic Bass"},{"bank":0,"program":18,"name":"Rock Organ"},{"bank":0,"program":61,"name":"Brass Section"},{"bank":0,"program":5,"name":"Electric Piano 2"},{"bank":0,"program":53,"name":"Voice Oohs"},{"bank":0,"program":49,"name":"Strings 2"},{"bank":0,"program":55,"name":"Orchestra Hit"},{"bank":0,"program":38,"name":"Synth Bass 1"},{"bank":0,"program":39,"name":"Synth Bass 2"},{"bank":0,"program":80,"name":"Lead 1 (Square)"},{"bank":0,"program":11,"name":"Vibraphone"},{"bank":0,"program":12,"name":"Marimba"},{"bank":0,"program":13,"name":"Xylophone"},{"bank":0,"program":52,"name":"Choir Aahs"},{"bank":0,"program":104,"name":"Sitar"},{"bank":0,"program":107,"name":"Pungi"},{"bank":0,"program":47,"name":"Timpani"},{"bank":0,"program":45,"name":"Pizzicato Strings"},{"bank":0,"program":73,"name":"Flute"},{"bank":0,"program":35,"name":"Fretless Bass"},{"bank":0,"program":43,"name":"Contrabass"},{"bank":0,"program":10,"name":"Music Box"},{"bank":0,"program":57,"name":"Trombone"},{"bank":0,"program":56,"name":"Trumpet"},{"bank":0,"program":19,"name":"Church Organ"},{"bank":0,"program":30,"name":"Distortion Guitar"},{"bank":0,"program":29,"name":"Overdrive Guitar"},{"bank":0,"program":24,"name":"Acoustic Guitar (N)"},{"bank":0,"program":25,"name":"Acoustic Guitar (S)"},{"bank":0,"program":50,"name":"Synth Strings 1"},{"bank":0,"program":51,"name":"Synth Strings 2"},{"bank":0,"program":58,"name":"Tuba"},{"bank":0,"program":62,"name":"Synth Brass 1"},{"bank":0,"program":63,"name":"Synth Brass 2"},{"bank":0,"program":64,"name":"Soprano Sax"},{"bank":0,"program":65,"name":"Alto Sax"},{"bank":0,"program":66,"name":"Tenor Sax"},{"bank":0,"program":67,"name":"Baritone Sax"},{"bank":0,"program":16,"name":"Drawback Organ"},{"bank":0,"program":20,"name":"Reed Organ"},{"bank":0,"program":74,"name":"Recorder"},{"bank":0,"program":76,"name":"Blown Bottle"},{"bank":0,"program":70,"name":"Bassoon"},{"bank":0,"program":71,"name":"Clarinet"},{"bank":0,"program":22,"name":"Harmonica"},{"bank":0,"program":81,"name":"Lead 2 (Sawtooth)"},{"bank":0,"program":1,"name":"Bright Acoustic Pian"},{"bank":0,"program":2,"name":"Electric Grand"},{"bank":0,"program":3,"name":"Honky-Tonk"},{"bank":0,"program":112,"name":"Tinkle Bell"},{"bank":0,"program":15,"name":"Dulcimer"},{"bank":0,"program":6,"name":"Harpsichord"},{"bank":0,"program":40,"name":"Violin"},{"bank":0,"program":41,"name":"Viola"},{"bank":0,"program":26,"name":"Electric Guitar (J)"},{"bank":0,"program":59,"name":"Muted Trumpet"},{"bank":0,"program":87,"name":"Lead 8 (Lead + Base)"},{"bank":0,"program":37,"name":"Slap Bass 2"},{"bank":0,"program":8,"name":"Celesta"},{"bank":0,"program":98,"name":"Crystal Synth"},{"bank":0,"program":69,"name":"English Horn"},{"bank":0,"program":79,"name":"Ocarina"},{"bank":0,"program":28,"name":"Electric Guitar (M)"},{"bank":0,"program":44,"name":"Tremolo Strings"},{"bank":0,"program":100,"name":"Brightness Synth"},{"bank":0,"program":92,"name":"Pad 5 (bowed)"},{"bank":0,"program":93,"name":"Pad 6 (metallic)"},{"bank":0,"program":88,"name":"Pad 1 (new age)"},{"bank":0,"program":46,"name":"Orchestrial Strings"},{"bank":128,"program":16,"name":"Powerful Percussion"},{"bank":0,"program":54,"name":"Synth Voice"},{"bank":0,"program":82,"name":"Lead 3 (Callope)"},{"bank":0,"program":72,"name":"Piccolo"},{"bank":0,"program":9,"name":"Glockenspiel"},{"bank":0,"program":108,"name":"Kalimba"},{"bank":0,"program":77,"name":"Skakuhachi"},{"bank":0,"program":68,"name":"Oboe"},{"bank":0,"program":99,"name":"Atmosphere Synth"},{"bank":0,"program":113,"name":"Agogo"},{"bank":0,"program":91,"name":"Pad 4 (choir)"},{"bank":0,"program":7,"name":"Clav"},{"bank":0,"program":96,"name":"Rain Synth"},{"bank":0,"program":118,"name":"Synth Drum"},{"bank":0,"program":14,"name":"Tubular Bells"},{"bank":0,"program":102,"name":"Echoes Synth"},{"bank":0,"program":90,"name":"Pad 3 (polysynth)"},{"bank":0,"program":116,"name":"Taiko Drum"},{"bank":0,"program":89,"name":"Pad 2 (warm)"},{"bank":0,"program":94,"name":"Pad 7 (halo)"},{"bank":0,"program":119,"name":"Reverse Cymbal"},{"bank":0,"program":23,"name":"Tango Accordion"},{"bank":0,"program":127,"name":"Gunshot"},{"bank":0,"program":106,"name":"Shamisen"},{"bank":0,"program":85,"name":"Lead 6 (voice)"},{"bank":0,"program":42,"name":"Cello"},{"bank":0,"program":103,"name":"Sci-Fi Synth"}],"rush":[{"bank":0,"program":0,"name":"Altitude Limit Piano"},{"bank":0,"program":4,"name":"E. Piano 1"},{"bank":0,"program":5,"name":"E. Piano 2"},{"bank":0,"program":10,"name":"Organ 1"},{"bank":0,"program":11,"name":"Organ 2"},{"bank":0,"program":15,"name":"Alt. Limit Guitar 1"},{"bank":0,"program":16,"name":"Alt. Limit Guitar 2"},{"bank":0,"program":17,"name":"Alt. Limit Guitar 3"},{"bank":0,"program":18,"name":"Alt. Limit Guitar 4"},{"bank":0,"program":23,"name":"Ending Guitar"},{"bank":0,"program":24,"name":"Exception Guitar"},{"bank":0,"program":25,"name":"Final Zone Guitar 1"},{"bank":0,"program":26,"name":"Final Zone Guitar 2"},{"bank":0,"program":32,"name":"Mirage Road Guitar 1"},{"bank":0,"program":33,"name":"Mirage Road Guitar 2"},{"bank":0,"program":34,"name":"N. Carniv. Guitar 1"},{"bank":0,"program":35,"name":"N. Carniv. Guitar 2"},{"bank":0,"program":38,"name":"Water Palace Guit. 1"},{"bank":0,"program":39,"name":"Water Palace Guit. 2"},{"bank":0,"program":40,"name":"Water Palace Guit. 3"},{"bank":0,"program":41,"name":"Water Palace Guit. 4"},{"bank":0,"program":42,"name":"Clean Guitar"},{"bank":0,"program":43,"name":"Dist. Guitar SFX"},{"bank":0,"program":45,"name":"Alt. Limit Bass 1"},{"bank":0,"program":46,"name":"Alt. Limit Bass 2"},{"bank":0,"program":50,"name":"Exception Bass"},{"bank":0,"program":51,"name":"Final Zone Bass"},{"bank":0,"program":52,"name":"Huge Crisis Bass"},{"bank":0,"program":55,"name":"Mirage Road Bass"},{"bank":0,"program":56,"name":"Night Carnival Bass"},{"bank":0,"program":58,"name":"Synth Bass 1"},{"bank":0,"program":59,"name":"Synth Bass 2"},{"bank":0,"program":60,"name":"Synth Bass 3"},{"bank":0,"program":62,"name":"Ending Strings 1"},{"bank":0,"program":63,"name":"Ending Strings 2"},{"bank":0,"program":64,"name":"Exception Strings 1"},{"bank":0,"program":65,"name":"Exception Strings 2"},{"bank":0,"program":66,"name":"Exception Strings 3"},{"bank":0,"program":67,"name":"Exception Violin"},{"bank":0,"program":68,"name":"Final Zone Strings"},{"bank":0,"program":70,"name":"Mirage Road Strings"},{"bank":0,"program":71,"name":"Mirage Road Violin"},{"bank":0,"program":79,"name":"Exception Choir"},{"bank":0,"program":101,"name":"Mirage Road Hit"},{"bank":0,"program":102,"name":"Orchestra Hit 1"},{"bank":0,"program":103,"name":"Orchestra Hit 2"},{"bank":0,"program":106,"name":"Huge Crisis Brass"},{"bank":0,"program":109,"name":"N. Carniv. Brass 1"},{"bank":0,"program":110,"name":"N. Carniv. Brass 2"},{"bank":0,"program":113,"name":"Water Palace Brass 1"},{"bank":0,"program":114,"name":"Water Palace Brass 2"},{"bank":0,"program":115,"name":"Water Palace Brass 3"},{"bank":0,"program":116,"name":"Brass Section 1"},{"bank":0,"program":117,"name":"Brass Section 2"},{"bank":0,"program":118,"name":"Brass Section 3"},{"bank":0,"program":119,"name":"Brass Section 4"},{"bank":0,"program":120,"name":"Synth Brass"},{"bank":0,"program":121,"name":"Alto Sax"},{"bank":0,"program":123,"name":"Flute Flutter"},{"bank":0,"program":124,"name":"N. Carniv. Whistle 1"},{"bank":0,"program":125,"name":"N. Carniv. Whistle 2"},{"bank":1,"program":2,"name":"Altitude Limit Synth"},{"bank":1,"program":8,"name":"Exception Synth 1"},{"bank":1,"program":10,"name":"Final Zone Synth 1"},{"bank":1,"program":11,"name":"Final Zone Synth 2"},{"bank":1,"program":16,"name":"Mirage Road Synth 1"},{"bank":1,"program":17,"name":"Mirage Road Synth 2"},{"bank":1,"program":18,"name":"Mirage Road Synth 3"},{"bank":1,"program":20,"name":"Water Palace Synth"},{"bank":1,"program":21,"name":"Sine Wave 1"},{"bank":1,"program":22,"name":"Sine Wave 2"},{"bank":1,"program":24,"name":"Saw Wave 2"},{"bank":1,"program":25,"name":"Saw Wave 3"},{"bank":1,"program":26,"name":"Synth Pad"},{"bank":1,"program":27,"name":"Mirage Road Sitar"},{"bank":1,"program":28,"name":"Chimes"},{"bank":1,"program":29,"name":"Drum Tap"},{"bank":1,"program":30,"name":"Huge Crisis Guiro"},{"bank":1,"program":31,"name":"Night Carnival Toms"},{"bank":1,"program":32,"name":"Snap"},{"bank":1,"program":34,"name":"Final Zone Alarm"},{"bank":1,"program":35,"name":"Bomber Barbara Beep"},{"bank":1,"program":36,"name":"Huge Crisis Drops"},{"bank":1,"program":37,"name":"Tire Screech"},{"bank":1,"program":39,"name":"N. Carniv. Scratch"},{"bank":1,"program":40,"name":"Whoosh"},{"bank":128,"program":6,"name":"Alt. Limit Drums 1"},{"bank":128,"program":7,"name":"Alt. Limit Drums 2"},{"bank":128,"program":8,"name":"Alt. Limit Drums 3"},{"bank":128,"program":9,"name":"Alt. Limit Drums 4"},{"bank":128,"program":10,"name":"Alt. Limit Drums 5"},{"bank":128,"program":20,"name":"Ending Drums"},{"bank":128,"program":21,"name":"Exception Drums 1A"},{"bank":128,"program":22,"name":"Exception Drums 1B"},{"bank":128,"program":23,"name":"Exception Drums 1C"},{"bank":128,"program":24,"name":"Exception Drums 2"},{"bank":128,"program":25,"name":"Exception Drums 3"},{"bank":128,"program":26,"name":"Final Zone Drums 1"},{"bank":128,"program":27,"name":"Final Zone Drums 2"},{"bank":128,"program":28,"name":"Final Zone Drums 3"},{"bank":128,"program":29,"name":"Huge Crisis Drums 1"},{"bank":128,"program":30,"name":"Huge Crisis Drums 2"},{"bank":128,"program":31,"name":"Huge Crisis Drums 3"},{"bank":128,"program":32,"name":"Huge Crisis Drums 4"},{"bank":128,"program":36,"name":"Mirage Road Drums 1"},{"bank":128,"program":37,"name":"Mirage Road Drums 2"},{"bank":128,"program":38,"name":"Mirage Road Drums 3"},{"bank":128,"program":39,"name":"N. Carniv. Drums 1"},{"bank":128,"program":40,"name":"N. Carniv. Drums 2"},{"bank":128,"program":41,"name":"N. Carniv. Drums 3"},{"bank":128,"program":42,"name":"N. Carniv. Drums 4"},{"bank":128,"program":43,"name":"N. Carniv. Drums 5"},{"bank":128,"program":44,"name":"N. Carniv. Drums 6"},{"bank":128,"program":50,"name":"Water Palace Drums 1"},{"bank":128,"program":51,"name":"Water Palace Drums 2"}],"genies":[{"bank":128,"program":30,"name":"32X PWM"},{"bank":128,"program":24,"name":"Power"},{"bank":0,"program":61,"name":"Brass Section"},{"bank":0,"program":114,"name":"Steel Drum"},{"bank":0,"program":100,"name":"Brightness"},{"bank":128,"program":26,"name":"Dance"},{"bank":128,"program":16,"name":"Electric"},{"bank":0,"program":127,"name":"Sound Effects"},{"bank":0,"program":95,"name":"Sweep Pad 5"},{"bank":0,"program":94,"name":"Sweep Pad 4"},{"bank":0,"program":93,"name":"Sweep Pad 3"},{"bank":0,"program":92,"name":"Bowed Glass"},{"bank":0,"program":90,"name":"Sweep Pad 1"},{"bank":0,"program":69,"name":"Oboe 2"},{"bank":0,"program":26,"name":"Jazz Guitar"},{"bank":0,"program":19,"name":"Organ 4"},{"bank":0,"program":18,"name":"Organ 3"},{"bank":0,"program":16,"name":"Organ 1"},{"bank":0,"program":81,"name":"Sawtooth Wave"},{"bank":0,"program":83,"name":"Lead 2"},{"bank":0,"program":88,"name":"Brightness 1"},{"bank":0,"program":87,"name":"Unused 13"},{"bank":0,"program":86,"name":"Unused 12"},{"bank":0,"program":67,"name":"Unused 11"},{"bank":0,"program":66,"name":"Unused 10"},{"bank":0,"program":65,"name":"Unused 9"},{"bank":0,"program":64,"name":"Unused 8"},{"bank":0,"program":52,"name":"Choir"},{"bank":0,"program":28,"name":"Unused 5"},{"bank":0,"program":23,"name":"Unused 3"},{"bank":0,"program":22,"name":"Unused 2"},{"bank":0,"program":21,"name":"Unused 1"},{"bank":0,"program":31,"name":"Mute Guitar"},{"bank":0,"program":7,"name":"Clavinet"},{"bank":0,"program":79,"name":"Whistle 2"},{"bank":0,"program":78,"name":"Whistle 1"},{"bank":0,"program":77,"name":"Flute 6"},{"bank":0,"program":76,"name":"Flute 5"},{"bank":0,"program":75,"name":"Flute 4"},{"bank":0,"program":74,"name":"Flute 3"},{"bank":0,"program":73,"name":"Flute 2"},{"bank":0,"program":72,"name":"Flute 1"},{"bank":0,"program":71,"name":"Clarinet 4"},{"bank":0,"program":70,"name":"Clarinet 3"},{"bank":0,"program":68,"name":"Oboe 1"},{"bank":0,"program":46,"name":"Harp"},{"bank":0,"program":6,"name":"Harpsichord"},{"bank":0,"program":27,"name":"Clean Guitar"},{"bank":0,"program":25,"name":"Steel Guitar 1"},{"bank":0,"program":24,"name":"Nylon Guitar 1"},{"bank":0,"program":45,"name":"Pizz. Strings"},{"bank":0,"program":15,"name":"Chimes 5"},{"bank":0,"program":14,"name":"Bells"},{"bank":0,"program":10,"name":"Chimes 3"},{"bank":0,"program":9,"name":"Chimes 2"},{"bank":0,"program":8,"name":"Chimes 1"},{"bank":0,"program":48,"name":"Strings 6"},{"bank":0,"program":47,"name":"DAC Timpani"},{"bank":0,"program":55,"name":"Orchestra Hit"},{"bank":0,"program":54,"name":"Choir 3"},{"bank":0,"program":53,"name":"Choir 2"},{"bank":0,"program":91,"name":"Choir Pad"},{"bank":0,"program":89,"name":"Warm Pad"},{"bank":0,"program":84,"name":"Lead 3"},{"bank":0,"program":80,"name":"Square Wave"},{"bank":128,"program":0,"name":"Standard"},{"bank":0,"program":63,"name":"Synth Brass 2"},{"bank":0,"program":62,"name":"Synth Brass 1"},{"bank":0,"program":60,"name":"French Horn"},{"bank":0,"program":59,"name":"Mute Trumpet"},{"bank":0,"program":58,"name":"Tuba"},{"bank":0,"program":57,"name":"Trombone"},{"bank":0,"program":56,"name":"Trumpet"},{"bank":0,"program":39,"name":"Synth Bass 2"},{"bank":0,"program":38,"name":"Synth Bass 1"},{"bank":0,"program":37,"name":"Slap Bass 2"},{"bank":0,"program":36,"name":"Slap Bass 1"},{"bank":0,"program":35,"name":"Fretless Bass"},{"bank":0,"program":34,"name":"E. Bass 2"},{"bank":0,"program":33,"name":"E. Bass 1"},{"bank":0,"program":32,"name":"Acoustic Bass"},{"bank":0,"program":51,"name":"Strings 9"},{"bank":0,"program":50,"name":"Strings 8"},{"bank":0,"program":49,"name":"Strings 7"},{"bank":0,"program":44,"name":"Strings 5"},{"bank":0,"program":43,"name":"Strings 4"},{"bank":0,"program":42,"name":"Strings 3"},{"bank":0,"program":41,"name":"Strings 2"},{"bank":0,"program":40,"name":"Strings 1"},{"bank":0,"program":30,"name":"Dist. Guitar 2"},{"bank":0,"program":29,"name":"Dist. Guitar 1"},{"bank":0,"program":20,"name":"Organ 5"},{"bank":0,"program":17,"name":"Organ 2"},{"bank":0,"program":13,"name":"Xylophone"},{"bank":0,"program":11,"name":"Vibes 4"},{"bank":0,"program":5,"name":"E. Piano 2"},{"bank":0,"program":4,"name":"E. Piano 1"},{"bank":0,"program":3,"name":"piano 4"},{"bank":0,"program":2,"name":"Piano 3"},{"bank":0,"program":1,"name":"Piano 2"},{"bank":0,"program":0,"name":"Piano 1"}],"meow":[{"bank":0,"program":0,"name":"cat_meow_x"},{"bank":0,"program":1,"name":"MeowSynthCombo"}],"casino":[{"bank":0,"program":0,"name":"Sonic Drums"}]});
 
   function instrumentPickerVoices(channel,sourceId){
     const bank=proceduralSoundFonts.get(sourceId);
@@ -10416,8 +10535,16 @@
     // catalog guarantees newly-added presets (notably MeowSynthCombo) stay
     // visible even if an older/cached parser view is missing a header.
     const presetByKey=new Map();
-    for(const p of (INSTRUMENT_PICKER_PRESET_CATALOG[sourceId]||[]))presetByKey.set(`${Number(p.bank)}:${Number(p.program)}`,p);
-    if(bank?.getPresetList)for(const p of bank.getPresetList())presetByKey.set(`${Number(p.bank)}:${Number(p.program)}`,p);
+    for(const raw of (INSTRUMENT_PICKER_PRESET_CATALOG[sourceId]||[])){
+      if(isExcludedSf64Preset(sourceId,raw.bank,raw.program,raw.name))continue;
+      const p={...raw,name:soundFontFriendlyPresetName(sourceId,raw.name)};
+      presetByKey.set(`${Number(p.bank)}:${Number(p.program)}`,p);
+    }
+    if(bank?.getPresetList)for(const raw of bank.getPresetList()){
+      if(isExcludedSf64Preset(sourceId,raw.bank,raw.program,raw.name))continue;
+      const p={...raw,name:soundFontFriendlyPresetName(sourceId,raw.name)};
+      presetByKey.set(`${Number(p.bank)}:${Number(p.program)}`,p);
+    }
     const sourcePresets=[...presetByKey.values()];
     const current=instrumentPickerCurrentVoice(channel);
     const seen=new Set();
@@ -10426,8 +10553,8 @@
       .filter(p=>sourceId!=="genies"||(!isExcludedGeniesGuitar(p.name)&&!proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(p.bank)}:${Number(p.program)}`)))
       .map(p=>{
         const key=`${sourceId}:${Number(p.bank)}:${Number(p.program)}`;
-        if(proceduralVoiceKey(current)===key)return current;
-        return sfVoice(sourceId,Number(p.bank),Number(p.program),String(p.name||"Patch"),sfVoiceSourceOptions(sourceId,p.bank,p.program));
+        if(proceduralVoiceKey(current)===key)return sfVoice(sourceId,Number(p.bank),Number(p.program),soundFontFriendlyPresetName(sourceId,current?.name||p.name),sfVoiceSourceOptions(sourceId,p.bank,p.program));
+        return sfVoice(sourceId,Number(p.bank),Number(p.program),soundFontFriendlyPresetName(sourceId,p.name),sfVoiceSourceOptions(sourceId,p.bank,p.program));
       })
       .filter(voice=>{
         const key=proceduralVoiceKey(voice);
@@ -10788,9 +10915,11 @@
     showSystemReadout(trackCategoryLabel(midiStemRole(channel.stem)).toUpperCase(),proceduralSoundFontDisplayName(next.source).toUpperCase(),String(next.name||"PATCH").toUpperCase());
   }
 
-  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverbPreDelay);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,autoGainCompensation:1,autoGainDeltaDb:0,autoGainBaseDeltaDb:0,autoGainDynamicDb:0,autoGainDynamicTargetDb:0,autoGainReferenceDb:null,autoGainCurrentReferenceDb:null,autoGainBufferAverageDb:null,autoGainCurrentDb:null,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
+  function createProceduralChannel(stem,index,state,el,buffer){const trim=audioCtx.createGain(),pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():audioCtx.createGain(),fxRack=window.WIFEY_STRIP_FX?.createRack(audioCtx,state.fx),fader=audioCtx.createGain(),send=audioCtx.createGain(),analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.68;const meterData=new Uint8Array(analyser.fftSize);trim.connect(pan);if(fxRack){pan.connect(fxRack.input);fxRack.output.connect(fader)}else pan.connect(fader);fader.connect(masterBus);fader.connect(send);send.connect(reverbPreDelay);fader.connect(analyser);return{stem,index,state,buffer,sources:new Set(),trim,pan,fxRack,fader,send,analyser,meterData,el,meterL:el?.querySelector("[data-meter-l]"),meterR:el?.querySelector("[data-meter-r]"),statusLed:el?.querySelector("[data-mute-led]"),instrumentLamp:el?.querySelector("[data-instrument-icon]"),ledDrive:0,iconDrive:0,autoGainCompensation:1,autoGainDeltaDb:0,autoGainBaseDeltaDb:0,autoGainDynamicDb:0,autoGainDynamicTargetDb:0,autoGainReferenceDb:null,autoGainCurrentReferenceDb:null,autoGainBufferAverageDb:null,autoGainCurrentDb:null,ready:true,error:false,procedural:true,readyPromise:Promise.resolve()}}
   async function setupProceduralAudioForRenderedChannels(playlist,generation){
     ensureAudioGraph();
+    await window.WIFEY_STRIP_FX?.prepareContext?.(audioCtx);
+    if(generation!==loadGeneration)return false;
     await ensureProceduralSoundFonts();
     if(generation!==loadGeneration)return false;
     const els=[...grid.querySelectorAll("[data-channel]")],program=playlist.program;
@@ -12051,6 +12180,26 @@
     masterPan = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createGain();
 
     masterGain = audioCtx.createGain();
+
+    // Measure the combined post-fader mix BEFORE the normalization gain so the
+    // controller never chases its own correction. The final analyser/meter stays
+    // after AGC so the MASTER meter shows the signal that actually reaches output.
+    masterAutoGainInputAnalyser = audioCtx.createAnalyser();
+    masterAutoGainInputAnalyser.fftSize = 2048;
+    masterAutoGainInputAnalyser.smoothingTimeConstant = .94;
+    masterAutoGainInputData = new Float32Array(masterAutoGainInputAnalyser.fftSize);
+    masterAutoGainGain = audioCtx.createGain();
+    masterAutoGainGain.gain.value = 1;
+
+    // A transparent peak catcher only protects headroom after a positive AGC lift;
+    // it is not intended to perform the slow loudness leveling itself.
+    masterAutoGainLimiter = audioCtx.createDynamicsCompressor();
+    masterAutoGainLimiter.threshold.value = -1.0;
+    masterAutoGainLimiter.knee.value = 0;
+    masterAutoGainLimiter.ratio.value = 20;
+    masterAutoGainLimiter.attack.value = .003;
+    masterAutoGainLimiter.release.value = .12;
+
     masterAnalyser = audioCtx.createAnalyser();
     masterAnalyser.fftSize = 256;
     masterAnalyser.smoothingTimeConstant = .72;
@@ -12156,7 +12305,10 @@
     megaLimiter.connect(megaphoneWet);
     megaphoneWet.connect(masterGain);
 
-    masterGain.connect(masterAnalyser);
+    masterGain.connect(masterAutoGainInputAnalyser);
+    masterAutoGainInputAnalyser.connect(masterAutoGainGain);
+    masterAutoGainGain.connect(masterAutoGainLimiter);
+    masterAutoGainLimiter.connect(masterAnalyser);
     masterAnalyser.connect(audioCtx.destination);
 
     applyMasterState();
@@ -12371,7 +12523,7 @@
   }
 
   function resetChannelAutoGainDynamics(channel,{apply=true}={}){if(!channel)return;channel.autoGainDynamicDb=0;channel.autoGainDynamicTargetDb=0;channel.autoGainDynamicLastMs=0;if(apply)applyChannelAutoGainCompensation(channel,.7)}
-  function resetAllAutoGainDynamics(){for(const channel of channels)resetChannelAutoGainDynamics(channel)}
+  function resetAllAutoGainDynamics(){for(const channel of channels)resetChannelAutoGainDynamics(channel);resetMasterAutoGain()}
 
   function updateAutoGainDynamics(timestamp){
     if(!isPlaying||!audioCtx)return;const nowMs=Number(timestamp)||performance.now();if(nowMs-lastAutoGainDynamicPassMs<AUTO_GAIN_DYNAMIC_INTERVAL_MS)return;lastAutoGainDynamicPassMs=nowMs;const position=getPosition();
@@ -12398,6 +12550,84 @@
     showSystemReadout(String(channel.stem?.displayInstrumentName||channel.stem?.name||"TRACK").toUpperCase(),channel.state.autoGain===false?"AGC OFF":"AGC ON",channel.state.autoGain===false?"UNITY":`${(Number(channel.autoGainDeltaDb)||0)>=0?"+":""}${(Number(channel.autoGainDeltaDb)||0).toFixed(1)} DB`);
   }
 
+
+  // MASTER AGC works on the summed mix. It is intentionally much slower than a
+  // compressor and follows an RMS target rather than individual peaks. The target
+  // moves with the master fader, so lowering MASTER still lowers the audible mix
+  // instead of AGC simply restoring the old output level.
+  const MASTER_AGC_BASE_TARGET_DB = -18;
+  const MASTER_AGC_MAX_BOOST_DB = 9;
+  const MASTER_AGC_MAX_CUT_DB = 12;
+  const MASTER_AGC_STRENGTH = .72;
+  const MASTER_AGC_DEADBAND_DB = 1.0;
+  const MASTER_AGC_INTERVAL_MS = 250;
+  const MASTER_AGC_CUT_SECONDS = 2.8;
+  const MASTER_AGC_LIFT_SECONDS = 6.5;
+
+  function masterAutoGainTargetLevelDb(){
+    const faderDb=faderValueToDb(masterState.level);
+    return MASTER_AGC_BASE_TARGET_DB+(Number.isFinite(faderDb)?faderDb:0);
+  }
+
+  function syncMasterAutoGainButton(){
+    const btn=document.getElementById("masterAgcBtn");
+    if(!btn)return;
+    btn.classList.toggle("active",masterAutoGainEnabled);
+    btn.setAttribute("aria-pressed",String(masterAutoGainEnabled));
+    btn.setAttribute("aria-label",`MASTER AUTO-GAIN COMPENSATION ${masterAutoGainEnabled?"ON":"OFF"}`);
+    btn.title=masterAutoGainEnabled
+      ? `MASTER AUTO-GAIN COMPENSATION · ${(masterAutoGainDb>=0?"+":"")+masterAutoGainDb.toFixed(1)} dB`
+      : "MASTER AUTO-GAIN COMPENSATION · OFF";
+  }
+
+  function applyMasterAutoGain(time=.45){
+    if(!audioCtx||!masterAutoGainGain)return;
+    const gain=masterAutoGainEnabled?dbToGain(masterAutoGainDb):1;
+    setParam(masterAutoGainGain.gain,gain,time);
+    syncMasterAutoGainButton();
+  }
+
+  function resetMasterAutoGain({apply=true}={}){
+    masterAutoGainDb=0;
+    masterAutoGainTargetDb=0;
+    masterAutoGainLastMs=0;
+    if(apply)applyMasterAutoGain(.35);
+  }
+
+  function updateMasterAutoGain(timestamp){
+    if(!isPlaying||!audioCtx||!masterAutoGainEnabled||!masterAutoGainInputAnalyser||!masterAutoGainInputData)return;
+    const nowMs=Number(timestamp)||performance.now();
+    if(nowMs-masterAutoGainLastMs<MASTER_AGC_INTERVAL_MS)return;
+    const previousPass=masterAutoGainLastMs||nowMs-MASTER_AGC_INTERVAL_MS;
+    masterAutoGainLastMs=nowMs;
+
+    const rms=analyserRmsFloat(masterAutoGainInputAnalyser,masterAutoGainInputData);
+    if(!Number.isFinite(rms)||rms<.0008)return; // do not lift silence/noise floors
+    const inputDb=20*Math.log10(rms);
+    const desiredDb=masterAutoGainTargetLevelDb();
+    const deviation=inputDb-desiredDb;
+    const excess=Math.max(0,Math.abs(deviation)-MASTER_AGC_DEADBAND_DB);
+    let target=excess?(-Math.sign(deviation)*excess*MASTER_AGC_STRENGTH):0;
+    target=Math.max(-MASTER_AGC_MAX_CUT_DB,Math.min(MASTER_AGC_MAX_BOOST_DB,target));
+    masterAutoGainTargetDb=target;
+
+    const dt=Math.max(.08,Math.min(1.5,(nowMs-previousPass)/1000));
+    const tau=target<masterAutoGainDb?MASTER_AGC_CUT_SECONDS:MASTER_AGC_LIFT_SECONDS;
+    const alpha=1-Math.exp(-dt/tau);
+    const next=masterAutoGainDb+(target-masterAutoGainDb)*alpha;
+    if(Math.abs(next-masterAutoGainDb)>.004){
+      masterAutoGainDb=Math.abs(next)<.01&&Math.abs(target)<.01?0:next;
+      applyMasterAutoGain(.55);
+    }
+  }
+
+  function toggleMasterAutoGain(){
+    masterAutoGainEnabled=!masterAutoGainEnabled;
+    if(!masterAutoGainEnabled)resetMasterAutoGain({apply:false});
+    applyMasterAutoGain(.35);
+    showSystemReadout("MASTER",masterAutoGainEnabled?"AGC ON":"AGC OFF",masterAutoGainEnabled?`${masterAutoGainDb>=0?"+":""}${masterAutoGainDb.toFixed(1)} DB`:"UNITY");
+  }
+
   function defaultStemState(stem) {
     const id = persistentStemId(stem);
     const persisted = id ? persistentPrefs.stemStates?.[id] : null;
@@ -12416,7 +12646,8 @@
       room:numDefault(source.room,cfg.room,0),
       level:numDefault(source.level,cfg.level,80),
       mute:boolDefault("mute",false),
-      solo:boolDefault("solo",false)
+      solo:boolDefault("solo",false),
+      fx:window.WIFEY_STRIP_FX?.normalizeState(source.fx)||{}
     };
 
     state.locked = isStemLocked(stem);
@@ -12530,7 +12761,8 @@
       room:Number(channel.state.room),
       level:Number(channel.state.level),
       mute:!!channel.state.mute,
-      solo:!!channel.state.solo
+      solo:!!channel.state.solo,
+      fx:window.WIFEY_STRIP_FX?.normalizeState(channel.state.fx)||{}
     };
 
     savedStemState.set(channel.stem.key,snapshot);
@@ -12580,6 +12812,7 @@
     for (const channel of channels) {
       saveChannelState(channel);
 
+      try { window.WIFEY_STRIP_FX?.destroyRack(channel.fxRack); } catch (_) {}
       for (const node of [channel.trim,channel.pan,channel.fader,channel.send,channel.analyser]) {
         try { node?.disconnect(); } catch (_) {}
       }
@@ -12776,6 +13009,8 @@
           <button class="hw-button auto-gain-button${state.autoGain !== false ? " active" : ""}" data-action="auto-gain" data-btn-channel="${index}"
                   aria-pressed="${state.autoGain !== false}" title="AUTO-GAIN COMPENSATION"
                   aria-label="AUTO-GAIN COMPENSATION ${state.autoGain !== false ? "ON" : "OFF"}">AGC</button>
+          <button class="hw-button strip-fx-button${window.WIFEY_STRIP_FX?.hasEnabled(state.fx) ? " active" : ""}" data-fx-channel="${index}" type="button"
+                  aria-haspopup="dialog" aria-expanded="false" title="STRIP EFFECTS" aria-label="Open ${title} effects rack">FX</button>
         </div>
       </div>`;
   }
@@ -12825,6 +13060,9 @@
 
         <div class="fader-zone min-h-0 grid">
           ${faderMarkup(masterState.level,"Master level","master",true)}
+          <button id="masterAgcBtn" class="hw-button auto-gain-button${masterAutoGainEnabled ? " active" : ""}" type="button"
+                  aria-pressed="${masterAutoGainEnabled}" title="MASTER AUTO-GAIN COMPENSATION"
+                  aria-label="MASTER AUTO-GAIN COMPENSATION ${masterAutoGainEnabled ? "ON" : "OFF"}">AGC</button>
         </div>
       </aside>`;
   }
@@ -12860,6 +13098,7 @@
   }
 
   function renderMixer(playlist) {
+    closeStripFxPanel();
     grid.innerHTML = "";
     masterDock.innerHTML = "";
 
@@ -13244,9 +13483,9 @@
     const role=midiStemRole(stem);
 
     function catalogVoice(source,preset){
-      if(!preset)return null;
+      if(!preset||isExcludedSf64Preset(source,preset.bank,preset.program,preset.name))return null;
       if(source==="genies"&&(isExcludedGeniesGuitar(preset.name)||proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(preset.bank)||0}:${Number(preset.program)||0}`)))return null;
-      return sfVoice(source,Number(preset.bank)||0,Number(preset.program)||0,String(preset.name||"Patch"),sfVoiceSourceOptions(source,preset.bank,preset.program));
+      return sfVoice(source,Number(preset.bank)||0,Number(preset.program)||0,soundFontFriendlyPresetName(source,preset.name),sfVoiceSourceOptions(source,preset.bank,preset.program));
     }
 
     if(programWanted!==null){
@@ -13325,9 +13564,9 @@
 
   function midiStoredVoiceForStem(stem){
     const ref=persistentPrefs.midiStemVoices?.[midiStemVoicePreferenceKey(stem)];
-    if(!ref?.source)return null;
+    if(!ref?.source||isExcludedSf64Preset(ref.source,ref.bank,ref.program,ref.name))return null;
     if(String(ref.source)==="genies"&&(isExcludedGeniesGuitar(ref.name)||proceduralGeniesExcludedVoiceKeys.has(`genies:${Number(ref.bank)||0}:${Number(ref.program)||0}`)))return null;
-    return sfVoice(String(ref.source),Number(ref.bank)||0,Number(ref.program)||0,String(ref.name||"Patch"));
+    return sfVoice(String(ref.source),Number(ref.bank)||0,Number(ref.program)||0,soundFontFriendlyPresetName(ref.source,ref.name));
   }
 
   function setMidiStemVoicePreference(stem,voice){
@@ -13467,7 +13706,7 @@
       if(embeddedPrograms&&!useSonicDrumMap){
         const nativeBank=Number.isFinite(Number(cfg.bank))?Number(cfg.bank):(Number(note.channel)===9?128:0);
         const nativeProgram=Math.max(0,Math.min(127,Math.round(Number(note.program)||0)));
-        if(bank.getPreset(nativeBank,nativeProgram)){
+        if(bank.getPreset(nativeBank,nativeProgram)&&!isExcludedSf64Preset(voice.source,nativeBank,nativeProgram,bank.getPreset(nativeBank,nativeProgram)?.name)){
           renderBank=nativeBank;renderProgram=nativeProgram;
           trim=Number.isFinite(Number(sfVoiceSourceOptions(voice.source,nativeBank,nativeProgram).gainTrim))?Number(sfVoiceSourceOptions(voice.source,nativeBank,nativeProgram).gainTrim):1;
         }
@@ -13719,8 +13958,10 @@
     }
   }
 
-  function setupAudioForRenderedChannels(playlist,generation) {
+  async function setupAudioForRenderedChannels(playlist,generation) {
     ensureAudioGraph();
+    await window.WIFEY_STRIP_FX?.prepareContext?.(audioCtx);
+    if(generation!==loadGeneration)return;
     const stripEls = [...grid.querySelectorAll("[data-channel]")];
 
     channels = playlist.stems.map((stem,index)=>{
@@ -13729,6 +13970,7 @@
 
       const trim = audioCtx.createGain();
       const pan = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createGain();
+      const fxRack = window.WIFEY_STRIP_FX?.createRack(audioCtx,state.fx);
       const fader = audioCtx.createGain();
       const send = audioCtx.createGain();
       const analyser = audioCtx.createAnalyser();
@@ -13739,7 +13981,8 @@
       const meterData = new Uint8Array(analyser.fftSize);
 
       trim.connect(pan);
-      pan.connect(fader);
+      if(fxRack){pan.connect(fxRack.input);fxRack.output.connect(fader)}
+      else pan.connect(fader);
       fader.connect(masterBus);
       fader.connect(send);
       send.connect(reverbPreDelay);
@@ -13747,7 +13990,7 @@
 
       const channel = {
         stem,index,state,buffer:null,sources:new Set(),
-        trim,pan,fader,send,analyser,meterData,
+        trim,pan,fxRack,fader,send,analyser,meterData,
         el:stripEls[index],
         meterL:stripEls[index]?.querySelector("[data-meter-l]"),
         meterR:stripEls[index]?.querySelector("[data-meter-r]"),
@@ -14158,6 +14401,160 @@
     }
   }
 
+
+  // ===== PER-STRIP FX DRAWER =====
+  let stripFxPanel=null;
+  let stripFxPanelChannelIndex=null;
+  let stripFxPanelAnchor=null;
+
+  function stripFxStateForChannel(channel){
+    if(!channel)return null;
+    channel.state.fx=window.WIFEY_STRIP_FX?.normalizeState(channel.state.fx)||{};
+    return channel.state.fx;
+  }
+
+  function syncStripFxButton(channel){
+    const button=channel?.el?.querySelector("[data-fx-channel]");
+    if(!button)return;
+    const active=!!window.WIFEY_STRIP_FX?.hasEnabled(channel.state.fx);
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-expanded",String(stripFxPanelChannelIndex===channel.index&&!stripFxPanel?.hidden));
+    button.title=active?"STRIP EFFECTS · ACTIVE":"STRIP EFFECTS";
+  }
+
+  function applyStripFxState(channel,{persist=true}={}){
+    if(!channel)return;
+    channel.state.fx=window.WIFEY_STRIP_FX?.normalizeState(channel.state.fx)||{};
+    if(channel.fxRack)window.WIFEY_STRIP_FX?.applyRackState(channel.fxRack,channel.state.fx);
+    if(persist)saveChannelState(channel);
+    syncStripFxButton(channel);
+  }
+
+  function ensureStripFxPanel(){
+    if(stripFxPanel)return stripFxPanel;
+    stripFxPanel=document.createElement("section");
+    stripFxPanel.className="strip-fx-panel";
+    stripFxPanel.hidden=true;
+    stripFxPanel.setAttribute("role","dialog");
+    stripFxPanel.setAttribute("aria-label","Strip effects rack");
+    document.body.appendChild(stripFxPanel);
+    stripFxPanel.addEventListener("click",event=>event.stopPropagation());
+    document.addEventListener("pointerdown",event=>{
+      if(stripFxPanel?.hidden)return;
+      if(stripFxPanel.contains(event.target)||stripFxPanelAnchor?.contains?.(event.target))return;
+      closeStripFxPanel();
+    });
+    document.addEventListener("keydown",event=>{if(event.key==="Escape")closeStripFxPanel()});
+    window.addEventListener("resize",()=>{if(!stripFxPanel?.hidden&&stripFxPanelAnchor)positionStripFxPanel(stripFxPanelAnchor)});
+    window.addEventListener("scroll",()=>{if(!stripFxPanel?.hidden&&stripFxPanelAnchor)positionStripFxPanel(stripFxPanelAnchor)},{capture:true,passive:true});
+    return stripFxPanel;
+  }
+
+  function positionStripFxPanel(anchor){
+    if(!stripFxPanel||stripFxPanel.hidden||!anchor)return;
+    const rect=anchor.getBoundingClientRect();
+    const width=stripFxPanel.offsetWidth||320,height=stripFxPanel.offsetHeight||420,gap=6,pad=5;
+    let left=rect.right-width;
+    left=Math.max(pad,Math.min(window.innerWidth-width-pad,left));
+    let top=rect.bottom-height-gap;
+    if(top<pad)top=Math.min(window.innerHeight-height-pad,rect.top+rect.height+gap);
+    top=Math.max(pad,Math.min(window.innerHeight-height-pad,top));
+    stripFxPanel.style.left=`${Math.round(left)}px`;
+    stripFxPanel.style.top=`${Math.round(top)}px`;
+  }
+
+  function closeStripFxPanel(){
+    if(!stripFxPanel)return;
+    const previousIndex=stripFxPanelChannelIndex,previousAnchor=stripFxPanelAnchor;
+    stripFxPanel.hidden=true;
+    stripFxPanel.replaceChildren();
+    stripFxPanelChannelIndex=null;
+    stripFxPanelAnchor=null;
+    previousAnchor?.setAttribute?.("aria-expanded","false");
+    if(Number.isInteger(previousIndex))syncStripFxButton(channels[previousIndex]);
+  }
+
+  function stripFxParamMarkup(effectKey,paramName,value){
+    const def=window.WIFEY_STRIP_FX.DEFINITIONS[effectKey].params[paramName];
+    return `<div class="strip-fx-param">
+      <label>${escapeHtml(def.label)}</label>
+      <input type="range" min="${def.min}" max="${def.max}" step="${def.step}" value="${value}" data-fx-param="${escapeHtml(paramName)}" aria-label="${escapeHtml(def.label)}">
+      <output>${escapeHtml(window.WIFEY_STRIP_FX.formatParam(effectKey,paramName,value))}</output>
+    </div>`;
+  }
+
+  function stripFxSlotMarkup(effectKey,slot){
+    const def=window.WIFEY_STRIP_FX.DEFINITIONS[effectKey];
+    const params=Object.keys(def.params).map(name=>stripFxParamMarkup(effectKey,name,slot.params[name])).join("");
+    return `<div class="strip-fx-slot${slot.enabled?" is-on":""}" data-fx-slot="${effectKey}">
+      <div class="strip-fx-main">
+        <button class="strip-fx-power" type="button" data-fx-power aria-pressed="${slot.enabled}" title="${slot.enabled?"Bypass":"Enable"} ${escapeHtml(def.name)}"></button>
+        <div class="strip-fx-name">${escapeHtml(def.label)}<small>${escapeHtml(def.name)}</small></div>
+        <button class="strip-fx-mode" type="button" data-fx-mode data-mode="${slot.mode}" title="Switch WET / SEND">${slot.mode.toUpperCase()}</button>
+        <div class="strip-fx-mix">
+          <input type="range" min="0" max="100" step="1" value="${slot.mix}" data-fx-mix aria-label="${slot.mode.toUpperCase()} amount">
+          <output>${Math.round(slot.mix)}%</output>
+        </div>
+        <button class="strip-fx-expand" type="button" data-fx-expand aria-expanded="false" title="Detailed settings">▾</button>
+      </div>
+      <div class="strip-fx-params" data-fx-params hidden>${params}</div>
+    </div>`;
+  }
+
+  function bindStripFxPanel(channel){
+    if(!stripFxPanel)return;
+    stripFxPanel.querySelector("[data-fx-close]")?.addEventListener("click",closeStripFxPanel);
+    stripFxPanel.querySelectorAll("[data-fx-slot]").forEach(row=>{
+      const key=row.dataset.fxSlot;
+      const getSlot=()=>stripFxStateForChannel(channel)?.[key];
+      row.querySelector("[data-fx-power]")?.addEventListener("click",()=>{
+        const slot=getSlot();if(!slot)return;slot.enabled=!slot.enabled;
+        row.classList.toggle("is-on",slot.enabled);
+        const power=row.querySelector("[data-fx-power]");power?.setAttribute("aria-pressed",String(slot.enabled));
+        if(power)power.title=`${slot.enabled?"Bypass":"Enable"} ${window.WIFEY_STRIP_FX.DEFINITIONS[key].name}`;
+        applyStripFxState(channel);
+        showSystemReadout(String(channel.stem?.displayInstrumentName||channel.stem?.name||"TRACK").toUpperCase(),`${window.WIFEY_STRIP_FX.DEFINITIONS[key].label} ${slot.enabled?"ON":"OFF"}`,`${slot.mode.toUpperCase()} ${Math.round(slot.mix)}%`);
+      });
+      row.querySelector("[data-fx-mode]")?.addEventListener("click",event=>{
+        const slot=getSlot();if(!slot)return;slot.mode=slot.mode==="wet"?"send":"wet";
+        event.currentTarget.textContent=slot.mode.toUpperCase();event.currentTarget.dataset.mode=slot.mode;
+        const mix=row.querySelector("[data-fx-mix]");if(mix)mix.setAttribute("aria-label",`${slot.mode.toUpperCase()} amount`);
+        applyStripFxState(channel);
+      });
+      row.querySelector("[data-fx-mix]")?.addEventListener("input",event=>{
+        const slot=getSlot();if(!slot)return;slot.mix=Math.max(0,Math.min(100,Number(event.currentTarget.value)||0));
+        const output=event.currentTarget.parentElement?.querySelector("output");if(output)output.textContent=`${Math.round(slot.mix)}%`;
+        applyStripFxState(channel);
+      });
+      row.querySelector("[data-fx-expand]")?.addEventListener("click",event=>{
+        const params=row.querySelector("[data-fx-params]"),open=!!params?.hidden;
+        if(params)params.hidden=!open;event.currentTarget.setAttribute("aria-expanded",String(open));event.currentTarget.textContent=open?"▴":"▾";
+        requestAnimationFrame(()=>positionStripFxPanel(stripFxPanelAnchor));
+      });
+      row.querySelectorAll("[data-fx-param]").forEach(input=>input.addEventListener("input",event=>{
+        const slot=getSlot();if(!slot)return;const name=event.currentTarget.dataset.fxParam;slot.params[name]=Number(event.currentTarget.value);
+        const output=event.currentTarget.parentElement?.querySelector("output");if(output)output.textContent=window.WIFEY_STRIP_FX.formatParam(key,name,slot.params[name]);
+        applyStripFxState(channel);
+      }));
+    });
+  }
+
+  function openStripFxPanel(channel,anchor){
+    if(!channel||!anchor||!window.WIFEY_STRIP_FX)return;
+    if(stripFxPanelChannelIndex===channel.index&&stripFxPanel&&!stripFxPanel.hidden){closeStripFxPanel();return}
+    const panel=ensureStripFxPanel(),state=stripFxStateForChannel(channel);
+    stripFxPanelChannelIndex=channel.index;stripFxPanelAnchor=anchor;
+    panel.innerHTML=`<div class="strip-fx-panel__head">
+      <span class="strip-fx-panel__badge">FX</span>
+      <span class="strip-fx-panel__track">${escapeHtml(String(channel.stem?.displayInstrumentName||channel.stem?.name||"TRACK").toUpperCase())}</span>
+      <button class="strip-fx-panel__close" type="button" data-fx-close aria-label="Close effects">×</button>
+    </div>
+    <div class="strip-fx-list">${window.WIFEY_STRIP_FX.ORDER.map(key=>stripFxSlotMarkup(key,state[key])).join("")}</div>
+    <div class="strip-fx-foot">WET = equal-power insert blend · SEND = dry + parallel effected return</div>`;
+    panel.hidden=false;anchor.setAttribute("aria-expanded","true");bindStripFxPanel(channel);
+    requestAnimationFrame(()=>positionStripFxPanel(anchor));
+  }
+
   function bindControlSurface() {
     mixerSurface.querySelectorAll(".knob-range").forEach(input=>{
       const owner=input.dataset.owner;
@@ -14226,6 +14623,14 @@
       });
     });
 
+    mixerSurface.querySelectorAll("[data-fx-channel]").forEach(btn=>{
+      btn.addEventListener("click",event=>{
+        event.preventDefault();event.stopPropagation();
+        const channel=channels[Number(btn.dataset.fxChannel)];
+        if(channel)openStripFxPanel(channel,btn);
+      });
+    });
+
     mixerSurface.querySelectorAll("[data-btn-channel]").forEach(btn=>{
       btn.addEventListener("click",()=>{
         const channel=channels[Number(btn.dataset.btnChannel)];
@@ -14261,7 +14666,9 @@
     document.getElementById("masterPlayBtn")?.addEventListener("click",togglePlayback);
     document.getElementById("masterStopBtn")?.addEventListener("click",stopCurrent);
     document.getElementById("megaphoneBtn")?.addEventListener("click",toggleMegaphone);
+    document.getElementById("masterAgcBtn")?.addEventListener("click",toggleMasterAutoGain);
     syncMegaphoneButton();
+    syncMasterAutoGainButton();
   }
 
   function playlistFilenameTimelineOrigin(playlist=currentPlaylist){
@@ -14698,7 +15105,8 @@
     loadReadout.textContent="LOADING";
     showSystemReadout(String(currentPlaylist?.title||"PLAYLIST").toUpperCase(),"LOADING STEMS","PLEASE WAIT");
     renderMixer(currentPlaylist);
-    setupAudioForRenderedChannels(currentPlaylist,generation);
+    await setupAudioForRenderedChannels(currentPlaylist,generation);
+    if(generation!==loadGeneration)return;
     syncTopTempoControl();
     horizontalScroller.scrollLeft=0;
     updateTransportDisplay();
@@ -15049,6 +15457,7 @@
 
     updateMegaphoneGainCompensation();
     updateAutoGainDynamics(timestamp);
+    updateMasterAutoGain(timestamp);
 
     if (isPlaying) {
       lastKnownPosition=getPosition();
