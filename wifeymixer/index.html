@@ -1609,7 +1609,7 @@
       font-size:clamp(5.5px,.58vw,7px) !important;line-height:1;letter-spacing:.055em;
       color:#747a76 !important;
       background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 18%),linear-gradient(180deg,#45494a,#303435 72%,#242728) !important;
-      transform:rotate(-90deg);
+      transform:rotate(var(--strip-button-angle,-90deg));
       transform-origin:center center;
     }
     .auto-gain-button::after{inset:2px 3px}
@@ -7755,6 +7755,21 @@
     }
     .strip-fx-button.active::before{background:#d7bb72;box-shadow:0 0 5px rgba(231,199,118,.75),inset 0 1px 1px rgba(255,255,255,.38)}
 
+    /* The two tiny fader-bay keys physically face the mixer center, like labels
+       on an analogue desk viewed from the engineer's normal central position.
+       JS assigns the side classes from each strip's actual on-screen position. */
+    .strip-fx-button{
+      transform:rotate(var(--strip-button-angle,-90deg));
+      transform-origin:center center;
+    }
+    .channel.button-orient-left .auto-gain-button,
+    .channel.button-orient-left .strip-fx-button{--strip-button-angle:-90deg}
+    .channel.button-orient-center .auto-gain-button{--strip-button-angle:-90deg}
+    .channel.button-orient-center .strip-fx-button{--strip-button-angle:90deg}
+    .channel.button-orient-right .auto-gain-button,
+    .channel.button-orient-right .strip-fx-button{--strip-button-angle:90deg}
+    .master-strip .auto-gain-button{--strip-button-angle:90deg}
+
     .strip-fx-panel{
       position:fixed;z-index:120000;width:min(330px,calc(100vw - 16px));max-height:min(72vh,620px);overflow:auto;
       padding:8px;border:1px solid #14110d;border-radius:5px;color:#d7d0bf;
@@ -13119,6 +13134,7 @@
 
     bindControlSurface();
     bindChannelNameMarquees();
+    requestStripButtonOrientationUpdate();
     showSystemReadout(
       playlist?.title ? String(playlist.title).toUpperCase() : "WIFEY MIX-8",
       "READY",
@@ -15733,6 +15749,51 @@
   seekRange.addEventListener("pointerup",finishTimelineSeek);
   seekRange.addEventListener("pointercancel",finishTimelineSeek);
 
+
+  // Rotate the tiny AGC / FX legends toward the physical center of the desk.
+  // This is based on viewport position rather than track number, so horizontal
+  // scrolling preserves the analogue-console viewing logic. The one visible
+  // strip nearest center gets split orientation: AGC CCW, FX CW.
+  let stripButtonOrientationFrame=0;
+  function updateStripButtonOrientation(){
+    stripButtonOrientationFrame=0;
+    const strips=[...grid.querySelectorAll(":scope > .channel[data-channel]")];
+    if(!strips.length||!horizontalScroller)return;
+    const viewport=horizontalScroller.getBoundingClientRect();
+    const centerX=(viewport.left+viewport.right)/2;
+    const visible=strips.filter(strip=>{
+      const rect=strip.getBoundingClientRect();
+      return rect.right>viewport.left&&rect.left<viewport.right;
+    });
+    const candidates=visible.length?visible:strips;
+    let centerStrip=candidates[0];
+    let centerDistance=Infinity;
+    for(const strip of candidates){
+      const rect=strip.getBoundingClientRect();
+      const distance=Math.abs(((rect.left+rect.right)/2)-centerX);
+      if(distance<centerDistance){centerDistance=distance;centerStrip=strip;}
+    }
+    for(const strip of strips){
+      strip.classList.remove("button-orient-left","button-orient-center","button-orient-right");
+      if(strip===centerStrip){
+        strip.classList.add("button-orient-center");
+        continue;
+      }
+      const rect=strip.getBoundingClientRect();
+      const stripCenter=(rect.left+rect.right)/2;
+      strip.classList.add(stripCenter<centerX?"button-orient-left":"button-orient-right");
+    }
+  }
+  function requestStripButtonOrientationUpdate(){
+    if(stripButtonOrientationFrame)return;
+    stripButtonOrientationFrame=requestAnimationFrame(updateStripButtonOrientation);
+  }
+  horizontalScroller?.addEventListener("scroll",requestStripButtonOrientationUpdate,{passive:true});
+  window.addEventListener("resize",requestStripButtonOrientationUpdate,{passive:true});
+  if(window.ResizeObserver&&horizontalScroller){
+    const stripButtonResizeObserver=new ResizeObserver(requestStripButtonOrientationUpdate);
+    stripButtonResizeObserver.observe(horizontalScroller);
+  }
 
   mixerSurface.addEventListener("wheel",event=>{
     if (event.ctrlKey || event.metaKey) return;
