@@ -1,6 +1,8 @@
 {
   "files": [
     "!index - Copy.html",
+    "AUTO-GAIN-README.txt",
+    "auto-gain-references.js",
     "index.html",
     "instrument-icons.json",
     "lillie_track_10/bass.mp3",

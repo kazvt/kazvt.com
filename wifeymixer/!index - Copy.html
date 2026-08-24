@@ -13,6 +13,7 @@
   <script src="sf2-procedural.js"></script>
   <script src="midi-support.js"></script>
   <script src="soundfont-icons.js"></script>
+  <script src="auto-gain-references.js"></script>
 
   <style>
     :root{
@@ -11779,14 +11780,20 @@
   // It lives before TRIM and the channel fader, so those hardware controls are
   // always post-compensation. If a stem or voice needs a hand-authored target,
   // set autoGainReferenceDb on that stem/voice or add a stable key here.
-  const AUTO_GAIN_REFERENCE_OVERRIDES_DB = Object.freeze({
-    stems:Object.freeze({
-      // Example: "lillie_track_3/bass.mp3": -19.5
-    }),
-    voices:Object.freeze({
-      // Example: "sf64:0:67": -18.0
-    })
-  });
+  // Offline playlist scans live in auto-gain-references.js so calibration is
+  // easy to tune without touching mixer logic. Each entry can be either a
+  // legacy numeric dB value or { measuredDb, adjustDb }. The effective target
+  // is measuredDb + adjustDb. Runtime measurement remains the fallback.
+  const AUTO_GAIN_REFERENCE_OVERRIDES_DB = window.WIFEY_AUTO_GAIN_REFERENCES || {stems:{},voices:{}};
+
+  function configuredAutoGainEntryDb(entry){
+    if(Number.isFinite(Number(entry)))return Number(entry);
+    if(!entry||typeof entry!=="object")return null;
+    const measured=Number(entry.measuredDb ?? entry.referenceDb);
+    if(!Number.isFinite(measured))return null;
+    const adjust=Number(entry.adjustDb);
+    return measured+(Number.isFinite(adjust)?adjust:0);
+  }
   const AUTO_GAIN_MAX_BOOST_DB=18;
   const AUTO_GAIN_MAX_CUT_DB=18;
   const autoGainReferenceDbCache=new Map();
@@ -11822,9 +11829,11 @@
       if(Number.isFinite(Number(value)))return Number(value);
     }
     const stemKey=autoGainStemKey(stem);
-    if(Number.isFinite(Number(AUTO_GAIN_REFERENCE_OVERRIDES_DB.stems[stemKey])))return Number(AUTO_GAIN_REFERENCE_OVERRIDES_DB.stems[stemKey]);
+    const stemConfigured=configuredAutoGainEntryDb(AUTO_GAIN_REFERENCE_OVERRIDES_DB.stems?.[stemKey]);
+    if(Number.isFinite(stemConfigured))return stemConfigured;
     const voiceKey=voice?proceduralVoiceKey(voice):"";
-    if(voiceKey&&Number.isFinite(Number(AUTO_GAIN_REFERENCE_OVERRIDES_DB.voices[voiceKey])))return Number(AUTO_GAIN_REFERENCE_OVERRIDES_DB.voices[voiceKey]);
+    const voiceConfigured=voiceKey?configuredAutoGainEntryDb(AUTO_GAIN_REFERENCE_OVERRIDES_DB.voices?.[voiceKey]):null;
+    if(Number.isFinite(voiceConfigured))return voiceConfigured;
     return null;
   }
 
