@@ -7755,19 +7755,38 @@
     }
     .strip-fx-button.active::before{background:#d7bb72;box-shadow:0 0 5px rgba(231,199,118,.75),inset 0 1px 1px rgba(255,255,255,.38)}
 
-    /* The two tiny fader-bay keys face inward from their FIXED mixer position.
-       For an even strip count both middle strips use the split orientation. */
+    /* AGC / FX legends face the listener seated at the center of the mixer.
+       IMPORTANT: use an explicit high-specificity transform here because the generic
+       .hw-button.active rule otherwise replaces an active AGC's rotation.
+
+       odd strip count:  LEFT ... LEFT | [AGC<-  ->FX] | RIGHT ... RIGHT
+       even strip count: LEFT ... LEFT | RIGHT ... RIGHT
+                         (no split strip; the split is between the two middle strips) */
     .strip-fx-button{
-      transform:rotate(var(--strip-button-angle,-90deg));
       transform-origin:center center;
     }
     .channel.button-orient-left .auto-gain-button,
-    .channel.button-orient-left .strip-fx-button{--strip-button-angle:-90deg}
-    .channel.button-orient-center .auto-gain-button{--strip-button-angle:-90deg}
-    .channel.button-orient-center .strip-fx-button{--strip-button-angle:90deg}
+    .channel.button-orient-left .strip-fx-button{
+      --strip-button-angle:-90deg;
+      transform:rotate(-90deg) !important;
+    }
+    .channel.button-orient-split .auto-gain-button{
+      --strip-button-angle:-90deg;
+      transform:rotate(-90deg) !important;
+    }
+    .channel.button-orient-split .strip-fx-button{
+      --strip-button-angle:90deg;
+      transform:rotate(90deg) !important;
+    }
     .channel.button-orient-right .auto-gain-button,
-    .channel.button-orient-right .strip-fx-button{--strip-button-angle:90deg}
-    .master-strip .auto-gain-button{--strip-button-angle:90deg}
+    .channel.button-orient-right .strip-fx-button{
+      --strip-button-angle:90deg;
+      transform:rotate(90deg) !important;
+    }
+    .master-strip .auto-gain-button{
+      --strip-button-angle:90deg;
+      transform:rotate(90deg) !important;
+    }
 
     .strip-fx-panel{
       position:fixed;z-index:120000;width:min(330px,calc(100vw - 16px));max-height:min(72vh,620px);overflow:auto;
@@ -15756,24 +15775,29 @@
   seekRange.addEventListener("pointercancel",finishTimelineSeek);
 
 
-  // Rotate AGC / FX from their original horizontal position according to the
-  // strip's fixed place in the full mixer, NOT according to the scrolled viewport.
-  // Odd strip count: the one true middle strip is split (AGC CCW / FX CW).
-  // Even strip count: BOTH middle strips are split. Everything left of that middle
-  // pair is CCW for both buttons; everything right is CW for both buttons.
+  // Face the AGC / FX legends toward a listener seated at the physical center.
+  // This depends ONLY on the fixed strip order, never on horizontal scroll position.
+  //
+  // EVEN N: first N/2 strips = both CCW; last N/2 strips = both CW.
+  // ODD N:  strips before the middle = both CCW; strips after = both CW;
+  //         the single middle strip is split: AGC CCW, FX CW.
   let stripButtonOrientationFrame=0;
   function updateStripButtonOrientation(){
     stripButtonOrientationFrame=0;
     const strips=[...grid.querySelectorAll(":scope > .channel[data-channel]")];
     const count=strips.length;
     if(!count)return;
-    const middleLeft=Math.floor((count-1)/2);
-    const middleRight=Math.ceil((count-1)/2);
+    const half=Math.floor(count/2);
+    const odd=(count%2)===1;
     strips.forEach((strip,index)=>{
-      strip.classList.remove("button-orient-left","button-orient-center","button-orient-right");
-      if(index<middleLeft)strip.classList.add("button-orient-left");
-      else if(index>middleRight)strip.classList.add("button-orient-right");
-      else strip.classList.add("button-orient-center");
+      strip.classList.remove("button-orient-left","button-orient-split","button-orient-right","button-orient-center");
+      if(index<half){
+        strip.classList.add("button-orient-left");
+      }else if(odd && index===half){
+        strip.classList.add("button-orient-split");
+      }else{
+        strip.classList.add("button-orient-right");
+      }
     });
   }
   function requestStripButtonOrientationUpdate(){
