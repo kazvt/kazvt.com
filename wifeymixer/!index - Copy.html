@@ -1603,7 +1603,7 @@
     .stem-action-buttons{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
     .fader-zone{position:relative}
     .auto-gain-button{
-      position:absolute;z-index:12;left:2px;bottom:7px;
+      position:absolute;z-index:12;left:5%;bottom:7px;
       width:clamp(24px,2.45vw,29px);height:clamp(16px,2.25vh,19px);min-height:0;
       padding:0 1px !important;display:grid;place-items:center;
       font-size:clamp(5.5px,.58vw,7px) !important;line-height:1;letter-spacing:.055em;
@@ -7733,7 +7733,7 @@
 
     /* ===== PER-STRIP VINTAGE FX RACK ===== */
     .strip-fx-button{
-      position:absolute;z-index:13;right:3px;bottom:7px;
+      position:absolute;z-index:13;right:5%;bottom:7px;
       width:clamp(25px,2.55vw,31px);height:clamp(18px,2.4vh,21px);min-height:0;
       padding:0 2px !important;display:grid;place-items:center;
       font-size:clamp(6px,.62vw,7.5px) !important;line-height:1;letter-spacing:.09em;font-weight:900;
@@ -15782,23 +15782,59 @@
   // ODD N:  strips before the middle = both CCW; strips after = both CW;
   //         the single middle strip is split: AGC CCW, FX CW.
   let stripButtonOrientationFrame=0;
+  function positionStripEdgeButtons(strip){
+    const zone=strip?.querySelector?.(".fader-zone");
+    const bay=zone?.querySelector?.(".fader-bay");
+    if(!zone||!bay)return;
+
+    // Put each button CENTER exactly halfway through the unused gutter between
+    // the channel-strip edge and the fader-bay edge. offsetWidth is the button's
+    // pre-transform width, while rotation keeps the same center point, so this
+    // remains correct for both the clockwise and counter-clockwise legends.
+    const zoneRect=zone.getBoundingClientRect();
+    const bayRect=bay.getBoundingClientRect();
+    const leftGutter=Math.max(0,bayRect.left-zoneRect.left);
+    const rightGutter=Math.max(0,zoneRect.right-bayRect.right);
+    const edgePad=3;
+
+    const agc=zone.querySelector(".auto-gain-button");
+    if(agc){
+      const left=Math.max(edgePad,(leftGutter/2)-(agc.offsetWidth/2));
+      agc.style.left=`${left.toFixed(2)}px`;
+      agc.style.right="auto";
+    }
+
+    const fx=zone.querySelector(".strip-fx-button");
+    if(fx){
+      const right=Math.max(edgePad,(rightGutter/2)-(fx.offsetWidth/2));
+      fx.style.right=`${right.toFixed(2)}px`;
+      fx.style.left="auto";
+    }
+  }
+
   function updateStripButtonOrientation(){
     stripButtonOrientationFrame=0;
     const strips=[...grid.querySelectorAll(":scope > .channel[data-channel]")];
     const count=strips.length;
-    if(!count)return;
-    const half=Math.floor(count/2);
-    const odd=(count%2)===1;
-    strips.forEach((strip,index)=>{
-      strip.classList.remove("button-orient-left","button-orient-split","button-orient-right","button-orient-center");
-      if(index<half){
-        strip.classList.add("button-orient-left");
-      }else if(odd && index===half){
-        strip.classList.add("button-orient-split");
-      }else{
-        strip.classList.add("button-orient-right");
-      }
-    });
+    if(count){
+      const half=Math.floor(count/2);
+      const odd=(count%2)===1;
+      strips.forEach((strip,index)=>{
+        strip.classList.remove("button-orient-left","button-orient-split","button-orient-right","button-orient-center");
+        if(index<half){
+          strip.classList.add("button-orient-left");
+        }else if(odd && index===half){
+          strip.classList.add("button-orient-split");
+        }else{
+          strip.classList.add("button-orient-right");
+        }
+        positionStripEdgeButtons(strip);
+      });
+    }
+
+    // MASTER only has AGC, but give it the same balanced edge-gutter placement.
+    const master=masterDock?.querySelector?.(".master-strip");
+    if(master)positionStripEdgeButtons(master);
   }
   function requestStripButtonOrientationUpdate(){
     if(stripButtonOrientationFrame)return;
