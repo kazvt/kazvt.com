@@ -1,6 +1,23 @@
 {
+  "schema_version": 2,
   "files": [
     "data.gif",
     "wumpa.gif"
-  ]
+  ],
+  "file_info": {
+    "data.gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 664850,
+      "modified_unix": 1786311984.303574,
+      "modified_ns": 1786311984303574000
+    },
+    "wumpa.gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 127128,
+      "modified_unix": 1786311984.307957,
+      "modified_ns": 1786311984307957400
+    }
+  }
 }

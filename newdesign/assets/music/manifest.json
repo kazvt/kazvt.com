@@ -1,4 +1,5 @@
 {
+  "schema_version": 2,
   "files": [
     "3l3d3p - ibitbt.mp3",
     "dontevenrespond.mp3",
@@ -7,5 +8,175 @@
     "nokia.mp3",
     "NovatoElFlow, Nasty Vato, Dulzon, Doony Graff, Sayuri & Sopholov, FuentesProd - Se Pone d a Perro 2.mp3",
     "Trgdy Plybck 1.mp3"
-  ]
+  ],
+  "file_info": {
+    "3l3d3p - ibitbt.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1496522,
+      "modified_unix": 1782816632.668903,
+      "modified_ns": 1782816632668903400,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 178469,
+        "duration_seconds": 66.997,
+        "average_volume_dbfs": -10.7,
+        "mean_volume_dbfs": -10.7,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -8.82,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -9.18,
+        "true_peak_dbtp": 0.57,
+        "loudness_range_lu": 1.4,
+        "loudness_threshold_lufs": -18.82
+      }
+    },
+    "dontevenrespond.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1318901,
+      "modified_unix": 1782816632.616388,
+      "modified_ns": 1782816632616388400,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 44100,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 167259,
+        "duration_seconds": 63.0215,
+        "average_volume_dbfs": -7.7,
+        "mean_volume_dbfs": -7.7,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -8.71,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -9.29,
+        "true_peak_dbtp": 1.4,
+        "loudness_range_lu": 3.0,
+        "loudness_threshold_lufs": -18.71
+      }
+    },
+    "kismet.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1392987,
+      "modified_unix": 1782816632.416559,
+      "modified_ns": 1782816632416559200,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 154175,
+        "duration_seconds": 72.013,
+        "average_volume_dbfs": -11.6,
+        "mean_volume_dbfs": -11.6,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -9.63,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -8.37,
+        "true_peak_dbtp": 0.88,
+        "loudness_range_lu": 2.7,
+        "loudness_threshold_lufs": -19.63
+      }
+    },
+    "nausea.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1287102,
+      "modified_unix": 1782816632.25907,
+      "modified_ns": 1782816632259069600,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 170859,
+        "duration_seconds": 60.013,
+        "average_volume_dbfs": -6.7,
+        "mean_volume_dbfs": -6.7,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -4.35,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -13.65,
+        "true_peak_dbtp": 2.46,
+        "loudness_range_lu": 3.0,
+        "loudness_threshold_lufs": -14.35
+      }
+    },
+    "nokia.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1823573,
+      "modified_unix": 1782816632.735641,
+      "modified_ns": 1782816632735641000,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 179871,
+        "duration_seconds": 81.013,
+        "average_volume_dbfs": -5.5,
+        "mean_volume_dbfs": -5.5,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -5.13,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -12.87,
+        "true_peak_dbtp": 1.15,
+        "loudness_range_lu": 1.3,
+        "loudness_threshold_lufs": -15.13
+      }
+    },
+    "NovatoElFlow, Nasty Vato, Dulzon, Doony Graff, Sayuri & Sopholov, FuentesProd - Se Pone d a Perro 2.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1846060,
+      "modified_unix": 1782816632.880679,
+      "modified_ns": 1782816632880678800,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 147177,
+        "duration_seconds": 100.285,
+        "average_volume_dbfs": -10.4,
+        "mean_volume_dbfs": -10.4,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -8.93,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -9.07,
+        "true_peak_dbtp": 1.16,
+        "loudness_range_lu": 2.9,
+        "loudness_threshold_lufs": -18.93
+      }
+    },
+    "Trgdy Plybck 1.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 2025477,
+      "modified_unix": 1782816632.931939,
+      "modified_ns": 1782816632931939000,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 170393,
+        "duration_seconds": 95.017,
+        "average_volume_dbfs": -11.3,
+        "mean_volume_dbfs": -11.3,
+        "peak_volume_dbfs": 0.0,
+        "integrated_lufs": -9.66,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -8.34,
+        "true_peak_dbtp": 0.22,
+        "loudness_range_lu": 0.8,
+        "loudness_threshold_lufs": -19.75
+      }
+    }
+  }
 }

@@ -1,8 +1,107 @@
 {
+  "schema_version": 2,
   "files": [
     "cute.mp3",
     "danger.mp3",
     "kitty.mp3",
     "smeemo.mp3"
-  ]
+  ],
+  "file_info": {
+    "cute.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 2053036,
+      "modified_unix": 1786926176.457191,
+      "modified_ns": 1786926176457191400,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 135345,
+        "duration_seconds": 121.3187,
+        "average_volume_dbfs": -20.1,
+        "mean_volume_dbfs": -20.1,
+        "peak_volume_dbfs": -1.7,
+        "integrated_lufs": -19.27,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": 1.27,
+        "true_peak_dbtp": -1.65,
+        "loudness_range_lu": 3.3,
+        "loudness_threshold_lufs": -29.4
+      }
+    },
+    "danger.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 2354140,
+      "modified_unix": 1786926176.473185,
+      "modified_ns": 1786926176473184600,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 137276,
+        "duration_seconds": 137.1429,
+        "average_volume_dbfs": -18.2,
+        "mean_volume_dbfs": -18.2,
+        "peak_volume_dbfs": -0.2,
+        "integrated_lufs": -16.39,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -1.61,
+        "true_peak_dbtp": -0.16,
+        "loudness_range_lu": 1.2,
+        "loudness_threshold_lufs": -26.56
+      }
+    },
+    "kitty.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 2121580,
+      "modified_unix": 1786926176.487309,
+      "modified_ns": 1786926176487308500,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 123714,
+        "duration_seconds": 137.1429,
+        "average_volume_dbfs": -17.9,
+        "mean_volume_dbfs": -17.9,
+        "peak_volume_dbfs": -1.3,
+        "integrated_lufs": -16.17,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -1.83,
+        "true_peak_dbtp": -1.29,
+        "loudness_range_lu": 1.4,
+        "loudness_threshold_lufs": -26.29
+      }
+    },
+    "smeemo.mp3": {
+      "type": "audio",
+      "extension": ".mp3",
+      "size_bytes": 1791752,
+      "modified_unix": 1786926176.498531,
+      "modified_ns": 1786926176498530600,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 122984,
+        "duration_seconds": 116.5049,
+        "average_volume_dbfs": -17.2,
+        "mean_volume_dbfs": -17.2,
+        "peak_volume_dbfs": -0.6,
+        "integrated_lufs": -15.92,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": -2.08,
+        "true_peak_dbtp": -0.58,
+        "loudness_range_lu": 1.6,
+        "loudness_threshold_lufs": -25.98
+      }
+    }
+  }
 }

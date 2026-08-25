@@ -1,4 +1,5 @@
 {
+  "schema_version": 2,
   "files": [
     "[backtowork].gif",
     "[bananas].gif",
@@ -44,5 +45,315 @@
     "monkey_from_kung_fu_panda.png",
     "oogway1.png",
     "oogway2.png"
-  ]
+  ],
+  "file_info": {
+    "[backtowork].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 4382,
+      "modified_unix": 1787394835.00124,
+      "modified_ns": 1787394835001239600
+    },
+    "[bananas].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 57637,
+      "modified_unix": 1787394835.045932,
+      "modified_ns": 1787394835045931500
+    },
+    "[blush].webp": {
+      "type": "file",
+      "extension": ".webp",
+      "size_bytes": 1598,
+      "modified_unix": 1787394835.047569,
+      "modified_ns": 1787394835047568600
+    },
+    "[burger].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 326,
+      "modified_unix": 1787394835.00396,
+      "modified_ns": 1787394835003959900
+    },
+    "[cheese].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 246,
+      "modified_unix": 1787394835.053521,
+      "modified_ns": 1787394835053520700
+    },
+    "[dance].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 1753,
+      "modified_unix": 1787394835.033558,
+      "modified_ns": 1787394835033558300
+    },
+    "[deep].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 38222,
+      "modified_unix": 1787394835.029187,
+      "modified_ns": 1787394835029187400
+    },
+    "[dishes].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 48218,
+      "modified_unix": 1787394835.021677,
+      "modified_ns": 1787394835021677000
+    },
+    "[egg].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 285,
+      "modified_unix": 1787394835.051843,
+      "modified_ns": 1787394835051843400
+    },
+    "[erin].webp": {
+      "type": "file",
+      "extension": ".webp",
+      "size_bytes": 43720,
+      "modified_unix": 1787394835.014711,
+      "modified_ns": 1787394835014711000
+    },
+    "[fired].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 2974,
+      "modified_unix": 1787394835.012031,
+      "modified_ns": 1787394835012031000
+    },
+    "[freaky].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 14536,
+      "modified_unix": 1787394835.007169,
+      "modified_ns": 1787394835007169300
+    },
+    "[happy].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 9927,
+      "modified_unix": 1787394834.999587,
+      "modified_ns": 1787394834999587200
+    },
+    "[hi].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 6397,
+      "modified_unix": 1787394835.036222,
+      "modified_ns": 1787394835036221500
+    },
+    "[hotdog].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 369,
+      "modified_unix": 1787394835.022782,
+      "modified_ns": 1787394835022781700
+    },
+    "[icecream].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 1516016,
+      "modified_unix": 1787394834.985871,
+      "modified_ns": 1787394834985870700
+    },
+    "[ily].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 11879,
+      "modified_unix": 1787394835.042706,
+      "modified_ns": 1787394835042706600
+    },
+    "[joke].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 45003,
+      "modified_unix": 1787394835.01794,
+      "modified_ns": 1787394835017939900
+    },
+    "[marge].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 12206,
+      "modified_unix": 1787394834.989676,
+      "modified_ns": 1787394834989675700
+    },
+    "[mrbeast].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 43443,
+      "modified_unix": 1787394835.039939,
+      "modified_ns": 1787394835039938600
+    },
+    "[murder].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 3541,
+      "modified_unix": 1787394835.032475,
+      "modified_ns": 1787394835032475200
+    },
+    "[parents].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 3722,
+      "modified_unix": 1787394834.994128,
+      "modified_ns": 1787394834994127600
+    },
+    "[penis].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 16003,
+      "modified_unix": 1787394835.025981,
+      "modified_ns": 1787394835025980600
+    },
+    "[sex].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 1938,
+      "modified_unix": 1787394835.050761,
+      "modified_ns": 1787394835050760600
+    },
+    "[smeemo].webp": {
+      "type": "file",
+      "extension": ".webp",
+      "size_bytes": 3186,
+      "modified_unix": 1787394835.005021,
+      "modified_ns": 1787394835005020500
+    },
+    "[snail].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 2771,
+      "modified_unix": 1787394835.002885,
+      "modified_ns": 1787394835002884800
+    },
+    "[steak].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 1698,
+      "modified_unix": 1787394835.030841,
+      "modified_ns": 1787394835030840600
+    },
+    "[stupid].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 4563,
+      "modified_unix": 1787394835.04432,
+      "modified_ns": 1787394835044320400
+    },
+    "[suckingheroff].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 14537,
+      "modified_unix": 1787394834.991409,
+      "modified_ns": 1787394834991409300
+    },
+    "[swing].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 103147,
+      "modified_unix": 1787394835.038351,
+      "modified_ns": 1787394835038351100
+    },
+    "[taco].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 1566,
+      "modified_unix": 1787394835.04917,
+      "modified_ns": 1787394835049169600
+    },
+    "[throbber].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 46417,
+      "modified_unix": 1787361328.854044,
+      "modified_ns": 1787361328854043800
+    },
+    "[toilet].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 22317,
+      "modified_unix": 1787394835.008766,
+      "modified_ns": 1787394835008765800
+    },
+    "[trans].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 4406,
+      "modified_unix": 1787394835.020079,
+      "modified_ns": 1787394835020079200
+    },
+    "[ty].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 13129,
+      "modified_unix": 1787394835.054592,
+      "modified_ns": 1787394835054591900
+    },
+    "[weekend].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 31845,
+      "modified_unix": 1787394834.993042,
+      "modified_ns": 1787394834993042100
+    },
+    "[wifeys].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 51131,
+      "modified_unix": 1787394835.0131,
+      "modified_ns": 1787394835013100200
+    },
+    "[working2].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 47826,
+      "modified_unix": 1787394835.016337,
+      "modified_ns": 1787394835016337000
+    },
+    "[working].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 2298,
+      "modified_unix": 1787394834.988089,
+      "modified_ns": 1787394834988088900
+    },
+    "[wumpa].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 127128,
+      "modified_unix": 1787394835.028124,
+      "modified_ns": 1787394835028124100
+    },
+    "[yay].gif": {
+      "type": "file",
+      "extension": ".gif",
+      "size_bytes": 5311,
+      "modified_unix": 1787394834.997916,
+      "modified_ns": 1787394834997915800
+    },
+    "monkey_from_kung_fu_panda.png": {
+      "type": "file",
+      "extension": ".png",
+      "size_bytes": 221156,
+      "modified_unix": 1787394834.996317,
+      "modified_ns": 1787394834996316900
+    },
+    "oogway1.png": {
+      "type": "file",
+      "extension": ".png",
+      "size_bytes": 181947,
+      "modified_unix": 1787394835.024919,
+      "modified_ns": 1787394835024918600
+    },
+    "oogway2.png": {
+      "type": "file",
+      "extension": ".png",
+      "size_bytes": 192814,
+      "modified_unix": 1787394835.010407,
+      "modified_ns": 1787394835010407000
+    }
+  }
 }
