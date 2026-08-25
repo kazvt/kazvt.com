@@ -7755,9 +7755,8 @@
     }
     .strip-fx-button.active::before{background:#d7bb72;box-shadow:0 0 5px rgba(231,199,118,.75),inset 0 1px 1px rgba(255,255,255,.38)}
 
-    /* The two tiny fader-bay keys physically face the mixer center, like labels
-       on an analogue desk viewed from the engineer's normal central position.
-       JS assigns the side classes from each strip's actual on-screen position. */
+    /* The two tiny fader-bay keys face inward from their FIXED mixer position.
+       For an even strip count both middle strips use the split orientation. */
     .strip-fx-button{
       transform:rotate(var(--strip-button-angle,-90deg));
       transform-origin:center center;
@@ -9570,8 +9569,13 @@
 
   function buildPlaylistsFromManifest(manifest) {
     const groups = new Map();
+    const infoMap=manifest?.file_info&&typeof manifest.file_info==="object"?manifest.file_info:{};
     let sourceIndex=0;
-    for (const file of (manifest?.files || [])) {
+    for (const entry of (manifest?.files || [])) {
+      // Keep old string manifests working, but also tolerate future object entries.
+      const file=typeof entry==="string"?entry:String(entry?.path||entry?.file||entry?.name||"");
+      if(!file)continue;
+      const manifestInfo=(typeof entry==="object"&&entry)||infoMap[file]||infoMap[file.replace(/\\/g,"/")]||null;
       const isAudio=AUDIO_EXT_RE.test(file);
       const isMidi=MIDI_EXT_RE.test(file);
       if (!isAudio && !isMidi) continue;
@@ -9586,6 +9590,9 @@
         kind:isMidi?"midi-url":"url",
         folderConfig:folderMeta.config
       });
+      if(manifestInfo&&typeof manifestInfo==="object")stem.manifestMetadata=manifestInfo;
+      const manifestAverageDb=Number(manifestInfo?.audio?.average_volume_dbfs ?? manifestInfo?.audio?.mean_volume_dbfs);
+      if(isAudio&&Number.isFinite(manifestAverageDb))stem.autoGainReferenceDb=manifestAverageDb;
       addTaggedStemToGroup(groups,{stem,folderMeta,source:"bundled",index:sourceIndex++});
     }
     return finalizeTaggedPlaylistGroups(groups);
@@ -15750,39 +15757,25 @@
   seekRange.addEventListener("pointercancel",finishTimelineSeek);
 
 
-  // Rotate the tiny AGC / FX legends toward the physical center of the desk.
-  // This is based on viewport position rather than track number, so horizontal
-  // scrolling preserves the analogue-console viewing logic. The one visible
-  // strip nearest center gets split orientation: AGC CCW, FX CW.
+  // Rotate AGC / FX from their original horizontal position according to the
+  // strip's fixed place in the full mixer, NOT according to the scrolled viewport.
+  // Odd strip count: the one true middle strip is split (AGC CCW / FX CW).
+  // Even strip count: BOTH middle strips are split. Everything left of that middle
+  // pair is CCW for both buttons; everything right is CW for both buttons.
   let stripButtonOrientationFrame=0;
   function updateStripButtonOrientation(){
     stripButtonOrientationFrame=0;
     const strips=[...grid.querySelectorAll(":scope > .channel[data-channel]")];
-    if(!strips.length||!horizontalScroller)return;
-    const viewport=horizontalScroller.getBoundingClientRect();
-    const centerX=(viewport.left+viewport.right)/2;
-    const visible=strips.filter(strip=>{
-      const rect=strip.getBoundingClientRect();
-      return rect.right>viewport.left&&rect.left<viewport.right;
-    });
-    const candidates=visible.length?visible:strips;
-    let centerStrip=candidates[0];
-    let centerDistance=Infinity;
-    for(const strip of candidates){
-      const rect=strip.getBoundingClientRect();
-      const distance=Math.abs(((rect.left+rect.right)/2)-centerX);
-      if(distance<centerDistance){centerDistance=distance;centerStrip=strip;}
-    }
-    for(const strip of strips){
+    const count=strips.length;
+    if(!count)return;
+    const middleLeft=Math.floor((count-1)/2);
+    const middleRight=Math.ceil((count-1)/2);
+    strips.forEach((strip,index)=>{
       strip.classList.remove("button-orient-left","button-orient-center","button-orient-right");
-      if(strip===centerStrip){
-        strip.classList.add("button-orient-center");
-        continue;
-      }
-      const rect=strip.getBoundingClientRect();
-      const stripCenter=(rect.left+rect.right)/2;
-      strip.classList.add(stripCenter<centerX?"button-orient-left":"button-orient-right");
-    }
+      if(index<middleLeft)strip.classList.add("button-orient-left");
+      else if(index>middleRight)strip.classList.add("button-orient-right");
+      else strip.classList.add("button-orient-center");
+    });
   }
   function requestStripButtonOrientationUpdate(){
     if(stripButtonOrientationFrame)return;
