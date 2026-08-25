@@ -9591,7 +9591,7 @@
         folderConfig:folderMeta.config
       });
       if(manifestInfo&&typeof manifestInfo==="object")stem.manifestMetadata=manifestInfo;
-      const manifestAverageDb=Number(manifestInfo?.audio?.average_volume_dbfs ?? manifestInfo?.audio?.mean_volume_dbfs);
+      const manifestAverageDb=Number(manifestInfo?.audio?.agc_reference_dbfs ?? manifestInfo?.audio?.average_volume_dbfs ?? manifestInfo?.audio?.mean_volume_dbfs);
       if(isAudio&&Number.isFinite(manifestAverageDb))stem.autoGainReferenceDb=manifestAverageDb;
       addTaggedStemToGroup(groups,{stem,folderMeta,source:"bundled",index:sourceIndex++});
     }
@@ -12397,8 +12397,10 @@
     return values.length?values.reduce((sum,value)=>sum+value,0)/values.length:-30;
   }
 
+  // Kept as a fallback measurement only for malformed/unmeasurable sources.
+  // It is NOT used as a strip loudness target; each stem's original is unity.
   const AUTO_GAIN_DATASET_TARGET_DB=configuredAudioDatasetAverageDb();
-  const AUTO_GAIN_STATIC_STRENGTH=.82;
+  const AUTO_GAIN_STATIC_STRENGTH=1;
   const AUTO_GAIN_MAX_BOOST_DB=12;
   const AUTO_GAIN_MAX_CUT_DB=12;
   const AUTO_GAIN_DYNAMIC_MAX_DB=2.5;
@@ -12503,17 +12505,25 @@
     channel.autoGainDeltaDb=delta;channel.autoGainCompensation=Math.pow(10,delta/20);syncLiveChannelAutoGain(channel,time);return channel.autoGainCompensation;
   }
 
-  function setChannelAutoGainForBuffer(channel,buffer,{referenceDb=null,currentReferenceDb=null,targetDb=AUTO_GAIN_DATASET_TARGET_DB}={}){
+  function setChannelAutoGainForBuffer(channel,buffer,{referenceDb=null,currentReferenceDb=null}={}){
     if(!channel||!buffer)return 1;
     const bufferDb=audioBufferLevelDb(buffer);channel.autoGainBufferAverageDb=bufferDb;channel.autoGainCurrentDb=bufferDb;
     if(Number.isFinite(Number(referenceDb)))channel.autoGainReferenceDb=Number(referenceDb);
     if(Number.isFinite(Number(currentReferenceDb)))channel.autoGainCurrentReferenceDb=Number(currentReferenceDb);
-    channel.autoGainTargetDb=Number.isFinite(Number(targetDb))?Number(targetDb):AUTO_GAIN_DATASET_TARGET_DB;
-    let sourceDb=Number(channel.autoGainCurrentReferenceDb);if(!Number.isFinite(sourceDb))sourceDb=Number(channel.autoGainReferenceDb);if(!Number.isFinite(sourceDb))sourceDb=bufferDb;
-    let baseDelta=Number.isFinite(sourceDb)?(channel.autoGainTargetDb-sourceDb)*AUTO_GAIN_STATIC_STRENGTH:0;
+
+    // Strip AGC is a SOURCE-MATCHING calibration, not a loudness target.
+    // The authored/original file (or default MIDI patch) defines 0.0 dB AGC.
+    // Only a different source/patch is moved back to that reference level.
+    let refDb=Number(channel.autoGainReferenceDb);
+    if(!Number.isFinite(refDb))refDb=bufferDb;
+    let sourceDb=Number(channel.autoGainCurrentReferenceDb);
+    if(!Number.isFinite(sourceDb))sourceDb=refDb;
+    channel.autoGainTargetDb=refDb;
+    const baseDelta=(Number.isFinite(refDb)&&Number.isFinite(sourceDb))?(refDb-sourceDb):0;
     channel.autoGainBaseDeltaDb=Math.max(-AUTO_GAIN_MAX_CUT_DB,Math.min(AUTO_GAIN_MAX_BOOST_DB,baseDelta));
-    if(!Number.isFinite(Number(channel.autoGainDynamicDb)))channel.autoGainDynamicDb=0;
-    applyChannelAutoGainCompensation(channel,.9);syncStemActionButtons(channel);return channel.autoGainCompensation;
+    channel.autoGainDynamicDb=0;
+    channel.autoGainDynamicTargetDb=0;
+    applyChannelAutoGainCompensation(channel,.35);syncStemActionButtons(channel);return channel.autoGainCompensation;
   }
 
   async function ensureChannelAutoGainReference(channel,currentBuffer=channel?.buffer){
@@ -12548,21 +12558,10 @@
   function resetAllAutoGainDynamics(){for(const channel of channels)resetChannelAutoGainDynamics(channel);resetMasterAutoGain()}
 
   function updateAutoGainDynamics(timestamp){
-    if(!isPlaying||!audioCtx)return;const nowMs=Number(timestamp)||performance.now();if(nowMs-lastAutoGainDynamicPassMs<AUTO_GAIN_DYNAMIC_INTERVAL_MS)return;lastAutoGainDynamicPassMs=nowMs;const position=getPosition();
-    for(const channel of channels){
-      if(!channel?.buffer||channel.error||channel.state?.autoGain===false)continue;
-      const cfg=filenameTrackConfig(channel.stem);
-      let bufferPosition=playlistFilenameTimelineOrigin(currentPlaylist)+position-configuredTrackTimelineStart(channel.stem);
-      if(cfg.loop===true&&cfg.oneShot!==true){
-        const ls=Math.max(0,Number(cfg.loopStart)||0),le=Number.isFinite(Number(cfg.loopEnd))?Math.min(channel.buffer.duration,Number(cfg.loopEnd)):channel.buffer.duration;
-        if(le>ls+.0005&&bufferPosition>=le)bufferPosition=ls+((bufferPosition-ls)%(le-ls));
-      }
-      const overallDb=Number(channel.autoGainBufferAverageDb),localDb=audioBufferWindowLevelDb(channel.buffer,Math.max(0,bufferPosition),AUTO_GAIN_DYNAMIC_WINDOW_SECONDS);if(!Number.isFinite(overallDb)||!Number.isFinite(localDb)||localDb<-72)continue;
-      const deviation=localDb-overallDb,excess=Math.max(0,Math.abs(deviation)-AUTO_GAIN_DYNAMIC_DEADBAND_DB);
-      let target=excess?(-Math.sign(deviation)*excess*AUTO_GAIN_DYNAMIC_STRENGTH):0;target=Math.max(-AUTO_GAIN_DYNAMIC_MAX_DB,Math.min(AUTO_GAIN_DYNAMIC_MAX_DB,target));channel.autoGainDynamicTargetDb=target;
-      const previous=Number(channel.autoGainDynamicDb)||0,last=Number(channel.autoGainDynamicLastMs)||nowMs-AUTO_GAIN_DYNAMIC_INTERVAL_MS,dt=Math.max(.15,Math.min(2.5,(nowMs-last)/1000));channel.autoGainDynamicLastMs=nowMs;
-      const tau=target<previous?AUTO_GAIN_DYNAMIC_CUT_SECONDS:AUTO_GAIN_DYNAMIC_LIFT_SECONDS,alpha=1-Math.exp(-dt/tau);let next=previous+(target-previous)*alpha;if(Math.abs(next)<.015&&Math.abs(target)<.015)next=0;channel.autoGainDynamicDb=next;if(Math.abs(next-previous)>.006)applyChannelAutoGainCompensation(channel,1.8);
-    }
+    // Intentionally no level-riding here. Strip AGC only matches an alternate
+    // source/patch to the authored original reference. This guarantees that an
+    // untouched original stem/default MIDI patch remains exactly 0.0 dB AGC.
+    return timestamp;
   }
 
   function toggleChannelAutoGain(channel){
