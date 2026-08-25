@@ -124,3 +124,4 @@ window.KAZVT_LINKS = {
     delayMs: 1000
   }
 };
+
