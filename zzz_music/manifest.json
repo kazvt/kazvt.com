@@ -9,9 +9,7 @@
   "file_info": {
     "cute.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 2053036,
-      "modified_unix": 1786926176.457191,
       "modified_ns": 1786926176457191400,
       "audio": {
         "codec": "mp3",
@@ -33,9 +31,7 @@
     },
     "danger.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 2354140,
-      "modified_unix": 1786926176.473185,
       "modified_ns": 1786926176473184600,
       "audio": {
         "codec": "mp3",
@@ -57,9 +53,7 @@
     },
     "kitty.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 2121580,
-      "modified_unix": 1786926176.487309,
       "modified_ns": 1786926176487308500,
       "audio": {
         "codec": "mp3",
@@ -81,9 +75,7 @@
     },
     "smeemo.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1791752,
-      "modified_unix": 1786926176.498531,
       "modified_ns": 1786926176498530600,
       "audio": {
         "codec": "mp3",

@@ -10,37 +10,27 @@
   "file_info": {
     "Cartoonish.ttf": {
       "type": "file",
-      "extension": ".ttf",
       "size_bytes": 18828,
-      "modified_unix": 1509330692.0,
       "modified_ns": 1509330692000000000
     },
     "Freak.ttf": {
       "type": "file",
-      "extension": ".ttf",
       "size_bytes": 163476,
-      "modified_unix": 1663641736.0,
       "modified_ns": 1663641736000000000
     },
     "Handwriting.ttf": {
       "type": "file",
-      "extension": ".ttf",
       "size_bytes": 13684,
-      "modified_unix": 1199167196.0,
       "modified_ns": 1199167196000000000
     },
     "Ketchup.ttf": {
       "type": "file",
-      "extension": ".ttf",
       "size_bytes": 159256,
-      "modified_unix": 1644008456.0,
       "modified_ns": 1644008456000000000
     },
     "ToyBox.ttf": {
       "type": "file",
-      "extension": ".ttf",
       "size_bytes": 53344,
-      "modified_unix": 945256626.0,
       "modified_ns": 945256626000000000
     }
   }

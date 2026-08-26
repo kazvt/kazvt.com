@@ -12,9 +12,7 @@
   "file_info": {
     "3l3d3p - ibitbt.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1496522,
-      "modified_unix": 1782816632.668903,
       "modified_ns": 1782816632668903400,
       "audio": {
         "codec": "mp3",
@@ -36,9 +34,7 @@
     },
     "dontevenrespond.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1318901,
-      "modified_unix": 1782816632.616388,
       "modified_ns": 1782816632616388400,
       "audio": {
         "codec": "mp3",
@@ -60,9 +56,7 @@
     },
     "kismet.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1392987,
-      "modified_unix": 1782816632.416559,
       "modified_ns": 1782816632416559200,
       "audio": {
         "codec": "mp3",
@@ -84,9 +78,7 @@
     },
     "nausea.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1287102,
-      "modified_unix": 1782816632.25907,
       "modified_ns": 1782816632259069600,
       "audio": {
         "codec": "mp3",
@@ -108,9 +100,7 @@
     },
     "nokia.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1823573,
-      "modified_unix": 1782816632.735641,
       "modified_ns": 1782816632735641000,
       "audio": {
         "codec": "mp3",
@@ -132,9 +122,7 @@
     },
     "NovatoElFlow, Nasty Vato, Dulzon, Doony Graff, Sayuri & Sopholov, FuentesProd - Se Pone d a Perro 2.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 1846060,
-      "modified_unix": 1782816632.880679,
       "modified_ns": 1782816632880678800,
       "audio": {
         "codec": "mp3",
@@ -156,9 +144,7 @@
     },
     "Trgdy Plybck 1.mp3": {
       "type": "audio",
-      "extension": ".mp3",
       "size_bytes": 2025477,
-      "modified_unix": 1782816632.931939,
       "modified_ns": 1782816632931939000,
       "audio": {
         "codec": "mp3",

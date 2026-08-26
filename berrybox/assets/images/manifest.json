@@ -12,51 +12,37 @@
   "file_info": {
     "chikawa.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 509203,
-      "modified_unix": 1786538009.162324,
       "modified_ns": 1786538009162324100
     },
     "dildo.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 289617,
-      "modified_unix": 1786619013.367816,
       "modified_ns": 1786619013367816100
     },
     "horse.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 625782,
-      "modified_unix": 1786618102.255928,
       "modified_ns": 1786618102255927900
     },
     "PLAYSTATION.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 75200,
-      "modified_unix": 1786537964.154541,
       "modified_ns": 1786537964154541300
     },
     "PVZ.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 818994,
-      "modified_unix": 1786500443.485287,
       "modified_ns": 1786500443485287100
     },
     "SPONGEBOB.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 456176,
-      "modified_unix": 1786538020.493611,
       "modified_ns": 1786538020493610700
     },
     "starterpack.png": {
       "type": "file",
-      "extension": ".png",
       "size_bytes": 499767,
-      "modified_unix": 1786618347.602098,
       "modified_ns": 1786618347602097500
     }
   }
