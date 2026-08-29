@@ -43,6 +43,7 @@
     "lillie_track_bossa/guitar melody.mp3",
     "lillie_track_bossa/keys.mp3",
     "lillie_track_bossa/synth counter melody.mp3",
+    "lillie_track_slowburn",
     "midi-support.js",
     "midi_lillie_10",
     "midi_lillie_10/bass.mid",
@@ -807,6 +808,10 @@
         "loudness_range_lu": 1.1,
         "loudness_threshold_lufs": -34.69
       }
+    },
+    "lillie_track_slowburn": {
+      "type": "folder",
+      "modified_ns": 1788013662237202200
     },
     "midi-support.js": {
       "type": "file",
