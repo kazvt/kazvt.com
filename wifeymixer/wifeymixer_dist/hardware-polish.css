@@ -98,7 +98,7 @@
 }
 .top-tempo-module[data-tempo-kind="audio"]::after,
 .top-tempo-module[data-tempo-kind="hybrid"]::after{
-  content:"PITCH LOCK";
+  content:"TAPE VARI";
   position:absolute;
   right:38px;bottom:2px;
   font:900 5px/1 Arial,sans-serif;

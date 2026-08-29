@@ -46,6 +46,40 @@ def make_click_wav(seconds=6, sample_rate=24000, stem="drums"):
     return raw.getvalue()
 
 
+def _vlq(value):
+    value = int(value)
+    out = [value & 0x7F]
+    value >>= 7
+    while value:
+        out.append((value & 0x7F) | 0x80)
+        value >>= 7
+    return bytes(reversed(out))
+
+
+def make_midi_fixture():
+    """Format-0 120 BPM MIDI with deliberately irregular note starts."""
+    division = 480
+    events = []
+    # (tick, priority, bytes). Note-offs sort before note-ons at the same tick.
+    starts = [0, 240, 720, 1440, 1920, 2880, 3360, 4320]
+    for i, tick in enumerate(starts):
+        note = 60 + (i % 5) * 2
+        events.append((tick, 1, bytes([0x90, note, 100])))
+        events.append((tick + 120, 0, bytes([0x80, note, 0])))
+    events.sort()
+    track = bytearray()
+    # 120 BPM = 500000 microseconds/quarter.
+    track += b"\x00\xff\x51\x03\x07\xa1\x20"
+    track += b"\x00\xc0\x00"
+    last = 0
+    for tick, _, data in events:
+        track += _vlq(tick - last) + data
+        last = tick
+    track += b"\x00\xff\x2f\x00"
+    header = b"MThd" + (6).to_bytes(4, "big") + (0).to_bytes(2, "big") + (1).to_bytes(2, "big") + division.to_bytes(2, "big")
+    return header + b"MTrk" + len(track).to_bytes(4, "big") + bytes(track)
+
+
 MANIFEST = {"files": []}
 ASSET_B64 = {}
 for song in range(1, 5):
@@ -56,6 +90,14 @@ for song in range(1, 5):
         MANIFEST["files"].append(rel)
         ASSET_B64[rel] = base64.b64encode(make_click_wav(stem=stem)).decode("ascii")
 MANIFEST["files"].append("Song 05 bp120/missing.wav")
+midi_rel = "Song 06 MIDI bp120/keys str1.mid"
+MANIFEST["files"].append(midi_rel)
+ASSET_B64[midi_rel] = base64.b64encode(make_midi_fixture()).decode("ascii")
+hybrid_audio = "Song 07 Hybrid bp120/drums.wav"
+hybrid_midi = "Song 07 Hybrid bp120/keys.mid"
+MANIFEST["files"].extend([hybrid_audio, hybrid_midi])
+ASSET_B64[hybrid_audio] = base64.b64encode(make_click_wav(stem="drums")).decode("ascii")
+ASSET_B64[hybrid_midi] = base64.b64encode(make_midi_fixture()).decode("ascii")
 
 
 def inline_script(code):
@@ -117,7 +159,7 @@ def build_html(storage_raw=None):
 
 def wait_ready(page):
     page.wait_for_function(
-        "typeof playlists!=='undefined' && playlists.length===5 && typeof currentPlaylist!=='undefined' && currentPlaylist && typeof channels!=='undefined' && channels.length===2",
+        "typeof playlists!=='undefined' && playlists.length===7 && typeof currentPlaylist!=='undefined' && currentPlaylist && typeof channels!=='undefined' && channels.length===2",
         timeout=30000,
     )
     page.wait_for_function("channels.length>0 && channels.every(c=>c.ready===true || c.error===true)", timeout=30000)
@@ -134,6 +176,9 @@ def set_tempo(page, value):
         f"topTempoModule.dataset.targetBpm === '{value}' && topTempoModule.getAttribute('aria-busy') !== 'true'",
         timeout=30000,
     )
+    # Live varispeed uses a very short click-suppression crossfade. Let retired
+    # sources receive their onended cleanup before inspecting the active set.
+    page.wait_for_timeout(80)
 
 
 def approx(actual, expected, tolerance=0.08):
@@ -155,53 +200,128 @@ with sync_playwright() as p:
     page.set_content(build_html(), wait_until="load", timeout=60000)
     wait_ready(page)
 
-    # Audio playlists expose pitch-locked tempo and inherit authored folder BPM.
+    # Audio playlists expose true tape-style varispeed and inherit authored folder BPM.
     assert page.locator("#topTempoModule").is_visible()
     tempo_meta = page.evaluate(
-        "({kind:topTempoModule.dataset.tempoKind,native:+topTempoModule.dataset.nativeBpm,target:+topTempoModule.dataset.targetBpm,min:+topTempoControl.min,max:+topTempoControl.max})"
+        "({kind:topTempoModule.dataset.tempoKind,native:+topTempoModule.dataset.nativeBpm,target:+topTempoModule.dataset.targetBpm,min:+topTempoControl.min,max:+topTempoControl.max,rate:+topTempoModule.dataset.varispeedRate,pitch:+topTempoModule.dataset.pitchSemitones,title:topTempoControl.title})"
     )
     assert tempo_meta["kind"] == "audio" and tempo_meta["native"] == 120 and tempo_meta["target"] == 120, tempo_meta
-    assert tempo_meta["min"] <= 90 and tempo_meta["max"] >= 160, tempo_meta
+    assert tempo_meta["min"] == 60 and tempo_meta["max"] == 180, tempo_meta
+    approx(tempo_meta["rate"], 1.0, 0.0001)
+    approx(tempo_meta["pitch"], 0.0, 0.0001)
+    assert "Tape varispeed" in tempo_meta["title"], tempo_meta
+    tape_badge = page.evaluate("getComputedStyle(topTempoModule,'::after').content")
+    assert "TAPE VARI" in tape_badge, tape_badge
 
-    # 120 -> 150 BPM must produce one exact shared duration/length for every stem.
+    # Instrument the old stretch engine: playlist tempo must never call it.
+    page.evaluate(
+        """()=>{const old=window.WIFEY_TEMPO_STRETCH;window.__stretchCalls=0;window.WIFEY_TEMPO_STRETCH={...old,stretchBuffer:(...args)=>{window.__stretchCalls++;return old.stretchBuffer(...args)}};window.__nativeTempoBuffers=channels.map(c=>c.buffer);}"""
+    )
+    page.evaluate("playCurrent()")
+    page.wait_for_function("isPlaying===true")
+
+    # 120 -> 150 BPM must keep the exact native AudioBuffers while every live
+    # source receives the same 1.25x resampling rate. The transport becomes 4.8s.
     set_tempo(page, 150)
     state = page.evaluate(
-        "({duration:playlistDuration,lengths:channels.map(c=>c.buffer.length),durations:channels.map(c=>c.buffer.duration),tempo:currentPlaylist.playbackTempoBpm})"
+        """()=>({duration:playlistDuration,lengths:channels.map(c=>c.buffer.length),durations:channels.map(c=>c.buffer.duration),tempo:currentPlaylist.playbackTempoBpm,rate:+topTempoModule.dataset.varispeedRate,pitch:+topTempoModule.dataset.pitchSemitones,sameBuffers:channels.every((c,i)=>c.buffer===window.__nativeTempoBuffers[i]),sourceRates:[...new Set(channels.flatMap(c=>[...c.sources].map(s=>+s._wifeyPlaybackRate.toFixed(6))))],stretchCalls:window.__stretchCalls})"""
     )
     assert state["tempo"] == 150
     approx(state["duration"], 4.8, 0.04)
+    assert state["sameBuffers"] is True and state["stretchCalls"] == 0, state
     assert len(set(state["lengths"])) == 1
-    approx(state["durations"][0], 4.8, 0.04)
+    approx(state["durations"][0], 6.0, 0.01)
+    approx(state["rate"], 1.25, 0.0001)
+    approx(state["pitch"], 12 * __import__("math").log2(1.25), 0.01)
+    assert state["sourceRates"] == [1.25], state
 
-    # Rapid changes must not allow the older render to overwrite the newest render.
+    # Rapid changes must settle on the newest shared varispeed rate without an
+    # offline-render busy phase or cumulative buffer processing.
     busy_seen = page.evaluate(
         """()=>{const el=topTempoControl;el.value='132';el.dispatchEvent(new Event('change',{bubbles:true}));const busy=topTempoModule.getAttribute('aria-busy')==='true';el.value='144';el.dispatchEvent(new Event('change',{bubbles:true}));return busy;}"""
     )
-    assert busy_seen is True
+    assert busy_seen is False
     page.wait_for_function(
-        "topTempoModule.dataset.targetBpm==='144' && topTempoModule.getAttribute('aria-busy')!=='true'",
+        "topTempoModule.dataset.targetBpm==='144' && Math.abs(+topTempoModule.dataset.varispeedRate-1.2)<1e-6",
         timeout=30000,
     )
+    page.wait_for_timeout(80)
     rapid = page.evaluate(
-        "({tempo:currentPlaylist.playbackTempoBpm,duration:playlistDuration,lengths:channels.map(c=>c.buffer.length)})"
+        """()=>({tempo:currentPlaylist.playbackTempoBpm,duration:playlistDuration,lengths:channels.map(c=>c.buffer.length),sameBuffers:channels.every((c,i)=>c.buffer===window.__nativeTempoBuffers[i]),rates:[...new Set(channels.flatMap(c=>[...c.sources].map(s=>+s._wifeyPlaybackRate.toFixed(6))))],stretchCalls:window.__stretchCalls})"""
     )
     assert rapid["tempo"] == 144
     approx(rapid["duration"], 5.0, 0.04)
-    assert len(set(rapid["lengths"])) == 1
+    assert rapid["sameBuffers"] is True and rapid["stretchCalls"] == 0, rapid
+    assert rapid["rates"] == [1.2], rapid
 
-    # Tempo extremes are rendered from the original decode, not cumulatively from
-    # the previous stretch. Returning to native must restore the exact six-second clock.
+    # Tempo extremes remain one continuous resample from the same native buffers.
+    # Returning to native restores the exact six-second transport and 1.0x rate.
     extreme_states = {}
-    for bpm, expected in [(84, 6 * 120 / 84), (174, 6 * 120 / 174), (120, 6.0)]:
+    for bpm, expected, rate in [(60, 12.0, 0.5), (84, 6 * 120 / 84, 0.7), (174, 6 * 120 / 174, 1.45), (180, 4.0, 1.5), (120, 6.0, 1.0)]:
         set_tempo(page, bpm)
         value = page.evaluate(
-            "({duration:playlistDuration,lengths:channels.map(c=>c.buffer.length),durations:channels.map(c=>c.buffer.duration),busy:topTempoModule.getAttribute('aria-busy')})"
+            """()=>({duration:playlistDuration,lengths:channels.map(c=>c.buffer.length),durations:channels.map(c=>c.buffer.duration),busy:topTempoModule.getAttribute('aria-busy'),sameBuffers:channels.every((c,i)=>c.buffer===window.__nativeTempoBuffers[i]),rates:[...new Set(channels.flatMap(c=>[...c.sources].map(s=>+s._wifeyPlaybackRate.toFixed(6))))],stretchCalls:window.__stretchCalls})"""
         )
         approx(value["duration"], expected, 0.05)
-        approx(value["durations"][0], expected, 0.05)
-        assert len(set(value["lengths"])) == 1
+        approx(value["durations"][0], 6.0, 0.01)
+        assert value["sameBuffers"] is True and value["stretchCalls"] == 0, value
+        assert value["rates"] == [rate], value
         assert value["busy"] != "true"
         extreme_states[str(bpm)] = value
+
+    # Pause/resume and seek at non-native varispeed must preserve the same clock
+    # mapping and never fall back to 1.0x or reprocess a stem buffer.
+    set_tempo(page, 150)
+    pause_resume = page.evaluate(
+        """async()=>{
+          const before=getPosition();
+          pauseCurrent();
+          const paused=lastKnownPosition;
+          await playCurrent();
+          await new Promise(done=>setTimeout(done,90));
+          const rates=[...new Set(channels.flatMap(c=>[...c.sources].map(s=>+s._wifeyPlaybackRate.toFixed(6))))];
+          return {before,paused,after:getPosition(),rates,sameBuffers:channels.every((c,i)=>c.buffer===window.__nativeTempoBuffers[i]),playing:isPlaying};
+        }"""
+    )
+    approx(pause_resume["paused"], pause_resume["before"], 0.03)
+    assert pause_resume["playing"] is True and pause_resume["rates"] == [1.25] and pause_resume["sameBuffers"] is True, pause_resume
+    assert pause_resume["after"] >= pause_resume["paused"], pause_resume
+
+    seek_state = page.evaluate(
+        """async()=>{
+          seekAll(2.4);
+          await new Promise(done=>setTimeout(done,80));
+          const snapshots=channels.map(c=>{
+            const list=[...c.sources].sort((a,b)=>a._wifeyStart-b._wifeyStart);
+            const first=list[0];
+            return {rate:first?._wifeyPlaybackRate,offset:first?._wifeySourceOffset,start:first?._wifeyStart,allStarts:list.map(s=>+s._wifeyStart.toFixed(6))};
+          });
+          return {position:getPosition(),snapshots};
+        }"""
+    )
+    assert all(abs(item["rate"] - 1.25) < 1e-9 for item in seek_state["snapshots"]), seek_state
+    for item in seek_state["snapshots"]:
+        approx(item["offset"], 3.0, 0.006)
+    assert seek_state["snapshots"][0]["allStarts"] == seek_state["snapshots"][1]["allStarts"], seek_state
+
+    # Exercise Chromium's actual Web Audio varispeed resampler with continuous
+    # material. The rendered signal must remain finite and contain no inserted
+    # near-zero sample gaps beyond ordinary sine-wave zero crossings.
+    continuity = page.evaluate(
+        """async()=>{
+          const sr=24000,seconds=2,rate=1.25;
+          const ctx=new OfflineAudioContext(1,Math.round(seconds*sr/rate),sr);
+          const b=ctx.createBuffer(1,seconds*sr,sr),d=b.getChannelData(0);
+          for(let i=0;i<d.length;i++)d[i]=0.7*Math.sin(2*Math.PI*233*i/sr);
+          const src=ctx.createBufferSource();src.buffer=b;src.playbackRate.value=rate;src.connect(ctx.destination);src.start(0);
+          const out=(await ctx.startRendering()).getChannelData(0);
+          let longest=0,run=0,finite=true,sum=0;
+          for(const v of out){if(!Number.isFinite(v))finite=false;sum+=v*v;if(Math.abs(v)<1e-8){run++;longest=Math.max(longest,run)}else run=0}
+          return {finite,longest,rms:Math.sqrt(sum/out.length),length:out.length,expected:Math.round(seconds*sr/rate)};
+        }"""
+    )
+    assert continuity["finite"] is True and continuity["length"] == continuity["expected"], continuity
+    assert continuity["longest"] <= 3 and continuity["rms"] > 0.35, continuity
 
     # Missing/null authored tempo must remain genuinely unset, and untagged audio
     # must derive a positive native tempo from decoded audio instead of coercing null to 0.
@@ -248,10 +368,10 @@ with sync_playwright() as p:
     menu = page.locator("#playlistMenu")
     menu.wait_for(state="visible")
     toggles = page.locator("[data-playlist-toggle-index]")
-    assert toggles.count() == 5
+    assert toggles.count() == 7
     toggles.nth(1).tap()
     assert toggles.nth(1).get_attribute("aria-checked") == "false"
-    assert "4/5 IN" in page.locator("#playlistRotationSummary").inner_text()
+    assert "6/7 IN" in page.locator("#playlistRotationSummary").inner_text()
     included_check_opacity = page.evaluate(
         "parseFloat(getComputedStyle(document.querySelector('[data-playlist-toggle-index=\"0\"] .playlist-include-toggle__check')).opacity)"
     )
@@ -287,6 +407,84 @@ with sync_playwright() as p:
     missing = page.evaluate("({error:channels[0].error,buttons:!playlistSelectorButton.disabled})")
     assert missing["error"] is True and missing["buttons"] is True, missing
 
+    # First live MIDI SoundFont swap: before any pause/resume, the replacement
+    # must hand off from the exact master transport position, not a raw MIDI-note
+    # timestamp. The fixture starts this strip one second into the song and uses
+    # irregular notes specifically to expose mixed-coordinate quantization.
+    page.evaluate("changePlaylist(5,false)")
+    page.wait_for_function("currentPlaylistIndex===5 && channels.length===1 && channels[0].ready===true", timeout=30000)
+    midi_meta = page.evaluate("({midi:isMidiStem(channels[0].stem),trackStart:configuredTrackTimelineStart(channels[0].stem,currentPlaylist),tempo:currentPlaylist.playbackTempoBpm})")
+    assert midi_meta["midi"] is True and midi_meta["trackStart"] == 1 and midi_meta["tempo"] == 120, midi_meta
+    page.evaluate("playCurrent()")
+    page.wait_for_function("isPlaying===true && getPosition()>1.30", timeout=5000)
+    first_swap = page.evaluate(
+        """async()=>{
+          const ch=channels[0];
+          proceduralSoundFonts.set('sf64',{getPreset:()=>({name:'TEST'}),renderNote:()=>true});
+          const voice=sfVoice('sf64',0,4,'TEST EP');
+          const zero=cycleZeroContextTime;
+          const clickedAt=audioCtx.currentTime;
+          await selectExactStripVoice(ch,voice);
+          const candidates=[...ch.sources].filter(s=>s._wifeyStart>=clickedAt-.001).sort((a,b)=>a._wifeyStart-b._wifeyStart);
+          const replacement=candidates[0];
+          const display=((replacement._wifeyStart-zero)%playlistDuration+playlistDuration)%playlistDuration;
+          const expected=Math.max(0,playlistFilenameTimelineOrigin(currentPlaylist)+display-configuredTrackTimelineStart(ch.stem,currentPlaylist));
+          return {
+            lead:replacement._wifeyStart-clickedAt,
+            offset:replacement._wifeySourceOffset,
+            expected,
+            rate:replacement._wifeyPlaybackRate,
+            zeroUnchanged:Math.abs(cycleZeroContextTime-zero)<1e-9,
+            revision:ch.stem.midiPatchRevision,
+            selected:midiSelectedVoiceForStem(ch.stem)?.program
+          };
+        }"""
+    )
+    assert 0.03 <= first_swap["lead"] <= 0.12, first_swap
+    approx(first_swap["offset"], first_swap["expected"], 0.004)
+    assert first_swap["rate"] == 1 and first_swap["zeroUnchanged"] is True and first_swap["selected"] == 4, first_swap
+
+    # Repeated/rapid patch requests must not resurrect an older render.
+    repeated_swap = page.evaluate(
+        """async()=>{
+          const ch=channels[0];
+          const a=sfVoice('sf64',0,5,'TEST A');
+          const b=sfVoice('sf64',0,7,'TEST B');
+          setMidiStemVoicePreference(ch.stem,a);
+          const p1=hotSwapMidiStripInstrument(ch);
+          setMidiStemVoicePreference(ch.stem,b);
+          const p2=hotSwapMidiStripInstrument(ch);
+          await Promise.all([p1,p2]);
+          return {selected:midiSelectedVoiceForStem(ch.stem)?.program,revision:ch.stem.midiPatchRevision,position:getPosition(),playing:isPlaying};
+        }"""
+    )
+    assert repeated_swap["selected"] == 7 and repeated_swap["revision"] >= 3 and repeated_swap["playing"] is True, repeated_swap
+
+    # Hybrid playlist regression: audio uses 1.25x tape varispeed while MIDI is
+    # re-rendered at 150 BPM and scheduled at rate 1. Both still share the exact
+    # same AudioContext start grid and 4.8-second musical transport.
+    page.evaluate("changePlaylist(6,false)")
+    page.wait_for_function("currentPlaylistIndex===6 && channels.length===2 && channels.every(c=>c.ready===true || c.error===true)", timeout=30000)
+    page.evaluate("playCurrent()")
+    page.wait_for_function("isPlaying===true")
+    set_tempo(page, 150)
+    hybrid_state = page.evaluate(
+        """()=>{
+          const rows=channels.map(c=>{
+            const list=[...c.sources].sort((a,b)=>a._wifeyStart-b._wifeyStart);
+            return {midi:isMidiStem(c.stem),bufferDuration:c.buffer.duration,rates:[...new Set(list.map(s=>+s._wifeyPlaybackRate.toFixed(6)))],starts:list.map(s=>+s._wifeyStart.toFixed(6))};
+          });
+          return {kind:playlistMediaProfile(currentPlaylist).kind,duration:playlistDuration,tempo:currentPlaylist.playbackTempoBpm,rows,stretchCalls:window.__stretchCalls};
+        }"""
+    )
+    assert hybrid_state["kind"] == "hybrid" and hybrid_state["tempo"] == 150, hybrid_state
+    approx(hybrid_state["duration"], 4.8, 0.05)
+    audio_row = next(row for row in hybrid_state["rows"] if not row["midi"])
+    midi_row = next(row for row in hybrid_state["rows"] if row["midi"])
+    assert audio_row["rates"] == [1.25] and midi_row["rates"] == [1], hybrid_state
+    assert audio_row["starts"] == midi_row["starts"], hybrid_state
+    assert hybrid_state["stretchCalls"] == 0, hybrid_state
+
     # New document, same persisted JSON: exclusion must survive.
     page.close()
     page = context.new_page()
@@ -301,7 +499,7 @@ with sync_playwright() as p:
     assert page.locator('[data-playlist-toggle-index="1"]').get_attribute("aria-checked") == "false"
 
     # Never permit a zero-track automatic rotation; ALL IN recovers state.
-    for i in [2, 3, 4]:
+    for i in [2, 3, 4, 5, 6]:
         toggle = page.locator(f'[data-playlist-toggle-index="{i}"]')
         if toggle.get_attribute("aria-checked") == "true":
             toggle.click()
@@ -368,8 +566,15 @@ with sync_playwright() as p:
                 "rapid": rapid,
                 "extremes": extreme_states,
                 "tempo_null_probe": tempo_null_probe,
+                "pause_resume": pause_resume,
+                "seek_state": seek_state,
+                "continuity": continuity,
                 "timing": timing,
                 "missing": missing,
+                "midi_meta": midi_meta,
+                "first_midi_swap": first_swap,
+                "repeated_midi_swap": repeated_swap,
+                "hybrid": hybrid_state,
                 "wide_fx": box,
                 "narrow_fx": nbox,
                 "menu_narrow": mbox,

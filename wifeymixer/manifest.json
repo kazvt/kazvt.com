@@ -42,6 +42,7 @@
     "lillie_track_bossa/guitar chords.mp3",
     "lillie_track_bossa/guitar melody.mp3",
     "lillie_track_bossa/keys.mp3",
+    "lillie_track_bossa/shakers.mp3",
     "lillie_track_bossa/synth counter melody.mp3",
     "lillie_track_slowburn",
     "lillie_track_slowburn/bass.mp3",
@@ -678,7 +679,7 @@
     },
     "lillie_track_bossa": {
       "type": "folder",
-      "modified_ns": 1787992186036543100
+      "modified_ns": 1788015107263578800
     },
     "lillie_track_bossa/bass.mp3": {
       "type": "audio",
@@ -810,6 +811,28 @@
         "true_peak_dbtp": -10.29,
         "loudness_range_lu": 3.7,
         "loudness_threshold_lufs": -33.71
+      }
+    },
+    "lillie_track_bossa/shakers.mp3": {
+      "type": "audio",
+      "size_bytes": 2135000,
+      "modified_ns": 1788015108672973600,
+      "audio": {
+        "codec": "mp3",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bit_rate_bps": 76494,
+        "duration_seconds": 223.2426,
+        "average_volume_dbfs": -40.0,
+        "mean_volume_dbfs": -40.0,
+        "peak_volume_dbfs": -17.9,
+        "integrated_lufs": -31.53,
+        "normalization_target_lufs": -18.0,
+        "gain_to_target_lufs_db": 13.53,
+        "true_peak_dbtp": -17.92,
+        "loudness_range_lu": 2.5,
+        "loudness_threshold_lufs": -41.73
       }
     },
     "lillie_track_bossa/synth counter melody.mp3": {
@@ -1573,7 +1596,7 @@
     },
     "soundfonts": {
       "type": "folder",
-      "modified_ns": 1788014922719281700
+      "modified_ns": 1788015847811800100
     },
     "soundfonts/Casino Drums.sf2": {
       "type": "file",
@@ -1588,7 +1611,7 @@
     "soundfonts/Gotta Rush.sf2": {
       "type": "file",
       "size_bytes": 4848976,
-      "modified_ns": 1788014922610123500
+      "modified_ns": 1788015847745261300
     },
     "soundfonts/Gotta-Rush-presets.json": {
       "type": "file",
@@ -1627,86 +1650,86 @@
     },
     "wifeymixer_dist": {
       "type": "folder",
-      "modified_ns": 1788014565717023900
+      "modified_ns": 1788017071964489000
     },
     "wifeymixer_dist/!index - Copy.html": {
       "type": "file",
-      "size_bytes": 696999,
-      "modified_ns": 1788014565707654200
+      "size_bytes": 696824,
+      "modified_ns": 1788017071945284900
     },
     "wifeymixer_dist/AUTO-GAIN-README.txt": {
       "type": "file",
       "size_bytes": 2120,
-      "modified_ns": 1788014565674156800
+      "modified_ns": 1788017071804811100
     },
     "wifeymixer_dist/auto-gain-references.js": {
       "type": "file",
       "size_bytes": 4800,
-      "modified_ns": 1788014565682906900
+      "modified_ns": 1788017071837149300
     },
     "wifeymixer_dist/filename-tag-rules.js": {
       "type": "file",
       "size_bytes": 9578,
-      "modified_ns": 1788014565676312400
+      "modified_ns": 1788017071818066500
     },
     "wifeymixer_dist/hardware-polish.css": {
       "type": "file",
-      "size_bytes": 17903,
-      "modified_ns": 1788014565698904200
+      "size_bytes": 17902,
+      "modified_ns": 1788017071910067200
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
-      "size_bytes": 696999,
-      "modified_ns": 1788014565696613100
+      "size_bytes": 696824,
+      "modified_ns": 1788017071896342400
     },
     "wifeymixer_dist/instrument-icons.json": {
       "type": "file",
       "size_bytes": 142840,
-      "modified_ns": 1788014565701597300
+      "modified_ns": 1788017071923146000
     },
     "wifeymixer_dist/midi-support.js": {
       "type": "file",
       "size_bytes": 19205,
-      "modified_ns": 1788014565716487300
+      "modified_ns": 1788017071964489000
     },
     "wifeymixer_dist/sf2-procedural.js": {
       "type": "file",
       "size_bytes": 16655,
-      "modified_ns": 1788014565678487000
+      "modified_ns": 1788017071830993400
     },
     "wifeymixer_dist/soundfont-icons.js": {
       "type": "file",
       "size_bytes": 30113,
-      "modified_ns": 1788014565693254500
+      "modified_ns": 1788017071858646000
     },
     "wifeymixer_dist/strip-fx-compressor-worklet.js": {
       "type": "file",
       "size_bytes": 2359,
-      "modified_ns": 1788014565703275200
+      "modified_ns": 1788017071940776500
     },
     "wifeymixer_dist/strip-fx-engine.js": {
       "type": "file",
       "size_bytes": 15882,
-      "modified_ns": 1788014565709940400
+      "modified_ns": 1788017071948082100
     },
     "wifeymixer_dist/tempo-stretch-engine.js": {
       "type": "file",
       "size_bytes": 10187,
-      "modified_ns": 1788014565680638000
+      "modified_ns": 1788017071835502600
     },
     "wifeymixer_dist/tests": {
       "type": "folder",
-      "modified_ns": 1788014565714315200
+      "modified_ns": 1788017071953783000
     },
     "wifeymixer_dist/tests/tempo-stretch-engine.test.js": {
       "type": "file",
       "size_bytes": 3824,
-      "modified_ns": 1788014565711568600
+      "modified_ns": 1788017071950839200
     },
     "wifeymixer_dist/tests/ui_integration_test.py": {
       "type": "file",
-      "size_bytes": 19717,
-      "modified_ns": 1788014565714315200
+      "size_bytes": 31874,
+      "modified_ns": 1788017071953243700
     }
   }
 }
