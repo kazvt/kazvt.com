@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "files": [
-    "!1index - Copy.html",
+    "!index - Copy.html",
     "AUTO-GAIN-README.txt",
     "auto-gain-references.js",
     "filename-tag-rules.js",
@@ -43,15 +43,6 @@
     "lillie_track_bossa/guitar melody.mp3",
     "lillie_track_bossa/keys.mp3",
     "lillie_track_bossa/synth counter melody.mp3",
-    "lillie_track_slowburn",
-    "lillie_track_slowburn/bass.mp3",
-    "lillie_track_slowburn/drums.mp3",
-    "lillie_track_slowburn/guitar chords.mp3",
-    "lillie_track_slowburn/guitar melody.mp3",
-    "lillie_track_slowburn/keys.mp3",
-    "lillie_track_slowburn/shakers.mp3",
-    "lillie_track_slowburn/synth counter melody.mp3",
-    "lillie_track_slowburn/synth melody misc.mp3",
     "midi-support.js",
     "midi_lillie_10",
     "midi_lillie_10/bass.mid",
@@ -100,27 +91,10 @@
     "soundfonts/SF64.sf2",
     "soundfonts/Sonic Drums.sf2",
     "strip-fx-compressor-worklet.js",
-    "strip-fx-engine.js",
-    "wifeymixer_dist",
-    "wifeymixer_dist/!index - Copy.html",
-    "wifeymixer_dist/AUTO-GAIN-README.txt",
-    "wifeymixer_dist/auto-gain-references.js",
-    "wifeymixer_dist/filename-tag-rules.js",
-    "wifeymixer_dist/hardware-polish.css",
-    "wifeymixer_dist/index.html",
-    "wifeymixer_dist/instrument-icons.json",
-    "wifeymixer_dist/midi-support.js",
-    "wifeymixer_dist/sf2-procedural.js",
-    "wifeymixer_dist/soundfont-icons.js",
-    "wifeymixer_dist/strip-fx-compressor-worklet.js",
-    "wifeymixer_dist/strip-fx-engine.js",
-    "wifeymixer_dist/tempo-stretch-engine.js",
-    "wifeymixer_dist/tests",
-    "wifeymixer_dist/tests/tempo-stretch-engine.test.js",
-    "wifeymixer_dist/tests/ui_integration_test.py"
+    "strip-fx-engine.js"
   ],
   "file_info": {
-    "!1index - Copy.html": {
+    "!index - Copy.html": {
       "type": "file",
       "size_bytes": 683362,
       "modified_ns": 1787667343426015500
@@ -834,186 +808,6 @@
         "loudness_threshold_lufs": -34.69
       }
     },
-    "lillie_track_slowburn": {
-      "type": "folder",
-      "modified_ns": 1788013762498844500
-    },
-    "lillie_track_slowburn/bass.mp3": {
-      "type": "audio",
-      "size_bytes": 2087120,
-      "modified_ns": 1788012100585843000,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 74778,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -26.7,
-        "mean_volume_dbfs": -26.7,
-        "peak_volume_dbfs": -12.9,
-        "integrated_lufs": -24.88,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 6.88,
-        "true_peak_dbtp": -12.89,
-        "loudness_range_lu": 1.1,
-        "loudness_threshold_lufs": -35.01
-      }
-    },
-    "lillie_track_slowburn/drums.mp3": {
-      "type": "audio",
-      "size_bytes": 2489240,
-      "modified_ns": 1788010570142074600,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 89187,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -26.0,
-        "mean_volume_dbfs": -26.0,
-        "peak_volume_dbfs": -4.4,
-        "integrated_lufs": -23.9,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 5.9,
-        "true_peak_dbtp": -4.43,
-        "loudness_range_lu": 1.9,
-        "loudness_threshold_lufs": -34.03
-      }
-    },
-    "lillie_track_slowburn/guitar chords.mp3": {
-      "type": "audio",
-      "size_bytes": 2224064,
-      "modified_ns": 1788011762970147900,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 79685,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -26.2,
-        "mean_volume_dbfs": -26.2,
-        "peak_volume_dbfs": -10.0,
-        "integrated_lufs": -21.36,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 3.36,
-        "true_peak_dbtp": -9.99,
-        "loudness_range_lu": 2.2,
-        "loudness_threshold_lufs": -31.56
-      }
-    },
-    "lillie_track_slowburn/guitar melody.mp3": {
-      "type": "audio",
-      "size_bytes": 1338176,
-      "modified_ns": 1788012977793328200,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 47943,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -32.7,
-        "mean_volume_dbfs": -32.7,
-        "peak_volume_dbfs": -12.5,
-        "integrated_lufs": -24.07,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 6.07,
-        "true_peak_dbtp": -12.51,
-        "loudness_range_lu": 0.7,
-        "loudness_threshold_lufs": -34.16
-      }
-    },
-    "lillie_track_slowburn/keys.mp3": {
-      "type": "audio",
-      "size_bytes": 1571384,
-      "modified_ns": 1788012005882531800,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 56299,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -33.4,
-        "mean_volume_dbfs": -33.4,
-        "peak_volume_dbfs": -13.0,
-        "integrated_lufs": -27.01,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 9.01,
-        "true_peak_dbtp": -13.01,
-        "loudness_range_lu": 1.6,
-        "loudness_threshold_lufs": -37.08
-      }
-    },
-    "lillie_track_slowburn/shakers.mp3": {
-      "type": "audio",
-      "size_bytes": 2134952,
-      "modified_ns": 1788010995575299300,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 76492,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -40.0,
-        "mean_volume_dbfs": -40.0,
-        "peak_volume_dbfs": -17.9,
-        "integrated_lufs": -31.53,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 13.53,
-        "true_peak_dbtp": -17.92,
-        "loudness_range_lu": 2.5,
-        "loudness_threshold_lufs": -41.73
-      }
-    },
-    "lillie_track_slowburn/synth counter melody.mp3": {
-      "type": "audio",
-      "size_bytes": 1298000,
-      "modified_ns": 1788013044374444800,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 46504,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -33.5,
-        "mean_volume_dbfs": -33.5,
-        "peak_volume_dbfs": -19.1,
-        "integrated_lufs": -23.38,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 5.38,
-        "true_peak_dbtp": -19.07,
-        "loudness_range_lu": 1.1,
-        "loudness_threshold_lufs": -33.42
-      }
-    },
-    "lillie_track_slowburn/synth melody misc.mp3": {
-      "type": "audio",
-      "size_bytes": 1082264,
-      "modified_ns": 1788013609829671000,
-      "audio": {
-        "codec": "mp3",
-        "sample_rate_hz": 48000,
-        "channels": 2,
-        "channel_layout": "stereo",
-        "bit_rate_bps": 38774,
-        "duration_seconds": 223.2426,
-        "average_volume_dbfs": -31.1,
-        "mean_volume_dbfs": -31.1,
-        "peak_volume_dbfs": -10.3,
-        "integrated_lufs": -22.3,
-        "normalization_target_lufs": -18.0,
-        "gain_to_target_lufs_db": 4.3,
-        "true_peak_dbtp": -10.31,
-        "loudness_range_lu": 4.7,
-        "loudness_threshold_lufs": -32.38
-      }
-    },
     "midi-support.js": {
       "type": "file",
       "size_bytes": 19205,
@@ -1624,89 +1418,6 @@
       "type": "file",
       "size_bytes": 15882,
       "modified_ns": 1787667345240086300
-    },
-    "wifeymixer_dist": {
-      "type": "folder",
-      "modified_ns": 1788014565717023900
-    },
-    "wifeymixer_dist/!index - Copy.html": {
-      "type": "file",
-      "size_bytes": 696999,
-      "modified_ns": 1788014565707654200
-    },
-    "wifeymixer_dist/AUTO-GAIN-README.txt": {
-      "type": "file",
-      "size_bytes": 2120,
-      "modified_ns": 1788014565674156800
-    },
-    "wifeymixer_dist/auto-gain-references.js": {
-      "type": "file",
-      "size_bytes": 4800,
-      "modified_ns": 1788014565682906900
-    },
-    "wifeymixer_dist/filename-tag-rules.js": {
-      "type": "file",
-      "size_bytes": 9578,
-      "modified_ns": 1788014565676312400
-    },
-    "wifeymixer_dist/hardware-polish.css": {
-      "type": "file",
-      "size_bytes": 17903,
-      "modified_ns": 1788014565698904200
-    },
-    "wifeymixer_dist/index.html": {
-      "type": "file",
-      "size_bytes": 696999,
-      "modified_ns": 1788014565696613100
-    },
-    "wifeymixer_dist/instrument-icons.json": {
-      "type": "file",
-      "size_bytes": 142840,
-      "modified_ns": 1788014565701597300
-    },
-    "wifeymixer_dist/midi-support.js": {
-      "type": "file",
-      "size_bytes": 19205,
-      "modified_ns": 1788014565716487300
-    },
-    "wifeymixer_dist/sf2-procedural.js": {
-      "type": "file",
-      "size_bytes": 16655,
-      "modified_ns": 1788014565678487000
-    },
-    "wifeymixer_dist/soundfont-icons.js": {
-      "type": "file",
-      "size_bytes": 30113,
-      "modified_ns": 1788014565693254500
-    },
-    "wifeymixer_dist/strip-fx-compressor-worklet.js": {
-      "type": "file",
-      "size_bytes": 2359,
-      "modified_ns": 1788014565703275200
-    },
-    "wifeymixer_dist/strip-fx-engine.js": {
-      "type": "file",
-      "size_bytes": 15882,
-      "modified_ns": 1788014565709940400
-    },
-    "wifeymixer_dist/tempo-stretch-engine.js": {
-      "type": "file",
-      "size_bytes": 10187,
-      "modified_ns": 1788014565680638000
-    },
-    "wifeymixer_dist/tests": {
-      "type": "folder",
-      "modified_ns": 1788014565714315200
-    },
-    "wifeymixer_dist/tests/tempo-stretch-engine.test.js": {
-      "type": "file",
-      "size_bytes": 3824,
-      "modified_ns": 1788014565711568600
-    },
-    "wifeymixer_dist/tests/ui_integration_test.py": {
-      "type": "file",
-      "size_bytes": 19717,
-      "modified_ns": 1788014565714315200
     }
   }
 }

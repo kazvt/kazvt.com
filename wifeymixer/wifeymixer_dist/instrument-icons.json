@@ -1,0 +1,7273 @@
+{
+  "version": 1,
+  "fontAwesomeStyle": "fa-solid",
+  "fallbackIcon": "fa-wave-square",
+  "description": "Predictive stem-name aliases for WIFEY MIX-8. Each row maps text found in a stem name to a Font Awesome icon.",
+  "aliases": [
+    {
+      "text": "guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "slide guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "resonator",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dobro",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "baritone guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "baritone gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar amp",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtr amp",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar di",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtr di",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass guitar",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass gtr",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bgtr",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bss",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "electric bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "e bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "ebass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass di",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass amp",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "upright bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "double bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "contrabass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "fretless",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "fretless bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "fretted bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass clean",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass dirty",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "bass distortion",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "picked bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "pick bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "finger bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "fingered bass",
+      "icon": "fa-guitar",
+      "category": "bass"
+    },
+    {
+      "text": "drum",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drums",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drm",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drms",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drum kit",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drumkit",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "kit",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "live drums",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "acoustic drums",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "electronic drums",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drum bus",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drum buss",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drum stem",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "drum mix",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "beat",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "beats",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "beat kit",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "rhythm kit",
+      "icon": "fa-drum",
+      "category": "drums"
+    },
+    {
+      "text": "kick",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick drum",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kickdrum",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kik",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kck",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "bd",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "bass drum",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick in",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick out",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick sub",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick sample",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick mic",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick close",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick beater",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick resonant",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "kick reso",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "k drum",
+      "icon": "fa-drum",
+      "category": "kick"
+    },
+    {
+      "text": "snare",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "sn",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snr",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare drum",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "sd",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare top",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare bottom",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "sn top",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "sn bottom",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "sn bot",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snr top",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snr bottom",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snr btm",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare mic",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare close",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare side",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "snare sample",
+      "icon": "fa-drum",
+      "category": "snare"
+    },
+    {
+      "text": "tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "toms",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom 1",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom 2",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom 3",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom1",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom2",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom3",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "rack tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "rack toms",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "rtom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "rtoms",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "floor tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "floor toms",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "ftom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "ftoms",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "high tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "mid tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "low tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "hi tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "lo tom",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "tom close",
+      "icon": "fa-drum",
+      "category": "toms"
+    },
+    {
+      "text": "hh",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hihat",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hihats",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hi hat",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hi hats",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hat",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hats",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "closed hat",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "closed hats",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "open hat",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "open hats",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "chh",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "ohh",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hat closed",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hat open",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "pedal hat",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hh close",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "hh mic",
+      "icon": "fa-drum",
+      "category": "hihat"
+    },
+    {
+      "text": "cymbal",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "cymbals",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "cym",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "crash",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "crashes",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "ride",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "rides",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "china",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "splash",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "splash cymbal",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "crash cymbal",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "ride cymbal",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "overhead",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "overheads",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "oh",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "ohs",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "drum overhead",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "drum overheads",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "drum oh",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "cymbal swell",
+      "icon": "fa-drum",
+      "category": "cymbals"
+    },
+    {
+      "text": "perc",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "percs",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "percussion",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "percussions",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "shaker",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "shakers",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "shkr",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "shkrs",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "shk",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "tamb",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "tmb",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "tambourine",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "tambourines",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "tambo",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "clap",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "claps",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "handclap",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "handclaps",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "cowbell",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "cow bell",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "bongo",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "bongos",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "conga",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "congas",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "djembe",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "cabasa",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "guiro",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "maraca",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "maracas",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "clave",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "claves",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "woodblock",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "wood block",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "triangle",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "agogo",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "agogo bell",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "blocks",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "hand percussion",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "aux perc",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "aux percussion",
+      "icon": "fa-drum-steelpan",
+      "category": "percussion"
+    },
+    {
+      "text": "piano",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "pno",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "pino",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "pn",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "pian",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "grand",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "grand piano",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "upright",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "upright piano",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "baby grand",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "concert grand",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "acoustic piano",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "piano close",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "piano room",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "piano mic",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "pno close",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "pno room",
+      "icon": "fa-keyboard",
+      "category": "piano"
+    },
+    {
+      "text": "keys",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "key",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "keyboard",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "keyboards",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "kbrd",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "kbd",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "keybd",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "kb",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "midi keys",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "midi keyboard",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "controller",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "key stack",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "keys stack",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "keyboard stack",
+      "icon": "fa-keyboard",
+      "category": "keys"
+    },
+    {
+      "text": "organ",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "org",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "orgn",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "organs",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "hammond",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "hammond b3",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "b3",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "leslie",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "church organ",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "pipe organ",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "combo organ",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "vox organ",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "farfisa",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "organ leslie",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "organ direct",
+      "icon": "fa-keyboard",
+      "category": "organ"
+    },
+    {
+      "text": "rhodes",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "rhds",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "rhod",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "electric piano",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "e piano",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "epiano",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "ep",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "mk1",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "mk2",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "mark i",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "mark ii",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "rhodes mk1",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "rhodes mk2",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "suitcase rhodes",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "stage rhodes",
+      "icon": "fa-keyboard",
+      "category": "rhodes"
+    },
+    {
+      "text": "wurli",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "wurlitzer",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "wurl",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "wrl",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "wurlie",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "wurly",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "electric wurli",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "wurli amp",
+      "icon": "fa-keyboard",
+      "category": "wurli"
+    },
+    {
+      "text": "synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synths",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "syn",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synthesizer",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synthesiser",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "analog synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "analogue synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "soft synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "vst synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "poly synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "mono synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "moog",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "minimoog",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "juno",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "jupiter",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "prophet",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "oberheim",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "yamaha synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "roland synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "lead synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synth lead",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synth bass",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synth keys",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "arp",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "arps",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "arpeggio",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "arpeggiator",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "seq",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "sequence",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "sequencer",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "modular",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "modular synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "fm synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "dx7",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "synth pluck",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "pluck synth",
+      "icon": "fa-wave-square",
+      "category": "synth"
+    },
+    {
+      "text": "pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "pads",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "synth pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "synth pads",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "ambient pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "ambient pads",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "string pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "string pads",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "warm pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "soft pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "texture",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "textures",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "textural",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "drone",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "drones",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "atmos pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "air pad",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "wash",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "washes",
+      "icon": "fa-wave-square",
+      "category": "pads"
+    },
+    {
+      "text": "vibes",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "vibe",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "vibraphone",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "vibra",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "marimba",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "xylophone",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "xylo",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "glock",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "glockenspiel",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "bells",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "bell",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "celeste",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "celesta",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "mallet",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "mallets",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "tubular bells",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "chimes",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "chime",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "music box",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "musicbox",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "kalimba",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "thumb piano",
+      "icon": "fa-bell",
+      "category": "mallets"
+    },
+    {
+      "text": "strings",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "string",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "str",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "strs",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "string section",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "orchestra strings",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "orchestral strings",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "violin",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "violins",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "vln",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "viola",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "violas",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "vla",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "cello",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "cellos",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "vc",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "string ensemble",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "string quartet",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "orchestra",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "orchestral",
+      "icon": "fa-music",
+      "category": "strings"
+    },
+    {
+      "text": "harp",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "harps",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "mandolin",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "mandolins",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "mand",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "ukulele",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "uke",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "banjo",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "banjos",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "sitar",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "sitars",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "bouzouki",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "lute",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "lutes",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "charango",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "dulcimer",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "lap steel",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "pedal steel",
+      "icon": "fa-guitar",
+      "category": "plucked-strings"
+    },
+    {
+      "text": "brass",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "horn",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "horns",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "brass section",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "trumpet",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "trumpets",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "trp",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "tpt",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "trombone",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "trombones",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "tbn",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "tbone",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "french horn",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "french horns",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "fhorn",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "flugelhorn",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "flugel",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "tuba",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "tubas",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "euphonium",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "brass ensemble",
+      "icon": "fa-music",
+      "category": "brass"
+    },
+    {
+      "text": "woodwind",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "woodwinds",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "ww",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "flute",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "flutes",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "flt",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "piccolo",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "clarinet",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "clarinets",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "clar",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "oboe",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "oboes",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "bassoon",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "bassoons",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "sax",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "saxophone",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "saxophones",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "alto sax",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "tenor sax",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "baritone sax",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "bari sax",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "soprano sax",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "recorder",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "woodwind section",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "winds",
+      "icon": "fa-music",
+      "category": "woodwinds"
+    },
+    {
+      "text": "vox",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "vocal",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "vocals",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "vocs",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "voc",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "voice",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "voices",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "vocalist",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lead vocal",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lead vocals",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lead vox",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lv",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lvox",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "main vocal",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "main vocals",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "main vox",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lead voice",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "singer",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "singing",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "vocal lead",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "vox lead",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "lead voc",
+      "icon": "fa-microphone",
+      "category": "lead-vocal"
+    },
+    {
+      "text": "bg vox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "bgvox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "bgv",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "bgvs",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "bvox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "backing vocal",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "backing vocals",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "background vocal",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "background vocals",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "back vox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "backing vox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "background vox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "harmony",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "harmonies",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "harmony vox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "harmony vocal",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "choir",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "choirs",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "gang vox",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "gang vocal",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "gang vocals",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "stacked vocals",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "vocal stack",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "vox stack",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "bv",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "bvs",
+      "icon": "fa-microphone",
+      "category": "backing-vocals"
+    },
+    {
+      "text": "spoken",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "spoken word",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "speech",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "talk",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "talkback",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "narration",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "narrator",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "dialog",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "dialogue",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "voiceover",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "voice over",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "vo",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "podcast",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "announcer",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "mc",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "rap",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "rapper",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "adlib",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "adlibs",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "ad lib",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "ad libs",
+      "icon": "fa-microphone-lines",
+      "category": "spoken-vocal"
+    },
+    {
+      "text": "fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sfx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "effect",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "effects",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sound fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sound effects",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "riser",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "risers",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "impact",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "impacts",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "whoosh",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "whooshes",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sweep",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sweeps",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "downlifter",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "downlifters",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "uplifter",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "uplifters",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "transition",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "transitions",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "noise",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "white noise",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "pink noise",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "foley",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "reverse",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "reversed",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "boom",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "booms",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "hit",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "hits",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "drop",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "drops",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "glitch",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "glitches",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "loop",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "loops",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "sample",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "samples",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "samp",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "samps",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "one shot",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "one shots",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "oneshot",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "oneshots",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "chop",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "chops",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "slice",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "slices",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "audio loop",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "music loop",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "sample loop",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "phrase",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "phrases",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "construction kit",
+      "icon": "fa-compact-disc",
+      "category": "loops-samples"
+    },
+    {
+      "text": "room",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "rooms",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "amb",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "ambience",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "ambiance",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "atmo",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "atmos",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "atmosphere",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "field",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "field recording",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "room mic",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "room mics",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "far mic",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "far mics",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "crowd",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "audience",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "environment",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "environmental",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "air",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "room tone",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "roomtone",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "wild track",
+      "icon": "fa-headphones",
+      "category": "ambience-room"
+    },
+    {
+      "text": "click",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "click track",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "metronome",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "metro",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "guide",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "guide track",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "count",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "count in",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "slate",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "sync",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "timecode",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "time code",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "tc",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "tempo",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "cue",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "cue track",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "reference click",
+      "icon": "fa-sliders",
+      "category": "click-guide"
+    },
+    {
+      "text": "master",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "mix",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "mixbus",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "mix bus",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "mix buss",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "2bus",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "2 bus",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "stereo bus",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "stereo buss",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "print",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "premaster",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "pre master",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "reference",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "ref",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "rough mix",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "roughmix",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "bounce",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "mix print",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "master print",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "instrumental",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "acapella",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "a cappella",
+      "icon": "fa-sliders",
+      "category": "mix-master"
+    },
+    {
+      "text": "808",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "808s",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "sub",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "subs",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "sub bass",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "subbass",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "low end",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "lowend",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "sine bass",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "sine sub",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "sub synth",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "low bass",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "boom bass",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "bass sub",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "808 bass",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "808 kick",
+      "icon": "fa-wave-square",
+      "category": "sub-808"
+    },
+    {
+      "text": "radio",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "lofi",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "lo-fi",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "telephone",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "phone fx",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "phone vocal",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "megaphone",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "speaker",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "amp sim",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "amp simulator",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "cassette",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "tape",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "tape fx",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "vinyl",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "record player",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "broadcast",
+      "icon": "fa-radio",
+      "category": "radio-lofi"
+    },
+    {
+      "text": "guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close gtar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guit double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close guit",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close guitr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "gtrs double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close gtrs",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "guitars double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close guitars",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ac gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close ac gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close acoustic gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "acoustic guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close acoustic guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "electric guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close electric guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "elec gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close elec gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "e gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close e gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "egtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close egtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close clean gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close dirty gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dist gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close dist gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "distorted guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close distorted guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close rhythm gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "rhythm guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close rhythm guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close lead gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close lead guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close nylon guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "nylon gtr double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close nylon gtr",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close steel guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "steel string guitar double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close steel string guitar",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string room",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string bus",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string stem",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string print",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string dbl",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12 string double",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "lead 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "main 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "alt 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "clean 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dirty 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "dry 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "wet 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "close 12 string",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str 1",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str 2",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str 3",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str a",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str b",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str main",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str alt",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str dry",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str wet",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str mono",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str stereo",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str st",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str close",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "12str far",
+      "icon": "fa-guitar",
+      "category": "guitar"
+    },
+    {
+      "text": "ear candy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "earcandy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "ear-candy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "candy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "candy fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "ear fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "earfx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "flair",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "flairs",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "flourish",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "flourishes",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sweetener",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sweeteners",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sweetening",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "stinger",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "stingers",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sting",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "stings",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "accent fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "fx accent",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sonic accent",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sonic accents",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "ear treat",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "ear treats",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "ear sparkle",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "ear sparkles",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sparkle fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sparkles fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "transition fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "transition effect",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "transition effects",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "riser fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "impact fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "whoosh fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sweep fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "uplifter fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "downlifter fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "reverse fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "reverse effect",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "reverse effects",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "fill fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "fx fill",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "micro fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "microfx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "detail fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sonic detail",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "sonic details",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "audio candy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "audio-candy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "production candy",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "production fx",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "production effect",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    },
+    {
+      "text": "production effects",
+      "icon": "fa-wand-magic-sparkles",
+      "category": "ear-candy"
+    }
+  ]
+}
