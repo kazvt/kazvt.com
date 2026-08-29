@@ -35,6 +35,7 @@
     "lillie_track_6/strings.mp3",
     "lillie_track_6/vibes.mp3",
     "lillie_track_6/yamaha synth.mp3",
+    "lillie_track_bossa",
     "midi-support.js",
     "midi_lillie_10",
     "midi_lillie_10/bass.mid",
@@ -641,6 +642,10 @@
         "loudness_range_lu": 5.2,
         "loudness_threshold_lufs": -37.12
       }
+    },
+    "lillie_track_bossa": {
+      "type": "folder",
+      "modified_ns": 1787992181682825400
     },
     "midi-support.js": {
       "type": "file",
