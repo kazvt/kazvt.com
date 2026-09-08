@@ -5019,11 +5019,15 @@ html.touch-device .big-palette .palette-cursor-preview {
 /* Retro scrapbook pass ------------------------------------------------------
    Small, low-stakes visual clutter keeps the page feeling like a lovingly
    assembled personal homepage instead of a polished template. */
+body {
+  position: relative;
+}
+
 .retro-debris {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 2;
-  overflow: hidden;
+  z-index: 0;
+  overflow: visible;
   pointer-events: none;
 }
 
@@ -5034,48 +5038,91 @@ html.touch-device .big-palette .palette-cursor-preview {
   image-rendering: auto;
   filter: drop-shadow(3px 4px 0 rgba(17, 17, 17, 0.2));
   opacity: 0.92;
+  z-index: 0;
 }
 
-.retro-debris-oldtimey {
-  top: 12%;
+.retro-debris-smiley {
+  top: 130px;
   left: max(8px, calc(50% - 650px));
-  width: 82px;
-  transform: rotate(-8deg);
+  width: 24px;
+  transform: rotate(-8deg) scale(1.3);
 }
 
-.retro-debris-happy {
-  top: 27%;
+.retro-debris-smiley-face {
+  top: 335px;
   right: max(12px, calc(50% - 650px));
-  width: 48px;
-  transform: rotate(11deg);
-}
-
-.retro-debris-wave {
-  top: 43%;
-  left: max(6px, calc(50% - 670px));
-  width: 76px;
-  transform: rotate(5deg);
-}
-
-.retro-debris-burger {
-  top: 59%;
-  right: max(8px, calc(50% - 660px));
   width: 58px;
-  transform: rotate(-13deg);
+  transform: rotate(8deg);
 }
 
-.retro-debris-throbber {
-  top: 75%;
+.retro-debris-wink {
+  top: 545px;
+  left: max(6px, calc(50% - 670px));
+  width: 25px;
+  transform: rotate(-11deg) scale(1.25);
+}
+
+.retro-debris-lol {
+  top: 755px;
+  right: max(8px, calc(50% - 660px));
+  width: 25px;
+  transform: rotate(10deg) scale(1.25);
+}
+
+.retro-debris-sleepy {
+  top: 965px;
   left: max(8px, calc(50% - 650px));
   width: 42px;
-  transform: rotate(7deg);
+  transform: rotate(-5deg);
 }
 
-.retro-debris-banana {
-  top: 89%;
+.retro-debris-sparkle {
+  top: 1175px;
   right: max(8px, calc(50% - 650px));
-  width: 72px;
-  transform: rotate(8deg);
+  width: 30px;
+  transform: rotate(14deg) scale(1.2);
+}
+
+.retro-debris-construction {
+  top: 1395px;
+  left: max(6px, calc(50% - 675px));
+  width: 54px;
+  transform: rotate(-7deg);
+}
+
+.retro-debris-email {
+  top: 1615px;
+  right: max(8px, calc(50% - 660px));
+  width: 56px;
+  transform: rotate(9deg);
+}
+
+.retro-debris-heart {
+  top: 1835px;
+  left: max(10px, calc(50% - 650px));
+  width: 30px;
+  transform: rotate(-12deg) scale(1.25);
+}
+
+.retro-debris-note {
+  top: 2055px;
+  right: max(10px, calc(50% - 670px));
+  width: 40px;
+  transform: rotate(12deg);
+}
+
+.retro-debris-guestbook {
+  top: 2265px;
+  left: max(6px, calc(50% - 680px));
+  width: 74px;
+  transform: rotate(-6deg);
+}
+
+.retro-debris-kiss {
+  top: 2475px;
+  right: max(8px, calc(50% - 650px));
+  width: 46px;
+  transform: rotate(7deg);
 }
 
 #welcome .panel-body {
@@ -5128,24 +5175,74 @@ html.touch-device .big-palette .palette-cursor-preview {
   font-size: 0.92rem;
 }
 
-.welcome-emote-row {
+.welcome-status-strip {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  min-height: 44px;
   margin: 14px 0 2px;
-  padding: 7px 9px;
+  padding: 8px 10px;
   border: 3px dashed var(--ink);
   background: color-mix(in srgb, var(--paper-alt) 70%, white 30%);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-.welcome-emote-row .inline-emote {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-  image-rendering: auto;
-  filter: drop-shadow(2px 2px 0 rgba(17, 17, 17, 0.2));
+.welcome-status-dot {
+  color: var(--green);
+  font-size: 1.2rem;
+  line-height: 0.7;
+}
+
+.welcome-status-code {
+  margin-left: auto;
+  color: var(--banner);
+}
+
+.welcome-console {
+  position: relative;
+  display: grid;
+  min-height: 218px;
+  align-content: center;
+  gap: 13px;
+  overflow: hidden;
+  padding: 32px 16px 16px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.07) 50%, transparent 50%),
+    var(--banner);
+  background-size: 100% 4px, auto;
+  color: var(--banner-text);
+  transform: rotate(1.2deg);
+}
+
+.welcome-console-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: 7px 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.welcome-console-face {
+  color: var(--yellow);
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.welcome-console-copy {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
 }
 
 .welcome-jumps {
@@ -5184,20 +5281,6 @@ html.touch-device .big-palette .palette-cursor-preview {
   color: var(--hover-text);
 }
 
-.welcome-scrapbook {
-  position: relative;
-  display: grid;
-  min-height: 218px;
-  place-items: center;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 20% 18%, color-mix(in srgb, var(--pink) 50%, transparent) 0 3px, transparent 4px),
-    radial-gradient(circle at 76% 78%, color-mix(in srgb, var(--blue) 44%, transparent) 0 4px, transparent 5px),
-    var(--paper-alt);
-  background-size: 31px 27px, 43px 37px, auto;
-  transform: rotate(1.2deg);
-}
-
 .scrapbook-tape {
   position: absolute;
   top: 8px;
@@ -5207,22 +5290,6 @@ html.touch-device .big-palette .palette-cursor-preview {
   background: color-mix(in srgb, var(--yellow) 72%, white 28%);
   opacity: 0.86;
   transform: translateX(-50%) rotate(-4deg);
-}
-
-.welcome-parrot {
-  width: min(68%, 132px);
-  margin-top: 4px;
-  transform: rotate(-5deg);
-  filter: drop-shadow(4px 5px 0 rgba(17, 17, 17, 0.23));
-}
-
-.welcome-burger {
-  position: absolute;
-  right: 12%;
-  bottom: 22%;
-  width: 48px;
-  transform: rotate(14deg);
-  filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, 0.2));
 }
 
 .welcome-stamp {
@@ -5247,107 +5314,17 @@ html.touch-device .big-palette .palette-cursor-preview {
   letter-spacing: 0.12em;
 }
 
-#scraps .panel-body {
-  padding: 6px 4px 2px;
-}
-
-.scrap-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.scrap-card {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-  margin: 0;
-  padding: 10px 8px 8px;
-  border: 3px solid var(--ink);
-  background: color-mix(in srgb, var(--paper-alt) 72%, white 28%);
-  box-shadow: 3px 3px 0 var(--shadow);
-  text-align: center;
-}
-
-.scrap-card:nth-child(2n) {
-  background: color-mix(in srgb, var(--blue) 18%, var(--paper-alt));
-  transform: rotate(1.8deg);
-}
-
-.scrap-card:nth-child(3n) {
-  background: color-mix(in srgb, var(--pink) 18%, var(--paper-alt));
-  transform: rotate(-1.3deg);
-}
-
-.scrap-image-frame {
-  display: grid;
-  min-height: 76px;
-  place-items: center;
-  border: 2px dashed var(--ink);
-  background: var(--paper);
-}
-
-.scrap-image-frame img {
-  display: block;
-  width: auto;
-  max-width: 92%;
-  height: 68px;
-  object-fit: contain;
-  image-rendering: auto;
-}
-
-.scrap-card figcaption {
-  overflow-wrap: anywhere;
-  font-size: 0.78rem;
-  font-weight: 900;
-  line-height: 1.1;
-}
-
-.scrap-note {
-  margin: 16px 0 0;
-  padding: 8px 10px;
-  border-top: 3px dotted var(--ink);
-  color: var(--banner);
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-align: center;
-}
-
 @media (max-width: 880px) {
   .retro-debris {
-    display: none;
+    display: block;
   }
 
   .welcome-grid {
     grid-template-columns: 1fr;
   }
 
-  .welcome-scrapbook {
+  .welcome-console {
     min-height: 166px;
-  }
-
-  .scrap-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 460px) {
-  .scrap-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .scrap-card {
-    grid-template-columns: 92px minmax(0, 1fr);
-    align-items: center;
-    text-align: left;
-  }
-
-  .scrap-image-frame {
-    min-height: 72px;
-  }
-
-  .scrap-card figcaption {
-    padding-right: 6px;
   }
 }
 
