@@ -1430,6 +1430,53 @@ function panel({ id, titleKey, stampKey, children }) {
   ]);
 }
 
+const retroDebrisFiles = Array.from({ length: 100 }, (_, index) =>
+  `archive-${String(index + 1).padStart(3, "0")}.gif`,
+);
+
+let retroDebrisResizeTimer = 0;
+
+function initializeRetroDebris() {
+  const mount = document.querySelector(".retro-debris");
+  if (!mount) return;
+
+  const paint = () => {
+    const pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1);
+    const usableHeight = Math.max(pageHeight - 150, 1);
+    mount.style.height = `${pageHeight}px`;
+    mount.replaceChildren(
+      ...retroDebrisFiles.map((file, index) => {
+        const image = el("img", {
+          className: "retro-debris-item",
+          src: `zzz_assets/retro-web/smileys/${file}`,
+          alt: "",
+          loading: "lazy",
+          decoding: "async",
+        });
+        const verticalJitter = ((index * 47) % 55) - 27;
+        const top = Math.max(80, Math.round((usableHeight * (index + 0.5)) / retroDebrisFiles.length + verticalJitter));
+        const rail = 3 + ((index * 17) % 22);
+        const side = index % 2 === 0 ? "left" : "right";
+        image.style.top = `${top}px`;
+        image.style[side] = `${rail}vw`;
+        image.style.width = `${16 + ((index * 29) % 48)}px`;
+        image.style.transform = `rotate(${((index * 23) % 31) - 15}deg)`;
+        return image;
+      }),
+    );
+  };
+
+  window.cancelAnimationFrame(mount._retroDebrisFrame || 0);
+  mount._retroDebrisFrame = window.requestAnimationFrame(paint);
+  if (!mount.dataset.resizeBound) {
+    mount.dataset.resizeBound = "true";
+    window.addEventListener("resize", () => {
+      window.clearTimeout(retroDebrisResizeTimer);
+      retroDebrisResizeTimer = window.setTimeout(paint, 180);
+    });
+  }
+}
+
 function homeWelcomePanel() {
   return panel({
     id: "welcome",
@@ -3183,6 +3230,7 @@ async function render(statusOverrides = {}) {
     ]),
   );
   markSoftLoaded(app);
+  initializeRetroDebris();
 
   initializeDrawingPad();
   initializeArtCarousel();
