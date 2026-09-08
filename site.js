@@ -1430,18 +1430,18 @@ function panel({ id, titleKey, stampKey, children }) {
   ]);
 }
 
-// GifCities-only asset list. The numbered order was shuffled once during
-// curation, with 50 smileys and 50 non-smiley graphics mixed throughout.
-// Keep this static: there is intentionally no runtime randomization.
-const retroDebrisFiles = Array.from({ length: 100 }, (_, index) =>
-  `zzz_assets/retro-web/gifcities/${String(index + 1).padStart(3, "0")}.gif`,
-);
-
 let retroDebrisResizeTimer = 0;
 
-function initializeRetroDebris() {
+async function initializeRetroDebris() {
   const mount = document.querySelector(".retro-debris");
   if (!mount) return;
+
+  const files = await loadManifest("zzz_assets/retro-web/gifcities/manifest.json", imageExtensions);
+  const retroDebrisFiles = files.map((file) => `zzz_assets/retro-web/gifcities/${file}`);
+  if (!retroDebrisFiles.length) {
+    mount.replaceChildren();
+    return;
+  }
 
   const paint = () => {
     const surface = mount.closest(".site-wrap");
@@ -3243,7 +3243,7 @@ async function render(statusOverrides = {}) {
     ]),
   );
   markSoftLoaded(app);
-  initializeRetroDebris();
+  await initializeRetroDebris();
 
   initializeDrawingPad();
   initializeArtCarousel();

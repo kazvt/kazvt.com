@@ -1,14 +1,11 @@
 Old-web decoration assets
 
-The homepage scatter uses the 100 files in gifcities/ only. Every file was
-downloaded from GifCities:
-https://gifcities.org/
+The homepage scatter reads gifcities/manifest.json and uses the files listed
+there, in exactly that order. All assets live together in gifcities/.
 
-The set contains exactly 50 smiley/face results and 50 non-smiley retro-web
-results. The files were shuffled once during curation and numbered in that
-fixed order, so the browser never randomizes the set on reload. manifest.json
-records each GifCities blob URL and its category.
+To customize the set, add or remove GIFs in that one folder, then edit only
+the "files" array in manifest.json. Filenames can be anything; the homepage
+does not expect numbering, categories, or a particular naming pattern.
 
-Each candidate was checked for actual alpha transparency, a small usable size,
-and exclusion from mostly opaque black or white backgrounds. The homepage does
-not source its decorative scatter from the site's other local GIF folders.
+The current assets were downloaded from https://gifcities.org/ and are kept
+locally, so the site does not depend on remote GIF URLs at runtime.

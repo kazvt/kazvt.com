@@ -1,606 +1,105 @@
 {
-  "source": "https://gifcities.org/",
-  "note": "One-time static shuffle: 50 smiley/face results and 50 non-smiley retro-web results.",
+  "schema_version": 2,
   "files": [
-    {
-      "file": "001.gif",
-      "category": "smiley",
-      "gifcities_id": "QWY7QEOZHHNMF4JB5RTHQBTG4RNYAW3W",
-      "source": "https://blob.gifcities.org/gifcities/QWY7QEOZHHNMF4JB5RTHQBTG4RNYAW3W.gif"
-    },
-    {
-      "file": "002.gif",
-      "category": "non-smiley",
-      "gifcities_id": "73SH7CL6RIX25SUOHGF74HRLU74ATA4E",
-      "source": "https://blob.gifcities.org/gifcities/73SH7CL6RIX25SUOHGF74HRLU74ATA4E.gif"
-    },
-    {
-      "file": "003.gif",
-      "category": "smiley",
-      "gifcities_id": "ENQ4UFIVQHZ76SDALHL754WXAANTLNRY",
-      "source": "https://blob.gifcities.org/gifcities/ENQ4UFIVQHZ76SDALHL754WXAANTLNRY.gif"
-    },
-    {
-      "file": "004.gif",
-      "category": "smiley",
-      "gifcities_id": "NEV7DG5H6QAZUHCX34QTBCJHAPGUQL7A",
-      "source": "https://blob.gifcities.org/gifcities/NEV7DG5H6QAZUHCX34QTBCJHAPGUQL7A.gif"
-    },
-    {
-      "file": "005.gif",
-      "category": "non-smiley",
-      "gifcities_id": "6NVR4SK562HVJRLMY7PF7RJEJ3BQ4C5O",
-      "source": "https://blob.gifcities.org/gifcities/6NVR4SK562HVJRLMY7PF7RJEJ3BQ4C5O.gif"
-    },
-    {
-      "file": "006.gif",
-      "category": "non-smiley",
-      "gifcities_id": "76B37NC7WXYLT4RKAD3CQVIVG6CPVVDP",
-      "source": "https://blob.gifcities.org/gifcities/76B37NC7WXYLT4RKAD3CQVIVG6CPVVDP.gif"
-    },
-    {
-      "file": "007.gif",
-      "category": "smiley",
-      "gifcities_id": "6T52UA3KJDGXD6DKPFNFXZULDCWNPCLW",
-      "source": "https://blob.gifcities.org/gifcities/6T52UA3KJDGXD6DKPFNFXZULDCWNPCLW.gif"
-    },
-    {
-      "file": "008.gif",
-      "category": "smiley",
-      "gifcities_id": "OGICMV5IK7I3GQLTPN2RAUDCECA5A6LQ",
-      "source": "https://blob.gifcities.org/gifcities/OGICMV5IK7I3GQLTPN2RAUDCECA5A6LQ.gif"
-    },
-    {
-      "file": "009.gif",
-      "category": "smiley",
-      "gifcities_id": "XIDOVLDWYGOVZBYYL32OFIQG2MBZ2BPQ",
-      "source": "https://blob.gifcities.org/gifcities/XIDOVLDWYGOVZBYYL32OFIQG2MBZ2BPQ.gif"
-    },
-    {
-      "file": "010.gif",
-      "category": "non-smiley",
-      "gifcities_id": "GCYSYCWJ5W4LGYU6ZFPZQZPAAIG6WPGC",
-      "source": "https://blob.gifcities.org/gifcities/GCYSYCWJ5W4LGYU6ZFPZQZPAAIG6WPGC.gif"
-    },
-    {
-      "file": "011.gif",
-      "category": "smiley",
-      "gifcities_id": "PYUQUQ3KK5EVGK5NMVY6OVVDJNLWUHXX",
-      "source": "https://blob.gifcities.org/gifcities/PYUQUQ3KK5EVGK5NMVY6OVVDJNLWUHXX.gif"
-    },
-    {
-      "file": "012.gif",
-      "category": "smiley",
-      "gifcities_id": "WFSFYATVI5D3SWQRVYQIVHKQTE6WA5E2",
-      "source": "https://blob.gifcities.org/gifcities/WFSFYATVI5D3SWQRVYQIVHKQTE6WA5E2.gif"
-    },
-    {
-      "file": "013.gif",
-      "category": "non-smiley",
-      "gifcities_id": "VJWBYQ4OCZHATT2DHXPTS4ETFPZRYXNJ",
-      "source": "https://blob.gifcities.org/gifcities/VJWBYQ4OCZHATT2DHXPTS4ETFPZRYXNJ.gif"
-    },
-    {
-      "file": "014.gif",
-      "category": "smiley",
-      "gifcities_id": "P7AJTYOJT7XCIHIHH3QT4OS6DXUB7T7T",
-      "source": "https://blob.gifcities.org/gifcities/P7AJTYOJT7XCIHIHH3QT4OS6DXUB7T7T.gif"
-    },
-    {
-      "file": "015.gif",
-      "category": "non-smiley",
-      "gifcities_id": "ZJRIFA2IHUPOSZAPYBJH3CFPO4BKF5O5",
-      "source": "https://blob.gifcities.org/gifcities/ZJRIFA2IHUPOSZAPYBJH3CFPO4BKF5O5.gif"
-    },
-    {
-      "file": "016.gif",
-      "category": "smiley",
-      "gifcities_id": "2OB7TYGMMD67KI77O7CZ3KEOT3Q5PSOX",
-      "source": "https://blob.gifcities.org/gifcities/2OB7TYGMMD67KI77O7CZ3KEOT3Q5PSOX.gif"
-    },
-    {
-      "file": "017.gif",
-      "category": "non-smiley",
-      "gifcities_id": "B234SQ5UWRN6Q6YAWTVWQFRZMYGYOMCO",
-      "source": "https://blob.gifcities.org/gifcities/B234SQ5UWRN6Q6YAWTVWQFRZMYGYOMCO.gif"
-    },
-    {
-      "file": "018.gif",
-      "category": "smiley",
-      "gifcities_id": "U7O3MDFVEZZCSSKEE4N6UZJYBT2LN4J2",
-      "source": "https://blob.gifcities.org/gifcities/U7O3MDFVEZZCSSKEE4N6UZJYBT2LN4J2.gif"
-    },
-    {
-      "file": "019.gif",
-      "category": "smiley",
-      "gifcities_id": "KIU454KKIWH4LFXXS643XBNNU7PYY4EC",
-      "source": "https://blob.gifcities.org/gifcities/KIU454KKIWH4LFXXS643XBNNU7PYY4EC.gif"
-    },
-    {
-      "file": "020.gif",
-      "category": "smiley",
-      "gifcities_id": "N2WSPKQII2W52TNX5Z6SJ3RCXYLRW36P",
-      "source": "https://blob.gifcities.org/gifcities/N2WSPKQII2W52TNX5Z6SJ3RCXYLRW36P.gif"
-    },
-    {
-      "file": "021.gif",
-      "category": "non-smiley",
-      "gifcities_id": "AWJOVSJAYAF7GLZT5AEZ33K2YHWMWJQC",
-      "source": "https://blob.gifcities.org/gifcities/AWJOVSJAYAF7GLZT5AEZ33K2YHWMWJQC.gif"
-    },
-    {
-      "file": "022.gif",
-      "category": "non-smiley",
-      "gifcities_id": "MHLICJ6ZGGP5TGKNDECCO2U7URY7M43U",
-      "source": "https://blob.gifcities.org/gifcities/MHLICJ6ZGGP5TGKNDECCO2U7URY7M43U.gif"
-    },
-    {
-      "file": "023.gif",
-      "category": "non-smiley",
-      "gifcities_id": "SILKJ5HXANSGPI23QJOX4CEIK2J5NMKW",
-      "source": "https://blob.gifcities.org/gifcities/SILKJ5HXANSGPI23QJOX4CEIK2J5NMKW.gif"
-    },
-    {
-      "file": "024.gif",
-      "category": "smiley",
-      "gifcities_id": "EPAYCXHSLE3EZ7MWVBJ53NRUTKBFHVPR",
-      "source": "https://blob.gifcities.org/gifcities/EPAYCXHSLE3EZ7MWVBJ53NRUTKBFHVPR.gif"
-    },
-    {
-      "file": "025.gif",
-      "category": "smiley",
-      "gifcities_id": "YH6ZCM3DXHVBVXS352Q3TVPM3AZQSIHE",
-      "source": "https://blob.gifcities.org/gifcities/YH6ZCM3DXHVBVXS352Q3TVPM3AZQSIHE.gif"
-    },
-    {
-      "file": "026.gif",
-      "category": "non-smiley",
-      "gifcities_id": "N34DR3RYBMMFKQPJRBQOIQZJ26ZLBQPR",
-      "source": "https://blob.gifcities.org/gifcities/N34DR3RYBMMFKQPJRBQOIQZJ26ZLBQPR.gif"
-    },
-    {
-      "file": "027.gif",
-      "category": "non-smiley",
-      "gifcities_id": "4FRF73WO2ZOYODYZ4NINMKAIZFHIZQX4",
-      "source": "https://blob.gifcities.org/gifcities/4FRF73WO2ZOYODYZ4NINMKAIZFHIZQX4.gif"
-    },
-    {
-      "file": "028.gif",
-      "category": "smiley",
-      "gifcities_id": "WTQPEDHRGMQDIWHHBYJLIHPLS3K6WDQQ",
-      "source": "https://blob.gifcities.org/gifcities/WTQPEDHRGMQDIWHHBYJLIHPLS3K6WDQQ.gif"
-    },
-    {
-      "file": "029.gif",
-      "category": "smiley",
-      "gifcities_id": "6XH4T2EGIA74DD3SE25HZCZUQD4OJ2IL",
-      "source": "https://blob.gifcities.org/gifcities/6XH4T2EGIA74DD3SE25HZCZUQD4OJ2IL.gif"
-    },
-    {
-      "file": "030.gif",
-      "category": "smiley",
-      "gifcities_id": "WNHKJEZPNN7ET2XNB2Y7ZLDDDKK7RJKW",
-      "source": "https://blob.gifcities.org/gifcities/WNHKJEZPNN7ET2XNB2Y7ZLDDDKK7RJKW.gif"
-    },
-    {
-      "file": "031.gif",
-      "category": "non-smiley",
-      "gifcities_id": "Y7EP5IMRZI7FAFKN3QYV3SYXYX3KETUG",
-      "source": "https://blob.gifcities.org/gifcities/Y7EP5IMRZI7FAFKN3QYV3SYXYX3KETUG.gif"
-    },
-    {
-      "file": "032.gif",
-      "category": "non-smiley",
-      "gifcities_id": "BRYH4K6FHOOHA2AJIO4SRJYP3ADMFVMZ",
-      "source": "https://blob.gifcities.org/gifcities/BRYH4K6FHOOHA2AJIO4SRJYP3ADMFVMZ.gif"
-    },
-    {
-      "file": "033.gif",
-      "category": "smiley",
-      "gifcities_id": "N2RTWBY7RRUDAHGQE2Z2UMDI3ROMAUED",
-      "source": "https://blob.gifcities.org/gifcities/N2RTWBY7RRUDAHGQE2Z2UMDI3ROMAUED.gif"
-    },
-    {
-      "file": "034.gif",
-      "category": "smiley",
-      "gifcities_id": "MF43ICE4RGWP6RLRJAMLP23RPX6S4QRA",
-      "source": "https://blob.gifcities.org/gifcities/MF43ICE4RGWP6RLRJAMLP23RPX6S4QRA.gif"
-    },
-    {
-      "file": "035.gif",
-      "category": "non-smiley",
-      "gifcities_id": "VCBLJVGCYIYBLCCWVJQSRCPYNX6PY3OV",
-      "source": "https://blob.gifcities.org/gifcities/VCBLJVGCYIYBLCCWVJQSRCPYNX6PY3OV.gif"
-    },
-    {
-      "file": "036.gif",
-      "category": "non-smiley",
-      "gifcities_id": "NP55FGXCWOMKQDOWANGB4AJV7WI63YIO",
-      "source": "https://blob.gifcities.org/gifcities/NP55FGXCWOMKQDOWANGB4AJV7WI63YIO.gif"
-    },
-    {
-      "file": "037.gif",
-      "category": "non-smiley",
-      "gifcities_id": "4DMUMEVC2E33SMKJJGAYL6EICWTWMAUR",
-      "source": "https://blob.gifcities.org/gifcities/4DMUMEVC2E33SMKJJGAYL6EICWTWMAUR.gif"
-    },
-    {
-      "file": "038.gif",
-      "category": "smiley",
-      "gifcities_id": "XKY2LLSFWZJYRTXEIFB5ISV342VV4SLW",
-      "source": "https://blob.gifcities.org/gifcities/XKY2LLSFWZJYRTXEIFB5ISV342VV4SLW.gif"
-    },
-    {
-      "file": "039.gif",
-      "category": "non-smiley",
-      "gifcities_id": "MSLTOZ743SOZM3IL4VOXQ2IHWWWSH3CI",
-      "source": "https://blob.gifcities.org/gifcities/MSLTOZ743SOZM3IL4VOXQ2IHWWWSH3CI.gif"
-    },
-    {
-      "file": "040.gif",
-      "category": "non-smiley",
-      "gifcities_id": "IWVPLNJRJ4GCMDMT7FISNP2YBQGML5UB",
-      "source": "https://blob.gifcities.org/gifcities/IWVPLNJRJ4GCMDMT7FISNP2YBQGML5UB.gif"
-    },
-    {
-      "file": "041.gif",
-      "category": "smiley",
-      "gifcities_id": "APONW5HTEL5K4M3RKUWRIYXG3XHX3Z5V",
-      "source": "https://blob.gifcities.org/gifcities/APONW5HTEL5K4M3RKUWRIYXG3XHX3Z5V.gif"
-    },
-    {
-      "file": "042.gif",
-      "category": "smiley",
-      "gifcities_id": "ETB5KXWRMGCITUPXIWUSJWU3NQEB55PQ",
-      "source": "https://blob.gifcities.org/gifcities/ETB5KXWRMGCITUPXIWUSJWU3NQEB55PQ.gif"
-    },
-    {
-      "file": "043.gif",
-      "category": "smiley",
-      "gifcities_id": "HQU6LA452NB7ETEEH6CHKYYTUEMEEEUF",
-      "source": "https://blob.gifcities.org/gifcities/HQU6LA452NB7ETEEH6CHKYYTUEMEEEUF.gif"
-    },
-    {
-      "file": "044.gif",
-      "category": "smiley",
-      "gifcities_id": "OAX3HHFFCTNUWK2HHDRYBVK5USB3OIE6",
-      "source": "https://blob.gifcities.org/gifcities/OAX3HHFFCTNUWK2HHDRYBVK5USB3OIE6.gif"
-    },
-    {
-      "file": "045.gif",
-      "category": "smiley",
-      "gifcities_id": "XL2JEHROJYIOOULBB3SWCNAJXQHC3JP4",
-      "source": "https://blob.gifcities.org/gifcities/XL2JEHROJYIOOULBB3SWCNAJXQHC3JP4.gif"
-    },
-    {
-      "file": "046.gif",
-      "category": "non-smiley",
-      "gifcities_id": "ZJEV56DA37ODB5GTWANPQO6BHI5BC7VB",
-      "source": "https://blob.gifcities.org/gifcities/ZJEV56DA37ODB5GTWANPQO6BHI5BC7VB.gif"
-    },
-    {
-      "file": "047.gif",
-      "category": "non-smiley",
-      "gifcities_id": "STVXY7GSMID2KUDQ3CKIQQWWLKQRGRY6",
-      "source": "https://blob.gifcities.org/gifcities/STVXY7GSMID2KUDQ3CKIQQWWLKQRGRY6.gif"
-    },
-    {
-      "file": "048.gif",
-      "category": "non-smiley",
-      "gifcities_id": "OOAFHOQIEL67ARR7KZPOCMPOKNN2JP4Y",
-      "source": "https://blob.gifcities.org/gifcities/OOAFHOQIEL67ARR7KZPOCMPOKNN2JP4Y.gif"
-    },
-    {
-      "file": "049.gif",
-      "category": "non-smiley",
-      "gifcities_id": "GM2O62UCJPHG5CXCMTIBAUDXXBQ4IMDL",
-      "source": "https://blob.gifcities.org/gifcities/GM2O62UCJPHG5CXCMTIBAUDXXBQ4IMDL.gif"
-    },
-    {
-      "file": "050.gif",
-      "category": "smiley",
-      "gifcities_id": "LKULRNT7OAQJE3Z523B2335TAFEEULC6",
-      "source": "https://blob.gifcities.org/gifcities/LKULRNT7OAQJE3Z523B2335TAFEEULC6.gif"
-    },
-    {
-      "file": "051.gif",
-      "category": "non-smiley",
-      "gifcities_id": "EYCA5SU7QI5G4V7URA2XWUTSHNHCFPR5",
-      "source": "https://blob.gifcities.org/gifcities/EYCA5SU7QI5G4V7URA2XWUTSHNHCFPR5.gif"
-    },
-    {
-      "file": "052.gif",
-      "category": "non-smiley",
-      "gifcities_id": "XGMTMP4ABJ2AT4OGV3Z36PP2ADJQHVZE",
-      "source": "https://blob.gifcities.org/gifcities/XGMTMP4ABJ2AT4OGV3Z36PP2ADJQHVZE.gif"
-    },
-    {
-      "file": "053.gif",
-      "category": "non-smiley",
-      "gifcities_id": "6OZTZ6YTZ2TKJ43UTYMAGG6E2T227IDY",
-      "source": "https://blob.gifcities.org/gifcities/6OZTZ6YTZ2TKJ43UTYMAGG6E2T227IDY.gif"
-    },
-    {
-      "file": "054.gif",
-      "category": "non-smiley",
-      "gifcities_id": "P5FPUHVA3Y6AKTFATVLZIR4OINVLM73Z",
-      "source": "https://blob.gifcities.org/gifcities/P5FPUHVA3Y6AKTFATVLZIR4OINVLM73Z.gif"
-    },
-    {
-      "file": "055.gif",
-      "category": "smiley",
-      "gifcities_id": "UUQ56BQNRK5H7ZTGMSULPFQ75SV7K7U3",
-      "source": "https://blob.gifcities.org/gifcities/UUQ56BQNRK5H7ZTGMSULPFQ75SV7K7U3.gif"
-    },
-    {
-      "file": "056.gif",
-      "category": "smiley",
-      "gifcities_id": "7NYA374JGQLKNVT3NZYRSPDRVMKBDXUS",
-      "source": "https://blob.gifcities.org/gifcities/7NYA374JGQLKNVT3NZYRSPDRVMKBDXUS.gif"
-    },
-    {
-      "file": "057.gif",
-      "category": "non-smiley",
-      "gifcities_id": "FPCFACMDCZUYQ2DQQSSLTU5U7MBMY5DN",
-      "source": "https://blob.gifcities.org/gifcities/FPCFACMDCZUYQ2DQQSSLTU5U7MBMY5DN.gif"
-    },
-    {
-      "file": "058.gif",
-      "category": "non-smiley",
-      "gifcities_id": "4JIDCRB7XP5ZVXSZ3GCU5Q4GIKKZVF26",
-      "source": "https://blob.gifcities.org/gifcities/4JIDCRB7XP5ZVXSZ3GCU5Q4GIKKZVF26.gif"
-    },
-    {
-      "file": "059.gif",
-      "category": "non-smiley",
-      "gifcities_id": "RZNSSMGJWEBM5JSZZ5K426WW6SHERHNM",
-      "source": "https://blob.gifcities.org/gifcities/RZNSSMGJWEBM5JSZZ5K426WW6SHERHNM.gif"
-    },
-    {
-      "file": "060.gif",
-      "category": "non-smiley",
-      "gifcities_id": "O4UIF2CR6STBEF44P252LT52J5A2YXBV",
-      "source": "https://blob.gifcities.org/gifcities/O4UIF2CR6STBEF44P252LT52J5A2YXBV.gif"
-    },
-    {
-      "file": "061.gif",
-      "category": "smiley",
-      "gifcities_id": "DJTFED3FTTKNZ27PBJLRYJUATXRFRGLE",
-      "source": "https://blob.gifcities.org/gifcities/DJTFED3FTTKNZ27PBJLRYJUATXRFRGLE.gif"
-    },
-    {
-      "file": "062.gif",
-      "category": "non-smiley",
-      "gifcities_id": "WX4GHQ2MBJ4WIQVQXPAZL63AK574DDMA",
-      "source": "https://blob.gifcities.org/gifcities/WX4GHQ2MBJ4WIQVQXPAZL63AK574DDMA.gif"
-    },
-    {
-      "file": "063.gif",
-      "category": "non-smiley",
-      "gifcities_id": "O7765CCVPS4NJDGEJM3PHXUAZ3F6CEOW",
-      "source": "https://blob.gifcities.org/gifcities/O7765CCVPS4NJDGEJM3PHXUAZ3F6CEOW.gif"
-    },
-    {
-      "file": "064.gif",
-      "category": "smiley",
-      "gifcities_id": "TYPCS4OIXJPE34L7M7JMLJRK4JDHEYQC",
-      "source": "https://blob.gifcities.org/gifcities/TYPCS4OIXJPE34L7M7JMLJRK4JDHEYQC.gif"
-    },
-    {
-      "file": "065.gif",
-      "category": "non-smiley",
-      "gifcities_id": "ONECGBBGUDSEHKRUQY7EQW7YMO3V4H2X",
-      "source": "https://blob.gifcities.org/gifcities/ONECGBBGUDSEHKRUQY7EQW7YMO3V4H2X.gif"
-    },
-    {
-      "file": "066.gif",
-      "category": "non-smiley",
-      "gifcities_id": "UTNSFGUXZDDUSDMQUJBWRPO4RK35KQLY",
-      "source": "https://blob.gifcities.org/gifcities/UTNSFGUXZDDUSDMQUJBWRPO4RK35KQLY.gif"
-    },
-    {
-      "file": "067.gif",
-      "category": "smiley",
-      "gifcities_id": "T5M3TYS4YCC7YIN7MJ4IEOTNEMWAWNEF",
-      "source": "https://blob.gifcities.org/gifcities/T5M3TYS4YCC7YIN7MJ4IEOTNEMWAWNEF.gif"
-    },
-    {
-      "file": "068.gif",
-      "category": "non-smiley",
-      "gifcities_id": "Z4FCDFQZPD6HEO7GASYKU2NJ5FQ4NWJW",
-      "source": "https://blob.gifcities.org/gifcities/Z4FCDFQZPD6HEO7GASYKU2NJ5FQ4NWJW.gif"
-    },
-    {
-      "file": "069.gif",
-      "category": "smiley",
-      "gifcities_id": "MSOFKBW47E2HDQEYSL5QPYEAAG3DK5MD",
-      "source": "https://blob.gifcities.org/gifcities/MSOFKBW47E2HDQEYSL5QPYEAAG3DK5MD.gif"
-    },
-    {
-      "file": "070.gif",
-      "category": "smiley",
-      "gifcities_id": "7HHVCPM4NFIHKCEAP4J5L4SBDL7QL5F6",
-      "source": "https://blob.gifcities.org/gifcities/7HHVCPM4NFIHKCEAP4J5L4SBDL7QL5F6.gif"
-    },
-    {
-      "file": "071.gif",
-      "category": "non-smiley",
-      "gifcities_id": "6IIETC6OJWBTK73FSOVBUCC72MRCNH63",
-      "source": "https://blob.gifcities.org/gifcities/6IIETC6OJWBTK73FSOVBUCC72MRCNH63.gif"
-    },
-    {
-      "file": "072.gif",
-      "category": "smiley",
-      "gifcities_id": "LC6X6CDFUMBYJ2QXRSZCPYQEIWRUPGLD",
-      "source": "https://blob.gifcities.org/gifcities/LC6X6CDFUMBYJ2QXRSZCPYQEIWRUPGLD.gif"
-    },
-    {
-      "file": "073.gif",
-      "category": "non-smiley",
-      "gifcities_id": "I3M53GUJC4DV7UPXCF2EOWHHLGIKDA2Q",
-      "source": "https://blob.gifcities.org/gifcities/I3M53GUJC4DV7UPXCF2EOWHHLGIKDA2Q.gif"
-    },
-    {
-      "file": "074.gif",
-      "category": "non-smiley",
-      "gifcities_id": "KI3L3MUEQ7AKQC5DNS2BJ5W7YM4BM2RT",
-      "source": "https://blob.gifcities.org/gifcities/KI3L3MUEQ7AKQC5DNS2BJ5W7YM4BM2RT.gif"
-    },
-    {
-      "file": "075.gif",
-      "category": "smiley",
-      "gifcities_id": "CCZAW66RPTGUF5MVFDZEMMBCSPJIKHAV",
-      "source": "https://blob.gifcities.org/gifcities/CCZAW66RPTGUF5MVFDZEMMBCSPJIKHAV.gif"
-    },
-    {
-      "file": "076.gif",
-      "category": "non-smiley",
-      "gifcities_id": "WGDISBCLD3IB2TIMO6XXZCPKYZFQLTAG",
-      "source": "https://blob.gifcities.org/gifcities/WGDISBCLD3IB2TIMO6XXZCPKYZFQLTAG.gif"
-    },
-    {
-      "file": "077.gif",
-      "category": "non-smiley",
-      "gifcities_id": "UY2PRXFBHYRFMYSKO4QQM7OHGRWCMPCO",
-      "source": "https://blob.gifcities.org/gifcities/UY2PRXFBHYRFMYSKO4QQM7OHGRWCMPCO.gif"
-    },
-    {
-      "file": "078.gif",
-      "category": "non-smiley",
-      "gifcities_id": "AOHJPQXOHVMEHYVTYRY67MBEXINMM3FV",
-      "source": "https://blob.gifcities.org/gifcities/AOHJPQXOHVMEHYVTYRY67MBEXINMM3FV.gif"
-    },
-    {
-      "file": "079.gif",
-      "category": "smiley",
-      "gifcities_id": "2YJO3CGJVTJQPP4VDTEBNLLWM2NVEJGA",
-      "source": "https://blob.gifcities.org/gifcities/2YJO3CGJVTJQPP4VDTEBNLLWM2NVEJGA.gif"
-    },
-    {
-      "file": "080.gif",
-      "category": "non-smiley",
-      "gifcities_id": "PO4A3OXCPD4SFELT2AYDJTNASLP6PJSH",
-      "source": "https://blob.gifcities.org/gifcities/PO4A3OXCPD4SFELT2AYDJTNASLP6PJSH.gif"
-    },
-    {
-      "file": "081.gif",
-      "category": "smiley",
-      "gifcities_id": "HOCYGFB2TCXVSJTOGZXXMIRQWVHQIZA6",
-      "source": "https://blob.gifcities.org/gifcities/HOCYGFB2TCXVSJTOGZXXMIRQWVHQIZA6.gif"
-    },
-    {
-      "file": "082.gif",
-      "category": "smiley",
-      "gifcities_id": "7MBBSS4AQYC54KBCASZJ5KWGBJ34KTAG",
-      "source": "https://blob.gifcities.org/gifcities/7MBBSS4AQYC54KBCASZJ5KWGBJ34KTAG.gif"
-    },
-    {
-      "file": "083.gif",
-      "category": "smiley",
-      "gifcities_id": "Z3L7ZJ7HX6ZOLZTGVLYAHUJNOXCF6UBE",
-      "source": "https://blob.gifcities.org/gifcities/Z3L7ZJ7HX6ZOLZTGVLYAHUJNOXCF6UBE.gif"
-    },
-    {
-      "file": "084.gif",
-      "category": "smiley",
-      "gifcities_id": "MRNZPHWYGQTHTS54LMDSKXG42IQIKIB4",
-      "source": "https://blob.gifcities.org/gifcities/MRNZPHWYGQTHTS54LMDSKXG42IQIKIB4.gif"
-    },
-    {
-      "file": "085.gif",
-      "category": "non-smiley",
-      "gifcities_id": "5WNO7BLBOJ5MKRXQFYYMJGNJR3U7ACSP",
-      "source": "https://blob.gifcities.org/gifcities/5WNO7BLBOJ5MKRXQFYYMJGNJR3U7ACSP.gif"
-    },
-    {
-      "file": "086.gif",
-      "category": "smiley",
-      "gifcities_id": "IXF4AFCDBCJGOMGJ4ERAIDX4QE7AZPKX",
-      "source": "https://blob.gifcities.org/gifcities/IXF4AFCDBCJGOMGJ4ERAIDX4QE7AZPKX.gif"
-    },
-    {
-      "file": "087.gif",
-      "category": "non-smiley",
-      "gifcities_id": "VY7XC4BALLN5CIX2IGUTK2EL3SPEBLFL",
-      "source": "https://blob.gifcities.org/gifcities/VY7XC4BALLN5CIX2IGUTK2EL3SPEBLFL.gif"
-    },
-    {
-      "file": "088.gif",
-      "category": "smiley",
-      "gifcities_id": "YVOT6JQOKF532OTSAACC76NI6HKLT3HW",
-      "source": "https://blob.gifcities.org/gifcities/YVOT6JQOKF532OTSAACC76NI6HKLT3HW.gif"
-    },
-    {
-      "file": "089.gif",
-      "category": "non-smiley",
-      "gifcities_id": "L23RCFXDDBTNRMMZLRGVYDNRX2HUWYIH",
-      "source": "https://blob.gifcities.org/gifcities/L23RCFXDDBTNRMMZLRGVYDNRX2HUWYIH.gif"
-    },
-    {
-      "file": "090.gif",
-      "category": "non-smiley",
-      "gifcities_id": "NNHAXAUGG5GUMS427TPQKEHBPHU3J4K4",
-      "source": "https://blob.gifcities.org/gifcities/NNHAXAUGG5GUMS427TPQKEHBPHU3J4K4.gif"
-    },
-    {
-      "file": "091.gif",
-      "category": "smiley",
-      "gifcities_id": "3T6YVLIXT52OLDITREUHLWOTHLU5BFE2",
-      "source": "https://blob.gifcities.org/gifcities/3T6YVLIXT52OLDITREUHLWOTHLU5BFE2.gif"
-    },
-    {
-      "file": "092.gif",
-      "category": "smiley",
-      "gifcities_id": "TMRLNRHHRXIWQMQ64GJPPF6V6WHVADDS",
-      "source": "https://blob.gifcities.org/gifcities/TMRLNRHHRXIWQMQ64GJPPF6V6WHVADDS.gif"
-    },
-    {
-      "file": "093.gif",
-      "category": "smiley",
-      "gifcities_id": "D23DAERZCKKFYDAHKYUNDT2LS63KVYC7",
-      "source": "https://blob.gifcities.org/gifcities/D23DAERZCKKFYDAHKYUNDT2LS63KVYC7.gif"
-    },
-    {
-      "file": "094.gif",
-      "category": "smiley",
-      "gifcities_id": "46V2GEMVLUODT6MREFAILFHKN3JU72Z5",
-      "source": "https://blob.gifcities.org/gifcities/46V2GEMVLUODT6MREFAILFHKN3JU72Z5.gif"
-    },
-    {
-      "file": "095.gif",
-      "category": "smiley",
-      "gifcities_id": "LSWQOFL5A3TMXBYR34XRCB5A5RM5RPTU",
-      "source": "https://blob.gifcities.org/gifcities/LSWQOFL5A3TMXBYR34XRCB5A5RM5RPTU.gif"
-    },
-    {
-      "file": "096.gif",
-      "category": "non-smiley",
-      "gifcities_id": "MYOVE5HT75PRNBUBQTWDCE5S2M5TO4WC",
-      "source": "https://blob.gifcities.org/gifcities/MYOVE5HT75PRNBUBQTWDCE5S2M5TO4WC.gif"
-    },
-    {
-      "file": "097.gif",
-      "category": "smiley",
-      "gifcities_id": "UGH5LZEFXTXQYL4XJQHFREL2KDF7XALB",
-      "source": "https://blob.gifcities.org/gifcities/UGH5LZEFXTXQYL4XJQHFREL2KDF7XALB.gif"
-    },
-    {
-      "file": "098.gif",
-      "category": "smiley",
-      "gifcities_id": "QPM7SEXR4RZF3IY3A4E2ITRE5QCDITSZ",
-      "source": "https://blob.gifcities.org/gifcities/QPM7SEXR4RZF3IY3A4E2ITRE5QCDITSZ.gif"
-    },
-    {
-      "file": "099.gif",
-      "category": "non-smiley",
-      "gifcities_id": "ATXBXGCE5I6R5B5KXDN2A5JPT7Z6Q3Z5",
-      "source": "https://blob.gifcities.org/gifcities/ATXBXGCE5I6R5B5KXDN2A5JPT7Z6Q3Z5.gif"
-    },
-    {
-      "file": "100.gif",
-      "category": "non-smiley",
-      "gifcities_id": "X7SH7YK7MIS4Z22MAQMZ4DZOUELHOID6",
-      "source": "https://blob.gifcities.org/gifcities/X7SH7YK7MIS4Z22MAQMZ4DZOUELHOID6.gif"
-    }
+    "001.gif",
+    "002.gif",
+    "003.gif",
+    "004.gif",
+    "005.gif",
+    "006.gif",
+    "007.gif",
+    "008.gif",
+    "009.gif",
+    "010.gif",
+    "011.gif",
+    "012.gif",
+    "013.gif",
+    "014.gif",
+    "015.gif",
+    "016.gif",
+    "017.gif",
+    "018.gif",
+    "019.gif",
+    "020.gif",
+    "021.gif",
+    "022.gif",
+    "023.gif",
+    "024.gif",
+    "025.gif",
+    "026.gif",
+    "027.gif",
+    "028.gif",
+    "029.gif",
+    "030.gif",
+    "031.gif",
+    "032.gif",
+    "033.gif",
+    "034.gif",
+    "035.gif",
+    "036.gif",
+    "037.gif",
+    "038.gif",
+    "039.gif",
+    "040.gif",
+    "041.gif",
+    "042.gif",
+    "043.gif",
+    "044.gif",
+    "045.gif",
+    "046.gif",
+    "047.gif",
+    "048.gif",
+    "049.gif",
+    "050.gif",
+    "051.gif",
+    "052.gif",
+    "053.gif",
+    "054.gif",
+    "055.gif",
+    "056.gif",
+    "057.gif",
+    "058.gif",
+    "059.gif",
+    "060.gif",
+    "061.gif",
+    "062.gif",
+    "063.gif",
+    "064.gif",
+    "065.gif",
+    "066.gif",
+    "067.gif",
+    "068.gif",
+    "069.gif",
+    "070.gif",
+    "071.gif",
+    "072.gif",
+    "073.gif",
+    "074.gif",
+    "075.gif",
+    "076.gif",
+    "077.gif",
+    "078.gif",
+    "079.gif",
+    "080.gif",
+    "081.gif",
+    "082.gif",
+    "083.gif",
+    "084.gif",
+    "085.gif",
+    "086.gif",
+    "087.gif",
+    "088.gif",
+    "089.gif",
+    "090.gif",
+    "091.gif",
+    "092.gif",
+    "093.gif",
+    "094.gif",
+    "095.gif",
+    "096.gif",
+    "097.gif",
+    "098.gif",
+    "099.gif",
+    "100.gif"
   ]
 }
