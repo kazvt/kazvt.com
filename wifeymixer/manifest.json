@@ -97,6 +97,7 @@
     "soundfonts/Gotta Rush.sf2",
     "soundfonts/Gotta-Rush-presets.json",
     "soundfonts/Meow.sf2",
+    "soundfonts/Ronald 88 - original.sf2",
     "soundfonts/Ronald 88.sf2",
     "soundfonts/SF64-presets.json",
     "soundfonts/SF64.sf2",
@@ -1623,6 +1624,11 @@
       "type": "file",
       "size_bytes": 114414,
       "modified_ns": 1787667343664490400
+    },
+    "soundfonts/Ronald 88 - original.sf2": {
+      "type": "file",
+      "size_bytes": 4235617758,
+      "modified_ns": 1559357234000000000
     },
     "soundfonts/Ronald 88.sf2": {
       "type": "file",
