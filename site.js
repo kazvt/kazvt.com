@@ -1444,15 +1444,16 @@ function initializeRetroDebris() {
   if (!mount) return;
 
   const paint = () => {
-    const surface = document.querySelector(".site-wrap");
+    const surface = mount.closest(".site-wrap");
     const surfaceHeight = Math.max(
       surface?.scrollHeight || 0,
       surface?.getBoundingClientRect().height || 0,
       1,
     );
     const usableHeight = Math.max(surfaceHeight - 150, 1);
-    mount.style.top = `${surface?.offsetTop || 0}px`;
-    mount.style.height = `${surfaceHeight}px`;
+    const maxAssetSize = Math.max(14, Math.min(64, usableHeight / (retroDebrisFiles.length * 0.7)));
+    mount.style.removeProperty("top");
+    mount.style.removeProperty("height");
     mount.replaceChildren(
       ...retroDebrisFiles.map((file, index) => {
         const image = el("img", {
@@ -1465,9 +1466,9 @@ function initializeRetroDebris() {
         const verticalJitter = ((index * 47) % 55) - 27;
         const rail = 3 + ((index * 17) % 22);
         const side = index % 2 === 0 ? "left" : "right";
-        const width = 16 + ((index * 29) % 48);
+        const width = Math.min(16 + ((index * 29) % 48), maxAssetSize);
         const rawTop = Math.round((usableHeight * (index + 0.5)) / retroDebrisFiles.length + verticalJitter);
-        const maxTop = Math.max(80, surfaceHeight - width - 18);
+        const maxTop = Math.max(80, surfaceHeight - maxAssetSize - 18);
         const top = Math.min(maxTop, Math.max(80, rawTop));
         image.style.top = `${top}px`;
         image.style[side] = `${rail}vw`;
