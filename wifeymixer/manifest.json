@@ -97,7 +97,7 @@
     "soundfonts/Gotta Rush.sf2",
     "soundfonts/Gotta-Rush-presets.json",
     "soundfonts/Meow.sf2",
-    "soundfonts/Ronald 88 - lossy.sf2",
+    "soundfonts/Ronald 88.sf2",
     "soundfonts/SF64-presets.json",
     "soundfonts/SF64.sf2",
     "soundfonts/Sonic Drums.sf2",
@@ -1597,7 +1597,7 @@
     },
     "soundfonts": {
       "type": "folder",
-      "modified_ns": 1788856652429722300
+      "modified_ns": 1788857597690660600
     },
     "soundfonts/Casino Drums.sf2": {
       "type": "file",
@@ -1624,7 +1624,7 @@
       "size_bytes": 114414,
       "modified_ns": 1787667343664490400
     },
-    "soundfonts/Ronald 88 - lossy.sf2": {
+    "soundfonts/Ronald 88.sf2": {
       "type": "file",
       "size_bytes": 78821864,
       "modified_ns": 1788856652618193300
