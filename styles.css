@@ -53,6 +53,36 @@
 }
 
 @font-face {
+  font-family: "KAZVT Spiral";
+  src: url("zzz_assets/fonts/SPIRAL.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT 64";
+  src: url("zzz_assets/fonts/64.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT Crunch";
+  src: url("zzz_assets/fonts/CRUNCH.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT Cola";
+  src: url("zzz_assets/fonts/COLA.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KAZVT Snooze";
+  src: url("zzz_assets/fonts/SNOOZE.otf") format("opentype");
+  font-display: swap;
+}
+
+@font-face {
   font-family: "KAZVT Aero";
   src: url("zzz_assets/fonts/AERO.ttf") format("truetype");
   font-display: swap;
@@ -153,7 +183,12 @@ body[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans
 body[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p10"] { --site-font: "KAZVT Handwrite", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p11"] { --site-font: "KAZVT Spiral", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p12"] { --site-font: "KAZVT Aero", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p13"] { --site-font: "KAZVT Snooze", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p14"] { --site-font: "KAZVT Cola", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p15"] { --site-font: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p16"] { --site-font: "KAZVT Crunch", "Comic Sans MS", "Comic Sans", cursive; }
 
 ::selection {
   background: var(--selection-bg);

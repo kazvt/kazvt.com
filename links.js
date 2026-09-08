@@ -56,6 +56,12 @@ window.KAZVT_LINKS = {
     logo: "/zzz_assets/redirect-logos/bsky.gif",
     delayMs: 1000
   },
+  lilliesays: {
+    url: "https://kazvt.com/lillie-says",
+    shortPath: "bsky",
+    logo: "/zzz_assets/redirect-logos/bsky.gif",
+    delayMs: 1000
+  },
   twitter: {
     url: "https://twitter.com/monkevt",
     shortPath: "twitter",
