@@ -1430,71 +1430,12 @@ function panel({ id, titleKey, stampKey, children }) {
   ]);
 }
 
-const retroSmileyFiles = Array.from({ length: 50 }, (_, index) =>
-  `zzz_assets/retro-web/smileys/archive-${String(index + 1).padStart(3, "0")}.gif`,
+// GifCities-only asset list. The numbered order was shuffled once during
+// curation, with 50 smileys and 50 non-smiley graphics mixed throughout.
+// Keep this static: there is intentionally no runtime randomization.
+const retroDebrisFiles = Array.from({ length: 100 }, (_, index) =>
+  `zzz_assets/retro-web/gifcities/${String(index + 1).padStart(3, "0")}.gif`,
 );
-
-// Keep the scatter close to a 50/50 split: archive smileys plus transparent
-// food, objects, characters, and other little old-web oddities already in the
-// site. Interleaving them keeps either category from clustering in one part of
-// the page.
-const retroNonSmileyFiles = [
-  "collectables/1.gif",
-  "collectables/2.gif",
-  "collectables/3.gif",
-  "collectables/4.gif",
-  "collectables/hammerandsickletrans/3dgifmaker01610.gif",
-  "cubepaint/gallery/aliens.gif",
-  "cubepaint/gallery/blairwitch.gif",
-  "cubepaint/gallery/clearcut.gif",
-  "cubepaint/gallery/dsillybun3.gif",
-  "cubepaint/gallery/hellraiser.gif",
-  "cubepaint/gallery/KazVictim.gif",
-  "cubepaint/gallery/maruchan.gif",
-  "cubepaint/gallery/perfectblue.gif",
-  "cubepaint/gallery/phantomoftheopera.gif",
-  "cubepaint/gallery/reanimator.gif",
-  "cubepaint/gallery/YaoiTomeHD.gif",
-  "newdesign/assets/randomGifs/171476.gif",
-  "newdesign/assets/randomGifs/2822162_3262a.gif",
-  "newdesign/assets/randomGifs/3286156cqcjte3wfa.gif",
-  "newdesign/assets/randomGifs/3286755rvkvkygvze.gif",
-  "newdesign/assets/randomGifs/3287272nrmc8n5dg8.gif",
-  "newdesign/assets/randomGifs/53194.gif",
-  "newdesign/assets/randomGifs/575666aaf100135d3cc337751f0fff3f.gif",
-  "newdesign/assets/randomGifs/5e1e1a9e0e5212b087ce07008d0465a8.gif",
-  "newdesign/assets/randomGifs/7153b2a0bf2eb9f80d577f1ba48abb2e.gif",
-  "newdesign/assets/randomGifs/833089qhdg988j8v.gif",
-  "newdesign/assets/randomGifs/miku.gif",
-  "newdesign/assets/randomGifs/picgifs-emo-316129.gif",
-  "newdesign/assets/randomGifs/picgifs-emo-7787017.gif",
-  "newdesign/assets/randomGifs/picgifs-emo-803820.gif",
-  "newdesign/assets/randomGifs/picgifs-emo-8157681.gif",
-  "newdesign/assets/randomGifs/tumblr_178497dc5be4a69e3b7937b109b3d6c9_9ca64a83_1280.gif",
-  "zzz_assets/emotes/[bananas].gif",
-  "zzz_assets/emotes/[burger].gif",
-  "zzz_assets/emotes/[cheese].gif",
-  "zzz_assets/emotes/[dishes].gif",
-  "zzz_assets/emotes/[egg].gif",
-  "zzz_assets/emotes/[hotdog].gif",
-  "zzz_assets/emotes/[icecream].gif",
-  "zzz_assets/emotes/[marge].gif",
-  "zzz_assets/emotes/[mrbeast].gif",
-  "zzz_assets/emotes/[murder].gif",
-  "zzz_assets/emotes/[parents].gif",
-  "zzz_assets/emotes/[penis].gif",
-  "zzz_assets/emotes/[snail].gif",
-  "zzz_assets/emotes/[steak].gif",
-  "zzz_assets/emotes/[taco].gif",
-  "zzz_assets/emotes/[toilet].gif",
-  "zzz_assets/emotes/[trans].gif",
-  "zzz_assets/emotes/[wumpa].gif",
-];
-
-const retroDebrisFiles = Array.from({ length: 50 }, (_, index) => [
-  retroSmileyFiles[index],
-  retroNonSmileyFiles[index],
-]).flat();
 
 let retroDebrisResizeTimer = 0;
 

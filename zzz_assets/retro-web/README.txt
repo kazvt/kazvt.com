@@ -1,11 +1,14 @@
 Old-web decoration assets
 
-The 100 smileys and tiny web graphics in smileys/ were selected from GifCities,
-the Internet Archive search engine for animated GIFs recovered from archived
-GeoCities pages. They are named archive-001.gif through archive-100.gif:
+The homepage scatter uses the 100 files in gifcities/ only. Every file was
+downloaded from GifCities:
 https://gifcities.org/
 
-The files were downloaded through dated Internet Archive replay URLs so the
-site keeps a local, self-contained copy. Each candidate was checked for
-actual alpha transparency and candidates dominated by opaque black or white
-pixels were excluded.
+The set contains exactly 50 smiley/face results and 50 non-smiley retro-web
+results. The files were shuffled once during curation and numbered in that
+fixed order, so the browser never randomizes the set on reload. manifest.json
+records each GifCities blob URL and its category.
+
+Each candidate was checked for actual alpha transparency, a small usable size,
+and exclusion from mostly opaque black or white backgrounds. The homepage does
+not source its decorative scatter from the site's other local GIF folders.
