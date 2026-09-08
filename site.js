@@ -1430,6 +1430,75 @@ function panel({ id, titleKey, stampKey, children }) {
   ]);
 }
 
+const retroScrapItems = [
+  { src: "zzz_assets/retro-web/hamburgerparrot.gif", key: "scraps.hamburger", alt: "hamburger party parrot" },
+  { src: "zzz_assets/retro-web/parrot.gif", key: "scraps.parrot", alt: "party parrot" },
+  { src: "zzz_assets/retro-web/bananaparrot.gif", key: "scraps.banana", alt: "banana party parrot" },
+  { src: "zzz_assets/retro-web/coffeeparrot.gif", key: "scraps.coffee", alt: "coffee party parrot" },
+  { src: "zzz_assets/retro-web/oldtimeyparrot.gif", key: "scraps.old", alt: "old-timey party parrot" },
+  { src: "zzz_assets/retro-web/wave1parrot.gif", key: "scraps.wave", alt: "waving party parrot" },
+];
+
+function retroScrapFigure(item, index) {
+  return el("figure", { className: `scrap-card scrap-card-${index + 1}` }, [
+    el("div", { className: "scrap-image-frame" }, [
+      el("img", { src: item.src, alt: item.alt, loading: "lazy", decoding: "async" }),
+    ]),
+    el("figcaption", { "data-i18n": item.key }, [translatedText(item.key)]),
+  ]);
+}
+
+function homeWelcomePanel() {
+  return panel({
+    id: "welcome",
+    titleKey: "panel.welcome.title",
+    stampKey: "panel.welcome.stamp",
+    children: [
+      el("div", { className: "welcome-grid" }, [
+        el("div", { className: "welcome-copy" }, [
+          el("div", { className: "welcome-kicker" }, ["★ welcome.exe ★"]),
+          el("p", { className: "welcome-lede", "data-i18n": "home.welcome_lede" }, [translatedText("home.welcome_lede")]),
+          el("p", { className: "welcome-copy-text", "data-i18n": "home.welcome_copy" }, [translatedText("home.welcome_copy")]),
+          el("div", { className: "welcome-emote-row", ariaHidden: "true" }, [
+            emoteNode("[happy]", "%5Bhappy%5D.gif"),
+            emoteNode("[yay]", "%5Byay%5D.gif"),
+            emoteNode("[burger]", "%5Bburger%5D.gif"),
+            emoteNode("[dance]", "%5Bdance%5D.gif"),
+          ]),
+          el("p", { className: "welcome-hint", "data-i18n": "home.welcome_hint" }, [translatedText("home.welcome_hint")]),
+          el("div", { className: "welcome-jumps" }, [
+            el("span", { className: "welcome-jumps-label", "data-i18n": "home.welcome_links" }, [translatedText("home.welcome_links")]),
+            el("a", { href: "#links", "data-i18n": "home.jump_links" }, [translatedText("home.jump_links")]),
+            el("a", { href: "#profile", "data-i18n": "home.jump_profile" }, [translatedText("home.jump_profile")]),
+            el("a", { href: "#guestbook", "data-i18n": "home.jump_guestbook" }, [translatedText("home.jump_guestbook")]),
+          ]),
+        ]),
+        el("div", { className: "welcome-scrapbook scribble-box" }, [
+          el("div", { className: "scrapbook-tape", ariaHidden: "true" }),
+          el("img", { className: "welcome-parrot", src: "zzz_assets/retro-web/hamburgerparrot.gif", alt: "" }),
+          el("img", { className: "welcome-burger", src: "zzz_assets/emotes/%5Bburger%5D.gif", alt: "" }),
+          el("div", { className: "welcome-stamp" }, [
+            el("span", { "data-i18n": "home.scrapbook_stamp" }, [translatedText("home.scrapbook_stamp")]),
+            el("span", { className: "welcome-stamp-stars", ariaHidden: "true" }, ["✦ ✧ ✦"]),
+          ]),
+        ]),
+      ]),
+    ],
+  });
+}
+
+function internetScrapsPanel() {
+  return panel({
+    id: "scraps",
+    titleKey: "panel.scraps.title",
+    stampKey: "panel.scraps.stamp",
+    children: [
+      el("div", { className: "scrap-grid" }, retroScrapItems.map(retroScrapFigure)),
+      el("p", { className: "scrap-note", "data-i18n": "scraps.note" }, [translatedText("scraps.note")]),
+    ],
+  });
+}
+
 function sticker(link, extraClass = "") {
   const hasStatus = Boolean(link.status);
   const status = link.status || "";
@@ -3122,6 +3191,7 @@ async function render(statusOverrides = {}) {
 
   updateSidebar(links);
   app.replaceChildren(
+    homeWelcomePanel(),
     panel({
       id: "links",
       titleKey: "panel.links.title",
@@ -3132,6 +3202,7 @@ async function render(statusOverrides = {}) {
       ],
     }),
     multistreamGuidePanel(),
+    internetScrapsPanel(),
     profilePanel(),
     oldWebPanel(),
     guestbookPanel(),

@@ -5015,3 +5015,400 @@ html.touch-device .big-palette .palette-cursor-preview {
   width: 52px;
   height: 52px;
 }
+
+/* Retro scrapbook pass ------------------------------------------------------
+   Small, low-stakes visual clutter keeps the page feeling like a lovingly
+   assembled personal homepage instead of a polished template. */
+.retro-debris {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.retro-debris img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  image-rendering: auto;
+  filter: drop-shadow(3px 4px 0 rgba(17, 17, 17, 0.2));
+  opacity: 0.92;
+}
+
+.retro-debris-oldtimey {
+  top: 12%;
+  left: max(8px, calc(50% - 650px));
+  width: 82px;
+  transform: rotate(-8deg);
+}
+
+.retro-debris-happy {
+  top: 27%;
+  right: max(12px, calc(50% - 650px));
+  width: 48px;
+  transform: rotate(11deg);
+}
+
+.retro-debris-wave {
+  top: 43%;
+  left: max(6px, calc(50% - 670px));
+  width: 76px;
+  transform: rotate(5deg);
+}
+
+.retro-debris-burger {
+  top: 59%;
+  right: max(8px, calc(50% - 660px));
+  width: 58px;
+  transform: rotate(-13deg);
+}
+
+.retro-debris-throbber {
+  top: 75%;
+  left: max(8px, calc(50% - 650px));
+  width: 42px;
+  transform: rotate(7deg);
+}
+
+.retro-debris-banana {
+  top: 89%;
+  right: max(8px, calc(50% - 650px));
+  width: 72px;
+  transform: rotate(8deg);
+}
+
+#welcome .panel-body {
+  padding: clamp(8px, 1.2vw, 16px);
+}
+
+.welcome-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(180px, 0.65fr);
+  gap: clamp(14px, 2.5vw, 26px);
+  align-items: stretch;
+}
+
+.welcome-copy {
+  min-width: 0;
+}
+
+.welcome-kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 5px 9px;
+  border: 3px solid var(--ink);
+  background: var(--blue);
+  color: var(--on-blue);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-1.5deg);
+}
+
+.welcome-lede {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.35rem, 3.5vw, 2rem);
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.welcome-copy-text,
+.welcome-hint {
+  max-width: 48rem;
+  margin: 12px 0 0;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.welcome-hint {
+  color: var(--banner);
+  font-size: 0.92rem;
+}
+
+.welcome-emote-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  margin: 14px 0 2px;
+  padding: 7px 9px;
+  border: 3px dashed var(--ink);
+  background: color-mix(in srgb, var(--paper-alt) 70%, white 30%);
+}
+
+.welcome-emote-row .inline-emote {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(2px 2px 0 rgba(17, 17, 17, 0.2));
+}
+
+.welcome-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.welcome-jumps-label {
+  margin-right: 2px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.welcome-jumps a {
+  padding: 5px 8px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-decoration-thickness: 2px;
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.welcome-jumps a:nth-of-type(2n) {
+  background: var(--pink);
+}
+
+.welcome-jumps a:hover,
+.welcome-jumps a:focus-visible {
+  background: var(--hover-surface);
+  color: var(--hover-text);
+}
+
+.welcome-scrapbook {
+  position: relative;
+  display: grid;
+  min-height: 218px;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 18%, color-mix(in srgb, var(--pink) 50%, transparent) 0 3px, transparent 4px),
+    radial-gradient(circle at 76% 78%, color-mix(in srgb, var(--blue) 44%, transparent) 0 4px, transparent 5px),
+    var(--paper-alt);
+  background-size: 31px 27px, 43px 37px, auto;
+  transform: rotate(1.2deg);
+}
+
+.scrapbook-tape {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 78px;
+  height: 18px;
+  background: color-mix(in srgb, var(--yellow) 72%, white 28%);
+  opacity: 0.86;
+  transform: translateX(-50%) rotate(-4deg);
+}
+
+.welcome-parrot {
+  width: min(68%, 132px);
+  margin-top: 4px;
+  transform: rotate(-5deg);
+  filter: drop-shadow(4px 5px 0 rgba(17, 17, 17, 0.23));
+}
+
+.welcome-burger {
+  position: absolute;
+  right: 12%;
+  bottom: 22%;
+  width: 48px;
+  transform: rotate(14deg);
+  filter: drop-shadow(2px 3px 0 rgba(17, 17, 17, 0.2));
+}
+
+.welcome-stamp {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  gap: 2px;
+  padding: 5px 7px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-5deg);
+}
+
+.welcome-stamp-stars {
+  color: var(--pink);
+  letter-spacing: 0.12em;
+}
+
+#scraps .panel-body {
+  padding: 6px 4px 2px;
+}
+
+.scrap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scrap-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 8px 8px;
+  border: 3px solid var(--ink);
+  background: color-mix(in srgb, var(--paper-alt) 72%, white 28%);
+  box-shadow: 3px 3px 0 var(--shadow);
+  text-align: center;
+}
+
+.scrap-card:nth-child(2n) {
+  background: color-mix(in srgb, var(--blue) 18%, var(--paper-alt));
+  transform: rotate(1.8deg);
+}
+
+.scrap-card:nth-child(3n) {
+  background: color-mix(in srgb, var(--pink) 18%, var(--paper-alt));
+  transform: rotate(-1.3deg);
+}
+
+.scrap-image-frame {
+  display: grid;
+  min-height: 76px;
+  place-items: center;
+  border: 2px dashed var(--ink);
+  background: var(--paper);
+}
+
+.scrap-image-frame img {
+  display: block;
+  width: auto;
+  max-width: 92%;
+  height: 68px;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.scrap-card figcaption {
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.scrap-note {
+  margin: 16px 0 0;
+  padding: 8px 10px;
+  border-top: 3px dotted var(--ink);
+  color: var(--banner);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+@media (max-width: 880px) {
+  .retro-debris {
+    display: none;
+  }
+
+  .welcome-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-scrapbook {
+    min-height: 166px;
+  }
+
+  .scrap-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 460px) {
+  .scrap-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scrap-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    text-align: left;
+  }
+
+  .scrap-image-frame {
+    min-height: 72px;
+  }
+
+  .scrap-card figcaption {
+    padding-right: 6px;
+  }
+}
+
+/* Give the older panels a shared scrapbook treatment so the new homepage
+   additions feel like part of the same little site. */
+#links .sticker-grid,
+#profile .profile-layout,
+#webcorner .web-corner,
+#paint .paint-app,
+#badges .badge-grid {
+  position: relative;
+}
+
+#links .sticker {
+  border: 3px solid var(--ink);
+}
+
+#profile .profile-facts {
+  padding: 9px 10px;
+  border: 3px dashed var(--ink);
+  background: color-mix(in srgb, var(--paper-alt) 64%, white 36%);
+}
+
+#profile .profile-facts div {
+  padding: 4px 0;
+  border-bottom: 2px dotted color-mix(in srgb, var(--ink) 48%, transparent);
+}
+
+#profile .profile-facts div:last-child {
+  border-bottom: 0;
+}
+
+#webcorner .web-corner {
+  padding: 10px;
+  border: 3px dashed var(--ink);
+  background:
+    linear-gradient(135deg, transparent 0 45%, color-mix(in srgb, var(--blue) 16%, transparent) 45% 55%, transparent 55%),
+    var(--paper-alt);
+}
+
+#webcorner .web-corner > p:last-child {
+  margin: 14px 0 2px;
+  font-weight: 900;
+  text-align: center;
+}
+
+#guestbook .guestbook-lines {
+  box-shadow: 4px 4px 0 var(--shadow);
+  transform: rotate(-0.8deg);
+}
+
+#paint .paint-app {
+  padding: 8px;
+  border: 3px dashed var(--ink);
+  background: color-mix(in srgb, var(--paper-alt) 65%, white 35%);
+}
+
+#badges .badge-grid {
+  padding: 10px;
+  border: 3px dashed var(--ink);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 10px, color-mix(in srgb, var(--pink) 16%, transparent) 10px 12px),
+    var(--paper-alt);
+}
