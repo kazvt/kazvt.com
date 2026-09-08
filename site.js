@@ -1436,8 +1436,8 @@ async function initializeRetroDebris() {
   const mount = document.querySelector(".retro-debris");
   if (!mount) return;
 
-  const files = await loadManifest("zzz_assets/retro-web/gifcities/manifest.json", imageExtensions);
-  const retroDebrisFiles = files.map((file) => `zzz_assets/retro-web/gifcities/${file}`);
+  const files = await loadManifest("zzz_assets/gifcities/manifest.json", imageExtensions);
+  const retroDebrisFiles = files.map((file) => `zzz_assets/gifcities/${file}`);
   if (!retroDebrisFiles.length) {
     mount.replaceChildren();
     return;
