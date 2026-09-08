@@ -804,16 +804,16 @@ body[data-theme="p9"] {
 }
 
 body[data-theme="p10"] {
-  --cursor-default: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Cookie.cur"), auto;
-  --cursor-pointer: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Mouse.cur"), pointer;
-  --cursor-text: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Text Select.cur"), text;
-  --cursor-help: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Help Select.cur"), help;
-  --cursor-busy: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Chancemaker.cur"), wait;
-  --cursor-precision: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Precision Select.cur"), crosshair;
-  --cursor-not-allowed: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Unavailable.cur"), not-allowed;
-  --cursor-move: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Move.cur"), move;
-  --cursor-ew-resize: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Horizontal Resize.cur"), ew-resize;
-  --cursor-ns-resize: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Vertical Resize.cur"), ns-resize;
+  --cursor-default: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Cookie-1.5x.png") 18 18, auto;
+  --cursor-pointer: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Mouse-1.5x.png") 10 6, pointer;
+  --cursor-text: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Text Select-1.5x.png") 18 18, text;
+  --cursor-help: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Help Select-1.5x.png") 9 6, help;
+  --cursor-busy: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Chancemaker-1.5x.png") 16 16, wait;
+  --cursor-precision: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Precision Select-1.5x.png") 18 18, crosshair;
+  --cursor-not-allowed: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Unavailable-1.5x.png") 18 18, not-allowed;
+  --cursor-move: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Move-1.5x.png") 18 18, move;
+  --cursor-ew-resize: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Horizontal Resize-1.5x.png") 18 18, ew-resize;
+  --cursor-ns-resize: url("/zzz_assets/cursors/rw-picked/cookie-clicker-classic/Vertical Resize-1.5x.png") 18 18, ns-resize;
 }
 
 body[data-theme="p11"] {
