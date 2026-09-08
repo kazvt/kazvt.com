@@ -14,13 +14,33 @@
     </p>
 
     <p>
-      <img src="burger.jpg" alt="burger" style="max-width: 100%; height: auto;">
+      <img src="burger.jpg" alt="burger" style="width: 50%; max-width: 600px; height: auto;">
     </p>
+
+    <p><small>(click anywhere to start the music)</small></p>
   </center>
 
-  <audio autoplay loop>
+  <audio id="background-music" autoplay loop preload="auto">
     <source src="pussy.mp3" type="audio/mpeg">
     Your browser does not support audio playback.
   </audio>
+
+  <script>
+    const music = document.getElementById("background-music");
+
+    function startMusic() {
+      const attempt = music.play();
+      if (attempt && typeof attempt.then === "function") {
+        attempt.then(() => {
+          document.removeEventListener("pointerdown", startMusic);
+          document.removeEventListener("keydown", startMusic);
+        }).catch(() => {});
+      }
+    }
+
+    document.addEventListener("pointerdown", startMusic, { passive: true });
+    document.addEventListener("keydown", startMusic, { passive: true });
+    music.play().catch(() => {});
+  </script>
 </body>
 </html>
