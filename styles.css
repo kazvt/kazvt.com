@@ -5026,6 +5026,7 @@ body {
 .retro-debris {
   position: absolute;
   inset: 0;
+  min-height: 2700px;
   z-index: 0;
   overflow: visible;
   pointer-events: none;
@@ -5043,84 +5044,84 @@ body {
 
 .retro-debris-smiley {
   top: 130px;
-  left: max(8px, calc(50% - 650px));
+  left: clamp(20px, 8vw, 150px);
   width: 24px;
   transform: rotate(-8deg) scale(1.3);
 }
 
 .retro-debris-smiley-face {
   top: 335px;
-  right: max(12px, calc(50% - 650px));
+  right: clamp(24px, 11vw, 190px);
   width: 58px;
   transform: rotate(8deg);
 }
 
 .retro-debris-wink {
   top: 545px;
-  left: max(6px, calc(50% - 670px));
+  left: clamp(40px, 17vw, 300px);
   width: 25px;
   transform: rotate(-11deg) scale(1.25);
 }
 
 .retro-debris-lol {
   top: 755px;
-  right: max(8px, calc(50% - 660px));
+  right: clamp(48px, 19vw, 330px);
   width: 25px;
   transform: rotate(10deg) scale(1.25);
 }
 
 .retro-debris-sleepy {
   top: 965px;
-  left: max(8px, calc(50% - 650px));
+  left: clamp(24px, 10vw, 180px);
   width: 42px;
   transform: rotate(-5deg);
 }
 
 .retro-debris-sparkle {
   top: 1175px;
-  right: max(8px, calc(50% - 650px));
+  right: clamp(36px, 14vw, 250px);
   width: 30px;
   transform: rotate(14deg) scale(1.2);
 }
 
 .retro-debris-construction {
   top: 1395px;
-  left: max(6px, calc(50% - 675px));
+  left: clamp(52px, 21vw, 370px);
   width: 54px;
   transform: rotate(-7deg);
 }
 
 .retro-debris-email {
   top: 1615px;
-  right: max(8px, calc(50% - 660px));
+  right: clamp(22px, 8vw, 145px);
   width: 56px;
   transform: rotate(9deg);
 }
 
 .retro-debris-heart {
   top: 1835px;
-  left: max(10px, calc(50% - 650px));
+  left: clamp(34px, 14vw, 245px);
   width: 30px;
   transform: rotate(-12deg) scale(1.25);
 }
 
 .retro-debris-note {
   top: 2055px;
-  right: max(10px, calc(50% - 670px));
+  right: clamp(54px, 23vw, 400px);
   width: 40px;
   transform: rotate(12deg);
 }
 
 .retro-debris-guestbook {
   top: 2265px;
-  left: max(6px, calc(50% - 680px));
+  left: clamp(18px, 7vw, 130px);
   width: 74px;
   transform: rotate(-6deg);
 }
 
 .retro-debris-kiss {
   top: 2475px;
-  right: max(8px, calc(50% - 650px));
+  right: clamp(40px, 16vw, 280px);
   width: 46px;
   transform: rotate(7deg);
 }
