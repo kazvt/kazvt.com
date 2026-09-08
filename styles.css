@@ -4569,6 +4569,35 @@ body[data-theme="p16"] .guide-map .badge.no text {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--yellow) 65%, transparent);
 }
 
+/* A palette-independent black splotch makes the selected tile unmistakable. */
+.palette-choice.is-selected::before,
+.palette-choice:has(> button[aria-pressed="true"])::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  z-index: 0;
+  pointer-events: none;
+  background: #000;
+  clip-path: polygon(
+    4% 25%,
+    14% 8%,
+    34% 12%,
+    51% 2%,
+    72% 9%,
+    94% 27%,
+    89% 47%,
+    98% 68%,
+    80% 91%,
+    59% 86%,
+    42% 98%,
+    20% 88%,
+    6% 95%,
+    10% 65%,
+    0 48%
+  );
+  transform: rotate(-2deg);
+}
+
 .big-palette .palette-choice.is-selected > button,
 .big-palette .palette-choice:has(> button[aria-pressed="true"]) > button {
   filter: saturate(1.14) contrast(1.04);
