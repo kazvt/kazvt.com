@@ -171,7 +171,7 @@ body {
 
 
 /* Palette-specific typography. Unlisted palettes intentionally use Comic Sans MS. */
-body[data-theme="p1"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p1"] { --site-font: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p2"] { --site-font: "KAZVT Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p3"] { --site-font: "KAZVT Tangled", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comic Sans", cursive; }
@@ -187,7 +187,7 @@ body[data-theme="p11"] { --site-font: "KAZVT Spiral", "Comic Sans MS", "Comic Sa
 body[data-theme="p12"] { --site-font: "KAZVT Aero", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p13"] { --site-font: "KAZVT Snooze", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p14"] { --site-font: "KAZVT Cola", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p15"] { --site-font: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p15"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p16"] { --site-font: "KAZVT Crunch", "Comic Sans MS", "Comic Sans", cursive; }
 
 ::selection {

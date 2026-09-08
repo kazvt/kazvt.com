@@ -58,6 +58,12 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "KAZVT 64";
+  src: url("../zzz_assets/fonts/64.ttf") format("truetype");
+  font-display: swap;
+}
+
 :root {
   --redirect-delay: 1000ms;
   --cream: #FFEA88;
@@ -100,7 +106,7 @@
 
 
 /* Palette-specific typography. Unlisted palettes intentionally use Comic Sans MS. */
-html[data-theme="p1"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
+html[data-theme="p1"] { --site-font: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p2"] { --site-font: "KAZVT Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p3"] { --site-font: "KAZVT Tangled", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comic Sans", cursive; }
@@ -113,6 +119,7 @@ html[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sa
 html[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p10"] { --site-font: "KAZVT Handwrite", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p12"] { --site-font: "KAZVT Aero", "Comic Sans MS", "Comic Sans", cursive; }
+html[data-theme="p15"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
 
 html[data-theme="p2"] {
   --cream: #F1E5A1;
