@@ -3208,7 +3208,6 @@ async function render(statusOverrides = {}) {
 
   updateSidebar(links);
   app.replaceChildren(
-    homeWelcomePanel(),
     panel({
       id: "links",
       titleKey: "panel.links.title",
@@ -3218,8 +3217,9 @@ async function render(statusOverrides = {}) {
         el("div", { className: "sticker-grid" }, [...links, ...socialLinks].map(sticker)),
       ],
     }),
-    multistreamGuidePanel(),
     profilePanel(),
+    homeWelcomePanel(),
+    multistreamGuidePanel(),
     oldWebPanel(),
     guestbookPanel(),
     paintPanel(),
