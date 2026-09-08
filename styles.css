@@ -88,6 +88,12 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "KAZVT Hair";
+  src: url("zzz_assets/fonts/HAIR.otf") format("opentype");
+  font-display: swap;
+}
+
 :root {
   --cream: #FFEA88;
   --paper: #FFEA88;
@@ -182,6 +188,7 @@ html[data-theme="p5"] { font-size: 80%; }
 body[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
+body[data-theme="p9"] { --site-font: "KAZVT Hair", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p10"] { --site-font: "KAZVT Handwrite", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p11"] { --site-font: "KAZVT Spiral", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p12"] { --site-font: "KAZVT Aero", "Comic Sans MS", "Comic Sans", cursive; }
