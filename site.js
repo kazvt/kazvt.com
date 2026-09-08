@@ -1430,9 +1430,71 @@ function panel({ id, titleKey, stampKey, children }) {
   ]);
 }
 
-const retroDebrisFiles = Array.from({ length: 100 }, (_, index) =>
-  `archive-${String(index + 1).padStart(3, "0")}.gif`,
+const retroSmileyFiles = Array.from({ length: 50 }, (_, index) =>
+  `zzz_assets/retro-web/smileys/archive-${String(index + 1).padStart(3, "0")}.gif`,
 );
+
+// Keep the scatter close to a 50/50 split: archive smileys plus transparent
+// food, objects, characters, and other little old-web oddities already in the
+// site. Interleaving them keeps either category from clustering in one part of
+// the page.
+const retroNonSmileyFiles = [
+  "collectables/1.gif",
+  "collectables/2.gif",
+  "collectables/3.gif",
+  "collectables/4.gif",
+  "collectables/hammerandsickletrans/3dgifmaker01610.gif",
+  "cubepaint/gallery/aliens.gif",
+  "cubepaint/gallery/blairwitch.gif",
+  "cubepaint/gallery/clearcut.gif",
+  "cubepaint/gallery/dsillybun3.gif",
+  "cubepaint/gallery/hellraiser.gif",
+  "cubepaint/gallery/KazVictim.gif",
+  "cubepaint/gallery/maruchan.gif",
+  "cubepaint/gallery/perfectblue.gif",
+  "cubepaint/gallery/phantomoftheopera.gif",
+  "cubepaint/gallery/reanimator.gif",
+  "cubepaint/gallery/YaoiTomeHD.gif",
+  "newdesign/assets/randomGifs/171476.gif",
+  "newdesign/assets/randomGifs/2822162_3262a.gif",
+  "newdesign/assets/randomGifs/3286156cqcjte3wfa.gif",
+  "newdesign/assets/randomGifs/3286755rvkvkygvze.gif",
+  "newdesign/assets/randomGifs/3287272nrmc8n5dg8.gif",
+  "newdesign/assets/randomGifs/53194.gif",
+  "newdesign/assets/randomGifs/575666aaf100135d3cc337751f0fff3f.gif",
+  "newdesign/assets/randomGifs/5e1e1a9e0e5212b087ce07008d0465a8.gif",
+  "newdesign/assets/randomGifs/7153b2a0bf2eb9f80d577f1ba48abb2e.gif",
+  "newdesign/assets/randomGifs/833089qhdg988j8v.gif",
+  "newdesign/assets/randomGifs/miku.gif",
+  "newdesign/assets/randomGifs/picgifs-emo-316129.gif",
+  "newdesign/assets/randomGifs/picgifs-emo-7787017.gif",
+  "newdesign/assets/randomGifs/picgifs-emo-803820.gif",
+  "newdesign/assets/randomGifs/picgifs-emo-8157681.gif",
+  "newdesign/assets/randomGifs/tumblr_178497dc5be4a69e3b7937b109b3d6c9_9ca64a83_1280.gif",
+  "zzz_assets/emotes/[bananas].gif",
+  "zzz_assets/emotes/[burger].gif",
+  "zzz_assets/emotes/[cheese].gif",
+  "zzz_assets/emotes/[dishes].gif",
+  "zzz_assets/emotes/[egg].gif",
+  "zzz_assets/emotes/[hotdog].gif",
+  "zzz_assets/emotes/[icecream].gif",
+  "zzz_assets/emotes/[marge].gif",
+  "zzz_assets/emotes/[mrbeast].gif",
+  "zzz_assets/emotes/[murder].gif",
+  "zzz_assets/emotes/[parents].gif",
+  "zzz_assets/emotes/[penis].gif",
+  "zzz_assets/emotes/[snail].gif",
+  "zzz_assets/emotes/[steak].gif",
+  "zzz_assets/emotes/[taco].gif",
+  "zzz_assets/emotes/[toilet].gif",
+  "zzz_assets/emotes/[trans].gif",
+  "zzz_assets/emotes/[wumpa].gif",
+];
+
+const retroDebrisFiles = Array.from({ length: 50 }, (_, index) => [
+  retroSmileyFiles[index],
+  retroNonSmileyFiles[index],
+]).flat();
 
 let retroDebrisResizeTimer = 0;
 
@@ -1441,25 +1503,34 @@ function initializeRetroDebris() {
   if (!mount) return;
 
   const paint = () => {
-    const pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1);
-    const usableHeight = Math.max(pageHeight - 150, 1);
-    mount.style.height = `${pageHeight}px`;
+    const surface = document.querySelector(".site-wrap");
+    const surfaceHeight = Math.max(
+      surface?.scrollHeight || 0,
+      surface?.getBoundingClientRect().height || 0,
+      1,
+    );
+    const usableHeight = Math.max(surfaceHeight - 150, 1);
+    mount.style.top = `${surface?.offsetTop || 0}px`;
+    mount.style.height = `${surfaceHeight}px`;
     mount.replaceChildren(
       ...retroDebrisFiles.map((file, index) => {
         const image = el("img", {
           className: "retro-debris-item",
-          src: `zzz_assets/retro-web/smileys/${file}`,
+          src: encodeURI(file),
           alt: "",
           loading: "lazy",
           decoding: "async",
         });
         const verticalJitter = ((index * 47) % 55) - 27;
-        const top = Math.max(80, Math.round((usableHeight * (index + 0.5)) / retroDebrisFiles.length + verticalJitter));
         const rail = 3 + ((index * 17) % 22);
         const side = index % 2 === 0 ? "left" : "right";
+        const width = 16 + ((index * 29) % 48);
+        const rawTop = Math.round((usableHeight * (index + 0.5)) / retroDebrisFiles.length + verticalJitter);
+        const maxTop = Math.max(80, surfaceHeight - width - 18);
+        const top = Math.min(maxTop, Math.max(80, rawTop));
         image.style.top = `${top}px`;
         image.style[side] = `${rail}vw`;
-        image.style.width = `${16 + ((index * 29) % 48)}px`;
+        image.style.width = `${width}px`;
         image.style.transform = `rotate(${((index * 23) % 31) - 15}deg)`;
         return image;
       }),

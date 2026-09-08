@@ -4572,7 +4572,7 @@ body[data-theme="p16"] .guide-map .badge.no text {
 .palette-choice.is-selected::after,
 .palette-choice:has(> button[aria-pressed="true"])::after {
   border-style: solid dashed dashed solid;
-  border-color: var(--pink);
+  border-color: #000;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--yellow) 65%, transparent);
 }
 
@@ -5027,7 +5027,8 @@ body {
   position: absolute;
   inset: 0;
   z-index: 0;
-  overflow: visible;
+  width: 100%;
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -5043,6 +5044,7 @@ body {
 
 .retro-debris-item {
   max-width: min(11vw, 64px);
+  max-height: min(11vw, 64px);
   opacity: 0.82;
 }
 
@@ -5242,6 +5244,7 @@ body {
 
   .retro-debris-item {
     max-width: 44px;
+    max-height: 44px;
   }
 
   .welcome-grid {
