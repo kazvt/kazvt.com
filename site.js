@@ -1593,19 +1593,49 @@ function spawnWifeKissEffect(sticker) {
   }
 }
 
+function normalizeKissyCount(value) {
+  const count = Number(value);
+  return Number.isFinite(count) && count >= 0 ? Math.floor(count) : 0;
+}
+
 function getKissyCount() {
   try {
-    return Number(sessionStorage.getItem(KISSY_STORAGE_KEY) || "0") || 0;
-  } catch {
-    return 0;
+    const stored = localStorage.getItem(KISSY_STORAGE_KEY);
+    if (stored !== null) return normalizeKissyCount(stored);
+  } catch {}
+
+  // Migrate counts created by the old sessionStorage implementation once.
+  let legacy = null;
+  try {
+    legacy = sessionStorage.getItem(KISSY_STORAGE_KEY);
+  } catch {}
+
+  const count = normalizeKissyCount(legacy);
+  if (legacy !== null) {
+    let migrated = false;
+    try {
+      localStorage.setItem(KISSY_STORAGE_KEY, String(count));
+      migrated = true;
+    } catch {}
+    if (migrated) {
+      try { sessionStorage.removeItem(KISSY_STORAGE_KEY); } catch {}
+    }
   }
+  return count;
 }
 
 function setKissyCount(count) {
-  const safeCount = Math.max(0, Number(count) || 0);
+  const safeCount = normalizeKissyCount(count);
+  let storedPersistently = false;
   try {
-    sessionStorage.setItem(KISSY_STORAGE_KEY, String(safeCount));
+    localStorage.setItem(KISSY_STORAGE_KEY, String(safeCount));
+    storedPersistently = true;
   } catch {}
+  if (storedPersistently) {
+    try { sessionStorage.removeItem(KISSY_STORAGE_KEY); } catch {}
+  } else {
+    try { sessionStorage.setItem(KISSY_STORAGE_KEY, String(safeCount)); } catch {}
+  }
 
   document.querySelectorAll("[data-kissy-count]").forEach((node) => {
     node.textContent = String(safeCount);
