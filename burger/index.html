@@ -4,8 +4,77 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>burger</title>
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    .entrance-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: #000;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .entrance-gate__card {
+      width: min(100%, 420px);
+    }
+
+    .entrance-gate__step {
+      margin: 0 0 20px;
+      color: #888;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+    }
+
+    .entrance-gate__question {
+      margin: 0 0 28px;
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 400;
+      line-height: 1.1;
+    }
+
+    .entrance-gate__options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .entrance-gate__button {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #fff;
+      background: #000;
+      color: #fff;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .entrance-gate__button:hover,
+    .entrance-gate__button:focus-visible {
+      background: #fff;
+      color: #000;
+      outline: none;
+    }
+  </style>
 </head>
 <body>
+  <div class="entrance-gate" id="entrance-gate" role="dialog" aria-modal="true" aria-labelledby="entrance-question">
+    <div class="entrance-gate__card">
+      <p class="entrance-gate__step" id="entrance-step">01 / 03</p>
+      <h1 class="entrance-gate__question" id="entrance-question">i don't think you're ready to enter</h1>
+      <div class="entrance-gate__options" id="entrance-options" role="group" aria-label="entrance answers">
+        <button class="entrance-gate__button" type="button" data-answer="leave">i agree</button>
+        <button class="entrance-gate__button" type="button" data-answer="continue">i disagree</button>
+      </div>
+    </div>
+  </div>
+
   <center>
     <p>
       <a href="../" title="go home">
@@ -17,30 +86,82 @@
       <img src="burger.jpg" alt="burger" style="width: 50%; max-width: 600px; height: auto;">
     </p>
 
-    <p style="font-size: 1.25rem;">(click anywhere to start the music)</p>
   </center>
 
-  <audio id="background-music" autoplay loop preload="auto">
+  <audio id="background-music" loop preload="auto">
     <source src="pussy.mp3" type="audio/mpeg">
     Your browser does not support audio playback.
   </audio>
 
   <script>
+    const gate = document.getElementById("entrance-gate");
+    const step = document.getElementById("entrance-step");
+    const question = document.getElementById("entrance-question");
+    const options = document.getElementById("entrance-options");
     const music = document.getElementById("background-music");
 
-    function startMusic() {
-      const attempt = music.play();
-      if (attempt && typeof attempt.then === "function") {
-        attempt.then(() => {
-          document.removeEventListener("pointerdown", startMusic);
-          document.removeEventListener("keydown", startMusic);
-        }).catch(() => {});
-      }
+    const questions = [
+      {
+        text: "i don't think you're ready to enter",
+        answers: [
+          { label: "i agree", action: "leave" },
+          { label: "i disagree", action: "continue" },
+        ],
+      },
+      {
+        text: "are you sure you want to enter?",
+        answers: [
+          { label: "yes", action: "continue" },
+          { label: "no", action: "leave" },
+        ],
+      },
+      {
+        text: "are you truly ready?",
+        answers: [
+          { label: "i am", action: "enter" },
+          { label: "i'm not", action: "leave" },
+        ],
+      },
+    ];
+
+    let questionIndex = 0;
+
+    function showQuestion() {
+      const current = questions[questionIndex];
+      step.textContent = `${String(questionIndex + 1).padStart(2, "0")} / 03`;
+      question.textContent = current.text;
+      options.replaceChildren(
+        ...current.answers.map((answer) => {
+          const button = document.createElement("button");
+          button.className = "entrance-gate__button";
+          button.type = "button";
+          button.textContent = answer.label;
+          button.dataset.answer = answer.action;
+          return button;
+        }),
+      );
     }
 
-    document.addEventListener("pointerdown", startMusic, { passive: true });
-    document.addEventListener("keydown", startMusic, { passive: true });
-    music.play().catch(() => {});
+    options.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-answer]");
+      if (!button) return;
+
+      if (button.dataset.answer === "leave") {
+        window.location.assign("../");
+        return;
+      }
+
+      if (button.dataset.answer === "enter") {
+        gate.hidden = true;
+        music.play().catch(() => {});
+        return;
+      }
+
+      questionIndex += 1;
+      showQuestion();
+    });
+
+    showQuestion();
   </script>
 </body>
 </html>
