@@ -8640,7 +8640,9 @@
   // AudioContext timestamp, rather than starting separate HTMLAudioElements.
   let cycleZeroContextTime = 0;
   let scheduledThroughCycle = 0;
+  let backgroundLoopSchedulerTimer = 0;
   const SCHEDULE_AHEAD_CYCLES = 32;
+  const SCHEDULE_AHEAD_SECONDS = 180;
 
   // Keep decoded PCM only while it fits a small warm cache. Live channels own
   // their buffers independently, so cache eviction never interrupts playback.
@@ -14962,10 +14964,11 @@
   function ensureScheduleHorizon(currentCycle=0) {
     if (!isPlaying || !playlistDuration || !audioCtx || (appMode !== "procedural" && playlistMode !== "loop")) return;
 
-    // AudioBuffer variation rendering is heavier than reusing decoded playlist stems.
-    // Two cycles of look-ahead is plenty for seamless procedural looping without
-    // pre-rendering dozens of variations into memory.
-    const horizon = appMode === "procedural" ? 2 : SCHEDULE_AHEAD_CYCLES;
+    // Procedural audio keeps its two-cycle horizon. Playlist loops target a
+    // three-minute buffer, retaining at least two cycles and the old maximum.
+    const horizon = appMode === "procedural"
+      ? 2
+      : Math.max(2,Math.min(SCHEDULE_AHEAD_CYCLES,Math.ceil(SCHEDULE_AHEAD_SECONDS/playlistDuration)));
     const target = currentCycle + horizon;
     for (let cycle=scheduledThroughCycle+1; cycle<=target; cycle++) {
       scheduleCycle(cycle);
@@ -15064,6 +15067,30 @@
       advanceAtSongEnd();
     }
   }
+
+  function syncBackgroundLoopScheduler(){
+    const shouldRun=document.visibilityState==="hidden"
+      && isPlaying
+      && (appMode==="procedural"||playlistMode==="loop");
+    if(!shouldRun){
+      if(backgroundLoopSchedulerTimer){
+        window.clearInterval(backgroundLoopSchedulerTimer);
+        backgroundLoopSchedulerTimer=0;
+      }
+      return;
+    }
+    if(backgroundLoopSchedulerTimer)return;
+    updateLoopScheduler();
+    backgroundLoopSchedulerTimer=window.setInterval(()=>{
+      if(document.visibilityState!=="hidden"||!isPlaying||(appMode!=="procedural"&&playlistMode!=="loop")){
+        window.clearInterval(backgroundLoopSchedulerTimer);
+        backgroundLoopSchedulerTimer=0;
+        return;
+      }
+      updateLoopScheduler();
+    },1000);
+  }
+  document.addEventListener("visibilitychange",syncBackgroundLoopScheduler,{passive:true});
 
   function seekAll(seconds) {
     const target = Math.max(0,Math.min(playlistDuration || Number.MAX_SAFE_INTEGER,Number(seconds)||0));
@@ -15213,6 +15240,7 @@
       masterPlay.title=isPlaying?"Pause":"Play";
       masterPlay.classList.toggle("active",isPlaying);
     }
+    syncBackgroundLoopScheduler();
   }
 
   async function changePlaylist(index,autoplay=false) {
@@ -15492,12 +15520,15 @@
   const METER_SEGMENT_PITCH_PX = 6;
   const METER_PEAK_HOLD_MS = 70;
   const METER_RELEASE_MS = 110;
-  const METER_REFRESH_INTERVAL_MS = 1000/30;
+  const METER_REFERENCE_INTERVAL_MS = 1000/30;
+  const METER_REFRESH_INTERVAL_MS = 1000/20;
+  const MIXER_CONTROL_REFRESH_INTERVAL_MS = METER_REFERENCE_INTERVAL_MS;
   const meterBallistics = new WeakMap();
   let meterRailHeightCache = new WeakMap();
   let mixerAnimationFrame = 0;
   let lastTransportUpdateAt = 0;
   let lastMeterUpdateAt = 0;
+  let lastActiveFrameAt = 0;
 
   function requestMixerAnimation(){
     if(!mixerAnimationFrame)mixerAnimationFrame=requestAnimationFrame(animationLoop);
@@ -15567,7 +15598,16 @@
   function animationLoop(timestamp) {
     mixerAnimationFrame=0;
     const now=Number(timestamp)||performance.now();
+    // Keep scheduler and transport housekeeping at 30 Hz; update meter
+    // visuals at 20 Hz. Web Audio remains sample-clocked independently.
+    if(isPlaying&&now-lastActiveFrameAt<MIXER_CONTROL_REFRESH_INTERVAL_MS-1){
+      requestMixerAnimation();
+      return;
+    }
+    if(isPlaying)lastActiveFrameAt=now;
     if(now-lastMeterUpdateAt>=METER_REFRESH_INTERVAL_MS){
+      const meterElapsedMs=lastMeterUpdateAt?Math.max(0,now-lastMeterUpdateAt):METER_REFERENCE_INTERVAL_MS;
+      const meterFrameScale=meterElapsedMs/METER_REFERENCE_INTERVAL_MS;
       lastMeterUpdateAt=now;
       for (const channel of channels) {
         const level=analyserLevel(channel.analyser,channel.meterData);
@@ -15589,7 +15629,8 @@
             if (target > channel.ledDrive) {
               channel.ledDrive = target;
             } else {
-              channel.ledDrive = channel.ledDrive*.84 + target*.16;
+              const ledRetain=Math.pow(.84,meterFrameScale);
+              channel.ledDrive = channel.ledDrive*ledRetain + target*(1-ledRetain);
             }
           }
 
@@ -15607,10 +15648,12 @@
 
           if (target > channel.iconDrive) {
             // Fairly quick attack, but not as abrupt as the signal-status LED.
-            channel.iconDrive += (target-channel.iconDrive)*.58;
+            const iconRetain=Math.pow(.42,meterFrameScale);
+            channel.iconDrive += (target-channel.iconDrive)*(1-iconRetain);
           } else {
             // Slow optical decay makes the lamp feel physical rather than digital.
-            channel.iconDrive = channel.iconDrive*.90 + target*.10;
+            const iconRetain=Math.pow(.90,meterFrameScale);
+            channel.iconDrive = channel.iconDrive*iconRetain + target*(1-iconRetain);
           }
 
           if (channel.iconDrive < .003) channel.iconDrive = 0;

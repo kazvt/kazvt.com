@@ -16,7 +16,6 @@
   <script src="filename-tag-rules.js"></script>
   <script src="auto-gain-references.js"></script>
   <script src="strip-fx-engine.js"></script>
-  <script src="tempo-stretch-engine.js"></script>
 
   <style>
     :root{
@@ -7838,7 +7837,6 @@
     }
 
   </style>
-  <link rel="stylesheet" href="hardware-polish.css">
 </head>
 
 <body>
@@ -7936,16 +7934,15 @@
           <select id="playlistSelect" class="sr-only" aria-label="Playlist folder"></select>
 
           <button id="playlistSelectorButton" class="playlist-selector-button" type="button"
-                  aria-haspopup="menu" aria-expanded="false" aria-controls="playlistMenu">
+                  aria-haspopup="listbox" aria-expanded="false" aria-controls="playlistMenu">
             <span class="playlist-selector-legend">TRACK PROGRAM</span>
             <span id="playlistSelectorLabel" class="playlist-selector-label">NO PROGRAM</span>
-            <span id="playlistRotationSummary" class="playlist-selector-rotation" aria-label="Playlist rotation inclusion">ALL IN</span>
             <span class="playlist-selector-lever" aria-hidden="true">
               <i class="fa-solid fa-caret-down"></i>
             </span>
           </button>
 
-          <div id="playlistMenu" class="playlist-hardware-menu" role="menu" aria-label="Playlist track program" hidden></div>
+          <div id="playlistMenu" class="playlist-hardware-menu" role="listbox" hidden></div>
         </div>
 
         <div class="transport-fader-wrap hidden min-w-0 flex-1 sm:block">
@@ -8080,7 +8077,6 @@
   </main>
 
 <script>
-
   const EMBEDDED_MANIFEST = {"files":["index.html","instrument-icons.json","lillie_track_6/bass.mp3","lillie_track_6/drums.mp3","lillie_track_6/guitar.mp3","lillie_track_6/strings.mp3","lillie_track_6/vibes.mp3","lillie_track_6/yamaha synth.mp3"]};
   const AUDIO_EXT_RE = /\.(mp3|wav|m4a|aac|ogg|opus|flac|webm)$/i;
   const MIDI_EXT_RE = /\.(mid|midi)$/i;
@@ -8100,7 +8096,6 @@
   const playlistSelect = document.getElementById("playlistSelect");
   const playlistSelectorButton = document.getElementById("playlistSelectorButton");
   const playlistSelectorLabel = document.getElementById("playlistSelectorLabel");
-  const playlistRotationSummary = document.getElementById("playlistRotationSummary");
   const playlistMenu = document.getElementById("playlistMenu");
   const prevTrackBtn = document.getElementById("prevTrackBtn");
   const playPauseBtn = document.getElementById("playPauseBtn");
@@ -8638,7 +8633,6 @@
   let lastKnownPosition = 0;
   let localObjectUrls = [];
   let loadGeneration = 0;
-  let playlistTempoRenderRevision = 0;
   let loopCount = 0;
 
   // Playback is driven by ONE Web Audio clock on every device.
@@ -8646,9 +8640,7 @@
   // AudioContext timestamp, rather than starting separate HTMLAudioElements.
   let cycleZeroContextTime = 0;
   let scheduledThroughCycle = 0;
-  let backgroundLoopSchedulerTimer = 0;
   const SCHEDULE_AHEAD_CYCLES = 32;
-  const SCHEDULE_AHEAD_SECONDS = 180;
 
   // Keep decoded PCM only while it fits a small warm cache. Live channels own
   // their buffers independently, so cache eviction never interrupts playback.
@@ -8676,9 +8668,6 @@
         playlistMode: ["loop","shuffle","sequential"].includes(parsed.playlistMode)
           ? parsed.playlistMode
           : "loop",
-        excludedPlaylistIds: Array.isArray(parsed.excludedPlaylistIds)
-          ? parsed.excludedPlaylistIds.filter(value=>typeof value==="string"&&value.length<512).slice(0,512)
-          : [],
         proceduralSeed: Math.max(1,Math.min(9999,Number(parsed.proceduralSeed)||1)),
         proceduralEnergy: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralEnergy)) ? Number(parsed.proceduralEnergy) : .52)),
         proceduralComplexity: Math.max(0,Math.min(1,Number.isFinite(Number(parsed.proceduralComplexity)) ? Number(parsed.proceduralComplexity) : .46)),
@@ -8717,7 +8706,6 @@
         megaphonePreferenceSet:false,
         playlistModePreferenceSet:false,
         playlistMode:"loop",
-        excludedPlaylistIds:[],
         proceduralSeed:1,
         proceduralEnergy:.52,
         proceduralComplexity:.46,
@@ -8748,7 +8736,6 @@
 
   const REVERB_DEFAULTS_VERSION = 2;
   const persistentPrefs = loadPersistentPrefs();
-  const excludedPlaylistIds = new Set(persistentPrefs.excludedPlaylistIds || []);
 
   // Reverb v2 starts dry. Migrate the old non-zero ROOM defaults once without
   // disturbing any of the user's other mixer/procedural preferences. After this
@@ -9513,7 +9500,6 @@
   const MIDI_DEFAULT_BPM = 104;
   const MIDI_TEMPO_MIN = 60;
   const MIDI_TEMPO_MAX = 180;
-  function hasFiniteTempoValue(value){return value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&Number(value)>0}
 
   function isMidiStem(stem){return String(stem?.kind||"").startsWith("midi-")}
   function playlistHasMidi(playlist){return !!playlist?.stems?.some(isMidiStem)}
@@ -9530,72 +9516,10 @@
       label:hasMidi?(hasAudio?"HYBRID":"MIDI"):"AUDIO"
     };
   }
-  function playlistStableId(playlist,index=-1){
-    return String(playlist?.id||playlist?.folder||`${index}:${playlist?.title||"playlist"}`);
-  }
-  function isPlaylistIncludedIndex(index){
-    const playlist=playlists[index];
-    return !!playlist&&!excludedPlaylistIds.has(playlistStableId(playlist,index));
-  }
-  function includedPlaylistIndices(){
-    return playlists.map((_,index)=>index).filter(isPlaylistIncludedIndex);
-  }
-  function savePlaylistExclusions(){
-    persistentPrefs.excludedPlaylistIds=[...excludedPlaylistIds];
-    savePersistentPrefs();
-  }
-  function nextIncludedPlaylistIndex(fromIndex,direction=1){
-    const count=playlists.length;
-    if(!count)return -1;
-    const step=direction<0?-1:1;
-    const start=((Number(fromIndex)||0)%count+count)%count;
-    for(let offset=1;offset<=count;offset++){
-      const index=(start+step*offset+count*2)%count;
-      if(isPlaylistIncludedIndex(index))return index;
-    }
-    return start;
-  }
-  function setPlaylistIncluded(index,included,{announce=true}={}){
-    const playlist=playlists[index];
-    if(!playlist)return false;
-    const id=playlistStableId(playlist,index);
-    const currentlyIncluded=!excludedPlaylistIds.has(id);
-    if(currentlyIncluded===!!included)return true;
-    if(!included&&currentlyIncluded&&includedPlaylistIndices().length<=1){
-      if(announce)showSystemReadout("PLAYLIST ROTATION","KEEP ONE TRACK IN","LAST PROGRAM");
-      const toggle=playlistMenu?.querySelector?.(`[data-playlist-toggle-index="${index}"]`);
-      toggle?.classList.add("is-denied");
-      setTimeout(()=>toggle?.classList.remove("is-denied"),520);
-      return false;
-    }
-    if(included)excludedPlaylistIds.delete(id);else excludedPlaylistIds.add(id);
-    queuedShuffleIndex=null;
-    savePlaylistExclusions();
-    syncPlaylistSelector();
-    scheduleBackgroundPreload();
-    if(announce){
-      const count=includedPlaylistIndices().length;
-      showSystemReadout("PLAYLIST ROTATION",included?"TRACK INCLUDED":"TRACK EXCLUDED",`${count}/${playlists.length} IN`);
-    }
-    return true;
-  }
-  function includeAllPlaylists({announce=true}={}){
-    for(let index=0;index<playlists.length;index++)excludedPlaylistIds.delete(playlistStableId(playlists[index],index));
-    savePlaylistExclusions();
-    queuedShuffleIndex=null;
-    syncPlaylistSelector();
-    scheduleBackgroundPreload();
-    if(announce)showSystemReadout("PLAYLIST ROTATION","ALL TRACKS INCLUDED",`${playlists.length}/${playlists.length} IN`);
-  }
-  function ensurePlaylistRotationHasIncluded(){
-    if(!playlists.length||includedPlaylistIndices().length)return;
-    excludedPlaylistIds.delete(playlistStableId(playlists[0],0));
-    savePlaylistExclusions();
-  }
   function midiPlaylistPreferenceKey(playlist){return String(playlist?.folder||playlist?.id||playlist?.title||"midi")}
   function storedMidiTempoForPlaylist(playlist){
     const raw=persistentPrefs.midiTempoByPlaylist?.[midiPlaylistPreferenceKey(playlist)];
-    return hasFiniteTempoValue(raw)?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(raw)))):null;
+    return Number.isFinite(Number(raw))?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(raw)))):null;
   }
   function initializePlaylistMode(playlist){
     const profile=playlistMediaProfile(playlist);
@@ -9603,8 +9527,8 @@
     playlist.contentMode=profile.kind;
     playlist.mediaProfile=profile;
     playlist.nativeTempoBpm=null;
-    const authoredTempo=playlist?.filenameConfig?.bpm;
-    playlist.filenameTempoBpm=hasFiniteTempoValue(authoredTempo)?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(authoredTempo)))):null;
+    const authoredTempo=Number(playlist?.filenameConfig?.bpm);
+    playlist.filenameTempoBpm=Number.isFinite(authoredTempo)?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(authoredTempo))):null;
     playlist.playbackTempoBpm=playlist.filenameTempoBpm;
     playlist.tempoManual=false;
     playlist.tempoAuthored=playlist.filenameTempoBpm!==null;
@@ -9616,7 +9540,7 @@
     }
     // Preserve the existing saved-tempo behavior for pure MIDI songs. Audio and
     // hybrid songs begin at native speed; their detected/native BPM becomes the
-    // reference for tape-style varispeed after load.
+    // reference for pitch-preserving time-stretching after load.
     if(pureMidi){
       const saved=storedMidiTempoForPlaylist(playlist);
       playlist.midiTempoBpm=saved??playlist.filenameTempoBpm??MIDI_DEFAULT_BPM;
@@ -9626,7 +9550,7 @@
       for(const stem of playlist.stems){if(isMidiStem(stem))stem.midiTempoBpm=playlist.midiTempoBpm}
     }else if(playlist.filenameTempoBpm!==null&&profile.hasMidi){
       // A folder-authored BPM is the shared hybrid target from the very first
-      // render: MIDI is re-rendered at it while audio uses matching varispeed.
+      // render: MIDI is re-rendered at it while audio is time-stretched to it.
       playlist.midiTempoBpm=playlist.filenameTempoBpm;
       for(const stem of playlist.stems){if(isMidiStem(stem))stem.midiTempoBpm=playlist.filenameTempoBpm}
     }
@@ -10522,15 +10446,37 @@
   }
 
   async function clockLockedMidiPatchSwapPoint(channel,minLead=.05){
-    if(!channel||!audioCtx||!playlistDuration||!isMidiStem(channel.stem)||!isPlaying)return null;
-    // Use the mixer transport itself as the only source of truth. The previous
-    // first-swap path quantized against raw MIDI note timestamps, then fed those
-    // values into the playlist scheduler, which may also apply filename
-    // start/offset/loop-origin transforms. That mixed two coordinate systems and
-    // could phase-jump the replacement strip. A short crossfade at the exact
-    // master position is sample-clock deterministic and is the same handoff model
-    // used by play/pause/seek.
-    return clockLockedPatchSwapPoint(Math.max(.035,Number(minLead)||.05),0);
+    if(!channel||!audioCtx||!playlistDuration||!isMidiStem(channel.stem))return null;
+    const requestedTempo=Number.isFinite(Number(channel.stem.midiTempoBpm))
+      ?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(channel.stem.midiTempoBpm))))
+      :null;
+    let parsed=null;
+    try{parsed=await getParsedMidiForStem(channel.stem,requestedTempo)}catch(_){return clockLockedPatchSwapPoint(minLead,0)}
+    if(!isPlaying||!audioCtx||!playlistDuration)return null;
+    // Re-read the transport AFTER any cache/fetch work. The chosen boundary is
+    // always based on the live master clock, never on the time the click occurred.
+    const earliest=Math.max(getAbsoluteCyclePosition()+Math.max(.025,Number(minLead)||.05),audioCtx.currentTime+Math.max(.025,Number(minLead)||.05)-cycleZeroContextTime);
+    const cycle=Math.max(0,Math.floor(earliest/playlistDuration));
+    const within=earliest-cycle*playlistDuration;
+    const starts=[];
+    let last=-1;
+    for(const note of parsed?.notes||[]){
+      const t=Number(note?.start);
+      if(!Number.isFinite(t)||t<0||t>=playlistDuration-.0005)continue;
+      if(last<0||Math.abs(t-last)>.0005){starts.push(t);last=t}
+    }
+    if(!starts.length)return clockLockedPatchSwapPoint(minLead,0);
+    let targetCycle=cycle;
+    let noteStart=starts.find(t=>t>=within-.00025);
+    if(!Number.isFinite(noteStart)){
+      if(appMode!=="procedural"&&playlistMode!=="loop")return null;
+      targetCycle=cycle+1;
+      noteStart=starts[0];
+    }
+    const absoluteSwap=targetCycle*playlistDuration+noteStart;
+    const swapAt=cycleZeroContextTime+absoluteSwap;
+    if(swapAt<audioCtx.currentTime+.012)return clockLockedPatchSwapPoint(Math.max(.025,minLead),0);
+    return{swapAt,absoluteSwap,cycleIndex:targetCycle,cycleOffset:noteStart};
   }
 
   function hotSwapProceduralStripInstrument(channel){
@@ -11097,15 +11043,6 @@
     syncTopTempoControl();
   }
 
-  function tempoVarispeedMeta(targetBpm,nativeBpm){
-    const native=Math.max(1,Number(nativeBpm)||MIDI_DEFAULT_BPM);
-    const target=Math.max(1,Number(targetBpm)||native);
-    const rate=Math.max(.25,Math.min(4,target/native));
-    const semitones=12*Math.log2(rate);
-    const pitchLabel=Math.abs(semitones)<.005?"0.00 st":`${semitones>0?"+":""}${semitones.toFixed(2)} st`;
-    return{rate,semitones,pitchLabel,rateLabel:`${rate.toFixed(3)}×`};
-  }
-
   function syncTopTempoControl(){
     if(!topTempoModule||!topTempoControl||!topTempoReadout)return;
     const procedural=appMode==="procedural";
@@ -11113,41 +11050,22 @@
     const visible=procedural||playlistModeActive;
     topTempoModule.hidden=!visible;
     if(!visible)return;
-    const profile=playlistModeActive?playlistMediaProfile(currentPlaylist):null;
     const bpm=procedural
       ?Math.round(currentProceduralProgram?.bpm||proceduralOverrides.bpm||MIDI_DEFAULT_BPM)
       :Math.round(currentPlaylist?.playbackTempoBpm||currentPlaylist?.midiTempoBpm||currentPlaylist?.nativeTempoBpm||MIDI_DEFAULT_BPM);
-    const native=Math.round(Number(currentPlaylist?.nativeTempoBpm||currentPlaylist?.filenameTempoBpm||bpm));
-    // Tape varispeed is continuous browser resampling, not a WSOLA quality band,
-    // so the physical control can use the full supported musical range.
-    const min=MIDI_TEMPO_MIN,max=MIDI_TEMPO_MAX;
-    topTempoControl.min=String(min);
-    topTempoControl.max=String(max);
-    topTempoControl.value=String(Math.max(min,Math.min(max,bpm)));
+    topTempoControl.value=String(bpm);
     topTempoReadout.textContent=`${bpm} BPM`;
-    topTempoModule.dataset.tempoKind=procedural?"procedural":profile?.kind||"audio";
-    topTempoModule.dataset.nativeBpm=String(native);
-    topTempoModule.dataset.targetBpm=String(bpm);
     topTempoModule.classList.toggle("is-manual",procedural?proceduralOverrides.bpm!==null:!!(currentPlaylist?.tempoManual||currentPlaylist?.midiTempoManual));
-    const varispeed=playlistModeActive&&profile?.hasAudio;
-    const meta=tempoVarispeedMeta(bpm,native);
-    topTempoModule.dataset.varispeedRate=varispeed?String(meta.rate):"1";
-    topTempoModule.dataset.pitchSemitones=varispeed?String(meta.semitones):"0";
-    topTempoControl.setAttribute("aria-valuetext",varispeed?`${bpm} BPM · tape varispeed ${meta.rateLabel} · pitch ${meta.pitchLabel}`:`${bpm} BPM`);
-    topTempoControl.title=varispeed
-      ?`Tape varispeed ${bpm} BPM · ${meta.rateLabel} · pitch ${meta.pitchLabel} · double-click for original ${native} BPM`
-      :"Tempo · drag to change · double-click to reset to original tempo";
     if(topTempoRandomBtn){
       topTempoRandomBtn.hidden=procedural;
-      topTempoRandomBtn.title=varispeed?"Choose another tape-varispeed tempo":"Randomize playback tempo";
-      topTempoRandomBtn.setAttribute("aria-label",varispeed?"Randomize tape varispeed tempo":"Randomize MIDI tempo");
+      topTempoRandomBtn.title=procedural?"Procedural tempo follows the current seed/manual override":"Randomize playback tempo (audio is pitch-preserving time-stretched)";
     }
   }
 
   function crossfadeTempoBufferSwap(newBuffers,oldDuration){
     const wasPlaying=isPlaying&&audioCtx&&oldDuration>0;
     const now=audioCtx?.currentTime||0;
-    const lead=.045,fade=.014;
+    const lead=.055,fade=.030;
     const currentPosition=getPosition();
     const oldSources=channels.map(channel=>[...channel.sources]);
     channels.forEach((channel,index)=>{channel.buffer=newBuffers[index]||channel.buffer;primeChannelAutoGain(channel,channel.buffer);channel.ready=true;channel.error=false});
@@ -11173,7 +11091,7 @@
     oldSources.forEach(list=>list.forEach(source=>{
       try{
         const gain=source?._wifeyGain?.gain;
-        if(gain){const held=Math.max(.0001,Number(gain.value)||1);gain.cancelScheduledValues(swapAt);gain.setValueAtTime(held,swapAt);gain.linearRampToValueAtTime(0,swapAt+fade)}
+        if(gain){gain.cancelScheduledValues(swapAt);gain.setValueAtTime(1,swapAt);gain.linearRampToValueAtTime(0,swapAt+fade)}
         source.stop(swapAt+fade+.008);
       }catch(_){}
     }));
@@ -11186,84 +11104,54 @@
     if(appMode!=="playlist"||!currentPlaylist)return;
     const playlist=currentPlaylist;
     const generation=loadGeneration;
-    const renderRevision=++playlistTempoRenderRevision;
     const next=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(bpm)||MIDI_DEFAULT_BPM)));
-    const hasAudio=playlistHasAudio(playlist);
-    const hasMidi=playlistHasMidi(playlist);
-    // Pure audio varispeed needs no offline render. Hybrid/MIDI playlists still
-    // render MIDI at the target BPM, so only those changes expose a busy state.
-    if(hasMidi){
-      topTempoModule?.classList.add("is-rendering");
-      topTempoModule?.setAttribute("aria-busy","true");
+    const native=await ensurePlaylistNativeTempo(playlist);
+    if(generation!==loadGeneration||playlist!==currentPlaylist)return;
+    const previousTempo=Math.round(Number(playlist.playbackTempoBpm||playlist.midiTempoBpm||native));
+    if(previousTempo===next){
+      syncTopTempoControl();
+      return;
     }
-    try{
-      const native=await ensurePlaylistNativeTempo(playlist);
-      if(renderRevision!==playlistTempoRenderRevision||generation!==loadGeneration||playlist!==currentPlaylist)return;
-      const previousTempo=Math.round(Number(playlist.playbackTempoBpm||playlist.midiTempoBpm||native));
-      if(previousTempo===next){syncTopTempoControl();return}
-      const oldDuration=playlistDuration;
-      playlist.playbackTempoBpm=next;
-      playlist.tempoManual=persist?true:!!playlist.tempoManual;
-      if(hasMidi){
-        playlist.midiTempoBpm=next;
-        playlist.midiTempoManual=persist?true:!!playlist.midiTempoManual;
-        for(const stem of playlist.stems)if(isMidiStem(stem))stem.midiTempoBpm=next;
-      }
-      if(persist&&isPureMidiPlaylist(playlist)){
-        if(!persistentPrefs.midiTempoByPlaylist||typeof persistentPrefs.midiTempoByPlaylist!=="object")persistentPrefs.midiTempoByPlaylist={};
-        persistentPrefs.midiTempoByPlaylist[midiPlaylistPreferenceKey(playlist)]=next;
-        savePersistentPrefs();
-      }
-      syncTopTempoControl();
-      const varispeed=tempoVarispeedMeta(next,native);
-      loadReadout.textContent=hasMidi?(hasAudio?"VARI + MIDI":"MIDI TEMPO"):"VARISPEED";
-      showSystemReadout(
-        String(playlist.title||"PLAYLIST").toUpperCase(),
-        hasAudio?(hasMidi?"TAPE VARISPEED + MIDI":"TAPE VARISPEED"):"RENDERING MIDI",
-        hasAudio?`${next} BPM · ${varispeed.pitchLabel}`:`${next} BPM`
-      );
-
-      let newBuffers;
-      if(!hasMidi){
-        // No sample processing at all for an audio-only tempo change. The exact
-        // same configured AudioBuffers are crossfaded into new Web Audio sources
-        // at the new shared playbackRate.
-        newBuffers=channels.map(channel=>channel.buffer);
-      }else{
-        newBuffers=[];
-        for(const channel of channels){
-          if(renderRevision!==playlistTempoRenderRevision||generation!==loadGeneration||playlist!==currentPlaylist)return;
-          await new Promise(done=>setTimeout(done,0));
-          if(renderRevision!==playlistTempoRenderRevision||generation!==loadGeneration||playlist!==currentPlaylist)return;
-          try{
-            if(isMidiStem(channel.stem)){
-              newBuffers.push(await getConfiguredStemPlaybackBuffer(channel.stem,await getMidiStemBuffer(channel.stem)));
-            }else{
-              // Hybrid audio also remains native; its source playbackRate is the
-              // same target/native ratio that the re-rendered MIDI transport uses.
-              newBuffers.push(channel.buffer||await getConfiguredStemPlaybackBuffer(channel.stem,await getDecodedStemBuffer(channel.stem)));
-            }
-          }catch(error){
-            console.warn("Tempo update failed; preserving current stem buffer",channel.stem?.displayPath||channel.stem?.name,error);
-            newBuffers.push(channel.buffer);
-          }
-        }
-      }
-      if(renderRevision!==playlistTempoRenderRevision||generation!==loadGeneration||playlist!==currentPlaylist)return;
-      crossfadeTempoBufferSwap(newBuffers,oldDuration||playlistDuration);
-      syncTopTempoControl();
-      loadReadout.textContent=isPlaying?"PLAYING":"READY";
-      showSystemReadout(
-        String(playlist.title||"PLAYLIST").toUpperCase(),
-        hasAudio?(hasMidi?"HYBRID VARISPEED LOCKED":"TAPE VARISPEED READY"):"TEMPO READY",
-        hasAudio?`${next} BPM · ${varispeed.pitchLabel}`:`${next} BPM`
-      );
-    }finally{
-      if(renderRevision===playlistTempoRenderRevision){
-        topTempoModule?.classList.remove("is-rendering");
-        topTempoModule?.removeAttribute("aria-busy");
+    const oldDuration=playlistDuration;
+    playlist.playbackTempoBpm=next;
+    playlist.tempoManual=persist?true:!!playlist.tempoManual;
+    if(playlistHasMidi(playlist)){
+      playlist.midiTempoBpm=next;
+      playlist.midiTempoManual=persist?true:!!playlist.midiTempoManual;
+      for(const stem of playlist.stems)if(isMidiStem(stem))stem.midiTempoBpm=next;
+    }
+    // Keep legacy local persistence for pure MIDI only. Audio/hybrid stretch
+    // state remains attached to the playlist for this browser run and never
+    // surprises a fresh load by silently rendering minutes of audio at startup.
+    if(persist&&isPureMidiPlaylist(playlist)){
+      if(!persistentPrefs.midiTempoByPlaylist||typeof persistentPrefs.midiTempoByPlaylist!=="object")persistentPrefs.midiTempoByPlaylist={};
+      persistentPrefs.midiTempoByPlaylist[midiPlaylistPreferenceKey(playlist)]=next;
+      savePersistentPrefs();
+    }
+    syncTopTempoControl();
+    loadReadout.textContent=playlistHasAudio(playlist)?"STRETCH":"MIDI TEMPO";
+    showSystemReadout(String(playlist.title||"PLAYLIST").toUpperCase(),playlistHasAudio(playlist)?"TIME-STRETCHING AUDIO":"RENDERING MIDI",`${next} BPM`);
+    const newBuffers=[];
+    // Render in strip order for deterministic swaps. Fast WSOLA now does far
+    // less correlation work and yields only occasionally, so this path completes
+    // much sooner without starving the live AudioContext.
+    for(const channel of channels){
+      if(generation!==loadGeneration||playlist!==currentPlaylist)return;
+      try{
+        const rawTempoBuffer=isMidiStem(channel.stem)
+          ?await getMidiStemBuffer(channel.stem)
+          :await getTempoAdjustedAudioStemBuffer(channel.stem,native,next);
+        newBuffers.push(await getConfiguredStemPlaybackBuffer(channel.stem,rawTempoBuffer));
+      }catch(error){
+        console.warn("Tempo render failed; preserving current stem buffer",channel.stem?.displayPath||channel.stem?.name,error);
+        newBuffers.push(channel.buffer);
       }
     }
+    if(generation!==loadGeneration||playlist!==currentPlaylist)return;
+    crossfadeTempoBufferSwap(newBuffers,oldDuration||playlistDuration);
+    syncTopTempoControl();
+    loadReadout.textContent=isPlaying?"PLAYING":"READY";
+    showSystemReadout(String(playlist.title||"PLAYLIST").toUpperCase(),playlistMediaProfile(playlist).kind==="hybrid"?"HYBRID TEMPO LOCKED":"TEMPO READY",`${next} BPM`);
   }
 
   async function resetTopTempoToNative(){
@@ -11278,7 +11166,7 @@
     if(appMode!=="playlist"||!currentPlaylist)return;
     const playlist=currentPlaylist;
     const detectedNative=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(await ensurePlaylistNativeTempo(playlist))));
-    const native=hasFiniteTempoValue(playlist.filenameTempoBpm)?Number(playlist.filenameTempoBpm):detectedNative;
+    const native=Number.isFinite(Number(playlist.filenameTempoBpm))?Number(playlist.filenameTempoBpm):detectedNative;
     // Reset returns to the filename-authored BPM when present, otherwise the
     // detected/embedded native tempo, while clearing legacy saved overrides.
     playlist.tempoManual=false;
@@ -11300,12 +11188,6 @@
     const bpm=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(value)||MIDI_DEFAULT_BPM)));
     if(topTempoReadout)topTempoReadout.textContent=`${bpm} BPM`;
     if(appMode==="procedural"&&proceduralTempoReadout)proceduralTempoReadout.textContent=`${bpm} BPM`;
-    if(appMode==="playlist"&&playlistHasAudio(currentPlaylist)&&topTempoControl){
-      const native=Math.round(Number(currentPlaylist?.nativeTempoBpm||currentPlaylist?.filenameTempoBpm||bpm));
-      const meta=tempoVarispeedMeta(bpm,native);
-      topTempoControl.setAttribute("aria-valuetext",`${bpm} BPM · tape varispeed ${meta.rateLabel} · pitch ${meta.pitchLabel}`);
-      topTempoControl.title=`Tape varispeed ${bpm} BPM · ${meta.rateLabel} · pitch ${meta.pitchLabel} · double-click for original ${native} BPM`;
-    }
   }
 
   function syncProceduralModeUi(showMonitor=false){const active=appMode==="procedural";mixerSurface.classList.toggle("is-procedural",active);proceduralModeBtn?.classList.toggle("active",active);proceduralModeBtn?.setAttribute("aria-pressed",String(active));if(proceduralDeck){proceduralDeck.hidden=!active;proceduralDeck.classList.toggle("hidden",!active);proceduralDeck.classList.toggle("flex",active)}prevTrackBtn.title=active?"Previous procedural seed":"Previous folder";prevTrackBtn.setAttribute("aria-label",prevTrackBtn.title);nextTrackBtn.title=active?"Next procedural seed":"Next folder";nextTrackBtn.setAttribute("aria-label",nextTrackBtn.title);if(active&&currentProceduralProgram)updateProceduralReadouts(currentProceduralProgram);if(showMonitor)showSystemReadout(active?"PROCEDURAL MODE":"PLAYLIST MODE",active?"SEED GENERATOR":"TRACK PROGRAM",active?`SEED ${String(proceduralSeed).padStart(4,"0")}`:"RESTORED");syncTopTempoControl()}
@@ -13435,10 +13317,7 @@
 
   function estimateAudioBufferBpm(buffer){
     if(!buffer?.length||!buffer?.sampleRate)return MIDI_DEFAULT_BPM;
-    // 512-sample onset frames materially reduce the half-tempo ambiguity that a
-    // coarse 1024-sample grid created around common 110–130 BPM material, while
-    // remaining cheap enough to analyse up to 90 seconds during initial decode.
-    const hop=512;
+    const hop=1024;
     const usable=Math.min(buffer.length,Math.floor(buffer.sampleRate*90));
     const frames=Math.max(8,Math.floor(usable/hop));
     const envelope=new Float32Array(frames);
@@ -13460,23 +13339,17 @@
     mean/=Math.max(1,envelope.length);
     for(let i=0;i<envelope.length;i++)envelope[i]=Math.max(0,envelope[i]-mean*.55);
     const framesPerSecond=buffer.sampleRate/hop;
-    const minLag=Math.max(1,Math.floor(framesPerSecond*60/MIDI_TEMPO_MAX));
-    const maxLag=Math.min(frames-2,Math.ceil(framesPerSecond*60/MIDI_TEMPO_MIN));
     let bestBpm=MIDI_DEFAULT_BPM,bestScore=-Infinity;
-    // Search unique autocorrelation lags and derive BPM from the winning lag.
-    // The previous integer-BPM search mapped many BPM values onto one coarse lag,
-    // which could incorrectly award a 60 BPM octave over an exact 120 BPM pulse.
-    for(let lag=minLag;lag<=maxLag;lag++){
-      const bpm=framesPerSecond*60/lag;
-      if(bpm<MIDI_TEMPO_MIN-.5||bpm>MIDI_TEMPO_MAX+.5)continue;
+    for(let bpm=MIDI_TEMPO_MIN;bpm<=MIDI_TEMPO_MAX;bpm++){
+      const lag=Math.max(1,Math.round(framesPerSecond*60/bpm));
       let score=0,weight=0;
       for(let i=lag;i<frames;i++){
         const a=envelope[i],b=envelope[i-lag];
         score+=a*b;weight+=a*a+b*b;
       }
       score/=Math.sqrt(Math.max(1e-12,weight));
-      // Prefer the usual musical centre only as a tie-breaker; transient evidence
-      // remains dominant throughout the full supported range.
+      // Prefer musically common central tempi only as a tiny tie-breaker; strong
+      // onset evidence still wins at the full 60–180 BPM range.
       score*=1-.0009*Math.abs(bpm-112);
       if(score>bestScore){bestScore=score;bestBpm=bpm}
     }
@@ -13485,18 +13358,16 @@
 
   async function ensurePlaylistNativeTempo(playlist=currentPlaylist){
     if(!playlist)return MIDI_DEFAULT_BPM;
-    if(hasFiniteTempoValue(playlist.nativeTempoBpm))return Number(playlist.nativeTempoBpm);
-    // Folder-authored BPM is authoritative source-tempo metadata. Prefer it to
-    // estimation so a producer can guarantee exact grid alignment.
-    let bpm=hasFiniteTempoValue(playlist.filenameTempoBpm)?Number(playlist.filenameTempoBpm):null;
+    if(Number.isFinite(Number(playlist.nativeTempoBpm)))return Number(playlist.nativeTempoBpm);
+    let bpm=null;
     const midiStem=playlist.stems?.find(isMidiStem);
-    if(!hasFiniteTempoValue(bpm)&&midiStem){
+    if(midiStem){
       try{
         const parsed=await getParsedMidiForStem(midiStem,null);
-        if(hasFiniteTempoValue(parsed?.sourceBpm))bpm=Number(parsed.sourceBpm);
-      }catch(error){console.warn("Could not read native MIDI tempo for hybrid varispeed",error)}
+        if(Number.isFinite(Number(parsed?.sourceBpm)))bpm=Number(parsed.sourceBpm);
+      }catch(error){console.warn("Could not read native MIDI tempo for hybrid stretch",error)}
     }
-    if(!hasFiniteTempoValue(bpm)){
+    if(!Number.isFinite(Number(bpm))){
       const audioStems=(playlist.stems||[]).filter(stem=>!isMidiStem(stem));
       const candidate=audioStems.find(stem=>/drum|beat|kick|perc/i.test(String(stem?.name||stem?.displayPath||"")))||audioStems[0];
       if(candidate){
@@ -13505,39 +13376,75 @@
       }
     }
     playlist.nativeTempoBpm=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(bpm)||MIDI_DEFAULT_BPM)));
-    if(!hasFiniteTempoValue(playlist.playbackTempoBpm))playlist.playbackTempoBpm=playlist.nativeTempoBpm;
+    if(!Number.isFinite(Number(playlist.playbackTempoBpm)))playlist.playbackTempoBpm=playlist.nativeTempoBpm;
     return playlist.nativeTempoBpm;
   }
 
-  async function legacyTimeStretchAudioBuffer(buffer,tempoRatio){
+  async function timeStretchAudioBuffer(buffer,tempoRatio){
     const ratio=Math.max(.34,Math.min(3,Number(tempoRatio)||1));
     if(Math.abs(ratio-1)<.002)return buffer;
     const channels=Math.max(1,buffer.numberOfChannels||1);
     const sampleRate=buffer.sampleRate;
     const outputLength=Math.max(1,Math.round(buffer.length/ratio));
     const output=audioCtx.createBuffer(channels,outputLength,sampleRate);
-    for(let c=0;c<channels;c++){
-      const src=buffer.getChannelData(c),dst=output.getChannelData(c);
-      for(let i=0;i<outputLength;i++){
-        const pos=i*ratio,lo=Math.min(src.length-1,Math.floor(pos)),hi=Math.min(src.length-1,lo+1),mix=pos-lo;
-        dst[i]=(src[lo]||0)*(1-mix)+(src[hi]||0)*mix;
+    const input=Array.from({length:channels},(_,c)=>buffer.getChannelData(c));
+    const out=Array.from({length:channels},(_,c)=>output.getChannelData(c));
+    const windowSize=2048;
+    const overlap=512;
+    const synthHop=windowSize-overlap;
+    const analysisHop=synthHop*ratio;
+    // Fast WSOLA: the old search tested ~64 candidate alignments with a dense
+    // correlation pass for every grain. A narrower search with sparse correlation
+    // preserves transient locking while cutting the hot-loop work by roughly an
+    // order of magnitude on long multitrack songs.
+    const searchRadius=128;
+    const candidateStep=16;
+    const correlationStride=32;
+    const fadeCurve=new Float32Array(overlap);
+    for(let i=0;i<overlap;i++)fadeCurve[i]=i/Math.max(1,overlap-1);
+    let sourceStart=0;
+    let outStart=0;
+    const firstCount=Math.min(windowSize,outputLength,buffer.length);
+    for(let c=0;c<channels;c++)out[c].set(input[c].subarray(0,firstCount),0);
+    let frame=0;
+    while(outStart+synthHop<outputLength){
+      const nextOut=outStart+synthHop;
+      const expected=Math.round(sourceStart+analysisHop);
+      const minCandidate=Math.max(0,expected-searchRadius);
+      const maxCandidate=Math.min(Math.max(0,buffer.length-windowSize),expected+searchRadius);
+      let best=Math.max(0,Math.min(maxCandidate,expected));
+      let bestScore=-Infinity;
+      const reference=Math.max(0,Math.min(buffer.length-overlap,sourceStart+synthHop));
+      const refData=input[0];
+      for(let candidate=minCandidate;candidate<=maxCandidate;candidate+=candidateStep){
+        let dot=0,a2=0,b2=0;
+        for(let i=0;i<overlap;i+=correlationStride){
+          const a=refData[reference+i]||0,b=refData[candidate+i]||0;
+          dot+=a*b;a2+=a*a;b2+=b*b;
+        }
+        const score=dot/Math.sqrt(Math.max(1e-12,a2*b2));
+        if(score>bestScore){bestScore=score;best=candidate}
       }
+      const overlapCount=Math.min(overlap,outputLength-nextOut,buffer.length-best);
+      for(let c=0;c<channels;c++){
+        const src=input[c],dst=out[c];
+        for(let i=0;i<overlapCount;i++){
+          const fade=overlapCount===overlap?fadeCurve[i]:i/Math.max(1,overlapCount-1);
+          dst[nextOut+i]=dst[nextOut+i]*(1-fade)+(src[best+i]||0)*fade;
+        }
+        const tailStart=overlapCount;
+        const tailCount=Math.min(windowSize-tailStart,outputLength-(nextOut+tailStart),buffer.length-(best+tailStart));
+        if(tailCount>0)dst.set(src.subarray(best+tailStart,best+tailStart+tailCount),nextOut+tailStart);
+      }
+      sourceStart=best;
+      outStart=nextOut;
+      frame++;
+      // Yield occasionally rather than every few dozen grains. The previous
+      // cadence could spend seconds just waiting on timer clamping across stems.
+      if(frame%224===0)await new Promise(done=>setTimeout(done,0));
+      if(best>=buffer.length-windowSize&&nextOut+windowSize>=outputLength)break;
     }
     return output;
-  }
-
-  async function timeStretchAudioBuffer(buffer,tempoRatio,plan=null){
-    const ratio=Math.max(.25,Math.min(4,Number(tempoRatio)||1));
-    if(Math.abs(ratio-1)<.002)return buffer;
-    const engine=window.WIFEY_TEMPO_STRETCH;
-    if(!engine?.stretchBuffer){
-      console.warn("Pitch-preserving tempo engine unavailable; using timing-safe resample fallback.");
-      return legacyTimeStretchAudioBuffer(buffer,ratio);
-    }
-    // Give input/change events a chance to advance the render revision before a
-    // potentially expensive offline stem render starts.
-    await new Promise(done=>setTimeout(done,0));
-    return engine.stretchBuffer(audioCtx,buffer,ratio,{plan});
   }
 
   const filenameConfiguredBufferCache=new WeakMap();
@@ -13606,6 +13513,19 @@
     return out;
   }
 
+  async function getTempoAdjustedAudioStemBuffer(stem,nativeBpm,targetBpm){
+    const original=await getDecodedStemBuffer(stem);
+    const native=Math.max(1,Number(nativeBpm)||MIDI_DEFAULT_BPM);
+    const target=Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Number(targetBpm)||native));
+    const ratio=target/native;
+    if(Math.abs(ratio-1)<.002)return original;
+    const key=`${stemCacheKey(stem)}|stretch:${native.toFixed(2)}:${target.toFixed(2)}`;
+    if(decodedBufferCache.has(key))return touchDecodedBuffer(key,decodedBufferCache.get(key));
+    if(decodedBufferPromises.has(key))return decodedBufferPromises.get(key);
+    const promise=(async()=>touchDecodedBuffer(key,await timeStretchAudioBuffer(original,ratio)))();
+    decodedBufferPromises.set(key,promise);
+    try{return await promise}finally{decodedBufferPromises.delete(key)}
+  }
 
   function midiRoleFromTrackCategory(category){
     const role=String(category||"").toLowerCase();
@@ -13973,9 +13893,9 @@
     if (!window.WifeyMIDI?.parse || !window.WifeyMIDI?.render) throw new Error("MIDI renderer did not load.");
 
     // Any MIDI stem may receive an explicit target tempo. In hybrid playlists
-    // audio follows the same target/native ratio by tape-style varispeed, so MIDI
-    // and audio remain locked to the shared transport without grain stretching.
-    const requestedTempo=hasFiniteTempoValue(stem.midiTempoBpm)
+    // the matching audio stems are pitch-preserving time-stretched by the same
+    // musical ratio, so MIDI and audio remain locked to the shared transport.
+    const requestedTempo=Number.isFinite(Number(stem.midiTempoBpm))
       ?Math.max(MIDI_TEMPO_MIN,Math.min(MIDI_TEMPO_MAX,Math.round(Number(stem.midiTempoBpm))))
       :null;
     const voice=midiSelectedVoiceForStem(stem);
@@ -14010,11 +13930,13 @@
   async function getStemPlaybackBuffer(stem) {
     if(String(stem?.kind || "").startsWith("midi-"))return getConfiguredStemPlaybackBuffer(stem,await getMidiStemBuffer(stem));
     const playlist=stem?.playlistRef;
-    if(playlist&&playlistHasAudio(playlist)&&!hasFiniteTempoValue(playlist?.nativeTempoBpm))await ensurePlaylistNativeTempo(playlist);
-    // Playlist tempo is tape-style varispeed at source scheduling time. Keep the
-    // decoded/configured audio buffer at its native timeline so every stem uses
-    // one continuous browser resampler instead of an offline grain/overlap render.
-    return getConfiguredStemPlaybackBuffer(stem,await getDecodedStemBuffer(stem));
+    if(playlist?.filenameTempoBpm!==null&&!Number.isFinite(Number(playlist?.nativeTempoBpm)))await ensurePlaylistNativeTempo(playlist);
+    const native=Number(playlist?.nativeTempoBpm);
+    const target=Number(playlist?.playbackTempoBpm);
+    const buffer=Number.isFinite(native)&&Number.isFinite(target)
+      ?await getTempoAdjustedAudioStemBuffer(stem,native,target)
+      :await getDecodedStemBuffer(stem);
+    return getConfiguredStemPlaybackBuffer(stem,buffer);
   }
 
   function scheduleMidiBackgroundPreload(playlist=currentPlaylist){
@@ -14071,12 +13993,15 @@
   }
 
   function chooseQueuedShuffleIndex() {
-    const included=includedPlaylistIndices();
-    if(!included.length){queuedShuffleIndex=currentPlaylistIndex;return queuedShuffleIndex}
-    const candidates=included.filter(index=>index!==currentPlaylistIndex);
-    const pool=candidates.length?candidates:included;
-    queuedShuffleIndex=pool[Math.floor(Math.random()*pool.length)];
-    return queuedShuffleIndex;
+    if (playlists.length <= 1) {
+      queuedShuffleIndex = 0;
+      return queuedShuffleIndex;
+    }
+
+    let pick = Math.floor(Math.random()*(playlists.length-1));
+    if (pick >= currentPlaylistIndex) pick += 1;
+    queuedShuffleIndex = pick;
+    return pick;
   }
 
   function requestBackgroundPreload(index) {
@@ -14496,8 +14421,7 @@
       Number.isInteger(queuedShuffleIndex) &&
       queuedShuffleIndex >= 0 &&
       queuedShuffleIndex < count &&
-      queuedShuffleIndex !== currentPlaylistIndex &&
-      isPlaylistIncludedIndex(queuedShuffleIndex)
+      queuedShuffleIndex !== currentPlaylistIndex
     ) {
       const pick = queuedShuffleIndex;
       queuedShuffleIndex = null;
@@ -14515,7 +14439,8 @@
       if (playlistMode === "shuffle") {
         await changePlaylist(getShuffledPlaylistIndex(),true);
       } else if (playlistMode === "sequential") {
-        await changePlaylist(nextIncludedPlaylistIndex(currentPlaylistIndex,1),true);
+        // changePlaylist normalizes the index, so the last song wraps to the first.
+        await changePlaylist(currentPlaylistIndex+1,true);
       }
     } finally {
       playlistAdvanceInProgress = false;
@@ -14854,31 +14779,9 @@
     syncMasterAutoGainButton();
   }
 
-  function playlistAudioPlaybackRate(playlist=currentPlaylist){
-    if(!playlistHasAudio(playlist))return 1;
-    const native=Number(playlist?.nativeTempoBpm);
-    const target=Number(playlist?.playbackTempoBpm);
-    if(!Number.isFinite(native)||!Number.isFinite(target)||native<=0||target<=0)return 1;
-    return Math.max(.25,Math.min(4,target/native));
-  }
-
-  function playlistTempoTimeScale(playlist=currentPlaylist){
-    return 1/playlistAudioPlaybackRate(playlist);
-  }
-
-  function stemPlaybackRate(stem,playlist=stem?.playlistRef||currentPlaylist){
-    return isMidiStem(stem)?1:playlistAudioPlaybackRate(playlist);
-  }
-
-  function scalePlaylistTimelineSeconds(value,playlist=currentPlaylist){
-    const numeric=Number(value);
-    if(!Number.isFinite(numeric))return numeric;
-    return numeric*playlistTempoTimeScale(playlist);
-  }
-
   function playlistFilenameTimelineOrigin(playlist=currentPlaylist){
     const value=Number(playlist?.filenameConfig?.loopStart);
-    return Number.isFinite(value)&&value>=0?scalePlaylistTimelineSeconds(value,playlist):0;
+    return Number.isFinite(value)&&value>=0?value:0;
   }
 
   function configuredBarsDuration(config,playlist=currentPlaylist){
@@ -14889,20 +14792,19 @@
     return bars*beats*60/Math.max(1,bpm);
   }
 
-  function configuredTrackTimelineStart(stem,playlist=stem?.playlistRef||currentPlaylist){
+  function configuredTrackTimelineStart(stem){
     const cfg=filenameTrackConfig(stem);
-    return scalePlaylistTimelineSeconds((Number(cfg.start)||0)+(Number(cfg.offset)||0),playlist);
+    return (Number(cfg.start)||0)+(Number(cfg.offset)||0);
   }
 
   function configuredTrackTimelineEnd(stem,buffer,playlist=currentPlaylist){
     const cfg=filenameTrackConfig(stem);
-    const start=configuredTrackTimelineStart(stem,playlist);
-    if(Number.isFinite(Number(cfg.end)))return Math.max(start,scalePlaylistTimelineSeconds(Number(cfg.end),playlist));
-    if(Number.isFinite(Number(cfg.length)))return start+Math.max(0,scalePlaylistTimelineSeconds(Number(cfg.length),playlist));
+    const start=configuredTrackTimelineStart(stem);
+    if(Number.isFinite(Number(cfg.end)))return Math.max(start,Number(cfg.end));
+    if(Number.isFinite(Number(cfg.length)))return start+Math.max(0,Number(cfg.length));
     const barsDuration=configuredBarsDuration(cfg,playlist);
     if(Number.isFinite(barsDuration))return start+barsDuration;
-    const naturalDuration=Math.max(0,Number(buffer?.duration)||Number(stem?.midiDuration)||0);
-    return start+naturalDuration/Math.max(.000001,stemPlaybackRate(stem,playlist));
+    return start+Math.max(0,Number(buffer?.duration)||Number(stem?.midiDuration)||0);
   }
 
   function updatePlaylistDuration() {
@@ -14915,10 +14817,9 @@
       const origin=playlistFilenameTimelineOrigin(currentPlaylist);
       const folderCfg=currentPlaylist?.filenameConfig||{};
       const explicitEnd=Number(folderCfg.loopEnd);
-      const scaledExplicitEnd=Number.isFinite(explicitEnd)?scalePlaylistTimelineSeconds(explicitEnd,currentPlaylist):explicitEnd;
       const barsDuration=configuredBarsDuration(folderCfg,currentPlaylist);
-      if(Number.isFinite(scaledExplicitEnd)&&scaledExplicitEnd>origin){
-        playlistDuration=scaledExplicitEnd-origin;
+      if(Number.isFinite(explicitEnd)&&explicitEnd>origin){
+        playlistDuration=explicitEnd-origin;
       }else if(Number.isFinite(barsDuration)){
         playlistDuration=barsDuration;
       }else{
@@ -14936,7 +14837,6 @@
 
     const duration = playbackBuffer.duration;
     const loop=options.loop===true;
-    const playbackRate=Math.max(.25,Math.min(4,Number(options.playbackRate)||1));
     let sourceOffset=Math.max(0,Number(offset)||0);
     const loopStart=Math.max(0,Math.min(duration-.0005,Number(options.loopStart)||0));
     const loopEnd=Math.max(loopStart+.0005,Math.min(duration,Number(options.loopEnd)||duration));
@@ -14951,7 +14851,6 @@
     const playDuration=Number.isFinite(Number(options.playDuration))?Math.max(.001,Number(options.playDuration)):null;
     const startGain=Number.isFinite(Number(options.startGain))?Number(options.startGain):1;
     source.buffer = playbackBuffer;
-    source.playbackRate.setValueAtTime(playbackRate,Math.max(audioCtx.currentTime,Number(when)||audioCtx.currentTime));
     source.loop=loop;
     if(loop){source.loopStart=loopStart;source.loopEnd=loopEnd}
     source.connect(sourceGain);
@@ -14961,9 +14860,6 @@
     source._wifeyAutoGain=sourceAutoGain;
     sourceAutoGain.gain.value=channel.state?.autoGain===false?1:Math.max(.05,Math.min(3.99,Number(channel.autoGainCompensation)||1));
     source._wifeyStart=when;
-    source._wifeySourceOffset=sourceOffset;
-    source._wifeyPlaybackRate=playbackRate;
-    source._wifeyPlayDuration=playDuration;
     const gainAt=Math.max(audioCtx.currentTime,Number(when)||audioCtx.currentTime);
     sourceGain.gain.setValueAtTime(fadeIn>0?0:startGain,gainAt);
     if(fadeIn>0)sourceGain.gain.linearRampToValueAtTime(startGain,gainAt+Math.min(fadeIn,playDuration||fadeIn));
@@ -14987,12 +14883,7 @@
         source.start(when,sourceOffset);
         if(playDuration)source.stop(when+playDuration);
       }else if(playDuration){
-        // start()'s duration is measured in source-buffer seconds and is
-        // independent of playbackRate. Convert our transport/output duration
-        // back to source time so a 1.25x varispeed source still plays for the
-        // exact requested mixer-clock interval.
-        const sourceDuration=Math.min(playDuration*playbackRate,Math.max(.001,duration-sourceOffset));
-        source.start(when,sourceOffset,sourceDuration);
+        source.start(when,sourceOffset,Math.min(playDuration,Math.max(.001,duration-sourceOffset)));
       }else source.start(when,sourceOffset);
       return source;
     } catch (error) {
@@ -15010,11 +14901,10 @@
     const playbackBuffer=bufferOverride||channel?.buffer;
     if(!playbackBuffer)return null;
     const cfg=filenameTrackConfig(channel?.stem);
-    const playbackRate=Math.max(.25,Math.min(4,Number(options.playbackRate)||stemPlaybackRate(channel?.stem,currentPlaylist)));
     const origin=playlistFilenameTimelineOrigin(currentPlaylist);
     const displayPosition=Math.max(0,Number(transportPosition)||0);
     let timelinePosition=origin+displayPosition;
-    const trackStart=configuredTrackTimelineStart(channel.stem,currentPlaylist);
+    const trackStart=configuredTrackTimelineStart(channel.stem);
     let startWhen=when;
     if(timelinePosition<trackStart){
       startWhen+=trackStart-timelinePosition;
@@ -15026,24 +14916,19 @@
       trackEnd=origin+playlistDuration;
     }
     if(timelinePosition>=trackEnd-.0005)return null;
-    // timelinePosition is measured on the mixer transport. Audio buffers stay at
-    // their native sample timeline and are varispeed-resampled by playbackRate,
-    // so convert transport seconds back into source-buffer seconds. MIDI buffers
-    // are re-rendered at the requested BPM and therefore use rate 1.
-    let bufferOffset=Math.max(0,(timelinePosition-trackStart)*playbackRate);
-    const loopStart=Math.max(0,scalePlaylistTimelineSeconds(Number(cfg.loopStart)||0,currentPlaylist)*playbackRate);
-    const loopEnd=Number.isFinite(Number(cfg.loopEnd))?Math.min(playbackBuffer.duration,scalePlaylistTimelineSeconds(Number(cfg.loopEnd),currentPlaylist)*playbackRate):playbackBuffer.duration;
+    let bufferOffset=Math.max(0,timelinePosition-trackStart);
+    const loopStart=Math.max(0,Number(cfg.loopStart)||0);
+    const loopEnd=Number.isFinite(Number(cfg.loopEnd))?Math.min(playbackBuffer.duration,Number(cfg.loopEnd)):playbackBuffer.duration;
     if(loopEnabled&&loopEnd>loopStart+.0005&&bufferOffset>=loopEnd)bufferOffset=loopStart+((bufferOffset-loopStart)%(loopEnd-loopStart));
     const playlistEnd=origin+playlistDuration;
     let playDuration=Math.max(0,Math.min(trackEnd,playlistEnd)-timelinePosition);
-    if(!loopEnabled)playDuration=Math.min(playDuration,Math.max(0,(playbackBuffer.duration-bufferOffset)/playbackRate));
+    if(!loopEnabled)playDuration=Math.min(playDuration,Math.max(0,playbackBuffer.duration-bufferOffset));
     if(playDuration<=.0005)return null;
     const db=Number(cfg.gain);
     const authoredGain=Number.isFinite(db)?Math.pow(10,db/20):1;
     const startGain=(Number.isFinite(Number(options.startGain))?Number(options.startGain):1)*authoredGain;
     return createScheduledSource(channel,startWhen,bufferOffset,playbackBuffer,{
       ...options,
-      playbackRate,
       startGain,
       fadeIn:Number.isFinite(Number(options.fadeIn))?Number(options.fadeIn):(Number(cfg.fadeIn)||0),
       fadeOut:Number.isFinite(Number(options.fadeOut))?Number(options.fadeOut):(Number(cfg.fadeOut)||0),
@@ -15077,11 +14962,10 @@
   function ensureScheduleHorizon(currentCycle=0) {
     if (!isPlaying || !playlistDuration || !audioCtx || (appMode !== "procedural" && playlistMode !== "loop")) return;
 
-    // Procedural audio keeps its two-cycle horizon. Playlist loops target a
-    // three-minute buffer, retaining at least two cycles and the old maximum.
-    const horizon = appMode === "procedural"
-      ? 2
-      : Math.max(2,Math.min(SCHEDULE_AHEAD_CYCLES,Math.ceil(SCHEDULE_AHEAD_SECONDS/playlistDuration)));
+    // AudioBuffer variation rendering is heavier than reusing decoded playlist stems.
+    // Two cycles of look-ahead is plenty for seamless procedural looping without
+    // pre-rendering dozens of variations into memory.
+    const horizon = appMode === "procedural" ? 2 : SCHEDULE_AHEAD_CYCLES;
     const target = currentCycle + horizon;
     for (let cycle=scheduledThroughCycle+1; cycle<=target; cycle++) {
       scheduleCycle(cycle);
@@ -15180,30 +15064,6 @@
       advanceAtSongEnd();
     }
   }
-
-  function syncBackgroundLoopScheduler(){
-    const shouldRun=document.visibilityState==="hidden"
-      && isPlaying
-      && (appMode==="procedural"||playlistMode==="loop");
-    if(!shouldRun){
-      if(backgroundLoopSchedulerTimer){
-        window.clearInterval(backgroundLoopSchedulerTimer);
-        backgroundLoopSchedulerTimer=0;
-      }
-      return;
-    }
-    if(backgroundLoopSchedulerTimer)return;
-    updateLoopScheduler();
-    backgroundLoopSchedulerTimer=window.setInterval(()=>{
-      if(document.visibilityState!=="hidden"||!isPlaying||(appMode!=="procedural"&&playlistMode!=="loop")){
-        window.clearInterval(backgroundLoopSchedulerTimer);
-        backgroundLoopSchedulerTimer=0;
-        return;
-      }
-      updateLoopScheduler();
-    },1000);
-  }
-  document.addEventListener("visibilitychange",syncBackgroundLoopScheduler,{passive:true});
 
   function seekAll(seconds) {
     const target = Math.max(0,Math.min(playlistDuration || Number.MAX_SAFE_INTEGER,Number(seconds)||0));
@@ -15353,7 +15213,6 @@
       masterPlay.title=isPlaying?"Pause":"Play";
       masterPlay.classList.toggle("active",isPlaying);
     }
-    syncBackgroundLoopScheduler();
   }
 
   async function changePlaylist(index,autoplay=false) {
@@ -15363,9 +15222,6 @@
 
     const normalized=(Number(index)+playlists.length)%playlists.length;
     const generation=++loadGeneration;
-    playlistTempoRenderRevision++;
-    topTempoModule?.classList.remove("is-rendering");
-    topTempoModule?.removeAttribute("aria-busy");
 
     stopAllScheduledSources();
     isPlaying=false;
@@ -15394,8 +15250,6 @@
     showSystemReadout(String(currentPlaylist?.title||"PLAYLIST").toUpperCase(),"LOADING STEMS","PLEASE WAIT");
     renderMixer(currentPlaylist);
     await setupAudioForRenderedChannels(currentPlaylist,generation);
-    if(generation!==loadGeneration)return;
-    if(playlistHasAudio(currentPlaylist))await ensurePlaylistNativeTempo(currentPlaylist);
     if(generation!==loadGeneration)return;
     syncTopTempoControl();
     horizontalScroller.scrollLeft=0;
@@ -15429,122 +15283,66 @@
       playlistSelectorLabel.textContent="NO PROGRAM";
     }
     playlistSelectorButton.disabled = !playlists.length;
-    const includedCount=includedPlaylistIndices().length;
-    if(playlistRotationSummary)playlistRotationSummary.textContent=includedCount===playlists.length?"ALL IN":`${includedCount}/${playlists.length} IN`;
 
-    playlistMenu.querySelectorAll("[data-playlist-row-index]").forEach(row=>{
-      const index=Number(row.dataset.playlistRowIndex);
-      const active=index===currentPlaylistIndex;
-      const included=isPlaylistIncludedIndex(index);
-      row.classList.toggle("is-selected",active);
-      row.classList.toggle("is-excluded",!included);
-      const select=row.querySelector("[data-playlist-index]");
-      select?.setAttribute("aria-current",active?"true":"false");
-      const toggle=row.querySelector("[data-playlist-toggle-index]");
-      toggle?.setAttribute("aria-checked",String(included));
-      if(toggle)toggle.title=included?"Included in Next / Previous / Shuffle / Sequential":"Excluded from automatic playlist rotation";
+    playlistMenu.querySelectorAll("[data-playlist-index]").forEach(button=>{
+      const active = Number(button.dataset.playlistIndex) === currentPlaylistIndex;
+      button.classList.toggle("is-selected",active);
+      button.setAttribute("aria-selected",String(active));
     });
   }
 
   function rebuildPlaylistHardwareMenu() {
     playlistMenu.replaceChildren();
 
-    const head=document.createElement("div");
-    head.className="playlist-rotation-head";
-    head.setAttribute("role","none");
-    const headCopy=document.createElement("span");
-    headCopy.className="playlist-rotation-head__copy";
-    const headTitle=document.createElement("strong");headTitle.textContent="ROTATION MATRIX";
-    const headHelp=document.createElement("small");headHelp.textContent="CHECK = INCLUDE · EXCLUDED TRACKS STILL OPEN MANUALLY";
-    headCopy.append(headTitle,headHelp);
-    const allIn=document.createElement("button");
-    allIn.type="button";allIn.className="playlist-hardware-all-in";allIn.textContent="ALL IN";
-    allIn.setAttribute("role","menuitem");allIn.title="Include every track in playlist rotation";
-    allIn.addEventListener("click",event=>{event.stopPropagation();includeAllPlaylists()});
-    head.append(headCopy,allIn);
-    playlistMenu.appendChild(head);
-
     playlists.forEach((playlist,index)=>{
-      const row=document.createElement("div");
-      row.className="playlist-hardware-option";
-      row.dataset.playlistRowIndex=String(index);
-      row.setAttribute("role","none");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "playlist-hardware-option";
+      button.dataset.playlistIndex = String(index);
+      button.setAttribute("role","option");
 
-      const button=document.createElement("button");
-      button.type="button";
-      button.className="playlist-hardware-option__select";
-      button.dataset.playlistIndex=String(index);
-      button.setAttribute("role","menuitem");
-
-      const lamp=document.createElement("span");
-      lamp.className="playlist-hardware-option__lamp";
+      const lamp = document.createElement("span");
+      lamp.className = "playlist-hardware-option__lamp";
       lamp.setAttribute("aria-hidden","true");
 
-      const number=document.createElement("span");
-      number.className="playlist-hardware-option__number";
-      number.textContent=String(index+1).padStart(2,"0");
+      const number = document.createElement("span");
+      number.className = "playlist-hardware-option__number";
+      number.textContent = String(index+1).padStart(2,"0");
 
-      const copy=document.createElement("span");
-      copy.className="playlist-hardware-option__copy";
+      const copy = document.createElement("span");
+      copy.className = "playlist-hardware-option__copy";
+
       const profile=playlistMediaProfile(playlist);
-      row.classList.toggle("is-midi-program",profile.midiClassified);
-      row.dataset.mediaKind=profile.kind;
+      button.classList.toggle("is-midi-program",profile.midiClassified);
+      button.dataset.mediaKind=profile.kind;
+
       const titleRow=document.createElement("span");
       titleRow.className="playlist-hardware-option__title";
+
       const typeIcon=document.createElement("i");
       typeIcon.className=`fa-solid ${profile.icon} playlist-hardware-option__type-icon`;
       typeIcon.setAttribute("aria-hidden","true");
-      const title=document.createElement("strong");
-      title.textContent=String(playlist.title||"UNTITLED").toUpperCase();
-      const meta=document.createElement("small");
-      meta.textContent=`${profile.label} · ${playlist.stems.length} STEM${playlist.stems.length===1?"":"S"}`;
+
+      const title = document.createElement("strong");
+      title.textContent = String(playlist.title || "UNTITLED").toUpperCase();
+
+      const meta = document.createElement("small");
+      meta.textContent = `${profile.label} · ${playlist.stems.length} STEM${playlist.stems.length === 1 ? "" : "S"}`;
+
       titleRow.append(typeIcon,title);
       copy.append(titleRow,meta);
       button.append(lamp,number,copy);
+
       button.addEventListener("click",()=>{
-        playlistSelect.value=String(index);
+        playlistSelect.value = String(index);
         closePlaylistHardwareMenu();
         playlistSelect.dispatchEvent(new Event("change",{bubbles:true}));
       });
 
-      const include=document.createElement("button");
-      include.type="button";
-      include.className="playlist-include-toggle";
-      include.dataset.playlistToggleIndex=String(index);
-      include.setAttribute("role","menuitemcheckbox");
-      include.setAttribute("aria-label",`Include ${playlist.title||`track ${index+1}`} in playlist rotation`);
-      const well=document.createElement("span");well.className="playlist-include-toggle__well";well.setAttribute("aria-hidden","true");
-      const check=document.createElement("span");check.className="playlist-include-toggle__check";check.textContent="✓";well.appendChild(check);
-      const status=document.createElement("small");status.setAttribute("aria-hidden","true");
-      include.append(well,status);
-      include.addEventListener("click",event=>{
-        event.preventDefault();event.stopPropagation();
-        setPlaylistIncluded(index,!isPlaylistIncludedIndex(index));
-      });
-      row.append(button,include);
-      playlistMenu.appendChild(row);
+      playlistMenu.appendChild(button);
     });
 
     syncPlaylistSelector();
-  }
-
-  function positionPlaylistHardwareMenu(){
-    if(!playlistMenu||playlistMenu.hidden)return;
-    if(window.innerWidth<=520){
-      const pad=6;
-      const anchor=playlistSelectorButton.getBoundingClientRect();
-      playlistMenu.style.setProperty("position","fixed","important");
-      playlistMenu.style.setProperty("left",`${pad}px`,"important");
-      playlistMenu.style.setProperty("right",`${pad}px`,"important");
-      playlistMenu.style.setProperty("width","auto","important");
-      playlistMenu.style.setProperty("transform","none","important");
-      const height=Math.min(playlistMenu.getBoundingClientRect().height,window.innerHeight-pad*2);
-      const preferred=anchor.bottom+6;
-      const top=Math.max(pad,Math.min(preferred,window.innerHeight-height-pad));
-      playlistMenu.style.setProperty("top",`${Math.round(top)}px`,"important");
-    }else{
-      for(const prop of ["position","left","right","width","transform","top"])playlistMenu.style.removeProperty(prop);
-    }
   }
 
   function openPlaylistHardwareMenu() {
@@ -15553,10 +15351,6 @@
     playlistSelectorButton.classList.add("is-open");
     playlistSelectorButton.setAttribute("aria-expanded","true");
     syncPlaylistSelector();
-    requestAnimationFrame(()=>{
-      positionPlaylistHardwareMenu();
-      playlistMenu.querySelector(`[data-playlist-index="${currentPlaylistIndex}"]`)?.focus();
-    });
   }
 
   function closePlaylistHardwareMenu() {
@@ -15571,7 +15365,6 @@
   }
 
   function populatePlaylistSelect() {
-    ensurePlaylistRotationHasIncluded();
     playlistSelect.innerHTML="";
     playlists.forEach((playlist,index)=>{
       const option=document.createElement("option");
@@ -15587,14 +15380,16 @@
     if (appMode === "procedural") return stepProceduralSeed(-1);
     playlistAdvanceInProgress=false;
     const shouldPlay=isPlaying;
-    await changePlaylist(nextIncludedPlaylistIndex(currentPlaylistIndex,-1),shouldPlay);
+    // Normalized indexing wraps first -> last in every playlist mode.
+    await changePlaylist(currentPlaylistIndex-1,shouldPlay);
   }
 
   async function nextPlaylist(forceAutoplay=null) {
     if (appMode === "procedural") return stepProceduralSeed(1);
     playlistAdvanceInProgress=false;
     const shouldPlay=forceAutoplay===null ? isPlaying : forceAutoplay;
-    await changePlaylist(nextIncludedPlaylistIndex(currentPlaylistIndex,1),shouldPlay);
+    // Normalized indexing wraps last -> first in every playlist mode.
+    await changePlaylist(currentPlaylistIndex+1,shouldPlay);
   }
 
   function updateTransportDisplay() {
@@ -15697,15 +15492,12 @@
   const METER_SEGMENT_PITCH_PX = 6;
   const METER_PEAK_HOLD_MS = 70;
   const METER_RELEASE_MS = 110;
-  const METER_REFERENCE_INTERVAL_MS = 1000/30;
-  const METER_REFRESH_INTERVAL_MS = 1000/20;
-  const MIXER_CONTROL_REFRESH_INTERVAL_MS = METER_REFERENCE_INTERVAL_MS;
+  const METER_REFRESH_INTERVAL_MS = 1000/30;
   const meterBallistics = new WeakMap();
   let meterRailHeightCache = new WeakMap();
   let mixerAnimationFrame = 0;
   let lastTransportUpdateAt = 0;
   let lastMeterUpdateAt = 0;
-  let lastActiveFrameAt = 0;
 
   function requestMixerAnimation(){
     if(!mixerAnimationFrame)mixerAnimationFrame=requestAnimationFrame(animationLoop);
@@ -15775,16 +15567,7 @@
   function animationLoop(timestamp) {
     mixerAnimationFrame=0;
     const now=Number(timestamp)||performance.now();
-    // Keep scheduler and transport housekeeping at 30 Hz; update meter
-    // visuals at 20 Hz. Web Audio remains sample-clocked independently.
-    if(isPlaying&&now-lastActiveFrameAt<MIXER_CONTROL_REFRESH_INTERVAL_MS-1){
-      requestMixerAnimation();
-      return;
-    }
-    if(isPlaying)lastActiveFrameAt=now;
     if(now-lastMeterUpdateAt>=METER_REFRESH_INTERVAL_MS){
-      const meterElapsedMs=lastMeterUpdateAt?Math.max(0,now-lastMeterUpdateAt):METER_REFERENCE_INTERVAL_MS;
-      const meterFrameScale=meterElapsedMs/METER_REFERENCE_INTERVAL_MS;
       lastMeterUpdateAt=now;
       for (const channel of channels) {
         const level=analyserLevel(channel.analyser,channel.meterData);
@@ -15806,8 +15589,7 @@
             if (target > channel.ledDrive) {
               channel.ledDrive = target;
             } else {
-              const ledRetain=Math.pow(.84,meterFrameScale);
-              channel.ledDrive = channel.ledDrive*ledRetain + target*(1-ledRetain);
+              channel.ledDrive = channel.ledDrive*.84 + target*.16;
             }
           }
 
@@ -15825,12 +15607,10 @@
 
           if (target > channel.iconDrive) {
             // Fairly quick attack, but not as abrupt as the signal-status LED.
-            const iconRetain=Math.pow(.42,meterFrameScale);
-            channel.iconDrive += (target-channel.iconDrive)*(1-iconRetain);
+            channel.iconDrive += (target-channel.iconDrive)*.58;
           } else {
             // Slow optical decay makes the lamp feel physical rather than digital.
-            const iconRetain=Math.pow(.90,meterFrameScale);
-            channel.iconDrive = channel.iconDrive*iconRetain + target*(1-iconRetain);
+            channel.iconDrive = channel.iconDrive*.90 + target*.10;
           }
 
           if (channel.iconDrive < .003) channel.iconDrive = 0;
@@ -15868,26 +15648,10 @@
     else scheduleIdleAudioContextSuspend();
   }
 
-  window.addEventListener("resize",()=>{if(!playlistMenu?.hidden)requestAnimationFrame(positionPlaylistHardwareMenu)},{passive:true});
-
   playlistSelectorButton?.addEventListener("click",event=>{
     event.preventDefault();
     event.stopPropagation();
     togglePlaylistHardwareMenu();
-  });
-  playlistSelectorButton?.addEventListener("keydown",event=>{
-    if(!["ArrowDown","ArrowUp","Home","End"].includes(event.key))return;
-    event.preventDefault();event.stopPropagation();
-    if(playlistMenu.hidden)openPlaylistHardwareMenu();
-    const buttons=[...playlistMenu.querySelectorAll("[data-playlist-index]")];
-    if(!buttons.length)return;
-    if(event.key==="End")buttons.at(-1)?.focus();
-    else if(event.key==="Home")buttons[0]?.focus();
-    else{
-      const current=buttons.findIndex(button=>button===document.activeElement);
-      const step=event.key==="ArrowUp"?-1:1;
-      buttons[(Math.max(0,current)+step+buttons.length)%buttons.length]?.focus();
-    }
   });
 
   document.addEventListener("pointerdown",event=>{
@@ -15898,25 +15662,9 @@
 
   document.addEventListener("keydown",event=>{
     if (event.key === "Escape" && !playlistMenu.hidden) {
-      event.preventDefault();
       closePlaylistHardwareMenu();
       playlistSelectorButton.focus();
-      return;
     }
-    if(playlistMenu.hidden||!["ArrowDown","ArrowUp","Home","End"].includes(event.key))return;
-    const active=document.activeElement;
-    if(!playlistMenu.contains(active))return;
-    const selects=[...playlistMenu.querySelectorAll("[data-playlist-index]")];
-    if(!selects.length)return;
-    event.preventDefault();
-    if(event.key==="Home")return selects[0].focus();
-    if(event.key==="End")return selects.at(-1).focus();
-    const activeRow=active.closest?.("[data-playlist-row-index]");
-    const activeIndex=activeRow?Number(activeRow.dataset.playlistRowIndex):Number(active?.dataset?.playlistIndex);
-    let position=selects.findIndex(button=>Number(button.dataset.playlistIndex)===activeIndex);
-    if(position<0)position=0;
-    position=(position+(event.key==="ArrowUp"?-1:1)+selects.length)%selects.length;
-    selects[position].focus();
   });
 
   playlistSelect.addEventListener("change",()=>{
@@ -16055,13 +15803,6 @@
 
   document.addEventListener("keydown",event=>{
     if (isGlobalTransportModifier(event)) return;
-
-    // Hardware-wide shortcuts must never steal keys from an interactive control.
-    // This keeps Enter/Space usable on buttons and lets the playlist menu own its
-    // arrows while preserving the dedicated fader/knob arrow behavior.
-    const focused=document.activeElement;
-    if(focused?.matches?.("button,a,select,textarea,[role='menuitem'],[role='menuitemcheckbox']"))return;
-    if(focused?.matches?.("input")&&!focused.matches(".fader,.knob-range"))return;
 
     const key = event.key;
 
@@ -16274,14 +16015,10 @@
   }
   topTempoRandomBtn?.addEventListener("click",async()=>{
     if(appMode!=="playlist"||!currentPlaylist)return;
-    const min=Math.round(Number(topTempoControl?.min)||MIDI_TEMPO_MIN);
-    const max=Math.round(Number(topTempoControl?.max)||MIDI_TEMPO_MAX);
-    const choices=[72,76,80,84,88,92,96,100,104,108,112,116,120,124,128,132,136,140,144,148,152,156,160].filter(value=>value>=min&&value<=max);
-    if(!choices.length)return;
-    const current=Math.round(Number(currentPlaylist.playbackTempoBpm||currentPlaylist.midiTempoBpm||currentPlaylist.nativeTempoBpm));
-    const alternatives=choices.filter(value=>value!==current);
-    const pool=alternatives.length?alternatives:choices;
-    await applyPlaylistTempo(pool[Math.floor(Math.random()*pool.length)],{persist:false});
+    const choices=[72,76,80,84,88,92,96,100,104,108,112,116,120,124];
+    let next=choices[Math.floor(Math.random()*choices.length)];
+    if(next===Math.round(Number(currentPlaylist.playbackTempoBpm||currentPlaylist.midiTempoBpm||currentPlaylist.nativeTempoBpm)))next=choices[(choices.indexOf(next)+1)%choices.length];
+    await applyPlaylistTempo(next,{persist:false});
   });
 
   async function droppedEntryFiles(entry,prefix=""){
