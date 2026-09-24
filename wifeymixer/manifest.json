@@ -100,6 +100,7 @@
     "soundfonts/Ronald 88 - original.sf2",
     "soundfonts/Ronald 88.sf2",
     "soundfonts/SF64-presets.json",
+    "soundfonts/SF64.backup-before-Gunshot-removal.sf2",
     "soundfonts/SF64.sf2",
     "soundfonts/Sonic Drums.sf2",
     "strip-fx-compressor-worklet.js",
@@ -145,8 +146,8 @@
     },
     "index.html": {
       "type": "file",
-      "size_bytes": 683362,
-      "modified_ns": 1787667345556075400
+      "size_bytes": 686654,
+      "modified_ns": 1790277127069699100
     },
     "instrument-icons.json": {
       "type": "file",
@@ -1598,7 +1599,7 @@
     },
     "soundfonts": {
       "type": "folder",
-      "modified_ns": 1788857693052487800
+      "modified_ns": 1788903959294819000
     },
     "soundfonts/Casino Drums.sf2": {
       "type": "file",
@@ -1640,10 +1641,15 @@
       "size_bytes": 12639,
       "modified_ns": 1787667344946824200
     },
-    "soundfonts/SF64.sf2": {
+    "soundfonts/SF64.backup-before-Gunshot-removal.sf2": {
       "type": "file",
       "size_bytes": 4223358,
       "modified_ns": 1787667343661684900
+    },
+    "soundfonts/SF64.sf2": {
+      "type": "file",
+      "size_bytes": 4223246,
+      "modified_ns": 1788903959238901300
     },
     "soundfonts/Sonic Drums.sf2": {
       "type": "file",
@@ -1691,8 +1697,8 @@
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
-      "size_bytes": 696824,
-      "modified_ns": 1788017071896342400
+      "size_bytes": 700246,
+      "modified_ns": 1790277127069699100
     },
     "wifeymixer_dist/instrument-icons.json": {
       "type": "file",
@@ -1731,7 +1737,7 @@
     },
     "wifeymixer_dist/tests": {
       "type": "folder",
-      "modified_ns": 1788017071953783000
+      "modified_ns": 1790277412735017800
     },
     "wifeymixer_dist/tests/tempo-stretch-engine.test.js": {
       "type": "file",

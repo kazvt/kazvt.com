@@ -8642,13 +8642,16 @@
   let scheduledThroughCycle = 0;
   const SCHEDULE_AHEAD_CYCLES = 32;
 
-  // Decoded AudioBuffers are shared between current playback and background
-  // preload jobs. This removes repeat network/decode waits on playlist changes.
+  // Keep decoded PCM only while it fits a small warm cache. Live channels own
+  // their buffers independently, so cache eviction never interrupts playback.
   const decodedBufferCache = new Map();
   const decodedBufferPromises = new Map();
-  const backgroundPlaylistJobs = new Map();
-  const MAX_DECODED_STEMS = 48;
-  const BACKGROUND_DECODE_CONCURRENCY = 2;
+  let backgroundPreloadRunning = false;
+  let backgroundPreloadScheduled = false;
+  let pendingBackgroundPreload = null;
+  const MAX_DECODED_STEMS = 16;
+  const MAX_DECODED_BUFFER_CACHE_BYTES = 64*1024*1024;
+  const ACTIVE_STEM_LOAD_CONCURRENCY = 2;
   let queuedShuffleIndex = null;
 
   const PERSIST_KEY = "wifey-mix8-persistent-v1";
@@ -8782,6 +8785,7 @@
   let proceduralSoundFontMode = ["auto","sf64","rush","genies","casino"].includes(persistentPrefs.proceduralSoundFont) ? persistentPrefs.proceduralSoundFont : "auto";
   let currentProceduralProgram = null;
   const proceduralLoopProgramCache = new Map();
+  const MAX_PROCEDURAL_LOOP_PROGRAMS = 64;
   let proceduralRegenerateTimer = null;
   let proceduralVibeMorphTimer = null;
   let proceduralVibeMorphRevision = 0;
@@ -8814,10 +8818,10 @@
   let proceduralGeniesProfile = null;
   let proceduralSoundFontsPromise = null;
   const proceduralSoundFontLoadPromises = new Map();
+  const proceduralSoundFontLoadRevisions = new Map();
   const midiParsedCache = new Map();
   const midiParsedPromises = new Map();
-  let midiChoiceWarmupRevision = 0;
-
+  const MAX_PARSED_MIDI_CACHE_ENTRIES = 16;
   function sfVoice(source,bank,program,name,options={}){return Object.freeze({source,bank,program,name,...options})}
   function sfVoiceSourceOptions(source,bank,program){
     return String(source)==="meow"&&Number(bank)===0&&Number(program)===0?{gainTrim:.90}:{};
@@ -9760,21 +9764,24 @@
     const source=PROCEDURAL_SF2_SOURCES[id];
     if(!source)return null;
     if(!window.WifeySF2?.load)throw new Error("Local SF2 renderer did not load");
-
-    const promise=(async()=>{
+    const revision=proceduralSoundFontLoadRevisions.get(id)||0;
+    let promise;
+    promise=(async()=>{
       if(!quiet)loadReadout.textContent=`${source.label||id} LOAD`;
       try{
         const bank=await loadProceduralSoundFontSource(source);
+        if((proceduralSoundFontLoadRevisions.get(id)||0)!==revision)return bank;
         proceduralSoundFonts.set(id,bank);
         proceduralSoundFontErrors.delete(id);
         if(id==="genies")inspectGeniesBank(bank);
         return bank;
       }catch(error){
+        if((proceduralSoundFontLoadRevisions.get(id)||0)!==revision)return null;
         proceduralSoundFontErrors.set(id,error);
         console.warn(`${source.label} SoundFont unavailable; that palette will be skipped.`,error);
         return null;
       }finally{
-        proceduralSoundFontLoadPromises.delete(id);
+        if(proceduralSoundFontLoadPromises.get(id)===promise)proceduralSoundFontLoadPromises.delete(id);
       }
     })();
     proceduralSoundFontLoadPromises.set(id,promise);
@@ -10128,17 +10135,36 @@
     if(currentProceduralProgram)proceduralLoopProgramCache.set(0,currentProceduralProgram);
   }
 
+  function pruneProceduralLoopProgramCache(){
+    while(proceduralLoopProgramCache.size>MAX_PROCEDURAL_LOOP_PROGRAMS+1){
+      let oldest;
+      for(const key of proceduralLoopProgramCache.keys()){
+        if(key!==0){oldest=key;break}
+      }
+      if(oldest===undefined)break;
+      proceduralLoopProgramCache.delete(oldest);
+    }
+  }
+
   function getProceduralLoopProgram(loopIndex){
     const target=Math.max(0,Math.trunc(Number(loopIndex)||0));
     if(!currentProceduralProgram||target===0||proceduralLoopVariance<=0)return currentProceduralProgram;
-    if(proceduralLoopProgramCache.has(target))return proceduralLoopProgramCache.get(target);
-    if(!proceduralLoopProgramCache.has(0))proceduralLoopProgramCache.set(0,currentProceduralProgram);
-    for(let i=1;i<=target;i++){
-      if(proceduralLoopProgramCache.has(i))continue;
-      const previous=proceduralLoopProgramCache.get(i-1)||currentProceduralProgram;
-      proceduralLoopProgramCache.set(i,createProceduralLoopVariation(previous,i,proceduralLoopVariance));
+    if(proceduralLoopProgramCache.has(target)){
+      const cached=proceduralLoopProgramCache.get(target);
+      proceduralLoopProgramCache.delete(target);
+      proceduralLoopProgramCache.set(target,cached);
+      return cached;
     }
-    return proceduralLoopProgramCache.get(target)||currentProceduralProgram;
+    if(!proceduralLoopProgramCache.has(0))proceduralLoopProgramCache.set(0,currentProceduralProgram);
+    let previousIndex=target-1;
+    while(previousIndex>0&&!proceduralLoopProgramCache.has(previousIndex))previousIndex--;
+    let previous=proceduralLoopProgramCache.get(previousIndex)||currentProceduralProgram;
+    for(let i=previousIndex+1;i<=target;i++){
+      previous=createProceduralLoopVariation(previous,i,proceduralLoopVariance);
+      proceduralLoopProgramCache.set(i,previous);
+      pruneProceduralLoopProgramCache();
+    }
+    return proceduralLoopProgramCache.get(target)||previous||currentProceduralProgram;
   }
 
   function makeProceduralPlaylist(program){return{id:`procedural:${program.seed}`,folder:"procedural",title:`PROC SEED ${String(program.seed).padStart(4,"0")}`,source:"procedural",procedural:true,program,stems:PROCEDURAL_TRACKS.map((track,index)=>({key:`procedural:${track.role}`,displayPath:`procedural/${track.role}`,name:track.name,kind:"procedural",role:track.role,soundfontSlot:track.soundfontSlot,sf2Voice:program.sf2Voices?.[track.role]||null,proceduralOrder:index}))}}
@@ -11285,7 +11311,7 @@
     proceduralVibeMorphTimer=setTimeout(applyProceduralVibeMorph,Math.max(0,Number(delay)||0));
   }
 
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);pruneDecodedBufferCacheForPlaylist(currentPlaylist);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
@@ -13190,27 +13216,61 @@
     return String(stem?.key || stem?.displayPath || stem?.src || stem?.name || "");
   }
 
-  function touchDecodedBuffer(key,buffer) {
-    if (!key || !buffer) return buffer;
+  function estimateDecodedBufferBytes(buffer) {
+    const length=Number(buffer?.length)||0;
+    const channels=Math.max(1,Number(buffer?.numberOfChannels)||1);
+    return Math.max(0,Math.ceil(length*channels*Float32Array.BYTES_PER_ELEMENT));
+  }
 
-    if (decodedBufferCache.has(key)) decodedBufferCache.delete(key);
+  function decodedBufferCacheStats() {
+    const activeBuffers=new Set(channels.map(channel=>channel?.buffer).filter(Boolean));
+    let entries=0,bytes=0;
+    for(const buffer of decodedBufferCache.values()){
+      if(activeBuffers.has(buffer))continue;
+      entries++;
+      bytes+=estimateDecodedBufferBytes(buffer);
+    }
+    return{entries,bytes};
+  }
+
+  function deleteDecodedBufferCacheEntry(key) {
+    if(!decodedBufferCache.has(key))return;
+    decodedBufferCache.delete(key);
+  }
+
+  function touchDecodedBuffer(key,buffer) {
+    if(!key||!buffer)return buffer;
+    if(decodedBufferCache.has(key))decodedBufferCache.delete(key);
     decodedBufferCache.set(key,buffer);
     pruneDecodedBufferCache();
     return buffer;
   }
 
   function pruneDecodedBufferCache() {
-    if (decodedBufferCache.size <= MAX_DECODED_STEMS) return;
-
-    const protectedKeys = new Set(
-      (currentPlaylist?.stems || []).map(stemCacheKey)
-    );
-
-    for (const key of [...decodedBufferCache.keys()]) {
-      if (decodedBufferCache.size <= MAX_DECODED_STEMS) break;
-      if (protectedKeys.has(key)) continue;
-      decodedBufferCache.delete(key);
+    const activeBuffers=new Set(channels.map(channel=>channel?.buffer).filter(Boolean));
+    let entries=0,bytes=0;
+    for(const buffer of decodedBufferCache.values()){
+      if(activeBuffers.has(buffer))continue;
+      entries++;
+      bytes+=estimateDecodedBufferBytes(buffer);
     }
+    if(entries<=MAX_DECODED_STEMS&&bytes<=MAX_DECODED_BUFFER_CACHE_BYTES)return;
+    for(const [key,buffer] of decodedBufferCache){
+      if(activeBuffers.has(buffer))continue;
+      deleteDecodedBufferCacheEntry(key);
+      entries--;
+      bytes-=estimateDecodedBufferBytes(buffer);
+      if(entries<=MAX_DECODED_STEMS&&bytes<=MAX_DECODED_BUFFER_CACHE_BYTES)break;
+    }
+  }
+
+  function pruneDecodedBufferCacheForPlaylist(playlist) {
+    const stemKeys=(playlist?.stems||[]).map(stemCacheKey).filter(Boolean);
+    for(const key of [...decodedBufferCache.keys()]){
+      const belongs=stemKeys.some(stemKey=>key===stemKey||key.startsWith(`${stemKey}|`));
+      if(!belongs)deleteDecodedBufferCacheEntry(key);
+    }
+    pruneDecodedBufferCache();
   }
 
   async function getDecodedStemBuffer(stem) {
@@ -13642,6 +13702,24 @@
     return midiStoredVoiceForStem(stem)||midiExplicitVoiceForStem(stem)||midiDefaultVoiceForStem(stem);
   }
 
+  function releaseUnusedProceduralSoundFonts(playlist){
+    const keep=new Set((playlist?.stems||[])
+      .filter(isMidiStem)
+      .map(stem=>midiSelectedVoiceForStem(stem)?.source)
+      .filter(Boolean));
+    const knownSources=new Set([...proceduralSoundFonts.keys(),...proceduralSoundFontLoadPromises.keys()]);
+    for(const sourceId of knownSources){
+      if(keep.has(sourceId))continue;
+      proceduralSoundFonts.delete(sourceId);
+      if(proceduralSoundFontLoadPromises.has(sourceId)){
+        proceduralSoundFontLoadRevisions.set(sourceId,(proceduralSoundFontLoadRevisions.get(sourceId)||0)+1);
+        proceduralSoundFontLoadPromises.delete(sourceId);
+      }
+    }
+    // The all-bank promise is only valid while the procedural rack stays active.
+    proceduralSoundFontsPromise=null;
+  }
+
   function midiRawRoleVoices(role,sourceId){
     // Meow.sf2 is intentionally a tiny novelty synth bank, so GM family-number
     // filtering would hide its custom programs from
@@ -13767,10 +13845,20 @@
     return target.buffer;
   }
 
+  function touchParsedMidiCache(key,parsed){
+    if(!key||!parsed)return parsed;
+    if(midiParsedCache.has(key))midiParsedCache.delete(key);
+    midiParsedCache.set(key,parsed);
+    while(midiParsedCache.size>MAX_PARSED_MIDI_CACHE_ENTRIES){
+      midiParsedCache.delete(midiParsedCache.keys().next().value);
+    }
+    return parsed;
+  }
+
   async function getParsedMidiForStem(stem,requestedTempo){
     const baseKey=stemCacheKey(stem);
     const key=`${baseKey}|parsed:${requestedTempo??"native"}`;
-    if(midiParsedCache.has(key))return midiParsedCache.get(key);
+    if(midiParsedCache.has(key))return touchParsedMidiCache(key,midiParsedCache.get(key));
     if(midiParsedPromises.has(key))return midiParsedPromises.get(key);
     const promise=(async()=>{
       const response=await fetch(stem.src,{cache:"force-cache"});
@@ -13778,7 +13866,7 @@
       const bytes=await response.arrayBuffer();
       const sourceParsed=WifeyMIDI.parse(bytes);
       const parsed=applyFilenameMidiPerformanceConfig(scaleParsedMidiTempo(sourceParsed,requestedTempo),stem);
-      midiParsedCache.set(key,parsed);
+      touchParsedMidiCache(key,parsed);
       return parsed;
     })();
     midiParsedPromises.set(key,promise);
@@ -13809,7 +13897,7 @@
 
     const promise = (async()=>{
       // Only the SoundFont actually selected for this strip is startup-critical.
-      // Other rack banks are warmed sequentially after playback begins.
+      // Other rack banks load only when their patch choices are opened.
       const [,parsed]=await Promise.all([
         ensureProceduralSoundFontSource(voice?.source,{quiet:true}),
         getParsedMidiForStem(stem,requestedTempo)
@@ -13842,37 +13930,9 @@
     return getConfiguredStemPlaybackBuffer(stem,buffer);
   }
 
-  function midiStartupSoundFontSources(playlist=currentPlaylist){
-    const sources=[];
-    const seen=new Set();
-    for(const stem of playlist?.stems||[]){
-      if(!isMidiStem(stem))continue;
-      const source=midiSelectedVoiceForStem(stem)?.source;
-      if(source&&!seen.has(source)){seen.add(source);sources.push(source)}
-    }
-    return sources;
-  }
-
-  function scheduleMidiChoiceSoundFontWarmup(playlist=currentPlaylist){
+  function scheduleMidiBackgroundPreload(playlist=currentPlaylist){
     if(!isPlaying||appMode!=="playlist"||!playlist?.stems?.some(isMidiStem))return;
-    const revision=++midiChoiceWarmupRevision;
-    const startup=new Set(midiStartupSoundFontSources(playlist));
-    const queue=PROCEDURAL_STRIP_SOURCE_ORDER.filter(id=>!startup.has(id)&&!proceduralSoundFonts.has(id));
-    if(!queue.length){scheduleBackgroundPreload();return}
-    idleTask(async()=>{
-      for(const sourceId of queue){
-        if(revision!==midiChoiceWarmupRevision||!isPlaying||currentPlaylist!==playlist)return;
-        await ensureProceduralSoundFontSource(sourceId,{quiet:true});
-        // Load choices serially and yield between banks. Playback remains the
-        // priority and never waits on these optional rack additions.
-        await new Promise(done=>setTimeout(done,0));
-      }
-      if(revision===midiChoiceWarmupRevision&&isPlaying&&currentPlaylist===playlist){
-        // Only after the live song has its complete switchable rack do we spend
-        // idle time rendering likely next/previous playlist destinations.
-        scheduleBackgroundPreload();
-      }
-    });
+    scheduleBackgroundPreload();
   }
 
   function idleTask(callback) {
@@ -13882,61 +13942,44 @@
     return window.setTimeout(()=>callback({didTimeout:true,timeRemaining:()=>0}),90);
   }
 
-  async function preloadPlaylist(index) {
-    if (!playlists.length) return;
+  function estimateManifestStemBufferBytes(stem){
+    const audio=stem?.manifestMetadata?.audio;
+    const duration=Number(audio?.duration_seconds);
+    const sampleRate=Number(audio?.sample_rate_hz);
+    const channelCount=Number(audio?.channels);
+    if(!(duration>0&&sampleRate>0&&channelCount>0))return null;
+    return Math.ceil(duration*sampleRate*channelCount*Float32Array.BYTES_PER_ELEMENT);
+  }
 
-    const normalized = (Number(index)+playlists.length)%playlists.length;
-    if (normalized === currentPlaylistIndex) return;
+  async function preloadPlaylist(index,generation=loadGeneration) {
+    if(!playlists.length||generation!==loadGeneration||appMode==="procedural")return;
+    const normalized=(Number(index)+playlists.length)%playlists.length;
+    if(normalized===currentPlaylistIndex)return;
+    const playlist=playlists[normalized];
+    if(!playlist?.stems?.length)return;
+    playlist.stems.forEach((stem,stemIndex)=>{stem.mixerStripIndex=stemIndex});
 
-    const playlist = playlists[normalized];
-    if (!playlist?.stems?.length) return;
-    playlist.stems.forEach((stem,index)=>{stem.mixerStripIndex=index});
-
-    const jobKey = String(playlist.id || normalized);
-    if (backgroundPlaylistJobs.has(jobKey)) {
-      return backgroundPlaylistJobs.get(jobKey);
-    }
-
-    const job = new Promise(resolve=>{
-      idleTask(async()=>{
-        const queue = playlist.stems.filter(stem=>{
-          const key = stemCacheKey(stem);
-          return key && !decodedBufferCache.has(key);
-        });
-
-        let cursor = 0;
-
-        async function worker() {
-          while (cursor < queue.length) {
-            const stem = queue[cursor++];
-            try {
-              await getStemPlaybackBuffer(stem);
-            } catch (error) {
-              // Background preload failures should never interrupt current playback.
-              console.warn("Background stem preload skipped:",stem?.displayPath || stem?.name,error);
-            }
-
-            // Yield between decodes so UI/audio work stays responsive.
-            await new Promise(done=>setTimeout(done,0));
-          }
-        }
-
-        const workers = Array.from(
-          {length:Math.min(BACKGROUND_DECODE_CONCURRENCY,Math.max(1,queue.length))},
-          ()=>worker()
-        );
-
-        await Promise.allSettled(workers);
-        resolve();
-      });
+    const queue=playlist.stems.filter(stem=>{
+      const key=stemCacheKey(stem);
+      return key&&!decodedBufferCache.has(key);
     });
-
-    backgroundPlaylistJobs.set(jobKey,job);
-
-    try {
-      await job;
-    } finally {
-      backgroundPlaylistJobs.delete(jobKey);
+    for(const stem of queue){
+      if(generation!==loadGeneration||appMode==="procedural")break;
+      const before=decodedBufferCacheStats();
+      const estimatedBytes=estimateManifestStemBufferBytes(stem);
+      if(before.entries>=MAX_DECODED_STEMS||before.bytes>=MAX_DECODED_BUFFER_CACHE_BYTES||
+        (estimatedBytes!==null&&estimatedBytes>MAX_DECODED_BUFFER_CACHE_BYTES-before.bytes))break;
+      try{
+        await getStemPlaybackBuffer(stem);
+      }catch(error){
+        // Background preload failures should never interrupt current playback.
+        console.warn("Background stem preload skipped:",stem?.displayPath||stem?.name,error);
+      }
+      const after=decodedBufferCacheStats();
+      // A large stem that cannot fit in the warm cache should not trigger more
+      // speculative decodes after it has already been discarded.
+      if(after.entries<=before.entries&&after.bytes<=before.bytes)break;
+      await new Promise(done=>setTimeout(done,0));
     }
   }
 
@@ -13952,29 +13995,35 @@
     return pick;
   }
 
-  function scheduleBackgroundPreload() {
-    if (appMode === "procedural") return;
-    if (!playlists.length || playlists.length <= 1) return;
-
-    const nextIndex = (currentPlaylistIndex+1)%playlists.length;
-    const previousIndex = (currentPlaylistIndex-1+playlists.length)%playlists.length;
-
-    // Sequential/manual navigation gets the next song first.
-    preloadPlaylist(nextIndex);
-
-    // Previous is also cheap insurance for manual navigation.
-    if (previousIndex !== nextIndex) {
-      idleTask(()=>preloadPlaylist(previousIndex));
-    }
-
-    // In SHUFFLE mode, choose the actual future shuffle target now, then decode
-    // that exact song in advance instead of waiting until the transition.
-    if (playlistMode === "shuffle") {
-      const shuffleIndex = chooseQueuedShuffleIndex();
-      if (shuffleIndex !== nextIndex && shuffleIndex !== previousIndex) {
-        idleTask(()=>preloadPlaylist(shuffleIndex));
+  function requestBackgroundPreload(index) {
+    pendingBackgroundPreload={index,generation:loadGeneration};
+    if(backgroundPreloadRunning||backgroundPreloadScheduled)return;
+    backgroundPreloadScheduled=true;
+    idleTask(async()=>{
+      backgroundPreloadScheduled=false;
+      if(backgroundPreloadRunning)return;
+      backgroundPreloadRunning=true;
+      try{
+        while(pendingBackgroundPreload){
+          const request=pendingBackgroundPreload;
+          pendingBackgroundPreload=null;
+          if(request.generation!==loadGeneration||appMode==="procedural")continue;
+          await preloadPlaylist(request.index,request.generation);
+        }
+      }finally{
+        backgroundPreloadRunning=false;
+        if(pendingBackgroundPreload)requestBackgroundPreload(pendingBackgroundPreload.index);
       }
-    }
+    });
+  }
+
+  function scheduleBackgroundPreload() {
+    if(appMode==="procedural"||!playlists.length||playlists.length<=1)return;
+    if(channels.some(channel=>!channel.ready&&!channel.error))return;
+    let targetIndex=(currentPlaylistIndex+1)%playlists.length;
+    if(playlistMode==="shuffle")targetIndex=chooseQueuedShuffleIndex();
+    if(playlists[targetIndex]?.stems?.some(isMidiStem))return;
+    requestBackgroundPreload(targetIndex);
   }
 
   async function loadStemBuffer(channel,generation) {
@@ -13983,6 +14032,7 @@
       if (generation !== loadGeneration) return channel;
 
       channel.buffer = buffer;
+      pruneDecodedBufferCache();
       primeChannelAutoGain(channel,buffer);
       channel.ready = true;
       channel.error = false;
@@ -14043,11 +14093,21 @@
         ready:false,error:false
       };
 
-      channel.readyPromise = loadStemBuffer(channel,generation);
       return channel;
     });
 
+    const loadQueue=channels.slice();
+    let nextChannelToLoad=0;
+    const loadWorkers=Array.from({length:Math.min(ACTIVE_STEM_LOAD_CONCURRENCY,loadQueue.length)},async()=>{
+      while(nextChannelToLoad<loadQueue.length){
+        const channel=loadQueue[nextChannelToLoad++];
+        if(generation!==loadGeneration)continue;
+        await loadStemBuffer(channel,generation);
+      }
+    });
+    const channelLoads=Promise.allSettled(loadWorkers);
     channels.forEach(channel=>{
+      channel.readyPromise=channelLoads;
       applyChannelState(channel);
       syncStemActionButtons(channel);
     });
@@ -14055,7 +14115,7 @@
     applyMegaphoneState(true);
     updateSoloRouting();
 
-    Promise.allSettled(channels.map(c=>c.readyPromise)).then(async()=>{
+    channelLoads.then(async()=>{
       if (generation !== loadGeneration) return;
 
       updatePlaylistDuration();
@@ -14072,9 +14132,7 @@
         loadReadout.textContent = channels.some(c=>c.error) ? "PARTIAL" : "READY";
       }
 
-      // Audio playlists can keep the legacy next-song preload behavior. MIDI
-      // playlists defer all optional work until playback is actually running:
-      // first warm unused instrument banks serially, then prepare other songs.
+      // Warm only the next destination after current stems have finished loading.
       if(!playlist.stems?.some(isMidiStem))scheduleBackgroundPreload();
     });
   }
@@ -15059,14 +15117,13 @@
     loadReadout.textContent = isPlaying ? "PLAYING" : "READY";
     if (isPlaying) {
       showAudioEngineStatus();
-      scheduleMidiChoiceSoundFontWarmup(currentPlaylist);
+      scheduleMidiBackgroundPreload(currentPlaylist);
     }
   }
 
   function pauseCurrent() {
     if (!isPlaying) return;
 
-    midiChoiceWarmupRevision++;
     lastKnownPosition = getPosition();
     stopAllScheduledSources();
     isPlaying = false;
@@ -15081,7 +15138,6 @@
   }
 
   function stopCurrent() {
-    midiChoiceWarmupRevision++;
     resetAllAutoGainDynamics();
     stopAllScheduledSources();
     isPlaying = false;
@@ -15120,7 +15176,6 @@
 
     const normalized=(Number(index)+playlists.length)%playlists.length;
     const generation=++loadGeneration;
-    midiChoiceWarmupRevision++;
 
     stopAllScheduledSources();
     isPlaying=false;
@@ -15130,6 +15185,8 @@
     currentPlaylistIndex=normalized;
     currentPlaylist=playlists[normalized];
     applyPlaylistFilenameDefaults(currentPlaylist);
+    releaseUnusedProceduralSoundFonts(currentPlaylist);
+    pruneDecodedBufferCacheForPlaylist(currentPlaylist);
     updatePlaylistModeButton(false);
     queuedShuffleIndex=null;
     syncTopTempoControl();
