@@ -9404,6 +9404,9 @@
   }
 
   let audioCtx = null;
+  let idleAudioContextSuspendTimer = 0;
+  let audioContextSuspendPromise = null;
+  let audioContextPowerRevision = 0;
   let masterBus = null;
   let masterTone = null;
   let masterPan = null;
@@ -11427,7 +11430,7 @@
     proceduralVibeMorphTimer=setTimeout(applyProceduralVibeMorph,Math.max(0,Number(delay)||0));
   }
 
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);pruneDecodedBufferCacheForPlaylist(currentPlaylist);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent()}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);pruneDecodedBufferCacheForPlaylist(currentPlaylist);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM · ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent();else scheduleIdleAudioContextSuspend()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
@@ -11643,6 +11646,7 @@
   };
 
   const sevenTypeTimers = new WeakMap();
+  const sevenSegmentRenderCache = new WeakMap();
 
   function normalizeSevenSegmentText(value) {
     return String(value ?? "")
@@ -12080,6 +12084,9 @@
         : tokens.slice(0,maxChars);
     }
 
+    const signature=tokens.map(token=>token.char+(token.dot?".":"")).join("");
+    if(sevenSegmentRenderCache.get(target)===signature)return;
+
     target.replaceChildren();
 
     for (const token of tokens) {
@@ -12093,6 +12100,7 @@
 
       target.appendChild(charNode);
     }
+    sevenSegmentRenderCache.set(target,signature);
   }
 
   /*
@@ -12141,6 +12149,7 @@
     };
 
     target.replaceChildren();
+    sevenSegmentRenderCache.delete(target);
     if (!tokens.length) {
       if (typeof onDone === "function") onDone();
       return;
@@ -15104,7 +15113,11 @@
     }
 
     isPlaying = scheduled > 0;
-    if (isPlaying) ensureScheduleHorizon(0);
+    if (isPlaying) {
+      ensureScheduleHorizon(0);
+      lastTransportUpdateAt=0;
+      requestMixerAnimation();
+    }
     return isPlaying;
   }
 
@@ -15178,8 +15191,37 @@
     updateTransportDisplay();
   }
 
+  function cancelIdleAudioContextSuspend(){
+    audioContextPowerRevision++;
+    if(idleAudioContextSuspendTimer){
+      clearTimeout(idleAudioContextSuspendTimer);
+      idleAudioContextSuspendTimer=0;
+    }
+  }
+
+  function scheduleIdleAudioContextSuspend(){
+    const context=audioCtx;
+    if(!context||context.state!=="running"||audioContextSuspendPromise)return;
+    cancelIdleAudioContextSuspend();
+    const revision=audioContextPowerRevision;
+    idleAudioContextSuspendTimer=window.setTimeout(()=>{
+      idleAudioContextSuspendTimer=0;
+      if(revision!==audioContextPowerRevision||isPlaying||audioCtx!==context||context.state!=="running"||hasMeterReleaseActivity())return;
+      let promise;
+      try{promise=context.suspend()}catch(_){return}
+      audioContextSuspendPromise=promise;
+      promise.catch(()=>{}).finally(()=>{
+        if(audioContextSuspendPromise===promise)audioContextSuspendPromise=null;
+      });
+    },1000);
+  }
+
   async function resumeAudioContext() {
     ensureAudioGraph();
+    cancelIdleAudioContextSuspend();
+    if(audioContextSuspendPromise){
+      try{await audioContextSuspendPromise}catch(_){}
+    }
 
     if (audioCtx.state === "suspended") await audioCtx.resume();
 
@@ -15219,6 +15261,7 @@
 
     if (!playlistDuration) {
       loadReadout.textContent = "NO AUDIO";
+      scheduleIdleAudioContextSuspend();
       return;
     }
 
@@ -15226,6 +15269,7 @@
     if (position >= playlistDuration-.03) position = 0;
 
     startClockedPlaybackAt(position);
+    if(!isPlaying)scheduleIdleAudioContextSuspend();
     updatePlaybackButtons();
     loadReadout.textContent = isPlaying ? "PLAYING" : "READY";
     if (isPlaying) {
@@ -15243,6 +15287,7 @@
 
     updatePlaybackButtons();
     updateTransportDisplay();
+    requestMixerAnimation();
     loadReadout.textContent = "PAUSED";
   }
 
@@ -15260,6 +15305,7 @@
 
     updatePlaybackButtons();
     updateTransportDisplay();
+    requestMixerAnimation();
     loadReadout.textContent = "STOPPED";
   }
 
@@ -15328,6 +15374,7 @@
     updateTransportDisplay();
 
     if (autoplay) await playCurrent();
+    else scheduleIdleAudioContextSuspend();
   }
 
   function playlistDisplayName(playlist,index) {
@@ -15622,7 +15669,28 @@
   const METER_SEGMENT_PITCH_PX = 6;
   const METER_PEAK_HOLD_MS = 70;
   const METER_RELEASE_MS = 110;
+  const METER_REFRESH_INTERVAL_MS = 1000/30;
   const meterBallistics = new WeakMap();
+  let meterRailHeightCache = new WeakMap();
+  let mixerAnimationFrame = 0;
+  let lastTransportUpdateAt = 0;
+  let lastMeterUpdateAt = 0;
+
+  function requestMixerAnimation(){
+    if(!mixerAnimationFrame)mixerAnimationFrame=requestAnimationFrame(animationLoop);
+  }
+
+  function hasMeterReleaseActivity(now=performance.now()){
+    const fillIsActive=fill=>{
+      if(!fill)return false;
+      const state=meterBallistics.get(fill);
+      return !!state&&state.level>0&&(state.level>.08||now<state.holdUntil);
+    };
+    for(const channel of channels){
+      if(channel.ledDrive>.001||channel.iconDrive>.003||fillIsActive(channel.meterL)||fillIsActive(channel.meterR))return true;
+    }
+    return fillIsActive(document.querySelector("[data-master-meter-l]"))||fillIsActive(document.querySelector("[data-master-meter-r]"));
+  }
 
   function meterBallisticLevel(fill,rawLevel) {
     const target=Math.max(0,Math.min(100,Number(rawLevel)||0));
@@ -15656,7 +15724,11 @@
     if (!fill) return;
     const level=meterBallisticLevel(fill,rawLevel);
     const rail=fill.parentElement;
-    const railHeight=Math.max(1,rail?.clientHeight||1);
+    let railHeight=rail?meterRailHeightCache.get(rail):null;
+    if(!Number.isFinite(railHeight)||railHeight<1){
+      railHeight=Math.max(1,rail?.clientHeight||1);
+      if(rail)meterRailHeightCache.set(rail,railHeight);
+    }
     const rawPx=(level/100)*railHeight;
     // Always round DOWN to a real lamp boundary so a colour region never
     // lights before the measured signal has actually reached that region.
@@ -15670,77 +15742,87 @@
   }
 
   function animationLoop(timestamp) {
-    for (const channel of channels) {
-      const level=analyserLevel(channel.analyser,channel.meterData);
+    mixerAnimationFrame=0;
+    const now=Number(timestamp)||performance.now();
+    if(now-lastMeterUpdateAt>=METER_REFRESH_INTERVAL_MS){
+      lastMeterUpdateAt=now;
+      for (const channel of channels) {
+        const level=analyserLevel(channel.analyser,channel.meterData);
 
-      setSegmentedMeterLevel(channel.meterL,level);
-      setSegmentedMeterLevel(channel.meterR,Math.max(0,level*.96));
+        setSegmentedMeterLevel(channel.meterL,level);
+        setSegmentedMeterLevel(channel.meterR,Math.max(0,level*.96));
 
-      if (channel.statusLed) {
-        const lampEnabled = !channel.state.mute || channel.state.solo;
+        if (channel.statusLed) {
+          const lampEnabled = !channel.state.mute || channel.state.solo;
 
-        if (!lampEnabled) {
-          channel.ledDrive = 0;
-        } else {
-          // Convert the meter's 0..100 range into an activity drive that still
-          // responds nicely to quieter material. Attack is immediate; decay is
-          // deliberately slower like a real signal/presence lamp circuit.
-          const target = Math.max(0,Math.min(1,Math.pow(level/100,.58)));
-
-          if (target > channel.ledDrive) {
-            channel.ledDrive = target;
+          if (!lampEnabled) {
+            channel.ledDrive = 0;
           } else {
-            channel.ledDrive = channel.ledDrive*.84 + target*.16;
+            // Convert the meter's 0..100 range into an activity drive that still
+            // responds nicely to quieter material. Attack is immediate; decay is
+            // deliberately slower like a real signal/presence lamp circuit.
+            const target = Math.max(0,Math.min(1,Math.pow(level/100,.58)));
+
+            if (target > channel.ledDrive) {
+              channel.ledDrive = target;
+            } else {
+              channel.ledDrive = channel.ledDrive*.84 + target*.16;
+            }
+          }
+
+          const ledDriveCss=channel.ledDrive.toFixed(3);
+          if(channel.statusLed.dataset.meterDrive!==ledDriveCss){
+            channel.statusLed.dataset.meterDrive=ledDriveCss;
+            channel.statusLed.style.setProperty("--led-drive",ledDriveCss);
           }
         }
 
-        channel.statusLed.style.setProperty(
-          "--led-drive",
-          channel.ledDrive.toFixed(3)
-        );
-      }
+        if (channel.instrumentLamp) {
+          // The deterministic instrument badge is a dim blue illuminated
+          // hardware key. Real post-fader signal lifts its lamp brightness.
+          const target = Math.max(0,Math.min(1,Math.pow(level/100,.64)));
 
-      if (channel.instrumentLamp) {
-        // The deterministic instrument badge is a dim blue illuminated
-        // hardware key. Real post-fader signal lifts its lamp brightness.
-        const target = Math.max(0,Math.min(1,Math.pow(level/100,.64)));
+          if (target > channel.iconDrive) {
+            // Fairly quick attack, but not as abrupt as the signal-status LED.
+            channel.iconDrive += (target-channel.iconDrive)*.58;
+          } else {
+            // Slow optical decay makes the lamp feel physical rather than digital.
+            channel.iconDrive = channel.iconDrive*.90 + target*.10;
+          }
 
-        if (target > channel.iconDrive) {
-          // Fairly quick attack, but not as abrupt as the signal-status LED.
-          channel.iconDrive += (target-channel.iconDrive)*.58;
-        } else {
-          // Slow optical decay makes the lamp feel physical rather than digital.
-          channel.iconDrive = channel.iconDrive*.90 + target*.10;
+          if (channel.iconDrive < .003) channel.iconDrive = 0;
+
+          const iconDriveCss=channel.iconDrive.toFixed(3);
+          if(channel.instrumentLamp.dataset.lightDrive!==iconDriveCss){
+            channel.instrumentLamp.dataset.lightDrive=iconDriveCss;
+            channel.instrumentLamp.style.setProperty("--icon-drive",iconDriveCss);
+          }
         }
+      }
 
-        if (channel.iconDrive < .003) channel.iconDrive = 0;
-
-        channel.instrumentLamp.style.setProperty(
-          "--icon-drive",
-          channel.iconDrive.toFixed(3)
-        );
+      if (masterAnalyser) {
+        const level=analyserLevel(masterAnalyser,masterMeterData);
+        const left=document.querySelector("[data-master-meter-l]");
+        const right=document.querySelector("[data-master-meter-r]");
+        setSegmentedMeterLevel(left,level);
+        setSegmentedMeterLevel(right,Math.max(0,level*.97));
       }
     }
-
-    if (masterAnalyser) {
-      const level=analyserLevel(masterAnalyser,masterMeterData);
-      const left=document.querySelector("[data-master-meter-l]");
-      const right=document.querySelector("[data-master-meter-r]");
-      setSegmentedMeterLevel(left,level);
-      setSegmentedMeterLevel(right,Math.max(0,level*.97));
-    }
-
-    updateMegaphoneGainCompensation();
-    updateAutoGainDynamics(timestamp);
-    updateMasterAutoGain(timestamp);
 
     if (isPlaying) {
       lastKnownPosition=getPosition();
       updateLoopScheduler();
+      updateAutoGainDynamics(timestamp);
+      updateMasterAutoGain(timestamp);
+      if(!isPlaying||now-lastTransportUpdateAt>=100){
+        updateTransportDisplay();
+        lastTransportUpdateAt=now;
+      }
     }
 
-    updateTransportDisplay();
-    requestAnimationFrame(animationLoop);
+    updateMegaphoneGainCompensation();
+    if(isPlaying||hasMeterReleaseActivity(now))requestMixerAnimation();
+    else scheduleIdleAudioContextSuspend();
   }
 
   window.addEventListener("resize",()=>{if(!playlistMenu?.hidden)requestAnimationFrame(positionPlaylistHardwareMenu)},{passive:true});
@@ -16226,6 +16308,7 @@
   window.addEventListener("beforeunload",revokeLocalObjectUrls);
 
   window.addEventListener("resize",()=>{
+    meterRailHeightCache=new WeakMap();
     if (currentPlaylist) updateGridGeometry(currentPlaylist.stems.length);
     requestAnimationFrame(()=>document.querySelectorAll(".channel-name").forEach(updateChannelNameMarquee));
   },{passive:true});
@@ -16259,7 +16342,6 @@
       return;
     }
     await changePlaylist(0,false);
-    requestAnimationFrame(animationLoop);
   })();
 </script>
 </body>

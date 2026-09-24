@@ -120,6 +120,7 @@
     "wifeymixer_dist/strip-fx-engine.js",
     "wifeymixer_dist/tempo-stretch-engine.js",
     "wifeymixer_dist/tests",
+    "wifeymixer_dist/tests/artifacts",
     "wifeymixer_dist/tests/tempo-stretch-engine.test.js",
     "wifeymixer_dist/tests/ui_integration_test.py"
   ],
@@ -146,8 +147,8 @@
     },
     "index.html": {
       "type": "file",
-      "size_bytes": 686654,
-      "modified_ns": 1790277127069699100
+      "size_bytes": 690246,
+      "modified_ns": 1790282164956014300
     },
     "instrument-icons.json": {
       "type": "file",
@@ -1697,8 +1698,8 @@
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
-      "size_bytes": 700246,
-      "modified_ns": 1790277127069699100
+      "size_bytes": 703838,
+      "modified_ns": 1790282164960275000
     },
     "wifeymixer_dist/instrument-icons.json": {
       "type": "file",
@@ -1737,7 +1738,11 @@
     },
     "wifeymixer_dist/tests": {
       "type": "folder",
-      "modified_ns": 1790277412735017800
+      "modified_ns": 1790282259222493300
+    },
+    "wifeymixer_dist/tests/artifacts": {
+      "type": "folder",
+      "modified_ns": 1790282259222493300
     },
     "wifeymixer_dist/tests/tempo-stretch-engine.test.js": {
       "type": "file",
