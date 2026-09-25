@@ -195,7 +195,12 @@ body[data-theme="p12"] { --site-font: "KAZVT Aero", "Comic Sans MS", "Comic Sans
 body[data-theme="p13"] { --site-font: "KAZVT Snooze", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p14"] { --site-font: "KAZVT Cola", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p15"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic Sans", cursive; }
-body[data-theme="p16"] { --site-font: "KAZVT Crunch", "Comic Sans MS", "Comic Sans", cursive; }
+/* Palette 16's Crunch font has a short x-height (about 22.5% of its em), so
+   normalize it to the site's usual visual text size without scaling rem layout. */
+body[data-theme="p16"] {
+  --site-font: "KAZVT Crunch", "Comic Sans MS", "Comic Sans", cursive;
+  font-size-adjust: 0.45;
+}
 
 ::selection {
   background: var(--selection-bg);
