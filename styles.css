@@ -199,7 +199,7 @@ body[data-theme="p15"] { --site-font: "KAZVT Digiwrite", "Comic Sans MS", "Comic
    normalize it to the site's usual visual text size without scaling rem layout. */
 body[data-theme="p16"] {
   --site-font: "KAZVT Crunch", "Comic Sans MS", "Comic Sans", cursive;
-  font-size-adjust: 0.45;
+  font-size-adjust: 0.68;
 }
 
 ::selection {
