@@ -2326,8 +2326,9 @@ function canonicalSamePageHash(hash) {
     id = decodeURIComponent(rawId);
   } catch {}
 
-  // Keep old shared links alive, but normalize them to the shorter canonical URL.
-  if (id === "multistream-guide-home") return "#multistream";
+  // Keep old shared links alive while sending every multistream deep link to
+  // the button that launches the guide.
+  if (id === "multistream" || id === "multistream-guide-home") return "#multistreaming";
   return hash;
 }
 
@@ -2361,12 +2362,60 @@ function flashScrollTarget(target) {
 }
 
 function scrollHashTargetIntoView(hash, { flash = true } = {}) {
+  if (
+    canonicalSamePageHash(hash) === "#multistreaming"
+    && document.querySelector("[data-multistream-guide-modal][open]")
+  ) return true;
+
   const target = findSamePageHashTarget(hash);
   if (!target) return false;
 
   target.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
   if (flash) flashHashTargetAfterScroll(hash);
   return true;
+}
+
+let multistreamGuideAutoOpenPending = false;
+let multistreamGuideAutoOpenHandled = false;
+
+function autoOpenMultistreamGuideFromHash(hash = window.location.hash, { force = false } = {}) {
+  if (canonicalSamePageHash(hash) !== "#multistreaming") {
+    multistreamGuideAutoOpenHandled = false;
+    return;
+  }
+
+  const trigger = document.querySelector('#multistreaming[data-open-multistream-guide]');
+  if (!trigger) return;
+
+  const modal = document.querySelector("[data-multistream-guide-modal]");
+  if (modal?.open) {
+    multistreamGuideAutoOpenHandled = true;
+    return;
+  }
+  if (multistreamGuideAutoOpenPending || (!force && multistreamGuideAutoOpenHandled)) return;
+
+  multistreamGuideAutoOpenPending = true;
+  multistreamGuideAutoOpenHandled = true;
+  const stillOnGuideHash = () => canonicalSamePageHash(window.location.hash) === "#multistreaming" && trigger.isConnected;
+
+  window.requestAnimationFrame(() => {
+    if (!stillOnGuideHash()) {
+      multistreamGuideAutoOpenPending = false;
+      multistreamGuideAutoOpenHandled = false;
+      return;
+    }
+
+    trigger.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
+    window.requestAnimationFrame(() => {
+      multistreamGuideAutoOpenPending = false;
+      if (!stillOnGuideHash()) {
+        multistreamGuideAutoOpenHandled = false;
+        return;
+      }
+
+      if (!document.querySelector("[data-multistream-guide-modal][open]")) trigger.click();
+    });
+  });
 }
 
 function flashHashTargetAfterScroll(hash) {
@@ -2418,7 +2467,12 @@ function initializeScrollTargetHighlights() {
 
     // Let the browser perform the native smooth hash scroll first, then flash
     // the destination once the motion has settled.
-    window.setTimeout(() => flashHashTargetAfterScroll(url.hash), 0);
+    window.setTimeout(() => {
+      flashHashTargetAfterScroll(url.hash);
+      if (canonicalSamePageHash(url.hash) === "#multistreaming") {
+        autoOpenMultistreamGuideFromHash(url.hash, { force: true });
+      }
+    }, 0);
   });
 
   window.addEventListener("hashchange", () => {
@@ -2426,7 +2480,11 @@ function initializeScrollTargetHighlights() {
     if (canonicalHash && canonicalHash !== window.location.hash) {
       history.replaceState(null, "", `${window.location.pathname}${window.location.search}${canonicalHash}`);
     }
-    window.setTimeout(() => scrollHashTargetIntoView(canonicalHash || window.location.hash), 0);
+    window.setTimeout(() => {
+      const targetHash = canonicalHash || window.location.hash;
+      scrollHashTargetIntoView(targetHash);
+      autoOpenMultistreamGuideFromHash(targetHash);
+    }, 0);
   });
 
   if (window.location.hash) {
@@ -2434,13 +2492,17 @@ function initializeScrollTargetHighlights() {
     if (canonicalHash && canonicalHash !== window.location.hash) {
       history.replaceState(null, "", `${window.location.pathname}${window.location.search}${canonicalHash}`);
     }
-    window.setTimeout(() => scrollHashTargetIntoView(canonicalHash || window.location.hash), 0);
+    window.setTimeout(() => {
+      const targetHash = canonicalHash || window.location.hash;
+      scrollHashTargetIntoView(targetHash);
+      autoOpenMultistreamGuideFromHash(targetHash);
+    }, 0);
   }
 }
 
 function multistreamGuidePanel() {
   return el("section", { id: "multistream-panel", className: "panel guide-launch-panel scribble-box" }, [
-    el("button", { id: "multistream", type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
+    el("button", { id: "multistreaming", type: "button", className: "guide-launch-button", "data-open-multistream-guide": "true", ariaHaspopup: "dialog" }, [
       el("span", { className: "guide-launch-kicker", "data-i18n": "guide.launch_kicker" }, [translatedText("guide.launch_kicker")]),
       el("span", { className: "guide-launch-title", "data-i18n": "guide.summary" }, [translatedText("guide.summary")]),
       el("span", { className: "guide-launch-pointer", ariaHidden: "true", "data-i18n": "guide.launch_pointer" }, [translatedText("guide.launch_pointer")]),
@@ -3275,6 +3337,8 @@ async function render(statusOverrides = {}) {
     ]),
   );
   markSoftLoaded(app);
+  initializeMultistreamGuideModal();
+  autoOpenMultistreamGuideFromHash(window.location.hash);
   await initializeRetroDebris();
 
   initializeDrawingPad();
@@ -3282,7 +3346,6 @@ async function render(statusOverrides = {}) {
   await initializeMusicPlayer();
   applyLanguageText(document);
   initializeWifeStickerEffects();
-  initializeMultistreamGuideModal();
   initializeWumpaGame();
   if (document.body.dataset.theme === "p16") updateCursorEffect("p16", { force: true });
 }
