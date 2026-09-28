@@ -128,6 +128,8 @@ html[data-theme="p6"] { font-size: 110%; }
 html[data-theme="p8"],
 html[data-theme="p10"],
 html[data-theme="p15"] { font-size: 110%; }
+/* Match the main site's compact Palette 13 typography scale. */
+html[data-theme="p13"] { font-size: 90%; }
 html[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
@@ -1071,6 +1073,13 @@ html[data-theme="p1"] *::after {
 html[data-theme="p6"] *,
 html[data-theme="p6"] *::before,
 html[data-theme="p6"] *::after {
+  font-weight: 400 !important;
+}
+
+/* Palette 13 uses the regular Snooze face sitewide, not synthetic bold. */
+html[data-theme="p13"] *,
+html[data-theme="p13"] *::before,
+html[data-theme="p13"] *::after {
   font-weight: 400 !important;
 }
 

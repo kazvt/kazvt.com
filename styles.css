@@ -193,6 +193,8 @@ html[data-theme="p6"] { font-size: 110%; }
 html[data-theme="p8"],
 html[data-theme="p10"],
 html[data-theme="p15"] { font-size: 110%; }
+/* Snooze's glyphs run large; keep Palette 13 slightly more compact. */
+html[data-theme="p13"] { font-size: 90%; }
 body[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
@@ -5353,5 +5355,12 @@ body[data-theme="p1"] *::after {
 body[data-theme="p6"] *,
 body[data-theme="p6"] *::before,
 body[data-theme="p6"] *::after {
+  font-weight: 400 !important;
+}
+
+/* Palette 13 uses the regular Snooze face sitewide, not synthetic bold. */
+body[data-theme="p13"] *,
+body[data-theme="p13"] *::before,
+body[data-theme="p13"] *::after {
   font-weight: 400 !important;
 }
