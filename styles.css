@@ -187,6 +187,8 @@ body[data-theme="p5"] { --site-font: "KAZVT East", "Comic Sans MS", "Comic Sans"
 html[data-theme="p5"] { font-size: 70%; }
 /* Palette 7's Comrade font gets a modest sitewide size bump. */
 html[data-theme="p7"] { font-size: 115%; }
+/* Palette 6 gets a slight size bump to balance its handwritten face. */
+html[data-theme="p6"] { font-size: 110%; }
 body[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
@@ -5340,5 +5342,12 @@ body {
 body[data-theme="p1"] *,
 body[data-theme="p1"] *::before,
 body[data-theme="p1"] *::after {
+  font-weight: 400 !important;
+}
+
+/* Palette 6 uses its regular Sweet face sitewide, not synthetic bold weights. */
+body[data-theme="p6"] *,
+body[data-theme="p6"] *::before,
+body[data-theme="p6"] *::after {
   font-weight: 400 !important;
 }
