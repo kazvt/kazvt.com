@@ -119,7 +119,7 @@ html[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comi
 html[data-theme="p5"] { --site-font: "KAZVT East", "Comic Sans MS", "Comic Sans", cursive; }
 
 /* Match the main site's Palette 5 typography scale. */
-html[data-theme="p5"] { font-size: 80%; }
+html[data-theme="p5"] { font-size: 70%; }
 /* Match the main site's larger Palette 7 typography scale. */
 html[data-theme="p7"] { font-size: 115%; }
 html[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
