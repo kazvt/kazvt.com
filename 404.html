@@ -9,6 +9,10 @@
         "multi_stream", "multi_streaming", "dual_stream", "dual_streaming"
       ]);
       const requestedPath = location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
+      const tuoyAliases = new Set(["toy", "touys", "tools", "tool", "assets", "asset", "toys"]);
+      if (tuoyAliases.has(requestedPath)) {
+        location.replace("https://kazvt.com/tuoys/");
+      }
       if (multistreamAliases.has(requestedPath)) {
         location.replace("https://kazvt.com/#multistreaming");
       }

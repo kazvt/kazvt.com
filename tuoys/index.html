@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ff9d16">
+    <meta name="description" content="A little directory of kazvt's browser toys: paint, make, play, and make some noise.">
+    <title>tuoys.exe // kazvt</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script>
+      (() => {
+        let theme = "p1";
+        let lineboil = "off";
+        try {
+          const savedTheme = localStorage.getItem("kazvt-theme");
+          if (/^p(?:[1-9]|1[0-6])$/.test(savedTheme || "")) theme = savedTheme;
+          const savedLineboil = localStorage.getItem("kazvt-lineboil");
+          if (savedLineboil === "on" || savedLineboil === "off") lineboil = savedLineboil;
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.lineboil = lineboil;
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles.css?v=tuoys-directory-1">
+    <link rel="stylesheet" href="/zzz_shared/cursor-packs.css">
+    <style>
+      .tuoys-page {
+        min-height: 100vh;
+      }
+
+      .tuoys-page .logo-row {
+        grid-template-columns: minmax(180px, 520px);
+        width: min(520px, 94vw);
+        margin-top: 4px;
+      }
+
+      .tuoys-page .site-header {
+        margin-bottom: 14px;
+      }
+
+      .tuoys-page .site-header h1 {
+        margin-top: 4px;
+      }
+
+      .tuoys-page .oldweb-nav {
+        grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+      }
+
+      .tuoy-stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .tuoy-panel {
+        min-width: 0;
+        padding: 12px;
+      }
+
+      .tuoy-panel .panel-head {
+        margin: -2px -2px 14px;
+      }
+
+      .tuoy-intro-copy {
+        margin: 0;
+        font-size: clamp(1rem, 2.2vw, 1.2rem);
+        font-weight: 800;
+        line-height: 1.5;
+      }
+
+      .tuoy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+        gap: 12px;
+      }
+
+      .tuoy-card {
+        display: flex;
+        min-width: 0;
+        min-height: 164px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 14px;
+        border: 3px solid var(--ink);
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--blue) 11%, transparent) 1px, transparent 1px),
+          linear-gradient(0deg, color-mix(in srgb, var(--pink) 12%, transparent) 1px, transparent 1px),
+          var(--paper-alt);
+        background-size: 16px 16px;
+        color: var(--ink);
+        text-decoration: none;
+        box-shadow: 4px 4px 0 var(--shadow);
+        clip-path: polygon(0 7px, 8px 0, 100% 4px, calc(100% - 5px) 100%, 4px calc(100% - 3px));
+        transition: transform 130ms steps(3, end), box-shadow 130ms steps(3, end);
+      }
+
+      .tuoy-card:hover,
+      .tuoy-card:focus-visible {
+        color: var(--ink);
+        transform: translate(-2px, -2px) rotate(-0.3deg);
+        box-shadow: 7px 7px 0 var(--shadow);
+        outline: 3px dashed var(--ink);
+        outline-offset: 4px;
+      }
+
+      .tuoy-card:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--shadow);
+      }
+
+      .tuoy-card-tag {
+        display: inline-block;
+        padding: 3px 7px;
+        border: 2px solid var(--ink);
+        background: var(--yellow);
+        color: var(--on-yellow);
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+        text-transform: uppercase;
+      }
+
+      .tuoy-card h3 {
+        margin: 2px 0 0;
+        color: var(--ink);
+        font-size: clamp(1.15rem, 2.3vw, 1.48rem);
+        line-height: 1.1;
+      }
+
+      .tuoy-card p {
+        margin: 0;
+        color: var(--ink);
+        font-size: 0.98rem;
+        font-weight: 700;
+        line-height: 1.4;
+      }
+
+      .tuoy-card-go {
+        margin-top: auto;
+        padding-top: 5px;
+        font-size: 0.82rem;
+        font-weight: 900;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .tuoy-footnote {
+        margin: 18px 4px 0;
+        color: var(--ink);
+        font-size: 0.88rem;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .tuoy-card {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="tuoys-page" data-page="tuoys" data-theme="p1">
+    <script>document.body.dataset.theme = document.documentElement.dataset.theme || "p1";</script>
+    <main class="site-wrap">
+      <header class="site-header">
+        <div class="logo-row">
+          <a class="logo-home" href="/" aria-label="kazvt home">
+            <span class="logo-flip-card">
+              <img class="site-logo logo-front" src="/zzz_assets/kazvt-transparent.gif" alt="kazvt">
+              <img class="site-logo logo-back" src="/zzz_assets/kazvt-transparent.gif" alt="">
+            </span>
+          </a>
+        </div>
+        <h1>tuoys.exe</h1>
+        <p class="tagline">small browser toys. big buttons. questionable amounts of fun.</p>
+      </header>
+
+      <nav class="oldweb-nav scribble-box" aria-label="page navigation">
+        <a href="/">home</a>
+        <a href="#make">make stuff</a>
+        <a href="#play">play</a>
+        <a href="#sound">make noise</a>
+      </nav>
+
+      <div class="tuoy-stack">
+        <section class="panel scribble-box tuoy-panel" aria-labelledby="tuoys-intro-title">
+          <header class="panel-head">
+            <strong id="tuoys-intro-title">welcome to the toybox</strong>
+            <span class="panel-stamp">kazvt public stuff</span>
+          </header>
+          <p class="tuoy-intro-copy">A hand-picked pile of things I made for the web. Click a card, try a toy, make something weird, and pass it along.</p>
+        </section>
+
+        <section class="panel scribble-box tuoy-panel" id="make" aria-labelledby="make-title">
+          <header class="panel-head">
+            <strong id="make-title">make &amp; export</strong>
+            <span class="panel-stamp">draw / crop / arrange</span>
+          </header>
+          <div class="tuoy-grid">
+            <a class="tuoy-card" href="/cubepainter/">
+              <span class="tuoy-card-tag">3D painting</span>
+              <h3>CubePainter</h3>
+              <p>Paint textures onto simple 3D shapes, preview them live, and export seamless little GIFs.</p>
+              <span class="tuoy-card-go">open the painter →</span>
+            </a>
+            <a class="tuoy-card" href="/commie/">
+              <span class="tuoy-card-tag">canvas maker</span>
+              <h3>Commie</h3>
+              <p>A tiny logo toy for composing your own hammer-and-sickle-style mark.</p>
+              <span class="tuoy-card-go">make a mark →</span>
+            </a>
+            <a class="tuoy-card" href="/dasher/">
+              <span class="tuoy-card-tag">forum graphics</span>
+              <h3>Signature Dasher</h3>
+              <p>Crop an image, add a marching dashed border, then export a PNG or GIF signature.</p>
+              <span class="tuoy-card-go">dash a border →</span>
+            </a>
+            <a class="tuoy-card" href="/grid/">
+              <span class="tuoy-card-tag">image layout</span>
+              <h3>Grid Maker</h3>
+              <p>Arrange a batch of pictures into a grid, choose the row width, and export a JPEG.</p>
+              <span class="tuoy-card-go">build a grid →</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="panel scribble-box tuoy-panel" id="play" aria-labelledby="play-title">
+          <header class="panel-head">
+            <strong id="play-title">play a little</strong>
+            <span class="panel-stamp">games &amp; group chaos</span>
+          </header>
+          <div class="tuoy-grid">
+            <a class="tuoy-card" href="/berrybox/">
+              <span class="tuoy-card-tag">party game</span>
+              <h3>Berrybox</h3>
+              <p>Draw, caption, vote, and crown the winner in a room-based drawing game.</p>
+              <span class="tuoy-card-go">get berrying →</span>
+            </a>
+            <a class="tuoy-card" href="/wildxhunt/">
+              <span class="tuoy-card-tag">roguelike adventure</span>
+              <h3>WILDxHUNT</h3>
+              <p>Gather a crew, take on monster bounties, and see how far your hunters get.</p>
+              <span class="tuoy-card-go">start a hunt →</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="panel scribble-box tuoy-panel" id="sound" aria-labelledby="sound-title">
+          <header class="panel-head">
+            <strong id="sound-title">make some noise</strong>
+            <span class="panel-stamp">in-browser sound lab</span>
+          </header>
+          <div class="tuoy-grid">
+            <a class="tuoy-card" href="/wifeymixer/">
+              <span class="tuoy-card-tag">soundfont mixer</span>
+              <h3>Wifey Mix-8</h3>
+              <p>Play soundfonts and MIDI, then shape the sound with channel controls and effects.</p>
+              <span class="tuoy-card-go">open the mixer →</span>
+            </a>
+          </div>
+        </section>
+      </div>
+
+      <footer class="tuoy-footnote">made on kazvt.com · <a href="/">back to the treehouse</a></footer>
+    </main>
+  </body>
+</html>
