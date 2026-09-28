@@ -5333,3 +5333,10 @@ body {
     repeating-linear-gradient(0deg, transparent 0 10px, color-mix(in srgb, var(--pink) 16%, transparent) 10px 12px),
     var(--paper-alt);
 }
+
+/* Palette 1 uses the regular 64.ttf face sitewide, not synthetic bold weights. */
+body[data-theme="p1"] *,
+body[data-theme="p1"] *::before,
+body[data-theme="p1"] *::after {
+  font-weight: 400 !important;
+}

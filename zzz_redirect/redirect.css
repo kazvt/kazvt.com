@@ -1052,6 +1052,13 @@ html[data-lineboil="off"] .redirect-logo-wrap::after {
   animation-play-state: paused !important;
 }
 
+/* Palette 1 uses its regular 64.ttf face on redirect pages too. */
+html[data-theme="p1"] *,
+html[data-theme="p1"] *::before,
+html[data-theme="p1"] *::after {
+  font-weight: 400 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .redirect-logo-wrap::before,
   .redirect-logo-wrap::after { animation: none !important; }
