@@ -185,10 +185,14 @@ body[data-theme="p5"] { --site-font: "KAZVT East", "Comic Sans MS", "Comic Sans"
 
 /* KAZVT East reads larger than the other palette fonts; normalize Palette 5 only. */
 html[data-theme="p5"] { font-size: 70%; }
-/* Palette 7's Comrade font gets a modest sitewide size bump. */
-html[data-theme="p7"] { font-size: 115%; }
+/* Palette 7's Comrade font gets a stronger sitewide size bump. */
+html[data-theme="p7"] { font-size: 125%; }
 /* Palette 6 gets a slight size bump to balance its handwritten face. */
 html[data-theme="p6"] { font-size: 110%; }
+/* Give the distinctive Veggie, Handwrite, and Digiwrite faces more room. */
+html[data-theme="p8"],
+html[data-theme="p10"],
+html[data-theme="p15"] { font-size: 110%; }
 body[data-theme="p6"] { --site-font: "KAZVT Sweet", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p7"] { --site-font: "KAZVT Comrade", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p8"] { --site-font: "KAZVT Veggie", "Comic Sans MS", "Comic Sans", cursive; }
