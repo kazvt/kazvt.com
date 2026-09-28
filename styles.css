@@ -177,6 +177,8 @@ body {
 
 
 /* Palette-specific typography. Unlisted palettes intentionally use Comic Sans MS. */
+/* Keep Palette 1's default type just a touch more compact. */
+html[data-theme="p1"] { font-size: 95%; }
 body[data-theme="p1"] { --site-font: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p2"] { --site-font: "KAZVT Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
 body[data-theme="p3"] { --site-font: "KAZVT Tangled", "Comic Sans MS", "Comic Sans", cursive; }
