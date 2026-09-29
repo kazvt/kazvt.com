@@ -4,12 +4,12 @@ The public archive lives at `/blog/`. Its source of truth is `blog/posts.json`, 
 
 ## Publish a post
 
-1. Open `/blog/write/` and write a post. Drafts autosave in this browser only.
+1. From the repository root on your own computer, start a loopback-only file server with `py -m http.server 8000 --bind 127.0.0.1` (or `python -m http.server 8000 --bind 127.0.0.1`), then open `http://127.0.0.1:8000/blog/write/`. The editor is excluded from the public Pages build; do not bind the server to `0.0.0.0` or a network interface. Drafts autosave in this browser only.
 2. Choose **add / update in export**, then **download posts.json**.
 3. Replace the repository's `blog/posts.json` with the downloaded file.
 4. Commit and push that file to `main`. The existing GitHub Pages workflow builds and deploys the site.
 
-The editor is deliberately not a server-side publisher. GitHub Pages serves static files and does not provide a private write API. No GitHub token, account credential, or draft is sent from the editor to a server. Anyone can open the desk, but their local drafts and prepared changes stay in their own browser until they export and commit them.
+The editor is deliberately not served at `kazvt.com/blog/write/`; Jekyll excludes its source directory from the public deployment. Keep the editor available only on your own loopback interface. GitHub Pages serves static files and does not provide a private write API, so no browser-only password can securely gate a public editor. No GitHub token, account credential, or draft is sent to a server; only people with repository write access can publish a changed manifest.
 
 If you edit a post already in the export list, use **edit selected**, then **add / update in export**. Removing a post from that list does not remove it from the live site until the replacement manifest is pushed. Importing a `posts.json` file replaces only the local prepared list; browser drafts are separate.
 

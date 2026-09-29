@@ -557,17 +557,16 @@
           const message = make("p", "", posts.length
             ? "No posts match those filters. Try another word or clear the filters."
             : "The archive is ready for its first dispatch.");
-          const actions = make("div", "blog-filter-actions");
           if (posts.length) {
+            const actions = make("div", "blog-filter-actions");
             const reset = make("button", "blog-button", "clear filters");
             reset.type = "button";
             reset.addEventListener("click", clearFilters);
             actions.append(reset);
+            empty.append(heading, message, actions);
+          } else {
+            empty.append(heading, message);
           }
-          const write = make("a", "blog-action", "open the post desk →");
-          write.href = "/blog/write/";
-          actions.append(write);
-          empty.append(heading, message, actions);
           results.append(empty);
           return;
         }

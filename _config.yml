@@ -1,0 +1,17 @@
+# The post editor is retained in the public repository for local authoring,
+# but must never be included in the public GitHub Pages build.
+exclude:
+  # Preserve Jekyll 3's standard exclusions; user-defined entries replace
+  # that default list in Jekyll 3 (used by GitHub Pages).
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - blog/write
+  - blog/write/**
