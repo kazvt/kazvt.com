@@ -1,7 +1,11 @@
 title.home=kazvt
 title.guide=multistream guide | kazvt
+title.blog=blog.exe | kazvt
+title.blog-write=post desk.exe | kazvt
 meta.home.description=kazvt's drawn, DS-art-program-inspired old web personal site with links & live status.
 meta.guide.description=kazvt's old-web multistreaming setup guide for OBS plugins, cloud multistreaming, or a VPS relay.
+meta.blog.description=Notes, experiments, and dispatches from kaz's treehouse.
+meta.blog-write.description=Write, preview, and export posts for the kazvt blog.
 logo.aria=kazvt home
 logo.image_alt=kazvt
 site.main_aria=kazvt personal site

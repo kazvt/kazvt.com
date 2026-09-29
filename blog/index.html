@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="/">
+    <meta name="theme-color" content="#ff9d16">
+    <meta name="description" content="Notes, experiments, and dispatches from kaz's treehouse.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="kazvt">
+    <meta property="og:title" content="blog.exe // kazvt">
+    <meta property="og:url" content="https://kazvt.com/blog/">
+    <meta property="og:description" content="Notes, experiments, and dispatches from kaz's treehouse.">
+    <title>blog.exe // kazvt</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="manifest" data-i18n-manifest>
+    <script>
+      (() => {
+        let theme = "p1";
+        let lineboil = "off";
+        try {
+          const savedTheme = localStorage.getItem("kazvt-theme");
+          if (/^p(?:[1-9]|1[0-6])$/.test(savedTheme || "")) theme = savedTheme;
+          const savedLineboil = localStorage.getItem("kazvt-lineboil");
+          if (savedLineboil === "on" || savedLineboil === "off") lineboil = savedLineboil;
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.lineboil = lineboil;
+        if (navigator.maxTouchPoints > 0 && matchMedia("(pointer: coarse)").matches) {
+          document.documentElement.classList.add("touch-device");
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles.css?v=palette-fonts-14">
+    <link rel="stylesheet" href="/zzz_shared/cursor-packs.css">
+    <link rel="stylesheet" href="/zzz_shared/language-dock.css">
+    <link rel="stylesheet" href="/lineboil-control.css">
+    <link rel="stylesheet" href="/zzz_assets/vendor/quill/quill-snow-2.0.3.css">
+    <link rel="stylesheet" href="/blog/blog.css?v=blog-v1">
+  </head>
+  <body class="blog-page" data-page="blog" data-theme="p1">
+    <script>document.body.dataset.theme = document.documentElement.dataset.theme || "p1";</script>
+    <svg class="boil-filters" aria-hidden="true" focusable="false">
+      <filter id="page-lineboil" x="-3%" y="-3%" width="106%" height="106%" color-interpolation-filters="sRGB">
+        <feTurbulence id="page-lineboil-noise" type="fractalNoise" baseFrequency="0.010 0.022" numOctaves="1" seed="4" stitchTiles="stitch" result="pageLineboilNoise" />
+        <feDisplacementMap id="page-lineboil-displace" in="SourceGraphic" in2="pageLineboilNoise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+    <main class="site-wrap blog-shell" data-lineboil-surface>
+      <header class="site-header blog-header">
+        <div class="logo-row">
+          <a class="logo-home" href="/" aria-label="kazvt home">
+            <span class="logo-flip-card">
+              <img class="site-logo logo-front" src="/zzz_assets/kazvt-transparent.gif" alt="kazvt">
+              <img class="site-logo logo-back" src="/zzz_assets/kazvt-transparent.gif" alt="">
+            </span>
+          </a>
+        </div>
+        <h1>blog.exe</h1>
+        <p class="tagline">notes from the treehouse</p>
+      </header>
+
+      <nav class="oldweb-nav scribble-box blog-nav" aria-label="page navigation">
+        <a href="/">home</a>
+        <a href="/blog/" aria-current="page">blog</a>
+        <a href="/tuoys/">tuoybox</a>
+      </nav>
+
+      <section class="web-grid grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)_180px] gap-3.5 items-start blog-layout">
+        <aside class="sidebar scribble-box palette-sidebar">
+          <h2 data-i18n="sidebar.palette"></h2>
+          <div class="palette big-palette" data-i18n-aria-label="palette.aria">
+            <div class="palette-choice"><button type="button" data-tool-theme="p1" style="--swatch: conic-gradient(#F599C6 0 25%, #FFEA88 0 50%, #7DCCAD 0 75%, #4D6787 0)" data-i18n-aria-label="palette.p1" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p1.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p2" style="--swatch: conic-gradient(#8B2626 0 25%, #EF6905 0 50%, #F1E5A1 0 75%, #486C2F 0)" data-i18n-aria-label="palette.p2" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p2.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p3" style="--swatch: conic-gradient(#1D4533 0 25%, #F7EAE0 0 50%, #F9D2BA 0 75%, #5E3122 0)" data-i18n-aria-label="palette.p3" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p3.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p4" style="--swatch: conic-gradient(#30AFFF 0 25%, #92EEFF 0 50%, #D8FFC5 0 75%, #C4F7CA 0)" data-i18n-aria-label="palette.p4" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p4.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p5" style="--swatch: conic-gradient(#133458 0 25%, #838921 0 50%, #D99B21 0 75%, #FAF7BB 0)" data-i18n-aria-label="palette.p5" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p5.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p6" style="--swatch: conic-gradient(#FEF2A0 0 25%, #F3CD97 0 50%, #E98B50 0 75%, #BC4F4F 0)" data-i18n-aria-label="palette.p6" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p6.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p7" style="--swatch: conic-gradient(#524646 0 25%, #A8A492 0 50%, #FCF2E5 0 75%, #EC5B38 0)" data-i18n-aria-label="palette.p7" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p7.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p8" style="--swatch: conic-gradient(#E8F5E9 0 25%, #A5D6A7 0 50%, #66BB6A 0 75%, #1B5E20 0)" data-i18n-aria-label="palette.p8" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p8.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p9" style="--swatch: conic-gradient(#E3F2FD 0 25%, #90CAF9 0 50%, #2196F3 0 75%, #0D47A1 0)" data-i18n-aria-label="palette.p9" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p9.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p10" style="--swatch: conic-gradient(#5D3140 0 25%, #CF4173 0 50%, #F39399 0 75%, #F6D8BD 0)" data-i18n-aria-label="palette.p10" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p10.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p11" style="--swatch: conic-gradient(#4E1F6E 0 25%, #3E3E75 0 50%, #45A9A9 0 75%, #98E8DE 0)" data-i18n-aria-label="palette.p11" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p11.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p12" style="--swatch: conic-gradient(#007DCC 0 25%, #FFB900 0 50%, #D10056 0 75%, #B2054C 0)" data-i18n-aria-label="palette.p12" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p12.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p13" style="--swatch: conic-gradient(#E73F1E 0 25%, #FB6C00 0 50%, #F9B637 0 75%, #FFDD9C 0)" data-i18n-aria-label="palette.p13" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p13.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p14" style="--swatch: conic-gradient(#FED24F 0 25%, #FFF449 0 50%, #B2D959 0 75%, #7EC151 0)" data-i18n-aria-label="palette.p14" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p14.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p15" style="--swatch: conic-gradient(#F8B2B2 0 25%, #AF719D 0 50%, #8B639B 0 75%, #403D88 0)" data-i18n-aria-label="palette.p15" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p15.png" alt="" aria-hidden="true"><span></span></button></div>
+            <div class="palette-choice"><button type="button" data-tool-theme="p16" style="--swatch: conic-gradient(#063B00 0 25%, #266210 0 50%, #90B800 0 75%, #E1E100 0)" data-i18n-aria-label="palette.p16" aria-pressed="false"><img class="palette-cursor-preview" src="/zzz_assets/cursor-previews/p16.png" alt="" aria-hidden="true"><span></span></button></div>
+          </div>
+        </aside>
+
+        <div id="blog-app" class="content-stack blog-content" aria-busy="true">
+          <section class="panel scribble-box blog-panel" aria-labelledby="blog-intro-title">
+            <header class="panel-head"><strong id="blog-intro-title">welcome to my blog</strong><span class="panel-stamp">kaz's treehouse</span></header>
+            <p>little dispatches from this corner of the web.</p>
+            <a class="blog-action" href="/blog/write/">open the post desk →</a>
+          </section>
+          <p class="blog-status" role="status">loading posts…</p>
+          <noscript><p class="blog-notice">This blog needs JavaScript to read its post archive.</p></noscript>
+        </div>
+
+        <aside class="sidebar scribble-box blog-radio">
+          <h2 data-i18n="sidebar.radio"></h2>
+          <div id="music-player" class="music-player"></div>
+          <p class="blog-sidebar-note">tiny posts, large feelings.</p>
+        </aside>
+      </section>
+      <footer class="blog-footer scribble-box"><span>kazvt.com/blog</span><a href="/">back to the treehouse</a></footer>
+    </main>
+    <script src="/zzz_assets/vendor/cursor-effects/browser.js"></script>
+    <script src="/links.js"></script>
+    <script src="/i18n.js"></script>
+    <script src="/language-dock.js"></script>
+    <script src="/lineboil-control.js?v=palette-refresh-2"></script>
+    <script src="/site.js?v=tuoys-shared-chrome"></script>
+    <script src="/zzz_assets/vendor/quill/quill-2.0.3.js"></script>
+    <script src="/blog/blog.js?v=blog-v1"></script>
+  </body>
+</html>
