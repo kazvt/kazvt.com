@@ -1351,9 +1351,12 @@ function setInlineNote(node, text, { animate = true } = {}) {
 }
 
 function platformIcon(name) {
+  const logoVersion = name === "discord" || name === "twitter"
+    ? "lineboil-gentle-contour-v1"
+    : "lineboil-independent-140ms-v3";
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
-    src: `/zzz_assets/redirect-logos/${name}.gif?v=lineboil-independent-140ms-v3`,
+    src: `/zzz_assets/redirect-logos/${name}.gif?v=${logoVersion}`,
     alt: "",
     ariaHidden: "true",
     decoding: "async",
