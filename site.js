@@ -1353,7 +1353,7 @@ function setInlineNote(node, text, { animate = true } = {}) {
 function platformIcon(name) {
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
-    src: `/zzz_assets/redirect-logos/${name}.gif?v=lineboil-independent-v2`,
+    src: `/zzz_assets/redirect-logos/${name}.gif?v=lineboil-independent-140ms-v3`,
     alt: "",
     ariaHidden: "true",
     decoding: "async",
