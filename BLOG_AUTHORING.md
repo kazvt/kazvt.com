@@ -4,7 +4,7 @@ The public archive lives at `/blog/`. Its source of truth is `blog/posts.json`, 
 
 ## Publish a post
 
-1. Open PowerShell in `C:\Users\pc\Documents\MEGA\ellie acoustic\programming stuff\OpenSeeFace-v1.20.4\blog`, run `py serve.py`, then open `http://127.0.0.1:8000/blog/write/`. The writer page and launcher live there; the launcher reuses site assets from `E:\sites\kazvt.com-1` without copying the rest of the repo. It listens only on your own computer. Drafts autosave in this browser only.
+1. Start or restart MSI as usual from `C:\Users\pc\Documents\MEGA\ellie acoustic\programming stuff\OpenSeeFace-v1.20.4`, then open `http://localhost:8000/blog/write/`. MSI's existing server also serves the public archive at `http://localhost:8000/blog/`, uses shared files from this site checkout, and keeps the OpenSeeFace folder as its default document root. The writer rejects non-loopback requests. Drafts autosave in this browser only.
 2. Choose **add / update in export**, then **download posts.json**.
 3. Replace the repository's `blog/posts.json` with the downloaded file.
 4. Commit and push that file to `main`. The existing GitHub Pages workflow builds and deploys the site.
