@@ -53,13 +53,13 @@ window.KAZVT_LINKS = {
   bsky: {
     url: "https://bsky.app/profile/kazvt.com",
     shortPath: "bsky",
-    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-broad-grain-v5",
+    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-broad-grain-v7",
     delayMs: 1000
   },
   lilliesays: {
     url: "https://kazvt.com/lillie-says",
     shortPath: "bsky",
-    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-broad-grain-v5",
+    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-broad-grain-v7",
     delayMs: 1000
   },
   twitter: {
