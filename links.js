@@ -41,7 +41,7 @@ window.KAZVT_LINKS = {
   discord: {
     url: "https://discord.com/invite/huzMpfJZ4J",
     shortPath: "discord",
-    logo: "/zzz_assets/redirect-logos/discord.gif?v=lineboil-broad-contour-v2",
+    logo: "/zzz_assets/redirect-logos/discord.gif?v=lineboil-two-lobe-v3",
     delayMs: 1000
   },
   tumblr: {
@@ -65,7 +65,7 @@ window.KAZVT_LINKS = {
   twitter: {
     url: "https://twitter.com/monkevt",
     shortPath: "twitter",
-    logo: "/zzz_assets/redirect-logos/twitter.gif?v=lineboil-broad-contour-v2",
+    logo: "/zzz_assets/redirect-logos/twitter.gif?v=lineboil-two-lobe-v3",
     delayMs: 1000
   },
   wife: {

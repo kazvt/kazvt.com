@@ -1352,7 +1352,7 @@ function setInlineNote(node, text, { animate = true } = {}) {
 
 function platformIcon(name) {
   const logoVersion = name === "discord" || name === "twitter"
-    ? "lineboil-broad-contour-v2"
+    ? "lineboil-two-lobe-v3"
     : "lineboil-independent-140ms-v3";
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
