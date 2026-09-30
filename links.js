@@ -53,19 +53,19 @@ window.KAZVT_LINKS = {
   bsky: {
     url: "https://bsky.app/profile/kazvt.com",
     shortPath: "bsky",
-    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-independent-140ms-v3",
+    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-broad-grain-v5",
     delayMs: 1000
   },
   lilliesays: {
     url: "https://kazvt.com/lillie-says",
     shortPath: "bsky",
-    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-independent-140ms-v3",
+    logo: "/zzz_assets/redirect-logos/bsky.gif?v=lineboil-broad-grain-v5",
     delayMs: 1000
   },
   twitter: {
     url: "https://twitter.com/monkevt",
     shortPath: "twitter",
-    logo: "/zzz_assets/redirect-logos/twitter.gif?v=lineboil-broad-grain-v4",
+    logo: "/zzz_assets/redirect-logos/twitter.gif?v=lineboil-broad-grain-v5",
     delayMs: 1000
   },
   wife: {
