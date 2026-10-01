@@ -186,7 +186,7 @@ body[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comi
 body[data-theme="p5"] { --site-font: "KAZVT East", "Comic Sans MS", "Comic Sans", cursive; }
 
 /* KAZVT East reads larger than the other palette fonts; normalize Palette 5 only. */
-html[data-theme="p5"] { font-size: 70%; }
+html[data-theme="p5"] { font-size: 67%; }
 /* Palette 7's Comrade font gets a stronger sitewide size bump. */
 html[data-theme="p7"] { font-size: 125%; }
 /* Palette 6 gets a slight size bump to balance its handwritten face. */
