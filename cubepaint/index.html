@@ -3119,7 +3119,8 @@
 
         .scene-shape-chip,
         .scene-shape-add,
-        .scene-shape-delete {
+        .scene-shape-delete,
+        .scene-shape-group {
             width: 100%;
             height: 22px;
             min-width: 0;
@@ -3140,7 +3141,8 @@
 
         .scene-shape-chip:hover,
         .scene-shape-add:hover,
-        .scene-shape-delete:hover {
+        .scene-shape-delete:hover,
+        .scene-shape-group:hover:not(:disabled) {
             opacity: 1;
             border-color: var(--paper);
             background: var(--ink);
@@ -3151,6 +3153,20 @@
             color: var(--ink);
             border-color: var(--paper);
             opacity: 1;
+        }
+
+        .scene-shape-chip.multi-selected {
+            box-shadow: inset 0 0 0 2px var(--accent);
+        }
+
+        .scene-shape-group-chip {
+            font-size: 8px !important;
+            letter-spacing: -0.04em;
+        }
+
+        .scene-shape-group:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
         }
 
         .scene-shape-add {
@@ -3183,8 +3199,16 @@
 
         .top-center.selected-shape-control {
             grid-column: 4 !important;
-            grid-template-columns: minmax(0, 1fr) !important;
-            justify-items: center !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            justify-items: stretch !important;
+        }
+
+        .top-center .scene-shape-group {
+            width: clamp(19px, 2vw, 25px);
+            height: clamp(18px, 3.2dvh, 24px);
+            min-width: 19px;
+            font-size: 9px;
+            background: rgba(255, 246, 216, 0.12);
         }
 
         .selected-shape-remove {
@@ -3215,7 +3239,8 @@
 
             .scene-shape-chip,
             .scene-shape-add,
-            .scene-shape-delete {
+            .scene-shape-delete,
+            .scene-shape-group {
                 height: 20px;
                 font-size: 10px;
             }
@@ -3248,7 +3273,8 @@
 
             .scene-shape-chip,
             .scene-shape-add,
-            .scene-shape-delete {
+            .scene-shape-delete,
+            .scene-shape-group {
                 height: 18px;
                 font-size: 9px;
             }
@@ -3668,6 +3694,7 @@
             <div class="scene-shape-strip" id="sceneShapeStrip" aria-label="shapes in view"></div>
             <div class="top-center selected-shape-control">
                 <span id="activeFaceTitle">FRONT</span>
+                <button class="scene-shape-group" id="sceneGroupBtn" type="button" title="Shift-click ribbon items to group them" aria-label="Group selected shapes" disabled>G</button>
                 <button class="selected-shape-remove" id="removeShapeBtn" type="button" title="Remove selected shape" aria-label="Remove selected shape">REMOVE</button>
             </div>
             <div class="top-param-controls" id="topParamControls">
@@ -4184,6 +4211,7 @@
         const activeFaceTitle = document.getElementById("activeFaceTitle");
         const removeShapeBtn = document.getElementById("removeShapeBtn");
         const sceneShapeStrip = document.getElementById("sceneShapeStrip");
+        const sceneGroupBtn = document.getElementById("sceneGroupBtn");
         const brushReadout = document.getElementById("brushReadout");
         const faceList = document.getElementById("faceList");
         const previewDebug = document.getElementById("previewDebug");
@@ -4338,8 +4366,13 @@
         let currentShapeIndex = 0;
         let currentShapeId = SHAPE_DEFS[0].id;
         let sceneShapes = [];
+        let sceneGroups = [];
+        let groupTransforms = {};
         let activeSceneShapeId = currentShapeId;
+        let selectedSceneItemIds = new Set();
+        let sceneGroupSerial = 1;
         const sceneShapeRuntime = new Map();
+        const sceneGroupRuntime = new Map();
         let sceneShapeSerial = 1;
         let transformHandleRoot = null;
         let transformHandleDrag = null;
@@ -4445,18 +4478,135 @@
         if (savedSession && savedSession.shapeOptions) {
             shapeOptions = savedSession.shapeOptions;
         }
+        if (savedSession && savedSession.groupTransforms) {
+            groupTransforms = savedSession.groupTransforms;
+        }
         if (savedCurrentShapeTypeId === "donut") {
             currentShapeId = "doughnut";
             currentShapeIndex = Math.max(0, SHAPE_DEFS.findIndex((shape) => shape.id === "doughnut"));
         }
 
         initializeSceneShapesFromSession(savedSession);
+        initializeSceneGroupsFromSession(savedSession);
+        selectedSceneItemIds = new Set(currentShapeId ? [getSceneItemIdForShape(currentShapeId)] : []);
 
         faces = currentShapeId ? ensureShapeFaces(currentShapeId) : [];
         currentFace = currentShapeId ? getShapeStore(currentShapeId).currentFace : 0;
 
         function getSceneShape(id = currentShapeId) {
             return sceneShapes.find((shape) => shape.id === id) || null;
+        }
+
+        function getSceneGroup(id) {
+            return sceneGroups.find((group) => group.id === id) || null;
+        }
+
+        function getSceneGroupForShapeId(id) {
+            return sceneGroups.find((group) => group.members.includes(id)) || null;
+        }
+
+        function getSceneItemIdForShape(id) {
+            return getSceneGroupForShapeId(id)?.id || id;
+        }
+
+        function getSceneItemMembers(itemId) {
+            const group = getSceneGroup(itemId);
+            if (group) return [...group.members];
+            return getSceneShape(itemId) ? [itemId] : [];
+        }
+
+        function getSceneRibbonItems() {
+            const items = [];
+            const emittedGroups = new Set();
+            sceneShapes.forEach((shape) => {
+                const group = getSceneGroupForShapeId(shape.id);
+                if (group) {
+                    if (!emittedGroups.has(group.id)) {
+                        emittedGroups.add(group.id);
+                        items.push(group);
+                    }
+                } else {
+                    items.push(shape);
+                }
+            });
+            return items;
+        }
+
+        function getSceneTransformRoot(id = currentShapeId) {
+            const group = getSceneGroupForShapeId(id);
+            return group
+                ? sceneGroupRuntime.get(group.id)?.root || null
+                : sceneShapeRuntime.get(id)?.root || null;
+        }
+
+        function uniqueSceneGroupId() {
+            let id = `group_${Date.now().toString(36)}_${sceneGroupSerial++}`;
+            while (sceneGroups.some((group) => group.id === id) || sceneShapeRuntime.has(id)) {
+                id = `group_${Date.now().toString(36)}_${sceneGroupSerial++}`;
+            }
+            return id;
+        }
+
+        function readObjectTransform(target) {
+            return {
+                position: { x: target.position.x, y: target.position.y, z: target.position.z },
+                rotation: { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z },
+                scale: { x: target.scale.x, y: target.scale.y, z: target.scale.z }
+            };
+        }
+
+        function getStoredGroupTransform(id) {
+            const transform = groupTransforms[id] || {};
+            const num = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+            const scaleValue = (value) => Math.max(0.001, num(value, 1));
+            return {
+                position: {
+                    x: num(transform.position?.x),
+                    y: num(transform.position?.y),
+                    z: num(transform.position?.z)
+                },
+                rotation: {
+                    x: num(transform.rotation?.x),
+                    y: num(transform.rotation?.y),
+                    z: num(transform.rotation?.z)
+                },
+                scale: {
+                    x: scaleValue(transform.scale?.x),
+                    y: scaleValue(transform.scale?.y),
+                    z: scaleValue(transform.scale?.z)
+                }
+            };
+        }
+
+        function applyStoredGroupTransform(target, id) {
+            if (!target) return;
+            const transform = getStoredGroupTransform(id);
+            target.position.set(transform.position.x, transform.position.y, transform.position.z);
+            target.rotation.set(transform.rotation.x, transform.rotation.y, transform.rotation.z);
+            target.scale.set(transform.scale.x, transform.scale.y, transform.scale.z);
+        }
+
+        function initializeSceneGroupsFromSession(session) {
+            const validShapeIds = new Set(sceneShapes.map((shape) => shape.id));
+            const usedMembers = new Set();
+            const normalized = [];
+            const entries = Array.isArray(session?.sceneGroups) ? session.sceneGroups : [];
+            entries.forEach((entry) => {
+                const id = typeof entry?.id === "string" ? entry.id.trim() : "";
+                if (!id || normalized.some((group) => group.id === id)) return;
+                const members = [...new Set(Array.isArray(entry.members) ? entry.members : [])]
+                    .filter((memberId) => validShapeIds.has(memberId) && !usedMembers.has(memberId));
+                if (members.length < 2) return;
+                members.forEach((memberId) => usedMembers.add(memberId));
+                normalized.push({
+                    id,
+                    name: typeof entry.name === "string" && entry.name.trim() ? entry.name.trim() : `Group ${normalized.length + 1}`,
+                    members
+                });
+            });
+            const validGroupIds = new Set(normalized.map((group) => group.id));
+            groupTransforms = Object.fromEntries(Object.entries(groupTransforms || {}).filter(([id]) => validGroupIds.has(id)));
+            sceneGroups = normalized;
         }
 
         function getShapeTypeId(id = currentShapeId) {
@@ -4577,7 +4727,7 @@
 
         function setActiveRuntime(id = currentShapeId) {
             const runtime = sceneShapeRuntime.get(id);
-            shapeRoot = runtime?.root || null;
+            shapeRoot = getSceneTransformRoot(id) || runtime?.root || null;
             shapeMesh = runtime?.mesh || null;
             materials = runtime?.materials || [];
             textures = runtime?.textures || [];
@@ -4750,26 +4900,14 @@
         function saveCurrentShapeContext() {
             if (!currentShapeId || !shapeStore[currentShapeId]) return;
             shapeStore[currentShapeId].currentFace = Math.max(0, Math.min(faces.length - 1, currentFace));
-            if (shapeRoot) {
-                shapeTransforms[currentShapeId] = {
-                    position: {
-                        x: shapeRoot.position.x,
-                        y: shapeRoot.position.y,
-                        z: shapeRoot.position.z
-                    },
-                    rotation: {
-                        x: shapeRoot.rotation.x,
-                        y: shapeRoot.rotation.y,
-                        z: shapeRoot.rotation.z
-                    },
-                    scale: {
-                        x: shapeRoot.scale.x,
-                        y: shapeRoot.scale.y,
-                        z: shapeRoot.scale.z
-                    }
-                };
+            const runtime = sceneShapeRuntime.get(currentShapeId);
+            if (runtime?.root) {
+                shapeTransforms[currentShapeId] = readObjectTransform(runtime.root);
                 shapeRotations[currentShapeId] = { ...shapeTransforms[currentShapeId].rotation };
             }
+            const group = getSceneGroupForShapeId(currentShapeId);
+            const groupRuntime = group && sceneGroupRuntime.get(group.id);
+            if (groupRuntime?.root) groupTransforms[group.id] = readObjectTransform(groupRuntime.root);
         }
 
         function getStoredShapeTransform(id) {
@@ -5212,12 +5350,12 @@
         }
 
         function focusActiveShapeInView() {
-            const runtime = sceneShapeRuntime.get(currentShapeId);
-            if (!runtime?.root || !camera) {
+            const transformRoot = getSceneTransformRoot(currentShapeId);
+            if (!transformRoot || !camera) {
                 setStatus("NO SHAPE");
                 return false;
             }
-            const box = new THREE.Box3().setFromObject(runtime.root);
+            const box = new THREE.Box3().setFromObject(transformRoot);
             if (box.isEmpty()) {
                 setStatus("NO SHAPE");
                 return false;
@@ -5245,11 +5383,15 @@
 
         function getSceneBounds(selectedOnly = false) {
             const targets = [];
-            if (selectedOnly && sceneShapeRuntime.get(currentShapeId)?.root) {
-                targets.push(sceneShapeRuntime.get(currentShapeId).root);
+            if (selectedOnly) {
+                const transformRoot = getSceneTransformRoot(currentShapeId);
+                if (transformRoot) targets.push(transformRoot);
             } else {
-                sceneShapeRuntime.forEach((runtime) => {
+                sceneGroupRuntime.forEach((runtime) => {
                     if (runtime?.root) targets.push(runtime.root);
+                });
+                sceneShapeRuntime.forEach((runtime) => {
+                    if (runtime?.root && !getSceneGroupForShapeId(runtime.id)) targets.push(runtime.root);
                 });
             }
             const box = new THREE.Box3();
@@ -7096,9 +7238,14 @@
             if (activeShape) {
                 const summary = document.createElement("div");
                 summary.className = "shape-instance-summary";
-                summary.title = "selected shape / total shapes in view";
-                const countLabel = `${sceneShapes.length} SHAPE${sceneShapes.length === 1 ? "" : "S"}`;
-                summary.textContent = `${activeShape.name || def.label} (${countLabel})`;
+                const activeGroup = getSceneGroupForShapeId(currentShapeId);
+                const itemCount = getSceneRibbonItems().length;
+                summary.title = activeGroup
+                    ? `${activeGroup.name} has ${activeGroup.members.length} separately textured parts; ${itemCount} scene items are in view.`
+                    : `${itemCount} scene items are in view.`;
+                summary.textContent = activeGroup
+                    ? `${activeGroup.name} (${itemCount} ITEMS · ${activeGroup.members.length} PARTS)`
+                    : `${activeShape.name || def.label} (${itemCount} SHAPE${itemCount === 1 ? "" : "S"})`;
                 faceList.append(summary);
             } else {
                 const summary = document.createElement("div");
@@ -7320,36 +7467,53 @@
         function renderSceneShapeStrip() {
             if (!sceneShapeStrip) return;
             sceneShapeStrip.innerHTML = "";
+            sceneShapeStrip.title = "Click an item to edit it. Shift-click items to select several, then use the G button to group them. Click a grouped part in the preview to edit its texture.";
 
+            const items = getSceneRibbonItems();
             const maxChips = 8;
-            const visibleShapes = sceneShapes.slice(Math.max(0, sceneShapes.length - maxChips));
-            if (!visibleShapes.length) {
-                sceneShapeStrip.setAttribute("data-empty", "true");
-            } else {
-                sceneShapeStrip.removeAttribute("data-empty");
-            }
+            const visibleItems = items.slice(Math.max(0, items.length - maxChips));
+            if (!visibleItems.length) sceneShapeStrip.setAttribute("data-empty", "true");
+            else sceneShapeStrip.removeAttribute("data-empty");
 
-            visibleShapes.forEach((shape) => {
+            visibleItems.forEach((item) => {
+                const members = Array.isArray(item.members) ? item.members : [item.id];
+                const isGroup = members.length > 1;
                 const chip = document.createElement("button");
                 chip.type = "button";
-                chip.className = `scene-shape-chip ${shape.id === currentShapeId ? "active" : ""}`;
-                chip.title = `Select ${shape.name || shapeDefById(shape.shapeId).label}`;
+                chip.className = `scene-shape-chip ${isGroup ? "scene-shape-group-chip" : ""} ${selectedSceneItemIds.has(item.id) ? "active" : ""} ${selectedSceneItemIds.size > 1 && selectedSceneItemIds.has(item.id) ? "multi-selected" : ""}`;
+                const partIndex = members.indexOf(currentShapeId);
+                chip.title = isGroup
+                    ? `${item.name} (${members.length} parts). Click to cycle the active texture part, or click a part in the preview. Shift-click to select this group with other items.`
+                    : `Select ${item.name || shapeDefById(item.shapeId).label}. Shift-click to select more items, then press G to group them.`;
                 chip.setAttribute("aria-label", chip.title);
-                chip.textContent = shapeMiniSymbol(shape);
+                chip.setAttribute("aria-pressed", String(selectedSceneItemIds.has(item.id)));
+                chip.textContent = isGroup ? (members.length < 10 ? `G${members.length}` : "G+") : shapeMiniSymbol(item);
                 chip.addEventListener("click", (event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    activateSceneShape(shape.id, { flash: true });
+                    if (event.shiftKey) {
+                        if (selectedSceneItemIds.has(item.id)) selectedSceneItemIds.delete(item.id);
+                        else selectedSceneItemIds.add(item.id);
+                    } else {
+                        selectedSceneItemIds = new Set([item.id]);
+                    }
+                    const activeMemberId = isGroup
+                        ? members[(Math.max(-1, partIndex) + 1) % members.length]
+                        : members[0];
+                    if (activeMemberId) activateSceneShape(activeMemberId, { flash: true, preserveSceneSelection: true });
+                    else updateShapeReadout();
                 });
                 sceneShapeStrip.append(chip);
             });
 
-            if (getSceneShape(currentShapeId)) {
+            const activeShape = getSceneShape(currentShapeId);
+            if (activeShape) {
+                const activeGroup = getSceneGroupForShapeId(currentShapeId);
                 const del = document.createElement("button");
                 del.type = "button";
                 del.className = "scene-shape-delete";
-                del.title = "Remove selected shape";
-                del.setAttribute("aria-label", "Remove selected shape");
+                del.title = activeGroup ? `Remove ${activeGroup.name} and all ${activeGroup.members.length} parts` : `Remove ${activeShape.name || shapeDefById(activeShape.shapeId).label}`;
+                del.setAttribute("aria-label", del.title);
                 del.textContent = "×";
                 del.addEventListener("click", (event) => {
                     event.preventDefault();
@@ -7358,6 +7522,8 @@
                 });
                 sceneShapeStrip.append(del);
             }
+
+            updateSceneGroupButton(sceneGroupBtn);
 
             const add = document.createElement("button");
             add.type = "button";
@@ -7374,14 +7540,156 @@
             sceneShapeStrip.append(add);
         }
 
+        function updateSceneGroupButton(button = document.getElementById("sceneGroupBtn")) {
+            if (!button) return;
+            const selected = [...selectedSceneItemIds]
+                .map((id) => ({ id, group: getSceneGroup(id), shape: getSceneShape(id) }))
+                .filter((item) => item.group || item.shape);
+            const canUngroup = selected.length > 0 && selected.every((item) => item.group);
+            const selectedMemberIds = [...new Set(selected.flatMap((item) => getSceneItemMembers(item.id)))];
+            const memberCount = selectedMemberIds.length;
+            const groupRuntimeReady = Boolean(webglAvailable && scene && selected.length
+                && selectedMemberIds.every((id) => sceneShapeRuntime.get(id)?.root));
+            const action = canUngroup ? "ungroup" : "group";
+            button.dataset.action = action;
+            button.textContent = canUngroup ? "U" : "G";
+            button.disabled = !groupRuntimeReady || (canUngroup ? false : memberCount < 2);
+            button.setAttribute("aria-disabled", String(button.disabled));
+            button.setAttribute("aria-label", canUngroup ? "Ungroup selected group" : "Group selected shapes");
+            button.title = !groupRuntimeReady
+                ? "Grouping requires the 3D preview to be available"
+                : canUngroup
+                    ? "Ungroup the selected group"
+                    : "Shift-click at least two ribbon items, then click G to join them";
+        }
+
+        function groupSelectedSceneItems() {
+            if (!webglAvailable || !scene) {
+                setStatus("NO WEBGL");
+                return false;
+            }
+            const selectedItems = [...selectedSceneItemIds]
+                .map((id) => ({ id, members: getSceneItemMembers(id) }))
+                .filter((item) => item.members.length);
+            const memberIds = [...new Set(selectedItems.flatMap((item) => item.members))]
+                .filter((id) => getSceneShape(id) && sceneShapeRuntime.get(id)?.root);
+            if (memberIds.length < 2) {
+                setStatus("SELECT 2+");
+                updateShapeReadout();
+                return false;
+            }
+
+            saveEditorToFace(true, false);
+            saveCurrentShapeContext();
+            scene.updateMatrixWorld(true);
+            const bounds = new THREE.Box3();
+            memberIds.forEach((id) => bounds.expandByObject(sceneShapeRuntime.get(id).root));
+            if (bounds.isEmpty()) {
+                setStatus("NO SHAPES");
+                return false;
+            }
+            const center = new THREE.Vector3();
+            bounds.getCenter(center);
+
+            const replacedGroups = sceneGroups.filter((group) => group.members.some((id) => memberIds.includes(id)));
+            const groupId = uniqueSceneGroupId();
+            const group = {
+                id: groupId,
+                name: `Group ${sceneGroups.length + 1}`,
+                members: sceneShapes.map((shape) => shape.id).filter((id) => memberIds.includes(id))
+            };
+            const root = new THREE.Group();
+            root.name = `${group.name} TRANSFORM`;
+            root.userData.sceneGroupId = groupId;
+            root.position.copy(center);
+            const spinRoot = new THREE.Group();
+            spinRoot.name = `${group.name} SPIN`;
+            root.add(spinRoot);
+            scene.add(root);
+            scene.updateMatrixWorld(true);
+
+            group.members.forEach((id) => {
+                const runtime = sceneShapeRuntime.get(id);
+                if (!runtime?.root) return;
+                runtime.root.quaternion.multiply(runtime.mesh.quaternion);
+                runtime.mesh.rotation.set(0, 0, 0);
+                spinRoot.attach(runtime.root);
+                shapeTransforms[id] = readObjectTransform(runtime.root);
+                shapeRotations[id] = { ...shapeTransforms[id].rotation };
+            });
+
+            replacedGroups.forEach((oldGroup) => {
+                const oldRuntime = sceneGroupRuntime.get(oldGroup.id);
+                oldRuntime?.root?.parent?.remove(oldRuntime.root);
+                sceneGroupRuntime.delete(oldGroup.id);
+                delete groupTransforms[oldGroup.id];
+            });
+            sceneGroups = sceneGroups.filter((oldGroup) => !replacedGroups.some((replaced) => replaced.id === oldGroup.id));
+            sceneGroups.push(group);
+            sceneGroupRuntime.set(groupId, { id: groupId, root, spinRoot, members: [...group.members] });
+            groupTransforms[groupId] = readObjectTransform(root);
+            if (!group.members.includes(currentShapeId)) currentShapeId = group.members[0];
+            activeSceneShapeId = currentShapeId;
+            selectedSceneItemIds = new Set([groupId]);
+            setActiveRuntime(currentShapeId);
+            updateShapeReadout();
+            renderFaceList();
+            updateDebugInfo();
+            setStatus(`GROUP ${group.members.length}`);
+            scheduleSave();
+            return true;
+        }
+
+        function ungroupSceneGroup(groupId) {
+            const group = getSceneGroup(groupId);
+            const runtime = sceneGroupRuntime.get(groupId);
+            if (!group || !runtime) return false;
+            scene.updateMatrixWorld(true);
+            group.members.forEach((id) => {
+                const shapeRuntime = sceneShapeRuntime.get(id);
+                if (!shapeRuntime?.root) return;
+                scene.attach(shapeRuntime.root);
+                shapeTransforms[id] = readObjectTransform(shapeRuntime.root);
+                shapeRotations[id] = { ...shapeTransforms[id].rotation };
+            });
+            runtime.root?.parent?.remove(runtime.root);
+            sceneGroupRuntime.delete(groupId);
+            delete groupTransforms[groupId];
+            sceneGroups = sceneGroups.filter((entry) => entry.id !== groupId);
+            return true;
+        }
+
+        function ungroupSelectedSceneGroups() {
+            if (!webglAvailable || !scene) {
+                setStatus("NO WEBGL");
+                return false;
+            }
+            const groupIds = [...selectedSceneItemIds].filter((id) => getSceneGroup(id));
+            if (!groupIds.length) return false;
+            saveEditorToFace(true, false);
+            saveCurrentShapeContext();
+            groupIds.forEach(ungroupSceneGroup);
+            if (!getSceneShape(currentShapeId) && sceneShapes.length) currentShapeId = sceneShapes[0].id;
+            activeSceneShapeId = currentShapeId;
+            selectedSceneItemIds = new Set(currentShapeId ? [currentShapeId] : []);
+            setActiveRuntime(currentShapeId);
+            updateShapeReadout();
+            renderFaceList();
+            updateDebugInfo();
+            setStatus("UNGROUP");
+            scheduleSave();
+            return true;
+        }
+
         function updateRemoveShapeButton() {
             if (!removeShapeBtn) return;
             const activeShape = getSceneShape(currentShapeId);
+            const activeGroup = getSceneGroupForShapeId(currentShapeId);
             const canRemove = Boolean(activeShape);
             removeShapeBtn.disabled = !canRemove;
             removeShapeBtn.setAttribute("aria-disabled", String(!canRemove));
             removeShapeBtn.title = canRemove
-                ? `Remove ${activeShape.name || getCurrentShapeDef().label} from the view`
+                ? `Remove ${activeGroup?.name || activeShape.name || getCurrentShapeDef().label} from the view`
                 : "No shape selected to remove";
         }
 
@@ -7395,22 +7703,35 @@
 
             saveEditorToFace(true, false);
             saveCurrentShapeContext();
+            const activeGroup = getSceneGroupForShapeId(currentShapeId);
+            const removedIds = new Set(activeGroup ? activeGroup.members : [currentShapeId]);
             const removeIndex = sceneShapes.findIndex((shape) => shape.id === currentShapeId);
-            const removedId = currentShapeId;
-            const removedName = activeShape.name || getCurrentShapeDef().label;
-            const nextShape = sceneShapes[removeIndex + 1] || sceneShapes[removeIndex - 1] || sceneShapes.find((shape) => shape.id !== removedId);
-            sceneShapes = sceneShapes.filter((shape) => shape.id !== removedId);
+            const removedName = activeGroup?.name || activeShape.name || getCurrentShapeDef().label;
+            const nextShape = [
+                ...sceneShapes.slice(removeIndex + 1),
+                ...sceneShapes.slice(0, removeIndex).reverse()
+            ].find((shape) => !removedIds.has(shape.id));
+            sceneShapes = sceneShapes.filter((shape) => !removedIds.has(shape.id));
 
-            const runtime = sceneShapeRuntime.get(removedId);
-            if (runtime) {
-                disposeRuntime(runtime);
-                sceneShapeRuntime.delete(removedId);
+            removedIds.forEach((id) => {
+                const runtime = sceneShapeRuntime.get(id);
+                if (runtime) {
+                    disposeRuntime(runtime);
+                    sceneShapeRuntime.delete(id);
+                }
+                delete shapeStore[id];
+                delete shapeTransforms[id];
+                delete shapeRotations[id];
+                delete shapePolyLevels[id];
+                delete shapeOptions[id];
+            });
+            if (activeGroup) {
+                const groupRuntime = sceneGroupRuntime.get(activeGroup.id);
+                groupRuntime?.root?.parent?.remove(groupRuntime.root);
+                sceneGroupRuntime.delete(activeGroup.id);
+                delete groupTransforms[activeGroup.id];
+                sceneGroups = sceneGroups.filter((group) => group.id !== activeGroup.id);
             }
-            delete shapeStore[removedId];
-            delete shapeTransforms[removedId];
-            delete shapeRotations[removedId];
-            delete shapePolyLevels[removedId];
-            delete shapeOptions[removedId];
 
             if (nextShape) {
                 currentShapeId = nextShape.id;
@@ -7419,11 +7740,13 @@
                 if (activeIndex >= 0) currentShapeIndex = activeIndex;
                 faces = ensureShapeFaces(currentShapeId);
                 currentFace = Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace));
+                selectedSceneItemIds = new Set([getSceneItemIdForShape(currentShapeId)]);
             } else {
                 currentShapeId = "";
                 activeSceneShapeId = "";
                 faces = [];
                 currentFace = 0;
+                selectedSceneItemIds.clear();
                 photoLayerSelected = false;
                 transformHandleDrag = null;
             }
@@ -7504,6 +7827,7 @@
                 visible: true
             };
             sceneShapes.push(sceneShape);
+            selectedSceneItemIds = new Set([id]);
             getShapeStore(id);
             layoutNewShapePosition(id);
             currentShapeId = id;
@@ -7523,14 +7847,17 @@
             const sceneShape = getSceneShape(id);
             if (!sceneShape) return false;
             if (id === currentShapeId) {
+                if (!options.preserveSceneSelection) selectedSceneItemIds = new Set([getSceneItemIdForShape(id)]);
                 setActiveRuntime(id);
                 if (Number.isInteger(options.faceIndex)) switchFace(options.faceIndex, Boolean(options.flash));
+                updateShapeReadout();
                 return true;
             }
             saveEditorToFace(true, false);
             saveCurrentShapeContext();
             currentShapeId = id;
             activeSceneShapeId = id;
+            if (!options.preserveSceneSelection) selectedSceneItemIds = new Set([getSceneItemIdForShape(id)]);
             const activeIndex = shapeIndexById(id);
             if (activeIndex >= 0) currentShapeIndex = activeIndex;
             faces = ensureShapeFaces(currentShapeId);
@@ -7564,6 +7891,8 @@
             if (transformHandleRoot) transformHandleRoot.visible = false;
             sceneShapeRuntime.forEach((runtime) => disposeRuntime(runtime));
             sceneShapeRuntime.clear();
+            sceneGroupRuntime.forEach((runtime) => runtime.root?.parent?.remove(runtime.root));
+            sceneGroupRuntime.clear();
             materials = [];
             textures = [];
             shapeMesh = null;
@@ -9253,7 +9582,10 @@
             root.userData.shapeTypeId = def.id;
             root.add(mesh);
             applyStoredShapeTransform(root, id);
-            scene.add(root);
+            const group = getSceneGroupForShapeId(id);
+            const groupRuntime = group && sceneGroupRuntime.get(group.id);
+            if (groupRuntime?.spinRoot) groupRuntime.spinRoot.add(root);
+            else scene.add(root);
             sceneShapeRuntime.set(id, {
                 id,
                 root,
@@ -9268,6 +9600,18 @@
             if (!webglAvailable || !scene) return;
 
             disposeCurrentMesh();
+            sceneGroups.forEach((group) => {
+                const root = new THREE.Group();
+                root.name = `${group.name} TRANSFORM`;
+                root.userData.sceneGroupId = group.id;
+                applyStoredGroupTransform(root, group.id);
+                const spinRoot = new THREE.Group();
+                spinRoot.name = `${group.name} SPIN`;
+                root.add(spinRoot);
+                scene.add(root);
+                sceneGroupRuntime.set(group.id, { id: group.id, root, spinRoot, members: [...group.members] });
+            });
+            scene.updateMatrixWorld(true);
             sceneShapes.forEach((sceneShape) => buildSingleShapeMesh(sceneShape));
             setActiveRuntime(currentShapeId);
             updateShadingLights();
@@ -9330,7 +9674,9 @@
 
             const rot = shapeRoot?.rotation || { x: 0, y: 0, z: 0 };
             const objPos = shapeRoot?.position || { x: 0, y: 0, z: 0 };
-            const spin = shapeMesh?.rotation || { x: 0, y: 0, z: 0 };
+            const activeGroup = getSceneGroupForShapeId(currentShapeId);
+            const groupRuntime = activeGroup && sceneGroupRuntime.get(activeGroup.id);
+            const spin = groupRuntime?.spinRoot?.rotation || shapeMesh?.rotation || { x: 0, y: 0, z: 0 };
             const pos = camera?.position || { x: 0, y: 0, z: 0 };
             const defaultPos = CAMERA_BASE_VECTOR.clone().multiplyScalar(DEFAULT_CAMERA_DISTANCE);
             const relPos = {
@@ -9363,8 +9709,9 @@
         function resetView() {
             if (!sceneShapeRuntime.size) return;
             sceneShapeRuntime.forEach((runtime) => {
-                runtime.mesh?.rotation?.set(0, 0, 0);
+                if (!getSceneGroupForShapeId(runtime.id)) runtime.mesh?.rotation?.set(0, 0, 0);
             });
+            sceneGroupRuntime.forEach((runtime) => runtime.spinRoot?.rotation?.set(0, 0, 0));
             cameraDistance = DEFAULT_CAMERA_DISTANCE;
             cameraPanOffset.set(0, 0, 0);
             warudoCameraPosition.copy(DEFAULT_WARUDO_CAMERA_POSITION);
@@ -10163,6 +10510,13 @@
             event.preventDefault();
             event.stopPropagation();
             removeActiveSceneShape();
+        });
+
+        sceneGroupBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (sceneGroupBtn.dataset.action === "ungroup") ungroupSelectedSceneGroups();
+            else groupSelectedSceneItems();
         });
 
         shapeSlider.addEventListener("input", () => selectAddShapeIndex(Number(shapeSlider.value)));
@@ -12091,10 +12445,17 @@
 
                     if (elapsed >= previewInterval || elapsed < 0) {
                         const tickDt = Math.min(elapsed / 1000, 0.25);
+                        sceneGroupRuntime.forEach((runtime) => {
+                            if (!runtime?.spinRoot) return;
+                            runtime.spinRoot.rotation.y += tickDt * xSpeed;
+                            runtime.spinRoot.rotation.x += tickDt * ySpeed;
+                        });
                         sceneShapeRuntime.forEach((runtime) => {
                             if (!runtime?.mesh) return;
-                            runtime.mesh.rotation.y += tickDt * xSpeed;
-                            runtime.mesh.rotation.x += tickDt * ySpeed;
+                            if (!getSceneGroupForShapeId(runtime.id)) {
+                                runtime.mesh.rotation.y += tickDt * xSpeed;
+                                runtime.mesh.rotation.x += tickDt * ySpeed;
+                            }
                             applyVertexWobbleToMesh(runtime.mesh, now);
                         });
                         previewFpsTickTime = now - (elapsed % previewInterval);
@@ -12291,7 +12652,10 @@
                 shapeTransforms = session.shapeTransforms || {};
                 shapePolyLevels = session.shapePolyLevels || {};
                 shapeOptions = session.shapeOptions || {};
+                groupTransforms = session.groupTransforms || {};
                 sceneShapes = [];
+                sceneGroups = [];
+                selectedSceneItemIds = new Set();
                 activeSceneShapeId = "";
                 currentShapeId = session.currentShapeId === "donut" ? "doughnut" : (session.currentShapeId || "");
                 photoLayerSelected = false;
@@ -12299,6 +12663,8 @@
                 preferCompactSession = false;
 
                 initializeSceneShapesFromSession(session);
+                initializeSceneGroupsFromSession(session);
+                selectedSceneItemIds = new Set(currentShapeId ? [getSceneItemIdForShape(currentShapeId)] : []);
                 faces = currentShapeId ? ensureShapeFaces(currentShapeId) : [];
                 currentFace = currentShapeId ? Math.max(0, Math.min(faces.length - 1, getShapeStore(currentShapeId).currentFace)) : 0;
 
@@ -12406,6 +12772,84 @@
             return candidates.find((type) => MediaRecorder.isTypeSupported?.(type)) || "video/webm";
         }
 
+        function createExportSceneRuntimes(exportScene, exportRenderer) {
+            const exportGroupRuntimes = new Map();
+            sceneGroups.forEach((group) => {
+                const source = sceneGroupRuntime.get(group.id);
+                const root = new THREE.Group();
+                const spinRoot = new THREE.Group();
+                if (source?.root) {
+                    root.position.copy(source.root.position);
+                    root.rotation.copy(source.root.rotation);
+                    root.scale.copy(source.root.scale);
+                }
+                if (source?.spinRoot) spinRoot.rotation.copy(source.spinRoot.rotation);
+                root.add(spinRoot);
+                exportScene.add(root);
+                exportGroupRuntimes.set(group.id, { id: group.id, root, spinRoot });
+            });
+
+            const exportRuntimes = sceneShapes.map((sceneShape) => {
+                rebuildAllTexturesForShape(sceneShape.id);
+                const store = getShapeStore(sceneShape.id);
+                const shapeTextures = store.faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
+                const shapeMaterials = shapeTextures.map(makeFaceMaterial);
+                const exportGeometry = createGeometry(shapeDefById(sceneShape.id), sceneShape.id);
+                centerGeometryOnOrigin(exportGeometry);
+                const exportMesh = new THREE.Mesh(exportGeometry, shapeMaterials);
+                const exportRoot = new THREE.Group();
+                exportRoot.add(exportMesh);
+                const source = sceneShapeRuntime.get(sceneShape.id);
+                if (source?.root) {
+                    exportRoot.position.copy(source.root.position);
+                    exportRoot.rotation.copy(source.root.rotation);
+                    exportRoot.scale.copy(source.root.scale);
+                }
+                if (source?.mesh) exportMesh.rotation.copy(source.mesh.rotation);
+                const group = getSceneGroupForShapeId(sceneShape.id);
+                const exportGroup = group && exportGroupRuntimes.get(group.id);
+                if (exportGroup) exportGroup.spinRoot.add(exportRoot);
+                else exportScene.add(exportRoot);
+                return {
+                    sceneShape,
+                    store,
+                    id: sceneShape.id,
+                    groupId: group?.id || "",
+                    root: exportRoot,
+                    mesh: exportMesh,
+                    geometry: exportGeometry,
+                    materials: shapeMaterials,
+                    textures: shapeTextures
+                };
+            });
+            return { exportRuntimes, exportGroupRuntimes };
+        }
+
+        function cleanupExportSceneRuntimes(exportScene, exportRuntimes, exportGroupRuntimes) {
+            exportRuntimes.forEach((runtime) => {
+                runtime.root.parent?.remove(runtime.root);
+                runtime.geometry.dispose();
+                runtime.materials.forEach((material) => material.dispose());
+                runtime.textures.forEach((texture) => texture.dispose());
+            });
+            exportGroupRuntimes.forEach((runtime) => runtime.root.parent?.remove(runtime.root));
+        }
+
+        function applyExportSceneSpin(exportRuntimes, exportGroupRuntimes, baseMeshRotations, baseGroupRotations, t, xSpan, ySpan) {
+            [...exportGroupRuntimes.values()].forEach((runtime, index) => {
+                runtime.spinRoot.rotation.copy(baseGroupRotations[index]);
+                runtime.spinRoot.rotation.y += t * xSpan;
+                runtime.spinRoot.rotation.x += t * ySpan;
+            });
+            exportRuntimes.forEach((runtime, index) => {
+                runtime.mesh.rotation.copy(baseMeshRotations[index]);
+                if (!runtime.groupId) {
+                    runtime.mesh.rotation.y += t * xSpan;
+                    runtime.mesh.rotation.x += t * ySpan;
+                }
+            });
+        }
+
         async function exportWebmView() {
             if (!webglAvailable || !renderer || !scene || !camera || !sceneShapeRuntime.size) {
                 setStatus("NO WEBGL");
@@ -12434,7 +12878,9 @@
             const seamlessLoopSeconds = exportShouldSpin ? Math.max(1.2, Math.min(12, fullTurnSeconds)) : 0;
             const frames = exportShouldSpin ? Math.max(24, Math.min(240, Math.round(seamlessLoopSeconds * fps))) : staticExportFrameCount();
             const runtimes = [...sceneShapeRuntime.values()].filter((runtime) => runtime?.mesh);
+            const groupRuntimes = [...sceneGroupRuntime.values()].filter((runtime) => runtime?.spinRoot);
             const baseRotations = runtimes.map((runtime) => runtime.mesh.rotation.clone());
+            const baseGroupRotations = groupRuntimes.map((runtime) => runtime.spinRoot.rotation.clone());
             const exportXRotationSpan = exportShouldSpin && exportXSpeed > 0.001 ? Math.PI * 2 : 0;
             const exportYRotationSpan = exportShouldSpin && exportYSpeed > 0.001 ? Math.PI * 2 : 0;
 
@@ -12473,10 +12919,17 @@
                 for (let i = 0; i < frames; i++) {
                     const t = exportShouldSpin ? i / frames : 0;
                     const animatedChanged = updateAnimatedFacesForExport(i * delay);
+                    groupRuntimes.forEach((runtime, runtimeIndex) => {
+                        runtime.spinRoot.rotation.copy(baseGroupRotations[runtimeIndex]);
+                        runtime.spinRoot.rotation.y += t * exportXRotationSpan;
+                        runtime.spinRoot.rotation.x += t * exportYRotationSpan;
+                    });
                     runtimes.forEach((runtime, runtimeIndex) => {
                         runtime.mesh.rotation.copy(baseRotations[runtimeIndex]);
-                        runtime.mesh.rotation.y += t * exportXRotationSpan;
-                        runtime.mesh.rotation.x += t * exportYRotationSpan;
+                        if (!getSceneGroupForShapeId(runtime.id)) {
+                            runtime.mesh.rotation.y += t * exportXRotationSpan;
+                            runtime.mesh.rotation.x += t * exportYRotationSpan;
+                        }
                         if (animatedChanged) {
                             runtime.textures?.forEach((texture) => {
                                 texture.needsUpdate = true;
@@ -12502,6 +12955,9 @@
                 runtimes.forEach((runtime, runtimeIndex) => {
                     runtime.mesh.rotation.copy(baseRotations[runtimeIndex]);
                     if (!vertexWobbleEnabled) restoreBaseGeometryPositions(runtime.mesh.geometry, true);
+                });
+                groupRuntimes.forEach((runtime, runtimeIndex) => {
+                    runtime.spinRoot.rotation.copy(baseGroupRotations[runtimeIndex]);
                 });
                 track.stop?.();
                 hideSaveOverlay();
@@ -12613,36 +13069,10 @@
             const exportCamera = makeExportCameraFromCurrentView(exportWidth / exportHeight);
             addShadingLightsToScene(exportScene);
 
-            const exportRuntimes = sceneShapes.map((sceneShape) => {
-                rebuildAllTexturesForShape(sceneShape.id);
-                const store = getShapeStore(sceneShape.id);
-                const shapeTextures = store.faces.map((face) => makeCanvasTexture(face.textureCanvas, exportRenderer));
-                const shapeMaterials = shapeTextures.map(makeFaceMaterial);
-                const exportGeometry = createGeometry(shapeDefById(sceneShape.id), sceneShape.id);
-                centerGeometryOnOrigin(exportGeometry);
-                const exportMesh = new THREE.Mesh(exportGeometry, shapeMaterials);
-                const exportRoot = new THREE.Group();
-                exportRoot.add(exportMesh);
-                const runtime = sceneShapeRuntime.get(sceneShape.id);
-                if (runtime?.root) {
-                    exportRoot.position.copy(runtime.root.position);
-                    exportRoot.rotation.copy(runtime.root.rotation);
-                    exportRoot.scale.copy(runtime.root.scale);
-                }
-                if (runtime?.mesh) {
-                    exportMesh.rotation.copy(runtime.mesh.rotation);
-                }
-                exportScene.add(exportRoot);
-                return { sceneShape, store, root: exportRoot, mesh: exportMesh, geometry: exportGeometry, materials: shapeMaterials, textures: shapeTextures };
-            });
+            const { exportRuntimes, exportGroupRuntimes } = createExportSceneRuntimes(exportScene, exportRenderer);
 
             function cleanupExportRenderer() {
-                exportRuntimes.forEach((runtime) => {
-                    exportScene.remove(runtime.root);
-                    runtime.geometry.dispose();
-                    runtime.materials.forEach((material) => material.dispose());
-                    runtime.textures.forEach((texture) => texture.dispose());
-                });
+                cleanupExportSceneRuntimes(exportScene, exportRuntimes, exportGroupRuntimes);
                 exportRenderer.dispose();
             }
 
@@ -12682,6 +13112,7 @@
 
             try {
                 const baseExportMeshRotations = exportRuntimes.map((runtime) => runtime.mesh.rotation.clone());
+                const baseExportGroupRotations = [...exportGroupRuntimes.values()].map((runtime) => runtime.spinRoot.rotation.clone());
                 const exportXRotationSpan = exportShouldSpin && exportXSpeed > 0.001 ? Math.PI * 2 : 0;
                 const exportYRotationSpan = exportShouldSpin && exportYSpeed > 0.001 ? Math.PI * 2 : 0;
 
@@ -12689,10 +13120,16 @@
                     const t = exportShouldSpin ? i / frames : 0;
 
                     const animatedChanged = updateAnimatedFacesForExport(i * delay);
-                    exportRuntimes.forEach((runtime, runtimeIndex) => {
-                        runtime.mesh.rotation.copy(baseExportMeshRotations[runtimeIndex]);
-                        runtime.mesh.rotation.y += t * exportXRotationSpan;
-                        runtime.mesh.rotation.x += t * exportYRotationSpan;
+                    applyExportSceneSpin(
+                        exportRuntimes,
+                        exportGroupRuntimes,
+                        baseExportMeshRotations,
+                        baseExportGroupRotations,
+                        t,
+                        exportXRotationSpan,
+                        exportYRotationSpan
+                    );
+                    exportRuntimes.forEach((runtime) => {
                         if (animatedChanged) {
                             runtime.textures.forEach((texture) => {
                                 texture.needsUpdate = true;
@@ -12799,6 +13236,8 @@
                     name: shape.name,
                     visible: shape.visible !== false
                 })),
+                sceneGroups: sceneGroups.map((group) => ({ id: group.id, name: group.name, members: [...group.members] })),
+                groupTransforms,
                 tool,
                 color: normalizeHex(brushColor.value),
                 brushSize: brushSize.value,
@@ -12851,6 +13290,8 @@
                 version: payload.version,
                 currentShapeId: payload.currentShapeId,
                 sceneShapes: payload.sceneShapes,
+                sceneGroups: payload.sceneGroups,
+                groupTransforms: payload.groupTransforms,
                 tool: payload.tool,
                 color: payload.color,
                 brushSize: payload.brushSize,
