@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Trivia reward links</title>
+  <link rel="stylesheet" href="reward-links.css">
+  <script src="reward-links.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <p class="eyebrow">OBS TRIVIA</p>
+        <h1>Reward links</h1>
+      </div>
+      <button id="refreshButton" class="secondary-button" type="button">Refresh</button>
+    </header>
+    <p class="help">Correct answers create a link here. Copy it and paste it into chat so the winner can open their reward.</p>
+    <p id="status" class="status" role="status">Loading reward links…</p>
+    <ol id="rewardList" class="reward-list"></ol>
+  </main>
+</body>
+</html>

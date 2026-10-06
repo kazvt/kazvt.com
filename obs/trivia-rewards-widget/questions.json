@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "gaming",
+      "name": "Gaming",
+      "aliases": ["games", "video games"],
+      "icon": "🎮",
+      "accent": "#8B5CF6",
+      "enabled": true,
+      "weight": 1,
+      "questions": [
+        {
+          "id": "gaming-001",
+          "prompt": "Which studio originally created Minecraft?",
+          "answers": ["Mojang", "Mojang Studios"],
+          "points": 10,
+          "durationSeconds": 25,
+          "difficulty": "easy",
+          "explanation": "Minecraft was originally created by Mojang, later acquired by Microsoft."
+        },
+        {
+          "id": "gaming-002",
+          "prompt": "What is the name of Nintendo's green-clad hero from The Legend of Zelda?",
+          "answers": ["Link"],
+          "points": 10,
+          "durationSeconds": 25,
+          "difficulty": "easy"
+        },
+        {
+          "id": "gaming-003",
+          "prompt": "What is the name of the AI antagonist in the Portal series?",
+          "answers": ["GLaDOS"],
+          "points": 15,
+          "durationSeconds": 30,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Science",
+      "aliases": ["sci"],
+      "icon": "🧪",
+      "accent": "#22C55E",
+      "enabled": true,
+      "weight": 1,
+      "questions": [
+        {
+          "id": "science-001",
+          "prompt": "Which planet is known as the Red Planet?",
+          "answers": ["Mars"],
+          "points": 10,
+          "durationSeconds": 20,
+          "difficulty": "easy"
+        },
+        {
+          "id": "science-002",
+          "prompt": "What is the chemical symbol for gold?",
+          "answers": ["Au"],
+          "points": 10,
+          "durationSeconds": 20,
+          "difficulty": "easy"
+        },
+        {
+          "id": "science-003",
+          "prompt": "What process do plants use to convert light energy into chemical energy?",
+          "answers": ["photosynthesis"],
+          "points": 15,
+          "durationSeconds": 30,
+          "difficulty": "medium"
+        }
+      ]
+    },
+    {
+      "id": "geography",
+      "name": "Geography",
+      "aliases": ["geo", "world"],
+      "icon": "🌍",
+      "accent": "#38BDF8",
+      "enabled": true,
+      "weight": 1,
+      "questions": [
+        {
+          "id": "geography-001",
+          "prompt": "What is the capital city of Japan?",
+          "answers": ["Tokyo"],
+          "points": 10,
+          "durationSeconds": 20,
+          "difficulty": "easy"
+        },
+        {
+          "id": "geography-002",
+          "prompt": "Which river flows through Egypt and empties into the Mediterranean Sea?",
+          "answers": ["Nile", "the Nile", "Nile River", "the Nile River"],
+          "points": 10,
+          "durationSeconds": 25,
+          "difficulty": "easy"
+        },
+        {
+          "id": "geography-003",
+          "prompt": "Which country has the city of Marrakech?",
+          "answers": ["Morocco"],
+          "points": 10,
+          "durationSeconds": 20,
+          "difficulty": "easy"
+        }
+      ]
+    },
+    {
+      "id": "technology",
+      "name": "Technology",
+      "aliases": ["tech", "computers"],
+      "icon": "💻",
+      "accent": "#F59E0B",
+      "enabled": true,
+      "weight": 1,
+      "questions": [
+        {
+          "id": "technology-001",
+          "prompt": "What does HTML stand for?",
+          "answers": ["HyperText Markup Language", "Hyper Text Markup Language"],
+          "points": 15,
+          "durationSeconds": 35,
+          "difficulty": "medium"
+        },
+        {
+          "id": "technology-002",
+          "prompt": "What does CPU stand for?",
+          "answers": ["Central Processing Unit"],
+          "points": 10,
+          "durationSeconds": 25,
+          "difficulty": "easy"
+        },
+        {
+          "id": "technology-003",
+          "prompt": "Which protocol is commonly used to securely load websites in a browser?",
+          "answers": ["HTTPS"],
+          "points": 10,
+          "durationSeconds": 20,
+          "difficulty": "easy"
+        }
+      ]
+    }
+  ]
+}

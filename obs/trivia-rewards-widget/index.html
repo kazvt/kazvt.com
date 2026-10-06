@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>OBS Trivia Widget — Rewards Edition</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="overlay" aria-live="polite">
+    <div id="connectionBadge" class="connection-badge is-hidden" role="status">
+      <span class="connection-dot"></span>
+      <span id="connectionText">Chat link reconnecting</span>
+    </div>
+
+    <section id="questionCard" class="panel question-card is-hidden" aria-label="Trivia question">
+      <header class="question-header">
+        <div class="brand-line">
+          <span class="brand-mark">Q</span>
+          <span class="brand-copy">LIVE TRIVIA</span>
+        </div>
+        <div id="categoryChip" class="category-chip">
+          <span id="categoryIcon" class="category-icon" aria-hidden="true"></span>
+          <span id="categoryName">General</span>
+        </div>
+      </header>
+
+      <div class="question-body">
+        <div id="difficulty" class="difficulty is-hidden">Easy</div>
+        <h1 id="questionText" class="question-text">Question</h1>
+      </div>
+
+      <footer class="question-footer">
+        <div class="question-meta">
+          <span id="pointsText">+10 pts</span>
+          <span class="meta-separator">•</span>
+          <span id="winnerCount">Answer in chat</span>
+        </div>
+        <div id="timeText" class="time-text">30s</div>
+      </footer>
+
+      <div class="timer-track" aria-hidden="true">
+        <div id="timerBar" class="timer-bar"></div>
+      </div>
+    </section>
+
+    <section id="resultCard" class="panel result-card is-hidden" aria-label="Trivia result">
+      <div id="resultKicker" class="result-kicker">ROUND OVER</div>
+      <div id="resultMain" class="result-main">Answer</div>
+      <div id="resultSub" class="result-sub"></div>
+    </section>
+
+    <section id="activityCard" class="panel activity-card is-hidden" aria-label="Trivia activity">
+      <span id="activityIcon" class="activity-icon" aria-hidden="true">✓</span>
+      <div class="activity-copy">
+        <strong id="activityTitle">Correct!</strong>
+        <span id="activitySub"></span>
+      </div>
+    </section>
+
+    <section id="leaderboardCard" class="panel leaderboard-card is-hidden" aria-label="Trivia leaderboard">
+      <header class="leaderboard-header">
+        <div>
+          <div class="leaderboard-kicker">LEADERBOARD</div>
+          <h2 id="leaderboardTitle">Overall</h2>
+        </div>
+        <span id="leaderboardScope" class="leaderboard-scope">Top 5</span>
+      </header>
+      <div id="leaderboardRows" class="leaderboard-rows"></div>
+    </section>
+
+    <section id="errorCard" class="panel error-card is-hidden" role="alert">
+      <div class="error-kicker">WIDGET SETUP ERROR</div>
+      <div id="errorTitle" class="error-title">Could not start trivia</div>
+      <div id="errorDetail" class="error-detail"></div>
+    </section>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

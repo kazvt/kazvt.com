@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="referrer" content="no-referrer">
+  <title>Chat reward</title>
+  <link rel="stylesheet" href="/reward/reward.css">
+  <script src="/reward/reward.js" defer></script>
+</head>
+<body>
+  <main class="reward-card" aria-live="polite">
+    <div class="eyebrow">KAZVT · CHAT REWARD</div>
+    <section id="loadingState">
+      <h1>Opening your reward…</h1>
+      <p class="message">One moment.</p>
+    </section>
+    <section id="rewardState" hidden>
+      <img id="rewardImage" class="reward-image" alt="">
+      <h1 id="recipient"></h1>
+      <p id="filename" class="filename"></p>
+    </section>
+    <section id="errorState" hidden>
+      <h1>This reward link is unavailable</h1>
+      <p id="errorMessage" class="message">Check that you copied the complete link.</p>
+    </section>
+  </main>
+</body>
+</html>

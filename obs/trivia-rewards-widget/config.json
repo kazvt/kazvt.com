@@ -1,0 +1,47 @@
+{
+  "questionsUrl": "questions.json",
+  "websocket": {
+    "url": "ws://127.0.0.1:8080",
+    "reconnectInitialMs": 1000,
+    "reconnectMaxMs": 15000,
+    "reconnectFactor": 1.8,
+    "reconnectJitter": 0.2,
+    "maxMessageChars": 32768,
+    "dedupeCacheSize": 2000,
+    "ignoreBots": true
+  },
+  "commands": {
+    "trivia": "!trivia",
+    "leaderboard": "!leaderboard",
+    "perUserCooldownMs": 1200,
+    "leaderboardGlobalCooldownMs": 3500
+  },
+  "game": {
+    "defaultDurationSeconds": 30,
+    "defaultPoints": 10,
+    "answerMode": "all_until_timeout",
+    "oneAwardPerUserPerQuestion": true,
+    "maxWinnersPerQuestion": 0,
+    "recentQuestionMemory": 5,
+    "resultVisibleMs": 4200,
+    "autoContinue": false,
+    "autoContinueDelayMs": 4500
+  },
+  "rewards": {
+    "enabled": true,
+    "catalogUrl": "rewards.json",
+    "pageUrl": "https://kazvt.com/reward/",
+    "queueEndpoint": "/api/rewards"
+  },
+  "leaderboard": {
+    "size": 5,
+    "visibleMs": 10000,
+    "storageKey": "obs-trivia-widget:v2:scores"
+  },
+  "display": {
+    "offsetX": 32,
+    "offsetY": 32,
+    "width": 620,
+    "showConnectionStatus": true
+  }
+}

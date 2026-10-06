@@ -1,0 +1,3 @@
+{"version":1,"type":"chat.message","id":"tw-msg-001","platform":"twitch","timestamp":"2026-10-06T12:34:56Z","user":{"id":"123456","displayName":"Alice","isBot":false},"message":{"text":"!trivia science"}}
+{"version":1,"type":"chat.message","id":"yt-msg-001","platform":"youtube","timestamp":"2026-10-06T12:34:57Z","user":{"id":"UC_example","displayName":"Bob","isBot":false},"message":{"text":"mars"}}
+{"version":1,"type":"chat.message","id":"kick-msg-001","platform":"kick","timestamp":"2026-10-06T12:35:00Z","user":{"id":"987654321","displayName":"Carol","isBot":false},"message":{"text":"!leaderboard"}}

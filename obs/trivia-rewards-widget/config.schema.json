@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/obs-trivia/config.schema.json",
+  "title": "OBS Trivia Widget Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["questionsUrl", "websocket", "commands", "game", "rewards", "leaderboard", "display"],
+  "properties": {
+    "questionsUrl": { "type": "string", "minLength": 1 },
+    "websocket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "pattern": "^wss?://" },
+        "reconnectInitialMs": { "type": "number", "minimum": 100, "maximum": 60000 },
+        "reconnectMaxMs": { "type": "number", "minimum": 500, "maximum": 300000 },
+        "reconnectFactor": { "type": "number", "minimum": 1, "maximum": 5 },
+        "reconnectJitter": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maxMessageChars": { "type": "integer", "minimum": 256, "maximum": 1000000 },
+        "dedupeCacheSize": { "type": "integer", "minimum": 100, "maximum": 20000 },
+        "ignoreBots": { "type": "boolean" }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trivia", "leaderboard"],
+      "properties": {
+        "trivia": { "type": "string", "pattern": "^!\\S+$" },
+        "leaderboard": { "type": "string", "pattern": "^!\\S+$" },
+        "perUserCooldownMs": { "type": "number", "minimum": 0, "maximum": 60000 },
+        "leaderboardGlobalCooldownMs": { "type": "number", "minimum": 0, "maximum": 60000 }
+      }
+    },
+    "game": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["answerMode"],
+      "properties": {
+        "defaultDurationSeconds": { "type": "integer", "minimum": 5, "maximum": 300 },
+        "defaultPoints": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "answerMode": { "enum": ["all_until_timeout", "first_correct"] },
+        "oneAwardPerUserPerQuestion": { "type": "boolean" },
+        "maxWinnersPerQuestion": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "recentQuestionMemory": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "resultVisibleMs": { "type": "number", "minimum": 500, "maximum": 60000 },
+        "autoContinue": { "type": "boolean" },
+        "autoContinueDelayMs": { "type": "number", "minimum": 500, "maximum": 60000 }
+      }
+    },
+    "rewards": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "catalogUrl", "pageUrl", "queueEndpoint"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "catalogUrl": { "type": "string", "minLength": 1 },
+        "pageUrl": { "type": "string", "pattern": "^https://kazvt\\.com/reward/?$" },
+        "queueEndpoint": { "type": "string", "pattern": "^/api/" }
+      }
+    },
+    "leaderboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "visibleMs": { "type": "number", "minimum": 1000, "maximum": 60000 },
+        "storageKey": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "display": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "offsetX": { "type": "integer", "minimum": 0, "maximum": 1920 },
+        "offsetY": { "type": "integer", "minimum": 0, "maximum": 1080 },
+        "width": { "type": "integer", "minimum": 320, "maximum": 1200 },
+        "showConnectionStatus": { "type": "boolean" }
+      }
+    }
+  }
+}

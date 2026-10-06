@@ -1,0 +1,27 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #101114;
+  color: #f7f7f8;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; padding: 28px 18px 48px; }
+.page { width: min(100%, 860px); margin: 0 auto; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.eyebrow { margin: 0 0 7px; color: #c6a5ff; font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+h1 { margin: 0; font-size: clamp(27px, 5vw, 38px); }
+.help { max-width: 650px; color: #b5b3be; line-height: 1.55; }
+.status { min-height: 22px; color: #aaa7b3; font-size: 13px; }
+.reward-list { display: grid; gap: 12px; margin: 18px 0 0; padding: 0; list-style: none; }
+.reward-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px; border: 1px solid #36343e; border-radius: 12px; background: #19181e; }
+.recipient { margin: 0 0 5px; font-size: 17px; font-weight: 800; overflow-wrap: anywhere; }
+.details, .issued { margin: 0; color: #aaa7b3; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.issued { margin-top: 4px; font-size: 11px; }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+button, .open-link { border: 1px solid #62527b; border-radius: 8px; padding: 9px 12px; background: #30263d; color: #fff; font: inherit; font-size: 13px; font-weight: 750; text-decoration: none; cursor: pointer; }
+.secondary-button { background: transparent; border-color: #45434d; }
+button:hover, .open-link:hover { background: #44335a; }
+.empty { padding: 24px 16px; border: 1px dashed #45434d; border-radius: 12px; color: #aaa7b3; text-align: center; }
+@media (max-width: 600px) { .reward-row { grid-template-columns: 1fr; } .actions { justify-content: flex-start; } }

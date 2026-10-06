@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/obs-trivia/chat-message.schema.json",
+  "title": "OBS Trivia Normalized Chat Message",
+  "description": "Preferred WebSocket event contract between the platform bridge and the OBS trivia overlay.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "type", "id", "platform", "user", "message"],
+  "properties": {
+    "version": { "const": 1 },
+    "type": { "const": "chat.message" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "platform": { "enum": ["twitch", "youtube", "kick"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "user": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "displayName"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "isBot": { "type": "boolean" }
+      }
+    },
+    "message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 32768 }
+      }
+    }
+  }
+}
