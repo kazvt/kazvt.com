@@ -16,6 +16,7 @@ This version is structured like a small production overlay instead of a single d
 - `config.json` controls WebSocket, command, scoring, display, and persistence behavior.
 - `rewards.json` lists the PNG rewards hosted by the site.
 - `reward-links.html` is the local dashboard for copying newly issued links into chat.
+- `reward-crypto.mjs` creates and validates the reward links as JWE Compact Serialization.
 - `app.js` contains the WebSocket adapters, trivia state machine, scoring, dedupe, reconnect, and UI logic.
 - `styles.css` is the OBS-friendly overlay styling; `reward-links.css` styles the local copy dashboard.
 - `server.py` serves the widget and its local reward queue on `127.0.0.1`.
@@ -60,16 +61,18 @@ The browser still receives chat only. It saves generated links to a local queue;
    ```
 
 6. Set Width = `1920` and Height = `1080`.
-6. Leave **Shutdown source when not visible** OFF if you want the WebSocket and an active round to survive scene changes.
-7. `Refresh browser source when scene becomes active` is normally best left OFF.
+7. Leave **Shutdown source when not visible** OFF if you want the WebSocket and an active round to survive scene changes.
+8. `Refresh browser source when scene becomes active` is normally best left OFF.
 
 The overlay background is transparent. The trivia UI appears in the top-left at 32×32 by default.
 
 ## Reward links
 
-The public reward page is `https://kazvt.com/reward/`. Each issued URL contains an AES-GCM encrypted `id` value with the viewer's display name and PNG filename. A random decryption key is included after `#key=` in the URL, so copy the complete link. The key stays out of the HTTP request; anyone who has the full reward link can still open it, so treat the link as a public bearer link.
+The public reward page is `https://kazvt.com/reward/`. Each issued URL contains a compact JWE in `id`; it encrypts the viewer's display name and PNG filename with AES-256-GCM. A random decryption key is included after `#key=` in the URL, so copy the complete link. The key stays out of the HTTP request; anyone who has the full reward link can still open it, so treat the link as a public share link.
 
 The page only accepts PNG filenames listed in the site repository's `/assets/rewards/manifest.json`. The images are hosted under `https://kazvt.com/assets/rewards/`. The local dashboard keeps the 250 most recent reward links in an ignored `.reward-queue.json` file beside `server.py`.
+
+For the data flow, limits, and design references, see [REWARD-LINKS.md](REWARD-LINKS.md). Run the built-in checks with `node --test tests/reward-crypto.test.mjs` and `python -m unittest discover -s tests`.
 
 ### Override the WebSocket without editing config.json
 

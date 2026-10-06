@@ -1,3 +1,5 @@
+import { decryptReward } from "./reward-crypto.mjs";
+
 (() => {
   "use strict";
 
@@ -9,14 +11,9 @@
   const rewardImage = document.getElementById("rewardImage");
   const errorMessage = document.getElementById("errorMessage");
 
-  function decodeBase64Url(value) {
-    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
-    const binary = atob(base64 + "=".repeat((4 - base64.length % 4) % 4));
-    return Uint8Array.from(binary, character => character.charCodeAt(0));
-  }
-
   function showError(message) {
     loadingState.hidden = true;
+    rewardState.hidden = true;
     errorMessage.textContent = message;
     errorState.hidden = false;
   }
@@ -26,12 +23,6 @@
     const keyText = new URLSearchParams(location.hash.slice(1)).get("key");
     if (!token || !keyText) throw new Error("The link is missing its encrypted reward data or key.");
 
-    const tokenBytes = decodeBase64Url(token);
-    const keyBytes = decodeBase64Url(keyText);
-    if (tokenBytes.length < 29 || tokenBytes.length > 2048 || keyBytes.length !== 32) {
-      throw new Error("The reward link is malformed.");
-    }
-
     const response = await fetch("/assets/rewards/manifest.json", { cache: "no-store" });
     if (!response.ok) throw new Error("The reward list could not be loaded.");
     const catalog = await response.json();
@@ -39,11 +30,7 @@
       throw new Error("The reward list is invalid.");
     }
 
-    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
-    const iv = tokenBytes.slice(0, 12);
-    const ciphertext = tokenBytes.slice(12);
-    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
-    const data = JSON.parse(new TextDecoder().decode(plaintext));
+    const data = await decryptReward(token, keyText);
     const allowedFiles = new Set(catalog.files.filter(file => typeof file === "string"));
 
     if (data.version !== 1 || typeof data.username !== "string" || !data.username.trim() ||
@@ -53,6 +40,7 @@
 
     rewardImage.src = `/assets/rewards/${encodeURIComponent(data.file)}`;
     rewardImage.alt = data.file;
+    rewardImage.onerror = () => showError("This award image is no longer available.");
     recipient.textContent = `For ${data.username}`;
     filename.textContent = data.file;
     loadingState.hidden = true;
@@ -61,6 +49,9 @@
 
   openReward().catch(error => {
     console.warn("[reward] Could not open reward link:", error);
-    showError("Check that you copied the complete reward link, including everything after #key=.");
+    const publicAssetError = /award list|reward list/i.test(String(error && error.message));
+    showError(publicAssetError
+      ? "The reward list could not be loaded. Refresh this page in a moment."
+      : "This link is invalid or incomplete. Copy the complete link, including everything after #key=.");
   });
 })();

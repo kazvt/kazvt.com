@@ -1,3 +1,5 @@
+import { encryptReward } from "./reward-crypto.mjs";
+
 (() => {
   "use strict";
 
@@ -233,36 +235,17 @@
     return files;
   }
 
-  function toBase64Url(bytes) {
-    let binary = "";
-    for (let index = 0; index < bytes.length; index += 1) {
-      binary += String.fromCharCode(bytes[index]);
-    }
-    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-  }
-
   async function createRewardUrl(player, file) {
-    if (!globalThis.crypto || !crypto.subtle) {
-      throw new Error("This browser does not support encrypted reward links.");
-    }
-
-    const keyBytes = crypto.getRandomValues(new Uint8Array(32));
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
-    const payload = new TextEncoder().encode(JSON.stringify({
+    const encrypted = await encryptReward({
       version: 1,
       username: String(player.displayName || "Viewer").slice(0, 100),
       file
-    }));
-    const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, payload));
-    const tokenBytes = new Uint8Array(iv.length + encrypted.length);
-    tokenBytes.set(iv, 0);
-    tokenBytes.set(encrypted, iv.length);
+    });
 
     const url = new URL(state.config.rewards.pageUrl);
     url.search = "";
-    url.searchParams.set("id", toBase64Url(tokenBytes));
-    url.hash = `key=${toBase64Url(keyBytes)}`;
+    url.searchParams.set("id", encrypted.id);
+    url.hash = `key=${encrypted.key}`;
     return url.href;
   }
 
