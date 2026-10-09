@@ -20,6 +20,7 @@
       --outline-color: #000000;
       --outline-scale: 0.25;
       --outline-width: 24px;
+      --outline-pad: 0px;
     }
 
     * {
@@ -57,13 +58,24 @@
     }
 
     .side-gif {
+      width: calc(var(--gif-size) + var(--outline-pad) + var(--outline-pad));
+      height: calc(var(--gif-size) + var(--outline-pad) + var(--outline-pad));
+      margin: calc(0px - var(--outline-pad));
+      flex: 0 0 auto;
+      display: block;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .gif-frame-source {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: var(--gif-size);
       height: var(--gif-size);
       object-fit: contain;
-      flex: 0 0 auto;
-      user-select: none;
+      opacity: 0;
       pointer-events: none;
-      vertical-align: middle;
     }
 
     .text-box {
@@ -107,18 +119,21 @@
 
 <body>
   <div class="wrap" id="wrap">
-    <img class="side-gif" id="gif1" alt="" />
+    <canvas class="side-gif" id="gif1" aria-hidden="true"></canvas>
     <div class="text-box">
       <svg id="titleSvg"></svg>
     </div>
-    <img class="side-gif" id="gif2" alt="" />
+    <canvas class="side-gif" id="gif2" aria-hidden="true"></canvas>
   </div>
+  <img class="gif-frame-source" id="gifSource" alt="" aria-hidden="true" />
 
   <script>
     const root = document.documentElement;
     const titleSvg = document.getElementById('titleSvg');
     const wrap = document.getElementById('wrap');
     const sideGifs = [document.getElementById('gif1'), document.getElementById('gif2')];
+    const gifSource = document.getElementById('gifSource');
+    const gifContexts = sideGifs.map(canvas => canvas.getContext('2d', { alpha: true }));
 
     // OBS browser source doesn't URL-encode spaces — it passes "text=Hello world"
     // literally. URLSearchParams behaviour with raw spaces varies across CEF
@@ -161,6 +176,12 @@
     const gifSrc = hasGifParam ? gifparam.trim() : 'wumpa.gif';
     const colorParam = params.get('color') || null;
     const outlineColorP = params.get('outlineColor') || null;
+    let gifOutlineColor = '#000000';
+    let gifOutlineOffsets = [];
+    let gifFrameSize = 0;
+    let gifOutlinePad = 0;
+    let gifFrameRatio = 1;
+    let gifRenderRaf = 0;
 
     const outlineScaleRaw = parseFloat(params.get('outlineScale'));
     const outlineScale = (Number.isFinite(outlineScaleRaw) && outlineScaleRaw > 0)
@@ -169,17 +190,14 @@
     root.style.setProperty('--outline-scale', outlineScale);
     if (outlineColorP) root.style.setProperty('--outline-color', normalizeColor(outlineColorP));
 
-    sideGifs.forEach(g => {
+    sideGifs.forEach(canvas => {
       if (hasValidGif) {
-        g.src = gifSrc;
-        g.style.display = '';
-        g.style.filter = '';
+        canvas.style.display = '';
       } else {
-        g.removeAttribute('src');
-        g.style.display = 'none';
-        g.style.filter = 'none';
+        canvas.style.display = 'none';
       }
     });
+    if (hasValidGif) gifSource.src = gifSrc;
 
     const FONT_FAMILY = fontParam || "'CrashBandicoot', monospace";
     if (fontParam) document.body.classList.add('custom-font');
@@ -307,20 +325,78 @@
       return Math.max(56, Math.round(approxCharWidth * 2.5));
     }
 
-    function applyGifOutlineFilter(fontSize) {
-      const outlineColor = getComputedStyle(root).getPropertyValue('--outline-color').trim() || '#000000';
+    function configureGifOutline(fontSize) {
+      gifOutlineColor = getComputedStyle(root).getPropertyValue('--outline-color').trim() || '#000000';
       const outlineWidth = computeOutlineWidth(fontSize);
       const radius = Math.max(1, Math.round(outlineWidth * 0.19));
-      const offsets = [
+      gifOutlineOffsets = [
         [radius, 0], [-radius, 0],
         [0, radius], [0, -radius],
         [radius, radius], [-radius, radius],
         [radius, -radius], [-radius, -radius]
       ];
-      const filterValue = offsets.map(([dx, dy]) =>
-        `drop-shadow(${dx}px ${dy}px 0 ${outlineColor})`
-      ).join(' ');
-      sideGifs.forEach(gif => gif.style.filter = filterValue);
+      gifFrameSize = parseFloat(getComputedStyle(root).getPropertyValue('--gif-size')) || 140;
+      gifOutlinePad = radius + 1;
+      gifFrameRatio = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      root.style.setProperty('--outline-pad', `${gifOutlinePad}px`);
+
+      const canvasExtent = gifFrameSize + gifOutlinePad * 2;
+      sideGifs.forEach((canvas, index) => {
+        canvas.style.width = `${canvasExtent}px`;
+        canvas.style.height = `${canvasExtent}px`;
+        canvas.style.margin = `${-gifOutlinePad}px`;
+        canvas.width = Math.ceil(canvasExtent * gifFrameRatio);
+        canvas.height = Math.ceil(canvasExtent * gifFrameRatio);
+        const context = gifContexts[index];
+        if (context) context.setTransform(gifFrameRatio, 0, 0, gifFrameRatio, 0, 0);
+      });
+    }
+
+    function drawGifFrames() {
+      if (!hasValidGif || !gifSource.complete || !gifSource.naturalWidth || !gifFrameSize) return;
+
+      const scale = Math.min(
+        gifFrameSize / gifSource.naturalWidth,
+        gifFrameSize / gifSource.naturalHeight
+      );
+      const drawWidth = gifSource.naturalWidth * scale;
+      const drawHeight = gifSource.naturalHeight * scale;
+      const drawX = gifOutlinePad + (gifFrameSize - drawWidth) / 2;
+      const drawY = gifOutlinePad + (gifFrameSize - drawHeight) / 2;
+      const canvasExtent = gifFrameSize + gifOutlinePad * 2;
+
+      sideGifs.forEach((canvas, index) => {
+        const context = gifContexts[index];
+        if (!context) return;
+
+        // Rebuild each frame from transparent pixels. Draw shifted copies of
+        // the decoded GIF to form its outline, tint that silhouette, then draw
+        // the current GIF frame on top instead of stacking CSS filters on the
+        // animated image element.
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.setTransform(gifFrameRatio, 0, 0, gifFrameRatio, 0, 0);
+
+        context.globalAlpha = 1;
+        context.globalCompositeOperation = 'source-over';
+        gifOutlineOffsets.forEach(([dx, dy]) => {
+          context.drawImage(gifSource, drawX + dx, drawY + dy, drawWidth, drawHeight);
+        });
+        context.globalCompositeOperation = 'source-in';
+        context.fillStyle = gifOutlineColor;
+        context.fillRect(0, 0, canvasExtent, canvasExtent);
+        context.globalCompositeOperation = 'source-over';
+        context.drawImage(gifSource, drawX, drawY, drawWidth, drawHeight);
+      });
+    }
+
+    function startGifRenderLoop() {
+      if (!hasValidGif || gifRenderRaf) return;
+      const render = () => {
+        drawGifFrames();
+        gifRenderRaf = requestAnimationFrame(render);
+      };
+      gifRenderRaf = requestAnimationFrame(render);
     }
 
     function fitLayoutToViewport() {
@@ -363,13 +439,9 @@
 
       createSvgText(bestFontSize);
       if (hasValidGif) {
-        applyGifOutlineFilter(bestFontSize);
+        configureGifOutline(bestFontSize);
       } else {
-        sideGifs.forEach(gif => {
-          gif.removeAttribute('src');
-          gif.style.display = 'none';
-          gif.style.filter = 'none';
-        });
+        sideGifs.forEach(canvas => canvas.style.display = 'none');
       }
     }
 
@@ -444,6 +516,7 @@
       fitLayoutToViewport();
       resetChars();
       wrap.classList.add('ready');
+      startGifRenderLoop();
       startLoop();
     }
 
