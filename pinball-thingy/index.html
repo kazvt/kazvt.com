@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#000000">
   <title>pinball thingy</title>
-  <link rel="preload" href="./assets/fonts/MonaspaceKryptonFrozen-Regular.ttf?v=1" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="./assets/fonts/MonaspaceKryptonFrozen-Regular.ttf?v=2" as="font" type="font/ttf" crossorigin>
   <style>
     :root { color-scheme:dark; --white:#fff; --black:#000; }
     @font-face {
       font-family: "Monaspace Krypton Frozen";
-      src: url("./assets/fonts/MonaspaceKryptonFrozen-Regular.ttf?v=1") format("truetype");
+      src: url("./assets/fonts/MonaspaceKryptonFrozen-Regular.ttf?v=2") format("truetype");
       font-style: normal;
       font-weight: 400;
       font-display: swap;
     }
     @font-face {
       font-family: "Monaspace Krypton Frozen";
-      src: url("./assets/fonts/MonaspaceKryptonFrozen-Bold.ttf?v=1") format("truetype");
+      src: url("./assets/fonts/MonaspaceKryptonFrozen-Bold.ttf?v=2") format("truetype");
       font-style: normal;
       font-weight: 700;
       font-display: swap;
@@ -40,20 +40,22 @@
     .overlay-panel { min-width:7.5rem; padding:.75rem 1.125rem; border:1px solid #fff; background:#000; text-align:center; }
     .overlay-title { color:#fff; font-weight:700; }
     .map-card { display:none; }
-    .map-card.map-focus { position:absolute; z-index:20; top:50%; left:50%; display:block; width:min(92vw,35rem); max-height:calc(100% - 6.25rem); overflow:auto; padding:.75rem; transform:translate(-50%,-50%); border:1px solid #fff; background:#000; }
+    .map-card.map-focus { position:absolute; z-index:20; top:50%; left:50%; display:block; width:min(92vw,56rem); max-height:calc(100% - 6.25rem); overflow:auto; padding:.75rem; transform:translate(-50%,-50%); border:1px solid #fff; background:#000; }
     .map-heading { display:flex; justify-content:space-between; gap:.75rem; margin-bottom:.625rem; color:#fff; font-size:.8rem; font-weight:700; }
-    .room-map { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.1875rem; }
-    .room-node { min-height:3.375rem; display:flex; flex-direction:column; justify-content:center; padding:.375rem; border:1px solid #fff; background:#000; color:#fff; font-size:.72rem; line-height:1.2; }
+    .room-map { position:relative; isolation:isolate; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.375rem; }
+    .map-routes { position:absolute; inset:0; z-index:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+    .room-node { position:relative; z-index:1; min-height:2.5rem; display:flex; flex-direction:column; justify-content:center; padding:.25rem; border:1px solid #fff; background:#000; color:#fff; font-size:.62rem; line-height:1.15; text-align:center; }
     .room-node.visited { border-style:double; }
     .room-node.current { background:#fff; color:#000; }
     .room-node.locked { border-style:dashed; }
+    .room-node.reachable { outline:1px dotted #fff; outline-offset:-3px; }
     @media (max-width:560px) {
       .game-hud { top:.3125rem; left:.3125rem; right:.3125rem; grid-template-columns:1.25fr repeat(3,minmax(0,.8fr)); gap:.25rem; padding:.3125rem; }
       .hud-label { font-size:.54rem; }
       .hud-value { font-size:.68rem; }
       #boss-label { font-size:.5rem; }
       .map-card.map-focus { max-height:calc(100% - 5rem); }
-      .room-node { min-height:2.75rem; font-size:.62rem; }
+      .room-node { min-height:2rem; padding:.125rem; font-size:.48rem; }
     }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms !important; } }
   </style>
@@ -63,9 +65,9 @@
     <div id="game" role="application" aria-label="pinball thingy game canvas." tabindex="0"></div>
     <section id="game-hud" class="game-hud" aria-label="Game status">
       <div class="hud-block">
-        <span class="hud-label">Hull score</span>
+        <span class="hud-label">Score</span>
         <span class="hud-value"><span id="score-value">2,500</span> / 10,000</span>
-        <div class="score-track" role="progressbar" aria-label="Hull score" aria-valuemin="0" aria-valuemax="10000" aria-valuenow="2500"><div id="score-bar"></div></div>
+        <div class="score-track" role="progressbar" aria-label="Score" aria-valuemin="0" aria-valuemax="10000" aria-valuenow="2500"><div id="score-bar"></div></div>
       </div>
       <div class="hud-block"><span class="hud-label">Ammo</span><span class="hud-value"><span id="ammo-value">4</span> / 10</span></div>
       <div class="hud-block"><span class="hud-label">Bomb</span><span id="bomb-label" class="hud-value">LOCKED</span><span id="echo-count" class="hud-label">ECHO 0</span></div>
@@ -73,25 +75,18 @@
     </section>
     <section id="map-card" class="map-card" aria-label="World map" aria-hidden="true">
       <div class="map-heading"><span>WORLD MAP</span></div>
-      <div id="world-map" class="room-map" role="img" aria-label="A connected six-room map arranged in two rows of three.">
-        <div id="room-0" class="room-node current">Dock</div>
-        <div id="room-1" class="room-node">Relay</div>
-        <div id="room-2" class="room-node">Shelf</div>
-        <div id="room-3" class="room-node">Underrail</div>
-        <div id="room-4" class="room-node">Foundry</div>
-        <div id="room-5" class="room-node">Core</div>
-      </div>
+      <div id="world-map" class="room-map" role="img" aria-label="A connected twenty-room map arranged in five columns and four rows."><svg id="map-routes" class="map-routes" aria-hidden="true"></svg></div>
     </section>
     <div id="game-overlay" class="game-overlay" aria-hidden="true"><div class="overlay-panel"><div id="overlay-title" class="overlay-title">PAUSED</div></div></div>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js" crossorigin="anonymous"></script>
   <script>
   (() => {
     'use strict';
 
     const CELL = 16;
-    const ROOM_COLS = 3;
-    const ROOM_ROWS = 2;
+    const ROOM_COLS = 5;
+    const ROOM_ROWS = 4;
     const ROOM_W = 48;
     const ROOM_H = 32;
     const MAP_W = ROOM_COLS * ROOM_W;
@@ -100,26 +95,46 @@
     const WORLD_H = MAP_H * CELL;
     const AIR = -1;
     const TILE = { ROCK: 1, RAMP_UP: 2, RAMP_DOWN: 3, CRACK: 4, GATE: 5 };
-    const CAT = { TERRAIN: 1, PLAYER: 2, ENEMY: 4, PICKUP: 8, BOMB: 16 };
+    const CAT = { TERRAIN: 1, PLAYER: 2, ENEMY: 4, PICKUP: 8, BOMB: 16, BUMPER: 32, FLIPPER:64 };
     const UPGRADE_KEYS = ['ghost', 'virtual', 'echo', 'bomb', 'super', 'phase', 'grip'];
     const UPGRADE_LABELS = {
       ghost: 'Ghost flipper', virtual: 'Virtual flipper', echo: 'Echo Lens',
       bomb: 'Bomb Kit', super: 'Super Bomb', phase: 'Phase Bomb', grip: 'Spider Ball'
     };
+    const ROOM_DEFS = [
+      { id:0, name:'Dock' }, { id:1, name:'Coilworks' }, { id:2, name:'Launch Gallery' }, { id:3, name:'Crown Access' }, { id:4, name:'Echo Vault' },
+      { id:5, name:'Sump' }, { id:6, name:'Junction' }, { id:7, name:'Bomb Bay' }, { id:8, name:'Spinner Hall' }, { id:9, name:'Observatory' },
+      { id:10, name:'Underloop' }, { id:11, name:'Bulkhead' }, { id:12, name:'Foundry' }, { id:13, name:'Needle Run' }, { id:14, name:'Phase Lab' },
+      { id:15, name:'Reservoir' }, { id:16, name:'Spider Gate' }, { id:17, name:'Capacitor' }, { id:18, name:'Superforge' }, { id:19, name:'Core' }
+    ];
+    // A connected room graph with several return loops. Upgrade doors create routes;
+    // they do not replace the ball's pinball traversal through each room.
+    const DOOR_DEFS = [
+      { id:'dock-coil', from:0, to:1 }, { id:'dock-sump', from:0, to:5 },
+      { id:'coil-launch', from:1, to:2 }, { id:'coil-junction', from:1, to:6 },
+      { id:'sump-junction', from:5, to:6 }, { id:'gallery-bay', from:2, to:7 }, { id:'junction-bay', from:6, to:7 },
+      { id:'ghost-crown', from:2, to:3, requires:'ghost' }, { id:'crown-echo', from:3, to:4 },
+      { id:'crown-spinner', from:3, to:8 }, { id:'echo-observatory', from:4, to:9 }, { id:'spinner-observatory', from:8, to:9 },
+      { id:'spinner-needle', from:8, to:13 }, { id:'observatory-phase', from:9, to:14 }, { id:'needle-phase', from:13, to:14 },
+      { id:'junction-underloop', from:6, to:11 }, { id:'bomb-bulkhead', from:11, to:12, requires:'bomb', breakable:true },
+      { id:'bulkhead-spider', from:11, to:16 }, { id:'spider-capacitor', from:16, to:17 },
+      { id:'capacitor-superforge', from:17, to:18 }, { id:'needle-superforge', from:13, to:18, requires:'super' },
+      { id:'foundry-shortcut', from:12, to:13, requires:'phase' }, { id:'sump-underloop', from:5, to:10, requires:'grip' },
+      { id:'underloop-reservoir', from:10, to:15 }, { id:'reservoir-spider', from:15, to:16 },
+      { id:'phase-core', from:14, to:19, requires:'phase' }, { id:'super-core', from:18, to:19, requires:'super' }
+    ];
     const BALL = {
-      radius:8, maxSpeed:10, airSteerPer60HzStep:0.12, maxAirSpeedX:7.5,
-      rollAcceleration:0.24, rollBrake:0.42, maxRollSpeed:4.8,
-      flipReach:36, flipCooldownMs:190, flipXKick:4.2, flipYKick:7.2,
-      airFlipXKick:2.4, airFlipYKick:6.8, nudgeCooldownMs:160,
-      nudgeXKick:2.2, nudgeYKick:0.7, spiderBallSpeed:1.7,
-      spiderAdhesion:0.16, spiderContactGraceMs:90, coyoteMs:160,
-      surfaceContactGraceMs:45, slopeSnapTolerance:5
+      radius:8, maxSpeed:13, launchReach:32,
+      flipperReach:14, flipCooldownMs:165, flipXKick:4.6, flipYKick:7.5,
+      airFlipXKick:2.7, airFlipYKick:6.6, nudgeCooldownMs:170,
+      nudgeXKick:1.8, nudgeYKick:1.35, spiderBallSpeed:1.9,
+      spiderAdhesion:0.16, spiderContactGraceMs:90, spiderTraverseMs:900, coyoteMs:160,
+      surfaceContactGraceMs:45, slopeSnapTolerance:5, flipperLength:88, flipperWidth:12, flipperSwingRate:0.011, bumperCooldownMs:380
     };
     const GRAVITY = { x:0, y:1, scale:0.001 };
     const ART_TILE = 8;
     const CHUNK_CELLS = 8;
     const CHUNK_PIXELS = CHUNK_CELLS * CELL;
-    const PHYSICS_STEP_MS = 1000 / 60;
     const SOUND_VOLUME = 0.25;
     const XP_SOUND_FILES = [
       'chimes.wav',
@@ -174,12 +189,63 @@
     const rampRuns = [];
     const rampUnderlay = new Set();
     const BOMB_TYPES = [
-      { key:'standard', label:'STANDARD', damage:2, radius:62, fuse:1250, phase:false },
+      { key:'standard', label:'STANDARD', damage:2, radius:70, fuse:1250, phase:false },
       { key:'super', label:'SUPER', damage:5, radius:112, fuse:1050, phase:false },
       { key:'phase', label:'PHASE', damage:3, radius:76, fuse:1200, phase:true }
     ];
 
+    const ROOM_LAYOUTS = [
+      {
+        ramps:[{ x:5, lift:2, steps:5, direction:'up' }, { x:38, lift:6, steps:5, direction:'down' }],
+        shelves:[[16,17,9],[28,12,7]], blocks:[[13,22,2,4],[34,21,2,5]]
+      },
+      {
+        ramps:[{ x:6, lift:6, steps:6, direction:'down' }, { x:39, lift:3, steps:5, direction:'up' }],
+        shelves:[[14,14,8],[27,18,8]], blocks:[[12,19,2,6],[34,22,2,4]]
+      },
+      {
+        ramps:[{ x:8, lift:3, steps:5, direction:'up' }, { x:38, lift:7, steps:6, direction:'down' }],
+        shelves:[[16,13,7],[28,16,9]], blocks:[[13,19,2,8],[34,20,2,6]]
+      },
+      {
+        ramps:[{ x:9, lift:7, steps:5, direction:'down' }, { x:39, lift:2, steps:5, direction:'up' }],
+        shelves:[[14,18,8],[27,11,10]], blocks:[[12,22,2,6],[34,19,2,8]]
+      },
+      {
+        ramps:[{ x:6, lift:5, steps:5, direction:'up' }, { x:38, lift:5, steps:5, direction:'down' }],
+        shelves:[[14,11,9],[28,16,8]], blocks:[[13,18,2,7],[34,20,2,6]]
+      },
+      {
+        ramps:[{ x:7, lift:6, steps:6, direction:'down' }, { x:39, lift:6, steps:5, direction:'up' }],
+        shelves:[[13,15,8],[29,12,7]], blocks:[[12,21,2,6],[34,18,2,8]]
+      },
+      {
+        ramps:[{ x:8, lift:6, steps:5, direction:'up' }, { x:38, lift:6, steps:6, direction:'down' }],
+        shelves:[[16,12,8],[27,19,9]], blocks:[[13,19,2,8],[34,21,2,6]]
+      },
+      {
+        ramps:[{ x:5, lift:5, steps:5, direction:'down' }, { x:38, lift:5, steps:5, direction:'up' }],
+        shelves:[[13,18,8],[28,13,9]], blocks:[[12,20,2,7],[34,20,2,7]]
+      }
+    ];
+
+    const roomPoint = (roomId, cellX, cellY) => {
+      const col = roomId % ROOM_COLS;
+      const row = Math.floor(roomId / ROOM_COLS);
+      return { x:(col * ROOM_W + cellX) * CELL, y:(row * ROOM_H + cellY) * CELL };
+    };
+    const enemyInRoom = (id, roomId, cellX, cellY, minCellX, maxCellX, hp, options = {}) => {
+      const point = roomPoint(roomId, cellX, cellY);
+      return {
+        id, x:point.x, y:point.y,
+        minX:roomPoint(roomId, minCellX, cellY).x,
+        maxX:roomPoint(roomId, maxCellX, cellY).x,
+        hp, ...options
+      };
+    };
+
     const grid = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(AIR));
+    const doorTileLookup = new Map();
     const setTile = (x, y, type) => {
       if (x >= 0 && x < MAP_W && y >= 0 && y < MAP_H) grid[y][x] = type;
     };
@@ -187,6 +253,7 @@
       for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) setTile(xx, yy, type);
     };
     const addRamp = (startX, startY, steps, direction, floorY) => {
+      if (direction === 'down' && startY + steps > floorY) throw new Error('Descending ramp extends below its room floor.');
       rampRuns.push({ startX, startY, steps, direction, floorY });
       for (let i = 0; i < steps; i++) {
         const tx = startX + i;
@@ -199,8 +266,28 @@
       }
     };
 
+    function doorCells(door) {
+      const fromCol = door.from % ROOM_COLS;
+      const fromRow = Math.floor(door.from / ROOM_COLS);
+      const toCol = door.to % ROOM_COLS;
+      const toRow = Math.floor(door.to / ROOM_COLS);
+      if (Math.abs(fromCol - toCol) + Math.abs(fromRow - toRow) !== 1) {
+        throw new Error('Door ' + door.id + ' must join neighboring rooms.');
+      }
+      if (fromRow === toRow) {
+        const x = Math.max(fromCol, toCol) * ROOM_W;
+        const roomTop = fromRow * ROOM_H;
+        return Array.from({ length:5 }, (_, index) => ({ x, y:roomTop + 23 + index }));
+      }
+      const y = Math.max(fromRow, toRow) * ROOM_H;
+      const roomLeft = fromCol * ROOM_W;
+      const upperFloor = Math.min(fromRow, toRow) * ROOM_H + 28;
+      return Array.from({ length:5 }, (_, index) => ({ x:roomLeft + 22 + index, y:upperFloor }))
+        .concat(Array.from({ length:5 }, (_, index) => ({ x:roomLeft + 22 + index, y })));
+    }
+
     function buildWorldGrid() {
-      // Room shells and low corridor floors. Openings form one connected 3-by-2 loop.
+      doorTileLookup.clear();
       for (let y = 0; y < MAP_H; y++) {
         setTile(0, y, TILE.ROCK);
         setTile(MAP_W - 1, y, TILE.ROCK);
@@ -209,46 +296,37 @@
         setTile(x, 0, TILE.ROCK);
         setTile(x, MAP_H - 1, TILE.ROCK);
       }
-      for (const boundaryX of [ROOM_W, ROOM_W * 2]) {
-        for (let y = 1; y < MAP_H - 1; y++) setTile(boundaryX, y, TILE.ROCK);
-        for (let row = 0; row < ROOM_ROWS; row++) {
-          const roomTop = row * ROOM_H;
-          for (let y = roomTop + 23; y <= roomTop + 27; y++) setTile(boundaryX, y, AIR);
-        }
+      for (let col = 1; col < ROOM_COLS; col++) {
+        for (let y = 1; y < MAP_H - 1; y++) setTile(col * ROOM_W, y, TILE.ROCK);
       }
-      const lowerBoundaryY = ROOM_H;
-      for (let x = 1; x < MAP_W - 1; x++) setTile(x, lowerBoundaryY, TILE.ROCK);
-      for (let col = 0; col < ROOM_COLS; col++) {
-        const center = col * ROOM_W + 22;
-        for (let x = center; x <= center + 4; x++) setTile(x, lowerBoundaryY, AIR);
+      for (let row = 1; row < ROOM_ROWS; row++) {
+        for (let x = 1; x < MAP_W - 1; x++) setTile(x, row * ROOM_H, TILE.ROCK);
       }
 
-      for (let row = 0; row < ROOM_ROWS; row++) {
-        for (let col = 0; col < ROOM_COLS; col++) {
-          const rx = col * ROOM_W;
-          const ry = row * ROOM_H;
-          const floor = ry + 28;
-          // Leave a wide vertical shaft through each chamber to the lower loop.
-          for (let x = rx + 1; x < rx + ROOM_W - 1; x++) {
-            if (row === 0 && x >= rx + 22 && x <= rx + 26) continue;
-            setTile(x, floor, TILE.ROCK);
-          }
-          // A pair of low ramps and a high shelf make the tile slopes visible and traversable.
-          addRamp(rx + 7, floor - 2, 5, 'up', floor);
-          addRamp(rx + 34, floor - 6, 5, 'down', floor);
-          fillRect(rx + 16, ry + 17, 9, 1, TILE.ROCK);
-          fillRect(rx + 28, ry + 12, 7, 1, TILE.ROCK);
-          // A small bumper tower gives each room a recognizable silhouette.
-          fillRect(rx + 5, ry + 22, 2, 5, TILE.ROCK);
-          fillRect(rx + 40, ry + 19, 2, 8, TILE.ROCK);
+      for (const room of ROOM_DEFS) {
+        const col = room.id % ROOM_COLS;
+        const row = Math.floor(room.id / ROOM_COLS);
+        const rx = col * ROOM_W;
+        const ry = row * ROOM_H;
+        const floor = ry + 28;
+        for (let x = rx + 1; x < rx + ROOM_W - 1; x++) {
+          setTile(x, floor, TILE.ROCK);
         }
+
+        const layout = ROOM_LAYOUTS[room.id % ROOM_LAYOUTS.length];
+        for (const ramp of layout.ramps) addRamp(rx + ramp.x, floor - ramp.lift, ramp.steps, ramp.direction, floor);
+        for (const [x, y, width] of layout.shelves) fillRect(rx + x, ry + y, width, 1, TILE.ROCK);
+        for (const [x, y, width, height] of layout.blocks) fillRect(rx + x, ry + y, width, height, TILE.ROCK);
       }
 
-      // Broken plating hides a shortcut in Foundry; the far vault has another sealed flank.
-      fillRect(ROOM_W + 31, ROOM_H + 21, 1, 6, TILE.CRACK);
-      fillRect(ROOM_W * 2 + 38, ROOM_H + 15, 1, 6, TILE.CRACK);
-      // The boss gate is permanent until the Core Warden falls.
-      fillRect(ROOM_W * 2 + 39, ROOM_H + 23, 1, 5, TILE.GATE);
+      for (const door of DOOR_DEFS) {
+        door.cells = doorCells(door);
+        const type = door.breakable ? TILE.CRACK : door.requires ? TILE.GATE : AIR;
+        for (const cell of door.cells) {
+          setTile(cell.x, cell.y, type);
+          if (type !== AIR) doorTileLookup.set(cell.x + ',' + cell.y, door.id);
+        }
+      }
     }
     buildWorldGrid();
     const worldChunks = packWorldChunks(grid);
@@ -294,34 +372,70 @@
     }
 
     const pickupDefs = [
-      { id: 'score-a', kind: 'score', x: 5 * CELL, y: 24 * CELL, amount: 500 },
-      { id: 'ammo-a', kind: 'ammo', x: 20 * CELL, y: 26 * CELL, amount: 1 },
-      { id: 'ghost', kind: 'upgrade', upgrade: 'ghost', x: 14 * CELL, y: 25 * CELL },
-      { id: 'score-b', kind: 'score', x: 44 * CELL, y: 25 * CELL, amount: 500 },
-      { id: 'virtual', kind: 'upgrade', upgrade: 'virtual', x: 80 * CELL, y: 15 * CELL },
-      { id: 'echo-lens', kind: 'upgrade', upgrade: 'echo', x: 128 * CELL, y: 17 * CELL },
-      { id: 'score-c', kind: 'score', x: 119 * CELL, y: 25 * CELL, amount: 500 },
-      { id: 'spider-ball', kind: 'upgrade', upgrade: 'grip', x: 11 * CELL, y: 47 * CELL },
-      { id: 'bomb-kit', kind: 'upgrade', upgrade: 'bomb', x: 37 * CELL, y: 55 * CELL },
-      { id: 'ammo-b', kind: 'ammo', x: 45 * CELL, y: 58 * CELL, amount: 1 },
-      { id: 'super-bomb', kind: 'upgrade', upgrade: 'super', x: 77 * CELL, y: 52 * CELL },
-      { id: 'score-d', kind: 'score', x: 67 * CELL, y: 58 * CELL, amount: 500 },
-      { id: 'phase-bomb', kind: 'upgrade', upgrade: 'phase', x: 127 * CELL, y: 49 * CELL },
-      { id: 'ammo-c', kind: 'ammo', x: 138 * CELL, y: 58 * CELL, amount: 1 }
+      { id:'score-dock', kind:'score', ...roomPoint(0,4,24), amount:500 },
+      { id:'ammo-coil', kind:'ammo', ...roomPoint(1,18,24), amount:1 },
+      { id:'ghost', kind:'upgrade', upgrade:'ghost', ...roomPoint(1,25,23) },
+      { id:'score-gallery', kind:'score', ...roomPoint(2,24,24), amount:500 },
+      { id:'virtual', kind:'upgrade', upgrade:'virtual', ...roomPoint(3,23,13) },
+      { id:'echo-lens', kind:'upgrade', upgrade:'echo', ...roomPoint(4,20,24) },
+      { id:'ammo-gallery', kind:'ammo', ...roomPoint(2,17,24), amount:1 },
+      { id:'score-sump', kind:'score', ...roomPoint(5,25,24), amount:500 },
+      { id:'score-junction', kind:'score', ...roomPoint(6,21,24), amount:500 },
+      { id:'bomb-kit', kind:'upgrade', upgrade:'bomb', ...roomPoint(7,23,24) },
+      { id:'ammo-bulkhead', kind:'ammo', ...roomPoint(11,29,24), amount:2 },
+      { id:'spider-ball', kind:'upgrade', upgrade:'grip', ...roomPoint(8,27,24) },
+      { id:'score-observatory', kind:'score', ...roomPoint(9,16,23), amount:500 },
+      { id:'ammo-underloop', kind:'ammo', ...roomPoint(10,32,24), amount:1 },
+      { id:'score-foundry', kind:'score', ...roomPoint(12,24,24), amount:750 },
+      { id:'super-bomb', kind:'upgrade', upgrade:'super', ...roomPoint(12,27,24) },
+      { id:'ammo-needle', kind:'ammo', ...roomPoint(13,30,24), amount:1 },
+      { id:'phase-bomb', kind:'upgrade', upgrade:'phase', ...roomPoint(14,26,13) },
+      { id:'score-reservoir', kind:'score', ...roomPoint(15,26,24), amount:750 },
+      { id:'ammo-spider', kind:'ammo', ...roomPoint(16,24,24), amount:1 },
+      { id:'score-capacitor', kind:'score', ...roomPoint(17,29,24), amount:750 },
+      { id:'ammo-superforge', kind:'ammo', ...roomPoint(18,25,24), amount:2 },
+      { id:'core-cache', kind:'score', ...roomPoint(19,29,24), amount:1000 }
     ];
 
     const echoGemDefs = [
-      { id: 'echo-gem-a', kind: 'echoGem', x: 27 * CELL, y: 14 * CELL },
-      { id: 'echo-gem-b', kind: 'echoGem', x: 61 * CELL, y: 14 * CELL }
+      { id:'echo-gem-dock', kind:'echoGem', ...roomPoint(0,29,21) },
+      { id:'echo-gem-coil', kind:'echoGem', ...roomPoint(1,24,21) },
+      { id:'echo-gem-gallery', kind:'echoGem', ...roomPoint(2,24,20) },
+      { id:'echo-gem-sump', kind:'echoGem', ...roomPoint(5,27,16) },
+      { id:'echo-gem-junction', kind:'echoGem', ...roomPoint(6,24,20) },
+      { id:'echo-gem-bay', kind:'echoGem', ...roomPoint(7,24,21) },
+      { id:'echo-gem-crown', kind:'echoGem', ...roomPoint(3,8,15) }
     ];
 
+    const bumperDefs = ROOM_DEFS.flatMap(room => {
+      const drift = room.id % 3;
+      return [
+        { id:'bumper-' + room.id + '-a', ...roomPoint(room.id,17 + drift,22), score:50 },
+        { id:'bumper-' + room.id + '-b', ...roomPoint(room.id,31 - drift,22), score:50 }
+      ];
+    });
+
     const enemyDefs = [
-      { id:'mite-1', x:27 * CELL, y:26 * CELL, minX:25 * CELL, maxX:34 * CELL, hp:1 },
-      { id:'mite-2', x:60 * CELL, y:25 * CELL, minX:55 * CELL, maxX:67 * CELL, hp:2 },
-      { id:'shield-1', x:105 * CELL, y:25 * CELL, minX:99 * CELL, maxX:112 * CELL, hp:3, shielded:true },
-      { id:'mite-3', x:33 * CELL, y:57 * CELL, minX:29 * CELL, maxX:38 * CELL, hp:2 },
-      { id:'shield-2', x:75 * CELL, y:57 * CELL, minX:70 * CELL, maxX:84 * CELL, hp:3, shielded:true },
-      { id:'core-warden', x:134 * CELL, y:(ROOM_H + 26) * CELL, minX:130 * CELL, maxX:139 * CELL, hp:8, boss:true, shielded:true }
+      enemyInRoom('mite-dock',0,29,25,25,35,1),
+      enemyInRoom('mite-coil',1,21,25,18,28,2),
+      enemyInRoom('mite-gallery',2,30,24,26,36,2),
+      enemyInRoom('mite-crown',3,19,23,16,27,1),
+      enemyInRoom('shield-echo',4,29,24,25,36,2,{ shielded:true }),
+      enemyInRoom('mite-sump',5,30,24,25,37,1),
+      enemyInRoom('mite-junction',6,27,23,23,34,2),
+      enemyInRoom('shield-bay',7,29,24,25,37,2,{ shielded:true }),
+      enemyInRoom('mite-spinner',8,22,22,18,29,2),
+      enemyInRoom('mite-observatory',9,37,24,33,43,1),
+      enemyInRoom('mite-underloop',10,25,24,21,32,2),
+      enemyInRoom('mite-bulkhead',11,31,24,27,38,1),
+      enemyInRoom('shield-foundry',12,23,22,20,29,2,{ shielded:true }),
+      enemyInRoom('mite-needle',13,20,24,16,27,1),
+      enemyInRoom('shield-phase',14,30,24,25,37,2,{ shielded:true }),
+      enemyInRoom('mite-reservoir',15,31,24,27,39,2),
+      enemyInRoom('mite-spider',16,24,23,20,31,1),
+      enemyInRoom('shield-capacitor',17,29,24,25,37,2,{ shielded:true }),
+      enemyInRoom('mite-superforge',18,22,24,18,29,2),
+      enemyInRoom('core-warden',19,25,22,20,30,8,{ boss:true, shielded:true })
     ];
 
     class PinballThingyScene extends Phaser.Scene {
@@ -348,7 +462,7 @@
         this.visitedRooms = new Set([0]);
         this.currentRoom = 0;
         this.selectedBomb = 'standard';
-        this.lastFlipper = 'left';
+        this.lastFlipper = null;
         this.airUses = { ghost: false, virtual: false };
         this.groundedUntil = 0;
         this.playerIFrameUntil = 0;
@@ -359,17 +473,22 @@
         this.lastPlayerHit = 0;
         this.spiderEnabled = false;
         this.spiderAttached = null;
+        this.nextSpiderAttachAt = 0;
         this.paused = false;
         this.deathLockUntil = 0;
         this.bombs = [];
         this.enemies = [];
         this.pickups = [];
         this.dropPickups = [];
+        this.enemyDropDefs = new Map();
         this.terrainBodies = [];
+        this.bumpers = [];
+        this.flippers = [];
         this.bossKilled = false;
         this.bossHealth = 8;
         this.lastHudUpdate = 0;
         this.playerFacing = 1;
+        this.playerFlipperContactUntil = 0;
         this.sfxCursor = Object.create(null);
         this.sfxLastAt = Object.create(null);
 
@@ -381,11 +500,13 @@
         this.buildTerrainBodies();
         this.createRoomDecor();
         this.createFlippers();
+        this.createBumpers();
         this.createPlayer();
         this.createEnemies();
         this.createPickups();
         this.createKeyboard();
         this.bindPhysicsEvents();
+        this.createWorldMap();
 
         this.cameras.main.setBounds(0, 0, WORLD_W, WORLD_H);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -530,6 +651,7 @@
         add('upgrade', ctx => diamond(ctx,'#fff',true));
         add('gem', ctx => { diamond(ctx,'#fff',false); pixel(ctx,7,6,2,4,'#000'); });
         add('grip', ctx => { pixel(ctx,3,7,10,2); pixel(ctx,7,3,2,10); pixel(ctx,4,4,2,2); pixel(ctx,10,4,2,2); pixel(ctx,4,10,2,2); pixel(ctx,10,10,2,2); });
+        add('bumper', ctx => { disk(ctx,8,8,7.5,'#fff'); disk(ctx,8,8,5.5,'#000'); disk(ctx,8,8,3,'#fff'); pixel(ctx,7,2,2,2,'#000'); pixel(ctx,7,12,2,2,'#000'); pixel(ctx,2,7,2,2,'#000'); pixel(ctx,12,7,2,2,'#000'); });
         const columns = 6, rows = Math.ceil(frames.length / columns);
         const texture = this.textures.createCanvas('pinballThingySprites', columns * CELL, rows * CELL);
         const ctx = texture.getContext();
@@ -554,29 +676,30 @@
         this.terrainBodies.length = 0;
         const seen = Array.from({ length:MAP_H }, () => Array(MAP_W).fill(false));
         const common = {
-          isStatic:true, friction:0.1, frictionStatic:0.35, restitution:0.03,
+          isStatic:true, friction:0.06, frictionStatic:0.25, restitution:0.15,
           collisionFilter:{ category:CAT.TERRAIN, mask:CAT.PLAYER | CAT.ENEMY | CAT.BOMB }
         };
-        const addRect = (tx, ty, w, h, type) => {
+        const addRect = (tx, ty, w, h, type, doorId) => {
           const body = this.matter.add.rectangle((tx + w / 2) * CELL, (ty + h / 2) * CELL, w * CELL, h * CELL, { ...common, label:type === TILE.GATE ? 'gate' : 'terrain' });
-          body.plugin.gameMeta = { kind:type === TILE.CRACK ? 'breakable' : 'terrain', tx, ty, w, h };
+          body.plugin.gameMeta = { kind:type === TILE.CRACK ? 'breakable' : 'terrain', tx, ty, w, h, doorId:doorId || null };
           this.terrainBodies.push(body);
         };
         for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
           const type = grid[y][x];
           if (seen[y][x] || rampUnderlay.has(x + ',' + y) || (type !== TILE.ROCK && type !== TILE.GATE)) continue;
+          const doorId = type === TILE.GATE ? doorTileLookup.get(x + ',' + y) : null;
           let width = 1;
-          while (x + width < MAP_W && !seen[y][x + width] && !rampUnderlay.has((x + width) + ',' + y) && grid[y][x + width] === type) width++;
+          while (x + width < MAP_W && !seen[y][x + width] && !rampUnderlay.has((x + width) + ',' + y) && grid[y][x + width] === type && (type !== TILE.GATE || doorTileLookup.get((x + width) + ',' + y) === doorId)) width++;
           let height = 1;
           outer: while (y + height < MAP_H) {
-            for (let xx = x; xx < x + width; xx++) if (seen[y + height][xx] || rampUnderlay.has(xx + ',' + (y + height)) || grid[y + height][xx] !== type) break outer;
+            for (let xx = x; xx < x + width; xx++) if (seen[y + height][xx] || rampUnderlay.has(xx + ',' + (y + height)) || grid[y + height][xx] !== type || (type === TILE.GATE && doorTileLookup.get(xx + ',' + (y + height)) !== doorId)) break outer;
             height++;
           }
           for (let yy = y; yy < y + height; yy++) for (let xx = x; xx < x + width; xx++) seen[yy][xx] = true;
-          addRect(x, y, width, height, type);
+          addRect(x, y, width, height, type, doorId);
         }
         for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
-          if (grid[y][x] === TILE.CRACK) addRect(x, y, 1, 1, TILE.CRACK);
+          if (grid[y][x] === TILE.CRACK) addRect(x, y, 1, 1, TILE.CRACK, doorTileLookup.get(x + ',' + y));
         }
         const Matter = Phaser.Physics.Matter.Matter;
         for (const ramp of rampRuns) {
@@ -600,22 +723,176 @@
         const decor = this.add.graphics().setDepth(1);
         decor.lineStyle(1, 0xffffff, 1);
         for (let col = 1; col < ROOM_COLS; col++) decor.lineBetween(col * ROOM_W * CELL, 0, col * ROOM_W * CELL, WORLD_H);
-        decor.lineBetween(0, ROOM_H * CELL, WORLD_W, ROOM_H * CELL);
+        for (let row = 1; row < ROOM_ROWS; row++) decor.lineBetween(0, row * ROOM_H * CELL, WORLD_W, row * ROOM_H * CELL);
       }
 
       createFlippers() {
         this.flippers = [];
-        for (let row = 0; row < ROOM_ROWS; row++) for (let col = 0; col < ROOM_COLS; col++) {
-          const rx = col * ROOM_W;
-          const ry = row * ROOM_H;
-          this.flippers.push({ x:(rx + 12) * CELL, y:(ry + 27) * CELL, side:'left', room:row * ROOM_COLS + col });
-          this.flippers.push({ x:(rx + 36) * CELL, y:(ry + 27) * CELL, side:'right', room:row * ROOM_COLS + col });
-          this.flippers.push({ x:(rx + 23) * CELL, y:(ry + 15) * CELL, side:col % 2 ? 'right' : 'left', room:row * ROOM_COLS + col });
+        const Matter = Phaser.Physics.Matter.Matter;
+        for (const room of ROOM_DEFS) {
+          for (const side of ['left', 'right']) {
+            const pivot = roomPoint(room.id, side === 'left' ? 16.5 : 31.5, 27);
+            const restAngle = side === 'left' ? 0.12 : Math.PI - 0.12;
+            const raisedAngle = side === 'left' ? -0.65 : Math.PI + 0.65;
+            const length = BALL.flipperLength;
+            const width = BALL.flipperWidth;
+            const center = { x:pivot.x + Math.cos(restAngle) * length / 2, y:pivot.y + Math.sin(restAngle) * length / 2 };
+            const paddle = this.add.rectangle(center.x, center.y, length, width, 0xffffff).setDepth(3).setStrokeStyle(2, 0x000000, 1);
+            this.matter.add.gameObject(paddle, {
+              shape:{ type:'rectangle', width:length, height:width }, label:'flipper',
+              isStatic:false, ignoreGravity:true, density:0.01, friction:0, frictionAir:0,
+              restitution:0.02,
+              collisionFilter:{ category:CAT.FLIPPER, mask:CAT.PLAYER }
+            });
+            paddle.body.plugin.gameMeta = { kind:'flipper', side, room:room.id, pivot, length, restAngle, raisedAngle, angle:restAngle, nextHitAt:0, hasFiredThisPress:false };
+            Matter.Body.setAngle(paddle.body, restAngle);
+            this.flippers.push(paddle);
+          }
         }
-        const g = this.add.graphics().setDepth(3);
-        for (const pad of this.flippers) {
-          g.lineStyle(1, 0xffffff, 1).strokeRect(pad.x - 16, pad.y - 4, 32, 8);
-          g.lineStyle(2, 0xffffff, 1).lineBetween(pad.x - 12, pad.y + 1, pad.x + 12, pad.y - (pad.side === 'left' ? 4 : -4));
+      }
+
+      createBumpers() {
+        this.bumpers = [];
+        for (const def of bumperDefs) {
+          const bumper = this.add.sprite(def.x, def.y, 'pinballThingySprites', 'bumper').setDepth(4).setDisplaySize(30, 30);
+          this.matter.add.gameObject(bumper, {
+            shape:{ type:'circle', radius:15 }, label:'bumper', isStatic:true,
+            friction:0, restitution:0.92,
+            collisionFilter:{ category:CAT.BUMPER, mask:CAT.PLAYER }
+          });
+          bumper.body.plugin.gameMeta = { kind:'bumper', id:def.id, score:def.score, x:def.x, y:def.y, lastHitAt:-Infinity };
+          this.bumpers.push(bumper);
+        }
+      }
+
+      updateFlippers(time, delta) {
+        const Matter = Phaser.Physics.Matter.Matter;
+        const leftPressed = this.keys.left.isDown || this.keys.a.isDown;
+        const rightPressed = this.keys.right.isDown || this.keys.d.isDown;
+        const step = Phaser.Math.Clamp(delta, 0, 34) * BALL.flipperSwingRate;
+        for (const paddle of this.flippers) {
+          const meta = paddle.body.plugin.gameMeta;
+          const wasPressed = meta.pressed;
+          const roomIsActive = meta.room === this.currentRoom;
+          meta.pressed = roomIsActive && (meta.side === 'left' ? leftPressed : rightPressed);
+          if (meta.pressed && !wasPressed) meta.hasFiredThisPress = false;
+          if (meta.pressed) meta.activeUntil = time + 180;
+          else if (time > (meta.activeUntil || 0)) meta.hasFiredThisPress = false;
+          const target = meta.pressed ? meta.raisedAngle : meta.restAngle;
+          const angleDelta = Phaser.Math.Angle.Wrap(target - meta.angle);
+          meta.angle += Phaser.Math.Clamp(angleDelta, -step, step);
+          const center = {
+            x:meta.pivot.x + Math.cos(meta.angle) * meta.length / 2,
+            y:meta.pivot.y + Math.sin(meta.angle) * meta.length / 2
+          };
+          Matter.Body.setPosition(paddle.body, center, true);
+          Matter.Body.setAngle(paddle.body, meta.angle, true);
+        }
+      }
+
+      hitFlipper(meta) {
+        const now = this.time.now;
+        if (!meta || meta.hasFiredThisPress || (!meta.pressed && now > (meta.activeUntil || 0)) || now < meta.nextHitAt || now < this.deathLockUntil) return;
+        meta.hasFiredThisPress = true;
+        meta.nextHitAt = now + BALL.flipCooldownMs;
+        this.nextFlipAt = now + BALL.flipCooldownMs;
+        this.initialLaunchAvailable = false;
+        this.lastFlipper = meta.side;
+        this.airUses = { ghost:false, virtual:false };
+        this.playerFlipperContactUntil = now + 60;
+        const toward = meta.side === 'left' ? 1 : -1;
+        const axisX = Math.cos(meta.angle);
+        const axisY = Math.sin(meta.angle);
+        const along = Phaser.Math.Clamp(((this.player.x - meta.pivot.x) * axisX + (this.player.y - meta.pivot.y) * axisY) / meta.length, 0, 1);
+        const aimBias = (along - 0.55) * 2.2;
+        const velocity = this.player.body.velocity;
+        const vx = Phaser.Math.Clamp(velocity.x * 0.3 + toward * (BALL.flipXKick + aimBias), -10, 10);
+        const lift = BALL.flipYKick * (0.86 + (1 - along) * 0.14);
+        const vy = Math.min(velocity.y, 0) - lift;
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
+        this.groundedUntil = 0;
+        this.groundSurface = null;
+        this.groundContactUntil = 0;
+        this.playerFacing = toward;
+        this.playSfx('movement');
+      }
+
+      hitBumper(meta) {
+        const now = this.time.now;
+        if (!meta || now - meta.lastHitAt < BALL.bumperCooldownMs || now < this.deathLockUntil) return;
+        meta.lastHitAt = now;
+        let nx = this.player.x - meta.x;
+        let ny = this.player.y - meta.y - 8;
+        let length = Math.hypot(nx, ny);
+        if (length < 0.001) { nx = this.player.body.velocity.x; ny = this.player.body.velocity.y; length = Math.hypot(nx, ny); }
+        if (length < 0.001) { nx = 0; ny = -1; length = 1; }
+        nx /= length; ny /= length;
+        const kick = Phaser.Math.Clamp(Math.hypot(this.player.body.velocity.x, this.player.body.velocity.y) * 0.7 + 5.5, 8.5, 12);
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:nx * kick, y:ny * kick });
+        this.changeScore(meta.score || 50);
+        this.playSfx('movement');
+      }
+
+      createWorldMap() {
+        const map = document.getElementById('world-map');
+        this.mapRoutes = document.getElementById('map-routes');
+        for (const room of ROOM_DEFS) {
+          const node = document.createElement('div');
+          node.id = 'room-' + room.id;
+          node.className = 'room-node';
+          node.textContent = room.name;
+          node.setAttribute('aria-label', 'Room ' + (room.id + 1) + ': ' + room.name);
+          map.appendChild(node);
+        }
+        this.scale.on('resize', this.updateWorldMap, this);
+        this.updateWorldMap();
+      }
+
+      doorIsOpen(door) {
+        if (door.breakable) return door.cells.every(cell => grid[cell.y][cell.x] === AIR);
+        return !door.requires || !!this.upgrades[door.requires];
+      }
+
+      updateWorldMap() {
+        if (!this.mapRoutes) return;
+        const reachable = new Set([0]);
+        const queue = [0];
+        while (queue.length) {
+          const roomId = queue.shift();
+          for (const door of DOOR_DEFS) {
+            if (!this.doorIsOpen(door)) continue;
+            const next = door.from === roomId ? door.to : door.to === roomId ? door.from : -1;
+            if (next >= 0 && !reachable.has(next)) { reachable.add(next); queue.push(next); }
+          }
+        }
+        for (const room of ROOM_DEFS) {
+          const node = document.getElementById('room-' + room.id);
+          if (!node) continue;
+          const known = this.visitedRooms.has(room.id) || reachable.has(room.id);
+          node.textContent = known ? room.name : '????';
+          node.classList.toggle('current', this.currentRoom === room.id);
+          node.classList.toggle('visited', this.visitedRooms.has(room.id));
+          node.classList.toggle('reachable', reachable.has(room.id) && !this.visitedRooms.has(room.id));
+          const locked = DOOR_DEFS.some(door => !this.doorIsOpen(door) && ((door.from === room.id && reachable.has(door.to)) || (door.to === room.id && reachable.has(door.from))));
+          node.classList.toggle('locked', locked);
+        }
+        const rect = document.getElementById('world-map').getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        this.mapRoutes.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+        this.mapRoutes.replaceChildren();
+        for (const door of DOOR_DEFS) {
+          const from = document.getElementById('room-' + door.from).getBoundingClientRect();
+          const to = document.getElementById('room-' + door.to).getBoundingClientRect();
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', from.left + from.width / 2 - rect.left);
+          line.setAttribute('y1', from.top + from.height / 2 - rect.top);
+          line.setAttribute('x2', to.left + to.width / 2 - rect.left);
+          line.setAttribute('y2', to.top + to.height / 2 - rect.top);
+          line.setAttribute('stroke', '#fff');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('opacity', this.doorIsOpen(door) ? '0.9' : '0.55');
+          if (!this.doorIsOpen(door)) line.setAttribute('stroke-dasharray', '4 2');
+          this.mapRoutes.appendChild(line);
         }
       }
 
@@ -631,11 +908,11 @@
       }
 
       createPlayer() {
-        const start = { x:12 * CELL, y:27 * CELL };
+        const start = { x:15 * CELL, y:27 * CELL };
         this.spawn = start;
         this.player = this.createMatterCircle(start.x, start.y, BALL.radius, {
           label:'player', friction:0.08, frictionStatic:0.2, frictionAir:0.0015, restitution:0.04, density:0.006,
-          collisionFilter:{ category:CAT.PLAYER, mask:CAT.TERRAIN | CAT.ENEMY | CAT.PICKUP }
+          collisionFilter:{ category:CAT.PLAYER, mask:CAT.TERRAIN | CAT.ENEMY | CAT.PICKUP | CAT.BUMPER | CAT.FLIPPER }
         }, { kind:'player' });
         this.rollAngle = 0;
         this.groundSurface = null;
@@ -687,8 +964,17 @@
             const b = pair.bodyB;
             const ma = a.plugin && a.plugin.gameMeta;
             const mb = b.plugin && b.plugin.gameMeta;
-            if (ma && ma.kind === 'player') { this.handlePlayerContact(b, mb, pair); if (mb && (mb.kind === 'terrain' || mb.kind === 'breakable')) this.playSurfaceSfx(pair); }
-            else if (mb && mb.kind === 'player') { this.handlePlayerContact(a, ma, pair); if (ma && (ma.kind === 'terrain' || ma.kind === 'breakable')) this.playSurfaceSfx(pair); }
+            if (ma && ma.kind === 'player') {
+              this.handlePlayerContact(b, mb, pair);
+              if (mb && (mb.kind === 'terrain' || mb.kind === 'breakable')) this.playSurfaceSfx(pair);
+              if (mb && mb.kind === 'flipper') this.hitFlipper(mb);
+              if (mb && mb.kind === 'bumper') this.hitBumper(mb);
+            } else if (mb && mb.kind === 'player') {
+              this.handlePlayerContact(a, ma, pair);
+              if (ma && (ma.kind === 'terrain' || ma.kind === 'breakable')) this.playSurfaceSfx(pair);
+              if (ma && ma.kind === 'flipper') this.hitFlipper(ma);
+              if (ma && ma.kind === 'bumper') this.hitBumper(ma);
+            }
             if (ma && ma.kind === 'bomb') this.handleBombContact(ma, b, mb);
             else if (mb && mb.kind === 'bomb') this.handleBombContact(mb, a, ma);
             if ((ma && ma.kind === 'player') || (mb && mb.kind === 'player')) this.attachSpiderBall(pair);
@@ -703,6 +989,12 @@
             if (ma && ma.kind === 'player' && mb && (mb.kind === 'terrain' || mb.kind === 'breakable')) {
               this.handlePlayerContact(b, mb, pair);
               this.refreshSpiderSurface(pair);
+            } else if (ma && ma.kind === 'player' && mb && mb.kind === 'flipper') {
+              this.playerFlipperContactUntil = this.time.now + 45;
+              this.hitFlipper(mb);
+            } else if (mb && mb.kind === 'player' && ma && ma.kind === 'flipper') {
+              this.playerFlipperContactUntil = this.time.now + 45;
+              this.hitFlipper(ma);
             } else if (mb && mb.kind === 'player' && ma && (ma.kind === 'terrain' || ma.kind === 'breakable')) {
               this.handlePlayerContact(a, ma, pair);
               this.refreshSpiderSurface(pair);
@@ -772,16 +1064,16 @@
         this.lastPlayerHit = this.time.now;
         this.playSfx('damage');
         if (enemyMeta.shielded) {
-          this.changeScore(-500);
-          this.showNotice('Shielded alien: bombs only. Hull −500.');
+          if (this.ammo > 0) this.ammo -= 1;
+          else this.changeScore(-500);
         } else if (this.ammo > 0) {
           this.ammo -= 1;
           this.damageEnemy(enemyMeta, 1);
-          this.showNotice('Impact blast absorbed with 1 ammo. Enemy takes 1 damage.');
         } else {
           this.changeScore(-500);
-          this.showNotice('Out of ammo. Hull −500. Find a refill.');
         }
+        if (this.time.now < this.deathLockUntil) return;
+        this.updateHud(true);
         const direction = this.player.x < (enemyMeta.id ? this.enemyX(enemyMeta.id) : this.player.x + 1) ? -1 : 1;
         const Matter = Phaser.Physics.Matter.Matter;
         Matter.Body.setVelocity(this.player.body, { x: direction * 4.5, y: -5.5 });
@@ -812,8 +1104,9 @@
           if (def.upgrade === 'bomb') this.selectedBomb = 'standard';
           if (def.upgrade === 'super' && this.selectedBomb === 'standard') this.selectedBomb = 'super';
           if (def.upgrade === 'phase') this.selectedBomb = 'phase';
-          this.showNotice(`${UPGRADE_LABELS[def.upgrade] || 'Upgrade'} acquired.`);
+          this.openUnlockedDoors();
           if (def.upgrade === 'echo') this.revealEchoGems();
+          this.updateWorldMap();
         } else if (def.kind === 'echoGem') {
           this.collectedGems.add(def.id);
           this.echoCharges += 1;
@@ -859,12 +1152,18 @@
         if (meta.boss) {
           this.bossKilled = true;
           this.bossHealth = 0;
-          this.showNotice('CORE WARDEN DISABLED. The vault gate is open permanently.');
-          this.openBossGate();
-        } else {
-          this.spawnPickup({ id: `drop-score-${meta.id}-${this.time.now}`, kind: 'score', x: x - 8, y, amount: 500 }, true);
-          this.spawnPickup({ id: `drop-ammo-${meta.id}-${this.time.now}`, kind: 'ammo', x: x + 9, y, amount: 1 }, true);
-          this.showNotice('Alien down. Score pellet + ammo dropped.');
+        }
+        if (!this.enemyDropDefs.has(meta.id)) {
+          const scoreAmount = meta.boss ? 2000 : 500;
+          const ammoAmount = meta.boss ? 3 : 1;
+          this.enemyDropDefs.set(meta.id, [
+            { id:`drop-score-${meta.id}`, kind:'score', x:x - 9, y, amount:scoreAmount },
+            { id:`drop-ammo-${meta.id}`, kind:'ammo', x:x + 9, y, amount:ammoAmount }
+          ]);
+        }
+        for (const drop of this.enemyDropDefs.get(meta.id)) {
+          const exists = this.pickups.some(item => item.body.plugin.gameMeta.def.id === drop.id);
+          if (!exists) this.spawnPickup({ ...drop }, true);
         }
         this.enemies = this.enemies.filter(item => item !== enemy);
         this.matter.world.remove(enemy.body);
@@ -872,20 +1171,23 @@
         this.updateHud(true);
       }
 
-      openBossGate() {
+      openUnlockedDoors() {
         let changed = false;
-        for (let y = ROOM_H + 23; y < ROOM_H + 28; y++) {
-          const x = ROOM_W * 2 + 39;
-          if (grid[y][x] === TILE.GATE) {
-            grid[y][x] = AIR;
-            this.tileLayer.removeTileAt(x, y);
+        for (const door of DOOR_DEFS) {
+          if (door.breakable || !door.requires || !this.upgrades[door.requires]) continue;
+          for (const cell of door.cells) {
+            if (grid[cell.y][cell.x] !== TILE.GATE) continue;
+            grid[cell.y][cell.x] = AIR;
+            doorTileLookup.delete(cell.x + ',' + cell.y);
+            if (this.tileLayer) this.tileLayer.removeTileAt(cell.x, cell.y);
             changed = true;
           }
         }
         if (changed) this.buildTerrainBodies();
+        this.updateWorldMap();
       }
 
-      lineBlocked(x1, y1, x2, y2) {
+      lineBlocked(x1, y1, x2, y2, allowCrackTargets = false) {
         const distance = Phaser.Math.Distance.Between(x1, y1, x2, y2);
         const count = Math.max(1, Math.ceil(distance / 8));
         for (let i = 1; i < count; i++) {
@@ -893,7 +1195,7 @@
           const tx = Math.floor(Phaser.Math.Linear(x1, x2, t) / CELL);
           const ty = Math.floor(Phaser.Math.Linear(y1, y2, t) / CELL);
           const tile = grid[ty] && grid[ty][tx];
-          if (tile === TILE.ROCK || tile === TILE.CRACK || tile === TILE.GATE || tile === TILE.RAMP_UP || tile === TILE.RAMP_DOWN) return true;
+          if (tile === TILE.ROCK || tile === TILE.GATE || tile === TILE.RAMP_UP || tile === TILE.RAMP_DOWN || (tile === TILE.CRACK && !allowCrackTargets)) return true;
         }
         return false;
       }
@@ -977,20 +1279,20 @@
             if (grid[ty][tx] !== TILE.CRACK) continue;
             const cx = (tx + .5) * CELL, cy = (ty + .5) * CELL;
             if (Phaser.Math.Distance.Between(x, y, cx, cy) > type.radius) continue;
-            if (!meta.phase && this.lineBlocked(x, y, cx, cy)) continue;
+            if (!meta.phase && this.lineBlocked(x, y, cx, cy, true)) continue;
             grid[ty][tx] = AIR;
+            doorTileLookup.delete(tx + ',' + ty);
             this.tileLayer.removeTileAt(tx, ty);
             removedAny = true;
           }
         }
-        if (removedAny) this.buildTerrainBodies();
+        if (removedAny) { this.buildTerrainBodies(); this.updateWorldMap(); }
         const bomb = meta.object;
         this.bombs = this.bombs.filter(entry => entry !== bomb);
         if (bomb && bomb.active) {
           this.matter.world.remove(bomb.body);
           bomb.destroy();
         }
-        this.showNotice(`${type.label} blast · ${type.damage} damage${removedAny ? ' · plating broken' : ''}.`);
       }
 
       sampleRampSurface(meta, x, y) {
@@ -1058,10 +1360,10 @@
           if (Math.abs(along) > .25) direction = Math.sign(along);
           else if (Math.abs(tangent.x) > .25) direction = Math.sign(tangent.x * this.playerFacing) || 1;
         }
-        this.spiderAttached = { body: contact.body, normal: contact.normal, direction, lastContactAt: this.time.now };
+        if (this.time.now < this.nextSpiderAttachAt) return;
+        this.spiderAttached = { body: contact.body, normal: contact.normal, direction, lastContactAt: this.time.now, attachedAt:this.time.now };
         const speed = BALL.spiderBallSpeed * direction;
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: tangent.x * speed, y: tangent.y * speed });
-        if (!previous) this.showNotice('Spider Ball attached · A/D to crawl.');
       }
 
       refreshSpiderSurface(pair) {
@@ -1119,6 +1421,15 @@
           this.spiderAttached = null;
           return;
         }
+        if (time - attached.attachedAt >= BALL.spiderTraverseMs) {
+          const tangent = this.surfaceTangent(attached.normal);
+          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:tangent.x * attached.direction * BALL.spiderBallSpeed, y:tangent.y * attached.direction * BALL.spiderBallSpeed });
+          this.spiderEnabled = false;
+          this.spiderAttached = null;
+          this.nextSpiderAttachAt = time + 250;
+          this.updateHud(true);
+          return;
+        }
         const normal = attached.normal;
         const tangent = this.surfaceTangent(normal);
         const left = this.keys.left.isDown || this.keys.a.isDown;
@@ -1126,53 +1437,64 @@
         const crawlInput = Number(right) - Number(left);
         if (crawlInput) attached.direction = crawlInput;
 
-        // Hold a direction to crawl. With no input, stay attached and let the
-        // surface adhesion cancel gravity instead of drifting along the wall.
+        // The ability carries the ball along a contacted surface automatically;
+        // left or right can reverse that short traversal.
         const gravityDotNormal = GRAVITY.x * normal.x + GRAVITY.y * normal.y;
         const forceScale = this.player.body.mass * GRAVITY.scale * (gravityDotNormal + BALL.spiderAdhesion);
         this.player.body.force.x -= forceScale * normal.x;
         this.player.body.force.y -= forceScale * normal.y;
-        const speed = crawlInput ? BALL.spiderBallSpeed * attached.direction : 0;
+        const speed = BALL.spiderBallSpeed * attached.direction;
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: tangent.x * speed, y: tangent.y * speed });
       }
 
       requestFlip(side) {
-        if (this.paused || this.time.now < this.deathLockUntil) return;
+        if (this.paused || this.time.now < this.deathLockUntil || this.spiderAttached) return;
         const now = this.time.now;
-        if (this.spiderAttached) return;
-        const pad = this.flippers
-          .filter(item => item.side === side && Phaser.Math.Distance.Between(item.x, item.y, this.player.x, this.player.y) < BALL.flipReach)
-          .sort((a, b) => Phaser.Math.Distance.Between(a.x, a.y, this.player.x, this.player.y) - Phaser.Math.Distance.Between(b.x, b.y, this.player.x, this.player.y))[0];
-        if (pad && now >= this.nextFlipAt) {
-          this.nextFlipAt = now + BALL.flipCooldownMs;
-          this.initialLaunchAvailable = false;
-          this.lastFlipper = side;
-          this.airUses = { ghost: false, virtual: false };
-          this.groundedUntil = now + 200;
-          const toward = side === 'left' ? 1 : -1;
-          const velocity = this.player.body.velocity;
-          const vx = Phaser.Math.Clamp(velocity.x + toward * BALL.flipXKick, -10, 10);
-          const vy = Math.max(-12, Math.min(velocity.y, 0) - BALL.flipYKick);
-          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: vx, y: vy });
-          this.playerFacing = toward;
-          this.playSfx('movement');
-          this.showNotice(`${side === 'left' ? 'Left' : 'Right'} flipper.`);
-          return;
-        }
-        if (now > this.groundedUntil) {
-          const jump = this.findAirBounce(side);
-          if (jump) {
-            this.playerFacing = side === 'left' ? -1 : 1;
-            const velocity = this.player.body.velocity;
-            const direction = side === 'left' ? -1 : 1;
-            const vx = Phaser.Math.Clamp(velocity.x + direction * BALL.airFlipXKick, -10, 10);
-            const vy = Math.max(-12, Math.min(velocity.y, 0) - BALL.airFlipYKick);
-            Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: vx, y: vy });
-            this.playSfx('movement');
-            this.showNotice(jump);
+        const launchDirection = side === 'left' ? 1 : -1;
+        this.playerFacing = launchDirection;
+
+        // A press close to a paddle is a real flipper action, even if the ball
+        // grazes the edge between Matter steps. It is limited to the current room.
+        const paddle = this.flippers.find(item => {
+          const meta = item.body.plugin.gameMeta;
+          return meta.room === this.currentRoom && meta.side === side;
+        });
+        if (paddle) {
+          const meta = paddle.body.plugin.gameMeta;
+          const axisX = Math.cos(meta.angle);
+          const axisY = Math.sin(meta.angle);
+          const tipX = meta.pivot.x + axisX * meta.length;
+          const tipY = meta.pivot.y + axisY * meta.length;
+          const distance = this.distanceToSegment(this.player.x, this.player.y, meta.pivot.x, meta.pivot.y, tipX, tipY);
+          if (distance <= BALL.radius + BALL.flipperWidth / 2 + BALL.flipperReach) {
+            meta.pressed = true;
+            meta.activeUntil = Math.max(meta.activeUntil || 0, now + 180);
+            this.hitFlipper(meta);
             return;
           }
         }
+
+        // Air bounces are upgrades. The base ball has no platformer-style jump.
+        if (now <= this.groundedUntil || now <= this.playerFlipperContactUntil || now < this.nextFlipAt) return;
+        const jump = this.findAirBounce(side);
+        if (!jump) return;
+        const velocity = this.player.body.velocity;
+        const vx = Phaser.Math.Clamp(velocity.x + launchDirection * BALL.airFlipXKick, -10, 10);
+        const vy = Math.max(-12, Math.min(velocity.y, 0) - BALL.airFlipYKick);
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
+        this.groundedUntil = 0;
+        this.groundSurface = null;
+        this.groundContactUntil = 0;
+        this.nextFlipAt = now + BALL.flipCooldownMs;
+        this.playSfx('movement');
+      }
+
+      distanceToSegment(px, py, ax, ay, bx, by) {
+        const dx = bx - ax;
+        const dy = by - ay;
+        const lengthSquared = dx * dx + dy * dy;
+        const t = lengthSquared ? Phaser.Math.Clamp(((px - ax) * dx + (py - ay) * dy) / lengthSquared, 0, 1) : 0;
+        return Phaser.Math.Distance.Between(px, py, ax + dx * t, ay + dy * t);
       }
 
       findAirBounce(side) {
@@ -1202,18 +1524,22 @@
         if (this.time.now - this.lastNudgeAt < BALL.nudgeCooldownMs) return;
         this.lastNudgeAt = this.time.now;
         const velocity = this.player.body.velocity;
-        const vx = Phaser.Math.Clamp(velocity.x + this.playerFacing * BALL.nudgeXKick, -10, 10);
-        if (this.time.now <= this.groundedUntil || this.initialLaunchAvailable) {
+        const atPlunger = this.initialLaunchAvailable &&
+          Phaser.Math.Distance.Between(this.player.x, this.player.y, this.spawn.x, this.spawn.y) <= BALL.launchReach;
+        if (atPlunger) {
           this.initialLaunchAvailable = false;
-          const vy = Math.max(-10, Math.min(velocity.y, 0) - 6.5);
-          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: vx, y: vy });
+          const vx = Phaser.Math.Clamp(velocity.x * 0.35 + this.playerFacing * 3.4, -9, 9);
+          const vy = Math.max(-10, Math.min(velocity.y, 0) - 8.2);
+          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
           this.groundedUntil = 0;
+          this.groundSurface = null;
+          this.groundContactUntil = 0;
           this.playSfx('launch');
-          this.showNotice('Launch.');
         } else {
-          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: vx, y: velocity.y - BALL.nudgeYKick });
+          // A nudge changes the ball's course slightly; SPACE is not a repeatable jump.
+          const vx = Phaser.Math.Clamp(velocity.x + this.playerFacing * BALL.nudgeXKick, -10, 10);
+          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:velocity.y - BALL.nudgeYKick });
           this.playSfx('movement');
-          this.showNotice('Nudge.');
         }
       }
 
@@ -1223,10 +1549,14 @@
         this.deathLockUntil = this.time.now + 1000;
         this.score = this.respawnScore;
         this.ammo = this.respawnAmmo;
+        this.currentRoom = 0;
         this.airUses = { ghost: false, virtual: false };
+        this.lastFlipper = null;
         this.spiderEnabled = false;
         this.spiderAttached = null;
         this.playerIFrameUntil = this.time.now + 1000;
+        this.playerFacing = 1;
+        this.nextFlipAt = 0;
         Phaser.Physics.Matter.Matter.Body.setPosition(this.player.body, this.spawn);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x: 0, y: 0 });
         this.rollAngle = 0;
@@ -1234,7 +1564,8 @@
         this.groundedUntil = this.time.now + 180;
         this.groundSurface = null;
         this.groundContactUntil = 0;
-        this.initialLaunchAvailable = false;
+        this.initialLaunchAvailable = true;
+        this.visitedRooms.add(0);
         for (const bomb of [...this.bombs]) {
           if (bomb.active) { this.matter.world.remove(bomb.body); bomb.destroy(); }
         }
@@ -1242,6 +1573,7 @@
         for (const item of [...this.pickups]) this.removePickup(item);
         this.dropPickups.length = 0;
         for (const def of pickupDefs) this.spawnPickup({ ...def }, false);
+        for (const drops of this.enemyDropDefs.values()) for (const def of drops) this.spawnPickup({ ...def }, true);
         if (this.upgrades.echo) this.revealEchoGems();
         for (const enemy of [...this.enemies]) {
           const meta = enemy.body.plugin.gameMeta;
@@ -1282,9 +1614,10 @@
         const col = Phaser.Math.Clamp(Math.floor(this.player.x / (ROOM_W * CELL)), 0, ROOM_COLS - 1);
         const row = Phaser.Math.Clamp(Math.floor(this.player.y / (ROOM_H * CELL)), 0, ROOM_ROWS - 1);
         const nextRoom = row * ROOM_COLS + col;
-        if (nextRoom !== this.currentRoom) this.playSfx('movement');
+        const changed = nextRoom !== this.currentRoom;
         this.currentRoom = nextRoom;
         this.visitedRooms.add(this.currentRoom);
+        if (changed) { this.playSfx('movement'); this.updateWorldMap(); }
       }
 
       applyGroundSurfaceResponse(time) {
@@ -1307,17 +1640,9 @@
       update(time, delta) {
         if (!this.player) return;
         if (this.paused) return;
-        const deltaScale = Phaser.Math.Clamp(delta / PHYSICS_STEP_MS, 0, 2);
         if (!this.spiderAttached && (Phaser.Input.Keyboard.JustDown(this.keys.left) || Phaser.Input.Keyboard.JustDown(this.keys.a))) this.requestFlip('left');
         if (!this.spiderAttached && (Phaser.Input.Keyboard.JustDown(this.keys.right) || Phaser.Input.Keyboard.JustDown(this.keys.d))) this.requestFlip('right');
-        if (this.keys.left.isDown || this.keys.a.isDown) {
-          this.playerFacing = -1;
-          if (!this.spiderAttached) this.drive(-1, deltaScale, time);
-        }
-        if (this.keys.right.isDown || this.keys.d.isDown) {
-          this.playerFacing = 1;
-          if (!this.spiderAttached) this.drive(1, deltaScale, time);
-        }
+        this.updateFlippers(time, delta);
         this.updateSpiderBall(time);
         this.applyGroundSurfaceResponse(time);
         const speed = this.player.body.velocity;
@@ -1347,36 +1672,6 @@
         if (time > this.lastHudUpdate + 120) this.updateHud();
       }
 
-      // Apply AM2R-style directional acceleration along the real floor or ramp tangent.
-      drive(direction, deltaScale, time) {
-        if (this.groundSurface && time <= this.groundContactUntil) {
-          const velocity = this.player.body.velocity;
-          const normal = this.groundSurface.normal;
-          const tangent = this.surfaceTangent(normal);
-          const tangentSpeed = velocity.x * tangent.x + velocity.y * tangent.y;
-          const normalSpeed = velocity.x * normal.x + velocity.y * normal.y;
-          const reversing = tangentSpeed * direction < -0.05;
-          const acceleration = reversing ? BALL.rollBrake : BALL.rollAcceleration;
-          const nextTangentSpeed = Phaser.Math.Clamp(
-            tangentSpeed + direction * acceleration * deltaScale,
-            -BALL.maxRollSpeed,
-            BALL.maxRollSpeed
-          );
-          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
-            x: tangent.x * nextTangentSpeed + normal.x * normalSpeed,
-            y: tangent.y * nextTangentSpeed + normal.y * normalSpeed
-          });
-          return;
-        }
-        if (time > this.groundedUntil) this.steer(direction, deltaScale);
-      }
-      steer(direction, deltaScale) {
-        const velocity = this.player.body.velocity;
-        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
-          x: Phaser.Math.Clamp(velocity.x + direction * BALL.airSteerPer60HzStep * deltaScale, -BALL.maxAirSpeedX, BALL.maxAirSpeedX),
-          y: velocity.y
-        });
-      }
 
       updateHud(force) {
         if (!force && this.time.now < this.lastHudUpdate + 110) return;
@@ -1389,15 +1684,12 @@
         progress.setAttribute('aria-valuenow', String(this.score));
         document.getElementById('ammo-value').textContent = this.ammo;
         document.getElementById('bomb-label').textContent = this.upgrades.bomb ? this.activeBomb().label : 'LOCKED';
-        document.getElementById('room-label').textContent = 'ZONE 0' + (this.currentRoom + 1);
+        const room = ROOM_DEFS[this.currentRoom];
+        document.getElementById('room-label').textContent = String(this.currentRoom + 1).padStart(2, '0') + ' ' + room.name.toUpperCase();
         document.getElementById('boss-label').textContent = this.bossKilled ? 'CORE: CLEARED' : 'CORE: ' + this.bossHealth + ' HP';
         document.getElementById('echo-count').textContent = 'ECHO ' + this.echoCharges;
         document.getElementById('ability-value').textContent = !this.upgrades.grip ? 'SPIDER LOCKED' : this.spiderEnabled ? 'SPIDER ON' : 'SPIDER READY';
-        for (let i = 0; i < 6; i++) {
-          const node = document.getElementById('room-' + i);
-          node.classList.toggle('current', this.currentRoom === i);
-          node.classList.toggle('visited', this.visitedRooms.has(i));
-        }
+        this.updateWorldMap();
       }
 
       showNotice() {}
@@ -1408,6 +1700,7 @@
         const shouldOpen = typeof force === 'boolean' ? force : !card.classList.contains('map-focus');
         card.classList.toggle('map-focus', shouldOpen);
         card.setAttribute('aria-hidden', String(!shouldOpen));
+        if (shouldOpen) this.updateWorldMap();
       }
 
       togglePause() {
