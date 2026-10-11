@@ -127,9 +127,8 @@
       radius:8, maxSpeed:13, launchReach:32,
       flipperReach:14, flipCooldownMs:165, flipXKick:4.6, flipYKick:7.5,
       airFlipXKick:2.7, airFlipYKick:6.6, airCorrectionPer60HzStep:0.055, airCorrectionMaxDirectionalSpeed:6.5,
-      groundWalkStartSpeed:0.8, groundWalkMaxSpeed:2.2, groundWalkAcceleration:0.16, groundWalkBraking:0.2,
-      groundWalkImpulseLimit:3.2, groundWalkNormalLimit:1.1, groundWalkFlatNormalX:0.08, nudgeCooldownMs:170,
-      nudgeXKick:1.8, nudgeYKick:1.35, spiderBallSpeed:1.9,
+      walkSpeed:2.2, walkAcceleration:0.16, walkBraking:0.2, walkRollSpeedLimit:3.2,
+      groundJumpSpeed:5.2, fastFallExtraGravity:1.5, spiderBallSpeed:1.9,
       spiderAdhesion:0.16, spiderContactGraceMs:90, spiderTraverseMs:900, coyoteMs:160,
       surfaceContactGraceMs:45, slopeSnapTolerance:5, flipperLength:88, flipperWidth:12, flipperSwingRate:0.011, bumperCooldownMs:380
     };
@@ -469,7 +468,6 @@
         this.groundedUntil = 0;
         this.playerIFrameUntil = 0;
         this.nextFlipAt = 0;
-        this.lastNudgeAt = -BALL.nudgeCooldownMs;
         this.initialLaunchAvailable = true;
         this.lastPlayerVelocity = { x: 0, y: 0 };
         this.lastPlayerHit = 0;
@@ -919,17 +917,16 @@
         this.rollAngle = 0;
         this.groundSurface = null;
         this.groundContactUntil = 0;
-        this.groundWalkActive = false;
         this.lastPlayerPosition = { x:start.x, y:start.y };
       }
 
       createKeyboard() {
         this.keys = this.input.keyboard.addKeys({
-          left: 'LEFT', right: 'RIGHT', a: 'A', d: 'D', space: 'SPACE', shift: 'SHIFT',
+          left: 'LEFT', right: 'RIGHT', down: 'DOWN', a: 'A', d: 'D', space: 'SPACE', shift: 'SHIFT',
           e: 'E', m: 'M', g: 'G', esc: 'ESC', enter: 'ENTER'
         });
         // Keep arrows and Space from scrolling the browser while they control the ball.
-        this.input.keyboard.addCapture('LEFT,RIGHT,SPACE');
+        this.input.keyboard.addCapture('LEFT,RIGHT,DOWN,SPACE');
         const once = (key, action) => this.input.keyboard.on('keydown-' + key, event => {
           if (event && event.repeat) return;
           action(event);
@@ -943,7 +940,7 @@
         once('E', () => this.cycleBomb());
         once('G', () => this.toggleSpiderBall());
         once('SHIFT', () => this.throwBomb());
-        once('SPACE', () => this.launchOrNudge());
+        once('SPACE', () => this.launchFromPlunger());
         once('R', event => {
           if (event && (event.ctrlKey || event.altKey || event.metaKey)) return;
           window.location.reload();
@@ -1477,7 +1474,21 @@
           }
         }
 
-        // Air bounces are upgrades. The base ball has no platformer-style jump.
+        // Action buttons jump while grounded; extra mid-air flips come from upgrades.
+        const grounded = this.groundSurface && now <= this.groundContactUntil && this.groundSurface.normal.y < -0.35;
+        if (grounded && now > this.playerFlipperContactUntil) {
+          const velocity = this.player.body.velocity;
+          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
+            x:velocity.x * 0.75,
+            y:-BALL.groundJumpSpeed
+          });
+          this.groundedUntil = 0;
+          this.groundSurface = null;
+          this.groundContactUntil = 0;
+          this.playSfx('movement');
+          return;
+        }
+
         if (now <= this.groundedUntil || now <= this.playerFlipperContactUntil || now < this.nextFlipAt) return;
         const jump = this.findAirBounce(side);
         if (!jump) return;
@@ -1516,7 +1527,7 @@
         return '';
       }
 
-      launchOrNudge() {
+      launchFromPlunger() {
         if (this.paused || this.time.now < this.deathLockUntil) return;
         if (this.spiderAttached) {
           this.playSfx('ui');
@@ -1524,26 +1535,17 @@
           this.showNotice('Spider Ball OFF · released.');
           return;
         }
-        if (this.time.now - this.lastNudgeAt < BALL.nudgeCooldownMs) return;
-        this.lastNudgeAt = this.time.now;
+        if (!this.initialLaunchAvailable ||
+            Phaser.Math.Distance.Between(this.player.x, this.player.y, this.spawn.x, this.spawn.y) > BALL.launchReach) return;
         const velocity = this.player.body.velocity;
-        const atPlunger = this.initialLaunchAvailable &&
-          Phaser.Math.Distance.Between(this.player.x, this.player.y, this.spawn.x, this.spawn.y) <= BALL.launchReach;
-        if (atPlunger) {
-          this.initialLaunchAvailable = false;
-          const vx = Phaser.Math.Clamp(velocity.x * 0.35 + this.playerFacing * 3.4, -9, 9);
-          const vy = Math.max(-10, Math.min(velocity.y, 0) - 8.2);
-          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
-          this.groundedUntil = 0;
-          this.groundSurface = null;
-          this.groundContactUntil = 0;
-          this.playSfx('launch');
-        } else {
-          // A nudge changes the ball's course slightly; SPACE is not a repeatable jump.
-          const vx = Phaser.Math.Clamp(velocity.x + this.playerFacing * BALL.nudgeXKick, -10, 10);
-          Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:velocity.y - BALL.nudgeYKick });
-          this.playSfx('movement');
-        }
+        this.initialLaunchAvailable = false;
+        const vx = Phaser.Math.Clamp(velocity.x * 0.35 + this.playerFacing * 3.4, -9, 9);
+        const vy = Math.max(-10, Math.min(velocity.y, 0) - 8.2);
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
+        this.groundedUntil = 0;
+        this.groundSurface = null;
+        this.groundContactUntil = 0;
+        this.playSfx('launch');
       }
 
       die() {
@@ -1641,7 +1643,7 @@
       }
 
       applyAirCorrection(time, delta, direction) {
-        if (!direction || this.paused || this.groundWalkActive || this.spiderAttached || time <= this.groundContactUntil || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
+        if (!direction || this.paused || this.spiderAttached || time <= this.groundContactUntil || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
         const velocity = this.player.body.velocity;
         const speedAlongInput = velocity.x * direction;
         if (speedAlongInput >= BALL.airCorrectionMaxDirectionalSpeed) return;
@@ -1652,50 +1654,20 @@
 
       applyGroundWalk(time, delta, direction) {
         const surface = this.groundSurface;
-        const onFlatGround = surface && time <= this.groundContactUntil &&
-          surface.normal.y < -0.99 && Math.abs(surface.normal.x) <= BALL.groundWalkFlatNormalX &&
-          !this.spiderAttached && time > this.playerFlipperContactUntil && time >= this.deathLockUntil;
-        if (!onFlatGround) {
-          this.groundWalkActive = false;
-          return;
-        }
-
-        const normal = surface.normal;
-        const tangent = this.surfaceTangent(normal);
+        if (!surface || time > this.groundContactUntil || surface.normal.y > -0.99 ||
+            this.spiderAttached || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
         const velocity = this.player.body.velocity;
-        const tangentSpeed = velocity.x * tangent.x + velocity.y * tangent.y;
-        const normalSpeed = velocity.x * normal.x + velocity.y * normal.y;
-        if (!this.groundWalkActive) {
-          // Start walking only from rest; a launched or rolling ball keeps its momentum.
-          if (!direction || Math.abs(tangentSpeed) > BALL.groundWalkStartSpeed || Math.abs(normalSpeed) > BALL.groundWalkNormalLimit) return;
-          this.groundWalkActive = true;
-        }
-        // External impacts end walking immediately so they keep their pinball momentum.
-        if (Math.abs(tangentSpeed) > BALL.groundWalkImpulseLimit || Math.abs(normalSpeed) > BALL.groundWalkNormalLimit) {
-          this.groundWalkActive = false;
-          return;
-        }
-
+        // Keep impact momentum; arrows only take over once the ball has settled.
+        if (Math.abs(velocity.x) > BALL.walkRollSpeedLimit || Math.abs(velocity.y) > 1.1) return;
         const frameScale = Phaser.Math.Clamp(delta / (1000 / 60), 0, 2);
-        let nextTangentSpeed = tangentSpeed;
-        if (direction) {
-          nextTangentSpeed = Phaser.Math.Clamp(
-            tangentSpeed + direction * BALL.groundWalkAcceleration * frameScale,
-            -BALL.groundWalkMaxSpeed,
-            BALL.groundWalkMaxSpeed
-          );
-          this.playerFacing = direction;
-        } else {
-          const brake = BALL.groundWalkBraking * frameScale;
-          nextTangentSpeed = Math.abs(tangentSpeed) <= brake ? 0 : tangentSpeed - Math.sign(tangentSpeed) * brake;
-          if (nextTangentSpeed === 0) this.groundWalkActive = false;
-        }
-
-        const deltaSpeed = nextTangentSpeed - tangentSpeed;
+        const target = direction * BALL.walkSpeed;
+        const rate = (direction ? BALL.walkAcceleration : BALL.walkBraking) * frameScale;
+        const nextX = velocity.x + Phaser.Math.Clamp(target - velocity.x, -rate, rate);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
-          x:velocity.x + tangent.x * deltaSpeed,
-          y:velocity.y + tangent.y * deltaSpeed
+          x:nextX,
+          y:velocity.y
         });
+        if (direction) this.playerFacing = direction;
       }
 
       update(time, delta) {
@@ -1706,6 +1678,10 @@
         const airCorrection = Number(this.keys.right.isDown) - Number(this.keys.left.isDown);
         this.applyAirCorrection(time, delta, airCorrection);
         this.applyGroundWalk(time, delta, airCorrection);
+        if (this.keys.down.isDown && !this.spiderAttached && time > this.groundContactUntil && time >= this.deathLockUntil) {
+          // Down adds 1.5× world gravity, for a 2.5× fall while airborne.
+          this.player.body.force.y += this.player.body.mass * GRAVITY.scale * BALL.fastFallExtraGravity;
+        }
         this.updateFlippers(time, delta);
         this.updateSpiderBall(time);
         this.applyGroundSurfaceResponse(time);
