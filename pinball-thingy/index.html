@@ -126,7 +126,9 @@
     const BALL = {
       radius:8, maxSpeed:13, launchReach:32,
       flipperReach:14, flipCooldownMs:165, flipXKick:4.6, flipYKick:7.5,
-      airFlipXKick:2.7, airFlipYKick:6.6, airCorrectionPer60HzStep:0.055, airCorrectionMaxDirectionalSpeed:6.5, nudgeCooldownMs:170,
+      airFlipXKick:2.7, airFlipYKick:6.6, airCorrectionPer60HzStep:0.055, airCorrectionMaxDirectionalSpeed:6.5,
+      groundWalkStartSpeed:0.8, groundWalkMaxSpeed:2.2, groundWalkAcceleration:0.16, groundWalkBraking:0.2,
+      groundWalkImpulseLimit:3.2, groundWalkNormalLimit:1.1, groundWalkFlatNormalX:0.08, nudgeCooldownMs:170,
       nudgeXKick:1.8, nudgeYKick:1.35, spiderBallSpeed:1.9,
       spiderAdhesion:0.16, spiderContactGraceMs:90, spiderTraverseMs:900, coyoteMs:160,
       surfaceContactGraceMs:45, slopeSnapTolerance:5, flipperLength:88, flipperWidth:12, flipperSwingRate:0.011, bumperCooldownMs:380
@@ -767,8 +769,8 @@
 
       updateFlippers(time, delta) {
         const Matter = Phaser.Physics.Matter.Matter;
-        const leftPressed = this.keys.left.isDown || this.keys.a.isDown;
-        const rightPressed = this.keys.right.isDown || this.keys.d.isDown;
+        const leftPressed = this.keys.a.isDown;
+        const rightPressed = this.keys.d.isDown;
         const step = Phaser.Math.Clamp(delta, 0, 34) * BALL.flipperSwingRate;
         for (const paddle of this.flippers) {
           const meta = paddle.body.plugin.gameMeta;
@@ -917,6 +919,7 @@
         this.rollAngle = 0;
         this.groundSurface = null;
         this.groundContactUntil = 0;
+        this.groundWalkActive = false;
         this.lastPlayerPosition = { x:start.x, y:start.y };
       }
 
@@ -1638,7 +1641,7 @@
       }
 
       applyAirCorrection(time, delta, direction) {
-        if (!direction || this.paused || this.spiderAttached || time <= this.groundContactUntil || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
+        if (!direction || this.paused || this.groundWalkActive || this.spiderAttached || time <= this.groundContactUntil || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
         const velocity = this.player.body.velocity;
         const speedAlongInput = velocity.x * direction;
         if (speedAlongInput >= BALL.airCorrectionMaxDirectionalSpeed) return;
@@ -1646,6 +1649,55 @@
         const step = Math.min(BALL.airCorrectionPer60HzStep * frameScale, BALL.airCorrectionMaxDirectionalSpeed - speedAlongInput);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:velocity.x + direction * step, y:velocity.y });
       }
+
+      applyGroundWalk(time, delta, direction) {
+        const surface = this.groundSurface;
+        const onFlatGround = surface && time <= this.groundContactUntil &&
+          surface.normal.y < -0.99 && Math.abs(surface.normal.x) <= BALL.groundWalkFlatNormalX &&
+          !this.spiderAttached && time > this.playerFlipperContactUntil && time >= this.deathLockUntil;
+        if (!onFlatGround) {
+          this.groundWalkActive = false;
+          return;
+        }
+
+        const normal = surface.normal;
+        const tangent = this.surfaceTangent(normal);
+        const velocity = this.player.body.velocity;
+        const tangentSpeed = velocity.x * tangent.x + velocity.y * tangent.y;
+        const normalSpeed = velocity.x * normal.x + velocity.y * normal.y;
+        if (!this.groundWalkActive) {
+          // Start walking only from rest; a launched or rolling ball keeps its momentum.
+          if (!direction || Math.abs(tangentSpeed) > BALL.groundWalkStartSpeed || Math.abs(normalSpeed) > BALL.groundWalkNormalLimit) return;
+          this.groundWalkActive = true;
+        }
+        // External impacts end walking immediately so they keep their pinball momentum.
+        if (Math.abs(tangentSpeed) > BALL.groundWalkImpulseLimit || Math.abs(normalSpeed) > BALL.groundWalkNormalLimit) {
+          this.groundWalkActive = false;
+          return;
+        }
+
+        const frameScale = Phaser.Math.Clamp(delta / (1000 / 60), 0, 2);
+        let nextTangentSpeed = tangentSpeed;
+        if (direction) {
+          nextTangentSpeed = Phaser.Math.Clamp(
+            tangentSpeed + direction * BALL.groundWalkAcceleration * frameScale,
+            -BALL.groundWalkMaxSpeed,
+            BALL.groundWalkMaxSpeed
+          );
+          this.playerFacing = direction;
+        } else {
+          const brake = BALL.groundWalkBraking * frameScale;
+          nextTangentSpeed = Math.abs(tangentSpeed) <= brake ? 0 : tangentSpeed - Math.sign(tangentSpeed) * brake;
+          if (nextTangentSpeed === 0) this.groundWalkActive = false;
+        }
+
+        const deltaSpeed = nextTangentSpeed - tangentSpeed;
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
+          x:velocity.x + tangent.x * deltaSpeed,
+          y:velocity.y + tangent.y * deltaSpeed
+        });
+      }
+
       update(time, delta) {
         if (!this.player) return;
         if (this.paused) return;
@@ -1653,6 +1705,7 @@
         if (!this.spiderAttached && Phaser.Input.Keyboard.JustDown(this.keys.d)) this.requestFlip('right');
         const airCorrection = Number(this.keys.right.isDown) - Number(this.keys.left.isDown);
         this.applyAirCorrection(time, delta, airCorrection);
+        this.applyGroundWalk(time, delta, airCorrection);
         this.updateFlippers(time, delta);
         this.updateSpiderBall(time);
         this.applyGroundSurfaceResponse(time);
