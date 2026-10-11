@@ -126,7 +126,7 @@
     const BALL = {
       radius:8, maxSpeed:13, launchReach:32,
       flipperReach:14, flipCooldownMs:165, flipXKick:4.6, flipYKick:7.5,
-      airFlipXKick:2.7, airFlipYKick:6.6, nudgeCooldownMs:170,
+      airFlipXKick:2.7, airFlipYKick:6.6, airCorrectionPer60HzStep:0.055, airCorrectionMaxDirectionalSpeed:6.5, nudgeCooldownMs:170,
       nudgeXKick:1.8, nudgeYKick:1.35, spiderBallSpeed:1.9,
       spiderAdhesion:0.16, spiderContactGraceMs:90, spiderTraverseMs:900, coyoteMs:160,
       surfaceContactGraceMs:45, slopeSnapTolerance:5, flipperLength:88, flipperWidth:12, flipperSwingRate:0.011, bumperCooldownMs:380
@@ -1137,7 +1137,7 @@
         if (!enemy || enemyMeta.dead) return;
         this.playSfx('bomb');
         enemyMeta.hp = Math.max(0, enemyMeta.hp - amount);
-        enemy.setTintFill(0xffffff);
+        enemy.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL);
         this.time.delayedCall(100, () => { if (enemy.active) enemy.clearTint(); });
         if (enemyMeta.boss) this.bossHealth = enemyMeta.hp;
         if (enemyMeta.hp <= 0) this.killEnemy(enemy, enemyMeta);
@@ -1637,11 +1637,22 @@
         }
       }
 
+      applyAirCorrection(time, delta, direction) {
+        if (!direction || this.paused || this.spiderAttached || time <= this.groundContactUntil || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
+        const velocity = this.player.body.velocity;
+        const speedAlongInput = velocity.x * direction;
+        if (speedAlongInput >= BALL.airCorrectionMaxDirectionalSpeed) return;
+        const frameScale = Phaser.Math.Clamp(delta / (1000 / 60), 0, 2);
+        const step = Math.min(BALL.airCorrectionPer60HzStep * frameScale, BALL.airCorrectionMaxDirectionalSpeed - speedAlongInput);
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:velocity.x + direction * step, y:velocity.y });
+      }
       update(time, delta) {
         if (!this.player) return;
         if (this.paused) return;
-        if (!this.spiderAttached && (Phaser.Input.Keyboard.JustDown(this.keys.left) || Phaser.Input.Keyboard.JustDown(this.keys.a))) this.requestFlip('left');
-        if (!this.spiderAttached && (Phaser.Input.Keyboard.JustDown(this.keys.right) || Phaser.Input.Keyboard.JustDown(this.keys.d))) this.requestFlip('right');
+        if (!this.spiderAttached && Phaser.Input.Keyboard.JustDown(this.keys.a)) this.requestFlip('left');
+        if (!this.spiderAttached && Phaser.Input.Keyboard.JustDown(this.keys.d)) this.requestFlip('right');
+        const airCorrection = Number(this.keys.right.isDown) - Number(this.keys.left.isDown);
+        this.applyAirCorrection(time, delta, airCorrection);
         this.updateFlippers(time, delta);
         this.updateSpiderBall(time);
         this.applyGroundSurfaceResponse(time);
