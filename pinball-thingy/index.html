@@ -124,13 +124,18 @@
       { id:'phase-core', from:14, to:19, requires:'phase' }, { id:'super-core', from:18, to:19, requires:'super' }
     ];
     const BALL = {
-      radius:8, maxSpeed:13, launchReach:32,
-      flipperReach:14, flipCooldownMs:165, flipXKick:4.6, flipYKick:7.5,
-      airFlipXKick:2.7, airFlipYKick:6.6, airCorrectionPer60HzStep:0.055, airCorrectionMaxDirectionalSpeed:6.5,
-      walkSpeed:2.2, walkAcceleration:0.16, walkBraking:0.2, walkRollSpeedLimit:3.2,
-      groundJumpSpeed:5.2, fastFallExtraGravity:1.5, spiderBallSpeed:1.9,
-      spiderAdhesion:0.16, spiderContactGraceMs:90, spiderTraverseMs:900, coyoteMs:160,
-      surfaceContactGraceMs:45, slopeSnapTolerance:5, flipperLength:88, flipperWidth:12, flipperSwingRate:0.011, bumperCooldownMs:380
+      // Normal-speed Spinball tuning: preserve a fast, inertial roll while keeping
+      // one room from disappearing in a single launch. Values are world pixels per
+      // fixed 60 Hz Matter step, not CSS pixels.
+      radius:8, maxSpeed:12, launchReach:32,
+      flipperReach:4, flipCooldownMs:110,
+      airFlipXKick:2.4, airFlipYKick:6.2, airCorrectionPer60HzStep:0.09, airCorrectionMaxDirectionalSpeed:3.5,
+      walkSpeed:2.4, walkAcceleration:0.2, walkBraking:0.34, groundFrictionFactor:0.985,
+      groundJumpSpeed:5.2, groundJumpMaxSpeed:0.55, fastFallExtraGravity:2,
+      spinDashStartSpeed:0.75, spinDashBaseSpeed:5.5, spinDashChargeSpeed:1.1, spinDashMaxCharges:5,
+      spiderBallSpeed:1.9,
+      spiderAdhesion:0.16, spiderContactGraceMs:90, spiderTraverseMs:900, coyoteMs:67,
+      surfaceContactGraceMs:34, slopeSnapTolerance:5, flipperLength:56, flipperWidth:10, flipperSwingRate:0.016, bumperCooldownMs:380
     };
     const GRAVITY = { x:0, y:1, scale:0.001 };
     const ART_TILE = 8;
@@ -466,6 +471,7 @@
         this.lastFlipper = null;
         this.airUses = { ghost: false, virtual: false };
         this.groundedUntil = 0;
+        this.lastGroundWasFlat = false;
         this.playerIFrameUntil = 0;
         this.nextFlipAt = 0;
         this.initialLaunchAvailable = true;
@@ -489,6 +495,8 @@
         this.lastHudUpdate = 0;
         this.playerFacing = 1;
         this.playerFlipperContactUntil = 0;
+        this.spinDashArmed = false;
+        this.spinDashCharge = 0;
         this.sfxCursor = Object.create(null);
         this.sfxLastAt = Object.create(null);
 
@@ -676,7 +684,7 @@
         this.terrainBodies.length = 0;
         const seen = Array.from({ length:MAP_H }, () => Array(MAP_W).fill(false));
         const common = {
-          isStatic:true, friction:0.06, frictionStatic:0.25, restitution:0.15,
+          isStatic:true, friction:0.02, frictionStatic:0.12, restitution:0.35,
           collisionFilter:{ category:CAT.TERRAIN, mask:CAT.PLAYER | CAT.ENEMY | CAT.BOMB }
         };
         const addRect = (tx, ty, w, h, type, doorId) => {
@@ -741,7 +749,7 @@
             this.matter.add.gameObject(paddle, {
               shape:{ type:'rectangle', width:length, height:width }, label:'flipper',
               isStatic:false, ignoreGravity:true, density:0.01, friction:0, frictionAir:0,
-              restitution:0.02,
+              restitution:0.34,
               collisionFilter:{ category:CAT.FLIPPER, mask:CAT.PLAYER }
             });
             paddle.body.plugin.gameMeta = { kind:'flipper', side, room:room.id, pivot, length, restAngle, raisedAngle, angle:restAngle, nextHitAt:0, hasFiredThisPress:false };
@@ -769,12 +777,14 @@
         const Matter = Phaser.Physics.Matter.Matter;
         const leftPressed = this.keys.a.isDown;
         const rightPressed = this.keys.d.isDown;
+        const bothPressed = this.keys.s.isDown;
+        const chargingSpinDash = this.keys.down.isDown && this.spinDashArmed && this.spinDashCharge > 0;
         const step = Phaser.Math.Clamp(delta, 0, 34) * BALL.flipperSwingRate;
         for (const paddle of this.flippers) {
           const meta = paddle.body.plugin.gameMeta;
           const wasPressed = meta.pressed;
           const roomIsActive = meta.room === this.currentRoom;
-          meta.pressed = roomIsActive && (meta.side === 'left' ? leftPressed : rightPressed);
+          meta.pressed = roomIsActive && !chargingSpinDash && (bothPressed || (meta.side === 'left' ? leftPressed : rightPressed));
           if (meta.pressed && !wasPressed) meta.hasFiredThisPress = false;
           if (meta.pressed) meta.activeUntil = time + 180;
           else if (time > (meta.activeUntil || 0)) meta.hasFiredThisPress = false;
@@ -798,22 +808,16 @@
         this.nextFlipAt = now + BALL.flipCooldownMs;
         this.initialLaunchAvailable = false;
         this.lastFlipper = meta.side;
+        this.playerFacing = meta.side === 'left' ? 1 : -1;
         this.airUses = { ghost:false, virtual:false };
         this.playerFlipperContactUntil = now + 60;
-        const toward = meta.side === 'left' ? 1 : -1;
-        const axisX = Math.cos(meta.angle);
-        const axisY = Math.sin(meta.angle);
-        const along = Phaser.Math.Clamp(((this.player.x - meta.pivot.x) * axisX + (this.player.y - meta.pivot.y) * axisY) / meta.length, 0, 1);
-        const aimBias = (along - 0.55) * 2.2;
-        const velocity = this.player.body.velocity;
-        const vx = Phaser.Math.Clamp(velocity.x * 0.3 + toward * (BALL.flipXKick + aimBias), -10, 10);
-        const lift = BALL.flipYKick * (0.86 + (1 - along) * 0.14);
-        const vy = Math.min(velocity.y, 0) - lift;
-        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
+        // The moving paddle's collision velocity launches the ball. Do not replace
+        // it with a fixed directional kick: launch speed and angle depend on where
+        // the real paddle struck the ball, just as they do in pinball.
         this.groundedUntil = 0;
         this.groundSurface = null;
         this.groundContactUntil = 0;
-        this.playerFacing = toward;
+        this.lastGroundWasFlat = false;
         this.playSfx('movement');
       }
 
@@ -829,6 +833,10 @@
         nx /= length; ny /= length;
         const kick = Phaser.Math.Clamp(Math.hypot(this.player.body.velocity.x, this.player.body.velocity.y) * 0.7 + 5.5, 8.5, 12);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:nx * kick, y:ny * kick });
+        this.groundedUntil = 0;
+        this.groundSurface = null;
+        this.groundContactUntil = 0;
+        this.lastGroundWasFlat = false;
         this.changeScore(meta.score || 50);
         this.playSfx('movement');
       }
@@ -911,7 +919,7 @@
         const start = { x:15 * CELL, y:27 * CELL };
         this.spawn = start;
         this.player = this.createMatterCircle(start.x, start.y, BALL.radius, {
-          label:'player', friction:0.08, frictionStatic:0.2, frictionAir:0.0015, restitution:0.04, density:0.006,
+          label:'player', friction:0.012, frictionStatic:0.08, frictionAir:0.0012, restitution:0.38, density:0.006,
           collisionFilter:{ category:CAT.PLAYER, mask:CAT.TERRAIN | CAT.ENEMY | CAT.PICKUP | CAT.BUMPER | CAT.FLIPPER }
         }, { kind:'player' });
         this.rollAngle = 0;
@@ -922,11 +930,11 @@
 
       createKeyboard() {
         this.keys = this.input.keyboard.addKeys({
-          left: 'LEFT', right: 'RIGHT', down: 'DOWN', a: 'A', d: 'D', space: 'SPACE', shift: 'SHIFT',
+          left: 'LEFT', right: 'RIGHT', up: 'UP', down: 'DOWN', a: 'A', s: 'S', d: 'D', space: 'SPACE', shift: 'SHIFT',
           e: 'E', m: 'M', g: 'G', esc: 'ESC', enter: 'ENTER'
         });
-        // Keep arrows and Space from scrolling the browser while they control the ball.
-        this.input.keyboard.addCapture('LEFT,RIGHT,DOWN,SPACE');
+        // Keep directional and launch keys from moving the browser page.
+        this.input.keyboard.addCapture('LEFT,RIGHT,UP,DOWN,SPACE');
         const once = (key, action) => this.input.keyboard.on('keydown-' + key, event => {
           if (event && event.repeat) return;
           action(event);
@@ -941,6 +949,16 @@
         once('G', () => this.toggleSpiderBall());
         once('SHIFT', () => this.throwBomb());
         once('SPACE', () => this.launchFromPlunger());
+        once('A', () => this.requestFlip('left'));
+        once('D', () => this.requestFlip('right'));
+        once('S', () => this.requestFlip('both'));
+        this.input.keyboard.on('keydown-DOWN', event => {
+          if (event && event.repeat) return;
+          const velocity = this.player && this.player.body.velocity;
+          this.spinDashArmed = this.isFlatGrounded(this.time.now) && velocity && Math.hypot(velocity.x, velocity.y) <= BALL.spinDashStartSpeed;
+          this.spinDashCharge = 0;
+        });
+        this.input.keyboard.on('keyup-DOWN', () => this.releaseSpinDash());
         once('R', event => {
           if (event && (event.ctrlKey || event.altKey || event.metaKey)) return;
           window.location.reload();
@@ -1052,6 +1070,7 @@
             this.groundSurface = surface;
             this.groundContactUntil = this.time.now + BALL.surfaceContactGraceMs;
             this.groundedUntil = this.time.now + BALL.coyoteMs;
+            this.lastGroundWasFlat = surface.normal.y <= -0.98;
             this.airUses = { ghost:false, virtual:false };
           }
         }
@@ -1059,6 +1078,8 @@
 
       hitByEnemy(enemyMeta) {
         if (this.time.now < this.playerIFrameUntil || this.time.now < this.deathLockUntil) return;
+        this.spinDashArmed = false;
+        this.spinDashCharge = 0;
         if (this.spiderEnabled) this.releaseSpiderBall();
         this.playerIFrameUntil = this.time.now + 850;
         this.lastPlayerHit = this.time.now;
@@ -1077,6 +1098,10 @@
         const direction = this.player.x < (enemyMeta.id ? this.enemyX(enemyMeta.id) : this.player.x + 1) ? -1 : 1;
         const Matter = Phaser.Physics.Matter.Matter;
         Matter.Body.setVelocity(this.player.body, { x: direction * 4.5, y: -5.5 });
+        this.groundedUntil = 0;
+        this.groundSurface = null;
+        this.groundContactUntil = 0;
+        this.lastGroundWasFlat = false;
       }
 
       enemyX(id) {
@@ -1450,57 +1475,95 @@
       requestFlip(side) {
         if (this.paused || this.time.now < this.deathLockUntil || this.spiderAttached) return;
         const now = this.time.now;
-        const launchDirection = side === 'left' ? 1 : -1;
-        this.playerFacing = launchDirection;
+        const velocity = this.player.body.velocity;
+        const speed = Math.hypot(velocity.x, velocity.y);
+        const flatGrounded = this.isFlatGrounded(now);
 
-        // A press close to a paddle is a real flipper action, even if the ball
-        // grazes the edge between Matter steps. It is limited to the current room.
-        const paddle = this.flippers.find(item => {
-          const meta = item.body.plugin.gameMeta;
-          return meta.room === this.currentRoom && meta.side === side;
-        });
-        if (paddle) {
-          const meta = paddle.body.plugin.gameMeta;
-          const axisX = Math.cos(meta.angle);
-          const axisY = Math.sin(meta.angle);
-          const tipX = meta.pivot.x + axisX * meta.length;
-          const tipY = meta.pivot.y + axisY * meta.length;
-          const distance = this.distanceToSegment(this.player.x, this.player.y, meta.pivot.x, meta.pivot.y, tipX, tipY);
-          if (distance <= BALL.radius + BALL.flipperWidth / 2 + BALL.flipperReach) {
-            meta.pressed = true;
-            meta.activeUntil = Math.max(meta.activeUntil || 0, now + 180);
-            this.hitFlipper(meta);
-            return;
-          }
+        // Down + repeated action taps charge a ground Spin Dash. Releasing Down
+        // launches it; Down in the air remains the fast-fall control.
+        if (this.keys.down.isDown && flatGrounded && speed <= BALL.spinDashStartSpeed) {
+          this.spinDashArmed = true;
+          this.spinDashCharge = Math.min(this.spinDashCharge + 1, BALL.spinDashMaxCharges);
+          this.playSfx('movement');
+          return;
         }
 
-        // Action buttons jump while grounded; extra mid-air flips come from upgrades.
-        const grounded = this.groundSurface && now <= this.groundContactUntil && this.groundSurface.normal.y < -0.35;
-        if (grounded && now > this.playerFlipperContactUntil) {
+        const nearFlipper = this.isNearFlipper(side);
+        if (flatGrounded && speed <= BALL.groundJumpMaxSpeed && !nearFlipper && now > this.playerFlipperContactUntil) {
           const velocity = this.player.body.velocity;
           Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
-            x:velocity.x * 0.75,
+            x:velocity.x * 0.85,
             y:-BALL.groundJumpSpeed
           });
           this.groundedUntil = 0;
           this.groundSurface = null;
           this.groundContactUntil = 0;
+          this.lastGroundWasFlat = false;
           this.playSfx('movement');
           return;
         }
 
         if (now <= this.groundedUntil || now <= this.playerFlipperContactUntil || now < this.nextFlipAt) return;
-        const jump = this.findAirBounce(side);
+        const bounceSide = side === 'both' ? (this.lastFlipper || 'left') : side;
+        const jump = this.findAirBounce(bounceSide);
         if (!jump) return;
-        const velocity = this.player.body.velocity;
-        const vx = Phaser.Math.Clamp(velocity.x + launchDirection * BALL.airFlipXKick, -10, 10);
+        const direction = side === 'left' ? 1 : side === 'right' ? -1 : this.playerFacing;
+        const vx = Phaser.Math.Clamp(velocity.x + direction * BALL.airFlipXKick, -BALL.maxSpeed, BALL.maxSpeed);
         const vy = Math.max(-12, Math.min(velocity.y, 0) - BALL.airFlipYKick);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
         this.groundedUntil = 0;
         this.groundSurface = null;
         this.groundContactUntil = 0;
+        this.lastGroundWasFlat = false;
         this.nextFlipAt = now + BALL.flipCooldownMs;
         this.playSfx('movement');
+      }
+
+      isGrounded(time = this.time.now) {
+        return Boolean((this.groundSurface && time <= this.groundContactUntil && this.groundSurface.normal.y < -0.35) || time <= this.groundedUntil);
+      }
+
+      isFlatGrounded(time = this.time.now) {
+        if (this.groundSurface && time <= this.groundContactUntil) return this.groundSurface.normal.y <= -0.98;
+        return Boolean(this.lastGroundWasFlat && time <= this.groundedUntil);
+      }
+
+      isNearFlipper(side) {
+        return this.flippers.some(item => {
+          const meta = item.body.plugin.gameMeta;
+          if (meta.room !== this.currentRoom || (side !== 'both' && meta.side !== side)) return false;
+          const tipX = meta.pivot.x + Math.cos(meta.angle) * meta.length;
+          const tipY = meta.pivot.y + Math.sin(meta.angle) * meta.length;
+          const distance = this.distanceToSegment(this.player.x, this.player.y, meta.pivot.x, meta.pivot.y, tipX, tipY);
+          return distance <= BALL.radius + BALL.flipperWidth / 2 + BALL.flipperReach;
+        });
+      }
+
+      releaseSpinDash() {
+        if (!this.spinDashArmed) return;
+        const charge = this.spinDashCharge;
+        this.spinDashArmed = false;
+        this.spinDashCharge = 0;
+        if (!charge || !this.isFlatGrounded(this.time.now) || this.time.now < this.deathLockUntil) return;
+        const surface = this.groundSurface && this.time.now <= this.groundContactUntil ? this.groundSurface : null;
+        const tangent = surface ? this.surfaceTangent(surface.normal) : { x:1, y:0 };
+        const normal = surface ? surface.normal : { x:0, y:-1 };
+        const velocity = this.player.body.velocity;
+        const along = velocity.x * tangent.x + velocity.y * tangent.y;
+        const into = velocity.x * normal.x + velocity.y * normal.y;
+        const launchSpeed = Math.min(BALL.spinDashBaseSpeed + charge * BALL.spinDashChargeSpeed, BALL.maxSpeed);
+        const nextAlong = this.playerFacing * launchSpeed + along * 0.15;
+        const nextNormal = Math.min(0, into);
+        Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
+          x:tangent.x * nextAlong + normal.x * nextNormal,
+          y:tangent.y * nextAlong + normal.y * nextNormal
+        });
+        this.groundedUntil = 0;
+        this.groundSurface = null;
+        this.groundContactUntil = 0;
+        this.lastGroundWasFlat = false;
+        this.initialLaunchAvailable = false;
+        this.playSfx('launch');
       }
 
       distanceToSegment(px, py, ax, ay, bx, by) {
@@ -1539,12 +1602,15 @@
             Phaser.Math.Distance.Between(this.player.x, this.player.y, this.spawn.x, this.spawn.y) > BALL.launchReach) return;
         const velocity = this.player.body.velocity;
         this.initialLaunchAvailable = false;
+        this.spinDashArmed = false;
+        this.spinDashCharge = 0;
         const vx = Phaser.Math.Clamp(velocity.x * 0.35 + this.playerFacing * 3.4, -9, 9);
         const vy = Math.max(-10, Math.min(velocity.y, 0) - 8.2);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:vx, y:vy });
         this.groundedUntil = 0;
         this.groundSurface = null;
         this.groundContactUntil = 0;
+        this.lastGroundWasFlat = false;
         this.playSfx('launch');
       }
 
@@ -1557,6 +1623,8 @@
         this.currentRoom = 0;
         this.airUses = { ghost: false, virtual: false };
         this.lastFlipper = null;
+        this.spinDashArmed = false;
+        this.spinDashCharge = 0;
         this.spiderEnabled = false;
         this.spiderAttached = null;
         this.playerIFrameUntil = this.time.now + 1000;
@@ -1569,6 +1637,7 @@
         this.groundedUntil = this.time.now + 180;
         this.groundSurface = null;
         this.groundContactUntil = 0;
+        this.lastGroundWasFlat = true;
         this.initialLaunchAvailable = true;
         this.visitedRooms.add(0);
         for (const bomb of [...this.bombs]) {
@@ -1643,43 +1712,54 @@
       }
 
       applyAirCorrection(time, delta, direction) {
-        if (!direction || this.paused || this.spiderAttached || time <= this.groundContactUntil || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
+        if (!direction || this.paused || this.spiderAttached || this.isGrounded(time) || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
         const velocity = this.player.body.velocity;
         const speedAlongInput = velocity.x * direction;
         if (speedAlongInput >= BALL.airCorrectionMaxDirectionalSpeed) return;
         const frameScale = Phaser.Math.Clamp(delta / (1000 / 60), 0, 2);
         const step = Math.min(BALL.airCorrectionPer60HzStep * frameScale, BALL.airCorrectionMaxDirectionalSpeed - speedAlongInput);
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, { x:velocity.x + direction * step, y:velocity.y });
+        this.playerFacing = direction;
       }
 
       applyGroundWalk(time, delta, direction) {
         const surface = this.groundSurface;
-        if (!surface || time > this.groundContactUntil || surface.normal.y > -0.99 ||
-            this.spiderAttached || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
+        if (!surface || time > this.groundContactUntil || surface.normal.y > -0.35 ||
+            this.spiderAttached || this.spinDashArmed || time <= this.playerFlipperContactUntil || time < this.deathLockUntil) return;
         const velocity = this.player.body.velocity;
-        // Keep impact momentum; arrows only take over once the ball has settled.
-        if (Math.abs(velocity.x) > BALL.walkRollSpeedLimit || Math.abs(velocity.y) > 1.1) return;
         const frameScale = Phaser.Math.Clamp(delta / (1000 / 60), 0, 2);
-        const target = direction * BALL.walkSpeed;
-        const rate = (direction ? BALL.walkAcceleration : BALL.walkBraking) * frameScale;
-        const nextX = velocity.x + Phaser.Math.Clamp(target - velocity.x, -rate, rate);
+        const tangent = this.surfaceTangent(surface.normal);
+        let tangentSpeed = velocity.x * tangent.x + velocity.y * tangent.y;
+        const normalSpeed = velocity.x * surface.normal.x + velocity.y * surface.normal.y;
+        if (direction) {
+          // Directional input can brake a fast roll instead of waiting for friction
+          // to make the ball controllable again. At walking pace it drives the ball.
+          if (tangentSpeed * direction < 0) {
+            tangentSpeed = Phaser.Math.Linear(tangentSpeed, 0, Math.min(1, BALL.walkBraking * frameScale / Math.max(Math.abs(tangentSpeed), 0.001)));
+          } else if (Math.abs(tangentSpeed) < BALL.walkSpeed) {
+            tangentSpeed = Phaser.Math.Clamp(tangentSpeed + direction * BALL.walkAcceleration * frameScale, -BALL.walkSpeed, BALL.walkSpeed);
+          }
+          this.playerFacing = direction;
+        } else {
+          // Keep the long pinball roll, but bleed speed at every ground contact.
+          tangentSpeed *= Math.pow(BALL.groundFrictionFactor, frameScale);
+          if (Math.abs(tangentSpeed) < 0.08) tangentSpeed = 0;
+        }
         Phaser.Physics.Matter.Matter.Body.setVelocity(this.player.body, {
-          x:nextX,
-          y:velocity.y
+          x:tangent.x * tangentSpeed + surface.normal.x * normalSpeed,
+          y:tangent.y * tangentSpeed + surface.normal.y * normalSpeed
         });
-        if (direction) this.playerFacing = direction;
       }
 
       update(time, delta) {
         if (!this.player) return;
         if (this.paused) return;
-        if (!this.spiderAttached && Phaser.Input.Keyboard.JustDown(this.keys.a)) this.requestFlip('left');
-        if (!this.spiderAttached && Phaser.Input.Keyboard.JustDown(this.keys.d)) this.requestFlip('right');
+        this.cameras.main.setFollowOffset(0, this.keys.up.isDown ? -24 : 0);
         const airCorrection = Number(this.keys.right.isDown) - Number(this.keys.left.isDown);
         this.applyAirCorrection(time, delta, airCorrection);
         this.applyGroundWalk(time, delta, airCorrection);
-        if (this.keys.down.isDown && !this.spiderAttached && time > this.groundContactUntil && time >= this.deathLockUntil) {
-          // Down adds 1.5× world gravity, for a 2.5× fall while airborne.
+        if (this.keys.down.isDown && !this.spiderAttached && !this.isGrounded(time) && time >= this.deathLockUntil) {
+          // Down adds 2× gravity, for a 3× fall while airborne.
           this.player.body.force.y += this.player.body.mass * GRAVITY.scale * BALL.fastFallExtraGravity;
         }
         this.updateFlippers(time, delta);
@@ -1700,7 +1780,10 @@
         } else if (this.groundSurface && time <= this.groundContactUntil) {
           const tangent = this.surfaceTangent(this.groundSurface.normal);
           this.rollAngle += (dx * tangent.x + dy * tangent.y) / BALL.radius;
-        } else if (Math.abs(dx) > .01) this.rollAngle += dx / BALL.radius;
+        } else if (Math.hypot(dx, dy) > .01) {
+          const direction = Math.abs(dx) > Math.abs(dy) ? Math.sign(dx) : Math.sign(dy) * (this.playerFacing || 1);
+          this.rollAngle += direction * Math.hypot(dx, dy) / BALL.radius;
+        }
         if (this.player.active) {
           const frame = ((Math.floor(this.rollAngle / (Math.PI / 2)) % 4) + 4) % 4;
           this.player.setFrame('ball-' + frame);
