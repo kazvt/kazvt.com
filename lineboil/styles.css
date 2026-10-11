@@ -3378,8 +3378,8 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 }
 
-/* Android/touch fallback: SVG filter boil is costly/unreliable, so use a visible transform boil instead. */
-@media (max-width: 600px), (hover: none) and (pointer: coarse) {
+/* Narrow viewports use a visible transform boil instead of the SVG filter. */
+@media (max-width: 600px) {
   .site-header,
   .oldweb-nav,
   .marquee,

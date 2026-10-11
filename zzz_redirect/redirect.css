@@ -818,7 +818,7 @@ body.redirect-page {
   to { transform: rotate(50deg) scale(1.18); }
 }
 
-@media (max-width: 520px), (pointer: coarse) {
+@media (max-width: 520px) {
   body.redirect-page { padding: 12px; }
   .redirect-shell { border-width: 4px; box-shadow: 6px 6px 0 var(--shadow); }
   .redirect-stage { min-height: clamp(165px, 48svh, 290px); }

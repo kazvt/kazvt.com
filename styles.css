@@ -3770,11 +3770,11 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 }
 
-/* Mobile paint/layout stability: do not virtualize animated panels.
+/* Narrow-viewport paint/layout stability: do not virtualize animated panels.
    content-visibility + continuously animated/filtering descendants can be
    clipped or rasterized at a stale viewport scale in Android Chromium after
-   scrolling. Keep the mobile document at one stable layout width instead. */
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+   scrolling. Keep narrow layouts at one stable width instead. */
+@media (max-width: 880px) {
   .site-wrap,
   .web-grid,
   .content-stack,
@@ -4050,12 +4050,12 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   }
 }
 
-/* Mobile-safe lineboil -------------------------------------------------------
+/* Narrow-viewport-safe lineboil ---------------------------------------------
    Desktop keeps the SVG turbulence/displacement filters. Those filters force
    large elements into rasterized compositing surfaces and Android Chromium can
    keep one of those surfaces at a stale scale after pinch-zoom + scrolling.
 
-   On touch/mobile we keep the hand-drawn boil motion, but perform it with tiny
+   On narrow viewports we keep the hand-drawn boil motion, but perform it with tiny
    relative paint offsets instead of SVG filters or transform animations on the
    large panels. Relative offsets do not change document flow and avoid the
    persistent filtered/composited surfaces that caused the split-scale page. */
@@ -4070,7 +4070,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   50% { translate: 0.7px -0.7px; }
 }
 
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .site-header,
   .oldweb-nav,
   .marquee,
@@ -4247,7 +4247,7 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 /* Keep the off-screen rendering optimization desktop-only. On mobile this must
    come after the generic content-visibility rule above so Android never swaps
    animated panels into/out of layout containment while the user scrolls. */
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .content-stack > .panel {
     content-visibility: visible;
     contain-intrinsic-size: none;
@@ -4255,89 +4255,21 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
 }
 
 
-/* Stable touch layout -------------------------------------------------------
-   Android Chrome's Page Zoom can change the CSS viewport width without the
-   device becoming a desktop. The early <head> bootstrap adds .touch-device so
-   these phone rules do not switch off just because the user zooms out. */
-html.touch-device .web-grid,
-html.touch-device .profile-layout {
-  grid-template-columns: 1fr;
-}
-
-html.touch-device .oldweb-nav {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-html.touch-device .sidebar {
-  position: relative;
-}
-
-html.touch-device .sticker-grid,
-html.touch-device .status-grid,
-html.touch-device .paint-app {
-  grid-template-columns: 1fr;
-}
-
-html.touch-device .web-grid > .sidebar:first-of-type { order: 0; }
-html.touch-device .web-grid > .sidebar:last-of-type { order: 1; }
-html.touch-device .web-grid > #app { order: 2; }
-
-html.touch-device .palette.big-palette {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 9px;
-}
-
-html.touch-device .big-palette button {
-  min-height: 0;
-  aspect-ratio: 1;
-  border-width: 2px;
-  box-shadow: 2px 2px 0 var(--shadow);
-}
-
-html.touch-device .palette button::before {
-  top: 2px;
-  left: 2px;
-  border-width: 1px;
-  box-shadow: none;
-}
-
-html.touch-device .big-palette span {
-  width: 12px;
-  height: 12px;
-  border-width: 2px;
-}
-
-html.touch-device .palette-choice::after {
-  inset: -5px;
-  border-width: 2px;
-}
-
-/* Keep guide pages in their mobile/single-column presentation on touch
-   devices too, regardless of page zoom. */
-html.touch-device .guide-page .web-grid {
-  grid-template-columns: 1fr;
-}
-
-html.touch-device .guide-page .content-stack {
-  order: -1;
-}
-
 /* Palette 16: text on the solid --pink surface must always stay white. */
 body[data-theme="p16"] .guide-map .badge.no text {
   fill: var(--on-pink);
 }
 
 
-/* Mobile readability pass ---------------------------------------------------
-   Keep layout/text physically stable on touch devices. The lineboil look is
+/* Narrow-viewport readability pass ------------------------------------------
+   Keep layout/text physically stable at small widths. The lineboil look is
    retained in decorative outline layers instead of moving whole reading boxes. */
 @keyframes mobileOutlineBoil {
   0%, 100% { transform: translate(0.45px, -0.35px) rotate(0deg); }
   50% { transform: translate(-0.45px, 0.4px) rotate(0.08deg); }
 }
 
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .site-header,
   .oldweb-nav,
   .marquee,
@@ -4402,7 +4334,7 @@ body[data-theme="p16"] .guide-map .badge.no text {
 }
 
 /* Keep the CTA alive on mobile after the generic stable-text rule above. */
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .site-wrap .guide-launch-button,
   .site-wrap .guide-launch-button:hover,
   .site-wrap .guide-launch-button:focus-visible {
@@ -4679,8 +4611,7 @@ body[data-theme="p16"] .guide-map .badge.no text {
     max-width: none;
   }
 
-  .palette.big-palette,
-  html.touch-device .palette.big-palette {
+  .palette.big-palette {
     grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: clamp(6px, 1.8vw, 10px);
     padding: 10px;
@@ -4697,19 +4628,16 @@ body[data-theme="p16"] .guide-map .badge.no text {
 }
 
 @media (max-width: 470px) {
-  .palette.big-palette,
-  html.touch-device .palette.big-palette {
+  .palette.big-palette {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 9px;
   }
 
-  .big-palette button,
-  html.touch-device .big-palette button {
+  .big-palette button {
     min-height: 48px;
   }
 
-  .big-palette span,
-  html.touch-device .big-palette span {
+  .big-palette span {
     width: 18px;
     height: 18px;
   }
@@ -4844,14 +4772,13 @@ body[data-theme="p16"] .guide-map .badge.no text {
   opacity: 0.72;
 }
 
-.guide-page .big-palette .palette-cursor-preview,
-html.touch-device .big-palette .palette-cursor-preview {
+.guide-page .big-palette .palette-cursor-preview {
   width: min(18px, 52%);
   height: min(18px, 52%);
 }
 
 /* Mobile keeps the stable box, but the independent scale property still gives the CTA its heartbeat. */
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .site-wrap .guide-launch-button,
   .site-wrap .guide-launch-button:hover,
   .site-wrap .guide-launch-button:focus-visible {
@@ -4951,7 +4878,7 @@ html.touch-device .big-palette .palette-cursor-preview {
   }
 }
 
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .marquee > span[data-live-stream-title-track] {
     translate: none;
     animation: marquee var(--marquee-duration, 18s) linear infinite !important;

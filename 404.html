@@ -34,13 +34,6 @@
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="manifest" data-i18n-manifest>
     <script>
-      // Keep phone/touch layout rules stable even when Android Chrome's page
-      // zoom changes the CSS viewport width enough to cross a breakpoint.
-      if (navigator.maxTouchPoints > 0 && matchMedia("(pointer: coarse)").matches) {
-        document.documentElement.classList.add("touch-device");
-      }
-    </script>
-    <script>
       (() => {
         let lineboil = "off";
         try {
@@ -50,7 +43,7 @@
         document.documentElement.dataset.lineboil = lineboil;
       })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=palette-fonts-14">
+    <link rel="stylesheet" href="styles.css?v=responsive-width-1">
     <link rel="stylesheet" href="/zzz_shared/cursor-packs.css">
     <link rel="stylesheet" href="/zzz_shared/language-dock.css">
     <link rel="stylesheet" href="/lineboil-control.css">

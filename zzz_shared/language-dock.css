@@ -140,7 +140,7 @@ body.redirect-page .language-dock {
   50% { left: .7px; top: -.7px; }
 }
 
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .language-dock {
     width: min(100% - 16px, 1060px);
     max-width: calc(100% - 16px);
@@ -331,7 +331,7 @@ body[data-theme="p14"] .language-option:focus-visible {
   color: #fff;
 }
 
-@media (max-width: 880px), (hover: none) and (pointer: coarse) {
+@media (max-width: 880px) {
   .language-options:not([hidden]) {
     gap: 7px;
     padding-top: 9px;
