@@ -35,6 +35,140 @@ body {
   letter-spacing: .14em;
 }
 
+.tier-badge {
+  --tier-ink: #253142;
+  --tier-fill: linear-gradient(135deg, #f8fafc, #cbd5e1);
+  --tier-edge: #64748b;
+  --tier-text-gradient: linear-gradient(100deg, #64748b, #263238 45%, #94a3b8 70%, #64748b);
+  --tier-mark: #475569;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  margin: 0 auto 18px;
+  padding: 6px 15px;
+  overflow: hidden;
+  border: 2px dotted var(--tier-edge);
+  border-radius: 4px;
+  background: var(--tier-fill);
+  color: var(--tier-ink);
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--tier-edge) 55%, transparent);
+  isolation: isolate;
+  white-space: nowrap;
+}
+
+.tier-badge[data-tier="common"] {
+  --tier-ink: #263238;
+  --tier-fill: linear-gradient(135deg, #f8fafc, #cbd5e1 72%, #e2e8f0);
+  --tier-edge: #64748b;
+  --tier-text-gradient: linear-gradient(100deg, #64748b, #263238 45%, #94a3b8 70%, #64748b);
+  --tier-mark: #64748b;
+  border-style: dotted;
+  border-radius: 3px;
+}
+
+.tier-badge[data-tier="uncommon"] {
+  --tier-ink: #123b22;
+  --tier-fill: linear-gradient(120deg, #ecfccb, #86efac 58%, #d9f99d);
+  --tier-edge: #27834b;
+  --tier-text-gradient: linear-gradient(100deg, #27834b, #124221 42%, #438d51 68%, #17532d);
+  --tier-mark: #207443;
+  border-style: dashed;
+  border-radius: 999px;
+}
+
+.tier-badge[data-tier="rare"] {
+  --tier-ink: #092b52;
+  --tier-fill: linear-gradient(120deg, #dff5ff, #91d7ff 55%, #dbeafe);
+  --tier-edge: #1674b8;
+  --tier-text-gradient: linear-gradient(100deg, #1674b8, #092b52 42%, #236fa6 68%, #0e4777);
+  --tier-mark: #1268a2;
+  border-style: double;
+  border-width: 4px;
+  border-radius: 3px 13px 3px 13px;
+}
+
+.tier-badge[data-tier="epic"] {
+  --tier-ink: #fff;
+  --tier-fill: linear-gradient(115deg, #3b176e, #8b35c9 48%, #4b2184);
+  --tier-edge: #e879f9;
+  --tier-text-gradient: linear-gradient(100deg, #f0abfc, #fff 38%, #d8b4fe 58%, #f0abfc);
+  --tier-mark: #fff0ff;
+  border: 3px double var(--tier-edge);
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px #421d68, 0 0 14px rgb(192 98 255 / 34%);
+}
+
+.tier-badge[data-tier="legendary"] {
+  --tier-ink: #4b2c00;
+  --tier-fill: linear-gradient(105deg, #f8c64e, #fff4b0 34%, #e6a323 67%, #fff0a0);
+  --tier-edge: #8b5700;
+  --tier-text-gradient: linear-gradient(100deg, #754600, #3d2600 34%, #986000 58%, #4b2c00 78%, #754600);
+  --tier-mark: #805000;
+  border: 3px ridge #f6d66e;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px #573300, 0 0 18px rgb(255 204 70 / 48%);
+}
+
+.tier-icon,
+.tier-name {
+  position: relative;
+  z-index: 1;
+}
+
+.tier-icon {
+  display: inline-block;
+  min-width: 1em;
+  color: var(--tier-mark);
+  font-size: 17px;
+  line-height: 1;
+  transform-origin: center;
+}
+
+.tier-name {
+  background-image: var(--tier-text-gradient);
+  background-size: 240% 100%;
+  background-position: 0% 50%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+.tier-glint {
+  position: absolute;
+  z-index: 0;
+  top: -50%;
+  bottom: -50%;
+  left: -25%;
+  width: 22%;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 88%), transparent);
+  mix-blend-mode: screen;
+  transform: translateX(-250%) rotate(18deg);
+}
+
+.tier-badge[data-tier="rare"] .tier-glint {
+  opacity: .55;
+}
+
+.tier-badge[data-tier="epic"] .tier-glint {
+  width: 30%;
+  opacity: .68;
+  background: linear-gradient(90deg, transparent, rgb(255 231 255 / 95%), transparent);
+}
+
+.tier-badge[data-tier="legendary"] .tier-glint {
+  width: 34%;
+  opacity: .78;
+  background: linear-gradient(90deg, transparent, #fff, #fff7c2, transparent);
+}
+
 h1 {
   margin: 20px 0 8px;
   font-size: clamp(22px, 6vw, 30px);
@@ -58,6 +192,18 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.award-note {
+  max-width: 330px;
+  margin: 0 auto;
+  color: #d8d4e0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .filename { margin-top: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-glint { display: none; }
+}
 
 [hidden] { display: none !important; }

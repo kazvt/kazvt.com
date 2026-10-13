@@ -15,6 +15,7 @@ This version is structured like a small production overlay instead of a single d
 - `sample-messages.jsonl` contains ready-to-send example events.
 - `config.json` controls WebSocket, command, scoring, display, and persistence behavior.
 - `rewards.json` lists the PNG rewards hosted by the site.
+- `generate-reward-catalog.mjs` syncs the site manifest and assigns fixed tiers from each PNG's SHA-256 content hash.
 - `reward-links.html` is the local dashboard for copying newly issued links into chat.
 - `reward-crypto.mjs` creates and validates the reward links as JWE Compact Serialization.
 - `app.js` contains the WebSocket adapters, trivia state machine, scoring, dedupe, reconnect, and UI logic.
@@ -72,7 +73,20 @@ The public reward page is `https://kazvt.com/reward/`. Each issued URL contains 
 
 The page only accepts PNG filenames listed in the site repository's `/assets/rewards/manifest.json`. The images are hosted under `https://kazvt.com/assets/rewards/`. The local dashboard keeps the 250 most recent reward links in an ignored `.reward-queue.json` file beside `server.py`.
 
-For the data flow, limits, and design references, see [REWARD-LINKS.md](REWARD-LINKS.md). Run the built-in checks with `node --test tests/reward-crypto.test.mjs` and `python -m unittest discover -s tests`.
+### Fixed reward tiers
+
+Each image's tier is derived from the first 32 bits of its SHA-256 hash, then saved in the public manifest. The weighted buckets are Common (60%), Uncommon (22%), Rare (12%), Epic (4.5%), and Legendary (1.5%). The assignment is deterministic: renaming or reordering an image does not change its tier, while changing/re-encoding its bytes can. The reward page does an O(1) tier lookup and checks the saved digest-to-tier mapping; it does not hash or decode every image when a viewer opens a link.
+
+After adding, replacing, or removing PNGs, regenerate both catalogs from the repository root:
+
+```bash
+node obs/trivia-rewards-widget/generate-reward-catalog.mjs
+node obs/trivia-rewards-widget/generate-reward-catalog.mjs --check
+```
+
+The page animates its tier badge with Anime.js 3.2.2; labels and tiers remain readable if the CDN is unavailable. Motion is disabled when the viewer requests reduced motion.
+
+For the data flow, limits, and design references, see [REWARD-LINKS.md](REWARD-LINKS.md). Run the built-in checks with `node --test tests/*.test.mjs` and `python -m unittest discover -s tests`.
 
 ### Override the WebSocket without editing config.json
 
