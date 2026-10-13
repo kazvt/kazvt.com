@@ -24,6 +24,18 @@ import { decryptReward } from "./reward-crypto.mjs";
     divine: "✧",
     splus: "★"
   };
+  const DEMO_ADJECTIVES = [
+    "Awesome", "Awful", "Baffled", "Bouncy", "Cosmic", "Cranky", "Cursed", "Dazzling",
+    "Dizzy", "Electric", "Feral", "Fizzy", "Fluffy", "Funky", "Glorious", "Goofy",
+    "Grumpy", "Haunted", "Jolly", "Lucky", "Mysterious", "Nifty", "Odd", "Radiant",
+    "Sleepy", "Spooky", "Unruly", "Wobbly", "Zesty"
+  ];
+  const DEMO_NOUNS = [
+    "Badger", "Banana", "Beetle", "Bison", "Capybara", "Cat", "Coyote", "Crow",
+    "Dinosaur", "Duck", "Ferret", "Frog", "Goblin", "Hamster", "Jellyfish", "Kookaburra",
+    "Lizard", "Moth", "Octopus", "Possum", "Raccoon", "Snail", "Spider", "Squid",
+    "Toad", "Turnip", "Wasp", "Wombat", "Yak", "Zucchini"
+  ];
   const ANIME_URL = "https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js";
   const ANIME_INTEGRITY = "sha384-oLmuahJgYYR1aWgZwdMQQ2AClE6A2eEwV2x1Z7cbIHehfkkmommQLH3wX1NDEszb";
 
@@ -40,7 +52,11 @@ import { decryptReward } from "./reward-crypto.mjs";
   const awardNote = document.getElementById("awardNote");
   const artWallpaper = document.getElementById("artWallpaper");
   const tierGlint = rewardTier.querySelector(".tier-glint");
+  const demoButton = document.getElementById("demoAgain");
   let animeLoad;
+  let rewardCatalogPromise;
+  let lastDemoFile = "";
+  let lastDemoName = "";
 
   function populateArtWallpaper(imageUrl) {
     const stampCount = 36;
@@ -102,6 +118,11 @@ import { decryptReward } from "./reward-crypto.mjs";
     rewardState.hidden = true;
     errorMessage.textContent = message;
     errorState.hidden = false;
+    if (demoButton) {
+      demoButton.hidden = false;
+      demoButton.disabled = false;
+      demoButton.textContent = "Try again";
+    }
   }
 
   function tierFromSha256(sha256) {
@@ -132,6 +153,22 @@ import { decryptReward } from "./reward-crypto.mjs";
     return catalog.assets;
   }
 
+  function loadRewardCatalog() {
+    if (!rewardCatalogPromise) {
+      rewardCatalogPromise = fetch("/assets/rewards/manifest.json", { cache: "no-store" })
+        .then(response => {
+          if (!response.ok) throw new Error("The reward list could not be loaded.");
+          return response.json();
+        })
+        .then(catalog => ({ catalog, assets: validateCatalog(catalog) }))
+        .catch(error => {
+          rewardCatalogPromise = null;
+          throw error;
+        });
+    }
+    return rewardCatalogPromise;
+  }
+
   function loadAnime() {
     if (typeof window.anime === "function") return Promise.resolve(window.anime);
     if (animeLoad) return animeLoad;
@@ -155,6 +192,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     const anime = await loadAnime();
+    anime.remove([rewardTier, tierIcon, rewardImage, tierName, tierGlint]);
     const choreography = {
       common: {
         badge: { translateY: [0, -1.5, 0], scale: [1, 1.025, 1], duration: 2800 },
@@ -318,16 +356,82 @@ import { decryptReward } from "./reward-crypto.mjs";
     });
   }
 
+  function randomIndex(length) {
+    const range = 0x100000000;
+    const limit = Math.floor(range / length) * length;
+    const sample = new Uint32Array(1);
+    do {
+      crypto.getRandomValues(sample);
+    } while (sample[0] >= limit);
+    return sample[0] % length;
+  }
+
+  function randomDemoName() {
+    let name;
+    do {
+      name = `${DEMO_ADJECTIVES[randomIndex(DEMO_ADJECTIVES.length)]}${DEMO_NOUNS[randomIndex(DEMO_NOUNS.length)]}`;
+    } while (name === lastDemoName);
+    return name;
+  }
+
+  async function openDemo() {
+    const { catalog, assets } = await loadRewardCatalog();
+    const candidates = catalog.files.filter(file => {
+      const validFilename = typeof file === "string" && file.length <= 180 &&
+        file.toLowerCase().endsWith(".png") && !file.includes("/") &&
+        !file.includes("\\") && !/[\u0000-\u001f]/.test(file);
+      return validFilename && Object.prototype.hasOwnProperty.call(assets, file);
+    });
+    if (candidates.length === 0) throw new Error("The reward list contains no demo artwork.");
+
+    const freshCandidates = candidates.length > 1
+      ? candidates.filter(file => file !== lastDemoFile)
+      : candidates;
+    const file = freshCandidates[randomIndex(freshCandidates.length)];
+    const metadata = assets[file];
+    const assignedTier = tierFromSha256(metadata?.sha256);
+    if (!assignedTier || metadata.tier !== assignedTier) {
+      throw new Error("The demo artwork tier is invalid.");
+    }
+
+    const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
+    const demoName = randomDemoName();
+    const imageUrl = `/assets/rewards/${encodeURIComponent(file)}`;
+    document.body.dataset.tier = tier.id;
+    rewardTier.dataset.tier = tier.id;
+    rewardImage.dataset.tier = tier.id;
+    rewardTier.setAttribute("aria-label", `${tier.label} demo tier`);
+    tierIcon.textContent = TIER_MARKS[tier.id];
+    tierName.textContent = tier.label;
+    recipient.textContent = `Preview: ${demoName}`;
+    awardNote.textContent = "Demo only. No award is issued or attached to this name.";
+    filename.textContent = file;
+    rewardImage.alt = `${tier.label} demo artwork: ${file}`;
+    rewardImage.onerror = () => showError("A sample image could not be loaded. Try another demo.");
+    rewardImage.src = imageUrl;
+    populateArtWallpaper(imageUrl);
+
+    lastDemoFile = file;
+    lastDemoName = demoName;
+    loadingState.hidden = true;
+    errorState.hidden = true;
+    rewardState.hidden = false;
+    if (demoButton) {
+      demoButton.hidden = false;
+      demoButton.textContent = "Roll another demo";
+    }
+    animateTier(assignedTier).catch(error => {
+      console.warn("[reward-demo] Tier animation is unavailable:", error);
+    });
+  }
+
   async function openReward() {
     const params = new URLSearchParams(location.search);
     const token = params.get("id");
     const keyText = new URLSearchParams(location.hash.slice(1)).get("key");
     if (!token || !keyText) throw new Error("The link is missing its encrypted reward data or key.");
 
-    const response = await fetch("/assets/rewards/manifest.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("The reward list could not be loaded.");
-    const catalog = await response.json();
-    const allowedAssets = validateCatalog(catalog);
+    const { assets: allowedAssets } = await loadRewardCatalog();
 
     const data = await decryptReward(token, keyText);
     const validFilename = typeof data.file === "string" && data.file.length <= 180 &&
@@ -365,11 +469,28 @@ import { decryptReward } from "./reward-crypto.mjs";
     });
   }
 
-  openReward().catch(error => {
-    console.warn("[reward] Could not open reward link:", error);
-    const publicAssetError = /award list|reward list|reward tier|reward asset/i.test(String(error && error.message));
-    showError(publicAssetError
-      ? "The reward list could not be loaded. Refresh page in a moment."
-      : "Invalid or incomplete link. Include everything after #key=.");
-  });
+  if (demoButton) {
+    demoButton.addEventListener("click", () => {
+      demoButton.disabled = true;
+      demoButton.textContent = "Rolling…";
+      openDemo().catch(error => {
+        console.warn("[reward-demo] Could not roll a demo:", error);
+        showError("Couldn't load a demo. Check the connection and try again.");
+      }).finally(() => {
+        demoButton.disabled = false;
+      });
+    });
+    openDemo().catch(error => {
+      console.warn("[reward-demo] Could not open demo:", error);
+      showError("Couldn't load a demo. Refresh the page or try again.");
+    });
+  } else {
+    openReward().catch(error => {
+      console.warn("[reward] Could not open reward link:", error);
+      const publicAssetError = /award list|reward list|reward tier|reward asset/i.test(String(error && error.message));
+      showError(publicAssetError
+        ? "The reward list could not be loaded. Refresh page in a moment."
+        : "Invalid or incomplete link. Include everything after #key=.");
+    });
+  }
 })();
