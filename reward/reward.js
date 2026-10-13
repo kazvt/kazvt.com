@@ -308,13 +308,27 @@ import { decryptReward } from "./reward-crypto.mjs";
       common: {
         badge: { translateY: [0, -1.5, 0], scale: [1, 1.025, 1], duration: 2800 },
         icon: { scale: [1, 1.34, 0.82, 1.17, 1], duration: 1850, delay: 120 },
-        artwork: { scale: [1, 1.018, 1], duration: 4600 },
+        artwork: {
+          translateX: [0, -3, 3, -2, 0],
+          translateY: [0, -6, -2, -8, 0],
+          rotate: [0, -1.5, 1.8, -1, 0],
+          scale: [1, 1.045, 1.02, 1.055, 1],
+          duration: 5600,
+          direction: "normal"
+        },
         labelDuration: 5200,
         glint: { peak: 0.24, delay: 1550, duration: 2100 }
       },
       uncommon: {
         badge: { rotate: [0, -1.4, 1.4, 0], translateY: [0, -1.5, 0], duration: 2500 },
-        artwork: { scale: [1, 1.022, 1], duration: 4200 },
+        artwork: {
+          translateX: [0, 6, -5, 4, 0],
+          translateY: [0, -8, -3, -10, 0],
+          rotate: [0, 2.5, -2.2, 1.8, 0],
+          scale: [1, 1.05, 1.025, 1.06, 1],
+          duration: 5300,
+          direction: "normal"
+        },
         icon: {
           rotate: [0, -24, 14, -8, 0],
           scale: [1, 1.2, 0.92, 1.12, 1],
@@ -327,7 +341,14 @@ import { decryptReward } from "./reward-crypto.mjs";
       },
       rare: {
         badge: { translateY: [0, -3, 0], scale: [1, 1.025, 1], duration: 2350 },
-        artwork: { scale: [1, 1.027, 1], duration: 3900 },
+        artwork: {
+          translateX: [0, -7, 7, -5, 0],
+          translateY: [0, -10, -4, -12, 0],
+          rotate: [0, -3.4, 3.6, -2.5, 0],
+          scale: [1, 1.06, 1.03, 1.07, 1],
+          duration: 5100,
+          direction: "normal"
+        },
         icon: {
           rotateY: [0, 100, 200, 300, 360],
           rotate: [0, 8, -5, 4, 0],
@@ -346,7 +367,14 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.04, 1],
           duration: 2150
         },
-        artwork: { scale: [1, 1.032, 1], duration: 3600 },
+        artwork: {
+          translateX: [0, 8, -7, 8, 0],
+          translateY: [0, -12, -5, -14, 0],
+          rotate: [0, 4, -3.8, 3, 0],
+          scale: [1, 1.075, 1.04, 1.085, 1],
+          duration: 4900,
+          direction: "normal"
+        },
         icon: {
           rotate: [0, 75, -30, 145, 360],
           scale: [1, 1.28, 0.86, 1.16, 1],
@@ -366,7 +394,14 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.035, 1],
           duration: 2800
         },
-        artwork: { scale: [1, 1.038, 1], duration: 3300 },
+        artwork: {
+          translateX: [0, -8, 9, -6, 0],
+          translateY: [0, -13, -4, -11, 0],
+          rotate: [0, -4.2, 4.6, -3.2, 0],
+          scale: [1, 1.08, 1.045, 1.09, 1],
+          duration: 5000,
+          direction: "normal"
+        },
         icon: {
           translateY: [0, -6, -1, -4, 0],
           rotate: [0, -16, 11, -7, 0],
@@ -384,7 +419,14 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.045, 0.99, 1.025, 1],
           duration: 2400
         },
-        artwork: { scale: [1, 1.042, 1], duration: 3300 },
+        artwork: {
+          translateX: [0, 9, -9, 7, 0],
+          translateY: [0, -15, -6, -13, 0],
+          rotate: [0, 4.8, -4.5, 3.8, 0],
+          scale: [1, 1.09, 1.05, 1.1, 1],
+          duration: 4700,
+          direction: "normal"
+        },
         icon: {
           rotate: [0, 140, -35, 230, 360],
           scale: [1, 1.3, 0.9, 1.18, 1],
@@ -403,7 +445,14 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.04, 1],
           duration: 2900
         },
-        artwork: { scale: [1, 1.035, 1], duration: 3000 },
+        artwork: {
+          translateX: [0, -10, 8, -9, 0],
+          translateY: [0, -16, -5, -14, 0],
+          rotate: [0, -5, 4.2, -4.3, 0],
+          scale: [1, 1.095, 1.05, 1.105, 1],
+          duration: 5000,
+          direction: "normal"
+        },
         icon: {
           rotateY: [0, 90, 180, 270, 360],
           scale: [1, 1.25, 0.9, 1.18, 1],
@@ -420,7 +469,14 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.06, 0.98, 1.035, 1],
           duration: 2000
         },
-        artwork: { scale: [1, 1.05, 1], duration: 2800 },
+        artwork: {
+          translateX: [0, 11, -10, 9, 0],
+          translateY: [0, -17, -6, -15, 0],
+          rotate: [0, 5.5, -5.2, 4.8, 0],
+          scale: [1, 1.11, 1.055, 1.12, 1],
+          duration: 4700,
+          direction: "normal"
+        },
         icon: {
           rotate: [0, 180, -60, 360],
           scale: [1, 1.42, 0.86, 1.24, 1],
