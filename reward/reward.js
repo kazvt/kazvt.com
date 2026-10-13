@@ -102,15 +102,15 @@ import { decryptReward } from "./reward-crypto.mjs";
     const height = artWallpaper.clientHeight;
     if (!width || !height) return;
 
-    const baseSize = Math.max(36, Math.min(68, width * 0.06, height * 0.09));
-    const gap = Math.max(8, Math.min(14, baseSize * 0.2));
-    const targetRadius = baseSize * Math.SQRT1_2 + 18;
+    const baseSize = Math.max(44, Math.min(92, width * 0.085, height * 0.125));
+    const gap = Math.max(6, Math.min(10, baseSize * 0.11));
+    const targetRadius = baseSize * Math.SQRT1_2 + 14;
     const targetDistance = targetRadius * 2 + gap;
     const inset = targetRadius + gap / 2 + 2;
     const availableArea = Math.max(0, width - inset * 2) * Math.max(0, height - inset * 2);
     const targetCount = Math.min(
       wallpaperItems.length,
-      Math.max(1, Math.floor(availableArea / (targetDistance ** 2 * 1.05)))
+      Math.max(1, Math.floor(availableArea / (targetDistance ** 2 * 0.9)))
     );
     const layoutItems = wallpaperItems.slice(0, targetCount);
     const retroItems = layoutItems.filter(item => item.isRetroDecal);
@@ -130,10 +130,10 @@ import { decryptReward } from "./reward-crypto.mjs";
     const placed = [];
     const visibleItems = new Set();
     for (const item of placementOrder) {
-      const size = Math.max(30, baseSize * (0.86 + Math.random() * 0.24));
+      const size = Math.max(36, baseSize * (0.9 + Math.random() * 0.22));
       // The circle encloses the rotated square image, plus its glow and gentle wobble.
-      const radius = size * Math.SQRT1_2 + 18;
-      const itemGap = Math.max(8, Math.min(14, size * 0.2));
+      const radius = size * Math.SQRT1_2 + 14;
+      const itemGap = Math.max(6, Math.min(10, size * 0.11));
       const minX = radius + 3;
       const maxX = width - radius - 3;
       const minY = radius + 3;
