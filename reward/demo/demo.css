@@ -2,37 +2,6 @@
   margin-bottom: 8px;
 }
 
-.demo-button {
-  display: block;
-  margin: 16px auto 0;
-  padding: 8px 14px;
-  border: 2px outset var(--palette-accent);
-  background: var(--palette-panel);
-  color: var(--palette-accent);
-  box-shadow: 3px 3px 0 color-mix(in srgb, var(--palette-accent) 48%, transparent);
-  cursor: pointer;
-  font-weight: 900;
-}
-
-.reward-demo-card .demo-button {
-  margin-top: 0;
-}
-
-.demo-button:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 color-mix(in srgb, var(--palette-accent) 55%, transparent);
-}
-
-.demo-button:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 3px;
-}
-
-.demo-button:disabled {
-  cursor: progress;
-  opacity: .75;
-}
-
 .demo-footnote {
   margin: 14px 0 0;
   color: var(--palette-accent);

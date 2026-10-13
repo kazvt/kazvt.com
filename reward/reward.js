@@ -70,14 +70,11 @@ import {
   const awardCollectionGrid = document.getElementById("awardCollectionGrid");
   const awardCollectionStatus = document.getElementById("awardCollectionStatus");
   const artWallpaper = document.getElementById("artWallpaper");
-  const demoButton = document.getElementById("demoAgain");
   const rewardCard = document.querySelector("main.reward-card");
   const rewardDecalLayer = document.getElementById("rewardDecals");
   let animeLoad;
   let rewardCatalogPromise;
   let assignmentRegistryPromise;
-  let lastDemoFile = "";
-  let lastDemoName = "";
   let wallpaperItems = [];
   let wallpaperResizeTimer = 0;
   let decalLayoutSeed = 1;
@@ -496,11 +493,6 @@ import {
     wallpaperItems = [];
     artWallpaper.replaceChildren();
     if (demoFootnote) demoFootnote.hidden = true;
-    if (demoButton) {
-      demoButton.hidden = false;
-      demoButton.disabled = false;
-      demoButton.textContent = "Try again";
-    }
   }
 
   function showLoading() {
@@ -514,7 +506,6 @@ import {
     wallpaperItems = [];
     artWallpaper.replaceChildren();
     if (demoFootnote) demoFootnote.hidden = true;
-    if (demoButton) demoButton.hidden = true;
   }
 
   function waitForRewardImage(imageUrl) {
@@ -722,11 +713,7 @@ import {
   }
 
   function randomDemoName() {
-    let name;
-    do {
-      name = `${DEMO_ADJECTIVES[randomIndex(DEMO_ADJECTIVES.length)]}${DEMO_NOUNS[randomIndex(DEMO_NOUNS.length)]}`;
-    } while (name === lastDemoName);
-    return name;
+    return `${DEMO_ADJECTIVES[randomIndex(DEMO_ADJECTIVES.length)]}${DEMO_NOUNS[randomIndex(DEMO_NOUNS.length)]}`;
   }
 
   async function openDemo() {
@@ -740,10 +727,7 @@ import {
     });
     if (candidates.length === 0) throw new Error("The reward list contains no demo artwork.");
 
-    const freshCandidates = candidates.length > 1
-      ? candidates.filter(file => file !== lastDemoFile)
-      : candidates;
-    const file = freshCandidates[randomIndex(freshCandidates.length)];
+    const file = candidates[randomIndex(candidates.length)];
     const metadata = assets[file];
     const assignedTier = tierFromSha256(metadata?.sha256);
     if (!assignedTier || metadata.tier !== assignedTier) {
@@ -765,8 +749,6 @@ import {
     rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
     await waitForRewardImage(imageUrl);
 
-    lastDemoFile = file;
-    lastDemoName = demoName;
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
     rewardCard.setAttribute("aria-busy", "false");
@@ -774,10 +756,6 @@ import {
     errorState.hidden = true;
     rewardState.hidden = false;
     if (demoFootnote) demoFootnote.hidden = false;
-    if (demoButton) {
-      demoButton.hidden = false;
-      demoButton.textContent = "Roll another demo";
-    }
     populateArtWallpaper(imageUrl);
     animateTier(assignedTier).catch(error => {
       console.warn("[reward-demo] Tier animation is unavailable:", error);
@@ -852,17 +830,7 @@ import {
     });
   }
 
-  if (demoButton) {
-    demoButton.addEventListener("click", () => {
-      demoButton.disabled = true;
-      demoButton.textContent = "Rolling…";
-      openDemo().catch(error => {
-        console.warn("[reward-demo] Could not roll a demo:", error);
-        showError("Couldn't load a demo. Check the connection and try again.");
-      }).finally(() => {
-        demoButton.disabled = false;
-      });
-    });
+  if (document.body.hasAttribute("data-reward-demo")) {
     openDemo().catch(error => {
       console.warn("[reward-demo] Could not open demo:", error);
       showError("Couldn't load a demo. Refresh the page or try again.");
