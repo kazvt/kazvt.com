@@ -5,7 +5,7 @@ import { decryptReward } from "./reward-crypto.mjs";
 
   // Keep the tier ID stable for hashing/palette selection; the label is display copy.
   const TIER_BUCKETS = [
-    { id: "common", label: "Singular", upperBound: 3000 },
+    { id: "common", label: "Frequent", upperBound: 3000 },
     { id: "uncommon", label: "Uncommon", upperBound: 5000 },
     { id: "rare", label: "Rare", upperBound: 6500 },
     { id: "epic", label: "Epic", upperBound: 7700 },
