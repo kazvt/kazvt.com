@@ -7,6 +7,18 @@ export function normalizeAwardUsername(value) {
   return typeof value === "string" ? value.normalize("NFKC").trim().toLowerCase() : "";
 }
 
+export function otherAwardsFor(assignments, username, currentAssetId) {
+  if (!Array.isArray(assignments)) return [];
+  const normalizedUsername = normalizeAwardUsername(username);
+  const currentId = typeof currentAssetId === "string" ? currentAssetId.toLowerCase() : "";
+  if (!normalizedUsername) return [];
+  return assignments.filter(assignment => {
+    const assetId = typeof assignment?.assetId === "string" ? assignment.assetId.toLowerCase() : "";
+    return normalizeAwardUsername(assignment?.username) === normalizedUsername &&
+      (!currentId || assetId !== currentId);
+  });
+}
+
 export function buildTwoRowAwardPreview(assignments, columnCount) {
   const columns = Number.isFinite(columnCount) ? Math.max(1, Math.floor(columnCount)) : 1;
   const capacity = columns * 2;

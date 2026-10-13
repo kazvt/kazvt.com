@@ -110,6 +110,9 @@ h1 {
 }
 
 .clear-button:hover, .open-button:hover { background: #f2ddff; }
+.open-button { display: inline-block; text-decoration: none; text-align: center; }
+.open-button.is-unavailable { border-style: inset; color: #b7a9c1; background: #34273d; cursor: not-allowed; }
+.open-button.is-unavailable:hover { background: #34273d; }
 
 .clear-button:focus-visible, .open-button:focus-visible, .back-link:focus-visible,
 .page-footer a:focus-visible, .search-row input:focus-visible {

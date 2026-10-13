@@ -1,9 +1,11 @@
-import { decryptReward, encryptReward } from "./reward-crypto.mjs";
+import { decryptReward } from "./reward-crypto.mjs";
 import { resolveRewardAsset } from "./asset-resolver.mjs";
+import { createRewardHref } from "./reward-link.mjs";
 import "./pattern-zoom.mjs?v=1";
 import {
   buildTwoRowAwardPreview,
   normalizeAwardUsername,
+  otherAwardsFor,
   validateAndSortAssignments
 } from "./assignment-registry.mjs";
 
@@ -340,9 +342,9 @@ import {
     item.className = "award-collection-item";
 
     const isCurrent = assignment.assetId === currentAssetId;
-    const canOpen = assignment.artworkIsCurrent && !isCurrent;
-    const tile = document.createElement(canOpen ? "button" : "span");
-    if (canOpen) tile.type = "button";
+    const canOpen = assignment.artworkIsCurrent && !isCurrent && Boolean(assignment.href);
+    const tile = document.createElement(canOpen ? "a" : "span");
+    if (canOpen) tile.href = assignment.href;
     tile.className = "award-collection-tile";
     if (assignment.tierId) tile.dataset.tier = assignment.tierId;
     if (isCurrent) {
@@ -351,7 +353,7 @@ import {
       tile.setAttribute("aria-label", `Current award: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}`);
       tile.title = "Current award";
     } else {
-      const action = canOpen ? "Open" : "Artwork unavailable";
+      const action = canOpen ? "Open" : "Award unavailable";
       const label = `${action}: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}, ${username}`;
       tile.setAttribute("aria-label", label);
       tile.title = label;
@@ -381,30 +383,6 @@ import {
       image.hidden = true;
     }
     tile.append(image, fallback);
-
-    if (canOpen) {
-      tile.addEventListener("click", async () => {
-        tile.disabled = true;
-        tile.setAttribute("aria-busy", "true");
-        try {
-          const encrypted = await encryptReward({
-            version: 2,
-            username: assignment.username,
-            assetId: assignment.assetId
-          });
-          const destination = new URL("/reward/", window.location.origin);
-          destination.searchParams.set("id", encrypted.id);
-          destination.hash = `key=${encrypted.key}`;
-          window.location.assign(destination.href);
-        } catch (error) {
-          console.error("[reward] Could not create an award link:", error);
-          tile.disabled = false;
-          tile.removeAttribute("aria-busy");
-          awardCollectionStatus.hidden = false;
-          awardCollectionStatus.textContent = "That award could not be opened. Please try again.";
-        }
-      });
-    }
 
     item.append(tile);
     return item;
@@ -447,35 +425,37 @@ import {
     if (!awardCollection) return;
     const generation = ++awardCollectionGeneration;
     activeAwardCollection = { username, currentAssetId, assignments: [] };
-    awardCollectionHeading.textContent = `Awards for ${username} - newest first`;
-    awardCollectionStatus.hidden = false;
-    awardCollectionStatus.textContent = "Loading this award collection…";
-    awardCollection.hidden = false;
-    layoutUserAwardCollection();
+    awardCollection.hidden = true;
+    awardCollectionGrid.replaceChildren();
+    awardCollectionStatus.hidden = true;
+    awardCollectionStatus.replaceChildren();
 
     loadAssignmentRegistry(catalog).then(assignments => {
       if (generation !== awardCollectionGeneration) return;
-      activeAwardCollection.assignments = assignments.filter(assignment =>
-        normalizeAwardUsername(assignment.username) === normalizeAwardUsername(username));
-      if (activeAwardCollection.assignments.length === 0) {
-        awardCollectionStatus.textContent = "No other awards are recorded for this name yet.";
-        awardCollectionStatus.hidden = false;
-      } else {
-        awardCollectionStatus.hidden = true;
-        awardCollectionStatus.replaceChildren();
-      }
-      layoutUserAwardCollection();
+      const otherAwards = otherAwardsFor(assignments, username, currentAssetId);
+      if (otherAwards.length === 0) return;
+
+      return Promise.all(otherAwards.map(async assignment => {
+        try {
+          const href = assignment.artworkIsCurrent
+            ? await createRewardHref(assignment.username, assignment.assetId, window.location.origin)
+            : "";
+          return { ...assignment, href };
+        } catch (error) {
+          console.warn("[reward] Could not prepare an individual award link:", error);
+          return { ...assignment, href: "" };
+        }
+      })).then(linkedAwards => {
+        if (generation !== awardCollectionGeneration) return;
+        activeAwardCollection.assignments = linkedAwards;
+        awardCollectionHeading.textContent = `Other awards for ${username} - newest first`;
+        awardCollection.hidden = false;
+        layoutUserAwardCollection();
+      });
     }).catch(error => {
       if (generation !== awardCollectionGeneration) return;
       console.warn("[reward] Could not load the user's award collection:", error);
-      awardCollectionStatus.replaceChildren(
-        document.createTextNode("The collection could not load. "),
-        Object.assign(document.createElement("a"), {
-          href: `/reward/list/?user=${encodeURIComponent(username)}`,
-          textContent: "Try the full award list."
-        })
-      );
-      awardCollectionStatus.hidden = false;
+      awardCollection.hidden = true;
     });
   }
 

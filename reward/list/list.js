@@ -1,4 +1,4 @@
-import { encryptReward } from "../reward-crypto.mjs";
+import { createRewardHref } from "../reward-link.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs";
 import "../pattern-zoom.mjs?v=1";
 
@@ -99,7 +99,7 @@ import "../pattern-zoom.mjs?v=1";
     return validateAndSortAssignments(registry, catalog);
   }
 
-  function makeCard(assignment) {
+  async function makeCard(assignment) {
     const card = document.createElement("article");
     card.className = "award-card";
 
@@ -143,36 +143,26 @@ import "../pattern-zoom.mjs?v=1";
       artworkFrame.append(createText("span", "artwork-fallback", "Artwork no longer in catalog"));
     }
 
-    const openButton = document.createElement("button");
-    openButton.type = "button";
-    openButton.className = "open-button";
-    openButton.textContent = "Open award ↗";
-    openButton.setAttribute("aria-label", `Open ${assignment.username}'s award`);
-    openButton.disabled = !assignment.artworkIsCurrent;
-    if (!assignment.artworkIsCurrent) openButton.title = "The assigned artwork is no longer in the current catalog.";
-    openButton.addEventListener("click", async () => {
-      if (openButton.disabled) return;
-      openButton.disabled = true;
-      openButton.textContent = "Opening…";
-      try {
-        const encrypted = await encryptReward({
-          version: 2,
-          username: assignment.username,
-          assetId: assignment.assetId
-        });
-        const destination = new URL("/reward/", window.location.origin);
-        destination.searchParams.set("id", encrypted.id);
-        destination.hash = `key=${encrypted.key}`;
-        window.location.assign(destination.href);
-      } catch (error) {
-        console.error("[reward-list] Could not create a display link:", error);
-        openButton.disabled = false;
-        openButton.textContent = "Try opening again";
-        resultStatus.textContent = "Could not open that award here. Check browser security settings and try again.";
-      }
-    });
+    let openLink;
+    try {
+      if (!assignment.artworkIsCurrent) throw new Error("The assigned artwork is no longer in the current catalog.");
+      openLink = document.createElement("a");
+      openLink.href = await createRewardHref(assignment.username, assignment.assetId, window.location.origin);
+      openLink.textContent = "Open award ↗";
+      openLink.setAttribute("aria-label", `Open ${assignment.username}'s award`);
+    } catch (error) {
+      console.warn("[reward-list] Could not prepare an individual award link:", error);
+      openLink = createText("span", "open-button is-unavailable", assignment.artworkIsCurrent
+        ? "Award link unavailable"
+        : "Award unavailable");
+      openLink.setAttribute("aria-disabled", "true");
+      openLink.setAttribute("role", "img");
+      openLink.setAttribute("aria-label", `${assignment.username}'s award cannot be opened`);
+      openLink.title = "This award cannot be opened from the current artwork catalog or browser security context.";
+    }
+    openLink.classList.add("open-button");
 
-    card.append(artworkFrame, info, openButton);
+    card.append(artworkFrame, info, openLink);
     const searchText = normalizeSearch(`${assignment.username} ${assignment.filename} ${filenameLabel(assignment.filename)}`);
     return { card, searchText };
   }
@@ -214,7 +204,7 @@ import "../pattern-zoom.mjs?v=1";
             normalizeAwardUsername(requestedUsername))
           : []
         : allAssignments;
-      const cards = assignments.map(makeCard);
+      const cards = await Promise.all(assignments.map(makeCard));
       awardList.replaceChildren(...cards.map(item => item.card));
       awardList.setAttribute("aria-busy", "false");
       if (assignments.length === 0) {

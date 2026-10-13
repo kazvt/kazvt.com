@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildTwoRowAwardPreview,
   normalizeAwardUsername,
+  otherAwardsFor,
   validateAndSortAssignments
 } from "./assignment-registry.mjs";
 
@@ -34,6 +35,18 @@ test("award usernames normalize consistently for matching", () => {
   assert.equal(normalizeAwardUsername("  KAZVT "), "kazvt");
   assert.equal(normalizeAwardUsername("Ｋａｚｖｔ"), "kazvt");
   assert.equal(normalizeAwardUsername(null), "");
+});
+
+test("other-awards collection excludes the award currently being viewed", () => {
+  const assignments = [
+    { username: " KAZVT ", assetId: assetIds[0], filename: "current.png" },
+    { username: "kazvt", assetId: assetIds[1], filename: "other.png" },
+    { username: "someone-else", assetId: "c".repeat(64), filename: "unrelated.png" }
+  ];
+
+  assert.deepEqual(otherAwardsFor(assignments, "kazvt", assetIds[0]), [assignments[1]]);
+  assert.deepEqual(otherAwardsFor([assignments[0]], "Ｋａｚｖｔ", assetIds[0]), []);
+  assert.deepEqual(otherAwardsFor(assignments, "", assetIds[0]), []);
 });
 
 test("assignments sort newest first and renamed artwork resolves by content ID", () => {

@@ -640,7 +640,7 @@ h1 {
 .award-collection-tile[data-tier="divine"] { --award-tile-accent: #8cff8c; }
 .award-collection-tile[data-tier="splus"] { --award-tile-accent: #e2d190; }
 
-button.award-collection-tile { cursor: pointer; font: inherit; }
+a.award-collection-tile[href] { cursor: pointer; }
 
 .award-collection-tile img {
   display: block;
@@ -676,7 +676,7 @@ button.award-collection-tile { cursor: pointer; font: inherit; }
   outline-offset: 2px;
 }
 
-.award-collection-tile:hover:not([aria-current="page"]) {
+a.award-collection-tile[href]:hover:not([aria-current="page"]) {
   border-style: inset;
   filter: brightness(1.18);
 }
