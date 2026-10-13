@@ -7,26 +7,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <title>Chat reward</title>
-  <link rel="stylesheet" href="/reward/reward.css?v=tiers-2">
-  <script type="module" src="/reward/reward.js?v=tiers-2"></script>
+  <link rel="stylesheet" href="/reward/reward.css?v=tiers-3">
+  <script type="module" src="/reward/reward.js?v=tiers-3"></script>
 </head>
 <body>
   <main class="reward-card" aria-live="polite">
-    <div class="eyebrow">KAZVT CHAT REWARD</div>
     <section id="loadingState">
       <h1>Opening reward…</h1>
       <p class="message">One moment.</p>
     </section>
     <section id="rewardState" hidden>
+      <img id="rewardImage" class="reward-image" alt="">
+      <p id="filename" class="filename"></p>
       <div id="rewardTier" class="tier-badge" data-tier="common" role="img" aria-label="Reward tier">
         <span id="tierIcon" class="tier-icon" aria-hidden="true"></span>
         <span id="tierName" class="tier-name"></span>
         <span class="tier-glint" aria-hidden="true"></span>
       </div>
-      <img id="rewardImage" class="reward-image" alt="">
       <h1 id="recipient"></h1>
       <p id="awardNote" class="award-note"></p>
-      <p id="filename" class="filename"></p>
     </section>
     <section id="errorState" hidden>
       <h1>Reward link unavailable</h1>

@@ -27,14 +27,6 @@ body {
   text-align: center;
 }
 
-.eyebrow {
-  margin-bottom: 22px;
-  color: #c6a5ff;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .14em;
-}
-
 .tier-badge {
   --tier-ink: #253142;
   --tier-fill: linear-gradient(135deg, #f8fafc, #cbd5e1);
