@@ -67,7 +67,8 @@ import { decryptReward } from "./reward-crypto.mjs";
     { className: "wall-art--coin", src: "/reward/retro/coin.gif" },
     { className: "wall-art--wow", src: "/reward/retro/wow.gif" },
     { className: "wall-art--genie", src: "/reward/retro/genie.gif" },
-    { className: "wall-art--dance", src: "/reward/retro/dance.gif" }
+    { className: "wall-art--dance", src: "/reward/retro/dance.gif" },
+    { className: "wall-art--dance", src: "/reward/retro/dancegif_bgless.gif" }
   ];
 
   function populateArtWallpaper(imageUrl) {
@@ -77,6 +78,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     wallpaperItems = RETRO_DECALS.map(decal => ({
       className: `wall-art ${decal.className}`,
       src: decal.src,
+      isRetroDecal: true,
       element: null
     }));
 
@@ -84,6 +86,7 @@ import { decryptReward } from "./reward-crypto.mjs";
       wallpaperItems.push({
         className: `wall-art wall-art--${(index % stampStyles) + 1}`,
         src: imageUrl,
+        isRetroDecal: false,
         element: null
       });
     }
@@ -110,16 +113,23 @@ import { decryptReward } from "./reward-crypto.mjs";
       Math.max(1, Math.floor(availableArea / (targetDistance ** 2 * 1.05)))
     );
     const layoutItems = wallpaperItems.slice(0, targetCount);
+    const retroItems = layoutItems.filter(item => item.isRetroDecal);
+    const stampItems = layoutItems.filter(item => !item.isRetroDecal);
+    const shuffle = items => {
+      for (let index = items.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+      }
+    };
 
-    // Shuffle placement order so the selected artwork and retro GIFs don't form rows.
-    for (let index = layoutItems.length - 1; index > 0; index -= 1) {
-      const swapIndex = Math.floor(Math.random() * (index + 1));
-      [layoutItems[index], layoutItems[swapIndex]] = [layoutItems[swapIndex], layoutItems[index]];
-    }
+    // Place every selected retro GIF first in random order, then fill remaining space with stamps.
+    shuffle(retroItems);
+    shuffle(stampItems);
+    const placementOrder = [...retroItems, ...stampItems];
 
     const placed = [];
     const visibleItems = new Set();
-    for (const item of layoutItems) {
+    for (const item of placementOrder) {
       const size = Math.max(30, baseSize * (0.86 + Math.random() * 0.24));
       // The circle encloses the rotated square image, plus its glow and gentle wobble.
       const radius = size * Math.SQRT1_2 + 18;
