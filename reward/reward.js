@@ -60,7 +60,8 @@ import { decryptReward } from "./reward-crypto.mjs";
       { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
       { className: "wall-art--treasure-two", src: "/reward/retro/treasure-chest-2.gif" },
       { className: "wall-art--winner", src: "/reward/retro/winner-trophy.gif" },
-      { className: "wall-art--coin", src: "/reward/retro/coin.gif" }
+      { className: "wall-art--coin", src: "/reward/retro/coin.gif" },
+      { className: "wall-art--wow", src: "/reward/retro/wow.gif" }
     ]) {
       const stamp = document.createElement("img");
       stamp.className = `wall-art ${decal.className}`;
