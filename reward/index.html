@@ -8,15 +8,20 @@
   <meta name="color-scheme" content="dark light">
   <title>Chat reward</title>
   <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
-  <link rel="stylesheet" href="/reward/reward.css?v=retro-19">
-  <script type="module" src="/reward/reward.js?v=retro-24"></script>
+  <link rel="preload" href="/reward/patterns/loading.gif" as="image">
+  <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
+  <link rel="stylesheet" href="/reward/reward.css?v=retro-20">
+  <script type="module" src="/reward/reward.js?v=retro-25"></script>
 </head>
-<body>
+<body data-page-state="loading">
   <div id="artWallpaper" class="art-wallpaper" aria-hidden="true"></div>
-  <main class="reward-card" aria-live="polite">
-    <section id="loadingState">
-      <h1>Opening reward…</h1>
-      <p class="message">One moment.</p>
+  <main class="reward-card" aria-live="polite" aria-busy="true">
+    <section id="loadingState" class="loading-state" role="status" aria-live="polite" aria-atomic="true">
+      <div class="loading-heading">
+        <img class="loading-hourglass" src="/reward/retro/hourglass.gif" alt="" width="42" height="42">
+        <span class="loading-hourglass-fallback" aria-hidden="true">⌛</span>
+        <h1 class="loading-title" aria-label="Loading...">Loading<span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
+      </div>
     </section>
     <section id="rewardState" hidden>
       <img id="rewardImage" class="reward-image" alt="">

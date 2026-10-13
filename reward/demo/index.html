@@ -10,16 +10,21 @@
   <meta name="robots" content="noindex,follow">
   <title>Reward demo · kazvt.com</title>
   <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
-  <link rel="stylesheet" href="/reward/reward.css?v=retro-19">
+  <link rel="preload" href="/reward/patterns/loading.gif" as="image">
+  <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
+  <link rel="stylesheet" href="/reward/reward.css?v=retro-20">
   <link rel="stylesheet" href="/reward/demo/demo.css?v=demo-3">
-  <script type="module" src="/reward/reward.js?v=retro-24"></script>
+  <script type="module" src="/reward/reward.js?v=retro-25"></script>
 </head>
-<body data-reward-demo>
+<body data-reward-demo data-page-state="loading">
   <div id="artWallpaper" class="art-wallpaper" aria-hidden="true"></div>
-  <main class="reward-card reward-demo-card" aria-live="polite">
-    <section id="loadingState">
-      <h1>Rolling a demo…</h1>
-      <p class="message">Picking a name and a reward.</p>
+  <main class="reward-card reward-demo-card" aria-live="polite" aria-busy="true">
+    <section id="loadingState" class="loading-state" role="status" aria-live="polite" aria-atomic="true">
+      <div class="loading-heading">
+        <img class="loading-hourglass" src="/reward/retro/hourglass.gif" alt="" width="42" height="42">
+        <span class="loading-hourglass-fallback" aria-hidden="true">⌛</span>
+        <h1 class="loading-title" aria-label="Loading...">Loading<span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
+      </div>
     </section>
     <section id="rewardState" hidden>
       <img id="rewardImage" class="reward-image" alt="">
@@ -37,7 +42,7 @@
       <p id="errorMessage" class="message">Couldn't load a demo. Please try again.</p>
     </section>
     <button id="demoAgain" class="demo-button" type="button" hidden>Roll another demo</button>
-    <p class="demo-footnote">The name and artwork are randomized. Nothing is assigned or saved.</p>
+    <p class="demo-footnote" hidden>The name and artwork are randomized. Nothing is assigned or saved.</p>
   </main>
 </body>
 </html>

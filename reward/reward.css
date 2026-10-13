@@ -20,10 +20,10 @@
 button { font: inherit; }
 
 body {
-  --palette-background: #1b0d37;
-  --palette-panel: #100922;
-  --palette-accent: #9999cc;
-  --palette-pattern: url("/reward/patterns/purple.gif");
+  --palette-background: #15151a;
+  --palette-panel: #101014;
+  --palette-accent: #c9c9d1;
+  --palette-pattern: url("/reward/patterns/loading.gif");
   position: relative;
   isolation: isolate;
   min-height: 100vh;
@@ -46,49 +46,56 @@ body {
   background-attachment: fixed, fixed;
 }
 
-body[data-tier="uncommon"] {
+body[data-page-state="reward"][data-tier="common"] {
+  --palette-background: #1b0d37;
+  --palette-panel: #100922;
+  --palette-accent: #9999cc;
+  --palette-pattern: url("/reward/patterns/purple.gif");
+}
+
+body[data-page-state="reward"][data-tier="uncommon"] {
   --palette-background: #111e3a;
   --palette-panel: #0d1028;
   --palette-accent: #3399cc;
   --palette-pattern: url("/reward/patterns/blue.gif");
 }
 
-body[data-tier="rare"] {
+body[data-page-state="reward"][data-tier="rare"] {
   --palette-background: #310d19;
   --palette-panel: #180711;
   --palette-accent: #ff334d;
   --palette-pattern: url("/reward/patterns/red.gif");
 }
 
-body[data-tier="epic"] {
+body[data-page-state="reward"][data-tier="epic"] {
   --palette-background: #352013;
   --palette-panel: #1e140d;
   --palette-accent: #ff9966;
   --palette-pattern: url("/reward/patterns/orange.gif");
 }
 
-body[data-tier="legendary"] {
+body[data-page-state="reward"][data-tier="legendary"] {
   --palette-background: #1d332a;
   --palette-panel: #101c1b;
   --palette-accent: #ccff66;
   --palette-pattern: url("/reward/patterns/green.gif");
 }
 
-body[data-tier="mythic"] {
+body[data-page-state="reward"][data-tier="mythic"] {
   --palette-background: #371733;
   --palette-panel: #201020;
   --palette-accent: #ffc1ff;
   --palette-pattern: url("/reward/patterns/pink.gif");
 }
 
-body[data-tier="divine"] {
+body[data-page-state="reward"][data-tier="divine"] {
   --palette-background: #1c1b39;
   --palette-panel: #101126;
   --palette-accent: #8cff8c;
   --palette-pattern: url("/reward/patterns/chrome.gif");
 }
 
-body[data-tier="splus"] {
+body[data-page-state="reward"][data-tier="splus"] {
   --palette-background: #392619;
   --palette-panel: #21140e;
   --palette-accent: #e2d190;
@@ -223,6 +230,75 @@ body[data-tier="splus"] {
     0 0 30px color-mix(in srgb, var(--palette-accent) 34%, transparent);
   backdrop-filter: blur(2px);
   text-align: center;
+}
+
+body[data-page-state="loading"] .reward-card,
+body[data-page-state="error"] .reward-card {
+  border-color: #c9c9d1;
+  background: rgb(13 13 17 / 94%);
+  box-shadow: 0 0 0 4px rgb(0 0 0 / 48%), 0 0 24px rgb(0 0 0 / 42%);
+}
+
+.loading-state {
+  min-height: 112px;
+  display: grid;
+  place-content: center;
+}
+
+.loading-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.loading-hourglass {
+  display: block;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  animation: loading-hourglass-bob 1.4s steps(2, end) infinite;
+}
+
+.loading-hourglass-fallback { display: none; }
+
+.loading-title {
+  display: inline-flex;
+  align-items: baseline;
+  margin: 0;
+  color: #f5f5f7;
+  font-size: clamp(24px, 6vw, 32px);
+  text-shadow: 2px 2px 0 #55555d;
+  animation: loading-text-pulse 1.8s ease-in-out infinite alternate;
+}
+
+.loading-ellipsis {
+  display: inline-flex;
+  width: 1.15em;
+}
+
+.loading-ellipsis span {
+  opacity: .25;
+  animation: loading-dot 1.05s steps(2, end) infinite;
+}
+
+.loading-ellipsis span:nth-child(2) { animation-delay: .18s; }
+.loading-ellipsis span:nth-child(3) { animation-delay: .36s; }
+
+@keyframes loading-hourglass-bob {
+  0%, 100% { transform: translateY(1px) rotate(-3deg); }
+  50% { transform: translateY(-2px) rotate(3deg); }
+}
+
+@keyframes loading-text-pulse {
+  from { opacity: .78; transform: translateY(1px); }
+  to { opacity: 1; transform: translateY(-1px); }
+}
+
+@keyframes loading-dot {
+  0%, 25% { opacity: .25; transform: translateY(0); }
+  55%, 100% { opacity: 1; transform: translateY(-2px); }
 }
 
 .reward-card:has(#rewardState:not([hidden])) {
@@ -494,6 +570,10 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loading-hourglass { display: none; animation: none; }
+  .loading-hourglass-fallback { display: inline; font-size: 32px; }
+  .loading-title, .loading-ellipsis span { animation: none; }
+  .loading-ellipsis span { opacity: 1; transform: none; }
   .tier-glint { display: none; }
   .wall-art--treasure,
   .wall-art--treasure-two,

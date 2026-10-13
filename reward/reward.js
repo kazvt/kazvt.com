@@ -46,6 +46,7 @@ import { decryptReward } from "./reward-crypto.mjs";
   const filename = document.getElementById("filename");
   const rewardImage = document.getElementById("rewardImage");
   const errorMessage = document.getElementById("errorMessage");
+  const demoFootnote = document.querySelector(".demo-footnote");
   const rewardTier = document.getElementById("rewardTier");
   const tierIcon = document.getElementById("tierIcon");
   const tierName = document.getElementById("tierName");
@@ -225,15 +226,69 @@ import { decryptReward } from "./reward-crypto.mjs";
   }
 
   function showError(message) {
+    document.body.dataset.pageState = "error";
+    delete document.body.dataset.tier;
+    document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
     loadingState.hidden = true;
     rewardState.hidden = true;
     errorMessage.textContent = message;
     errorState.hidden = false;
+    wallpaperItems = [];
+    artWallpaper.replaceChildren();
+    if (demoFootnote) demoFootnote.hidden = true;
     if (demoButton) {
       demoButton.hidden = false;
       demoButton.disabled = false;
       demoButton.textContent = "Try again";
     }
+  }
+
+  function showLoading() {
+    document.body.dataset.pageState = "loading";
+    delete document.body.dataset.tier;
+    document.querySelector("main.reward-card").setAttribute("aria-busy", "true");
+    loadingState.hidden = false;
+    rewardState.hidden = true;
+    errorState.hidden = true;
+    wallpaperItems = [];
+    artWallpaper.replaceChildren();
+    if (demoFootnote) demoFootnote.hidden = true;
+    if (demoButton) demoButton.hidden = true;
+  }
+
+  function waitForRewardImage(imageUrl) {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      let decoding = false;
+      const finish = (callback, value) => {
+        if (settled) return;
+        settled = true;
+        rewardImage.onload = null;
+        rewardImage.onerror = null;
+        callback(value);
+      };
+      const decodeIfReady = () => {
+        if (settled || decoding || !rewardImage.complete) return;
+        if (!rewardImage.naturalWidth || !rewardImage.naturalHeight) {
+          finish(reject, new Error("The reward image could not be loaded."));
+          return;
+        }
+        decoding = true;
+        Promise.resolve(typeof rewardImage.decode === "function" ? rewardImage.decode() : undefined)
+          .then(() => {
+            if (!rewardImage.naturalWidth || !rewardImage.naturalHeight) {
+              throw new Error("The reward image could not be decoded.");
+            }
+            finish(resolve);
+          })
+          .catch(error => finish(reject, error));
+      };
+
+      rewardImage.onload = decodeIfReady;
+      rewardImage.onerror = () => finish(reject, new Error("The reward image could not be loaded."));
+      rewardImage.src = imageUrl;
+      decodeIfReady();
+    });
   }
 
   function tierFromSha256(sha256) {
@@ -542,6 +597,7 @@ import { decryptReward } from "./reward-crypto.mjs";
   }
 
   async function openDemo() {
+    showLoading();
     const { catalog, assets } = await loadRewardCatalog();
     const candidates = catalog.files.filter(file => {
       const validFilename = typeof file === "string" && file.length <= 180 &&
@@ -564,7 +620,6 @@ import { decryptReward } from "./reward-crypto.mjs";
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     const demoName = randomDemoName();
     const imageUrl = `/assets/rewards/${encodeURIComponent(file)}`;
-    document.body.dataset.tier = tier.id;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} demo tier`);
@@ -574,15 +629,18 @@ import { decryptReward } from "./reward-crypto.mjs";
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
     filename.textContent = filenameLabel(file);
     rewardImage.alt = `${tier.label} demo artwork: ${file}`;
-    rewardImage.onerror = () => showError("A sample image could not be loaded. Try another demo.");
-    rewardImage.src = imageUrl;
-    populateArtWallpaper(imageUrl);
+    await waitForRewardImage(imageUrl);
 
     lastDemoFile = file;
     lastDemoName = demoName;
+    document.body.dataset.tier = tier.id;
+    document.body.dataset.pageState = "reward";
+    document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
+    populateArtWallpaper(imageUrl);
     loadingState.hidden = true;
     errorState.hidden = true;
     rewardState.hidden = false;
+    if (demoFootnote) demoFootnote.hidden = false;
     if (demoButton) {
       demoButton.hidden = false;
       demoButton.textContent = "Roll another demo";
@@ -593,6 +651,7 @@ import { decryptReward } from "./reward-crypto.mjs";
   }
 
   async function openReward() {
+    showLoading();
     const params = new URLSearchParams(location.search);
     const token = params.get("id");
     const keyText = new URLSearchParams(location.hash.slice(1)).get("key");
@@ -615,7 +674,6 @@ import { decryptReward } from "./reward-crypto.mjs";
     if (!assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
-    document.body.dataset.tier = tier.id;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
@@ -623,11 +681,13 @@ import { decryptReward } from "./reward-crypto.mjs";
     tierName.textContent = tier.label;
     renderUsernameCopy(data.username);
     const imageUrl = `/assets/rewards/${encodeURIComponent(data.file)}`;
-    rewardImage.src = imageUrl;
-    populateArtWallpaper(imageUrl);
     rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
-    rewardImage.onerror = () => showError("Award image unavailable.");
     filename.textContent = filenameLabel(data.file);
+    await waitForRewardImage(imageUrl);
+    document.body.dataset.tier = tier.id;
+    document.body.dataset.pageState = "reward";
+    document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
+    populateArtWallpaper(imageUrl);
     loadingState.hidden = true;
     rewardState.hidden = false;
     animateTier(assignedTier).catch(error => {
@@ -654,7 +714,12 @@ import { decryptReward } from "./reward-crypto.mjs";
   } else {
     openReward().catch(error => {
       console.warn("[reward] Could not open reward link:", error);
-      const publicAssetError = /award list|reward list|reward tier|reward asset/i.test(String(error && error.message));
+      const message = String(error && error.message);
+      if (/reward image could not be (?:loaded|decoded)/i.test(message)) {
+        showError("Award image unavailable.");
+        return;
+      }
+      const publicAssetError = /award list|reward list|reward tier|reward asset/i.test(message);
       showError(publicAssetError
         ? "The reward list could not be loaded. Refresh page in a moment."
         : "Invalid or incomplete link. Include everything after #key=.");
