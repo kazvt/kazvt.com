@@ -97,6 +97,30 @@ body {
 .wall-art:nth-child(35) { left: 46%; top: 87%; }
 .wall-art:nth-child(36) { left: 3%;  top: 95%; }
 
+.wall-art--treasure {
+  top: 16%;
+  left: 3%;
+  width: clamp(68px, 9vw, 128px);
+  --wall-angle: -12deg;
+  --wall-opacity: 0.76;
+  --wall-bright: 0.98;
+  --wall-speed: 9s;
+  --wall-delay: -2s;
+  filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 9px rgb(255 193 76 / 38%));
+}
+
+.wall-art--winner {
+  right: 3%;
+  bottom: 13%;
+  width: clamp(64px, 8vw, 116px);
+  --wall-angle: 11deg;
+  --wall-opacity: 0.78;
+  --wall-bright: 1;
+  --wall-speed: 11s;
+  --wall-delay: -6s;
+  filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 9px rgb(255 226 93 / 42%));
+}
+
 .wall-art--1  { --wall-angle: -27deg; --wall-opacity: 0.08; --wall-bright: 0.13; --wall-speed: 13s; --wall-delay: -3s; }
 .wall-art--2  { --wall-angle: 18deg; --wall-opacity: 0.13; --wall-bright: 0.18; --wall-speed: 17s; --wall-delay: -11s; }
 .wall-art--3  { --wall-angle: -9deg; --wall-opacity: 0.1; --wall-bright: 0.16; --wall-speed: 15s; --wall-delay: -8s; }
@@ -416,6 +440,8 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .tier-glint { display: none; }
   .motion-toggle { display: none; }
+  .wall-art--treasure,
+  .wall-art--winner { display: none; }
   .wall-art {
     animation: none;
     opacity: var(--wall-opacity);

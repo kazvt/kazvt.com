@@ -67,6 +67,19 @@ import { decryptReward } from "./reward-crypto.mjs";
       stamps.append(stamp);
     }
 
+    for (const decal of [
+      { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
+      { className: "wall-art--winner", src: "/reward/retro/winner-trophy.gif" }
+    ]) {
+      const stamp = document.createElement("img");
+      stamp.className = `wall-art ${decal.className}`;
+      stamp.src = decal.src;
+      stamp.alt = "";
+      stamp.draggable = false;
+      stamp.decoding = "async";
+      stamps.append(stamp);
+    }
+
     artWallpaper.replaceChildren(stamps);
   }
 
