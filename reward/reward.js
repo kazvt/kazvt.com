@@ -58,7 +58,7 @@ import { decryptReward } from "./reward-crypto.mjs";
   let lastDemoFile = "";
   let lastDemoName = "";
   let wallpaperItems = [];
-  let wallpaperResizeFrame = 0;
+  let wallpaperResizeTimer = 0;
 
   const RETRO_DECALS = [
     { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
@@ -95,34 +95,64 @@ import { decryptReward } from "./reward-crypto.mjs";
   function layoutArtWallpaper() {
     if (!artWallpaper || wallpaperItems.length === 0) return;
 
-    const style = window.getComputedStyle(artWallpaper);
-    const horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-    const columnGap = parseFloat(style.columnGap) || 0;
-    const rowGap = parseFloat(style.rowGap) || 0;
-    const usableWidth = Math.max(0, artWallpaper.clientWidth - horizontalPadding);
-    const usableHeight = Math.max(0, artWallpaper.clientHeight - verticalPadding);
-    const minimumCellWidth = Math.min(190, Math.max(128, artWallpaper.clientWidth * 0.14));
-    const minimumCellHeight = 126;
-    const columns = Math.max(1, Math.floor((usableWidth + columnGap) / (minimumCellWidth + columnGap)));
-    const maxRows = Math.max(1, Math.floor((usableHeight + rowGap) / (minimumCellHeight + rowGap)));
-    const visibleCount = Math.min(wallpaperItems.length, columns * maxRows);
-    const rows = Math.max(1, Math.ceil(visibleCount / columns));
-    const finalRowCount = visibleCount - columns * (rows - 1);
-    const finalRowOffset = Math.floor((columns - finalRowCount) / 2);
+    const width = artWallpaper.clientWidth;
+    const height = artWallpaper.clientHeight;
+    if (!width || !height) return;
 
-    artWallpaper.style.setProperty("--wall-columns", columns);
-    artWallpaper.style.setProperty("--wall-rows", rows);
+    const baseSize = Math.max(36, Math.min(68, width * 0.06, height * 0.09));
+    const gap = Math.max(8, Math.min(14, baseSize * 0.2));
+    const targetRadius = baseSize * Math.SQRT1_2 + 18;
+    const targetDistance = targetRadius * 2 + gap;
+    const inset = targetRadius + gap / 2 + 2;
+    const availableArea = Math.max(0, width - inset * 2) * Math.max(0, height - inset * 2);
+    const targetCount = Math.min(
+      wallpaperItems.length,
+      Math.max(1, Math.floor(availableArea / (targetDistance ** 2 * 1.05)))
+    );
+    const layoutItems = wallpaperItems.slice(0, targetCount);
 
-    wallpaperItems.forEach((item, index) => {
-      if (index >= visibleCount) {
-        if (item.element) {
-          item.element.hidden = true;
-          item.element.removeAttribute("src");
+    // Shuffle placement order so the selected artwork and retro GIFs don't form rows.
+    for (let index = layoutItems.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [layoutItems[index], layoutItems[swapIndex]] = [layoutItems[swapIndex], layoutItems[index]];
+    }
+
+    const placed = [];
+    const visibleItems = new Set();
+    for (const item of layoutItems) {
+      const size = Math.max(30, baseSize * (0.86 + Math.random() * 0.24));
+      // The circle encloses the rotated square image, plus its glow and gentle wobble.
+      const radius = size * Math.SQRT1_2 + 18;
+      const itemGap = Math.max(8, Math.min(14, size * 0.2));
+      const minX = radius + 3;
+      const maxX = width - radius - 3;
+      const minY = radius + 3;
+      const maxY = height - radius - 3;
+      if (maxX <= minX || maxY <= minY) continue;
+
+      let point = null;
+      for (let attempt = 0; attempt < 800; attempt += 1) {
+        const candidate = {
+          x: minX + Math.random() * (maxX - minX),
+          y: minY + Math.random() * (maxY - minY),
+          radius
+        };
+        const clear = placed.every(other => {
+          const dx = candidate.x - other.x;
+          const dy = candidate.y - other.y;
+          const clearance = candidate.radius + other.radius + Math.max(itemGap, other.gap);
+          return dx * dx + dy * dy >= clearance * clearance;
+        });
+        if (clear) {
+          point = candidate;
+          break;
         }
-        return;
       }
+      if (!point) continue;
 
+      point.gap = itemGap;
+      placed.push(point);
+      visibleItems.add(item);
       if (!item.element) {
         item.element = document.createElement("img");
         item.element.className = item.className;
@@ -132,24 +162,29 @@ import { decryptReward } from "./reward-crypto.mjs";
         item.element.setAttribute("aria-hidden", "true");
       }
 
-      const row = Math.floor(index / columns);
-      let column = index % columns;
-      if (row === rows - 1 && finalRowCount < columns) column += finalRowOffset;
-
       item.element.hidden = false;
-      item.element.style.gridColumn = String(column + 1);
-      item.element.style.gridRow = String(row + 1);
+      item.element.style.left = `${point.x}px`;
+      item.element.style.top = `${point.y}px`;
+      item.element.style.setProperty("--wall-size", `${size}px`);
+      item.element.style.setProperty("--wall-angle-jitter", `${(Math.random() * 16 - 8).toFixed(1)}deg`);
+      item.element.style.setProperty("--wall-drift-x", `${(Math.random() * 6 - 3).toFixed(1)}px`);
+      item.element.style.setProperty("--wall-drift-y", `${(Math.random() * 6 - 3).toFixed(1)}px`);
       if (item.element.getAttribute("src") !== item.src) item.element.src = item.src;
       if (!item.element.isConnected) artWallpaper.append(item.element);
+    }
+
+    wallpaperItems.forEach(item => {
+      if (visibleItems.has(item)) return;
+      if (item.element) {
+        item.element.hidden = true;
+        item.element.removeAttribute("src");
+      }
     });
   }
 
   function scheduleWallpaperLayout() {
-    if (wallpaperResizeFrame) return;
-    wallpaperResizeFrame = window.requestAnimationFrame(() => {
-      wallpaperResizeFrame = 0;
-      layoutArtWallpaper();
-    });
+    window.clearTimeout(wallpaperResizeTimer);
+    wallpaperResizeTimer = window.setTimeout(layoutArtWallpaper, 180);
   }
 
   window.addEventListener("resize", scheduleWallpaperLayout, { passive: true });

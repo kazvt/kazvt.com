@@ -99,26 +99,18 @@ body[data-tier="splus"] {
   position: fixed;
   z-index: 0;
   inset: 0;
-  --wall-padding: clamp(10px, 1.5vw, 22px);
-  --wall-gap: clamp(10px, 1.4vw, 20px);
-  display: grid;
-  grid-template-columns: repeat(var(--wall-columns, 1), minmax(0, 1fr));
-  grid-template-rows: repeat(var(--wall-rows, 1), minmax(0, 1fr));
-  gap: var(--wall-gap);
-  padding: var(--wall-padding);
   overflow: hidden;
   pointer-events: none;
   user-select: none;
 }
 
 .wall-art {
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   display: block;
-  place-self: center;
-  width: min(52%, 96px);
-  max-width: 58%;
-  max-height: 52%;
-  height: auto;
+  width: var(--wall-size, 64px);
+  height: var(--wall-size, 64px);
   opacity: var(--wall-opacity, 0.11);
   object-fit: contain;
   transform-origin: center;
@@ -206,11 +198,14 @@ body[data-tier="splus"] {
 @keyframes wall-art-wobble {
   from {
     opacity: var(--wall-opacity);
-    transform: translateY(0) rotate(var(--wall-angle)) scale(0.96);
+    transform: translate(-50%, -50%) rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg))) scale(0.96);
   }
   to {
     opacity: var(--wall-bright);
-    transform: translateY(-4px) rotate(calc(var(--wall-angle) + 6deg)) scale(1.02);
+    transform:
+      translate(calc(-50% + var(--wall-drift-x, 0px)), calc(-50% + var(--wall-drift-y, 0px)))
+      rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg) + 6deg))
+      scale(1.02);
   }
 }
 
@@ -506,7 +501,7 @@ h1 {
   .wall-art {
     animation: none;
     opacity: var(--wall-opacity);
-    transform: rotate(var(--wall-angle));
+    transform: translate(-50%, -50%) rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg)));
   }
   .reward-image[data-tier] {
     animation: none;
