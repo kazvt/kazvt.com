@@ -72,7 +72,7 @@ function createSingleSizeLayout(seed, artSize, idOffset = 0) {
 
     for (let attempt = 0; attempt < CANDIDATE_TRIES; attempt += 1) {
       const angle = random() * Math.PI * 2;
-      const distance = WALLPAPER_MIN_DISTANCE * (1 + random());
+      const distance = minimumDistance * (1 + random());
       const x = origin.x + Math.cos(angle) * distance;
       const y = origin.y + Math.sin(angle) * distance;
       if (x < margin || x > WORLD_WIDTH - margin || y < margin || y > WORLD_HEIGHT - margin) continue;
