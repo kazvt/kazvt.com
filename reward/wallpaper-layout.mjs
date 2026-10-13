@@ -1,5 +1,11 @@
 export const WALLPAPER_ART_SIZE = 210;
-export const WALLPAPER_BOUND_RADIUS = WALLPAPER_ART_SIZE * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
+export const WALLPAPER_FILLER_SIZE = 128;
+
+function boundRadiusFor(size) {
+  return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
+}
+
+export const WALLPAPER_BOUND_RADIUS = boundRadiusFor(WALLPAPER_ART_SIZE);
 export const WALLPAPER_MIN_DISTANCE = WALLPAPER_BOUND_RADIUS * 2 + 4;
 
 const WORLD_WIDTH = 16384;
@@ -17,10 +23,10 @@ function createSeededRandom(seed) {
   };
 }
 
-function canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points) {
+function canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points, minimumDistance) {
   const cellColumn = Math.floor(x / cellSize);
   const cellRow = Math.floor(y / cellSize);
-  const minimumDistanceSquared = WALLPAPER_MIN_DISTANCE ** 2;
+  const minimumDistanceSquared = minimumDistance ** 2;
 
   for (let row = Math.max(0, cellRow - 2); row <= Math.min(gridRows - 1, cellRow + 2); row += 1) {
     for (let column = Math.max(0, cellColumn - 2); column <= Math.min(gridColumns - 1, cellColumn + 2); column += 1) {
@@ -36,9 +42,11 @@ function canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points) {
   return true;
 }
 
-export function createWallpaperLayout(seed) {
+function createSingleSizeLayout(seed, artSize, idOffset = 0) {
   const random = createSeededRandom(seed);
-  const cellSize = WALLPAPER_MIN_DISTANCE / Math.SQRT2;
+  const boundRadius = boundRadiusFor(artSize);
+  const minimumDistance = boundRadius * 2 + 4;
+  const cellSize = minimumDistance / Math.SQRT2;
   const gridColumns = Math.ceil(WORLD_WIDTH / cellSize);
   const gridRows = Math.ceil(WORLD_HEIGHT / cellSize);
   const grid = new Int32Array(gridColumns * gridRows);
@@ -46,7 +54,7 @@ export function createWallpaperLayout(seed) {
 
   const points = [];
   const active = [];
-  const margin = WALLPAPER_BOUND_RADIUS + 3;
+  const margin = boundRadius + 3;
   const addPoint = (x, y) => {
     const pointIndex = points.length;
     points.push({ x, y });
@@ -68,7 +76,7 @@ export function createWallpaperLayout(seed) {
       const x = origin.x + Math.cos(angle) * distance;
       const y = origin.y + Math.sin(angle) * distance;
       if (x < margin || x > WORLD_WIDTH - margin || y < margin || y > WORLD_HEIGHT - margin) continue;
-      if (!canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points)) continue;
+      if (!canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points, minimumDistance)) continue;
       addPoint(x, y);
       foundNearbyPoint = true;
       break;
@@ -81,12 +89,15 @@ export function createWallpaperLayout(seed) {
   }
 
   return points.map(({ x, y }, id) => {
-    const variantSeed = (seed ^ Math.imul(id + 1, 0x9e3779b1)) >>> 0;
+    const layoutId = id + idOffset;
+    const variantSeed = (seed ^ Math.imul(layoutId + 1, 0x9e3779b1)) >>> 0;
     const variant = createSeededRandom(variantSeed);
     return {
-      id,
+      id: layoutId,
       x,
       y,
+      size: artSize,
+      radius: boundRadius,
       styleIndex: Math.floor(variant() * 12) + 1,
       spinDirection: variant() < 0.5 ? "wall-art-spin--clockwise" : "wall-art-spin--counterclockwise",
       angleJitter: Number((variant() * 16 - 8).toFixed(1)),
@@ -94,6 +105,20 @@ export function createWallpaperLayout(seed) {
       driftY: variant() * 6 - 3
     };
   });
+}
+
+export function createWallpaperLayout(seed) {
+  const primary = createSingleSizeLayout(seed, WALLPAPER_ART_SIZE);
+  const fillerSeed = (seed ^ 0x85ebca6b) >>> 0;
+  const fillers = createSingleSizeLayout(fillerSeed, WALLPAPER_FILLER_SIZE, primary.length)
+    .filter(filler => primary.every(anchor => {
+      const dx = filler.x - anchor.x;
+      const dy = filler.y - anchor.y;
+      const requiredDistance = filler.radius + anchor.radius + 4;
+      return dx * dx + dy * dy >= requiredDistance ** 2;
+    }));
+
+  return [...primary, ...fillers];
 }
 
 export function wallpaperPointsForViewport(layout, width, height, zoomCompensation = 1) {
@@ -104,14 +129,14 @@ export function wallpaperPointsForViewport(layout, width, height, zoomCompensati
   const physicalHeight = height / scale;
 
   return layout
-    .filter(point => point.x + WALLPAPER_BOUND_RADIUS >= 0 && point.x - WALLPAPER_BOUND_RADIUS <= physicalWidth &&
-      point.y + WALLPAPER_BOUND_RADIUS >= 0 && point.y - WALLPAPER_BOUND_RADIUS <= physicalHeight)
+    .filter(point => point.x + point.radius >= 0 && point.x - point.radius <= physicalWidth &&
+      point.y + point.radius >= 0 && point.y - point.radius <= physicalHeight)
     .map(point => ({
       ...point,
       x: point.x * scale,
       y: point.y * scale,
-      size: WALLPAPER_ART_SIZE * scale,
-      radius: WALLPAPER_BOUND_RADIUS * scale,
+      size: point.size * scale,
+      radius: point.radius * scale,
       driftX: `${(point.driftX * scale).toFixed(2)}px`,
       driftY: `${(point.driftY * scale).toFixed(2)}px`
     }));

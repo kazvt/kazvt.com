@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   WALLPAPER_BOUND_RADIUS,
+  WALLPAPER_ART_SIZE,
+  WALLPAPER_FILLER_SIZE,
   createWallpaperLayout,
   wallpaperPointsForViewport
 } from "./wallpaper-layout.mjs";
@@ -77,4 +79,14 @@ test("larger screens reveal additional points without moving existing ones", () 
     assert.equal(matching.x, point.x);
     assert.equal(matching.y, point.y);
   }
+});
+
+test("smaller filler artwork increases the count while keeping the large repeats", () => {
+  const points = wallpaperPointsForViewport(createWallpaperLayout(42), 1920, 1080);
+  const large = points.filter(point => point.size === WALLPAPER_ART_SIZE);
+  const fillers = points.filter(point => point.size === WALLPAPER_FILLER_SIZE);
+
+  assert.ok(large.length >= 10, "large wallpaper art remains the dominant size");
+  assert.ok(fillers.length > 0, "smaller repeats fill safe gaps between larger art");
+  assert.ok(points.length > large.length, "the viewport shows more artwork overall");
 });
