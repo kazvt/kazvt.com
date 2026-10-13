@@ -1,5 +1,6 @@
 export const WALLPAPER_ART_SIZE = 210;
 export const WALLPAPER_FILLER_SIZE = 96;
+export const WALLPAPER_MICRO_SIZE = 72;
 
 function boundRadiusFor(size) {
   return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
@@ -40,6 +41,15 @@ function canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points, mini
   }
 
   return true;
+}
+
+function staysSeparated(point, anchors) {
+  return anchors.every(anchor => {
+    const dx = point.x - anchor.x;
+    const dy = point.y - anchor.y;
+    const requiredDistance = point.radius + anchor.radius + 4;
+    return dx * dx + dy * dy >= requiredDistance ** 2;
+  });
 }
 
 function createSingleSizeLayout(seed, artSize, idOffset = 0) {
@@ -111,14 +121,13 @@ export function createWallpaperLayout(seed) {
   const primary = createSingleSizeLayout(seed, WALLPAPER_ART_SIZE);
   const fillerSeed = (seed ^ 0x85ebca6b) >>> 0;
   const fillers = createSingleSizeLayout(fillerSeed, WALLPAPER_FILLER_SIZE, primary.length)
-    .filter(filler => primary.every(anchor => {
-      const dx = filler.x - anchor.x;
-      const dy = filler.y - anchor.y;
-      const requiredDistance = filler.radius + anchor.radius + 4;
-      return dx * dx + dy * dy >= requiredDistance ** 2;
-    }));
+    .filter(filler => staysSeparated(filler, primary));
+  const microSeed = (seed ^ 0xc2b2ae35) >>> 0;
+  const existing = [...primary, ...fillers];
+  const micro = createSingleSizeLayout(microSeed, WALLPAPER_MICRO_SIZE, existing.length)
+    .filter(point => staysSeparated(point, existing));
 
-  return [...primary, ...fillers];
+  return [...primary, ...fillers, ...micro];
 }
 
 export function wallpaperPointsForViewport(layout, width, height, zoomCompensation = 1) {

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   WALLPAPER_ART_SIZE,
   WALLPAPER_FILLER_SIZE,
+  WALLPAPER_MICRO_SIZE,
   createWallpaperLayout,
   wallpaperPointsForViewport
 } from "./wallpaper-layout.mjs";
@@ -85,8 +86,10 @@ test("smaller filler artwork increases the count while keeping the large repeats
   const points = wallpaperPointsForViewport(createWallpaperLayout(42), 1920, 1080);
   const large = points.filter(point => point.size === WALLPAPER_ART_SIZE);
   const fillers = points.filter(point => point.size === WALLPAPER_FILLER_SIZE);
+  const micro = points.filter(point => point.size === WALLPAPER_MICRO_SIZE);
 
   assert.ok(large.length >= 10, "large wallpaper art remains the dominant size");
   assert.ok(fillers.length >= 5, "smaller repeats noticeably fill safe gaps between larger art");
+  assert.ok(micro.length >= 6, "an extra small repeat layer fills more of the remaining safe gaps");
   assert.ok(points.length > large.length, "the viewport shows more artwork overall");
 });
