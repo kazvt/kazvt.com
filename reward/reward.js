@@ -66,6 +66,27 @@ import { decryptReward } from "./reward-crypto.mjs";
     artWallpaper.replaceChildren(stamps);
   }
 
+  function usernameMention(username) {
+    const mention = document.createElement("span");
+    mention.className = "username-mention";
+    mention.textContent = username;
+    return mention;
+  }
+
+  function renderUsernameCopy(username) {
+    recipient.replaceChildren(
+      document.createTextNode("For "),
+      usernameMention(username)
+    );
+    awardNote.replaceChildren(
+      document.createTextNode("Only "),
+      usernameMention(username),
+      document.createTextNode(" gets the award. The artwork can show up elsewhere, but the award belongs to "),
+      usernameMention(username),
+      document.createTextNode(" alone.")
+    );
+  }
+
   function showError(message) {
     loadingState.hidden = true;
     rewardState.hidden = true;
@@ -263,13 +284,12 @@ import { decryptReward } from "./reward-crypto.mjs";
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
-    awardNote.textContent = `Only ${data.username} gets the award. The artwork can show up elsewhere, but the award belongs to ${data.username} alone.`;
+    renderUsernameCopy(data.username);
     const imageUrl = `/assets/rewards/${encodeURIComponent(data.file)}`;
     rewardImage.src = imageUrl;
     populateArtWallpaper(imageUrl);
     rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
     rewardImage.onerror = () => showError("Award image unavailable.");
-    recipient.textContent = `For ${data.username}`;
     filename.textContent = data.file;
     loadingState.hidden = true;
     rewardState.hidden = false;

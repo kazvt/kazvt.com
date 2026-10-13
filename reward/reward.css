@@ -173,7 +173,7 @@ body {
   justify-content: center;
   gap: 8px;
   min-height: 36px;
-  margin: 0 auto 18px;
+  margin: 0 auto;
   padding: 6px 15px;
   overflow: hidden;
   border: 2px dotted var(--tier-edge);
@@ -403,6 +403,13 @@ h1 {
 }
 
 .filename { margin-top: 10px; }
+
+.username-mention {
+  text-decoration-line: underline;
+  text-decoration-color: #65f3ff;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.14em;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .tier-glint { display: none; }
