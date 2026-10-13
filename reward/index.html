@@ -10,8 +10,8 @@
   <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
   <link rel="preload" href="/reward/patterns/loading-stars.gif" as="image">
   <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
-  <link rel="stylesheet" href="/reward/reward.css?v=retro-25">
-  <script type="module" src="/reward/reward.js?v=retro-31"></script>
+  <link rel="stylesheet" href="/reward/reward.css?v=retro-26">
+  <script type="module" src="/reward/reward.js?v=retro-32"></script>
 <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
 </head>
 <body data-page-state="loading">
@@ -34,6 +34,11 @@
       </div>
       <h1 id="recipient"></h1>
       <p id="awardNote" class="award-note"></p>
+      <section id="awardCollection" class="award-collection" hidden aria-labelledby="awardCollectionHeading">
+        <h2 id="awardCollectionHeading" class="award-collection-heading"></h2>
+        <ul id="awardCollectionGrid" class="award-collection-grid" aria-label="Awards, newest first"></ul>
+        <p id="awardCollectionStatus" class="award-collection-status" role="status" hidden></p>
+      </section>
     </section>
     <section id="errorState" hidden>
       <h1>Reward link unavailable</h1>

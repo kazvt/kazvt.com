@@ -1,5 +1,10 @@
-import { decryptReward } from "./reward-crypto.mjs";
+import { decryptReward, encryptReward } from "./reward-crypto.mjs";
 import { resolveRewardAsset } from "./asset-resolver.mjs";
+import {
+  buildTwoRowAwardPreview,
+  normalizeAwardUsername,
+  validateAndSortAssignments
+} from "./assignment-registry.mjs";
 
 (() => {
   "use strict";
@@ -52,17 +57,24 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
   const tierIcon = document.getElementById("tierIcon");
   const tierName = document.getElementById("tierName");
   const awardNote = document.getElementById("awardNote");
+  const awardCollection = document.getElementById("awardCollection");
+  const awardCollectionHeading = document.getElementById("awardCollectionHeading");
+  const awardCollectionGrid = document.getElementById("awardCollectionGrid");
+  const awardCollectionStatus = document.getElementById("awardCollectionStatus");
   const artWallpaper = document.getElementById("artWallpaper");
   const demoButton = document.getElementById("demoAgain");
   const rewardCard = document.querySelector("main.reward-card");
   const rewardDecalLayer = document.getElementById("rewardDecals");
   let animeLoad;
   let rewardCatalogPromise;
+  let assignmentRegistryPromise;
   let lastDemoFile = "";
   let lastDemoName = "";
   let wallpaperItems = [];
   let wallpaperResizeTimer = 0;
   let decalLayoutSeed = 1;
+  let activeAwardCollection = null;
+  let awardCollectionGeneration = 0;
   const decalElements = new Map();
 
   const RETRO_DECALS = [
@@ -88,7 +100,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
   }
 
   function hashRewardIdentity(username, assetId) {
-    const canonicalUsername = username.normalize("NFKC").trim().toLowerCase();
+    const canonicalUsername = normalizeAwardUsername(username);
     const canonicalAssetId = typeof assetId === "string" ? assetId.toLowerCase() : "";
     const identity = `reward-decals-v1\u0000${canonicalUsername}\u0000${canonicalAssetId}`;
     let hash = 0x811c9dc5;
@@ -262,6 +274,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     wallpaperResizeTimer = window.setTimeout(() => {
       layoutArtWallpaper();
       layoutRewardDecals();
+      layoutUserAwardCollection();
     }, 180);
   }
 
@@ -295,7 +308,178 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     );
   }
 
+  function hideAwardCollection() {
+    awardCollectionGeneration += 1;
+    activeAwardCollection = null;
+    if (!awardCollection) return;
+    awardCollection.hidden = true;
+    awardCollectionGrid.replaceChildren();
+    awardCollectionStatus.hidden = true;
+    awardCollectionStatus.replaceChildren();
+  }
+
+  function loadAssignmentRegistry(catalog) {
+    if (!assignmentRegistryPromise) {
+      assignmentRegistryPromise = fetch("/zzz_assets/rewards/assignments.json", { cache: "no-store" })
+        .then(response => {
+          if (!response.ok) throw new Error("The award assignment registry could not be loaded.");
+          return response.json();
+        })
+        .then(registry => validateAndSortAssignments(registry, catalog))
+        .catch(error => {
+          assignmentRegistryPromise = null;
+          throw error;
+        });
+    }
+    return assignmentRegistryPromise;
+  }
+
+  function makeAwardCollectionTile(assignment, username, currentAssetId) {
+    const item = document.createElement("li");
+    item.className = "award-collection-item";
+
+    const isCurrent = assignment.assetId === currentAssetId;
+    const canOpen = assignment.artworkIsCurrent && !isCurrent;
+    const tile = document.createElement(canOpen ? "button" : "span");
+    if (canOpen) tile.type = "button";
+    tile.className = "award-collection-tile";
+    if (assignment.tierId) tile.dataset.tier = assignment.tierId;
+    if (isCurrent) {
+      tile.setAttribute("role", "img");
+      tile.setAttribute("aria-current", "page");
+      tile.setAttribute("aria-label", `Current award: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}`);
+      tile.title = "Current award";
+    } else {
+      const action = canOpen ? "Open" : "Artwork unavailable";
+      const label = `${action}: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}, ${username}`;
+      tile.setAttribute("aria-label", label);
+      tile.title = label;
+      if (!canOpen) tile.setAttribute("role", "img");
+    }
+
+    const image = document.createElement("img");
+    image.src = `/zzz_assets/rewards/${encodeURIComponent(assignment.filename)}`;
+    image.alt = "";
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.addEventListener("error", () => {
+      image.hidden = true;
+      fallback.hidden = false;
+      tile.classList.add("is-unavailable");
+      tile.setAttribute("aria-label", `Artwork unavailable: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}, ${username}`);
+      tile.title = "Artwork unavailable";
+    }, { once: true });
+
+    const fallback = document.createElement("span");
+    fallback.className = "award-collection-fallback";
+    fallback.textContent = "?";
+    fallback.hidden = assignment.artworkIsCurrent;
+    if (assignment.artworkIsCurrent) {
+      image.src = `/zzz_assets/rewards/${encodeURIComponent(assignment.filename)}`;
+    } else {
+      image.hidden = true;
+    }
+    tile.append(image, fallback);
+
+    if (canOpen) {
+      tile.addEventListener("click", async () => {
+        tile.disabled = true;
+        tile.setAttribute("aria-busy", "true");
+        try {
+          const encrypted = await encryptReward({
+            version: 2,
+            username: assignment.username,
+            assetId: assignment.assetId
+          });
+          const destination = new URL("/reward/", window.location.origin);
+          destination.searchParams.set("id", encrypted.id);
+          destination.hash = `key=${encrypted.key}`;
+          window.location.assign(destination.href);
+        } catch (error) {
+          console.error("[reward] Could not create an award link:", error);
+          tile.disabled = false;
+          tile.removeAttribute("aria-busy");
+          awardCollectionStatus.hidden = false;
+          awardCollectionStatus.textContent = "That award could not be opened. Please try again.";
+        }
+      });
+    }
+
+    item.append(tile);
+    return item;
+  }
+
+  function layoutUserAwardCollection() {
+    if (!activeAwardCollection || !awardCollection || awardCollection.hidden) return;
+
+    const gridStyle = getComputedStyle(awardCollectionGrid);
+    const sizeProbe = document.createElement("li");
+    sizeProbe.className = "award-collection-item";
+    sizeProbe.setAttribute("aria-hidden", "true");
+    Object.assign(sizeProbe.style, { position: "absolute", visibility: "hidden", pointerEvents: "none" });
+    awardCollectionGrid.append(sizeProbe);
+    const tileSize = sizeProbe.getBoundingClientRect().width || 48;
+    sizeProbe.remove();
+    const gap = Number.parseFloat(gridStyle.columnGap) || 6;
+    const columns = Math.max(1, Math.floor((awardCollectionGrid.clientWidth + gap) / (tileSize + gap)));
+    const preview = buildTwoRowAwardPreview(activeAwardCollection.assignments, columns);
+    const items = preview.visible.map(assignment =>
+      makeAwardCollectionTile(assignment, activeAwardCollection.username, activeAwardCollection.currentAssetId));
+
+    if (preview.overflowCount > 0) {
+      const item = document.createElement("li");
+      item.className = "award-collection-item";
+      const link = document.createElement("a");
+      link.className = "award-collection-tile award-collection-overflow";
+      link.href = `/reward/list/?user=${encodeURIComponent(activeAwardCollection.username)}`;
+      link.textContent = preview.overflowLabel;
+      link.title = `Show all ${preview.overflowCount} more awards for ${activeAwardCollection.username}`;
+      link.setAttribute("aria-label", `Show all ${preview.overflowCount} more awards for ${activeAwardCollection.username}`);
+      item.append(link);
+      items.push(item);
+    }
+
+    awardCollectionGrid.replaceChildren(...items);
+  }
+
+  function showUserAwardCollection(username, currentAssetId, catalog) {
+    if (!awardCollection) return;
+    const generation = ++awardCollectionGeneration;
+    activeAwardCollection = { username, currentAssetId, assignments: [] };
+    awardCollectionHeading.textContent = `Awards for ${username} · newest first`;
+    awardCollectionStatus.hidden = false;
+    awardCollectionStatus.textContent = "Loading this award collection…";
+    awardCollection.hidden = false;
+    layoutUserAwardCollection();
+
+    loadAssignmentRegistry(catalog).then(assignments => {
+      if (generation !== awardCollectionGeneration) return;
+      activeAwardCollection.assignments = assignments.filter(assignment =>
+        normalizeAwardUsername(assignment.username) === normalizeAwardUsername(username));
+      if (activeAwardCollection.assignments.length === 0) {
+        awardCollectionStatus.textContent = "No other awards are recorded for this name yet.";
+        awardCollectionStatus.hidden = false;
+      } else {
+        awardCollectionStatus.hidden = true;
+        awardCollectionStatus.replaceChildren();
+      }
+      layoutUserAwardCollection();
+    }).catch(error => {
+      if (generation !== awardCollectionGeneration) return;
+      console.warn("[reward] Could not load the user's award collection:", error);
+      awardCollectionStatus.replaceChildren(
+        document.createTextNode("The collection could not load. "),
+        Object.assign(document.createElement("a"), {
+          href: `/reward/list/?user=${encodeURIComponent(username)}`,
+          textContent: "Try the full award list."
+        })
+      );
+      awardCollectionStatus.hidden = false;
+    });
+  }
+
   function showError(message) {
+    hideAwardCollection();
     document.body.dataset.pageState = "error";
     delete document.body.dataset.tier;
     document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
@@ -314,6 +498,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
   }
 
   function showLoading() {
+    hideAwardCollection();
     document.body.dataset.pageState = "loading";
     delete document.body.dataset.tier;
     document.querySelector("main.reward-card").setAttribute("aria-busy", "true");
@@ -630,6 +815,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     loadingState.hidden = true;
     rewardState.hidden = false;
     populateArtWallpaper(imageUrl);
+    showUserAwardCollection(data.username, metadata.assetId, catalog);
     animateTier(assignedTier).catch(error => {
       // The award remains readable and correctly tiered when an external animation CDN is unavailable.
       console.warn("[reward] Tier animation is unavailable:", error);

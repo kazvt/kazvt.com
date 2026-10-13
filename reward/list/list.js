@@ -1,5 +1,5 @@
 import { encryptReward } from "../reward-crypto.mjs";
-import { resolveAssetById } from "../asset-resolver.mjs";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs";
 
 (() => {
   "use strict";
@@ -10,6 +10,14 @@ import { resolveAssetById } from "../asset-resolver.mjs";
   const awardList = document.getElementById("awardList");
   const emptyState = document.getElementById("emptyState");
   const errorState = document.getElementById("errorState");
+  const pageTitle = document.getElementById("pageTitle");
+  const pageIntro = document.getElementById("pageIntro");
+  const searchLabel = document.getElementById("search-label");
+  const usernameParam = new URLSearchParams(window.location.search).get("user");
+  const userFilterRequested = usernameParam !== null;
+  const requestedUsername = usernameParam?.trim() ?? "";
+  const userFilterValid = !userFilterRequested || (requestedUsername.length > 0 &&
+    requestedUsername.length <= 100 && !/[\u0000-\u001f]/.test(requestedUsername));
 
   function normalizeSearch(value) {
     return value.normalize("NFKD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase().trim();
@@ -74,50 +82,6 @@ import { resolveAssetById } from "../asset-resolver.mjs";
     return null;
   }
 
-  function validateAssignments(registry, catalog) {
-    if (!registry || registry.version !== 1 || !Array.isArray(registry.assignments)) {
-      throw new Error("The assignment registry is invalid.");
-    }
-
-    const seenAssets = new Set();
-    return registry.assignments.map((record, index) => {
-      if (!record || typeof record !== "object" || Array.isArray(record) ||
-          typeof record.filename !== "string" || record.filename.length > 255 ||
-          !/^[^/\\\u0000-\u001f]+\.png$/i.test(record.filename) ||
-          typeof record.username !== "string" || !record.username.trim() ||
-          record.username.length > 100 || /[\u0000-\u001f]/.test(record.username) ||
-          (typeof (record.assetId ?? record.assetSha256) !== "string" ||
-            !/^[a-f0-9]{64}$/i.test(record.assetId ?? record.assetSha256)) ||
-          (record.assetId != null && record.assetSha256 != null &&
-            record.assetId.toLowerCase() !== record.assetSha256.toLowerCase()) ||
-          typeof record.issuedAt !== "string" || record.issuedAt.length > 40 ||
-          !Number.isFinite(Date.parse(record.issuedAt))) {
-        throw new Error(`Assignment record ${index + 1} is invalid.`);
-      }
-
-      const assetId = (record.assetId ?? record.assetSha256).toLowerCase();
-      if (seenAssets.has(assetId)) throw new Error("The assignment registry repeats artwork.");
-      seenAssets.add(assetId);
-
-      const tier = tierForHash(assetId, catalog);
-      const tierId = tier?.id ?? "";
-      const current = resolveAssetById(catalog, assetId);
-      const currentFilename = current?.filename;
-      const currentAsset = current?.metadata;
-      const artworkIsCurrent = Boolean(currentAsset && currentAsset.assetId === assetId && currentAsset.tier === tierId);
-
-      return {
-        filename: artworkIsCurrent ? currentFilename : record.filename,
-        username: record.username.trim(),
-        assetId,
-        issuedAt: record.issuedAt,
-        tierId: tier ? tier.id : "",
-        tierLabel: tier ? tier.label : "Award",
-        artworkIsCurrent
-      };
-    });
-  }
-
   async function loadRegistry() {
     const [registryResponse, catalogResponse] = await Promise.all([
       fetch("/zzz_assets/rewards/assignments.json", { cache: "no-cache" }),
@@ -131,10 +95,7 @@ import { resolveAssetById } from "../asset-resolver.mjs";
       catalogResponse.json()
     ]);
     const catalog = validateCatalog(rawCatalog);
-    const assignments = validateAssignments(registry, catalog);
-    assignments.sort((left, right) => Date.parse(right.issuedAt) - Date.parse(left.issuedAt) ||
-      left.filename.localeCompare(right.filename));
-    return assignments;
+    return validateAndSortAssignments(registry, catalog);
   }
 
   function makeCard(assignment) {
@@ -234,14 +195,34 @@ import { resolveAssetById } from "../asset-resolver.mjs";
   }
 
   async function start() {
+    if (userFilterRequested) {
+      pageTitle.textContent = userFilterValid ? `Awards for ${requestedUsername}` : "Award lookup";
+      pageIntro.textContent = userFilterValid
+        ? `All recorded awards for ${requestedUsername}, newest first.`
+        : "That username is invalid.";
+      document.title = userFilterValid ? `Awards for ${requestedUsername} — kazvt` : "Award lookup — kazvt";
+      searchLabel.textContent = "Search this collection";
+      searchInput.placeholder = "Try an artwork name";
+    }
+
     try {
-      const assignments = await loadRegistry();
+      const allAssignments = await loadRegistry();
+      const assignments = userFilterRequested
+        ? userFilterValid
+          ? allAssignments.filter(record => normalizeAwardUsername(record.username) ===
+            normalizeAwardUsername(requestedUsername))
+          : []
+        : allAssignments;
       const cards = assignments.map(makeCard);
       awardList.replaceChildren(...cards.map(item => item.card));
       awardList.setAttribute("aria-busy", "false");
       if (assignments.length === 0) {
         emptyState.hidden = false;
-        emptyState.textContent = "No awards have been recorded yet.";
+        emptyState.textContent = userFilterRequested
+          ? userFilterValid
+            ? `No recorded awards for ${requestedUsername}.`
+            : "That username is invalid."
+          : "No awards have been recorded yet.";
       }
       updateResults(cards);
       searchInput.addEventListener("input", () => updateResults(cards));
