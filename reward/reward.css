@@ -31,7 +31,7 @@ body {
   margin: 0;
   display: grid;
   place-items: center;
-  padding: 24px 18px;
+  padding: 40px max(18px, 7.5vw);
   overflow-x: clip;
   background-color: var(--palette-background);
   background-image:
@@ -189,18 +189,18 @@ body[data-page-state="reward"][data-tier="splus"] {
   filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 10px rgb(255 105 174 / 48%));
 }
 
-.wall-art--1  { --wall-angle: -27deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 13s; --wall-delay: -3s; }
-.wall-art--2  { --wall-angle: 18deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 17s; --wall-delay: -11s; }
-.wall-art--3  { --wall-angle: -9deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 15s; --wall-delay: -8s; }
-.wall-art--4  { --wall-angle: 34deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 19s; --wall-delay: -6s; }
-.wall-art--5  { --wall-angle: -41deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 12s; --wall-delay: -9s; }
-.wall-art--6  { --wall-angle: 12deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 16s; --wall-delay: -13s; }
-.wall-art--7  { --wall-angle: -18deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 21s; --wall-delay: -5s; }
-.wall-art--8  { --wall-angle: 43deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 14s; --wall-delay: -10s; }
-.wall-art--9  { --wall-angle: -34deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 18s; --wall-delay: -15s; }
-.wall-art--10 { --wall-angle: 25deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 12s; --wall-delay: -7s; }
-.wall-art--11 { --wall-angle: -13deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 20s; --wall-delay: -12s; }
-.wall-art--12 { --wall-angle: 38deg; --wall-opacity: 1; --wall-bright: 1; --wall-speed: 16s; --wall-delay: -2s; }
+.wall-art--1  { --wall-angle: -27deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 13s; --wall-delay: -3s; }
+.wall-art--2  { --wall-angle: 18deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 17s; --wall-delay: -11s; }
+.wall-art--3  { --wall-angle: -9deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 15s; --wall-delay: -8s; }
+.wall-art--4  { --wall-angle: 34deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 19s; --wall-delay: -6s; }
+.wall-art--5  { --wall-angle: -41deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 12s; --wall-delay: -9s; }
+.wall-art--6  { --wall-angle: 12deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 16s; --wall-delay: -13s; }
+.wall-art--7  { --wall-angle: -18deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 21s; --wall-delay: -5s; }
+.wall-art--8  { --wall-angle: 43deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 14s; --wall-delay: -10s; }
+.wall-art--9  { --wall-angle: -34deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 18s; --wall-delay: -15s; }
+.wall-art--10 { --wall-angle: 25deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 12s; --wall-delay: -7s; }
+.wall-art--11 { --wall-angle: -13deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 20s; --wall-delay: -12s; }
+.wall-art--12 { --wall-angle: 38deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 16s; --wall-delay: -2s; }
 
 @keyframes wall-art-wobble {
   from {
@@ -230,6 +230,44 @@ body[data-page-state="reward"][data-tier="splus"] {
     0 0 30px color-mix(in srgb, var(--palette-accent) 34%, transparent);
   backdrop-filter: blur(2px);
   text-align: center;
+}
+
+.reward-decal-layer {
+  position: absolute;
+  z-index: 2;
+  inset: -3px;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+}
+
+body:not([data-page-state="reward"]) .reward-decal-layer { visibility: hidden; }
+
+.reward-card > :not(.reward-decal-layer) {
+  position: relative;
+  z-index: 1;
+}
+
+.reward-decal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: var(--decal-size, 64px);
+  height: var(--decal-size, 64px);
+  object-fit: contain;
+  opacity: 1;
+  transform-origin: center;
+  animation: reward-decal-wobble var(--wall-speed, 9s) ease-in-out var(--wall-delay, -3s) infinite alternate;
+}
+
+@keyframes reward-decal-wobble {
+  from {
+    transform: translate(-50%, -50%) rotate(calc(var(--decal-angle, 0deg) - 3deg)) scale(.96);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(calc(var(--decal-angle, 0deg) + 3deg)) scale(1.04);
+  }
 }
 
 body[data-page-state="loading"] .reward-card,
@@ -575,17 +613,14 @@ h1 {
   .loading-title, .loading-ellipsis span { animation: none; }
   .loading-ellipsis span { opacity: 1; transform: none; }
   .tier-glint { display: none; }
-  .wall-art--treasure,
-  .wall-art--treasure-two,
-  .wall-art--winner,
-  .wall-art--coin,
-  .wall-art--wow,
-  .wall-art--genie,
-  .wall-art--dance { display: none; }
   .wall-art {
     animation: none;
     opacity: var(--wall-opacity);
     transform: translate(-50%, -50%) rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg)));
+  }
+  .reward-decal {
+    animation: none;
+    transform: translate(-50%, -50%) rotate(var(--decal-angle, 0deg));
   }
   .reward-image[data-tier] {
     animation: none;

@@ -55,12 +55,16 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
   const artWallpaper = document.getElementById("artWallpaper");
   const tierGlint = rewardTier.querySelector(".tier-glint");
   const demoButton = document.getElementById("demoAgain");
+  const rewardCard = document.querySelector("main.reward-card");
+  const rewardDecalLayer = document.getElementById("rewardDecals");
   let animeLoad;
   let rewardCatalogPromise;
   let lastDemoFile = "";
   let lastDemoName = "";
   let wallpaperItems = [];
   let wallpaperResizeTimer = 0;
+  const decalLayoutSeed = Math.floor(Math.random() * 0xffffffff) || 1;
+  const decalElements = new Map();
 
   const RETRO_DECALS = [
     { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
@@ -73,28 +77,89 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     { className: "wall-art--dance", src: "/reward/retro/dancegif_bgless.gif" }
   ];
 
+  function createSeededRandom(seed) {
+    let state = seed >>> 0;
+    return () => {
+      state += 0x6D2B79F5;
+      let value = state;
+      value = Math.imul(value ^ (value >>> 15), value | 1);
+      value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function pointOnPerimeter(distance, width, height) {
+    const perimeter = 2 * (width + height);
+    let offset = ((distance % perimeter) + perimeter) % perimeter;
+    if (offset < width) return { x: offset, y: 0 };
+    offset -= width;
+    if (offset < height) return { x: width, y: offset };
+    offset -= height;
+    if (offset < width) return { x: width - offset, y: height };
+    offset -= width;
+    return { x: 0, y: height - offset };
+  }
+
+  function layoutRewardDecals() {
+    if (!rewardDecalLayer || document.body.dataset.pageState !== "reward") return;
+
+    const width = rewardDecalLayer.clientWidth;
+    const height = rewardDecalLayer.clientHeight;
+    if (!width || !height || RETRO_DECALS.length === 0) return;
+
+    const random = createSeededRandom(decalLayoutSeed);
+    const items = [...RETRO_DECALS];
+    for (let index = items.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(random() * (index + 1));
+      [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+    }
+
+    const perimeter = 2 * (width + height);
+    const step = perimeter / items.length;
+    const size = Math.max(24, Math.min(76, Math.min(width, height) * 0.16, step / 1.9));
+    const maximumJitter = Math.max(0, Math.min(step * 0.18, (step - size * 1.9) * 0.45));
+    const start = random() * step;
+
+    items.forEach((item, index) => {
+      const jitter = (random() * 2 - 1) * maximumJitter;
+      const point = pointOnPerimeter(start + (index + 0.5) * step + jitter, width, height);
+      let element = decalElements.get(item.src);
+      if (!element) {
+        element = document.createElement("img");
+        element.className = `reward-decal ${item.className}`;
+        element.alt = "";
+        element.draggable = false;
+        element.decoding = "async";
+        element.setAttribute("aria-hidden", "true");
+        element.src = item.src;
+        decalElements.set(item.src, element);
+      }
+
+      element.hidden = false;
+      element.style.left = `${point.x}px`;
+      element.style.top = `${point.y}px`;
+      element.style.setProperty("--decal-size", `${size}px`);
+      element.style.setProperty("--decal-angle", `${(random() * 26 - 13).toFixed(1)}deg`);
+      if (element.parentElement !== rewardDecalLayer) rewardDecalLayer.append(element);
+    });
+  }
+
   function populateArtWallpaper(imageUrl) {
     const stampCount = 36;
     const stampStyles = 12;
 
-    wallpaperItems = RETRO_DECALS.map(decal => ({
-      className: `wall-art ${decal.className}`,
-      src: decal.src,
-      isRetroDecal: true,
-      element: null
-    }));
-
+    wallpaperItems = [];
     for (let index = 0; index < stampCount; index += 1) {
       wallpaperItems.push({
         className: `wall-art wall-art--${(index % stampStyles) + 1}`,
         src: imageUrl,
-        isRetroDecal: false,
         element: null
       });
     }
 
     artWallpaper.replaceChildren();
     layoutArtWallpaper();
+    layoutRewardDecals();
   }
 
   function layoutArtWallpaper() {
@@ -115,23 +180,10 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
       Math.max(1, Math.floor(availableArea / (targetDistance ** 2 * 0.9)))
     );
     const layoutItems = wallpaperItems.slice(0, targetCount);
-    const retroItems = layoutItems.filter(item => item.isRetroDecal);
-    const stampItems = layoutItems.filter(item => !item.isRetroDecal);
-    const shuffle = items => {
-      for (let index = items.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
-        [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
-      }
-    };
-
-    // Place every selected retro GIF first in random order, then fill remaining space with stamps.
-    shuffle(retroItems);
-    shuffle(stampItems);
-    const placementOrder = [...retroItems, ...stampItems];
 
     const placed = [];
     const visibleItems = new Set();
-    for (const item of placementOrder) {
+    for (const item of layoutItems) {
       const size = Math.max(36, baseSize * (0.9 + Math.random() * 0.22));
       // The circle encloses the rotated square image, plus its glow and gentle wobble.
       const radius = size * Math.SQRT1_2 + 14;
@@ -196,11 +248,17 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
 
   function scheduleWallpaperLayout() {
     window.clearTimeout(wallpaperResizeTimer);
-    wallpaperResizeTimer = window.setTimeout(layoutArtWallpaper, 180);
+    wallpaperResizeTimer = window.setTimeout(() => {
+      layoutArtWallpaper();
+      layoutRewardDecals();
+    }, 180);
   }
 
   window.addEventListener("resize", scheduleWallpaperLayout, { passive: true });
   window.visualViewport?.addEventListener("resize", scheduleWallpaperLayout, { passive: true });
+  if (typeof ResizeObserver === "function" && rewardCard) {
+    new ResizeObserver(scheduleWallpaperLayout).observe(rewardCard);
+  }
 
   function usernameMention(username) {
     const mention = document.createElement("span");
@@ -667,8 +725,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     lastDemoName = demoName;
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
-    document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
-    populateArtWallpaper(imageUrl);
+    rewardCard.setAttribute("aria-busy", "false");
     loadingState.hidden = true;
     errorState.hidden = true;
     rewardState.hidden = false;
@@ -677,6 +734,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
       demoButton.hidden = false;
       demoButton.textContent = "Roll another demo";
     }
+    populateArtWallpaper(imageUrl);
     animateTier(assignedTier).catch(error => {
       console.warn("[reward-demo] Tier animation is unavailable:", error);
     });
@@ -717,10 +775,10 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     await waitForRewardImage(imageUrl);
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
-    document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
-    populateArtWallpaper(imageUrl);
+    rewardCard.setAttribute("aria-busy", "false");
     loadingState.hidden = true;
     rewardState.hidden = false;
+    populateArtWallpaper(imageUrl);
     animateTier(assignedTier).catch(error => {
       // The award remains readable and correctly tiered when an external animation CDN is unavailable.
       console.warn("[reward] Tier animation is unavailable:", error);
