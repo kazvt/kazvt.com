@@ -2,7 +2,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=uuid-link-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
-import { wallpaperCellsForViewport } from "./wallpaper-layout.mjs?v=1";
+import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=2";
 import "./pattern-zoom.mjs?v=3";
 import {
   buildTwoRowAwardPreview,
@@ -85,6 +85,7 @@ import {
   let rewardCatalogPromise;
   let assignmentRegistryPromise;
   const wallpaperSlots = new Map();
+  let wallpaperLayout = [];
   let wallpaperImageUrl = "";
   let wallpaperResizeTimer = 0;
   let decalLayoutSeed = 1;
@@ -166,6 +167,7 @@ import {
 
   function populateArtWallpaper(imageUrl) {
     wallpaperImageUrl = imageUrl;
+    wallpaperLayout = createWallpaperLayout(decalLayoutSeed);
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
     layoutArtWallpaper();
@@ -181,11 +183,11 @@ import {
 
     const scale = Number.parseFloat(getComputedStyle(document.documentElement)
       .getPropertyValue("--reward-zoom-compensation")) || 1;
-    const cells = wallpaperCellsForViewport(width, height, decalLayoutSeed, scale);
+    const cells = wallpaperPointsForViewport(wallpaperLayout, width, height, scale);
     const visibleKeys = new Set();
 
     for (const cell of cells) {
-      const key = `${cell.row}:${cell.column}`;
+      const key = String(cell.id);
       visibleKeys.add(key);
       let item = wallpaperSlots.get(key);
       if (!item) {
@@ -449,6 +451,7 @@ import {
     errorMessage.textContent = message;
     errorState.hidden = false;
     wallpaperImageUrl = "";
+    wallpaperLayout = [];
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
     if (demoFootnote) demoFootnote.hidden = true;
@@ -463,6 +466,7 @@ import {
     rewardState.hidden = true;
     errorState.hidden = true;
     wallpaperImageUrl = "";
+    wallpaperLayout = [];
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
     if (demoFootnote) demoFootnote.hidden = true;
