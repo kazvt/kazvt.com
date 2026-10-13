@@ -1,5 +1,5 @@
-import { createRewardHref } from "../reward-link.mjs?v=uuid-link-1";
-import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=uuid-link-1";
+import { createRewardHref } from "../reward-link.mjs?v=short-id-1";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=short-id-1";
 import "../pattern-zoom.mjs?v=2";
 
 (() => {

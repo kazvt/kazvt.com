@@ -3,18 +3,25 @@ import { resolveAssetById } from "./asset-resolver.mjs";
 const FILENAME_PATTERN = /^[^/\\\u0000-\u001f]+\.png$/i;
 const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/i;
 const UUID4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const COMPACT_REWARD_ID_PATTERN = /^[A-Za-z0-9_-]{16}$/;
 
 export function normalizeAwardUsername(value) {
   return typeof value === "string" ? value.normalize("NFKC").trim().toLowerCase() : "";
 }
 
 export function isRewardLinkId(value) {
-  return typeof value === "string" && UUID4_PATTERN.test(value);
+  return typeof value === "string" && (UUID4_PATTERN.test(value) || COMPACT_REWARD_ID_PATTERN.test(value));
+}
+
+export function normalizeRewardLinkId(value) {
+  if (typeof value !== "string") return "";
+  if (UUID4_PATTERN.test(value)) return value.toLowerCase();
+  return COMPACT_REWARD_ID_PATTERN.test(value) ? value : "";
 }
 
 export function findAssignmentByLinkId(assignments, linkId) {
   if (!Array.isArray(assignments) || !isRewardLinkId(linkId)) return null;
-  const normalizedId = linkId.toLowerCase();
+  const normalizedId = normalizeRewardLinkId(linkId);
   return assignments.find(assignment => assignment.linkId === normalizedId) ?? null;
 }
 
@@ -90,7 +97,7 @@ export function validateAndSortAssignments(registry, catalog) {
     const assetId = recordedAssetId.toLowerCase();
     if (seenAssets.has(assetId)) throw new Error("The assignment registry repeats artwork.");
     seenAssets.add(assetId);
-    const normalizedLinkId = linkId.toLowerCase();
+    const normalizedLinkId = normalizeRewardLinkId(linkId);
     if (normalizedLinkId && seenLinkIds.has(normalizedLinkId)) {
       throw new Error("The assignment registry repeats a reward link ID.");
     }

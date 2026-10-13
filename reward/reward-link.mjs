@@ -1,8 +1,8 @@
-import { isRewardLinkId } from "./assignment-registry.mjs?v=uuid-link-1";
+import { isRewardLinkId, normalizeRewardLinkId } from "./assignment-registry.mjs?v=short-id-1";
 
 export function createRewardHref(linkId, origin) {
   if (!isRewardLinkId(linkId)) throw new TypeError("A valid reward link ID is required.");
   const destination = new URL("/reward/", origin);
-  destination.searchParams.set("id", linkId.toLowerCase());
+  destination.searchParams.set("id", normalizeRewardLinkId(linkId));
   return destination.href;
 }

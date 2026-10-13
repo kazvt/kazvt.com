@@ -1,5 +1,5 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
-import { createRewardHref } from "./reward-link.mjs?v=uuid-link-1";
+import { createRewardHref } from "./reward-link.mjs?v=short-id-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=3";
@@ -12,7 +12,7 @@ import {
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs?v=uuid-link-1";
+} from "./assignment-registry.mjs?v=short-id-1";
 
 (() => {
   "use strict";
@@ -746,7 +746,7 @@ import {
     let assignment;
 
     if (isRewardLinkId(token)) {
-      if (location.hash) throw new Error("A UUID reward link does not need extra URL data.");
+      if (location.hash) throw new Error("A direct reward link does not need extra URL data.");
       assignment = findAssignmentByLinkId(assignments, token);
       if (!assignment) throw new Error("This reward link is unknown or has not been assigned.");
     } else {

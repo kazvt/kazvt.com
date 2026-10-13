@@ -102,6 +102,14 @@ body[data-page-state="reward"][data-tier="splus"] {
   --palette-pattern: url("/reward/patterns/sand.gif");
 }
 
+/* Demos show tier information, but only issued direct links receive tier palettes. */
+body[data-reward-demo] {
+  --palette-background: #15151a;
+  --palette-panel: #101014;
+  --palette-accent: #c9c9d1;
+  --palette-pattern: url("/reward/patterns/loading-stars.gif");
+}
+
 .art-wallpaper {
   position: fixed;
   z-index: 0;
