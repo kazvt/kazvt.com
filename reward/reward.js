@@ -159,10 +159,10 @@ import { decryptReward } from "./reward-crypto.mjs";
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
-    awardNote.textContent = `This is ${data.username}'s personal award for their win. The artwork can repeat, but this card is addressed to them.`;
+    awardNote.textContent = `One-of-one award for ${data.username}. Artwork assigned once; no repeat issuance.`;
     rewardImage.src = `/assets/rewards/${encodeURIComponent(data.file)}`;
     rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
-    rewardImage.onerror = () => showError("This award image is no longer available.");
+    rewardImage.onerror = () => showError("Award image unavailable.");
     recipient.textContent = `For ${data.username}`;
     filename.textContent = data.file;
     loadingState.hidden = true;
@@ -177,7 +177,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     console.warn("[reward] Could not open reward link:", error);
     const publicAssetError = /award list|reward list|reward tier|reward asset/i.test(String(error && error.message));
     showError(publicAssetError
-      ? "The reward list could not be loaded. Refresh this page in a moment."
-      : "This link is invalid or incomplete. Copy the complete link, including everything after #key=.");
+      ? "The reward list could not be loaded. Refresh page in a moment."
+      : "Invalid or incomplete link. Include everything after #key=.");
   });
 })();

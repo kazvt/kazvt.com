@@ -19,15 +19,37 @@ REWARD_QUEUE = ROOT / ".reward-queue.json"
 REWARD_QUEUE_TEMP = ROOT / ".reward-queue.json.tmp"
 REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()
+REWARD_STATE_VERSION = 2
+PREASSIGNED_REWARDS = {
+    "1.png": {
+        "username": "kazvt",
+        "platform": "manual",
+        "issuedAt": "2026-10-13T00:00:00.000Z",
+    }
+}
 SUPPORTED_REWARD_PROTECTED_HEADER = base64.urlsafe_b64encode(
     b'{"alg":"dir","enc":"A256GCM"}'
 ).decode("ascii").rstrip("=")
 
 try:
     with (ROOT / "rewards.json").open("r", encoding="utf-8-sig") as catalog_file:
-        REWARD_FILES = set(json.load(catalog_file).get("files", []))
+        REWARD_CATALOG = json.load(catalog_file)
+    REWARD_FILES = set(REWARD_CATALOG.get("files", []))
+    REWARD_SHA256 = {
+        filename: metadata["sha256"].lower()
+        for filename, metadata in REWARD_CATALOG.get("assets", {}).items()
+        if isinstance(filename, str) and isinstance(metadata, dict) and
+        isinstance(metadata.get("sha256"), str) and
+        re.fullmatch(r"[a-fA-F0-9]{64}", metadata["sha256"])
+    }
 except (OSError, json.JSONDecodeError, AttributeError):
     REWARD_FILES = set()
+    REWARD_SHA256 = {}
+
+
+def reward_asset_identity(filename: str) -> str:
+    digest = REWARD_SHA256.get(filename)
+    return digest if digest else f"file:{filename}"
 
 
 def decode_base64url(value: str) -> bytes:
@@ -99,14 +121,71 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def read_reward_queue(self) -> list[dict[str, str]]:
+    def read_reward_state(self) -> dict[str, object]:
         try:
             with REWARD_QUEUE.open("r", encoding="utf-8") as queue_file:
                 data = json.load(queue_file)
-            items = data.get("items", []) if isinstance(data, dict) else []
-            return items[:REWARD_QUEUE_LIMIT] if isinstance(items, list) else []
-        except (OSError, json.JSONDecodeError):
-            return []
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError as error:
+            raise ValueError("The reward ledger is invalid JSON.") from error
+
+        if not isinstance(data, dict):
+            raise ValueError("The reward ledger must be an object.")
+        items = data.get("items", [])
+        owners = data.get("owners", {})
+        if not isinstance(items, list) or not isinstance(owners, dict):
+            raise ValueError("The reward ledger has an invalid structure.")
+
+        # Migrate the legacy recent-link queue into the durable ownership map.
+        normalized_owners: dict[str, dict[str, str]] = {}
+        for identity, owner in owners.items():
+            if (not isinstance(identity, str) or not isinstance(owner, dict) or
+                    not isinstance(owner.get("username"), str) or not owner["username"].strip()):
+                raise ValueError("The reward ownership record is invalid.")
+            filename = owner.get("filename")
+            if not isinstance(filename, str):
+                filename = identity.removeprefix("file:") if identity.startswith("file:") else identity
+            canonical_identity = identity if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else reward_asset_identity(filename)
+            normalized_owners.setdefault(canonical_identity, {
+                "filename": filename,
+                "username": owner["username"].strip(),
+                "platform": str(owner.get("platform", "chat"))[:60],
+                "issuedAt": str(owner.get("issuedAt", ""))[:40],
+            })
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            filename = item.get("filename")
+            username = item.get("username")
+            identity = reward_asset_identity(filename) if isinstance(filename, str) else ""
+            if (identity and isinstance(username, str) and identity not in normalized_owners):
+                normalized_owners[identity] = {
+                    "filename": filename,
+                    "username": username.strip() or "Unknown",
+                    "platform": str(item.get("platform", "chat"))[:60],
+                    "issuedAt": str(item.get("issuedAt", ""))[:40],
+                }
+
+        for filename, owner in PREASSIGNED_REWARDS.items():
+            identity = reward_asset_identity(filename)
+            existing = normalized_owners.get(identity) or next(
+                (entry for entry in normalized_owners.values() if entry["filename"] == filename),
+                None,
+            )
+            if existing and existing["username"].casefold() != owner["username"].casefold():
+                raise ValueError("The preassigned reward conflicts with the saved ownership ledger.")
+            normalized_owners.setdefault(identity, {"filename": filename, **owner})
+
+        return {
+            "version": REWARD_STATE_VERSION,
+            "owners": normalized_owners,
+            "items": items[:REWARD_QUEUE_LIMIT],
+        }
+
+    def read_reward_queue(self) -> list[dict[str, str]]:
+        return self.read_reward_state()["items"]  # type: ignore[return-value]
 
     def do_GET(self) -> None:
         if not self.local_request_allowed():
@@ -114,8 +193,28 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             return
         if urlsplit(self.path).path == "/api/rewards":
             with REWARD_QUEUE_LOCK:
-                items = self.read_reward_queue()
+                try:
+                    items = self.read_reward_queue()
+                except (OSError, ValueError):
+                    self.send_json(500, {"error": "The reward ledger could not be read."})
+                    return
             self.send_json(200, {"items": items})
+            return
+        if urlsplit(self.path).path == "/api/rewards/available":
+            with REWARD_QUEUE_LOCK:
+                try:
+                    state = self.read_reward_state()
+                except (OSError, ValueError):
+                    self.send_json(500, {"error": "The reward ledger could not be read."})
+                    return
+            owners = state["owners"]
+            assigned_filenames = {owner["filename"] for owner in owners.values()}
+            self.send_json(200, {
+                "files": sorted(
+                    filename for filename in REWARD_FILES
+                    if filename not in assigned_filenames and reward_asset_identity(filename) not in owners
+                )
+            })
             return
         super().do_GET()
 
@@ -208,11 +307,33 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             "issuedAt": issued_at,
         }
         with REWARD_QUEUE_LOCK:
-            items = self.read_reward_queue()
+            try:
+                state = self.read_reward_state()
+            except (OSError, ValueError):
+                self.send_json(500, {"error": "The reward ledger could not be read."})
+                return
+            owners = state["owners"]
+            identity = reward_asset_identity(filename)
+            assigned_filenames = {owner["filename"] for owner in owners.values()}
+            if filename in assigned_filenames or identity in owners:
+                self.send_json(409, {"error": "Reward artwork has already been assigned."})
+                return
+
+            owners[identity] = {
+                "filename": filename,
+                "username": username.strip(),
+                "platform": platform,
+                "issuedAt": issued_at,
+            }
+            items = state["items"]
             items.insert(0, saved_record)
             items = items[:REWARD_QUEUE_LIMIT]
             REWARD_QUEUE_TEMP.write_text(
-                json.dumps({"items": items}, ensure_ascii=False, indent=2),
+                json.dumps({
+                    "version": REWARD_STATE_VERSION,
+                    "owners": owners,
+                    "items": items,
+                }, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
             REWARD_QUEUE_TEMP.replace(REWARD_QUEUE)

@@ -69,7 +69,11 @@ export async function buildRewardCatalogs() {
       files,
       assets
     },
-    widgetCatalog: { version: 1, files }
+    widgetCatalog: {
+      version: 2,
+      files,
+      assets: Object.fromEntries(files.map(file => [file, { sha256: assets[file].sha256 }]))
+    }
   };
 }
 

@@ -223,14 +223,19 @@ import { encryptReward } from "./reward-crypto.mjs";
   }
 
   function validateRewardCatalog(raw) {
-    if (!isPlainObject(raw) || raw.version !== 1 || !Array.isArray(raw.files)) {
-      throw new Error("Reward catalog must have version 1 and a files array.");
+    if (!isPlainObject(raw) || ![1, 2].includes(raw.version) || !Array.isArray(raw.files)) {
+      throw new Error("Reward catalog must have a supported version and a files array.");
     }
 
     const files = [...new Set(raw.files.map(value => String(value || "").trim()))];
     const invalid = files.filter(file => !/^[^/\\\u0000-\u001f]+\.png$/i.test(file));
     if (files.length === 0 || invalid.length > 0) {
       throw new Error("Reward catalog must contain PNG filenames without folders.");
+    }
+    if (raw.version === 2 && (!isPlainObject(raw.assets) || files.some(file =>
+      !isPlainObject(raw.assets[file]) || !/^[a-f0-9]{64}$/.test(raw.assets[file].sha256)
+    ))) {
+      throw new Error("Reward catalog version 2 requires a SHA-256 hash for every PNG.");
     }
     return files;
   }
@@ -249,31 +254,67 @@ import { encryptReward } from "./reward-crypto.mjs";
     return url.href;
   }
 
+  async function getAvailableRewardFiles() {
+    const endpoint = `${state.config.rewards.queueEndpoint.replace(/\/+$/, "")}/available`;
+    const response = await fetch(endpoint, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Could not load unassigned reward artwork (HTTP ${response.status}).`);
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("The available reward list is invalid.");
+    }
+    if (!data || !Array.isArray(data.files)) {
+      throw new Error("The available reward list is invalid.");
+    }
+
+    const files = [...new Set(data.files)];
+    if (files.some(file => typeof file !== "string" || !state.rewardCatalog.includes(file))) {
+      throw new Error("The available reward list contains an unknown image.");
+    }
+    return files;
+  }
+
   async function issueRewardLink(player) {
     if (!state.config.rewards.enabled) return null;
     if (state.rewardCatalog.length === 0) throw new Error("No reward PNGs are available.");
 
-    const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % state.rewardCatalog.length;
-    const file = state.rewardCatalog[randomIndex];
-    const link = await createRewardUrl(player, file);
-    const record = {
-      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      username: String(player.displayName || "Viewer").slice(0, 100),
-      filename: file,
-      link,
-      platform: String(player.platform || "chat"),
-      issuedAt: new Date().toISOString()
-    };
+    // The server owns the permanent assignment ledger. Retry if another widget
+    // instance claims the same candidate between the availability check and POST.
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const availableFiles = await getAvailableRewardFiles();
+      if (availableFiles.length === 0) {
+        throw new Error("All reward artwork has already been assigned.");
+      }
 
-    const response = await fetch(state.config.rewards.queueEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(record)
-    });
-    if (!response.ok) {
-      throw new Error(`Could not save the reward link (HTTP ${response.status}).`);
+      const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % availableFiles.length;
+      const file = availableFiles[randomIndex];
+      const link = await createRewardUrl(player, file);
+      const record = {
+        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        username: String(player.displayName || "Viewer").slice(0, 100),
+        filename: file,
+        link,
+        platform: String(player.platform || "chat"),
+        issuedAt: new Date().toISOString()
+      };
+
+      const response = await fetch(state.config.rewards.queueEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record)
+      });
+      if (response.status === 409) continue;
+      if (!response.ok) {
+        throw new Error(`Could not save the reward link (HTTP ${response.status}).`);
+      }
+      return record;
     }
-    return record;
+
+    throw new Error("Reward artwork changed during assignment. Try again.");
   }
 
   function applyQueryOverrides(config) {

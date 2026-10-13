@@ -41,10 +41,12 @@ class RewardQueueApiTests(unittest.TestCase):
             widget_server.REWARD_QUEUE,
             widget_server.REWARD_QUEUE_TEMP,
             widget_server.REWARD_FILES,
+            widget_server.REWARD_SHA256,
         )
         widget_server.REWARD_QUEUE = root / "queue.json"
         widget_server.REWARD_QUEUE_TEMP = root / "queue.json.tmp"
         widget_server.REWARD_FILES = {"test reward.png"}
+        widget_server.REWARD_SHA256 = {}
         self.httpd = widget_server.ThreadingHTTPServer(("127.0.0.1", 0), widget_server.NoCacheHandler)
         self.httpd.daemon_threads = True
         self.port = self.httpd.server_address[1]
@@ -57,7 +59,8 @@ class RewardQueueApiTests(unittest.TestCase):
         self.thread.join(timeout=2)
         (widget_server.REWARD_QUEUE,
          widget_server.REWARD_QUEUE_TEMP,
-         widget_server.REWARD_FILES) = self.original_paths
+         widget_server.REWARD_FILES,
+         widget_server.REWARD_SHA256) = self.original_paths
         self.temp_dir.cleanup()
 
     def request(self, method: str, path: str, body=None, headers=None):
@@ -97,6 +100,73 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["username"], "Viewer")
         self.assertEqual(items[0]["filename"], "test reward.png")
+
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], [])
+
+    def test_artwork_cannot_be_assigned_twice(self):
+        record = self.valid_record()
+        status, _ = self.post(record)
+        self.assertEqual(status, 201)
+
+        duplicate = self.valid_record()
+        duplicate["id"] = "test-2"
+        duplicate["username"] = "AnotherViewer"
+        status, response = self.post(duplicate)
+        self.assertEqual(status, 409)
+        self.assertIn("already been assigned", json.loads(response)["error"])
+
+        status, response = self.request("GET", "/api/rewards")
+        self.assertEqual(status, 200)
+        self.assertEqual(len(json.loads(response)["items"]), 1)
+
+    def test_1_png_is_preassigned_to_kazvt_and_never_offered(self):
+        widget_server.REWARD_FILES.add("1.png")
+        widget_server.REWARD_FILES.add("copy of 1.png")
+        shared_digest = "b" * 64
+        widget_server.REWARD_SHA256 = {
+            "1.png": shared_digest,
+            "copy of 1.png": shared_digest,
+        }
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], ["test reward.png"])
+
+        for filename in ("1.png", "copy of 1.png"):
+            record = self.valid_record()
+            record["filename"] = filename
+            status, response = self.post(record)
+            self.assertEqual(status, 409)
+            self.assertIn("already been assigned", json.loads(response)["error"])
+
+    def test_identical_artwork_cannot_repeat_under_a_different_filename(self):
+        shared_digest = "a" * 64
+        widget_server.REWARD_FILES.add("renamed reward.png")
+        widget_server.REWARD_SHA256 = {
+            "test reward.png": shared_digest,
+            "renamed reward.png": shared_digest,
+        }
+        status, _ = self.post(self.valid_record())
+        self.assertEqual(status, 201)
+
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], [])
+
+        duplicate = self.valid_record()
+        duplicate["filename"] = "renamed reward.png"
+        status, response = self.post(duplicate)
+        self.assertEqual(status, 409)
+        self.assertIn("already been assigned", json.loads(response)["error"])
+
+    def test_legacy_queue_assignments_migrate_into_the_permanent_ledger(self):
+        widget_server.REWARD_QUEUE.write_text(
+            json.dumps({"items": [self.valid_record()]}), encoding="utf-8"
+        )
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], [])
 
     def test_rejects_cross_origin_and_form_encoded_posts(self):
         status, _ = self.post(self.valid_record(), {"Origin": "https://attacker.example"})

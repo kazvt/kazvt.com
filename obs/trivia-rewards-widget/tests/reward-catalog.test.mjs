@@ -36,13 +36,16 @@ test("generated catalogs cover every valid PNG and keep matching deterministic t
   const { manifest, widgetCatalog } = await buildRewardCatalogs();
   assert.equal(manifest.version, 2);
   assert.ok(manifest.files.length > 0);
+  assert.equal(widgetCatalog.version, 2);
   assert.deepEqual(widgetCatalog.files, manifest.files);
   assert.equal(Object.keys(manifest.assets).length, manifest.files.length);
+  assert.equal(Object.keys(widgetCatalog.assets).length, manifest.files.length);
   assert.equal(manifest.tierWeights.reduce((sum, tier) => sum + tier.basisPoints, 0), 10000);
 
   for (const file of manifest.files) {
     const metadata = manifest.assets[file];
     assert.match(metadata.sha256, /^[a-f0-9]{64}$/);
+    assert.deepEqual(widgetCatalog.assets[file], { sha256: metadata.sha256 });
     assert.equal(metadata.tier, tierForSha256(metadata.sha256), file);
   }
 });

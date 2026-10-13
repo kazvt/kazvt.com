@@ -14,13 +14,13 @@ This version is structured like a small production overlay instead of a single d
 - `chat-message.schema.json` defines the preferred sender → overlay WebSocket event contract.
 - `sample-messages.jsonl` contains ready-to-send example events.
 - `config.json` controls WebSocket, command, scoring, display, and persistence behavior.
-- `rewards.json` lists the PNG rewards hosted by the site.
-- `generate-reward-catalog.mjs` syncs the site manifest and assigns fixed tiers from each PNG's SHA-256 content hash.
+- `rewards.json` lists the PNG rewards hosted by the site and includes each file's SHA-256 digest for duplicate-artwork prevention.
+- `generate-reward-catalog.mjs` syncs the site manifest and widget catalog, assigning fixed tiers from each PNG's SHA-256 content hash.
 - `reward-links.html` is the local dashboard for copying newly issued links into chat.
 - `reward-crypto.mjs` creates and validates the reward links as JWE Compact Serialization.
 - `app.js` contains the WebSocket adapters, trivia state machine, scoring, dedupe, reconnect, and UI logic.
 - `styles.css` is the OBS-friendly overlay styling; `reward-links.css` styles the local copy dashboard.
-- `server.py` serves the widget and its local reward queue on `127.0.0.1`.
+- `server.py` serves the widget, recent-link queue, and durable artwork-assignment ledger on `127.0.0.1`.
 - Incoming messages can be your preferred normalized format, a simple flat format, or common Twitch EventSub / YouTube LiveChatMessage / Kick `chat.message.sent` shapes.
 
 The browser still receives chat only. It saves generated links to a local queue; the dashboard lets you copy a link and paste it into chat.
@@ -71,7 +71,9 @@ The overlay background is transparent. The trivia UI appears in the top-left at 
 
 The public reward page is `https://kazvt.com/reward/`. Each issued URL contains a compact JWE in `id`; it encrypts the viewer's display name and PNG filename with AES-256-GCM. A random decryption key is included after `#key=` in the URL, so copy the complete link. The key stays out of the HTTP request; anyone who has the full reward link can still open it, so treat the link as a public share link.
 
-The page only accepts PNG filenames listed in the site repository's `/assets/rewards/manifest.json`. The images are hosted under `https://kazvt.com/assets/rewards/`. The local dashboard keeps the 250 most recent reward links in an ignored `.reward-queue.json` file beside `server.py`.
+The page only accepts PNG filenames listed in the site repository's `/assets/rewards/manifest.json`. The images are hosted under `https://kazvt.com/assets/rewards/`. Each artwork file can be assigned once by the local widget; identical PNG bytes are treated as the same artwork even after a rename. `1.png` is preassigned to `kazvt`; every other assignment is retained by SHA-256 in the all-time ownership ledger inside the ignored `.reward-queue.json` file. The dashboard keeps only the 250 most recent full reward links, while the ownership ledger remains uncapped. When all PNGs are assigned, the widget stops issuing rewards until new artwork is added.
+
+The ledger belongs to one local widget installation. The public static reward page does not authenticate owners, and an encrypted URL is a shareable display card—not cryptographic proof of exclusive ownership. Separate installations do not share an assignment ledger.
 
 ### Fixed reward tiers
 
