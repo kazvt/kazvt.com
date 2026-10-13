@@ -306,12 +306,15 @@
       } catch {
         throw new Error("The reward server returned an invalid link response.");
       }
-      const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      const expectedLink = `https://kazvt.com/reward/?id=${issued?.linkId?.toLowerCase?.()}`;
-      if (!issued || issued.ok !== true || !uuidV4.test(issued.linkId) || issued.link !== expectedLink) {
+      const validRewardId = typeof issued?.linkId === "string" && (
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(issued.linkId) ||
+        /^[A-Za-z0-9_-]{16}$/.test(issued.linkId)
+      );
+      const expectedLink = `https://kazvt.com/reward/?id=${issued?.linkId}`;
+      if (!issued || issued.ok !== true || !validRewardId || issued.link !== expectedLink) {
         throw new Error("The reward server returned an invalid link response.");
       }
-      return { ...record, linkId: issued.linkId.toLowerCase(), link: issued.link };
+      return { ...record, linkId: issued.linkId, link: issued.link };
     }
 
     throw new Error("Reward artwork changed during assignment. Try again.");

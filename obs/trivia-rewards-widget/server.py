@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import secrets
 import threading
 import uuid
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -26,6 +27,7 @@ UUID4_PATTERN = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
     re.IGNORECASE,
 )
+COMPACT_REWARD_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{16}$")
 PREASSIGNED_REWARDS = {
     "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03": {
         "username": "kazvt",
@@ -79,13 +81,17 @@ def current_reward_filename(asset_id: str) -> str | None:
 
 
 def ensure_owner_link_ids(owners: dict[str, dict[str, str]]) -> None:
-    """Give every assignment one persisted, opaque UUIDv4 link identifier."""
+    """Give every assignment one persisted, compact opaque reward-link ID."""
     used_ids: set[str] = set()
     for owner in owners.values():
-        link_id = owner.get("linkId", "").lower()
+        link_id = owner.get("linkId", "")
+        if not isinstance(link_id, str):
+            raise ValueError("The reward ownership ledger contains an invalid link ID.")
         if link_id:
-            if not UUID4_PATTERN.fullmatch(link_id):
+            if not (UUID4_PATTERN.fullmatch(link_id) or COMPACT_REWARD_ID_PATTERN.fullmatch(link_id)):
                 raise ValueError("The reward ownership ledger contains an invalid link ID.")
+            if UUID4_PATTERN.fullmatch(link_id):
+                link_id = link_id.lower()
             if link_id in used_ids:
                 raise ValueError("The reward ownership ledger repeats a link ID.")
             owner["linkId"] = link_id
@@ -94,9 +100,9 @@ def ensure_owner_link_ids(owners: dict[str, dict[str, str]]) -> None:
     for owner in owners.values():
         if owner.get("linkId"):
             continue
-        link_id = str(uuid.uuid4())
+        link_id = secrets.token_urlsafe(12)
         while link_id in used_ids:
-            link_id = str(uuid.uuid4())
+            link_id = secrets.token_urlsafe(12)
         owner["linkId"] = link_id
         used_ids.add(link_id)
 
@@ -157,7 +163,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 "username": owner["username"].strip(),
                 "platform": str(owner.get("platform", "chat"))[:60],
                 "issuedAt": str(owner.get("issuedAt", ""))[:40],
-                "linkId": link_id.lower(),
+                "linkId": link_id.lower() if UUID4_PATTERN.fullmatch(link_id) else link_id,
             })
 
         for item in items:
@@ -172,7 +178,11 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                     "username": username.strip() or "Unknown",
                     "platform": str(item.get("platform", "chat"))[:60],
                     "issuedAt": str(item.get("issuedAt", ""))[:40],
-                    "linkId": str(item.get("linkId", "")).lower(),
+                    "linkId": (
+                        str(item.get("linkId", "")).lower()
+                        if UUID4_PATTERN.fullmatch(str(item.get("linkId", "")))
+                        else str(item.get("linkId", ""))
+                    ),
                 }
 
         try:
@@ -210,9 +220,11 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                     re.search(r"[\x00-\x1f]", platform) or
                     not isinstance(issued_at, str) or len(issued_at) > 40 or
                     not isinstance(link_id, str) or
-                    (link_id and not UUID4_PATTERN.fullmatch(link_id))):
+                    (link_id and not (UUID4_PATTERN.fullmatch(link_id) or
+                                      COMPACT_REWARD_ID_PATTERN.fullmatch(link_id)))):
                 raise ValueError("The public assignment record is invalid.")
-            link_id = link_id.lower()
+            if UUID4_PATTERN.fullmatch(link_id):
+                link_id = link_id.lower()
             if link_id and link_id in seen_public_link_ids:
                 raise ValueError("The public assignment registry repeats a link ID.")
             if link_id:
@@ -396,9 +408,9 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             except ValueError:
                 self.send_json(500, {"error": "The reward ledger contains an invalid link ID."})
                 return
-            link_id = str(uuid.uuid4())
+            link_id = secrets.token_urlsafe(12)
             while any(owner["linkId"] == link_id for owner in owners.values()):
-                link_id = str(uuid.uuid4())
+                link_id = secrets.token_urlsafe(12)
             link = f"{PUBLIC_REWARD_URL}?id={link_id}"
             saved_record["link"] = link
             saved_record["linkId"] = link_id
