@@ -1,6 +1,7 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=uuid-link-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
+import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import "./pattern-zoom.mjs?v=2";
 import {
   buildTwoRowAwardPreview,
@@ -14,6 +15,13 @@ import {
 
 (() => {
   "use strict";
+
+  const navigationStartTime = performance.getEntriesByType("navigation")[0]?.startTime ?? performance.now();
+
+  function waitForMinimumLoading() {
+    const delay = minimumLoadingDelay(navigationStartTime, performance.now());
+    return delay > 0 ? new Promise(resolve => window.setTimeout(resolve, delay)) : Promise.resolve();
+  }
 
   // Keep the tier ID stable for hashing/palette selection; the label is display copy.
   const TIER_BUCKETS = [
@@ -748,6 +756,7 @@ import {
     renderFilename(file);
     rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
     await waitForRewardImage(imageUrl);
+    await waitForMinimumLoading();
 
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
@@ -817,6 +826,7 @@ import {
     rewardImage.setAttribute("aria-label", `${tier.label} reward artwork: ${file}`);
     renderFilename(file);
     await waitForRewardImage(imageUrl);
+    await waitForMinimumLoading();
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
     rewardCard.setAttribute("aria-busy", "false");
@@ -831,13 +841,15 @@ import {
   }
 
   if (document.body.hasAttribute("data-reward-demo")) {
-    openDemo().catch(error => {
+    openDemo().catch(async error => {
       console.warn("[reward-demo] Could not open demo:", error);
+      await waitForMinimumLoading();
       showError("Couldn't load a demo. Refresh the page or try again.");
     });
   } else {
-    openReward().catch(error => {
+    openReward().catch(async error => {
       console.warn("[reward] Could not open reward link:", error);
+      await waitForMinimumLoading();
       const message = String(error && error.message);
       if (/reward image could not be (?:loaded|decoded)/i.test(message)) {
         showError("Award image unavailable.");
