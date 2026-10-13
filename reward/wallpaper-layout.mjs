@@ -1,5 +1,5 @@
 export const WALLPAPER_ART_SIZE = 210;
-export const WALLPAPER_FILLER_SIZE = 128;
+export const WALLPAPER_FILLER_SIZE = 96;
 
 function boundRadiusFor(size) {
   return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
