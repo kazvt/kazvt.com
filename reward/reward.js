@@ -62,7 +62,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
   let lastDemoName = "";
   let wallpaperItems = [];
   let wallpaperResizeTimer = 0;
-  const decalLayoutSeed = Math.floor(Math.random() * 0xffffffff) || 1;
+  let decalLayoutSeed = 1;
   const decalElements = new Map();
 
   const RETRO_DECALS = [
@@ -85,6 +85,17 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
       value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
       return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
     };
+  }
+
+  function hashRewardIdentity(username, assetId) {
+    const canonicalUsername = username.normalize("NFKC").trim().toLowerCase();
+    const canonicalAssetId = typeof assetId === "string" ? assetId.toLowerCase() : "";
+    const identity = `reward-decals-v1\u0000${canonicalUsername}\u0000${canonicalAssetId}`;
+    let hash = 0x811c9dc5;
+    for (let index = 0; index < identity.length; index += 1) {
+      hash = Math.imul(hash ^ identity.charCodeAt(index), 0x01000193);
+    }
+    return (hash >>> 0) || 1;
   }
 
   function pointOnPerimeter(distance, width, height) {
@@ -546,6 +557,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     const demoName = randomDemoName();
+    decalLayoutSeed = hashRewardIdentity(demoName, metadata.assetId);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
@@ -599,6 +611,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     }
     if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
 
+    decalLayoutSeed = hashRewardIdentity(data.username, metadata.assetId);
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
