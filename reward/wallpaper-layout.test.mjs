@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  WALLPAPER_BOUND_RADIUS,
   WALLPAPER_ART_SIZE,
   WALLPAPER_FILLER_SIZE,
   createWallpaperLayout,
