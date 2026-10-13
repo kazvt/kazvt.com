@@ -207,6 +207,11 @@ import { decryptReward } from "./reward-crypto.mjs";
     return mention;
   }
 
+  function filenameLabel(file) {
+    const extensionStart = file.lastIndexOf(".");
+    return extensionStart > 0 ? file.slice(0, extensionStart) : file;
+  }
+
   function renderUsernameCopy(username) {
     recipient.replaceChildren(
       document.createTextNode("For "),
@@ -511,7 +516,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     tierName.textContent = tier.label;
     recipient.textContent = `Preview: ${demoName}`;
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
-    filename.textContent = file;
+    filename.textContent = filenameLabel(file);
     rewardImage.alt = `${tier.label} demo artwork: ${file}`;
     rewardImage.onerror = () => showError("A sample image could not be loaded. Try another demo.");
     rewardImage.src = imageUrl;
@@ -566,7 +571,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     populateArtWallpaper(imageUrl);
     rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
     rewardImage.onerror = () => showError("Award image unavailable.");
-    filename.textContent = data.file;
+    filename.textContent = filenameLabel(data.file);
     loadingState.hidden = true;
     rewardState.hidden = false;
     animateTier(assignedTier).catch(error => {
