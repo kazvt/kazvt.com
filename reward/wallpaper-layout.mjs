@@ -4,7 +4,7 @@ export const WALLPAPER_MIN_DISTANCE = WALLPAPER_BOUND_RADIUS * 2 + 4;
 
 const WORLD_WIDTH = 16384;
 const WORLD_HEIGHT = 8192;
-const CANDIDATE_TRIES = 40;
+const CANDIDATE_TRIES = 120;
 
 function createSeededRandom(seed) {
   let state = seed >>> 0;
