@@ -668,7 +668,7 @@ import {
     });
 
     // Each tier has one fixed motion. Ping-pong easing makes both ends of the loop settle smoothly.
-    startLoop(rewardArtworkMotion, 1.28, 0.72);
+    startLoop(rewardArtworkMotion, 1.55, 0.72);
     startLoop(rewardTier, 0.42);
   }
 
