@@ -6,6 +6,7 @@ import {
   findAssignmentForLegacyPayload,
   isRewardLinkId,
   normalizeAwardUsername,
+  normalizeRewardLinkId,
   otherAwardsFor,
   validateAndSortAssignments
 } from "./assignment-registry.mjs";
@@ -13,7 +14,7 @@ import {
 const assetIds = ["a", "b"].map(character => character.repeat(64));
 const linkIds = [
   "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7",
-  "8ca03f2b-1dbd-4ed9-904a-a9888aed6a1d"
+  "aB3_dE5-fG7_hJ9k"
 ];
 
 function makeCatalog() {
@@ -44,11 +45,11 @@ test("award usernames normalize consistently for matching", () => {
   assert.equal(normalizeAwardUsername(null), "");
 });
 
-test("UUID reward links resolve only to their recorded assignment", () => {
+test("legacy UUIDs and compact reward links resolve only to their recorded assignments", () => {
   const registry = validateAndSortAssignments({ version: 1, assignments: [
     {
       assetId: assetIds[0], filename: "gift-current.png", username: "kazvt",
-      linkId: linkIds[0], issuedAt: "2026-09-01T00:00:00Z"
+      linkId: linkIds[0].toUpperCase(), issuedAt: "2026-09-01T00:00:00Z"
     },
     {
       assetId: assetIds[1], filename: "older-gift-current.png", username: "Viewer",
@@ -57,9 +58,14 @@ test("UUID reward links resolve only to their recorded assignment", () => {
   ] }, makeCatalog());
 
   assert.equal(findAssignmentByLinkId(registry, linkIds[0]).username, "kazvt");
+  assert.equal(findAssignmentByLinkId(registry, linkIds[1]).username, "Viewer");
+  assert.equal(findAssignmentByLinkId(registry, linkIds[1].toLowerCase()), null);
   assert.equal(findAssignmentByLinkId(registry, "d2b8a0b2-7dd8-4d10-802f-d308ec33ffe7"), null);
   assert.equal(isRewardLinkId(linkIds[0]), true);
+  assert.equal(isRewardLinkId(linkIds[1]), true);
   assert.equal(isRewardLinkId("00000000-0000-0000-0000-000000000000"), false);
+  assert.equal(normalizeRewardLinkId(linkIds[0].toUpperCase()), linkIds[0]);
+  assert.equal(normalizeRewardLinkId(linkIds[1]), linkIds[1]);
   assert.equal(findAssignmentForLegacyPayload(registry, "KAZVT", assetIds[0]).username, "kazvt");
   assert.equal(findAssignmentForLegacyPayload(registry, "attacker", assetIds[0]), null);
   assert.equal(findAssignmentForLegacyPayload(registry, "kazvt", "c".repeat(64)), null);
@@ -116,6 +122,10 @@ test("invalid and duplicated award records are rejected", () => {
   assert.throws(() => validateAndSortAssignments({ version: 1, assignments: [
     { ...valid, linkId: "not-a-uuid" }
   ] }, makeCatalog()), /Assignment record 1 is invalid/);
+  assert.throws(() => validateAndSortAssignments({ version: 1, assignments: [
+    { ...valid, linkId: linkIds[1] },
+    { ...valid, assetId: assetIds[1], linkId: linkIds[1] }
+  ] }, makeCatalog()), /repeats a reward link ID/);
 });
 
 test("two-row preview reserves its final slot for the overflow link", () => {

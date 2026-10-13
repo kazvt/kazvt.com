@@ -7,11 +7,11 @@ Correct chat answer
       ↓
 OBS widget proposes one PNG
       ↓ POST on 127.0.0.1 only
-Local server records assignment + creates a UUIDv4
+Local server records assignment + creates a short random ID
       ↓
 Reward Links dashboard → Copy into chat
       ↓
-Viewer opens https://kazvt.com/reward/?id=<UUID>
+Viewer opens https://kazvt.com/reward/?id=<16-character-ID>
       ↓
 Reward page accepts only a matching public assignment and shows it
 ```
@@ -20,19 +20,19 @@ The OBS widget receives chat over the existing WebSocket. Its local Python serve
 
 ## Link format and validation
 
-New links contain a UUIDv4 only: `https://kazvt.com/reward/?id=<UUID>`. The trusted local Python issuer generates the ID with Python's UUIDv4 implementation and writes it into both the durable local ownership ledger and the public assignment index. The public page treats the index as an allowlist: it looks up the exact ID, then uses the recorded username and artwork. It never accepts a username or artwork from the URL. A random-looking UUID that is not in the registry is rejected, as are duplicate IDs in the registry.
+New links contain a 16-character URL-safe random ID (96 bits): `https://kazvt.com/reward/?id=<16-character-ID>`. The trusted local Python issuer generates each ID with a cryptographically secure random source and writes it into both the durable local ownership ledger and the public assignment index. IDs are case-sensitive. The public page treats the index as an allowlist: it looks up the exact ID, then uses the recorded username and artwork. It never accepts a username or artwork from the URL. An unlisted ID is rejected, as are duplicate IDs in the registry. Previously issued UUID links continue to work.
 
-The IDs are public, shareable identifiers, not passwords. Anyone can copy a known reward URL and open that existing award; the UUID system prevents creating a new official award merely by inventing a URL. Because the site is static, it cannot authenticate the person viewing a card or keep public assignments secret. Actual private access or revocation would require a trusted backend with authorization checks.
+The IDs are public, shareable identifiers, not passwords. Anyone can copy a known reward URL and open that existing award; the random ID prevents creating a new official award merely by inventing a URL. Because the site is static, it cannot authenticate the person viewing a card or keep public assignments secret. Actual private access or revocation would require a trusted backend with authorization checks.
 
 Previously issued JWE links remain readable for compatibility, but only when their decrypted username and artwork content ID exactly match a public assignment. This compatibility path cannot create a second assignment. New links and the OBS widget no longer encrypt data in the browser or put a decryption key in the URL.
 
 ## What this link proves—and what it does not
 
-This is a self-contained share card for public art, not a login token or a way to redeem, claim, or spend anything. The image and assignment are public. Copying an existing UUID link opens the already-recorded award; inventing a different UUID does not create another award because it has no matching registry record.
+This is a self-contained share card for public art, not a login token or a way to redeem, claim, or spend anything. The image and assignment are public. Copying an existing reward link opens the already-recorded award; inventing a different ID does not create another award because it has no matching registry record.
 
 The local widget assigns each distinct PNG artwork at most once. The content ID for the `1.png` artwork is preassigned to `kazvt`; additional assignments are kept in the all-time `owners` map in the local `.reward-queue.json` state file. The current filename is a display label, not the ownership key, so renames preserve assignments and new links. The queue retains only the 250 newest full links, but the ownership map is never truncated. Removed artwork remains assigned by ID if later re-added with the same bytes. Once every distinct artwork item is assigned, the widget stops issuing rewards until new artwork is added.
 
-The one-of-one rule is enforced by the local issuer and checked again by the public page against the assignment index. The widget checks both its private ledger and the public index, so installations using the same up-to-date repository copy see the same assignments. The index is static and has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. UUID links make arbitrary, unrecorded cards fail validation; they do not make a public card private or prove who owns the browser that opened it. The Frequent, Uncommon, Rare, Epic, Legendary, Mythic, Divine, or S+ tier remains fixed from the PNG's SHA-256 content hash; its matching pattern palette is cosmetic and independent from the one-time assignment rule.
+The one-of-one rule is enforced by the local issuer and checked again by the public page against the assignment index. The widget checks both its private ledger and the public index, so installations using the same up-to-date repository copy see the same assignments. The index is static and has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. Opaque IDs make arbitrary, unrecorded cards fail validation; they do not make a public card private or prove who owns the browser that opened it. The Frequent, Uncommon, Rare, Epic, Legendary, Mythic, Divine, or S+ tier remains fixed from the PNG's SHA-256 content hash; its matching pattern palette is cosmetic and independent from the one-time assignment rule.
 
 This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS, and JavaScript; it does not provide a private server endpoint or database that can check who issued a claim. Therefore these links do not expire, cannot be revoked, and do not prevent copying. For a real or scarce prize, use a backend to issue high-entropy random IDs, store the authoritative winner and item server-side, and support expiry, revocation, and one-time redemption. Keep the platform credentials and issuance secret in that trusted backend or a local bot process, never in the public page.
 
@@ -51,13 +51,13 @@ This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS,
       "username": "kazvt",
       "issuedAt": "2026-10-13T00:00:00.000Z",
       "platform": "manual",
-      "linkId": "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7"
+      "linkId": "aB3_dE5-fG7_hJ9k"
     }
   ]
 }
 ```
 
-Other systems can read this format and should join records to `manifest.json` by `assetId` (or legacy `assetSha256`), never by filename. The filename is only the current human-readable label. `linkId` is the public UUIDv4 used by `/reward/?id=…`; it is an opaque lookup key, not a secret. The list searches usernames and the current artwork filename, and uses the content ID to find renamed artwork. Older records remain searchable if artwork is later removed or replaced, but their detail link is disabled unless both the matching content and a link ID are present. The local OBS issuer imports this registry when checking availability and updates it after an award, alongside its private ignored queue. The public file intentionally contains no full URLs, keys, or encrypted payloads. It is a public index, not a secure proof of ownership. The issuer does not push to GitHub; publish its local registry changes with the usual repository commit/push workflow. A read-only/distributable copy cannot issue a working public award because it cannot update the registry.
+Other systems can read this format and should join records to `manifest.json` by `assetId` (or legacy `assetSha256`), never by filename. The filename is only the current human-readable label. `linkId` is the public compact ID used by `/reward/?id=…`; it is an opaque lookup key, not a secret. The list searches usernames and the current artwork filename, and uses the content ID to find renamed artwork. Older records remain searchable if artwork is later removed or replaced, but their detail link is disabled unless both the matching content and a link ID are present. The local OBS issuer imports this registry when checking availability and updates it after an award, alongside its private ignored queue. The public file intentionally contains no full URLs, keys, or encrypted payloads. It is a public index, not a secure proof of ownership. The issuer does not push to GitHub; publish its local registry changes with the usual repository commit/push workflow. A read-only/distributable copy cannot issue a working public award because it cannot update the registry.
 
 ## Chat posting
 
@@ -65,8 +65,8 @@ The current trivia WebSocket is receive-only. The widget creates each URL and pu
 
 ## Design references
 
-- [RFC 9562: UUIDs](https://www.rfc-editor.org/rfc/rfc9562.html) specifies UUID formats, including UUIDv4 values generated from random or pseudorandom data.
-- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html) explains that unpredictable or complex IDs do not replace server-side authorization checks; here, the assignment registry is the allowlist, while UUIDs are only identifiers.
+- [Python `secrets`](https://docs.python.org/3/library/secrets.html) provides cryptographically strong random tokens; new IDs use 12 random bytes encoded as 16 URL-safe characters.
+- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html) explains that unpredictable or complex IDs do not replace server-side authorization checks; here, the assignment registry is the allowlist, while IDs are only identifiers.
 - [RFC 7516: JSON Web Encryption](https://www.rfc-editor.org/rfc/rfc7516.html) documents the legacy encrypted-link format retained only for backward compatibility.
 - [OWASP REST Security](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html#sensitive-information-in-http-requests) warns against putting credentials or security tokens in URLs because requests can be logged. The UUID here is a public lookup ID, not a credential; assignments are already intentionally public.
 - [OWASP Forgot Password guidance](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html#url-tokens) recommends secure random tokens, expiry, and invalidation for links that grant a real account action. Those server-side controls are intentionally absent here because this page only displays public images.

@@ -81,12 +81,13 @@ class RewardQueueApiTests(unittest.TestCase):
         request_headers.update(headers or {})
         return self.request("POST", "/api/rewards", json.dumps(record), request_headers)
 
-    def test_server_issues_uuid_link_and_ignores_client_supplied_url_and_id(self):
+    def test_server_issues_short_link_and_ignores_client_supplied_url_and_id(self):
         status, response = self.post(self.valid_record())
         self.assertEqual(status, 201)
         issued = json.loads(response)
         self.assertTrue(issued["ok"])
-        self.assertRegex(issued["linkId"], widget_server.UUID4_PATTERN)
+        self.assertRegex(issued["linkId"], widget_server.COMPACT_REWARD_ID_PATTERN)
+        self.assertEqual(len(issued["linkId"]), 16)
         self.assertEqual(issued["link"], f"https://kazvt.com/reward/?id={issued['linkId']}")
         self.assertNotIn("#", issued["link"])
         self.assertNotIn("attacker.example", issued["link"])
@@ -270,7 +271,7 @@ class RewardQueueApiTests(unittest.TestCase):
         saved = json.loads(widget_server.PUBLIC_ASSIGNMENTS.read_text(encoding="utf-8"))
         assigned = next(row for row in saved["assignments"] if row["assetId"] == content_id)
         self.assertEqual(assigned["filename"], "renamed award.png")
-        self.assertRegex(assigned["linkId"], widget_server.UUID4_PATTERN)
+        self.assertRegex(assigned["linkId"], widget_server.COMPACT_REWARD_ID_PATTERN)
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(response)["files"], [])
@@ -330,6 +331,39 @@ class RewardQueueApiTests(unittest.TestCase):
             }],
         }), encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "record is invalid"):
+            object.__new__(widget_server.NoCacheHandler).read_reward_state()
+
+    def test_public_registry_accepts_short_ids_and_preserves_case(self):
+        link_id = "aB3_dE5-fG7_hJ9k"
+        widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
+            "version": 1,
+            "assignments": [{
+                "assetId": "a" * 64,
+                "filename": "test reward.png",
+                "username": "Viewer",
+                "issuedAt": "2026-10-06T12:00:00.000Z",
+                "platform": "twitch",
+                "linkId": link_id,
+            }],
+        }), encoding="utf-8")
+        state = object.__new__(widget_server.NoCacheHandler).read_reward_state()
+        self.assertEqual(state["owners"]["a" * 64]["linkId"], link_id)
+
+        duplicate_id = "AaBbCcDdEeFf1234"
+        widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
+            "version": 1,
+            "assignments": [
+                {
+                    "assetId": "a" * 64, "filename": "test reward.png", "username": "Viewer",
+                    "issuedAt": "2026-10-06T12:00:00.000Z", "platform": "twitch", "linkId": duplicate_id,
+                },
+                {
+                    "assetId": "b" * 64, "filename": "second reward.png", "username": "Someone else",
+                    "issuedAt": "2026-10-06T12:01:00.000Z", "platform": "twitch", "linkId": duplicate_id,
+                },
+            ],
+        }), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "repeats a link ID"):
             object.__new__(widget_server.NoCacheHandler).read_reward_state()
 
     def test_rejects_unknown_assets_and_invalid_host(self):
