@@ -1,5 +1,5 @@
-.reward-demo-card {
-  padding-top: clamp(18px, 4vw, 26px);
+.reward-demo-card .award-note {
+  margin-bottom: 8px;
 }
 
 .demo-button {
@@ -12,6 +12,10 @@
   box-shadow: 3px 3px 0 color-mix(in srgb, var(--palette-accent) 48%, transparent);
   cursor: pointer;
   font-weight: 900;
+}
+
+.reward-demo-card .demo-button {
+  margin-top: 0;
 }
 
 .demo-button:hover:not(:disabled) {

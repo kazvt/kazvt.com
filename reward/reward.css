@@ -225,6 +225,10 @@ body[data-tier="splus"] {
   text-align: center;
 }
 
+.reward-card:has(#rewardState:not([hidden])) {
+  padding-top: 0;
+}
+
 .tier-badge {
   --tier-ink: #fff8ff;
   --tier-fill: linear-gradient(135deg, var(--palette-panel), var(--palette-background));
@@ -480,7 +484,7 @@ h1 {
   line-height: 1.55;
 }
 
-.filename { margin-top: 10px; }
+.filename { margin: 0 auto 8px; }
 
 .username-mention {
   text-decoration-line: underline;
