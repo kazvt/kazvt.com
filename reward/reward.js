@@ -56,7 +56,9 @@ import {
   const errorState = document.getElementById("errorState");
   const recipient = document.getElementById("recipient");
   const filename = document.getElementById("filename");
+  const rewardArtworkMotion = document.getElementById("rewardArtworkMotion");
   const rewardImage = document.getElementById("rewardImage");
+  rewardArtworkMotion.addEventListener("contextmenu", event => event.preventDefault());
   const errorMessage = document.getElementById("errorMessage");
   const demoFootnote = document.querySelector(".demo-footnote");
   const rewardTier = document.getElementById("rewardTier");
@@ -514,33 +516,36 @@ import {
     return new Promise((resolve, reject) => {
       let settled = false;
       let decoding = false;
+      const image = new Image();
       const finish = (callback, value) => {
         if (settled) return;
         settled = true;
-        rewardImage.onload = null;
-        rewardImage.onerror = null;
+        image.onload = null;
+        image.onerror = null;
         callback(value);
       };
       const decodeIfReady = () => {
-        if (settled || decoding || !rewardImage.complete) return;
-        if (!rewardImage.naturalWidth || !rewardImage.naturalHeight) {
+        if (settled || decoding || !image.complete) return;
+        if (!image.naturalWidth || !image.naturalHeight) {
           finish(reject, new Error("The reward image could not be loaded."));
           return;
         }
         decoding = true;
-        Promise.resolve(typeof rewardImage.decode === "function" ? rewardImage.decode() : undefined)
+        Promise.resolve(typeof image.decode === "function" ? image.decode() : undefined)
           .then(() => {
-            if (!rewardImage.naturalWidth || !rewardImage.naturalHeight) {
+            if (!image.naturalWidth || !image.naturalHeight) {
               throw new Error("The reward image could not be decoded.");
             }
+            rewardArtworkMotion.style.setProperty("--reward-art-ratio", `${image.naturalWidth} / ${image.naturalHeight}`);
+            rewardImage.style.backgroundImage = `url("${imageUrl}")`;
             finish(resolve);
           })
           .catch(error => finish(reject, error));
       };
 
-      rewardImage.onload = decodeIfReady;
-      rewardImage.onerror = () => finish(reject, new Error("The reward image could not be loaded."));
-      rewardImage.src = imageUrl;
+      image.onload = decodeIfReady;
+      image.onerror = () => finish(reject, new Error("The reward image could not be loaded."));
+      image.src = imageUrl;
       decodeIfReady();
     });
   }
@@ -676,9 +681,9 @@ import {
 
   async function animateTier(tier) {
     const generation = ++tierAnimationGeneration;
-    if (typeof window.anime === "function") window.anime.remove([rewardTier, rewardImage]);
+    if (typeof window.anime === "function") window.anime.remove([rewardTier, rewardArtworkMotion]);
     rewardTier.style.removeProperty("transform");
-    rewardImage.style.removeProperty("transform");
+    rewardArtworkMotion.style.removeProperty("transform");
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     const motion = TIER_LOOP_MOTION[tier];
@@ -686,7 +691,7 @@ import {
 
     const anime = await loadAnime();
     if (generation !== tierAnimationGeneration || rewardTier.dataset.tier !== tier) return;
-    anime.remove([rewardTier, rewardImage]);
+    anime.remove([rewardTier, rewardArtworkMotion]);
     const startLoop = (target, intensity) => anime({
       targets: target,
       ...motionProperties(motion, intensity),
@@ -697,7 +702,7 @@ import {
     });
 
     // Each tier has one fixed motion. Ping-pong easing makes both ends of the loop settle smoothly.
-    startLoop(rewardImage, 1);
+    startLoop(rewardArtworkMotion, 1);
     startLoop(rewardTier, 0.42);
   }
 
@@ -752,7 +757,7 @@ import {
     recipient.textContent = demoName;
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
     renderFilename(file);
-    rewardImage.alt = `${tier.label} demo artwork: ${file}`;
+    rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
     await waitForRewardImage(imageUrl);
 
     lastDemoFile = file;
@@ -826,7 +831,7 @@ import {
     tierName.textContent = tier.label;
     renderUsernameCopy(data.username);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
-    rewardImage.alt = `${tier.label} reward artwork: ${file}`;
+    rewardImage.setAttribute("aria-label", `${tier.label} reward artwork: ${file}`);
     renderFilename(file);
     await waitForRewardImage(imageUrl);
     document.body.dataset.tier = tier.id;
