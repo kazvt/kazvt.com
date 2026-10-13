@@ -514,7 +514,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     rewardTier.setAttribute("aria-label", `${tier.label} demo tier`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
-    recipient.textContent = `Preview: ${demoName}`;
+    recipient.textContent = demoName;
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
     filename.textContent = filenameLabel(file);
     rewardImage.alt = `${tier.label} demo artwork: ${file}`;
