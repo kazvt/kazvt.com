@@ -2,7 +2,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=uuid-link-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
-import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=2";
+import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=3";
 import "./pattern-zoom.mjs?v=3";
 import {
   buildTwoRowAwardPreview,

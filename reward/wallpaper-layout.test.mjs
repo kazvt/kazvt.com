@@ -87,6 +87,6 @@ test("smaller filler artwork increases the count while keeping the large repeats
   const fillers = points.filter(point => point.size === WALLPAPER_FILLER_SIZE);
 
   assert.ok(large.length >= 10, "large wallpaper art remains the dominant size");
-  assert.ok(fillers.length > 0, "smaller repeats fill safe gaps between larger art");
+  assert.ok(fillers.length >= 5, "smaller repeats noticeably fill safe gaps between larger art");
   assert.ok(points.length > large.length, "the viewport shows more artwork overall");
 });
