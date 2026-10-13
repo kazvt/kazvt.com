@@ -7,7 +7,6 @@ function boundRadiusFor(size) {
 }
 
 export const WALLPAPER_BOUND_RADIUS = boundRadiusFor(WALLPAPER_ART_SIZE);
-export const WALLPAPER_MIN_DISTANCE = WALLPAPER_BOUND_RADIUS * 2 + 4;
 
 const WORLD_WIDTH = 16384;
 const WORLD_HEIGHT = 8192;
