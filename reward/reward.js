@@ -2,7 +2,8 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=uuid-link-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
-import "./pattern-zoom.mjs?v=2";
+import { wallpaperCellsForViewport } from "./wallpaper-layout.mjs?v=1";
+import "./pattern-zoom.mjs?v=3";
 import {
   buildTwoRowAwardPreview,
   findAssignmentByLinkId,
@@ -83,7 +84,8 @@ import {
   let animeLoad;
   let rewardCatalogPromise;
   let assignmentRegistryPromise;
-  let wallpaperItems = [];
+  const wallpaperSlots = new Map();
+  let wallpaperImageUrl = "";
   let wallpaperResizeTimer = 0;
   let decalLayoutSeed = 1;
   let activeAwardCollection = null;
@@ -163,111 +165,59 @@ import {
   }
 
   function populateArtWallpaper(imageUrl) {
-    const stampCount = 36;
-    const stampStyles = 12;
-
-    wallpaperItems = [];
-    for (let index = 0; index < stampCount; index += 1) {
-      wallpaperItems.push({
-        className: `wall-art--${(index % stampStyles) + 1}`,
-        spinDirection: index % 2 === 0 ? "wall-art-spin--clockwise" : "wall-art-spin--counterclockwise",
-        src: imageUrl,
-        element: null,
-        image: null
-      });
-    }
-
+    wallpaperImageUrl = imageUrl;
+    wallpaperSlots.clear();
     artWallpaper.replaceChildren();
     layoutArtWallpaper();
     layoutRewardDecals();
   }
 
   function layoutArtWallpaper() {
-    if (!artWallpaper || wallpaperItems.length === 0) return;
+    if (!artWallpaper || !wallpaperImageUrl) return;
 
     const width = artWallpaper.clientWidth;
     const height = artWallpaper.clientHeight;
     if (!width || !height) return;
 
-    const baseSize = Math.max(88, Math.min(220, width * 0.2, height * 0.28));
-    const stampGap = size => Math.max(0, Math.min(2, size * 0.01));
-    const gap = stampGap(baseSize);
-    const targetRadius = baseSize * Math.SQRT1_2 + 5;
-    const targetDistance = targetRadius * 2 + gap;
-    const inset = targetRadius + gap / 2 + 2;
-    const availableArea = Math.max(0, width - inset * 2) * Math.max(0, height - inset * 2);
-    const targetCount = Math.min(
-      wallpaperItems.length,
-      Math.max(1, Math.floor(availableArea / (targetDistance ** 2 * 0.9)))
-    );
-    const layoutItems = wallpaperItems.slice(0, targetCount);
+    const scale = Number.parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue("--reward-zoom-compensation")) || 1;
+    const cells = wallpaperCellsForViewport(width, height, decalLayoutSeed, scale);
+    const visibleKeys = new Set();
 
-    const placed = [];
-    const visibleItems = new Set();
-    for (const item of layoutItems) {
-      const size = Math.max(36, baseSize * (0.9 + Math.random() * 0.22));
-      // The circle encloses the rotated square image, plus its glow and gentle wobble.
-      const radius = size * Math.SQRT1_2 + 5;
-      const itemGap = stampGap(size);
-      const minX = radius + 3;
-      const maxX = width - radius - 3;
-      const minY = radius + 3;
-      const maxY = height - radius - 3;
-      if (maxX <= minX || maxY <= minY) continue;
-
-      let point = null;
-      for (let attempt = 0; attempt < 800; attempt += 1) {
-        const candidate = {
-          x: minX + Math.random() * (maxX - minX),
-          y: minY + Math.random() * (maxY - minY),
-          radius
-        };
-        const clear = placed.every(other => {
-          const dx = candidate.x - other.x;
-          const dy = candidate.y - other.y;
-          const clearance = candidate.radius + other.radius + Math.max(itemGap, other.gap);
-          return dx * dx + dy * dy >= clearance * clearance;
-        });
-        if (clear) {
-          point = candidate;
-          break;
-        }
-      }
-      if (!point) continue;
-
-      point.gap = itemGap;
-      placed.push(point);
-      visibleItems.add(item);
-      if (!item.element) {
-        item.element = document.createElement("span");
-        item.element.className = `wall-art-spin ${item.className} ${item.spinDirection}`;
-        item.element.setAttribute("aria-hidden", "true");
-        item.image = document.createElement("img");
-        item.image.className = "wall-art";
-        item.image.alt = "";
-        item.image.draggable = false;
-        item.image.decoding = "async";
-        item.element.append(item.image);
+    for (const cell of cells) {
+      const key = `${cell.row}:${cell.column}`;
+      visibleKeys.add(key);
+      let item = wallpaperSlots.get(key);
+      if (!item) {
+        const element = document.createElement("span");
+        element.className = `wall-art-spin wall-art--${cell.styleIndex} ${cell.spinDirection}`;
+        element.setAttribute("aria-hidden", "true");
+        const image = document.createElement("img");
+        image.className = "wall-art";
+        image.alt = "";
+        image.draggable = false;
+        image.decoding = "async";
+        element.append(image);
+        item = { element, image };
+        wallpaperSlots.set(key, item);
+        artWallpaper.append(element);
       }
 
       item.element.hidden = false;
-      item.element.style.left = `${point.x}px`;
-      item.element.style.top = `${point.y}px`;
-      item.element.style.setProperty("--wall-size", `${size}px`);
-      item.element.style.setProperty("--wall-angle-jitter", `${(Math.random() * 16 - 8).toFixed(1)}deg`);
-      item.element.style.setProperty("--wall-drift-x", `${(Math.random() * 6 - 3).toFixed(1)}px`);
-      item.element.style.setProperty("--wall-drift-y", `${(Math.random() * 6 - 3).toFixed(1)}px`);
-      if (item.image.getAttribute("src") !== item.src) item.image.src = item.src;
-      if (!item.element.isConnected) artWallpaper.append(item.element);
+      item.element.style.left = `${cell.x.toFixed(2)}px`;
+      item.element.style.top = `${cell.y.toFixed(2)}px`;
+      item.element.style.setProperty("--wall-size", `${cell.size.toFixed(2)}px`);
+      item.element.style.setProperty("--wall-angle-jitter", `${cell.angleJitter}deg`);
+      item.element.style.setProperty("--wall-drift-x", cell.driftX);
+      item.element.style.setProperty("--wall-drift-y", cell.driftY);
+      if (item.image.getAttribute("src") !== wallpaperImageUrl) item.image.src = wallpaperImageUrl;
     }
 
-    wallpaperItems.forEach(item => {
-      if (visibleItems.has(item)) return;
-      if (item.element) {
-        item.element.hidden = true;
-        item.image.removeAttribute("src");
-      }
-    });
+    for (const [key, item] of wallpaperSlots) {
+      if (visibleKeys.has(key)) continue;
+      item.element.hidden = true;
+      item.image.removeAttribute("src");
+    }
   }
 
   function scheduleWallpaperLayout() {
@@ -498,7 +448,8 @@ import {
     rewardState.hidden = true;
     errorMessage.textContent = message;
     errorState.hidden = false;
-    wallpaperItems = [];
+    wallpaperImageUrl = "";
+    wallpaperSlots.clear();
     artWallpaper.replaceChildren();
     if (demoFootnote) demoFootnote.hidden = true;
   }
@@ -511,7 +462,8 @@ import {
     loadingState.hidden = false;
     rewardState.hidden = true;
     errorState.hidden = true;
-    wallpaperItems = [];
+    wallpaperImageUrl = "";
+    wallpaperSlots.clear();
     artWallpaper.replaceChildren();
     if (demoFootnote) demoFootnote.hidden = true;
   }
