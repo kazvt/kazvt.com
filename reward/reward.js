@@ -285,6 +285,38 @@ import {
     return extensionStart > 0 ? file.slice(0, extensionStart) : file;
   }
 
+  function renderFilename(file) {
+    const label = filenameLabel(file);
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion || !label) {
+      filename.textContent = label;
+      filename.classList.remove("filename--animated");
+      return;
+    }
+
+    const graphemes = typeof Intl.Segmenter === "function"
+      ? Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(label), part => part.segment)
+      : Array.from(label);
+    const fragment = document.createDocumentFragment();
+    const accessibleLabel = document.createElement("span");
+    accessibleLabel.className = "filename-sr-only";
+    accessibleLabel.textContent = label;
+    fragment.append(accessibleLabel);
+
+    graphemes.forEach((grapheme, index) => {
+      const character = document.createElement("span");
+      character.className = "filename-character";
+      character.setAttribute("aria-hidden", "true");
+      character.style.setProperty("--char-index", index);
+      character.textContent = grapheme;
+      fragment.append(character);
+    });
+
+    filename.style.setProperty("--filename-wave-duration", `${Math.max(1900, 1300 + graphemes.length * 55)}ms`);
+    filename.classList.add("filename--animated");
+    filename.replaceChildren(fragment);
+  }
+
   function renderUsernameCopy(username) {
     recipient.replaceChildren(
       document.createTextNode("For "),
@@ -608,14 +640,14 @@ import {
   }
 
   const TIER_LOOP_MOTION = {
-    common: { type: "scale", amount: 0.035, duration: 4800 },
-    uncommon: { type: "rotate", amount: 1.25, duration: 5200 },
-    rare: { type: "translateY", amount: 2.2, duration: 4500 },
-    epic: { type: "translateX", amount: 2.5, duration: 5000 },
-    legendary: { type: "rotateY", amount: 3, duration: 5600 },
-    mythic: { type: "squish", amount: 0.028, duration: 3800 },
-    divine: { type: "scale", amount: 0.045, duration: 5200 },
-    splus: { type: "rotateY", amount: 4.5, duration: 4600 }
+    common: { type: "scale", amount: 0.041, duration: 3900 },
+    uncommon: { type: "rotate", amount: 1.45, duration: 4250 },
+    rare: { type: "translateY", amount: 2.6, duration: 3700 },
+    epic: { type: "translateX", amount: 2.9, duration: 4100 },
+    legendary: { type: "rotateY", amount: 3.5, duration: 4600 },
+    mythic: { type: "squish", amount: 0.033, duration: 3150 },
+    divine: { type: "scale", amount: 0.052, duration: 4250 },
+    splus: { type: "rotateY", amount: 5.2, duration: 3750 }
   };
   let tierAnimationGeneration = 0;
 
@@ -719,7 +751,7 @@ import {
     tierName.textContent = tier.label;
     recipient.textContent = demoName;
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
-    filename.textContent = filenameLabel(file);
+    renderFilename(file);
     rewardImage.alt = `${tier.label} demo artwork: ${file}`;
     await waitForRewardImage(imageUrl);
 
@@ -795,7 +827,7 @@ import {
     renderUsernameCopy(data.username);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardImage.alt = `${tier.label} reward artwork: ${file}`;
-    filename.textContent = filenameLabel(file);
+    renderFilename(file);
     await waitForRewardImage(imageUrl);
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
