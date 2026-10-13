@@ -1,4 +1,3 @@
-import base64
 from concurrent.futures import ThreadPoolExecutor
 import http.client
 import importlib.util
@@ -13,25 +12,6 @@ SERVER_PATH = Path(__file__).resolve().parents[1] / "server.py"
 SPEC = importlib.util.spec_from_file_location("reward_widget_server", SERVER_PATH)
 widget_server = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(widget_server)
-
-
-def base64url(value: bytes) -> str:
-    return base64.urlsafe_b64encode(value).decode("ascii").rstrip("=")
-
-
-def noncanonical_base64url(value: str) -> str:
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
-    last_value = alphabet.index(value[-1])
-    changed_last_value = (last_value & 0b110000) | ((last_value + 1) & 0b001111)
-    return value[:-1] + alphabet[changed_last_value]
-
-
-def syntactically_valid_jwe() -> str:
-    header = base64url(b'{"alg":"dir","enc":"A256GCM"}')
-    iv = base64url(bytes(range(12)))
-    ciphertext = base64url(b"opaque")
-    tag = base64url(bytes(range(16)))
-    return f"{header}..{iv}.{ciphertext}.{tag}"
 
 
 class RewardQueueApiTests(unittest.TestCase):
@@ -86,15 +66,14 @@ class RewardQueueApiTests(unittest.TestCase):
         return status, data
 
     def valid_record(self):
-        token = syntactically_valid_jwe()
-        key = base64url(bytes(range(32)))
         return {
             "id": "test-1",
             "username": "Viewer",
             "filename": "test reward.png",
             "platform": "twitch",
             "issuedAt": "2026-10-06T12:00:00.000Z",
-            "link": f"https://kazvt.com/reward/?id={token}#key={key}",
+            "link": "https://attacker.example/reward/?id=made-up",
+            "linkId": "00000000-0000-0000-0000-000000000000",
         }
 
     def post(self, record, headers=None):
@@ -102,10 +81,16 @@ class RewardQueueApiTests(unittest.TestCase):
         request_headers.update(headers or {})
         return self.request("POST", "/api/rewards", json.dumps(record), request_headers)
 
-    def test_valid_link_is_saved_and_returned_to_dashboard(self):
+    def test_server_issues_uuid_link_and_ignores_client_supplied_url_and_id(self):
         status, response = self.post(self.valid_record())
         self.assertEqual(status, 201)
-        self.assertEqual(json.loads(response), {"ok": True})
+        issued = json.loads(response)
+        self.assertTrue(issued["ok"])
+        self.assertRegex(issued["linkId"], widget_server.UUID4_PATTERN)
+        self.assertEqual(issued["link"], f"https://kazvt.com/reward/?id={issued['linkId']}")
+        self.assertNotIn("#", issued["link"])
+        self.assertNotIn("attacker.example", issued["link"])
+        self.assertNotEqual(issued["linkId"], "00000000-0000-0000-0000-000000000000")
 
         status, response = self.request("GET", "/api/rewards")
         self.assertEqual(status, 200)
@@ -113,6 +98,8 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["username"], "Viewer")
         self.assertEqual(items[0]["filename"], "test reward.png")
+        self.assertEqual(items[0]["link"], issued["link"])
+        self.assertEqual(items[0]["linkId"], issued["linkId"])
 
         public_registry = json.loads(widget_server.PUBLIC_ASSIGNMENTS.read_text(encoding="utf-8"))
         self.assertEqual(public_registry["version"], 1)
@@ -121,6 +108,9 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertEqual(assignment["assetSha256"], "a" * 64)
         self.assertEqual(assignment["assetId"], "a" * 64)
         self.assertEqual(assignment["username"], "Viewer")
+        self.assertEqual(assignment["linkId"], issued["linkId"])
+        saved_owner = object.__new__(widget_server.NoCacheHandler).read_reward_state()["owners"]["a" * 64]
+        self.assertEqual(saved_owner["linkId"], issued["linkId"])
         self.assertNotIn("link", assignment)
         self.assertNotIn("id", assignment)
         self.assertNotIn("key", assignment)
@@ -192,6 +182,10 @@ class RewardQueueApiTests(unittest.TestCase):
         state = object.__new__(widget_server.NoCacheHandler).read_reward_state()
         self.assertEqual(state["owners"][content_id]["username"], "kazvt")
         self.assertEqual(state["owners"][content_id]["filename"], "renamed special award.png")
+        self.assertEqual(
+            state["owners"][content_id]["linkId"],
+            widget_server.PREASSIGNED_REWARDS[content_id]["linkId"],
+        )
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(response)["files"], [])
@@ -276,6 +270,7 @@ class RewardQueueApiTests(unittest.TestCase):
         saved = json.loads(widget_server.PUBLIC_ASSIGNMENTS.read_text(encoding="utf-8"))
         assigned = next(row for row in saved["assignments"] if row["assetId"] == content_id)
         self.assertEqual(assigned["filename"], "renamed award.png")
+        self.assertRegex(assigned["linkId"], widget_server.UUID4_PATTERN)
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(response)["files"], [])
@@ -297,45 +292,49 @@ class RewardQueueApiTests(unittest.TestCase):
         status, _ = self.request("HEAD", "/index.html", headers={"Host": f"evil.example:{self.port}"})
         self.assertEqual(status, 403)
 
-    def test_rejects_duplicate_or_extra_url_fields_and_noncanonical_keys(self):
-        record = self.valid_record()
-        record["link"] += "&id=duplicate"
-        status, _ = self.post(record)
-        self.assertEqual(status, 400)
+    def test_public_registry_rejects_invalid_or_reused_link_ids(self):
+        duplicate_id = "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7"
+        widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
+            "version": 1,
+            "assignments": [
+                {
+                    "assetId": "a" * 64,
+                    "filename": "test reward.png",
+                    "username": "Viewer",
+                    "issuedAt": "2026-10-06T12:00:00.000Z",
+                    "platform": "twitch",
+                    "linkId": duplicate_id,
+                },
+                {
+                    "assetId": "b" * 64,
+                    "filename": "second reward.png",
+                    "username": "Someone else",
+                    "issuedAt": "2026-10-06T12:01:00.000Z",
+                    "platform": "twitch",
+                    "linkId": duplicate_id,
+                },
+            ],
+        }), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "repeats a link ID"):
+            object.__new__(widget_server.NoCacheHandler).read_reward_state()
 
-        record = self.valid_record()
-        record["link"] += "&extra=unexpected"
-        status, _ = self.post(record)
-        self.assertEqual(status, 400)
+        widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
+            "version": 1,
+            "assignments": [{
+                "assetId": "a" * 64,
+                "filename": "test reward.png",
+                "username": "Viewer",
+                "issuedAt": "2026-10-06T12:00:00.000Z",
+                "platform": "twitch",
+                "linkId": "not-a-uuid",
+            }],
+        }), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "record is invalid"):
+            object.__new__(widget_server.NoCacheHandler).read_reward_state()
 
-        record = self.valid_record()
-        record["link"] += "&key=duplicate"
-        status, _ = self.post(record)
-        self.assertEqual(status, 400)
-
-        record = self.valid_record()
-        prefix, key = record["link"].rsplit("#key=", 1)
-        record["link"] = f"{prefix}#key={noncanonical_base64url(key)}"
-        status, _ = self.post(record)
-        self.assertEqual(status, 400)
-
-    def test_rejects_unknown_assets_bad_jwe_and_invalid_host(self):
+    def test_rejects_unknown_assets_and_invalid_host(self):
         record = self.valid_record()
         record["filename"] = "../private.png"
-        status, _ = self.post(record)
-        self.assertEqual(status, 400)
-
-        record = self.valid_record()
-        bad_header = base64url(b'{"alg":"dir","enc":"A128GCM"}')
-        bad_jwe = f"{bad_header}..{base64url(bytes(range(12)))}.{base64url(b'opaque')}.{base64url(bytes(range(16)))}"
-        record["link"] = f"https://kazvt.com/reward/?id={bad_jwe}#key={base64url(bytes(range(32)))}"
-        status, _ = self.post(record)
-        self.assertEqual(status, 400)
-
-        record = self.valid_record()
-        duplicate_header = base64url(b'{"alg":"none","alg":"dir","enc":"A256GCM"}')
-        duplicate_jwe = f"{duplicate_header}..{base64url(bytes(range(12)))}.{base64url(b'opaque')}.{base64url(bytes(range(16)))}"
-        record["link"] = f"https://kazvt.com/reward/?id={duplicate_jwe}#key={base64url(bytes(range(32)))}"
         status, _ = self.post(record)
         self.assertEqual(status, 400)
 

@@ -2,12 +2,19 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildTwoRowAwardPreview,
+  findAssignmentByLinkId,
+  findAssignmentForLegacyPayload,
+  isRewardLinkId,
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
 } from "./assignment-registry.mjs";
 
 const assetIds = ["a", "b"].map(character => character.repeat(64));
+const linkIds = [
+  "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7",
+  "8ca03f2b-1dbd-4ed9-904a-a9888aed6a1d"
+];
 
 function makeCatalog() {
   const files = ["gift-current.png", "older-gift-current.png"];
@@ -35,6 +42,27 @@ test("award usernames normalize consistently for matching", () => {
   assert.equal(normalizeAwardUsername("  KAZVT "), "kazvt");
   assert.equal(normalizeAwardUsername("Ｋａｚｖｔ"), "kazvt");
   assert.equal(normalizeAwardUsername(null), "");
+});
+
+test("UUID reward links resolve only to their recorded assignment", () => {
+  const registry = validateAndSortAssignments({ version: 1, assignments: [
+    {
+      assetId: assetIds[0], filename: "gift-current.png", username: "kazvt",
+      linkId: linkIds[0], issuedAt: "2026-09-01T00:00:00Z"
+    },
+    {
+      assetId: assetIds[1], filename: "older-gift-current.png", username: "Viewer",
+      linkId: linkIds[1], issuedAt: "2026-09-02T00:00:00Z"
+    }
+  ] }, makeCatalog());
+
+  assert.equal(findAssignmentByLinkId(registry, linkIds[0]).username, "kazvt");
+  assert.equal(findAssignmentByLinkId(registry, "d2b8a0b2-7dd8-4d10-802f-d308ec33ffe7"), null);
+  assert.equal(isRewardLinkId(linkIds[0]), true);
+  assert.equal(isRewardLinkId("00000000-0000-0000-0000-000000000000"), false);
+  assert.equal(findAssignmentForLegacyPayload(registry, "KAZVT", assetIds[0]).username, "kazvt");
+  assert.equal(findAssignmentForLegacyPayload(registry, "attacker", assetIds[0]), null);
+  assert.equal(findAssignmentForLegacyPayload(registry, "kazvt", "c".repeat(64)), null);
 });
 
 test("other-awards collection excludes the award currently being viewed", () => {
@@ -81,6 +109,12 @@ test("invalid and duplicated award records are rejected", () => {
   ] }, makeCatalog()), /repeats artwork/);
   assert.throws(() => validateAndSortAssignments({ version: 1, assignments: [
     { ...valid, filename: "../gift.png" }
+  ] }, makeCatalog()), /Assignment record 1 is invalid/);
+  assert.throws(() => validateAndSortAssignments({ version: 1, assignments: [
+    { ...valid, linkId: linkIds[0] }, { ...valid, assetId: assetIds[1], linkId: linkIds[0] }
+  ] }, makeCatalog()), /repeats a reward link ID/);
+  assert.throws(() => validateAndSortAssignments({ version: 1, assignments: [
+    { ...valid, linkId: "not-a-uuid" }
   ] }, makeCatalog()), /Assignment record 1 is invalid/);
 });
 

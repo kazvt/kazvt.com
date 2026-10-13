@@ -1,9 +1,8 @@
-import { encryptReward } from "./reward-crypto.mjs";
+import { isRewardLinkId } from "./assignment-registry.mjs?v=uuid-link-1";
 
-export async function createRewardHref(username, assetId, origin) {
-  const encrypted = await encryptReward({ version: 2, username, assetId });
+export function createRewardHref(linkId, origin) {
+  if (!isRewardLinkId(linkId)) throw new TypeError("A valid reward link ID is required.");
   const destination = new URL("/reward/", origin);
-  destination.searchParams.set("id", encrypted.id);
-  destination.hash = `key=${encrypted.key}`;
+  destination.searchParams.set("id", linkId.toLowerCase());
   return destination.href;
 }

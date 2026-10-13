@@ -1,5 +1,3 @@
-import { encryptReward } from "./reward-crypto.mjs";
-
 (() => {
   "use strict";
 
@@ -35,7 +33,6 @@ import { encryptReward } from "./reward-crypto.mjs";
     rewards: {
       enabled: true,
       catalogUrl: "rewards.json",
-      pageUrl: "https://kazvt.com/reward/",
       queueEndpoint: "/api/rewards"
     },
     leaderboard: {
@@ -106,7 +103,6 @@ import { encryptReward } from "./reward-crypto.mjs";
     shuttingDown: false,
     scores: new Map(),
     rewardCatalog: [],
-    rewardAssetIds: Object.create(null),
     storageAvailable: true
   };
 
@@ -175,11 +171,7 @@ import { encryptReward } from "./reward-crypto.mjs";
 
     out.rewards.enabled = Boolean(out.rewards.enabled);
     out.rewards.catalogUrl = String(out.rewards.catalogUrl || DEFAULT_CONFIG.rewards.catalogUrl);
-    out.rewards.pageUrl = String(out.rewards.pageUrl || DEFAULT_CONFIG.rewards.pageUrl);
     out.rewards.queueEndpoint = String(out.rewards.queueEndpoint || DEFAULT_CONFIG.rewards.queueEndpoint);
-    if (!/^https:\/\/kazvt\.com\/reward\/?$/.test(out.rewards.pageUrl)) {
-      out.rewards.pageUrl = DEFAULT_CONFIG.rewards.pageUrl;
-    }
     if (!/^\/api\/[a-z0-9/_-]+$/i.test(out.rewards.queueEndpoint)) {
       out.rewards.queueEndpoint = DEFAULT_CONFIG.rewards.queueEndpoint;
     }
@@ -234,13 +226,11 @@ import { encryptReward } from "./reward-crypto.mjs";
     if (files.length === 0 || invalid.length > 0) {
       throw new Error("Reward catalog must contain PNG filenames without folders.");
     }
-    const assetIds = Object.create(null);
     if (files.some(file => {
       const asset = raw.assets[file];
       if (!isPlainObject(asset) || !/^[a-f0-9]{64}$/.test(asset.assetId) ||
           asset.assetId !== asset.sha256 || !Number.isSafeInteger(asset.width) || asset.width < 1 ||
           !Number.isSafeInteger(asset.height) || asset.height < 1) return true;
-      assetIds[file] = asset.assetId;
       return false;
     })) {
       throw new Error("Reward catalog version 3 requires a content ID and PNG dimensions for every image.");
@@ -252,23 +242,7 @@ import { encryptReward } from "./reward-crypto.mjs";
         throw new Error("Reward catalog contains invalid filename history.");
       }
     }
-    return { files, assetIds };
-  }
-
-  async function createRewardUrl(player, file) {
-    const assetId = state.rewardAssetIds[file];
-    if (!assetId) throw new Error("The selected reward has no stable content ID.");
-    const encrypted = await encryptReward({
-      version: 2,
-      username: String(player.displayName || "Viewer").slice(0, 100),
-      assetId
-    });
-
-    const url = new URL(state.config.rewards.pageUrl);
-    url.search = "";
-    url.searchParams.set("id", encrypted.id);
-    url.hash = `key=${encrypted.key}`;
-    return url.href;
+    return { files };
   }
 
   async function getAvailableRewardFiles() {
@@ -309,12 +283,10 @@ import { encryptReward } from "./reward-crypto.mjs";
 
       const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % availableFiles.length;
       const file = availableFiles[randomIndex];
-      const link = await createRewardUrl(player, file);
       const record = {
         id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         username: String(player.displayName || "Viewer").slice(0, 100),
         filename: file,
-        link,
         platform: String(player.platform || "chat"),
         issuedAt: new Date().toISOString()
       };
@@ -328,7 +300,18 @@ import { encryptReward } from "./reward-crypto.mjs";
       if (!response.ok) {
         throw new Error(`Could not save the reward link (HTTP ${response.status}).`);
       }
-      return record;
+      let issued;
+      try {
+        issued = await response.json();
+      } catch {
+        throw new Error("The reward server returned an invalid link response.");
+      }
+      const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const expectedLink = `https://kazvt.com/reward/?id=${issued?.linkId?.toLowerCase?.()}`;
+      if (!issued || issued.ok !== true || !uuidV4.test(issued.linkId) || issued.link !== expectedLink) {
+        throw new Error("The reward server returned an invalid link response.");
+      }
+      return { ...record, linkId: issued.linkId.toLowerCase(), link: issued.link };
     }
 
     throw new Error("Reward artwork changed during assignment. Try again.");
@@ -1392,7 +1375,6 @@ import { encryptReward } from "./reward-crypto.mjs";
         const rewardRaw = await fetchJson(state.config.rewards.catalogUrl, "reward catalog");
         const rewardCatalog = validateRewardCatalog(rewardRaw);
         state.rewardCatalog = rewardCatalog.files;
-        state.rewardAssetIds = rewardCatalog.assetIds;
       }
       buildCategoryIndex();
       loadScores();

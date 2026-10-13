@@ -1,14 +1,16 @@
-import { decryptReward } from "./reward-crypto.mjs";
 import { resolveRewardAsset } from "./asset-resolver.mjs";
-import { createRewardHref } from "./reward-link.mjs";
+import { createRewardHref } from "./reward-link.mjs?v=uuid-link-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import "./pattern-zoom.mjs?v=2";
 import {
   buildTwoRowAwardPreview,
+  findAssignmentByLinkId,
+  findAssignmentForLegacyPayload,
+  isRewardLinkId,
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs";
+} from "./assignment-registry.mjs?v=uuid-link-1";
 
 (() => {
   "use strict";
@@ -422,7 +424,7 @@ import {
       return Promise.all(otherAwards.map(async assignment => {
         try {
           const href = assignment.artworkIsCurrent
-            ? await createRewardHref(assignment.username, assignment.assetId, window.location.origin)
+            ? createRewardHref(assignment.linkId, window.location.origin)
             : "";
           return { ...assignment, href };
         } catch (error) {
@@ -744,22 +746,43 @@ import {
     showLoading();
     const params = new URLSearchParams(location.search);
     const token = params.get("id");
-    const keyText = new URLSearchParams(location.hash.slice(1)).get("key");
-    if (!token || !keyText) throw new Error("The link is missing its encrypted reward data or key.");
+    if (!token || params.size !== 1 || params.getAll("id").length !== 1) {
+      throw new Error("The reward URL must contain one link ID.");
+    }
 
     const { catalog, assets: allowedAssets } = await loadRewardCatalog();
+    const assignments = await loadAssignmentRegistry(catalog);
+    let assignment;
 
-    const data = await decryptReward(token, keyText);
+    if (isRewardLinkId(token)) {
+      if (location.hash) throw new Error("A UUID reward link does not need extra URL data.");
+      assignment = findAssignmentByLinkId(assignments, token);
+      if (!assignment) throw new Error("This reward link is unknown or has not been assigned.");
+    } else {
+      const keyParams = new URLSearchParams(location.hash.slice(1));
+      const keyText = keyParams.get("key");
+      if (!keyText || keyParams.size !== 1 || keyParams.getAll("key").length !== 1) {
+        throw new Error("The legacy reward link is missing its key.");
+      }
+      const { decryptReward } = await import("./reward-crypto.mjs");
+      const data = await decryptReward(token, keyText);
+      if (![1, 2].includes(data.version) || typeof data.username !== "string" || !data.username.trim() ||
+          data.username.length > 100) {
+        throw new Error("The legacy reward details are invalid.");
+      }
+      const legacyAsset = resolveRewardAsset(catalog, data);
+      if (!legacyAsset) throw new Error("The legacy reward artwork is invalid.");
+      assignment = findAssignmentForLegacyPayload(assignments, data.username, legacyAsset.metadata.assetId);
+      if (!assignment) throw new Error("This legacy link does not match a recorded reward assignment.");
+    }
+
+    const data = { version: 2, username: assignment.username, assetId: assignment.assetId };
     const resolvedAsset = resolveRewardAsset(catalog, data);
     const file = resolvedAsset?.filename || "";
     const metadata = file && Object.prototype.hasOwnProperty.call(allowedAssets, file)
       ? allowedAssets[file]
       : null;
     const assignedTier = tierFromSha256(metadata?.sha256);
-    if (![1, 2].includes(data.version) || typeof data.username !== "string" || !data.username.trim() ||
-        data.username.length > 100) {
-      throw new Error("The reward details are invalid.");
-    }
     if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
 
     decalLayoutSeed = hashRewardIdentity(data.username, metadata.assetId);
@@ -810,10 +833,10 @@ import {
         showError("Award image unavailable.");
         return;
       }
-      const publicAssetError = /award list|reward list|reward tier|reward asset/i.test(message);
+      const publicAssetError = /assignment registry|award list|reward list|reward tier|reward asset/i.test(message);
       showError(publicAssetError
         ? "The reward list could not be loaded. Refresh page in a moment."
-        : "Invalid or incomplete link. Include everything after #key=.");
+        : "Invalid or unrecorded reward link. Check the URL and try again.");
     });
   }
 })();

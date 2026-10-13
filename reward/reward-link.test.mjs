@@ -1,22 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createRewardHref } from "./reward-link.mjs";
-import { decryptReward } from "./reward-crypto.mjs";
 
-test("each award gets its own direct URL for the exact assigned artwork", async () => {
-  const awards = [
-    { username: "kazvt", assetId: "a".repeat(64) },
-    { username: "Kazvt", assetId: "b".repeat(64) }
-  ];
-  const hrefs = await Promise.all(awards.map(award =>
-    createRewardHref(award.username, award.assetId, "https://kazvt.com")));
+const LINK_ID = "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7";
 
-  assert.notEqual(hrefs[0], hrefs[1]);
-  for (const [index, href] of hrefs.entries()) {
-    const url = new URL(href);
-    const payload = await decryptReward(url.searchParams.get("id"), new URLSearchParams(url.hash.slice(1)).get("key"));
-    assert.equal(url.origin, "https://kazvt.com");
-    assert.equal(url.pathname, "/reward/");
-    assert.deepEqual(payload, { version: 2, ...awards[index] });
+test("a reward URL contains only its UUID and no decryptable payload or key", () => {
+  const href = createRewardHref(LINK_ID, "https://kazvt.com");
+  const url = new URL(href);
+
+  assert.equal(url.origin, "https://kazvt.com");
+  assert.equal(url.pathname, "/reward/");
+  assert.deepEqual([...url.searchParams.entries()], [["id", LINK_ID]]);
+  assert.equal(url.hash, "");
+  assert.equal(href.length, "https://kazvt.com/reward/?id=".length + LINK_ID.length);
+});
+
+test("reward URLs reject malformed, non-v4, or missing identifiers", () => {
+  for (const linkId of ["", "not-a-uuid", "00000000-0000-0000-0000-000000000000", null]) {
+    assert.throws(() => createRewardHref(linkId, "https://kazvt.com"), /valid reward link ID/);
   }
 });

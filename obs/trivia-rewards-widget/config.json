@@ -30,7 +30,6 @@
   "rewards": {
     "enabled": true,
     "catalogUrl": "rewards.json",
-    "pageUrl": "https://kazvt.com/reward/",
     "queueEndpoint": "/api/rewards"
   },
   "leaderboard": {

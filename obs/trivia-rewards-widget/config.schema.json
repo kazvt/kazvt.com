@@ -52,11 +52,10 @@
     "rewards": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enabled", "catalogUrl", "pageUrl", "queueEndpoint"],
+      "required": ["enabled", "catalogUrl", "queueEndpoint"],
       "properties": {
         "enabled": { "type": "boolean" },
         "catalogUrl": { "type": "string", "minLength": 1 },
-        "pageUrl": { "type": "string", "pattern": "^https://kazvt\\.com/reward/?$" },
         "queueEndpoint": { "type": "string", "pattern": "^/api/" }
       }
     },

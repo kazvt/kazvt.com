@@ -1,5 +1,5 @@
-import { createRewardHref } from "../reward-link.mjs";
-import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs";
+import { createRewardHref } from "../reward-link.mjs?v=uuid-link-1";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=uuid-link-1";
 import "../pattern-zoom.mjs?v=2";
 
 (() => {
@@ -145,9 +145,11 @@ import "../pattern-zoom.mjs?v=2";
 
     let openLink;
     try {
-      if (!assignment.artworkIsCurrent) throw new Error("The assigned artwork is no longer in the current catalog.");
+      if (!assignment.artworkIsCurrent || !assignment.linkId) {
+        throw new Error("The assigned award does not have an active direct link.");
+      }
       openLink = document.createElement("a");
-      openLink.href = await createRewardHref(assignment.username, assignment.assetId, window.location.origin);
+      openLink.href = createRewardHref(assignment.linkId, window.location.origin);
       openLink.textContent = "Open award ↗";
       openLink.setAttribute("aria-label", `Open ${assignment.username}'s award`);
     } catch (error) {
@@ -158,7 +160,7 @@ import "../pattern-zoom.mjs?v=2";
       openLink.setAttribute("aria-disabled", "true");
       openLink.setAttribute("role", "img");
       openLink.setAttribute("aria-label", `${assignment.username}'s award cannot be opened`);
-      openLink.title = "This award cannot be opened from the current artwork catalog or browser security context.";
+      openLink.title = "This award has no UUID link or its artwork is no longer in the current catalog.";
     }
     openLink.classList.add("open-button");
 

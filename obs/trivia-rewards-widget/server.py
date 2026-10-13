@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 import argparse
-import base64
-import binascii
 import json
 import os
 import re
 import threading
+import uuid
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
 REWARD_QUEUE = ROOT / ".reward-queue.json"
@@ -22,16 +21,19 @@ PUBLIC_ASSIGNMENTS_TEMP = PUBLIC_ASSIGNMENTS.with_name(PUBLIC_ASSIGNMENTS.name +
 REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()
 REWARD_STATE_VERSION = 2
+PUBLIC_REWARD_URL = "https://kazvt.com/reward/"
+UUID4_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
 PREASSIGNED_REWARDS = {
     "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03": {
         "username": "kazvt",
         "platform": "manual",
         "issuedAt": "2026-10-13T00:00:00.000Z",
+        "linkId": "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7",
     }
 }
-SUPPORTED_REWARD_PROTECTED_HEADER = base64.urlsafe_b64encode(
-    b'{"alg":"dir","enc":"A256GCM"}'
-).decode("ascii").rstrip("=")
 
 try:
     with (ROOT / "rewards.json").open("r", encoding="utf-8-sig") as catalog_file:
@@ -76,51 +78,27 @@ def current_reward_filename(asset_id: str) -> str | None:
     return next((filename for filename, digest in REWARD_SHA256.items() if digest == asset_id), None)
 
 
-def decode_base64url(value: str) -> bytes:
-    if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise ValueError("Invalid base64url value.")
-    padded = value + "=" * ((4 - len(value) % 4) % 4)
-    decoded = base64.b64decode(padded, altchars=b"-_", validate=True)
-    canonical = base64.urlsafe_b64encode(decoded).decode("ascii").rstrip("=")
-    if canonical != value:
-        raise ValueError("Non-canonical base64url value.")
-    return decoded
+def ensure_owner_link_ids(owners: dict[str, dict[str, str]]) -> None:
+    """Give every assignment one persisted, opaque UUIDv4 link identifier."""
+    used_ids: set[str] = set()
+    for owner in owners.values():
+        link_id = owner.get("linkId", "").lower()
+        if link_id:
+            if not UUID4_PATTERN.fullmatch(link_id):
+                raise ValueError("The reward ownership ledger contains an invalid link ID.")
+            if link_id in used_ids:
+                raise ValueError("The reward ownership ledger repeats a link ID.")
+            owner["linkId"] = link_id
+            used_ids.add(link_id)
 
-
-def _reject_duplicate_header_names(pairs: list[tuple[str, object]]) -> dict[str, object]:
-    header: dict[str, object] = {}
-    for name, value in pairs:
-        if name in header:
-            raise ValueError("Duplicate protected header parameter.")
-        header[name] = value
-    return header
-
-
-def is_supported_reward_jwe(value: str) -> bool:
-    if not isinstance(value, str) or len(value) > 2048:
-        return False
-    parts = value.split(".")
-    if len(parts) != 5 or not parts[0] or parts[1] != "":
-        return False
-    if parts[0] != SUPPORTED_REWARD_PROTECTED_HEADER:
-        return False
-    try:
-        header = json.loads(
-            decode_base64url(parts[0]).decode("utf-8"),
-            object_pairs_hook=_reject_duplicate_header_names,
-        )
-        iv = decode_base64url(parts[2])
-        ciphertext = decode_base64url(parts[3])
-        tag = decode_base64url(parts[4])
-    except (ValueError, UnicodeDecodeError, json.JSONDecodeError, binascii.Error):
-        return False
-    return (
-        isinstance(header, dict)
-        and header == {"alg": "dir", "enc": "A256GCM"}
-        and len(iv) == 12
-        and 0 < len(ciphertext) <= 1024
-        and len(tag) == 16
-    )
+    for owner in owners.values():
+        if owner.get("linkId"):
+            continue
+        link_id = str(uuid.uuid4())
+        while link_id in used_ids:
+            link_id = str(uuid.uuid4())
+        owner["linkId"] = link_id
+        used_ids.add(link_id)
 
 
 class NoCacheHandler(SimpleHTTPRequestHandler):
@@ -171,11 +149,15 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             if not isinstance(filename, str):
                 filename = identity.removeprefix("file:") if identity.startswith("file:") else identity
             canonical_identity = identity.lower() if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else reward_asset_identity(filename)
+            link_id = owner.get("linkId", "")
+            if not isinstance(link_id, str):
+                raise ValueError("The reward ownership record has an invalid link ID.")
             normalized_owners.setdefault(canonical_identity, {
                 "filename": current_reward_filename(canonical_identity) or filename,
                 "username": owner["username"].strip(),
                 "platform": str(owner.get("platform", "chat"))[:60],
                 "issuedAt": str(owner.get("issuedAt", ""))[:40],
+                "linkId": link_id.lower(),
             })
 
         for item in items:
@@ -190,6 +172,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                     "username": username.strip() or "Unknown",
                     "platform": str(item.get("platform", "chat"))[:60],
                     "issuedAt": str(item.get("issuedAt", ""))[:40],
+                    "linkId": str(item.get("linkId", "")).lower(),
                 }
 
         try:
@@ -204,6 +187,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 not isinstance(public_registry.get("assignments"), list)):
             raise ValueError("The public assignment registry has an invalid structure.")
         seen_public_assets: set[str] = set()
+        seen_public_link_ids: set[str] = set()
         for assignment in public_registry["assignments"]:
             if not isinstance(assignment, dict):
                 raise ValueError("The public assignment record is invalid.")
@@ -213,6 +197,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             legacy_digest = assignment.get("assetSha256")
             platform = assignment.get("platform", "manual")
             issued_at = assignment.get("issuedAt", "")
+            link_id = assignment.get("linkId", "")
             if (not isinstance(filename, str) or not filename.lower().endswith(".png") or
                     "/" in filename or "\\" in filename or len(filename) > 255 or
                     re.search(r"[\x00-\x1f]", filename) or
@@ -223,8 +208,15 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                      (not isinstance(legacy_digest, str) or digest.lower() != legacy_digest.lower())) or
                     not isinstance(platform, str) or len(platform) > 60 or
                     re.search(r"[\x00-\x1f]", platform) or
-                    not isinstance(issued_at, str) or len(issued_at) > 40):
+                    not isinstance(issued_at, str) or len(issued_at) > 40 or
+                    not isinstance(link_id, str) or
+                    (link_id and not UUID4_PATTERN.fullmatch(link_id))):
                 raise ValueError("The public assignment record is invalid.")
+            link_id = link_id.lower()
+            if link_id and link_id in seen_public_link_ids:
+                raise ValueError("The public assignment registry repeats a link ID.")
+            if link_id:
+                seen_public_link_ids.add(link_id)
             identity = digest.lower()
             if identity in seen_public_assets:
                 raise ValueError("The public assignment registry repeats artwork.")
@@ -233,12 +225,19 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             existing = normalized_owners.get(identity)
             if existing and existing["username"].casefold() != username.strip().casefold():
                 raise ValueError("The public registry conflicts with the saved ownership ledger.")
-            normalized_owners.setdefault(identity, {
-                "filename": current_filename or filename,
-                "username": username.strip(),
-                "platform": platform,
-                "issuedAt": issued_at,
-            })
+            if existing:
+                if existing.get("linkId") and link_id and existing["linkId"] != link_id:
+                    raise ValueError("The public registry conflicts with the saved reward link ID.")
+                if link_id:
+                    existing["linkId"] = link_id
+            else:
+                normalized_owners[identity] = {
+                    "filename": current_filename or filename,
+                    "username": username.strip(),
+                    "platform": platform,
+                    "issuedAt": issued_at,
+                    "linkId": link_id,
+                }
 
         for identity, owner in PREASSIGNED_REWARDS.items():
             filename = current_reward_filename(identity)
@@ -247,7 +246,12 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             existing = normalized_owners.get(identity)
             if existing and existing["username"].casefold() != owner["username"].casefold():
                 raise ValueError("The preassigned reward conflicts with the saved ownership ledger.")
-            normalized_owners.setdefault(identity, {"filename": filename, **owner})
+            if existing:
+                if existing.get("linkId") and existing["linkId"] != owner["linkId"]:
+                    raise ValueError("The preassigned reward conflicts with the saved reward link ID.")
+                existing["linkId"] = owner["linkId"]
+            else:
+                normalized_owners[identity] = {"filename": filename, **owner}
 
         return {
             "version": REWARD_STATE_VERSION,
@@ -256,6 +260,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         }
 
     def write_public_assignments(self, owners: dict[str, dict[str, str]]) -> None:
+        ensure_owner_link_ids(owners)
         assignments = []
         for identity, owner in owners.items():
             digest = identity.lower() if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else REWARD_SHA256.get(owner["filename"])
@@ -270,6 +275,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 "username": owner["username"],
                 "issuedAt": owner.get("issuedAt", ""),
                 "platform": owner.get("platform", "manual"),
+                "linkId": owner["linkId"],
             })
         assignments.sort(key=lambda item: (item["issuedAt"], item["filename"].casefold(), item["username"].casefold()))
         PUBLIC_ASSIGNMENTS_TEMP.write_text(
@@ -351,7 +357,6 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
 
         username = record.get("username")
         filename = record.get("filename")
-        link = record.get("link")
         platform = record.get("platform", "chat")
         issued_at = record.get("issuedAt")
         if (not isinstance(username, str) or not username.strip() or len(username) > 100 or
@@ -367,39 +372,10 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         if not isinstance(issued_at, str) or len(issued_at) > 40:
             self.send_json(400, {"error": "Invalid issue time."})
             return
-        if not isinstance(link, str) or len(link) > 2048:
-            self.send_json(400, {"error": "Invalid reward link."})
-            return
-
-        try:
-            parsed_link = urlsplit(link)
-        except ValueError:
-            self.send_json(400, {"error": "Reward link format is invalid."})
-            return
-        query = parse_qs(parsed_link.query, keep_blank_values=True)
-        fragment = parse_qs(parsed_link.fragment, keep_blank_values=True)
-        query_id = query.get("id", [""])[0]
-        key = fragment.get("key", [""])[0]
-        if (parsed_link.scheme != "https" or parsed_link.netloc.lower() != "kazvt.com" or
-                parsed_link.path.rstrip("/") != "/reward" or
-                set(query) != {"id"} or len(query.get("id", [])) != 1 or
-                set(fragment) != {"key"} or len(fragment.get("key", [])) != 1 or
-                not is_supported_reward_jwe(query_id) or
-                not re.fullmatch(r"[A-Za-z0-9_-]{43}", key)):
-            self.send_json(400, {"error": "Reward link format is invalid."})
-            return
-        try:
-            if len(decode_base64url(key)) != 32:
-                raise ValueError("Wrong key size.")
-        except (ValueError, binascii.Error):
-            self.send_json(400, {"error": "Reward link key is invalid."})
-            return
-
         saved_record = {
             "id": str(record.get("id", ""))[:80],
             "username": username.strip(),
             "filename": filename,
-            "link": link,
             "platform": platform,
             "issuedAt": issued_at,
         }
@@ -415,31 +391,52 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 self.send_json(409, {"error": "Reward artwork has already been assigned."})
                 return
 
+            try:
+                ensure_owner_link_ids(owners)
+            except ValueError:
+                self.send_json(500, {"error": "The reward ledger contains an invalid link ID."})
+                return
+            link_id = str(uuid.uuid4())
+            while any(owner["linkId"] == link_id for owner in owners.values()):
+                link_id = str(uuid.uuid4())
+            link = f"{PUBLIC_REWARD_URL}?id={link_id}"
+            saved_record["link"] = link
+            saved_record["linkId"] = link_id
+
             owners[identity] = {
                 "filename": filename,
                 "username": username.strip(),
                 "platform": platform,
                 "issuedAt": issued_at,
+                "linkId": link_id,
             }
             items = state["items"]
             items.insert(0, saved_record)
             items = items[:REWARD_QUEUE_LIMIT]
-            REWARD_QUEUE_TEMP.write_text(
-                json.dumps({
-                    "version": REWARD_STATE_VERSION,
-                    "owners": owners,
-                    "items": items,
-                }, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            REWARD_QUEUE_TEMP.replace(REWARD_QUEUE)
             try:
                 self.write_public_assignments(owners)
             except (OSError, ValueError) as error:
-                # The private ledger remains authoritative if the source checkout is read-only
-                # or the widget is running from a distributable copy without the website repo.
-                print(f"[widget] Warning: public assignment registry was not updated: {error}")
-        self.send_json(201, {"ok": True})
+                self.send_json(500, {"error": f"The public reward registry could not be saved: {error}"})
+                return
+
+            queue_warning = ""
+            try:
+                REWARD_QUEUE_TEMP.write_text(
+                    json.dumps({
+                        "version": REWARD_STATE_VERSION,
+                        "owners": owners,
+                        "items": items,
+                    }, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                REWARD_QUEUE_TEMP.replace(REWARD_QUEUE)
+            except OSError as error:
+                queue_warning = "The public assignment is saved, but the recent-link queue could not be updated."
+                print(f"[widget] Warning: {queue_warning} {error}")
+        response = {"ok": True, "linkId": link_id, "link": link}
+        if queue_warning:
+            response["warning"] = queue_warning
+        self.send_json(201, response)
 
     def end_headers(self) -> None:
         self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")

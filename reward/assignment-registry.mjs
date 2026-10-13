@@ -2,9 +2,29 @@ import { resolveAssetById } from "./asset-resolver.mjs";
 
 const FILENAME_PATTERN = /^[^/\\\u0000-\u001f]+\.png$/i;
 const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/i;
+const UUID4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function normalizeAwardUsername(value) {
   return typeof value === "string" ? value.normalize("NFKC").trim().toLowerCase() : "";
+}
+
+export function isRewardLinkId(value) {
+  return typeof value === "string" && UUID4_PATTERN.test(value);
+}
+
+export function findAssignmentByLinkId(assignments, linkId) {
+  if (!Array.isArray(assignments) || !isRewardLinkId(linkId)) return null;
+  const normalizedId = linkId.toLowerCase();
+  return assignments.find(assignment => assignment.linkId === normalizedId) ?? null;
+}
+
+export function findAssignmentForLegacyPayload(assignments, username, assetId) {
+  if (!Array.isArray(assignments) || typeof assetId !== "string" || !ASSET_ID_PATTERN.test(assetId)) return null;
+  const normalizedUsername = normalizeAwardUsername(username);
+  if (!normalizedUsername) return null;
+  const normalizedAssetId = assetId.toLowerCase();
+  return assignments.find(assignment => assignment.assetId === normalizedAssetId &&
+    normalizeAwardUsername(assignment.username) === normalizedUsername) ?? null;
 }
 
 export function otherAwardsFor(assignments, username, currentAssetId) {
@@ -49,8 +69,10 @@ export function validateAndSortAssignments(registry, catalog) {
   }
 
   const seenAssets = new Set();
+  const seenLinkIds = new Set();
   const assignments = registry.assignments.map((record, index) => {
     const recordedAssetId = record?.assetId ?? record?.assetSha256;
+    const linkId = record?.linkId ?? "";
     if (!record || typeof record !== "object" || Array.isArray(record) ||
         typeof record.filename !== "string" || record.filename.length > 255 ||
         !FILENAME_PATTERN.test(record.filename) ||
@@ -59,6 +81,7 @@ export function validateAndSortAssignments(registry, catalog) {
         typeof recordedAssetId !== "string" || !ASSET_ID_PATTERN.test(recordedAssetId) ||
         (record.assetId != null && record.assetSha256 != null &&
           record.assetId.toLowerCase() !== record.assetSha256.toLowerCase()) ||
+        (linkId !== "" && !isRewardLinkId(linkId)) ||
         typeof record.issuedAt !== "string" || record.issuedAt.length > 40 ||
         !Number.isFinite(Date.parse(record.issuedAt))) {
       throw new Error(`Assignment record ${index + 1} is invalid.`);
@@ -67,6 +90,11 @@ export function validateAndSortAssignments(registry, catalog) {
     const assetId = recordedAssetId.toLowerCase();
     if (seenAssets.has(assetId)) throw new Error("The assignment registry repeats artwork.");
     seenAssets.add(assetId);
+    const normalizedLinkId = linkId.toLowerCase();
+    if (normalizedLinkId && seenLinkIds.has(normalizedLinkId)) {
+      throw new Error("The assignment registry repeats a reward link ID.");
+    }
+    if (normalizedLinkId) seenLinkIds.add(normalizedLinkId);
 
     const tier = tierForHash(assetId, catalog);
     const current = resolveAssetById(catalog, assetId);
@@ -75,6 +103,7 @@ export function validateAndSortAssignments(registry, catalog) {
       filename: artworkIsCurrent ? current.filename : record.filename,
       username: record.username.trim(),
       assetId,
+      linkId: normalizedLinkId,
       issuedAt: record.issuedAt,
       tierId: tier?.id ?? "",
       tierLabel: tier?.label ?? "Award",

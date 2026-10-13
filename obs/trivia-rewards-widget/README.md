@@ -17,7 +17,7 @@ This version is structured like a small production overlay instead of a single d
 - `rewards.json` lists the PNG rewards hosted by the site and includes a filename-independent content ID plus image dimensions for duplicate-artwork prevention.
 - `generate-reward-catalog.mjs` syncs the site manifest and widget catalog, assigning fixed tiers from each PNG's SHA-256 content hash.
 - `reward-links.html` is the local dashboard for copying newly issued links into chat.
-- `reward-crypto.mjs` creates and validates the reward links as JWE Compact Serialization.
+- `server.py` creates UUIDv4 reward links only after saving the award in the public assignment registry; the crypto module remains only for opening legacy links.
 - `app.js` contains the WebSocket adapters, trivia state machine, scoring, dedupe, reconnect, and UI logic.
 - `styles.css` is the OBS-friendly overlay styling; `reward-links.css` styles the local copy dashboard.
 - `server.py` serves the widget, recent-link queue, and durable artwork-assignment ledger on `127.0.0.1`.
@@ -69,13 +69,13 @@ The overlay background is transparent. The trivia UI appears in the top-left at 
 
 ## Reward links
 
-The public reward page is `https://kazvt.com/reward/`. Each issued URL contains a compact JWE in `id`; it encrypts the viewer's display name and stable artwork content ID with AES-256-GCM. A random decryption key is included after `#key=` in the URL, so copy the complete link. The key stays out of the HTTP request; anyone who has the full reward link can still open it, so treat the link as a public share link.
+New public reward links look like `https://kazvt.com/reward/?id=<UUID>`. The local Python server creates a random UUIDv4 when it records an award; the public page looks up that exact ID in `zzz_assets/rewards/assignments.json` and gets the username and artwork from the saved record. The OBS page no longer creates a reward URL or chooses its ID. Old encrypted links can still open, but only if the username and artwork match an assignment in that same registry.
 
 The page resolves IDs through `/zzz_assets/rewards/manifest.json` and loads the current filename for that artwork. The images are hosted under `https://kazvt.com/zzz_assets/rewards/`. Each artwork can be assigned once by the local widget; its ID is the SHA-256 hash of the exact PNG bytes, with width and height recorded alongside it. Renaming a PNG does not change its ID, tier, existing assignment, or newly issued links. Changing/re-exporting the image bytes creates a new ID. `1.png`'s content ID is preassigned to `kazvt`; every other assignment is retained by content ID in the all-time ownership ledger inside the ignored `.reward-queue.json` file. The public, reusable index at `/zzz_assets/rewards/assignments.json` is shown at `https://kazvt.com/reward/list/`; it contains no bearer URLs or keys and is updated locally by the issuer. The dashboard keeps only the 250 most recent full reward links, while the ownership ledger remains uncapped. When all PNGs are assigned, the widget stops issuing rewards until new artwork is added.
 
 To rename an award, rename its PNG in `zzz_assets/rewards/` and regenerate the catalogs from the repository root. Restart the local OBS reward server and refresh the OBS widget so both read the updated catalog. The assignment index uses the content ID, so the list follows the artwork to its new filename. The public catalog preserves old filename-to-ID history so existing filename-based links continue to work when a name has never been reused for different artwork. New links do not embed filenames.
 
-The issuer checks both its private ledger and the public assignment index; installations using the same up-to-date repository copy see the same recorded assignments. The public file has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. The public static reward page does not authenticate owners, and an encrypted URL is a shareable display card—not cryptographic proof of exclusive ownership.
+The issuer checks both its private ledger and the public assignment index; installations using the same up-to-date repository copy see the same recorded assignments. The public file has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. A UUID prevents someone from inventing a new official reward by writing their own URL: unknown IDs have no assignment and are rejected. IDs in the public registry are public and shareable, however, so this is not private access control or proof of who is viewing a card. The registry is the allowlist; UUID opacity alone is not authorization.
 
 ### Fixed reward tiers
 
