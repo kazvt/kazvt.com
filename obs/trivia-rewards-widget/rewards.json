@@ -5,6 +5,7 @@
     "1.png",
     "2.png",
     "3d.png",
+    "A Pedophile.png",
     "Gregory.png",
     "appil.png",
     "bana.png",
@@ -78,6 +79,12 @@
       "sha256": "d79d015822e42241d1fbb071866613c23586a701d3e02a6d31a5561c40897d22",
       "width": 420,
       "height": 420
+    },
+    "A Pedophile.png": {
+      "assetId": "2487c81243047399c494fcec1512639ded78d69e9899adebf8230cfcd010603e",
+      "sha256": "2487c81243047399c494fcec1512639ded78d69e9899adebf8230cfcd010603e",
+      "width": 512,
+      "height": 512
     },
     "Gregory.png": {
       "assetId": "7a815d7d40003f05aae91fe80283728b75f42f0f66e7950a94836be6ad3aa933",
@@ -461,6 +468,7 @@
     "white cupcake.png": "0a89af309347cdf6377e208e2bbbbeab823782c23fb39467ca1fc02fc4e1b701",
     "you lost.png": "30b92664d9cae51dd6337f316924491053f8058cf8a034e636eb8a59feedaf64",
     "yoyo.png": "6718de21b5bb20ed9ffdc0df0416129468ddffcd3e5a40cc11eec0484cbda38c",
-    "yummy.png": "db9b609a6c2203d2fb7cb2102d5d67d34cc8cfaf345b8975d0145760968f9f7e"
+    "yummy.png": "db9b609a6c2203d2fb7cb2102d5d67d34cc8cfaf345b8975d0145760968f9f7e",
+    "A Pedophile.png": "2487c81243047399c494fcec1512639ded78d69e9899adebf8230cfcd010603e"
   }
 }

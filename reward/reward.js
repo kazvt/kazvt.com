@@ -710,7 +710,7 @@ import {
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", `${tier.label} demo tier`);
+    rewardTier.setAttribute("aria-label", `TIER: ${tier.label} demo tier`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = `TIER: ${tier.label}`;
     recipient.textContent = demoName;
@@ -780,7 +780,7 @@ import {
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
+    rewardTier.setAttribute("aria-label", `TIER: ${tier.label} tier award`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = `TIER: ${tier.label}`;
     renderUsernameCopy(data.username);
