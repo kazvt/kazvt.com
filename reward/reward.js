@@ -11,7 +11,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     { id: "legendary", label: "Legendary", upperBound: 10000 }
   ];
   const TIER_MARKS = {
-    common: "●",
+    common: "",
     uncommon: "✿",
     rare: "◆",
     epic: "✦",
@@ -92,41 +92,106 @@ import { decryptReward } from "./reward-crypto.mjs";
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     const anime = await loadAnime();
-    const motion = {
-      common: { scale: [1, 1.1], translateY: [0, -1], duration: 2200 },
-      uncommon: { rotate: [-8, 8], scale: [1, 1.08], duration: 1700 },
-      rare: { rotate: [-5, 5], translateY: [0, -2], duration: 1450 },
-      epic: { rotate: [-12, 12], scale: [1, 1.12], duration: 1150 },
-      legendary: { rotate: [-8, 8], translateY: [0, -3], scale: [1, 1.1], duration: 1800 }
+    const choreography = {
+      common: {
+        badge: { translateY: [0, -1.5, 0], scale: [1, 1.025, 1], duration: 2800 },
+        icon: { scale: [1, 1.34, 0.82, 1.17, 1], duration: 1850, delay: 120 },
+        labelDuration: 5200,
+        glint: { peak: 0.24, delay: 1550, duration: 2100 }
+      },
+      uncommon: {
+        badge: { rotate: [0, -1.4, 1.4, 0], translateY: [0, -1.5, 0], duration: 2500 },
+        icon: {
+          rotate: [0, -24, 14, -8, 0],
+          scale: [1, 1.2, 0.92, 1.12, 1],
+          translateY: [0, -3, 1, -2, 0],
+          duration: 2050,
+          easing: "easeOutBack"
+        },
+        labelDuration: 4550,
+        glint: { peak: 0.38, delay: 1050, duration: 1850 }
+      },
+      rare: {
+        badge: { translateY: [0, -3, 0], scale: [1, 1.025, 1], duration: 2350 },
+        icon: {
+          rotateY: [0, 100, 200, 300, 360],
+          rotate: [0, 8, -5, 4, 0],
+          scale: [1, 1.12, 0.94, 1.08, 1],
+          duration: 2650,
+          delay: 100,
+          direction: "normal"
+        },
+        labelDuration: 3750,
+        glint: { peak: 0.58, delay: 760, duration: 1850 }
+      },
+      epic: {
+        badge: {
+          translateY: [0, -2, 0],
+          rotate: [0, -1.5, 0, 1.5, 0],
+          scale: [1, 1.04, 1],
+          duration: 2150
+        },
+        icon: {
+          rotate: [0, 75, -30, 145, 360],
+          scale: [1, 1.28, 0.86, 1.16, 1],
+          translateY: [0, -5, 1, -3, 0],
+          duration: 1950,
+          delay: 150,
+          easing: "easeOutBack",
+          direction: "normal"
+        },
+        labelDuration: 3050,
+        glint: { peak: 0.84, delay: 560, duration: 1650 }
+      },
+      legendary: {
+        badge: {
+          translateY: [0, -2, 1, -1, 0],
+          rotate: [0, 1.2, -1, 0.6, 0],
+          scale: [1, 1.035, 1],
+          duration: 2800
+        },
+        icon: {
+          translateY: [0, -6, -1, -4, 0],
+          rotate: [0, -16, 11, -7, 0],
+          scale: [1, 1.32, 1.03, 1.2, 1],
+          duration: 2050,
+          easing: "easeOutBack"
+        },
+        labelDuration: 2500,
+        glint: { peak: 0.98, delay: 420, duration: 1550 }
+      }
     }[tier];
 
-    anime({
-      targets: tierIcon,
-      ...motion,
-      direction: "alternate",
-      easing: "easeInOutSine",
-      loop: true
-    });
-    anime({
-      targets: tierName,
-      backgroundPosition: ["0% 50%", "100% 50%"],
-      duration: tier === "legendary" ? 2300 : tier === "epic" ? 3000 : 4200,
-      direction: "alternate",
-      easing: "easeInOutSine",
-      loop: true
-    });
-
-    if (tier !== "common") {
+    function loopMotion(target, motion) {
+      const { direction = "alternate", easing = "easeInOutSine", ...properties } = motion;
       anime({
-        targets: tierGlint,
-        translateX: ["-250%", "600%"],
-        opacity: [0, tier === "legendary" ? 0.95 : tier === "epic" ? 0.8 : 0.6],
-        delay: tier === "legendary" ? 350 : tier === "epic" ? 650 : 1100,
-        duration: tier === "legendary" ? 1500 : tier === "epic" ? 1750 : 2100,
-        easing: "linear",
+        targets: target,
+        ...properties,
+        direction,
+        easing,
         loop: true
       });
     }
+
+    loopMotion(rewardTier, choreography.badge);
+    loopMotion(tierIcon, choreography.icon);
+    anime({
+      targets: tierName,
+      backgroundPosition: ["0% 50%", "100% 50%"],
+      duration: choreography.labelDuration,
+      direction: "alternate",
+      easing: "easeInOutSine",
+      loop: true
+    });
+    anime({
+      targets: tierGlint,
+      translateX: ["-250%", "600%"],
+      opacity: [0, choreography.glint.peak, 0],
+      delay: choreography.glint.delay,
+      duration: choreography.glint.duration,
+      easing: "linear",
+      loop: true
+    });
   }
 
   async function openReward() {

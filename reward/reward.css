@@ -56,6 +56,7 @@ body {
   color: var(--tier-ink);
   box-shadow: 3px 3px 0 color-mix(in srgb, var(--tier-edge) 55%, transparent);
   isolation: isolate;
+  transform-origin: center center;
   white-space: nowrap;
 }
 
@@ -119,17 +120,33 @@ body {
 }
 
 .tier-icon {
-  display: inline-block;
-  min-width: 1em;
+  display: inline-flex;
+  flex: 0 0 1.2em;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1.2em;
+  height: 1.2em;
   color: var(--tier-mark);
   font-size: 17px;
   line-height: 1;
-  transform-origin: center;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+}
+
+.tier-badge[data-tier="common"] .tier-icon {
+  flex-basis: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tier-mark);
+  font-size: 0;
 }
 
 .tier-name {
   background-image: var(--tier-text-gradient);
-  background-size: 240% 100%;
+  background-size: 300% 100%;
   background-position: 0% 50%;
   background-clip: text;
   -webkit-background-clip: text;
