@@ -33,7 +33,7 @@ import {
     { id: "legendary", label: "Legendary", upperBound: 8600 },
     { id: "mythic", label: "Mythic", upperBound: 9250 },
     { id: "divine", label: "Divine", upperBound: 9700 },
-    { id: "splus", label: "GOOD SHIT", upperBound: 10000 }
+    { id: "splus", label: "Good Shit", upperBound: 10000 }
   ];
   const TIER_MARKS = {
     common: "",

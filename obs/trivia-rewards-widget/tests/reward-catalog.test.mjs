@@ -47,7 +47,7 @@ test("generated catalogs cover every valid PNG and keep matching deterministic t
   assert.equal(manifest.assetIdAlgorithm, "sha256-png-bytes-v1");
   assert.equal(manifest.tierAlgorithm, TIER_ALGORITHM);
   assert.equal(manifest.tierWeights.length, 8);
-  assert.equal(manifest.tierWeights.find(({ id }) => id === "splus")?.label, "GOOD SHIT");
+  assert.equal(manifest.tierWeights.find(({ id }) => id === "splus")?.label, "Good Shit");
   assert.deepEqual(manifest.tierWeights.map(({ id, label }) => ({ id, label })),
     TIER_BUCKETS.map(({ id, label }) => ({ id, label })));
   assert.ok(manifest.files.length > 0);
