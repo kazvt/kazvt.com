@@ -23,7 +23,7 @@ REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()
 REWARD_STATE_VERSION = 2
 PREASSIGNED_REWARDS = {
-    "1.png": {
+    "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03": {
         "username": "kazvt",
         "platform": "manual",
         "issuedAt": "2026-10-13T00:00:00.000Z",
@@ -36,22 +36,44 @@ SUPPORTED_REWARD_PROTECTED_HEADER = base64.urlsafe_b64encode(
 try:
     with (ROOT / "rewards.json").open("r", encoding="utf-8-sig") as catalog_file:
         REWARD_CATALOG = json.load(catalog_file)
+    if (REWARD_CATALOG.get("version") != 3 or
+            REWARD_CATALOG.get("assetIdAlgorithm") != "sha256-png-bytes-v1"):
+        raise ValueError("Unsupported reward catalog identity format.")
     REWARD_FILES = set(REWARD_CATALOG.get("files", []))
     REWARD_SHA256 = {
-        filename: metadata["sha256"].lower()
+        filename: metadata["assetId"].lower()
         for filename, metadata in REWARD_CATALOG.get("assets", {}).items()
         if isinstance(filename, str) and isinstance(metadata, dict) and
-        isinstance(metadata.get("sha256"), str) and
-        re.fullmatch(r"[a-fA-F0-9]{64}", metadata["sha256"])
+        isinstance(metadata.get("assetId"), str) and
+        metadata.get("assetId") == metadata.get("sha256") and
+        re.fullmatch(r"[a-fA-F0-9]{64}", metadata["assetId"])
     }
-except (OSError, json.JSONDecodeError, AttributeError):
+    REWARD_FILENAME_HISTORY = {
+        filename: asset_id.lower()
+        for filename, asset_id in REWARD_CATALOG.get("filenameHistory", {}).items()
+        if isinstance(filename, str) and isinstance(asset_id, str) and
+        re.fullmatch(r"[a-fA-F0-9]{64}", asset_id)
+    }
+except (OSError, json.JSONDecodeError, AttributeError, TypeError):
     REWARD_FILES = set()
     REWARD_SHA256 = {}
+    REWARD_FILENAME_HISTORY = {}
+except ValueError:
+    REWARD_FILES = set()
+    REWARD_SHA256 = {}
+    REWARD_FILENAME_HISTORY = {}
 
 
 def reward_asset_identity(filename: str) -> str:
     digest = REWARD_SHA256.get(filename)
-    return digest if digest else f"file:{filename}"
+    if digest:
+        return digest
+    historical_digest = REWARD_FILENAME_HISTORY.get(filename)
+    return historical_digest if historical_digest else f"file:{filename}"
+
+
+def current_reward_filename(asset_id: str) -> str | None:
+    return next((filename for filename, digest in REWARD_SHA256.items() if digest == asset_id), None)
 
 
 def decode_base64url(value: str) -> bytes:
@@ -148,9 +170,9 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             filename = owner.get("filename")
             if not isinstance(filename, str):
                 filename = identity.removeprefix("file:") if identity.startswith("file:") else identity
-            canonical_identity = identity if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else reward_asset_identity(filename)
+            canonical_identity = identity.lower() if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else reward_asset_identity(filename)
             normalized_owners.setdefault(canonical_identity, {
-                "filename": filename,
+                "filename": current_reward_filename(canonical_identity) or filename,
                 "username": owner["username"].strip(),
                 "platform": str(owner.get("platform", "chat"))[:60],
                 "issuedAt": str(owner.get("issuedAt", ""))[:40],
@@ -164,7 +186,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             identity = reward_asset_identity(filename) if isinstance(filename, str) else ""
             if (identity and isinstance(username, str) and identity not in normalized_owners):
                 normalized_owners[identity] = {
-                    "filename": filename,
+                    "filename": current_reward_filename(identity) or filename,
                     "username": username.strip() or "Unknown",
                     "platform": str(item.get("platform", "chat"))[:60],
                     "issuedAt": str(item.get("issuedAt", ""))[:40],
@@ -187,15 +209,18 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 raise ValueError("The public assignment record is invalid.")
             filename = assignment.get("filename")
             username = assignment.get("username")
-            digest = assignment.get("assetSha256")
+            digest = assignment.get("assetId", assignment.get("assetSha256"))
+            legacy_digest = assignment.get("assetSha256")
             platform = assignment.get("platform", "manual")
             issued_at = assignment.get("issuedAt", "")
             if (not isinstance(filename, str) or not filename.lower().endswith(".png") or
-                    "/" in filename or "\\" in filename or len(filename) > 180 or
+                    "/" in filename or "\\" in filename or len(filename) > 255 or
                     re.search(r"[\x00-\x1f]", filename) or
                     not isinstance(username, str) or not username.strip() or len(username) > 100 or
                     re.search(r"[\x00-\x1f]", username) or
                     not isinstance(digest, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", digest) or
+                    (legacy_digest is not None and
+                     (not isinstance(legacy_digest, str) or digest.lower() != legacy_digest.lower())) or
                     not isinstance(platform, str) or len(platform) > 60 or
                     re.search(r"[\x00-\x1f]", platform) or
                     not isinstance(issued_at, str) or len(issued_at) > 40):
@@ -204,22 +229,22 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             if identity in seen_public_assets:
                 raise ValueError("The public assignment registry repeats artwork.")
             seen_public_assets.add(identity)
+            current_filename = current_reward_filename(identity)
             existing = normalized_owners.get(identity)
             if existing and existing["username"].casefold() != username.strip().casefold():
                 raise ValueError("The public registry conflicts with the saved ownership ledger.")
             normalized_owners.setdefault(identity, {
-                "filename": filename,
+                "filename": current_filename or filename,
                 "username": username.strip(),
                 "platform": platform,
                 "issuedAt": issued_at,
             })
 
-        for filename, owner in PREASSIGNED_REWARDS.items():
-            identity = reward_asset_identity(filename)
-            existing = normalized_owners.get(identity) or next(
-                (entry for entry in normalized_owners.values() if entry["filename"] == filename),
-                None,
-            )
+        for identity, owner in PREASSIGNED_REWARDS.items():
+            filename = current_reward_filename(identity)
+            if not filename:
+                continue
+            existing = normalized_owners.get(identity)
             if existing and existing["username"].casefold() != owner["username"].casefold():
                 raise ValueError("The preassigned reward conflicts with the saved ownership ledger.")
             normalized_owners.setdefault(identity, {"filename": filename, **owner})
@@ -233,11 +258,13 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
     def write_public_assignments(self, owners: dict[str, dict[str, str]]) -> None:
         assignments = []
         for identity, owner in owners.items():
-            filename = owner["filename"]
-            digest = identity.lower() if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else REWARD_SHA256.get(filename)
+            digest = identity.lower() if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else REWARD_SHA256.get(owner["filename"])
+            filename = current_reward_filename(digest) if isinstance(digest, str) else None
+            filename = filename or owner["filename"]
             if not isinstance(digest, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", digest):
                 raise ValueError(f"No SHA-256 checksum is available for {filename}.")
             assignments.append({
+                "assetId": digest.lower(),
                 "assetSha256": digest.lower(),
                 "filename": filename,
                 "username": owner["username"],
@@ -275,13 +302,15 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                     self.send_json(500, {"error": "The reward ledger could not be read."})
                     return
             owners = state["owners"]
-            assigned_filenames = {owner["filename"] for owner in owners.values()}
-            self.send_json(200, {
-                "files": sorted(
-                    filename for filename in REWARD_FILES
-                    if filename not in assigned_filenames and reward_asset_identity(filename) not in owners
-                )
-            })
+            available = []
+            seen_assets = set()
+            for filename in sorted(REWARD_FILES):
+                identity = reward_asset_identity(filename)
+                if identity in owners or identity in seen_assets:
+                    continue
+                seen_assets.add(identity)
+                available.append(filename)
+            self.send_json(200, {"files": available})
             return
         super().do_GET()
 
@@ -382,8 +411,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 return
             owners = state["owners"]
             identity = reward_asset_identity(filename)
-            assigned_filenames = {owner["filename"] for owner in owners.values()}
-            if filename in assigned_filenames or identity in owners:
+            if identity in owners:
                 self.send_json(409, {"error": "Reward artwork has already been assigned."})
                 return
 

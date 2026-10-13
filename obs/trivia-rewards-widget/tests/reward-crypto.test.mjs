@@ -19,6 +19,16 @@ test("JWE reward links round-trip Unicode usernames and spaced PNG filenames", a
   assert.deepEqual(await decryptReward(encrypted.id, encrypted.key), example);
 });
 
+test("content-ID reward links round-trip without embedding a filename", async () => {
+  const payload = { version: 2, username: "AwesomeFerret", assetId: "A".repeat(64) };
+  const encrypted = await encryptReward(payload);
+  assert.deepEqual(await decryptReward(encrypted.id, encrypted.key), {
+    version: 2,
+    username: "AwesomeFerret",
+    assetId: "a".repeat(64)
+  });
+});
+
 test("independent rewards receive independent keys and IVs", async () => {
   const first = await encryptReward(example);
   const second = await encryptReward(example);
@@ -79,4 +89,5 @@ test("unsupported algorithms, malformed compact serialization, and path filename
   await assert.rejects(() => decryptReward(parts.join("."), encrypted.key), /Unsupported/);
   await assert.rejects(() => decryptReward(`${encrypted.id}.extra`, encrypted.key), /compact serialization/);
   await assert.rejects(() => encryptReward({ ...example, file: "../private.png" }), /Invalid reward payload/);
+  await assert.rejects(() => encryptReward({ version: 2, username: "Viewer", assetId: "../image.png" }), /Invalid reward payload/);
 });

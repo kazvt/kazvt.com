@@ -1,4 +1,5 @@
 import { encryptReward } from "../reward-crypto.mjs";
+import { resolveAssetById } from "../asset-resolver.mjs";
 
 (() => {
   "use strict";
@@ -27,14 +28,38 @@ import { encryptReward } from "../reward-crypto.mjs";
   }
 
   function validateCatalog(catalog) {
-    if (!catalog || catalog.version !== 3 || !Array.isArray(catalog.files) ||
+    if (!catalog || catalog.version !== 4 || catalog.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
+        !Array.isArray(catalog.files) ||
         !catalog.assets || typeof catalog.assets !== "object" || Array.isArray(catalog.assets) ||
+        !catalog.assetsById || typeof catalog.assetsById !== "object" || Array.isArray(catalog.assetsById) ||
+        !catalog.filenameHistory || typeof catalog.filenameHistory !== "object" || Array.isArray(catalog.filenameHistory) ||
         catalog.tierAlgorithm !== "sha256-leading-32-bit-weighted-v2" ||
         !Array.isArray(catalog.tierWeights) ||
         catalog.tierWeights.some(entry => !entry || typeof entry.id !== "string" ||
           typeof entry.label !== "string" || !Number.isInteger(entry.basisPoints) || entry.basisPoints < 0) ||
         catalog.tierWeights.reduce((sum, entry) => sum + entry.basisPoints, 0) !== 10000) {
       throw new Error("The reward artwork catalog is invalid.");
+    }
+    for (const filename of catalog.files) {
+      const asset = catalog.assets[filename];
+      const indexed = asset && catalog.assetsById[asset.assetId];
+      const expectedTier = asset && /^[a-f0-9]{64}$/.test(asset.assetId)
+        ? tierForHash(asset.assetId, catalog)?.id
+        : null;
+      if (typeof filename !== "string" || filename.length > 255 || !/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+          !asset || !/^[a-f0-9]{64}$/.test(asset.assetId) || asset.assetId !== asset.sha256 ||
+          !Number.isSafeInteger(asset.width) || asset.width < 1 ||
+          !Number.isSafeInteger(asset.height) || asset.height < 1 ||
+          asset.tier !== expectedTier || !indexed || indexed.filename !== filename ||
+          indexed.width !== asset.width || indexed.height !== asset.height || indexed.tier !== asset.tier) {
+        throw new Error("The reward artwork content index is invalid.");
+      }
+    }
+    for (const [filename, assetId] of Object.entries(catalog.filenameHistory)) {
+      if (!/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+          (assetId !== null && !/^[a-f0-9]{64}$/.test(assetId))) {
+        throw new Error("The reward filename history is invalid.");
+      }
     }
     return catalog;
   }
@@ -57,30 +82,34 @@ import { encryptReward } from "../reward-crypto.mjs";
     const seenAssets = new Set();
     return registry.assignments.map((record, index) => {
       if (!record || typeof record !== "object" || Array.isArray(record) ||
-          typeof record.filename !== "string" || record.filename.length > 180 ||
+          typeof record.filename !== "string" || record.filename.length > 255 ||
           !/^[^/\\\u0000-\u001f]+\.png$/i.test(record.filename) ||
           typeof record.username !== "string" || !record.username.trim() ||
           record.username.length > 100 || /[\u0000-\u001f]/.test(record.username) ||
-          typeof record.assetSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(record.assetSha256) ||
+          (typeof (record.assetId ?? record.assetSha256) !== "string" ||
+            !/^[a-f0-9]{64}$/i.test(record.assetId ?? record.assetSha256)) ||
+          (record.assetId != null && record.assetSha256 != null &&
+            record.assetId.toLowerCase() !== record.assetSha256.toLowerCase()) ||
           typeof record.issuedAt !== "string" || record.issuedAt.length > 40 ||
           !Number.isFinite(Date.parse(record.issuedAt))) {
         throw new Error(`Assignment record ${index + 1} is invalid.`);
       }
 
-      const assetSha256 = record.assetSha256.toLowerCase();
-      if (seenAssets.has(assetSha256)) throw new Error("The assignment registry repeats artwork.");
-      seenAssets.add(assetSha256);
+      const assetId = (record.assetId ?? record.assetSha256).toLowerCase();
+      if (seenAssets.has(assetId)) throw new Error("The assignment registry repeats artwork.");
+      seenAssets.add(assetId);
 
-      const tier = tierForHash(assetSha256, catalog);
+      const tier = tierForHash(assetId, catalog);
       const tierId = tier?.id ?? "";
-      const catalogHash = catalog.assets[record.filename]?.sha256?.toLowerCase();
-      const artworkIsCurrent = catalog.files.includes(record.filename) && catalogHash === assetSha256 &&
-        catalog.assets[record.filename]?.tier === tierId;
+      const current = resolveAssetById(catalog, assetId);
+      const currentFilename = current?.filename;
+      const currentAsset = current?.metadata;
+      const artworkIsCurrent = Boolean(currentAsset && currentAsset.assetId === assetId && currentAsset.tier === tierId);
 
       return {
-        filename: record.filename,
+        filename: artworkIsCurrent ? currentFilename : record.filename,
         username: record.username.trim(),
-        assetSha256,
+        assetId,
         issuedAt: record.issuedAt,
         tierId: tier ? tier.id : "",
         tierLabel: tier ? tier.label : "Award",
@@ -165,9 +194,9 @@ import { encryptReward } from "../reward-crypto.mjs";
       openButton.textContent = "Opening…";
       try {
         const encrypted = await encryptReward({
-          version: 1,
+          version: 2,
           username: assignment.username,
-          file: assignment.filename
+          assetId: assignment.assetId
         });
         const destination = new URL("/reward/", window.location.origin);
         destination.searchParams.set("id", encrypted.id);

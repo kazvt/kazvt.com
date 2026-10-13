@@ -45,6 +45,7 @@ class RewardQueueApiTests(unittest.TestCase):
             widget_server.PUBLIC_ASSIGNMENTS_TEMP,
             widget_server.REWARD_FILES,
             widget_server.REWARD_SHA256,
+            widget_server.REWARD_FILENAME_HISTORY,
         )
         widget_server.REWARD_QUEUE = root / "queue.json"
         widget_server.REWARD_QUEUE_TEMP = root / "queue.json.tmp"
@@ -55,6 +56,7 @@ class RewardQueueApiTests(unittest.TestCase):
             "test reward.png": "a" * 64,
             "1.png": "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03",
         }
+        widget_server.REWARD_FILENAME_HISTORY = {}
         self.httpd = widget_server.ThreadingHTTPServer(("127.0.0.1", 0), widget_server.NoCacheHandler)
         self.httpd.daemon_threads = True
         self.port = self.httpd.server_address[1]
@@ -70,7 +72,8 @@ class RewardQueueApiTests(unittest.TestCase):
          widget_server.PUBLIC_ASSIGNMENTS,
          widget_server.PUBLIC_ASSIGNMENTS_TEMP,
          widget_server.REWARD_FILES,
-         widget_server.REWARD_SHA256) = self.original_paths
+         widget_server.REWARD_SHA256,
+         widget_server.REWARD_FILENAME_HISTORY) = self.original_paths
         self.temp_dir.cleanup()
 
     def request(self, method: str, path: str, body=None, headers=None):
@@ -116,6 +119,7 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertEqual(len(public_registry["assignments"]), 2)
         assignment = next(item for item in public_registry["assignments"] if item["filename"] == "test reward.png")
         self.assertEqual(assignment["assetSha256"], "a" * 64)
+        self.assertEqual(assignment["assetId"], "a" * 64)
         self.assertEqual(assignment["username"], "Viewer")
         self.assertNotIn("link", assignment)
         self.assertNotIn("id", assignment)
@@ -163,7 +167,7 @@ class RewardQueueApiTests(unittest.TestCase):
     def test_1_png_is_preassigned_to_kazvt_and_never_offered(self):
         widget_server.REWARD_FILES.add("1.png")
         widget_server.REWARD_FILES.add("copy of 1.png")
-        shared_digest = "b" * 64
+        shared_digest = next(iter(widget_server.PREASSIGNED_REWARDS))
         widget_server.REWARD_SHA256 = {
             "1.png": shared_digest,
             "copy of 1.png": shared_digest,
@@ -178,6 +182,19 @@ class RewardQueueApiTests(unittest.TestCase):
             status, response = self.post(record)
             self.assertEqual(status, 409)
             self.assertIn("already been assigned", json.loads(response)["error"])
+
+    def test_preassigned_artwork_remains_kazvt_after_renaming(self):
+        content_id = next(iter(widget_server.PREASSIGNED_REWARDS))
+        widget_server.REWARD_FILES = {"renamed special award.png"}
+        widget_server.REWARD_SHA256 = {"renamed special award.png": content_id}
+        widget_server.REWARD_FILENAME_HISTORY = {"1.png": content_id}
+
+        state = object.__new__(widget_server.NoCacheHandler).read_reward_state()
+        self.assertEqual(state["owners"][content_id]["username"], "kazvt")
+        self.assertEqual(state["owners"][content_id]["filename"], "renamed special award.png")
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], [])
 
     def test_identical_artwork_cannot_repeat_under_a_different_filename(self):
         shared_digest = "a" * 64
@@ -211,17 +228,64 @@ class RewardQueueApiTests(unittest.TestCase):
     def test_public_registry_assignments_are_not_offered_again(self):
         widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
             "version": 1,
+            "assignments": [
+                {
+                    "assetId": "a" * 64,
+                    "filename": "test reward.png",
+                    "username": "Viewer",
+                    "issuedAt": "2026-10-06T12:00:00.000Z",
+                    "platform": "twitch",
+                },
+                {
+                    "assetSha256": next(iter(widget_server.PREASSIGNED_REWARDS)),
+                    "filename": "1.png",
+                    "username": "kazvt",
+                    "issuedAt": "2026-10-13T00:00:00.000Z",
+                    "platform": "manual",
+                },
+            ],
+        }), encoding="utf-8")
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], [])
+
+    def test_renaming_an_assigned_file_keeps_ownership_by_content_id(self):
+        content_id = "a" * 64
+        widget_server.REWARD_FILES = {"renamed award.png"}
+        widget_server.REWARD_SHA256 = {
+            "renamed award.png": content_id,
+            "1.png": next(iter(widget_server.PREASSIGNED_REWARDS)),
+        }
+        widget_server.REWARD_FILENAME_HISTORY = {"old award.png": content_id}
+        widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
+            "version": 1,
             "assignments": [{
-                "assetSha256": "a" * 64,
-                "filename": "test reward.png",
+                "assetSha256": content_id,
+                "filename": "old award.png",
                 "username": "Viewer",
                 "issuedAt": "2026-10-06T12:00:00.000Z",
                 "platform": "twitch",
             }],
         }), encoding="utf-8")
+
+        handler = object.__new__(widget_server.NoCacheHandler)
+        state = handler.read_reward_state()
+        self.assertEqual(state["owners"][content_id]["filename"], "renamed award.png")
+
+        handler.write_public_assignments(state["owners"])
+        saved = json.loads(widget_server.PUBLIC_ASSIGNMENTS.read_text(encoding="utf-8"))
+        assigned = next(row for row in saved["assignments"] if row["assetId"] == content_id)
+        self.assertEqual(assigned["filename"], "renamed award.png")
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(response)["files"], [])
+
+        duplicate = self.valid_record()
+        duplicate["filename"] = "renamed award.png"
+        duplicate["username"] = "AnotherViewer"
+        status, response = self.post(duplicate)
+        self.assertEqual(status, 409)
+        self.assertIn("already been assigned", json.loads(response)["error"])
 
     def test_rejects_cross_origin_and_form_encoded_posts(self):
         status, _ = self.post(self.valid_record(), {"Origin": "https://attacker.example"})

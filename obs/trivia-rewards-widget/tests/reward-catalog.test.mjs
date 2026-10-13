@@ -1,5 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+import { resolveRewardAsset } from "../../../reward/asset-resolver.mjs";
 import {
   buildRewardCatalogs,
   TIER_ALGORITHM,
@@ -39,13 +43,15 @@ test("tier assignment rejects malformed digests", () => {
 
 test("generated catalogs cover every valid PNG and keep matching deterministic tier metadata", async () => {
   const { manifest, widgetCatalog } = await buildRewardCatalogs();
-  assert.equal(manifest.version, 3);
+  assert.equal(manifest.version, 4);
+  assert.equal(manifest.assetIdAlgorithm, "sha256-png-bytes-v1");
   assert.equal(manifest.tierAlgorithm, TIER_ALGORITHM);
   assert.equal(manifest.tierWeights.length, 8);
   assert.deepEqual(manifest.tierWeights.map(({ id, label }) => ({ id, label })),
     TIER_BUCKETS.map(({ id, label }) => ({ id, label })));
   assert.ok(manifest.files.length > 0);
-  assert.equal(widgetCatalog.version, 2);
+  assert.equal(widgetCatalog.version, 3);
+  assert.equal(widgetCatalog.assetIdAlgorithm, manifest.assetIdAlgorithm);
   assert.deepEqual(widgetCatalog.files, manifest.files);
   assert.equal(Object.keys(manifest.assets).length, manifest.files.length);
   assert.equal(Object.keys(widgetCatalog.assets).length, manifest.files.length);
@@ -54,7 +60,65 @@ test("generated catalogs cover every valid PNG and keep matching deterministic t
   for (const file of manifest.files) {
     const metadata = manifest.assets[file];
     assert.match(metadata.sha256, /^[a-f0-9]{64}$/);
-    assert.deepEqual(widgetCatalog.assets[file], { sha256: metadata.sha256 });
+    assert.equal(metadata.assetId, metadata.sha256);
+    assert.ok(metadata.width > 0);
+    assert.ok(metadata.height > 0);
+    assert.deepEqual(widgetCatalog.assets[file], {
+      assetId: metadata.assetId,
+      sha256: metadata.sha256,
+      width: metadata.width,
+      height: metadata.height
+    });
+    assert.equal(manifest.assetsById[metadata.assetId].filename, file);
+    assert.equal(manifest.filenameHistory[file], metadata.assetId);
     assert.equal(metadata.tier, tierForSha256(metadata.sha256), file);
+  }
+});
+
+test("renaming a PNG preserves its content ID and keeps the old filename as a legacy alias", async () => {
+  const temporaryRoot = await mkdtemp(resolve(tmpdir(), "reward-asset-id-"));
+  const originalName = "first award.png";
+  const renamedName = "award name can change.png";
+  try {
+    const pngBytes = await readFile(new URL("../../../zzz_assets/rewards/1.png", import.meta.url));
+    await writeFile(resolve(temporaryRoot, originalName), pngBytes);
+
+    const first = await buildRewardCatalogs({ rewardDir: temporaryRoot });
+    const originalId = first.manifest.assets[originalName].assetId;
+    await writeFile(resolve(temporaryRoot, "manifest.json"), `${JSON.stringify(first.manifest)}\n`);
+    await rename(resolve(temporaryRoot, originalName), resolve(temporaryRoot, renamedName));
+
+    const renamed = await buildRewardCatalogs({ rewardDir: temporaryRoot });
+    assert.equal(renamed.manifest.assets[renamedName].assetId, originalId);
+    assert.equal(renamed.manifest.assetsById[originalId].filename, renamedName);
+    assert.equal(renamed.manifest.filenameHistory[originalName], originalId);
+    assert.equal(renamed.manifest.filenameHistory[renamedName], originalId);
+    assert.equal(renamed.widgetCatalog.filenameHistory[originalName], originalId);
+    assert.deepEqual(resolveRewardAsset(renamed.manifest, {
+      version: 2, username: "Viewer", assetId: originalId
+    }), {
+      filename: renamedName,
+      metadata: renamed.manifest.assets[renamedName]
+    });
+    assert.deepEqual(resolveRewardAsset(renamed.manifest, {
+      version: 1, username: "Viewer", file: originalName
+    }), {
+      filename: renamedName,
+      metadata: renamed.manifest.assets[renamedName]
+    });
+
+    await writeFile(resolve(temporaryRoot, "manifest.json"), `${JSON.stringify(renamed.manifest)}\n`);
+    const differentPng = await readFile(new URL("../../../zzz_assets/rewards/2.png", import.meta.url));
+    await writeFile(resolve(temporaryRoot, originalName), differentPng);
+    const reusedName = await buildRewardCatalogs({ rewardDir: temporaryRoot });
+    assert.equal(reusedName.manifest.filenameHistory[originalName], null);
+    assert.equal(resolveRewardAsset(reusedName.manifest, {
+      version: 1, username: "Viewer", file: originalName
+    }), null);
+    assert.equal(resolveRewardAsset(reusedName.manifest, {
+      version: 2, username: "Viewer", assetId: originalId
+    }).filename, renamedName);
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
   }
 });

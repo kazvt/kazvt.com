@@ -24,13 +24,23 @@ export function decodeBase64Url(value) {
 }
 
 function validatePayload(data) {
-  if (!data || typeof data !== "object" || Array.isArray(data) || data.version !== 1 ||
+  if (!data || typeof data !== "object" || Array.isArray(data) ||
       typeof data.username !== "string" || !data.username.trim() || data.username.length > 100 ||
-      typeof data.file !== "string" || data.file.length > 120 ||
-      !/^[^/\\\u0000-\u001f]+\.png$/i.test(data.file)) {
+      /[\u0000-\u001f]/.test(data.username)) {
     throw new Error("Invalid reward payload.");
   }
-  return { version: 1, username: data.username, file: data.file };
+
+  if (data.version === 1 && typeof data.file === "string" && data.file.length <= 255 &&
+      /^[^/\\\u0000-\u001f]+\.png$/i.test(data.file)) {
+    return { version: 1, username: data.username, file: data.file };
+  }
+
+  if (data.version === 2 && typeof data.assetId === "string" &&
+      /^[a-f0-9]{64}$/i.test(data.assetId)) {
+    return { version: 2, username: data.username, assetId: data.assetId.toLowerCase() };
+  }
+
+  throw new Error("Invalid reward payload.");
 }
 
 function joinBytes(left, right) {

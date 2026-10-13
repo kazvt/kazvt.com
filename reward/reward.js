@@ -1,4 +1,5 @@
 import { decryptReward } from "./reward-crypto.mjs";
+import { resolveRewardAsset } from "./asset-resolver.mjs";
 
 (() => {
   "use strict";
@@ -298,10 +299,13 @@ import { decryptReward } from "./reward-crypto.mjs";
   }
 
   function validateCatalog(catalog) {
-    if (!catalog || catalog.version !== 3 ||
+    if (!catalog || catalog.version !== 4 ||
+        catalog.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
         catalog.tierAlgorithm !== "sha256-leading-32-bit-weighted-v2" ||
         !Array.isArray(catalog.files) || !Array.isArray(catalog.tierWeights) ||
-        !catalog.assets || typeof catalog.assets !== "object" || Array.isArray(catalog.assets)) {
+        !catalog.assets || typeof catalog.assets !== "object" || Array.isArray(catalog.assets) ||
+        !catalog.assetsById || typeof catalog.assetsById !== "object" || Array.isArray(catalog.assetsById) ||
+        !catalog.filenameHistory || typeof catalog.filenameHistory !== "object" || Array.isArray(catalog.filenameHistory)) {
       throw new Error("The reward list is invalid.");
     }
 
@@ -316,7 +320,32 @@ import { decryptReward } from "./reward-crypto.mjs";
       throw new Error("The reward tier settings are invalid.");
     }
 
-    return catalog.assets;
+    const seenFiles = new Set();
+    for (const file of catalog.files) {
+      const metadata = catalog.assets[file];
+      if (typeof file !== "string" || file.length > 255 || !/^[^/\\\u0000-\u001f]+\.png$/i.test(file) ||
+          seenFiles.has(file) || !metadata || typeof metadata !== "object" ||
+          !/^[a-f0-9]{64}$/.test(metadata.assetId) || metadata.assetId !== metadata.sha256 ||
+          !Number.isSafeInteger(metadata.width) || metadata.width < 1 ||
+          !Number.isSafeInteger(metadata.height) || metadata.height < 1 ||
+          metadata.tier !== tierFromSha256(metadata.assetId)) {
+        throw new Error("The reward artwork identity is invalid.");
+      }
+      seenFiles.add(file);
+      const indexed = catalog.assetsById[metadata.assetId];
+      if (!indexed || indexed.filename !== file || indexed.width !== metadata.width ||
+          indexed.height !== metadata.height || indexed.tier !== metadata.tier) {
+        throw new Error("The reward artwork ID index is invalid.");
+      }
+    }
+    for (const [filename, assetId] of Object.entries(catalog.filenameHistory)) {
+      if (!/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+          (assetId !== null && !/^[a-f0-9]{64}$/.test(assetId))) {
+        throw new Error("The reward filename history is invalid.");
+      }
+    }
+
+    return catalog;
   }
 
   function loadRewardCatalog() {
@@ -326,7 +355,10 @@ import { decryptReward } from "./reward-crypto.mjs";
           if (!response.ok) throw new Error("The reward list could not be loaded.");
           return response.json();
         })
-        .then(catalog => ({ catalog, assets: validateCatalog(catalog) }))
+        .then(catalog => {
+          validateCatalog(catalog);
+          return { catalog, assets: catalog.assets };
+        })
         .catch(error => {
           rewardCatalogPromise = null;
           throw error;
@@ -600,7 +632,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     showLoading();
     const { catalog, assets } = await loadRewardCatalog();
     const candidates = catalog.files.filter(file => {
-      const validFilename = typeof file === "string" && file.length <= 180 &&
+      const validFilename = typeof file === "string" && file.length <= 255 &&
         file.toLowerCase().endsWith(".png") && !file.includes("/") &&
         !file.includes("\\") && !/[\u0000-\u001f]/.test(file);
       return validFilename && Object.prototype.hasOwnProperty.call(assets, file);
@@ -657,21 +689,20 @@ import { decryptReward } from "./reward-crypto.mjs";
     const keyText = new URLSearchParams(location.hash.slice(1)).get("key");
     if (!token || !keyText) throw new Error("The link is missing its encrypted reward data or key.");
 
-    const { assets: allowedAssets } = await loadRewardCatalog();
+    const { catalog, assets: allowedAssets } = await loadRewardCatalog();
 
     const data = await decryptReward(token, keyText);
-    const validFilename = typeof data.file === "string" && data.file.length <= 180 &&
-      data.file.toLowerCase().endsWith(".png") && !data.file.includes("/") &&
-      !data.file.includes("\\") && !/[\u0000-\u001f]/.test(data.file);
-    const metadata = validFilename && Object.prototype.hasOwnProperty.call(allowedAssets, data.file)
-      ? allowedAssets[data.file]
+    const resolvedAsset = resolveRewardAsset(catalog, data);
+    const file = resolvedAsset?.filename || "";
+    const metadata = file && Object.prototype.hasOwnProperty.call(allowedAssets, file)
+      ? allowedAssets[file]
       : null;
     const assignedTier = tierFromSha256(metadata?.sha256);
-    if (data.version !== 1 || typeof data.username !== "string" || !data.username.trim() ||
+    if (![1, 2].includes(data.version) || typeof data.username !== "string" || !data.username.trim() ||
         data.username.length > 100) {
       throw new Error("The reward details are invalid.");
     }
-    if (!assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
+    if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     rewardTier.dataset.tier = tier.id;
@@ -680,9 +711,9 @@ import { decryptReward } from "./reward-crypto.mjs";
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
     renderUsernameCopy(data.username);
-    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(data.file)}`;
-    rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
-    filename.textContent = filenameLabel(data.file);
+    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
+    rewardImage.alt = `${tier.label} reward artwork: ${file}`;
+    filename.textContent = filenameLabel(file);
     await waitForRewardImage(imageUrl);
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";

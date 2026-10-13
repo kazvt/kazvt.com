@@ -106,6 +106,7 @@ import { encryptReward } from "./reward-crypto.mjs";
     shuttingDown: false,
     scores: new Map(),
     rewardCatalog: [],
+    rewardAssetIds: Object.create(null),
     storageAvailable: true
   };
 
@@ -223,28 +224,44 @@ import { encryptReward } from "./reward-crypto.mjs";
   }
 
   function validateRewardCatalog(raw) {
-    if (!isPlainObject(raw) || ![1, 2].includes(raw.version) || !Array.isArray(raw.files)) {
-      throw new Error("Reward catalog must have a supported version and a files array.");
+    if (!isPlainObject(raw) || raw.version !== 3 || raw.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
+        !Array.isArray(raw.files) || !isPlainObject(raw.assets) || !isPlainObject(raw.filenameHistory)) {
+      throw new Error("Reward catalog must have a supported version, content IDs, and a files array.");
     }
 
     const files = [...new Set(raw.files.map(value => String(value || "").trim()))];
-    const invalid = files.filter(file => !/^[^/\\\u0000-\u001f]+\.png$/i.test(file));
+    const invalid = files.filter(file => file.length > 255 || !/^[^/\\\u0000-\u001f]+\.png$/i.test(file));
     if (files.length === 0 || invalid.length > 0) {
       throw new Error("Reward catalog must contain PNG filenames without folders.");
     }
-    if (raw.version === 2 && (!isPlainObject(raw.assets) || files.some(file =>
-      !isPlainObject(raw.assets[file]) || !/^[a-f0-9]{64}$/.test(raw.assets[file].sha256)
-    ))) {
-      throw new Error("Reward catalog version 2 requires a SHA-256 hash for every PNG.");
+    const assetIds = Object.create(null);
+    if (files.some(file => {
+      const asset = raw.assets[file];
+      if (!isPlainObject(asset) || !/^[a-f0-9]{64}$/.test(asset.assetId) ||
+          asset.assetId !== asset.sha256 || !Number.isSafeInteger(asset.width) || asset.width < 1 ||
+          !Number.isSafeInteger(asset.height) || asset.height < 1) return true;
+      assetIds[file] = asset.assetId;
+      return false;
+    })) {
+      throw new Error("Reward catalog version 3 requires a content ID and PNG dimensions for every image.");
     }
-    return files;
+
+    for (const [filename, assetId] of Object.entries(raw.filenameHistory)) {
+      if (!/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+          (assetId !== null && !/^[a-f0-9]{64}$/.test(assetId))) {
+        throw new Error("Reward catalog contains invalid filename history.");
+      }
+    }
+    return { files, assetIds };
   }
 
   async function createRewardUrl(player, file) {
+    const assetId = state.rewardAssetIds[file];
+    if (!assetId) throw new Error("The selected reward has no stable content ID.");
     const encrypted = await encryptReward({
-      version: 1,
+      version: 2,
       username: String(player.displayName || "Viewer").slice(0, 100),
-      file
+      assetId
     });
 
     const url = new URL(state.config.rewards.pageUrl);
@@ -1373,7 +1390,9 @@ import { encryptReward } from "./reward-crypto.mjs";
       state.bank = validateQuestionBank(bankRaw);
       if (state.config.rewards.enabled) {
         const rewardRaw = await fetchJson(state.config.rewards.catalogUrl, "reward catalog");
-        state.rewardCatalog = validateRewardCatalog(rewardRaw);
+        const rewardCatalog = validateRewardCatalog(rewardRaw);
+        state.rewardCatalog = rewardCatalog.files;
+        state.rewardAssetIds = rewardCatalog.assetIds;
       }
       buildCategoryIndex();
       loadScores();

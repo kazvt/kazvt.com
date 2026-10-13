@@ -11,7 +11,7 @@ const WIDGET_CATALOG = resolve(WIDGET_ROOT, "rewards.json");
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export const TIER_BUCKETS = [
-  { id: "common", label: "Common", upperBound: 3000 },
+  { id: "common", label: "Frequent", upperBound: 3000 },
   { id: "uncommon", label: "Uncommon", upperBound: 5000 },
   { id: "rare", label: "Rare", upperBound: 6500 },
   { id: "epic", label: "Epic", upperBound: 7700 },
@@ -40,29 +40,106 @@ function compareNames(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-export async function buildRewardCatalogs() {
-  const entries = await readdir(REWARD_DIR, { withFileTypes: true });
+const ASSET_ID_ALGORITHM = "sha256-png-bytes-v1";
+
+function validAssetId(value) {
+  return typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
+}
+
+function addFilenameHistory(history, filename, assetId) {
+  if (typeof filename !== "string" || filename.length > 255 ||
+      !/^[^/\\\u0000-\u001f]+\.png$/i.test(filename)) return;
+  const normalizedId = validAssetId(assetId) ? assetId.toLowerCase() : null;
+  if (!Object.prototype.hasOwnProperty.call(history, filename)) {
+    history[filename] = normalizedId;
+  } else if (history[filename] !== normalizedId) {
+    history[filename] = null;
+  }
+}
+
+function assetIdForPreviousName(manifest, filename) {
+  const historical = manifest?.filenameHistory?.[filename];
+  if (historical === null) return null;
+  if (validAssetId(historical)) return historical.toLowerCase();
+  const metadata = manifest?.assets?.[filename];
+  const id = metadata?.assetId ?? metadata?.sha256;
+  return validAssetId(id) ? id.toLowerCase() : null;
+}
+
+function readPngDimensions(bytes, file) {
+  if (bytes.length < 33 || !bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE) ||
+      bytes.readUInt32BE(8) !== 13 || bytes.toString("ascii", 12, 16) !== "IHDR") {
+    throw new Error(`${file} is not a PNG with a valid IHDR header.`);
+  }
+  const width = bytes.readUInt32BE(16);
+  const height = bytes.readUInt32BE(20);
+  if (!width || !height || width > 0x7fffffff || height > 0x7fffffff) {
+    throw new Error(`${file} has invalid PNG dimensions.`);
+  }
+  return { width, height };
+}
+
+async function readPreviousManifest(rewardDir) {
+  try {
+    return JSON.parse(await readFile(resolve(rewardDir, "manifest.json"), "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw new Error(`Could not read the previous reward manifest: ${error.message || error}`);
+  }
+}
+
+export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousManifest } = {}) {
+  const previous = previousManifest === undefined
+    ? await readPreviousManifest(rewardDir)
+    : previousManifest;
+  const entries = await readdir(rewardDir, { withFileTypes: true });
   const files = entries
     .filter(entry => entry.isFile() && entry.name.toLowerCase().endsWith(".png"))
     .map(entry => entry.name)
     .sort(compareNames);
 
-  if (files.length === 0) throw new Error(`No PNG reward images found in ${REWARD_DIR}.`);
+  if (files.length === 0) throw new Error(`No PNG reward images found in ${rewardDir}.`);
+  if (files.some(file => file.length > 255)) {
+    throw new Error("Reward filenames must fit within the 255-character filesystem component limit.");
+  }
 
   const assets = {};
+  const assetsById = {};
   for (const file of files) {
-    const bytes = await readFile(resolve(REWARD_DIR, file));
-    if (bytes.length < PNG_SIGNATURE.length || !bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
-      throw new Error(`${file} has a .png extension but is not a PNG image.`);
-    }
-
+    const bytes = await readFile(resolve(rewardDir, file));
+    const { width, height } = readPngDimensions(bytes, file);
     const sha256 = createHash("sha256").update(bytes).digest("hex");
-    assets[file] = { sha256, tier: tierForSha256(sha256) };
+    if (Object.prototype.hasOwnProperty.call(assetsById, sha256)) {
+      throw new Error(`${file} has identical artwork bytes to ${assetsById[sha256].filename}; keep one file per award.`);
+    }
+    const tier = tierForSha256(sha256);
+    const metadata = { assetId: sha256, sha256, width, height, tier };
+    assets[file] = metadata;
+    assetsById[sha256] = { filename: file, width, height, tier };
+  }
+
+  const filenameHistory = {};
+  if (previous && typeof previous === "object") {
+    if (previous.filenameHistory && typeof previous.filenameHistory === "object" &&
+        !Array.isArray(previous.filenameHistory)) {
+      for (const [filename, assetId] of Object.entries(previous.filenameHistory)) {
+        addFilenameHistory(filenameHistory, filename, assetId);
+      }
+    }
+    if (Array.isArray(previous.files) && previous.assets && typeof previous.assets === "object") {
+      for (const filename of previous.files) {
+        addFilenameHistory(filenameHistory, filename, assetIdForPreviousName(previous, filename));
+      }
+    }
+  }
+  for (const [filename, metadata] of Object.entries(assets)) {
+    addFilenameHistory(filenameHistory, filename, metadata.assetId);
   }
 
   return {
     manifest: {
-      version: 3,
+      version: 4,
+      assetIdAlgorithm: ASSET_ID_ALGORITHM,
       tierAlgorithm: TIER_ALGORITHM,
       tierWeights: TIER_BUCKETS.map(({ id, label }, index) => ({
         id,
@@ -70,12 +147,21 @@ export async function buildRewardCatalogs() {
         basisPoints: TIER_BUCKETS[index].upperBound - (TIER_BUCKETS[index - 1]?.upperBound ?? 0)
       })),
       files,
-      assets
+      assets,
+      assetsById,
+      filenameHistory
     },
     widgetCatalog: {
-      version: 2,
+      version: 3,
+      assetIdAlgorithm: ASSET_ID_ALGORITHM,
       files,
-      assets: Object.fromEntries(files.map(file => [file, { sha256: assets[file].sha256 }]))
+      assets: Object.fromEntries(files.map(file => [file, {
+        assetId: assets[file].assetId,
+        sha256: assets[file].sha256,
+        width: assets[file].width,
+        height: assets[file].height
+      }])),
+      filenameHistory
     }
   };
 }

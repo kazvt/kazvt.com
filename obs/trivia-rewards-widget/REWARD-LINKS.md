@@ -5,7 +5,7 @@
 ```text
 Correct chat answer
       ↓
-OBS widget selects one PNG and encrypts { username, file }
+OBS widget selects one PNG and encrypts { username, assetId }
       ↓ POST on 127.0.0.1 only
 Local reward queue → Reward Links dashboard → Copy into chat
       ↓
@@ -18,17 +18,17 @@ The OBS widget receives chat over the existing WebSocket. Its local Python serve
 
 ## Link format
 
-The query parameter `id` is a JWE Compact Serialization with the protected header `{"alg":"dir","enc":"A256GCM"}`. Its encrypted JSON contains the version, chat display name, and PNG filename. The direct 256-bit key is generated separately for each link and placed in the URL fragment as `#key=…`. AES-GCM uses a fresh 96-bit random IV and a 128-bit authentication tag; the protected header is authenticated as additional data. The page accepts only this algorithm pair and only PNG filenames in `/zzz_assets/rewards/manifest.json`.
+The query parameter `id` is a JWE Compact Serialization with the protected header `{"alg":"dir","enc":"A256GCM"}`. New links encrypt the version, chat display name, and artwork `assetId`; older version-1 links contain a filename and resolve through the catalog's preserved filename history. An asset ID is SHA-256 of the exact PNG bytes; the catalog also stores width and height. The direct 256-bit key is generated separately for each link and placed in the URL fragment as `#key=…`. AES-GCM uses a fresh 96-bit random IV and a 128-bit authentication tag; the protected header is authenticated as additional data. The page accepts only this algorithm pair and resolves artwork IDs through `/zzz_assets/rewards/manifest.json`.
 
 The fragment is processed by the browser and is not part of the HTTP request. That keeps the decryption key out of ordinary server request logs; the query contains the JWE protected header, IV, ciphertext, and authentication tag, but not the plaintext username, PNG name, or key. The page also sends no referrer and loads only same-origin resources. Copy the entire URL because a link without its fragment key cannot be opened.
 
 ## What this link proves—and what it does not
 
-This is a self-contained share card for public art. It is not a login token or proof that the streamer issued the award: anyone with the code can make another key and encrypt a different username or catalog filename. The full link lets anyone who receives it view its contents. The image itself is public, and the page does not let a viewer redeem, claim, or spend anything.
+This is a self-contained share card for public art. It is not a login token or proof that the streamer issued the award: anyone with the code can make another key and encrypt a different username or catalog asset ID. The full link lets anyone who receives it view its contents. The image itself is public, and the page does not let a viewer redeem, claim, or spend anything.
 
-The local widget now assigns each distinct PNG artwork at most once. `1.png` is preassigned to `kazvt`; additional assignments are kept in the all-time `owners` map in the local `.reward-queue.json` state file. Assignments use each PNG's SHA-256 content hash, so byte-identical artwork stays assigned after a rename. The queue retains only the 250 newest full links, but the ownership map is never truncated. A removed PNG stays assigned if later added back under the same filename or with the same bytes. Once every distinct artwork item is assigned, the widget stops issuing rewards until new artwork is added.
+The local widget assigns each distinct PNG artwork at most once. The content ID for the `1.png` artwork is preassigned to `kazvt`; additional assignments are kept in the all-time `owners` map in the local `.reward-queue.json` state file. The current filename is a display label, not the ownership key, so renames preserve assignments and new links. The queue retains only the 250 newest full links, but the ownership map is never truncated. Removed artwork remains assigned by ID if later re-added with the same bytes. Once every distinct artwork item is assigned, the widget stops issuing rewards until new artwork is added.
 
-The one-of-one rule is enforced by the issuing widget, not by the public static reward page. The widget checks both its private ledger and the public assignment index, so installations using the same up-to-date repository copy see the same recorded assignments. The index is static and has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. A JWE link can also be created outside the intended issuer. The card is a shareable display card, not cryptographic proof of exclusive ownership. The Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, or S+ tier remains fixed from the PNG's SHA-256 content hash; its matching pattern palette is cosmetic and independent from the one-time assignment rule.
+The one-of-one rule is enforced by the issuing widget, not by the public static reward page. The widget checks both its private ledger and the public assignment index, so installations using the same up-to-date repository copy see the same recorded assignments. The index is static and has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. A JWE link can also be created outside the intended issuer. The card is a shareable display card, not cryptographic proof of exclusive ownership. The Frequent, Uncommon, Rare, Epic, Legendary, Mythic, Divine, or S+ tier remains fixed from the PNG's SHA-256 content hash; its matching pattern palette is cosmetic and independent from the one-time assignment rule.
 
 This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS, and JavaScript; it does not provide a private server endpoint or database that can check who issued a claim. Therefore these links do not expire, cannot be revoked, and do not prevent copying. For a real or scarce prize, use a backend to issue high-entropy random IDs, store the authoritative winner and item server-side, and support expiry, revocation, and one-time redemption. Keep the platform credentials and issuance secret in that trusted backend or a local bot process, never in the public page.
 
@@ -41,7 +41,8 @@ This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS,
   "version": 1,
   "assignments": [
     {
-      "assetSha256": "lowercase SHA-256 from the reward catalog",
+      "assetId": "lowercase SHA-256 content ID from the reward catalog",
+      "assetSha256": "same value; legacy-compatible field",
       "filename": "1.png",
       "username": "kazvt",
       "issuedAt": "2026-10-13T00:00:00.000Z",
@@ -51,7 +52,7 @@ This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS,
 }
 ```
 
-Other systems can read and write this same format. The list searches both usernames and artwork filenames, and only enables a detail link when the filename and hash still match the current reward catalog. Older records remain searchable if artwork is later removed or replaced. The local OBS issuer imports this registry when checking availability and updates it after an award, alongside its private ignored queue. The public file intentionally contains no encrypted URLs, keys, or bearer-link data. It is a public index, not a secure proof of ownership. The issuer does not push to GitHub; publish its local registry changes with the usual repository commit/push workflow. A read-only/distributable copy can still use its private ledger, but cannot update the repository index.
+Other systems can read this format and should join records to `manifest.json` by `assetId` (or legacy `assetSha256`), never by filename. The filename is only the current human-readable label. The list searches usernames and the current artwork filename, and uses the content ID to find renamed artwork. Older records remain searchable if artwork is later removed or replaced, but their detail link is disabled unless the matching content is present. The local OBS issuer imports this registry when checking availability and updates it after an award, alongside its private ignored queue. The public file intentionally contains no encrypted URLs, keys, or bearer-link data. It is a public index, not a secure proof of ownership. The issuer does not push to GitHub; publish its local registry changes with the usual repository commit/push workflow. A read-only/distributable copy can still use its private ledger, but cannot update the repository index.
 
 ## Chat posting
 
