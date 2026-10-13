@@ -476,7 +476,7 @@ h1 {
   width: min(100%, 300px);
   max-height: 300px;
   object-fit: contain;
-  margin: 0 auto;
+  margin: 20px auto;
 }
 
 .reward-image[data-tier] {
