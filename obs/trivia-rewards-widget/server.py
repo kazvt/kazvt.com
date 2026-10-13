@@ -17,7 +17,7 @@ from urllib.parse import parse_qs, urlsplit
 ROOT = Path(__file__).resolve().parent
 REWARD_QUEUE = ROOT / ".reward-queue.json"
 REWARD_QUEUE_TEMP = ROOT / ".reward-queue.json.tmp"
-PUBLIC_ASSIGNMENTS = ROOT.parent.parent / "assets" / "rewards" / "assignments.json"
+PUBLIC_ASSIGNMENTS = ROOT.parent.parent / "zzz_assets" / "rewards" / "assignments.json"
 PUBLIC_ASSIGNMENTS_TEMP = PUBLIC_ASSIGNMENTS.with_name(PUBLIC_ASSIGNMENTS.name + ".tmp")
 REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()

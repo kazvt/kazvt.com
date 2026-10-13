@@ -18,7 +18,7 @@ The OBS widget receives chat over the existing WebSocket. Its local Python serve
 
 ## Link format
 
-The query parameter `id` is a JWE Compact Serialization with the protected header `{"alg":"dir","enc":"A256GCM"}`. Its encrypted JSON contains the version, chat display name, and PNG filename. The direct 256-bit key is generated separately for each link and placed in the URL fragment as `#key=…`. AES-GCM uses a fresh 96-bit random IV and a 128-bit authentication tag; the protected header is authenticated as additional data. The page accepts only this algorithm pair and only PNG filenames in `/assets/rewards/manifest.json`.
+The query parameter `id` is a JWE Compact Serialization with the protected header `{"alg":"dir","enc":"A256GCM"}`. Its encrypted JSON contains the version, chat display name, and PNG filename. The direct 256-bit key is generated separately for each link and placed in the URL fragment as `#key=…`. AES-GCM uses a fresh 96-bit random IV and a 128-bit authentication tag; the protected header is authenticated as additional data. The page accepts only this algorithm pair and only PNG filenames in `/zzz_assets/rewards/manifest.json`.
 
 The fragment is processed by the browser and is not part of the HTTP request. That keeps the decryption key out of ordinary server request logs; the query contains the JWE protected header, IV, ciphertext, and authentication tag, but not the plaintext username, PNG name, or key. The page also sends no referrer and loads only same-origin resources. Copy the entire URL because a link without its fragment key cannot be opened.
 
@@ -34,7 +34,7 @@ This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS,
 
 ## Public assignment index
 
-`assets/rewards/assignments.json` (served at `/assets/rewards/assignments.json`) is the public, reusable assignment index. The page at `/reward/list/` reads this file together with the reward catalog. Version 1 uses one record per artwork content hash:
+`zzz_assets/rewards/assignments.json` (served at `/zzz_assets/rewards/assignments.json`) is the public, reusable assignment index. The page at `/reward/list/` reads this file together with the reward catalog. Version 1 uses one record per artwork content hash:
 
 ```json
 {

@@ -91,8 +91,8 @@ import { encryptReward } from "../reward-crypto.mjs";
 
   async function loadRegistry() {
     const [registryResponse, catalogResponse] = await Promise.all([
-      fetch("/assets/rewards/assignments.json", { cache: "no-cache" }),
-      fetch("/assets/rewards/manifest.json", { cache: "no-cache" })
+      fetch("/zzz_assets/rewards/assignments.json", { cache: "no-cache" }),
+      fetch("/zzz_assets/rewards/manifest.json", { cache: "no-cache" })
     ]);
     if (!registryResponse.ok || !catalogResponse.ok) {
       throw new Error("The public award data could not be fetched.");
@@ -139,7 +139,7 @@ import { encryptReward } from "../reward-crypto.mjs";
 
     if (assignment.artworkIsCurrent) {
       const image = document.createElement("img");
-      image.src = `/assets/rewards/${encodeURIComponent(assignment.filename)}`;
+      image.src = `/zzz_assets/rewards/${encodeURIComponent(assignment.filename)}`;
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";

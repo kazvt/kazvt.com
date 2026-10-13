@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const WIDGET_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(WIDGET_ROOT, "../..");
-const REWARD_DIR = resolve(REPO_ROOT, "assets", "rewards");
+const REWARD_DIR = resolve(REPO_ROOT, "zzz_assets", "rewards");
 const PUBLIC_MANIFEST = resolve(REWARD_DIR, "manifest.json");
 const WIDGET_CATALOG = resolve(WIDGET_ROOT, "rewards.json");
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);

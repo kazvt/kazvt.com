@@ -321,7 +321,7 @@ import { decryptReward } from "./reward-crypto.mjs";
 
   function loadRewardCatalog() {
     if (!rewardCatalogPromise) {
-      rewardCatalogPromise = fetch("/assets/rewards/manifest.json", { cache: "no-store" })
+      rewardCatalogPromise = fetch("/zzz_assets/rewards/manifest.json", { cache: "no-store" })
         .then(response => {
           if (!response.ok) throw new Error("The reward list could not be loaded.");
           return response.json();
@@ -619,7 +619,7 @@ import { decryptReward } from "./reward-crypto.mjs";
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     const demoName = randomDemoName();
-    const imageUrl = `/assets/rewards/${encodeURIComponent(file)}`;
+    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} demo tier`);
@@ -680,7 +680,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
     renderUsernameCopy(data.username);
-    const imageUrl = `/assets/rewards/${encodeURIComponent(data.file)}`;
+    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(data.file)}`;
     rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
     filename.textContent = filenameLabel(data.file);
     await waitForRewardImage(imageUrl);
