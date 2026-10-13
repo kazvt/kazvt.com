@@ -1,4 +1,5 @@
 import base64
+from concurrent.futures import ThreadPoolExecutor
 import http.client
 import importlib.util
 import json
@@ -120,6 +121,25 @@ class RewardQueueApiTests(unittest.TestCase):
         status, response = self.request("GET", "/api/rewards")
         self.assertEqual(status, 200)
         self.assertEqual(len(json.loads(response)["items"]), 1)
+
+    def test_concurrent_awards_cannot_assign_the_same_artwork_twice(self):
+        first = self.valid_record()
+        second = self.valid_record()
+        second["id"] = "test-2"
+        second["username"] = "AnotherViewer"
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            responses = list(executor.map(self.post, (first, second)))
+
+        self.assertEqual(sorted(status for status, _ in responses), [201, 409])
+        saved_state = json.loads(widget_server.REWARD_QUEUE.read_text(encoding="utf-8"))
+        awarded_owners = [
+            owner for owner in saved_state["owners"].values()
+            if owner["filename"] == "test reward.png"
+        ]
+        self.assertEqual(len(awarded_owners), 1)
+        self.assertEqual(len(saved_state["items"]), 1)
+        self.assertEqual(saved_state["items"][0]["username"], awarded_owners[0]["username"])
 
     def test_1_png_is_preassigned_to_kazvt_and_never_offered(self):
         widget_server.REWARD_FILES.add("1.png")

@@ -85,11 +85,9 @@ import { decryptReward } from "./reward-crypto.mjs";
       usernameMention(username)
     );
     awardNote.replaceChildren(
-      document.createTextNode("Only "),
+      document.createTextNode("This artwork belongs only to "),
       usernameMention(username),
-      document.createTextNode(" gets the award. The artwork can show up elsewhere, but the award belongs to "),
-      usernameMention(username),
-      document.createTextNode(" alone.")
+      document.createTextNode(". No other award receives the same artwork.")
     );
   }
 
