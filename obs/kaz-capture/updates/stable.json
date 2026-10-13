@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "product": "kaz-capture",
+  "channel": "stable",
+  "version": "0.4.17",
+  "release_url": "https://github.com/kazvt/kazvt.com/releases/tag/kaz-capture-v0.4.17"
+}

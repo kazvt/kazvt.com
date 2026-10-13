@@ -130,8 +130,8 @@
   "file_info": {
     "!1index - Copy.html": {
       "type": "file",
-      "size_bytes": 683362,
-      "modified_ns": 1787667343426015500
+      "size_bytes": 683428,
+      "modified_ns": 1791884796764564000
     },
     "AUTO-GAIN-README.txt": {
       "type": "file",
@@ -150,8 +150,8 @@
     },
     "index.html": {
       "type": "file",
-      "size_bytes": 692108,
-      "modified_ns": 1790287551125582000
+      "size_bytes": 692174,
+      "modified_ns": 1791884796749174800
     },
     "instrument-icons.json": {
       "type": "file",
@@ -1317,13 +1317,13 @@
     },
     "outputs/wifeymixer-dist-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
-      "size_bytes": 703838,
-      "modified_ns": 1790282164960275000
+      "size_bytes": 703904,
+      "modified_ns": 1791884796661075700
     },
     "outputs/wifeymixer-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
-      "size_bytes": 690246,
-      "modified_ns": 1790282164956014300
+      "size_bytes": 690312,
+      "modified_ns": 1791884796657825300
     },
     "sf2-procedural.js": {
       "type": "file",
@@ -1690,8 +1690,8 @@
     },
     "wifeymixer_dist/!index - Copy.html": {
       "type": "file",
-      "size_bytes": 696824,
-      "modified_ns": 1788017071945284900
+      "size_bytes": 696890,
+      "modified_ns": 1791884796228916700
     },
     "wifeymixer_dist/AUTO-GAIN-README.txt": {
       "type": "file",
@@ -1715,8 +1715,8 @@
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
-      "size_bytes": 705700,
-      "modified_ns": 1790287551126101300
+      "size_bytes": 705766,
+      "modified_ns": 1791884796180609000
     },
     "wifeymixer_dist/instrument-icons.json": {
       "type": "file",
