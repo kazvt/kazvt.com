@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Award index — kazvt</title>
+  <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
+  <link rel="stylesheet" href="/reward/list/list.css?v=1">
+  <script type="module" src="/reward/list/list.js?v=1"></script>
+</head>
+<body>
+  <main class="index-shell">
+    <header class="page-header">
+      <a class="back-link" href="/reward/">&larr; reward page</a>
+      <p class="eyebrow">KAZVT.COM // PUBLIC RECORD</p>
+      <h1>Reward index</h1>
+      <p class="intro">Find an award by username or artwork name.</p>
+    </header>
+
+    <section class="search-panel" aria-labelledby="search-label">
+      <label id="search-label" for="awardSearch">Search names + artwork</label>
+      <div class="search-row">
+        <input id="awardSearch" type="search" autocomplete="off" spellcheck="false"
+          placeholder="Try kazvt or 1.png" aria-controls="awardList">
+        <button id="clearSearch" class="clear-button" type="button" hidden>Clear</button>
+      </div>
+      <p id="resultStatus" class="result-status" role="status" aria-live="polite">Loading the award index…</p>
+    </section>
+
+    <section id="awardList" class="award-list" aria-label="Assigned awards" aria-busy="true"></section>
+    <p id="emptyState" class="empty-state" hidden>No awards match that search.</p>
+    <p id="errorState" class="error-state" role="alert" hidden>The award index could not be loaded. Please refresh and try again.</p>
+
+    <footer class="page-footer">
+      <span>ONE ARTWORK · ONE ASSIGNMENT</span>
+      <a href="/">back to kazvt.com</a>
+    </footer>
+  </main>
+</body>
+</html>

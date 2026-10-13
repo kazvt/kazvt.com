@@ -17,6 +17,8 @@ from urllib.parse import parse_qs, urlsplit
 ROOT = Path(__file__).resolve().parent
 REWARD_QUEUE = ROOT / ".reward-queue.json"
 REWARD_QUEUE_TEMP = ROOT / ".reward-queue.json.tmp"
+PUBLIC_ASSIGNMENTS = ROOT.parent.parent / "assets" / "rewards" / "assignments.json"
+PUBLIC_ASSIGNMENTS_TEMP = PUBLIC_ASSIGNMENTS.with_name(PUBLIC_ASSIGNMENTS.name + ".tmp")
 REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()
 REWARD_STATE_VERSION = 2
@@ -168,6 +170,50 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                     "issuedAt": str(item.get("issuedAt", ""))[:40],
                 }
 
+        try:
+            with PUBLIC_ASSIGNMENTS.open("r", encoding="utf-8-sig") as registry_file:
+                public_registry = json.load(registry_file)
+        except FileNotFoundError:
+            public_registry = {"version": 1, "assignments": []}
+        except json.JSONDecodeError as error:
+            raise ValueError("The public assignment registry is invalid JSON.") from error
+
+        if (not isinstance(public_registry, dict) or public_registry.get("version") != 1 or
+                not isinstance(public_registry.get("assignments"), list)):
+            raise ValueError("The public assignment registry has an invalid structure.")
+        seen_public_assets: set[str] = set()
+        for assignment in public_registry["assignments"]:
+            if not isinstance(assignment, dict):
+                raise ValueError("The public assignment record is invalid.")
+            filename = assignment.get("filename")
+            username = assignment.get("username")
+            digest = assignment.get("assetSha256")
+            platform = assignment.get("platform", "manual")
+            issued_at = assignment.get("issuedAt", "")
+            if (not isinstance(filename, str) or not filename.lower().endswith(".png") or
+                    "/" in filename or "\\" in filename or len(filename) > 180 or
+                    re.search(r"[\x00-\x1f]", filename) or
+                    not isinstance(username, str) or not username.strip() or len(username) > 100 or
+                    re.search(r"[\x00-\x1f]", username) or
+                    not isinstance(digest, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", digest) or
+                    not isinstance(platform, str) or len(platform) > 60 or
+                    re.search(r"[\x00-\x1f]", platform) or
+                    not isinstance(issued_at, str) or len(issued_at) > 40):
+                raise ValueError("The public assignment record is invalid.")
+            identity = digest.lower()
+            if identity in seen_public_assets:
+                raise ValueError("The public assignment registry repeats artwork.")
+            seen_public_assets.add(identity)
+            existing = normalized_owners.get(identity)
+            if existing and existing["username"].casefold() != username.strip().casefold():
+                raise ValueError("The public registry conflicts with the saved ownership ledger.")
+            normalized_owners.setdefault(identity, {
+                "filename": filename,
+                "username": username.strip(),
+                "platform": platform,
+                "issuedAt": issued_at,
+            })
+
         for filename, owner in PREASSIGNED_REWARDS.items():
             identity = reward_asset_identity(filename)
             existing = normalized_owners.get(identity) or next(
@@ -183,6 +229,27 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             "owners": normalized_owners,
             "items": items[:REWARD_QUEUE_LIMIT],
         }
+
+    def write_public_assignments(self, owners: dict[str, dict[str, str]]) -> None:
+        assignments = []
+        for identity, owner in owners.items():
+            filename = owner["filename"]
+            digest = identity.lower() if re.fullmatch(r"[a-fA-F0-9]{64}", identity) else REWARD_SHA256.get(filename)
+            if not isinstance(digest, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", digest):
+                raise ValueError(f"No SHA-256 checksum is available for {filename}.")
+            assignments.append({
+                "assetSha256": digest.lower(),
+                "filename": filename,
+                "username": owner["username"],
+                "issuedAt": owner.get("issuedAt", ""),
+                "platform": owner.get("platform", "manual"),
+            })
+        assignments.sort(key=lambda item: (item["issuedAt"], item["filename"].casefold(), item["username"].casefold()))
+        PUBLIC_ASSIGNMENTS_TEMP.write_text(
+            json.dumps({"version": 1, "assignments": assignments}, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        PUBLIC_ASSIGNMENTS_TEMP.replace(PUBLIC_ASSIGNMENTS)
 
     def read_reward_queue(self) -> list[dict[str, str]]:
         return self.read_reward_state()["items"]  # type: ignore[return-value]
@@ -258,7 +325,8 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         link = record.get("link")
         platform = record.get("platform", "chat")
         issued_at = record.get("issuedAt")
-        if not isinstance(username, str) or not username.strip() or len(username) > 100:
+        if (not isinstance(username, str) or not username.strip() or len(username) > 100 or
+                re.search(r"[\x00-\x1f]", username)):
             self.send_json(400, {"error": "Invalid username."})
             return
         if not isinstance(filename, str) or filename not in REWARD_FILES:
@@ -337,6 +405,12 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
                 encoding="utf-8",
             )
             REWARD_QUEUE_TEMP.replace(REWARD_QUEUE)
+            try:
+                self.write_public_assignments(owners)
+            except (OSError, ValueError) as error:
+                # The private ledger remains authoritative if the source checkout is read-only
+                # or the widget is running from a distributable copy without the website repo.
+                print(f"[widget] Warning: public assignment registry was not updated: {error}")
         self.send_json(201, {"ok": True})
 
     def end_headers(self) -> None:

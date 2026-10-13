@@ -28,9 +28,30 @@ This is a self-contained share card for public art. It is not a login token or p
 
 The local widget now assigns each distinct PNG artwork at most once. `1.png` is preassigned to `kazvt`; additional assignments are kept in the all-time `owners` map in the local `.reward-queue.json` state file. Assignments use each PNG's SHA-256 content hash, so byte-identical artwork stays assigned after a rename. The queue retains only the 250 newest full links, but the ownership map is never truncated. A removed PNG stays assigned if later added back under the same filename or with the same bytes. Once every distinct artwork item is assigned, the widget stops issuing rewards until new artwork is added.
 
-The one-of-one rule is enforced by the local issuing widget, not by the public static reward page. Separate widget installations have separate ledgers, and a JWE link can still be created outside the intended issuer. The card is a shareable display card, not cryptographic proof of exclusive ownership. The Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, or S+ tier remains fixed from the PNG's SHA-256 content hash; its matching pattern palette is cosmetic and independent from the one-time assignment rule.
+The one-of-one rule is enforced by the issuing widget, not by the public static reward page. The widget checks both its private ledger and the public assignment index, so installations using the same up-to-date repository copy see the same recorded assignments. The index is static and has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. A JWE link can also be created outside the intended issuer. The card is a shareable display card, not cryptographic proof of exclusive ownership. The Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, or S+ tier remains fixed from the PNG's SHA-256 content hash; its matching pattern palette is cosmetic and independent from the one-time assignment rule.
 
 This limit follows from the static-site setup. GitHub Pages publishes HTML, CSS, and JavaScript; it does not provide a private server endpoint or database that can check who issued a claim. Therefore these links do not expire, cannot be revoked, and do not prevent copying. For a real or scarce prize, use a backend to issue high-entropy random IDs, store the authoritative winner and item server-side, and support expiry, revocation, and one-time redemption. Keep the platform credentials and issuance secret in that trusted backend or a local bot process, never in the public page.
+
+## Public assignment index
+
+`assets/rewards/assignments.json` (served at `/assets/rewards/assignments.json`) is the public, reusable assignment index. The page at `/reward/list/` reads this file together with the reward catalog. Version 1 uses one record per artwork content hash:
+
+```json
+{
+  "version": 1,
+  "assignments": [
+    {
+      "assetSha256": "lowercase SHA-256 from the reward catalog",
+      "filename": "1.png",
+      "username": "kazvt",
+      "issuedAt": "2026-10-13T00:00:00.000Z",
+      "platform": "manual"
+    }
+  ]
+}
+```
+
+Other systems can read and write this same format. The list searches both usernames and artwork filenames, and only enables a detail link when the filename and hash still match the current reward catalog. Older records remain searchable if artwork is later removed or replaced. The local OBS issuer imports this registry when checking availability and updates it after an award, alongside its private ignored queue. The public file intentionally contains no encrypted URLs, keys, or bearer-link data. It is a public index, not a secure proof of ownership. The issuer does not push to GitHub; publish its local registry changes with the usual repository commit/push workflow. A read-only/distributable copy can still use its private ledger, but cannot update the repository index.
 
 ## Chat posting
 

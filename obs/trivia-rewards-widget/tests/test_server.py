@@ -41,13 +41,20 @@ class RewardQueueApiTests(unittest.TestCase):
         self.original_paths = (
             widget_server.REWARD_QUEUE,
             widget_server.REWARD_QUEUE_TEMP,
+            widget_server.PUBLIC_ASSIGNMENTS,
+            widget_server.PUBLIC_ASSIGNMENTS_TEMP,
             widget_server.REWARD_FILES,
             widget_server.REWARD_SHA256,
         )
         widget_server.REWARD_QUEUE = root / "queue.json"
         widget_server.REWARD_QUEUE_TEMP = root / "queue.json.tmp"
-        widget_server.REWARD_FILES = {"test reward.png"}
-        widget_server.REWARD_SHA256 = {}
+        widget_server.PUBLIC_ASSIGNMENTS = root / "assignments.json"
+        widget_server.PUBLIC_ASSIGNMENTS_TEMP = root / "assignments.json.tmp"
+        widget_server.REWARD_FILES = {"test reward.png", "1.png"}
+        widget_server.REWARD_SHA256 = {
+            "test reward.png": "a" * 64,
+            "1.png": "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03",
+        }
         self.httpd = widget_server.ThreadingHTTPServer(("127.0.0.1", 0), widget_server.NoCacheHandler)
         self.httpd.daemon_threads = True
         self.port = self.httpd.server_address[1]
@@ -60,6 +67,8 @@ class RewardQueueApiTests(unittest.TestCase):
         self.thread.join(timeout=2)
         (widget_server.REWARD_QUEUE,
          widget_server.REWARD_QUEUE_TEMP,
+         widget_server.PUBLIC_ASSIGNMENTS,
+         widget_server.PUBLIC_ASSIGNMENTS_TEMP,
          widget_server.REWARD_FILES,
          widget_server.REWARD_SHA256) = self.original_paths
         self.temp_dir.cleanup()
@@ -101,6 +110,16 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["username"], "Viewer")
         self.assertEqual(items[0]["filename"], "test reward.png")
+
+        public_registry = json.loads(widget_server.PUBLIC_ASSIGNMENTS.read_text(encoding="utf-8"))
+        self.assertEqual(public_registry["version"], 1)
+        self.assertEqual(len(public_registry["assignments"]), 2)
+        assignment = next(item for item in public_registry["assignments"] if item["filename"] == "test reward.png")
+        self.assertEqual(assignment["assetSha256"], "a" * 64)
+        self.assertEqual(assignment["username"], "Viewer")
+        self.assertNotIn("link", assignment)
+        self.assertNotIn("id", assignment)
+        self.assertNotIn("key", assignment)
 
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
@@ -166,6 +185,7 @@ class RewardQueueApiTests(unittest.TestCase):
         widget_server.REWARD_SHA256 = {
             "test reward.png": shared_digest,
             "renamed reward.png": shared_digest,
+            "1.png": "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03",
         }
         status, _ = self.post(self.valid_record())
         self.assertEqual(status, 201)
@@ -184,6 +204,21 @@ class RewardQueueApiTests(unittest.TestCase):
         widget_server.REWARD_QUEUE.write_text(
             json.dumps({"items": [self.valid_record()]}), encoding="utf-8"
         )
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(response)["files"], [])
+
+    def test_public_registry_assignments_are_not_offered_again(self):
+        widget_server.PUBLIC_ASSIGNMENTS.write_text(json.dumps({
+            "version": 1,
+            "assignments": [{
+                "assetSha256": "a" * 64,
+                "filename": "test reward.png",
+                "username": "Viewer",
+                "issuedAt": "2026-10-06T12:00:00.000Z",
+                "platform": "twitch",
+            }],
+        }), encoding="utf-8")
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(response)["files"], [])
