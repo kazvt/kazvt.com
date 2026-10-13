@@ -267,7 +267,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
-    awardNote.textContent = `One-of-one award for ${data.username}. Artwork assigned once; no repeat issuance.`;
+    awardNote.textContent = `Only ${data.username} gets the award. The artwork can show up elsewhere, but the award belongs to ${data.username} alone.`;
     const imageUrl = `/assets/rewards/${encodeURIComponent(data.file)}`;
     rewardImage.src = imageUrl;
     populateArtWallpaper(imageUrl);
