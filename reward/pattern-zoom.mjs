@@ -38,6 +38,7 @@ function updatePatternScale() {
   const tileWidth = Number((TILE_WIDTH_CSS_PX / zoomRatio).toFixed(4));
 
   root.style.setProperty("--reward-pattern-tile-width", `${tileWidth}px`);
+  root.style.setProperty("--reward-zoom-compensation", Number((1 / zoomRatio).toFixed(6)));
 }
 
 function watchResolutionChanges() {
