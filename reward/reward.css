@@ -337,9 +337,9 @@ body[data-page-state="error"] .reward-card {
 
 .loading-hourglass {
   display: block;
-  flex: 0 0 63px;
-  width: 63px;
-  height: 63px;
+  flex: 0 0 78.75px;
+  width: 78.75px;
+  height: 78.75px;
   object-fit: contain;
   animation: loading-hourglass-bob 1.4s steps(2, end) infinite;
 }
@@ -800,7 +800,7 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
 
 @media (prefers-reduced-motion: reduce) {
   .loading-hourglass { display: none; animation: none; }
-  .loading-hourglass-fallback { display: inline; font-size: 48px; }
+  .loading-hourglass-fallback { display: inline; font-size: 60px; }
   .loading-title, .loading-ellipsis span { animation: none; }
   .loading-ellipsis span { opacity: 1; transform: none; }
   .wall-art-spin {
