@@ -10,6 +10,27 @@
       ]);
       const requestedPath = location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
       const tuoyAliases = new Set(["toy", "touys", "tools", "tool", "assets", "asset", "toys"]);
+      const rewardUsernameMatch = /^\/reward\/([^/]+)\/?$/u.exec(location.pathname);
+      if (rewardUsernameMatch) {
+        let username = "";
+        try {
+          username = decodeURIComponent(rewardUsernameMatch[1]);
+        } catch {}
+
+        const reservedRewardRoutes = new Set([
+          "demo", "list", "patterns", "retro", "asset-resolver.mjs", "assignment-registry.mjs",
+          "decal-layout.mjs", "index.html", "pattern-zoom.mjs", "reward-crypto.mjs",
+          "reward-link.mjs", "reward.css", "reward.js"
+        ]);
+        if (username.trim() && username.length <= 100 && !/[\u0000-\u001f\u007f/\\]/u.test(username) &&
+            !reservedRewardRoutes.has(username.toLowerCase())) {
+          const destination = new URL("/reward/list/", location.origin);
+          destination.searchParams.set("user", username);
+          location.replace(destination.href);
+          return;
+        }
+      }
+
       if (tuoyAliases.has(requestedPath)) {
         location.replace("https://kazvt.com/tuoys/");
       }
