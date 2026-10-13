@@ -1,5 +1,6 @@
 import { encryptReward } from "../reward-crypto.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs";
+import "../pattern-zoom.mjs?v=1";
 
 (() => {
   "use strict";

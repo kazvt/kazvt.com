@@ -29,7 +29,7 @@ body {
   background-image:
     linear-gradient(rgb(22 9 43 / 28%), rgb(22 9 43 / 28%)),
     url("/reward/patterns/purple.gif");
-  background-size: auto, 200px auto;
+  background-size: auto, var(--reward-pattern-tile-width, 200px) auto;
   background-repeat: repeat;
   background-attachment: fixed;
 }

@@ -1,5 +1,6 @@
 import { decryptReward, encryptReward } from "./reward-crypto.mjs";
 import { resolveRewardAsset } from "./asset-resolver.mjs";
+import "./pattern-zoom.mjs?v=1";
 import {
   buildTwoRowAwardPreview,
   normalizeAwardUsername,
