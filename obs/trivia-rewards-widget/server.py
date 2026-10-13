@@ -9,7 +9,6 @@ import os
 import re
 import secrets
 import threading
-import uuid
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
