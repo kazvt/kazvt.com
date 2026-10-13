@@ -40,7 +40,7 @@ body {
       color-mix(in srgb, var(--palette-background) 38%, transparent)
     ),
     var(--palette-pattern);
-  background-size: cover, var(--reward-pattern-tile-width, 150px) auto;
+  background-size: cover, var(--reward-pattern-tile-width, 100px) auto;
   background-position: center, 0 0;
   background-repeat: no-repeat, repeat;
   background-attachment: fixed, fixed;

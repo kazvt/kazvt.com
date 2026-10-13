@@ -1,4 +1,4 @@
-const TILE_WIDTH_CSS_PX = 150;
+const TILE_WIDTH_CSS_PX = 100;
 const BASELINE_KEY = "kazvt.reward-pattern-baseline-dpr.v1";
 const root = document.documentElement;
 const viewport = window.visualViewport;
