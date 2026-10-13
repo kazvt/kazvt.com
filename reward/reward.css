@@ -102,14 +102,6 @@ body[data-page-state="reward"][data-tier="splus"] {
   --palette-pattern: url("/reward/patterns/sand.gif");
 }
 
-/* Demos keep the loading-page backdrop, while their badge still previews the actual tier look. */
-body[data-reward-demo][data-page-state="reward"][data-tier] {
-  --palette-background: #15151a;
-  --palette-panel: #101014;
-  --palette-accent: #c9c9d1;
-  --palette-pattern: url("/reward/patterns/loading-stars.gif");
-}
-
 body[data-reward-demo][data-page-state="reward"][data-tier="common"] .tier-badge { --demo-tier-accent: #9999cc; }
 body[data-reward-demo][data-page-state="reward"][data-tier="uncommon"] .tier-badge { --demo-tier-accent: #3399cc; }
 body[data-reward-demo][data-page-state="reward"][data-tier="rare"] .tier-badge { --demo-tier-accent: #ff334d; }
