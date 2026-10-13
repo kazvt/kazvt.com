@@ -110,6 +110,10 @@ body[data-reward-demo][data-page-state="reward"][data-tier] {
   --palette-pattern: url("/reward/patterns/loading-stars.gif");
 }
 
+body[data-reward-demo][data-page-state="reward"][data-tier] .reward-image[data-tier] {
+  --art-glow-rgb: 201, 201, 209;
+}
+
 .art-wallpaper {
   position: fixed;
   z-index: 0;
