@@ -189,10 +189,10 @@ import {
     const height = artWallpaper.clientHeight;
     if (!width || !height) return;
 
-    const baseSize = Math.max(54, Math.min(128, width * 0.12, height * 0.18));
-    const stampGap = size => Math.max(3, Math.min(6, size * 0.05));
+    const baseSize = Math.max(88, Math.min(220, width * 0.2, height * 0.28));
+    const stampGap = size => Math.max(0, Math.min(2, size * 0.01));
     const gap = stampGap(baseSize);
-    const targetRadius = baseSize * Math.SQRT1_2 + 14;
+    const targetRadius = baseSize * Math.SQRT1_2 + 5;
     const targetDistance = targetRadius * 2 + gap;
     const inset = targetRadius + gap / 2 + 2;
     const availableArea = Math.max(0, width - inset * 2) * Math.max(0, height - inset * 2);
@@ -207,7 +207,7 @@ import {
     for (const item of layoutItems) {
       const size = Math.max(36, baseSize * (0.9 + Math.random() * 0.22));
       // The circle encloses the rotated square image, plus its glow and gentle wobble.
-      const radius = size * Math.SQRT1_2 + 14;
+      const radius = size * Math.SQRT1_2 + 5;
       const itemGap = stampGap(size);
       const minX = radius + 3;
       const maxX = width - radius - 3;
