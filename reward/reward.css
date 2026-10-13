@@ -308,9 +308,9 @@ body[data-page-state="error"] .reward-card {
 
 .loading-hourglass {
   display: block;
-  flex: 0 0 42px;
-  width: 42px;
-  height: 42px;
+  flex: 0 0 63px;
+  width: 63px;
+  height: 63px;
   object-fit: contain;
   animation: loading-hourglass-bob 1.4s steps(2, end) infinite;
 }
@@ -322,7 +322,7 @@ body[data-page-state="error"] .reward-card {
   align-items: baseline;
   margin: 0;
   color: #f5f5f7;
-  font-size: clamp(24px, 6vw, 32px);
+  font-size: clamp(36px, 9vw, 48px);
   text-shadow: 2px 2px 0 #55555d;
   animation: loading-text-pulse 1.8s ease-in-out infinite alternate;
 }
@@ -339,6 +339,10 @@ body[data-page-state="error"] .reward-card {
 
 .loading-ellipsis span:nth-child(2) { animation-delay: .18s; }
 .loading-ellipsis span:nth-child(3) { animation-delay: .36s; }
+
+@media (max-width: 390px) {
+  .loading-heading { flex-direction: column; gap: 0; }
+}
 
 @keyframes loading-hourglass-bob {
   0%, 100% { transform: translateY(1px) rotate(-3deg); }
@@ -767,7 +771,7 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
 
 @media (prefers-reduced-motion: reduce) {
   .loading-hourglass { display: none; animation: none; }
-  .loading-hourglass-fallback { display: inline; font-size: 32px; }
+  .loading-hourglass-fallback { display: inline; font-size: 48px; }
   .loading-title, .loading-ellipsis span { animation: none; }
   .loading-ellipsis span { opacity: 1; transform: none; }
   .wall-art-spin {
