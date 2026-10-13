@@ -111,20 +111,39 @@ body[data-page-state="reward"][data-tier="splus"] {
   user-select: none;
 }
 
-.wall-art {
+.wall-art-spin {
   position: absolute;
   left: 0;
   top: 0;
   display: block;
   width: var(--wall-size, 64px);
   height: var(--wall-size, 64px);
+  transform-origin: center;
+  animation: wall-art-spin var(--wall-speed, 18s) linear var(--wall-delay, 0s) infinite;
+}
+
+.wall-art-spin--counterclockwise { animation-direction: reverse; }
+
+.wall-art {
+  display: block;
+  width: 100%;
+  height: 100%;
   opacity: var(--wall-opacity, 0.11);
   object-fit: contain;
   transform-origin: center;
   animation: wall-art-wobble var(--wall-speed, 14s) ease-in-out var(--wall-delay, -4s) infinite alternate;
 }
 
-.wall-art[hidden] { display: none !important; }
+.wall-art-spin[hidden] { display: none !important; }
+
+@keyframes wall-art-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(calc(var(--wall-angle, 0deg) + var(--wall-angle-jitter, 0deg)));
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(calc(var(--wall-angle, 0deg) + var(--wall-angle-jitter, 0deg) + 360deg));
+  }
+}
 
 .wall-art--treasure {
   --wall-angle: -12deg;
@@ -205,14 +224,11 @@ body[data-page-state="reward"][data-tier="splus"] {
 @keyframes wall-art-wobble {
   from {
     opacity: var(--wall-opacity);
-    transform: translate(-50%, -50%) rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg))) scale(0.96);
+    transform: translate(0, 0) scale(0.96);
   }
   to {
     opacity: var(--wall-bright);
-    transform:
-      translate(calc(-50% + var(--wall-drift-x, 0px)), calc(-50% + var(--wall-drift-y, 0px)))
-      rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg) + 6deg))
-      scale(1.02);
+    transform: translate(var(--wall-drift-x, 0px), var(--wall-drift-y, 0px)) scale(1.02);
   }
 }
 
@@ -754,11 +770,11 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
   .loading-hourglass-fallback { display: inline; font-size: 32px; }
   .loading-title, .loading-ellipsis span { animation: none; }
   .loading-ellipsis span { opacity: 1; transform: none; }
-  .wall-art {
+  .wall-art-spin {
     animation: none;
-    opacity: var(--wall-opacity);
     transform: translate(-50%, -50%) rotate(calc(var(--wall-angle) + var(--wall-angle-jitter, 0deg)));
   }
+  .wall-art { animation: none; opacity: var(--wall-opacity); transform: none; }
   .reward-decal {
     animation: none;
     transform: translate(-50%, -50%) rotate(var(--decal-angle, 0deg));

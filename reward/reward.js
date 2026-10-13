@@ -164,9 +164,11 @@ import {
     wallpaperItems = [];
     for (let index = 0; index < stampCount; index += 1) {
       wallpaperItems.push({
-        className: `wall-art wall-art--${(index % stampStyles) + 1}`,
+        className: `wall-art--${(index % stampStyles) + 1}`,
+        spinDirection: index % 2 === 0 ? "wall-art-spin--clockwise" : "wall-art-spin--counterclockwise",
         src: imageUrl,
-        element: null
+        element: null,
+        image: null
       });
     }
 
@@ -232,12 +234,15 @@ import {
       placed.push(point);
       visibleItems.add(item);
       if (!item.element) {
-        item.element = document.createElement("img");
-        item.element.className = item.className;
-        item.element.alt = "";
-        item.element.draggable = false;
-        item.element.decoding = "async";
+        item.element = document.createElement("span");
+        item.element.className = `wall-art-spin ${item.className} ${item.spinDirection}`;
         item.element.setAttribute("aria-hidden", "true");
+        item.image = document.createElement("img");
+        item.image.className = "wall-art";
+        item.image.alt = "";
+        item.image.draggable = false;
+        item.image.decoding = "async";
+        item.element.append(item.image);
       }
 
       item.element.hidden = false;
@@ -247,7 +252,7 @@ import {
       item.element.style.setProperty("--wall-angle-jitter", `${(Math.random() * 16 - 8).toFixed(1)}deg`);
       item.element.style.setProperty("--wall-drift-x", `${(Math.random() * 6 - 3).toFixed(1)}px`);
       item.element.style.setProperty("--wall-drift-y", `${(Math.random() * 6 - 3).toFixed(1)}px`);
-      if (item.element.getAttribute("src") !== item.src) item.element.src = item.src;
+      if (item.image.getAttribute("src") !== item.src) item.image.src = item.src;
       if (!item.element.isConnected) artWallpaper.append(item.element);
     }
 
@@ -255,7 +260,7 @@ import {
       if (visibleItems.has(item)) return;
       if (item.element) {
         item.element.hidden = true;
-        item.element.removeAttribute("src");
+        item.image.removeAttribute("src");
       }
     });
   }
