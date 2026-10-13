@@ -447,7 +447,7 @@ import {
     if (!awardCollection) return;
     const generation = ++awardCollectionGeneration;
     activeAwardCollection = { username, currentAssetId, assignments: [] };
-    awardCollectionHeading.textContent = `Awards for ${username} · newest first`;
+    awardCollectionHeading.textContent = `Awards for ${username} - newest first`;
     awardCollectionStatus.hidden = false;
     awardCollectionStatus.textContent = "Loading this award collection…";
     awardCollection.hidden = false;
