@@ -96,11 +96,13 @@ import { decryptReward } from "./reward-crypto.mjs";
       common: {
         badge: { translateY: [0, -1.5, 0], scale: [1, 1.025, 1], duration: 2800 },
         icon: { scale: [1, 1.34, 0.82, 1.17, 1], duration: 1850, delay: 120 },
+        artwork: { scale: [1, 1.018, 1], duration: 4600 },
         labelDuration: 5200,
         glint: { peak: 0.24, delay: 1550, duration: 2100 }
       },
       uncommon: {
         badge: { rotate: [0, -1.4, 1.4, 0], translateY: [0, -1.5, 0], duration: 2500 },
+        artwork: { scale: [1, 1.022, 1], duration: 4200 },
         icon: {
           rotate: [0, -24, 14, -8, 0],
           scale: [1, 1.2, 0.92, 1.12, 1],
@@ -113,6 +115,7 @@ import { decryptReward } from "./reward-crypto.mjs";
       },
       rare: {
         badge: { translateY: [0, -3, 0], scale: [1, 1.025, 1], duration: 2350 },
+        artwork: { scale: [1, 1.027, 1], duration: 3900 },
         icon: {
           rotateY: [0, 100, 200, 300, 360],
           rotate: [0, 8, -5, 4, 0],
@@ -131,6 +134,7 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.04, 1],
           duration: 2150
         },
+        artwork: { scale: [1, 1.032, 1], duration: 3600 },
         icon: {
           rotate: [0, 75, -30, 145, 360],
           scale: [1, 1.28, 0.86, 1.16, 1],
@@ -150,6 +154,7 @@ import { decryptReward } from "./reward-crypto.mjs";
           scale: [1, 1.035, 1],
           duration: 2800
         },
+        artwork: { scale: [1, 1.038, 1], duration: 3300 },
         icon: {
           translateY: [0, -6, -1, -4, 0],
           rotate: [0, -16, 11, -7, 0],
@@ -175,6 +180,7 @@ import { decryptReward } from "./reward-crypto.mjs";
 
     loopMotion(rewardTier, choreography.badge);
     loopMotion(tierIcon, choreography.icon);
+    loopMotion(rewardImage, choreography.artwork);
     anime({
       targets: tierName,
       backgroundPosition: ["0% 50%", "100% 50%"],
@@ -221,6 +227,7 @@ import { decryptReward } from "./reward-crypto.mjs";
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     rewardTier.dataset.tier = tier.id;
+    rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;

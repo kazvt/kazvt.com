@@ -193,6 +193,62 @@ h1 {
   margin: 0 auto;
 }
 
+.reward-image[data-tier] {
+  --art-glow-rgb: 100, 116, 139;
+  --art-glow-soft-low: 0.16;
+  --art-glow-soft-high: 0.38;
+  --art-glow-halo-low: 0.06;
+  --art-glow-halo-high: 0.17;
+  animation: reward-art-glow 4.8s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+.reward-image[data-tier="common"] {
+  --art-glow-rgb: 100, 116, 139;
+  animation-duration: 5.2s;
+}
+
+.reward-image[data-tier="uncommon"] {
+  --art-glow-rgb: 39, 131, 75;
+  --art-glow-soft-high: 0.42;
+  --art-glow-halo-high: 0.19;
+  animation-duration: 4.8s;
+}
+
+.reward-image[data-tier="rare"] {
+  --art-glow-rgb: 22, 116, 184;
+  --art-glow-soft-high: 0.46;
+  --art-glow-halo-high: 0.22;
+  animation-duration: 4.3s;
+}
+
+.reward-image[data-tier="epic"] {
+  --art-glow-rgb: 192, 98, 255;
+  --art-glow-soft-high: 0.5;
+  --art-glow-halo-high: 0.25;
+  animation-duration: 3.9s;
+}
+
+.reward-image[data-tier="legendary"] {
+  --art-glow-rgb: 255, 204, 70;
+  --art-glow-soft-high: 0.54;
+  --art-glow-halo-high: 0.29;
+  animation-duration: 3.5s;
+}
+
+@keyframes reward-art-glow {
+  from {
+    filter:
+      drop-shadow(0 0 7px rgba(var(--art-glow-rgb), var(--art-glow-soft-low)))
+      drop-shadow(0 0 18px rgba(var(--art-glow-rgb), var(--art-glow-halo-low)));
+  }
+  to {
+    filter:
+      drop-shadow(0 0 12px rgba(var(--art-glow-rgb), var(--art-glow-soft-high)))
+      drop-shadow(0 0 30px rgba(var(--art-glow-rgb), var(--art-glow-halo-high)));
+  }
+}
+
 .filename, .message {
   margin: 0;
   color: #aaa7b3;
@@ -213,6 +269,12 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .tier-glint { display: none; }
+  .reward-image[data-tier] {
+    animation: none;
+    filter:
+      drop-shadow(0 0 9px rgba(var(--art-glow-rgb), 0.3))
+      drop-shadow(0 0 20px rgba(var(--art-glow-rgb), 0.12));
+  }
 }
 
 [hidden] { display: none !important; }
