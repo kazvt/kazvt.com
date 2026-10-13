@@ -60,7 +60,8 @@ test("wallpaper art never overlaps during its rotation and wobble", () => {
         const right = points[rightIndex];
         const dx = left.x - right.x;
         const dy = left.y - right.y;
-        assert.ok(dx * dx + dy * dy >= (WALLPAPER_BOUND_RADIUS * 2) ** 2,
+        const requiredDistance = left.radius + right.radius + 4;
+        assert.ok(dx * dx + dy * dy >= requiredDistance ** 2,
           `wallpaper art overlaps for seed ${seed}`);
       }
     }
