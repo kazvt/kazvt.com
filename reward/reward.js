@@ -293,9 +293,9 @@ import {
       usernameMention(username)
     );
     awardNote.replaceChildren(
-      document.createTextNode("This artwork belongs only to "),
+      document.createTextNode("This belongs only to "),
       usernameMention(username),
-      document.createTextNode(". No other award receives the same artwork.")
+      document.createTextNode("! Nobody else has this reward but you!")
     );
   }
 
