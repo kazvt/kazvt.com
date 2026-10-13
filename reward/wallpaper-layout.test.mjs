@@ -4,6 +4,7 @@ import {
   WALLPAPER_ART_SIZE,
   WALLPAPER_FILLER_SIZE,
   WALLPAPER_MICRO_SIZE,
+  WALLPAPER_SPRINKLE_SIZE,
   createWallpaperLayout,
   wallpaperPointsForViewport
 } from "./wallpaper-layout.mjs";
@@ -87,9 +88,12 @@ test("smaller filler artwork increases the count while keeping the large repeats
   const large = points.filter(point => point.size === WALLPAPER_ART_SIZE);
   const fillers = points.filter(point => point.size === WALLPAPER_FILLER_SIZE);
   const micro = points.filter(point => point.size === WALLPAPER_MICRO_SIZE);
+  const sprinkles = points.filter(point => point.size === WALLPAPER_SPRINKLE_SIZE);
 
   assert.ok(large.length >= 10, "large wallpaper art remains the dominant size");
   assert.ok(fillers.length >= 5, "smaller repeats noticeably fill safe gaps between larger art");
   assert.ok(micro.length >= 6, "an extra small repeat layer fills more of the remaining safe gaps");
-  assert.ok(points.length > large.length, "the viewport shows more artwork overall");
+  assert.ok(sprinkles.length >= 10, "a dense sprinkle layer fills open pockets between the larger repeats");
+  assert.ok(points.length >= large.length + fillers.length + micro.length + 10,
+    "the viewport shows substantially more artwork overall");
 });

@@ -1,6 +1,7 @@
 export const WALLPAPER_ART_SIZE = 210;
 export const WALLPAPER_FILLER_SIZE = 96;
 export const WALLPAPER_MICRO_SIZE = 72;
+export const WALLPAPER_SPRINKLE_SIZE = 48;
 
 function boundRadiusFor(size) {
   return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
@@ -125,8 +126,12 @@ export function createWallpaperLayout(seed) {
   const existing = [...primary, ...fillers];
   const micro = createSingleSizeLayout(microSeed, WALLPAPER_MICRO_SIZE, existing.length)
     .filter(point => staysSeparated(point, existing));
+  const denserExisting = [...existing, ...micro];
+  const sprinkleSeed = (seed ^ 0x27d4eb2f) >>> 0;
+  const sprinkles = createSingleSizeLayout(sprinkleSeed, WALLPAPER_SPRINKLE_SIZE, denserExisting.length)
+    .filter(point => staysSeparated(point, denserExisting));
 
-  return [...primary, ...fillers, ...micro];
+  return [...denserExisting, ...sprinkles];
 }
 
 export function wallpaperPointsForViewport(layout, width, height, zoomCompensation = 1) {
