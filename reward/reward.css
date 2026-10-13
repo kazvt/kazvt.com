@@ -509,77 +509,77 @@ h1 {
 
 .reward-image[data-tier] {
   --art-glow-rgb: 153, 153, 204;
-  --art-glow-soft-low: 0.16;
-  --art-glow-soft-high: 0.38;
-  --art-glow-halo-low: 0.06;
-  --art-glow-halo-high: 0.17;
-  animation: reward-art-glow 4s ease-in-out infinite alternate;
+  --art-glow-soft-low: 0.2;
+  --art-glow-soft-high: 0.48;
+  --art-glow-halo-low: 0.09;
+  --art-glow-halo-high: 0.23;
+  animation: reward-art-glow 2.9s ease-in-out infinite alternate;
 }
 
 .reward-image[data-tier="common"] {
   --art-glow-rgb: 153, 153, 204;
-  animation-duration: 4.3s;
+  animation-duration: 3.1s;
 }
 
 .reward-image[data-tier="uncommon"] {
   --art-glow-rgb: 51, 153, 204;
-  --art-glow-soft-high: 0.42;
-  --art-glow-halo-high: 0.19;
-  animation-duration: 4s;
+  --art-glow-soft-high: 0.52;
+  --art-glow-halo-high: 0.27;
+  animation-duration: 2.9s;
 }
 
 .reward-image[data-tier="rare"] {
   --art-glow-rgb: 255, 51, 77;
-  --art-glow-soft-high: 0.46;
-  --art-glow-halo-high: 0.22;
-  animation-duration: 3.6s;
+  --art-glow-soft-high: 0.56;
+  --art-glow-halo-high: 0.3;
+  animation-duration: 2.65s;
 }
 
 .reward-image[data-tier="epic"] {
   --art-glow-rgb: 255, 153, 102;
-  --art-glow-soft-high: 0.5;
-  --art-glow-halo-high: 0.25;
-  animation-duration: 3.25s;
+  --art-glow-soft-high: 0.6;
+  --art-glow-halo-high: 0.34;
+  animation-duration: 2.4s;
 }
 
 .reward-image[data-tier="legendary"] {
   --art-glow-rgb: 204, 255, 102;
-  --art-glow-soft-high: 0.54;
-  --art-glow-halo-high: 0.29;
-  animation-duration: 2.9s;
+  --art-glow-soft-high: 0.64;
+  --art-glow-halo-high: 0.38;
+  animation-duration: 2.15s;
 }
 
 .reward-image[data-tier="mythic"] {
   --art-glow-rgb: 255, 193, 255;
-  --art-glow-soft-high: 0.57;
-  --art-glow-halo-high: 0.31;
-  animation-duration: 2.75s;
+  --art-glow-soft-high: 0.67;
+  --art-glow-halo-high: 0.41;
+  animation-duration: 2.05s;
 }
 
 .reward-image[data-tier="divine"] {
   --art-glow-rgb: 140, 255, 140;
-  --art-glow-soft-high: 0.6;
-  --art-glow-halo-high: 0.33;
-  animation-duration: 2.6s;
+  --art-glow-soft-high: 0.7;
+  --art-glow-halo-high: 0.44;
+  animation-duration: 1.9s;
 }
 
 .reward-image[data-tier="splus"] {
   --art-glow-rgb: 226, 209, 144;
-  --art-glow-soft-high: 0.64;
-  --art-glow-halo-high: 0.35;
-  animation-duration: 2.4s;
+  --art-glow-soft-high: 0.74;
+  --art-glow-halo-high: 0.48;
+  animation-duration: 1.75s;
 }
 
 @keyframes reward-art-glow {
   from {
     filter:
-      drop-shadow(0 0 7px rgba(var(--art-glow-rgb), var(--art-glow-soft-low)))
-      drop-shadow(0 0 18px rgba(var(--art-glow-rgb), var(--art-glow-halo-low)));
+      drop-shadow(0 0 9px rgba(var(--art-glow-rgb), var(--art-glow-soft-low)))
+      drop-shadow(0 0 22px rgba(var(--art-glow-rgb), var(--art-glow-halo-low)));
   }
   to {
     filter:
-      drop-shadow(0 0 12px rgba(var(--art-glow-rgb), var(--art-glow-soft-high)))
-      drop-shadow(0 0 30px rgba(var(--art-glow-rgb), var(--art-glow-halo-high)));
+      drop-shadow(0 0 16px rgba(var(--art-glow-rgb), var(--art-glow-soft-high)))
+      drop-shadow(0 0 42px rgba(var(--art-glow-rgb), var(--art-glow-halo-high)));
   }
 }
 

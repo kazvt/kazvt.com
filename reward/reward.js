@@ -658,17 +658,17 @@ import {
     const anime = await loadAnime();
     if (generation !== tierAnimationGeneration || rewardTier.dataset.tier !== tier) return;
     anime.remove([rewardTier, rewardArtworkMotion]);
-    const startLoop = (target, intensity) => anime({
+    const startLoop = (target, intensity, durationScale = 1) => anime({
       targets: target,
       ...motionProperties(motion, intensity),
-      duration: motion.duration,
+      duration: Math.max(900, Math.round(motion.duration * durationScale)),
       easing: "easeInOutSine",
       direction: "alternate",
       loop: true
     });
 
     // Each tier has one fixed motion. Ping-pong easing makes both ends of the loop settle smoothly.
-    startLoop(rewardArtworkMotion, 1);
+    startLoop(rewardArtworkMotion, 1.28, 0.72);
     startLoop(rewardTier, 0.42);
   }
 
