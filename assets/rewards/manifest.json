@@ -4,7 +4,7 @@
   "tierWeights": [
     {
       "id": "common",
-      "label": "Common",
+      "label": "Singular",
       "basisPoints": 3000
     },
     {
