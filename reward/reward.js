@@ -179,8 +179,9 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     const height = artWallpaper.clientHeight;
     if (!width || !height) return;
 
-    const baseSize = Math.max(44, Math.min(92, width * 0.085, height * 0.125));
-    const gap = Math.max(6, Math.min(10, baseSize * 0.11));
+    const baseSize = Math.max(54, Math.min(128, width * 0.12, height * 0.18));
+    const stampGap = size => Math.max(3, Math.min(6, size * 0.05));
+    const gap = stampGap(baseSize);
     const targetRadius = baseSize * Math.SQRT1_2 + 14;
     const targetDistance = targetRadius * 2 + gap;
     const inset = targetRadius + gap / 2 + 2;
@@ -197,7 +198,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
       const size = Math.max(36, baseSize * (0.9 + Math.random() * 0.22));
       // The circle encloses the rotated square image, plus its glow and gentle wobble.
       const radius = size * Math.SQRT1_2 + 14;
-      const itemGap = Math.max(6, Math.min(10, size * 0.11));
+      const itemGap = stampGap(size);
       const minX = radius + 3;
       const maxX = width - radius - 3;
       const minY = radius + 3;
