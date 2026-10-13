@@ -33,7 +33,7 @@ import {
     { id: "legendary", label: "Legendary", upperBound: 8600 },
     { id: "mythic", label: "Mythic", upperBound: 9250 },
     { id: "divine", label: "Divine", upperBound: 9700 },
-    { id: "splus", label: "S+", upperBound: 10000 }
+    { id: "splus", label: "GOOD SHIT", upperBound: 10000 }
   ];
   const TIER_MARKS = {
     common: "",
@@ -712,7 +712,7 @@ import {
     rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} demo tier`);
     tierIcon.textContent = TIER_MARKS[tier.id];
-    tierName.textContent = tier.label;
+    tierName.textContent = `TIER: ${tier.label}`;
     recipient.textContent = demoName;
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
     renderFilename(file);
@@ -782,7 +782,7 @@ import {
     rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
     tierIcon.textContent = TIER_MARKS[tier.id];
-    tierName.textContent = tier.label;
+    tierName.textContent = `TIER: ${tier.label}`;
     renderUsernameCopy(data.username);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardImage.setAttribute("aria-label", `${tier.label} reward artwork: ${file}`);

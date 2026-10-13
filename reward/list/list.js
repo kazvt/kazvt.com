@@ -116,7 +116,7 @@ import "../pattern-zoom.mjs?v=2";
 
     const meta = document.createElement("div");
     meta.className = "award-meta";
-    const badge = createText("span", "tier-badge", assignment.tierLabel);
+    const badge = createText("span", "tier-badge", `TIER: ${assignment.tierLabel}`);
     badge.dataset.tier = assignment.tierId;
     meta.append(badge);
     const date = document.createElement("time");
