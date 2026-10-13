@@ -1,6 +1,6 @@
 import { createRewardHref } from "../reward-link.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs";
-import "../pattern-zoom.mjs?v=1";
+import "../pattern-zoom.mjs?v=2";
 
 (() => {
   "use strict";
