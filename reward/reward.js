@@ -53,7 +53,6 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
   const tierName = document.getElementById("tierName");
   const awardNote = document.getElementById("awardNote");
   const artWallpaper = document.getElementById("artWallpaper");
-  const tierGlint = rewardTier.querySelector(".tier-glint");
   const demoButton = document.getElementById("demoAgain");
   const rewardCard = document.querySelector("main.reward-card");
   const rewardDecalLayer = document.getElementById("rewardDecals");
@@ -444,228 +443,66 @@ import { resolveRewardAsset } from "./asset-resolver.mjs";
     return animeLoad;
   }
 
+  const TIER_LOOP_MOTION = {
+    common: { type: "scale", amount: 0.035, duration: 4800 },
+    uncommon: { type: "rotate", amount: 1.25, duration: 5200 },
+    rare: { type: "translateY", amount: 2.2, duration: 4500 },
+    epic: { type: "translateX", amount: 2.5, duration: 5000 },
+    legendary: { type: "rotateY", amount: 3, duration: 5600 },
+    mythic: { type: "squish", amount: 0.028, duration: 3800 },
+    divine: { type: "scale", amount: 0.045, duration: 5200 },
+    splus: { type: "rotateY", amount: 4.5, duration: 4600 }
+  };
+  let tierAnimationGeneration = 0;
+
+  function motionProperties(motion, intensity) {
+    const amount = motion.amount * intensity;
+    switch (motion.type) {
+      case "scale":
+        return { scale: [1, 1 + amount] };
+      case "rotate":
+        return { rotate: [`${-amount}deg`, `${amount}deg`] };
+      case "translateY":
+        return { translateY: [`${-amount}px`, `${amount}px`] };
+      case "translateX":
+        return { translateX: [`${-amount}px`, `${amount}px`] };
+      case "rotateY":
+        return { rotateY: [`${-amount}deg`, `${amount}deg`] };
+      case "squish":
+        return {
+          scaleX: [1 - amount, 1 + amount],
+          scaleY: [1 + amount, 1 - amount]
+        };
+      default:
+        return {};
+    }
+  }
+
   async function animateTier(tier) {
+    const generation = ++tierAnimationGeneration;
+    if (typeof window.anime === "function") window.anime.remove([rewardTier, rewardImage]);
+    rewardTier.style.removeProperty("transform");
+    rewardImage.style.removeProperty("transform");
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
+    const motion = TIER_LOOP_MOTION[tier];
+    if (!motion) return;
+
     const anime = await loadAnime();
-    anime.remove([rewardTier, tierIcon, rewardImage, tierName, tierGlint]);
-    const choreography = {
-      common: {
-        badge: { translateY: [0, -1.5, 0], scale: [1, 1.025, 1], duration: 2800 },
-        icon: { scale: [1, 1.34, 0.82, 1.17, 1], duration: 1850, delay: 120 },
-        artwork: {
-          translateX: [0, -3, 3, -2, 0],
-          translateY: [0, -6, -2, -8, 0],
-          rotate: [0, -1.5, 1.8, -1, 0],
-          scale: [1, 1.045, 1.02, 1.055, 1],
-          duration: 5600,
-          direction: "normal"
-        },
-        labelDuration: 5200,
-        glint: { peak: 0.24, delay: 1550, duration: 2100 }
-      },
-      uncommon: {
-        badge: { rotate: [0, -1.4, 1.4, 0], translateY: [0, -1.5, 0], duration: 2500 },
-        artwork: {
-          translateX: [0, 6, -5, 4, 0],
-          translateY: [0, -8, -3, -10, 0],
-          rotate: [0, 2.5, -2.2, 1.8, 0],
-          scale: [1, 1.05, 1.025, 1.06, 1],
-          duration: 5300,
-          direction: "normal"
-        },
-        icon: {
-          rotate: [0, -24, 14, -8, 0],
-          scale: [1, 1.2, 0.92, 1.12, 1],
-          translateY: [0, -3, 1, -2, 0],
-          duration: 2050,
-          easing: "easeOutBack"
-        },
-        labelDuration: 4550,
-        glint: { peak: 0.38, delay: 1050, duration: 1850 }
-      },
-      rare: {
-        badge: { translateY: [0, -3, 0], scale: [1, 1.025, 1], duration: 2350 },
-        artwork: {
-          translateX: [0, -7, 7, -5, 0],
-          translateY: [0, -10, -4, -12, 0],
-          rotate: [0, -3.4, 3.6, -2.5, 0],
-          scale: [1, 1.06, 1.03, 1.07, 1],
-          duration: 5100,
-          direction: "normal"
-        },
-        icon: {
-          rotateY: [0, 100, 200, 300, 360],
-          rotate: [0, 8, -5, 4, 0],
-          scale: [1, 1.12, 0.94, 1.08, 1],
-          duration: 2650,
-          delay: 100,
-          direction: "normal"
-        },
-        labelDuration: 3750,
-        glint: { peak: 0.58, delay: 760, duration: 1850 }
-      },
-      epic: {
-        badge: {
-          translateY: [0, -2, 0],
-          rotate: [0, -1.5, 0, 1.5, 0],
-          scale: [1, 1.04, 1],
-          duration: 2150
-        },
-        artwork: {
-          translateX: [0, 8, -7, 8, 0],
-          translateY: [0, -12, -5, -14, 0],
-          rotate: [0, 4, -3.8, 3, 0],
-          scale: [1, 1.075, 1.04, 1.085, 1],
-          duration: 4900,
-          direction: "normal"
-        },
-        icon: {
-          rotate: [0, 75, -30, 145, 360],
-          scale: [1, 1.28, 0.86, 1.16, 1],
-          translateY: [0, -5, 1, -3, 0],
-          duration: 1950,
-          delay: 150,
-          easing: "easeOutBack",
-          direction: "normal"
-        },
-        labelDuration: 3050,
-        glint: { peak: 0.84, delay: 560, duration: 1650 }
-      },
-      legendary: {
-        badge: {
-          translateY: [0, -2, 1, -1, 0],
-          rotate: [0, 1.2, -1, 0.6, 0],
-          scale: [1, 1.035, 1],
-          duration: 2800
-        },
-        artwork: {
-          translateX: [0, -8, 9, -6, 0],
-          translateY: [0, -13, -4, -11, 0],
-          rotate: [0, -4.2, 4.6, -3.2, 0],
-          scale: [1, 1.08, 1.045, 1.09, 1],
-          duration: 5000,
-          direction: "normal"
-        },
-        icon: {
-          translateY: [0, -6, -1, -4, 0],
-          rotate: [0, -16, 11, -7, 0],
-          scale: [1, 1.32, 1.03, 1.2, 1],
-          duration: 2050,
-          easing: "easeOutBack"
-        },
-        labelDuration: 2500,
-        glint: { peak: 0.98, delay: 420, duration: 1550 }
-      },
-      mythic: {
-        badge: {
-          translateY: [0, -3, 1, -2, 0],
-          rotate: [0, -2, 1.5, -1, 0],
-          scale: [1, 1.045, 0.99, 1.025, 1],
-          duration: 2400
-        },
-        artwork: {
-          translateX: [0, 9, -9, 7, 0],
-          translateY: [0, -15, -6, -13, 0],
-          rotate: [0, 4.8, -4.5, 3.8, 0],
-          scale: [1, 1.09, 1.05, 1.1, 1],
-          duration: 4700,
-          direction: "normal"
-        },
-        icon: {
-          rotate: [0, 140, -35, 230, 360],
-          scale: [1, 1.3, 0.9, 1.18, 1],
-          translateY: [0, -7, 1, -3, 0],
-          duration: 2250,
-          easing: "easeOutBack",
-          direction: "normal"
-        },
-        labelDuration: 2450,
-        glint: { peak: 1, delay: 330, duration: 1450 }
-      },
-      divine: {
-        badge: {
-          translateY: [0, -2, 0, 1, 0],
-          rotate: [0, 1.2, -1.2, 0.6, 0],
-          scale: [1, 1.04, 1],
-          duration: 2900
-        },
-        artwork: {
-          translateX: [0, -10, 8, -9, 0],
-          translateY: [0, -16, -5, -14, 0],
-          rotate: [0, -5, 4.2, -4.3, 0],
-          scale: [1, 1.095, 1.05, 1.105, 1],
-          duration: 5000,
-          direction: "normal"
-        },
-        icon: {
-          rotateY: [0, 90, 180, 270, 360],
-          scale: [1, 1.25, 0.9, 1.18, 1],
-          duration: 2700,
-          direction: "normal"
-        },
-        labelDuration: 2200,
-        glint: { peak: 1, delay: 220, duration: 1250 }
-      },
-      splus: {
-        badge: {
-          translateY: [0, -4, 0, -2, 0],
-          rotate: [0, -2.5, 2, -1, 0],
-          scale: [1, 1.06, 0.98, 1.035, 1],
-          duration: 2000
-        },
-        artwork: {
-          translateX: [0, 11, -10, 9, 0],
-          translateY: [0, -17, -6, -15, 0],
-          rotate: [0, 5.5, -5.2, 4.8, 0],
-          scale: [1, 1.11, 1.055, 1.12, 1],
-          duration: 4700,
-          direction: "normal"
-        },
-        icon: {
-          rotate: [0, 180, -60, 360],
-          scale: [1, 1.42, 0.86, 1.24, 1],
-          translateY: [0, -8, 2, -4, 0],
-          duration: 1850,
-          easing: "easeOutBack",
-          direction: "normal"
-        },
-        labelDuration: 1950,
-        glint: { peak: 1, delay: 160, duration: 1100 }
-      }
-    }[tier];
-
-    function loopMotion(target, motion) {
-      const { direction = "alternate", easing = "easeInOutSine", ...properties } = motion;
-      anime({
-        targets: target,
-        ...properties,
-        direction,
-        easing,
-        loop: true
-      });
-    }
-
-    loopMotion(rewardTier, choreography.badge);
-    loopMotion(tierIcon, choreography.icon);
-    loopMotion(rewardImage, choreography.artwork);
-    anime({
-      targets: tierName,
-      backgroundPosition: ["0% 50%", "100% 50%"],
-      duration: choreography.labelDuration,
-      direction: "alternate",
+    if (generation !== tierAnimationGeneration || rewardTier.dataset.tier !== tier) return;
+    anime.remove([rewardTier, rewardImage]);
+    const startLoop = (target, intensity) => anime({
+      targets: target,
+      ...motionProperties(motion, intensity),
+      duration: motion.duration,
       easing: "easeInOutSine",
+      direction: "alternate",
       loop: true
     });
-    anime({
-      targets: tierGlint,
-      translateX: ["-250%", "600%"],
-      opacity: [0, choreography.glint.peak, 0],
-      delay: choreography.glint.delay,
-      duration: choreography.glint.duration,
-      easing: "linear",
-      loop: true
-    });
+
+    // Each tier has one fixed motion. Ping-pong easing makes both ends of the loop settle smoothly.
+    startLoop(rewardImage, 1);
+    startLoop(rewardTier, 0.42);
   }
 
   function randomIndex(length) {

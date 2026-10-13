@@ -343,6 +343,10 @@ body[data-page-state="error"] .reward-card {
   padding-top: 0;
 }
 
+#rewardState {
+  perspective: 900px;
+}
+
 .tier-badge {
   --tier-ink: #fff8ff;
   --tier-fill: linear-gradient(135deg, var(--palette-panel), var(--palette-background));
@@ -365,6 +369,7 @@ body[data-page-state="error"] .reward-card {
   box-shadow: 3px 3px 0 color-mix(in srgb, var(--tier-edge) 55%, transparent);
   isolation: isolate;
   transform-origin: center center;
+  transform-style: preserve-3d;
   white-space: nowrap;
 }
 
@@ -447,44 +452,14 @@ body[data-page-state="error"] .reward-card {
 
 .tier-name {
   background-image: var(--tier-text-gradient);
-  background-size: 300% 100%;
-  background-position: 0% 50%;
+  background-size: 100% 100%;
+  background-position: 50% 50%;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   font-size: 13px;
   font-weight: 900;
   letter-spacing: .09em;
-}
-
-.tier-glint {
-  position: absolute;
-  z-index: 0;
-  top: -50%;
-  bottom: -50%;
-  left: -25%;
-  width: 22%;
-  opacity: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 88%), transparent);
-  mix-blend-mode: screen;
-  transform: translateX(-250%) rotate(18deg);
-}
-
-.tier-badge[data-tier="rare"] .tier-glint {
-  opacity: .55;
-}
-
-.tier-badge[data-tier="epic"] .tier-glint {
-  width: 30%;
-  opacity: .68;
-  background: linear-gradient(90deg, transparent, rgb(255 231 255 / 95%), transparent);
-}
-
-.tier-badge[data-tier="legendary"] .tier-glint {
-  width: 34%;
-  opacity: .78;
-  background: linear-gradient(90deg, transparent, #fff, #fff7c2, transparent);
 }
 
 h1 {
@@ -512,6 +487,7 @@ h1 {
   --art-glow-halo-high: 0.17;
   animation: reward-art-glow 4.8s ease-in-out infinite alternate;
   transform-origin: center;
+  transform-style: preserve-3d;
 }
 
 .reward-image[data-tier="common"] {
@@ -612,7 +588,6 @@ h1 {
   .loading-hourglass-fallback { display: inline; font-size: 32px; }
   .loading-title, .loading-ellipsis span { animation: none; }
   .loading-ellipsis span { opacity: 1; transform: none; }
-  .tier-glint { display: none; }
   .wall-art {
     animation: none;
     opacity: var(--wall-opacity);
