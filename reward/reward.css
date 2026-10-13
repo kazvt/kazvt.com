@@ -190,6 +190,18 @@ body[data-tier="splus"] {
   filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 9px rgb(255 193 76 / 38%));
 }
 
+.wall-art--coin {
+  bottom: 14%;
+  left: 3%;
+  width: clamp(54px, 7vw, 96px);
+  --wall-angle: -9deg;
+  --wall-opacity: 0.82;
+  --wall-bright: 1;
+  --wall-speed: 8s;
+  --wall-delay: -3s;
+  filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 10px rgb(255 92 50 / 48%));
+}
+
 .wall-art--1  { --wall-angle: -27deg; --wall-opacity: 0.08; --wall-bright: 0.13; --wall-speed: 13s; --wall-delay: -3s; }
 .wall-art--2  { --wall-angle: 18deg; --wall-opacity: 0.13; --wall-bright: 0.18; --wall-speed: 17s; --wall-delay: -11s; }
 .wall-art--3  { --wall-angle: -9deg; --wall-opacity: 0.1; --wall-bright: 0.16; --wall-speed: 15s; --wall-delay: -8s; }
@@ -498,7 +510,8 @@ h1 {
   .tier-glint { display: none; }
   .wall-art--treasure,
   .wall-art--treasure-two,
-  .wall-art--winner { display: none; }
+  .wall-art--winner,
+  .wall-art--coin { display: none; }
   .wall-art {
     animation: none;
     opacity: var(--wall-opacity);
