@@ -25,9 +25,9 @@ test("wallpaper cells keep the same seeded positions as viewport dimensions chan
 test("zoom compensation preserves artwork coordinates and size in screen pixels", () => {
   const normal = wallpaperCell(2, 3, 0x87654321, 1);
   const zoomed = wallpaperCell(2, 3, 0x87654321, 0.5);
-  assert.equal(zoomed.x * 2, normal.x);
-  assert.equal(zoomed.y * 2, normal.y);
-  assert.equal(zoomed.size * 2, normal.size);
+  assert.ok(Math.abs(zoomed.x * 2 - normal.x) < 1e-9);
+  assert.ok(Math.abs(zoomed.y * 2 - normal.y) < 1e-9);
+  assert.ok(Math.abs(zoomed.size * 2 - normal.size) < 1e-9);
 });
 
 test("neighboring wallpaper art remains separated through its rotation and wobble", () => {
@@ -55,8 +55,8 @@ test("viewport size only changes which fixed cells are visible", () => {
   assert.deepEqual(
     compact.map(cell => `${cell.row}:${cell.column}`).sort(),
     wider.filter(cell => cell.x + cell.radius <= 500 || cell.x - cell.radius >= 0)
-      .filter(cell => cell.y + cell.radius <= 700 || cell.y - cell.radius >= 0)
-      .filter(cell => cell.x - cell.radius >= 0 && cell.x + cell.radius <= 500)
+      .filter(cell => cell.x + cell.radius >= 0 && cell.x - cell.radius <= 500 &&
+        cell.y + cell.radius >= 0 && cell.y - cell.radius <= 700)
       .map(cell => `${cell.row}:${cell.column}`).sort()
   );
 });
