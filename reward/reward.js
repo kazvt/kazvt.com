@@ -87,6 +87,7 @@ import {
   const wallpaperSlots = new Map();
   let wallpaperLayout = [];
   let wallpaperImageUrl = "";
+  let wallpaperLayoutFrame = 0;
   let wallpaperResizeTimer = 0;
   let decalLayoutSeed = 1;
   let activeAwardCollection = null;
@@ -223,9 +224,14 @@ import {
   }
 
   function scheduleWallpaperLayout() {
+    if (!wallpaperLayoutFrame) {
+      wallpaperLayoutFrame = window.requestAnimationFrame(() => {
+        wallpaperLayoutFrame = 0;
+        layoutArtWallpaper();
+      });
+    }
     window.clearTimeout(wallpaperResizeTimer);
     wallpaperResizeTimer = window.setTimeout(() => {
-      layoutArtWallpaper();
       layoutRewardDecals();
       layoutUserAwardCollection();
     }, 180);
