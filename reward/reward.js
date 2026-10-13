@@ -1,6 +1,7 @@
 import { decryptReward } from "./reward-crypto.mjs";
 import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs";
+import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import "./pattern-zoom.mjs?v=2";
 import {
   buildTwoRowAwardPreview,
@@ -113,18 +114,6 @@ import {
     return (hash >>> 0) || 1;
   }
 
-  function pointOnPerimeter(distance, width, height) {
-    const perimeter = 2 * (width + height);
-    let offset = ((distance % perimeter) + perimeter) % perimeter;
-    if (offset < width) return { x: offset, y: 0 };
-    offset -= width;
-    if (offset < height) return { x: width, y: offset };
-    offset -= height;
-    if (offset < width) return { x: width - offset, y: height };
-    offset -= width;
-    return { x: 0, y: height - offset };
-  }
-
   function layoutRewardDecals() {
     if (!rewardDecalLayer || document.body.dataset.pageState !== "reward") return;
 
@@ -139,15 +128,10 @@ import {
       [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
     }
 
-    const perimeter = 2 * (width + height);
-    const step = perimeter / items.length;
-    const size = Math.max(24, Math.min(76, Math.min(width, height) * 0.16, step / 1.9));
-    const maximumJitter = Math.max(0, Math.min(step * 0.18, (step - size * 1.9) * 0.45));
-    const start = random() * step;
+    const positions = layoutSideEdgeDecals(width, height, items.length, decalLayoutSeed);
 
     items.forEach((item, index) => {
-      const jitter = (random() * 2 - 1) * maximumJitter;
-      const point = pointOnPerimeter(start + (index + 0.5) * step + jitter, width, height);
+      const point = positions[index];
       let element = decalElements.get(item.src);
       if (!element) {
         element = document.createElement("img");
@@ -163,8 +147,8 @@ import {
       element.hidden = false;
       element.style.left = `${point.x}px`;
       element.style.top = `${point.y}px`;
-      element.style.setProperty("--decal-size", `${size}px`);
-      element.style.setProperty("--decal-angle", `${(random() * 26 - 13).toFixed(1)}deg`);
+      element.style.setProperty("--decal-size", `${point.size}px`);
+      element.style.setProperty("--decal-angle", `${point.angle.toFixed(1)}deg`);
       if (element.parentElement !== rewardDecalLayer) rewardDecalLayer.append(element);
     });
   }
