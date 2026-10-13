@@ -23,7 +23,7 @@ body {
   --palette-background: #15151a;
   --palette-panel: #101014;
   --palette-accent: #c9c9d1;
-  --palette-pattern: url("/reward/patterns/loading.gif");
+  --palette-pattern: url("/reward/patterns/loading-stars.gif");
   position: relative;
   isolation: isolate;
   min-height: 100vh;
