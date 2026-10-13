@@ -31,8 +31,44 @@ import { decryptReward } from "./reward-crypto.mjs";
   const tierIcon = document.getElementById("tierIcon");
   const tierName = document.getElementById("tierName");
   const awardNote = document.getElementById("awardNote");
+  const artWallpaper = document.getElementById("artWallpaper");
+  const motionToggle = document.getElementById("motionToggle");
   const tierGlint = rewardTier.querySelector(".tier-glint");
+  const activeAnimations = [];
   let animeLoad;
+  let motionPaused = false;
+
+  motionToggle.addEventListener("click", () => {
+    motionPaused = !motionPaused;
+    document.documentElement.classList.toggle("motion-paused", motionPaused);
+    activeAnimations.forEach(animation => motionPaused ? animation.pause() : animation.play());
+    motionToggle.textContent = motionPaused ? "Resume animations" : "Pause animations";
+  });
+
+  function startTrackedAnimation(anime, options) {
+    const animation = anime(options);
+    activeAnimations.push(animation);
+    if (motionPaused) animation.pause();
+    return animation;
+  }
+
+  function populateArtWallpaper(imageUrl) {
+    const stampCount = 36;
+    const stampStyles = 12;
+    const stamps = document.createDocumentFragment();
+
+    for (let index = 0; index < stampCount; index += 1) {
+      const stamp = document.createElement("img");
+      stamp.className = `wall-art wall-art--${(index % stampStyles) + 1}`;
+      stamp.src = imageUrl;
+      stamp.alt = "";
+      stamp.draggable = false;
+      stamp.decoding = "async";
+      stamps.append(stamp);
+    }
+
+    artWallpaper.replaceChildren(stamps);
+  }
 
   function showError(message) {
     loadingState.hidden = true;
@@ -169,7 +205,7 @@ import { decryptReward } from "./reward-crypto.mjs";
 
     function loopMotion(target, motion) {
       const { direction = "alternate", easing = "easeInOutSine", ...properties } = motion;
-      anime({
+      startTrackedAnimation(anime, {
         targets: target,
         ...properties,
         direction,
@@ -181,7 +217,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     loopMotion(rewardTier, choreography.badge);
     loopMotion(tierIcon, choreography.icon);
     loopMotion(rewardImage, choreography.artwork);
-    anime({
+    startTrackedAnimation(anime, {
       targets: tierName,
       backgroundPosition: ["0% 50%", "100% 50%"],
       duration: choreography.labelDuration,
@@ -189,7 +225,7 @@ import { decryptReward } from "./reward-crypto.mjs";
       easing: "easeInOutSine",
       loop: true
     });
-    anime({
+    startTrackedAnimation(anime, {
       targets: tierGlint,
       translateX: ["-250%", "600%"],
       opacity: [0, choreography.glint.peak, 0],
@@ -232,7 +268,9 @@ import { decryptReward } from "./reward-crypto.mjs";
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = tier.label;
     awardNote.textContent = `One-of-one award for ${data.username}. Artwork assigned once; no repeat issuance.`;
-    rewardImage.src = `/assets/rewards/${encodeURIComponent(data.file)}`;
+    const imageUrl = `/assets/rewards/${encodeURIComponent(data.file)}`;
+    rewardImage.src = imageUrl;
+    populateArtWallpaper(imageUrl);
     rewardImage.alt = `${tier.label} reward artwork: ${data.file}`;
     rewardImage.onerror = () => showError("Award image unavailable.");
     recipient.textContent = `For ${data.username}`;
