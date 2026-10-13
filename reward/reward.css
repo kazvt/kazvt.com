@@ -102,7 +102,7 @@ body[data-page-state="reward"][data-tier="splus"] {
   --palette-pattern: url("/reward/patterns/sand.gif");
 }
 
-/* Demos show tier information, but only issued direct links receive tier palettes. */
+/* Demos keep the loading-page backdrop, while their badge still previews the actual tier look. */
 body[data-reward-demo][data-page-state="reward"][data-tier] {
   --palette-background: #15151a;
   --palette-panel: #101014;
@@ -110,8 +110,25 @@ body[data-reward-demo][data-page-state="reward"][data-tier] {
   --palette-pattern: url("/reward/patterns/loading-stars.gif");
 }
 
-body[data-reward-demo][data-page-state="reward"][data-tier] .reward-image[data-tier] {
-  --art-glow-rgb: 201, 201, 209;
+body[data-reward-demo][data-page-state="reward"][data-tier="common"] .tier-badge { --demo-tier-accent: #9999cc; }
+body[data-reward-demo][data-page-state="reward"][data-tier="uncommon"] .tier-badge { --demo-tier-accent: #3399cc; }
+body[data-reward-demo][data-page-state="reward"][data-tier="rare"] .tier-badge { --demo-tier-accent: #ff334d; }
+body[data-reward-demo][data-page-state="reward"][data-tier="epic"] .tier-badge { --demo-tier-accent: #ff9966; }
+body[data-reward-demo][data-page-state="reward"][data-tier="legendary"] .tier-badge { --demo-tier-accent: #ccff66; }
+body[data-reward-demo][data-page-state="reward"][data-tier="mythic"] .tier-badge { --demo-tier-accent: #ffc1ff; }
+body[data-reward-demo][data-page-state="reward"][data-tier="divine"] .tier-badge { --demo-tier-accent: #8cff8c; }
+body[data-reward-demo][data-page-state="reward"][data-tier="splus"] .tier-badge { --demo-tier-accent: #e2d190; }
+
+body[data-reward-demo][data-page-state="reward"][data-tier] .tier-badge {
+  --palette-accent: var(--demo-tier-accent);
+  --tier-edge: var(--demo-tier-accent);
+  --tier-mark: var(--demo-tier-accent);
+  --tier-fill: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--demo-tier-accent) 24%, #201b28),
+    #101014 82%
+  );
+  --tier-text-gradient: linear-gradient(100deg, #fff 0%, var(--demo-tier-accent) 48%, #fff 100%);
 }
 
 .art-wallpaper {
