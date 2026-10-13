@@ -208,18 +208,18 @@ body[data-page-state="reward"][data-tier="splus"] {
   filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 10px rgb(255 105 174 / 48%));
 }
 
-.wall-art--1  { --wall-angle: -27deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 13s; --wall-delay: -3s; }
-.wall-art--2  { --wall-angle: 18deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 17s; --wall-delay: -11s; }
-.wall-art--3  { --wall-angle: -9deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 15s; --wall-delay: -8s; }
-.wall-art--4  { --wall-angle: 34deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 19s; --wall-delay: -6s; }
-.wall-art--5  { --wall-angle: -41deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 12s; --wall-delay: -9s; }
-.wall-art--6  { --wall-angle: 12deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 16s; --wall-delay: -13s; }
-.wall-art--7  { --wall-angle: -18deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 21s; --wall-delay: -5s; }
-.wall-art--8  { --wall-angle: 43deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 14s; --wall-delay: -10s; }
-.wall-art--9  { --wall-angle: -34deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 18s; --wall-delay: -15s; }
-.wall-art--10 { --wall-angle: 25deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 12s; --wall-delay: -7s; }
-.wall-art--11 { --wall-angle: -13deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 20s; --wall-delay: -12s; }
-.wall-art--12 { --wall-angle: 38deg; --wall-opacity: .8; --wall-bright: .8; --wall-speed: 16s; --wall-delay: -2s; }
+.wall-art--1  { --wall-angle: -27deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 13s; --wall-delay: -3s; }
+.wall-art--2  { --wall-angle: 18deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 17s; --wall-delay: -11s; }
+.wall-art--3  { --wall-angle: -9deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 15s; --wall-delay: -8s; }
+.wall-art--4  { --wall-angle: 34deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 19s; --wall-delay: -6s; }
+.wall-art--5  { --wall-angle: -41deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 12s; --wall-delay: -9s; }
+.wall-art--6  { --wall-angle: 12deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 16s; --wall-delay: -13s; }
+.wall-art--7  { --wall-angle: -18deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 21s; --wall-delay: -5s; }
+.wall-art--8  { --wall-angle: 43deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 14s; --wall-delay: -10s; }
+.wall-art--9  { --wall-angle: -34deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 18s; --wall-delay: -15s; }
+.wall-art--10 { --wall-angle: 25deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 12s; --wall-delay: -7s; }
+.wall-art--11 { --wall-angle: -13deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 20s; --wall-delay: -12s; }
+.wall-art--12 { --wall-angle: 38deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 16s; --wall-delay: -2s; }
 
 @keyframes wall-art-wobble {
   from {
