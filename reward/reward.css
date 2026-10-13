@@ -99,17 +99,25 @@ body[data-tier="splus"] {
   position: fixed;
   z-index: 0;
   inset: 0;
-  display: block;
+  --wall-padding: clamp(10px, 1.5vw, 22px);
+  --wall-gap: clamp(10px, 1.4vw, 20px);
+  display: grid;
+  grid-template-columns: repeat(var(--wall-columns, 1), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--wall-rows, 1), minmax(0, 1fr));
+  gap: var(--wall-gap);
+  padding: var(--wall-padding);
   overflow: hidden;
   pointer-events: none;
   user-select: none;
 }
 
 .wall-art {
-  position: absolute;
+  position: relative;
   display: block;
-  width: clamp(48px, 8vw, 112px);
-  max-width: 100%;
+  place-self: center;
+  width: min(52%, 96px);
+  max-width: 58%;
+  max-height: 52%;
   height: auto;
   opacity: var(--wall-opacity, 0.11);
   object-fit: contain;
@@ -117,47 +125,9 @@ body[data-tier="splus"] {
   animation: wall-art-wobble var(--wall-speed, 14s) ease-in-out var(--wall-delay, -4s) infinite alternate;
 }
 
-.wall-art:nth-child(1)  { left: 1%;  top: 4%; }
-.wall-art:nth-child(2)  { left: 14%; top: 17%; }
-.wall-art:nth-child(3)  { left: 27%; top: 3%; }
-.wall-art:nth-child(4)  { left: 42%; top: 12%; }
-.wall-art:nth-child(5)  { left: 58%; top: 2%; }
-.wall-art:nth-child(6)  { left: 73%; top: 11%; }
-.wall-art:nth-child(7)  { left: 88%; top: 3%; }
-.wall-art:nth-child(8)  { left: 5%;  top: 27%; }
-.wall-art:nth-child(9)  { left: 19%; top: 38%; }
-.wall-art:nth-child(10) { left: 33%; top: 23%; }
-.wall-art:nth-child(11) { left: 48%; top: 34%; }
-.wall-art:nth-child(12) { left: 64%; top: 25%; }
-.wall-art:nth-child(13) { left: 81%; top: 32%; }
-.wall-art:nth-child(14) { left: 93%; top: 23%; }
-.wall-art:nth-child(15) { left: 2%;  top: 51%; }
-.wall-art:nth-child(16) { left: 15%; top: 65%; }
-.wall-art:nth-child(17) { left: 29%; top: 52%; }
-.wall-art:nth-child(18) { left: 44%; top: 66%; }
-.wall-art:nth-child(19) { left: 60%; top: 53%; }
-.wall-art:nth-child(20) { left: 76%; top: 65%; }
-.wall-art:nth-child(21) { left: 91%; top: 51%; }
-.wall-art:nth-child(22) { left: 7%;  top: 81%; }
-.wall-art:nth-child(23) { left: 23%; top: 88%; }
-.wall-art:nth-child(24) { left: 38%; top: 82%; }
-.wall-art:nth-child(25) { left: 54%; top: 92%; }
-.wall-art:nth-child(26) { left: 69%; top: 82%; }
-.wall-art:nth-child(27) { left: 84%; top: 92%; }
-.wall-art:nth-child(28) { left: 96%; top: 78%; }
-.wall-art:nth-child(29) { left: 11%; top: 43%; }
-.wall-art:nth-child(30) { left: 26%; top: 8%; }
-.wall-art:nth-child(31) { left: 39%; top: 47%; }
-.wall-art:nth-child(32) { left: 56%; top: 72%; }
-.wall-art:nth-child(33) { left: 71%; top: 43%; }
-.wall-art:nth-child(34) { left: 86%; top: 17%; }
-.wall-art:nth-child(35) { left: 46%; top: 87%; }
-.wall-art:nth-child(36) { left: 3%;  top: 95%; }
+.wall-art[hidden] { display: none !important; }
 
 .wall-art--treasure {
-  top: 16%;
-  left: 3%;
-  width: clamp(68px, 9vw, 128px);
   --wall-angle: -12deg;
   --wall-opacity: 0.76;
   --wall-bright: 0.98;
@@ -167,9 +137,6 @@ body[data-tier="splus"] {
 }
 
 .wall-art--winner {
-  right: 3%;
-  bottom: 13%;
-  width: clamp(64px, 8vw, 116px);
   --wall-angle: 11deg;
   --wall-opacity: 0.78;
   --wall-bright: 1;
@@ -179,9 +146,6 @@ body[data-tier="splus"] {
 }
 
 .wall-art--treasure-two {
-  top: 18%;
-  right: 3%;
-  width: clamp(68px, 9vw, 128px);
   --wall-angle: 14deg;
   --wall-opacity: 0.72;
   --wall-bright: 0.98;
@@ -191,9 +155,6 @@ body[data-tier="splus"] {
 }
 
 .wall-art--coin {
-  bottom: 14%;
-  left: 3%;
-  width: clamp(54px, 7vw, 96px);
   --wall-angle: -9deg;
   --wall-opacity: 0.82;
   --wall-bright: 1;
@@ -203,9 +164,6 @@ body[data-tier="splus"] {
 }
 
 .wall-art--wow {
-  top: 46%;
-  left: 4%;
-  width: clamp(58px, 8vw, 88px);
   --wall-angle: 8deg;
   --wall-opacity: 0.9;
   --wall-bright: 1;
@@ -215,9 +173,6 @@ body[data-tier="splus"] {
 }
 
 .wall-art--genie {
-  top: 45%;
-  right: 4%;
-  width: clamp(64px, 9vw, 108px);
   --wall-angle: -8deg;
   --wall-opacity: 0.9;
   --wall-bright: 1;
@@ -227,9 +182,6 @@ body[data-tier="splus"] {
 }
 
 .wall-art--dance {
-  top: 29%;
-  left: 4%;
-  width: clamp(48px, 6.4vw, 76px);
   --wall-angle: 6deg;
   --wall-opacity: 0.9;
   --wall-bright: 1;
@@ -254,11 +206,11 @@ body[data-tier="splus"] {
 @keyframes wall-art-wobble {
   from {
     opacity: var(--wall-opacity);
-    transform: translateY(0) rotate(var(--wall-angle)) scale(0.92);
+    transform: translateY(0) rotate(var(--wall-angle)) scale(0.96);
   }
   to {
     opacity: var(--wall-bright);
-    transform: translateY(-12px) rotate(calc(var(--wall-angle) + 9deg)) scale(1.08);
+    transform: translateY(-4px) rotate(calc(var(--wall-angle) + 6deg)) scale(1.02);
   }
 }
 

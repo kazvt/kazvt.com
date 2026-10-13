@@ -57,42 +57,103 @@ import { decryptReward } from "./reward-crypto.mjs";
   let rewardCatalogPromise;
   let lastDemoFile = "";
   let lastDemoName = "";
+  let wallpaperItems = [];
+  let wallpaperResizeFrame = 0;
+
+  const RETRO_DECALS = [
+    { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
+    { className: "wall-art--treasure-two", src: "/reward/retro/treasure-chest-2.gif" },
+    { className: "wall-art--winner", src: "/reward/retro/winner-trophy.gif" },
+    { className: "wall-art--coin", src: "/reward/retro/coin.gif" },
+    { className: "wall-art--wow", src: "/reward/retro/wow.gif" },
+    { className: "wall-art--genie", src: "/reward/retro/genie.gif" },
+    { className: "wall-art--dance", src: "/reward/retro/dance.gif" }
+  ];
 
   function populateArtWallpaper(imageUrl) {
     const stampCount = 36;
     const stampStyles = 12;
-    const stamps = document.createDocumentFragment();
+
+    wallpaperItems = RETRO_DECALS.map(decal => ({
+      className: `wall-art ${decal.className}`,
+      src: decal.src,
+      element: null
+    }));
 
     for (let index = 0; index < stampCount; index += 1) {
-      const stamp = document.createElement("img");
-      stamp.className = `wall-art wall-art--${(index % stampStyles) + 1}`;
-      stamp.src = imageUrl;
-      stamp.alt = "";
-      stamp.draggable = false;
-      stamp.decoding = "async";
-      stamps.append(stamp);
+      wallpaperItems.push({
+        className: `wall-art wall-art--${(index % stampStyles) + 1}`,
+        src: imageUrl,
+        element: null
+      });
     }
 
-    for (const decal of [
-      { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
-      { className: "wall-art--treasure-two", src: "/reward/retro/treasure-chest-2.gif" },
-      { className: "wall-art--winner", src: "/reward/retro/winner-trophy.gif" },
-      { className: "wall-art--coin", src: "/reward/retro/coin.gif" },
-      { className: "wall-art--wow", src: "/reward/retro/wow.gif" },
-      { className: "wall-art--genie", src: "/reward/retro/genie.gif" },
-      { className: "wall-art--dance", src: "/reward/retro/dance.gif" }
-    ]) {
-      const stamp = document.createElement("img");
-      stamp.className = `wall-art ${decal.className}`;
-      stamp.src = decal.src;
-      stamp.alt = "";
-      stamp.draggable = false;
-      stamp.decoding = "async";
-      stamps.append(stamp);
-    }
-
-    artWallpaper.replaceChildren(stamps);
+    artWallpaper.replaceChildren();
+    layoutArtWallpaper();
   }
+
+  function layoutArtWallpaper() {
+    if (!artWallpaper || wallpaperItems.length === 0) return;
+
+    const style = window.getComputedStyle(artWallpaper);
+    const horizontalPadding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    const columnGap = parseFloat(style.columnGap) || 0;
+    const rowGap = parseFloat(style.rowGap) || 0;
+    const usableWidth = Math.max(0, artWallpaper.clientWidth - horizontalPadding);
+    const usableHeight = Math.max(0, artWallpaper.clientHeight - verticalPadding);
+    const minimumCellWidth = Math.min(190, Math.max(128, artWallpaper.clientWidth * 0.14));
+    const minimumCellHeight = 126;
+    const columns = Math.max(1, Math.floor((usableWidth + columnGap) / (minimumCellWidth + columnGap)));
+    const maxRows = Math.max(1, Math.floor((usableHeight + rowGap) / (minimumCellHeight + rowGap)));
+    const visibleCount = Math.min(wallpaperItems.length, columns * maxRows);
+    const rows = Math.max(1, Math.ceil(visibleCount / columns));
+    const finalRowCount = visibleCount - columns * (rows - 1);
+    const finalRowOffset = Math.floor((columns - finalRowCount) / 2);
+
+    artWallpaper.style.setProperty("--wall-columns", columns);
+    artWallpaper.style.setProperty("--wall-rows", rows);
+
+    wallpaperItems.forEach((item, index) => {
+      if (index >= visibleCount) {
+        if (item.element) {
+          item.element.hidden = true;
+          item.element.removeAttribute("src");
+        }
+        return;
+      }
+
+      if (!item.element) {
+        item.element = document.createElement("img");
+        item.element.className = item.className;
+        item.element.alt = "";
+        item.element.draggable = false;
+        item.element.decoding = "async";
+        item.element.setAttribute("aria-hidden", "true");
+      }
+
+      const row = Math.floor(index / columns);
+      let column = index % columns;
+      if (row === rows - 1 && finalRowCount < columns) column += finalRowOffset;
+
+      item.element.hidden = false;
+      item.element.style.gridColumn = String(column + 1);
+      item.element.style.gridRow = String(row + 1);
+      if (item.element.getAttribute("src") !== item.src) item.element.src = item.src;
+      if (!item.element.isConnected) artWallpaper.append(item.element);
+    });
+  }
+
+  function scheduleWallpaperLayout() {
+    if (wallpaperResizeFrame) return;
+    wallpaperResizeFrame = window.requestAnimationFrame(() => {
+      wallpaperResizeFrame = 0;
+      layoutArtWallpaper();
+    });
+  }
+
+  window.addEventListener("resize", scheduleWallpaperLayout, { passive: true });
+  window.visualViewport?.addEventListener("resize", scheduleWallpaperLayout, { passive: true });
 
   function usernameMention(username) {
     const mention = document.createElement("span");
