@@ -299,6 +299,10 @@ import {
     );
   }
 
+  function setRewardTitle(username) {
+    document.title = `${username} Reward`;
+  }
+
   function hideAwardCollection() {
     awardCollectionGeneration += 1;
     activeAwardCollection = null;
@@ -706,6 +710,7 @@ import {
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     const demoName = randomDemoName();
+    setRewardTitle(demoName);
     decalLayoutSeed = hashRewardIdentity(demoName, metadata.assetId);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
@@ -768,6 +773,7 @@ import {
     }
 
     const data = { version: 2, username: assignment.username, assetId: assignment.assetId };
+    setRewardTitle(data.username);
     const resolvedAsset = resolveRewardAsset(catalog, data);
     const file = resolvedAsset?.filename || "";
     const metadata = file && Object.prototype.hasOwnProperty.call(allowedAssets, file)
