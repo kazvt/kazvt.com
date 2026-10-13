@@ -54,8 +54,7 @@ test("viewport size only changes which fixed cells are visible", () => {
   assert.ok(wider.length > compact.length);
   assert.deepEqual(
     compact.map(cell => `${cell.row}:${cell.column}`).sort(),
-    wider.filter(cell => cell.x + cell.radius <= 500 || cell.x - cell.radius >= 0)
-      .filter(cell => cell.x + cell.radius >= 0 && cell.x - cell.radius <= 500 &&
+    wider.filter(cell => cell.x + cell.radius >= 0 && cell.x - cell.radius <= 500 &&
         cell.y + cell.radius >= 0 && cell.y - cell.radius <= 700)
       .map(cell => `${cell.row}:${cell.column}`).sort()
   );
