@@ -77,7 +77,7 @@ The ledger belongs to one local widget installation. The public static reward pa
 
 ### Fixed reward tiers
 
-Each image's tier is derived from the first 32 bits of its SHA-256 hash, then saved in the public manifest. The weighted buckets are Common (60%), Uncommon (22%), Rare (12%), Epic (4.5%), and Legendary (1.5%). The assignment is deterministic: renaming or reordering an image does not change its tier, while changing/re-encoding its bytes can. The reward page does an O(1) tier lookup and checks the saved digest-to-tier mapping; it does not hash or decode every image when a viewer opens a link.
+Each image's tier is derived from the first 32 bits of its SHA-256 hash, then saved in the public manifest. The weighted buckets are Common (30%), Uncommon (20%), Rare (15%), Epic (12%), Legendary (9%), Mythic (6.5%), Divine (4.5%), and S+ (3%). The reward page maps these tiers in order to the purple, blue, red, orange, green, pink, chrome, and sand GifCities pattern palettes. The assignment is deterministic: renaming or reordering an image does not change its tier, while changing/re-encoding its bytes can. The reward page does an O(1) tier lookup and checks the saved digest-to-tier mapping; it does not hash or decode every image when a viewer opens a link.
 
 After adding, replacing, or removing PNGs, regenerate both catalogs from the repository root:
 

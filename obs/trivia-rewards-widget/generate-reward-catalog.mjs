@@ -11,14 +11,17 @@ const WIDGET_CATALOG = resolve(WIDGET_ROOT, "rewards.json");
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export const TIER_BUCKETS = [
-  { id: "common", label: "Common", upperBound: 6000 },
-  { id: "uncommon", label: "Uncommon", upperBound: 8200 },
-  { id: "rare", label: "Rare", upperBound: 9400 },
-  { id: "epic", label: "Epic", upperBound: 9850 },
-  { id: "legendary", label: "Legendary", upperBound: 10000 }
+  { id: "common", label: "Common", upperBound: 3000 },
+  { id: "uncommon", label: "Uncommon", upperBound: 5000 },
+  { id: "rare", label: "Rare", upperBound: 6500 },
+  { id: "epic", label: "Epic", upperBound: 7700 },
+  { id: "legendary", label: "Legendary", upperBound: 8600 },
+  { id: "mythic", label: "Mythic", upperBound: 9250 },
+  { id: "divine", label: "Divine", upperBound: 9700 },
+  { id: "splus", label: "S+", upperBound: 10000 }
 ];
 
-export const TIER_ALGORITHM = "sha256-leading-32-bit-weighted-v1";
+export const TIER_ALGORITHM = "sha256-leading-32-bit-weighted-v2";
 
 export function tierBucketForSha256(sha256) {
   if (typeof sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(sha256)) {
@@ -30,7 +33,7 @@ export function tierBucketForSha256(sha256) {
 
 export function tierForSha256(sha256) {
   const bucket = tierBucketForSha256(sha256);
-  return TIER_BUCKETS.find(tier => bucket < tier.upperBound)?.id ?? "legendary";
+  return TIER_BUCKETS.find(tier => bucket < tier.upperBound)?.id ?? "splus";
 }
 
 function compareNames(left, right) {
@@ -59,7 +62,7 @@ export async function buildRewardCatalogs() {
 
   return {
     manifest: {
-      version: 2,
+      version: 3,
       tierAlgorithm: TIER_ALGORITHM,
       tierWeights: TIER_BUCKETS.map(({ id, label }, index) => ({
         id,

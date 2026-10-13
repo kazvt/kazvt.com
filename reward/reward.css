@@ -20,6 +20,10 @@
 button { font: inherit; }
 
 body {
+  --palette-background: #1b0d37;
+  --palette-panel: #100922;
+  --palette-accent: #9999cc;
+  --palette-pattern: url("/reward/patterns/purple.gif");
   position: relative;
   isolation: isolate;
   min-height: 100vh;
@@ -29,13 +33,66 @@ body {
   place-items: center;
   padding: 24px 18px;
   overflow-x: clip;
-  background-color: #090411;
+  background-color: var(--palette-background);
   background-image:
-    radial-gradient(circle, rgb(255 133 231 / 42%) 0 1px, transparent 1.7px),
-    radial-gradient(circle, rgb(87 241 255 / 32%) 0 1.5px, transparent 2px),
-    radial-gradient(ellipse at 50% 48%, #28103c 0, #13091f 55%, #07030e 100%);
-  background-size: 43px 43px, 71px 71px, auto;
-  background-position: 4px 8px, 26px 39px, center;
+    linear-gradient(
+      color-mix(in srgb, var(--palette-background) 38%, transparent),
+      color-mix(in srgb, var(--palette-background) 38%, transparent)
+    ),
+    var(--palette-pattern);
+  background-size: cover, auto;
+  background-position: center, 0 0;
+  background-repeat: no-repeat, repeat;
+  background-attachment: fixed, fixed;
+}
+
+body[data-tier="uncommon"] {
+  --palette-background: #111e3a;
+  --palette-panel: #0d1028;
+  --palette-accent: #3399cc;
+  --palette-pattern: url("/reward/patterns/blue.gif");
+}
+
+body[data-tier="rare"] {
+  --palette-background: #310d19;
+  --palette-panel: #180711;
+  --palette-accent: #ff334d;
+  --palette-pattern: url("/reward/patterns/red.gif");
+}
+
+body[data-tier="epic"] {
+  --palette-background: #352013;
+  --palette-panel: #1e140d;
+  --palette-accent: #ff9966;
+  --palette-pattern: url("/reward/patterns/orange.gif");
+}
+
+body[data-tier="legendary"] {
+  --palette-background: #1d332a;
+  --palette-panel: #101c1b;
+  --palette-accent: #ccff66;
+  --palette-pattern: url("/reward/patterns/green.gif");
+}
+
+body[data-tier="mythic"] {
+  --palette-background: #371733;
+  --palette-panel: #201020;
+  --palette-accent: #ffc1ff;
+  --palette-pattern: url("/reward/patterns/pink.gif");
+}
+
+body[data-tier="divine"] {
+  --palette-background: #1c1b39;
+  --palette-panel: #101126;
+  --palette-accent: #8cff8c;
+  --palette-pattern: url("/reward/patterns/chrome.gif");
+}
+
+body[data-tier="splus"] {
+  --palette-background: #392619;
+  --palette-panel: #21140e;
+  --palette-accent: #e2d190;
+  --palette-pattern: url("/reward/patterns/sand.gif");
 }
 
 .art-wallpaper {
@@ -150,23 +207,23 @@ body {
   z-index: 1;
   width: min(100%, 470px);
   padding: clamp(20px, 5vw, 32px);
-  border: 3px ridge #ec64d7;
+  border: 3px ridge var(--palette-accent);
   border-radius: 7px;
-  background: rgb(20 8 36 / 91%);
+  background: color-mix(in srgb, var(--palette-panel) 95%, transparent);
   box-shadow:
-    0 0 0 4px #10051d,
-    0 0 0 6px rgb(75 229 255 / 48%),
-    0 0 30px rgb(239 61 212 / 34%);
+    0 0 0 4px color-mix(in srgb, var(--palette-background) 90%, transparent),
+    0 0 0 6px color-mix(in srgb, var(--palette-accent) 48%, transparent),
+    0 0 30px color-mix(in srgb, var(--palette-accent) 34%, transparent);
   backdrop-filter: blur(2px);
   text-align: center;
 }
 
 .tier-badge {
-  --tier-ink: #253142;
-  --tier-fill: linear-gradient(135deg, #f8fafc, #cbd5e1);
-  --tier-edge: #64748b;
-  --tier-text-gradient: linear-gradient(100deg, #64748b, #263238 45%, #94a3b8 70%, #64748b);
-  --tier-mark: #475569;
+  --tier-ink: #fff8ff;
+  --tier-fill: linear-gradient(135deg, var(--palette-panel), var(--palette-background));
+  --tier-edge: var(--palette-accent);
+  --tier-text-gradient: linear-gradient(100deg, var(--palette-accent), #fff 45%, var(--palette-accent));
+  --tier-mark: var(--palette-accent);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -187,56 +244,49 @@ body {
 }
 
 .tier-badge[data-tier="common"] {
-  --tier-ink: #263238;
-  --tier-fill: linear-gradient(135deg, #f8fafc, #cbd5e1 72%, #e2e8f0);
-  --tier-edge: #64748b;
-  --tier-text-gradient: linear-gradient(100deg, #64748b, #263238 45%, #94a3b8 70%, #64748b);
-  --tier-mark: #64748b;
   border-style: dotted;
   border-radius: 3px;
 }
 
 .tier-badge[data-tier="uncommon"] {
-  --tier-ink: #123b22;
-  --tier-fill: linear-gradient(120deg, #ecfccb, #86efac 58%, #d9f99d);
-  --tier-edge: #27834b;
-  --tier-text-gradient: linear-gradient(100deg, #27834b, #124221 42%, #438d51 68%, #17532d);
-  --tier-mark: #207443;
   border-style: dashed;
   border-radius: 999px;
 }
 
 .tier-badge[data-tier="rare"] {
-  --tier-ink: #092b52;
-  --tier-fill: linear-gradient(120deg, #dff5ff, #91d7ff 55%, #dbeafe);
-  --tier-edge: #1674b8;
-  --tier-text-gradient: linear-gradient(100deg, #1674b8, #092b52 42%, #236fa6 68%, #0e4777);
-  --tier-mark: #1268a2;
   border-style: double;
   border-width: 4px;
   border-radius: 3px 13px 3px 13px;
 }
 
 .tier-badge[data-tier="epic"] {
-  --tier-ink: #fff;
-  --tier-fill: linear-gradient(115deg, #3b176e, #8b35c9 48%, #4b2184);
-  --tier-edge: #e879f9;
-  --tier-text-gradient: linear-gradient(100deg, #f0abfc, #fff 38%, #d8b4fe 58%, #f0abfc);
-  --tier-mark: #fff0ff;
   border: 3px double var(--tier-edge);
   border-radius: 3px;
-  box-shadow: 0 0 0 2px #421d68, 0 0 14px rgb(192 98 255 / 34%);
+  box-shadow: 0 0 0 2px var(--palette-background), 0 0 14px color-mix(in srgb, var(--palette-accent) 34%, transparent);
 }
 
 .tier-badge[data-tier="legendary"] {
-  --tier-ink: #4b2c00;
-  --tier-fill: linear-gradient(105deg, #f8c64e, #fff4b0 34%, #e6a323 67%, #fff0a0);
-  --tier-edge: #8b5700;
-  --tier-text-gradient: linear-gradient(100deg, #754600, #3d2600 34%, #986000 58%, #4b2c00 78%, #754600);
-  --tier-mark: #805000;
-  border: 3px ridge #f6d66e;
+  border: 3px ridge var(--tier-edge);
   border-radius: 4px;
-  box-shadow: 0 0 0 2px #573300, 0 0 18px rgb(255 204 70 / 48%);
+  box-shadow: 0 0 0 2px var(--palette-background), 0 0 18px color-mix(in srgb, var(--palette-accent) 48%, transparent);
+}
+
+.tier-badge[data-tier="mythic"] {
+  border: 4px groove var(--tier-edge);
+  border-radius: 12px 3px 12px 3px;
+  box-shadow: 0 0 0 2px var(--palette-background), 0 0 20px color-mix(in srgb, var(--palette-accent) 52%, transparent);
+}
+
+.tier-badge[data-tier="divine"] {
+  border: 4px double var(--tier-edge);
+  border-radius: 999px 4px;
+  box-shadow: 0 0 0 2px var(--palette-background), 0 0 22px color-mix(in srgb, var(--palette-accent) 58%, transparent);
+}
+
+.tier-badge[data-tier="splus"] {
+  border: 4px ridge var(--tier-edge);
+  border-radius: 0;
+  box-shadow: 0 0 0 3px var(--palette-background), 0 0 24px color-mix(in srgb, var(--palette-accent) 64%, transparent);
 }
 
 .tier-icon,
@@ -318,7 +368,7 @@ h1 {
   line-height: 1.2;
   overflow-wrap: anywhere;
   color: #fff9b9;
-  text-shadow: 2px 2px 0 #d42aab, -1px -1px 0 #12c9e7;
+  text-shadow: 2px 2px 0 var(--palette-accent), -1px -1px 0 color-mix(in srgb, var(--palette-accent) 58%, #fff);
 }
 
 .reward-image {
@@ -330,7 +380,7 @@ h1 {
 }
 
 .reward-image[data-tier] {
-  --art-glow-rgb: 100, 116, 139;
+  --art-glow-rgb: 153, 153, 204;
   --art-glow-soft-low: 0.16;
   --art-glow-soft-high: 0.38;
   --art-glow-halo-low: 0.06;
@@ -340,36 +390,57 @@ h1 {
 }
 
 .reward-image[data-tier="common"] {
-  --art-glow-rgb: 100, 116, 139;
+  --art-glow-rgb: 153, 153, 204;
   animation-duration: 5.2s;
 }
 
 .reward-image[data-tier="uncommon"] {
-  --art-glow-rgb: 39, 131, 75;
+  --art-glow-rgb: 51, 153, 204;
   --art-glow-soft-high: 0.42;
   --art-glow-halo-high: 0.19;
   animation-duration: 4.8s;
 }
 
 .reward-image[data-tier="rare"] {
-  --art-glow-rgb: 22, 116, 184;
+  --art-glow-rgb: 255, 51, 77;
   --art-glow-soft-high: 0.46;
   --art-glow-halo-high: 0.22;
   animation-duration: 4.3s;
 }
 
 .reward-image[data-tier="epic"] {
-  --art-glow-rgb: 192, 98, 255;
+  --art-glow-rgb: 255, 153, 102;
   --art-glow-soft-high: 0.5;
   --art-glow-halo-high: 0.25;
   animation-duration: 3.9s;
 }
 
 .reward-image[data-tier="legendary"] {
-  --art-glow-rgb: 255, 204, 70;
+  --art-glow-rgb: 204, 255, 102;
   --art-glow-soft-high: 0.54;
   --art-glow-halo-high: 0.29;
   animation-duration: 3.5s;
+}
+
+.reward-image[data-tier="mythic"] {
+  --art-glow-rgb: 255, 193, 255;
+  --art-glow-soft-high: 0.57;
+  --art-glow-halo-high: 0.31;
+  animation-duration: 3.3s;
+}
+
+.reward-image[data-tier="divine"] {
+  --art-glow-rgb: 140, 255, 140;
+  --art-glow-soft-high: 0.6;
+  --art-glow-halo-high: 0.33;
+  animation-duration: 3.1s;
+}
+
+.reward-image[data-tier="splus"] {
+  --art-glow-rgb: 226, 209, 144;
+  --art-glow-soft-high: 0.64;
+  --art-glow-halo-high: 0.35;
+  animation-duration: 2.9s;
 }
 
 @keyframes reward-art-glow {
@@ -387,11 +458,11 @@ h1 {
 
 .filename, .message {
   margin: 0;
-  color: #9ff8ff;
+  color: var(--palette-accent);
   font-size: 14px;
   line-height: 1.5;
   overflow-wrap: anywhere;
-  text-shadow: 1px 1px 0 #7d2186;
+  text-shadow: 1px 1px 0 var(--palette-panel);
 }
 
 .award-note {
@@ -406,7 +477,7 @@ h1 {
 
 .username-mention {
   text-decoration-line: underline;
-  text-decoration-color: #65f3ff;
+  text-decoration-color: var(--palette-accent);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.14em;
 }

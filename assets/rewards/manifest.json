@@ -1,31 +1,46 @@
 {
-  "version": 2,
-  "tierAlgorithm": "sha256-leading-32-bit-weighted-v1",
+  "version": 3,
+  "tierAlgorithm": "sha256-leading-32-bit-weighted-v2",
   "tierWeights": [
     {
       "id": "common",
       "label": "Common",
-      "basisPoints": 6000
+      "basisPoints": 3000
     },
     {
       "id": "uncommon",
       "label": "Uncommon",
-      "basisPoints": 2200
+      "basisPoints": 2000
     },
     {
       "id": "rare",
       "label": "Rare",
-      "basisPoints": 1200
+      "basisPoints": 1500
     },
     {
       "id": "epic",
       "label": "Epic",
-      "basisPoints": 450
+      "basisPoints": 1200
     },
     {
       "id": "legendary",
       "label": "Legendary",
-      "basisPoints": 150
+      "basisPoints": 900
+    },
+    {
+      "id": "mythic",
+      "label": "Mythic",
+      "basisPoints": 650
+    },
+    {
+      "id": "divine",
+      "label": "Divine",
+      "basisPoints": 450
+    },
+    {
+      "id": "splus",
+      "label": "S+",
+      "basisPoints": 300
     }
   ],
   "files": [
@@ -94,39 +109,39 @@
     },
     "2.png": {
       "sha256": "da1f5e2c2d784e621d38720765b581a2e044807134561a1f69efd57f04b610cd",
-      "tier": "rare"
+      "tier": "legendary"
     },
     "3d.png": {
       "sha256": "d79d015822e42241d1fbb071866613c23586a701d3e02a6d31a5561c40897d22",
-      "tier": "rare"
+      "tier": "legendary"
     },
     "Gregory.png": {
       "sha256": "7a815d7d40003f05aae91fe80283728b75f42f0f66e7950a94836be6ad3aa933",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "appil.png": {
       "sha256": "9a95f3d43cb764216b9303a17970196aee62c6c7bd9d3b1a7106b12963d872f1",
-      "tier": "uncommon"
+      "tier": "rare"
     },
     "bana.png": {
       "sha256": "5daf121f1bf0a6790727523cc5d992d98383050c15029fa9d8b94a2dfa75e6ad",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "berry.png": {
       "sha256": "810ae49f3666e65f629ed1e6dc602f91ee8c4891891e8a61ddafcd8a970446d4",
-      "tier": "common"
+      "tier": "rare"
     },
     "candy.png": {
       "sha256": "e4e02f3ea10926fac2cce738b4b33d4901cd36b91310db3542fcf7b845d680f7",
-      "tier": "rare"
+      "tier": "mythic"
     },
     "carts.png": {
       "sha256": "c0b20efca9aecd97c29bd7062662e5853fc58a8957b4700da614e8def0c82da7",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "cash monkey.png": {
       "sha256": "7576180cbd3fcf6eed3e89f806c5ee3a8049127ff6fcb52fb1a82270849840c9",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "cheese.png": {
       "sha256": "22646a0e70dafda3511b399cb5c9b302e65b9b421c69d397086827037a9a27ca",
@@ -134,23 +149,23 @@
     },
     "choco cupcake.png": {
       "sha256": "b8d183aae5fc2d14482c07eb0bdbbbfbd9d95bd21d0a399e40468c42f4b1191e",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "cigarette.png": {
       "sha256": "9aa988bff0c8c65a6d1bd717e63626b1f387612bc384b501e115d9404c8c1cce",
-      "tier": "uncommon"
+      "tier": "rare"
     },
     "cold.png": {
       "sha256": "7fda8a505aef46d50d452d6f1b49fd9c4e4cc2979b53db19d4118416208c437e",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "cookie.png": {
       "sha256": "60ad4b82b2e84bebfe5168d2e8c2e27ce270dd27efa62304796480a6cf1f35cc",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "creep.png": {
       "sha256": "a9e9cb04b6472ced80bc18dd0be16ce80f52fda76fe186d172e845fecd4cc53b",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "crom.png": {
       "sha256": "36d2ab4ee9ea6b4cffda288662f9440471d7179eefc2803617d0df20cc966a0e",
@@ -166,7 +181,7 @@
     },
     "fresas.png": {
       "sha256": "ae7b0bc80eff1c09400e008f4391042b32dbb72ee96b5cf009f0ee008e001404",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "good pussy.png": {
       "sha256": "05c9d3946706dd5f6ebd4f6da03c7616925090bf327be41683a0ecffd263ef93",
@@ -178,27 +193,27 @@
     },
     "i hate this thing i cant ever get it right.png": {
       "sha256": "4d2d8f2b068974b090c5c53848df6ad08861b9b2b9cc11272334a9470694b69e",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "i propse to you.png": {
       "sha256": "bea859071526bbee5a0f2db26a12f1e0d92e8d839734f1f2ca2632e922f5572e",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "ice ceam.png": {
       "sha256": "c49f0529da24a1c17f6c148d148ef99369b7437fab7cced33ed4fec8683da7da",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "kiwis.png": {
       "sha256": "58447bae6ee5db15964123828b8a9957ca11bdffb4350a1cf9418caf121046d5",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "kkrrrrrrnkkkkkk.png": {
       "sha256": "5d87a805299f834b5fb13fdf2de47c13c719a6c430d54b18112adba7fb2e2c70",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "line.png": {
       "sha256": "dfdeb1eab4d1c1cfa9fc62ac414ca18bd5e2320a8d0ffd68d890742e51264305",
-      "tier": "rare"
+      "tier": "mythic"
     },
     "man standing.png": {
       "sha256": "09640d2e2874d78ab84b0761e54feeaba71c15a5133b3b5842307125bc8a6fa5",
@@ -214,7 +229,7 @@
     },
     "my friends.png": {
       "sha256": "d10d12013c94812eb5e6a0b74dcd9e3a310d81510e7f81b95ffc13e96c9bfd5d",
-      "tier": "uncommon"
+      "tier": "legendary"
     },
     "normal binky for babies.png": {
       "sha256": "3225c18a4eb7d5798a2580d85aef5062ea17d0c37fd0282a2ff49bc17e447354",
@@ -222,23 +237,23 @@
     },
     "oats.png": {
       "sha256": "bb48dfb9357103c6303993880345267d8af4b002c5745435aedc6625a0427ca1",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "packet of cigarettes.png": {
       "sha256": "6819763416b2702a10438bfd60e73e51fda632af43048496934f40973e685d0d",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "pancak.png": {
       "sha256": "c63fd6e9daba949551a767b7428420cdf25ff1edd26773e18898921c48783c7e",
-      "tier": "uncommon"
+      "tier": "legendary"
     },
     "real burger.png": {
       "sha256": "d5ad738b3e921358f4ca3b1c23f288de18416c3aab9e5d2d79f4f088e8d788d6",
-      "tier": "rare"
+      "tier": "legendary"
     },
     "refreshing genocide conla.png": {
       "sha256": "f848b442a199edfda84d6a1a5697a5a017224be42b53798b79ffb2d6f1eb4921",
-      "tier": "epic"
+      "tier": "divine"
     },
     "ribcage.png": {
       "sha256": "2dd7b69389af54a20e6474223201e1300979d7b46a3c0de53c0b5c0cdc89c569",
@@ -246,15 +261,15 @@
     },
     "some bullshit.png": {
       "sha256": "634aac2be826b4333af51b9ee54cf8f39f68b05d1083ac50b51322b06e57e29a",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "stolen appel.png": {
       "sha256": "a1929663f56c516221b7f0906001f70ec5d23d2fef35bea0234d8444861dd9c2",
-      "tier": "uncommon"
+      "tier": "rare"
     },
     "that thing that makes it sizzle.png": {
       "sha256": "661e902d36fa2eaf292026b0688ac6a3884f26f9be334fb900a21b9b38abd0bf",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "the.png": {
       "sha256": "3dc8bc7b1a4d5831e35dd4c17d333d82b9e697d74c183479e2ba86aa233432df",
@@ -262,15 +277,15 @@
     },
     "thing yum.png": {
       "sha256": "e1dc9eb53b45c4293f838a01a742ceea57c2e7996238bef47c8cf76979340163",
-      "tier": "rare"
+      "tier": "mythic"
     },
     "thing.png": {
       "sha256": "fd4f40dfbaa55227281edc53bbe579d542c92839b95d4077edeaea08ea7fd3d9",
-      "tier": "legendary"
+      "tier": "splus"
     },
     "this cna kill you.png": {
       "sha256": "5a4fa316273496105e33af92b06da351039501d5761644592f889abd91b0e4d3",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "this is what u look like.png": {
       "sha256": "2fda3d26b4fc5dfcb873da5a2745f721824ffeece31b9fcee03af7898e1eaaff",
@@ -278,11 +293,11 @@
     },
     "this one.png": {
       "sha256": "bfb17f4c17b0778dfaed997ee53e1788c84573db3c8034e9acdfb18da782d404",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "this thing.png": {
       "sha256": "e476a902cefa275f05ad871997992ea32564138f3b13ef84c8cec8a71e8641f2",
-      "tier": "rare"
+      "tier": "mythic"
     },
     "weed.png": {
       "sha256": "282295b906a8cab569c0fd44dd65f8b3c4619c718244eef8e93f2e9f2815fbf3",
@@ -294,11 +309,11 @@
     },
     "whar.png": {
       "sha256": "c248390ced4e662c6c689f2e413f5b869e8b30a23e4f117267fe675d6cdb67a4",
-      "tier": "uncommon"
+      "tier": "epic"
     },
     "wheres the gameGIRL huh.png": {
       "sha256": "d88cf9f93904a199d2a4d66f7563db0360249795677f96bc3b5b2756eea10ff0",
-      "tier": "rare"
+      "tier": "legendary"
     },
     "white cupcake.png": {
       "sha256": "0a89af309347cdf6377e208e2bbbbeab823782c23fb39467ca1fc02fc4e1b701",
@@ -310,11 +325,11 @@
     },
     "yoyo.png": {
       "sha256": "6718de21b5bb20ed9ffdc0df0416129468ddffcd3e5a40cc11eec0484cbda38c",
-      "tier": "common"
+      "tier": "uncommon"
     },
     "yummy.png": {
       "sha256": "db9b609a6c2203d2fb7cb2102d5d67d34cc8cfaf345b8975d0145760968f9f7e",
-      "tier": "rare"
+      "tier": "legendary"
     }
   }
 }

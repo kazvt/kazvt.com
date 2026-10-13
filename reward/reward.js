@@ -4,18 +4,24 @@ import { decryptReward } from "./reward-crypto.mjs";
   "use strict";
 
   const TIER_BUCKETS = [
-    { id: "common", label: "Common", upperBound: 6000 },
-    { id: "uncommon", label: "Uncommon", upperBound: 8200 },
-    { id: "rare", label: "Rare", upperBound: 9400 },
-    { id: "epic", label: "Epic", upperBound: 9850 },
-    { id: "legendary", label: "Legendary", upperBound: 10000 }
+    { id: "common", label: "Common", upperBound: 3000 },
+    { id: "uncommon", label: "Uncommon", upperBound: 5000 },
+    { id: "rare", label: "Rare", upperBound: 6500 },
+    { id: "epic", label: "Epic", upperBound: 7700 },
+    { id: "legendary", label: "Legendary", upperBound: 8600 },
+    { id: "mythic", label: "Mythic", upperBound: 9250 },
+    { id: "divine", label: "Divine", upperBound: 9700 },
+    { id: "splus", label: "S+", upperBound: 10000 }
   ];
   const TIER_MARKS = {
     common: "",
     uncommon: "✿",
     rare: "◆",
     epic: "✦",
-    legendary: "♛"
+    legendary: "♛",
+    mythic: "☄",
+    divine: "✧",
+    splus: "★"
   };
   const ANIME_URL = "https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js";
   const ANIME_INTEGRITY = "sha384-oLmuahJgYYR1aWgZwdMQQ2AClE6A2eEwV2x1Z7cbIHehfkkmommQLH3wX1NDEszb";
@@ -97,12 +103,12 @@ import { decryptReward } from "./reward-crypto.mjs";
   function tierFromSha256(sha256) {
     if (typeof sha256 !== "string" || !/^[a-f0-9]{64}$/.test(sha256)) return null;
     const bucket = Math.floor((Number.parseInt(sha256.slice(0, 8), 16) / 0x100000000) * 10000);
-    return TIER_BUCKETS.find(tier => bucket < tier.upperBound)?.id ?? "legendary";
+    return TIER_BUCKETS.find(tier => bucket < tier.upperBound)?.id ?? "splus";
   }
 
   function validateCatalog(catalog) {
-    if (!catalog || catalog.version !== 2 ||
-        catalog.tierAlgorithm !== "sha256-leading-32-bit-weighted-v1" ||
+    if (!catalog || catalog.version !== 3 ||
+        catalog.tierAlgorithm !== "sha256-leading-32-bit-weighted-v2" ||
         !Array.isArray(catalog.files) || !Array.isArray(catalog.tierWeights) ||
         !catalog.assets || typeof catalog.assets !== "object" || Array.isArray(catalog.assets)) {
       throw new Error("The reward list is invalid.");
@@ -217,6 +223,61 @@ import { decryptReward } from "./reward-crypto.mjs";
         },
         labelDuration: 2500,
         glint: { peak: 0.98, delay: 420, duration: 1550 }
+      },
+      mythic: {
+        badge: {
+          translateY: [0, -3, 1, -2, 0],
+          rotate: [0, -2, 1.5, -1, 0],
+          scale: [1, 1.045, 0.99, 1.025, 1],
+          duration: 2400
+        },
+        artwork: { scale: [1, 1.042, 1], duration: 3300 },
+        icon: {
+          rotate: [0, 140, -35, 230, 360],
+          scale: [1, 1.3, 0.9, 1.18, 1],
+          translateY: [0, -7, 1, -3, 0],
+          duration: 2250,
+          easing: "easeOutBack",
+          direction: "normal"
+        },
+        labelDuration: 2450,
+        glint: { peak: 1, delay: 330, duration: 1450 }
+      },
+      divine: {
+        badge: {
+          translateY: [0, -2, 0, 1, 0],
+          rotate: [0, 1.2, -1.2, 0.6, 0],
+          scale: [1, 1.04, 1],
+          duration: 2900
+        },
+        artwork: { scale: [1, 1.035, 1], duration: 3000 },
+        icon: {
+          rotateY: [0, 90, 180, 270, 360],
+          scale: [1, 1.25, 0.9, 1.18, 1],
+          duration: 2700,
+          direction: "normal"
+        },
+        labelDuration: 2200,
+        glint: { peak: 1, delay: 220, duration: 1250 }
+      },
+      splus: {
+        badge: {
+          translateY: [0, -4, 0, -2, 0],
+          rotate: [0, -2.5, 2, -1, 0],
+          scale: [1, 1.06, 0.98, 1.035, 1],
+          duration: 2000
+        },
+        artwork: { scale: [1, 1.05, 1], duration: 2800 },
+        icon: {
+          rotate: [0, 180, -60, 360],
+          scale: [1, 1.42, 0.86, 1.24, 1],
+          translateY: [0, -8, 2, -4, 0],
+          duration: 1850,
+          easing: "easeOutBack",
+          direction: "normal"
+        },
+        labelDuration: 1950,
+        glint: { peak: 1, delay: 160, duration: 1100 }
       }
     }[tier];
 
@@ -279,6 +340,7 @@ import { decryptReward } from "./reward-crypto.mjs";
     if (!assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
+    document.body.dataset.tier = tier.id;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
     rewardTier.setAttribute("aria-label", `${tier.label} tier award`);
