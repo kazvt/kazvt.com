@@ -110,6 +110,18 @@ def _validate_registry(registry: dict[str, Any]) -> None:
             raise RewardIssueError("The assignment registry repeats artwork; refusing to issue another award.")
         seen_assets.add(asset_id)
 
+        filename = record.get("filename")
+        username = record.get("username")
+        issued_at = record.get("issuedAt")
+        if (not isinstance(filename, str) or not FILENAME_RE.fullmatch(filename) or
+                not isinstance(username, str) or not username.strip() or len(username) > 100 or _contains_control(username) or
+                not isinstance(issued_at, str) or len(issued_at) > 40):
+            raise RewardIssueError(f"Assignment record {index + 1} is invalid.")
+        try:
+            datetime.fromisoformat(issued_at.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise RewardIssueError(f"Assignment record {index + 1} has an invalid timestamp.") from exc
+
         link_id = record.get("linkId", "")
         if link_id:
             if not isinstance(link_id, str) or not (COMPACT_ID_RE.fullmatch(link_id) or UUID4_RE.fullmatch(link_id)):
