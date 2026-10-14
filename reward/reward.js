@@ -616,14 +616,14 @@ import {
   }
 
   const TIER_LOOP_MOTION = {
-    common: { type: "scale", amount: 0.041, duration: 3900 },
-    uncommon: { type: "rotate", amount: 1.45, duration: 4250 },
-    rare: { type: "translateY", amount: 2.6, duration: 3700 },
-    epic: { type: "translateX", amount: 2.9, duration: 4100 },
-    legendary: { type: "rotateY", amount: 3.5, duration: 4600 },
-    mythic: { type: "squish", amount: 0.033, duration: 3150 },
-    divine: { type: "scale", amount: 0.052, duration: 4250 },
-    splus: { type: "rotateY", amount: 5.2, duration: 3750 }
+    common: { type: "scale", amount: 0.041, squishAmount: 0.041, duration: 3900 },
+    uncommon: { type: "rotate", amount: 1.45, squishAmount: 0.038, duration: 4250 },
+    rare: { type: "translateY", amount: 2.6, squishAmount: 0.04, duration: 3700 },
+    epic: { type: "translateX", amount: 2.9, squishAmount: 0.042, duration: 4100 },
+    legendary: { type: "rotateY", amount: 3.5, squishAmount: 0.045, duration: 4600 },
+    mythic: { type: "squish", amount: 0.033, squishAmount: 0.033, duration: 3150 },
+    divine: { type: "scale", amount: 0.052, squishAmount: 0.052, duration: 4250 },
+    splus: { type: "rotateY", amount: 5.2, squishAmount: 0.06, duration: 3750 }
   };
   let tierAnimationGeneration = 0;
 
@@ -663,17 +663,17 @@ import {
     const anime = await loadAnime();
     if (generation !== tierAnimationGeneration || rewardTier.dataset.tier !== tier) return;
     anime.remove([rewardTier, rewardArtworkMotion]);
-    const startLoop = (target, intensity, durationScale = 1) => anime({
+    const startLoop = (target, intensity, durationScale = 1, motionType = motion.type, amount = motion.amount) => anime({
       targets: target,
-      ...motionProperties(motion, intensity),
+      ...motionProperties({ type: motionType, amount }, intensity),
       duration: Math.max(900, Math.round(motion.duration * durationScale)),
       easing: "easeInOutSine",
       direction: "alternate",
       loop: true
     });
 
-    // Each tier has one fixed motion. Ping-pong easing makes both ends of the loop settle smoothly.
-    startLoop(rewardArtworkMotion, 1.55, 0.72);
+    // Keep the artwork's motion consistent: each tier squishes in X/Y, with tier-tuned strength and tempo.
+    startLoop(rewardArtworkMotion, 1.55, 0.72, "squish", motion.squishAmount);
     startLoop(rewardTier, 0.42);
   }
 
