@@ -6,6 +6,46 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Naughty Tape";
+  src: url("/zzz_assets/fonts/Naughty%20Tape.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Panties Bottom";
+  src: url("/zzz_assets/fonts/Panties%20Bottom.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bricked Up";
+  src: url("/zzz_assets/fonts/Bricked%20Up.OTF") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Freak Show";
+  src: url("/zzz_assets/fonts/Freak%20Show.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Easy Access";
+  src: url("/zzz_assets/fonts/Easy%20Access.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   font-family: "SPIRAL", "Trebuchet MS", sans-serif;
@@ -20,6 +60,7 @@
 button { font: inherit; }
 
 body {
+  font-family: var(--reward-tier-font, "SPIRAL", "Trebuchet MS", sans-serif);
   --palette-background: #15151a;
   --palette-panel: #101014;
   --palette-accent: #c9c9d1;
@@ -47,6 +88,7 @@ body {
 }
 
 body[data-page-state="reward"][data-tier="common"] {
+  --reward-tier-font: "Naughty Tape", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #1b0d37;
   --palette-panel: #100922;
   --palette-accent: #9999cc;
@@ -54,6 +96,7 @@ body[data-page-state="reward"][data-tier="common"] {
 }
 
 body[data-page-state="reward"][data-tier="uncommon"] {
+  --reward-tier-font: "Comic Sans MS", "Comic Sans", cursive;
   --palette-background: #111e3a;
   --palette-panel: #0d1028;
   --palette-accent: #3399cc;
@@ -61,6 +104,7 @@ body[data-page-state="reward"][data-tier="uncommon"] {
 }
 
 body[data-page-state="reward"][data-tier="rare"] {
+  --reward-tier-font: "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #310d19;
   --palette-panel: #180711;
   --palette-accent: #ff334d;
@@ -68,6 +112,7 @@ body[data-page-state="reward"][data-tier="rare"] {
 }
 
 body[data-page-state="reward"][data-tier="epic"] {
+  --reward-tier-font: "Panties Bottom", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #352013;
   --palette-panel: #1e140d;
   --palette-accent: #ff9966;
@@ -75,6 +120,7 @@ body[data-page-state="reward"][data-tier="epic"] {
 }
 
 body[data-page-state="reward"][data-tier="legendary"] {
+  --reward-tier-font: "Freak Show", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #1d332a;
   --palette-panel: #101c1b;
   --palette-accent: #ccff66;
@@ -82,6 +128,7 @@ body[data-page-state="reward"][data-tier="legendary"] {
 }
 
 body[data-page-state="reward"][data-tier="mythic"] {
+  --reward-tier-font: "Easy Access", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #371733;
   --palette-panel: #201020;
   --palette-accent: #ffc1ff;
@@ -89,6 +136,7 @@ body[data-page-state="reward"][data-tier="mythic"] {
 }
 
 body[data-page-state="reward"][data-tier="divine"] {
+  --reward-tier-font: "Bricked Up", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #1c1b39;
   --palette-panel: #101126;
   --palette-accent: #8cff8c;
@@ -96,6 +144,7 @@ body[data-page-state="reward"][data-tier="divine"] {
 }
 
 body[data-page-state="reward"][data-tier="splus"] {
+  --reward-tier-font: "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #392619;
   --palette-panel: #21140e;
   --palette-accent: #e2d190;
@@ -693,6 +742,17 @@ h1 {
 .filename--animated .filename-character {
   animation: filename-character-wave var(--filename-wave-duration, 1900ms) cubic-bezier(.2, .75, .25, 1) infinite;
   animation-delay: calc(var(--char-index, 0) * 55ms);
+}
+
+.filename-prefix {
+  color: #f4f4f6;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .68em;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-shadow: none;
+  vertical-align: .08em;
+  white-space: pre;
 }
 
 @keyframes filename-character-wave {
