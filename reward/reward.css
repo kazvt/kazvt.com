@@ -229,6 +229,14 @@ body[data-reward-demo][data-page-state="reward"][data-tier] .tier-badge {
   filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 10px rgb(255 105 174 / 48%));
 }
 
+.wall-art--decal-pool {
+  --wall-opacity: 0.92;
+  --wall-bright: 1;
+  --wall-speed: 8s;
+  --wall-delay: -4s;
+  filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 55%)) drop-shadow(0 0 9px rgb(255 255 255 / 38%));
+}
+
 .wall-art--1  { --wall-angle: -27deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 13s; --wall-delay: -3s; }
 .wall-art--2  { --wall-angle: 18deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 17s; --wall-delay: -11s; }
 .wall-art--3  { --wall-angle: -9deg; --wall-opacity: .95; --wall-bright: .95; --wall-speed: 15s; --wall-delay: -8s; }
