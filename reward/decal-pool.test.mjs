@@ -10,7 +10,7 @@ const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 test("the edge pool includes the existing decals and every added GIF exactly once", () => {
   const sources = REWARD_DECAL_POOL.map(item => item.src);
-  assert.equal(REWARD_DECAL_POOL.length, 58);
+  assert.equal(REWARD_DECAL_POOL.length, 64);
   assert.equal(new Set(sources).size, sources.length);
   assert.ok(sources.includes("/reward/retro/decal-pool/dancey_bgless.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/672ZLW3ZRJMOYJ4OFMF4VOTN45WFA5VL.gif"));
@@ -18,6 +18,12 @@ test("the edge pool includes the existing decals and every added GIF exactly onc
   assert.ok(sources.includes("/reward/retro/decal-pool/WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/awaw.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/WNYOPWW72P424UFMBK7YTD76GSFCYYIL.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/CWKDK64M4KFOKNEK5244P52V57DJGDPL.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/DFKBEM3QMD4SYQEUYGRXVNNZLPUJX5AO.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/AMLVTNU2URJXNELKRPSKE7NTY5VTTA4E.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/FAY72EKBPY2XQ7TG6DXLZASSTYAT3HR6.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/ROSN2WTVW2U2AUQKM5JYHT2JAHTA7S22.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/PIUMSHKA5VQRPNYL5YA523BW7BVVF7IE.gif"));
 });
 
 test("every pool entry resolves to a local GIF file", async () => {
@@ -49,7 +55,9 @@ test("side-restricted GIFs only appear on their intended edge", () => {
     ["AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD_repaired.gif", "left"],
     ["FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif", "right"],
     ["S4PFGWRLGB34WVSA3KRJ6US45232D3EU.gif", "left"],
-    ["WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif", "right"]
+    ["WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif", "right"],
+    ["CWKDK64M4KFOKNEK5244P52V57DJGDPL.gif", "left"],
+    ["FAY72EKBPY2XQ7TG6DXLZASSTYAT3HR6.gif", "right"]
   ]);
   const seen = new Set();
 

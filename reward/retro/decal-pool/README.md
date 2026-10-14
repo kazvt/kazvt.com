@@ -14,3 +14,9 @@ download's final frame was truncated, so the pool uses a repaired copy with its
 `FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif` is right-edge only.
 `S4PFGWRLGB34WVSA3KRJ6US45232D3EU.gif` is left-edge only, and
 `WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif` is right-edge only.
+`CWKDK64M4KFOKNEK5244P52V57DJGDPL.gif` is left-edge only, and
+`FAY72EKBPY2XQ7TG6DXLZASSTYAT3HR6.gif` is right-edge only. The GIFs
+`DFKBEM3QMD4SYQEUYGRXVNNZLPUJX5AO.gif`,
+`AMLVTNU2URJXNELKRPSKE7NTY5VTTA4E.gif`,
+`ROSN2WTVW2U2AUQKM5JYHT2JAHTA7S22.gif`, and
+`PIUMSHKA5VQRPNYL5YA523BW7BVVF7IE.gif` can appear on either edge.
