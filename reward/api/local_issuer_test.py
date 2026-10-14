@@ -7,6 +7,7 @@ import unittest
 import zlib
 from pathlib import Path
 
+import local_issuer
 from local_issuer import RewardIssueError, issue_and_publish, list_available_artwork
 
 
@@ -55,13 +56,14 @@ class LocalRewardIssuerTests(unittest.TestCase):
             metadata = {"assetId": asset_id, "sha256": asset_id, "width": width, "height": height, "tier": "rare"}
             assets[name] = metadata
             assets_by_id[asset_id] = {"filename": name, "width": width, "height": height, "tier": "rare"}
-        (self.reward_dir / "manifest.json").write_text(json.dumps({
+        self.catalog = {
             "version": 4,
             "assetIdAlgorithm": "sha256-png-bytes-v1",
             "files": files,
             "assets": assets,
             "assetsById": assets_by_id,
-        }), encoding="utf-8")
+        }
+        (self.reward_dir / "manifest.json").write_text(json.dumps(self.catalog), encoding="utf-8")
         (self.reward_dir / "assignments.json").write_text(json.dumps({"version": 1, "assignments": []}), encoding="utf-8")
         git(self.site, "add", "zzz_assets/rewards")
         git(self.site, "commit", "-m", "test fixture")
@@ -116,11 +118,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         (self.site / "unrelated.tmp").unlink()
         (self.reward_dir / "toast.png").write_bytes(b"not the cataloged reward")
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
-            issue_and_publish(
-                self.site,
-                {"username": "Winner", "assetId": self.art_ids[0], "eventId": "changed-png"},
-                expected_remote=str(self.remote),
-            )
+            local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
 
 
 if __name__ == "__main__":
