@@ -181,7 +181,7 @@ export async function issueAward(input, options = {}) {
       }
     })
   });
-  if (dispatchResponse.status !== 204) {
+  if (dispatchResponse.status !== 200 && dispatchResponse.status !== 204) {
     const detail = (await dispatchResponse.text()).slice(0, 500);
     throw new Error(`GitHub did not accept the reward workflow (HTTP ${dispatchResponse.status}). ${detail}`.trim());
   }

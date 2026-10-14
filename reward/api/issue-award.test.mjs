@@ -52,7 +52,7 @@ test("dispatches through GitHub and waits for the award to publish on Pages", as
     if (url.hostname === "api.github.com" && url.pathname.endsWith("/dispatches")) {
       dispatchedBody = JSON.parse(init.body);
       publishedRegistry = { version: 1, assignments: [issued] };
-      return new Response(null, { status: 204 });
+      return Response.json({ workflow_run_id: 456, html_url: "https://github.com/kazvt/kazvt.com/actions/runs/456" }, { status: 200 });
     }
     if (url.hostname === "kazvt.com" && url.pathname.endsWith("manifest.json")) return Response.json(catalog);
     if (url.hostname === "kazvt.com" && url.pathname.endsWith("assignments.json")) return Response.json(publishedRegistry);
