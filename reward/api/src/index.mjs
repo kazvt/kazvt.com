@@ -95,9 +95,12 @@ async function readStaticAssignments(env) {
   }
   for (const record of registry.assignments) {
     const assetId = record?.assetId ?? record?.assetSha256;
-    if (!record || typeof record !== "object" || !ASSET_ID_PATTERN.test(assetId || "") ||
+    if (!record || typeof record !== "object" || typeof assetId !== "string" || !ASSET_ID_PATTERN.test(assetId) ||
         typeof record.username !== "string" || !record.username.trim() ||
-        !PNG_FILENAME_PATTERN.test(record.filename || "")) {
+        record.username.length > 100 || !USERNAME_PATTERN.test(record.username) ||
+        !PNG_FILENAME_PATTERN.test(record.filename || "") ||
+        (record.linkId != null && typeof record.linkId !== "string") ||
+        (record.linkId && !(COMPACT_ID_PATTERN.test(record.linkId) || UUID4_PATTERN.test(record.linkId)))) {
       throw new Error("A published reward assignment is invalid.");
     }
   }
@@ -146,13 +149,13 @@ async function allAssignments(env) {
   for (const record of [...staticAssignments, ...rows.map(assignmentFromRow)]) {
     const assetId = String(record.assetId ?? record.assetSha256).toLowerCase();
     const linkId = UUID4_PATTERN.test(record.linkId || "") ? record.linkId.toLowerCase() : record.linkId;
-    if (!ASSET_ID_PATTERN.test(assetId) || !linkId ||
-        !(COMPACT_ID_PATTERN.test(linkId) || UUID4_PATTERN.test(linkId))) {
+    if (!ASSET_ID_PATTERN.test(assetId) || (linkId &&
+        !(COMPACT_ID_PATTERN.test(linkId) || UUID4_PATTERN.test(linkId)))) {
       throw new Error("The reward index contains a malformed assignment.");
     }
     const canonical = { ...record, assetId, assetSha256: assetId, linkId };
     const priorAsset = byAsset.get(assetId);
-    const priorLink = byLink.get(linkId);
+    const priorLink = linkId ? byLink.get(linkId) : null;
     if (priorAsset || priorLink) {
       const prior = priorAsset || priorLink;
       if (prior.assetId !== canonical.assetId || prior.linkId !== canonical.linkId ||
@@ -162,7 +165,7 @@ async function allAssignments(env) {
       continue;
     }
     byAsset.set(assetId, canonical);
-    byLink.set(linkId, canonical);
+    if (linkId) byLink.set(linkId, canonical);
     records.push(canonical);
   }
 
@@ -327,6 +330,9 @@ export async function handleRequest(request, env) {
       const records = await allAssignments(env);
       if (url.pathname === "/v1/awards") {
         const requestedUsername = url.searchParams.get("username");
+        if (requestedUsername != null && (requestedUsername.length > 100 || !USERNAME_PATTERN.test(requestedUsername))) {
+          return error(request, env, 400, "Invalid username filter.");
+        }
         const filtered = requestedUsername == null ? records : records.filter(record =>
           normalizeUsername(record.username) === normalizeUsername(requestedUsername));
         return response(request, env, { version: 1, assignments: filtered });
@@ -343,7 +349,9 @@ export async function handleRequest(request, env) {
         return response(request, env, { version: 1, artwork });
       }
 
-      const linkId = decodeURIComponent(url.pathname.slice("/v1/awards/".length));
+      let linkId;
+      try { linkId = decodeURIComponent(url.pathname.slice("/v1/awards/".length)); }
+      catch { return error(request, env, 400, "Invalid reward link ID."); }
       const normalizedId = UUID4_PATTERN.test(linkId) ? linkId.toLowerCase() : linkId;
       if (!(COMPACT_ID_PATTERN.test(normalizedId) || UUID4_PATTERN.test(normalizedId))) {
         return error(request, env, 400, "Invalid reward link ID.");
