@@ -41,13 +41,14 @@ The website already loads reward images from `/zzz_assets/rewards/{filename}` an
 
 Run these commands from this directory with a Cloudflare account available to Wrangler:
 
-1. `npx wrangler d1 create kazvt-rewards`
-2. Replace `REPLACE_WITH_D1_DATABASE_ID` in `wrangler.jsonc` with the returned database ID.
-3. `npx wrangler d1 migrations apply kazvt-rewards --remote`
-4. Generate a 32-byte random key in a trusted terminal (for example, `node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"`) and store it in a password manager.
-5. Run `npx wrangler secret put AWARD_ISSUER_KEY` and paste the key at the hidden prompt. Do not put it in this repository, a workflow log, OBS browser-source HTML, or website JavaScript.
-6. Run `npx wrangler deploy`.
-7. Set `window.KAZVT_REWARD_API_BASE` in `reward/api-config.js` to the deployed Worker origin. Prefer a custom domain such as `https://api.kazvt.com`; if using the `workers.dev` URL, add that exact origin to `connect-src` in the CSP of `reward/index.html` and `reward/list/index.html`. The Worker CORS allowlist is `ALLOWED_ORIGINS` in `wrangler.jsonc`; keep it limited to the website origins.
+1. `npx wrangler login`
+2. `npx wrangler d1 create kazvt-rewards`
+3. Replace `REPLACE_WITH_D1_DATABASE_ID` in `wrangler.jsonc` with the returned database ID.
+4. `npx wrangler d1 migrations apply kazvt-rewards --remote`
+5. Generate a 32-byte random key in a trusted terminal (for example, `node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"`) and store it in a password manager.
+6. Run `npx wrangler secret put AWARD_ISSUER_KEY` and paste the key at the hidden prompt. Do not put it in this repository, a workflow log, OBS browser-source HTML, or website JavaScript.
+7. Run `npx wrangler deploy`.
+8. Set `window.KAZVT_REWARD_API_BASE` in `reward/api-config.js` to the deployed Worker origin. Prefer a custom domain such as `https://api.kazvt.com`; if using the `workers.dev` URL, add that exact origin to `connect-src` in the CSP of `reward/index.html` and `reward/list/index.html`. The Worker CORS allowlist is `ALLOWED_ORIGINS` in `wrangler.jsonc`; keep it limited to the website origins.
 
 The `AWARD_ISSUER_KEY` must live only in a trusted server process, such as a private game/OBS companion process on the streaming PC. A key placed in a public browser game can be extracted by viewers and cannot be made secret by obfuscation. If a key is exposed, rotate it with `npx wrangler secret put AWARD_ISSUER_KEY`.
 
