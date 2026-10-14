@@ -4,18 +4,21 @@ import { handleRequest } from "../src/index.mjs";
 
 const ART_A = "0".repeat(64);
 const ART_B = "f".repeat(64);
+const ART_C = "1".repeat(64);
 const ISSUER_KEY = "0123456789abcdef0123456789abcdef0123456789abc";
 const catalog = {
   version: 4,
   assetIdAlgorithm: "sha256-png-bytes-v1",
-  files: ["alpha.png", "beta.png"],
+  files: ["alpha.png", "beta.png", "gamma.png"],
   assets: {
     "alpha.png": { assetId: ART_A, sha256: ART_A, width: 32, height: 32, tier: "common" },
-    "beta.png": { assetId: ART_B, sha256: ART_B, width: 48, height: 48, tier: "splus" }
+    "beta.png": { assetId: ART_B, sha256: ART_B, width: 48, height: 48, tier: "splus" },
+    "gamma.png": { assetId: ART_C, sha256: ART_C, width: 50, height: 50, tier: "common" }
   },
   assetsById: {
-    [ART_A]: { assetId: ART_A, filename: "alpha.png", width: 32, height: 32, tier: "common" },
-    [ART_B]: { assetId: ART_B, filename: "beta.png", width: 48, height: 48, tier: "splus" }
+    [ART_A]: { filename: "alpha.png", width: 32, height: 32, tier: "common" },
+    [ART_B]: { filename: "beta.png", width: 48, height: 48, tier: "splus" },
+    [ART_C]: { filename: "gamma.png", width: 50, height: 50, tier: "common" }
   },
   tierWeights: [
     { id: "common", basisPoints: 3000 }, { id: "uncommon", basisPoints: 2000 },
@@ -143,7 +146,8 @@ test("the issuer is private, idempotent, one-of-one, and readable by the public 
 
     const available = await handleRequest(new Request("https://api.test/v1/artwork/available"), env);
     assert.equal(available.status, 200);
-    assert.deepEqual((await available.json()).artwork, []);
+    const availableArtwork = await available.json();
+    assert.deepEqual(availableArtwork.artwork.map(item => item.assetId), [ART_C]);
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -349,9 +349,9 @@ export async function handleRequest(request, env) {
       if (url.pathname === "/v1/artwork/available") {
         const catalog = await readCatalog(env);
         const assignedIds = new Set(records.map(record => record.assetId));
-        const artwork = Object.values(catalog.assetsById)
-          .filter(item => item && ASSET_ID_PATTERN.test(item.assetId || "") && !assignedIds.has(item.assetId))
-          .map(item => catalogAsset(catalog, item.assetId))
+        const artwork = Object.keys(catalog.assetsById)
+          .filter(assetId => ASSET_ID_PATTERN.test(assetId) && !assignedIds.has(assetId))
+          .map(assetId => catalogAsset(catalog, assetId))
           .filter(Boolean)
           .sort((left, right) => left.filename.localeCompare(right.filename));
         return response(request, env, { version: 1, artwork });
