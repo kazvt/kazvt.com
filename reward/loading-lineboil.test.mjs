@@ -5,6 +5,7 @@ import vm from "node:vm";
 
 test("loading text cycles through the three per-character phases every 500ms", async () => {
   const source = await readFile(new URL("./loading-lineboil.mjs", import.meta.url), "utf8");
+  const styles = await readFile(new URL("./reward.css", import.meta.url), "utf8");
   const loadingState = { hidden: false };
   const ellipsis = { nodeType: 1 };
   const title = { childNodes: [], dataset: {} };
@@ -61,6 +62,8 @@ test("loading text cycles through the three per-character phases every 500ms", a
   const letters = title.childNodes.slice(0, -1);
   assert.equal(letters.map(letter => letter.textContent).join(""), "Loading");
   assert.ok(letters.every(letter => letter.className === "loading-lineboil-letter" && letter["aria-hidden"] === "true"));
+  assert.match(styles, /transform: translateY\(-4px\)/);
+  assert.match(styles, /transform: translateY\(4px\)/);
   assert.equal(intervalDelay, 500);
   assert.equal(title.dataset.boilPhase, undefined);
 

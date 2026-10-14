@@ -359,12 +359,12 @@ body[data-page-state="error"] .reward-card {
 
 .loading-lineboil[data-boil-phase="1"] > .loading-lineboil-letter:nth-child(odd),
 .loading-lineboil[data-boil-phase="3"] > .loading-lineboil-letter:nth-child(even) {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
 }
 
 .loading-lineboil[data-boil-phase="1"] > .loading-lineboil-letter:nth-child(even),
 .loading-lineboil[data-boil-phase="3"] > .loading-lineboil-letter:nth-child(odd) {
-  transform: translateY(2px);
+  transform: translateY(4px);
 }
 
 .loading-ellipsis {
