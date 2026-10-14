@@ -109,9 +109,7 @@ import "../pattern-zoom.mjs?v=2";
 
     const info = document.createElement("div");
     info.className = "award-info";
-    info.append(createText("p", "field-label", "Awarded to"));
     info.append(createText("h2", "username", assignment.username));
-    info.append(createText("p", "field-label", "Artwork"));
     info.append(createText("p", "artwork-name", filenameLabel(assignment.filename)));
 
     const meta = document.createElement("div");
@@ -119,13 +117,6 @@ import "../pattern-zoom.mjs?v=2";
     const badge = createText("span", "tier-badge", `TIER: ${assignment.tierLabel}`);
     badge.dataset.tier = assignment.tierId;
     meta.append(badge);
-    const date = document.createElement("time");
-    date.className = "issue-date";
-    date.dateTime = assignment.issuedAt;
-    date.textContent = new Intl.DateTimeFormat(undefined, {
-      year: "numeric", month: "short", day: "numeric"
-    }).format(new Date(assignment.issuedAt));
-    meta.append(date);
     info.append(meta);
 
     if (assignment.artworkIsCurrent) {
