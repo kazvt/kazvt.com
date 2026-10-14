@@ -348,6 +348,12 @@ body[data-page-state="error"] .reward-card {
   animation: loading-text-pulse 1.8s ease-in-out infinite alternate;
 }
 
+.loading-lineboil {
+  display: inline-flex;
+  align-items: baseline;
+  transform: translate3d(0, 0, 0);
+}
+
 .loading-ellipsis {
   display: inline-flex;
   width: 1.15em;
@@ -794,6 +800,7 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
   .loading-hourglass { display: none; animation: none; }
   .loading-hourglass-fallback { display: inline; font-size: 60px; }
   .loading-title, .loading-ellipsis span { animation: none; }
+  .loading-lineboil { transform: none !important; }
   .loading-ellipsis span { opacity: 1; transform: none; }
   .wall-art-spin {
     animation: none;
