@@ -6,6 +6,6 @@ deterministic from the reward artwork's SHA-256 asset ID; tier and username do n
 affect them. The pool does not reuse an image within one reward.
 
 The checksum-named GIFs are local copies from `blob.gifcities.org/gifcities/`.
-The three `*_bgless.gif` files and `dancey_bgless.gif` were copied from the
-provided Downloads folder. `AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD.gif` is left-edge only;
+The three GIFs provided from the Downloads folder are copied locally.
+`AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD.gif` is left-edge only;
 `FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif` is right-edge only.
