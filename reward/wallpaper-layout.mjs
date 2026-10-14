@@ -74,7 +74,11 @@ function createSingleSizeLayout(seed, artSize, idOffset = 0) {
     grid[cellRow * gridColumns + cellColumn] = pointIndex;
   };
 
-  addPoint(margin, margin);
+  const startingPoint = createSeededRandom(seed ^ 0xa511e9b3);
+  addPoint(
+    margin + startingPoint() * (WORLD_WIDTH - margin * 2),
+    margin + startingPoint() * (WORLD_HEIGHT - margin * 2)
+  );
   while (active.length > 0) {
     const activeSlot = Math.floor(random() * active.length);
     const origin = points[active[activeSlot]];
