@@ -1,5 +1,5 @@
 name: Issue one reward
-run-name: Reward issuance: ${{ inputs.event_id }}
+run-name: "Reward issuance: ${{ inputs.event_id }}"
 
 on:
   workflow_dispatch:

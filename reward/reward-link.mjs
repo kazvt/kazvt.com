@@ -1,4 +1,4 @@
-import { isRewardLinkId, normalizeRewardLinkId } from "./assignment-registry.mjs?v=api-1";
+import { isRewardLinkId, normalizeRewardLinkId } from "./assignment-registry.mjs?v=github-static-1";
 
 export function createRewardHref(linkId, origin) {
   if (!isRewardLinkId(linkId)) throw new TypeError("A valid reward link ID is required.");

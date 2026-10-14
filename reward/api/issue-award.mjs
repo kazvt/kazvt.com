@@ -1,4 +1,6 @@
 import { setTimeout as sleep } from "node:timers/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createRewardHref } from "../reward-link.mjs";
 
 const DEFAULT_SITE_ORIGIN = "https://kazvt.com";
@@ -144,7 +146,6 @@ export async function issueAward(input, options = {}) {
   const request = validateRequest(input);
   const siteOrigin = validateOrigin(options.siteOrigin ?? DEFAULT_SITE_ORIGIN);
   const repository = validateRepository(options.repository ?? process.env.KAZVT_GITHUB_REPOSITORY ?? DEFAULT_REPOSITORY);
-  const [owner] = repository.split("/");
   const token = options.token ?? process.env.KAZVT_GITHUB_ISSUER_TOKEN;
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   const sleepImpl = options.sleepImpl ?? sleep;
@@ -222,7 +223,7 @@ export async function issueAward(input, options = {}) {
   throw new Error(`${runHint}The award was dispatched, but it did not appear on GitHub Pages before timeout. Check ${actionUrl}, then retry with the same eventId.${pollingHint}`);
 }
 
-if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1].replaceAll("\\", "/")) {
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [username, assetId, eventId, platform] = process.argv.slice(2);
   issueAward({ username, assetId, eventId, platform }).then(result => {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
