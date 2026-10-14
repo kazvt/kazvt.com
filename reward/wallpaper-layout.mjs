@@ -1,7 +1,7 @@
-export const WALLPAPER_ART_SIZE = 210;
-export const WALLPAPER_MIN_SIZE = 100;
-export const WALLPAPER_FILLER_SIZE = 148;
-export const WALLPAPER_MEDIUM_SIZE = 124;
+export const WALLPAPER_ART_SIZE = 180;
+export const WALLPAPER_MIN_SIZE = 80;
+export const WALLPAPER_FILLER_SIZE = 132;
+export const WALLPAPER_MEDIUM_SIZE = 104;
 
 function boundRadiusFor(size) {
   return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
@@ -129,7 +129,8 @@ export function createWallpaperLayout(seed) {
     { size: WALLPAPER_MIN_SIZE, salt: 0x27d4eb2f },
     { size: WALLPAPER_MIN_SIZE, salt: 0x165667b1 },
     { size: WALLPAPER_MIN_SIZE, salt: 0xd3a2646c },
-    { size: WALLPAPER_MIN_SIZE, salt: 0xfd7046c5 }
+    { size: WALLPAPER_MIN_SIZE, salt: 0xfd7046c5 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0xb55a4f09 }
   ];
   const layout = [];
   let nextId = 0;
