@@ -1,5 +1,6 @@
-import { createRewardHref } from "../reward-link.mjs?v=short-id-1";
-import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=short-id-1";
+import { loadApiAssignments } from "../api-client.mjs?v=1";
+import { createRewardHref } from "../reward-link.mjs?v=api-1";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=api-1";
 import "../pattern-zoom.mjs?v=2";
 
 (() => {
@@ -95,6 +96,12 @@ import "../pattern-zoom.mjs?v=2";
       catalogResponse.json()
     ]);
     const catalog = validateCatalog(rawCatalog);
+    try {
+      const apiRegistry = await loadApiAssignments();
+      if (apiRegistry) return validateAndSortAssignments(apiRegistry, catalog);
+    } catch (error) {
+      console.warn("[reward-list] Live award API unavailable; using the published assignment index.", error);
+    }
     return validateAndSortAssignments(registry, catalog);
   }
 

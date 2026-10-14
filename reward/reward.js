@@ -1,5 +1,6 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
-import { createRewardHref } from "./reward-link.mjs?v=short-id-1";
+import { createRewardHref } from "./reward-link.mjs?v=api-1";
+import { loadApiAssignments } from "./api-client.mjs?v=1";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
@@ -13,7 +14,7 @@ import {
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs?v=short-id-1";
+} from "./assignment-registry.mjs?v=api-1";
 
 (() => {
   "use strict";
@@ -323,12 +324,18 @@ import {
 
   function loadAssignmentRegistry(catalog) {
     if (!assignmentRegistryPromise) {
-      assignmentRegistryPromise = fetch("/zzz_assets/rewards/assignments.json", { cache: "no-store" })
-        .then(response => {
-          if (!response.ok) throw new Error("The award assignment registry could not be loaded.");
-          return response.json();
-        })
-        .then(registry => validateAndSortAssignments(registry, catalog))
+      assignmentRegistryPromise = (async () => {
+        try {
+          const apiRegistry = await loadApiAssignments();
+          if (apiRegistry) return validateAndSortAssignments(apiRegistry, catalog);
+        } catch (error) {
+          console.warn("[reward] Live award API unavailable; using the published assignment index.", error);
+        }
+
+        const response = await fetch("/zzz_assets/rewards/assignments.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("The award assignment registry could not be loaded.");
+        return validateAndSortAssignments(await response.json(), catalog);
+      })()
         .catch(error => {
           assignmentRegistryPromise = null;
           throw error;
