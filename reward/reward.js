@@ -1,6 +1,5 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
-import { createRewardHref } from "./reward-link.mjs?v=api-1";
-import { loadApiAssignments } from "./api-client.mjs?v=1";
+import { createRewardHref } from "./reward-link.mjs?v=github-static-1";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
@@ -14,7 +13,7 @@ import {
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs?v=api-1";
+} from "./assignment-registry.mjs?v=github-static-1";
 
 (() => {
   "use strict";
@@ -325,13 +324,6 @@ import {
   function loadAssignmentRegistry(catalog) {
     if (!assignmentRegistryPromise) {
       assignmentRegistryPromise = (async () => {
-        try {
-          const apiRegistry = await loadApiAssignments();
-          if (apiRegistry) return validateAndSortAssignments(apiRegistry, catalog);
-        } catch (error) {
-          console.warn("[reward] Live award API unavailable; using the published assignment index.", error);
-        }
-
         const response = await fetch("/zzz_assets/rewards/assignments.json", { cache: "no-store" });
         if (!response.ok) throw new Error("The award assignment registry could not be loaded.");
         return validateAndSortAssignments(await response.json(), catalog);
