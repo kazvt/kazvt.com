@@ -1,6 +1,6 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=short-id-1";
-import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=1";
+import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
 import "./loading-lineboil.mjs?v=5";

@@ -10,10 +10,12 @@ const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 test("the edge pool includes the existing decals and every added GIF exactly once", () => {
   const sources = REWARD_DECAL_POOL.map(item => item.src);
-  assert.equal(REWARD_DECAL_POOL.length, 42);
+  assert.equal(REWARD_DECAL_POOL.length, 56);
   assert.equal(new Set(sources).size, sources.length);
   assert.ok(sources.includes("/reward/retro/decal-pool/dancey_bgless.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/672ZLW3ZRJMOYJ4OFMF4VOTN45WFA5VL.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/S4PFGWRLGB34WVSA3KRJ6US45232D3EU.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif"));
 });
 
 test("every pool entry resolves to a local GIF file", async () => {
@@ -40,26 +42,26 @@ test("each image hash deterministically chooses eight unique decals and balanced
   }
 });
 
-test("directional GIFs only appear on their intended edge", () => {
-  let sawLeftArrow = false;
-  let sawRightArrow = false;
+test("side-restricted GIFs only appear on their intended edge", () => {
+  const sideRestrictions = new Map([
+    ["AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD_repaired.gif", "left"],
+    ["FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif", "right"],
+    ["S4PFGWRLGB34WVSA3KRJ6US45232D3EU.gif", "left"],
+    ["WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif", "right"]
+  ]);
+  const seen = new Set();
 
   for (let index = 1; index <= 256; index += 1) {
     const assetHash = index.toString(16).padStart(64, "0");
     for (const { item, position } of selectRewardEdgeDecals(assetHash, 470, 520)) {
-      if (item.src.endsWith("AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD_repaired.gif")) {
-        assert.equal(position.side, "left");
-        sawLeftArrow = true;
-      }
-      if (item.src.endsWith("FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif")) {
-        assert.equal(position.side, "right");
-        sawRightArrow = true;
-      }
+      const filename = item.src.split("/").at(-1);
+      if (!sideRestrictions.has(filename)) continue;
+      assert.equal(position.side, sideRestrictions.get(filename), filename);
+      seen.add(filename);
     }
   }
 
-  assert.ok(sawLeftArrow);
-  assert.ok(sawRightArrow);
+  assert.deepEqual([...seen].sort(), [...sideRestrictions.keys()].sort());
 });
 
 test("invalid artwork hashes and unusable dimensions produce no edge decals", () => {

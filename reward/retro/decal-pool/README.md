@@ -11,3 +11,5 @@ The three GIFs provided from the Downloads folder are copied locally.
 download's final frame was truncated, so the pool uses a repaired copy with its
 37 complete transparent frames; the original download is kept unchanged.
 `FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif` is right-edge only.
+`S4PFGWRLGB34WVSA3KRJ6US45232D3EU.gif` is left-edge only, and
+`WLDLDJVKFZKRH5VLQSGZM4EPB7TN6MEC.gif` is right-edge only.
