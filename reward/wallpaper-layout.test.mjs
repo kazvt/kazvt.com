@@ -3,8 +3,8 @@ import test from "node:test";
 import {
   WALLPAPER_ART_SIZE,
   WALLPAPER_FILLER_SIZE,
-  WALLPAPER_MICRO_SIZE,
-  WALLPAPER_SPRINKLE_SIZE,
+  WALLPAPER_MEDIUM_SIZE,
+  WALLPAPER_MIN_SIZE,
   createWallpaperLayout,
   wallpaperPointsForViewport
 } from "./wallpaper-layout.mjs";
@@ -83,17 +83,24 @@ test("larger screens reveal additional points without moving existing ones", () 
   }
 });
 
-test("smaller filler artwork increases the count while keeping the large repeats", () => {
+test("dense wallpaper keeps every artwork above its minimum size", () => {
   const points = wallpaperPointsForViewport(createWallpaperLayout(42), 1920, 1080);
   const large = points.filter(point => point.size === WALLPAPER_ART_SIZE);
   const fillers = points.filter(point => point.size === WALLPAPER_FILLER_SIZE);
-  const micro = points.filter(point => point.size === WALLPAPER_MICRO_SIZE);
-  const sprinkles = points.filter(point => point.size === WALLPAPER_SPRINKLE_SIZE);
+  const medium = points.filter(point => point.size === WALLPAPER_MEDIUM_SIZE);
+  const minimumSize = points.filter(point => point.size === WALLPAPER_MIN_SIZE);
 
   assert.ok(large.length >= 10, "large wallpaper art remains the dominant size");
-  assert.ok(fillers.length >= 5, "smaller repeats noticeably fill safe gaps between larger art");
-  assert.ok(micro.length >= 6, "an extra small repeat layer fills more of the remaining safe gaps");
-  assert.ok(sprinkles.length >= 10, "a dense sprinkle layer fills open pockets between the larger repeats");
-  assert.ok(points.length >= large.length + fillers.length + micro.length + 10,
-    "the viewport shows substantially more artwork overall");
+  assert.ok(fillers.length >= 5, "large fillers add another visible size");
+  assert.ok(medium.length >= 8, "medium repeats fill gaps between large artworks");
+  assert.ok(minimumSize.length >= 20, "the extra minimum-size layers make the wallpaper much denser");
+  assert.ok(points.every(point => point.size >= WALLPAPER_MIN_SIZE),
+    "no wallpaper artwork renders below the minimum size");
+  assert.ok(points.length >= 70, "a desktop viewport shows substantially more artwork overall");
+});
+
+test("every wallpaper artwork has a distinct stable DOM identity", () => {
+  const layout = createWallpaperLayout(42);
+  assert.equal(new Set(layout.map(point => point.id)).size, layout.length);
+  assert.deepEqual(layout, createWallpaperLayout(42));
 });

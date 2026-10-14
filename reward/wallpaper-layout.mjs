@@ -1,7 +1,7 @@
 export const WALLPAPER_ART_SIZE = 210;
-export const WALLPAPER_FILLER_SIZE = 96;
-export const WALLPAPER_MICRO_SIZE = 72;
-export const WALLPAPER_SPRINKLE_SIZE = 48;
+export const WALLPAPER_MIN_SIZE = 100;
+export const WALLPAPER_FILLER_SIZE = 148;
+export const WALLPAPER_MEDIUM_SIZE = 124;
 
 function boundRadiusFor(size) {
   return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
@@ -118,20 +118,26 @@ function createSingleSizeLayout(seed, artSize, idOffset = 0) {
 }
 
 export function createWallpaperLayout(seed) {
-  const primary = createSingleSizeLayout(seed, WALLPAPER_ART_SIZE);
-  const fillerSeed = (seed ^ 0x85ebca6b) >>> 0;
-  const fillers = createSingleSizeLayout(fillerSeed, WALLPAPER_FILLER_SIZE, primary.length)
-    .filter(filler => staysSeparated(filler, primary));
-  const microSeed = (seed ^ 0xc2b2ae35) >>> 0;
-  const existing = [...primary, ...fillers];
-  const micro = createSingleSizeLayout(microSeed, WALLPAPER_MICRO_SIZE, existing.length)
-    .filter(point => staysSeparated(point, existing));
-  const denserExisting = [...existing, ...micro];
-  const sprinkleSeed = (seed ^ 0x27d4eb2f) >>> 0;
-  const sprinkles = createSingleSizeLayout(sprinkleSeed, WALLPAPER_SPRINKLE_SIZE, denserExisting.length)
-    .filter(point => staysSeparated(point, denserExisting));
+  const layers = [
+    { size: WALLPAPER_ART_SIZE, salt: 0 },
+    { size: WALLPAPER_FILLER_SIZE, salt: 0x85ebca6b },
+    { size: WALLPAPER_MEDIUM_SIZE, salt: 0xc2b2ae35 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x27d4eb2f },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x165667b1 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0xd3a2646c },
+    { size: WALLPAPER_MIN_SIZE, salt: 0xfd7046c5 }
+  ];
+  const layout = [];
+  let nextId = 0;
 
-  return [...denserExisting, ...sprinkles];
+  for (const layer of layers) {
+    const layerSeed = (seed ^ layer.salt) >>> 0;
+    const candidates = createSingleSizeLayout(layerSeed, layer.size, nextId);
+    layout.push(...candidates.filter(point => staysSeparated(point, layout)));
+    nextId += candidates.length;
+  }
+
+  return layout;
 }
 
 export function wallpaperPointsForViewport(layout, width, height, zoomCompensation = 1) {
