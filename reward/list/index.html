@@ -6,26 +6,32 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Award index — kazvt</title>
+  <title>Reward index — kazvt</title>
   <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
-  <link rel="stylesheet" href="/reward/list/list.css?v=7">
-  <script type="module" src="/reward/list/list.js?v=11"></script>
+  <link rel="stylesheet" href="/reward/list/list.css?v=8">
+  <script type="module" src="/reward/list/list.js?v=12"></script>
 <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
 </head>
 <body>
   <main class="index-shell">
     <header class="page-header">
-      <a class="back-link" href="/reward/">&larr; reward page</a>
-      <p class="eyebrow">KAZVT.COM // PUBLIC RECORD</p>
+      <a class="back-link" href="/reward/">&larr; rewards</a>
+      <div class="archive-stickers" aria-hidden="true">
+        <img class="archive-sticker archive-sticker--trophy" src="/reward/list/gifcities/LHPZYDHWQZWA5QMMAVSBTJNP6CADGLMP.gif" alt="" width="60" height="92">
+        <img class="archive-sticker archive-sticker--star" src="/reward/list/gifcities/C2VUVFZAMAM22S3B5P3ZNSEUH623I3MK.gif" alt="" width="35" height="36">
+        <img class="archive-sticker archive-sticker--medal" src="/reward/list/gifcities/N3JCEOHYG7DR4M5AIV5LJ77E6335GKGY.gif" alt="" width="50" height="50">
+      </div>
+      <p class="eyebrow">KAZVT.COM / AWARD ARCHIVE</p>
       <h1 id="pageTitle">Reward index</h1>
-      <p id="pageIntro" class="intro">Find an award by username or artwork name.</p>
+      <p id="pageIntro" class="intro">Find a name or prize.</p>
+      <div class="header-rule" aria-hidden="true"></div>
     </header>
 
     <section class="search-panel" aria-labelledby="search-label">
-      <label id="search-label" for="awardSearch">Search names + artwork</label>
+      <label id="search-label" for="awardSearch">Search awards</label>
       <div class="search-row">
         <input id="awardSearch" type="search" autocomplete="off" spellcheck="false"
-          placeholder="Try kazvt or 1.png" aria-controls="awardList">
+          placeholder="Username or artwork" aria-controls="awardList">
         <button id="clearSearch" class="clear-button" type="button" hidden>Clear</button>
       </div>
       <p id="resultStatus" class="result-status" role="status" aria-live="polite">Loading the award index…</p>
