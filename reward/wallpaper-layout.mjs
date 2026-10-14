@@ -1,7 +1,7 @@
 export const WALLPAPER_ART_SIZE = 180;
-export const WALLPAPER_MIN_SIZE = 80;
-export const WALLPAPER_FILLER_SIZE = 132;
-export const WALLPAPER_MEDIUM_SIZE = 104;
+export const WALLPAPER_MIN_SIZE = 64;
+export const WALLPAPER_FILLER_SIZE = 128;
+export const WALLPAPER_MEDIUM_SIZE = 96;
 
 function boundRadiusFor(size) {
   return size * Math.SQRT1_2 * 1.02 + Math.SQRT2 * 3 + 5;
@@ -41,15 +41,6 @@ function canPlacePoint(x, y, grid, gridColumns, gridRows, cellSize, points, mini
   }
 
   return true;
-}
-
-function staysSeparated(point, anchors) {
-  return anchors.every(anchor => {
-    const dx = point.x - anchor.x;
-    const dy = point.y - anchor.y;
-    const requiredDistance = point.radius + anchor.radius + 4;
-    return dx * dx + dy * dy >= requiredDistance ** 2;
-  });
 }
 
 function createAnchorIndex(anchors = []) {
@@ -222,10 +213,18 @@ export function createWallpaperLayout(seed) {
     { size: WALLPAPER_MIN_SIZE, salt: 0x165667b1 },
     { size: WALLPAPER_MIN_SIZE, salt: 0xd3a2646c },
     { size: WALLPAPER_MIN_SIZE, salt: 0xfd7046c5 },
-    { size: WALLPAPER_MIN_SIZE, salt: 0xb55a4f09 }
+    { size: WALLPAPER_MIN_SIZE, salt: 0xb55a4f09 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x0a21b5f3 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x51f15e2d },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x9e3779b9 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x7f4a7c15 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x6a09e667 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0xbb67ae85 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0x3c6ef372 },
+    { size: WALLPAPER_MIN_SIZE, salt: 0xa54ff53a }
   ];
   const primary = createSingleSizeLayout(seed, WALLPAPER_ART_SIZE);
-  const layout = [...primary];
+  const layout = primary.filter(point => point.id % 5 < 2);
   let nextId = 0;
 
   nextId = primary.length;

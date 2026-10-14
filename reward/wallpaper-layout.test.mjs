@@ -90,13 +90,15 @@ test("dense wallpaper keeps every artwork above its minimum size", () => {
   const medium = points.filter(point => point.size === WALLPAPER_MEDIUM_SIZE);
   const minimumSize = points.filter(point => point.size === WALLPAPER_MIN_SIZE);
 
-  assert.ok(large.length >= 10, "large wallpaper art remains the dominant size");
-  assert.ok(fillers.length >= 5, "large fillers add another visible size");
+  assert.ok(large.length >= 6, "the largest wallpaper repeats remain visible");
+  assert.ok(fillers.length >= 8, "large fillers add another visible size");
   assert.ok(medium.length >= 8, "medium repeats fill gaps between large artworks");
-  assert.ok(minimumSize.length >= 20, "the extra minimum-size layers make the wallpaper much denser");
+  assert.ok(minimumSize.length >= 25, "the extra minimum-size layers make the wallpaper much denser");
   assert.ok(points.every(point => point.size >= WALLPAPER_MIN_SIZE),
     "no wallpaper artwork renders below the minimum size");
-  assert.ok(points.length >= 70, "a desktop viewport shows substantially more artwork overall");
+  assert.ok(points.length >= 55, "a desktop viewport shows substantially more artwork overall");
+  const standardDesktop = wallpaperPointsForViewport(createWallpaperLayout(42), 1366, 768);
+  assert.ok(standardDesktop.length >= 30, "standard desktop viewports also show a dense scatter");
 });
 
 test("every wallpaper artwork has a distinct stable DOM identity", () => {
