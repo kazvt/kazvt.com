@@ -12,7 +12,6 @@ import "../pattern-zoom.mjs?v=2";
   const emptyState = document.getElementById("emptyState");
   const errorState = document.getElementById("errorState");
   const pageTitle = document.getElementById("pageTitle");
-  const pageIntro = document.getElementById("pageIntro");
   const searchLabel = document.getElementById("search-label");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
   const userFilterRequested = usernameParam !== null;
