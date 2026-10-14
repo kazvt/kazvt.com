@@ -23,7 +23,7 @@ if (title && loadingState) {
 
   function resetTitle() {
     previousDirection = -1;
-    title.style.transform = "translate3d(0, 0, 0)";
+    title.style.transform = "none";
   }
 
   function stop() {
