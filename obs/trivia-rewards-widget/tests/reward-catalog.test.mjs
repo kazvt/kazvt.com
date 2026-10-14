@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { resolveRewardAsset } from "../../../reward/asset-resolver.mjs";
 import {
   buildRewardCatalogs,
@@ -11,6 +12,16 @@ import {
   tierBucketForSha256,
   tierForSha256
 } from "../generate-reward-catalog.mjs";
+
+const REWARD_DIRECTORY = resolve(fileURLToPath(new URL("../../../zzz_assets/rewards/", import.meta.url)));
+
+async function currentArtworkBytesForHistoricalName(filename) {
+  const catalog = JSON.parse(await readFile(resolve(REWARD_DIRECTORY, "manifest.json"), "utf8"));
+  const assetId = catalog.filenameHistory?.[filename];
+  const currentFilename = assetId && catalog.assetsById?.[assetId]?.filename;
+  assert.ok(currentFilename, `No current artwork resolves historical name ${filename}.`);
+  return readFile(resolve(REWARD_DIRECTORY, currentFilename));
+}
 
 function digest(prefix) {
   return `${prefix}${"0".repeat(64 - prefix.length)}`;
@@ -81,7 +92,7 @@ test("renaming a PNG preserves its content ID and keeps the old filename as a le
   const originalName = "first award.png";
   const renamedName = "award name can change.png";
   try {
-    const pngBytes = await readFile(new URL("../../../zzz_assets/rewards/1.png", import.meta.url));
+    const pngBytes = await currentArtworkBytesForHistoricalName("1.png");
     await writeFile(resolve(temporaryRoot, originalName), pngBytes);
 
     const first = await buildRewardCatalogs({ rewardDir: temporaryRoot });
@@ -109,7 +120,7 @@ test("renaming a PNG preserves its content ID and keeps the old filename as a le
     });
 
     await writeFile(resolve(temporaryRoot, "manifest.json"), `${JSON.stringify(renamed.manifest)}\n`);
-    const differentPng = await readFile(new URL("../../../zzz_assets/rewards/2.png", import.meta.url));
+    const differentPng = await currentArtworkBytesForHistoricalName("2.png");
     await writeFile(resolve(temporaryRoot, originalName), differentPng);
     const reusedName = await buildRewardCatalogs({ rewardDir: temporaryRoot });
     assert.equal(reusedName.manifest.filenameHistory[originalName], null);
