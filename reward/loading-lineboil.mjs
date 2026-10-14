@@ -1,5 +1,6 @@
 const title = document.querySelector(".loading-lineboil");
 const loadingState = document.getElementById("loadingState");
+const PHASE_INTERVAL_MS = 500;
 
 if (title && loadingState) {
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -51,7 +52,7 @@ if (title && loadingState) {
     if (document.hidden || motionPreference.matches) {
       stop();
     } else if (!timer) {
-      timer = window.setInterval(advancePhase, 500);
+      timer = window.setInterval(advancePhase, PHASE_INTERVAL_MS);
     }
   }
 
