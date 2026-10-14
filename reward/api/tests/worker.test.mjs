@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { handleRequest } from "../src/index.mjs";
 
-const ART_A = "a".repeat(64);
-const ART_B = "b".repeat(64);
+const ART_A = "0".repeat(64);
+const ART_B = "f".repeat(64);
 const ISSUER_KEY = "0123456789abcdef0123456789abcdef0123456789abc";
 const catalog = {
   version: 4,
@@ -11,12 +11,18 @@ const catalog = {
   files: ["alpha.png", "beta.png"],
   assets: {
     "alpha.png": { assetId: ART_A, sha256: ART_A, width: 32, height: 32, tier: "common" },
-    "beta.png": { assetId: ART_B, sha256: ART_B, width: 48, height: 48, tier: "rare" }
+    "beta.png": { assetId: ART_B, sha256: ART_B, width: 48, height: 48, tier: "splus" }
   },
   assetsById: {
     [ART_A]: { assetId: ART_A, filename: "alpha.png", width: 32, height: 32, tier: "common" },
-    [ART_B]: { assetId: ART_B, filename: "beta.png", width: 48, height: 48, tier: "rare" }
-  }
+    [ART_B]: { assetId: ART_B, filename: "beta.png", width: 48, height: 48, tier: "splus" }
+  },
+  tierWeights: [
+    { id: "common", basisPoints: 3000 }, { id: "uncommon", basisPoints: 2000 },
+    { id: "rare", basisPoints: 1500 }, { id: "epic", basisPoints: 1200 },
+    { id: "legendary", basisPoints: 900 }, { id: "mythic", basisPoints: 650 },
+    { id: "divine", basisPoints: 450 }, { id: "splus", basisPoints: 300 }
+  ]
 };
 const staticAssignments = [{
   assetId: ART_B,

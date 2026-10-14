@@ -82,7 +82,9 @@ async function readJson(url) {
 async function readCatalog(env) {
   const catalog = await readJson(siteUrl(env, "/zzz_assets/rewards/manifest.json"));
   if (!catalog || catalog.version !== 4 || catalog.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
-      !Array.isArray(catalog.files) || !catalog.assets || !catalog.assetsById) {
+      !Array.isArray(catalog.files) || !catalog.assets || !catalog.assetsById ||
+      !Array.isArray(catalog.tierWeights) ||
+      catalog.tierWeights.reduce((sum, item) => sum + (Number.isInteger(item?.basisPoints) ? item.basisPoints : -10001), 0) !== 10000) {
     throw new Error("The published reward catalog is invalid.");
   }
   return catalog;
@@ -112,10 +114,16 @@ function catalogAsset(catalog, assetId) {
   if (!indexed || !PNG_FILENAME_PATTERN.test(indexed.filename || "") ||
       !catalog.files.includes(indexed.filename)) return null;
   const metadata = catalog.assets[indexed.filename];
+  const bucket = Math.floor((Number.parseInt(assetId.slice(0, 8), 16) / 0x100000000) * 10000);
+  let cumulativeWeight = 0;
+  const expectedTier = catalog.tierWeights.find(item => {
+    cumulativeWeight += item.basisPoints;
+    return bucket < cumulativeWeight;
+  })?.id;
   if (!metadata || metadata.assetId !== assetId || metadata.sha256 !== assetId ||
       !Number.isSafeInteger(metadata.width) || metadata.width < 1 ||
       !Number.isSafeInteger(metadata.height) || metadata.height < 1 ||
-      metadata.tier !== indexed.tier) return null;
+      metadata.tier !== indexed.tier || metadata.tier !== expectedTier) return null;
   return { assetId, filename: indexed.filename, width: metadata.width, height: metadata.height, tier: metadata.tier };
 }
 
