@@ -96,6 +96,11 @@ test("the issuer is private, idempotent, one-of-one, and readable by the public 
     const unauthorized = await issue({ username: "attacker", assetId: ART_A });
     assert.equal(unauthorized.status, 401);
 
+    const oversized = await issue({ username: "x".repeat(5000), assetId: ART_A }, {
+      Authorization: `Bearer ${ISSUER_KEY}`
+    });
+    assert.equal(oversized.status, 413);
+
     const browserRequest = await issue({ username: "attacker", assetId: ART_A }, {
       Authorization: `Bearer ${ISSUER_KEY}`,
       Origin: "https://kazvt.com"

@@ -5,6 +5,32 @@ const COMPACT_ID_PATTERN = /^[A-Za-z0-9_-]{16,22}$/;
 const UUID4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 4096;
 
+class RequestBodyTooLargeError extends Error {}
+
+async function readLimitedBody(request) {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks = [];
+  let byteLength = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    byteLength += value.byteLength;
+    if (byteLength > MAX_BODY_BYTES) {
+      await reader.cancel().catch(() => {});
+      throw new RequestBodyTooLargeError();
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(byteLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+}
+
 function allowedOrigins(env) {
   return new Set(String(env.ALLOWED_ORIGINS || "https://kazvt.com,https://www.kazvt.com")
     .split(",").map(value => value.trim()).filter(Boolean));
@@ -203,14 +229,16 @@ async function issueAward(request, env) {
   }
 
   const announcedLength = Number(request.headers.get("Content-Length") || 0);
-  if (announcedLength > MAX_BODY_BYTES) return error(request, env, 413, "Award request is too large.");
+  if (Number.isFinite(announcedLength) && announcedLength > MAX_BODY_BYTES) {
+    return error(request, env, 413, "Award request is too large.");
+  }
   let rawBody;
   try {
-    rawBody = await request.text();
-    if (new TextEncoder().encode(rawBody).length > MAX_BODY_BYTES) {
+    rawBody = await readLimitedBody(request);
+  } catch (cause) {
+    if (cause instanceof RequestBodyTooLargeError) {
       return error(request, env, 413, "Award request is too large.");
     }
-  } catch {
     return error(request, env, 400, "Award request could not be read.");
   }
 
