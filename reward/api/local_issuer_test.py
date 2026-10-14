@@ -116,7 +116,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 expected_remote=str(self.remote),
             )
         (self.site / "unrelated.tmp").unlink()
-        (self.reward_dir / "toast.png").write_bytes(b"not the cataloged reward")
+        (self.reward_dir / "toast.png").write_bytes(png_bytes(4, 4))
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
             local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
 
