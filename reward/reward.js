@@ -243,20 +243,33 @@ import {
   function renderFilename(file) {
     const label = filenameLabel(file);
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    filename.classList.remove("filename--animated");
+
+    const fragment = document.createDocumentFragment();
+    const accessibleLabel = document.createElement("span");
+    accessibleLabel.className = "filename-sr-only";
+    accessibleLabel.textContent = `You got: ${label}`;
+    fragment.append(accessibleLabel);
+
+    const prefix = document.createElement("span");
+    prefix.className = "filename-prefix";
+    prefix.setAttribute("aria-hidden", "true");
+    prefix.textContent = "You got: ";
+    fragment.append(prefix);
+
     if (reducedMotion || !label) {
-      filename.textContent = label;
-      filename.classList.remove("filename--animated");
+      const artworkName = document.createElement("span");
+      artworkName.className = "filename-artwork-name";
+      artworkName.setAttribute("aria-hidden", "true");
+      artworkName.textContent = label;
+      fragment.append(artworkName);
+      filename.replaceChildren(fragment);
       return;
     }
 
     const graphemes = typeof Intl.Segmenter === "function"
       ? Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(label), part => part.segment)
       : Array.from(label);
-    const fragment = document.createDocumentFragment();
-    const accessibleLabel = document.createElement("span");
-    accessibleLabel.className = "filename-sr-only";
-    accessibleLabel.textContent = label;
-    fragment.append(accessibleLabel);
 
     let word = null;
     let characterIndex = 0;
