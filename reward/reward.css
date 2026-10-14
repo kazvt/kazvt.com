@@ -656,7 +656,12 @@ h1 {
   font-weight: 900;
   line-height: 1.25;
   letter-spacing: .035em;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.filename-word {
+  white-space: nowrap;
 }
 
 .filename-sr-only {

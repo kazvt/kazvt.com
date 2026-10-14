@@ -274,14 +274,37 @@ import {
     accessibleLabel.textContent = label;
     fragment.append(accessibleLabel);
 
-    graphemes.forEach((grapheme, index) => {
+    let word = null;
+    let characterIndex = 0;
+    const finishWord = () => {
+      if (!word) return;
+      fragment.append(word);
+      word = null;
+    };
+
+    graphemes.forEach(grapheme => {
+      if (/^\s+$/u.test(grapheme)) {
+        finishWord();
+        fragment.append(document.createTextNode(grapheme));
+        characterIndex += 1;
+        return;
+      }
+
+      if (!word) {
+        word = document.createElement("span");
+        word.className = "filename-word";
+        word.setAttribute("aria-hidden", "true");
+      }
+
       const character = document.createElement("span");
       character.className = "filename-character";
       character.setAttribute("aria-hidden", "true");
-      character.style.setProperty("--char-index", index);
+      character.style.setProperty("--char-index", characterIndex);
       character.textContent = grapheme;
-      fragment.append(character);
+      word.append(character);
+      characterIndex += 1;
     });
+    finishWord();
 
     filename.style.setProperty("--filename-wave-duration", `${Math.max(1900, 1300 + graphemes.length * 55)}ms`);
     filename.classList.add("filename--animated");
