@@ -349,8 +349,22 @@ body[data-page-state="error"] .reward-card {
 }
 
 .loading-lineboil {
-  display: inline-flex;
-  align-items: baseline;
+  display: inline-block;
+}
+
+.loading-lineboil-letter {
+  display: inline-block;
+  transition: transform 100ms ease-out;
+}
+
+.loading-lineboil[data-boil-phase="1"] > .loading-lineboil-letter:nth-child(odd),
+.loading-lineboil[data-boil-phase="3"] > .loading-lineboil-letter:nth-child(even) {
+  transform: translateY(-2px);
+}
+
+.loading-lineboil[data-boil-phase="1"] > .loading-lineboil-letter:nth-child(even),
+.loading-lineboil[data-boil-phase="3"] > .loading-lineboil-letter:nth-child(odd) {
+  transform: translateY(2px);
 }
 
 .loading-ellipsis {
@@ -799,7 +813,7 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
   .loading-hourglass { display: none; animation: none; }
   .loading-hourglass-fallback { display: inline; font-size: 60px; }
   .loading-title, .loading-ellipsis span { animation: none; }
-  .loading-lineboil { transform: none !important; }
+  .loading-lineboil-letter { transform: none !important; transition: none; }
   .loading-ellipsis span { opacity: 1; transform: none; }
   .wall-art-spin {
     animation: none;

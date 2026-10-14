@@ -3,27 +3,32 @@ const loadingState = document.getElementById("loadingState");
 
 if (title && loadingState) {
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const directions = [
-    [-1, -1], [0, -1], [1, -1], [1, 0],
-    [1, 1], [0, 1], [-1, 1], [-1, 0]
-  ];
-  let previousDirection = -1;
+  const loadingText = Array.from(title.childNodes).find(node =>
+    node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+  );
+  if (loadingText) {
+    const letters = document.createDocumentFragment();
+    for (const character of loadingText.textContent) {
+      const letter = document.createElement("span");
+      letter.className = "loading-lineboil-letter";
+      letter.textContent = character;
+      letter.setAttribute("aria-hidden", "true");
+      letters.append(letter);
+    }
+    loadingText.replaceWith(letters);
+  }
+
+  let phase = 0;
   let timer = 0;
 
-  function nudgeTitle() {
-    const pick = Math.floor(Math.random() * (directions.length - (previousDirection < 0 ? 0 : 1)));
-    const directionIndex = previousDirection < 0
-      ? pick
-      : pick >= previousDirection ? pick + 1 : pick;
-    const [x, y] = directions[directionIndex];
-    const distance = Math.random() < 0.5 ? 1 : 2;
-    previousDirection = directionIndex;
-    title.style.transform = `translate3d(${x * distance}px, ${y * distance}px, 0)`;
+  function advancePhase() {
+    phase = (phase % 3) + 1;
+    title.dataset.boilPhase = String(phase);
   }
 
   function resetTitle() {
-    previousDirection = -1;
-    title.style.transform = "none";
+    phase = 0;
+    delete title.dataset.boilPhase;
   }
 
   function stop() {
@@ -46,7 +51,7 @@ if (title && loadingState) {
     if (document.hidden || motionPreference.matches) {
       stop();
     } else if (!timer) {
-      timer = window.setInterval(nudgeTitle, 500);
+      timer = window.setInterval(advancePhase, 500);
     }
   }
 
