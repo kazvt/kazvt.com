@@ -65,7 +65,7 @@ class FakeD1 {
 test("the issuer is private, idempotent, one-of-one, and readable by the public site", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async input => {
-    const url = new URL(typeof input === "string" ? input : input.url);
+    const url = new URL(input instanceof URL ? input.href : typeof input === "string" ? input : input.url);
     if (url.pathname.endsWith("/manifest.json")) return Response.json(catalog);
     if (url.pathname.endsWith("/assignments.json")) return Response.json({ version: 1, assignments: staticAssignments });
     throw new Error(`Unexpected upstream fetch: ${url}`);
