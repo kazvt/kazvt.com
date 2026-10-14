@@ -205,8 +205,7 @@ function createJitteredSizeLayout(seed, artSize, idOffset, anchors) {
 }
 
 export function createWallpaperLayout(seed) {
-  const layers = [
-    { size: WALLPAPER_ART_SIZE, salt: 0 },
+  const fillerLayers = [
     { size: WALLPAPER_FILLER_SIZE, salt: 0x85ebca6b },
     { size: WALLPAPER_MEDIUM_SIZE, salt: 0xc2b2ae35 },
     { size: WALLPAPER_MIN_SIZE, salt: 0x27d4eb2f },
@@ -224,11 +223,10 @@ export function createWallpaperLayout(seed) {
     { size: WALLPAPER_MIN_SIZE, salt: 0xa54ff53a }
   ];
   const primary = createSingleSizeLayout(seed, WALLPAPER_ART_SIZE);
+  // Keep occasional oversized repeats and use the freed gaps for a denser scatter.
   const layout = primary.filter(point => point.id % 5 < 2);
-  let nextId = 0;
-
-  nextId = primary.length;
-  for (const layer of layers.slice(1)) {
+  let nextId = primary.length;
+  for (const layer of fillerLayers) {
     const layerSeed = (seed ^ layer.salt) >>> 0;
     const points = createJitteredSizeLayout(layerSeed, layer.size, nextId, layout);
     layout.push(...points);
