@@ -71,7 +71,7 @@ a { color: inherit; }
   min-height: 70px;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 11px;
   margin: 0 auto 3px;
 }
 
@@ -83,32 +83,15 @@ a { color: inherit; }
   object-fit: contain;
 }
 
+.archive-sticker--chest { width: 44px; height: 30px; }
 .archive-sticker--trophy { width: 42px; height: 64px; }
 .archive-sticker--star { width: 31px; height: 32px; }
-.archive-sticker--medal { width: 41px; height: 41px; }
-
-.eyebrow {
-  margin: 2px 0 4px;
-  color: var(--signal);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-}
 
 h1 {
-  margin: 4px 0 1px;
+  margin: 2px 0 9px;
   color: #faf9ff;
   font-size: clamp(1.9rem, 4.8vw, 2.7rem);
   text-shadow: 2px 2px #694d9a, 4px 4px #07070c;
-}
-
-.intro { margin: 3px 0 12px; color: #dedbea; }
-
-.header-rule {
-  width: min(82%, 560px);
-  height: 5px;
-  margin: 0 auto 12px;
-  border-top: 1px dotted #aaa5d2;
-  border-bottom: 1px dotted #526982;
 }
 
 .search-panel {
@@ -120,11 +103,16 @@ h1 {
   box-shadow: 2px 2px 0 #050509;
 }
 
-.search-panel label {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--accent);
-  font-size: 0.9rem;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .search-row { display: flex; gap: 8px; }
@@ -157,7 +145,7 @@ h1 {
 .open-button.is-unavailable:hover { background: #292832; }
 
 .clear-button:focus-visible, .open-button:focus-visible, .back-link:focus-visible,
-.page-footer a:focus-visible, .search-row input:focus-visible {
+.search-row input:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
 }
@@ -235,32 +223,18 @@ h1 {
 
 .error-state { border-color: #ef7f94; color: #ffd6dc; }
 
-.page-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 9px;
-  border-top: 1px dotted #777492;
-  color: #c4c2d3;
-  font-size: 0.76rem;
-}
-
-.page-footer a { color: var(--signal); }
-
 @media (max-width: 560px) {
   body { padding: 10px; }
   .index-shell { padding: 15px 12px; }
   .page-header { padding-top: 28px; }
   .back-link { top: 0; left: 0; }
-  .archive-stickers { min-height: 56px; gap: 11px; }
+  .archive-stickers { min-height: 56px; gap: 8px; }
+  .archive-sticker--chest { width: 36px; height: 25px; }
   .archive-sticker--trophy { width: 34px; height: 52px; }
   .archive-sticker--star { width: 27px; height: 28px; }
-  .archive-sticker--medal { width: 35px; height: 35px; }
   .award-card { grid-template-columns: 76px minmax(0, 1fr); gap: 9px; }
   .artwork-frame { width: 72px; height: 72px; }
   .open-button { grid-column: 1 / -1; }
-  .page-footer { flex-direction: column; align-items: center; text-align: center; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -141,7 +141,7 @@ import "../pattern-zoom.mjs?v=2";
       }
       openLink = document.createElement("a");
       openLink.href = createRewardHref(assignment.linkId, window.location.origin);
-      openLink.textContent = "Open award ↗";
+      openLink.textContent = "Open ↗";
       openLink.setAttribute("aria-label", `Open ${assignment.username}'s award`);
     } catch (error) {
       console.warn("[reward-list] Could not prepare an individual award link:", error);
@@ -172,21 +172,18 @@ import "../pattern-zoom.mjs?v=2";
     emptyState.hidden = visibleCount !== 0;
     clearButton.hidden = !searchInput.value;
     if (query && visibleCount === 0) {
-      resultStatus.textContent = `No awards match “${searchInput.value.trim()}”.`;
+      resultStatus.textContent = `No matches for “${searchInput.value.trim()}”.`;
     } else {
-      resultStatus.textContent = `${visibleCount} ${visibleCount === 1 ? "award" : "awards"} found.`;
+      resultStatus.textContent = `${visibleCount} ${visibleCount === 1 ? "result" : "results"}`;
     }
   }
 
   async function start() {
     if (userFilterRequested) {
       pageTitle.textContent = userFilterValid ? `Awards for ${requestedUsername}` : "Award lookup";
-      pageIntro.textContent = userFilterValid
-        ? `All recorded awards for ${requestedUsername}, newest first.`
-        : "That username is invalid.";
       document.title = userFilterValid ? `Awards for ${requestedUsername} — kazvt` : "Award lookup — kazvt";
       searchLabel.textContent = "Search this collection";
-      searchInput.placeholder = "Try an artwork name";
+      searchInput.placeholder = "Search artwork…";
     }
 
     try {
@@ -204,9 +201,9 @@ import "../pattern-zoom.mjs?v=2";
         emptyState.hidden = false;
         emptyState.textContent = userFilterRequested
           ? userFilterValid
-            ? `No recorded awards for ${requestedUsername}.`
-            : "That username is invalid."
-          : "No awards have been recorded yet.";
+            ? `No awards for ${requestedUsername}.`
+            : "Invalid username."
+          : "No awards yet.";
       }
       updateResults(cards);
       searchInput.addEventListener("input", () => updateResults(cards));
