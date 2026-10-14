@@ -625,6 +625,7 @@ import {
     divine: { type: "scale", amount: 0.052, squishAmount: 0.052, duration: 4250 },
     splus: { type: "rotateY", amount: 5.2, squishAmount: 0.06, duration: 3750 }
   };
+  const ARTWORK_AXIS_HALF_CYCLE_MS = 2000;
   let tierAnimationGeneration = 0;
 
   function motionProperties(motion, intensity) {
@@ -663,17 +664,17 @@ import {
     const anime = await loadAnime();
     if (generation !== tierAnimationGeneration || rewardTier.dataset.tier !== tier) return;
     anime.remove([rewardTier, rewardArtworkMotion]);
-    const startLoop = (target, intensity, durationScale = 1, motionType = motion.type, amount = motion.amount) => anime({
+    const startLoop = (target, intensity, duration = motion.duration, motionType = motion.type, amount = motion.amount) => anime({
       targets: target,
       ...motionProperties({ type: motionType, amount }, intensity),
-      duration: Math.max(900, Math.round(motion.duration * durationScale)),
+      duration: Math.max(900, Math.round(duration)),
       easing: "easeInOutSine",
       direction: "alternate",
       loop: true
     });
 
-    // Keep the artwork's motion consistent: each tier squishes in X/Y, with tier-tuned strength and tempo.
-    startLoop(rewardArtworkMotion, 1.55, 0.72, "squish", motion.squishAmount);
+    // Two-second alternate legs make a four-second loop; opposing Y endpoints offset that axis by two seconds.
+    startLoop(rewardArtworkMotion, 1.55, ARTWORK_AXIS_HALF_CYCLE_MS, "squish", motion.squishAmount);
     startLoop(rewardTier, 0.42);
   }
 
