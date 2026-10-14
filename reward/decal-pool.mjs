@@ -46,7 +46,7 @@ export const REWARD_DECAL_POOL = Object.freeze([
   {
     className: "wall-art--decal-pool",
     side: "left",
-    src: "/reward/retro/decal-pool/AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD.gif"
+    src: "/reward/retro/decal-pool/AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD_repaired.gif"
   },
   {
     className: "wall-art--decal-pool",

@@ -47,7 +47,7 @@ test("directional GIFs only appear on their intended edge", () => {
   for (let index = 1; index <= 256; index += 1) {
     const assetHash = index.toString(16).padStart(64, "0");
     for (const { item, position } of selectRewardEdgeDecals(assetHash, 470, 520)) {
-      if (item.src.endsWith("AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD.gif")) {
+      if (item.src.endsWith("AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD_repaired.gif")) {
         assert.equal(position.side, "left");
         sawLeftArrow = true;
       }

@@ -7,5 +7,7 @@ affect them. The pool does not reuse an image within one reward.
 
 The checksum-named GIFs are local copies from `blob.gifcities.org/gifcities/`.
 The three GIFs provided from the Downloads folder are copied locally.
-`AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD.gif` is left-edge only;
+`AJ3PGGLROVFZ4RADSQHDTT6ILHCMIGVD_repaired.gif` is left-edge only. The original
+download's final frame was truncated, so the pool uses a repaired copy with its
+37 complete transparent frames; the original download is kept unchanged.
 `FZOIT4NKHYKHZELQATMJIGYUJM3VUZ45.gif` is right-edge only.
