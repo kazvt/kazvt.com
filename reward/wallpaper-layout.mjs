@@ -9,8 +9,8 @@ function boundRadiusFor(size) {
 
 export const WALLPAPER_BOUND_RADIUS = boundRadiusFor(WALLPAPER_ART_SIZE);
 
-const WORLD_WIDTH = 16384;
-const WORLD_HEIGHT = 8192;
+const WORLD_WIDTH = 8192;
+const WORLD_HEIGHT = 4096;
 const CANDIDATE_TRIES = 40;
 
 function createSeededRandom(seed) {
@@ -50,6 +50,46 @@ function staysSeparated(point, anchors) {
     const requiredDistance = point.radius + anchor.radius + 4;
     return dx * dx + dy * dy >= requiredDistance ** 2;
   });
+}
+
+function createAnchorIndex(anchors = []) {
+  const cellSize = WALLPAPER_BOUND_RADIUS * 2 + 4;
+  const columns = Math.ceil(WORLD_WIDTH / cellSize);
+  const cells = new Map();
+  const cellKey = (column, row) => row * columns + column;
+
+  function add(point) {
+    const column = Math.floor(point.x / cellSize);
+    const row = Math.floor(point.y / cellSize);
+    const key = cellKey(column, row);
+    const bucket = cells.get(key);
+    if (bucket) bucket.push(point);
+    else cells.set(key, [point]);
+  }
+
+  for (const anchor of anchors) add(anchor);
+
+  return {
+    add,
+    isSeparated(point) {
+      const column = Math.floor(point.x / cellSize);
+      const row = Math.floor(point.y / cellSize);
+      const reach = Math.ceil((point.radius + WALLPAPER_BOUND_RADIUS + 4) / cellSize);
+      for (let nearbyRow = Math.max(0, row - reach); nearbyRow <= Math.min(Math.ceil(WORLD_HEIGHT / cellSize) - 1, row + reach); nearbyRow += 1) {
+        for (let nearbyColumn = Math.max(0, column - reach); nearbyColumn <= Math.min(columns - 1, column + reach); nearbyColumn += 1) {
+          const bucket = cells.get(cellKey(nearbyColumn, nearbyRow));
+          if (!bucket) continue;
+          for (const anchor of bucket) {
+            const dx = point.x - anchor.x;
+            const dy = point.y - anchor.y;
+            const requiredDistance = point.radius + anchor.radius + 4;
+            if (dx * dx + dy * dy < requiredDistance ** 2) return false;
+          }
+        }
+      }
+      return true;
+    }
+  };
 }
 
 function createSingleSizeLayout(seed, artSize, idOffset = 0) {
@@ -121,6 +161,58 @@ function createSingleSizeLayout(seed, artSize, idOffset = 0) {
   });
 }
 
+function createJitteredSizeLayout(seed, artSize, idOffset, anchors) {
+  const random = createSeededRandom(seed);
+  const radius = boundRadiusFor(artSize);
+  const minimumDistance = radius * 2 + 4;
+  const spacing = minimumDistance * 1.12;
+  const rowSpacing = spacing * Math.sqrt(3) / 2;
+  const margin = radius + 3;
+  const originX = margin + random() * spacing;
+  const originY = margin + random() * rowSpacing;
+  const candidates = [];
+
+  for (let row = 0, y = originY; y <= WORLD_HEIGHT - margin; row += 1, y += rowSpacing) {
+    const rowOffset = (row % 2) * spacing / 2 + (random() - 0.5) * spacing * 0.32;
+    for (let x = originX + rowOffset; x <= WORLD_WIDTH - margin; x += spacing) {
+      candidates.push({
+        x: x + (random() - 0.5) * spacing * 0.32,
+        y: y + (random() - 0.5) * rowSpacing * 0.32
+      });
+    }
+  }
+
+  for (let index = candidates.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [candidates[index], candidates[swapIndex]] = [candidates[swapIndex], candidates[index]];
+  }
+
+  const spatialIndex = createAnchorIndex(anchors);
+  const points = [];
+  for (const candidate of candidates) {
+    if (candidate.x < margin || candidate.x > WORLD_WIDTH - margin ||
+        candidate.y < margin || candidate.y > WORLD_HEIGHT - margin) continue;
+    const id = idOffset + points.length;
+    const variant = createSeededRandom((seed ^ Math.imul(id + 1, 0x9e3779b1)) >>> 0);
+    const point = {
+      id,
+      ...candidate,
+      size: artSize,
+      radius,
+      styleIndex: Math.floor(variant() * 12) + 1,
+      spinDirection: variant() < 0.5 ? "wall-art-spin--clockwise" : "wall-art-spin--counterclockwise",
+      angleJitter: Number((variant() * 16 - 8).toFixed(1)),
+      driftX: variant() * 6 - 3,
+      driftY: variant() * 6 - 3
+    };
+    if (!spatialIndex.isSeparated(point)) continue;
+    spatialIndex.add(point);
+    points.push(point);
+  }
+
+  return points;
+}
+
 export function createWallpaperLayout(seed) {
   const layers = [
     { size: WALLPAPER_ART_SIZE, salt: 0 },
@@ -132,14 +224,16 @@ export function createWallpaperLayout(seed) {
     { size: WALLPAPER_MIN_SIZE, salt: 0xfd7046c5 },
     { size: WALLPAPER_MIN_SIZE, salt: 0xb55a4f09 }
   ];
-  const layout = [];
+  const primary = createSingleSizeLayout(seed, WALLPAPER_ART_SIZE);
+  const layout = [...primary];
   let nextId = 0;
 
-  for (const layer of layers) {
+  nextId = primary.length;
+  for (const layer of layers.slice(1)) {
     const layerSeed = (seed ^ layer.salt) >>> 0;
-    const candidates = createSingleSizeLayout(layerSeed, layer.size, nextId);
-    layout.push(...candidates.filter(point => staysSeparated(point, layout)));
-    nextId += candidates.length;
+    const points = createJitteredSizeLayout(layerSeed, layer.size, nextId, layout);
+    layout.push(...points);
+    nextId += points.length;
   }
 
   return layout;
