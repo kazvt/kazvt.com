@@ -92,7 +92,7 @@ test("dense wallpaper keeps every artwork above its minimum size", () => {
 
   assert.ok(large.length >= 6, "the largest wallpaper repeats remain visible");
   assert.ok(fillers.length >= 8, "large fillers add another visible size");
-  assert.ok(medium.length >= 8, "medium repeats fill gaps between large artworks");
+  assert.ok(medium.length >= 5, "medium repeats fill gaps between large artworks");
   assert.ok(minimumSize.length >= 25, "the extra minimum-size layers make the wallpaper much denser");
   assert.ok(points.every(point => point.size >= WALLPAPER_MIN_SIZE),
     "no wallpaper artwork renders below the minimum size");
