@@ -1,6 +1,6 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=short-id-1";
-import { layoutSideEdgeDecals } from "./decal-layout.mjs";
+import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=1";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
 import "./loading-lineboil.mjs?v=5";
@@ -91,31 +91,10 @@ import {
   let wallpaperLayoutFrame = 0;
   let wallpaperResizeTimer = 0;
   let decalLayoutSeed = 1;
+  let decalAssetHash = "";
   let activeAwardCollection = null;
   let awardCollectionGeneration = 0;
   const decalElements = new Map();
-
-  const RETRO_DECALS = [
-    { className: "wall-art--treasure", src: "/reward/retro/treasure-chest.gif" },
-    { className: "wall-art--treasure-two", src: "/reward/retro/treasure-chest-2.gif" },
-    { className: "wall-art--winner", src: "/reward/retro/winner-trophy.gif" },
-    { className: "wall-art--coin", src: "/reward/retro/coin.gif" },
-    { className: "wall-art--wow", src: "/reward/retro/wow.gif" },
-    { className: "wall-art--genie", src: "/reward/retro/genie.gif" },
-    { className: "wall-art--dance", src: "/reward/retro/dance.gif" },
-    { className: "wall-art--dance", src: "/reward/retro/dancegif_bgless.gif" }
-  ];
-
-  function createSeededRandom(seed) {
-    let state = seed >>> 0;
-    return () => {
-      state += 0x6D2B79F5;
-      let value = state;
-      value = Math.imul(value ^ (value >>> 15), value | 1);
-      value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-    };
-  }
 
   function hashRewardIdentity(username, assetId) {
     const canonicalUsername = normalizeAwardUsername(username);
@@ -129,23 +108,21 @@ import {
   }
 
   function layoutRewardDecals() {
-    if (!rewardDecalLayer || document.body.dataset.pageState !== "reward") return;
+    if (!rewardDecalLayer || !decalAssetHash || document.body.dataset.pageState !== "reward") return;
 
     const width = rewardDecalLayer.clientWidth;
     const height = rewardDecalLayer.clientHeight;
-    if (!width || !height || RETRO_DECALS.length === 0) return;
+    if (!width || !height) return;
 
-    const random = createSeededRandom(decalLayoutSeed);
-    const items = [...RETRO_DECALS];
-    for (let index = items.length - 1; index > 0; index -= 1) {
-      const swapIndex = Math.floor(random() * (index + 1));
-      [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+    const placements = selectRewardEdgeDecals(decalAssetHash, width, height);
+    const activeSources = new Set(placements.map(({ item }) => item.src));
+    for (const [src, element] of decalElements) {
+      if (activeSources.has(src)) continue;
+      element.remove();
+      decalElements.delete(src);
     }
 
-    const positions = layoutSideEdgeDecals(width, height, items.length, decalLayoutSeed);
-
-    items.forEach((item, index) => {
-      const point = positions[index];
+    placements.forEach(({ item, position }) => {
       let element = decalElements.get(item.src);
       if (!element) {
         element = document.createElement("img");
@@ -159,19 +136,23 @@ import {
       }
 
       element.hidden = false;
-      element.style.left = `${point.x}px`;
-      element.style.top = `${point.y}px`;
-      element.style.setProperty("--decal-size", `${point.size}px`);
-      element.style.setProperty("--decal-angle", `${point.angle.toFixed(1)}deg`);
+      element.style.left = `${position.x}px`;
+      element.style.top = `${position.y}px`;
+      element.style.setProperty("--decal-size", `${position.size}px`);
+      element.style.setProperty("--decal-angle", `${position.angle.toFixed(1)}deg`);
       if (element.parentElement !== rewardDecalLayer) rewardDecalLayer.append(element);
     });
   }
 
-  function populateArtWallpaper(imageUrl) {
+  function populateArtWallpaper(imageUrl, assetHash) {
     wallpaperImageUrl = imageUrl;
+    decalAssetHash = assetHash;
     wallpaperLayout = createWallpaperLayout(decalLayoutSeed);
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
+    rewardDecalLayer.replaceChildren();
+    decalElements.clear();
+    decalAssetHash = "";
     layoutArtWallpaper();
     layoutRewardDecals();
   }
@@ -757,7 +738,7 @@ import {
     errorState.hidden = true;
     rewardState.hidden = false;
     if (demoFootnote) demoFootnote.hidden = false;
-    populateArtWallpaper(imageUrl);
+    populateArtWallpaper(imageUrl, metadata.assetId);
     animateTier(assignedTier).catch(error => {
       console.warn("[reward-demo] Tier animation is unavailable:", error);
     });
@@ -825,7 +806,7 @@ import {
     rewardCard.setAttribute("aria-busy", "false");
     loadingState.hidden = true;
     rewardState.hidden = false;
-    populateArtWallpaper(imageUrl);
+    populateArtWallpaper(imageUrl, metadata.assetId);
     showUserAwardCollection(data.username, metadata.assetId, catalog);
     animateTier(assignedTier).catch(error => {
       // The award remains readable and correctly tiered when an external animation CDN is unavailable.
