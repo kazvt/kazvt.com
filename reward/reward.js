@@ -107,6 +107,12 @@ import {
     return (hash >>> 0) || 1;
   }
 
+  function clearRewardDecals() {
+    decalAssetHash = "";
+    rewardDecalLayer.replaceChildren();
+    decalElements.clear();
+  }
+
   function layoutRewardDecals() {
     if (!rewardDecalLayer || !decalAssetHash || document.body.dataset.pageState !== "reward") return;
 
@@ -150,9 +156,6 @@ import {
     wallpaperLayout = createWallpaperLayout(decalLayoutSeed);
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
-    rewardDecalLayer.replaceChildren();
-    decalElements.clear();
-    decalAssetHash = "";
     layoutArtWallpaper();
     layoutRewardDecals();
   }
@@ -469,6 +472,7 @@ import {
     wallpaperLayout = [];
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
+    clearRewardDecals();
     if (demoFootnote) demoFootnote.hidden = true;
   }
 
@@ -484,6 +488,7 @@ import {
     wallpaperLayout = [];
     wallpaperSlots.clear();
     artWallpaper.replaceChildren();
+    clearRewardDecals();
     if (demoFootnote) demoFootnote.hidden = true;
   }
 
