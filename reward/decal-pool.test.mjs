@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { REWARD_DECAL_COUNT, REWARD_DECAL_POOL, selectRewardEdgeDecals } from "./decal-pool.mjs";
 
 const ASSET_HASH = "f848b442a199edfda84d6a1a5697a5a017224be42b53798b79ffb2d6f1eb4921";
+const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 test("the edge pool includes the existing decals and every added GIF exactly once", () => {
   const sources = REWARD_DECAL_POOL.map(item => item.src);
@@ -10,6 +14,14 @@ test("the edge pool includes the existing decals and every added GIF exactly onc
   assert.equal(new Set(sources).size, sources.length);
   assert.ok(sources.includes("/reward/retro/decal-pool/dancey_bgless.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/672ZLW3ZRJMOYJ4OFMF4VOTN45WFA5VL.gif"));
+});
+
+test("every pool entry resolves to a local GIF file", async () => {
+  for (const item of REWARD_DECAL_POOL) {
+    const filePath = path.resolve(REPOSITORY_ROOT, `.${item.src}`);
+    const contents = await readFile(filePath);
+    assert.ok(contents.subarray(0, 6).toString("ascii").startsWith("GIF8"), item.src);
+  }
 });
 
 test("each image hash deterministically chooses eight unique decals and balanced side placements", () => {
