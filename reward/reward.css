@@ -367,6 +367,11 @@ body[data-page-state="error"] .reward-card {
   transform: translateY(4px);
 }
 
+.loading-lineboil[data-boil-phase="2"] > .loading-lineboil-letter,
+.loading-lineboil[data-boil-phase="4"] > .loading-lineboil-letter {
+  transform: translateY(0);
+}
+
 .loading-ellipsis {
   display: inline-flex;
   width: 1.15em;

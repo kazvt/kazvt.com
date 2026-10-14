@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 
-test("loading text cycles through the three per-character phases every 500ms", async () => {
+test("loading text cycles through four per-character phases every 500ms", async () => {
   const source = await readFile(new URL("./loading-lineboil.mjs", import.meta.url), "utf8");
   const styles = await readFile(new URL("./reward.css", import.meta.url), "utf8");
   const loadingState = { hidden: false };
@@ -64,6 +64,8 @@ test("loading text cycles through the three per-character phases every 500ms", a
   assert.ok(letters.every(letter => letter.className === "loading-lineboil-letter" && letter["aria-hidden"] === "true"));
   assert.match(styles, /transform: translateY\(-4px\)/);
   assert.match(styles, /transform: translateY\(4px\)/);
+  assert.match(styles, /data-boil-phase="2"[^}]*transform: translateY\(0\)/s);
+  assert.match(styles, /data-boil-phase="4"[^}]*transform: translateY\(0\)/s);
   assert.equal(intervalDelay, 500);
   assert.equal(title.dataset.boilPhase, undefined);
 
@@ -73,6 +75,8 @@ test("loading text cycles through the three per-character phases every 500ms", a
   assert.equal(title.dataset.boilPhase, "2");
   intervalCallback();
   assert.equal(title.dataset.boilPhase, "3");
+  intervalCallback();
+  assert.equal(title.dataset.boilPhase, "4");
   intervalCallback();
   assert.equal(title.dataset.boilPhase, "1");
 

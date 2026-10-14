@@ -1,6 +1,7 @@
 const title = document.querySelector(".loading-lineboil");
 const loadingState = document.getElementById("loadingState");
 const PHASE_INTERVAL_MS = 500;
+const PHASE_COUNT = 4;
 
 if (title && loadingState) {
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -23,7 +24,7 @@ if (title && loadingState) {
   let timer = 0;
 
   function advancePhase() {
-    phase = (phase % 3) + 1;
+    phase = (phase % PHASE_COUNT) + 1;
     title.dataset.boilPhase = String(phase);
   }
 
