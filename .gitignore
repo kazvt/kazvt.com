@@ -2,5 +2,6 @@
 obs/trivia-rewards-widget/.reward-queue.json
 obs/trivia-rewards-widget/.reward-queue.json.tmp
 zzz_assets/rewards/assignments.json.tmp
+reward/api/.dev.vars*
 obs/trivia-rewards-widget/__pycache__/
 obs/trivia-rewards-widget/tests/__pycache__/
