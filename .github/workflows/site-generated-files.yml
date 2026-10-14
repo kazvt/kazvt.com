@@ -13,7 +13,12 @@ on:
       - "obs/trivia-rewards-widget/generate-reward-catalog.mjs"
 
 permissions:
+  actions: write
   contents: write
+
+concurrency:
+  group: reward-registry-writes
+  queue: max
 
 jobs:
   refresh:
@@ -35,9 +40,11 @@ jobs:
           python scripts/build-emote-manifest.py
           node obs/trivia-rewards-widget/generate-reward-catalog.mjs
       - name: Commit generated files when needed
+        id: commit
         shell: bash
         run: |
           if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -45,3 +52,11 @@ jobs:
           git add -A
           git commit -m "chore: refresh generated site files"
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Publish generated files on GitHub Pages
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run jekyll-gh-pages.yml --repo "$GH_REPO" --ref main
