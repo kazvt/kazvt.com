@@ -20,6 +20,8 @@ const { assignment, href } = await issueAward({
 
 `GET http://127.0.0.1:8000/reward-api/available` returns catalogued PNGs that have not already been awarded. `POST http://127.0.0.1:8000/reward-api/issue` takes JSON with `username`, `assetId`, a stable `eventId`, and optional `platform`. The client supplies the required local same-origin header. `issueAward()` waits until the public Pages registry contains the new link, then returns `{ assignment, href, replayed, pushed }`.
 
+A game page served locally by MSI can call the endpoint directly with a same-origin `fetch()`. A game running only at `kazvt.com` cannot issue awards; it must not be given a public write endpoint or a credential.
+
 Give the same stable `eventId` to retries. MSI stores only its SHA-256 digest in the public registry. A retry for the same winner and art returns the original link; trying to reuse that event for another winner/art is rejected. Each PNG's exact bytes are checked against its SHA-256 catalog ID and dimensions immediately before assignment, and a PNG can only be assigned once.
 
 New art belongs in `zzz_assets/rewards/`. It is eligible after the repository's reward catalog has been regenerated and published. The filename is only a display name; the SHA-256 asset ID is the identity.
