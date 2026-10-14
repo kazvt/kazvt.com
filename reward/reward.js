@@ -3,7 +3,7 @@ import { createRewardHref } from "./reward-link.mjs?v=short-id-1";
 import { layoutSideEdgeDecals } from "./decal-layout.mjs";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=5";
-import "./loading-lineboil.mjs?v=1";
+import "./loading-lineboil.mjs?v=2";
 import "./pattern-zoom.mjs?v=3";
 import {
   buildTwoRowAwardPreview,

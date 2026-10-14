@@ -46,7 +46,7 @@ if (title && loadingState) {
     if (document.hidden || motionPreference.matches) {
       stop();
     } else if (!timer) {
-      timer = window.setInterval(nudgeTitle, 1000);
+      timer = window.setInterval(nudgeTitle, 500);
     }
   }
 
