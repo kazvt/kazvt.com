@@ -33,9 +33,9 @@ class FakeD1 {
 
   prepare(sql) {
     return {
+      all: async () => this.all(sql),
       bind: (...values) => ({
         first: async () => this.first(sql, values),
-        all: async () => this.all(sql),
         run: async () => this.run(sql, values)
       })
     };
