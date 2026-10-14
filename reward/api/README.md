@@ -27,13 +27,13 @@ Award links are public, opaque identifiers—not proof of a real-world identity 
 
 ## Add or rename reward artwork
 
-Put each new reward PNG in the repository's `zzz_assets/rewards/` directory. Regenerate the browser and widget catalogs with:
+Put each new reward PNG directly in the repository's `zzz_assets/rewards/` directory and push it. The GitHub Actions generated-files workflow automatically runs the catalog builder, commits the refreshed browser/widget catalogs, and the normal GitHub Pages publish then exposes the artwork. For local work, or to regenerate manually, run:
 
 ```powershell
 node obs/trivia-rewards-widget/generate-reward-catalog.mjs
 ```
 
-That script scans the directory, hashes the exact PNG bytes, derives the tier, preserves filename history, and updates `zzz_assets/rewards/manifest.json`. Publish the updated files to GitHub Pages; after that, `/v1/artwork/available` will see the new PNGs automatically. No Worker code change is needed. Existing artwork must stay byte-identical when renamed; changing the PNG bytes creates a new artwork identity.
+That script scans the directory, hashes the exact PNG bytes, derives the tier, preserves filename history, and updates `zzz_assets/rewards/manifest.json`. Once Pages finishes publishing, `/v1/artwork/available` sees the new PNG automatically. No Worker code change is needed. Existing artwork must stay byte-identical when renamed; changing the PNG bytes creates a new artwork identity. The reward catalog currently indexes PNG files in that directory (not nested folders or other image formats).
 
 The website already loads reward images from `/zzz_assets/rewards/{filename}` and its catalog from `/zzz_assets/rewards/manifest.json`; those paths resolve to `zzz_assets/rewards/` in this repository. The Worker uses the same published catalog and `assignments.json` as its authoritative static inputs.
 
