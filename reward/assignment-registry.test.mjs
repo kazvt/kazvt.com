@@ -14,7 +14,8 @@ import {
 const assetIds = ["a", "b"].map(character => character.repeat(64));
 const linkIds = [
   "e2b8a0b2-7dd8-4d10-802f-d308ec33ffe7",
-  "aB3_dE5-fG7_hJ9k"
+  "aB3_dE5-fG7_hJ9k",
+  "A".repeat(22)
 ];
 
 function makeCatalog() {
@@ -66,6 +67,8 @@ test("legacy UUIDs and compact reward links resolve only to their recorded assig
   assert.equal(isRewardLinkId("00000000-0000-0000-0000-000000000000"), false);
   assert.equal(normalizeRewardLinkId(linkIds[0].toUpperCase()), linkIds[0]);
   assert.equal(normalizeRewardLinkId(linkIds[1]), linkIds[1]);
+  assert.equal(isRewardLinkId(linkIds[2]), true);
+  assert.equal(normalizeRewardLinkId(linkIds[2]), linkIds[2]);
   assert.equal(findAssignmentForLegacyPayload(registry, "KAZVT", assetIds[0]).username, "kazvt");
   assert.equal(findAssignmentForLegacyPayload(registry, "attacker", assetIds[0]), null);
   assert.equal(findAssignmentForLegacyPayload(registry, "kazvt", "c".repeat(64)), null);

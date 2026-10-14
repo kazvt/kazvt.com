@@ -3,7 +3,7 @@ import { resolveAssetById } from "./asset-resolver.mjs";
 const FILENAME_PATTERN = /^[^/\\\u0000-\u001f]+\.png$/i;
 const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/i;
 const UUID4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const COMPACT_REWARD_ID_PATTERN = /^[A-Za-z0-9_-]{16}$/;
+const COMPACT_REWARD_ID_PATTERN = /^[A-Za-z0-9_-]{16,22}$/;
 
 export function normalizeAwardUsername(value) {
   return typeof value === "string" ? value.normalize("NFKC").trim().toLowerCase() : "";

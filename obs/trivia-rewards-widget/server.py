@@ -26,7 +26,7 @@ UUID4_PATTERN = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
     re.IGNORECASE,
 )
-COMPACT_REWARD_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{16}$")
+COMPACT_REWARD_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{16,22}$")
 PREASSIGNED_REWARDS = {
     "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03": {
         "username": "kazvt",
