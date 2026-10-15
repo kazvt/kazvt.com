@@ -528,8 +528,6 @@ def _commit_registry(
     registry: dict[str, Any],
     event_hash: str,
     commit_action: str,
-    *,
-    expected_remote: str,
 ) -> None:
     """Publish one validated registry mutation, and no other working-tree files.
 
@@ -623,7 +621,6 @@ def _issue_and_publish(
 
         _commit_registry(
             root, next_registry, assignment["eventIdHash"], "issue award",
-            expected_remote=expected_remote,
         )
 
         return {
@@ -768,7 +765,7 @@ def _revoke_rewards_and_publish(
             ],
         }
         _validate_registry(next_registry)
-        _commit_registry(root, next_registry, event_hash, commit_action, expected_remote=expected_remote)
+        _commit_registry(root, next_registry, event_hash, commit_action)
         print(f"[reward chat] {action}: released {len(archived_records)} award(s) from {request['username']} on {request['platform']}.")
         return {
             "action": action,

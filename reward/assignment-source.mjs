@@ -9,7 +9,8 @@ function withCacheBust(url, token) {
 
 export function assignmentRegistrySources({ hostname = "", origin = "https://kazvt.com", cacheBust = Date.now() } = {}) {
   const local = withCacheBust(new URL(ASSIGNMENT_PATH, origin).href, cacheBust);
-  const isProductionSite = hostname.toLowerCase() === "kazvt.com" || hostname.toLowerCase() === "www.kazvt.com";
+  const host = String(hostname || "").toLowerCase();
+  const isProductionSite = host === "kazvt.com" || host === "www.kazvt.com";
   return isProductionSite ? [withCacheBust(PUBLIC_REPOSITORY, cacheBust), local] : [local];
 }
 
