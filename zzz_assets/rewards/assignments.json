@@ -22,6 +22,17 @@
       "linkId": "7Gg1LbL0Xmkx9M7b",
       "eventIdHash": "1e38c3bb44c6a97a2dadd86e1913e81bc7980bcb142941d045ccb192695f408b",
       "userId": "93017606"
+    },
+    {
+      "assetId": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
+      "assetSha256": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
+      "filename": "Gregory.png",
+      "username": "zig_zag_houten",
+      "issuedAt": "2026-10-15T13:46:47.540Z",
+      "platform": "twitch",
+      "linkId": "1KuJMLLwOqnxAKnB",
+      "eventIdHash": "06dc03f2e2fd72d1206ad90d836fe41146ab1b9310695b1671a02e32922b5f83",
+      "userId": "271802039"
     }
   ]
 }
