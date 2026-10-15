@@ -426,14 +426,18 @@ def _atomic_write_registry(root: Path, registry: dict[str, Any]) -> None:
                 pass
 
 
-def issue_and_publish(
+def _issue_and_publish(
     site_root: str | os.PathLike[str],
     payload: Any,
     *,
     expected_remote: str = DEFAULT_REMOTE,
+    automatic_asset: bool = False,
 ) -> dict[str, Any]:
-    """Assign one PNG, commit only the assignment JSON, and push it to Pages."""
-    request = _clean_request(payload)
+    request = _clean_request(
+        payload,
+        allow_automatic_asset=automatic_asset,
+        require_user_identity=automatic_asset,
+    )
     root = Path(site_root).resolve()
     if not root.is_dir():
         raise RewardIssueError("The configured website folder is unavailable.")
@@ -442,6 +446,31 @@ def issue_and_publish(
         _repo_sync_state(root, expected_remote)
         _ensure_commit_identity(root)
         catalog, registry = _load_records(root)
+        event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
+        previous = _find_event(registry, event_hash)
+        if previous:
+            matches = (_same_chat_identity(previous, request) if automatic_asset
+                       else _assignment_matches(previous, request))
+            if not matches:
+                raise RewardIssueError("eventId is already assigned to a different winner or artwork.")
+            return {
+                "assignment": previous,
+                "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={previous['linkId']}",
+                "replayed": True,
+                "pushed": True,
+            }
+
+        if automatic_asset:
+            assigned_assets = {
+                str(record.get("assetId", record.get("assetSha256", ""))).lower()
+                for record in registry["assignments"]
+            }
+            available = [item for item in _catalog_artworks(catalog)
+                         if item["assetId"] not in assigned_assets]
+            if not available:
+                raise RewardIssueError("No unassigned reward artwork is available.")
+            request["assetId"] = available[0]["assetId"]
+
         now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         next_registry, assignment = _new_assignment(root, catalog, registry, request, now)
         replayed = next_registry is registry
@@ -484,4 +513,26 @@ def issue_and_publish(
             "replayed": False,
             "pushed": True,
         }
+
+
+def issue_and_publish(
+    site_root: str | os.PathLike[str],
+    payload: Any,
+    *,
+    expected_remote: str = DEFAULT_REMOTE,
+) -> dict[str, Any]:
+    """Assign a specifically selected PNG, then publish only assignments.json."""
+    return _issue_and_publish(site_root, payload, expected_remote=expected_remote)
+
+
+def issue_next_and_publish(
+    site_root: str | os.PathLike[str],
+    payload: Any,
+    *,
+    expected_remote: str = DEFAULT_REMOTE,
+) -> dict[str, Any]:
+    """Assign the next unused catalog PNG to a platform user ID, then publish."""
+    return _issue_and_publish(
+        site_root, payload, expected_remote=expected_remote, automatic_asset=True
+    )
 
