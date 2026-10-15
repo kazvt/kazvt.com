@@ -516,6 +516,7 @@ def _commit_registry(
     expected_remote: str,
 ) -> None:
     """Publish one validated registry mutation, and no other working-tree files."""
+    _validate_registry(registry)
     _repo_sync_state(root, expected_remote)
     _atomic_write_registry(root, registry)
     try:
@@ -560,6 +561,8 @@ def _issue_and_publish(
         _ensure_commit_identity(root)
         catalog, registry = _load_records(root)
         event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
+        if _find_reward_command_event(registry, event_hash):
+            raise RewardIssueError("This chat event was already used for a reward removal command.")
         previous = _find_event(registry, event_hash)
         if previous:
             if "revokedAt" in previous:
@@ -679,6 +682,8 @@ def _revoke_rewards_and_publish(
         _ensure_commit_identity(root)
         _, registry = _load_records(root)
         event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
+        if _find_event(registry, event_hash):
+            raise RewardIssueError("This chat event was already used to issue an award.")
         previous_event = _find_reward_command_event(registry, event_hash)
         if previous_event:
             if (previous_event.get("action") != action or
@@ -705,6 +710,9 @@ def _revoke_rewards_and_publish(
             selected = sorted(owned, key=_issued_at_key, reverse=True)
             commit_action = "clear awards"
 
+        if any(not str(record.get("linkId", "")) for record in selected):
+            raise RewardIssueError("A selected award has no stable link ID, so it cannot be safely removed automatically.")
+
         occurred_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         archived_records = []
         revoked_link_ids = []
@@ -720,12 +728,11 @@ def _revoke_rewards_and_publish(
             archived_records.append(archived)
             revoked_link_ids.append(str(record.get("linkId", "")))
 
-        selected_links = set(revoked_link_ids)
+        selected_records = {id(record) for record in selected}
         next_registry = {
             **registry,
             "version": 1,
-            "assignments": [record for record in registry["assignments"]
-                            if str(record.get("linkId", "")) not in selected_links],
+            "assignments": [record for record in registry["assignments"] if id(record) not in selected_records],
             "revokedAssignments": [*registry.get("revokedAssignments", []), *archived_records],
             "rewardCommandEvents": [
                 *registry.get("rewardCommandEvents", []),
