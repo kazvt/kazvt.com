@@ -11,6 +11,17 @@
       "linkId": "8STSEMGPeigjguO0",
       "eventIdHash": "39dfa00dd068b40f2bb094bf8495d23cab16b3adeb3e7acdb6cdfee3e940ec51",
       "userId": "93017606"
+    },
+    {
+      "assetId": "4714a3ca80794200bcb5668cde2191163194c2e20dea3e6781885c05b9f47ddb",
+      "assetSha256": "4714a3ca80794200bcb5668cde2191163194c2e20dea3e6781885c05b9f47ddb",
+      "filename": "fanter.png",
+      "username": "kazvt",
+      "issuedAt": "2026-10-15T13:01:36.386Z",
+      "platform": "kick",
+      "linkId": "7Gg1LbL0Xmkx9M7b",
+      "eventIdHash": "1e38c3bb44c6a97a2dadd86e1913e81bc7980bcb142941d045ccb192695f408b",
+      "userId": "93017606"
     }
   ]
 }
