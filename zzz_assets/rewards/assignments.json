@@ -2,28 +2,6 @@
   "version": 1,
   "assignments": [
     {
-      "assetId": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
-      "assetSha256": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
-      "filename": "ribcage.png",
-      "username": "kazvt",
-      "issuedAt": "2026-10-15T13:00:50.559Z",
-      "platform": "kick",
-      "linkId": "8STSEMGPeigjguO0",
-      "eventIdHash": "39dfa00dd068b40f2bb094bf8495d23cab16b3adeb3e7acdb6cdfee3e940ec51",
-      "userId": "93017606"
-    },
-    {
-      "assetId": "4714a3ca80794200bcb5668cde2191163194c2e20dea3e6781885c05b9f47ddb",
-      "assetSha256": "4714a3ca80794200bcb5668cde2191163194c2e20dea3e6781885c05b9f47ddb",
-      "filename": "fanter.png",
-      "username": "kazvt",
-      "issuedAt": "2026-10-15T13:01:36.386Z",
-      "platform": "kick",
-      "linkId": "7Gg1LbL0Xmkx9M7b",
-      "eventIdHash": "1e38c3bb44c6a97a2dadd86e1913e81bc7980bcb142941d045ccb192695f408b",
-      "userId": "93017606"
-    },
-    {
       "assetId": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
       "assetSha256": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
       "filename": "Gregory.png",
@@ -66,6 +44,53 @@
       "linkId": "CczplJese8sKdpLv",
       "eventIdHash": "8323cd5df9f795d6ebc4c557f247ead6a33e0b2902fffb824866144d4c4ce205",
       "userId": "1263826885"
+    }
+  ],
+  "revokedAssignments": [
+    {
+      "assetId": "4714a3ca80794200bcb5668cde2191163194c2e20dea3e6781885c05b9f47ddb",
+      "assetSha256": "4714a3ca80794200bcb5668cde2191163194c2e20dea3e6781885c05b9f47ddb",
+      "filename": "fanter.png",
+      "username": "kazvt",
+      "issuedAt": "2026-10-15T13:01:36.386Z",
+      "platform": "kick",
+      "linkId": "7Gg1LbL0Xmkx9M7b",
+      "eventIdHash": "1e38c3bb44c6a97a2dadd86e1913e81bc7980bcb142941d045ccb192695f408b",
+      "userId": "93017606",
+      "revokedAt": "2026-10-15T18:19:56.181Z",
+      "revokedBy": "kazvt",
+      "revocationEventHash": "fa4f72d5c10d3c65d8324eeb91d89d26104999ac6a6c691b323c72d24ac86568",
+      "revocationAction": "clear_user"
+    },
+    {
+      "assetId": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
+      "assetSha256": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
+      "filename": "ribcage.png",
+      "username": "kazvt",
+      "issuedAt": "2026-10-15T13:00:50.559Z",
+      "platform": "kick",
+      "linkId": "8STSEMGPeigjguO0",
+      "eventIdHash": "39dfa00dd068b40f2bb094bf8495d23cab16b3adeb3e7acdb6cdfee3e940ec51",
+      "userId": "93017606",
+      "revokedAt": "2026-10-15T18:19:56.181Z",
+      "revokedBy": "kazvt",
+      "revocationEventHash": "fa4f72d5c10d3c65d8324eeb91d89d26104999ac6a6c691b323c72d24ac86568",
+      "revocationAction": "clear_user"
+    }
+  ],
+  "rewardCommandEvents": [
+    {
+      "eventIdHash": "fa4f72d5c10d3c65d8324eeb91d89d26104999ac6a6c691b323c72d24ac86568",
+      "action": "clear_user",
+      "platform": "kick",
+      "userId": "93017606",
+      "username": "kazvt",
+      "actorLogin": "kazvt",
+      "occurredAt": "2026-10-15T18:19:56.181Z",
+      "assignmentLinkIds": [
+        "7Gg1LbL0Xmkx9M7b",
+        "8STSEMGPeigjguO0"
+      ]
     }
   ]
 }
