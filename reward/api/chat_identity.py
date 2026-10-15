@@ -65,12 +65,15 @@ class RewardIdentityCache:
             display_name = str(item.get("displayName") or username).strip().lstrip("@").strip()
             if (platform in SUPPORTED_PLATFORMS and _valid_text(user_id, 128) and
                     _valid_text(username, 100) and _valid_text(display_name, 100)):
-                users[self._key(platform, user_id)] = {
+                record = {
                     "platform": platform,
                     "userId": user_id,
                     "username": username,
                     "displayName": display_name,
                 }
+                if isinstance(item.get("updatedAt"), str):
+                    record["updatedAt"] = item["updatedAt"]
+                users[self._key(platform, user_id)] = record
         self._users = users
         return users
 
@@ -129,14 +132,15 @@ class RewardIdentityCache:
 
     def resolve(self, platform: str, target: str) -> dict[str, str]:
         platform = str(platform or "").strip().casefold()
-        needle = normalize_name(str(target or ""))
+        raw_target = unicodedata.normalize("NFKC", str(target or "")).strip().lstrip("@").strip()
+        needle = normalize_name(raw_target)
         if platform not in SUPPORTED_PLATFORMS or not needle:
             raise IdentityLookupError("A platform and recipient username are required.")
 
         with self._lock:
             users = self._load_locked()
             candidates = [item for item in users.values() if item["platform"] == platform and (
-                item["userId"] == needle or normalize_name(item["username"]) == needle or
+                item["userId"] == raw_target or normalize_name(item["username"]) == needle or
                 normalize_name(item["displayName"]) == needle
             )]
         unique = {item["userId"]: item for item in candidates}
