@@ -531,9 +531,14 @@ def _commit_registry(
     *,
     expected_remote: str,
 ) -> None:
-    """Publish one validated registry mutation, and no other working-tree files."""
+    """Publish one validated registry mutation, and no other working-tree files.
+
+    Callers hold _ISSUE_LOCK and have already verified/synced the clean main
+    checkout. A successful push is the authoritative publication confirmation;
+    another fetch here would only add network latency. A concurrent remote push
+    still makes Git reject this push as non-fast-forward.
+    """
     _validate_registry(registry)
-    _repo_sync_state(root, expected_remote)
     _atomic_write_registry(root, registry)
     try:
         _git(root, "add", "--", ASSIGNMENTS_RELATIVE)
@@ -544,10 +549,6 @@ def _commit_registry(
             raise RewardIssueError("Only assignments.json may be included in a reward registry commit; review Git status.")
         _git(root, "commit", "-m", f"reward: {commit_action} {event_hash[:12]}")
         _git(root, "push", "origin", "HEAD:refs/heads/main")
-        _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
-        counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
-        if counts != ["0", "0"]:
-            raise RewardIssueError("The reward registry push has not synchronized with GitHub. Retry the same chat event.")
         if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
             raise RewardIssueError("The reward registry was pushed, but the checkout changed during publication. Review Git status.")
     except RewardIssueError:

@@ -1,4 +1,5 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
+import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=github-static-2";
 import "../pattern-zoom.mjs?v=2";
 
@@ -83,17 +84,14 @@ import "../pattern-zoom.mjs?v=2";
   }
 
   async function loadRegistry() {
-    const [registryResponse, catalogResponse] = await Promise.all([
-      fetch("/zzz_assets/rewards/assignments.json", { cache: "no-cache" }),
+    const [registry, catalogResponse] = await Promise.all([
+      fetchAssignmentRegistry(),
       fetch("/zzz_assets/rewards/manifest.json", { cache: "no-cache" })
     ]);
-    if (!registryResponse.ok || !catalogResponse.ok) {
+    if (!catalogResponse.ok) {
       throw new Error("The public award data could not be fetched.");
     }
-    const [registry, rawCatalog] = await Promise.all([
-      registryResponse.json(),
-      catalogResponse.json()
-    ]);
+    const rawCatalog = await catalogResponse.json();
     const catalog = validateCatalog(rawCatalog);
     return validateAndSortAssignments(registry, catalog);
   }

@@ -1,4 +1,5 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
+import { fetchAssignmentRegistry } from "./assignment-source.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
@@ -70,6 +71,7 @@ import {
   const rewardImage = document.getElementById("rewardImage");
   rewardArtworkMotion.addEventListener("contextmenu", event => event.preventDefault());
   const errorMessage = document.getElementById("errorMessage");
+  const loadingNote = document.getElementById("loadingNote");
   const demoFootnote = document.querySelector(".demo-footnote");
   const rewardTier = document.getElementById("rewardTier");
   const tierIcon = document.getElementById("tierIcon");
@@ -337,9 +339,7 @@ import {
   function loadAssignmentRegistry(catalog) {
     if (!assignmentRegistryPromise) {
       assignmentRegistryPromise = (async () => {
-        const response = await fetch("/zzz_assets/rewards/assignments.json", { cache: "no-store" });
-        if (!response.ok) throw new Error("The award assignment registry could not be loaded.");
-        return validateAndSortAssignments(await response.json(), catalog);
+        return validateAndSortAssignments(await fetchAssignmentRegistry(), catalog);
       })()
         .catch(error => {
           assignmentRegistryPromise = null;
@@ -477,6 +477,7 @@ import {
     delete document.body.dataset.tier;
     document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
     loadingState.hidden = true;
+    if (loadingNote) loadingNote.hidden = true;
     rewardState.hidden = true;
     errorMessage.textContent = message;
     errorState.hidden = false;
@@ -494,6 +495,7 @@ import {
     delete document.body.dataset.tier;
     document.querySelector("main.reward-card").setAttribute("aria-busy", "true");
     loadingState.hidden = false;
+    if (loadingNote) loadingNote.hidden = true;
     rewardState.hidden = true;
     errorState.hidden = true;
     wallpaperImageUrl = "";
@@ -615,6 +617,27 @@ import {
         });
     }
     return rewardCatalogPromise;
+  }
+
+  async function findAssignmentWithBriefRetry(catalog, linkId) {
+    let assignments = await loadAssignmentRegistry(catalog);
+    let assignment = findAssignmentByLinkId(assignments, linkId);
+    const compactId = /^[A-Za-z0-9_-]{16,22}$/.test(linkId);
+    if (assignment || !compactId) return assignment;
+
+    if (loadingNote) {
+      loadingNote.textContent = "Your reward is syncing in. Checking again…";
+      loadingNote.hidden = false;
+    }
+    for (const delay of [1000, 1500, 2500, 4000, 6000]) {
+      await new Promise(resolve => window.setTimeout(resolve, delay));
+      assignmentRegistryPromise = null;
+      assignments = await loadAssignmentRegistry(catalog);
+      assignment = findAssignmentByLinkId(assignments, linkId);
+      if (assignment) break;
+    }
+    if (loadingNote) loadingNote.hidden = true;
+    return assignment;
   }
 
   function loadAnime() {
@@ -775,7 +798,7 @@ import {
 
     if (isRewardLinkId(token)) {
       if (location.hash) throw new Error("A direct reward link does not need extra URL data.");
-      assignment = findAssignmentByLinkId(assignments, token);
+      assignment = await findAssignmentWithBriefRetry(catalog, token);
       if (!assignment) throw new Error("This reward link is unknown or has not been assigned.");
     } else {
       const keyParams = new URLSearchParams(location.hash.slice(1));

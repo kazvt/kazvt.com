@@ -384,6 +384,13 @@ body[data-page-state="error"] .reward-card {
   gap: 12px;
 }
 
+.loading-note {
+  margin: 4px 0 0;
+  color: #d7d5e3;
+  font: 14px/1.4 Arial, sans-serif;
+  text-align: center;
+}
+
 .loading-hourglass {
   display: block;
   flex: 0 0 78.75px;
