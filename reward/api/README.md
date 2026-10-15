@@ -32,7 +32,7 @@ The command is acknowledged back to Acer, and both PCs log the award link or a s
 
 Platform IDs are stored in the public `assignments.json` because GitHub Pages has no private server-side database. The username shown on award pages remains the latest known platform handle, not the ID. Treat the IDs and reward ledger as public data.
 
-Give the same stable `eventId` to retries. MSI stores only its SHA-256 digest in the public registry. A retry for the same winner and art returns the original link; trying to reuse that event for another winner/art is rejected. Each PNG's exact bytes are checked against its SHA-256 catalog ID and dimensions immediately before assignment, and a PNG can only be assigned once.
+Give the same stable `eventId` to retries. MSI stores only its SHA-256 digest in the public registry. A retry for the same winner and art returns the original link; trying to reuse that event for another winner/art is rejected. Chat selection is pseudo-random from the remaining pool, seeded by the platform message ID, so a retry selects the same artwork. Each PNG's exact bytes are checked against its SHA-256 catalog ID and dimensions immediately before assignment, and a PNG can only be assigned once.
 
 New art belongs in `zzz_assets/rewards/`. It is eligible after the repository's reward catalog has been regenerated and published. The filename is only a display name; the SHA-256 asset ID is the identity.
 
