@@ -4,6 +4,7 @@ import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
+import { createRewardMusicPlayer, deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs?v=reward-pixels-v1";
 import "./loading-lineboil.mjs?v=5";
 import "./pattern-zoom.mjs?v=3";
 import {
@@ -94,6 +95,15 @@ import {
   const artWallpaper = document.getElementById("artWallpaper");
   const rewardCard = document.querySelector("main.reward-card");
   const rewardDecalLayer = document.getElementById("rewardDecals");
+  const rewardMusic = document.getElementById("rewardMusic");
+  const rewardMusicKey = document.getElementById("rewardMusicKey");
+  const rewardMusicInstruments = document.getElementById("rewardMusicInstruments");
+  const rewardMusicToggle = document.getElementById("rewardMusicToggle");
+  const rewardMusicChords = document.getElementById("rewardMusicChords");
+  const rewardMusicArp = document.getElementById("rewardMusicArp");
+  const rewardMusicVolume = document.getElementById("rewardMusicVolume");
+  const rewardMusicVolumeValue = document.getElementById("rewardMusicVolumeValue");
+  const rewardMusicStatus = document.getElementById("rewardMusicStatus");
   let animeLoad;
   let rewardCatalogPromise;
   let assignmentRegistryPromise;
@@ -106,7 +116,99 @@ import {
   let decalAssetHash = "";
   let activeAwardCollection = null;
   let awardCollectionGeneration = 0;
+  let rewardMusicPlayer = null;
+  let rewardMusicGeneration = 0;
   const decalElements = new Map();
+
+  function updateRewardMusicControls(state) {
+    if (rewardMusicToggle) {
+      rewardMusicToggle.textContent = state.playing ? "■ Stop" : "▶ Play";
+      rewardMusicToggle.setAttribute("aria-pressed", String(state.playing));
+    }
+    if (rewardMusicChords) {
+      rewardMusicChords.textContent = `Chords ${state.chordsEnabled ? "✓" : "×"}`;
+      rewardMusicChords.setAttribute("aria-pressed", String(state.chordsEnabled));
+    }
+    if (rewardMusicArp) {
+      rewardMusicArp.textContent = `Arp ${state.arpEnabled ? "✓" : "×"}`;
+      rewardMusicArp.setAttribute("aria-pressed", String(state.arpEnabled));
+    }
+    if (rewardMusicVolumeValue) rewardMusicVolumeValue.value = `${Math.round(state.volume * 100)}%`;
+    if (rewardMusicStatus) rewardMusicStatus.textContent = state.playing ? "Playing" : "Ready to play";
+  }
+
+  function resetRewardMusic() {
+    rewardMusicGeneration += 1;
+    rewardMusicPlayer?.destroy();
+    rewardMusicPlayer = null;
+    if (rewardMusic) rewardMusic.hidden = true;
+    if (rewardMusicToggle) {
+      rewardMusicToggle.disabled = true;
+      rewardMusicToggle.textContent = "▶ Play";
+      rewardMusicToggle.setAttribute("aria-pressed", "false");
+    }
+    if (rewardMusicChords) rewardMusicChords.disabled = true;
+    if (rewardMusicArp) rewardMusicArp.disabled = true;
+  }
+
+  async function prepareRewardMusic(image) {
+    if (!rewardMusic) return;
+    const generation = ++rewardMusicGeneration;
+    rewardMusic.hidden = false;
+    if (rewardMusicStatus) rewardMusicStatus.textContent = "Reading the artwork pixels…";
+
+    try {
+      const pixelHash = await hashRewardPixels(image);
+      if (generation !== rewardMusicGeneration) return;
+      const plan = deriveRewardMusicPlan(pixelHash);
+      rewardMusicPlayer?.destroy();
+      rewardMusicPlayer = createRewardMusicPlayer(plan, {
+        initialVolume: Number(rewardMusicVolume?.value ?? 42) / 100,
+        onStateChange: updateRewardMusicControls
+      });
+      if (rewardMusicKey) rewardMusicKey.textContent = `In ${plan.keyName} · ${plan.bpm} BPM`;
+      if (rewardMusicInstruments) {
+        rewardMusicInstruments.textContent = `${plan.chordPatch.label} chords + ${plan.arpPatch.label} arp`;
+      }
+      if (rewardMusicToggle) rewardMusicToggle.disabled = false;
+      if (rewardMusicChords) rewardMusicChords.disabled = false;
+      if (rewardMusicArp) rewardMusicArp.disabled = false;
+      updateRewardMusicControls({ playing: false, chordsEnabled: true, arpEnabled: true, volume: Number(rewardMusicVolume?.value ?? 42) / 100 });
+    } catch (error) {
+      if (generation !== rewardMusicGeneration) return;
+      console.warn("[reward-music] Could not build the pixel-derived soundtrack:", error);
+      if (rewardMusicKey) rewardMusicKey.textContent = "Key unavailable";
+      if (rewardMusicInstruments) rewardMusicInstruments.textContent = "";
+      if (rewardMusicStatus) rewardMusicStatus.textContent = "This browser couldn't read the artwork pixels.";
+    }
+  }
+
+  rewardMusicToggle?.addEventListener("click", () => {
+    if (!rewardMusicPlayer) return;
+    if (rewardMusicPlayer.isPlaying) {
+      rewardMusicPlayer.stop();
+      return;
+    }
+    if (rewardMusicStatus) rewardMusicStatus.textContent = "Starting…";
+    rewardMusicPlayer.start().catch(error => {
+      console.warn("[reward-music] Playback could not start:", error);
+      if (rewardMusicStatus) rewardMusicStatus.textContent = "Playback couldn't start. Press Play to try again.";
+    });
+  });
+
+  rewardMusicChords?.addEventListener("click", () => {
+    if (rewardMusicPlayer) rewardMusicPlayer.setTrackEnabled("chords", !rewardMusicPlayer.trackState.chords);
+  });
+
+  rewardMusicArp?.addEventListener("click", () => {
+    if (rewardMusicPlayer) rewardMusicPlayer.setTrackEnabled("arp", !rewardMusicPlayer.trackState.arp);
+  });
+
+  rewardMusicVolume?.addEventListener("input", () => {
+    const volume = Number(rewardMusicVolume.value) / 100;
+    if (rewardMusicVolumeValue) rewardMusicVolumeValue.value = `${Math.round(volume * 100)}%`;
+    rewardMusicPlayer?.setVolume(volume);
+  });
 
   function hashRewardIdentity(username, assetId) {
     const canonicalUsername = normalizeAwardUsername(username);
