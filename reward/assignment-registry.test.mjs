@@ -86,6 +86,19 @@ test("other-awards collection excludes the award currently being viewed", () => 
   assert.deepEqual(otherAwardsFor(assignments, "", assetIds[0]), []);
 });
 
+test("platform user IDs keep reward collections together across handle changes without merging platforms", () => {
+  const assignments = [
+    { username: "OldHandle", platform: "twitch", userId: "1001", assetId: assetIds[0] },
+    { username: "NewHandle", platform: "twitch", userId: "1001", assetId: assetIds[1] },
+    { username: "NewHandle", platform: "kick", userId: "1001", assetId: "c".repeat(64) }
+  ];
+
+  assert.deepEqual(
+    otherAwardsFor(assignments, "NewHandle", assetIds[0], { platform: "twitch", userId: "1001" }),
+    [assignments[1]]
+  );
+});
+
 test("assignments sort newest first and renamed artwork resolves by content ID", () => {
   const assignments = validateAndSortAssignments({ version: 1, assignments: [
     {
