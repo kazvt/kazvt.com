@@ -90,6 +90,7 @@ import {
   const awardCollectionHeading = document.getElementById("awardCollectionHeading");
   const awardCollectionGrid = document.getElementById("awardCollectionGrid");
   const awardCollectionStatus = document.getElementById("awardCollectionStatus");
+  const allRewardsLink = document.getElementById("allRewardsLink");
   const artWallpaper = document.getElementById("artWallpaper");
   const rewardCard = document.querySelector("main.reward-card");
   const rewardDecalLayer = document.getElementById("rewardDecals");
@@ -338,6 +339,7 @@ import {
   function hideAwardCollection() {
     awardCollectionGeneration += 1;
     activeAwardCollection = null;
+    if (allRewardsLink) allRewardsLink.hidden = true;
     if (!awardCollection) return;
     awardCollection.hidden = true;
     awardCollectionGrid.replaceChildren();
@@ -861,6 +863,7 @@ import {
     rewardCard.setAttribute("aria-busy", "false");
     loadingState.hidden = true;
     rewardState.hidden = false;
+    if (allRewardsLink) allRewardsLink.hidden = false;
     populateArtWallpaper(imageUrl, metadata.assetId);
     showUserAwardCollection(data.username, metadata.assetId, catalog, {
       platform: data.platform,
