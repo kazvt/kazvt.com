@@ -714,7 +714,10 @@ h1 {
 }
 
 .all-rewards-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   margin: 10px auto 0;
   padding: 2px 6px;
   border: 1px dotted color-mix(in srgb, var(--palette-accent) 78%, transparent);
@@ -723,6 +726,18 @@ h1 {
   line-height: 1.25;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.all-rewards-icon {
+  display: block;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  shape-rendering: crispEdges;
 }
 
 .all-rewards-link:hover,
