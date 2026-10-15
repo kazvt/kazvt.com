@@ -150,7 +150,7 @@ class RewardIdentityCache:
         unique = {item["userId"]: item for item in candidates}
         if not unique:
             raise IdentityLookupError(
-                "That name has not been identified in this platform's chat yet; use the platform user ID or have the user chat first."
+                "That identity has no known display handle yet; have the recipient chat on this platform first."
             )
         if len(unique) > 1:
             raise IdentityLookupError("That display name matches multiple users; use the platform user ID instead.")
