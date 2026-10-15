@@ -20,6 +20,15 @@ import {
   "use strict";
 
   const navigationStartTime = performance.getEntriesByType("navigation")[0]?.startTime ?? performance.now();
+  const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (currentPath === "/reward" && !new URLSearchParams(window.location.search).has("id") &&
+      !document.body.hasAttribute("data-reward-demo")) {
+    const destination = new URL("/reward/list/", window.location.origin);
+    destination.search = window.location.search;
+    destination.hash = window.location.hash;
+    window.location.replace(destination.href);
+    return;
+  }
 
   function waitForMinimumLoading() {
     const delay = minimumLoadingDelay(navigationStartTime, performance.now());

@@ -94,6 +94,18 @@ h1 {
   text-shadow: 2px 2px #694d9a, 4px 4px #07070c;
 }
 
+.pool-status {
+  display: table;
+  margin: 0 auto 10px;
+  padding: 3px 8px;
+  border: 1px dotted #7deaff;
+  color: #bfeff6;
+  background: #10101a;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  letter-spacing: 0.025em;
+}
+
 .search-panel {
   max-width: 650px;
   margin: 0 auto 14px;

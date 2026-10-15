@@ -13,6 +13,7 @@ import "../pattern-zoom.mjs?v=2";
   const emptyState = document.getElementById("emptyState");
   const errorState = document.getElementById("errorState");
   const pageTitle = document.getElementById("pageTitle");
+  const poolStatus = document.getElementById("poolStatus");
   const searchLabel = document.getElementById("search-label");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
   const userFilterRequested = usernameParam !== null;
@@ -93,7 +94,20 @@ import "../pattern-zoom.mjs?v=2";
     }
     const rawCatalog = await catalogResponse.json();
     const catalog = validateCatalog(rawCatalog);
-    return validateAndSortAssignments(registry, catalog);
+    return {
+      assignments: validateAndSortAssignments(registry, catalog),
+      catalog
+    };
+  }
+
+  function countUniqueRewardsLeft(catalog, assignments) {
+    const availableAssetIds = new Set(catalog.files
+      .map(filename => catalog.assets[filename]?.assetId)
+      .filter(assetId => typeof assetId === "string" && /^[a-f0-9]{64}$/i.test(assetId)));
+    for (const assignment of assignments) {
+      if (assignment.artworkIsCurrent) availableAssetIds.delete(assignment.assetId);
+    }
+    return availableAssetIds.size;
   }
 
   async function makeCard(assignment) {
@@ -186,7 +200,9 @@ import "../pattern-zoom.mjs?v=2";
     }
 
     try {
-      const allAssignments = await loadRegistry();
+      const { assignments: allAssignments, catalog } = await loadRegistry();
+      const poolCount = countUniqueRewardsLeft(catalog, allAssignments);
+      poolStatus.textContent = `Pool: ${poolCount} unique ${poolCount === 1 ? "reward" : "rewards"} left`;
       const assignments = userFilterRequested
         ? userFilterValid
           ? allAssignments.filter(record => normalizeAwardUsername(record.username) ===
@@ -213,6 +229,7 @@ import "../pattern-zoom.mjs?v=2";
       });
     } catch (error) {
       console.error("[reward-list] Could not load award data:", error);
+      poolStatus.textContent = "Pool: unavailable";
       awardList.setAttribute("aria-busy", "false");
       resultStatus.textContent = "The award index is unavailable.";
       errorState.hidden = false;
