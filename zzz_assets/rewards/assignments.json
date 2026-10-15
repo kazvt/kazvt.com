@@ -33,6 +33,17 @@
       "linkId": "1KuJMLLwOqnxAKnB",
       "eventIdHash": "06dc03f2e2fd72d1206ad90d836fe41146ab1b9310695b1671a02e32922b5f83",
       "userId": "271802039"
+    },
+    {
+      "assetId": "1f9c482f486cadfa02908db089abee1002bed75d89a4a62276d8ee5647deb071",
+      "assetSha256": "1f9c482f486cadfa02908db089abee1002bed75d89a4a62276d8ee5647deb071",
+      "filename": "no more stink.png",
+      "username": "zig_zag_houten",
+      "issuedAt": "2026-10-15T14:09:02.388Z",
+      "platform": "twitch",
+      "linkId": "ZwuE8OLOJKoyrOxe",
+      "eventIdHash": "7f689cc314ed54bd465e933e542bc6d7f3914bf26181eeca1734553cca47a510",
+      "userId": "271802039"
     }
   ]
 }
