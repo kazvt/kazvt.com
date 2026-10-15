@@ -34,14 +34,19 @@ export function findAssignmentForLegacyPayload(assignments, username, assetId) {
     normalizeAwardUsername(assignment.username) === normalizedUsername) ?? null;
 }
 
-export function otherAwardsFor(assignments, username, currentAssetId) {
+export function otherAwardsFor(assignments, username, currentAssetId, owner = null) {
   if (!Array.isArray(assignments)) return [];
   const normalizedUsername = normalizeAwardUsername(username);
   const currentId = typeof currentAssetId === "string" ? currentAssetId.toLowerCase() : "";
-  if (!normalizedUsername) return [];
+  const platform = typeof owner?.platform === "string" ? owner.platform.trim().toLowerCase() : "";
+  const userId = typeof owner?.userId === "string" ? owner.userId.trim() : "";
+  if (!userId && !normalizedUsername) return [];
   return assignments.filter(assignment => {
     const assetId = typeof assignment?.assetId === "string" ? assignment.assetId.toLowerCase() : "";
-    return normalizeAwardUsername(assignment?.username) === normalizedUsername &&
+    const sameOwner = userId
+      ? assignment?.platform?.toLowerCase() === platform && assignment?.userId === userId
+      : normalizeAwardUsername(assignment?.username) === normalizedUsername;
+    return sameOwner &&
       (!currentId || assetId !== currentId);
   });
 }
@@ -80,6 +85,8 @@ export function validateAndSortAssignments(registry, catalog) {
   const assignments = registry.assignments.map((record, index) => {
     const recordedAssetId = record?.assetId ?? record?.assetSha256;
     const linkId = record?.linkId ?? "";
+    const platform = typeof record?.platform === "string" ? record.platform.trim().toLowerCase() : "";
+    const userId = typeof record?.userId === "string" ? record.userId.trim() : "";
     if (!record || typeof record !== "object" || Array.isArray(record) ||
         typeof record.filename !== "string" || record.filename.length > 255 ||
         !FILENAME_PATTERN.test(record.filename) ||
@@ -88,6 +95,11 @@ export function validateAndSortAssignments(registry, catalog) {
         typeof recordedAssetId !== "string" || !ASSET_ID_PATTERN.test(recordedAssetId) ||
         (record.assetId != null && record.assetSha256 != null &&
           record.assetId.toLowerCase() !== record.assetSha256.toLowerCase()) ||
+        (record.platform != null && (typeof record.platform !== "string" || record.platform.length > 60 ||
+          /[\u0000-\u001f]/.test(record.platform))) ||
+        (record.userId != null && (typeof record.userId !== "string" || !record.userId.trim() ||
+          record.userId.length > 128 || /[\u0000-\u001f]/.test(record.userId))) ||
+        (userId && !platform) ||
         (linkId !== "" && !isRewardLinkId(linkId)) ||
         typeof record.issuedAt !== "string" || record.issuedAt.length > 40 ||
         !Number.isFinite(Date.parse(record.issuedAt))) {
@@ -112,6 +124,8 @@ export function validateAndSortAssignments(registry, catalog) {
       assetId,
       linkId: normalizedLinkId,
       issuedAt: record.issuedAt,
+      platform,
+      userId,
       tierId: tier?.id ?? "",
       tierLabel: tier?.label ?? "Award",
       artworkIsCurrent
