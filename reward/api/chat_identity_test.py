@@ -34,6 +34,11 @@ class RewardIdentityCacheTests(unittest.TestCase):
         with self.assertRaisesRegex(IdentityLookupError, "matches multiple users"):
             self.cache.resolve("kick", "Same Name")
 
+    def test_numeric_target_is_always_treated_as_a_user_id(self):
+        self.cache.upsert("twitch", "900", "12345", "12345")
+        with self.assertRaisesRegex(IdentityLookupError, "has not been identified"):
+            self.cache.resolve("twitch", "12345")
+
     def test_corrupt_cache_is_not_silently_replaced(self):
         self.path.parent.mkdir(parents=True)
         self.path.write_text(json.dumps({"version": 99, "users": []}), encoding="utf-8")
