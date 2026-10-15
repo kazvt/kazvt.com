@@ -1,5 +1,5 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs";
-import { createRewardHref } from "./reward-link.mjs?v=github-static-1";
+import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
@@ -13,7 +13,7 @@ import {
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs?v=github-static-1";
+} from "./assignment-registry.mjs?v=github-static-2";
 
 (() => {
   "use strict";

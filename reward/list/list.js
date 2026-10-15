@@ -1,5 +1,5 @@
-import { createRewardHref } from "../reward-link.mjs?v=github-static-1";
-import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=github-static-1";
+import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=github-static-2";
 import "../pattern-zoom.mjs?v=2";
 
 (() => {
