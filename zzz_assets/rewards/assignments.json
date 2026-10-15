@@ -1,4 +1,16 @@
 {
   "version": 1,
-  "assignments": []
+  "assignments": [
+    {
+      "assetId": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
+      "assetSha256": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
+      "filename": "ribcage.png",
+      "username": "kazvt",
+      "issuedAt": "2026-10-15T13:00:50.559Z",
+      "platform": "kick",
+      "linkId": "8STSEMGPeigjguO0",
+      "eventIdHash": "39dfa00dd068b40f2bb094bf8495d23cab16b3adeb3e7acdb6cdfee3e940ec51",
+      "userId": "93017606"
+    }
+  ]
 }
