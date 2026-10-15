@@ -22,6 +22,16 @@ const { assignment, href } = await issueAward({
 
 A game page served locally by MSI can call the endpoint directly with a same-origin `fetch()`. A game running only at `kazvt.com` cannot issue awards; it must not be given a public write endpoint or a credential.
 
+## Issue from Twitch, Kick, and YouTube chat
+
+With MSI running on the streaming PC, the existing Acer-to-MSI WebSocket carries Twitch and Kick chat commands from the other PC. MSI also connects locally to Streamer.bot's WebSocket and subscribes to `YouTube.Message`. In any of those chats, an exact `!reward @username` message from `kazvt` or `Chimpwurldos` issues the next unused catalog artwork. `@` is optional. A platform user ID can be used instead of a handle.
+
+On the streaming PC, enable Streamer.bot's WebSocket server under **Servers/Clients → WebSocket Server** and keep it on `127.0.0.1:8080` (the Streamer.bot default). MSI connects to `ws://127.0.0.1:8080/` automatically. If WebSocket authentication is enabled, also set `STREAMERBOT_WS_PASSWORD` in MSI's existing secrets configuration; the listener performs Streamer.bot's challenge-response authentication. Make sure the YouTube account is connected in Streamer.bot. On the remote PC, Acer must already be connected to this MSI instance through the existing `MSI_WS_HOST`/`MSI_WS_PORT` settings.
+
+The command is acknowledged back to Acer, and both PCs log the award link or a specific failure in their consoles; it does not post the link publicly into chat. Award ownership is keyed by `(platform, userId)`, not the mutable handle, while the latest handle is kept for display. MSI keeps a separate local name-to-ID cache beside its own `msi.py`; it is not published. Acer can resolve Twitch handles through its existing Twitch account lookup. For Kick and YouTube, a recipient must first have appeared in chat so the platform ID is known; if a name is ambiguous or unknown, issuance stops instead of creating a second name-based identity. Retrying a command event is idempotent, and an artwork can only be issued once globally.
+
+Platform IDs are stored in the public `assignments.json` because GitHub Pages has no private server-side database. The username shown on award pages remains the latest known platform handle, not the ID. Treat the IDs and reward ledger as public data.
+
 Give the same stable `eventId` to retries. MSI stores only its SHA-256 digest in the public registry. A retry for the same winner and art returns the original link; trying to reuse that event for another winner/art is rejected. Each PNG's exact bytes are checked against its SHA-256 catalog ID and dimensions immediately before assignment, and a PNG can only be assigned once.
 
 New art belongs in `zzz_assets/rewards/`. It is eligible after the repository's reward catalog has been regenerated and published. The filename is only a display name; the SHA-256 asset ID is the identity.
