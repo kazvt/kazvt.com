@@ -139,10 +139,14 @@ class RewardIdentityCache:
 
         with self._lock:
             users = self._load_locked()
-            candidates = [item for item in users.values() if item["platform"] == platform and (
-                item["userId"] == raw_target or normalize_name(item["username"]) == needle or
-                normalize_name(item["displayName"]) == needle
-            )]
+            platform_users = [item for item in users.values() if item["platform"] == platform]
+            # Exact platform IDs win over name aliases. A numeric target is
+            # always an ID, never a numeric-looking username.
+            candidates = [item for item in platform_users if item["userId"] == raw_target]
+            if not candidates and not raw_target.isdecimal():
+                candidates = [item for item in platform_users if
+                              normalize_name(item["username"]) == needle or
+                              normalize_name(item["displayName"]) == needle]
         unique = {item["userId"]: item for item in candidates}
         if not unique:
             raise IdentityLookupError(
