@@ -503,6 +503,38 @@ def _atomic_write_registry(root: Path, registry: dict[str, Any]) -> None:
                 pass
 
 
+def _commit_registry(
+    root: Path,
+    registry: dict[str, Any],
+    event_hash: str,
+    commit_action: str,
+    *,
+    expected_remote: str,
+) -> None:
+    """Publish one validated registry mutation, and no other working-tree files."""
+    _repo_sync_state(root, expected_remote)
+    _atomic_write_registry(root, registry)
+    try:
+        _git(root, "add", "--", ASSIGNMENTS_RELATIVE)
+        staged = _git(root, "diff", "--cached", "--name-only").splitlines()
+        unstaged = _git(root, "diff", "--name-only").splitlines()
+        untracked = _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
+        if staged != [ASSIGNMENTS_RELATIVE] or unstaged or untracked:
+            raise RewardIssueError("Only assignments.json may be included in a reward registry commit; review Git status.")
+        _git(root, "commit", "-m", f"reward: {commit_action} {event_hash[:12]}")
+        _git(root, "push", "origin", "HEAD:refs/heads/main")
+        _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
+        counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
+        if counts != ["0", "0"]:
+            raise RewardIssueError("The reward registry push has not synchronized with GitHub. Retry the same chat event.")
+        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
+            raise RewardIssueError("The reward registry was pushed, but the checkout changed during publication. Review Git status.")
+    except RewardIssueError:
+        raise
+    except Exception as exc:
+        raise RewardIssueError("The reward registry may be saved locally but could not be confirmed on GitHub. Retry the same chat event after checking Git status.") from exc
+
+
 def _issue_and_publish(
     site_root: str | os.PathLike[str],
     payload: Any,
@@ -526,6 +558,8 @@ def _issue_and_publish(
         event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
         previous = _find_event(registry, event_hash)
         if previous:
+            if "revokedAt" in previous:
+                raise RewardIssueError("That award was revoked; this original chat event cannot issue it again.")
             matches = (_same_chat_identity(previous, request) if automatic_asset
                        else _assignment_matches(previous, request))
             if not matches:
@@ -563,30 +597,10 @@ def _issue_and_publish(
                 "pushed": True,
             }
 
-        # Recheck immediately before touching the worktree. This catches ordinary
-        # user edits made while the local catalog was being read.
-        _repo_sync_state(root, expected_remote)
-        _atomic_write_registry(root, next_registry)
-        try:
-            _git(root, "add", "--", ASSIGNMENTS_RELATIVE)
-            staged = _git(root, "diff", "--cached", "--name-only").splitlines()
-            unstaged = _git(root, "diff", "--name-only").splitlines()
-            untracked = _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
-            if staged != [ASSIGNMENTS_RELATIVE] or unstaged or untracked:
-                raise RewardIssueError("Only assignments.json may be included in an issuance commit; review Git status.")
-            event_prefix = assignment["eventIdHash"][:12]
-            _git(root, "commit", "-m", f"reward: issue award {event_prefix}")
-            _git(root, "push", "origin", "HEAD:refs/heads/main")
-            _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
-            counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
-            if counts != ["0", "0"]:
-                raise RewardIssueError("The reward was committed but GitHub has not confirmed the push. Retry the same eventId.")
-            if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
-                raise RewardIssueError("The reward was pushed, but the checkout changed during publication. Review Git status.")
-        except RewardIssueError:
-            raise
-        except Exception as exc:
-            raise RewardIssueError("The reward may be saved locally but could not be confirmed on GitHub. Retry the same eventId after checking Git status.") from exc
+        _commit_registry(
+            root, next_registry, assignment["eventIdHash"], "issue award",
+            expected_remote=expected_remote,
+        )
 
         return {
             "assignment": assignment,
