@@ -277,7 +277,7 @@ function chordMidiNotes(plan, degree) {
   return [0, 2, 4, 6].map(interval => root + scaleSemitone(interval, plan.scale));
 }
 
-function scheduleVoice(context, trackGain, patch, midiNote, startTime, duration, pluck) {
+function scheduleVoice(context, trackGain, patch, midiNote, startTime, duration, pluck, trackName, activeSources) {
   const filter = context.createBiquadFilter();
   filter.type = "lowpass";
   filter.frequency.setValueAtTime(patch.cutoff, startTime);
@@ -309,6 +309,9 @@ function scheduleVoice(context, trackGain, patch, midiNote, startTime, duration,
     oscillator.detune.setValueAtTime(layer.detune, startTime);
     layerGain.gain.setValueAtTime(layer.mix, startTime);
     oscillator.connect(layerGain).connect(filter);
+    const sourceRecord = { oscillator, track: trackName };
+    activeSources.add(sourceRecord);
+    oscillator.onended = () => activeSources.delete(sourceRecord);
     oscillator.start(startTime);
     oscillator.stop(startTime + duration + 0.015);
   }
@@ -335,6 +338,7 @@ export function createRewardMusicPlayer(plan, {
   let chordEnabled = true;
   let arpEnabled = true;
   let destroyed = false;
+  const activeSources = new Set();
 
   const beatSeconds = 60 / plan.bpm;
   const stepSeconds = beatSeconds / 2;
@@ -380,7 +384,7 @@ export function createRewardMusicPlayer(plan, {
     const notes = chordMidiNotes(plan, degree);
     const barDuration = beatSeconds * 4;
     for (const note of notes) {
-      scheduleVoice(context, chordGain, plan.chordPatch, note, time, barDuration, false);
+      scheduleVoice(context, chordGain, plan.chordPatch, note, time, barDuration, false, "chords", activeSources);
     }
   }
 
@@ -388,7 +392,20 @@ export function createRewardMusicPlayer(plan, {
     const notes = chordMidiNotes(plan, degree);
     const noteIndex = plan.arpPattern[step % plan.arpPattern.length];
     const note = notes[noteIndex] + 12;
-    scheduleVoice(context, arpGain, plan.arpPatch, note, time, stepSeconds * 0.88, true);
+    scheduleVoice(context, arpGain, plan.arpPatch, note, time, stepSeconds * 0.88, true, "arp", activeSources);
+  }
+
+  function stopActiveSources(trackName = "") {
+    if (!context) return;
+    const stopAt = context.currentTime + 0.06;
+    for (const source of activeSources) {
+      if (trackName && source.track !== trackName) continue;
+      try {
+        source.oscillator.stop(stopAt);
+      } catch {
+        // A source may have ended between scheduling and this cleanup pass.
+      }
+    }
   }
 
   function scheduleStep(time, index) {
@@ -469,6 +486,7 @@ export function createRewardMusicPlayer(plan, {
     const now = context.currentTime;
     masterGain.gain.cancelScheduledValues(now);
     masterGain.gain.setTargetAtTime(0, now, 0.025);
+    stopActiveSources();
     globalThis.clearTimeout(suspendTimer);
     suspendTimer = globalThis.setTimeout(() => {
       if (!isPlaying && context?.state === "running") context.suspend().catch(() => {});
@@ -485,6 +503,7 @@ export function createRewardMusicPlayer(plan, {
       const gain = track === "chords" ? chordGain : arpGain;
       gain.gain.cancelScheduledValues(now);
       gain.gain.setTargetAtTime(enabled ? (track === "chords" ? 0.78 : 0.58) : 0, now, 0.025);
+      if (!enabled) stopActiveSources(track);
     }
     notify();
   }

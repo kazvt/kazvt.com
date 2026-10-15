@@ -155,7 +155,15 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
     createDynamicsCompressor() { return new FakeNode(); }
     createOscillator() {
       this.oscillatorCount += 1;
-      return { type: "", frequency: new FakeAudioParam(), detune: new FakeAudioParam(), connect(destination) { return destination; }, start() {}, stop() {} };
+      return {
+        type: "",
+        frequency: new FakeAudioParam(),
+        detune: new FakeAudioParam(),
+        stopCount: 0,
+        connect(destination) { return destination; },
+        start() {},
+        stop() { this.stopCount += 1; }
+      };
     }
     resume() {
       this.#startedAt = performance.now();
