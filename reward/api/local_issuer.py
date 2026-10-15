@@ -459,7 +459,23 @@ def _repo_sync_state(root: Path, expected_remote: str = DEFAULT_REMOTE) -> tuple
         raise RewardIssueError("Git could not compare the website checkout with origin/main.")
     remote_ahead, local_ahead = (int(part) for part in counts)
     if remote_ahead:
-        raise RewardIssueError("The website checkout is behind GitHub. Pull the latest main branch before issuing.")
+        if local_ahead:
+            raise RewardIssueError(
+                "The website checkout and GitHub main have diverged. Resolve the Git history manually before issuing."
+            )
+        # The registry can be behind when another site edit was pushed since the
+        # last reward. The clean-worktree and main-branch checks above make a
+        # fast-forward safe; never merge, reset, or overwrite local work here.
+        _git(root, "merge", "--ff-only", "origin/main")
+        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
+            raise RewardIssueError(
+                "The website checkout changed while syncing from GitHub. Review its Git status before issuing."
+            )
+        counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
+        if len(counts) != 2 or counts != ["0", "0"]:
+            raise RewardIssueError(
+                "The website checkout did not finish syncing with GitHub. Retry the same eventId."
+            )
 
     if local_ahead:
         changed = _git(root, "diff", "--name-only", "origin/main...HEAD").splitlines()

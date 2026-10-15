@@ -158,6 +158,25 @@ class LocalRewardIssuerTests(unittest.TestCase):
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
             local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
 
+    def test_clean_checkout_fast_forwards_when_github_main_has_new_commits(self) -> None:
+        peer = self.base / "peer"
+        subprocess.run(
+            ["git", "clone", str(self.remote), str(peer)],
+            check=True,
+            capture_output=True,
+        )
+        git(peer, "config", "user.name", "Site Maintainer")
+        git(peer, "config", "user.email", "site-maintainer@example.invalid")
+        (peer / "site-note.txt").write_text("new site edit\n", encoding="utf-8")
+        git(peer, "add", "site-note.txt")
+        git(peer, "commit", "-m", "site update")
+        git(peer, "push", "origin", "main")
+
+        self.assertEqual(local_issuer._repo_sync_state(self.site, str(self.remote)), (0, 0))
+        self.assertEqual(git(self.site, "rev-parse", "HEAD"), git(self.site, "rev-parse", "origin/main"))
+        self.assertEqual((self.site / "site-note.txt").read_text(encoding="utf-8"), "new site edit\n")
+        self.assertEqual(git(self.site, "status", "--porcelain=v1"), "")
+
     def test_unassign_latest_releases_art_and_preserves_retry_safety(self) -> None:
         winner = {"username": "Viewer", "userId": "yt-user-1", "platform": "youtube"}
         older = issue_next_and_publish(
