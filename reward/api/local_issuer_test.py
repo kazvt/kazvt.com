@@ -8,7 +8,14 @@ import zlib
 from pathlib import Path
 
 import local_issuer
-from local_issuer import RewardIssueError, issue_and_publish, issue_next_and_publish, list_available_artwork
+from local_issuer import (
+    RewardIssueError,
+    clear_user_rewards_and_publish,
+    issue_and_publish,
+    issue_next_and_publish,
+    list_available_artwork,
+    unassign_latest_and_publish,
+)
 
 
 def png_bytes(width: int, height: int) -> bytes:
@@ -150,6 +157,85 @@ class LocalRewardIssuerTests(unittest.TestCase):
         (self.reward_dir / "toast.png").write_bytes(png_bytes(4, 4))
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
             local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
+
+    def test_unassign_latest_releases_art_and_preserves_retry_safety(self) -> None:
+        winner = {"username": "Viewer", "userId": "yt-user-1", "platform": "youtube"}
+        older = issue_next_and_publish(
+            self.site, {**winner, "eventId": "youtube:award-older"}, expected_remote=str(self.remote)
+        )
+        newer = issue_next_and_publish(
+            self.site, {**winner, "eventId": "youtube:award-newer"}, expected_remote=str(self.remote)
+        )
+        self.assertNotEqual(older["assignment"]["assetId"], newer["assignment"]["assetId"])
+        self.assertEqual(list_available_artwork(self.site), [])
+
+        removal = {
+            **winner,
+            "actorLogin": "kazvt",
+            "eventId": "youtube:remove-newest",
+        }
+        result = unassign_latest_and_publish(self.site, removal, expected_remote=str(self.remote))
+        self.assertEqual(result["revokedCount"], 1)
+        self.assertEqual(result["revoked"][0]["linkId"], newer["assignment"]["linkId"])
+        registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        self.assertEqual([item["linkId"] for item in registry["assignments"]], [older["assignment"]["linkId"]])
+        self.assertEqual([item["linkId"] for item in registry["revokedAssignments"]], [newer["assignment"]["linkId"]])
+        self.assertEqual(len(list_available_artwork(self.site)), 1)
+
+        replay = unassign_latest_and_publish(self.site, removal, expected_remote=str(self.remote))
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["revokedCount"], 1)
+        with self.assertRaisesRegex(RewardIssueError, "original chat event cannot issue it again"):
+            issue_next_and_publish(
+                self.site, {**winner, "eventId": "youtube:award-newer"}, expected_remote=str(self.remote)
+            )
+
+        replacement = issue_next_and_publish(
+            self.site,
+            {"username": "AnotherViewer", "userId": "yt-user-2", "platform": "youtube", "eventId": "youtube:replacement"},
+            expected_remote=str(self.remote),
+        )
+        self.assertEqual(replacement["assignment"]["assetId"], newer["assignment"]["assetId"])
+        self.assertEqual(len(list_available_artwork(self.site)), 0)
+
+    def test_clear_user_is_all_active_awards_idempotent_and_platform_scoped(self) -> None:
+        twitch = {"username": "same-handle", "userId": "shared-id", "platform": "twitch"}
+        kick = {"username": "same-handle", "userId": "shared-id", "platform": "kick"}
+        twitch_award = issue_next_and_publish(
+            self.site, {**twitch, "eventId": "twitch:award"}, expected_remote=str(self.remote)
+        )
+        kick_award = issue_next_and_publish(
+            self.site, {**kick, "eventId": "kick:award"}, expected_remote=str(self.remote)
+        )
+        self.assertNotEqual(twitch_award["assignment"]["assetId"], kick_award["assignment"]["assetId"])
+
+        clear_request = {
+            **twitch,
+            "actorLogin": "chimpwurldos",
+            "eventId": "twitch:clear-all",
+        }
+        cleared = clear_user_rewards_and_publish(self.site, clear_request, expected_remote=str(self.remote))
+        self.assertEqual(cleared["revokedCount"], 1)
+        registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        self.assertEqual([item["linkId"] for item in registry["assignments"]], [kick_award["assignment"]["linkId"]])
+        self.assertEqual(len(list_available_artwork(self.site)), 1)
+
+        replay = clear_user_rewards_and_publish(self.site, clear_request, expected_remote=str(self.remote))
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["revokedCount"], 1)
+
+    def test_empty_clear_is_audited_and_replay_does_not_clear_later_awards(self) -> None:
+        owner = {"username": "Viewer", "userId": "viewer-1", "platform": "kick"}
+        command = {**owner, "actorLogin": "kazvt", "eventId": "kick:clear-before-award"}
+        empty = clear_user_rewards_and_publish(self.site, command, expected_remote=str(self.remote))
+        self.assertEqual(empty["revokedCount"], 0)
+        later = issue_next_and_publish(
+            self.site, {**owner, "eventId": "kick:later-award"}, expected_remote=str(self.remote)
+        )
+        replay = clear_user_rewards_and_publish(self.site, command, expected_remote=str(self.remote))
+        self.assertTrue(replay["replayed"])
+        registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        self.assertEqual([item["linkId"] for item in registry["assignments"]], [later["assignment"]["linkId"]])
 
 
 if __name__ == "__main__":
