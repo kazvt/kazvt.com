@@ -66,6 +66,30 @@ test("pixel fingerprint processes all image tiles, including a partial edge tile
   assert.notEqual(originalHash, await fingerprint(image));
 });
 
+test("pixel fingerprint cache is keyed independently of the displayed filename", async () => {
+  const storage = new Map();
+  const image = { width: 1, height: 1, pixels: new Uint8ClampedArray([12, 34, 56, 255]) };
+  const cacheKey = "b".repeat(64);
+  const storageRef = {
+    getItem: key => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, value)
+  };
+  const pixelHash = await hashRewardPixels(image, {
+    documentRef: fakeCanvasDocument(),
+    cryptoRef: webcrypto,
+    storageRef,
+    cacheKey
+  });
+  const cachedHash = await hashRewardPixels(image, {
+    documentRef: { createElement() { throw new Error("cached pixels should not be redrawn"); } },
+    cryptoRef: webcrypto,
+    storageRef,
+    cacheKey
+  });
+  assert.equal(cachedHash, pixelHash);
+  assert.equal(storage.size, 1);
+});
+
 test("pixel-derived music plan is stable and maps hashes across 24 musical keys", () => {
   const keyNames = new Set();
   for (let key = 0; key < 24; key += 1) {
