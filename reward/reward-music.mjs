@@ -332,8 +332,8 @@ export function createRewardMusicPlayer(plan, {
     chordGain = context.createGain();
     arpGain = context.createGain();
     compressor = context.createDynamicsCompressor();
-    chordGain.gain.value = 0.78;
-    arpGain.gain.value = 0.58;
+    chordGain.gain.value = chordEnabled ? 0.78 : 0;
+    arpGain.gain.value = arpEnabled ? 0.58 : 0;
     masterGain.gain.value = 0;
     compressor.threshold.value = -16;
     compressor.knee.value = 12;

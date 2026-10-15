@@ -604,6 +604,7 @@ import {
 
   function showLoading() {
     hideAwardCollection();
+    resetRewardMusic();
     document.body.dataset.pageState = "loading";
     delete document.body.dataset.tier;
     document.querySelector("main.reward-card").setAttribute("aria-busy", "true");
@@ -645,7 +646,7 @@ import {
             }
             rewardArtworkMotion.style.setProperty("--reward-art-ratio", `${image.naturalWidth} / ${image.naturalHeight}`);
             rewardImage.style.backgroundImage = `url("${imageUrl}")`;
-            finish(resolve);
+            finish(resolve, image);
           })
           .catch(error => finish(reject, error));
       };
@@ -881,7 +882,8 @@ import {
     awardNote.textContent = "Demo only. No award is issued or attached to this name.";
     renderFilename(file);
     rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
-    await waitForRewardImage(imageUrl);
+    const artworkImage = await waitForRewardImage(imageUrl);
+    void prepareRewardMusic(artworkImage);
     await waitForMinimumLoading();
 
     document.body.dataset.tier = tier.id;
@@ -958,7 +960,8 @@ import {
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardImage.setAttribute("aria-label", `${tier.label} reward artwork: ${file}`);
     renderFilename(file);
-    await waitForRewardImage(imageUrl);
+    const artworkImage = await waitForRewardImage(imageUrl);
+    void prepareRewardMusic(artworkImage);
     await waitForMinimumLoading();
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
