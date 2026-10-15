@@ -193,7 +193,8 @@ def _validate_registry(registry: dict[str, Any]) -> None:
             revoked_by = record.get("revokedBy")
             revocation_event_hash = record.get("revocationEventHash")
             revocation_action = record.get("revocationAction")
-            if (not isinstance(revoked_by, str) or revoked_by.casefold() not in REWARD_CHAT_ACTORS or
+            if (not isinstance(link_id, str) or not link_id or
+                    not isinstance(revoked_by, str) or revoked_by.casefold() not in REWARD_CHAT_ACTORS or
                     not isinstance(revocation_event_hash, str) or not ASSET_ID_RE.fullmatch(revocation_event_hash) or
                     revocation_action not in REWARD_COMMAND_ACTIONS):
                 raise RewardIssueError(f"Revoked assignment record {index + 1} is invalid.")
@@ -227,7 +228,10 @@ def _validate_registry(registry: dict[str, Any]) -> None:
             raise RewardIssueError(f"Reward command event {index + 1} is invalid.")
         validate_timestamp(event.get("occurredAt"), f"Reward command event {index + 1}")
         link_ids = event.get("assignmentLinkIds")
-        if not isinstance(link_ids, list) or any(not isinstance(link_id, str) for link_id in link_ids):
+        if (not isinstance(link_ids, list) or
+                any(not isinstance(link_id, str) or not link_id or
+                    not (COMPACT_ID_RE.fullmatch(link_id) or UUID4_RE.fullmatch(link_id))
+                    for link_id in link_ids)):
             raise RewardIssueError(f"Reward command event {index + 1} has invalid assignment links.")
         normalized_hash = event_hash.lower()
         normalized_links = set(link_ids)
@@ -629,5 +633,147 @@ def issue_next_and_publish(
     """Assign the next unused catalog PNG to a platform user ID, then publish."""
     return _issue_and_publish(
         site_root, payload, expected_remote=expected_remote, automatic_asset=True
+    )
+
+
+def _find_reward_command_event(registry: dict[str, Any], event_hash: str) -> dict[str, Any] | None:
+    return next((event for event in registry.get("rewardCommandEvents", [])
+                 if str(event.get("eventIdHash", "")).lower() == event_hash), None)
+
+
+def _issued_at_key(record: dict[str, Any]) -> tuple[datetime, str]:
+    timestamp = datetime.fromisoformat(str(record["issuedAt"]).replace("Z", "+00:00"))
+    if timestamp.tzinfo is None:
+        timestamp = timestamp.replace(tzinfo=timezone.utc)
+    return timestamp, str(record.get("linkId", ""))
+
+
+def _revoke_rewards_and_publish(
+    site_root: str | os.PathLike[str],
+    payload: Any,
+    *,
+    action: str,
+    expected_remote: str = DEFAULT_REMOTE,
+) -> dict[str, Any]:
+    if action not in REWARD_COMMAND_ACTIONS:
+        raise RewardIssueError("Unsupported reward removal operation.")
+    if not isinstance(payload, dict):
+        raise RewardIssueError("A JSON object is required.")
+    request = _clean_request({
+        "username": payload.get("username"),
+        "assetId": "",
+        "eventId": payload.get("eventId"),
+        "platform": payload.get("platform"),
+        "userId": payload.get("userId"),
+    }, allow_automatic_asset=True, require_user_identity=True)
+    actor_login = str(payload.get("actorLogin") or "").strip().lstrip("@").casefold()
+    if actor_login not in REWARD_CHAT_ACTORS:
+        raise RewardIssueError("Only kazvt or Chimpwurldos can remove chat rewards.")
+
+    root = Path(site_root).resolve()
+    if not root.is_dir():
+        raise RewardIssueError("The configured website folder is unavailable.")
+
+    with _ISSUE_LOCK:
+        _repo_sync_state(root, expected_remote)
+        _ensure_commit_identity(root)
+        _, registry = _load_records(root)
+        event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
+        previous_event = _find_reward_command_event(registry, event_hash)
+        if previous_event:
+            if (previous_event.get("action") != action or
+                    str(previous_event.get("platform", "")).casefold() != request["platform"] or
+                    str(previous_event.get("userId", "")) != request["userId"] or
+                    str(previous_event.get("actorLogin", "")).casefold() != actor_login):
+                raise RewardIssueError("This chat event was already used for a different reward operation.")
+            archived = registry.get("revokedAssignments", [])
+            by_link = {str(record.get("linkId", "")): record for record in archived}
+            return {
+                "action": action,
+                "username": previous_event["username"],
+                "revoked": [by_link[link_id] for link_id in previous_event["assignmentLinkIds"] if link_id in by_link],
+                "revokedCount": len(previous_event["assignmentLinkIds"]),
+                "replayed": True,
+                "pushed": True,
+            }
+
+        owned = [record for record in registry["assignments"] if _same_chat_identity(record, request)]
+        if action == "unassign_latest":
+            selected = [max(owned, key=_issued_at_key)] if owned else []
+            commit_action = "unassign award"
+        else:
+            selected = sorted(owned, key=_issued_at_key, reverse=True)
+            commit_action = "clear awards"
+
+        occurred_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        archived_records = []
+        revoked_link_ids = []
+        for record in selected:
+            archived = {
+                **record,
+                "username": request["username"],
+                "revokedAt": occurred_at,
+                "revokedBy": actor_login,
+                "revocationEventHash": event_hash,
+                "revocationAction": action,
+            }
+            archived_records.append(archived)
+            revoked_link_ids.append(str(record.get("linkId", "")))
+
+        selected_links = set(revoked_link_ids)
+        next_registry = {
+            **registry,
+            "version": 1,
+            "assignments": [record for record in registry["assignments"]
+                            if str(record.get("linkId", "")) not in selected_links],
+            "revokedAssignments": [*registry.get("revokedAssignments", []), *archived_records],
+            "rewardCommandEvents": [
+                *registry.get("rewardCommandEvents", []),
+                {
+                    "eventIdHash": event_hash,
+                    "action": action,
+                    "platform": request["platform"],
+                    "userId": request["userId"],
+                    "username": request["username"],
+                    "actorLogin": actor_login,
+                    "occurredAt": occurred_at,
+                    "assignmentLinkIds": revoked_link_ids,
+                },
+            ],
+        }
+        _validate_registry(next_registry)
+        _commit_registry(root, next_registry, event_hash, commit_action, expected_remote=expected_remote)
+        print(f"[reward chat] {action}: released {len(archived_records)} award(s) from {request['username']} on {request['platform']}.")
+        return {
+            "action": action,
+            "username": request["username"],
+            "revoked": archived_records,
+            "revokedCount": len(archived_records),
+            "replayed": False,
+            "pushed": True,
+        }
+
+
+def unassign_latest_and_publish(
+    site_root: str | os.PathLike[str],
+    payload: Any,
+    *,
+    expected_remote: str = DEFAULT_REMOTE,
+) -> dict[str, Any]:
+    """Revoke the recipient's most recently issued active award."""
+    return _revoke_rewards_and_publish(
+        site_root, payload, action="unassign_latest", expected_remote=expected_remote
+    )
+
+
+def clear_user_rewards_and_publish(
+    site_root: str | os.PathLike[str],
+    payload: Any,
+    *,
+    expected_remote: str = DEFAULT_REMOTE,
+) -> dict[str, Any]:
+    """Revoke every active award belonging to one platform user ID."""
+    return _revoke_rewards_and_publish(
+        site_root, payload, action="clear_user", expected_remote=expected_remote
     )
 
