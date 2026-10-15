@@ -50,6 +50,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         subprocess.run(["git", "init", "--initial-branch=main", str(self.site)], check=True, capture_output=True)
         git(self.site, "config", "user.name", "Reward Issuer Test")
         git(self.site, "config", "user.email", "reward-test@example.invalid")
+        git(self.site, "config", "commit.gpgsign", "false")
         self.art_ids = []
         assets = {}
         assets_by_id = {}
@@ -167,6 +168,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         )
         git(peer, "config", "user.name", "Site Maintainer")
         git(peer, "config", "user.email", "site-maintainer@example.invalid")
+        git(peer, "config", "commit.gpgsign", "false")
         (peer / "site-note.txt").write_text("new site edit\n", encoding="utf-8")
         git(peer, "add", "site-note.txt")
         git(peer, "commit", "-m", "site update")
