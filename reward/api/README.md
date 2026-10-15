@@ -45,6 +45,7 @@ There is no new token to create or paste anywhere. This assumes `git push` alrea
 ## Safety boundary
 
 - `/reward-api/*` is not part of the public website and is not an internet-facing issuer. MSI checks the client address, local Host, and same-origin headers; it emits no CORS permission. Requests from other computers and cross-origin web pages are rejected.
+- Twitch/Kick commands cross MSI's existing LAN WebSocket from the single registered Acer client. That existing bridge is not cryptographically authenticated, so keep it on a trusted private network and never port-forward MSI's WebSocket port (9876) to the internet. The chat readers and MSI both check the issuing account allowlist, but this is not protection against a compromised trusted PC or LAN.
 - This is intentionally modest protection: any program already running as the local Windows user can call loopback and issue awards. Do not expose port 8000 through a router, tunnel, or public reverse proxy, and do not put the client in code distributed to players.
 - `assignments.json` and all award images are public. Opaque reward IDs identify existing cards; they do not prove who opened a link, keep an award private, or prevent copying.
 - The older OBS trivia widget has its own local assignment writer and private queue. Do not issue awards in both it and MSI at the same time; they share the public registry but have no cross-process lock. Use one issuer at a time.
