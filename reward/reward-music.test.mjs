@@ -87,6 +87,8 @@ test("music plan rejects malformed pixel hashes", () => {
 });
 
 test("music engine schedules the enabled track and can stop cleanly", async () => {
+  let audioContext;
+
   class FakeAudioParam {
     value = 0;
     setValueAtTime(value) { this.value = value; }
@@ -114,6 +116,10 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
     oscillatorCount = 0;
     #elapsed = 0;
     #startedAt = 0;
+
+    constructor() {
+      audioContext = this;
+    }
 
     get currentTime() {
       return this.#elapsed + (this.state === "running" ? (performance.now() - this.#startedAt) / 1000 : 0);
@@ -144,7 +150,6 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
   }
 
   const plan = deriveRewardMusicPlan("12345678" + "abcdef01".repeat(7));
-  const context = new FakeAudioContext();
   const fakeDocument = { hidden: false, addEventListener() {}, removeEventListener() {} };
   const player = createRewardMusicPlayer(plan, {
     audioContextConstructor: FakeAudioContext,
@@ -155,9 +160,9 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
   await player.start();
   await new Promise(resolve => setTimeout(resolve, 45));
   assert.equal(player.isPlaying, true);
-  assert.equal(context.oscillatorCount, plan.arpPatch.layers.length);
+  assert.equal(audioContext.oscillatorCount, plan.arpPatch.layers.length);
   player.stop();
   assert.equal(player.isPlaying, false);
   player.destroy();
-  assert.equal(context.state, "closed");
+  assert.equal(audioContext.state, "closed");
 });
