@@ -138,6 +138,8 @@ function yieldToBrowser() {
 export async function hashRewardPixels(image, {
   documentRef = globalThis.document,
   cryptoRef = globalThis.crypto,
+  storageRef,
+  cacheKey = "",
   onProgress = null
 } = {}) {
   const width = Number(image?.naturalWidth || image?.width);
@@ -150,6 +152,26 @@ export async function hashRewardPixels(image, {
   }
   if (!documentRef?.createElement || typeof cryptoRef?.subtle?.digest !== "function") {
     throw new Error("Pixel fingerprinting is unavailable in this browser.");
+  }
+
+  let storage = storageRef;
+  if (storage === undefined) {
+    try {
+      storage = globalThis.localStorage;
+    } catch {
+      storage = null;
+    }
+  }
+  const cacheName = /^[a-f0-9]{64}$/i.test(cacheKey)
+    ? `kazvt.reward-pixels.v1.${cacheKey.toLowerCase()}`
+    : "";
+  if (cacheName) {
+    try {
+      const cached = storage?.getItem(cacheName);
+      if (typeof cached === "string" && /^[a-f0-9]{64}$/.test(cached)) return cached;
+    } catch {
+      // Pixel hashing still works when browser storage is blocked or full.
+    }
   }
 
   const canvas = documentRef.createElement("canvas");
@@ -188,7 +210,15 @@ export async function hashRewardPixels(image, {
     `kazvt.reward-pixels.sha256.v1\u0000${width}x${height}\u0000${PIXEL_HASH_TILE_SIZE}\u0000${tileCount}\u0000`
   );
   const rootDigest = await cryptoRef.subtle.digest("SHA-256", concatenateBytes([rootHeader, ...tileDigests]));
-  return toHex(new Uint8Array(rootDigest));
+  const pixelHash = toHex(new Uint8Array(rootDigest));
+  if (cacheName) {
+    try {
+      storage?.setItem(cacheName, pixelHash);
+    } catch {
+      // The generated music remains usable if its tiny local cache cannot be saved.
+    }
+  }
+  return pixelHash;
 }
 
 function createSeededRandom(seed) {

@@ -151,14 +151,14 @@ import {
     if (rewardMusicArp) rewardMusicArp.disabled = true;
   }
 
-  async function prepareRewardMusic(image) {
+  async function prepareRewardMusic(image, cacheKey) {
     if (!rewardMusic) return;
     const generation = ++rewardMusicGeneration;
     rewardMusic.hidden = false;
     if (rewardMusicStatus) rewardMusicStatus.textContent = "Reading the artwork pixels…";
 
     try {
-      const pixelHash = await hashRewardPixels(image);
+      const pixelHash = await hashRewardPixels(image, { cacheKey });
       if (generation !== rewardMusicGeneration) return;
       const plan = deriveRewardMusicPlan(pixelHash);
       rewardMusicPlayer?.destroy();
@@ -883,7 +883,7 @@ import {
     renderFilename(file);
     rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
     const artworkImage = await waitForRewardImage(imageUrl);
-    void prepareRewardMusic(artworkImage);
+    void prepareRewardMusic(artworkImage, metadata.assetId);
     await waitForMinimumLoading();
 
     document.body.dataset.tier = tier.id;
@@ -961,7 +961,7 @@ import {
     rewardImage.setAttribute("aria-label", `${tier.label} reward artwork: ${file}`);
     renderFilename(file);
     const artworkImage = await waitForRewardImage(imageUrl);
-    void prepareRewardMusic(artworkImage);
+    void prepareRewardMusic(artworkImage, metadata.assetId);
     await waitForMinimumLoading();
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
