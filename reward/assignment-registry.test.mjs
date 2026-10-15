@@ -121,6 +121,27 @@ test("assignments sort newest first and renamed artwork resolves by content ID",
   ]);
 });
 
+test("revoked assignment history is never exposed as an active reward or link", () => {
+  const active = {
+    assetId: assetIds[0], filename: "gift-current.png", username: "Viewer",
+    linkId: linkIds[0], issuedAt: "2026-09-02T00:00:00Z"
+  };
+  const revoked = {
+    assetId: assetIds[1], filename: "older-gift-current.png", username: "Viewer",
+    linkId: linkIds[1], issuedAt: "2026-09-01T00:00:00Z",
+    revokedAt: "2026-09-03T00:00:00Z", revokedBy: "kazvt"
+  };
+  const assignments = validateAndSortAssignments({
+    version: 1,
+    assignments: [active],
+    revokedAssignments: [revoked],
+    rewardCommandEvents: []
+  }, makeCatalog());
+
+  assert.deepEqual(assignments.map(item => item.linkId), [linkIds[0]]);
+  assert.equal(findAssignmentByLinkId(assignments, linkIds[1]), null);
+});
+
 test("invalid and duplicated award records are rejected", () => {
   const valid = {
     assetId: assetIds[0], filename: "gift.png", username: "kazvt",
