@@ -433,10 +433,10 @@ import {
     awardCollectionGrid.replaceChildren(...items);
   }
 
-  function showUserAwardCollection(username, currentAssetId, catalog) {
+  function showUserAwardCollection(username, currentAssetId, catalog, owner = null) {
     if (!awardCollection) return;
     const generation = ++awardCollectionGeneration;
-    activeAwardCollection = { username, currentAssetId, assignments: [] };
+    activeAwardCollection = { username, currentAssetId, owner, assignments: [] };
     awardCollection.hidden = true;
     awardCollectionGrid.replaceChildren();
     awardCollectionStatus.hidden = true;
@@ -444,7 +444,7 @@ import {
 
     loadAssignmentRegistry(catalog).then(assignments => {
       if (generation !== awardCollectionGeneration) return;
-      const otherAwards = otherAwardsFor(assignments, username, currentAssetId);
+      const otherAwards = otherAwardsFor(assignments, username, currentAssetId, owner);
       if (otherAwards.length === 0) return;
 
       return Promise.all(otherAwards.map(async assignment => {
@@ -795,7 +795,13 @@ import {
       if (!assignment) throw new Error("This legacy link does not match a recorded reward assignment.");
     }
 
-    const data = { version: 2, username: assignment.username, assetId: assignment.assetId };
+    const data = {
+      version: 2,
+      username: assignment.username,
+      assetId: assignment.assetId,
+      platform: assignment.platform,
+      userId: assignment.userId,
+    };
     setRewardTitle(data.username);
     const resolvedAsset = resolveRewardAsset(catalog, data);
     const file = resolvedAsset?.filename || "";
@@ -824,7 +830,10 @@ import {
     loadingState.hidden = true;
     rewardState.hidden = false;
     populateArtWallpaper(imageUrl, metadata.assetId);
-    showUserAwardCollection(data.username, metadata.assetId, catalog);
+    showUserAwardCollection(data.username, metadata.assetId, catalog, {
+      platform: data.platform,
+      userId: data.userId,
+    });
     animateTier(assignedTier).catch(error => {
       // The award remains readable and correctly tiered when an external animation CDN is unavailable.
       console.warn("[reward] Tier animation is unavailable:", error);

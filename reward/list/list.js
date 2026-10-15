@@ -155,7 +155,9 @@ import "../pattern-zoom.mjs?v=2";
     openLink.classList.add("open-button");
 
     card.append(artworkFrame, info, openLink);
-    const searchText = normalizeSearch(`${assignment.username} ${assignment.filename} ${filenameLabel(assignment.filename)}`);
+    const searchText = normalizeSearch(
+      `${assignment.username} ${assignment.platform} ${assignment.userId} ${assignment.filename} ${filenameLabel(assignment.filename)}`
+    );
     return { card, searchText };
   }
 
