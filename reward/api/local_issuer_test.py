@@ -8,7 +8,7 @@ import zlib
 from pathlib import Path
 
 import local_issuer
-from local_issuer import RewardIssueError, issue_and_publish, list_available_artwork
+from local_issuer import RewardIssueError, issue_and_publish, issue_next_and_publish, list_available_artwork
 
 
 def png_bytes(width: int, height: int) -> bytes:
@@ -100,6 +100,37 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 {"username": "Other", "assetId": self.art_ids[1], "eventId": "one-event"},
                 expected_remote=str(self.remote),
             )
+
+    def test_chat_issue_uses_platform_user_id_updates_display_name_and_never_reuses_art(self) -> None:
+        first = issue_next_and_publish(self.site, {
+            "username": "@OldHandle", "userId": "123456", "platform": "twitch",
+            "eventId": "twitch:message-1",
+        }, expected_remote=str(self.remote))
+        self.assertEqual(first["assignment"]["userId"], "123456")
+        self.assertEqual(first["assignment"]["username"], "OldHandle")
+        self.assertEqual(len(list_available_artwork(self.site)), 1)
+
+        second = issue_next_and_publish(self.site, {
+            "username": "NewHandle", "userId": "123456", "platform": "twitch",
+            "eventId": "twitch:message-2",
+        }, expected_remote=str(self.remote))
+        self.assertNotEqual(second["assignment"]["assetId"], first["assignment"]["assetId"])
+        records = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))["assignments"]
+        self.assertEqual({record["username"] for record in records}, {"NewHandle"})
+        self.assertEqual({record["userId"] for record in records}, {"123456"})
+        self.assertEqual({record["platform"] for record in records}, {"twitch"})
+
+        replay = issue_next_and_publish(self.site, {
+            "username": "NewHandle", "userId": "123456", "platform": "twitch",
+            "eventId": "twitch:message-2",
+        }, expected_remote=str(self.remote))
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["assignment"]["linkId"], second["assignment"]["linkId"])
+        with self.assertRaisesRegex(RewardIssueError, "No unassigned reward artwork"):
+            issue_next_and_publish(self.site, {
+                "username": "Other", "userId": "999", "platform": "youtube",
+                "eventId": "youtube:message-3",
+            }, expected_remote=str(self.remote))
         with self.assertRaisesRegex(RewardIssueError, "already been awarded"):
             issue_and_publish(
                 self.site,
