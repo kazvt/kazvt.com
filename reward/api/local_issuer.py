@@ -29,7 +29,9 @@ ASSET_ID_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
 FILENAME_RE = re.compile(r"^[^/\\\x00-\x1f\x7f]{1,255}\.png$", re.IGNORECASE)
 COMPACT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{16,22}$")
 UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.IGNORECASE)
-EVENT_COMMIT_RE = re.compile(r"^reward: issue award [a-f0-9]{12}$")
+EVENT_COMMIT_RE = re.compile(r"^reward: (?:issue award|unassign award|clear awards) [a-f0-9]{12}$")
+REWARD_CHAT_ACTORS = {"kazvt", "chimpwurldos"}
+REWARD_COMMAND_ACTIONS = {"unassign_latest", "clear_user"}
 _ISSUE_LOCK = threading.Lock()
 
 
@@ -115,10 +117,25 @@ def _validate_registry(registry: dict[str, Any]) -> None:
     records = registry.get("assignments")
     if registry.get("version") != 1 or not isinstance(records, list):
         raise RewardIssueError("The reward assignment registry is invalid.")
+    revoked_records = registry.get("revokedAssignments", [])
+    command_events = registry.get("rewardCommandEvents", [])
+    if not isinstance(revoked_records, list) or not isinstance(command_events, list):
+        raise RewardIssueError("The reward assignment history is invalid.")
+
     seen_assets: set[str] = set()
     seen_links: set[str] = set()
-    seen_events: set[str] = set()
-    for index, record in enumerate(records):
+    seen_issue_events: set[str] = set()
+    archived_by_command: dict[str, set[str]] = {}
+
+    def validate_timestamp(value: Any, description: str) -> None:
+        if not isinstance(value, str) or len(value) > 40:
+            raise RewardIssueError(f"{description} has an invalid timestamp.")
+        try:
+            datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise RewardIssueError(f"{description} has an invalid timestamp.") from exc
+
+    def validate_assignment(record: Any, index: int, *, revoked: bool) -> None:
         if not isinstance(record, dict):
             raise RewardIssueError(f"Assignment record {index + 1} is invalid.")
         asset_id = record.get("assetId", record.get("assetSha256", ""))
@@ -127,9 +144,10 @@ def _validate_registry(registry: dict[str, Any]) -> None:
         asset_id = asset_id.lower()
         if record.get("assetSha256") is not None and str(record.get("assetSha256")).lower() != asset_id:
             raise RewardIssueError(f"Assignment record {index + 1} has conflicting artwork IDs.")
-        if asset_id in seen_assets:
+        if not revoked and asset_id in seen_assets:
             raise RewardIssueError("The assignment registry repeats artwork; refusing to issue another award.")
-        seen_assets.add(asset_id)
+        if not revoked:
+            seen_assets.add(asset_id)
 
         filename = record.get("filename")
         username = record.get("username")
@@ -166,9 +184,59 @@ def _validate_registry(registry: dict[str, Any]) -> None:
             old_event_id = record.get("eventId")
             event_hash = hashlib.sha256(old_event_id.encode("utf-8")).hexdigest() if isinstance(old_event_id, str) else ""
         if event_hash:
-            if event_hash in seen_events:
+            if event_hash in seen_issue_events:
                 raise RewardIssueError("The assignment registry repeats an issuance event.")
-            seen_events.add(event_hash)
+            seen_issue_events.add(event_hash)
+
+        if revoked:
+            revoked_at = record.get("revokedAt")
+            revoked_by = record.get("revokedBy")
+            revocation_event_hash = record.get("revocationEventHash")
+            revocation_action = record.get("revocationAction")
+            if (not isinstance(revoked_by, str) or revoked_by.casefold() not in REWARD_CHAT_ACTORS or
+                    not isinstance(revocation_event_hash, str) or not ASSET_ID_RE.fullmatch(revocation_event_hash) or
+                    revocation_action not in REWARD_COMMAND_ACTIONS):
+                raise RewardIssueError(f"Revoked assignment record {index + 1} is invalid.")
+            validate_timestamp(revoked_at, f"Revoked assignment record {index + 1}")
+            archived_by_command.setdefault(revocation_event_hash.lower(), set()).add(str(link_id))
+        elif any(key in record for key in ("revokedAt", "revokedBy", "revocationEventHash", "revocationAction")):
+            raise RewardIssueError(f"Active assignment record {index + 1} has revocation metadata.")
+
+    for index, record in enumerate(records):
+        validate_assignment(record, index, revoked=False)
+    for index, record in enumerate(revoked_records):
+        validate_assignment(record, index, revoked=True)
+
+    seen_command_events: set[str] = set()
+    for index, event in enumerate(command_events):
+        if not isinstance(event, dict):
+            raise RewardIssueError(f"Reward command event {index + 1} is invalid.")
+        event_hash = event.get("eventIdHash")
+        action = event.get("action")
+        platform = event.get("platform")
+        user_id = event.get("userId")
+        username = event.get("username")
+        actor_login = event.get("actorLogin")
+        if (not isinstance(event_hash, str) or not ASSET_ID_RE.fullmatch(event_hash) or
+                event_hash.lower() in seen_command_events or event_hash.lower() in seen_issue_events or
+                action not in REWARD_COMMAND_ACTIONS or
+                not isinstance(platform, str) or platform not in {"twitch", "kick", "youtube"} or
+                not isinstance(user_id, str) or not user_id.strip() or len(user_id) > 128 or _contains_control(user_id) or
+                not isinstance(username, str) or not username.strip() or len(username) > 100 or _contains_control(username) or
+                not isinstance(actor_login, str) or actor_login.casefold() not in REWARD_CHAT_ACTORS):
+            raise RewardIssueError(f"Reward command event {index + 1} is invalid.")
+        validate_timestamp(event.get("occurredAt"), f"Reward command event {index + 1}")
+        link_ids = event.get("assignmentLinkIds")
+        if not isinstance(link_ids, list) or any(not isinstance(link_id, str) for link_id in link_ids):
+            raise RewardIssueError(f"Reward command event {index + 1} has invalid assignment links.")
+        normalized_hash = event_hash.lower()
+        normalized_links = set(link_ids)
+        if len(normalized_links) != len(link_ids) or normalized_links != archived_by_command.get(normalized_hash, set()):
+            raise RewardIssueError(f"Reward command event {index + 1} does not match its revoked assignments.")
+        seen_command_events.add(normalized_hash)
+
+    if set(archived_by_command) != seen_command_events:
+        raise RewardIssueError("Revoked assignments are missing their reward command audit event.")
 
 
 def _reward_paths(site_root: Path) -> tuple[Path, Path]:
