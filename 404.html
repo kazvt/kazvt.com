@@ -14,8 +14,22 @@
       if (rewardsAliasMatch) {
         const suffix = rewardsAliasMatch[1] ?? "";
         const hasDirectRewardId = new URLSearchParams(location.search).has("id");
-        const destinationPath = suffix ? `/reward/${suffix}` : hasDirectRewardId ? "/reward/" : "/reward/list/";
+        const suffixWithoutTrailingSlash = suffix.replace(/\/+$/, "");
+        const rewardDirectoryAliases = new Set(["demo", "list", "patterns", "retro"]);
+        const isRewardDirectory = rewardDirectoryAliases.has(suffixWithoutTrailingSlash.toLowerCase());
+        const destinationPath = suffix
+          ? `/reward/${suffixWithoutTrailingSlash}${isRewardDirectory || suffix.endsWith("/") ? "/" : ""}`
+          : hasDirectRewardId ? "/reward/" : "/reward/list/";
         const destination = new URL(destinationPath, location.origin);
+        destination.search = location.search;
+        destination.hash = location.hash;
+        location.replace(destination.href);
+        return;
+      }
+
+      const slashlessRewardDirectory = /^\/reward\/(demo|list|patterns|retro)$/iu.exec(location.pathname);
+      if (slashlessRewardDirectory) {
+        const destination = new URL(`/reward/${slashlessRewardDirectory[1].toLowerCase()}/`, location.origin);
         destination.search = location.search;
         destination.hash = location.hash;
         location.replace(destination.href);
