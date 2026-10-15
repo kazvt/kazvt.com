@@ -644,11 +644,11 @@ def _find_reward_command_event(registry: dict[str, Any], event_hash: str) -> dic
                  if str(event.get("eventIdHash", "")).lower() == event_hash), None)
 
 
-def _issued_at_key(record: dict[str, Any]) -> tuple[datetime, str]:
+def _issued_at_key(record: dict[str, Any]) -> datetime:
     timestamp = datetime.fromisoformat(str(record["issuedAt"]).replace("Z", "+00:00"))
     if timestamp.tzinfo is None:
         timestamp = timestamp.replace(tzinfo=timezone.utc)
-    return timestamp, str(record.get("linkId", ""))
+    return timestamp
 
 
 def _revoke_rewards_and_publish(
@@ -704,7 +704,9 @@ def _revoke_rewards_and_publish(
 
         owned = [record for record in registry["assignments"] if _same_chat_identity(record, request)]
         if action == "unassign_latest":
-            selected = [max(owned, key=_issued_at_key)] if owned else []
+            # The assignments list is append-ordered; use that as the final
+            # tie-breaker if two imports share the same timestamp precision.
+            selected = [max(enumerate(owned), key=lambda pair: (_issued_at_key(pair[1]), pair[0]))[1]] if owned else []
             commit_action = "unassign award"
         else:
             selected = sorted(owned, key=_issued_at_key, reverse=True)
