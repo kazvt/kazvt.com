@@ -100,6 +100,12 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 {"username": "Other", "assetId": self.art_ids[1], "eventId": "one-event"},
                 expected_remote=str(self.remote),
             )
+        with self.assertRaisesRegex(RewardIssueError, "already been awarded"):
+            issue_and_publish(
+                self.site,
+                {"username": "Winner", "assetId": self.art_ids[0], "eventId": "different-event"},
+                expected_remote=str(self.remote),
+            )
 
     def test_chat_issue_uses_platform_user_id_updates_display_name_and_never_reuses_art(self) -> None:
         first = issue_next_and_publish(self.site, {
@@ -131,12 +137,6 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 "username": "Other", "userId": "999", "platform": "youtube",
                 "eventId": "youtube:message-3",
             }, expected_remote=str(self.remote))
-        with self.assertRaisesRegex(RewardIssueError, "already been awarded"):
-            issue_and_publish(
-                self.site,
-                {"username": "Winner", "assetId": self.art_ids[0], "eventId": "different-event"},
-                expected_remote=str(self.remote),
-            )
 
     def test_refuses_dirty_worktree_and_modified_png(self) -> None:
         (self.site / "unrelated.tmp").write_text("keep me", encoding="utf-8")
