@@ -45,30 +45,51 @@ def _contains_control(value: str) -> bool:
     return any(unicodedata.category(character) == "Cc" for character in value)
 
 
-def _clean_request(payload: Any) -> dict[str, str]:
+def _clean_request(
+    payload: Any,
+    *,
+    allow_automatic_asset: bool = False,
+    require_user_identity: bool = False,
+) -> dict[str, str]:
     if not isinstance(payload, dict):
         raise RewardIssueError("A JSON object is required.")
 
     raw_username = payload.get("username")
     username = unicodedata.normalize("NFKC", raw_username).strip() if isinstance(raw_username, str) else ""
+    if username.startswith("@"):
+        username = username[1:].strip()
     asset_id = payload.get("assetId", "")
     asset_id = asset_id.lower() if isinstance(asset_id, str) else ""
     raw_event_id = payload.get("eventId")
     event_id = raw_event_id.strip() if isinstance(raw_event_id, str) else ""
     raw_platform = payload.get("platform")
-    platform = raw_platform.strip() if isinstance(raw_platform, str) else ""
+    platform = raw_platform.strip().casefold() if isinstance(raw_platform, str) else ""
     platform = platform or "stream-game"
+    raw_user_id = payload.get("userId", "")
+    user_id = unicodedata.normalize("NFKC", raw_user_id).strip() if isinstance(raw_user_id, str) else ""
 
     if not username or len(username) > 100 or _contains_control(username):
         raise RewardIssueError("username must be 1-100 characters and contain no control characters.")
-    if not ASSET_ID_RE.fullmatch(asset_id):
+    if not allow_automatic_asset and not ASSET_ID_RE.fullmatch(asset_id):
         raise RewardIssueError("assetId must be a SHA-256 artwork ID.")
+    if allow_automatic_asset and asset_id and not ASSET_ID_RE.fullmatch(asset_id):
+        raise RewardIssueError("assetId must be a SHA-256 artwork ID when supplied.")
     if not event_id or len(event_id) > 128 or _contains_control(event_id):
         raise RewardIssueError("eventId must be a stable 1-128 character ID without control characters.")
     if not platform or len(platform) > 60 or _contains_control(platform):
         raise RewardIssueError("platform must be 1-60 characters and contain no control characters.")
+    if user_id and (len(user_id) > 128 or _contains_control(user_id)):
+        raise RewardIssueError("userId must be 1-128 characters and contain no control characters.")
+    if require_user_identity and (platform not in {"twitch", "kick", "youtube"} or not user_id):
+        raise RewardIssueError("A supported platform and stable platform userId are required.")
 
-    return {"username": username, "assetId": asset_id, "eventId": event_id, "platform": platform}
+    return {
+        "username": username,
+        "assetId": asset_id,
+        "eventId": event_id,
+        "platform": platform,
+        "userId": user_id,
+    }
 
 
 def _read_json(path: Path, description: str) -> dict[str, Any]:
