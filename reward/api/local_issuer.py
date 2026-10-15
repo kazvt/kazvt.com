@@ -469,7 +469,11 @@ def _issue_and_publish(
                          if item["assetId"] not in assigned_assets]
             if not available:
                 raise RewardIssueError("No unassigned reward artwork is available.")
-            request["assetId"] = available[0]["assetId"]
+            # Stable pseudo-random choice: message IDs spread awards across the
+            # pool, while retries of the same event remain deterministic.
+            selection_hash = hashlib.sha256(request["eventId"].encode("utf-8")).digest()
+            selection_index = int.from_bytes(selection_hash[:8], "big") % len(available)
+            request["assetId"] = available[selection_index]["assetId"]
 
         now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         next_registry, assignment = _new_assignment(root, catalog, registry, request, now)
