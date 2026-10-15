@@ -150,9 +150,7 @@ export async function hashRewardPixels(image, {
   if (width * height > MAX_REWARD_PIXEL_COUNT) {
     throw new Error("Reward artwork is too large to fingerprint efficiently.");
   }
-  if (!documentRef?.createElement || typeof cryptoRef?.subtle?.digest !== "function") {
-    throw new Error("Pixel fingerprinting is unavailable in this browser.");
-  }
+  if (!documentRef?.createElement) throw new Error("Pixel fingerprinting is unavailable in this browser.");
 
   let storage = storageRef;
   if (storage === undefined) {
@@ -172,6 +170,9 @@ export async function hashRewardPixels(image, {
     } catch {
       // Pixel hashing still works when browser storage is blocked or full.
     }
+  }
+  if (typeof cryptoRef?.subtle?.digest !== "function") {
+    throw new Error("Pixel fingerprinting is unavailable in this browser.");
   }
 
   const canvas = documentRef.createElement("canvas");

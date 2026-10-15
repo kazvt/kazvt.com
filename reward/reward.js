@@ -149,6 +149,7 @@ import {
     }
     if (rewardMusicChords) rewardMusicChords.disabled = true;
     if (rewardMusicArp) rewardMusicArp.disabled = true;
+    if (rewardMusicVolume) rewardMusicVolume.disabled = true;
   }
 
   async function prepareRewardMusic(image, cacheKey) {
@@ -173,6 +174,7 @@ import {
       if (rewardMusicToggle) rewardMusicToggle.disabled = false;
       if (rewardMusicChords) rewardMusicChords.disabled = false;
       if (rewardMusicArp) rewardMusicArp.disabled = false;
+      if (rewardMusicVolume) rewardMusicVolume.disabled = false;
       updateRewardMusicControls({ playing: false, chordsEnabled: true, arpEnabled: true, volume: Number(rewardMusicVolume?.value ?? 42) / 100 });
     } catch (error) {
       if (generation !== rewardMusicGeneration) return;
