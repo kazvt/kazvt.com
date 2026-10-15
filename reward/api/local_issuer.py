@@ -235,7 +235,7 @@ def _validate_registry(registry: dict[str, Any]) -> None:
             raise RewardIssueError(f"Reward command event {index + 1} does not match its revoked assignments.")
         seen_command_events.add(normalized_hash)
 
-    if set(archived_by_command) != seen_command_events:
+    if set(archived_by_command) - seen_command_events:
         raise RewardIssueError("Revoked assignments are missing their reward command audit event.")
 
 
@@ -328,7 +328,7 @@ def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> 
 
 
 def _find_event(registry: dict[str, Any], event_hash: str) -> dict[str, Any] | None:
-    for record in registry["assignments"]:
+    for record in [*registry["assignments"], *registry.get("revokedAssignments", [])]:
         current_hash = record.get("eventIdHash")
         if isinstance(current_hash, str) and current_hash.lower() == event_hash:
             return record
@@ -356,6 +356,8 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
     event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
     previous = _find_event(registry, event_hash)
     if previous:
+        if "revokedAt" in previous:
+            raise RewardIssueError("That award was revoked; this original chat event cannot issue it again.")
         if not _assignment_matches(previous, request):
             raise RewardIssueError("eventId is already assigned to a different winner or artwork.")
         return registry, previous
@@ -369,7 +371,10 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
         for previous_assignment in registry["assignments"]:
             if _same_chat_identity(previous_assignment, request):
                 previous_assignment["username"] = request["username"]
-    used_link_ids = {str(record.get("linkId", "")) for record in registry["assignments"]}
+    used_link_ids = {
+        str(record.get("linkId", ""))
+        for record in [*registry["assignments"], *registry.get("revokedAssignments", [])]
+    }
     link_id = ""
     for _ in range(8):
         candidate = secrets.token_urlsafe(12)
@@ -391,7 +396,11 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
     }
     if request.get("userId"):
         assignment["userId"] = request["userId"]
-    next_registry = {"version": 1, "assignments": [*registry["assignments"], assignment]}
+    next_registry = {
+        **registry,
+        "version": 1,
+        "assignments": [*registry["assignments"], assignment],
+    }
     return next_registry, assignment
 
 
