@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { webcrypto } from "node:crypto";
-import { deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs";
+import { createRewardMusicPlayer, deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs";
 
 function fakeCanvasDocument() {
   const canvas = { width: 0, height: 0 };
@@ -84,4 +84,80 @@ test("pixel-derived music plan is stable and maps hashes across 24 musical keys"
 test("music plan rejects malformed pixel hashes", () => {
   assert.throws(() => deriveRewardMusicPlan("not-a-hash"), /SHA-256/);
   assert.throws(() => deriveRewardMusicPlan("a".repeat(63)), /SHA-256/);
+});
+
+test("music engine schedules the enabled track and can stop cleanly", async () => {
+  class FakeAudioParam {
+    value = 0;
+    setValueAtTime(value) { this.value = value; }
+    linearRampToValueAtTime(value) { this.value = value; }
+    setTargetAtTime(value) { this.value = value; }
+    cancelScheduledValues() {}
+  }
+
+  class FakeNode {
+    gain = new FakeAudioParam();
+    frequency = new FakeAudioParam();
+    detune = new FakeAudioParam();
+    threshold = new FakeAudioParam();
+    knee = new FakeAudioParam();
+    ratio = new FakeAudioParam();
+    attack = new FakeAudioParam();
+    release = new FakeAudioParam();
+    type = "";
+    connect(destination) { return destination; }
+  }
+
+  class FakeAudioContext {
+    state = "suspended";
+    destination = new FakeNode();
+    oscillatorCount = 0;
+    #elapsed = 0;
+    #startedAt = 0;
+
+    get currentTime() {
+      return this.#elapsed + (this.state === "running" ? (performance.now() - this.#startedAt) / 1000 : 0);
+    }
+
+    createGain() { return new FakeNode(); }
+    createBiquadFilter() { return new FakeNode(); }
+    createDynamicsCompressor() { return new FakeNode(); }
+    createOscillator() {
+      this.oscillatorCount += 1;
+      return { type: "", frequency: new FakeAudioParam(), detune: new FakeAudioParam(), connect() {}, start() {}, stop() {} };
+    }
+    resume() {
+      this.#startedAt = performance.now();
+      this.state = "running";
+      return Promise.resolve();
+    }
+    suspend() {
+      this.#elapsed = this.currentTime;
+      this.state = "suspended";
+      return Promise.resolve();
+    }
+    close() {
+      this.#elapsed = this.currentTime;
+      this.state = "closed";
+      return Promise.resolve();
+    }
+  }
+
+  const plan = deriveRewardMusicPlan("12345678" + "abcdef01".repeat(7));
+  const context = new FakeAudioContext();
+  const fakeDocument = { hidden: false, addEventListener() {}, removeEventListener() {} };
+  const player = createRewardMusicPlayer(plan, {
+    audioContextConstructor: FakeAudioContext,
+    documentRef: fakeDocument,
+    initialVolume: 0.2
+  });
+  player.setTrackEnabled("chords", false);
+  await player.start();
+  await new Promise(resolve => setTimeout(resolve, 45));
+  assert.equal(player.isPlaying, true);
+  assert.equal(context.oscillatorCount, plan.arpPatch.layers.length);
+  player.stop();
+  assert.equal(player.isPlaying, false);
+  player.destroy();
+  assert.equal(context.state, "closed");
 });

@@ -1,6 +1,6 @@
 const PIXEL_HASH_TILE_SIZE = 512;
 const MAX_REWARD_PIXEL_COUNT = 24_000_000;
-const TILES_PER_YIELD = 8;
+const TILES_PER_YIELD = 4;
 
 const NOTE_NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
 const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
