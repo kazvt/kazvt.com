@@ -27,15 +27,6 @@
         return;
       }
 
-      const slashlessRewardDirectory = /^\/reward\/(demo|list|patterns|retro)$/iu.exec(location.pathname);
-      if (slashlessRewardDirectory) {
-        const destination = new URL(`/reward/${slashlessRewardDirectory[1].toLowerCase()}/`, location.origin);
-        destination.search = location.search;
-        destination.hash = location.hash;
-        location.replace(destination.href);
-        return;
-      }
-
       const rewardUsernameMatch = /^\/reward\/([^/]+)\/?$/u.exec(location.pathname);
       if (rewardUsernameMatch) {
         let username = "";

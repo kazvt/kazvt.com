@@ -7,16 +7,18 @@ const notFoundHtml = readFileSync(new URL("../404.html", import.meta.url), "utf8
 const firstInlineScript = notFoundHtml.match(/<script>\s*([\s\S]*?)<\/script>/i)?.[1];
 assert.ok(firstInlineScript, "404.html should keep its early route handler inline");
 
-function redirectsFor(pathname) {
+function redirectsFor(pathname, search = "", hash = "") {
   const location = {
     pathname,
+    search,
+    hash,
     origin: "https://kazvt.com",
     redirects: [],
     replace(destination) {
       this.redirects.push(destination);
     }
   };
-  runInNewContext(firstInlineScript, { location, URL });
+  runInNewContext(firstInlineScript, { location, URL, URLSearchParams, decodeURIComponent });
   return location.redirects;
 }
 
@@ -31,6 +33,20 @@ test("a reward username path opens that user's filtered award list", () => {
 test("reward username routes accept a trailing slash and encoded names", () => {
   const redirects = redirectsFor("/reward/Queen%20Bee/");
   assert.equal(new URL(redirects[0]).searchParams.get("user"), "Queen Bee");
+});
+
+test("plural reward aliases preserve nested routes and URL data", () => {
+  assert.deepEqual(redirectsFor("/rewards"), ["https://kazvt.com/reward/list/"]);
+  assert.deepEqual(redirectsFor("/rewards/list"), ["https://kazvt.com/reward/list/"]);
+  assert.deepEqual(redirectsFor("/rewards/demo", "?x=1", "#preview"), [
+    "https://kazvt.com/reward/demo/?x=1#preview"
+  ]);
+  assert.deepEqual(redirectsFor("/rewards", "?id=opaque-id"), [
+    "https://kazvt.com/reward/?id=opaque-id"
+  ]);
+  assert.deepEqual(redirectsFor("/rewards/list/", "?user=kazvt"), [
+    "https://kazvt.com/reward/list/?user=kazvt"
+  ]);
 });
 
 test("existing reward pages and static files are not treated as usernames", () => {
