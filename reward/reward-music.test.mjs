@@ -139,6 +139,7 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
     state = "suspended";
     destination = new FakeNode();
     oscillatorCount = 0;
+    oscillators = [];
     #elapsed = 0;
     #startedAt = 0;
 
@@ -155,7 +156,7 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
     createDynamicsCompressor() { return new FakeNode(); }
     createOscillator() {
       this.oscillatorCount += 1;
-      return {
+      const oscillator = {
         type: "",
         frequency: new FakeAudioParam(),
         detune: new FakeAudioParam(),
@@ -164,6 +165,8 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
         start() {},
         stop() { this.stopCount += 1; }
       };
+      this.oscillators.push(oscillator);
+      return oscillator;
     }
     resume() {
       this.#startedAt = performance.now();
@@ -196,6 +199,7 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
   assert.equal(audioContext.oscillatorCount, plan.arpPatch.layers.length);
   player.stop();
   assert.equal(player.isPlaying, false);
+  assert.ok(audioContext.oscillators.every(oscillator => oscillator.stopCount >= 2));
   player.destroy();
   assert.equal(audioContext.state, "closed");
 });
