@@ -105,7 +105,7 @@ import "../pattern-zoom.mjs?v=2";
       .map(filename => catalog.assets[filename]?.assetId)
       .filter(assetId => typeof assetId === "string" && /^[a-f0-9]{64}$/i.test(assetId)));
     for (const assignment of assignments) {
-      if (assignment.artworkIsCurrent) availableAssetIds.delete(assignment.assetId);
+      availableAssetIds.delete(assignment.assetId);
     }
     return availableAssetIds.size;
   }

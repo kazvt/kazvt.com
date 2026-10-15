@@ -13,7 +13,9 @@
       const rewardsAliasMatch = /^\/rewards(?:\/(.*))?\/?$/u.exec(location.pathname);
       if (rewardsAliasMatch) {
         const suffix = rewardsAliasMatch[1] ?? "";
-        const destination = new URL(suffix ? `/reward/${suffix}` : "/reward/list/", location.origin);
+        const hasDirectRewardId = new URLSearchParams(location.search).has("id");
+        const destinationPath = suffix ? `/reward/${suffix}` : hasDirectRewardId ? "/reward/" : "/reward/list/";
+        const destination = new URL(destinationPath, location.origin);
         destination.search = location.search;
         destination.hash = location.hash;
         location.replace(destination.href);
