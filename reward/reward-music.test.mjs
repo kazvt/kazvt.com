@@ -103,6 +103,13 @@ test("pixel-derived music plan is stable and maps hashes across 24 musical keys"
     assert.equal(JSON.stringify(plan), JSON.stringify(deriveRewardMusicPlan(hash)));
   }
   assert.equal(keyNames.size, 24);
+
+  const instrumentVariations = Array.from({ length: 40 }, (_, index) => {
+    const seed = index.toString(16).padStart(8, "0");
+    return deriveRewardMusicPlan(`00000000${seed}${"a".repeat(48)}`);
+  });
+  assert.ok(new Set(instrumentVariations.map(plan => plan.chordPatch.id)).size > 1);
+  assert.ok(new Set(instrumentVariations.map(plan => plan.arpPatch.id)).size > 1);
 });
 
 test("music plan rejects malformed pixel hashes", () => {
@@ -199,6 +206,13 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
   assert.equal(audioContext.oscillatorCount, plan.arpPatch.layers.length);
   player.stop();
   assert.equal(player.isPlaying, false);
+
+  player.setTrackEnabled("chords", true);
+  await player.start();
+  await new Promise(resolve => setTimeout(resolve, 45));
+  assert.equal(audioContext.oscillatorCount,
+    plan.arpPatch.layers.length + 4 * plan.chordPatch.layers.length + plan.arpPatch.layers.length);
+  player.stop();
   assert.ok(audioContext.oscillators.every(oscillator => oscillator.stopCount >= 2));
   player.destroy();
   assert.equal(audioContext.state, "closed");
