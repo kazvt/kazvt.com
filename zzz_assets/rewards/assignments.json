@@ -2,28 +2,6 @@
   "version": 1,
   "assignments": [
     {
-      "assetId": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
-      "assetSha256": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
-      "filename": "Gregory.png",
-      "username": "zig_zag_houten",
-      "issuedAt": "2026-10-15T13:46:47.540Z",
-      "platform": "twitch",
-      "linkId": "1KuJMLLwOqnxAKnB",
-      "eventIdHash": "06dc03f2e2fd72d1206ad90d836fe41146ab1b9310695b1671a02e32922b5f83",
-      "userId": "271802039"
-    },
-    {
-      "assetId": "1f9c482f486cadfa02908db089abee1002bed75d89a4a62276d8ee5647deb071",
-      "assetSha256": "1f9c482f486cadfa02908db089abee1002bed75d89a4a62276d8ee5647deb071",
-      "filename": "no more stink.png",
-      "username": "zig_zag_houten",
-      "issuedAt": "2026-10-15T14:09:02.388Z",
-      "platform": "twitch",
-      "linkId": "ZwuE8OLOJKoyrOxe",
-      "eventIdHash": "7f689cc314ed54bd465e933e542bc6d7f3914bf26181eeca1734553cca47a510",
-      "userId": "271802039"
-    },
-    {
       "assetId": "1e13b47edfebcac09b362f9f9913e04ee57947c7bce31d11f4f8f06953f2814e",
       "assetSha256": "1e13b47edfebcac09b362f9f9913e04ee57947c7bce31d11f4f8f06953f2814e",
       "filename": "Soil drinck.png",
@@ -76,6 +54,36 @@
       "revokedBy": "kazvt",
       "revocationEventHash": "fa4f72d5c10d3c65d8324eeb91d89d26104999ac6a6c691b323c72d24ac86568",
       "revocationAction": "clear_user"
+    },
+    {
+      "assetId": "1f9c482f486cadfa02908db089abee1002bed75d89a4a62276d8ee5647deb071",
+      "assetSha256": "1f9c482f486cadfa02908db089abee1002bed75d89a4a62276d8ee5647deb071",
+      "filename": "no more stink.png",
+      "username": "zig_zag_houten",
+      "issuedAt": "2026-10-15T14:09:02.388Z",
+      "platform": "twitch",
+      "linkId": "ZwuE8OLOJKoyrOxe",
+      "eventIdHash": "7f689cc314ed54bd465e933e542bc6d7f3914bf26181eeca1734553cca47a510",
+      "userId": "271802039",
+      "revokedAt": "2026-10-15T18:20:08.670Z",
+      "revokedBy": "kazvt",
+      "revocationEventHash": "461425a143f38bcf4e7142d8cc3adda448290a040fe00623597f821e7a3aceeb",
+      "revocationAction": "clear_user"
+    },
+    {
+      "assetId": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
+      "assetSha256": "3f0c12770bb7c3ca201929051930defb9c7da487a86eaf3a69048cdaca9f896e",
+      "filename": "Gregory.png",
+      "username": "zig_zag_houten",
+      "issuedAt": "2026-10-15T13:46:47.540Z",
+      "platform": "twitch",
+      "linkId": "1KuJMLLwOqnxAKnB",
+      "eventIdHash": "06dc03f2e2fd72d1206ad90d836fe41146ab1b9310695b1671a02e32922b5f83",
+      "userId": "271802039",
+      "revokedAt": "2026-10-15T18:20:08.670Z",
+      "revokedBy": "kazvt",
+      "revocationEventHash": "461425a143f38bcf4e7142d8cc3adda448290a040fe00623597f821e7a3aceeb",
+      "revocationAction": "clear_user"
     }
   ],
   "rewardCommandEvents": [
@@ -90,6 +98,19 @@
       "assignmentLinkIds": [
         "7Gg1LbL0Xmkx9M7b",
         "8STSEMGPeigjguO0"
+      ]
+    },
+    {
+      "eventIdHash": "461425a143f38bcf4e7142d8cc3adda448290a040fe00623597f821e7a3aceeb",
+      "action": "clear_user",
+      "platform": "twitch",
+      "userId": "271802039",
+      "username": "zig_zag_houten",
+      "actorLogin": "kazvt",
+      "occurredAt": "2026-10-15T18:20:08.670Z",
+      "assignmentLinkIds": [
+        "ZwuE8OLOJKoyrOxe",
+        "1KuJMLLwOqnxAKnB"
       ]
     }
   ]
