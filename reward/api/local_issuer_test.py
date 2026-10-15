@@ -197,6 +197,15 @@ class LocalRewardIssuerTests(unittest.TestCase):
         )
         self.assertEqual(replacement["assignment"]["assetId"], newer["assignment"]["assetId"])
         self.assertEqual(len(list_available_artwork(self.site)), 0)
+        replay_after_reissue = unassign_latest_and_publish(
+            self.site, removal, expected_remote=str(self.remote)
+        )
+        self.assertTrue(replay_after_reissue["replayed"])
+        current_registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            {item["linkId"] for item in current_registry["assignments"]},
+            {older["assignment"]["linkId"], replacement["assignment"]["linkId"]},
+        )
 
     def test_clear_user_is_all_active_awards_idempotent_and_platform_scoped(self) -> None:
         twitch = {"username": "same-handle", "userId": "shared-id", "platform": "twitch"}
