@@ -125,6 +125,7 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
     gain = new FakeAudioParam();
     frequency = new FakeAudioParam();
     detune = new FakeAudioParam();
+    Q = new FakeAudioParam();
     threshold = new FakeAudioParam();
     knee = new FakeAudioParam();
     ratio = new FakeAudioParam();
@@ -154,7 +155,7 @@ test("music engine schedules the enabled track and can stop cleanly", async () =
     createDynamicsCompressor() { return new FakeNode(); }
     createOscillator() {
       this.oscillatorCount += 1;
-      return { type: "", frequency: new FakeAudioParam(), detune: new FakeAudioParam(), connect() {}, start() {}, stop() {} };
+      return { type: "", frequency: new FakeAudioParam(), detune: new FakeAudioParam(), connect(destination) { return destination; }, start() {}, stop() {} };
     }
     resume() {
       this.#startedAt = performance.now();
