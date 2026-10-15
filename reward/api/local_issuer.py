@@ -134,8 +134,13 @@ def _validate_registry(registry: dict[str, Any]) -> None:
         filename = record.get("filename")
         username = record.get("username")
         issued_at = record.get("issuedAt")
+        platform = record.get("platform", "")
+        user_id = record.get("userId", "")
         if (not isinstance(filename, str) or not FILENAME_RE.fullmatch(filename) or
                 not isinstance(username, str) or not username.strip() or len(username) > 100 or _contains_control(username) or
+                not isinstance(platform, str) or len(platform) > 60 or _contains_control(platform) or
+                not isinstance(user_id, str) or len(user_id) > 128 or _contains_control(user_id) or
+                (user_id and not platform) or
                 not isinstance(issued_at, str) or len(issued_at) > 40):
             raise RewardIssueError(f"Assignment record {index + 1} is invalid.")
         try:
@@ -266,8 +271,17 @@ def _find_event(registry: dict[str, Any], event_hash: str) -> dict[str, Any] | N
 
 
 def _assignment_matches(record: dict[str, Any], request: dict[str, str]) -> bool:
+    if request.get("userId"):
+        return (str(record.get("platform", "")).casefold() == request["platform"] and
+                str(record.get("userId", "")) == request["userId"] and
+                str(record.get("assetId", record.get("assetSha256", ""))).lower() == request["assetId"])
     return (_normal_username(str(record.get("username", ""))) == _normal_username(request["username"]) and
             str(record.get("assetId", record.get("assetSha256", ""))).lower() == request["assetId"])
+
+
+def _same_chat_identity(record: dict[str, Any], request: dict[str, str]) -> bool:
+    return (str(record.get("platform", "")).casefold() == request["platform"] and
+            str(record.get("userId", "")) == request["userId"])
 
 
 def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str, Any], request: dict[str, str], issued_at: str) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -283,6 +297,10 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
         raise RewardIssueError("That artwork has already been awarded.")
 
     artwork = _verify_artwork(site_root, catalog, request["assetId"])
+    if request.get("userId"):
+        for previous_assignment in registry["assignments"]:
+            if _same_chat_identity(previous_assignment, request):
+                previous_assignment["username"] = request["username"]
     used_link_ids = {str(record.get("linkId", "")) for record in registry["assignments"]}
     link_id = ""
     for _ in range(8):
@@ -303,6 +321,8 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
         "linkId": link_id,
         "eventIdHash": event_hash,
     }
+    if request.get("userId"):
+        assignment["userId"] = request["userId"]
     next_registry = {"version": 1, "assignments": [*registry["assignments"], assignment]}
     return next_registry, assignment
 
