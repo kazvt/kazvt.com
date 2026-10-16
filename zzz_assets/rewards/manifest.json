@@ -48,8 +48,10 @@
     "10th century strap-on.png",
     "A night of good sleep.png",
     "ACTUAL french tasting fries.png",
+    "Aprin.png",
     "Bag of surprise.png",
     "Banned aids.png",
+    "Bed.png",
     "Big stronmg.png",
     "Bite Bite Bite Bite Bite Bite.png",
     "Braclets.png",
@@ -58,11 +60,15 @@
     "Chair for little kitten yay.png",
     "Chomp.png",
     "Ciratgete.png",
+    "Circle.png",
     "Cleaning time.png",
     "Cool Tree.png",
+    "Cute Paw.png",
     "Dildo.png",
     "Dink oiter.png",
     "Exploinde.png",
+    "Fatufck.png",
+    "Fuckable Wet Bread.png",
     "Fuckkkkkkkk.png",
     "Get closer.png",
     "Get in the bagh.png",
@@ -82,6 +88,7 @@
     "My Anus.png",
     "My mold.png",
     "New Car.png",
+    "No bills to pay.png",
     "Not so yummy now are you.png",
     "Okay sooooo.png",
     "Ominous.png",
@@ -98,6 +105,7 @@
     "SHES MADE OF WHAaat.png",
     "Salted Lemonade.png",
     "Sex toy.png",
+    "Slop Spread.png",
     "Snack.png",
     "Soil drinck.png",
     "Soinc.png",
@@ -127,6 +135,7 @@
     "Whatdo u want.png",
     "Woims.png",
     "Yay toy.png",
+    "You rich as fuuuuck.png",
     "a One of these.png",
     "a Two oft hese.png",
     "a paper back.png",
@@ -227,7 +236,8 @@
     "yayy yum.png",
     "you lost.png",
     "yoyo.png",
-    "yummy.png"
+    "yummy.png",
+    "♿♿♿♿♿.png"
   ],
   "assets": {
     "10th century strap-on.png": {
@@ -251,6 +261,13 @@
       "height": 519,
       "tier": "epic"
     },
+    "Aprin.png": {
+      "assetId": "378020658bc136c922880ffedac5b9f25df55e08e4eec9d906a5395b3c9c680c",
+      "sha256": "378020658bc136c922880ffedac5b9f25df55e08e4eec9d906a5395b3c9c680c",
+      "width": 476,
+      "height": 253,
+      "tier": "common"
+    },
     "Bag of surprise.png": {
       "assetId": "1057bba17a186be4978909febe38f3a1ad199dd529e805febf9c826b51b76b23",
       "sha256": "1057bba17a186be4978909febe38f3a1ad199dd529e805febf9c826b51b76b23",
@@ -264,6 +281,13 @@
       "width": 544,
       "height": 288,
       "tier": "common"
+    },
+    "Bed.png": {
+      "assetId": "ed0899d7720db2edc0486ceae6239ca0e67878d77f187002973befbf4f13ffaa",
+      "sha256": "ed0899d7720db2edc0486ceae6239ca0e67878d77f187002973befbf4f13ffaa",
+      "width": 515,
+      "height": 467,
+      "tier": "divine"
     },
     "Big stronmg.png": {
       "assetId": "1ae74226b5546793826dd8ff57de512dfc66eb7f9453fdc5811f8d0b274299a7",
@@ -321,6 +345,13 @@
       "height": 471,
       "tier": "uncommon"
     },
+    "Circle.png": {
+      "assetId": "92ac05c2f828fdd1d32bb056951e1bfad1d510392afdcf99085c187961056275",
+      "sha256": "92ac05c2f828fdd1d32bb056951e1bfad1d510392afdcf99085c187961056275",
+      "width": 625,
+      "height": 812,
+      "tier": "rare"
+    },
     "Cleaning time.png": {
       "assetId": "a9f72fdb66edb55cecf7ee3fc03651a7328090a4095c472f2ef508e6afe3948c",
       "sha256": "a9f72fdb66edb55cecf7ee3fc03651a7328090a4095c472f2ef508e6afe3948c",
@@ -334,6 +365,13 @@
       "width": 1211,
       "height": 3708,
       "tier": "mythic"
+    },
+    "Cute Paw.png": {
+      "assetId": "73c5f84e752dcd441eda6089e2177c941f461fb08dd1c5a699e2a13d9a5bff1f",
+      "sha256": "73c5f84e752dcd441eda6089e2177c941f461fb08dd1c5a699e2a13d9a5bff1f",
+      "width": 419,
+      "height": 289,
+      "tier": "uncommon"
     },
     "Dildo.png": {
       "assetId": "40837fb32a35c5280353e7dd3e514c1c43b9a951f0a9a394d20a7c82dbefb475",
@@ -355,6 +393,20 @@
       "width": 1140,
       "height": 1196,
       "tier": "splus"
+    },
+    "Fatufck.png": {
+      "assetId": "108901997e7260625d8b4768894dee40c03a7ad9c07fca7c6bd880364cb3e6e5",
+      "sha256": "108901997e7260625d8b4768894dee40c03a7ad9c07fca7c6bd880364cb3e6e5",
+      "width": 1793,
+      "height": 1953,
+      "tier": "common"
+    },
+    "Fuckable Wet Bread.png": {
+      "assetId": "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec",
+      "sha256": "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec",
+      "width": 413,
+      "height": 383,
+      "tier": "epic"
     },
     "Fuckkkkkkkk.png": {
       "assetId": "e7f41cc378345abcc6755053f8bed670834df69fc909b37601c69b925935880f",
@@ -489,6 +541,13 @@
       "height": 916,
       "tier": "divine"
     },
+    "No bills to pay.png": {
+      "assetId": "f6f7ba7bfa21cfaa7ab7657816434a7e135a13425c4527f221906732383025ba",
+      "sha256": "f6f7ba7bfa21cfaa7ab7657816434a7e135a13425c4527f221906732383025ba",
+      "width": 606,
+      "height": 642,
+      "tier": "divine"
+    },
     "Not so yummy now are you.png": {
       "assetId": "1e7e68f8ac090bc29eb703e36351a156f557b2aa9c7dc089e6522723f849fcf1",
       "sha256": "1e7e68f8ac090bc29eb703e36351a156f557b2aa9c7dc089e6522723f849fcf1",
@@ -600,6 +659,13 @@
       "width": 658,
       "height": 337,
       "tier": "common"
+    },
+    "Slop Spread.png": {
+      "assetId": "7d5c3ca45f2bc97e28112a4cdd0ddbb8bcb228647b8dfdced35ad26e367342af",
+      "sha256": "7d5c3ca45f2bc97e28112a4cdd0ddbb8bcb228647b8dfdced35ad26e367342af",
+      "width": 551,
+      "height": 642,
+      "tier": "uncommon"
     },
     "Snack.png": {
       "assetId": "2f3d8f882d975e9712eb852d2353ba6846dc5ea0792fc3974fc4c17720d10c54",
@@ -802,6 +868,13 @@
       "sha256": "0b98273245f2a5a70d4f7657645f55b80b700090eb46f33755ec9ca78c8fccbc",
       "width": 846,
       "height": 703,
+      "tier": "common"
+    },
+    "You rich as fuuuuck.png": {
+      "assetId": "43fd7763c938cbf0dd94c568259f8a6b8fea9d02cacb12702aa3d84e23bf4f30",
+      "sha256": "43fd7763c938cbf0dd94c568259f8a6b8fea9d02cacb12702aa3d84e23bf4f30",
+      "width": 1235,
+      "height": 1139,
       "tier": "common"
     },
     "a One of these.png": {
@@ -1510,6 +1583,13 @@
       "width": 349,
       "height": 346,
       "tier": "common"
+    },
+    "♿♿♿♿♿.png": {
+      "assetId": "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c",
+      "sha256": "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c",
+      "width": 709,
+      "height": 677,
+      "tier": "common"
     }
   },
   "assetsById": {
@@ -1531,6 +1611,12 @@
       "height": 519,
       "tier": "epic"
     },
+    "378020658bc136c922880ffedac5b9f25df55e08e4eec9d906a5395b3c9c680c": {
+      "filename": "Aprin.png",
+      "width": 476,
+      "height": 253,
+      "tier": "common"
+    },
     "1057bba17a186be4978909febe38f3a1ad199dd529e805febf9c826b51b76b23": {
       "filename": "Bag of surprise.png",
       "width": 264,
@@ -1542,6 +1628,12 @@
       "width": 544,
       "height": 288,
       "tier": "common"
+    },
+    "ed0899d7720db2edc0486ceae6239ca0e67878d77f187002973befbf4f13ffaa": {
+      "filename": "Bed.png",
+      "width": 515,
+      "height": 467,
+      "tier": "divine"
     },
     "1ae74226b5546793826dd8ff57de512dfc66eb7f9453fdc5811f8d0b274299a7": {
       "filename": "Big stronmg.png",
@@ -1591,6 +1683,12 @@
       "height": 471,
       "tier": "uncommon"
     },
+    "92ac05c2f828fdd1d32bb056951e1bfad1d510392afdcf99085c187961056275": {
+      "filename": "Circle.png",
+      "width": 625,
+      "height": 812,
+      "tier": "rare"
+    },
     "a9f72fdb66edb55cecf7ee3fc03651a7328090a4095c472f2ef508e6afe3948c": {
       "filename": "Cleaning time.png",
       "width": 361,
@@ -1602,6 +1700,12 @@
       "width": 1211,
       "height": 3708,
       "tier": "mythic"
+    },
+    "73c5f84e752dcd441eda6089e2177c941f461fb08dd1c5a699e2a13d9a5bff1f": {
+      "filename": "Cute Paw.png",
+      "width": 419,
+      "height": 289,
+      "tier": "uncommon"
     },
     "40837fb32a35c5280353e7dd3e514c1c43b9a951f0a9a394d20a7c82dbefb475": {
       "filename": "Dildo.png",
@@ -1620,6 +1724,18 @@
       "width": 1140,
       "height": 1196,
       "tier": "splus"
+    },
+    "108901997e7260625d8b4768894dee40c03a7ad9c07fca7c6bd880364cb3e6e5": {
+      "filename": "Fatufck.png",
+      "width": 1793,
+      "height": 1953,
+      "tier": "common"
+    },
+    "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec": {
+      "filename": "Fuckable Wet Bread.png",
+      "width": 413,
+      "height": 383,
+      "tier": "epic"
     },
     "e7f41cc378345abcc6755053f8bed670834df69fc909b37601c69b925935880f": {
       "filename": "Fuckkkkkkkk.png",
@@ -1735,6 +1851,12 @@
       "height": 916,
       "tier": "divine"
     },
+    "f6f7ba7bfa21cfaa7ab7657816434a7e135a13425c4527f221906732383025ba": {
+      "filename": "No bills to pay.png",
+      "width": 606,
+      "height": 642,
+      "tier": "divine"
+    },
     "1e7e68f8ac090bc29eb703e36351a156f557b2aa9c7dc089e6522723f849fcf1": {
       "filename": "Not so yummy now are you.png",
       "width": 495,
@@ -1830,6 +1952,12 @@
       "width": 658,
       "height": 337,
       "tier": "common"
+    },
+    "7d5c3ca45f2bc97e28112a4cdd0ddbb8bcb228647b8dfdced35ad26e367342af": {
+      "filename": "Slop Spread.png",
+      "width": 551,
+      "height": 642,
+      "tier": "uncommon"
     },
     "2f3d8f882d975e9712eb852d2353ba6846dc5ea0792fc3974fc4c17720d10c54": {
       "filename": "Snack.png",
@@ -2003,6 +2131,12 @@
       "filename": "Yay toy.png",
       "width": 846,
       "height": 703,
+      "tier": "common"
+    },
+    "43fd7763c938cbf0dd94c568259f8a6b8fea9d02cacb12702aa3d84e23bf4f30": {
+      "filename": "You rich as fuuuuck.png",
+      "width": 1235,
+      "height": 1139,
       "tier": "common"
     },
     "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095": {
@@ -2610,6 +2744,12 @@
       "width": 349,
       "height": 346,
       "tier": "common"
+    },
+    "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c": {
+      "filename": "♿♿♿♿♿.png",
+      "width": 709,
+      "height": 677,
+      "tier": "common"
     }
   },
   "filenameHistory": {
@@ -2803,6 +2943,16 @@
     "One of them smeems.png": "0cd6c9c2b11d4a0b3c31bc3178c53767349e50b14f8aa978cf612a88e2398694",
     "Uhhhhhhhh.png": "05cf4a6b0e1c352ffb07a46a8c03072674d0749d93f6efbbbfdc1c58b1b41ec6",
     "WOA LOOK OUT.png": "dd5991a6d74db12166a15d77f7e50ce541f8831fe384bc322f3e1272223a3766",
-    "Tooth Pick.png": "cd0af9d5818eea030717b36635b5a15e11e2d2b7cade0adce1fefd8f3d26d129"
+    "Tooth Pick.png": "cd0af9d5818eea030717b36635b5a15e11e2d2b7cade0adce1fefd8f3d26d129",
+    "Aprin.png": "378020658bc136c922880ffedac5b9f25df55e08e4eec9d906a5395b3c9c680c",
+    "Bed.png": "ed0899d7720db2edc0486ceae6239ca0e67878d77f187002973befbf4f13ffaa",
+    "Circle.png": "92ac05c2f828fdd1d32bb056951e1bfad1d510392afdcf99085c187961056275",
+    "Cute Paw.png": "73c5f84e752dcd441eda6089e2177c941f461fb08dd1c5a699e2a13d9a5bff1f",
+    "Fatufck.png": "108901997e7260625d8b4768894dee40c03a7ad9c07fca7c6bd880364cb3e6e5",
+    "Fuckable Wet Bread.png": "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec",
+    "No bills to pay.png": "f6f7ba7bfa21cfaa7ab7657816434a7e135a13425c4527f221906732383025ba",
+    "Slop Spread.png": "7d5c3ca45f2bc97e28112a4cdd0ddbb8bcb228647b8dfdced35ad26e367342af",
+    "You rich as fuuuuck.png": "43fd7763c938cbf0dd94c568259f8a6b8fea9d02cacb12702aa3d84e23bf4f30",
+    "♿♿♿♿♿.png": "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c"
   }
 }
