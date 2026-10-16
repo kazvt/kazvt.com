@@ -932,6 +932,12 @@ body[data-reward-demo] #recipient {
   text-transform: uppercase !important;
 }
 
+/* Username-only selectors outrank third-party rules that reset text transforms globally. */
+#recipient .username-mention,
+#awardCollectionHeading .username-display {
+  text-transform: uppercase !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loading-hourglass { display: none; animation: none; }
   .loading-hourglass-fallback { display: inline; font-size: 60px; }
