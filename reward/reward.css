@@ -785,13 +785,8 @@ h1 {
 }
 
 .filename-prefix {
-  color: #f4f4f6;
-  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
   font-size: .68em;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-shadow: none;
-  vertical-align: .08em;
   white-space: pre;
 }
 
