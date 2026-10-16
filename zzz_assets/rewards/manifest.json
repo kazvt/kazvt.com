@@ -114,6 +114,7 @@
     "This is periot Blood.png",
     "This site broke, Call the IT.png",
     "Ties your arteries.png",
+    "Tooth Pick.png",
     "Tringle.png",
     "Tuoy.png",
     "Uhhhhhhhh.png",
@@ -711,6 +712,13 @@
       "width": 356,
       "height": 1326,
       "tier": "uncommon"
+    },
+    "Tooth Pick.png": {
+      "assetId": "cd0af9d5818eea030717b36635b5a15e11e2d2b7cade0adce1fefd8f3d26d129",
+      "sha256": "cd0af9d5818eea030717b36635b5a15e11e2d2b7cade0adce1fefd8f3d26d129",
+      "width": 1089,
+      "height": 336,
+      "tier": "legendary"
     },
     "Tringle.png": {
       "assetId": "cf8585dbfc17d114b6dea597f8408c87f6db1c6e798850d9cb246e1625aa78f8",
@@ -1919,6 +1927,12 @@
       "height": 1326,
       "tier": "uncommon"
     },
+    "cd0af9d5818eea030717b36635b5a15e11e2d2b7cade0adce1fefd8f3d26d129": {
+      "filename": "Tooth Pick.png",
+      "width": 1089,
+      "height": 336,
+      "tier": "legendary"
+    },
     "cf8585dbfc17d114b6dea597f8408c87f6db1c6e798850d9cb246e1625aa78f8": {
       "filename": "Tringle.png",
       "width": 564,
@@ -2788,6 +2802,7 @@
     "I think hungry therefore I am not m.png": "60da2fd7f5f2058bfca39e2dc81f4e104e7c9ef0bbd72b5e4ce46f04ab0b5c56",
     "One of them smeems.png": "0cd6c9c2b11d4a0b3c31bc3178c53767349e50b14f8aa978cf612a88e2398694",
     "Uhhhhhhhh.png": "05cf4a6b0e1c352ffb07a46a8c03072674d0749d93f6efbbbfdc1c58b1b41ec6",
-    "WOA LOOK OUT.png": "dd5991a6d74db12166a15d77f7e50ce541f8831fe384bc322f3e1272223a3766"
+    "WOA LOOK OUT.png": "dd5991a6d74db12166a15d77f7e50ce541f8831fe384bc322f3e1272223a3766",
+    "Tooth Pick.png": "cd0af9d5818eea030717b36635b5a15e11e2d2b7cade0adce1fefd8f3d26d129"
   }
 }
