@@ -10,8 +10,8 @@
   <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
   <link rel="preload" href="/reward/patterns/loading-stars.gif" as="image">
   <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
-  <link rel="stylesheet" href="/reward/reward.css?v=retro-46">
-  <script type="module" src="/reward/reward.js?v=reward-music-20261016-1"></script>
+  <link rel="stylesheet" href="/reward/reward.css?v=retro-47">
+  <script type="module" src="/reward/reward.js?v=reward-autoplay-20261016-1"></script>
 <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
 </head>
 <body data-page-state="loading">
@@ -37,20 +37,6 @@
       </div>
       <h1 id="recipient"></h1>
       <p id="awardNote" class="award-note"></p>
-      <section id="rewardMusic" class="reward-music" hidden aria-label="Generated reward soundtrack">
-        <div class="reward-music-heading">
-          <h2>Artwork soundtrack</h2>
-          <p id="rewardMusicKey" class="reward-music-key">Finding the artwork key…</p>
-        </div>
-        <p id="rewardMusicInstruments" class="reward-music-instruments"></p>
-        <div class="reward-music-controls">
-          <button id="rewardMusicToggle" class="reward-music-play" type="button" aria-pressed="false" disabled>▶ Play</button>
-          <button id="rewardMusicChords" class="reward-music-track" type="button" aria-pressed="true" disabled>Chords ✓</button>
-          <button id="rewardMusicArp" class="reward-music-track" type="button" aria-pressed="true" disabled>Arp ✓</button>
-          <label class="reward-music-volume"><span>Vol</span><input id="rewardMusicVolume" type="range" min="0" max="80" value="42" aria-label="Reward music volume" disabled><output id="rewardMusicVolumeValue" for="rewardMusicVolume">42%</output></label>
-        </div>
-        <p id="rewardMusicStatus" class="reward-music-status" role="status" aria-live="polite">Reading the artwork pixels…</p>
-      </section>
       <section id="awardCollection" class="award-collection" hidden aria-labelledby="awardCollectionHeading">
         <h2 id="awardCollectionHeading" class="award-collection-heading"></h2>
         <ul id="awardCollectionGrid" class="award-collection-grid" aria-label="Awards, newest first"></ul>
