@@ -922,6 +922,12 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
   text-underline-offset: 0.14em;
 }
 
+.username-display,
+.username-mention,
+body[data-reward-demo] #recipient {
+  text-transform: uppercase;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loading-hourglass { display: none; animation: none; }
   .loading-hourglass-fallback { display: inline; font-size: 60px; }

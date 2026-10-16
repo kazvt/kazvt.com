@@ -204,7 +204,10 @@ h1 {
   color: #fff08a;
   font-size: 1.35rem;
   text-shadow: 1px 1px #634a8d;
+  text-transform: uppercase;
 }
+
+.username-display { text-transform: uppercase; }
 
 .artwork-name { margin: 0; overflow-wrap: anywhere; color: var(--signal); }
 .award-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 6px; }
