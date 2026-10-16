@@ -929,7 +929,7 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
 .username-display,
 .username-mention,
 body[data-reward-demo] #recipient {
-  text-transform: uppercase;
+  text-transform: uppercase !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

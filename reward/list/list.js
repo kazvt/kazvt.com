@@ -136,7 +136,7 @@ import "../background-context.mjs?v=1";
 
     const info = document.createElement("div");
     info.className = "award-info";
-    info.append(createText("h2", "username", assignment.username));
+    info.append(createText("h2", "username username-display", assignment.username));
     info.append(createText("p", "artwork-name", filenameLabel(assignment.filename)));
 
     const meta = document.createElement("div");
