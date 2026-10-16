@@ -193,8 +193,16 @@ import "../pattern-zoom.mjs?v=2";
 
   async function start() {
     if (userFilterRequested) {
-      pageTitle.textContent = userFilterValid ? `Awards for ${requestedUsername}` : "Award lookup";
-      document.title = userFilterValid ? `Awards for ${requestedUsername} — kazvt` : "Award lookup — kazvt";
+      if (userFilterValid) {
+        pageTitle.replaceChildren(
+          document.createTextNode("Awards for "),
+          createText("span", "username-display", requestedUsername)
+        );
+        document.title = `Awards for ${requestedUsername.toUpperCase()} — kazvt`;
+      } else {
+        pageTitle.textContent = "Award lookup";
+        document.title = "Award lookup — kazvt";
+      }
       searchLabel.textContent = "Search this collection";
       searchInput.placeholder = "Search artwork…";
     }
@@ -214,11 +222,15 @@ import "../pattern-zoom.mjs?v=2";
       awardList.setAttribute("aria-busy", "false");
       if (assignments.length === 0) {
         emptyState.hidden = false;
-        emptyState.textContent = userFilterRequested
-          ? userFilterValid
-            ? `No awards for ${requestedUsername}.`
-            : "Invalid username."
-          : "No awards yet.";
+        if (userFilterRequested && userFilterValid) {
+          emptyState.replaceChildren(
+            document.createTextNode("No awards for "),
+            createText("span", "username-display", requestedUsername),
+            document.createTextNode(".")
+          );
+        } else {
+          emptyState.textContent = userFilterRequested ? "Invalid username." : "No awards yet.";
+        }
       }
       updateResults(cards);
       searchInput.addEventListener("input", () => updateResults(cards));

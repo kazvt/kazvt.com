@@ -311,6 +311,13 @@ import {
     return mention;
   }
 
+  function usernameDisplay(username) {
+    const display = document.createElement("span");
+    display.className = "username-display";
+    display.textContent = username;
+    return display;
+  }
+
   function filenameLabel(file) {
     const extensionStart = file.lastIndexOf(".");
     return extensionStart > 0 ? file.slice(0, extensionStart) : file;
@@ -397,7 +404,7 @@ import {
   }
 
   function setRewardTitle(username) {
-    document.title = `${username} Reward`;
+    document.title = `${username.toUpperCase()} Reward`;
   }
 
   function hideAwardCollection() {
@@ -535,7 +542,11 @@ import {
       })).then(linkedAwards => {
         if (generation !== awardCollectionGeneration) return;
         activeAwardCollection.assignments = linkedAwards;
-        awardCollectionHeading.textContent = `Other awards for ${username} - newest first`;
+        awardCollectionHeading.replaceChildren(
+          document.createTextNode("Other awards for "),
+          usernameDisplay(username),
+          document.createTextNode(" - newest first")
+        );
         awardCollection.hidden = false;
         layoutUserAwardCollection();
       });
