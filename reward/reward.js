@@ -7,6 +7,7 @@ import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-l
 import { createRewardMusicPlayer, deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs?v=reward-pixels-v2";
 import "./loading-lineboil.mjs?v=5";
 import "./pattern-zoom.mjs?v=3";
+import "./background-context.mjs?v=1";
 import {
   buildTwoRowAwardPreview,
   findAssignmentByLinkId,
