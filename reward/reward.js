@@ -4,7 +4,7 @@ import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
-import { createRewardMusicPlayer, deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs?v=reward-pixels-v1";
+import { createRewardMusicPlayer, deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs?v=reward-pixels-v2";
 import "./loading-lineboil.mjs?v=5";
 import "./pattern-zoom.mjs?v=3";
 import {
@@ -154,7 +154,7 @@ import {
       const plan = deriveRewardMusicPlan(pixelHash);
       rewardMusicPlayer?.destroy();
       rewardMusicPlayer = createRewardMusicPlayer(plan, {
-        initialVolume: 0.42
+        initialVolume: 0.07
       });
       rewardMusicPlayer.setTrackEnabled("chords", true);
       rewardMusicPlayer.setTrackEnabled("arp", true);
