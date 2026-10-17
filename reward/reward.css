@@ -937,6 +937,18 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
   text-underline-offset: 0.14em;
 }
 
+.username-mention:hover,
+#awardCollectionHeading .username-display:hover {
+  color: #fff;
+  text-decoration-thickness: 3px;
+}
+
+.username-mention:focus-visible,
+#awardCollectionHeading .username-display:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
 .username-display,
 .username-mention,
 body[data-reward-demo] #recipient {

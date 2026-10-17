@@ -303,6 +303,16 @@ h1 {
 
 .username-display { text-transform: uppercase !important; }
 
+.username-list-link {
+  color: inherit;
+  text-decoration-color: #bfeff6;
+  text-decoration-line: underline;
+  text-underline-offset: 0.13em;
+}
+
+.username-list-link:hover { color: #fff; text-decoration-color: #fff; }
+.username-list-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
 /* Beat injected global resets while keeping the ledger's original casing intact. */
 #awardList .award-card .username.username-display,
 #pageTitle .username-display,
