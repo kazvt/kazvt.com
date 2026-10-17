@@ -271,7 +271,7 @@
 
   async function issueRewardLink(player) {
     if (!state.config.rewards.enabled) return null;
-    if (state.rewardCatalog.length === 0) throw new Error("No reward PNGs are available.");
+    if (state.rewardCatalog.length === 0) throw new Error("No reward images are available.");
 
     // The server owns the permanent assignment ledger. Retry if another widget
     // instance claims the same candidate between the availability check and POST.

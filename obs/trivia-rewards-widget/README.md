@@ -2,7 +2,7 @@
 
 A local, transparent 1920×1080 OBS Browser Source widget that receives chat messages over WebSocket, runs category-based trivia, awards points, and shows an on-stream leaderboard.
 
-This copy also issues a random PNG reward link for each correct answer. The original `obs-trivia-widget-v2.zip` archive is unchanged.
+This copy also issues a random PNG/GIF reward link for each correct answer. The original `obs-trivia-widget-v2.zip` archive is unchanged.
 
 ## What changed from the first version
 
@@ -14,8 +14,8 @@ This version is structured like a small production overlay instead of a single d
 - `chat-message.schema.json` defines the preferred sender → overlay WebSocket event contract.
 - `sample-messages.jsonl` contains ready-to-send example events.
 - `config.json` controls WebSocket, command, scoring, display, and persistence behavior.
-- `rewards.json` lists the PNG rewards hosted by the site and includes a filename-independent content ID plus image dimensions for duplicate-artwork prevention.
-- `generate-reward-catalog.mjs` syncs the site manifest and widget catalog, assigning fixed tiers from each PNG's SHA-256 content hash.
+- `rewards.json` lists the PNG/GIF rewards hosted by the site and includes a filename-independent content ID plus image dimensions for duplicate-artwork prevention.
+- `generate-reward-catalog.mjs` syncs the site manifest and widget catalog, assigning fixed tiers from each image's SHA-256 content hash.
 - `reward-links.html` is the local dashboard for copying newly issued links into chat.
 - `server.py` creates compact random reward links only after saving the award in the public assignment registry; the crypto module remains only for opening legacy links.
 - `app.js` contains the WebSocket adapters, trivia state machine, scoring, dedupe, reconnect, and UI logic.
@@ -71,9 +71,19 @@ The overlay background is transparent. The trivia UI appears in the top-left at 
 
 New public reward links look like `https://kazvt.com/reward/?id=<16-character-ID>`. The local Python server creates a 96-bit, URL-safe random ID when it records an award; the public page looks up that exact, case-sensitive ID in `zzz_assets/rewards/assignments.json` and gets the username and artwork from the saved record. The OBS page no longer creates a reward URL or chooses its ID. Previously issued UUID links and old encrypted links can still open, but only if the assignment is present in that same registry.
 
-The page resolves IDs through `/zzz_assets/rewards/manifest.json` and loads the current filename for that artwork. The images are hosted under `https://kazvt.com/zzz_assets/rewards/`. Each artwork can be assigned once by the local widget; its ID is the SHA-256 hash of the exact PNG bytes, with width and height recorded alongside it. Renaming a PNG does not change its ID, tier, existing assignment, or newly issued links. Changing/re-exporting the image bytes creates a new ID. `1.png`'s content ID is preassigned to `kazvt`; every other assignment is retained by content ID in the all-time ownership ledger inside the ignored `.reward-queue.json` file. The public, reusable index at `/zzz_assets/rewards/assignments.json` is shown at `https://kazvt.com/reward/list/`; it contains no bearer URLs or keys and is updated locally by the issuer. The dashboard keeps only the 250 most recent full reward links, while the ownership ledger remains uncapped. When all PNGs are assigned, the widget stops issuing rewards until new artwork is added.
+The page resolves IDs through `/zzz_assets/rewards/manifest.json` and loads the current filename for that artwork. The images are hosted under `https://kazvt.com/zzz_assets/rewards/`. Each artwork can be assigned once by the local widget; its ID is the SHA-256 hash of the exact PNG or GIF bytes, with width and height recorded alongside it. Renaming an image does not change its ID, tier, existing assignment, or newly issued links. Changing/re-exporting the image bytes creates a new ID. `1.png`'s content ID is preassigned to `kazvt`; every other assignment is retained by content ID in the all-time ownership ledger inside the ignored `.reward-queue.json` file. The public, reusable index at `/zzz_assets/rewards/assignments.json` is shown at `https://kazvt.com/reward/list/`; it contains no bearer URLs or keys and is updated locally by the issuer. The dashboard keeps only the 250 most recent full reward links, while the ownership ledger remains uncapped. When all unreserved images are assigned, the widget stops issuing rewards until new artwork is added.
 
-To rename an award, rename its PNG in `zzz_assets/rewards/` and regenerate the catalogs from the repository root. Restart the local OBS reward server and refresh the OBS widget so both read the updated catalog. The assignment index uses the content ID, so the list follows the artwork to its new filename. The public catalog preserves old filename-to-ID history so existing filename-based links continue to work when a name has never been reused for different artwork. New links do not embed filenames.
+### Reserved rewards
+
+Edit `zzz_assets/rewards/reservations.txt` to route one artwork to one or more username aliases. Matching ignores capitalization and a leading `@`. For example:
+
+```text
+transrantula, transrantula-0000 -> "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"
+```
+
+The target can also be just `Munch on this RABBIT.gif`; `->`, `=>`, `=`, `:`, and `→` are accepted, and aliases may be comma-, semicolon-, or pipe-separated. A reserved image is excluded from ordinary awards and from the public pool count; a matching `!reward` receives that image. The page does not display reservation labels or identities. Renamed artwork continues to resolve through the content-ID filename history. This file is served as a static file by GitHub Pages and is therefore visible to anyone who can access the repository/site; the reservation details are hidden from the UI, not secret.
+
+To rename an award, rename its PNG or GIF in `zzz_assets/rewards/` and regenerate the catalogs from the repository root. Restart the local OBS reward server and refresh the OBS widget so both read the updated catalog. The assignment index uses the content ID, so the list follows the artwork to its new filename. The public catalog preserves old filename-to-ID history so existing filename-based links continue to work when a name has never been reused for different artwork. New links do not embed filenames.
 
 The issuer checks both its private ledger and the public assignment index; installations using the same up-to-date repository copy see the same recorded assignments. The public file has no real-time lock or automatic GitHub push, so stale copies or concurrent issuers do not coordinate. An unlisted random ID cannot create an official reward: it has no assignment and is rejected. IDs in the public registry are public and shareable, however, so this is not private access control or proof of who is viewing a card. The registry is the allowlist; ID opacity alone is not authorization. Existing 36-character UUID links remain supported, while newly issued links use shorter 16-character IDs.
 
@@ -81,7 +91,7 @@ The issuer checks both its private ledger and the public assignment index; insta
 
 Each image's tier is derived from the first 32 bits of its SHA-256 content ID, then saved in the public manifest. The weighted buckets are Frequent (30%), Uncommon (20%), Rare (15%), Epic (12%), Legendary (9%), Mythic (6.5%), Divine (4.5%), and Good Shit (3%). Direct reward pages map these tiers in order to the purple, blue, red, orange, green, pink, chrome, and sand GifCities pattern palettes. The non-direct reward index, username lists, and demo instead use the neutral loading-page look. The assignment and tier are deterministic: renaming or reordering an image does not change its content ID or tier, while changing/re-exporting its bytes can. The reward page does an O(1) ID lookup and checks the saved digest-to-tier mapping; it does not hash or decode every image when a viewer opens a link.
 
-After adding, replacing, or removing PNGs, regenerate both catalogs from the repository root:
+After adding, replacing, or removing PNGs or GIFs, regenerate both catalogs from the repository root:
 
 ```bash
 node obs/trivia-rewards-widget/generate-reward-catalog.mjs
