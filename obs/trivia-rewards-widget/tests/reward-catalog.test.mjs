@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -96,7 +97,7 @@ test("GIF dimensions and byte identity are added to both catalogs", async () => 
     const { manifest, widgetCatalog } = await buildRewardCatalogs({ rewardDir: temporaryRoot });
     const metadata = manifest.assets["reserved.gif"];
     assert.deepEqual({ width: metadata.width, height: metadata.height }, { width: 1, height: 1 });
-    assert.equal(metadata.assetId, (await import("node:crypto")).createHash("sha256").update(gif).digest("hex"));
+    assert.equal(metadata.assetId, createHash("sha256").update(gif).digest("hex"));
     assert.equal(widgetCatalog.assets["reserved.gif"].assetId, metadata.assetId);
     assert.equal(resolveRewardAsset(manifest, {
       version: 1, username: "Viewer", file: "reserved.gif"

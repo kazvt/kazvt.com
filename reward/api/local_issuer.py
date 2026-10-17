@@ -731,7 +731,7 @@ def issue_and_publish(
     *,
     expected_remote: str = DEFAULT_REMOTE,
 ) -> dict[str, Any]:
-    """Assign a specifically selected PNG, then publish only assignments.json."""
+    """Assign a specifically selected catalog image, then publish only assignments.json."""
     return _issue_and_publish(site_root, payload, expected_remote=expected_remote)
 
 
@@ -741,7 +741,7 @@ def issue_next_and_publish(
     *,
     expected_remote: str = DEFAULT_REMOTE,
 ) -> dict[str, Any]:
-    """Assign the next unused catalog PNG to a platform user ID, then publish."""
+    """Assign the next unused catalog image to a platform user ID, then publish."""
     return _issue_and_publish(
         site_root, payload, expected_remote=expected_remote, automatic_asset=True
     )
