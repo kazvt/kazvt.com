@@ -1733,11 +1733,11 @@
       "tier": "common"
     },
     "yayy rotisserie chicken.png": {
-      "assetId": "794db72c4166b1a72c370eb89aedddb025d8c36bb21b6defca29a776afb73982",
-      "sha256": "794db72c4166b1a72c370eb89aedddb025d8c36bb21b6defca29a776afb73982",
+      "assetId": "2d3cb55b1e1cd54bb97ec09f4752207c04d5f2483fd550d9b765e320c9ad8804",
+      "sha256": "2d3cb55b1e1cd54bb97ec09f4752207c04d5f2483fd550d9b765e320c9ad8804",
       "width": 811,
       "height": 1108,
-      "tier": "uncommon"
+      "tier": "common"
     },
     "yayy yum--fb223ad628338dd5db2e53f62ea54c6478c6feabab455be5b5240610de589bd9.png": {
       "assetId": "fb223ad628338dd5db2e53f62ea54c6478c6feabab455be5b5240610de589bd9",
@@ -3029,11 +3029,11 @@
       "height": 528,
       "tier": "common"
     },
-    "794db72c4166b1a72c370eb89aedddb025d8c36bb21b6defca29a776afb73982": {
+    "2d3cb55b1e1cd54bb97ec09f4752207c04d5f2483fd550d9b765e320c9ad8804": {
       "filename": "yayy rotisserie chicken.png",
       "width": 811,
       "height": 1108,
-      "tier": "uncommon"
+      "tier": "common"
     },
     "fb223ad628338dd5db2e53f62ea54c6478c6feabab455be5b5240610de589bd9": {
       "filename": "yayy yum--fb223ad628338dd5db2e53f62ea54c6478c6feabab455be5b5240610de589bd9.png",
