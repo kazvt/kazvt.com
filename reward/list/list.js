@@ -31,6 +31,10 @@ import "../background-context.mjs?v=1";
     return value.normalize("NFKD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase().trim();
   }
 
+  function displayUsername(username) {
+    return username.toUpperCase();
+  }
+
   function filenameLabel(filename) {
     const extensionStart = filename.lastIndexOf(".");
     return extensionStart > 0 ? filename.slice(0, extensionStart) : filename;
@@ -143,7 +147,8 @@ import "../background-context.mjs?v=1";
     const info = document.createElement("div");
     info.className = "award-info";
     const usernameHeading = createText("h2", "username username-display", "");
-    const usernameLink = createText("a", "username-list-link username-display", assignment.username);
+    const shownUsername = displayUsername(assignment.username);
+    const usernameLink = createText("a", "username-list-link username-display", shownUsername);
     usernameLink.href = createUserRewardListHref(assignment.username, window.location.origin);
     usernameHeading.append(usernameLink);
     info.append(usernameHeading);
@@ -179,7 +184,7 @@ import "../background-context.mjs?v=1";
       openLink = document.createElement("a");
       openLink.href = createRewardHref(assignment.linkId, window.location.origin);
       openLink.textContent = "Open ↗";
-      openLink.setAttribute("aria-label", `Open ${assignment.username}'s award`);
+      openLink.setAttribute("aria-label", `Open ${shownUsername}'s award`);
     } catch (error) {
       console.warn("[reward-list] Could not prepare an individual award link:", error);
       openLink = createText("span", "open-button is-unavailable", assignment.artworkIsCurrent
@@ -187,7 +192,7 @@ import "../background-context.mjs?v=1";
         : "Award unavailable");
       openLink.setAttribute("aria-disabled", "true");
       openLink.setAttribute("role", "img");
-      openLink.setAttribute("aria-label", `${assignment.username}'s award cannot be opened`);
+      openLink.setAttribute("aria-label", `${shownUsername}'s award cannot be opened`);
       openLink.title = "This award has no UUID link or its artwork is no longer in the current catalog.";
     }
     openLink.classList.add("open-button");
@@ -222,9 +227,9 @@ import "../background-context.mjs?v=1";
       if (userFilterValid) {
         pageTitle.replaceChildren(
           document.createTextNode("Awards for "),
-          createText("span", "username-display", requestedUsername)
+          createText("span", "username-display", displayUsername(requestedUsername))
         );
-        document.title = `Awards for ${requestedUsername.toUpperCase()} — kazvt`;
+        document.title = `Awards for ${displayUsername(requestedUsername)} — kazvt`;
       } else {
         pageTitle.textContent = "Award lookup";
         document.title = "Award lookup — kazvt";
@@ -250,7 +255,7 @@ import "../background-context.mjs?v=1";
         if (userFilterRequested && userFilterValid) {
           emptyState.replaceChildren(
             document.createTextNode("No awards for "),
-            createText("span", "username-display", requestedUsername),
+            createText("span", "username-display", displayUsername(requestedUsername)),
             document.createTextNode(".")
           );
         } else {
