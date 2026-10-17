@@ -1,0 +1,7 @@
+# Copy this file to reservations.local.txt beside this example.
+# The active reservations.local.txt is ignored by Git and is never published.
+# One private rule per line; aliases are case-insensitive and may start with @.
+# Separate aliases with commas, semicolons, or |. Use ->, =>, =, : or →.
+# You may use a filename or full Windows/Unix path; filename history keeps renamed art linked.
+# Example:
+# viewer, viewer-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Award name.gif"

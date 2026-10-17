@@ -1,6 +1,6 @@
 # Local reward issuer
 
-GitHub Pages stays static. Award issuance happens only on the streaming PC through the existing `msi.py` HTTP server; it does not add a GitHub Actions issuer, PAT, database, Cloudflare Worker, or other service. The server accepts issuer requests from loopback only, then uses the site's existing Git login to publish the one updated public registry file.
+GitHub Pages stays static. Award issuance happens only on the streaming PC through the existing `msi.py` HTTP server; it does not add a GitHub Actions issuer, PAT, database, Cloudflare Worker, or other service. The server accepts issuer requests from loopback only, then uses the site's existing Git login to publish the assignment registry and anonymous pool count.
 
 ## Use it from a trusted local game process
 
@@ -44,9 +44,20 @@ Give the same stable `eventId` to retries. MSI stores only its SHA-256 digest in
 
 New art belongs in `zzz_assets/rewards/`. It is eligible after the repository's reward catalog has been regenerated and published. The filename is only a display name; the SHA-256 asset ID is the identity.
 
+## Private planned rewards
+
+Put private alias-to-artwork rules in `reward/api/reservations.local.txt`. The file is ignored by Git and is not served by the site. `reservations.example.txt` documents the forgiving syntax. For example:
+
+```text
+transrantula, transrantula-0000 -> Munch on this RABBIT.gif
+another-viewer => E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\another-gift.png
+```
+
+Adding a rule does not issue or attach an award. When an authorized `!reward username` command arrives, the issuer checks both the current username and platform user ID against the aliases. A match gets that reserved artwork first; otherwise the normal unreserved pool is used. The rule itself and its alias-to-art mapping are never published, displayed, or included in reward announcements. Reserved items are omitted from the available pool and its count until issued. Once issued, the normal public assignment record is created. Keep a private backup of `reservations.local.txt`; the ignored file does not travel with Git clones or commits.
+
 ## What it publishes
 
-Before writing, MSI checks that the configured folder is the `kazvt/kazvt.com` checkout, on `main`, clean, and synchronized with `origin/main`. It refuses if it sees unrelated edits or commits. It stages only `zzz_assets/rewards/assignments.json`, creates a small reward-specific commit, and pushes with the Git credentials already configured on that PC. The existing Pages-on-push publishing then makes the static record live. If push or deployment is delayed, retry using the same `eventId`; do not invent a new one.
+Before writing, MSI checks that the configured folder is the `kazvt/kazvt.com` checkout, on `main`, clean, and synchronized with `origin/main`. It refuses if it sees unrelated edits or commits. It stages only `zzz_assets/rewards/assignments.json` and the anonymous `zzz_assets/rewards/pool.json` totals, creates a small reward-specific commit, and pushes with the Git credentials already configured on that PC. The public pool file contains only `remaining` and `total`, never usernames or reserved artwork identities. The existing Pages-on-push publishing then makes the static record live. If push or deployment is delayed, retry using the same `eventId`; do not invent a new one.
 
 There is no new token to create or paste anywhere. This assumes `git push` already works from the website checkout on the MSI computer. If it does not, the issuer refuses and reports a publish error; it will not switch to an unauthenticated or public write path. After updating `msi.py`, restart MSI once so its existing port-8000 server loads the route.
 
