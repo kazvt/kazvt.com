@@ -2,12 +2,16 @@ import { createHash } from "node:crypto";
 import { readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseRewardReservations } from "../../reward/reward-reservations.mjs";
 
 const WIDGET_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(WIDGET_ROOT, "../..");
 const REWARD_DIR = resolve(REPO_ROOT, "zzz_assets", "rewards");
 const PUBLIC_MANIFEST = resolve(REWARD_DIR, "manifest.json");
+const PUBLIC_ASSIGNMENTS = resolve(REWARD_DIR, "assignments.json");
+const PUBLIC_POOL = resolve(REWARD_DIR, "pool.json");
 const WIDGET_CATALOG = resolve(WIDGET_ROOT, "rewards.json");
+const PRIVATE_RESERVATIONS = resolve(REPO_ROOT, "reward", "api", "reservations.local.txt");
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export const TIER_BUCKETS = [
@@ -190,11 +194,56 @@ async function writeAtomically(path, contents) {
   }
 }
 
+async function readOptionalText(path) {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return "";
+    throw error;
+  }
+}
+
+async function buildAnonymousPool(manifest) {
+  const [reservationText, registryText] = await Promise.all([
+    readOptionalText(PRIVATE_RESERVATIONS),
+    readOptionalText(PUBLIC_ASSIGNMENTS)
+  ]);
+  const reservations = parseRewardReservations(reservationText, manifest);
+  let registry = { assignments: [] };
+  if (registryText) {
+    try {
+      registry = JSON.parse(registryText);
+    } catch (error) {
+      throw new Error(`Could not read the public reward assignment registry: ${error.message || error}`);
+    }
+  }
+  if (!registry || !Array.isArray(registry.assignments)) {
+    throw new Error("The public reward assignment registry is invalid.");
+  }
+
+  const artworkIds = new Set(manifest.files
+    .map(filename => manifest.assets[filename]?.assetId?.toLowerCase())
+    .filter(assetId => validAssetId(assetId)));
+  const reservedIds = new Set([...reservations.assetIds].filter(assetId => artworkIds.has(assetId)));
+  const eligibleIds = new Set([...artworkIds].filter(assetId => !reservedIds.has(assetId)));
+  for (const assignment of registry.assignments) {
+    const assetId = assignment?.assetId ?? assignment?.assetSha256;
+    if (typeof assetId === "string") eligibleIds.delete(assetId.toLowerCase());
+  }
+  return {
+    version: 1,
+    remaining: eligibleIds.size,
+    total: artworkIds.size - reservedIds.size
+  };
+}
+
 export async function syncRewardCatalogs({ checkOnly = false } = {}) {
   const { manifest, widgetCatalog } = await buildRewardCatalogs();
+  const pool = await buildAnonymousPool(manifest);
   const outputs = [
     [PUBLIC_MANIFEST, asJson(manifest)],
-    [WIDGET_CATALOG, asJson(widgetCatalog)]
+    [WIDGET_CATALOG, asJson(widgetCatalog)],
+    [PUBLIC_POOL, asJson(pool)]
   ];
 
   if (checkOnly) {
