@@ -23,6 +23,8 @@ class RewardQueueApiTests(unittest.TestCase):
             widget_server.REWARD_QUEUE_TEMP,
             widget_server.PUBLIC_ASSIGNMENTS,
             widget_server.PUBLIC_ASSIGNMENTS_TEMP,
+            widget_server.PUBLIC_POOL,
+            widget_server.PUBLIC_POOL_TEMP,
             widget_server.RESERVATIONS_FILE,
             widget_server.REWARD_FILES,
             widget_server.REWARD_SHA256,
@@ -32,6 +34,8 @@ class RewardQueueApiTests(unittest.TestCase):
         widget_server.REWARD_QUEUE_TEMP = root / "queue.json.tmp"
         widget_server.PUBLIC_ASSIGNMENTS = root / "assignments.json"
         widget_server.PUBLIC_ASSIGNMENTS_TEMP = root / "assignments.json.tmp"
+        widget_server.PUBLIC_POOL = root / "pool.json"
+        widget_server.PUBLIC_POOL_TEMP = root / "pool.json.tmp"
         widget_server.RESERVATIONS_FILE = root / "reservations.txt"
         widget_server.RESERVATIONS_FILE.write_text("", encoding="utf-8")
         widget_server.REWARD_FILES = {"test reward.png", "1.png"}
@@ -54,6 +58,8 @@ class RewardQueueApiTests(unittest.TestCase):
          widget_server.REWARD_QUEUE_TEMP,
          widget_server.PUBLIC_ASSIGNMENTS,
          widget_server.PUBLIC_ASSIGNMENTS_TEMP,
+         widget_server.PUBLIC_POOL,
+         widget_server.PUBLIC_POOL_TEMP,
          widget_server.RESERVATIONS_FILE,
          widget_server.REWARD_FILES,
          widget_server.REWARD_SHA256,
