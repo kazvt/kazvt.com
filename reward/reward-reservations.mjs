@@ -3,7 +3,7 @@ const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/i;
 const SEPARATOR_PATTERN = /\s*(?:->|=>|→|=|:)\s*/u;
 
 function normalizeAlias(value) {
-  return value.normalize("NFKC").trim().replace(/^@+/, "").trim().toLocaleLowerCase();
+  return value.normalize("NFKC").trim().replace(/^@+/, "").trim().toLowerCase();
 }
 
 function unquote(value) {
@@ -43,7 +43,7 @@ export function parseRewardReservations(source, catalog) {
   for (const filename of catalog.files) {
     const id = catalog.assets[filename]?.assetId;
     if (FILENAME_PATTERN.test(filename) && ASSET_ID_PATTERN.test(id ?? "")) {
-      currentByName.set(filename.toLocaleLowerCase(), id.toLowerCase());
+    currentByName.set(filename.toLowerCase(), id.toLowerCase());
     }
   }
   const historyByName = new Map(Object.entries(catalog.filenameHistory)
