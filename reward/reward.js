@@ -697,8 +697,8 @@ import {
         const response = await fetch(url.href, { cache: "no-store", credentials: "omit" });
         if (!response.ok) throw new Error(`The reward list could not be loaded (HTTP ${response.status}).`);
         const catalog = await response.json();
-          validateCatalog(catalog);
-          return { catalog, assets: catalog.assets };
+        validateCatalog(catalog);
+        return { catalog, assets: catalog.assets };
       })
         .catch(error => {
           rewardCatalogPromise = null;
