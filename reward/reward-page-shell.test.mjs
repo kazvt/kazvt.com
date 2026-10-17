@@ -37,6 +37,17 @@ test("the common reward component retains artwork, tier, title, collection, and 
   const demoLoader = rewardScript.match(/async function openDemo[\s\S]*?(?=async function openReward)/)?.[0] ?? "";
   const assignmentLoader = rewardScript.match(/async function openReward[\s\S]*?(?=\n  if \(document\.body\.hasAttribute)/)?.[0] ?? "";
   assert.match(sharedRenderer, /setRewardFavicon\(file, metadata\.assetId\)/);
+
+  const titleIndex = sharedRenderer.indexOf("setRewardTitle(file, displayName)");
+  const faviconIndex = sharedRenderer.indexOf("setRewardFavicon(file, metadata.assetId)");
+  const imageWaitIndex = sharedRenderer.indexOf("await waitForRewardImage(imageUrl)");
+  const minimumLoadingWaitIndex = sharedRenderer.indexOf("await waitForMinimumLoading()");
+  assert.ok(titleIndex >= 0 && faviconIndex >= 0, "title and favicon are set once reward identity is known");
+  assert.ok(titleIndex < imageWaitIndex && titleIndex < minimumLoadingWaitIndex,
+    "tab title updates before image loading and the minimum loading screen delay");
+  assert.ok(faviconIndex < imageWaitIndex && faviconIndex < minimumLoadingWaitIndex,
+    "reward favicon starts loading before image loading and the minimum loading screen delay");
+
   assert.match(demoLoader, /await renderRewardPage\(/);
   assert.match(assignmentLoader, /await renderRewardPage\(/);
 });

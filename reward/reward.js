@@ -859,6 +859,7 @@ import {
     if (!tier) throw new Error("The reward tier is invalid.");
 
     setRewardTitle(file, displayName);
+    setRewardFavicon(file, metadata.assetId);
     decalLayoutSeed = hashRewardIdentity(displayName, metadata.assetId);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
@@ -880,7 +881,6 @@ import {
     const artworkImage = await waitForRewardImage(imageUrl);
     void prepareRewardMusic(artworkImage, metadata.assetId);
     await waitForMinimumLoading();
-    setRewardFavicon(file, metadata.assetId);
 
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
