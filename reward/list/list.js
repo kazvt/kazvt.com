@@ -1,6 +1,7 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=images-reservations-1";
+import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -18,7 +19,6 @@ import "../background-context.mjs?v=1";
   const poolMeterFill = document.getElementById("poolMeterFill");
   const poolMeterCount = document.getElementById("poolMeterCount");
   const poolStatus = document.getElementById("poolStatus");
-  const poolCountWords = ["ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN"];
   const searchLabel = document.getElementById("search-label");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
   const userFilterRequested = usernameParam !== null;
@@ -120,7 +120,7 @@ import "../background-context.mjs?v=1";
     poolMeter.setAttribute("aria-valuetext", `${remaining} of ${total} unique rewards remain`);
     poolMeter.classList.toggle("is-empty", remaining === 0);
     poolMeter.classList.remove("is-unavailable");
-    const countLabel = remaining <= 10 ? poolCountWords[remaining] : String(remaining);
+    const countLabel = formatPoolCount(remaining);
     poolMeter.dataset.emptyLabel = countLabel;
     poolMeterCount.textContent = countLabel;
     const fillPercent = total ? (remaining / total) * 100 : 0;
