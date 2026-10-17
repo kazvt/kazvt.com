@@ -2,6 +2,7 @@ import { resolveRewardAsset } from "./asset-resolver.mjs?v=images-reservations-1
 import { fetchAssignmentRegistry } from "./assignment-source.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { createUserRewardListHref } from "./user-list-link.mjs?v=1";
+import { rewardFaviconForAsset } from "./reward-favicon.mjs?v=1";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=3";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { retryRead } from "./retry-read.mjs?v=1";
@@ -83,6 +84,7 @@ import {
   const rewardArtworkMotion = document.getElementById("rewardArtworkMotion");
   const rewardImage = document.getElementById("rewardImage");
   const errorMessage = document.getElementById("errorMessage");
+  const rewardFavicon = document.getElementById("rewardFavicon");
   const loadingNote = document.getElementById("loadingNote");
   const demoFootnote = document.querySelector(".demo-footnote");
   const rewardTier = document.getElementById("rewardTier");
@@ -570,8 +572,23 @@ import {
     });
   }
 
+  function resetRewardFavicon() {
+    if (!rewardFavicon) return;
+    rewardFavicon.type = "image/svg+xml";
+    rewardFavicon.href = "/favicon.svg";
+  }
+
+  function setRewardFavicon(file, assetId) {
+    if (!rewardFavicon) return;
+    const icon = rewardFaviconForAsset(file, assetId, window.location.origin);
+    if (!icon) return;
+    rewardFavicon.type = icon.type;
+    rewardFavicon.href = icon.href;
+  }
+
   function showError(message) {
     hideAwardCollection();
+    resetRewardFavicon();
     document.body.dataset.pageState = "error";
     delete document.body.dataset.tier;
     document.querySelector("main.reward-card").setAttribute("aria-busy", "false");
@@ -590,6 +607,7 @@ import {
 
   function showLoading() {
     hideAwardCollection();
+    resetRewardFavicon();
     resetRewardMusic();
     document.body.dataset.pageState = "loading";
     delete document.body.dataset.tier;
@@ -949,6 +967,7 @@ import {
     const artworkImage = await waitForRewardImage(imageUrl);
     void prepareRewardMusic(artworkImage, metadata.assetId);
     await waitForMinimumLoading();
+    setRewardFavicon(file, metadata.assetId);
     document.body.dataset.tier = tier.id;
     document.body.dataset.pageState = "reward";
     rewardCard.setAttribute("aria-busy", "false");
