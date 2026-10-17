@@ -1,5 +1,6 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs?v=images-reservations-1";
 import { fetchAssignmentRegistry } from "./assignment-source.mjs";
+import { parseRewardReservations } from "./reward-reservations.mjs?v=reservations-1";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
@@ -827,11 +828,17 @@ import {
   async function openDemo() {
     showLoading();
     const { catalog, assets } = await loadRewardCatalog();
+    const reservationResponse = await fetch(`/zzz_assets/rewards/reservations.txt?demo=${Date.now()}`, {
+      cache: "no-store"
+    });
+    if (!reservationResponse.ok) throw new Error("The demo reward list could not be loaded.");
+    const reservedAssetIds = parseRewardReservations(await reservationResponse.text(), catalog).assetIds;
     const candidates = catalog.files.filter(file => {
       const validFilename = typeof file === "string" && file.length <= 255 &&
         /\.(?:png|gif)$/i.test(file) && !file.includes("/") &&
         !file.includes("\\") && !/[\u0000-\u001f]/.test(file);
-      return validFilename && Object.prototype.hasOwnProperty.call(assets, file);
+      return validFilename && Object.prototype.hasOwnProperty.call(assets, file) &&
+        !reservedAssetIds.has(assets[file].assetId);
     });
     if (candidates.length === 0) throw new Error("The reward list contains no demo artwork.");
 
