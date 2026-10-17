@@ -16,14 +16,6 @@ import {
 
 const REWARD_DIRECTORY = resolve(fileURLToPath(new URL("../../../zzz_assets/rewards/", import.meta.url)));
 
-async function currentArtworkBytesForHistoricalName(filename) {
-  const catalog = JSON.parse(await readFile(resolve(REWARD_DIRECTORY, "manifest.json"), "utf8"));
-  const assetId = catalog.filenameHistory?.[filename];
-  const currentFilename = assetId && catalog.assetsById?.[assetId]?.filename;
-  assert.ok(currentFilename, `No current artwork resolves historical name ${filename}.`);
-  return readFile(resolve(REWARD_DIRECTORY, currentFilename));
-}
-
 function digest(prefix) {
   return `${prefix}${"0".repeat(64 - prefix.length)}`;
 }
