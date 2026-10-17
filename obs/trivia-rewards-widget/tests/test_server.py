@@ -97,24 +97,6 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertNotIn("attacker.example", issued["link"])
         self.assertNotEqual(issued["linkId"], "00000000-0000-0000-0000-000000000000")
 
-    def test_reserved_art_is_omitted_from_pool_and_rejected_for_other_names(self):
-        widget_server.RESERVATIONS_FILE.write_text(
-            "OnlyViewer, viewer-0000 => test reward.png\n", encoding="utf-8"
-        )
-        status, response = self.request("GET", "/api/rewards/available")
-        self.assertEqual(status, 200)
-        self.assertNotIn("test reward.png", json.loads(response)["files"])
-
-        intruder = self.valid_record()
-        intruder["username"] = "SomeoneElse"
-        status, _ = self.post(intruder)
-        self.assertEqual(status, 403)
-
-        intended = self.valid_record()
-        intended["username"] = "@VIEWER-0000"
-        status, response = self.post(intended)
-        self.assertEqual(status, 201, response)
-
         status, response = self.request("GET", "/api/rewards")
         self.assertEqual(status, 200)
         items = json.loads(response)["items"]
@@ -141,6 +123,24 @@ class RewardQueueApiTests(unittest.TestCase):
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(response)["files"], [])
+
+    def test_reserved_art_is_omitted_from_pool_and_rejected_for_other_names(self):
+        widget_server.RESERVATIONS_FILE.write_text(
+            "OnlyViewer, viewer-0000 => test reward.png\n", encoding="utf-8"
+        )
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertNotIn("test reward.png", json.loads(response)["files"])
+
+        intruder = self.valid_record()
+        intruder["username"] = "SomeoneElse"
+        status, _ = self.post(intruder)
+        self.assertEqual(status, 403)
+
+        intended = self.valid_record()
+        intended["username"] = "@VIEWER-0000"
+        status, response = self.post(intended)
+        self.assertEqual(status, 201, response)
 
     def test_artwork_cannot_be_assigned_twice(self):
         record = self.valid_record()
