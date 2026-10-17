@@ -223,6 +223,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             "eventId": "twitch:lillie-reserved-1",
         }, expected_remote=str(self.remote))
         self.assertEqual(first["assignment"]["assetId"], self.art_ids[0])
+        self.assertEqual(git(self.site, "status", "--porcelain=v1", "--untracked-files=normal"), "")
 
         second = issue_next_and_publish(self.site, {
             "username": "Lillie_Garden", "userId": "lillie-user", "platform": "twitch",
