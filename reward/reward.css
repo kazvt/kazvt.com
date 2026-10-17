@@ -77,8 +77,8 @@ body {
   background-color: var(--palette-background);
   background-image:
     linear-gradient(
-      color-mix(in srgb, var(--palette-background) 38%, transparent),
-      color-mix(in srgb, var(--palette-background) 38%, transparent)
+      color-mix(in srgb, var(--palette-background) 50%, transparent),
+      color-mix(in srgb, var(--palette-background) 50%, transparent)
     ),
     var(--palette-pattern);
   background-size: cover, var(--reward-pattern-tile-width, 100px) auto;

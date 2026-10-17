@@ -318,8 +318,8 @@ h1 {
   background-color: var(--preview-tone);
   background-image:
     linear-gradient(
-      color-mix(in srgb, var(--preview-tone) 38%, transparent),
-      color-mix(in srgb, var(--preview-tone) 38%, transparent)
+      color-mix(in srgb, var(--preview-tone) 50%, transparent),
+      color-mix(in srgb, var(--preview-tone) 50%, transparent)
     ),
     var(--preview-pattern);
   background-size: 100% 100%, calc(var(--reward-pattern-tile-width, 100px) * 0.4) auto;
