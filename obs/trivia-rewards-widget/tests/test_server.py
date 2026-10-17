@@ -125,6 +125,10 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertNotIn("link", assignment)
         self.assertNotIn("id", assignment)
         self.assertNotIn("key", assignment)
+        self.assertEqual(
+            json.loads(widget_server.PUBLIC_POOL.read_text(encoding="utf-8")),
+            {"version": 1, "remaining": 0, "total": 2},
+        )
 
         status, response = self.request("GET", "/api/rewards/available")
         self.assertEqual(status, 200)
