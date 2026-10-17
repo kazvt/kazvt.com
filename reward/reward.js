@@ -3,6 +3,7 @@ import { fetchAssignmentRegistry } from "./assignment-source.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
+import { retryRead } from "./retry-read.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
 import { createRewardMusicPlayer, deriveRewardMusicPlan, hashRewardPixels } from "./reward-music.mjs?v=reward-pixels-v2";
 import "./loading-lineboil.mjs?v=5";
@@ -421,9 +422,9 @@ import {
 
   function loadAssignmentRegistry(catalog) {
     if (!assignmentRegistryPromise) {
-      assignmentRegistryPromise = (async () => {
-        return validateAndSortAssignments(await fetchAssignmentRegistry(), catalog);
-      })()
+      assignmentRegistryPromise = retryRead(async () =>
+        validateAndSortAssignments(await fetchAssignmentRegistry(), catalog)
+      )
         .catch(error => {
           assignmentRegistryPromise = null;
           throw error;
@@ -690,15 +691,15 @@ import {
 
   function loadRewardCatalog() {
     if (!rewardCatalogPromise) {
-      rewardCatalogPromise = fetch("/zzz_assets/rewards/manifest.json", { cache: "no-store" })
-        .then(response => {
-          if (!response.ok) throw new Error("The reward list could not be loaded.");
-          return response.json();
-        })
-        .then(catalog => {
+      rewardCatalogPromise = retryRead(async attempt => {
+        const url = new URL("/zzz_assets/rewards/manifest.json", window.location.origin);
+        url.searchParams.set("_", `${Date.now()}-${attempt}`);
+        const response = await fetch(url.href, { cache: "no-store", credentials: "omit" });
+        if (!response.ok) throw new Error(`The reward list could not be loaded (HTTP ${response.status}).`);
+        const catalog = await response.json();
           validateCatalog(catalog);
           return { catalog, assets: catalog.assets };
-        })
+      })
         .catch(error => {
           rewardCatalogPromise = null;
           throw error;
