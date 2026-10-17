@@ -931,11 +931,14 @@ a.award-collection-tile[href]:hover:not([aria-current="page"]) {
 }
 
 .username-mention {
+  color: inherit;
   text-decoration-line: underline;
   text-decoration-color: var(--palette-accent);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.14em;
 }
+
+#awardCollectionHeading .username-display { color: inherit; }
 
 .username-mention:hover,
 #awardCollectionHeading .username-display:hover {
