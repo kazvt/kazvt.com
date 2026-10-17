@@ -19,7 +19,9 @@ REWARD_QUEUE = ROOT / ".reward-queue.json"
 REWARD_QUEUE_TEMP = ROOT / ".reward-queue.json.tmp"
 PUBLIC_ASSIGNMENTS = ROOT.parent.parent / "zzz_assets" / "rewards" / "assignments.json"
 PUBLIC_ASSIGNMENTS_TEMP = PUBLIC_ASSIGNMENTS.with_name(PUBLIC_ASSIGNMENTS.name + ".tmp")
-RESERVATIONS_FILE = ROOT.parent.parent / "zzz_assets" / "rewards" / "reservations.txt"
+PUBLIC_POOL = ROOT.parent.parent / "zzz_assets" / "rewards" / "pool.json"
+PUBLIC_POOL_TEMP = PUBLIC_POOL.with_name(PUBLIC_POOL.name + ".tmp")
+RESERVATIONS_FILE = ROOT.parent.parent / "reward" / "api" / "reservations.local.txt"
 REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()
 REWARD_STATE_VERSION = 2
@@ -334,6 +336,23 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             encoding="utf-8",
         )
         PUBLIC_ASSIGNMENTS_TEMP.replace(PUBLIC_ASSIGNMENTS)
+
+        _, reserved_asset_ids = read_reward_reservations()
+        catalog_ids = {digest.lower() for digest in REWARD_SHA256.values()}
+        eligible_ids = catalog_ids - reserved_asset_ids
+        assigned_ids = {
+            str(identity).lower() for identity in owners
+            if re.fullmatch(r"[a-fA-F0-9]{64}", str(identity))
+        }
+        PUBLIC_POOL_TEMP.write_text(
+            json.dumps({
+                "version": 1,
+                "remaining": len(eligible_ids - assigned_ids),
+                "total": len(eligible_ids),
+            }, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        PUBLIC_POOL_TEMP.replace(PUBLIC_POOL)
 
     def read_reward_queue(self) -> list[dict[str, str]]:
         return self.read_reward_state()["items"]  # type: ignore[return-value]
