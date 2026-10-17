@@ -1,4 +1,5 @@
 import hashlib
+import base64
 import json
 import struct
 import subprocess
@@ -66,7 +67,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             assets_by_id[asset_id] = {"filename": name, "width": width, "height": height, "tier": "rare"}
         self.catalog = {
             "version": 4,
-            "assetIdAlgorithm": "sha256-png-bytes-v1",
+            "assetIdAlgorithm": "sha256-image-bytes-v1",
             "files": files,
             "assets": assets,
             "assetsById": assets_by_id,
@@ -145,6 +146,47 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 "username": "Other", "userId": "999", "platform": "youtube",
                 "eventId": "youtube:message-3",
             }, expected_remote=str(self.remote))
+
+    def test_alias_reservation_routes_gif_only_to_matching_user_and_excludes_it_from_pool(self) -> None:
+        gif = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==")
+        filename = "Munch on this RABBIT.gif"
+        asset_id = hashlib.sha256(gif).hexdigest()
+        (self.reward_dir / filename).write_bytes(gif)
+        self.catalog["files"].append(filename)
+        self.catalog.setdefault("filenameHistory", {})[filename] = asset_id
+        self.catalog["assets"][filename] = {
+            "assetId": asset_id, "sha256": asset_id, "width": 1, "height": 1, "tier": "rare",
+        }
+        self.catalog["assetsById"][asset_id] = {
+            "filename": filename, "width": 1, "height": 1, "tier": "rare",
+        }
+        (self.reward_dir / "manifest.json").write_text(json.dumps(self.catalog), encoding="utf-8")
+        (self.reward_dir / "reservations.txt").write_text(
+            '@Transrantula, transrantula-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"\n',
+            encoding="utf-8",
+        )
+        git(self.site, "add", "zzz_assets/rewards")
+        git(self.site, "commit", "-m", "add reserved GIF test fixture")
+        git(self.site, "push", "origin", "main")
+
+        self.assertNotIn(asset_id, {item["assetId"] for item in list_available_artwork(self.site)})
+        with self.assertRaisesRegex(RewardIssueError, "reserved for a different username"):
+            issue_and_publish(self.site, {
+                "username": "Intruder", "assetId": asset_id, "eventId": "manual-reserved-gif",
+            }, expected_remote=str(self.remote))
+
+        assigned = issue_next_and_publish(self.site, {
+            "username": "@TRANSRANTULA-0000", "userId": "viewer-1", "platform": "twitch",
+            "eventId": "twitch:reserved-gif",
+        }, expected_remote=str(self.remote))
+        self.assertEqual(assigned["assignment"]["assetId"], asset_id)
+        self.assertEqual(assigned["assignment"]["filename"], filename)
+        next_award = issue_next_and_publish(self.site, {
+            "username": "OtherViewer", "userId": "viewer-2", "platform": "twitch",
+            "eventId": "twitch:ordinary-gift",
+        }, expected_remote=str(self.remote))
+        self.assertNotEqual(next_award["assignment"]["assetId"], asset_id)
+        self.assertEqual(len(list_available_artwork(self.site)), 1)
 
     def test_refuses_dirty_worktree_and_modified_png(self) -> None:
         (self.site / "unrelated.tmp").write_text("keep me", encoding="utf-8")
