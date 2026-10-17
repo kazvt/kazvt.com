@@ -105,6 +105,7 @@ a { color: inherit; }
 
 h1 {
   margin: 2px 0 9px;
+  overflow-wrap: anywhere;
   color: #faf9ff;
   font-size: clamp(1.9rem, 4.8vw, 2.7rem);
   text-shadow: 2px 2px #694d9a, 4px 4px #07070c;
