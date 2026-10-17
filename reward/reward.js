@@ -854,6 +854,46 @@ import {
     return `${DEMO_ADJECTIVES[randomIndex(DEMO_ADJECTIVES.length)]}${DEMO_NOUNS[randomIndex(DEMO_NOUNS.length)]}`;
   }
 
+  async function renderRewardPage({ file, metadata, assignedTier, displayName, demo = false }) {
+    const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
+    if (!tier) throw new Error("The reward tier is invalid.");
+
+    setRewardTitle(file, displayName);
+    decalLayoutSeed = hashRewardIdentity(displayName, metadata.assetId);
+    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
+    rewardTier.dataset.tier = tier.id;
+    rewardImage.dataset.tier = tier.id;
+    rewardTier.setAttribute("aria-label", `TIER: ${tier.label}${demo ? " demo" : ""} tier`);
+    tierIcon.textContent = TIER_MARKS[tier.id];
+    tierName.textContent = `TIER: ${tier.label}`;
+    if (demo) {
+      recipient.textContent = displayName;
+      awardNote.textContent = "Demo only. No reward is issued or attached to this name.";
+    } else {
+      renderUsernameCopy(displayName);
+    }
+    renderFilename(file);
+    rewardImage.setAttribute("aria-label", `${tier.label} ${demo ? "demo " : ""}artwork: ${file}`);
+
+    const artworkImage = await waitForRewardImage(imageUrl);
+    void prepareRewardMusic(artworkImage, metadata.assetId);
+    await waitForMinimumLoading();
+    setRewardFavicon(file, metadata.assetId);
+
+    document.body.dataset.tier = tier.id;
+    document.body.dataset.pageState = "reward";
+    rewardCard.setAttribute("aria-busy", "false");
+    loadingState.hidden = true;
+    errorState.hidden = true;
+    rewardState.hidden = false;
+    if (demoFootnote) demoFootnote.hidden = !demo;
+    if (allRewardsLink) allRewardsLink.hidden = demo;
+    populateArtWallpaper(imageUrl, metadata.assetId);
+    animateTier(assignedTier).catch(error => {
+      console.warn(demo ? "[reward-demo]" : "[reward]", "Tier animation is unavailable:", error);
+    });
+  }
+
   async function openDemo() {
     showLoading();
     const { catalog, assets } = await loadRewardCatalog();
@@ -872,35 +912,8 @@ import {
       throw new Error("The demo artwork tier is invalid.");
     }
 
-    const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     const demoName = randomDemoName();
-    setRewardTitle(file, demoName);
-    decalLayoutSeed = hashRewardIdentity(demoName, metadata.assetId);
-    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
-    rewardTier.dataset.tier = tier.id;
-    rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", `TIER: ${tier.label} demo tier`);
-    tierIcon.textContent = TIER_MARKS[tier.id];
-    tierName.textContent = `TIER: ${tier.label}`;
-    recipient.textContent = demoName;
-    awardNote.textContent = "Demo only. No reward is issued or attached to this name.";
-    renderFilename(file);
-    rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
-    const artworkImage = await waitForRewardImage(imageUrl);
-    void prepareRewardMusic(artworkImage, metadata.assetId);
-    await waitForMinimumLoading();
-
-    document.body.dataset.tier = tier.id;
-    document.body.dataset.pageState = "reward";
-    rewardCard.setAttribute("aria-busy", "false");
-    loadingState.hidden = true;
-    errorState.hidden = true;
-    rewardState.hidden = false;
-    if (demoFootnote) demoFootnote.hidden = false;
-    populateArtWallpaper(imageUrl, metadata.assetId);
-    animateTier(assignedTier).catch(error => {
-      console.warn("[reward-demo] Tier animation is unavailable:", error);
-    });
+    await renderRewardPage({ file, metadata, assignedTier, displayName: demoName, demo: true });
   }
 
   async function openReward() {
@@ -951,37 +964,10 @@ import {
       : null;
     const assignedTier = tierFromSha256(metadata?.sha256);
     if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
-    setRewardTitle(file, data.username);
-
-    decalLayoutSeed = hashRewardIdentity(data.username, metadata.assetId);
-    const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
-    rewardTier.dataset.tier = tier.id;
-    rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", `TIER: ${tier.label} tier reward`);
-    tierIcon.textContent = TIER_MARKS[tier.id];
-    tierName.textContent = `TIER: ${tier.label}`;
-    renderUsernameCopy(data.username);
-    const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
-    rewardImage.setAttribute("aria-label", `${tier.label} reward artwork: ${file}`);
-    renderFilename(file);
-    const artworkImage = await waitForRewardImage(imageUrl);
-    void prepareRewardMusic(artworkImage, metadata.assetId);
-    await waitForMinimumLoading();
-    setRewardFavicon(file, metadata.assetId);
-    document.body.dataset.tier = tier.id;
-    document.body.dataset.pageState = "reward";
-    rewardCard.setAttribute("aria-busy", "false");
-    loadingState.hidden = true;
-    rewardState.hidden = false;
-    if (allRewardsLink) allRewardsLink.hidden = false;
-    populateArtWallpaper(imageUrl, metadata.assetId);
+    await renderRewardPage({ file, metadata, assignedTier, displayName: data.username });
     showUserAwardCollection(data.username, metadata.assetId, catalog, {
       platform: data.platform,
       userId: data.userId,
-    });
-    animateTier(assignedTier).catch(error => {
-      // The reward remains readable and correctly tiered when an external animation CDN is unavailable.
-      console.warn("[reward] Tier animation is unavailable:", error);
     });
   }
 
