@@ -47,6 +47,10 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.remote = self.base / "origin.git"
         self.reward_dir = self.site / "zzz_assets" / "rewards"
         self.reward_dir.mkdir(parents=True)
+        (self.site / "reward" / "api").mkdir(parents=True)
+        (self.site / ".gitignore").write_text(
+            "reward/api/reservations.local.txt\n", encoding="utf-8"
+        )
         subprocess.run(["git", "init", "--bare", "--initial-branch=main", str(self.remote)], check=True, capture_output=True)
         subprocess.run(["git", "init", "--initial-branch=main", str(self.site)], check=True, capture_output=True)
         git(self.site, "config", "user.name", "Reward Issuer Test")
@@ -74,7 +78,10 @@ class LocalRewardIssuerTests(unittest.TestCase):
         }
         (self.reward_dir / "manifest.json").write_text(json.dumps(self.catalog), encoding="utf-8")
         (self.reward_dir / "assignments.json").write_text(json.dumps({"version": 1, "assignments": []}), encoding="utf-8")
-        git(self.site, "add", "zzz_assets/rewards")
+        (self.reward_dir / "pool.json").write_text(
+            json.dumps({"version": 1, "remaining": 2, "total": 2}), encoding="utf-8"
+        )
+        git(self.site, "add", ".gitignore", "zzz_assets/rewards")
         git(self.site, "commit", "-m", "test fixture")
         git(self.site, "remote", "add", "origin", str(self.remote))
         git(self.site, "push", "--set-upstream", "origin", "main")
@@ -92,8 +99,15 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertNotIn("eventId", first["assignment"])
         self.assertEqual(first["assignment"]["eventIdHash"], hashlib.sha256(request["eventId"].encode()).hexdigest())
         self.assertEqual(first["href"], f"https://kazvt.com/reward/?id={first['assignment']['linkId']}")
-        self.assertEqual(git(self.site, "diff", "--name-only", "HEAD^", "HEAD"), "zzz_assets/rewards/assignments.json")
+        self.assertEqual(
+            git(self.site, "diff", "--name-only", "HEAD^", "HEAD").splitlines(),
+            ["zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"],
+        )
         self.assertEqual(len(list_available_artwork(self.site)), 1)
+        self.assertEqual(
+            json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8")),
+            {"version": 1, "remaining": 1, "total": 2},
+        )
 
         replay = issue_and_publish(self.site, request, expected_remote=str(self.remote))
         self.assertTrue(replay["replayed"])
@@ -161,9 +175,12 @@ class LocalRewardIssuerTests(unittest.TestCase):
             "filename": filename, "width": 1, "height": 1, "tier": "rare",
         }
         (self.reward_dir / "manifest.json").write_text(json.dumps(self.catalog), encoding="utf-8")
-        (self.reward_dir / "reservations.txt").write_text(
+        (self.site / local_issuer.RESERVATIONS_RELATIVE).write_text(
             '@Transrantula, transrantula-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"\n',
             encoding="utf-8",
+        )
+        (self.reward_dir / "pool.json").write_text(
+            json.dumps({"version": 1, "remaining": 2, "total": 2}), encoding="utf-8"
         )
         git(self.site, "add", "zzz_assets/rewards")
         git(self.site, "commit", "-m", "add reserved GIF test fixture")
@@ -187,6 +204,11 @@ class LocalRewardIssuerTests(unittest.TestCase):
         }, expected_remote=str(self.remote))
         self.assertNotEqual(next_award["assignment"]["assetId"], asset_id)
         self.assertEqual(len(list_available_artwork(self.site)), 1)
+        public_pool = json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8"))
+        self.assertEqual(public_pool, {"version": 1, "remaining": 1, "total": 2})
+        public_files = git(self.site, "ls-files").splitlines()
+        self.assertNotIn(local_issuer.RESERVATIONS_RELATIVE, public_files)
+        self.assertNotIn("transrantula", " ".join(public_files))
 
     def test_refuses_dirty_worktree_and_modified_png(self) -> None:
         (self.site / "unrelated.tmp").write_text("keep me", encoding="utf-8")
