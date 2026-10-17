@@ -164,6 +164,7 @@ import "../background-context.mjs?v=1";
   async function makeCard(assignment) {
     const card = document.createElement("article");
     card.className = "award-card";
+    card.dataset.tier = assignment.tierId;
 
     const artworkFrame = document.createElement("div");
     artworkFrame.className = "artwork-frame";

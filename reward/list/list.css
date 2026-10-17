@@ -293,6 +293,8 @@ h1 {
 
 .award-card {
   position: relative;
+  isolation: isolate;
+  --card-pattern: url("/reward/patterns/purple.gif");
   display: grid;
   grid-template-columns: 94px minmax(0, 1fr) auto;
   align-items: center;
@@ -303,6 +305,27 @@ h1 {
   background: linear-gradient(135deg, #1e1d2b, #111119 74%);
   box-shadow: 3px 3px 0 #050507;
 }
+
+.award-card::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: var(--card-pattern);
+  background-size: var(--reward-pattern-tile-width, 100px) auto;
+  background-position: 0 0;
+  background-repeat: repeat;
+  content: "";
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.award-card[data-tier="uncommon"] { --card-pattern: url("/reward/patterns/blue.gif"); }
+.award-card[data-tier="rare"] { --card-pattern: url("/reward/patterns/red.gif"); }
+.award-card[data-tier="epic"] { --card-pattern: url("/reward/patterns/orange.gif"); }
+.award-card[data-tier="legendary"] { --card-pattern: url("/reward/patterns/green.gif"); }
+.award-card[data-tier="mythic"] { --card-pattern: url("/reward/patterns/pink.gif"); }
+.award-card[data-tier="divine"] { --card-pattern: url("/reward/patterns/chrome.gif"); }
+.award-card[data-tier="splus"] { --card-pattern: url("/reward/patterns/sand.gif"); }
 
 .award-card[hidden] { display: none; }
 
