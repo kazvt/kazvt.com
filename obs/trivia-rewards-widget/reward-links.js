@@ -11,6 +11,12 @@
     return element;
   }
 
+  function rewardFilenameLabel(filename) {
+    const extensionStart = filename.lastIndexOf(".");
+    const label = extensionStart > 0 ? filename.slice(0, extensionStart) : filename;
+    return label.replace(/--[a-f0-9]{64}$/i, "");
+  }
+
   function fallbackCopy(value) {
     const input = document.createElement("textarea");
     input.value = value;
@@ -45,7 +51,7 @@
       row.className = "reward-row";
       const details = document.createElement("div");
       details.appendChild(makeText("p", "recipient", `${item.username} won`));
-      details.appendChild(makeText("p", "details", item.filename));
+      details.appendChild(makeText("p", "details", rewardFilenameLabel(item.filename)));
       const issuedAt = new Date(item.issuedAt);
       details.appendChild(makeText("p", "issued", Number.isNaN(issuedAt.valueOf()) ? "" : issuedAt.toLocaleString()));
 

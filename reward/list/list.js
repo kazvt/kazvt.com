@@ -62,7 +62,8 @@ import "../background-context.mjs?v=1";
 
   function filenameLabel(filename) {
     const extensionStart = filename.lastIndexOf(".");
-    return extensionStart > 0 ? filename.slice(0, extensionStart) : filename;
+    const label = extensionStart > 0 ? filename.slice(0, extensionStart) : filename;
+    return label.replace(/--[a-f0-9]{64}$/i, "");
   }
 
   function createText(tagName, className, value) {

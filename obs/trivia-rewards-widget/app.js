@@ -133,6 +133,12 @@
     return value !== null && typeof value === "object" && !Array.isArray(value);
   }
 
+  function rewardFilenameLabel(filename) {
+    const extensionStart = filename.lastIndexOf(".");
+    const label = extensionStart > 0 ? filename.slice(0, extensionStart) : filename;
+    return label.replace(/--[a-f0-9]{64}$/i, "");
+  }
+
   function clamp(value, min, max, fallback) {
     const number = Number(value);
     if (!Number.isFinite(number)) return fallback;
@@ -1080,7 +1086,7 @@
         showActivity(
           "🎁",
           `${record.username} won a reward!`,
-          `Link ready to copy • ${record.filename}`,
+          `Link ready to copy • ${rewardFilenameLabel(record.filename)}`,
           5600,
           "success"
         );

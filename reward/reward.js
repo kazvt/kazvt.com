@@ -332,7 +332,8 @@ import {
 
   function filenameLabel(file) {
     const extensionStart = file.lastIndexOf(".");
-    return extensionStart > 0 ? file.slice(0, extensionStart) : file;
+    const label = extensionStart > 0 ? file.slice(0, extensionStart) : file;
+    return label.replace(/--[a-f0-9]{64}$/i, "");
   }
 
   function renderFilename(file) {
