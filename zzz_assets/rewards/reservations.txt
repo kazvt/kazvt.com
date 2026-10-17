@@ -1,0 +1,8 @@
+# Private-use routing rules for the reward issuer.
+# One rule per line; aliases are case-insensitive and may start with @.
+# Separate aliases with commas, semicolons, or |. Use ->, =>, =, or : before the artwork.
+# You may use a filename or a full Windows/Unix path; filename history keeps renamed art linked.
+# Example:
+# viewer, viewer-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Award name.gif"
+
+transrantula, transrantula-0000 -> Munch on this RABBIT.gif
