@@ -1,7 +1,6 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=images-reservations-1";
-import { parseRewardReservations } from "../reward-reservations.mjs?v=reservations-1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -89,37 +88,26 @@ import "../background-context.mjs?v=1";
   }
 
   async function loadRegistry() {
-    const [registry, catalogResponse, reservationResponse] = await Promise.all([
+    const [registry, catalogResponse, poolResponse] = await Promise.all([
       fetchAssignmentRegistry(),
       fetch("/zzz_assets/rewards/manifest.json", { cache: "no-cache" }),
-      fetch(`/zzz_assets/rewards/reservations.txt?pool=${Date.now()}`, { cache: "no-store" })
+      fetch("/zzz_assets/rewards/pool.json", { cache: "no-cache" })
     ]);
-    if (!catalogResponse.ok) {
-      throw new Error("The public award data could not be fetched.");
-    }
-    if (!reservationResponse.ok) {
+    if (!catalogResponse.ok || !poolResponse.ok) {
       throw new Error("The reward pool data could not be fetched.");
     }
     const rawCatalog = await catalogResponse.json();
     const catalog = validateCatalog(rawCatalog);
-    const reservations = parseRewardReservations(await reservationResponse.text(), catalog);
+    const pool = await poolResponse.json();
+    if (!pool || pool.version !== 1 || !Number.isSafeInteger(pool.remaining) ||
+        !Number.isSafeInteger(pool.total) || pool.remaining < 0 || pool.total < 0 ||
+        pool.remaining > pool.total) {
+      throw new Error("The public reward pool count is invalid.");
+    }
     return {
       assignments: validateAndSortAssignments(registry, catalog),
-      catalog,
-      reservedAssetIds: reservations.assetIds
+      pool
     };
-  }
-
-  function countUniqueRewardsLeft(catalog, assignments, reservedAssetIds) {
-    const allAssetIds = new Set(catalog.files
-      .map(filename => catalog.assets[filename]?.assetId)
-      .filter(assetId => typeof assetId === "string" && /^[a-f0-9]{64}$/i.test(assetId)));
-    for (const assetId of reservedAssetIds) allAssetIds.delete(assetId);
-    const availableAssetIds = new Set(allAssetIds);
-    for (const assignment of assignments) {
-      availableAssetIds.delete(assignment.assetId);
-    }
-    return { remaining: availableAssetIds.size, total: allAssetIds.size };
   }
 
   function renderPoolStatus(pool) {
@@ -232,8 +220,7 @@ import "../background-context.mjs?v=1";
     }
 
     try {
-      const { assignments: allAssignments, catalog, reservedAssetIds } = await loadRegistry();
-      const pool = countUniqueRewardsLeft(catalog, allAssignments, reservedAssetIds);
+      const { assignments: allAssignments, pool } = await loadRegistry();
       renderPoolStatus(pool);
       const assignments = userFilterRequested
         ? userFilterValid
