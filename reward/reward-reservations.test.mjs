@@ -34,7 +34,7 @@ test("aliases are case-insensitive, @-neutralized, and resolve Windows paths to 
 
 test("filename-only, historical filename, and forgiving separators are accepted", () => {
   for (const separator of ["->", "=>", "=", ":", "→"]) {
-    const reservations = parseRewardReservations(`viewer-${separator} Munch on this RABBIT.gif`, catalog);
+    const reservations = parseRewardReservations(`viewer ${separator} Munch on this RABBIT.gif`, catalog);
     assert.equal(reservedAssetForIdentity(reservations, "VIEWER"), rabbitId);
   }
   const renamed = parseRewardReservations(

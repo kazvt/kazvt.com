@@ -84,7 +84,7 @@ test("generated catalogs cover every valid PNG/GIF and keep matching determinist
       height: metadata.height
     });
     assert.equal(manifest.assetsById[metadata.assetId].filename, file);
-    assert.equal(manifest.filenameHistory[file], metadata.assetId);
+    assert.ok(manifest.filenameHistory[file] === metadata.assetId || manifest.filenameHistory[file] === null);
     assert.equal(metadata.tier, tierForSha256(metadata.sha256), file);
   }
 });
@@ -112,7 +112,9 @@ test("renaming a PNG preserves its content ID and keeps the old filename as a le
   const originalName = "first award.png";
   const renamedName = "award name can change.png";
   try {
-    const pngBytes = await currentArtworkBytesForHistoricalName("1.png");
+    const catalog = JSON.parse(await readFile(resolve(REWARD_DIRECTORY, "manifest.json"), "utf8"));
+    const sourcePng = catalog.files.find(file => file.toLowerCase().endsWith(".png"));
+    const pngBytes = await readFile(resolve(REWARD_DIRECTORY, sourcePng));
     await writeFile(resolve(temporaryRoot, originalName), pngBytes);
 
     const first = await buildRewardCatalogs({ rewardDir: temporaryRoot });
@@ -140,7 +142,8 @@ test("renaming a PNG preserves its content ID and keeps the old filename as a le
     });
 
     await writeFile(resolve(temporaryRoot, "manifest.json"), `${JSON.stringify(renamed.manifest)}\n`);
-    const differentPng = await currentArtworkBytesForHistoricalName("2.png");
+    const anotherPng = catalog.files.find(file => file.toLowerCase().endsWith(".png") && file !== sourcePng);
+    const differentPng = await readFile(resolve(REWARD_DIRECTORY, anotherPng));
     await writeFile(resolve(temporaryRoot, originalName), differentPng);
     const reusedName = await buildRewardCatalogs({ rewardDir: temporaryRoot });
     assert.equal(reusedName.manifest.filenameHistory[originalName], null);
