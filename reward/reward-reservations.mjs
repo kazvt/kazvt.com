@@ -68,11 +68,9 @@ export function parseRewardReservations(source, catalog) {
     const assetId = resolveAssetId(catalog, right, currentByName, historyByName);
     if (!assetId) throw new Error(`Reservation line ${index + 1} refers to artwork not found in the current catalog.`);
     for (const alias of names) {
-      const existing = aliases.get(alias);
-      if (existing && existing !== assetId) {
-        throw new Error(`Reservation alias “${alias}” points to more than one artwork.`);
-      }
-      aliases.set(alias, assetId);
+      const reservedForAlias = aliases.get(alias) ?? [];
+      if (!reservedForAlias.includes(assetId)) reservedForAlias.push(assetId);
+      aliases.set(alias, reservedForAlias);
     }
     assetIds.add(assetId);
     entries.push({ aliases: names, filename, assetId });
@@ -80,13 +78,20 @@ export function parseRewardReservations(source, catalog) {
   return { aliases, assetIds, entries };
 }
 
-export function reservedAssetForIdentity(reservations, username, userId = "") {
-  const matches = new Set();
+export function reservedAssetsForIdentity(reservations, username, userId = "") {
+  const identityMatches = [];
   for (const candidate of [username, userId]) {
     if (typeof candidate !== "string" || !candidate.trim()) continue;
-    const assetId = reservations?.aliases?.get(normalizeAlias(candidate));
-    if (assetId) matches.add(assetId);
+    const assetIds = reservations?.aliases?.get(normalizeAlias(candidate)) ?? [];
+    if (assetIds.length && !identityMatches.some(match =>
+      match.length === assetIds.length && match.every((assetId, index) => assetId === assetIds[index]))) {
+      identityMatches.push(assetIds);
+    }
   }
-  if (matches.size > 1) throw new Error("The username and platform user ID resolve to different reserved rewards.");
-  return matches.values().next().value ?? "";
+  if (identityMatches.length > 1) throw new Error("The username and platform user ID resolve to different reserved rewards.");
+  return identityMatches[0] ?? [];
+}
+
+export function reservedAssetForIdentity(reservations, username, userId = "") {
+  return reservedAssetsForIdentity(reservations, username, userId)[0] ?? "";
 }

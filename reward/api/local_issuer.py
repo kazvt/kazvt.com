@@ -282,7 +282,7 @@ def _load_reservations(site_root: Path, catalog: dict[str, Any]) -> dict[str, An
         for filename, asset_id in catalog.get("filenameHistory", {}).items()
         if isinstance(filename, str) and isinstance(asset_id, str) and ASSET_ID_RE.fullmatch(asset_id)
     }
-    aliases: dict[str, str] = {}
+    aliases: dict[str, list[str]] = {}
     asset_ids: set[str] = set()
     entries: list[dict[str, Any]] = []
     for line_number, raw_line in enumerate(source.splitlines(), 1):
@@ -305,23 +305,25 @@ def _load_reservations(site_root: Path, catalog: dict[str, Any]) -> dict[str, An
         if not asset_id or asset_id not in catalog["assetsById"]:
             raise RewardIssueError(f"Reservation line {line_number} refers to artwork not found in the current catalog.")
         for alias in names:
-            existing = aliases.get(alias)
-            if existing and existing != asset_id:
-                raise RewardIssueError(f"Reservation alias {alias!r} points to more than one artwork.")
-            aliases[alias] = asset_id
+            reserved_for_alias = aliases.setdefault(alias, [])
+            if asset_id not in reserved_for_alias:
+                reserved_for_alias.append(asset_id)
         asset_ids.add(asset_id)
         entries.append({"aliases": names, "filename": filename, "assetId": asset_id})
     return {"aliases": aliases, "assetIds": asset_ids, "entries": entries}
 
 
-def _reserved_asset_for_identity(reservations: dict[str, Any], username: str, user_id: str) -> str:
-    matches = {
-        asset_id for candidate in (username, user_id) if candidate
-        if (asset_id := reservations["aliases"].get(_reservation_alias(candidate)))
-    }
-    if len(matches) > 1:
+def _reserved_assets_for_identity(reservations: dict[str, Any], username: str, user_id: str) -> list[str]:
+    identity_matches = []
+    for candidate in (username, user_id):
+        if not candidate:
+            continue
+        asset_ids = reservations["aliases"].get(_reservation_alias(candidate), [])
+        if asset_ids and asset_ids not in identity_matches:
+            identity_matches.append(asset_ids)
+    if len(identity_matches) > 1:
         raise RewardIssueError("The username and platform user ID resolve to different reserved rewards.")
-    return next(iter(matches), "")
+    return identity_matches[0] if identity_matches else []
 
 
 def _load_records(site_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -708,7 +710,7 @@ def _issue_and_publish(
             }
 
         reservations = _load_reservations(root, catalog)
-        reserved_asset_id = _reserved_asset_for_identity(
+        reserved_asset_ids = _reserved_assets_for_identity(
             reservations, request["username"], request["userId"],
         )
         assigned_assets = {
@@ -716,9 +718,12 @@ def _issue_and_publish(
             for record in registry["assignments"]
         }
         if automatic_asset:
-            if reserved_asset_id:
-                if reserved_asset_id in assigned_assets:
-                    raise RewardIssueError("This reserved reward has already been assigned and cannot be issued again.")
+            if reserved_asset_ids:
+                reserved_asset_id = next(
+                    (asset_id for asset_id in reserved_asset_ids if asset_id not in assigned_assets), ""
+                )
+                if not reserved_asset_id:
+                    raise RewardIssueError("All rewards reserved for this username have already been assigned.")
                 request["assetId"] = reserved_asset_id
             else:
                 available = [item for item in _catalog_artworks(catalog)
@@ -731,7 +736,7 @@ def _issue_and_publish(
                 selection_hash = hashlib.sha256(request["eventId"].encode("utf-8")).digest()
                 selection_index = int.from_bytes(selection_hash[:8], "big") % len(available)
                 request["assetId"] = available[selection_index]["assetId"]
-        elif request["assetId"] in reservations["assetIds"] and request["assetId"] != reserved_asset_id:
+        elif request["assetId"] in reservations["assetIds"] and request["assetId"] not in reserved_asset_ids:
             raise RewardIssueError("That artwork is reserved for a different username.")
 
         now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")

@@ -91,7 +91,7 @@ def read_reward_reservations() -> tuple[dict[str, str], set[str]]:
         source = ""
     current = {filename.lower(): digest.lower() for filename, digest in REWARD_SHA256.items()}
     history = {filename.lower(): digest.lower() for filename, digest in REWARD_FILENAME_HISTORY.items()}
-    aliases: dict[str, str] = {}
+    aliases: dict[str, set[str]] = {}
     asset_ids: set[str] = set()
     for line_number, raw_line in enumerate(source.splitlines(), 1):
         line = raw_line.strip()
@@ -113,10 +113,7 @@ def read_reward_reservations() -> tuple[dict[str, str], set[str]]:
         if not asset_id or asset_id not in {value.lower() for value in REWARD_SHA256.values()}:
             raise ValueError(f"Reward reservation line {line_number} points to artwork not in the current catalog.")
         for name in names:
-            previous = aliases.get(name)
-            if previous and previous != asset_id:
-                raise ValueError(f"Reward reservation alias {name!r} points to multiple artworks.")
-            aliases[name] = asset_id
+            aliases.setdefault(name, set()).add(asset_id)
         asset_ids.add(asset_id)
     return aliases, asset_ids
 
@@ -460,7 +457,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             owners = state["owners"]
             identity = reward_asset_identity(filename)
             normalized_username = unicodedata.normalize("NFKC", username).strip().lstrip("@").strip().lower()
-            if identity in reserved_asset_ids and reservation_aliases.get(normalized_username) != identity:
+            if identity in reserved_asset_ids and identity not in reservation_aliases.get(normalized_username, set()):
                 self.send_json(403, {"error": "That artwork is reserved for a different username."})
                 return
             if identity in owners:

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseRewardReservations, reservedAssetForIdentity } from "./reward-reservations.mjs";
+import { parseRewardReservations, reservedAssetForIdentity, reservedAssetsForIdentity } from "./reward-reservations.mjs";
 
 const rabbitId = "a".repeat(64);
 const starId = "b".repeat(64);
@@ -43,8 +43,22 @@ test("filename-only, historical filename, and forgiving separators are accepted"
   assert.equal(reservedAssetForIdentity(renamed, "viewer-0000"), rabbitId);
 });
 
-test("malformed, unknown, or conflicting reservation rules fail closed", () => {
+test("multiple reservations for an identity remain ordered and identity conflicts fail closed", () => {
+  const reservations = parseRewardReservations(
+    "viewer, viewer-0000 -> Munch on this RABBIT.gif\nVIEWER => star.png",
+    catalog
+  );
+  assert.deepEqual(reservedAssetsForIdentity(reservations, "Viewer-0000"), [rabbitId, starId]);
+  assert.equal(reservedAssetForIdentity(reservations, "viewer"), rabbitId);
+
+  const conflictingIdentity = parseRewardReservations(
+    "viewer -> Munch on this RABBIT.gif\nplatform-id -> star.png",
+    catalog
+  );
+  assert.throws(() => reservedAssetsForIdentity(conflictingIdentity, "viewer", "platform-id"), /different/);
+});
+
+test("malformed or unknown reservation rules fail closed", () => {
   assert.throws(() => parseRewardReservations("missing separator", catalog), /separator/);
   assert.throws(() => parseRewardReservations("viewer -> absent.gif", catalog), /not found/);
-  assert.throws(() => parseRewardReservations("viewer -> star.png\nVIEWER => Munch on this RABBIT.gif", catalog), /more than one/);
 });

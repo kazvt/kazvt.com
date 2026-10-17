@@ -152,6 +152,15 @@ class RewardQueueApiTests(unittest.TestCase):
         status, response = self.post(intended)
         self.assertEqual(status, 201, response)
 
+    def test_reservation_parser_allows_multiple_artworks_for_the_same_alias(self):
+        second_asset_id = next(iter(widget_server.PREASSIGNED_REWARDS))
+        widget_server.RESERVATIONS_FILE.write_text(
+            "OnlyViewer -> test reward.png\nonlyviewer => 1.png\n", encoding="utf-8"
+        )
+        aliases, reserved_asset_ids = widget_server.read_reward_reservations()
+        self.assertEqual(aliases["onlyviewer"], {"a" * 64, second_asset_id})
+        self.assertEqual(reserved_asset_ids, {"a" * 64, second_asset_id})
+
     def test_artwork_cannot_be_assigned_twice(self):
         record = self.valid_record()
         status, _ = self.post(record)

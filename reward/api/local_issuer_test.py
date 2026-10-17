@@ -210,6 +210,32 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertNotIn(local_issuer.RESERVATIONS_RELATIVE, public_files)
         self.assertNotIn("transrantula", " ".join(public_files))
 
+    def test_multiple_reservations_for_one_alias_are_issued_in_file_order(self) -> None:
+        (self.site / local_issuer.RESERVATIONS_RELATIVE).write_text(
+            "lillie_garden, lillie-garden -> toast.png\n"
+            "LILLIE_GARDEN, lillie-garden => star.png\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(list_available_artwork(self.site), [])
+
+        first = issue_next_and_publish(self.site, {
+            "username": "@LILLIE-GARDEN", "userId": "lillie-user", "platform": "twitch",
+            "eventId": "twitch:lillie-reserved-1",
+        }, expected_remote=str(self.remote))
+        self.assertEqual(first["assignment"]["assetId"], self.art_ids[0])
+
+        second = issue_next_and_publish(self.site, {
+            "username": "Lillie_Garden", "userId": "lillie-user", "platform": "twitch",
+            "eventId": "twitch:lillie-reserved-2",
+        }, expected_remote=str(self.remote))
+        self.assertEqual(second["assignment"]["assetId"], self.art_ids[1])
+
+        with self.assertRaisesRegex(RewardIssueError, "All rewards reserved"):
+            issue_next_and_publish(self.site, {
+                "username": "lillie_garden", "userId": "lillie-user", "platform": "twitch",
+                "eventId": "twitch:lillie-reserved-3",
+            }, expected_remote=str(self.remote))
+
     def test_refuses_dirty_worktree_and_modified_png(self) -> None:
         (self.site / "unrelated.tmp").write_text("keep me", encoding="utf-8")
         with self.assertRaisesRegex(RewardIssueError, "local changes"):
