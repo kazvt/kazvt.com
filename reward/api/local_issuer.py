@@ -659,8 +659,9 @@ def _commit_registry(
         staged = _git(root, "diff", "--cached", "--name-only").splitlines()
         unstaged = _git(root, "diff", "--name-only").splitlines()
         untracked = _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
-        if staged != [ASSIGNMENTS_RELATIVE, POOL_RELATIVE] or unstaged or untracked:
-            print("DEBUG reward commit paths", staged, unstaged, untracked, flush=True)
+        allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
+        if (ASSIGNMENTS_RELATIVE not in staged or not set(staged) <= allowed_paths or
+                unstaged or untracked):
             raise RewardIssueError("Only assignments.json and the anonymous pool count may be included in a reward commit; review Git status.")
         _git(root, "commit", "-m", f"reward: {commit_action} {event_hash[:12]}")
         _git(root, "push", "origin", "HEAD:refs/heads/main")
