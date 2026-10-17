@@ -640,7 +640,7 @@ import {
 
   function validateCatalog(catalog) {
     if (!catalog || catalog.version !== 4 ||
-        catalog.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
+        catalog.assetIdAlgorithm !== "sha256-image-bytes-v1" ||
         catalog.tierAlgorithm !== "sha256-leading-32-bit-weighted-v2" ||
         !Array.isArray(catalog.files) || !Array.isArray(catalog.tierWeights) ||
         !catalog.assets || typeof catalog.assets !== "object" || Array.isArray(catalog.assets) ||
@@ -663,7 +663,7 @@ import {
     const seenFiles = new Set();
     for (const file of catalog.files) {
       const metadata = catalog.assets[file];
-      if (typeof file !== "string" || file.length > 255 || !/^[^/\\\u0000-\u001f]+\.png$/i.test(file) ||
+      if (typeof file !== "string" || file.length > 255 || !/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(file) ||
           seenFiles.has(file) || !metadata || typeof metadata !== "object" ||
           !/^[a-f0-9]{64}$/.test(metadata.assetId) || metadata.assetId !== metadata.sha256 ||
           !Number.isSafeInteger(metadata.width) || metadata.width < 1 ||
@@ -679,7 +679,7 @@ import {
       }
     }
     for (const [filename, assetId] of Object.entries(catalog.filenameHistory)) {
-      if (!/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+      if (!/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(filename) ||
           (assetId !== null && !/^[a-f0-9]{64}$/.test(assetId))) {
         throw new Error("The reward filename history is invalid.");
       }
@@ -829,7 +829,7 @@ import {
     const { catalog, assets } = await loadRewardCatalog();
     const candidates = catalog.files.filter(file => {
       const validFilename = typeof file === "string" && file.length <= 255 &&
-        file.toLowerCase().endsWith(".png") && !file.includes("/") &&
+        /\.(?:png|gif)$/i.test(file) && !file.includes("/") &&
         !file.includes("\\") && !/[\u0000-\u001f]/.test(file);
       return validFilename && Object.prototype.hasOwnProperty.call(assets, file);
     });
