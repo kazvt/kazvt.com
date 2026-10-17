@@ -18,6 +18,7 @@ import "../background-context.mjs?v=1";
   const poolMeterFill = document.getElementById("poolMeterFill");
   const poolMeterCount = document.getElementById("poolMeterCount");
   const poolStatus = document.getElementById("poolStatus");
+  const poolCountWords = ["ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN"];
   const searchLabel = document.getElementById("search-label");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
   const userFilterRequested = usernameParam !== null;
@@ -119,7 +120,9 @@ import "../background-context.mjs?v=1";
     poolMeter.setAttribute("aria-valuetext", `${remaining} of ${total} unique rewards remain`);
     poolMeter.classList.toggle("is-empty", remaining === 0);
     poolMeter.classList.remove("is-unavailable");
-    poolMeterCount.textContent = String(remaining);
+    const countLabel = remaining <= 10 ? poolCountWords[remaining] : String(remaining);
+    poolMeter.dataset.emptyLabel = countLabel;
+    poolMeterCount.textContent = countLabel;
     const fillPercent = total ? (remaining / total) * 100 : 0;
     const countWidth = Math.ceil(poolMeterCount.getBoundingClientRect().width + 12);
     poolMeterFill.style.width = remaining > 0

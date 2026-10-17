@@ -168,7 +168,7 @@ h1 {
 .pool-meter.is-empty .pool-meter-fill { visibility: hidden; }
 
 .pool-meter.is-empty::after {
-  content: "0";
+  content: attr(data-empty-label);
   position: absolute;
   inset: 0;
   display: grid;
