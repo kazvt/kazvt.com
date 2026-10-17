@@ -25,7 +25,8 @@ from typing import Any
 DEFAULT_SITE_ORIGIN = "https://kazvt.com"
 DEFAULT_REMOTE = "https://github.com/kazvt/kazvt.com.git"
 ASSIGNMENTS_RELATIVE = "zzz_assets/rewards/assignments.json"
-RESERVATIONS_RELATIVE = "zzz_assets/rewards/reservations.txt"
+POOL_RELATIVE = "zzz_assets/rewards/pool.json"
+RESERVATIONS_RELATIVE = "reward/api/reservations.local.txt"
 ASSET_ID_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
 FILENAME_RE = re.compile(r"^[^/\\\x00-\x1f\x7f]{1,255}\.(?:png|gif)$", re.IGNORECASE)
 RESERVATION_SEPARATOR_RE = re.compile(r"\s*(?:->|=>|→|=|:)\s*")
@@ -581,24 +582,55 @@ def _ensure_commit_identity(root: Path) -> None:
         raise RewardIssueError("Git commit identity is not configured for this website checkout.")
 
 
+def _anonymous_pool_summary(
+    catalog: dict[str, Any], registry: dict[str, Any], reservations: dict[str, Any],
+) -> dict[str, int]:
+    catalog_ids = {
+        str(item["assetId"]).lower()
+        for item in _catalog_artworks(catalog)
+        if ASSET_ID_RE.fullmatch(str(item.get("assetId", "")))
+    }
+    reserved_ids = set(reservations["assetIds"]) & catalog_ids
+    assigned_ids = {
+        str(record.get("assetId", record.get("assetSha256", ""))).lower()
+        for record in registry.get("assignments", [])
+    }
+    eligible_ids = catalog_ids - reserved_ids
+    return {
+        "version": 1,
+        "remaining": len(eligible_ids - assigned_ids),
+        "total": len(eligible_ids),
+    }
+
+
 def _atomic_write_registry(root: Path, registry: dict[str, Any]) -> None:
     _, assignments_path = _reward_paths(root)
+    pool_path = root / POOL_RELATIVE
     git_dir = Path(_git(root, "rev-parse", "--absolute-git-dir"))
-    temporary_path: Path | None = None
+    temporary_paths: list[Path] = []
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb", prefix="reward-assignments-", suffix=".tmp", dir=git_dir, delete=False
-        ) as temporary:
-            temporary_path = Path(temporary.name)
-            data = (json.dumps(registry, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
-            temporary.write(data)
-            temporary.flush()
-            os.fsync(temporary.fileno())
-        os.replace(temporary_path, assignments_path)
+        catalog, _ = _load_records(root)
+        reservations = _load_reservations(root, catalog)
+        pool = _anonymous_pool_summary(catalog, registry, reservations)
+        for path, payload, prefix in (
+            (assignments_path, registry, "reward-assignments-"),
+            (pool_path, pool, "reward-pool-"),
+        ):
+            with tempfile.NamedTemporaryFile(
+                mode="wb", prefix=prefix, suffix=".tmp", dir=git_dir, delete=False
+            ) as temporary:
+                temporary_path = Path(temporary.name)
+                temporary_paths.append(temporary_path)
+                data = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+                temporary.write(data)
+                temporary.flush()
+                os.fsync(temporary.fileno())
+        os.replace(temporary_paths[0], assignments_path)
+        os.replace(temporary_paths[1], pool_path)
     except OSError as exc:
-        raise RewardIssueError("Could not safely write the reward assignment registry.") from exc
+        raise RewardIssueError("Could not safely write the reward registry and pool count.") from exc
     finally:
-        if temporary_path is not None:
+        for temporary_path in temporary_paths:
             try:
                 temporary_path.unlink(missing_ok=True)
             except OSError:
@@ -621,12 +653,12 @@ def _commit_registry(
     _validate_registry(registry)
     _atomic_write_registry(root, registry)
     try:
-        _git(root, "add", "--", ASSIGNMENTS_RELATIVE)
+        _git(root, "add", "--", ASSIGNMENTS_RELATIVE, POOL_RELATIVE)
         staged = _git(root, "diff", "--cached", "--name-only").splitlines()
         unstaged = _git(root, "diff", "--name-only").splitlines()
         untracked = _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
-        if staged != [ASSIGNMENTS_RELATIVE] or unstaged or untracked:
-            raise RewardIssueError("Only assignments.json may be included in a reward registry commit; review Git status.")
+        if staged != [ASSIGNMENTS_RELATIVE, POOL_RELATIVE] or unstaged or untracked:
+            raise RewardIssueError("Only assignments.json and the anonymous pool count may be included in a reward commit; review Git status.")
         _git(root, "commit", "-m", f"reward: {commit_action} {event_hash[:12]}")
         _git(root, "push", "origin", "HEAD:refs/heads/main")
         if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
