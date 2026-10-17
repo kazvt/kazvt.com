@@ -213,7 +213,7 @@ import "../background-context.mjs?v=1";
       openLink.textContent = "Open ↗";
       openLink.setAttribute("aria-label", `Open ${shownUsername}'s reward`);
     } catch (error) {
-      console.warn("[reward-list] Could not prepare an individual award link:", error);
+      console.warn("[reward-list] Could not prepare an individual reward link:", error);
       openLink = createText("span", "open-button is-unavailable", assignment.artworkIsCurrent
         ? "Reward link unavailable"
         : "Reward unavailable");
@@ -295,7 +295,7 @@ import "../background-context.mjs?v=1";
         updateResults(cards);
       });
     } catch (error) {
-      console.error("[reward-list] Could not load award data:", error);
+      console.error("[reward-list] Could not load reward data:", error);
       poolMeter.classList.add("is-unavailable");
       poolMeter.setAttribute("aria-valuetext", "Reward pool unavailable");
       poolStatus.textContent = "The reward pool is unavailable.";

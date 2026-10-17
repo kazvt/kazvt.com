@@ -548,7 +548,7 @@ import {
             : "";
           return { ...assignment, href };
         } catch (error) {
-          console.warn("[reward] Could not prepare an individual award link:", error);
+          console.warn("[reward] Could not prepare an individual reward link:", error);
           return { ...assignment, href: "" };
         }
       })).then(linkedAwards => {
@@ -564,7 +564,7 @@ import {
       });
     }).catch(error => {
       if (generation !== awardCollectionGeneration) return;
-      console.warn("[reward] Could not load the user's award collection:", error);
+      console.warn("[reward] Could not load the user's reward collection:", error);
       awardCollection.hidden = true;
     });
   }
