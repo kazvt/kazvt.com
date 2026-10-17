@@ -1,6 +1,7 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs?v=images-reservations-1";
 import { fetchAssignmentRegistry } from "./assignment-source.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
+import { createUserRewardListHref } from "./user-list-link.mjs?v=1";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { retryRead } from "./retry-read.mjs?v=1";
@@ -314,15 +315,17 @@ import {
   }
 
   function usernameMention(username) {
-    const mention = document.createElement("span");
+    const mention = document.createElement("a");
     mention.className = "username-mention";
+    mention.href = createUserRewardListHref(username, window.location.origin);
     mention.textContent = username;
     return mention;
   }
 
   function usernameDisplay(username) {
-    const display = document.createElement("span");
+    const display = document.createElement("a");
     display.className = "username-display";
+    display.href = createUserRewardListHref(username, window.location.origin);
     display.textContent = username;
     return display;
   }
@@ -513,7 +516,7 @@ import {
       item.className = "award-collection-item";
       const link = document.createElement("a");
       link.className = "award-collection-tile award-collection-overflow";
-      link.href = `/reward/list/?user=${encodeURIComponent(activeAwardCollection.username)}`;
+      link.href = createUserRewardListHref(activeAwardCollection.username, window.location.origin);
       link.textContent = preview.overflowLabel;
       link.title = `Show all ${preview.overflowCount} more awards for ${activeAwardCollection.username}`;
       link.setAttribute("aria-label", `Show all ${preview.overflowCount} more awards for ${activeAwardCollection.username}`);
