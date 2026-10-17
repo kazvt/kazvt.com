@@ -136,7 +136,7 @@ export async function listAvailableArtwork({
 
 /**
  * Issues one award through the loopback-only MSI server. MSI commits and pushes
- * only assignments.json using the existing Git login; this helper waits until
+ * assignments.json plus anonymous pool counts using the existing Git login; this helper waits until
  * GitHub Pages serves that assignment before returning its public URL.
  */
 export async function issueAward(input, options = {}) {

@@ -75,7 +75,7 @@ The page resolves IDs through `/zzz_assets/rewards/manifest.json` and loads the 
 
 ### Reserved rewards
 
-Edit `zzz_assets/rewards/reservations.txt` to route one artwork to one or more username aliases. Matching ignores capitalization and a leading `@`. For example:
+Edit the private, Git-ignored `reward/api/reservations.local.txt` file to route one artwork to one or more username aliases. Matching ignores capitalization and a leading `@`. The rules are local to the issuing PC and are never published. For example:
 
 ```text
 transrantula, transrantula-0000 -> "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"

@@ -763,7 +763,7 @@ def issue_and_publish(
     *,
     expected_remote: str = DEFAULT_REMOTE,
 ) -> dict[str, Any]:
-    """Assign a specifically selected catalog image, then publish only assignments.json."""
+    """Assign a selected catalog image and publish the assignment and anonymous pool count."""
     return _issue_and_publish(site_root, payload, expected_remote=expected_remote)
 
 
