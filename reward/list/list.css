@@ -307,14 +307,33 @@ h1 {
 .award-card[hidden] { display: none; }
 
 .artwork-frame {
+  --preview-tone: #1b0d37;
+  --preview-pattern: url("/reward/patterns/purple.gif");
   display: grid;
   width: 88px;
   height: 82px;
   place-items: center;
   overflow: hidden;
   border: 3px inset #85839e;
-  background: #08080d;
+  background-color: var(--preview-tone);
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--preview-tone) 38%, transparent),
+      color-mix(in srgb, var(--preview-tone) 38%, transparent)
+    ),
+    var(--preview-pattern);
+  background-size: 100% 100%, calc(var(--reward-pattern-tile-width, 100px) * 0.4) auto;
+  background-position: center, 0 0;
+  background-repeat: no-repeat, repeat;
 }
+
+.artwork-frame[data-tier="uncommon"] { --preview-tone: #111e3a; --preview-pattern: url("/reward/patterns/blue.gif"); }
+.artwork-frame[data-tier="rare"] { --preview-tone: #310d19; --preview-pattern: url("/reward/patterns/red.gif"); }
+.artwork-frame[data-tier="epic"] { --preview-tone: #352013; --preview-pattern: url("/reward/patterns/orange.gif"); }
+.artwork-frame[data-tier="legendary"] { --preview-tone: #1d332a; --preview-pattern: url("/reward/patterns/green.gif"); }
+.artwork-frame[data-tier="mythic"] { --preview-tone: #371733; --preview-pattern: url("/reward/patterns/pink.gif"); }
+.artwork-frame[data-tier="divine"] { --preview-tone: #1c1b39; --preview-pattern: url("/reward/patterns/chrome.gif"); }
+.artwork-frame[data-tier="splus"] { --preview-tone: #392619; --preview-pattern: url("/reward/patterns/sand.gif"); }
 
 .artwork-frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .artwork-fallback { padding: 8px; color: #c3c3cb; text-align: center; font-size: 0.8rem; }

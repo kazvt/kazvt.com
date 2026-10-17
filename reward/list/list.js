@@ -167,6 +167,7 @@ import "../background-context.mjs?v=1";
 
     const artworkFrame = document.createElement("div");
     artworkFrame.className = "artwork-frame";
+    artworkFrame.dataset.tier = assignment.tierId;
     artworkFrame.setAttribute("aria-hidden", "true");
 
     const info = document.createElement("div");
