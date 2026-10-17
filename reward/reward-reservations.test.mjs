@@ -45,7 +45,7 @@ test("filename-only, historical filename, and forgiving separators are accepted"
 
 test("multiple reservations for an identity remain ordered and identity conflicts fail closed", () => {
   const reservations = parseRewardReservations(
-    "viewer, viewer-0000 -> Munch on this RABBIT.gif\nVIEWER => star.png",
+    "viewer, viewer-0000 -> Munch on this RABBIT.gif\nVIEWER, VIEWER-0000 => star.png",
     catalog
   );
   assert.deepEqual(reservedAssetsForIdentity(reservations, "Viewer-0000"), [rabbitId, starId]);
