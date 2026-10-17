@@ -1,6 +1,7 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=github-static-2";
+import { parseRewardReservations } from "../reward-reservations.mjs?v=reservations-1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -41,7 +42,7 @@ import "../background-context.mjs?v=1";
   }
 
   function validateCatalog(catalog) {
-    if (!catalog || catalog.version !== 4 || catalog.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
+    if (!catalog || catalog.version !== 4 || catalog.assetIdAlgorithm !== "sha256-image-bytes-v1" ||
         !Array.isArray(catalog.files) ||
         !catalog.assets || typeof catalog.assets !== "object" || Array.isArray(catalog.assets) ||
         !catalog.assetsById || typeof catalog.assetsById !== "object" || Array.isArray(catalog.assetsById) ||
@@ -59,7 +60,7 @@ import "../background-context.mjs?v=1";
       const expectedTier = asset && /^[a-f0-9]{64}$/.test(asset.assetId)
         ? tierForHash(asset.assetId, catalog)?.id
         : null;
-      if (typeof filename !== "string" || filename.length > 255 || !/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+      if (typeof filename !== "string" || filename.length > 255 || !/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(filename) ||
           !asset || !/^[a-f0-9]{64}$/.test(asset.assetId) || asset.assetId !== asset.sha256 ||
           !Number.isSafeInteger(asset.width) || asset.width < 1 ||
           !Number.isSafeInteger(asset.height) || asset.height < 1 ||
@@ -69,7 +70,7 @@ import "../background-context.mjs?v=1";
       }
     }
     for (const [filename, assetId] of Object.entries(catalog.filenameHistory)) {
-      if (!/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+      if (!/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(filename) ||
           (assetId !== null && !/^[a-f0-9]{64}$/.test(assetId))) {
         throw new Error("The reward filename history is invalid.");
       }
