@@ -6,6 +6,22 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Panties Bottom";
+  src: url("/zzz_assets/fonts/Panties%20Bottom.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bricked Up";
+  src: url("/zzz_assets/fonts/Bricked%20Up.OTF") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   font-family: "SPIRAL", "Trebuchet MS", sans-serif;
@@ -93,6 +109,10 @@ h1 {
   font-size: clamp(1.9rem, 4.8vw, 2.7rem);
   text-shadow: 2px 2px #694d9a, 4px 4px #07070c;
 }
+
+.mixed-title-glyph--spiral { font-family: "SPIRAL", "Trebuchet MS", sans-serif; }
+.mixed-title-glyph--panties { font-family: "Panties Bottom", "SPIRAL", sans-serif; }
+.mixed-title-glyph--bricked { font-family: "Bricked Up", "SPIRAL", sans-serif; }
 
 .pool-readout {
   display: flex;

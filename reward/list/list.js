@@ -35,6 +35,31 @@ import "../background-context.mjs?v=1";
     return username.toUpperCase();
   }
 
+  function graphemes(value) {
+    if (typeof Intl.Segmenter === "function") {
+      const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+      return Array.from(segmenter.segment(value), part => part.segment);
+    }
+    return Array.from(value);
+  }
+
+  function renderAlternatingTitle(text) {
+    const fontClasses = [
+      "mixed-title-glyph--spiral",
+      "mixed-title-glyph--panties",
+      "mixed-title-glyph--bricked"
+    ];
+    const fragment = document.createDocumentFragment();
+    for (const [index, glyph] of graphemes(text).entries()) {
+      const character = document.createElement("span");
+      character.className = `mixed-title-glyph ${fontClasses[index % fontClasses.length]}`;
+      character.textContent = glyph;
+      fragment.append(character);
+    }
+    pageTitle.setAttribute("aria-label", text);
+    pageTitle.replaceChildren(fragment);
+  }
+
   function filenameLabel(filename) {
     const extensionStart = filename.lastIndexOf(".");
     return extensionStart > 0 ? filename.slice(0, extensionStart) : filename;
@@ -225,11 +250,9 @@ import "../background-context.mjs?v=1";
   async function start() {
     if (userFilterRequested) {
       if (userFilterValid) {
-        pageTitle.replaceChildren(
-          document.createTextNode("Awards for "),
-          createText("span", "username-display", displayUsername(requestedUsername))
-        );
-        document.title = `Awards for ${displayUsername(requestedUsername)} — kazvt`;
+        const title = `${displayUsername(requestedUsername)} Rewards`;
+        renderAlternatingTitle(title);
+        document.title = `${title} — kazvt`;
       } else {
         pageTitle.textContent = "Award lookup";
         document.title = "Award lookup — kazvt";
