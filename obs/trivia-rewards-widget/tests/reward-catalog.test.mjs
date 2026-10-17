@@ -52,16 +52,17 @@ test("tier assignment rejects malformed digests", () => {
   assert.throws(() => tierForSha256("g".repeat(64)), /SHA-256/);
 });
 
-test("generated catalogs cover every valid PNG and keep matching deterministic tier metadata", async () => {
+test("generated catalogs cover every valid PNG/GIF and keep matching deterministic tier metadata", async () => {
   const { manifest, widgetCatalog } = await buildRewardCatalogs();
   assert.equal(manifest.version, 4);
-  assert.equal(manifest.assetIdAlgorithm, "sha256-png-bytes-v1");
+  assert.equal(manifest.assetIdAlgorithm, "sha256-image-bytes-v1");
   assert.equal(manifest.tierAlgorithm, TIER_ALGORITHM);
   assert.equal(manifest.tierWeights.length, 8);
   assert.equal(manifest.tierWeights.find(({ id }) => id === "splus")?.label, "Good Shit");
   assert.deepEqual(manifest.tierWeights.map(({ id, label }) => ({ id, label })),
     TIER_BUCKETS.map(({ id, label }) => ({ id, label })));
   assert.ok(manifest.files.length > 0);
+  assert.ok(manifest.files.some(file => file.toLowerCase().endsWith(".gif")));
   assert.equal(widgetCatalog.version, 3);
   assert.equal(widgetCatalog.assetIdAlgorithm, manifest.assetIdAlgorithm);
   assert.deepEqual(widgetCatalog.files, manifest.files);
@@ -84,6 +85,24 @@ test("generated catalogs cover every valid PNG and keep matching deterministic t
     assert.equal(manifest.assetsById[metadata.assetId].filename, file);
     assert.equal(manifest.filenameHistory[file], metadata.assetId);
     assert.equal(metadata.tier, tierForSha256(metadata.sha256), file);
+  }
+});
+
+test("GIF dimensions and byte identity are added to both catalogs", async () => {
+  const temporaryRoot = await mkdtemp(resolve(tmpdir(), "reward-gif-catalog-"));
+  try {
+    const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==", "base64");
+    await writeFile(resolve(temporaryRoot, "reserved.gif"), gif);
+    const { manifest, widgetCatalog } = await buildRewardCatalogs({ rewardDir: temporaryRoot });
+    const metadata = manifest.assets["reserved.gif"];
+    assert.deepEqual({ width: metadata.width, height: metadata.height }, { width: 1, height: 1 });
+    assert.equal(metadata.assetId, (await import("node:crypto")).createHash("sha256").update(gif).digest("hex"));
+    assert.equal(widgetCatalog.assets["reserved.gif"].assetId, metadata.assetId);
+    assert.equal(resolveRewardAsset(manifest, {
+      version: 1, username: "Viewer", file: "reserved.gif"
+    }).metadata.assetId, metadata.assetId);
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
   }
 });
 
