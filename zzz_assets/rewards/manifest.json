@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "assetIdAlgorithm": "sha256-png-bytes-v1",
+  "assetIdAlgorithm": "sha256-image-bytes-v1",
   "tierAlgorithm": "sha256-leading-32-bit-weighted-v2",
   "tierWeights": [
     {
@@ -49,6 +49,7 @@
     "A night of good sleep.png",
     "ACTUAL french tasting fries.png",
     "Aprin.png",
+    "BLOOD meccarone.gif",
     "Bag of surprise.png",
     "Banned aids.png",
     "Bed.png",
@@ -68,6 +69,8 @@
     "Dink oiter.png",
     "Exploinde.png",
     "Fatufck.png",
+    "Finger santwhich.gif",
+    "Fuck it. Now..gif",
     "Fuckable Wet Bread.png",
     "Fuckkkkkkkk.png",
     "Get closer.png",
@@ -82,11 +85,14 @@
     "I think hungry therefore I am not m.png",
     "It's time. Get dressed up.png",
     "Its a lot of Peppers.png",
+    "Its the bro.gif",
     "Mooooooooo.png",
     "Mosquito.png",
     "Mrow.png",
+    "Munch on this RABBIT.gif",
     "My Anus.png",
     "My mold.png",
+    "Mysterious ignredient Sants Which.gif",
     "New Car.png",
     "No bills to pay.png",
     "Not so yummy now are you.png",
@@ -104,6 +110,7 @@
     "Ropes ropes Ropes.png",
     "SHES MADE OF WHAaat.png",
     "Salted Lemonade.png",
+    "Sans Which.gif",
     "Sex toy.png",
     "Slop Spread.png",
     "Snack.png",
@@ -119,6 +126,7 @@
     "They slurped my spine.png",
     "They took my fucking knees.png",
     "They will find you.png",
+    "This asuka.gif",
     "This is periot Blood.png",
     "This site broke, Call the IT.png",
     "Ties your arteries.png",
@@ -126,6 +134,7 @@
     "Tringle.png",
     "Tuoy.png",
     "Uhhhhhhhh.png",
+    "Valid Meal Replacement.gif",
     "Vroom.png",
     "WHar the hell.png",
     "WOA LOOK OUT.png",
@@ -136,6 +145,7 @@
     "Woims.png",
     "Yay toy.png",
     "You rich as fuuuuck.png",
+    "You win Your Feet back.gif",
     "a One of these.png",
     "a Two oft hese.png",
     "a paper back.png",
@@ -146,6 +156,7 @@
     "bana.png",
     "berry.png",
     "bonky.png",
+    "bread thing.gif",
     "candy.png",
     "carts.png",
     "cash monkey.png",
@@ -158,6 +169,7 @@
     "creep.png",
     "crom.png",
     "cup of coffee.png",
+    "danc.gif",
     "do not.png",
     "elephant.png",
     "fanter.png",
@@ -179,6 +191,7 @@
     "i propse to you.png",
     "i used to put these on my lips and pretend i have really lonbg fangs.png",
     "iPhone 20 Pro Max.png",
+    "iamsmackingthewoodenfurniture.gif",
     "ice ceam.png",
     "is cream.png",
     "its full of pee.png",
@@ -192,6 +205,7 @@
     "mama mia stars.png",
     "man standing.png",
     "miju.png",
+    "minecaft choclate.gif",
     "mog.png",
     "my friends.png",
     "no more stink.png",
@@ -199,14 +213,17 @@
     "oangutan.png",
     "oats.png",
     "object from dreams.png",
+    "oh its a vegina bowl.gif",
     "ohhh penis woudl feel so good up this thing.png",
     "okay this is crazy.png",
     "omg its a big.png",
     "omg u won A Pedophile.png",
+    "one ball.gif",
     "packet of cigarettes.png",
     "pancak.png",
     "psst.png",
     "real burger.png",
+    "really good pussy.gif",
     "refreshing genocide conla.png",
     "ribcage.png",
     "shoves 500 of this down your panties.png",
@@ -214,21 +231,26 @@
     "sooo this just happened.png",
     "stolen appel.png",
     "that thing that makes it sizzle.png",
+    "the looong way.gif",
+    "the uhhh one of these.gif",
     "the.png",
     "thing.png",
     "this + head.png",
+    "this cat.gif",
     "this cna kill you.png",
     "this is what u look like.png",
     "this one.png",
     "this thing.png",
     "this wuld feel so good up my pussy.png",
     "three dies.png",
+    "toenail burger from spongebob.gif",
     "ur brian.png",
     "waaah waaah waaah u need this.png",
     "waow u got this.png",
     "wetfloor.png",
     "whaever.png",
     "whar.png",
+    "what is thaaar.gif",
     "what is this joy emoji joy emoji joy emoji.png",
     "wheres the gameGIRL huh.png",
     "white cupcake.png",
@@ -266,6 +288,13 @@
       "sha256": "378020658bc136c922880ffedac5b9f25df55e08e4eec9d906a5395b3c9c680c",
       "width": 476,
       "height": 253,
+      "tier": "common"
+    },
+    "BLOOD meccarone.gif": {
+      "assetId": "08102024e0f84d4f4d23d8c2a9c73bb822cdfd8aa353655b877dfeadfbad77d1",
+      "sha256": "08102024e0f84d4f4d23d8c2a9c73bb822cdfd8aa353655b877dfeadfbad77d1",
+      "width": 272,
+      "height": 264,
       "tier": "common"
     },
     "Bag of surprise.png": {
@@ -401,6 +430,20 @@
       "height": 1953,
       "tier": "common"
     },
+    "Finger santwhich.gif": {
+      "assetId": "5d7511565f9de43baac848e75a7b375213d063b9fda069ad952a5165e7dba343",
+      "sha256": "5d7511565f9de43baac848e75a7b375213d063b9fda069ad952a5165e7dba343",
+      "width": 350,
+      "height": 270,
+      "tier": "uncommon"
+    },
+    "Fuck it. Now..gif": {
+      "assetId": "7af9681a7851913c794e21291a332450bb2156409317254781498fa193c8e4c2",
+      "sha256": "7af9681a7851913c794e21291a332450bb2156409317254781498fa193c8e4c2",
+      "width": 467,
+      "height": 253,
+      "tier": "uncommon"
+    },
     "Fuckable Wet Bread.png": {
       "assetId": "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec",
       "sha256": "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec",
@@ -499,6 +542,13 @@
       "height": 716,
       "tier": "splus"
     },
+    "Its the bro.gif": {
+      "assetId": "d3d35e46d3ae8932ac91b3a872042f4e2f7896f0bbcf1447b52857fa464a842d",
+      "sha256": "d3d35e46d3ae8932ac91b3a872042f4e2f7896f0bbcf1447b52857fa464a842d",
+      "width": 192,
+      "height": 195,
+      "tier": "legendary"
+    },
     "Mooooooooo.png": {
       "assetId": "56f1afdb6385e1346741749e2e26059977bbaa427fb769d161a55d810e98a58f",
       "sha256": "56f1afdb6385e1346741749e2e26059977bbaa427fb769d161a55d810e98a58f",
@@ -520,6 +570,13 @@
       "height": 407,
       "tier": "splus"
     },
+    "Munch on this RABBIT.gif": {
+      "assetId": "0df40093c541e2f2b348b417b08e9fba59bc6bdd4a605db7e238a17d278e9ebe",
+      "sha256": "0df40093c541e2f2b348b417b08e9fba59bc6bdd4a605db7e238a17d278e9ebe",
+      "width": 448,
+      "height": 257,
+      "tier": "common"
+    },
     "My Anus.png": {
       "assetId": "e9fd0ac84c0ea7b2e509956b15b993d28b8d2885983551b583110287ee9a3814",
       "sha256": "e9fd0ac84c0ea7b2e509956b15b993d28b8d2885983551b583110287ee9a3814",
@@ -533,6 +590,13 @@
       "width": 1089,
       "height": 912,
       "tier": "rare"
+    },
+    "Mysterious ignredient Sants Which.gif": {
+      "assetId": "284a1008adda1ddd6942e8f8015d6b7273ac1b02c841b707433540ce8af65c5d",
+      "sha256": "284a1008adda1ddd6942e8f8015d6b7273ac1b02c841b707433540ce8af65c5d",
+      "width": 469,
+      "height": 216,
+      "tier": "common"
     },
     "New Car.png": {
       "assetId": "f1c79eca4908cd473e0d3bb6264b06d910b742478b38670a48f21f19b938719a",
@@ -653,6 +717,13 @@
       "height": 171,
       "tier": "mythic"
     },
+    "Sans Which.gif": {
+      "assetId": "24b6bb2be2ce686c7e579f109f6f6d38ebfbf82258300abda278e708833bfb22",
+      "sha256": "24b6bb2be2ce686c7e579f109f6f6d38ebfbf82258300abda278e708833bfb22",
+      "width": 461,
+      "height": 252,
+      "tier": "common"
+    },
     "Sex toy.png": {
       "assetId": "1a121410b53511edd0b6a37d4162ddb3bef5939636eac0852689dda9e07dd49d",
       "sha256": "1a121410b53511edd0b6a37d4162ddb3bef5939636eac0852689dda9e07dd49d",
@@ -758,6 +829,13 @@
       "height": 905,
       "tier": "epic"
     },
+    "This asuka.gif": {
+      "assetId": "0f4e1191744d982499622364e6347d3c7ffb604f97348c7f2a8a75ab8cc2e251",
+      "sha256": "0f4e1191744d982499622364e6347d3c7ffb604f97348c7f2a8a75ab8cc2e251",
+      "width": 132,
+      "height": 141,
+      "tier": "common"
+    },
     "This is periot Blood.png": {
       "assetId": "b65618e0e8829ccb197679ef51400f1c46c20495e0800b5ad38108fc0d60677f",
       "sha256": "b65618e0e8829ccb197679ef51400f1c46c20495e0800b5ad38108fc0d60677f",
@@ -806,6 +884,13 @@
       "width": 634,
       "height": 607,
       "tier": "common"
+    },
+    "Valid Meal Replacement.gif": {
+      "assetId": "bd0c8025d796ffefe91fc117847073b939ab6a26c5e188349a25a823f616fa4d",
+      "sha256": "bd0c8025d796ffefe91fc117847073b939ab6a26c5e188349a25a823f616fa4d",
+      "width": 480,
+      "height": 270,
+      "tier": "epic"
     },
     "Vroom.png": {
       "assetId": "e2725461f24155583546df81d71cd77501a895d0a8e97b282bd6ed78b9ab2fbe",
@@ -877,6 +962,13 @@
       "height": 1139,
       "tier": "common"
     },
+    "You win Your Feet back.gif": {
+      "assetId": "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3",
+      "sha256": "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3",
+      "width": 92,
+      "height": 97,
+      "tier": "mythic"
+    },
     "a One of these.png": {
       "assetId": "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095",
       "sha256": "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095",
@@ -946,6 +1038,13 @@
       "width": 394,
       "height": 381,
       "tier": "uncommon"
+    },
+    "bread thing.gif": {
+      "assetId": "d051797b8a1d8b7a26ed54da4b43d418f7dc49614b9a069604b98c2542a04632",
+      "sha256": "d051797b8a1d8b7a26ed54da4b43d418f7dc49614b9a069604b98c2542a04632",
+      "width": 65,
+      "height": 90,
+      "tier": "legendary"
     },
     "candy.png": {
       "assetId": "2bb7bf63b80d383fc1d6bca6a327c1e1fca857b78fa295413345ef19ef21525f",
@@ -1029,6 +1128,13 @@
       "sha256": "4d3e8134929268bae19a8cd4ed551d6a778db6d1eb4645a948d8bdd10c4699a5",
       "width": 592,
       "height": 438,
+      "tier": "uncommon"
+    },
+    "danc.gif": {
+      "assetId": "6afbfaa6c531a095aeda2cf007ca6087ffe09d607568327f61e2f733564252a0",
+      "sha256": "6afbfaa6c531a095aeda2cf007ca6087ffe09d607568327f61e2f733564252a0",
+      "width": 334,
+      "height": 431,
       "tier": "uncommon"
     },
     "do not.png": {
@@ -1178,6 +1284,13 @@
       "height": 846,
       "tier": "common"
     },
+    "iamsmackingthewoodenfurniture.gif": {
+      "assetId": "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e",
+      "sha256": "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e",
+      "width": 64,
+      "height": 64,
+      "tier": "epic"
+    },
     "ice ceam.png": {
       "assetId": "baf661706a75827be4c6f8af94175e0fa58072e345f69e65252e897362aafa85",
       "sha256": "baf661706a75827be4c6f8af94175e0fa58072e345f69e65252e897362aafa85",
@@ -1269,6 +1382,13 @@
       "height": 336,
       "tier": "legendary"
     },
+    "minecaft choclate.gif": {
+      "assetId": "fe2154310f39452de9792b720da30035050d426390aa5acb17b00312ecbe556a",
+      "sha256": "fe2154310f39452de9792b720da30035050d426390aa5acb17b00312ecbe556a",
+      "width": 198,
+      "height": 171,
+      "tier": "splus"
+    },
     "mog.png": {
       "assetId": "6e173339358a7e205a221c2c68a12e7392288d7cbf7110ca20cf3d07774d0dd2",
       "sha256": "6e173339358a7e205a221c2c68a12e7392288d7cbf7110ca20cf3d07774d0dd2",
@@ -1318,6 +1438,13 @@
       "height": 838,
       "tier": "uncommon"
     },
+    "oh its a vegina bowl.gif": {
+      "assetId": "c2a275838ef64525d1e53b3b3412d63431c64aaec6b8559a3c9f704667a2ec37",
+      "sha256": "c2a275838ef64525d1e53b3b3412d63431c64aaec6b8559a3c9f704667a2ec37",
+      "width": 144,
+      "height": 139,
+      "tier": "epic"
+    },
     "ohhh penis woudl feel so good up this thing.png": {
       "assetId": "070076f2be2a289ca1cf995b73d177ed885f39a9ba80fb33fa6e301d54c4b112",
       "sha256": "070076f2be2a289ca1cf995b73d177ed885f39a9ba80fb33fa6e301d54c4b112",
@@ -1346,6 +1473,13 @@
       "height": 484,
       "tier": "uncommon"
     },
+    "one ball.gif": {
+      "assetId": "194eb58c4be2c4c107a1e281ea3ac50057227fc8dfdd66699215c2e6a037f2d0",
+      "sha256": "194eb58c4be2c4c107a1e281ea3ac50057227fc8dfdd66699215c2e6a037f2d0",
+      "width": 42,
+      "height": 42,
+      "tier": "common"
+    },
     "packet of cigarettes.png": {
       "assetId": "3146a63c6f14e40e4e1c6a6a87468e9a5b4e4b094e02169088f81d0d6b037a85",
       "sha256": "3146a63c6f14e40e4e1c6a6a87468e9a5b4e4b094e02169088f81d0d6b037a85",
@@ -1372,6 +1506,13 @@
       "sha256": "fd5b5b65265f963425911ef0667cdae7857ae6869fcb86576e36c62dbe3f893a",
       "width": 346,
       "height": 336,
+      "tier": "splus"
+    },
+    "really good pussy.gif": {
+      "assetId": "fb0022dbe24261a804326ec9e5a343711d1ee8043cbfa424f45f8231aed88e7f",
+      "sha256": "fb0022dbe24261a804326ec9e5a343711d1ee8043cbfa424f45f8231aed88e7f",
+      "width": 457,
+      "height": 262,
       "tier": "splus"
     },
     "refreshing genocide conla.png": {
@@ -1423,6 +1564,20 @@
       "height": 249,
       "tier": "common"
     },
+    "the looong way.gif": {
+      "assetId": "fe8a319d687d9a01dc3226022d1da9a9f86d57575f644049d406ee139c3a9af4",
+      "sha256": "fe8a319d687d9a01dc3226022d1da9a9f86d57575f644049d406ee139c3a9af4",
+      "width": 232,
+      "height": 256,
+      "tier": "splus"
+    },
+    "the uhhh one of these.gif": {
+      "assetId": "94b581f62fbfc43224ffc0e6a0aded882edc7a324916575dcb6e415b7d4175b1",
+      "sha256": "94b581f62fbfc43224ffc0e6a0aded882edc7a324916575dcb6e415b7d4175b1",
+      "width": 120,
+      "height": 199,
+      "tier": "rare"
+    },
     "the.png": {
       "assetId": "61c72519ec35e493928f0afdcb0432bf58befab3ba3ca1703100d60e9c4ca7c3",
       "sha256": "61c72519ec35e493928f0afdcb0432bf58befab3ba3ca1703100d60e9c4ca7c3",
@@ -1443,6 +1598,13 @@
       "width": 259,
       "height": 980,
       "tier": "epic"
+    },
+    "this cat.gif": {
+      "assetId": "daeffb8d85fd79e64764b9e5af52a20e384f28bc156118c69c71e633b32b6a92",
+      "sha256": "daeffb8d85fd79e64764b9e5af52a20e384f28bc156118c69c71e633b32b6a92",
+      "width": 198,
+      "height": 254,
+      "tier": "legendary"
     },
     "this cna kill you.png": {
       "assetId": "e5dcb72747d979748736bc887f67a56e636fe3001d4f81e5c809260186a69043",
@@ -1486,6 +1648,13 @@
       "height": 196,
       "tier": "uncommon"
     },
+    "toenail burger from spongebob.gif": {
+      "assetId": "22a9753fdcca76f4f00bd370e81df14deab495e2b4c7b7163a59f941eea237ca",
+      "sha256": "22a9753fdcca76f4f00bd370e81df14deab495e2b4c7b7163a59f941eea237ca",
+      "width": 169,
+      "height": 122,
+      "tier": "common"
+    },
     "ur brian.png": {
       "assetId": "b7556f5cf77b9742eabae19c850f6381bb83d08e2baf3aafc858858c1d2a3cf8",
       "sha256": "b7556f5cf77b9742eabae19c850f6381bb83d08e2baf3aafc858858c1d2a3cf8",
@@ -1527,6 +1696,13 @@
       "width": 669,
       "height": 694,
       "tier": "rare"
+    },
+    "what is thaaar.gif": {
+      "assetId": "4374e15c9dd75ba7951884bd42fb94b88795930957ac7c26496f84fc55bcc672",
+      "sha256": "4374e15c9dd75ba7951884bd42fb94b88795930957ac7c26496f84fc55bcc672",
+      "width": 74,
+      "height": 74,
+      "tier": "common"
     },
     "what is this joy emoji joy emoji joy emoji.png": {
       "assetId": "a7331ae5dc3cb0128898b1a1db558cf404b6ec4e92c4ab7a39beb6701def1102",
@@ -1615,6 +1791,12 @@
       "filename": "Aprin.png",
       "width": 476,
       "height": 253,
+      "tier": "common"
+    },
+    "08102024e0f84d4f4d23d8c2a9c73bb822cdfd8aa353655b877dfeadfbad77d1": {
+      "filename": "BLOOD meccarone.gif",
+      "width": 272,
+      "height": 264,
       "tier": "common"
     },
     "1057bba17a186be4978909febe38f3a1ad199dd529e805febf9c826b51b76b23": {
@@ -1731,6 +1913,18 @@
       "height": 1953,
       "tier": "common"
     },
+    "5d7511565f9de43baac848e75a7b375213d063b9fda069ad952a5165e7dba343": {
+      "filename": "Finger santwhich.gif",
+      "width": 350,
+      "height": 270,
+      "tier": "uncommon"
+    },
+    "7af9681a7851913c794e21291a332450bb2156409317254781498fa193c8e4c2": {
+      "filename": "Fuck it. Now..gif",
+      "width": 467,
+      "height": 253,
+      "tier": "uncommon"
+    },
     "b074b5ed9f16ca2fe828143e43ad57e900c6634668fdf275924770279d8910ec": {
       "filename": "Fuckable Wet Bread.png",
       "width": 413,
@@ -1815,6 +2009,12 @@
       "height": 716,
       "tier": "splus"
     },
+    "d3d35e46d3ae8932ac91b3a872042f4e2f7896f0bbcf1447b52857fa464a842d": {
+      "filename": "Its the bro.gif",
+      "width": 192,
+      "height": 195,
+      "tier": "legendary"
+    },
     "56f1afdb6385e1346741749e2e26059977bbaa427fb769d161a55d810e98a58f": {
       "filename": "Mooooooooo.png",
       "width": 573,
@@ -1833,6 +2033,12 @@
       "height": 407,
       "tier": "splus"
     },
+    "0df40093c541e2f2b348b417b08e9fba59bc6bdd4a605db7e238a17d278e9ebe": {
+      "filename": "Munch on this RABBIT.gif",
+      "width": 448,
+      "height": 257,
+      "tier": "common"
+    },
     "e9fd0ac84c0ea7b2e509956b15b993d28b8d2885983551b583110287ee9a3814": {
       "filename": "My Anus.png",
       "width": 524,
@@ -1844,6 +2050,12 @@
       "width": 1089,
       "height": 912,
       "tier": "rare"
+    },
+    "284a1008adda1ddd6942e8f8015d6b7273ac1b02c841b707433540ce8af65c5d": {
+      "filename": "Mysterious ignredient Sants Which.gif",
+      "width": 469,
+      "height": 216,
+      "tier": "common"
     },
     "f1c79eca4908cd473e0d3bb6264b06d910b742478b38670a48f21f19b938719a": {
       "filename": "New Car.png",
@@ -1947,6 +2159,12 @@
       "height": 171,
       "tier": "mythic"
     },
+    "24b6bb2be2ce686c7e579f109f6f6d38ebfbf82258300abda278e708833bfb22": {
+      "filename": "Sans Which.gif",
+      "width": 461,
+      "height": 252,
+      "tier": "common"
+    },
     "1a121410b53511edd0b6a37d4162ddb3bef5939636eac0852689dda9e07dd49d": {
       "filename": "Sex toy.png",
       "width": 658,
@@ -2037,6 +2255,12 @@
       "height": 905,
       "tier": "epic"
     },
+    "0f4e1191744d982499622364e6347d3c7ffb604f97348c7f2a8a75ab8cc2e251": {
+      "filename": "This asuka.gif",
+      "width": 132,
+      "height": 141,
+      "tier": "common"
+    },
     "b65618e0e8829ccb197679ef51400f1c46c20495e0800b5ad38108fc0d60677f": {
       "filename": "This is periot Blood.png",
       "width": 377,
@@ -2078,6 +2302,12 @@
       "width": 634,
       "height": 607,
       "tier": "common"
+    },
+    "bd0c8025d796ffefe91fc117847073b939ab6a26c5e188349a25a823f616fa4d": {
+      "filename": "Valid Meal Replacement.gif",
+      "width": 480,
+      "height": 270,
+      "tier": "epic"
     },
     "e2725461f24155583546df81d71cd77501a895d0a8e97b282bd6ed78b9ab2fbe": {
       "filename": "Vroom.png",
@@ -2139,6 +2369,12 @@
       "height": 1139,
       "tier": "common"
     },
+    "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3": {
+      "filename": "You win Your Feet back.gif",
+      "width": 92,
+      "height": 97,
+      "tier": "mythic"
+    },
     "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095": {
       "filename": "a One of these.png",
       "width": 616,
@@ -2198,6 +2434,12 @@
       "width": 394,
       "height": 381,
       "tier": "uncommon"
+    },
+    "d051797b8a1d8b7a26ed54da4b43d418f7dc49614b9a069604b98c2542a04632": {
+      "filename": "bread thing.gif",
+      "width": 65,
+      "height": 90,
+      "tier": "legendary"
     },
     "2bb7bf63b80d383fc1d6bca6a327c1e1fca857b78fa295413345ef19ef21525f": {
       "filename": "candy.png",
@@ -2269,6 +2511,12 @@
       "filename": "cup of coffee.png",
       "width": 592,
       "height": 438,
+      "tier": "uncommon"
+    },
+    "6afbfaa6c531a095aeda2cf007ca6087ffe09d607568327f61e2f733564252a0": {
+      "filename": "danc.gif",
+      "width": 334,
+      "height": 431,
       "tier": "uncommon"
     },
     "daa7d4854df2754c6e402ae87ab8fecab85017bd839cb0843754b716de4c12fe": {
@@ -2397,6 +2645,12 @@
       "height": 846,
       "tier": "common"
     },
+    "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e": {
+      "filename": "iamsmackingthewoodenfurniture.gif",
+      "width": 64,
+      "height": 64,
+      "tier": "epic"
+    },
     "baf661706a75827be4c6f8af94175e0fa58072e345f69e65252e897362aafa85": {
       "filename": "ice ceam.png",
       "width": 225,
@@ -2475,6 +2729,12 @@
       "height": 336,
       "tier": "legendary"
     },
+    "fe2154310f39452de9792b720da30035050d426390aa5acb17b00312ecbe556a": {
+      "filename": "minecaft choclate.gif",
+      "width": 198,
+      "height": 171,
+      "tier": "splus"
+    },
     "6e173339358a7e205a221c2c68a12e7392288d7cbf7110ca20cf3d07774d0dd2": {
       "filename": "mog.png",
       "width": 248,
@@ -2517,6 +2777,12 @@
       "height": 838,
       "tier": "uncommon"
     },
+    "c2a275838ef64525d1e53b3b3412d63431c64aaec6b8559a3c9f704667a2ec37": {
+      "filename": "oh its a vegina bowl.gif",
+      "width": 144,
+      "height": 139,
+      "tier": "epic"
+    },
     "070076f2be2a289ca1cf995b73d177ed885f39a9ba80fb33fa6e301d54c4b112": {
       "filename": "ohhh penis woudl feel so good up this thing.png",
       "width": 378,
@@ -2541,6 +2807,12 @@
       "height": 484,
       "tier": "uncommon"
     },
+    "194eb58c4be2c4c107a1e281ea3ac50057227fc8dfdd66699215c2e6a037f2d0": {
+      "filename": "one ball.gif",
+      "width": 42,
+      "height": 42,
+      "tier": "common"
+    },
     "3146a63c6f14e40e4e1c6a6a87468e9a5b4e4b094e02169088f81d0d6b037a85": {
       "filename": "packet of cigarettes.png",
       "width": 469,
@@ -2563,6 +2835,12 @@
       "filename": "real burger.png",
       "width": 346,
       "height": 336,
+      "tier": "splus"
+    },
+    "fb0022dbe24261a804326ec9e5a343711d1ee8043cbfa424f45f8231aed88e7f": {
+      "filename": "really good pussy.gif",
+      "width": 457,
+      "height": 262,
       "tier": "splus"
     },
     "d3f1043ce1c07e228ec571b6aba8b1f5f16827e0a028d0f28e60f7025e719d98": {
@@ -2607,6 +2885,18 @@
       "height": 249,
       "tier": "common"
     },
+    "fe8a319d687d9a01dc3226022d1da9a9f86d57575f644049d406ee139c3a9af4": {
+      "filename": "the looong way.gif",
+      "width": 232,
+      "height": 256,
+      "tier": "splus"
+    },
+    "94b581f62fbfc43224ffc0e6a0aded882edc7a324916575dcb6e415b7d4175b1": {
+      "filename": "the uhhh one of these.gif",
+      "width": 120,
+      "height": 199,
+      "tier": "rare"
+    },
     "61c72519ec35e493928f0afdcb0432bf58befab3ba3ca1703100d60e9c4ca7c3": {
       "filename": "the.png",
       "width": 331,
@@ -2624,6 +2914,12 @@
       "width": 259,
       "height": 980,
       "tier": "epic"
+    },
+    "daeffb8d85fd79e64764b9e5af52a20e384f28bc156118c69c71e633b32b6a92": {
+      "filename": "this cat.gif",
+      "width": 198,
+      "height": 254,
+      "tier": "legendary"
     },
     "e5dcb72747d979748736bc887f67a56e636fe3001d4f81e5c809260186a69043": {
       "filename": "this cna kill you.png",
@@ -2661,6 +2957,12 @@
       "height": 196,
       "tier": "uncommon"
     },
+    "22a9753fdcca76f4f00bd370e81df14deab495e2b4c7b7163a59f941eea237ca": {
+      "filename": "toenail burger from spongebob.gif",
+      "width": 169,
+      "height": 122,
+      "tier": "common"
+    },
     "b7556f5cf77b9742eabae19c850f6381bb83d08e2baf3aafc858858c1d2a3cf8": {
       "filename": "ur brian.png",
       "width": 563,
@@ -2696,6 +2998,12 @@
       "width": 669,
       "height": 694,
       "tier": "rare"
+    },
+    "4374e15c9dd75ba7951884bd42fb94b88795930957ac7c26496f84fc55bcc672": {
+      "filename": "what is thaaar.gif",
+      "width": 74,
+      "height": 74,
+      "tier": "common"
     },
     "a7331ae5dc3cb0128898b1a1db558cf404b6ec4e92c4ab7a39beb6701def1102": {
       "filename": "what is this joy emoji joy emoji joy emoji.png",
@@ -2953,6 +3261,28 @@
     "No bills to pay.png": "f6f7ba7bfa21cfaa7ab7657816434a7e135a13425c4527f221906732383025ba",
     "Slop Spread.png": "7d5c3ca45f2bc97e28112a4cdd0ddbb8bcb228647b8dfdced35ad26e367342af",
     "You rich as fuuuuck.png": "43fd7763c938cbf0dd94c568259f8a6b8fea9d02cacb12702aa3d84e23bf4f30",
-    "♿♿♿♿♿.png": "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c"
+    "♿♿♿♿♿.png": "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c",
+    "BLOOD meccarone.gif": "08102024e0f84d4f4d23d8c2a9c73bb822cdfd8aa353655b877dfeadfbad77d1",
+    "Finger santwhich.gif": "5d7511565f9de43baac848e75a7b375213d063b9fda069ad952a5165e7dba343",
+    "Fuck it. Now..gif": "7af9681a7851913c794e21291a332450bb2156409317254781498fa193c8e4c2",
+    "Its the bro.gif": "d3d35e46d3ae8932ac91b3a872042f4e2f7896f0bbcf1447b52857fa464a842d",
+    "Munch on this RABBIT.gif": "0df40093c541e2f2b348b417b08e9fba59bc6bdd4a605db7e238a17d278e9ebe",
+    "Mysterious ignredient Sants Which.gif": "284a1008adda1ddd6942e8f8015d6b7273ac1b02c841b707433540ce8af65c5d",
+    "Sans Which.gif": "24b6bb2be2ce686c7e579f109f6f6d38ebfbf82258300abda278e708833bfb22",
+    "This asuka.gif": "0f4e1191744d982499622364e6347d3c7ffb604f97348c7f2a8a75ab8cc2e251",
+    "Valid Meal Replacement.gif": "bd0c8025d796ffefe91fc117847073b939ab6a26c5e188349a25a823f616fa4d",
+    "You win Your Feet back.gif": "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3",
+    "bread thing.gif": "d051797b8a1d8b7a26ed54da4b43d418f7dc49614b9a069604b98c2542a04632",
+    "danc.gif": "6afbfaa6c531a095aeda2cf007ca6087ffe09d607568327f61e2f733564252a0",
+    "iamsmackingthewoodenfurniture.gif": "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e",
+    "minecaft choclate.gif": "fe2154310f39452de9792b720da30035050d426390aa5acb17b00312ecbe556a",
+    "oh its a vegina bowl.gif": "c2a275838ef64525d1e53b3b3412d63431c64aaec6b8559a3c9f704667a2ec37",
+    "one ball.gif": "194eb58c4be2c4c107a1e281ea3ac50057227fc8dfdd66699215c2e6a037f2d0",
+    "really good pussy.gif": "fb0022dbe24261a804326ec9e5a343711d1ee8043cbfa424f45f8231aed88e7f",
+    "the looong way.gif": "fe8a319d687d9a01dc3226022d1da9a9f86d57575f644049d406ee139c3a9af4",
+    "the uhhh one of these.gif": "94b581f62fbfc43224ffc0e6a0aded882edc7a324916575dcb6e415b7d4175b1",
+    "this cat.gif": "daeffb8d85fd79e64764b9e5af52a20e384f28bc156118c69c71e633b32b6a92",
+    "toenail burger from spongebob.gif": "22a9753fdcca76f4f00bd370e81df14deab495e2b4c7b7163a59f941eea237ca",
+    "what is thaaar.gif": "4374e15c9dd75ba7951884bd42fb94b88795930957ac7c26496f84fc55bcc672"
   }
 }
