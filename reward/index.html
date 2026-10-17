@@ -1,0 +1,17 @@
+---
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https://raw.githubusercontent.com; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  {% include reward/head-assets.html %}
+  <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
+</head>
+<body {% if page.reward_demo %}data-reward-demo {% endif %}data-page-state="loading">
+  {% include reward/body.html %}
+</body>
+</html>

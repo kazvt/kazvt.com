@@ -1,0 +1,43 @@
+  <div id="artWallpaper" class="art-wallpaper" aria-hidden="true"></div>
+  <main class="reward-card{% if page.reward_demo %} reward-demo-card{% endif %}" aria-live="polite" aria-busy="true">
+    <div id="rewardDecals" class="reward-decal-layer" aria-hidden="true"></div>
+    <section id="loadingState" class="loading-state" role="status" aria-live="polite" aria-atomic="true">
+      <div class="loading-heading">
+        <img class="loading-hourglass" src="/reward/retro/hourglass.gif" alt="" width="79" height="79">
+        <span class="loading-hourglass-fallback" aria-hidden="true">⌛</span>
+        <h1 class="loading-title" aria-label="Loading..."><span class="loading-lineboil">Loading<span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></span></h1>
+      </div>
+      <p id="loadingNote" class="loading-note" hidden></p>
+    </section>
+    <section id="rewardState" hidden>
+      <div id="rewardArtworkMotion" class="reward-artwork-motion">
+        <div id="rewardImage" class="reward-image" role="img" aria-label="" draggable="false"></div>
+      </div>
+      <p id="filename" class="filename"></p>
+      <div id="rewardTier" class="tier-badge" data-tier="common" role="img" aria-label="Reward tier">
+        <span id="tierIcon" class="tier-icon" aria-hidden="true"></span>
+        <span id="tierName" class="tier-name"></span>
+      </div>
+      <h1 id="recipient"></h1>
+      <p id="awardNote" class="award-note">{% if page.reward_demo %}Demo only. No reward is issued or attached to this name.{% endif %}</p>
+      <section id="awardCollection" class="award-collection" hidden aria-labelledby="awardCollectionHeading">
+        <h2 id="awardCollectionHeading" class="award-collection-heading"></h2>
+        <ul id="awardCollectionGrid" class="award-collection-grid" aria-label="Rewards, newest first"></ul>
+        <p id="awardCollectionStatus" class="award-collection-status" role="status" hidden></p>
+      </section>
+    </section>
+    <section id="errorState" hidden>
+      <h1>{% if page.reward_demo %}Demo temporarily unavailable{% else %}Reward link unavailable{% endif %}</h1>
+      <p id="errorMessage" class="message">{% if page.reward_demo %}Couldn't load a demo. Please try again.{% else %}Complete link required.{% endif %}</p>
+    </section>
+    {% if page.reward_demo %}<p class="demo-footnote" hidden>The name and artwork are randomized. Nothing is assigned or saved.</p>{% endif %}
+  </main>
+  <a id="allRewardsLink" class="all-rewards-link" href="/reward/list/" hidden>
+    <svg class="all-rewards-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <rect x="1.5" y="4.5" width="9" height="10"></rect>
+      <path d="m3 12 2.5-2.5 2 1.75L9 9.5l1.5 1.5"></path>
+      <circle cx="4.25" cy="7.25" r=".75"></circle>
+      <path d="M5.5 2h9v10"></path>
+    </svg>
+    <span>Reward gallery</span>
+  </a>
