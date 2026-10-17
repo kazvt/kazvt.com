@@ -863,7 +863,9 @@ import {
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", `TIER: ${tier.label}${demo ? " demo" : ""} tier`);
+    rewardTier.setAttribute("aria-label", demo
+      ? `TIER: ${tier.label} demo tier`
+      : `TIER: ${tier.label} tier reward`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = `TIER: ${tier.label}`;
     if (demo) {
