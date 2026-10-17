@@ -77,8 +77,8 @@ body {
   background-color: var(--palette-background);
   background-image:
     linear-gradient(
-      color-mix(in srgb, var(--palette-background) 50%, transparent),
-      color-mix(in srgb, var(--palette-background) 50%, transparent)
+      color-mix(in srgb, var(--palette-background) 38%, transparent),
+      color-mix(in srgb, var(--palette-background) 38%, transparent)
     ),
     var(--palette-pattern);
   background-size: cover, var(--reward-pattern-tile-width, 100px) auto;
@@ -726,7 +726,7 @@ h1 {
   padding: 3px 6px;
   border: 1px outset var(--palette-accent);
   color: #fff;
-  background: var(--palette-panel, #101014);
+  background: color-mix(in srgb, var(--palette-panel, #101014) 50%, transparent);
   box-shadow: 1px 1px 0 #000, 0 0 6px color-mix(in srgb, var(--palette-accent) 36%, transparent);
   font-size: 10px;
   font-weight: 700;
