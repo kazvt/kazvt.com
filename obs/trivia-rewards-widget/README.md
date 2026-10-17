@@ -75,13 +75,13 @@ The page resolves IDs through `/zzz_assets/rewards/manifest.json` and loads the 
 
 ### Reserved rewards
 
-Edit the private, Git-ignored `reward/api/reservations.local.txt` file to route one artwork to one or more username aliases. Matching ignores capitalization and a leading `@`. The rules are local to the issuing PC and are never published. For example:
+Edit the private, Git-ignored `reward/api/reservations.local.txt` file to route one artwork to one or more username aliases. Matching ignores capitalization and a leading `@`. The rules stay on the issuing PC. For example:
 
 ```text
-transrantula, transrantula-0000 -> "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"
+viewer, viewer-0000 -> "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\award.gif"
 ```
 
-The target can also be just `Munch on this RABBIT.gif`; `->`, `=>`, `=`, `:`, and `→` are accepted, and aliases may be comma-, semicolon-, or pipe-separated. A reserved image is excluded from ordinary awards and from the public pool count; a matching `!reward` receives that image. The page does not display reservation labels or identities. Renamed artwork continues to resolve through the content-ID filename history. This file is served as a static file by GitHub Pages and is therefore visible to anyone who can access the repository/site; the reservation details are hidden from the UI, not secret.
+The target can also be just `award.gif`; `->`, `=>`, `=`, `:`, and `→` are accepted, and aliases may be comma-, semicolon-, or pipe-separated. A reserved image is excluded from ordinary awards and from the anonymous public pool count; a matching `!reward` receives that image without a reservation label or announcement. The rule file is local-only and is not served by the website. Renamed artwork continues to resolve through the content-ID filename history.
 
 To rename an award, rename its PNG or GIF in `zzz_assets/rewards/` and regenerate the catalogs from the repository root. Restart the local OBS reward server and refresh the OBS widget so both read the updated catalog. The assignment index uses the content ID, so the list follows the artwork to its new filename. The public catalog preserves old filename-to-ID history so existing filename-based links continue to work when a name has never been reused for different artwork. New links do not embed filenames.
 

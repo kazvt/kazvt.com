@@ -49,8 +49,8 @@ New art belongs in `zzz_assets/rewards/`. It is eligible after the repository's 
 Put private alias-to-artwork rules in `reward/api/reservations.local.txt`. The file is ignored by Git and is not served by the site. `reservations.example.txt` documents the forgiving syntax. For example:
 
 ```text
-transrantula, transrantula-0000 -> Munch on this RABBIT.gif
-another-viewer => E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\another-gift.png
+viewer, viewer-0000 -> award.gif
+another-viewer => E:\sites\kazvt.com-1\zzz_assets\rewards\another-gift.png
 ```
 
 Adding a rule does not issue or attach an award. When an authorized `!reward username` command arrives, the issuer checks both the current username and platform user ID against the aliases. A match gets that reserved artwork first; otherwise the normal unreserved pool is used. The rule itself and its alias-to-art mapping are never published, displayed, or included in reward announcements. Reserved items are omitted from the available pool and its count until issued. Once issued, the normal public assignment record is created. Keep a private backup of `reservations.local.txt`; the ignored file does not travel with Git clones or commits.
