@@ -271,8 +271,14 @@ h1 {
 .open-button.is-unavailable { border-style: inset; color: #aaa8b7; background: #292832; cursor: not-allowed; }
 .open-button.is-unavailable:hover { background: #292832; }
 
-.clear-button:focus-visible, .open-button:focus-visible, .back-link:focus-visible,
+.clear-button:focus-visible, .back-link:focus-visible,
 .search-row input:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.open-button[href]:focus-visible { outline: none; }
+.open-button[href]:focus-visible::after {
   outline: 3px solid #fff;
   outline-offset: 3px;
 }
@@ -286,6 +292,7 @@ h1 {
 }
 
 .award-card {
+  position: relative;
   display: grid;
   grid-template-columns: 94px minmax(0, 1fr) auto;
   align-items: center;
@@ -322,6 +329,8 @@ h1 {
 }
 
 .username-list-link {
+  position: relative;
+  z-index: 2;
   color: inherit;
   text-decoration-color: #bfeff6;
   text-decoration-line: underline;
@@ -330,6 +339,13 @@ h1 {
 
 .username-list-link:hover { color: #fff; text-decoration-color: #fff; }
 .username-list-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.open-button[href]::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+}
 
 .artwork-name { margin: 0; overflow-wrap: anywhere; color: var(--signal); }
 .award-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 6px; }
