@@ -404,8 +404,8 @@ import {
     );
   }
 
-  function setRewardTitle(username) {
-    document.title = `${username.toUpperCase()} Reward`;
+  function setRewardTitle(rewardFilename, username) {
+    document.title = `${filenameLabel(rewardFilename)} (${username})`;
   }
 
   function hideAwardCollection() {
@@ -844,7 +844,7 @@ import {
 
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     const demoName = randomDemoName();
-    setRewardTitle(demoName);
+    setRewardTitle(file, demoName);
     decalLayoutSeed = hashRewardIdentity(demoName, metadata.assetId);
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
@@ -914,7 +914,6 @@ import {
       platform: assignment.platform,
       userId: assignment.userId,
     };
-    setRewardTitle(data.username);
     const resolvedAsset = resolveRewardAsset(catalog, data);
     const file = resolvedAsset?.filename || "";
     const metadata = file && Object.prototype.hasOwnProperty.call(allowedAssets, file)
@@ -922,6 +921,7 @@ import {
       : null;
     const assignedTier = tierFromSha256(metadata?.sha256);
     if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
+    setRewardTitle(file, data.username);
 
     decalLayoutSeed = hashRewardIdentity(data.username, metadata.assetId);
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);

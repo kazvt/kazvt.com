@@ -934,6 +934,7 @@ body[data-reward-demo] #recipient {
 
 /* Username-only selectors outrank third-party rules that reset text transforms globally. */
 #recipient .username-mention,
+#awardNote .username-mention,
 #awardCollectionHeading .username-display {
   text-transform: uppercase !important;
 }
