@@ -84,7 +84,7 @@ def current_reward_filename(asset_id: str) -> str | None:
     return next((filename for filename, digest in REWARD_SHA256.items() if digest == asset_id), None)
 
 
-def read_reward_reservations() -> tuple[dict[str, str], set[str]]:
+def read_reward_reservations() -> tuple[dict[str, set[str]], set[str]]:
     try:
         source = RESERVATIONS_FILE.read_text(encoding="utf-8-sig")
     except FileNotFoundError:
