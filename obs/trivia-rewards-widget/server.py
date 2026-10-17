@@ -9,6 +9,7 @@ import os
 import re
 import secrets
 import threading
+import unicodedata
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -18,6 +19,7 @@ REWARD_QUEUE = ROOT / ".reward-queue.json"
 REWARD_QUEUE_TEMP = ROOT / ".reward-queue.json.tmp"
 PUBLIC_ASSIGNMENTS = ROOT.parent.parent / "zzz_assets" / "rewards" / "assignments.json"
 PUBLIC_ASSIGNMENTS_TEMP = PUBLIC_ASSIGNMENTS.with_name(PUBLIC_ASSIGNMENTS.name + ".tmp")
+RESERVATIONS_FILE = ROOT.parent.parent / "zzz_assets" / "rewards" / "reservations.txt"
 REWARD_QUEUE_LIMIT = 250
 REWARD_QUEUE_LOCK = threading.Lock()
 REWARD_STATE_VERSION = 2
@@ -27,6 +29,7 @@ UUID4_PATTERN = re.compile(
     re.IGNORECASE,
 )
 COMPACT_REWARD_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{16,22}$")
+RESERVATION_SEPARATOR_PATTERN = re.compile(r"\s*(?:->|=>|→|=|:)\s*")
 PREASSIGNED_REWARDS = {
     "3029196882de1c75ad40ad3cc9ebe3612b8bf29c0328b36d6dce5db6f45ede03": {
         "username": "kazvt",
@@ -77,6 +80,43 @@ def reward_asset_identity(filename: str) -> str:
 
 def current_reward_filename(asset_id: str) -> str | None:
     return next((filename for filename, digest in REWARD_SHA256.items() if digest == asset_id), None)
+
+
+def read_reward_reservations() -> tuple[dict[str, str], set[str]]:
+    try:
+        source = RESERVATIONS_FILE.read_text(encoding="utf-8-sig")
+    except FileNotFoundError:
+        source = ""
+    current = {filename.lower(): digest.lower() for filename, digest in REWARD_SHA256.items()}
+    history = {filename.lower(): digest.lower() for filename, digest in REWARD_FILENAME_HISTORY.items()}
+    aliases: dict[str, str] = {}
+    asset_ids: set[str] = set()
+    for line_number, raw_line in enumerate(source.splitlines(), 1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        separator = RESERVATION_SEPARATOR_PATTERN.search(line)
+        if not separator:
+            raise ValueError(f"Reward reservation line {line_number} needs an alias-to-artwork separator.")
+        names = [unicodedata.normalize("NFKC", name).strip().lstrip("@").strip().lower()
+                 for name in re.split(r"[,;|]", line[:separator.start()])]
+        names = [name for name in names if name]
+        if not names or any(len(name) > 100 or re.search(r"[\x00-\x1f\x7f]", name) for name in names):
+            raise ValueError(f"Reward reservation line {line_number} has an invalid alias.")
+        target = line[separator.end():].strip()
+        if len(target) >= 2 and target[0] == target[-1] and target[0] in "\"'<>" :
+            target = target[1:-1].strip()
+        filename = re.split(r"[\\/]", target)[-1].strip()
+        asset_id = current.get(filename.lower()) or history.get(filename.lower(), "")
+        if not asset_id or asset_id not in {value.lower() for value in REWARD_SHA256.values()}:
+            raise ValueError(f"Reward reservation line {line_number} points to artwork not in the current catalog.")
+        for name in names:
+            previous = aliases.get(name)
+            if previous and previous != asset_id:
+                raise ValueError(f"Reward reservation alias {name!r} points to multiple artworks.")
+            aliases[name] = asset_id
+        asset_ids.add(asset_id)
+    return aliases, asset_ids
 
 
 def ensure_owner_link_ids(owners: dict[str, dict[str, str]]) -> None:
