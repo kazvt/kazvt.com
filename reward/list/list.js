@@ -89,25 +89,32 @@ import "../background-context.mjs?v=1";
   }
 
   async function loadRegistry() {
-    const [registry, catalogResponse] = await Promise.all([
+    const [registry, catalogResponse, reservationResponse] = await Promise.all([
       fetchAssignmentRegistry(),
-      fetch("/zzz_assets/rewards/manifest.json", { cache: "no-cache" })
+      fetch("/zzz_assets/rewards/manifest.json", { cache: "no-cache" }),
+      fetch(`/zzz_assets/rewards/reservations.txt?pool=${Date.now()}`, { cache: "no-store" })
     ]);
     if (!catalogResponse.ok) {
       throw new Error("The public award data could not be fetched.");
     }
+    if (!reservationResponse.ok) {
+      throw new Error("The reward pool data could not be fetched.");
+    }
     const rawCatalog = await catalogResponse.json();
     const catalog = validateCatalog(rawCatalog);
+    const reservations = parseRewardReservations(await reservationResponse.text(), catalog);
     return {
       assignments: validateAndSortAssignments(registry, catalog),
-      catalog
+      catalog,
+      reservedAssetIds: reservations.assetIds
     };
   }
 
-  function countUniqueRewardsLeft(catalog, assignments) {
+  function countUniqueRewardsLeft(catalog, assignments, reservedAssetIds) {
     const allAssetIds = new Set(catalog.files
       .map(filename => catalog.assets[filename]?.assetId)
       .filter(assetId => typeof assetId === "string" && /^[a-f0-9]{64}$/i.test(assetId)));
+    for (const assetId of reservedAssetIds) allAssetIds.delete(assetId);
     const availableAssetIds = new Set(allAssetIds);
     for (const assignment of assignments) {
       availableAssetIds.delete(assignment.assetId);
@@ -225,8 +232,8 @@ import "../background-context.mjs?v=1";
     }
 
     try {
-      const { assignments: allAssignments, catalog } = await loadRegistry();
-      const pool = countUniqueRewardsLeft(catalog, allAssignments);
+      const { assignments: allAssignments, catalog, reservedAssetIds } = await loadRegistry();
+      const pool = countUniqueRewardsLeft(catalog, allAssignments, reservedAssetIds);
       renderPoolStatus(pool);
       const assignments = userFilterRequested
         ? userFilterValid

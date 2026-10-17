@@ -31,7 +31,7 @@ function validatePayload(data) {
   }
 
   if (data.version === 1 && typeof data.file === "string" && data.file.length <= 255 &&
-      /^[^/\\\u0000-\u001f]+\.png$/i.test(data.file)) {
+      /^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(data.file)) {
     return { version: 1, username: data.username, file: data.file };
   }
 

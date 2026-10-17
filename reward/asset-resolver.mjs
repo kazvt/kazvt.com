@@ -1,5 +1,5 @@
 const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/;
-const FILENAME_PATTERN = /^[^/\\\u0000-\u001f]+\.png$/i;
+const FILENAME_PATTERN = /^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i;
 
 export function resolveAssetById(catalog, assetId) {
   if (typeof assetId !== "string" || !ASSET_ID_PATTERN.test(assetId)) return null;

@@ -7,7 +7,7 @@ const DEFAULT_API_ORIGIN = "http://127.0.0.1:8000";
 const DEFAULT_SITE_ORIGIN = "https://kazvt.com";
 const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/i;
 const LINK_ID_PATTERN = /^(?:[A-Za-z0-9_-]{16,22}|[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})$/i;
-const FILENAME_PATTERN = /^[^/\\\u0000-\u001f\u007f]{1,255}\.png$/iu;
+const FILENAME_PATTERN = /^[^/\\\u0000-\u001f\u007f]{1,255}\.(?:png|gif)$/iu;
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/u;
 
 function normalizeUsername(value) {
