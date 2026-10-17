@@ -328,7 +328,7 @@ body[data-reward-demo][data-page-state="reward"][data-tier] .tier-badge {
 
 .reward-decal-layer {
   position: absolute;
-  z-index: 2;
+  z-index: 0;
   inset: -3px;
   overflow: visible;
   pointer-events: none;

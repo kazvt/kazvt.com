@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript] = await Promise.all([
+const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles] = await Promise.all([
   readFile(new URL("./index.html", import.meta.url), "utf8"),
   readFile(new URL("./demo/index.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/head-assets.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/body.html", import.meta.url), "utf8"),
   readFile(new URL("./reward.js", import.meta.url), "utf8"),
+  readFile(new URL("./reward.css", import.meta.url), "utf8"),
 ]);
 
 test("reward and demo pages use the same shared shell and versioned assets", () => {
@@ -50,4 +51,16 @@ test("the common reward component retains artwork, tier, title, collection, and 
 
   assert.match(demoLoader, /await renderRewardPage\(/);
   assert.match(assignmentLoader, /await renderRewardPage\(/);
+});
+
+test("all reward-panel content layers above the side decals", () => {
+  const decalRule = rewardStyles.match(/\.reward-decal-layer\s*\{([^}]*)\}/)?.[1] ?? "";
+  const contentRule = rewardStyles.match(/\.reward-card\s*>\s*:not\(\.reward-decal-layer\)\s*\{([^}]*)\}/)?.[1] ?? "";
+  const decalZIndex = Number(decalRule.match(/\bz-index:\s*(-?\d+)/)?.[1]);
+  const contentZIndex = Number(contentRule.match(/\bz-index:\s*(-?\d+)/)?.[1]);
+
+  assert.ok(Number.isFinite(decalZIndex), "side decal layer has an explicit stacking level");
+  assert.ok(Number.isFinite(contentZIndex), "panel content has an explicit stacking level");
+  assert.ok(contentZIndex > decalZIndex,
+    "artwork, tier, and text must paint above the side decal layer");
 });
