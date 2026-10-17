@@ -203,11 +203,8 @@ async function readOptionalText(path) {
   }
 }
 
-async function buildAnonymousPool(manifest) {
-  const [reservationText, registryText] = await Promise.all([
-    readOptionalText(PRIVATE_RESERVATIONS),
-    readOptionalText(PUBLIC_ASSIGNMENTS)
-  ]);
+async function buildAnonymousPool(manifest, reservationText) {
+  const registryText = await readOptionalText(PUBLIC_ASSIGNMENTS);
   const reservations = parseRewardReservations(reservationText, manifest);
   let registry = { assignments: [] };
   if (registryText) {
@@ -239,12 +236,19 @@ async function buildAnonymousPool(manifest) {
 
 export async function syncRewardCatalogs({ checkOnly = false } = {}) {
   const { manifest, widgetCatalog } = await buildRewardCatalogs();
-  const pool = await buildAnonymousPool(manifest);
   const outputs = [
     [PUBLIC_MANIFEST, asJson(manifest)],
-    [WIDGET_CATALOG, asJson(widgetCatalog)],
-    [PUBLIC_POOL, asJson(pool)]
+    [WIDGET_CATALOG, asJson(widgetCatalog)]
   ];
+  let privateReservationsAvailable = true;
+  try {
+    const reservationText = await readFile(PRIVATE_RESERVATIONS, "utf8");
+    const pool = await buildAnonymousPool(manifest, reservationText);
+    outputs.push([PUBLIC_POOL, asJson(pool)]);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    privateReservationsAvailable = false;
+  }
 
   if (checkOnly) {
     const stale = [];
@@ -259,11 +263,17 @@ export async function syncRewardCatalogs({ checkOnly = false } = {}) {
     }
     if (stale.length) throw new Error(`Reward catalogs are stale: ${stale.join(", ")}. Run this script to regenerate them.`);
     console.log(`Reward catalogs match all ${manifest.files.length} PNG/GIF assets.`);
+    if (!privateReservationsAvailable) {
+      console.log("Private reservation config is absent; the anonymous pool count was left unchanged.");
+    }
     return;
   }
 
   for (const [path, contents] of outputs) await writeAtomically(path, contents);
   console.log(`Generated tiers for ${manifest.files.length} PNG/GIF assets.`);
+  if (!privateReservationsAvailable) {
+    console.log("Private reservation config is absent; the anonymous pool count was left unchanged.");
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
