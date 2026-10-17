@@ -233,7 +233,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RewardIssueError, "All rewards reserved"):
             issue_next_and_publish(self.site, {
-                "username": "reserved_viewer", "userId": "reserved-user", "platform": "twitch",
+                "username": "reserved-viewer", "userId": "reserved-user", "platform": "twitch",
                 "eventId": "twitch:reserved-order-3",
             }, expected_remote=str(self.remote))
 
