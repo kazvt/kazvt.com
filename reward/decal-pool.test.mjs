@@ -10,8 +10,11 @@ const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 test("the edge pool includes the existing decals and every added GIF exactly once", () => {
   const sources = REWARD_DECAL_POOL.map(item => item.src);
-  assert.equal(REWARD_DECAL_POOL.length, 64);
+  assert.equal(REWARD_DECAL_POOL.length, 61);
   assert.equal(new Set(sources).size, sources.length);
+  assert.ok(!sources.includes("/reward/retro/decal-pool/532EV253ZQEW44WBJXAA4O7ENQPQ5UBC.gif"));
+  assert.ok(!sources.includes("/reward/retro/decal-pool/4HIPRF5OTTQDQNUUF2FJGODOYYYYHR5K.gif"));
+  assert.ok(!sources.includes("/reward/retro/decal-pool/3IXSSZGOSDMVNZ64BMYP4S2EZQLSTVTW.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/dancey_bgless.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/672ZLW3ZRJMOYJ4OFMF4VOTN45WFA5VL.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/S4PFGWRLGB34WVSA3KRJ6US45232D3EU.gif"));
