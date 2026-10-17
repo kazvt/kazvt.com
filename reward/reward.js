@@ -456,10 +456,10 @@ import {
     if (isCurrent) {
       tile.setAttribute("role", "img");
       tile.setAttribute("aria-current", "page");
-      tile.setAttribute("aria-label", `Current award: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}`);
-      tile.title = "Current award";
+      tile.setAttribute("aria-label", `Current reward: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}`);
+      tile.title = "Current reward";
     } else {
-      const action = canOpen ? "Open" : "Award unavailable";
+      const action = canOpen ? "Open" : "Reward unavailable";
       const label = `${action}: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}, ${username}`;
       tile.setAttribute("aria-label", label);
       tile.title = label;
@@ -518,8 +518,8 @@ import {
       link.className = "award-collection-tile award-collection-overflow";
       link.href = createUserRewardListHref(activeAwardCollection.username, window.location.origin);
       link.textContent = preview.overflowLabel;
-      link.title = `Show all ${preview.overflowCount} more awards for ${activeAwardCollection.username}`;
-      link.setAttribute("aria-label", `Show all ${preview.overflowCount} more awards for ${activeAwardCollection.username}`);
+      link.title = `Show all ${preview.overflowCount} more rewards for ${activeAwardCollection.username}`;
+      link.setAttribute("aria-label", `Show all ${preview.overflowCount} more rewards for ${activeAwardCollection.username}`);
       item.append(link);
       items.push(item);
     }
@@ -555,7 +555,7 @@ import {
         if (generation !== awardCollectionGeneration) return;
         activeAwardCollection.assignments = linkedAwards;
         awardCollectionHeading.replaceChildren(
-          document.createTextNode("Other awards for "),
+          document.createTextNode("Other rewards for "),
           usernameDisplay(username),
           document.createTextNode(" - newest first")
         );
@@ -864,7 +864,7 @@ import {
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = `TIER: ${tier.label}`;
     recipient.textContent = demoName;
-    awardNote.textContent = "Demo only. No award is issued or attached to this name.";
+    awardNote.textContent = "Demo only. No reward is issued or attached to this name.";
     renderFilename(file);
     rewardImage.setAttribute("aria-label", `${tier.label} demo artwork: ${file}`);
     const artworkImage = await waitForRewardImage(imageUrl);
@@ -938,7 +938,7 @@ import {
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", `TIER: ${tier.label} tier award`);
+    rewardTier.setAttribute("aria-label", `TIER: ${tier.label} tier reward`);
     tierIcon.textContent = TIER_MARKS[tier.id];
     tierName.textContent = `TIER: ${tier.label}`;
     renderUsernameCopy(data.username);
@@ -960,7 +960,7 @@ import {
       userId: data.userId,
     });
     animateTier(assignedTier).catch(error => {
-      // The award remains readable and correctly tiered when an external animation CDN is unavailable.
+      // The reward remains readable and correctly tiered when an external animation CDN is unavailable.
       console.warn("[reward] Tier animation is unavailable:", error);
     });
   }
@@ -977,7 +977,7 @@ import {
       await waitForMinimumLoading();
       const message = String(error && error.message);
       if (/reward image could not be (?:loaded|decoded)/i.test(message)) {
-        showError("Award image unavailable.");
+        showError("Reward image unavailable.");
         return;
       }
       const publicAssetError = /assignment registry|award list|reward list|reward tier|reward asset/i.test(message);

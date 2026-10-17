@@ -206,21 +206,21 @@ import "../background-context.mjs?v=1";
     let openLink;
     try {
       if (!assignment.artworkIsCurrent || !assignment.linkId) {
-        throw new Error("The assigned award does not have an active direct link.");
+        throw new Error("The assigned reward does not have an active direct link.");
       }
       openLink = document.createElement("a");
       openLink.href = createRewardHref(assignment.linkId, window.location.origin);
       openLink.textContent = "Open ↗";
-      openLink.setAttribute("aria-label", `Open ${shownUsername}'s award`);
+      openLink.setAttribute("aria-label", `Open ${shownUsername}'s reward`);
     } catch (error) {
       console.warn("[reward-list] Could not prepare an individual award link:", error);
       openLink = createText("span", "open-button is-unavailable", assignment.artworkIsCurrent
-        ? "Award link unavailable"
-        : "Award unavailable");
+        ? "Reward link unavailable"
+        : "Reward unavailable");
       openLink.setAttribute("aria-disabled", "true");
       openLink.setAttribute("role", "img");
-      openLink.setAttribute("aria-label", `${shownUsername}'s award cannot be opened`);
-      openLink.title = "This award has no UUID link or its artwork is no longer in the current catalog.";
+      openLink.setAttribute("aria-label", `${shownUsername}'s reward cannot be opened`);
+      openLink.title = "This reward has no UUID link or its artwork is no longer in the current catalog.";
     }
     openLink.classList.add("open-button");
 
@@ -256,8 +256,8 @@ import "../background-context.mjs?v=1";
         renderAlternatingTitle(title);
         document.title = `${title} — kazvt`;
       } else {
-        pageTitle.textContent = "Award lookup";
-        document.title = "Award lookup — kazvt";
+        pageTitle.textContent = "Reward lookup";
+        document.title = "Reward lookup — kazvt";
       }
       searchLabel.textContent = "Search this collection";
       searchInput.placeholder = "Search artwork…";
@@ -279,12 +279,12 @@ import "../background-context.mjs?v=1";
         emptyState.hidden = false;
         if (userFilterRequested && userFilterValid) {
           emptyState.replaceChildren(
-            document.createTextNode("No awards for "),
+            document.createTextNode("No rewards for "),
             createText("span", "username-display", displayUsername(requestedUsername)),
             document.createTextNode(".")
           );
         } else {
-          emptyState.textContent = userFilterRequested ? "Invalid username." : "No awards yet.";
+          emptyState.textContent = userFilterRequested ? "Invalid username." : "No rewards yet.";
         }
       }
       updateResults(cards);
@@ -300,7 +300,7 @@ import "../background-context.mjs?v=1";
       poolMeter.setAttribute("aria-valuetext", "Reward pool unavailable");
       poolStatus.textContent = "The reward pool is unavailable.";
       awardList.setAttribute("aria-busy", "false");
-      resultStatus.textContent = "The award index is unavailable.";
+      resultStatus.textContent = "The reward index is unavailable.";
       errorState.hidden = false;
     }
   }
