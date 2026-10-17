@@ -40,7 +40,8 @@ function compareNames(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-const ASSET_ID_ALGORITHM = "sha256-png-bytes-v1";
+const ASSET_ID_ALGORITHM = "sha256-image-bytes-v1";
+const IMAGE_FILENAME = /^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i;
 
 function validAssetId(value) {
   return typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
@@ -48,7 +49,7 @@ function validAssetId(value) {
 
 function addFilenameHistory(history, filename, assetId) {
   if (typeof filename !== "string" || filename.length > 255 ||
-      !/^[^/\\\u0000-\u001f]+\.png$/i.test(filename)) return;
+      !IMAGE_FILENAME.test(filename)) return;
   const normalizedId = validAssetId(assetId) ? assetId.toLowerCase() : null;
   if (!Object.prototype.hasOwnProperty.call(history, filename)) {
     history[filename] = normalizedId;
@@ -66,15 +67,23 @@ function assetIdForPreviousName(manifest, filename) {
   return validAssetId(id) ? id.toLowerCase() : null;
 }
 
-function readPngDimensions(bytes, file) {
-  if (bytes.length < 33 || !bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE) ||
-      bytes.readUInt32BE(8) !== 13 || bytes.toString("ascii", 12, 16) !== "IHDR") {
-    throw new Error(`${file} is not a PNG with a valid IHDR header.`);
+function readImageDimensions(bytes, file) {
+  let width;
+  let height;
+  if (bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
+    if (bytes.length < 33 || bytes.readUInt32BE(8) !== 13 || bytes.toString("ascii", 12, 16) !== "IHDR") {
+      throw new Error(`${file} is not a PNG with a valid IHDR header.`);
+    }
+    width = bytes.readUInt32BE(16);
+    height = bytes.readUInt32BE(20);
+  } else if (bytes.length >= 13 && /^GIF8[79]a$/.test(bytes.toString("ascii", 0, 6))) {
+    width = bytes.readUInt16LE(6);
+    height = bytes.readUInt16LE(8);
+  } else {
+    throw new Error(`${file} is not a supported PNG or GIF image.`);
   }
-  const width = bytes.readUInt32BE(16);
-  const height = bytes.readUInt32BE(20);
   if (!width || !height || width > 0x7fffffff || height > 0x7fffffff) {
-    throw new Error(`${file} has invalid PNG dimensions.`);
+    throw new Error(`${file} has invalid image dimensions.`);
   }
   return { width, height };
 }
@@ -94,11 +103,11 @@ export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousMani
     : previousManifest;
   const entries = await readdir(rewardDir, { withFileTypes: true });
   const files = entries
-    .filter(entry => entry.isFile() && entry.name.toLowerCase().endsWith(".png"))
+    .filter(entry => entry.isFile() && IMAGE_FILENAME.test(entry.name))
     .map(entry => entry.name)
     .sort(compareNames);
 
-  if (files.length === 0) throw new Error(`No PNG reward images found in ${rewardDir}.`);
+  if (files.length === 0) throw new Error(`No PNG or GIF reward images found in ${rewardDir}.`);
   if (files.some(file => file.length > 255)) {
     throw new Error("Reward filenames must fit within the 255-character filesystem component limit.");
   }
@@ -107,7 +116,7 @@ export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousMani
   const assetsById = {};
   for (const file of files) {
     const bytes = await readFile(resolve(rewardDir, file));
-    const { width, height } = readPngDimensions(bytes, file);
+    const { width, height } = readImageDimensions(bytes, file);
     const sha256 = createHash("sha256").update(bytes).digest("hex");
     if (Object.prototype.hasOwnProperty.call(assetsById, sha256)) {
       throw new Error(`${file} has identical artwork bytes to ${assetsById[sha256].filename}; keep one file per award.`);
@@ -200,12 +209,12 @@ export async function syncRewardCatalogs({ checkOnly = false } = {}) {
       if (current !== expected) stale.push(path);
     }
     if (stale.length) throw new Error(`Reward catalogs are stale: ${stale.join(", ")}. Run this script to regenerate them.`);
-    console.log(`Reward catalogs match all ${manifest.files.length} PNG assets.`);
+    console.log(`Reward catalogs match all ${manifest.files.length} PNG/GIF assets.`);
     return;
   }
 
   for (const [path, contents] of outputs) await writeAtomically(path, contents);
-  console.log(`Generated tiers for ${manifest.files.length} PNG assets.`);
+  console.log(`Generated tiers for ${manifest.files.length} PNG/GIF assets.`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
