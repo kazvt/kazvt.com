@@ -262,6 +262,10 @@ class LocalRewardIssuerTests(unittest.TestCase):
         result = unassign_latest_and_publish(self.site, removal, expected_remote=str(self.remote))
         self.assertEqual(result["revokedCount"], 1)
         self.assertEqual(result["revoked"][0]["linkId"], newer["assignment"]["linkId"])
+        self.assertEqual(
+            json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8")),
+            {"version": 1, "remaining": 1, "total": 2},
+        )
         registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
         self.assertEqual([item["linkId"] for item in registry["assignments"]], [older["assignment"]["linkId"]])
         self.assertEqual([item["linkId"] for item in registry["revokedAssignments"]], [newer["assignment"]["linkId"]])
@@ -310,6 +314,10 @@ class LocalRewardIssuerTests(unittest.TestCase):
         }
         cleared = clear_user_rewards_and_publish(self.site, clear_request, expected_remote=str(self.remote))
         self.assertEqual(cleared["revokedCount"], 1)
+        self.assertEqual(
+            json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8")),
+            {"version": 1, "remaining": 1, "total": 2},
+        )
         registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
         self.assertEqual([item["linkId"] for item in registry["assignments"]], [kick_award["assignment"]["linkId"]])
         self.assertEqual(len(list_available_artwork(self.site)), 1)
