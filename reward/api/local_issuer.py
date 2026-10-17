@@ -251,7 +251,7 @@ def _reward_paths(site_root: Path) -> tuple[Path, Path]:
 
 
 def _reservation_alias(value: str) -> str:
-    return unicodedata.normalize("NFKC", value).strip().lstrip("@").strip().casefold()
+    return unicodedata.normalize("NFKC", value).strip().lstrip("@").strip().lower()
 
 
 def _reservation_filename(value: str) -> str:
@@ -271,13 +271,13 @@ def _load_reservations(site_root: Path, catalog: dict[str, Any]) -> dict[str, An
         raise RewardIssueError("Could not read the reward reservation list.") from exc
 
     current_by_name = {
-        filename.casefold(): str(metadata["assetId"]).lower()
+        filename.lower(): str(metadata["assetId"]).lower()
         for filename, metadata in catalog["assets"].items()
         if isinstance(filename, str) and isinstance(metadata, dict) and
         isinstance(metadata.get("assetId"), str) and ASSET_ID_RE.fullmatch(metadata["assetId"])
     }
     history_by_name = {
-        filename.casefold(): asset_id.lower()
+        filename.lower(): asset_id.lower()
         for filename, asset_id in catalog.get("filenameHistory", {}).items()
         if isinstance(filename, str) and isinstance(asset_id, str) and ASSET_ID_RE.fullmatch(asset_id)
     }
@@ -300,7 +300,7 @@ def _load_reservations(site_root: Path, catalog: dict[str, Any]) -> dict[str, An
         filename = _reservation_filename(target)
         if not FILENAME_RE.fullmatch(filename):
             raise RewardIssueError(f"Reservation line {line_number} has an invalid artwork filename.")
-        asset_id = current_by_name.get(filename.casefold()) or history_by_name.get(filename.casefold(), "")
+        asset_id = current_by_name.get(filename.lower()) or history_by_name.get(filename.lower(), "")
         if not asset_id or asset_id not in catalog["assetsById"]:
             raise RewardIssueError(f"Reservation line {line_number} refers to artwork not found in the current catalog.")
         for alias in names:

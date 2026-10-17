@@ -43,12 +43,12 @@ export function parseRewardReservations(source, catalog) {
   for (const filename of catalog.files) {
     const id = catalog.assets[filename]?.assetId;
     if (FILENAME_PATTERN.test(filename) && ASSET_ID_PATTERN.test(id ?? "")) {
-    currentByName.set(filename.toLowerCase(), id.toLowerCase());
+      currentByName.set(filename.toLowerCase(), id.toLowerCase());
     }
   }
   const historyByName = new Map(Object.entries(catalog.filenameHistory)
     .filter(([filename, id]) => FILENAME_PATTERN.test(filename) && ASSET_ID_PATTERN.test(id ?? ""))
-    .map(([filename, id]) => [filename.toLocaleLowerCase(), id.toLowerCase()]));
+    .map(([filename, id]) => [filename.toLowerCase(), id.toLowerCase()]));
 
   const aliases = new Map();
   const assetIds = new Set();
