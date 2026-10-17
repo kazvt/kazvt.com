@@ -78,7 +78,7 @@ The page resolves IDs through `/zzz_assets/rewards/manifest.json` and loads the 
 Edit the private, Git-ignored `reward/api/reservations.local.txt` file to route one artwork to one or more username aliases. Matching ignores capitalization and a leading `@`. The rules stay on the issuing PC. For example:
 
 ```text
-viewer, viewer-0000 -> "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\award.gif"
+viewer, viewer-0000 -> "E:/sites/kazvt.com-1/zzz_assets/rewards/award.gif"
 ```
 
 The target can also be just `award.gif`; `->`, `=>`, `=`, `:`, and `→` are accepted, and aliases may be comma-, semicolon-, or pipe-separated. A reserved image is excluded from ordinary awards and from the anonymous public pool count; a matching `!reward` receives that image without a reservation label or announcement. The rule file is local-only and is not served by the website. Renamed artwork continues to resolve through the content-ID filename history.

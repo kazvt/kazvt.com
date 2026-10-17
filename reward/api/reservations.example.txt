@@ -4,4 +4,4 @@
 # Separate aliases with commas, semicolons, or |. Use ->, =>, =, : or →.
 # You may use a filename or full Windows/Unix path; filename history keeps renamed art linked.
 # Example:
-# viewer, viewer-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Award name.gif"
+# viewer, viewer-0000 => "E:/sites/kazvt.com-1/zzz_assets/rewards/Award name.gif"
