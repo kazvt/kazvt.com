@@ -16,6 +16,7 @@ import "../background-context.mjs?v=1";
   const pageTitle = document.getElementById("pageTitle");
   const poolMeter = document.getElementById("poolMeter");
   const poolMeterFill = document.getElementById("poolMeterFill");
+  const poolMeterCount = document.getElementById("poolMeterCount");
   const poolStatus = document.getElementById("poolStatus");
   const searchLabel = document.getElementById("search-label");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
@@ -118,8 +119,13 @@ import "../background-context.mjs?v=1";
     poolMeter.setAttribute("aria-valuetext", `${remaining} of ${total} unique rewards remain`);
     poolMeter.classList.toggle("is-empty", remaining === 0);
     poolMeter.classList.remove("is-unavailable");
-    poolMeterFill.style.width = total ? `${(remaining / total) * 100}%` : "0%";
-    poolStatus.textContent = `${remaining} left`;
+    poolMeterCount.textContent = String(remaining);
+    const fillPercent = total ? (remaining / total) * 100 : 0;
+    const countWidth = Math.ceil(poolMeterCount.getBoundingClientRect().width + 12);
+    poolMeterFill.style.width = remaining > 0
+      ? `max(${fillPercent}%, ${countWidth}px)`
+      : "0%";
+    poolStatus.textContent = `${remaining} unique ${remaining === 1 ? "reward" : "rewards"} left.`;
   }
 
   async function makeCard(assignment) {
@@ -254,7 +260,7 @@ import "../background-context.mjs?v=1";
       console.error("[reward-list] Could not load award data:", error);
       poolMeter.classList.add("is-unavailable");
       poolMeter.setAttribute("aria-valuetext", "Reward pool unavailable");
-      poolStatus.textContent = "unavailable";
+      poolStatus.textContent = "The reward pool is unavailable.";
       awardList.setAttribute("aria-busy", "false");
       resultStatus.textContent = "The award index is unavailable.";
       errorState.hidden = false;

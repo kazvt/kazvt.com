@@ -99,22 +99,20 @@ h1 {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 5px 10px;
+  gap: 6px 9px;
   margin: 2px auto 10px;
 }
 
-.pool-status {
-  margin: 0;
+.pool-label {
   color: #d9d6e9;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   line-height: 1;
-  letter-spacing: 0.015em;
-  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   text-shadow: 1px 1px #050509;
 }
 
 .pool-meter {
+  position: relative;
   flex: 0 1 clamp(118px, 26vw, 250px);
   width: clamp(118px, 26vw, 250px);
   height: 21px;
@@ -127,8 +125,10 @@ h1 {
 }
 
 .pool-meter-fill {
+  position: relative;
   display: block;
   width: 0;
+  min-width: 0;
   height: 100%;
   border-right: 2px solid #f2eaff;
   background-color: #9679ca;
@@ -142,12 +142,53 @@ h1 {
   animation: pool-stripe-scroll 850ms linear infinite;
 }
 
+.pool-meter-count {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  padding: 0 2px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: -1px -1px 1px #211537, 1px 1px 1px #211537, 0 0 3px #211537;
+  transform: translateY(-50%);
+}
+
 .pool-meter.is-empty .pool-meter-fill,
 .pool-meter.is-unavailable .pool-meter-fill {
   width: 0 !important;
+  min-width: 0;
   border-right: 0;
   box-shadow: none;
   animation: none;
+}
+
+.pool-meter.is-empty .pool-meter-fill { visibility: hidden; }
+
+.pool-meter.is-empty::after {
+  content: "0";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #d9d6e9;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 1px 1px #050509;
+}
+
+.pool-meter.is-unavailable::after {
+  content: "—";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #d9d6e9;
+  font-size: 0.72rem;
+  line-height: 1;
 }
 
 @keyframes pool-stripe-scroll {
