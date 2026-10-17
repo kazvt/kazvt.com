@@ -39,8 +39,8 @@
 }
 
 @font-face {
-  font-family: "Easy Access";
-  src: url("/zzz_assets/fonts/Easy%20Access.ttf") format("truetype");
+  font-family: "Crash Team Racing";
+  src: url("/zzz_assets/fonts/CrashTeamRacing.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -128,7 +128,7 @@ body[data-page-state="reward"][data-tier="legendary"] {
 }
 
 body[data-page-state="reward"][data-tier="mythic"] {
-  --reward-tier-font: "Easy Access", "SPIRAL", "Trebuchet MS", sans-serif;
+  --reward-tier-font: "Crash Team Racing", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #371733;
   --palette-panel: #201020;
   --palette-accent: #ffc1ff;
