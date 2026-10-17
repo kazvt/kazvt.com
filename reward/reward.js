@@ -81,7 +81,6 @@ import {
   const filename = document.getElementById("filename");
   const rewardArtworkMotion = document.getElementById("rewardArtworkMotion");
   const rewardImage = document.getElementById("rewardImage");
-  rewardArtworkMotion.addEventListener("contextmenu", event => event.preventDefault());
   const errorMessage = document.getElementById("errorMessage");
   const loadingNote = document.getElementById("loadingNote");
   const demoFootnote = document.querySelector(".demo-footnote");
@@ -96,6 +95,14 @@ import {
   const allRewardsLink = document.getElementById("allRewardsLink");
   const artWallpaper = document.getElementById("artWallpaper");
   const rewardCard = document.querySelector("main.reward-card");
+  rewardCard.addEventListener("contextmenu", event => {
+    const target = event.target;
+    if (typeof target?.closest === "function" &&
+        target.closest('a[href], button, input, textarea, select, [contenteditable="true"]')) {
+      return;
+    }
+    event.preventDefault();
+  }, true);
   const rewardDecalLayer = document.getElementById("rewardDecals");
   let animeLoad;
   let rewardCatalogPromise;
