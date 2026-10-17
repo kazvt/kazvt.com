@@ -355,15 +355,16 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             with REWARD_QUEUE_LOCK:
                 try:
                     state = self.read_reward_state()
+                    _, reserved_asset_ids = read_reward_reservations()
                 except (OSError, ValueError):
-                    self.send_json(500, {"error": "The reward ledger could not be read."})
+                    self.send_json(500, {"error": "The reward pool could not be read."})
                     return
             owners = state["owners"]
             available = []
             seen_assets = set()
             for filename in sorted(REWARD_FILES):
                 identity = reward_asset_identity(filename)
-                if identity in owners or identity in seen_assets:
+                if identity in owners or identity in seen_assets or identity in reserved_asset_ids:
                     continue
                 seen_assets.add(identity)
                 available.append(filename)
@@ -433,11 +434,16 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         with REWARD_QUEUE_LOCK:
             try:
                 state = self.read_reward_state()
+                reservation_aliases, reserved_asset_ids = read_reward_reservations()
             except (OSError, ValueError):
-                self.send_json(500, {"error": "The reward ledger could not be read."})
+                self.send_json(500, {"error": "The reward pool could not be read."})
                 return
             owners = state["owners"]
             identity = reward_asset_identity(filename)
+            normalized_username = unicodedata.normalize("NFKC", username).strip().lstrip("@").strip().lower()
+            if identity in reserved_asset_ids and reservation_aliases.get(normalized_username) != identity:
+                self.send_json(403, {"error": "That artwork is reserved for a different username."})
+                return
             if identity in owners:
                 self.send_json(409, {"error": "Reward artwork has already been assigned."})
                 return

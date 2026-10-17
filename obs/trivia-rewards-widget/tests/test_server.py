@@ -23,6 +23,7 @@ class RewardQueueApiTests(unittest.TestCase):
             widget_server.REWARD_QUEUE_TEMP,
             widget_server.PUBLIC_ASSIGNMENTS,
             widget_server.PUBLIC_ASSIGNMENTS_TEMP,
+            widget_server.RESERVATIONS_FILE,
             widget_server.REWARD_FILES,
             widget_server.REWARD_SHA256,
             widget_server.REWARD_FILENAME_HISTORY,
@@ -31,6 +32,8 @@ class RewardQueueApiTests(unittest.TestCase):
         widget_server.REWARD_QUEUE_TEMP = root / "queue.json.tmp"
         widget_server.PUBLIC_ASSIGNMENTS = root / "assignments.json"
         widget_server.PUBLIC_ASSIGNMENTS_TEMP = root / "assignments.json.tmp"
+        widget_server.RESERVATIONS_FILE = root / "reservations.txt"
+        widget_server.RESERVATIONS_FILE.write_text("", encoding="utf-8")
         widget_server.REWARD_FILES = {"test reward.png", "1.png"}
         widget_server.REWARD_SHA256 = {
             "test reward.png": "a" * 64,
@@ -51,6 +54,7 @@ class RewardQueueApiTests(unittest.TestCase):
          widget_server.REWARD_QUEUE_TEMP,
          widget_server.PUBLIC_ASSIGNMENTS,
          widget_server.PUBLIC_ASSIGNMENTS_TEMP,
+         widget_server.RESERVATIONS_FILE,
          widget_server.REWARD_FILES,
          widget_server.REWARD_SHA256,
          widget_server.REWARD_FILENAME_HISTORY) = self.original_paths
@@ -92,6 +96,24 @@ class RewardQueueApiTests(unittest.TestCase):
         self.assertNotIn("#", issued["link"])
         self.assertNotIn("attacker.example", issued["link"])
         self.assertNotEqual(issued["linkId"], "00000000-0000-0000-0000-000000000000")
+
+    def test_reserved_art_is_omitted_from_pool_and_rejected_for_other_names(self):
+        widget_server.RESERVATIONS_FILE.write_text(
+            "OnlyViewer, viewer-0000 => test reward.png\n", encoding="utf-8"
+        )
+        status, response = self.request("GET", "/api/rewards/available")
+        self.assertEqual(status, 200)
+        self.assertNotIn("test reward.png", json.loads(response)["files"])
+
+        intruder = self.valid_record()
+        intruder["username"] = "SomeoneElse"
+        status, _ = self.post(intruder)
+        self.assertEqual(status, 403)
+
+        intended = self.valid_record()
+        intended["username"] = "@VIEWER-0000"
+        status, response = self.post(intended)
+        self.assertEqual(status, 201, response)
 
         status, response = self.request("GET", "/api/rewards")
         self.assertEqual(status, 200)
