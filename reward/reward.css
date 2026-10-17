@@ -750,7 +750,7 @@ h1 {
 .all-rewards-link:hover,
 .all-rewards-link:focus-visible {
   color: var(--palette-panel, #101014);
-  background: var(--palette-accent);
+  background: color-mix(in srgb, var(--palette-accent) 50%, transparent);
   border-style: inset;
   text-decoration: none;
 }
