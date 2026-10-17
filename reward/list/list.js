@@ -1,6 +1,6 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
-import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=github-static-2";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=images-reservations-1";
 import { parseRewardReservations } from "../reward-reservations.mjs?v=reservations-1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";

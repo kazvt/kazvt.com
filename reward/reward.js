@@ -1,4 +1,4 @@
-import { resolveRewardAsset } from "./asset-resolver.mjs";
+import { resolveRewardAsset } from "./asset-resolver.mjs?v=images-reservations-1";
 import { fetchAssignmentRegistry } from "./assignment-source.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=2";
@@ -16,7 +16,7 @@ import {
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs?v=github-static-2";
+} from "./assignment-registry.mjs?v=images-reservations-1";
 
 (() => {
   "use strict";
