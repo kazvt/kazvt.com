@@ -176,7 +176,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         }
         (self.reward_dir / "manifest.json").write_text(json.dumps(self.catalog), encoding="utf-8")
         (self.site / local_issuer.RESERVATIONS_RELATIVE).write_text(
-            '@Transrantula, transrantula-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"\n',
+            '@ExampleViewer, example-viewer-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"\n',
             encoding="utf-8",
         )
         (self.reward_dir / "pool.json").write_text(
@@ -193,7 +193,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             }, expected_remote=str(self.remote))
 
         assigned = issue_next_and_publish(self.site, {
-            "username": "@TRANSRANTULA-0000", "userId": "viewer-1", "platform": "twitch",
+            "username": "@EXAMPLE-VIEWER-0000", "userId": "viewer-1", "platform": "twitch",
             "eventId": "twitch:reserved-gif",
         }, expected_remote=str(self.remote))
         self.assertEqual(assigned["assignment"]["assetId"], asset_id)
@@ -208,33 +208,33 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertEqual(public_pool, {"version": 1, "remaining": 1, "total": 2})
         public_files = git(self.site, "ls-files").splitlines()
         self.assertNotIn(local_issuer.RESERVATIONS_RELATIVE, public_files)
-        self.assertNotIn("transrantula", " ".join(public_files))
+        self.assertNotIn("example-viewer", " ".join(public_files))
 
     def test_multiple_reservations_for_one_alias_are_issued_in_file_order(self) -> None:
         (self.site / local_issuer.RESERVATIONS_RELATIVE).write_text(
-            "lillie_garden, lillie-garden -> toast.png\n"
-            "LILLIE_GARDEN, lillie-garden => star.png\n",
+            "ReservedViewer, reserved-viewer -> toast.png\n"
+            "RESERVEDVIEWER, RESERVED-VIEWER => star.png\n",
             encoding="utf-8",
         )
         self.assertEqual(list_available_artwork(self.site), [])
 
         first = issue_next_and_publish(self.site, {
-            "username": "@LILLIE-GARDEN", "userId": "lillie-user", "platform": "twitch",
-            "eventId": "twitch:lillie-reserved-1",
+            "username": "@RESERVED-VIEWER", "userId": "reserved-user", "platform": "twitch",
+            "eventId": "twitch:reserved-order-1",
         }, expected_remote=str(self.remote))
         self.assertEqual(first["assignment"]["assetId"], self.art_ids[0])
         self.assertEqual(git(self.site, "status", "--porcelain=v1", "--untracked-files=normal"), "")
 
         second = issue_next_and_publish(self.site, {
-            "username": "Lillie_Garden", "userId": "lillie-user", "platform": "twitch",
-            "eventId": "twitch:lillie-reserved-2",
+            "username": "ReservedViewer", "userId": "reserved-user", "platform": "twitch",
+            "eventId": "twitch:reserved-order-2",
         }, expected_remote=str(self.remote))
         self.assertEqual(second["assignment"]["assetId"], self.art_ids[1])
 
         with self.assertRaisesRegex(RewardIssueError, "All rewards reserved"):
             issue_next_and_publish(self.site, {
-                "username": "lillie_garden", "userId": "lillie-user", "platform": "twitch",
-                "eventId": "twitch:lillie-reserved-3",
+                "username": "reserved_viewer", "userId": "reserved-user", "platform": "twitch",
+                "eventId": "twitch:reserved-order-3",
             }, expected_remote=str(self.remote))
 
     def test_refuses_dirty_worktree_and_modified_png(self) -> None:

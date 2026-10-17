@@ -23,12 +23,12 @@ const catalog = {
 
 test("aliases are case-insensitive, @-neutralized, and resolve Windows paths to GIF content", () => {
   const reservations = parseRewardReservations(
-    '@Transrantula, transrantula-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"',
+    '@ExampleViewer, example-viewer-0000 => "E:\\sites\\kazvt.com-1\\zzz_assets\\rewards\\Munch on this RABBIT.gif"',
     catalog
   );
   assert.deepEqual([...reservations.assetIds], [rabbitId]);
-  assert.equal(reservedAssetForIdentity(reservations, "@TRANSRANTULA"), rabbitId);
-  assert.equal(reservedAssetForIdentity(reservations, "DifferentName", "transrantula-0000"), rabbitId);
+  assert.equal(reservedAssetForIdentity(reservations, "@EXAMPLEVIEWER"), rabbitId);
+  assert.equal(reservedAssetForIdentity(reservations, "DifferentName", "example-viewer-0000"), rabbitId);
   assert.equal(reservedAssetForIdentity(reservations, "unrelated"), "");
 });
 
