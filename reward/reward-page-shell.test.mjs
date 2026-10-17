@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [rewardPage, demoPage, sharedHead, sharedBody] = await Promise.all([
+const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript] = await Promise.all([
   readFile(new URL("./index.html", import.meta.url), "utf8"),
   readFile(new URL("./demo/index.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/head-assets.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/body.html", import.meta.url), "utf8"),
+  readFile(new URL("./reward.js", import.meta.url), "utf8"),
 ]);
 
 test("reward and demo pages use the same shared shell and versioned assets", () => {
@@ -31,4 +32,11 @@ test("the common reward component retains artwork, tier, title, collection, and 
     assert.match(sharedBody, new RegExp(`id="${id}"`));
   }
   assert.match(sharedBody, /page\.reward_demo/);
+
+  const sharedRenderer = rewardScript.match(/async function renderRewardPage[\s\S]*?(?=async function openDemo)/)?.[0] ?? "";
+  const demoLoader = rewardScript.match(/async function openDemo[\s\S]*?(?=async function openReward)/)?.[0] ?? "";
+  const assignmentLoader = rewardScript.match(/async function openReward[\s\S]*?(?=\n  if \(document\.body\.hasAttribute)/)?.[0] ?? "";
+  assert.match(sharedRenderer, /setRewardFavicon\(file, metadata\.assetId\)/);
+  assert.match(demoLoader, /await renderRewardPage\(/);
+  assert.match(assignmentLoader, /await renderRewardPage\(/);
 });
