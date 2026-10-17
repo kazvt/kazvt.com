@@ -10,6 +10,7 @@
     "Bag of surprise.png",
     "Banned aids.png",
     "Bed.png",
+    "Big nuts.png",
     "Big stronmg.png",
     "Bite Bite Bite Bite Bite Bite.png",
     "Braclets.png",
@@ -214,7 +215,6 @@
     "yayy rotisserie chicken.png",
     "yayy yum--fb223ad628338dd5db2e53f62ea54c6478c6feabab455be5b5240610de589bd9.png",
     "you lost.png",
-    "yoyo.png",
     "yummy.png",
     "♿♿♿♿♿.png"
   ],
@@ -266,6 +266,12 @@
       "sha256": "ed0899d7720db2edc0486ceae6239ca0e67878d77f187002973befbf4f13ffaa",
       "width": 515,
       "height": 467
+    },
+    "Big nuts.png": {
+      "assetId": "0000135b8f81a381e48ac4d76975fffccc633f0333ce422b0c800a0d681d4102",
+      "sha256": "0000135b8f81a381e48ac4d76975fffccc633f0333ce422b0c800a0d681d4102",
+      "width": 518,
+      "height": 447
     },
     "Big stronmg.png": {
       "assetId": "1ae74226b5546793826dd8ff57de512dfc66eb7f9453fdc5811f8d0b274299a7",
@@ -1491,12 +1497,6 @@
       "width": 537,
       "height": 353
     },
-    "yoyo.png": {
-      "assetId": "0000135b8f81a381e48ac4d76975fffccc633f0333ce422b0c800a0d681d4102",
-      "sha256": "0000135b8f81a381e48ac4d76975fffccc633f0333ce422b0c800a0d681d4102",
-      "width": 518,
-      "height": 447
-    },
     "yummy.png": {
       "assetId": "3caf1a99ff53b237b06eb735c170820a73dc283fbccd37bec4c1cc660b18f6cb",
       "sha256": "3caf1a99ff53b237b06eb735c170820a73dc283fbccd37bec4c1cc660b18f6cb",
@@ -1739,6 +1739,7 @@
     "three deez.png": "6a0bc03d87ba3639b7992a399d41000b83bffb81c3ad891dd03c42919c15edd0",
     "bhoclate bhip bookie.png": "0161effb5284a7a21f9005096ae480b750cb7f207faa6e077b762da56b7b8ca3",
     "PS1 Liquid D&B Mix - Jazzy D&B, Atmospheric, Jungle, Y2K.png": "769c5f7d0a5c8a93f5535f48715ac83453e42c8ba01cec401c8cc74a827df54f",
-    "toothpicks.png": "bcb772a4211e0ec6843237031771ae31f4f0b0f83292e939cd837c9501b02fb0"
+    "toothpicks.png": "bcb772a4211e0ec6843237031771ae31f4f0b0f83292e939cd837c9501b02fb0",
+    "Big nuts.png": "0000135b8f81a381e48ac4d76975fffccc633f0333ce422b0c800a0d681d4102"
   }
 }
