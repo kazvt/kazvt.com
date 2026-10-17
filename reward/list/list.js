@@ -119,7 +119,7 @@ import "../background-context.mjs?v=1";
     poolMeter.classList.toggle("is-empty", remaining === 0);
     poolMeter.classList.remove("is-unavailable");
     poolMeterFill.style.width = total ? `${(remaining / total) * 100}%` : "0%";
-    poolStatus.textContent = `Pool: ${remaining} unique ${remaining === 1 ? "reward" : "rewards"} left`;
+    poolStatus.textContent = `${remaining} left`;
   }
 
   async function makeCard(assignment) {
@@ -254,7 +254,7 @@ import "../background-context.mjs?v=1";
       console.error("[reward-list] Could not load award data:", error);
       poolMeter.classList.add("is-unavailable");
       poolMeter.setAttribute("aria-valuetext", "Reward pool unavailable");
-      poolStatus.textContent = "Pool: unavailable";
+      poolStatus.textContent = "unavailable";
       awardList.setAttribute("aria-busy", "false");
       resultStatus.textContent = "The award index is unavailable.";
       errorState.hidden = false;

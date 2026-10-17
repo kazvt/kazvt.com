@@ -99,20 +99,19 @@ h1 {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 7px 9px;
+  gap: 5px 10px;
   margin: 2px auto 10px;
 }
 
 .pool-status {
   margin: 0;
-  padding: 4px 8px;
-  border: 2px ridge #8f8cae;
-  color: #eeeaff;
-  background: linear-gradient(180deg, #252238, #12121b);
-  box-shadow: 2px 2px 0 #050509;
-  font-size: 0.78rem;
-  line-height: 1.2;
-  letter-spacing: 0.025em;
+  color: #d9d6e9;
+  font-size: 0.84rem;
+  line-height: 1;
+  letter-spacing: 0.015em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-shadow: 1px 1px #050509;
 }
 
 .pool-meter {
