@@ -970,11 +970,11 @@
       "tier": "common"
     },
     "You win Your Feet back.gif": {
-      "assetId": "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3",
-      "sha256": "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3",
-      "width": 92,
-      "height": 97,
-      "tier": "mythic"
+      "assetId": "ab03157b1e358813838d2be4a2f7ccd5fc196ee770f0e49915f4882b7554ee80",
+      "sha256": "ab03157b1e358813838d2be4a2f7ccd5fc196ee770f0e49915f4882b7554ee80",
+      "width": 77,
+      "height": 91,
+      "tier": "epic"
     },
     "a One of these.png": {
       "assetId": "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095",
@@ -2375,11 +2375,11 @@
       "height": 1139,
       "tier": "common"
     },
-    "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3": {
+    "ab03157b1e358813838d2be4a2f7ccd5fc196ee770f0e49915f4882b7554ee80": {
       "filename": "You win Your Feet back.gif",
-      "width": 92,
-      "height": 97,
-      "tier": "mythic"
+      "width": 77,
+      "height": 91,
+      "tier": "epic"
     },
     "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095": {
       "filename": "a One of these.png",
@@ -3271,7 +3271,7 @@
     "Sans Which.gif": "24b6bb2be2ce686c7e579f109f6f6d38ebfbf82258300abda278e708833bfb22",
     "This asuka.gif": "0f4e1191744d982499622364e6347d3c7ffb604f97348c7f2a8a75ab8cc2e251",
     "Valid Meal Replacement.gif": "bd0c8025d796ffefe91fc117847073b939ab6a26c5e188349a25a823f616fa4d",
-    "You win Your Feet back.gif": "e44269ac185f9eaff6eddbd5b934d8c4cfc6dc6a901ff68529c33016462648d3",
+    "You win Your Feet back.gif": null,
     "bread thing.gif": "d051797b8a1d8b7a26ed54da4b43d418f7dc49614b9a069604b98c2542a04632",
     "danc.gif": "6afbfaa6c531a095aeda2cf007ca6087ffe09d607568327f61e2f733564252a0",
     "iamsmackingthewoodenfurniture.gif": "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e",
