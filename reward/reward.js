@@ -889,7 +889,7 @@ import {
     errorState.hidden = true;
     rewardState.hidden = false;
     if (demoFootnote) demoFootnote.hidden = !demo;
-    if (allRewardsLink) allRewardsLink.hidden = demo;
+    if (allRewardsLink) allRewardsLink.hidden = false;
     populateArtWallpaper(imageUrl, metadata.assetId);
     animateTier(assignedTier).catch(error => {
       console.warn(demo ? "[reward-demo]" : "[reward]", "Tier animation is unavailable:", error);

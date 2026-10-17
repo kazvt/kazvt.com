@@ -38,6 +38,10 @@ test("the common reward component retains artwork, tier, title, collection, and 
   const demoLoader = rewardScript.match(/async function openDemo[\s\S]*?(?=async function openReward)/)?.[0] ?? "";
   const assignmentLoader = rewardScript.match(/async function openReward[\s\S]*?(?=\n  if \(document\.body\.hasAttribute)/)?.[0] ?? "";
   assert.match(sharedRenderer, /setRewardFavicon\(file, metadata\.assetId\)/);
+  assert.match(sharedRenderer, /if \(allRewardsLink\) allRewardsLink\.hidden = false;/,
+    "the shared reward gallery link is shown for both assigned rewards and demos");
+  assert.doesNotMatch(sharedRenderer, /allRewardsLink\.hidden\s*=\s*demo/,
+    "demo mode must not suppress shared reward-page UI");
 
   const titleIndex = sharedRenderer.indexOf("setRewardTitle(file, displayName)");
   const faviconIndex = sharedRenderer.indexOf("setRewardFavicon(file, metadata.assetId)");
