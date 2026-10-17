@@ -25,8 +25,10 @@ from typing import Any
 DEFAULT_SITE_ORIGIN = "https://kazvt.com"
 DEFAULT_REMOTE = "https://github.com/kazvt/kazvt.com.git"
 ASSIGNMENTS_RELATIVE = "zzz_assets/rewards/assignments.json"
+RESERVATIONS_RELATIVE = "zzz_assets/rewards/reservations.txt"
 ASSET_ID_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
-FILENAME_RE = re.compile(r"^[^/\\\x00-\x1f\x7f]{1,255}\.png$", re.IGNORECASE)
+FILENAME_RE = re.compile(r"^[^/\\\x00-\x1f\x7f]{1,255}\.(?:png|gif)$", re.IGNORECASE)
+RESERVATION_SEPARATOR_RE = re.compile(r"\s*(?:->|=>|→|=|:)\s*")
 COMPACT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{16,22}$")
 UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.IGNORECASE)
 EVENT_COMMIT_RE = re.compile(r"^reward: (?:issue award|unassign award|clear awards) [a-f0-9]{12}$")
@@ -106,7 +108,7 @@ def _read_json(path: Path, description: str) -> dict[str, Any]:
 
 def _validate_catalog(catalog: dict[str, Any]) -> None:
     if (catalog.get("version") != 4 or
-            catalog.get("assetIdAlgorithm") != "sha256-png-bytes-v1" or
+            catalog.get("assetIdAlgorithm") != "sha256-image-bytes-v1" or
             not isinstance(catalog.get("files"), list) or
             not isinstance(catalog.get("assets"), dict) or
             not isinstance(catalog.get("assetsById"), dict)):
@@ -246,6 +248,79 @@ def _validate_registry(registry: dict[str, Any]) -> None:
 def _reward_paths(site_root: Path) -> tuple[Path, Path]:
     reward_dir = site_root / "zzz_assets" / "rewards"
     return reward_dir / "manifest.json", reward_dir / "assignments.json"
+
+
+def _reservation_alias(value: str) -> str:
+    return unicodedata.normalize("NFKC", value).strip().lstrip("@").strip().casefold()
+
+
+def _reservation_filename(value: str) -> str:
+    candidate = value.strip()
+    if len(candidate) >= 2 and candidate[0] == candidate[-1] and candidate[0] in "\"'<>" :
+        candidate = candidate[1:-1].strip()
+    return re.split(r"[\\/]", candidate)[-1].strip()
+
+
+def _load_reservations(site_root: Path, catalog: dict[str, Any]) -> dict[str, Any]:
+    path = site_root / RESERVATIONS_RELATIVE
+    try:
+        source = path.read_text(encoding="utf-8-sig")
+    except FileNotFoundError:
+        source = ""
+    except (OSError, UnicodeError) as exc:
+        raise RewardIssueError("Could not read the reward reservation list.") from exc
+
+    current_by_name = {
+        filename.casefold(): str(metadata["assetId"]).lower()
+        for filename, metadata in catalog["assets"].items()
+        if isinstance(filename, str) and isinstance(metadata, dict) and
+        isinstance(metadata.get("assetId"), str) and ASSET_ID_RE.fullmatch(metadata["assetId"])
+    }
+    history_by_name = {
+        filename.casefold(): asset_id.lower()
+        for filename, asset_id in catalog.get("filenameHistory", {}).items()
+        if isinstance(filename, str) and isinstance(asset_id, str) and ASSET_ID_RE.fullmatch(asset_id)
+    }
+    aliases: dict[str, str] = {}
+    asset_ids: set[str] = set()
+    entries: list[dict[str, Any]] = []
+    for line_number, raw_line in enumerate(source.splitlines(), 1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        separator = RESERVATION_SEPARATOR_RE.search(line)
+        if not separator:
+            raise RewardIssueError(f"Reservation line {line_number} needs an alias-to-artwork separator.")
+        raw_aliases = line[:separator.start()].strip()
+        target = line[separator.end():].strip()
+        names = [_reservation_alias(alias) for alias in re.split(r"[,;|]", raw_aliases)]
+        names = [alias for alias in names if alias]
+        if not names or any(len(alias) > 100 or _contains_control(alias) for alias in names):
+            raise RewardIssueError(f"Reservation line {line_number} has an invalid alias.")
+        filename = _reservation_filename(target)
+        if not FILENAME_RE.fullmatch(filename):
+            raise RewardIssueError(f"Reservation line {line_number} has an invalid artwork filename.")
+        asset_id = current_by_name.get(filename.casefold()) or history_by_name.get(filename.casefold(), "")
+        if not asset_id or asset_id not in catalog["assetsById"]:
+            raise RewardIssueError(f"Reservation line {line_number} refers to artwork not found in the current catalog.")
+        for alias in names:
+            existing = aliases.get(alias)
+            if existing and existing != asset_id:
+                raise RewardIssueError(f"Reservation alias {alias!r} points to more than one artwork.")
+            aliases[alias] = asset_id
+        asset_ids.add(asset_id)
+        entries.append({"aliases": names, "filename": filename, "assetId": asset_id})
+    return {"aliases": aliases, "assetIds": asset_ids, "entries": entries}
+
+
+def _reserved_asset_for_identity(reservations: dict[str, Any], username: str, user_id: str) -> str:
+    matches = {
+        asset_id for candidate in (username, user_id) if candidate
+        if (asset_id := reservations["aliases"].get(_reservation_alias(candidate)))
+    }
+    if len(matches) > 1:
+        raise RewardIssueError("The username and platform user ID resolve to different reserved rewards.")
+    return next(iter(matches), "")
 
 
 def _load_records(site_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
