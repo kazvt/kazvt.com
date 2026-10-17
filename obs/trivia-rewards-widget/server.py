@@ -40,7 +40,7 @@ try:
     with (ROOT / "rewards.json").open("r", encoding="utf-8-sig") as catalog_file:
         REWARD_CATALOG = json.load(catalog_file)
     if (REWARD_CATALOG.get("version") != 3 or
-            REWARD_CATALOG.get("assetIdAlgorithm") != "sha256-png-bytes-v1"):
+            REWARD_CATALOG.get("assetIdAlgorithm") != "sha256-image-bytes-v1"):
         raise ValueError("Unsupported reward catalog identity format.")
     REWARD_FILES = set(REWARD_CATALOG.get("files", []))
     REWARD_SHA256 = {
@@ -207,7 +207,7 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
             platform = assignment.get("platform", "manual")
             issued_at = assignment.get("issuedAt", "")
             link_id = assignment.get("linkId", "")
-            if (not isinstance(filename, str) or not filename.lower().endswith(".png") or
+            if (not isinstance(filename, str) or not filename.lower().endswith((".png", ".gif")) or
                     "/" in filename or "\\" in filename or len(filename) > 255 or
                     re.search(r"[\x00-\x1f]", filename) or
                     not isinstance(username, str) or not username.strip() or len(username) > 100 or

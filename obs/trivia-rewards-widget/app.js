@@ -216,15 +216,15 @@
   }
 
   function validateRewardCatalog(raw) {
-    if (!isPlainObject(raw) || raw.version !== 3 || raw.assetIdAlgorithm !== "sha256-png-bytes-v1" ||
+    if (!isPlainObject(raw) || raw.version !== 3 || raw.assetIdAlgorithm !== "sha256-image-bytes-v1" ||
         !Array.isArray(raw.files) || !isPlainObject(raw.assets) || !isPlainObject(raw.filenameHistory)) {
       throw new Error("Reward catalog must have a supported version, content IDs, and a files array.");
     }
 
     const files = [...new Set(raw.files.map(value => String(value || "").trim()))];
-    const invalid = files.filter(file => file.length > 255 || !/^[^/\\\u0000-\u001f]+\.png$/i.test(file));
+    const invalid = files.filter(file => file.length > 255 || !/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(file));
     if (files.length === 0 || invalid.length > 0) {
-      throw new Error("Reward catalog must contain PNG filenames without folders.");
+      throw new Error("Reward catalog must contain PNG or GIF filenames without folders.");
     }
     if (files.some(file => {
       const asset = raw.assets[file];
@@ -233,11 +233,11 @@
           !Number.isSafeInteger(asset.height) || asset.height < 1) return true;
       return false;
     })) {
-      throw new Error("Reward catalog version 3 requires a content ID and PNG dimensions for every image.");
+      throw new Error("Reward catalog version 3 requires a content ID and dimensions for every image.");
     }
 
     for (const [filename, assetId] of Object.entries(raw.filenameHistory)) {
-      if (!/^[^/\\\u0000-\u001f]+\.png$/i.test(filename) ||
+      if (!/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(filename) ||
           (assetId !== null && !/^[a-f0-9]{64}$/.test(assetId))) {
         throw new Error("Reward catalog contains invalid filename history.");
       }
