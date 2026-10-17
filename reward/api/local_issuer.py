@@ -363,11 +363,13 @@ def list_available_artwork(site_root: str | os.PathLike[str]) -> list[dict[str, 
     """Return only cataloged artworks not already assigned in the public ledger."""
     root = Path(site_root).resolve()
     catalog, registry = _load_records(root)
+    reserved = _load_reservations(root, catalog)["assetIds"]
     assigned = {
         str(record.get("assetId", record.get("assetSha256", ""))).lower()
         for record in registry["assignments"]
     }
-    return [item for item in _catalog_artworks(catalog) if item["assetId"] not in assigned]
+    return [item for item in _catalog_artworks(catalog)
+            if item["assetId"] not in assigned and item["assetId"] not in reserved]
 
 
 def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> dict[str, Any]:
@@ -398,9 +400,14 @@ def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> 
                 digest.update(block)
     except OSError as exc:
         raise RewardIssueError("The selected artwork file is missing or unreadable.") from exc
-    if len(first_24) < 24 or first_24[:8] != b"\x89PNG\r\n\x1a\n" or first_24[12:16] != b"IHDR":
-        raise RewardIssueError("The selected artwork is not a valid PNG file.")
-    width, height = struct.unpack(">II", first_24[16:24])
+    if filename.lower().endswith(".png") and len(first_24) >= 24 and \
+            first_24[:8] == b"\x89PNG\r\n\x1a\n" and first_24[12:16] == b"IHDR":
+        width, height = struct.unpack(">II", first_24[16:24])
+    elif filename.lower().endswith(".gif") and len(first_24) >= 10 and \
+            first_24[:6] in (b"GIF87a", b"GIF89a"):
+        width, height = struct.unpack("<HH", first_24[6:10])
+    else:
+        raise RewardIssueError("The selected artwork is not a valid PNG or GIF file.")
     if digest.hexdigest() != asset_id or width != metadata["width"] or height != metadata["height"]:
         raise RewardIssueError("The selected artwork changed after the reward catalog was generated.")
     return {"filename": filename, "tier": metadata["tier"]}
@@ -668,20 +675,32 @@ def _issue_and_publish(
                 "pushed": True,
             }
 
+        reservations = _load_reservations(root, catalog)
+        reserved_asset_id = _reserved_asset_for_identity(
+            reservations, request["username"], request["userId"],
+        )
+        assigned_assets = {
+            str(record.get("assetId", record.get("assetSha256", ""))).lower()
+            for record in registry["assignments"]
+        }
         if automatic_asset:
-            assigned_assets = {
-                str(record.get("assetId", record.get("assetSha256", ""))).lower()
-                for record in registry["assignments"]
-            }
-            available = [item for item in _catalog_artworks(catalog)
-                         if item["assetId"] not in assigned_assets]
-            if not available:
-                raise RewardIssueError("No unassigned reward artwork is available.")
-            # Stable pseudo-random choice: message IDs spread awards across the
-            # pool, while retries of the same event remain deterministic.
-            selection_hash = hashlib.sha256(request["eventId"].encode("utf-8")).digest()
-            selection_index = int.from_bytes(selection_hash[:8], "big") % len(available)
-            request["assetId"] = available[selection_index]["assetId"]
+            if reserved_asset_id:
+                if reserved_asset_id in assigned_assets:
+                    raise RewardIssueError("This reserved reward has already been assigned and cannot be issued again.")
+                request["assetId"] = reserved_asset_id
+            else:
+                available = [item for item in _catalog_artworks(catalog)
+                             if item["assetId"] not in assigned_assets and
+                             item["assetId"] not in reservations["assetIds"]]
+                if not available:
+                    raise RewardIssueError("No unassigned reward artwork is available.")
+                # Stable pseudo-random choice: message IDs spread awards across the
+                # pool, while retries of the same event remain deterministic.
+                selection_hash = hashlib.sha256(request["eventId"].encode("utf-8")).digest()
+                selection_index = int.from_bytes(selection_hash[:8], "big") % len(available)
+                request["assetId"] = available[selection_index]["assetId"]
+        elif request["assetId"] in reservations["assetIds"] and request["assetId"] != reserved_asset_id:
+            raise RewardIssueError("That artwork is reserved for a different username.")
 
         now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         next_registry, assignment = _new_assignment(root, catalog, registry, request, now)
