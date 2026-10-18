@@ -121,6 +121,7 @@ test("MSI generic manifest metadata feeds reward IDs, dimensions, tiers, and ren
           type: "image",
           size_bytes: gif.length,
           modified_ns_exact: imageStat.mtimeNs.toString(),
+          file_identity: `${imageStat.dev}:${imageStat.ino}`,
           hashes: { sha256 },
           image: { width: 1, height: 1, format: "gif" }
         }

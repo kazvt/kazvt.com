@@ -135,7 +135,8 @@ function validateMsiImageRecord(sourceManifest, filename) {
   if (!record || record.type !== "image" || record.hash_errors?.sha256 || record.image?.metadata_error ||
       !validAssetId(sha256) || !Number.isSafeInteger(width) || width < 1 ||
       !Number.isSafeInteger(height) || height < 1 || !Number.isSafeInteger(record.size_bytes) || record.size_bytes < 1 ||
-      typeof record.modified_ns_exact !== "string" || !/^\d+$/.test(record.modified_ns_exact)) {
+      typeof record.modified_ns_exact !== "string" || !/^\d+$/.test(record.modified_ns_exact) ||
+      (record.file_identity !== undefined && (typeof record.file_identity !== "string" || !/^\d+:\d+$/.test(record.file_identity)))) {
     throw new Error(`${filename} is missing valid image metadata in the MSI source manifest.`);
   }
   return { sha256: sha256.toLowerCase(), width, height, sizeBytes: record.size_bytes, record };
@@ -173,7 +174,8 @@ export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousMani
       const metadata = validateMsiImageRecord(msiManifest, file);
       const currentStat = await stat(resolve(rewardDir, file), { bigint: true });
       if (currentStat.size !== BigInt(metadata.sizeBytes) ||
-          (metadata.record.modified_ns_exact && currentStat.mtimeNs.toString() !== metadata.record.modified_ns_exact)) {
+          (metadata.record.modified_ns_exact && currentStat.mtimeNs.toString() !== metadata.record.modified_ns_exact) ||
+          (metadata.record.file_identity && `${currentStat.dev}:${currentStat.ino}` !== metadata.record.file_identity)) {
         throw new Error(`${file} changed since MSI last indexed it; wait for the manifest watcher and try again.`);
       }
       ({ width, height, sha256 } = metadata);
