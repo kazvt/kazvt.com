@@ -112,12 +112,17 @@ async function readMsiSourceManifest(sourceManifest) {
     }
   }
   if (!parsed || parsed.schema_version !== 3 ||
-      !Array.isArray(parsed.files) || !parsed.file_info || typeof parsed.file_info !== "object" ||
+      !Array.isArray(parsed.files) || !parsed.file_info || typeof parsed.file_info !== "object" || Array.isArray(parsed.file_info) ||
       parsed.metadata_options?.hash_algorithms?.includes("sha256") !== true ||
       parsed.metadata_options?.image_dimensions !== true ||
       parsed.metadata_options?.filename_history !== true ||
       !parsed.filename_history || typeof parsed.filename_history !== "object" || Array.isArray(parsed.filename_history)) {
     throw new Error("The MSI source manifest is missing required SHA-256, image-dimension, or filename-history metadata.");
+  }
+  for (const [filename, assetId] of Object.entries(parsed.filename_history)) {
+    if (!IMAGE_FILENAME.test(filename) || (assetId !== null && !validAssetId(assetId))) {
+      throw new Error("The MSI source manifest contains invalid filename history.");
+    }
   }
   return parsed;
 }
@@ -129,7 +134,8 @@ function validateMsiImageRecord(sourceManifest, filename) {
   const height = record?.image?.height;
   if (!record || record.type !== "image" || record.hash_errors?.sha256 || record.image?.metadata_error ||
       !validAssetId(sha256) || !Number.isSafeInteger(width) || width < 1 ||
-      !Number.isSafeInteger(height) || height < 1 || !Number.isSafeInteger(record.size_bytes) || record.size_bytes < 1) {
+      !Number.isSafeInteger(height) || height < 1 || !Number.isSafeInteger(record.size_bytes) || record.size_bytes < 1 ||
+      typeof record.modified_ns_exact !== "string" || !/^\d+$/.test(record.modified_ns_exact)) {
     throw new Error(`${filename} is missing valid image metadata in the MSI source manifest.`);
   }
   return { sha256: sha256.toLowerCase(), width, height, sizeBytes: record.size_bytes, record };
