@@ -154,6 +154,19 @@ test("MSI generic manifest metadata feeds reward IDs, dimensions, tiers, and ren
       }),
       /file list is stale/
     );
+    await assert.rejects(
+      buildRewardCatalogs({
+        rewardDir: temporaryRoot,
+        sourceManifest: {
+          ...sourceManifest,
+          file_info: {
+            ...sourceManifest.file_info,
+            [filename]: { ...sourceManifest.file_info[filename], modified_ns_exact: "0" }
+          }
+        }
+      }),
+      /changed since MSI last indexed it/
+    );
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
   }
