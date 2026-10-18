@@ -1,5 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
     "cute.mp3",
     "danger.mp3",
@@ -11,6 +17,8 @@
       "type": "audio",
       "size_bytes": 2053036,
       "modified_ns": 1786926176457191400,
+      "modified_ns_exact": "1786926176457191400",
+      "file_identity": "2725177794:281474977566976",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -33,6 +41,8 @@
       "type": "audio",
       "size_bytes": 2354140,
       "modified_ns": 1786926176473184600,
+      "modified_ns_exact": "1786926176473184600",
+      "file_identity": "2725177794:281474977566977",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -55,6 +65,8 @@
       "type": "audio",
       "size_bytes": 2121580,
       "modified_ns": 1786926176487308500,
+      "modified_ns_exact": "1786926176487308500",
+      "file_identity": "2725177794:281474977566978",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -77,6 +89,8 @@
       "type": "audio",
       "size_bytes": 1791752,
       "modified_ns": 1786926176498530600,
+      "modified_ns_exact": "1786926176498530600",
+      "file_identity": "2725177794:281474977566980",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,

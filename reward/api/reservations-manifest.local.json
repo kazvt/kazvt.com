@@ -1,39 +1,29 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
-    "__pycache__",
-    "migrations",
     "reservations.example.txt",
-    "reservations.local.txt",
-    "src",
-    "tests"
+    "reservations.local.txt"
   ],
   "file_info": {
-    "__pycache__": {
-      "type": "folder",
-      "modified_ns": 1792272668956145400
-    },
-    "migrations": {
-      "type": "folder",
-      "modified_ns": 1791984450123586500
-    },
     "reservations.example.txt": {
       "type": "file",
       "size_bytes": 485,
-      "modified_ns": 1792220919690473300
+      "modified_ns": 1792220919690473300,
+      "modified_ns_exact": "1792220919690473300",
+      "file_identity": "2725177794:3096224743918754"
     },
     "reservations.local.txt": {
       "type": "file",
       "size_bytes": 588,
-      "modified_ns": 1792272323389688400
-    },
-    "src": {
-      "type": "folder",
-      "modified_ns": 1791984450120880400
-    },
-    "tests": {
-      "type": "folder",
-      "modified_ns": 1791984450121414900
+      "modified_ns": 1792272323389688400,
+      "modified_ns_exact": "1792272323389688400",
+      "file_identity": "2725177794:21673573206924786"
     }
   }
 }

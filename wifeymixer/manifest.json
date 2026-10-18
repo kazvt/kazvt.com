@@ -1,5 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
     "!1index - Copy.html",
     "AUTO-GAIN-README.txt",
@@ -131,32 +137,44 @@
     "!1index - Copy.html": {
       "type": "file",
       "size_bytes": 683428,
-      "modified_ns": 1791884796764564000
+      "modified_ns": 1791884796764564000,
+      "modified_ns_exact": "1791884796764564000",
+      "file_identity": "2725177794:5629499534438497"
     },
     "AUTO-GAIN-README.txt": {
       "type": "file",
       "size_bytes": 2120,
-      "modified_ns": 1787667345506015700
+      "modified_ns": 1787667345506015700,
+      "modified_ns_exact": "1787667345506015700",
+      "file_identity": "2725177794:5348024557543048"
     },
     "auto-gain-references.js": {
       "type": "file",
       "size_bytes": 4800,
-      "modified_ns": 1787667343422611500
+      "modified_ns": 1787667343422611500,
+      "modified_ns_exact": "1787667343422611500",
+      "file_identity": "2725177794:8444249301360365"
     },
     "filename-tag-rules.js": {
       "type": "file",
       "size_bytes": 9578,
-      "modified_ns": 1787667345264882600
+      "modified_ns": 1787667345264882600,
+      "modified_ns_exact": "1787667345264882600",
+      "file_identity": "2725177794:10696049115209446"
     },
     "index.html": {
       "type": "file",
       "size_bytes": 692174,
-      "modified_ns": 1791884796749174800
+      "modified_ns": 1791884796749174800,
+      "modified_ns_exact": "1791884796749174800",
+      "file_identity": "2725177794:3940649674101035"
     },
     "instrument-icons.json": {
       "type": "file",
       "size_bytes": 142840,
-      "modified_ns": 1787667345619375200
+      "modified_ns": 1787667345619375200,
+      "modified_ns_exact": "1787667345619375200",
+      "file_identity": "2725177794:8162774324649722"
     },
     "lillie_track_10": {
       "type": "folder",
@@ -166,6 +184,8 @@
       "type": "audio",
       "size_bytes": 741200,
       "modified_ns": 1787667345465904200,
+      "modified_ns_exact": "1787667345465904200",
+      "file_identity": "2725177794:6473924464570491",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -188,6 +208,8 @@
       "type": "audio",
       "size_bytes": 1782608,
       "modified_ns": 1787667345503689100,
+      "modified_ns_exact": "1787667345503689100",
+      "file_identity": "2725177794:6192449487672048",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -210,6 +232,8 @@
       "type": "audio",
       "size_bytes": 1277888,
       "modified_ns": 1787667345482962600,
+      "modified_ns_exact": "1787667345482962600",
+      "file_identity": "2725177794:6192449487675196",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -236,6 +260,8 @@
       "type": "audio",
       "size_bytes": 2167856,
       "modified_ns": 1787667345494785100,
+      "modified_ns_exact": "1787667345494785100",
+      "file_identity": "2725177794:7881299348123746",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -258,6 +284,8 @@
       "type": "audio",
       "size_bytes": 1774832,
       "modified_ns": 1787667345475300500,
+      "modified_ns_exact": "1787667345475300500",
+      "file_identity": "2725177794:3659174697497288",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -284,6 +312,8 @@
       "type": "audio",
       "size_bytes": 1214456,
       "modified_ns": 1787619382895875200,
+      "modified_ns_exact": "1787619382895875200",
+      "file_identity": "2725177794:2251799814134032",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -306,6 +336,8 @@
       "type": "audio",
       "size_bytes": 2510312,
       "modified_ns": 1787618773142647300,
+      "modified_ns_exact": "1787618773142647300",
+      "file_identity": "2725177794:2814749767555345",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -328,6 +360,8 @@
       "type": "audio",
       "size_bytes": 1103456,
       "modified_ns": 1787619446481764200,
+      "modified_ns_exact": "1787619446481764200",
+      "file_identity": "2725177794:9851624185321746",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -350,6 +384,8 @@
       "type": "audio",
       "size_bytes": 2688392,
       "modified_ns": 1787619284081729100,
+      "modified_ns_exact": "1787619284081729100",
+      "file_identity": "2725177794:1970324837423379",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -372,6 +408,8 @@
       "type": "audio",
       "size_bytes": 1699952,
       "modified_ns": 1787619336667402400,
+      "modified_ns_exact": "1787619336667402400",
+      "file_identity": "2725177794:2251799814134036",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -394,6 +432,8 @@
       "type": "audio",
       "size_bytes": 3177872,
       "modified_ns": 1787619623742535600,
+      "modified_ns_exact": "1787619623742535600",
+      "file_identity": "2725177794:3096224744266005",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -420,6 +460,8 @@
       "type": "audio",
       "size_bytes": 828080,
       "modified_ns": 1787667345510886400,
+      "modified_ns_exact": "1787667345510886400",
+      "file_identity": "2725177794:3659174697687339",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -442,6 +484,8 @@
       "type": "audio",
       "size_bytes": 1899728,
       "modified_ns": 1787667345551160400,
+      "modified_ns_exact": "1787667345551160400",
+      "file_identity": "2725177794:12384898975494372",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -464,6 +508,8 @@
       "type": "audio",
       "size_bytes": 1358744,
       "modified_ns": 1787667345540625400,
+      "modified_ns_exact": "1787667345540625400",
+      "file_identity": "2725177794:6473924464570558",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -486,6 +532,8 @@
       "type": "audio",
       "size_bytes": 766856,
       "modified_ns": 1787667345524172900,
+      "modified_ns_exact": "1787667345524172900",
+      "file_identity": "2725177794:4503599627629362",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -508,6 +556,8 @@
       "type": "audio",
       "size_bytes": 1422296,
       "modified_ns": 1787667345532307000,
+      "modified_ns_exact": "1787667345532307000",
+      "file_identity": "2725177794:6473924464570462",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -530,6 +580,8 @@
       "type": "audio",
       "size_bytes": 1385264,
       "modified_ns": 1787667345519192700,
+      "modified_ns_exact": "1787667345519192700",
+      "file_identity": "2725177794:8444249301324303",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -556,6 +608,8 @@
       "type": "audio",
       "size_bytes": 930604,
       "modified_ns": 1787667344952390800,
+      "modified_ns_exact": "1787667344952390800",
+      "file_identity": "2725177794:3940649674101033",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -578,6 +632,8 @@
       "type": "audio",
       "size_bytes": 3072628,
       "modified_ns": 1787667344999644200,
+      "modified_ns_exact": "1787667344999644200",
+      "file_identity": "2725177794:14918173765816182",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -600,6 +656,8 @@
       "type": "audio",
       "size_bytes": 2139796,
       "modified_ns": 1787667344975113800,
+      "modified_ns_exact": "1787667344975113800",
+      "file_identity": "2725177794:10414574138334904",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -622,6 +680,8 @@
       "type": "audio",
       "size_bytes": 2395084,
       "modified_ns": 1787667344963621900,
+      "modified_ns_exact": "1787667344963621900",
+      "file_identity": "2725177794:4785074604121900",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -644,6 +704,8 @@
       "type": "audio",
       "size_bytes": 1618300,
       "modified_ns": 1787667345107836500,
+      "modified_ns_exact": "1787667345107836500",
+      "file_identity": "2725177794:14918173765806265",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -666,6 +728,8 @@
       "type": "audio",
       "size_bytes": 2233948,
       "modified_ns": 1787667344985597200,
+      "modified_ns_exact": "1787667344985597200",
+      "file_identity": "2725177794:10977524091745682",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -692,6 +756,8 @@
       "type": "audio",
       "size_bytes": 1961024,
       "modified_ns": 1787991763387920000,
+      "modified_ns_exact": "1787991763387920000",
+      "file_identity": "2725177794:1688849861087634",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -714,6 +780,8 @@
       "type": "audio",
       "size_bytes": 1058672,
       "modified_ns": 1787992009503050700,
+      "modified_ns_exact": "1787992009503050700",
+      "file_identity": "2725177794:303992974848332173",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -736,6 +804,8 @@
       "type": "audio",
       "size_bytes": 2559416,
       "modified_ns": 1787991587379634100,
+      "modified_ns_exact": "1787991587379634100",
+      "file_identity": "2725177794:1407374884376981",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -758,6 +828,8 @@
       "type": "audio",
       "size_bytes": 2248712,
       "modified_ns": 1787991641504902800,
+      "modified_ns_exact": "1787991641504902800",
+      "file_identity": "2725177794:562949954245012",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -780,6 +852,8 @@
       "type": "audio",
       "size_bytes": 1342880,
       "modified_ns": 1787991892932791800,
+      "modified_ns_exact": "1787991892932791800",
+      "file_identity": "2725177794:844424930955665",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -802,6 +876,8 @@
       "type": "audio",
       "size_bytes": 1619984,
       "modified_ns": 1787991674637845500,
+      "modified_ns_exact": "1787991674637845500",
+      "file_identity": "2725177794:19984723347280275",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -824,6 +900,8 @@
       "type": "audio",
       "size_bytes": 2135000,
       "modified_ns": 1788015108672973600,
+      "modified_ns_exact": "1788015108672973600",
+      "file_identity": "2725177794:7881299348754100",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -846,6 +924,8 @@
       "type": "audio",
       "size_bytes": 1290728,
       "modified_ns": 1787991947463031400,
+      "modified_ns_exact": "1787991947463031400",
+      "file_identity": "2725177794:844424930955662",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -872,6 +952,8 @@
       "type": "audio",
       "size_bytes": 2087120,
       "modified_ns": 1788012100585843000,
+      "modified_ns_exact": "1788012100585843000",
+      "file_identity": "2725177794:562949954245044",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -894,6 +976,8 @@
       "type": "audio",
       "size_bytes": 2489240,
       "modified_ns": 1788010570142074600,
+      "modified_ns_exact": "1788010570142074600",
+      "file_identity": "2725177794:2251799814509363",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -916,6 +1000,8 @@
       "type": "audio",
       "size_bytes": 2224064,
       "modified_ns": 1788011762970147900,
+      "modified_ns_exact": "1788011762970147900",
+      "file_identity": "2725177794:562949954245425",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -938,6 +1024,8 @@
       "type": "audio",
       "size_bytes": 1338176,
       "modified_ns": 1788012977793328200,
+      "modified_ns_exact": "1788012977793328200",
+      "file_identity": "2725177794:562949954245043",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -960,6 +1048,8 @@
       "type": "audio",
       "size_bytes": 1571384,
       "modified_ns": 1788012005882531800,
+      "modified_ns_exact": "1788012005882531800",
+      "file_identity": "2725177794:1970324837798704",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -982,6 +1072,8 @@
       "type": "audio",
       "size_bytes": 2134952,
       "modified_ns": 1788010995575299300,
+      "modified_ns_exact": "1788010995575299300",
+      "file_identity": "2725177794:1125899907666738",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1004,6 +1096,8 @@
       "type": "audio",
       "size_bytes": 1298000,
       "modified_ns": 1788013044374444800,
+      "modified_ns_exact": "1788013044374444800",
+      "file_identity": "2725177794:1688849861087665",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1026,6 +1120,8 @@
       "type": "audio",
       "size_bytes": 1082264,
       "modified_ns": 1788013609829671000,
+      "modified_ns_exact": "1788013609829671000",
+      "file_identity": "2725177794:844424930955688",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1047,7 +1143,9 @@
     "midi-support.js": {
       "type": "file",
       "size_bytes": 19205,
-      "modified_ns": 1787667345322580600
+      "modified_ns": 1787667345322580600,
+      "modified_ns_exact": "1787667345322580600",
+      "file_identity": "2725177794:5629499534438522"
     },
     "midi_lillie_10": {
       "type": "folder",
@@ -1056,22 +1154,30 @@
     "midi_lillie_10/bass.mid": {
       "type": "midi",
       "size_bytes": 2758,
-      "modified_ns": 1787667345624331600
+      "modified_ns": 1787667345624331600,
+      "modified_ns_exact": "1787667345624331600",
+      "file_identity": "2725177794:7036874418215181"
     },
     "midi_lillie_10/drums.mid": {
       "type": "midi",
       "size_bytes": 5417,
-      "modified_ns": 1787667345625425500
+      "modified_ns": 1787667345625425500,
+      "modified_ns_exact": "1787667345625425500",
+      "file_identity": "2725177794:4222124650918582"
     },
     "midi_lillie_10/keys.mid": {
       "type": "midi",
       "size_bytes": 1646,
-      "modified_ns": 1787667345622734600
+      "modified_ns": 1787667345622734600,
+      "modified_ns_exact": "1787667345622734600",
+      "file_identity": "2725177794:7599824371446542"
     },
     "midi_lillie_10/synth lead.mid": {
       "type": "midi",
       "size_bytes": 2695,
-      "modified_ns": 1787667345621620400
+      "modified_ns": 1787667345621620400,
+      "modified_ns_exact": "1787667345621620400",
+      "file_identity": "2725177794:10414574138742974"
     },
     "midi_lillie_3": {
       "type": "folder",
@@ -1081,6 +1187,8 @@
       "type": "audio",
       "size_bytes": 828080,
       "modified_ns": 1787667345352848700,
+      "modified_ns_exact": "1787667345352848700",
+      "file_identity": "2725177794:5910974511149152",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1103,6 +1211,8 @@
       "type": "audio",
       "size_bytes": 1899728,
       "modified_ns": 1787667345460428200,
+      "modified_ns_exact": "1787667345460428200",
+      "file_identity": "2725177794:7318349394628847",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1125,6 +1235,8 @@
       "type": "audio",
       "size_bytes": 1358744,
       "modified_ns": 1787667345450489800,
+      "modified_ns_exact": "1787667345450489800",
+      "file_identity": "2725177794:3940649674207929",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1147,6 +1259,8 @@
       "type": "audio",
       "size_bytes": 766856,
       "modified_ns": 1787667345357848200,
+      "modified_ns_exact": "1787667345357848200",
+      "file_identity": "2725177794:3940649674397991",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1169,6 +1283,8 @@
       "type": "audio",
       "size_bytes": 1422296,
       "modified_ns": 1787667345442350600,
+      "modified_ns_exact": "1787667345442350600",
+      "file_identity": "2725177794:7318349394925757",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1190,7 +1306,9 @@
     "midi_lillie_3/synth melody.mid": {
       "type": "midi",
       "size_bytes": 1408,
-      "modified_ns": 1787667345360037700
+      "modified_ns": 1787667345360037700,
+      "modified_ns_exact": "1787667345360037700",
+      "file_identity": "2725177794:7036874418215106"
     },
     "midi_lillie_6": {
       "type": "folder",
@@ -1200,6 +1318,8 @@
       "type": "audio",
       "size_bytes": 930604,
       "modified_ns": 1787667345270438300,
+      "modified_ns_exact": "1787667345270438300",
+      "file_identity": "2725177794:6473924464793791",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1222,6 +1342,8 @@
       "type": "audio",
       "size_bytes": 3072628,
       "modified_ns": 1787667345311158900,
+      "modified_ns_exact": "1787667345311158900",
+      "file_identity": "2725177794:8162774324649729",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1244,6 +1366,8 @@
       "type": "audio",
       "size_bytes": 2139796,
       "modified_ns": 1787667345296193700,
+      "modified_ns_exact": "1787667345296193700",
+      "file_identity": "2725177794:14636698789179600",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1266,6 +1390,8 @@
       "type": "audio",
       "size_bytes": 2395084,
       "modified_ns": 1787667345283128200,
+      "modified_ns_exact": "1787667345283128200",
+      "file_identity": "2725177794:7599824371413087",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1287,12 +1413,16 @@
     "midi_lillie_6/synth melody.mid": {
       "type": "midi",
       "size_bytes": 2246,
-      "modified_ns": 1787667345284750900
+      "modified_ns": 1787667345284750900,
+      "modified_ns_exact": "1787667345284750900",
+      "file_identity": "2725177794:5629499534253865"
     },
     "midi_lillie_6/vibes.mp3": {
       "type": "audio",
       "size_bytes": 1618300,
       "modified_ns": 1787667345320953400,
+      "modified_ns_exact": "1787667345320953400",
+      "file_identity": "2725177794:3940649674101039",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1318,17 +1448,23 @@
     "outputs/wifeymixer-dist-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
       "size_bytes": 703904,
-      "modified_ns": 1791884796661075700
+      "modified_ns": 1791884796661075700,
+      "modified_ns_exact": "1791884796661075700",
+      "file_identity": "2725177794:281474977577140"
     },
     "outputs/wifeymixer-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
       "size_bytes": 690312,
-      "modified_ns": 1791884796657825300
+      "modified_ns": 1791884796657825300,
+      "modified_ns_exact": "1791884796657825300",
+      "file_identity": "2725177794:281474977577139"
     },
     "sf2-procedural.js": {
       "type": "file",
       "size_bytes": 16655,
-      "modified_ns": 1787667345552793900
+      "modified_ns": 1787667345552793900,
+      "modified_ns_exact": "1787667345552793900",
+      "file_identity": "2725177794:3377699720786703"
     },
     "sonic no 7 narabe main theme": {
       "type": "folder",
@@ -1338,6 +1474,8 @@
       "type": "audio",
       "size_bytes": 815504,
       "modified_ns": 1787667345327946300,
+      "modified_ns_exact": "1787667345327946300",
+      "file_identity": "2725177794:5348024557951272",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1360,6 +1498,8 @@
       "type": "audio",
       "size_bytes": 1856864,
       "modified_ns": 1787667345347230900,
+      "modified_ns_exact": "1787667345347230900",
+      "file_identity": "2725177794:12103423998782803",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1382,6 +1522,8 @@
       "type": "audio",
       "size_bytes": 1622816,
       "modified_ns": 1787667345336846800,
+      "modified_ns_exact": "1787667345336846800",
+      "file_identity": "2725177794:6755399441096455",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1408,6 +1550,8 @@
       "type": "audio",
       "size_bytes": 992768,
       "modified_ns": 1787667345562556000,
+      "modified_ns_exact": "1787667345562556000",
+      "file_identity": "2725177794:6192449487859832",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1430,6 +1574,8 @@
       "type": "audio",
       "size_bytes": 2590424,
       "modified_ns": 1787667345585922800,
+      "modified_ns_exact": "1787667345585922800",
+      "file_identity": "2725177794:5066549580832393",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1452,6 +1598,8 @@
       "type": "audio",
       "size_bytes": 1753232,
       "modified_ns": 1787667345572148500,
+      "modified_ns_exact": "1787667345572148500",
+      "file_identity": "2725177794:5629499534364852",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1478,6 +1626,8 @@
       "type": "audio",
       "size_bytes": 1058240,
       "modified_ns": 1787667343506203800,
+      "modified_ns_exact": "1787667343506203800",
+      "file_identity": "2725177794:6755399441260143",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1500,6 +1650,8 @@
       "type": "audio",
       "size_bytes": 2566520,
       "modified_ns": 1787667343529826400,
+      "modified_ns_exact": "1787667343529826400",
+      "file_identity": "2725177794:5348024557951175",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1522,6 +1674,8 @@
       "type": "audio",
       "size_bytes": 1794968,
       "modified_ns": 1787667343515975200,
+      "modified_ns_exact": "1787667343515975200",
+      "file_identity": "2725177794:6755399441096332",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1548,6 +1702,8 @@
       "type": "audio",
       "size_bytes": 1000640,
       "modified_ns": 1787667345247752900,
+      "modified_ns_exact": "1787667345247752900",
+      "file_identity": "2725177794:3940649674101027",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1570,6 +1726,8 @@
       "type": "audio",
       "size_bytes": 1397288,
       "modified_ns": 1787667345263229100,
+      "modified_ns_exact": "1787667345263229100",
+      "file_identity": "2725177794:5910974510961380",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1592,6 +1750,8 @@
       "type": "audio",
       "size_bytes": 1560488,
       "modified_ns": 1787667345255964700,
+      "modified_ns_exact": "1787667345255964700",
+      "file_identity": "2725177794:10977524092051712",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -1613,7 +1773,9 @@
     "soundfont-icons.js": {
       "type": "file",
       "size_bytes": 30113,
-      "modified_ns": 1787667345241793000
+      "modified_ns": 1787667345241793000,
+      "modified_ns_exact": "1787667345241793000",
+      "file_identity": "2725177794:3377699720976688"
     },
     "soundfonts": {
       "type": "folder",
@@ -1622,67 +1784,93 @@
     "soundfonts/Casino Drums.sf2": {
       "type": "file",
       "size_bytes": 194968,
-      "modified_ns": 1787667343533089600
+      "modified_ns": 1787667343533089600,
+      "modified_ns_exact": "1787667343533089600",
+      "file_identity": "2725177794:5348024557543050"
     },
     "soundfonts/Genies.SF2": {
       "type": "file",
       "size_bytes": 61062240,
-      "modified_ns": 1787667344938551700
+      "modified_ns": 1787667344938551700,
+      "modified_ns_exact": "1787667344938551700",
+      "file_identity": "2725177794:5066549580832555"
     },
     "soundfonts/Gotta Rush.sf2": {
       "type": "file",
       "size_bytes": 4848976,
-      "modified_ns": 1788015847745261300
+      "modified_ns": 1788015847745261300,
+      "modified_ns_exact": "1788015847745261300",
+      "file_identity": "2725177794:1125899907708389"
     },
     "soundfonts/Gotta-Rush-presets.json": {
       "type": "file",
       "size_bytes": 13982,
-      "modified_ns": 1787667343666113500
+      "modified_ns": 1787667343666113500,
+      "modified_ns_exact": "1787667343666113500",
+      "file_identity": "2725177794:9570149208313809"
     },
     "soundfonts/Meow.sf2": {
       "type": "file",
       "size_bytes": 114414,
-      "modified_ns": 1787667343664490400
+      "modified_ns": 1787667343664490400,
+      "modified_ns_exact": "1787667343664490400",
+      "file_identity": "2725177794:7036874417807110"
     },
     "soundfonts/Ronald 88 - original.sf2": {
       "type": "file",
       "size_bytes": 4235617758,
-      "modified_ns": 1559357234000000000
+      "modified_ns": 1559357234000000000,
+      "modified_ns_exact": "1559357234000000000",
+      "file_identity": "2725177794:3377699720557939"
     },
     "soundfonts/Ronald 88.sf2": {
       "type": "file",
       "size_bytes": 78821864,
-      "modified_ns": 1788857693532768900
+      "modified_ns": 1788857693532768900,
+      "modified_ns_exact": "1788857693532768900",
+      "file_identity": "2725177794:1407374884372916"
     },
     "soundfonts/SF64-presets.json": {
       "type": "file",
       "size_bytes": 12639,
-      "modified_ns": 1787667344946824200
+      "modified_ns": 1787667344946824200,
+      "modified_ns_exact": "1787667344946824200",
+      "file_identity": "2725177794:7318349394488309"
     },
     "soundfonts/SF64.backup-before-Gunshot-removal.sf2": {
       "type": "file",
       "size_bytes": 4223358,
-      "modified_ns": 1787667343661684900
+      "modified_ns": 1787667343661684900,
+      "modified_ns_exact": "1787667343661684900",
+      "file_identity": "2725177794:1970324837840470"
     },
     "soundfonts/SF64.sf2": {
       "type": "file",
       "size_bytes": 4223246,
-      "modified_ns": 1788903959238901300
+      "modified_ns": 1788903959238901300,
+      "modified_ns_exact": "1788903959238901300",
+      "file_identity": "2725177794:844424930997867"
     },
     "soundfonts/Sonic Drums.sf2": {
       "type": "file",
       "size_bytes": 194966,
-      "modified_ns": 1787667344945190100
+      "modified_ns": 1787667344945190100,
+      "modified_ns_exact": "1787667344945190100",
+      "file_identity": "2725177794:5348024557761302"
     },
     "strip-fx-compressor-worklet.js": {
       "type": "file",
       "size_bytes": 2359,
-      "modified_ns": 1787667345627042500
+      "modified_ns": 1787667345627042500,
+      "modified_ns_exact": "1787667345627042500",
+      "file_identity": "2725177794:3940649674101026"
     },
     "strip-fx-engine.js": {
       "type": "file",
       "size_bytes": 15882,
-      "modified_ns": 1787667345240086300
+      "modified_ns": 1787667345240086300,
+      "modified_ns_exact": "1787667345240086300",
+      "file_identity": "2725177794:4785074604529934"
     },
     "wifeymixer_dist": {
       "type": "folder",
@@ -1691,67 +1879,93 @@
     "wifeymixer_dist/!index - Copy.html": {
       "type": "file",
       "size_bytes": 696890,
-      "modified_ns": 1791884796228916700
+      "modified_ns": 1791884796228916700,
+      "modified_ns_exact": "1791884796228916700",
+      "file_identity": "2725177794:1407374884377424"
     },
     "wifeymixer_dist/AUTO-GAIN-README.txt": {
       "type": "file",
       "size_bytes": 2120,
-      "modified_ns": 1788017071804811100
+      "modified_ns": 1788017071804811100,
+      "modified_ns_exact": "1788017071804811100",
+      "file_identity": "2725177794:2251799814509368"
     },
     "wifeymixer_dist/auto-gain-references.js": {
       "type": "file",
       "size_bytes": 4800,
-      "modified_ns": 1788017071837149300
+      "modified_ns": 1788017071837149300,
+      "modified_ns_exact": "1788017071837149300",
+      "file_identity": "2725177794:1125899907666762"
     },
     "wifeymixer_dist/filename-tag-rules.js": {
       "type": "file",
       "size_bytes": 9578,
-      "modified_ns": 1788017071818066500
+      "modified_ns": 1788017071818066500,
+      "modified_ns_exact": "1788017071818066500",
+      "file_identity": "2725177794:2251799814509381"
     },
     "wifeymixer_dist/hardware-polish.css": {
       "type": "file",
       "size_bytes": 17902,
-      "modified_ns": 1788017071910067200
+      "modified_ns": 1788017071910067200,
+      "modified_ns_exact": "1788017071910067200",
+      "file_identity": "2725177794:1688849861088077"
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
       "size_bytes": 705766,
-      "modified_ns": 1791884796180609000
+      "modified_ns": 1791884796180609000,
+      "modified_ns_exact": "1791884796180609000",
+      "file_identity": "2725177794:1125899907666764"
     },
     "wifeymixer_dist/instrument-icons.json": {
       "type": "file",
       "size_bytes": 142840,
-      "modified_ns": 1788017071923146000
+      "modified_ns": 1788017071923146000,
+      "modified_ns_exact": "1788017071923146000",
+      "file_identity": "2725177794:1970324837798734"
     },
     "wifeymixer_dist/midi-support.js": {
       "type": "file",
       "size_bytes": 19205,
-      "modified_ns": 1788017071964489000
+      "modified_ns": 1788017071964489000,
+      "modified_ns_exact": "1788017071964489000",
+      "file_identity": "2725177794:1125899907666773"
     },
     "wifeymixer_dist/sf2-procedural.js": {
       "type": "file",
       "size_bytes": 16655,
-      "modified_ns": 1788017071830993400
+      "modified_ns": 1788017071830993400,
+      "modified_ns_exact": "1788017071830993400",
+      "file_identity": "2725177794:3659174698062664"
     },
     "wifeymixer_dist/soundfont-icons.js": {
       "type": "file",
       "size_bytes": 30113,
-      "modified_ns": 1788017071858646000
+      "modified_ns": 1788017071858646000,
+      "modified_ns_exact": "1788017071858646000",
+      "file_identity": "2725177794:1125899907666763"
     },
     "wifeymixer_dist/strip-fx-compressor-worklet.js": {
       "type": "file",
       "size_bytes": 2359,
-      "modified_ns": 1788017071940776500
+      "modified_ns": 1788017071940776500,
+      "modified_ns_exact": "1788017071940776500",
+      "file_identity": "2725177794:1407374884377423"
     },
     "wifeymixer_dist/strip-fx-engine.js": {
       "type": "file",
       "size_bytes": 15882,
-      "modified_ns": 1788017071948082100
+      "modified_ns": 1788017071948082100,
+      "modified_ns_exact": "1788017071948082100",
+      "file_identity": "2725177794:5066549581615953"
     },
     "wifeymixer_dist/tempo-stretch-engine.js": {
       "type": "file",
       "size_bytes": 10187,
-      "modified_ns": 1788017071835502600
+      "modified_ns": 1788017071835502600,
+      "modified_ns_exact": "1788017071835502600",
+      "file_identity": "2725177794:1125899907666761"
     },
     "wifeymixer_dist/tests": {
       "type": "folder",
@@ -1764,12 +1978,16 @@
     "wifeymixer_dist/tests/tempo-stretch-engine.test.js": {
       "type": "file",
       "size_bytes": 3824,
-      "modified_ns": 1788017071950839200
+      "modified_ns": 1788017071950839200,
+      "modified_ns_exact": "1788017071950839200",
+      "file_identity": "2725177794:1125899907666770"
     },
     "wifeymixer_dist/tests/ui_integration_test.py": {
       "type": "file",
       "size_bytes": 31874,
-      "modified_ns": 1788017071953243700
+      "modified_ns": 1788017071953243700,
+      "modified_ns_exact": "1788017071953243700",
+      "file_identity": "2725177794:4222124651483987"
     }
   }
 }

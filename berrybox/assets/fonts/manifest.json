@@ -1,5 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
     "Cartoonish.ttf",
     "Freak.ttf",
@@ -11,27 +17,37 @@
     "Cartoonish.ttf": {
       "type": "file",
       "size_bytes": 18828,
-      "modified_ns": 1509330692000000000
+      "modified_ns": 1509330692000000000,
+      "modified_ns_exact": "1509330692000000000",
+      "file_identity": "2725177794:1407374884406131"
     },
     "Freak.ttf": {
       "type": "file",
       "size_bytes": 163476,
-      "modified_ns": 1663641736000000000
+      "modified_ns": 1663641736000000000,
+      "modified_ns_exact": "1663641736000000000",
+      "file_identity": "2725177794:562949954274175"
     },
     "Handwriting.ttf": {
       "type": "file",
       "size_bytes": 13684,
-      "modified_ns": 1199167196000000000
+      "modified_ns": 1199167196000000000,
+      "modified_ns_exact": "1199167196000000000",
+      "file_identity": "2725177794:562949954274164"
     },
     "Ketchup.ttf": {
       "type": "file",
       "size_bytes": 159256,
-      "modified_ns": 1644008456000000000
+      "modified_ns": 1644008456000000000,
+      "modified_ns_exact": "1644008456000000000",
+      "file_identity": "2725177794:562949954274168"
     },
     "ToyBox.ttf": {
       "type": "file",
       "size_bytes": 53344,
-      "modified_ns": 945256626000000000
+      "modified_ns": 945256626000000000,
+      "modified_ns_exact": "945256626000000000",
+      "file_identity": "2725177794:562949954274177"
     }
   }
 }

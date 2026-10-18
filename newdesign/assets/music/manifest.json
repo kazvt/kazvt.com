@@ -1,5 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
     "3l3d3p - ibitbt.mp3",
     "dontevenrespond.mp3",
@@ -14,6 +20,8 @@
       "type": "audio",
       "size_bytes": 1496522,
       "modified_ns": 1782816632668903400,
+      "modified_ns_exact": "1782816632668903400",
+      "file_identity": "2725177794:11258999068605078",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -36,6 +44,8 @@
       "type": "audio",
       "size_bytes": 1318901,
       "modified_ns": 1782816632616388400,
+      "modified_ns_exact": "1782816632616388400",
+      "file_identity": "2725177794:11258999068605076",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 44100,
@@ -58,6 +68,8 @@
       "type": "audio",
       "size_bytes": 1392987,
       "modified_ns": 1782816632416559200,
+      "modified_ns_exact": "1782816632416559200",
+      "file_identity": "2725177794:12103423998737041",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -80,6 +92,8 @@
       "type": "audio",
       "size_bytes": 1287102,
       "modified_ns": 1782816632259069600,
+      "modified_ns_exact": "1782816632259069600",
+      "file_identity": "2725177794:15481123719264856",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -102,6 +116,8 @@
       "type": "audio",
       "size_bytes": 1823573,
       "modified_ns": 1782816632735641000,
+      "modified_ns_exact": "1782816632735641000",
+      "file_identity": "2725177794:11258999068605075",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -124,6 +140,8 @@
       "type": "audio",
       "size_bytes": 1846060,
       "modified_ns": 1782816632880678800,
+      "modified_ns_exact": "1782816632880678800",
+      "file_identity": "2725177794:11258999068605077",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,
@@ -146,6 +164,8 @@
       "type": "audio",
       "size_bytes": 2025477,
       "modified_ns": 1782816632931939000,
+      "modified_ns_exact": "1782816632931939000",
+      "file_identity": "2725177794:11821949022026391",
       "audio": {
         "codec": "mp3",
         "sample_rate_hz": 48000,

@@ -1,19 +1,29 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
     "data.gif",
     "wumpa.gif"
   ],
   "file_info": {
     "data.gif": {
-      "type": "file",
+      "type": "image",
       "size_bytes": 664850,
-      "modified_ns": 1786311984303574000
+      "modified_ns": 1786311984303574000,
+      "modified_ns_exact": "1786311984303574000",
+      "file_identity": "2725177794:5910974510961581"
     },
     "wumpa.gif": {
-      "type": "file",
+      "type": "image",
       "size_bytes": 127128,
-      "modified_ns": 1786311984307957400
+      "modified_ns": 1786311984307957400,
+      "modified_ns_exact": "1786311984307957400",
+      "file_identity": "2725177794:6192449487798333"
     }
   }
 }
