@@ -144,6 +144,7 @@
     "here comes the airplaneee.png",
     "here u go.png",
     "hhhhhh.png",
+    "i am smacking the wooden furniture 4K.gif",
     "i hate this thing i cant ever get it right.png",
     "i propse to you.png",
     "i used to put these on my lips and pretend i have really lonbg fangs.png",
@@ -1071,6 +1072,12 @@
       "width": 275,
       "height": 288
     },
+    "i am smacking the wooden furniture 4K.gif": {
+      "assetId": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6",
+      "sha256": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6",
+      "width": 766,
+      "height": 792
+    },
     "i hate this thing i cant ever get it right.png": {
       "assetId": "fda2a934388c2adbe774ab4ee8442b45ceea65e04518fa4cbfe4bd092a42d02a",
       "sha256": "fda2a934388c2adbe774ab4ee8442b45ceea65e04518fa4cbfe4bd092a42d02a",
@@ -1741,6 +1748,7 @@
     "PS1 Liquid D&B Mix - Jazzy D&B, Atmospheric, Jungle, Y2K.png": null,
     "toothpicks.png": null,
     "Big nuts.png": null,
-    "Fit checkkkk 🔥🔥🔥.png": null
+    "Fit checkkkk 🔥🔥🔥.png": null,
+    "i am smacking the wooden furniture 4K.gif": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6"
   }
 }
