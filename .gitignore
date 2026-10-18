@@ -3,6 +3,7 @@ obs/trivia-rewards-widget/.reward-queue.json
 obs/trivia-rewards-widget/.reward-queue.json.tmp
 zzz_assets/rewards/assignments.json.tmp
 reward/api/reservations.local.txt
+# Machine-local MSI source manifests are caches, not deployable site data.
 reward/api/reservations-manifest.local.json
 zzz_assets/rewards/msi-manifest.local.json
 obs/trivia-rewards-widget/__pycache__/

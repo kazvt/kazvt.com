@@ -120,7 +120,7 @@ async function readMsiSourceManifest(sourceManifest) {
     throw new Error("The MSI source manifest is missing required SHA-256, image-dimension, or filename-history metadata.");
   }
   for (const [filename, assetId] of Object.entries(parsed.filename_history)) {
-    if (!IMAGE_FILENAME.test(filename) || (assetId !== null && !validAssetId(assetId))) {
+    if (filename.length > 255 || !IMAGE_FILENAME.test(filename) || (assetId !== null && !validAssetId(assetId))) {
       throw new Error("The MSI source manifest contains invalid filename history.");
     }
   }
