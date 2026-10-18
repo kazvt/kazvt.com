@@ -1,5 +1,4 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
-import { createUserRewardListHref } from "../user-list-link.mjs?v=1";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=images-reservations-1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
@@ -174,12 +173,8 @@ import "../background-context.mjs?v=1";
 
     const info = document.createElement("div");
     info.className = "award-info";
-    const usernameHeading = createText("h2", "username username-display", "");
     const shownUsername = displayUsername(assignment.username);
-    const usernameLink = createText("a", "username-list-link username-display", shownUsername);
-    usernameLink.href = createUserRewardListHref(assignment.username, window.location.origin);
-    usernameHeading.append(usernameLink);
-    info.append(usernameHeading);
+    info.append(createText("h2", "username username-display", shownUsername));
     info.append(createText("p", "artwork-name", filenameLabel(assignment.filename)));
 
     const meta = document.createElement("div");

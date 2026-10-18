@@ -2,13 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles] = await Promise.all([
+const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles, galleryScript, galleryStyles] = await Promise.all([
   readFile(new URL("./index.html", import.meta.url), "utf8"),
   readFile(new URL("./demo/index.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/head-assets.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/body.html", import.meta.url), "utf8"),
   readFile(new URL("./reward.js", import.meta.url), "utf8"),
   readFile(new URL("./reward.css", import.meta.url), "utf8"),
+  readFile(new URL("../reward/list/list.js", import.meta.url), "utf8"),
+  readFile(new URL("../reward/list/list.css", import.meta.url), "utf8"),
 ]);
 
 test("reward and demo pages use the same shared shell and versioned assets", () => {
@@ -67,4 +69,22 @@ test("all reward-panel content layers above the side decals", () => {
   assert.ok(Number.isFinite(contentZIndex), "panel content has an explicit stacking level");
   assert.ok(contentZIndex > decalZIndex,
     "artwork, tier, and text must paint above the side decal layer");
+});
+
+test("gallery usernames follow the whole-card reward link while detail usernames still open the gallery", () => {
+  const cardRenderer = galleryScript.match(/async function makeCard\([\s\S]*?(?=\n  function updateResults)/)?.[0] ?? "";
+  assert.match(cardRenderer, /createText\("h2", "username username-display", shownUsername\)/,
+    "the gallery card displays its username as non-interactive text");
+  assert.doesNotMatch(cardRenderer, /createUserRewardListHref|username-list-link/,
+    "clicking the card username must not route to the user's gallery");
+  assert.match(cardRenderer, /createRewardHref\(assignment\.linkId/,
+    "the card still links to the individual reward");
+
+  const cardOverlay = galleryStyles.match(/\.open-button\[href\]::after\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(cardOverlay, /\binset:\s*0\s*;/,
+    "the reward link overlay continues to make the whole card clickable");
+
+  const usernameMention = rewardScript.match(/function usernameMention\(username\)\s*\{([\s\S]*?)\n  \}/)?.[1] ?? "";
+  assert.match(usernameMention, /createUserRewardListHref\(username/,
+    "username links on individual reward pages still open that user's gallery");
 });
