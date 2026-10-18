@@ -87,7 +87,6 @@
     "How could you do this.png",
     "How do i safely get to Denmark.png",
     "i am smacking the wooden furniture 4K.gif",
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif",
     "i hate this thing i cant ever get it right.png",
     "i propse to you.png",
     "i used to put these on my lips and pretend i have really lonbg fangs.png",
@@ -1385,27 +1384,12 @@
     },
     "i am smacking the wooden furniture 4K.gif": {
       "type": "image",
-      "size_bytes": 907186,
-      "modified_ns": 1792307658058024900,
-      "modified_ns_exact": "1792307658058024900",
-      "file_identity": "2725177794:16325548650037732",
-      "hashes": {
-        "sha256": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6"
-      },
-      "image": {
-        "width": 766,
-        "height": 792,
-        "format": "gif"
-      }
-    },
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": {
-      "type": "image",
       "size_bytes": 8524940,
-      "modified_ns": 1792307686858522600,
-      "modified_ns_exact": "1792307686858522600",
-      "file_identity": "2725177794:32932572275595638",
+      "modified_ns": 1792307706143430200,
+      "modified_ns_exact": "1792307706143430200",
+      "file_identity": "2725177794:4785074604900774",
       "hashes": {
-        "sha256": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230"
+        "sha256": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
       },
       "image": {
         "width": 766,
@@ -3700,7 +3684,8 @@
     "You win Your Feet back.gif": null,
     "yummy.png": null,
     "♿♿♿♿♿.png": null,
-    "i am smacking the wooden furniture 4K.gif": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6",
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230"
+    "i am smacking the wooden furniture 4K.gif": null,
+    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
+    "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
   }
 }

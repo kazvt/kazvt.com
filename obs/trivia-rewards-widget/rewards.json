@@ -145,7 +145,6 @@
     "here u go.png",
     "hhhhhh.png",
     "i am smacking the wooden furniture 4K.gif",
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif",
     "i hate this thing i cant ever get it right.png",
     "i propse to you.png",
     "i used to put these on my lips and pretend i have really lonbg fangs.png",
@@ -1074,14 +1073,8 @@
       "height": 288
     },
     "i am smacking the wooden furniture 4K.gif": {
-      "assetId": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6",
-      "sha256": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6",
-      "width": 766,
-      "height": 792
-    },
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": {
-      "assetId": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
-      "sha256": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
+      "assetId": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+      "sha256": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
       "width": 766,
       "height": 792
     },
@@ -1756,7 +1749,8 @@
     "toothpicks.png": null,
     "Big nuts.png": null,
     "Fit checkkkk 🔥🔥🔥.png": null,
-    "i am smacking the wooden furniture 4K.gif": "1d2c604fc2c5a57c5e3b842f2b7d32c37e7e3cb8fcf6a732735379aa67b81de6",
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230"
+    "i am smacking the wooden furniture 4K.gif": null,
+    "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
+    "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
   }
 }
