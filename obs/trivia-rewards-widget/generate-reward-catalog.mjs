@@ -150,8 +150,11 @@ export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousMani
   if (files.some(file => file.length > 255)) {
     throw new Error("Reward filenames must fit within the 255-character filesystem component limit.");
   }
-  if (msiManifest && JSON.stringify(msiManifest.files) !== JSON.stringify(files)) {
-    throw new Error("The MSI source manifest file list is stale; wait for the manifest watcher and try again.");
+  if (msiManifest) {
+    const indexedFiles = new Set(msiManifest.files);
+    if (indexedFiles.size !== files.length || files.some(file => !indexedFiles.has(file))) {
+      throw new Error("The MSI source manifest file list is stale; wait for the manifest watcher and try again.");
+    }
   }
 
   const assets = {};
@@ -290,8 +293,8 @@ async function buildAnonymousPool(manifest, reservationText) {
   };
 }
 
-export async function syncRewardCatalogs({ checkOnly = false } = {}) {
-  const { manifest, widgetCatalog } = await buildRewardCatalogs();
+export async function syncRewardCatalogs({ checkOnly = false, sourceManifest } = {}) {
+  const { manifest, widgetCatalog } = await buildRewardCatalogs({ sourceManifest });
   const outputs = [
     [PUBLIC_MANIFEST, asJson(manifest)],
     [WIDGET_CATALOG, asJson(widgetCatalog)]
@@ -334,11 +337,25 @@ export async function syncRewardCatalogs({ checkOnly = false } = {}) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  if (args.some(argument => argument !== "--check") || args.filter(argument => argument === "--check").length > 1) {
-    console.error("Usage: node generate-reward-catalog.mjs [--check]");
+  let checkOnly = false;
+  let sourceManifest;
+  let invalid = false;
+  for (let index = 0; index < args.length; index += 1) {
+    if (args[index] === "--check" && !checkOnly) {
+      checkOnly = true;
+    } else if (args[index] === "--source-manifest" && !sourceManifest && args[index + 1]) {
+      sourceManifest = args[index + 1];
+      index += 1;
+    } else {
+      invalid = true;
+      break;
+    }
+  }
+  if (invalid) {
+    console.error("Usage: node generate-reward-catalog.mjs [--check] [--source-manifest PATH]");
     process.exitCode = 2;
   } else {
-    syncRewardCatalogs({ checkOnly: args.includes("--check") }).catch(error => {
+    syncRewardCatalogs({ checkOnly, sourceManifest }).catch(error => {
       console.error(`[reward catalog] ${error.message || error}`);
       process.exitCode = 1;
     });
