@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,6 +94,63 @@ test("GIF dimensions and byte identity are added to both catalogs", async () => 
     assert.equal(resolveRewardAsset(manifest, {
       version: 1, username: "Viewer", file: "reserved.gif"
     }).metadata.assetId, metadata.assetId);
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+});
+
+test("MSI generic manifest metadata feeds reward IDs, dimensions, tiers, and rename history", async () => {
+  const temporaryRoot = await mkdtemp(resolve(tmpdir(), "reward-msi-manifest-"));
+  try {
+    const filename = "renamed reward.gif";
+    const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==", "base64");
+    const sha256 = createHash("sha256").update(gif).digest("hex");
+    const imagePath = resolve(temporaryRoot, filename);
+    await writeFile(imagePath, gif);
+    const imageStat = await stat(imagePath, { bigint: true });
+    const sourceManifest = {
+      schema_version: 3,
+      metadata_options: {
+        hash_algorithms: ["sha256"],
+        image_dimensions: true,
+        filename_history: true
+      },
+      files: [filename],
+      file_info: {
+        [filename]: {
+          type: "image",
+          size_bytes: gif.length,
+          modified_ns_exact: imageStat.mtimeNs.toString(),
+          hashes: { sha256 },
+          image: { width: 1, height: 1, format: "gif" }
+        }
+      },
+      filename_history: {
+        "original name.gif": sha256,
+        [filename]: sha256
+      }
+    };
+
+    const { manifest, widgetCatalog } = await buildRewardCatalogs({
+      rewardDir: temporaryRoot,
+      sourceManifest
+    });
+    assert.equal(manifest.assets[filename].sha256, sha256);
+    assert.deepEqual({
+      width: manifest.assets[filename].width,
+      height: manifest.assets[filename].height
+    }, { width: 1, height: 1 });
+    assert.equal(manifest.assets[filename].tier, tierForSha256(sha256));
+    assert.equal(manifest.filenameHistory["original name.gif"], sha256);
+    assert.equal(widgetCatalog.filenameHistory["original name.gif"], sha256);
+
+    await assert.rejects(
+      buildRewardCatalogs({
+        rewardDir: temporaryRoot,
+        sourceManifest: { ...sourceManifest, files: ["stale.gif"] }
+      }),
+      /file list is stale/
+    );
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
   }
