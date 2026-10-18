@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseRewardReservations } from "../../reward/reward-reservations.mjs";
@@ -101,10 +101,45 @@ async function readPreviousManifest(rewardDir) {
   }
 }
 
-export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousManifest } = {}) {
+async function readMsiSourceManifest(sourceManifest) {
+  if (!sourceManifest) return null;
+  let parsed = sourceManifest;
+  if (typeof sourceManifest === "string") {
+    try {
+      parsed = JSON.parse(await readFile(sourceManifest, "utf8"));
+    } catch (error) {
+      throw new Error(`Could not read the MSI source manifest: ${error.message || error}`);
+    }
+  }
+  if (!parsed || parsed.schema_version !== 3 ||
+      !Array.isArray(parsed.files) || !parsed.file_info || typeof parsed.file_info !== "object" ||
+      parsed.metadata_options?.hash_algorithms?.includes("sha256") !== true ||
+      parsed.metadata_options?.image_dimensions !== true ||
+      parsed.metadata_options?.filename_history !== true ||
+      !parsed.filename_history || typeof parsed.filename_history !== "object" || Array.isArray(parsed.filename_history)) {
+    throw new Error("The MSI source manifest is missing required SHA-256, image-dimension, or filename-history metadata.");
+  }
+  return parsed;
+}
+
+function validateMsiImageRecord(sourceManifest, filename) {
+  const record = sourceManifest?.file_info?.[filename];
+  const sha256 = record?.hashes?.sha256;
+  const width = record?.image?.width;
+  const height = record?.image?.height;
+  if (!record || record.type !== "image" || record.hash_errors?.sha256 || record.image?.metadata_error ||
+      !validAssetId(sha256) || !Number.isSafeInteger(width) || width < 1 ||
+      !Number.isSafeInteger(height) || height < 1 || !Number.isSafeInteger(record.size_bytes) || record.size_bytes < 1) {
+    throw new Error(`${filename} is missing valid image metadata in the MSI source manifest.`);
+  }
+  return { sha256: sha256.toLowerCase(), width, height, sizeBytes: record.size_bytes, record };
+}
+
+export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousManifest, sourceManifest } = {}) {
   const previous = previousManifest === undefined
     ? await readPreviousManifest(rewardDir)
     : previousManifest;
+  const msiManifest = await readMsiSourceManifest(sourceManifest);
   const entries = await readdir(rewardDir, { withFileTypes: true });
   const files = entries
     .filter(entry => entry.isFile() && IMAGE_FILENAME.test(entry.name))
@@ -115,13 +150,29 @@ export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousMani
   if (files.some(file => file.length > 255)) {
     throw new Error("Reward filenames must fit within the 255-character filesystem component limit.");
   }
+  if (msiManifest && JSON.stringify(msiManifest.files) !== JSON.stringify(files)) {
+    throw new Error("The MSI source manifest file list is stale; wait for the manifest watcher and try again.");
+  }
 
   const assets = {};
   const assetsById = {};
   for (const file of files) {
-    const bytes = await readFile(resolve(rewardDir, file));
-    const { width, height } = readImageDimensions(bytes, file);
-    const sha256 = createHash("sha256").update(bytes).digest("hex");
+    let width;
+    let height;
+    let sha256;
+    if (msiManifest) {
+      const metadata = validateMsiImageRecord(msiManifest, file);
+      const currentStat = await stat(resolve(rewardDir, file), { bigint: true });
+      if (currentStat.size !== BigInt(metadata.sizeBytes) ||
+          (metadata.record.modified_ns_exact && currentStat.mtimeNs.toString() !== metadata.record.modified_ns_exact)) {
+        throw new Error(`${file} changed since MSI last indexed it; wait for the manifest watcher and try again.`);
+      }
+      ({ width, height, sha256 } = metadata);
+    } else {
+      const bytes = await readFile(resolve(rewardDir, file));
+      ({ width, height } = readImageDimensions(bytes, file));
+      sha256 = createHash("sha256").update(bytes).digest("hex");
+    }
     if (Object.prototype.hasOwnProperty.call(assetsById, sha256)) {
       throw new Error(`${file} has identical artwork bytes to ${assetsById[sha256].filename}; keep one file per award.`);
     }
@@ -143,6 +194,11 @@ export async function buildRewardCatalogs({ rewardDir = REWARD_DIR, previousMani
       for (const filename of previous.files) {
         addFilenameHistory(filenameHistory, filename, assetIdForPreviousName(previous, filename));
       }
+    }
+  }
+  if (msiManifest) {
+    for (const [filename, assetId] of Object.entries(msiManifest.filename_history)) {
+      addFilenameHistory(filenameHistory, filename, assetId);
     }
   }
   for (const [filename, metadata] of Object.entries(assets)) {
