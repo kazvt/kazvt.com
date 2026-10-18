@@ -166,7 +166,7 @@ import {
       const plan = deriveRewardMusicPlan(pixelHash);
       rewardMusicPlayer?.destroy();
       rewardMusicPlayer = createRewardMusicPlayer(plan, {
-        initialVolume: 0.07
+        initialVolume: 0.035
       });
       rewardMusicPlayer.setTrackEnabled("chords", true);
       rewardMusicPlayer.setTrackEnabled("arp", true);

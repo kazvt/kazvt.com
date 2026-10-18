@@ -323,7 +323,7 @@ export function createRewardMusicPlayer(plan, {
   onStateChange = () => {},
   audioContextConstructor = globalThis.AudioContext || globalThis.webkitAudioContext,
   documentRef = globalThis.document,
-  initialVolume = 0.07
+  initialVolume = 0.035
 } = {}) {
   let context = null;
   let masterGain = null;
