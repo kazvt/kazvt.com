@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "files": [
+    "__pycache__",
+    "migrations",
+    "reservations.example.txt",
+    "reservations.local.txt",
+    "src",
+    "tests"
+  ],
+  "file_info": {
+    "__pycache__": {
+      "type": "folder",
+      "modified_ns": 1792272668956145400
+    },
+    "migrations": {
+      "type": "folder",
+      "modified_ns": 1791984450123586500
+    },
+    "reservations.example.txt": {
+      "type": "file",
+      "size_bytes": 485,
+      "modified_ns": 1792220919690473300
+    },
+    "reservations.local.txt": {
+      "type": "file",
+      "size_bytes": 588,
+      "modified_ns": 1792272323389688400
+    },
+    "src": {
+      "type": "folder",
+      "modified_ns": 1791984450120880400
+    },
+    "tests": {
+      "type": "folder",
+      "modified_ns": 1791984450121414900
+    }
+  }
+}
