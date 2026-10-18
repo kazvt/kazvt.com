@@ -9,6 +9,8 @@ on:
       - "zzz_assets/emotes/**"
       - "zzz_assets/rewards/*.png"
       - "zzz_assets/rewards/*.PNG"
+      - "zzz_assets/rewards/*.gif"
+      - "zzz_assets/rewards/*.GIF"
       - "scripts/build-emote-manifest.py"
       - "obs/trivia-rewards-widget/generate-reward-catalog.mjs"
 

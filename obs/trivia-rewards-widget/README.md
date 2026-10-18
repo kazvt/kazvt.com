@@ -91,12 +91,22 @@ The issuer checks both its private ledger and the public assignment index; insta
 
 Each image's tier is derived from the first 32 bits of its SHA-256 content ID, then saved in the public manifest. The weighted buckets are Frequent (30%), Uncommon (20%), Rare (15%), Epic (12%), Legendary (9%), Mythic (6.5%), Divine (4.5%), and Good Shit (3%). Direct reward pages map these tiers in order to the purple, blue, red, orange, green, pink, chrome, and sand GifCities pattern palettes. The non-direct reward index, username lists, and demo instead use the neutral loading-page look. The assignment and tier are deterministic: renaming or reordering an image does not change its content ID or tier, while changing/re-exporting its bytes can. The reward page does an O(1) ID lookup and checks the saved digest-to-tier mapping; it does not hash or decode every image when a viewer opens a link.
 
-After adding, replacing, or removing PNGs or GIFs, regenerate both catalogs from the repository root:
+After adding, replacing, or removing PNGs or GIFs, the local MSI manifest watcher can regenerate the catalogs automatically. It writes an ignored `msi-manifest.local.json` sidecar with opt-in SHA-256, image dimensions, and filename history, then passes that metadata to the reward catalog generator. The public reward manifest remains the site's existing v4 contract; reward tiers and pool eligibility continue to be computed by the reward generator. The local reservation file is watched separately and never included in either public manifest.
+
+To run the generator manually (or in CI without the local MSI sidecar), it still scans the artwork directly:
 
 ```bash
 node obs/trivia-rewards-widget/generate-reward-catalog.mjs
 node obs/trivia-rewards-widget/generate-reward-catalog.mjs --check
 ```
+
+When a validated MSI sidecar is available, it may be supplied explicitly to avoid hashing unchanged media a second time:
+
+```text
+node obs/trivia-rewards-widget/generate-reward-catalog.mjs --source-manifest zzz_assets/rewards/msi-manifest.local.json
+```
+
+The site's generated-files workflow watches both lowercase and uppercase `.png` and `.gif` additions, edits, and removals. It is a fallback for repository pushes; the local MSI pipeline is the path that can read private reservation rules and update `pool.json` with them.
 
 The page animates its tier badge with Anime.js 3.2.2; labels and tiers remain readable if the CDN is unavailable. Motion is disabled when the viewer requests reduced motion.
 
