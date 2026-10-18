@@ -187,11 +187,11 @@
     "here comes the airplaneee.png",
     "here u go.png",
     "hhhhhh.png",
-    "i am smacking the wooden furniture 4K.gif",
     "i hate this thing i cant ever get it right.png",
     "i propse to you.png",
     "i used to put these on my lips and pretend i have really lonbg fangs.png",
     "iPhone 20 Pro Max.png",
+    "iamsmackingthewoodenfurniture 4K.gif",
     "iamsmackingthewoodenfurniture.gif",
     "ice ceam.png",
     "is cream.png",
@@ -1257,13 +1257,6 @@
       "height": 288,
       "tier": "legendary"
     },
-    "i am smacking the wooden furniture 4K.gif": {
-      "assetId": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
-      "sha256": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
-      "width": 766,
-      "height": 792,
-      "tier": "epic"
-    },
     "i hate this thing i cant ever get it right.png": {
       "assetId": "fda2a934388c2adbe774ab4ee8442b45ceea65e04518fa4cbfe4bd092a42d02a",
       "sha256": "fda2a934388c2adbe774ab4ee8442b45ceea65e04518fa4cbfe4bd092a42d02a",
@@ -1291,6 +1284,13 @@
       "width": 363,
       "height": 846,
       "tier": "common"
+    },
+    "iamsmackingthewoodenfurniture 4K.gif": {
+      "assetId": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+      "sha256": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+      "width": 766,
+      "height": 792,
+      "tier": "epic"
     },
     "iamsmackingthewoodenfurniture.gif": {
       "assetId": "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e",
@@ -2629,12 +2629,6 @@
       "height": 288,
       "tier": "legendary"
     },
-    "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967": {
-      "filename": "i am smacking the wooden furniture 4K.gif",
-      "width": 766,
-      "height": 792,
-      "tier": "epic"
-    },
     "fda2a934388c2adbe774ab4ee8442b45ceea65e04518fa4cbfe4bd092a42d02a": {
       "filename": "i hate this thing i cant ever get it right.png",
       "width": 159,
@@ -2658,6 +2652,12 @@
       "width": 363,
       "height": 846,
       "tier": "common"
+    },
+    "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967": {
+      "filename": "iamsmackingthewoodenfurniture 4K.gif",
+      "width": 766,
+      "height": 792,
+      "tier": "epic"
     },
     "c26bbcf3afd43d74cb337bfe51c625561d47864f6187646b19f6aae33dbaa49e": {
       "filename": "iamsmackingthewoodenfurniture.gif",
@@ -3308,6 +3308,7 @@
     "Fit checkkkk 🔥🔥🔥.png": null,
     "i am smacking the wooden furniture 4K.gif": null,
     "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
-    "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
+    "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+    "iamsmackingthewoodenfurniture 4K.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
   }
 }
