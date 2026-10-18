@@ -130,10 +130,12 @@ test("MSI generic manifest metadata feeds reward IDs, dimensions, tiers, and ren
         [filename]: sha256
       }
     };
+    const sourceManifestPath = resolve(temporaryRoot, "msi-manifest.local.json");
+    await writeFile(sourceManifestPath, `${JSON.stringify(sourceManifest)}\n`);
 
     const { manifest, widgetCatalog } = await buildRewardCatalogs({
       rewardDir: temporaryRoot,
-      sourceManifest
+      sourceManifest: sourceManifestPath
     });
     assert.equal(manifest.assets[filename].sha256, sha256);
     assert.deepEqual({
