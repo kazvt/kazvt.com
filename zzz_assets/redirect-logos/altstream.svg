@@ -10,8 +10,8 @@
 
   <!-- A slim orange bridge separates the cheek patches and points down to the fox's nose. -->
   <path d="M49 47 C56 55 60 72 64 94 C68 72 72 55 79 47 C75 69 70 88 64 98 C58 88 53 69 49 47 Z" fill="#F45A18"/>
-  <ellipse cx="46" cy="80" rx="5.5" ry="6.3" fill="#24140F"/>
-  <ellipse cx="82" cy="80" rx="5.5" ry="6.3" fill="#24140F"/>
+  <ellipse cx="46" cy="80" rx="5.5" ry="6.3" fill="#050407"/>
+  <ellipse cx="82" cy="80" rx="5.5" ry="6.3" fill="#050407"/>
   <circle cx="47.5" cy="78" r="1.35" fill="#FFF8EB"/>
   <circle cx="83.5" cy="78" r="1.35" fill="#FFF8EB"/>
   <path d="M58 96 C60 93 68 93 70 96 C69 101 67 104 64 105 C61 104 59 101 58 96 Z" fill="#050407"/>
