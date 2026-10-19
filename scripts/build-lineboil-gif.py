@@ -92,6 +92,68 @@ def smooth_grid(
     return [value / scale for value in softened]
 
 
+def scatter_displace(
+    frame: Image.Image,
+    frame_index: int,
+    amplitude: float,
+    cell: int,
+) -> Image.Image:
+    """Redraw each frame from a separate, deterministic random contour field.
+
+    There is deliberately no time-based interpolation or periodic wave here:
+    every frame gets a far-separated seed, so the outline jumps to a fresh,
+    broad hand-drawn variation instead of rippling around the fox.
+    """
+    width, height = frame.size
+    xs = list(range(0, width, cell)) + [width]
+    ys = list(range(0, height, cell)) + [height]
+    columns, rows = len(xs), len(ys)
+    seed_base = 0xA17 + width * 17 + height * 31 + cell * 131
+    # Large odd strides keep successive frames in distant deterministic PRNG
+    # streams; axis-specific strides keep horizontal and vertical fields apart.
+    frame_seed = seed_base + (frame_index + 1) * 0x9E3779B1
+
+    fields: list[list[float]] = []
+    for axis in range(2):
+        rng = random.Random(frame_seed + axis * 0x85EBCA77)
+        points = [rng.uniform(-1, 1) for _ in range(columns * rows)]
+        fields.append(smooth_grid(points, columns, rows, passes=1))
+
+    def offset(axis: int, node: int) -> float:
+        x = xs[node % columns]
+        y = ys[node // columns]
+        edge_fade = min(1.0, x / cell, (width - x) / cell, y / cell, (height - y) / cell)
+        return amplitude * max(0.0, edge_fade) * fields[axis][node]
+
+    mesh = []
+    for y_index, top in enumerate(ys[:-1]):
+        for x_index, left in enumerate(xs[:-1]):
+            right, bottom = xs[x_index + 1], ys[y_index + 1]
+            top_left = y_index * columns + x_index
+            bottom_left = (y_index + 1) * columns + x_index
+            bottom_right = bottom_left + 1
+            top_right = top_left + 1
+            quad = (
+                left + offset(0, top_left),
+                top + offset(1, top_left),
+                left + offset(0, bottom_left),
+                bottom + offset(1, bottom_left),
+                right + offset(0, bottom_right),
+                bottom + offset(1, bottom_right),
+                right + offset(0, top_right),
+                top + offset(1, top_right),
+            )
+            mesh.append(((left, top, right, bottom), quad))
+
+    return frame.transform(
+        frame.size,
+        Image.Transform.MESH,
+        mesh,
+        resample=Image.Resampling.BICUBIC,
+        fillcolor=(0, 0, 0, 0),
+    )
+
+
 def choppy_displace(
     frame: Image.Image,
     frame_index: int,
@@ -309,9 +371,9 @@ def main() -> None:
     parser.add_argument("--amplitude", type=float, default=None, help="maximum contour displacement")
     parser.add_argument(
         "--style",
-        choices=("soft", "choppy", "broad"),
+        choices=("soft", "choppy", "broad", "scatter"),
         default="soft",
-        help="soft warp, detailed choppy contour motion, or broad low-frequency line boil",
+        help="soft warp, periodic choppy/broad line boil, or independently seeded scatter redraws",
     )
     parser.add_argument("--cell-size", type=int, default=None, help="control-point spacing for choppy/broad styles")
     parser.add_argument("--palette-colors", type=int, default=None, help="maximum opaque palette colors (2-255)")
@@ -323,11 +385,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    padding = args.padding if args.padding is not None else (6 if args.style == "broad" else 3)
-    amplitude = args.amplitude if args.amplitude is not None else (10.0 if args.style == "broad" else 2.0)
-    cell_size = args.cell_size if args.cell_size is not None else (28 if args.style == "broad" else 5)
-    palette_colors = args.palette_colors if args.palette_colors is not None else (55 if args.style == "broad" else 255)
-    dither_name = args.dither if args.dither is not None else ("none" if args.style == "broad" else "floyd-steinberg")
+    broad_style = args.style in ("broad", "scatter")
+    padding = args.padding if args.padding is not None else (7 if args.style == "scatter" else 6 if args.style == "broad" else 3)
+    amplitude = args.amplitude if args.amplitude is not None else (9.0 if args.style == "scatter" else 10.0 if args.style == "broad" else 2.0)
+    cell_size = args.cell_size if args.cell_size is not None else (24 if args.style == "scatter" else 28 if args.style == "broad" else 5)
+    palette_colors = args.palette_colors if args.palette_colors is not None else (128 if args.style == "scatter" else 55 if args.style == "broad" else 255)
+    dither_name = args.dither if args.dither is not None else ("none" if broad_style else "floyd-steinberg")
 
     if (
         args.frames < 2
@@ -351,6 +414,8 @@ def main() -> None:
             frames.append(choppy_displace(bases[source_index], index, args.frames, amplitude, cell_size))
         elif args.style == "broad":
             frames.append(broad_displace(bases[source_index], index, args.frames, amplitude, cell_size))
+        elif args.style == "scatter":
+            frames.append(scatter_displace(bases[source_index], index, amplitude, cell_size))
         else:
             phase = 2 * math.pi * index / args.frames
             frames.append(displace(bases[source_index], phase, amplitude))
