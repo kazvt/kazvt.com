@@ -193,6 +193,14 @@ def render_frame(pattern: Image.Image, icon: Image.Image, glyphs, pose_index: in
 
 
 def save_gif(frames: list[Image.Image], durations: list[int], output: Path) -> None:
+    # Draw supersampled for clean rotated edges, then export at the actual
+    # 88x31 banner dimensions rather than relying on CSS to downscale.
+    frames = [
+        frame.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
+        if frame.size != (WIDTH, HEIGHT)
+        else frame
+        for frame in frames
+    ]
     sheet = Image.new("RGB", (WIDTH, HEIGHT * len(frames)), (0, 0, 0))
     for index, frame in enumerate(frames):
         sheet.paste(frame, (0, index * HEIGHT))
