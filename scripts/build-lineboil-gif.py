@@ -110,8 +110,16 @@ def choppy_displace(
     xs = list(range(0, width, cell)) + [width]
     ys = list(range(0, height, cell)) + [height]
     columns, rows = len(xs), len(ys)
-    harmonics = (1, 2, 3, 5)
-    weights = (0.40, 0.29, 0.19, 0.12)
+    source_harmonics = ((1, 0.40), (2, 0.29), (3, 0.19), (5, 0.12))
+    max_harmonic = max(1, (frame_count - 1) // 2)
+    active_harmonics = tuple(
+        (harmonic, weight)
+        for harmonic, weight in source_harmonics
+        if harmonic <= max_harmonic
+    )
+    weight_total = sum(weight for _, weight in active_harmonics)
+    harmonics = tuple(harmonic for harmonic, _ in active_harmonics)
+    weights = tuple(weight / weight_total for _, weight in active_harmonics)
     seed = 0xA17 + width * 17 + height * 31 + cell * 131
 
     fields: list[list[list[float]]] = []
