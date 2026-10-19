@@ -2,7 +2,7 @@ import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
-import { createMixedTitleGlyphs } from "./mixed-title.mjs?v=indecisive-title-fonts-20261020-v1";
+import { createMixedTitleGlyphs } from "./mixed-title.mjs?v=indecisive-title-fonts-20261020-v2";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
