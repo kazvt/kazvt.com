@@ -326,8 +326,12 @@ def _reserved_assets_for_identity(reservations: dict[str, Any], username: str, u
     return identity_matches[0] if identity_matches else []
 
 
-def _load_records(site_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    manifest_path, assignments_path = _reward_paths(site_root)
+def _load_records(site_root: str | os.PathLike[str]) -> tuple[dict[str, Any], dict[str, Any]]:
+    # MSI's identity fallback calls this helper with its configured root, which
+    # is commonly a plain string. Normalize at the boundary so path joins below
+    # never attempt ``str / str``.
+    root = Path(site_root)
+    manifest_path, assignments_path = _reward_paths(root)
     catalog = _read_json(manifest_path, "reward catalog")
     registry = _read_json(assignments_path, "reward assignment registry")
     _validate_catalog(catalog)

@@ -161,6 +161,11 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 "eventId": "youtube:message-3",
             }, expected_remote=str(self.remote))
 
+    def test_load_records_accepts_string_site_root_for_msi_identity_fallback(self) -> None:
+        catalog, registry = local_issuer._load_records(str(self.site))
+        self.assertEqual(catalog["version"], 4)
+        self.assertEqual(registry["assignments"], [])
+
     def test_alias_reservation_routes_gif_only_to_matching_user_and_excludes_it_from_pool(self) -> None:
         gif = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==")
         filename = "Munch on this RABBIT.gif"
