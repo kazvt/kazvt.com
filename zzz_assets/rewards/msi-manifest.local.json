@@ -87,6 +87,7 @@
     "How could you do this.png",
     "How do i safely get to Denmark.png",
     "i hate this thing i cant ever get it right.png",
+    "I have attempted murder in the past, genuinely.gif",
     "i propse to you.png",
     "i used to put these on my lips and pretend i have really lonbg fangs.png",
     "iamsmackingthewoodenfurniture 4K.gif",
@@ -224,7 +225,8 @@
     "You rich as fuuuuck.png",
     "You win Your Feet back.gif",
     "yummy.png",
-    "♿♿♿♿♿.png"
+    "♿♿♿♿♿.png",
+    "🌟🎆🎇✨❇️💖.gif"
   ],
   "file_info": {
     "10th century strap-on.png": {
@@ -1395,6 +1397,21 @@
         "width": 159,
         "height": 165,
         "format": "png"
+      }
+    },
+    "I have attempted murder in the past, genuinely.gif": {
+      "type": "image",
+      "size_bytes": 2004833,
+      "modified_ns": 1792414464974623400,
+      "modified_ns_exact": "1792414464974623400",
+      "file_identity": "2725177794:1688849861087647",
+      "hashes": {
+        "sha256": "b5a75fd9d2b7223bb5e7b230f9e08ca295f0c5aa0719f368e047143371292926"
+      },
+      "image": {
+        "width": 380,
+        "height": 531,
+        "format": "gif"
       }
     },
     "i propse to you.png": {
@@ -3466,6 +3483,21 @@
         "height": 677,
         "format": "png"
       }
+    },
+    "🌟🎆🎇✨❇️💖.gif": {
+      "type": "image",
+      "size_bytes": 1388224,
+      "modified_ns": 1792414466374639900,
+      "modified_ns_exact": "1792414466374639900",
+      "file_identity": "2725177794:2533274791219608",
+      "hashes": {
+        "sha256": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712"
+      },
+      "image": {
+        "width": 215,
+        "height": 255,
+        "format": "gif"
+      }
     }
   },
   "filename_history": {
@@ -3687,6 +3719,8 @@
     "i am smacking the wooden furniture 4K.gif": null,
     "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
     "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
-    "iamsmackingthewoodenfurniture 4K.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
+    "iamsmackingthewoodenfurniture 4K.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+    "I have attempted murder in the past, genuinely.gif": "b5a75fd9d2b7223bb5e7b230f9e08ca295f0c5aa0719f368e047143371292926",
+    "🌟🎆🎇✨❇️💖.gif": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712"
   }
 }

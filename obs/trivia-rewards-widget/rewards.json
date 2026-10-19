@@ -40,6 +40,7 @@
     "Hot take.png",
     "How could you do this.png",
     "How do i safely get to Denmark.png",
+    "I have attempted murder in the past, genuinely.gif",
     "It's time. Get dressed up.png",
     "Its a lot of Peppers.png",
     "Its the bro.gif",
@@ -217,7 +218,8 @@
     "yayy yum--fb223ad628338dd5db2e53f62ea54c6478c6feabab455be5b5240610de589bd9.png",
     "you lost.png",
     "yummy.png",
-    "♿♿♿♿♿.png"
+    "♿♿♿♿♿.png",
+    "🌟🎆🎇✨❇️💖.gif"
   ],
   "assets": {
     "10th century strap-on.png": {
@@ -447,6 +449,12 @@
       "sha256": "d07e9e4100fdc68eef934140cadd03b96b62edaf550f69b2268f6ecb0bd1cf47",
       "width": 1018,
       "height": 795
+    },
+    "I have attempted murder in the past, genuinely.gif": {
+      "assetId": "b5a75fd9d2b7223bb5e7b230f9e08ca295f0c5aa0719f368e047143371292926",
+      "sha256": "b5a75fd9d2b7223bb5e7b230f9e08ca295f0c5aa0719f368e047143371292926",
+      "width": 380,
+      "height": 531
     },
     "It's time. Get dressed up.png": {
       "assetId": "da0d3553844f8387ecf985676adf9ea9cc5ce76187b497eb2bce4c0c3e1642b3",
@@ -1515,6 +1523,12 @@
       "sha256": "3d3beecbf1294a29e274f1ea4677dc53d313a19cde0ed963044af95897bbc42c",
       "width": 709,
       "height": 677
+    },
+    "🌟🎆🎇✨❇️💖.gif": {
+      "assetId": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712",
+      "sha256": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712",
+      "width": 215,
+      "height": 255
     }
   },
   "filenameHistory": {
@@ -1752,6 +1766,8 @@
     "i am smacking the wooden furniture 4K.gif": null,
     "i am smacking the wooden furniture 4K_gifspeed_20261018_151445_453500.gif": "eaf6f0c6ec5bbfe9ae9277f38de3797ea021072f49e0c199579f91cd54f14230",
     "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
-    "iamsmackingthewoodenfurniture 4K.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967"
+    "iamsmackingthewoodenfurniture 4K.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+    "I have attempted murder in the past, genuinely.gif": "b5a75fd9d2b7223bb5e7b230f9e08ca295f0c5aa0719f368e047143371292926",
+    "🌟🎆🎇✨❇️💖.gif": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712"
   }
 }
