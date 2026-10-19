@@ -114,6 +114,7 @@ h1 {
 .mixed-title-glyph--spiral { font-family: "SPIRAL", "Trebuchet MS", sans-serif; }
 .mixed-title-glyph--panties { font-family: "Panties Bottom", "SPIRAL", sans-serif; }
 .mixed-title-glyph--bricked { font-family: "Bricked Up", "SPIRAL", sans-serif; }
+.mixed-title-glyph--comic { font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive; }
 
 .pool-readout {
   display: flex;

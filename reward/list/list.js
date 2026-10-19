@@ -2,6 +2,7 @@ import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
+import { createMixedTitleGlyphs } from "./mixed-title.mjs?v=indecisive-title-fonts-20261020-v1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -34,24 +35,15 @@ import "../background-context.mjs?v=1";
     return username.toUpperCase();
   }
 
-  function graphemes(value) {
-    if (typeof Intl.Segmenter === "function") {
-      const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
-      return Array.from(segmenter.segment(value), part => part.segment);
-    }
-    return Array.from(value);
-  }
-
-  function renderAlternatingTitle(text) {
-    const fontClasses = [
-      "mixed-title-glyph--spiral",
-      "mixed-title-glyph--panties",
-      "mixed-title-glyph--bricked"
-    ];
+  function renderMixedTitle(text) {
     const fragment = document.createDocumentFragment();
-    for (const [index, glyph] of graphemes(text).entries()) {
+    for (const { glyph, fontClass } of createMixedTitleGlyphs(text)) {
+      if (!fontClass) {
+        fragment.append(document.createTextNode(glyph));
+        continue;
+      }
       const character = document.createElement("span");
-      character.className = `mixed-title-glyph ${fontClasses[index % fontClasses.length]}`;
+      character.className = `mixed-title-glyph ${fontClass}`;
       character.textContent = glyph;
       fragment.append(character);
     }
@@ -256,18 +248,18 @@ import "../background-context.mjs?v=1";
   }
 
   async function start() {
+    let title = "Rewards";
     if (userFilterRequested) {
       if (userFilterValid) {
-        const title = `${displayUsername(requestedUsername)} Rewards`;
-        renderAlternatingTitle(title);
-        document.title = `${title} — kazvt`;
+        title = `${displayUsername(requestedUsername)} Rewards`;
       } else {
-        pageTitle.textContent = "Reward lookup";
-        document.title = "Reward lookup — kazvt";
+        title = "Reward lookup";
       }
       searchLabel.textContent = "Search this collection";
       searchInput.placeholder = "Search artwork…";
     }
+    renderMixedTitle(title);
+    document.title = `${title} — kazvt`;
 
     try {
       const { assignments: allAssignments, pool } = await loadRegistry();
