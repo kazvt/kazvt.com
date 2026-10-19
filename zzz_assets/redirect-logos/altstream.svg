@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-hidden="true">
   <!-- Flat fox mark: tall ears, eye-level cream cheeks, narrow orange bridge, and a low nose. -->
-  <path d="M17 15 C24 12 34 26 43 35 C49 32 57 30 64 30 C71 30 79 32 85 35 C94 26 104 12 111 15 C117 29 116 47 111 61 C117 66 120 72 118 79 C113 93 102 103 91 111 C81 118 70 123 64 124 C58 123 47 118 37 111 C26 103 15 93 10 79 C8 72 11 66 17 61 C12 47 11 29 17 15 Z" fill="#F45A18" stroke="#24140F" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M17 15 C24 12 34 26 43 35 C49 32 57 30 64 30 C71 30 79 32 85 35 C94 26 104 12 111 15 C117 29 116 47 111 61 C117 66 120 72 118 79 C113 93 102 103 91 111 C81 118 70 123 64 124 C58 123 47 118 37 111 C26 103 15 93 10 79 C8 72 11 66 17 61 C12 47 11 29 17 15 Z" fill="#F45A18" stroke="#050407" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <path d="M21 23 C26 26 32 34 38 40 C32 42 27 45 22 49 C19 42 19 31 21 23 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M107 23 C102 26 96 34 90 40 C96 42 101 45 106 49 C109 42 109 31 107 23 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M21 23 C26 26 32 34 38 40 C32 42 27 45 22 49 C19 42 19 31 21 23 Z" fill="#FFF2D8" stroke="#050407" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M107 23 C102 26 96 34 90 40 C96 42 101 45 106 49 C109 42 109 31 107 23 Z" fill="#FFF2D8" stroke="#050407" stroke-width="5" stroke-linejoin="round"/>
 
   <!-- Cream face fur frames the eyes, stays off the forehead, and meets at the chin. -->
-  <path d="M10 77 C19 68 29 63 41 63 C53 64 60 73 63 89 C66 73 74 64 87 63 C99 63 109 68 118 77 C110 92 101 102 89 110 C80 117 70 122 64 124 C58 122 48 117 39 110 C27 102 18 92 10 77 Z" fill="#FFF2D8"/>
+  <path d="M10 77 C19 68 29 63 41 63 C53 64 60 73 63 89 C66 73 74 64 87 63 C99 63 109 68 118 77 C110 92 101 102 89 110 C80 117 70 122 64 124 C58 122 48 117 39 110 C27 102 18 92 10 77 Z" fill="#FFF2D8" stroke="#050407" stroke-width="5" stroke-linejoin="round"/>
 
   <!-- A slim orange bridge separates the cheek patches and points down to the fox's nose. -->
   <path d="M49 47 C56 55 60 72 64 94 C68 72 72 55 79 47 C75 69 70 88 64 98 C58 88 53 69 49 47 Z" fill="#F45A18"/>
@@ -14,5 +14,5 @@
   <ellipse cx="82" cy="80" rx="5.5" ry="6.3" fill="#24140F"/>
   <circle cx="47.5" cy="78" r="1.35" fill="#FFF8EB"/>
   <circle cx="83.5" cy="78" r="1.35" fill="#FFF8EB"/>
-  <path d="M58 96 C60 93 68 93 70 96 C69 101 67 104 64 105 C61 104 59 101 58 96 Z" fill="#24140F"/>
+  <path d="M58 96 C60 93 68 93 70 96 C69 101 67 104 64 105 C61 104 59 101 58 96 Z" fill="#050407"/>
 </svg>
