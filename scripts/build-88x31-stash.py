@@ -2,8 +2,8 @@
 """Build the site's compact, animated 88x31 button stash.
 
 Each button uses a cropped top-square from a source GIF, a tiled site pattern,
-and per-glyph two-pose rotation. The source GIF's original frame loop is kept;
-the text changes pose once per complete source-image loop.
+and a two-frame, per-glyph rotation loop. Two source-image poses are sampled so
+the imported GIF remains visibly animated without making these tiny buttons heavy.
 """
 
 from __future__ import annotations
@@ -81,9 +81,8 @@ def load_font_paths(font_dir: Path | None) -> list[Path]:
     return candidates
 
 
-def source_crops(path: Path) -> tuple[list[Image.Image], list[int]]:
+def source_crops(path: Path) -> list[Image.Image]:
     frames: list[Image.Image] = []
-    durations: list[int] = []
     with Image.open(path) as source:
         for index in range(getattr(source, "n_frames", 1)):
             source.seek(index)
@@ -97,10 +96,9 @@ def source_crops(path: Path) -> tuple[list[Image.Image], list[int]]:
             square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
             square.alpha_composite(top_crop, ((side - width) // 2, 0))
             frames.append(square.resize((24 * SCALE, 24 * SCALE), Image.Resampling.LANCZOS))
-            durations.append(max(50, int(source.info.get("duration", 100))))
     if not frames:
         raise ValueError(f"Source image contains no frames: {path}")
-    return frames, durations
+    return frames
 
 
 def load_pattern(path: Path) -> Image.Image:
@@ -200,7 +198,7 @@ def save_gif(frames: list[Image.Image], durations: list[int], output: Path) -> N
         sheet.paste(frame, (0, index * HEIGHT))
     # A compact shared palette plus frame-delta optimization keeps these tiny
     # buttons from carrying repeated full-frame image data.
-    palette = sheet.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    palette = sheet.quantize(colors=96, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
     encoded = [
         frame.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
         for frame in frames
@@ -228,7 +226,7 @@ def main() -> None:
     if not args.source.is_file():
         parser.error(f"source GIF not found: {args.source}")
     fonts = load_font_paths(args.fonts)
-    icon_frames, icon_durations = source_crops(args.source)
+    icon_frames = source_crops(args.source)
     total = 0
 
     for label, filename, pattern_name in BUTTONS:
@@ -237,12 +235,12 @@ def main() -> None:
             parser.error(f"pattern GIF not found: {pattern_path}")
         pattern = load_pattern(pattern_path)
         glyphs = prepare_glyphs(label, fonts)
-        frames: list[Image.Image] = []
-        durations: list[int] = []
-        for pose_index in range(2):
-            for icon, duration in zip(icon_frames, icon_durations, strict=True):
-                frames.append(render_frame(pattern, icon, glyphs, pose_index))
-                durations.append(duration)
+        icon_indices = [0] if len(icon_frames) == 1 else [0, len(icon_frames) // 2]
+        frames = [
+            render_frame(pattern, icon_frames[icon_index], glyphs, pose_index)
+            for pose_index, icon_index in enumerate(icon_indices)
+        ]
+        durations = [250] * len(frames)
         output = args.output / filename
         save_gif(frames, durations, output)
         total += 1
