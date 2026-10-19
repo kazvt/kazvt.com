@@ -294,30 +294,35 @@ def main() -> None:
     parser.add_argument("--frames", type=int, default=12)
     parser.add_argument("--duration", type=int, default=140, help="milliseconds per frame")
     parser.add_argument("--padding", type=int, default=3, help="transparent edge safety in pixels")
-    parser.add_argument("--amplitude", type=float, default=2.0, help="maximum contour displacement")
+    parser.add_argument("--amplitude", type=float, default=None, help="maximum contour displacement")
     parser.add_argument(
         "--style",
         choices=("soft", "choppy", "broad"),
         default="soft",
         help="soft warp, detailed choppy contour motion, or broad low-frequency line boil",
     )
-    parser.add_argument("--cell-size", type=int, default=5, help="control-point spacing for choppy/broad styles")
-    parser.add_argument("--palette-colors", type=int, default=255, help="maximum opaque palette colors (2-255)")
+    parser.add_argument("--cell-size", type=int, default=None, help="control-point spacing for choppy/broad styles")
+    parser.add_argument("--palette-colors", type=int, default=None, help="maximum opaque palette colors (2-255)")
     parser.add_argument(
         "--dither",
         choices=("floyd-steinberg", "none"),
-        default="floyd-steinberg",
+        default=None,
         help="palette edge treatment; none keeps flat-color logo edges crisp",
     )
     args = parser.parse_args()
+
+    amplitude = args.amplitude if args.amplitude is not None else (10.0 if args.style == "broad" else 2.0)
+    cell_size = args.cell_size if args.cell_size is not None else (28 if args.style == "broad" else 5)
+    palette_colors = args.palette_colors if args.palette_colors is not None else (55 if args.style == "broad" else 255)
+    dither_name = args.dither if args.dither is not None else ("none" if args.style == "broad" else "floyd-steinberg")
 
     if (
         args.frames < 2
         or args.duration < 20
         or args.padding < 0
-        or args.amplitude < 0
-        or args.cell_size < 2
-        or not 2 <= args.palette_colors <= 255
+        or amplitude < 0
+        or cell_size < 2
+        or not 2 <= palette_colors <= 255
     ):
         parser.error("frames >= 2, duration >= 20, padding/amplitude >= 0, cell-size >= 2, and palette-colors 2-255 required")
 
@@ -330,15 +335,15 @@ def main() -> None:
     for index in range(args.frames):
         source_index = min(len(bases) - 1, index * len(bases) // args.frames)
         if args.style == "choppy":
-            frames.append(choppy_displace(bases[source_index], index, args.frames, args.amplitude, args.cell_size))
+            frames.append(choppy_displace(bases[source_index], index, args.frames, amplitude, cell_size))
         elif args.style == "broad":
-            frames.append(broad_displace(bases[source_index], index, args.frames, args.amplitude, args.cell_size))
+            frames.append(broad_displace(bases[source_index], index, args.frames, amplitude, cell_size))
         else:
             phase = 2 * math.pi * index / args.frames
-            frames.append(displace(bases[source_index], phase, args.amplitude))
+            frames.append(displace(bases[source_index], phase, amplitude))
 
-    dither = Image.Dither.NONE if args.dither == "none" else Image.Dither.FLOYDSTEINBERG
-    encode_gif(frames, args.output, args.duration, args.palette_colors, dither)
+    dither = Image.Dither.NONE if dither_name == "none" else Image.Dither.FLOYDSTEINBERG
+    encode_gif(frames, args.output, args.duration, palette_colors, dither)
     print(f"wrote {args.output} ({args.frames} frames, {args.duration} ms/frame)")
 
 
