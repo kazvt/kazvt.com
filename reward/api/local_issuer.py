@@ -32,6 +32,7 @@ FILENAME_RE = re.compile(r"^[^/\\\x00-\x1f\x7f]{1,255}\.(?:png|gif)$", re.IGNORE
 RESERVATION_SEPARATOR_RE = re.compile(r"\s*(?:->|=>|→|=|:)\s*")
 COMPACT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{16,22}$")
 UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.IGNORECASE)
+REASON_BIDI_CONTROL_RE = re.compile(r"[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]")
 EVENT_COMMIT_RE = re.compile(r"^reward: (?:issue award|unassign award|clear awards) [a-f0-9]{12}$")
 REWARD_CHAT_ACTORS = {"kazvt", "chimpwurldos"}
 REWARD_COMMAND_ACTIONS = {"unassign_latest", "clear_user"}
@@ -58,7 +59,9 @@ def _normalize_assignment_reason(value: Any) -> str:
     reason = " ".join(unicodedata.normalize("NFKC", value).split())
     if len(reason) > 180:
         raise RewardIssueError("reason must be 180 characters or fewer.")
-    if any(unicodedata.category(character) in {"Cc", "Cf", "Cs"} for character in reason):
+    if _contains_control(reason) or REASON_BIDI_CONTROL_RE.search(reason) or any(
+        unicodedata.category(character) == "Cs" for character in reason
+    ):
         raise RewardIssueError("reason cannot contain control or formatting characters.")
     return reason
 
