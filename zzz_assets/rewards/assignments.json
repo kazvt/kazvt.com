@@ -66,6 +66,17 @@
       "linkId": "1w4qnSCNBozFftbc",
       "eventIdHash": "e94bf3a93175ed9d04e5d53bbb01cc4978194b1243bd846cd6d714abd1d5b738",
       "userId": "57672838"
+    },
+    {
+      "assetId": "04aa3a053a9c307235a34947c9d4e9a2a2c72e55004a3018a9070a9a404f8012",
+      "assetSha256": "04aa3a053a9c307235a34947c9d4e9a2a2c72e55004a3018a9070a9a404f8012",
+      "filename": "cold.png",
+      "username": "kaos_dragon",
+      "issuedAt": "2026-10-19T20:20:01.609Z",
+      "platform": "twitch",
+      "linkId": "NZr_mRpdh7w3rb_C",
+      "eventIdHash": "225e0f44393c3d6f529bf1215b64d201c308318f4b92a8c891fe8fca69047fc2",
+      "userId": "57672838"
     }
   ],
   "revokedAssignments": [
