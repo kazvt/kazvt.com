@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import random
 from pathlib import Path
 
 from PIL import Image
@@ -69,6 +70,97 @@ def displace(frame: Image.Image, phase: float, amplitude: float) -> Image.Image:
     )
 
 
+def smooth_grid(values: list[float], columns: int, rows: int) -> list[float]:
+    """Soften random control points just enough to make irregular drawn contours."""
+    softened = []
+    for y in range(rows):
+        for x in range(columns):
+            total = values[y * columns + x] * 4
+            weight = 4
+            for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+                if 0 <= nx < columns and 0 <= ny < rows:
+                    total += values[ny * columns + nx]
+                    weight += 1
+            softened.append(total / weight)
+
+    scale = max((abs(value) for value in softened), default=1) or 1
+    return [value / scale for value in softened]
+
+
+def choppy_displace(
+    frame: Image.Image,
+    frame_index: int,
+    frame_count: int,
+    amplitude: float,
+    cell: int,
+) -> Image.Image:
+    """Periodic, coarse-grained contour wobble for the site's hand-boiled logos.
+
+    Integer temporal harmonics make the deformation genuinely cyclic: the final
+    frame-to-first-frame step is the same kind of step as any other in the loop.
+    Higher harmonics add the quick, frame-by-frame redraw quality of the platform
+    marks without turning the logo into a smooth rubbery warp.
+    """
+    width, height = frame.size
+    xs = list(range(0, width, cell)) + [width]
+    ys = list(range(0, height, cell)) + [height]
+    columns, rows = len(xs), len(ys)
+    harmonics = (1, 2, 3, 5)
+    weights = (0.40, 0.29, 0.19, 0.12)
+    seed = 0xA17 + width * 17 + height * 31 + cell * 131
+
+    fields: list[list[list[float]]] = []
+    phases: list[list[float]] = []
+    for axis in range(2):
+        axis_fields = []
+        axis_phases = []
+        for harmonic in harmonics:
+            rng = random.Random(seed + axis * 1009 + harmonic * 7919)
+            points = [rng.uniform(-1, 1) for _ in range(columns * rows)]
+            axis_fields.append(smooth_grid(points, columns, rows))
+            axis_phases.append(rng.uniform(0, 2 * math.pi))
+        fields.append(axis_fields)
+        phases.append(axis_phases)
+
+    loop_phase = 2 * math.pi * frame_index / frame_count
+
+    def offset(axis: int, node: int) -> float:
+        return amplitude * sum(
+            weight
+            * fields[axis][component][node]
+            * math.sin(harmonic * loop_phase + phases[axis][component])
+            for component, (harmonic, weight) in enumerate(zip(harmonics, weights))
+        )
+
+    mesh = []
+    for y_index, top in enumerate(ys[:-1]):
+        for x_index, left in enumerate(xs[:-1]):
+            right, bottom = xs[x_index + 1], ys[y_index + 1]
+            top_left = y_index * columns + x_index
+            bottom_left = (y_index + 1) * columns + x_index
+            bottom_right = bottom_left + 1
+            top_right = top_left + 1
+            quad = (
+                left + offset(0, top_left),
+                top + offset(1, top_left),
+                left + offset(0, bottom_left),
+                bottom + offset(1, bottom_left),
+                right + offset(0, bottom_right),
+                bottom + offset(1, bottom_right),
+                right + offset(0, top_right),
+                top + offset(1, top_right),
+            )
+            mesh.append(((left, top, right, bottom), quad))
+
+    return frame.transform(
+        frame.size,
+        Image.Transform.MESH,
+        mesh,
+        resample=Image.Resampling.BICUBIC,
+        fillcolor=(0, 0, 0, 0),
+    )
+
+
 def make_palette(frames: list[Image.Image]) -> Image.Image:
     width, height = frames[0].size
     contact_sheet = Image.new("RGB", (width, height * len(frames)), (0, 0, 0))
@@ -111,10 +203,17 @@ def main() -> None:
     parser.add_argument("--duration", type=int, default=140, help="milliseconds per frame")
     parser.add_argument("--padding", type=int, default=3, help="transparent edge safety in pixels")
     parser.add_argument("--amplitude", type=float, default=2.0, help="maximum contour displacement")
+    parser.add_argument(
+        "--style",
+        choices=("soft", "choppy"),
+        default="soft",
+        help="soft sine warp (legacy) or periodic hand-boiled contour motion",
+    )
+    parser.add_argument("--cell-size", type=int, default=5, help="control-point spacing for choppy style")
     args = parser.parse_args()
 
-    if args.frames < 2 or args.duration < 20 or args.padding < 0 or args.amplitude < 0:
-        parser.error("frames must be >= 2, duration >= 20, and padding/amplitude >= 0")
+    if args.frames < 2 or args.duration < 20 or args.padding < 0 or args.amplitude < 0 or args.cell_size < 2:
+        parser.error("frames must be >= 2, duration >= 20, padding/amplitude >= 0, and cell-size >= 2")
 
     source_frames = load_frames(args.source)
     if not source_frames:
@@ -124,8 +223,11 @@ def main() -> None:
     frames = []
     for index in range(args.frames):
         source_index = min(len(bases) - 1, index * len(bases) // args.frames)
-        phase = 2 * math.pi * index / args.frames
-        frames.append(displace(bases[source_index], phase, args.amplitude))
+        if args.style == "choppy":
+            frames.append(choppy_displace(bases[source_index], index, args.frames, args.amplitude, args.cell_size))
+        else:
+            phase = 2 * math.pi * index / args.frames
+            frames.append(displace(bases[source_index], phase, args.amplitude))
 
     encode_gif(frames, args.output, args.duration)
     print(f"wrote {args.output} ({args.frames} frames, {args.duration} ms/frame)")

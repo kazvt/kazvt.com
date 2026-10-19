@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-hidden="true">
+  <!-- Flat, bold redraw: the hand-boiled outline is added by build-lineboil-gif.py. -->
+  <path d="M10 12 C24 10 37 19 46 33 C52 29 58 27 64 27 C70 27 76 29 82 33 C91 19 104 10 118 12 C114 24 110 36 108 45 C120 54 122 69 112 83 C101 99 84 112 64 121 C44 112 27 99 16 83 C6 69 8 54 20 45 C18 36 14 24 10 12 Z" fill="#F36B24" stroke="#101018" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 63 C31 59 42 66 51 77 C57 84 61 91 64 96 C67 91 71 84 77 77 C86 66 97 59 110 63 C106 83 88 101 64 110 C40 101 22 83 18 63 Z" fill="#FFF1D8" stroke="#101018" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="43" cy="57" rx="4.4" ry="5.3" fill="#101018"/>
+  <ellipse cx="85" cy="57" rx="4.4" ry="5.3" fill="#101018"/>
+  <path d="M58 79 Q64 75 70 79 L64 86 Z" fill="#101018" stroke="#101018" stroke-width="2" stroke-linejoin="round"/>
+</svg>
