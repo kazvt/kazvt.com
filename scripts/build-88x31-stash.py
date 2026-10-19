@@ -90,10 +90,12 @@ def source_crops(path: Path) -> tuple[list[Image.Image], list[int]]:
             frame = source.convert("RGBA")
             width, height = frame.size
             top_height = max(1, round(height * 0.70))
-            side = min(width, top_height)
-            left = (width - side) // 2
-            # Crop to the top 70% first, then take a top-aligned square crop.
-            square = frame.crop((left, 0, left + side, side))
+            # Keep the full top 70% and center it in a square without stretching
+            # or trimming the lower edge of that crop.
+            top_crop = frame.crop((0, 0, width, top_height))
+            side = max(width, top_height)
+            square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+            square.alpha_composite(top_crop, ((side - width) // 2, 0))
             frames.append(square.resize((24 * SCALE, 24 * SCALE), Image.Resampling.LANCZOS))
             durations.append(max(50, int(source.info.get("duration", 100))))
     if not frames:
