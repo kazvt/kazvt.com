@@ -15,7 +15,7 @@ const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles,
 
 test("reward and demo pages use the same shared shell and versioned assets", () => {
   for (const page of [rewardPage, demoPage]) {
-    assert.doesNotMatch(page, /\{%|\{%|\{\{/,
+    assert.doesNotMatch(page, /\{%|\{\{/,
       "published reward documents must be fully rendered static HTML");
     assert.match(page, /<meta charset="utf-8">/);
     assert.match(page, /id="rewardFavicon"/);
