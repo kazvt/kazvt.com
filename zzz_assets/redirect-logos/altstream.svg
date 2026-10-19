@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-hidden="true">
+  <!-- Flat fox mark: tall ears, eye-level cream cheeks, narrow orange bridge, and a low nose. -->
+  <path d="M17 15 C24 12 34 26 43 35 C49 32 57 30 64 30 C71 30 79 32 85 35 C94 26 104 12 111 15 C117 29 116 47 111 61 C117 66 120 72 118 79 C113 93 102 103 91 111 C81 118 70 123 64 124 C58 123 47 118 37 111 C26 103 15 93 10 79 C8 72 11 66 17 61 C12 47 11 29 17 15 Z" fill="#F45A18" stroke="#24140F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M21 23 C26 26 32 34 38 40 C32 42 27 45 22 49 C19 42 19 31 21 23 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M107 23 C102 26 96 34 90 40 C96 42 101 45 106 49 C109 42 109 31 107 23 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- Cream fur belongs around the eyes and along the lower cheeks, not across the forehead. -->
+  <path d="M10 77 C19 68 29 63 41 63 C53 64 60 73 63 89 C65 102 61 112 52 116 C36 108 19 93 10 77 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M118 77 C109 68 99 63 87 63 C75 64 68 73 65 89 C63 102 67 112 76 116 C92 108 109 93 118 77 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- A slim orange bridge separates the cheek patches and points down to the fox's nose. -->
+  <path d="M52 48 C58 54 61 67 64 88 C67 67 70 54 76 48 C73 69 69 87 64 98 C59 87 55 69 52 48 Z" fill="#F45A18"/>
+  <ellipse cx="46" cy="80" rx="5.5" ry="6.3" fill="#24140F"/>
+  <ellipse cx="82" cy="80" rx="5.5" ry="6.3" fill="#24140F"/>
+  <circle cx="47.5" cy="78" r="1.35" fill="#FFF8EB"/>
+  <circle cx="83.5" cy="78" r="1.35" fill="#FFF8EB"/>
+  <path d="M58 96 C60 93 68 93 70 96 C69 102 67 105 64 106 C61 105 59 102 58 96 Z" fill="#24140F"/>
+  <path d="M64 106 C64 109 62 111 60 112" fill="none" stroke="#24140F" stroke-width="2" stroke-linecap="round"/>
+  <path d="M64 106 C64 109 66 111 68 112" fill="none" stroke="#24140F" stroke-width="2" stroke-linecap="round"/>
+</svg>
