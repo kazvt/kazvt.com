@@ -6,7 +6,9 @@
   <path d="M107 23 C102 26 96 34 90 40 C96 42 101 45 106 49 C109 42 109 31 107 23 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
 
   <!-- Cream face fur frames the eyes, stays off the forehead, and meets at the chin. -->
-  <path d="M10 77 C19 68 29 63 41 63 C53 64 60 73 63 89 C66 73 74 64 87 63 C99 63 109 68 118 77 C110 92 101 102 89 110 C80 117 70 122 64 124 C58 122 48 117 39 110 C27 102 18 92 10 77 Z" fill="#FFF2D8" stroke="#24140F" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M10 77 C19 68 29 63 41 63 C53 64 60 73 63 89 C66 73 74 64 87 63 C99 63 109 68 118 77 C110 92 101 102 89 110 C80 117 70 122 64 124 C58 122 48 117 39 110 C27 102 18 92 10 77 Z" fill="#FFF2D8"/>
+  <path d="M11 77 C20 68 30 63 41 63 C50 63 56 67 60 74" fill="none" stroke="#24140F" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M117 77 C108 68 98 63 87 63 C78 63 72 67 68 74" fill="none" stroke="#24140F" stroke-width="2.5" stroke-linecap="round"/>
 
   <!-- A slim orange bridge separates the cheek patches and points down to the fox's nose. -->
   <path d="M52 48 C58 55 61 72 64 94 C67 72 70 55 76 48 C73 69 69 87 64 98 C59 87 55 69 52 48 Z" fill="#F45A18"/>
