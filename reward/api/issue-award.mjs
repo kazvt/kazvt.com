@@ -177,6 +177,9 @@ export async function issueAward(input, options = {}) {
       result.pushed !== true) {
     throw new Error("The local API response did not match the requested award or confirm its push.");
   }
+  const expectedReason = typeof result.assignment.reason === "string"
+    ? result.assignment.reason.normalize("NFKC").replace(/\s+/gu, " ").trim()
+    : "";
   const href = createRewardHref(result.assignment.linkId, siteOrigin);
 
   const deadline = Date.now() + timeoutMs;
@@ -187,7 +190,10 @@ export async function issueAward(input, options = {}) {
       const published = registry.assignments.find(record => record.linkId === result.assignment.linkId);
       if (published) {
         if (normalizeUsername(published.username) !== normalizeUsername(request.username) ||
-            String(published.assetId ?? published.assetSha256).toLowerCase() !== request.assetId) {
+            String(published.assetId ?? published.assetSha256).toLowerCase() !== request.assetId ||
+            (typeof published.reason === "string"
+              ? published.reason.normalize("NFKC").replace(/\s+/gu, " ").trim()
+              : "") !== expectedReason) {
           throw new Error("The public registry contains conflicting data for this reward link.");
         }
         return {
