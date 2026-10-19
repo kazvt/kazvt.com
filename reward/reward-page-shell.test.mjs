@@ -15,15 +15,24 @@ const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles,
 
 test("reward and demo pages use the same shared shell and versioned assets", () => {
   for (const page of [rewardPage, demoPage]) {
-    assert.match(page, /\{% include reward\/head-assets\.html %\}/);
-    assert.match(page, /\{% include reward\/body\.html %\}/);
-    assert.match(page, /layout: null/);
+    assert.doesNotMatch(page, /\{%|\{%|\{\{/,
+      "published reward documents must be fully rendered static HTML");
+    assert.match(page, /<meta charset="utf-8">/);
+    assert.match(page, /id="rewardFavicon"/);
+    assert.match(page, /id="rewardArtworkMotion"/);
   }
 
-  assert.match(demoPage, /reward_demo: true/);
   assert.match(sharedHead, /id="rewardFavicon"/);
-  assert.match(sharedHead, /reward\.css\?v=\{\{ reward_asset_version \}\}/);
-  assert.match(sharedHead, /reward\.js\?v=\{\{ reward_asset_version \}\}/);
+  assert.match(sharedHead, /reward\.css\?v=\{\{REWARD_ASSET_VERSION\}\}/);
+  assert.match(sharedHead, /reward\.js\?v=\{\{REWARD_ASSET_VERSION\}\}/);
+  assert.match(rewardPage, /reward\.css\?v=[a-f0-9]{12}/);
+  assert.match(demoPage, /reward\.css\?v=[a-f0-9]{12}/);
+  assert.doesNotMatch(rewardPage, /data-reward-demo/);
+  assert.match(demoPage, /<body data-reward-demo data-page-state="loading">/);
+  assert.match(rewardPage, /Reward link unavailable/);
+  assert.match(demoPage, /Demo temporarily unavailable/);
+  assert.match(rewardPage, /Complete link required\./);
+  assert.match(demoPage, /Couldn't load a demo\. Please try again\./);
 });
 
 test("the common reward component retains artwork, tier, title, collection, and gallery UI", () => {
@@ -34,7 +43,7 @@ test("the common reward component retains artwork, tier, title, collection, and 
   ]) {
     assert.match(sharedBody, new RegExp(`id="${id}"`));
   }
-  assert.match(sharedBody, /page\.reward_demo/);
+  assert.match(sharedBody, /\{\{REWARD_DEMO_CLASS\}\}/);
 
   const sharedRenderer = rewardScript.match(/async function renderRewardPage[\s\S]*?(?=async function openDemo)/)?.[0] ?? "";
   const demoLoader = rewardScript.match(/async function openDemo[\s\S]*?(?=async function openReward)/)?.[0] ?? "";

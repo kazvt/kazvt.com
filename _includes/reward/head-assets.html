@@ -3,7 +3,6 @@
 <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
 <link rel="preload" href="/reward/patterns/loading-stars.gif" as="image">
 <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
-{% assign reward_asset_version = site.time | date: '%s' %}
-<link rel="stylesheet" href="/reward/reward.css?v={{ reward_asset_version }}">
-<link rel="stylesheet" href="/reward/demo/demo.css?v={{ reward_asset_version }}">
-<script type="module" src="/reward/reward.js?v={{ reward_asset_version }}"></script>
+<link rel="stylesheet" href="/reward/reward.css?v={{REWARD_ASSET_VERSION}}">
+<link rel="stylesheet" href="/reward/demo/demo.css?v={{REWARD_ASSET_VERSION}}">
+<script type="module" src="/reward/reward.js?v={{REWARD_ASSET_VERSION}}"></script>

@@ -1,5 +1,5 @@
   <div id="artWallpaper" class="art-wallpaper" aria-hidden="true"></div>
-  <main class="reward-card{% if page.reward_demo %} reward-demo-card{% endif %}" aria-live="polite" aria-busy="true">
+  <main class="reward-card{{REWARD_DEMO_CLASS}}" aria-live="polite" aria-busy="true">
     <div id="rewardDecals" class="reward-decal-layer" aria-hidden="true"></div>
     <section id="loadingState" class="loading-state" role="status" aria-live="polite" aria-atomic="true">
       <div class="loading-heading">
@@ -19,7 +19,7 @@
         <span id="tierName" class="tier-name"></span>
       </div>
       <h1 id="recipient"></h1>
-      <p id="awardNote" class="award-note">{% if page.reward_demo %}Demo only. No reward is issued or attached to this name.{% endif %}</p>
+      <p id="awardNote" class="award-note">{{REWARD_DEMO_NOTE}}</p>
       <section id="awardCollection" class="award-collection" hidden aria-labelledby="awardCollectionHeading">
         <h2 id="awardCollectionHeading" class="award-collection-heading"></h2>
         <ul id="awardCollectionGrid" class="award-collection-grid" aria-label="Rewards, newest first"></ul>
@@ -27,10 +27,10 @@
       </section>
     </section>
     <section id="errorState" hidden>
-      <h1>{% if page.reward_demo %}Demo temporarily unavailable{% else %}Reward link unavailable{% endif %}</h1>
-      <p id="errorMessage" class="message">{% if page.reward_demo %}Couldn't load a demo. Please try again.{% else %}Complete link required.{% endif %}</p>
+      <h1>{{ERROR_TITLE}}</h1>
+      <p id="errorMessage" class="message">{{ERROR_MESSAGE}}</p>
     </section>
-    {% if page.reward_demo %}<p class="demo-footnote" hidden>The name and artwork are randomized. Nothing is assigned or saved.</p>{% endif %}
+    {{DEMO_FOOTNOTE}}
   </main>
   <a id="allRewardsLink" class="all-rewards-link" href="/reward/list/" hidden>
     <svg class="all-rewards-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">

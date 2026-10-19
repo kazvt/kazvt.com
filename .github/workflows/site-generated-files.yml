@@ -4,6 +4,11 @@ on:
   push:
     paths:
       - "links.js"
+      - "_includes/reward/**"
+      - "scripts/build-reward-pages.mjs"
+      - "reward/reward.css"
+      - "reward/demo/demo.css"
+      - "reward/reward.js"
       - "zzz_redirect/template.html"
       - "zzz_redirect/build-shortlinks.mjs"
       - "zzz_assets/emotes/**"
@@ -38,6 +43,7 @@ jobs:
           python-version: "3.x"
       - name: Regenerate shortlinks, emote manifest, and reward catalogs
         run: |
+          node scripts/build-reward-pages.mjs
           node zzz_redirect/build-shortlinks.mjs
           python scripts/build-emote-manifest.py
           node obs/trivia-rewards-widget/generate-reward-catalog.mjs
