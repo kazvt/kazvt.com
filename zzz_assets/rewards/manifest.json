@@ -120,7 +120,7 @@
     "Soinc.png",
     "Sour Candy.png",
     "Spotaneously piss your pants.png",
-    "Stroke it a litle.png",
+    "Stroke me a litle.png",
     "Stwbabe_bgless.png",
     "THINK FAST!!!!!!!!!.png",
     "Testicle.png",
@@ -790,7 +790,7 @@
       "height": 814,
       "tier": "rare"
     },
-    "Stroke it a litle.png": {
+    "Stroke me a litle.png": {
       "assetId": "d9a323561f6ecb0f89f9817774007a8eae373f231fc26b3d1f185154163945d8",
       "sha256": "d9a323561f6ecb0f89f9817774007a8eae373f231fc26b3d1f185154163945d8",
       "width": 206,
@@ -2244,7 +2244,7 @@
       "tier": "rare"
     },
     "d9a323561f6ecb0f89f9817774007a8eae373f231fc26b3d1f185154163945d8": {
-      "filename": "Stroke it a litle.png",
+      "filename": "Stroke me a litle.png",
       "width": 206,
       "height": 368,
       "tier": "legendary"
@@ -3339,6 +3339,7 @@
     "i am smacking the wooden furniture 4K_gifspeed_20261018_151504_742800.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
     "iamsmackingthewoodenfurniture 4K.gif": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
     "I have attempted murder in the past, genuinely.gif": "b5a75fd9d2b7223bb5e7b230f9e08ca295f0c5aa0719f368e047143371292926",
-    "🌟🎆🎇✨❇️💖.gif": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712"
+    "🌟🎆🎇✨❇️💖.gif": "a443480c406de57d67369a7409dae226a31baeca2d0eb40876ebb04ebaa24712",
+    "Stroke me a litle.png": "d9a323561f6ecb0f89f9817774007a8eae373f231fc26b3d1f185154163945d8"
   }
 }
