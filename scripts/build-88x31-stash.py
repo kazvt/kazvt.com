@@ -235,7 +235,8 @@ def main() -> None:
             parser.error(f"pattern GIF not found: {pattern_path}")
         pattern = load_pattern(pattern_path)
         glyphs = prepare_glyphs(label, fonts)
-        icon_indices = [0] if len(icon_frames) == 1 else [0, len(icon_frames) // 2]
+        second_icon_index = 0 if len(icon_frames) == 1 else len(icon_frames) // 2
+        icon_indices = [0, second_icon_index]
         frames = [
             render_frame(pattern, icon_frames[icon_index], glyphs, pose_index)
             for pose_index, icon_index in enumerate(icon_indices)
