@@ -19,7 +19,7 @@ import {
   normalizeAwardUsername,
   otherAwardsFor,
   validateAndSortAssignments
-} from "./assignment-registry.mjs?v=images-reservations-1";
+} from "./assignment-registry.mjs?v=award-reason-20261020-v1";
 
 (() => {
   "use strict";
@@ -91,6 +91,8 @@ import {
   const tierIcon = document.getElementById("tierIcon");
   const tierName = document.getElementById("tierName");
   const awardNote = document.getElementById("awardNote");
+  const awardReason = document.getElementById("awardReason");
+  const awardReasonText = document.getElementById("awardReasonText");
   const awardCollection = document.getElementById("awardCollection");
   const awardCollectionHeading = document.getElementById("awardCollectionHeading");
   const awardCollectionGrid = document.getElementById("awardCollectionGrid");
@@ -420,6 +422,12 @@ import {
 
   function setRewardTitle(rewardFilename, username) {
     document.title = `${filenameLabel(rewardFilename)} (${username})`;
+  }
+
+  function renderAwardReason(reason, demo) {
+    const visibleReason = !demo && typeof reason === "string" ? reason.trim() : "";
+    awardReasonText.textContent = visibleReason;
+    awardReason.hidden = !visibleReason;
   }
 
   function hideAwardCollection() {
@@ -854,7 +862,7 @@ import {
     return `${DEMO_ADJECTIVES[randomIndex(DEMO_ADJECTIVES.length)]}${DEMO_NOUNS[randomIndex(DEMO_NOUNS.length)]}`;
   }
 
-  async function renderRewardPage({ file, metadata, assignedTier, displayName, demo = false }) {
+  async function renderRewardPage({ file, metadata, assignedTier, displayName, demo = false, reason = "" }) {
     const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
     if (!tier) throw new Error("The reward tier is invalid.");
 
@@ -876,6 +884,7 @@ import {
       renderUsernameCopy(displayName);
     }
     renderFilename(file);
+    renderAwardReason(reason, demo);
     rewardImage.setAttribute("aria-label", `${tier.label} ${demo ? "demo " : ""}artwork: ${file}`);
 
     const artworkImage = await waitForRewardImage(imageUrl);
@@ -966,7 +975,13 @@ import {
       : null;
     const assignedTier = tierFromSha256(metadata?.sha256);
     if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
-    await renderRewardPage({ file, metadata, assignedTier, displayName: data.username });
+    await renderRewardPage({
+      file,
+      metadata,
+      assignedTier,
+      displayName: data.username,
+      reason: assignment.reason,
+    });
     showUserAwardCollection(data.username, metadata.assetId, catalog, {
       platform: data.platform,
       userId: data.userId,

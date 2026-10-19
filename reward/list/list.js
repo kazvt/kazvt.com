@@ -1,6 +1,6 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
-import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=images-reservations-1";
+import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
@@ -184,6 +184,16 @@ import "../background-context.mjs?v=1";
     meta.append(badge);
     info.append(meta);
 
+    if (assignment.reason) {
+      const reason = document.createElement("p");
+      reason.className = "award-reason-card";
+      reason.title = `Awarded for: ${assignment.reason}`;
+      const label = createText("span", "reward-reason-label", "FOR:");
+      const note = createText("span", "award-reason-text", assignment.reason);
+      reason.append(label, note);
+      info.append(reason);
+    }
+
     if (assignment.artworkIsCurrent) {
       const image = document.createElement("img");
       image.src = `/zzz_assets/rewards/${encodeURIComponent(assignment.filename)}`;
@@ -222,7 +232,7 @@ import "../background-context.mjs?v=1";
 
     card.append(artworkFrame, info, openLink);
     const searchText = normalizeSearch(
-      `${assignment.username} ${assignment.platform} ${assignment.userId} ${assignment.filename} ${filenameLabel(assignment.filename)}`
+      `${assignment.username} ${assignment.platform} ${assignment.userId} ${assignment.filename} ${filenameLabel(assignment.filename)} ${assignment.reason}`
     );
     return { card, searchText };
   }
