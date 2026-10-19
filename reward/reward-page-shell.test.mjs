@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles, galleryScript, galleryStyles] = await Promise.all([
+const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles, galleryScript, galleryStyles, galleryPage] = await Promise.all([
   readFile(new URL("./index.html", import.meta.url), "utf8"),
   readFile(new URL("./demo/index.html", import.meta.url), "utf8"),
   readFile(new URL("../_includes/reward/head-assets.html", import.meta.url), "utf8"),
@@ -11,6 +11,7 @@ const [rewardPage, demoPage, sharedHead, sharedBody, rewardScript, rewardStyles,
   readFile(new URL("./reward.css", import.meta.url), "utf8"),
   readFile(new URL("../reward/list/list.js", import.meta.url), "utf8"),
   readFile(new URL("../reward/list/list.css", import.meta.url), "utf8"),
+  readFile(new URL("../reward/list/index.html", import.meta.url), "utf8"),
 ]);
 
 test("reward and demo pages use the same shared shell and versioned assets", () => {
@@ -107,6 +108,10 @@ test("palette-free reward gallery titles use the mixed font set while the demo s
     "username-filtered galleries use the same title renderer");
   assert.match(galleryStyles, /\.mixed-title-glyph--comic\s*\{[^}]*"Comic Sans MS"/,
     "Comic Sans is available as one of the glyph fonts");
+  assert.match(galleryPage, /list\.css\?v=indecisive-title-fonts-20261020-v2/,
+    "the updated collage stylesheet receives a fresh cache key");
+  assert.match(galleryPage, /list\.js\?v=indecisive-title-fonts-20261020-v2/,
+    "the updated collage script receives a fresh cache key");
   assert.doesNotMatch(demoPage, /mixed-title-glyph|mixed-title\.mjs|list\.js/,
     "the standalone demo page does not load the palette-free gallery title treatment");
 });
