@@ -130,10 +130,7 @@ def choppy_displace(
     loop_phase = 2 * math.pi * frame_index / frame_count
 
     def offset(axis: int, node: int) -> float:
-        x = xs[node % columns]
-        y = ys[node // columns]
-        edge_fade = min(1.0, x / cell, (width - x) / cell, y / cell, (height - y) / cell)
-        return amplitude * max(0.0, edge_fade) * sum(
+        return amplitude * sum(
             weight
             * fields[axis][component][node]
             * math.sin(harmonic * loop_phase + phases[axis][component])
@@ -211,7 +208,10 @@ def broad_displace(
     loop_phase = 2 * math.pi * frame_index / frame_count
 
     def offset(axis: int, node: int) -> float:
-        return amplitude * sum(
+        x = xs[node % columns]
+        y = ys[node // columns]
+        edge_fade = min(1.0, x / cell, (width - x) / cell, y / cell, (height - y) / cell)
+        return amplitude * max(0.0, edge_fade) * sum(
             weight
             * fields[axis][component][node]
             * math.sin(harmonic * loop_phase + phases[axis][component])
