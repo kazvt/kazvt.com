@@ -11,9 +11,9 @@
 <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
 <link rel="preload" href="/reward/patterns/loading-stars.gif" as="image">
 <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
-<link rel="stylesheet" href="/reward/reward.css?v=6298e4d5062e">
+<link rel="stylesheet" href="/reward/reward.css?v=award-reason-20261020-v1">
 <link rel="stylesheet" href="/reward/demo/demo.css?v=6298e4d5062e">
-<script type="module" src="/reward/reward.js?v=6298e4d5062e"></script>
+<script type="module" src="/reward/reward.js?v=award-reason-20261020-v1"></script>
 
   <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
 </head>
@@ -34,6 +34,10 @@
         <div id="rewardImage" class="reward-image" role="img" aria-label="" draggable="false"></div>
       </div>
       <p id="filename" class="filename"></p>
+      <p id="awardReason" class="reward-reason" hidden>
+        <span class="reward-reason-label">FOR:</span>
+        <span id="awardReasonText"></span>
+      </p>
       <div id="rewardTier" class="tier-badge" data-tier="common" role="img" aria-label="Reward tier">
         <span id="tierIcon" class="tier-icon" aria-hidden="true"></span>
         <span id="tierName" class="tier-name"></span>

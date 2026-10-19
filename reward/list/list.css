@@ -378,6 +378,37 @@ h1 {
 }
 
 .artwork-name { margin: 0; overflow-wrap: anywhere; color: var(--signal); }
+.award-reason-card {
+  display: flex;
+  max-width: 100%;
+  align-items: baseline;
+  gap: 5px;
+  margin: 4px 0 0;
+  padding: 2px 5px;
+  overflow: hidden;
+  border-left: 2px dotted #ffe778;
+  color: #f1efff;
+  background: rgb(0 0 0 / 24%);
+  font-size: 0.76rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.award-reason-card .reward-reason-label {
+  flex: 0 0 auto;
+  color: #ffe778;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.award-reason-card .award-reason-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .award-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 6px; }
 
 .tier-badge {
