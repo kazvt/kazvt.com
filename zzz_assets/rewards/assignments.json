@@ -88,6 +88,17 @@
       "linkId": "zv8eQncH_7UM6fQc",
       "eventIdHash": "0db1cd7321fb0cd0b35ccb71ae60c27c7752978f5f2b6589b9dd27584b3ad533",
       "userId": "57672838"
+    },
+    {
+      "assetId": "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095",
+      "assetSha256": "12b76c6a5c78cd96608ea2d9261b84498457fbeae2ed4a071ce617e6796b9095",
+      "filename": "a One of these.png",
+      "username": "enorkri",
+      "issuedAt": "2026-10-19T21:08:07.034Z",
+      "platform": "twitch",
+      "linkId": "vuktc7QzupgRRrC5",
+      "eventIdHash": "3e0ff448809a1242a81ee74abcc8443caf8c5d0687d3d686d1742cb981ba4a67",
+      "userId": "106078197"
     }
   ],
   "revokedAssignments": [
