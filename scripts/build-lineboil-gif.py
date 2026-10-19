@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a transparent, gently line-boiled GIF from a logo image."""
+"""Create a transparent, line-boiled GIF from a logo image."""
 
 from __future__ import annotations
 
@@ -161,21 +161,27 @@ def choppy_displace(
     )
 
 
-def make_palette(frames: list[Image.Image]) -> Image.Image:
+def make_palette(frames: list[Image.Image], colors: int) -> Image.Image:
     width, height = frames[0].size
     contact_sheet = Image.new("RGB", (width, height * len(frames)), (0, 0, 0))
     for index, frame in enumerate(frames):
         contact_sheet.paste(frame.convert("RGB"), (0, index * height))
-    return contact_sheet.quantize(colors=255, method=Image.Quantize.MEDIANCUT)
+    return contact_sheet.quantize(colors=colors, method=Image.Quantize.MEDIANCUT)
 
 
-def encode_gif(frames: list[Image.Image], output: Path, duration: int) -> None:
-    palette = make_palette(frames)
+def encode_gif(
+    frames: list[Image.Image],
+    output: Path,
+    duration: int,
+    colors: int = 255,
+    dither: Image.Dither = Image.Dither.FLOYDSTEINBERG,
+) -> None:
+    palette = make_palette(frames, colors)
     palette_frames = []
     for frame in frames:
         indexed = frame.convert("RGB").quantize(
             palette=palette,
-            dither=Image.Dither.FLOYDSTEINBERG,
+            dither=dither,
         )
         transparent = frame.getchannel("A").point(lambda alpha: 255 if alpha < 128 else 0)
         indexed.paste(255, mask=transparent)
@@ -210,10 +216,24 @@ def main() -> None:
         help="soft sine warp (legacy) or periodic hand-boiled contour motion",
     )
     parser.add_argument("--cell-size", type=int, default=5, help="control-point spacing for choppy style")
+    parser.add_argument("--palette-colors", type=int, default=255, help="maximum opaque palette colors (2-255)")
+    parser.add_argument(
+        "--dither",
+        choices=("floyd-steinberg", "none"),
+        default="floyd-steinberg",
+        help="palette edge treatment; none keeps flat-color logo edges crisp",
+    )
     args = parser.parse_args()
 
-    if args.frames < 2 or args.duration < 20 or args.padding < 0 or args.amplitude < 0 or args.cell_size < 2:
-        parser.error("frames must be >= 2, duration >= 20, padding/amplitude >= 0, and cell-size >= 2")
+    if (
+        args.frames < 2
+        or args.duration < 20
+        or args.padding < 0
+        or args.amplitude < 0
+        or args.cell_size < 2
+        or not 2 <= args.palette_colors <= 255
+    ):
+        parser.error("frames >= 2, duration >= 20, padding/amplitude >= 0, cell-size >= 2, and palette-colors 2-255 required")
 
     source_frames = load_frames(args.source)
     if not source_frames:
@@ -229,7 +249,8 @@ def main() -> None:
             phase = 2 * math.pi * index / args.frames
             frames.append(displace(bases[source_index], phase, args.amplitude))
 
-    encode_gif(frames, args.output, args.duration)
+    dither = Image.Dither.NONE if args.dither == "none" else Image.Dither.FLOYDSTEINBERG
+    encode_gif(frames, args.output, args.duration, args.palette_colors, dither)
     print(f"wrote {args.output} ({args.frames} frames, {args.duration} ms/frame)")
 
 
