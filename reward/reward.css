@@ -772,7 +772,8 @@ h1 {
 }
 
 .reward-reason {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   max-width: min(100%, 430px);
   align-items: baseline;
   justify-content: center;
