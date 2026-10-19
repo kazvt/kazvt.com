@@ -193,7 +193,7 @@ def broad_displace(
     fields: list[list[list[float]]] = []
     phases: list[list[float]] = []
     seam_midpoint = 2 * math.pi * (frame_count - 0.5) / frame_count
-    seam_target = math.acos(0.64)
+    seam_target = math.acos(0.74)
     for axis in range(2):
         axis_fields = []
         axis_phases = []
