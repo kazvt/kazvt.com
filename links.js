@@ -38,6 +38,12 @@ window.KAZVT_LINKS = {
     logo: "/zzz_assets/redirect-logos/youtube.gif",
     delayMs: 1000
   },
+  altstream: {
+    url: "https://altstream.online/kazvt",
+    shortPath: "altstream",
+    logo: "/zzz_assets/redirect-logos/altstream.gif",
+    delayMs: 1000
+  },
   discord: {
     url: "https://discord.com/invite/huzMpfJZ4J",
     shortPath: "discord",

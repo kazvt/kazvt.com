@@ -68,6 +68,15 @@ const streamLinks = [
     status: "offline",
     color: "#ffc6b7",
   },
+  {
+    key: "altstream",
+    label: "AltStream",
+    href: editableLink("altstream", "url", "https://altstream.online/kazvt"),
+    icon: "altstream",
+    note: "",
+    status: "offline",
+    color: "#ff9d16",
+  },
 ];
 
 const socialLinks = [
@@ -3358,7 +3367,12 @@ async function render(statusOverrides = {}) {
 }
 
 async function loadStatus() {
-  return parseColonKeyValueLines(await loadTextLines("status.txt"));
+  const statuses = parseColonKeyValueLines(await loadTextLines("status.txt"));
+  const twitchStatus = normalizeStatus(String(statuses.twitch || "offline").trim().toLowerCase());
+  // AltStream mirrors the Twitch destination for this site; it is not a
+  // separately polled service, so its badge follows Twitch's live state.
+  statuses.altstream = twitchStatus === "live" ? "live" : "offline";
+  return statuses;
 }
 
 async function loadLastStreamInfo() {
