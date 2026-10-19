@@ -41,7 +41,7 @@ window.KAZVT_LINKS = {
   altstream: {
     url: "https://altstream.online/kazvt",
     shortPath: "altstream",
-    logo: "/zzz_assets/redirect-logos/altstream.gif?v=redrawn-simple-lineboil-v1",
+    logo: "/zzz_assets/redirect-logos/altstream.gif?v=platform-match-choppy-lineboil-v2",
     delayMs: 1000
   },
   discord: {
