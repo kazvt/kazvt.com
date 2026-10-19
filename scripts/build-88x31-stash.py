@@ -198,7 +198,9 @@ def save_gif(frames: list[Image.Image], durations: list[int], output: Path) -> N
     sheet = Image.new("RGB", (WIDTH, HEIGHT * len(frames)), (0, 0, 0))
     for index, frame in enumerate(frames):
         sheet.paste(frame, (0, index * HEIGHT))
-    palette = sheet.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    # A compact shared palette plus frame-delta optimization keeps these tiny
+    # buttons from carrying repeated full-frame image data.
+    palette = sheet.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
     encoded = [
         frame.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
         for frame in frames
@@ -211,7 +213,7 @@ def save_gif(frames: list[Image.Image], durations: list[int], output: Path) -> N
         duration=durations,
         loop=0,
         disposal=2,
-        optimize=False,
+        optimize=True,
     )
 
 
