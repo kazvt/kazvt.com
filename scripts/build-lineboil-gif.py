@@ -375,7 +375,7 @@ def main() -> None:
         default="soft",
         help="soft warp, periodic choppy/broad line boil, or independently seeded scatter redraws",
     )
-    parser.add_argument("--cell-size", type=int, default=None, help="control-point spacing for choppy/broad styles")
+    parser.add_argument("--cell-size", type=int, default=None, help="control-point spacing for choppy/broad/scatter styles")
     parser.add_argument("--palette-colors", type=int, default=None, help="maximum opaque palette colors (2-255)")
     parser.add_argument(
         "--dither",

@@ -1366,7 +1366,7 @@ function platformIcon(name) {
       : name === "bsky"
         ? "lineboil-broad-grain-v7"
         : name === "altstream"
-          ? "fox-black-ink-choppy-v2"
+          ? "fox-black-ink-scattered-v3"
         : "lineboil-independent-140ms-v3";
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
