@@ -293,7 +293,7 @@ def main() -> None:
     parser.add_argument("output", type=Path, help="destination animated GIF")
     parser.add_argument("--frames", type=int, default=12)
     parser.add_argument("--duration", type=int, default=140, help="milliseconds per frame")
-    parser.add_argument("--padding", type=int, default=3, help="transparent edge safety in pixels")
+    parser.add_argument("--padding", type=int, default=None, help="transparent edge safety in pixels")
     parser.add_argument("--amplitude", type=float, default=None, help="maximum contour displacement")
     parser.add_argument(
         "--style",
@@ -311,6 +311,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    padding = args.padding if args.padding is not None else (6 if args.style == "broad" else 3)
     amplitude = args.amplitude if args.amplitude is not None else (10.0 if args.style == "broad" else 2.0)
     cell_size = args.cell_size if args.cell_size is not None else (28 if args.style == "broad" else 5)
     palette_colors = args.palette_colors if args.palette_colors is not None else (55 if args.style == "broad" else 255)
@@ -319,7 +320,7 @@ def main() -> None:
     if (
         args.frames < 2
         or args.duration < 20
-        or args.padding < 0
+        or padding < 0
         or amplitude < 0
         or cell_size < 2
         or not 2 <= palette_colors <= 255
@@ -330,7 +331,7 @@ def main() -> None:
     if not source_frames:
         parser.error("source image contains no frames")
 
-    bases = [padded(frame, args.padding) for frame in source_frames]
+    bases = [padded(frame, padding) for frame in source_frames]
     frames = []
     for index in range(args.frames):
         source_index = min(len(bases) - 1, index * len(bases) // args.frames)
