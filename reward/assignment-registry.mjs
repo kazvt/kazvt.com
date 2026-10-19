@@ -9,6 +9,15 @@ export function normalizeAwardUsername(value) {
   return typeof value === "string" ? value.normalize("NFKC").trim().toLowerCase() : "";
 }
 
+export function normalizeAssignmentReason(value) {
+  if (typeof value !== "string") return "";
+  const normalized = value.normalize("NFKC")
+    .replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+  return Array.from(normalized).slice(0, 180).join("");
+}
+
 export function isRewardLinkId(value) {
   return typeof value === "string" && (UUID4_PATTERN.test(value) || COMPACT_REWARD_ID_PATTERN.test(value));
 }
@@ -125,6 +134,7 @@ export function validateAndSortAssignments(registry, catalog) {
       assetId,
       linkId: normalizedLinkId,
       issuedAt: record.issuedAt,
+      reason: normalizeAssignmentReason(record.reason),
       platform,
       userId,
       tierId: tier?.id ?? "",

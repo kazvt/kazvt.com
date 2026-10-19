@@ -50,6 +50,19 @@ def _contains_control(value: str) -> bool:
     return any(unicodedata.category(character) == "Cc" for character in value)
 
 
+def _normalize_assignment_reason(value: Any) -> str:
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise RewardIssueError("reason must be text when supplied.")
+    reason = " ".join(unicodedata.normalize("NFKC", value).split())
+    if len(reason) > 180:
+        raise RewardIssueError("reason must be 180 characters or fewer.")
+    if any(unicodedata.category(character) in {"Cc", "Cf", "Cs"} for character in reason):
+        raise RewardIssueError("reason cannot contain control or formatting characters.")
+    return reason
+
+
 def _clean_request(
     payload: Any,
     *,
@@ -72,6 +85,7 @@ def _clean_request(
     platform = platform or "stream-game"
     raw_user_id = payload.get("userId", "")
     user_id = unicodedata.normalize("NFKC", raw_user_id).strip() if isinstance(raw_user_id, str) else ""
+    reason = _normalize_assignment_reason(payload.get("reason"))
 
     if not username or len(username) > 100 or _contains_control(username):
         raise RewardIssueError("username must be 1-100 characters and contain no control characters.")
@@ -96,6 +110,7 @@ def _clean_request(
         "eventId": event_id,
         "platform": platform,
         "userId": user_id,
+        "reason": reason,
     }
 
 
@@ -159,6 +174,10 @@ def _validate_registry(registry: dict[str, Any]) -> None:
         issued_at = record.get("issuedAt")
         platform = record.get("platform", "")
         user_id = record.get("userId", "")
+        try:
+            _normalize_assignment_reason(record.get("reason"))
+        except RewardIssueError as exc:
+            raise RewardIssueError(f"Assignment record {index + 1} has an invalid reason.") from exc
         if (not isinstance(filename, str) or not FILENAME_RE.fullmatch(filename) or
                 not isinstance(username, str) or not username.strip() or len(username) > 100 or _contains_control(username) or
                 not isinstance(platform, str) or len(platform) > 60 or _contains_control(platform) or
@@ -506,6 +525,8 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
         "linkId": link_id,
         "eventIdHash": event_hash,
     }
+    if request.get("reason"):
+        assignment["reason"] = request["reason"]
     if request.get("userId"):
         assignment["userId"] = request["userId"]
     next_registry = {
