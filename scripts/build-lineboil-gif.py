@@ -70,18 +70,23 @@ def displace(frame: Image.Image, phase: float, amplitude: float) -> Image.Image:
     )
 
 
-def smooth_grid(values: list[float], columns: int, rows: int) -> list[float]:
-    """Soften random control points just enough to make irregular drawn contours."""
-    softened = []
-    for y in range(rows):
-        for x in range(columns):
-            total = values[y * columns + x] * 4
-            weight = 4
-            for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
-                if 0 <= nx < columns and 0 <= ny < rows:
-                    total += values[ny * columns + nx]
-                    weight += 1
-            softened.append(total / weight)
+def smooth_grid(
+    values: list[float], columns: int, rows: int, passes: int = 1
+) -> list[float]:
+    """Smooth control points into broad, continuous displacement fields."""
+    softened = values
+    for _ in range(passes):
+        next_values = []
+        for y in range(rows):
+            for x in range(columns):
+                total = softened[y * columns + x] * 4
+                weight = 4
+                for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+                    if 0 <= nx < columns and 0 <= ny < rows:
+                        total += softened[ny * columns + nx]
+                        weight += 1
+                next_values.append(total / weight)
+        softened = next_values
 
     scale = max((abs(value) for value in softened), default=1) or 1
     return [value / scale for value in softened]
@@ -118,6 +123,79 @@ def choppy_displace(
             rng = random.Random(seed + axis * 1009 + harmonic * 7919)
             points = [rng.uniform(-1, 1) for _ in range(columns * rows)]
             axis_fields.append(smooth_grid(points, columns, rows))
+            axis_phases.append(rng.uniform(0, 2 * math.pi))
+        fields.append(axis_fields)
+        phases.append(axis_phases)
+
+    loop_phase = 2 * math.pi * frame_index / frame_count
+
+    def offset(axis: int, node: int) -> float:
+        return amplitude * sum(
+            weight
+            * fields[axis][component][node]
+            * math.sin(harmonic * loop_phase + phases[axis][component])
+            for component, (harmonic, weight) in enumerate(zip(harmonics, weights))
+        )
+
+    mesh = []
+    for y_index, top in enumerate(ys[:-1]):
+        for x_index, left in enumerate(xs[:-1]):
+            right, bottom = xs[x_index + 1], ys[y_index + 1]
+            top_left = y_index * columns + x_index
+            bottom_left = (y_index + 1) * columns + x_index
+            bottom_right = bottom_left + 1
+            top_right = top_left + 1
+            quad = (
+                left + offset(0, top_left),
+                top + offset(1, top_left),
+                left + offset(0, bottom_left),
+                bottom + offset(1, bottom_left),
+                right + offset(0, bottom_right),
+                bottom + offset(1, bottom_right),
+                right + offset(0, top_right),
+                top + offset(1, top_right),
+            )
+            mesh.append(((left, top, right, bottom), quad))
+
+    return frame.transform(
+        frame.size,
+        Image.Transform.MESH,
+        mesh,
+        resample=Image.Resampling.BICUBIC,
+        fillcolor=(0, 0, 0, 0),
+    )
+
+
+def broad_displace(
+    frame: Image.Image,
+    frame_index: int,
+    frame_count: int,
+    amplitude: float,
+    cell: int,
+) -> Image.Image:
+    """Make large, smooth, cyclic redraws with no fine-grained surface jitter.
+
+    Wide mesh spacing and repeated field smoothing move whole contour regions
+    together. Two low temporal harmonics keep the loop lively and frame-snappy
+    while preserving the underlying silhouette and feature placement.
+    """
+    width, height = frame.size
+    xs = list(range(0, width, cell)) + [width]
+    ys = list(range(0, height, cell)) + [height]
+    columns, rows = len(xs), len(ys)
+    harmonics = (1, 2)
+    weights = (0.74, 0.26)
+    seed = 0xB04D + width * 19 + height * 37 + cell * 149
+
+    fields: list[list[list[float]]] = []
+    phases: list[list[float]] = []
+    for axis in range(2):
+        axis_fields = []
+        axis_phases = []
+        for harmonic in harmonics:
+            rng = random.Random(seed + axis * 1013 + harmonic * 7927)
+            points = [rng.uniform(-1, 1) for _ in range(columns * rows)]
+            axis_fields.append(smooth_grid(points, columns, rows, passes=3))
             axis_phases.append(rng.uniform(0, 2 * math.pi))
         fields.append(axis_fields)
         phases.append(axis_phases)
@@ -211,11 +289,11 @@ def main() -> None:
     parser.add_argument("--amplitude", type=float, default=2.0, help="maximum contour displacement")
     parser.add_argument(
         "--style",
-        choices=("soft", "choppy"),
+        choices=("soft", "choppy", "broad"),
         default="soft",
-        help="soft sine warp (legacy) or periodic hand-boiled contour motion",
+        help="soft warp, detailed choppy contour motion, or broad low-frequency line boil",
     )
-    parser.add_argument("--cell-size", type=int, default=5, help="control-point spacing for choppy style")
+    parser.add_argument("--cell-size", type=int, default=5, help="control-point spacing for choppy/broad styles")
     parser.add_argument("--palette-colors", type=int, default=255, help="maximum opaque palette colors (2-255)")
     parser.add_argument(
         "--dither",
@@ -245,6 +323,8 @@ def main() -> None:
         source_index = min(len(bases) - 1, index * len(bases) // args.frames)
         if args.style == "choppy":
             frames.append(choppy_displace(bases[source_index], index, args.frames, args.amplitude, args.cell_size))
+        elif args.style == "broad":
+            frames.append(broad_displace(bases[source_index], index, args.frames, args.amplitude, args.cell_size))
         else:
             phase = 2 * math.pi * index / args.frames
             frames.append(displace(bases[source_index], phase, args.amplitude))
