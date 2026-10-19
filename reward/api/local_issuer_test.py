@@ -166,6 +166,41 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertEqual(catalog["version"], 4)
         self.assertEqual(registry["assignments"], [])
 
+    def test_unverified_twitch_login_can_receive_and_release_reward(self) -> None:
+        request = {
+            "username": "Lillie_Garden", "platform": "twitch",
+            "eventId": "twitch:unverified-name-award",
+        }
+        issued = issue_next_and_publish(
+            self.site, request, expected_remote=str(self.remote)
+        )
+        self.assertEqual(issued["assignment"]["username"], "Lillie_Garden")
+        self.assertNotIn("userId", issued["assignment"])
+
+        replay = issue_next_and_publish(
+            self.site,
+            {**request, "username": "lillie_garden"},
+            expected_remote=str(self.remote),
+        )
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["assignment"]["linkId"], issued["assignment"]["linkId"])
+
+        self.assertTrue(local_issuer._same_chat_identity(
+            {"platform": "twitch", "username": "Lillie_Garden", "userId": ""},
+            {"platform": "twitch", "username": "lillie_garden", "userId": "12345"},
+        ))
+
+        released = unassign_latest_and_publish(
+            self.site,
+            {
+                "username": "lillie_garden", "platform": "twitch", "userId": "",
+                "actorLogin": "kazvt", "eventId": "twitch:unverified-name-release",
+            },
+            expected_remote=str(self.remote),
+        )
+        self.assertEqual(released["revokedCount"], 1)
+        self.assertEqual(len(list_available_artwork(self.site)), 2)
+
     def test_alias_reservation_routes_gif_only_to_matching_user_and_excludes_it_from_pool(self) -> None:
         gif = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==")
         filename = "Munch on this RABBIT.gif"

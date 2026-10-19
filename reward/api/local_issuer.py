@@ -85,8 +85,10 @@ def _clean_request(
         raise RewardIssueError("platform must be 1-60 characters and contain no control characters.")
     if user_id and (len(user_id) > 128 or _contains_control(user_id)):
         raise RewardIssueError("userId must be 1-128 characters and contain no control characters.")
-    if require_user_identity and (platform not in {"twitch", "kick", "youtube"} or not user_id):
-        raise RewardIssueError("A supported platform and stable platform userId are required.")
+    if require_user_identity and platform not in {"twitch", "kick", "youtube"}:
+        raise RewardIssueError("A supported platform is required.")
+    if require_user_identity and not user_id and platform != "twitch":
+        raise RewardIssueError("A stable platform userId is required for this platform.")
 
     return {
         "username": username,
@@ -441,8 +443,22 @@ def _assignment_matches(record: dict[str, Any], request: dict[str, str]) -> bool
 
 
 def _same_chat_identity(record: dict[str, Any], request: dict[str, str]) -> bool:
-    return (str(record.get("platform", "")).casefold() == request["platform"] and
-            str(record.get("userId", "")) == request["userId"])
+    if str(record.get("platform", "")).casefold() != request["platform"]:
+        return False
+    record_user_id = str(record.get("userId", ""))
+    request_user_id = request["userId"]
+    if request_user_id:
+        return (
+            record_user_id == request_user_id or
+            (not record_user_id and
+             _normal_username(str(record.get("username", ""))) ==
+             _normal_username(request["username"]))
+        )
+    return (
+        not record_user_id and
+        _normal_username(str(record.get("username", ""))) ==
+        _normal_username(request["username"])
+    )
 
 
 def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str, Any], request: dict[str, str], issued_at: str) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -464,6 +480,8 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
         for previous_assignment in registry["assignments"]:
             if _same_chat_identity(previous_assignment, request):
                 previous_assignment["username"] = request["username"]
+                if not previous_assignment.get("userId"):
+                    previous_assignment["userId"] = request["userId"]
     used_link_ids = {
         str(record.get("linkId", ""))
         for record in [*registry["assignments"], *registry.get("revokedAssignments", [])]
