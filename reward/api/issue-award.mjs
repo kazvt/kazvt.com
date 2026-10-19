@@ -9,6 +9,7 @@ const ASSET_ID_PATTERN = /^[a-f0-9]{64}$/i;
 const LINK_ID_PATTERN = /^(?:[A-Za-z0-9_-]{16,22}|[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})$/i;
 const FILENAME_PATTERN = /^[^/\\\u0000-\u001f\u007f]{1,255}\.(?:png|gif)$/iu;
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/u;
+const REASON_FORMATTING_PATTERN = /[\u202a-\u202e\u2066-\u2069]/u;
 
 function normalizeUsername(value) {
   return typeof value === "string" ? value.normalize("NFKC").trim().toLowerCase() : "";
@@ -44,6 +45,13 @@ function cleanRequest(input) {
   const platform = typeof input?.platform === "string" && input.platform.trim()
     ? input.platform.trim()
     : "stream-game";
+  if (input?.reason != null && typeof input.reason !== "string") {
+    throw new Error("reason must be text when supplied.");
+  }
+  const reason = (input?.reason ?? "").normalize("NFKC")
+    .replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
   if (!username || username.length > 100 || CONTROL_CHARACTER_PATTERN.test(username)) {
     throw new Error("username must be 1-100 characters and contain no control characters.");
   }
@@ -51,10 +59,13 @@ function cleanRequest(input) {
   if (!eventId || eventId.length > 128 || CONTROL_CHARACTER_PATTERN.test(eventId)) {
     throw new Error("eventId must be a stable 1-128 character ID without control characters.");
   }
+  if (reason.length > 180 || REASON_FORMATTING_PATTERN.test(reason)) {
+    throw new Error("reason must be 180 characters or fewer and cannot contain formatting controls.");
+  }
   if (!platform || platform.length > 60 || CONTROL_CHARACTER_PATTERN.test(platform)) {
     throw new Error("platform must be 1-60 characters and contain no control characters.");
   }
-  return { username, assetId, eventId, platform };
+  return { username, assetId, eventId, platform, reason };
 }
 
 function withTimeout(timeoutMs) {
