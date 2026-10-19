@@ -227,7 +227,8 @@ def _validate_registry(registry: dict[str, Any]) -> None:
                 event_hash.lower() in seen_command_events or event_hash.lower() in seen_issue_events or
                 action not in REWARD_COMMAND_ACTIONS or
                 not isinstance(platform, str) or platform not in {"twitch", "kick", "youtube"} or
-                not isinstance(user_id, str) or not user_id.strip() or len(user_id) > 128 or _contains_control(user_id) or
+                not isinstance(user_id, str) or len(user_id) > 128 or _contains_control(user_id) or
+                (not user_id.strip() and platform != "twitch") or
                 not isinstance(username, str) or not username.strip() or len(username) > 100 or _contains_control(username) or
                 not isinstance(actor_login, str) or actor_login.casefold() not in REWARD_CHAT_ACTORS):
             raise RewardIssueError(f"Reward command event {index + 1} is invalid.")
