@@ -161,6 +161,40 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 "eventId": "youtube:message-3",
             }, expected_remote=str(self.remote))
 
+    def test_optional_award_reason_is_normalized_published_and_idempotent(self) -> None:
+        request = {
+            "username": "Winner", "userId": "123", "platform": "twitch",
+            "eventId": "twitch:reason-note", "reason": "  won\t tic\n tac   toe  ",
+        }
+        first = issue_next_and_publish(self.site, request, expected_remote=str(self.remote))
+        self.assertEqual(first["assignment"]["reason"], "won tic tac toe")
+
+        public_registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        self.assertEqual(public_registry["assignments"][0]["reason"], "won tic tac toe")
+
+        replay = issue_next_and_publish(
+            self.site,
+            {key: value for key, value in request.items() if key != "reason"},
+            expected_remote=str(self.remote),
+        )
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["assignment"]["reason"], "won tic tac toe")
+
+    def test_award_reason_rejects_invalid_types_controls_and_overlong_text(self) -> None:
+        base = {"username": "Winner", "userId": "123", "platform": "twitch"}
+        for event_id, reason in (
+            ("reason-number", 7),
+            ("reason-too-long", "x" * 181),
+            ("reason-bidi", "won \u202e a match"),
+            ("reason-surrogate", "won \ud800 a match"),
+        ):
+            with self.subTest(event_id=event_id), self.assertRaises(RewardIssueError):
+                issue_next_and_publish(
+                    self.site,
+                    {**base, "eventId": f"twitch:{event_id}", "reason": reason},
+                    expected_remote=str(self.remote),
+                )
+
     def test_load_records_accepts_string_site_root_for_msi_identity_fallback(self) -> None:
         catalog, registry = local_issuer._load_records(str(self.site))
         self.assertEqual(catalog["version"], 4)
