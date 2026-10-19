@@ -77,6 +77,17 @@
       "linkId": "NZr_mRpdh7w3rb_C",
       "eventIdHash": "225e0f44393c3d6f529bf1215b64d201c308318f4b92a8c891fe8fca69047fc2",
       "userId": "57672838"
+    },
+    {
+      "assetId": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+      "assetSha256": "a6c85300c02b26dd222b5ea179f6b97cadd6a9fbe2cef9b45397eac6f4cc3967",
+      "filename": "iamsmackingthewoodenfurniture 4K.gif",
+      "username": "kaos_dragon",
+      "issuedAt": "2026-10-19T20:30:56.035Z",
+      "platform": "twitch",
+      "linkId": "zv8eQncH_7UM6fQc",
+      "eventIdHash": "0db1cd7321fb0cd0b35ccb71ae60c27c7752978f5f2b6589b9dd27584b3ad533",
+      "userId": "57672838"
     }
   ],
   "revokedAssignments": [
