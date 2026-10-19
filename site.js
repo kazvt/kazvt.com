@@ -1796,12 +1796,12 @@ function badgesPanel() {
           el(
             "a",
             {
-              href: `zzz_assets/buttons/${badge.file}`,
+              href: `zzz_assets/buttons/${badge.file}?v=88x31-refresh-20261019`,
               download: badge.file,
               className: "badge-link",
               title: translateTemplate("badge.download_title", { label: translatedText(`badge.${badge.key}`) }),
             },
-            [el("img", { src: `zzz_assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
+            [el("img", { src: `zzz_assets/buttons/${badge.file}?v=88x31-refresh-20261019`, alt: translatedText(`badge.${badge.key}`), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
           ),
         ),
       ),

@@ -1314,12 +1314,12 @@ function badgesPanel() {
           el(
             "a",
             {
-              href: `assets/buttons/${badge.file}`,
+              href: `assets/buttons/${badge.file}?v=88x31-refresh-20261019`,
               download: badge.file,
               className: "badge-link",
               title: translateTemplate("badge.download_title", "download {label}", { label: translatedText(`badge.${badge.key}`, badge.label) }),
             },
-            [el("img", { src: `assets/buttons/${badge.file}`, alt: translatedText(`badge.${badge.key}`, badge.label), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
+            [el("img", { src: `assets/buttons/${badge.file}?v=88x31-refresh-20261019`, alt: translatedText(`badge.${badge.key}`, badge.label), width: "88", height: "31", "data-i18n-alt": `badge.${badge.key}` })],
           ),
         ),
       ),
