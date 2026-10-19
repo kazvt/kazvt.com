@@ -63,7 +63,7 @@ function cleanRequest(input) {
   if (!eventId || eventId.length > 128 || CONTROL_CHARACTER_PATTERN.test(eventId)) {
     throw new Error("eventId must be a stable 1-128 character ID without control characters.");
   }
-  if (reason.length > 180) {
+  if (Array.from(reason).length > 180 || /[\ud800-\udfff]/u.test(reason)) {
     throw new Error("reason must be 180 characters or fewer and cannot contain formatting controls.");
   }
   if (!platform || platform.length > 60 || CONTROL_CHARACTER_PATTERN.test(platform)) {
