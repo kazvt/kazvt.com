@@ -12,7 +12,7 @@ export function normalizeAwardUsername(value) {
 export function normalizeAssignmentReason(value) {
   if (typeof value !== "string") return "";
   const normalized = value.normalize("NFKC")
-    .replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/gu, " ")
+    .replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/gu, " ")
     .replace(/\s+/gu, " ")
     .trim();
   return Array.from(normalized).slice(0, 180).join("");

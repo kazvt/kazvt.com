@@ -134,6 +134,22 @@ test("assignments sort newest first and renamed artwork resolves by content ID",
   ]);
 });
 
+test("optional award reasons normalize while older assignments stay valid", () => {
+  const assignments = validateAndSortAssignments({ version: 1, assignments: [
+    {
+      assetId: assetIds[0], filename: "gift-current.png", username: "Viewer",
+      issuedAt: "2026-09-01T00:00:00Z", reason: "  won\t tic\n tac   toe  "
+    },
+    {
+      assetId: assetIds[1], filename: "older-gift-current.png", username: "Viewer",
+      issuedAt: "2026-08-01T00:00:00Z"
+    }
+  ] }, makeCatalog());
+
+  assert.equal(assignments[0].reason, "won tic tac toe");
+  assert.equal(assignments[1].reason, "");
+});
+
 test("revoked assignment history is never exposed as an active reward or link", () => {
   const active = {
     assetId: assetIds[0], filename: "gift-current.png", username: "Viewer",
