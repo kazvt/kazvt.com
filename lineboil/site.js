@@ -74,14 +74,13 @@ const socialLinks = [
 ];
 
 const buttonBadges = [
-  { key: "believe", label: "believe it!", file: "believe-it.png" },
-  { key: "moon", label: "moon prism", file: "moon-prism.png" },
-  { key: "waku", label: "waku waku", file: "waku-waku.png" },
-  { key: "blast", label: "gotta blast", file: "gotta-blast.png" },
-  { key: "ultra", label: "plus ultra", file: "plus-ultra.png" },
-  { key: "snack", label: "snack break", file: "snack-break.png" },
-  { key: "cowboy", label: "space cowboy", file: "space-cowboy.png" },
-  { key: "power", label: "power up!", file: "power-up.png" },
+  { key: "boobs", label: "BOOBS", file: "boobs.gif" },
+  { key: "titties", label: "TITTIES", file: "titties.gif" },
+  { key: "breasts", label: "BREASTS", file: "breasts.gif" },
+  { key: "oppai", label: "OPPAI", file: "oppai.gif" },
+  { key: "tits", label: "TITS", file: "tits.gif" },
+  { key: "boobies", label: "BOOBIES", file: "boobies.gif" },
+  { key: "honkers", label: "HONKERS", file: "honkers.gif" },
 ];
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"]);

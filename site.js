@@ -123,14 +123,13 @@ const socialLinks = [
 ];
 
 const buttonBadges = [
-  { key: "believe", file: "believe-it.png" },
-  { key: "moon", file: "moon-prism.png" },
-  { key: "waku", file: "waku-waku.png" },
-  { key: "blast", file: "gotta-blast.png" },
-  { key: "ultra", file: "plus-ultra.png" },
-  { key: "snack", file: "snack-break.png" },
-  { key: "cowboy", file: "space-cowboy.png" },
-  { key: "power", file: "power-up.png" },
+  { key: "boobs", file: "boobs.gif" },
+  { key: "titties", file: "titties.gif" },
+  { key: "breasts", file: "breasts.gif" },
+  { key: "oppai", file: "oppai.gif" },
+  { key: "tits", file: "tits.gif" },
+  { key: "boobies", file: "boobies.gif" },
+  { key: "honkers", file: "honkers.gif" },
 ];
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif"]);
@@ -1366,6 +1365,8 @@ function platformIcon(name) {
       ? "lineboil-broad-grain-v5"
       : name === "bsky"
         ? "lineboil-broad-grain-v7"
+        : name === "altstream"
+          ? "redrawn-simple-lineboil-v1"
         : "lineboil-independent-140ms-v3";
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
