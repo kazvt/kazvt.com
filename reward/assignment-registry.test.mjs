@@ -99,6 +99,19 @@ test("platform user IDs keep reward collections together across handle changes w
   );
 });
 
+test("name-based reward collections stay platform-scoped without a stable user ID", () => {
+  const assignments = [
+    { username: "Lillie_Garden", platform: "twitch", userId: "", assetId: assetIds[0] },
+    { username: "lillie_garden", platform: "twitch", userId: "", assetId: assetIds[1] },
+    { username: "lillie_garden", platform: "kick", userId: "kick-1", assetId: "c".repeat(64) }
+  ];
+
+  assert.deepEqual(
+    otherAwardsFor(assignments, "lillie_garden", assetIds[0], { platform: "twitch", userId: "" }),
+    [assignments[1]]
+  );
+});
+
 test("assignments sort newest first and renamed artwork resolves by content ID", () => {
   const assignments = validateAndSortAssignments({ version: 1, assignments: [
     {

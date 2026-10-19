@@ -45,7 +45,8 @@ export function otherAwardsFor(assignments, username, currentAssetId, owner = nu
     const assetId = typeof assignment?.assetId === "string" ? assignment.assetId.toLowerCase() : "";
     const sameOwner = userId
       ? assignment?.platform?.toLowerCase() === platform && assignment?.userId === userId
-      : normalizeAwardUsername(assignment?.username) === normalizedUsername;
+      : (!platform || assignment?.platform?.toLowerCase() === platform) &&
+        normalizeAwardUsername(assignment?.username) === normalizedUsername;
     return sameOwner &&
       (!currentId || assetId !== currentId);
   });
