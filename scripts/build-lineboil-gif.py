@@ -192,6 +192,8 @@ def broad_displace(
 
     fields: list[list[list[float]]] = []
     phases: list[list[float]] = []
+    seam_midpoint = 2 * math.pi * (frame_count - 0.5) / frame_count
+    seam_target = math.acos(0.64)
     for axis in range(2):
         axis_fields = []
         axis_phases = []
@@ -199,7 +201,10 @@ def broad_displace(
             rng = random.Random(seed + axis * 1013 + harmonic * 7927)
             points = [rng.uniform(-1, 1) for _ in range(columns * rows)]
             axis_fields.append(smooth_grid(points, columns, rows, passes=3))
-            axis_phases.append(rng.uniform(0, 2 * math.pi))
+            # Put the loop seam on a typical redraw step, not at a motion peak.
+            base_phase = seam_target - harmonic * seam_midpoint
+            axis_phase_offset = -0.10 if axis == 0 else 0.10
+            axis_phases.append((base_phase + axis_phase_offset) % (2 * math.pi))
         fields.append(axis_fields)
         phases.append(axis_phases)
 
