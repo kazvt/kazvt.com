@@ -81,8 +81,9 @@ def load_font_paths(font_dir: Path | None) -> list[Path]:
     return candidates
 
 
-def source_crops(path: Path) -> list[Image.Image]:
+def source_crops(path: Path) -> tuple[list[Image.Image], list[int]]:
     frames: list[Image.Image] = []
+    durations: list[int] = []
     with Image.open(path) as source:
         for index in range(getattr(source, "n_frames", 1)):
             source.seek(index)
@@ -96,9 +97,10 @@ def source_crops(path: Path) -> list[Image.Image]:
             square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
             square.alpha_composite(top_crop, ((side - width) // 2, 0))
             frames.append(square.resize((24 * SCALE, 24 * SCALE), Image.Resampling.LANCZOS))
+            durations.append(max(50, int(source.info.get("duration", 100))))
     if not frames:
         raise ValueError(f"Source image contains no frames: {path}")
-    return frames
+    return frames, durations
 
 
 def load_pattern(path: Path) -> Image.Image:
@@ -234,7 +236,7 @@ def main() -> None:
     if not args.source.is_file():
         parser.error(f"source GIF not found: {args.source}")
     fonts = load_font_paths(args.fonts)
-    icon_frames = source_crops(args.source)
+    icon_frames, icon_durations = source_crops(args.source)
     total = 0
 
     for label, filename, pattern_name in BUTTONS:
@@ -243,13 +245,12 @@ def main() -> None:
             parser.error(f"pattern GIF not found: {pattern_path}")
         pattern = load_pattern(pattern_path)
         glyphs = prepare_glyphs(label, fonts)
-        second_icon_index = 0 if len(icon_frames) == 1 else len(icon_frames) // 2
-        icon_indices = [0, second_icon_index]
-        frames = [
-            render_frame(pattern, icon_frames[icon_index], glyphs, pose_index)
-            for pose_index, icon_index in enumerate(icon_indices)
-        ]
-        durations = [250] * len(frames)
+        frames: list[Image.Image] = []
+        durations: list[int] = []
+        for pose_index in range(2):
+            for icon, duration in zip(icon_frames, icon_durations, strict=True):
+                frames.append(render_frame(pattern, icon, glyphs, pose_index))
+                durations.append(duration)
         output = args.output / filename
         save_gif(frames, durations, output)
         total += 1
