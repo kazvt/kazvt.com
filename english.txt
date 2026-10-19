@@ -435,7 +435,7 @@ guide.load_standalone=open the standalone multistream guide
 music.mode.bars=bars
 music.mode.scope=scope
 music.mode.burst=burst
-meta.home.og_description=kazvt\ni am a monke called kaz, she/her, i play retro games :)\n\n🟣 twitch: https://www.twitch.tv/kazvt\n🔴 yt: https://www.youtube.com/@kazvt\n🟢 kick: https://kick.com/kazvt
+meta.home.og_description=kazvt\ni am a monke called kaz, she/her, i play retro games :)\n\n🟣 twitch: https://www.twitch.tv/kazvt\n🔴 yt: https://www.youtube.com/@kazvt\n🟢 kick: https://kick.com/kazvt\n🟠 altstream: https://altstream.online/kazvt\n🔵 tumblr: https://tumblr.com/kazvt
 meta.guide.og_description=a yes/no old-web map for choosing a multistreaming setup.
 meta.404.og_description=lost page on kazvt.com
 
