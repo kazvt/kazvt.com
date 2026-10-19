@@ -38,7 +38,7 @@ test("reward and demo pages use the same shared shell and versioned assets", () 
 test("the common reward component retains artwork, tier, title, collection, and gallery UI", () => {
   for (const id of [
     "artWallpaper", "rewardDecals", "loadingState", "rewardArtworkMotion", "rewardImage",
-    "filename", "rewardTier", "recipient", "awardNote", "awardCollection", "errorState",
+    "filename", "awardReason", "rewardTier", "recipient", "awardNote", "awardCollection", "errorState",
     "allRewardsLink",
   ]) {
     assert.match(sharedBody, new RegExp(`id="${id}"`));
