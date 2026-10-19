@@ -22,6 +22,17 @@
       "linkId": "CczplJese8sKdpLv",
       "eventIdHash": "8323cd5df9f795d6ebc4c557f247ead6a33e0b2902fffb824866144d4c4ce205",
       "userId": "1263826885"
+    },
+    {
+      "assetId": "f7cb644603796308a76c189fc09c7a425e919a351a64bb412eec63bd7bbc3f8d",
+      "assetSha256": "f7cb644603796308a76c189fc09c7a425e919a351a64bb412eec63bd7bbc3f8d",
+      "filename": "Braclets.png",
+      "username": "cassidyrose",
+      "issuedAt": "2026-10-19T17:52:29.535Z",
+      "platform": "twitch",
+      "linkId": "Wz3syUksPCG5A6UI",
+      "eventIdHash": "bb6e33cb05561023da6aa88a4ab009bc0145561a64f49b690e51a06b68c4f71c",
+      "userId": "466020151"
     }
   ],
   "revokedAssignments": [
