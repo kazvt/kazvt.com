@@ -54,9 +54,9 @@ def displace(frame: Image.Image, phase: float, amplitude: float) -> Image.Image:
             bottom = min(height, top + cell)
             quad = (
                 *source_point(left, top),
-                *source_point(right, top),
-                *source_point(right, bottom),
                 *source_point(left, bottom),
+                *source_point(right, bottom),
+                *source_point(right, top),
             )
             mesh.append(((left, top, right, bottom), quad))
 
