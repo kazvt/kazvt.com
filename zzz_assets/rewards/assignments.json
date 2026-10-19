@@ -44,6 +44,17 @@
       "linkId": "9ekjeQHg8YGLQy2x",
       "eventIdHash": "073e22a94f771a9893e08471b1bb7d2c0249a10fe01debfc44933e437cadf355",
       "userId": "93006961"
+    },
+    {
+      "assetId": "1a121410b53511edd0b6a37d4162ddb3bef5939636eac0852689dda9e07dd49d",
+      "assetSha256": "1a121410b53511edd0b6a37d4162ddb3bef5939636eac0852689dda9e07dd49d",
+      "filename": "Sex toy.png",
+      "username": "daena_me",
+      "issuedAt": "2026-10-19T18:44:55.329Z",
+      "platform": "twitch",
+      "linkId": "Z40P7JMFdAW_e-bp",
+      "eventIdHash": "a01cc6141e5ce6ee04cf5232c7b6eed1b160bd765e73a5384e2206f037553eba",
+      "userId": "23564331"
     }
   ],
   "revokedAssignments": [
