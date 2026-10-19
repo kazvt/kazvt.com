@@ -99,6 +99,17 @@
       "linkId": "vuktc7QzupgRRrC5",
       "eventIdHash": "3e0ff448809a1242a81ee74abcc8443caf8c5d0687d3d686d1742cb981ba4a67",
       "userId": "106078197"
+    },
+    {
+      "assetId": "5003c0a2a7c1f09a62d7d0771b347ea1c1b3819fee28e48e021f896c0472ee31",
+      "assetSha256": "5003c0a2a7c1f09a62d7d0771b347ea1c1b3819fee28e48e021f896c0472ee31",
+      "filename": "omg its a big.png",
+      "username": "sulfurado_g",
+      "issuedAt": "2026-10-19T21:33:12.458Z",
+      "platform": "twitch",
+      "linkId": "iUOAIvJfDQyA0G5F",
+      "eventIdHash": "4c0c36d683e3240c35385f851fdef97321e54963869b42eeb355b9dcab4a8bce",
+      "userId": "147666719"
     }
   ],
   "revokedAssignments": [
