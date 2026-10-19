@@ -67,6 +67,11 @@ def load_font_paths(font_dir: Path | None) -> list[Path]:
                 return candidates
         font_dir = ROOT / "zzz_assets" / "fonts"
 
+    preferred = [font_dir / name for name in WINDOWS_BOLD_FONTS]
+    bold_candidates = [path for path in preferred if path.is_file()]
+    if bold_candidates:
+        return bold_candidates
+
     candidates = sorted(
         [*font_dir.glob("*.ttf"), *font_dir.glob("*.otf"), *font_dir.glob("*.TTF"), *font_dir.glob("*.OTF")],
         key=lambda path: path.name.casefold(),
@@ -155,8 +160,6 @@ def background(pattern: Image.Image) -> Image.Image:
 def render_frame(pattern: Image.Image, icon: Image.Image, glyphs, pose_index: int) -> Image.Image:
     canvas = background(pattern)
     draw = ImageDraw.Draw(canvas)
-    # A translucent label well keeps the words readable while leaving the tile visible.
-    draw.rectangle((28 * SCALE, 2 * SCALE, 86 * SCALE, 28 * SCALE), fill=(6, 5, 18, 100))
     # Tiny double-line bevel, echoing the site's old-web panels.
     draw.rectangle((0, 0, WIDTH * SCALE - 1, HEIGHT * SCALE - 1), outline=INK, width=SCALE)
     draw.rectangle((SCALE, SCALE, (WIDTH - 2) * SCALE, (HEIGHT - 2) * SCALE), outline=(255, 245, 216, 235), width=SCALE)
