@@ -1,7 +1,9 @@
 import { REWARD_DECAL_POOL } from "../decal-pool.mjs";
 import { layoutSideEdgeDecals } from "../decal-layout.mjs";
 
-export const GALLERY_DECAL_COUNT = 24;
+// Fewer decals give each side more vertical breathing room while still keeping
+// the gallery lively. The shared layout spreads these evenly over the panel.
+export const GALLERY_DECAL_COUNT = 16;
 
 function createSeededRandom(seed) {
   let state = seed >>> 0;
