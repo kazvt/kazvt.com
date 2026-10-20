@@ -1576,13 +1576,10 @@ async function initializeRewardGalleryPreview() {
   if (!mount) return;
 
   try {
-    const response = await fetch("/zzz_assets/rewards/assignments.json", {
-      cache: "no-store",
-      credentials: "same-origin",
-    });
-    if (!response.ok) return;
-
-    const registry = await response.json();
+    const { fetchAssignmentRegistry } = await import(
+      "/reward/assignment-source.mjs?v=reward-gallery-home-20261020-v1"
+    );
+    const registry = await fetchAssignmentRegistry();
     if (registry?.version !== 1 || !Array.isArray(registry.assignments)) return;
 
     const previews = registry.assignments
