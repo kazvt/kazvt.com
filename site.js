@@ -3745,6 +3745,7 @@ async function bootSite() {
   await loadActiveLanguageText();
   applyLanguageText(document);
   initializeSiteTools();
+  initializeSiteWelcomePopup();
   initializeCurrentUrl();
   await initializeMarquee();
 
