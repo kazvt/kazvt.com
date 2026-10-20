@@ -3,7 +3,7 @@ import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
 import { createMixedGlyphs } from "./mixed-glyphs.mjs?v=gallery-glyph-collage-20261020-v4";
-import { createGalleryDecalSeed, GALLERY_DECAL_COUNT, selectGalleryEdgeDecals } from "./gallery-decals.mjs?v=gallery-decal-scatter-20261020-v2";
+import { createGalleryDecalSeed, selectGalleryEdgeDecals } from "./gallery-decals.mjs?v=gallery-decal-scatter-20261020-v3";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -104,7 +104,7 @@ import "../background-context.mjs?v=1";
     if (layoutSize === galleryDecalLayoutSize) return;
     galleryDecalLayoutSize = layoutSize;
 
-    const placements = selectGalleryEdgeDecals(width, height, galleryDecalSeed, GALLERY_DECAL_COUNT);
+    const placements = selectGalleryEdgeDecals(width, height, galleryDecalSeed);
     const activeSources = new Set(placements.map(({ item }) => item.src));
     for (const [src, element] of galleryDecalElements) {
       if (activeSources.has(src)) continue;

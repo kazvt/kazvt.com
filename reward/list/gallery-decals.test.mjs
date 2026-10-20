@@ -4,20 +4,25 @@ import test from "node:test";
 import { REWARD_DECAL_POOL } from "../decal-pool.mjs";
 import {
   createGalleryDecalSeed,
-  GALLERY_DECAL_COUNT,
+  getGalleryDecalCount,
+  GALLERY_DECAL_TARGET_SPACING,
   selectGalleryEdgeDecals
 } from "./gallery-decals.mjs";
 
-test("gallery decal scatter uses a spaced set of unique pool entries on both panel sides", () => {
+test("gallery decal scatter dynamically spaces unique entries down both panel sides", () => {
   const first = selectGalleryEdgeDecals(914, 1160, 0x12345678);
   const repeated = selectGalleryEdgeDecals(914, 1160, 0x12345678);
 
-  assert.equal(GALLERY_DECAL_COUNT, 16);
-  assert.equal(first.length, GALLERY_DECAL_COUNT);
+  assert.equal(GALLERY_DECAL_TARGET_SPACING, 260);
+  assert.equal(getGalleryDecalCount(1160), 8);
+  assert.equal(getGalleryDecalCount(985), 6);
+  assert.equal(getGalleryDecalCount(500), 2);
+  assert.equal(getGalleryDecalCount(0), 0);
+  assert.equal(first.length, getGalleryDecalCount(1160));
   assert.deepEqual(first, repeated);
   assert.equal(new Set(first.map(({ item }) => item.src)).size, first.length);
-  assert.equal(first.filter(({ position }) => position.side === "left").length, 8);
-  assert.equal(first.filter(({ position }) => position.side === "right").length, 8);
+  assert.equal(first.filter(({ position }) => position.side === "left").length, 4);
+  assert.equal(first.filter(({ position }) => position.side === "right").length, 4);
   assert.ok(first.every(({ item }) => REWARD_DECAL_POOL.includes(item)));
 
   for (const side of ["left", "right"]) {
@@ -27,7 +32,7 @@ test("gallery decal scatter uses a spaced set of unique pool entries on both pan
     const minimumGap = Math.min(...sideDecals.slice(1).map((decal, index) =>
       decal.position.y - sideDecals[index].position.y
     ));
-    assert.ok(minimumGap >= sideDecals[0].position.size * 1.5);
+    assert.ok(minimumGap >= GALLERY_DECAL_TARGET_SPACING * 0.75);
   }
 });
 

@@ -3,7 +3,14 @@ import { layoutSideEdgeDecals } from "../decal-layout.mjs";
 
 // Fewer decals give each side more vertical breathing room while still keeping
 // the gallery lively. The shared layout spreads these evenly over the panel.
-export const GALLERY_DECAL_COUNT = 16;
+export const GALLERY_DECAL_TARGET_SPACING = 260;
+
+export function getGalleryDecalCount(height) {
+  if (!Number.isFinite(height) || height <= 0) return 0;
+  const slotsPerSide = Math.max(1, Math.floor(height / GALLERY_DECAL_TARGET_SPACING));
+  const maxBalancedSlots = Math.floor(REWARD_DECAL_POOL.length / 2);
+  return Math.min(slotsPerSide, maxBalancedSlots) * 2;
+}
 
 function createSeededRandom(seed) {
   let state = seed >>> 0;
@@ -29,7 +36,7 @@ export function createGalleryDecalSeed(cryptoProvider = globalThis.crypto) {
   return (Math.floor(Math.random() * 4294967296) >>> 0) || 1;
 }
 
-export function selectGalleryEdgeDecals(width, height, seed, count = GALLERY_DECAL_COUNT) {
+export function selectGalleryEdgeDecals(width, height, seed, count = getGalleryDecalCount(height)) {
   if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff ||
       !Number.isInteger(count) || count <= 0 || count > REWARD_DECAL_POOL.length) {
     return [];
