@@ -1836,6 +1836,11 @@ function guestbookPanel() {
         }, [
           el("p", { className: "guestbook-loading", role: "status", ariaLive: "polite", "data-i18n": "guestbook.loading" }, [translatedText("guestbook.loading")]),
         ]),
+        el("p", { className: "guestbook-privacy" }, [
+          "notes are hosted by ",
+          el("a", { href: "https://www.htmlcommentbox.com/static/privacy.pdf", target: "_blank", rel: "noopener noreferrer" }, ["HTML Comment Box"]),
+          "; keep private details out of them.",
+        ]),
       ]),
     ],
   });

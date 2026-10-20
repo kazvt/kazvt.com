@@ -5267,6 +5267,14 @@ body {
   text-align: center;
 }
 
+#guestbook .guestbook-privacy {
+  margin: 0;
+  font-size: 0.74em;
+  font-weight: 600;
+  opacity: 0.82;
+  text-align: center;
+}
+
 #guestbook .guestbook-widget {
   min-width: 0;
   color: var(--ink);
