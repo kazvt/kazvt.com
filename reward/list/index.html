@@ -8,8 +8,8 @@
   <meta name="color-scheme" content="dark">
   <title>Rewards — kazvt</title>
   <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
-  <link rel="stylesheet" href="/reward/list/list.css?v=indecisive-title-fonts-20261020-v2">
-  <script type="module" src="/reward/list/list.js?v=indecisive-title-fonts-20261020-v2"></script>
+  <link rel="stylesheet" href="/reward/list/list.css?v=gallery-glyph-collage-20261020-v3">
+  <script type="module" src="/reward/list/list.js?v=gallery-glyph-collage-20261020-v3"></script>
 <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
 </head>
 <body>
@@ -26,10 +26,12 @@
       <h1 id="pageTitle">Rewards</h1>
       <div class="pool-readout">
         <span class="pool-label" aria-hidden="true">Rewards left:</span>
-        <div id="poolMeter" class="pool-meter" data-empty-label="ZERO" role="progressbar" aria-label="Unique rewards remaining in the pool" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-valuetext="Loading reward pool">
+        <div id="poolMeter" class="pool-meter" role="progressbar" aria-label="Unique rewards remaining in the pool" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-valuetext="Loading reward pool">
           <span id="poolMeterFill" class="pool-meter-fill" aria-hidden="true">
             <span id="poolMeterCount" class="pool-meter-count">0</span>
           </span>
+          <span id="poolMeterEmptyCount" class="pool-meter-empty-count" aria-hidden="true">ZERO</span>
+          <span id="poolMeterUnavailable" class="pool-meter-unavailable" aria-hidden="true">—</span>
         </div>
         <p id="poolStatus" class="visually-hidden" role="status" aria-live="polite">Loading reward count.</p>
       </div>
@@ -38,8 +40,11 @@
     <section class="search-panel" aria-labelledby="search-label">
       <label id="search-label" class="visually-hidden" for="awardSearch">Search rewards</label>
       <div class="search-row">
-        <input id="awardSearch" type="search" autocomplete="off" spellcheck="false"
-          placeholder="Search…" aria-controls="awardList">
+        <div class="search-input-wrap">
+          <input id="awardSearch" type="search" autocomplete="off" spellcheck="false"
+            placeholder="Search…" aria-controls="awardList">
+          <span id="searchGlyphOverlay" class="search-glyph-overlay" aria-hidden="true"></span>
+        </div>
         <button id="clearSearch" class="clear-button" type="button" hidden>Clear</button>
       </div>
       <p id="resultStatus" class="result-status" role="status" aria-live="polite">Loading…</p>
