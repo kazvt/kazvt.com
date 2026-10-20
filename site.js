@@ -1528,6 +1528,7 @@ function homeWelcomePanel() {
             el("span", { className: "welcome-jumps-label", "data-i18n": "home.welcome_links" }, [translatedText("home.welcome_links")]),
             el("a", { href: "#links", "data-i18n": "home.jump_links" }, [translatedText("home.jump_links")]),
             el("a", { href: "#profile", "data-i18n": "home.jump_profile" }, [translatedText("home.jump_profile")]),
+            el("a", { href: "#reward-gallery", "data-i18n": "home.jump_rewards" }, [translatedText("home.jump_rewards")]),
             el("a", { href: "#guestbook", "data-i18n": "home.jump_guestbook" }, [translatedText("home.jump_guestbook")]),
           ]),
         ]),
@@ -1544,6 +1545,85 @@ function homeWelcomePanel() {
       ]),
     ],
   });
+}
+
+function rewardGalleryPanel() {
+  return panel({
+    id: "reward-gallery",
+    titleKey: "panel.reward_gallery.title",
+    stampKey: "panel.reward_gallery.stamp",
+    children: [
+      el("div", { className: "reward-gallery-wrap" }, [
+        el("div", {
+          className: "reward-gallery-stage",
+          role: "list",
+          ariaLabel: translatedText("home.reward_gallery_aria"),
+          "data-reward-preview": "",
+        }),
+        el("div", { className: "reward-gallery-action-row" }, [
+          el("a", { className: "reward-gallery-action", href: "/reward/list/" }, [
+            el("span", { "data-i18n": "home.reward_gallery_link" }, [translatedText("home.reward_gallery_link")]),
+            el("span", { className: "reward-gallery-action-arrow", ariaHidden: "true" }, ["↗"]),
+          ]),
+        ]),
+      ]),
+    ],
+  });
+}
+
+async function initializeRewardGalleryPreview() {
+  const mount = document.querySelector("[data-reward-preview]");
+  if (!mount) return;
+
+  try {
+    const response = await fetch("/zzz_assets/rewards/assignments.json", {
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+    if (!response.ok) return;
+
+    const registry = await response.json();
+    if (registry?.version !== 1 || !Array.isArray(registry.assignments)) return;
+
+    const previews = registry.assignments
+      .filter((assignment) => {
+        const filename = assignment?.filename;
+        const linkId = assignment?.linkId;
+        return typeof filename === "string" && filename.length <= 255 &&
+          /^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(filename) &&
+          typeof linkId === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(linkId);
+      })
+      .sort((left, right) => {
+        const leftDate = Date.parse(left.issuedAt) || 0;
+        const rightDate = Date.parse(right.issuedAt) || 0;
+        return rightDate - leftDate;
+      })
+      .slice(0, 6);
+
+    if (!previews.length) return;
+
+    mount.replaceChildren(...previews.map((assignment, index) => {
+      const label = assignment.filename.replace(/\.(?:png|gif)$/i, "");
+      const card = el("a", {
+        className: `reward-preview-card reward-preview-card--${index + 1}`,
+        href: `/reward/?id=${encodeURIComponent(assignment.linkId)}`,
+        role: "listitem",
+        ariaLabel: `View reward: ${label}`,
+        title: label,
+      }, [
+        el("img", {
+          src: `/zzz_assets/rewards/${encodeURIComponent(assignment.filename)}`,
+          alt: "",
+          loading: "lazy",
+          decoding: "async",
+        }),
+      ]);
+      return card;
+    }));
+    mount.dataset.ready = "true";
+  } catch {
+    // Keep the little animated empty-state decoration; the gallery link still works.
+  }
 }
 
 function sticker(link, extraClass = "") {
@@ -3343,6 +3423,7 @@ async function render(statusOverrides = {}) {
     }),
     profilePanel(),
     homeWelcomePanel(),
+    rewardGalleryPanel(),
     multistreamGuidePanel(),
     oldWebPanel(),
     guestbookPanel(),
@@ -3356,6 +3437,7 @@ async function render(statusOverrides = {}) {
   markSoftLoaded(app);
   initializeMultistreamGuideModal();
   autoOpenMultistreamGuideFromHash(window.location.hash);
+  void initializeRewardGalleryPreview();
   await initializeRetroDebris();
 
   initializeDrawingPad();
