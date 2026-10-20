@@ -5288,7 +5288,22 @@ body {
   gap: 9px;
 }
 
-#guestbook #HCB_comment_box input:not([type="submit"]),
+#guestbook #HCB_comment_box #hcb_form_name_container,
+#guestbook #HCB_comment_box .hcb-wrapper-half,
+#guestbook #HCB_comment_box .hcb-wrapper {
+  width: 100%;
+  max-width: 100%;
+}
+
+#guestbook #HCB_comment_box input[type="text"],
+#guestbook #HCB_comment_box input[type="email"],
+#guestbook #HCB_comment_box textarea,
+#guestbook #HCB_comment_box #hcb_submit {
+  box-sizing: border-box;
+}
+
+#guestbook #HCB_comment_box input[type="text"],
+#guestbook #HCB_comment_box input[type="email"],
 #guestbook #HCB_comment_box textarea {
   width: 100%;
   max-width: 100%;
@@ -5346,7 +5361,8 @@ body {
   outline-offset: 3px;
 }
 
-#guestbook #HCB_comment_box .hcb-comment {
+#guestbook #HCB_comment_box #comments_list .comment_,
+#guestbook #HCB_comment_box #comments_list > div {
   margin: 12px 0;
   padding: 10px 12px;
   border: 2px dashed var(--ink);
@@ -5377,13 +5393,17 @@ body {
   font-size: 0.78em;
 }
 
-#guestbook #HCB_comment_box .guestbook-loading,
-#guestbook #HCB_comment_box .guestbook-status {
+#guestbook #HCB_comment_box #no_comments,
+#guestbook #HCB_comment_box #hcb_msg {
   margin: 0;
   padding: 10px;
   border: 2px dotted var(--ink);
   background: color-mix(in srgb, var(--paper-alt) 70%, transparent);
   text-align: center;
+}
+
+#guestbook #HCB_comment_box #hcb_msg:empty {
+  display: none;
 }
 
 #guestbook #HCB_comment_box.is-loading::before {
