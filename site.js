@@ -1827,11 +1827,71 @@ function guestbookPanel() {
     stampKey: "panel.guestbook.stamp",
     children: [
       el("div", { className: "guestbook-lines" }, [
-        el("p", { "data-i18n": "guestbook.name" }, [translatedText("guestbook.name")]),
-        el("p", { "data-i18n": "guestbook.message" }, [translatedText("guestbook.message")]),
+        el("p", { className: "guestbook-intro", "data-i18n": "guestbook.intro" }, [translatedText("guestbook.intro")]),
+        el("div", {
+          id: "HCB_comment_box",
+          className: "guestbook-widget",
+          role: "region",
+          ariaLabel: translatedText("panel.guestbook.title"),
+        }, [
+          el("p", { className: "guestbook-loading", role: "status", ariaLive: "polite", "data-i18n": "guestbook.loading" }, [translatedText("guestbook.loading")]),
+        ]),
       ]),
     ],
   });
+}
+
+function initializeGuestbookWidget() {
+  const mount = document.getElementById("HCB_comment_box");
+  if (!mount || document.getElementById("kazvt-hcb-guestbook-loader")) return;
+
+  let fallbackTimer = 0;
+  const previousHcbConfig = window.hcb_user && typeof window.hcb_user === "object" ? window.hcb_user : {};
+  const previousOnload = previousHcbConfig.onload;
+  window.hcb_user = {
+    ...previousHcbConfig,
+    comments_header: "little notes from visitors",
+    name_label: "your name",
+    content_label: "leave a little note...",
+    submit: "stick it in!",
+    no_comments_msg: "no scribbles yet — be the first!",
+    add: "sign the guestbook",
+    again: "leave another note",
+    anonymous: "someone",
+    said: "left a note:",
+    MAX_CHARS: 500,
+    PAGE: "https://kazvt.com/#guestbook",
+    RELATIVE_DATES: true,
+    onload(...args) {
+      window.clearTimeout(fallbackTimer);
+      mount.dataset.hcbLoaded = "true";
+      mount.classList.remove("is-loading");
+      if (typeof previousOnload === "function") {
+        try {
+          previousOnload.apply(this, args);
+        } catch {}
+      }
+    },
+  };
+
+  mount.classList.add("is-loading");
+  const showLoadFailure = () => {
+    if (!mount.isConnected || mount.dataset.hcbLoaded === "true") return;
+    mount.classList.remove("is-loading");
+    mount.replaceChildren(el("p", { className: "guestbook-status", role: "status" }, [translatedText("guestbook.failed")]));
+  };
+
+  const script = document.createElement("script");
+  script.id = "kazvt-hcb-guestbook-loader";
+  script.async = true;
+  const page = encodeURIComponent(window.hcb_user.PAGE).replace(/\+/g, "%2B");
+  // 2=latest comments first, 4=dates, 16=profanity filter, 256=watermark labels.
+  // Deliberately omit email/reply/subscription fields and the moderator token:
+  // visitors can post without accounts, and no other site's moderator key is reused.
+  script.src = `https://www.htmlcommentbox.com/jread?page=${page}&opts=278&num=20&ts=${Date.now()}`;
+  script.addEventListener("error", showLoadFailure, { once: true });
+  fallbackTimer = window.setTimeout(showLoadFailure, 20000);
+  document.head.append(script);
 }
 
 function oldWebPanel() {
