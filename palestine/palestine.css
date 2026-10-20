@@ -157,53 +157,6 @@ h1 {
   line-height: 1.12;
 }
 
-.content-note {
-  max-width: 650px;
-  margin: 14px 0 0;
-  padding: 9px 12px;
-  color: #514333;
-  background: #eee2c9;
-  border-left: 2px solid var(--clay);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.8rem;
-  line-height: 1.5;
-}
-
-.content-note strong {
-  color: var(--ink);
-}
-
-.file-notes {
-  margin-top: 13px;
-  color: var(--muted);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.78rem;
-}
-
-.file-notes summary {
-  width: fit-content;
-  color: var(--olive);
-  cursor: pointer;
-  font-weight: 700;
-  text-underline-offset: 3px;
-}
-
-.file-notes[open] summary {
-  margin-bottom: 8px;
-}
-
-.file-notes-body p {
-  max-width: 650px;
-  margin: 6px 0 0;
-  line-height: 1.55;
-}
-
-.source-note a {
-  color: var(--olive);
-  font-weight: 700;
-  text-underline-offset: 2px;
-}
-
 .entry-actions {
   display: flex;
   flex-direction: column;
