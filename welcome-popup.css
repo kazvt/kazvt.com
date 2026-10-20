@@ -120,6 +120,23 @@
   margin: 0;
   color: color-mix(in srgb, var(--ink, #17141c) 86%, var(--paper, #f5f2e7) 14%);
   font: 14px/1.55 "Segoe UI", Tahoma, Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.welcome-copy a {
+  color: color-mix(in srgb, var(--ink, #17141c) 70%, var(--banner, #4d6787) 30%);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.welcome-copy .inline-emote {
+  display: inline-block;
+  width: 1.35em;
+  height: 1.35em;
+  margin-inline: calc(0.08em + 2px);
+  vertical-align: -0.28em;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .welcome-actions {

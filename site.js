@@ -2836,7 +2836,7 @@ function initializeSiteWelcomePopup() {
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v2";
+  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v3";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";
@@ -2864,7 +2864,15 @@ function initializeSiteWelcomePopup() {
   const copy = (key, fallback) => translatedText(key) || fallback;
   dialog.querySelector("[data-welcome-window-title]").textContent = copy("popup.window_title", "kazvt.com");
   dialog.querySelector("[data-welcome-heading]").textContent = copy("popup.heading", "hey, you made it!");
-  dialog.querySelector("[data-welcome-copy]").textContent = copy("popup.message", "have a poke around, peek at the reward pile, or leave a little note in the guestbook. ✦");
+  const popupMessage = copy("popup.message", "sub to my wife https://youtube.com/@lillie_garden do it for monkey woman!! it'd mean the whole world to her [wumpa]");
+  const popupMessageNodes = inlineNoteNodes(popupMessage).flatMap((node) => {
+    if (typeof node !== "string") return [node];
+    return node.split(/(https?:\/\/[^\s]+)/gi).filter(Boolean).map((part) => {
+      if (!/^https?:\/\//i.test(part)) return part;
+      return el("a", { href: part, target: "_blank", rel: "noopener noreferrer" }, [part]);
+    });
+  });
+  dialog.querySelector("[data-welcome-copy]").replaceChildren(...popupMessageNodes);
   dialog.querySelector("[data-welcome-close]").setAttribute("aria-label", copy("popup.close_aria", "close welcome popup"));
   dialog.querySelector("[data-welcome-confirm]").textContent = copy("popup.dismiss", "okay, let's go");
 
