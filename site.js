@@ -2801,6 +2801,124 @@ async function mountLanguageSelector() {
   return window.KazvtLanguageDock?.mount?.();
 }
 
+function initializeSiteWelcomePopup() {
+  if (document.body.dataset.page !== "home" || document.querySelector("[data-welcome-popup-host]")) return;
+
+  const storageKey = "kazvt-welcome-popup-dismissed-until";
+  const cooldownMs = 24 * 60 * 60 * 1000;
+  const getExpiry = (value) => {
+    const expiry = Number(value);
+    return Number.isFinite(expiry) && expiry > Date.now() ? expiry : 0;
+  };
+  const readDismissal = () => {
+    let expiry = 0;
+    try {
+      expiry = Math.max(expiry, getExpiry(localStorage.getItem(storageKey)));
+    } catch {}
+    try {
+      const cookie = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${storageKey}=`));
+      if (cookie) expiry = Math.max(expiry, getExpiry(decodeURIComponent(cookie.slice(storageKey.length + 1))));
+    } catch {}
+    return expiry;
+  };
+
+  if (readDismissal()) return;
+
+  const host = document.createElement("div");
+  host.dataset.welcomePopupHost = "true";
+  const shadow = host.attachShadow({ mode: "open" });
+  const xpStyles = document.createElement("link");
+  xpStyles.rel = "stylesheet";
+  xpStyles.href = "https://unpkg.com/xp.css@0.2.6/dist/XP.css";
+  xpStyles.integrity = "sha384-isKk8ZXKlU28/m3uIrnyTfuPaamQIF4ONLeGSfsWGEe3qBvaeLU5wkS4J7cTIwxI";
+  xpStyles.crossOrigin = "anonymous";
+  xpStyles.referrerPolicy = "no-referrer";
+
+  const localStyles = document.createElement("link");
+  localStyles.rel = "stylesheet";
+  localStyles.href = "/welcome-popup.css?v=20261020-1";
+
+  const dialog = document.createElement("dialog");
+  dialog.className = "window welcome-dialog";
+  dialog.setAttribute("aria-labelledby", "welcome-popup-title");
+  dialog.setAttribute("aria-describedby", "welcome-popup-copy");
+  dialog.innerHTML = `
+    <div class="title-bar welcome-titlebar">
+      <div class="title-bar-text welcome-titlebar-text">
+        <img class="welcome-icon" src="/favicon-96x96.png" alt="" width="18" height="18">
+        <span data-welcome-window-title></span>
+      </div>
+      <div class="title-bar-controls">
+        <button type="button" class="welcome-close" data-welcome-close aria-label="close welcome popup"><span aria-hidden="true">×</span></button>
+      </div>
+    </div>
+    <div class="window-body welcome-body">
+      <p class="welcome-kicker" aria-hidden="true">✦  HOME.EXE  ✦</p>
+      <h2 id="welcome-popup-title" data-welcome-heading></h2>
+      <p id="welcome-popup-copy" class="welcome-copy" data-welcome-copy></p>
+      <div class="field-row welcome-actions">
+        <button type="button" class="default welcome-confirm" data-welcome-confirm autofocus></button>
+      </div>
+    </div>`;
+
+  const copy = (key, fallback) => translatedText(key) || fallback;
+  dialog.querySelector("[data-welcome-window-title]").textContent = copy("popup.window_title", "kazvt.com");
+  dialog.querySelector("[data-welcome-heading]").textContent = copy("popup.heading", "hey, you made it!");
+  dialog.querySelector("[data-welcome-copy]").textContent = copy("popup.message", "have a poke around, peek at the reward pile, or leave a little note in the guestbook. ✦");
+  dialog.querySelector("[data-welcome-close]").setAttribute("aria-label", copy("popup.close_aria", "close welcome popup"));
+  dialog.querySelector("[data-welcome-confirm]").textContent = copy("popup.dismiss", "okay, let's go");
+
+  shadow.append(xpStyles, localStyles, dialog);
+  document.body.append(host);
+
+  const rememberDismissal = () => {
+    const expiry = String(Date.now() + cooldownMs);
+    try {
+      localStorage.setItem(storageKey, expiry);
+    } catch {}
+    try {
+      const secure = window.location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `${storageKey}=${encodeURIComponent(expiry)}; Max-Age=86400; Path=/; SameSite=Lax${secure}`;
+    } catch {}
+  };
+
+  const closePopup = () => {
+    if (typeof dialog.close === "function" && dialog.open) dialog.close();
+    else {
+      dialog.removeAttribute("open");
+      rememberDismissal();
+    }
+  };
+
+  dialog.querySelectorAll("[data-welcome-close], [data-welcome-confirm]").forEach((button) => {
+    button.addEventListener("click", closePopup);
+  });
+  dialog.addEventListener("close", rememberDismissal);
+  window.addEventListener("storage", (event) => {
+    if (event.key === storageKey && getExpiry(event.newValue) && dialog.open) dialog.close();
+  });
+
+  let opened = false;
+  const openPopup = () => {
+    if (opened) return;
+    opened = true;
+    if (readDismissal()) {
+      host.remove();
+      return;
+    }
+    try {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    } catch {
+      dialog.setAttribute("open", "");
+    }
+  };
+
+  localStyles.addEventListener("load", openPopup, { once: true });
+  localStyles.addEventListener("error", openPopup, { once: true });
+  window.setTimeout(openPopup, 900);
+}
+
 function initializeSiteTools() {
   const themeButtons = [...document.querySelectorAll("[data-tool-theme]")];
   const boilButton = document.querySelector("[data-tool-boil]");
