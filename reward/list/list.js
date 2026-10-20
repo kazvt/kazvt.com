@@ -2,7 +2,7 @@ import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
-import { createMixedTitleGlyphs } from "./mixed-title.mjs?v=indecisive-title-fonts-20261020-v2";
+import { createMixedGlyphs } from "./mixed-glyphs.mjs?v=gallery-glyph-collage-20261020-v3";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -19,7 +19,9 @@ import "../background-context.mjs?v=1";
   const poolMeter = document.getElementById("poolMeter");
   const poolMeterFill = document.getElementById("poolMeterFill");
   const poolMeterCount = document.getElementById("poolMeterCount");
+  const poolMeterEmptyCount = document.getElementById("poolMeterEmptyCount");
   const poolStatus = document.getElementById("poolStatus");
+  const searchGlyphOverlay = document.getElementById("searchGlyphOverlay");
   const searchLabel = document.getElementById("search-label");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
   const userFilterRequested = usernameParam !== null;
@@ -35,21 +37,68 @@ import "../background-context.mjs?v=1";
     return username.toUpperCase();
   }
 
-  function renderMixedTitle(text) {
+  function mixedTextFragment(text) {
     const fragment = document.createDocumentFragment();
-    for (const { glyph, fontClass } of createMixedTitleGlyphs(text)) {
+    for (const { glyph, fontClass } of createMixedGlyphs(text)) {
       if (!fontClass) {
         fragment.append(document.createTextNode(glyph));
         continue;
       }
-      const character = document.createElement("span");
-      character.className = `mixed-title-glyph ${fontClass}`;
-      character.textContent = glyph;
-      fragment.append(character);
+      const glyphElement = document.createElement("span");
+      glyphElement.className = `mixed-page-glyph ${fontClass}`;
+      glyphElement.textContent = glyph;
+      fragment.append(glyphElement);
     }
-    pageTitle.setAttribute("aria-label", text);
-    pageTitle.replaceChildren(fragment);
+    return fragment;
   }
+
+  function renderMixedText(element, text) {
+    element.replaceChildren(mixedTextFragment(text));
+  }
+
+  function shouldSkipTextNode(node) {
+    const parent = node.parentElement;
+    return !parent || !/\S/u.test(node.nodeValue ?? "") ||
+      parent.closest(".mixed-page-glyph, script, style, noscript, textarea, select, option, [contenteditable]:not([contenteditable='false']), [data-no-glyph-collage]") !== null;
+  }
+
+  function mixTextNode(node) {
+    if (shouldSkipTextNode(node)) return;
+    node.replaceWith(mixedTextFragment(node.nodeValue));
+  }
+
+  function mixTextIn(root) {
+    if (root.nodeType === Node.TEXT_NODE) {
+      mixTextNode(root);
+      return;
+    }
+    if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return;
+    if (root.nodeType === Node.ELEMENT_NODE && root.closest(".mixed-page-glyph")) return;
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    for (const node of textNodes) mixTextNode(node);
+  }
+
+  const pageGlyphObserver = new MutationObserver(records => {
+    for (const record of records) {
+      for (const node of record.addedNodes) mixTextIn(node);
+    }
+  });
+  pageGlyphObserver.observe(document.body, { childList: true, subtree: true });
+  mixTextIn(document.body);
+
+  function updateSearchGlyphOverlay() {
+    if (document.activeElement === searchInput) return;
+    const isPlaceholder = searchInput.value.length === 0;
+    searchGlyphOverlay.classList.toggle("is-placeholder", isPlaceholder);
+    renderMixedText(searchGlyphOverlay, isPlaceholder ? searchInput.placeholder : searchInput.value);
+  }
+
+  updateSearchGlyphOverlay();
+  searchInput.addEventListener("input", updateSearchGlyphOverlay);
+  searchInput.addEventListener("blur", updateSearchGlyphOverlay);
 
   function filenameLabel(filename) {
     const extensionStart = filename.lastIndexOf(".");
@@ -143,8 +192,8 @@ import "../background-context.mjs?v=1";
     poolMeter.classList.toggle("is-empty", remaining === 0);
     poolMeter.classList.remove("is-unavailable");
     const countLabel = formatPoolCount(remaining);
-    poolMeter.dataset.emptyLabel = countLabel;
-    poolMeterCount.textContent = countLabel;
+    renderMixedText(poolMeterEmptyCount, countLabel);
+    renderMixedText(poolMeterCount, countLabel);
     const fillPercent = total ? (remaining / total) * 100 : 0;
     const countWidth = Math.ceil(poolMeterCount.getBoundingClientRect().width + 12);
     poolMeterFill.style.width = remaining > 0
@@ -257,8 +306,10 @@ import "../background-context.mjs?v=1";
       }
       searchLabel.textContent = "Search this collection";
       searchInput.placeholder = "Search artwork…";
+      updateSearchGlyphOverlay();
     }
-    renderMixedTitle(title);
+    pageTitle.setAttribute("aria-label", title);
+    renderMixedText(pageTitle, title);
     document.title = `${title} — kazvt`;
 
     try {
