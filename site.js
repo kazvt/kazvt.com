@@ -2829,14 +2829,11 @@ function initializeSiteWelcomePopup() {
   const shadow = host.attachShadow({ mode: "open" });
   const xpStyles = document.createElement("link");
   xpStyles.rel = "stylesheet";
-  xpStyles.href = "https://unpkg.com/xp.css@0.2.6/dist/XP.css";
-  xpStyles.integrity = "sha384-isKk8ZXKlU28/m3uIrnyTfuPaamQIF4ONLeGSfsWGEe3qBvaeLU5wkS4J7cTIwxI";
-  xpStyles.crossOrigin = "anonymous";
-  xpStyles.referrerPolicy = "no-referrer";
+  xpStyles.href = "/zzz_shared/xp.css?v=0.2.6";
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v4";
+  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v5";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";
@@ -2849,7 +2846,7 @@ function initializeSiteWelcomePopup() {
         <span data-welcome-window-title></span>
       </div>
       <div class="title-bar-controls">
-        <button type="button" class="welcome-close" data-welcome-close aria-label="close welcome popup"><span aria-hidden="true">×</span></button>
+        <button type="button" class="welcome-close" data-welcome-close aria-label="Close"></button>
       </div>
     </div>
     <div class="window-body welcome-body">
@@ -2873,7 +2870,7 @@ function initializeSiteWelcomePopup() {
     });
   });
   dialog.querySelector("[data-welcome-copy]").replaceChildren(...popupMessageNodes);
-  dialog.querySelector("[data-welcome-close]").setAttribute("aria-label", copy("popup.close_aria", "close welcome popup"));
+  dialog.querySelector("[data-welcome-close]").setAttribute("aria-label", copy("popup.close_aria", "Close"));
   dialog.querySelector("[data-welcome-confirm]").textContent = copy("popup.dismiss", "okay, let's go");
 
   shadow.append(xpStyles, localStyles, dialog);
