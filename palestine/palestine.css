@@ -1,11 +1,12 @@
 :root {
   color-scheme: light;
-  --paper: #f4f1e8;
-  --ink: #242522;
-  --muted: #66665f;
-  --rule: #d1ccbf;
-  --green: #285742;
-  --red: #963a3b;
+  --paper: #e9ddc8;
+  --ink: #352a21;
+  --muted: #756654;
+  --rule: #c3b092;
+  --olive: #656447;
+  --clay: #92563e;
+  --walnut: #5a4634;
 }
 
 * {
@@ -21,7 +22,11 @@ body {
   min-height: 100vh;
   margin: 0;
   color: var(--ink);
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 12% 8%, rgb(151 105 64 / 8%), transparent 34rem),
+    radial-gradient(ellipse at 91% 36%, rgb(91 96 62 / 7%), transparent 39rem),
+    linear-gradient(135deg, rgb(255 250 238 / 18%), transparent 58%);
   font-family: Georgia, "Times New Roman", serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -32,7 +37,7 @@ a {
 }
 
 a:focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--clay);
   outline-offset: 4px;
 }
 
@@ -87,7 +92,7 @@ a:focus-visible {
 
 .kicker {
   margin: 0 0 18px;
-  color: var(--green);
+  color: var(--olive);
 }
 
 h1 {
@@ -108,7 +113,7 @@ h1 {
 
 .flag-rule {
   height: 4px;
-  background: linear-gradient(90deg, #242522 0 25%, var(--green) 25% 50%, #e8e3d8 50% 75%, var(--red) 75% 100%);
+  background: linear-gradient(90deg, var(--walnut) 0 25%, var(--olive) 25% 50%, #d9c7a7 50% 75%, var(--clay) 75% 100%);
 }
 
 .collection {
@@ -147,7 +152,7 @@ h1 {
 
 .entry-number {
   padding-top: 5px;
-  color: var(--red);
+  color: var(--clay);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
@@ -160,7 +165,7 @@ h1 {
 
 .entry-kind span {
   padding: 0 5px;
-  color: #a8a295;
+  color: #a18d70;
 }
 
 .content-note {
@@ -202,7 +207,7 @@ h1 {
 }
 
 .source-note a {
-  color: var(--green);
+  color: var(--olive);
   text-underline-offset: 2px;
 }
 
@@ -223,13 +228,13 @@ h1 {
   gap: 14px;
   padding: 10px 13px;
   color: #fff;
-  background: var(--green);
+  background: var(--clay);
   font-weight: 700;
   text-decoration: none;
 }
 
 .download-link:hover {
-  background: #1e4434;
+  background: #75432f;
 }
 
 .download-link span {
@@ -237,7 +242,7 @@ h1 {
 }
 
 .read-link {
-  color: #4c514a;
+  color: var(--walnut);
   text-underline-offset: 3px;
 }
 
