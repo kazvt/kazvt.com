@@ -83,14 +83,14 @@ import "../background-context.mjs?v=1";
 
   const pageGlyphObserver = new MutationObserver(records => {
     for (const record of records) {
+      if (record.type === "characterData") mixTextNode(record.target);
       for (const node of record.addedNodes) mixTextIn(node);
     }
   });
-  pageGlyphObserver.observe(document.body, { childList: true, subtree: true });
+  pageGlyphObserver.observe(document.body, { childList: true, characterData: true, subtree: true });
   mixTextIn(document.body);
 
   function updateSearchGlyphOverlay() {
-    if (document.activeElement === searchInput) return;
     const isPlaceholder = searchInput.value.length === 0;
     searchGlyphOverlay.classList.toggle("is-placeholder", isPlaceholder);
     renderMixedText(searchGlyphOverlay, isPlaceholder ? searchInput.placeholder : searchInput.value);
@@ -341,6 +341,7 @@ import "../background-context.mjs?v=1";
       clearButton.addEventListener("click", () => {
         searchInput.value = "";
         searchInput.focus();
+        updateSearchGlyphOverlay();
         updateResults(cards);
       });
     } catch (error) {

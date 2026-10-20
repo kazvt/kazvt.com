@@ -112,8 +112,12 @@ test("palette-free reward galleries mix every rendered text node while demo and 
     "the main and username-filtered headings use the shared renderer");
   assert.match(galleryStyles, /\.mixed-page-glyph--comic\s*\{[^}]*"Comic Sans MS"/,
     "Comic Sans is available as one of the glyph fonts");
-  assert.match(galleryStyles, /\.search-row input:focus ~ \.search-glyph-overlay\s*\{\s*display:\s*none/,
-    "search typing remains native and keeps its caret and selection behavior");
+  assert.match(galleryStyles, /input:focus:not\(:placeholder-shown\) ~ \.search-glyph-overlay\s*\{\s*display:\s*none/,
+    "search typing remains native once the user enters a query");
+  assert.match(galleryPage, /id="poolMeterEmptyCount"/,
+    "the decorative zero-pool label is real text, so it can use per-glyph fonts");
+  assert.match(galleryPage, /id="searchGlyphOverlay"[^>]*aria-hidden="true"/,
+    "the collage search overlay remains decorative to assistive technology");
   assert.match(galleryPage, /list\.css\?v=gallery-glyph-collage-20261020-v3/,
     "the updated collage stylesheet receives a fresh cache key");
   assert.match(galleryPage, /list\.js\?v=gallery-glyph-collage-20261020-v3/,

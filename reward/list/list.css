@@ -250,14 +250,12 @@ h1 {
   background: #080810;
 }
 
-.search-row input::placeholder { color: #b6b4c4; opacity: 1; }
+.search-row input::placeholder { color: transparent; opacity: 0; }
 
 .search-row input:not(:focus) {
   color: transparent;
   -webkit-text-fill-color: transparent;
 }
-
-.search-row input:not(:focus)::placeholder { color: transparent; opacity: 0; }
 
 .search-glyph-overlay {
   position: absolute;
@@ -271,7 +269,7 @@ h1 {
 }
 
 .search-glyph-overlay.is-placeholder { color: #b6b4c4; }
-.search-input-wrap input:focus ~ .search-glyph-overlay { display: none; }
+.search-input-wrap input:focus:not(:placeholder-shown) ~ .search-glyph-overlay { display: none; }
 
 .clear-button, .open-button {
   padding: 7px 10px;
