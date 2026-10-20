@@ -159,6 +159,35 @@ def background(pattern: Image.Image) -> Image.Image:
     return canvas
 
 
+def text_backing(canvas: Image.Image) -> None:
+    """Give animated lettering a dark, lightly patterned inset to sit on."""
+    left, top = 29 * SCALE, 2 * SCALE
+    right, bottom = (WIDTH - 2) * SCALE, (HEIGHT - 2) * SCALE
+    plate = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(plate)
+
+    # The translucent fill quiets busy patterns behind the type without hiding
+    # them completely. A dark outer edge and pale inset keyline keep the plaque
+    # legible against both light and dark pattern tiles.
+    draw.rectangle(
+        (left, top, right, bottom),
+        fill=(12, 8, 22, 222),
+        outline=(5, 3, 12, 255),
+        width=SCALE,
+    )
+    draw.rectangle(
+        (left + SCALE, top + SCALE, right - SCALE, bottom - SCALE),
+        outline=(246, 237, 255, 235),
+        width=max(2, SCALE // 2),
+    )
+    draw.line(
+        (left + 2 * SCALE, top + 2 * SCALE, right - 2 * SCALE, top + 2 * SCALE),
+        fill=(255, 246, 220, 105),
+        width=max(1, SCALE // 2),
+    )
+    canvas.alpha_composite(plate)
+
+
 def render_frame(pattern: Image.Image, icon: Image.Image, glyphs, pose_index: int) -> Image.Image:
     canvas = background(pattern)
     draw = ImageDraw.Draw(canvas)
@@ -169,6 +198,7 @@ def render_frame(pattern: Image.Image, icon: Image.Image, glyphs, pose_index: in
     draw.rectangle((2 * SCALE, 3 * SCALE, 25 * SCALE, 27 * SCALE), outline=(255, 245, 216, 245), width=max(2, SCALE // 2))
     canvas.alpha_composite(icon, (2 * SCALE, 3 * SCALE))
     draw.line((28 * SCALE, 4 * SCALE, 28 * SCALE, 27 * SCALE), fill=INK, width=SCALE)
+    text_backing(canvas)
 
     left = 30 * SCALE
     right = 86 * SCALE
