@@ -8,17 +8,27 @@ import {
   selectGalleryEdgeDecals
 } from "./gallery-decals.mjs";
 
-test("gallery decal scatter uses many unique pool entries on both panel sides", () => {
+test("gallery decal scatter uses a spaced set of unique pool entries on both panel sides", () => {
   const first = selectGalleryEdgeDecals(914, 1160, 0x12345678);
   const repeated = selectGalleryEdgeDecals(914, 1160, 0x12345678);
 
-  assert.equal(GALLERY_DECAL_COUNT, 24);
+  assert.equal(GALLERY_DECAL_COUNT, 16);
   assert.equal(first.length, GALLERY_DECAL_COUNT);
   assert.deepEqual(first, repeated);
   assert.equal(new Set(first.map(({ item }) => item.src)).size, first.length);
-  assert.equal(first.filter(({ position }) => position.side === "left").length, 12);
-  assert.equal(first.filter(({ position }) => position.side === "right").length, 12);
+  assert.equal(first.filter(({ position }) => position.side === "left").length, 8);
+  assert.equal(first.filter(({ position }) => position.side === "right").length, 8);
   assert.ok(first.every(({ item }) => REWARD_DECAL_POOL.includes(item)));
+
+  for (const side of ["left", "right"]) {
+    const sideDecals = first
+      .filter(({ position }) => position.side === side)
+      .sort((a, b) => a.position.y - b.position.y);
+    const minimumGap = Math.min(...sideDecals.slice(1).map((decal, index) =>
+      decal.position.y - sideDecals[index].position.y
+    ));
+    assert.ok(minimumGap >= sideDecals[0].position.size * 1.5);
+  }
 });
 
 test("gallery decal selection changes for a new page-load seed", () => {
