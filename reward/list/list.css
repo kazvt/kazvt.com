@@ -111,10 +111,10 @@ h1 {
   text-shadow: 2px 2px #694d9a, 4px 4px #07070c;
 }
 
-.mixed-title-glyph--spiral { font-family: "SPIRAL", "Trebuchet MS", sans-serif; }
-.mixed-title-glyph--panties { font-family: "Panties Bottom", "SPIRAL", sans-serif; }
-.mixed-title-glyph--bricked { font-family: "Bricked Up", "SPIRAL", sans-serif; }
-.mixed-title-glyph--comic { font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive; }
+.mixed-page-glyph--spiral { font-family: "SPIRAL", "Trebuchet MS", sans-serif; }
+.mixed-page-glyph--panties { font-family: "Panties Bottom", "SPIRAL", sans-serif; }
+.mixed-page-glyph--bricked { font-family: "Bricked Up", "SPIRAL", sans-serif; }
+.mixed-page-glyph--comic { font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive; }
 
 .pool-readout {
   display: flex;
@@ -189,8 +189,7 @@ h1 {
 
 .pool-meter.is-empty .pool-meter-fill { visibility: hidden; }
 
-.pool-meter.is-empty::after {
-  content: attr(data-empty-label);
+.pool-meter-empty-count, .pool-meter-unavailable {
   position: absolute;
   inset: 0;
   display: grid;
@@ -202,16 +201,9 @@ h1 {
   text-shadow: 1px 1px #050509;
 }
 
-.pool-meter.is-unavailable::after {
-  content: "—";
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #d9d6e9;
-  font-size: 0.72rem;
-  line-height: 1;
-}
+.pool-meter-empty-count, .pool-meter-unavailable { display: none; }
+.pool-meter.is-empty .pool-meter-empty-count,
+.pool-meter.is-unavailable .pool-meter-unavailable { display: grid; }
 
 @keyframes pool-stripe-scroll {
   /* Shift by exactly one tile so the animation wraps without a phase jump. */
@@ -245,9 +237,11 @@ h1 {
 
 .search-row { display: flex; gap: 8px; }
 
+.search-input-wrap { position: relative; flex: 1; min-width: 0; }
+
 .search-row input {
   min-width: 0;
-  flex: 1;
+  width: 100%;
   padding: 8px 10px;
   border: 2px inset #8f90a8;
   border-radius: 0;
@@ -257,6 +251,27 @@ h1 {
 }
 
 .search-row input::placeholder { color: #b6b4c4; opacity: 1; }
+
+.search-row input:not(:focus) {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.search-row input:not(:focus)::placeholder { color: transparent; opacity: 0; }
+
+.search-glyph-overlay {
+  position: absolute;
+  inset: 2px;
+  padding: 8px 10px;
+  overflow: hidden;
+  color: #fff;
+  line-height: normal;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.search-glyph-overlay.is-placeholder { color: #b6b4c4; }
+.search-input-wrap input:focus ~ .search-glyph-overlay { display: none; }
 
 .clear-button, .open-button {
   padding: 7px 10px;
