@@ -9,24 +9,19 @@
 
 .welcome-dialog {
   position: fixed;
-  inset: 0;
+  inset: auto 14px 14px auto;
   box-sizing: border-box;
-  width: min(490px, calc(100vw - 28px));
+  width: min(370px, calc(100vw - 28px));
   max-width: none;
-  max-height: min(650px, calc(100vh - 24px));
-  max-height: min(650px, calc(100dvh - 24px));
-  margin: auto;
+  max-height: min(420px, calc(100vh - 28px));
+  max-height: min(420px, calc(100dvh - 28px));
+  margin: 0;
   overflow: auto;
   border: 0;
   background: var(--paper, #ece9d8);
   color: var(--ink, #17141c);
   filter: drop-shadow(0 20px 34px rgb(0 0 0 / 48%));
   pointer-events: auto;
-}
-
-.welcome-dialog::backdrop {
-  background: rgb(12 10 16 / 48%);
-  backdrop-filter: blur(1.5px);
 }
 
 .welcome-titlebar {
@@ -63,19 +58,6 @@
 
 .welcome-body {
   color: var(--ink, #17141c);
-}
-
-.welcome-kicker {
-  margin: 0 0 7px;
-  color: color-mix(in srgb, var(--banner, #4d6787) 82%, var(--ink, #17141c) 18%);
-  font: 700 10px/1.2 "Pixelated MS Sans Serif", Arial, sans-serif;
-  letter-spacing: 0.13em;
-}
-
-.welcome-body h2 {
-  margin: 0 0 8px;
-  color: var(--ink, #17141c);
-  font: 700 clamp(18px, 5vw, 22px)/1.25 "Pixelated MS Sans Serif", Arial, sans-serif;
 }
 
 .welcome-copy {
@@ -121,6 +103,12 @@
 }
 
 @media (max-width: 440px) {
+  .welcome-dialog {
+    inset: auto 10px 10px auto;
+    width: min(380px, calc(100vw - 20px));
+    max-height: min(420px, calc(100dvh - 20px));
+  }
+
   .welcome-copy { font-size: 13px; }
 }
 

@@ -2833,7 +2833,7 @@ function initializeSiteWelcomePopup() {
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v5";
+  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v6";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";
@@ -2843,24 +2843,21 @@ function initializeSiteWelcomePopup() {
     <div class="title-bar welcome-titlebar">
       <div class="title-bar-text welcome-titlebar-text">
         <img class="welcome-icon" src="/favicon-96x96.png" alt="" width="18" height="18">
-        <span data-welcome-window-title></span>
+        <span id="welcome-popup-title" data-welcome-window-title></span>
       </div>
       <div class="title-bar-controls">
         <button type="button" class="welcome-close" data-welcome-close aria-label="Close"></button>
       </div>
     </div>
     <div class="window-body welcome-body">
-      <p class="welcome-kicker" aria-hidden="true">✦  HOME.EXE  ✦</p>
-      <h2 id="welcome-popup-title" data-welcome-heading></h2>
       <p id="welcome-popup-copy" class="welcome-copy" data-welcome-copy></p>
       <div class="field-row welcome-actions">
-        <button type="button" class="default welcome-confirm" data-welcome-confirm autofocus></button>
+        <button type="button" class="default welcome-confirm" data-welcome-confirm></button>
       </div>
     </div>`;
 
   const copy = (key, fallback) => translatedText(key) || fallback;
-  dialog.querySelector("[data-welcome-window-title]").textContent = copy("popup.window_title", "kazvt.com");
-  dialog.querySelector("[data-welcome-heading]").textContent = copy("popup.heading", "hey, you made it!");
+  dialog.querySelector("[data-welcome-window-title]").textContent = copy("popup.window_title", "REMINDER:");
   const popupMessage = copy("popup.message", "sub to my wife https://youtube.com/@lillie_garden do it for monkey woman!! it'd mean the whole world to her [wumpa]");
   const popupMessageNodes = inlineNoteNodes(popupMessage).flatMap((node) => {
     if (typeof node !== "string") return [node];
@@ -2912,7 +2909,7 @@ function initializeSiteWelcomePopup() {
       return;
     }
     try {
-      if (typeof dialog.showModal === "function") dialog.showModal();
+      if (typeof dialog.show === "function") dialog.show();
       else dialog.setAttribute("open", "");
     } catch {
       dialog.setAttribute("open", "");
