@@ -99,19 +99,27 @@ test("gallery usernames follow the whole-card reward link while detail usernames
     "username links on individual reward pages still open that user's gallery");
 });
 
-test("palette-free reward gallery titles use the mixed font set while the demo stays separate", () => {
-  assert.match(galleryScript, /createMixedTitleGlyphs\(text\)/,
-    "gallery headings are rendered glyph-by-glyph from the mixed-font pool");
-  assert.match(galleryScript, /let title = "Rewards"/,
-    "the unfiltered rewards gallery gets the mixed title treatment");
-  assert.match(galleryScript, /title = `\$\{displayUsername\(requestedUsername\)\} Rewards`/,
-    "username-filtered galleries use the same title renderer");
-  assert.match(galleryStyles, /\.mixed-title-glyph--comic\s*\{[^}]*"Comic Sans MS"/,
+test("palette-free reward galleries mix every rendered text node while demo and reward pages stay separate", () => {
+  assert.match(galleryScript, /createMixedGlyphs\(text\)/,
+    "all wrapped gallery text uses the mixed-font glyph generator");
+  assert.match(galleryScript, /mixTextIn\(document\.body\)/,
+    "static page copy receives the treatment on load");
+  assert.match(galleryScript, /new MutationObserver/,
+    "async status copy and dynamically rendered cards receive the same treatment");
+  assert.match(galleryScript, /mixed-page-glyph \$\{fontClass\}/,
+    "each non-space grapheme gets its own font span");
+  assert.match(galleryScript, /renderMixedText\(pageTitle, title\)/,
+    "the main and username-filtered headings use the shared renderer");
+  assert.match(galleryStyles, /\.mixed-page-glyph--comic\s*\{[^}]*"Comic Sans MS"/,
     "Comic Sans is available as one of the glyph fonts");
-  assert.match(galleryPage, /list\.css\?v=indecisive-title-fonts-20261020-v2/,
+  assert.match(galleryStyles, /\.search-row input:focus ~ \.search-glyph-overlay\s*\{\s*display:\s*none/,
+    "search typing remains native and keeps its caret and selection behavior");
+  assert.match(galleryPage, /list\.css\?v=gallery-glyph-collage-20261020-v3/,
     "the updated collage stylesheet receives a fresh cache key");
-  assert.match(galleryPage, /list\.js\?v=indecisive-title-fonts-20261020-v2/,
+  assert.match(galleryPage, /list\.js\?v=gallery-glyph-collage-20261020-v3/,
     "the updated collage script receives a fresh cache key");
-  assert.doesNotMatch(demoPage, /mixed-title-glyph|mixed-title\.mjs|list\.js/,
-    "the standalone demo page does not load the palette-free gallery title treatment");
+  assert.doesNotMatch(demoPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,
+    "the standalone demo page does not load the palette-free gallery treatment");
+  assert.doesNotMatch(rewardPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,
+    "individual reward pages do not load the palette-free gallery treatment");
 });
