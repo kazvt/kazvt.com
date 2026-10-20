@@ -185,11 +185,25 @@ h1 {
 
 .provenance {
   max-width: 590px;
-  margin: 12px 0 0;
+  margin: 9px 0 0;
   color: var(--muted);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.84rem;
   line-height: 1.55;
+}
+
+.source-note {
+  max-width: 590px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.source-note a {
+  color: var(--green);
+  text-underline-offset: 2px;
 }
 
 .entry-actions {
