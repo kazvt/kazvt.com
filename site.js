@@ -2833,7 +2833,7 @@ function initializeSiteWelcomePopup() {
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v6";
+  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v7";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";

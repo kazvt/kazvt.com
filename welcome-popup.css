@@ -2,8 +2,9 @@
   position: fixed;
   inset: 0;
   z-index: 2147483647;
-  color: var(--ink, #17141c);
-  font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+  /* XP.css puts these base defaults on body; mirror them into this shadow root. */
+  color: #222;
+  font: 12px Arial, sans-serif;
   pointer-events: none;
 }
 
@@ -18,60 +19,15 @@
   margin: 0;
   overflow: auto;
   border: 0;
-  background: var(--paper, #ece9d8);
-  color: var(--ink, #17141c);
-  filter: drop-shadow(0 20px 34px rgb(0 0 0 / 48%));
   pointer-events: auto;
 }
 
-.welcome-titlebar {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--banner, #4d6787) 62%, #fff 38%),
-    color-mix(in srgb, var(--banner, #4d6787) 88%, #fff 12%) 12%,
-    var(--banner, #4d6787) 52%,
-    color-mix(in srgb, var(--banner, #4d6787) 84%, #000 16%) 100%
-  );
-  border-top-color: color-mix(in srgb, var(--banner, #4d6787) 64%, #fff 36%);
-  border-left-color: color-mix(in srgb, var(--banner, #4d6787) 74%, #fff 26%);
-  border-right-color: color-mix(in srgb, var(--banner, #4d6787) 78%, #000 22%);
-}
-
-.welcome-titlebar-text {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 7px;
-}
-
 .welcome-icon {
-  display: block;
-  flex: 0 0 16px;
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.welcome-titlebar .title-bar-controls button {
-  background-color: var(--banner, #4d6787);
-}
-
-.welcome-body {
-  color: var(--ink, #17141c);
+  vertical-align: middle;
 }
 
 .welcome-copy {
-  max-width: 42ch;
-  margin: 0;
-  color: color-mix(in srgb, var(--ink, #17141c) 86%, var(--paper, #f5f2e7) 14%);
-  font: 11px/1.55 "Pixelated MS Sans Serif", Arial, sans-serif;
   overflow-wrap: anywhere;
-}
-
-.welcome-copy a {
-  color: color-mix(in srgb, var(--ink, #17141c) 70%, var(--banner, #4d6787) 30%);
-  text-decoration: underline;
-  text-underline-offset: 0.12em;
 }
 
 .welcome-copy .inline-emote {
@@ -87,10 +43,6 @@
 .welcome-actions {
   justify-content: flex-end;
   margin-top: 14px;
-}
-
-.welcome-actions button.welcome-confirm {
-  min-width: 100px;
 }
 
 @keyframes welcome-popup-in {
@@ -109,7 +61,6 @@
     max-height: min(420px, calc(100dvh - 20px));
   }
 
-  .welcome-copy { font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
