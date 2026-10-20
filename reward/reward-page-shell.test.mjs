@@ -122,9 +122,9 @@ test("palette-free reward galleries mix every rendered text node while demo and 
     "the decorative zero-pool label is real text, so it can use per-glyph fonts");
   assert.match(galleryPage, /id="searchGlyphOverlay"[^>]*aria-hidden="true"/,
     "the collage search overlay remains decorative to assistive technology");
-  assert.match(galleryPage, /list\.css\?v=gallery-glyph-collage-20261020-v3/,
+  assert.match(galleryPage, /list\.css\?v=gallery-glyph-collage-20261020-v4/,
     "the updated collage stylesheet receives a fresh cache key");
-  assert.match(galleryPage, /list\.js\?v=gallery-glyph-collage-20261020-v3/,
+  assert.match(galleryPage, /list\.js\?v=gallery-glyph-collage-20261020-v4/,
     "the updated collage script receives a fresh cache key");
   assert.doesNotMatch(demoPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,
     "the standalone demo page does not load the palette-free gallery treatment");
