@@ -66,7 +66,7 @@ import "../background-context.mjs?v=1";
   function shouldSkipTextNode(node) {
     const parent = node.parentElement;
     return !parent || !/\S/u.test(node.nodeValue ?? "") ||
-      parent.closest(".mixed-page-glyph, script, style, noscript, textarea, select, option, [contenteditable]:not([contenteditable='false']), [data-no-glyph-collage]") !== null;
+      parent.closest(".mixed-page-glyph, .tier-font-text, script, style, noscript, textarea, select, option, [contenteditable]:not([contenteditable='false']), [data-no-glyph-collage]") !== null;
   }
 
   function mixTextNode(node) {
@@ -223,7 +223,7 @@ import "../background-context.mjs?v=1";
     info.className = "award-info";
     const shownUsername = displayUsername(assignment.username);
     info.append(createText("h2", "username username-display", shownUsername));
-    info.append(createText("p", "artwork-name", filenameLabel(assignment.filename)));
+    info.append(createText("p", "artwork-name tier-font-text", filenameLabel(assignment.filename)));
 
     const meta = document.createElement("div");
     meta.className = "award-meta";
@@ -237,7 +237,7 @@ import "../background-context.mjs?v=1";
       reason.className = "award-reason-card";
       reason.title = `Awarded for: ${assignment.reason}`;
       const label = createText("span", "reward-reason-label", "FOR:");
-      const note = createText("span", "award-reason-text", assignment.reason);
+      const note = createText("span", "award-reason-text tier-font-text", assignment.reason);
       reason.append(label, note);
       info.append(reason);
     }
