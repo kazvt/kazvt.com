@@ -115,6 +115,7 @@ h1 {
 .mixed-page-glyph--panties { font-family: "Panties Bottom", "SPIRAL", sans-serif; }
 .mixed-page-glyph--bricked { font-family: "Bricked Up", "SPIRAL", sans-serif; }
 .mixed-page-glyph--comic { font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive; }
+.mixed-page-word { display: inline-block; max-width: 100%; overflow-wrap: break-word; vertical-align: baseline; }
 
 .pool-readout {
   display: flex;

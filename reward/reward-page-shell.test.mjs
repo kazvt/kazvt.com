@@ -108,6 +108,10 @@ test("palette-free reward galleries mix every rendered text node while demo and 
     "async status copy and dynamically rendered cards receive the same treatment");
   assert.match(galleryScript, /mixed-page-glyph \$\{fontClass\}/,
     "each non-space grapheme gets its own font span");
+  assert.match(galleryScript, /currentWord\.className = "mixed-page-word"/,
+    "glyphs stay grouped by word rather than becoming individual wrap points");
+  assert.match(galleryStyles, /\.mixed-page-word\s*\{[^}]*display:\s*inline-block/,
+    "whole words move together unless an unusually long word must break to fit");
   assert.match(galleryScript, /renderMixedText\(pageTitle, title\)/,
     "the main and username-filtered headings use the shared renderer");
   assert.match(galleryStyles, /\.mixed-page-glyph--comic\s*\{[^}]*"Comic Sans MS"/,

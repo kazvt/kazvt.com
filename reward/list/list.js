@@ -39,15 +39,22 @@ import "../background-context.mjs?v=1";
 
   function mixedTextFragment(text) {
     const fragment = document.createDocumentFragment();
+    let currentWord = null;
     for (const { glyph, fontClass } of createMixedGlyphs(text)) {
       if (!fontClass) {
+        currentWord = null;
         fragment.append(document.createTextNode(glyph));
         continue;
+      }
+      if (!currentWord) {
+        currentWord = document.createElement("span");
+        currentWord.className = "mixed-page-word";
+        fragment.append(currentWord);
       }
       const glyphElement = document.createElement("span");
       glyphElement.className = `mixed-page-glyph ${fontClass}`;
       glyphElement.textContent = glyph;
-      fragment.append(glyphElement);
+      currentWord.append(glyphElement);
     }
     return fragment;
   }
