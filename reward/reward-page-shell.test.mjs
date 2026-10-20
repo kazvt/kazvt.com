@@ -136,15 +136,21 @@ test("palette-free galleries keep their glyph collage except tier-styled reward 
     "the decorative zero-pool label is real text, so it can use per-glyph fonts");
   assert.match(galleryPage, /id="searchGlyphOverlay"[^>]*aria-hidden="true"/,
     "the collage search overlay remains decorative to assistive technology");
-  assert.match(galleryPage, /list\.css\?v=gallery-tier-type-preview-20261020-v1/,
-    "the updated collage stylesheet receives a fresh cache key");
-  assert.match(galleryPage, /list\.js\?v=gallery-tier-type-preview-20261020-v1/,
-    "the updated collage script receives a fresh cache key");
+  assert.match(galleryPage, /list\.css\?v=gallery-edge-decals-20261020-v1/,
+    "the updated gallery stylesheet receives a fresh cache key");
+  assert.match(galleryPage, /list\.js\?v=gallery-edge-decals-20261020-v1/,
+    "the updated gallery script receives a fresh cache key");
   const previewBackdrop = galleryStyles.match(/\.artwork-frame::before\s*\{([^}]*)\}/)?.[1] ?? "";
   assert.match(previewBackdrop, /opacity:\s*0\.7\s*;/,
     "only the artwork preview backdrop is reduced to 70% opacity");
   assert.doesNotMatch(galleryStyles.match(/\.artwork-frame\s*\{([^}]*)\}/)?.[1] ?? "", /opacity:/,
     "the preview frame itself is not faded along with its artwork");
+  assert.match(galleryPage, /id="galleryDecals"[^>]*aria-hidden="true"/,
+    "gallery decals are decorative and hidden from assistive technology");
+  assert.match(galleryStyles, /\.gallery-edge-decal\s*\{[^}]*filter:\s*grayscale\(70%\)/,
+    "gallery decals retain some color while being mostly desaturated");
+  assert.match(galleryStyles, /\.index-shell\s*>\s*:not\(\.gallery-decal-layer\)\s*\{[^}]*z-index:\s*1/,
+    "all gallery content stays layered above the edge decals");
   assert.doesNotMatch(demoPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,
     "the standalone demo page does not load the palette-free gallery treatment");
   assert.doesNotMatch(rewardPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,

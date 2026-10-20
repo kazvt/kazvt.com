@@ -66,6 +66,7 @@ body {
   min-height: 100svh;
   margin: 0;
   padding: clamp(14px, 3vw, 36px);
+  overflow-x: clip;
   background-color: #090910;
   background-image:
     linear-gradient(rgb(8 8 15 / 28%), rgb(8 8 15 / 28%)),
@@ -80,12 +81,41 @@ button, input { font: inherit; }
 a { color: inherit; }
 
 .index-shell {
+  position: relative;
+  isolation: isolate;
   width: min(100%, 920px);
   margin: 0 auto;
   padding: clamp(16px, 3vw, 28px);
   border: 3px ridge var(--line);
   background: rgb(12 12 20 / 96%);
   box-shadow: 0 0 0 4px rgb(0 0 0 / 52%), 0 0 24px rgb(45 31 96 / 38%);
+}
+
+.gallery-decal-layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+}
+
+.index-shell > :not(.gallery-decal-layer) {
+  position: relative;
+  z-index: 1;
+}
+
+.gallery-edge-decal {
+  position: absolute;
+  display: block;
+  width: var(--gallery-decal-size, 48px);
+  height: var(--gallery-decal-size, 48px);
+  object-fit: contain;
+  opacity: 0.96;
+  filter: grayscale(70%) drop-shadow(1px 2px 0 rgb(0 0 0 / 72%));
+  transform: translate(-50%, -50%) rotate(var(--gallery-decal-angle, 0deg));
+  pointer-events: none;
+  user-select: none;
 }
 
 .page-header {
@@ -494,6 +524,7 @@ h1 {
 @media (max-width: 560px) {
   body { padding: 10px; }
   .index-shell { padding: 15px 12px; }
+  .gallery-edge-decal { width: min(var(--gallery-decal-size, 24px), 24px); height: min(var(--gallery-decal-size, 24px), 24px); }
   .page-header { padding-top: 28px; }
   .back-link { top: 0; left: 0; }
   .archive-stickers { min-height: 56px; gap: 8px; }

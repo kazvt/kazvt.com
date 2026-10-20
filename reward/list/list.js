@@ -3,6 +3,7 @@ import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
 import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
 import { createMixedGlyphs } from "./mixed-glyphs.mjs?v=gallery-glyph-collage-20261020-v4";
+import { createGalleryDecalSeed, GALLERY_DECAL_COUNT, selectGalleryEdgeDecals } from "./gallery-decals.mjs?v=gallery-decal-scatter-20261020-v1";
 import "../pattern-zoom.mjs?v=2";
 import "../background-context.mjs?v=1";
 
@@ -23,11 +24,16 @@ import "../background-context.mjs?v=1";
   const poolStatus = document.getElementById("poolStatus");
   const searchGlyphOverlay = document.getElementById("searchGlyphOverlay");
   const searchLabel = document.getElementById("search-label");
+  const galleryShell = document.querySelector(".index-shell");
+  const galleryDecalLayer = document.getElementById("galleryDecals");
   const usernameParam = new URLSearchParams(window.location.search).get("user");
   const userFilterRequested = usernameParam !== null;
   const requestedUsername = usernameParam?.trim() ?? "";
   const userFilterValid = !userFilterRequested || (requestedUsername.length > 0 &&
     requestedUsername.length <= 100 && !/[\u0000-\u001f]/.test(requestedUsername));
+  const galleryDecalSeed = createGalleryDecalSeed();
+  const galleryDecalElements = new Map();
+  let galleryDecalLayoutSize = "";
 
   function normalizeSearch(value) {
     return value.normalize("NFKD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase().trim();
@@ -86,6 +92,58 @@ import "../background-context.mjs?v=1";
     const textNodes = [];
     while (walker.nextNode()) textNodes.push(walker.currentNode);
     for (const node of textNodes) mixTextNode(node);
+  }
+
+  function layoutGalleryDecals() {
+    if (!galleryDecalLayer) return;
+    const width = galleryDecalLayer.clientWidth;
+    const height = galleryDecalLayer.clientHeight;
+    if (!width || !height) return;
+
+    const layoutSize = `${width}x${height}`;
+    if (layoutSize === galleryDecalLayoutSize) return;
+    galleryDecalLayoutSize = layoutSize;
+
+    const placements = selectGalleryEdgeDecals(width, height, galleryDecalSeed, GALLERY_DECAL_COUNT);
+    const activeSources = new Set(placements.map(({ item }) => item.src));
+    for (const [src, element] of galleryDecalElements) {
+      if (activeSources.has(src)) continue;
+      element.remove();
+      galleryDecalElements.delete(src);
+    }
+
+    for (const { item, position } of placements) {
+      let image = galleryDecalElements.get(item.src);
+      if (!image) {
+        image = document.createElement("img");
+        image.className = "gallery-edge-decal";
+        image.alt = "";
+        image.draggable = false;
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.setAttribute("fetchpriority", "low");
+        image.setAttribute("aria-hidden", "true");
+        image.src = item.src;
+        galleryDecalElements.set(item.src, image);
+      }
+
+      image.dataset.side = position.side;
+      image.style.left = `${position.x}px`;
+      image.style.top = `${position.y}px`;
+      image.style.setProperty("--gallery-decal-size", `${position.size}px`);
+      image.style.setProperty("--gallery-decal-angle", `${position.angle.toFixed(1)}deg`);
+      if (image.parentElement !== galleryDecalLayer) galleryDecalLayer.append(image);
+    }
+  }
+
+  if (galleryShell && galleryDecalLayer) {
+    if ("ResizeObserver" in window) {
+      const galleryDecalObserver = new ResizeObserver(layoutGalleryDecals);
+      galleryDecalObserver.observe(galleryShell);
+    } else {
+      window.addEventListener("resize", layoutGalleryDecals, { passive: true });
+    }
+    layoutGalleryDecals();
   }
 
   const pageGlyphObserver = new MutationObserver(records => {
