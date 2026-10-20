@@ -163,6 +163,18 @@ h1 {
   color: #a8a295;
 }
 
+.content-note {
+  margin: 13px 0 0;
+  color: #4d4439;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.content-note strong {
+  color: var(--ink);
+}
+
 .entry-details h3 {
   margin: 0;
   font-size: clamp(1.7rem, 4vw, 2.35rem);
