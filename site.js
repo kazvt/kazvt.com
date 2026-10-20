@@ -3492,6 +3492,7 @@ async function render(statusOverrides = {}) {
     ]),
   );
   markSoftLoaded(app);
+  initializeGuestbookWidget();
   initializeMultistreamGuideModal();
   autoOpenMultistreamGuideFromHash(window.location.hash);
   void initializeRewardGalleryPreview();
