@@ -1848,11 +1848,13 @@ function initializeGuestbookWidget() {
   let fallbackTimer = 0;
   const previousHcbConfig = window.hcb_user && typeof window.hcb_user === "object" ? window.hcb_user : {};
   const previousOnload = previousHcbConfig.onload;
+  const nameLabel = translatedText("guestbook.form_name");
+  const messageLabel = translatedText("guestbook.form_message");
   window.hcb_user = {
     ...previousHcbConfig,
     comments_header: "little notes from visitors",
-    name_label: "your name",
-    content_label: "leave a little note...",
+    name_label: nameLabel,
+    content_label: messageLabel,
     submit: "stick it in!",
     no_comments_msg: "no scribbles yet — be the first!",
     add: "sign the guestbook",
@@ -1866,6 +1868,8 @@ function initializeGuestbookWidget() {
       window.clearTimeout(fallbackTimer);
       mount.dataset.hcbLoaded = "true";
       mount.classList.remove("is-loading");
+      mount.querySelector("#hcb_form_name")?.setAttribute("aria-label", nameLabel);
+      mount.querySelector("#hcb_form_content")?.setAttribute("aria-label", messageLabel);
       if (typeof previousOnload === "function") {
         try {
           previousOnload.apply(this, args);
