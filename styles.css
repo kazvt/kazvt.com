@@ -5329,6 +5329,7 @@ body {
 }
 
 #guestbook #HCB_comment_box .submit,
+#guestbook #HCB_comment_box .btn,
 #guestbook #HCB_comment_box input[type="submit"],
 #guestbook #HCB_comment_box #hcb_submit {
   min-height: 38px;
@@ -5344,6 +5345,7 @@ body {
 }
 
 #guestbook #HCB_comment_box .submit:hover,
+#guestbook #HCB_comment_box .btn:hover,
 #guestbook #HCB_comment_box input[type="submit"]:hover,
 #guestbook #HCB_comment_box #hcb_submit:hover {
   filter: brightness(1.06);
