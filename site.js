@@ -1576,13 +1576,22 @@ async function initializeRewardGalleryPreview() {
   if (!mount) return;
 
   try {
-    const { fetchAssignmentRegistry } = await import(
-      "/reward/assignment-source.mjs?v=reward-gallery-home-20261020-v1"
-    );
-    const registry = await fetchAssignmentRegistry();
+    const [{ fetchAssignmentRegistry }, { validateAndSortAssignments }] = await Promise.all([
+      import("/reward/assignment-source.mjs?v=reward-gallery-home-20261020-v1"),
+      import("/reward/assignment-registry.mjs?v=reward-gallery-home-20261020-v2"),
+    ]);
+    const [registry, catalogResponse] = await Promise.all([
+      fetchAssignmentRegistry(),
+      fetch("/zzz_assets/rewards/manifest.json", { cache: "no-cache" }),
+    ]);
+    if (!catalogResponse.ok) throw new Error("The reward artwork catalog could not be loaded.");
+    const catalog = await catalogResponse.json();
+    if (catalog?.version !== 4 || !Array.isArray(catalog.tierWeights)) {
+      throw new Error("The reward artwork catalog is invalid.");
+    }
     if (registry?.version !== 1 || !Array.isArray(registry.assignments)) return;
 
-    const previews = registry.assignments
+    const previews = validateAndSortAssignments(registry, catalog)
       .filter((assignment) => {
         const filename = assignment?.filename;
         const linkId = assignment?.linkId;
@@ -1615,6 +1624,7 @@ async function initializeRewardGalleryPreview() {
           decoding: "async",
         }),
       ]);
+      card.dataset.tier = assignment.tierId || "common";
       return card;
     }));
     mount.dataset.ready = "true";

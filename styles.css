@@ -5479,6 +5479,7 @@ body {
 .reward-preview-card {
   position: relative;
   z-index: 1;
+  isolation: isolate;
   display: grid;
   width: 100%;
   aspect-ratio: 1;
@@ -5486,19 +5487,42 @@ body {
   padding: 5px;
   overflow: hidden;
   border: 3px solid var(--ink);
-  background:
-    repeating-linear-gradient(45deg, color-mix(in srgb, var(--blue) 14%, transparent) 0 5px, transparent 5px 11px),
-    var(--paper);
+  background: var(--paper);
   box-shadow: 4px 4px 0 var(--shadow);
   transform-origin: 50% 65%;
   animation: reward-preview-bob 3.8s steps(2, end) infinite;
 }
 
+.reward-preview-card::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: var(--reward-preview-pattern, url("/reward/patterns/purple.gif"));
+  background-size: calc(var(--reward-pattern-tile-width, 100px) * 0.4) auto;
+  background-position: center;
+  background-repeat: repeat;
+  content: "";
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.reward-preview-card[data-tier="common"] { --reward-preview-pattern: url("/reward/patterns/purple.gif"); }
+.reward-preview-card[data-tier="uncommon"] { --reward-preview-pattern: url("/reward/patterns/blue.gif"); }
+.reward-preview-card[data-tier="rare"] { --reward-preview-pattern: url("/reward/patterns/red.gif"); }
+.reward-preview-card[data-tier="epic"] { --reward-preview-pattern: url("/reward/patterns/orange.gif"); }
+.reward-preview-card[data-tier="legendary"] { --reward-preview-pattern: url("/reward/patterns/green.gif"); }
+.reward-preview-card[data-tier="mythic"] { --reward-preview-pattern: url("/reward/patterns/pink.gif"); }
+.reward-preview-card[data-tier="divine"] { --reward-preview-pattern: url("/reward/patterns/chrome.gif"); }
+.reward-preview-card[data-tier="splus"] { --reward-preview-pattern: url("/reward/patterns/sand.gif"); }
+
 .reward-preview-card img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: 50% 50%;
 }
 
 .reward-preview-card:hover,
