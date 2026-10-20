@@ -136,9 +136,9 @@ test("palette-free galleries keep their glyph collage except tier-styled reward 
     "the decorative zero-pool label is real text, so it can use per-glyph fonts");
   assert.match(galleryPage, /id="searchGlyphOverlay"[^>]*aria-hidden="true"/,
     "the collage search overlay remains decorative to assistive technology");
-  assert.match(galleryPage, /list\.css\?v=gallery-edge-decals-20261020-v1/,
+  assert.match(galleryPage, /list\.css\?v=gallery-edge-decals-20261020-v2/,
     "the updated gallery stylesheet receives a fresh cache key");
-  assert.match(galleryPage, /list\.js\?v=gallery-edge-decals-20261020-v1/,
+  assert.match(galleryPage, /list\.js\?v=gallery-edge-decals-20261020-v2/,
     "the updated gallery script receives a fresh cache key");
   const previewBackdrop = galleryStyles.match(/\.artwork-frame::before\s*\{([^}]*)\}/)?.[1] ?? "";
   assert.match(previewBackdrop, /opacity:\s*0\.7\s*;/,
