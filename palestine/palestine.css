@@ -1,4 +1,4 @@
-+ :root {
+:root {
   color-scheme: light;
   --soil: #49392e;
   --soil-deep: #35291f;
@@ -10,6 +10,7 @@
   --olive: #676744;
   --clay: #97583e;
   --gold: #c59c58;
+  --walnut: #5a4634;
 }
 
 * {
