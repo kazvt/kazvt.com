@@ -99,7 +99,7 @@ test("gallery usernames follow the whole-card reward link while detail usernames
     "username links on individual reward pages still open that user's gallery");
 });
 
-test("palette-free reward galleries mix every rendered text node while demo and reward pages stay separate", () => {
+test("palette-free galleries keep their glyph collage except tier-styled reward names and notes", () => {
   assert.match(galleryScript, /createMixedGlyphs\(text\)/,
     "all wrapped gallery text uses the mixed-font glyph generator");
   assert.match(galleryScript, /mixTextIn\(document\.body\)/,
@@ -112,6 +112,20 @@ test("palette-free reward galleries mix every rendered text node while demo and 
     "glyphs stay grouped by word rather than becoming individual wrap points");
   assert.match(galleryStyles, /\.mixed-page-word\s*\{[^}]*display:\s*inline-block/,
     "whole words move together unless an unusually long word must break to fit");
+  assert.match(galleryScript, /parent\.closest\([\s\S]*?\.tier-font-text/,
+    "tier-styled reward text is excluded from the page-wide glyph observer");
+  assert.match(galleryScript, /createText\("p", "artwork-name tier-font-text"/,
+    "reward names opt into their own tier font");
+  assert.match(galleryScript, /createText\("span", "award-reason-text tier-font-text"/,
+    "the optional reason note also opts into its reward's tier font");
+  for (const [tier, font] of [
+    ["common", "Naughty Tape"], ["uncommon", "Comic Sans MS"], ["rare", "SPIRAL"],
+    ["epic", "Panties Bottom"], ["legendary", "Freak Show"],
+    ["mythic", "Crash Team Racing"], ["divine", "Bricked Up"], ["splus", "SPIRAL"]
+  ]) {
+    assert.match(galleryStyles, new RegExp(`\\.award-card\\[data-tier="${tier}"\\][^{]*\\{[^}]*--reward-tier-font:\\s*"${font}"`),
+      `${tier} reward text uses the same font mapping as its individual reward page`);
+  }
   assert.match(galleryScript, /renderMixedText\(pageTitle, title\)/,
     "the main and username-filtered headings use the shared renderer");
   assert.match(galleryStyles, /\.mixed-page-glyph--comic\s*\{[^}]*"Comic Sans MS"/,
@@ -122,10 +136,15 @@ test("palette-free reward galleries mix every rendered text node while demo and 
     "the decorative zero-pool label is real text, so it can use per-glyph fonts");
   assert.match(galleryPage, /id="searchGlyphOverlay"[^>]*aria-hidden="true"/,
     "the collage search overlay remains decorative to assistive technology");
-  assert.match(galleryPage, /list\.css\?v=gallery-glyph-collage-20261020-v4/,
+  assert.match(galleryPage, /list\.css\?v=gallery-tier-type-preview-20261020-v1/,
     "the updated collage stylesheet receives a fresh cache key");
-  assert.match(galleryPage, /list\.js\?v=gallery-glyph-collage-20261020-v4/,
+  assert.match(galleryPage, /list\.js\?v=gallery-tier-type-preview-20261020-v1/,
     "the updated collage script receives a fresh cache key");
+  const previewBackdrop = galleryStyles.match(/\.artwork-frame::before\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(previewBackdrop, /opacity:\s*0\.7\s*;/,
+    "only the artwork preview backdrop is reduced to 70% opacity");
+  assert.doesNotMatch(galleryStyles.match(/\.artwork-frame\s*\{([^}]*)\}/)?.[1] ?? "", /opacity:/,
+    "the preview frame itself is not faded along with its artwork");
   assert.doesNotMatch(demoPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,
     "the standalone demo page does not load the palette-free gallery treatment");
   assert.doesNotMatch(rewardPage, /mixed-page-glyph|mixed-glyphs\.mjs|list\.js/,
