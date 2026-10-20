@@ -238,7 +238,7 @@ h1 {
 
 .read-link {
   align-self: flex-start;
-  color: var(--walnut, #5a4634);
+  color: var(--soil-deep);
   text-underline-offset: 3px;
 }
 
