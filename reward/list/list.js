@@ -392,15 +392,17 @@ import "../background-context.mjs?v=1";
   }
 
   async function start() {
-    let title = "Rewards";
+    const registryPromise = loadRegistry();
+    await (i18n?.ready ?? Promise.resolve());
+    let title = text("reward.gallery_title", "Rewards");
     if (userFilterRequested) {
       if (userFilterValid) {
-        title = `${displayUsername(requestedUsername)} Rewards`;
+        title = format("reward.user_title", "{username} Rewards", { username: displayUsername(requestedUsername) });
       } else {
-        title = "Reward lookup";
+        title = text("reward.lookup_title", "Reward lookup");
       }
-      searchLabel.textContent = "Search this collection";
-      searchInput.placeholder = "Search artwork…";
+      searchLabel.textContent = text("reward.search_collection", "Search this collection");
+      searchInput.placeholder = text("reward.search_art", "Search artwork…");
       updateSearchGlyphOverlay();
     }
     pageTitle.setAttribute("aria-label", title);
@@ -408,7 +410,7 @@ import "../background-context.mjs?v=1";
     document.title = `${title} — kazvt`;
 
     try {
-      const { assignments: allAssignments, pool } = await loadRegistry();
+      const { assignments: allAssignments, pool } = await registryPromise;
       renderPoolStatus(pool);
       const assignments = userFilterRequested
         ? userFilterValid
@@ -423,12 +425,15 @@ import "../background-context.mjs?v=1";
         emptyState.hidden = false;
         if (userFilterRequested && userFilterValid) {
           emptyState.replaceChildren(
-            document.createTextNode("No rewards for "),
+            document.createTextNode(text("reward.no_rewards_for_prefix", "No rewards for") + " "),
             createText("span", "username-display", displayUsername(requestedUsername)),
-            document.createTextNode(".")
+            document.createTextNode(text("reward.no_rewards_for_suffix", "."))
           );
+          emptyState.lastElementChild?.setAttribute("dir", "auto");
         } else {
-          emptyState.textContent = userFilterRequested ? "Invalid username." : "No rewards yet.";
+          emptyState.textContent = userFilterRequested
+            ? text("reward.invalid_username", "Invalid username.")
+            : text("reward.no_rewards_yet", "No rewards yet.");
         }
       }
       updateResults(cards);
@@ -442,10 +447,10 @@ import "../background-context.mjs?v=1";
     } catch (error) {
       console.error("[reward-list] Could not load reward data:", error);
       poolMeter.classList.add("is-unavailable");
-      poolMeter.setAttribute("aria-valuetext", "Reward pool unavailable");
-      poolStatus.textContent = "The reward pool is unavailable.";
+      poolMeter.setAttribute("aria-valuetext", text("reward.pool_unavailable_aria", "Reward pool unavailable"));
+      poolStatus.textContent = text("reward.pool_unavailable", "The reward pool is unavailable.");
       awardList.setAttribute("aria-busy", "false");
-      resultStatus.textContent = "The reward index is unavailable.";
+      resultStatus.textContent = text("reward.index_unavailable", "The reward index is unavailable.");
       errorState.hidden = false;
     }
   }
