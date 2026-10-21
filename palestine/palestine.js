@@ -3,6 +3,7 @@
   const text = (key, fallback) => i18n?.t?.(key) || fallback;
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
   const touchPreference = window.matchMedia("(hover: none) and (pointer: coarse)");
+  const sideRailPreference = window.matchMedia("(min-width: 600px)");
   const touchOnly = () => touchPreference.matches && navigator.maxTouchPoints > 0;
   const cursorColors = ["#ce1126", "#171a18", "#fffdf3", "#087a3f"];
   let cursorEffect = null;
@@ -117,7 +118,7 @@
   touchPreference.addEventListener("change", updateCursor);
 
   const toggle = document.querySelector("[data-gif-toggle]");
-  const images = [...document.querySelectorAll(".gif-grid img[data-gif]")];
+  const images = [...document.querySelectorAll(".palestine-sprinkles img[data-gif]")];
   if (!toggle || !images.length) return;
 
   const label = toggle.querySelector("[data-gif-toggle-label]");
@@ -125,12 +126,20 @@
   const staticSources = new Map(images.map((image) => [image, image.getAttribute("src")]));
   let visitorChoice = null;
 
+  toggle.hidden = !sideRailPreference.matches;
+
+  function translated(key, fallback) {
+    return window.KazvtI18n?.t?.(key) || fallback;
+  }
+
   function setGifMotion(playing) {
+    const shouldPlay = playing && sideRailPreference.matches;
     images.forEach((image) => {
-      const source = playing ? image.dataset.gif : staticSources.get(image);
+      const source = shouldPlay ? image.dataset.gif : staticSources.get(image);
       if (source && image.getAttribute("src") !== source) image.setAttribute("src", source);
     });
 
+<<<<<<< ours
     toggle.setAttribute("aria-pressed", String(playing));
     toggle.setAttribute("aria-label", text(playing ? "palestine.pause_aria" : "palestine.play_aria", playing ? "Pause Palestine GIFs" : "Play Palestine GIFs"));
     if (label) label.textContent = text(playing ? "palestine.pause" : "palestine.play", playing ? "Pause GIFs" : "Play GIFs");
@@ -139,6 +148,21 @@
 
   setGifMotion(!motionPreference.matches);
   i18n?.ready?.then(() => setGifMotion(toggle.getAttribute("aria-pressed") === "true"));
+=======
+    toggle.setAttribute("aria-pressed", String(shouldPlay));
+    toggle.setAttribute(
+      "aria-label",
+      translated(shouldPlay ? "palestine.pause_aria" : "palestine.play_aria", shouldPlay ? "Pause Palestine GIFs" : "Play Palestine GIFs"),
+    );
+    if (label) label.textContent = translated(shouldPlay ? "palestine.pause" : "palestine.play", shouldPlay ? "Pause GIFs" : "Play GIFs");
+    if (mark) mark.textContent = shouldPlay ? "Ⅱ" : "▶";
+  }
+
+  setGifMotion(!motionPreference.matches && sideRailPreference.matches);
+  window.KazvtI18n?.ready?.then(() => {
+    setGifMotion(toggle.getAttribute("aria-pressed") === "true");
+  });
+>>>>>>> theirs
 
   toggle.addEventListener("click", () => {
     visitorChoice = toggle.getAttribute("aria-pressed") !== "true";
@@ -147,6 +171,16 @@
 
   motionPreference.addEventListener("change", (event) => {
     if (visitorChoice !== null) return;
-    setGifMotion(!event.matches);
+    setGifMotion(!event.matches && sideRailPreference.matches);
+  });
+
+  sideRailPreference.addEventListener("change", (event) => {
+    toggle.hidden = !event.matches;
+    const shouldPlay = visitorChoice === null ? !motionPreference.matches : visitorChoice;
+    setGifMotion(shouldPlay && event.matches);
+  });
+
+  window.addEventListener("kazvt:languagechange", () => {
+    setGifMotion(toggle.getAttribute("aria-pressed") === "true");
   });
 })();

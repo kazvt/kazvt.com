@@ -1857,6 +1857,26 @@ async function initializeMultistreamGuideModal() {
   });
 }
 
+function findLanguageFooter() {
+  const preferred = document.querySelector("[data-page-footer]")
+    || document.querySelector(".page-footer")
+    || document.querySelector(".site-footer")
+    || document.querySelector(".archive-footer")
+    || document.querySelector(".language-footer");
+  if (preferred) return preferred;
+
+  const semanticFooter = [...document.querySelectorAll("footer")].find(
+    (footer) => !footer.closest("article, aside, main, nav, section"),
+  );
+  if (semanticFooter) return semanticFooter;
+
+  const footer = document.createElement("footer");
+  footer.className = "language-footer";
+  footer.dataset.pageFooter = "true";
+  document.body.append(footer);
+  return footer;
+}
+
 async function mountLanguageSelector() {
   if (document.querySelector(".language-dock")) return;
 
@@ -1895,9 +1915,9 @@ async function mountLanguageSelector() {
     window.location.reload();
   });
 
-  const siteWrap = document.querySelector(".site-wrap");
-  if (siteWrap) siteWrap.insertAdjacentElement("afterend", dock);
-  else document.body.append(dock);
+  const footer = findLanguageFooter();
+  footer.classList.add("has-language-dock");
+  footer.append(dock);
 }
 
 function initializeSiteTools() {
