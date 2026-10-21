@@ -449,8 +449,7 @@ reward.reason_title=سبب منح المكافأة: {reason}
 
 # أرشيف الأدب الفلسطيني
 palestine.title=الأدب الفلسطيني
-palestine.meta_description=أدب فلسطيني ترجمه kazvt.
-palestine.byline=ترجمة kazvt.
+palestine.meta_description=أدب فلسطيني للقراءة أو التنزيل.
 palestine.home=العودة إلى kazvt.com
 palestine.gif_wall=صور GIF عن فلسطين
 palestine.solidarity=فلسطين حرة
