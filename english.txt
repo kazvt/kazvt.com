@@ -108,7 +108,6 @@ webcorner.random=random
 webcorner.next=next
 panel.guestbook.title=guestbook
 panel.guestbook.stamp=sign here
-guestbook.intro=leave your name + a little note. no account nonsense.
 guestbook.form_name=your name
 guestbook.form_message=leave a little note...
 guestbook.loading=opening the guestbook...

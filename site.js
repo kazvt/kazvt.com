@@ -1837,7 +1837,9 @@ function guestbookPanel() {
     stampKey: "panel.guestbook.stamp",
     children: [
       el("div", { className: "guestbook-lines" }, [
-        el("p", { className: "guestbook-intro", "data-i18n": "guestbook.intro" }, [translatedText("guestbook.intro")]),
+        el("div", { className: "guestbook-heading" }, [
+          el("span", { className: "guestbook-visual", ariaHidden: "true" }, ["✎"]),
+        ]),
         el("div", {
           id: "HCB_comment_box",
           className: "guestbook-widget",
@@ -1845,11 +1847,6 @@ function guestbookPanel() {
           ariaLabel: translatedText("panel.guestbook.title"),
         }, [
           el("p", { className: "guestbook-loading", role: "status", ariaLive: "polite", "data-i18n": "guestbook.loading" }, [translatedText("guestbook.loading")]),
-        ]),
-        el("p", { className: "guestbook-privacy" }, [
-          "notes are hosted by ",
-          el("a", { href: "https://www.htmlcommentbox.com/static/privacy.pdf", target: "_blank", rel: "noopener noreferrer" }, ["HTML Comment Box"]),
-          "; keep private details out of them.",
         ]),
       ]),
     ],
@@ -1867,7 +1864,7 @@ function initializeGuestbookWidget() {
   const messageLabel = translatedText("guestbook.form_message");
   window.hcb_user = {
     ...previousHcbConfig,
-    comments_header: "little notes from visitors",
+    comments_header: "",
     name_label: nameLabel,
     content_label: messageLabel,
     submit: "stick it in!",
