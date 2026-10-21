@@ -1876,35 +1876,14 @@ function initializeGuestbookWidget() {
       if (normalizedText !== originalText) textNode.nodeValue = normalizedText;
     }
   };
-  const normalizeGuestbookMetaNode = (node, includeDescendants = false) => {
-    const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
-    if (!element) return;
-
-    const metadataNodes = new Set();
-    const enclosingMetadata = element.closest(".hcb-comment-tb");
-    if (enclosingMetadata) metadataNodes.add(enclosingMetadata);
-
-    if (includeDescendants) {
-      element.querySelectorAll(".hcb-comment-tb").forEach((metadata) => metadataNodes.add(metadata));
-    }
-
-    metadataNodes.forEach(normalizeGuestbookMetadata);
-  };
   const replaceGuestbookMetaDots = () => {
     mount.querySelectorAll(".hcb-comment-tb").forEach(normalizeGuestbookMetadata);
   };
-  const guestbookObserver = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      normalizeGuestbookMetaNode(mutation.target);
-      mutation.addedNodes.forEach((node) => normalizeGuestbookMetaNode(node, true));
-    }
-  });
-  guestbookObserver.observe(mount, { childList: true, characterData: true, subtree: true });
-  window.addEventListener("pagehide", () => guestbookObserver.disconnect(), { once: true });
 
   let fallbackTimer = 0;
   const previousHcbConfig = window.hcb_user && typeof window.hcb_user === "object" ? window.hcb_user : {};
   const previousOnload = previousHcbConfig.onload;
+  const previousOnComment = previousHcbConfig.ON_COMMENT;
   const nameLabel = translatedText("guestbook.form_name");
   const messageLabel = translatedText("guestbook.form_message");
   window.hcb_user = {
@@ -1921,6 +1900,14 @@ function initializeGuestbookWidget() {
     MAX_CHARS: 500,
     PAGE: "https://kazvt.com/#guestbook",
     RELATIVE_DATES: true,
+    ON_COMMENT(...args) {
+      if (typeof previousOnComment === "function") {
+        try {
+          previousOnComment.apply(this, args);
+        } catch {}
+      }
+      replaceGuestbookMetaDots();
+    },
     onload(...args) {
       window.clearTimeout(fallbackTimer);
       mount.dataset.hcbLoaded = "true";
