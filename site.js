@@ -3292,9 +3292,251 @@ function initializeDrawingPad() {
   }
 }
 
+function initializeBlogReadingPad(mount) {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) {
+    mount.replaceChildren(el("p", { className: "small-copy" }, ["This browser does not support the reading pad."]));
+    return;
+  }
+
+  const keyNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const root = Math.floor(Math.random() * keyNames.length);
+  const title = el("p", { className: "track-title blog-pad-title" }, [`${keyNames[root]} minor reading pad`]);
+  const play = el("button", {
+    type: "button",
+    className: "music-button",
+    "data-i18n": "music.play",
+    ariaPressed: "false",
+  }, [translatedText("music.play") || "play"]);
+  const volumeLabel = el("label", { className: "volume-label" }, [
+    el("span", { "data-i18n": "music.volume" }, [translatedText("music.volume") || "vol"]),
+  ]);
+  const padVolumeKey = "kazvt-blog-reading-pad-volume";
+  let initialVolume = 0.25;
+  try {
+    const stored = Number(sessionStorage.getItem(padVolumeKey));
+    if (sessionStorage.getItem(padVolumeKey) !== null && Number.isFinite(stored)) {
+      initialVolume = Math.max(0, Math.min(1, stored));
+    }
+  } catch {}
+  const volume = el("input", {
+    type: "range",
+    min: "0",
+    max: "1",
+    step: "0.01",
+    value: String(initialVolume),
+    ariaLabel: translatedText("music.volume") || "volume",
+    "data-i18n-aria-label": "music.volume",
+  });
+  volumeLabel.append(volume);
+
+  const visualizer = el("canvas", {
+    width: "150",
+    height: "44",
+    className: "visualizer",
+    role: "img",
+    ariaLabel: "Reading pad visualizer",
+  });
+  const visual = visualizer.getContext("2d");
+  const controls = el("div", { className: "music-controls blog-pad-controls" }, [play]);
+
+  let context = null;
+  let analyser = null;
+  let master = null;
+  let oscillators = [];
+  let playing = false;
+  let visualizerTimer = 0;
+  let generation = 0;
+
+  function colors() {
+    const css = getComputedStyle(document.body);
+    return {
+      bg: css.getPropertyValue("--visualizer-bg").trim() || css.getPropertyValue("--banner").trim() || "#16111a",
+      primary: css.getPropertyValue("--visualizer-primary").trim() || css.getPropertyValue("--green").trim() || "#6cff7a",
+      secondary: css.getPropertyValue("--visualizer-secondary").trim() || css.getPropertyValue("--blue").trim() || "#48cfff",
+    };
+  }
+
+  function drawVisualizer() {
+    if (!visual) return;
+    const width = visualizer.width;
+    const height = visualizer.height;
+    const palette = colors();
+    visual.fillStyle = palette.bg;
+    visual.fillRect(0, 0, width, height);
+
+    const levels = new Uint8Array(analyser?.frequencyBinCount || 12);
+    if (playing && analyser) analyser.getByteFrequencyData(levels);
+    const bars = 12;
+    const slot = width / bars;
+    for (let index = 0; index < bars; index += 1) {
+      const bin = Math.floor((index / bars) * levels.length);
+      const strength = playing ? levels[bin] / 255 : 0.12 + ((index * 7) % 5) * 0.025;
+      const barHeight = Math.max(4, strength * (height - 9));
+      visual.fillStyle = index % 2 ? palette.secondary : palette.primary;
+      visual.fillRect(Math.round(index * slot + 2), height - barHeight - 4, Math.max(3, Math.floor(slot - 4)), barHeight);
+    }
+  }
+
+  function stopVisualizer() {
+    if (visualizerTimer) window.clearTimeout(visualizerTimer);
+    visualizerTimer = 0;
+    drawVisualizer();
+  }
+
+  function visualizerFrame() {
+    visualizerTimer = 0;
+    if (!playing || document.hidden) return;
+    drawVisualizer();
+    visualizerTimer = window.setTimeout(visualizerFrame, 1000 / 20);
+  }
+
+  function startVisualizer() {
+    if (visualizerTimer || document.hidden) return;
+    drawVisualizer();
+    visualizerTimer = window.setTimeout(visualizerFrame, 1000 / 20);
+  }
+
+  function ensureAudioGraph() {
+    if (context) return;
+    context = new AudioContext();
+    const filter = context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 1500;
+    filter.Q.value = 0.55;
+    master = context.createGain();
+    master.gain.value = 0.0001;
+    analyser = context.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.88;
+    filter.connect(master);
+    master.connect(analyser);
+    analyser.connect(context.destination);
+    context.__readingPadFilter = filter;
+  }
+
+  function startChordVoices() {
+    const now = context.currentTime;
+    const filter = context.__readingPadFilter;
+    const midiRoot = 48 + root; // C3 through B3
+    // A single minor ninth voicing: root, fifth, octave, minor third, fifth, seventh, ninth.
+    const intervals = [0, 7, 12, 15, 19, 22];
+    oscillators = [];
+
+    intervals.forEach((interval, noteIndex) => {
+      const frequency = 440 * (2 ** ((midiRoot + interval - 69) / 12));
+      [-5, 5].forEach((detune, layerIndex) => {
+        const oscillator = context.createOscillator();
+        const voice = context.createGain();
+        oscillator.type = "triangle";
+        oscillator.frequency.value = frequency;
+        oscillator.detune.value = detune;
+        voice.gain.setValueAtTime(0.0001, now);
+        voice.gain.linearRampToValueAtTime(0.018, now + 4.2);
+
+        if (context.createStereoPanner) {
+          const panner = context.createStereoPanner();
+          const side = noteIndex % 2 === 0 ? -1 : 1;
+          panner.pan.value = side * (layerIndex === 0 ? 0.34 : 0.62);
+          oscillator.connect(voice);
+          voice.connect(panner);
+          panner.connect(filter);
+        } else {
+          oscillator.connect(voice);
+          voice.connect(filter);
+        }
+
+        oscillator.start(now);
+        oscillators.push({ oscillator, voice });
+      });
+    });
+
+    master.gain.cancelScheduledValues(now);
+    master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
+    master.gain.linearRampToValueAtTime(Number(volume.value), now + 4.2);
+  }
+
+  async function beginPlayback() {
+    ensureAudioGraph();
+    await context.resume();
+    if (context.state !== "running") throw new Error("Audio is not available yet.");
+    generation += 1;
+    startChordVoices();
+    playing = true;
+    setInlineNote(play, translatedText("music.pause") || "pause");
+    play.setAttribute("aria-pressed", "true");
+    play.setAttribute("aria-label", "Stop the reading pad");
+    startVisualizer();
+  }
+
+  function endPlayback() {
+    if (!context || !playing) return;
+    playing = false;
+    const stopGeneration = ++generation;
+    const now = context.currentTime;
+    master.gain.cancelScheduledValues(now);
+    master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
+    master.gain.linearRampToValueAtTime(0.0001, now + 1.7);
+    oscillators.forEach(({ oscillator, voice }) => {
+      voice.gain.cancelScheduledValues(now);
+      voice.gain.setValueAtTime(Math.max(0.0001, voice.gain.value), now);
+      voice.gain.linearRampToValueAtTime(0.0001, now + 1.5);
+      try { oscillator.stop(now + 1.55); } catch {}
+    });
+    oscillators = [];
+    setInlineNote(play, translatedText("music.play") || "play");
+    play.setAttribute("aria-pressed", "false");
+    play.setAttribute("aria-label", "Play the reading pad");
+    stopVisualizer();
+    window.setTimeout(() => {
+      if (!playing && generation === stopGeneration && context?.state === "running") {
+        context.suspend().catch(() => {});
+      }
+    }, 1800);
+  }
+
+  play.setAttribute("aria-label", "Play the reading pad");
+  play.addEventListener("click", () => {
+    if (playing) {
+      endPlayback();
+      return;
+    }
+    play.disabled = true;
+    beginPlayback().catch((error) => {
+      console.warn("Blog reading pad could not start:", error);
+      title.textContent = `${keyNames[root]} minor reading pad - press play to enable audio`;
+    }).finally(() => {
+      play.disabled = false;
+    });
+  });
+  volume.addEventListener("input", () => {
+    try { sessionStorage.setItem(padVolumeKey, volume.value); } catch {}
+    if (!context || !playing) return;
+    const now = context.currentTime;
+    master.gain.cancelScheduledValues(now);
+    master.gain.setTargetAtTime(Number(volume.value), now, 0.08);
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopVisualizer();
+    else if (playing) startVisualizer();
+    else drawVisualizer();
+  });
+  window.addEventListener("kazvt:themechange", drawVisualizer);
+
+  mount.classList.add("blog-reading-pad");
+  mount.replaceChildren(title, controls, volumeLabel, visualizer);
+  drawVisualizer();
+  markSoftLoaded(mount);
+}
+
 async function initializeMusicPlayer() {
   const mount = document.querySelector("#music-player");
   if (!mount) return;
+
+  if (document.body.dataset.page === "blog") {
+    initializeBlogReadingPad(mount);
+    return;
+  }
 
   const tracks = await loadManifest("zzz_music/manifest.json", audioExtensions);
   if (!tracks.length) {
