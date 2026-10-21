@@ -48,7 +48,7 @@
 
 :root {
   color-scheme: dark;
-  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive;
+  font-family: "SPIRAL", "Trebuchet MS", sans-serif;
   color: #f3f3f6;
   background: #090910;
   font-synthesis: none;
@@ -169,7 +169,7 @@ h1 {
   max-width: 620px;
   margin: -2px auto 8px;
   color: #cfccdc;
-  font-family: "SPIRAL", "Trebuchet MS", sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive;
   font-size: 0.82rem;
   line-height: 1.35;
   text-shadow: 1px 1px #050509;
