@@ -45,9 +45,9 @@
 
   function selectedLanguage(languages) {
     let stored = "";
-    for (const storage of [sessionStorage, localStorage]) {
+    for (const storageName of ["sessionStorage", "localStorage"]) {
       try {
-        stored = storage.getItem(CONFIG.storageKey) || stored;
+        stored = window[storageName].getItem(CONFIG.storageKey) || stored;
       } catch {}
       if (stored) break;
     }

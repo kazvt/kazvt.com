@@ -38,9 +38,9 @@
   }
 
   function storedLanguageName() {
-    for (const storage of [sessionStorage, localStorage]) {
+    for (const storageName of ["sessionStorage", "localStorage"]) {
       try {
-        const stored = storage.getItem(LANGUAGE_STORAGE_KEY);
+        const stored = window[storageName].getItem(LANGUAGE_STORAGE_KEY);
         if (stored) return stored;
       } catch {}
     }

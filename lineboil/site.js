@@ -659,9 +659,9 @@ async function loadLanguageManifest() {
 function selectedLanguageFromManifest(languages) {
   let selectedName = languages[0].name;
 
-  for (const storage of [sessionStorage, localStorage]) {
+  for (const storageName of ["sessionStorage", "localStorage"]) {
     try {
-      const stored = storage.getItem(LANGUAGE_STORAGE_KEY);
+      const stored = window[storageName].getItem(LANGUAGE_STORAGE_KEY);
       const match = languages.find((language) => language.name === stored || language.code === stored);
       if (match) selectedName = match.name;
     } catch {}
