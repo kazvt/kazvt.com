@@ -443,6 +443,7 @@ reward.reason_title=获奖原因：{reason}
 
 # 巴勒斯坦文学档案
 palestine.title=巴勒斯坦文学
+palestine.meta_description=由 kazvt 翻译的巴勒斯坦文学。
 palestine.byline=由 kazvt 翻译。
 palestine.home=返回 kazvt.com
 palestine.gif_wall=巴勒斯坦 GIF

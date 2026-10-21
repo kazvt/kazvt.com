@@ -443,6 +443,7 @@ reward.reason_title=Ödül verilme nedeni: {reason}
 
 # Filistin edebiyatı arşivi
 palestine.title=Filistin Edebiyatı
+palestine.meta_description=kazvt tarafından çevrilen Filistin edebiyatı.
 palestine.byline=kazvt tarafından çevrildi.
 palestine.home=kazvt.com'a dön
 palestine.gif_wall=Filistin GIF'leri
