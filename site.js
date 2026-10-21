@@ -2869,11 +2869,35 @@ function initializeSiteWelcomePopup() {
   const copy = (key, fallback) => translatedText(key) || fallback;
   dialog.querySelector("[data-welcome-window-title]").textContent = copy("popup.window_title", "REMINDER:");
   const popupMessage = copy("popup.message", "sub to my wife https://youtube.com/@lillie_garden do it for monkey woman!! it'd mean the whole world to her [wumpa]");
+  const popupDestination = (() => {
+    const match = popupMessage.match(/https?:\/\/[^\s<>"']+/i);
+    if (!match) return null;
+    const candidate = match[0].replace(/[.,!?;:]+$/, "");
+    try {
+      const url = new URL(candidate, window.location.href);
+      return url.protocol === "http:" || url.protocol === "https:" ? url : null;
+    } catch {
+      return null;
+    }
+  })();
+  const isKazvtUrl = (url) => url.hostname === "kazvt.com" || url.hostname.endsWith(".kazvt.com");
   const popupMessageNodes = inlineNoteNodes(popupMessage).flatMap((node) => {
     if (typeof node !== "string") return [node];
-    return node.split(/(https?:\/\/[^\s]+)/gi).filter(Boolean).map((part) => {
-      if (!/^https?:\/\//i.test(part)) return part;
-      return el("a", { href: part, target: "_blank", rel: "noopener noreferrer" }, [part]);
+    return node.split(/(https?:\/\/[^\s]+)/gi).filter(Boolean).flatMap((part) => {
+      if (!/^https?:\/\//i.test(part)) return [part];
+      const candidate = part.replace(/[.,!?;:]+$/, "");
+      let url;
+      try {
+        url = new URL(candidate, window.location.href);
+      } catch {
+        return [part];
+      }
+      if (url.protocol !== "http:" && url.protocol !== "https:") return [part];
+      const trailingText = part.slice(candidate.length);
+      const link = isKazvtUrl(url)
+        ? el("a", { href: url.href }, [candidate])
+        : el("a", { href: url.href, target: "_blank", rel: "noopener noreferrer" }, [candidate]);
+      return trailingText ? [link, trailingText] : [link];
     });
   });
   dialog.querySelector("[data-welcome-copy]").replaceChildren(...popupMessageNodes);
@@ -2902,8 +2926,23 @@ function initializeSiteWelcomePopup() {
     }
   };
 
-  dialog.querySelectorAll("[data-welcome-close], [data-welcome-confirm]").forEach((button) => {
+  dialog.querySelectorAll("[data-welcome-close]").forEach((button) => {
     button.addEventListener("click", closePopup);
+  });
+  dialog.querySelector("[data-welcome-confirm]")?.addEventListener("click", () => {
+    if (!popupDestination) {
+      closePopup();
+      return;
+    }
+
+    rememberDismissal();
+    if (isKazvtUrl(popupDestination)) {
+      window.location.assign(popupDestination.href);
+      return;
+    }
+
+    window.open(popupDestination.href, "_blank", "noopener,noreferrer");
+    closePopup();
   });
   dialog.addEventListener("close", rememberDismissal);
   window.addEventListener("storage", (event) => {
