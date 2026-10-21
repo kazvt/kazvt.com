@@ -181,7 +181,7 @@ guide.root.4=Apple Music
 guide.root.5=plak şirketi parçaları
 guide.root.6=veya yayınlamanın yasal olmadığı şarkılar.
 guide.vod.1=Twitch VOD'larının
-guide.vod.2`sessize alınması` seni rahatsız eder mi?
+guide.vod.2=sessize alınması seni rahatsız eder mi?
 guide.vod.3=Evetse müziği
 guide.vod.4=ayrı kanala alalım.
 guide.vod.5=Hayırsa YouTube'a
