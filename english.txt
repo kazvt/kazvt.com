@@ -544,17 +544,16 @@ reward.search_label=Search rewards
 reward.collection_search_label=Search this collection
 
 # Palestine literature page
-title.palestine=Palestinian Literature - kazvt
+title.palestine=Palestinian Literature - Translated by kazvt
+palestine.meta_description=Palestinian literature translated by kazvt.
 palestine.title=Palestinian Literature
 palestine.byline=Translated by kazvt.
 palestine.home=Return to kazvt.com
-palestine.gif_wall=Palestine GIFs
-palestine.solidarity=FREE PALESTINE
 palestine.play=Play GIFs
 palestine.pause=Pause GIFs
 palestine.play_aria=Play Palestine GIFs
 palestine.pause_aria=Pause Palestine GIFs
-palestine.gif_credit=Old-web finds from
+palestine.gif_credit=GIFs from
 palestine.collection=Available literature
 palestine.entry_kind=English-language PDF - 2 pages
 palestine.download=Download PDF

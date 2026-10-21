@@ -2794,12 +2794,25 @@ body.guide-modal-open :where(.site-wrap, .language-dock) input[type="range"] {
   display: grid;
   width: min(1060px, calc(100% - 24px));
   gap: 9px;
-  margin: -22px auto 34px;
+  margin: 0;
   padding: 10px;
   background:
     repeating-linear-gradient(-45deg, color-mix(in srgb, var(--pink) 18%, transparent) 0 8px, transparent 8px 16px),
     var(--paper);
   color: var(--ink);
+}
+
+.language-footer {
+  width: min(1060px, calc(100% - 24px));
+  max-width: calc(100% - 24px);
+  margin: 24px auto 34px;
+}
+
+.language-footer > .language-dock,
+footer.has-language-dock > .language-dock {
+  width: min(1060px, calc(100% - 24px));
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .language-title {

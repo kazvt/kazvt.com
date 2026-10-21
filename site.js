@@ -4073,6 +4073,8 @@ async function initializeMusicPlayer() {
 
 async function render(statusOverrides = {}) {
   const app = document.querySelector("#app");
+  const languageDock = document.querySelector(".language-dock");
+  languageDock?.remove();
   const links = streamLinks.map((link) => ({
     ...link,
     status: normalizeStatus(statusOverrides[link.key] || link.status),
@@ -4102,6 +4104,7 @@ async function render(statusOverrides = {}) {
       createVisitCounter({ label: translatedText("footer.counter") }),
     ]),
   );
+  if (languageDock) app.querySelector(".page-footer")?.append(languageDock);
   markSoftLoaded(app);
   initializeGuestbookWidget();
   initializeMultistreamGuideModal();

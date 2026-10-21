@@ -1,6 +1,26 @@
 (() => {
   "use strict";
 
+  function findOrCreatePageFooter() {
+    const preferred = document.querySelector("[data-page-footer]")
+      || document.querySelector(".page-footer")
+      || document.querySelector(".site-footer")
+      || document.querySelector(".archive-footer")
+      || document.querySelector(".language-footer");
+    if (preferred) return preferred;
+
+    const semanticFooter = [...document.querySelectorAll("footer")].find(
+      (footer) => !footer.closest("article, aside, main, nav, section"),
+    );
+    if (semanticFooter) return semanticFooter;
+
+    const footer = document.createElement("footer");
+    footer.className = "language-footer";
+    footer.dataset.pageFooter = "true";
+    document.body.append(footer);
+    return footer;
+  }
+
   async function mount() {
     const i18n = window.KazvtI18n;
     if (!i18n) return null;
@@ -11,7 +31,19 @@
       dock = document.createElement("div");
       dock.className = "language-dock";
       dock.dataset.languageDock = "true";
-      document.body.append(dock);
+    }
+
+    const footer = findOrCreatePageFooter();
+    footer.classList.add("has-language-dock");
+    if (dock.parentElement !== footer) footer.append(dock);
+
+    if (dock.dataset.languageMounted === "true") {
+      dock.querySelectorAll("[data-language]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.language === i18n.language.name));
+      });
+      i18n.apply(dock);
+      window.KazvtLineboil?.sync?.();
+      return dock;
     }
 
     dock.replaceChildren();
@@ -48,6 +80,7 @@
     });
 
     dock.append(toggle, options);
+    dock.dataset.languageMounted = "true";
     i18n.apply(dock);
     window.KazvtLineboil?.sync?.();
     return dock;
