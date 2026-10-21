@@ -563,6 +563,15 @@
   text-align: center;
 }
 
+.blog-reading-pad .blog-pad-title {
+  min-height: 0;
+  line-height: 1.3;
+}
+
+.blog-reading-pad .blog-pad-controls {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .blog-footer {
   display: flex;
   flex-wrap: wrap;
