@@ -48,7 +48,7 @@
 
 :root {
   color-scheme: dark;
-  font-family: "SPIRAL", "Trebuchet MS", sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive;
   color: #f3f3f6;
   background: #090910;
   font-synthesis: none;
@@ -173,12 +173,6 @@ h1 {
   font-size: 0.82rem;
   line-height: 1.35;
   text-shadow: 1px 1px #050509;
-}
-
-.reward-intro-aside {
-  display: block;
-  margin-top: 2px;
-  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive;
 }
 
 .mixed-page-glyph--spiral { font-family: "SPIRAL", "Trebuchet MS", sans-serif; }
