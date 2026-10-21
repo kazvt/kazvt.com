@@ -21,8 +21,24 @@ import {
   validateAndSortAssignments
 } from "./assignment-registry.mjs?v=award-reason-20261020-v1";
 
-(() => {
+(async () => {
   "use strict";
+
+  function rewardText(key, fallback) {
+    return window.KazvtI18n?.t?.(key) || fallback;
+  }
+
+  function rewardFormat(key, fallback, replacements = {}) {
+    let value = rewardText(key, fallback);
+    Object.entries(replacements).forEach(([name, replacement]) => {
+      value = value.replaceAll(`{${name}}`, String(replacement));
+    });
+    return value;
+  }
+
+  function tierText(tier) {
+    return rewardText(`reward.tier.${tier.id}`, tier.label);
+  }
 
   const navigationStartTime = performance.getEntriesByType("navigation")[0]?.startTime ?? performance.now();
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
@@ -323,6 +339,7 @@ import {
     mention.className = "username-mention";
     mention.href = createUserRewardListHref(username, window.location.origin);
     mention.textContent = username;
+    mention.dir = "auto";
     return mention;
   }
 
@@ -331,6 +348,7 @@ import {
     display.className = "username-display";
     display.href = createUserRewardListHref(username, window.location.origin);
     display.textContent = username;
+    display.dir = "auto";
     return display;
   }
 
@@ -343,21 +361,25 @@ import {
   function renderFilename(file) {
     const label = filenameLabel(file);
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const languageCode = document.documentElement.lang.toLowerCase();
+    const needsUnsplitText = /^(?:ar|zh)(?:-|$)/.test(languageCode);
+    filename.dir = "auto";
     filename.classList.remove("filename--animated");
 
     const fragment = document.createDocumentFragment();
     const accessibleLabel = document.createElement("span");
     accessibleLabel.className = "filename-sr-only";
-    accessibleLabel.textContent = `You got: ${label}`;
+    const gotPrefix = rewardText("reward.you_got", "You got:");
+    accessibleLabel.textContent = `${gotPrefix} ${label}`;
     fragment.append(accessibleLabel);
 
     const prefix = document.createElement("span");
     prefix.className = "filename-prefix";
     prefix.setAttribute("aria-hidden", "true");
-    prefix.textContent = "You got: ";
+    prefix.textContent = `${gotPrefix} `;
     fragment.append(prefix);
 
-    if (reducedMotion || !label) {
+    if (reducedMotion || needsUnsplitText || !label) {
       const artworkName = document.createElement("span");
       artworkName.className = "filename-artwork-name";
       artworkName.setAttribute("aria-hidden", "true");
@@ -410,13 +432,13 @@ import {
 
   function renderUsernameCopy(username) {
     recipient.replaceChildren(
-      document.createTextNode("For "),
+      document.createTextNode(`${rewardText("reward.for", "For")} `),
       usernameMention(username)
     );
     awardNote.replaceChildren(
-      document.createTextNode("This belongs only to "),
+      document.createTextNode(`${rewardText("reward.belongs_only", "This belongs only to")} `),
       usernameMention(username),
-      document.createTextNode("! Nobody else has this reward but you!")
+      document.createTextNode(rewardText("reward.nobody_else", "! Nobody else has this reward but you!"))
     );
   }
 
@@ -467,11 +489,18 @@ import {
     if (isCurrent) {
       tile.setAttribute("role", "img");
       tile.setAttribute("aria-current", "page");
-      tile.setAttribute("aria-label", `Current reward: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}`);
-      tile.title = "Current reward";
+      tile.setAttribute("aria-label", rewardFormat("reward.collection_current", "Current reward: {name}, {tier}", {
+        name: filenameLabel(assignment.filename), tier: tierText({ id: assignment.tierId, label: assignment.tierLabel }),
+      }));
+      tile.title = rewardText("reward.collection_tile_current", "Current reward");
     } else {
-      const action = canOpen ? "Open" : "Reward unavailable";
-      const label = `${action}: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}, ${username}`;
+      const label = canOpen
+        ? rewardFormat("reward.collection_open", "Open: {name}, {tier}, {username}", {
+          name: filenameLabel(assignment.filename), tier: tierText({ id: assignment.tierId, label: assignment.tierLabel }), username,
+        })
+        : rewardFormat("reward.collection_unavailable", "Reward unavailable: {name}, {tier}, {username}", {
+          name: filenameLabel(assignment.filename), tier: tierText({ id: assignment.tierId, label: assignment.tierLabel }), username,
+        });
       tile.setAttribute("aria-label", label);
       tile.title = label;
       if (!canOpen) tile.setAttribute("role", "img");
@@ -486,8 +515,10 @@ import {
       image.hidden = true;
       fallback.hidden = false;
       tile.classList.add("is-unavailable");
-      tile.setAttribute("aria-label", `Artwork unavailable: ${filenameLabel(assignment.filename)}, ${assignment.tierLabel}, ${username}`);
-      tile.title = "Artwork unavailable";
+      tile.setAttribute("aria-label", rewardFormat("reward.collection_art_unavailable", "Artwork unavailable: {name}, {tier}, {username}", {
+        name: filenameLabel(assignment.filename), tier: tierText({ id: assignment.tierId, label: assignment.tierLabel }), username,
+      }));
+      tile.title = rewardText("reward.collection_tile_art_unavailable", "Artwork unavailable");
     }, { once: true });
 
     const fallback = document.createElement("span");
@@ -529,8 +560,12 @@ import {
       link.className = "award-collection-tile award-collection-overflow";
       link.href = createUserRewardListHref(activeAwardCollection.username, window.location.origin);
       link.textContent = preview.overflowLabel;
-      link.title = `Show all ${preview.overflowCount} more rewards for ${activeAwardCollection.username}`;
-      link.setAttribute("aria-label", `Show all ${preview.overflowCount} more rewards for ${activeAwardCollection.username}`);
+      link.title = rewardFormat("reward.collection_overflow_title", "Show all {count} more rewards for {username}", {
+        count: preview.overflowCount, username: activeAwardCollection.username,
+      });
+      link.setAttribute("aria-label", rewardFormat("reward.collection_overflow_aria", "Show all {count} more rewards for {username}", {
+        count: preview.overflowCount, username: activeAwardCollection.username,
+      }));
       item.append(link);
       items.push(item);
     }
@@ -566,9 +601,9 @@ import {
         if (generation !== awardCollectionGeneration) return;
         activeAwardCollection.assignments = linkedAwards;
         awardCollectionHeading.replaceChildren(
-          document.createTextNode("Other rewards for "),
+          document.createTextNode(rewardText("reward.collection_other_rewards", "Other rewards for") + " "),
           usernameDisplay(username),
-          document.createTextNode(" - newest first")
+          document.createTextNode(rewardText("reward.collection_newest", " - newest first"))
         );
         awardCollection.hidden = false;
         layoutUserAwardCollection();
@@ -752,7 +787,7 @@ import {
     if (assignment || !compactId) return assignment;
 
     if (loadingNote) {
-      loadingNote.textContent = "Your reward is syncing in. Checking again…";
+      loadingNote.textContent = rewardText("reward.syncing", "Your reward is syncing in. Checking again…");
       loadingNote.hidden = false;
     }
     for (const delay of [1000, 1500, 2500, 4000, 6000]) {
@@ -872,20 +907,21 @@ import {
     const imageUrl = `/zzz_assets/rewards/${encodeURIComponent(file)}`;
     rewardTier.dataset.tier = tier.id;
     rewardImage.dataset.tier = tier.id;
-    rewardTier.setAttribute("aria-label", demo
-      ? `TIER: ${tier.label} demo tier`
-      : `TIER: ${tier.label} tier reward`);
+    rewardTier.setAttribute("aria-label", rewardFormat(demo ? "reward.tier_demo_aria" : "reward.tier_reward_aria",
+      demo ? "TIER: {tier} demo tier" : "TIER: {tier} tier reward", { tier: tierText(tier) }));
     tierIcon.textContent = TIER_MARKS[tier.id];
-    tierName.textContent = `TIER: ${tier.label}`;
+    tierName.textContent = `${rewardText("reward.tier_prefix", "TIER")}: ${tierText(tier)}`;
     if (demo) {
       recipient.textContent = displayName;
-      awardNote.textContent = "Demo only. No reward is issued or attached to this name.";
+      awardNote.textContent = rewardText("reward.demo_note", "Demo only. No reward is issued or attached to this name.");
     } else {
       renderUsernameCopy(displayName);
     }
     renderFilename(file);
     renderAwardReason(reason, demo);
-    rewardImage.setAttribute("aria-label", `${tier.label} ${demo ? "demo " : ""}artwork: ${file}`);
+    rewardImage.setAttribute("aria-label", rewardFormat("reward.artwork_aria", "{tier} {demo}artwork: {name}", {
+      tier: tierText(tier), demo: demo ? rewardText("reward.demo_word", "demo ") : "", name: file,
+    }));
 
     const artworkImage = await waitForRewardImage(imageUrl);
     void prepareRewardMusic(artworkImage, metadata.assetId);
@@ -988,11 +1024,13 @@ import {
     });
   }
 
+  await (window.KazvtI18n?.ready ?? Promise.resolve());
+
   if (document.body.hasAttribute("data-reward-demo")) {
     openDemo().catch(async error => {
       console.warn("[reward-demo] Could not open demo:", error);
       await waitForMinimumLoading();
-      showError("Couldn't load a demo. Refresh the page or try again.");
+      showError(rewardText("reward.demo_load_failed", "Couldn't load a demo. Refresh the page or try again."));
     });
   } else {
     openReward().catch(async error => {
@@ -1000,13 +1038,13 @@ import {
       await waitForMinimumLoading();
       const message = String(error && error.message);
       if (/reward image could not be (?:loaded|decoded)/i.test(message)) {
-        showError("Reward image unavailable.");
+        showError(rewardText("reward.image_unavailable", "Reward image unavailable."));
         return;
       }
       const publicAssetError = /assignment registry|award list|reward list|reward tier|reward asset/i.test(message);
       showError(publicAssetError
-        ? "The reward list could not be loaded. Refresh page in a moment."
-        : "Invalid or unrecorded reward link. Check the URL and try again.");
+        ? rewardText("reward.list_unavailable", "The reward list could not be loaded. Refresh page in a moment.")
+        : rewardText("reward.invalid_link", "Invalid or unrecorded reward link. Check the URL and try again."));
     });
   }
 })();
