@@ -96,7 +96,6 @@
         if (index === 0) context.moveTo(center.x, center.y);
         else context.lineTo(center.x, center.y);
       });
-      context.fillStyle = color;
       context.strokeStyle = color;
       context.lineWidth = lineWidth;
       context.lineCap = "round";
@@ -173,7 +172,6 @@
       context.strokeStyle = "rgba(23, 26, 24, 0.65)";
       context.lineWidth = 0.8;
       context.stroke();
-
     }
 
     function draw() {
