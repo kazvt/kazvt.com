@@ -6106,7 +6106,7 @@ function forwardSupportEvent(eventType, evt, bridgeMeta) {
     if (note) {
         messageSegments.push(note);
     }
-    const chatmessage = messageSegments.length ? messageSegments.join(' • ') : 'New support received!';
+    const chatmessage = messageSegments.length ? messageSegments.join(' - ') : 'New support received!';
     const chatname = supporter || 'Kick supporter';
     const chatimg =
         supporterProfile.avatar ||
@@ -6143,7 +6143,7 @@ function forwardSupportEvent(eventType, evt, bridgeMeta) {
     });
     const noteLabel = note ? ` – ${note}` : '';
     const prefix = bridgeMeta?.verified === false ? '[TIP ⚠]' : '[TIP]';
-    log(`${prefix} ${supporter}${amountLabel ? ` • ${amountLabel}` : ''}${noteLabel}`);
+    log(`${prefix} ${supporter}${amountLabel ? ` - ${amountLabel}` : ''}${noteLabel}`);
 }
 
 function forwardLiveStatus(evt, bridgeMeta) {
@@ -6179,7 +6179,7 @@ function forwardLiveStatus(evt, bridgeMeta) {
 
     const prefix = bridgeMeta?.verified === false ? '[LIVE ⚠]' : '[LIVE]';
     if (viewerTotal != null) {
-        log(`${prefix} ${isLive ? 'Online' : 'Offline'} • ${viewerTotal} viewers`);
+        log(`${prefix} ${isLive ? 'Online' : 'Offline'} - ${viewerTotal} viewers`);
     } else {
         log(`${prefix} ${isLive ? 'Online' : 'Offline'}`);
     }
