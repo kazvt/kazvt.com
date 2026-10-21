@@ -5515,7 +5515,7 @@ body {
   background-position: center;
   background-repeat: repeat;
   content: "";
-  opacity: 0.25;
+  opacity: 0.5;
   pointer-events: none;
 }
 
