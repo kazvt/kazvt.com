@@ -165,6 +165,16 @@ h1 {
   text-shadow: 2px 2px #694d9a, 4px 4px #07070c;
 }
 
+.reward-intro {
+  max-width: 620px;
+  margin: -2px auto 8px;
+  color: #cfccdc;
+  font-family: "SPIRAL", "Trebuchet MS", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-shadow: 1px 1px #050509;
+}
+
 .mixed-page-glyph--spiral { font-family: "SPIRAL", "Trebuchet MS", sans-serif; }
 .mixed-page-glyph--panties { font-family: "Panties Bottom", "SPIRAL", sans-serif; }
 .mixed-page-glyph--bricked { font-family: "Bricked Up", "SPIRAL", sans-serif; }
