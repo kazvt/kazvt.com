@@ -603,7 +603,7 @@ import {
         awardCollectionHeading.replaceChildren(
           document.createTextNode(rewardText("reward.collection_other_rewards", "Other rewards for") + " "),
           usernameDisplay(username),
-          document.createTextNode(rewardText("reward.collection_newest", " - newest first"))
+          document.createTextNode(` - ${rewardText("reward.collection_newest", "newest first")}`)
         );
         awardCollection.hidden = false;
         layoutUserAwardCollection();
@@ -920,7 +920,7 @@ import {
     renderFilename(file);
     renderAwardReason(reason, demo);
     rewardImage.setAttribute("aria-label", rewardFormat("reward.artwork_aria", "{tier} {demo}artwork: {name}", {
-      tier: tierText(tier), demo: demo ? rewardText("reward.demo_word", "demo ") : "", name: file,
+      tier: tierText(tier), demo: demo ? `${rewardText("reward.demo_word", "demo")} ` : "", name: file,
     }));
 
     const artworkImage = await waitForRewardImage(imageUrl);

@@ -1,1 +1,6 @@
 english=en
+spanish=es
+arabic=ar
+turkish=tr
+chinese=zh-CN
+portuguese=pt-BR
