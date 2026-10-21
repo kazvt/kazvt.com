@@ -3,15 +3,15 @@
   const touchPreference = window.matchMedia("(hover: none) and (pointer: coarse)");
   const sideRailPreference = window.matchMedia("(min-width: 600px)");
   const touchOnly = () => touchPreference.matches && navigator.maxTouchPoints > 0;
-  const cursorColors = ["#ce1126", "#171a18", "#fffdf3", "#087a3f"];
   let cursorEffect = null;
 
-  function createStripedCursorFallback() {
+  function createPalestinianFlagCursor() {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     if (!context) return null;
 
     canvas.dataset.palestineCursor = "true";
+    canvas.setAttribute("aria-hidden", "true");
     Object.assign(canvas.style, {
       position: "fixed",
       inset: "0",
@@ -26,9 +26,13 @@
     let height = window.innerHeight;
     let pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     let animationFrame = 0;
-    let started = false;
+    let hasPointer = false;
     const target = { x: width / 2, y: height / 2 };
     const points = Array.from({ length: 24 }, () => ({ ...target }));
+    let lastDirection = { x: 1, y: 0 };
+    const bandHeight = 6;
+    const halfHeight = bandHeight * 1.5;
+    const followRate = 0.4;
 
     const resize = () => {
       width = window.innerWidth;
@@ -42,54 +46,185 @@
     const move = (event) => {
       target.x = event.clientX;
       target.y = event.clientY;
-      if (!started) {
-        started = true;
+      if (!hasPointer) {
+        hasPointer = true;
         points.forEach((point) => {
           point.x = target.x;
           point.y = target.y;
         });
       }
+      scheduleDraw();
     };
 
-    const draw = () => {
-      context.clearRect(0, 0, width, height);
-      if (started) {
-        const trail = [];
-        let x = target.x;
-        let y = target.y;
+    function scheduleDraw() {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(draw);
+    }
 
-        points.forEach((point, index) => {
-          const next = points[index + 1] || points[0];
-          point.x = x;
-          point.y = y;
-          trail.push({ x, y });
-          x += 0.4 * (next.x - point.x);
-          y += 0.4 * (next.y - point.y);
-        });
+    function getNormals(trail) {
+      let previousNormal = { x: lastDirection.y, y: -lastDirection.x };
 
-        cursorColors.forEach((color, colorIndex) => {
-          context.beginPath();
-          context.strokeStyle = color;
-          context.lineWidth = 5;
-          trail.forEach((point, pointIndex) => {
-            const offset = pointIndex === 0 ? colorIndex * 4 : colorIndex * 5;
-            if (pointIndex === 0) context.moveTo(point.x, point.y + offset);
-            else context.lineTo(point.x, point.y + offset);
-          });
-          context.stroke();
-        });
+      return trail.map((point, index) => {
+        const before = trail[Math.max(0, index - 1)];
+        const after = trail[Math.min(trail.length - 1, index + 1)];
+        let dx = before.x - after.x;
+        let dy = before.y - after.y;
+        const magnitude = Math.hypot(dx, dy);
+
+        if (magnitude > 0.001) {
+          dx /= magnitude;
+          dy /= magnitude;
+          lastDirection = { x: dx, y: dy };
+        } else {
+          dx = lastDirection.x;
+          dy = lastDirection.y;
+        }
+
+        let normal = { x: dy, y: -dx };
+        if (normal.x * previousNormal.x + normal.y * previousNormal.y < 0) {
+          normal = { x: -normal.x, y: -normal.y };
+        }
+        previousNormal = normal;
+        return normal;
+      });
+    }
+
+    function fillBand(trail, normals, outerOffset, innerOffset, color) {
+      context.beginPath();
+      trail.forEach((point, index) => {
+        const edge = {
+          x: point.x + normals[index].x * outerOffset,
+          y: point.y + normals[index].y * outerOffset,
+        };
+        if (index === 0) context.moveTo(edge.x, edge.y);
+        else context.lineTo(edge.x, edge.y);
+      });
+      for (let index = trail.length - 1; index >= 0; index -= 1) {
+        const point = trail[index];
+        context.lineTo(
+          point.x + normals[index].x * innerOffset,
+          point.y + normals[index].y * innerOffset,
+        );
       }
-      animationFrame = window.requestAnimationFrame(draw);
+      context.closePath();
+      context.fillStyle = color;
+      context.fill();
+    }
+
+    function findTriangleTip(trail, normals) {
+      let totalLength = 0;
+      for (let index = 1; index < trail.length; index += 1) {
+        totalLength += Math.hypot(
+          trail[index - 1].x - trail[index].x,
+          trail[index - 1].y - trail[index].y,
+        );
+      }
+
+      if (totalLength < 2) return null;
+      let distanceFromTail = totalLength / 3;
+
+      for (let index = trail.length - 1; index > 0; index -= 1) {
+        const tail = trail[index];
+        const towardHead = trail[index - 1];
+        const segmentLength = Math.hypot(towardHead.x - tail.x, towardHead.y - tail.y);
+        if (segmentLength < 0.001) continue;
+        if (distanceFromTail <= segmentLength) {
+          const fraction = distanceFromTail / segmentLength;
+          return {
+            x: tail.x + (towardHead.x - tail.x) * fraction,
+            y: tail.y + (towardHead.y - tail.y) * fraction,
+          };
+        }
+        distanceFromTail -= segmentLength;
+      }
+      return null;
+    }
+
+    function drawFlag(trail) {
+      const normals = getNormals(trail);
+      context.lineJoin = "round";
+      context.lineCap = "round";
+
+      fillBand(trail, normals, halfHeight, bandHeight / 2, "#171a18");
+      fillBand(trail, normals, bandHeight / 2, -bandHeight / 2, "#fffdf3");
+      fillBand(trail, normals, -bandHeight / 2, -halfHeight, "#087a3f");
+
+      const tip = findTriangleTip(trail, normals);
+      if (!tip) return;
+
+      const tail = trail[trail.length - 1];
+      context.beginPath();
+      context.moveTo(tail.x + normals[normals.length - 1].x * halfHeight,
+        tail.y + normals[normals.length - 1].y * halfHeight);
+      context.lineTo(tip.x, tip.y);
+      context.lineTo(tail.x - normals[normals.length - 1].x * halfHeight,
+        tail.y - normals[normals.length - 1].y * halfHeight);
+      context.closePath();
+      context.fillStyle = "#ce1126";
+      context.fill();
+
+      context.beginPath();
+      context.moveTo(tail.x + normals[normals.length - 1].x * halfHeight,
+        tail.y + normals[normals.length - 1].y * halfHeight);
+      context.lineTo(tip.x, tip.y);
+      context.lineTo(tail.x - normals[normals.length - 1].x * halfHeight,
+        tail.y - normals[normals.length - 1].y * halfHeight);
+      context.closePath();
+      context.strokeStyle = "rgba(23, 26, 24, 0.65)";
+      context.lineWidth = 0.8;
+      context.stroke();
+
+      context.beginPath();
+      trail.forEach((point, index) => {
+        const edge = {
+          x: point.x + normals[index].x * halfHeight,
+          y: point.y + normals[index].y * halfHeight,
+        };
+        if (index === 0) context.moveTo(edge.x, edge.y);
+        else context.lineTo(edge.x, edge.y);
+      });
+      for (let index = trail.length - 1; index >= 0; index -= 1) {
+        context.lineTo(
+          trail[index].x - normals[index].x * halfHeight,
+          trail[index].y - normals[index].y * halfHeight,
+        );
+      }
+      context.closePath();
+      context.strokeStyle = "rgba(23, 26, 24, 0.55)";
+      context.lineWidth = 1;
+      context.stroke();
+    }
+
+    function draw() {
+      animationFrame = 0;
+      context.clearRect(0, 0, width, height);
+      if (!hasPointer) return;
+
+      points[0].x = target.x;
+      points[0].y = target.y;
+      for (let index = 1; index < points.length; index += 1) {
+        const previous = points[index - 1];
+        const point = points[index];
+        point.x += followRate * (previous.x - point.x);
+        point.y += followRate * (previous.y - point.y);
+      }
+
+      drawFlag(points);
+
+      const stillMoving = points.some((point, index) => index > 0 && (
+        Math.abs(points[index - 1].x - point.x) > 0.2
+        || Math.abs(points[index - 1].y - point.y) > 0.2
+      ));
+      if (stillMoving) animationFrame = window.requestAnimationFrame(draw);
+      else context.clearRect(0, 0, width, height);
     };
 
     resize();
     window.addEventListener("resize", resize);
     document.body.addEventListener("mousemove", move);
-    draw();
 
     return {
       destroy() {
-        window.cancelAnimationFrame(animationFrame);
+        if (animationFrame) window.cancelAnimationFrame(animationFrame);
         window.removeEventListener("resize", resize);
         document.body.removeEventListener("mousemove", move);
         canvas.remove();
@@ -101,14 +236,7 @@
     cursorEffect?.destroy?.();
     cursorEffect = null;
     if (motionPreference.matches || touchOnly()) return;
-
-    const rainbowCursor = window.cursoreffects?.rainbowCursor
-      || (typeof cursoreffects !== "undefined" ? cursoreffects.rainbowCursor : null);
-    if (typeof rainbowCursor === "function") {
-      cursorEffect = rainbowCursor({ colors: cursorColors, length: 24, size: 5 });
-    } else {
-      cursorEffect = createStripedCursorFallback();
-    }
+    cursorEffect = createPalestinianFlagCursor();
   }
 
   updateCursor();
