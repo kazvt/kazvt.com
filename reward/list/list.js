@@ -304,12 +304,16 @@ import "../background-context.mjs?v=1";
     const info = document.createElement("div");
     info.className = "award-info";
     const shownUsername = displayUsername(assignment.username);
-    info.append(createText("h2", "username username-display", shownUsername));
-    info.append(createText("p", "artwork-name tier-font-text", filenameLabel(assignment.filename)));
+    const username = createText("h2", "username username-display", shownUsername);
+    username.dir = "auto";
+    info.append(username);
+    const artworkName = createText("p", "artwork-name tier-font-text", filenameLabel(assignment.filename));
+    artworkName.dir = "auto";
+    info.append(artworkName);
 
     const meta = document.createElement("div");
     meta.className = "award-meta";
-    const badge = createText("span", "tier-badge", `TIER: ${assignment.tierLabel}`);
+    const badge = createText("span", "tier-badge", `${text("reward.tier_prefix", "TIER")}: ${translatedTier(assignment.tierId, assignment.tierLabel)}`);
     badge.dataset.tier = assignment.tierId;
     meta.append(badge);
     info.append(meta);
@@ -317,9 +321,10 @@ import "../background-context.mjs?v=1";
     if (assignment.reason) {
       const reason = document.createElement("p");
       reason.className = "award-reason-card";
-      reason.title = `Awarded for: ${assignment.reason}`;
-      const label = createText("span", "reward-reason-label", "FOR:");
+      reason.title = format("reward.reason_title", "Awarded for: {reason}", { reason: assignment.reason });
+      const label = createText("span", "reward-reason-label", text("reward.reason_label", "FOR:"));
       const note = createText("span", "award-reason-text tier-font-text", assignment.reason);
+      note.dir = "auto";
       reason.append(label, note);
       info.append(reason);
     }
@@ -332,11 +337,11 @@ import "../background-context.mjs?v=1";
       image.decoding = "async";
       image.addEventListener("error", () => {
         image.remove();
-        artworkFrame.append(createText("span", "artwork-fallback", "Artwork unavailable"));
+        artworkFrame.append(createText("span", "artwork-fallback", text("reward.artwork_unavailable", "Artwork unavailable")));
       }, { once: true });
       artworkFrame.append(image);
     } else {
-      artworkFrame.append(createText("span", "artwork-fallback", "Artwork no longer in catalog"));
+      artworkFrame.append(createText("span", "artwork-fallback", text("reward.artwork_missing", "Artwork no longer in catalog")));
     }
 
     let openLink;
@@ -346,17 +351,17 @@ import "../background-context.mjs?v=1";
       }
       openLink = document.createElement("a");
       openLink.href = createRewardHref(assignment.linkId, window.location.origin);
-      openLink.textContent = "Open ↗";
-      openLink.setAttribute("aria-label", `Open ${shownUsername}'s reward`);
+      openLink.textContent = text("reward.open", "Open ↗");
+      openLink.setAttribute("aria-label", format("reward.open_aria", "Open {username}'s reward", { username: shownUsername }));
     } catch (error) {
       console.warn("[reward-list] Could not prepare an individual reward link:", error);
       openLink = createText("span", "open-button is-unavailable", assignment.artworkIsCurrent
-        ? "Reward link unavailable"
-        : "Reward unavailable");
+        ? text("reward.link_unavailable", "Reward link unavailable")
+        : text("reward.reward_unavailable", "Reward unavailable"));
       openLink.setAttribute("aria-disabled", "true");
       openLink.setAttribute("role", "img");
-      openLink.setAttribute("aria-label", `${shownUsername}'s reward cannot be opened`);
-      openLink.title = "This reward has no UUID link or its artwork is no longer in the current catalog.";
+      openLink.setAttribute("aria-label", format("reward.cannot_open_aria", "{username}'s reward cannot be opened", { username: shownUsername }));
+      openLink.title = text("reward.cannot_open_title", "This reward has no UUID link or its artwork is no longer in the current catalog.");
     }
     openLink.classList.add("open-button");
 
@@ -379,9 +384,10 @@ import "../background-context.mjs?v=1";
     emptyState.hidden = visibleCount !== 0;
     clearButton.hidden = !searchInput.value;
     if (query && visibleCount === 0) {
-      resultStatus.textContent = `No matches for “${searchInput.value.trim()}”.`;
+      resultStatus.textContent = format("reward.no_matches_for", "No matches for “{query}”.", { query: searchInput.value.trim() });
     } else {
-      resultStatus.textContent = `${visibleCount} ${visibleCount === 1 ? "result" : "results"}`;
+      resultStatus.textContent = format(visibleCount === 1 ? "reward.result_one" : "reward.result_many",
+        visibleCount === 1 ? "{count} result" : "{count} results", { count: visibleCount });
     }
   }
 
