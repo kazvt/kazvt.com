@@ -118,7 +118,8 @@
       }
 
       if (totalLength < 2) return null;
-      let distanceFromBase = totalLength / 3;
+      // Keep the hoist wedge local to the ribbon; a long or looping trail must not stretch it.
+      let distanceFromBase = Math.min(totalLength / 3, halfHeight * 3.5);
       const step = baseIndex === 0 ? 1 : -1;
       const endIndex = baseIndex === 0 ? trail.length - 1 : 0;
 
