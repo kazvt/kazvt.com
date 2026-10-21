@@ -2861,9 +2861,9 @@ function initializeSiteWelcomePopup() {
     </div>
     <div class="window-body welcome-body">
       <p id="welcome-popup-copy" class="welcome-copy" data-welcome-copy></p>
-      <div class="field-row welcome-actions">
-        <button type="button" class="default welcome-confirm" data-welcome-confirm></button>
-      </div>
+      <form class="field-row welcome-actions" data-welcome-form>
+        <button type="submit" class="default welcome-confirm" data-welcome-confirm></button>
+      </form>
     </div>`;
 
   const copy = (key, fallback) => translatedText(key) || fallback;
@@ -2929,20 +2929,22 @@ function initializeSiteWelcomePopup() {
   dialog.querySelectorAll("[data-welcome-close]").forEach((button) => {
     button.addEventListener("click", closePopup);
   });
-  dialog.querySelector("[data-welcome-confirm]")?.addEventListener("click", () => {
+  const welcomeForm = dialog.querySelector("[data-welcome-form]");
+  if (popupDestination) {
+    welcomeForm.action = popupDestination.href;
+    welcomeForm.target = isKazvtUrl(popupDestination) ? "_self" : "_blank";
+    welcomeForm.method = "get";
+    if (!isKazvtUrl(popupDestination)) welcomeForm.rel = "noopener noreferrer";
+  }
+  welcomeForm.addEventListener("submit", (event) => {
     if (!popupDestination) {
+      event.preventDefault();
       closePopup();
       return;
     }
 
     rememberDismissal();
-    if (isKazvtUrl(popupDestination)) {
-      window.location.assign(popupDestination.href);
-      return;
-    }
-
-    window.open(popupDestination.href, "_blank", "noopener,noreferrer");
-    closePopup();
+    if (!isKazvtUrl(popupDestination)) closePopup();
   });
   dialog.addEventListener("close", rememberDismissal);
   window.addEventListener("storage", (event) => {
