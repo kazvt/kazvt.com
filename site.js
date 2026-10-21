@@ -1857,6 +1857,19 @@ function initializeGuestbookWidget() {
   const mount = document.getElementById("HCB_comment_box");
   if (!mount || document.getElementById("kazvt-hcb-guestbook-loader")) return;
 
+  const replaceGuestbookMetaDots = () => {
+    mount.querySelectorAll(".hcb-comment-tb").forEach((metadata) => {
+      const walker = document.createTreeWalker(metadata, NodeFilter.SHOW_TEXT);
+      let textNode;
+      while ((textNode = walker.nextNode())) {
+        textNode.nodeValue = textNode.nodeValue.replace(/\s*[·•]\s*/g, " - ");
+      }
+    });
+  };
+  const guestbookObserver = new MutationObserver(replaceGuestbookMetaDots);
+  guestbookObserver.observe(mount, { childList: true, characterData: true, subtree: true });
+  window.addEventListener("pagehide", () => guestbookObserver.disconnect(), { once: true });
+
   let fallbackTimer = 0;
   const previousHcbConfig = window.hcb_user && typeof window.hcb_user === "object" ? window.hcb_user : {};
   const previousOnload = previousHcbConfig.onload;
@@ -1880,6 +1893,7 @@ function initializeGuestbookWidget() {
       window.clearTimeout(fallbackTimer);
       mount.dataset.hcbLoaded = "true";
       mount.classList.remove("is-loading");
+      replaceGuestbookMetaDots();
       mount.querySelector("#hcb_form_name")?.setAttribute("aria-label", nameLabel);
       mount.querySelector("#hcb_form_content")?.setAttribute("aria-label", messageLabel);
       if (typeof previousOnload === "function") {
