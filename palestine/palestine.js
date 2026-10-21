@@ -245,20 +245,10 @@
   motionPreference.addEventListener("change", updateCursor);
   touchPreference.addEventListener("change", updateCursor);
 
-  const toggle = document.querySelector("[data-gif-toggle]");
   const images = [...document.querySelectorAll(".palestine-sprinkles img[data-gif]")];
-  if (!toggle || !images.length) return;
+  if (!images.length) return;
 
-  const label = toggle.querySelector("[data-gif-toggle-label]");
-  const mark = toggle.querySelector(".toggle-mark");
   const staticSources = new Map(images.map((image) => [image, image.getAttribute("src")]));
-  let visitorChoice = null;
-
-  toggle.hidden = !sideRailPreference.matches;
-
-  function translated(key, fallback) {
-    return window.KazvtI18n?.t?.(key) || fallback;
-  }
 
   function setGifMotion(playing) {
     const shouldPlay = playing && sideRailPreference.matches;
@@ -266,38 +256,15 @@
       const source = shouldPlay ? image.dataset.gif : staticSources.get(image);
       if (source && image.getAttribute("src") !== source) image.setAttribute("src", source);
     });
-
-    toggle.setAttribute("aria-pressed", String(shouldPlay));
-    toggle.setAttribute(
-      "aria-label",
-      translated(shouldPlay ? "palestine.pause_aria" : "palestine.play_aria", shouldPlay ? "Pause Palestine GIFs" : "Play Palestine GIFs"),
-    );
-    if (label) label.textContent = translated(shouldPlay ? "palestine.pause" : "palestine.play", shouldPlay ? "Pause GIFs" : "Play GIFs");
-    if (mark) mark.textContent = shouldPlay ? "Ⅱ" : "▶";
   }
 
   setGifMotion(!motionPreference.matches && sideRailPreference.matches);
-  window.KazvtI18n?.ready?.then(() => {
-    setGifMotion(toggle.getAttribute("aria-pressed") === "true");
-  });
-
-  toggle.addEventListener("click", () => {
-    visitorChoice = toggle.getAttribute("aria-pressed") !== "true";
-    setGifMotion(visitorChoice);
-  });
 
   motionPreference.addEventListener("change", (event) => {
-    if (visitorChoice !== null) return;
     setGifMotion(!event.matches && sideRailPreference.matches);
   });
 
   sideRailPreference.addEventListener("change", (event) => {
-    toggle.hidden = !event.matches;
-    const shouldPlay = visitorChoice === null ? !motionPreference.matches : visitorChoice;
-    setGifMotion(shouldPlay && event.matches);
-  });
-
-  window.addEventListener("kazvt:languagechange", () => {
-    setGifMotion(toggle.getAttribute("aria-pressed") === "true");
+    setGifMotion(!motionPreference.matches && event.matches);
   });
 })();
