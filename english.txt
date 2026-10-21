@@ -557,6 +557,8 @@ reward.no_rewards_for_prefix=No rewards for
 reward.no_rewards_for_suffix=.
 reward.search_label=Search rewards
 reward.collection_search_label=Search this collection
+reward.back=← rewards
+reward.assigned_aria=Assigned rewards
 
 # Palestine literature page
 title.palestine=Palestinian Literature - kazvt
@@ -574,3 +576,16 @@ palestine.collection=Available literature
 palestine.entry_kind=English-language PDF - 2 pages
 palestine.download=Download PDF
 palestine.read=Read in browser
+palestine.gif_alt_1=Small waving Palestinian flag GIF
+palestine.gif_alt_2=Waving Palestinian flag GIF
+palestine.gif_alt_3=GeoCities Free Palestine banner
+palestine.gif_alt_4=Animated gold word Free
+palestine.gif_alt_5=Bright animated FREE! badge
+palestine.gif_alt_6=Palestinian flag on a pole GIF
+palestine.gif_alt_7=Animated Palestinian flag GIF
+palestine.gif_alt_8=Little waving Palestinian flag GIF
+palestine.gif_alt_9=Animated Palestinian flag artwork
+palestine.gif_alt_10=Tall waving Palestinian flag GIF
+palestine.gif_alt_11=Archival crowd and flag scene from a GeoCities Palestine page
+palestine.gif_alt_12=Waving Palestinian flag GIF from a Palestine page
+palestine.gif_alt_13=Palestinian flag waving over green
