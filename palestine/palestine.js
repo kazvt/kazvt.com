@@ -61,8 +61,6 @@
     }
 
     function getNormals(trail) {
-      let previousNormal = { x: lastDirection.y, y: -lastDirection.x };
-
       return trail.map((point, index) => {
         const before = trail[Math.max(0, index - 1)];
         const after = trail[Math.min(trail.length - 1, index + 1)];
@@ -80,10 +78,10 @@
         }
 
         let normal = { x: dy, y: -dx };
-        if (normal.x * previousNormal.x + normal.y * previousNormal.y < 0) {
+        // Keep black above green on screen even when the cursor reverses direction.
+        if (normal.y > 0 || (Math.abs(normal.y) < 0.001 && normal.x > 0)) {
           normal = { x: -normal.x, y: -normal.y };
         }
-        previousNormal = normal;
         return normal;
       });
     }
@@ -110,7 +108,7 @@
       context.fill();
     }
 
-    function findTriangleTip(trail, normals) {
+    function findTriangleTip(trail, baseIndex) {
       let totalLength = 0;
       for (let index = 1; index < trail.length; index += 1) {
         totalLength += Math.hypot(
@@ -120,21 +118,23 @@
       }
 
       if (totalLength < 2) return null;
-      let distanceFromTail = totalLength / 3;
+      let distanceFromBase = totalLength / 3;
+      const step = baseIndex === 0 ? 1 : -1;
+      const endIndex = baseIndex === 0 ? trail.length - 1 : 0;
 
-      for (let index = trail.length - 1; index > 0; index -= 1) {
-        const tail = trail[index];
-        const towardHead = trail[index - 1];
-        const segmentLength = Math.hypot(towardHead.x - tail.x, towardHead.y - tail.y);
+      for (let index = baseIndex; index !== endIndex; index += step) {
+        const base = trail[index];
+        const next = trail[index + step];
+        const segmentLength = Math.hypot(next.x - base.x, next.y - base.y);
         if (segmentLength < 0.001) continue;
-        if (distanceFromTail <= segmentLength) {
-          const fraction = distanceFromTail / segmentLength;
+        if (distanceFromBase <= segmentLength) {
+          const fraction = distanceFromBase / segmentLength;
           return {
-            x: tail.x + (towardHead.x - tail.x) * fraction,
-            y: tail.y + (towardHead.y - tail.y) * fraction,
+            x: base.x + (next.x - base.x) * fraction,
+            y: base.y + (next.y - base.y) * fraction,
           };
         }
-        distanceFromTail -= segmentLength;
+        distanceFromBase -= segmentLength;
       }
       return null;
     }
@@ -148,26 +148,28 @@
       fillBand(trail, normals, bandHeight / 2, -bandHeight / 2, "#fffdf3");
       fillBand(trail, normals, -bandHeight / 2, -halfHeight, "#087a3f");
 
-      const tip = findTriangleTip(trail, normals);
+      const baseIndex = trail[0].x <= trail[trail.length - 1].x ? 0 : trail.length - 1;
+      const tip = findTriangleTip(trail, baseIndex);
       if (!tip) return;
 
-      const tail = trail[trail.length - 1];
+      const base = trail[baseIndex];
+      const baseNormal = normals[baseIndex];
       context.beginPath();
-      context.moveTo(tail.x + normals[normals.length - 1].x * halfHeight,
-        tail.y + normals[normals.length - 1].y * halfHeight);
+      context.moveTo(base.x + baseNormal.x * halfHeight,
+        base.y + baseNormal.y * halfHeight);
       context.lineTo(tip.x, tip.y);
-      context.lineTo(tail.x - normals[normals.length - 1].x * halfHeight,
-        tail.y - normals[normals.length - 1].y * halfHeight);
+      context.lineTo(base.x - baseNormal.x * halfHeight,
+        base.y - baseNormal.y * halfHeight);
       context.closePath();
       context.fillStyle = "#ce1126";
       context.fill();
 
       context.beginPath();
-      context.moveTo(tail.x + normals[normals.length - 1].x * halfHeight,
-        tail.y + normals[normals.length - 1].y * halfHeight);
+      context.moveTo(base.x + baseNormal.x * halfHeight,
+        base.y + baseNormal.y * halfHeight);
       context.lineTo(tip.x, tip.y);
-      context.lineTo(tail.x - normals[normals.length - 1].x * halfHeight,
-        tail.y - normals[normals.length - 1].y * halfHeight);
+      context.lineTo(base.x - baseNormal.x * halfHeight,
+        base.y - baseNormal.y * halfHeight);
       context.closePath();
       context.strokeStyle = "rgba(23, 26, 24, 0.65)";
       context.lineWidth = 0.8;
