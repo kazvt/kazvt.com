@@ -85,6 +85,11 @@
   overflow: visible;
 }
 
+/* Author display rules otherwise override the browser's [hidden] default. */
+.language-options[hidden] {
+  display: none !important;
+}
+
 .language-button {
   position: relative;
   min-height: 36px;

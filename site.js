@@ -746,11 +746,14 @@ function selectedLanguageFromManifest(languages) {
 
   let selectedName = languages[0].name;
 
-  try {
-    const stored = sessionStorage.getItem(LANGUAGE_STORAGE_KEY);
-    const match = languages.find((language) => language.name === stored || language.code === stored);
-    if (match) selectedName = match.name;
-  } catch {}
+  for (const storageName of ["sessionStorage", "localStorage"]) {
+    try {
+      const stored = window[storageName].getItem(LANGUAGE_STORAGE_KEY);
+      const match = languages.find((language) => language.name === stored || language.code === stored);
+      if (match) selectedName = match.name;
+    } catch {}
+    if (selectedName !== languages[0].name) break;
+  }
 
   return languages.find((item) => item.name === selectedName) || languages[0];
 }
@@ -2884,7 +2887,7 @@ function initializeSiteWelcomePopup() {
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261020-v8";
+  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261021-v9";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";
