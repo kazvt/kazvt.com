@@ -6,6 +6,7 @@
   const DEFAULT_LANGUAGE_CODE = "en";
   let currentLanguage = { name: DEFAULT_LANGUAGE_NAME, code: DEFAULT_LANGUAGE_CODE };
   let languages = [];
+  let fallbackValues = new Map();
   let values = new Map();
   let manifestObjectUrl = "";
 
@@ -57,7 +58,24 @@
   }
 
   function t(key) {
-    return values.get(key) || "";
+    return values.get(key) ?? fallbackValues.get(key) ?? "";
+  }
+
+  function setDocumentLanguage(language) {
+    const code = language?.code || DEFAULT_LANGUAGE_CODE;
+    document.documentElement.lang = code;
+    document.documentElement.dir = code.toLowerCase().startsWith("ar") ? "rtl" : "ltr";
+  }
+
+  async function loadValues(language) {
+    const english = language?.name === DEFAULT_LANGUAGE_NAME
+      ? fallbackValues
+      : parseKeyValueLines(await loadTextLines(`${DEFAULT_LANGUAGE_NAME}.txt`));
+    if (english.size) fallbackValues = english;
+    const localized = language?.name === DEFAULT_LANGUAGE_NAME
+      ? fallbackValues
+      : parseKeyValueLines(await loadTextLines(`${language.name}.txt`));
+    return new Map([...fallbackValues, ...localized]);
   }
 
   function list(key) {
@@ -135,10 +153,8 @@
     try { sessionStorage.setItem(LANGUAGE_STORAGE_KEY, language.name); } catch {}
     try { localStorage.setItem(LANGUAGE_STORAGE_KEY, language.name); } catch {}
     currentLanguage = language;
-    const next = parseKeyValueLines(await loadTextLines(`${language.name}.txt`));
-    if (!next.size) return false;
-    values = next;
-    document.documentElement.lang = language.code || DEFAULT_LANGUAGE_CODE;
+    values = await loadValues(language);
+    setDocumentLanguage(language);
     apply(document);
     window.dispatchEvent(new CustomEvent("kazvt:languagechange", { detail: { language } }));
     return true;
@@ -146,12 +162,13 @@
 
   async function init() {
     await loadManifest();
-    values = parseKeyValueLines(await loadTextLines(`${currentLanguage.name}.txt`));
-    if (!values.size && currentLanguage.name !== DEFAULT_LANGUAGE_NAME) {
+    fallbackValues = parseKeyValueLines(await loadTextLines(`${DEFAULT_LANGUAGE_NAME}.txt`));
+    values = await loadValues(currentLanguage);
+    if (!fallbackValues.size && currentLanguage.name !== DEFAULT_LANGUAGE_NAME) {
       currentLanguage = languages.find((item) => item.name === DEFAULT_LANGUAGE_NAME) || languages[0];
-      values = parseKeyValueLines(await loadTextLines(`${currentLanguage.name}.txt`));
+      values = await loadValues(currentLanguage);
     }
-    document.documentElement.lang = currentLanguage.code || DEFAULT_LANGUAGE_CODE;
+    setDocumentLanguage(currentLanguage);
     apply(document);
     window.dispatchEvent(new CustomEvent("kazvt:i18nready", { detail: { language: currentLanguage } }));
     return values;

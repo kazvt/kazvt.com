@@ -650,7 +650,7 @@ function parseKeyValueLines(lines) {
 }
 
 async function loadLanguageManifest() {
-  const lines = await loadTextLines("languages.txt");
+  const lines = await loadTextLines("/languages.txt");
   const values = parseKeyValueLines(lines.flatMap((line) => line.split(",")));
   const languages = [...values.entries()].map(([name, code]) => ({ name, code }));
   return languages.length ? languages : [{ name: DEFAULT_LANGUAGE_NAME, code: DEFAULT_LANGUAGE_CODE }];
@@ -659,11 +659,14 @@ async function loadLanguageManifest() {
 function selectedLanguageFromManifest(languages) {
   let selectedName = languages[0].name;
 
-  try {
-    const stored = sessionStorage.getItem(LANGUAGE_STORAGE_KEY);
-    const match = languages.find((language) => language.name === stored || language.code === stored);
-    if (match) selectedName = match.name;
-  } catch {}
+  for (const storage of [sessionStorage, localStorage]) {
+    try {
+      const stored = storage.getItem(LANGUAGE_STORAGE_KEY);
+      const match = languages.find((language) => language.name === stored || language.code === stored);
+      if (match) selectedName = match.name;
+    } catch {}
+    if (selectedName !== languages[0].name) break;
+  }
 
   return languages.find((item) => item.name === selectedName) || languages[0];
 }
@@ -676,10 +679,19 @@ async function loadActiveEmotes() {
 async function loadActiveLanguageText() {
   const languages = await loadLanguageManifest();
   const language = selectedLanguageFromManifest(languages);
-  const lines = await loadTextLines(`${language.name}.txt`);
-  const text = parseKeyValueLines(lines);
+  const [englishLines, localizedLines, lineboilLines] = await Promise.all([
+    loadTextLines("/english.txt"),
+    loadTextLines(`/${language.name}.txt`),
+    loadTextLines("english.txt"),
+  ]);
+  const english = parseKeyValueLines(englishLines);
+  const localized = language.name === DEFAULT_LANGUAGE_NAME
+    ? english
+    : parseKeyValueLines(localizedLines);
+  const text = new Map([...english, ...parseKeyValueLines(lineboilLines), ...localized]);
   activeLanguageText = text;
   document.documentElement.lang = language.code || DEFAULT_LANGUAGE_CODE;
+  document.documentElement.dir = language.code?.toLowerCase().startsWith("ar") ? "rtl" : "ltr";
   return text;
 }
 

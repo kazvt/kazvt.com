@@ -45,7 +45,12 @@
 
   function selectedLanguage(languages) {
     let stored = "";
-    try { stored = sessionStorage.getItem(CONFIG.storageKey) || ""; } catch {}
+    for (const storage of [sessionStorage, localStorage]) {
+      try {
+        stored = storage.getItem(CONFIG.storageKey) || stored;
+      } catch {}
+      if (stored) break;
+    }
     return languages.find((language) => language.name === stored || language.code === stored)
       || languages[0];
   }
@@ -77,6 +82,9 @@
       try {
         sessionStorage.setItem(CONFIG.storageKey, button.dataset.languageName || CONFIG.defaultName);
       } catch {}
+      try {
+        localStorage.setItem(CONFIG.storageKey, button.dataset.languageName || CONFIG.defaultName);
+      } catch {}
       window.location.reload();
     });
 
@@ -89,6 +97,7 @@
     const labels = parseKeyValue(await fetchText(`/${selected.name}.txt`));
 
     document.documentElement.lang = selected.code || CONFIG.defaultCode;
+    document.documentElement.dir = (selected.code || "").toLowerCase().startsWith("ar") ? "rtl" : "ltr";
     dock.setAttribute("aria-label", labels.get("language.aria") || "");
     title.textContent = labels.get("language.title") || "";
     options.replaceChildren();

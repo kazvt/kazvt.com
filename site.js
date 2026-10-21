@@ -740,6 +740,10 @@ async function loadLanguageManifest() {
 }
 
 function selectedLanguageFromManifest(languages) {
+  if (/^\/blog(?:\/|$)/i.test(window.location.pathname)) {
+    return languages.find((language) => language.name === DEFAULT_LANGUAGE_NAME) || languages[0];
+  }
+
   let selectedName = languages[0].name;
 
   try {
@@ -815,6 +819,7 @@ async function loadActiveLanguageText() {
     await window.KazvtI18n.ready;
     activeLanguageText = new Map(window.KazvtI18n.entries());
     document.documentElement.lang = window.KazvtI18n.language.code || DEFAULT_LANGUAGE_CODE;
+    document.documentElement.dir = window.KazvtI18n.language.code?.toLowerCase().startsWith("ar") ? "rtl" : "ltr";
     return activeLanguageText;
   }
 
@@ -822,6 +827,7 @@ async function loadActiveLanguageText() {
   const language = selectedLanguageFromManifest(languages);
   activeLanguageText = parseKeyValueLines(await loadTextLines(`${language.name}.txt`));
   document.documentElement.lang = language.code || DEFAULT_LANGUAGE_CODE;
+  document.documentElement.dir = language.code?.toLowerCase().startsWith("ar") ? "rtl" : "ltr";
   return activeLanguageText;
 }
 
@@ -2819,6 +2825,7 @@ async function initializeMultistreamGuideModal() {
 }
 
 async function mountLanguageSelector() {
+  if (/^\/blog(?:\/|$)/i.test(window.location.pathname)) return null;
   return window.KazvtLanguageDock?.mount?.();
 }
 
