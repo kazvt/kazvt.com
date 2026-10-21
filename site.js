@@ -2887,20 +2887,34 @@ function initializeSiteWelcomePopup() {
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261021-v9";
+  localStyles.href = "/welcome-popup.css?v=welcome-popup-20261021-v10";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";
   dialog.setAttribute("aria-labelledby", "welcome-popup-title");
   dialog.setAttribute("aria-describedby", "welcome-popup-copy");
   dialog.innerHTML = `
-    <div class="title-bar welcome-titlebar">
+    <div class="title-bar welcome-titlebar" tabindex="0" role="group" data-welcome-titlebar>
       <div class="title-bar-text welcome-titlebar-text">
         <img class="welcome-icon" src="/favicon-96x96.png" alt="" width="18" height="18">
         <span id="welcome-popup-title" data-welcome-window-title></span>
       </div>
       <div class="title-bar-controls">
+        <button type="button" class="welcome-position-toggle" data-welcome-position-toggle aria-controls="welcome-position-menu" aria-expanded="false">↕</button>
         <button type="button" class="welcome-close" data-welcome-close aria-label="Close"></button>
+      </div>
+      <div class="window welcome-position-menu" id="welcome-position-menu" data-welcome-position-menu hidden role="group">
+        <div class="welcome-position-pad">
+          <button type="button" data-welcome-move-direction="up_left" data-welcome-move-x="-1" data-welcome-move-y="-1">↖</button>
+          <button type="button" data-welcome-move-direction="up" data-welcome-move-x="0" data-welcome-move-y="-1">↑</button>
+          <button type="button" data-welcome-move-direction="up_right" data-welcome-move-x="1" data-welcome-move-y="-1">↗</button>
+          <button type="button" data-welcome-move-direction="left" data-welcome-move-x="-1" data-welcome-move-y="0">←</button>
+          <button type="button" data-welcome-move-direction="reset" data-welcome-position-reset>⌂</button>
+          <button type="button" data-welcome-move-direction="right" data-welcome-move-x="1" data-welcome-move-y="0">→</button>
+          <button type="button" data-welcome-move-direction="down_left" data-welcome-move-x="-1" data-welcome-move-y="1">↙</button>
+          <button type="button" data-welcome-move-direction="down" data-welcome-move-x="0" data-welcome-move-y="1">↓</button>
+          <button type="button" data-welcome-move-direction="down_right" data-welcome-move-x="1" data-welcome-move-y="1">↘</button>
+        </div>
       </div>
     </div>
     <div class="window-body welcome-body">
@@ -2912,6 +2926,21 @@ function initializeSiteWelcomePopup() {
 
   const copy = (key, fallback) => translatedText(key) || fallback;
   dialog.querySelector("[data-welcome-window-title]").textContent = copy("popup.window_title", "REMINDER:");
+  const titlebar = dialog.querySelector("[data-welcome-titlebar]");
+  titlebar.setAttribute("aria-label", copy("popup.move_handle_aria", "Reminder window. Drag to move it, or use the arrow keys. Press Home to return it to the bottom right."));
+  titlebar.setAttribute("aria-keyshortcuts", "ArrowUp ArrowDown ArrowLeft ArrowRight Home");
+  const positionToggle = dialog.querySelector("[data-welcome-position-toggle]");
+  positionToggle.setAttribute("aria-label", copy("popup.move_aria", "Move reminder"));
+  positionToggle.setAttribute("title", copy("popup.move_aria", "Move reminder"));
+  const positionMenu = dialog.querySelector("[data-welcome-position-menu]");
+  positionMenu.setAttribute("aria-label", copy("popup.move_pad_aria", "Use these buttons to move the reminder without dragging."));
+  positionMenu.querySelectorAll("button").forEach((button) => {
+    const direction = button.dataset.welcomeMoveDirection;
+    const key = direction === "reset" ? "popup.move_reset" : `popup.move_${direction}`;
+    const fallback = direction === "reset" ? "Return reminder to the bottom right" : `Move reminder ${direction.replaceAll("_", " ")}`;
+    button.setAttribute("aria-label", copy(key, fallback));
+    if (direction === "reset") button.setAttribute("title", copy(key, fallback));
+  });
   const popupMessage = copy("popup.message", "sub to my wife https://youtube.com/@lillie_garden do it for monkey woman!! it'd mean the whole world to her [wumpa]");
   const popupDestination = (() => {
     const match = popupMessage.match(/https?:\/\/[^\s<>"']+/i);
@@ -2993,6 +3022,132 @@ function initializeSiteWelcomePopup() {
   dialog.addEventListener("close", rememberDismissal);
   window.addEventListener("storage", (event) => {
     if (event.key === storageKey && getExpiry(event.newValue) && dialog.open) dialog.close();
+  });
+
+  const moveStep = 24;
+  const clamp = (value, maximum) => Math.max(0, Math.min(maximum, value));
+  const setPosition = (left, top, width = dialog.offsetWidth, height = dialog.offsetHeight) => {
+    const maximumLeft = Math.max(0, window.innerWidth - width);
+    const maximumTop = Math.max(0, window.innerHeight - height);
+    dialog.style.left = `${Math.round(clamp(left, maximumLeft))}px`;
+    dialog.style.top = `${Math.round(clamp(top, maximumTop))}px`;
+    dialog.style.right = "auto";
+    dialog.style.bottom = "auto";
+    dialog.dataset.welcomePositioned = "true";
+  };
+  const currentPosition = () => {
+    if (dialog.dataset.welcomePositioned === "true") {
+      return { left: Number.parseFloat(dialog.style.left) || 0, top: Number.parseFloat(dialog.style.top) || 0 };
+    }
+    const rect = dialog.getBoundingClientRect();
+    return { left: rect.left, top: rect.top };
+  };
+  const resetPosition = () => {
+    dialog.style.removeProperty("left");
+    dialog.style.removeProperty("top");
+    dialog.style.removeProperty("right");
+    dialog.style.removeProperty("bottom");
+    delete dialog.dataset.welcomePositioned;
+  };
+  const closeMovePad = ({ restoreFocus = false } = {}) => {
+    positionMenu.hidden = true;
+    positionToggle.setAttribute("aria-expanded", "false");
+    if (restoreFocus) positionToggle.focus();
+  };
+
+  positionToggle.addEventListener("click", () => {
+    const opening = positionMenu.hidden;
+    positionMenu.hidden = !opening;
+    positionToggle.setAttribute("aria-expanded", String(opening));
+    if (opening) positionMenu.querySelector("button")?.focus();
+  });
+  positionMenu.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("button") : null;
+    if (!button) return;
+    if (button.hasAttribute("data-welcome-position-reset")) {
+      resetPosition();
+      return;
+    }
+    const { left, top } = currentPosition();
+    const dx = Number(button.dataset.welcomeMoveX);
+    const dy = Number(button.dataset.welcomeMoveY);
+    if (Number.isFinite(dx) && Number.isFinite(dy)) setPosition(left + dx * moveStep, top + dy * moveStep);
+  });
+  positionMenu.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    event.stopPropagation();
+    closeMovePad({ restoreFocus: true });
+  });
+
+  titlebar.addEventListener("keydown", (event) => {
+    if (event.target !== titlebar) return;
+    const nudge = event.shiftKey ? moveStep * 3 : moveStep;
+    const offsets = {
+      ArrowLeft: [-nudge, 0],
+      ArrowRight: [nudge, 0],
+      ArrowUp: [0, -nudge],
+      ArrowDown: [0, nudge],
+    };
+    if (event.key === "Home") {
+      event.preventDefault();
+      resetPosition();
+      return;
+    }
+    const offset = offsets[event.key];
+    if (!offset) return;
+    event.preventDefault();
+    const { left, top } = currentPosition();
+    setPosition(left + offset[0], top + offset[1]);
+  });
+
+  let dragState = null;
+  const finishDrag = (event) => {
+    if (!dragState || (event?.pointerId != null && event.pointerId !== dragState.pointerId)) return;
+    const pointerId = dragState.pointerId;
+    dragState = null;
+    dialog.classList.remove("welcome-is-dragging");
+    if (titlebar.hasPointerCapture?.(pointerId)) {
+      try { titlebar.releasePointerCapture(pointerId); } catch {}
+    }
+  };
+  titlebar.addEventListener("pointerdown", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || !event.isPrimary || event.button !== 0 || target.closest("button, a, input, textarea, select, [data-welcome-position-menu]")) return;
+    const rect = dialog.getBoundingClientRect();
+    dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      width: dialog.offsetWidth,
+      height: dialog.offsetHeight,
+      moved: false,
+    };
+    event.preventDefault();
+    try {
+      titlebar.setPointerCapture(event.pointerId);
+    } catch {
+      dragState = null;
+    }
+  });
+  titlebar.addEventListener("pointermove", (event) => {
+    if (!dragState || event.pointerId !== dragState.pointerId) return;
+    if (!dragState.moved && Math.hypot(event.clientX - dragState.startX, event.clientY - dragState.startY) < 2) return;
+    dragState.moved = true;
+    dialog.classList.add("welcome-is-dragging");
+    event.preventDefault();
+    setPosition(event.clientX - dragState.offsetX, event.clientY - dragState.offsetY, dragState.width, dragState.height);
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((eventName) => {
+    titlebar.addEventListener(eventName, finishDrag);
+  });
+  window.addEventListener("blur", () => finishDrag());
+  window.addEventListener("resize", () => {
+    if (dialog.dataset.welcomePositioned !== "true") return;
+    const { left, top } = currentPosition();
+    setPosition(left, top);
   });
 
   let opened = false;
