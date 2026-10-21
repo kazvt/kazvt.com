@@ -1889,6 +1889,9 @@ async function mountLanguageSelector() {
     try {
       sessionStorage.setItem(LANGUAGE_STORAGE_KEY, button.getAttribute("data-language-name") || DEFAULT_LANGUAGE_NAME);
     } catch {}
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, button.getAttribute("data-language-name") || DEFAULT_LANGUAGE_NAME);
+    } catch {}
     window.location.reload();
   });
 

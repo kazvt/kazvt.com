@@ -1,4 +1,6 @@
 (() => {
+  const i18n = window.KazvtI18n;
+  const text = (key, fallback) => i18n?.t?.(key) || fallback;
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
   const touchPreference = window.matchMedia("(hover: none) and (pointer: coarse)");
   const touchOnly = () => touchPreference.matches && navigator.maxTouchPoints > 0;
@@ -130,12 +132,13 @@
     });
 
     toggle.setAttribute("aria-pressed", String(playing));
-    toggle.setAttribute("aria-label", playing ? "Pause Palestine GIFs" : "Play Palestine GIFs");
-    if (label) label.textContent = playing ? "Pause GIFs" : "Play GIFs";
+    toggle.setAttribute("aria-label", text(playing ? "palestine.pause_aria" : "palestine.play_aria", playing ? "Pause Palestine GIFs" : "Play Palestine GIFs"));
+    if (label) label.textContent = text(playing ? "palestine.pause" : "palestine.play", playing ? "Pause GIFs" : "Play GIFs");
     if (mark) mark.textContent = playing ? "Ⅱ" : "▶";
   }
 
   setGifMotion(!motionPreference.matches);
+  i18n?.ready?.then(() => setGifMotion(toggle.getAttribute("aria-pressed") === "true"));
 
   toggle.addEventListener("click", () => {
     visitorChoice = toggle.getAttribute("aria-pressed") !== "true";

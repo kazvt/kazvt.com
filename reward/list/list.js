@@ -392,7 +392,10 @@ import "../background-context.mjs?v=1";
   }
 
   async function start() {
-    const registryPromise = loadRegistry();
+    const registryPromise = loadRegistry().then(
+      value => ({ value }),
+      error => ({ error }),
+    );
     await (i18n?.ready ?? Promise.resolve());
     let title = text("reward.gallery_title", "Rewards");
     if (userFilterRequested) {
@@ -410,7 +413,9 @@ import "../background-context.mjs?v=1";
     document.title = `${title} — kazvt`;
 
     try {
-      const { assignments: allAssignments, pool } = await registryPromise;
+      const result = await registryPromise;
+      if (result.error) throw result.error;
+      const { assignments: allAssignments, pool } = result.value;
       renderPoolStatus(pool);
       const assignments = userFilterRequested
         ? userFilterValid
