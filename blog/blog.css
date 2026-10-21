@@ -706,8 +706,12 @@
 
 .blog-editor .ql-editor {
   min-height: 290px;
+  min-width: 0;
   padding: 16px;
   line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .blog-editor .ql-editor.ql-blank::before {
