@@ -5256,7 +5256,7 @@
             <div style="display: flex; align-items: center; gap: 10px;">
                 <div>
                     <div style="font-weight: bold; font-size: 14px;">📡 VDO.Ninja Group Scene</div>
-                    <div style="font-size: 11px; opacity: 0.8;">${streamCount} stream${streamCount !== 1 ? 's' : ''} active • Room: ${ROOM_ID}</div>
+                    <div style="font-size: 11px; opacity: 0.8;">${streamCount} stream${streamCount !== 1 ? 's' : ''} active - Room: ${ROOM_ID}</div>
                 </div>
                 <div style="display: flex; gap: 6px;">
                     <a href="${sceneLink}" target="_blank" style="

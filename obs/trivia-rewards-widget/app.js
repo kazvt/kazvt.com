@@ -967,7 +967,7 @@
         showActivity(
           "?",
           "Unknown category",
-          `Try: ${listEnabledCategoryNames().join(" • ")}`,
+          `Try: ${listEnabledCategoryNames().join(" - ")}`,
           4200,
           "info"
         );
@@ -993,7 +993,7 @@
         showActivity(
           "?",
           "Unknown leaderboard category",
-          `Try: ${listEnabledCategoryNames().join(" • ")}`,
+          `Try: ${listEnabledCategoryNames().join(" - ")}`,
           4200,
           "info"
         );
@@ -1075,7 +1075,7 @@
     showActivity(
       "✓",
       `${player.displayName} got it!`,
-      `+${round.question.points} points • ${platformLabel(player.platform)}`,
+      `+${round.question.points} points - ${platformLabel(player.platform)}`,
       2400,
       "success"
     );
@@ -1086,7 +1086,7 @@
         showActivity(
           "🎁",
           `${record.username} won a reward!`,
-          `Link ready to copy • ${rewardFilenameLabel(record.filename)}`,
+          `Link ready to copy - ${rewardFilenameLabel(record.filename)}`,
           5600,
           "success"
         );

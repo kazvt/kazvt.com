@@ -89,7 +89,7 @@
       letter-spacing:.16em;
     }
     #qs-game .masthead:after{
-      content:"BUILD 0.8  •  RIFT LINK";
+      content:"BUILD 0.8  -  RIFT LINK";
       position:absolute;
       right:18px;top:22px;
       color:#bcae8c;
@@ -1009,7 +1009,7 @@
     }
     function character(){
       if(!S.party.length){$('character').textContent=`No hunters completed. Creating ${S.createIndex+1} of ${PARTY_SIZE}.`;return}
-      $('character').innerHTML='<div class="party-summary">'+S.party.map((p,i)=>`<span class="badge" title="${p.weapon.name} / ${p.armorGear.name}">${hunterName(i)}: H${maxHp(p)} A${maxAr(p)} S${baseSp(p)} • ${weaponRange(p)}R/${weaponDamage(p)}D</span>`).join('')+'</div>';
+      $('character').innerHTML='<div class="party-summary">'+S.party.map((p,i)=>`<span class="badge" title="${p.weapon.name} / ${p.armorGear.name}">${hunterName(i)}: H${maxHp(p)} A${maxAr(p)} S${baseSp(p)} - ${weaponRange(p)}R/${weaponDamage(p)}D</span>`).join('')+'</div>';
     }
     function pack(){let a=[];if(S.quarry.length)a.push('Quarry: '+S.quarry.map(text).join(', '));if(S.meals.length)a.push('Meals: '+S.meals.map(x=>x+' hp').join(', '));if(S.bounty)a.push(`Encounter — ${S.bounty.title}: ${S.left} target${S.left===1?'':'s'} left`);$('pack').innerHTML=(a.length?a:['Empty']).map(x=>`<li>${x}</li>`).join('')}
     function setTownTab(tab){S.townTab=tab;['shop','bounties','market'].forEach(x=>$('town-'+x).classList.toggle('hidden',x!==tab));document.querySelectorAll('#qs-game [data-town-tab]').forEach(b=>b.classList.toggle('active',b.dataset.townTab===tab));fitActive()}
@@ -1024,7 +1024,7 @@
       gearCatalog.filter(g=>g.kind===S.shopKind).forEach(g=>{
         const d=document.createElement('article');d.className='gear-card';
         const stats=g.kind==='weapon'?`<span>${g.range} range</span><span>${g.damage} damage</span>`:`<span>${g.durability} durability</span><span>${g.weight} weight</span>`;
-        d.innerHTML=`<header><span class="gear-mark">${g.rank}${g.symbol}</span><div><h4>${g.name}</h4><div class="gear-type">${g.form} • ${g.kind}</div></div></header><p>${g.description}</p><div class="gear-stats">${stats}<span>${g.price} gold</span></div><button class="primary" ${S.gold<g.price?'disabled':''}>Buy & equip — ${g.price}g</button>`;
+        d.innerHTML=`<header><span class="gear-mark">${g.rank}${g.symbol}</span><div><h4>${g.name}</h4><div class="gear-type">${g.form} - ${g.kind}</div></div></header><p>${g.description}</p><div class="gear-stats">${stats}<span>${g.price} gold</span></div><button class="primary" ${S.gold<g.price?'disabled':''}>Buy & equip — ${g.price}g</button>`;
         d.querySelector('button').onclick=()=>buyGear(g.id);box.appendChild(d);
       });
     }
@@ -1071,7 +1071,7 @@
       let b=S.battle,e=S.enemy,ai=activeIndex(),m=activeMember(),p=S.party[ai],pct=(n,max)=>max?cap(n/max*100,0,100):0;
       $('party-combat').innerHTML=S.party.map((p2,i)=>renderHunterMini(p2,b.members[i],i,i===ai)).join('');
       $('dist').textContent=m?m.distance:'—';$('engaged').textContent=!m?'No hunter':m.distance<=weaponRange(p)?'Your weapon engaged':m.distance<=e.range?'Enemy engaged':'Out of range';
-      $('e-name').textContent=e.name;$('e-count').textContent=`Wave ${S.targetIndex+1}/${S.targets.length} • ${S.left} target${S.left===1?'':'s'} remain • ${e.attacks} attack${e.attacks===1?'':'s'}/round`;
+      $('e-name').textContent=e.name;$('e-count').textContent=`Wave ${S.targetIndex+1}/${S.targets.length} - ${S.left} target${S.left===1?'':'s'} remain - ${e.attacks} attack${e.attacks===1?'':'s'}/round`;
       $('e-hp-t').textContent=`${e.hp} / ${e.maxHp}`;$('e-hp').style.width=pct(e.hp,e.maxHp)+'%';$('e-ar-t').textContent=`${e.armor} / ${e.maxArmor}`;$('e-ar').style.width=pct(e.armor,e.maxArmor)+'%';
       ['Speed','Range','Damage','Trait'].forEach(k=>$("e-"+({Speed:'sp',Range:'ra',Damage:'da',Trait:'tr'}[k])).textContent=S.clues.includes(k)?e[k.toLowerCase()]:'?');
       $('turn-heading').textContent=m?`${hunterName(ai)} turn`:'Party turn';
