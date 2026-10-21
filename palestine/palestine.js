@@ -126,17 +126,12 @@
         const tail = trail[index];
         const towardHead = trail[index - 1];
         const segmentLength = Math.hypot(towardHead.x - tail.x, towardHead.y - tail.y);
+        if (segmentLength < 0.001) continue;
         if (distanceFromTail <= segmentLength) {
           const fraction = distanceFromTail / segmentLength;
-          const normal = {
-            x: normals[index].x + (normals[index - 1].x - normals[index].x) * fraction,
-            y: normals[index].y + (normals[index - 1].y - normals[index].y) * fraction,
-          };
-          const normalLength = Math.hypot(normal.x, normal.y) || 1;
           return {
             x: tail.x + (towardHead.x - tail.x) * fraction,
             y: tail.y + (towardHead.y - tail.y) * fraction,
-            normal: { x: normal.x / normalLength, y: normal.y / normalLength },
           };
         }
         distanceFromTail -= segmentLength;
@@ -146,6 +141,8 @@
 
     function drawFlag(trail) {
       const normals = getNormals(trail);
+      context.lineJoin = "round";
+      context.lineCap = "round";
 
       fillBand(trail, normals, halfHeight, bandHeight / 2, "#171a18");
       fillBand(trail, normals, bandHeight / 2, -bandHeight / 2, "#fffdf3");
