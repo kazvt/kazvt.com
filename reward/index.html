@@ -6,21 +6,18 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https://raw.githubusercontent.com; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-<title data-i18n="title.reward">Reward</title>
+<title>Reward</title>
 <link id="rewardFavicon" rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
 <link rel="preload" href="/reward/patterns/loading-stars.gif" as="image">
 <link rel="preload" href="/reward/retro/hourglass.gif" as="image">
-<link rel="stylesheet" href="/reward/reward.css?v=d33df51624fc">
-<link rel="stylesheet" href="/reward/demo/demo.css?v=d33df51624fc">
-<link rel="stylesheet" href="/zzz_shared/language-dock.css">
-<script src="/i18n.js"></script>
-<script src="/language-dock.js"></script>
-<script type="module" src="/reward/reward.js?v=d33df51624fc"></script>
+<link rel="stylesheet" href="/reward/reward.css?v=1cf40dd30f25">
+<link rel="stylesheet" href="/reward/demo/demo.css?v=1cf40dd30f25">
+<script type="module" src="/reward/reward.js?v=1cf40dd30f25"></script>
 
   <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
 </head>
-<body data-reward-page data-page-state="loading">
+<body data-page-state="loading">
   <div id="artWallpaper" class="art-wallpaper" aria-hidden="true"></div>
   <main class="reward-card" aria-live="polite" aria-busy="true">
     <div id="rewardDecals" class="reward-decal-layer" aria-hidden="true"></div>
@@ -28,7 +25,7 @@
       <div class="loading-heading">
         <img class="loading-hourglass" src="/reward/retro/hourglass.gif" alt="" width="79" height="79">
         <span class="loading-hourglass-fallback" aria-hidden="true">⌛</span>
-        <h1 class="loading-title" aria-label="Loading..." data-i18n-aria-label="reward.loading"><span class="loading-lineboil" data-i18n="reward.loading">Loading…</span><span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
+        <h1 class="loading-title" aria-label="Loading..."><span class="loading-lineboil">Loading<span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></span></h1>
       </div>
       <p id="loadingNote" class="loading-note" hidden></p>
     </section>
@@ -38,10 +35,10 @@
       </div>
       <p id="filename" class="filename"></p>
       <p id="awardReason" class="reward-reason" hidden>
-        <span class="reward-reason-label" data-i18n="reward.reason_label">FOR:</span>
+        <span class="reward-reason-label">FOR:</span>
         <span id="awardReasonText"></span>
       </p>
-      <div id="rewardTier" class="tier-badge" data-tier="common" role="img" aria-label="Reward tier" data-i18n-aria-label="reward.tier_badge_aria">
+      <div id="rewardTier" class="tier-badge" data-tier="common" role="img" aria-label="Reward tier">
         <span id="tierIcon" class="tier-icon" aria-hidden="true"></span>
         <span id="tierName" class="tier-name"></span>
       </div>
@@ -54,7 +51,7 @@
       </section>
     </section>
     <section id="errorState" hidden>
-      <h1 data-i18n="reward.error_title">Reward link unavailable</h1>
+      <h1>Reward link unavailable</h1>
       <p id="errorMessage" class="message">Complete link required.</p>
     </section>
     
@@ -66,7 +63,7 @@
       <circle cx="4.25" cy="7.25" r=".75"></circle>
       <path d="M5.5 2h9v10"></path>
     </svg>
-    <span data-i18n="reward.gallery_link">Reward gallery</span>
+    <span>Reward gallery</span>
   </a>
 
 </body>
