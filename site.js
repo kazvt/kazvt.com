@@ -3301,7 +3301,8 @@ function initializeBlogReadingPad(mount) {
 
   const keyNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   const root = Math.floor(Math.random() * keyNames.length);
-  const title = el("p", { className: "track-title blog-pad-title" }, [`${keyNames[root]} minor reading pad`]);
+  const padTitle = `${keyNames[root]} minor reading pad`;
+  const title = el("p", { className: "track-title blog-pad-title" }, [padTitle]);
   const play = el("button", {
     type: "button",
     className: "music-button",
@@ -3419,8 +3420,9 @@ function initializeBlogReadingPad(mount) {
     const now = context.currentTime;
     const filter = context.__readingPadFilter;
     const midiRoot = 48 + root; // C3 through B3
-    // A single minor ninth voicing: root, fifth, octave, minor third, fifth, seventh, ninth.
-    const intervals = [0, 7, 12, 15, 19, 22];
+    // One held minor-ninth chord, voiced wide: root, fifth, octave, minor third,
+    // fifth, minor seventh, and ninth. The key never changes during this visit.
+    const intervals = [0, 7, 12, 15, 19, 22, 26];
     oscillators = [];
 
     intervals.forEach((interval, noteIndex) => {
@@ -3463,6 +3465,7 @@ function initializeBlogReadingPad(mount) {
     generation += 1;
     startChordVoices();
     playing = true;
+    title.textContent = padTitle;
     setInlineNote(play, translatedText("music.pause") || "pause");
     play.setAttribute("aria-pressed", "true");
     play.setAttribute("aria-label", "Stop the reading pad");
