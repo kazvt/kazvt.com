@@ -11,6 +11,7 @@
     if (!context) return null;
 
     canvas.dataset.palestineCursor = "true";
+    canvas.setAttribute("aria-hidden", "true");
     Object.assign(canvas.style, {
       position: "fixed",
       inset: "0",
@@ -217,6 +218,7 @@
         || Math.abs(points[index - 1].y - point.y) > 0.2
       ));
       if (stillMoving) animationFrame = window.requestAnimationFrame(draw);
+      else context.clearRect(0, 0, width, height);
     };
 
     resize();
