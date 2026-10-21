@@ -136,9 +136,9 @@
   "file_info": {
     "!1index - Copy.html": {
       "type": "file",
-      "size_bytes": 683507,
-      "modified_ns": 1792577749323058200,
-      "modified_ns_exact": "1792577749323058200",
+      "size_bytes": 683351,
+      "modified_ns": 1792577864395280300,
+      "modified_ns_exact": "1792577864395280300",
       "file_identity": "2725177794:5629499534438497"
     },
     "AUTO-GAIN-README.txt": {
@@ -164,9 +164,9 @@
     },
     "index.html": {
       "type": "file",
-      "size_bytes": 692253,
-      "modified_ns": 1792577749337369500,
-      "modified_ns_exact": "1792577749337369500",
+      "size_bytes": 692097,
+      "modified_ns": 1792577864399735900,
+      "modified_ns_exact": "1792577864399735900",
       "file_identity": "2725177794:3940649674101035"
     },
     "instrument-icons.json": {
@@ -1447,16 +1447,16 @@
     },
     "outputs/wifeymixer-dist-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
-      "size_bytes": 703998,
-      "modified_ns": 1792577749341389100,
-      "modified_ns_exact": "1792577749341389100",
+      "size_bytes": 703812,
+      "modified_ns": 1792577864405013200,
+      "modified_ns_exact": "1792577864405013200",
       "file_identity": "2725177794:281474977577140"
     },
     "outputs/wifeymixer-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
-      "size_bytes": 690391,
-      "modified_ns": 1792577749356577700,
-      "modified_ns_exact": "1792577749356577700",
+      "size_bytes": 690235,
+      "modified_ns": 1792577864408910900,
+      "modified_ns_exact": "1792577864408910900",
       "file_identity": "2725177794:281474977577139"
     },
     "sf2-procedural.js": {
@@ -1878,9 +1878,9 @@
     },
     "wifeymixer_dist/!index - Copy.html": {
       "type": "file",
-      "size_bytes": 696984,
-      "modified_ns": 1792577749359837800,
-      "modified_ns_exact": "1792577749359837800",
+      "size_bytes": 696798,
+      "modified_ns": 1792577864413472500,
+      "modified_ns_exact": "1792577864413472500",
       "file_identity": "2725177794:1407374884377424"
     },
     "wifeymixer_dist/AUTO-GAIN-README.txt": {
@@ -1913,9 +1913,9 @@
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
-      "size_bytes": 705860,
-      "modified_ns": 1792577749363922700,
-      "modified_ns_exact": "1792577749363922700",
+      "size_bytes": 705674,
+      "modified_ns": 1792577864434346800,
+      "modified_ns_exact": "1792577864434346800",
       "file_identity": "2725177794:1125899907666764"
     },
     "wifeymixer_dist/instrument-icons.json": {

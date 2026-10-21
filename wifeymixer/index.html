@@ -7925,7 +7925,7 @@
         <div id="topTempoModule" class="top-tempo-module" hidden aria-label="Tempo control">
           <span class="top-tempo-legend" aria-hidden="true">TEMPO</span>
           <span id="topTempoReadout" class="top-tempo-screen">104 BPM</span>
-          <span class="top-tempo-fader-wrap" title="Tempo  -  drag to change  -  double-click to reset to original tempo"><input id="topTempoControl" class="top-tempo-range" type="range" min="60" max="180" step="1" value="104" aria-label="Tempo in BPM"></span>
+          <span class="top-tempo-fader-wrap" title="Tempo - drag to change - double-click to reset to original tempo"><input id="topTempoControl" class="top-tempo-range" type="range" min="60" max="180" step="1" value="104" aria-label="Tempo in BPM"></span>
           <button id="topTempoRandomBtn" class="top-tempo-random" type="button" title="Randomize MIDI tempo for this session" aria-label="Randomize MIDI tempo">
             <i class="fa-solid fa-dice" aria-hidden="true"></i>
           </button>
@@ -7987,11 +7987,11 @@
           <div class="proc-seed-module">
             <span class="proc-engrave">SEED MEMORY</span>
             <div id="proceduralSeedReadout" class="proc-seed-window">0001</div>
-            <div class="proc-seed-caption">PREV / NEXT  -  STATE RECALL</div>
+            <div class="proc-seed-caption">PREV / NEXT - STATE RECALL</div>
           </div>
 
           <div class="vibe-module">
-            <div class="vibe-module__title">VIBE  -  X/Y PROGRAMMER</div>
+            <div class="vibe-module__title">VIBE - X/Y PROGRAMMER</div>
             <span class="vibe-axis-label vibe-axis-label--high">HIGH<br>ENERGY</span>
             <span class="vibe-axis-label vibe-axis-label--low">LOW<br>ENERGY</span>
             <span class="vibe-axis-label vibe-axis-label--simple">SIMPLE</span>
@@ -8006,7 +8006,7 @@
           <div class="proc-info-module proc-direct-module" aria-label="Procedural direct program settings">
             <div class="proc-direct-head">
               <span>DIRECT PROGRAM</span>
-              <small>MOVE = HOLD  -  DBL DISPLAY = SEED AUTO</small>
+              <small>MOVE = HOLD - DBL DISPLAY = SEED AUTO</small>
             </div>
 
             <div class="proc-scroll-hint" aria-hidden="true">scroll settings rack</div>
@@ -8032,7 +8032,7 @@
 
             <label class="proc-hw-control" data-proc-control="chords">
               <span class="proc-hw-control__legend">CHORD PROGRAM <i class="proc-lock-lamp" aria-hidden="true"></i></span>
-              <span id="proceduralChordReadout" class="proc-mini-screen proc-mini-screen--chords">I  -  V  -  VI  -  IV</span>
+              <span id="proceduralChordReadout" class="proc-mini-screen proc-mini-screen--chords">I - V - VI - IV</span>
               <span class="proc-mini-fader"><input id="proceduralChordControl" type="range" min="0" max="9" step="1" value="0" aria-label="Procedural chord program"></span>
             </label>
 
@@ -8768,16 +8768,16 @@
   const PROCEDURAL_KEYS = Object.freeze(["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"]);
   const PROCEDURAL_MODES = Object.freeze(["major","minor"]);
   const PROCEDURAL_CHORD_PROGRAMS = Object.freeze([
-    Object.freeze({label:"I  -  V  -  VI  -  IV",degrees:[1,5,6,4]}),
-    Object.freeze({label:"I  -  IV  -  V  -  I",degrees:[1,4,5,1]}),
-    Object.freeze({label:"VI  -  IV  -  I  -  V",degrees:[6,4,1,5]}),
-    Object.freeze({label:"I  -  VI  -  II  -  V",degrees:[1,6,2,5]}),
-    Object.freeze({label:"I  -  III  -  IV  -  V",degrees:[1,3,4,5]}),
-    Object.freeze({label:"I  -  VI  -  III  -  VII",degrees:[1,6,3,7]}),
-    Object.freeze({label:"I  -  IV  -  VI  -  V",degrees:[1,4,6,5]}),
-    Object.freeze({label:"I  -  VII  -  VI  -  VII",degrees:[1,7,6,7]}),
-    Object.freeze({label:"VI  -  VII  -  I  -  I",degrees:[6,7,1,1]}),
-    Object.freeze({label:"I  -  III  -  VII  -  VI",degrees:[1,3,7,6]})
+    Object.freeze({label:"I - V - VI - IV",degrees:[1,5,6,4]}),
+    Object.freeze({label:"I - IV - V - I",degrees:[1,4,5,1]}),
+    Object.freeze({label:"VI - IV - I - V",degrees:[6,4,1,5]}),
+    Object.freeze({label:"I - VI - II - V",degrees:[1,6,2,5]}),
+    Object.freeze({label:"I - III - IV - V",degrees:[1,3,4,5]}),
+    Object.freeze({label:"I - VI - III - VII",degrees:[1,6,3,7]}),
+    Object.freeze({label:"I - IV - VI - V",degrees:[1,4,6,5]}),
+    Object.freeze({label:"I - VII - VI - VII",degrees:[1,7,6,7]}),
+    Object.freeze({label:"VI - VII - I - I",degrees:[6,7,1,1]}),
+    Object.freeze({label:"I - III - VII - VI",degrees:[1,3,7,6]})
   ]);
   const proceduralOverrides = {
     tonic: PROCEDURAL_KEYS.includes(persistentPrefs.proceduralTonicOverride) ? persistentPrefs.proceduralTonicOverride : null,
@@ -9868,7 +9868,7 @@
     const instrument=String(voice?.name||"").trim();
     const category=trackCategoryLabel(role);
     return instrument&&!samePatchAndSoundFontName(sourceName,instrument)
-      ?`${sourceName}  -  ${instrument} (${category})`
+      ?`${sourceName} - ${instrument} (${category})`
       :`${sourceName} (${category})`;
   }
 
@@ -10022,7 +10022,7 @@
     for(let step=0;step<melodySteps;step++){const bar=Math.floor((step*melodyStep)/4),chord=chordEvents[Math.min(chordEvents.length-1,bar)],restChance=.54-energy*.28-complexity*.12;if(rngMelody()<restChance)continue;const chordIndexes=chord.notes.map(n=>Math.max(0,scale.indexOf(n)));if(rngMelody()<.58&&chordIndexes.length)lastDegree=chordIndexes[Math.floor(rngMelody()*chordIndexes.length)];else{const motion=rngMelody()<.5?-1:1,leap=complexity>.68&&rngMelody()>.78?2:1;lastDegree=(lastDegree+motion*leap+7)%7}const sync=complexity>.48&&rngMelody()>.72?melodyStep*.5:0;melodyEvents.push({time:Math.min(duration-.04,(step*melodyStep+sync)*beat),duration:beat*melodyStep*(complexity>.70?.72:.84),note:scale[lastDegree%7],octave:rngMelody()>.78?5:4})}
     const drumEvents=[];for(let bar=0;bar<bars;bar++){const barStart=bar*barDuration;for(let b=0;b<4;b++){const t=barStart+b*beat;if(b===0||b===2||(energy>.72&&b===3&&rngDrums()>.55))drumEvents.push({type:"kick",time:t,amp:.80});if(b===1||b===3)drumEvents.push({type:"snare",time:t,amp:.66+energy*.18})}const hatStep=energy>.62||complexity>.58?.5:1;for(let h=0;h<4/hatStep;h++){const t=barStart+h*hatStep*beat,off=h%2===1;if(!off||energy>.28||rngDrums()>.4)drumEvents.push({type:"hat",time:t,amp:off?.20+.18*energy:.14+.12*energy})}if(complexity>.72&&rngDrums()>.42)drumEvents.push({type:"kick",time:barStart+3.5*beat,amp:.58})}
     const percussionEvents=[],shakeStep=energy>.58?.5:1;for(let t=0,step=0;t<duration-.02;t+=shakeStep*beat,step++){if(rngPerc()<(.28+energy*.48))percussionEvents.push({type:"shaker",time:t,amp:.12+.18*energy});if(step%Math.round(4/shakeStep)===Math.round(1/shakeStep)&&rngPerc()<(.35+complexity*.35))percussionEvents.push({type:"tamb",time:t,amp:.18+.20*energy})}
-    const program={seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join("  -  "),manual:{tonic:proceduralOverrides.tonic!==null,mode:proceduralOverrides.mode!==null,bpm:proceduralOverrides.bpm!==null,chords:proceduralOverrides.chordIndex!==null}};
+    const program={seed,energy,complexity,tonic,mode,scale,bpm,bars,beat,barDuration,duration,progression,chordEvents,bassEvents,melodyEvents,drumEvents,percussionEvents,chordLabel:progression.map(romanDegree).join(" - "),manual:{tonic:proceduralOverrides.tonic!==null,mode:proceduralOverrides.mode!==null,bpm:proceduralOverrides.bpm!==null,chords:proceduralOverrides.chordIndex!==null}};
     program.sf2Voices=chooseProceduralSf2Voices(program);
     return program;
   }
@@ -10373,7 +10373,7 @@
         const explicit=!!proceduralStripVoicePreference(channel.stem.role);
         const locked=!!channel.state?.locked;
         const patchLocked=isInstrumentLockedForChannel(channel);
-        iconEl.title=`${label}  -  click: patch select  -  right-click: reset fader position${explicit?"  -  STRIP PATCH":""}${patchLocked?"  -  PATCH LOCK":""}${locked?"  -  RANDOM LOCK":""}`;
+        iconEl.title=`${label} - click: patch select - right-click: reset fader position${explicit?" - STRIP PATCH":""}${patchLocked?" - PATCH LOCK":""}${locked?" - RANDOM LOCK":""}`;
         iconEl.setAttribute("aria-label",`${label}. Click to open SoundFont and instrument patch select. Right-click to reset this track's fader to its original position.${patchLocked?" Instrument locked to this strip.":""}${locked?" Strip mute state locked from randomizer.":""}`);
         iconEl.classList.toggle("has-strip-voice",explicit);
       }
@@ -10410,7 +10410,7 @@
         const patchLocked=isInstrumentLockedForChannel(channel);
         const authored=!!midiExplicitVoiceForStem(channel.stem);
         const pinned=authored&&filenameTrackConfig(channel.stem).lockInstrument===true&&!stored&&!patchLocked;
-        iconEl.title=patchLocked?`${label}  -  PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")}  -  click: patch select  -  right-click: reset fader  -  double-click: restore default patch`:pinned?`${label}  -  PINNED DEFAULT  -  click: patch select  -  right-click: reset fader  -  double-click: restore default patch`:`${label}  -  click: patch select  -  right-click: reset fader  -  double-click: restore default patch`;
+        iconEl.title=patchLocked?`${label} - PATCH LOCKED TO STRIP ${String(channel.index+1).padStart(2,"0")} - click: patch select - right-click: reset fader - double-click: restore default patch`:pinned?`${label} - PINNED DEFAULT - click: patch select - right-click: reset fader - double-click: restore default patch`:`${label} - click: patch select - right-click: reset fader - double-click: restore default patch`;
         iconEl.setAttribute("aria-label",patchLocked?`${label}. Instrument locked to this mixer strip across MIDI track changes and randomization. Click to open patch select. Right-click to reset this track's fader to its original position. Double-click to restore this MIDI strip's original/default instrument while keeping the patch lock enabled.`:pinned?`${label}. Pinned MIDI default. Click to open exact SoundFont and instrument selection. Right-click to reset this track's fader to its original position. Double-click to restore the original/default instrument.`:`${label}. Click to open exact SoundFont and instrument selection. Right-click to reset this track's fader to its original position. Double-click to restore the original/default instrument.`);
         iconEl.classList.toggle("has-strip-voice",stored||pinned||patchLocked);
       }
@@ -10695,7 +10695,7 @@
         if(!matches)hitDiscouragedVoice=true;
         const icon=soundFontPatchIconMeta(voice);
         const category=soundFontVoiceCategoryLabel(voice);
-        return `<button type="button" class="instrument-picker__voice${selected?" is-current":""}${matches?"":" is-mismatch"}${firstVoiceMismatch?" is-first-mismatch":""}" data-picker-voice data-source="${escapePickerText(sourceId)}" data-bank="${Number(voice.bank)}" data-program="${Number(voice.program)}" aria-pressed="${selected}" title="${escapePickerText(`${icon.label||voice.name||"Instrument"}  -  ${category}${matches?"":"  -  outside this strip category"}`)}"><span class="instrument-picker__voice-icon" aria-hidden="true"><i class="fa-solid ${safeFontAwesomeIcon(icon.icon||"fa-music")}"></i></span><span>${escapePickerText(voice.name||"PATCH")}</span><span class="instrument-picker__voice-category">${escapePickerText(category)}</span></button>`;
+        return `<button type="button" class="instrument-picker__voice${selected?" is-current":""}${matches?"":" is-mismatch"}${firstVoiceMismatch?" is-first-mismatch":""}" data-picker-voice data-source="${escapePickerText(sourceId)}" data-bank="${Number(voice.bank)}" data-program="${Number(voice.program)}" aria-pressed="${selected}" title="${escapePickerText(`${icon.label||voice.name||"Instrument"} - ${category}${matches?"":" - outside this strip category"}`)}"><span class="instrument-picker__voice-icon" aria-hidden="true"><i class="fa-solid ${safeFontAwesomeIcon(icon.icon||"fa-music")}"></i></span><span>${escapePickerText(voice.name||"PATCH")}</span><span class="instrument-picker__voice-category">${escapePickerText(category)}</span></button>`;
       }).join(""):`<div class="instrument-picker__empty">NO PATCHES</div>`}</div>`;
       return `<div class="instrument-picker__group${open?" is-open":""}${hasCurrent?" has-current":""}${loading?" is-loading":""}${sourceMatches?"":" is-mismatch"}${firstMismatch?" is-first-mismatch":""}">
         <button type="button" class="instrument-picker__source" data-picker-source="${escapePickerText(sourceId)}" aria-expanded="${open}">
@@ -10704,7 +10704,7 @@
     }).join("")||`<div class="instrument-picker__empty">NO SOUNDFONTS</div>`;
     const patchLocked=isInstrumentLockedForChannel(channel);
     const lockTitle=patchLocked?"Unlock this instrument from the strip":"Lock the current instrument to this strip";
-    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT  -  ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)}  -  SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
+    return `<div class="instrument-picker__head"><div><div class="instrument-picker__title">PATCH SELECT - ${escapePickerText(title)}</div><div class="instrument-picker__sub">${escapePickerText(strip)} - SOUNDFONT → INSTRUMENT</div></div><div class="instrument-picker__head-actions"><button type="button" class="instrument-picker__lock${patchLocked?" is-active":""}" data-picker-lock aria-pressed="${patchLocked}" title="${escapePickerText(lockTitle)}" aria-label="${escapePickerText(lockTitle)}"><i class="fa-solid ${patchLocked?"fa-lock":"fa-lock-open"}" aria-hidden="true"></i></button><button type="button" class="instrument-picker__close" data-picker-close aria-label="Close instrument picker">×</button></div></div><div class="instrument-picker__list">${groups}</div>`;
   }
   function positionInstrumentPicker(){
     if(!instrumentPicker||!instrumentPickerAnchor?.isConnected)return;
@@ -11317,7 +11317,7 @@
     proceduralVibeMorphTimer=setTimeout(applyProceduralVibeMorph,Math.max(0,Number(delay)||0));
   }
 
-  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);pruneDecodedBufferCacheForPlaylist(currentPlaylist);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM  -  ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent();else scheduleIdleAudioContextSuspend()}
+  async function loadProceduralSeed(seed,autoplay=false,{preservePosition=false}={}){const oldPosition=preservePosition?getPosition():0,oldDuration=playlistDuration||1,phase=oldDuration?oldPosition/oldDuration:0;proceduralSeed=normalizeProceduralSeed(seed);persistentPrefs.proceduralSeed=proceduralSeed;saveProceduralHardwarePrefs();const generation=++loadGeneration;stopAllScheduledSources();isPlaying=false;updatePlaybackButtons();cleanupChannels();loadReadout.textContent="LOADING";showSystemReadout("PROCEDURAL MODE","LOADING",`SEED ${String(proceduralSeed).padStart(4,"0")}`);currentProceduralProgram=createProceduralProgram(proceduralSeed,proceduralEnergy,proceduralComplexity);resetProceduralLoopProgramCache();currentPlaylist=makeProceduralPlaylist(currentProceduralProgram);pruneDecodedBufferCacheForPlaylist(currentPlaylist);playlistDuration=currentProceduralProgram.duration;lastKnownPosition=preservePosition?Math.max(0,Math.min(playlistDuration-.02,phase*playlistDuration)):0;loopCount=0;scheduledThroughCycle=0;cycleZeroContextTime=0;renderMixer(currentPlaylist);await setupProceduralAudioForRenderedChannels(currentPlaylist,generation);if(generation!==loadGeneration)return;horizontalScroller.scrollLeft=0;trackReadout.textContent=`SEED ${String(proceduralSeed).padStart(4,"0")}`;updateTransportDisplay();syncProceduralModeUi(false);showSystemReadout(currentPlaylist.title,proceduralSoundFontDisplayName(),`${currentProceduralProgram.bpm} BPM - ${currentProceduralProgram.tonic.toUpperCase()} ${currentProceduralProgram.mode==="minor"?"MIN":"MAJ"}`);if(autoplay)await playCurrent();else scheduleIdleAudioContextSuspend()}
   async function enterProceduralMode(){if(appMode==="procedural")return;const shouldPlay=isPlaying;playlistResumeIndex=currentPlaylistIndex;closePlaylistHardwareMenu();appMode="procedural";syncProceduralModeUi(true);await loadProceduralSeed(proceduralSeed,shouldPlay)}
   async function exitProceduralMode(){if(appMode!=="procedural")return;const shouldPlay=isPlaying;appMode="playlist";syncProceduralModeUi(true);await changePlaylist(playlistResumeIndex,shouldPlay)}
   async function toggleProceduralMode(){if(appMode==="procedural")await exitProceduralMode();else await enterProceduralMode()}
@@ -11354,7 +11354,7 @@
     if(kind==="key")proceduralKeyReadout.textContent=PROCEDURAL_KEYS[Math.max(0,Math.min(PROCEDURAL_KEYS.length-1,Math.round(value)))];
     else if(kind==="mode")proceduralModeReadout.textContent=value>=.5?"MINOR":"MAJOR";
     else if(kind==="tempo")proceduralTempoReadout.textContent=`${Math.round(value)} BPM`;
-    else if(kind==="chords")proceduralChordReadout.textContent=PROCEDURAL_CHORD_PROGRAMS[Math.max(0,Math.min(PROCEDURAL_CHORD_PROGRAMS.length-1,Math.round(value)))]?.label||"I  -  V  -  VI  -  IV";
+    else if(kind==="chords")proceduralChordReadout.textContent=PROCEDURAL_CHORD_PROGRAMS[Math.max(0,Math.min(PROCEDURAL_CHORD_PROGRAMS.length-1,Math.round(value)))]?.label||"I - V - VI - IV";
     else if(kind==="soundfont")proceduralSoundFontReadout.textContent=proceduralSoundFontDisplayName(["auto","sf64","rush","genies","casino"][Math.max(0,Math.min(4,Math.round(value)))]) ;
     else if(kind==="energy"){proceduralEnergy=snapProceduralUnit(value/100);proceduralEnergyReadout.textContent=formatSteppedPercent01(proceduralEnergy);proceduralDeck?.style.setProperty("--vibe-y",`${(1-proceduralEnergy)*100}%`)}
     else if(kind==="complexity"){proceduralComplexity=snapProceduralUnit(value/100);proceduralComplexityReadout.textContent=formatSteppedPercent01(proceduralComplexity);proceduralDeck?.style.setProperty("--vibe-x",`${proceduralComplexity*100}%`)}
@@ -12238,7 +12238,7 @@
     showSystemReadout(
       "MASTER",
       "TELEPHONE",
-      megaphoneEnabled ? "ON  -  350–3.4 kHz" : "OFF"
+      megaphoneEnabled ? "ON - 350–3.4 kHz" : "OFF"
     );
   }
 
@@ -12654,8 +12654,8 @@
     btn.setAttribute("aria-pressed",String(masterAutoGainEnabled));
     btn.setAttribute("aria-label",`MASTER AUTO-GAIN COMPENSATION ${masterAutoGainEnabled?"ON":"OFF"}`);
     btn.title=masterAutoGainEnabled
-      ? `MASTER AUTO-GAIN COMPENSATION  -  ${(masterAutoGainDb>=0?"+":"")+masterAutoGainDb.toFixed(1)} dB`
-      : "MASTER AUTO-GAIN COMPENSATION  -  OFF";
+      ? `MASTER AUTO-GAIN COMPENSATION - ${(masterAutoGainDb>=0?"+":"")+masterAutoGainDb.toFixed(1)} dB`
+      : "MASTER AUTO-GAIN COMPENSATION - OFF";
   }
 
   function applyMasterAutoGain(time=.45){
@@ -13038,7 +13038,7 @@
         <div class="channel-header">
           <div class="channel-ident">
             <span class="channel-instrument-icon${instrumentSelectable ? " is-instrument-selector" : ""}" data-instrument-icon data-instrument-channel="${index}"
-                  title="${escapeHtml(iconMatch.category)}  -  right-click: reset fader position  -  matched ${escapeHtml(iconMatch.text || "fallback")}" role="${instrumentSelectable?"button":"img"}" tabindex="${instrumentSelectable?"0":"-1"}"
+                  title="${escapeHtml(iconMatch.category)} - right-click: reset fader position - matched ${escapeHtml(iconMatch.text || "fallback")}" role="${instrumentSelectable?"button":"img"}" tabindex="${instrumentSelectable?"0":"-1"}"
                   aria-label="${instrumentSelectable?`${title} instrument selector`:title}">
               <i class="fa-solid ${escapeHtml(iconMatch.icon)}"></i>
             </span>
@@ -14365,7 +14365,7 @@
     sequential:{
       icon:"fa-list-ol",
       name:"SEQUENTIAL",
-      description:"NEXT SONG  -  WRAP"
+      description:"NEXT SONG - WRAP"
     }
   };
 
@@ -14492,8 +14492,8 @@
     const lockedCount = channels.filter(channel=>channel.state.locked).length;
     showSystemReadout(
       currentPlaylist?.title ? String(currentPlaylist.title).toUpperCase() : "RANDOMIZER",
-      reason === "loop" ? `LOOP ${loopCount}  -  RANDOMIZED` : "RANDOMIZED",
-      `${mutedCount} MUTE  -  ${lockedCount} LOCK`
+      reason === "loop" ? `LOOP ${loopCount} - RANDOMIZED` : "RANDOMIZED",
+      `${mutedCount} MUTE - ${lockedCount} LOCK`
     );
   }
 
@@ -14530,7 +14530,7 @@
     const active=!!window.WIFEY_STRIP_FX?.hasEnabled(channel.state.fx);
     button.classList.toggle("active",active);
     button.setAttribute("aria-expanded",String(stripFxPanelChannelIndex===channel.index&&!stripFxPanel?.hidden));
-    button.title=active?"STRIP EFFECTS  -  ACTIVE":"STRIP EFFECTS";
+    button.title=active?"STRIP EFFECTS - ACTIVE":"STRIP EFFECTS";
   }
 
   function applyStripFxState(channel,{persist=true}={}){
@@ -14661,7 +14661,7 @@
       <button class="strip-fx-panel__close" type="button" data-fx-close aria-label="Close effects">×</button>
     </div>
     <div class="strip-fx-list">${window.WIFEY_STRIP_FX.ORDER.map(key=>stripFxSlotMarkup(key,state[key])).join("")}</div>
-    <div class="strip-fx-foot">WET = equal-power insert blend  -  SEND = dry + parallel effected return</div>`;
+    <div class="strip-fx-foot">WET = equal-power insert blend - SEND = dry + parallel effected return</div>`;
     panel.hidden=false;anchor.setAttribute("aria-expanded","true");bindStripFxPanel(channel);
     requestAnimationFrame(()=>positionStripFxPanel(anchor));
   }
@@ -15356,7 +15356,7 @@
       title.textContent = String(playlist.title || "UNTITLED").toUpperCase();
 
       const meta = document.createElement("small");
-      meta.textContent = `${profile.label}  -  ${playlist.stems.length} STEM${playlist.stems.length === 1 ? "" : "S"}`;
+      meta.textContent = `${profile.label} - ${playlist.stems.length} STEM${playlist.stems.length === 1 ? "" : "S"}`;
 
       titleRow.append(typeIcon,title);
       copy.append(titleRow,meta);
@@ -15398,7 +15398,7 @@
     playlists.forEach((playlist,index)=>{
       const option=document.createElement("option");
       option.value=String(index);
-      option.textContent=`${playlist.title}  -  ${playlist.stems.length} stems`;
+      option.textContent=`${playlist.title} - ${playlist.stems.length} stems`;
       playlistSelect.appendChild(option);
     });
 
@@ -16050,7 +16050,7 @@
     await applyPlaylistTempo(bpm,{persist:true});
   });
   if(topTempoControl){
-    topTempoControl.title="Tempo  -  drag to change  -  double-click to reset to original tempo";
+    topTempoControl.title="Tempo - drag to change - double-click to reset to original tempo";
     topTempoControl.addEventListener("dblclick",async event=>{
       event.preventDefault();
       event.stopPropagation();

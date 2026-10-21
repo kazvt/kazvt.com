@@ -1,4 +1,4 @@
-# OBS Trivia Widget v2  -  Reward Links Edition
+# OBS Trivia Widget v2 - Reward Links Edition
 
 A local, transparent 1920×1080 OBS Browser Source widget that receives chat messages over WebSocket, runs category-based trivia, awards points, and shows an on-stream leaderboard.
 
