@@ -326,7 +326,7 @@
 			}
 		}
 		if (viewerCount === null && liveText) {
-			var liveMatch = liveText.match(/LIVE\s*[·•]?\s*([\d.,]+\s*[KMB]?)/i);
+			var liveMatch = liveText.match(/LIVE\s*[\u00B7•]?\s*([\d.,]+\s*[KMB]?)/i);
 			if (liveMatch && liveMatch[1]) {
 				viewerCount = parseCompactNumber(liveMatch[1]);
 			}
