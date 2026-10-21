@@ -349,7 +349,6 @@ redirect.vps_streaming.status=正在打开 VPS 直播代码仓库……
 reward.gallery_title=奖励
 reward.user_title={username} 的奖励
 reward.gallery_intro=我会在直播时把这些手作小奖励送给讲了好笑的笑话、赢了游戏或创造了其他有趣时刻的人。这些不是 NFT，只是我找到的有趣 GIF。
-reward.gallery_intro_aside=如果你叫它们 NFT 我就封禁你啦，开玩笑的，我大概只会说：嘿，别这么叫它们
 reward.lookup_title=查找奖励
 reward.search=搜索奖励
 reward.search_placeholder=搜索……

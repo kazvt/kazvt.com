@@ -355,7 +355,6 @@ redirect.vps_streaming.status=جار فتح مستودع البث عبر VPS...
 reward.gallery_title=المكافآت
 reward.user_title=مكافآت {username}
 reward.gallery_intro=مكافآت صغيرة أصنعها يدويا وأقدمها في البث مقابل النكات الجيدة والفوز بالألعاب واللحظات الممتعة. هذه ليست NFT. إنها صور GIF ممتعة وجدتها.
-reward.gallery_intro_aside=إذا سميتها NFT فسأحظرك، لا أمزح، غالبا سأقول فقط: لا تسمها هكذا
 reward.lookup_title=البحث عن مكافأة
 reward.search=ابحث عن المكافآت
 reward.search_placeholder=بحث…

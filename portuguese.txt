@@ -349,7 +349,6 @@ redirect.vps_streaming.status=abrindo o repositório de VPS streaming...
 reward.gallery_title=Recompensas
 reward.user_title=Recompensas de {username}
 reward.gallery_intro=Recompensas artesanais que eu dou nas lives por piadas boas, vitórias em jogos e outros momentos divertidos. NÃO são NFTs. São só GIFs legais que encontrei.
-reward.gallery_intro_aside=se você chamar isso de NFT eu vou te banir - tô brincando, provavelmente só vou dizer EI, NÃO CHAMA ISSO ASSIM
 reward.lookup_title=Buscar recompensa
 reward.search=Buscar recompensas
 reward.search_placeholder=Buscar…

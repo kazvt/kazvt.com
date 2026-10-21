@@ -466,7 +466,6 @@ title.reward=Reward
 reward.gallery_title=Rewards
 reward.user_title={username} Rewards
 reward.gallery_intro=Little handmade rewards I give out on stream for good jokes, game wins, and other fun moments. These are NOT NFTs. Just fun gifs I found.
-reward.gallery_intro_aside=if you call them NFTs i'll ban you, not really, i'll probably just go HEY DON'T CALL EM THAT
 reward.lookup_title=Reward lookup
 reward.search=Search rewards
 reward.search_placeholder=Search…

@@ -349,7 +349,6 @@ redirect.vps_streaming.status=VPS streaming deposu açılıyor...
 reward.gallery_title=Ödüller
 reward.user_title={username} ödülleri
 reward.gallery_intro=İyi şakalar, oyun galibiyetleri ve eğlenceli anlar için yayında dağıttığım el yapımı ufak ödüller. NFT DEĞİLLER. Sadece bulduğum eğlenceli GIF'ler.
-reward.gallery_intro_aside=bunlara NFT dersen seni banlarım; şaka şaka, muhtemelen sadece HEY, BUNLARA ÖYLE DEME derim
 reward.lookup_title=Ödül ara
 reward.search=Ödüllerde ara
 reward.search_placeholder=Ara…
