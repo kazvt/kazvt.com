@@ -87,6 +87,42 @@ body {
   background-attachment: fixed, fixed;
 }
 
+body[data-reward-page] .language-dock {
+  position: fixed;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  z-index: 20;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 20px));
+  margin: 0;
+  padding: 6px;
+  border-width: 2px;
+  gap: 5px;
+  background: color-mix(in srgb, var(--palette-panel) 94%, transparent);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--palette-accent) 65%, transparent);
+  clip-path: none;
+}
+
+body[data-reward-page] .language-dock::before,
+body[data-reward-page] .language-dock::after {
+  display: none;
+}
+
+body[data-reward-page] .language-title,
+body[data-reward-page] .language-dock > .language-button,
+body[data-reward-page] .language-option {
+  border-color: var(--palette-accent);
+  background-color: var(--palette-panel);
+  color: #fff8ff;
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--palette-accent) 65%, transparent);
+  clip-path: none;
+}
+
+body[data-reward-page] .language-options:not([hidden]) {
+  padding: 6px 2px 2px;
+  border-top-color: color-mix(in srgb, var(--palette-accent) 65%, transparent);
+}
+
 body[data-page-state="reward"][data-tier="common"] {
   --reward-tier-font: "Naughty Tape", "SPIRAL", "Trebuchet MS", sans-serif;
   --palette-background: #1b0d37;

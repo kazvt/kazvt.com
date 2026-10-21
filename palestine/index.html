@@ -8,13 +8,16 @@
     <meta name="theme-color" content="#183d2a">
     <link rel="canonical" href="https://kazvt.com/palestine/">
     <link rel="stylesheet" href="/palestine/palestine.css?v=8">
+    <link rel="stylesheet" href="/zzz_shared/language-dock.css">
+    <script src="/i18n.js"></script>
+    <script src="/language-dock.js"></script>
     <script src="/zzz_assets/vendor/cursor-effects/browser.js" defer></script>
     <script src="/palestine/palestine.js?v=2" defer></script>
   </head>
-  <body>
+  <body data-page="palestine">
     <main class="archive">
       <div class="masthead">
-        <a class="home-link" href="/" aria-label="Return to kazvt.com">
+        <a class="home-link" href="/" aria-label="Return to kazvt.com" data-i18n-aria-label="palestine.home">
           <span class="home-mark" aria-hidden="true">✦</span>
           <span>kazvt.com</span>
         </a>
@@ -22,21 +25,21 @@
       </div>
 
       <header class="intro">
-        <h1 id="page-title">Palestinian Literature</h1>
-        <p class="byline">Translated by kazvt.</p>
+        <h1 id="page-title" data-i18n="palestine.title">Palestinian Literature</h1>
+        <p class="byline" data-i18n="palestine.byline">Translated by kazvt.</p>
       </header>
 
       <section class="gif-wall" aria-labelledby="gif-wall-title">
-        <h2 id="gif-wall-title" class="visually-hidden">Palestine GIFs</h2>
+        <h2 id="gif-wall-title" class="visually-hidden" data-i18n="palestine.gif_wall">Palestine GIFs</h2>
         <div class="gif-wall-top">
           <p class="solidarity-line">
-            <span>FREE PALESTINE</span>
+            <span data-i18n="palestine.solidarity">FREE PALESTINE</span>
             <span class="solidarity-dash" aria-hidden="true">-</span>
             <span lang="ar" dir="rtl">فلسطين حرة</span>
           </p>
-          <button class="motion-toggle" type="button" data-gif-toggle aria-pressed="false">
+          <button class="motion-toggle" type="button" data-gif-toggle aria-label="Play Palestine GIFs" data-i18n-aria-label="palestine.play_aria" aria-pressed="false">
             <span class="toggle-mark" aria-hidden="true">▶</span>
-            <span data-gif-toggle-label>Play GIFs</span>
+            <span data-gif-toggle-label data-i18n="palestine.play">Play GIFs</span>
           </button>
         </div>
         <ul class="gif-grid">
@@ -54,23 +57,23 @@
           <li class="gif-tile gif-tile-large"><img src="/palestine/gifs/posters/FS3UXGLGA5T4D5PYCCF5AZVIQNS63OL2.png" data-gif="/palestine/gifs/FS3UXGLGA5T4D5PYCCF5AZVIQNS63OL2.gif" width="148" height="80" loading="lazy" decoding="async" alt="Waving Palestinian flag GIF from a Palestine page"></li>
           <li class="gif-tile gif-tile-large"><img src="/palestine/gifs/posters/LD5NIWQ5ALXOK7LFLA7D5PAF4GC477AQ.png" data-gif="/palestine/gifs/LD5NIWQ5ALXOK7LFLA7D5PAF4GC477AQ.gif" width="119" height="76" loading="lazy" decoding="async" alt="Palestinian flag waving over green"></li>
         </ul>
-        <p class="gif-credit">Old-web finds from <a href="https://gifcities.org/search?q=free+palestine" target="_blank" rel="noopener noreferrer">GifCities</a></p>
+        <p class="gif-credit"><span data-i18n="palestine.gif_credit">Old-web finds from</span> <a href="https://gifcities.org/search?q=free+palestine" target="_blank" rel="noopener noreferrer">GifCities</a></p>
       </section>
 
       <section class="collection" aria-labelledby="collection-heading">
-        <h2 id="collection-heading" class="visually-hidden">Available literature</h2>
+        <h2 id="collection-heading" class="visually-hidden" data-i18n="palestine.collection">Available literature</h2>
         <ol class="entries">
           <!-- Add future texts as another entry here; keep their files in /palestine/library/. -->
           <li>
             <article class="entry">
               <span class="entry-number" aria-hidden="true">01</span>
               <div class="entry-details">
-                <p class="entry-kind">English-language PDF - 2 pages</p>
+                <p class="entry-kind" data-i18n="palestine.entry_kind">English-language PDF - 2 pages</p>
                 <h3>Sinwar's Will</h3>
               </div>
               <div class="entry-actions">
-                <a class="download-link" href="/palestine/library/sinwars-will.pdf" download="Sinwar's Will.pdf">Download PDF</a>
-                <a class="read-link" href="/palestine/library/sinwars-will.pdf" target="_blank" rel="noopener">Read in browser</a>
+                <a class="download-link" href="/palestine/library/sinwars-will.pdf" download="Sinwar's Will.pdf" data-i18n="palestine.download">Download PDF</a>
+                <a class="read-link" href="/palestine/library/sinwars-will.pdf" target="_blank" rel="noopener" data-i18n="palestine.read">Read in browser</a>
               </div>
             </article>
           </li>
@@ -78,7 +81,7 @@
       </section>
 
       <footer class="archive-footer">
-        <a href="/">Return to kazvt.com</a>
+        <a href="/" data-i18n="palestine.home">Return to kazvt.com</a>
       </footer>
     </main>
   </body>

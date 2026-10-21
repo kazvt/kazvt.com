@@ -55,6 +55,45 @@ button:focus-visible {
   box-shadow: 7px 7px 0 var(--pal-green), 12px 12px 0 var(--pal-red);
 }
 
+body[data-page="palestine"] .language-dock {
+  --ink: var(--pal-black);
+  --paper: var(--pal-paper);
+  --pink: var(--pal-red);
+  --yellow: var(--pal-white);
+  --green: var(--pal-green);
+  --banner: var(--pal-black);
+  --banner-text: var(--pal-white);
+  --shadow: var(--pal-shadow);
+  position: fixed;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+  width: min(320px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  margin: 0;
+  padding: 7px;
+  border: 2px solid var(--pal-black);
+  clip-path: none;
+  box-shadow: 3px 3px 0 var(--pal-red);
+}
+
+body[data-page="palestine"] .language-dock::before,
+body[data-page="palestine"] .language-dock::after {
+  display: none;
+}
+
+body[data-page="palestine"] .language-title,
+body[data-page="palestine"] .language-dock > .language-button,
+body[data-page="palestine"] .language-option {
+  border-color: var(--pal-black);
+  box-shadow: 2px 2px 0 var(--pal-green);
+  clip-path: none;
+}
+
+body[data-page="palestine"] .language-option[aria-pressed="true"]::before,
+body[data-page="palestine"] .language-option[aria-pressed="true"]::after {
+  background: var(--pal-red);
+}
+
 .masthead {
   display: flex;
   align-items: center;
