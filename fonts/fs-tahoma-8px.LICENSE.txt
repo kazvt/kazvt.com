@@ -3,7 +3,7 @@ Designer: ETHproductions
 Copyright: Copyright ETHproductions 2012
 Source: https://www.onlinewebfonts.com/download/42f9562c8f7c7a67c631997066a9bff4
 Webfont file: https://db.onlinewebfonts.com/t/42f9562c8f7c7a67c631997066a9bff4.woff2
-License: Creative Commons Attribution-ShareAlike (CC BY-SA)
-License text: https://creativecommons.org/licenses/by-sa/3.0/
+License: Creative Commons Attribution-ShareAlike (CC BY-SA; version not stated on source page)
+License details: https://creativecommons.org/share-your-work/cclicenses/
 
 The font is used by the bottom-right Windows XP-style reminder notification.
