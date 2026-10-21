@@ -35,6 +35,62 @@
   font-family: "fs Tahoma 8px", Tahoma, sans-serif;
 }
 
+.welcome-titlebar {
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.welcome-titlebar:focus-visible {
+  outline: 1px dotted #fff;
+  outline-offset: -3px;
+}
+
+.welcome-dialog.welcome-is-dragging .welcome-titlebar {
+  cursor: grabbing;
+}
+
+.welcome-titlebar .title-bar-controls {
+  cursor: default;
+}
+
+.welcome-titlebar .welcome-position-toggle {
+  width: 18px;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 12px;
+  cursor: pointer;
+}
+
+.welcome-position-menu {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 3px);
+  right: 22px;
+  margin: 0;
+  padding: 4px;
+}
+
+.welcome-position-menu[hidden] {
+  display: none !important;
+}
+
+.welcome-position-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 26px);
+  gap: 2px;
+}
+
+.welcome-position-pad button {
+  min-width: 26px;
+  min-height: 24px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
 .welcome-icon {
   vertical-align: middle;
 }
