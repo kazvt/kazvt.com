@@ -30,8 +30,8 @@
       <h1 id="pageTitle">Rewards</h1>
       <p class="reward-intro" data-no-glyph-collage>Little handmade rewards I give out on stream for good jokes, game wins, and other fun moments. these are NOT NFTs. Just fun gifs i found.<span class="reward-intro-aside">if you call them NFTs i'll ban you, not really, i'll probably just go HEY DON'T CALL EM THAT</span></p>
       <div class="pool-readout">
-        <span class="pool-label" aria-hidden="true">Rewards left:</span>
-        <div id="poolMeter" class="pool-meter" role="progressbar" aria-label="Unique rewards remaining in the pool" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-valuetext="Loading reward pool">
+      <span class="pool-label" aria-hidden="true" data-i18n="reward.pool_left">Rewards left:</span>
+        <div id="poolMeter" class="pool-meter" role="progressbar" aria-label="Unique rewards remaining in the pool" data-i18n-aria-label="reward.pool_aria" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-valuetext="Loading reward pool">
           <span id="poolMeterFill" class="pool-meter-fill" aria-hidden="true">
             <span id="poolMeterCount" class="pool-meter-count">0</span>
           </span>
@@ -43,21 +43,21 @@
     </header>
 
     <section class="search-panel" aria-labelledby="search-label">
-      <label id="search-label" class="visually-hidden" for="awardSearch">Search rewards</label>
+        <label id="search-label" class="visually-hidden" for="awardSearch" data-i18n="reward.search">Search rewards</label>
       <div class="search-row">
         <div class="search-input-wrap">
           <input id="awardSearch" type="search" autocomplete="off" spellcheck="false"
-            placeholder="Search…" aria-controls="awardList">
+            placeholder="Search…" data-i18n-placeholder="reward.search_placeholder" aria-controls="awardList">
           <span id="searchGlyphOverlay" class="search-glyph-overlay" aria-hidden="true"></span>
         </div>
-        <button id="clearSearch" class="clear-button" type="button" hidden>Clear</button>
+        <button id="clearSearch" class="clear-button" type="button" data-i18n="reward.clear" hidden>Clear</button>
       </div>
-      <p id="resultStatus" class="result-status" role="status" aria-live="polite">Loading…</p>
+      <p id="resultStatus" class="result-status" role="status" aria-live="polite" data-i18n="reward.loading_results">Loading…</p>
     </section>
 
     <section id="awardList" class="award-list" aria-label="Assigned rewards" aria-busy="true"></section>
-    <p id="emptyState" class="empty-state" hidden>No matches.</p>
-    <p id="errorState" class="error-state" role="alert" hidden>Couldn’t load rewards. Refresh.</p>
+    <p id="emptyState" class="empty-state" data-i18n="reward.no_matches" hidden>No matches.</p>
+    <p id="errorState" class="error-state" role="alert" data-i18n="reward.load_failed" hidden>Couldn’t load rewards. Refresh.</p>
   </main>
 </body>
 </html>

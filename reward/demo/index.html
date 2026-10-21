@@ -8,7 +8,7 @@
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="A randomized, non-claimable preview of the kazvt.com chat rewards.">
   <meta name="robots" content="noindex,follow">
-<title>Reward</title>
+  <title data-i18n="title.reward">Reward</title>
 <link id="rewardFavicon" rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preload" href="/zzz_assets/fonts/SPIRAL.otf" as="font" type="font/otf" crossorigin>
 <link rel="preload" href="/reward/patterns/loading-stars.gif" as="image">
@@ -30,7 +30,7 @@
       <div class="loading-heading">
         <img class="loading-hourglass" src="/reward/retro/hourglass.gif" alt="" width="79" height="79">
         <span class="loading-hourglass-fallback" aria-hidden="true">⌛</span>
-        <h1 class="loading-title" aria-label="Loading..."><span class="loading-lineboil">Loading<span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></span></h1>
+        <h1 class="loading-title" aria-label="Loading..." data-i18n-aria-label="reward.loading"><span class="loading-lineboil" data-i18n="reward.loading">Loading…</span><span class="loading-ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
       </div>
       <p id="loadingNote" class="loading-note" hidden></p>
     </section>
@@ -48,7 +48,7 @@
         <span id="tierName" class="tier-name"></span>
       </div>
       <h1 id="recipient"></h1>
-      <p id="awardNote" class="award-note">Demo only. No reward is issued or attached to this name.</p>
+      <p id="awardNote" class="award-note" data-i18n="reward.demo_note">Demo only. No reward is issued or attached to this name.</p>
       <section id="awardCollection" class="award-collection" hidden aria-labelledby="awardCollectionHeading">
         <h2 id="awardCollectionHeading" class="award-collection-heading"></h2>
         <ul id="awardCollectionGrid" class="award-collection-grid" aria-label="Rewards, newest first"></ul>
@@ -56,10 +56,10 @@
       </section>
     </section>
     <section id="errorState" hidden>
-      <h1>Demo temporarily unavailable</h1>
+      <h1 data-i18n="reward.demo_error_title">Demo temporarily unavailable</h1>
       <p id="errorMessage" class="message">Couldn't load a demo. Please try again.</p>
     </section>
-    <p class="demo-footnote" hidden>The name and artwork are randomized. Nothing is assigned or saved.</p>
+    <p class="demo-footnote" data-i18n="reward.demo_footnote" hidden>The name and artwork are randomized. Nothing is assigned or saved.</p>
   </main>
   <a id="allRewardsLink" class="all-rewards-link" href="/reward/list/" hidden>
     <svg class="all-rewards-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -68,7 +68,7 @@
       <circle cx="4.25" cy="7.25" r=".75"></circle>
       <path d="M5.5 2h9v10"></path>
     </svg>
-    <span>Reward gallery</span>
+    <span data-i18n="reward.gallery_link">Reward gallery</span>
   </a>
 
 </body>
