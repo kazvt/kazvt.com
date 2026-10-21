@@ -139,16 +139,6 @@
       if (source && image.getAttribute("src") !== source) image.setAttribute("src", source);
     });
 
-<<<<<<< ours
-    toggle.setAttribute("aria-pressed", String(playing));
-    toggle.setAttribute("aria-label", text(playing ? "palestine.pause_aria" : "palestine.play_aria", playing ? "Pause Palestine GIFs" : "Play Palestine GIFs"));
-    if (label) label.textContent = text(playing ? "palestine.pause" : "palestine.play", playing ? "Pause GIFs" : "Play GIFs");
-    if (mark) mark.textContent = playing ? "Ⅱ" : "▶";
-  }
-
-  setGifMotion(!motionPreference.matches);
-  i18n?.ready?.then(() => setGifMotion(toggle.getAttribute("aria-pressed") === "true"));
-=======
     toggle.setAttribute("aria-pressed", String(shouldPlay));
     toggle.setAttribute(
       "aria-label",
@@ -162,7 +152,6 @@
   window.KazvtI18n?.ready?.then(() => {
     setGifMotion(toggle.getAttribute("aria-pressed") === "true");
   });
->>>>>>> theirs
 
   toggle.addEventListener("click", () => {
     visitorChoice = toggle.getAttribute("aria-pressed") !== "true";
