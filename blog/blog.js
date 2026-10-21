@@ -1040,7 +1040,7 @@
       const selected = publishedSelect.value;
       publishedSelect.replaceChildren(new Option(workingPosts.length ? "choose a post…" : "no posts in export yet", ""));
       [...workingPosts].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).forEach((post) => {
-        publishedSelect.add(new Option(`${post.title} · ${new Date(post.publishedAt).toLocaleDateString()}`, post.slug));
+        publishedSelect.add(new Option(`${post.title}  -  ${new Date(post.publishedAt).toLocaleDateString()}`, post.slug));
       });
       publishedSelect.value = workingPosts.some((post) => post.slug === selected) ? selected : "";
     }
@@ -1052,7 +1052,7 @@
       drafts.forEach((draft) => {
         const label = draft.title?.trim() || "untitled draft";
         const date = parseDate(draft.savedAt)?.toLocaleString() || "";
-        draftSelect.add(new Option(`${label}${date ? ` · ${date}` : ""}`, draft.id));
+        draftSelect.add(new Option(`${label}${date ? `  -  ${date}` : ""}`, draft.id));
       });
       draftSelect.value = drafts.some((draft) => draft.id === selected) ? selected : "";
     }
@@ -1077,10 +1077,10 @@
       const record = draftSnapshot();
       try {
         const storage = await putDraft(record);
-        setStatus(saveStatus, `draft saved on this device · ${new Date(record.savedAt).toLocaleTimeString()}`, "ok");
+        setStatus(saveStatus, `draft saved on this device  -  ${new Date(record.savedAt).toLocaleTimeString()}`, "ok");
         await refreshDraftSelect();
         if (storage === "browser storage") {
-          setStatus(saveStatus, "draft saved on this device · limited-storage fallback in use", "warning");
+          setStatus(saveStatus, "draft saved on this device  -  limited-storage fallback in use", "warning");
         }
       } catch (error) {
         setStatus(saveStatus, `${error.message}. Download the publish file to keep your work.`, "error");

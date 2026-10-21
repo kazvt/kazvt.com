@@ -1254,7 +1254,7 @@
         this.time.delayedCall(type.fuse, () => {
           if (bomb.active && !bomb.body.plugin.gameMeta.detonated) this.explodeBomb(bomb.body.plugin.gameMeta, bomb.x, bomb.y);
         });
-        this.showNotice(`${type.label} bomb launched · −1 ammo.`);
+        this.showNotice(`${type.label} bomb launched  -  −1 ammo.`);
         this.updateHud(true);
       }
 
@@ -1429,7 +1429,7 @@
           for (const pair of contacts) {
             if (this.surfaceContact(pair)) { this.attachSpiderBall(pair); break; }
           }
-          this.showNotice(this.spiderAttached ? 'Spider Ball ON · A/D to crawl.' : 'Spider Ball ON · touch a surface.');
+          this.showNotice(this.spiderAttached ? 'Spider Ball ON  -  A/D to crawl.' : 'Spider Ball ON  -  touch a surface.');
         }
         this.updateHud(true);
       }
@@ -1578,15 +1578,15 @@
       findAirBounce(side) {
         if (this.upgrades.ghost && !this.airUses.ghost && side === this.lastFlipper) {
           this.airUses.ghost = true;
-          return 'GHOST FLIP · same flipper, one mid-air bounce.';
+          return 'GHOST FLIP  -  same flipper, one mid-air bounce.';
         }
         if (this.upgrades.virtual && !this.airUses.virtual) {
           this.airUses.virtual = true;
-          return 'VIRTUAL FLIP · either side, one mid-air bounce.';
+          return 'VIRTUAL FLIP  -  either side, one mid-air bounce.';
         }
         if (this.echoCharges > 0) {
           this.echoCharges -= 1;
-          return `ECHO FLIP · ${this.echoCharges} charge${this.echoCharges === 1 ? '' : 's'} left.`;
+          return `ECHO FLIP  -  ${this.echoCharges} charge${this.echoCharges === 1 ? '' : 's'} left.`;
         }
         return '';
       }
@@ -1596,7 +1596,7 @@
         if (this.spiderAttached) {
           this.playSfx('ui');
           this.releaseSpiderBall();
-          this.showNotice('Spider Ball OFF · released.');
+          this.showNotice('Spider Ball OFF  -  released.');
           return;
         }
         if (!this.initialLaunchAvailable ||
@@ -1665,7 +1665,7 @@
           }, { kind: 'enemy', id: def.id, hp: def.hp, maxHp: def.hp, minX: def.minX, maxX: def.maxX, dir: 1, shielded: !!def.shielded, boss: false, dead: false });
           this.enemies.push(enemy);
         }
-        this.showNotice('HULL EMPTY · respawned. Score/ammo drops and ordinary aliens returned; upgrades persist.');
+        this.showNotice('HULL EMPTY  -  respawned. Score/ammo drops and ordinary aliens returned; upgrades persist.');
         this.updateHud(true);
       }
 
