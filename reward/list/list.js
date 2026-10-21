@@ -10,6 +10,18 @@ import "../background-context.mjs?v=1";
 (() => {
   "use strict";
 
+  const i18n = window.KazvtI18n;
+  const text = (key, fallback) => i18n?.t?.(key) || fallback;
+  const format = (key, fallback, replacements = {}) => {
+    let value = text(key, fallback);
+    Object.entries(replacements).forEach(([name, replacement]) => {
+      value = value.replaceAll(`{${name}}`, String(replacement));
+    });
+    return value;
+  };
+  const translatedTier = (tierId, fallback) => text(`reward.tier.${tierId}`, fallback);
+  const isRightToLeftOrCjk = () => /^(?:ar|zh)(?:-|$)/i.test(document.documentElement.lang);
+
   const searchInput = document.getElementById("awardSearch");
   const clearButton = document.getElementById("clearSearch");
   const resultStatus = document.getElementById("resultStatus");
@@ -44,6 +56,7 @@ import "../background-context.mjs?v=1";
   }
 
   function mixedTextFragment(text) {
+    if (isRightToLeftOrCjk()) return document.createTextNode(text);
     const fragment = document.createDocumentFragment();
     let currentWord = null;
     for (const { glyph, fontClass } of createMixedGlyphs(text)) {
@@ -66,13 +79,14 @@ import "../background-context.mjs?v=1";
   }
 
   function renderMixedText(element, text) {
+    element.dir = "auto";
     element.replaceChildren(mixedTextFragment(text));
   }
 
   function shouldSkipTextNode(node) {
     const parent = node.parentElement;
     return !parent || !/\S/u.test(node.nodeValue ?? "") ||
-      parent.closest(".mixed-page-glyph, .tier-font-text, script, style, noscript, textarea, select, option, [contenteditable]:not([contenteditable='false']), [data-no-glyph-collage]") !== null;
+      parent.closest(".language-dock, .mixed-page-glyph, .tier-font-text, script, style, noscript, textarea, select, option, [contenteditable]:not([contenteditable='false']), [data-no-glyph-collage]") !== null;
   }
 
   function mixTextNode(node) {
