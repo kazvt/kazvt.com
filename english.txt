@@ -561,10 +561,9 @@ reward.back=← rewards
 reward.assigned_aria=Assigned rewards
 
 # Palestine literature page
-title.palestine=Palestinian Literature - Translated by kazvt
-palestine.meta_description=Palestinian literature translated by kazvt.
+title.palestine=Palestinian Literature
+palestine.meta_description=Palestinian literature to read and download.
 palestine.title=Palestinian Literature
-palestine.byline=Translated by kazvt.
 palestine.home=Return to kazvt.com
 palestine.play=Play GIFs
 palestine.pause=Pause GIFs

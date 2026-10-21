@@ -443,8 +443,7 @@ reward.reason_title=Motivo de la recompensa: {reason}
 
 # Palestine archive
 palestine.title=Literatura palestina
-palestine.meta_description=Literatura palestina traducida por kazvt.
-palestine.byline=Traducida por kazvt.
+palestine.meta_description=Literatura palestina para leer y descargar.
 palestine.home=Volver a kazvt.com
 palestine.gif_wall=GIFs de Palestina
 palestine.solidarity=PALESTINA LIBRE
