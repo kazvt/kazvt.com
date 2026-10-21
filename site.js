@@ -1863,16 +1863,39 @@ function initializeGuestbookWidget() {
   const mount = document.getElementById("HCB_comment_box");
   if (!mount || document.getElementById("kazvt-hcb-guestbook-loader")) return;
 
-  const replaceGuestbookMetaDots = () => {
-    mount.querySelectorAll(".hcb-comment-tb").forEach((metadata) => {
-      const walker = document.createTreeWalker(metadata, NodeFilter.SHOW_TEXT);
-      let textNode;
-      while ((textNode = walker.nextNode())) {
-        textNode.nodeValue = textNode.nodeValue.replace(/\s*[·•]\s*/g, " - ");
-      }
-    });
+  const normalizeGuestbookMetadata = (metadata) => {
+    const walker = document.createTreeWalker(metadata, NodeFilter.SHOW_TEXT);
+    let textNode;
+    while ((textNode = walker.nextNode())) {
+      const originalText = textNode.nodeValue;
+      const normalizedText = originalText.replace(/\s*[·•]\s*/g, " - ");
+      // Avoid emitting another characterData mutation when nothing changed.
+      if (normalizedText !== originalText) textNode.nodeValue = normalizedText;
+    }
   };
-  const guestbookObserver = new MutationObserver(replaceGuestbookMetaDots);
+  const normalizeGuestbookMetaNode = (node, includeDescendants = false) => {
+    const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    if (!element) return;
+
+    const metadataNodes = new Set();
+    const enclosingMetadata = element.closest(".hcb-comment-tb");
+    if (enclosingMetadata) metadataNodes.add(enclosingMetadata);
+
+    if (includeDescendants) {
+      element.querySelectorAll(".hcb-comment-tb").forEach((metadata) => metadataNodes.add(metadata));
+    }
+
+    metadataNodes.forEach(normalizeGuestbookMetadata);
+  };
+  const replaceGuestbookMetaDots = () => {
+    mount.querySelectorAll(".hcb-comment-tb").forEach(normalizeGuestbookMetadata);
+  };
+  const guestbookObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      normalizeGuestbookMetaNode(mutation.target);
+      mutation.addedNodes.forEach((node) => normalizeGuestbookMetaNode(node, true));
+    }
+  });
   guestbookObserver.observe(mount, { childList: true, characterData: true, subtree: true });
   window.addEventListener("pagehide", () => guestbookObserver.disconnect(), { once: true });
 
