@@ -1,7 +1,6 @@
 import { createRewardHref } from "../reward-link.mjs?v=github-static-2";
 import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { normalizeAwardUsername, validateAndSortAssignments } from "../assignment-registry.mjs?v=award-reason-20261020-v1";
-import { formatPoolCount } from "./pool-count.mjs?v=uppercase-count-words-1";
 import { createMixedGlyphs } from "./mixed-glyphs.mjs?v=gallery-glyph-collage-20261020-v4";
 import { createGalleryDecalSeed, selectGalleryEdgeDecals } from "./gallery-decals.mjs?v=gallery-decal-scatter-20261020-v3";
 import "../pattern-zoom.mjs?v=2";
@@ -175,6 +174,16 @@ import "../background-context.mjs?v=1";
     renderMixedText(searchGlyphOverlay, isPlaceholder ? searchInput.placeholder : searchInput.value);
   }
 
+  function formatPoolWord(count) {
+    const wordKeys = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+    if (Number.isInteger(count) && count >= 0 && count <= 10) {
+      const englishWords = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+      const localized = text(`reward.count.${wordKeys[count]}`, englishWords[count]);
+      return isRightToLeftOrCjk() ? localized : localized.toLocaleUpperCase(document.documentElement.lang || "en");
+    }
+    return new Intl.NumberFormat(document.documentElement.lang || "en", { useGrouping: false }).format(count);
+  }
+
   updateSearchGlyphOverlay();
   searchInput.addEventListener("input", updateSearchGlyphOverlay);
   searchInput.addEventListener("blur", updateSearchGlyphOverlay);
@@ -267,10 +276,10 @@ import "../background-context.mjs?v=1";
     const max = Math.max(total, 1);
     poolMeter.setAttribute("aria-valuemax", String(max));
     poolMeter.setAttribute("aria-valuenow", String(remaining));
-    poolMeter.setAttribute("aria-valuetext", `${remaining} of ${total} unique rewards remain`);
+    poolMeter.setAttribute("aria-valuetext", format("reward.pool_remaining", "{remaining} of {total} unique rewards remain", { remaining, total }));
     poolMeter.classList.toggle("is-empty", remaining === 0);
     poolMeter.classList.remove("is-unavailable");
-    const countLabel = formatPoolCount(remaining);
+    const countLabel = formatPoolWord(remaining);
     renderMixedText(poolMeterEmptyCount, countLabel);
     renderMixedText(poolMeterCount, countLabel);
     const fillPercent = total ? (remaining / total) * 100 : 0;
@@ -278,7 +287,8 @@ import "../background-context.mjs?v=1";
     poolMeterFill.style.width = remaining > 0
       ? `max(${fillPercent}%, ${countWidth}px)`
       : "0%";
-    poolStatus.textContent = `${remaining} unique ${remaining === 1 ? "reward" : "rewards"} left.`;
+    poolStatus.textContent = format(remaining === 1 ? "reward.pool_status_one" : "reward.pool_status_many",
+      remaining === 1 ? "{count} unique reward left." : "{count} unique rewards left.", { count: remaining });
   }
 
   async function makeCard(assignment) {
