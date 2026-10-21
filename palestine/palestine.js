@@ -98,7 +98,7 @@
       });
       context.strokeStyle = color;
       context.lineWidth = lineWidth;
-      context.lineCap = "round";
+      context.lineCap = "butt";
       context.lineJoin = "round";
       context.stroke();
     }
