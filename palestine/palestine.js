@@ -86,26 +86,21 @@
       });
     }
 
-    function fillBand(trail, normals, outerOffset, innerOffset, color) {
+    function strokeBand(trail, normals, offset, color, lineWidth) {
       context.beginPath();
       trail.forEach((point, index) => {
-        const edge = {
-          x: point.x + normals[index].x * outerOffset,
-          y: point.y + normals[index].y * outerOffset,
+        const center = {
+          x: point.x + normals[index].x * offset,
+          y: point.y + normals[index].y * offset,
         };
-        if (index === 0) context.moveTo(edge.x, edge.y);
-        else context.lineTo(edge.x, edge.y);
+        if (index === 0) context.moveTo(center.x, center.y);
+        else context.lineTo(center.x, center.y);
       });
-      for (let index = trail.length - 1; index >= 0; index -= 1) {
-        const point = trail[index];
-        context.lineTo(
-          point.x + normals[index].x * innerOffset,
-          point.y + normals[index].y * innerOffset,
-        );
-      }
-      context.closePath();
-      context.fillStyle = color;
-      context.fill();
+      context.strokeStyle = color;
+      context.lineWidth = lineWidth;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      context.stroke();
     }
 
     function findTriangleTip(trail, baseIndex) {
@@ -144,10 +139,12 @@
       const normals = getNormals(trail);
       context.lineJoin = "round";
       context.lineCap = "round";
+      context.miterLimit = 2;
 
-      fillBand(trail, normals, halfHeight, bandHeight / 2, "#171a18");
-      fillBand(trail, normals, bandHeight / 2, -bandHeight / 2, "#fffdf3");
-      fillBand(trail, normals, -bandHeight / 2, -halfHeight, "#087a3f");
+      strokeBand(trail, normals, 0, "rgba(23, 26, 24, 0.8)", bandHeight * 3 + 2);
+      strokeBand(trail, normals, bandHeight, "#171a18", bandHeight);
+      strokeBand(trail, normals, 0, "#fffdf3", bandHeight);
+      strokeBand(trail, normals, -bandHeight, "#087a3f", bandHeight);
 
       const baseIndex = trail[0].x <= trail[trail.length - 1].x ? 0 : trail.length - 1;
       const tip = findTriangleTip(trail, baseIndex);
@@ -174,26 +171,6 @@
       context.closePath();
       context.strokeStyle = "rgba(23, 26, 24, 0.65)";
       context.lineWidth = 0.8;
-      context.stroke();
-
-      context.beginPath();
-      trail.forEach((point, index) => {
-        const edge = {
-          x: point.x + normals[index].x * halfHeight,
-          y: point.y + normals[index].y * halfHeight,
-        };
-        if (index === 0) context.moveTo(edge.x, edge.y);
-        else context.lineTo(edge.x, edge.y);
-      });
-      for (let index = trail.length - 1; index >= 0; index -= 1) {
-        context.lineTo(
-          trail[index].x - normals[index].x * halfHeight,
-          trail[index].y - normals[index].y * halfHeight,
-        );
-      }
-      context.closePath();
-      context.strokeStyle = "rgba(23, 26, 24, 0.55)";
-      context.lineWidth = 1;
       context.stroke();
     }
 
