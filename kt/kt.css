@@ -208,18 +208,6 @@ body[data-page="kt"] summary:focus-visible {
   animation: kt-flag-rock 3.8s steps(8, end) infinite;
 }
 
-.kt-flag-star {
-  position: absolute;
-  z-index: 2;
-  top: 8%;
-  right: 3%;
-  width: 30px;
-  height: auto;
-  image-rendering: pixelated;
-  filter: drop-shadow(2px 2px 0 var(--kt-ink));
-  animation: kt-star-spin 4s steps(8, end) infinite;
-}
-
 .kt-hero-copy {
   position: relative;
   z-index: 2;
@@ -546,39 +534,37 @@ body[data-page="kt"] summary:focus-visible {
   image-rendering: auto;
 }
 
-.kt-sticker--welcome {
+.kt-sticker--flag-button {
   top: 122px;
   left: -16px;
-  width: clamp(115px, 17vw, 170px);
+  width: 88px;
+  pointer-events: auto;
   transform: rotate(-7deg) perspective(400px) rotateY(13deg);
   animation: kt-sticker-hop 5.4s steps(7, end) infinite;
 }
 
-.kt-sticker--smiley {
-  top: 185px;
+.kt-sticker--flag-button img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.kt-sticker--trans-proud {
+  top: 205px;
   right: -21px;
-  width: clamp(42px, 6vw, 65px);
-  transform: perspective(300px) rotateY(-16deg) rotateZ(9deg);
+  width: clamp(112px, 14vw, 142px);
+  transform: perspective(360px) rotateY(-16deg) rotateZ(7deg);
   animation: kt-sticker-hop 4.1s steps(6, end) infinite reverse;
 }
 
-.kt-sticker--mailbox {
+.kt-sticker--gender-symbol {
   top: 570px;
   left: -11px;
-  width: clamp(36px, 5vw, 52px);
+  width: clamp(46px, 5.5vw, 58px);
   transform: perspective(360px) rotateY(14deg) rotateZ(-6deg);
   animation: kt-sticker-hop 4.7s steps(6, end) infinite;
   animation-delay: -2.1s;
-}
-
-.kt-sticker--star {
-  top: 455px;
-  right: 4px;
-  width: 31px;
-  transform: scale(2.2);
-  image-rendering: pixelated;
-  animation: kt-star-spin 3.2s steps(8, end) infinite;
-  animation-delay: -1.2s;
 }
 
 @keyframes kt-flag-rock {
@@ -594,11 +580,6 @@ body[data-page="kt"] summary:focus-visible {
 @keyframes kt-sticker-hop {
   0%, 100% { translate: 0 0; rotate: -1deg; }
   50% { translate: 2px -7px; rotate: 2deg; }
-}
-
-@keyframes kt-star-spin {
-  0%, 100% { rotate: -13deg; translate: 0 0; }
-  50% { rotate: 22deg; translate: 2px -3px; }
 }
 
 @media (max-width: 700px) {
@@ -627,10 +608,7 @@ body[data-page="kt"] summary:focus-visible {
   .kt-affiliation { margin-inline: auto; text-align: start; }
   .kt-roster-heading { align-items: start; flex-direction: column; gap: 6px; }
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); gap: 13px; }
-  .kt-sticker--welcome,
-  .kt-sticker--mailbox,
-  .kt-sticker--star,
-  .kt-sticker--smiley { display: none; }
+  .kt-floaties { display: none; }
 }
 
 @media (max-width: 430px) {
@@ -648,17 +626,19 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kt-floaties,
-  .kt-flag-star { display: none !important; }
+  .kt-sticker--trans-proud,
+  .kt-sticker--gender-symbol { display: none !important; }
 
   .kt-flag,
   .kt-member,
   .kt-kick-link,
-  .kt-home-link {
+  .kt-home-link,
+  .kt-sticker--flag-button {
     animation: none !important;
     transition: none !important;
   }
 
+  .kt-sticker--flag-button { transform: none; }
   .kt-flag { transform: rotateY(-12deg) rotateX(4deg); }
   .kt-member { transform: none; }
 }
