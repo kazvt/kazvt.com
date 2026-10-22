@@ -424,6 +424,7 @@ body[data-page="kt"] summary:focus-visible {
 .kt-member-name {
   overflow-wrap: anywhere;
   color: var(--kt-ink);
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: clamp(1.04rem, 2vw, 1.32rem);
   font-weight: 1000;
   line-height: 1.05;
