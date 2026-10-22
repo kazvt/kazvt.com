@@ -195,7 +195,7 @@ body[data-page="kt"] summary:focus-visible {
   top: 50%;
   left: 50%;
   display: block;
-  width: min(130%, 460px);
+  width: min(170%, 560px);
   aspect-ratio: 16 / 9;
   border: 0;
   outline: 0;
@@ -622,7 +622,7 @@ body[data-page="kt"] summary:focus-visible {
     width: min(280px, 82%);
   }
 
-  .kt-flag { width: min(110%, 300px); }
+  .kt-flag { width: min(125%, 350px); }
   .kt-hero-copy { text-align: center; }
   .kt-eyebrow { letter-spacing: .09em; }
   .kt-hero h1 { justify-items: center; font-size: clamp(2.6rem, 11vw, 4.2rem); }
