@@ -475,6 +475,8 @@ function renderAssignments() {
     assignmentMode = "active";
     selectedAssignment = "";
     renderAssignments();
+    updatePreviewLink();
+    sendDetailPreview();
   }));
   const modes = make("div", "preview-tabs");
   for (const [mode, label] of [["active", "Active"], ["editor", "Removed here"], ["revoked", "Revoked"]]) {
@@ -482,6 +484,8 @@ function renderAssignments() {
       assignmentMode = mode;
       selectedAssignment = "";
       renderAssignments();
+      updatePreviewLink();
+      sendDetailPreview();
     });
     modes.append(button);
   }
