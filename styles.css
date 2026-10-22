@@ -5257,21 +5257,21 @@ body {
 }
 
 #guestbook .guestbook-lines {
-  gap: 3px;
-  padding: 4px;
+  gap: 2px;
+  padding: 3px;
   border: 2px solid var(--ink);
   background: color-mix(in srgb, var(--paper-alt) 78%, transparent);
   box-shadow: 3px 3px 0 var(--shadow);
 }
 
 #guestbook {
-  padding: 10px;
+  padding: 8px;
 }
 
 #guestbook .panel-head {
-  gap: 7px;
-  margin: -2px -2px 8px;
-  padding: 7px 9px;
+  gap: 6px;
+  margin: -2px -2px 6px;
+  padding: 6px 8px;
   border-width: 3px;
 }
 
@@ -5299,7 +5299,7 @@ body {
 
 #guestbook #HCB_comment_box form {
   display: grid;
-  gap: 3px;
+  gap: 2px;
   margin: 0;
 }
 
@@ -5384,10 +5384,19 @@ body {
   outline-offset: 3px;
 }
 
+#guestbook #HCB_comment_box #comments_list {
+  max-height: 48vh;
+  max-height: min(30rem, 48vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--pink) var(--paper-alt);
+  scrollbar-width: thin;
+}
+
 #guestbook #HCB_comment_box #comments_list .comment_,
 #guestbook #HCB_comment_box #comments_list > div {
-  margin: 3px 0;
-  padding: 4px 6px;
+  margin: 2px 0;
+  padding: 3px 5px;
   border: 2px dashed var(--ink);
   background: color-mix(in srgb, var(--paper-alt) 72%, transparent);
   box-shadow: 2px 2px 0 var(--shadow);
