@@ -48,7 +48,7 @@ test("the common reward component retains artwork, tier, title, collection, and 
 
   const sharedRenderer = rewardScript.match(/async function renderRewardPage[\s\S]*?(?=async function openDemo)/)?.[0] ?? "";
   const demoLoader = rewardScript.match(/async function openDemo[\s\S]*?(?=async function openReward)/)?.[0] ?? "";
-  const assignmentLoader = rewardScript.match(/async function openReward[\s\S]*?(?=\n  if \(document\.body\.hasAttribute)/)?.[0] ?? "";
+  const assignmentLoader = rewardScript.match(/async function openReward[\s\S]*?(?=\n  await \(window\.KazvtI18n\?\.ready)/)?.[0] ?? "";
   assert.match(sharedRenderer, /setRewardFavicon\(file, metadata\.assetId\)/);
   assert.match(sharedRenderer, /if \(allRewardsLink\) allRewardsLink\.hidden = false;/,
     "the shared reward gallery link is shown for both assigned rewards and demos");
@@ -148,7 +148,7 @@ test("palette-free galleries keep their glyph collage except tier-styled reward 
     "the decorative zero-pool label is real text, so it can use per-glyph fonts");
   assert.match(galleryPage, /id="searchGlyphOverlay"[^>]*aria-hidden="true"/,
     "the collage search overlay remains decorative to assistive technology");
-  assert.match(galleryPage, /list\.css\?v=gallery-edge-decals-20261020-v3/,
+  assert.match(galleryPage, /list\.css\?v=reward-intro-comic-20261022-v1/,
     "the updated gallery stylesheet receives a fresh cache key");
   assert.match(galleryPage, /list\.js\?v=gallery-edge-decals-20261020-v3/,
     "the updated gallery script receives a fresh cache key");
