@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path, PurePosixPath
 from typing import Any
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -336,7 +336,7 @@ def _list_artwork(catalog: dict[str, Any], registry: dict[str, Any], reservation
             "assigned": bool(assignment),
             "reserved": metadata["assetId"] in reserved,
             "assignedTo": assignment.get("username", "") if assignment else "",
-            "url": "/zzz_assets/rewards/" + "/".join(__import__("urllib.parse", fromlist=["quote"]).quote(part) for part in filename.split("/")),
+            "url": "/zzz_assets/rewards/" + quote(filename, safe=""),
         })
     return results
 
