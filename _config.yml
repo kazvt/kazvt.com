@@ -15,3 +15,6 @@ exclude:
   - vendor/ruby/
   - blog/write
   - blog/write/**
+  # The reward editor is served only by its loopback-only Python server.
+  - tools/reward-editor-local
+  - tools/reward-editor-local/**
