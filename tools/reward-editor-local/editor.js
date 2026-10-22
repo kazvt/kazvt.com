@@ -471,7 +471,7 @@ function renderAssignments() {
   const group = make("div");
   group.append(make("h2", "", assignmentMode === "active" ? "Active rewards" : assignmentMode === "editor" ? "Removed here" : "Revoked rewards"),
     make("p", "", "Every active reward has its own username and optional public FOR note."));
-  top.append(group, makeButton("+ New award", "button", () => {
+  top.append(group, makeButton("+ New reward", "button", () => {
     assignmentMode = "active";
     selectedAssignment = "";
     renderAssignments();
@@ -595,7 +595,7 @@ function renderAssignmentInspector() {
   );
   const publicWarning = make("p", "warning", "Username, platform ID, reward name, date, and FOR note are published in assignments.json. Do not put private details in the note.");
   const actions = make("div", "form-actions");
-  const save = makeButton(creating ? "Create assignment locally" : "Save assignment locally", "button", async () => {
+  const save = makeButton(creating ? "Create reward locally" : "Save reward locally", "button", async () => {
     const payload = {
       action: creating ? "create" : "update",
       expectedAssignments: state.digests.assignments,
@@ -614,7 +614,13 @@ function renderAssignmentInspector() {
       const result = await api("/assignments", { method: "POST", json: payload });
       const url = result.href ? ` - ${new URL(result.href, location.origin).href}` : "";
       await refreshState({ message: `${result.message}${url}` });
-      if (creating) assignmentMode = "active";
+      if (creating) {
+        assignmentMode = "active";
+        selectedAssignment = new URL(result.href, location.origin).searchParams.get("id") || selectedAssignment;
+        renderAssignments();
+        updatePreviewLink();
+        sendDetailPreview();
+      }
     } catch (error) { setFlash(error.message, true); }
   });
   actions.append(save);
