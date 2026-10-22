@@ -168,7 +168,7 @@ body[data-page="kt"] summary:focus-visible {
   z-index: 1;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(190px, .8fr) minmax(0, 1.7fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: clamp(18px, 4vw, 42px);
   padding: clamp(28px, 5vw, 56px) clamp(22px, 6vw, 70px) 34px;
