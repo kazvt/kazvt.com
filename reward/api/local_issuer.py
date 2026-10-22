@@ -142,7 +142,9 @@ def _validate_registry(registry: dict[str, Any]) -> None:
         raise RewardIssueError("The reward assignment registry is invalid.")
     revoked_records = registry.get("revokedAssignments", [])
     command_events = registry.get("rewardCommandEvents", [])
-    if not isinstance(revoked_records, list) or not isinstance(command_events, list):
+    editor_archived_records = registry.get("editorArchivedAssignments", [])
+    if (not isinstance(revoked_records, list) or not isinstance(command_events, list) or
+            not isinstance(editor_archived_records, list)):
         raise RewardIssueError("The reward assignment history is invalid.")
 
     seen_assets: set[str] = set()
@@ -158,7 +160,9 @@ def _validate_registry(registry: dict[str, Any]) -> None:
         except ValueError as exc:
             raise RewardIssueError(f"{description} has an invalid timestamp.") from exc
 
-    def validate_assignment(record: Any, index: int, *, revoked: bool) -> None:
+    def validate_assignment(
+        record: Any, index: int, *, revoked: bool, editor_archived: bool = False,
+    ) -> None:
         if not isinstance(record, dict):
             raise RewardIssueError(f"Assignment record {index + 1} is invalid.")
         asset_id = record.get("assetId", record.get("assetSha256", ""))
@@ -167,9 +171,9 @@ def _validate_registry(registry: dict[str, Any]) -> None:
         asset_id = asset_id.lower()
         if record.get("assetSha256") is not None and str(record.get("assetSha256")).lower() != asset_id:
             raise RewardIssueError(f"Assignment record {index + 1} has conflicting artwork IDs.")
-        if not revoked and asset_id in seen_assets:
+        if not revoked and not editor_archived and asset_id in seen_assets:
             raise RewardIssueError("The assignment registry repeats artwork; refusing to issue another award.")
-        if not revoked:
+        if not revoked and not editor_archived:
             seen_assets.add(asset_id)
 
         filename = record.get("filename")
@@ -227,13 +231,23 @@ def _validate_registry(registry: dict[str, Any]) -> None:
                 raise RewardIssueError(f"Revoked assignment record {index + 1} is invalid.")
             validate_timestamp(revoked_at, f"Revoked assignment record {index + 1}")
             archived_by_command.setdefault(revocation_event_hash.lower(), set()).add(str(link_id))
+        elif editor_archived:
+            if (not isinstance(record.get("editorArchivedBy"), str) or
+                    record["editorArchivedBy"].casefold() not in REWARD_CHAT_ACTORS or
+                    any(key in record for key in ("revokedAt", "revokedBy", "revocationEventHash", "revocationAction"))):
+                raise RewardIssueError(f"Editor-archived assignment record {index + 1} is invalid.")
+            validate_timestamp(record.get("editorArchivedAt"), f"Editor-archived assignment record {index + 1}")
         elif any(key in record for key in ("revokedAt", "revokedBy", "revocationEventHash", "revocationAction")):
             raise RewardIssueError(f"Active assignment record {index + 1} has revocation metadata.")
+        elif any(key in record for key in ("editorArchivedAt", "editorArchivedBy")):
+            raise RewardIssueError(f"Active assignment record {index + 1} has editor-archive metadata.")
 
     for index, record in enumerate(records):
         validate_assignment(record, index, revoked=False)
     for index, record in enumerate(revoked_records):
         validate_assignment(record, index, revoked=True)
+    for index, record in enumerate(editor_archived_records):
+        validate_assignment(record, index, revoked=False, editor_archived=True)
 
     seen_command_events: set[str] = set()
     for index, event in enumerate(command_events):
@@ -446,7 +460,8 @@ def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> 
 
 
 def _find_event(registry: dict[str, Any], event_hash: str) -> dict[str, Any] | None:
-    for record in [*registry["assignments"], *registry.get("revokedAssignments", [])]:
+    for record in [*registry["assignments"], *registry.get("revokedAssignments", []),
+                   *registry.get("editorArchivedAssignments", [])]:
         current_hash = record.get("eventIdHash")
         if isinstance(current_hash, str) and current_hash.lower() == event_hash:
             return record
