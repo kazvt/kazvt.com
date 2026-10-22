@@ -168,8 +168,10 @@ function setPreviewMode(mode) {
 }
 
 function previewPayload() {
-  let assignment = null;
-  if (activeSection === "assignments") assignment = selectedAssignmentRecord();
+  let assignment = activeSection === "assignments"
+    ? selectedAssignmentRecord() || state.editorArchivedAssignments.find(item => item.linkId === selectedAssignment) ||
+      state.revokedAssignments.find(item => item.linkId === selectedAssignment)
+    : null;
   if (!assignment && selectedArtwork) {
     assignment = state.assignments.find(item => item.filename === selectedArtwork) || null;
   }
@@ -189,9 +191,11 @@ function updatePreviewLink() {
     return;
   }
   const payload = previewPayload();
-  const assignment = activeSection === "assignments" ? selectedAssignmentRecord()
+  const assignment = activeSection === "assignments"
+    ? selectedAssignmentRecord() || state.editorArchivedAssignments.find(item => item.linkId === selectedAssignment) ||
+      state.revokedAssignments.find(item => item.linkId === selectedAssignment)
     : state.assignments.find(item => item.filename === payload.filename);
-  if (assignment?.linkId) {
+  if (assignment?.linkId && assignmentMode === "active") {
     previewLink.href = `/reward/?id=${encodeURIComponent(assignment.linkId)}`;
   } else {
     const query = new URLSearchParams({
@@ -228,6 +232,7 @@ document.querySelectorAll(".nav-button[data-section]").forEach(button => {
   button.addEventListener("click", () => {
     activeSection = button.dataset.section;
     renderSection();
+    updatePreviewLink();
     if (previewMode === "detail") sendDetailPreview();
   });
 });
