@@ -546,7 +546,7 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 .kt-sticker--welcome {
-  top: 22px;
+  top: 122px;
   left: -16px;
   width: clamp(115px, 17vw, 170px);
   transform: rotate(-7deg) perspective(400px) rotateY(13deg);
@@ -626,10 +626,10 @@ body[data-page="kt"] summary:focus-visible {
   .kt-affiliation { margin-inline: auto; text-align: start; }
   .kt-roster-heading { align-items: start; flex-direction: column; gap: 6px; }
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); gap: 13px; }
-  .kt-sticker--welcome { top: 72px; left: -3px; width: 100px; opacity: .78; }
-  .kt-sticker--smiley { top: 330px; right: -3px; width: 39px; }
+  .kt-sticker--welcome,
   .kt-sticker--mailbox,
   .kt-sticker--star { display: none; }
+  .kt-sticker--smiley { top: 330px; right: -3px; width: 39px; }
 }
 
 @media (max-width: 430px) {
