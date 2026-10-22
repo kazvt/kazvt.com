@@ -526,8 +526,8 @@ body[data-page="kt"] summary:focus-visible {
   min-height: 56px;
   padding: 10px clamp(18px, 5vw, 54px);
   border-top: 3px solid var(--kt-ink);
-  background: var(--kt-ink);
-  color: var(--kt-white);
+  background: var(--kt-pink);
+  color: var(--kt-ink);
 }
 
 .kt-footer.has-language-dock {
@@ -551,39 +551,6 @@ body[data-page="kt"] summary:focus-visible {
   color: var(--kt-blue) !important;
   text-decoration: underline;
 }
-
-.kt-credits {
-  position: relative;
-  z-index: 5;
-  color: var(--kt-white);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
-  font-size: .75rem;
-}
-
-.kt-credits summary {
-  width: fit-content;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: var(--kt-pink);
-  text-underline-offset: 3px;
-}
-
-.kt-credits ul {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 9px);
-  width: min(360px, calc(100vw - 48px));
-  margin: 0;
-  padding: 10px 12px 10px 29px;
-  border: 3px solid var(--kt-ink);
-  background: var(--kt-paper);
-  box-shadow: 4px 4px 0 var(--kt-pink);
-  color: var(--kt-ink);
-}
-
-.kt-credits li + li { margin-top: 5px; }
-.kt-credits a { color: #214e72 !important; text-decoration: underline !important; text-underline-offset: 2px; }
-.kt-credits a:hover { color: #9e355d !important; }
 
 .kt-floaties {
   position: absolute;
@@ -643,9 +610,9 @@ body[data-page="kt"] summary:focus-visible {
   image-rendering: pixelated;
 }
 
-@keyframes kt-flag-rock {
-  0%, 100% { transform: rotateY(-19deg) rotateX(7deg) translateZ(18px) rotateZ(-1deg); }
-  50% { transform: rotateY(-13deg) rotateX(4deg) translateZ(21px) rotateZ(1deg); }
+@keyframes kt-flag-wave {
+  0%, 100% { transform: perspective(520px) rotateY(-21deg) skewY(-1deg); }
+  50% { transform: perspective(520px) rotateY(21deg) skewY(1deg); }
 }
 
 @keyframes kt-card-float {
@@ -676,8 +643,8 @@ body[data-page="kt"] summary:focus-visible {
     width: min(280px, 82%);
   }
 
-  .kt-flag { width: min(220px, 82%); }
-  .kt-flag-pole { left: 7%; height: 95%; }
+  .kt-flag { top: 11%; left: 8.5%; width: min(88%, 220px); }
+  .kt-flag-pole { left: 8%; height: 94%; }
   .kt-hero-copy { text-align: center; }
   .kt-eyebrow { letter-spacing: .09em; }
   .kt-hero h1 { justify-items: center; font-size: clamp(2.6rem, 11vw, 4.2rem); }
@@ -694,18 +661,17 @@ body[data-page="kt"] summary:focus-visible {
   .kt-topbar-label { font-size: .68rem; }
   .kt-topbar-label { text-align: center; }
   .kt-roster { padding-inline: 15px; }
-  .kt-member { grid-template-columns: 20px 47px minmax(0, 1fr) auto; gap: 8px; padding-inline: 8px; }
+  .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) auto; gap: 8px; padding-inline: 8px; }
   .kt-member-token { width: 43px; height: 43px; }
+  .kt-member-avatar { width: 43px; height: 43px; }
   .kt-member-badge { max-width: 74px; font-size: .55rem; }
   .kt-footer { align-items: start; flex-direction: column; }
-  .kt-credits ul { right: auto; left: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .kt-sticker--mica-button,
   .kt-sticker--trans-flag-button { display: none !important; }
 
-  .kt-flag,
   .kt-member,
   .kt-kick-link,
   .kt-home-link,
@@ -715,6 +681,6 @@ body[data-page="kt"] summary:focus-visible {
   }
 
   .kt-sticker--flag-button { transform: none; }
-  .kt-flag { transform: rotateY(-12deg) rotateX(4deg); }
+  .kt-flag-segment { animation: none !important; transform: none !important; }
   .kt-member { transform: none; }
 }
