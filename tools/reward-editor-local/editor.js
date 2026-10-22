@@ -277,6 +277,7 @@ function renderArtwork() {
       tile.addEventListener("click", () => {
         selectedArtwork = item.filename;
         renderArtwork();
+        updatePreviewLink();
         sendDetailPreview();
       });
       grid.append(tile);
@@ -504,6 +505,7 @@ function renderAssignments() {
       row.addEventListener("click", () => {
         selectedAssignment = item.linkId || "";
         renderAssignments();
+        updatePreviewLink();
         sendDetailPreview();
       });
       rows.append(row);
