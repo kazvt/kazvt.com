@@ -354,59 +354,6 @@ body[data-page="kt"] summary:focus-visible {
   line-height: 1.35;
 }
 
-.kt-recommendation-grid {
-  flex: 1 0 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  gap: 9px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.kt-recommendation-grid > li {
-  min-width: 0;
-}
-
-.kt-recommendation-link {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 10px;
-  border: 2px solid var(--kt-ink);
-  background: var(--kt-paper);
-  box-shadow: 3px 3px 0 var(--kt-blue), 5px 5px 0 var(--kt-pink);
-  color: var(--kt-ink);
-  text-decoration: none;
-  transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end), background-color 140ms steps(3, end);
-}
-
-.kt-recommendation-link:hover,
-.kt-recommendation-link:focus-visible {
-  background: var(--kt-lilac);
-  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink);
-  transform: translate(2px, 2px) rotate(-.5deg);
-}
-
-.kt-recommendation-copy {
-  display: grid;
-  min-width: 0;
-}
-
-.kt-recommendation-name {
-  font-weight: 1000;
-  line-height: 1.1;
-}
-
-.kt-recommendation-handle {
-  overflow-wrap: anywhere;
-  color: #66535e;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
-  font-size: .76rem;
-}
-
 .kt-member-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -708,7 +655,6 @@ body[data-page="kt"] summary:focus-visible {
   .kt-sticker--trans-flag-button { display: none !important; }
 
   .kt-member,
-  .kt-recommendation-link,
   .kt-kick-link,
   .kt-home-link,
   .kt-sticker--flag-button {
