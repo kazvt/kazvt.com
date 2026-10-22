@@ -550,7 +550,7 @@ body[data-page="kt"] summary:focus-visible {
   image-rendering: pixelated;
 }
 
-.kt-sticker--trans-proud {
+.kt-sticker--mica-button {
   top: 205px;
   right: -21px;
   width: clamp(112px, 14vw, 142px);
@@ -558,13 +558,21 @@ body[data-page="kt"] summary:focus-visible {
   animation: kt-sticker-hop 4.1s steps(6, end) infinite reverse;
 }
 
-.kt-sticker--gender-symbol {
+.kt-sticker--trans-flag-button {
   top: 570px;
   left: -11px;
-  width: clamp(46px, 5.5vw, 58px);
+  width: clamp(112px, 14vw, 142px);
   transform: perspective(360px) rotateY(14deg) rotateZ(-6deg);
   animation: kt-sticker-hop 4.7s steps(6, end) infinite;
   animation-delay: -2.1s;
+}
+
+.kt-sticker--mica-button img,
+.kt-sticker--trans-flag-button img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
 }
 
 @keyframes kt-flag-rock {
@@ -626,8 +634,8 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kt-sticker--trans-proud,
-  .kt-sticker--gender-symbol { display: none !important; }
+  .kt-sticker--mica-button,
+  .kt-sticker--trans-flag-button { display: none !important; }
 
   .kt-flag,
   .kt-member,
