@@ -4,7 +4,20 @@
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
   const touchPreference = window.matchMedia("(hover: none) and (pointer: coarse)");
   const touchOnly = () => touchPreference.matches && navigator.maxTouchPoints > 0;
+  const flagVideo = document.querySelector(".kt-flag");
   let cursorEffect = null;
+
+  function syncFlagPlayback() {
+    if (!(flagVideo instanceof HTMLVideoElement)) return;
+    if (motionPreference.matches) {
+      flagVideo.pause();
+      return;
+    }
+    flagVideo.play().catch(() => {});
+  }
+
+  syncFlagPlayback();
+  motionPreference.addEventListener("change", syncFlagPlayback);
 
   function createTransStripeCursor() {
     const canvas = document.createElement("canvas");

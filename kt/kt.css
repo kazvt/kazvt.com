@@ -208,16 +208,15 @@ body[data-page="kt"] summary:focus-visible {
   left: 9%;
   display: block;
   width: min(88%, 270px);
-  aspect-ratio: 512 / 307;
-  overflow: hidden;
-  border: 4px solid var(--kt-ink);
-  outline: 4px solid var(--kt-white);
-  background: var(--kt-white);
-  box-shadow: 4px 4px 0 var(--kt-ink);
-  object-fit: cover;
-  transform-origin: left center;
-  animation: kt-flag-wave 2.8s ease-in-out infinite;
-  will-change: transform;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  object-fit: contain;
+  filter: drop-shadow(0 7px 8px rgb(43 32 40 / 20%));
+  -webkit-mask-image: radial-gradient(ellipse 100% 100% at center, #000 78%, rgb(0 0 0 / 82%) 88%, transparent 100%);
+  mask-image: radial-gradient(ellipse 100% 100% at center, #000 78%, rgb(0 0 0 / 82%) 88%, transparent 100%);
 }
 
 .kt-hero-copy {
@@ -604,11 +603,6 @@ body[data-page="kt"] summary:focus-visible {
   image-rendering: pixelated;
 }
 
-@keyframes kt-flag-wave {
-  0%, 100% { transform: perspective(760px) rotateY(-12deg) rotateZ(-1deg) skewY(1deg) scaleX(.98); }
-  50% { transform: perspective(760px) rotateY(13deg) rotateZ(1deg) skewY(-1deg) scaleX(.98); }
-}
-
 @keyframes kt-card-float {
   0%, 100% { transform: translateY(0) rotateX(1deg) rotateY(-1deg); }
   50% { transform: translateY(-3px) rotateX(2deg) rotateY(1deg); }
@@ -674,6 +668,5 @@ body[data-page="kt"] summary:focus-visible {
   }
 
   .kt-sticker--flag-button { transform: none; }
-  .kt-flag { animation: none !important; transform: none !important; }
   .kt-member { transform: none; }
 }
