@@ -19,7 +19,7 @@ let flashTimeout = 0;
 
 const headings = {
   artwork: ["THE REWARD POOL", "Artwork", "Names, files, hashes, sizes, tiers, and the pool itself."],
-  assignments: ["PEOPLE AND THEIR REWARDS", "Streamers", "Edit who got each reward and the reason shown on its page."],
+  assignments: ["PEOPLE AND THEIR REWARDS", "Users", "Edit who got each reward and the reason shown on its page."],
   reservations: ["LOCAL AND PRIVATE", "Reservations", "Keep a reward aside for a username without showing it publicly."],
   media: ["THE PAGE'S IMAGE FILES", "Page assets", "Patterns, decals, and fonts used by the actual reward pages."],
   source: ["ONE SET OF COMPONENTS", "Components & files", "Edit the same source files the public reward pages use."]
@@ -489,7 +489,7 @@ function renderAssignments() {
     });
     modes.append(button);
   }
-  const query = textInput("assignmentSearch", "", { placeholder: "Find a streamer, reward, or reason..." });
+  const query = textInput("assignmentSearch", "", { placeholder: "Find a user, reward, or reason..." });
   const rows = make("div", "table-list");
   const sourceRecords = assignmentMode === "active" ? state.assignments
     : assignmentMode === "editor" ? state.editorArchivedAssignments
@@ -561,7 +561,7 @@ function renderAssignmentInspector() {
   }
   const title = make("div", "card-title-row");
   const titleText = make("div");
-  titleText.append(make("h2", "", creating ? "Give a reward" : "Edit assignment"), make("p", "", "One reward, one streamer, one optional reason."));
+    titleText.append(make("h2", "", creating ? "Give a reward" : "Edit assignment"), make("p", "", "One reward, one user, one optional reason."));
   title.append(titleText, make("span", `pill ${creating ? "pill--public" : ""}`, "shown on site"));
   const username = textInput("assignmentUsername", item?.username || "", { placeholder: "Username", maxLength: 100 });
   const platform = make("select", "select");
@@ -585,7 +585,7 @@ function renderAssignmentInspector() {
   const issuedAt = textInput("assignmentIssuedAt", item?.issuedAt || "", { placeholder: "2026-10-22T12:00:00.000Z" });
   const fields = make("div", "form-grid");
   fields.append(
-    makeField("Streamer username", username),
+    makeField("Username", username),
     makeField("Platform", platform),
     makeField("Platform user ID", userId, "Optional for manual names. This ID is public in the assignment registry."),
     makeField("Reward artwork", assetSelect, "Reserved art can only be assigned to one of its matching aliases."),
