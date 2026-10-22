@@ -47,7 +47,7 @@ body[data-page="kt"] {
   color: var(--kt-ink);
   background-color: transparent;
   background-image: none;
-  font-family: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive;
+  font-family: "fs Tahoma 8px", "Comic Sans MS", "Comic Sans", cursive;
   --cursor-default: auto;
   --cursor-pointer: pointer;
   --cursor-text: text;
