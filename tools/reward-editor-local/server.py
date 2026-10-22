@@ -762,6 +762,39 @@ def _artwork_mutation(payload: dict[str, Any]) -> dict[str, Any]:
     raise ApiError(400, "Unknown artwork action.")
 
 
+def _rename_artwork(payload: dict[str, Any]) -> dict[str, Any]:
+    catalog, registry, reservation_text, _ = _load_core()
+    _check_digest(ROOT / CATALOG_REL, payload.get("expectedCatalog"))
+    old_name = payload.get("filename")
+    new_name = payload.get("newFilename")
+    if not isinstance(old_name, str) or old_name not in catalog["files"]:
+        raise ApiError(404, "That artwork is no longer in the catalog.")
+    if not isinstance(new_name, str) or not local_issuer.FILENAME_RE.fullmatch(new_name):
+        raise ApiError(400, "Reward artwork names need to end in .png or .gif.")
+    old_path = ROOT / "zzz_assets" / "rewards" / old_name
+    new_path = ROOT / "zzz_assets" / "rewards" / new_name
+    _check_digest(old_path, payload.get("expectedFile"))
+    if old_name.casefold() == new_name.casefold() or new_path.exists():
+        raise ApiError(409, "Choose a different filename; reward names must be unique, including capitalization.")
+    data = old_path.read_bytes()
+    reservation_text_next = _rewrite_reservation_targets(reservation_text, old_name, new_name)
+    next_catalog, next_registry, reservations, pool = _rebuild_current_catalog(
+        catalog, registry, reservation_text_next,
+        overrides={new_name: data}, removed_names={old_name},
+    )
+    _validate_registry_for_catalog(next_registry, next_catalog)
+    updates = {
+        new_path: data,
+        ROOT / CATALOG_REL: _json_bytes(next_catalog),
+        ROOT / ASSIGNMENTS_REL: _json_bytes(next_registry),
+        ROOT / POOL_REL: _json_bytes(pool),
+    }
+    if reservation_text_next != reservation_text:
+        updates[ROOT / RESERVATIONS_REL] = reservation_text_next.encode("utf-8")
+    _transaction(updates, {old_path})
+    return {"message": "Reward renamed; assignment links, reservation targets, and filename history were kept in sync.", "pool": pool, "filename": new_name}
+
+
 def _save_reservations(payload: dict[str, Any]) -> dict[str, Any]:
     catalog, registry, old_text, _ = _load_core()
     path = ROOT / RESERVATIONS_REL
@@ -1001,6 +1034,8 @@ class Handler(BaseHTTPRequestHandler):
                         result = _assignment_mutation(payload)
                     elif split.path == "/__reward_editor/api/artwork-action":
                         result = _artwork_mutation(payload)
+                    elif split.path == "/__reward_editor/api/rename-artwork":
+                        result = _rename_artwork(payload)
                     elif split.path == "/__reward_editor/api/reservations":
                         result = _save_reservations(payload)
                     elif split.path == "/__reward_editor/api/tier-weights":
