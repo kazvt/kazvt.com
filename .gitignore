@@ -8,4 +8,5 @@ reward/api/reservations-manifest.local.json
 zzz_assets/rewards/msi-manifest.local.json
 obs/trivia-rewards-widget/__pycache__/
 /reward/api/__pycache__/
+/tools/reward-editor-local/__pycache__/
 obs/trivia-rewards-widget/tests/__pycache__/

@@ -525,7 +525,11 @@ def _save_text_file(relative: str, text: str, expected: str) -> dict[str, Any]:
             text=True, timeout=30, check=False,
         )
         if command.returncode != 0:
-            raise ApiError(500, "Source saved, but generated detail pages did not rebuild. Use the rebuild button after fixing the source.")
+            return {
+                "message": "The source file was saved, but the generated detail pages could not rebuild. Fix the source and use Rebuild generated pages.",
+                "rebuiltRewardPages": False,
+                "sourceSaved": True,
+            }
         rebuilt = True
     return {"message": "Source file saved to the working tree.", "rebuiltRewardPages": rebuilt}
 
