@@ -13,10 +13,10 @@
 }
 
 .kt-recommendation-link {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   min-height: 48px;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   padding: 7px 10px;
   border: 2px solid var(--kt-ink);
@@ -37,6 +37,25 @@
 .kt-recommendation-copy {
   display: grid;
   min-width: 0;
+}
+
+.kt-recommendation-avatar {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--kt-ink);
+  border-radius: 50%;
+  background: var(--kt-white);
+  box-shadow: 2px 2px 0 var(--kt-blue);
+  object-fit: cover;
+}
+
+.kt-recommendation-avatar--fallback {
+  display: grid;
+  place-items: center;
+  background: var(--kt-pink);
+  color: var(--kt-ink);
+  font-weight: 1000;
 }
 
 .kt-recommendation-name {
