@@ -377,7 +377,7 @@ body[data-page="kt"] summary:focus-visible {
   isolation: isolate;
   display: grid;
   min-height: 91px;
-  grid-template-columns: 28px 56px minmax(0, 1fr) auto;
+  grid-template-columns: 28px 56px minmax(0, 1fr) auto 20px;
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
@@ -510,6 +510,7 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 .kt-member-arrow {
+  grid-column: 5;
   color: var(--kt-ink);
   font-size: 1.05rem;
   transform: translateZ(12px);
@@ -661,7 +662,7 @@ body[data-page="kt"] summary:focus-visible {
   .kt-topbar-label { font-size: .68rem; }
   .kt-topbar-label { text-align: center; }
   .kt-roster { padding-inline: 15px; }
-  .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) auto; gap: 8px; padding-inline: 8px; }
+  .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) auto 18px; gap: 8px; padding-inline: 8px; }
   .kt-member-token { width: 43px; height: 43px; }
   .kt-member-avatar { width: 43px; height: 43px; }
   .kt-member-badge { max-width: 74px; font-size: .55rem; }
