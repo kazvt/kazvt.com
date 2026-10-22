@@ -440,6 +440,34 @@ class LocalRewardIssuerTests(unittest.TestCase):
         registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
         self.assertEqual([item["linkId"] for item in registry["assignments"]], [later["assignment"]["linkId"]])
 
+    def test_editor_archived_chat_award_stays_idempotent_without_chat_revocation_event(self) -> None:
+        assignment = {
+            "assetId": self.art_ids[0],
+            "assetSha256": self.art_ids[0],
+            "filename": "toast.png",
+            "username": "Viewer",
+            "issuedAt": "2026-10-22T12:00:00.000Z",
+            "platform": "twitch",
+            "linkId": "EditorArchive0001",
+            "eventIdHash": "b" * 64,
+        }
+        archived = {
+            **assignment,
+            "editorArchivedAt": "2026-10-22T13:00:00.000Z",
+            "editorArchivedBy": "kazvt",
+        }
+        registry = {
+            "version": 1,
+            "assignments": [],
+            "editorArchivedAssignments": [archived],
+        }
+        local_issuer._validate_registry(registry)
+        self.assertIs(local_issuer._find_event(registry, "b" * 64), archived)
+
+        invalid = {**registry, "editorArchivedAssignments": [{**archived, "editorArchivedBy": "someone-else"}]}
+        with self.assertRaisesRegex(RewardIssueError, "Editor-archived assignment"):
+            local_issuer._validate_registry(invalid)
+
 
 if __name__ == "__main__":
     unittest.main()
