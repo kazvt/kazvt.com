@@ -1,45 +1,44 @@
 :root.kt-root {
-  --kt-ink: #101522;
-  --kt-night: #17243c;
-  --kt-deep: #243552;
+  --kt-ink: #2b2028;
+  --kt-night: #f7dce6;
+  --kt-deep: #e6a0b7;
   --kt-paper: #fff9fc;
   --kt-blue: #5bcefa;
   --kt-pink: #f5a9b8;
   --kt-white: #ffffff;
-  --kt-lilac: #c7b0ec;
+  --kt-lilac: #dff5fc;
   --ink: var(--kt-ink);
   --paper: var(--kt-paper);
-  --paper-alt: #f6edf4;
-  --bg: var(--kt-night);
-  --bg-alt: #283952;
+  --paper-alt: #ffedf3;
+  --bg: var(--kt-pink);
+  --bg-alt: var(--kt-blue);
   --blue: var(--kt-blue);
   --pink: var(--kt-pink);
-  --purple: var(--kt-lilac);
-  --green: #80d1bd;
-  --yellow: #fff0a6;
-  --orange: #ffbd7a;
-  --red: #f47491;
+  --purple: var(--kt-pink);
+  --green: var(--kt-white);
+  --yellow: var(--kt-blue);
+  --orange: var(--kt-pink);
+  --red: var(--kt-pink);
   --on-blue: var(--kt-ink);
   --on-pink: var(--kt-ink);
   --on-green: var(--kt-ink);
   --on-yellow: var(--kt-ink);
   --on-orange: var(--kt-ink);
   --on-red: var(--kt-ink);
-  --banner: var(--kt-ink);
-  --banner-text: var(--kt-white);
-  --shadow: rgb(0 0 0 / 42%);
+  --banner: var(--kt-pink);
+  --banner-text: var(--kt-ink);
+  --shadow: rgb(43 32 40 / 28%);
   --wallpaper-image:
-    radial-gradient(circle at 15% 24%, rgb(91 206 250 / 24%) 0 2px, transparent 3px),
-    radial-gradient(circle at 82% 72%, rgb(245 169 184 / 24%) 0 2px, transparent 3px),
-    repeating-linear-gradient(135deg, rgb(255 255 255 / 5%) 0 2px, transparent 2px 22px),
-    linear-gradient(135deg, #15233a, #26324c 48%, #191c32);
-  --wallpaper-size: 43px 43px, 57px 57px, auto, auto;
+    url("/kt/assets/trans-heart-tile.svg"),
+    linear-gradient(135deg, #ffe7ef, #f5a9b8 52%, #dff5fc);
+  --wallpaper-size: 112px 112px, auto;
 }
 
 html.kt-root {
   min-height: 100%;
   background-color: var(--kt-night);
   background-image: var(--wallpaper-image);
+  background-size: var(--wallpaper-size);
   background-attachment: fixed;
 }
 
@@ -132,8 +131,8 @@ body[data-page="kt"] summary:focus-visible {
   gap: 12px;
   padding: 9px 16px;
   border-bottom: 4px solid var(--kt-ink);
-  background: var(--kt-ink);
-  color: var(--kt-white);
+  background: var(--kt-blue);
+  color: var(--kt-ink);
   box-shadow: 0 5px 0 rgb(91 206 250 / 75%);
 }
 
@@ -144,8 +143,8 @@ body[data-page="kt"] summary:focus-visible {
   min-height: 30px;
   padding: 4px 9px;
   border: 2px solid var(--kt-pink);
-  background: #202d47;
-  color: var(--kt-white) !important;
+  background: var(--kt-paper);
+  color: var(--kt-ink) !important;
   font-size: .82rem;
   font-weight: 900;
   letter-spacing: .035em;
@@ -160,7 +159,7 @@ body[data-page="kt"] summary:focus-visible {
 
 .kt-topbar-label {
   border-color: var(--kt-blue);
-  background: var(--kt-paper);
+  background: var(--kt-pink);
   color: var(--kt-ink) !important;
 }
 
