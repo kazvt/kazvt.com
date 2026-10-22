@@ -42,8 +42,10 @@ import {
 
   const navigationStartTime = performance.getEntriesByType("navigation")[0]?.startTime ?? performance.now();
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const localEditorPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname) &&
+    new URLSearchParams(window.location.search).get("editorPreview") === "1";
   if (currentPath === "/reward" && !new URLSearchParams(window.location.search).has("id") &&
-      !document.body.hasAttribute("data-reward-demo")) {
+      !document.body.hasAttribute("data-reward-demo") && !localEditorPreview) {
     const destination = new URL("/reward/list/", window.location.origin);
     destination.search = window.location.search;
     destination.hash = window.location.hash;
@@ -57,16 +59,7 @@ import {
   }
 
   // Keep the tier ID stable for hashing/palette selection; the label is display copy.
-  const TIER_BUCKETS = [
-    { id: "common", label: "Frequent", upperBound: 3000 },
-    { id: "uncommon", label: "Uncommon", upperBound: 5000 },
-    { id: "rare", label: "Rare", upperBound: 6500 },
-    { id: "epic", label: "Epic", upperBound: 7700 },
-    { id: "legendary", label: "Legendary", upperBound: 8600 },
-    { id: "mythic", label: "Mythic", upperBound: 9250 },
-    { id: "divine", label: "Divine", upperBound: 9700 },
-    { id: "splus", label: "Good Shit", upperBound: 10000 }
-  ];
+  const TIER_IDS = ["common", "uncommon", "rare", "epic", "legendary", "mythic", "divine", "splus"];
   const TIER_MARKS = {
     common: "",
     uncommon: "✿",
@@ -705,10 +698,15 @@ import {
     });
   }
 
-  function tierFromSha256(sha256) {
+  function tierFromSha256(sha256, catalog) {
     if (typeof sha256 !== "string" || !/^[a-f0-9]{64}$/.test(sha256)) return null;
     const bucket = Math.floor((Number.parseInt(sha256.slice(0, 8), 16) / 0x100000000) * 10000);
-    return TIER_BUCKETS.find(tier => bucket < tier.upperBound)?.id ?? "splus";
+    let upperBound = 0;
+    for (const tier of catalog?.tierWeights ?? []) {
+      upperBound += tier.basisPoints;
+      if (bucket < upperBound) return tier.id;
+    }
+    return null;
   }
 
   function validateCatalog(catalog) {
@@ -724,12 +722,10 @@ import {
 
     const declaredWeights = catalog.tierWeights;
     const totalWeight = declaredWeights.reduce((sum, entry) => sum + (entry?.basisPoints ?? 0), 0);
-    if (declaredWeights.length !== TIER_BUCKETS.length || totalWeight !== 10000 ||
-        declaredWeights.some((entry, index) => {
-          const tier = TIER_BUCKETS[index];
-          const expectedWeight = tier.upperBound - (TIER_BUCKETS[index - 1]?.upperBound ?? 0);
-          return entry?.id !== tier.id || entry?.label !== tier.label || entry?.basisPoints !== expectedWeight;
-        })) {
+    if (declaredWeights.length !== TIER_IDS.length || totalWeight !== 10000 ||
+        declaredWeights.some((entry, index) => entry?.id !== TIER_IDS[index] ||
+          typeof entry?.label !== "string" || !entry.label.trim() || entry.label.length > 60 ||
+          !Number.isInteger(entry?.basisPoints) || entry.basisPoints < 0 || entry.basisPoints > 10000)) {
       throw new Error("The reward tier settings are invalid.");
     }
 
@@ -741,7 +737,7 @@ import {
           !/^[a-f0-9]{64}$/.test(metadata.assetId) || metadata.assetId !== metadata.sha256 ||
           !Number.isSafeInteger(metadata.width) || metadata.width < 1 ||
           !Number.isSafeInteger(metadata.height) || metadata.height < 1 ||
-          metadata.tier !== tierFromSha256(metadata.assetId)) {
+          metadata.tier !== tierFromSha256(metadata.assetId, catalog)) {
         throw new Error("The reward artwork identity is invalid.");
       }
       seenFiles.add(file);
@@ -897,8 +893,8 @@ import {
     return `${DEMO_ADJECTIVES[randomIndex(DEMO_ADJECTIVES.length)]}${DEMO_NOUNS[randomIndex(DEMO_NOUNS.length)]}`;
   }
 
-  async function renderRewardPage({ file, metadata, assignedTier, displayName, demo = false, reason = "" }) {
-    const tier = TIER_BUCKETS.find(entry => entry.id === assignedTier);
+  async function renderRewardPage({ file, metadata, catalog, assignedTier, displayName, demo = false, reason = "" }) {
+    const tier = catalog?.tierWeights?.find(entry => entry.id === assignedTier);
     if (!tier) throw new Error("The reward tier is invalid.");
 
     setRewardTitle(file, displayName);
@@ -954,13 +950,13 @@ import {
 
     const file = candidates[randomIndex(candidates.length)];
     const metadata = assets[file];
-    const assignedTier = tierFromSha256(metadata?.sha256);
+    const assignedTier = tierFromSha256(metadata?.sha256, catalog);
     if (!assignedTier || metadata.tier !== assignedTier) {
       throw new Error("The demo artwork tier is invalid.");
     }
 
     const demoName = randomDemoName();
-    await renderRewardPage({ file, metadata, assignedTier, displayName: demoName, demo: true });
+    await renderRewardPage({ file, metadata, catalog, assignedTier, displayName: demoName, demo: true });
   }
 
   async function openReward() {
@@ -1009,11 +1005,12 @@ import {
     const metadata = file && Object.prototype.hasOwnProperty.call(allowedAssets, file)
       ? allowedAssets[file]
       : null;
-    const assignedTier = tierFromSha256(metadata?.sha256);
+    const assignedTier = tierFromSha256(metadata?.sha256, catalog);
     if (!file || !assignedTier || metadata.tier !== assignedTier) throw new Error("The reward asset record is invalid.");
     await renderRewardPage({
       file,
       metadata,
+      catalog,
       assignedTier,
       displayName: data.username,
       reason: assignment.reason,
@@ -1026,7 +1023,30 @@ import {
 
   await (window.KazvtI18n?.ready ?? Promise.resolve());
 
-  if (document.body.hasAttribute("data-reward-demo")) {
+  if (localEditorPreview) {
+    window.addEventListener("message", async event => {
+      if (event.source !== window.parent || event.origin !== window.location.origin ||
+          event.data?.type !== "kazvt-reward-editor-preview") return;
+      const { filename: file, username: displayName, reason = "" } = event.data;
+      if (typeof file !== "string" || file.length > 255 || !/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(file) ||
+          typeof displayName !== "string" || !displayName.trim() || displayName.length > 100 ||
+          typeof reason !== "string" || reason.length > 180) return;
+      try {
+        showLoading();
+        const { catalog, assets } = await loadRewardCatalog();
+        const metadata = assets[file];
+        const assignedTier = tierFromSha256(metadata?.sha256, catalog);
+        if (!metadata || !assignedTier || metadata.tier !== assignedTier) {
+          throw new Error("The selected reward artwork is not in the local catalog.");
+        }
+        await renderRewardPage({ file, metadata, catalog, assignedTier, displayName: displayName.trim(), reason });
+      } catch (error) {
+        console.warn("[reward-editor-preview] Could not render the selected reward:", error);
+        showError("This reward preview could not be loaded. Rebuild the reward catalog and try again.");
+      }
+    });
+    window.parent.postMessage({ type: "kazvt-reward-editor-preview-ready" }, window.location.origin);
+  } else if (document.body.hasAttribute("data-reward-demo")) {
     openDemo().catch(async error => {
       console.warn("[reward-demo] Could not open demo:", error);
       await waitForMinimumLoading();
