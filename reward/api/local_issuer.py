@@ -302,14 +302,19 @@ def _reservation_filename(value: str) -> str:
     return re.split(r"[\\/]", candidate)[-1].strip()
 
 
-def _load_reservations(site_root: Path, catalog: dict[str, Any]) -> dict[str, Any]:
+def _load_reservations(
+    site_root: Path, catalog: dict[str, Any], *, source_override: str | None = None,
+) -> dict[str, Any]:
     path = site_root / RESERVATIONS_RELATIVE
-    try:
-        source = path.read_text(encoding="utf-8-sig")
-    except FileNotFoundError:
-        source = ""
-    except (OSError, UnicodeError) as exc:
-        raise RewardIssueError("Could not read the reward reservation list.") from exc
+    if source_override is not None:
+        source = source_override
+    else:
+        try:
+            source = path.read_text(encoding="utf-8-sig")
+        except FileNotFoundError:
+            source = ""
+        except (OSError, UnicodeError) as exc:
+            raise RewardIssueError("Could not read the reward reservation list.") from exc
 
     current_by_name = {
         filename.lower(): str(metadata["assetId"]).lower()
