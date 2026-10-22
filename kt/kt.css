@@ -473,6 +473,18 @@ body[data-page="kt"] summary:focus-visible {
   color: var(--kt-white);
 }
 
+.kt-footer.has-language-dock {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.kt-footer > .language-dock {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 100%;
+  margin: 8px auto 0;
+}
+
 .kt-footer-home {
   font-size: .86rem;
   font-weight: 900;
