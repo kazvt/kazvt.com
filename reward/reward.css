@@ -508,6 +508,20 @@ body[data-page-state="error"] .reward-card {
   padding-top: 0;
 }
 
+.reward-card:has(> #awardReason:not([hidden])) {
+  padding-bottom: clamp(56px, 15vw, 68px);
+}
+
+.reward-card > #awardReason {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 0;
+  margin: 0;
+  transform: translate(-50%, 50%);
+  text-align: center;
+}
+
 #rewardState {
   perspective: 900px;
 }

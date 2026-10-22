@@ -69,6 +69,18 @@ test("the common reward component retains artwork, tier, title, collection, and 
   assert.match(assignmentLoader, /await renderRewardPage\(/);
 });
 
+test("the optional reason note is centered on the reward panel's bottom edge", () => {
+  assert.match(sharedBody, /<\/section>\s*<p id="awardReason" class="reward-reason"/,
+    "the reason note sits outside the content stack so it can anchor to the panel");
+
+  const anchorRule = rewardStyles.match(/\.reward-card\s*>\s*#awardReason\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(anchorRule, /position:\s*absolute/);
+  assert.match(anchorRule, /left:\s*50%/);
+  assert.match(anchorRule, /bottom:\s*0/);
+  assert.match(anchorRule, /transform:\s*translate\(-50%,\s*50%\)/,
+    "the note's center is the fixed point on the panel edge, so longer notes expand around it");
+});
+
 test("all reward-panel content layers above the side decals", () => {
   const decalRule = rewardStyles.match(/\.reward-decal-layer\s*\{([^}]*)\}/)?.[1] ?? "";
   const contentRule = rewardStyles.match(/\.reward-card\s*>\s*:not\(\.reward-decal-layer\)\s*\{([^}]*)\}/)?.[1] ?? "";
