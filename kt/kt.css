@@ -49,6 +49,22 @@ body[data-page="kt"] {
   background-color: transparent;
   background-image: none;
   font-family: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive;
+  --cursor-default: auto;
+  --cursor-pointer: pointer;
+  --cursor-text: text;
+  --cursor-help: help;
+  --cursor-busy: wait;
+  --cursor-precision: crosshair;
+  --cursor-not-allowed: not-allowed;
+  --cursor-move: move;
+  --cursor-ew-resize: ew-resize;
+  --cursor-ns-resize: ns-resize;
+  --cursor-progress: progress;
+  --cursor-handwriting: text;
+  --cursor-alternate: auto;
+  --cursor-nwse-resize: nwse-resize;
+  --cursor-nesw-resize: nesw-resize;
+  cursor: auto !important;
 }
 
 body[data-page="kt"] :is(a, button, summary) {
@@ -239,6 +255,12 @@ body[data-page="kt"] summary:focus-visible {
   color: #274761;
   font-size: .72em;
   letter-spacing: .12em;
+}
+
+.kt-logo {
+  display: block;
+  width: min(100%, 553px);
+  height: auto;
 }
 
 .kt-title-name {
