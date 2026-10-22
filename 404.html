@@ -10,6 +10,13 @@
       ]);
       const requestedPath = location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
       const tuoyAliases = new Set(["toy", "touys", "tools", "tool", "assets", "asset", "toys"]);
+      if (requestedPath === "kt" && location.pathname !== "/kt/") {
+        const destination = new URL("/kt/", location.origin);
+        destination.search = location.search;
+        destination.hash = location.hash;
+        location.replace(destination.href);
+        return;
+      }
       const rewardsAliasMatch = /^\/rewards(?:\/(.*))?\/?$/u.exec(location.pathname);
       if (rewardsAliasMatch) {
         const suffix = rewardsAliasMatch[1] ?? "";
