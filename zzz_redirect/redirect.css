@@ -59,8 +59,10 @@
 }
 
 @font-face {
-  font-family: "KAZVT 64";
-  src: url("../zzz_assets/fonts/64.ttf") format("truetype");
+  font-family: "fs Tahoma 8px";
+  src: url("../zzz_assets/fonts/fs-Tahoma-8px.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
   font-display: swap;
 }
 
@@ -114,7 +116,7 @@
 /* Palette-specific typography. Unlisted palettes intentionally use Comic Sans MS. */
 /* Match the main site's slightly smaller Palette 1 typography scale. */
 html[data-theme="p1"] { font-size: 95%; }
-html[data-theme="p1"] { --site-font: "KAZVT 64", "Comic Sans MS", "Comic Sans", cursive; }
+html[data-theme="p1"] { --site-font: "fs Tahoma 8px", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p2"] { --site-font: "KAZVT Classic MMO", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p3"] { --site-font: "KAZVT Tangled", "Comic Sans MS", "Comic Sans", cursive; }
 html[data-theme="p4"] { --site-font: "KAZVT Lined Paper", "Comic Sans MS", "Comic Sans", cursive; }
