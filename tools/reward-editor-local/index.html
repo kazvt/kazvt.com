@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="reward-editor-token" content="__REWARD_EDITOR_TOKEN__">
+  <meta name="color-scheme" content="dark">
+  <title>Reward Workshop - local</title>
+  <link rel="stylesheet" href="/reward/editor/editor.css">
+  <script type="module" src="/reward/editor/editor.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/reward/list/" target="_blank" rel="noreferrer">
+      <span class="brand-mark" aria-hidden="true">R</span>
+      <span><strong>Reward Workshop</strong><small>same pages, same files</small></span>
+    </a>
+    <div class="local-badge"><span class="local-light" aria-hidden="true"></span> LOCAL ONLY <span class="badge-separator">-</span> nothing gets pushed</div>
+    <a class="site-link" href="/reward/list/" target="_blank" rel="noreferrer">Open local site ↗</a>
+  </header>
+
+  <div class="app-shell">
+    <nav class="side-nav" aria-label="Reward editor sections">
+      <p class="nav-caption">REWARDS</p>
+      <button class="nav-button is-active" type="button" data-section="artwork"><span class="nav-icon">▧</span> Artwork <span class="nav-count" id="artworkCount">-</span></button>
+      <button class="nav-button" type="button" data-section="assignments"><span class="nav-icon">♙</span> Streamers <span class="nav-count" id="assignmentCount">-</span></button>
+      <button class="nav-button" type="button" data-section="reservations"><span class="nav-icon">⌑</span> Reservations <span class="nav-lock">private</span></button>
+      <button class="nav-button" type="button" data-section="media"><span class="nav-icon">▤</span> Page assets</button>
+      <p class="nav-caption nav-caption--lower">THE ACTUAL SITE</p>
+      <button class="nav-button" type="button" data-section="source"><span class="nav-icon">{ }</span> Components & files</button>
+      <div class="nav-spacer"></div>
+      <div class="nav-footnote">
+        <span class="footnote-mark">i</span>
+        <p>Saves go straight into this website checkout. <b>No commit, push, or deploy button exists here.</b></p>
+      </div>
+    </nav>
+
+    <main class="work-area">
+      <div class="work-heading">
+        <div>
+          <p class="eyebrow" id="sectionEyebrow">THE REWARD POOL</p>
+          <h1 id="sectionTitle">Artwork</h1>
+          <p class="section-subtitle" id="sectionSubtitle">The real files behind each reward.</p>
+        </div>
+        <div class="pool-chip"><span id="poolRemaining">-</span><small>left in pool</small></div>
+      </div>
+      <div id="flashMessage" class="flash-message" role="status" aria-live="polite" hidden></div>
+      <div id="sectionContent" class="section-content" aria-live="polite"></div>
+    </main>
+
+    <aside class="preview-rail" aria-label="Live website preview">
+      <div class="preview-heading">
+        <div><p class="eyebrow">REAL PAGE PREVIEW</p><h2>Preview</h2></div>
+        <button id="refreshPreview" class="icon-button" type="button" title="Refresh preview" aria-label="Refresh preview">↻</button>
+      </div>
+      <div class="preview-tabs" role="group" aria-label="Choose preview page">
+        <button class="preview-tab is-active" type="button" data-preview="gallery">Gallery</button>
+        <button class="preview-tab" type="button" data-preview="detail">Individual</button>
+      </div>
+      <div class="frame-wrap">
+        <iframe id="sitePreview" title="Actual reward page preview" loading="lazy"></iframe>
+      </div>
+      <a id="openPreview" class="preview-open" href="/reward/list/" target="_blank" rel="noreferrer">Open this page in a tab ↗</a>
+      <p class="preview-note">This is the public page itself - not a second mockup. It reads the files you are editing.</p>
+    </aside>
+  </div>
+
+  <footer class="statusbar">
+    <span class="status-light" aria-hidden="true"></span><span id="connectionStatus">Connecting to the local checkout…</span>
+    <span class="status-path" id="checkoutPath">127.0.0.1 only</span>
+  </footer>
+</body>
+</html>
