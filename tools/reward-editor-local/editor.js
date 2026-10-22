@@ -158,8 +158,7 @@ function setPreviewMode(mode) {
   previewMode = mode;
   document.querySelectorAll(".preview-tab").forEach(button => button.classList.toggle("is-active", button.dataset.preview === mode));
   const url = mode === "detail" ? "/reward/?editorPreview=1" : "/reward/list/";
-  previewLink.href = url;
-  previewLink.textContent = mode === "detail" ? "Open this reward page ↗" : "Open this gallery page ↗";
+  updatePreviewLink();
   const nextSrc = `${url}${url.includes("?") ? "&" : "?"}localWorkshop=${Date.now()}`;
   if (!previewFrame.src || new URL(previewFrame.src).pathname !== new URL(nextSrc, location.href).pathname || mode === "gallery") {
     previewFrame.src = nextSrc;
@@ -183,12 +182,36 @@ function previewPayload() {
   };
 }
 
+function updatePreviewLink() {
+  if (previewMode === "gallery") {
+    previewLink.href = "/reward/list/";
+    previewLink.textContent = "Open this gallery page ↗";
+    return;
+  }
+  const payload = previewPayload();
+  const assignment = activeSection === "assignments" ? selectedAssignmentRecord()
+    : state.assignments.find(item => item.filename === payload.filename);
+  if (assignment?.linkId) {
+    previewLink.href = `/reward/?id=${encodeURIComponent(assignment.linkId)}`;
+  } else {
+    const query = new URLSearchParams({
+      editorPreview: "1",
+      previewFile: payload.filename,
+      previewUser: payload.username,
+      previewReason: payload.reason,
+    });
+    previewLink.href = `/reward/?${query}`;
+  }
+  previewLink.textContent = "Open this reward page ↗";
+}
+
 function sendDetailPreview() {
   if (previewMode !== "detail" || !previewFrame.contentWindow) return;
   previewFrame.contentWindow.postMessage(previewPayload(), location.origin);
 }
 
 function refreshPreview() {
+  updatePreviewLink();
   if (previewMode === "detail") sendDetailPreview();
   else {
     try { previewFrame.contentWindow?.location.reload(); }

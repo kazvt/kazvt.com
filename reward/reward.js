@@ -1024,13 +1024,14 @@ import {
   await (window.KazvtI18n?.ready ?? Promise.resolve());
 
   if (localEditorPreview) {
-    window.addEventListener("message", async event => {
-      if (event.source !== window.parent || event.origin !== window.location.origin ||
-          event.data?.type !== "kazvt-reward-editor-preview") return;
-      const { filename: file, username: displayName, reason = "" } = event.data;
+    async function renderLocalEditorPreview(data) {
+      const { filename: file, username: displayName, reason = "" } = data;
       if (typeof file !== "string" || file.length > 255 || !/^[^/\\\u0000-\u001f]+\.(?:png|gif)$/i.test(file) ||
           typeof displayName !== "string" || !displayName.trim() || displayName.length > 100 ||
-          typeof reason !== "string" || reason.length > 180) return;
+          typeof reason !== "string" || reason.length > 180) {
+        showError("This local reward preview has invalid details.");
+        return;
+      }
       try {
         showLoading();
         const { catalog, assets } = await loadRewardCatalog();
@@ -1044,8 +1045,24 @@ import {
         console.warn("[reward-editor-preview] Could not render the selected reward:", error);
         showError("This reward preview could not be loaded. Rebuild the reward catalog and try again.");
       }
-    });
-    window.parent.postMessage({ type: "kazvt-reward-editor-preview-ready" }, window.location.origin);
+    }
+
+    const previewParams = new URLSearchParams(window.location.search);
+    const queryPreviewFile = previewParams.get("previewFile");
+    if (queryPreviewFile) {
+      await renderLocalEditorPreview({
+        filename: queryPreviewFile,
+        username: previewParams.get("previewUser") || "PREVIEW USERNAME",
+        reason: previewParams.get("previewReason") || "",
+      });
+    } else {
+      window.addEventListener("message", async event => {
+        if (event.source !== window.parent || event.origin !== window.location.origin ||
+            event.data?.type !== "kazvt-reward-editor-preview") return;
+        await renderLocalEditorPreview(event.data);
+      });
+      window.parent.postMessage({ type: "kazvt-reward-editor-preview-ready" }, window.location.origin);
+    }
   } else if (document.body.hasAttribute("data-reward-demo")) {
     openDemo().catch(async error => {
       console.warn("[reward-demo] Could not open demo:", error);
