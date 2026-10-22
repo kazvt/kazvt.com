@@ -232,7 +232,8 @@ def _validate_registry(registry: dict[str, Any]) -> None:
             validate_timestamp(revoked_at, f"Revoked assignment record {index + 1}")
             archived_by_command.setdefault(revocation_event_hash.lower(), set()).add(str(link_id))
         elif editor_archived:
-            if (not isinstance(record.get("editorArchivedBy"), str) or
+            if (not isinstance(link_id, str) or not link_id or
+                    not isinstance(record.get("editorArchivedBy"), str) or
                     record["editorArchivedBy"].casefold() not in REWARD_CHAT_ACTORS or
                     any(key in record for key in ("revokedAt", "revokedBy", "revocationEventHash", "revocationAction"))):
                 raise RewardIssueError(f"Editor-archived assignment record {index + 1} is invalid.")
