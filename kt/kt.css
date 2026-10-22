@@ -359,6 +359,7 @@ body[data-page="kt"] summary:focus-visible {
 .kt-member {
   --kt-member-accent: var(--kt-blue);
   --kt-member-wash: rgb(91 206 250 / 22%);
+  --kt-member-end: var(--kt-paper);
   position: relative;
   isolation: isolate;
   display: grid;
@@ -368,7 +369,7 @@ body[data-page="kt"] summary:focus-visible {
   gap: 10px;
   padding: 11px 12px;
   border: 3px solid var(--kt-ink);
-  background: linear-gradient(135deg, var(--kt-member-wash), var(--kt-paper) 78%);
+  background: linear-gradient(135deg, var(--kt-member-wash), var(--kt-member-end) 78%);
   box-shadow: 4px 4px 0 var(--kt-ink), 8px 8px 0 var(--kt-member-accent);
   transform: rotateX(1deg) rotateY(-1deg);
   transform-style: preserve-3d;
@@ -400,6 +401,7 @@ body[data-page="kt"] summary:focus-visible {
 .kt-member-grid > li:nth-child(3n) .kt-member {
   --kt-member-accent: var(--kt-white);
   --kt-member-wash: rgb(255 255 255 / 88%);
+  --kt-member-end: var(--kt-white);
   animation-delay: -3.2s;
 }
 
