@@ -166,6 +166,7 @@ body[data-page="kt"] summary:focus-visible {
 .kt-hero {
   position: relative;
   z-index: 1;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(190px, .8fr) minmax(0, 1.7fr);
   align-items: center;
@@ -180,43 +181,29 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 .kt-flag-stage {
-  position: relative;
-  display: grid;
-  min-height: 200px;
-  place-items: center;
-  perspective: 760px;
-  transform-style: preserve-3d;
-}
-
-.kt-flag-pole {
   position: absolute;
-  z-index: 4;
-  top: 4%;
-  left: 8.5%;
-  width: 8px;
-  height: 94%;
-  border: 2px solid var(--kt-ink);
-  background: linear-gradient(90deg, var(--kt-blue), var(--kt-white) 45%, var(--kt-blue));
-  box-shadow: 3px 3px 0 rgb(43 32 40 / 30%);
-  transform: rotate(-1deg) translateZ(24px);
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .kt-flag {
   position: absolute;
-  z-index: 2;
-  top: 12%;
-  left: 9%;
+  top: 50%;
+  left: 50%;
   display: block;
-  width: min(88%, 270px);
+  width: min(108%, 760px);
   aspect-ratio: 16 / 9;
   border: 0;
   outline: 0;
   background: transparent;
   box-shadow: none;
   object-fit: contain;
-  filter: drop-shadow(0 7px 8px rgb(43 32 40 / 20%));
-  -webkit-mask-image: radial-gradient(ellipse 100% 100% at center, #000 78%, rgb(0 0 0 / 82%) 88%, transparent 100%);
-  mask-image: radial-gradient(ellipse 100% 100% at center, #000 78%, rgb(0 0 0 / 82%) 88%, transparent 100%);
+  opacity: .18;
+  transform: translate(-50%, -50%);
+  -webkit-mask-image: radial-gradient(ellipse 92% 90% at center, #000 42%, rgb(0 0 0 / 56%) 72%, transparent 100%);
+  mask-image: radial-gradient(ellipse 92% 90% at center, #000 42%, rgb(0 0 0 / 56%) 72%, transparent 100%);
 }
 
 .kt-hero-copy {
@@ -625,14 +612,6 @@ body[data-page="kt"] summary:focus-visible {
     padding: 27px 22px 28px;
   }
 
-  .kt-flag-stage {
-    min-height: 135px;
-    justify-self: center;
-    width: min(280px, 82%);
-  }
-
-  .kt-flag { top: 11%; left: 8.5%; width: min(88%, 220px); }
-  .kt-flag-pole { left: 8%; height: 94%; }
   .kt-hero-copy { text-align: center; }
   .kt-eyebrow { letter-spacing: .09em; }
   .kt-hero h1 { justify-items: center; font-size: clamp(2.6rem, 11vw, 4.2rem); }
