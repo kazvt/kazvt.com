@@ -16,7 +16,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools" / "reward-editor-local"))
 import server  # noqa: E402
-from build_reward_catalog import build_catalog  # noqa: E402
+from build_reward_catalog import TIER_IDS, build_catalog  # noqa: E402
 
 
 class LocalRewardEditorTests(unittest.TestCase):
@@ -36,7 +36,7 @@ class LocalRewardEditorTests(unittest.TestCase):
 
         weights = [
             {"id": tier_id, "label": tier_id.title(), "basisPoints": 1250}
-            for tier_id in server.local_issuer.TIER_IDS
+            for tier_id in TIER_IDS
         ]
         catalog = build_catalog(artwork_dir, {"tierWeights": weights})
         self.write_json("zzz_assets/rewards/manifest.json", catalog)
