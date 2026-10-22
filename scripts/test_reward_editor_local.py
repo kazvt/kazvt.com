@@ -148,7 +148,10 @@ class LocalRewardEditorTests(unittest.TestCase):
         with self.assertRaises(server.ApiError):
             server._safe_relative("../reward/manifest.json")
         with self.assertRaises(server.ApiError):
-            server._public_path("/reward/api/reservations.local.txt")
+            server._source_path("reward/api/reservations.local.txt")
+        handler = server.Handler.__new__(server.Handler)
+        with self.assertRaises(server.ApiError):
+            handler._public_path("/reward/api/reservations.local.txt")
         source = 'alice -> "E:\\site\\zzz_assets\\rewards\\reward-1.png"\n'
         changed = server._rewrite_reservation_targets(source, "reward-1.png", "renamed.png")
         self.assertEqual(changed, 'alice -> "E:\\site\\zzz_assets\\rewards\\renamed.png"\n')
