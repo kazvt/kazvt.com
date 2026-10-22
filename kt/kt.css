@@ -195,7 +195,7 @@ body[data-page="kt"] summary:focus-visible {
   top: 50%;
   left: 50%;
   display: block;
-  width: min(170%, 520px);
+  width: min(110%, 340px);
   aspect-ratio: 16 / 9;
   border: 0;
   outline: 0;
@@ -203,7 +203,7 @@ body[data-page="kt"] summary:focus-visible {
   box-shadow: none;
   object-fit: contain;
   opacity: 1;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(90deg);
   -webkit-mask-image: radial-gradient(ellipse 92% 90% at center, #000 42%, rgb(0 0 0 / 56%) 72%, transparent 100%);
   mask-image: radial-gradient(ellipse 92% 90% at center, #000 42%, rgb(0 0 0 / 56%) 72%, transparent 100%);
 }
@@ -620,7 +620,7 @@ body[data-page="kt"] summary:focus-visible {
     width: min(280px, 82%);
   }
 
-  .kt-flag { width: min(155%, 420px); }
+  .kt-flag { width: min(100%, 250px); }
   .kt-hero-copy { text-align: center; }
   .kt-eyebrow { letter-spacing: .09em; }
   .kt-hero h1 { justify-items: center; font-size: clamp(2.6rem, 11vw, 4.2rem); }
