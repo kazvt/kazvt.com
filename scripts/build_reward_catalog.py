@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
 import re
@@ -62,33 +63,36 @@ def tier_for_asset_id(asset_id: str, tier_weights: list[dict[str, Any]]) -> str:
     raise CatalogError("Tier weights did not cover the full hash range.")
 
 
-def _image_metadata(path: Path) -> tuple[str, int, int]:
+def _image_metadata(filename: str, data: bytes) -> tuple[str, int, int]:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
-            with Image.open(path) as image:
+            with Image.open(io.BytesIO(data)) as image:
                 image_format = (image.format or "").upper()
                 width, height = image.size
                 if width < 1 or height < 1 or width * height > MAX_IMAGE_PIXELS:
-                    raise CatalogError(f"{path.name}: image dimensions are invalid or too large.")
-                expected_format = path.suffix[1:].upper()
+                    raise CatalogError(f"{filename}: image dimensions are invalid or too large.")
+                expected_format = Path(filename).suffix[1:].upper()
                 if image_format != expected_format:
-                    raise CatalogError(f"{path.name}: file extension does not match its {image_format or 'unknown'} image data.")
+                    raise CatalogError(f"{filename}: file extension does not match its {image_format or 'unknown'} image data.")
                 image.verify()
             # Pillow's verify() checks the encoded file without altering it.
-            with Image.open(path) as image:
+            with Image.open(io.BytesIO(data)) as image:
                 return image_format, int(image.width), int(image.height)
     except CatalogError:
         raise
     except (OSError, ValueError, UnidentifiedImageError, Image.DecompressionBombError,
             Image.DecompressionBombWarning) as exc:
-        raise CatalogError(f"{path.name}: could not decode this PNG/GIF.") from exc
+        raise CatalogError(f"{filename}: could not decode this PNG/GIF.") from exc
 
 
 def build_catalog(
     rewards_dir: Path,
     previous: dict[str, Any] | None = None,
     tier_weights: Any = None,
+    *,
+    overrides: dict[str, bytes] | None = None,
+    removed_names: set[str] | None = None,
 ) -> dict[str, Any]:
     previous = previous or {}
     weights = normalize_tier_weights(
@@ -104,25 +108,37 @@ def build_catalog(
         (asset_id is None or re.fullmatch(r"[a-f0-9]{64}", asset_id, re.IGNORECASE))
     }
 
-    files: list[str] = []
-    assets: dict[str, dict[str, Any]] = {}
-    assets_by_id: dict[str, dict[str, Any]] = {}
+    sources: dict[str, Path | bytes] = {}
+    removed_folded = {name.casefold() for name in (removed_names or set())}
     try:
         candidates = sorted(rewards_dir.iterdir(), key=lambda item: (item.name.casefold(), item.name))
     except OSError as exc:
         raise CatalogError("The reward artwork folder could not be read.") from exc
-
     for path in candidates:
         if path.is_symlink() or not path.is_file() or path.suffix.lower() not in {".png", ".gif"}:
             continue
-        filename = path.name
+        if path.name.casefold() not in removed_folded:
+            sources[path.name] = path
+    for filename, data in (overrides or {}).items():
+        if not isinstance(filename, str) or not FILENAME_RE.fullmatch(filename) or not isinstance(data, bytes):
+            raise CatalogError("An artwork replacement has an invalid filename or image body.")
+        existing = next((name for name in sources if name.casefold() == filename.casefold()), None)
+        if existing and existing != filename:
+            raise CatalogError("Artwork filenames cannot differ only by capitalization.")
+        sources[filename] = data
+
+    files: list[str] = []
+    assets: dict[str, dict[str, Any]] = {}
+    assets_by_id: dict[str, dict[str, Any]] = {}
+    for filename in sorted(sources, key=lambda item: (item.casefold(), item)):
         if not FILENAME_RE.fullmatch(filename):
             raise CatalogError(f"{filename!r} is not a safe PNG/GIF filename (maximum 255 characters).")
         try:
-            data = path.read_bytes()
+            source = sources[filename]
+            data = source if isinstance(source, bytes) else source.read_bytes()
         except OSError as exc:
             raise CatalogError(f"{filename}: could not read the artwork file.") from exc
-        image_format, width, height = _image_metadata(path)
+        image_format, width, height = _image_metadata(filename, data)
         if not data:
             raise CatalogError(f"{filename}: artwork files cannot be empty.")
         asset_id = hashlib.sha256(data).hexdigest()
