@@ -1368,6 +1368,11 @@ function setInlineNote(node, text, { animate = true } = {}) {
 }
 
 function platformIcon(name) {
+  const fineGrainLogo = {
+    discord: "/zzz_assets/redirect-logos/_originals/discord-lineboil-two-lobe-v3-pre-broad-grain-v4.gif",
+    twitter: "/zzz_assets/redirect-logos/_originals/twitter-lineboil-two-lobe-v3-pre-broad-grain-v4.gif",
+    bsky: "/zzz_assets/redirect-logos/_originals/bsky-independent-140ms-v3-pre-broad-grain-20260930.gif",
+  }[name];
   const logoVersion = name === "discord"
     ? "lineboil-broad-grain-v4"
     : name === "twitter"
@@ -1379,7 +1384,7 @@ function platformIcon(name) {
         : "lineboil-independent-140ms-v3";
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
-    src: `/zzz_assets/redirect-logos/${name}.gif?v=${logoVersion}`,
+    src: fineGrainLogo || `/zzz_assets/redirect-logos/${name}.gif?v=${logoVersion}`,
     alt: "",
     ariaHidden: "true",
     decoding: "async",
