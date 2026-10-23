@@ -456,16 +456,21 @@ body[data-page="kt"] summary:focus-visible {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background:
-    linear-gradient(90deg, transparent 0%, rgb(43 32 40 / 100%) 100%),
-    linear-gradient(90deg, transparent 0%, rgb(43 32 40 / 90%) 22%, rgb(43 32 40 / 90%) 78%, transparent 100%);
-  background-size: 100% 100%, 50% 100%;
-  background-repeat: no-repeat, repeat-x;
-  background-position: 0 0, 0 0;
+  background-image: repeating-linear-gradient(
+    var(--kt-hover-flag-angle, 90deg),
+    var(--kt-blue) 0 12px,
+    var(--kt-pink) 12px 24px,
+    var(--kt-white) 24px 36px,
+    var(--kt-pink) 36px 48px,
+    var(--kt-blue) 48px 60px
+  );
+  background-size: var(--kt-hover-flag-tile, 240px) var(--kt-hover-flag-tile, 240px);
+  background-repeat: repeat;
+  background-position: 0 0;
   content: "";
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms steps(4, end);
+  transition: opacity 100ms linear;
 }
 
 .kt-member > * {
@@ -512,8 +517,8 @@ body[data-page="kt"] summary:focus-visible {
 
 .kt-member:hover::after,
 .kt-member:focus-visible::after {
-  opacity: .2;
-  animation: kt-member-gradient-scroll 4.6s linear infinite;
+  opacity: 1;
+  animation: kt-trans-flag-scroll 700ms linear infinite;
 }
 
 .kt-member-number {
@@ -1056,9 +1061,13 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
   to { transform: translateX(calc(100vw + 110%)) skewX(-12deg); }
 }
 
-@keyframes kt-member-gradient-scroll {
-  from { background-position: 0 0, 0 0; }
-  to { background-position: 0 0, 100% 0; }
+@keyframes kt-trans-flag-scroll {
+  from { background-position: 0 0; }
+  to {
+    background-position:
+      var(--kt-hover-flag-x, 60px)
+      var(--kt-hover-flag-y, 0px);
+  }
 }
 
 @keyframes kt-sticker-hop {
@@ -1133,7 +1142,7 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
   .kt-member:hover::after,
   .kt-member:focus-visible::after {
     animation: none;
-    background-position: 0 0, 0 0;
+    background-position: 0 0;
   }
   .kt-pride-gif-stagger { display: none !important; }
 }
