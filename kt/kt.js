@@ -306,6 +306,70 @@
     if (formatted) label.textContent = formatted;
   }
 
+  function initializePrideGifStagger() {
+    const rail = document.querySelector("[data-kt-pride-gif-stagger]");
+    const frame = document.querySelector(".kt-frame");
+    if (!rail || !frame) return;
+
+    const sourcePool = [
+      "/kt/assets/trans-you-matter.gif",
+      "/kt/assets/trans-flag-heart.gif",
+      "/kt/assets/trans-power.gif",
+      "/kt/assets/trans-caturday.gif",
+      "/kt/assets/transgender-favicon.gif",
+      "/kt/assets/trans-flag-trapbob.gif",
+      "/kt/assets/trans-support-fox-fisher.gif",
+      "/kt/assets/trans-rights-intoaction.gif",
+      "/kt/assets/trans-akcija-cat-flag.gif",
+      "/kt/assets/trans-femme-heart-fox-fisher.gif",
+      "/kt/assets/trans-love-heart-contextual.gif",
+      "/kt/assets/trans-rights-taimi.gif",
+    ];
+    const shuffledPool = [...sourcePool];
+    for (let index = shuffledPool.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffledPool[index], shuffledPool[swapIndex]] = [shuffledPool[swapIndex], shuffledPool[index]];
+    }
+
+    const desktopPreference = window.matchMedia("(min-width: 1280px)");
+    const approximateSlotSpacing = 190;
+    let renderedCount = -1;
+
+    function renderRail() {
+      const railHeight = rail.clientHeight;
+      const count = desktopPreference.matches && !motionPreference.matches && railHeight > 0
+        ? Math.ceil(railHeight / approximateSlotSpacing) + 1
+        : 0;
+      if (count === renderedCount) return;
+      renderedCount = count;
+
+      const fragment = document.createDocumentFragment();
+      for (let index = 0; index < count; index += 1) {
+        const image = document.createElement("img");
+        image.className = index % 2 === 0 ? "kt-pride-gif--left" : "kt-pride-gif--right";
+        image.src = shuffledPool[index % shuffledPool.length];
+        image.width = 200;
+        image.height = 200;
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        fragment.append(image);
+      }
+      rail.replaceChildren(fragment);
+    }
+
+    renderRail();
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(renderRail);
+      observer.observe(frame);
+      window.addEventListener("pagehide", () => observer.disconnect(), { once: true });
+    } else {
+      window.addEventListener("resize", renderRail, { passive: true });
+    }
+    desktopPreference.addEventListener("change", renderRail);
+    motionPreference.addEventListener("change", renderRail);
+  }
+
   function initializeTransFlagHover() {
     const selector = ".kt-member, .kt-recommendation-link";
     const directions = [
@@ -487,6 +551,7 @@
   window.addEventListener("kazvt:languagechange", updateMemberCount);
 
   initializeMemberKitCopy();
+  initializePrideGifStagger();
   initializeTransFlagHover();
   initializeLivePips();
 
