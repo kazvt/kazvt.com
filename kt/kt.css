@@ -86,7 +86,7 @@ body[data-page="kt"]::before {
   );
   content: "";
   pointer-events: none;
-  mix-blend-mode: screen;
+  mix-blend-mode: overlay;
   opacity: .96;
   transform: translateX(-110%) skewX(-12deg);
   animation: kt-wallpaper-sweep 34s linear infinite;
