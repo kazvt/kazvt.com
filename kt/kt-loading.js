@@ -242,15 +242,27 @@ function initializeKtLoadingScreen() {
     message.textContent = secondMessage;
   }, 2000);
 
-  const updateProgress = window.setInterval(() => {
+  let progressFrame = 0;
+  let lastDisplayedPercent = -1;
+  const updateProgress = () => {
     const percent = Math.min(100, ((performance.now() - startedAt) / 3000) * 100);
     progress.value = percent;
-    progress.setAttribute("aria-valuetext", `${Math.round(percent)} percent`);
-    percentLabel.textContent = `${Math.round(percent)}%`;
-  }, 50);
+    const roundedPercent = Math.round(percent);
+    if (roundedPercent !== lastDisplayedPercent) {
+      progress.setAttribute("aria-valuetext", `${roundedPercent} percent`);
+      percentLabel.textContent = `${roundedPercent}%`;
+      lastDisplayedPercent = roundedPercent;
+    }
+    if (percent < 100) progressFrame = window.requestAnimationFrame(updateProgress);
+  };
+  const stopProgress = () => {
+    window.cancelAnimationFrame(progressFrame);
+    progressFrame = 0;
+  };
+  progressFrame = window.requestAnimationFrame(updateProgress);
 
   const finishFade = window.setTimeout(() => {
-    window.clearInterval(updateProgress);
+    stopProgress();
     progress.value = 100;
     progress.setAttribute("aria-valuetext", "100 percent");
     percentLabel.textContent = "100%";
@@ -260,7 +272,7 @@ function initializeKtLoadingScreen() {
   window.setTimeout(() => {
     window.clearTimeout(showSecondMessage);
     window.clearTimeout(finishFade);
-    window.clearInterval(updateProgress);
+    stopProgress();
     host.remove();
     if (previousBusy === null) document.body.removeAttribute("aria-busy");
     else document.body.setAttribute("aria-busy", previousBusy);
