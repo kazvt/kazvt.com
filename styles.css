@@ -177,6 +177,13 @@ body {
   cursor: var(--cursor-default, auto);
 }
 
+/* Intentional emphasis uses Comic Sans; display faces stay at their own weight. */
+.comic-sans-emphasis {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-weight: 700;
+  font-synthesis: weight;
+}
+
 
 /* Palette-specific typography. Unlisted palettes intentionally use Comic Sans MS. */
 /* Keep Palette 1's default type just a touch more compact. */
@@ -5653,6 +5660,15 @@ body[data-theme="p1"] *,
 body[data-theme="p1"] *::before,
 body[data-theme="p1"] *::after {
   font-weight: 400 !important;
+  font-synthesis: none;
+}
+
+/* 04b_30 is already visually heavy; reserve actual bold emphasis for Comic Sans. */
+body[data-theme="p1"] :is(b, strong),
+body[data-theme="p1"] .comic-sans-emphasis {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-weight: 700 !important;
+  font-synthesis: weight;
 }
 
 /* Palette 6 uses its regular Sweet face sitewide, not synthetic bold weights. */
