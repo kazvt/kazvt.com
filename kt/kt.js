@@ -62,68 +62,58 @@
       let badgeRequest = 0;
       const badgePreloads = new Map();
 
-      function preloadBadge(option) {
-        if (badgePreloads.has(option.src)) return badgePreloads.get(option.src);
+      function waitForImageLoad(image, src) {
+        return new Promise((resolve, reject) => {
+          const expectedSrc = new URL(src, document.baseURI).href;
+          let settled = false;
+
+          const cleanup = () => {
+            image.removeEventListener("load", onLoad);
+            image.removeEventListener("error", onError);
+          };
+          const finish = (error = null) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            if (error) reject(error);
+            else resolve();
+          };
+          const isExpectedImage = () => (image.currentSrc || image.src) === expectedSrc;
+          const onLoad = () => {
+            if (!isExpectedImage()) return;
+            if (image.naturalWidth > 0 && image.naturalHeight > 0) finish();
+            else finish(new Error("Badge image has no decoded dimensions"));
+          };
+          const onError = () => {
+            if (isExpectedImage()) finish(new Error("Badge image failed to load"));
+          };
+
+          image.addEventListener("load", onLoad);
+          image.addEventListener("error", onError);
+          image.src = src;
+          if (image.complete && image.naturalWidth > 0 && isExpectedImage()) onLoad();
+        });
+      }
+
+      function preloadBadge(option, priority = "low") {
+        const existing = badgePreloads.get(option.src);
+        if (existing) {
+          if (priority === "high" && "fetchPriority" in existing.image) {
+            existing.image.fetchPriority = "high";
+          }
+          return existing.promise;
+        }
 
         const image = new Image();
         image.decoding = "async";
-        if ("fetchPriority" in image) image.fetchPriority = "low";
-
-        const load = typeof image.decode === "function"
-          ? new Promise((resolve, reject) => {
-              image.src = option.src;
-              image.decode().then(resolve, reject);
-            })
-          : new Promise((resolve, reject) => {
-              const finish = () => {
-                image.removeEventListener("load", onLoad);
-                image.removeEventListener("error", onError);
-              };
-              const onLoad = () => {
-                finish();
-                image.naturalWidth > 0 ? resolve() : reject(new Error("Badge image has no decoded dimensions"));
-              };
-              const onError = () => {
-                finish();
-                reject(new Error("Badge image failed to load"));
-              };
-              image.addEventListener("load", onLoad);
-              image.addEventListener("error", onError);
-              image.src = option.src;
-              if (image.complete) onLoad();
-            });
-
-        const trackedLoad = load.catch((error) => {
-          badgePreloads.delete(option.src);
+        if ("fetchPriority" in image) image.fetchPriority = priority;
+        const preload = { image, promise: null };
+        preload.promise = waitForImageLoad(image, option.src).catch((error) => {
+          if (badgePreloads.get(option.src) === preload) badgePreloads.delete(option.src);
           throw error;
         });
-        badgePreloads.set(option.src, trackedLoad);
-        return trackedLoad;
-      }
-
-      function decodeDisplayedBadge() {
-        if (typeof badgeImage.decode === "function") return badgeImage.decode();
-        if (badgeImage.complete) {
-          return badgeImage.naturalWidth > 0
-            ? Promise.resolve()
-            : Promise.reject(new Error("Badge image has no decoded dimensions"));
-        }
-        return new Promise((resolve, reject) => {
-          const finish = () => {
-            badgeImage.removeEventListener("load", onLoad);
-            badgeImage.removeEventListener("error", onError);
-          };
-          const onLoad = () => {
-            finish();
-            badgeImage.naturalWidth > 0 ? resolve() : reject(new Error("Badge image has no decoded dimensions"));
-          };
-          const onError = () => {
-            finish();
-            reject(new Error("Badge image failed to load"));
-          };
-          badgeImage.addEventListener("load", onLoad);
-          badgeImage.addEventListener("error", onError);
-        });
+        badgePreloads.set(option.src, preload);
+        return preload.promise;
       }
 
       function selectBadge(index, activatedArrow = null) {
@@ -142,10 +132,11 @@
         badgeLoading.hidden = false;
         badgeError.hidden = true;
 
-        preloadBadge(option).then(() => {
+        preloadBadge(option, "high").then(() => {
           if (request !== badgeRequest) return;
-          badgeImage.src = option.src;
-          return decodeDisplayedBadge();
+          badgeImage.loading = "eager";
+          if ("fetchPriority" in badgeImage) badgeImage.fetchPriority = "high";
+          return waitForImageLoad(badgeImage, option.src);
         }).then(() => {
           if (request !== badgeRequest) return;
           delete badgePicker.dataset.loading;
@@ -168,9 +159,9 @@
 
       previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1, previousBadge));
       nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1, nextBadge));
-      // Start the optional 7 MB variant early at low priority, without blocking
-      // the page's initial render or replacing the visible badge before decode.
-      void preloadBadge(badgeOptions[1]).catch(() => {});
+      // Preload the optional 7 MB variant at low priority, then prioritize it
+      // on demand. Keep the truthful loading state until the displayed image loads.
+      void preloadBadge(badgeOptions[1], "low").catch(() => {});
     }
 
     if (descriptionInput instanceof HTMLInputElement && previewDescription) {
