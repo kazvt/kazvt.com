@@ -230,12 +230,22 @@
 
       indicator.hidden = false;
       indicator.dataset.state = state;
-      indicator.textContent = state === "live" ? "LIVE" : "?";
+      const translate = (key, fallback, replacements = {}) => {
+        const i18n = window.KazvtI18n;
+        return i18n?.format?.(key, replacements) || i18n?.t?.(key) || fallback;
+      };
+      indicator.textContent = state === "live"
+        ? translate("kt.live_label", "LIVE")
+        : translate("kt.unknown_label", "?");
       indicator.setAttribute(
         "aria-label",
-        state === "live" ? `${slug} is live on Kick` : `Couldn't check ${slug}'s Kick status`
+        state === "live"
+          ? translate("kt.live_aria", `${slug} is live on KICK`, { name: slug })
+          : translate("kt.unknown_aria", `Couldn't check ${slug}'s KICK status`, { name: slug })
       );
-      indicator.title = state === "live" ? "Live on Kick" : "Kick status unavailable";
+      indicator.title = state === "live"
+        ? translate("kt.live_title", "Live on KICK")
+        : translate("kt.unknown_title", "KICK status unavailable");
     }
 
     async function checkEntry(entry) {
@@ -297,6 +307,13 @@
       if (elapsed >= refreshInterval) void refreshStatuses();
       else scheduleRefresh(refreshInterval - elapsed);
     });
+
+    const refreshIndicatorLanguage = () => entries.forEach((entry) => {
+      const state = entry.indicator.dataset.state;
+      if (!entry.indicator.hidden && state) setState(entry, state);
+    });
+    window.addEventListener("kazvt:i18nready", refreshIndicatorLanguage);
+    window.addEventListener("kazvt:languagechange", refreshIndicatorLanguage);
 
     void refreshStatuses();
   }
