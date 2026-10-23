@@ -25,6 +25,9 @@
 }
 
 .kt-recommendation-link {
+  --kt-live-accent: var(--kt-blue);
+  --kt-live-glow: rgb(91 206 250 / 24%);
+  --kt-live-halo: transparent;
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   min-height: 48px;
@@ -33,16 +36,20 @@
   padding: 7px 10px;
   border: 2px solid var(--kt-ink);
   background: var(--kt-paper);
-  box-shadow: 3px 3px 0 var(--kt-blue), 5px 5px 0 var(--kt-pink);
+  box-shadow: 3px 3px 0 var(--kt-blue), 5px 5px 0 var(--kt-pink), 0 0 12px 1px var(--kt-live-halo);
   color: var(--kt-ink);
   text-decoration: none;
   transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end), background-color 140ms steps(3, end);
 }
 
+.kt-recommendation-link[data-live-state="live"] {
+  --kt-live-halo: var(--kt-live-glow);
+}
+
 .kt-recommendation-link:hover,
 .kt-recommendation-link:focus-visible {
   background: var(--kt-lilac);
-  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink);
+  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink), 0 0 12px 1px var(--kt-live-halo);
 }
 
 .kt-recommendation-copy {
