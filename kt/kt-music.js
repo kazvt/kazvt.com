@@ -12,6 +12,14 @@
   // A major triad spread across two octaves: root, third, fifth and their
   // octave doublings. The voicing changes on each fresh page load.
   const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
+  // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
+  // After 32 bars (128 seconds), glide down an octave; after 32 more, return.
+  const beatsPerBar = 4;
+  const tempoBpm = 60;
+  const barDuration = (60 / tempoBpm) * beatsPerBar;
+  const registerChangeInterval = 32 * barDuration;
+  const registerGlideDuration = barDuration;
+  const registerScheduleLookahead = 10 * 60;
 
   let context = null;
   let padFilter = null;
@@ -22,6 +30,9 @@
   let preferenceExpiresAt = 0;
   let preferenceTimer = 0;
   let generation = 0;
+  let registerScheduleTimer = 0;
+  let registerCycleStart = 0;
+  let scheduledRegisterChanges = 0;
 
   function setButtonState() {
     button.textContent = muted ? "Unmute" : "Mute";
@@ -91,6 +102,37 @@
     return impulse;
   }
 
+  function scheduleRegisterChange(when, down) {
+    const startFactor = down ? 1 : 0.5;
+    const endFactor = down ? 0.5 : 1;
+    oscillators.forEach(({ oscillator, frequency }) => {
+      oscillator.frequency.setValueAtTime(frequency * startFactor, when);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        frequency * endFactor,
+        when + registerGlideDuration
+      );
+    });
+  }
+
+  function extendRegisterSchedule(throughTime) {
+    while (registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval <= throughTime) {
+      const changeAt = registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval;
+      scheduleRegisterChange(changeAt, scheduledRegisterChanges % 2 === 0);
+      scheduledRegisterChanges += 1;
+    }
+  }
+
+  function startRegisterCycle(startTime) {
+    window.clearInterval(registerScheduleTimer);
+    registerCycleStart = startTime;
+    scheduledRegisterChanges = 0;
+    extendRegisterSchedule(startTime + registerScheduleLookahead);
+    registerScheduleTimer = window.setInterval(() => {
+      if (!playing || !context || context.state !== "running") return;
+      extendRegisterSchedule(context.currentTime + registerScheduleLookahead);
+    }, 30_000);
+  }
+
   function ensureAudioGraph() {
     if (context) return true;
     if (!AudioContextClass) return false;
@@ -157,11 +199,12 @@
         }
 
         oscillator.start(now);
-        voices.push({ oscillator, voice });
+        voices.push({ oscillator, voice, frequency });
       });
     });
 
     oscillators = voices;
+    startRegisterCycle(now);
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
     master.gain.linearRampToValueAtTime(0.25, now + fadeSeconds);
@@ -184,6 +227,8 @@
   }
 
   function stopMusic() {
+    window.clearInterval(registerScheduleTimer);
+    registerScheduleTimer = 0;
     if (!context || !master) return;
     if (!playing) {
       if (context.state === "running") context.suspend().catch(() => {});
