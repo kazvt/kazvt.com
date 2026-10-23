@@ -223,7 +223,7 @@ function initializeKtLoadingScreen() {
         </div>
       </div>
       <progress class="loading-progress" max="100" value="0" aria-label="KickassTransfems loading progress" aria-valuetext="0 percent"></progress>
-      <div class="progress-caption" aria-hidden="true"><span>BUFFERING THE GIRL INTERNET</span><span data-loading-percent>0%</span></div>
+      <div class="progress-caption" aria-hidden="true"><span>buffering tgirl internet...</span><span data-loading-percent>0%</span></div>
       <p class="loading-footer" aria-hidden="true"><span>♡</span> hold tight, sweetie <span>♡</span></p>
     </div>
   `;
