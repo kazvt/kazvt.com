@@ -399,7 +399,11 @@ body[data-page="kt"] summary:focus-visible {
   padding: 11px 12px;
   border: 3px solid var(--kt-ink);
   background: linear-gradient(135deg, var(--kt-member-wash), var(--kt-member-end) 78%);
-  box-shadow: 4px 4px 0 var(--kt-ink), 8px 8px 0 var(--kt-member-accent), 0 0 12px 1px var(--kt-live-halo);
+  box-shadow:
+    4px 4px 0 var(--kt-ink),
+    8px 8px 0 var(--kt-member-accent),
+    0 0 20px 6px var(--kt-live-halo),
+    0 0 34px 10px var(--kt-live-halo);
   transform: none;
   transform-style: preserve-3d;
   transition: transform 160ms steps(4, end), box-shadow 160ms steps(4, end);
@@ -454,8 +458,8 @@ body[data-page="kt"] summary:focus-visible {
   --kt-member-accent: var(--kt-white);
   --kt-member-wash: rgb(255 255 255 / 88%);
   --kt-member-end: var(--kt-white);
-  --kt-live-accent: var(--kt-blue);
-  --kt-live-glow: rgb(91 206 250 / 24%);
+  --kt-live-accent: var(--kt-pink);
+  --kt-live-glow: rgb(245 169 184 / 24%);
 }
 
 .kt-member[data-live-state="live"] {
@@ -465,7 +469,11 @@ body[data-page="kt"] summary:focus-visible {
 .kt-member:hover,
 .kt-member:focus-visible {
   z-index: 3;
-  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-member-accent), 0 0 12px 1px var(--kt-live-halo);
+  box-shadow:
+    2px 2px 0 var(--kt-ink),
+    4px 4px 0 var(--kt-member-accent),
+    0 0 20px 6px var(--kt-live-halo),
+    0 0 34px 10px var(--kt-live-halo);
   transform: translate(2px, 2px) rotate(-.5deg);
 }
 
