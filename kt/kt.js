@@ -13,6 +13,17 @@
 
     const status = panel.querySelector("[data-kt-copy-status]");
     const message = (key, fallback) => window.KazvtI18n?.t(key) || fallback;
+    const descriptionInput = panel.querySelector("#kt-webring-plain-text");
+    const previewDescription = panel.querySelector("[data-kt-panel-description-preview]");
+
+    if (descriptionInput instanceof HTMLInputElement && previewDescription) {
+      const syncPanelDescription = () => {
+        previewDescription.textContent = descriptionInput.value;
+      };
+      syncPanelDescription();
+      descriptionInput.addEventListener("input", syncPanelDescription);
+      descriptionInput.addEventListener("change", syncPanelDescription);
+    }
 
     async function copyField(input) {
       if (!(input instanceof HTMLInputElement) || !input.readOnly) return;
