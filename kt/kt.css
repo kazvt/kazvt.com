@@ -529,6 +529,7 @@ body[data-page="kt"] summary:focus-visible {
   font-size: .64rem;
   font-weight: 600;
   line-height: 1.2;
+  transform: rotate(2deg) translateZ(14px);
 }
 
 .kt-member-pronouns {
