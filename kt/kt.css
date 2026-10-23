@@ -503,7 +503,8 @@ body[data-page="kt"] summary:focus-visible {
   flex-wrap: wrap;
 }
 
-.kt-member-name {
+.kt-member-name,
+.kt-recommendation-name {
   overflow-wrap: anywhere;
   color: var(--kt-ink);
   font-family: "Comic Sans MS", "Comic Sans", cursive;
