@@ -115,7 +115,7 @@
   place-items: center;
   background: var(--kt-pink);
   color: var(--kt-ink);
-  font-weight: 1000;
+  font-weight: 400;
 }
 
 .kt-recommendation-handle {
