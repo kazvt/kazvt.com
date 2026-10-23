@@ -72,16 +72,12 @@ function initializeKtLoadingScreen() {
     .title-bar { min-height: 32px; }
     .title-bar-text { display: flex; align-items: center; gap: 8px; }
     .window-icon {
-      display: inline-grid;
+      display: block;
+      flex: 0 0 18px;
       width: 18px;
-      height: 18px;
-      place-items: center;
-      color: #3c2346;
-      background: linear-gradient(135deg, #5bcefa 0 48%, #fff 48% 52%, #f5a9b8 52%);
-      border: 1px solid #fff;
-      box-shadow: 1px 1px #24212a;
-      font-size: 12px;
-      line-height: 1;
+      height: 14px;
+      object-fit: contain;
+      background: transparent;
     }
     .window-body { padding: 22px 24px 16px; }
     .loading-row {
@@ -209,7 +205,7 @@ function initializeKtLoadingScreen() {
   windowPanel.setAttribute("aria-label", "Loading KickassTransfems");
   windowPanel.innerHTML = `
     <div class="title-bar">
-      <div class="title-bar-text"><span class="window-icon" aria-hidden="true">✦</span>KICKASSTRANSFEMS - PLEASE WAIT</div>
+      <div class="title-bar-text"><img class="window-icon" src="/kt/assets/transgender-favicon.gif?v=transgender-favicon-transparent-20261023-v3" width="18" height="14" alt="" aria-hidden="true">KICKASSTRANSFEMS - PLEASE WAIT</div>
     </div>
     <div class="window-body">
       <div class="loading-row">
