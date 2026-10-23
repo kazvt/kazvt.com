@@ -13,6 +13,7 @@
   /* XP.css puts these base defaults on body; mirror them into this shadow root. */
   color: #222;
   font: 12px "04b_30", Tahoma, sans-serif;
+  font-synthesis: none;
   pointer-events: none;
 }
 
@@ -33,6 +34,8 @@
 
 .welcome-dialog * {
   font-family: "04b_30", Tahoma, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
 }
 
 .welcome-titlebar {
