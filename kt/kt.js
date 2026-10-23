@@ -39,7 +39,8 @@
       ];
       let badgeIndex = 0;
 
-      function selectBadge(index) {
+      function selectBadge(index, activatedArrow = null) {
+        const shouldRestoreArrowFocus = activatedArrow && document.activeElement === activatedArrow;
         badgeIndex = Math.max(0, Math.min(badgeOptions.length - 1, index));
         const option = badgeOptions[badgeIndex];
         badgeImage.src = option.src;
@@ -49,10 +50,15 @@
         badgeStatus.textContent = `${option.label} · ${badgeIndex + 1} / ${badgeOptions.length}`;
         previousBadge.disabled = badgeIndex === 0;
         nextBadge.disabled = badgeIndex === badgeOptions.length - 1;
+
+        if (shouldRestoreArrowFocus && activatedArrow.disabled) {
+          const remainingArrow = badgeIndex === 0 ? nextBadge : previousBadge;
+          remainingArrow.focus({ preventScroll: true });
+        }
       }
 
-      previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1));
-      nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1));
+      previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1, previousBadge));
+      nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1, nextBadge));
       selectBadge(0);
     }
 
