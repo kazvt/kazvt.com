@@ -186,8 +186,125 @@
     if (formatted) label.textContent = formatted;
   }
 
+  function initializeLivePips() {
+    const cards = [...document.querySelectorAll(".kt-member-grid > li > .kt-member")];
+    const entries = cards.flatMap((card) => {
+      const title = card.querySelector(".kt-member-title");
+      let profile;
+      try {
+        profile = new URL(card.href);
+      } catch {
+        return [];
+      }
+
+      const slug = profile.hostname === "kick.com"
+        ? profile.pathname.split("/").filter(Boolean)[0]
+        : "";
+      if (!slug || !title) return [];
+
+      const indicator = document.createElement("span");
+      indicator.className = "kt-live-indicator";
+      indicator.hidden = true;
+      indicator.setAttribute("role", "img");
+      title.append(indicator);
+      return [{ slug, indicator }];
+    });
+
+    if (!entries.length) return;
+
+    const refreshInterval = 120_000;
+    const requestTimeout = 8_000;
+    const maxConcurrentRequests = 4;
+    let inFlight = false;
+    let lastRefresh = 0;
+    let refreshTimer = 0;
+
+    function setState(entry, state) {
+      const { indicator, slug } = entry;
+      if (state === "offline") {
+        indicator.hidden = true;
+        indicator.removeAttribute("aria-label");
+        indicator.removeAttribute("title");
+        return;
+      }
+
+      indicator.hidden = false;
+      indicator.dataset.state = state;
+      indicator.textContent = state === "live" ? "LIVE" : "?";
+      indicator.setAttribute(
+        "aria-label",
+        state === "live" ? `${slug} is live on Kick` : `Couldn't check ${slug}'s Kick status`
+      );
+      indicator.title = state === "live" ? "Live on Kick" : "Kick status unavailable";
+    }
+
+    async function checkEntry(entry) {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), requestTimeout);
+      try {
+        const response = await fetch(
+          `https://kick.com/api/v2/channels/${encodeURIComponent(entry.slug)}/livestream`,
+          { headers: { Accept: "application/json" }, signal: controller.signal }
+        );
+        if (!response.ok) throw new Error(`Kick returned ${response.status}`);
+
+        const payload = await response.json();
+        if (!payload || !Object.prototype.hasOwnProperty.call(payload, "data")) {
+          throw new Error("Unexpected Kick status response");
+        }
+        setState(entry, payload.data ? "live" : "offline");
+      } catch {
+        setState(entry, "unknown");
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    }
+
+    async function refreshStatuses() {
+      if (inFlight || document.visibilityState !== "visible") return;
+      inFlight = true;
+      lastRefresh = Date.now();
+      let nextEntry = 0;
+
+      try {
+        await Promise.all(Array.from({ length: Math.min(maxConcurrentRequests, entries.length) }, async () => {
+          while (nextEntry < entries.length) {
+            const entry = entries[nextEntry];
+            nextEntry += 1;
+            await checkEntry(entry);
+          }
+        }));
+      } finally {
+        inFlight = false;
+        scheduleRefresh(refreshInterval);
+      }
+    }
+
+    function scheduleRefresh(delay) {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => {
+        if (document.visibilityState === "visible") {
+          void refreshStatuses();
+        } else {
+          scheduleRefresh(refreshInterval);
+        }
+      }, delay);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      const elapsed = Date.now() - lastRefresh;
+      if (elapsed >= refreshInterval) void refreshStatuses();
+      else scheduleRefresh(refreshInterval - elapsed);
+    });
+
+    void refreshStatuses();
+  }
+
   window.addEventListener("kazvt:i18nready", updateMemberCount);
   window.addEventListener("kazvt:languagechange", updateMemberCount);
+
+  initializeLivePips();
 
   if (window.KazvtI18n?.ready) {
     window.KazvtI18n.ready.then(updateMemberCount);
