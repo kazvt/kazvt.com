@@ -491,10 +491,11 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   inset: 0;
   background-image: repeating-linear-gradient(
     var(--kt-hover-flag-angle, 90deg),
-    var(--kt-blue) 0 12px,
-    var(--kt-pink) 12px 24px,
-    var(--kt-white) 24px 36px,
-    var(--kt-pink) 36px 48px
+    var(--kt-pink) -1px,
+    var(--kt-blue) 1px 11px,
+    var(--kt-pink) 13px 23px,
+    var(--kt-white) 25px 35px,
+    var(--kt-pink) 37px 47px
   );
   background-size: var(--kt-hover-flag-tile, 240px) var(--kt-hover-flag-tile, 240px);
   background-repeat: repeat;
