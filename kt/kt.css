@@ -784,19 +784,10 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-kick-panel-mock__brand {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   color: var(--kt-kick-green);
   font-size: .68rem;
   font-weight: 800;
   letter-spacing: .12em;
-}
-
-.kt-kick-panel-mock__mark {
-  width: 7px;
-  height: 13px;
-  border-radius: 2px;
-  background: var(--kt-kick-green);
-  box-shadow: 0 0 8px rgb(83 252 24 / 42%);
 }
 
 .kt-kick-panel-mock__tab {
