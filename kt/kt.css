@@ -961,7 +961,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 
 .kt-webring-steps {
   display: grid;
-  grid-template-columns: minmax(330px, .95fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(400px, 1fr) minmax(0, 1.12fr);
   grid-template-rows: auto auto;
   align-items: start;
   gap: 14px clamp(16px, 2.5vw, 26px);
@@ -976,7 +976,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   display: grid;
   grid-column: 1;
   grid-row: 1 / span 2;
-  grid-template-columns: minmax(128px, .68fr) minmax(0, 1.32fr);
+  grid-template-columns: minmax(170px, .78fr) minmax(210px, 1.1fr);
   align-items: center;
   gap: 16px;
 }
@@ -1012,7 +1012,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-webring-step-arrow {
   position: absolute;
   z-index: 4;
-  top: 50%;
+  top: calc(50% - 42px);
   right: -38px;
   display: block;
   width: 58px;
@@ -1416,7 +1416,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   to { transform: rotate(-3deg) translateY(-2px); }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 960px) {
   .kt-webring-steps {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
@@ -1426,34 +1426,44 @@ body[data-page="kt"] .kt-member-badge--admin {
   .kt-webring-step--preview {
     grid-column: 1;
     grid-row: auto;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(170px, .78fr) minmax(0, 1.1fr);
     gap: 10px;
   }
 
   .kt-webring-step--link,
   .kt-webring-step--text { grid-column: 1; grid-row: auto; }
 
-  .kt-webring-step-callout {
-    display: flex;
-    width: min(100%, 420px);
-    align-items: center;
-    gap: 8px;
-    margin: 0 auto -5px;
-    padding-right: 6px;
-  }
-
-  .kt-webring-step-callout__box { flex: 1 1 auto; }
-
-  .kt-webring-step-arrow {
-    position: static;
-    flex: 0 0 auto;
-    width: clamp(48px, 13vw, 60px);
-    transform: translateY(9px);
-  }
-
   .kt-webring-badge-card {
     width: min(100%, 420px);
     justify-self: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .kt-webring-step--preview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .kt-webring-step-callout {
+    display: grid;
+    justify-items: center;
+    width: min(100%, 420px);
+    gap: 0;
+    margin: 0 auto -5px;
+    padding: 0;
+  }
+
+  .kt-webring-step-callout__box {
+    width: 100%;
+    min-height: 58px;
+  }
+
+  .kt-webring-step-arrow {
+    position: static;
+    width: 68px;
+    margin-block: 0 -20px;
+    transform: rotate(90deg);
   }
 }
 
