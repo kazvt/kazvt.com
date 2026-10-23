@@ -805,6 +805,11 @@ body[data-page="kt"] summary:focus-visible {
   font-weight: 400;
 }
 
+body[data-page="kt"] .kt-webring-copy-field label[for]:hover {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
 .kt-webring-copy-row {
   display: flex;
   min-width: 0;
