@@ -14,6 +14,7 @@
   const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
 
   let context = null;
+  let padFilter = null;
   let master = null;
   let oscillators = [];
   let playing = false;
@@ -21,7 +22,6 @@
   let preferenceExpiresAt = 0;
   let preferenceTimer = 0;
   let generation = 0;
-  let startPromise = null;
 
   function setButtonState() {
     button.textContent = muted ? "Unmute" : "Mute";
@@ -101,7 +101,7 @@
       filter.type = "lowpass";
       filter.frequency.value = 1650;
       filter.Q.value = 0.5;
-      context.__ktPadFilter = filter;
+      padFilter = filter;
 
       master = context.createGain();
       master.gain.value = 0.0001;
@@ -123,6 +123,7 @@
     } catch {
       context?.close().catch(() => {});
       context = null;
+      padFilter = null;
       master = null;
       return false;
     }
@@ -149,10 +150,10 @@
           panner.pan.value = (noteIndex % 2 ? 1 : -1) * (layerIndex ? 0.42 : 0.24);
           oscillator.connect(voice);
           voice.connect(panner);
-          panner.connect(context.__ktPadFilter);
+          panner.connect(padFilter);
         } else {
           oscillator.connect(voice);
-          voice.connect(context.__ktPadFilter);
+          voice.connect(padFilter);
         }
 
         oscillator.start(now);
@@ -168,21 +169,26 @@
   }
 
   async function startMusic() {
-    if (muted || playing || startPromise) return startPromise;
+    if (muted || playing) return;
     if (!ensureAudioGraph()) return;
 
-    startPromise = (async () => {
+    try {
       await context.resume();
-      if (muted || context.state !== "running" || playing) return;
+      if (muted) {
+        if (context.state === "running") context.suspend().catch(() => {});
+        return;
+      }
+      if (context.state !== "running" || playing) return;
       startChord();
-    })().catch(() => {}).finally(() => {
-      startPromise = null;
-    });
-    return startPromise;
+    } catch {}
   }
 
   function stopMusic() {
-    if (!context || !master || !playing) return;
+    if (!context || !master) return;
+    if (!playing) {
+      if (context.state === "running") context.suspend().catch(() => {});
+      return;
+    }
     playing = false;
     const stopGeneration = ++generation;
     const now = context.currentTime;
