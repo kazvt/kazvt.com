@@ -7,6 +7,24 @@
   const flagVideo = document.querySelector(".kt-flag");
   let cursorEffect = null;
 
+  function initializeWeBringSteps() {
+    const stepList = document.querySelector("[data-kt-webring-steps]");
+    if (!(stepList instanceof HTMLOListElement) || motionPreference.matches) return;
+
+    const revealSteps = () => stepList.classList.add("is-revealed");
+    if (!("IntersectionObserver" in window)) {
+      revealSteps();
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      revealSteps();
+      observer.disconnect();
+    }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
+    observer.observe(stepList);
+  }
+
   function initializeMemberKitCopy() {
     const panel = document.querySelector(".kt-webring-kit");
     if (!panel) return;
@@ -878,6 +896,7 @@
   window.addEventListener("kazvt:languagechange", updateMemberCount);
 
   initializeMemberKitCopy();
+  initializeWeBringSteps();
   initializePrideGifStagger();
   initializeTransFlagHover();
   initializeLivePips();
