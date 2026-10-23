@@ -15,13 +15,13 @@
   // octave doublings. The voicing changes on each fresh page load.
   const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
-  // Every 8 bars (32 seconds), glide down two semitones; after 8 more, return.
+  // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
   const tempoBpm = 60;
   const barDuration = (60 / tempoBpm) * beatsPerBar;
   const registerChangeInterval = 8 * barDuration;
   const registerGlideDuration = 0.75;
-  const loweredPitchFactor = 2 ** (-2 / 12);
+  const registerPitchCycle = [-7, 0, 5, 0];
   const registerScheduleLookahead = 10 * 60;
 
   let context = null;
@@ -121,9 +121,9 @@
     return impulse;
   }
 
-  function scheduleRegisterChange(when, down) {
-    const startFactor = down ? 1 : loweredPitchFactor;
-    const endFactor = down ? loweredPitchFactor : 1;
+  function scheduleRegisterChange(when, fromSemitones, toSemitones) {
+    const startFactor = 2 ** (fromSemitones / 12);
+    const endFactor = 2 ** (toSemitones / 12);
     oscillators.forEach(({ oscillator, frequency }) => {
       oscillator.frequency.setValueAtTime(frequency * startFactor, when);
       oscillator.frequency.exponentialRampToValueAtTime(
@@ -136,7 +136,11 @@
   function extendRegisterSchedule(throughTime) {
     while (registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval <= throughTime) {
       const changeAt = registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval;
-      scheduleRegisterChange(changeAt, scheduledRegisterChanges % 2 === 0);
+      const targetSemitones = registerPitchCycle[scheduledRegisterChanges % registerPitchCycle.length];
+      const currentSemitones = scheduledRegisterChanges === 0
+        ? 0
+        : registerPitchCycle[(scheduledRegisterChanges - 1) % registerPitchCycle.length];
+      scheduleRegisterChange(changeAt, currentSemitones, targetSemitones);
       scheduledRegisterChanges += 1;
     }
   }
