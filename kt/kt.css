@@ -843,8 +843,9 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-live-sticker {
   position: absolute;
   z-index: 4;
-  top: -11px;
-  right: 16px;
+  top: auto;
+  right: 6px;
+  bottom: 4px;
   display: block;
   width: 62px;
   height: auto;
