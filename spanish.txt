@@ -554,6 +554,7 @@ kt.webring_kicker=KIT PARA MIEMBROS - LLÉVATE EL DISTINTIVO
 kt.webring_title=Ponnos en tu página
 kt.webring_intro=Los miembros pueden poner el distintivo animado en su web o perfil para que otras transfems de KICK.com encuentren nuestra comunidad. KickassTransfems es una comunidad y un webring para encontrarnos y apoyarnos.
 kt.webring_preview_label=Abrir la página de miembros de KickassTransfems
+kt.webring_logo_alt=Distintivo animado de KickassTransfems
 kt.webring_preview_note=El distintivo enlaza con la página del grupo.
 kt.webring_badge_label=Enlace al distintivo animado
 kt.webring_badge_hint=Haz clic en el campo o en el botón para copiar el HTML.
