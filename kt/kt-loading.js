@@ -11,12 +11,12 @@ function initializeKtLoadingScreen() {
     "Beautiful girls inbound...",
     "Waking up the dollhouse...",
     "Tuning the trans frequency...",
-    "Polishing the pixels...",
+    "Brushing the princess hair...",
     "Dialling the girl internet...",
-    "Reapplying the digital glitter...",
-    "Reticulating princess splines...",
-    "Loading cute people...",
-    "Sending the girlypop signal...",
+    "Reapplying pink glitter...",
+    "Polishing the princess boot...",
+    "Loading cute girls...",
+    "Sending the girls over...",
   ];
   const firstIndex = Math.floor(Math.random() * messages.length);
   const remainingMessages = messages.filter((_, index) => index !== firstIndex);
