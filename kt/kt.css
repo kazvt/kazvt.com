@@ -48,6 +48,7 @@ body[data-page="kt"] {
   background-color: transparent;
   background-image: none;
   font-family: "04b_30", "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: none;
   --cursor-default: auto;
   --cursor-pointer: pointer;
   --cursor-text: text;
@@ -180,7 +181,7 @@ body[data-page="kt"] summary:focus-visible {
   background: var(--kt-paper);
   color: var(--kt-ink) !important;
   font-size: .82rem;
-  font-weight: 900;
+  font-weight: 400;
   letter-spacing: .035em;
 }
 
@@ -207,7 +208,7 @@ body[data-page="kt"] summary:focus-visible {
   color: var(--kt-ink);
   font: inherit;
   font-size: .78rem;
-  font-weight: 900;
+  font-weight: 400;
   cursor: pointer;
 }
 
@@ -277,7 +278,7 @@ body[data-page="kt"] summary:focus-visible {
   margin: 0 0 8px;
   color: #3b2b35;
   font-size: .78rem;
-  font-weight: 1000;
+  font-weight: 400;
   letter-spacing: .14em;
   text-transform: uppercase;
 }
@@ -322,7 +323,7 @@ body[data-page="kt"] summary:focus-visible {
   background: var(--kt-blue);
   box-shadow: 4px 4px 0 var(--kt-ink), 7px 7px 0 var(--kt-pink);
   font-size: 1rem;
-  font-weight: 1000;
+  font-weight: 400;
   text-decoration: none;
   transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end), background-color 140ms steps(3, end);
 }
@@ -336,7 +337,7 @@ body[data-page="kt"] summary:focus-visible {
 .kt-link-arrow,
 .kt-member-arrow {
   font-family: Arial, sans-serif;
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .kt-roster {
@@ -390,7 +391,7 @@ body[data-page="kt"] summary:focus-visible {
   margin: 0;
   color: #7a3654;
   font-size: .9rem;
-  font-weight: 1000;
+  font-weight: 400;
 }
 
 .kt-recommendations p {
@@ -525,7 +526,7 @@ body[data-page="kt"] summary:focus-visible {
   color: #66535e;
   font-family: Arial, sans-serif;
   font-size: .72rem;
-  font-weight: 900;
+  font-weight: 400;
   writing-mode: vertical-rl;
 }
 
@@ -560,6 +561,7 @@ body[data-page="kt"] summary:focus-visible {
   overflow-wrap: anywhere;
   color: var(--kt-ink);
   font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: weight;
   font-size: clamp(1.04rem, 2vw, 1.32rem);
   font-weight: 1000;
   line-height: 1.05;
@@ -570,6 +572,7 @@ body[data-page="kt"] summary:focus-visible {
   overflow-wrap: anywhere;
   color: #51404a;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: weight;
   font-size: .8rem;
   font-weight: 700;
 }
@@ -582,6 +585,7 @@ body[data-page="kt"] summary:focus-visible {
   background: rgb(255 255 255 / 42%);
   color: #66535e;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: weight;
   font-size: .64rem;
   font-weight: 600;
   line-height: 1.2;
@@ -595,7 +599,7 @@ body[data-page="kt"] summary:focus-visible {
   color: var(--kt-ink);
   font-family: Arial, sans-serif;
   font-size: .68rem;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -617,7 +621,7 @@ body[data-page="kt"] summary:focus-visible {
   box-shadow: 2px 2px 0 var(--kt-pink);
   font-family: "pixellatedfont", "Courier New", monospace;
   font-size: .57rem;
-  font-weight: 900;
+  font-weight: 400;
   letter-spacing: .04em;
   line-height: 1;
   white-space: nowrap;
@@ -647,7 +651,7 @@ body[data-page="kt"] summary:focus-visible {
   background: var(--kt-pink);
   color: var(--kt-ink);
   font-size: .63rem;
-  font-weight: 1000;
+  font-weight: 400;
   line-height: 1.05;
   text-align: center;
   transform: rotate(2deg) translateZ(14px);
@@ -711,6 +715,7 @@ body[data-page="kt"] summary:focus-visible {
   gap: clamp(16px, 3vw, 28px);
   padding: clamp(16px, 3vw, 28px);
   font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: weight;
 }
 
 .kt-webring-badge-card {
@@ -753,6 +758,7 @@ body[data-page="kt"] summary:focus-visible {
   margin: 10px 0 0;
   color: #51404a;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: weight;
   font-size: .8rem;
   font-weight: 700;
   line-height: 1.35;
@@ -786,7 +792,7 @@ body[data-page="kt"] summary:focus-visible {
   margin-bottom: 7px;
   color: #5b3850;
   font-size: .82rem;
-  font-weight: 1000;
+  font-weight: 400;
 }
 
 .kt-webring-copy-row {
@@ -828,7 +834,7 @@ body[data-page="kt"] summary:focus-visible {
   cursor: pointer;
   font: inherit;
   font-size: .76rem;
-  font-weight: 1000;
+  font-weight: 400;
   letter-spacing: .025em;
   transition: transform 120ms steps(2, end), box-shadow 120ms steps(2, end), background-color 120ms steps(2, end);
 }
@@ -859,7 +865,7 @@ body[data-page="kt"] summary:focus-visible {
   background: rgb(91 206 250 / 18%);
   color: var(--kt-ink);
   font-size: .78rem;
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .kt-webring-copy-status[data-state="copied"] {
@@ -941,7 +947,7 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
 
 .kt-footer-home {
   font-size: .86rem;
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .kt-footer-home:hover {
