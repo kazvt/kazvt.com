@@ -493,47 +493,6 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   margin-inline: 0;
 }
 
-.kt-flag-motion-toggle {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 6px 10px;
-  border: 2px dashed var(--kt-ink);
-  background: var(--kt-white);
-  box-shadow: 3px 3px 0 var(--kt-pink);
-  color: var(--kt-ink);
-  cursor: pointer;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
-  font-synthesis: weight;
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .035em;
-  transition: transform 120ms steps(2, end), background-color 120ms steps(2, end), box-shadow 120ms steps(2, end);
-}
-
-.kt-flag-motion-toggle__icon {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: .85rem;
-  line-height: 1;
-}
-
-.kt-flag-motion-toggle:hover {
-  background: var(--kt-blue);
-  box-shadow: 1px 1px 0 var(--kt-ink);
-  transform: translate(2px, 2px);
-}
-
-.kt-flag-motion-toggle:focus-visible {
-  outline: 3px dashed var(--kt-ink);
-  outline-offset: 3px;
-}
-
-.kt-flag-motion-toggle[data-paused="true"] {
-  background: var(--kt-pink);
-}
-
 .kt-link-arrow,
 .kt-member-arrow {
   font-family: Arial, sans-serif;
