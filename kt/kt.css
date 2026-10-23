@@ -853,6 +853,10 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   filter: drop-shadow(2px 2px 0 var(--kt-pink));
 }
 
+.kt-live-sticker--blue {
+  filter: drop-shadow(2px 2px 0 var(--kt-blue));
+}
+
 .kt-member-badge {
   align-self: center;
   justify-self: end;
