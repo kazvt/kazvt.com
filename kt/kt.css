@@ -332,7 +332,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   display: inline;
 }
 
-html:lang(zh) .kt-affiliation-space {
+html:lang(zh) .kt-affiliation-space--sentence {
   display: none;
 }
 
