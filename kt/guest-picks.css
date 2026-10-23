@@ -73,7 +73,7 @@
 }
 
 .kt-recommendation-link[data-live-state="offline"] .kt-recommendation-avatar {
-  filter: grayscale(80%);
+  filter: none; /* Keep the offline-avatar hook; grayscale is currently disabled. */
 }
 
 .kt-recommendation-avatar--fallback {
