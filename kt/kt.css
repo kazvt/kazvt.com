@@ -614,6 +614,240 @@ body[data-page="kt"] summary:focus-visible {
   transform: translateZ(12px);
 }
 
+.kt-webring-kit {
+  position: relative;
+  z-index: 1;
+  margin: 0 clamp(16px, 5vw, 54px) 38px;
+  border: 4px solid var(--kt-ink);
+  background: var(--kt-paper);
+  box-shadow: 6px 6px 0 var(--kt-blue), 12px 12px 0 var(--kt-pink);
+}
+
+.kt-webring-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px clamp(14px, 3vw, 24px);
+  border-bottom: 4px solid var(--kt-ink);
+  background: var(--kt-blue);
+}
+
+.kt-webring-heading .kt-eyebrow {
+  margin: 0 0 3px;
+  color: #305168;
+}
+
+.kt-webring-heading h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.08;
+  text-shadow: 2px 2px 0 var(--kt-pink);
+}
+
+.kt-webring-stamp {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 3px solid var(--kt-ink);
+  background: var(--kt-pink);
+  box-shadow: 4px 4px 0 var(--kt-ink);
+  font-size: .78rem;
+  font-weight: 1000;
+  letter-spacing: .06em;
+  transform: rotate(4deg);
+  animation: kt-webring-stamp-pop 1.5s steps(2, end) infinite;
+}
+
+.kt-webring-body {
+  display: grid;
+  grid-template-columns: minmax(190px, .72fr) minmax(0, 1.7fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 28px);
+  padding: clamp(16px, 3vw, 28px);
+}
+
+.kt-webring-badge-card {
+  min-width: 0;
+  padding: 12px;
+  border: 3px dashed var(--kt-ink);
+  background-color: var(--kt-white);
+  background-image:
+    linear-gradient(45deg, rgb(91 206 250 / 20%) 25%, transparent 25%, transparent 75%, rgb(91 206 250 / 20%) 75%),
+    linear-gradient(45deg, rgb(245 169 184 / 20%) 25%, transparent 25%, transparent 75%, rgb(245 169 184 / 20%) 75%);
+  background-position: 0 0, 9px 9px;
+  background-size: 18px 18px;
+  text-align: center;
+}
+
+.kt-webring-preview {
+  display: grid;
+  min-height: 112px;
+  place-items: center;
+  padding: 8px;
+  border: 2px solid var(--kt-ink);
+  background: rgb(255 255 255 / 62%);
+  box-shadow: 3px 3px 0 var(--kt-pink);
+  transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end);
+}
+
+.kt-webring-preview:hover,
+.kt-webring-preview:focus-visible {
+  box-shadow: 1px 1px 0 var(--kt-ink), 5px 5px 0 var(--kt-blue);
+  transform: translate(2px, 2px) rotate(-1deg);
+}
+
+.kt-webring-preview img {
+  display: block;
+  width: min(100%, 240px);
+  height: auto;
+}
+
+.kt-webring-caption {
+  margin: 10px 0 0;
+  color: #51404a;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: .8rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.kt-webring-copy-stack {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.kt-webring-intro {
+  margin: 0;
+  padding: 10px 13px;
+  border-left: 5px solid var(--kt-pink);
+  background: rgb(245 169 184 / 25%);
+  font-size: .94rem;
+  line-height: 1.45;
+}
+
+.kt-webring-copy-field {
+  min-width: 0;
+  padding: 10px;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-white);
+  box-shadow: 3px 3px 0 var(--kt-pink);
+}
+
+.kt-webring-copy-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #5b3850;
+  font-size: .82rem;
+  font-weight: 1000;
+}
+
+.kt-webring-copy-row {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+}
+
+.kt-webring-copy-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 42px;
+  padding: 8px 10px;
+  overflow: hidden;
+  border: 2px solid var(--kt-ink);
+  border-radius: 0;
+  background: #fff;
+  color: var(--kt-ink);
+  cursor: copy;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: .72rem;
+  text-overflow: clip;
+}
+
+.kt-webring-copy-row input:focus-visible {
+  outline: 3px dashed var(--kt-blue);
+  outline-offset: 2px;
+}
+
+.kt-webring-copy-row button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 7px 11px;
+  border: 3px solid var(--kt-ink);
+  border-radius: 0;
+  background: var(--kt-pink);
+  box-shadow: 3px 3px 0 var(--kt-blue);
+  color: var(--kt-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 1000;
+  letter-spacing: .025em;
+  transition: transform 120ms steps(2, end), box-shadow 120ms steps(2, end), background-color 120ms steps(2, end);
+}
+
+.kt-webring-copy-row button:hover {
+  background: var(--kt-blue);
+  box-shadow: 1px 1px 0 var(--kt-ink);
+  transform: translate(2px, 2px);
+}
+
+.kt-webring-copy-row button:focus-visible {
+  outline: 3px dashed var(--kt-ink);
+  outline-offset: 3px;
+}
+
+.kt-webring-field-hint {
+  margin: 7px 0 0;
+  color: #51404a;
+  font-size: .73rem;
+  line-height: 1.35;
+}
+
+.kt-webring-copy-status {
+  min-height: 1.25em;
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 5px solid var(--kt-blue);
+  background: rgb(91 206 250 / 18%);
+  color: var(--kt-ink);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.kt-webring-copy-status[data-state="copied"] {
+  border-left-color: #168552;
+  background: rgb(22 133 82 / 12%);
+}
+
+.kt-webring-copy-status[data-state="fallback"] {
+  border-left-color: var(--kt-pink);
+  background: rgb(245 169 184 / 25%);
+}
+
+@keyframes kt-webring-stamp-pop {
+  from { transform: rotate(4deg) translateY(0); }
+  to { transform: rotate(-3deg) translateY(-2px); }
+}
+
+@media (max-width: 760px) {
+  .kt-webring-body { grid-template-columns: minmax(0, 1fr); }
+  .kt-webring-badge-card { width: min(100%, 420px); justify-self: center; }
+}
+
+@media (max-width: 520px) {
+  .kt-webring-heading { align-items: start; }
+  .kt-webring-stamp { padding: 5px 7px; font-size: .66rem; }
+  .kt-webring-body { padding: 12px; }
+  .kt-webring-copy-row { flex-direction: column; }
+  .kt-webring-copy-row button { width: 100%; }
+  .kt-webring-copy-row input { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kt-webring-stamp { animation: none; }
+}
+
 .kt-footer {
   position: relative;
   z-index: 1;

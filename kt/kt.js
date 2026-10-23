@@ -7,6 +7,74 @@
   const flagVideo = document.querySelector(".kt-flag");
   let cursorEffect = null;
 
+  function initializeMemberKitCopy() {
+    const panel = document.querySelector(".kt-webring-kit");
+    if (!panel) return;
+
+    const status = panel.querySelector("[data-kt-copy-status]");
+    const message = (key, fallback) => window.KazvtI18n?.t(key) || fallback;
+
+    async function copyField(input) {
+      if (!(input instanceof HTMLInputElement) || !input.readOnly) return;
+
+      input.focus({ preventScroll: true });
+      input.select();
+      let copied = false;
+
+      try {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+          await navigator.clipboard.writeText(input.value);
+          copied = true;
+        }
+      } catch {}
+
+      if (!copied) {
+        try { copied = document.execCommand("copy"); } catch {}
+      }
+
+      if (!copied) {
+        input.focus({ preventScroll: true });
+        input.select();
+      }
+
+      if (status) {
+        status.dataset.state = copied ? "copied" : "fallback";
+        status.textContent = copied
+          ? message("kt.webring_copied", "Copied! Thanks for linking us.")
+          : message("kt.webring_copy_failed", "Couldn't copy automatically - the text is selected. Press Ctrl+C or Command+C.");
+      }
+    }
+
+    panel.addEventListener("focusin", (event) => {
+      const target = event.target;
+      if (target instanceof HTMLInputElement && target.hasAttribute("data-kt-copy-input")) target.select();
+    });
+
+    panel.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const input = target.closest("[data-kt-copy-input]");
+      if (input instanceof HTMLInputElement) {
+        void copyField(input);
+        return;
+      }
+
+      const button = target.closest("[data-kt-copy-target]");
+      if (!(button instanceof HTMLButtonElement)) return;
+      const destination = document.getElementById(button.dataset.ktCopyTarget || "");
+      if (destination instanceof HTMLInputElement) void copyField(destination);
+    });
+
+    panel.addEventListener("keydown", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || !target.hasAttribute("data-kt-copy-input")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      void copyField(target);
+    });
+  }
+
   function initializeAnimatedFavicon() {
     const iconLink = document.getElementById("ktFavicon");
     if (!(iconLink instanceof HTMLLinkElement)) return;
@@ -389,6 +457,7 @@
   window.addEventListener("kazvt:i18nready", updateMemberCount);
   window.addEventListener("kazvt:languagechange", updateMemberCount);
 
+  initializeMemberKitCopy();
   initializeLivePips();
 
   if (window.KazvtI18n?.ready) {
