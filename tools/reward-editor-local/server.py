@@ -930,11 +930,11 @@ class RewardEditorHandlerMixin:
         if self.command != "HEAD":
             self.wfile.write(body)
 
-    def _send_json(self, status: int, value: Any) -> None:
+    def _editor_send_json(self, status: int, value: Any) -> None:
         self._send(status, _json_bytes(value), "application/json; charset=utf-8")
 
     def _error(self, status: int, message: str) -> None:
-        self._send_json(status, {"error": message})
+        self._editor_send_json(status, {"error": message})
 
     def _parse_url(self):
         return urlsplit(self.path), parse_qs(urlsplit(self.path).query, keep_blank_values=True)
@@ -982,7 +982,7 @@ class RewardEditorHandlerMixin:
             split, query = self._parse_url()
             if split.path == "/__reward_editor/api/state":
                 with FILE_LOCK:
-                    self._send_json(200, _state())
+                    self._editor_send_json(200, _state())
                 return
             if split.path == "/__reward_editor/api/file":
                 relative = query.get("path", [""])[0]
@@ -995,7 +995,7 @@ class RewardEditorHandlerMixin:
                     text = path.read_text(encoding="utf-8-sig")
                 except UnicodeDecodeError as exc:
                     raise ApiError(415, "This source file is not UTF-8 text.") from exc
-                self._send_json(200, {
+                self._editor_send_json(200, {
                     "path": relative,
                     "text": text,
                     "digest": _file_hash(path),
@@ -1004,7 +1004,7 @@ class RewardEditorHandlerMixin:
                 })
                 return
             if split.path == "/__reward_editor/api/open-url":
-                self._send_json(200, {"url": f"http://{self._expected_host()}/reward/list/"})
+                self._editor_send_json(200, {"url": f"http://{self._expected_host()}/reward/list/"})
                 return
 
             editor_path = self._editor_path(split.path)
@@ -1080,7 +1080,7 @@ class RewardEditorHandlerMixin:
                         result = {"message": "Generated reward detail pages rebuilt from the shared templates."}
                     else:
                         raise ApiError(404, "Unknown local editor action.")
-            self._send_json(200, result)
+            self._editor_send_json(200, result)
         except ApiError as exc:
             self._error(exc.status, exc.message)
         except (CatalogError, local_issuer.RewardIssueError) as exc:
