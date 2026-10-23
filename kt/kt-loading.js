@@ -63,6 +63,14 @@ function initializeKtLoadingScreen() {
       width: min(640px, calc(100vw - 36px));
       margin: auto;
       font-family: "04b_30", Tahoma, sans-serif;
+      /* Preserve XP.css's three-step inset bevel, recolored to the title-bar pinks. */
+      box-shadow:
+        inset -1px -1px #821b52,
+        inset 1px 1px #e450a4,
+        inset -2px -2px #98205f,
+        inset 2px 2px #f080b9,
+        inset -3px -3px #b32971,
+        inset 3px 3px #d82f89;
     }
     .loading-window.is-minimized { width: min(320px, calc(100vw - 36px)); }
     .loading-window.is-minimized .window-body { display: none; }
@@ -87,6 +95,9 @@ function initializeKtLoadingScreen() {
         #aa2871 96%,
         #aa2871 100%
       );
+      border-top-color: #d82f89;
+      border-left-color: #e450a4;
+      border-right-color: #aa2871;
     }
     .title-bar-text {
       display: flex;
