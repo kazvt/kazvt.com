@@ -46,13 +46,13 @@
     if (badgeImageLink && badgeImage instanceof HTMLImageElement && badgePicker && badgeLoading && badgeError && badgeStatus && previousBadge instanceof HTMLButtonElement && nextBadge instanceof HTMLButtonElement) {
       const badgeOptions = [
         {
-          src: "/kt/assets/KT-LOGO.gif",
+          src: "/kt/assets/KT-LOGO-panel-320.gif",
           label: "Transparent",
           alt: "Animated KickassTransfems logo with a transparent background",
           linkLabel: "Open the transparent KickassTransfems badge GIF",
         },
         {
-          src: "/kt/assets/KT-LOGO-trans-flag-panel.gif",
+          src: "/kt/assets/KT-LOGO-trans-flag-panel-320.gif",
           label: "Trans flag background",
           alt: "Animated KickassTransfems logo over a moving transgender pride flag",
           linkLabel: "Open the KickassTransfems badge GIF over the trans flag",
@@ -159,7 +159,7 @@
 
       previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1, previousBadge));
       nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1, nextBadge));
-      // Preload the optional under-4-MB variant at low priority, then prioritize it
+      // Preload the optional flag-backed 320px variant at low priority, then prioritize it
       // on demand. Keep the truthful loading state until the displayed image loads.
       void preloadBadge(badgeOptions[1], "low").catch(() => {});
     }
