@@ -133,6 +133,17 @@
       "linkId": "-BQCAFirk9DHig3v",
       "eventIdHash": "8e8f7df4fc8c15f872d54348653df3c067e9d72f64838fee0b8fce4020e1ba1b",
       "userId": "93006961"
+    },
+    {
+      "assetId": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
+      "assetSha256": "617d45487e28b38183daddd3acd7c75d3ad98552430789b93302e56da7214de9",
+      "filename": "ribcage.png",
+      "username": "GazelDHazel",
+      "issuedAt": "2026-10-23T00:33:12.040Z",
+      "platform": "kick",
+      "linkId": "DvOS_XGvuszR4o_y",
+      "eventIdHash": "db6811c30c7d40060e0376644eb5ed98067e06262bc1d0ed6c75953541477c1d",
+      "userId": "94402016"
     }
   ],
   "revokedAssignments": [
