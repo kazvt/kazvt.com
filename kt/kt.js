@@ -761,6 +761,13 @@
       pendingGuestOrder = false;
     }
 
+    function syncMemberAvatarAvailability() {
+      const hasOnlineMember = memberRecords.some(
+        (member) => member.card?.dataset.liveState === "live"
+      );
+      memberList?.classList.toggle("has-online-member", hasOnlineMember);
+    }
+
     memberList?.addEventListener("focusout", (event) => {
       if (!pendingMemberOrder) return;
       if (event.relatedTarget instanceof Node && memberList.contains(event.relatedTarget)) return;
@@ -789,6 +796,7 @@
     function setState(entry, state) {
       const { card, indicator, slug, tooltipLabel, liveSticker } = entry;
       card.dataset.liveState = state;
+      if (memberList?.contains(card)) syncMemberAvatarAvailability();
       const tooltip = tooltipLabel
         ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
         : "";
