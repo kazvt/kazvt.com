@@ -800,18 +800,6 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   color: #f4f5f4;
 }
 
-.kt-kick-panel-mock__preview {
-  margin-left: auto;
-  padding: 4px 6px;
-  border: 1px solid rgb(83 252 24 / 42%);
-  border-radius: 4px;
-  background: rgb(83 252 24 / 9%);
-  color: #a7ff83;
-  font-size: .5rem;
-  letter-spacing: .08em;
-  white-space: nowrap;
-}
-
 .kt-kick-panel-mock__content {
   margin: 9px;
   padding: 9px;
