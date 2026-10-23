@@ -456,11 +456,20 @@ import {
     awardCollectionStatus.replaceChildren();
   }
 
-  function loadAssignmentRegistry(catalog) {
+  function loadAssignmentRegistry(catalog, expectedLinkId = "") {
+    const load = () => retryRead(async () =>
+      validateAndSortAssignments(await fetchAssignmentRegistry(
+        expectedLinkId ? { expectedLinkId } : undefined
+      ), catalog)
+    );
+
+    // Link opens need a read targeted at that link, not the generic cached
+    // registry promise used by the reward collection. This lets us select the
+    // freshest public copy immediately after publication.
+    if (expectedLinkId) return load();
+
     if (!assignmentRegistryPromise) {
-      assignmentRegistryPromise = retryRead(async () =>
-        validateAndSortAssignments(await fetchAssignmentRegistry(), catalog)
-      )
+      assignmentRegistryPromise = load()
         .catch(error => {
           assignmentRegistryPromise = null;
           throw error;
@@ -777,10 +786,9 @@ import {
   }
 
   async function findAssignmentWithBriefRetry(catalog, linkId) {
-    let assignments = await loadAssignmentRegistry(catalog);
+    let assignments = await loadAssignmentRegistry(catalog, linkId);
     let assignment = findAssignmentByLinkId(assignments, linkId);
-    const compactId = /^[A-Za-z0-9_-]{16,22}$/.test(linkId);
-    if (assignment || !compactId) return assignment;
+    if (assignment || !isRewardLinkId(linkId)) return assignment;
 
     if (loadingNote) {
       loadingNote.textContent = rewardText("reward.syncing", "Your reward is syncing in. Checking again…");
@@ -789,7 +797,7 @@ import {
     for (const delay of [1000, 1500, 2500, 4000, 6000]) {
       await new Promise(resolve => window.setTimeout(resolve, delay));
       assignmentRegistryPromise = null;
-      assignments = await loadAssignmentRegistry(catalog);
+      assignments = await loadAssignmentRegistry(catalog, linkId);
       assignment = findAssignmentByLinkId(assignments, linkId);
       if (assignment) break;
     }
@@ -968,7 +976,6 @@ import {
     }
 
     const { catalog, assets: allowedAssets } = await loadRewardCatalog();
-    const assignments = await loadAssignmentRegistry(catalog);
     let assignment;
 
     if (isRewardLinkId(token)) {
@@ -981,6 +988,7 @@ import {
       if (!keyText || keyParams.size !== 1 || keyParams.getAll("key").length !== 1) {
         throw new Error("The legacy reward link is missing its key.");
       }
+      const assignments = await loadAssignmentRegistry(catalog);
       const { decryptReward } = await import("./reward-crypto.mjs");
       const data = await decryptReward(token, keyText);
       if (![1, 2].includes(data.version) || typeof data.username !== "string" || !data.username.trim() ||
