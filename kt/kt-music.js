@@ -4,6 +4,7 @@
   const button = document.querySelector("[data-kt-music-toggle]");
   if (!button) return;
   const buttonLabel = button.querySelector("[data-kt-music-toggle-label]");
+  const buttonStateLabel = button.querySelector("[data-kt-music-state]");
 
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const preferenceKey = "kazvt-kt-pad-preference-v1";
@@ -36,12 +37,26 @@
   let registerCycleStart = 0;
   let scheduledRegisterChanges = 0;
 
+  function localizedMessage(key, fallback) {
+    return window.KazvtI18n?.t?.(key) || fallback;
+  }
+
   function setButtonState() {
-    const action = muted ? "Unmute" : "Mute";
-    buttonLabel.textContent = action;
+    const action = muted
+      ? localizedMessage("kt.music_unmute", "UNMUTE")
+      : localizedMessage("kt.music_mute", "MUTE");
+    const state = muted
+      ? localizedMessage("kt.music_state_muted", "SOUND MUTED")
+      : localizedMessage("kt.music_state_on", "SOUND ON");
+    const accessibleAction = muted
+      ? localizedMessage("kt.music_unmute_aria", "Unmute background music")
+      : localizedMessage("kt.music_mute_aria", "Mute background music");
+
+    if (buttonLabel) buttonLabel.textContent = action;
+    if (buttonStateLabel) buttonStateLabel.textContent = state;
     button.dataset.muted = String(muted);
-    button.setAttribute("aria-label", action);
-    button.title = `${action} music`;
+    button.setAttribute("aria-label", accessibleAction);
+    button.title = accessibleAction;
   }
 
   function removeStoredPreference() {
@@ -269,6 +284,9 @@
     if (muted) stopMusic();
     else void startMusic();
   });
+
+  document.addEventListener("kazvt:i18nready", setButtonState);
+  document.addEventListener("kazvt:languagechange", setButtonState);
 
   function unlockFromInteraction(event) {
     if (muted || event.target?.closest?.("[data-kt-music-toggle]")) return;
