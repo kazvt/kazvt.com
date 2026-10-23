@@ -1438,7 +1438,7 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   }
 
   .kt-music-toggle {
-    right: max(4px, env(safe-area-inset-right, 0px));
+    right: max(0px, env(safe-area-inset-right, 0px));
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     width: 44px;
