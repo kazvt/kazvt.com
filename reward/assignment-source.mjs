@@ -28,17 +28,33 @@ export async function fetchAssignmentRegistry({
     // A successful GitHub raw response can still be an older CDN snapshot just
     // after the issuer has pushed a new reward. Check both public copies at the
     // same time and prefer the one that actually contains this link ID.
-    const results = await Promise.allSettled(sources.map(async url => {
+    const reads = sources.map(async url => {
       const response = await fetchImpl(url, { cache: "no-store", credentials: "omit" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
-    }));
+    });
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(expectedLinkId);
+    const hasExpectedLink = registry => Array.isArray(registry?.assignments) &&
+      registry.assignments.some(assignment => {
+        const linkId = typeof assignment?.linkId === "string" ? assignment.linkId : "";
+        return isUuid ? linkId.toLowerCase() === expectedLinkId.toLowerCase() : linkId === expectedLinkId;
+      });
+    try {
+      // Resolve as soon as either source has the requested assignment; don't
+      // wait for a slower stale source after the current copy is already found.
+      return await Promise.any(reads.map(async read => {
+        const registry = await read;
+        if (!hasExpectedLink(registry)) throw new Error("This registry snapshot predates the requested reward.");
+        return registry;
+      }));
+    } catch {
+      // Neither source had this ID yet (or both failed). Preserve a successful
+      // stale snapshot so the page's bounded retry can check again shortly.
+    }
+    const results = await Promise.allSettled(reads);
     const registries = results
       .filter(result => result.status === "fulfilled")
       .map(result => result.value);
-    const matching = registries.find(registry => Array.isArray(registry?.assignments) &&
-      registry.assignments.some(assignment => assignment?.linkId === expectedLinkId));
-    if (matching) return matching;
     if (registries.length) return registries[0];
 
     const lastError = [...results].reverse().find(result => result.status === "rejected")?.reason;
