@@ -120,13 +120,33 @@
     if (previousUrl) setTimeout(() => URL.revokeObjectURL(previousUrl), 0);
   }
 
+  function applyLocalizedRichText(node, value) {
+    const fragment = document.createDocumentFragment();
+    const boldPattern = /\*\*([^*]+)\*\*/g;
+    let cursor = 0;
+    let match;
+
+    while ((match = boldPattern.exec(value))) {
+      if (match.index > cursor) fragment.append(document.createTextNode(value.slice(cursor, match.index)));
+      const emphasis = document.createElement("strong");
+      emphasis.textContent = match[1];
+      fragment.append(emphasis);
+      cursor = match.index + match[0].length;
+    }
+
+    if (cursor < value.length) fragment.append(document.createTextNode(value.slice(cursor)));
+    node.replaceChildren(fragment);
+  }
+
   function apply(root = document) {
     if (!root) return;
 
     root.querySelectorAll?.("[data-i18n]").forEach((node) => {
       const key = node.getAttribute("data-i18n");
       if (!key || !values.has(key)) return;
-      node.textContent = values.get(key);
+      const value = values.get(key);
+      if (node.hasAttribute("data-i18n-rich-text")) applyLocalizedRichText(node, value);
+      else node.textContent = value;
     });
 
     ["aria-label", "title", "alt", "placeholder", "content"].forEach((attribute) => {
