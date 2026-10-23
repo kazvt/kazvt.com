@@ -11,8 +11,9 @@
       const requestedPath = location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
       const tuoyAliases = new Set(["toy", "touys", "tools", "tool", "assets", "asset", "toys"]);
       const ktAliases = new Set(["kt", "kickasstransfems"]);
-      if (ktAliases.has(requestedPath) && location.pathname !== "/kt/") {
-        const destination = new URL("/kt/", location.origin);
+      const canonicalKtPath = "/KickassTransfems/";
+      if (ktAliases.has(requestedPath) && location.pathname !== canonicalKtPath) {
+        const destination = new URL(canonicalKtPath, location.origin);
         destination.search = location.search;
         destination.hash = location.hash;
         location.replace(destination.href);
