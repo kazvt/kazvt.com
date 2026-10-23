@@ -30,7 +30,7 @@ function initializeKtLoadingScreen() {
 
   const xpStyles = document.createElement("link");
   xpStyles.rel = "stylesheet";
-  xpStyles.href = "/zzz_shared/xp.css?v=0.2.6";
+  xpStyles.href = "/zzz_shared/xp.css";
 
   const styles = document.createElement("style");
   styles.textContent = `
@@ -238,7 +238,7 @@ function initializeKtLoadingScreen() {
   windowPanel.setAttribute("aria-label", "Loading KickassTransfems");
   windowPanel.innerHTML = `
     <div class="title-bar">
-      <div class="title-bar-text"><img class="window-icon" src="/kt/assets/transgender-favicon.gif?v=transgender-favicon-transparent-20261023-v3" width="18" height="14" alt="" aria-hidden="true"><span class="title-bar-title">KICKASSTRANSFEMS - PLEASE WAIT</span></div>
+      <div class="title-bar-text"><img class="window-icon" src="/kt/assets/transgender-favicon.gif" width="18" height="14" alt="" aria-hidden="true"><span class="title-bar-title">KICKASSTRANSFEMS - PLEASE WAIT</span></div>
       <div class="title-bar-controls">
         <button type="button" aria-label="Minimize" aria-pressed="false" title="Minimize"></button>
         <button type="button" aria-label="Maximize" aria-pressed="false" title="Maximize"></button>

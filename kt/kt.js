@@ -137,7 +137,7 @@
       iconLink.type = "image/gif";
       iconLink.href = gifUrl;
     }, { once: true });
-    sprite.src = "/kt/assets/transgender-favicon-sprite.png?v=transgender-favicon-sprite-transparent-20261023-v1";
+    sprite.src = "/kt/assets/transgender-favicon-sprite.png";
     motionPreference.addEventListener("change", syncFaviconMotion);
     window.addEventListener("pagehide", () => window.clearInterval(interval), { once: true });
   }
