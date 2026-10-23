@@ -244,7 +244,9 @@
   }
 
   function initializeLivePips() {
-    const cards = [...document.querySelectorAll(".kt-member-grid > li > .kt-member")];
+    const cards = [...document.querySelectorAll(
+      ".kt-member-grid > li > .kt-member, .kt-recommendation-grid > li > .kt-recommendation-link"
+    )];
     const entries = cards.flatMap((card) => {
       const title = card.querySelector(".kt-member-title");
       let profile;
@@ -263,8 +265,9 @@
       indicator.className = "kt-live-indicator";
       indicator.hidden = true;
       indicator.setAttribute("role", "img");
-      title.insertBefore(indicator, title.querySelector(".kt-member-name") || title.firstChild);
-      return [{ slug, indicator }];
+      const name = title.querySelector(".kt-member-name, .kt-recommendation-name");
+      title.insertBefore(indicator, name || title.firstChild);
+      return [{ card, slug, indicator }];
     });
 
     if (!entries.length) return;
@@ -277,9 +280,11 @@
     let refreshTimer = 0;
 
     function setState(entry, state) {
-      const { indicator, slug } = entry;
+      const { card, indicator, slug } = entry;
+      card.dataset.liveState = state;
       if (state === "offline") {
         indicator.hidden = true;
+        delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
         indicator.removeAttribute("title");
         return;
@@ -291,8 +296,8 @@
         const i18n = window.KazvtI18n;
         return i18n?.format?.(key, replacements) || i18n?.t?.(key) || fallback;
       };
-      const displayName = entry.indicator.closest(".kt-member-title")
-        ?.querySelector(".kt-member-name")?.textContent?.trim() || slug;
+      const displayName = card.querySelector(".kt-member-name, .kt-recommendation-name")
+        ?.textContent?.trim() || slug;
       indicator.textContent = state === "live"
         ? ""
         : translate("kt.unknown_label", "?");
