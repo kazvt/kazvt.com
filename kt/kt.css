@@ -943,19 +943,121 @@ body[data-page="kt"] .kt-member-badge--admin {
 }
 
 .kt-webring-body {
-  display: grid;
-  grid-template-columns: minmax(190px, .72fr) minmax(0, 1.7fr);
-  align-items: center;
-  gap: clamp(16px, 3vw, 28px);
+  display: block;
   padding: clamp(16px, 3vw, 28px);
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-synthesis: weight;
 }
 
+.kt-webring-intro {
+  margin: 0 0 clamp(16px, 2.5vw, 24px);
+  padding: 10px 13px;
+  border-left: 5px solid var(--kt-pink);
+  background: rgb(245 169 184 / 25%);
+  font-size: .94rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.kt-webring-steps {
+  display: grid;
+  grid-template-columns: minmax(330px, .95fr) minmax(0, 1.25fr);
+  grid-template-rows: auto auto;
+  align-items: start;
+  gap: 14px clamp(16px, 2.5vw, 26px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kt-webring-step { min-width: 0; }
+
+.kt-webring-step--preview {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  grid-template-columns: minmax(128px, .68fr) minmax(0, 1.32fr);
+  align-items: center;
+  gap: 16px;
+}
+
+.kt-webring-step--link { grid-column: 2; grid-row: 1; }
+.kt-webring-step--text { grid-column: 2; grid-row: 2; }
+
+.kt-webring-step-callout {
+  position: relative;
+  z-index: 3;
+  min-width: 0;
+}
+
+.kt-webring-step-callout__box {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-white);
+  box-shadow: 3px 3px 0 var(--kt-pink);
+  color: var(--kt-ink);
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: .84rem;
+  font-synthesis: weight;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.kt-webring-step-callout__text { min-width: 0; }
+
+.kt-webring-step-arrow {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  right: -38px;
+  display: block;
+  width: 58px;
+  height: auto;
+  transform: translateY(-50%);
+  filter: drop-shadow(1px 2px 0 var(--kt-blue));
+  pointer-events: none;
+}
+
+.kt-webring-step-number {
+  display: inline-grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid var(--kt-ink);
+  border-radius: 50%;
+  background: var(--kt-pink);
+  box-shadow: 2px 2px 0 var(--kt-blue);
+  color: var(--kt-ink);
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: 1.05rem;
+  font-synthesis: weight;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+.kt-webring-steps.is-revealed .kt-webring-step-number {
+  animation: kt-webring-step-arrive 520ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.kt-webring-step--link .kt-webring-step-number { animation-delay: 150ms; }
+.kt-webring-step--text .kt-webring-step-number { animation-delay: 300ms; }
+
+@keyframes kt-webring-step-arrive {
+  0% { opacity: .35; transform: scale(.78) translateY(4px); }
+  65% { opacity: 1; transform: scale(1.1) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .kt-webring-badge-card {
   min-width: 0;
   width: min(100%, 330px);
-  margin: 0 auto;
+  margin: 0;
 }
 
 .kt-kick-panel-mock {
@@ -1192,22 +1294,6 @@ body[data-page="kt"] .kt-member-badge--admin {
   overflow-wrap: anywhere;
 }
 
-.kt-webring-copy-stack {
-  display: grid;
-  min-width: 0;
-  gap: 12px;
-}
-
-.kt-webring-intro {
-  margin: 0;
-  padding: 10px 13px;
-  border-left: 5px solid var(--kt-pink);
-  background: rgb(245 169 184 / 25%);
-  font-size: .94rem;
-  font-weight: 400;
-  line-height: 1.45;
-}
-
 .kt-webring-copy-field {
   min-width: 0;
   padding: 10px;
@@ -1222,6 +1308,18 @@ body[data-page="kt"] .kt-member-badge--admin {
   color: #5b3850;
   font-size: .82rem;
   font-weight: 700;
+}
+
+.kt-webring-copy-field label.kt-webring-step-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: .9rem;
+  font-synthesis: weight;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 #kt-webring-badge-label:hover,
@@ -1299,6 +1397,8 @@ body[data-page="kt"] .kt-member-badge--admin {
   font-weight: 400;
 }
 
+.kt-webring-copy-field .kt-webring-copy-status { margin-top: 10px; }
+
 .kt-webring-copy-status:empty { display: none; }
 
 .kt-webring-copy-status[data-state="copied"] {
@@ -1317,8 +1417,44 @@ body[data-page="kt"] .kt-member-badge--admin {
 }
 
 @media (max-width: 760px) {
-  .kt-webring-body { grid-template-columns: minmax(0, 1fr); }
-  .kt-webring-badge-card { width: min(100%, 420px); justify-self: center; }
+  .kt-webring-steps {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    gap: 14px;
+  }
+
+  .kt-webring-step--preview {
+    grid-column: 1;
+    grid-row: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .kt-webring-step--link,
+  .kt-webring-step--text { grid-column: 1; grid-row: auto; }
+
+  .kt-webring-step-callout {
+    display: flex;
+    width: min(100%, 420px);
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto -5px;
+    padding-right: 6px;
+  }
+
+  .kt-webring-step-callout__box { flex: 1 1 auto; }
+
+  .kt-webring-step-arrow {
+    position: static;
+    flex: 0 0 auto;
+    width: clamp(48px, 13vw, 60px);
+    transform: translateY(9px);
+  }
+
+  .kt-webring-badge-card {
+    width: min(100%, 420px);
+    justify-self: center;
+  }
 }
 
 @media (max-width: 520px) {
@@ -1332,6 +1468,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 
 @media (prefers-reduced-motion: reduce) {
   .kt-webring-stamp { animation: none; }
+  .kt-webring-step-number { animation: none !important; }
 }
 
 .kt-footer {
