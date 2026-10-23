@@ -3100,6 +3100,7 @@ function initializeSiteLoadingScreen() {
   }, 50);
 
   const finishFade = window.setTimeout(() => {
+    window.clearInterval(updateProgress);
     progress.value = 100;
     progress.setAttribute("aria-valuetext", "100 percent");
     percentLabel.textContent = "100%";
