@@ -961,7 +961,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 
 .kt-webring-steps {
   display: grid;
-  grid-template-columns: minmax(400px, 1fr) minmax(0, 1.12fr);
+  grid-template-columns: minmax(460px, 1.15fr) minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-items: start;
   gap: 14px clamp(16px, 2.5vw, 26px);
@@ -976,7 +976,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   display: grid;
   grid-column: 1;
   grid-row: 1 / span 2;
-  grid-template-columns: minmax(170px, .78fr) minmax(210px, 1.1fr);
+  grid-template-columns: minmax(170px, .78fr) minmax(240px, 1.1fr);
   align-items: center;
   gap: 16px;
 }
