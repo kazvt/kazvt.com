@@ -35,7 +35,19 @@
       </a>
     </div>
 
-    <button class="kt-music-toggle" type="button" data-kt-music-toggle aria-label="Mute" aria-pressed="false">Mute</button>
+    <button class="kt-music-toggle" type="button" data-kt-music-toggle data-muted="false" aria-label="Mute" title="Mute music">
+      <span class="kt-music-toggle__icon-tile" aria-hidden="true">
+        <svg class="kt-music-toggle__icon" viewBox="0 0 24 24" focusable="false">
+          <path class="kt-music-toggle__speaker" d="M3 9v6h4l5 4V5L7 9H3z"></path>
+          <g class="kt-music-toggle__waves">
+            <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+            <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
+          </g>
+          <path class="kt-music-toggle__mute-mark" d="m16 9 5 6m0-6-5 6"></path>
+        </svg>
+      </span>
+      <span data-kt-music-toggle-label>Mute</span>
+    </button>
 
     <main class="kt-frame" aria-labelledby="kt-title">
       <header class="kt-topbar">

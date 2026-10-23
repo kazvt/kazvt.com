@@ -3,6 +3,7 @@
 
   const button = document.querySelector("[data-kt-music-toggle]");
   if (!button) return;
+  const buttonLabel = button.querySelector("[data-kt-music-toggle-label]");
 
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const preferenceKey = "kazvt-kt-pad-preference-v1";
@@ -36,9 +37,11 @@
   let scheduledRegisterChanges = 0;
 
   function setButtonState() {
-    button.textContent = muted ? "Unmute" : "Mute";
-    button.setAttribute("aria-label", muted ? "Unmute" : "Mute");
-    button.setAttribute("aria-pressed", String(muted));
+    const action = muted ? "Unmute" : "Mute";
+    buttonLabel.textContent = action;
+    button.dataset.muted = String(muted);
+    button.setAttribute("aria-label", action);
+    button.title = `${action} music`;
   }
 
   function removeStoredPreference() {
