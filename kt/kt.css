@@ -634,6 +634,23 @@ body[data-page="kt"] summary:focus-visible {
   margin: 8px auto 0;
 }
 
+body[data-page="kt"] .kt-footer .language-dock > .language-button {
+  background-color: var(--kt-blue);
+  background-image: url("/kt/assets/trans-heart-tile.svg");
+  background-repeat: repeat;
+  background-size: 112px 112px;
+  color: var(--kt-ink);
+}
+
+body[data-page="kt"] .kt-footer .language-dock > .language-button:hover,
+body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible {
+  background-color: var(--kt-pink);
+  background-image: url("/kt/assets/trans-heart-tile.svg");
+  background-repeat: repeat;
+  background-size: 112px 112px;
+  color: var(--kt-ink);
+}
+
 .kt-footer-home {
   font-size: .86rem;
   font-weight: 900;
