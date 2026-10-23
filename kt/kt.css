@@ -171,6 +171,10 @@ body[data-page="kt"] summary:focus-visible {
   gap: 9px;
 }
 
+@media (max-width: 1256px) {
+  .kt-topbar-actions { padding-right: 84px; }
+}
+
 .kt-home-link,
 .kt-topbar-label {
   display: inline-flex;
@@ -199,6 +203,10 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 .kt-music-toggle {
+  position: fixed;
+  z-index: 1000;
+  top: max(12px, calc(env(safe-area-inset-top, 0px) + 12px));
+  right: max(12px, calc(env(safe-area-inset-right, 0px) + 12px));
   min-width: 72px;
   min-height: 30px;
   padding: 4px 9px;
