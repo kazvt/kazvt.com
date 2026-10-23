@@ -551,11 +551,12 @@
     if (!entries.length) return;
 
     const memberList = document.querySelector(".kt-member-grid");
+    const guestList = document.querySelector(".kt-recommendation-grid");
     const pinnedMemberSlugs = new Set(["kazvt", "lillie-garden"]);
-    const liveStickerVariants = [
-      { src: "/kt/assets/kt-live-sticker.gif", color: "pink" },
-      { src: "/kt/assets/kt-live-sticker-blue.gif", color: "blue" },
-    ];
+    const liveStickerVariants = {
+      pink: "/kt/assets/kt-live-sticker.gif",
+      blue: "/kt/assets/kt-live-sticker-blue.gif",
+    };
     const entriesByCard = new Map(entries.map((entry) => [entry.card, entry]));
     const memberRecords = memberList
       ? [...memberList.children].map((listItem, defaultOrder) => {
@@ -564,10 +565,37 @@
         return { listItem, card, entry, slug: entry?.slug || "", defaultOrder };
       })
       : [];
+    const guestRecords = guestList
+      ? [...guestList.children].map((listItem, defaultOrder) => {
+        const card = listItem.querySelector(".kt-recommendation-link");
+        const entry = card ? entriesByCard.get(card) : null;
+        return { listItem, card, entry, defaultOrder };
+      })
+      : [];
     let pendingMemberOrder = false;
+    let pendingGuestOrder = false;
+
+    function syncLiveStickers() {
+      memberRecords.forEach((member) => {
+        if (member.card?.dataset.liveState !== "live" || !member.entry?.liveSticker) return;
+
+        const stickerTone = getComputedStyle(member.card)
+          .getPropertyValue("--kt-live-sticker-tone")
+          .trim();
+        const stickerColor = stickerTone === "blue" ? "blue" : "pink";
+        const src = liveStickerVariants[stickerColor];
+        if (member.entry.liveSticker.getAttribute("src") !== src) {
+          member.entry.liveSticker.setAttribute("src", src);
+        }
+        member.entry.liveSticker.classList.toggle("kt-live-sticker--blue", stickerColor === "blue");
+      });
+    }
 
     function applyMemberOrder() {
-      if (!memberList || !memberRecords.length) return;
+      if (!memberList || !memberRecords.length) {
+        syncLiveStickers();
+        return;
+      }
 
       const orderedMembers = [...memberRecords].sort((left, right) => {
         const leftPinned = pinnedMemberSlugs.has(left.slug);
@@ -583,6 +611,7 @@
       const orderChanged = orderedMembers.some((member, index) => memberList.children[index] !== member.listItem);
       if (orderChanged && memberList.contains(document.activeElement)) {
         pendingMemberOrder = true;
+        syncLiveStickers();
         return;
       }
 
@@ -595,18 +624,30 @@
         if (number && number.textContent !== displayNumber) number.textContent = displayNumber;
       });
       pendingMemberOrder = false;
+      syncLiveStickers();
+    }
 
-      let liveStickerIndex = 0;
-      orderedMembers.forEach((member) => {
-        if (member.card?.dataset.liveState !== "live" || !member.entry?.liveSticker) return;
+    function applyGuestOrder() {
+      if (!guestList || !guestRecords.length) return;
 
-        const variant = liveStickerVariants[liveStickerIndex % liveStickerVariants.length];
-        liveStickerIndex += 1;
-        if (member.entry.liveSticker.getAttribute("src") !== variant.src) {
-          member.entry.liveSticker.setAttribute("src", variant.src);
-        }
-        member.entry.liveSticker.classList.toggle("kt-live-sticker--blue", variant.color === "blue");
+      const orderedGuests = [...guestRecords].sort((left, right) => {
+        const leftLive = left.card?.dataset.liveState === "live";
+        const rightLive = right.card?.dataset.liveState === "live";
+        if (leftLive !== rightLive) return leftLive ? -1 : 1;
+        return left.defaultOrder - right.defaultOrder;
       });
+
+      const orderChanged = orderedGuests.some((guest, index) => guestList.children[index] !== guest.listItem);
+      if (orderChanged && guestList.contains(document.activeElement)) {
+        pendingGuestOrder = true;
+        return;
+      }
+
+      orderedGuests.forEach((guest, index) => {
+        const currentItem = guestList.children[index] || null;
+        if (currentItem !== guest.listItem) guestList.insertBefore(guest.listItem, currentItem);
+      });
+      pendingGuestOrder = false;
     }
 
     memberList?.addEventListener("focusout", (event) => {
@@ -615,6 +656,15 @@
 
       window.requestAnimationFrame(() => {
         if (!memberList.contains(document.activeElement)) applyMemberOrder();
+      });
+    });
+
+    guestList?.addEventListener("focusout", (event) => {
+      if (!pendingGuestOrder) return;
+      if (event.relatedTarget instanceof Node && guestList.contains(event.relatedTarget)) return;
+
+      window.requestAnimationFrame(() => {
+        if (!guestList.contains(document.activeElement)) applyGuestOrder();
       });
     });
 
@@ -646,6 +696,7 @@
       indicator.hidden = false;
       indicator.dataset.state = state;
       if (liveSticker && !liveSticker.isConnected) card.append(liveSticker);
+      syncLiveStickers();
       const displayName = card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || slug;
       const i18n = window.KazvtI18n;
@@ -695,6 +746,7 @@
           }
         }));
         applyMemberOrder();
+        applyGuestOrder();
       } finally {
         inFlight = false;
         scheduleRefresh(Math.max(0, refreshInterval - (Date.now() - lastRefresh)));
