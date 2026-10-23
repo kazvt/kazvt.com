@@ -3099,18 +3099,20 @@ function initializeSiteLoadingScreen() {
     percentLabel.textContent = `${Math.round(percent)}%`;
   }, 50);
 
-  window.setTimeout(() => {
-    window.clearTimeout(showSecondMessage);
-    window.clearInterval(updateProgress);
+  const finishFade = window.setTimeout(() => {
     progress.value = 100;
     progress.setAttribute("aria-valuetext", "100 percent");
     percentLabel.textContent = "100%";
     host.classList.add("is-exiting");
-    window.setTimeout(() => {
-      host.remove();
-      if (previousBusy === null) document.body.removeAttribute("aria-busy");
-      else document.body.setAttribute("aria-busy", previousBusy);
-    }, 180);
+  }, 2820);
+
+  window.setTimeout(() => {
+    window.clearTimeout(showSecondMessage);
+    window.clearTimeout(finishFade);
+    window.clearInterval(updateProgress);
+    host.remove();
+    if (previousBusy === null) document.body.removeAttribute("aria-busy");
+    else document.body.setAttribute("aria-busy", previousBusy);
   }, 3000);
 }
 
