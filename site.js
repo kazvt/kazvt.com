@@ -3114,11 +3114,16 @@ function initializeSiteLoadingScreen() {
     host.remove();
     if (previousBusy === null) document.body.removeAttribute("aria-busy");
     else document.body.setAttribute("aria-busy", previousBusy);
+    document.dispatchEvent(new Event("kazvt-site-loading-complete"));
   }, 3000);
 }
 
 function initializeSiteWelcomePopup() {
   if (document.body.dataset.page !== "home" || document.querySelector("[data-welcome-popup-host]")) return;
+  if (document.querySelector("[data-site-loading-screen]")) {
+    document.addEventListener("kazvt-site-loading-complete", initializeSiteWelcomePopup, { once: true });
+    return;
+  }
 
   const storageKey = "kazvt-welcome-popup-dismissed-until";
   const cooldownMs = 24 * 60 * 60 * 1000;
