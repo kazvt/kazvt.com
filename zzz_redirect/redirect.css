@@ -1070,7 +1070,6 @@ html[data-lineboil="off"] .redirect-logo-wrap::after {
 html[data-theme="p1"] *,
 html[data-theme="p1"] *::before,
 html[data-theme="p1"] *::after {
-  font-weight: 400 !important;
   font-synthesis: none;
 }
 
