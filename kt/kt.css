@@ -1460,9 +1460,10 @@ body[data-page="kt"] .kt-member-badge--admin {
   }
 
   .kt-webring-step-arrow {
-    position: static;
+    position: relative;
+    z-index: 4;
     width: 68px;
-    margin-block: 0 -20px;
+    margin-block: 0 -36px;
     transform: rotate(90deg);
   }
 }
