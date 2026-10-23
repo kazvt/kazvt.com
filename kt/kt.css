@@ -304,6 +304,11 @@ body[data-page="kt"] summary:focus-visible {
   text-transform: uppercase;
 }
 
+.kt-hero-copy .kt-eyebrow {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
 .kt-hero h1 {
   display: grid;
   justify-items: start;
@@ -355,10 +360,13 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 .kt-kick-link {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
   align-items: center;
   justify-content: center;
   gap: 11px;
+  margin-inline: auto;
   min-height: 46px;
   padding: 8px 15px;
   border: 3px solid var(--kt-ink);
@@ -706,6 +714,12 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   line-height: 1.05;
   text-align: center;
   transform: rotate(2deg) translateZ(14px);
+}
+
+body[data-page="kt"] .kt-member-badge--admin {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-synthesis: weight;
+  font-weight: 700 !important;
 }
 
 .kt-member-arrow {
