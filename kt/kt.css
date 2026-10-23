@@ -856,7 +856,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border-left: 5px solid var(--kt-pink);
   background: rgb(245 169 184 / 25%);
   font-size: .94rem;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.45;
 }
 
@@ -901,6 +901,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   cursor: copy;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: .72rem;
+  font-weight: 700;
   text-overflow: clip;
 }
 
