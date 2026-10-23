@@ -27,12 +27,14 @@
       transform-box: fill-box;
       transform-origin: center;
     }
-    .pink-dot,
-    .blue-dot {
+    .pink-dot {
       animation-name: pink-dot;
       animation-delay: -1s;
     }
-    .blue-dot { animation-name: blue-dot; }
+    .blue-dot {
+      animation-name: blue-dot;
+      animation-delay: -1s;
+    }
 
     @keyframes big-one {
       0%, 49.999% { opacity: 1; }
