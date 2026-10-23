@@ -157,6 +157,7 @@
   .kt-member-handle { font-size: .73rem; line-height: 1.15; }
   .kt-member-tag,
   .kt-member-badge { grid-column: 3; grid-row: 2; align-self: end; justify-self: stretch; max-width: none; padding: 4px 5px; font-size: .64rem; line-height: 1.15; text-align: center; }
+  .kt-live-sticker { top: -9px; right: 13px; width: 56px; }
 
   .kt-recommendations {
     display: grid;
