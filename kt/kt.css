@@ -256,7 +256,7 @@ body[data-page="kt"] summary:focus-visible {
   left: 50%;
   display: block;
   width: min(170%, 560px);
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   border: 0;
   outline: 0;
   background: transparent;
@@ -264,15 +264,16 @@ body[data-page="kt"] summary:focus-visible {
   object-fit: contain;
   opacity: 1;
   transform: translate(-50%, -50%) rotate(90deg);
+  /* The video is rotated 90deg: these two masks soften its top/bottom ends and its long left/right sides. */
   -webkit-mask-image:
     linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    linear-gradient(0deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
   -webkit-mask-composite: source-in;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
   mask-image:
     linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    linear-gradient(0deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
   mask-composite: intersect;
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
