@@ -1071,6 +1071,21 @@ html[data-theme="p1"] *,
 html[data-theme="p1"] *::before,
 html[data-theme="p1"] *::after {
   font-weight: 400 !important;
+  font-synthesis: none;
+}
+
+/* 04b_30 stays regular; intentional bold emphasis switches to Comic Sans. */
+html[data-theme="p1"] :is(b, strong),
+html[data-theme="p1"] .comic-sans-emphasis {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-weight: 700 !important;
+  font-synthesis: weight;
+}
+
+.comic-sans-emphasis {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-weight: 700;
+  font-synthesis: weight;
 }
 
 /* Palette 6 uses its regular Sweet face sitewide, not synthetic bold weights. */
