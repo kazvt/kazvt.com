@@ -5655,7 +5655,7 @@ body {
     var(--paper-alt);
 }
 
-/* Palette 1 uses the regular 64.ttf face sitewide, not synthetic bold weights. */
+/* Palette 1 uses regular 04b_30 weights; semantic emphasis opts into Comic Sans below. */
 body[data-theme="p1"] *,
 body[data-theme="p1"] *::before,
 body[data-theme="p1"] *::after {
