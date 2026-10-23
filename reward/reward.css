@@ -137,6 +137,7 @@ body[data-page-state="reward"][data-tier="uncommon"] {
   --palette-panel: #0d1028;
   --palette-accent: #3399cc;
   --palette-pattern: url("/reward/patterns/blue.gif");
+  font-synthesis: weight;
 }
 
 body[data-page-state="reward"][data-tier="rare"] {
