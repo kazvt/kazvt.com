@@ -322,6 +322,14 @@ body[data-page="kt"] summary:focus-visible {
   line-height: 1.45;
 }
 
+body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--kt-blue);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
 .kt-kick-link {
   display: inline-flex;
   align-items: center;
