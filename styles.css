@@ -2106,6 +2106,14 @@ code {
   filter: drop-shadow(2px 2px 0 #111111);
 }
 
+/* The finer line-boil GIFs use a small palette, so a light contrast lift makes
+   their existing texture read clearly without scaling the grain itself. */
+.mini-logo-discord,
+.mini-logo-twitter,
+.mini-logo-bsky {
+  filter: contrast(1.14) drop-shadow(2px 2px 0 #111111);
+}
+
 .mini-logo .logo-bg {
   fill: #2b2b2b;
   stroke: #2b2b2b;
