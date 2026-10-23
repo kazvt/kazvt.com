@@ -413,7 +413,7 @@ body[data-page="kt"] summary:focus-visible {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background: #2b2028;
+  background: linear-gradient(90deg, transparent 0%, rgb(43 32 40 / 100%) 100%);
   content: "";
   opacity: 0;
   pointer-events: none;
@@ -450,7 +450,7 @@ body[data-page="kt"] summary:focus-visible {
 
 .kt-member:hover::after,
 .kt-member:focus-visible::after {
-  opacity: .12;
+  opacity: .2;
 }
 
 .kt-member-number {
