@@ -76,11 +76,12 @@ function initializeKtLoadingScreen() {
     .title-bar {
       height: auto;
       min-height: 32px;
+      /* Keep XP.css's native gradient stop positions; only recolor the stops. */
       background: linear-gradient(
         180deg,
         #ff9fc9 0%,
-        #e7489f 8%,
-        #d83c91 40%,
+        #d82f89 8%,
+        #c82d80 40%,
         #e450a4 88%,
         #e450a4 93%,
         #d63a91 95%,
@@ -104,6 +105,10 @@ function initializeKtLoadingScreen() {
       white-space: nowrap;
     }
     .title-bar-controls { flex: 0 0 auto; }
+    .title-bar-controls button[aria-label="Minimize"],
+    .title-bar-controls button[aria-label="Maximize"] {
+      filter: hue-rotate(112deg);
+    }
     .window-icon {
       display: block;
       flex: 0 0 18px;
@@ -213,7 +218,7 @@ function initializeKtLoadingScreen() {
       font-size: 12px;
       text-align: center;
     }
-    .loading-footer span { color: #936d87; }
+    .loading-footer span { color: #ff3a98; }
     @media (max-width: 520px) {
       .window-body { padding: 16px; }
       .loading-row { gap: 12px; min-height: 90px; }
@@ -238,7 +243,7 @@ function initializeKtLoadingScreen() {
   windowPanel.setAttribute("aria-label", "Loading KickassTransfems");
   windowPanel.innerHTML = `
     <div class="title-bar">
-      <div class="title-bar-text"><img class="window-icon" src="/kt/assets/transgender-favicon.gif" width="18" height="14" alt="" aria-hidden="true"><span class="title-bar-title">KICKASSTRANSFEMS - PLEASE WAIT</span></div>
+      <div class="title-bar-text"><img class="window-icon" src="/kt/assets/transgender-favicon.gif" width="18" height="14" alt="" aria-hidden="true"><span class="title-bar-title">KickassTransfems - PLEASE WAIT</span></div>
       <div class="title-bar-controls">
         <button type="button" aria-label="Minimize" aria-pressed="false" title="Minimize"></button>
         <button type="button" aria-label="Maximize" aria-pressed="false" title="Maximize"></button>
