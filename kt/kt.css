@@ -323,6 +323,19 @@ body[data-page="kt"] summary:focus-visible {
   line-height: 1.45;
 }
 
+.kt-affiliation strong,
+body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
+  font-weight: 700;
+}
+
+.kt-affiliation-space {
+  display: inline;
+}
+
+html:lang(zh) .kt-affiliation-space {
+  display: none;
+}
+
 body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   color: inherit;
   text-decoration: underline;
