@@ -122,8 +122,6 @@
   .kt-affiliation { margin: 13px auto; padding: 9px 10px; font-size: clamp(.88rem, 3.7vw, 1rem); line-height: 1.45; text-align: start; }
   .kt-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
   .kt-hero-actions .kt-kick-link { width: 100%; min-height: 50px; padding: 8px 10px; font-size: .9rem; }
-  .kt-flag-motion-toggle { min-height: 44px; }
-
   .kt-roster { padding: 24px 14px 30px; }
   .kt-roster-heading {
     align-items: start;

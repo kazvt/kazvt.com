@@ -595,6 +595,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-live-accent: var(--kt-blue);
   --kt-live-glow: rgb(91 206 250 / 42%);
   --kt-live-halo: transparent;
+  --kt-live-scan-color: #fff;
   position: relative;
   isolation: isolate;
   display: grid;
@@ -648,7 +649,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-member > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .kt-member-grid > li:nth-child(3n + 1) .kt-member {
@@ -671,10 +672,39 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-member-end: var(--kt-white);
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 42%);
+  --kt-live-scan-color: var(--kt-pink);
 }
 
 .kt-member[data-live-state="live"] {
   --kt-live-halo: var(--kt-live-glow);
+}
+
+.kt-live-scan {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.kt-member[data-live-state="live"] > .kt-live-scan,
+.kt-recommendation-link[data-live-state="live"] > .kt-live-scan { display: block; }
+
+.kt-member > .kt-live-scan,
+.kt-recommendation-link > .kt-live-scan { position: absolute; z-index: 1; }
+
+.kt-live-scan::before {
+  position: absolute;
+  top: -100%;
+  left: -155%;
+  width: 18%;
+  height: 300%;
+  background: var(--kt-live-scan-color, var(--kt-pink));
+  content: "";
+  opacity: .92;
+  transform: rotate(45deg);
+  animation: kt-live-scan 1.8s linear infinite;
 }
 
 .kt-member:hover,
@@ -1324,6 +1354,11 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   to { box-shadow: 0 0 7px 2px var(--kt-live-glow), 0 0 17px 5px var(--kt-live-glow); }
 }
 
+@keyframes kt-live-scan {
+  from { left: -155%; }
+  to { left: 155%; }
+}
+
 @keyframes kt-wallpaper-sweep {
   from { transform: translateX(-110%) skewX(-12deg); }
   to { transform: translateX(calc(100vw + 110%)) skewX(-12deg); }
@@ -1362,6 +1397,8 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
     animation: none !important;
     transition: none !important;
   }
+
+  .kt-live-scan { display: none !important; }
 
   .kt-sticker--flag-button { transform: none; }
   .kt-member,

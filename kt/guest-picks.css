@@ -16,6 +16,7 @@
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 42%);
   --kt-live-halo: transparent;
+  --kt-live-scan-color: var(--kt-pink);
   position: relative;
   isolation: isolate;
   display: grid;
@@ -38,7 +39,7 @@
 
 .kt-recommendation-link > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .kt-recommendation-link[data-live-state="live"] {
@@ -87,6 +88,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .kt-live-scan { display: none !important; }
+
   .kt-recommendation-link {
     transition: none;
   }
