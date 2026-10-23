@@ -554,6 +554,7 @@ kt.webring_kicker=ÜYE KİTİ - ROZETİ AL
 kt.webring_title=Bizi sayfana ekle
 kt.webring_intro=Üyeler, KICK.com'daki diğer transfemlerin topluluğumuzu bulmasına yardımcı olmak için animasyonlu rozeti sitelerine veya profillerine ekleyebilir. KickassTransfems, birbirimizi bulup desteklememiz için bir topluluk ve webring.
 kt.webring_preview_label=KickassTransfems üye sayfasını aç
+kt.webring_logo_alt=KickassTransfems animasyonlu rozeti
 kt.webring_preview_note=Rozet grup sayfasına bağlantı verir.
 kt.webring_badge_label=Animasyonlu rozet bağlantısı
 kt.webring_badge_hint=HTML kodunu kopyalamak için kutuya veya düğmesine tıkla.

@@ -560,6 +560,7 @@ kt.webring_kicker=مجموعة الأعضاء - خذوا الشارة
 kt.webring_title=أضيفوا الشارة إلى صفحاتكم
 kt.webring_intro=يمكن للأعضاء وضع الشارة المتحركة على مواقعهم أو ملفاتهم الشخصية لمساعدة العابرين جندريًا على KICK.com في العثور على مجتمعنا. KickassTransfems مجتمع وحلقة روابط تساعدنا على العثور على بعضنا ودعم بعضنا.
 kt.webring_preview_label=افتح صفحة أعضاء KickassTransfems
+kt.webring_logo_alt=شارة KickassTransfems المتحركة
 kt.webring_preview_note=تؤدي الشارة إلى صفحة المجموعة.
 kt.webring_badge_label=رابط الشارة المتحركة
 kt.webring_badge_hint=اضغطوا على الحقل أو الزر لنسخ HTML.

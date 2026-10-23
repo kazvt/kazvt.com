@@ -554,6 +554,7 @@ kt.webring_kicker=成员小工具 - 带上徽章
 kt.webring_title=把我们放到你的页面上
 kt.webring_intro=成员可以把动态徽章放在自己的网站或个人资料里，帮助 KICK.com 上的跨性别女性找到我们的社群。KickassTransfems 是一个社群和 webring，让我们彼此发现、互相支持。
 kt.webring_preview_label=打开 KickassTransfems 成员页面
+kt.webring_logo_alt=KickassTransfems 动态徽章
 kt.webring_preview_note=徽章会链接回小组页面。
 kt.webring_badge_label=动态徽章链接
 kt.webring_badge_hint=点击输入框或按钮即可复制 HTML。

@@ -614,6 +614,7 @@ kt.webring_kicker=MEMBER KIT - TAKE THE BADGE
 kt.webring_title=Put us on your page
 kt.webring_intro=Members can put the animated badge on their page or profile to help fellow transfems on KICK.com find our community. KickassTransfems is a community and webring for finding and supporting one another.
 kt.webring_preview_label=Open the KickassTransfems member page
+kt.webring_logo_alt=KickassTransfems animated badge
 kt.webring_preview_note=The badge links back to the group page.
 kt.webring_badge_label=Animated badge link
 kt.webring_badge_hint=Click the box or its button to copy the HTML.
