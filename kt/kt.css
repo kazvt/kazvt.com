@@ -1461,7 +1461,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 
   .kt-webring-step-arrow {
     position: relative;
-    top: auto;
+    top: 10px;
     right: auto;
     z-index: 4;
     width: 58px;
