@@ -1,4 +1,11 @@
 {
+  "schema_version": 3,
+  "metadata_options": {
+    "hash_algorithms": [],
+    "image_dimensions": false,
+    "filename_history": false,
+    "filename_history_algorithm": null
+  },
   "files": [
     "[backtowork].gif",
     "[bananas].gif",
@@ -44,5 +51,315 @@
     "monkey_from_kung_fu_panda.png",
     "oogway1.png",
     "oogway2.png"
-  ]
+  ],
+  "file_info": {
+    "[backtowork].gif": {
+      "type": "image",
+      "size_bytes": 4382,
+      "modified_ns": 1787394835001239600,
+      "modified_ns_exact": "1787394835001239600",
+      "file_identity": "2725177794:8162774324788383"
+    },
+    "[bananas].gif": {
+      "type": "image",
+      "size_bytes": 57637,
+      "modified_ns": 1787394835045931500,
+      "modified_ns_exact": "1787394835045931500",
+      "file_identity": "2725177794:9288674231631002"
+    },
+    "[blush].webp": {
+      "type": "image",
+      "size_bytes": 1598,
+      "modified_ns": 1787394835047568600,
+      "modified_ns_exact": "1787394835047568600",
+      "file_identity": "2725177794:8162774324788370"
+    },
+    "[burger].gif": {
+      "type": "image",
+      "size_bytes": 326,
+      "modified_ns": 1787394835003959900,
+      "modified_ns_exact": "1787394835003959900",
+      "file_identity": "2725177794:11258999068651602"
+    },
+    "[cheese].gif": {
+      "type": "image",
+      "size_bytes": 246,
+      "modified_ns": 1787394835053520700,
+      "modified_ns_exact": "1787394835053520700",
+      "file_identity": "2725177794:8162774324788367"
+    },
+    "[dance].gif": {
+      "type": "image",
+      "size_bytes": 1753,
+      "modified_ns": 1787394835033558300,
+      "modified_ns_exact": "1787394835033558300",
+      "file_identity": "2725177794:8162774324788365"
+    },
+    "[deep].gif": {
+      "type": "image",
+      "size_bytes": 38222,
+      "modified_ns": 1787394835029187400,
+      "modified_ns_exact": "1787394835029187400",
+      "file_identity": "2725177794:18295873486371374"
+    },
+    "[dishes].gif": {
+      "type": "image",
+      "size_bytes": 48218,
+      "modified_ns": 1787394835021677000,
+      "modified_ns_exact": "1787394835021677000",
+      "file_identity": "2725177794:2251799814021330"
+    },
+    "[egg].gif": {
+      "type": "image",
+      "size_bytes": 285,
+      "modified_ns": 1787394835051843400,
+      "modified_ns_exact": "1787394835051843400",
+      "file_identity": "2725177794:8162774324788396"
+    },
+    "[erin].webp": {
+      "type": "image",
+      "size_bytes": 43720,
+      "modified_ns": 1787394835014711000,
+      "modified_ns_exact": "1787394835014711000",
+      "file_identity": "2725177794:8162774324788390"
+    },
+    "[fired].gif": {
+      "type": "image",
+      "size_bytes": 2974,
+      "modified_ns": 1787394835012031000,
+      "modified_ns_exact": "1787394835012031000",
+      "file_identity": "2725177794:8162774324788364"
+    },
+    "[freaky].gif": {
+      "type": "image",
+      "size_bytes": 14536,
+      "modified_ns": 1787394835007169300,
+      "modified_ns_exact": "1787394835007169300",
+      "file_identity": "2725177794:8162774324788381"
+    },
+    "[happy].gif": {
+      "type": "image",
+      "size_bytes": 9927,
+      "modified_ns": 1787394834999587200,
+      "modified_ns_exact": "1787394834999587200",
+      "file_identity": "2725177794:10414574138473642"
+    },
+    "[hi].gif": {
+      "type": "image",
+      "size_bytes": 6397,
+      "modified_ns": 1787394835036221500,
+      "modified_ns_exact": "1787394835036221500",
+      "file_identity": "2725177794:8162774324788385"
+    },
+    "[hotdog].gif": {
+      "type": "image",
+      "size_bytes": 369,
+      "modified_ns": 1787394835022781700,
+      "modified_ns_exact": "1787394835022781700",
+      "file_identity": "2725177794:4222124650995848"
+    },
+    "[icecream].gif": {
+      "type": "image",
+      "size_bytes": 1516016,
+      "modified_ns": 1787394834985870700,
+      "modified_ns_exact": "1787394834985870700",
+      "file_identity": "2725177794:8162774324765003"
+    },
+    "[ily].gif": {
+      "type": "image",
+      "size_bytes": 11879,
+      "modified_ns": 1787394835042706600,
+      "modified_ns_exact": "1787394835042706600",
+      "file_identity": "2725177794:8162774324788377"
+    },
+    "[joke].gif": {
+      "type": "image",
+      "size_bytes": 45003,
+      "modified_ns": 1787394835017939900,
+      "modified_ns_exact": "1787394835017939900",
+      "file_identity": "2725177794:8162774324760823"
+    },
+    "[marge].gif": {
+      "type": "image",
+      "size_bytes": 12206,
+      "modified_ns": 1787394834989675700,
+      "modified_ns_exact": "1787394834989675700",
+      "file_identity": "2725177794:8162774324788386"
+    },
+    "[mrbeast].gif": {
+      "type": "image",
+      "size_bytes": 43443,
+      "modified_ns": 1787394835039938600,
+      "modified_ns_exact": "1787394835039938600",
+      "file_identity": "2725177794:8162774324788388"
+    },
+    "[murder].gif": {
+      "type": "image",
+      "size_bytes": 3541,
+      "modified_ns": 1787394835032475200,
+      "modified_ns_exact": "1787394835032475200",
+      "file_identity": "2725177794:11258999068685090"
+    },
+    "[parents].gif": {
+      "type": "image",
+      "size_bytes": 3722,
+      "modified_ns": 1787394834994127600,
+      "modified_ns_exact": "1787394834994127600",
+      "file_identity": "2725177794:8162774324788380"
+    },
+    "[penis].gif": {
+      "type": "image",
+      "size_bytes": 16003,
+      "modified_ns": 1787394835025980600,
+      "modified_ns_exact": "1787394835025980600",
+      "file_identity": "2725177794:8162774324788376"
+    },
+    "[sex].gif": {
+      "type": "image",
+      "size_bytes": 1938,
+      "modified_ns": 1787394835050760600,
+      "modified_ns_exact": "1787394835050760600",
+      "file_identity": "2725177794:8162774324788368"
+    },
+    "[smeemo].webp": {
+      "type": "image",
+      "size_bytes": 3186,
+      "modified_ns": 1787394835005020500,
+      "modified_ns_exact": "1787394835005020500",
+      "file_identity": "2725177794:4503599627629253"
+    },
+    "[snail].gif": {
+      "type": "image",
+      "size_bytes": 2771,
+      "modified_ns": 1787394835002884800,
+      "modified_ns_exact": "1787394835002884800",
+      "file_identity": "2725177794:8162774324788371"
+    },
+    "[steak].gif": {
+      "type": "image",
+      "size_bytes": 1698,
+      "modified_ns": 1787394835030840600,
+      "modified_ns_exact": "1787394835030840600",
+      "file_identity": "2725177794:8162774324788363"
+    },
+    "[stupid].gif": {
+      "type": "image",
+      "size_bytes": 4563,
+      "modified_ns": 1787394835044320400,
+      "modified_ns_exact": "1787394835044320400",
+      "file_identity": "2725177794:5910974511182525"
+    },
+    "[suckingheroff].gif": {
+      "type": "image",
+      "size_bytes": 14537,
+      "modified_ns": 1787394834991409300,
+      "modified_ns_exact": "1787394834991409300",
+      "file_identity": "2725177794:3377699720863848"
+    },
+    "[swing].gif": {
+      "type": "image",
+      "size_bytes": 103147,
+      "modified_ns": 1787394835038351100,
+      "modified_ns_exact": "1787394835038351100",
+      "file_identity": "2725177794:8162774324760922"
+    },
+    "[taco].gif": {
+      "type": "image",
+      "size_bytes": 1566,
+      "modified_ns": 1787394835049169600,
+      "modified_ns_exact": "1787394835049169600",
+      "file_identity": "2725177794:8162774324764948"
+    },
+    "[throbber].gif": {
+      "type": "image",
+      "size_bytes": 46417,
+      "modified_ns": 1787361328854043800,
+      "modified_ns_exact": "1787361328854043800",
+      "file_identity": "2725177794:4503599627596168"
+    },
+    "[toilet].gif": {
+      "type": "image",
+      "size_bytes": 22317,
+      "modified_ns": 1787394835008765800,
+      "modified_ns_exact": "1787394835008765800",
+      "file_identity": "2725177794:7318349394702595"
+    },
+    "[trans].gif": {
+      "type": "image",
+      "size_bytes": 4406,
+      "modified_ns": 1787394835020079200,
+      "modified_ns_exact": "1787394835020079200",
+      "file_identity": "2725177794:18295873486371407"
+    },
+    "[ty].gif": {
+      "type": "image",
+      "size_bytes": 13129,
+      "modified_ns": 1787394835054591900,
+      "modified_ns_exact": "1787394835054591900",
+      "file_identity": "2725177794:8162774324788409"
+    },
+    "[weekend].gif": {
+      "type": "image",
+      "size_bytes": 31845,
+      "modified_ns": 1787394834993042100,
+      "modified_ns_exact": "1787394834993042100",
+      "file_identity": "2725177794:8725724278209668"
+    },
+    "[wifeys].gif": {
+      "type": "image",
+      "size_bytes": 51131,
+      "modified_ns": 1787394835013100200,
+      "modified_ns_exact": "1787394835013100200",
+      "file_identity": "2725177794:5348024557761210"
+    },
+    "[working2].gif": {
+      "type": "image",
+      "size_bytes": 47826,
+      "modified_ns": 1787394835016337000,
+      "modified_ns_exact": "1787394835016337000",
+      "file_identity": "2725177794:8162774324788341"
+    },
+    "[working].gif": {
+      "type": "image",
+      "size_bytes": 2298,
+      "modified_ns": 1787394834988088900,
+      "modified_ns_exact": "1787394834988088900",
+      "file_identity": "2725177794:5066549581050552"
+    },
+    "[wumpa].gif": {
+      "type": "image",
+      "size_bytes": 127128,
+      "modified_ns": 1787394835028124100,
+      "modified_ns_exact": "1787394835028124100",
+      "file_identity": "2725177794:9851624185052297"
+    },
+    "[yay].gif": {
+      "type": "image",
+      "size_bytes": 5311,
+      "modified_ns": 1787394834997915800,
+      "modified_ns_exact": "1787394834997915800",
+      "file_identity": "2725177794:21110623253477880"
+    },
+    "monkey_from_kung_fu_panda.png": {
+      "type": "image",
+      "size_bytes": 221156,
+      "modified_ns": 1787394834996316900,
+      "modified_ns_exact": "1787394834996316900",
+      "file_identity": "2725177794:6473924464603828"
+    },
+    "oogway1.png": {
+      "type": "image",
+      "size_bytes": 181947,
+      "modified_ns": 1787394835024918600,
+      "modified_ns_exact": "1787394835024918600",
+      "file_identity": "2725177794:17169973579529354"
+    },
+    "oogway2.png": {
+      "type": "image",
+      "size_bytes": 192814,
+      "modified_ns": 1787394835010407000,
+      "modified_ns_exact": "1787394835010407000",
+      "file_identity": "2725177794:8162774324788109"
+    }
+  }
 }
