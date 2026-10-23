@@ -595,6 +595,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-live-accent: var(--kt-blue);
   --kt-live-glow: rgb(91 206 250 / 42%);
   --kt-live-card-glow: rgb(91 206 250 / 12%);
+  --kt-live-sticker-tone: pink;
   --kt-live-halo: transparent;
   --kt-live-scan-color: #fff;
   position: relative;
@@ -659,6 +660,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 42%);
   --kt-live-card-glow: rgb(245 169 184 / 12%);
+  --kt-live-sticker-tone: pink;
 }
 
 .kt-member-grid > li:nth-child(3n + 2) .kt-member {
@@ -667,6 +669,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-live-accent: var(--kt-blue);
   --kt-live-glow: rgb(91 206 250 / 42%);
   --kt-live-card-glow: rgb(91 206 250 / 12%);
+  --kt-live-sticker-tone: blue;
 }
 
 .kt-member-grid > li:nth-child(3n) .kt-member {
@@ -676,6 +679,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 42%);
   --kt-live-card-glow: rgb(245 169 184 / 12%);
+  --kt-live-sticker-tone: pink;
   --kt-live-scan-color: var(--kt-pink);
 }
 
