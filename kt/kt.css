@@ -66,6 +66,29 @@ body[data-page="kt"] {
   cursor: auto !important;
 }
 
+body[data-page="kt"]::before {
+  position: fixed;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: clamp(120px, 20vw, 250px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 8%) 12%,
+    rgb(255 255 255 / 78%) 50%,
+    rgb(255 255 255 / 8%) 88%,
+    transparent 100%
+  );
+  content: "";
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: .82;
+  transform: translateX(-110%) skewX(-12deg);
+  animation: kt-wallpaper-sweep 34s linear infinite;
+}
+
 body[data-page="kt"] :is(a, button, summary) {
   -webkit-tap-highlight-color: rgb(91 206 250 / 28%);
 }
@@ -599,6 +622,11 @@ body[data-page="kt"] summary:focus-visible {
   50% { transform: translateY(-3px) rotateX(2deg) rotateY(1deg); }
 }
 
+@keyframes kt-wallpaper-sweep {
+  from { transform: translateX(-110%) skewX(-12deg); }
+  to { transform: translateX(calc(100vw + 110%)) skewX(-12deg); }
+}
+
 @keyframes kt-sticker-hop {
   0%, 100% { translate: 0 0; rotate: -1deg; }
   50% { translate: 2px -7px; rotate: 2deg; }
@@ -646,6 +674,8 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body[data-page="kt"]::before { display: none; }
+
   .kt-sticker--mica-button,
   .kt-sticker--trans-flag-button { display: none !important; }
 
