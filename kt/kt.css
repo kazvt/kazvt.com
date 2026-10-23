@@ -845,7 +845,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   z-index: 4;
   top: auto;
   right: 6px;
-  bottom: 4px;
+  bottom: 0;
   display: block;
   width: 62px;
   height: auto;
