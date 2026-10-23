@@ -2998,7 +2998,13 @@ function initializeSiteLoadingScreen() {
       overflow: hidden;
     }
     .loading-progress[value]::-webkit-progress-bar { background-color: #fff; }
-    .loading-progress[value]::-webkit-progress-value,
+    .loading-progress[value]::-webkit-progress-value {
+      border-radius: 0;
+      background:
+        linear-gradient(180deg, rgb(255 255 255 / 58%), transparent 34%, rgb(0 0 0 / 9%)),
+        repeating-linear-gradient(90deg, rgb(255 255 255 / 86%) 0 2px, transparent 2px 15px),
+        repeating-linear-gradient(90deg, #5bcefa 0 15px, #f5a9b8 15px 30px);
+    }
     .loading-progress[value]::-moz-progress-bar {
       border-radius: 0;
       background:
