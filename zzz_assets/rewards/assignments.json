@@ -111,6 +111,17 @@
       "eventIdHash": "4c0c36d683e3240c35385f851fdef97321e54963869b42eeb355b9dcab4a8bce",
       "userId": "147666719",
       "reason": "slapped me around in chess"
+    },
+    {
+      "assetId": "8e7c092845083693c745274427e95839f8e8b6143c912f56eb37edbbf8a16101",
+      "assetSha256": "8e7c092845083693c745274427e95839f8e8b6143c912f56eb37edbbf8a16101",
+      "filename": "Ominous.png",
+      "username": "kaos_dragon",
+      "issuedAt": "2026-10-23T00:26:42.934Z",
+      "platform": "twitch",
+      "linkId": "OBw7MfANygD_dInb",
+      "eventIdHash": "f05449d18340e1137e086cb7dfcf7de26bec9f7246a3557b67771f2c7bc2db8d",
+      "userId": "57672838"
     }
   ],
   "revokedAssignments": [
