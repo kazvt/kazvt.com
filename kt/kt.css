@@ -264,8 +264,18 @@ body[data-page="kt"] summary:focus-visible {
   object-fit: contain;
   opacity: 1;
   transform: translate(-50%, -50%) rotate(90deg);
-  -webkit-mask-image: radial-gradient(ellipse 92% 90% at center, #000 42%, rgb(0 0 0 / 56%) 72%, transparent 100%);
-  mask-image: radial-gradient(ellipse 92% 90% at center, #000 42%, rgb(0 0 0 / 56%) 72%, transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  mask-composite: intersect;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
 }
 
 .kt-hero-copy {
