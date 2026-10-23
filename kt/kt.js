@@ -91,8 +91,8 @@
     if (!(iconLink instanceof HTMLLinkElement)) return;
 
     const gifUrl = iconLink.href;
-    const sourceGif = new Image();
-    sourceGif.decoding = "async";
+    const sprite = new Image();
+    sprite.decoding = "async";
     const canvas = document.createElement("canvas");
     canvas.width = 32;
     canvas.height = 32;
@@ -100,37 +100,44 @@
     if (!context) return;
 
     context.imageSmoothingEnabled = false;
+    const frameSize = canvas.width;
+    let frameIcons = [];
+    let frameIndex = 0;
     let interval = 0;
 
-    function captureCurrentGifFrame() {
-      const scale = Math.min(canvas.width / sourceGif.naturalWidth, canvas.height / sourceGif.naturalHeight);
-      const width = Math.round(sourceGif.naturalWidth * scale);
-      const height = Math.round(sourceGif.naturalHeight * scale);
-      const x = Math.round((canvas.width - width) / 2);
-      const y = Math.round((canvas.height - height) / 2);
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(sourceGif, 0, 0, sourceGif.naturalWidth, sourceGif.naturalHeight, x, y, width, height);
+    function showFaviconFrame(index) {
+      frameIndex = index % frameIcons.length;
       iconLink.type = "image/png";
-      iconLink.href = canvas.toDataURL("image/png");
+      iconLink.href = frameIcons[frameIndex];
     }
 
     function syncFaviconMotion() {
-      if (!sourceGif.naturalWidth || !sourceGif.naturalHeight) return;
+      if (!frameIcons.length) return;
       window.clearInterval(interval);
       interval = 0;
-      captureCurrentGifFrame();
+      showFaviconFrame(0);
       if (motionPreference.matches) return;
-      interval = window.setInterval(captureCurrentGifFrame, 90);
+      interval = window.setInterval(() => {
+        showFaviconFrame((frameIndex + 1) % frameIcons.length);
+      }, 90);
     }
 
-    sourceGif.addEventListener("load", () => {
+    sprite.addEventListener("load", () => {
+      const frameCount = Math.floor(sprite.naturalWidth / frameSize);
+      if (sprite.naturalHeight !== frameSize || frameCount < 2 || sprite.naturalWidth % frameSize !== 0) return;
+
+      frameIcons = Array.from({ length: frameCount }, (_, index) => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(sprite, index * frameSize, 0, frameSize, frameSize, 0, 0, frameSize, frameSize);
+        return canvas.toDataURL("image/png");
+      });
       syncFaviconMotion();
     }, { once: true });
-    sourceGif.addEventListener("error", () => {
+    sprite.addEventListener("error", () => {
       iconLink.type = "image/gif";
       iconLink.href = gifUrl;
     }, { once: true });
-    sourceGif.src = "/kt/assets/transgender-favicon.gif?v=transgender-favicon-transparent-20261023-v3";
+    sprite.src = "/kt/assets/transgender-favicon-sprite.png?v=transgender-favicon-sprite-transparent-20261023-v1";
     motionPreference.addEventListener("change", syncFaviconMotion);
     window.addEventListener("pagehide", () => window.clearInterval(interval), { once: true });
   }
