@@ -16,6 +16,46 @@
     const descriptionInput = panel.querySelector("#kt-webring-plain-text");
     const previewDescription = panel.querySelector("[data-kt-panel-description-preview]");
 
+    const badgeImageLink = panel.querySelector("#kt-panel-badge-image-link");
+    const badgeImage = panel.querySelector("#kt-panel-badge-image");
+    const badgeStatus = panel.querySelector("[data-kt-badge-status]");
+    const previousBadge = panel.querySelector("[data-kt-badge-previous]");
+    const nextBadge = panel.querySelector("[data-kt-badge-next]");
+
+    if (badgeImageLink && badgeImage instanceof HTMLImageElement && badgeStatus && previousBadge instanceof HTMLButtonElement && nextBadge instanceof HTMLButtonElement) {
+      const badgeOptions = [
+        {
+          src: "/kt/assets/KT-LOGO.gif",
+          label: "Transparent",
+          alt: "Animated KickassTransfems logo with a transparent background",
+          linkLabel: "Open the transparent KickassTransfems badge GIF",
+        },
+        {
+          src: "/kt/assets/KT-LOGO-trans-flag.gif",
+          label: "Trans flag background",
+          alt: "Animated KickassTransfems logo over a moving transgender pride flag",
+          linkLabel: "Open the KickassTransfems badge GIF over the trans flag",
+        },
+      ];
+      let badgeIndex = 0;
+
+      function selectBadge(index) {
+        badgeIndex = Math.max(0, Math.min(badgeOptions.length - 1, index));
+        const option = badgeOptions[badgeIndex];
+        badgeImage.src = option.src;
+        badgeImage.alt = option.alt;
+        badgeImageLink.href = option.src;
+        badgeImageLink.setAttribute("aria-label", option.linkLabel);
+        badgeStatus.textContent = `${option.label} · ${badgeIndex + 1} / ${badgeOptions.length}`;
+        previousBadge.disabled = badgeIndex === 0;
+        nextBadge.disabled = badgeIndex === badgeOptions.length - 1;
+      }
+
+      previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1));
+      nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1));
+      selectBadge(0);
+    }
+
     if (descriptionInput instanceof HTMLInputElement && previewDescription) {
       const syncPanelDescription = () => {
         previewDescription.textContent = descriptionInput.value;
