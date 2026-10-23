@@ -1373,15 +1373,9 @@ function platformIcon(name) {
     twitter: "/zzz_assets/redirect-logos/_originals/twitter-lineboil-two-lobe-v3-pre-broad-grain-v4.gif",
     bsky: "/zzz_assets/redirect-logos/_originals/bsky-independent-140ms-v3-pre-broad-grain-20260930.gif",
   }[name];
-  const logoVersion = name === "discord"
-    ? "lineboil-broad-grain-v4"
-    : name === "twitter"
-      ? "lineboil-broad-grain-v5"
-      : name === "bsky"
-        ? "lineboil-broad-grain-v7"
-        : name === "altstream"
-          ? "fox-black-ink-scattered-v3"
-        : "lineboil-independent-140ms-v3";
+  const logoVersion = name === "altstream"
+    ? "fox-black-ink-scattered-v3"
+    : "lineboil-independent-140ms-v3";
   const img = el("img", {
     className: `mini-logo mini-logo-${name}`,
     src: fineGrainLogo || `/zzz_assets/redirect-logos/${name}.gif?v=${logoVersion}`,
