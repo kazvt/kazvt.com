@@ -2885,6 +2885,7 @@ function initializeSiteLoadingScreen() {
       overflow: auto;
       color: #282334;
       font: 14px "04b_30", Tahoma, sans-serif;
+      font-synthesis: none;
       background-color: #fceaf3;
       background-image:
         linear-gradient(90deg, transparent 0 23px, rgb(87 202 239 / 15%) 23px 24px),
@@ -2904,7 +2905,11 @@ function initializeSiteLoadingScreen() {
       box-shadow: 8px 8px 0 rgb(65 43 71 / 22%), 0 0 0 3px #fff;
       font-family: "04b_30", Tahoma, sans-serif;
     }
-    .loading-window, .loading-window * { font-family: "04b_30", Tahoma, sans-serif; }
+    .loading-window, .loading-window * {
+      font-family: "04b_30", Tahoma, sans-serif;
+      font-weight: 400;
+      font-synthesis: none;
+    }
     .title-bar { min-height: 32px; }
     .title-bar-text { display: flex; align-items: center; gap: 8px; }
     .window-icon {
