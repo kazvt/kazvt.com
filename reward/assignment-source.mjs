@@ -18,12 +18,35 @@ export async function fetchAssignmentRegistry({
   fetchImpl = globalThis.fetch,
   hostname = globalThis.location?.hostname ?? "",
   origin = globalThis.location?.origin ?? "https://kazvt.com",
-  cacheBust = Date.now()
+  cacheBust = Date.now(),
+  expectedLinkId = ""
 } = {}) {
   if (typeof fetchImpl !== "function") throw new TypeError("Fetch is not available.");
 
+  const sources = assignmentRegistrySources({ hostname, origin, cacheBust });
+  if (expectedLinkId && sources.length > 1) {
+    // A successful GitHub raw response can still be an older CDN snapshot just
+    // after the issuer has pushed a new reward. Check both public copies at the
+    // same time and prefer the one that actually contains this link ID.
+    const results = await Promise.allSettled(sources.map(async url => {
+      const response = await fetchImpl(url, { cache: "no-store", credentials: "omit" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }));
+    const registries = results
+      .filter(result => result.status === "fulfilled")
+      .map(result => result.value);
+    const matching = registries.find(registry => Array.isArray(registry?.assignments) &&
+      registry.assignments.some(assignment => assignment?.linkId === expectedLinkId));
+    if (matching) return matching;
+    if (registries.length) return registries[0];
+
+    const lastError = [...results].reverse().find(result => result.status === "rejected")?.reason;
+    throw new Error("The award assignment registry could not be loaded.", { cause: lastError });
+  }
+
   let lastError;
-  for (const url of assignmentRegistrySources({ hostname, origin, cacheBust })) {
+  for (const url of sources) {
     try {
       const response = await fetchImpl(url, { cache: "no-store", credentials: "omit" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
