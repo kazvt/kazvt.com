@@ -18,11 +18,14 @@
 
     const badgeImageLink = panel.querySelector("#kt-panel-badge-image-link");
     const badgeImage = panel.querySelector("#kt-panel-badge-image");
+    const badgePicker = panel.querySelector(".kt-kick-panel-mock__badge-picker");
+    const badgeLoading = panel.querySelector("[data-kt-badge-loading]");
+    const badgeError = panel.querySelector("[data-kt-badge-error]");
     const badgeStatus = panel.querySelector("[data-kt-badge-status]");
     const previousBadge = panel.querySelector("[data-kt-badge-previous]");
     const nextBadge = panel.querySelector("[data-kt-badge-next]");
 
-    if (badgeImageLink && badgeImage instanceof HTMLImageElement && badgeStatus && previousBadge instanceof HTMLButtonElement && nextBadge instanceof HTMLButtonElement) {
+    if (badgeImageLink && badgeImage instanceof HTMLImageElement && badgePicker && badgeLoading && badgeError && badgeStatus && previousBadge instanceof HTMLButtonElement && nextBadge instanceof HTMLButtonElement) {
       const badgeOptions = [
         {
           src: "/kt/assets/KT-LOGO.gif",
@@ -38,18 +41,106 @@
         },
       ];
       let badgeIndex = 0;
+      let badgeRequest = 0;
+      const badgePreloads = new Map();
+
+      function preloadBadge(option) {
+        if (badgePreloads.has(option.src)) return badgePreloads.get(option.src);
+
+        const image = new Image();
+        image.decoding = "async";
+        if ("fetchPriority" in image) image.fetchPriority = "low";
+
+        const load = typeof image.decode === "function"
+          ? new Promise((resolve, reject) => {
+              image.src = option.src;
+              image.decode().then(resolve, reject);
+            })
+          : new Promise((resolve, reject) => {
+              const finish = () => {
+                image.removeEventListener("load", onLoad);
+                image.removeEventListener("error", onError);
+              };
+              const onLoad = () => {
+                finish();
+                image.naturalWidth > 0 ? resolve() : reject(new Error("Badge image has no decoded dimensions"));
+              };
+              const onError = () => {
+                finish();
+                reject(new Error("Badge image failed to load"));
+              };
+              image.addEventListener("load", onLoad);
+              image.addEventListener("error", onError);
+              image.src = option.src;
+              if (image.complete) onLoad();
+            });
+
+        const trackedLoad = load.catch((error) => {
+          badgePreloads.delete(option.src);
+          throw error;
+        });
+        badgePreloads.set(option.src, trackedLoad);
+        return trackedLoad;
+      }
+
+      function decodeDisplayedBadge() {
+        if (typeof badgeImage.decode === "function") return badgeImage.decode();
+        if (badgeImage.complete) {
+          return badgeImage.naturalWidth > 0
+            ? Promise.resolve()
+            : Promise.reject(new Error("Badge image has no decoded dimensions"));
+        }
+        return new Promise((resolve, reject) => {
+          const finish = () => {
+            badgeImage.removeEventListener("load", onLoad);
+            badgeImage.removeEventListener("error", onError);
+          };
+          const onLoad = () => {
+            finish();
+            badgeImage.naturalWidth > 0 ? resolve() : reject(new Error("Badge image has no decoded dimensions"));
+          };
+          const onError = () => {
+            finish();
+            reject(new Error("Badge image failed to load"));
+          };
+          badgeImage.addEventListener("load", onLoad);
+          badgeImage.addEventListener("error", onError);
+        });
+      }
 
       function selectBadge(index, activatedArrow = null) {
         const shouldRestoreArrowFocus = activatedArrow && document.activeElement === activatedArrow;
         badgeIndex = Math.max(0, Math.min(badgeOptions.length - 1, index));
         const option = badgeOptions[badgeIndex];
-        badgeImage.src = option.src;
+        const request = ++badgeRequest;
         badgeImage.alt = option.alt;
         badgeImageLink.href = option.src;
         badgeImageLink.setAttribute("aria-label", option.linkLabel);
-        badgeStatus.textContent = `${option.label} · ${badgeIndex + 1} / ${badgeOptions.length}`;
+        badgeStatus.textContent = `Loading ${option.label.toLowerCase()} badge · ${badgeIndex + 1} / ${badgeOptions.length}`;
         previousBadge.disabled = badgeIndex === 0;
         nextBadge.disabled = badgeIndex === badgeOptions.length - 1;
+        badgePicker.dataset.loading = "true";
+        delete badgePicker.dataset.error;
+        badgeLoading.hidden = false;
+        badgeError.hidden = true;
+
+        preloadBadge(option).then(() => {
+          if (request !== badgeRequest) return;
+          badgeImage.src = option.src;
+          return decodeDisplayedBadge();
+        }).then(() => {
+          if (request !== badgeRequest) return;
+          delete badgePicker.dataset.loading;
+          badgeLoading.hidden = true;
+          badgeStatus.textContent = `${option.label} · ${badgeIndex + 1} / ${badgeOptions.length}`;
+        }).catch(() => {
+          if (request !== badgeRequest) return;
+          delete badgePicker.dataset.loading;
+          badgePicker.dataset.error = "true";
+          badgeLoading.hidden = true;
+          badgeError.hidden = false;
+          badgeStatus.textContent = `Couldn’t load the ${option.label.toLowerCase()} badge preview. Go back and try again.`;
+        });
 
         if (shouldRestoreArrowFocus && activatedArrow.disabled) {
           const remainingArrow = badgeIndex === 0 ? nextBadge : previousBadge;
@@ -59,7 +150,9 @@
 
       previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1, previousBadge));
       nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1, nextBadge));
-      selectBadge(0);
+      // Start the optional 7 MB variant early at low priority, without blocking
+      // the page's initial render or replacing the visible badge before decode.
+      void preloadBadge(badgeOptions[1]).catch(() => {});
     }
 
     if (descriptionInput instanceof HTMLInputElement && previewDescription) {

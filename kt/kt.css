@@ -1056,6 +1056,47 @@ body[data-page="kt"] .kt-member-badge--admin {
   filter: drop-shadow(0 5px 7px rgb(0 0 0 / 45%));
 }
 
+.kt-kick-panel-mock__badge-picker[data-loading="true"] .kt-kick-panel-mock__image img,
+.kt-kick-panel-mock__badge-picker[data-error="true"] .kt-kick-panel-mock__image img {
+  visibility: hidden;
+}
+
+.kt-kick-panel-mock__badge-loading,
+.kt-kick-panel-mock__badge-error {
+  position: absolute;
+  z-index: 1;
+  inset: 1px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgb(13 17 14 / 88%);
+  color: #f4f5f4;
+  font: 700 13px/1.35 Arial, Helvetica, sans-serif;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.kt-kick-panel-mock__badge-loading[hidden],
+.kt-kick-panel-mock__badge-error[hidden] {
+  display: none !important;
+}
+
+.kt-kick-panel-mock__badge-spinner {
+  width: 25px;
+  height: 25px;
+  border: 3px solid rgb(255 255 255 / 38%);
+  border-top-color: var(--kt-kick-green);
+  border-right-color: var(--kt-blue);
+  border-radius: 50%;
+  animation: kt-badge-spinner 700ms linear infinite;
+}
+
+@keyframes kt-badge-spinner {
+  to { transform: rotate(1turn); }
+}
+
 .kt-kick-panel-mock__badge-arrow {
   position: absolute;
   z-index: 2;
@@ -1134,6 +1175,10 @@ body[data-page="kt"] .kt-member-badge--admin {
   .kt-kick-panel-mock__badge-arrow,
   .kt-kick-panel-mock__badge-status {
     transition: none;
+  }
+
+  .kt-kick-panel-mock__badge-spinner {
+    animation: none;
   }
 }
 
