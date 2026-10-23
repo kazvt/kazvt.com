@@ -273,9 +273,9 @@ body[data-page="kt"] summary:focus-visible {
   width: 8px;
   height: 8px;
   flex: 0 0 8px;
-  border: 1.5px solid #000;
+  border: 1.5px solid #888187;
   border-radius: 50%;
-  background: var(--kt-pink);
+  background: transparent;
   content: "";
 }
 
@@ -305,8 +305,9 @@ body[data-page="kt"] summary:focus-visible {
   display: block;
 }
 
-.kt-music-toggle[data-muted="true"] .kt-music-toggle__state::before {
-  background: var(--kt-blue);
+.kt-music-toggle[data-audio-playing="true"] .kt-music-toggle__state::before {
+  border-color: #000;
+  background: var(--kt-pink);
 }
 
 .kt-music-toggle:hover {
@@ -364,14 +365,14 @@ body[data-page="kt"] summary:focus-visible {
   opacity: 1;
   transform: none;
   -webkit-mask-image:
-    linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+    linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
   -webkit-mask-composite: source-in;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
   mask-image:
-    linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+    linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
   mask-composite: intersect;
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
