@@ -298,8 +298,8 @@
     else void startMusic();
   });
 
-  document.addEventListener("kazvt:i18nready", setButtonState);
-  document.addEventListener("kazvt:languagechange", setButtonState);
+  window.addEventListener("kazvt:i18nready", setButtonState);
+  window.addEventListener("kazvt:languagechange", setButtonState);
 
   function unlockFromInteraction(event) {
     if (muted || event.target?.closest?.("[data-kt-music-toggle]")) return;
