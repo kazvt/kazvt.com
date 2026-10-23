@@ -11,7 +11,7 @@
     }
 
     .heart-frame,
-    .dot-frame { animation-timing-function: ease-in-out; }
+    .dot-frame { animation-timing-function: steps(1, end); }
 
     .big-one { animation-name: big-one; }
     .big-two { animation-name: big-two; }
@@ -27,7 +27,11 @@
       transform-box: fill-box;
       transform-origin: center;
     }
-    .pink-dot { animation-name: pink-dot; }
+    .pink-dot,
+    .blue-dot {
+      animation-name: pink-dot;
+      animation-delay: -1s;
+    }
     .blue-dot { animation-name: blue-dot; }
 
     @keyframes big-one {
