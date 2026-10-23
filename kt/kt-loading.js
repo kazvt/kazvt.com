@@ -58,12 +58,10 @@ function initializeKtLoadingScreen() {
     }
     :host(.is-exiting) { opacity: 0; }
     *, *::before, *::after { box-sizing: border-box; }
+    /* Keep XP.css's native .window frame, bevel, and rounded top corners. */
     .loading-window {
       width: min(640px, calc(100vw - 36px));
       margin: auto;
-      border: 2px solid #302638;
-      border-radius: 0;
-      box-shadow: 8px 8px 0 rgb(65 43 71 / 22%), 0 0 0 3px #fff;
       font-family: "04b_30", Tahoma, sans-serif;
     }
     .loading-window.is-minimized { width: min(320px, calc(100vw - 36px)); }
