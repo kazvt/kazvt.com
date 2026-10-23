@@ -43,7 +43,6 @@
 .kt-recommendation-link:focus-visible {
   background: var(--kt-lilac);
   box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink);
-  transform: translate(2px, 2px) rotate(-.5deg);
 }
 
 .kt-recommendation-copy {
