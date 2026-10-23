@@ -41,12 +41,16 @@
     return window.KazvtI18n?.t?.(key) || fallback;
   }
 
+  function syncAudioSignal() {
+    button.dataset.audioPlaying = String(!muted && playing && context?.state === "running");
+  }
+
   function setButtonState() {
     const action = muted
       ? localizedMessage("kt.music_unmute", "UNMUTE")
       : localizedMessage("kt.music_mute", "MUTE");
     const state = muted
-      ? localizedMessage("kt.music_state_muted", "SOUND MUTED")
+      ? localizedMessage("kt.music_state_muted", "SOUND OFF")
       : localizedMessage("kt.music_state_on", "SOUND ON");
     const accessibleAction = muted
       ? localizedMessage("kt.music_unmute_aria", "Unmute background music")
@@ -55,6 +59,7 @@
     if (buttonLabel) buttonLabel.textContent = action;
     if (buttonStateLabel) buttonStateLabel.textContent = state;
     button.dataset.muted = String(muted);
+    syncAudioSignal();
     button.setAttribute("aria-label", accessibleAction);
     button.title = accessibleAction;
   }
@@ -162,6 +167,7 @@
 
     try {
       context = new AudioContextClass({ latencyHint: "playback" });
+      context.addEventListener("statechange", syncAudioSignal);
       const filter = context.createBiquadFilter();
       filter.type = "lowpass";
       filter.frequency.value = 1650;
@@ -232,6 +238,7 @@
     master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
     master.gain.linearRampToValueAtTime(0.25, now + fadeSeconds);
     playing = true;
+    syncAudioSignal();
   }
 
   async function startMusic() {
@@ -255,9 +262,11 @@
     if (!context || !master) return;
     if (!playing) {
       if (context.state === "running") context.suspend().catch(() => {});
+      syncAudioSignal();
       return;
     }
     playing = false;
+    syncAudioSignal();
     const stopGeneration = ++generation;
     const now = context.currentTime;
     master.gain.cancelScheduledValues(now);
