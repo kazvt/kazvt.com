@@ -1072,6 +1072,12 @@ body[data-page="kt"] .kt-member-badge--admin {
   pointer-events: auto;
 }
 
+.kt-kick-panel-mock__badge-picker:hover .kt-kick-panel-mock__badge-arrow:disabled,
+.kt-kick-panel-mock__badge-picker:focus-within .kt-kick-panel-mock__badge-arrow:disabled {
+  opacity: .52;
+  pointer-events: none;
+}
+
 .kt-kick-panel-mock__badge-arrow:hover:not(:disabled),
 .kt-kick-panel-mock__badge-arrow:focus-visible:not(:disabled) {
   background: var(--kt-blue);
