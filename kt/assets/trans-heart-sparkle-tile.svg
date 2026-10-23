@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112" fill="none">
   <style>
-    .tile-motion {
+    .tile-motion,
+    .sparkle-frame {
       animation-duration: 4s;
       animation-iteration-count: infinite;
     }
