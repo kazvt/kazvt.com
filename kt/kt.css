@@ -754,7 +754,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 .kt-member-grid.has-online-member .kt-member[data-live-state="offline"] .kt-member-avatar {
-  filter: grayscale(50%);
+  filter: grayscale(80%);
 }
 
 .kt-member-copy {

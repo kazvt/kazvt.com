@@ -73,7 +73,7 @@
 }
 
 .kt-recommendation-link[data-live-state="offline"] .kt-recommendation-avatar {
-  filter: grayscale(50%);
+  filter: grayscale(80%);
 }
 
 .kt-recommendation-avatar--fallback {
