@@ -701,8 +701,8 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   color: #66535e;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-synthesis: weight;
-  font-size: .64rem;
-  font-weight: 600;
+  font-size: calc(.64rem + 2px);
+  font-weight: 700;
   line-height: 1.2;
   transform: rotate(2deg) translateZ(14px);
 }
@@ -803,6 +803,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-webring-heading .kt-eyebrow {
   margin: 0 0 3px;
   color: #305168;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
 
 .kt-webring-heading h2 {
@@ -818,6 +819,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   border: 3px solid var(--kt-ink);
   background: var(--kt-pink);
   box-shadow: 4px 4px 0 var(--kt-ink);
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: .78rem;
   font-weight: 400;
   letter-spacing: .06em;
@@ -1325,7 +1327,7 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) 74px 18px; gap: 8px; padding-inline: 8px; }
   .kt-member-avatar { width: 43px; height: 43px; }
   .kt-member-badge { max-width: 74px; font-size: .55rem; }
-  .kt-member-tag { max-width: 74px; font-size: .55rem; text-align: center; }
+  .kt-member-tag { max-width: 74px; font-size: calc(.55rem + 2px); text-align: center; }
   .kt-footer { align-items: start; flex-direction: column; }
 }
 
