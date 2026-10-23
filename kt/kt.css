@@ -29,7 +29,7 @@
   --banner-text: var(--kt-ink);
   --shadow: rgb(43 32 40 / 28%);
   --wallpaper-image:
-    url("/kt/assets/trans-heart-tile.svg"),
+    url("/kt/assets/trans-heart-sparkle-tile.svg"),
     linear-gradient(135deg, #ffe7ef, #f5a9b8 52%, #dff5fc);
   --wallpaper-size: 112px 112px, auto;
 }

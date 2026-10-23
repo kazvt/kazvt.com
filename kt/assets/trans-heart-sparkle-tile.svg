@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112" fill="none">
+  <style>
+    .sparkle-frame {
+      animation-duration: 8s;
+      animation-iteration-count: infinite;
+      animation-timing-function: steps(1, end);
+    }
+
+    .big-one { animation-name: big-one; }
+    .big-two { animation-name: big-two; }
+    .small-one { animation-name: small-one; }
+    .small-two { animation-name: small-two; }
+
+    @keyframes big-one {
+      0%, 49.999% { opacity: 1; }
+      50%, 99.999% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes big-two {
+      0%, 49.999% { opacity: 0; }
+      50%, 99.999% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes small-one {
+      0%, 24.999% { opacity: 0; }
+      25%, 74.999% { opacity: 1; }
+      75%, 100% { opacity: 0; }
+    }
+
+    @keyframes small-two {
+      0%, 24.999% { opacity: 1; }
+      25%, 74.999% { opacity: 0; }
+      75%, 100% { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sparkle-frame { animation: none !important; }
+    }
+  </style>
+
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 37c-5-7-16 0-10 8l12 12 12-12c6-8-5-15-12-8l-1 1-1-1Z" fill="#f5a9b8" stroke="#bd718b" stroke-width="2"/>
+    <path d="M82 88c-4-6-13 0-8 7l10 10 10-10c5-7-4-13-10-7l-1 1-1-1Z" fill="#5bcefa" stroke="#4a9fbc" stroke-width="2"/>
+
+    <path class="sparkle-frame big-one" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <path class="sparkle-frame big-two" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" transform="rotate(45 83 27)" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+
+    <path class="sparkle-frame small-one" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <path class="sparkle-frame small-two" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" transform="rotate(45 38 88)" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+
+    <circle cx="93" cy="52" r="2.5" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <circle cx="53" cy="27" r="2" fill="#5bcefa" stroke="#4a9fbc" stroke-width="1.5"/>
+    <circle cx="19" cy="91" r="2" fill="#f5a9b8" stroke="#bd718b" stroke-width="1.5"/>
+  </g>
+</svg>
