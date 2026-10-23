@@ -387,7 +387,7 @@ body[data-page="kt"] summary:focus-visible {
   isolation: isolate;
   display: grid;
   min-height: 91px;
-  grid-template-columns: 28px 56px minmax(0, 1fr) auto 20px;
+  grid-template-columns: 28px 56px minmax(0, 1fr) 98px 20px;
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
@@ -506,7 +506,8 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 .kt-member-tag {
-  justify-self: start;
+  justify-self: end;
+  max-width: 98px;
   padding: 1px 5px;
   border: 1px dashed rgb(43 32 40 / 42%);
   background: rgb(255 255 255 / 42%);
@@ -569,6 +570,7 @@ body[data-page="kt"] summary:focus-visible {
 
 .kt-member-badge {
   align-self: center;
+  justify-self: end;
   max-width: 98px;
   padding: 4px 6px;
   border: 2px solid var(--kt-ink);
@@ -733,9 +735,10 @@ body[data-page="kt"] summary:focus-visible {
   .kt-topbar-label { font-size: .68rem; }
   .kt-topbar-label { text-align: center; }
   .kt-roster { padding-inline: 15px; }
-  .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) auto 18px; gap: 8px; padding-inline: 8px; }
+  .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) 74px 18px; gap: 8px; padding-inline: 8px; }
   .kt-member-avatar { width: 43px; height: 43px; }
   .kt-member-badge { max-width: 74px; font-size: .55rem; }
+  .kt-member-tag { max-width: 74px; font-size: .55rem; text-align: center; }
   .kt-footer { align-items: start; flex-direction: column; }
 }
 
