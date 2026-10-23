@@ -485,9 +485,13 @@
       indicator.className = "kt-live-indicator";
       indicator.hidden = true;
       indicator.setAttribute("role", "img");
+      const scan = document.createElement("span");
+      scan.className = "kt-live-scan";
+      scan.setAttribute("aria-hidden", "true");
+      card.prepend(scan);
       const name = title.querySelector(".kt-member-name, .kt-recommendation-name");
       title.insertBefore(indicator, name || title.firstChild);
-      return [{ card, slug, indicator, tooltipLabel }];
+      return [{ card, slug, indicator, scan, tooltipLabel }];
     });
 
     if (!entries.length) return;
