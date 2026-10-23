@@ -489,9 +489,17 @@
       scan.className = "kt-live-scan";
       scan.setAttribute("aria-hidden", "true");
       card.prepend(scan);
+      const liveSticker = card.matches(".kt-member") ? document.createElement("img") : null;
+      if (liveSticker) {
+        liveSticker.className = "kt-live-sticker";
+        liveSticker.src = "/kt/assets/kt-live-sticker.gif";
+        liveSticker.alt = "";
+        liveSticker.setAttribute("aria-hidden", "true");
+        liveSticker.decoding = "async";
+      }
       const name = title.querySelector(".kt-member-name, .kt-recommendation-name");
       title.insertBefore(indicator, name || title.firstChild);
-      return [{ card, slug, indicator, scan, tooltipLabel }];
+      return [{ card, slug, indicator, scan, tooltipLabel, liveSticker }];
     });
 
     if (!entries.length) return;
@@ -504,7 +512,7 @@
     let refreshTimer = 0;
 
     function setState(entry, state) {
-      const { card, indicator, slug, tooltipLabel } = entry;
+      const { card, indicator, slug, tooltipLabel, liveSticker } = entry;
       card.dataset.liveState = state;
       const tooltip = tooltipLabel
         ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
@@ -514,6 +522,7 @@
 
       if (state !== "live") {
         indicator.hidden = true;
+        liveSticker?.remove();
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
         indicator.removeAttribute("title");
@@ -522,6 +531,7 @@
 
       indicator.hidden = false;
       indicator.dataset.state = state;
+      if (liveSticker && !liveSticker.isConnected) card.append(liveSticker);
       const displayName = card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || slug;
       const i18n = window.KazvtI18n;
