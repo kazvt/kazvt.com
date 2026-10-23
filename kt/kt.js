@@ -351,22 +351,56 @@
       const count = desktopPreference.matches && !motionPreference.matches && railHeight > 0
         ? Math.ceil(railHeight / approximateSlotSpacing) + 1
         : 0;
-      if (count === renderedCount) return;
+      if (count === renderedCount) {
+        rail.querySelectorAll(".kt-pride-gif-slot--scan").forEach((slot) => {
+          const image = slot.querySelector(".kt-pride-gif-art");
+          if (!(image instanceof HTMLImageElement)) return;
+          setScanDistance(slot, image);
+        });
+        return;
+      }
       renderedCount = count;
 
       const fragment = document.createDocumentFragment();
       for (let index = 0; index < count; index += 1) {
+        const slot = document.createElement("span");
+        slot.className = `kt-pride-gif-slot ${index % 2 === 0 ? "kt-pride-gif--left" : "kt-pride-gif--right"}`;
+
         const image = document.createElement("img");
-        image.className = index % 2 === 0 ? "kt-pride-gif--left" : "kt-pride-gif--right";
-        image.src = shuffledPool[index % shuffledPool.length];
+        image.className = "kt-pride-gif-art";
         image.width = 200;
         image.height = 200;
         image.alt = "";
         image.loading = "lazy";
         image.decoding = "async";
-        fragment.append(image);
+        image.addEventListener("load", () => setScanDistance(slot, image), { once: true });
+        slot.append(image);
+        fragment.append(slot);
+        image.src = shuffledPool[index % shuffledPool.length];
       }
       rail.replaceChildren(fragment);
+    }
+
+    function setScanDistance(slot, image) {
+      if (!image.naturalWidth || !image.naturalHeight) return;
+      const frameWidth = slot.clientWidth;
+      const frameHeight = slot.clientHeight;
+      if (!frameWidth || !frameHeight) return;
+
+      const naturalRatio = image.naturalWidth / image.naturalHeight;
+      const renderedWidth = frameHeight * naturalRatio;
+      const overflow = renderedWidth - frameWidth;
+      if (overflow <= 2) {
+        slot.classList.remove("kt-pride-gif-slot--scan");
+        image.style.removeProperty("--kt-pride-gif-pan-end");
+        image.style.removeProperty("--kt-pride-gif-scan-duration");
+        return;
+      }
+
+      const scanDuration = Math.max(5, Math.min(9, 4.5 + (overflow / frameWidth) * 1.4));
+      image.style.setProperty("--kt-pride-gif-pan-end", `${-overflow}px`);
+      image.style.setProperty("--kt-pride-gif-scan-duration", `${scanDuration.toFixed(1)}s`);
+      slot.classList.add("kt-pride-gif-slot--scan");
     }
 
     renderRail();
