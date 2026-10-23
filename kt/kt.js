@@ -371,16 +371,16 @@
   }
 
   function initializeTransFlagHover() {
-    const selector = ".kt-member, .kt-recommendation-link";
+    const selector = ".kt-member";
     const directions = [
-      { angle: "90deg", x: "60px", y: "0px", tile: "240px" },
-      { angle: "90deg", x: "-60px", y: "0px", tile: "240px" },
-      { angle: "0deg", x: "0px", y: "60px", tile: "240px" },
-      { angle: "0deg", x: "0px", y: "-60px", tile: "240px" },
-      { angle: "225deg", x: "-42.4264px", y: "42.4264px", tile: "509.1169px" },
-      { angle: "135deg", x: "42.4264px", y: "42.4264px", tile: "509.1169px" },
-      { angle: "45deg", x: "42.4264px", y: "-42.4264px", tile: "509.1169px" },
-      { angle: "315deg", x: "-42.4264px", y: "-42.4264px", tile: "509.1169px" },
+      { angle: "90deg", x: "48px", y: "0px", tile: "240px" },
+      { angle: "90deg", x: "-48px", y: "0px", tile: "240px" },
+      { angle: "0deg", x: "0px", y: "48px", tile: "240px" },
+      { angle: "0deg", x: "0px", y: "-48px", tile: "240px" },
+      { angle: "225deg", x: "-33.9411px", y: "33.9411px", tile: "407.2935px" },
+      { angle: "135deg", x: "33.9411px", y: "33.9411px", tile: "407.2935px" },
+      { angle: "45deg", x: "33.9411px", y: "-33.9411px", tile: "407.2935px" },
+      { angle: "315deg", x: "-33.9411px", y: "-33.9411px", tile: "407.2935px" },
     ];
 
     function randomizeDirection(card) {
@@ -450,7 +450,9 @@
         ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
         : "";
       if (tooltip) card.title = tooltip;
-      if (state === "offline") {
+      else card.removeAttribute("title");
+
+      if (state !== "live") {
         indicator.hidden = true;
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
@@ -460,27 +462,16 @@
 
       indicator.hidden = false;
       indicator.dataset.state = state;
-      const translate = (key, fallback, replacements = {}) => {
-        const i18n = window.KazvtI18n;
-        return i18n?.format?.(key, replacements) || i18n?.t?.(key) || fallback;
-      };
       const displayName = card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || slug;
-      indicator.textContent = state === "live"
-        ? ""
-        : translate("kt.unknown_label", "?");
-      indicator.setAttribute(
-        "aria-label",
-        state === "live"
-          ? translate("kt.live_aria", `${displayName} is live on KICK`, { name: displayName })
-          : translate("kt.unknown_aria", `Couldn't check ${slug}'s KICK status`, { name: slug })
-      );
-      if (state === "live") {
-        if (tooltip) indicator.title = tooltip;
-        else indicator.removeAttribute("title");
-      } else {
-        indicator.title = tooltip || translate("kt.unknown_title", "KICK status unavailable");
-      }
+      const i18n = window.KazvtI18n;
+      const liveLabel = i18n?.format?.("kt.live_aria", { name: displayName })
+        || i18n?.t?.("kt.live_aria")
+        || `${displayName} is live on KICK`;
+      indicator.textContent = "";
+      indicator.setAttribute("aria-label", liveLabel);
+      if (tooltip) indicator.title = tooltip;
+      else indicator.removeAttribute("title");
     }
 
     async function checkEntry(entry) {
@@ -521,7 +512,7 @@
         }));
       } finally {
         inFlight = false;
-        scheduleRefresh(refreshInterval);
+        scheduleRefresh(Math.max(0, refreshInterval - (Date.now() - lastRefresh)));
       }
     }
 

@@ -493,8 +493,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
     var(--kt-blue) 0 12px,
     var(--kt-pink) 12px 24px,
     var(--kt-white) 24px 36px,
-    var(--kt-pink) 36px 48px,
-    var(--kt-blue) 48px 60px
+    var(--kt-pink) 36px 48px
   );
   background-size: var(--kt-hover-flag-tile, 240px) var(--kt-hover-flag-tile, 240px);
   background-repeat: repeat;
@@ -667,10 +666,6 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   background: var(--kt-live-accent);
   box-shadow: 0 0 3px 1px var(--kt-live-glow), 0 0 7px 2px var(--kt-live-glow);
   animation: kt-live-glow 1.35s ease-in-out infinite alternate;
-}
-
-.kt-live-indicator[data-state="unknown"] {
-  background: var(--kt-pink);
 }
 
 .kt-member-badge {
