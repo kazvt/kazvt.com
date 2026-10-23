@@ -1392,19 +1392,19 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
 @media (max-width: 700px) {
   .kt-frame {
     width: min(100% - 24px, 560px);
-    margin-top: 20px;
+    margin-top: calc(env(safe-area-inset-top, 0px) + 70px);
   }
 
   .kt-topbar {
-    min-height: 102px;
-    align-items: flex-start;
     flex-wrap: wrap;
-    padding: 62px 12px 9px;
+    gap: 8px;
+    padding: 9px 12px;
   }
 
   .kt-topbar-actions {
-    flex: 1 0 100%;
-    justify-content: flex-start;
+    flex: 0 1 auto;
+    justify-content: flex-end;
+    margin-left: auto;
     padding-right: 0;
   }
 
@@ -1429,9 +1429,10 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
 }
 
 @media (max-width: 430px) {
-  .kt-frame { width: calc(100% - 22px); margin-top: 12px; }
+  .kt-frame { width: calc(100% - 22px); margin-top: calc(env(safe-area-inset-top, 0px) + 70px); }
   .kt-topbar { padding-inline: 9px; }
   .kt-topbar-actions { gap: 5px; }
+  .kt-topbar-actions { flex: 1 0 100%; justify-content: flex-start; margin-left: 0; }
   .kt-home-link,
   .kt-topbar-label { font-size: .68rem; }
   .kt-music-toggle { min-width: 138px; min-height: 48px; padding-inline: 7px; }
