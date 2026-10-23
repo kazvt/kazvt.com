@@ -77,6 +77,9 @@
   initializeAnimatedFavicon();
 
   function createTransStripeCursor() {
+    const stripeColors = ["#5bcefa", "#f5a9b8", "#ffffff", "#f5a9b8", "#5bcefa"];
+    const bandWidth = 5;
+    const edgePadding = bandWidth * stripeColors.length + 4;
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     if (!context) return null;
@@ -85,29 +88,28 @@
     canvas.setAttribute("aria-hidden", "true");
     Object.assign(canvas.style, {
       position: "fixed",
-      inset: "0",
-      width: "100%",
-      height: "100%",
+      top: `${-edgePadding}px`,
+      left: `${-edgePadding}px`,
+      width: `calc(100% + ${edgePadding * 2}px)`,
+      height: `calc(100% + ${edgePadding * 2}px)`,
       pointerEvents: "none",
       zIndex: "2147483646",
     });
     document.body.append(canvas);
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let width = window.innerWidth + edgePadding * 2;
+    let height = window.innerHeight + edgePadding * 2;
     let pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     let animationFrame = 0;
     let hasPointer = false;
     const target = { x: width / 2, y: height / 2 };
     const points = Array.from({ length: 24 }, () => ({ ...target }));
-    const stripeColors = ["#5bcefa", "#f5a9b8", "#ffffff", "#f5a9b8", "#5bcefa"];
-    const bandWidth = 5;
     const followRate = 0.4;
     let lastDirection = { x: 1, y: 0 };
 
     const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      width = window.innerWidth + edgePadding * 2;
+      height = window.innerHeight + edgePadding * 2;
       pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(width * pixelRatio);
       canvas.height = Math.round(height * pixelRatio);
@@ -115,8 +117,8 @@
     };
 
     const move = (event) => {
-      target.x = event.clientX;
-      target.y = event.clientY;
+      target.x = event.clientX + edgePadding;
+      target.y = event.clientY + edgePadding;
       if (!hasPointer) {
         hasPointer = true;
         points.forEach((point) => {
@@ -197,13 +199,13 @@
 
     resize();
     window.addEventListener("resize", resize);
-    document.body.addEventListener("mousemove", move);
+    window.addEventListener("pointermove", move, { passive: true });
 
     return {
       destroy() {
         if (animationFrame) window.cancelAnimationFrame(animationFrame);
         window.removeEventListener("resize", resize);
-        document.body.removeEventListener("mousemove", move);
+        window.removeEventListener("pointermove", move);
         canvas.remove();
       },
     };
