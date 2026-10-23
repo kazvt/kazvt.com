@@ -705,6 +705,7 @@ body[data-page="kt"] summary:focus-visible {
   align-items: center;
   gap: clamp(16px, 3vw, 28px);
   padding: clamp(16px, 3vw, 28px);
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
 
 .kt-webring-badge-card {
@@ -800,7 +801,7 @@ body[data-page="kt"] summary:focus-visible {
   background: #fff;
   color: var(--kt-ink);
   cursor: copy;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: .72rem;
   text-overflow: clip;
 }
