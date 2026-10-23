@@ -61,19 +61,19 @@
     }
 
     @keyframes pink-heart {
-      0% { transform: rotate(45deg); }
+      0% { transform: rotate(20deg); }
       25% { transform: rotate(0deg); }
-      50% { transform: rotate(-45deg); }
+      50% { transform: rotate(-20deg); }
       75% { transform: rotate(0deg); }
-      100% { transform: rotate(45deg); }
+      100% { transform: rotate(20deg); }
     }
 
     @keyframes blue-heart {
-      0% { transform: rotate(-45deg); }
+      0% { transform: rotate(-20deg); }
       25% { transform: rotate(0deg); }
-      50% { transform: rotate(45deg); }
+      50% { transform: rotate(20deg); }
       75% { transform: rotate(0deg); }
-      100% { transform: rotate(-45deg); }
+      100% { transform: rotate(-20deg); }
     }
 
     @keyframes pink-dot {
