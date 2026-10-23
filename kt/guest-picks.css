@@ -26,7 +26,7 @@
 
 .kt-recommendation-link {
   --kt-live-accent: var(--kt-pink);
-  --kt-live-glow: rgb(245 169 184 / 24%);
+  --kt-live-glow: rgb(245 169 184 / 42%);
   --kt-live-halo: transparent;
   position: relative;
   isolation: isolate;
@@ -41,8 +41,8 @@
   box-shadow:
     3px 3px 0 var(--kt-blue),
     5px 5px 0 var(--kt-pink),
-    0 0 20px 6px var(--kt-live-halo),
-    0 0 34px 10px var(--kt-live-halo);
+    0 0 24px 7px var(--kt-live-halo),
+    0 0 44px 14px var(--kt-live-halo);
   color: var(--kt-ink);
   text-decoration: none;
   transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end), background-color 140ms steps(3, end);
@@ -63,8 +63,8 @@
   box-shadow:
     2px 2px 0 var(--kt-ink),
     4px 4px 0 var(--kt-pink),
-    0 0 20px 6px var(--kt-live-halo),
-    0 0 34px 10px var(--kt-live-halo);
+    0 0 24px 7px var(--kt-live-halo),
+    0 0 44px 14px var(--kt-live-halo);
 }
 
 .kt-recommendation-copy {
