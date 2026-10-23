@@ -5,6 +5,10 @@
   const touchPreference = window.matchMedia("(hover: none) and (pointer: coarse)");
   const touchOnly = () => touchPreference.matches && navigator.maxTouchPoints > 0;
   const flagVideo = document.querySelector(".kt-flag");
+  const flagMotionToggle = document.querySelector("[data-kt-flag-motion-toggle]");
+  const flagMotionIcon = flagMotionToggle?.querySelector("[data-kt-flag-motion-icon]");
+  const flagMotionLabel = flagMotionToggle?.querySelector("[data-kt-flag-motion-label]");
+  let flagPlaybackOverride = null;
   let cursorEffect = null;
 
   function initializeMemberKitCopy() {
@@ -144,15 +148,35 @@
 
   function syncFlagPlayback() {
     if (!(flagVideo instanceof HTMLVideoElement)) return;
-    if (motionPreference.matches) {
+    const shouldPause = flagPlaybackOverride === null
+      ? motionPreference.matches
+      : flagPlaybackOverride === "paused";
+
+    if (shouldPause) {
       flagVideo.pause();
-      return;
+    } else {
+      flagVideo.play().catch(() => {});
     }
-    flagVideo.play().catch(() => {});
+
+    const paused = shouldPause || flagVideo.paused;
+    flagMotionToggle?.setAttribute("data-paused", String(paused));
+    flagMotionToggle?.setAttribute("aria-label", paused ? "Play the waving flag" : "Pause the waving flag");
+    if (flagMotionIcon) flagMotionIcon.textContent = paused ? "▶" : "Ⅱ";
+    if (flagMotionLabel) flagMotionLabel.textContent = paused ? "PLAY FLAG" : "PAUSE FLAG";
   }
 
+  flagMotionToggle?.addEventListener("click", () => {
+    if (!(flagVideo instanceof HTMLVideoElement)) return;
+    flagPlaybackOverride = flagVideo.paused ? "playing" : "paused";
+    syncFlagPlayback();
+  });
+  flagVideo?.addEventListener("play", syncFlagPlayback);
+  flagVideo?.addEventListener("pause", syncFlagPlayback);
   syncFlagPlayback();
-  motionPreference.addEventListener("change", syncFlagPlayback);
+  motionPreference.addEventListener("change", () => {
+    flagPlaybackOverride = null;
+    syncFlagPlayback();
+  });
   initializeAnimatedFavicon();
 
   function createTransStripeCursor() {
