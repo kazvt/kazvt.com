@@ -385,13 +385,26 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   text-shadow: 2px 2px 0 var(--kt-pink);
 }
 
-.kt-roster-heading > p {
+.kt-roster-note {
+  display: grid;
+  gap: 5px;
+  max-width: 28rem;
+}
+
+.kt-roster-note > p {
   max-width: 24rem;
-  margin: 0 0 2px;
+  margin: 0;
   color: var(--kt-ink);
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: .94rem;
   line-height: 1.4;
+}
+
+.kt-roster-note > .kt-roster-statement {
+  padding-inline-start: 9px;
+  border-inline-start: 3px solid var(--kt-pink);
+  font-size: .78rem;
+  line-height: 1.35;
 }
 
 .kt-recommendations {
@@ -971,7 +984,7 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
 
 body[data-page="kt"] :is(
   .kt-affiliation,
-  .kt-roster-heading > p,
+  .kt-roster-note > p,
   .kt-recommendations p,
   .kt-recommendation-handle
 ) {
