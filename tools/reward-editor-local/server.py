@@ -891,9 +891,6 @@ class RewardEditorServer(ThreadingHTTPServer):
 
 
 class RewardEditorHandlerMixin:
-    server_version = "KazvtRewardEditor/1.0"
-    sys_version = ""
-
     def _expected_host(self) -> str:
         host = str(self.headers.get("Host", "")).strip()
         try:
@@ -1101,7 +1098,8 @@ class RewardEditorHandlerMixin:
 
 class Handler(RewardEditorHandlerMixin, BaseHTTPRequestHandler):
     """Standalone loopback handler and mixin-backed MSI route implementation."""
-    pass
+    server_version = "KazvtRewardEditor/1.0"
+    sys_version = ""
 
 
 def main() -> None:
