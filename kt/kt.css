@@ -72,19 +72,22 @@ body[data-page="kt"]::before {
   top: 0;
   bottom: 0;
   left: 0;
-  width: clamp(120px, 20vw, 250px);
+  width: clamp(150px, 23vw, 300px);
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(255 255 255 / 8%) 12%,
-    rgb(255 255 255 / 78%) 50%,
-    rgb(255 255 255 / 8%) 88%,
+    rgb(255 255 255 / 16%) 8%,
+    rgb(255 255 255 / 66%) 30%,
+    rgb(255 255 255 / 94%) 48%,
+    rgb(91 206 250 / 72%) 56%,
+    rgb(255 255 255 / 60%) 72%,
+    rgb(245 169 184 / 44%) 86%,
     transparent 100%
   );
   content: "";
   pointer-events: none;
-  mix-blend-mode: soft-light;
-  opacity: .82;
+  mix-blend-mode: screen;
+  opacity: .96;
   transform: translateX(-110%) skewX(-12deg);
   animation: kt-wallpaper-sweep 34s linear infinite;
 }
