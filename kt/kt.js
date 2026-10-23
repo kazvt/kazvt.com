@@ -377,10 +377,10 @@
       { angle: "90deg", x: "-48px", y: "0px", tile: "240px" },
       { angle: "0deg", x: "0px", y: "48px", tile: "240px" },
       { angle: "0deg", x: "0px", y: "-48px", tile: "240px" },
-      { angle: "225deg", x: "-33.9411px", y: "33.9411px", tile: "407.2935px" },
-      { angle: "135deg", x: "33.9411px", y: "33.9411px", tile: "407.2935px" },
-      { angle: "45deg", x: "33.9411px", y: "-33.9411px", tile: "407.2935px" },
-      { angle: "315deg", x: "-33.9411px", y: "-33.9411px", tile: "407.2935px" },
+      { angle: "225deg", x: "-33.941125497px", y: "33.941125497px", tile: "407.293505963px" },
+      { angle: "135deg", x: "33.941125497px", y: "33.941125497px", tile: "407.293505963px" },
+      { angle: "45deg", x: "33.941125497px", y: "-33.941125497px", tile: "407.293505963px" },
+      { angle: "315deg", x: "-33.941125497px", y: "-33.941125497px", tile: "407.293505963px" },
     ];
 
     function randomizeDirection(card) {
