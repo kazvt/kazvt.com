@@ -28,6 +28,8 @@
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 24%);
   --kt-live-halo: transparent;
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   min-height: 48px;
@@ -46,6 +48,32 @@
   transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end), background-color 140ms steps(3, end);
 }
 
+.kt-recommendation-link::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    var(--kt-hover-flag-angle, 90deg),
+    var(--kt-blue) 0 12px,
+    var(--kt-pink) 12px 24px,
+    var(--kt-white) 24px 36px,
+    var(--kt-pink) 36px 48px,
+    var(--kt-blue) 48px 60px
+  );
+  background-size: var(--kt-hover-flag-tile, 240px) var(--kt-hover-flag-tile, 240px);
+  background-repeat: repeat;
+  background-position: 0 0;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms linear;
+}
+
+.kt-recommendation-link > * {
+  position: relative;
+  z-index: 1;
+}
+
 .kt-recommendation-link[data-live-state="live"] {
   --kt-live-halo: var(--kt-live-glow);
 }
@@ -58,6 +86,12 @@
     4px 4px 0 var(--kt-pink),
     0 0 20px 6px var(--kt-live-halo),
     0 0 34px 10px var(--kt-live-halo);
+}
+
+.kt-recommendation-link:hover::after,
+.kt-recommendation-link:focus-visible::after {
+  opacity: 1;
+  animation: kt-trans-flag-scroll 700ms linear infinite;
 }
 
 .kt-recommendation-copy {
@@ -99,5 +133,13 @@
   .kt-recommendation-link:hover,
   .kt-recommendation-link:focus-visible {
     transform: none;
+  }
+
+  .kt-recommendation-link::after { transition: none; }
+
+  .kt-recommendation-link:hover::after,
+  .kt-recommendation-link:focus-visible::after {
+    animation: none;
+    background-position: 0 0;
   }
 }

@@ -306,6 +306,42 @@
     if (formatted) label.textContent = formatted;
   }
 
+  function initializeTransFlagHover() {
+    const selector = ".kt-member, .kt-recommendation-link";
+    const directions = [
+      { angle: "90deg", x: "60px", y: "0px", tile: "240px" },
+      { angle: "90deg", x: "-60px", y: "0px", tile: "240px" },
+      { angle: "0deg", x: "0px", y: "60px", tile: "240px" },
+      { angle: "0deg", x: "0px", y: "-60px", tile: "240px" },
+      { angle: "225deg", x: "-42.4264px", y: "42.4264px", tile: "509.1169px" },
+      { angle: "135deg", x: "42.4264px", y: "42.4264px", tile: "509.1169px" },
+      { angle: "45deg", x: "42.4264px", y: "-42.4264px", tile: "509.1169px" },
+      { angle: "315deg", x: "-42.4264px", y: "-42.4264px", tile: "509.1169px" },
+    ];
+
+    function randomizeDirection(card) {
+      const direction = directions[Math.floor(Math.random() * directions.length)];
+      card.style.setProperty("--kt-hover-flag-angle", direction.angle);
+      card.style.setProperty("--kt-hover-flag-x", direction.x);
+      card.style.setProperty("--kt-hover-flag-y", direction.y);
+      card.style.setProperty("--kt-hover-flag-tile", direction.tile);
+    }
+
+    function handleEntry(event) {
+      if (!(event.target instanceof Element)) return;
+      const card = event.target.closest(selector);
+      if (!card || (event.relatedTarget instanceof Node && card.contains(event.relatedTarget))) return;
+      randomizeDirection(card);
+    }
+
+    document.addEventListener("pointerover", handleEntry);
+    document.addEventListener("focusin", (event) => {
+      if (!(event.target instanceof Element)) return;
+      const card = event.target.closest(selector);
+      if (card && !card.matches(":hover")) randomizeDirection(card);
+    });
+  }
+
   function initializeLivePips() {
     const cards = [...document.querySelectorAll(
       ".kt-member-grid > li > .kt-member, .kt-recommendation-grid > li > .kt-recommendation-link"
@@ -451,6 +487,7 @@
   window.addEventListener("kazvt:languagechange", updateMemberCount);
 
   initializeMemberKitCopy();
+  initializeTransFlagHover();
   initializeLivePips();
 
   if (window.KazvtI18n?.ready) {
