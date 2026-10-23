@@ -1465,7 +1465,7 @@ body[data-page="kt"] .kt-member-badge--admin {
     right: auto;
     z-index: 4;
     width: 58px;
-    margin-block: 0 -36px;
+    margin-block: 0 -46px;
     transform: rotate(90deg);
   }
 }
