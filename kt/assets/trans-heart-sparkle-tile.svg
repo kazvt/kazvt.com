@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112" fill="none">
   <style>
-    .sparkle-frame {
-      animation-duration: 8s;
+    .tile-motion {
+      animation-duration: 4s;
       animation-iteration-count: infinite;
       animation-timing-function: steps(1, end);
     }
@@ -10,6 +10,18 @@
     .big-two { animation-name: big-two; }
     .small-one { animation-name: small-one; }
     .small-two { animation-name: small-two; }
+    .pink-heart {
+      animation-name: pink-heart;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .blue-heart {
+      animation-name: blue-heart;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .pink-dot { animation-name: pink-dot; }
+    .blue-dot { animation-name: blue-dot; }
 
     @keyframes big-one {
       0%, 49.999% { opacity: 1; }
@@ -35,14 +47,44 @@
       75%, 100% { opacity: 1; }
     }
 
+    @keyframes pink-heart {
+      0%, 24.999% { transform: rotate(45deg); }
+      25%, 49.999% { transform: rotate(0deg); }
+      50%, 74.999% { transform: rotate(-45deg); }
+      75%, 99.999% { transform: rotate(0deg); }
+      100% { transform: rotate(45deg); }
+    }
+
+    @keyframes blue-heart {
+      0%, 24.999% { transform: rotate(-45deg); }
+      25%, 49.999% { transform: rotate(0deg); }
+      50%, 74.999% { transform: rotate(45deg); }
+      75%, 99.999% { transform: rotate(0deg); }
+      100% { transform: rotate(-45deg); }
+    }
+
+    @keyframes pink-dot {
+      0%, 24.999% { transform: translateY(-4px); }
+      25%, 49.999% { transform: translateY(0); }
+      50%, 74.999% { transform: translateY(4px); }
+      75%, 100% { transform: translateY(0); }
+    }
+
+    @keyframes blue-dot {
+      0%, 24.999% { transform: translateY(4px); }
+      25%, 49.999% { transform: translateY(0); }
+      50%, 74.999% { transform: translateY(-4px); }
+      75%, 100% { transform: translateY(0); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .sparkle-frame { animation: none !important; }
+      .tile-motion { animation: none !important; }
     }
   </style>
 
   <g stroke-linecap="round" stroke-linejoin="round">
-    <path d="M20 37c-5-7-16 0-10 8l12 12 12-12c6-8-5-15-12-8l-1 1-1-1Z" fill="#f5a9b8" stroke="#bd718b" stroke-width="2"/>
-    <path d="M82 88c-4-6-13 0-8 7l10 10 10-10c5-7-4-13-10-7l-1 1-1-1Z" fill="#5bcefa" stroke="#4a9fbc" stroke-width="2"/>
+    <path class="tile-motion pink-heart" d="M20 37c-5-7-16 0-10 8l12 12 12-12c6-8-5-15-12-8l-1 1-1-1Z" fill="#f5a9b8" stroke="#bd718b" stroke-width="2"/>
+    <path class="tile-motion blue-heart" d="M82 88c-4-6-13 0-8 7l10 10 10-10c5-7-4-13-10-7l-1 1-1-1Z" fill="#5bcefa" stroke="#4a9fbc" stroke-width="2"/>
 
     <path class="sparkle-frame big-one" opacity="1" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
     <path class="sparkle-frame big-two" opacity="0" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" transform="rotate(45 83 27)" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
@@ -51,7 +93,7 @@
     <path class="sparkle-frame small-two" opacity="1" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" transform="rotate(45 38 88)" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
 
     <circle cx="93" cy="52" r="2.5" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
-    <circle cx="53" cy="27" r="2" fill="#5bcefa" stroke="#4a9fbc" stroke-width="1.5"/>
-    <circle cx="19" cy="91" r="2" fill="#f5a9b8" stroke="#bd718b" stroke-width="1.5"/>
+    <circle class="tile-motion blue-dot" cx="53" cy="27" r="2" fill="#5bcefa" stroke="#4a9fbc" stroke-width="1.5"/>
+    <circle class="tile-motion pink-dot" cx="19" cy="91" r="2" fill="#f5a9b8" stroke="#bd718b" stroke-width="1.5"/>
   </g>
 </svg>
