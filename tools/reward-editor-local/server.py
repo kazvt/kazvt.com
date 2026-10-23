@@ -890,11 +890,26 @@ class RewardEditorServer(ThreadingHTTPServer):
     daemon_threads = True
 
 
-class Handler(BaseHTTPRequestHandler):
+class RewardEditorHandlerMixin:
     server_version = "KazvtRewardEditor/1.0"
     sys_version = ""
 
     def _expected_host(self) -> str:
+        host = str(self.headers.get("Host", "")).strip()
+        try:
+            parsed = urlsplit("//" + host)
+            if (
+                (parsed.hostname or "").casefold() in {"127.0.0.1", "localhost", "::1"}
+                and parsed.port == self.server.server_port
+                and not parsed.username
+                and not parsed.password
+                and not parsed.path
+                and not parsed.query
+                and not parsed.fragment
+            ):
+                return host
+        except (TypeError, ValueError):
+            pass
         return f"127.0.0.1:{self.server.server_port}"
 
     def _check_host(self) -> None:
@@ -912,7 +927,8 @@ class Handler(BaseHTTPRequestHandler):
         if csp:
             self.send_header("Content-Security-Policy", csp)
         self.end_headers()
-        self.wfile.write(body)
+        if self.command != "HEAD":
+            self.wfile.write(body)
 
     def _send_json(self, status: int, value: Any) -> None:
         self._send(status, _json_bytes(value), "application/json; charset=utf-8")
@@ -1011,6 +1027,9 @@ class Handler(BaseHTTPRequestHandler):
         except (OSError, ValueError) as exc:
             self._error(404, "Not found.")
 
+    def do_HEAD(self) -> None:
+        self.do_GET()
+
     def do_POST(self) -> None:
         try:
             self._check_host()
@@ -1078,6 +1097,11 @@ class Handler(BaseHTTPRequestHandler):
             print(f"[reward-editor] {self.command} {urlsplit(self.path).path}", file=sys.stderr, flush=True)
         else:
             super().log_message(format, *args)
+
+
+class Handler(RewardEditorHandlerMixin, BaseHTTPRequestHandler):
+    """Standalone loopback handler and mixin-backed MSI route implementation."""
+    pass
 
 
 def main() -> None:
