@@ -856,6 +856,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border-left: 5px solid var(--kt-pink);
   background: rgb(245 169 184 / 25%);
   font-size: .94rem;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -872,7 +873,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   margin-bottom: 7px;
   color: #5b3850;
   font-size: .82rem;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 #kt-webring-badge-label:hover,
@@ -936,13 +937,6 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   outline-offset: 3px;
 }
 
-.kt-webring-field-hint {
-  margin: 7px 0 0;
-  color: #51404a;
-  font-size: .73rem;
-  line-height: 1.35;
-}
-
 .kt-webring-copy-status {
   min-height: 1.25em;
   margin: 0;
@@ -953,6 +947,8 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   font-size: .78rem;
   font-weight: 400;
 }
+
+.kt-webring-copy-status:empty { display: none; }
 
 .kt-webring-copy-status[data-state="copied"] {
   border-left-color: #168552;
