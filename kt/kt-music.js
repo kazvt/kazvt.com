@@ -101,6 +101,7 @@
       filter.type = "lowpass";
       filter.frequency.value = 1650;
       filter.Q.value = 0.5;
+      context.__ktPadFilter = filter;
 
       master = context.createGain();
       master.gain.value = 0.0001;
@@ -173,13 +174,6 @@
     startPromise = (async () => {
       await context.resume();
       if (muted || context.state !== "running" || playing) return;
-      context.__ktPadFilter = context.__ktPadFilter || context.createBiquadFilter();
-      if (!context.__ktPadFilter.__ktConnected) {
-        context.__ktPadFilter.type = "lowpass";
-        context.__ktPadFilter.frequency.value = 1650;
-        context.__ktPadFilter.Q.value = 0.5;
-        context.__ktPadFilter.__ktConnected = true;
-      }
       startChord();
     })().catch(() => {}).finally(() => {
       startPromise = null;
