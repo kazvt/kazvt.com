@@ -1597,6 +1597,31 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   .kt-webring-stamp { align-self: flex-end; }
 }
 
+@media (min-width: 701px) and (max-width: 900px) {
+  .kt-member-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 700px;
+    gap: 12px;
+    margin-inline: auto;
+  }
+
+  .kt-member {
+    min-height: 108px;
+    grid-template-columns: 50px minmax(0, 1fr) 96px;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 10px 12px;
+    border-width: 2px;
+  }
+
+  .kt-member-number,
+  .kt-member-arrow { display: none; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1 / span 2; width: 48px; height: 48px; transform: none; }
+  .kt-member-copy { grid-column: 2; grid-row: 1 / span 2; }
+  .kt-member-tag,
+  .kt-member-badge { grid-column: 3; grid-row: 2; align-self: end; justify-self: stretch; max-width: none; text-align: center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body[data-page="kt"]::before { display: none; }
 
