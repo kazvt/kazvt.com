@@ -146,7 +146,7 @@
     gap: 8px;
     padding: 9px 10px;
     border-width: 2px;
-    box-shadow: 3px 3px 0 var(--kt-ink), 6px 6px 0 var(--kt-member-accent), 0 0 24px 7px var(--kt-live-halo), 0 0 44px 14px var(--kt-live-halo);
+    box-shadow: 3px 3px 0 var(--kt-ink), 6px 6px 0 var(--kt-member-accent), 0 0 14px 2px var(--kt-live-halo), 0 0 26px 6px var(--kt-live-halo);
   }
   .kt-member-number,
   .kt-member-arrow { display: none; }
