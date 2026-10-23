@@ -594,6 +594,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-member-end: var(--kt-paper);
   --kt-live-accent: var(--kt-blue);
   --kt-live-glow: rgb(91 206 250 / 42%);
+  --kt-live-card-glow: rgb(91 206 250 / 12%);
   --kt-live-halo: transparent;
   --kt-live-scan-color: #fff;
   position: relative;
@@ -609,8 +610,8 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   box-shadow:
     4px 4px 0 var(--kt-ink),
     8px 8px 0 var(--kt-member-accent),
-    0 0 24px 7px var(--kt-live-halo),
-    0 0 44px 14px var(--kt-live-halo);
+    0 0 14px 2px var(--kt-live-halo),
+    0 0 26px 6px var(--kt-live-halo);
   transform: none;
   transform-style: preserve-3d;
   transition: transform 160ms steps(4, end), box-shadow 160ms steps(4, end);
@@ -657,6 +658,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-member-wash: rgb(91 206 250 / 22%);
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 42%);
+  --kt-live-card-glow: rgb(245 169 184 / 12%);
 }
 
 .kt-member-grid > li:nth-child(3n + 2) .kt-member {
@@ -664,6 +666,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-member-wash: rgb(245 169 184 / 25%);
   --kt-live-accent: var(--kt-blue);
   --kt-live-glow: rgb(91 206 250 / 42%);
+  --kt-live-card-glow: rgb(91 206 250 / 12%);
 }
 
 .kt-member-grid > li:nth-child(3n) .kt-member {
@@ -672,11 +675,12 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   --kt-member-end: var(--kt-white);
   --kt-live-accent: var(--kt-pink);
   --kt-live-glow: rgb(245 169 184 / 42%);
+  --kt-live-card-glow: rgb(245 169 184 / 12%);
   --kt-live-scan-color: var(--kt-pink);
 }
 
 .kt-member[data-live-state="live"] {
-  --kt-live-halo: var(--kt-live-glow);
+  --kt-live-halo: var(--kt-live-card-glow);
 }
 
 .kt-live-scan {
@@ -713,8 +717,8 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   box-shadow:
     2px 2px 0 var(--kt-ink),
     4px 4px 0 var(--kt-member-accent),
-    0 0 24px 7px var(--kt-live-halo),
-    0 0 44px 14px var(--kt-live-halo);
+    0 0 14px 2px var(--kt-live-halo),
+    0 0 26px 6px var(--kt-live-halo);
   transform: translate(2px, 2px) rotate(-.5deg);
 }
 
