@@ -1529,8 +1529,9 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
 
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); gap: 11px; }
   .kt-member {
-    min-height: 78px;
+    min-height: 96px;
     grid-template-columns: 46px minmax(0, 1fr) 88px;
+    grid-template-rows: minmax(0, 1fr) auto;
     align-items: center;
     gap: 8px;
     padding: 9px 10px;
@@ -1539,13 +1540,13 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   }
   .kt-member-number,
   .kt-member-arrow { display: none; }
-  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 44px; height: 44px; border-width: 2px; box-shadow: 2px 2px 0 var(--kt-ink); transform: none; }
-  .kt-member-copy { grid-column: 2; grid-row: 1; gap: 4px; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1 / span 2; width: 44px; height: 44px; border-width: 2px; box-shadow: 2px 2px 0 var(--kt-ink); transform: none; }
+  .kt-member-copy { grid-column: 2; grid-row: 1 / span 2; gap: 4px; }
   .kt-member-title { align-items: center; gap: 5px; }
   .kt-member-name { font-size: clamp(.96rem, 4.3vw, 1.12rem); }
   .kt-member-handle { font-size: .73rem; line-height: 1.15; }
   .kt-member-tag,
-  .kt-member-badge { grid-column: 3; grid-row: 1; justify-self: stretch; max-width: none; padding: 4px 5px; font-size: .64rem; line-height: 1.15; text-align: center; }
+  .kt-member-badge { grid-column: 3; grid-row: 2; align-self: end; justify-self: stretch; max-width: none; padding: 4px 5px; font-size: .64rem; line-height: 1.15; text-align: center; }
 
   .kt-recommendations {
     display: grid;
