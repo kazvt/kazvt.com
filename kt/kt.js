@@ -206,7 +206,7 @@
       indicator.className = "kt-live-indicator";
       indicator.hidden = true;
       indicator.setAttribute("role", "img");
-      title.append(indicator);
+      title.insertBefore(indicator, title.querySelector(".kt-member-name") || title.firstChild);
       return [{ slug, indicator }];
     });
 
@@ -234,18 +234,22 @@
         const i18n = window.KazvtI18n;
         return i18n?.format?.(key, replacements) || i18n?.t?.(key) || fallback;
       };
+      const displayName = entry.indicator.closest(".kt-member-title")
+        ?.querySelector(".kt-member-name")?.textContent?.trim() || slug;
       indicator.textContent = state === "live"
-        ? translate("kt.live_label", "LIVE")
+        ? ""
         : translate("kt.unknown_label", "?");
       indicator.setAttribute(
         "aria-label",
         state === "live"
-          ? translate("kt.live_aria", `${slug} is live on KICK`, { name: slug })
+          ? translate("kt.live_aria", `${displayName} is live on KICK`, { name: displayName })
           : translate("kt.unknown_aria", `Couldn't check ${slug}'s KICK status`, { name: slug })
       );
-      indicator.title = state === "live"
-        ? translate("kt.live_title", "Live on KICK")
-        : translate("kt.unknown_title", "KICK status unavailable");
+      if (state === "live") {
+        indicator.removeAttribute("title");
+      } else {
+        indicator.title = translate("kt.unknown_title", "KICK status unavailable");
+      }
     }
 
     async function checkEntry(entry) {
