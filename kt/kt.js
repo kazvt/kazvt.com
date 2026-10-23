@@ -379,6 +379,10 @@
         image.src = shuffledPool[index % shuffledPool.length];
       }
       rail.replaceChildren(fragment);
+      rail.querySelectorAll(".kt-pride-gif-slot").forEach((slot) => {
+        const image = slot.querySelector(".kt-pride-gif-art");
+        if (image instanceof HTMLImageElement && image.complete) setScanDistance(slot, image);
+      });
     }
 
     function setScanDistance(slot, image) {

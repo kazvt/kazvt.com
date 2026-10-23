@@ -1152,13 +1152,21 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
     pointer-events: none;
   }
 
-  .kt-pride-gif-stagger img {
+  .kt-pride-gif-stagger .kt-pride-gif-slot {
     display: block;
     width: clamp(62px, 5.5vw, 76px);
     aspect-ratio: 1;
+    flex: 0 0 auto;
+    overflow: hidden;
     border: 3px solid var(--kt-ink);
     background: var(--kt-paper);
     box-shadow: 4px 4px 0 var(--kt-blue), 8px 8px 0 var(--kt-pink), 0 5px 10px rgb(0 0 0 / 24%);
+  }
+
+  .kt-pride-gif-stagger .kt-pride-gif-art {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
   }
 
@@ -1172,6 +1180,12 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
     align-self: flex-end;
     margin-right: 16px;
     transform: rotate(7deg);
+  }
+
+  .kt-pride-gif-slot--scan .kt-pride-gif-art {
+    width: auto;
+    max-width: none;
+    animation: kt-pride-gif-scan var(--kt-pride-gif-scan-duration, 7s) ease-in-out infinite alternate;
   }
 }
 
@@ -1197,6 +1211,11 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
 @keyframes kt-sticker-hop {
   0%, 100% { translate: 0 0; rotate: -1deg; }
   50% { translate: 2px -7px; rotate: 2deg; }
+}
+
+@keyframes kt-pride-gif-scan {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--kt-pride-gif-pan-end, -1px), 0, 0); }
 }
 
 @media (max-width: 700px) {
@@ -1269,4 +1288,5 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
     background-position: 0 0;
   }
   .kt-pride-gif-stagger { display: none !important; }
+  .kt-pride-gif-slot--scan .kt-pride-gif-art { animation: none !important; }
 }
