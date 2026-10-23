@@ -151,30 +151,20 @@ function initializeKtLoadingScreen() {
       0%, 100% { transform: translateY(2px); filter: brightness(.82); }
       50% { transform: translateY(-2px); filter: brightness(1.12); }
     }
-    .loading-progress { display: block; width: 100%; height: 20px; margin-top: 20px; }
-    .loading-progress[value] {
-      appearance: none;
-      -webkit-appearance: none;
-      border: 1px solid #6c6872;
-      border-radius: 0;
-      background: #fff;
-      box-shadow: inset 1px 1px 2px rgb(20 20 30 / 28%);
-      overflow: hidden;
-    }
-    .loading-progress[value]::-webkit-progress-bar { background-color: #fff; }
+    .loading-progress { display: block; width: 100%; margin-top: 20px; }
     .loading-progress[value]::-webkit-progress-value {
-      border-radius: 0;
       background:
-        linear-gradient(180deg, rgb(255 255 255 / 58%), transparent 34%, rgb(0 0 0 / 9%)),
-        repeating-linear-gradient(90deg, rgb(255 255 255 / 86%) 0 2px, transparent 2px 15px),
-        repeating-linear-gradient(90deg, #5bcefa 0 15px, #f5a9b8 15px 30px);
+        repeating-linear-gradient(90deg, #fff 0, #fff 2px, transparent 0, transparent 10px),
+        linear-gradient(180deg, #acedad 0, #7be47d 14%, #4cda50 28%, #2ed330 42%, #42d845 57%, #76e275 71%, #8fe791 85%, #fff),
+        repeating-linear-gradient(90deg, #5bcefa 0 10px, #f5a9b8 10px 20px);
+      background-blend-mode: normal, luminosity, normal;
     }
     .loading-progress[value]::-moz-progress-bar {
-      border-radius: 0;
       background:
-        linear-gradient(180deg, rgb(255 255 255 / 58%), transparent 34%, rgb(0 0 0 / 9%)),
-        repeating-linear-gradient(90deg, rgb(255 255 255 / 86%) 0 2px, transparent 2px 15px),
-        repeating-linear-gradient(90deg, #5bcefa 0 15px, #f5a9b8 15px 30px);
+        repeating-linear-gradient(90deg, #fff 0, #fff 2px, transparent 0, transparent 10px),
+        linear-gradient(180deg, #acedad 0, #7be47d 14%, #4cda50 28%, #2ed330 42%, #42d845 57%, #76e275 71%, #8fe791 85%, #fff),
+        repeating-linear-gradient(90deg, #5bcefa 0 10px, #f5a9b8 10px 20px);
+      background-blend-mode: normal, luminosity, normal;
     }
     .progress-caption {
       display: flex;
