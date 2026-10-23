@@ -78,7 +78,8 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .tile-motion { animation: none !important; }
+      .tile-motion,
+      .sparkle-frame { animation: none !important; }
     }
   </style>
 
