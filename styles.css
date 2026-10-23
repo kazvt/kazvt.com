@@ -5655,11 +5655,10 @@ body {
     var(--paper-alt);
 }
 
-/* Palette 1 uses regular 04b_30 weights; semantic emphasis opts into Comic Sans below. */
+/* Palette 1 keeps 04b_30 unsynthesized; emphasis below opts into Comic Sans instead. */
 body[data-theme="p1"] *,
 body[data-theme="p1"] *::before,
 body[data-theme="p1"] *::after {
-  font-weight: 400 !important;
   font-synthesis: none;
 }
 
