@@ -1028,7 +1028,7 @@ class RewardEditorHandlerMixin:
             self._error(404, "Not found.")
 
     def do_HEAD(self) -> None:
-        self.do_GET()
+        RewardEditorHandlerMixin.do_GET(self)
 
     def do_POST(self) -> None:
         try:
