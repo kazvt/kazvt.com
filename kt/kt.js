@@ -544,6 +544,74 @@
 
     if (!entries.length) return;
 
+    const memberList = document.querySelector(".kt-member-grid");
+    const pinnedMemberSlugs = new Set(["kazvt", "lillie-garden"]);
+    const liveStickerVariants = [
+      { src: "/kt/assets/kt-live-sticker.gif", color: "pink" },
+      { src: "/kt/assets/kt-live-sticker-blue.gif", color: "blue" },
+    ];
+    const entriesByCard = new Map(entries.map((entry) => [entry.card, entry]));
+    const memberRecords = memberList
+      ? [...memberList.children].map((listItem, defaultOrder) => {
+        const card = listItem.querySelector(".kt-member");
+        const entry = card ? entriesByCard.get(card) : null;
+        return { listItem, card, entry, slug: entry?.slug || "", defaultOrder };
+      })
+      : [];
+    let pendingMemberOrder = false;
+
+    function applyMemberOrder() {
+      if (!memberList || !memberRecords.length) return;
+
+      const orderedMembers = [...memberRecords].sort((left, right) => {
+        const leftPinned = pinnedMemberSlugs.has(left.slug);
+        const rightPinned = pinnedMemberSlugs.has(right.slug);
+        if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+
+        const leftLive = left.card?.dataset.liveState === "live";
+        const rightLive = right.card?.dataset.liveState === "live";
+        if (leftLive !== rightLive) return leftLive ? -1 : 1;
+        return left.defaultOrder - right.defaultOrder;
+      });
+
+      const orderChanged = orderedMembers.some((member, index) => memberList.children[index] !== member.listItem);
+      if (orderChanged && memberList.contains(document.activeElement)) {
+        pendingMemberOrder = true;
+        return;
+      }
+
+      orderedMembers.forEach((member, index) => {
+        const currentItem = memberList.children[index] || null;
+        if (currentItem !== member.listItem) memberList.insertBefore(member.listItem, currentItem);
+
+        const number = member.card?.querySelector(".kt-member-number");
+        const displayNumber = String(index + 1).padStart(2, "0");
+        if (number && number.textContent !== displayNumber) number.textContent = displayNumber;
+      });
+      pendingMemberOrder = false;
+
+      let liveStickerIndex = 0;
+      orderedMembers.forEach((member) => {
+        if (member.card?.dataset.liveState !== "live" || !member.entry?.liveSticker) return;
+
+        const variant = liveStickerVariants[liveStickerIndex % liveStickerVariants.length];
+        liveStickerIndex += 1;
+        if (member.entry.liveSticker.getAttribute("src") !== variant.src) {
+          member.entry.liveSticker.setAttribute("src", variant.src);
+        }
+        member.entry.liveSticker.classList.toggle("kt-live-sticker--blue", variant.color === "blue");
+      });
+    }
+
+    memberList?.addEventListener("focusout", (event) => {
+      if (!pendingMemberOrder) return;
+      if (event.relatedTarget instanceof Node && memberList.contains(event.relatedTarget)) return;
+
+      window.requestAnimationFrame(() => {
+        if (!memberList.contains(document.activeElement)) applyMemberOrder();
+      });
+    });
+
     const refreshInterval = 120_000;
     const requestTimeout = 8_000;
     const maxConcurrentRequests = 4;
@@ -620,6 +688,7 @@
             await checkEntry(entry);
           }
         }));
+        applyMemberOrder();
       } finally {
         inFlight = false;
         scheduleRefresh(Math.max(0, refreshInterval - (Date.now() - lastRefresh)));
