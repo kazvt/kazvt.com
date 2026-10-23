@@ -61,6 +61,7 @@ function initializeKtLoadingScreen() {
     .loading-window {
       width: min(640px, calc(100vw - 36px));
       margin: auto;
+      border: 2px solid #302638;
       border-radius: 0;
       box-shadow: 8px 8px 0 rgb(65 43 71 / 22%), 0 0 0 3px #fff;
       font-family: "04b_30", Tahoma, sans-serif;
@@ -107,7 +108,10 @@ function initializeKtLoadingScreen() {
     .title-bar-controls { flex: 0 0 auto; }
     .title-bar-controls button[aria-label="Minimize"],
     .title-bar-controls button[aria-label="Maximize"] {
-      filter: hue-rotate(112deg);
+      filter: hue-rotate(112deg) saturate(.68) brightness(.9);
+    }
+    .title-bar-controls button[aria-label="Close"] {
+      filter: hue-rotate(325deg) saturate(.68) brightness(.9);
     }
     .window-icon {
       display: block;
