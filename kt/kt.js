@@ -423,6 +423,7 @@
         ? profile.pathname.split("/").filter(Boolean)[0]
         : "";
       if (!slug || !title) return [];
+      const tooltipLabel = card.title.trim();
 
       const indicator = document.createElement("span");
       indicator.className = "kt-live-indicator";
@@ -430,7 +431,7 @@
       indicator.setAttribute("role", "img");
       const name = title.querySelector(".kt-member-name, .kt-recommendation-name");
       title.insertBefore(indicator, name || title.firstChild);
-      return [{ card, slug, indicator }];
+      return [{ card, slug, indicator, tooltipLabel }];
     });
 
     if (!entries.length) return;
@@ -443,8 +444,12 @@
     let refreshTimer = 0;
 
     function setState(entry, state) {
-      const { card, indicator, slug } = entry;
+      const { card, indicator, slug, tooltipLabel } = entry;
       card.dataset.liveState = state;
+      const tooltip = tooltipLabel
+        ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
+        : "";
+      if (tooltip) card.title = tooltip;
       if (state === "offline") {
         indicator.hidden = true;
         delete indicator.dataset.state;
@@ -471,9 +476,10 @@
           : translate("kt.unknown_aria", `Couldn't check ${slug}'s KICK status`, { name: slug })
       );
       if (state === "live") {
-        indicator.removeAttribute("title");
+        if (tooltip) indicator.title = tooltip;
+        else indicator.removeAttribute("title");
       } else {
-        indicator.title = translate("kt.unknown_title", "KICK status unavailable");
+        indicator.title = tooltip || translate("kt.unknown_title", "KICK status unavailable");
       }
     }
 
