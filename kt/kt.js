@@ -5,12 +5,7 @@
   const touchPreference = window.matchMedia("(hover: none) and (pointer: coarse)");
   const touchOnly = () => touchPreference.matches && navigator.maxTouchPoints > 0;
   const flagVideo = document.querySelector(".kt-flag");
-  const flagMotionToggle = document.querySelector("[data-kt-flag-motion-toggle]");
-  const flagMotionIcon = flagMotionToggle?.querySelector("[data-kt-flag-motion-icon]");
-  const flagMotionLabel = flagMotionToggle?.querySelector("[data-kt-flag-motion-label]");
-  let flagPlaybackOverride = null;
   let cursorEffect = null;
-  const localizedMessage = (key, fallback) => window.KazvtI18n?.t?.(key) || fallback;
 
   function initializeMemberKitCopy() {
     const panel = document.querySelector(".kt-webring-kit");
@@ -147,44 +142,17 @@
     window.addEventListener("pagehide", () => window.clearInterval(interval), { once: true });
   }
 
-  function updateFlagMotionControl() {
-    if (!(flagVideo instanceof HTMLVideoElement)) return;
-    const paused = flagVideo.paused;
-    const labelKey = paused ? "kt.flag_play" : "kt.flag_pause";
-    const labelFallback = paused ? "PLAY FLAG" : "PAUSE FLAG";
-    const ariaKey = paused ? "kt.flag_play_aria" : "kt.flag_pause_aria";
-    const ariaFallback = paused ? "Play the waving flag" : "Pause the waving flag";
-    flagMotionToggle?.setAttribute("data-paused", String(paused));
-    flagMotionToggle?.setAttribute("aria-label", localizedMessage(ariaKey, ariaFallback));
-    if (flagMotionIcon) flagMotionIcon.textContent = paused ? "▶" : "Ⅱ";
-    if (flagMotionLabel) flagMotionLabel.textContent = localizedMessage(labelKey, labelFallback);
-  }
-
   function syncFlagPlayback() {
     if (!(flagVideo instanceof HTMLVideoElement)) return;
-    const shouldPause = flagPlaybackOverride === null
-      ? motionPreference.matches
-      : flagPlaybackOverride === "paused";
-
-    if (shouldPause) flagVideo.pause();
-    else flagVideo.play().catch(updateFlagMotionControl);
-    updateFlagMotionControl();
+    if (motionPreference.matches) {
+      flagVideo.pause();
+      return;
+    }
+    flagVideo.play().catch(() => {});
   }
 
-  flagMotionToggle?.addEventListener("click", () => {
-    if (!(flagVideo instanceof HTMLVideoElement)) return;
-    flagPlaybackOverride = flagVideo.paused ? "playing" : "paused";
-    syncFlagPlayback();
-  });
-  flagVideo?.addEventListener("play", updateFlagMotionControl);
-  flagVideo?.addEventListener("pause", updateFlagMotionControl);
-  window.addEventListener("kazvt:i18nready", updateFlagMotionControl);
-  window.addEventListener("kazvt:languagechange", updateFlagMotionControl);
   syncFlagPlayback();
-  motionPreference.addEventListener("change", () => {
-    flagPlaybackOverride = null;
-    syncFlagPlayback();
-  });
+  motionPreference.addEventListener("change", syncFlagPlayback);
   initializeAnimatedFavicon();
 
   function createTransStripeCursor() {
