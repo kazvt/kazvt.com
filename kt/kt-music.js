@@ -13,12 +13,13 @@
   // octave doublings. The voicing changes on each fresh page load.
   const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
-  // After 32 bars (128 seconds), glide down an octave; after 32 more, return.
+  // Every 8 bars (32 seconds), glide down two semitones; after 8 more, return.
   const beatsPerBar = 4;
   const tempoBpm = 60;
   const barDuration = (60 / tempoBpm) * beatsPerBar;
-  const registerChangeInterval = 32 * barDuration;
-  const registerGlideDuration = barDuration;
+  const registerChangeInterval = 8 * barDuration;
+  const registerGlideDuration = 0.75;
+  const loweredPitchFactor = 2 ** (-2 / 12);
   const registerScheduleLookahead = 10 * 60;
 
   let context = null;
@@ -103,8 +104,8 @@
   }
 
   function scheduleRegisterChange(when, down) {
-    const startFactor = down ? 1 : 0.5;
-    const endFactor = down ? 0.5 : 1;
+    const startFactor = down ? 1 : loweredPitchFactor;
+    const endFactor = down ? loweredPitchFactor : 1;
     oscillators.forEach(({ oscillator, frequency }) => {
       oscillator.frequency.setValueAtTime(frequency * startFactor, when);
       oscillator.frequency.exponentialRampToValueAtTime(
