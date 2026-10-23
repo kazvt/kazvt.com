@@ -146,23 +146,24 @@
     window.addEventListener("pagehide", () => window.clearInterval(interval), { once: true });
   }
 
+  function updateFlagMotionControl() {
+    if (!(flagVideo instanceof HTMLVideoElement)) return;
+    const paused = flagVideo.paused;
+    flagMotionToggle?.setAttribute("data-paused", String(paused));
+    flagMotionToggle?.setAttribute("aria-label", paused ? "Play the waving flag" : "Pause the waving flag");
+    if (flagMotionIcon) flagMotionIcon.textContent = paused ? "▶" : "Ⅱ";
+    if (flagMotionLabel) flagMotionLabel.textContent = paused ? "PLAY FLAG" : "PAUSE FLAG";
+  }
+
   function syncFlagPlayback() {
     if (!(flagVideo instanceof HTMLVideoElement)) return;
     const shouldPause = flagPlaybackOverride === null
       ? motionPreference.matches
       : flagPlaybackOverride === "paused";
 
-    if (shouldPause) {
-      flagVideo.pause();
-    } else {
-      flagVideo.play().catch(() => {});
-    }
-
-    const paused = shouldPause || flagVideo.paused;
-    flagMotionToggle?.setAttribute("data-paused", String(paused));
-    flagMotionToggle?.setAttribute("aria-label", paused ? "Play the waving flag" : "Pause the waving flag");
-    if (flagMotionIcon) flagMotionIcon.textContent = paused ? "▶" : "Ⅱ";
-    if (flagMotionLabel) flagMotionLabel.textContent = paused ? "PLAY FLAG" : "PAUSE FLAG";
+    if (shouldPause) flagVideo.pause();
+    else flagVideo.play().catch(updateFlagMotionControl);
+    updateFlagMotionControl();
   }
 
   flagMotionToggle?.addEventListener("click", () => {
@@ -170,8 +171,8 @@
     flagPlaybackOverride = flagVideo.paused ? "playing" : "paused";
     syncFlagPlayback();
   });
-  flagVideo?.addEventListener("play", syncFlagPlayback);
-  flagVideo?.addEventListener("pause", syncFlagPlayback);
+  flagVideo?.addEventListener("play", updateFlagMotionControl);
+  flagVideo?.addEventListener("pause", updateFlagMotionControl);
   syncFlagPlayback();
   motionPreference.addEventListener("change", () => {
     flagPlaybackOverride = null;
