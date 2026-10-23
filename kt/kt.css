@@ -752,6 +752,10 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   transform: translateZ(18px) rotateY(8deg) rotateX(-4deg);
 }
 
+.kt-member-grid.has-online-member .kt-member[data-live-state="offline"] .kt-member-avatar {
+  filter: grayscale(50%);
+}
+
 .kt-member-copy {
   display: grid;
   min-width: 0;

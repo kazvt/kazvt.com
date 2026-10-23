@@ -72,6 +72,10 @@
   object-fit: cover;
 }
 
+.kt-recommendation-link[data-live-state="offline"] .kt-recommendation-avatar {
+  filter: grayscale(50%);
+}
+
 .kt-recommendation-avatar--fallback {
   display: grid;
   place-items: center;
