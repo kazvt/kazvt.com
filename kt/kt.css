@@ -837,7 +837,9 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border-radius: 50%;
   background: var(--kt-live-accent);
   box-shadow: 0 0 5px 2px var(--kt-live-glow), 0 0 13px 4px var(--kt-live-glow);
-  animation: kt-live-glow 1.35s ease-in-out infinite alternate;
+  animation:
+    kt-live-glow 1.35s ease-in-out infinite alternate,
+    kt-live-pip-flash 1.35s steps(1, end) infinite;
 }
 
 .kt-live-sticker {
@@ -1486,6 +1488,12 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
 @keyframes kt-live-glow {
   from { box-shadow: 0 0 5px 2px var(--kt-live-glow), 0 0 13px 4px var(--kt-live-glow); }
   to { box-shadow: 0 0 7px 2px var(--kt-live-glow), 0 0 17px 5px var(--kt-live-glow); }
+}
+
+@keyframes kt-live-pip-flash {
+  0%, 49.999% { background-color: var(--kt-live-accent); }
+  50%, 99.999% { background-color: #000; }
+  100% { background-color: var(--kt-live-accent); }
 }
 
 @keyframes kt-live-scan {
