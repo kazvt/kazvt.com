@@ -1395,16 +1395,34 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
     margin-top: 20px;
   }
 
-  .kt-hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-    padding: 27px 22px 28px;
+  .kt-topbar {
+    min-height: 102px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 62px 12px 9px;
   }
 
-  .kt-hero-copy { grid-column: 1; text-align: center; }
+  .kt-topbar-actions {
+    flex: 1 0 100%;
+    justify-content: flex-start;
+    padding-right: 0;
+  }
+
+  .kt-hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 560px;
+    gap: 0;
+    padding: 24px 12px 28px;
+  }
+
+  .kt-hero-copy {
+    grid-column: 1;
+    width: 100%;
+    padding: 16px clamp(12px, 4vw, 22px);
+  }
   .kt-eyebrow { letter-spacing: .09em; }
   .kt-hero h1 { justify-items: center; font-size: clamp(2.6rem, 11vw, 4.2rem); }
-  .kt-affiliation { margin-inline: auto; text-align: start; }
+  .kt-affiliation { margin: 16px auto; text-align: start; }
   .kt-roster-heading { align-items: start; flex-direction: column; gap: 6px; }
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); gap: 13px; }
   .kt-floaties { display: none; }
@@ -1416,7 +1434,7 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   .kt-topbar-actions { gap: 5px; }
   .kt-home-link,
   .kt-topbar-label { font-size: .68rem; }
-  .kt-music-toggle { min-width: 78px; padding-inline: 6px; font-size: .68rem; }
+  .kt-music-toggle { min-width: 138px; min-height: 48px; padding-inline: 7px; }
   .kt-topbar-label { text-align: center; }
   .kt-roster { padding-inline: 15px; }
   .kt-member { grid-template-columns: 20px 50px minmax(0, 1fr) 74px 18px; gap: 8px; padding-inline: 8px; }
@@ -1453,4 +1471,20 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   }
   .kt-pride-gif-stagger { display: none !important; }
   .kt-pride-gif-slot--scan .kt-pride-gif-art { animation: none !important; }
+}
+
+@media (forced-colors: active) {
+  .kt-music-toggle,
+  .kt-music-toggle[data-muted="true"] {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: 3px 3px 0 ButtonText;
+  }
+
+  .kt-music-toggle__icon-tile {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
 }
