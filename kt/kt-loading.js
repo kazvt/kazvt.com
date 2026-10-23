@@ -17,6 +17,7 @@ function initializeKtLoadingScreen() {
     "Polishing the princess boot...",
     "Loading cute girls...",
     "Sending the girls over...",
+    "Serving the princesses tea...",
   ];
   const firstIndex = Math.floor(Math.random() * messages.length);
   const remainingMessages = messages.filter((_, index) => index !== firstIndex);
