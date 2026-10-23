@@ -7,6 +7,60 @@
   const flagVideo = document.querySelector(".kt-flag");
   let cursorEffect = null;
 
+  function initializeAnimatedFavicon() {
+    const iconLink = document.getElementById("ktFavicon");
+    if (!(iconLink instanceof HTMLLinkElement)) return;
+
+    const gifUrl = iconLink.href;
+    const gif = new Image();
+    gif.decoding = "async";
+    const canvas = document.createElement("canvas");
+    canvas.width = 32;
+    canvas.height = 32;
+    const context = canvas.getContext("2d", { alpha: true });
+    if (!context) return;
+
+    context.imageSmoothingEnabled = false;
+    let staticFrame = "";
+    let lastFrame = "";
+    let interval = 0;
+
+    function drawFaviconFrame() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(gif, 0, 0, canvas.width, canvas.height);
+      const frame = canvas.toDataURL("image/png");
+      if (frame === lastFrame) return;
+      lastFrame = frame;
+      iconLink.type = "image/png";
+      iconLink.href = frame;
+    }
+
+    function syncFaviconMotion() {
+      if (!staticFrame) return;
+      if (motionPreference.matches) {
+        window.clearInterval(interval);
+        interval = 0;
+        lastFrame = staticFrame;
+        iconLink.type = "image/png";
+        iconLink.href = staticFrame;
+        return;
+      }
+      if (interval) return;
+      drawFaviconFrame();
+      interval = window.setInterval(drawFaviconFrame, 90);
+    }
+
+    gif.addEventListener("load", () => {
+      context.drawImage(gif, 0, 0, canvas.width, canvas.height);
+      staticFrame = canvas.toDataURL("image/png");
+      lastFrame = staticFrame;
+      syncFaviconMotion();
+    }, { once: true });
+    gif.src = gifUrl;
+    motionPreference.addEventListener("change", syncFaviconMotion);
+    window.addEventListener("pagehide", () => window.clearInterval(interval), { once: true });
+  }
+
   function syncFlagPlayback() {
     if (!(flagVideo instanceof HTMLVideoElement)) return;
     if (motionPreference.matches) {
@@ -18,6 +72,7 @@
 
   syncFlagPlayback();
   motionPreference.addEventListener("change", syncFlagPlayback);
+  initializeAnimatedFavicon();
 
   function createTransStripeCursor() {
     const canvas = document.createElement("canvas");
