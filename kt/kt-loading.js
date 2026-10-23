@@ -307,15 +307,38 @@ function initializeKtLoadingScreen() {
     host.classList.add("is-exiting");
   }, 2820);
 
-  window.setTimeout(() => {
+  let hasFinished = false;
+  let removalTimer = 0;
+  const finishLoadingScreen = () => {
+    if (hasFinished) return;
+    hasFinished = true;
     window.clearTimeout(showSecondMessage);
     window.clearTimeout(finishFade);
+    window.clearTimeout(removalTimer);
     stopProgress();
     host.remove();
     if (previousBusy === null) document.body.removeAttribute("aria-busy");
     else document.body.setAttribute("aria-busy", previousBusy);
     document.dispatchEvent(new Event("kt-loading-complete"));
-  }, 3000);
+  };
+
+  const minimizeButton = shadow.querySelector('[aria-label="Minimize"]');
+  const maximizeButton = shadow.querySelector('[aria-label="Maximize"]');
+  const closeButton = shadow.querySelector('[aria-label="Close"]');
+  minimizeButton.addEventListener("click", () => {
+    const minimized = windowPanel.classList.toggle("is-minimized");
+    minimizeButton.setAttribute("aria-pressed", String(minimized));
+  });
+  maximizeButton.addEventListener("click", () => {
+    const maximized = windowPanel.classList.toggle("is-maximized");
+    maximizeButton.setAttribute("aria-pressed", String(maximized));
+  });
+  closeButton.addEventListener("click", () => {
+    host.classList.add("is-exiting");
+    window.clearTimeout(removalTimer);
+    removalTimer = window.setTimeout(finishLoadingScreen, 180);
+  });
+  removalTimer = window.setTimeout(finishLoadingScreen, 3000);
 }
 
   initializeKtLoadingScreen();
