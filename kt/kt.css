@@ -702,7 +702,7 @@ body[data-page="kt"] summary:focus-visible {
   background: var(--kt-pink);
   box-shadow: 4px 4px 0 var(--kt-ink);
   font-size: .78rem;
-  font-weight: 1000;
+  font-weight: 400;
   letter-spacing: .06em;
   transform: rotate(4deg);
   animation: kt-webring-stamp-pop 1.5s steps(2, end) infinite;
@@ -943,6 +943,21 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
   background-repeat: repeat;
   background-size: 112px 112px;
   color: var(--kt-ink);
+}
+
+body[data-page="kt"] :is(
+  .kt-affiliation,
+  .kt-roster-heading > p,
+  .kt-recommendations p,
+  .kt-recommendation-handle
+) {
+  font-synthesis: weight;
+}
+
+body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-weight: 700;
+  font-synthesis: weight;
 }
 
 .kt-footer-home {
