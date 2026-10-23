@@ -1438,6 +1438,7 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   }
 
   .kt-music-toggle {
+    right: max(4px, env(safe-area-inset-right, 0px));
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     width: 44px;
@@ -1592,6 +1593,8 @@ body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
   .kt-member-badge { padding-inline: 3px; font-size: .57rem; }
   .kt-webring-body { padding: 10px; }
   .kt-webring-heading h2 { font-size: 1.2rem; }
+  .kt-webring-heading { align-items: stretch; flex-direction: column; gap: 6px; }
+  .kt-webring-stamp { align-self: flex-end; }
 }
 
 @media (prefers-reduced-motion: reduce) {
