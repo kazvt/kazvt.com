@@ -79,7 +79,7 @@
     min-width: 20px;
     padding: 1px 2px;
     border: 1px solid var(--kt-ink);
-    background: var(--kt-pink);
+    background: #d9d4d8;
     box-shadow: 1px 1px 0 var(--kt-ink);
     color: var(--kt-ink);
     content: "ON";
@@ -90,8 +90,12 @@
   }
 
   .kt-music-toggle[data-muted="true"]::after {
-    background: var(--kt-blue);
+    background: #d9d4d8;
     content: "OFF";
+  }
+
+  .kt-music-toggle[data-audio-playing="true"]::after {
+    background: var(--kt-pink);
   }
 
   .kt-hero {
