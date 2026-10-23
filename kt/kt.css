@@ -752,6 +752,8 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-kick-panel-mock {
   --kt-kick-green: #53fc18;
+  width: min(100%, 320px);
+  margin-inline: auto;
   overflow: hidden;
   border: 1px solid #343a36;
   border-radius: 10px;
