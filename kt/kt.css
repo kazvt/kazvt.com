@@ -652,7 +652,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border: 1px solid var(--kt-blue);
   background: var(--kt-white);
   color: var(--kt-ink);
-  font-family: Arial, sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: .68rem;
   font-weight: 400;
   line-height: 1.2;
