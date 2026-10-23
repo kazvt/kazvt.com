@@ -52,7 +52,7 @@
           linkLabel: "Open the transparent KickassTransfems badge GIF",
         },
         {
-          src: "/kt/assets/KT-LOGO-trans-flag.gif",
+          src: "/kt/assets/KT-LOGO-trans-flag-panel.gif",
           label: "Trans flag background",
           alt: "Animated KickassTransfems logo over a moving transgender pride flag",
           linkLabel: "Open the KickassTransfems badge GIF over the trans flag",
@@ -159,7 +159,7 @@
 
       previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1, previousBadge));
       nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1, nextBadge));
-      // Preload the optional 7 MB variant at low priority, then prioritize it
+      // Preload the optional under-4-MB variant at low priority, then prioritize it
       // on demand. Keep the truthful loading state until the displayed image loads.
       void preloadBadge(badgeOptions[1], "low").catch(() => {});
     }
