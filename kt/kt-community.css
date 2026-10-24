@@ -297,6 +297,14 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
   font-synthesis: weight;
 }
 
+body[data-page="kt"] .kt-discord__signal [data-i18n="kt.discord_status"] {
+  font-size: clamp(.52rem, .76vw, .62rem);
+}
+
+body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] {
+  font-size: clamp(.55rem, .95vw, .65rem);
+}
+
 .kt-discord__count-note {
   color: #5b3850;
   font-size: .78em;
