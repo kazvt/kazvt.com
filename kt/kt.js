@@ -118,7 +118,9 @@
 
       function selectBadge(index, activatedArrow = null) {
         const shouldRestoreArrowFocus = activatedArrow && document.activeElement === activatedArrow;
+        const previousIndex = badgeIndex;
         badgeIndex = Math.max(0, Math.min(badgeOptions.length - 1, index));
+        if (badgeIndex !== previousIndex) window.KazvtSfx?.play("paperFlip");
         const option = badgeOptions[badgeIndex];
         const request = ++badgeRequest;
         badgeImage.alt = option.alt;
@@ -196,6 +198,8 @@
         input.select();
       }
 
+      if (copied) window.KazvtSfx?.play("copy");
+
       if (status) {
         status.dataset.state = copied ? "copied" : "fallback";
         status.textContent = copied
@@ -231,6 +235,32 @@
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
       void copyField(target);
+    });
+  }
+
+  function initializeNewMemberBadges() {
+    const newMemberWindowMs = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    document.querySelectorAll(".kt-member[data-member-added]").forEach((card) => {
+      const addedDate = card.dataset.memberAdded || "";
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(addedDate)) return;
+
+      const addedAt = Date.parse(`${addedDate}T00:00:00Z`);
+      if (!Number.isFinite(addedAt) || addedAt > now || now - addedAt >= newMemberWindowMs) return;
+
+      const title = card.querySelector(".kt-member-title");
+      if (!title || title.querySelector(".kt-member-new-badge")) return;
+
+      const badge = document.createElement("img");
+      badge.className = "kt-member-new-badge";
+      badge.src = "/kt/assets/new-member-burst.gif";
+      badge.alt = "New member";
+      badge.width = 98;
+      badge.height = 64;
+      badge.loading = "lazy";
+      badge.decoding = "async";
+      title.append(badge);
     });
   }
 
@@ -951,6 +981,7 @@
   window.addEventListener("kazvt:languagechange", updateMemberCount);
 
   initializeMemberKitCopy();
+  initializeNewMemberBadges();
   initializeWeBringSteps();
   initializePrideGifStagger();
   initializeTransFlagHover();
