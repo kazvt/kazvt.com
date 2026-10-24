@@ -21,6 +21,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
+  height: 100%;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   min-height: 48px;
   align-items: center;
