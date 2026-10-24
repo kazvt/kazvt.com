@@ -13,7 +13,7 @@
 
     while ((match = brandPattern.exec(text))) {
       if (match.index > cursor) {
-        const groupText = document.createElement("span");
+        const groupText = document.createElement("strong");
         groupText.className = "kt-topbar-label__group";
         groupText.textContent = text.slice(cursor, match.index);
         fragment.append(groupText);
@@ -28,7 +28,7 @@
     }
 
     if (cursor < text.length || !foundBrand) {
-      const groupText = document.createElement("span");
+      const groupText = document.createElement("strong");
       groupText.className = "kt-topbar-label__group";
       groupText.textContent = text.slice(cursor) || text;
       fragment.append(groupText);
