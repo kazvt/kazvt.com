@@ -556,13 +556,6 @@
   height: 166px;
 }
 
-.blog-sidebar-note {
-  margin: 12px 0 0;
-  font-size: 0.84rem;
-  font-weight: 800;
-  text-align: center;
-}
-
 .blog-reading-pad .blog-pad-title {
   min-height: 0;
   line-height: 1.3;
