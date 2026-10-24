@@ -925,8 +925,10 @@
     function kickDurationMilliseconds(value) {
       const duration = Number(value);
       if (!Number.isFinite(duration) || duration <= 0) return 0;
-      const durationMs = duration > 7 * 24 * 60 * 60 ? duration : duration * 1000;
-      return durationMs <= 14 * 24 * 60 * 60 * 1000 ? durationMs : 0;
+      const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+      const fourteenDaysSeconds = fourteenDaysMs / 1000;
+      if (duration <= fourteenDaysMs) return duration;
+      return duration <= fourteenDaysSeconds ? duration * 1000 : 0;
     }
 
     function lastLiveRecord(videos) {
@@ -936,6 +938,8 @@
       const candidates = records
         .filter((video) => video && typeof video === "object" && video.is_live !== true)
         .map((video) => {
+          const endedAt = parseKickTimestamp(video.ended_at || video.end_time);
+          if (endedAt) return { timestamp: endedAt, approximate: false };
           const startedAt = parseKickTimestamp(video.start_time || video.started_at);
           const durationMs = kickDurationMilliseconds(video.duration);
           const createdAt = parseKickTimestamp(video.created_at);
