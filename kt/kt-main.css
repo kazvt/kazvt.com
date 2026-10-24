@@ -801,6 +801,17 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   flex-wrap: wrap;
 }
 
+.kt-member-new-badge {
+  display: block;
+  width: clamp(40px, 4.5vw, 50px);
+  height: auto;
+  flex: 0 0 auto;
+  align-self: center;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(1px 2px 0 rgb(43 32 40 / 38%));
+}
+
 .kt-member-name,
 .kt-recommendation-name {
   overflow-wrap: anywhere;
@@ -1712,7 +1723,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   flex: 0 0 auto;
   place-items: center;
   border: 2px solid var(--kt-ink);
-  background: linear-gradient(135deg, var(--kt-blue) 0 48%, var(--kt-white) 48% 57%, var(--kt-pink) 57% 100%);
+  background: #fff;
   box-shadow: 2px 2px 0 var(--kt-ink);
   font-family: "04b_30", var(--kt-comic-font);
   font-size: .78rem;
