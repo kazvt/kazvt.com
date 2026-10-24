@@ -608,7 +608,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-member-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: 144px;
   gap: 14px 18px;
   margin: 0;
   padding: 0 0 8px;
