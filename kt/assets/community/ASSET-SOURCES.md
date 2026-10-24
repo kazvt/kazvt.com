@@ -12,6 +12,8 @@ The supplied PNG artwork in this directory was copied from files or URLs provide
 - `trans-ghost.png` — supplied local illustration (`clipboard_20261024_220157_bgless.png`).
 - `translesbian-pixelheart.png` — https://cdn3.emoji.gg/emojis/4823-pixelheart-translesbian.png
 
+The animated flag and heart GIFmojis in `pride-gifmojis/` were copied from the site owner's local `Pride_GIFmojis_by_Violet_violxiv` folder and are used as small decorative accents. Their original filenames are preserved; redistribution terms were not independently verified.
+
 The two small decorative loops were downloaded from AnimatEmojis and use Microsoft Fluent Emoji artwork as their source:
 
 - `fluent-transgender-flag.gif` — https://animatemojis.com/emoji/fluent-transgender-flag
