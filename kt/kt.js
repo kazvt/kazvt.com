@@ -327,7 +327,7 @@
     let width = window.innerWidth + edgePadding * 2;
     let height = window.innerHeight + edgePadding * 2;
     // This decorative trail only needs CSS-pixel detail; a 1x backing store
-    // keeps software-rendered browsers from clearing a multi-DPR fullscreen canvas.
+    // avoids allocating a multi-DPR full-viewport surface on software renderers.
     const pixelRatio = 1;
     let animationFrame = 0;
     let hasPointer = false;
