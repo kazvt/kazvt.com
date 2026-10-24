@@ -1147,6 +1147,9 @@
       if (!timestamp || entry.card.dataset.liveState !== "offline") return;
       entry.lastLiveAt = timestamp;
       entry.lastLiveApproximate = approximate;
+      entry.lastLiveSource = "vod";
+      entry.lastLiveEstimateDays = 0;
+      entry.lastLiveCheckedAt = 0;
       entry.lastLiveText.textContent = `${approximate ? "~" : ""}${formatRelativeTime(timestamp, "narrow")}`;
       const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || entry.slug;
@@ -1158,6 +1161,36 @@
       entry.lastLiveBadge.title = label;
       entry.lastLiveBadge.hidden = false;
       entry.card.dataset.lastLive = "true";
+      delete entry.card.dataset.lastLiveEstimate;
+    }
+
+    function showRetentionEstimate(entry, retentionDays, checkedAt = Date.now()) {
+      if (!retentionDays || entry.card.dataset.liveState !== "offline") return;
+      entry.lastLiveAt = checkedAt - retentionDays * 24 * 60 * 60 * 1000;
+      entry.lastLiveApproximate = true;
+      entry.lastLiveSource = "retention-estimate";
+      entry.lastLiveEstimateDays = retentionDays;
+      entry.lastLiveCheckedAt = checkedAt;
+      entry.lastLiveText.textContent = `${retentionDays}d+`;
+      const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
+        ?.textContent?.trim() || entry.slug;
+      const label = window.KazvtI18n?.format?.("kt.last_live_retention_aria", {
+        name: displayName,
+        days: retentionDays,
+      }) || `${displayName}: no public VOD is available; showing ${retentionDays}d+ from Kick's retention window. Last live may be older or unknown.`;
+      entry.lastLiveBadge.setAttribute("aria-label", label);
+      entry.lastLiveBadge.title = label;
+      entry.lastLiveBadge.hidden = false;
+      entry.card.dataset.lastLive = "true";
+      entry.card.dataset.lastLiveEstimate = "retention-window";
+    }
+
+    function refreshLastLiveDisplay(entry) {
+      if (entry.lastLiveSource === "retention-estimate") {
+        showRetentionEstimate(entry, entry.lastLiveEstimateDays, entry.lastLiveCheckedAt);
+      } else if (entry.lastLiveAt) {
+        showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
+      }
     }
 
     function cachedStatusDescription(entry, checkedAt) {
@@ -1171,7 +1204,10 @@
     async function loadLastLive(entry, requestId) {
       const cached = readLastLiveCache(entry.slug);
       if (cached) {
-        if (cached.timestamp) showLastLive(entry, cached.timestamp, cached.approximate);
+        if (cached.kind === "vod") showLastLive(entry, cached.timestamp, cached.approximate);
+        if (cached.kind === "retention-estimate") {
+          showRetentionEstimate(entry, cached.retentionDays, cached.checkedAt);
+        }
         return;
       }
 
@@ -1183,10 +1219,23 @@
           { headers: { Accept: "application/json" }, signal: controller.signal }
         );
         if (!response.ok) throw new Error(`Kick returned ${response.status}`);
-        const record = lastLiveRecord(await response.json());
+        const history = lastLiveRecord(await response.json());
         if (entry.statusRequestId !== requestId) return;
-        writeLastLiveCache(entry.slug, record, historyCacheTtl);
-        if (record) showLastLive(entry, record.timestamp, record.approximate);
+        if (!history.valid) throw new Error("Unexpected Kick VOD history response");
+        if (history.record) {
+          const record = { ...history.record, kind: "vod" };
+          writeLastLiveCache(entry.slug, record, historyCacheTtl);
+          showLastLive(entry, record.timestamp, record.approximate);
+        } else if (!history.hasVideos) {
+          const verified = await channelIsVerified(entry.slug, controller.signal);
+          if (entry.statusRequestId !== requestId) return;
+          const retentionDays = verified ? 30 : 7;
+          const estimate = { kind: "retention-estimate", retentionDays };
+          const cachedEstimate = writeLastLiveCache(entry.slug, estimate, historyCacheTtl);
+          showRetentionEstimate(entry, retentionDays, cachedEstimate.checkedAt);
+        } else {
+          writeLastLiveCache(entry.slug, null, historyFailureTtl);
+        }
       } catch {
         if (entry.statusRequestId === requestId) {
           writeLastLiveCache(entry.slug, null, historyFailureTtl);
