@@ -57,6 +57,18 @@
           alt: "Static KickassTransfems wordmark with stacked trans-color outlines over a waving transgender pride flag",
           linkLabel: "Open the KickassTransfems panel PNG over the trans flag",
         },
+        {
+          src: "/kt/assets/KT-K-panel-static-320.png",
+          label: "Transparent K PNG",
+          alt: "Static KickassTransfems K monogram in transgender flag colors on a transparent background",
+          linkLabel: "Open the transparent KickassTransfems K panel PNG",
+        },
+        {
+          src: "/kt/assets/KT-K-trans-flag-panel-static-320.png",
+          label: "Trans flag K PNG",
+          alt: "Static KickassTransfems K monogram in transgender flag colors over a transgender pride flag background",
+          linkLabel: "Open the KickassTransfems K panel PNG over the trans flag",
+        },
       ];
       let badgeIndex = 0;
       let badgeRequest = 0;
@@ -161,9 +173,11 @@
 
       previousBadge.addEventListener("click", () => selectBadge(badgeIndex - 1, previousBadge));
       nextBadge.addEventListener("click", () => selectBadge(badgeIndex + 1, nextBadge));
-      // Preload the optional flag-backed 320px variant at low priority, then prioritize it
-      // on demand. Keep the truthful loading state until the displayed image loads.
-      void preloadBadge(badgeOptions[1], "low").catch(() => {});
+      // Preload the three alternate 320px variants at low priority, then prioritize
+      // whichever one is selected. Keep the truthful loading state until it displays.
+      badgeOptions.slice(1).forEach((option) => {
+        void preloadBadge(option, "low").catch(() => {});
+      });
     }
 
     if (descriptionInput instanceof HTMLInputElement && previewDescription) {
