@@ -620,6 +620,10 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   perspective: 800px;
 }
 
+.kt-member-grid > li > .kt-member {
+  height: 100%;
+}
+
 .kt-member {
   --kt-member-status-space: 34px;
   --kt-member-accent: var(--kt-blue);
