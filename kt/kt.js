@@ -767,7 +767,18 @@
       }
       const name = title.querySelector(".kt-member-name, .kt-recommendation-name");
       title.insertBefore(indicator, name || title.firstChild);
-      return [{ card, slug, indicator, scan, tooltipLabel, liveSticker, lastLiveBadge, lastLiveText }];
+      return [{
+        card,
+        slug,
+        indicator,
+        scan,
+        tooltipLabel,
+        liveSticker,
+        lastLiveBadge,
+        lastLiveText,
+        originalAriaDescription: card.getAttribute("aria-description"),
+        cachedStatus: null,
+      }];
     });
 
     if (!entries.length) return;
@@ -985,6 +996,27 @@
       } catch {}
     }
 
+    function readStatusCache(slug) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(`kt:live-status:v1:${slug}`) || "null");
+        if (stored && (stored.state === "live" || stored.state === "offline")
+          && Number.isFinite(stored.checkedAt)
+          && stored.checkedAt > 0
+          && stored.checkedAt <= Date.now() + 5 * 60 * 1000) {
+          return stored;
+        }
+      } catch {}
+      return null;
+    }
+
+    function writeStatusCache(slug, state) {
+      const status = { state, checkedAt: Date.now() };
+      try {
+        localStorage.setItem(`kt:live-status:v1:${slug}`, JSON.stringify(status));
+      } catch {}
+      return status;
+    }
+
     function formatRelativeTime(timestamp, style) {
       const age = Math.max(0, Date.now() - timestamp);
       const minute = 60_000;
@@ -1038,6 +1070,14 @@
       entry.card.dataset.lastLive = "true";
     }
 
+    function cachedStatusDescription(entry, checkedAt) {
+      const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
+        ?.textContent?.trim() || entry.slug;
+      const time = formatRelativeTime(checkedAt, "long");
+      return window.KazvtI18n?.format?.("kt.status_cached_aria", { name: displayName, time })
+        || `${displayName}'s status was last checked ${time}; checking again now`;
+    }
+
     async function loadLastLive(entry, requestId) {
       const cached = readLastLiveCache(entry.slug);
       if (cached) {
@@ -1066,19 +1106,35 @@
       }
     }
 
-    function setState(entry, state) {
+    function setState(entry, state, { fromCache = false, checkedAt = entry.cachedStatus?.checkedAt } = {}) {
       const { card, indicator, slug, tooltipLabel, liveSticker } = entry;
       const previousState = card.dataset.liveState;
       card.dataset.liveState = state;
-      entry.lastLiveBadge.hidden = true;
-      delete card.dataset.lastLive;
-      entry.lastLiveBadge.removeAttribute("aria-label");
-      entry.lastLiveBadge.removeAttribute("title");
+      const preserveOfflineHistory = state === "offline" && previousState === "offline" && entry.lastLiveAt;
+      if (!preserveOfflineHistory) {
+        entry.lastLiveBadge.hidden = true;
+        delete card.dataset.lastLive;
+        entry.lastLiveBadge.removeAttribute("aria-label");
+        entry.lastLiveBadge.removeAttribute("title");
+      }
+      const cacheNote = fromCache && checkedAt ? cachedStatusDescription(entry, checkedAt) : "";
+      if (cacheNote) {
+        card.dataset.liveStatusCached = "true";
+        indicator.dataset.cached = "true";
+        const originalDescription = entry.originalAriaDescription?.trim();
+        card.setAttribute("aria-description", [originalDescription, cacheNote].filter(Boolean).join(". "));
+      } else {
+        delete card.dataset.liveStatusCached;
+        delete indicator.dataset.cached;
+        if (entry.originalAriaDescription) card.setAttribute("aria-description", entry.originalAriaDescription);
+        else card.removeAttribute("aria-description");
+      }
       if (memberList?.contains(card)) syncMemberAvatarAvailability();
       const tooltip = tooltipLabel
         ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
         : "";
-      if (tooltip) card.title = tooltip;
+      const cardTitle = [tooltip, cacheNote].filter(Boolean).join(" · ");
+      if (cardTitle) card.title = cardTitle;
       else card.removeAttribute("title");
 
       if (state !== "live") {
@@ -1087,11 +1143,11 @@
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
         indicator.removeAttribute("title");
-        entry.lastLiveAt = 0;
+        if (!preserveOfflineHistory) entry.lastLiveAt = 0;
         return;
       }
 
-      if (previousState !== "live") clearLastLiveCache(slug);
+      if (previousState !== "live" && !fromCache) clearLastLiveCache(slug);
       entry.lastLiveAt = 0;
 
       indicator.hidden = false;
@@ -1105,9 +1161,25 @@
         || i18n?.t?.("kt.live_aria")
         || `${displayName} is live on KICK`;
       indicator.textContent = "";
-      indicator.setAttribute("aria-label", liveLabel);
-      if (tooltip) indicator.title = tooltip;
+      indicator.setAttribute("aria-label", cacheNote ? `${liveLabel}. ${cacheNote}` : liveLabel);
+      if (cardTitle) indicator.title = cardTitle;
       else indicator.removeAttribute("title");
+    }
+
+    function restoreStatusCache() {
+      entries.forEach((entry) => {
+        const cached = readStatusCache(entry.slug);
+        if (!cached) return;
+        entry.cachedStatus = cached;
+        entry.statusRequestId = 0;
+        setState(entry, cached.state, { fromCache: true, checkedAt: cached.checkedAt });
+        if (cached.state === "offline") {
+          const lastLive = readLastLiveCache(entry.slug);
+          if (lastLive?.timestamp) showLastLive(entry, lastLive.timestamp, lastLive.approximate);
+        }
+      });
+      applyMemberOrder();
+      applyGuestOrder();
     }
 
     async function checkEntry(entry) {
@@ -1128,9 +1200,20 @@
           throw new Error("Unexpected Kick status response");
         }
         state = payload.data ? "live" : "offline";
+        if (entry.statusRequestId !== requestId) return;
+        entry.cachedStatus = writeStatusCache(entry.slug, state);
         setState(entry, state);
       } catch {
-        setState(entry, "unknown");
+        if (entry.statusRequestId === requestId) {
+          if (entry.cachedStatus) {
+            setState(entry, entry.cachedStatus.state, {
+              fromCache: true,
+              checkedAt: entry.cachedStatus.checkedAt,
+            });
+          } else {
+            setState(entry, "unknown");
+          }
+        }
       } finally {
         window.clearTimeout(timeout);
       }
@@ -1194,6 +1277,7 @@
       });
     }, 60_000);
 
+    restoreStatusCache();
     void refreshStatuses();
   }
 
