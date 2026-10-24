@@ -608,6 +608,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-member-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Equal fixed tracks stop missing tags or changing status from resizing rows. */
   grid-auto-rows: 148px;
   gap: 14px 18px;
   margin: 0;
@@ -829,6 +830,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   bottom: 3px;
   left: 6px;
   display: flex;
+  direction: ltr;
   min-width: 0;
   height: 28px;
   align-items: center;
