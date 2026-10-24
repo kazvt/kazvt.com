@@ -2,6 +2,7 @@
   flex: 1 0 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 9px;
   margin: 0;
   padding: 0;
@@ -24,7 +25,7 @@
   min-height: 48px;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px;
+  padding: 7px 10px 31px;
   border: 2px solid var(--kt-ink);
   background: var(--kt-paper);
   box-shadow:
@@ -76,7 +77,6 @@
   filter: none; /* Keep the offline-avatar hook; grayscale is currently disabled. */
 }
 
-.kt-recommendation-link[data-last-live="true"] { padding-bottom: 24px; }
 .kt-recommendation-link > .kt-last-live:not([hidden]) { right: 6px; bottom: 3px; }
 
 .kt-recommendation-avatar--fallback {
