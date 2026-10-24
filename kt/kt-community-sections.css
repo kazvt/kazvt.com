@@ -1,0 +1,151 @@
+/* Paired member-kit and Discord feature styling. */
+.kt-webring-kit {
+  box-shadow:
+    6px 6px 0 var(--kt-ink),
+    10px 10px 0 var(--kt-pink),
+    16px 16px 0 var(--kt-blue),
+    0 22px 38px rgb(43 32 40 / 18%);
+}
+
+.kt-webring-heading {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(112deg, var(--kt-blue) 0 47%, #dff5fc 48% 53%, var(--kt-pink) 54% 100%);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 75%), inset 0 -2px 0 rgb(43 32 40 / 20%);
+}
+
+.kt-webring-heading::after {
+  position: absolute;
+  z-index: 0;
+  top: -45%;
+  bottom: -45%;
+  left: -38%;
+  width: 26%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 72%), transparent);
+  content: "";
+  pointer-events: none;
+  transform: translateX(-130%) skewX(-22deg);
+  animation: kt-webring-heading-shine 7.5s ease-in-out infinite;
+}
+
+.kt-webring-heading > * {
+  position: relative;
+  z-index: 1;
+}
+
+.kt-webring-heading .kt-eyebrow {
+  color: #4a2841;
+  text-shadow: 1px 1px 0 rgb(255 255 255 / 75%);
+}
+
+.kt-webring-body {
+  background:
+    linear-gradient(90deg, rgb(91 206 250 / 8%) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgb(245 169 184 / 9%) 0 1px, transparent 1px 100%),
+    radial-gradient(ellipse at 3% 3%, rgb(91 206 250 / 11%), transparent 38%),
+    radial-gradient(ellipse at 100% 100%, rgb(245 169 184 / 16%), transparent 36%),
+    var(--kt-paper);
+  background-size: 18px 18px, 18px 18px, auto, auto, auto;
+}
+
+.kt-discord__message-art {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: min(84%, 310px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 8px 0 rgb(43 32 40 / 18%));
+  transform-origin: 54% 55%;
+  animation: kt-discord-message-float 5.2s steps(4, end) infinite;
+}
+
+.kt-discord__message-extrusion {
+  fill: var(--kt-pink);
+  stroke: var(--kt-ink);
+  stroke-linejoin: round;
+  stroke-width: 10px;
+  transform: translate(10px, 12px);
+}
+
+.kt-discord__message-face {
+  fill: url(#kt-discord-message-fill);
+  stroke: var(--kt-ink);
+  stroke-linejoin: round;
+  stroke-width: 10px;
+}
+
+.kt-discord__message-detail {
+  fill: none;
+  stroke: var(--kt-ink);
+  stroke-linecap: round;
+  stroke-width: 7px;
+}
+
+.kt-discord__message-detail circle {
+  stroke: var(--kt-ink);
+  stroke-width: 4px;
+}
+
+.kt-discord__blinkie {
+  width: min(210px, 78%);
+  min-height: 64px;
+}
+
+.kt-discord__blinkie-copy {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 2px;
+  font-size: clamp(.47rem, .95vw, .59rem);
+}
+
+.kt-discord__member-count {
+  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-size: clamp(.76rem, 1.2vw, .9rem);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.kt-discord__count-note {
+  color: #5b3850;
+  font-size: .78em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+@keyframes kt-discord-message-float {
+  0%, 100% { transform: rotate(-4deg) translateY(1px); }
+  50% { transform: rotate(-2deg) translateY(-5px); }
+}
+
+@keyframes kt-webring-heading-shine {
+  0%, 70% { opacity: 0; transform: translateX(-130%) skewX(-22deg); }
+  77% { opacity: .86; }
+  90%, 100% { opacity: 0; transform: translateX(520%) skewX(-22deg); }
+}
+
+@media (max-width: 520px) {
+  .kt-webring-kit {
+    margin-bottom: 34px;
+    box-shadow: 4px 4px 0 var(--kt-ink), 7px 7px 0 var(--kt-pink), 11px 11px 0 var(--kt-blue), 0 16px 28px rgb(43 32 40 / 15%);
+  }
+
+  .kt-webring-heading {
+    background: linear-gradient(112deg, var(--kt-blue) 0 47%, #dff5fc 48% 53%, var(--kt-pink) 54% 100%);
+  }
+
+  .kt-discord__art { min-height: 260px; }
+  .kt-discord__orbit--two { height: 88%; }
+  .kt-discord__message-art { width: min(78%, 288px); margin-bottom: 72px; }
+  .kt-discord__blinkie { right: 3%; bottom: 2%; width: min(194px, 79%); min-height: 64px; }
+  .kt-discord__blinkie-copy { font-size: .48rem; }
+  .kt-discord__member-count { font-size: .82rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kt-discord__message-art,
+  .kt-webring-heading::after { animation: none !important; }
+}
