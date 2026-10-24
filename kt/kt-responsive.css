@@ -326,7 +326,7 @@
     justify-items: center;
     align-content: center;
     gap: 5px;
-    padding: 8px 4px;
+    padding: 8px 4px 32px;
     box-shadow: 2px 2px 0 var(--kt-blue), 4px 4px 0 var(--kt-pink), 0 0 24px 7px var(--kt-live-halo), 0 0 44px 14px var(--kt-live-halo);
   }
 
