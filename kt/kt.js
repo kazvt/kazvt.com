@@ -567,15 +567,14 @@
       "/kt/assets/trans-you-matter.gif",
       "/kt/assets/trans-flag-heart.gif",
       "/kt/assets/trans-power.gif",
-      "/kt/assets/trans-caturday.gif",
+      "/kt/assets/community/fluent-transgender-flag.gif",
       "/kt/assets/transgender-favicon.gif",
       "/kt/assets/trans-flag-trapbob.gif",
       "/kt/assets/trans-support-fox-fisher.gif",
-      "/kt/assets/trans-rights-intoaction.gif",
       "/kt/assets/trans-akcija-cat-flag.gif",
       "/kt/assets/trans-femme-heart-fox-fisher.gif",
       "/kt/assets/trans-love-heart-contextual.gif",
-      "/kt/assets/trans-rights-taimi.gif",
+      "/kt/assets/community/fluent-pink-heart.gif",
     ];
     const shuffledPool = [...sourcePool];
     for (let index = shuffledPool.length - 1; index > 0; index -= 1) {
