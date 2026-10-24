@@ -46,16 +46,10 @@
     if (badgeImageLink && badgeImage instanceof HTMLImageElement && badgePicker && badgeLoading && badgeError && badgeStatus && previousBadge instanceof HTMLButtonElement && nextBadge instanceof HTMLButtonElement) {
       const badgeOptions = [
         {
-          src: "/kt/assets/KT-LOGO-panel-static-320.png",
-          label: "Transparent PNG",
-          alt: "Static KickassTransfems wordmark with stacked transgender flag color outlines on a transparent background",
-          linkLabel: "Open the transparent KickassTransfems panel PNG",
-        },
-        {
-          src: "/kt/assets/KT-LOGO-trans-flag-panel-static-320.png",
-          label: "Trans flag PNG",
-          alt: "Static KickassTransfems wordmark with stacked trans-color outlines over a waving transgender pride flag",
-          linkLabel: "Open the KickassTransfems panel PNG over the trans flag",
+          src: "/kt/assets/KT-K-trans-flag-panel-static-320.png",
+          label: "Trans flag K PNG",
+          alt: "Static KickassTransfems K monogram in transgender flag colors over a transgender pride flag background",
+          linkLabel: "Open the KickassTransfems K panel PNG over the trans flag",
         },
         {
           src: "/kt/assets/KT-K-panel-static-320.png",
@@ -64,10 +58,16 @@
           linkLabel: "Open the transparent KickassTransfems K panel PNG",
         },
         {
-          src: "/kt/assets/KT-K-trans-flag-panel-static-320.png",
-          label: "Trans flag K PNG",
-          alt: "Static KickassTransfems K monogram in transgender flag colors over a transgender pride flag background",
-          linkLabel: "Open the KickassTransfems K panel PNG over the trans flag",
+          src: "/kt/assets/KT-LOGO-trans-flag-panel-static-320.png",
+          label: "Trans flag PNG",
+          alt: "Static KickassTransfems wordmark with stacked trans-color outlines over a waving transgender pride flag",
+          linkLabel: "Open the KickassTransfems panel PNG over the trans flag",
+        },
+        {
+          src: "/kt/assets/KT-LOGO-panel-static-320.png",
+          label: "Transparent PNG",
+          alt: "Static KickassTransfems wordmark with stacked transgender flag color outlines on a transparent background",
+          linkLabel: "Open the transparent KickassTransfems panel PNG",
         },
       ];
       let badgeIndex = 0;
