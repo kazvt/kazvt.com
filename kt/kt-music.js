@@ -67,6 +67,7 @@
     if (buttonStateLabel) buttonStateLabel.textContent = state;
     button.dataset.muted = String(muted);
     syncAudioSignal();
+    window.KazvtSfx?.setMuted(muted);
     button.setAttribute("aria-label", accessibleAction);
     button.title = accessibleAction;
   }
