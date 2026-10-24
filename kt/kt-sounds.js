@@ -352,8 +352,6 @@
       return;
     }
 
-    if (event.relatedTarget instanceof Node
-      && (event.target.contains(event.relatedTarget) || event.relatedTarget.contains(event.target))) return;
     const now = performance.now();
     if (now - lastGenericHoverAt < 180) return;
     lastGenericHoverAt = now;
