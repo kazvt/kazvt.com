@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Comic Neue";
+  src: url("/kt/assets/fonts/comic-neue-latin-400-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Comic Neue";
+  src: url("/kt/assets/fonts/comic-neue-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 .blog-page {
   min-height: 100vh;
 }
@@ -445,6 +461,12 @@
   color: var(--ink);
   font-family: inherit;
   font-size: 1.04rem;
+}
+
+/* Keep published post prose on the embedded comic face, independent of the site theme. */
+.blog-article .blog-rich-content .ql-container.ql-snow,
+.blog-article .blog-rich-content .ql-editor {
+  font-family: "Comic Neue", "Comic Sans MS", "Comic Sans", cursive;
 }
 
 .blog-rich-content .ql-editor {
