@@ -77,7 +77,19 @@
   filter: none; /* Keep the offline-avatar hook; grayscale is currently disabled. */
 }
 
-.kt-recommendation-link > .kt-last-live:not([hidden]) { right: 6px; bottom: 3px; }
+.kt-recommendation-link > .kt-member-arrow {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+  justify-self: end;
+  z-index: 3;
+}
+
+.kt-recommendation-link > .kt-last-live:not([hidden]) {
+  right: 6px;
+  bottom: 3px;
+  z-index: 2;
+}
 
 .kt-recommendation-avatar--fallback {
   display: grid;
