@@ -2,8 +2,7 @@
   flex: 1 0 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  /* Keep offline-history labels inside reserved space without growing one card. */
-  grid-auto-rows: 108px;
+  grid-auto-rows: auto;
   gap: 9px;
   margin: 0;
   padding: 0;
@@ -22,12 +21,11 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  height: 100%;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   min-height: 48px;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px 31px;
+  padding: 7px 10px;
   border: 2px solid var(--kt-ink);
   background: var(--kt-paper);
   box-shadow:
