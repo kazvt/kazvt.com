@@ -510,51 +510,22 @@
     const roster = document.querySelector(".kt-member-grid");
     if (!label || !roster) return;
 
-    const content = label.querySelector("[data-kt-kicker-content]") || label;
     const count = roster.querySelectorAll(":scope > li > .kt-member").length;
     const i18n = window.KazvtI18n;
+    if (!i18n?.format) {
+      label.textContent = label.textContent.replace(/\d+/, String(count));
+      return;
+    }
+
     const languageCode = i18n.language?.code || document.documentElement.lang || "en";
     let displayCount = String(count);
     try {
       displayCount = new Intl.NumberFormat(languageCode).format(count);
     } catch {}
 
-    let formatted = "";
-    if (i18n?.format) {
-      const key = count === 1 ? "kt.kicker_one" : "kt.kicker";
-      formatted = i18n.format(key, { count: displayCount }) || "";
-    }
-    const text = formatted || content.textContent.replace(/\d+/, displayCount);
-
-    // Keep the KICK brand in its existing display face, and isolate the
-    // count/group copy for its Comic Sans treatment. Text nodes ensure
-    // translated strings stay inert even if their source is malformed.
-    const fragment = document.createDocumentFragment();
-    const brandPattern = /\bKICK(?:\.COM)?\b/gi;
-    let cursor = 0;
-    let match;
-    let foundBrand = false;
-    while ((match = brandPattern.exec(text))) {
-      if (match.index > cursor) {
-        const group = document.createElement("span");
-        group.className = "kt-topbar-label__group";
-        group.textContent = text.slice(cursor, match.index);
-        fragment.append(group);
-      }
-      const brand = document.createElement("span");
-      brand.className = "kt-topbar-label__brand";
-      brand.textContent = "KICK";
-      fragment.append(brand);
-      cursor = brandPattern.lastIndex;
-      foundBrand = true;
-    }
-    if (cursor < text.length || !foundBrand) {
-      const group = document.createElement("span");
-      group.className = "kt-topbar-label__group";
-      group.textContent = text.slice(cursor) || text;
-      fragment.append(group);
-    }
-    content.replaceChildren(fragment);
+    const key = count === 1 ? "kt.kicker_one" : "kt.kicker";
+    const formatted = i18n.format(key, { count: displayCount });
+    if (formatted) label.textContent = formatted;
   }
 
   function initializePrideGifStagger() {

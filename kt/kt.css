@@ -202,11 +202,6 @@ body[data-page="kt"] summary:focus-visible {
   color: var(--kt-ink) !important;
 }
 
-.kt-topbar-label__group {
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
-  font-weight: 700;
-}
-
 .kt-music-toggle {
   position: fixed;
   z-index: 1000;
