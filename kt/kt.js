@@ -989,7 +989,8 @@
     function lastLiveRecord(videos) {
       const records = Array.isArray(videos)
         ? videos
-        : Array.isArray(videos?.data) ? videos.data : [];
+        : Array.isArray(videos?.data) ? videos.data : null;
+      if (!records) return { valid: false, hasVideos: false, record: null };
       const candidates = records
         .filter((video) => video && typeof video === "object" && video.is_live !== true)
         .map((video) => {
@@ -1002,17 +1003,25 @@
           return { timestamp: createdAt, approximate: true };
         })
         .filter(({ timestamp }) => timestamp > 0 && timestamp <= Date.now() + 5 * 60 * 1000);
-      return candidates.reduce((latest, candidate) => candidate.timestamp > (latest?.timestamp || 0) ? candidate : latest, null);
+      return {
+        valid: true,
+        hasVideos: records.length > 0,
+        record: candidates.reduce((latest, candidate) => candidate.timestamp > (latest?.timestamp || 0) ? candidate : latest, null),
+      };
     }
 
     function readLastLiveCache(slug) {
       const memoryValue = lastLiveCache.get(slug);
       if (memoryValue && memoryValue.expiresAt > Date.now()) return memoryValue;
       try {
-        const stored = JSON.parse(localStorage.getItem(`kt:last-live:v1:${slug}`) || "null");
+        const stored = JSON.parse(localStorage.getItem(`kt:last-live:v2:${slug}`) || "null");
+        const validVod = stored?.kind === "vod" && Number.isFinite(stored.timestamp) && stored.timestamp > 0
+          && typeof stored.approximate === "boolean";
+        const validEstimate = stored?.kind === "retention-estimate"
+          && (stored.retentionDays === 7 || stored.retentionDays === 30);
+        const validUnavailable = stored?.kind === "unavailable";
         if (stored && Number.isFinite(stored.checkedAt) && Number.isFinite(stored.expiresAt)
-          && stored.expiresAt > Date.now() && (stored.timestamp === null || Number.isFinite(stored.timestamp))
-          && typeof stored.approximate === "boolean") {
+          && stored.expiresAt > Date.now() && (validVod || validEstimate || validUnavailable)) {
           lastLiveCache.set(slug, stored);
           return stored;
         }
@@ -1024,12 +1033,14 @@
       const cacheValue = {
         checkedAt: Date.now(),
         expiresAt: Date.now() + ttl,
+        kind: record?.kind || "unavailable",
         timestamp: record?.timestamp || null,
         approximate: Boolean(record?.approximate),
+        retentionDays: record?.retentionDays || null,
       };
       lastLiveCache.set(slug, cacheValue);
       try {
-        localStorage.setItem(`kt:last-live:v1:${slug}`, JSON.stringify(cacheValue));
+        localStorage.setItem(`kt:last-live:v2:${slug}`, JSON.stringify(cacheValue));
       } catch {}
       return cacheValue;
     }
@@ -1037,8 +1048,42 @@
     function clearLastLiveCache(slug) {
       lastLiveCache.delete(slug);
       try {
-        localStorage.removeItem(`kt:last-live:v1:${slug}`);
+        localStorage.removeItem(`kt:last-live:v2:${slug}`);
       } catch {}
+    }
+
+    const channelVerificationCache = new Map();
+    const channelVerificationCacheTtl = 4 * 60 * 60 * 1000;
+
+    async function channelIsVerified(slug, signal) {
+      const cached = channelVerificationCache.get(slug);
+      if (cached && cached.expiresAt > Date.now()) return cached.verified;
+      try {
+        const stored = JSON.parse(localStorage.getItem(`kt:channel-verification:v1:${slug}`) || "null");
+        if (stored && typeof stored.verified === "boolean" && Number.isFinite(stored.expiresAt)
+          && stored.expiresAt > Date.now()) {
+          channelVerificationCache.set(slug, stored);
+          return stored.verified;
+        }
+      } catch {}
+
+      const response = await fetch(
+        `https://kick.com/api/v2/channels/${encodeURIComponent(slug)}`,
+        { headers: { Accept: "application/json" }, signal }
+      );
+      if (!response.ok) throw new Error(`Kick returned ${response.status}`);
+      const channel = await response.json();
+      const verified = typeof channel?.verified === "boolean"
+        ? channel.verified
+        : typeof channel?.is_verified === "boolean" ? channel.is_verified : null;
+      if (verified === null) throw new Error("Kick did not provide channel verification status");
+
+      const verification = { verified, expiresAt: Date.now() + channelVerificationCacheTtl };
+      channelVerificationCache.set(slug, verification);
+      try {
+        localStorage.setItem(`kt:channel-verification:v1:${slug}`, JSON.stringify(verification));
+      } catch {}
+      return verified;
     }
 
     function readStatusCache(slug) {
