@@ -1,4 +1,4 @@
 .kt-topbar-label__group {
   font-family: var(--kt-comic-font);
-  font-weight: 700;
+  font-weight: 700 !important;
 }
