@@ -1332,6 +1332,7 @@
         if (!preserveOfflineHistory) {
           entry.lastLiveAt = 0;
           entry.lastLiveSource = "";
+          entry.lastLiveKnownOnly = false;
           entry.lastLiveEstimateDays = 0;
           entry.lastLiveCheckedAt = 0;
         }
