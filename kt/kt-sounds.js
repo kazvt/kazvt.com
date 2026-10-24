@@ -384,17 +384,16 @@
     const languageOption = target.closest(".language-option, [data-language-option]");
     if (languageOption) {
       if (action === "Hover") return "languageOptionHover";
-      const value = [
-        languageOption.dataset.language,
-        languageOption.dataset.languageName,
-        languageOption.dataset.languageCode,
-      ].filter(Boolean).join(" ").toLowerCase();
-      if (value.includes("spanish") || /(^|\\s)es(?:-|\\s|$)/.test(value)) return "languageSpanish";
-      if (value.includes("arabic") || /(^|\\s)ar(?:-|\\s|$)/.test(value)) return "languageArabic";
-      if (value.includes("turkish") || /(^|\\s)tr(?:-|\\s|$)/.test(value)) return "languageTurkish";
-      if (value.includes("chinese") || value.includes("zh")) return "languageChinese";
-      if (value.includes("portuguese") || value.includes("pt")) return "languagePortuguese";
-      return "languageEnglish";
+      const languageName = languageOption.dataset.language?.toLowerCase();
+      const languageCues = {
+        english: "languageEnglish",
+        spanish: "languageSpanish",
+        arabic: "languageArabic",
+        turkish: "languageTurkish",
+        chinese: "languageChinese",
+        portuguese: "languagePortuguese",
+      };
+      return languageCues[languageName] || "languageEnglish";
     }
 
     if (target.closest(".language-button, [data-language-toggle]")) return `languageMenu${action}`;
