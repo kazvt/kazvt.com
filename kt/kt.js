@@ -851,6 +851,10 @@
       if (leftRank !== rightRank) return leftRank - rightRank;
 
       if (leftRank === 1) {
+        const leftEstimate = left.entry?.lastLiveSource === "retention-estimate";
+        const rightEstimate = right.entry?.lastLiveSource === "retention-estimate";
+        if (leftEstimate && rightEstimate
+          && left.entry.lastLiveEstimateDays === right.entry.lastLiveEstimateDays) return 0;
         const leftTimestamp = Number(left.entry?.lastLiveAt) || 0;
         const rightTimestamp = Number(right.entry?.lastLiveAt) || 0;
         if (leftTimestamp !== rightTimestamp) return rightTimestamp - leftTimestamp;
