@@ -723,6 +723,8 @@
     )];
     const entries = cards.flatMap((card) => {
       const title = card.querySelector(".kt-member-title");
+      const copy = card.querySelector(".kt-member-copy, .kt-recommendation-copy");
+      const handle = card.querySelector(".kt-member-handle, .kt-recommendation-handle");
       let profile;
       try {
         profile = new URL(card.href);
@@ -733,12 +735,12 @@
       const slug = profile.hostname === "kick.com"
         ? profile.pathname.split("/").filter(Boolean)[0]
         : "";
-      if (!slug || !title) return [];
+      if (!slug || !title || !copy || !handle) return [];
 
       const languages = document.createElement("span");
       languages.className = "kt-streamer-languages";
       languages.setAttribute("role", "group");
-      languages.setAttribute("aria-label", "Languages");
+      languages.setAttribute("aria-label", window.KazvtI18n?.t?.("kt.languages_label") || "Spoken languages");
       const spokenLanguages = slug.toLowerCase() === "vestaphoenix"
         ? [{ code: "en", label: "EN", name: "English" }, { code: "es", label: "ESP", name: "Spanish" }]
         : [{ code: "en", label: "EN", name: "English" }];
@@ -750,7 +752,7 @@
         language.textContent = label;
         languages.append(language);
       });
-      title.append(languages);
+      copy.append(languages);
 
       const tooltipLabel = card.title.trim();
       const statusRail = card.matches(".kt-member")

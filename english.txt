@@ -627,6 +627,7 @@ kt.live_label=LIVE
 kt.live_aria={name} is live on KICK
 kt.last_live_aria={name} was last live {time}
 kt.last_live_retention_aria=No public VOD is available for {name}; using Kick's {days}-day retention limit as an estimate. Their last stream may be older or unknown.
+kt.languages_label=Spoken languages
 kt.status_cached_aria={name}'s status was last checked {time}; checking again now
 kt.live_title=Live on KICK
 kt.unknown_label=?
