@@ -800,6 +800,7 @@
       return [{
         card,
         slug,
+        languages,
         indicator,
         scan,
         tooltipLabel,
@@ -1418,6 +1419,10 @@
     });
 
     const refreshIndicatorLanguage = () => entries.forEach((entry) => {
+      entry.languages.setAttribute(
+        "aria-label",
+        window.KazvtI18n?.t?.("kt.languages_label") || "Spoken languages"
+      );
       const state = entry.card.dataset.liveState;
       const fromCache = entry.card.dataset.liveStatusCached === "true";
       if (state === "live" || (state === "offline" && fromCache)) {
