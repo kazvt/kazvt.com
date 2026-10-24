@@ -566,6 +566,7 @@ kt.home_footer=Voltar para kazvt.com
 kt.live_label=AO VIVO
 kt.live_aria={name} está ao vivo na KICK
 kt.last_live_aria={name} esteve ao vivo pela última vez: {time}
+kt.last_live_retention_aria=Não há VOD público disponível para {name}; o limite de retenção de {days} dias da Kick é usado como estimativa. A última transmissão pode ser anterior ou desconhecida.
 kt.status_cached_aria=O status de {name} foi verificado pela última vez {time}; verificando novamente
 kt.live_title=Ao vivo na KICK
 kt.unknown_label=?
