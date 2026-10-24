@@ -1692,15 +1692,6 @@ body[data-page="kt"] .kt-member-badge--admin {
   text-shadow: 1px 1px 0 var(--kt-white);
 }
 
-.kt-discord__blinkie-mark span {
-  position: absolute;
-  margin: -27px 0 0 28px;
-  color: var(--kt-white);
-  font-family: Arial, sans-serif;
-  font-size: .75rem;
-  text-shadow: 1px 1px 0 var(--kt-ink);
-}
-
 .kt-discord__blinkie-copy {
   min-width: 0;
   color: var(--kt-ink);

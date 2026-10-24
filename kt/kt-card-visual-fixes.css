@@ -1,0 +1,17 @@
+/* Keep the moving beam inside the card face, without clipping its outer bevel or sticker. */
+.kt-live-scan {
+  overflow: clip;
+  clip-path: inset(0);
+}
+
+/* This short section label is a heading cue, so give it the same weight as the stamp. */
+.kt-webring-heading .kt-eyebrow {
+  font-weight: 700;
+}
+
+.kt-discord__blinkie-mark > img {
+  display: block;
+  width: 32px;
+  height: 24px;
+  image-rendering: pixelated;
+}
