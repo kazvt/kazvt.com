@@ -565,6 +565,7 @@ kt.admin=ADMIN DEL GRUPO
 kt.home_footer=Volver a kazvt.com
 kt.live_label=EN VIVO
 kt.live_aria={name} está en directo en KICK
+kt.last_live_aria={name} estuvo en directo por última vez: {time}
 kt.live_title=En directo en KICK
 kt.unknown_label=?
 kt.unknown_aria=No se pudo comprobar el estado de KICK de {name}

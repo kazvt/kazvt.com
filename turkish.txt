@@ -565,6 +565,7 @@ kt.admin=GRUP YÖNETİCİSİ
 kt.home_footer=kazvt.com'a dön
 kt.live_label=CANLI
 kt.live_aria={name} KICK'te canlı
+kt.last_live_aria={name} en son {time} canlıydı
 kt.live_title=KICK'te canlı
 kt.unknown_label=?
 kt.unknown_aria={name} için KICK durumu kontrol edilemedi

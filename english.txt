@@ -625,6 +625,7 @@ kt.admin=GROUP ADMIN
 kt.home_footer=Back to kazvt.com
 kt.live_label=LIVE
 kt.live_aria={name} is live on KICK
+kt.last_live_aria={name} was last live {time}
 kt.live_title=Live on KICK
 kt.unknown_label=?
 kt.unknown_aria=Couldn't check {name}'s KICK status
