@@ -43,31 +43,30 @@
       noise: { frequency: 1750, endFrequency: 980, duration: 0.022, gain: 0.011 },
     },
     memberLiveHover: {
+      base: "memberHover",
       tones: [
-        { type: "sine", frequency: 784, endFrequency: 988, duration: 0.115, gain: 0.014 },
-        { type: "sine", frequency: 1047, endFrequency: 1319, delay: 0.018, duration: 0.12, gain: 0.012 },
-        { type: "triangle", frequency: 1319, endFrequency: 1568, delay: 0.035, duration: 0.11, gain: 0.009 },
+        { type: "sine", frequency: 1047, endFrequency: 1319, delay: 0.018, duration: 0.12, gain: 0.009 },
+        { type: "triangle", frequency: 1319, endFrequency: 1568, delay: 0.035, duration: 0.11, gain: 0.007 },
       ],
     },
     memberLiveClick: {
+      base: "memberClick",
       tones: [
-        { type: "triangle", frequency: 554, endFrequency: 659, duration: 0.15, gain: 0.023 },
-        { type: "sine", frequency: 831, endFrequency: 988, delay: 0.025, duration: 0.16, gain: 0.02 },
-        { type: "sine", frequency: 1109, endFrequency: 1319, delay: 0.05, duration: 0.17, gain: 0.016 },
+        { type: "sine", frequency: 831, endFrequency: 988, delay: 0.025, duration: 0.16, gain: 0.014 },
+        { type: "sine", frequency: 1109, endFrequency: 1319, delay: 0.05, duration: 0.17, gain: 0.011 },
       ],
-      noise: { frequency: 2300, endFrequency: 1400, duration: 0.024, gain: 0.013 },
     },
     guestLiveHover: {
+      base: "guestHover",
       tones: [
-        { type: "sine", frequency: 659, endFrequency: 831, duration: 0.105, gain: 0.009 },
-        { type: "sine", frequency: 988, endFrequency: 1175, delay: 0.025, duration: 0.105, gain: 0.007 },
+        { type: "sine", frequency: 988, endFrequency: 1175, delay: 0.025, duration: 0.105, gain: 0.005 },
       ],
     },
     guestLiveClick: {
+      base: "guestClick",
       tones: [
-        { type: "triangle", frequency: 494, endFrequency: 587, duration: 0.14, gain: 0.016 },
-        { type: "sine", frequency: 740, endFrequency: 880, delay: 0.03, duration: 0.15, gain: 0.014 },
-        { type: "sine", frequency: 988, endFrequency: 1175, delay: 0.055, duration: 0.15, gain: 0.011 },
+        { type: "sine", frequency: 740, endFrequency: 880, delay: 0.03, duration: 0.15, gain: 0.009 },
+        { type: "sine", frequency: 988, endFrequency: 1175, delay: 0.055, duration: 0.15, gain: 0.007 },
       ],
     },
   };
@@ -234,17 +233,20 @@
     const now = context.currentTime + 0.003;
     const pitchFactor = nextPitch(cue);
     const voice = { cue, sources: [], nodes: [], cleanupTimer: 0 };
+    const baseProfile = profile.base ? profiles[profile.base] : null;
+    const tones = [...(baseProfile?.tones || []), ...(profile.tones || [])];
+    const noises = [baseProfile?.noise, profile.noise].filter(Boolean);
     activeVoices.add(voice);
 
     try {
-      profile.tones?.forEach((tone) => {
+      tones.forEach((tone) => {
         const startAt = now + (tone.delay || 0);
         startTone(context, voice, tone, pitchFactor, startAt);
       });
-      if (profile.noise) startNoise(context, voice, profile.noise, pitchFactor, now);
+      noises.forEach((noise) => startNoise(context, voice, noise, pitchFactor, now));
 
       const longestSound = Math.max(
-        ...[...(profile.tones || []), ...(profile.noise ? [profile.noise] : [])]
+        ...[...tones, ...noises]
           .map((sound) => (sound.delay || 0) + sound.duration)
       );
       voice.cleanupTimer = window.setTimeout(() => disconnectVoice(voice), (longestSound + 0.08) * 1000);
