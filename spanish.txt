@@ -590,5 +590,5 @@ kt.music_state_on=SONIDO ACTIVO
 kt.music_state_muted=SONIDO DESACTIVADO
 kt.music_mute=SILENCIAR
 kt.music_unmute=ACTIVAR SONIDO
-kt.music_mute_aria=Silenciar la música de fondo
-kt.music_unmute_aria=Activar la música de fondo
+kt.music_mute_aria=Silenciar todos los sonidos del sitio
+kt.music_unmute_aria=Activar todos los sonidos del sitio

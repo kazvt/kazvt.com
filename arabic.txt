@@ -596,5 +596,5 @@ kt.music_state_on=الصوت يعمل
 kt.music_state_muted=الصوت متوقف
 kt.music_mute=كتم الصوت
 kt.music_unmute=إلغاء كتم الصوت
-kt.music_mute_aria=كتم موسيقى الخلفية
-kt.music_unmute_aria=إلغاء كتم موسيقى الخلفية
+kt.music_mute_aria=كتم جميع أصوات الموقع
+kt.music_unmute_aria=إلغاء كتم جميع أصوات الموقع

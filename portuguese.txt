@@ -589,5 +589,5 @@ kt.music_state_on=SOM LIGADO
 kt.music_state_muted=SOM DESLIGADO
 kt.music_mute=MUTAR
 kt.music_unmute=ATIVAR SOM
-kt.music_mute_aria=Silenciar a música de fundo
-kt.music_unmute_aria=Ativar a música de fundo
+kt.music_mute_aria=Silenciar todos os sons do site
+kt.music_unmute_aria=Ativar todos os sons do site
