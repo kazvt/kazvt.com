@@ -513,9 +513,19 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 .kt-link-arrow,
-.kt-member-arrow {
-  font-family: Arial, sans-serif;
-  font-weight: 400;
+.kt-member-arrow,
+.kt-discord__join-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.kt-external-link-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
 }
 
 .kt-roster {
@@ -1834,9 +1844,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-discord__join-icon svg { display: block; width: 25px; height: 25px; }
 
 .kt-discord__join-arrow {
-  font-family: Arial, sans-serif;
   font-size: 1.3rem;
-  font-weight: 700;
 }
 
 .kt-discord__route {
