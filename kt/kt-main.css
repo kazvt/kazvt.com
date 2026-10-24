@@ -16,6 +16,8 @@
 
 :root.kt-root {
   --kt-comic-font: "Comic Neue", "Comic Sans MS", "Comic Sans", cursive;
+  --kt-live-pip-duration: 900ms;
+  --kt-live-pip-visual-cycle: 1800ms;
   --kt-ink: #2b2028;
   --kt-night: #f7dce6;
   --kt-deep: #e6a0b7;
@@ -973,12 +975,12 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   background: var(--kt-live-accent);
   box-shadow: 0 0 5px 2px var(--kt-live-glow), 0 0 13px 4px var(--kt-live-glow);
   animation:
-    kt-live-glow .9s ease-in-out infinite alternate,
-    kt-live-pip-flash .9s ease-in-out infinite;
+    kt-live-glow var(--kt-live-pip-duration) ease-in-out infinite alternate,
+    kt-live-pip-flash var(--kt-live-pip-duration) ease-in-out infinite;
+  animation-delay: var(--kt-live-pip-phase, 0ms);
 }
 
 .kt-live-indicator[data-state="live"][data-cached="true"] {
-  animation: none;
   opacity: .58;
 }
 
