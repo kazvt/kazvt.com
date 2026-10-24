@@ -815,6 +815,19 @@
 
     if (!entries.length) return;
 
+    // Anchor every live pip to the same document-timeline phase, even when
+    // status requests resolve at different times. The glow alternates, so its
+    // full visual cycle is twice the shared 900ms animation duration.
+    const livePipVisualCycle = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--kt-live-pip-visual-cycle")
+    ) || 1800;
+    function synchronizeLivePip(indicator) {
+      const timelineTime = document.timeline?.currentTime;
+      const now = Number.isFinite(timelineTime) ? timelineTime : performance.now();
+      const phase = ((now % livePipVisualCycle) + livePipVisualCycle) % livePipVisualCycle;
+      indicator.style.setProperty("--kt-live-pip-phase", `${-phase}ms`);
+    }
+
     const memberList = document.querySelector(".kt-member-grid");
     const guestList = document.querySelector(".kt-recommendation-grid");
     const pinnedMemberSlugs = new Set(["kazvt", "lillie-garden"]);
@@ -1325,6 +1338,7 @@
 
       if (state !== "live") {
         indicator.hidden = true;
+        indicator.style.removeProperty("--kt-live-pip-phase");
         liveSticker?.remove();
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
@@ -1346,6 +1360,7 @@
       entry.lastLiveEstimateDays = 0;
       entry.lastLiveCheckedAt = 0;
 
+      synchronizeLivePip(indicator);
       indicator.hidden = false;
       indicator.dataset.state = state;
       if (liveSticker && !liveSticker.isConnected) (entry.statusRail || card).append(liveSticker);
