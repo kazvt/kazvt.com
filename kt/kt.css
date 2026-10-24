@@ -1494,6 +1494,518 @@ body[data-page="kt"] .kt-member-badge--admin {
   .kt-webring-step-number { animation: none !important; }
 }
 
+.kt-discord {
+  position: relative;
+  z-index: 1;
+  margin: 0 clamp(16px, 5vw, 54px) 42px;
+  perspective: 1300px;
+}
+
+.kt-discord__window {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 4px solid var(--kt-ink);
+  background: var(--kt-paper);
+  box-shadow:
+    6px 6px 0 var(--kt-ink),
+    10px 10px 0 var(--kt-pink),
+    16px 16px 0 var(--kt-blue),
+    0 22px 42px rgb(43 32 40 / 20%);
+  transform-style: preserve-3d;
+}
+
+.kt-discord__window::before {
+  position: absolute;
+  z-index: -1;
+  inset: 7px -9px -9px 7px;
+  border: 2px solid rgb(255 255 255 / 88%);
+  content: "";
+  pointer-events: none;
+  transform: translateZ(-12px);
+}
+
+.kt-discord__titlebar {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px clamp(10px, 2vw, 18px);
+  border-bottom: 4px solid var(--kt-ink);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 35%), transparent 46%),
+    linear-gradient(112deg, #f8bfd0 0%, var(--kt-pink) 48%, #dc7898 100%);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 75%), inset 0 -2px 0 rgb(43 32 40 / 20%);
+  color: var(--kt-ink);
+  font-family: "04b_30", "Comic Sans MS", "Comic Sans", cursive;
+  font-size: clamp(.65rem, 1.3vw, .82rem);
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.kt-discord__window-title,
+.kt-discord__signal {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.kt-discord__window-mark {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 3px;
+}
+
+.kt-discord__window-mark i {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--kt-ink);
+  background: var(--kt-white);
+  box-shadow: 1px 1px 0 rgb(43 32 40 / 70%);
+}
+
+.kt-discord__window-mark i:first-child { background: var(--kt-blue); }
+.kt-discord__window-mark i:last-child { background: var(--kt-pink); }
+
+.kt-discord__signal {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-paper);
+  box-shadow: 2px 2px 0 var(--kt-ink);
+  font-size: .72em;
+}
+
+.kt-discord__signal-light,
+.kt-discord__route-light {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border: 2px solid var(--kt-ink);
+  border-radius: 50%;
+  background: #b6f4d0;
+  box-shadow: 0 0 0 2px rgb(182 244 208 / 38%), 0 0 9px rgb(64 182 127 / 70%);
+}
+
+.kt-discord__body {
+  display: grid;
+  grid-template-columns: minmax(250px, .92fr) minmax(0, 1.08fr);
+  align-items: stretch;
+  gap: clamp(16px, 3vw, 34px);
+  padding: clamp(14px, 3vw, 30px);
+  background:
+    linear-gradient(90deg, rgb(91 206 250 / 8%) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgb(245 169 184 / 10%) 0 1px, transparent 1px 100%),
+    linear-gradient(135deg, rgb(255 249 252 / 99%), rgb(255 237 243 / 96%) 56%, rgb(223 245 252 / 96%));
+  background-size: 18px 18px, 18px 18px, auto;
+}
+
+.kt-discord__art {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 256px;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid var(--kt-ink);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgb(91 206 250 / 32%) 0 22%, transparent 58%),
+    repeating-linear-gradient(135deg, rgb(245 169 184 / 17%) 0 7px, transparent 7px 15px),
+    var(--kt-paper);
+  box-shadow: inset 0 0 0 5px var(--kt-white), 4px 4px 0 var(--kt-blue), 8px 8px 0 rgb(245 169 184 / 82%);
+  perspective: 900px;
+}
+
+.kt-discord__orbit {
+  position: absolute;
+  top: 49%;
+  left: 50%;
+  width: min(82%, 274px);
+  height: 70%;
+  border: 2px dashed rgb(91 206 250 / 86%);
+  border-radius: 50%;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.kt-discord__orbit--one {
+  animation: kt-discord-orbit-one 22s linear infinite;
+}
+
+.kt-discord__orbit--two {
+  width: min(70%, 226px);
+  height: 86%;
+  border-color: rgb(245 169 184 / 90%);
+  border-style: solid;
+  animation: kt-discord-orbit-two 27s linear infinite;
+}
+
+.kt-discord__spark {
+  position: absolute;
+  z-index: 4;
+  color: var(--kt-white);
+  font-family: Arial, sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  text-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink);
+  animation: kt-discord-spark 2.8s steps(2, end) infinite;
+}
+
+.kt-discord__spark--one { top: 17%; left: 15%; }
+.kt-discord__spark--two { right: 14%; bottom: 20%; animation-delay: -1.4s; }
+
+.kt-discord__bubble {
+  position: absolute;
+  border: 3px solid var(--kt-ink);
+  border-radius: 23px;
+  transform-style: preserve-3d;
+}
+
+.kt-discord__bubble::after {
+  position: absolute;
+  bottom: -13px;
+  left: 24px;
+  width: 24px;
+  height: 24px;
+  border-right: 3px solid var(--kt-ink);
+  border-bottom: 3px solid var(--kt-ink);
+  background: inherit;
+  content: "";
+  transform: skewY(-24deg) rotate(29deg);
+}
+
+.kt-discord__bubble--back {
+  z-index: 1;
+  width: 122px;
+  height: 88px;
+  margin: -38px 0 0 -84px;
+  background: linear-gradient(145deg, #ffc5d0, var(--kt-pink));
+  box-shadow: 0 4px 0 var(--kt-ink), 0 7px 0 var(--kt-blue), 7px 10px 0 rgb(43 32 40 / 20%);
+  transform: rotate(10deg) translateZ(-14px);
+}
+
+.kt-discord__bubble--back i {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin: 33px 0 0 15px;
+  border: 2px solid var(--kt-ink);
+  border-radius: 50%;
+  background: var(--kt-white);
+}
+
+.kt-discord__bubble--front {
+  z-index: 2;
+  display: flex;
+  width: 162px;
+  height: 114px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  margin: -4px 0 0 28px;
+  background: linear-gradient(140deg, #fff 0%, #f7fbff 43%, #dff5fc 44%, #a8e8fb 100%);
+  box-shadow: 0 5px 0 var(--kt-ink), 0 9px 0 var(--kt-blue), 8px 14px 0 rgb(43 32 40 / 22%);
+  transform: rotate(-6deg) translateZ(26px);
+  animation: kt-discord-bubble-float 4.8s steps(4, end) infinite;
+}
+
+.kt-discord__bubble--front::after { z-index: 1; }
+
+.kt-discord__bubble-dots {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.kt-discord__bubble-dots i {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--kt-ink);
+  border-radius: 50%;
+  background: var(--kt-pink);
+  box-shadow: 1px 1px 0 var(--kt-white);
+}
+
+.kt-discord__bubble-dots i:nth-child(2) { background: var(--kt-blue); }
+.kt-discord__bubble-dots i:nth-child(3) { background: var(--kt-white); }
+
+.kt-discord__bubble-line {
+  display: block;
+  height: 7px;
+  border: 1px solid rgb(43 32 40 / 58%);
+  background: linear-gradient(90deg, var(--kt-pink) 0 34%, var(--kt-white) 34% 39%, var(--kt-blue) 39% 100%);
+  box-shadow: 1px 1px 0 var(--kt-white);
+}
+
+.kt-discord__bubble-line--long { width: 100px; }
+.kt-discord__bubble-line--short { width: 68px; opacity: .72; }
+
+.kt-discord__blinkie {
+  position: absolute;
+  z-index: 5;
+  right: 5%;
+  bottom: 8%;
+  display: flex;
+  width: min(198px, 76%);
+  min-height: 55px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border: 3px solid var(--kt-ink);
+  background: repeating-linear-gradient(180deg, #fff 0 8px, #f6c4d2 8px 15px, #fff 15px 22px, #95def6 22px 29px);
+  box-shadow: 3px 3px 0 var(--kt-ink), 6px 6px 0 var(--kt-pink);
+  transform: rotate(4deg) translateZ(36px);
+  animation: kt-discord-badge-float 5.2s steps(4, end) infinite;
+}
+
+.kt-discord__blinkie-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid var(--kt-ink);
+  background: linear-gradient(135deg, var(--kt-blue) 0 48%, var(--kt-white) 48% 57%, var(--kt-pink) 57% 100%);
+  box-shadow: 2px 2px 0 var(--kt-ink);
+  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-size: .78rem;
+  text-shadow: 1px 1px 0 var(--kt-white);
+}
+
+.kt-discord__blinkie-mark span {
+  position: absolute;
+  margin: -27px 0 0 28px;
+  color: var(--kt-white);
+  font-family: Arial, sans-serif;
+  font-size: .75rem;
+  text-shadow: 1px 1px 0 var(--kt-ink);
+}
+
+.kt-discord__blinkie-copy {
+  min-width: 0;
+  color: var(--kt-ink);
+  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-size: clamp(.5rem, 1.05vw, .65rem);
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 1px 1px 0 var(--kt-white);
+}
+
+.kt-discord__copy {
+  align-self: center;
+  min-width: 0;
+  padding: clamp(4px, 1.5vw, 16px) clamp(2px, 1vw, 10px);
+}
+
+.kt-discord__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 5px 8px;
+  border: 2px dashed var(--kt-ink);
+  background: var(--kt-white);
+  color: #305168;
+  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-size: clamp(.59rem, 1.1vw, .72rem);
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.kt-discord__eyebrow::before {
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--kt-ink);
+  border-radius: 50%;
+  background: var(--kt-pink);
+  box-shadow: 2px 2px 0 var(--kt-blue);
+  content: "";
+}
+
+.kt-discord__copy h2 {
+  max-width: 16ch;
+  margin: 0;
+  color: var(--kt-ink);
+  font-size: clamp(1.7rem, 3.6vw, 3rem);
+  font-weight: 400;
+  line-height: 1.08;
+  text-shadow: 2px 2px 0 var(--kt-white), 4px 4px 0 var(--kt-pink), 6px 6px 0 rgb(91 206 250 / 65%);
+}
+
+.kt-discord__description {
+  max-width: 48ch;
+  margin: 17px 0 0;
+  color: var(--kt-ink);
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: clamp(.98rem, 1.6vw, 1.12rem);
+  line-height: 1.5;
+}
+
+.kt-discord__join {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: min(100%, 430px);
+  min-height: 66px;
+  grid-template-columns: 40px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+  margin-top: 20px;
+  padding: 9px 13px;
+  border: 3px solid var(--kt-ink);
+  background: linear-gradient(112deg, var(--kt-blue) 0 43%, #dff5fc 43% 51%, var(--kt-pink) 51% 100%);
+  box-shadow: 4px 4px 0 var(--kt-ink), 8px 8px 0 var(--kt-pink), 0 0 24px rgb(91 206 250 / 27%);
+  color: var(--kt-ink);
+  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-size: clamp(.78rem, 1.4vw, 1rem);
+  font-weight: 400;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 150ms steps(3, end), box-shadow 150ms steps(3, end), filter 150ms steps(3, end);
+}
+
+.kt-discord__join::after {
+  position: absolute;
+  z-index: 0;
+  top: -40%;
+  bottom: -40%;
+  left: -42%;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 82%), transparent);
+  content: "";
+  pointer-events: none;
+  transform: translateX(-130%) skewX(-22deg);
+  animation: kt-discord-join-shine 7s ease-in-out infinite;
+}
+
+.kt-discord__join > * { position: relative; z-index: 1; }
+
+.kt-discord__join:hover {
+  box-shadow: 1px 1px 0 var(--kt-ink), 3px 3px 0 var(--kt-blue), 0 0 28px rgb(245 169 184 / 45%);
+  filter: saturate(1.12);
+  transform: translate(4px, 4px) rotate(-.5deg);
+}
+
+.kt-discord__join:focus-visible {
+  outline: 3px dashed var(--kt-ink);
+  outline-offset: 5px;
+}
+
+.kt-discord__join-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-white);
+  box-shadow: 2px 2px 0 var(--kt-ink);
+}
+
+.kt-discord__join-icon svg { display: block; width: 25px; height: 25px; }
+
+.kt-discord__join-arrow {
+  font-family: Arial, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.kt-discord__route {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  margin: 15px 0 0;
+  color: #55434c;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: .8rem;
+  overflow-wrap: anywhere;
+}
+
+.kt-discord__route-light {
+  width: 8px;
+  height: 8px;
+  background: var(--kt-blue);
+  box-shadow: 0 0 0 2px rgb(91 206 250 / 30%);
+}
+
+.kt-discord__footer {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px clamp(10px, 2vw, 18px);
+  border-top: 3px dashed var(--kt-ink);
+  background: linear-gradient(90deg, rgb(91 206 250 / 46%), rgb(255 249 252 / 94%) 46%, rgb(245 169 184 / 52%));
+  color: var(--kt-ink);
+  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-size: clamp(.55rem, 1vw, .68rem);
+  letter-spacing: .04em;
+}
+
+.kt-discord__footer-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.kt-discord__footer-code i {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--kt-ink);
+  border-radius: 50%;
+  background: var(--kt-pink);
+}
+
+@keyframes kt-discord-orbit-one {
+  from { transform: translate(-50%, -50%) rotateX(59deg) rotateZ(-18deg); }
+  to { transform: translate(-50%, -50%) rotateX(59deg) rotateZ(342deg); }
+}
+
+@keyframes kt-discord-orbit-two {
+  from { transform: translate(-50%, -50%) rotateX(66deg) rotateZ(22deg); }
+  to { transform: translate(-50%, -50%) rotateX(66deg) rotateZ(-338deg); }
+}
+
+@keyframes kt-discord-spark {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .72; transform: scale(.88); }
+}
+
+@keyframes kt-discord-bubble-float {
+  0%, 100% { transform: rotate(-6deg) translate3d(0, 0, 26px); }
+  50% { transform: rotate(-4deg) translate3d(0, -5px, 26px); }
+}
+
+@keyframes kt-discord-badge-float {
+  0%, 100% { transform: rotate(4deg) translate3d(0, 0, 36px); }
+  50% { transform: rotate(1deg) translate3d(0, -3px, 36px); }
+}
+
+@keyframes kt-discord-join-shine {
+  0%, 73% { opacity: 0; transform: translateX(-130%) skewX(-22deg); }
+  79% { opacity: .92; }
+  91%, 100% { opacity: 0; transform: translateX(520%) skewX(-22deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kt-discord__orbit,
+  .kt-discord__spark,
+  .kt-discord__bubble--front,
+  .kt-discord__blinkie,
+  .kt-discord__join::after { animation: none !important; }
+  .kt-discord__join { transition: none; }
+}
+
 .kt-footer {
   position: relative;
   z-index: 1;
