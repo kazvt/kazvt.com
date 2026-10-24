@@ -4,6 +4,7 @@
   const muteButton = document.querySelector("[data-kt-music-toggle]");
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const pitchPoolCents = [-55, -35, -18, 0, 18, 35, 55];
+  const scrollPitchSteps = [0, 2, 4, 5, 7, 9, 12];
   const newVoiceLimit = 18;
   const profiles = {
     click: {
@@ -15,8 +16,15 @@
       noise: { frequency: 3300, endFrequency: 1550, duration: 0.016, gain: 0.025 },
     },
     scroll: {
-      tones: [{ type: "sine", frequency: 390, endFrequency: 540, duration: 0.09, gain: 0.009 }],
-      noise: { frequency: 1450, endFrequency: 610, duration: 0.085, gain: 0.019 },
+      tones: [{ type: "sine", frequency: 310, duration: 0.06, gain: 0.006 }],
+      noise: { frequency: 2600, endFrequency: 760, duration: 0.115, gain: 0.024 },
+    },
+    hover: {
+      noise: { frequency: 2850, endFrequency: 1050, duration: 0.07, gain: 0.007 },
+    },
+    drag: {
+      tones: [{ type: "triangle", frequency: 230, endFrequency: 920, duration: 0.17, gain: 0.022 }],
+      noise: { frequency: 850, endFrequency: 2400, duration: 0.12, gain: 0.01 },
     },
     paperFlip: {
       tones: [{ type: "triangle", frequency: 610, endFrequency: 285, duration: 0.13, gain: 0.016 }],
@@ -78,8 +86,21 @@
   let noiseBuffer = null;
   let lastTypeSoundAt = -Infinity;
   let lastScrollSoundAt = -Infinity;
+  let lastGenericHoverAt = -Infinity;
+  let scrollSequenceIndex = 0;
+  let scrollSequenceDirection = null;
+  let recentWheelDirection = null;
+  let recentWheelDirectionAt = -Infinity;
+  let dragCandidate = null;
   let activeVoices = new Set();
   const pitchBags = new Map();
+  const previousScrollPositions = new WeakMap();
+
+  const rootScroller = document.scrollingElement || document.documentElement;
+  previousScrollPositions.set(rootScroller, {
+    x: rootScroller.scrollLeft,
+    y: rootScroller.scrollTop,
+  });
 
   function shuffle(values) {
     for (let index = values.length - 1; index > 0; index -= 1) {
@@ -214,24 +235,24 @@
   }
 
   function cueIsLowPriority(cue) {
-    return cue === "scroll" || cue.endsWith("Hover");
+    return cue === "scroll" || cue === "hover" || cue.endsWith("Hover");
   }
 
-  async function play(cue) {
+  async function play(cue, fixedPitchFactor = null) {
     const profile = profiles[cue];
-    if (!profile || muted || !userActivatedAudio) return;
-    if (!await resumeAudio()) return;
+    if (!profile || muted || !userActivatedAudio) return false;
+    if (!await resumeAudio()) return false;
     if (activeVoices.size >= newVoiceLimit) {
-      if (cueIsLowPriority(cue)) return;
+      if (cueIsLowPriority(cue)) return false;
       const quietVoice = [...activeVoices].find((voice) => cueIsLowPriority(voice.cue));
-      if (!quietVoice) return;
+      if (!quietVoice) return false;
       disconnectVoice(quietVoice, true);
     }
-    if (muted) return;
+    if (muted) return false;
 
     const context = audioContext;
     const now = context.currentTime + 0.003;
-    const pitchFactor = nextPitch(cue);
+    const pitchFactor = Number.isFinite(fixedPitchFactor) ? fixedPitchFactor : nextPitch(cue);
     const voice = { cue, sources: [], nodes: [], cleanupTimer: 0 };
     const baseProfile = profile.base ? profiles[profile.base] : null;
     const tones = [...(baseProfile?.tones || []), ...(profile.tones || [])];
@@ -250,9 +271,23 @@
           .map((sound) => (sound.delay || 0) + sound.duration)
       );
       voice.cleanupTimer = window.setTimeout(() => disconnectVoice(voice), (longestSound + 0.08) * 1000);
+      return true;
     } catch {
       disconnectVoice(voice, true);
+      return false;
     }
+  }
+
+  function directionFromDelta(deltaX, deltaY) {
+    if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return null;
+    if (Math.abs(deltaY) >= Math.abs(deltaX)) return deltaY > 0 ? "down" : "up";
+    return deltaX > 0 ? "right" : "left";
+  }
+
+  function rememberScrollDirection(direction) {
+    if (!direction || direction === scrollSequenceDirection) return;
+    scrollSequenceDirection = direction;
+    scrollSequenceIndex = 0;
   }
 
   function cueForEntry(target, action) {
@@ -282,17 +317,47 @@
 
   document.addEventListener("pointerdown", (event) => {
     unlockFromGesture(event);
+    if (event.isTrusted && event.button === 0 && event.isPrimary !== false) {
+      dragCandidate = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+      };
+    }
     if (!event.isTrusted || event.button !== 2) return;
     void play(cueForEntry(event.target, "Click") || "click");
   }, { capture: true, passive: true });
 
+  document.addEventListener("pointermove", (event) => {
+    if (!event.isTrusted || !dragCandidate || event.pointerId !== dragCandidate.pointerId || event.buttons === 0) return;
+    if (Math.hypot(event.clientX - dragCandidate.x, event.clientY - dragCandidate.y) < 8) return;
+    dragCandidate = null;
+    void play("drag");
+  }, { capture: true, passive: true });
+
+  function clearDragCandidate(event) {
+    if (dragCandidate && event.pointerId === dragCandidate.pointerId) dragCandidate = null;
+  }
+
+  document.addEventListener("pointerup", clearDragCandidate, { capture: true, passive: true });
+  document.addEventListener("pointercancel", clearDragCandidate, { capture: true, passive: true });
+
   document.addEventListener("pointerover", (event) => {
     if (!event.isTrusted || event.pointerType === "touch" || !(event.target instanceof Element)) return;
     const cue = cueForEntry(event.target, "Hover");
-    if (!cue) return;
-    const card = event.target.closest(".kt-member-grid > li > .kt-member, .kt-recommendation-grid > li > .kt-recommendation-link");
-    if (event.relatedTarget instanceof Node && card?.contains(event.relatedTarget)) return;
-    void play(cue);
+    if (cue) {
+      const card = event.target.closest(".kt-member-grid > li > .kt-member, .kt-recommendation-grid > li > .kt-recommendation-link");
+      if (event.relatedTarget instanceof Node && card?.contains(event.relatedTarget)) return;
+      void play(cue);
+      return;
+    }
+
+    if (event.relatedTarget instanceof Node
+      && (event.target.contains(event.relatedTarget) || event.relatedTarget.contains(event.target))) return;
+    const now = performance.now();
+    if (now - lastGenericHoverAt < 180) return;
+    lastGenericHoverAt = now;
+    void play("hover");
   }, { capture: true, passive: true });
 
   document.addEventListener("click", (event) => {
@@ -318,14 +383,39 @@
     void play("type");
   }, { capture: true });
 
-  document.addEventListener("wheel", unlockFromGesture, { capture: true, passive: true });
+  document.addEventListener("wheel", (event) => {
+    unlockFromGesture(event);
+    if (!event.isTrusted) return;
+    const direction = directionFromDelta(event.deltaX, event.deltaY);
+    if (direction) {
+      recentWheelDirection = direction;
+      recentWheelDirectionAt = performance.now();
+    }
+  }, { capture: true, passive: true });
   document.addEventListener("touchmove", unlockFromGesture, { capture: true, passive: true });
   document.addEventListener("scroll", (event) => {
     if (!event.isTrusted) return;
     const now = performance.now();
+    const scroller = event.target instanceof Element
+      ? event.target
+      : document.scrollingElement || document.documentElement;
+    const previous = previousScrollPositions.get(scroller);
+    const current = { x: scroller.scrollLeft, y: scroller.scrollTop };
+    previousScrollPositions.set(scroller, current);
+    const movementDirection = previous
+      ? directionFromDelta(current.x - previous.x, current.y - previous.y)
+      : null;
+    const wheelDirection = now - recentWheelDirectionAt < 800 ? recentWheelDirection : null;
+    rememberScrollDirection(movementDirection || wheelDirection);
+
     if (now - lastScrollSoundAt < 500) return;
     lastScrollSoundAt = now;
-    void play("scroll");
+    if (muted || !userActivatedAudio) return;
+
+    const semitones = scrollPitchSteps[scrollSequenceIndex];
+    const pitchFactor = 2 ** (semitones / 12);
+    scrollSequenceIndex = (scrollSequenceIndex + 1) % scrollPitchSteps.length;
+    void play("scroll", pitchFactor);
   }, { capture: true, passive: true });
 
   document.addEventListener("visibilitychange", () => {
