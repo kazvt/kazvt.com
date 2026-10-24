@@ -8,15 +8,20 @@
 
     .sparkle-frame {
       animation-timing-function: steps(1, end);
+      transform-box: fill-box;
+      transform-origin: center;
     }
 
     .heart-frame,
     .dot-frame { animation-timing-function: steps(1, end); }
 
-    .big-one { animation-name: big-one; }
-    .big-two { animation-name: big-two; }
-    .small-one { animation-name: small-one; }
-    .small-two { animation-name: small-two; }
+    .big-one,
+    .small-one { animation-name: sparkle-base; }
+    .big-two,
+    .small-two {
+      animation-name: sparkle-tilt;
+      transform: rotate(45deg) scale(1.5);
+    }
     .pink-heart {
       animation-name: pink-heart;
       transform-box: fill-box;
@@ -36,28 +41,14 @@
       animation-delay: -1s;
     }
 
-    @keyframes big-one {
-      0%, 49.999% { opacity: 1; }
-      50%, 99.999% { opacity: 0; }
-      100% { opacity: 1; }
+    @keyframes sparkle-base {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0; }
     }
 
-    @keyframes big-two {
-      0%, 49.999% { opacity: 0; }
-      50%, 99.999% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    @keyframes small-one {
-      0%, 24.999% { opacity: 0; }
-      25%, 74.999% { opacity: 1; }
-      75%, 100% { opacity: 0; }
-    }
-
-    @keyframes small-two {
-      0%, 24.999% { opacity: 1; }
-      25%, 74.999% { opacity: 0; }
-      75%, 100% { opacity: 1; }
+    @keyframes sparkle-tilt {
+      0%, 50%, 100% { opacity: 0; }
+      25%, 75% { opacity: 1; }
     }
 
     @keyframes pink-heart {
@@ -77,19 +68,19 @@
     }
 
     @keyframes pink-dot {
-      0% { transform: translateY(-4px); }
-      25% { transform: translateY(0); }
-      50% { transform: translateY(4px); }
-      75% { transform: translateY(0); }
-      100% { transform: translateY(-4px); }
+      0% { transform: translateY(-4px) scale(1.5); }
+      25% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(4px) scale(1.5); }
+      75% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-4px) scale(1.5); }
     }
 
     @keyframes blue-dot {
-      0% { transform: translateY(4px); }
-      25% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-      75% { transform: translateY(0); }
-      100% { transform: translateY(4px); }
+      0% { transform: translateY(4px) scale(1.5); }
+      25% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-4px) scale(1.5); }
+      75% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(4px) scale(1.5); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -103,12 +94,12 @@
     <path class="tile-motion heart-frame blue-heart" d="M82 88c-4-6-13 0-8 7l10 10 10-10c5-7-4-13-10-7l-1 1-1-1Z" fill="#5bcefa" stroke="#4a9fbc" stroke-width="2"/>
 
     <path class="sparkle-frame big-one" opacity="1" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
-    <path class="sparkle-frame big-two" opacity="0" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" transform="rotate(45 83 27)" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <path class="sparkle-frame big-two" opacity="0" d="m83 20 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
 
-    <path class="sparkle-frame small-one" opacity="0" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
-    <path class="sparkle-frame small-two" opacity="1" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" transform="rotate(45 38 88)" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <path class="sparkle-frame small-one" opacity="1" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <path class="sparkle-frame small-two" opacity="0" d="m38 83 1.5 3.5L43 88l-3.5 1.5L38 93l-1.5-3.5L33 88l3.5-1.5L38 83Z" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
 
-    <circle cx="93" cy="52" r="2.5" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
+    <circle class="tile-motion dot-frame pink-dot" cx="93" cy="52" r="2.5" fill="#fff" stroke="#d88fa6" stroke-width="1.5"/>
     <circle class="tile-motion dot-frame blue-dot" cx="53" cy="27" r="2" fill="#5bcefa" stroke="#4a9fbc" stroke-width="1.5"/>
     <circle class="tile-motion dot-frame pink-dot" cx="19" cy="91" r="2" fill="#f5a9b8" stroke="#bd718b" stroke-width="1.5"/>
   </g>
