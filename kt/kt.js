@@ -264,7 +264,6 @@
       if (!Number.isFinite(addedAt) || addedAt > now || now - addedAt >= newMemberWindowMs) return;
 
       if (card.querySelector(".kt-member-new-badge")) {
-        card.classList.add("kt-member--has-new-badge");
         return;
       }
 
@@ -277,7 +276,6 @@
       badge.loading = "lazy";
       badge.decoding = "async";
       card.append(badge);
-      card.classList.add("kt-member--has-new-badge");
     });
   }
 
