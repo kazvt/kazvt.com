@@ -371,6 +371,14 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
   .kt-webring-intro-art { justify-content: flex-start; }
 }
 
+@media (max-width: 360px) {
+  .kt-hero-sticker-rail { gap: 5px; }
+  .kt-hero-sticker { width: 36px; height: 36px; }
+  .kt-hero-sticker--hearts { width: 34px; height: 34px; }
+  .kt-hero-sticker--flag { width: 36px; height: 36px; }
+  .kt-hero-sticker.kt-pride-sticker { width: 32px; height: 32px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kt-hero-sticker,
   .kt-discord__mascot,
