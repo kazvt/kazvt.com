@@ -68,7 +68,10 @@
       button.setAttribute("aria-pressed", String(language.name === i18n.language.name));
       button.addEventListener("click", async () => {
         const changed = await i18n.select(language.name);
-        if (changed) window.location.reload();
+        if (changed) {
+          const reloadDelay = document.body.dataset.page === "kt" ? 200 : 0;
+          window.setTimeout(() => window.location.reload(), reloadDelay);
+        }
       });
       options.append(button);
     });

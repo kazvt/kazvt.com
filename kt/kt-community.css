@@ -155,8 +155,9 @@
   position: relative;
   z-index: 2;
   display: block;
-  width: min(78%, 330px);
+  width: min(94%, 360px);
   height: auto;
+  margin-top: -26px;
   overflow: visible;
   filter: drop-shadow(0 7px 0 rgb(43 32 40 / 24%)) drop-shadow(0 0 18px rgb(91 206 250 / 25%));
   transform-origin: 50% 58%;
@@ -219,10 +220,10 @@
 }
 
 @keyframes kt-discord-mascot-flight {
-  0%, 100% { translate: 0 1px; rotate: -1deg; scale: 1; }
-  25% { translate: 0 -5px; rotate: 1deg; scale: 1.02; }
-  50% { translate: 0 -2px; rotate: 2deg; scale: 1; }
-  75% { translate: 0 -7px; rotate: -1deg; scale: 1.02; }
+  0%, 100% { translate: 0 1px; rotate: -2deg; scale: 1; }
+  25% { translate: 0 -8px; rotate: 2deg; scale: 1.04; }
+  50% { translate: 0 -3px; rotate: 0deg; scale: 1.01; }
+  75% { translate: 0 -10px; rotate: -2deg; scale: 1.05; }
 }
 
 @keyframes kt-community-sticker-bob {
@@ -262,7 +263,7 @@
 
   .kt-discord__art { min-height: 246px; }
   .kt-discord__orbit--two { height: 88%; }
-  .kt-discord__mascot { width: min(76%, 292px); }
+  .kt-discord__mascot { width: min(92%, 292px); }
   .kt-discord__art-sticker { width: 41px; padding: 2px; }
   .kt-discord__art-sticker--heart { width: 37px; }
   .kt-discord__art-sticker--hearts { width: 43px; }
