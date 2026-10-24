@@ -807,7 +807,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   left: 6px;
   bottom: 5px;
   display: block;
-  width: clamp(26px, 2.8vw, 32px);
+  width: clamp(30px, 2.8vw, 36px);
   height: auto;
   flex: 0 0 auto;
   object-fit: contain;
