@@ -14,6 +14,11 @@
   // A major triad spread across two octaves: root, third, fifth and their
   // octave doublings. The voicing changes on each fresh page load.
   const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
+  // Four bars into each 8-bar register, bloom a quieter high fifth, major
+  // seventh, and root octave; release them just before the next register shift.
+  const chordLiftIntervals = [31, 35, 36];
+  const chordLiftGain = 0.0055;
+  const chordLiftFadeDuration = 2.6;
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
   // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
@@ -28,6 +33,7 @@
   let padFilter = null;
   let master = null;
   let oscillators = [];
+  let chordLiftVoices = [];
   let playing = false;
   let muted = false;
   let preferenceExpiresAt = 0;
@@ -36,6 +42,7 @@
   let registerScheduleTimer = 0;
   let registerCycleStart = 0;
   let scheduledRegisterChanges = 0;
+  let scheduledChordSegments = 0;
 
   function localizedMessage(key, fallback) {
     return window.KazvtI18n?.t?.(key) || fallback;
@@ -138,6 +145,19 @@
     });
   }
 
+  function scheduleChordLift(segmentStart) {
+    const liftAt = segmentStart + registerChangeInterval / 2;
+    const segmentEnd = segmentStart + registerChangeInterval;
+    const liftOutAt = segmentEnd - chordLiftFadeDuration;
+
+    chordLiftVoices.forEach((voice) => {
+      voice.gain.setValueAtTime(0.0001, liftAt);
+      voice.gain.linearRampToValueAtTime(chordLiftGain, liftAt + chordLiftFadeDuration);
+      voice.gain.setValueAtTime(chordLiftGain, liftOutAt);
+      voice.gain.linearRampToValueAtTime(0.0001, segmentEnd);
+    });
+  }
+
   function extendRegisterSchedule(throughTime) {
     while (registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval <= throughTime) {
       const changeAt = registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval;
@@ -148,12 +168,19 @@
       scheduleRegisterChange(changeAt, currentSemitones, targetSemitones);
       scheduledRegisterChanges += 1;
     }
+
+    while (registerCycleStart + scheduledChordSegments * registerChangeInterval + registerChangeInterval / 2 <= throughTime) {
+      const segmentStart = registerCycleStart + scheduledChordSegments * registerChangeInterval;
+      scheduleChordLift(segmentStart);
+      scheduledChordSegments += 1;
+    }
   }
 
   function startRegisterCycle(startTime) {
     window.clearInterval(registerScheduleTimer);
     registerCycleStart = startTime;
     scheduledRegisterChanges = 0;
+    scheduledChordSegments = 0;
     extendRegisterSchedule(startTime + registerScheduleLookahead);
     registerScheduleTimer = window.setInterval(() => {
       if (!playing || !context || context.state !== "running") return;
@@ -184,6 +211,41 @@
       const wet = context.createGain();
       wet.gain.value = 0.2;
 
+      // A restrained dual-tap, modulated delay adds stereo motion without
+      // feedback or a heavy phaser network. The suspended AudioContext also
+      // suspends its LFOs when visitors mute the pad.
+      const chorusWet = context.createGain();
+      chorusWet.gain.value = 0.13;
+      chorusWet.connect(master);
+      [
+        { delaySeconds: 0.014, rateHz: 0.16, depthSeconds: 0.0024, pan: -0.74 },
+        { delaySeconds: 0.021, rateHz: 0.21, depthSeconds: 0.003, pan: 0.74 }
+      ].forEach(({ delaySeconds, rateHz, depthSeconds, pan }) => {
+        const delay = context.createDelay(0.05);
+        delay.delayTime.value = delaySeconds;
+        const lfo = context.createOscillator();
+        lfo.frequency.value = rateHz;
+        const depth = context.createGain();
+        depth.gain.value = depthSeconds;
+        lfo.connect(depth);
+        depth.connect(delay.delayTime);
+
+        const tap = context.createGain();
+        tap.gain.value = 0.5;
+        const panner = context.createStereoPanner?.();
+        if (panner) {
+          panner.pan.value = pan;
+          tap.connect(panner);
+          panner.connect(chorusWet);
+        } else {
+          tap.connect(chorusWet);
+        }
+
+        filter.connect(delay);
+        delay.connect(tap);
+        lfo.start();
+      });
+
       filter.connect(dry);
       dry.connect(master);
       filter.connect(convolver);
@@ -196,6 +258,7 @@
       context = null;
       padFilter = null;
       master = null;
+      chordLiftVoices = [];
       return false;
     }
   }
@@ -204,17 +267,22 @@
     const now = context.currentTime;
     const midiRoot = 48 + rootSemitone;
     const voices = [];
+    const liftVoices = [];
+    const chordTones = [
+      ...chordIntervals.map((interval) => ({ interval, lift: false })),
+      ...chordLiftIntervals.map((interval) => ({ interval, lift: true }))
+    ];
 
-    chordIntervals.forEach((interval, noteIndex) => {
+    chordTones.forEach(({ interval, lift }, noteIndex) => {
       const frequency = 440 * (2 ** ((midiRoot + interval - 69) / 12));
-      [-5, 5].forEach((detune, layerIndex) => {
+      (lift ? [-3, 3] : [-5, 5]).forEach((detune, layerIndex) => {
         const oscillator = context.createOscillator();
         const voice = context.createGain();
         oscillator.type = "triangle";
         oscillator.frequency.value = frequency;
         oscillator.detune.value = detune;
         voice.gain.setValueAtTime(0.0001, now);
-        voice.gain.linearRampToValueAtTime(0.018, now + fadeSeconds);
+        if (!lift) voice.gain.linearRampToValueAtTime(0.018, now + fadeSeconds);
 
         if (context.createStereoPanner) {
           const panner = context.createStereoPanner();
@@ -229,10 +297,12 @@
 
         oscillator.start(now);
         voices.push({ oscillator, voice, frequency });
+        if (lift) liftVoices.push(voice);
       });
     });
 
     oscillators = voices;
+    chordLiftVoices = liftVoices;
     startRegisterCycle(now);
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
