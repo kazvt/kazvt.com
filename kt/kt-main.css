@@ -818,6 +818,42 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   filter: drop-shadow(1px 1px 0 rgb(43 32 40 / 55%));
 }
 
+.kt-member-status-rail {
+  position: absolute;
+  z-index: 4;
+  right: 6px;
+  bottom: 3px;
+  left: 6px;
+  display: flex;
+  min-width: 0;
+  height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.kt-member-status-rail > .kt-member-new-badge {
+  position: static;
+  width: clamp(27px, 2.4vw, 30px);
+  max-width: 30px;
+  max-height: 27px;
+  margin-inline-end: auto;
+}
+
+.kt-member-status-rail > .kt-live-sticker {
+  position: static;
+  width: 62px;
+  max-width: 45%;
+  margin-inline-start: auto;
+}
+
+.kt-member-status-rail > .kt-last-live:not([hidden]) {
+  position: static;
+  max-width: calc(100% - 38px);
+  margin-inline-start: auto;
+}
+
 .kt-member-name,
 .kt-recommendation-name {
   overflow-wrap: anywhere;
