@@ -926,9 +926,8 @@
       const duration = Number(value);
       if (!Number.isFinite(duration) || duration <= 0) return 0;
       const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
-      const fourteenDaysSeconds = fourteenDaysMs / 1000;
-      if (duration <= fourteenDaysMs) return duration;
-      return duration <= fourteenDaysSeconds ? duration * 1000 : 0;
+      // The public channel-videos response reports duration in milliseconds.
+      return duration <= fourteenDaysMs ? duration : 0;
     }
 
     function lastLiveRecord(videos) {
