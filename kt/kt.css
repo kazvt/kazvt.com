@@ -15,7 +15,7 @@
 }
 
 :root.kt-root {
-  --kt-comic-font: "Comic Neue", var(--kt-comic-font);
+  --kt-comic-font: "Comic Neue", "Comic Sans MS", "Comic Sans", cursive;
   --kt-ink: #2b2028;
   --kt-night: #f7dce6;
   --kt-deep: #e6a0b7;
