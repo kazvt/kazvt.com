@@ -390,7 +390,7 @@
     if (!(target instanceof Element)) return null;
     if (target.closest(".kt-discord__join")) return `discordJoin${action}`;
     if (target.closest(".kt-kick-link")) return `kickLink${action}`;
-    if (action === "Hover" && target.closest("[data-kt-copy-input]")) return "inputHover";
+    if (action === "Hover" && target.closest("[data-kt-copy-input], [data-kt-copy-target]")) return "inputHover";
     if (action === "Hover" && target.closest(".kt-kick-panel-mock")) return "panelPreviewHover";
 
     const languageOption = target.closest(".language-option, [data-language-option]");
@@ -464,7 +464,7 @@
 
     const controlCue = cueForControl(event.target, "Hover");
     if (controlCue) {
-      const control = event.target.closest(".kt-discord__join, .kt-kick-link, [data-kt-copy-input], .kt-kick-panel-mock, .language-button, .language-option, [data-language-option], [data-language-toggle]");
+      const control = event.target.closest(".kt-discord__join, .kt-kick-link, [data-kt-copy-input], [data-kt-copy-target], .kt-kick-panel-mock, .language-button, .language-option, [data-language-option], [data-language-toggle]");
       if (event.relatedTarget instanceof Node && control?.contains(event.relatedTarget)) return;
       const now = performance.now();
       if (now - lastSpecificHoverAt < 150) return;
@@ -472,6 +472,11 @@
       void play(controlCue);
       return;
     }
+
+    // Hyperlinks without a more-specific rule use the same subtle hover fallback,
+    // once on entry rather than again while the pointer crosses their child elements.
+    const hyperlink = event.target.closest("a[href], area[href]");
+    if (hyperlink && event.relatedTarget instanceof Node && hyperlink.contains(event.relatedTarget)) return;
 
     const now = performance.now();
     if (now - lastGenericHoverAt < 180) return;
