@@ -927,7 +927,7 @@
       return durationMs <= 14 * 24 * 60 * 60 * 1000 ? durationMs : 0;
     }
 
-    function lastLiveTimestamp(videos) {
+    function lastLiveRecord(videos) {
       const records = Array.isArray(videos)
         ? videos
         : Array.isArray(videos?.data) ? videos.data : [];
@@ -937,10 +937,11 @@
           const startedAt = parseKickTimestamp(video.start_time || video.started_at);
           const durationMs = kickDurationMilliseconds(video.duration);
           const createdAt = parseKickTimestamp(video.created_at);
-          return startedAt ? startedAt + durationMs : createdAt;
+          if (startedAt) return { timestamp: startedAt + durationMs, approximate: !durationMs };
+          return { timestamp: createdAt, approximate: true };
         })
-        .filter((timestamp) => timestamp > 0 && timestamp <= Date.now() + 5 * 60 * 1000);
-      return candidates.length ? Math.max(...candidates) : 0;
+        .filter(({ timestamp }) => timestamp > 0 && timestamp <= Date.now() + 5 * 60 * 1000);
+      return candidates.reduce((latest, candidate) => candidate.timestamp > (latest?.timestamp || 0) ? candidate : latest, null);
     }
 
     function readLastLiveCache(slug) {
@@ -949,7 +950,8 @@
       try {
         const stored = JSON.parse(localStorage.getItem(`kt:last-live:v1:${slug}`) || "null");
         if (stored && Number.isFinite(stored.checkedAt) && Number.isFinite(stored.expiresAt)
-          && stored.expiresAt > Date.now() && (stored.timestamp === null || Number.isFinite(stored.timestamp))) {
+          && stored.expiresAt > Date.now() && (stored.timestamp === null || Number.isFinite(stored.timestamp))
+          && typeof stored.approximate === "boolean") {
           lastLiveCache.set(slug, stored);
           return stored;
         }
@@ -957,8 +959,13 @@
       return null;
     }
 
-    function writeLastLiveCache(slug, timestamp, ttl) {
-      const cacheValue = { checkedAt: Date.now(), expiresAt: Date.now() + ttl, timestamp: timestamp || null };
+    function writeLastLiveCache(slug, record, ttl) {
+      const cacheValue = {
+        checkedAt: Date.now(),
+        expiresAt: Date.now() + ttl,
+        timestamp: record?.timestamp || null,
+        approximate: Boolean(record?.approximate),
+      };
       lastLiveCache.set(slug, cacheValue);
       try {
         localStorage.setItem(`kt:last-live:v1:${slug}`, JSON.stringify(cacheValue));
@@ -1009,13 +1016,13 @@
       }
     }
 
-    function showLastLive(entry, timestamp) {
+    function showLastLive(entry, timestamp, approximate = false) {
       if (!timestamp || entry.card.dataset.liveState !== "offline") return;
       entry.lastLiveAt = timestamp;
-      entry.lastLiveText.textContent = formatRelativeTime(timestamp, "narrow");
+      entry.lastLiveText.textContent = `${approximate ? "~" : ""}${formatRelativeTime(timestamp, "narrow")}`;
       const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || entry.slug;
-      const fullTime = formatRelativeTime(timestamp, "long");
+      const fullTime = `${approximate ? "~" : ""}${formatRelativeTime(timestamp, "long")}`;
       const i18n = window.KazvtI18n;
       const label = i18n?.format?.("kt.last_live_aria", { name: displayName, time: fullTime })
         || `${displayName} was last live ${fullTime}`;
@@ -1028,7 +1035,7 @@
     async function loadLastLive(entry, requestId) {
       const cached = readLastLiveCache(entry.slug);
       if (cached) {
-        if (cached.timestamp) showLastLive(entry, cached.timestamp);
+        if (cached.timestamp) showLastLive(entry, cached.timestamp, cached.approximate);
         return;
       }
 
@@ -1040,11 +1047,13 @@
           { headers: { Accept: "application/json" }, signal: controller.signal }
         );
         if (!response.ok) throw new Error(`Kick returned ${response.status}`);
-        const timestamp = lastLiveTimestamp(await response.json());
-        writeLastLiveCache(entry.slug, timestamp, historyCacheTtl);
-        if (entry.statusRequestId === requestId && timestamp) showLastLive(entry, timestamp);
+        const record = lastLiveRecord(await response.json());
+        writeLastLiveCache(entry.slug, record, historyCacheTtl);
+        if (entry.statusRequestId === requestId && record) {
+          showLastLive(entry, record.timestamp, record.approximate);
+        }
       } catch {
-        writeLastLiveCache(entry.slug, 0, historyFailureTtl);
+        writeLastLiveCache(entry.slug, null, historyFailureTtl);
       } finally {
         window.clearTimeout(timeout);
       }
@@ -1071,7 +1080,7 @@
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
         indicator.removeAttribute("title");
-        if (state !== "offline") entry.lastLiveAt = 0;
+        entry.lastLiveAt = 0;
         return;
       }
 
