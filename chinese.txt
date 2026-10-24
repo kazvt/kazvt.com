@@ -565,6 +565,7 @@ kt.admin=小组管理员
 kt.home_footer=返回 kazvt.com
 kt.live_label=直播中
 kt.live_aria={name} 正在 KICK 直播
+kt.last_live_aria={name} 上次直播：{time}
 kt.live_title=正在 KICK 直播
 kt.unknown_label=?
 kt.unknown_aria=无法查询 {name} 的 KICK 状态
