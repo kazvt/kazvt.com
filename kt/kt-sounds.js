@@ -77,6 +77,79 @@
         { type: "sine", frequency: 988, endFrequency: 1175, delay: 0.055, duration: 0.15, gain: 0.007 },
       ],
     },
+    discordJoinHover: {
+      tones: [{ type: "sine", frequency: 740, endFrequency: 988, duration: 0.09, gain: 0.012 }],
+      noise: { frequency: 2700, endFrequency: 1550, duration: 0.035, gain: 0.006 },
+    },
+    discordJoinClick: {
+      base: "memberClick",
+      tones: [
+        { type: "sine", frequency: 784, endFrequency: 1047, delay: 0.025, duration: 0.14, gain: 0.014 },
+        { type: "sine", frequency: 1175, endFrequency: 1568, delay: 0.08, duration: 0.15, gain: 0.01 },
+      ],
+    },
+    kickLinkHover: {
+      tones: [{ type: "triangle", frequency: 520, endFrequency: 780, duration: 0.085, gain: 0.012 }],
+    },
+    kickLinkClick: {
+      base: "click",
+      tones: [
+        { type: "triangle", frequency: 587, endFrequency: 784, duration: 0.085, gain: 0.02 },
+        { type: "sine", frequency: 1175, endFrequency: 1568, delay: 0.055, duration: 0.12, gain: 0.012 },
+      ],
+    },
+    languageMenuHover: {
+      tones: [{ type: "sine", frequency: 680, endFrequency: 820, duration: 0.075, gain: 0.008 }],
+      noise: { frequency: 2400, endFrequency: 1500, duration: 0.025, gain: 0.004 },
+    },
+    languageMenuClick: {
+      tones: [
+        { type: "triangle", frequency: 620, endFrequency: 820, duration: 0.075, gain: 0.016 },
+        { type: "sine", frequency: 930, endFrequency: 1175, delay: 0.045, duration: 0.09, gain: 0.01 },
+      ],
+    },
+    languageOptionHover: {
+      tones: [{ type: "sine", frequency: 580, endFrequency: 740, duration: 0.07, gain: 0.008 }],
+    },
+    languageEnglish: {
+      base: "click",
+      tones: [{ type: "sine", frequency: 784, endFrequency: 1047, delay: 0.02, duration: 0.13, gain: 0.015 }],
+    },
+    languageSpanish: {
+      base: "click",
+      tones: [
+        { type: "sine", frequency: 659, endFrequency: 784, delay: 0.02, duration: 0.1, gain: 0.014 },
+        { type: "sine", frequency: 988, endFrequency: 1319, delay: 0.065, duration: 0.11, gain: 0.01 },
+      ],
+    },
+    languageArabic: {
+      base: "click",
+      tones: [
+        { type: "triangle", frequency: 698, endFrequency: 587, delay: 0.02, duration: 0.1, gain: 0.014 },
+        { type: "sine", frequency: 880, endFrequency: 1047, delay: 0.075, duration: 0.1, gain: 0.009 },
+      ],
+    },
+    languageTurkish: {
+      base: "click",
+      tones: [
+        { type: "triangle", frequency: 523, endFrequency: 659, delay: 0.02, duration: 0.09, gain: 0.015 },
+        { type: "sine", frequency: 784, endFrequency: 988, delay: 0.06, duration: 0.12, gain: 0.01 },
+      ],
+    },
+    languageChinese: {
+      base: "click",
+      tones: [
+        { type: "sine", frequency: 880, endFrequency: 1175, delay: 0.02, duration: 0.1, gain: 0.014 },
+        { type: "sine", frequency: 1319, endFrequency: 1568, delay: 0.07, duration: 0.12, gain: 0.01 },
+      ],
+    },
+    languagePortuguese: {
+      base: "click",
+      tones: [
+        { type: "sine", frequency: 587, endFrequency: 740, delay: 0.02, duration: 0.09, gain: 0.015 },
+        { type: "triangle", frequency: 988, endFrequency: 1319, delay: 0.065, duration: 0.12, gain: 0.011 },
+      ],
+    },
   };
 
   let muted = muteButton?.dataset.muted === "true";
@@ -87,6 +160,7 @@
   let lastTypeSoundAt = -Infinity;
   let lastScrollSoundAt = -Infinity;
   let lastGenericHoverAt = -Infinity;
+  let lastSpecificHoverAt = -Infinity;
   let scrollSequenceIndex = 0;
   let scrollSequenceDirection = null;
   let recentWheelDirection = null;
@@ -302,6 +376,31 @@
     return `${category}${live ? "Live" : ""}${action}`;
   }
 
+  function cueForControl(target, action) {
+    if (!(target instanceof Element)) return null;
+    if (target.closest(".kt-discord__join")) return `discordJoin${action}`;
+    if (target.closest(".kt-kick-link")) return `kickLink${action}`;
+
+    const languageOption = target.closest(".language-option, [data-language-option]");
+    if (languageOption) {
+      if (action === "Hover") return "languageOptionHover";
+      const value = [
+        languageOption.dataset.language,
+        languageOption.dataset.languageName,
+        languageOption.dataset.languageCode,
+      ].filter(Boolean).join(" ").toLowerCase();
+      if (value.includes("spanish") || /(^|\\s)es(?:-|\\s|$)/.test(value)) return "languageSpanish";
+      if (value.includes("arabic") || /(^|\\s)ar(?:-|\\s|$)/.test(value)) return "languageArabic";
+      if (value.includes("turkish") || /(^|\\s)tr(?:-|\\s|$)/.test(value)) return "languageTurkish";
+      if (value.includes("chinese") || value.includes("zh")) return "languageChinese";
+      if (value.includes("portuguese") || value.includes("pt")) return "languagePortuguese";
+      return "languageEnglish";
+    }
+
+    if (target.closest(".language-button, [data-language-toggle]")) return `languageMenu${action}`;
+    return null;
+  }
+
   function isSpecialSoundControl(target) {
     return target instanceof Element && Boolean(target.closest(
       "[data-kt-music-toggle], [data-kt-copy-input], [data-kt-copy-target], [data-kt-badge-previous], [data-kt-badge-next]"
@@ -352,6 +451,17 @@
       return;
     }
 
+    const controlCue = cueForControl(event.target, "Hover");
+    if (controlCue) {
+      const control = event.target.closest(".kt-discord__join, .kt-kick-link, .language-button, .language-option, [data-language-option], [data-language-toggle]");
+      if (event.relatedTarget instanceof Node && control?.contains(event.relatedTarget)) return;
+      const now = performance.now();
+      if (now - lastSpecificHoverAt < 150) return;
+      lastSpecificHoverAt = now;
+      void play(controlCue);
+      return;
+    }
+
     const now = performance.now();
     if (now - lastGenericHoverAt < 180) return;
     lastGenericHoverAt = now;
@@ -365,6 +475,11 @@
     const entryCue = cueForEntry(target, "Click");
     if (entryCue) {
       void play(entryCue);
+      return;
+    }
+    const controlCue = cueForControl(target, "Click");
+    if (controlCue) {
+      void play(controlCue);
       return;
     }
     if (isSpecialSoundControl(target)) return;
