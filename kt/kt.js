@@ -735,6 +735,26 @@
       scan.className = "kt-live-scan";
       scan.setAttribute("aria-hidden", "true");
       card.prepend(scan);
+      const lastLiveBadge = document.createElement("span");
+      lastLiveBadge.className = "kt-last-live";
+      lastLiveBadge.hidden = true;
+      lastLiveBadge.setAttribute("role", "img");
+      lastLiveBadge.setAttribute("dir", "auto");
+      const clockIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      clockIcon.setAttribute("viewBox", "0 0 16 16");
+      clockIcon.setAttribute("aria-hidden", "true");
+      clockIcon.setAttribute("focusable", "false");
+      const clockFace = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      clockFace.setAttribute("cx", "8");
+      clockFace.setAttribute("cy", "8");
+      clockFace.setAttribute("r", "6");
+      const clockHands = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      clockHands.setAttribute("d", "M8 4.5v3.8l2.4 1.4");
+      clockIcon.append(clockFace, clockHands);
+      const lastLiveText = document.createElement("span");
+      lastLiveText.className = "kt-last-live__text";
+      lastLiveBadge.append(clockIcon, lastLiveText);
+      card.append(lastLiveBadge);
       const liveSticker = card.matches(".kt-member") ? document.createElement("img") : null;
       if (liveSticker) {
         liveSticker.className = "kt-live-sticker";
@@ -745,7 +765,7 @@
       }
       const name = title.querySelector(".kt-member-name, .kt-recommendation-name");
       title.insertBefore(indicator, name || title.firstChild);
-      return [{ card, slug, indicator, scan, tooltipLabel, liveSticker }];
+      return [{ card, slug, indicator, scan, tooltipLabel, liveSticker, lastLiveBadge, lastLiveText }];
     });
 
     if (!entries.length) return;
