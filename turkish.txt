@@ -566,6 +566,7 @@ kt.home_footer=kazvt.com'a dön
 kt.live_label=CANLI
 kt.live_aria={name} KICK'te canlı
 kt.last_live_aria={name} en son {time} canlıydı
+kt.last_live_cached_aria={name} için bilinen en son herkese açık KICK VOD'u {time}; herkese açık kaydı olmayan daha yeni yayınlar yansımayabilir.
 kt.last_live_retention_aria={name} için herkese açık VOD yok; Kick'in {days} günlük saklama sınırı tahmin olarak kullanılıyor. Son yayın daha eski olabilir veya bilinmiyor olabilir.
 kt.languages_label=Konuşulan diller
 kt.status_cached_aria={name} durumu en son {time} kontrol edildi; yeniden kontrol ediliyor
