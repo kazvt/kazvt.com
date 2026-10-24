@@ -185,7 +185,7 @@ body[data-page="kt"] summary:focus-visible {
   background: var(--kt-paper);
   color: var(--kt-ink) !important;
   font-size: .82rem;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: .035em;
 }
 
@@ -944,7 +944,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   box-shadow: 4px 4px 0 var(--kt-ink);
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: .78rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: .06em;
   transform: rotate(4deg);
   animation: kt-webring-stamp-pop 1.5s steps(2, end) infinite;
