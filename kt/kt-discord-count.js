@@ -5,7 +5,7 @@
   const unavailableNote = document.querySelector("[data-kt-discord-count-note]");
   if (!(countNode instanceof HTMLElement) || !(unavailableNote instanceof HTMLElement)) return;
 
-  const cacheKey = "kt-discord-member-count-v1";
+  const cacheKey = "kt-discord-personal-server-member-count";
   const cacheLifetime = 15 * 60 * 1000;
   let currentCount = null;
 
@@ -69,7 +69,7 @@
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 7000);
 
-  fetch("https://discord.com/api/v10/invites/vqwczEjWB?with_counts=true", {
+  fetch("https://discord.com/api/v10/invites/huzMpfJZ4J?with_counts=true", {
     method: "GET",
     mode: "cors",
     credentials: "omit",
