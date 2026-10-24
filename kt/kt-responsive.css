@@ -250,10 +250,10 @@
   .kt-discord__signal { padding: 4px 5px; }
   .kt-discord__signal-light { width: 7px; height: 7px; }
   .kt-discord__body { gap: 21px; padding: 12px; }
-  .kt-discord__art { min-height: 203px; }
+  .kt-discord__art { min-height: 260px; }
   .kt-discord__orbit--two { height: 88%; }
-  .kt-discord__message-art { width: min(84%, 288px); }
-  .kt-discord__blinkie { right: 3%; bottom: 7%; width: min(204px, 82%); min-height: 64px; }
+  .kt-discord__message-art { width: min(78%, 288px); margin-bottom: 72px; }
+  .kt-discord__blinkie { right: 3%; bottom: 2%; width: min(194px, 79%); min-height: 64px; }
   .kt-discord__blinkie-copy { font-size: .48rem; }
   .kt-discord__member-count { font-size: .82rem; }
   .kt-discord__copy h2 { font-size: clamp(1.55rem, 7.2vw, 2.2rem); }

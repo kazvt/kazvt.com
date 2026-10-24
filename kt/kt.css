@@ -1799,6 +1799,8 @@ body[data-page="kt"] .kt-member-badge--admin {
   color: #5b3850;
   font-size: .78em;
   line-height: 1.05;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .kt-discord__copy {
