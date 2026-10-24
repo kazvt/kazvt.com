@@ -598,3 +598,6 @@ kt.music_mute=كتم الصوت
 kt.music_unmute=إلغاء كتم الصوت
 kt.music_mute_aria=كتم جميع أصوات الموقع
 kt.music_unmute_aria=إلغاء كتم جميع أصوات الموقع
+kt.pronouns.she_her=هي
+kt.pronouns.he_him=هو
+kt.pronouns.they_them=هما

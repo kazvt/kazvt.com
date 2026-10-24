@@ -591,3 +591,6 @@ kt.music_mute=MUTAR
 kt.music_unmute=ATIVAR SOM
 kt.music_mute_aria=Silenciar todos os sons do site
 kt.music_unmute_aria=Ativar todos os sons do site
+kt.pronouns.she_her=ela
+kt.pronouns.he_him=ele
+kt.pronouns.they_them=elu

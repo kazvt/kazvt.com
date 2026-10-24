@@ -591,3 +591,6 @@ kt.music_mute=SESSİZE AL
 kt.music_unmute=SESSİZİ AÇ
 kt.music_mute_aria=Sitedeki tüm sesleri kapat
 kt.music_unmute_aria=Sitedeki tüm sesleri aç
+kt.pronouns.she_her=o
+kt.pronouns.he_him=o
+kt.pronouns.they_them=onlar

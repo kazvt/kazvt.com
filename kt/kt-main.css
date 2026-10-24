@@ -1073,6 +1073,14 @@ body[data-page="kt"] .kt-member-badge--admin {
   pointer-events: none;
 }
 
+@media (min-width: 761px) {
+  html[dir="rtl"] .kt-webring-step-arrow {
+    right: auto;
+    left: -38px;
+    transform: translateY(-50%) scaleX(-1);
+  }
+}
+
 .kt-webring-step-number {
   display: inline-grid;
   flex: 0 0 36px;

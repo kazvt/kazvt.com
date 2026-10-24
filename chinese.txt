@@ -592,3 +592,6 @@ kt.music_mute=静音
 kt.music_unmute=取消静音
 kt.music_mute_aria=静音网站上的所有声音
 kt.music_unmute_aria=取消静音网站上的所有声音
+kt.pronouns.she_her=她
+kt.pronouns.he_him=他
+kt.pronouns.they_them=TA
