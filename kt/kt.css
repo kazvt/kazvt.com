@@ -1533,6 +1533,10 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
   color: var(--kt-ink);
 }
 
+body[data-page="kt"] .language-options .language-option {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
 body[data-page="kt"] :is(
   .kt-affiliation,
   .kt-roster-note > p,
