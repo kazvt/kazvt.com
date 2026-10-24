@@ -1019,6 +1019,7 @@
     function showLastLive(entry, timestamp, approximate = false) {
       if (!timestamp || entry.card.dataset.liveState !== "offline") return;
       entry.lastLiveAt = timestamp;
+      entry.lastLiveApproximate = approximate;
       entry.lastLiveText.textContent = `${approximate ? "~" : ""}${formatRelativeTime(timestamp, "narrow")}`;
       const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || entry.slug;
@@ -1173,14 +1174,16 @@
     const refreshIndicatorLanguage = () => entries.forEach((entry) => {
       const state = entry.card.dataset.liveState;
       if (state === "live") setState(entry, state);
-      else if (state === "offline" && entry.lastLiveAt) showLastLive(entry, entry.lastLiveAt);
+      else if (state === "offline" && entry.lastLiveAt) {
+        showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
+      }
     });
     window.addEventListener("kazvt:i18nready", refreshIndicatorLanguage);
     window.addEventListener("kazvt:languagechange", refreshIndicatorLanguage);
     window.setInterval(() => {
       entries.forEach((entry) => {
         if (entry.card.dataset.liveState === "offline" && entry.lastLiveAt) {
-          showLastLive(entry, entry.lastLiveAt);
+          showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
         }
       });
     }, 60_000);
