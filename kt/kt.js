@@ -256,7 +256,14 @@
     const newMemberWindowMs = 30 * 24 * 60 * 60 * 1000;
     const now = Date.now();
 
-    document.querySelectorAll(".kt-member-grid > li > .kt-member[data-member-added]").forEach((card) => {
+    document.querySelectorAll(".kt-member-grid > li > .kt-member").forEach((card) => {
+      let statusRail = card.querySelector(".kt-member-status-rail");
+      if (!statusRail) {
+        statusRail = document.createElement("span");
+        statusRail.className = "kt-member-status-rail";
+        card.append(statusRail);
+      }
+
       const addedDate = card.dataset.memberAdded || "";
       if (!/^\d{4}-\d{2}-\d{2}$/.test(addedDate)) return;
 
@@ -275,7 +282,7 @@
       badge.height = 24;
       badge.loading = "lazy";
       badge.decoding = "async";
-      card.append(badge);
+      statusRail.append(badge);
     });
   }
 
@@ -728,6 +735,9 @@
         : "";
       if (!slug || !title) return [];
       const tooltipLabel = card.title.trim();
+      const statusRail = card.matches(".kt-member")
+        ? card.querySelector(".kt-member-status-rail")
+        : null;
 
       const indicator = document.createElement("span");
       indicator.className = "kt-live-indicator";
@@ -756,7 +766,7 @@
       const lastLiveText = document.createElement("span");
       lastLiveText.className = "kt-last-live__text";
       lastLiveBadge.append(clockIcon, lastLiveText);
-      card.append(lastLiveBadge);
+      (statusRail || card).append(lastLiveBadge);
       const liveSticker = card.matches(".kt-member") ? document.createElement("img") : null;
       if (liveSticker) {
         liveSticker.className = "kt-live-sticker";
@@ -774,6 +784,7 @@
         scan,
         tooltipLabel,
         liveSticker,
+        statusRail,
         lastLiveBadge,
         lastLiveText,
         originalAriaDescription: card.getAttribute("aria-description"),
@@ -808,6 +819,25 @@
     let pendingMemberOrder = false;
     let pendingGuestOrder = false;
 
+    function compareStatusAndRecency(left, right) {
+      const rank = (record) => {
+        const state = record.card?.dataset.liveState;
+        if (state === "live") return 0;
+        if (state === "offline") return 1;
+        return 2;
+      };
+      const leftRank = rank(left);
+      const rightRank = rank(right);
+      if (leftRank !== rightRank) return leftRank - rightRank;
+
+      if (leftRank === 1) {
+        const leftTimestamp = Number(left.entry?.lastLiveAt) || 0;
+        const rightTimestamp = Number(right.entry?.lastLiveAt) || 0;
+        if (leftTimestamp !== rightTimestamp) return rightTimestamp - leftTimestamp;
+      }
+      return 0;
+    }
+
     function syncLiveStickers() {
       memberRecords.forEach((member) => {
         if (member.card?.dataset.liveState !== "live" || !member.entry?.liveSticker) return;
@@ -835,10 +865,7 @@
         const rightPinned = pinnedMemberSlugs.has(right.slug);
         if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
 
-        const leftLive = left.card?.dataset.liveState === "live";
-        const rightLive = right.card?.dataset.liveState === "live";
-        if (leftLive !== rightLive) return leftLive ? -1 : 1;
-        return left.defaultOrder - right.defaultOrder;
+        return compareStatusAndRecency(left, right) || left.defaultOrder - right.defaultOrder;
       });
 
       const orderChanged = orderedMembers.some((member, index) => memberList.children[index] !== member.listItem);
@@ -864,10 +891,7 @@
       if (!guestList || !guestRecords.length) return;
 
       const orderedGuests = [...guestRecords].sort((left, right) => {
-        const leftLive = left.card?.dataset.liveState === "live";
-        const rightLive = right.card?.dataset.liveState === "live";
-        if (leftLive !== rightLive) return leftLive ? -1 : 1;
-        return left.defaultOrder - right.defaultOrder;
+        return compareStatusAndRecency(left, right) || left.defaultOrder - right.defaultOrder;
       });
 
       const orderChanged = orderedGuests.some((guest, index) => guestList.children[index] !== guest.listItem);
@@ -1152,7 +1176,7 @@
 
       indicator.hidden = false;
       indicator.dataset.state = state;
-      if (liveSticker && !liveSticker.isConnected) card.append(liveSticker);
+      if (liveSticker && !liveSticker.isConnected) (entry.statusRail || card).append(liveSticker);
       syncLiveStickers();
       const displayName = card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || slug;
