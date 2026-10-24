@@ -15,7 +15,7 @@
 }
 
 :root.kt-root {
-  --kt-comic-font: "Comic Neue", "Comic Sans MS", "Comic Sans", cursive;
+  --kt-comic-font: "Comic Neue", var(--kt-comic-font);
   --kt-ink: #2b2028;
   --kt-night: #f7dce6;
   --kt-deep: #e6a0b7;
@@ -555,7 +555,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   max-width: 24rem;
   margin: 0;
   color: var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .94rem;
   line-height: 1.4;
 }
@@ -590,7 +590,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-recommendations p {
   margin: 0;
   color: #51404a;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .82rem;
   line-height: 1.35;
 }
@@ -795,7 +795,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-recommendation-name {
   overflow-wrap: anywhere;
   color: var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-synthesis: weight;
   font-size: clamp(1.04rem, 2vw, 1.32rem);
   font-weight: 1000;
@@ -806,7 +806,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-member-handle {
   overflow-wrap: anywhere;
   color: #51404a;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-synthesis: weight;
   font-size: .8rem;
   font-weight: 700;
@@ -819,7 +819,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border: 1px dashed rgb(43 32 40 / 42%);
   background: rgb(255 255 255 / 42%);
   color: #66535e;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-synthesis: weight;
   font-size: calc(.64rem + 2px);
   font-weight: 700;
@@ -832,7 +832,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border: 1px solid var(--kt-blue);
   background: var(--kt-white);
   color: var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .68rem;
   font-weight: 400;
   line-height: 1.2;
@@ -909,7 +909,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 body[data-page="kt"] .kt-member-badge--admin {
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-synthesis: weight;
   font-weight: 700 !important;
 }
@@ -943,7 +943,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-webring-heading .kt-eyebrow {
   margin: 0 0 3px;
   color: #305168;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
 }
 
 .kt-webring-heading h2 {
@@ -959,7 +959,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   border: 3px solid var(--kt-ink);
   background: var(--kt-pink);
   box-shadow: 4px 4px 0 var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .78rem;
   font-weight: 700;
   letter-spacing: .06em;
@@ -970,7 +970,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-webring-body {
   display: block;
   padding: clamp(16px, 3vw, 28px);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-synthesis: weight;
 }
 
@@ -1027,7 +1027,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   background: var(--kt-white);
   box-shadow: 3px 3px 0 var(--kt-pink);
   color: var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .84rem;
   font-synthesis: weight;
   font-weight: 700;
@@ -1060,7 +1060,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   background: var(--kt-pink);
   box-shadow: 2px 2px 0 var(--kt-blue);
   color: var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: 1.05rem;
   font-synthesis: weight;
   font-weight: 700;
@@ -1342,7 +1342,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   align-items: center;
   gap: 10px;
   margin-bottom: 9px;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .9rem;
   font-synthesis: weight;
   font-weight: 700;
@@ -1372,7 +1372,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   background: #fff;
   color: var(--kt-ink);
   cursor: copy;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .72rem;
   font-weight: 700;
   text-overflow: clip;
@@ -1394,7 +1394,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   color: var(--kt-ink);
   cursor: pointer;
   font: inherit;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-synthesis: weight;
   font-size: .76rem;
   font-weight: 700;
@@ -1555,7 +1555,7 @@ body[data-page="kt"] .kt-member-badge--admin {
     linear-gradient(112deg, #f8bfd0 0%, var(--kt-pink) 48%, #dc7898 100%);
   box-shadow: inset 0 2px 0 rgb(255 255 255 / 75%), inset 0 -2px 0 rgb(43 32 40 / 20%);
   color: var(--kt-ink);
-  font-family: "04b_30", "Comic Sans MS", "Comic Sans", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: clamp(.65rem, 1.3vw, .82rem);
   letter-spacing: .035em;
   text-transform: uppercase;
@@ -1704,7 +1704,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   border: 2px solid var(--kt-ink);
   background: linear-gradient(135deg, var(--kt-blue) 0 48%, var(--kt-white) 48% 57%, var(--kt-pink) 57% 100%);
   box-shadow: 2px 2px 0 var(--kt-ink);
-  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: .78rem;
   text-shadow: 1px 1px 0 var(--kt-white);
 }
@@ -1712,7 +1712,7 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-discord__blinkie-copy {
   min-width: 0;
   color: var(--kt-ink);
-  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: clamp(.5rem, 1.05vw, .65rem);
   line-height: 1.2;
   text-align: center;
@@ -1734,7 +1734,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   border: 2px dashed var(--kt-ink);
   background: var(--kt-white);
   color: #305168;
-  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: clamp(.59rem, 1.1vw, .72rem);
   letter-spacing: .045em;
   text-transform: uppercase;
@@ -1764,7 +1764,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   max-width: 48ch;
   margin: 17px 0 0;
   color: var(--kt-ink);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: clamp(.98rem, 1.6vw, 1.12rem);
   line-height: 1.5;
 }
@@ -1785,7 +1785,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   background: linear-gradient(112deg, var(--kt-blue) 0 43%, #dff5fc 43% 51%, var(--kt-pink) 51% 100%);
   box-shadow: 4px 4px 0 var(--kt-ink), 8px 8px 0 var(--kt-pink), 0 0 24px rgb(91 206 250 / 27%);
   color: var(--kt-ink);
-  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: clamp(.78rem, 1.4vw, 1rem);
   font-weight: 400;
   line-height: 1.3;
@@ -1846,7 +1846,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   gap: 9px;
   margin: 15px 0 0;
   color: #55434c;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .8rem;
   overflow-wrap: anywhere;
 }
@@ -1869,7 +1869,7 @@ body[data-page="kt"] .kt-member-badge--admin {
   border-top: 3px dashed var(--kt-ink);
   background: linear-gradient(90deg, rgb(91 206 250 / 46%), rgb(255 249 252 / 94%) 46%, rgb(245 169 184 / 52%));
   color: var(--kt-ink);
-  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: clamp(.55rem, 1vw, .68rem);
   letter-spacing: .04em;
 }
@@ -1954,7 +1954,7 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
 }
 
 body[data-page="kt"] .language-options .language-option {
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
 }
 
 body[data-page="kt"] :is(
@@ -1967,7 +1967,7 @@ body[data-page="kt"] :is(
 }
 
 body[data-page="kt"] :is(b, strong, .comic-sans-emphasis) {
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-weight: 700;
   font-synthesis: weight;
 }
