@@ -404,7 +404,7 @@ body[data-page="kt"] summary:focus-visible {
   margin-inline: auto;
   padding: clamp(16px, 2.3vw, 26px);
   border: 3px solid rgb(43 32 40 / 70%);
-  background: rgb(255 249 252 / 40%);
+  background: rgb(255 249 252 / 76%);
   box-shadow: 5px 5px 0 rgb(245 169 184 / 88%), 10px 10px 0 rgb(91 206 250 / 72%), 0 16px 38px rgb(43 32 40 / 22%);
   text-align: center;
 }
