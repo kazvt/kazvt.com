@@ -1023,14 +1023,21 @@
       try {
         const stored = JSON.parse(localStorage.getItem(`kt:last-live:v2:${slug}`) || "null");
         const validVod = stored?.kind === "vod" && Number.isFinite(stored.timestamp) && stored.timestamp > 0
-          && typeof stored.approximate === "boolean";
+          && typeof stored.approximate === "boolean"
+          && (stored.lastKnownOnly === undefined || typeof stored.lastKnownOnly === "boolean");
         const validEstimate = stored?.kind === "retention-estimate"
           && (stored.retentionDays === 7 || stored.retentionDays === 30);
         const validUnavailable = stored?.kind === "unavailable";
+        const cacheIsFresh = Number.isFinite(stored?.expiresAt) && stored.expiresAt > Date.now();
         if (stored && Number.isFinite(stored.checkedAt) && Number.isFinite(stored.expiresAt)
-          && stored.expiresAt > Date.now() && (validVod || validEstimate || validUnavailable)) {
-          lastLiveCache.set(slug, stored);
-          return stored;
+          && (validVod || (cacheIsFresh && (validEstimate || validUnavailable)))) {
+          const cacheValue = {
+            ...stored,
+            lastKnownOnly: Boolean(stored.lastKnownOnly),
+            stale: !cacheIsFresh,
+          };
+          if (cacheIsFresh) lastLiveCache.set(slug, cacheValue);
+          return cacheValue;
         }
       } catch {}
       return null;
@@ -1043,7 +1050,9 @@
         kind: record?.kind || "unavailable",
         timestamp: record?.timestamp || null,
         approximate: Boolean(record?.approximate),
+        lastKnownOnly: Boolean(record?.lastKnownOnly),
         retentionDays: record?.retentionDays || null,
+        stale: false,
       };
       lastLiveCache.set(slug, cacheValue);
       try {
@@ -1150,24 +1159,31 @@
       }
     }
 
-    function showLastLive(entry, timestamp, approximate = false) {
+    function showLastLive(entry, timestamp, approximate = false, lastKnownOnly = false) {
       if (!timestamp || entry.card.dataset.liveState !== "offline") return;
       entry.lastLiveAt = timestamp;
       entry.lastLiveApproximate = approximate;
-      entry.lastLiveSource = "vod";
+      entry.lastLiveKnownOnly = lastKnownOnly;
+      entry.lastLiveSource = lastKnownOnly ? "cached-vod" : "vod";
       entry.lastLiveEstimateDays = 0;
       entry.lastLiveCheckedAt = 0;
-      entry.lastLiveText.textContent = `${approximate ? "~" : ""}${formatRelativeTime(timestamp, "narrow")}`;
+      const uncertain = approximate || lastKnownOnly;
+      entry.lastLiveText.textContent = `${uncertain ? "~" : ""}${formatRelativeTime(timestamp, "narrow")}`;
       const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || entry.slug;
-      const fullTime = `${approximate ? "~" : ""}${formatRelativeTime(timestamp, "long")}`;
+      const fullTime = `${uncertain ? "~" : ""}${formatRelativeTime(timestamp, "long")}`;
       const i18n = window.KazvtI18n;
-      const label = i18n?.format?.("kt.last_live_aria", { name: displayName, time: fullTime })
-        || `${displayName} was last live ${fullTime}`;
+      const label = lastKnownOnly
+        ? i18n?.format?.("kt.last_live_cached_aria", { name: displayName, time: fullTime })
+          || `${displayName}'s last known public KICK VOD was ${fullTime}; later streams without a public replay may not be reflected.`
+        : i18n?.format?.("kt.last_live_aria", { name: displayName, time: fullTime })
+          || `${displayName} was last live ${fullTime}`;
       entry.lastLiveBadge.setAttribute("aria-label", label);
       entry.lastLiveBadge.title = label;
       entry.lastLiveBadge.hidden = false;
       entry.card.dataset.lastLive = "true";
+      if (lastKnownOnly) entry.card.dataset.lastLiveKnownOnly = "true";
+      else delete entry.card.dataset.lastLiveKnownOnly;
       delete entry.card.dataset.lastLiveEstimate;
     }
 
@@ -1175,6 +1191,7 @@
       if (!retentionDays || entry.card.dataset.liveState !== "offline") return;
       entry.lastLiveAt = checkedAt - retentionDays * 24 * 60 * 60 * 1000;
       entry.lastLiveApproximate = true;
+      entry.lastLiveKnownOnly = false;
       entry.lastLiveSource = "retention-estimate";
       entry.lastLiveEstimateDays = retentionDays;
       entry.lastLiveCheckedAt = checkedAt;
@@ -1189,6 +1206,7 @@
       entry.lastLiveBadge.title = label;
       entry.lastLiveBadge.hidden = false;
       entry.card.dataset.lastLive = "true";
+      delete entry.card.dataset.lastLiveKnownOnly;
       entry.card.dataset.lastLiveEstimate = "retention-window";
     }
 
@@ -1196,7 +1214,7 @@
       if (entry.lastLiveSource === "retention-estimate") {
         showRetentionEstimate(entry, entry.lastLiveEstimateDays, entry.lastLiveCheckedAt);
       } else if (entry.lastLiveAt) {
-        showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
+        showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate, entry.lastLiveKnownOnly);
       }
     }
 
@@ -1211,11 +1229,13 @@
     async function loadLastLive(entry, requestId) {
       const cached = readLastLiveCache(entry.slug);
       if (cached) {
-        if (cached.kind === "vod") showLastLive(entry, cached.timestamp, cached.approximate);
+        if (cached.kind === "vod") {
+          showLastLive(entry, cached.timestamp, cached.approximate, cached.lastKnownOnly || cached.stale);
+        }
         if (cached.kind === "retention-estimate") {
           showRetentionEstimate(entry, cached.retentionDays, cached.checkedAt);
         }
-        return;
+        if (!cached.stale) return;
       }
 
       const controller = new AbortController();
@@ -1233,6 +1253,14 @@
           const record = { ...history.record, kind: "vod" };
           writeLastLiveCache(entry.slug, record, historyCacheTtl);
           showLastLive(entry, record.timestamp, record.approximate);
+        } else if (cached?.kind === "vod") {
+          const retained = writeLastLiveCache(entry.slug, {
+            kind: "vod",
+            timestamp: cached.timestamp,
+            approximate: cached.approximate,
+            lastKnownOnly: true,
+          }, historyCacheTtl);
+          showLastLive(entry, retained.timestamp, retained.approximate, true);
         } else if (!history.hasVideos) {
           const verified = await channelIsVerified(entry.slug, controller.signal);
           if (entry.statusRequestId !== requestId) return;
@@ -1245,7 +1273,17 @@
         }
       } catch {
         if (entry.statusRequestId === requestId) {
-          writeLastLiveCache(entry.slug, null, historyFailureTtl);
+          if (cached?.kind === "vod") {
+            const retained = writeLastLiveCache(entry.slug, {
+              kind: "vod",
+              timestamp: cached.timestamp,
+              approximate: cached.approximate,
+              lastKnownOnly: true,
+            }, historyFailureTtl);
+            showLastLive(entry, retained.timestamp, retained.approximate, true);
+          } else {
+            writeLastLiveCache(entry.slug, null, historyFailureTtl);
+          }
         }
       } finally {
         window.clearTimeout(timeout);
@@ -1260,6 +1298,7 @@
       if (!preserveOfflineHistory) {
         entry.lastLiveBadge.hidden = true;
         delete card.dataset.lastLive;
+        delete card.dataset.lastLiveKnownOnly;
         delete card.dataset.lastLiveEstimate;
         entry.lastLiveBadge.removeAttribute("aria-label");
         entry.lastLiveBadge.removeAttribute("title");
@@ -1299,9 +1338,10 @@
         return;
       }
 
-      if (previousState !== "live" && !fromCache) clearLastLiveCache(slug);
+      if (state === "live" && previousState !== "live" && !fromCache) clearLastLiveCache(slug);
       entry.lastLiveAt = 0;
       entry.lastLiveSource = "";
+      entry.lastLiveKnownOnly = false;
       entry.lastLiveEstimateDays = 0;
       entry.lastLiveCheckedAt = 0;
 
@@ -1330,7 +1370,9 @@
         setState(entry, cached.state, { fromCache: true, checkedAt: cached.checkedAt });
         if (cached.state === "offline") {
           const lastLive = readLastLiveCache(entry.slug);
-          if (lastLive?.kind === "vod") showLastLive(entry, lastLive.timestamp, lastLive.approximate);
+          if (lastLive?.kind === "vod") {
+            showLastLive(entry, lastLive.timestamp, lastLive.approximate, lastLive.lastKnownOnly || lastLive.stale);
+          }
           if (lastLive?.kind === "retention-estimate") {
             showRetentionEstimate(entry, lastLive.retentionDays, lastLive.checkedAt);
           }
