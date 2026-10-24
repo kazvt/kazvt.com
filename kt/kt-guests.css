@@ -76,6 +76,9 @@
   filter: none; /* Keep the offline-avatar hook; grayscale is currently disabled. */
 }
 
+.kt-recommendation-link[data-last-live="true"] { padding-bottom: 24px; }
+.kt-recommendation-link > .kt-last-live:not([hidden]) { right: 6px; bottom: 3px; }
+
 .kt-recommendation-avatar--fallback {
   display: grid;
   place-items: center;
