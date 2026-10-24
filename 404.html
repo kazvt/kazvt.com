@@ -12,6 +12,11 @@
       const tuoyAliases = new Set(["toy", "touys", "tools", "tool", "assets", "asset", "toys"]);
       const ktAliases = new Set(["kt", "kickasstransfems"]);
       const canonicalKtPath = "/KickassTransfems/";
+      const discordAliases = new Set(["kt/discord", "kickasstransfems/discord"]);
+      if (discordAliases.has(requestedPath)) {
+        location.replace("https://discord.gg/vqwczEjWB");
+        return;
+      }
       if (ktAliases.has(requestedPath) && location.pathname !== canonicalKtPath) {
         const destination = new URL(canonicalKtPath, location.origin);
         destination.search = location.search;
