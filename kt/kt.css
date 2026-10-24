@@ -1,4 +1,21 @@
+@font-face {
+  font-family: "Comic Neue";
+  src: url("/kt/assets/fonts/comic-neue-latin-400-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Comic Neue";
+  src: url("/kt/assets/fonts/comic-neue-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root.kt-root {
+  --kt-comic-font: "Comic Neue", "Comic Sans MS", "Comic Sans", cursive;
   --kt-ink: #2b2028;
   --kt-night: #f7dce6;
   --kt-deep: #e6a0b7;
@@ -47,7 +64,7 @@ body[data-page="kt"] {
   color: var(--kt-ink);
   background-color: transparent;
   background-image: none;
-  font-family: "04b_30", "Comic Sans MS", "Comic Sans", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-synthesis: none;
   --cursor-default: auto;
   --cursor-pointer: pointer;
@@ -280,7 +297,7 @@ body[data-page="kt"] summary:focus-visible {
 }
 
 .kt-music-toggle__action {
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .79rem;
   font-weight: 700;
   line-height: 1;
@@ -430,7 +447,7 @@ body[data-page="kt"] summary:focus-visible {
   padding: 9px 12px;
   border-left: 6px solid var(--kt-blue);
   background: rgb(245 169 184 / 30%);
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: clamp(.96rem, 2vw, 1.13rem);
   line-height: 1.45;
   text-align: justify;

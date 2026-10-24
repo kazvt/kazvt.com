@@ -87,7 +87,7 @@
 .kt-recommendation-handle {
   overflow-wrap: anywhere;
   color: #66535e;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--kt-comic-font);
   font-size: .76rem;
 }
 

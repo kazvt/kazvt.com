@@ -102,7 +102,7 @@
 }
 
 .kt-discord__member-count {
-  font-family: "04b_30", "Comic Sans MS", cursive;
+  font-family: "04b_30", var(--kt-comic-font);
   font-size: clamp(.76rem, 1.2vw, .9rem);
   line-height: 1;
   white-space: nowrap;
