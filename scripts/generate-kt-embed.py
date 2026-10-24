@@ -31,6 +31,7 @@ VIDEO = ASSETS / "trans-flag-pingpong-wide-soft-seam.mp4"
 K_FACE = ASSETS / "kick-trans-k-face.png"
 AVATAR_DIR = ASSETS / "embed-team"
 OUTPUT = ASSETS / "kick-trans-k-team-1200x630.gif"
+SITE_FONT = ROOT / "zzz_assets" / "fonts" / "04b-30.ttf"
 WIDTH, HEIGHT = 1200, 630
 BLUE = (87, 204, 247)
 PINK = (244, 169, 184)
@@ -94,20 +95,11 @@ def read_roster(refresh: bool = False) -> list[tuple[str, Image.Image]]:
     return members
 
 
-def load_font(size: int, heavy: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    candidates = (
-        [r"C:\Windows\Fonts\ariblk.ttf", r"C:\Windows\Fonts\arialbd.ttf"]
-        if heavy
-        else [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf"]
-    )
-    candidates += ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if heavy
-                   else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
-    for candidate in candidates:
-        try:
-            return ImageFont.truetype(candidate, size)
-        except OSError:
-            continue
-    return ImageFont.load_default()
+def load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Use the exact 04b_30 face declared by the KT site stylesheet."""
+    if not SITE_FONT.is_file():
+        raise FileNotFoundError(f"The KT site font is missing: {SITE_FONT}")
+    return ImageFont.truetype(str(SITE_FONT), size)
 
 
 def center_text(
@@ -185,7 +177,7 @@ def draw_atmospheric_lights(frame: Image.Image, t: float, duration: float) -> No
         (151, 138, 116, 48, (199, 218, 243), 0.052, 0.08),
     ):
         cx = x + 9 * math.sin(phase + drift)
-        cy = y + 5 * math.cos(phase * 0.7 + drift)
+        cy = y + 5 * math.cos(phase * 2 + drift)
         field = np.exp(-0.5 * (((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2))
         lights += field[..., None] * np.asarray(color, dtype=np.float32) * strength
     base = np.asarray(frame.resize((w, h), Image.Resampling.BILINEAR), dtype=np.float32)
@@ -279,47 +271,108 @@ def crystal_mesh(width: float, length: float, depth: float) -> tuple[np.ndarray,
     return np.asarray(vertices, dtype=np.float64), faces
 
 
+def torus_mesh(
+    radius_x: float,
+    radius_y: float,
+    tube: float,
+    segments: int = 36,
+    tube_segments: int = 8,
+) -> tuple[np.ndarray, list[tuple[int, ...]]]:
+    """Create a closed, genuinely volumetric elliptical orbit ring."""
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+    for around in range(segments):
+        a = math.tau * around / segments
+        ca, sa = math.cos(a), math.sin(a)
+        for cross in range(tube_segments):
+            b = math.tau * cross / tube_segments
+            radial = tube * math.cos(b)
+            vertices.append(((radius_x + radial) * ca,
+                             (radius_y + radial) * sa,
+                             tube * math.sin(b)))
+    for around in range(segments):
+        next_around = (around + 1) % segments
+        for cross in range(tube_segments):
+            next_cross = (cross + 1) % tube_segments
+            a = around * tube_segments + cross
+            b = next_around * tube_segments + cross
+            c = next_around * tube_segments + next_cross
+            d = around * tube_segments + next_cross
+            faces.append((a, b, c, d))
+    return np.asarray(vertices, dtype=np.float64), faces
+
+
 def draw_3d_props(
     frame: Image.Image,
     t: float,
     duration: float,
     foreground: bool = False,
 ) -> None:
-    """Build an atmospheric field of real shaded trans-colored crystal meshes."""
+    """Build a layered set of actual 3D crystals around the flag and K."""
     all_bases = [
-        (70, 228, 136, 244, 78, -0.44, 0.25, 0.12),
-        (195, 109, 74, 150, 53, 0.52, -0.30, -0.14),
-        (339, 536, -84, 171, 58, -0.28, -0.22, 0.28),
-        (882, 108, -72, 160, 56, 0.41, 0.24, -0.10),
-        (1065, 244, -115, 204, 85, -0.55, 0.18, 0.14),
-        (1120, 495, -80, 170, 57, 0.32, -0.30, -0.24),
-        (845, 555, 185, 139, 48, -0.39, 0.15, 0.20),
-        (31, 488, 210, 174, 69, 0.56, 0.25, -0.15),
-        (1184, 354, 185, 160, 58, -0.37, -0.18, 0.27),
+        (42, 218, -180, 210, 82, -0.44, 0.25, 0.12),
+        (145, 76, -185, 145, 62, 0.52, -0.30, -0.14),
+        (257, 555, -205, 180, 66, -0.28, -0.22, 0.28),
+        (366, 122, -245, 235, 72, 0.41, 0.24, -0.10),
+        (840, 78, -195, 185, 66, -0.55, 0.18, 0.14),
+        (1014, 202, -175, 220, 88, 0.32, -0.30, -0.24),
+        (1168, 440, -210, 190, 61, -0.39, 0.15, 0.20),
+        (902, 566, -190, 160, 72, 0.56, 0.25, -0.15),
+        (53, 488, -135, 148, 60, -0.37, -0.18, 0.27),
+        (310, 92, -85, 120, 56, 0.48, 0.22, 0.17),
+        (895, 517, -95, 144, 58, -0.35, 0.28, -0.12),
+        (1145, 112, -75, 164, 56, 0.38, -0.24, 0.18),
+        (20, 350, 175, 170, 68, 0.55, 0.18, -0.17),
+        (1180, 302, 160, 155, 61, -0.42, -0.20, 0.24),
+        (205, 570, 135, 145, 55, 0.34, 0.24, -0.16),
+        (1002, 574, 152, 130, 56, -0.48, -0.18, 0.20),
+        (336, 32, -120, 100, 45, -0.28, 0.36, -0.18),
+        (866, 33, -125, 110, 47, 0.36, -0.32, 0.16),
     ]
     bases = [row for row in all_bases if (row[2] >= 0) == foreground]
-    palette = (BLUE, PINK, (231, 241, 249), (75, 160, 196), (220, 130, 157))
+    palette = (BLUE, PINK, (235, 242, 249), (69, 151, 191), (212, 133, 159))
     vertices_by_shape: dict[tuple[int, int, int], tuple[np.ndarray, list[tuple[int, ...]]]] = {}
-    phase = math.tau * t / duration
+    cycle = math.tau * t / duration
     for index, (x, y, z, length, width, yaw, pitch, roll) in enumerate(bases):
         shape_key = (int(width), int(length), int(width * 0.70))
         if shape_key not in vertices_by_shape:
             vertices_by_shape[shape_key] = crystal_mesh(shape_key[0], shape_key[1], shape_key[2])
         vertices, faces = vertices_by_shape[shape_key]
         drift = index * 1.71
-        center = (x + 7 * math.sin(phase + drift),
-                  y + 11 * math.sin(phase * 0.72 + drift),
-                  z + 18 * math.cos(phase + drift))
-        rotation = scene_rotation(yaw + 0.10 * math.sin(phase + drift),
-                                  pitch + 0.12 * math.cos(phase * 0.8 + drift),
-                                  roll + 0.12 * math.sin(phase + drift))
-        alpha = 114 if z < 0 else 128
+        center = (x + 12 * math.sin(cycle + drift),
+                  y + 16 * math.sin(2 * cycle + drift),
+                  z + 24 * math.cos(cycle + drift))
+        rotation = scene_rotation(yaw + 0.15 * math.sin(cycle + drift),
+                                  pitch + 0.17 * math.cos(2 * cycle + drift),
+                                  roll + 0.16 * math.sin(cycle + drift))
+        alpha = 112 if z < 0 else 128
+        materials = [
+            (palette[(index + face_index // 2) % len(palette)], alpha)
+            for face_index in range(len(faces))
+        ]
+        draw_mesh_object(frame, vertices, faces, center, rotation, materials,
+                         edge_color=(24, 39, 58, 76))
+
+
+def draw_3d_orbits(frame: Image.Image, t: float, duration: float) -> None:
+    """Add dimensional, softly lit trans-color rings behind the focal K."""
+    cycle = math.tau * t / duration
+    palette = (BLUE, PINK, (244, 249, 253), PINK, BLUE)
+    for index, (rx, ry, tube, z, yaw, pitch) in enumerate((
+        (384, 248, 7.5, -235, 0.13, 0.31),
+        (333, 211, 5.0, -115, -0.27, -0.40),
+        (454, 297, 4.0, -315, 0.32, -0.17),
+    )):
+        vertices, faces = torus_mesh(rx, ry, tube, 48, 8)
+        rotation = scene_rotation(yaw + 0.13 * math.sin(cycle + index),
+                                  pitch + 0.10 * math.cos(cycle + index),
+                                  0.08 * math.sin(cycle + index * 1.7))
         materials = []
         for face_index in range(len(faces)):
-            color = palette[(index + face_index // 2) % len(palette)]
-            materials.append((color, alpha))
-        draw_mesh_object(frame, vertices, faces, center, rotation, materials,
-                         edge_color=(24, 39, 58, 74))
+            band = (face_index // 8 // 6 + index) % len(palette)
+            materials.append((palette[band], 52 if index != 1 else 42))
+        draw_mesh_object(frame, vertices, faces, (600, 319, z), rotation,
+                         materials, focal=1820.0)
 
 
 def make_lens_face(avatar: Image.Image, size: int) -> Image.Image:
@@ -400,9 +453,9 @@ def draw_portrait_pod(
     faces.append(tuple(front_inner))
     materials.append(((12, 18, 28), 150))
     vertices_array = np.asarray(vertices, dtype=np.float64)
-    rotation = scene_rotation(0.25 * math.sin(phase * 0.71),
-                              0.23 * math.cos(phase * 0.67),
-                              0.13 * math.sin(phase * 0.83))
+    rotation = scene_rotation(0.31 * math.sin(phase),
+                              0.27 * math.cos(phase * 2),
+                              0.18 * math.sin(phase))
     draw_mesh_object(frame, vertices_array, faces, (x, y, z), rotation, materials,
                      edge_color=(8, 15, 26, 68))
 
@@ -425,24 +478,130 @@ def draw_portrait_pod(
 def draw_floating_team(
     frame: Image.Image,
     roster: list[tuple[str, Image.Image]],
-    t: float,
-    duration: float,
+    poses: np.ndarray,
 ) -> None:
-    """Let the member lenses drift independently through the full 3D scene."""
-    anchors = [
-        (76, 172), (186, 118), (337, 235), (70, 340), (242, 316),
-        (169, 438), (340, 511), (102, 530), (72, 438),
-        (1120, 137), (1035, 78), (865, 210), (1130, 260), (972, 309),
-        (1080, 398), (875, 444), (1004, 518), (1128, 520),
-    ]
-    for index, ((name, avatar), (base_x, base_y)) in enumerate(zip(roster, anchors)):
-        phase = math.tau * t / duration + index * 2.399
-        x = base_x + 13 * math.sin(phase * 0.63) + 4 * math.sin(phase * 0.31 + 0.8)
-        y = base_y + 17 * math.sin(phase * 0.78 + 0.6)
-        z = -40 + 120 * math.sin(phase * 0.57 + index * 0.23)
-        radius = 30 + (index % 4) * 2.0
-        draw_portrait_pod(frame, avatar, x, y, z, radius, phase,
-                          (BLUE, PINK, (205, 216, 231))[index % 3])
+    """Draw the physically simulated portrait bodies back to front."""
+    order = np.argsort(poses[:, 2])
+    accents = (BLUE, PINK, (205, 216, 231))
+    for index in order:
+        x, y, z, radius, spin = poses[index]
+        _name, avatar = roster[int(index)]
+        draw_portrait_pod(frame, avatar, float(x), float(y), float(z),
+                          float(radius), float(spin), accents[int(index) % 3])
+
+
+def simulate_team_motion(frame_count: int, fps: int, count: int) -> tuple[np.ndarray, int, float]:
+    """Solve a driven periodic 3D sphere simulation with elastic portrait collisions."""
+    if count != 18:
+        raise RuntimeError(f"Expected 18 team members, found {count}.")
+    anchors = np.asarray([
+        (80, 145), (225, 145), (370, 145),
+        (80, 320), (225, 320), (370, 320),
+        (80, 495), (225, 495), (370, 495),
+        (830, 145), (975, 145), (1120, 145),
+        (830, 320), (975, 320), (1120, 320),
+        (830, 495), (975, 495), (1120, 495),
+    ], dtype=np.float64)
+    radii = np.asarray([39 + (index % 3) * 2.0 for index in range(count)], dtype=np.float64)
+    phase_offsets = np.arange(count, dtype=np.float64) * 2.399963229728653
+    side = np.asarray([0] * 9 + [1] * 9)
+    mass = radii * radii
+    inverse_mass = 1.0 / mass
+    states = np.zeros((count, 8), dtype=np.float64)
+    states[:, :2] = anchors
+    states[:, 2] = np.asarray([-28, 0, 28] * 6, dtype=np.float64)
+    states[:, 0] += 3.0 * np.sin(phase_offsets)
+    states[:, 1] += 2.0 * np.cos(phase_offsets)
+    substeps = 4
+    dt = 1.0 / (fps * substeps)
+    spring = 21.0
+    drag = 7.8
+    restitution = 0.58
+    collision_impacts = 0
+    period_residual = float("inf")
+
+    def advance_cycle(capture: bool) -> np.ndarray | None:
+        nonlocal collision_impacts
+        saved = [] if capture else None
+        for frame_index in range(frame_count):
+            if saved is not None:
+                saved.append(np.column_stack((states[:, :3], radii, states[:, 6])).copy())
+            for substep in range(substeps):
+                phase = math.tau * (frame_index + (substep + 0.5) / substeps) / frame_count
+                angle = phase + phase_offsets
+                targets = np.column_stack((
+                    anchors[:, 0] + 43.0 * np.sin(angle),
+                    anchors[:, 1] + 51.0 * np.sin(2 * angle + 0.6),
+                    states[:, 2] * 0.18 + 47.0 * np.sin(angle * 1.0 + 1.4),
+                ))
+                acceleration = spring * (targets - states[:, :3]) - drag * states[:, 3:6]
+                states[:, 3:6] += acceleration * dt
+                states[:, :3] += states[:, 3:6] * dt
+                states[:, 6] += states[:, 7] * dt
+                states[:, 7] *= 0.986
+
+                for first in range(count - 1):
+                    for second in range(first + 1, count):
+                        if side[first] != side[second]:
+                            continue
+                        delta = states[second, :3] - states[first, :3]
+                        distance = float(np.linalg.norm(delta))
+                        minimum = radii[first] + radii[second]
+                        if distance >= minimum:
+                            continue
+                        normal = delta / distance if distance > 1e-7 else np.asarray((1.0, 0.0, 0.0))
+                        inv_first, inv_second = inverse_mass[first], inverse_mass[second]
+                        inv_sum = inv_first + inv_second
+                        penetration = minimum - distance
+                        correction = normal * (max(0.0, penetration - 0.2) * 0.72 / inv_sum)
+                        states[first, :3] -= correction * inv_first
+                        states[second, :3] += correction * inv_second
+                        relative = states[second, 3:6] - states[first, 3:6]
+                        normal_speed = float(relative @ normal)
+                        if normal_speed < 0.0:
+                            impulse_size = -(1.0 + restitution) * normal_speed / inv_sum
+                            impulse = impulse_size * normal
+                            states[first, 3:6] -= impulse * inv_first
+                            states[second, 3:6] += impulse * inv_second
+                            tangent = relative - normal_speed * normal
+                            tangent_speed = float(np.linalg.norm(tangent))
+                            if tangent_speed > 1e-7:
+                                tangent /= tangent_speed
+                                friction = min(tangent_speed / inv_sum, impulse_size * 0.10)
+                                spin_impulse = friction * 0.35
+                                states[first, 7] -= spin_impulse / max(radii[first] ** 3, 1.0)
+                                states[second, 7] += spin_impulse / max(radii[second] ** 3, 1.0)
+                            collision_impacts += 1
+
+                # Stage rails contain the actors in two clear side lanes around the K.
+                for index in range(count):
+                    radius = radii[index]
+                    left, right = ((30 + radius, 414 - radius) if side[index] == 0
+                                   else (786 + radius, WIDTH - 24 - radius))
+                    for axis, low, high in ((0, left, right),
+                                            (1, 76 + radius, HEIGHT - 43 - radius),
+                                            (2, -125.0, 125.0)):
+                        if states[index, axis] < low:
+                            states[index, axis] = low
+                            states[index, axis + 3] = abs(states[index, axis + 3]) * 0.72
+                        elif states[index, axis] > high:
+                            states[index, axis] = high
+                            states[index, axis + 3] = -abs(states[index, axis + 3]) * 0.72
+        return np.asarray(saved) if saved is not None else None
+
+    # Strong damping makes the driven contact simulation converge to a periodic orbit.
+    for _ in range(22):
+        cycle_start = states.copy()
+        advance_cycle(False)
+        period_residual = float(np.max(np.linalg.norm(states[:, :3] - cycle_start[:, :3], axis=1)))
+        if period_residual < 0.035:
+            break
+    cycle_start = states.copy()
+    collision_impacts = 0
+    poses = advance_cycle(True)
+    period_residual = float(np.max(np.linalg.norm(states[:, :3] - cycle_start[:, :3], axis=1)))
+    assert poses is not None
+    return poses, collision_impacts, period_residual
 
 
 def rotation_matrix(yaw: float, pitch: float) -> np.ndarray:
@@ -527,8 +686,8 @@ def build_lit_face(face: Image.Image, t: float, duration: float) -> np.ndarray:
     norm = np.sqrt(nx * nx + ny * ny + nz * nz)
     nx, ny, nz = nx / norm, ny / norm, nz / norm
     phase = math.tau * t / duration
-    lx = 0.30 + 0.08 * math.sin(phase)
-    ly = -0.44 + 0.05 * math.cos(phase)
+    lx = 0.30 + 0.11 * math.sin(phase)
+    ly = -0.44 + 0.07 * math.cos(phase)
     lz = math.sqrt(max(0.2, 1.0 - lx * lx - ly * ly))
     ndotl = np.clip(nx * lx + ny * ly + nz * lz, 0.0, 1.0)
     directional = 0.94 + 0.13 * ndotl
@@ -539,8 +698,13 @@ def build_lit_face(face: Image.Image, t: float, duration: float) -> np.ndarray:
     edge_dot = (edge_x * lx - edge_y * ly) / edge_norm
     bevel = np.clip(1.0 - distance / 18.0, 0.0, 1.0)
     bevel_light = 1.0 + bevel * edge_dot * 0.055
+    # A slow clear-coat sweep changes the apparent roughness without bleaching
+    # the trans flag colors or washing out the K's dark separation keyline.
+    roughness = 0.32 + 0.13 * (0.5 + 0.5 * math.cos(phase + 0.45))
     sweep = (-0.22 + 1.44 * (0.5 + 0.5 * math.sin(phase - 0.8))) * w
-    specular = 6.5 * np.exp(-0.5 * ((xx - sweep) / (w * 0.075)) ** 2)
+    sheen_width = w * (0.045 + roughness * 0.075)
+    sheen_strength = 8.0 + 7.0 * (0.5 + 0.5 * math.sin(phase + 0.6))
+    specular = sheen_strength * np.exp(-0.5 * ((xx - sweep) / sheen_width) ** 2)
     specular *= np.exp(-0.5 * ((yy - h * 0.33) / (h * 0.56)) ** 2)
     material = np.ones((h, w), dtype=np.float32)
     material[flag_fill] = directional[flag_fill] * bevel_light[flag_fill]
@@ -677,25 +841,132 @@ def render_3d_k(
     frame.alpha_composite(Image.fromarray(warp_rgba(ring_rgba, front_transform), "RGBA"))
 
     front = warp_rgba(source, front_transform)
+    # Restrained highlight-only bloom: it lifts the flag-colored face but leaves
+    # the black and pale keylines crisp so the K stays separate from the flag.
+    luminance = (front[..., 0] * 0.2126 + front[..., 1] * 0.7152
+                 + front[..., 2] * 0.0722)
+    highlights = np.clip((luminance - 198.0) / 57.0, 0.0, 1.0)
+    highlights *= front[..., 3].astype(np.float32) / 255.0
+    bloom = cv2.GaussianBlur(highlights, (0, 0), 6.0)
+    bloom_layer = np.zeros((HEIGHT, WIDTH, 4), dtype=np.uint8)
+    bloom_layer[..., :3] = (130, 224, 248)
+    bloom_layer[..., 3] = np.uint8(np.clip(bloom * 42.0, 0, 17))
+    frame.alpha_composite(Image.fromarray(bloom_layer, "RGBA"))
     frame.alpha_composite(Image.fromarray(front, "RGBA"))
 
+
+def draw_extruded_text(
+    frame: Image.Image,
+    text: str,
+    font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
+    center_x: float,
+    center_y: float,
+    face_color: tuple[int, int, int],
+    cycle: float,
+    depth: float = 18.0,
+) -> None:
+    """Render site-font text as a perspective-projected, shaded extruded mesh."""
+    bounds = font.getbbox(text)
+    width, height = max(1, bounds[2] - bounds[0]), max(1, bounds[3] - bounds[1])
+    glyph = Image.new("L", (width, height), 0)
+    ImageDraw.Draw(glyph).text((-bounds[0], -bounds[1]), text, font=font, fill=255)
+    mask = np.asarray(glyph, dtype=np.uint8)
+    if not np.any(mask):
+        return
+    outer = cv2.dilate(mask, np.ones((5, 5), dtype=np.uint8), iterations=1)
+    outer_mask = (outer > 0).astype(np.uint8)
+    yaw = 0.14 + 0.025 * math.sin(cycle)
+    pitch = 0.07 + 0.016 * math.sin(2 * cycle + 0.3)
+    roll = 0.012 * math.sin(cycle)
+    matrix = scene_rotation(yaw, pitch, roll)
+    corners = np.float32([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]])
+
+    def transform_points(points: np.ndarray, z: float) -> tuple[np.ndarray, np.ndarray]:
+        p = np.asarray(points, dtype=np.float64)
+        local = np.column_stack((p[:, 0] - width / 2,
+                                 height / 2 - p[:, 1],
+                                 np.full(len(p), z)))
+        rotated = local @ matrix.T
+        camera_z = 1820.0 - rotated[:, 2]
+        factor = 1820.0 / np.maximum(camera_z, 1.0)
+        screen = np.column_stack((center_x + rotated[:, 0] * factor,
+                                  center_y - rotated[:, 1] * factor))
+        return screen.astype(np.float32), rotated
+
+    z_slices = np.linspace(-depth, 0.0, 12)
+    projected_corners = [transform_points(corners, z)[0] for z in z_slices]
+    all_corners = np.concatenate(projected_corners, axis=0)
+    x0 = max(0, int(math.floor(float(all_corners[:, 0].min()) - 2)))
+    y0 = max(0, int(math.floor(float(all_corners[:, 1].min()) - 2)))
+    x1 = min(WIDTH, int(math.ceil(float(all_corners[:, 0].max()) + 3)))
+    y1 = min(HEIGHT, int(math.ceil(float(all_corners[:, 1].max()) + 3)))
+    if x1 <= x0 or y1 <= y0:
+        return
+    patch_width, patch_height = x1 - x0, y1 - y0
+    translate = np.asarray(((1.0, 0.0, -x0), (0.0, 1.0, -y0), (0.0, 0.0, 1.0)))
+    layers: list[np.ndarray] = []
+    for z, screen_corners in zip(z_slices, projected_corners):
+        transform_z = cv2.getPerspectiveTransform(corners, screen_corners)
+        local_transform = translate @ transform_z
+        layers.append(cv2.warpPerspective(outer, local_transform, (patch_width, patch_height),
+                                          flags=cv2.INTER_LINEAR,
+                                          borderMode=cv2.BORDER_CONSTANT, borderValue=0))
+
+    # The union of the projected cross-sections is the visible side wall of a
+    # real extruded glyph volume. Color bands follow its thickness and lighting.
+    union = np.zeros((patch_height, patch_width), dtype=np.uint8)
+    side_rgb = np.zeros((patch_height, patch_width, 3), dtype=np.uint8)
+    side_palette = (BLUE, PINK, (239, 245, 251), (73, 153, 193), (224, 140, 164))
+    for slice_index, layer in enumerate(layers):
+        new_surface = cv2.subtract(layer, union)
+        lit = 0.57 + 0.29 * (0.5 + 0.5 * math.sin(cycle + slice_index * 0.31))
+        color = np.clip(np.asarray(side_palette[slice_index % len(side_palette)]) * lit,
+                        0, 255).astype(np.uint8)
+        side_rgb[new_surface > 0] = color
+        union = cv2.max(union, layer)
+    front_outer = layers[-1]
+    side_alpha = cv2.subtract(union, front_outer)
+    side_rgba = np.dstack((side_rgb, side_alpha))
+    frame.alpha_composite(Image.fromarray(side_rgba, "RGBA"), (x0, y0))
+
+    front_corners, _rotated = transform_points(corners, 0.0)
+    transform = cv2.getPerspectiveTransform(corners, front_corners)
+
+    def project_mask(source_mask: np.ndarray, color: tuple[int, int, int]) -> None:
+        layer = np.zeros((height, width, 4), dtype=np.uint8)
+        layer[..., :3] = color
+        layer[..., 3] = source_mask
+        composite_projected_rgba(frame, layer, transform, corners)
+
+    # The black front rim is a real front surface; the colored glyph sits inside it.
+    project_mask(outer_mask * 255, (6, 12, 22))
+    inner_highlight = cv2.erode(mask, np.ones((3, 3), dtype=np.uint8), iterations=1)
+    face = np.zeros((height, width, 4), dtype=np.uint8)
+    yy, xx = np.mgrid[0:height, 0:width]
+    sheen = 0.92 + 0.08 * np.cos((xx / max(width, 1)) * math.tau + cycle)
+    rgb = np.asarray(face_color, dtype=np.float32)[None, None, :] * sheen[..., None]
+    face[..., :3] = np.uint8(np.clip(rgb, 0, 255))
+    face[..., 3] = mask
+    composite_projected_rgba(frame, face, transform, corners)
+    if np.any(inner_highlight):
+        highlight_layer = np.zeros((height, width, 4), dtype=np.uint8)
+        highlight_layer[..., :3] = (255, 255, 255)
+        highlight_layer[..., 3] = np.uint8(inner_highlight * 0.12)
+        composite_projected_rgba(frame, highlight_layer, transform, corners)
+
+
 def draw_labels(frame: Image.Image, t: float, duration: float) -> None:
-    draw = ImageDraw.Draw(frame)
-    phase = math.tau * t / duration
-    # Keep the title and destination readable inside the scene without UI chrome.
-    title_y = 18 + round(math.sin(phase) * 1.2)
-    center_text(draw, 600, title_y, "KICKASS TRANSFEMS",
-                load_font(29, heavy=True), (255, 255, 255, 255), 2,
-                (6, 13, 25, 240), 1.15)
-    center_text(draw, 600, 54, "18 TRANSFEM CREATORS ON KICK",
-                load_font(13, heavy=True), (238, 244, 249, 255), 1,
-                (7, 14, 26, 235), 0.72)
-    center_text(draw, 600, 596, "MEET THE CREW",
-                load_font(16, heavy=True), (255, 255, 255, 255), 2,
-                (7, 14, 26, 240), 0.8)
-    center_text(draw, 600, 616, "KAZVT.COM/KT",
-                load_font(9, heavy=True), (222, 231, 240, 255), 1,
-                (7, 14, 26, 235), 1.05)
+    cycle = math.tau * t / duration
+    bob = 1.4 * math.sin(cycle)
+    # Reuse the same site face as the KT page and the real extruded glyph outlines.
+    draw_extruded_text(frame, "KICKASS TRANSFEMS", load_font(36), 600, 35 + bob,
+                       (255, 248, 252), cycle, depth=22)
+    draw_extruded_text(frame, "18 TRANSFEM CREATORS ON KICK", load_font(24), 600,
+                       73 + bob * 0.55, (238, 248, 255), cycle, depth=14)
+    draw_extruded_text(frame, "MEET THE CREW", load_font(26), 600, 585 + bob * 0.45,
+                       (255, 248, 252), cycle, depth=16)
+    draw_extruded_text(frame, "KAZVT.COM/KT", load_font(18), 600, 611,
+                       (238, 248, 255), cycle, depth=12)
 
 
 def render_frame(
@@ -707,18 +978,23 @@ def render_frame(
     frame_count: int,
     fps: int,
     duration: float,
+    team_poses: np.ndarray,
+    source_duration: float,
 ) -> Image.Image:
-    phase = frame_index / max(1, frame_count - 1)
-    # Ping-pong through a clip section so the flag itself loops cleanly in the GIF.
-    source_time = 3.15 * (1 - abs(2 * phase - 1))
-    t = frame_index / fps
+    phase = frame_index / max(1, frame_count)
+    cycle = math.tau * phase
+    # Cosine ping-pong covers the full waving-flag clip with zero velocity at
+    # both ends, so the background also closes smoothly at the GIF boundary.
+    source_time = source_duration * 0.5 * (1.0 - math.cos(cycle))
+    t = duration * phase
     frame = make_background(cap, source_time)
     draw_atmospheric_lights(frame, t, duration)
     frame = frame.convert("RGBA")
     distant_props = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     draw_3d_props(distant_props, t, duration, foreground=False)
-    frame.alpha_composite(distant_props.filter(ImageFilter.GaussianBlur(1.15)))
-    draw_floating_team(frame, roster, t, duration)
+    draw_3d_orbits(distant_props, t, duration)
+    frame.alpha_composite(distant_props.filter(ImageFilter.GaussianBlur(0.65)))
+    draw_floating_team(frame, roster, team_poses[frame_index])
     render_3d_k(frame, face, contour, t, duration)
     draw_3d_props(frame, t, duration, foreground=True)
     draw_labels(frame, t, duration)
@@ -730,7 +1006,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=OUTPUT)
     parser.add_argument("--fps", type=int, default=8)
     parser.add_argument("--seconds", type=float, default=5.6)
-    parser.add_argument("--colors", type=int, default=48)
+    parser.add_argument("--colors", type=int, default=40)
     parser.add_argument("--refresh-avatars", action="store_true")
     parser.add_argument("--preview-frame", type=Path, help="also save the first frame as a PNG")
     args = parser.parse_args()
@@ -749,13 +1025,21 @@ def main() -> None:
         raise RuntimeError(f"Could not open {VIDEO}")
 
     frame_count = max(2, round(args.fps * args.seconds))
+    duration = frame_count / args.fps
+    source_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    source_fps = cap.get(cv2.CAP_PROP_FPS)
+    source_duration = max(0.0, (source_frames - 1) / source_fps) if source_fps > 0 else 0.0
+    team_poses, collision_impacts, period_residual = simulate_team_motion(
+        frame_count, args.fps, len(roster))
+    print(f"Portrait physics: {collision_impacts} impacts in the loop; "
+          f"periodic-state residual {period_residual:.3f}px")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="kt-embed-") as temp_name:
         temp = Path(temp_name)
         first_frame: Image.Image | None = None
         for index in range(frame_count):
             frame = render_frame(cap, roster, face, contour, index, frame_count,
-                                 args.fps, args.seconds)
+                                 args.fps, duration, team_poses, source_duration)
             if index == 0:
                 first_frame = frame.copy()
             frame.save(temp / f"frame-{index:04d}.png", compress_level=1)
