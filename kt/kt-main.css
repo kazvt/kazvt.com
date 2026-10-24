@@ -1055,6 +1055,13 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   color: #66535e;
 }
 
+.kt-member[data-last-live-known-only="true"] .kt-last-live,
+.kt-recommendation-link[data-last-live-known-only="true"] .kt-last-live {
+  border-style: dotted;
+  background: rgb(255 249 252 / 88%);
+  color: #66535e;
+}
+
 .kt-member-badge {
   align-self: center;
   justify-self: end;
