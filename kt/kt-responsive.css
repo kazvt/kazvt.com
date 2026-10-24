@@ -185,8 +185,8 @@
     transform: rotate(1deg);
   }
   .kt-member[data-live-state="live"] .kt-member-tag,
-  .kt-member[data-live-state="live"] .kt-member-badge { max-width: calc(100% - 42px); }
-  .kt-live-sticker { top: auto; right: 2px; bottom: 0; width: 38px; }
+  .kt-member[data-live-state="live"] .kt-member-badge { max-width: calc(100% - 46px); }
+  .kt-live-sticker { top: auto; right: 2px; bottom: 0; width: 42px; }
 
   .kt-recommendations {
     display: grid;
@@ -228,14 +228,14 @@
   .kt-topbar-label { padding-inline: 4px; font-size: .46rem; }
   .kt-member { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px 6px; }
   .kt-member-avatar { width: 32px; height: 32px; }
-  .kt-member-name { font-size: .74rem; }
-  .kt-member-pronouns { font-size: .53rem; }
-  .kt-member-handle { font-size: .55rem; }
+  .kt-member-name { font-size: .78rem; }
+  .kt-member-pronouns { font-size: .58rem; }
+  .kt-member-handle { font-size: .6rem; }
   .kt-member-tag,
-  .kt-member-badge { padding-inline: 3px; font-size: .57rem; }
+  .kt-member-badge { padding-inline: 3px; font-size: .6rem; }
   .kt-member[data-live-state="live"] .kt-member-tag,
-  .kt-member[data-live-state="live"] .kt-member-badge { max-width: calc(100% - 36px); }
-  .kt-live-sticker { width: 32px; }
+  .kt-member[data-live-state="live"] .kt-member-badge { max-width: calc(100% - 42px); }
+  .kt-live-sticker { width: 38px; }
   .kt-webring-body { padding: 10px; }
   .kt-webring-heading h2 { font-size: 1.2rem; }
   .kt-webring-heading { align-items: stretch; flex-direction: column; gap: 6px; }
