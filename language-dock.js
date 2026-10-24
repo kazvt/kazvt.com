@@ -69,8 +69,10 @@
       button.addEventListener("click", async () => {
         const changed = await i18n.select(language.name);
         if (changed) {
-          const reloadDelay = document.body.dataset.page === "kt" ? 200 : 0;
-          window.setTimeout(() => window.location.reload(), reloadDelay);
+          const soundCuePending = document.body.dataset.page === "kt"
+            && document.querySelector("[data-kt-music-toggle]")?.dataset.muted !== "true";
+          if (soundCuePending) window.setTimeout(() => window.location.reload(), 200);
+          else window.location.reload();
         }
       });
       options.append(button);
