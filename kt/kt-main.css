@@ -802,14 +802,17 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 .kt-member-new-badge {
+  position: absolute;
+  z-index: 4;
+  left: 6px;
+  bottom: 5px;
   display: block;
-  width: clamp(40px, 4.5vw, 50px);
+  width: clamp(26px, 2.8vw, 32px);
   height: auto;
   flex: 0 0 auto;
-  align-self: center;
   object-fit: contain;
   pointer-events: none;
-  filter: drop-shadow(1px 2px 0 rgb(43 32 40 / 38%));
+  filter: drop-shadow(1px 1px 0 rgb(43 32 40 / 55%));
 }
 
 .kt-member-name,
@@ -819,7 +822,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   font-family: var(--kt-comic-font);
   font-synthesis: weight;
   font-size: clamp(1.04rem, 2vw, 1.32rem);
-  font-weight: 1000;
+  font-weight: 700;
   line-height: 1.05;
   text-shadow: 1px 1px 0 var(--kt-white), 2px 2px 0 var(--kt-pink);
 }
@@ -855,7 +858,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   color: var(--kt-ink);
   font-family: var(--kt-comic-font);
   font-size: .68rem;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -1974,6 +1977,8 @@ body[data-page="kt"] .kt-footer .language-dock > .language-button:focus-visible 
 
 body[data-page="kt"] .language-options .language-option {
   font-family: var(--kt-comic-font);
+  font-weight: 700;
+  font-synthesis: weight;
 }
 
 body[data-page="kt"] :is(
