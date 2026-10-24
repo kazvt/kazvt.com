@@ -1262,11 +1262,11 @@
 
     const refreshIndicatorLanguage = () => entries.forEach((entry) => {
       const state = entry.card.dataset.liveState;
-      if (state === "live") {
-        const fromCache = entry.card.dataset.liveStatusCached === "true";
+      const fromCache = entry.card.dataset.liveStatusCached === "true";
+      if (state === "live" || (state === "offline" && fromCache)) {
         setState(entry, state, { fromCache, checkedAt: entry.cachedStatus?.checkedAt });
       }
-      else if (state === "offline" && entry.lastLiveAt) {
+      if (state === "offline" && entry.lastLiveAt) {
         showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
       }
     });
@@ -1274,6 +1274,12 @@
     window.addEventListener("kazvt:languagechange", refreshIndicatorLanguage);
     window.setInterval(() => {
       entries.forEach((entry) => {
+        if (entry.card.dataset.liveStatusCached === "true" && entry.cachedStatus) {
+          setState(entry, entry.cachedStatus.state, {
+            fromCache: true,
+            checkedAt: entry.cachedStatus.checkedAt,
+          });
+        }
         if (entry.card.dataset.liveState === "offline" && entry.lastLiveAt) {
           showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
         }
