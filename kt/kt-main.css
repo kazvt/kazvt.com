@@ -790,12 +790,16 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-member-copy {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   min-width: 0;
-  gap: 3px;
+  column-gap: 6px;
+  row-gap: 3px;
 }
 
 .kt-member-title {
   display: flex;
+  grid-column: 1 / -1;
+  grid-row: 1;
   min-width: 0;
   align-items: baseline;
   gap: 8px;
@@ -804,8 +808,12 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-streamer-languages {
   display: inline-flex;
+  grid-column: 2;
+  grid-row: 2;
   min-width: 0;
   align-items: center;
+  align-self: center;
+  justify-self: end;
   gap: 2px;
   flex: 0 0 auto;
   white-space: nowrap;
@@ -894,6 +902,10 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 .kt-member-handle {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  align-self: center;
   overflow-wrap: anywhere;
   color: #51404a;
   font-family: var(--kt-comic-font);

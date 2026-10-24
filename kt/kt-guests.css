@@ -59,7 +59,22 @@
 
 .kt-recommendation-copy {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   min-width: 0;
+  column-gap: 6px;
+  row-gap: 3px;
+}
+
+.kt-recommendation-copy .kt-member-title {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.kt-recommendation-handle {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  align-self: center;
 }
 
 .kt-recommendation-avatar {

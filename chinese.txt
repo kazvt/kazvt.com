@@ -567,6 +567,7 @@ kt.live_label=直播中
 kt.live_aria={name} 正在 KICK 直播
 kt.last_live_aria={name} 上次直播：{time}
 kt.last_live_retention_aria={name} 没有可用的公开视频；此处按 Kick 的 {days} 天保留期限估算。实际最近直播可能更早，也可能无法确认。
+kt.languages_label=使用的语言
 kt.status_cached_aria={name} 的状态上次检查于 {time}；正在重新检查
 kt.live_title=正在 KICK 直播
 kt.unknown_label=?
