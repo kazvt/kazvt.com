@@ -255,8 +255,8 @@
       badge.className = "kt-member-new-badge";
       badge.src = "/kt/assets/new-member-burst.gif";
       badge.alt = "New member";
-      badge.width = 32;
-      badge.height = 21;
+      badge.width = 36;
+      badge.height = 24;
       badge.loading = "lazy";
       badge.decoding = "async";
       card.append(badge);
