@@ -566,6 +566,7 @@ kt.home_footer=Voltar para kazvt.com
 kt.live_label=AO VIVO
 kt.live_aria={name} está ao vivo na KICK
 kt.last_live_aria={name} esteve ao vivo pela última vez: {time}
+kt.status_cached_aria=O status de {name} foi verificado pela última vez {time}; verificando novamente
 kt.live_title=Ao vivo na KICK
 kt.unknown_label=?
 kt.unknown_aria=Não foi possível verificar o status da KICK de {name}

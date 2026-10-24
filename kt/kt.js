@@ -1262,7 +1262,10 @@
 
     const refreshIndicatorLanguage = () => entries.forEach((entry) => {
       const state = entry.card.dataset.liveState;
-      if (state === "live") setState(entry, state);
+      if (state === "live") {
+        const fromCache = entry.card.dataset.liveStatusCached === "true";
+        setState(entry, state, { fromCache, checkedAt: entry.cachedStatus?.checkedAt });
+      }
       else if (state === "offline" && entry.lastLiveAt) {
         showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
       }

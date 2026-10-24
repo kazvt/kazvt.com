@@ -899,6 +899,11 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
     kt-live-pip-flash .9s ease-in-out infinite;
 }
 
+.kt-live-indicator[data-state="live"][data-cached="true"] {
+  animation: none;
+  opacity: .58;
+}
+
 .kt-live-sticker {
   position: absolute;
   z-index: 4;
