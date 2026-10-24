@@ -590,5 +590,5 @@ kt.music_state_on=声音开启
 kt.music_state_muted=声音关闭
 kt.music_mute=静音
 kt.music_unmute=取消静音
-kt.music_mute_aria=将背景音乐静音
-kt.music_unmute_aria=取消背景音乐静音
+kt.music_mute_aria=静音网站上的所有声音
+kt.music_unmute_aria=取消静音网站上的所有声音

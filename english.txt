@@ -650,5 +650,5 @@ kt.music_state_on=SOUND ON
 kt.music_state_muted=SOUND OFF
 kt.music_mute=MUTE
 kt.music_unmute=UNMUTE
-kt.music_mute_aria=Mute background music
-kt.music_unmute_aria=Unmute background music
+kt.music_mute_aria=Mute all site audio
+kt.music_unmute_aria=Unmute all site audio
