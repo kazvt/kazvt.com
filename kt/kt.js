@@ -1054,12 +1054,13 @@
         );
         if (!response.ok) throw new Error(`Kick returned ${response.status}`);
         const record = lastLiveRecord(await response.json());
+        if (entry.statusRequestId !== requestId) return;
         writeLastLiveCache(entry.slug, record, historyCacheTtl);
-        if (entry.statusRequestId === requestId && record) {
-          showLastLive(entry, record.timestamp, record.approximate);
-        }
+        if (record) showLastLive(entry, record.timestamp, record.approximate);
       } catch {
-        writeLastLiveCache(entry.slug, null, historyFailureTtl);
+        if (entry.statusRequestId === requestId) {
+          writeLastLiveCache(entry.slug, null, historyFailureTtl);
+        }
       } finally {
         window.clearTimeout(timeout);
       }
