@@ -897,14 +897,167 @@
 
     const refreshInterval = 120_000;
     const requestTimeout = 8_000;
+    const historyRequestTimeout = 5_000;
+    const historyCacheTtl = 4 * 60 * 60 * 1000;
+    const historyFailureTtl = 10 * 60 * 1000;
     const maxConcurrentRequests = 4;
     let inFlight = false;
     let lastRefresh = 0;
     let refreshTimer = 0;
+    const lastLiveCache = new Map();
+
+    function parseKickTimestamp(value) {
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return value < 100_000_000_000 ? value * 1000 : value;
+      }
+      if (typeof value !== "string" || !value.trim()) return 0;
+      const text = value.trim();
+      const normalized = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(text)
+        && !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(text)
+        ? `${text.replace(" ", "T")}Z`
+        : text;
+      const parsed = Date.parse(normalized);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function kickDurationMilliseconds(value) {
+      const duration = Number(value);
+      if (!Number.isFinite(duration) || duration <= 0) return 0;
+      const durationMs = duration > 7 * 24 * 60 * 60 ? duration : duration * 1000;
+      return durationMs <= 14 * 24 * 60 * 60 * 1000 ? durationMs : 0;
+    }
+
+    function lastLiveTimestamp(videos) {
+      const records = Array.isArray(videos)
+        ? videos
+        : Array.isArray(videos?.data) ? videos.data : [];
+      const candidates = records
+        .filter((video) => video && typeof video === "object" && video.is_live !== true)
+        .map((video) => {
+          const startedAt = parseKickTimestamp(video.start_time || video.started_at);
+          const durationMs = kickDurationMilliseconds(video.duration);
+          const createdAt = parseKickTimestamp(video.created_at);
+          return startedAt ? startedAt + durationMs : createdAt;
+        })
+        .filter((timestamp) => timestamp > 0 && timestamp <= Date.now() + 5 * 60 * 1000);
+      return candidates.length ? Math.max(...candidates) : 0;
+    }
+
+    function readLastLiveCache(slug) {
+      const memoryValue = lastLiveCache.get(slug);
+      if (memoryValue && memoryValue.expiresAt > Date.now()) return memoryValue;
+      try {
+        const stored = JSON.parse(localStorage.getItem(`kt:last-live:v1:${slug}`) || "null");
+        if (stored && Number.isFinite(stored.checkedAt) && Number.isFinite(stored.expiresAt)
+          && stored.expiresAt > Date.now() && (stored.timestamp === null || Number.isFinite(stored.timestamp))) {
+          lastLiveCache.set(slug, stored);
+          return stored;
+        }
+      } catch {}
+      return null;
+    }
+
+    function writeLastLiveCache(slug, timestamp, ttl) {
+      const cacheValue = { checkedAt: Date.now(), expiresAt: Date.now() + ttl, timestamp: timestamp || null };
+      lastLiveCache.set(slug, cacheValue);
+      try {
+        localStorage.setItem(`kt:last-live:v1:${slug}`, JSON.stringify(cacheValue));
+      } catch {}
+      return cacheValue;
+    }
+
+    function clearLastLiveCache(slug) {
+      lastLiveCache.delete(slug);
+      try {
+        localStorage.removeItem(`kt:last-live:v1:${slug}`);
+      } catch {}
+    }
+
+    function formatRelativeTime(timestamp, style) {
+      const age = Math.max(0, Date.now() - timestamp);
+      const minute = 60_000;
+      const hour = 60 * minute;
+      const day = 24 * hour;
+      let unit = "second";
+      let amount = 0;
+      if (age >= minute && age < hour) {
+        unit = "minute";
+        amount = -Math.floor(age / minute);
+      } else if (age >= hour && age < day) {
+        unit = "hour";
+        amount = -Math.floor(age / hour);
+      } else if (age >= day && age < 7 * day) {
+        unit = "day";
+        amount = -Math.floor(age / day);
+      } else if (age >= 7 * day && age < 30 * day) {
+        unit = "week";
+        amount = -Math.floor(age / (7 * day));
+      } else if (age >= 30 * day && age < 365 * day) {
+        unit = "month";
+        amount = -Math.floor(age / (30 * day));
+      } else if (age >= 365 * day) {
+        unit = "year";
+        amount = -Math.floor(age / (365 * day));
+      }
+
+      const locale = window.KazvtI18n?.language?.code || document.documentElement.lang || "en";
+      try {
+        return new Intl.RelativeTimeFormat(locale, { numeric: "auto", style }).format(amount, unit);
+      } catch {
+        const fallbackUnits = { second: "s", minute: "m", hour: "h", day: "d", week: "w", month: "mo", year: "y" };
+        return amount === 0 ? "now" : `${Math.abs(amount)}${fallbackUnits[unit]} ago`;
+      }
+    }
+
+    function showLastLive(entry, timestamp) {
+      if (!timestamp || entry.card.dataset.liveState !== "offline") return;
+      entry.lastLiveAt = timestamp;
+      entry.lastLiveText.textContent = formatRelativeTime(timestamp, "narrow");
+      const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
+        ?.textContent?.trim() || entry.slug;
+      const fullTime = formatRelativeTime(timestamp, "long");
+      const i18n = window.KazvtI18n;
+      const label = i18n?.format?.("kt.last_live_aria", { name: displayName, time: fullTime })
+        || `${displayName} was last live ${fullTime}`;
+      entry.lastLiveBadge.setAttribute("aria-label", label);
+      entry.lastLiveBadge.title = label;
+      entry.lastLiveBadge.hidden = false;
+      entry.card.dataset.lastLive = "true";
+    }
+
+    async function loadLastLive(entry, requestId) {
+      const cached = readLastLiveCache(entry.slug);
+      if (cached) {
+        if (cached.timestamp) showLastLive(entry, cached.timestamp);
+        return;
+      }
+
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), historyRequestTimeout);
+      try {
+        const response = await fetch(
+          `https://kick.com/api/v2/channels/${encodeURIComponent(entry.slug)}/videos`,
+          { headers: { Accept: "application/json" }, signal: controller.signal }
+        );
+        if (!response.ok) throw new Error(`Kick returned ${response.status}`);
+        const timestamp = lastLiveTimestamp(await response.json());
+        writeLastLiveCache(entry.slug, timestamp, historyCacheTtl);
+        if (entry.statusRequestId === requestId && timestamp) showLastLive(entry, timestamp);
+      } catch {
+        writeLastLiveCache(entry.slug, 0, historyFailureTtl);
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    }
 
     function setState(entry, state) {
       const { card, indicator, slug, tooltipLabel, liveSticker } = entry;
+      const previousState = card.dataset.liveState;
       card.dataset.liveState = state;
+      entry.lastLiveBadge.hidden = true;
+      delete card.dataset.lastLive;
+      entry.lastLiveBadge.removeAttribute("aria-label");
+      entry.lastLiveBadge.removeAttribute("title");
       if (memberList?.contains(card)) syncMemberAvatarAvailability();
       const tooltip = tooltipLabel
         ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
@@ -918,8 +1071,12 @@
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
         indicator.removeAttribute("title");
+        if (state !== "offline") entry.lastLiveAt = 0;
         return;
       }
+
+      if (previousState !== "live") clearLastLiveCache(slug);
+      entry.lastLiveAt = 0;
 
       indicator.hidden = false;
       indicator.dataset.state = state;
@@ -938,8 +1095,11 @@
     }
 
     async function checkEntry(entry) {
+      const requestId = (entry.statusRequestId || 0) + 1;
+      entry.statusRequestId = requestId;
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), requestTimeout);
+      let state = "unknown";
       try {
         const response = await fetch(
           `https://kick.com/api/v2/channels/${encodeURIComponent(entry.slug)}/livestream`,
@@ -951,12 +1111,14 @@
         if (!payload || !Object.prototype.hasOwnProperty.call(payload, "data")) {
           throw new Error("Unexpected Kick status response");
         }
-        setState(entry, payload.data ? "live" : "offline");
+        state = payload.data ? "live" : "offline";
+        setState(entry, state);
       } catch {
         setState(entry, "unknown");
       } finally {
         window.clearTimeout(timeout);
       }
+      if (state === "offline" && entry.statusRequestId === requestId) await loadLastLive(entry, requestId);
     }
 
     async function refreshStatuses() {
@@ -1000,11 +1162,19 @@
     });
 
     const refreshIndicatorLanguage = () => entries.forEach((entry) => {
-      const state = entry.indicator.dataset.state;
-      if (!entry.indicator.hidden && state) setState(entry, state);
+      const state = entry.card.dataset.liveState;
+      if (state === "live") setState(entry, state);
+      else if (state === "offline" && entry.lastLiveAt) showLastLive(entry, entry.lastLiveAt);
     });
     window.addEventListener("kazvt:i18nready", refreshIndicatorLanguage);
     window.addEventListener("kazvt:languagechange", refreshIndicatorLanguage);
+    window.setInterval(() => {
+      entries.forEach((entry) => {
+        if (entry.card.dataset.liveState === "offline" && entry.lastLiveAt) {
+          showLastLive(entry, entry.lastLiveAt);
+        }
+      });
+    }, 60_000);
 
     void refreshStatuses();
   }
