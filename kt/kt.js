@@ -734,6 +734,24 @@
         ? profile.pathname.split("/").filter(Boolean)[0]
         : "";
       if (!slug || !title) return [];
+
+      const languages = document.createElement("span");
+      languages.className = "kt-streamer-languages";
+      languages.setAttribute("role", "group");
+      languages.setAttribute("aria-label", "Languages");
+      const spokenLanguages = slug.toLowerCase() === "vestaphoenix"
+        ? [{ code: "en", label: "EN", name: "English" }, { code: "es", label: "ESP", name: "Spanish" }]
+        : [{ code: "en", label: "EN", name: "English" }];
+      spokenLanguages.forEach(({ code, label, name: languageName }) => {
+        const language = document.createElement("abbr");
+        language.className = "kt-streamer-language";
+        language.lang = code;
+        language.title = languageName;
+        language.textContent = label;
+        languages.append(language);
+      });
+      title.append(languages);
+
       const tooltipLabel = card.title.trim();
       const statusRail = card.matches(".kt-member")
         ? card.querySelector(".kt-member-status-rail")
