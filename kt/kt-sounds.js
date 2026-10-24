@@ -151,10 +151,9 @@
     if (!activeVoices.has(voice)) return;
     activeVoices.delete(voice);
     window.clearTimeout(voice.cleanupTimer);
-    if (stopNow && audioContext) {
-      const stopAt = audioContext.currentTime + 0.008;
+    if (stopNow) {
       voice.sources.forEach((source) => {
-        try { source.stop(stopAt); } catch {}
+        try { source.stop(); } catch {}
       });
     }
     voice.nodes.forEach((node) => {
@@ -222,13 +221,14 @@
   async function play(cue) {
     const profile = profiles[cue];
     if (!profile || muted || !userActivatedAudio) return;
+    if (!await resumeAudio()) return;
     if (activeVoices.size >= newVoiceLimit) {
       if (cueIsLowPriority(cue)) return;
       const quietVoice = [...activeVoices].find((voice) => cueIsLowPriority(voice.cue));
       if (!quietVoice) return;
       disconnectVoice(quietVoice, true);
     }
-    if (!await resumeAudio()) return;
+    if (muted) return;
 
     const context = audioContext;
     const now = context.currentTime + 0.003;
@@ -236,17 +236,21 @@
     const voice = { cue, sources: [], nodes: [], cleanupTimer: 0 };
     activeVoices.add(voice);
 
-    profile.tones?.forEach((tone) => {
-      const startAt = now + (tone.delay || 0);
-      startTone(context, voice, tone, pitchFactor, startAt);
-    });
-    if (profile.noise) startNoise(context, voice, profile.noise, pitchFactor, now);
+    try {
+      profile.tones?.forEach((tone) => {
+        const startAt = now + (tone.delay || 0);
+        startTone(context, voice, tone, pitchFactor, startAt);
+      });
+      if (profile.noise) startNoise(context, voice, profile.noise, pitchFactor, now);
 
-    const longestSound = Math.max(
-      ...[...(profile.tones || []), ...(profile.noise ? [profile.noise] : [])]
-        .map((sound) => (sound.delay || 0) + sound.duration)
-    );
-    voice.cleanupTimer = window.setTimeout(() => disconnectVoice(voice), (longestSound + 0.08) * 1000);
+      const longestSound = Math.max(
+        ...[...(profile.tones || []), ...(profile.noise ? [profile.noise] : [])]
+          .map((sound) => (sound.delay || 0) + sound.duration)
+      );
+      voice.cleanupTimer = window.setTimeout(() => disconnectVoice(voice), (longestSound + 0.08) * 1000);
+    } catch {
+      disconnectVoice(voice, true);
+    }
   }
 
   function cueForEntry(target, action) {
