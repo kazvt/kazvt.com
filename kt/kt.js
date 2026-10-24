@@ -1253,6 +1253,7 @@
       if (!preserveOfflineHistory) {
         entry.lastLiveBadge.hidden = true;
         delete card.dataset.lastLive;
+        delete card.dataset.lastLiveEstimate;
         entry.lastLiveBadge.removeAttribute("aria-label");
         entry.lastLiveBadge.removeAttribute("title");
       }
@@ -1282,12 +1283,20 @@
         delete indicator.dataset.state;
         indicator.removeAttribute("aria-label");
         indicator.removeAttribute("title");
-        if (!preserveOfflineHistory) entry.lastLiveAt = 0;
+        if (!preserveOfflineHistory) {
+          entry.lastLiveAt = 0;
+          entry.lastLiveSource = "";
+          entry.lastLiveEstimateDays = 0;
+          entry.lastLiveCheckedAt = 0;
+        }
         return;
       }
 
       if (previousState !== "live" && !fromCache) clearLastLiveCache(slug);
       entry.lastLiveAt = 0;
+      entry.lastLiveSource = "";
+      entry.lastLiveEstimateDays = 0;
+      entry.lastLiveCheckedAt = 0;
 
       indicator.hidden = false;
       indicator.dataset.state = state;
@@ -1314,7 +1323,10 @@
         setState(entry, cached.state, { fromCache: true, checkedAt: cached.checkedAt });
         if (cached.state === "offline") {
           const lastLive = readLastLiveCache(entry.slug);
-          if (lastLive?.timestamp) showLastLive(entry, lastLive.timestamp, lastLive.approximate);
+          if (lastLive?.kind === "vod") showLastLive(entry, lastLive.timestamp, lastLive.approximate);
+          if (lastLive?.kind === "retention-estimate") {
+            showRetentionEstimate(entry, lastLive.retentionDays, lastLive.checkedAt);
+          }
         }
       });
       applyMemberOrder();
@@ -1405,9 +1417,7 @@
       if (state === "live" || (state === "offline" && fromCache)) {
         setState(entry, state, { fromCache, checkedAt: entry.cachedStatus?.checkedAt });
       }
-      if (state === "offline" && entry.lastLiveAt) {
-        showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
-      }
+      if (state === "offline" && entry.lastLiveAt) refreshLastLiveDisplay(entry);
     });
     window.addEventListener("kazvt:i18nready", refreshIndicatorLanguage);
     window.addEventListener("kazvt:languagechange", refreshIndicatorLanguage);
@@ -1419,9 +1429,7 @@
             checkedAt: entry.cachedStatus.checkedAt,
           });
         }
-        if (entry.card.dataset.liveState === "offline" && entry.lastLiveAt) {
-          showLastLive(entry, entry.lastLiveAt, entry.lastLiveApproximate);
-        }
+        if (entry.card.dataset.liveState === "offline" && entry.lastLiveAt) refreshLastLiveDisplay(entry);
       });
     }, 60_000);
 
