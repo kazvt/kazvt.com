@@ -274,6 +274,7 @@
       badge.loading = "lazy";
       badge.decoding = "async";
       card.append(badge);
+      card.classList.add("kt-member--has-new-badge");
     });
   }
 
