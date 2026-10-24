@@ -150,7 +150,7 @@
     min-width: 0;
     min-height: 0;
     grid-template-columns: 38px minmax(0, 1fr);
-    grid-template-rows: minmax(38px, auto) auto;
+    grid-template-rows: minmax(38px, auto) auto 25px;
     align-items: center;
     align-content: start;
     gap: 5px 8px;
@@ -164,7 +164,13 @@
   .kt-member-avatar { grid-column: 1; grid-row: 1; width: 38px; height: 38px; border-width: 2px; box-shadow: 2px 2px 0 var(--kt-ink); transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; column-gap: 4px; row-gap: 3px; }
   .kt-member-title { align-items: center; gap: 3px; row-gap: 2px; }
-  .kt-member-status-rail { right: 3px; left: 3px; bottom: 2px; height: 25px; }
+  .kt-member-status-rail {
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    height: 25px;
+  }
   .kt-member-status-rail > .kt-member-new-badge { width: 28px; max-height: 25px; }
   .kt-member-status-rail > .kt-live-sticker { width: 42px; }
   .kt-member-name { font-size: clamp(.78rem, 3.6vw, .98rem); line-height: 1.08; }
@@ -285,7 +291,7 @@
   .kt-webring-stamp { align-self: flex-end; }
 }
 
-@media (min-width: 701px) and (max-width: 900px) {
+@media (min-width: 701px) and (max-width: 1100px) {
   .kt-member-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     max-width: none;
@@ -294,20 +300,105 @@
   }
 
   .kt-member {
-    min-height: 108px;
-    grid-template-columns: 50px minmax(0, 1fr) 96px;
-    grid-template-rows: minmax(0, 1fr) auto;
-    gap: 8px 12px;
-    padding: 10px 12px;
+    min-height: 0;
+    grid-template-columns: 42px minmax(0, 1fr) minmax(70px, 96px);
+    grid-template-rows: minmax(42px, auto) 22px;
+    align-content: center;
+    gap: 6px 8px;
+    padding: 8px;
     border-width: 2px;
   }
 
   .kt-member-number,
   .kt-member-arrow { display: none; }
-  .kt-member-avatar { grid-column: 1; grid-row: 1 / span 2; width: 48px; height: 48px; transform: none; }
-  .kt-member-copy { grid-column: 2; grid-row: 1 / span 2; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 42px; height: 42px; border-width: 2px; transform: none; }
+  .kt-member-copy { grid-column: 2; grid-row: 1; }
   .kt-member-tag,
-  .kt-member-badge { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; max-width: none; text-align: center; }
+  .kt-member-badge { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; width: 100%; max-width: 96px; text-align: center; transform: none; }
+  .kt-member-tag { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; width: 100%; max-width: 96px; overflow-wrap: anywhere; text-align: center; transform: none; }
+  .kt-member-status-rail { position: static; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 22px; }
+}
+
+/* Reflow each roster card from its actual width, not the browser viewport.
+   Zoom and narrow two-column layouts can make a card cramped long before a
+   viewport media query notices. Keep all member data in flow so labels and
+   status markers can never cover one another. */
+@container kt-member-card (max-width: 480px) {
+  .kt-member {
+    min-height: 0;
+    grid-template-columns: 42px minmax(0, 1fr) minmax(70px, 96px);
+    grid-template-rows: minmax(42px, auto) 22px;
+    align-content: center;
+    gap: 6px 8px;
+    padding: 8px;
+    border-width: 2px;
+  }
+
+  .kt-member-number,
+  .kt-member-arrow { display: none; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 42px; height: 42px; border-width: 2px; transform: none; }
+  .kt-member-copy { grid-column: 2; grid-row: 1; column-gap: 4px; row-gap: 3px; }
+  .kt-member-title { align-items: center; gap: 4px; row-gap: 2px; }
+  .kt-member-name { font-size: clamp(.76rem, 3.5cqi, .95rem); line-height: 1.08; }
+  .kt-member-pronouns { padding: 1px 3px; font-size: clamp(.52rem, 2.1cqi, .62rem); }
+  .kt-member-handle { font-size: clamp(.56rem, 2.4cqi, .7rem); line-height: 1.15; }
+  .kt-streamer-languages { gap: 2px; }
+  .kt-streamer-language { min-height: 13px; padding: 1px 3px; font-size: clamp(.48rem, 1.9cqi, .55rem); }
+  .kt-member-tag,
+  .kt-member-badge {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    justify-self: stretch;
+    width: 100%;
+    max-width: 96px;
+    min-width: 0;
+    padding: 3px 4px;
+    font-size: clamp(.52rem, 2cqi, .62rem);
+    line-height: 1.15;
+    text-align: center;
+    overflow-wrap: anywhere;
+    transform: none;
+  }
+  .kt-member-status-rail { position: static; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 22px; }
+  .kt-member-status-rail > .kt-member-new-badge { width: 26px; max-height: 22px; }
+  .kt-member-status-rail > .kt-live-sticker { width: 52px; max-width: 42%; }
+  .kt-member-status-rail > .kt-last-live:not([hidden]) { max-width: calc(100% - 34px); padding: 2px 4px; font-size: .54rem; }
+}
+
+@container kt-member-card (max-width: 340px) {
+  .kt-member {
+    grid-template-columns: 29px minmax(0, 1fr);
+    grid-template-rows: minmax(30px, auto) auto 20px;
+    align-content: start;
+    gap: 4px 6px;
+    padding: 6px;
+  }
+
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 29px; height: 29px; }
+  .kt-member-copy { grid-column: 2; grid-row: 1; grid-template-columns: minmax(0, 1fr); row-gap: 2px; }
+  .kt-member-title { grid-column: 1; grid-row: 1; gap: 3px; }
+  .kt-member-name { font-size: clamp(.62rem, 3.8cqi, .76rem); }
+  .kt-member-pronouns { padding: 1px 2px; font-size: clamp(.48rem, 2.7cqi, .54rem); }
+  .kt-member-handle { grid-column: 1; grid-row: 2; font-size: clamp(.5rem, 2.9cqi, .59rem); }
+  .kt-streamer-languages { grid-column: 1; grid-row: 3; justify-self: start; gap: 2px; }
+  .kt-streamer-language { min-height: 12px; padding: 1px 2px; font-size: clamp(.44rem, 2.5cqi, .5rem); }
+  .kt-member-tag,
+  .kt-member-badge {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+    padding: 2px 4px;
+    font-size: clamp(.48rem, 2.8cqi, .57rem);
+    text-align: start;
+  }
+  .kt-member-status-rail { grid-row: 3; height: 20px; }
+  .kt-member-status-rail > .kt-member-new-badge { width: 23px; max-height: 19px; }
+  .kt-member-status-rail > .kt-live-sticker { width: 38px; max-width: 40%; }
+  .kt-member-status-rail > .kt-last-live:not([hidden]) { max-width: calc(100% - 30px); gap: 2px; padding: 2px 3px; font-size: .5rem; }
+  .kt-member-status-rail > .kt-last-live:not([hidden]) svg { width: 9px; height: 9px; flex-basis: 9px; }
 }
 
 @media (max-width: 700px) {
