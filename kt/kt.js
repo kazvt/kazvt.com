@@ -326,9 +326,12 @@
 
     let width = window.innerWidth + edgePadding * 2;
     let height = window.innerHeight + edgePadding * 2;
-    let pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    // This decorative trail only needs CSS-pixel detail; a 1x backing store
+    // keeps software-rendered browsers from clearing a multi-DPR fullscreen canvas.
+    const pixelRatio = 1;
     let animationFrame = 0;
     let hasPointer = false;
+    let lastDrawBounds = null;
     const target = { x: width / 2, y: height / 2 };
     const points = Array.from({ length: 24 }, () => ({ ...target }));
     const followRate = 0.4;
@@ -337,21 +340,29 @@
     const resize = () => {
       width = window.innerWidth + edgePadding * 2;
       height = window.innerHeight + edgePadding * 2;
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(width * pixelRatio);
       canvas.height = Math.round(height * pixelRatio);
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      lastDrawBounds = null;
     };
 
     const move = (event) => {
-      target.x = event.clientX + edgePadding;
-      target.y = event.clientY + edgePadding;
+      if (event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+
+      const nextX = event.clientX + edgePadding;
+      const nextY = event.clientY + edgePadding;
       if (!hasPointer) {
         hasPointer = true;
+        target.x = nextX;
+        target.y = nextY;
         points.forEach((point) => {
           point.x = target.x;
           point.y = target.y;
         });
+      } else {
+        if (nextX === target.x && nextY === target.y) return;
+        target.x = nextX;
+        target.y = nextY;
       }
       scheduleDraw();
     };
@@ -396,9 +407,39 @@
       context.stroke();
     }
 
+    function getTrailBounds() {
+      const padding = bandWidth * stripeColors.length / 2 + 4;
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      points.forEach((point) => {
+        minX = Math.min(minX, point.x);
+        minY = Math.min(minY, point.y);
+        maxX = Math.max(maxX, point.x);
+        maxY = Math.max(maxY, point.y);
+      });
+
+      const left = Math.floor(minX - padding);
+      const top = Math.floor(minY - padding);
+      return {
+        left,
+        top,
+        width: Math.ceil(maxX + padding) - left,
+        height: Math.ceil(maxY + padding) - top,
+      };
+    }
+
+    function clearTrail(bounds) {
+      if (!bounds) return;
+      context.clearRect(bounds.left, bounds.top, bounds.width, bounds.height);
+    }
+
     function draw() {
       animationFrame = 0;
-      context.clearRect(0, 0, width, height);
+      clearTrail(lastDrawBounds);
+      lastDrawBounds = null;
       if (!hasPointer) return;
 
       points[0].x = target.x;
@@ -420,19 +461,34 @@
         Math.abs(points[index - 1].x - point.x) > 0.2
         || Math.abs(points[index - 1].y - point.y) > 0.2
       ));
-      if (stillMoving) animationFrame = window.requestAnimationFrame(draw);
-      else context.clearRect(0, 0, width, height);
+      if (stillMoving) {
+        lastDrawBounds = getTrailBounds();
+        animationFrame = window.requestAnimationFrame(draw);
+      } else {
+        clearTrail(getTrailBounds());
+      }
+    }
+
+    function pauseWhenHidden() {
+      if (!document.hidden) return;
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      clearTrail(lastDrawBounds);
+      lastDrawBounds = null;
+      hasPointer = false;
     }
 
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("pointermove", move, { passive: true });
+    document.addEventListener("visibilitychange", pauseWhenHidden);
 
     return {
       destroy() {
         if (animationFrame) window.cancelAnimationFrame(animationFrame);
         window.removeEventListener("resize", resize);
         window.removeEventListener("pointermove", move);
+        document.removeEventListener("visibilitychange", pauseWhenHidden);
         canvas.remove();
       },
     };
