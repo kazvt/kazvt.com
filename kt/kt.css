@@ -185,7 +185,7 @@ body[data-page="kt"] summary:focus-visible {
   background: var(--kt-paper);
   color: var(--kt-ink) !important;
   font-size: .82rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: .035em;
 }
 
