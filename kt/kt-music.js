@@ -307,7 +307,7 @@
     startRegisterCycle(now);
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
-    master.gain.linearRampToValueAtTime(0.25, now + fadeSeconds);
+    master.gain.linearRampToValueAtTime(0.125, now + fadeSeconds);
     playing = true;
     syncAudioSignal();
   }
