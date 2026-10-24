@@ -910,51 +910,23 @@ body[data-page="kt"] .kt-member-badge--admin {
   margin: 0 clamp(16px, 5vw, 54px) 38px;
   border: 4px solid var(--kt-ink);
   background: var(--kt-paper);
-  box-shadow:
-    6px 6px 0 var(--kt-ink),
-    10px 10px 0 var(--kt-pink),
-    16px 16px 0 var(--kt-blue),
-    0 22px 38px rgb(43 32 40 / 18%);
+  box-shadow: 6px 6px 0 var(--kt-blue), 12px 12px 0 var(--kt-pink);
 }
 
 .kt-webring-heading {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 12px clamp(14px, 3vw, 24px);
   border-bottom: 4px solid var(--kt-ink);
-  background: linear-gradient(112deg, var(--kt-blue) 0 47%, #dff5fc 48% 53%, var(--kt-pink) 54% 100%);
-  box-shadow: inset 0 2px 0 rgb(255 255 255 / 75%), inset 0 -2px 0 rgb(43 32 40 / 20%);
-}
-
-.kt-webring-heading::after {
-  position: absolute;
-  z-index: 0;
-  top: -45%;
-  bottom: -45%;
-  left: -38%;
-  width: 26%;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 72%), transparent);
-  content: "";
-  pointer-events: none;
-  transform: translateX(-130%) skewX(-22deg);
-  animation: kt-webring-heading-shine 7.5s ease-in-out infinite;
-}
-
-.kt-webring-heading > * {
-  position: relative;
-  z-index: 1;
+  background: var(--kt-blue);
 }
 
 .kt-webring-heading .kt-eyebrow {
   margin: 0 0 3px;
-  color: #4a2841;
+  color: #305168;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
-  text-shadow: 1px 1px 0 rgb(255 255 255 / 75%);
 }
 
 .kt-webring-heading h2 {
@@ -981,13 +953,6 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-webring-body {
   display: block;
   padding: clamp(16px, 3vw, 28px);
-  background:
-    linear-gradient(90deg, rgb(91 206 250 / 8%) 0 1px, transparent 1px 100%),
-    linear-gradient(0deg, rgb(245 169 184 / 9%) 0 1px, transparent 1px 100%),
-    radial-gradient(ellipse at 3% 3%, rgb(91 206 250 / 11%), transparent 38%),
-    radial-gradient(ellipse at 100% 100%, rgb(245 169 184 / 16%), transparent 36%),
-    var(--kt-paper);
-  background-size: 18px 18px, 18px 18px, auto, auto, auto;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-synthesis: weight;
 }
@@ -1694,45 +1659,6 @@ body[data-page="kt"] .kt-member-badge--admin {
 .kt-discord__spark--one { top: 17%; left: 15%; }
 .kt-discord__spark--two { right: 14%; bottom: 20%; animation-delay: -1.4s; }
 
-.kt-discord__message-art {
-  position: relative;
-  z-index: 2;
-  display: block;
-  width: min(84%, 310px);
-  height: auto;
-  overflow: visible;
-  filter: drop-shadow(0 8px 0 rgb(43 32 40 / 18%));
-  transform-origin: 54% 55%;
-  animation: kt-discord-message-float 5.2s steps(4, end) infinite;
-}
-
-.kt-discord__message-extrusion {
-  fill: var(--kt-pink);
-  stroke: var(--kt-ink);
-  stroke-linejoin: round;
-  stroke-width: 10px;
-  transform: translate(10px, 12px);
-}
-
-.kt-discord__message-face {
-  fill: url(#kt-discord-message-fill);
-  stroke: var(--kt-ink);
-  stroke-linejoin: round;
-  stroke-width: 10px;
-}
-
-.kt-discord__message-detail {
-  fill: none;
-  stroke: var(--kt-ink);
-  stroke-linecap: round;
-  stroke-width: 7px;
-}
-
-.kt-discord__message-detail circle {
-  stroke: var(--kt-ink);
-  stroke-width: 4px;
-}
-
 .kt-discord__blinkie {
   position: absolute;
   z-index: 5;
@@ -1777,30 +1703,12 @@ body[data-page="kt"] .kt-member-badge--admin {
 
 .kt-discord__blinkie-copy {
   min-width: 0;
-  display: grid;
-  justify-items: center;
-  gap: 2px;
   color: var(--kt-ink);
   font-family: "04b_30", "Comic Sans MS", cursive;
-  font-size: clamp(.47rem, .95vw, .59rem);
+  font-size: clamp(.5rem, 1.05vw, .65rem);
   line-height: 1.2;
   text-align: center;
   text-shadow: 1px 1px 0 var(--kt-white);
-}
-
-.kt-discord__member-count {
-  font-family: "04b_30", "Comic Sans MS", cursive;
-  font-size: clamp(.76rem, 1.2vw, .9rem);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.kt-discord__count-note {
-  color: #5b3850;
-  font-size: .78em;
-  line-height: 1.05;
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
 }
 
 .kt-discord__copy {
@@ -1973,11 +1881,6 @@ body[data-page="kt"] .kt-member-badge--admin {
   50% { opacity: .72; transform: scale(.88); }
 }
 
-@keyframes kt-discord-message-float {
-  0%, 100% { transform: rotate(-4deg) translateY(1px); }
-  50% { transform: rotate(-2deg) translateY(-5px); }
-}
-
 @keyframes kt-discord-badge-float {
   0%, 100% { transform: rotate(4deg) translate3d(0, 0, 36px); }
   50% { transform: rotate(1deg) translate3d(0, -3px, 36px); }
@@ -1989,19 +1892,12 @@ body[data-page="kt"] .kt-member-badge--admin {
   91%, 100% { opacity: 0; transform: translateX(520%) skewX(-22deg); }
 }
 
-@keyframes kt-webring-heading-shine {
-  0%, 70% { opacity: 0; transform: translateX(-130%) skewX(-22deg); }
-  77% { opacity: .86; }
-  90%, 100% { opacity: 0; transform: translateX(520%) skewX(-22deg); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .kt-discord__orbit,
   .kt-discord__spark,
-  .kt-discord__message-art,
+  .kt-discord__bubble--front,
   .kt-discord__blinkie,
-  .kt-discord__join::after,
-  .kt-webring-heading::after { animation: none !important; }
+  .kt-discord__join::after { animation: none !important; }
   .kt-discord__join { transition: none; }
 }
 
