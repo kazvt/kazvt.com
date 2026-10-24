@@ -802,6 +802,33 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   flex-wrap: wrap;
 }
 
+.kt-streamer-languages {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.kt-streamer-language {
+  display: inline-flex;
+  min-height: 15px;
+  align-items: center;
+  padding: 1px 4px;
+  border: 1px dashed rgb(43 32 40 / 45%);
+  background: rgb(91 206 250 / 24%);
+  color: var(--kt-ink);
+  font-family: var(--kt-comic-font);
+  font-size: .55rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: .02em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
 .kt-member-new-badge {
   position: absolute;
   z-index: 4;
