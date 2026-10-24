@@ -903,11 +903,12 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   position: absolute;
   z-index: 4;
   top: auto;
-  right: 6px;
+  left: 6px;
   bottom: 0;
   display: block;
   width: 62px;
   height: auto;
+  opacity: .9;
   pointer-events: none;
   transform: rotate(4deg);
   filter: drop-shadow(2px 2px 0 var(--kt-pink));
@@ -915,6 +916,54 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-live-sticker--blue {
   filter: drop-shadow(2px 2px 0 var(--kt-blue));
+}
+
+.kt-member--has-new-badge > .kt-live-sticker,
+.kt-member--has-new-badge > .kt-last-live { left: 42px; }
+
+.kt-last-live,
+.kt-last-live[hidden] {
+  display: none;
+}
+
+.kt-last-live:not([hidden]) {
+  position: absolute;
+  z-index: 4;
+  left: 6px;
+  bottom: 3px;
+  display: inline-flex;
+  max-width: calc(100% - 46px);
+  align-items: center;
+  gap: 3px;
+  padding: 3px 5px;
+  border: 1px solid var(--kt-ink);
+  background: rgb(255 249 252 / 94%);
+  box-shadow: 1px 1px 0 var(--kt-pink);
+  color: var(--kt-ink);
+  font-family: var(--kt-comic-font);
+  font-size: .6rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  transform: rotate(-1deg);
+}
+
+.kt-last-live svg {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.kt-last-live__text {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .kt-member-badge {

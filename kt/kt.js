@@ -263,7 +263,10 @@
       const addedAt = Date.parse(`${addedDate}T00:00:00Z`);
       if (!Number.isFinite(addedAt) || addedAt > now || now - addedAt >= newMemberWindowMs) return;
 
-      if (card.querySelector(".kt-member-new-badge")) return;
+      if (card.querySelector(".kt-member-new-badge")) {
+        card.classList.add("kt-member--has-new-badge");
+        return;
+      }
 
       const badge = document.createElement("img");
       badge.className = "kt-member-new-badge";
