@@ -572,6 +572,7 @@ kt.home_footer=العودة إلى kazvt.com
 kt.live_label=مباشر
 kt.live_aria={name} يبث مباشرة على KICK
 kt.last_live_aria=آخر بث لـ{name}: {time}
+kt.status_cached_aria=آخر تحقق من حالة {name} كان {time}؛ جارٍ التحقق مجددًا
 kt.live_title=مباشر على KICK
 kt.unknown_label=?
 kt.unknown_aria=تعذر التحقق من حالة KICK لـ {name}

@@ -566,6 +566,7 @@ kt.home_footer=kazvt.com'a dön
 kt.live_label=CANLI
 kt.live_aria={name} KICK'te canlı
 kt.last_live_aria={name} en son {time} canlıydı
+kt.status_cached_aria={name} durumu en son {time} kontrol edildi; yeniden kontrol ediliyor
 kt.live_title=KICK'te canlı
 kt.unknown_label=?
 kt.unknown_aria={name} için KICK durumu kontrol edilemedi
