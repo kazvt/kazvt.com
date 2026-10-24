@@ -189,7 +189,7 @@
 .kt-discord__art-sticker--kitty { top: 14%; left: 7%; transform: rotate(-8deg); }
 .kt-discord__art-sticker--heart { top: 11%; right: 8%; width: clamp(36px, 3.8vw, 47px); transform: rotate(7deg); animation-delay: -1.4s; }
 .kt-discord__art-sticker--hearts { bottom: 24%; left: 10%; width: clamp(40px, 4.4vw, 54px); border-color: transparent; background: transparent; box-shadow: none; transform: rotate(-10deg); animation-delay: -2.7s; }
-.kt-discord__art-sticker--ghost { top: 49%; right: 8%; width: clamp(34px, 3.6vw, 45px); border-color: #739fa8; background: #f7f7f7; box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink); transform: rotate(9deg); animation-delay: -4s; }
+.kt-discord__art-sticker--ghost { top: 42%; right: 5%; width: clamp(48px, 4.5vw, 58px); padding: 1px; border-color: var(--kt-ink); background: var(--kt-white); box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink); transform: rotate(9deg); animation-delay: -4s; }
 
 .kt-discord__blinkie {
   width: min(210px, 78%);
@@ -267,7 +267,7 @@
   .kt-discord__art-sticker { width: 41px; padding: 2px; }
   .kt-discord__art-sticker--heart { width: 37px; }
   .kt-discord__art-sticker--hearts { width: 43px; }
-  .kt-discord__art-sticker--ghost { width: 35px; }
+  .kt-discord__art-sticker--ghost { width: 48px; }
   .kt-discord__blinkie { right: 3%; bottom: 2%; width: min(194px, 79%); min-height: 64px; }
   .kt-discord__blinkie-copy { font-size: .48rem; }
   .kt-discord__member-count { font-size: .82rem; }
