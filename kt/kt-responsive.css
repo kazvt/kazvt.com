@@ -147,6 +147,7 @@
   }
 
   .kt-member {
+    --kt-member-status-space: 31px;
     min-width: 0;
     min-height: 0;
     grid-template-columns: 38px minmax(0, 1fr);
@@ -154,7 +155,7 @@
     align-items: center;
     align-content: start;
     gap: 7px 8px;
-    padding: 9px 8px 10px;
+    padding: 9px 8px calc(10px + var(--kt-member-status-space));
     border-width: 2px;
     box-shadow: 3px 3px 0 var(--kt-ink), 6px 6px 0 var(--kt-member-accent), 0 0 14px 2px var(--kt-live-halo), 0 0 26px 6px var(--kt-live-halo);
   }
@@ -164,7 +165,9 @@
   .kt-member-avatar { grid-column: 1; grid-row: 1; width: 38px; height: 38px; border-width: 2px; box-shadow: 2px 2px 0 var(--kt-ink); transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; gap: 4px; }
   .kt-member-title { align-items: center; gap: 3px; row-gap: 3px; }
-  .kt-member-new-badge { width: 32px; }
+  .kt-member-status-rail { right: 3px; left: 3px; bottom: 2px; height: 25px; }
+  .kt-member-status-rail > .kt-member-new-badge { width: 28px; max-height: 25px; }
+  .kt-member-status-rail > .kt-live-sticker { width: 42px; }
   .kt-member-name { font-size: clamp(.78rem, 3.6vw, .98rem); line-height: 1.08; }
   .kt-member-pronouns { padding: 1px 3px; font-size: .57rem; }
   .kt-member-handle { font-size: clamp(.57rem, 2.4vw, .7rem); line-height: 1.15; overflow-wrap: anywhere; }
@@ -185,11 +188,8 @@
     overflow-wrap: anywhere;
     transform: rotate(1deg);
   }
-  .kt-member[data-live-state="live"] .kt-member-tag,
-  .kt-member[data-live-state="live"] .kt-member-badge { max-width: calc(100% - 46px); }
-  .kt-live-sticker { top: auto; right: 2px; bottom: 0; left: auto; width: 42px; }
+  .kt-live-sticker { width: 42px; }
   .kt-last-live:not([hidden]) { right: 2px; bottom: 3px; max-width: calc(100% - 42px); }
-  .kt-member[data-last-live="true"] { padding-bottom: 25px; }
 
   .kt-recommendations {
     display: grid;
@@ -268,19 +268,16 @@
   .kt-topbar { gap: 5px; }
   .kt-home-link,
   .kt-topbar-label { padding-inline: 4px; font-size: .46rem; }
-  .kt-member { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px 6px; }
+  .kt-member { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px 6px calc(8px + var(--kt-member-status-space)); }
   .kt-member-avatar { width: 32px; height: 32px; }
   .kt-member-name { font-size: .78rem; }
   .kt-member-pronouns { font-size: .58rem; }
-  .kt-member-new-badge { width: 30px; }
+  .kt-member-status-rail > .kt-member-new-badge { width: 26px; max-height: 24px; }
   .kt-member-handle { font-size: .6rem; }
   .kt-member-tag,
   .kt-member-badge { padding-inline: 3px; font-size: .6rem; }
-  .kt-member[data-live-state="live"] .kt-member-tag,
-  .kt-member[data-live-state="live"] .kt-member-badge { max-width: calc(100% - 42px); }
-  .kt-live-sticker { width: 38px; }
-  .kt-last-live:not([hidden]) { max-width: calc(100% - 40px); }
-  .kt-member[data-last-live="true"] { padding-bottom: 25px; }
+  .kt-member-status-rail { height: 24px; }
+  .kt-member-status-rail > .kt-live-sticker { width: 38px; }
   .kt-webring-body { padding: 10px; }
   .kt-webring-heading h2 { font-size: 1.2rem; }
   .kt-webring-heading { align-items: stretch; flex-direction: column; gap: 6px; }
@@ -300,7 +297,7 @@
     grid-template-columns: 50px minmax(0, 1fr) 96px;
     grid-template-rows: minmax(0, 1fr) auto;
     gap: 8px 12px;
-    padding: 10px 12px;
+    padding: 10px 12px calc(10px + var(--kt-member-status-space));
     border-width: 2px;
   }
 
