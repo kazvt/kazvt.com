@@ -863,7 +863,10 @@
       const orderedMembers = [...memberRecords].sort((left, right) => {
         const leftPinned = pinnedMemberSlugs.has(left.slug);
         const rightPinned = pinnedMemberSlugs.has(right.slug);
-        if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+        if (leftPinned || rightPinned) {
+          if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+          return left.defaultOrder - right.defaultOrder;
+        }
 
         return compareStatusAndRecency(left, right) || left.defaultOrder - right.defaultOrder;
       });
