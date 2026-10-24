@@ -15,6 +15,11 @@
     .heart-frame,
     .dot-frame { animation-timing-function: steps(1, end); }
 
+    .dot-frame {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
     .big-one,
     .small-one { animation-name: sparkle-base; }
     .big-two,
