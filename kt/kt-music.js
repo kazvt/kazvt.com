@@ -60,8 +60,8 @@
       ? localizedMessage("kt.music_state_muted", "SOUND OFF")
       : localizedMessage("kt.music_state_on", "SOUND ON");
     const accessibleAction = muted
-      ? localizedMessage("kt.music_unmute_aria", "Unmute background music")
-      : localizedMessage("kt.music_mute_aria", "Mute background music");
+      ? localizedMessage("kt.music_unmute_aria", "Unmute all site audio")
+      : localizedMessage("kt.music_mute_aria", "Mute all site audio");
 
     if (buttonLabel) buttonLabel.textContent = action;
     if (buttonStateLabel) buttonStateLabel.textContent = state;
@@ -361,12 +361,18 @@
     const wasMuted = muted;
     const expired = expirePreference();
     // If the old button said Unmute, the expiry itself has fulfilled that click.
-    if (expired && wasMuted) return;
+    if (expired && wasMuted) {
+      window.KazvtSfx?.play("click");
+      return;
+    }
     muted = !muted;
     setButtonState();
     rememberChoice();
     if (muted) stopMusic();
-    else void startMusic();
+    else {
+      void startMusic();
+      window.KazvtSfx?.play("click");
+    }
   });
 
   window.addEventListener("kazvt:i18nready", setButtonState);
