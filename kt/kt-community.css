@@ -49,44 +49,146 @@
   background-size: 18px 18px, 18px 18px, auto, auto, auto;
 }
 
-.kt-discord__message-art {
+.kt-hero-sticker-rail {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 60px;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.5vw, 15px);
+  margin: 9px auto -2px;
+  pointer-events: none;
+}
+
+.kt-hero-sticker {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 3px;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-white);
+  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink);
+  animation: kt-community-sticker-bob 6.2s steps(4, end) infinite;
+}
+
+.kt-hero-sticker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.kt-hero-sticker--kitty { transform: rotate(-7deg); }
+.kt-hero-sticker--hearts { width: 46px; height: 46px; transform: rotate(5deg); animation-delay: -2.1s; }
+.kt-hero-sticker--flag { width: 48px; height: 48px; padding: 0; background: #4e6870; transform: rotate(-3deg); animation-delay: -4.3s; }
+
+.kt-roster-welcome-art {
+  display: flex;
+  min-height: 69px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 1px;
+  pointer-events: none;
+}
+
+.kt-roster-welcome-art__buddy {
+  display: block;
+  width: clamp(58px, 6vw, 72px);
+  height: auto;
+  filter: drop-shadow(2px 3px 0 rgb(43 32 40 / 35%));
+  transform: rotate(-5deg);
+}
+
+.kt-roster-welcome-art__heart {
+  display: block;
+  width: clamp(38px, 4vw, 48px);
+  height: auto;
+  filter: drop-shadow(2px 3px 0 rgb(43 32 40 / 25%));
+  transform: rotate(7deg);
+}
+
+.kt-webring-intro-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(8px, 2vw, 18px);
+  margin-bottom: clamp(16px, 2.5vw, 24px);
+}
+
+.kt-webring-intro-row .kt-webring-intro { margin: 0; }
+
+.kt-webring-intro-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  pointer-events: none;
+}
+
+.kt-webring-intro-art__sprite,
+.kt-webring-intro-art__pixel-heart {
+  display: block;
+  width: 55px;
+  height: 55px;
+  padding: 2px;
+  border: 2px solid var(--kt-ink);
+  background: #111411;
+  box-shadow: 2px 2px 0 var(--kt-pink), 4px 4px 0 var(--kt-ink);
+  image-rendering: pixelated;
+}
+
+.kt-webring-intro-art__sprite { transform: rotate(-5deg); }
+
+.kt-webring-intro-art__pixel-heart {
+  width: 39px;
+  height: 39px;
+  padding: 2px;
+  background: var(--kt-white);
+  transform: rotate(8deg) translateY(7px);
+}
+
+.kt-discord__mascot {
   position: relative;
   z-index: 2;
   display: block;
-  width: min(84%, 310px);
+  width: min(78%, 330px);
   height: auto;
   overflow: visible;
-  filter: drop-shadow(0 8px 0 rgb(43 32 40 / 18%));
-  transform-origin: 54% 55%;
-  animation: kt-discord-message-float 5.2s steps(4, end) infinite;
+  filter: drop-shadow(0 7px 0 rgb(43 32 40 / 24%)) drop-shadow(0 0 18px rgb(91 206 250 / 25%));
+  transform-origin: 50% 58%;
+  animation: kt-discord-mascot-flight 4.8s steps(4, end) infinite;
 }
 
-.kt-discord__message-extrusion {
-  fill: var(--kt-pink);
-  stroke: var(--kt-ink);
-  stroke-linejoin: round;
-  stroke-width: 10px;
-  transform: translate(10px, 12px);
+.kt-discord__art-sticker {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  width: clamp(38px, 4vw, 50px);
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 3px;
+  border: 2px solid var(--kt-ink);
+  background: rgb(255 249 252 / 96%);
+  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-blue);
+  pointer-events: none;
+  animation: kt-community-sticker-bob 5.4s steps(4, end) infinite;
 }
 
-.kt-discord__message-face {
-  fill: url(#kt-discord-message-fill);
-  stroke: var(--kt-ink);
-  stroke-linejoin: round;
-  stroke-width: 10px;
+.kt-discord__art-sticker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.kt-discord__message-detail {
-  fill: none;
-  stroke: var(--kt-ink);
-  stroke-linecap: round;
-  stroke-width: 7px;
-}
-
-.kt-discord__message-detail circle {
-  stroke: var(--kt-ink);
-  stroke-width: 4px;
-}
+.kt-discord__art-sticker--kitty { top: 14%; left: 7%; transform: rotate(-8deg); }
+.kt-discord__art-sticker--heart { top: 11%; right: 8%; width: clamp(36px, 3.8vw, 47px); transform: rotate(7deg); animation-delay: -1.4s; }
+.kt-discord__art-sticker--hearts { bottom: 24%; left: 10%; width: clamp(40px, 4.4vw, 54px); border-color: transparent; background: transparent; box-shadow: none; transform: rotate(-10deg); animation-delay: -2.7s; }
+.kt-discord__art-sticker--ghost { top: 49%; right: 8%; width: clamp(34px, 3.6vw, 45px); border-color: #739fa8; background: #f7f7f7; box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink); transform: rotate(9deg); animation-delay: -4s; }
 
 .kt-discord__blinkie {
   width: min(210px, 78%);
@@ -116,9 +218,16 @@
   overflow-wrap: anywhere;
 }
 
-@keyframes kt-discord-message-float {
-  0%, 100% { transform: rotate(-4deg) translateY(1px); }
-  50% { transform: rotate(-2deg) translateY(-5px); }
+@keyframes kt-discord-mascot-flight {
+  0%, 100% { translate: 0 1px; rotate: -1deg; scale: 1; }
+  25% { translate: 0 -5px; rotate: 1deg; scale: 1.02; }
+  50% { translate: 0 -2px; rotate: 2deg; scale: 1; }
+  75% { translate: 0 -7px; rotate: -1deg; scale: 1.02; }
+}
+
+@keyframes kt-community-sticker-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
 }
 
 @keyframes kt-webring-heading-shine {
@@ -137,15 +246,40 @@
     background: linear-gradient(112deg, var(--kt-blue) 0 47%, #dff5fc 48% 53%, var(--kt-pink) 54% 100%);
   }
 
-  .kt-discord__art { min-height: 260px; }
+  .kt-hero-sticker-rail { min-height: 48px; gap: 8px; margin-top: 8px; }
+  .kt-hero-sticker { width: 44px; height: 44px; }
+  .kt-hero-sticker--hearts { width: 40px; height: 40px; }
+  .kt-hero-sticker--flag { width: 42px; height: 42px; }
+
+  .kt-roster-welcome-art { min-height: 56px; justify-content: center; }
+  .kt-roster-welcome-art__buddy { width: 58px; }
+  .kt-roster-welcome-art__heart { width: 38px; }
+
+  .kt-webring-intro-row { align-items: start; gap: 7px; }
+  .kt-webring-intro-art { gap: 4px; padding-top: 3px; }
+  .kt-webring-intro-art__sprite { width: 43px; height: 43px; }
+  .kt-webring-intro-art__pixel-heart { width: 31px; height: 31px; }
+
+  .kt-discord__art { min-height: 246px; }
   .kt-discord__orbit--two { height: 88%; }
-  .kt-discord__message-art { width: min(78%, 288px); margin-bottom: 72px; }
+  .kt-discord__mascot { width: min(76%, 292px); }
+  .kt-discord__art-sticker { width: 41px; padding: 2px; }
+  .kt-discord__art-sticker--heart { width: 37px; }
+  .kt-discord__art-sticker--hearts { width: 43px; }
+  .kt-discord__art-sticker--ghost { width: 35px; }
   .kt-discord__blinkie { right: 3%; bottom: 2%; width: min(194px, 79%); min-height: 64px; }
   .kt-discord__blinkie-copy { font-size: .48rem; }
   .kt-discord__member-count { font-size: .82rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kt-discord__message-art,
+  .kt-hero-sticker,
+  .kt-discord__mascot,
+  .kt-discord__art-sticker,
+  .kt-discord__orbit,
+  .kt-discord__spark,
+  .kt-discord__blinkie,
   .kt-webring-heading::after { animation: none !important; }
+  .kt-hero-sticker,
+  .kt-discord__art-sticker { translate: none !important; }
 }
