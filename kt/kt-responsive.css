@@ -123,7 +123,7 @@
 
   .kt-hero h1 { justify-items: center; font-size: clamp(2rem, 10vw, 3.5rem); }
   .kt-logo { width: min(100%, 560px); }
-  .kt-affiliation { margin: 13px auto; padding: 9px 10px; font-size: clamp(.88rem, 3.7vw, 1rem); line-height: 1.45; text-align: start; }
+  .kt-affiliation { margin: 13px auto; padding: 9px 10px; font-size: clamp(.88rem, 3.7vw, 1rem); line-height: 1.45; text-align: justify; text-align-last: start; }
   .kt-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
   .kt-hero-actions .kt-kick-link { width: 100%; min-height: 50px; padding: 8px 10px; font-size: .9rem; }
   .kt-roster { padding: 24px 14px 30px; }

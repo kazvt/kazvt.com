@@ -433,7 +433,8 @@ body[data-page="kt"] summary:focus-visible {
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   font-size: clamp(.96rem, 2vw, 1.13rem);
   line-height: 1.45;
-  text-align: start;
+  text-align: justify;
+  text-align-last: start;
 }
 
 .kt-affiliation strong,
@@ -547,6 +548,8 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   border-inline-start: 3px solid var(--kt-pink);
   font-size: .78rem;
   line-height: 1.35;
+  text-align: justify;
+  text-align-last: start;
 }
 
 .kt-recommendations {
@@ -962,6 +965,8 @@ body[data-page="kt"] .kt-member-badge--admin {
   font-size: .94rem;
   font-weight: 400;
   line-height: 1.45;
+  text-align: justify;
+  text-align-last: start;
 }
 
 .kt-webring-steps {
