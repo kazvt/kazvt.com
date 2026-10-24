@@ -69,10 +69,11 @@
   height: 52px;
   flex: 0 0 auto;
   place-items: center;
-  padding: 3px;
-  border: 2px solid var(--kt-ink);
-  background: var(--kt-white);
-  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(1px 2px 1px rgb(43 32 40 / 38%));
   animation: kt-community-sticker-bob 6.2s steps(4, end) infinite;
 }
 
@@ -85,7 +86,7 @@
 
 .kt-hero-sticker--kitty { transform: rotate(-7deg); }
 .kt-hero-sticker--hearts { width: 46px; height: 46px; transform: rotate(5deg); animation-delay: -2.1s; }
-.kt-hero-sticker--flag { width: 48px; height: 48px; padding: 0; background: #4e6870; transform: rotate(-3deg); animation-delay: -4.3s; }
+.kt-hero-sticker--flag { width: 48px; height: 48px; transform: rotate(-3deg); animation-delay: -4.3s; }
 
 .kt-hero-sticker.kt-pride-sticker {
   width: 40px;
@@ -172,10 +173,11 @@
   display: block;
   width: 55px;
   height: 55px;
-  padding: 2px;
-  border: 2px solid var(--kt-ink);
-  background: #111411;
-  box-shadow: 2px 2px 0 var(--kt-pink), 4px 4px 0 var(--kt-ink);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(1px 2px 1px rgb(43 32 40 / 38%));
   image-rendering: pixelated;
 }
 
@@ -184,8 +186,6 @@
 .kt-webring-intro-art__pixel-heart {
   width: 39px;
   height: 39px;
-  padding: 2px;
-  background: var(--kt-white);
   transform: rotate(8deg) translateY(7px);
 }
 
@@ -222,10 +222,11 @@
   width: clamp(38px, 4vw, 50px);
   aspect-ratio: 1;
   place-items: center;
-  padding: 3px;
-  border: 2px solid var(--kt-ink);
-  background: rgb(255 249 252 / 96%);
-  box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-blue);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(1px 2px 1px rgb(43 32 40 / 38%));
   pointer-events: none;
   animation: kt-community-sticker-bob 5.4s steps(4, end) infinite;
 }
@@ -239,8 +240,8 @@
 
 .kt-discord__art-sticker--kitty { top: 14%; left: 7%; transform: rotate(-8deg); }
 .kt-discord__art-sticker--heart { top: 11%; right: 8%; width: clamp(36px, 3.8vw, 47px); transform: rotate(7deg); animation-delay: -1.4s; }
-.kt-discord__art-sticker--hearts { bottom: 24%; left: 10%; width: clamp(40px, 4.4vw, 54px); border-color: transparent; background: transparent; box-shadow: none; transform: rotate(-10deg); animation-delay: -2.7s; }
-.kt-discord__art-sticker--ghost { top: 42%; right: 5%; width: clamp(48px, 4.5vw, 58px); padding: 1px; border-color: var(--kt-ink); background: var(--kt-white); box-shadow: 2px 2px 0 var(--kt-ink), 4px 4px 0 var(--kt-pink); transform: rotate(9deg); animation-delay: -4s; }
+.kt-discord__art-sticker--hearts { bottom: 24%; left: 10%; width: clamp(40px, 4.4vw, 54px); transform: rotate(-10deg); animation-delay: -2.7s; }
+.kt-discord__art-sticker--ghost { top: 42%; right: 5%; width: clamp(48px, 4.5vw, 58px); transform: rotate(9deg); animation-delay: -4s; }
 
 .kt-discord__art-sticker--wlw-heart,
 .kt-discord__art-sticker--nb-heart,
