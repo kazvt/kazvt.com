@@ -16,8 +16,8 @@
       noise: { frequency: 3300, endFrequency: 1550, duration: 0.016, gain: 0.025 },
     },
     scroll: {
-      tones: [{ type: "sine", frequency: 310, duration: 0.06, gain: 0.006 }],
-      noise: { frequency: 2600, endFrequency: 760, duration: 0.115, gain: 0.024 },
+      tones: [{ type: "sine", frequency: 225, endFrequency: 180, duration: 0.14, gain: 0.0025 }],
+      noise: { frequency: 1700, endFrequency: 720, duration: 0.16, gain: 0.008, filterType: "lowpass", q: 0.45, attack: 0.02 },
     },
     hover: {
       noise: { frequency: 2850, endFrequency: 1050, duration: 0.07, gain: 0.007 },
@@ -27,8 +27,7 @@
       noise: { frequency: 850, endFrequency: 2400, duration: 0.12, gain: 0.01 },
     },
     paperFlip: {
-      tones: [{ type: "triangle", frequency: 610, endFrequency: 285, duration: 0.13, gain: 0.016 }],
-      noise: { frequency: 2100, endFrequency: 690, duration: 0.15, gain: 0.03 },
+      noise: { frequency: 1550, endFrequency: 640, duration: 0.22, gain: 0.011, filterType: "lowpass", q: 0.42, attack: 0.032 },
     },
     copy: {
       tones: [
@@ -110,6 +109,16 @@
     },
     languageOptionHover: {
       tones: [{ type: "sine", frequency: 580, endFrequency: 740, duration: 0.07, gain: 0.008 }],
+    },
+    inputHover: {
+      tones: [{ type: "sine", frequency: 620, endFrequency: 740, duration: 0.07, gain: 0.006 }],
+      noise: { frequency: 1350, endFrequency: 820, duration: 0.06, gain: 0.0028, filterType: "lowpass", q: 0.45, attack: 0.018 },
+    },
+    panelPreviewHover: {
+      tones: [
+        { type: "triangle", frequency: 440, endFrequency: 554, duration: 0.09, gain: 0.007 },
+        { type: "sine", frequency: 831, endFrequency: 988, delay: 0.025, duration: 0.07, gain: 0.0035 },
+      ],
     },
     languageEnglish: {
       base: "click",
@@ -259,10 +268,11 @@
     [...activeVoices].forEach((voice) => disconnectVoice(voice, true));
   }
 
-  function makeEnvelope(context, destination, startAt, duration, peak, nodes) {
+  function makeEnvelope(context, destination, startAt, duration, peak, nodes, attackSeconds = 0.004) {
     const envelope = context.createGain();
+    const attack = Math.max(0.001, Math.min(attackSeconds, duration * 0.45));
     envelope.gain.setValueAtTime(0.0001, startAt);
-    envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), startAt + 0.004);
+    envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), startAt + attack);
     envelope.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
     envelope.connect(destination);
     nodes.push(envelope);
@@ -292,14 +302,14 @@
     source.playbackRate.value = pitchFactor;
 
     const filter = context.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.Q.value = 0.72;
+    filter.type = profile.filterType || "bandpass";
+    filter.Q.value = profile.q ?? 0.72;
     filter.frequency.setValueAtTime(profile.frequency * pitchFactor, startAt);
     if (profile.endFrequency) {
       filter.frequency.exponentialRampToValueAtTime(profile.endFrequency * pitchFactor, startAt + profile.duration);
     }
 
-    const envelope = makeEnvelope(context, masterGain, startAt, profile.duration, profile.gain, voice.nodes);
+    const envelope = makeEnvelope(context, masterGain, startAt, profile.duration, profile.gain, voice.nodes, profile.attack ?? 0.004);
     source.connect(filter);
     filter.connect(envelope);
     voice.sources.push(source);
@@ -380,6 +390,8 @@
     if (!(target instanceof Element)) return null;
     if (target.closest(".kt-discord__join")) return `discordJoin${action}`;
     if (target.closest(".kt-kick-link")) return `kickLink${action}`;
+    if (action === "Hover" && target.closest("[data-kt-copy-input]")) return "inputHover";
+    if (action === "Hover" && target.closest(".kt-kick-panel-mock")) return "panelPreviewHover";
 
     const languageOption = target.closest(".language-option, [data-language-option]");
     if (languageOption) {
@@ -452,7 +464,7 @@
 
     const controlCue = cueForControl(event.target, "Hover");
     if (controlCue) {
-      const control = event.target.closest(".kt-discord__join, .kt-kick-link, .language-button, .language-option, [data-language-option], [data-language-toggle]");
+      const control = event.target.closest(".kt-discord__join, .kt-kick-link, [data-kt-copy-input], .kt-kick-panel-mock, .language-button, .language-option, [data-language-option], [data-language-toggle]");
       if (event.relatedTarget instanceof Node && control?.contains(event.relatedTarget)) return;
       const now = performance.now();
       if (now - lastSpecificHoverAt < 150) return;
