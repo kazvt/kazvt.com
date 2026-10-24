@@ -198,8 +198,8 @@
   .kt-recommendations h3 { font-size: .94rem; }
   .kt-recommendations p { font-size: .79rem; }
 
-  .kt-webring-kit { margin: 0 12px 28px; border-width: 3px; box-shadow: 4px 4px 0 var(--kt-blue), 8px 8px 0 var(--kt-pink); }
-  .kt-webring-heading { gap: 10px; padding: 11px 12px; }
+  .kt-webring-kit { margin: 0 12px 34px; border-width: 3px; box-shadow: 4px 4px 0 var(--kt-ink), 7px 7px 0 var(--kt-pink), 11px 11px 0 var(--kt-blue), 0 16px 28px rgb(43 32 40 / 15%); }
+  .kt-webring-heading { gap: 10px; padding: 11px 12px; background: linear-gradient(112deg, var(--kt-blue) 0 47%, #dff5fc 48% 53%, var(--kt-pink) 54% 100%); }
   .kt-webring-heading h2 { font-size: clamp(1.25rem, 5.5vw, 1.7rem); }
   .kt-webring-body { gap: 15px; padding: 14px; }
   .kt-webring-copy-row button { min-height: 48px; }
@@ -252,9 +252,10 @@
   .kt-discord__body { gap: 21px; padding: 12px; }
   .kt-discord__art { min-height: 203px; }
   .kt-discord__orbit--two { height: 88%; }
-  .kt-discord__bubble--back { transform: scale(.88) rotate(10deg) translateZ(-14px); }
-  .kt-discord__bubble--front { transform: scale(.9) rotate(-6deg) translateZ(26px); }
-  .kt-discord__blinkie { right: 3%; bottom: 7%; width: min(188px, 78%); }
+  .kt-discord__message-art { width: min(84%, 288px); }
+  .kt-discord__blinkie { right: 3%; bottom: 7%; width: min(204px, 82%); min-height: 64px; }
+  .kt-discord__blinkie-copy { font-size: .48rem; }
+  .kt-discord__member-count { font-size: .82rem; }
   .kt-discord__copy h2 { font-size: clamp(1.55rem, 7.2vw, 2.2rem); }
   .kt-discord__description { margin-top: 14px; }
   .kt-discord__join { width: 100%; min-height: 58px; grid-template-columns: 36px minmax(0, 1fr) 19px; gap: 7px; margin-top: 17px; padding-inline: 8px; font-size: .74rem; }
@@ -262,7 +263,6 @@
   .kt-discord__join-icon svg { width: 22px; height: 22px; }
   .kt-discord__route { font-size: .7rem; }
   .kt-discord__footer { min-height: 34px; }
-  .kt-discord__footer-code { display: none; }
 }
 
 @media (max-width: 360px) {
