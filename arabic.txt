@@ -572,6 +572,7 @@ kt.home_footer=العودة إلى kazvt.com
 kt.live_label=مباشر
 kt.live_aria={name} يبث مباشرة على KICK
 kt.last_live_aria=آخر بث لـ{name}: {time}
+kt.last_live_retention_aria=لا تتوفر إعادة بث عامة لـ{name}؛ يُستخدم حد الاحتفاظ لدى كيك البالغ {days} يومًا كتقدير. قد يكون آخر بث أقدم أو غير معروف.
 kt.status_cached_aria=آخر تحقق من حالة {name} كان {time}؛ جارٍ التحقق مجددًا
 kt.live_title=مباشر على KICK
 kt.unknown_label=?
