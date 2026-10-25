@@ -1399,7 +1399,7 @@
         const liveNowLabel = i18n?.t?.("kt.live_now") || "Live now";
         entry.lastLiveText.textContent = liveNowLabel;
         entry.lastLiveBadge.classList.add("kt-last-live--live-now");
-        entry.lastLiveBadge.setAttribute("aria-label", cacheNote ? `${liveLabel}. ${cacheNote}` : liveLabel);
+        entry.lastLiveBadge.setAttribute("aria-label", liveNowLabel);
         entry.lastLiveBadge.title = liveNowLabel;
         entry.lastLiveBadge.hidden = false;
       }
