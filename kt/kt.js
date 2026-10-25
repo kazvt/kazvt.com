@@ -785,9 +785,23 @@
       const clockHands = document.createElementNS("http://www.w3.org/2000/svg", "path");
       clockHands.setAttribute("d", "M8 4.5v3.8l2.4 1.4");
       clockIcon.append(clockFace, clockHands);
+      clockIcon.classList.add("kt-last-live__clock");
+      const broadcastIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      broadcastIcon.classList.add("kt-last-live__broadcast");
+      broadcastIcon.setAttribute("viewBox", "0 0 16 16");
+      broadcastIcon.setAttribute("aria-hidden", "true");
+      broadcastIcon.setAttribute("focusable", "false");
+      const broadcastWaves = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      broadcastWaves.setAttribute("d", "M5.15 5.15a4.05 4.05 0 0 0 0 5.7M10.85 5.15a4.05 4.05 0 0 1 0 5.7M3.1 3.1a6.95 6.95 0 0 0 0 9.8M12.9 3.1a6.95 6.95 0 0 1 0 9.8");
+      const broadcastDot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      broadcastDot.classList.add("kt-live-now-dot");
+      broadcastDot.setAttribute("cx", "8");
+      broadcastDot.setAttribute("cy", "8");
+      broadcastDot.setAttribute("r", "1.25");
+      broadcastIcon.append(broadcastWaves, broadcastDot);
       const lastLiveText = document.createElement("span");
       lastLiveText.className = "kt-last-live__text";
-      lastLiveBadge.append(clockIcon, lastLiveText);
+      lastLiveBadge.append(clockIcon, broadcastIcon, lastLiveText);
       (statusRail || card).append(lastLiveBadge);
       const liveSticker = card.matches(".kt-member") ? document.createElement("img") : null;
       if (liveSticker) {
@@ -1176,6 +1190,7 @@
 
     function showLastLive(entry, timestamp, approximate = false, lastKnownOnly = false) {
       if (!timestamp || entry.card.dataset.liveState !== "offline") return;
+      entry.lastLiveBadge.classList.remove("kt-last-live--live-now");
       entry.lastLiveAt = timestamp;
       entry.lastLiveApproximate = approximate;
       entry.lastLiveKnownOnly = lastKnownOnly;
@@ -1204,6 +1219,7 @@
 
     function showRetentionEstimate(entry, retentionDays, checkedAt = Date.now()) {
       if (!retentionDays || entry.card.dataset.liveState !== "offline") return;
+      entry.lastLiveBadge.classList.remove("kt-last-live--live-now");
       entry.lastLiveAt = checkedAt - retentionDays * 24 * 60 * 60 * 1000;
       entry.lastLiveApproximate = true;
       entry.lastLiveKnownOnly = false;
@@ -1307,6 +1323,7 @@
 
     function setState(entry, state, { fromCache = false, checkedAt = entry.cachedStatus?.checkedAt } = {}) {
       const { card, indicator, slug, tooltipLabel, liveSticker } = entry;
+      entry.lastLiveBadge.classList.remove("kt-last-live--live-now");
       const previousState = card.dataset.liveState;
       card.dataset.liveState = state;
       const preserveOfflineHistory = state === "offline" && previousState === "offline" && entry.lastLiveAt;
@@ -1377,6 +1394,15 @@
       indicator.setAttribute("aria-label", cacheNote ? `${liveLabel}. ${cacheNote}` : liveLabel);
       if (cardTitle) indicator.title = cardTitle;
       else indicator.removeAttribute("title");
+
+      if (card.matches(".kt-recommendation-link")) {
+        const liveNowLabel = i18n?.t?.("kt.live_now") || "Live now";
+        entry.lastLiveText.textContent = liveNowLabel;
+        entry.lastLiveBadge.classList.add("kt-last-live--live-now");
+        entry.lastLiveBadge.setAttribute("aria-label", cacheNote ? `${liveLabel}. ${cacheNote}` : liveLabel);
+        entry.lastLiveBadge.title = liveNowLabel;
+        entry.lastLiveBadge.hidden = false;
+      }
     }
 
     function restoreStatusCache() {
