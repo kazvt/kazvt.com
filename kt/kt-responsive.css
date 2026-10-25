@@ -314,7 +314,6 @@
   .kt-member-avatar { grid-column: 1; grid-row: 1; width: 42px; height: 42px; border-width: 2px; transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; }
   .kt-member-tag,
-  .kt-member-tag,
   .kt-member-badge { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; width: 100%; max-width: 96px; overflow-wrap: anywhere; text-align: center; transform: rotate(.8deg) translateZ(14px); }
   .kt-member-status-rail { position: static; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 22px; }
 }
@@ -468,7 +467,7 @@
     margin: 0;
     padding: 2px 4px;
     font-size: .51rem;
-    transform: none;
+    transform: rotate(-1deg);
   }
   .kt-recommendation-link > .kt-last-live:not([hidden]) svg { width: 9px; height: 9px; flex-basis: 9px; }
 }
