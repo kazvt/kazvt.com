@@ -812,15 +812,18 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-streamer-languages {
   display: inline-flex;
-  grid-column: 2;
-  grid-row: 2;
   min-width: 0;
+  max-width: 100%;
   align-items: center;
-  align-self: center;
-  justify-self: end;
+  justify-content: flex-end;
   gap: 2px;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   white-space: nowrap;
+}
+
+.kt-member-title > .kt-streamer-languages {
+  margin-inline-start: auto;
 }
 
 .kt-streamer-language {

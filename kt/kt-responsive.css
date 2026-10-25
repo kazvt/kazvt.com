@@ -225,7 +225,7 @@
   .kt-home-link,
   .kt-topbar-label { padding-inline: 5px; font-size: clamp(.45rem, 1.95vw, .58rem); }
   .kt-topbar-label { text-align: center; }
-  .kt-member { grid-template-columns: 36px minmax(0, 1fr); gap: 6px; padding-inline: 7px; }
+  .kt-member { grid-template-columns: 36px minmax(0, 1fr); gap: 6px; padding-inline: 8px; }
   .kt-member-avatar { width: 36px; height: 36px; }
   .kt-member-tag,
   .kt-member-badge { font-size: .61rem; }
@@ -275,7 +275,7 @@
   .kt-topbar { gap: 5px; }
   .kt-home-link,
   .kt-topbar-label { padding-inline: 4px; font-size: .46rem; }
-  .kt-member { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px 6px; }
+  .kt-member { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px; }
   .kt-member-avatar { width: 32px; height: 32px; }
   .kt-member-name { font-size: .78rem; }
   .kt-member-pronouns { font-size: .58rem; }
@@ -371,7 +371,7 @@
     grid-template-rows: minmax(30px, auto) auto 20px;
     align-content: start;
     gap: 4px 6px;
-    padding: 6px;
+    padding: 8px;
   }
 
   .kt-member-avatar { grid-column: 1; grid-row: 1; width: 29px; height: 29px; }
@@ -380,7 +380,7 @@
   .kt-member-name { font-size: clamp(.62rem, 3.8cqi, .76rem); }
   .kt-member-pronouns { padding: 1px 2px; font-size: clamp(.48rem, 2.7cqi, .54rem); }
   .kt-member-handle { grid-column: 1; grid-row: 2; font-size: clamp(.5rem, 2.9cqi, .59rem); }
-  .kt-streamer-languages { grid-column: 1; grid-row: 3; justify-self: start; gap: 2px; }
+  .kt-streamer-languages { justify-content: flex-end; gap: 2px; }
   .kt-streamer-language { min-height: 12px; padding: 1px 2px; font-size: clamp(.44rem, 2.5cqi, .5rem); }
   .kt-member-tag,
   .kt-member-badge {
@@ -474,7 +474,7 @@
 
 @media (max-width: 360px) {
   .kt-recommendation-grid { gap: 6px; }
-  .kt-recommendation-link { min-height: 62px; grid-template-columns: 27px minmax(0, 1fr); grid-template-rows: auto 20px; gap: 2px 5px; padding-inline: 5px; }
+  .kt-recommendation-link { min-height: 62px; grid-template-columns: 27px minmax(0, 1fr); grid-template-rows: auto 20px; gap: 2px 5px; padding-inline: 8px; }
   .kt-recommendation-avatar { width: 27px; height: 27px; }
   .kt-recommendation-name { font-size: .7rem; }
   .kt-recommendation-copy .kt-member-pronouns { font-size: .47rem; }
