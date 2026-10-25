@@ -752,9 +752,9 @@
         language.textContent = label;
         languages.append(language);
       });
-      // Keep language tags beside the name/pronouns for every streamer. The
-      // title flex row right-aligns them and lets them wrap above status data.
-      title.append(languages);
+      // Keep language tags beside the @handle row, separate from the display
+      // name and pronouns. labels.js wraps these in the card's language slot.
+      handle.insertAdjacentElement("afterend", languages);
 
       const tooltipLabel = card.title.trim();
       const statusRail = card.matches(".kt-member")
