@@ -174,11 +174,13 @@
 /* Shared code sometimes leaves a now-empty wrapper where badges originated. */
 [data-kt-empty-language-container]:empty { display: none !important; }
 
-/* Recency stamps sit at the lower edge of each card in the shared UI.
-   Reserve a footer lane even when the title/handle wraps at high zoom. */
-.kt-member .kt-member-copy,
-.kt-recommendation-link .kt-recommendation-copy {
+/* Member recency sits over the card at desktop sizes, so keep a footer lane
+   there. Guest recency uses its own grid row and needs no extra copy padding. */
+.kt-member .kt-member-copy {
   padding-block-end: 1.8rem;
+}
+@media (max-width: 1100px) {
+  .kt-member .kt-member-copy { padding-block-end: 0; }
 }
 
 .kt-member-copy > .kt-member-handle,
