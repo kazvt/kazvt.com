@@ -567,6 +567,7 @@ kt.live_label=AO VIVO
 kt.live_aria={name} está ao vivo na KICK
 kt.live_now=Ao vivo agora
 kt.last_live_aria={name} esteve ao vivo pela última vez: {time}
+kt.last_live_long_ago=há muito tempo
 kt.last_live_cached_aria=O VOD público mais recente conhecido de {name} foi {time}; transmissões posteriores sem replay público podem não estar refletidas.
 kt.last_live_retention_aria=Não há VOD público disponível para {name}; o limite de retenção de {days} dias da Kick é usado como estimativa. A última transmissão pode ser anterior ou desconhecida.
 kt.languages_label=Idiomas falados

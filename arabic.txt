@@ -573,6 +573,7 @@ kt.live_label=مباشر
 kt.live_aria={name} يبث مباشرة على KICK
 kt.live_now=مباشر الآن
 kt.last_live_aria=آخر بث لـ{name}: {time}
+kt.last_live_long_ago=منذ زمن طويل
 kt.last_live_cached_aria=آخر تسجيل بث عام معروف لـ{name} كان {time}؛ وقد لا تظهر البثوث الأحدث التي لا تتوفر لها إعادة عامة.
 kt.last_live_retention_aria=لا تتوفر إعادة بث عامة لـ{name}؛ يُستخدم حد الاحتفاظ لدى كيك البالغ {days} يومًا كتقدير. قد يكون آخر بث أقدم أو غير معروف.
 kt.languages_label=اللغات التي يتحدثون بها
