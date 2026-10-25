@@ -112,6 +112,12 @@
     grid-column: 1;
     grid-row: 3;
     justify-self: end;
+    gap: 0.1rem;
+    padding: 0;
+  }
+  .kt-recommendation-copy:has(> .kt-card-languages [data-kt-language-badge]:nth-of-type(2))
+    .kt-card-languages [data-kt-language-container] {
+    gap: 0.1rem;
   }
 }
 
