@@ -2,7 +2,8 @@
  * Web pages cannot read the browser's hardware-acceleration setting directly.
  * Use a conservative WebGL software-renderer check, accessibility/data-saving
  * preferences, and actual frame timing while the pointer moves instead.
- * Override automatic detection with ?ktPerf=lite or ?ktPerf=full.
+ * Cache the last inferred rendering state for fast reloads, then probe again
+ * to detect changes. Override automatic detection with ?ktPerf=lite or ?ktPerf=full.
  */
 (() => {
   'use strict';
@@ -13,35 +14,58 @@
   const forced = override === 'lite' || override === 'full';
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const dataSaver = Boolean(navigator.connection && navigator.connection.saveData);
-  let softwareRenderer = false;
 
-  if (!forced && !motionPreference.matches && !dataSaver) {
-    // failIfMajorPerformanceCaveat is supported by Chromium/Firefox. A null
-    // context is a useful hint, NOT proof that GPU acceleration is disabled.
+  // Browsers don't provide access to their hardware-acceleration checkbox.
+  // Persist our *best-effort* renderer/slow-frame observations instead, so
+  // return visitors start in the last suitable mode without a heavy first paint.
+  // Recheck WebGL on each non-forced load to notice hardware-setting changes.
+  const CACHE_KEY = 'kt:render-performance:v1';
+  const MAX_CACHE_AGE = 30 * 24 * 60 * 60 * 1000;
+  const SLOW_FRAME_TTL = 48 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  function readCachedDetection() {
     try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl', {
-        failIfMajorPerformanceCaveat: true,
-        powerPreference: 'low-power'
-      });
-      if (!gl) {
-        softwareRenderer = true;
-      } else {
-        const debug = gl.getExtension('WEBGL_debug_renderer_info');
-        const renderer = debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : '';
-        softwareRenderer = /swiftshader|llvmpipe|softpipe|software raster|software renderer/i.test(renderer);
-        const lose = gl.getExtension('WEBGL_lose_context');
-        if (lose) lose.loseContext();
-      }
-      // Release this small probe's canvas; never create an animation loop for it.
-      canvas.width = canvas.height = 0;
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (data.version !== 1 || !Number.isFinite(data.updatedAt) ||
+          data.updatedAt > now || now - data.updatedAt > MAX_CACHE_AGE ||
+          !['software', 'accelerated', 'unknown'].includes(data.renderer)) return null;
+      return data;
     } catch (_) {
-      // Privacy settings / disabled WebGL should not break the page.
-      softwareRenderer = true;
+      // Storage may be blocked (private browsing, site settings, sandbox).
+      return null;
     }
   }
 
-  let lite = override === 'lite' || (!forced && (motionPreference.matches || dataSaver || softwareRenderer));
+  const cached = readCachedDetection();
+  let renderer = cached ? cached.renderer : 'unknown';
+  let slowPointerAt = cached && Number.isFinite(cached.slowPointerAt) &&
+    cached.slowPointerAt <= now && now - cached.slowPointerAt < SLOW_FRAME_TTL
+    ? cached.slowPointerAt : 0;
+
+  function saveDetection() {
+    if (forced) return; // URL testing must not overwrite automatic detection.
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        version: 1,
+        renderer,
+        slowPointerAt,
+        updatedAt: Date.now()
+      }));
+    } catch (_) {
+      // Storage failure should never affect the page.
+    }
+  }
+
+  function shouldUseLite() {
+    return motionPreference.matches || dataSaver || renderer === 'software' || Boolean(slowPointerAt);
+  }
+
+  // Apply the cached decision BEFORE probing WebGL and before the body paints.
+  // Cached status is only an initial hint, never a permanent hardware claim.
+  let lite = override === 'lite' || (!forced && shouldUseLite());
   let flagVideo = null;
   let flagInView = true;
   let prideObserver = null;
@@ -101,7 +125,43 @@
   setMode(lite);
 
   if (!forced) {
-    const onMotionChange = () => setMode(motionPreference.matches || dataSaver || softwareRenderer);
+    // failIfMajorPerformanceCaveat rejects many software WebGL contexts. A
+    // missing context is a hint, not proof that GPU acceleration is disabled.
+    // No persistent GL context or animation loop is created by this probe.
+    function checkRenderer() {
+      const canvas = document.createElement('canvas');
+      try {
+        const gl = canvas.getContext('webgl', {
+          failIfMajorPerformanceCaveat: true,
+          powerPreference: 'low-power'
+        });
+        if (!gl) return 'software';
+        const debug = gl.getExtension('WEBGL_debug_renderer_info');
+        const description = debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : '';
+        const isSoftware = /swiftshader|llvmpipe|softpipe|software raster|software renderer/i.test(description);
+        const lose = gl.getExtension('WEBGL_lose_context');
+        if (lose) lose.loseContext();
+        return isSoftware ? 'software' : 'accelerated';
+      } catch (_) {
+        return 'unknown'; // Keep the cached hint if probing is blocked.
+      } finally {
+        canvas.width = canvas.height = 0;
+      }
+    }
+
+    if (!motionPreference.matches && !dataSaver) {
+      const fresh = checkRenderer();
+      if (fresh !== 'unknown') {
+        // A changed renderer is a strong reason to discard an old slow-pointer
+        // observation: e.g. acceleration was just enabled in the browser.
+        if (renderer !== 'unknown' && renderer !== fresh) slowPointerAt = 0;
+        renderer = fresh;
+      }
+      saveDetection();
+      setMode(shouldUseLite());
+    }
+
+    const onMotionChange = () => setMode(shouldUseLite());
     if (motionPreference.addEventListener) motionPreference.addEventListener('change', onMotionChange);
     else if (motionPreference.addListener) motionPreference.addListener(onMotionChange);
   }
@@ -134,7 +194,7 @@
     }
     document.addEventListener('visibilitychange', updateVideo);
 
-    if (forced || lite || !('requestAnimationFrame' in window)) return;
+    if (forced || !('requestAnimationFrame' in window)) return;
 
     // Diagnose real-world jank only when the cursor is actually moving.
     // Sampling is brief and infrequent; there is NO permanent animation loop.
@@ -168,7 +228,8 @@
           // Several slow frames while moving the cursor signal that rendering
           // is over budget even if WebGL reported an accelerated context.
           if (frames >= 10 && slowFrames >= 7 && slowFrames / frames > 0.45) {
-            softwareRenderer = true;
+            slowPointerAt = Date.now();
+            saveDetection();
             setMode(true);
           }
         }
