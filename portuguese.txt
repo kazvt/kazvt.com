@@ -606,3 +606,4 @@ kt.pronouns.she_her=ela
 kt.pronouns.he_him=ele
 kt.pronouns.they_them=elu
 kt.pronouns.they_she=elu/ela
+kt.pronouns.she_they=ela/elu

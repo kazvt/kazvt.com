@@ -613,3 +613,4 @@ kt.pronouns.she_her=هي
 kt.pronouns.he_him=هو
 kt.pronouns.they_them=هما
 kt.pronouns.they_she=هما/هي
+kt.pronouns.she_they=هي/هما
