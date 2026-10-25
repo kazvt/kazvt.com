@@ -1055,6 +1055,23 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   stroke-width: 1.5;
 }
 
+.kt-last-live__broadcast { display: none; }
+
+.kt-last-live--live-now {
+  gap: 2px;
+  padding: 2px 4px;
+  border-color: #b62e72;
+  background: rgb(255 220 234 / 96%);
+  box-shadow: 1px 1px 0 var(--kt-blue);
+  color: #862052;
+  font-size: .57rem;
+  transform: none;
+}
+
+.kt-last-live--live-now .kt-last-live__clock { display: none; }
+.kt-last-live--live-now .kt-last-live__broadcast { display: block; }
+.kt-last-live--live-now .kt-live-now-dot { fill: currentColor; stroke: none; }
+
 .kt-last-live__text {
   overflow: hidden;
   max-width: 100%;
