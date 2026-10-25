@@ -1,0 +1,97 @@
+/* Software-rendering fallback. Normal GPU-accelerated pages keep their design. */
+html.kt-lite-mode {
+  scroll-behavior: auto !important;
+}
+
+/* Remove expensive blur/shadow compositing while retaining backgrounds, text,
+   borders, layout, hover/click targets, and the page's functional controls. */
+html.kt-lite-mode *,
+html.kt-lite-mode *::before,
+html.kt-lite-mode *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Static decorative artwork is retained, but CSS-driven motion is stopped.
+   Do not suppress loading spinners or application-state animations globally. */
+html.kt-lite-mode :is(
+  .kt-floaties, .kt-sticker, .kt-hero-sticker, .kt-logo,
+  .kt-roster-welcome-art, .kt-webring-intro-art, .kt-webring-stamp,
+  .kt-webring-step-arrow, .kt-discord__art, .kt-discord__orbit,
+  .kt-discord__spark, .kt-discord__art-sticker, .kt-discord__signal-light,
+  .kt-pride-gif-stagger
+),
+html.kt-lite-mode :is(
+  .kt-floaties, .kt-sticker, .kt-hero-sticker, .kt-logo,
+  .kt-roster-welcome-art, .kt-webring-intro-art, .kt-webring-stamp,
+  .kt-webring-step-arrow, .kt-discord__art, .kt-discord__orbit,
+  .kt-discord__spark, .kt-discord__art-sticker, .kt-discord__signal-light,
+  .kt-pride-gif-stagger
+) *,
+html.kt-lite-mode :is(
+  .kt-floaties, .kt-sticker, .kt-hero-sticker,
+  .kt-roster-welcome-art, .kt-webring-intro-art, .kt-webring-stamp,
+  .kt-discord__art, .kt-pride-gif-stagger
+)::before,
+html.kt-lite-mode :is(
+  .kt-floaties, .kt-sticker, .kt-hero-sticker,
+  .kt-roster-welcome-art, .kt-webring-intro-art, .kt-webring-stamp,
+  .kt-discord__art, .kt-pride-gif-stagger
+)::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Large animated emoji/GIF overlays are optional decoration. Hiding these
+   avoids repeated decoding and repaints on software rasterizers. */
+html.kt-lite-mode :is(
+  .kt-pride-sticker, .kt-roster-welcome-art__pride-sticker,
+  .kt-webring-intro-art__pride-sticker,
+  .kt-pride-gif-stagger
+) {
+  display: none !important;
+}
+html.kt-lite-mode .kt-discord__art-sticker img[src*="/pride-gifmojis/"] {
+  display: none !important;
+}
+
+/* Custom cursors/trails, if present in the site's shared scripts, are purely
+   cosmetic. Native pointer/links/form cursors remain usable in lite mode. */
+html.kt-lite-mode :is(
+  #cursor, #custom-cursor, #cursor-trail, #mouse-trail,
+  .custom-cursor, .cursor-trail, .cursor-glow, .kt-cursor,
+  [data-custom-cursor], [data-cursor-trail],
+  [class*="cursor" i], [id*="cursor" i],
+  [class*="pointer-trail" i], [class*="mouse-trail" i]
+) {
+  display: none !important;
+}
+html.kt-lite-mode body,
+html.kt-lite-mode body * {
+  cursor: auto !important;
+}
+html.kt-lite-mode :is(a[href], button, select, summary, [role="button"], [type="checkbox"], [type="radio"]),
+html.kt-lite-mode :is(a[href], button, select, summary, [role="button"], [type="checkbox"], [type="radio"]) * {
+  cursor: pointer !important;
+}
+html.kt-lite-mode :is(textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"])) {
+  cursor: text !important;
+}
+
+/* Keep the hero's existing video poster/last frame but skip decoding frames. */
+html.kt-lite-mode .kt-flag {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Avoid continuous hover compositing on repeated member cards. */
+html.kt-lite-mode :is(.kt-member, .kt-recommendation-link, .kt-kick-link, .kt-discord__join) {
+  transition: none !important;
+}
+html.kt-lite-mode :is(.kt-member, .kt-recommendation-link, .kt-kick-link, .kt-discord__join):hover {
+  transform: none !important;
+}
