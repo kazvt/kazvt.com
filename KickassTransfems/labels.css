@@ -131,6 +131,20 @@
   }
 }
 
+/* At mid-size desktop widths, three columns can leave only ~100px for guest
+   names. Tighten the title rhythm slightly there so names and pronouns stay
+   on one line instead of inflating every card in that grid row. */
+@media (min-width: 701px) {
+  @container kt-guest-card (min-width: 171px) and (max-width: 300px) {
+    .kt-recommendation-copy .kt-member-title { gap: 2px; }
+    .kt-recommendation-copy .kt-recommendation-name { font-size: 0.9em; }
+    .kt-recommendation-copy .kt-member-pronouns {
+      font-size: 9.6px;
+      padding-inline: 4px;
+    }
+  }
+}
+
 /* Reserve room for the handle and its language slot even in narrow cards. */
 @container kt-member-card (max-width: 340px) {
   .kt-member-copy,
