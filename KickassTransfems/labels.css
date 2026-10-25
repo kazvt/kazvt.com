@@ -155,3 +155,26 @@
     gap: 0.5rem;
   }
 }
+
+/* Restore a clear inner gutter without changing the compact card layout. */
+.kt-member { padding: 14px 16px; }
+.kt-recommendation-link { padding: 10px 14px; }
+.kt-member-status-rail { right: 10px; bottom: 6px; left: 10px; }
+.kt-member-new-badge { left: 10px; bottom: 7px; }
+
+@media (max-width: 700px) {
+  .kt-member { padding: 12px; }
+  .kt-recommendation-link { padding: 9px 10px 8px; }
+}
+
+@container kt-member-card (max-width: 480px) {
+  .kt-member { padding: 12px; }
+}
+
+@container kt-member-card (max-width: 340px) {
+  .kt-member { padding: 10px; }
+}
+
+@media (max-width: 360px) {
+  .kt-recommendation-link { padding: 8px 9px 7px; }
+}
