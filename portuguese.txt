@@ -539,6 +539,7 @@ kt.affiliation_network=não temos uma rede nossa.
 kt.affiliation_brand=KickassTransfems
 kt.affiliation_webring=é um pequeno webring no KICK e um projeto de divulgação liderado por
 kt.affiliation_after=. Nossas comunidades se sobrepõem, mas continuamos sendo um grupo próprio.
+kt.affiliation_repository=Além da divulgação, a lista também é um repositório comunitário: uma pequena lista telefônica de transfems no KICK, com nomes de usuário em vez de números, para facilitar que a gente se encontre.
 kt.open_kick=Abrir o perfil de kazvt no KICK
 kt.discord_kicker=CANAL DA COMUNIDADE
 kt.discord_status=CONVITE ABERTO
