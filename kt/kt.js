@@ -752,10 +752,9 @@
         language.textContent = label;
         languages.append(language);
       });
-      // Keep guest language tags beside the name/pronouns, well above the
-      // card's separate last-live slot. Member tags retain their handle row.
-      if (card.matches(".kt-recommendation-link")) title.append(languages);
-      else copy.append(languages);
+      // Keep language tags beside the name/pronouns for every streamer. The
+      // title flex row right-aligns them and lets them wrap above status data.
+      title.append(languages);
 
       const tooltipLabel = card.title.trim();
       const statusRail = card.matches(".kt-member")

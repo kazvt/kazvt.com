@@ -144,10 +144,7 @@
 }
 
 .kt-recommendation-copy .kt-member-title > .kt-streamer-languages {
-  grid-column: auto;
-  grid-row: auto;
-  justify-self: auto;
-  margin-inline-start: 1px;
+  margin-inline-start: auto;
 }
 
 @media (min-width: 701px) and (max-width: 900px) {
