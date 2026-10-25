@@ -592,7 +592,7 @@ html[dir="rtl"] .kt-chatters__arrow { transform: scaleX(-1); }
   .kt-chatters__card { min-height: 72px; padding: 8px; grid-template-columns: 32px minmax(0, 1fr); gap: 5px; }
   .kt-chatters__avatar { width: 32px; height: 32px; }
   .kt-chatters__arrow { display: none; }
-  .kt-chatters__handle { font-size: clamp(.56rem, 2.9vw, .72rem); }
+  .kt-chatters__handle { font-size: clamp(.56rem, 2.9vw, .72rem); letter-spacing: -.02em; }
 }
 
 @media (max-width: 360px) {
