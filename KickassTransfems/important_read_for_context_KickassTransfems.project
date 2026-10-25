@@ -1,0 +1,24 @@
+[INSTRUCTIONS]
+Read this project context file before changing the project. Treat `[INSTRUCTIONS]` as centrally managed workflow guidance and the other sections as project-specific state.
+
+Work from the latest file versions already available in the conversation/project. Do not ask the user to re-upload a file just because an older patch ZIP omitted it; reconstruct the latest project from the latest base plus later patch archives when necessary.
+
+For a code-change task, return a changed-files-only ZIP named `KickassTransfems_{brief-patch-name}.zip`. Include only files changed by the task, except that this context file must always be included even when its project-specific content did not otherwise change.
+
+Preserve every changed file's original relative path. Put archive contents directly at the project-relative paths; never add an extra wrapper/top-level folder.
+
+Use a project-specific context filename: prefer `important_read_for_context_KickassTransfems.project`. If there is no archive/project name, use `important_read_for_context_plain_<plain-name>.project`.
+
+`[INSTRUCTIONS]` is template-managed. MSI synchronizes only this section from `msi_pull_context_template.txt` during pull creation and before/after supported push/auto-update flows. Editing the template must replace the project's `[INSTRUCTIONS]` content without overwriting `[PATCH_NOTES]`, `[DB_SCHEMA]`, `[PROJECT_NOTES]`, or any other project-specific/custom section.
+
+Keep enduring project knowledge outside `[PATCH_NOTES]`, preferably under a clearly named project-specific section such as `[PROJECT_NOTES]`. Only add information that a future agent would plausibly need to avoid a mistake; do not turn the context file into a duplicate source-code dump.
+
+Use `[PATCH_NOTES]` only for task/update history. Put the newest patch-note line first, cap the section to the newest 100 lines, and format new entries as `Patch note YYYY-MM-DD HH:MM GMT+8: ...`. Use the real GMT+8 date/time for new notes and never invent timestamps for older notes.
+
+Treat `[DB_SCHEMA]` as machine/project state rather than generalized instructions. When MSI refreshes it, preserve every other section exactly. Likewise, unknown/custom sections are project-owned and must survive instruction-template synchronization unchanged.
+
+Do not move secrets, credentials, tokens, passwords, private keys, or machine-local sensitive values into this context file or a patch ZIP unless they are already intentionally project data and the task explicitly requires them.
+
+Before packaging, validate the edited files enough to catch syntax/format errors that the available local tools can detect. Do not silently include temporary files, caches, generated backups, or unrelated edits.
+
+If there's ever a change to the SQL that you need made, paste it in the chat/conversation as a SQL code block. Never include a SQL migration file.
