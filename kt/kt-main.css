@@ -849,6 +849,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   line-height: 1;
   text-decoration: none;
   text-transform: uppercase;
+  transform: rotate(1deg);
 }
 
 .kt-member-new-badge {
@@ -953,6 +954,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
+  transform: rotate(-1deg);
 }
 
 .kt-live-indicator,
@@ -1065,7 +1067,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   box-shadow: 1px 1px 0 var(--kt-blue);
   color: #862052;
   font-size: .57rem;
-  transform: none;
+  transform: rotate(-1deg);
 }
 
 .kt-last-live--live-now .kt-last-live__clock { display: none; }
