@@ -620,9 +620,15 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 .kt-member-grid > li {
   min-width: 0;
   display: flex;
+  flex-direction: column;
   perspective: 800px;
   container-name: kt-member-card;
   container-type: inline-size;
+}
+
+.kt-member-grid > li > .kt-member {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .kt-member {
