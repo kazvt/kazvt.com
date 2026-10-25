@@ -667,3 +667,4 @@ kt.pronouns.she_her=she/her
 kt.pronouns.he_him=he/him
 kt.pronouns.they_them=they/them
 kt.pronouns.they_she=they/she
+kt.pronouns.she_they=she/they
