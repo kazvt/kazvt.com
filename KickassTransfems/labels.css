@@ -240,15 +240,22 @@
   margin-block-start: 0;
 }
 
+/* Cards in the 341–480px range have enough room for a compact two-row
+   layout. Distribute those rows to the card edges so the portrait's top
+   inset and the status rail's bottom inset match the side gutters. */
+@container kt-member-card (min-width: 341px) and (max-width: 480px) {
+  .kt-member { align-content: space-between; }
+}
+
 /* Preserve a clear card gutter while trimming excess vertical padding. */
 .kt-member { padding: 14px 16px; }
-.kt-recommendation-link { padding: 7px 14px; }
+.kt-recommendation-link { padding: 7px 9px; }
 .kt-member-status-rail { right: 10px; bottom: 6px; left: 10px; }
 .kt-member-new-badge { left: 10px; bottom: 7px; }
 
 @media (max-width: 700px) {
   .kt-member { padding: 12px; }
-  .kt-recommendation-link { padding: 7px 10px; }
+  .kt-recommendation-link { padding: 7px 9px; }
 }
 
 @container kt-member-card (max-width: 480px) {
