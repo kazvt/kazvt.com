@@ -475,13 +475,26 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
 
 .kt-chatters__item { min-width: 0; }
 
+.kt-chatters__avatar {
+  display: block;
+  width: 44px;
+  height: 44px;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-white);
+  box-shadow: 2px 2px 0 var(--kt-blue);
+  object-fit: cover;
+  transform: rotate(-1deg);
+}
+
 .kt-chatters__card {
   position: relative;
   isolation: isolate;
   display: grid;
   min-width: 0;
   min-height: 78px;
-  grid-template-columns: minmax(0, 1fr) 18px;
+  grid-template-columns: 44px minmax(0, 1fr) 18px;
   grid-template-rows: minmax(1.15em, auto) auto;
   align-content: center;
   align-items: center;
@@ -510,7 +523,7 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
 }
 
 .kt-chatters__handle {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
   min-width: 0;
   color: inherit;
@@ -525,7 +538,7 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
 }
 
 .kt-chatters__pronouns {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 2;
   justify-self: start;
   max-width: 100%;
@@ -545,7 +558,7 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
   display: grid;
   width: 18px;
   height: 18px;
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1 / span 2;
   align-self: center;
   place-items: center;
@@ -576,15 +589,18 @@ html[dir="rtl"] .kt-chatters__arrow { transform: scaleX(-1); }
 @media (max-width: 520px) {
   .kt-chatters { margin: 0 12px 34px; padding: 16px 13px; }
   .kt-chatters__heading { margin-bottom: 17px; }
-  .kt-chatters__card { min-height: 76px; padding: 10px; gap: 6px; }
+  .kt-chatters__card { min-height: 76px; padding: 10px; grid-template-columns: 38px minmax(0, 1fr) 16px; gap: 5px 6px; }
+  .kt-chatters__avatar { width: 38px; height: 38px; }
+  .kt-chatters__arrow { width: 16px; height: 16px; }
+  .kt-chatters__arrow svg { width: 13px; height: 13px; }
 }
 
 @media (max-width: 360px) {
   .kt-chatters { margin-inline: 10px; padding: 13px 10px; }
   .kt-chatters__list { gap: 8px; }
-  .kt-chatters__card { min-height: 72px; padding: 8px; grid-template-columns: minmax(0, 1fr) 16px; gap: 5px; }
-  .kt-chatters__arrow { width: 16px; height: 16px; }
-  .kt-chatters__arrow svg { width: 13px; height: 13px; }
+  .kt-chatters__card { min-height: 72px; padding: 8px; grid-template-columns: 30px minmax(0, 1fr); gap: 5px; }
+  .kt-chatters__avatar { width: 30px; height: 30px; }
+  .kt-chatters__arrow { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
