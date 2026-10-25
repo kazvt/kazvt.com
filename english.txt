@@ -625,6 +625,7 @@ kt.admin=GROUP ADMIN
 kt.home_footer=Back to kazvt.com
 kt.live_label=LIVE
 kt.live_aria={name} is live on KICK
+kt.live_now=Live now
 kt.last_live_aria={name} was last live {time}
 kt.last_live_cached_aria=The last known public KICK VOD for {name} was {time}; later streams without a public replay may not be reflected.
 kt.last_live_retention_aria=No public VOD is available for {name}; using Kick's {days}-day retention limit as an estimate. Their last stream may be older or unknown.
