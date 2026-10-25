@@ -80,6 +80,7 @@
   justify-self: end;
   min-inline-size: 0;
   max-inline-size: 100%;
+  flex: 0 1 auto;
   flex-flow: row wrap;
   align-items: center;
   align-content: center;
@@ -87,6 +88,7 @@
   gap: 0.35rem;
   padding: 0.2rem;
   margin: 0;
+  position: static !important;
   white-space: normal !important;
   overflow: visible !important;
   vertical-align: middle;
@@ -99,57 +101,6 @@
   .kt-member-copy,
   .kt-recommendation-copy { grid-template-columns: minmax(0, 1fr) auto; }
 }
-
-/* Keep all language badges together until wrapping is needed. Allow EN/ESP to
-   wrap within their own group at very small widths or expanded text spacing. */
-.kt-member-copy > .kt-card-languages,
-.kt-recommendation-copy > .kt-card-languages {
-  flex: 0 1 auto;
-  position: static !important;
-}
-.kt-member-title > .kt-card-languages {
-  display: none !important;
-}
-.kt-member-title > .kt-card-languages {
-  /* Backward-compatible only for a placeholder before labels.js relocates it. */
-  flex: 0 1 auto;
-  flex-flow: row wrap;
-  align-items: center;
-  align-content: center;
-  justify-content: flex-start;
-  gap: 0.35rem;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  padding: 0.2rem;
-  margin: 0;
-  position: static !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  vertical-align: middle;
-}
-.kt-member-title > .kt-card-languages:empty { display: none !important; }
-
-/* A language slot temporarily in the title is moved by labels.js before paint. */
-/*
- .kt-member-title > .kt-card-languages {
-  display: inline-flex !important;
-  flex: 0 1 auto;
-  flex-flow: row wrap;
-  align-items: center;
-  align-content: center;
-  justify-content: flex-start;
-  gap: 0.35rem;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  padding: 0.2rem;
-  margin: 0;
-  position: static !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  vertical-align: middle;
-}
-.kt-member-title > .kt-card-languages:empty { display: none !important; }
-*/
 
 /* External /kt/ badge styles may absolutely position a group or badge.
    Neutralize ONLY the known, relocated language nodes, not the whole card. */
