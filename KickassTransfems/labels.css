@@ -232,6 +232,14 @@
   margin-block-start: 2px;
 }
 
+/* Member portraits share the same top inset as the identity copy. The grid
+   row can grow for wrapped labels, so centering the portrait made its top
+   margin drift much farther from the card edge than its side margin. */
+.kt-member-avatar {
+  align-self: start;
+  margin-block-start: 0;
+}
+
 /* Preserve a clear card gutter while trimming excess vertical padding. */
 .kt-member { padding: 14px 16px; }
 .kt-recommendation-link { padding: 7px 14px; }
