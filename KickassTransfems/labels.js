@@ -61,12 +61,15 @@
   function updateCardLabels() {
     for (const card of document.querySelectorAll(CARD_SELECTOR)) {
       const title = card.querySelector('.kt-member-title');
-      if (!title) continue;
-      let destination = title.querySelector(':scope > .kt-card-languages');
+      const copy = card.querySelector('.kt-member-copy, .kt-recommendation-copy');
+      const handle = copy?.querySelector(':scope > .kt-member-handle, :scope > .kt-recommendation-handle');
+      if (!title || !copy) continue;
+      let destination = copy.querySelector(':scope > .kt-card-languages');
       if (!destination) {
-        destination = document.createElement('span');
+        destination = title.querySelector(':scope > .kt-card-languages') || document.createElement('span');
         destination.className = 'kt-card-languages';
-        title.appendChild(destination);
+        if (handle?.parentElement === copy) handle.insertAdjacentElement('afterend', destination);
+        else copy.appendChild(destination);
       }
       for (const node of findLanguageNodes(card, destination)) {
         const previous = node.parentElement;
