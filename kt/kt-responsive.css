@@ -481,3 +481,12 @@
   .kt-recommendation-copy .kt-streamer-language { font-size: .42rem; }
   .kt-recommendation-handle { font-size: .56rem; }
 }
+
+/* Keep the playful sticker-like angle on every compact roster label, even when
+   container queries tighten the card layout. Transforms don't change grid sizing. */
+body[data-page="kt"] .kt-member-tag,
+body[data-page="kt"] .kt-member-badge { transform: rotate(1.6deg) translateZ(14px); }
+body[data-page="kt"] .kt-member-pronouns { transform: rotate(-1.2deg); }
+body[data-page="kt"] .kt-streamer-language { transform: rotate(1.2deg); }
+body[data-page="kt"] .kt-last-live:not([hidden]) { transform: rotate(-1.2deg); }
+body[data-page="kt"] .kt-member-new-badge { transform: rotate(-1.5deg); }
