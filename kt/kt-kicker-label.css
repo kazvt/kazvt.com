@@ -1,4 +1,6 @@
-.kt-topbar-label__group {
+body[data-page="kt"] .kt-topbar-label__group {
   font-family: var(--kt-comic-font);
   font-weight: 700 !important;
+  font-synthesis: weight;
+  margin-inline-start: clamp(3px, .28em, 5px);
 }
