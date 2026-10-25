@@ -881,10 +881,12 @@
       if (leftRank !== rightRank) return leftRank - rightRank;
 
       if (leftRank === 1) {
-        const leftEstimate = left.entry?.lastLiveSource === "retention-estimate";
-        const rightEstimate = right.entry?.lastLiveSource === "retention-estimate";
-        if (leftEstimate && rightEstimate
-          && left.entry.lastLiveEstimateDays === right.entry.lastLiveEstimateDays) return 0;
+        const hasKnownLastLive = (record) => record.entry?.lastLiveSource !== "retention-estimate"
+          && Number(record.entry?.lastLiveAt) > 0;
+        const leftHasKnownTime = hasKnownLastLive(left);
+        const rightHasKnownTime = hasKnownLastLive(right);
+        if (leftHasKnownTime !== rightHasKnownTime) return leftHasKnownTime ? -1 : 1;
+        if (!leftHasKnownTime) return 0;
         const leftTimestamp = Number(left.entry?.lastLiveAt) || 0;
         const rightTimestamp = Number(right.entry?.lastLiveAt) || 0;
         if (leftTimestamp !== rightTimestamp) return rightTimestamp - leftTimestamp;
@@ -1181,7 +1183,8 @@
 
       const locale = window.KazvtI18n?.language?.code || document.documentElement.lang || "en";
       try {
-        return new Intl.RelativeTimeFormat(locale, { numeric: "auto", style }).format(amount, unit);
+        const numeric = amount === 0 ? "auto" : "always";
+        return new Intl.RelativeTimeFormat(locale, { numeric, style }).format(amount, unit);
       } catch {
         const fallbackUnits = { second: "s", minute: "m", hour: "h", day: "d", week: "w", month: "mo", year: "y" };
         return amount === 0 ? "now" : `${Math.abs(amount)}${fallbackUnits[unit]} ago`;
@@ -1226,7 +1229,7 @@
       entry.lastLiveSource = "retention-estimate";
       entry.lastLiveEstimateDays = retentionDays;
       entry.lastLiveCheckedAt = checkedAt;
-      entry.lastLiveText.textContent = `${retentionDays}d+`;
+      entry.lastLiveText.textContent = window.KazvtI18n?.t?.("kt.last_live_long_ago") || "long ago";
       const displayName = entry.card.querySelector(".kt-member-name, .kt-recommendation-name")
         ?.textContent?.trim() || entry.slug;
       const label = window.KazvtI18n?.format?.("kt.last_live_retention_aria", {
