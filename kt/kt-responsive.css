@@ -413,7 +413,7 @@
   .kt-recommendation-link {
     min-height: 64px;
     grid-template-columns: 30px minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: auto 20px;
     justify-items: stretch;
     align-content: center;
     gap: 2px 7px;
@@ -434,7 +434,7 @@
     grid-column: 2;
     grid-row: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     align-content: center;
     justify-items: start;
     column-gap: 4px;
@@ -464,7 +464,7 @@
     justify-self: end;
     align-self: end;
     max-width: 100%;
-    margin-top: 1px;
+    margin: 0;
     padding: 2px 4px;
     font-size: .51rem;
     transform: none;
@@ -474,7 +474,7 @@
 
 @media (max-width: 360px) {
   .kt-recommendation-grid { gap: 6px; }
-  .kt-recommendation-link { min-height: 62px; grid-template-columns: 27px minmax(0, 1fr); gap: 2px 5px; padding-inline: 5px; }
+  .kt-recommendation-link { min-height: 62px; grid-template-columns: 27px minmax(0, 1fr); grid-template-rows: auto 20px; gap: 2px 5px; padding-inline: 5px; }
   .kt-recommendation-avatar { width: 27px; height: 27px; }
   .kt-recommendation-name { font-size: .7rem; }
   .kt-recommendation-copy .kt-member-pronouns { font-size: .47rem; }

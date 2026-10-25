@@ -752,7 +752,8 @@
         language.textContent = label;
         languages.append(language);
       });
-      copy.append(languages);
+      if (card.matches(".kt-recommendation-link")) title.append(languages);
+      else copy.append(languages);
 
       const tooltipLabel = card.title.trim();
       const statusRail = card.matches(".kt-member")

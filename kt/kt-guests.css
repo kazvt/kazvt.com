@@ -21,10 +21,11 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
-  min-height: 48px;
+  grid-template-columns: 40px minmax(0, 1fr) 62px;
+  grid-template-rows: auto 20px;
+  min-height: 64px;
   align-items: center;
-  gap: 10px;
+  gap: 3px 10px;
   padding: 7px 10px;
   border: 2px solid var(--kt-ink);
   background: var(--kt-paper);
@@ -58,10 +59,13 @@
 }
 
 .kt-recommendation-copy {
+  grid-column: 2;
+  grid-row: 1 / 3;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
-  column-gap: 6px;
+  align-content: center;
+  column-gap: 0;
   row-gap: 3px;
 }
 
@@ -78,6 +82,9 @@
 }
 
 .kt-recommendation-avatar {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: center;
   display: block;
   width: 40px;
   height: 40px;
@@ -101,9 +108,17 @@
 }
 
 .kt-recommendation-link > .kt-last-live:not([hidden]) {
-  right: 6px;
-  bottom: 3px;
+  position: relative;
+  inset: auto;
+  grid-column: 3;
+  grid-row: 2;
+  justify-self: end;
+  align-self: center;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
   z-index: 2;
+  transform: none;
 }
 
 .kt-recommendation-avatar--fallback {
@@ -119,6 +134,22 @@
   color: #66535e;
   font-family: var(--kt-comic-font);
   font-size: .76rem;
+}
+
+.kt-recommendation-copy .kt-member-title {
+  align-items: center;
+  gap: 5px;
+}
+
+.kt-recommendation-copy .kt-member-title > .kt-streamer-languages {
+  grid-column: auto;
+  grid-row: auto;
+  justify-self: auto;
+  margin-inline-start: 1px;
+}
+
+@media (min-width: 701px) and (max-width: 900px) {
+  .kt-recommendation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
