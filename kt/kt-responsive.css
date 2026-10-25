@@ -314,7 +314,7 @@
   .kt-member-avatar { grid-column: 1; grid-row: 1; width: 42px; height: 42px; border-width: 2px; transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; }
   .kt-member-tag,
-  .kt-member-badge { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; width: 100%; max-width: 96px; overflow-wrap: anywhere; text-align: center; transform: none; }
+  .kt-member-badge { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; width: 100%; max-width: 96px; overflow-wrap: anywhere; text-align: center; transform: rotate(.8deg) translateZ(14px); }
   .kt-member-status-rail { position: static; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 22px; }
 }
 
@@ -357,7 +357,7 @@
     line-height: 1.15;
     text-align: center;
     overflow-wrap: anywhere;
-    transform: none;
+    transform: rotate(.8deg) translateZ(14px);
   }
   .kt-member-status-rail { position: static; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 22px; }
   .kt-member-status-rail > .kt-member-new-badge { width: 26px; max-height: 22px; }
