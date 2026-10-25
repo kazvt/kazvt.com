@@ -1,0 +1,157 @@
+/* Identity-label reflow (members + guest picks).
+   Keep labels in normal flow: zoom and translated names change intrinsic width,
+   so an absolutely positioned EN/ESP pill cannot reliably share a row with
+   the name and pronouns. Small rotations are paint-only; leave room for them. */
+.kt-member-grid > li,
+.kt-recommendation-grid > li,
+.kt-member .kt-member-copy,
+.kt-recommendation-link .kt-recommendation-copy,
+.kt-member-title {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Keep every card in a grid row as tall as its tallest sibling, even
+   when only one profile has wrapped to a second or third title line. */
+.kt-member-grid > li,
+.kt-recommendation-grid > li {
+  display: flex;
+  flex-direction: column;
+}
+.kt-member-grid > li > .kt-member,
+.kt-recommendation-grid > li > .kt-recommendation-link {
+  flex: 1 1 auto;
+}
+
+/* Let a card grow if a zoomed/translated identity needs an additional line.
+   The existing min-height and decorative frame remain governed by shared CSS. */
+.kt-member,
+.kt-recommendation-link {
+  block-size: auto !important;
+  min-block-size: 7.1rem;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+/* The name, pronouns and languages participate in ONE wrapping layout. */
+.kt-member .kt-member-title,
+.kt-recommendation-link .kt-member-title {
+  display: flex !important;
+  flex-flow: row wrap !important;
+  align-items: center;
+  align-content: flex-start;
+  justify-content: flex-start;
+  gap: 0.45rem 0.65rem;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+.kt-member-title > .kt-member-name,
+.kt-member-title > .kt-recommendation-name {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+.kt-member-title > .kt-member-pronouns {
+  flex: 0 0 auto;
+  inline-size: max-content;
+  max-inline-size: 100%;
+  white-space: nowrap;
+  margin: 0 !important;
+  position: static !important;
+}
+
+/* Keep all language badges together until wrapping is needed. Allow EN/ESP to
+   wrap within their own group at very small widths or expanded text spacing. */
+.kt-member-title > .kt-card-languages {
+  display: inline-flex !important;
+  flex: 0 1 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  align-content: center;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding: 0.2rem;
+  margin: 0;
+  position: static !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  vertical-align: middle;
+}
+.kt-member-title > .kt-card-languages:empty { display: none !important; }
+
+/* External /kt/ badge styles may absolutely position a group or badge.
+   Neutralize ONLY the known, relocated language nodes, not the whole card. */
+.kt-card-languages [data-kt-language-container],
+.kt-card-languages [data-kt-language-badge] {
+  position: static !important;
+  inset: auto !important;
+  float: none !important;
+  margin: 0 !important;
+  vertical-align: middle;
+  max-inline-size: 100%;
+  white-space: normal !important;
+}
+.kt-card-languages [data-kt-language-container] {
+  display: inline-flex !important;
+  flex: 0 1 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-inline-size: 0;
+  overflow: visible !important;
+}
+.kt-card-languages [data-kt-language-badge] {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap !important;
+  /* Subtle sticker-like wonkiness, including EN and ESP. */
+  rotate: -3deg !important;
+  transform-origin: center;
+}
+.kt-card-languages [data-kt-language-badge]:nth-of-type(even) {
+  rotate: 3deg !important;
+}
+
+/* Defensive styling while external scripts are still populating a card. If
+   a recognized language chip appears before relocation, it still gets a
+   slight tilt. Once relocated, the data-kt marker rules above take over. */
+:is(.kt-member, .kt-recommendation-link)
+  :is([class*="lang-badge" i], [class*="language-badge" i],
+      [class*="lang-pill" i], [class*="language-pill" i]):not([data-kt-language-container]) {
+  rotate: -3deg !important;
+}
+
+/* Shared code sometimes leaves a now-empty wrapper where badges originated. */
+[data-kt-empty-language-container]:empty { display: none !important; }
+
+/* Recency stamps sit at the lower edge of each card in the shared UI.
+   Reserve a footer lane even when the title/handle wraps at high zoom. */
+.kt-member .kt-member-copy,
+.kt-recommendation-link .kt-recommendation-copy {
+  padding-block-end: 1.8rem;
+}
+
+.kt-member-copy > .kt-member-handle,
+.kt-recommendation-copy > .kt-recommendation-handle {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* In a single-column layout the card has room to breathe; the individual
+   labels wrap rather than shrinking their type to fit arbitrary breakpoints. */
+@media (max-width: 480px) {
+  .kt-member .kt-member-title,
+  .kt-recommendation-link .kt-member-title {
+    gap: 0.5rem;
+  }
+}
