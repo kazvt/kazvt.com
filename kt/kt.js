@@ -276,7 +276,7 @@
 
       const badge = document.createElement("img");
       badge.className = "kt-member-new-badge";
-      badge.src = "/kt/assets/new-member-burst.gif";
+      badge.src = "/kt/assets/new-member-burst-pink-purple.gif";
       badge.alt = "New member";
       badge.width = 36;
       badge.height = 24;
