@@ -539,6 +539,7 @@ kt.affiliation_network=还没有自己的小圈子。
 kt.affiliation_brand=KickassTransfems
 kt.affiliation_webring=是 KICK 上的一个小型 webring，也是由
 kt.affiliation_after=带领的外展项目。我们的社群有不少重叠，但我们仍是独立的团体。
+kt.affiliation_repository=除了外展项目，这份名单也是由社群共同维护的资料库——一本 KICK 上跨性别女性的小小“电话簿”，用账号名代替电话号码，让我们更容易找到彼此。
 kt.open_kick=打开 kazvt 的 KICK 主页
 kt.discord_kicker=社群频道
 kt.discord_status=邀请开放中

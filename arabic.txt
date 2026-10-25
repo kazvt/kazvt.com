@@ -545,6 +545,7 @@ kt.affiliation_network=لكننا لا نملك شبكة خاصة بنا بعد.
 kt.affiliation_brand=KickassTransfems
 kt.affiliation_webring=webring صغير على KICK ومشروع توعوي تقوده
 kt.affiliation_after=. مجتمعاتنا متداخلة، لكننا ما زلنا مجموعة مستقلة.
+kt.affiliation_repository=وإلى جانب جهود التواصل، تشكّل هذه القائمة مستودعًا مجتمعيًا للمعلومات — كدليل أرقام صغير للنساء العابرات على KICK، بأسماء الحسابات بدل أرقام الهواتف، ليسهل علينا العثور على بعضنا.
 kt.open_kick=افتح حساب kazvt على KICK
 kt.discord_kicker=قناة المجتمع
 kt.discord_status=الدعوة مفتوحة
