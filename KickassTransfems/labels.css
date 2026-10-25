@@ -71,6 +71,10 @@
 .kt-recommendation-copy {
   grid-template-columns: minmax(0, 1fr) auto;
 }
+.kt-recommendation-grid > li {
+  container-name: kt-guest-card;
+  container-type: inline-size;
+}
 .kt-member-copy > .kt-card-languages,
 .kt-recommendation-copy > .kt-card-languages {
   display: inline-flex !important;
@@ -95,6 +99,21 @@
 }
 .kt-member-copy > .kt-card-languages:empty,
 .kt-recommendation-copy > .kt-card-languages:empty { display: none !important; }
+
+/* Tina is the only two-language guest. When a two-column mobile card is too
+   narrow to give both the full handle and EN/ESP a readable share of one row,
+   let the chips wrap to a right-aligned line below the handle instead of
+   crushing the @handle into a vertical stack. */
+@container kt-guest-card (max-width: 170px) {
+  .kt-recommendation-copy:has(> .kt-card-languages [data-kt-language-badge]:nth-of-type(2)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kt-recommendation-copy:has(> .kt-card-languages [data-kt-language-badge]:nth-of-type(2)) > .kt-card-languages {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: end;
+  }
+}
 
 /* Reserve room for the handle and its language slot even in narrow cards. */
 @container kt-member-card (max-width: 340px) {
