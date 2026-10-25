@@ -25,10 +25,15 @@
 
 /* Let a card grow if a zoomed/translated identity needs an additional line.
    The existing min-height and decorative frame remain governed by shared CSS. */
-.kt-member,
-.kt-recommendation-link {
+.kt-member {
   block-size: auto !important;
   min-block-size: 7.1rem;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+.kt-recommendation-link {
+  block-size: auto !important;
+  min-block-size: 5rem;
   max-inline-size: 100%;
   box-sizing: border-box;
 }
@@ -206,15 +211,24 @@
   }
 }
 
-/* Restore a clear inner gutter without changing the compact card layout. */
+/* Keep guest portraits anchored in the upper-left corner with a clear inset. */
+.kt-recommendation-avatar {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  justify-self: start;
+  margin-block-start: 2px;
+}
+
+/* Preserve a clear card gutter while trimming excess vertical padding. */
 .kt-member { padding: 14px 16px; }
-.kt-recommendation-link { padding: 10px 14px; }
+.kt-recommendation-link { padding: 7px 14px; }
 .kt-member-status-rail { right: 10px; bottom: 6px; left: 10px; }
 .kt-member-new-badge { left: 10px; bottom: 7px; }
 
 @media (max-width: 700px) {
   .kt-member { padding: 12px; }
-  .kt-recommendation-link { padding: 9px 10px 8px; }
+  .kt-recommendation-link { padding: 7px 10px; }
 }
 
 @container kt-member-card (max-width: 480px) {
@@ -226,7 +240,7 @@
 }
 
 @media (max-width: 360px) {
-  .kt-recommendation-link { padding: 8px 9px 7px; }
+  .kt-recommendation-link { padding: 7px 9px; }
 }
 
 /* Keep the mobile cards compact; they use an in-flow status/timestamp row, so
