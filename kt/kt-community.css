@@ -529,7 +529,7 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
   color: inherit;
   direction: ltr;
   font-family: var(--kt-comic-font);
-  font-size: clamp(.72rem, 1.15vw, .94rem);
+  font-size: clamp(.68rem, .95vw, .88rem);
   font-weight: 700;
   line-height: 1.16;
   overflow-wrap: anywhere;
@@ -589,18 +589,18 @@ html[dir="rtl"] .kt-chatters__arrow { transform: scaleX(-1); }
 @media (max-width: 520px) {
   .kt-chatters { margin: 0 12px 34px; padding: 16px 13px; }
   .kt-chatters__heading { margin-bottom: 17px; }
-  .kt-chatters__card { min-height: 76px; padding: 10px; grid-template-columns: 38px minmax(0, 1fr) 16px; gap: 5px 6px; }
-  .kt-chatters__avatar { width: 38px; height: 38px; }
-  .kt-chatters__arrow { width: 16px; height: 16px; }
-  .kt-chatters__arrow svg { width: 13px; height: 13px; }
+  .kt-chatters__card { min-height: 72px; padding: 8px; grid-template-columns: 32px minmax(0, 1fr); gap: 5px; }
+  .kt-chatters__avatar { width: 32px; height: 32px; }
+  .kt-chatters__arrow { display: none; }
+  .kt-chatters__handle { font-size: clamp(.56rem, 2.9vw, .72rem); }
 }
 
 @media (max-width: 360px) {
   .kt-chatters { margin-inline: 10px; padding: 13px 10px; }
   .kt-chatters__list { gap: 8px; }
-  .kt-chatters__card { min-height: 72px; padding: 8px; grid-template-columns: 30px minmax(0, 1fr); gap: 5px; }
-  .kt-chatters__avatar { width: 30px; height: 30px; }
-  .kt-chatters__arrow { display: none; }
+  .kt-chatters__card { min-height: 68px; padding: 7px 6px; grid-template-columns: 24px minmax(0, 1fr); gap: 4px; }
+  .kt-chatters__avatar { width: 24px; height: 24px; }
+  .kt-chatters__handle { font-size: .56rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
