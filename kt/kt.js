@@ -752,6 +752,8 @@
         language.textContent = label;
         languages.append(language);
       });
+      // Keep guest language tags beside the name/pronouns, well above the
+      // card's separate last-live slot. Member tags retain their handle row.
       if (card.matches(".kt-recommendation-link")) title.append(languages);
       else copy.append(languages);
 
