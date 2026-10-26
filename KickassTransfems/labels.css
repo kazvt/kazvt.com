@@ -246,7 +246,7 @@
   --kt-member-safe-inset: clamp(14px, 2.4cqi, 18px);
   box-sizing: border-box;
   min-block-size: calc(var(--kt-member-avatar-size) + 24px);
-  grid-template-columns: 24px var(--kt-member-avatar-size) minmax(0, 1fr) 24px;
+  grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr) 24px;
   grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
   align-items: start;
   align-content: center;
@@ -267,11 +267,15 @@
 }
 
 .kt-member-number {
+  position: absolute;
   display: flex;
-  grid-column: 1;
-  grid-row: 1;
-  align-self: center;
-  justify-self: center;
+  inset-inline-start: 2px;
+  inset-block-start: 50%;
+  inline-size: calc(var(--kt-member-safe-inset) - 4px);
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .kt-member-avatar-wrap {
@@ -288,6 +292,8 @@
   box-sizing: border-box;
   aspect-ratio: 1;
   overflow: visible;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .kt-member-avatar-wrap > .kt-member-avatar {
@@ -325,7 +331,7 @@
 .kt-member-info {
   position: relative;
   display: grid;
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 1;
   grid-template-columns: minmax(0, 1fr) minmax(102px, 124px);
   align-self: stretch;
@@ -396,7 +402,7 @@
 
 .kt-member-arrow {
   display: inline-flex;
-  grid-column: 4;
+  grid-column: 3;
   grid-row: 1;
   align-self: start;
   justify-self: end;
