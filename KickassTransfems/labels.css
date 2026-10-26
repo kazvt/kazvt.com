@@ -531,8 +531,45 @@
   }
 }
 
-/* Last-resort reflow for cards too narrow to hold a portrait and copy side by side.
-   This is deliberately after the viewport rules so the per-card query wins. */
+/* Keep tight two-column cards on one repeatable compact composition:
+   portrait + identity, descriptor row, then status footer. */
+@container kt-member-card (max-width: 340px) {
+  .kt-member {
+    min-block-size: 0;
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 18px;
+    align-content: start;
+    gap: 3px 5px;
+    padding: 6px 8px;
+  }
+  .kt-member-avatar-wrap { grid-column: 1; grid-row: 1; }
+  .kt-member-info { display: contents; }
+  .kt-member-info > .kt-member-copy {
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: 0;
+    padding: 0;
+  }
+  .kt-member-info > .kt-member-tag,
+  .kt-member-info > .kt-member-badge {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: end;
+    align-self: start;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .kt-member-status-rail {
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    height: 18px;
+  }
+}
+
+/* Tightest cards also reduce only the supporting type scale; portraits stay
+   proportionally large while long handles and labels retain room to wrap. */
 @container kt-member-card (max-width: 140px) {
   .kt-member {
     --kt-member-avatar-size: clamp(44px, 40cqi, 56px);
