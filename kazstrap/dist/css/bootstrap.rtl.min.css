@@ -139,11 +139,14 @@
   .btn:not(.btn-link) {
     transition: none;
   }
-  .btn:not(.btn-link):hover,
-  .btn:not(.btn-link):active,
-  .btn:not(.btn-link).active,
-  .btn:not(.btn-link).show,
-  .btn-check:checked + .btn:not(.btn-link) {
+  .btn:not(.btn-link):hover:not(:focus-visible),
+  .btn:not(.btn-link):active:not(:focus-visible),
+  .btn:not(.btn-link).active:not(:focus-visible),
+  .btn:not(.btn-link).show:not(:focus-visible),
+  .btn-check:checked + .btn:not(.btn-link):not(:focus-visible),
+  .btn:not(.btn-link):active:focus-visible,
+  .btn:not(.btn-link).active:focus-visible,
+  .btn:not(.btn-link).show:focus-visible {
     transform: none;
   }
 }
