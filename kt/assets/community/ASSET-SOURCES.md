@@ -2,22 +2,22 @@
 
 The supplied PNG artwork in this directory was copied from files or URLs provided by the site owner for this page:
 
-- `discord-trans-flag-mascot.png` — supplied local Discord/trans-flag illustration.
-- `trans-kitty.png` — https://cdn3.emoji.gg/emojis/1407-trans-kitty.png
-- `transgender-pride-heart.png` — https://cdn3.emoji.gg/emojis/1717-transgender-pride-heart.png
-- `welcome-trans-buddy.png` — supplied local welcome illustration (`clipboard_20261024_220018_bgless.png`).
-- `trans-hearts.png` — https://cdn3.emoji.gg/emojis/Hearts_Trans.png
-- `trans-flag-emoji.png` — https://www.customemoji.com/images/emojis/lgbtq/trans-flag.png
-- `trans-pride-sprite.png` — https://emoji.discadia.com/emojis/7e83f857-66aa-45c8-8508-980a326abe5f.png
-- `trans-ghost.png` — supplied local illustration (`clipboard_20261024_220157_bgless.png`).
-- `translesbian-pixelheart.png` — https://cdn3.emoji.gg/emojis/4823-pixelheart-translesbian.png
+- `discord-trans-flag-mascot.png` - supplied local Discord/trans-flag illustration.
+- `trans-kitty.png` - https://cdn3.emoji.gg/emojis/1407-trans-kitty.png
+- `transgender-pride-heart.png` - https://cdn3.emoji.gg/emojis/1717-transgender-pride-heart.png
+- `welcome-trans-buddy.png` - supplied local welcome illustration (`clipboard_20261024_220018_bgless.png`).
+- `trans-hearts.png` - https://cdn3.emoji.gg/emojis/Hearts_Trans.png
+- `trans-flag-emoji.png` - https://www.customemoji.com/images/emojis/lgbtq/trans-flag.png
+- `trans-pride-sprite.png` - https://emoji.discadia.com/emojis/7e83f857-66aa-45c8-8508-980a326abe5f.png
+- `trans-ghost.png` - supplied local illustration (`clipboard_20261024_220157_bgless.png`).
+- `translesbian-pixelheart.png` - https://cdn3.emoji.gg/emojis/4823-pixelheart-translesbian.png
 
 The animated flag and heart GIFmojis in `pride-gifmojis/` were copied from the site owner's local `Pride_GIFmojis_by_Violet_violxiv` folder and are used as small decorative accents. Their original filenames are preserved; redistribution terms were not independently verified.
 
 The two small decorative loops were downloaded from AnimatEmojis and use Microsoft Fluent Emoji artwork as their source:
 
-- `fluent-transgender-flag.gif` — https://animatemojis.com/emoji/fluent-transgender-flag
-- `fluent-pink-heart.gif` — https://animatemojis.com/emoji/fluent-pink-heart
+- `fluent-transgender-flag.gif` - https://animatemojis.com/emoji/fluent-transgender-flag
+- `fluent-pink-heart.gif` - https://animatemojis.com/emoji/fluent-pink-heart
 
 The underlying Fluent Emoji artwork is distributed under the MIT License. The animated GIF derivatives are locally stored and used only as decorative page art; the site does not hot-link the source files.
 

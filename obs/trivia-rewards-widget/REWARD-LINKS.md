@@ -28,7 +28,7 @@ The IDs are public, shareable identifiers, not passwords. Anyone can copy a know
 
 Previously issued JWE links remain readable for compatibility, but only when their decrypted username and artwork content ID exactly match a public assignment. This compatibility path cannot create a second assignment. New links and the OBS widget no longer encrypt data in the browser or put a decryption key in the URL.
 
-## What this link proves—and what it does not
+## What this link proves-and what it does not
 
 This is a self-contained share card for public art, not a login token or a way to redeem, claim, or spend anything. The image and assignment are public. Copying an existing reward link opens the already-recorded award; inventing a different ID does not create another award because it has no matching registry record.
 

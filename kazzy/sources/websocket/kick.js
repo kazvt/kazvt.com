@@ -2339,9 +2339,9 @@ function updateInputsFromState() {
             }
         } else {
             if (isTextOnlyMode()) {
-                els.channelLabel.textContent = 'Channel: —';
+                els.channelLabel.textContent = 'Channel: -';
             } else {
-                els.channelLabel.innerHTML = 'Channel: <span class="status-subtle">—</span>';
+                els.channelLabel.innerHTML = 'Channel: <span class="status-subtle">-</span>';
             }
         }
     }
@@ -2700,7 +2700,7 @@ function updateKickViewerCountDisplay(count) {
         return;
     }
     if (!Number.isFinite(count)) {
-        els.viewerCount.textContent = 'Viewers: —';
+        els.viewerCount.textContent = 'Viewers: -';
         els.viewerCount.className = 'status-chip warning';
         return;
     }
@@ -3083,7 +3083,7 @@ function initLocalSocketBridge() {
 
 async function connectLocalSocket(force = false) {
     if (!supportsLocalSocket()) return;
-    // Our Pusher handles chat — don't start ninjafy's duplicate WebSocket
+    // Our Pusher handles chat - don't start ninjafy's duplicate WebSocket
     if (state.socket.pusherWs || state.socket.pusherStatus === 'connecting') return;
     if (!state.channelSlug) return;
     if (!force && state.socket.status === 'connected') return;
@@ -3261,7 +3261,7 @@ function handlePusherMessage(event) {
         state.socket.pusherPingTimer = setInterval(() => {
             sendPusherFrame('pusher:ping', {});
         }, Math.min(timeout * 1000 * 0.75, PUSHER_PING_INTERVAL_MS));
-        // Pusher is now handling chat — reconnect bridge with noChat if needed
+        // Pusher is now handling chat - reconnect bridge with noChat if needed
         syncBridgeChatMode();
         return;
     }
@@ -3325,7 +3325,7 @@ function connectPusherSocket() {
         state.socket.status = 'disconnected';
         updateSocketState({ status: 'disconnected' });
         schedulePusherReconnect();
-        // Pusher down — reconnect bridge with chat enabled as fallback
+        // Pusher down - reconnect bridge with chat enabled as fallback
         syncBridgeChatMode();
     });
     state.socket.pusherWs.addEventListener('error', () => {
@@ -3398,7 +3398,7 @@ async function resolveChannelForPusher() {
             }
         }
     } catch (_) {
-        // Cloudflare block or CORS — expected, not an error
+        // Cloudflare block or CORS - expected, not an error
     }
 
     log('Could not resolve chatroomId. Sign in or pass ?chatroom_id= URL param.', 'warning');
@@ -3906,7 +3906,7 @@ async function updateKickStreamInfoFromInputs() {
         body: JSON.stringify(payload)
     });
     log('Kick stream title/category updated.', 'info');
-    // Reflect submitted values immediately — the Kick API caches stale data
+    // Reflect submitted values immediately - the Kick API caches stale data
     // after a PATCH so an immediate re-fetch would overwrite the inputs with
     // old values.  After a short delay the cache should have cleared.
     if (els.streamTitle && title) els.streamTitle.value = title;
@@ -4869,10 +4869,10 @@ function syncBridgeChatMode() {
     // If Pusher just connected and bridge has chat enabled, reconnect with noChat
     // If Pusher just disconnected and bridge has chat disabled, reconnect with chat
     if (pusherActive && !bridgeChatDisabled && state.bridge.status === 'connected') {
-        log('Pusher connected — reconnecting bridge with noChat.');
+        log('Pusher connected - reconnecting bridge with noChat.');
         connectBridge();
     } else if (!pusherActive && bridgeChatDisabled && state.bridge.status === 'connected') {
-        log('Pusher disconnected — reconnecting bridge with chat fallback.');
+        log('Pusher disconnected - reconnecting bridge with chat fallback.');
         connectBridge();
     }
 }
@@ -5256,7 +5256,7 @@ function processBridgeEvent(packet, isReplay = false) {
 
 function handleBridgeEvent(packet) {
     if (!packet) return;
-    // Socket-sourced events are already scoped to the correct chatroom — skip queue
+    // Socket-sourced events are already scoped to the correct chatroom - skip queue
     if (state.channelId == null && state.channelSlug && packet.source !== 'socket') {
         const type = packet.type || packet.body?.event || 'unknown';
         if (pendingBridgeEvents.length < MAX_PENDING_EVENTS) {
@@ -6408,7 +6408,7 @@ async function sendChatMessage() {
         console.error('Chat send failed', err);
         const status = getKickApiErrorStatus(err);
         if (status === 400) {
-            setChatStatus('Kick rejected the message — check account permissions.', 'error');
+            setChatStatus('Kick rejected the message - check account permissions.', 'error');
         } else if (status === 401 || status === 403) {
             setChatStatus('Authentication expired. Please sign in again.', 'error');
         } else if (/failed to fetch/i.test(err?.message || '')) {
@@ -6441,7 +6441,7 @@ async function sendChatPayload(content, messageType, isRetry) {
         });
     } catch (err) {
         if (!isRetry && getKickApiErrorStatus(err) === 400) {
-            log('Chat send got 400 — retrying with fresh channel resolution.', 'warning');
+            log('Chat send got 400 - retrying with fresh channel resolution.', 'warning');
             return sendChatPayload(content, messageType, true);
         }
         throw err;

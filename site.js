@@ -1871,7 +1871,7 @@ function initializeGuestbookWidget() {
     let textNode;
     while ((textNode = walker.nextNode())) {
       const originalText = textNode.nodeValue;
-      const normalizedText = originalText.replace(/\s*[·•]\s*/g, " - ");
+      const normalizedText = originalText.replace(/\s*[-•]\s*/g, " - ");
       // Avoid emitting another characterData mutation when nothing changed.
       if (normalizedText !== originalText) textNode.nodeValue = normalizedText;
     }
@@ -1892,7 +1892,7 @@ function initializeGuestbookWidget() {
     name_label: nameLabel,
     content_label: messageLabel,
     submit: "stick it in!",
-    no_comments_msg: "no scribbles yet — be the first!",
+    no_comments_msg: "no scribbles yet - be the first!",
     add: "sign the guestbook",
     again: "leave another note",
     anonymous: "someone",

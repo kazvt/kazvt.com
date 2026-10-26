@@ -1,5 +1,5 @@
 /*
-  WIFEY MIX-8 — filename/folder tag rules
+  WIFEY MIX-8 - filename/folder tag rules
   ----------------------------------------
   This is the actual parser vocabulary, not just documentation.
   Add/remove aliases here and index.html will use them on the next page load.

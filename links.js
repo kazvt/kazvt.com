@@ -1,5 +1,5 @@
 // ============================================================
-// KAZVT REDIRECTS — EDIT EVERY DESTINATION / SHORT PATH / LOGO HERE
+// KAZVT REDIRECTS - EDIT EVERY DESTINATION / SHORT PATH / LOGO HERE
 // ============================================================
 // All user-visible copy belongs in the active language .txt file.
 // `shortPath: "yt"` means kazvt.com/yt/.

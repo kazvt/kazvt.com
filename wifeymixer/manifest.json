@@ -136,37 +136,37 @@
   "file_info": {
     "!1index - Copy.html": {
       "type": "file",
-      "size_bytes": 683346,
-      "modified_ns": 1792583086085261300,
-      "modified_ns_exact": "1792583086085261300",
+      "size_bytes": 683338,
+      "modified_ns": 1793046474099951600,
+      "modified_ns_exact": "1793046474099951600",
       "file_identity": "2725177794:5629499534438497"
     },
     "AUTO-GAIN-README.txt": {
       "type": "file",
-      "size_bytes": 2120,
-      "modified_ns": 1787667345506015700,
-      "modified_ns_exact": "1787667345506015700",
+      "size_bytes": 2118,
+      "modified_ns": 1793046474078064200,
+      "modified_ns_exact": "1793046474078064200",
       "file_identity": "2725177794:5348024557543048"
     },
     "auto-gain-references.js": {
       "type": "file",
-      "size_bytes": 4800,
-      "modified_ns": 1787667343422611500,
-      "modified_ns_exact": "1787667343422611500",
+      "size_bytes": 4798,
+      "modified_ns": 1793046474083987300,
+      "modified_ns_exact": "1793046474083987300",
       "file_identity": "2725177794:8444249301360365"
     },
     "filename-tag-rules.js": {
       "type": "file",
-      "size_bytes": 9578,
-      "modified_ns": 1787667345264882600,
-      "modified_ns_exact": "1787667345264882600",
+      "size_bytes": 9576,
+      "modified_ns": 1793046474084566200,
+      "modified_ns_exact": "1793046474084566200",
       "file_identity": "2725177794:10696049115209446"
     },
     "index.html": {
       "type": "file",
-      "size_bytes": 692091,
-      "modified_ns": 1792583056803767600,
-      "modified_ns_exact": "1792583056803767600",
+      "size_bytes": 692083,
+      "modified_ns": 1793046474082913600,
+      "modified_ns_exact": "1793046474082913600",
       "file_identity": "2725177794:3940649674101035"
     },
     "instrument-icons.json": {
@@ -1447,16 +1447,16 @@
     },
     "outputs/wifeymixer-dist-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
-      "size_bytes": 703812,
-      "modified_ns": 1792577864405013200,
-      "modified_ns_exact": "1792577864405013200",
+      "size_bytes": 703804,
+      "modified_ns": 1793046474077552400,
+      "modified_ns_exact": "1793046474077552400",
       "file_identity": "2725177794:281474977577140"
     },
     "outputs/wifeymixer-index-before-cpu-followup-2026-09-25.html": {
       "type": "file",
-      "size_bytes": 690235,
-      "modified_ns": 1792577864408910900,
-      "modified_ns_exact": "1792577864408910900",
+      "size_bytes": 690227,
+      "modified_ns": 1793046474071584400,
+      "modified_ns_exact": "1793046474071584400",
       "file_identity": "2725177794:281474977577139"
     },
     "sf2-procedural.js": {
@@ -1772,9 +1772,9 @@
     },
     "soundfont-icons.js": {
       "type": "file",
-      "size_bytes": 30113,
-      "modified_ns": 1787667345241793000,
-      "modified_ns_exact": "1787667345241793000",
+      "size_bytes": 30111,
+      "modified_ns": 1793046474044472000,
+      "modified_ns_exact": "1793046474044472000",
       "file_identity": "2725177794:3377699720976688"
     },
     "soundfonts": {
@@ -1878,44 +1878,44 @@
     },
     "wifeymixer_dist/!index - Copy.html": {
       "type": "file",
-      "size_bytes": 696793,
-      "modified_ns": 1792583086089096200,
-      "modified_ns_exact": "1792583086089096200",
+      "size_bytes": 696785,
+      "modified_ns": 1793046474021611700,
+      "modified_ns_exact": "1793046474021611700",
       "file_identity": "2725177794:1407374884377424"
     },
     "wifeymixer_dist/AUTO-GAIN-README.txt": {
       "type": "file",
-      "size_bytes": 2120,
-      "modified_ns": 1788017071804811100,
-      "modified_ns_exact": "1788017071804811100",
+      "size_bytes": 2118,
+      "modified_ns": 1793046473997254100,
+      "modified_ns_exact": "1793046473997254100",
       "file_identity": "2725177794:2251799814509368"
     },
     "wifeymixer_dist/auto-gain-references.js": {
       "type": "file",
-      "size_bytes": 4800,
-      "modified_ns": 1788017071837149300,
-      "modified_ns_exact": "1788017071837149300",
+      "size_bytes": 4798,
+      "modified_ns": 1793046473996741200,
+      "modified_ns_exact": "1793046473996741200",
       "file_identity": "2725177794:1125899907666762"
     },
     "wifeymixer_dist/filename-tag-rules.js": {
       "type": "file",
-      "size_bytes": 9578,
-      "modified_ns": 1788017071818066500,
-      "modified_ns_exact": "1788017071818066500",
+      "size_bytes": 9576,
+      "modified_ns": 1793046473996195100,
+      "modified_ns_exact": "1793046473996195100",
       "file_identity": "2725177794:2251799814509381"
     },
     "wifeymixer_dist/hardware-polish.css": {
       "type": "file",
-      "size_bytes": 17902,
-      "modified_ns": 1788017071910067200,
-      "modified_ns_exact": "1788017071910067200",
+      "size_bytes": 17900,
+      "modified_ns": 1793046473995685300,
+      "modified_ns_exact": "1793046473995685300",
       "file_identity": "2725177794:1688849861088077"
     },
     "wifeymixer_dist/index.html": {
       "type": "file",
-      "size_bytes": 705668,
-      "modified_ns": 1792583056807323100,
-      "modified_ns_exact": "1792583056807323100",
+      "size_bytes": 705660,
+      "modified_ns": 1793046473970999900,
+      "modified_ns_exact": "1793046473970999900",
       "file_identity": "2725177794:1125899907666764"
     },
     "wifeymixer_dist/instrument-icons.json": {
@@ -1941,9 +1941,9 @@
     },
     "wifeymixer_dist/soundfont-icons.js": {
       "type": "file",
-      "size_bytes": 30113,
-      "modified_ns": 1788017071858646000,
-      "modified_ns_exact": "1788017071858646000",
+      "size_bytes": 30111,
+      "modified_ns": 1793046473964790400,
+      "modified_ns_exact": "1793046473964790400",
       "file_identity": "2725177794:1125899907666763"
     },
     "wifeymixer_dist/strip-fx-compressor-worklet.js": {
@@ -1962,9 +1962,9 @@
     },
     "wifeymixer_dist/tempo-stretch-engine.js": {
       "type": "file",
-      "size_bytes": 10187,
-      "modified_ns": 1788017071835502600,
-      "modified_ns_exact": "1788017071835502600",
+      "size_bytes": 10185,
+      "modified_ns": 1793046473933941700,
+      "modified_ns_exact": "1793046473933941700",
       "file_identity": "2725177794:1125899907666761"
     },
     "wifeymixer_dist/tests": {

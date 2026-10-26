@@ -1,4 +1,4 @@
-WIFEY MIX-8 — AGC / AUTO-GAIN COMPENSATION
+WIFEY MIX-8 - AGC / AUTO-GAIN COMPENSATION
 
 The bundled MP3 playlist stems were scanned offline. Their measured full-file RMS
 levels are stored in auto-gain-references.js.
