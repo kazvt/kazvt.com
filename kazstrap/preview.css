@@ -1,4 +1,9 @@
-/* First Kazstrap customization: use square corners throughout Bootstrap. */
+/* First Kazstrap customization: square corners throughout Bootstrap. */
 *, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+/* Keep the hero panel square even if its markup changes later. */
+.kaz-hero-panel {
   border-radius: 0 !important;
 }
