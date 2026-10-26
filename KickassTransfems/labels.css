@@ -534,7 +534,7 @@
 
 /* Once the card's information lane gets compact, put its decorative tag on a
    second line so the larger identity and external-link cue stay separate. */
-@container kt-member-card (min-width: 341px) and (max-width: 380px) {
+@container kt-member-card (max-width: 380px) {
   .kt-member-info {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
