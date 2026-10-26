@@ -237,10 +237,9 @@
   .kt-recommendation-link { min-block-size: 64px; }
 }
 
-/* Canonical member-card composition. The earlier shared stylesheet still
-   contains older viewport rules; this final layer gives the actual, JS-wrapped
-   card structure one predictable set of tracks. Container queries key the
-   composition to each card, so zoom and narrow embeds behave like phones. */
+/* Canonical member-card composition. Container queries key the composition to
+   each card, so zoom and narrow embeds behave like phones. The ordinal sits in
+   the safe inset instead of reserving a column before the portrait. */
 .kt-member {
   --kt-member-avatar-size: clamp(90px, 22cqi, 116px);
   --kt-member-safe-inset: clamp(14px, 2.4cqi, 18px);
@@ -272,9 +271,11 @@
   inset-inline-start: 2px;
   inset-block-start: 50%;
   inline-size: calc(var(--kt-member-safe-inset) - 4px);
+  writing-mode: horizontal-tb;
+  white-space: nowrap;
   align-items: center;
   justify-content: center;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(90deg);
   pointer-events: none;
 }
 
