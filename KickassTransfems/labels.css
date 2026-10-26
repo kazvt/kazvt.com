@@ -287,3 +287,171 @@
   .kt-member .kt-member-title { grid-column: 1 / -1; }
   .kt-member .kt-member-title > .kt-member-name { flex: 0 0 auto; }
 }
+
+/* Portrait-forward member cards. Size and type scale from each card so the
+   two-column roster keeps a consistent visual rhythm from phone to desktop. */
+.kt-member {
+  --kt-member-avatar-size: clamp(48px, 6vw, 92px);
+  min-block-size: 0;
+  padding: 8px 12px;
+}
+
+@supports (width: 1cqi) {
+  .kt-member {
+    --kt-member-avatar-size: clamp(48px, 20cqi, 92px);
+    gap: clamp(5px, 1.2cqi, 10px);
+    padding: clamp(6px, 1.7cqi, 10px) clamp(8px, 2.6cqi, 14px);
+  }
+
+  .kt-member-name { font-size: clamp(1rem, 4.6cqi, 1.55rem); }
+  .kt-member-handle { font-size: clamp(.62rem, 2.8cqi, .86rem); }
+  .kt-member-pronouns { font-size: clamp(.59rem, 2.4cqi, .72rem); }
+  .kt-streamer-language { font-size: clamp(.53rem, 2.05cqi, .64rem); }
+  .kt-member-tag,
+  .kt-member-badge { font-size: clamp(.57rem, 1.95cqi, .7rem); }
+  .kt-last-live:not([hidden]) { font-size: clamp(.55rem, 2cqi, .65rem); }
+}
+
+.kt-member {
+  min-block-size: calc(var(--kt-member-avatar-size) + 24px);
+  align-content: center;
+}
+
+.kt-member-avatar-wrap {
+  position: relative;
+  z-index: 3;
+  display: block;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  justify-self: start;
+  flex: 0 0 auto;
+  inline-size: var(--kt-member-avatar-size);
+  block-size: var(--kt-member-avatar-size);
+  aspect-ratio: 1;
+  overflow: visible;
+}
+
+.kt-member-avatar-wrap > .kt-member-avatar {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  aspect-ratio: 1;
+  border-width: clamp(2px, .45vw, 3px);
+  object-fit: cover;
+}
+
+.kt-member-avatar-wrap > .kt-member-new-badge {
+  position: absolute !important;
+  z-index: 6;
+  inset-inline-start: -5px;
+  inset-block-end: -3px;
+  display: block;
+  inline-size: clamp(22px, 7cqi, 34px);
+  max-inline-size: 58%;
+  max-block-size: 55%;
+  block-size: auto;
+  margin: 0;
+  object-fit: contain;
+  pointer-events: none;
+  transform: rotate(-6deg);
+  transform-origin: bottom left;
+  filter: drop-shadow(1px 1px 0 rgb(43 32 40 / 65%));
+}
+
+.kt-member .kt-member-copy {
+  min-inline-size: 0;
+  padding-block-end: 16px;
+}
+
+.kt-member-title { gap: .4rem .6rem; }
+.kt-member-tag,
+.kt-member-badge {
+  padding: 3px 6px;
+  line-height: 1.16;
+}
+
+.kt-member-status-rail {
+  height: 20px;
+  right: 9px;
+  bottom: 3px;
+  left: 9px;
+}
+
+.kt-member-status-rail > .kt-live-sticker {
+  width: clamp(44px, 12cqi, 60px);
+  max-width: 46%;
+}
+
+.kt-last-live:not([hidden]) {
+  gap: 4px;
+  padding: 3px 6px;
+}
+.kt-last-live:not([hidden]) svg { width: 12px; height: 12px; flex-basis: 12px; }
+
+/* Cards in this width band keep the timestamp in a predictable bottom lane,
+   while the portrait remains the height anchor for the card itself. */
+@container kt-member-card (min-width: 341px) and (max-width: 480px) {
+  .kt-member {
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
+    align-content: center;
+    padding-block: 8px;
+  }
+  .kt-member .kt-member-copy { padding-block-end: 18px; }
+  .kt-member-status-rail {
+    position: absolute;
+    grid-row: auto;
+    height: 19px;
+  }
+  .kt-member-avatar-wrap { grid-column: 1; grid-row: 1; }
+}
+
+/* Very narrow two-column cards preserve the earlier information order: the
+   descriptor sits beneath the identity on the right, and the footer stays a
+   dedicated row. The overlay badge never takes a grid cell. */
+@container kt-member-card (max-width: 340px) {
+  .kt-member {
+    min-block-size: 0;
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 18px;
+    align-content: start;
+    gap: 4px 5px;
+    padding: 6px 8px;
+  }
+  .kt-member-avatar-wrap { grid-column: 1; grid-row: 1; }
+  .kt-member .kt-member-copy { padding-block-end: 0; }
+  .kt-member-tag,
+  .kt-member-badge {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    align-self: start;
+    width: fit-content;
+    max-width: 100%;
+    padding: 2px 4px;
+    text-align: end;
+    overflow-wrap: anywhere;
+  }
+  .kt-member-status-rail {
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    height: 18px;
+  }
+  .kt-member-status-rail > .kt-live-sticker { width: 38px; max-width: 42%; }
+  .kt-member-status-rail > .kt-last-live:not([hidden]) {
+    max-width: calc(100% - 38px);
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .kt-member-avatar-wrap { grid-column: 1; grid-row: 1; }
+}
+
+@supports not (width: 1cqi) {
+  .kt-member-avatar-wrap > .kt-member-avatar { border-width: 2px; }
+  .kt-member-avatar-wrap > .kt-member-new-badge { width: 28px; }
+  .kt-member-status-rail > .kt-live-sticker { width: 48px; }
+}
