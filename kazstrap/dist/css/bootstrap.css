@@ -12045,4 +12045,19 @@ textarea.form-control-lg {
   }
 }
 
+/* Kazstrap: square corners across the full Bootstrap build. */
+:root {
+  --bs-border-radius: 0;
+  --bs-border-radius-sm: 0;
+  --bs-border-radius-lg: 0;
+  --bs-border-radius-xl: 0;
+  --bs-border-radius-xxl: 0;
+  --bs-border-radius-pill: 0;
+}
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+.rounded, [class*="rounded-"] {
+  border-radius: 0 !important;
+}
 /*# sourceMappingURL=bootstrap.css.map */
