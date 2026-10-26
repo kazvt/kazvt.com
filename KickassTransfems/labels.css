@@ -409,7 +409,7 @@
 
 @container kt-member-card (min-width: 341px) and (max-width: 480px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(78px, 23cqi, 108px);
+    --kt-member-avatar-size: clamp(78px, 24.7cqi, 108px);
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
     align-content: center;
@@ -517,7 +517,7 @@
    proportionally large while long handles and labels retain room to wrap. */
 @container kt-member-card (max-width: 140px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(44px, 40cqi, 56px);
+    --kt-member-avatar-size: clamp(44px, 42cqi, 60px);
     min-block-size: 0;
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 18px;
