@@ -337,7 +337,7 @@
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr) minmax(70px, 96px);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 16px;
     align-content: center;
-    gap: 1px 6px;
+    gap: 3px 6px;
     padding: 4px 8px;
     border-width: 2px;
   }
@@ -382,7 +382,7 @@
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 14px;
     align-content: start;
-    gap: 1px 4px;
+    gap: 3px 4px;
     padding: 3px 6px;
   }
 
