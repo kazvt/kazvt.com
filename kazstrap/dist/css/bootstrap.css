@@ -12060,19 +12060,16 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: offset pop-art outlines and layered button shadows. */
+/* Kazstrap: compact pop-art button outlines and shadows. */
 .btn {
   --kaz-btn-pop-color: var(--bs-btn-bg);
   --kaz-btn-pop-dark: color-mix(in srgb, var(--kaz-btn-pop-color) 62%, #171126);
   --kaz-btn-pop-light: color-mix(in srgb, var(--kaz-btn-pop-color) 48%, white);
-  --kaz-btn-pop-glow: color-mix(in srgb, var(--kaz-btn-pop-color) 24%, transparent);
   position: relative;
-
   isolation: isolate;
   box-shadow:
-    6px 6px 0 -1px var(--kaz-btn-pop-dark),
-    12px 12px 0 -2px var(--kaz-btn-pop-light),
-    19px 22px 15px -6px var(--kaz-btn-pop-glow);
+    4px 4px 0 -1px var(--kaz-btn-pop-dark),
+    8px 8px 0 -2px var(--kaz-btn-pop-light);
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s cubic-bezier(.2, .8, .2, 1);
 }
 .btn::before,
@@ -12082,18 +12079,18 @@ textarea.form-control-lg {
   z-index: -1;
   pointer-events: none;
   background: transparent;
-  border: 2px solid;
+  border: 1px solid;
   transition: border-color 0.15s ease-in-out;
 }
 .btn::before {
-  inset: -8px;
+  inset: -4px;
   border-color: var(--kaz-btn-pop-dark);
-  transform: translate(3px, 3px);
+  transform: translate(1px, 1px);
 }
 .btn::after {
-  inset: -18px;
+  inset: -9px;
   border-color: var(--kaz-btn-pop-light);
-  transform: translate(8px, 8px);
+  transform: translate(4px, 4px);
 }
 .btn[class*="btn-outline-"],
 .btn.btn-link {
@@ -12101,7 +12098,7 @@ textarea.form-control-lg {
 }
 .btn:hover {
   --kaz-btn-pop-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
-  transform: translate(-2px, -2px);
+  transform: translate(-1px, -1px);
 }
 .btn[class*="btn-outline-"]:hover {
   --kaz-btn-pop-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
@@ -12114,7 +12111,7 @@ textarea.form-control-lg {
 .btn.show,
 .btn-check:checked + .btn {
   --kaz-btn-pop-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
-  transform: translate(3px, 3px);
+  transform: translate(2px, 2px);
 }
 .btn.btn-link:active,
 .btn.btn-link.active,
