@@ -232,22 +232,9 @@
   .kt-recommendation-link { padding: 7px 9px; }
 }
 
-/* Keep the mobile cards compact; they use an in-flow status/timestamp row, so
-   the desktop minimum size and absolute-footer reservation are not needed. */
+/* Preserve guest-card height on phones. */
 @media (max-width: 700px) {
-  .kt-member { min-block-size: 0; }
   .kt-recommendation-link { min-block-size: 64px; }
-  .kt-member .kt-member-copy { padding-block-end: 0; }
-}
-
-/* Once the compact card puts language chips beside the handle, let the full
-   title row span both copy columns so names do not get squeezed mid-word. */
-@container kt-member-card (max-width: 480px) {
-  .kt-member .kt-member-copy { padding-block-end: 0; }
-}
-@container kt-member-card (max-width: 340px) {
-  .kt-member .kt-member-title { grid-column: 1 / -1; }
-  .kt-member .kt-member-title > .kt-member-name { flex: 0 0 auto; }
 }
 
 /* Canonical member-card composition. The earlier shared stylesheet still
