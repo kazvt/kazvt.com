@@ -279,3 +279,13 @@
   .kt-recommendation-link { min-block-size: 64px; }
   .kt-member .kt-member-copy { padding-block-end: 0; }
 }
+
+/* Once the compact card puts language chips beside the handle, let the full
+   title row span both copy columns so names do not get squeezed mid-word. */
+@container kt-member-card (max-width: 480px) {
+  .kt-member .kt-member-copy { padding-block-end: 0; }
+}
+@container kt-member-card (max-width: 340px) {
+  .kt-member .kt-member-title { grid-column: 1 / -1; }
+  .kt-member .kt-member-title > .kt-member-name { flex: 0 0 auto; }
+}
