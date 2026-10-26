@@ -1,0 +1,4 @@
+/* First Kazstrap customization: use square corners throughout Bootstrap. */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
