@@ -632,6 +632,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 }
 
 .kt-member {
+  --kt-member-avatar-size: 64px;
   --kt-member-accent: var(--kt-blue);
   --kt-member-wash: rgb(91 206 250 / 22%);
   --kt-member-end: var(--kt-paper);

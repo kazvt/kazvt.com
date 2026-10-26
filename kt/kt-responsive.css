@@ -4,7 +4,10 @@
    Keep a modest mobile floor and cap so image tracks never crush identity text. */
 .kt-member {
   --kt-member-avatar-size: clamp(42px, 5vw, 72px);
-  --kt-member-avatar-size: clamp(42px, 42cqi, 72px);
+}
+
+@supports (width: 1cqi) {
+  .kt-member { --kt-member-avatar-size: clamp(42px, 42cqi, 72px); }
 }
 
 @media (max-width: 700px) {
