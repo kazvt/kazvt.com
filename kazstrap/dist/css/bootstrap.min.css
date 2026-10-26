@@ -18,14 +18,18 @@
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: two color-derived shadow tiers for buttons. */
+/* Kazstrap: compound color-matched button outlines and shadows. */
 .btn {
   --kaz-btn-shadow-color: var(--bs-btn-bg);
+  --kaz-btn-shadow-dark: color-mix(in srgb, var(--kaz-btn-shadow-color) 60%, #101322);
+  --kaz-btn-shadow-light: color-mix(in srgb, var(--kaz-btn-shadow-color) 35%, white);
+  --kaz-btn-shadow-glow: color-mix(in srgb, var(--kaz-btn-shadow-color) 24%, transparent);
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--kaz-btn-shadow-color) 72%, black),
-    0 0 0 4px color-mix(in srgb, var(--kaz-btn-shadow-color) 48%, white),
-    0 4px 0 color-mix(in srgb, var(--kaz-btn-shadow-color) 72%, black),
-    0 8px 0 color-mix(in srgb, var(--kaz-btn-shadow-color) 48%, white);
+    0 0 0 1px var(--kaz-btn-shadow-dark),
+    0 0 0 4px var(--kaz-btn-shadow-light),
+    0 4px 0 -1px var(--kaz-btn-shadow-dark),
+    0 10px 16px -3px var(--kaz-btn-shadow-glow);
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s cubic-bezier(.2, .8, .2, 1);
 }
 .btn[class*="btn-outline-"],
 .btn.btn-link {
@@ -33,6 +37,7 @@
 }
 .btn:hover {
   --kaz-btn-shadow-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
+  transform: translateY(-2px);
 }
 .btn[class*="btn-outline-"]:hover {
   --kaz-btn-shadow-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
@@ -45,5 +50,24 @@
 .btn.show,
 .btn-check:checked + .btn {
   --kaz-btn-shadow-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
+  transform: translateY(1px);
 }
+.btn.btn-link:active,
+.btn.btn-link.active,
+.btn.btn-link.show {
+  --kaz-btn-shadow-color: var(--bs-btn-active-color, var(--bs-btn-color));
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  .btn:hover,
+  .btn:active,
+  .btn.active,
+  .btn.show,
+  .btn-check:checked + .btn {
+    transform: none;
+  }
+}
+
 /*# sourceMappingURL=bootstrap.min.css.map */
