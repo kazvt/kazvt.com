@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap button study - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-researched-1">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-researched-2">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="alert alert-info" role="status">
-      Kazstrap buttons use a dark keyline, a separated color outline, and two color-derived hard shadows.
+      Button layers follow Bootstrap's --bs-btn-bg variable, so stock variants and custom colors both work.
     </div>
 
     <section class="py-4" aria-labelledby="button-study-title">
@@ -46,6 +46,7 @@
       <div class="d-flex flex-wrap gap-4 px-2 pt-4 pb-3">
         <button type="button" class="btn btn-primary">Primary</button>
         <button type="button" class="btn btn-danger">Danger</button>
+        <button type="button" class="btn" style="--bs-btn-bg: #e00038; --bs-btn-color: #fff; --bs-btn-hover-bg: #c00032; --bs-btn-active-bg: #a00028;">Custom red</button>
         <button type="button" class="btn btn-warning">Warning</button>
         <button type="button" class="btn btn-success">Success</button>
         <button type="button" class="btn btn-outline-primary">Outline</button>
