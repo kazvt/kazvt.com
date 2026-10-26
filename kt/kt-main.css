@@ -910,11 +910,13 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   color: var(--kt-ink);
   font-family: var(--kt-comic-font);
   font-synthesis: weight;
-  font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+  font-size: clamp(1.04rem, 2vw, 1.32rem);
   font-weight: 700;
   line-height: 1.05;
   text-shadow: 1px 1px 0 var(--kt-white), 2px 2px 0 var(--kt-pink);
 }
+
+.kt-member-name { font-size: clamp(1.2rem, 1.8vw, 1.55rem); }
 
 .kt-member-handle {
   grid-column: 1;

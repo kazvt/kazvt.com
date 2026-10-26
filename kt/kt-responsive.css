@@ -275,9 +275,9 @@
   .kt-topbar { gap: 5px; }
   .kt-home-link,
   .kt-topbar-label { padding-inline: 4px; font-size: .46rem; }
-  .kt-member { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px; }
-  .kt-member-avatar { width: 32px; height: 32px; }
-  .kt-member-name { font-size: .78rem; }
+  .kt-member { grid-template-columns: 42px minmax(0, 1fr); gap: 3px 6px; padding: 6px 8px; }
+  .kt-member-avatar { width: 42px; height: 42px; }
+  .kt-member-name { font-size: 1rem; }
   .kt-member-pronouns { font-size: .58rem; }
   .kt-member-status-rail > .kt-member-new-badge { width: 26px; max-height: 24px; }
   .kt-member-handle { font-size: .6rem; }
@@ -327,17 +327,17 @@
 @container kt-member-card (max-width: 480px) {
   .kt-member {
     min-height: 0;
-    grid-template-columns: 42px minmax(0, 1fr) minmax(70px, 96px);
-    grid-template-rows: minmax(42px, auto) 22px;
+    grid-template-columns: 54px minmax(0, 1fr) minmax(70px, 96px);
+    grid-template-rows: minmax(54px, auto) 20px;
     align-content: center;
-    gap: 6px 8px;
-    padding: 8px;
+    gap: 4px 6px;
+    padding: 7px 8px;
     border-width: 2px;
   }
 
   .kt-member-number,
   .kt-member-arrow { display: none; }
-  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 42px; height: 42px; border-width: 2px; transform: none; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 54px; height: 54px; border-width: 2px; transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; column-gap: 4px; row-gap: 3px; }
   .kt-member-title { align-items: center; gap: 4px; row-gap: 2px; }
   .kt-member-name { font-size: clamp(1rem, 4.2cqi, 1.2rem); line-height: 1.08; }
