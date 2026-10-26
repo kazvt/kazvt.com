@@ -218,40 +218,14 @@
   margin-block-start: 2px;
 }
 
-/* Member portraits share the same top inset as the identity copy. The grid
-   row can grow for wrapped labels, so centering the portrait made its top
-   margin drift much farther from the card edge than its side margin. */
-.kt-member-avatar {
-  align-self: start;
-  margin-block-start: 0;
-}
-
-/* Keep the portrait and status row on the card's inset edges, even when a
-   taller neighboring card stretches this card's grid row. */
-@container kt-member-card (max-width: 480px) {
-  .kt-member { align-content: space-between; }
-}
-
-/* Preserve a clear card gutter while trimming excess vertical padding. */
-.kt-member { padding: 8px 16px; }
+/* Guest-card geometry remains owned by the shared responsive stylesheet. */
 .kt-recommendation-link {
   align-content: space-between;
   padding: 7px 9px;
 }
-.kt-member-status-rail { right: 10px; bottom: 6px; left: 10px; }
-.kt-member-new-badge { left: 10px; bottom: 7px; }
 
 @media (max-width: 700px) {
-  .kt-member { padding: 5px 8px; }
   .kt-recommendation-link { padding: 7px 9px; }
-}
-
-@container kt-member-card (max-width: 480px) {
-  .kt-member { padding: 5px 8px; }
-}
-
-@container kt-member-card (max-width: 340px) {
-  .kt-member { padding: 4px 8px; }
 }
 
 @media (max-width: 360px) {
