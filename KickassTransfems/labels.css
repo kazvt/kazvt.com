@@ -27,7 +27,7 @@
    The existing min-height and decorative frame remain governed by shared CSS. */
 .kt-member {
   block-size: auto !important;
-  min-block-size: 6.75rem;
+  min-block-size: 6rem;
   max-inline-size: 100%;
   box-sizing: border-box;
 }
