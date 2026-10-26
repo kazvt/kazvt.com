@@ -25,7 +25,7 @@
   --kaz-btn-pop-light: color-mix(in srgb, var(--kaz-btn-pop-color) 48%, white);
   --kaz-btn-pop-glow: color-mix(in srgb, var(--kaz-btn-pop-color) 24%, transparent);
   position: relative;
-  z-index: 0;
+
   isolation: isolate;
   box-shadow:
     6px 6px 0 -1px var(--kaz-btn-pop-dark),
@@ -44,14 +44,14 @@
   transition: border-color 0.15s ease-in-out;
 }
 .btn::before {
-  inset: -5px;
+  inset: -8px;
   border-color: var(--kaz-btn-pop-dark);
-  transform: translate(2px, 2px);
+  transform: translate(3px, 3px);
 }
 .btn::after {
-  inset: -15px;
+  inset: -18px;
   border-color: var(--kaz-btn-pop-light);
-  transform: translate(7px, 7px);
+  transform: translate(8px, 8px);
 }
 .btn[class*="btn-outline-"],
 .btn.btn-link {
