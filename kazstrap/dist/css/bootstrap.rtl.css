@@ -12037,6 +12037,8 @@ textarea.form-control-lg {
 .btn {
   --kaz-btn-shadow-color: var(--bs-btn-bg);
   box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--kaz-btn-shadow-color) 72%, black),
+    0 0 0 4px color-mix(in srgb, var(--kaz-btn-shadow-color) 48%, white),
     0 4px 0 color-mix(in srgb, var(--kaz-btn-shadow-color) 72%, black),
     0 8px 0 color-mix(in srgb, var(--kaz-btn-shadow-color) 48%, white);
 }
