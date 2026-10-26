@@ -511,6 +511,7 @@
     width: 100%;
     height: 18px;
   }
+  .kt-member-status-rail > .kt-live-sticker { width: 36px; max-width: 42%; }
 }
 
 /* Tightest cards also reduce only the supporting type scale; portraits stay
@@ -602,4 +603,10 @@
     padding: 2px 4px;
     font-size: .54rem;
   }
+}
+
+/* Below the 320 CSS-pixel reflow target, one column is the only way to keep
+   the complete profile readable without forcing names and handles to collide. */
+@media (max-width: 279px) {
+  .kt-member-grid { grid-template-columns: minmax(0, 1fr); }
 }
