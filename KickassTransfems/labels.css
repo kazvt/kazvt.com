@@ -456,7 +456,7 @@
     --kt-member-avatar-size: clamp(78px, 22cqi, 106px);
     --kt-member-safe-inset: 12px;
     min-block-size: 0;
-    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr) 24px;
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 16px;
     align-content: start;
     gap: 2px 8px;
@@ -497,13 +497,7 @@
     padding: 3px 4px;
   }
 
-  .kt-member-arrow {
-    display: inline-flex;
-    grid-column: 3;
-    grid-row: 1;
-    align-self: start;
-    justify-self: end;
-  }
+  .kt-member-arrow { display: none; }
 
   .kt-member .kt-member-title { gap: 4px 6px; }
   .kt-member-name { font-size: clamp(1.25rem, 5.8cqi, 1.55rem); line-height: 1.08; }
