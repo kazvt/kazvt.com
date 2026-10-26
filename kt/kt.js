@@ -266,6 +266,19 @@
         avatarWrap.append(avatar);
       }
 
+      let infoWrap = card.querySelector(".kt-member-info");
+      const copy = card.querySelector(".kt-member-copy");
+      if (!infoWrap && copy) {
+        infoWrap = document.createElement("span");
+        infoWrap.className = "kt-member-info";
+        copy.before(infoWrap);
+      }
+      if (infoWrap && copy && copy.parentElement !== infoWrap) infoWrap.append(copy);
+      const descriptor = [...card.children].find((child) =>
+        child.matches(".kt-member-tag, .kt-member-badge")
+      );
+      if (infoWrap && descriptor && descriptor.parentElement !== infoWrap) infoWrap.append(descriptor);
+
       let statusRail = card.querySelector(".kt-member-status-rail");
       if (!statusRail) {
         statusRail = document.createElement("span");
