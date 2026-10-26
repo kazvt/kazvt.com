@@ -548,11 +548,11 @@
     gap: 2px 4px;
   }
   .kt-member-info .kt-member-name {
-    font-size: clamp(.72rem, 9.6cqi, .82rem);
+    font-size: clamp(.75rem, 9.8cqi, .86rem);
     line-height: 1.08;
   }
   .kt-member-info .kt-member-pronouns {
-    font-size: clamp(.52rem, 6.2cqi, .58rem);
+    font-size: clamp(.54rem, 6.4cqi, .61rem);
     line-height: 1.05;
     padding: 1px 2px;
   }
@@ -560,7 +560,7 @@
     grid-column: 1;
     grid-row: 2;
     min-width: 0;
-    font-size: clamp(.55rem, 6.8cqi, .62rem);
+    font-size: clamp(.58rem, 7cqi, .65rem);
     line-height: 1.12;
     overflow-wrap: anywhere;
   }
@@ -574,7 +574,7 @@
   .kt-member-copy > .kt-card-languages [data-kt-language-badge] {
     min-height: 10px;
     padding-inline: 2px;
-    font-size: .48rem;
+    font-size: .5rem;
   }
   .kt-member-info > .kt-member-tag,
   .kt-member-info > .kt-member-badge {
@@ -585,7 +585,7 @@
     width: fit-content;
     max-width: 100%;
     padding: 2px 5px;
-    font-size: clamp(.54rem, 6.4cqi, .62rem);
+    font-size: clamp(.56rem, 6.7cqi, .64rem);
     line-height: 1.1;
     overflow-wrap: anywhere;
     text-align: end;
