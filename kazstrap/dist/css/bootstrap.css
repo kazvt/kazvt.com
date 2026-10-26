@@ -12060,47 +12060,71 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: compound color-matched button outlines and shadows. */
+/* Kazstrap: offset pop-art outlines and layered button shadows. */
 .btn {
-  --kaz-btn-shadow-color: var(--bs-btn-bg);
-  --kaz-btn-shadow-dark: color-mix(in srgb, var(--kaz-btn-shadow-color) 60%, #101322);
-  --kaz-btn-shadow-light: color-mix(in srgb, var(--kaz-btn-shadow-color) 35%, white);
-  --kaz-btn-shadow-glow: color-mix(in srgb, var(--kaz-btn-shadow-color) 24%, transparent);
+  --kaz-btn-pop-color: var(--bs-btn-bg);
+  --kaz-btn-pop-dark: color-mix(in srgb, var(--kaz-btn-pop-color) 62%, #171126);
+  --kaz-btn-pop-light: color-mix(in srgb, var(--kaz-btn-pop-color) 48%, white);
+  --kaz-btn-pop-glow: color-mix(in srgb, var(--kaz-btn-pop-color) 24%, transparent);
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
   box-shadow:
-    0 0 0 1px var(--kaz-btn-shadow-dark),
-    0 0 0 4px var(--kaz-btn-shadow-light),
-    0 4px 0 -1px var(--kaz-btn-shadow-dark),
-    0 10px 16px -3px var(--kaz-btn-shadow-glow);
+    6px 6px 0 -1px var(--kaz-btn-pop-dark),
+    12px 12px 0 -2px var(--kaz-btn-pop-light),
+    19px 22px 15px -6px var(--kaz-btn-pop-glow);
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s cubic-bezier(.2, .8, .2, 1);
+}
+.btn::before,
+.btn::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+  border: 2px solid;
+  transition: border-color 0.15s ease-in-out;
+}
+.btn::before {
+  inset: -5px;
+  border-color: var(--kaz-btn-pop-dark);
+  transform: translate(2px, 2px);
+}
+.btn::after {
+  inset: -15px;
+  border-color: var(--kaz-btn-pop-light);
+  transform: translate(7px, 7px);
 }
 .btn[class*="btn-outline-"],
 .btn.btn-link {
-  --kaz-btn-shadow-color: var(--bs-btn-color);
+  --kaz-btn-pop-color: var(--bs-btn-color);
 }
 .btn:hover {
-  --kaz-btn-shadow-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
-  transform: translateY(-2px);
+  --kaz-btn-pop-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
+  transform: translate(-2px, -2px);
 }
 .btn[class*="btn-outline-"]:hover {
-  --kaz-btn-shadow-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
+  --kaz-btn-pop-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
 }
 .btn.btn-link:hover {
-  --kaz-btn-shadow-color: var(--bs-btn-hover-color, var(--bs-btn-color));
+  --kaz-btn-pop-color: var(--bs-btn-hover-color, var(--bs-btn-color));
 }
 .btn:active,
 .btn.active,
 .btn.show,
 .btn-check:checked + .btn {
-  --kaz-btn-shadow-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
-  transform: translateY(1px);
+  --kaz-btn-pop-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
+  transform: translate(3px, 3px);
 }
 .btn.btn-link:active,
 .btn.btn-link.active,
 .btn.btn-link.show {
-  --kaz-btn-shadow-color: var(--bs-btn-active-color, var(--bs-btn-color));
+  --kaz-btn-pop-color: var(--bs-btn-active-color, var(--bs-btn-color));
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn {
+  .btn,
+  .btn::before,
+  .btn::after {
     transition: none;
   }
   .btn:hover,
@@ -12111,5 +12135,4 @@ textarea.form-control-lg {
     transform: none;
   }
 }
-
 /*# sourceMappingURL=bootstrap.css.map */
