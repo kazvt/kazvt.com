@@ -198,15 +198,6 @@
 /* Shared code sometimes leaves a now-empty wrapper where badges originated. */
 [data-kt-empty-language-container]:empty { display: none !important; }
 
-/* Member recency sits over the card at desktop sizes, so keep a footer lane
-   there. Guest recency uses its own grid row and needs no extra copy padding. */
-.kt-member .kt-member-copy {
-  padding-block-end: 1.8rem;
-}
-@media (max-width: 1100px) {
-  .kt-member .kt-member-copy { padding-block-end: 0; }
-}
-
 .kt-member-copy > .kt-member-handle,
 .kt-recommendation-copy > .kt-recommendation-handle {
   min-inline-size: 0;
@@ -214,10 +205,7 @@
   overflow-wrap: anywhere;
 }
 
-/* In a single-column layout the card has room to breathe; the individual
-   labels wrap rather than shrinking their type to fit arbitrary breakpoints. */
 @media (max-width: 480px) {
-  .kt-member .kt-member-title { gap: .25rem; row-gap: 2px; }
   .kt-recommendation-link .kt-member-title { gap: .5rem; }
 }
 
