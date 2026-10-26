@@ -27,7 +27,7 @@
    The existing min-height and decorative frame remain governed by shared CSS. */
 .kt-member {
   block-size: auto !important;
-  min-block-size: 6rem;
+  min-block-size: 5.5rem;
   max-inline-size: 100%;
   box-sizing: border-box;
 }
@@ -217,10 +217,8 @@
 /* In a single-column layout the card has room to breathe; the individual
    labels wrap rather than shrinking their type to fit arbitrary breakpoints. */
 @media (max-width: 480px) {
-  .kt-member .kt-member-title,
-  .kt-recommendation-link .kt-member-title {
-    gap: 0.5rem;
-  }
+  .kt-member .kt-member-title { gap: .25rem; row-gap: 2px; }
+  .kt-recommendation-link .kt-member-title { gap: .5rem; }
 }
 
 /* Keep guest portraits anchored in the upper-left corner with a clear inset. */
@@ -247,7 +245,7 @@
 }
 
 /* Preserve a clear card gutter while trimming excess vertical padding. */
-.kt-member { padding: 10px 16px; }
+.kt-member { padding: 8px 16px; }
 .kt-recommendation-link {
   align-content: space-between;
   padding: 7px 9px;
@@ -256,16 +254,16 @@
 .kt-member-new-badge { left: 10px; bottom: 7px; }
 
 @media (max-width: 700px) {
-  .kt-member { padding: 7px 8px; }
+  .kt-member { padding: 5px 8px; }
   .kt-recommendation-link { padding: 7px 9px; }
 }
 
 @container kt-member-card (max-width: 480px) {
-  .kt-member { padding: 7px 8px; }
+  .kt-member { padding: 5px 8px; }
 }
 
 @container kt-member-card (max-width: 340px) {
-  .kt-member { padding: 6px 8px; }
+  .kt-member { padding: 4px 8px; }
 }
 
 @media (max-width: 360px) {
