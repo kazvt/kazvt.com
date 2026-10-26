@@ -51,14 +51,17 @@
 @import "utilities/api";
 // scss-docs-end import-stack
 
-/* Kazstrap: controlled pop treatment for Bootstrap buttons. */
+/* Kazstrap: color-aware pop treatment for Bootstrap buttons. */
 .btn:not(.btn-link) {
-  --kaz-btn-ink: #171126;
+  --kaz-btn-ink: var(--bs-emphasis-color, #171126);
   --kaz-btn-color: var(--bs-btn-bg);
-  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 68%, var(--kaz-btn-ink));
+  --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 62%, var(--kaz-btn-ink));
+  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 42%, var(--kaz-btn-ink));
   --kaz-btn-shadow-light: color-mix(in oklab, var(--kaz-btn-color) 72%, white);
+  --kaz-btn-focus-gap: var(--bs-body-bg, white);
+  --kaz-btn-focus-ring: var(--bs-emphasis-color, #171126);
   border: 2px solid var(--kaz-btn-ink);
-  outline: 2px solid var(--kaz-btn-shadow-light);
+  outline: 2px solid var(--kaz-btn-outline);
   outline-offset: 4px;
   box-shadow:
     4px 4px 0 var(--kaz-btn-shadow-deep),
@@ -97,25 +100,34 @@
     4px 4px 0 var(--kaz-btn-shadow-light);
 }
 .btn:not(.btn-link):focus-visible {
+  outline-color: var(--kaz-btn-focus-ring);
   box-shadow:
-    var(--bs-btn-focus-box-shadow),
+    0 0 0 2px var(--kaz-btn-focus-gap),
+    0 0 0 4px var(--kaz-btn-focus-ring),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-shadow-light);
 }
 .btn:not(.btn-link):active:focus-visible,
 .btn:not(.btn-link).active:focus-visible,
-.btn:not(.btn-link).show:focus-visible,
-.btn-check:checked + .btn:not(.btn-link):focus-visible {
+.btn:not(.btn-link).show:focus-visible {
   transform: translate(4px, 4px);
   box-shadow:
-    var(--bs-btn-focus-box-shadow),
+    0 0 0 2px var(--kaz-btn-focus-gap),
+    0 0 0 4px var(--kaz-btn-focus-ring),
     0 0 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-shadow-light);
 }
+.btn-check:focus-visible + .btn:not(.btn-link) {
+  outline-color: var(--kaz-btn-focus-ring);
+  box-shadow:
+    0 0 0 2px var(--kaz-btn-focus-gap),
+    0 0 0 4px var(--kaz-btn-focus-ring),
+    4px 4px 0 var(--kaz-btn-shadow-deep),
+    8px 8px 0 var(--kaz-btn-shadow-light);
+}
 .btn-group,
-.btn-group-vertical,
-.input-group {
-  box-shadow: 4px 4px 0 #171126;
+.btn-group-vertical {
+  box-shadow: 4px 4px 0 var(--bs-emphasis-color, #171126);
 }
 .btn-group > .btn:not(.btn-link),
 .btn-group-vertical > .btn:not(.btn-link),
@@ -140,11 +152,21 @@
 .btn-group > .btn:not(.btn-link):focus-visible,
 .btn-group-vertical > .btn:not(.btn-link):focus-visible,
 .input-group > .btn:not(.btn-link):focus-visible,
-.btn-group > .btn:not(.btn-link):active:focus-visible,
-.btn-group-vertical > .btn:not(.btn-link):active:focus-visible,
-.input-group > .btn:not(.btn-link):active:focus-visible {
-  box-shadow: var(--bs-btn-focus-box-shadow);
+.btn-group > .btn-check:focus-visible + .btn:not(.btn-link),
+.btn-group-vertical > .btn-check:focus-visible + .btn:not(.btn-link),
+.input-group > .btn-check:focus-visible + .btn:not(.btn-link) {
+  outline-color: var(--kaz-btn-focus-ring);
+  box-shadow:
+    0 0 0 2px var(--kaz-btn-focus-gap),
+    0 0 0 4px var(--kaz-btn-focus-ring);
   transform: none;
+}
+@supports not (color: color-mix(in oklab, white, black)) {
+  .btn:not(.btn-link) {
+    --kaz-btn-outline: var(--kaz-btn-color);
+    --kaz-btn-shadow-deep: var(--kaz-btn-ink);
+    --kaz-btn-shadow-light: var(--kaz-btn-color);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .btn:not(.btn-link) {
@@ -156,5 +178,28 @@
   .btn:not(.btn-link).show,
   .btn-check:checked + .btn:not(.btn-link) {
     transform: none;
+  }
+}
+@media (forced-colors: active) {
+  .btn-group,
+  .btn-group-vertical {
+    box-shadow: none;
+  }
+  .btn:not(.btn-link) {
+    border-color: ButtonText;
+    outline-color: ButtonText;
+    box-shadow: none;
+  }
+  .btn:not(.btn-link):focus-visible,
+  .btn-check:focus-visible + .btn:not(.btn-link),
+  .btn-group > .btn:not(.btn-link):focus-visible,
+  .btn-group-vertical > .btn:not(.btn-link):focus-visible,
+  .input-group > .btn:not(.btn-link):focus-visible,
+  .btn-group > .btn-check:focus-visible + .btn:not(.btn-link),
+  .btn-group-vertical > .btn-check:focus-visible + .btn:not(.btn-link),
+  .input-group > .btn-check:focus-visible + .btn:not(.btn-link) {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
   }
 }
