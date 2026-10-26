@@ -12060,4 +12060,30 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
+/* Kazstrap: two color-derived shadow tiers for buttons. */
+.btn {
+  --kaz-btn-shadow-color: var(--bs-btn-bg);
+  box-shadow:
+    0 4px 0 color-mix(in srgb, var(--kaz-btn-shadow-color) 72%, black),
+    0 8px 0 color-mix(in srgb, var(--kaz-btn-shadow-color) 48%, white);
+}
+.btn[class*="btn-outline-"],
+.btn.btn-link {
+  --kaz-btn-shadow-color: var(--bs-btn-color);
+}
+.btn:hover {
+  --kaz-btn-shadow-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
+}
+.btn[class*="btn-outline-"]:hover {
+  --kaz-btn-shadow-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
+}
+.btn.btn-link:hover {
+  --kaz-btn-shadow-color: var(--bs-btn-hover-color, var(--bs-btn-color));
+}
+.btn:active,
+.btn.active,
+.btn.show,
+.btn-check:checked + .btn {
+  --kaz-btn-shadow-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
+}
 /*# sourceMappingURL=bootstrap.css.map */
