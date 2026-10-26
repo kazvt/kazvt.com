@@ -1,5 +1,12 @@
 /* Dedicated responsive layer so phone/tablet layouts stay easy to tune. */
 
+/* Size each square portrait from its own card, not the overall viewport.
+   Keep a modest mobile floor and cap so image tracks never crush identity text. */
+.kt-member {
+  --kt-member-avatar-size: clamp(42px, 6vw, 72px);
+  --kt-member-avatar-size: clamp(42px, 38cqi, 72px);
+}
+
 @media (max-width: 700px) {
   html.kt-root {
     background-attachment: scroll;
@@ -149,8 +156,8 @@
   .kt-member {
     min-width: 0;
     min-height: 0;
-    grid-template-columns: 48px minmax(0, 1fr);
-    grid-template-rows: minmax(48px, auto) auto 22px;
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 22px;
     align-items: center;
     align-content: start;
     gap: 3px 7px;
@@ -161,7 +168,7 @@
 
   .kt-member-number,
   .kt-member-arrow { display: none; }
-  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 48px; height: 48px; border-width: 2px; box-shadow: 2px 2px 0 var(--kt-ink); transform: none; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: var(--kt-member-avatar-size); height: var(--kt-member-avatar-size); border-width: 2px; box-shadow: 2px 2px 0 var(--kt-ink); transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; column-gap: 4px; row-gap: 3px; }
   .kt-member-title { align-items: center; gap: 3px; row-gap: 2px; }
   .kt-member-status-rail {
@@ -225,8 +232,8 @@
   .kt-home-link,
   .kt-topbar-label { padding-inline: 5px; font-size: clamp(.45rem, 1.95vw, .58rem); }
   .kt-topbar-label { text-align: center; }
-  .kt-member { grid-template-columns: 44px minmax(0, 1fr); gap: 4px 7px; padding-inline: 8px; }
-  .kt-member-avatar { width: 44px; height: 44px; }
+  .kt-member { grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr); gap: 4px 7px; padding-inline: 8px; }
+  .kt-member-avatar { width: var(--kt-member-avatar-size); height: var(--kt-member-avatar-size); }
   .kt-member-tag,
   .kt-member-badge { font-size: .61rem; }
   .kt-webring-heading { align-items: center; }
@@ -275,8 +282,8 @@
   .kt-topbar { gap: 5px; }
   .kt-home-link,
   .kt-topbar-label { padding-inline: 4px; font-size: .46rem; }
-  .kt-member { grid-template-columns: 42px minmax(0, 1fr); gap: 3px 6px; padding: 6px 8px; }
-  .kt-member-avatar { width: 42px; height: 42px; }
+  .kt-member { grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr); gap: 3px 6px; padding: 6px 8px; }
+  .kt-member-avatar { width: var(--kt-member-avatar-size); height: var(--kt-member-avatar-size); }
   .kt-member-name { font-size: 1rem; }
   .kt-member-pronouns { font-size: .58rem; }
   .kt-member-status-rail > .kt-member-new-badge { width: 26px; max-height: 24px; }
@@ -301,8 +308,8 @@
 
   .kt-member {
     min-height: 0;
-    grid-template-columns: 56px minmax(0, 1fr) minmax(70px, 96px);
-    grid-template-rows: minmax(56px, auto) 20px;
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr) minmax(70px, 96px);
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 20px;
     align-content: center;
     gap: 4px 8px;
     padding: 7px 8px;
@@ -311,7 +318,7 @@
 
   .kt-member-number,
   .kt-member-arrow { display: none; }
-  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 56px; height: 56px; border-width: 2px; transform: none; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: var(--kt-member-avatar-size); height: var(--kt-member-avatar-size); border-width: 2px; transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; }
   .kt-member-tag,
   .kt-member-badge { grid-column: 3; grid-row: 1; align-self: start; justify-self: stretch; width: 100%; max-width: 96px; overflow-wrap: anywhere; text-align: center; transform: rotate(.8deg) translateZ(14px); }
@@ -327,8 +334,8 @@
 @container kt-member-card (max-width: 480px) {
   .kt-member {
     min-height: 0;
-    grid-template-columns: 54px minmax(0, 1fr) minmax(70px, 96px);
-    grid-template-rows: minmax(54px, auto) 16px;
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr) minmax(70px, 96px);
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 16px;
     align-content: center;
     gap: 1px 6px;
     padding: 4px 8px;
@@ -337,7 +344,7 @@
 
   .kt-member-number,
   .kt-member-arrow { display: none; }
-  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 54px; height: 54px; border-width: 2px; transform: none; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: var(--kt-member-avatar-size); height: var(--kt-member-avatar-size); border-width: 2px; transform: none; }
   .kt-member-copy { grid-column: 2; grid-row: 1; column-gap: 4px; row-gap: 2px; }
   .kt-member .kt-member-copy { padding-block-end: 0; }
   .kt-member-title { align-items: center; gap: 4px; row-gap: 2px; }
@@ -372,14 +379,14 @@
 
 @container kt-member-card (max-width: 340px) {
   .kt-member {
-    grid-template-columns: 42px minmax(0, 1fr);
-    grid-template-rows: minmax(42px, auto) auto 14px;
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 14px;
     align-content: start;
     gap: 1px 4px;
     padding: 3px 6px;
   }
 
-  .kt-member-avatar { grid-column: 1; grid-row: 1; width: 42px; height: 42px; }
+  .kt-member-avatar { grid-column: 1; grid-row: 1; width: var(--kt-member-avatar-size); height: var(--kt-member-avatar-size); }
   .kt-member-copy { grid-column: 2; grid-row: 1; grid-template-columns: minmax(0, 1fr); row-gap: 2px; }
   .kt-member-title { grid-column: 1 / -1; grid-row: 1; gap: 2px; row-gap: 2px; }
   .kt-member-title > .kt-member-name { flex: 0 0 auto; }

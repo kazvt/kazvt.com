@@ -645,7 +645,7 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
   isolation: isolate;
   display: grid;
   min-height: 91px;
-  grid-template-columns: 28px 72px minmax(0, 1fr) 98px 20px;
+  grid-template-columns: 28px var(--kt-member-avatar-size) minmax(0, 1fr) 98px 20px;
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
@@ -785,13 +785,14 @@ body[data-page="kt"] .kt-affiliation a.kt-berrytube-link {
 
 .kt-member-avatar {
   display: block;
-  width: 64px;
-  height: 64px;
+  width: var(--kt-member-avatar-size);
+  height: var(--kt-member-avatar-size);
   border: 3px solid var(--kt-ink);
   border-radius: 0;
   background: var(--kt-white);
   box-shadow: 3px 3px 0 var(--kt-ink), 5px 5px 0 rgb(43 32 40 / 16%);
   object-fit: cover;
+  aspect-ratio: 1 / 1;
   transform: translateZ(18px) rotateY(8deg) rotateX(-4deg);
 }
 
