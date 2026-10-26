@@ -27,7 +27,7 @@
    The existing min-height and decorative frame remain governed by shared CSS. */
 .kt-member {
   block-size: auto !important;
-  min-block-size: 7.1rem;
+  min-block-size: 6.75rem;
   max-inline-size: 100%;
   box-sizing: border-box;
 }
@@ -247,7 +247,7 @@
 }
 
 /* Preserve a clear card gutter while trimming excess vertical padding. */
-.kt-member { padding: 14px 16px; }
+.kt-member { padding: 10px 16px; }
 .kt-recommendation-link {
   align-content: space-between;
   padding: 7px 9px;
@@ -256,16 +256,16 @@
 .kt-member-new-badge { left: 10px; bottom: 7px; }
 
 @media (max-width: 700px) {
-  .kt-member { padding: 12px; }
+  .kt-member { padding: 7px 8px; }
   .kt-recommendation-link { padding: 7px 9px; }
 }
 
 @container kt-member-card (max-width: 480px) {
-  .kt-member { padding: 12px; }
+  .kt-member { padding: 7px 8px; }
 }
 
 @container kt-member-card (max-width: 340px) {
-  .kt-member { padding: 10px; }
+  .kt-member { padding: 6px 8px; }
 }
 
 @media (max-width: 360px) {
