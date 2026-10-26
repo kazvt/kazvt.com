@@ -486,6 +486,53 @@
   }
 }
 
+@supports not (width: 1cqi) {
+  .kt-member-name { font-size: clamp(1.05rem, 1.8vw, 1.6rem); }
+  .kt-member-handle { font-size: clamp(.65rem, .9vw, .9rem); }
+  .kt-member-pronouns { font-size: clamp(.64rem, .74vw, .74rem); }
+  .kt-streamer-language { font-size: .56rem; }
+  .kt-member-tag,
+  .kt-member-badge { font-size: clamp(.62rem, .72vw, .72rem); }
+  .kt-last-live:not([hidden]) { font-size: .58rem; }
+  .kt-member-avatar-wrap > .kt-member-avatar { border-width: 2px; }
+  .kt-member-avatar-wrap > .kt-member-new-badge { width: 28px; }
+}
+
+@media (max-width: 700px) {
+  .kt-member {
+    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 18px;
+    gap: 4px 6px;
+    padding: 6px 8px;
+  }
+  .kt-member-avatar-wrap { grid-column: 1; grid-row: 1; }
+  .kt-member-info {
+    grid-column: 2;
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: start;
+    gap: 3px;
+  }
+  .kt-member-info > .kt-member-tag,
+  .kt-member-info > .kt-member-badge {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: end;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .kt-member-status-rail {
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    height: 18px;
+  }
+}
+
+/* Last-resort reflow for cards too narrow to hold a portrait and copy side by side.
+   This is deliberately after the viewport rules so the per-card query wins. */
 @container kt-member-card (max-width: 140px) {
   .kt-member {
     --kt-member-avatar-size: clamp(46px, 43cqi, 60px);
@@ -538,51 +585,6 @@
     position: static;
     grid-column: 1;
     grid-row: 3;
-    width: 100%;
-    height: 18px;
-  }
-}
-
-@supports not (width: 1cqi) {
-  .kt-member-name { font-size: clamp(1.05rem, 1.8vw, 1.6rem); }
-  .kt-member-handle { font-size: clamp(.65rem, .9vw, .9rem); }
-  .kt-member-pronouns { font-size: clamp(.64rem, .74vw, .74rem); }
-  .kt-streamer-language { font-size: .56rem; }
-  .kt-member-tag,
-  .kt-member-badge { font-size: clamp(.62rem, .72vw, .72rem); }
-  .kt-last-live:not([hidden]) { font-size: .58rem; }
-  .kt-member-avatar-wrap > .kt-member-avatar { border-width: 2px; }
-  .kt-member-avatar-wrap > .kt-member-new-badge { width: 28px; }
-}
-
-@media (max-width: 700px) {
-  .kt-member {
-    grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
-    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 18px;
-    gap: 4px 6px;
-    padding: 6px 8px;
-  }
-  .kt-member-avatar-wrap { grid-column: 1; grid-row: 1; }
-  .kt-member-info {
-    grid-column: 2;
-    grid-row: 1;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    align-content: start;
-    gap: 3px;
-  }
-  .kt-member-info > .kt-member-tag,
-  .kt-member-info > .kt-member-badge {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: end;
-    width: fit-content;
-    max-width: 100%;
-  }
-  .kt-member-status-rail {
-    position: static;
-    grid-column: 1 / -1;
-    grid-row: 2;
     width: 100%;
     height: 18px;
   }
