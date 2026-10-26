@@ -243,14 +243,27 @@
    composition to each card, so zoom and narrow embeds behave like phones. */
 .kt-member {
   --kt-member-avatar-size: clamp(90px, 22cqi, 116px);
+  --kt-member-safe-inset: clamp(14px, 2.4cqi, 18px);
   box-sizing: border-box;
   min-block-size: calc(var(--kt-member-avatar-size) + 24px);
-  grid-template-columns: 24px var(--kt-member-avatar-size) minmax(0, 1fr) 20px;
+  grid-template-columns: 24px var(--kt-member-avatar-size) minmax(0, 1fr) 24px;
   grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
   align-items: start;
   align-content: center;
   gap: 8px;
-  padding: 8px clamp(14px, 2.4cqi, 18px);
+  padding: var(--kt-member-safe-inset);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kt-member:active {
+  transform: translate(4px, 4px) scale(.99);
+  box-shadow:
+    1px 1px 0 var(--kt-ink),
+    2px 2px 0 var(--kt-member-accent),
+    0 0 14px 2px var(--kt-live-halo);
+  transition-duration: 80ms;
 }
 
 .kt-member-number {
@@ -286,6 +299,8 @@
   aspect-ratio: 1;
   border-width: clamp(2px, .45cqi, 3px);
   object-fit: cover;
+  /* Keep the visible portrait edge aligned with its inset on every side. */
+  transform: none;
 }
 
 /* The welcome burst is a true overlay on the portrait, not another grid item. */
@@ -357,26 +372,26 @@
 }
 
 .kt-member-name {
-  font-size: clamp(1.25rem, 4.8cqi, 1.7rem);
-  line-height: 1.1;
+  font-size: clamp(1.5rem, 5.5cqi, 1.95rem);
+  line-height: 1.08;
 }
 
 .kt-member-handle {
-  font-size: clamp(.78rem, 2.7cqi, 1rem);
-  line-height: 1.15;
+  font-size: clamp(.9rem, 3.1cqi, 1.1rem);
+  line-height: 1.12;
 }
 
 .kt-member-pronouns {
-  font-size: clamp(.7rem, 2.45cqi, .82rem);
+  font-size: clamp(.75rem, 2.7cqi, .88rem);
 }
 
 .kt-streamer-language {
-  font-size: clamp(.58rem, 2.25cqi, .72rem);
+  font-size: clamp(.6rem, 2.3cqi, .72rem);
 }
 
 .kt-member-info > .kt-member-tag,
 .kt-member-info > .kt-member-badge {
-  font-size: clamp(.7rem, 2.7cqi, .86rem);
+  font-size: clamp(.8rem, 3.1cqi, 1rem);
 }
 
 .kt-member-arrow {
@@ -385,6 +400,25 @@
   grid-row: 1;
   align-self: start;
   justify-self: end;
+  inline-size: 24px;
+  block-size: 24px;
+  box-sizing: border-box;
+  border: 2px solid var(--kt-ink);
+  background: var(--kt-member-accent);
+  box-shadow: 2px 2px 0 var(--kt-ink);
+  font-size: 1.12rem;
+  transition: transform 140ms steps(3, end), box-shadow 140ms steps(3, end);
+}
+
+.kt-member:hover .kt-member-arrow,
+.kt-member:focus-visible .kt-member-arrow {
+  transform: translateZ(12px) rotate(6deg) scale(1.08);
+  box-shadow: 1px 1px 0 var(--kt-ink);
+}
+
+.kt-member:active .kt-member-arrow {
+  transform: translateZ(10px) translate(2px, 2px);
+  box-shadow: none;
 }
 
 .kt-member-status-rail {
@@ -392,9 +426,8 @@
   grid-column: auto;
   grid-row: auto;
   inline-size: auto;
-  right: 9px;
-  bottom: 5px;
-  left: 9px;
+  inset-inline: var(--kt-member-safe-inset);
+  inset-block-end: var(--kt-member-safe-inset);
   height: 19px;
 }
 
@@ -407,7 +440,7 @@
   max-width: calc(100% - 40px);
   margin-inline-start: auto;
   padding: 2px 5px;
-  font-size: clamp(.58rem, 2cqi, .66rem);
+  font-size: clamp(.66rem, 2.4cqi, .76rem);
 }
 
 .kt-member-status-rail > .kt-last-live:not([hidden]) svg {
