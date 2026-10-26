@@ -257,6 +257,15 @@
     const now = Date.now();
 
     document.querySelectorAll(".kt-member-grid > li > .kt-member").forEach((card) => {
+      let avatarWrap = card.querySelector(".kt-member-avatar-wrap");
+      const avatar = card.querySelector(".kt-member-avatar");
+      if (!avatarWrap && avatar) {
+        avatarWrap = document.createElement("span");
+        avatarWrap.className = "kt-member-avatar-wrap";
+        avatar.before(avatarWrap);
+        avatarWrap.append(avatar);
+      }
+
       let statusRail = card.querySelector(".kt-member-status-rail");
       if (!statusRail) {
         statusRail = document.createElement("span");
@@ -270,7 +279,9 @@
       const addedAt = Date.parse(`${addedDate}T00:00:00Z`);
       if (!Number.isFinite(addedAt) || addedAt > now || now - addedAt >= newMemberWindowMs) return;
 
-      if (card.querySelector(".kt-member-new-badge")) {
+      const existingBadge = card.querySelector(".kt-member-new-badge");
+      if (existingBadge) {
+        if (avatarWrap && existingBadge.parentElement !== avatarWrap) avatarWrap.append(existingBadge);
         return;
       }
 
@@ -282,7 +293,7 @@
       badge.height = 24;
       badge.loading = "lazy";
       badge.decoding = "async";
-      statusRail.append(badge);
+      (avatarWrap || statusRail).append(badge);
     });
   }
 
