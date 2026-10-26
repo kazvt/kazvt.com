@@ -28,7 +28,7 @@
   function showUnavailable() {
     currentCount = null;
     countNode.dataset.state = "unavailable";
-    countNode.textContent = "—";
+    countNode.textContent = "-";
     countNode.setAttribute("aria-label", translate("kt.discord_count_unavailable", "Discord member count unavailable"));
     unavailableNote.hidden = false;
   }

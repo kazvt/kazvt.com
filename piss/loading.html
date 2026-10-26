@@ -121,7 +121,7 @@
     const wrap = document.getElementById('wrap');
     const sideGifs = [document.getElementById('gif1'), document.getElementById('gif2')];
 
-    // OBS browser source doesn't URL-encode spaces — it passes "text=Hello world"
+    // OBS browser source doesn't URL-encode spaces - it passes "text=Hello world"
     // literally. URLSearchParams behaviour with raw spaces varies across CEF
     // versions and may truncate or drop the value entirely.
     // Fix: read the raw href, replace literal spaces with '+' before parsing.
@@ -278,7 +278,7 @@
         g.appendChild(fill);
         titleSvg.appendChild(g);
 
-        // getComputedTextLength() returns the typographic advance width —
+        // getComputedTextLength() returns the typographic advance width -
         // the actual space the glyph occupies before the next character,
         // including sidebearings. getBBox().width only returns ink bounds
         // and is narrower, which caused characters to visually collide.
@@ -428,7 +428,7 @@
         ]);
         document.fonts.add(loaded);
       } catch (e) {
-        // font failed or timed out — fall back gracefully, layout still runs
+        // font failed or timed out - fall back gracefully, layout still runs
       }
     }
 

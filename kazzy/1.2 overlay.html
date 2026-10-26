@@ -3235,31 +3235,31 @@ body.twoLines .hl-firstline .hl-badges {
 
 		<button class="imgButton" id="pause" data-state="0" onclick="pause();"
 			style="background-image: url(./icons/main_msg_pause.png)"
-			title="Main — ⏸ Pause incoming chat messages"></button>
+			title="Main - ⏸ Pause incoming chat messages"></button>
 		<button class="imgButton" id="say_hello" data-state="0" style="background-image: url(./icons/main_msg_send.png)"
-			title="Main — 💬 Send a text message to social endpoint. (Hold ALT to pop out)"></button>
+			title="Main - 💬 Send a text message to social endpoint. (Hold ALT to pop out)"></button>
 		<button class="imgButton imgSmallButton" id="notify" data-state="0" onclick="notify();"
 			style="background-image: url(./icons/main_msg_notify_off.png)"
-			title="Main — 🔔 Start beeping when there is a new message"></button>
+			title="Main - 🔔 Start beeping when there is a new message"></button>
 		<button class="imgButton imgSmallButton hidden" id="select_save_file" data-state="0"
 			onclick="overwriteFile('setup');" style="border-radius:0;background-image: url(./icons/main_msg_save.png)"
-			title="Main — 💾 Select the file you want to save the most recent message to"></button>
+			title="Main - 💾 Select the file you want to save the most recent message to"></button>
 
 		<div class="horizontalSeparator"></div>
 
 		<!-- Filter buttons -->
 
 		<button class="imgButton" id="filter" data-state="0" style="background-image: url(./icons/filter_msg.png)"
-			title="Filter — 🔽 Filter messages based on what you have entered"></button>
+			title="Filter - 🔽 Filter messages based on what you have entered"></button>
 		<button class="imgButton imgSmallButton" id="hide_emoji" data-state="0" onclick="emoji();"
 			style="background-image: url(./icons/filter_hideemojionly_on.png)"
-			title="Filter — 😀🚫 Hide messages that contains emojis only"></button>
+			title="Filter - 😀🚫 Hide messages that contains emojis only"></button>
 		<button class="imgButton imgSmallButton" id="only_donos" data-state="0" onclick="donos();"
 			style="background-image: url(./icons/filter_showpaidonly_off.png)"
-			title="Filter — 💲 Filter for messages that have donations/cheer"></button>
+			title="Filter - 💲 Filter for messages that have donations/cheer"></button>
 		<button class="imgButton imgSmallButton" id="only_members" data-state="0" onclick="members();"
 			style="background-image: url(./icons/filter_showmembers_off.png)"
-			title="Filter — 👑 Filter for messages that are from members"></button>
+			title="Filter - 👑 Filter for messages that are from members"></button>
 
 		<div class="horizontalSeparator"></div>
 
@@ -3267,11 +3267,11 @@ body.twoLines .hl-firstline .hl-badges {
 		<div id="queueSection" class="hidden">
 			<button class="imgButton" id="next_in_queue" data-state="0" onclick="nextInQueue(event);"
 				style="background-image: url(./icons/queue_show_next.png)"
-				title="Queue — ⏭ Feature next message in queue (select messages holding CTRL for add them to the queue)"><span
+				title="Queue - ⏭ Feature next message in queue (select messages holding CTRL for add them to the queue)"><span
 					id="next_in_queue_badge" class="buttonBadge">0</span></button>
 			<button class="imgButton imgSmallButton" id="show_only_queue" data-state="0" onclick="filterQueued();"
 				style="background-image: url(./icons/queue_show_listonly_off.png)"
-				title="Queue — 📑 Show only the messages in queue"></button>
+				title="Queue - 📑 Show only the messages in queue"></button>
 			<div class="horizontalSeparator"></div>
 		</div>
 
@@ -3280,10 +3280,10 @@ body.twoLines .hl-firstline .hl-badges {
 		<button class="imgButton" id="clear_overlay" data-state="0"
 			onclick="this.classList.remove('brush');setTimeout(function(ele){ele.classList.add('brush');},0,this);sendDataP2P(false);"
 			style="background-image: url(./icons/featured_clear.png)"
-			title="Featured — 🧹🌟 Clear the featured message (not this chat)"></button>
+			title="Featured - 🧹🌟 Clear the featured message (not this chat)"></button>
 		<button class="imgButton" id="autoshow" data-state="0" onclick="autoShow();"
 			style="background-image: url(./icons/featured_auto_stop.png)"
-			title="Featured — 🌟 Auto-feature messages as they come in"></button>
+			title="Featured - 🌟 Auto-feature messages as they come in"></button>
 
 		<div class="horizontalSeparator"></div>
 
@@ -3293,7 +3293,7 @@ body.twoLines .hl-firstline .hl-badges {
 			<input type="range" id="volumeSlider" min="0" max="100" value="100" class="volume-slider">
 			<button class="imgButton imgSmallButton" id="tts" data-state="0"
 				style="background-image: url(./icons/tts_incoming_messages_off.png)"
-				title="Text-to-speech — 🔊 Start reading incoming messages out-loud with text-to-speech"></button>
+				title="Text-to-speech - 🔊 Start reading incoming messages out-loud with text-to-speech"></button>
 		</div>
 
 		<!-- Scroll button -->
@@ -4968,7 +4968,7 @@ const usePrimaryNicknames = primaryNickKeys.some((key) => {
 			let ele = getById("notify");
 			ele.dataset.state = beep * 1;
 			ele.style["background-image"] = "url(./icons/main_msg_notify_on.png)";
-			ele.title = "Main — 🔕 Stop beeping when there is a new message";
+			ele.title = "Main - 🔕 Stop beeping when there is a new message";
 			playtone();
 		}
 
@@ -6195,14 +6195,14 @@ setTextShadow(bolderShadow);
 				//document.documentElement.style.setProperty("--show-emoji-only", "none");
 				//document.documentElement.style.setProperty("--show-images", "none");
 				ele.style["background-image"] = "url(./icons/filter_hideemojionly_off.png)";
-				ele.title = "Filter — 📄 Show all messages, including with emojis only";
+				ele.title = "Filter - 📄 Show all messages, including with emojis only";
 			} else {
 				hideEmojiOnly = false;
 				ele.dataset.state = "0";
 				//document.documentElement.style.setProperty("--show-emoji-only", "flex");
 				//document.documentElement.style.setProperty("--show-images", "inline-block");
 				ele.style["background-image"] = "url(./icons/filter_hideemojionly_on.png)";
-				ele.title = "Filter — 😀🚫 Hide messages that contains emojis only";
+				ele.title = "Filter - 😀🚫 Hide messages that contains emojis only";
 			}
 			redoOdd();
 		}
@@ -6361,13 +6361,13 @@ setTextShadow(bolderShadow);
 					//document.documentElement.style.setProperty("--show-donos-only", "none");
 
 					ele.style["background-image"] = "url(./icons/filter_showpaidonly_on.png)";
-					ele.title = "Filter — 📄 Stop filtering for messages that have donations/cheer";
+					ele.title = "Filter - 📄 Stop filtering for messages that have donations/cheer";
 				} else {
 					hideNotDonos = false;
 					ele.dataset.state = "0";
 					//document.documentElement.style.setProperty("--show-donos-only", flexOrNotToFlex);
 					ele.style["background-image"] = "url(./icons/filter_showpaidonly_off.png)";
-					ele.title = "Filter — 💲 Filter for messages that have donations/cheer";
+					ele.title = "Filter - 💲 Filter for messages that have donations/cheer";
 				}
 			} catch (e) { }
 			redoOdd();
@@ -6381,13 +6381,13 @@ setTextShadow(bolderShadow);
 					ele.dataset.state = "1";
 					//document.documentElement.style.setProperty("--show-donos-only", "none");
 					ele.style["background-image"] = "url(./icons/filter_showmembers_on.png)";
-					ele.title = "Filter — 📄 Stop filtering for messages that are from members";
+					ele.title = "Filter - 📄 Stop filtering for messages that are from members";
 				} else {
 					//document.documentElement.style.setProperty("--show-donos-only", flexOrNotToFlex);
 					hideNotMembers = false;
 					ele.dataset.state = "0";
 					ele.style["background-image"] = "url(./icons/filter_showmembers_off.png)";
-					ele.title = "Filter — 👑 Filter for messages that are from members";
+					ele.title = "Filter - 👑 Filter for messages that are from members";
 				}
 			} catch (e) { }
 			redoOdd();
@@ -6565,11 +6565,11 @@ setTextShadow(bolderShadow);
 			}
 			if (autoshow) {
 				getById("autoshow").style["background-image"] = "url(./icons/featured_auto_play.png)";
-				getById("autoshow").title = "Featured — ⏹🌟 Stop auto-featuring messages";
+				getById("autoshow").title = "Featured - ⏹🌟 Stop auto-featuring messages";
 			} else {
 				autoShowQueue = []; // empty the auto show queue to stop messages
 				getById("autoshow").style["background-image"] = "url(./icons/featured_auto_stop.png)";
-				getById("autoshow").title = "Featured — 🌟 Auto-feature messages as they come in";
+				getById("autoshow").title = "Featured - 🌟 Auto-feature messages as they come in";
 			}
 		}
 		function pause() {
@@ -6577,10 +6577,10 @@ setTextShadow(bolderShadow);
 			var ele = getById("pause");
 			if (pauseState) {
 				ele.style["background-image"] = "url(./icons/main_msg_play.png)";
-				ele.title = "Main — ▶️ Play incoming chat messages";
+				ele.title = "Main - ▶️ Play incoming chat messages";
 			} else {
 				ele.style["background-image"] = "url(./icons/main_msg_pause.png)";
-				ele.title = "Main — ⏸ Pause incoming chat messages";
+				ele.title = "Main - ⏸ Pause incoming chat messages";
 				//var queueR = queue.reverse();
 				if (!pauseState) {
 					if (smoothMessageBuffer) {
@@ -6608,12 +6608,12 @@ setTextShadow(bolderShadow);
 			if (beep) {
 				ele.dataset.state = beep * 1;
 				ele.style["background-image"] = "url(./icons/main_msg_notify_on.png)";
-				ele.title = "Main — 🔕 Stop beeping when there is a new message";
+				ele.title = "Main - 🔕 Stop beeping when there is a new message";
 				playtone();
 			} else {
 				ele.dataset.state = beep * 1;
 				ele.style["background-image"] = "url(./icons/main_msg_notify_off.png)";
-				ele.title = "Main — 🔔 Start beeping when there is a new message";
+				ele.title = "Main - 🔔 Start beeping when there is a new message";
 			}
 		}
 
@@ -8167,11 +8167,11 @@ setTextShadow(bolderShadow);
 					if (TTS.speech) {
 						getById("tts").dataset.state = "1";
 						getById("tts").style["background-image"] = "url(./icons/tts_incoming_messages_on.png)";
-						getById("tts").title = "Text-to-speech — 🔊⏹ Stop reading incoming messages out-loud with text-to-speech";
+						getById("tts").title = "Text-to-speech - 🔊⏹ Stop reading incoming messages out-loud with text-to-speech";
 					} else {
 						getById("tts").dataset.state = "0";
 						getById("tts").style["background-image"] = "url(./icons/tts_incoming_messages_off.png)";
-						getById("tts").title = "Text-to-speech — 🔊 Start reading incoming messages out-loud with text-to-speech";
+						getById("tts").title = "Text-to-speech - 🔊 Start reading incoming messages out-loud with text-to-speech";
 					}
 					return TTS.speech;
 				}
@@ -8829,7 +8829,7 @@ setTextShadow(bolderShadow);
 			} else if (event && autoshowqueued) {
 				autoshowqueued = false;
 				getById("next_in_queue").style["background-image"] = "url(./icons/queue_show_next.png)";
-				getById("next_in_queue").title = "Queue — ⏭ Feature next message in queue (select messages holding CTRL for add them to the queue)";
+				getById("next_in_queue").title = "Queue - ⏭ Feature next message in queue (select messages holding CTRL for add them to the queue)";
 				//	getById("next_in_queue_badge").classList.remove("hidden");
 				return;
 			}
@@ -9162,13 +9162,13 @@ setTextShadow(bolderShadow);
 				//document.documentElement.style.setProperty("--show-queue-only", "none");
 				hideNotQueued = true;
 				ele.style["background-image"] = "url(./icons/queue_show_listonly_on.png)";
-				ele.title = "Queue — 📄 Show all messages, including the ones in queue";
+				ele.title = "Queue - 📄 Show all messages, including the ones in queue";
 			} else {
 				ele.dataset.state = "0";
 				//document.documentElement.style.setProperty("--show-queue-only", flexOrNotToFlex);
 				hideNotQueued = false;
 				ele.style["background-image"] = "url(./icons/queue_show_listonly_off.png)";
-				ele.title = "Queue — 📑 Show only the messages in queue";
+				ele.title = "Queue - 📑 Show only the messages in queue";
 			}
 			redoOdd();
 		}
@@ -9176,11 +9176,11 @@ setTextShadow(bolderShadow);
 		function updateQueueButton(relabel = false) {
 			if (!selectedQueue.length) {
 				getById("next_in_queue_badge").innerText = "0";
-				getById("next_in_queue").title = "Queue — ⏭ Feature next message in queue (since queue is empty, it will clear the active overlay)";
+				getById("next_in_queue").title = "Queue - ⏭ Feature next message in queue (since queue is empty, it will clear the active overlay)";
 			} else {
 				getById("queueSection").classList.remove("hidden");
 				getById("next_in_queue_badge").innerText = selectedQueue.length;
-				getById("next_in_queue").title = "Queue — ⏭ Feature next message in queue (select messages holding CTRL for add them to the queue)";
+				getById("next_in_queue").title = "Queue - ⏭ Feature next message in queue (select messages holding CTRL for add them to the queue)";
 			}
 			if (relabel) {
 				for (var i = 0; i < selectedQueue.length; i++) {

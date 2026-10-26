@@ -655,7 +655,7 @@ async function sendChatMessage() {
         // channelId == the authenticated user's id
         const channelId = state.authUser?.id;
         if (!channelId) {
-            setChatStatus('No channel ID — profile not loaded.', true);
+            setChatStatus('No channel ID - profile not loaded.', true);
             els.sendChat.disabled = false;
             return;
         }

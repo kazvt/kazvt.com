@@ -984,7 +984,7 @@
       let box=$('slots');box.innerHTML='';
       stats.forEach(stat=>{
         let b=document.createElement('button'),c=S.draftStats[stat];
-        b.className='slot '+(c?'ready':'');b.innerHTML=`<strong>${stat}</strong><span>${c?text(c):'—'}</span>`;
+        b.className='slot '+(c?'ready':'');b.innerHTML=`<strong>${stat}</strong><span>${c?text(c):'-'}</span>`;
         b.onclick=()=>{if(S.chosen){let n=S.hand.find(x=>x.id===S.chosen),old=S.draftStats[stat];S.draftStats[stat]=n;S.chosen=old?old.id:null}else if(c){S.chosen=c.id;delete S.draftStats[stat]}creation()};
         box.appendChild(b);
       });
@@ -1003,7 +1003,7 @@
     function ui(){
       $('s-gold').textContent=S.gold;$('s-quarry').textContent=S.quarry.length;$('s-meals').textContent=S.meals.length;$('s-level').textContent=S.level;$('s-xp').textContent=`${S.xp} / ${S.need}`;
       $('meal').disabled=!S.quarry.length;$('track-more').disabled=!S.quarry.length;
-      let sel=$('sell-quarry');if(sel){sel.innerHTML=S.quarry.map((q,i)=>`<option value="${i}">${text(q)} — ${val(q)} gold</option>`).join('');$('sell').disabled=!S.quarry.length}
+      let sel=$('sell-quarry');if(sel){sel.innerHTML=S.quarry.map((q,i)=>`<option value="${i}">${text(q)} - ${val(q)} gold</option>`).join('');$('sell').disabled=!S.quarry.length}
       character();pack();
       if(!$('town').classList.contains('hidden'))renderShop();
     }
@@ -1011,20 +1011,20 @@
       if(!S.party.length){$('character').textContent=`No hunters completed. Creating ${S.createIndex+1} of ${PARTY_SIZE}.`;return}
       $('character').innerHTML='<div class="party-summary">'+S.party.map((p,i)=>`<span class="badge" title="${p.weapon.name} / ${p.armorGear.name}">${hunterName(i)}: H${maxHp(p)} A${maxAr(p)} S${baseSp(p)} - ${weaponRange(p)}R/${weaponDamage(p)}D</span>`).join('')+'</div>';
     }
-    function pack(){let a=[];if(S.quarry.length)a.push('Quarry: '+S.quarry.map(text).join(', '));if(S.meals.length)a.push('Meals: '+S.meals.map(x=>x+' hp').join(', '));if(S.bounty)a.push(`Encounter — ${S.bounty.title}: ${S.left} target${S.left===1?'':'s'} left`);$('pack').innerHTML=(a.length?a:['Empty']).map(x=>`<li>${x}</li>`).join('')}
+    function pack(){let a=[];if(S.quarry.length)a.push('Quarry: '+S.quarry.map(text).join(', '));if(S.meals.length)a.push('Meals: '+S.meals.map(x=>x+' hp').join(', '));if(S.bounty)a.push(`Encounter - ${S.bounty.title}: ${S.left} target${S.left===1?'':'s'} left`);$('pack').innerHTML=(a.length?a:['Empty']).map(x=>`<li>${x}</li>`).join('')}
     function setTownTab(tab){S.townTab=tab;['shop','bounties','market'].forEach(x=>$('town-'+x).classList.toggle('hidden',x!==tab));document.querySelectorAll('#qs-game [data-town-tab]').forEach(b=>b.classList.toggle('active',b.dataset.townTab===tab));fitActive()}
     function renderShop(){
       const hs=$('shop-hunter');if(!hs)return;
       const previous=hs.value;hs.innerHTML=S.party.map((_,i)=>`<option value="${i}">${hunterName(i)}</option>`).join('');if(previous!==''&&S.party[+previous])hs.value=previous;
       const i=+hs.value||0,p=S.party[i];
       if(!p){$('shop-equipped').textContent='Finish the four hunters before shopping.';$('shop-items').innerHTML='';return}
-      $('shop-equipped').innerHTML=`<b>${hunterName(i)} currently carries</b><br>${p.weapon.name} — ${weaponRange(p)} range / ${weaponDamage(p)} damage<br>${p.armorGear.name} — ${maxAr(p)} durability / ${armorWeight(p)} weight`;
+      $('shop-equipped').innerHTML=`<b>${hunterName(i)} currently carries</b><br>${p.weapon.name} - ${weaponRange(p)} range / ${weaponDamage(p)} damage<br>${p.armorGear.name} - ${maxAr(p)} durability / ${armorWeight(p)} weight`;
       document.querySelectorAll('#qs-game [data-shop-kind]').forEach(b=>b.classList.toggle('active',b.dataset.shopKind===S.shopKind));
       const box=$('shop-items');box.innerHTML='';
       gearCatalog.filter(g=>g.kind===S.shopKind).forEach(g=>{
         const d=document.createElement('article');d.className='gear-card';
         const stats=g.kind==='weapon'?`<span>${g.range} range</span><span>${g.damage} damage</span>`:`<span>${g.durability} durability</span><span>${g.weight} weight</span>`;
-        d.innerHTML=`<header><span class="gear-mark">${g.rank}${g.symbol}</span><div><h4>${g.name}</h4><div class="gear-type">${g.form} - ${g.kind}</div></div></header><p>${g.description}</p><div class="gear-stats">${stats}<span>${g.price} gold</span></div><button class="primary" ${S.gold<g.price?'disabled':''}>Buy & equip — ${g.price}g</button>`;
+        d.innerHTML=`<header><span class="gear-mark">${g.rank}${g.symbol}</span><div><h4>${g.name}</h4><div class="gear-type">${g.form} - ${g.kind}</div></div></header><p>${g.description}</p><div class="gear-stats">${stats}<span>${g.price} gold</span></div><button class="primary" ${S.gold<g.price?'disabled':''}>Buy & equip - ${g.price}g</button>`;
         d.querySelector('button').onclick=()=>buyGear(g.id);box.appendChild(d);
       });
     }
@@ -1065,12 +1065,12 @@
     function activeMember(){return S.battle.members[activeIndex()]}
     function renderHunterMini(p,m,i,active){
       const pct=(n,max)=>max?cap(n/max*100,0,100):0;
-      return `<article class="hunter-mini ${active?'active':''} ${m.fainted?'fainted':''}"><h4>${hunterName(i)}${m.fainted?' — fainted':''}</h4><div class="gear-line">${p.weapon.name} / ${p.armorGear.name}</div><div class="meter"><div class="meter-label"><span>HP</span><span>${m.hp}/${maxHp(p)}</span></div><div class="track"><div class="fill" style="width:${pct(m.hp,maxHp(p))}%"></div></div></div><div class="meter"><div class="meter-label"><span>Armor</span><span>${m.armor}/${m.armorMax}</span></div><div class="track"><div class="fill armor" style="width:${pct(m.armor,m.armorMax)}%"></div></div></div><div class="facts"><span>Spd <b>${speedFor(i)}</b></span><span>Dist <b>${m.distance}</b></span><span>Rng <b>${weaponRange(p)}</b></span><span>Dmg <b>${weaponDamage(p)}</b></span></div></article>`;
+      return `<article class="hunter-mini ${active?'active':''} ${m.fainted?'fainted':''}"><h4>${hunterName(i)}${m.fainted?' - fainted':''}</h4><div class="gear-line">${p.weapon.name} / ${p.armorGear.name}</div><div class="meter"><div class="meter-label"><span>HP</span><span>${m.hp}/${maxHp(p)}</span></div><div class="track"><div class="fill" style="width:${pct(m.hp,maxHp(p))}%"></div></div></div><div class="meter"><div class="meter-label"><span>Armor</span><span>${m.armor}/${m.armorMax}</span></div><div class="track"><div class="fill armor" style="width:${pct(m.armor,m.armorMax)}%"></div></div></div><div class="facts"><span>Spd <b>${speedFor(i)}</b></span><span>Dist <b>${m.distance}</b></span><span>Rng <b>${weaponRange(p)}</b></span><span>Dmg <b>${weaponDamage(p)}</b></span></div></article>`;
     }
     function combat(){
       let b=S.battle,e=S.enemy,ai=activeIndex(),m=activeMember(),p=S.party[ai],pct=(n,max)=>max?cap(n/max*100,0,100):0;
       $('party-combat').innerHTML=S.party.map((p2,i)=>renderHunterMini(p2,b.members[i],i,i===ai)).join('');
-      $('dist').textContent=m?m.distance:'—';$('engaged').textContent=!m?'No hunter':m.distance<=weaponRange(p)?'Your weapon engaged':m.distance<=e.range?'Enemy engaged':'Out of range';
+      $('dist').textContent=m?m.distance:'-';$('engaged').textContent=!m?'No hunter':m.distance<=weaponRange(p)?'Your weapon engaged':m.distance<=e.range?'Enemy engaged':'Out of range';
       $('e-name').textContent=e.name;$('e-count').textContent=`Wave ${S.targetIndex+1}/${S.targets.length} - ${S.left} target${S.left===1?'':'s'} remain - ${e.attacks} attack${e.attacks===1?'':'s'}/round`;
       $('e-hp-t').textContent=`${e.hp} / ${e.maxHp}`;$('e-hp').style.width=pct(e.hp,e.maxHp)+'%';$('e-ar-t').textContent=`${e.armor} / ${e.maxArmor}`;$('e-ar').style.width=pct(e.armor,e.maxArmor)+'%';
       ['Speed','Range','Damage','Trait'].forEach(k=>$("e-"+({Speed:'sp',Range:'ra',Damage:'da',Trait:'tr'}[k])).textContent=S.clues.includes(k)?e[k.toLowerCase()]:'?');
@@ -1111,7 +1111,7 @@
       S.targetIndex++;S.enemy=monster(S.targets[S.targetIndex]);signalMonster();
       S.battle.members.forEach(m=>{if(!m.fainted){m.distance=Math.max(0,S.enemy.speed+(S.bounty.distanceMod||0));m.moved=false;m.acted=false;m.block='none'}});S.battle.round++;newRoundOrder();
       const foe=document.querySelector('#qs-game .enemy-fighter');foe.classList.remove('rift-arrival');void foe.offsetWidth;foe.classList.add('rift-arrival');setTimeout(()=>foe.classList.remove('rift-arrival'),850);
-      note(`${S.enemy.name} arrives through the wormhole — wave ${S.targetIndex+1} of ${S.targets.length}. The encounter continues without returning to camp.`);combat();
+      note(`${S.enemy.name} arrives through the wormhole - wave ${S.targetIndex+1} of ${S.targets.length}. The encounter continues without returning to camp.`);combat();
     }
     function victory(){note(`${S.enemy.name} is defeated by the party.`,'good');S.left--;let q=draw();S.quarry.push(q);S.xp++;note(`Recovered ${text(q)} quarry and gained 1 shared experience. This draw did not remove that card from future draws.`,'good');if(S.xp>=S.need){S.returnTo=S.left?'nextWave':'reward';level()}else if(S.left)nextWave();else reward()}
     function reward(){let n=S.bounty.reward;for(let i=0;i<n;i++)S.quarry.push(draw());note(`${S.bounty.title} cleared: the encounter is complete and awards ${n} bonus quarry.`,'good');town()}
@@ -1175,7 +1175,7 @@
       S.targetIndex++;S.enemy=monster(S.targets[S.targetIndex]);signalMonster();
       S.battle.members.forEach(m=>{if(!m.fainted){m.distance=Math.max(0,S.enemy.speed+(S.bounty.distanceMod||0));m.moved=false;m.acted=false;m.block='none'}});S.battle.round++;newRoundOrder();
       const foe=document.querySelector('#qs-game .enemy-fighter');foe.classList.remove('rift-arrival');void foe.offsetWidth;foe.classList.add('rift-arrival');setTimeout(()=>foe.classList.remove('rift-arrival'),850);
-      note(`${S.enemy.name} arrives through the wormhole — wave ${S.targetIndex+1} of ${S.targets.length}. The encounter continues without returning to camp.`);combat();
+      note(`${S.enemy.name} arrives through the wormhole - wave ${S.targetIndex+1} of ${S.targets.length}. The encounter continues without returning to camp.`);combat();
     }
     function victory(){note(`${S.enemy.name} is defeated by the party.`,'good');S.left--;let q=draw();S.quarry.push(q);S.xp++;note(`Recovered ${text(q)} quarry and gained 1 shared experience. This draw did not remove that card from future draws.`,'good');if(S.xp>=S.need){S.returnTo=S.left?'nextWave':'reward';level()}else if(S.left)nextWave();else reward()}
     function reward(){let n=S.bounty.reward;for(let i=0;i<n;i++)S.quarry.push(draw());note(`${S.bounty.title} cleared: the encounter is complete and awards ${n} bonus quarry.`,'good');town()}

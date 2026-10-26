@@ -123,25 +123,25 @@
         <fieldset class="grid min-w-0 gap-1.5">
           <legend class="text-sm font-bold">Text</legend>
           <div class="grid min-w-0 grid-cols-3 gap-1 min-[360px]:grid-cols-6">
-            <input id="textColor" type="color" value="#000000" aria-label="Text colour" title="Text colour — selection, or all text when nothing is selected"
+            <input id="textColor" type="color" value="#000000" aria-label="Text colour" title="Text colour - selection, or all text when nothing is selected"
                    class="h-11 min-w-0 w-full cursor-pointer rounded-[0.6rem_0.45rem_0.65rem_0.5rem] border-2 border-stone-300 bg-white/75 p-1 outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-300/60">
-            <button id="boldText" type="button" aria-label="Bold" aria-pressed="false" title="Bold — selection, or all text when nothing is selected"
+            <button id="boldText" type="button" aria-label="Bold" aria-pressed="false" title="Bold - selection, or all text when nothing is selected"
                     class="grid h-11 min-w-0 place-items-center rounded-[0.6rem_0.45rem_0.65rem_0.5rem] border-2 border-dashed border-stone-400 bg-transparent text-stone-700 outline-none transition active:translate-y-px focus-visible:ring-2 focus-visible:ring-stone-300/70 aria-pressed:bg-stone-200 data-[mixed=true]:bg-stone-100">
               <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h5.5a3.5 3.5 0 0 1 0 7H7V4Z"/><path d="M7 11h6a4 4 0 0 1 0 8H7v-8Z"/></svg>
             </button>
-            <button id="italicText" type="button" aria-label="Italic" aria-pressed="false" title="Italic — selection, or all text when nothing is selected"
+            <button id="italicText" type="button" aria-label="Italic" aria-pressed="false" title="Italic - selection, or all text when nothing is selected"
                     class="grid h-11 min-w-0 place-items-center rounded-[0.6rem_0.45rem_0.65rem_0.5rem] border-2 border-dashed border-stone-400 bg-transparent text-stone-700 outline-none transition active:translate-y-px focus-visible:ring-2 focus-visible:ring-stone-300/70 aria-pressed:bg-stone-200 data-[mixed=true]:bg-stone-100">
               <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 4h8M6 20h8M14.5 4 9.5 20"/></svg>
             </button>
-            <button id="underlineText" type="button" aria-label="Underline" aria-pressed="false" title="Underline — selection, or all text when nothing is selected"
+            <button id="underlineText" type="button" aria-label="Underline" aria-pressed="false" title="Underline - selection, or all text when nothing is selected"
                     class="grid h-11 min-w-0 place-items-center rounded-[0.6rem_0.45rem_0.65rem_0.5rem] border-2 border-dashed border-stone-400 bg-transparent text-stone-700 outline-none transition active:translate-y-px focus-visible:ring-2 focus-visible:ring-stone-300/70 aria-pressed:bg-stone-200 data-[mixed=true]:bg-stone-100">
               <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v7a6 6 0 0 0 12 0V4M5 20h14"/></svg>
             </button>
-            <button id="strikeText" type="button" aria-label="Strikethrough" aria-pressed="false" title="Strikethrough — selection, or all text when nothing is selected"
+            <button id="strikeText" type="button" aria-label="Strikethrough" aria-pressed="false" title="Strikethrough - selection, or all text when nothing is selected"
                     class="grid h-11 min-w-0 place-items-center rounded-[0.6rem_0.45rem_0.65rem_0.5rem] border-2 border-dashed border-stone-400 bg-transparent text-stone-700 outline-none transition active:translate-y-px focus-visible:ring-2 focus-visible:ring-stone-300/70 aria-pressed:bg-stone-200 data-[mixed=true]:bg-stone-100">
               <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.5 6.5C16.4 5 14.6 4 12.2 4 9.4 4 7.5 5.4 7.5 7.5c0 1.2.6 2.1 1.9 2.7M6 12h12M10 13.8c.8.2 1.7.4 2.6.7 2.6.8 3.9 1.7 3.9 3.2 0 1.5-1.5 2.3-4.2 2.3-2.5 0-4.5-.8-5.8-2.4"/></svg>
             </button>
-            <button id="clearTextStyle" type="button" aria-label="Clear text style" title="Clear text style — selection, or all text when nothing is selected"
+            <button id="clearTextStyle" type="button" aria-label="Clear text style" title="Clear text style - selection, or all text when nothing is selected"
                     class="grid h-11 min-w-0 place-items-center rounded-[0.6rem_0.45rem_0.65rem_0.5rem] border-2 border-dashed border-stone-400 bg-transparent text-stone-700 outline-none transition active:translate-y-px focus-visible:ring-2 focus-visible:ring-stone-300/70">
               <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 7-11 9 6-5.4 8H8L4 17Z"/><path d="m9 13 6 4M4 20h16"/></svg>
             </button>
@@ -692,8 +692,8 @@
     const colorState = rangeColorState();
     textColorInput.value = colorState.value;
     textColorInput.title = colorState.mixed
-      ? "Mixed colours — choose a colour for the selection"
-      : "Text colour — selection, or all text when nothing is selected";
+      ? "Mixed colours - choose a colour for the selection"
+      : "Text colour - selection, or all text when nothing is selected";
     alignLeftButton.setAttribute("aria-pressed", textAlignment === "left" ? "true" : "false");
     alignCenterButton.setAttribute("aria-pressed", textAlignment === "center" ? "true" : "false");
     alignRightButton.setAttribute("aria-pressed", textAlignment === "right" ? "true" : "false");

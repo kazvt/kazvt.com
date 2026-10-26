@@ -1,4 +1,4 @@
-/* WIFEY MIX-8 — explicit SoundFont + preset icon map.
+/* WIFEY MIX-8 - explicit SoundFont + preset icon map.
    All classes target Font Awesome 6.7.2 Free Solid, already loaded by index.html. */
 (function(){
   const sourceIcons={"sf64":{"icon":"fa-ghost","label":"8-bit / retro game palette"},"rush":{"icon":"fa-grip","secondary":"fa-hand-pointer","label":"finger drum-pad / game soundtrack palette"},"genies":{"icon":"fa-gamepad","label":"game-console palette"},"meow":{"icon":"fa-cat","label":"cat / meow palette"},"casino":{"icon":"fa-drum","secondary":"fa-music","label":"jazz-style drum palette"}};

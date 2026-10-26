@@ -1851,7 +1851,7 @@
       /\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/g,
       /\b\d{4}-\d{2}-\d{2}\b/g,
       // Common platform patterns
-      /(?:^|\s+)[-–—]\s+(?:Seconds|Minutes|Hours|Days|Weeks|Months|Years) ago(?:\s+|$)/gi,
+      /(?:^|\s+)[-–-]\s+(?:Seconds|Minutes|Hours|Days|Weeks|Months|Years) ago(?:\s+|$)/gi,
       /\s*<i><small>.*?<\/small><\/i>\s*/gi,
       /\s*<small>.*?<\/small>\s*/gi,
       /\s*-\s+Seconds ago\s*/gi,
@@ -1882,8 +1882,8 @@
     if (!name) return "";
     
     // Handle special case time patterns
-    if (name.match(/\s+-\s+Seconds ago/i) || name.match(/\s+[-–—]\s+.*ago/i)) {
-      name = name.split(/\s+[-–—]\s+/)[0];
+    if (name.match(/\s+-\s+Seconds ago/i) || name.match(/\s+[-–-]\s+.*ago/i)) {
+      name = name.split(/\s+[-–-]\s+/)[0];
     }
     
     // Remove common suffix patterns

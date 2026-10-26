@@ -1,5 +1,5 @@
 /*
-  WIFEY MIX-8 — drift-safe pitch-preserving tempo engine
+  WIFEY MIX-8 - drift-safe pitch-preserving tempo engine
   ------------------------------------------------------
   Offline WSOLA-style time stretching for decoded AudioBuffers.
 

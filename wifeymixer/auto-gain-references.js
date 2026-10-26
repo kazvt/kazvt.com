@@ -1,4 +1,4 @@
-// Wifey Mix-8 — offline AUTO GAIN reference scan
+// Wifey Mix-8 - offline AUTO GAIN reference scan
 // Generated from the bundled MP3 stems using full-file RMS level (dBFS).
 //
 // EDITING: leave measuredDb alone and change adjustDb if a stem feels wrong.

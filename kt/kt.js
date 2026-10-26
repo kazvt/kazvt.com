@@ -138,7 +138,7 @@
         badgeImage.alt = option.alt;
         badgeImageLink.href = option.src;
         badgeImageLink.setAttribute("aria-label", option.linkLabel);
-        badgeStatus.textContent = `Loading ${option.label.toLowerCase()} badge · ${badgeIndex + 1} / ${badgeOptions.length}`;
+        badgeStatus.textContent = `Loading ${option.label.toLowerCase()} badge - ${badgeIndex + 1} / ${badgeOptions.length}`;
         previousBadge.disabled = badgeIndex === 0;
         nextBadge.disabled = badgeIndex === badgeOptions.length - 1;
         badgePicker.dataset.loading = "true";
@@ -155,7 +155,7 @@
           if (request !== badgeRequest) return;
           delete badgePicker.dataset.loading;
           badgeLoading.hidden = true;
-          badgeStatus.textContent = `${option.label} · ${badgeIndex + 1} / ${badgeOptions.length}`;
+          badgeStatus.textContent = `${option.label} - ${badgeIndex + 1} / ${badgeOptions.length}`;
         }).catch(() => {
           if (request !== badgeRequest) return;
           delete badgePicker.dataset.loading;
@@ -1378,7 +1378,7 @@
       const tooltip = tooltipLabel
         ? (state === "live" ? `⬤ LIVE: ${tooltipLabel}` : tooltipLabel)
         : "";
-      const cardTitle = [tooltip, cacheNote].filter(Boolean).join(" · ");
+      const cardTitle = [tooltip, cacheNote].filter(Boolean).join(" - ");
       if (cardTitle) card.title = cardTitle;
       else card.removeAttribute("title");
 

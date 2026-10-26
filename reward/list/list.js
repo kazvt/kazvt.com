@@ -410,7 +410,7 @@ import "../background-context.mjs?v=1";
     }
     pageTitle.setAttribute("aria-label", title);
     renderMixedText(pageTitle, title);
-    document.title = `${title} — kazvt`;
+    document.title = `${title} - kazvt`;
 
     try {
       const result = await registryPromise;
