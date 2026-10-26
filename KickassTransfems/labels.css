@@ -439,6 +439,10 @@
 }
 
 .kt-member-status-rail {
+  position: absolute;
+  grid-column: auto;
+  grid-row: auto;
+  inline-size: auto;
   right: 9px;
   bottom: 5px;
   left: 9px;
