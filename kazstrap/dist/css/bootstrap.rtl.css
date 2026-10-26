@@ -12033,76 +12033,110 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: bold pop-art button stack. */
-.btn {
-  --kaz-btn-pop-color: var(--bs-btn-bg);
-  --kaz-btn-pop-ink: color-mix(in srgb, var(--kaz-btn-pop-color) 48%, #171126);
-  --kaz-btn-pop-accent: color-mix(in srgb, var(--kaz-btn-pop-color) 52%, #ff2f92);
-  position: relative;
-  isolation: isolate;
-  border: 3px solid var(--kaz-btn-pop-ink);
+/* Kazstrap: controlled pop treatment for Bootstrap buttons. */
+.btn:not(.btn-link) {
+  --kaz-btn-ink: #171126;
+  --kaz-btn-color: var(--bs-btn-bg);
+  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 68%, var(--kaz-btn-ink));
+  --kaz-btn-shadow-light: color-mix(in oklab, var(--kaz-btn-color) 72%, white);
+  border: 2px solid var(--kaz-btn-ink);
+  outline: 2px solid var(--kaz-btn-shadow-light);
+  outline-offset: 4px;
   box-shadow:
-    5px 5px 0 var(--kaz-btn-pop-ink),
-    10px 10px 0 var(--kaz-btn-pop-accent);
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s cubic-bezier(.2, .8, .2, 1);
+    4px 4px 0 var(--kaz-btn-shadow-deep),
+    8px 8px 0 var(--kaz-btn-shadow-light);
+  font-weight: 600;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, outline-color 0.15s ease-in-out, box-shadow 0.12s ease-out, transform 0.12s ease-out;
 }
-.btn::before,
-.btn::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  background: transparent;
-  border: 2px solid;
-  transition: border-color 0.15s ease-in-out;
+.btn[class*="btn-outline-"]:not(.btn-link) {
+  --kaz-btn-color: var(--bs-btn-color);
 }
-.btn::before {
-  inset: -5px;
-  border-color: var(--kaz-btn-pop-ink);
-  transform: translate(2px, 2px);
+.btn:not(.btn-link):hover {
+  --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
 }
-.btn::after {
-  inset: -12px;
-  border-color: var(--kaz-btn-pop-accent);
-  transform: translate(6px, 6px);
+.btn[class*="btn-outline-"]:hover:not(.btn-link) {
+  --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
 }
-.btn[class*="btn-outline-"],
-.btn.btn-link {
-  --kaz-btn-pop-color: var(--bs-btn-color);
+.btn:not(.btn-link):active,
+.btn:not(.btn-link).active,
+.btn:not(.btn-link).show,
+.btn-check:checked + .btn:not(.btn-link) {
+  --kaz-btn-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
 }
-.btn:hover {
-  --kaz-btn-pop-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
-  transform: translate(-2px, -2px);
+.btn:not(.btn-link):hover:not(:focus-visible) {
+  transform: translate(-1px, -1px);
+  box-shadow:
+    5px 5px 0 var(--kaz-btn-shadow-deep),
+    10px 10px 0 var(--kaz-btn-shadow-light);
 }
-.btn[class*="btn-outline-"]:hover {
-  --kaz-btn-pop-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
+.btn:not(.btn-link):active:not(:focus-visible),
+.btn:not(.btn-link).active:not(:focus-visible),
+.btn:not(.btn-link).show:not(:focus-visible),
+.btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
+  transform: translate(4px, 4px);
+  box-shadow:
+    0 0 0 var(--kaz-btn-shadow-deep),
+    4px 4px 0 var(--kaz-btn-shadow-light);
 }
-.btn.btn-link:hover {
-  --kaz-btn-pop-color: var(--bs-btn-hover-color, var(--bs-btn-color));
+.btn:not(.btn-link):focus-visible {
+  box-shadow:
+    var(--bs-btn-focus-box-shadow),
+    4px 4px 0 var(--kaz-btn-shadow-deep),
+    8px 8px 0 var(--kaz-btn-shadow-light);
 }
-.btn:active,
-.btn.active,
-.btn.show,
-.btn-check:checked + .btn {
-  --kaz-btn-pop-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
-  transform: translate(3px, 3px);
+.btn:not(.btn-link):active:focus-visible,
+.btn:not(.btn-link).active:focus-visible,
+.btn:not(.btn-link).show:focus-visible,
+.btn-check:checked + .btn:not(.btn-link):focus-visible {
+  transform: translate(4px, 4px);
+  box-shadow:
+    var(--bs-btn-focus-box-shadow),
+    0 0 0 var(--kaz-btn-shadow-deep),
+    4px 4px 0 var(--kaz-btn-shadow-light);
 }
-.btn.btn-link:active,
-.btn.btn-link.active,
-.btn.btn-link.show {
-  --kaz-btn-pop-color: var(--bs-btn-active-color, var(--bs-btn-color));
+.btn-group,
+.btn-group-vertical,
+.input-group {
+  box-shadow: 4px 4px 0 #171126;
+}
+.btn-group > .btn:not(.btn-link),
+.btn-group-vertical > .btn:not(.btn-link),
+.input-group > .btn:not(.btn-link) {
+  border-width: 1px;
+  outline: 0;
+  box-shadow: none;
+  transform: none;
+}
+.btn-group > .btn:not(.btn-link):active,
+.btn-group > .btn:not(.btn-link).active,
+.btn-group > .btn:not(.btn-link).show,
+.btn-group-vertical > .btn:not(.btn-link):active,
+.btn-group-vertical > .btn:not(.btn-link).active,
+.btn-group-vertical > .btn:not(.btn-link).show,
+.input-group > .btn:not(.btn-link):active,
+.input-group > .btn:not(.btn-link).active,
+.input-group > .btn:not(.btn-link).show {
+  box-shadow: none;
+  transform: none;
+}
+.btn-group > .btn:not(.btn-link):focus-visible,
+.btn-group-vertical > .btn:not(.btn-link):focus-visible,
+.input-group > .btn:not(.btn-link):focus-visible,
+.btn-group > .btn:not(.btn-link):active:focus-visible,
+.btn-group-vertical > .btn:not(.btn-link):active:focus-visible,
+.input-group > .btn:not(.btn-link):active:focus-visible {
+  box-shadow: var(--bs-btn-focus-box-shadow);
+  transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn,
-  .btn::before,
-  .btn::after {
+  .btn:not(.btn-link) {
     transition: none;
   }
-  .btn:hover,
-  .btn:active,
-  .btn.active,
-  .btn.show,
-  .btn-check:checked + .btn {
+  .btn:not(.btn-link):hover,
+  .btn:not(.btn-link):active,
+  .btn:not(.btn-link).active,
+  .btn:not(.btn-link).show,
+  .btn-check:checked + .btn:not(.btn-link) {
     transform: none;
   }
 }
