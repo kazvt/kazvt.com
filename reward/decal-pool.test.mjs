@@ -10,7 +10,7 @@ const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 test("the edge pool includes the existing decals and every added GIF exactly once", () => {
   const sources = REWARD_DECAL_POOL.map(item => item.src);
-  assert.equal(REWARD_DECAL_POOL.length, 61);
+  assert.equal(REWARD_DECAL_POOL.length, 66);
   assert.equal(new Set(sources).size, sources.length);
   assert.ok(!sources.includes("/reward/retro/decal-pool/532EV253ZQEW44WBJXAA4O7ENQPQ5UBC.gif"));
   assert.ok(!sources.includes("/reward/retro/decal-pool/4HIPRF5OTTQDQNUUF2FJGODOYYYYHR5K.gif"));
@@ -27,6 +27,26 @@ test("the edge pool includes the existing decals and every added GIF exactly onc
   assert.ok(sources.includes("/reward/retro/decal-pool/FAY72EKBPY2XQ7TG6DXLZASSTYAT3HR6.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/ROSN2WTVW2U2AUQKM5JYHT2JAHTA7S22.gif"));
   assert.ok(sources.includes("/reward/retro/decal-pool/PIUMSHKA5VQRPNYL5YA523BW7BVVF7IE.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/QP3WU3GXFXMXCHPXCFWL3HZ6MAPTP7PC.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/2EYNBD774YWU6RPB5T6ZDUHI4QV5TSHX_bgless.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/57BLD2VKXE35ZAXFUQ7MUJS3KEMRWYQF.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/JZSVZSUQGID7GWMAUNLS45CBCRBMRRIV.gif"));
+  assert.ok(sources.includes("/reward/retro/decal-pool/VUOP5UKB566QCBHE55NGQIZMLZMRI5OV.gif"));
+});
+
+test("the five supplied celebration sprites are eligible for either side", () => {
+  const suppliedFiles = [
+    "QP3WU3GXFXMXCHPXCFWL3HZ6MAPTP7PC.gif",
+    "2EYNBD774YWU6RPB5T6ZDUHI4QV5TSHX_bgless.gif",
+    "57BLD2VKXE35ZAXFUQ7MUJS3KEMRWYQF.gif",
+    "JZSVZSUQGID7GWMAUNLS45CBCRBMRRIV.gif",
+    "VUOP5UKB566QCBHE55NGQIZMLZMRI5OV.gif"
+  ];
+  for (const filename of suppliedFiles) {
+    const item = REWARD_DECAL_POOL.find(entry => entry.src.endsWith(`/${filename}`));
+    assert.ok(item, `${filename} is present in the reward decal pool`);
+    assert.equal(item.side, undefined, `${filename} is not restricted to one edge`);
+  }
 });
 
 test("every pool entry resolves to a local GIF file", async () => {
