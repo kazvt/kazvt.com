@@ -55,7 +55,7 @@
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
-  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 68%, white);
+  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
   --kaz-btn-shadow: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 82%, black);
