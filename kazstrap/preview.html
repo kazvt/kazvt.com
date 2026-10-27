@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap button study - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-shadow-colors-back-1">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-retro-pop-1">
   <style>
     .shadow-comparison {
       display: grid;
@@ -26,9 +26,11 @@
       gap: 1.25rem 1.1rem;
       padding: .75rem .35rem 1rem;
     }
-    .shadow-comparison__neutral .btn:not(.btn-link) {
-      --kaz-btn-shadow-deep: #111116;
-      --kaz-btn-layer: #252530;
+    .shadow-comparison__solid .btn:not(.btn-link) {
+      background-image: none;
+    }
+    .shadow-comparison__solid .btn[class*="btn-outline-"]:not(.btn-link) {
+      background-image: none;
     }
   </style>
 </head>
@@ -60,17 +62,17 @@
     </div>
 
     <div class="alert alert-info" role="status">
-      Compare two hard-shadow color treatments. The buttons use the same colors and interactions; only the shadow colors change.
+      Compare the new color-derived face gradient with a solid face. Both use the same bevel, hard shadows, and interaction states.
     </div>
 
     <section class="py-4" aria-labelledby="button-study-title">
       <p class="text-body-secondary mb-1">BUTTON STUDY</p>
-      <h2 class="h3 mb-0" id="button-study-title">Color-reactive button layers</h2>
-      <p class="text-body-secondary mt-2 mb-4">Same button colors, bevel, and offsets on both sides. Compare color-matched shadows with neutral dark shadows.</p>
+      <h2 class="h3 mb-0" id="button-study-title">Retro pop buttons</h2>
+      <p class="text-body-secondary mt-2 mb-4">Same button colors, bevel, and hard-shadow offsets on both sides. Hover and press them to see the feedback.</p>
       <div class="shadow-comparison">
-        <div class="shadow-comparison__option shadow-comparison__tonal">
-          <h3 class="h5">Button-color shadows</h3>
-          <p class="text-body-secondary">A darker shade sits close to the button; a lighter shade sits farther out.</p>
+        <div class="shadow-comparison__option">
+          <h3 class="h5">Tonal face gradient</h3>
+          <p class="text-body-secondary">A gentle color-matched shade deepens toward the bottom edge.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
@@ -80,9 +82,9 @@
             <button type="button" class="btn btn-outline-primary">Outline</button>
           </div>
         </div>
-        <div class="shadow-comparison__option shadow-comparison__neutral">
-          <h3 class="h5">Neutral dark shadows</h3>
-          <p class="text-body-secondary">Uses the same neutral dark shades for every button, in the same order.</p>
+        <div class="shadow-comparison__option shadow-comparison__solid">
+          <h3 class="h5">Solid face</h3>
+          <p class="text-body-secondary">The same directional bevel and hard shadows, with a flat button face.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
