@@ -105,7 +105,6 @@ export const REWARD_DECAL_POOL = Object.freeze([
   { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/57BLD2VKXE35ZAXFUQ7MUJS3KEMRWYQF.gif" },
   { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/JZSVZSUQGID7GWMAUNLS45CBCRBMRRIV.gif" },
   { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/VUOP5UKB566QCBHE55NGQIZMLZMRI5OV.gif" }
-  }
 ]);
 
 function createSeededRandom(seed) {
