@@ -541,7 +541,7 @@
 
 /* Only genuinely narrow cards stack the descriptor beneath identity; wider
    cards preserve the consistent right-hand tag lane and bottom status corner. */
-@container kt-member-card (max-width: 280px) {
+@container kt-member-card (max-width: 340px) {
   .kt-member-info {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
@@ -566,12 +566,14 @@
 }
 
 /* In the narrow fallback, give identity and descriptor separate short rows. */
-@container kt-member-card (max-width: 280px) {
+@container kt-member-card (max-width: 340px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(44px, 42cqi, 78px);
+    --kt-member-avatar-size: clamp(42px, 36cqi, 70px);
     --kt-member-safe-inset: clamp(7px, calc(2.5cqi + 3.5px), 12px);
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
+    min-height: 0;
+    min-block-size: 0;
     gap: 3px 6px;
     padding: var(--kt-member-safe-inset);
   }
@@ -585,7 +587,8 @@
     grid-template-rows: auto auto;
     align-self: stretch;
     align-content: start;
-    row-gap: 3px;
+    row-gap: 1px;
+    padding-block-end: 14px;
   }
 
   .kt-member-info > .kt-member-copy {
@@ -596,7 +599,7 @@
     grid-template-rows: auto auto;
     align-content: start;
     align-self: start;
-    gap: 3px;
+    gap: 2px;
     padding: 0;
   }
 
@@ -604,18 +607,18 @@
     grid-column: 1 / -1;
     grid-row: 1;
     justify-content: flex-start;
-    gap: 3px 5px;
+    gap: 2px 4px;
   }
 
-  .kt-member-info .kt-member-name { font-size: clamp(1rem, 10cqi, 1.2rem); line-height: 1.08; }
-  .kt-member-info .kt-member-pronouns { font-size: clamp(.62rem, 7cqi, .72rem); padding: 1px 3px; }
+  .kt-member-info .kt-member-name { font-size: clamp(.64rem, 7.5cqi, .82rem); line-height: 1; }
+  .kt-member-info .kt-member-pronouns { font-size: clamp(.46rem, 5.2cqi, .58rem); padding: 1px 2px; line-height: 1; }
 
   .kt-member-info .kt-member-handle {
     grid-column: 1;
     grid-row: 2;
     min-inline-size: 0;
-    font-size: clamp(.68rem, 8cqi, .82rem);
-    line-height: 1.12;
+    font-size: clamp(.44rem, 4.6cqi, .54rem);
+    line-height: 1;
   }
 
   .kt-member-copy > .kt-card-languages {
@@ -627,9 +630,9 @@
   }
 
   .kt-member-copy > .kt-card-languages [data-kt-language-badge] {
-    min-height: 11px;
-    padding-inline: 2px;
-    font-size: .54rem;
+    min-height: 9px;
+    padding-inline: 1px;
+    font-size: .4rem;
   }
 
   .kt-member-info > .kt-member-tag,
@@ -640,22 +643,29 @@
     align-self: start;
     inline-size: fit-content;
     max-inline-size: 100%;
-    padding: 2px 5px;
-    font-size: clamp(.68rem, 7.8cqi, .8rem);
-    line-height: 1.12;
+    padding: 1px 3px;
+    font-size: clamp(.46rem, 5.5cqi, .6rem);
+    line-height: 1;
     text-align: end;
   }
 
   .kt-member-status-rail {
-    height: 16px;
+    inset-inline-start: auto;
+    inset-inline-end: var(--kt-member-safe-inset);
+    inset-block-start: auto;
+    inset-block-end: var(--kt-member-safe-inset);
+    inline-size: auto;
+    max-inline-size: 42%;
+    height: 12px;
+    justify-content: flex-end;
   }
 
   .kt-member-status-rail > .kt-live-sticker { width: 38px; max-width: 40%; }
   .kt-member-status-rail > .kt-last-live:not([hidden]) {
-    max-inline-size: calc(100% - 30px);
+    max-inline-size: 100%;
     gap: 2px;
-    padding: 1px 3px;
-    font-size: .58rem;
+    padding: 1px 2px;
+    font-size: .46rem;
   }
   .kt-member-status-rail > .kt-last-live:not([hidden]) svg {
     width: 9px;
@@ -664,21 +674,22 @@
   }
 }
 
-/* The narrowest two-column cards keep the portrait large but tighten only
-   secondary type and gutters; long strings can wrap instead of clipping. */
+/* The narrowest two-column cards tighten the portrait and type together so
+   long identities remain legible without creating a tall extra status row. */
 @container kt-member-card (max-width: 140px) {
   .kt-member {
+    --kt-member-avatar-size: clamp(40px, 34cqi, 46px);
     gap: 3px 4px;
     padding: var(--kt-member-safe-inset);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
   }
 
   .kt-member-info .kt-member-title { gap: 2px 4px; }
-  .kt-member-info .kt-member-name { font-size: clamp(.84rem, 10.5cqi, .96rem); }
-  .kt-member-info .kt-member-pronouns { font-size: clamp(.6rem, 6.8cqi, .68rem); padding: 1px 2px; }
-  .kt-member-info .kt-member-handle { font-size: clamp(.64rem, 7.8cqi, .74rem); }
+  .kt-member-info .kt-member-name { font-size: clamp(.6rem, 7.5cqi, .72rem); }
+  .kt-member-info .kt-member-pronouns { font-size: clamp(.44rem, 5.2cqi, .52rem); }
+  .kt-member-info .kt-member-handle { font-size: clamp(.42rem, 4.6cqi, .5rem); }
   .kt-member-info > .kt-member-tag,
-  .kt-member-info > .kt-member-badge { padding: 2px 4px; font-size: clamp(.62rem, 7.4cqi, .72rem); }
+  .kt-member-info > .kt-member-badge { font-size: clamp(.44rem, 5.5cqi, .54rem); }
   .kt-member-status-rail { height: 14px; }
   .kt-member-status-rail > .kt-live-sticker { width: 34px; }
   .kt-member-status-rail > .kt-last-live:not([hidden]) { font-size: .54rem; }
