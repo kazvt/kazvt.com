@@ -8,6 +8,39 @@
   <title>Kazstrap button study - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-high-contrast-2">
+  <style>
+    .shadow-comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+      gap: 1.25rem;
+    }
+    .shadow-comparison__option {
+      min-width: 0;
+      padding: 1.25rem;
+      border: 1px solid var(--bs-border-color);
+      background: var(--bs-body-bg);
+    }
+    .shadow-comparison__buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem 1.1rem;
+      padding: .75rem .35rem 1rem;
+    }
+    .shadow-comparison__tonal .btn:not(.btn-link) {
+      --kaz-btn-shadow-deep: color-mix(in srgb, var(--kaz-btn-color) 60%, black);
+      --kaz-btn-layer: color-mix(in srgb, var(--kaz-btn-color) 42%, black);
+    }
+    @supports (color: hsl(from red h calc(s * 1.1) calc(l * .4))) {
+      .shadow-comparison__tonal .btn:not(.btn-link) {
+        --kaz-btn-shadow-deep: hsl(from var(--kaz-btn-color) h calc(s * 1.1) calc(l * .34));
+        --kaz-btn-layer: hsl(from var(--kaz-btn-color) h calc(s * 1.1) calc(l * .5));
+      }
+    }
+    .shadow-comparison__neutral .btn:not(.btn-link) {
+      --kaz-btn-shadow-deep: #252530;
+      --kaz-btn-layer: #111116;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
@@ -37,19 +70,38 @@
     </div>
 
     <div class="alert alert-info" role="status">
-      A deep color shade and a bright color tint form two crisp shadow tiers beneath the compact bevel.
+      Compare two hard-shadow color treatments. The buttons use the same colors and interactions; only the shadow colors change.
     </div>
 
     <section class="py-4" aria-labelledby="button-study-title">
       <p class="text-body-secondary mb-1">BUTTON STUDY</p>
       <h2 class="h3 mb-0" id="button-study-title">Color-reactive button layers</h2>
-      <div class="d-flex flex-wrap gap-4 px-2 pt-4 pb-3">
-        <button type="button" class="btn btn-primary">Primary</button>
-        <button type="button" class="btn btn-danger">Danger</button>
-        <button type="button" class="btn" style="--bs-btn-bg: #e00038; --bs-btn-color: #fff; --bs-btn-hover-bg: #c00032; --bs-btn-active-bg: #a00028;">Custom red</button>
-        <button type="button" class="btn btn-warning">Warning</button>
-        <button type="button" class="btn btn-success">Success</button>
-        <button type="button" class="btn btn-outline-primary">Outline</button>
+      <p class="text-body-secondary mt-2 mb-4">Same button colors, bevel, and offsets on both sides. Compare color-matched shadows with neutral dark shadows.</p>
+      <div class="shadow-comparison">
+        <div class="shadow-comparison__option shadow-comparison__tonal">
+          <h3 class="h5">Darker, button-color shadows</h3>
+          <p class="text-body-secondary">Keeps each button’s hue and pushes the shadows darker.</p>
+          <div class="shadow-comparison__buttons">
+            <button type="button" class="btn btn-primary">Primary</button>
+            <button type="button" class="btn btn-danger">Danger</button>
+            <button type="button" class="btn" style="--bs-btn-bg: #e00038; --bs-btn-color: #fff; --bs-btn-hover-bg: #c00032; --bs-btn-active-bg: #a00028;">Custom red</button>
+            <button type="button" class="btn btn-warning">Warning</button>
+            <button type="button" class="btn btn-success">Success</button>
+            <button type="button" class="btn btn-outline-primary">Outline</button>
+          </div>
+        </div>
+        <div class="shadow-comparison__option shadow-comparison__neutral">
+          <h3 class="h5">Neutral dark shadows</h3>
+          <p class="text-body-secondary">Uses the same dark ink colors for every button.</p>
+          <div class="shadow-comparison__buttons">
+            <button type="button" class="btn btn-primary">Primary</button>
+            <button type="button" class="btn btn-danger">Danger</button>
+            <button type="button" class="btn" style="--bs-btn-bg: #e00038; --bs-btn-color: #fff; --bs-btn-hover-bg: #c00032; --bs-btn-active-bg: #a00028;">Custom red</button>
+            <button type="button" class="btn btn-warning">Warning</button>
+            <button type="button" class="btn btn-success">Success</button>
+            <button type="button" class="btn btn-outline-primary">Outline</button>
+          </div>
+        </div>
       </div>
     </section>
     <section class="py-4" id="games" aria-labelledby="games-title">
