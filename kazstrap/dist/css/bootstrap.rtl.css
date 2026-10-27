@@ -12033,28 +12033,37 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: color-derived retro pop buttons. */
+/* Kazstrap: color-derived arcade buttons with layered up, over, and down states. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
-  --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
+  --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 60%, black);
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 30%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
-  --kaz-btn-face-gradient: linear-gradient(
-    to bottom,
-    var(--kaz-btn-color) 0%,
-    var(--kaz-btn-color) 48%,
-    color-mix(in oklab, var(--kaz-btn-color) 92%, black) 100%
-  );
-  border: 2px solid var(--kaz-btn-edge);
+  --kaz-btn-face-gradient:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--kaz-btn-color) 84%, white) 0%,
+      color-mix(in oklab, var(--kaz-btn-color) 92%, white) 9%,
+      color-mix(in oklab, var(--kaz-btn-color) 98%, white) 18%,
+      transparent 32%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--kaz-btn-color) 0%,
+      var(--kaz-btn-color) 46%,
+      color-mix(in oklab, var(--kaz-btn-color) 82%, black) 100%
+    );
+  border: 3px solid var(--kaz-btn-edge);
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
-    inset -1px -1px 0 var(--kaz-btn-lower-lip),
+    inset 2px 2px 0 var(--kaz-btn-highlight),
+    inset -2px -2px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
 .btn[class*="btn-outline-"]:not(.btn-link) {
@@ -12083,8 +12092,8 @@ textarea.form-control-lg {
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-2px, -2px);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
-    inset -1px -1px 0 var(--kaz-btn-lower-lip),
+    inset 2px 2px 0 var(--kaz-btn-highlight),
+    inset -2px -2px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
 }
@@ -12094,8 +12103,8 @@ textarea.form-control-lg {
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
   transform: translate(3px, 3px);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
-    inset -1px -1px 0 var(--kaz-btn-lower-lip),
+    inset 2px 2px 0 var(--kaz-btn-lower-lip),
+    inset -2px -2px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
@@ -12104,8 +12113,8 @@ textarea.form-control-lg {
 .btn:not(.btn-link).show:focus-visible {
   transform: translate(3px, 3px);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
-    inset -1px -1px 0 var(--kaz-btn-lower-lip),
+    inset 2px 2px 0 var(--kaz-btn-lower-lip),
+    inset -2px -2px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
