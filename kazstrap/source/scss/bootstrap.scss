@@ -55,12 +55,14 @@
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
-  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 55%, white);
+  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 48%, white);
+  --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
   --kaz-btn-shadow: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 82%, black);
   border: 2px solid var(--kaz-btn-edge);
   box-shadow:
-    inset 0 1px 0 var(--kaz-btn-highlight),
+    inset 0 2px 0 var(--kaz-btn-highlight),
+    inset 0 -1px 0 var(--kaz-btn-lower-lip),
     0 4px 0 var(--kaz-btn-shadow),
     0 8px 0 var(--kaz-btn-layer);
   font-weight: 600;
@@ -84,7 +86,8 @@
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translateY(-2px);
   box-shadow:
-    inset 0 1px 0 var(--kaz-btn-highlight),
+    inset 0 2px 0 var(--kaz-btn-highlight),
+    inset 0 -1px 0 var(--kaz-btn-lower-lip),
     0 6px 0 var(--kaz-btn-shadow),
     0 10px 0 var(--kaz-btn-layer);
 }
@@ -94,7 +97,8 @@
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
   transform: translateY(2px);
   box-shadow:
-    inset 0 1px 0 var(--kaz-btn-highlight),
+    inset 0 2px 0 var(--kaz-btn-highlight),
+    inset 0 -1px 0 var(--kaz-btn-lower-lip),
     0 1px 0 var(--kaz-btn-shadow),
     0 4px 0 var(--kaz-btn-layer);
 }
@@ -107,6 +111,7 @@
   .btn:not(.btn-link) {
     --kaz-btn-edge: var(--kaz-btn-color);
     --kaz-btn-highlight: var(--kaz-btn-color);
+    --kaz-btn-lower-lip: var(--kaz-btn-color);
     --kaz-btn-shadow: var(--kaz-btn-color);
     --kaz-btn-layer: var(--kaz-btn-color);
   }
