@@ -588,7 +588,7 @@
     align-self: stretch;
     align-content: start;
     row-gap: 1px;
-    padding-block-end: 14px;
+    padding-block-end: 16px;
   }
 
   .kt-member-info > .kt-member-copy {
