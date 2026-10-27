@@ -248,7 +248,7 @@
    each card, so zoom and narrow embeds behave like phones. The ordinal sits in
    the safe inset instead of reserving a column before the portrait. */
 .kt-member {
-  --kt-member-avatar-size: clamp(90px, 22cqi, 116px);
+  --kt-member-avatar-size: clamp(94px, 24cqi, 122px);
   --kt-member-safe-inset: clamp(14px, 2.4cqi, 18px);
   box-sizing: border-box;
   min-height: 0;
@@ -466,7 +466,7 @@
    remains in a dedicated right-hand lane; the status rail stays out of flow. */
 @container kt-member-card (max-width: 480px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(78px, 22cqi, 106px);
+    --kt-member-avatar-size: clamp(82px, 24cqi, 112px);
     --kt-member-safe-inset: 12px;
     min-block-size: 0;
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
@@ -568,7 +568,7 @@
 /* In the narrow fallback, give identity and descriptor separate short rows. */
 @container kt-member-card (max-width: 340px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(42px, 40cqi, 70px);
+    --kt-member-avatar-size: clamp(44px, 44cqi, 76px);
     --kt-member-safe-inset: clamp(7px, calc(2.5cqi + 3.5px), 12px);
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
@@ -678,7 +678,7 @@
    long identities remain legible without creating a tall extra status row. */
 @container kt-member-card (max-width: 140px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(40px, 34cqi, 46px);
+    --kt-member-avatar-size: clamp(42px, 36cqi, 48px);
     gap: 3px 4px;
     padding: var(--kt-member-safe-inset);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
