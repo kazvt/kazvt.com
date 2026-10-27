@@ -18,23 +18,18 @@
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: color-aware pop treatment for Bootstrap buttons. */
+/* Kazstrap: compact, color-derived pop buttons. */
 .btn:not(.btn-link) {
-  --kaz-btn-ink: var(--bs-emphasis-color, #171126);
   --kaz-btn-color: var(--bs-btn-bg);
-  --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 62%, var(--kaz-btn-ink));
-  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 42%, var(--kaz-btn-ink));
-  --kaz-btn-shadow-light: color-mix(in oklab, var(--kaz-btn-color) 72%, white);
-  --kaz-btn-focus-gap: var(--bs-body-bg, white);
-  --kaz-btn-focus-ring: var(--bs-emphasis-color, #171126);
-  border: 2px solid var(--kaz-btn-ink);
-  outline: 2px solid var(--kaz-btn-outline);
-  outline-offset: 4px;
+  --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
+  --kaz-btn-shadow: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
+  --kaz-btn-glow: color-mix(in srgb, var(--kaz-btn-color) 26%, transparent);
+  border: 2px solid var(--kaz-btn-edge);
   box-shadow:
-    4px 4px 0 var(--kaz-btn-shadow-deep),
-    8px 8px 0 var(--kaz-btn-shadow-light);
+    0 4px 0 var(--kaz-btn-shadow),
+    0 12px 20px var(--kaz-btn-glow);
   font-weight: 600;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, outline-color 0.15s ease-in-out, box-shadow 0.12s ease-out, transform 0.12s ease-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
 .btn[class*="btn-outline-"]:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-color);
@@ -52,87 +47,30 @@
   --kaz-btn-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
 }
 .btn:not(.btn-link):hover:not(:focus-visible) {
-  transform: translate(-1px, -1px);
+  transform: translateY(-2px);
   box-shadow:
-    5px 5px 0 var(--kaz-btn-shadow-deep),
-    10px 10px 0 var(--kaz-btn-shadow-light);
+    0 6px 0 var(--kaz-btn-shadow),
+    0 16px 24px var(--kaz-btn-glow);
 }
 .btn:not(.btn-link):active:not(:focus-visible),
 .btn:not(.btn-link).active:not(:focus-visible),
 .btn:not(.btn-link).show:not(:focus-visible),
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
-  transform: translate(4px, 4px);
+  transform: translateY(2px);
   box-shadow:
-    0 0 0 var(--kaz-btn-shadow-deep),
-    4px 4px 0 var(--kaz-btn-shadow-light);
+    0 2px 0 var(--kaz-btn-shadow),
+    0 5px 10px var(--kaz-btn-glow);
 }
-.btn:not(.btn-link):focus-visible {
-  outline-color: var(--kaz-btn-focus-ring);
-  box-shadow:
-    0 0 0 2px var(--kaz-btn-focus-gap),
-    0 0 0 4px var(--kaz-btn-focus-ring),
-    4px 4px 0 var(--kaz-btn-shadow-deep),
-    8px 8px 0 var(--kaz-btn-shadow-light);
-}
-.btn:not(.btn-link):active:focus-visible,
-.btn:not(.btn-link).active:focus-visible,
-.btn:not(.btn-link).show:focus-visible {
-  transform: translate(4px, 4px);
-  box-shadow:
-    0 0 0 2px var(--kaz-btn-focus-gap),
-    0 0 0 4px var(--kaz-btn-focus-ring),
-    0 0 0 var(--kaz-btn-shadow-deep),
-    4px 4px 0 var(--kaz-btn-shadow-light);
-}
+.btn:not(.btn-link):focus-visible,
 .btn-check:focus-visible + .btn:not(.btn-link) {
-  outline-color: var(--kaz-btn-focus-ring);
-  box-shadow:
-    0 0 0 2px var(--kaz-btn-focus-gap),
-    0 0 0 4px var(--kaz-btn-focus-ring),
-    4px 4px 0 var(--kaz-btn-shadow-deep),
-    8px 8px 0 var(--kaz-btn-shadow-light);
-}
-.btn-group,
-.btn-group-vertical {
-  box-shadow: 4px 4px 0 var(--bs-emphasis-color, #171126);
-}
-.btn-group > .btn:not(.btn-link),
-.btn-group-vertical > .btn:not(.btn-link),
-.input-group > .btn:not(.btn-link) {
-  border-width: 1px;
-  outline: 0;
-  box-shadow: none;
-  transform: none;
-}
-.btn-group > .btn:not(.btn-link):active,
-.btn-group > .btn:not(.btn-link).active,
-.btn-group > .btn:not(.btn-link).show,
-.btn-group-vertical > .btn:not(.btn-link):active,
-.btn-group-vertical > .btn:not(.btn-link).active,
-.btn-group-vertical > .btn:not(.btn-link).show,
-.input-group > .btn:not(.btn-link):active,
-.input-group > .btn:not(.btn-link).active,
-.input-group > .btn:not(.btn-link).show {
-  box-shadow: none;
-  transform: none;
-}
-.btn-group > .btn:not(.btn-link):focus-visible,
-.btn-group-vertical > .btn:not(.btn-link):focus-visible,
-.input-group > .btn:not(.btn-link):focus-visible,
-.btn-group > .btn-check:focus-visible + .btn:not(.btn-link),
-.btn-group-vertical > .btn-check:focus-visible + .btn:not(.btn-link),
-.input-group > .btn-check:focus-visible + .btn:not(.btn-link) {
-  outline-color: var(--kaz-btn-focus-ring);
-  box-shadow:
-    0 0 0 2px var(--kaz-btn-focus-gap),
-    0 0 0 4px var(--kaz-btn-focus-ring);
-  transform: none;
+  outline: 2px solid var(--bs-emphasis-color, #171126);
+  outline-offset: 3px;
 }
 @supports not (color: color-mix(in oklab, white, black)) {
   .btn:not(.btn-link) {
-    --kaz-btn-outline: var(--kaz-btn-color);
-    --kaz-btn-shadow-deep: var(--kaz-btn-ink);
-    --kaz-btn-shadow-light: var(--kaz-btn-color);
+    --kaz-btn-edge: var(--kaz-btn-color);
+    --kaz-btn-shadow: var(--kaz-btn-color);
+    --kaz-btn-glow: transparent;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -151,26 +89,14 @@
   }
 }
 @media (forced-colors: active) {
-  .btn-group,
-  .btn-group-vertical {
-    box-shadow: none;
-  }
   .btn:not(.btn-link) {
     border-color: ButtonText;
-    outline-color: ButtonText;
     box-shadow: none;
   }
   .btn:not(.btn-link):focus-visible,
-  .btn-check:focus-visible + .btn:not(.btn-link),
-  .btn-group > .btn:not(.btn-link):focus-visible,
-  .btn-group-vertical > .btn:not(.btn-link):focus-visible,
-  .input-group > .btn:not(.btn-link):focus-visible,
-  .btn-group > .btn-check:focus-visible + .btn:not(.btn-link),
-  .btn-group-vertical > .btn-check:focus-visible + .btn:not(.btn-link),
-  .input-group > .btn-check:focus-visible + .btn:not(.btn-link) {
+  .btn-check:focus-visible + .btn:not(.btn-link) {
     outline: 2px solid Highlight;
     outline-offset: 2px;
-    box-shadow: none;
   }
 }
 /*# sourceMappingURL=bootstrap.rtl.min.css.map */
