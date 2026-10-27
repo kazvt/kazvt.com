@@ -12048,7 +12048,7 @@ textarea.form-control-lg {
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
 
-    16px 16px 0 var(--kaz-btn-layer);
+    10px 10px 0 var(--kaz-btn-layer);
   font-weight: 600;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
@@ -12074,7 +12074,7 @@ textarea.form-control-lg {
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
 
-    18px 18px 0 var(--kaz-btn-layer);
+    12px 12px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):active:not(:focus-visible),
 .btn:not(.btn-link).active:not(:focus-visible),
@@ -12086,7 +12086,7 @@ textarea.form-control-lg {
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     1px 1px 0 var(--kaz-btn-shadow-deep),
 
-    13px 13px 0 var(--kaz-btn-layer);
+    7px 7px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):active:focus-visible,
 .btn:not(.btn-link).active:focus-visible,
@@ -12097,7 +12097,7 @@ textarea.form-control-lg {
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     1px 1px 0 var(--kaz-btn-shadow-deep),
 
-    13px 13px 0 var(--kaz-btn-layer);
+    7px 7px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):focus-visible,
 .btn-check:focus-visible + .btn:not(.btn-link) {
