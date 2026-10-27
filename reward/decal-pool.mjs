@@ -99,6 +99,12 @@ export const REWARD_DECAL_POOL = Object.freeze([
   {
     className: "wall-art--decal-pool",
     src: "/reward/retro/decal-pool/PIUMSHKA5VQRPNYL5YA523BW7BVVF7IE.gif"
+  },
+  { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/QP3WU3GXFXMXCHPXCFWL3HZ6MAPTP7PC.gif" },
+  { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/2EYNBD774YWU6RPB5T6ZDUHI4QV5TSHX_bgless.gif" },
+  { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/57BLD2VKXE35ZAXFUQ7MUJS3KEMRWYQF.gif" },
+  { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/JZSVZSUQGID7GWMAUNLS45CBCRBMRRIV.gif" },
+  { className: "wall-art--decal-pool", src: "/reward/retro/decal-pool/VUOP5UKB566QCBHE55NGQIZMLZMRI5OV.gif" }
   }
 ]);
 
