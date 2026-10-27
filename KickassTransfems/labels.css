@@ -11,23 +11,30 @@
   max-inline-size: 100%;
 }
 
-/* Keep every card in a grid row as tall as its tallest sibling, even
-   when only one profile has wrapped to a second or third title line. */
-.kt-member-grid > li,
+/* Member cards keep their own portrait-led height; a long identity can grow
+   its card without stretching every neighboring profile in the grid row. */
+.kt-member-grid > li {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+}
 .kt-recommendation-grid > li {
   display: flex;
   flex-direction: column;
 }
-.kt-member-grid > li > .kt-member,
+.kt-member-grid > li > .kt-member {
+  flex: 0 0 auto;
+}
 .kt-recommendation-grid > li > .kt-recommendation-link {
   flex: 1 1 auto;
 }
 
-/* Let a card grow if a zoomed/translated identity needs an additional line.
-   The existing min-height and decorative frame remain governed by shared CSS. */
+/* Let the portrait track and equal padding define the compact card height.
+   Intrinsic text can still grow the grid row when wrapping genuinely requires it. */
 .kt-member {
   block-size: auto !important;
-  min-block-size: 5rem;
+  min-height: 0;
+  min-block-size: 0;
   max-inline-size: 100%;
   box-sizing: border-box;
 }
@@ -244,7 +251,8 @@
   --kt-member-avatar-size: clamp(90px, 22cqi, 116px);
   --kt-member-safe-inset: clamp(14px, 2.4cqi, 18px);
   box-sizing: border-box;
-  min-block-size: calc(var(--kt-member-avatar-size) + 24px);
+  min-height: 0;
+  min-block-size: 0;
   grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr) 24px;
   grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
   align-items: start;
@@ -430,8 +438,6 @@
 
 .kt-member-status-rail {
   position: absolute;
-  grid-column: auto;
-  grid-row: auto;
   inline-size: auto;
   inset-inline: var(--kt-member-safe-inset);
   inset-block-end: var(--kt-member-safe-inset);
@@ -464,7 +470,7 @@
     --kt-member-safe-inset: 12px;
     min-block-size: 0;
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
-    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) 16px;
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
     align-content: start;
     gap: 2px 8px;
     padding: var(--kt-member-safe-inset);
@@ -515,10 +521,10 @@
   .kt-member-info > .kt-member-badge { font-size: clamp(.8rem, 3cqi, 1rem); }
 
   .kt-member-status-rail {
-    position: static;
-    grid-column: 1 / -1;
-    grid-row: 2;
-    inline-size: 100%;
+    position: absolute;
+    inline-size: auto;
+    inset-inline: var(--kt-member-safe-inset);
+    inset-block-end: var(--kt-member-safe-inset);
     height: 16px;
   }
 
@@ -566,16 +572,25 @@
     --kt-member-avatar-size: clamp(44px, 42cqi, 78px);
     --kt-member-safe-inset: clamp(7px, calc(2.5cqi + 3.5px), 12px);
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
-    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 16px;
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
     gap: 3px 6px;
     padding: var(--kt-member-safe-inset);
   }
 
   .kt-member-arrow { display: none; }
-  .kt-member-info { display: contents; }
+  .kt-member-info {
+    display: grid;
+    grid-column: 2;
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-self: stretch;
+    align-content: start;
+    row-gap: 3px;
+  }
 
   .kt-member-info > .kt-member-copy {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 1;
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
@@ -620,7 +635,7 @@
 
   .kt-member-info > .kt-member-tag,
   .kt-member-info > .kt-member-badge {
-    grid-column: 1 / -1;
+    grid-column: 1;
     grid-row: 2;
     justify-self: end;
     align-self: start;
@@ -633,7 +648,6 @@
   }
 
   .kt-member-status-rail {
-    grid-row: 3;
     height: 16px;
   }
 
@@ -657,7 +671,7 @@
   .kt-member {
     gap: 3px 4px;
     padding: var(--kt-member-safe-inset);
-    grid-template-rows: minmax(var(--kt-member-avatar-size), auto) auto 14px;
+    grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
   }
 
   .kt-member-info .kt-member-title { gap: 2px 4px; }
