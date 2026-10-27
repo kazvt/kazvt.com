@@ -51,20 +51,22 @@
 @import "utilities/api";
 // scss-docs-end import-stack
 
-/* Kazstrap: compact, color-derived pop buttons. */
+/* Kazstrap: directional, color-derived pop buttons. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
+  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 42%, black);
   --kaz-btn-shadow: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 82%, black);
   border: 2px solid var(--kaz-btn-edge);
   box-shadow:
     inset 0 2px 0 var(--kaz-btn-highlight),
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
-    0 4px 0 var(--kaz-btn-shadow),
-    0 8px 0 var(--kaz-btn-layer);
+    3px 3px 0 var(--kaz-btn-shadow-deep),
+    6px 6px 0 var(--kaz-btn-shadow),
+    9px 9px 0 var(--kaz-btn-layer);
   font-weight: 600;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
@@ -84,23 +86,36 @@
   --kaz-btn-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
 }
 .btn:not(.btn-link):hover:not(:focus-visible) {
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
   box-shadow:
     inset 0 2px 0 var(--kaz-btn-highlight),
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
-    0 6px 0 var(--kaz-btn-shadow),
-    0 10px 0 var(--kaz-btn-layer);
+    5px 5px 0 var(--kaz-btn-shadow-deep),
+    8px 8px 0 var(--kaz-btn-shadow),
+    11px 11px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):active:not(:focus-visible),
 .btn:not(.btn-link).active:not(:focus-visible),
 .btn:not(.btn-link).show:not(:focus-visible),
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
-  transform: translateY(2px);
+  transform: translate(3px, 3px);
   box-shadow:
     inset 0 2px 0 var(--kaz-btn-highlight),
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
-    0 1px 0 var(--kaz-btn-shadow),
-    0 4px 0 var(--kaz-btn-layer);
+    0 0 0 var(--kaz-btn-shadow-deep),
+    3px 3px 0 var(--kaz-btn-shadow),
+    6px 6px 0 var(--kaz-btn-layer);
+}
+.btn:not(.btn-link):active:focus-visible,
+.btn:not(.btn-link).active:focus-visible,
+.btn:not(.btn-link).show:focus-visible {
+  transform: translate(3px, 3px);
+  box-shadow:
+    inset 0 2px 0 var(--kaz-btn-highlight),
+    inset 0 -1px 0 var(--kaz-btn-lower-lip),
+    0 0 0 var(--kaz-btn-shadow-deep),
+    3px 3px 0 var(--kaz-btn-shadow),
+    6px 6px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):focus-visible,
 .btn-check:focus-visible + .btn:not(.btn-link) {
@@ -112,6 +127,7 @@
     --kaz-btn-edge: var(--kaz-btn-color);
     --kaz-btn-highlight: var(--kaz-btn-color);
     --kaz-btn-lower-lip: var(--kaz-btn-color);
+    --kaz-btn-shadow-deep: var(--kaz-btn-color);
     --kaz-btn-shadow: var(--kaz-btn-color);
     --kaz-btn-layer: var(--kaz-btn-color);
   }
