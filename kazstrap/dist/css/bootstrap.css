@@ -12066,8 +12066,8 @@ textarea.form-control-lg {
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
-  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
-  --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 30%, black);
+  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 30%, black);
+  --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
   border: 2px solid var(--kaz-btn-edge);
   box-shadow:
     inset 0 2px 0 var(--kaz-btn-highlight),

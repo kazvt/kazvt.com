@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap button study - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-shadow-offset-8">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-shadow-colors-back-1">
   <style>
     .shadow-comparison {
       display: grid;
@@ -27,8 +27,8 @@
       padding: .75rem .35rem 1rem;
     }
     .shadow-comparison__neutral .btn:not(.btn-link) {
-      --kaz-btn-shadow-deep: #252530;
-      --kaz-btn-layer: #111116;
+      --kaz-btn-shadow-deep: #111116;
+      --kaz-btn-layer: #252530;
     }
   </style>
 </head>
@@ -69,8 +69,8 @@
       <p class="text-body-secondary mt-2 mb-4">Same button colors, bevel, and offsets on both sides. Compare color-matched shadows with neutral dark shadows.</p>
       <div class="shadow-comparison">
         <div class="shadow-comparison__option shadow-comparison__tonal">
-          <h3 class="h5">Swapped button-color shadows</h3>
-          <p class="text-body-secondary">A lighter shade sits close to the button; a darker shade anchors the outer layer.</p>
+          <h3 class="h5">Button-color shadows</h3>
+          <p class="text-body-secondary">A darker shade sits close to the button; a lighter shade sits farther out.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
@@ -82,7 +82,7 @@
         </div>
         <div class="shadow-comparison__option shadow-comparison__neutral">
           <h3 class="h5">Neutral dark shadows</h3>
-          <p class="text-body-secondary">Uses the same dark ink colors for every button.</p>
+          <p class="text-body-secondary">Uses the same neutral dark shades for every button, in the same order.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
