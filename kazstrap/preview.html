@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap button study - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-high-contrast-2">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-shadow-swap-1">
   <style>
     .shadow-comparison {
       display: grid;
@@ -25,16 +25,6 @@
       flex-wrap: wrap;
       gap: 1.25rem 1.1rem;
       padding: .75rem .35rem 1rem;
-    }
-    .shadow-comparison__tonal .btn:not(.btn-link) {
-      --kaz-btn-shadow-deep: color-mix(in srgb, var(--kaz-btn-color) 60%, black);
-      --kaz-btn-layer: color-mix(in srgb, var(--kaz-btn-color) 42%, black);
-    }
-    @supports (color: hsl(from red h calc(s * 1.1) calc(l * .4))) {
-      .shadow-comparison__tonal .btn:not(.btn-link) {
-        --kaz-btn-shadow-deep: hsl(from var(--kaz-btn-color) h calc(s * 1.1) calc(l * .34));
-        --kaz-btn-layer: hsl(from var(--kaz-btn-color) h calc(s * 1.1) calc(l * .5));
-      }
     }
     .shadow-comparison__neutral .btn:not(.btn-link) {
       --kaz-btn-shadow-deep: #252530;
@@ -79,8 +69,8 @@
       <p class="text-body-secondary mt-2 mb-4">Same button colors, bevel, and offsets on both sides. Compare color-matched shadows with neutral dark shadows.</p>
       <div class="shadow-comparison">
         <div class="shadow-comparison__option shadow-comparison__tonal">
-          <h3 class="h5">Darker, button-color shadows</h3>
-          <p class="text-body-secondary">Keeps each button’s hue and pushes the shadows darker.</p>
+          <h3 class="h5">Swapped button-color shadows</h3>
+          <p class="text-body-secondary">A lighter shade sits close to the button; a darker shade anchors the outer layer.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
