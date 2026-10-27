@@ -711,8 +711,8 @@
 
 /* Very narrow viewports need one full-width card: two columns would squeeze
    portraits, handles, language chips, and timestamps into an unreadable strip.
-   At 360px and above the two-column layout has enough room for the compact
+   At 375px and above the two-column layout has enough room for the compact
    identity-first card composition, including when zoom reduces the CSS width. */
-@media (max-width: 359px) {
+@media (max-width: 374px) {
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); }
 }
