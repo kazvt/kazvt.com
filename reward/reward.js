@@ -3,7 +3,7 @@ import { fetchAssignmentRegistry } from "./assignment-source.mjs";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { createUserRewardListHref } from "./user-list-link.mjs?v=1";
 import { rewardFaviconForAsset } from "./reward-favicon.mjs?v=1";
-import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=3";
+import { selectRewardEdgeDecals } from "./decal-pool.mjs?v=4";
 import { minimumLoadingDelay } from "./loading-duration.mjs?v=1";
 import { retryRead } from "./retry-read.mjs?v=1";
 import { createWallpaperLayout, wallpaperPointsForViewport } from "./wallpaper-layout.mjs?v=6";
