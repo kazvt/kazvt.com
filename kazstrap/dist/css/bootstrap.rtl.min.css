@@ -18,20 +18,18 @@
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: stacked, color-derived pop buttons. */
+/* Kazstrap: compact, color-derived pop buttons. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
   --kaz-btn-shadow: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 82%, black);
   border: 2px solid var(--kaz-btn-edge);
-  outline: 2px solid var(--kaz-btn-layer);
-  outline-offset: 3px;
   box-shadow:
-    0 6px 0 var(--kaz-btn-shadow),
-    0 11px 0 var(--kaz-btn-layer);
+    0 4px 0 var(--kaz-btn-shadow),
+    0 8px 0 var(--kaz-btn-layer);
   font-weight: 600;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, outline-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
 .btn[class*="btn-outline-"]:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-color);
@@ -51,8 +49,8 @@
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translateY(-2px);
   box-shadow:
-    0 8px 0 var(--kaz-btn-shadow),
-    0 14px 0 var(--kaz-btn-layer);
+    0 6px 0 var(--kaz-btn-shadow),
+    0 10px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):active:not(:focus-visible),
 .btn:not(.btn-link).active:not(:focus-visible),
@@ -60,12 +58,13 @@
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
   transform: translateY(2px);
   box-shadow:
-    0 2px 0 var(--kaz-btn-shadow),
-    0 6px 0 var(--kaz-btn-layer);
+    0 1px 0 var(--kaz-btn-shadow),
+    0 4px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):focus-visible,
 .btn-check:focus-visible + .btn:not(.btn-link) {
-  outline-color: var(--bs-emphasis-color, #171126);
+  outline: 2px solid var(--bs-emphasis-color, #171126);
+  outline-offset: 2px;
 }
 @supports not (color: color-mix(in oklab, white, black)) {
   .btn:not(.btn-link) {
@@ -92,7 +91,6 @@
 @media (forced-colors: active) {
   .btn:not(.btn-link) {
     border-color: ButtonText;
-    outline-color: ButtonText;
     box-shadow: none;
   }
   .btn:not(.btn-link):focus-visible,
