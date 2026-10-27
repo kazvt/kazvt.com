@@ -692,7 +692,7 @@
   .kt-member-info > .kt-member-badge { font-size: clamp(.44rem, 5.5cqi, .54rem); }
   .kt-member-status-rail { height: 14px; }
   .kt-member-status-rail > .kt-live-sticker { width: 34px; }
-  .kt-member-status-rail > .kt-last-live:not([hidden]) { font-size: .54rem; }
+  .kt-member-status-rail > .kt-last-live:not([hidden]) { font-size: .46rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
