@@ -12060,16 +12060,13 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: compact, color-derived pop buttons. */
+/* Kazstrap: crisp, color-derived pop buttons. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
   --kaz-btn-shadow: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
-  --kaz-btn-glow: color-mix(in srgb, var(--kaz-btn-color) 26%, transparent);
   border: 2px solid var(--kaz-btn-edge);
-  box-shadow:
-    0 4px 0 var(--kaz-btn-shadow),
-    0 12px 20px var(--kaz-btn-glow);
+  box-shadow: 0 4px 0 var(--kaz-btn-shadow);
   font-weight: 600;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
@@ -12090,18 +12087,14 @@ textarea.form-control-lg {
 }
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translateY(-2px);
-  box-shadow:
-    0 6px 0 var(--kaz-btn-shadow),
-    0 16px 24px var(--kaz-btn-glow);
+  box-shadow: 0 6px 0 var(--kaz-btn-shadow);
 }
 .btn:not(.btn-link):active:not(:focus-visible),
 .btn:not(.btn-link).active:not(:focus-visible),
 .btn:not(.btn-link).show:not(:focus-visible),
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
   transform: translateY(2px);
-  box-shadow:
-    0 2px 0 var(--kaz-btn-shadow),
-    0 5px 10px var(--kaz-btn-glow);
+  box-shadow: 0 2px 0 var(--kaz-btn-shadow);
 }
 .btn:not(.btn-link):focus-visible,
 .btn-check:focus-visible + .btn:not(.btn-link) {
@@ -12112,7 +12105,6 @@ textarea.form-control-lg {
   .btn:not(.btn-link) {
     --kaz-btn-edge: var(--kaz-btn-color);
     --kaz-btn-shadow: var(--kaz-btn-color);
-    --kaz-btn-glow: transparent;
   }
 }
 @media (prefers-reduced-motion: reduce) {
