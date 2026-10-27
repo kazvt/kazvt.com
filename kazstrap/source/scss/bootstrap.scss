@@ -58,15 +58,9 @@
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 42%, black);
-
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 82%, black);
   border: 2px solid var(--kaz-btn-edge);
-  box-shadow:
-    inset 0 2px 0 var(--kaz-btn-highlight),
-    inset 0 -1px 0 var(--kaz-btn-lower-lip),
-    4px 4px 0 var(--kaz-btn-shadow-deep),
-
-    4px 4px 0 var(--kaz-btn-layer);
+  17px 7px 0 var(--kaz-btn-layer);
   font-weight: 600;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
 }
@@ -91,7 +85,6 @@
     inset 0 2px 0 var(--kaz-btn-highlight),
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
-
     9px 9px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):active:not(:focus-visible),
@@ -103,7 +96,6 @@
     inset 0 2px 0 var(--kaz-btn-highlight),
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     1px 1px 0 var(--kaz-btn-shadow-deep),
-
     4px 4px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):active:focus-visible,
@@ -114,7 +106,6 @@
     inset 0 2px 0 var(--kaz-btn-highlight),
     inset 0 -1px 0 var(--kaz-btn-lower-lip),
     1px 1px 0 var(--kaz-btn-shadow-deep),
-
     4px 4px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):focus-visible,
@@ -128,7 +119,6 @@
     --kaz-btn-highlight: var(--kaz-btn-color);
     --kaz-btn-lower-lip: var(--kaz-btn-color);
     --kaz-btn-shadow-deep: var(--kaz-btn-color);
-
     --kaz-btn-layer: var(--kaz-btn-color);
   }
 }
