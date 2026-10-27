@@ -12060,7 +12060,7 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: directional, color-derived pop buttons. */
+/* Kazstrap: color-derived retro pop buttons. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 68%, black);
@@ -12068,10 +12068,17 @@ textarea.form-control-lg {
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 30%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
+  --kaz-btn-face-gradient: linear-gradient(
+    to bottom,
+    var(--kaz-btn-color) 0%,
+    var(--kaz-btn-color) 48%,
+    color-mix(in oklab, var(--kaz-btn-color) 92%, black) 100%
+  );
   border: 2px solid var(--kaz-btn-edge);
+  background-image: var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 0 2px 0 var(--kaz-btn-highlight),
-    inset 0 -1px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
   font-weight: 600;
@@ -12079,12 +12086,20 @@ textarea.form-control-lg {
 }
 .btn[class*="btn-outline-"]:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-color);
+  background-image: none;
 }
 .btn:not(.btn-link):hover {
   --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
 }
 .btn[class*="btn-outline-"]:hover:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
+}
+.btn[class*="btn-outline-"]:hover:not(.btn-link),
+.btn[class*="btn-outline-"]:active:not(.btn-link),
+.btn[class*="btn-outline-"].active:not(.btn-link),
+.btn[class*="btn-outline-"].show:not(.btn-link),
+.btn-check:checked + .btn[class*="btn-outline-"]:not(.btn-link) {
+  background-image: var(--kaz-btn-face-gradient);
 }
 .btn:not(.btn-link):active,
 .btn:not(.btn-link).active,
@@ -12095,8 +12110,8 @@ textarea.form-control-lg {
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-2px, -2px);
   box-shadow:
-    inset 0 2px 0 var(--kaz-btn-highlight),
-    inset 0 -1px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
 }
@@ -12106,8 +12121,8 @@ textarea.form-control-lg {
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
   transform: translate(3px, 3px);
   box-shadow:
-    inset 0 2px 0 var(--kaz-btn-highlight),
-    inset 0 -1px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
@@ -12116,8 +12131,8 @@ textarea.form-control-lg {
 .btn:not(.btn-link).show:focus-visible {
   transform: translate(3px, 3px);
   box-shadow:
-    inset 0 2px 0 var(--kaz-btn-highlight),
-    inset 0 -1px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
@@ -12133,6 +12148,7 @@ textarea.form-control-lg {
     --kaz-btn-lower-lip: var(--kaz-btn-color);
     --kaz-btn-shadow-deep: var(--kaz-btn-color);
     --kaz-btn-layer: var(--kaz-btn-color);
+    --kaz-btn-face-gradient: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -12153,12 +12169,11 @@ textarea.form-control-lg {
 @media (forced-colors: active) {
   .btn:not(.btn-link) {
     border-color: ButtonText;
+    background-image: none;
     box-shadow: none;
   }
   .btn:not(.btn-link):focus-visible,
   .btn-check:focus-visible + .btn:not(.btn-link) {
-    outline: 2px solid Highlight;
-    outline-offset: 2px;
+    outline-color: Highlight;
   }
 }
-/*# sourceMappingURL=bootstrap.css.map */
