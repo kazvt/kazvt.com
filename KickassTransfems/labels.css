@@ -711,6 +711,6 @@
 
 /* Keep two roster columns down to the 320 CSS-pixel reflow target; below that
    width a single column protects readable identities from being crushed. */
-@media (max-width: 279px) {
+@media (max-width: 319px) {
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); }
 }
