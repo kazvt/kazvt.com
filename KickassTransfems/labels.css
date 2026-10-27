@@ -709,8 +709,10 @@
   }
 }
 
-/* Keep two roster columns down to the 320 CSS-pixel reflow target; below that
-   width a single column protects readable identities from being crushed. */
-@media (max-width: 319px) {
+/* Very narrow viewports need one full-width card: two columns would squeeze
+   portraits, handles, language chips, and timestamps into an unreadable strip.
+   At 360px and above the two-column layout has enough room for the compact
+   identity-first card composition, including when zoom reduces the CSS width. */
+@media (max-width: 359px) {
   .kt-member-grid { grid-template-columns: minmax(0, 1fr); }
 }
