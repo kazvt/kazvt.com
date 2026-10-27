@@ -568,7 +568,7 @@
 /* In the narrow fallback, give identity and descriptor separate short rows. */
 @container kt-member-card (max-width: 340px) {
   .kt-member {
-    --kt-member-avatar-size: clamp(42px, 36cqi, 70px);
+    --kt-member-avatar-size: clamp(42px, 40cqi, 70px);
     --kt-member-safe-inset: clamp(7px, calc(2.5cqi + 3.5px), 12px);
     grid-template-columns: var(--kt-member-avatar-size) minmax(0, 1fr);
     grid-template-rows: minmax(var(--kt-member-avatar-size), auto);
