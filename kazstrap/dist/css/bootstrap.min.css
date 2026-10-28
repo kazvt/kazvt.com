@@ -21,21 +21,26 @@
 /* Kazstrap: color-derived arcade buttons with layered up, over, and down states. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
+  --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 22%, black);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 68%, white);
+  --kaz-btn-glint: color-mix(in oklab, var(--kaz-btn-color) 62%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
   --kaz-btn-face-gradient:
     linear-gradient(
       to bottom,
-      var(--kaz-btn-color) 0%,
-      var(--kaz-btn-color) 52%,
+      var(--kaz-btn-glint) 0 5%,
+      color-mix(in oklab, var(--kaz-btn-color) 88%, white) 14%,
+      var(--kaz-btn-color) 27% 68%,
       color-mix(in oklab, var(--kaz-btn-color) 72%, black) 100%
     );
   border: 3px solid var(--kaz-btn-edge);
   border-top-color: var(--kaz-btn-highlight);
   border-left-color: var(--kaz-btn-highlight);
+  outline: 1px solid var(--kaz-btn-outline);
+  outline-offset: 0;
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
     inset 2px 2px 0 var(--kaz-btn-highlight),
@@ -105,12 +110,15 @@
 }
 @supports not (color: color-mix(in oklab, white, black)) {
   .btn:not(.btn-link) {
-    --kaz-btn-edge: var(--kaz-btn-color);
+    --kaz-btn-outline: rgba(0, 0, 0, 0.78);
+    --kaz-btn-edge: rgba(0, 0, 0, 0.48);
+    --kaz-btn-highlight: rgba(255, 255, 255, 0.32);
+    --kaz-btn-glint: rgba(255, 255, 255, 0.38);
     --kaz-btn-highlight: var(--kaz-btn-color);
-    --kaz-btn-lower-lip: var(--kaz-btn-color);
-    --kaz-btn-shadow-deep: var(--kaz-btn-color);
-    --kaz-btn-layer: var(--kaz-btn-color);
-    --kaz-btn-face-gradient: none;
+    --kaz-btn-lower-lip: rgba(0, 0, 0, 0.22);
+    --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.48);
+    --kaz-btn-layer: rgba(0, 0, 0, 0.72);
+    --kaz-btn-face-gradient: linear-gradient(to bottom, rgba(255, 255, 255, 0.22) 0 5%, transparent 18%, rgba(0, 0, 0, 0.2) 100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -131,6 +139,7 @@
 @media (forced-colors: active) {
   .btn:not(.btn-link) {
     border-color: ButtonText;
+    outline-color: ButtonText;
     background-image: none;
     box-shadow: none;
   }
