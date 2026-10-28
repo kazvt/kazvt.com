@@ -4447,7 +4447,7 @@ export { Alert, Button, Carousel, Collapse, Dropdown, Modal, Offcanvas, Popover,
 //# sourceMappingURL=bootstrap.esm.js.map
 
 
-/* Kazstrap glyph typography: rotate each grapheme through five font families. */
+/* Kazstrap glyph typography: round-robin across six font choices. */
 ;(function initializeKazstrapGlyphCycle() {
   if (typeof window === 'undefined' || typeof document === 'undefined' || window.__kazstrapGlyphCycleStarted) {
     return
