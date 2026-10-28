@@ -51,7 +51,7 @@
 @import "utilities/api";
 // scss-docs-end import-stack
 
-/* Kazstrap: compact arcade buttons with one consistent light direction and shadow depth. */
+/* Kazstrap: color-derived arcade buttons with layered enamel faces and tactile states. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 22%, black);
@@ -60,21 +60,27 @@
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 64%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
+  --kaz-btn-glaze-gradient:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--kaz-btn-color) 90%, white) 0%,
+      color-mix(in oklab, var(--kaz-btn-color) 97%, white) 14%,
+      transparent 40%
+    );
   --kaz-btn-face-gradient:
     linear-gradient(
       to bottom,
-      color-mix(in oklab, var(--kaz-btn-color) 96%, white) 0%,
-      var(--kaz-btn-color) 18% 76%,
+      var(--kaz-btn-color) 0% 70%,
       color-mix(in oklab, var(--kaz-btn-color) 88%, black) 100%
     );
   border: 1px solid var(--kaz-btn-edge);
-  border-color:
-    var(--kaz-btn-highlight) var(--kaz-btn-edge)
-    var(--kaz-btn-edge) var(--kaz-btn-highlight);
   outline: 1px solid var(--kaz-btn-outline);
   outline-offset: 0;
-  background-image: var(--kaz-btn-face-gradient);
+  background-image:
+    var(--kaz-btn-glaze-gradient),
+    var(--kaz-btn-face-gradient);
   box-shadow:
+    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -1px -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
@@ -102,7 +108,9 @@
 .btn[class*="btn-outline-"].active:not(.btn-link),
 .btn[class*="btn-outline-"].show:not(.btn-link),
 .btn-check:checked + .btn[class*="btn-outline-"]:not(.btn-link) {
-  background-image: var(--kaz-btn-face-gradient);
+  background-image:
+    var(--kaz-btn-glaze-gradient),
+    var(--kaz-btn-face-gradient);
 }
 .btn:not(.btn-link):active,
 .btn:not(.btn-link).active,
@@ -113,6 +121,7 @@
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-1px, -1px);
   box-shadow:
+    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -1px -1px 0 var(--kaz-btn-lower-lip),
     5px 5px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
@@ -121,9 +130,6 @@
 .btn:not(.btn-link).active,
 .btn:not(.btn-link).show,
 .btn-check:checked + .btn:not(.btn-link) {
-  border-color:
-    var(--kaz-btn-edge) var(--kaz-btn-highlight)
-    var(--kaz-btn-highlight) var(--kaz-btn-edge);
   transform: translate(3px, 3px);
   box-shadow:
     inset 1px 1px 0 var(--kaz-btn-lower-lip),
@@ -144,7 +150,10 @@
     --kaz-btn-lower-lip: rgba(0, 0, 0, 0.24);
     --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.76);
     --kaz-btn-layer: rgba(0, 0, 0, 0.38);
-    --kaz-btn-face-gradient: linear-gradient(to bottom, transparent 76%, rgba(0, 0, 0, 0.12) 100%);
+    --kaz-btn-glaze-gradient:
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 14%, transparent 40%);
+    --kaz-btn-face-gradient:
+      linear-gradient(to bottom, transparent 76%, rgba(0, 0, 0, 0.12) 100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
