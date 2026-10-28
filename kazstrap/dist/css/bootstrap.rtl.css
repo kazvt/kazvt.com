@@ -12050,7 +12050,9 @@ textarea.form-control-lg {
       color-mix(in oklab, var(--kaz-btn-color) 88%, black) 100%
     );
   border: 1px solid var(--kaz-btn-edge);
-  border-color: var(--kaz-btn-highlight) var(--kaz-btn-edge) var(--kaz-btn-edge) var(--kaz-btn-highlight);
+  border-color:
+    var(--kaz-btn-highlight) var(--kaz-btn-edge)
+    var(--kaz-btn-edge) var(--kaz-btn-highlight);
   outline: 1px solid var(--kaz-btn-outline);
   outline-offset: 0;
   background-image: var(--kaz-btn-face-gradient);
@@ -12060,7 +12062,12 @@ textarea.form-control-lg {
     8px 8px 0 var(--kaz-btn-layer);
   font-weight: 700;
   letter-spacing: 0.02em;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.14s ease-out, transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.14s ease-out,
+    transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .btn[class*="btn-outline-"]:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-color);
@@ -12096,7 +12103,9 @@ textarea.form-control-lg {
 .btn:not(.btn-link).active,
 .btn:not(.btn-link).show,
 .btn-check:checked + .btn:not(.btn-link) {
-  border-color: var(--kaz-btn-edge) var(--kaz-btn-highlight) var(--kaz-btn-highlight) var(--kaz-btn-edge);
+  border-color:
+    var(--kaz-btn-edge) var(--kaz-btn-highlight)
+    var(--kaz-btn-highlight) var(--kaz-btn-edge);
   transform: translate(3px, 3px);
   box-shadow:
     inset 1px 1px 0 var(--kaz-btn-lower-lip),
@@ -12115,8 +12124,8 @@ textarea.form-control-lg {
     --kaz-btn-edge: rgba(0, 0, 0, 0.48);
     --kaz-btn-highlight: rgba(255, 255, 255, 0.10);
     --kaz-btn-lower-lip: rgba(0, 0, 0, 0.24);
-    --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.48);
-    --kaz-btn-layer: rgba(0, 0, 0, 0.72);
+    --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.76);
+    --kaz-btn-layer: rgba(0, 0, 0, 0.38);
     --kaz-btn-face-gradient: linear-gradient(to bottom, transparent 76%, rgba(0, 0, 0, 0.12) 100%);
   }
 }
@@ -12133,7 +12142,17 @@ textarea.form-control-lg {
   }
 }
 @media (forced-colors: active) {
-  .btn:not(.btn-link) {
+  .btn:not(.btn-link),
+  .btn:not(.btn-link):hover,
+  .btn:not(.btn-link):active,
+  .btn:not(.btn-link).active,
+  .btn:not(.btn-link).show,
+  .btn-check:checked + .btn:not(.btn-link),
+  .btn[class*="btn-outline-"]:hover:not(.btn-link),
+  .btn[class*="btn-outline-"]:active:not(.btn-link),
+  .btn[class*="btn-outline-"].active:not(.btn-link),
+  .btn[class*="btn-outline-"].show:not(.btn-link),
+  .btn-check:checked + .btn[class*="btn-outline-"]:not(.btn-link) {
     border-color: ButtonText;
     outline-color: ButtonText;
     background-image: none;
