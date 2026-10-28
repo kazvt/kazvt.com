@@ -305,7 +305,7 @@ export {
   toType
 }
 
-/* Kazstrap glyph typography: round-robin across six font choices. */
+/* Kazstrap glyph typography: round-robin across eleven font choices. */
 ;(function initializeKazstrapGlyphCycle() {
   if (typeof window === 'undefined' || typeof document === 'undefined' || window.__kazstrapGlyphCycleStarted) {
     return
@@ -380,7 +380,7 @@ export {
       glyph.className = `kazstrap-glyph kazstrap-glyph--${nextFont}`
       glyph.textContent = grapheme
       fragment.append(glyph)
-      nextFont = (nextFont + 1) % 6
+      nextFont = (nextFont + 1) % 11
       changed = true
     }
 
