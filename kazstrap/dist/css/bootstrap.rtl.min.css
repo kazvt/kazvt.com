@@ -24,7 +24,6 @@
   --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 22%, black);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
-  --kaz-btn-glint: color-mix(in oklab, var(--kaz-btn-color) 78%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
@@ -41,7 +40,6 @@
   outline-offset: 0;
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -2px -2px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
@@ -75,7 +73,6 @@
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-2px, -2px);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -2px -2px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
@@ -111,7 +108,6 @@
     --kaz-btn-outline: rgba(0, 0, 0, 0.78);
     --kaz-btn-edge: rgba(0, 0, 0, 0.48);
     --kaz-btn-highlight: rgba(255, 255, 255, 0.20);
-    --kaz-btn-glint: rgba(255, 255, 255, 0.24);
 
     --kaz-btn-lower-lip: rgba(0, 0, 0, 0.22);
     --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.48);
