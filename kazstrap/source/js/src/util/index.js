@@ -304,3 +304,104 @@ export {
   triggerTransitionEnd,
   toType
 }
+
+/* Kazstrap glyph typography: rotate each grapheme through five font families. */
+;(function initializeKazstrapGlyphCycle() {
+  if (typeof window === 'undefined' || typeof document === 'undefined' || window.__kazstrapGlyphCycleStarted) {
+    return
+  }
+
+  window.__kazstrapGlyphCycleStarted = true
+
+  const excludedSelector = 'script, style, noscript, template, textarea, input, select, option, code, pre, kbd, samp, svg, canvas, math, .kazstrap-glyph, [contenteditable]:not([contenteditable="false"])'
+  const segmenter = typeof Intl !== 'undefined' && Intl.Segmenter
+    ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+    : null
+  let nextFont = 0
+
+  const getGraphemes = text => segmenter
+    ? Array.from(segmenter.segment(text), part => part.segment)
+    : Array.from(text)
+
+  const cycleTextNode = textNode => {
+    if (!textNode.parentElement || !textNode.nodeValue || !textNode.nodeValue.trim()) {
+      return
+    }
+
+    if (textNode.parentElement.closest(excludedSelector)) {
+      return
+    }
+
+    const fragment = document.createDocumentFragment()
+    let changed = false
+
+    for (const grapheme of getGraphemes(textNode.nodeValue)) {
+      if (/^\s+$/u.test(grapheme)) {
+        fragment.append(document.createTextNode(grapheme))
+        continue
+      }
+
+      const glyph = document.createElement('span')
+      glyph.className = `kazstrap-glyph kazstrap-glyph--${nextFont}`
+      glyph.textContent = grapheme
+      fragment.append(glyph)
+      nextFont = (nextFont + 1) % 5
+      changed = true
+    }
+
+    if (changed) {
+      textNode.replaceWith(fragment)
+    }
+  }
+
+  const cycleTextWithin = root => {
+    if (root.nodeType === Node.TEXT_NODE) {
+      cycleTextNode(root)
+      return
+    }
+
+    if (root.nodeType === Node.ELEMENT_NODE && root.matches(excludedSelector)) {
+      return
+    }
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: textNode => textNode.parentElement && textNode.parentElement.closest(excludedSelector)
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT
+    })
+    const textNodes = []
+
+    while (walker.nextNode()) {
+      textNodes.push(walker.currentNode)
+    }
+
+    for (const textNode of textNodes) {
+      cycleTextNode(textNode)
+    }
+  }
+
+  const start = () => {
+    if (!document.body) {
+      return
+    }
+
+    cycleTextWithin(document.body)
+
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          cycleTextWithin(node)
+        }
+      }
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+    window.__kazstrapGlyphCycleObserver = observer
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true })
+  } else {
+    start()
+  }
+})()
