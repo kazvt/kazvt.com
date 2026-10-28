@@ -12062,7 +12062,7 @@ textarea.form-control-lg {
     var(--kaz-btn-glaze-gradient),
     var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset 3px 3px 0 var(--kaz-btn-highlight),
     inset -1px -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
@@ -12103,7 +12103,7 @@ textarea.form-control-lg {
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-1px, -1px);
   box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset 3px 3px 0 var(--kaz-btn-highlight),
     inset -1px -1px 0 var(--kaz-btn-lower-lip),
     5px 5px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
@@ -12115,7 +12115,7 @@ textarea.form-control-lg {
   transform: translate(3px, 3px);
   box-shadow:
     inset 1px 1px 0 var(--kaz-btn-lower-lip),
-    inset -1px -1px 0 var(--kaz-btn-highlight),
+    inset -3px -3px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     5px 5px 0 var(--kaz-btn-layer);
 }
