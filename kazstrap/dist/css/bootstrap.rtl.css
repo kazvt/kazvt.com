@@ -12161,6 +12161,6 @@ textarea.form-control-lg {
 
 /* Kazstrap: screen-friendly, playful default type. */
 :root {
-  --bs-font-sans-serif: "Trebuchet MS", Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-sans-serif: Candara, "Trebuchet MS", Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-body-font-family: var(--bs-font-sans-serif);
 }
