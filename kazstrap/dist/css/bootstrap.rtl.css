@@ -12195,7 +12195,7 @@ h3,
   --kaz-font-cycle-9: "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --kaz-font-cycle-10: "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
-.kazstrap-glyph { font-weight: 900; }
+.kazstrap-glyph { font-weight: normal; }
 .kazstrap-glyph--0 { font-family: var(--kaz-font-cycle-0); }
 .kazstrap-glyph--1 { font-family: var(--kaz-font-cycle-1); }
 .kazstrap-glyph--2 { font-family: var(--kaz-font-cycle-2); }
