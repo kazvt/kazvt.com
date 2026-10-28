@@ -12038,16 +12038,16 @@ textarea.form-control-lg {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 22%, black);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
-  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 68%, white);
-  --kaz-btn-glint: color-mix(in oklab, var(--kaz-btn-color) 62%, white);
+  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 78%, white);
+  --kaz-btn-glint: color-mix(in oklab, var(--kaz-btn-color) 78%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
   --kaz-btn-face-gradient:
     linear-gradient(
       to bottom,
-      var(--kaz-btn-glint) 0 5%,
-      color-mix(in oklab, var(--kaz-btn-color) 88%, white) 14%,
+      var(--kaz-btn-glint) 0 3%,
+      color-mix(in oklab, var(--kaz-btn-color) 92%, white) 8%,
       var(--kaz-btn-color) 27% 68%,
       color-mix(in oklab, var(--kaz-btn-color) 72%, black) 100%
     );
@@ -12058,7 +12058,7 @@ textarea.form-control-lg {
   outline-offset: 0;
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-highlight),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -2px -2px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
@@ -12092,7 +12092,7 @@ textarea.form-control-lg {
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-2px, -2px);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-highlight),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -2px -2px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
@@ -12104,7 +12104,7 @@ textarea.form-control-lg {
   transform: translate(3px, 3px);
   box-shadow:
     inset 2px 2px 0 var(--kaz-btn-lower-lip),
-    inset -2px -2px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
@@ -12114,7 +12114,7 @@ textarea.form-control-lg {
   transform: translate(3px, 3px);
   box-shadow:
     inset 2px 2px 0 var(--kaz-btn-lower-lip),
-    inset -2px -2px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
@@ -12127,13 +12127,13 @@ textarea.form-control-lg {
   .btn:not(.btn-link) {
     --kaz-btn-outline: rgba(0, 0, 0, 0.78);
     --kaz-btn-edge: rgba(0, 0, 0, 0.48);
-    --kaz-btn-highlight: rgba(255, 255, 255, 0.32);
-    --kaz-btn-glint: rgba(255, 255, 255, 0.38);
+    --kaz-btn-highlight: rgba(255, 255, 255, 0.24);
+    --kaz-btn-glint: rgba(255, 255, 255, 0.24);
 
     --kaz-btn-lower-lip: rgba(0, 0, 0, 0.22);
     --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.48);
     --kaz-btn-layer: rgba(0, 0, 0, 0.72);
-    --kaz-btn-face-gradient: linear-gradient(to bottom, rgba(255, 255, 255, 0.22) 0 5%, transparent 18%, rgba(0, 0, 0, 0.2) 100%);
+    --kaz-btn-face-gradient: linear-gradient(to bottom, rgba(255, 255, 255, 0.16) 0 3%, transparent 12%, rgba(0, 0, 0, 0.2) 100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
