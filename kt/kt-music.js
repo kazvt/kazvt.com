@@ -257,7 +257,7 @@
 
     chordTones.forEach(({ interval, lift }, noteIndex) => {
       const frequency = 440 * (2 ** ((midiRoot + interval - 69) / 12));
-      (lift ? [-3, 3] : [-5, 5]).forEach((detune, layerIndex) => {
+      (lift ? [-2, 2] : [-3, 3]).forEach((detune, layerIndex) => {
         const oscillator = context.createOscillator();
         const voice = context.createGain();
         oscillator.type = "sine";
