@@ -12033,34 +12033,34 @@ textarea.form-control-lg {
 .rounded, [class*="rounded-"] {
   border-radius: 0 !important;
 }
-/* Kazstrap: color-derived arcade buttons with layered up, over, and down states. */
+/* Kazstrap: compact arcade buttons with one consistent light direction and shadow depth. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 22%, black);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
-  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
-  --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
+  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 90%, white);
+  --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 64%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
   --kaz-btn-face-gradient:
     linear-gradient(
       to bottom,
-      var(--kaz-btn-color) 0% 68%,
-      color-mix(in oklab, var(--kaz-btn-color) 72%, black) 100%
+      color-mix(in oklab, var(--kaz-btn-color) 96%, white) 0%,
+      var(--kaz-btn-color) 18% 76%,
+      color-mix(in oklab, var(--kaz-btn-color) 88%, black) 100%
     );
-  border: 2px solid var(--kaz-btn-edge);
-  border-top-color: var(--kaz-btn-highlight);
-  border-left-color: var(--kaz-btn-highlight);
+  border: 1px solid var(--kaz-btn-edge);
+  border-color: var(--kaz-btn-highlight) var(--kaz-btn-edge) var(--kaz-btn-edge) var(--kaz-btn-highlight);
   outline: 1px solid var(--kaz-btn-outline);
   outline-offset: 0;
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
-    inset -2px -2px 0 var(--kaz-btn-lower-lip),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
   font-weight: 700;
   letter-spacing: 0.02em;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.16s ease-out, transform 0.16s ease-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.14s ease-out, transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .btn[class*="btn-outline-"]:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-color);
@@ -12086,32 +12086,23 @@ textarea.form-control-lg {
   --kaz-btn-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
 }
 .btn:not(.btn-link):hover:not(:focus-visible) {
-  transform: translate(-2px, -2px);
+  transform: translate(-1px, -1px);
   box-shadow:
-    inset -2px -2px 0 var(--kaz-btn-lower-lip),
-    6px 6px 0 var(--kaz-btn-shadow-deep),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
+    5px 5px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
 }
-.btn:not(.btn-link):active:not(:focus-visible),
-.btn:not(.btn-link).active:not(:focus-visible),
-.btn:not(.btn-link).show:not(:focus-visible),
-.btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
+.btn:not(.btn-link):active,
+.btn:not(.btn-link).active,
+.btn:not(.btn-link).show,
+.btn-check:checked + .btn:not(.btn-link) {
+  border-color: var(--kaz-btn-edge) var(--kaz-btn-highlight) var(--kaz-btn-highlight) var(--kaz-btn-edge);
   transform: translate(3px, 3px);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-lower-lip),
     inset -1px -1px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
-    4px 4px 0 var(--kaz-btn-layer);
-}
-.btn:not(.btn-link):active:focus-visible,
-.btn:not(.btn-link).active:focus-visible,
-.btn:not(.btn-link).show:focus-visible {
-  transform: translate(3px, 3px);
-  box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-lower-lip),
-    inset -1px -1px 0 var(--kaz-btn-highlight),
-    1px 1px 0 var(--kaz-btn-shadow-deep),
-    4px 4px 0 var(--kaz-btn-layer);
+    5px 5px 0 var(--kaz-btn-layer);
 }
 .btn:not(.btn-link):focus-visible,
 .btn-check:focus-visible + .btn:not(.btn-link) {
@@ -12122,12 +12113,11 @@ textarea.form-control-lg {
   .btn:not(.btn-link) {
     --kaz-btn-outline: rgba(0, 0, 0, 0.78);
     --kaz-btn-edge: rgba(0, 0, 0, 0.48);
-    --kaz-btn-highlight: rgba(255, 255, 255, 0.20);
-
-    --kaz-btn-lower-lip: rgba(0, 0, 0, 0.22);
+    --kaz-btn-highlight: rgba(255, 255, 255, 0.10);
+    --kaz-btn-lower-lip: rgba(0, 0, 0, 0.24);
     --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.48);
     --kaz-btn-layer: rgba(0, 0, 0, 0.72);
-    --kaz-btn-face-gradient: linear-gradient(to bottom, transparent 68%, rgba(0, 0, 0, 0.2) 100%);
+    --kaz-btn-face-gradient: linear-gradient(to bottom, transparent 76%, rgba(0, 0, 0, 0.12) 100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -12135,13 +12125,10 @@ textarea.form-control-lg {
     transition: none;
   }
   .btn:not(.btn-link):hover:not(:focus-visible),
-  .btn:not(.btn-link):active:not(:focus-visible),
-  .btn:not(.btn-link).active:not(:focus-visible),
-  .btn:not(.btn-link).show:not(:focus-visible),
-  .btn-check:checked + .btn:not(.btn-link):not(:focus-visible),
-  .btn:not(.btn-link):active:focus-visible,
-  .btn:not(.btn-link).active:focus-visible,
-  .btn:not(.btn-link).show:focus-visible {
+  .btn:not(.btn-link):active,
+  .btn:not(.btn-link).active,
+  .btn:not(.btn-link).show,
+  .btn-check:checked + .btn:not(.btn-link) {
     transform: none;
   }
 }
