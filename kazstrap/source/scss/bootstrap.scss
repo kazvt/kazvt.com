@@ -177,8 +177,23 @@
   }
 }
 
-/* Kazstrap: screen-friendly, playful default type. */
+/* Kazstrap: lively display lettering with a readable text face. */
 :root {
   --bs-font-sans-serif: Candara, "Trebuchet MS", Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-body-font-family: var(--bs-font-sans-serif);
+  --kaz-font-display: "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, sans-serif;
+}
+h1,
+h2,
+h3,
+.display-1,
+.display-2,
+.display-3,
+.display-4,
+.display-5,
+.display-6,
+.navbar-brand,
+.btn:not(.btn-link),
+.badge {
+  font-family: var(--kaz-font-display);
 }
