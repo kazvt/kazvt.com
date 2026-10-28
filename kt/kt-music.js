@@ -10,6 +10,7 @@
   const preferenceKey = "kazvt-kt-pad-preference-v1";
   const preferenceLifetime = 24 * 60 * 60 * 1000;
   const fadeSeconds = 3.2;
+  const padAttackSeconds = 4.8;
   const rootSemitone = Math.floor(Math.random() * 12);
   // A major triad spread across two octaves: root, third, fifth and their
   // octave doublings. The voicing changes on each fresh page load.
@@ -17,8 +18,8 @@
   // Four bars into each 8-bar register, bloom a quieter high fifth, major
   // seventh, and root octave; release them just before the next register shift.
   const chordLiftIntervals = [31, 35, 36];
-  const chordLiftGain = 0.0055;
-  const chordLiftFadeDuration = 2.6;
+  const chordLiftGain = 0.0038;
+  const chordLiftFadeDuration = 4.2;
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
   // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
@@ -120,20 +121,6 @@
     schedulePreferenceExpiry();
   }
 
-  function createReverbImpulse(audioContext) {
-    const duration = 2.25;
-    const length = Math.floor(audioContext.sampleRate * duration);
-    const impulse = audioContext.createBuffer(2, length, audioContext.sampleRate);
-    for (let channel = 0; channel < impulse.numberOfChannels; channel += 1) {
-      const data = impulse.getChannelData(channel);
-      for (let index = 0; index < length; index += 1) {
-        const tail = 1 - index / length;
-        data[index] = (Math.random() * 2 - 1) * tail ** 2.8;
-      }
-    }
-    return impulse;
-  }
-
   function scheduleRegisterChange(when, fromSemitones, toSemitones) {
     const startFactor = 2 ** (fromSemitones / 12);
     const endFactor = 2 ** (toSemitones / 12);
@@ -198,23 +185,20 @@
       context.addEventListener("statechange", syncAudioSignal);
       const filter = context.createBiquadFilter();
       filter.type = "lowpass";
-      filter.frequency.value = 1650;
+      // Keep the chord body intact while gently tucking away the brightest lift notes.
+      filter.frequency.value = 1400;
       filter.Q.value = 0.5;
       padFilter = filter;
 
       master = context.createGain();
       master.gain.value = 0.0001;
 
-      const dry = context.createGain();
-      dry.gain.value = 0.82;
-      const convolver = context.createConvolver();
-      convolver.buffer = createReverbImpulse(context);
-      const wet = context.createGain();
-      wet.gain.value = 0.2;
+      const direct = context.createGain();
+      direct.gain.value = 0.82;
 
-      // A restrained dual-tap, modulated delay adds stereo motion without
-      // feedback or a heavy phaser network. The suspended AudioContext also
-      // suspends its LFOs when visitors mute the pad.
+      // Keep the existing restrained dual-tap chorus for gentle stereo width.
+      // The pad itself stays dry: its softer, more distant character comes from
+      // the oscillator timbre, slower envelopes, and lower voice levels.
       const chorusWet = context.createGain();
       chorusWet.gain.value = 0.13;
       chorusWet.connect(master);
@@ -247,11 +231,8 @@
         lfo.start();
       });
 
-      filter.connect(dry);
-      dry.connect(master);
-      filter.connect(convolver);
-      convolver.connect(wet);
-      wet.connect(master);
+      filter.connect(direct);
+      direct.connect(master);
       master.connect(context.destination);
       return true;
     } catch {
@@ -279,11 +260,11 @@
       (lift ? [-3, 3] : [-5, 5]).forEach((detune, layerIndex) => {
         const oscillator = context.createOscillator();
         const voice = context.createGain();
-        oscillator.type = "triangle";
+        oscillator.type = "sine";
         oscillator.frequency.value = frequency;
         oscillator.detune.value = detune;
         voice.gain.setValueAtTime(0.0001, now);
-        if (!lift) voice.gain.linearRampToValueAtTime(0.018, now + fadeSeconds);
+        if (!lift) voice.gain.linearRampToValueAtTime(0.0135, now + padAttackSeconds);
 
         if (context.createStereoPanner) {
           const panner = context.createStereoPanner();
