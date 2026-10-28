@@ -45,6 +45,10 @@
     guestHover: {
       tones: [{ type: "sine", frequency: 510, endFrequency: 650, duration: 0.08, gain: 0.01 }],
     },
+    familiarHover: {
+      base: "guestHover",
+      pitchMultiplier: 2 ** (-4 / 12),
+    },
     guestClick: {
       tones: [{ type: "triangle", frequency: 390, endFrequency: 650, duration: 0.105, gain: 0.024 }],
       noise: { frequency: 1750, endFrequency: 980, duration: 0.022, gain: 0.011 },
@@ -336,7 +340,8 @@
 
     const context = audioContext;
     const now = context.currentTime + 0.003;
-    const pitchFactor = Number.isFinite(fixedPitchFactor) ? fixedPitchFactor : nextPitch(cue);
+    const pitchFactor = (Number.isFinite(fixedPitchFactor) ? fixedPitchFactor : nextPitch(cue))
+      * (Number.isFinite(profile.pitchMultiplier) ? profile.pitchMultiplier : 1);
     const voice = { cue, sources: [], nodes: [], cleanupTimer: 0 };
     const baseProfile = profile.base ? profiles[profile.base] : null;
     const tones = [...(baseProfile?.tones || []), ...(profile.tones || [])];
@@ -376,6 +381,7 @@
 
   function cueForEntry(target, action) {
     if (!(target instanceof Element)) return null;
+    if (action === "Hover" && target.closest(".kt-chatters__card")) return "familiarHover";
     const member = target.closest(".kt-member-grid > li > .kt-member");
     const guest = target.closest(".kt-recommendation-grid > li > .kt-recommendation-link");
     const card = member || guest;
@@ -456,7 +462,7 @@
     if (!event.isTrusted || event.pointerType === "touch" || !(event.target instanceof Element)) return;
     const cue = cueForEntry(event.target, "Hover");
     if (cue) {
-      const card = event.target.closest(".kt-member-grid > li > .kt-member, .kt-recommendation-grid > li > .kt-recommendation-link");
+      const card = event.target.closest(".kt-member-grid > li > .kt-member, .kt-recommendation-grid > li > .kt-recommendation-link, .kt-chatters__card");
       if (event.relatedTarget instanceof Node && card?.contains(event.relatedTarget)) return;
       void play(cue);
       return;
