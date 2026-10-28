@@ -71,7 +71,7 @@
   --bs-dark-border-subtle: #adb5bd;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
-  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-sans-serif: "Microsoft YaHei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-body-font-family: var(--bs-font-sans-serif);
@@ -12159,13 +12159,7 @@ textarea.form-control-lg {
   }
 }
 
-/* Kazstrap: bold retro display type with emoji-aware fallback. */
-:root {
-  --kaz-font-bold-fun: "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --bs-font-sans-serif: var(--kaz-font-bold-fun);
-  --bs-body-font-family: var(--bs-font-sans-serif);
-  --kaz-font-display: var(--kaz-font-bold-fun);
-}
+/* Kazstrap: use Microsoft YaHei for all Bootstrap text. */
 h1,
 h2,
 h3,
@@ -12178,32 +12172,5 @@ h3,
 .navbar-brand,
 .btn:not(.btn-link),
 .badge {
-  font-family: var(--kaz-font-display);
+  font-family: var(--bs-font-sans-serif);
 }
-
-/* Kazstrap: cycle glyphs through a bold retro display-font pool. */
-:root {
-  --kaz-font-cycle-0: "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-1: Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-2: "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-3: "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-4: "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-5: "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-6: "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-7: Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-8: "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-9: "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-10: "Gill Sans Ultra Bold", "Arial Black", Arial Black, "Cooper Black", "Arial Black", "Arial Black", "Arial Black", "Jokerman", Ravie, "Britannic Bold", "Franklin Gothic Heavy", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-.kazstrap-glyph { font-weight: normal; }
-.kazstrap-glyph--0 { font-family: var(--kaz-font-cycle-0); }
-.kazstrap-glyph--1 { font-family: var(--kaz-font-cycle-1); }
-.kazstrap-glyph--2 { font-family: var(--kaz-font-cycle-2); }
-.kazstrap-glyph--3 { font-family: var(--kaz-font-cycle-3); }
-.kazstrap-glyph--4 { font-family: var(--kaz-font-cycle-4); }
-.kazstrap-glyph--5 { font-family: var(--kaz-font-cycle-5); }
-.kazstrap-glyph--6 { font-family: var(--kaz-font-cycle-6); }
-.kazstrap-glyph--7 { font-family: var(--kaz-font-cycle-7); }
-.kazstrap-glyph--8 { font-family: var(--kaz-font-cycle-8); }
-.kazstrap-glyph--9 { font-family: var(--kaz-font-cycle-9); }
-.kazstrap-glyph--10 { font-family: var(--kaz-font-cycle-10); }
