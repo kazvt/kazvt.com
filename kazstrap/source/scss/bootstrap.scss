@@ -64,8 +64,8 @@
   --kaz-btn-face-gradient:
     linear-gradient(
       to bottom,
-      var(--kaz-btn-glint) 0 5%,
-      color-mix(in oklab, var(--kaz-btn-color) 88%, white) 14%,
+      var(--kaz-btn-glint) 0 3%,
+      color-mix(in oklab, var(--kaz-btn-color) 88%, white) 10%,
       var(--kaz-btn-color) 27% 68%,
       color-mix(in oklab, var(--kaz-btn-color) 72%, black) 100%
     );
@@ -76,8 +76,8 @@
   outline-offset: 0;
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-highlight),
-    inset -2px -2px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
   font-weight: 700;
@@ -110,8 +110,8 @@
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-2px, -2px);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-highlight),
-    inset -2px -2px 0 var(--kaz-btn-lower-lip),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-lower-lip),
     6px 6px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
 }
@@ -121,8 +121,8 @@
 .btn-check:checked + .btn:not(.btn-link):not(:focus-visible) {
   transform: translate(3px, 3px);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-lower-lip),
-    inset -2px -2px 0 var(--kaz-btn-highlight),
+    inset 1px 1px 0 var(--kaz-btn-lower-lip),
+    inset -1px -1px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
@@ -131,8 +131,8 @@
 .btn:not(.btn-link).show:focus-visible {
   transform: translate(3px, 3px);
   box-shadow:
-    inset 2px 2px 0 var(--kaz-btn-lower-lip),
-    inset -2px -2px 0 var(--kaz-btn-highlight),
+    inset 1px 1px 0 var(--kaz-btn-lower-lip),
+    inset -1px -1px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     4px 4px 0 var(--kaz-btn-layer);
 }
