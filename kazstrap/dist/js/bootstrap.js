@@ -4629,3 +4629,140 @@
     start()
   }
 })()
+
+
+/* Kazstrap glyph typography: round-robin across eleven font choices. */
+;(function initializeKazstrapGlyphCycle() {
+  if (typeof window === 'undefined' || typeof document === 'undefined' || window.__kazstrapGlyphCycleStarted) {
+    return
+  }
+
+  window.__kazstrapGlyphCycleStarted = true
+
+  const excludedSelector = 'script, style, noscript, template, textarea, input, select, option, code, pre, kbd, samp, svg, canvas, math, .kazstrap-glyph, [contenteditable]:not([contenteditable="false"])'
+  const segmenter = typeof Intl !== 'undefined' && Intl.Segmenter
+    ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+    : null
+  let nextFont = 0
+
+  const isGraphemeExtender = character => {
+    const codePoint = character.codePointAt(0)
+    return (codePoint >= 0x0300 && codePoint <= 0x036f) ||
+      (codePoint >= 0x1ab0 && codePoint <= 0x1aff) ||
+      (codePoint >= 0x1dc0 && codePoint <= 0x1dff) ||
+      (codePoint >= 0x20d0 && codePoint <= 0x20ff) ||
+      (codePoint >= 0xfe00 && codePoint <= 0xfe0f) ||
+      (codePoint >= 0xfe20 && codePoint <= 0xfe2f) ||
+      (codePoint >= 0x1f3fb && codePoint <= 0x1f3ff) ||
+      (codePoint >= 0xe0020 && codePoint <= 0xe007f) ||
+      (codePoint >= 0xe0100 && codePoint <= 0xe01ef)
+  }
+
+  const getGraphemes = text => {
+    if (segmenter) {
+      return Array.from(segmenter.segment(text), part => part.segment)
+    }
+
+    const graphemes = []
+
+    for (const character of Array.from(text)) {
+      const codePoint = character.codePointAt(0)
+      const previous = graphemes[graphemes.length - 1] || ''
+      const previousCodePoints = Array.from(previous)
+      const previousPoint = previousCodePoints[0]?.codePointAt(0)
+      const isRegionalPair = previousCodePoints.length === 1 &&
+        previousPoint >= 0x1f1e6 && previousPoint <= 0x1f1ff &&
+        codePoint >= 0x1f1e6 && codePoint <= 0x1f1ff
+
+      if (previous && (isGraphemeExtender(character) || character === '\u200d' || previous.endsWith('\u200d') || isRegionalPair)) {
+        graphemes[graphemes.length - 1] += character
+      } else {
+        graphemes.push(character)
+      }
+    }
+
+    return graphemes
+  }
+
+  const cycleTextNode = textNode => {
+    if (!textNode.parentElement || !textNode.nodeValue || !textNode.nodeValue.trim()) {
+      return
+    }
+
+    if (textNode.parentElement.closest(excludedSelector)) {
+      return
+    }
+
+    const fragment = document.createDocumentFragment()
+    let changed = false
+
+    for (const grapheme of getGraphemes(textNode.nodeValue)) {
+      if (/^\s+$/u.test(grapheme)) {
+        fragment.append(document.createTextNode(grapheme))
+        continue
+      }
+
+      const glyph = document.createElement('span')
+      glyph.className = `kazstrap-glyph kazstrap-glyph--${nextFont}`
+      glyph.textContent = grapheme
+      fragment.append(glyph)
+      nextFont = (nextFont + 1) % 11
+      changed = true
+    }
+
+    if (changed) {
+      textNode.replaceWith(fragment)
+    }
+  }
+
+  const cycleTextWithin = root => {
+    if (root.nodeType === Node.TEXT_NODE) {
+      cycleTextNode(root)
+      return
+    }
+
+    if (root.nodeType === Node.ELEMENT_NODE && root.matches(excludedSelector)) {
+      return
+    }
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: textNode => textNode.parentElement && textNode.parentElement.closest(excludedSelector)
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT
+    })
+    const textNodes = []
+
+    while (walker.nextNode()) {
+      textNodes.push(walker.currentNode)
+    }
+
+    for (const textNode of textNodes) {
+      cycleTextNode(textNode)
+    }
+  }
+
+  const start = () => {
+    if (!document.body) {
+      return
+    }
+
+    cycleTextWithin(document.body)
+
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          cycleTextWithin(node)
+        }
+      }
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+    window.__kazstrapGlyphCycleObserver = observer
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true })
+  } else {
+    start()
+  }
+})()

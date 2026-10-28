@@ -165,15 +165,19 @@ h3,
   font-family: var(--kaz-font-display);
 }
 
-
 /* Kazstrap: cycle short text graphemes through a playful sans-serif mix. */
 :root {
-  --kaz-font-cycle-0: "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-1: "Trebuchet MS", Candara, Verdana, Arial, "Arial Rounded MT Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-2: Candara, Verdana, Arial, "Arial Rounded MT Bold", "Trebuchet MS", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-3: Verdana, Arial, "Arial Rounded MT Bold", "Trebuchet MS", Candara, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-4: Arial, "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-0: "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-1: "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-2: Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-3: Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-4: Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --kaz-font-cycle-5: sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-6: "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-7: Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-8: "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-9: Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-10: "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 .kazstrap-glyph--0 { font-family: var(--kaz-font-cycle-0); }
 .kazstrap-glyph--1 { font-family: var(--kaz-font-cycle-1); }
@@ -181,3 +185,8 @@ h3,
 .kazstrap-glyph--3 { font-family: var(--kaz-font-cycle-3); }
 .kazstrap-glyph--4 { font-family: var(--kaz-font-cycle-4); }
 .kazstrap-glyph--5 { font-family: var(--kaz-font-cycle-5); }
+.kazstrap-glyph--6 { font-family: var(--kaz-font-cycle-6); }
+.kazstrap-glyph--7 { font-family: var(--kaz-font-cycle-7); }
+.kazstrap-glyph--8 { font-family: var(--kaz-font-cycle-8); }
+.kazstrap-glyph--9 { font-family: var(--kaz-font-cycle-9); }
+.kazstrap-glyph--10 { font-family: var(--kaz-font-cycle-10); }
