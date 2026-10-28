@@ -56,7 +56,7 @@
   --kaz-btn-color: var(--bs-btn-bg);
   --kaz-btn-outline: color-mix(in oklab, var(--kaz-btn-color) 22%, black);
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
-  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 90%, white);
+  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 64%, black);
   --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
@@ -80,7 +80,7 @@
     var(--kaz-btn-glaze-gradient),
     var(--kaz-btn-face-gradient);
   box-shadow:
-    inset 3px 3px 0 var(--kaz-btn-highlight),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -1px -1px 0 var(--kaz-btn-lower-lip),
     4px 4px 0 var(--kaz-btn-shadow-deep),
     8px 8px 0 var(--kaz-btn-layer);
@@ -121,7 +121,7 @@
 .btn:not(.btn-link):hover:not(:focus-visible) {
   transform: translate(-1px, -1px);
   box-shadow:
-    inset 3px 3px 0 var(--kaz-btn-highlight),
+    inset 1px 1px 0 var(--kaz-btn-highlight),
     inset -1px -1px 0 var(--kaz-btn-lower-lip),
     5px 5px 0 var(--kaz-btn-shadow-deep),
     9px 9px 0 var(--kaz-btn-layer);
@@ -133,7 +133,7 @@
   transform: translate(3px, 3px);
   box-shadow:
     inset 1px 1px 0 var(--kaz-btn-lower-lip),
-    inset -3px -3px 0 var(--kaz-btn-highlight),
+    inset -1px -1px 0 var(--kaz-btn-highlight),
     1px 1px 0 var(--kaz-btn-shadow-deep),
     5px 5px 0 var(--kaz-btn-layer);
 }
