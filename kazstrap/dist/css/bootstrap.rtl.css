@@ -12159,11 +12159,12 @@ textarea.form-control-lg {
   }
 }
 
-/* Kazstrap: lively display lettering with a readable text face. */
+/* Kazstrap: bold retro display type with emoji-aware fallback. */
 :root {
-  --bs-font-sans-serif: Candara, "Trebuchet MS", Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-bold-fun: "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-sans-serif: var(--kaz-font-bold-fun);
   --bs-body-font-family: var(--bs-font-sans-serif);
-  --kaz-font-display: "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, sans-serif;
+  --kaz-font-display: var(--kaz-font-bold-fun);
 }
 h1,
 h2,
@@ -12180,20 +12181,21 @@ h3,
   font-family: var(--kaz-font-display);
 }
 
-/* Kazstrap: cycle short text graphemes through a playful sans-serif mix. */
+/* Kazstrap: cycle glyphs through a bold retro display-font pool. */
 :root {
-  --kaz-font-cycle-0: "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-1: "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-2: Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-3: Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-4: Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-5: sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-6: "Comic Sans MS", Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-7: Calibri, "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-8: "Segoe UI", Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-9: Corbel, "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --kaz-font-cycle-10: "Century Gothic", "Arial Rounded MT Bold", "Trebuchet MS", Candara, Verdana, Arial, "Comic Sans MS", Calibri, "Segoe UI", Corbel, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-0: "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-1: Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-2: "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-3: "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-4: "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-5: "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-6: "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-7: Ravie, "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-8: "Britannic Bold", "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-9: "Franklin Gothic Heavy", "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --kaz-font-cycle-10: "Gill Sans Ultra Bold", "Arial Black", Impact, "Cooper Black", "Rockwell Extra Bold", "Bauhaus 93", "Showcard Gothic", "Goudy Stout", Ravie, "Britannic Bold", "Franklin Gothic Heavy", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+.kazstrap-glyph { font-weight: 900; }
 .kazstrap-glyph--0 { font-family: var(--kaz-font-cycle-0); }
 .kazstrap-glyph--1 { font-family: var(--kaz-font-cycle-1); }
 .kazstrap-glyph--2 { font-family: var(--kaz-font-cycle-2); }
