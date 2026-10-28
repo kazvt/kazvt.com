@@ -114,7 +114,7 @@
     --kaz-btn-edge: rgba(0, 0, 0, 0.48);
     --kaz-btn-highlight: rgba(255, 255, 255, 0.32);
     --kaz-btn-glint: rgba(255, 255, 255, 0.38);
-    --kaz-btn-highlight: var(--kaz-btn-color);
+
     --kaz-btn-lower-lip: rgba(0, 0, 0, 0.22);
     --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.48);
     --kaz-btn-layer: rgba(0, 0, 0, 0.72);
