@@ -21,25 +21,21 @@
 /* Kazstrap: color-derived arcade buttons with layered up, over, and down states. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
-  --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 60%, black);
-  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 84%, white);
-  --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
-  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 30%, black);
-  --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 72%, black);
+  --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
+  --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 68%, white);
+  --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 56%, black);
+  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
+  --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
   --kaz-btn-face-gradient:
     linear-gradient(
       to bottom,
-      color-mix(in oklab, var(--kaz-btn-color) 84%, white) 0 1px,
-      color-mix(in oklab, var(--kaz-btn-color) 78%, black) 1px 2px,
-      transparent 2px
-    ),
-    linear-gradient(
-      to bottom,
       var(--kaz-btn-color) 0%,
-      var(--kaz-btn-color) 46%,
-      color-mix(in oklab, var(--kaz-btn-color) 82%, black) 100%
+      var(--kaz-btn-color) 52%,
+      color-mix(in oklab, var(--kaz-btn-color) 72%, black) 100%
     );
   border: 3px solid var(--kaz-btn-edge);
+  border-top-color: var(--kaz-btn-highlight);
+  border-left-color: var(--kaz-btn-highlight);
   background-image: var(--kaz-btn-face-gradient);
   box-shadow:
     inset 2px 2px 0 var(--kaz-btn-highlight),
