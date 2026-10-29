@@ -171,9 +171,10 @@
         chatterResizeObserver.observe(list);
         list.querySelectorAll('.kt-chatters__card').forEach(card => chatterResizeObserver.observe(card));
       });
-    } else {
-      window.addEventListener('resize', scheduleChatterHandleFit, { passive: true });
     }
+    // The panel can be max-width constrained while its vw-based type size still
+    // changes, so watch viewport changes even when ResizeObserver is available.
+    window.addEventListener('resize', scheduleChatterHandleFit, { passive: true });
     if (document.fonts?.ready) document.fonts.ready.then(scheduleChatterHandleFit);
     if (chatterLists.length) {
       const chatterTextObserver = new MutationObserver(scheduleChatterHandleFit);
