@@ -947,7 +947,7 @@ h1, h2, h3, h4, h5, h6,
     1px 1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 24%, transparent),
     2px 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 12%, transparent);
 }
-h1, h2, h3, .h1, .h2, .h3,
+h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
 .card-title, .alert-heading, .modal-title, .offcanvas-title {
   background-image: linear-gradient(90deg,
     color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 78%, black 22%) 0% 64%,
@@ -958,7 +958,7 @@ h1, h2, h3, .h1, .h2, .h3,
   background-size: 3.25rem 3px;
   padding-bottom: 0.18em;
 }
-[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3:not(.accordion-header),
 [dir="rtl"] .h1, [dir="rtl"] .h2, [dir="rtl"] .h3,
 [dir="rtl"] .card-title, [dir="rtl"] .alert-heading,
 [dir="rtl"] .modal-title, [dir="rtl"] .offcanvas-title {
@@ -1508,14 +1508,14 @@ kbd {
     background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.055) 1px, transparent 1.5px);
     background-size: 18px 18px;
   }
-  h1, h2, h3, .h1, .h2, .h3,
+  h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
   .card-title, .alert-heading, .modal-title, .offcanvas-title {
     background-image: linear-gradient(90deg,
       rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
       rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
       rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
   }
-  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3:not(.accordion-header),
   [dir="rtl"] .h1, [dir="rtl"] .h2, [dir="rtl"] .h3,
   [dir="rtl"] .card-title, [dir="rtl"] .alert-heading,
   [dir="rtl"] .modal-title, [dir="rtl"] .offcanvas-title {
@@ -1679,7 +1679,7 @@ kbd {
   .nav-tabs .nav-link, .nav-pills .nav-link, .page-link,
   .form-control, .form-select, .input-group-text, .badge,
   .progress, .progress-bar, .table thead th, .breadcrumb, blockquote, kbd, mark,
-  h1, h2, h3, .h1, .h2, .h3, .card-title, .alert-heading, .modal-title, .offcanvas-title, hr {
+  h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header), .card-title, .alert-heading, .modal-title, .offcanvas-title, hr {
     background-image: none;
     box-shadow: none;
   }
