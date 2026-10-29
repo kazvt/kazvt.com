@@ -453,6 +453,7 @@ palestine.pause_aria=Pausar los GIFs de Palestina
 palestine.gif_credit=Hallazgos de la vieja web en
 palestine.collection=Literatura disponible
 palestine.entry_kind=PDF en inglés - 2 páginas
+palestine.mural_entry_kind=PDF de 33 páginas
 palestine.download=Descargar PDF
 palestine.read=Leer en el navegador
 palestine.gif_alt_1=GIF pequeño de una bandera palestina ondeando

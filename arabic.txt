@@ -459,6 +459,7 @@ palestine.pause_aria=إيقاف صور GIF عن فلسطين مؤقتا
 palestine.gif_credit=صور قديمة من
 palestine.collection=الأدب المتاح
 palestine.entry_kind=ملف PDF باللغة الإنجليزية - صفحتان
+palestine.mural_entry_kind=ملف PDF من 33 صفحة
 palestine.download=تنزيل PDF
 palestine.read=اقرأ في المتصفح
 palestine.gif_alt_1=صورة GIF صغيرة لعلم فلسطيني يرفرف
