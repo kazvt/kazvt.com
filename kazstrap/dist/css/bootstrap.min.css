@@ -184,12 +184,12 @@ h3,
 .offcanvas-title {
   text-shadow: 1px 1px 0 color-mix(in oklab, var(--bs-primary) 14%, transparent);
 }
-a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand) {
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action) {
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.18em;
   text-decoration-color: color-mix(in oklab, var(--bs-link-color) 62%, transparent);
 }
-a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):hover {
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):hover {
   text-decoration-thickness: 0.12em;
   text-decoration-color: currentColor;
 }
@@ -199,6 +199,37 @@ button:not(.btn):focus-visible {
   outline-offset: 2px;
 }
 
+a.btn-link {
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in oklab, var(--bs-link-color) 62%, transparent);
+}
+a.btn-link:hover {
+  text-decoration-thickness: 0.12em;
+  text-decoration-color: currentColor;
+}
+a.btn-link:focus-visible {
+  outline: 2px solid var(--bs-emphasis-color);
+  outline-offset: 2px;
+}
+.dropdown-item {
+  border-inline-start: 2px solid transparent;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
+}
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active,
+.dropdown-item:active {
+  border-inline-start-color: color-mix(in oklab, var(--bs-primary) 72%, transparent);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 9%, transparent),
+    transparent
+  );
+}
 /* Raised surfaces share the buttons' crisp, two-step depth without a soft glow. */
 .card,
 .dropdown-menu,
