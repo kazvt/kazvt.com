@@ -12915,6 +12915,300 @@ mark {
 }
 
 /* Kazstrap: layered site-wide finish. */
+/* Muted semantic palette. Solid tokens preserve utility compatibility; surfaces and controls layer them into gradients below. */
+:root,
+[data-bs-theme="light"] {
+  --bs-primary: #66619e;
+  --bs-primary-rgb: 102, 97, 158;
+  --bs-secondary: #626c7a;
+  --bs-secondary-rgb: 98, 108, 122;
+  --bs-success: #44735b;
+  --bs-success-rgb: 68, 115, 91;
+  --bs-info: #47727c;
+  --bs-info-rgb: 71, 114, 124;
+  --bs-warning: #d8b36d;
+  --bs-warning-rgb: 216, 179, 109;
+  --bs-danger: #a6495a;
+  --bs-danger-rgb: 166, 73, 90;
+
+  --bs-primary-text-emphasis: #39356f;
+  --bs-secondary-text-emphasis: #35404c;
+  --bs-success-text-emphasis: #244a35;
+  --bs-info-text-emphasis: #1f4650;
+  --bs-warning-text-emphasis: #5b411a;
+  --bs-danger-text-emphasis: #682f3b;
+
+  --bs-primary-bg-subtle: #efedf8;
+  --bs-secondary-bg-subtle: #eef0f4;
+  --bs-success-bg-subtle: #e9f1eb;
+  --bs-info-bg-subtle: #e8f1f3;
+  --bs-warning-bg-subtle: #f8f0de;
+  --bs-danger-bg-subtle: #f4e8eb;
+
+  --bs-primary-border-subtle: #c4c0e0;
+  --bs-secondary-border-subtle: #c9cfd7;
+  --bs-success-border-subtle: #bdd4c4;
+  --bs-info-border-subtle: #b9d3d9;
+  --bs-warning-border-subtle: #dfc58f;
+  --bs-danger-border-subtle: #dfb9c1;
+
+  --bs-link-color: #55518f;
+  --bs-link-color-rgb: 85, 81, 143;
+  --bs-link-hover-color: #39356f;
+  --bs-link-hover-color-rgb: 57, 53, 111;
+  --bs-focus-ring-color: rgba(102, 97, 158, 0.3);
+  --bs-form-valid-color: var(--bs-success-text-emphasis);
+  --bs-form-valid-border-color: var(--bs-success);
+  --bs-form-invalid-color: var(--bs-danger-text-emphasis);
+  --bs-form-invalid-border-color: var(--bs-danger);
+  --bs-highlight-color: var(--bs-body-color);
+  --bs-highlight-bg: var(--bs-warning-bg-subtle);
+  --bs-code-color: #89506f;
+  --bs-border-color: #d7d6e0;
+  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2344735b' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
+  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23a6495a'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23a6495a' stroke='none'/%3e%3c/svg%3e");
+}
+[data-bs-theme="dark"] {
+  --bs-primary: #66619e;
+  --bs-primary-rgb: 102, 97, 158;
+  --bs-secondary: #626c7a;
+  --bs-secondary-rgb: 98, 108, 122;
+  --bs-success: #44735b;
+  --bs-success-rgb: 68, 115, 91;
+  --bs-info: #47727c;
+  --bs-info-rgb: 71, 114, 124;
+  --bs-warning: #d8b36d;
+  --bs-warning-rgb: 216, 179, 109;
+  --bs-danger: #a6495a;
+  --bs-danger-rgb: 166, 73, 90;
+
+  --bs-primary-text-emphasis: #bdb8ee;
+  --bs-secondary-text-emphasis: #c2cad4;
+  --bs-success-text-emphasis: #acd1b8;
+  --bs-info-text-emphasis: #aad0d8;
+  --bs-warning-text-emphasis: #eed094;
+  --bs-danger-text-emphasis: #e7adb7;
+
+  --bs-primary-bg-subtle: #25243b;
+  --bs-secondary-bg-subtle: #292d34;
+  --bs-success-bg-subtle: #1f2d24;
+  --bs-info-bg-subtle: #1e2c31;
+  --bs-warning-bg-subtle: #332b20;
+  --bs-danger-bg-subtle: #332128;
+
+  --bs-primary-border-subtle: #514c7a;
+  --bs-secondary-border-subtle: #515d6e;
+  --bs-success-border-subtle: #3f6a51;
+  --bs-info-border-subtle: #3d6974;
+  --bs-warning-border-subtle: #81663b;
+  --bs-danger-border-subtle: #7b4651;
+
+  --bs-link-color: #bdb8ee;
+  --bs-link-color-rgb: 189, 184, 238;
+  --bs-link-hover-color: #d4cff7;
+  --bs-link-hover-color-rgb: 212, 207, 247;
+  --bs-focus-ring-color: rgba(189, 184, 238, 0.38);
+  --bs-form-valid-color: var(--bs-success-text-emphasis);
+  --bs-form-valid-border-color: #6b9e7d;
+  --bs-form-invalid-color: var(--bs-danger-text-emphasis);
+  --bs-form-invalid-border-color: #c17482;
+  --bs-highlight-color: var(--bs-body-color);
+  --bs-highlight-bg: var(--bs-warning-bg-subtle);
+  --bs-code-color: #d6a2c1;
+  --bs-border-color: #4b4d5b;
+  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23acd1b8' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
+  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23e7adb7'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e7adb7' stroke='none'/%3e%3c/svg%3e");
+}
+
+.was-validated .form-control:valid, .form-control.is-valid { background-image: var(--kaz-form-valid-icon); }
+.was-validated .form-control:invalid, .form-control.is-invalid { background-image: var(--kaz-form-invalid-icon); }
+.was-validated .form-select:valid:not([multiple]):not([size]),
+.was-validated .form-select:valid:not([multiple])[size="1"],
+.form-select.is-valid:not([multiple]):not([size]),
+.form-select.is-valid:not([multiple])[size="1"] {
+  --bs-form-select-bg-icon: var(--kaz-form-valid-icon);
+}
+.was-validated .form-select:invalid:not([multiple]):not([size]),
+.was-validated .form-select:invalid:not([multiple])[size="1"],
+.form-select.is-invalid:not([multiple]):not([size]),
+.form-select.is-invalid:not([multiple])[size="1"] {
+  --bs-form-select-bg-icon: var(--kaz-form-invalid-icon);
+}
+
+/* Keep inherited Bootstrap component states on the same semantic palette. */
+.dropdown-menu, .dropdown-menu-dark {
+  --bs-dropdown-link-active-bg: var(--bs-primary);
+  --bs-dropdown-link-active-color: #fff;
+}
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--bs-primary);
+  --bs-nav-pills-link-active-color: #fff;
+}
+.pagination {
+  --bs-pagination-active-bg: var(--bs-primary);
+  --bs-pagination-active-border-color: var(--bs-primary);
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+.list-group {
+  --bs-list-group-active-bg: var(--bs-primary);
+  --bs-list-group-active-border-color: var(--bs-primary);
+  --bs-list-group-active-color: #fff;
+}
+.progress {
+  --bs-progress-bar-bg: var(--bs-primary);
+  --bs-progress-bar-color: #fff;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 24%, transparent),
+    0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+.form-check-input:focus {
+  border-color: color-mix(in oklab, var(--bs-primary) 72%, white);
+  box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+.form-check-input:checked,
+.form-check-input[type="checkbox"]:indeterminate {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+.form-range::-webkit-slider-thumb, .form-range::-moz-range-thumb {
+  background-color: var(--bs-primary);
+}
+.form-range::-webkit-slider-thumb:active, .form-range::-moz-range-thumb:active {
+  background-color: var(--bs-primary-text-emphasis);
+}
+.form-range:focus::-webkit-slider-thumb, .form-range:focus::-moz-range-thumb {
+  box-shadow:
+    0 0 0 1px var(--bs-body-bg),
+    0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+
+/* Keep button highlights soft enough for readable labels over the full gradient. */
+.btn:not(.btn-link) {
+  --kaz-btn-glaze-gradient:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--kaz-btn-color) 95%, white) 0%,
+      color-mix(in oklab, var(--kaz-btn-color) 98%, white) 14%,
+      transparent 40%
+    );
+}
+
+/* Bootstrap's button variables drive the existing color-derived face and shadow layers. */
+.btn-primary, .btn-outline-primary {
+  --kaz-button-base: var(--bs-primary);
+  --kaz-button-rgb: var(--bs-primary-rgb);
+  --kaz-button-emphasis: var(--bs-primary-text-emphasis);
+  --kaz-button-hover: var(--kaz-button-base);
+  --kaz-button-active: var(--kaz-button-base);
+}
+.btn-secondary, .btn-outline-secondary {
+  --kaz-button-base: var(--bs-secondary);
+  --kaz-button-rgb: var(--bs-secondary-rgb);
+  --kaz-button-emphasis: var(--bs-secondary-text-emphasis);
+  --kaz-button-hover: var(--kaz-button-base);
+  --kaz-button-active: var(--kaz-button-base);
+}
+.btn-success, .btn-outline-success {
+  --kaz-button-base: var(--bs-success);
+  --kaz-button-rgb: var(--bs-success-rgb);
+  --kaz-button-emphasis: var(--bs-success-text-emphasis);
+  --kaz-button-hover: var(--kaz-button-base);
+  --kaz-button-active: var(--kaz-button-base);
+}
+.btn-info, .btn-outline-info {
+  --kaz-button-base: var(--bs-info);
+  --kaz-button-rgb: var(--bs-info-rgb);
+  --kaz-button-emphasis: var(--bs-info-text-emphasis);
+  --kaz-button-hover: var(--kaz-button-base);
+  --kaz-button-active: var(--kaz-button-base);
+}
+.btn-warning, .btn-outline-warning {
+  --kaz-button-base: var(--bs-warning);
+  --kaz-button-rgb: var(--bs-warning-rgb);
+  --kaz-button-emphasis: var(--bs-warning-text-emphasis);
+  --kaz-button-hover: var(--kaz-button-base);
+  --kaz-button-active: var(--kaz-button-base);
+}
+.btn-danger, .btn-outline-danger {
+  --kaz-button-base: var(--bs-danger);
+  --kaz-button-rgb: var(--bs-danger-rgb);
+  --kaz-button-emphasis: var(--bs-danger-text-emphasis);
+  --kaz-button-hover: var(--kaz-button-base);
+  --kaz-button-active: var(--kaz-button-base);
+}
+@supports (color: color-mix(in oklab, white, black)) {
+  .btn-primary, .btn-outline-primary,
+  .btn-secondary, .btn-outline-secondary,
+  .btn-success, .btn-outline-success,
+  .btn-info, .btn-outline-info,
+  .btn-warning, .btn-outline-warning,
+  .btn-danger, .btn-outline-danger {
+    --kaz-button-hover: color-mix(in oklab, var(--kaz-button-base) 88%, black 12%);
+    --kaz-button-active: color-mix(in oklab, var(--kaz-button-base) 78%, black 22%);
+  }
+  .btn-warning, .btn-outline-warning {
+    --kaz-button-active: color-mix(in oklab, var(--kaz-button-base) 88%, black 12%);
+  }
+}
+.btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-warning, .btn-danger {
+  --bs-btn-bg: var(--kaz-button-base);
+  --bs-btn-border-color: var(--kaz-button-base);
+  --bs-btn-hover-bg: var(--kaz-button-hover);
+  --bs-btn-hover-border-color: var(--kaz-button-hover);
+  --bs-btn-active-bg: var(--kaz-button-active);
+  --bs-btn-active-border-color: var(--kaz-button-active);
+  --bs-btn-disabled-bg: var(--kaz-button-base);
+  --bs-btn-disabled-border-color: var(--kaz-button-base);
+  --bs-btn-focus-shadow-rgb: var(--kaz-button-rgb);
+}
+.btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-color: #fff;
+}
+.btn-warning {
+  --bs-btn-color: #24231f;
+  --bs-btn-hover-color: #24231f;
+  --bs-btn-active-color: #24231f;
+  --bs-btn-disabled-color: #24231f;
+}
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-success,
+.btn-outline-info, .btn-outline-warning, .btn-outline-danger {
+  --bs-btn-color: var(--kaz-button-emphasis);
+  --bs-btn-border-color: var(--kaz-button-base);
+  --bs-btn-hover-bg: var(--kaz-button-base);
+  --bs-btn-hover-border-color: var(--kaz-button-base);
+  --bs-btn-active-bg: var(--kaz-button-active);
+  --bs-btn-active-border-color: var(--kaz-button-active);
+  --bs-btn-disabled-color: var(--kaz-button-emphasis);
+  --bs-btn-disabled-border-color: var(--kaz-button-base);
+  --bs-btn-focus-shadow-rgb: var(--kaz-button-rgb);
+}
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-success,
+.btn-outline-info, .btn-outline-danger {
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+}
+.btn-outline-warning {
+  --bs-btn-hover-color: #24231f;
+  --bs-btn-active-color: #24231f;
+}
+
+/* Text and link utilities use the mode-aware emphasis shades; the warning fill stays a warm pastel. */
+.text-primary, .link-primary, .link-primary:hover, .link-primary:focus { color: var(--bs-primary-text-emphasis) !important; }
+.text-secondary, .link-secondary, .link-secondary:hover, .link-secondary:focus { color: var(--bs-secondary-text-emphasis) !important; }
+.text-success, .link-success, .link-success:hover, .link-success:focus { color: var(--bs-success-text-emphasis) !important; }
+.text-info, .link-info, .link-info:hover, .link-info:focus { color: var(--bs-info-text-emphasis) !important; }
+.text-warning, .link-warning, .link-warning:hover, .link-warning:focus { color: var(--bs-warning-text-emphasis) !important; }
+.text-danger, .link-danger, .link-danger:hover, .link-danger:focus { color: var(--bs-danger-text-emphasis) !important; }
+.text-bg-info { color: #fff !important; }
+.border-warning { border-color: var(--bs-warning-text-emphasis) !important; }
+
 /* Bootstrap shadow utilities use a close extrusion, a cast edge, and a color echo. */
 :root,
 [data-bs-theme] {
