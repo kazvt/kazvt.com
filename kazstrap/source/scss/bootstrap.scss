@@ -2255,6 +2255,71 @@ kbd {
       transparent 1px 11px);
   }
 
+  .form-control:not(.form-control-color):not(.form-control-plaintext),
+  .input-group-text {
+    --kaz-ui-accent: var(--bs-primary);
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-form-pattern: repeating-linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+      transparent 1px 13px);
+    background-image:
+      var(--kaz-form-pattern),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 3%, transparent), transparent 68%);
+  }
+  .was-validated .form-control:valid:not(.form-control-color):not(.form-control-plaintext),
+  .form-control.is-valid:not(.form-control-color):not(.form-control-plaintext) {
+    --kaz-ui-accent: var(--bs-success);
+    background-image:
+      var(--kaz-form-valid-icon),
+      var(--kaz-form-pattern),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 3%, transparent), transparent 68%);
+    background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center, 0 0, center, center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem), auto, 100% 100%, 100% 100%;
+  }
+  .was-validated .form-control:invalid:not(.form-control-color):not(.form-control-plaintext),
+  .form-control.is-invalid:not(.form-control-color):not(.form-control-plaintext) {
+    --kaz-ui-accent: var(--bs-danger);
+    background-image:
+      var(--kaz-form-invalid-icon),
+      var(--kaz-form-pattern),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 3%, transparent), transparent 68%);
+    background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center, 0 0, center, center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem), auto, 100% 100%, 100% 100%;
+  }
+  .was-validated textarea.form-control:valid:not(.form-control-color):not(.form-control-plaintext),
+  textarea.form-control.is-valid:not(.form-control-color):not(.form-control-plaintext),
+  .was-validated textarea.form-control:invalid:not(.form-control-color):not(.form-control-plaintext),
+  textarea.form-control.is-invalid:not(.form-control-color):not(.form-control-plaintext) {
+    background-position: top calc(0.375em + 0.1875rem) right calc(0.375em + 0.1875rem), 0 0, center, center;
+  }
+  .form-select {
+    --kaz-ui-accent: var(--bs-primary);
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-form-select-pattern: repeating-linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+      transparent 1px 13px);
+    background-image: var(--kaz-form-select-pattern), var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
+    background-repeat: repeat, no-repeat, no-repeat;
+    background-position: 0 0, right 0.75rem center, center right 2.25rem;
+    background-size: auto, 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+  .was-validated .form-select:valid:not([multiple]):not([size]),
+  .was-validated .form-select:valid:not([multiple])[size="1"],
+  .form-select.is-valid:not([multiple]):not([size]),
+  .form-select.is-valid:not([multiple])[size="1"],
+  .was-validated .form-select:invalid:not([multiple]):not([size]),
+  .was-validated .form-select:invalid:not([multiple])[size="1"],
+  .form-select.is-invalid:not([multiple]):not([size]),
+  .form-select.is-invalid:not([multiple])[size="1"] {
+    background-position: 0 0, right 0.75rem center, center right 2.25rem;
+    background-size: auto, 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+
   .badge,
   mark,
   .mark,
