@@ -529,10 +529,12 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
   color: inherit;
   direction: ltr;
   font-family: var(--kt-comic-font);
-  font-size: clamp(.68rem, .95vw, .88rem);
+  --kt-chatters-handle-base-size: clamp(.68rem, .95vw, .88rem);
+  font-size: var(--kt-chatters-handle-fit-size, var(--kt-chatters-handle-base-size));
   font-weight: 700;
   line-height: 1.16;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
   text-align: start;
   unicode-bidi: isolate;
 }
@@ -583,16 +585,26 @@ body[data-page="kt"] .kt-discord__blinkie-copy > [data-i18n="kt.discord_badge"] 
 html[dir="rtl"] .kt-chatters__arrow { transform: scaleX(-1); }
 
 @media (min-width: 980px) {
+  .kt-chatters__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1280px) {
   .kt-chatters__list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
   .kt-chatters { margin: 0 12px 34px; padding: 16px 13px; }
   .kt-chatters__heading { margin-bottom: 17px; }
-  .kt-chatters__card { min-height: 72px; padding: 8px; grid-template-columns: 32px minmax(0, 1fr); gap: 5px; }
-  .kt-chatters__avatar { width: 32px; height: 32px; }
+  .kt-chatters__card { min-height: 72px; padding: 6px 8px; grid-template-columns: 32px minmax(0, 1fr); grid-template-rows: 32px auto; gap: 5px; }
+  .kt-chatters__avatar { width: 32px; height: 32px; grid-row: 1; align-self: start; }
   .kt-chatters__arrow { display: none; }
-  .kt-chatters__handle { font-size: clamp(.56rem, 2.9vw, .72rem); letter-spacing: -.02em; }
+  .kt-chatters__handle {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    --kt-chatters-handle-base-size: clamp(.56rem, 2.9vw, .72rem);
+    letter-spacing: -.02em;
+  }
+  .kt-chatters__pronouns { grid-column: 2; grid-row: 1; align-self: center; }
 }
 
 @media (max-width: 360px) {
@@ -600,7 +612,7 @@ html[dir="rtl"] .kt-chatters__arrow { transform: scaleX(-1); }
   .kt-chatters__list { gap: 8px; }
   .kt-chatters__card { min-height: 68px; padding: 7px 6px; grid-template-columns: 24px minmax(0, 1fr); gap: 4px; }
   .kt-chatters__avatar { width: 24px; height: 24px; }
-  .kt-chatters__handle { font-size: .56rem; }
+  .kt-chatters__handle { --kt-chatters-handle-base-size: .56rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
