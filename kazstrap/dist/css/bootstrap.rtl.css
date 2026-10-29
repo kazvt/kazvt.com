@@ -12888,14 +12888,32 @@ mark {
 }
 
 /* Kazstrap: layered site-wide finish. */
+/* Bootstrap shadow utilities use a close extrusion, a cast edge, and a color echo. */
+:root,
+[data-bs-theme] {
+  --bs-box-shadow:
+    0 2px 0 color-mix(in oklab, var(--bs-primary) 72%, black 28%),
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 19%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--bs-primary) 38%, transparent);
+  --bs-box-shadow-sm:
+    0 1px 0 color-mix(in oklab, var(--bs-primary) 64%, black 36%),
+    2px 2px 0 color-mix(in oklab, var(--bs-emphasis-color) 13%, transparent),
+    4px 4px 0 color-mix(in oklab, var(--bs-primary) 25%, transparent);
+  --bs-box-shadow-lg:
+    0 3px 0 color-mix(in oklab, var(--bs-primary) 74%, black 26%),
+    6px 6px 0 color-mix(in oklab, var(--bs-emphasis-color) 23%, transparent),
+    12px 12px 0 color-mix(in oklab, var(--bs-primary) 44%, transparent);
+  --bs-box-shadow-inset: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
+}
+
 /* Quiet halftone and a two-color paper wash give the page a little life. */
 body {
   background-image:
-    radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--bs-primary) 12%, transparent) 1px, transparent 1.5px),
+    radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--bs-primary) 15%, transparent) 1px, transparent 1.5px),
     linear-gradient(135deg,
-      color-mix(in oklab, var(--bs-primary) 3%, var(--bs-body-bg)) 0%,
+      color-mix(in oklab, var(--bs-primary) 4%, var(--bs-body-bg)) 0%,
       var(--bs-body-bg) 48%,
-      color-mix(in oklab, var(--bs-info) 3%, var(--bs-body-bg)) 100%);
+      color-mix(in oklab, var(--bs-info) 4%, var(--bs-body-bg)) 100%);
   background-size: 22px 22px, 100% 100%;
   background-repeat: repeat, no-repeat;
 }
@@ -12917,17 +12935,26 @@ a.btn-link {
 .popover {
   --kaz-ui-accent: var(--bs-primary);
   --kaz-ui-shadow-ink: color-mix(in oklab, var(--bs-emphasis-color) 20%, transparent);
-  --kaz-ui-shadow-color: color-mix(in oklab, var(--kaz-ui-accent) 34%, transparent);
-  --kaz-ui-highlight: color-mix(in oklab, white 18%, transparent);
-  border-color: color-mix(in oklab, var(--bs-border-color) 58%, var(--kaz-ui-accent) 42%);
+  --kaz-ui-shadow-color: color-mix(in oklab, var(--kaz-ui-accent) 42%, transparent);
+  --kaz-ui-highlight: color-mix(in oklab, white 21%, transparent);
+  border-color: color-mix(in oklab, var(--bs-border-color) 54%, var(--kaz-ui-accent) 46%);
   background-image:
-    linear-gradient(145deg, color-mix(in oklab, white 11%, transparent) 0%, transparent 34%),
-    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0%, transparent 62%),
-    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 4%, transparent) 0%, transparent 70%);
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-accent) 72%, black) 0% 74%,
+      color-mix(in oklab, var(--kaz-ui-accent) 64%, white) 74% 86%,
+      color-mix(in oklab, var(--kaz-ui-accent) 68%, black) 86% 100%),
+    linear-gradient(145deg, color-mix(in oklab, white 14%, transparent) 0%, transparent 34%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 10%, transparent) 0%, transparent 62%),
+    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 5%, transparent) 0%, transparent 70%);
+  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: top left, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
   box-shadow:
     inset 0 1px 0 var(--kaz-ui-highlight),
-    inset 1px 0 0 color-mix(in oklab, var(--kaz-ui-accent) 9%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, var(--bs-emphasis-color) 6%, transparent),
+    inset 1px 0 0 color-mix(in oklab, var(--kaz-ui-accent) 14%, transparent),
+    inset -1px 0 0 color-mix(in oklab, white 9%, transparent),
+    inset 0 -2px 0 color-mix(in oklab, var(--bs-emphasis-color) 13%, transparent),
+    0 2px 0 color-mix(in oklab, var(--kaz-ui-accent) 72%, black 28%),
     4px 4px 0 var(--kaz-ui-shadow-ink),
     8px 8px 0 var(--kaz-ui-shadow-color);
 }
@@ -12977,13 +13004,22 @@ a.btn-link {
   --kaz-ui-shadow-color: color-mix(in oklab, var(--kaz-ui-accent) 34%, transparent);
   border: 1px solid color-mix(in oklab, var(--bs-border-color) 59%, var(--kaz-ui-accent) 41%);
   background-image:
-    linear-gradient(145deg, color-mix(in oklab, white 10%, transparent) 0%, transparent 36%),
-    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0%, transparent 62%),
-    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 4%, transparent) 0%, transparent 72%);
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-accent) 72%, black) 0% 74%,
+      color-mix(in oklab, var(--kaz-ui-accent) 64%, white) 74% 86%,
+      color-mix(in oklab, var(--kaz-ui-accent) 68%, black) 86% 100%),
+    linear-gradient(145deg, color-mix(in oklab, white 13%, transparent) 0%, transparent 36%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 10%, transparent) 0%, transparent 62%),
+    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 5%, transparent) 0%, transparent 72%);
+  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: top left, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 17%, transparent),
-    inset 1px 0 0 color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, var(--bs-emphasis-color) 6%, transparent),
+    inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
+    inset 1px 0 0 color-mix(in oklab, var(--kaz-ui-accent) 12%, transparent),
+    inset -1px 0 0 color-mix(in oklab, white 8%, transparent),
+    inset 0 -2px 0 color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent),
+    0 2px 0 color-mix(in oklab, var(--kaz-ui-accent) 72%, black 28%),
     4px 4px 0 var(--kaz-ui-shadow-ink),
     8px 8px 0 var(--kaz-ui-shadow-color);
 }
@@ -13036,22 +13072,34 @@ a.btn-link {
 .alert-dark { --kaz-ui-accent: var(--bs-dark); }
 .alert-light { --kaz-ui-accent: var(--bs-secondary); }
 
-/* Slim title bands, inset rails, and warmer multi-stop surfaces. */
+/* Slim title bands have a three-tone rail and a thin inner highlight. */
 .card-header,
-.card-footer,
 .modal-header,
-.modal-footer,
 .offcanvas-header,
 .toast-header,
 .popover-header,
 .accordion-header {
   background-image:
-    linear-gradient(145deg, color-mix(in oklab, white 12%, transparent) 0%, transparent 45%),
-    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 12%, transparent), transparent 84%);
-  border-color: color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-ui-accent, var(--bs-primary)) 38%);
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
+      color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
+      color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 86% 100%),
+    linear-gradient(145deg, color-mix(in oklab, white 14%, transparent) 0%, transparent 48%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 84%);
+  background-size: 100% 3px, 100% 100%, 100% 100%;
+  background-position: top left, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  border-color: color-mix(in oklab, var(--bs-border-color) 56%, var(--kaz-ui-accent, var(--bs-primary)) 44%);
+  border-inline-start: 3px solid color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 74%, black 26%);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent);
+    inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent);
+}
+.card-footer,
+.modal-footer {
+  background-image:
+    linear-gradient(35deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 72%),
+    linear-gradient(to top, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent), transparent 82%);
 }
 .card-footer,
 .modal-footer {
@@ -13067,8 +13115,17 @@ a.btn-link {
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 16%, transparent),
     inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent),
+    0 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
     4px 4px 0 var(--kaz-ui-shadow-ink),
-    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 32%, transparent);
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 42%, transparent);
+}
+
+/* The accordion reads as one raised cabinet with inset, clickable rows. */
+.accordion:not(.accordion-flush) {
+  box-shadow:
+    0 2px 0 color-mix(in oklab, var(--bs-primary) 70%, black 30%),
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--bs-primary) 36%, transparent);
 }
 
 /* Headers read like compact forum title bars; rows have a fine warm hover cue. */
@@ -13086,6 +13143,12 @@ a.btn-link {
   background-image:
     linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 50%),
     linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 13%, transparent), transparent 92%);
+}
+.list-group:not(.list-group-flush) {
+  box-shadow:
+    0 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 38%, transparent);
 }
 .list-group-item {
   background-image:
@@ -13115,12 +13178,19 @@ a.btn-link {
 /* Give the navigation edge and active tab clear, small interactive signals. */
 .navbar {
   background-image:
-    linear-gradient(100deg, color-mix(in oklab, white 8%, transparent), transparent 52%),
-    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 84%);
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 78%,
+      color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 65%, white) 78% 89%,
+      color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 89% 100%),
+    linear-gradient(100deg, color-mix(in oklab, white 9%, transparent), transparent 52%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 84%);
+  background-size: 100% 3px, 100% 100%, 100% 100%;
+  background-position: top left, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
   box-shadow:
-    0 1px 0 color-mix(in oklab, var(--bs-border-color) 48%, var(--kaz-ui-accent, var(--bs-primary)) 52%),
-    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 15%, transparent),
-    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 22%, transparent);
+    0 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 30%, transparent);
 }
 .navbar .nav-link {
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.15s ease-out;
@@ -13222,8 +13292,9 @@ a.btn-link {
     linear-gradient(145deg, color-mix(in oklab, white 14%, transparent), transparent 66%),
     linear-gradient(to bottom, color-mix(in oklab, currentColor 4%, transparent), transparent);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, currentColor 18%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, black 9%, transparent);
+    inset 0 1px 0 color-mix(in oklab, currentColor 20%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 12%, transparent),
+    1px 1px 0 color-mix(in oklab, currentColor 30%, black 70%);
 }
 .progress {
   background-image:
@@ -13257,16 +13328,42 @@ kbd {
   background-image: linear-gradient(145deg, color-mix(in oklab, white 16%, transparent), transparent 72%);
 }
 
-/* RTL offcanvas panels cast their outside edges in the direction they enter from. */
+/* Offcanvas depth is directional and keeps its hard edges aligned in RTL. */
+.offcanvas-start {
+  box-shadow:
+    2px 0 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 34%, transparent);
+}
+.offcanvas-end {
+  box-shadow:
+    -2px 0 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
+    -4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    -8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 34%, transparent);
+}
+.offcanvas-top {
+  box-shadow:
+    0 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
+    0 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    0 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 34%, transparent);
+}
+.offcanvas-bottom {
+  box-shadow:
+    0 -2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
+    0 -4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    0 -8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 34%, transparent);
+}
 [dir="rtl"] .offcanvas-start {
   box-shadow:
+    -2px 0 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
     -4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
-    -8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 32%, transparent);
+    -8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 34%, transparent);
 }
 [dir="rtl"] .offcanvas-end {
   box-shadow:
+    2px 0 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 70%, black 30%),
     4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
-    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 32%, transparent);
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 34%, transparent);
 }
 
 /* Old engines still get a clean edge; forced colors remove all decoration. */
@@ -13292,7 +13389,7 @@ kbd {
     .card-header, .card-body, .card-footer, .modal-header, .modal-body, .modal-footer,
     .offcanvas-header, .offcanvas-body, .toast-header, .toast-body, .popover-header,
     .popover-body, .accordion-header, .accordion-body, .dropdown-header)) {
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18), 8px 8px 0 rgba(0, 0, 0, 0.22);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.38), 4px 4px 0 rgba(0, 0, 0, 0.18), 8px 8px 0 rgba(0, 0, 0, 0.22);
   }
   .table-striped > tbody > tr:nth-of-type(odd) > * {
     --bs-table-bg-type: rgba(var(--bs-emphasis-color-rgb), 0.035);
@@ -13345,6 +13442,9 @@ kbd {
     background-image: none;
     box-shadow: none;
     border-color: CanvasText;
+  }
+  .card-header, .modal-header, .offcanvas-header, .toast-header, .popover-header, .accordion-header {
+    border-inline-start-color: CanvasText;
   }
   h1, h2, h3, .card-title, .alert-heading, .modal-title, .offcanvas-title, .navbar-brand {
     text-shadow: none;
