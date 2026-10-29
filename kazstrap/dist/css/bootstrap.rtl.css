@@ -12740,7 +12740,6 @@ mark {
   .nav-pills .nav-link,
   .page-link,
   .form-control,
-  .form-select,
   .input-group-text,
   .badge,
   .progress,
@@ -12800,6 +12799,47 @@ mark {
   }
   a:not(.btn):focus-visible,
   button:not(.btn):focus-visible {
+    outline-color: Highlight;
+  }
+}
+@supports not (color: color-mix(in oklab, white, black)) {
+  .accordion:not(.accordion-flush),
+  .list-group {
+    box-shadow:
+      4px 4px 0 rgba(0, 0, 0, 0.18),
+      8px 8px 0 rgba(0, 0, 0, 0.22);
+  }
+  .navbar {
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+  }
+  .offcanvas-start {
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18), 8px 8px 0 rgba(0, 0, 0, 0.22);
+  }
+  .offcanvas-end {
+    box-shadow: -4px 4px 0 rgba(0, 0, 0, 0.18), -8px 8px 0 rgba(0, 0, 0, 0.22);
+  }
+  .offcanvas-top {
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 8px 0 rgba(0, 0, 0, 0.22);
+  }
+  .offcanvas-bottom {
+    box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.18), 0 -8px 0 rgba(0, 0, 0, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-item {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .dropdown-item {
+    background-image: none;
+    border-inline-start-color: ButtonText;
+  }
+  .form-select {
+    box-shadow: none;
+  }
+  a.btn-link:focus-visible {
     outline-color: Highlight;
   }
 }
