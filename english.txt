@@ -669,3 +669,6 @@ kt.pronouns.he_him=he/him
 kt.pronouns.they_them=they/them
 kt.pronouns.they_she=they/she
 kt.pronouns.she_they=she/they
+appearance.toggle=Color appearance
+appearance.switch_dark=Switch to dark mode
+appearance.switch_light=Switch to light mode

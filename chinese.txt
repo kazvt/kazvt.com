@@ -609,3 +609,6 @@ kt.pronouns.he_him=他
 kt.pronouns.they_them=TA
 kt.pronouns.they_she=TA/她
 kt.pronouns.she_they=她/TA
+appearance.toggle=颜色外观
+appearance.switch_dark=切换到深色模式
+appearance.switch_light=切换到浅色模式
