@@ -993,6 +993,9 @@ a.btn-link {
     text-decoration-thickness 0.15s ease-in-out,
     text-underline-offset 0.15s ease-in-out;
 }
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action) {
+  color: color-mix(in oklab, rgb(var(--bs-link-color-rgb)) 82%, var(--bs-body-color) 18%);
+}
 a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):focus-visible {
   outline: 2px solid var(--bs-emphasis-color);
   outline-offset: 2px;
@@ -1654,6 +1657,11 @@ kbd {
       2px 0 0 rgba(var(--bs-primary-rgb), 0.62),
       4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
       8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
+  }
+}
+@supports not (color: color-mix(in oklab, white, black)) {
+  a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action) {
+    color: var(--bs-primary-text-emphasis);
   }
 }
 @supports not (background-image: conic-gradient(red, blue)) {
