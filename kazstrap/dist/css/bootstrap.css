@@ -13340,6 +13340,30 @@ a.btn-link {
     inset 0 -1px 0 color-mix(in oklab, black 12%, transparent),
     1px 1px 0 color-mix(in oklab, currentColor 30%, black 70%);
 }
+/* Color badges get a tiny two-step stamped edge that follows their own variant. */
+.badge.bg-primary, .badge.text-bg-primary { --kaz-ui-accent: var(--bs-primary); }
+.badge.bg-secondary, .badge.text-bg-secondary { --kaz-ui-accent: var(--bs-secondary); }
+.badge.bg-success, .badge.text-bg-success { --kaz-ui-accent: var(--bs-success); }
+.badge.bg-info, .badge.text-bg-info { --kaz-ui-accent: var(--bs-info); }
+.badge.bg-warning, .badge.text-bg-warning { --kaz-ui-accent: var(--bs-warning); }
+.badge.bg-danger, .badge.text-bg-danger { --kaz-ui-accent: var(--bs-danger); }
+.badge.bg-dark, .badge.text-bg-dark, .badge.bg-black, .badge.text-bg-black { --kaz-ui-accent: var(--bs-dark); }
+.badge.bg-light, .badge.text-bg-light, .badge.bg-white, .badge.text-bg-white { --kaz-ui-accent: var(--bs-secondary); }
+.badge.bg-primary, .badge.text-bg-primary,
+.badge.bg-secondary, .badge.text-bg-secondary,
+.badge.bg-success, .badge.text-bg-success,
+.badge.bg-info, .badge.text-bg-info,
+.badge.bg-warning, .badge.text-bg-warning,
+.badge.bg-danger, .badge.text-bg-danger,
+.badge.bg-dark, .badge.text-bg-dark, .badge.bg-black, .badge.text-bg-black,
+.badge.bg-light, .badge.text-bg-light, .badge.bg-white, .badge.text-bg-white {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, currentColor 20%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 12%, transparent),
+    1px 1px 0 color-mix(in oklab, var(--kaz-ui-accent) 72%, black 28%),
+    3px 3px 0 color-mix(in oklab, var(--kaz-ui-accent) 32%, transparent);
+}
+
 .progress {
   background-image:
     linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 55%),
