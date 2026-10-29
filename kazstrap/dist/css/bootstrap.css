@@ -12933,6 +12933,15 @@ mark {
   --bs-box-shadow-inset: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
 }
 
+/* Two crisp color echoes give display type the same printed depth as panels. */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.card-title, .alert-heading, .modal-title, .offcanvas-title {
+  text-shadow:
+    1px 1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 24%, transparent),
+    2px 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 12%, transparent);
+}
+
 /* Quiet halftone and a two-color paper wash give the page a little life. */
 body {
   background-image:
@@ -13542,7 +13551,9 @@ kbd {
   .card-header, .modal-header, .offcanvas-header, .toast-header, .popover-header, .accordion-header {
     border-inline-start-color: CanvasText;
   }
-  h1, h2, h3, .card-title, .alert-heading, .modal-title, .offcanvas-title, .navbar-brand {
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6,
+  .card-title, .alert-heading, .modal-title, .offcanvas-title, .navbar-brand {
     text-shadow: none;
   }
   .navbar .nav-link:hover, .navbar .nav-link:focus-visible, .navbar .nav-link.active {
