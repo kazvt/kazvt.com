@@ -1110,6 +1110,13 @@ mark {
         color-mix(in oklab, var(--kaz-btn-color) 98%, white) 14%,
         transparent 40%
       );
+    --kaz-btn-face-gradient:
+      linear-gradient(
+        135deg,
+        var(--kaz-btn-color) 0% 54%,
+        color-mix(in oklab, var(--kaz-btn-color) 94%, black) 76%,
+        color-mix(in oklab, var(--kaz-btn-color) 84%, black) 100%
+      );
   }
 }
 .progress-bar {
