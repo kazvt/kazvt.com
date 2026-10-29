@@ -314,6 +314,11 @@ html.kt-root[data-color-mode="dark"] .kt-webring-stamp {
   color: var(--kazvt-on-accent);
 }
 
+html.kt-root[data-color-mode="dark"] .kt-webring-step-number {
+  border-color: var(--kazvt-on-accent);
+  color: var(--kazvt-on-accent);
+}
+
 html.kt-root[data-color-mode="dark"] .kt-discord__body {
   background:
     linear-gradient(90deg, rgb(138 226 247 / 8%) 0 1px, transparent 1px 100%),
@@ -336,6 +341,11 @@ html.kt-root[data-color-mode="dark"] :is(.kt-discord__blinkie-mark, .kt-discord_
 }
 
 html.kt-root[data-color-mode="dark"] .kt-discord__blinkie-mark { background: #fff5f8; }
+
+html.kt-root[data-color-mode="dark"] .kt-discord__blinkie,
+html.kt-root[data-color-mode="dark"] .kt-discord__blinkie-mark {
+  border-color: var(--kazvt-on-accent);
+}
 
 html.kt-root[data-color-mode="dark"] body[data-page="kt"]::before {
   background: linear-gradient(90deg, transparent, rgb(138 226 247 / 10%), rgb(255 175 199 / 18%), transparent);
