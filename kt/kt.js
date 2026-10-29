@@ -767,9 +767,9 @@
       languages.setAttribute("aria-label", window.KazvtI18n?.t?.("kt.languages_label") || "Spoken languages");
       const normalizedSlug = slug.toLowerCase();
       const spokenLanguages = normalizedSlug === "rakumi"
-        ? [{ code: "es", label: "ESP", name: "Spanish" }]
+        ? [{ code: "es", label: "ESP", name: "Spanish" }, { code: "en", label: "EN", name: "English" }]
         : normalizedSlug === "vestaphoenix"
-          ? [{ code: "en", label: "EN", name: "English" }, { code: "es", label: "ESP", name: "Spanish" }]
+          ? [{ code: "es", label: "ESP", name: "Spanish" }, { code: "en", label: "EN", name: "English" }]
           : [{ code: "en", label: "EN", name: "English" }];
       spokenLanguages.forEach(({ code, label, name: languageName }) => {
         const language = document.createElement("abbr");
