@@ -2867,6 +2867,12 @@ function initializeSiteWelcomePopup() {
 
   const host = document.createElement("div");
   host.dataset.welcomePopupHost = "true";
+  const syncPopupAppearance = (event) => {
+    const mode = event?.detail?.mode || document.documentElement.dataset.colorMode;
+    host.dataset.colorMode = mode === "dark" ? "dark" : "light";
+  };
+  syncPopupAppearance();
+  window.addEventListener("kazvt:colormodechange", syncPopupAppearance);
   const shadow = host.attachShadow({ mode: "open" });
   const xpStyles = document.createElement("link");
   xpStyles.rel = "stylesheet";
@@ -3142,6 +3148,7 @@ function initializeSiteWelcomePopup() {
     if (opened) return;
     opened = true;
     if (readDismissal()) {
+      window.removeEventListener("kazvt:colormodechange", syncPopupAppearance);
       host.remove();
       return;
     }
