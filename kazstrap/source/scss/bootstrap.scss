@@ -933,6 +933,15 @@ body {
   background-repeat: repeat, no-repeat;
 }
 
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action),
+a.btn-link {
+  transition:
+    color 0.15s ease-in-out,
+    text-decoration-color 0.15s ease-in-out,
+    text-decoration-thickness 0.15s ease-in-out,
+    text-underline-offset 0.15s ease-in-out;
+}
+
 /* Keep Bootstrap component color choices, then add a fine color-printed frame. */
 .card,
 .dropdown-menu,
@@ -985,7 +994,9 @@ body {
   .text-bg-warning,
   .text-bg-danger,
   .text-bg-dark,
-  .text-bg-light
+  .text-bg-light,
+  .text-bg-white,
+  .text-bg-black
 ):not(:where(
   .card, .alert, .accordion, .accordion-item, .list-group, .list-group-item,
   .dropdown-menu, .modal-content, .offcanvas, .toast, .popover, .navbar,
@@ -1030,9 +1041,11 @@ body {
   --kaz-ui-accent: var(--bs-danger);
 }
 .bg-dark:not(.badge):not(.btn), .text-bg-dark, .alert-dark, .list-group-item-dark, .navbar.bg-dark,
-.bg-black:not(.badge):not(.btn), .navbar.bg-black,
-.bg-light:not(.badge):not(.btn), .bg-white:not(.badge):not(.btn), .text-bg-light,
-.alert-light, .list-group-item-light, .navbar.bg-light {
+.bg-black:not(.badge):not(.btn), .text-bg-black, .navbar.bg-black {
+  --kaz-ui-accent: var(--bs-dark);
+}
+.bg-light:not(.badge):not(.btn), .bg-white:not(.badge):not(.btn), .text-bg-light, .text-bg-white,
+.alert-light, .list-group-item-light, .navbar.bg-light, .navbar.bg-white {
   --kaz-ui-accent: var(--bs-secondary);
 }
 .bg-primary-subtle:not(.badge):not(.btn), .card.text-bg-primary { --kaz-ui-accent: var(--bs-primary); }
@@ -1306,7 +1319,7 @@ kbd {
     .bg-primary-subtle, .bg-secondary-subtle, .bg-success-subtle, .bg-info-subtle,
     .bg-warning-subtle, .bg-danger-subtle, .bg-dark-subtle,
     .text-bg-primary, .text-bg-secondary, .text-bg-success, .text-bg-info,
-    .text-bg-warning, .text-bg-danger, .text-bg-dark, .text-bg-light
+    .text-bg-warning, .text-bg-danger, .text-bg-dark, .text-bg-light, .text-bg-white, .text-bg-black
   ):not(:where(.card, .alert, .accordion, .accordion-item, .list-group, .list-group-item,
     .dropdown-menu, .modal-content, .offcanvas, .toast, .popover, .navbar, .badge, .btn,
     .card-header, .card-body, .card-footer, .modal-header, .modal-body, .modal-footer,
@@ -1356,7 +1369,7 @@ kbd {
     .bg-primary-subtle, .bg-secondary-subtle, .bg-success-subtle, .bg-info-subtle,
     .bg-warning-subtle, .bg-danger-subtle, .bg-dark-subtle,
     .text-bg-primary, .text-bg-secondary, .text-bg-success, .text-bg-info,
-    .text-bg-warning, .text-bg-danger, .text-bg-dark, .text-bg-light
+    .text-bg-warning, .text-bg-danger, .text-bg-dark, .text-bg-light, .text-bg-white, .text-bg-black
   ):not(:where(.card, .alert, .accordion, .accordion-item, .list-group, .list-group-item,
     .dropdown-menu, .modal-content, .offcanvas, .toast, .popover, .navbar, .badge, .btn,
     .card-header, .card-body, .card-footer, .modal-header, .modal-body, .modal-footer,
