@@ -316,14 +316,37 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
+.entry-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 5px;
+}
+
 .entry-kind {
-  margin: 0 0 5px;
+  margin: 0;
   color: var(--pal-green);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.68rem;
   font-weight: 900;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+
+.entry-date {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border: 1px solid var(--pal-black);
+  background: var(--pal-paper);
+  color: var(--pal-green);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .entry-details h3 {
