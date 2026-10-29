@@ -1148,12 +1148,16 @@ a.btn-link {
   background-image:
     linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 48%),
     linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 5%, transparent), transparent 86%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 14%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent);
 }
 .list-group-item-action {
   transition:
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out;
+    border-color 0.15s ease-in-out,
+    transform 0.15s ease-out;
 }
 .list-group-item-action:focus-visible {
   position: relative;
@@ -1166,6 +1170,10 @@ a.btn-link {
     background-image:
       linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 48%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 88%);
+    transform: translateX(2px);
+  }
+  [dir="rtl"] .list-group-item-action:hover {
+    transform: translateX(-2px);
   }
 }
 
@@ -1365,17 +1373,18 @@ kbd {
   :root,
   [data-bs-theme] {
     --bs-box-shadow:
-      0 2px 0 rgba(0, 0, 0, 0.38),
-      4px 4px 0 rgba(0, 0, 0, 0.18),
-      8px 8px 0 rgba(0, 0, 0, 0.22);
+      0 2px 0 rgba(var(--bs-primary-rgb), 0.62),
+      4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
     --bs-box-shadow-sm:
-      0 1px 0 rgba(0, 0, 0, 0.34),
-      2px 2px 0 rgba(0, 0, 0, 0.13),
-      4px 4px 0 rgba(0, 0, 0, 0.18);
+      0 1px 0 rgba(var(--bs-primary-rgb), 0.55),
+      2px 2px 0 rgba(var(--bs-emphasis-color-rgb), 0.13),
+      4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18);
     --bs-box-shadow-lg:
-      0 3px 0 rgba(0, 0, 0, 0.40),
-      6px 6px 0 rgba(0, 0, 0, 0.23),
-      12px 12px 0 rgba(0, 0, 0, 0.28);
+      0 3px 0 rgba(var(--bs-primary-rgb), 0.64),
+      6px 6px 0 rgba(var(--bs-emphasis-color-rgb), 0.23),
+      12px 12px 0 rgba(var(--bs-primary-rgb), 0.38);
+    --bs-box-shadow-inset: inset 0 1px 2px rgba(var(--bs-emphasis-color-rgb), 0.12);
   }
   body {
     background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.055) 1px, transparent 1.5px);
@@ -1398,7 +1407,7 @@ kbd {
     .card-header, .card-body, .card-footer, .modal-header, .modal-body, .modal-footer,
     .offcanvas-header, .offcanvas-body, .toast-header, .toast-body, .popover-header,
     .popover-body, .accordion-header, .accordion-body, .dropdown-header)) {
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.38), 4px 4px 0 rgba(0, 0, 0, 0.18), 8px 8px 0 rgba(0, 0, 0, 0.22);
+    box-shadow: 0 2px 0 rgba(var(--bs-primary-rgb), 0.62), 4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18), 8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   .table-striped > tbody > tr:nth-of-type(odd) > * {
     --bs-table-bg-type: rgba(var(--bs-emphasis-color-rgb), 0.035);
@@ -1410,48 +1419,48 @@ kbd {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.16),
       inset 0 -1px 0 rgba(0, 0, 0, 0.08),
-      0 2px 0 rgba(0, 0, 0, 0.38),
-      4px 4px 0 rgba(0, 0, 0, 0.18),
-      8px 8px 0 rgba(0, 0, 0, 0.22);
+      0 2px 0 rgba(var(--bs-primary-rgb), 0.62),
+      4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   .accordion:not(.accordion-flush),
   .list-group:not(.list-group-flush),
   .navbar,
   .offcanvas-start {
     box-shadow:
-      0 2px 0 rgba(0, 0, 0, 0.38),
-      4px 4px 0 rgba(0, 0, 0, 0.18),
-      8px 8px 0 rgba(0, 0, 0, 0.22);
+      0 2px 0 rgba(var(--bs-primary-rgb), 0.62),
+      4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   .offcanvas-end {
     box-shadow:
-      0 2px 0 rgba(0, 0, 0, 0.38),
-      -4px 4px 0 rgba(0, 0, 0, 0.18),
-      -8px 8px 0 rgba(0, 0, 0, 0.22);
+      0 2px 0 rgba(var(--bs-primary-rgb), 0.62),
+      -4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      -8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   .offcanvas-top {
     box-shadow:
-      0 2px 0 rgba(0, 0, 0, 0.38),
-      0 4px 0 rgba(0, 0, 0, 0.18),
-      0 8px 0 rgba(0, 0, 0, 0.22);
+      0 2px 0 rgba(var(--bs-primary-rgb), 0.62),
+      0 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      0 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   .offcanvas-bottom {
     box-shadow:
-      0 -2px 0 rgba(0, 0, 0, 0.38),
-      0 -4px 0 rgba(0, 0, 0, 0.18),
-      0 -8px 0 rgba(0, 0, 0, 0.22);
+      0 -2px 0 rgba(var(--bs-primary-rgb), 0.62),
+      0 -4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      0 -8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   [dir="rtl"] .offcanvas-start {
     box-shadow:
-      -2px 0 0 rgba(0, 0, 0, 0.38),
-      -4px 4px 0 rgba(0, 0, 0, 0.18),
-      -8px 8px 0 rgba(0, 0, 0, 0.22);
+      -2px 0 0 rgba(var(--bs-primary-rgb), 0.62),
+      -4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      -8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   [dir="rtl"] .offcanvas-end {
     box-shadow:
-      2px 0 0 rgba(0, 0, 0, 0.38),
-      4px 4px 0 rgba(0, 0, 0, 0.18),
-      8px 8px 0 rgba(0, 0, 0, 0.22);
+      2px 0 0 rgba(var(--bs-primary-rgb), 0.62),
+      4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
+      8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1466,7 +1475,8 @@ kbd {
     transition: none;
   }
   .navbar .nav-link:hover,
-  .page-item:not(.disabled):not(.active) .page-link:hover {
+  .page-item:not(.disabled):not(.active) .page-link:hover,
+  .list-group-item-action:hover {
     transform: none;
   }
 }
@@ -1481,9 +1491,11 @@ kbd {
   body {
     background-image: none;
   }
-  .card, .dropdown-menu, .modal-content, .toast, .popover,
-  .accordion:not(.accordion-flush), .accordion-item, .accordion-button,
-  .list-group, .list-group-item, .alert, .offcanvas, .navbar,
+  .card, .card-header, .card-body, .card-footer,
+  .dropdown-menu, .dropdown-header, .modal-content, .modal-header, .modal-body, .modal-footer,
+  .toast, .toast-header, .toast-body, .popover, .popover-header, .popover-body,
+  .accordion:not(.accordion-flush), .accordion-item, .accordion-header, .accordion-body, .accordion-button,
+  .list-group, .list-group-item, .alert, .offcanvas, .offcanvas-header, .offcanvas-body, .navbar,
   .nav-tabs .nav-link, .nav-pills .nav-link, .page-link,
   .form-control, .form-select, .input-group-text, .badge,
   .progress, .progress-bar, .table thead th, .breadcrumb, blockquote, kbd, mark {
@@ -1506,8 +1518,32 @@ kbd {
     box-shadow: none;
     border-color: CanvasText;
   }
+  .card, .dropdown-menu, .modal-content, .toast, .popover,
+  .accordion:not(.accordion-flush), .accordion-item, .accordion-button,
+  .list-group, .list-group-item, .alert, .offcanvas, .navbar,
+  .page-link, .form-control, .form-select, .input-group-text, .badge, .progress,
+  .card-header, .card-footer, .modal-header, .modal-body, .modal-footer,
+  .offcanvas-header, .offcanvas-body, .toast-header, .toast-body,
+  .popover-header, .popover-body, .accordion-header, .accordion-body {
+    border-color: CanvasText;
+  }
   .card-header, .modal-header, .offcanvas-header, .toast-header, .popover-header, .accordion-header {
     border-inline-start-color: CanvasText;
+  }
+  .alert {
+    border-inline-start-color: CanvasText;
+  }
+  .table > :not(caption) > * > * {
+    border-color: CanvasText;
+  }
+  .badge, .mark, mark {
+    outline-color: CanvasText;
+  }
+  blockquote {
+    border-inline-start-color: CanvasText;
+  }
+  hr {
+    border-color: CanvasText;
   }
   h1, h2, h3, h4, h5, h6,
   .h1, .h2, .h3, .h4, .h5, .h6,
