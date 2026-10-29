@@ -13987,6 +13987,391 @@ kbd {
     color: var(--bs-primary-text-emphasis);
   }
 }
+/* Seamless, low-opacity print textures add depth without washing out the component colors. */
+@supports (background-image: repeating-linear-gradient(135deg, transparent 0 1px, transparent 1px 12px)) and (color: color-mix(in oklab, white, black)) {
+  .btn:not(.btn-link) {
+    --kaz-ui-accent: var(--kaz-btn-color);
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-btn-pattern: repeating-linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
+      transparent 1px 10px
+    );
+    background-image: var(--kaz-btn-pattern), var(--kaz-btn-glaze-gradient), var(--kaz-btn-face-gradient);
+  }
+  .btn[class*="btn-outline-"]:not(.btn-link) {
+    background-image: var(--kaz-btn-pattern);
+  }
+  @media (hover: hover) {
+    .btn[class*="btn-outline-"]:hover:not(.btn-link),
+    .btn[class*="btn-outline-"]:active:not(.btn-link),
+    .btn[class*="btn-outline-"].active:not(.btn-link),
+    .btn[class*="btn-outline-"].show:not(.btn-link),
+    .btn-check:checked + .btn[class*="btn-outline-"]:not(.btn-link) {
+      background-image: var(--kaz-btn-pattern), var(--kaz-btn-glaze-gradient), var(--kaz-btn-face-gradient);
+    }
+  }
+
+  .card,
+  .dropdown-menu,
+  .modal-content,
+  .toast,
+  .popover,
+  .offcanvas {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        transparent 1px 16px),
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 86% 100%),
+      linear-gradient(145deg, color-mix(in oklab, white 6%, transparent) 0%, transparent 34%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent) 0%, transparent 62%),
+      linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent) 0%, transparent 46%),
+      linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent) 0%, transparent 70%);
+    background-size: auto, 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-position: 0 0, top left, center, center, center, center;
+    background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  }
+
+  :where(div, section, article, aside, main, header, footer, figure, form, nav):is(
+    .bg-body,
+    .bg-body-secondary,
+    .bg-body-tertiary,
+    .bg-light,
+    .bg-white,
+    .bg-primary,
+    .bg-secondary,
+    .bg-success,
+    .bg-info,
+    .bg-warning,
+    .bg-danger,
+    .bg-dark,
+    .bg-black,
+    .bg-primary-subtle,
+    .bg-secondary-subtle,
+    .bg-success-subtle,
+    .bg-info-subtle,
+    .bg-warning-subtle,
+    .bg-danger-subtle,
+    .bg-dark-subtle,
+    .text-bg-primary,
+    .text-bg-secondary,
+    .text-bg-success,
+    .text-bg-info,
+    .text-bg-warning,
+    .text-bg-danger,
+    .text-bg-dark,
+    .text-bg-light,
+    .text-bg-white,
+    .text-bg-black
+  ):not(:where(
+    .card, .alert, .accordion, .accordion-item, .list-group, .list-group-item,
+    .dropdown-menu, .modal-content, .offcanvas, .toast, .popover, .navbar,
+    .badge, .btn, .card-header, .card-body, .card-footer,
+    .modal-header, .modal-body, .modal-footer, .offcanvas-header, .offcanvas-body,
+    .toast-header, .toast-body, .popover-header, .popover-body,
+    .accordion-header, .accordion-body, .dropdown-header
+  )) {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        transparent 1px 16px),
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 86% 100%),
+      linear-gradient(145deg, color-mix(in oklab, white 6%, transparent) 0%, transparent 36%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent) 0%, transparent 62%),
+      linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent) 0%, transparent 46%),
+      linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent) 0%, transparent 72%);
+    background-size: auto, 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-position: 0 0, top left, center, center, center, center;
+    background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  }
+
+  .card-header,
+  .modal-header,
+  .offcanvas-header,
+  .toast-header,
+  .popover-header,
+  .accordion-header,
+  .dropdown-header {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+        transparent 1px 7px),
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 86% 100%),
+      linear-gradient(145deg, color-mix(in oklab, white 6%, transparent) 0%, transparent 48%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 84%);
+    background-size: auto, 100% 3px, 100% 100%, 100% 100%;
+    background-position: 0 0, top left, center, center;
+    background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  }
+
+  .card-footer,
+  .modal-footer {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 14px),
+      linear-gradient(35deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 72%),
+      linear-gradient(to top, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 82%);
+  }
+
+  .alert {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(105deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 64%),
+      linear-gradient(to bottom, color-mix(in oklab, white 5%, transparent), transparent 48%);
+  }
+  .alert-warning {
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+        transparent 1px 11px),
+      linear-gradient(105deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 64%),
+      linear-gradient(to bottom, color-mix(in oklab, white 5%, transparent), transparent 48%);
+  }
+
+  .accordion-item {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 15px),
+      linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 40%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent), transparent 76%);
+  }
+  .accordion-button,
+  .accordion-button:not(.collapsed) {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 50%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 86%);
+  }
+  .accordion-button:not(.collapsed) {
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 50%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 92%);
+  }
+
+  .list-group-item {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 15px),
+      linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 48%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 5%, transparent), transparent 86%);
+  }
+  @media (hover: hover) {
+    .list-group-item-action:hover {
+      background-image:
+        repeating-linear-gradient(135deg,
+          color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+          transparent 1px 13px),
+        linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 48%),
+        linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 88%);
+    }
+  }
+
+  .navbar {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        transparent 1px 16px),
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 78%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 65%, white) 78% 89%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 89% 100%),
+      linear-gradient(100deg, color-mix(in oklab, white 6%, transparent), transparent 52%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 84%);
+    background-size: auto, 100% 3px, 100% 100%, 100% 100%;
+    background-position: 0 0, top left, center, center;
+    background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  }
+  .navbar .nav-link:focus-visible,
+  .navbar .nav-link.active,
+  .nav-tabs .nav-link.active,
+  .nav-pills .nav-link.active,
+  .page-link {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        transparent 1px 11px),
+      linear-gradient(145deg, color-mix(in oklab, white 9%, transparent), transparent 55%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent), transparent 90%);
+  }
+  @media (hover: hover) {
+    .navbar .nav-link:hover,
+    .nav-tabs .nav-link:not(.active):hover,
+    .page-item:not(.disabled):not(.active) .page-link:hover {
+      --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+      background-image:
+        repeating-linear-gradient(90deg,
+          color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+          transparent 1px 11px),
+        linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 55%),
+        linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 90%);
+    }
+    .nav-pills .nav-link.active {
+      --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    }
+  }
+
+  .dropdown-item:hover,
+  .dropdown-item:focus,
+  .dropdown-item.active,
+  .dropdown-item:active {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image: repeating-linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+      transparent 1px 11px);
+  }
+
+  .form-control:not(.form-control-color):not(.form-control-plaintext),
+  .input-group-text {
+    --kaz-ui-accent: var(--bs-primary);
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-form-pattern: repeating-linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+      transparent 1px 13px);
+    background-image:
+      var(--kaz-form-pattern),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 3%, transparent), transparent 68%);
+  }
+  .was-validated .form-control:valid:not(.form-control-color):not(.form-control-plaintext),
+  .form-control.is-valid:not(.form-control-color):not(.form-control-plaintext) {
+    --kaz-ui-accent: var(--bs-success);
+    background-image:
+      var(--kaz-form-valid-icon),
+      var(--kaz-form-pattern),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 3%, transparent), transparent 68%);
+    background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center, 0 0, center, center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem), auto, 100% 100%, 100% 100%;
+  }
+  .was-validated .form-control:invalid:not(.form-control-color):not(.form-control-plaintext),
+  .form-control.is-invalid:not(.form-control-color):not(.form-control-plaintext) {
+    --kaz-ui-accent: var(--bs-danger);
+    background-image:
+      var(--kaz-form-invalid-icon),
+      var(--kaz-form-pattern),
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 3%, transparent), transparent 68%);
+    background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center, 0 0, center, center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem), auto, 100% 100%, 100% 100%;
+  }
+  .was-validated textarea.form-control:valid:not(.form-control-color):not(.form-control-plaintext),
+  textarea.form-control.is-valid:not(.form-control-color):not(.form-control-plaintext),
+  .was-validated textarea.form-control:invalid:not(.form-control-color):not(.form-control-plaintext),
+  textarea.form-control.is-invalid:not(.form-control-color):not(.form-control-plaintext) {
+    background-position: top calc(0.375em + 0.1875rem) right calc(0.375em + 0.1875rem), 0 0, center, center;
+  }
+  .form-select {
+    --kaz-ui-accent: var(--bs-primary);
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-form-select-pattern: repeating-linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+      transparent 1px 13px);
+    background-image: var(--kaz-form-select-pattern), var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
+    background-repeat: repeat, no-repeat, no-repeat;
+    background-position: 0 0, right 0.75rem center, center right 2.25rem;
+    background-size: auto, 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+  .was-validated .form-select:valid:not([multiple]):not([size]),
+  .was-validated .form-select:valid:not([multiple])[size="1"],
+  .form-select.is-valid:not([multiple]):not([size]),
+  .form-select.is-valid:not([multiple])[size="1"],
+  .was-validated .form-select:invalid:not([multiple]):not([size]),
+  .was-validated .form-select:invalid:not([multiple])[size="1"],
+  .form-select.is-invalid:not([multiple]):not([size]),
+  .form-select.is-invalid:not([multiple])[size="1"] {
+    background-position: 0 0, right 0.75rem center, center right 2.25rem;
+    background-size: auto, 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+
+  .badge,
+  mark,
+  .mark,
+  kbd {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-warning)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 6px),
+      linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 66%),
+      linear-gradient(to bottom, color-mix(in oklab, currentColor 2%, transparent), transparent);
+  }
+
+  .progress {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 12px),
+      linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 55%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 4%, transparent), transparent);
+  }
+  .progress-bar {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 8%, transparent) 0 1px,
+        transparent 1px 8px),
+      linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
+  }
+  .table thead th {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 8px),
+      linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 55%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent);
+  }
+  .breadcrumb {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 14px),
+      linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 56%),
+      linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 76%);
+  }
+  blockquote {
+    --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        transparent 1px 14px),
+      linear-gradient(135deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 11%, transparent), transparent 62%),
+      linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
+  }
+}
 @supports not (background-image: conic-gradient(red, blue)) {
   body::before {
     display: none;
@@ -14010,6 +14395,9 @@ kbd {
   }
 }
 @media (forced-colors: active) {
+  .btn:not(.btn-link) {
+    background-image: none;
+  }
   :root,
   [data-bs-theme] {
     --bs-box-shadow: none;
