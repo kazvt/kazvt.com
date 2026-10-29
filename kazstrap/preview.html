@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap site-wide style preview - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-review-3">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-pop-layered-1">
   <style>
     .shadow-comparison {
       display: grid;
@@ -179,6 +179,19 @@
         <li class="nav-item"><a class="nav-link" href="#games">Game shelf</a></li>
         <li class="nav-item"><a class="nav-link" href="#watch">Stream info</a></li>
       </ul>
+      <div class="table-responsive bg-body-tertiary p-3 mb-4">
+        <table class="table table-striped table-hover align-middle mb-0">
+          <caption class="caption-top fw-semibold">Kaz's game queue</caption>
+          <thead>
+            <tr><th scope="col">Game</th><th scope="col">System</th><th scope="col">Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Doom</th><td>PC</td><td><span class="badge text-bg-success">Ready</span></td></tr>
+            <tr><th scope="row">Sonic the Hedgehog</th><td>Mega Drive</td><td><span class="badge text-bg-info">Next up</span></td></tr>
+            <tr><th scope="row">A surprise pick</th><td>Classic console</td><td><span class="badge text-bg-warning">TBD</span></td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="row g-4">
         <div class="col-lg-7">
           <article class="card h-100">
