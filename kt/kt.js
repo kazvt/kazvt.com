@@ -948,6 +948,9 @@
         const rightPinned = pinnedMemberSlugs.has(right.slug);
         if (leftPinned || rightPinned) {
           if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+          const leftLive = left.card?.dataset.liveState === "live";
+          const rightLive = right.card?.dataset.liveState === "live";
+          if (leftLive !== rightLive) return leftLive ? -1 : 1;
           return left.defaultOrder - right.defaultOrder;
         }
 
