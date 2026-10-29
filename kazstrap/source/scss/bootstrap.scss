@@ -562,7 +562,6 @@ a.btn-link:focus-visible {
   font-weight: 600;
 }
 .form-control,
-.form-select,
 .input-group-text {
   border-color: color-mix(in oklab, var(--bs-border-color) 78%, var(--bs-primary) 22%);
   background-image: linear-gradient(
@@ -570,6 +569,10 @@ a.btn-link:focus-visible {
     color-mix(in oklab, var(--bs-primary) 3%, transparent),
     transparent 60%
   );
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 10%, transparent);
+}
+.form-select {
+  border-color: color-mix(in oklab, var(--bs-border-color) 78%, var(--bs-primary) 22%);
   box-shadow: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 10%, transparent);
 }
 .form-control:focus,
@@ -596,12 +599,9 @@ a.btn-link:focus-visible {
   box-shadow: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 14%, transparent);
 }
 .progress-bar {
-  background-image: linear-gradient(
-    to bottom,
-    color-mix(in oklab, white 18%, transparent),
-    transparent 48%,
-    color-mix(in oklab, black 10%, transparent)
-  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 10%, transparent);
 }
 .table > :not(caption) > * > * {
   border-color: color-mix(in oklab, var(--bs-border-color) 76%, var(--bs-primary) 24%);
