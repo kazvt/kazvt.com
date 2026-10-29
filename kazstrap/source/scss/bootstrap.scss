@@ -112,20 +112,22 @@
   --kaz-btn-color: var(--bs-btn-color);
   background-image: none;
 }
-.btn:not(.btn-link):hover {
-  --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
-}
-.btn[class*="btn-outline-"]:hover:not(.btn-link) {
-  --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
-}
-.btn[class*="btn-outline-"]:hover:not(.btn-link),
-.btn[class*="btn-outline-"]:active:not(.btn-link),
-.btn[class*="btn-outline-"].active:not(.btn-link),
-.btn[class*="btn-outline-"].show:not(.btn-link),
-.btn-check:checked + .btn[class*="btn-outline-"]:not(.btn-link) {
-  background-image:
-    var(--kaz-btn-glaze-gradient),
-    var(--kaz-btn-face-gradient);
+@media (hover: hover) {
+  .btn:not(.btn-link):hover {
+    --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
+  }
+  .btn[class*="btn-outline-"]:hover:not(.btn-link) {
+    --kaz-btn-color: var(--bs-btn-hover-bg, var(--bs-btn-color));
+  }
+  .btn[class*="btn-outline-"]:hover:not(.btn-link),
+  .btn[class*="btn-outline-"]:active:not(.btn-link),
+  .btn[class*="btn-outline-"].active:not(.btn-link),
+  .btn[class*="btn-outline-"].show:not(.btn-link),
+  .btn-check:checked + .btn[class*="btn-outline-"]:not(.btn-link) {
+    background-image:
+      var(--kaz-btn-glaze-gradient),
+      var(--kaz-btn-face-gradient);
+  }
 }
 .btn:not(.btn-link):active,
 .btn:not(.btn-link).active,
@@ -133,13 +135,15 @@
 .btn-check:checked + .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
 }
-.btn:not(.btn-link):hover:not(:focus-visible) {
-  transform: translate(-1px, -1px);
-  box-shadow:
-    inset 1px 1px 0 var(--kaz-btn-highlight),
-    inset -1px -1px 0 var(--kaz-btn-lower-lip),
-    5px 5px 0 var(--kaz-btn-shadow-deep),
-    9px 9px 0 var(--kaz-btn-layer);
+@media (hover: hover) {
+  .btn:not(.btn-link):hover:not(:focus-visible) {
+    transform: translate(-1px, -1px);
+    box-shadow:
+      inset 1px 1px 0 var(--kaz-btn-highlight),
+      inset -1px -1px 0 var(--kaz-btn-lower-lip),
+      5px 5px 0 var(--kaz-btn-shadow-deep),
+      9px 9px 0 var(--kaz-btn-layer);
+  }
 }
 .btn:not(.btn-link):active,
 .btn:not(.btn-link).active,
