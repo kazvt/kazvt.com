@@ -968,20 +968,28 @@ h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
     color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 80% 100%);
 }
 
-/* A static diamond checker gives the paper a playful repeat without moving behind text. */
+/* Static crossed gradients form a tile-aligned diamond checker without motion behind text. */
 body {
   background-image:
-    conic-gradient(from 45deg,
-      color-mix(in oklab, var(--bs-primary) 10%, transparent) 0% 25%,
-      color-mix(in oklab, var(--bs-info) 5%, transparent) 25% 50%,
-      color-mix(in oklab, var(--bs-primary) 10%, transparent) 50% 75%,
-      color-mix(in oklab, var(--bs-info) 5%, transparent) 75% 100%),
+    linear-gradient(45deg,
+      color-mix(in oklab, var(--bs-primary) 8%, transparent) 25%,
+      transparent 25%,
+      transparent 75%,
+      color-mix(in oklab, var(--bs-primary) 8%, transparent) 75%,
+      color-mix(in oklab, var(--bs-primary) 8%, transparent)),
+    linear-gradient(-45deg,
+      color-mix(in oklab, var(--bs-info) 5%, transparent) 25%,
+      transparent 25%,
+      transparent 75%,
+      color-mix(in oklab, var(--bs-info) 5%, transparent) 75%,
+      color-mix(in oklab, var(--bs-info) 5%, transparent)),
     linear-gradient(135deg,
       color-mix(in oklab, var(--bs-primary) 4%, var(--bs-body-bg)) 0%,
       var(--bs-body-bg) 48%,
       color-mix(in oklab, var(--bs-info) 4%, var(--bs-body-bg)) 100%);
-  background-size: 48px 48px, 100% 100%;
-  background-repeat: repeat, no-repeat;
+  background-size: 48px 48px, 48px 48px, 100% 100%;
+  background-position: 0 0, 0 0, center;
+  background-repeat: repeat, repeat, no-repeat;
 }
 
 a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action),
@@ -1510,14 +1518,16 @@ kbd {
   }
   body {
     background-image:
-      conic-gradient(from 45deg,
-        rgba(var(--bs-primary-rgb), 0.10) 0% 25%,
-        rgba(var(--bs-info-rgb), 0.05) 25% 50%,
-        rgba(var(--bs-primary-rgb), 0.10) 50% 75%,
-        rgba(var(--bs-info-rgb), 0.05) 75% 100%),
+      linear-gradient(45deg,
+        rgba(var(--bs-primary-rgb), 0.08) 25%, transparent 25%, transparent 75%,
+        rgba(var(--bs-primary-rgb), 0.08) 75%, rgba(var(--bs-primary-rgb), 0.08)),
+      linear-gradient(-45deg,
+        rgba(var(--bs-info-rgb), 0.05) 25%, transparent 25%, transparent 75%,
+        rgba(var(--bs-info-rgb), 0.05) 75%, rgba(var(--bs-info-rgb), 0.05)),
       linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.04), transparent 48%, rgba(var(--bs-info-rgb), 0.04));
-    background-size: 48px 48px, 100% 100%;
-    background-repeat: repeat, no-repeat;
+    background-size: 48px 48px, 48px 48px, 100% 100%;
+    background-position: 0 0, 0 0, center;
+    background-repeat: repeat, repeat, no-repeat;
   }
   h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
   .card-title, .alert-heading, .modal-title, .offcanvas-title {
@@ -1652,15 +1662,6 @@ kbd {
       2px 0 0 rgba(var(--bs-primary-rgb), 0.62),
       4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18),
       8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
-  }
-}
-@supports not (background-image: conic-gradient(from 45deg, red 0 25%, blue 25% 50%, red 50% 75%, blue 75%)) {
-  body {
-    background-image:
-      repeating-linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.035) 0 1px, transparent 1px 28px),
-      linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.04), transparent 48%, rgba(var(--bs-info-rgb), 0.04));
-    background-size: 100% 100%, 100% 100%;
-    background-repeat: repeat, no-repeat;
   }
 }
 @media (prefers-reduced-motion: reduce) {
