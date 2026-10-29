@@ -12906,13 +12906,33 @@ mark {
   --bs-box-shadow-inset: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
 }
 
-/* Two crisp color echoes give display type the same printed depth as panels. */
+/* Two crisp color echoes and compact score bars give titles a printed arcade finish. */
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6,
 .card-title, .alert-heading, .modal-title, .offcanvas-title {
   text-shadow:
     1px 1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 24%, transparent),
     2px 2px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 12%, transparent);
+}
+h1, h2, h3, .h1, .h2, .h3,
+.card-title, .alert-heading, .modal-title, .offcanvas-title {
+  background-image: linear-gradient(90deg,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 78%, black 22%) 0% 64%,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, white 32%) 64% 80%,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 80% 100%);
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  background-size: 3.25rem 3px;
+  padding-bottom: 0.18em;
+}
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+[dir="rtl"] .h1, [dir="rtl"] .h2, [dir="rtl"] .h3,
+[dir="rtl"] .card-title, [dir="rtl"] .alert-heading,
+[dir="rtl"] .modal-title, [dir="rtl"] .offcanvas-title {
+  background-image: linear-gradient(270deg,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 78%, black 22%) 0% 64%,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, white 32%) 64% 80%,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 80% 100%);
 }
 
 /* Quiet halftone and a two-color paper wash give the page a little life. */
@@ -12923,7 +12943,7 @@ body {
       color-mix(in oklab, var(--bs-primary) 4%, var(--bs-body-bg)) 0%,
       var(--bs-body-bg) 48%,
       color-mix(in oklab, var(--bs-info) 4%, var(--bs-body-bg)) 100%);
-  background-size: 22px 22px, 100% 100%;
+  background-size: 18px 18px, 100% 100%;
   background-repeat: repeat, no-repeat;
 }
 
@@ -12934,6 +12954,17 @@ a.btn-link {
     text-decoration-color 0.15s ease-in-out,
     text-decoration-thickness 0.15s ease-in-out,
     text-underline-offset 0.15s ease-in-out;
+}
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):focus-visible {
+  outline: 2px solid var(--bs-emphasis-color);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):hover,
+  a.btn-link:hover {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
 }
 
 /* Keep Bootstrap component color choices, then add a fine color-printed frame. */
@@ -12953,11 +12984,12 @@ a.btn-link {
       color-mix(in oklab, var(--kaz-ui-accent) 64%, white) 74% 86%,
       color-mix(in oklab, var(--kaz-ui-accent) 68%, black) 86% 100%),
     linear-gradient(145deg, color-mix(in oklab, white 14%, transparent) 0%, transparent 34%),
-    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 10%, transparent) 0%, transparent 62%),
-    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 5%, transparent) 0%, transparent 70%);
-  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%;
-  background-position: top left, center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 13%, transparent) 0%, transparent 62%),
+    linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0%, transparent 46%),
+    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 6%, transparent) 0%, transparent 70%);
+  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-position: top left, center, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   box-shadow:
     inset 0 1px 0 var(--kaz-ui-highlight),
     inset 1px 0 0 color-mix(in oklab, var(--kaz-ui-accent) 14%, transparent),
@@ -13018,11 +13050,12 @@ a.btn-link {
       color-mix(in oklab, var(--kaz-ui-accent) 64%, white) 74% 86%,
       color-mix(in oklab, var(--kaz-ui-accent) 68%, black) 86% 100%),
     linear-gradient(145deg, color-mix(in oklab, white 13%, transparent) 0%, transparent 36%),
-    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 10%, transparent) 0%, transparent 62%),
-    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 5%, transparent) 0%, transparent 72%);
-  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%;
-  background-position: top left, center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+    linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 13%, transparent) 0%, transparent 62%),
+    linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent) 7%, transparent) 0%, transparent 46%),
+    linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 6%, transparent) 0%, transparent 72%);
+  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-position: top left, center, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
     inset 1px 0 0 color-mix(in oklab, var(--kaz-ui-accent) 12%, transparent),
@@ -13103,12 +13136,6 @@ a.btn-link {
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
     inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent);
-}
-.card-footer,
-.modal-footer {
-  background-image:
-    linear-gradient(35deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 72%),
-    linear-gradient(to top, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent), transparent 82%);
 }
 .card-footer,
 .modal-footer {
@@ -13363,7 +13390,26 @@ a.btn-link {
     2px 2px 0 color-mix(in oklab, var(--bs-primary) 16%, transparent);
 }
 blockquote {
-  background-image: linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
+  border-inline-start: 3px solid color-mix(in oklab, var(--bs-primary) 70%, var(--bs-border-color) 30%);
+  padding-inline-start: 0.9rem;
+  background-image:
+    linear-gradient(135deg, color-mix(in oklab, var(--bs-primary) 11%, transparent), transparent 62%),
+    linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
+}
+hr {
+  height: 3px;
+  border: 0;
+  opacity: 1;
+  background-image: linear-gradient(90deg,
+    color-mix(in oklab, var(--bs-primary) 78%, black 22%) 0% 64%,
+    color-mix(in oklab, var(--bs-primary) 68%, white 32%) 64% 80%,
+    color-mix(in oklab, var(--bs-primary) 72%, black 28%) 80% 100%);
+}
+[dir="rtl"] hr {
+  background-image: linear-gradient(270deg,
+    color-mix(in oklab, var(--bs-primary) 78%, black 22%) 0% 64%,
+    color-mix(in oklab, var(--bs-primary) 68%, white 32%) 64% 80%,
+    color-mix(in oklab, var(--bs-primary) 72%, black 28%) 80% 100%);
 }
 kbd {
   background-image: linear-gradient(145deg, color-mix(in oklab, white 16%, transparent), transparent 72%);
@@ -13427,7 +13473,35 @@ kbd {
   }
   body {
     background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.055) 1px, transparent 1.5px);
-    background-size: 22px 22px;
+    background-size: 18px 18px;
+  }
+  h1, h2, h3, .h1, .h2, .h3,
+  .card-title, .alert-heading, .modal-title, .offcanvas-title {
+    background-image: linear-gradient(90deg,
+      rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
+      rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
+      rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
+  }
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+  [dir="rtl"] .h1, [dir="rtl"] .h2, [dir="rtl"] .h3,
+  [dir="rtl"] .card-title, [dir="rtl"] .alert-heading,
+  [dir="rtl"] .modal-title, [dir="rtl"] .offcanvas-title {
+    background-image: linear-gradient(270deg,
+      rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
+      rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
+      rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
+  }
+  hr {
+    background-image: linear-gradient(90deg,
+      rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
+      rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
+      rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
+  }
+  [dir="rtl"] hr {
+    background-image: linear-gradient(270deg,
+      rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
+      rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
+      rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
   }
   .card, .dropdown-menu, .modal-content, .toast, .popover, .accordion-item,
   .list-group-item, .navbar, .offcanvas {
@@ -13453,6 +13527,25 @@ kbd {
   }
   .table-hover > tbody > tr:hover > * {
     --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.10);
+  }
+  blockquote {
+    border-inline-start-color: rgba(var(--bs-primary-rgb), 0.68);
+    background-image: linear-gradient(90deg, rgba(var(--bs-primary-rgb), 0.06), transparent 76%);
+  }
+  [dir="rtl"] blockquote {
+    background-image: linear-gradient(270deg, rgba(var(--bs-primary-rgb), 0.06), transparent 76%);
+  }
+  hr {
+    background-image: linear-gradient(90deg,
+      rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
+      rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
+      rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
+  }
+  [dir="rtl"] hr {
+    background-image: linear-gradient(270deg,
+      rgba(var(--bs-primary-rgb), 0.78) 0% 64%,
+      rgba(var(--bs-primary-rgb), 0.5) 64% 80%,
+      rgba(var(--bs-primary-rgb), 0.7) 80% 100%);
   }
   .alert {
     box-shadow:
@@ -13537,7 +13630,8 @@ kbd {
   .list-group, .list-group-item, .alert, .offcanvas, .offcanvas-header, .offcanvas-body, .navbar,
   .nav-tabs .nav-link, .nav-pills .nav-link, .page-link,
   .form-control, .form-select, .input-group-text, .badge,
-  .progress, .progress-bar, .table thead th, .breadcrumb, blockquote, kbd, mark {
+  .progress, .progress-bar, .table thead th, .breadcrumb, blockquote, kbd, mark,
+  h1, h2, h3, .h1, .h2, .h3, .card-title, .alert-heading, .modal-title, .offcanvas-title, hr {
     background-image: none;
     box-shadow: none;
   }
@@ -13582,6 +13676,8 @@ kbd {
     border-inline-start-color: CanvasText;
   }
   hr {
+    height: 1px;
+    background-color: CanvasText;
     border-color: CanvasText;
   }
   h1, h2, h3, h4, h5, h6,
