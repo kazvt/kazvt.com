@@ -80,7 +80,9 @@
 
   function updateVideo() {
     if (!flagVideo) return;
-    const shouldPlay = !lite && !document.hidden && flagInView;
+    // The waving flag is essential page identity, so low-rendering mode must
+    // not freeze it. Still honor reduced-motion and avoid offscreen/background playback.
+    const shouldPlay = !motionPreference.matches && !document.hidden && flagInView;
     if (!shouldPlay) {
       flagVideo.pause();
       return;
@@ -177,11 +179,11 @@
     syncOptionalGIFs();
     if (flagVideo) {
       flagVideo.addEventListener('play', () => {
-        if (lite || document.hidden || !flagInView) flagVideo.pause();
+        if (motionPreference.matches || document.hidden || !flagInView) flagVideo.pause();
       });
       // Video has no autoplay attribute: the script starts it only when useful.
       flagVideo.autoplay = false;
-      flagVideo.preload = lite ? 'none' : 'metadata';
+      flagVideo.preload = motionPreference.matches ? 'none' : 'metadata';
       if ('IntersectionObserver' in window) {
         flagInView = false;
         const observer = new IntersectionObserver(entries => {

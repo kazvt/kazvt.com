@@ -82,12 +82,6 @@ html.kt-lite-mode :is(textarea, input:not([type="checkbox"]):not([type="radio"])
   cursor: text !important;
 }
 
-/* Keep the hero's existing video poster/last frame but skip decoding frames. */
-html.kt-lite-mode .kt-flag {
-  animation: none !important;
-  transition: none !important;
-}
-
 /* Avoid continuous hover compositing on repeated member cards. */
 html.kt-lite-mode :is(.kt-member, .kt-recommendation-link, .kt-kick-link, .kt-discord__join) {
   transition: none !important;
