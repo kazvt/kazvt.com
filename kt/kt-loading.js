@@ -25,6 +25,12 @@ function initializeKtLoadingScreen() {
 
   const host = document.createElement("div");
   host.dataset.ktLoadingScreen = "true";
+  const syncLoadingAppearance = (event) => {
+    const mode = event?.detail?.mode || document.documentElement.dataset.colorMode;
+    host.dataset.colorMode = mode === "dark" ? "dark" : "light";
+  };
+  syncLoadingAppearance();
+  window.addEventListener("kazvt:colormodechange", syncLoadingAppearance);
   host.setAttribute("aria-label", "Loading KickassTransfems");
   const shadow = host.attachShadow({ mode: "open" });
 
@@ -245,6 +251,68 @@ function initializeKtLoadingScreen() {
       .buffer-machine { align-self: flex-end; }
       .loading-message { min-height: 2.2em; }
     }
+    :host([data-color-mode="dark"]) {
+      color: var(--kazvt-text, #fff5f8);
+      background-color: var(--kazvt-night, #15131f);
+      background-image: var(--kazvt-dark-wallpaper, linear-gradient(145deg, #15131f, #1d1726 58%, #171923));
+      background-size: auto;
+    }
+    :host([data-color-mode="dark"]) .loading-window {
+      background: var(--kazvt-surface, #211d2b) !important;
+      color: var(--kazvt-text, #fff5f8) !important;
+      box-shadow:
+        3px 3px 0 var(--kazvt-trans-cyan, #8ae2f7),
+        6px 6px 0 var(--kazvt-trans-pink, #ffafc7),
+        inset 0 0 0 1px var(--kazvt-line, #aa9aaf) !important;
+    }
+    :host([data-color-mode="dark"]) .title-bar {
+      background: linear-gradient(100deg,
+        var(--kazvt-trans-cyan, #8ae2f7) 0 20%,
+        var(--kazvt-trans-pink, #ffafc7) 20% 40%,
+        var(--kazvt-text, #fff5f8) 40% 60%,
+        var(--kazvt-trans-pink, #ffafc7) 60% 80%,
+        var(--kazvt-trans-cyan, #8ae2f7) 80% 100%) !important;
+      border-color: var(--kazvt-line, #aa9aaf) !important;
+    }
+    :host([data-color-mode="dark"]) .title-bar-text { color: var(--kazvt-on-accent, #251722) !important; }
+    :host([data-color-mode="dark"]) .window-body {
+      background: var(--kazvt-surface, #211d2b) !important;
+      color: var(--kazvt-text, #fff5f8) !important;
+    }
+    :host([data-color-mode="dark"]) .loading-kicker,
+    :host([data-color-mode="dark"]) .progress-caption { color: var(--kazvt-text-muted, #d7c8d6) !important; }
+    :host([data-color-mode="dark"]) .loading-message { color: var(--kazvt-text, #fff5f8) !important; text-shadow: 1px 1px var(--kazvt-trans-pink, #ffafc7); }
+    :host([data-color-mode="dark"]) .buffer-machine {
+      border-color: var(--kazvt-line, #aa9aaf);
+      background: var(--kazvt-surface-raised, #2d2638);
+      box-shadow: 3px 3px 0 var(--kazvt-trans-pink, #ffafc7);
+    }
+    :host([data-color-mode="dark"]) .buffer-label { color: var(--kazvt-text, #fff5f8); }
+    :host([data-color-mode="dark"]) .buffer-display {
+      border-color: var(--kazvt-line, #aa9aaf);
+      background: repeating-linear-gradient(0deg, var(--kazvt-surface-high, #372e43) 0 5px, var(--kazvt-surface-raised, #2d2638) 5px 6px);
+    }
+    :host([data-color-mode="dark"]) .buffer-segment { border-color: var(--kazvt-on-accent, #251722); }
+    :host([data-color-mode="dark"]) .loading-progress[value] {
+      border-color: var(--kazvt-line, #aa9aaf);
+      background: var(--kazvt-surface-high, #372e43);
+      box-shadow: inset 0 0 2px rgb(0 0 0 / 60%);
+    }
+    :host([data-color-mode="dark"]) .loading-progress[value]::-webkit-progress-bar { background: var(--kazvt-surface-high, #372e43); }
+    :host([data-color-mode="dark"]) .loading-progress[value]::-webkit-progress-value,
+    :host([data-color-mode="dark"]) .loading-progress[value]::-moz-progress-bar {
+      background: repeating-linear-gradient(90deg,
+        var(--kazvt-trans-cyan, #8ae2f7) 0 10px,
+        var(--kazvt-trans-pink, #ffafc7) 10px 20px,
+        var(--kazvt-text, #fff5f8) 20px 30px);
+    }
+    :host([data-color-mode="dark"]) .loading-footer { color: var(--kazvt-text-muted, #d7c8d6); }
+    :host([data-color-mode="dark"]) .loading-footer span { color: var(--kazvt-trans-pink, #ffafc7); }
+    :host([data-color-mode="dark"]) .title-bar-controls button {
+      border: 1px solid var(--kazvt-line, #aa9aaf) !important;
+      background-color: var(--kazvt-surface-raised, #2d2638) !important;
+      box-shadow: 1px 1px 0 rgb(0 0 0 / 50%) !important;
+    }
     @media (prefers-reduced-motion: reduce) {
       :host { transition: none; }
       .buffer-segment { animation: none; }
@@ -330,6 +398,7 @@ function initializeKtLoadingScreen() {
   const finishLoadingScreen = () => {
     if (hasFinished) return;
     hasFinished = true;
+    window.removeEventListener("kazvt:colormodechange", syncLoadingAppearance);
     window.clearTimeout(showSecondMessage);
     window.clearTimeout(finishFade);
     window.clearTimeout(removalTimer);
