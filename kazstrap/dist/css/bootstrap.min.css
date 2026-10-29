@@ -2192,9 +2192,6 @@ kbd {
         linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 55%),
         linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 90%);
     }
-    .nav-pills .nav-link.active {
-      --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
-    }
   }
 
   .dropdown-item:hover,
@@ -2354,6 +2351,12 @@ kbd {
 }
 @media (forced-colors: active) {
   .btn:not(.btn-link) {
+    background-image: none;
+  }
+  .dropdown-item:hover,
+  .dropdown-item:focus,
+  .dropdown-item.active,
+  .dropdown-item:active {
     background-image: none;
   }
   :root,
