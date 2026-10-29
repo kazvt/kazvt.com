@@ -24,6 +24,9 @@
 html[data-color-mode="dark"] {
   color-scheme: dark;
   background-color: var(--kazvt-night);
+  background-image: var(--kazvt-dark-wallpaper);
+  background-repeat: repeat;
+  background-size: auto;
   scrollbar-color: var(--kazvt-trans-cyan) var(--kazvt-surface);
 }
 
@@ -490,12 +493,6 @@ html[data-color-mode="dark"] body[data-page="palestine"] {
   color: var(--kazvt-text);
   background-color: var(--kazvt-night);
   background-image: none;
-}
-
-html[data-color-mode="dark"]:has(body[data-page="palestine"]) {
-  background-color: var(--kazvt-night);
-  background-image: var(--kazvt-dark-wallpaper);
-  background-size: auto;
 }
 
 html[data-color-mode="dark"] body[data-page="palestine"] .archive-layout { background: transparent; }
