@@ -14366,13 +14366,14 @@ kbd {
 }
 @media (forced-colors: active) {
   .btn:not(.btn-link) {
-    background-image: none;
+    background-image: none !important;
+    box-shadow: none !important;
   }
   .dropdown-item:hover,
   .dropdown-item:focus,
   .dropdown-item.active,
   .dropdown-item:active {
-    background-image: none;
+    background-image: none !important;
   }
   :root,
   [data-bs-theme] {
@@ -14453,7 +14454,29 @@ kbd {
   .form-select, .form-select:valid, .form-select:invalid, .form-select.is-valid,
   .form-select.is-invalid, .was-validated .form-select:valid, .was-validated .form-select:invalid {
     appearance: auto;
-    background-image: none;
+    background-image: none !important;
     box-shadow: none;
+  }
+  .card, .card-header, .card-body, .card-footer,
+  .dropdown-menu, .dropdown-header, .modal-content, .modal-header, .modal-body, .modal-footer,
+  .toast, .toast-header, .toast-body, .popover, .popover-header, .popover-body, .offcanvas,
+  .offcanvas-header, .offcanvas-body, .alert, .accordion-item, .accordion-button,
+  .list-group-item, .navbar, .navbar .nav-link,
+  .nav-tabs .nav-link, .nav-pills .nav-link, .page-link,
+  .form-control, .form-select, .input-group-text, .badge, .mark, mark, kbd,
+  .progress, .progress-bar, .table thead th, .breadcrumb, blockquote,
+  :where(div, section, article, aside, main, header, footer, figure, form, nav):is(
+    .bg-body, .bg-body-secondary, .bg-body-tertiary, .bg-light, .bg-white,
+    .bg-primary, .bg-secondary, .bg-success, .bg-info, .bg-warning, .bg-danger, .bg-dark, .bg-black,
+    .bg-primary-subtle, .bg-secondary-subtle, .bg-success-subtle, .bg-info-subtle,
+    .bg-warning-subtle, .bg-danger-subtle, .bg-dark-subtle,
+    .text-bg-primary, .text-bg-secondary, .text-bg-success, .text-bg-info,
+    .text-bg-warning, .text-bg-danger, .text-bg-dark, .text-bg-light, .text-bg-white, .text-bg-black
+  ):not(:where(.card, .alert, .accordion, .accordion-item, .list-group, .list-group-item,
+    .dropdown-menu, .modal-content, .offcanvas, .toast, .popover, .navbar, .badge, .btn,
+    .card-header, .card-body, .card-footer, .modal-header, .modal-body, .modal-footer,
+    .offcanvas-header, .offcanvas-body, .toast-header, .toast-body, .popover-header,
+    .popover-body, .accordion-header, .accordion-body, .dropdown-header)) {
+    background-image: none !important;
   }
 }
