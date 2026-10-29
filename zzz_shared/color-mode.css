@@ -379,7 +379,7 @@ html.kt-root[data-color-mode="dark"] .kt-webring-kit :is(h2, h3, p, a, label, sp
 html.kt-root[data-color-mode="dark"] .kt-discord__window :is(h2, h3, p, a, span, strong),
 html.kt-root[data-color-mode="dark"] .kt-chatters :is(h2, h3, p, a, span, strong) { color: var(--kazvt-text); }
 
-html.kt-root[data-color-mode="dark"] :is(.kt-topbar, .kt-webring-heading, .kt-chatters__eyebrow) {
+html.kt-root[data-color-mode="dark"] :is(.kt-topbar, .kt-webring-heading, .kt-discord__titlebar, .kt-chatters__eyebrow) {
   background-color: var(--kazvt-surface-raised);
   background-image: linear-gradient(105deg, #27384a 0%, #374054 46%, #473143 100%);
   color: var(--kazvt-text);
