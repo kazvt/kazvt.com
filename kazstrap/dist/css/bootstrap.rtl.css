@@ -71,7 +71,7 @@
   --bs-dark-border-subtle: #adb5bd;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
-  --bs-font-sans-serif: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-sans-serif: "Microsoft YaHei UI", "Microsoft YaHei", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-body-font-family: var(--bs-font-sans-serif);
@@ -12843,7 +12843,15 @@ mark {
     background-image: none;
     border-inline-start-color: ButtonText;
   }
-  .form-select {
+  .form-select,
+  .form-select:valid,
+  .form-select:invalid,
+  .form-select.is-valid,
+  .form-select.is-invalid,
+  .was-validated .form-select:valid,
+  .was-validated .form-select:invalid {
+    appearance: auto;
+    background-image: none;
     box-shadow: none;
   }
   a.btn-link:focus-visible {
@@ -12866,5 +12874,11 @@ mark {
     --bs-box-shadow-sm: none;
     --bs-box-shadow-lg: none;
     --bs-box-shadow-inset: none;
+  }
+}
+
+@supports not (color: color-mix(in oklab, white, black)) {
+  .table-hover > tbody > tr:hover > * {
+    --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.08);
   }
 }

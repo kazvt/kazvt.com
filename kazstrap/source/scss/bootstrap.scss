@@ -51,6 +51,22 @@
 @import "utilities/api";
 // scss-docs-end import-stack
 
+/* Kazstrap: square corners across the full Bootstrap build. */
+:root {
+  --bs-border-radius: 0;
+  --bs-border-radius-sm: 0;
+  --bs-border-radius-lg: 0;
+  --bs-border-radius-xl: 0;
+  --bs-border-radius-xxl: 0;
+  --bs-border-radius-pill: 0;
+}
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+.rounded, [class*="rounded-"] {
+  border-radius: 0 !important;
+}
+
 /* Kazstrap: color-derived arcade buttons with layered enamel faces and tactile states. */
 .btn:not(.btn-link) {
   --kaz-btn-color: var(--bs-btn-bg);
@@ -861,7 +877,15 @@ mark {
     background-image: none;
     border-inline-start-color: ButtonText;
   }
-  .form-select {
+  .form-select,
+  .form-select:valid,
+  .form-select:invalid,
+  .form-select.is-valid,
+  .form-select.is-invalid,
+  .was-validated .form-select:valid,
+  .was-validated .form-select:invalid {
+    appearance: auto;
+    background-image: none;
     box-shadow: none;
   }
   a.btn-link:focus-visible {
@@ -884,5 +908,11 @@ mark {
     --bs-box-shadow-sm: none;
     --bs-box-shadow-lg: none;
     --bs-box-shadow-inset: none;
+  }
+}
+
+@supports not (color: color-mix(in oklab, white, black)) {
+  .table-hover > tbody > tr:hover > * {
+    --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.08);
   }
 }
