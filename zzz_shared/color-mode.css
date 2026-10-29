@@ -145,6 +145,31 @@ html[data-color-mode="dark"] .kazvt-mode-toggle::after {
   .kazvt-mode-toggle:active { transform: none; }
 }
 
+/* The alternate lineboil home page has three stacked columns on mobile. Its
+   eight-column palette otherwise imposes a 596px min-content width. Keep the
+   dark variant inside the viewport by giving the grid and its items shrinkable
+   tracks and arranging the palette as four comfortable columns. */
+@media (max-width: 640px) {
+  html[data-color-mode="dark"] body[data-site-variant="lineboil"] .web-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-color-mode="dark"] body[data-site-variant="lineboil"] .web-grid > * {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  html[data-color-mode="dark"] body[data-site-variant="lineboil"] .palette.big-palette {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  html[data-color-mode="dark"] body[data-site-variant="lineboil"] #app > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
 @media (forced-colors: active) {
   .kazvt-mode-toggle,
   html[data-color-mode="dark"] .kazvt-mode-toggle {
