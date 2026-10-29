@@ -1065,6 +1065,14 @@ mark {
   --bs-progress-bar-bg: var(--bs-primary);
   --bs-progress-bar-color: #fff;
 }
+.accordion {
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2339356f' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+[data-bs-theme="dark"] .accordion-button::after {
+  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23bdb8ee'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23bdb8ee'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+}
 .form-control:focus, .form-select:focus {
   border-color: var(--bs-primary);
   box-shadow:
@@ -1093,14 +1101,19 @@ mark {
 }
 
 /* Keep button highlights soft enough for readable labels over the full gradient. */
-.btn:not(.btn-link) {
-  --kaz-btn-glaze-gradient:
-    linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--kaz-btn-color) 95%, white) 0%,
-      color-mix(in oklab, var(--kaz-btn-color) 98%, white) 14%,
-      transparent 40%
-    );
+@supports (color: color-mix(in oklab, white, black)) {
+  .btn:not(.btn-link) {
+    --kaz-btn-glaze-gradient:
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--kaz-btn-color) 95%, white) 0%,
+        color-mix(in oklab, var(--kaz-btn-color) 98%, white) 14%,
+        transparent 40%
+      );
+  }
+}
+.progress-bar {
+  background-image: linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
 }
 
 /* Bootstrap's button variables drive the existing color-derived face and shadow layers. */
