@@ -32,6 +32,15 @@
   pointer-events: auto;
 }
 
+/* Reserve the bottom-left corner for the site's persistent appearance toggle.
+   On narrow screens this dialog spans almost the full viewport, so its default
+   bottom-right placement would otherwise cover the control's hit target. */
+@media (max-width: 460px) {
+  .welcome-dialog {
+    bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 64px);
+  }
+}
+
 .welcome-dialog * {
   font-family: "04b_30", Tahoma, sans-serif;
   font-weight: 400;
