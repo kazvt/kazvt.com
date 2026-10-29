@@ -1,0 +1,507 @@
+/* Persistent, manually selected appearance mode. Light mode intentionally
+   has no page-wide overrides; only the small control is styled in both modes. */
+:root {
+  --kazvt-night: #15131f;
+  --kazvt-surface: #211d2b;
+  --kazvt-surface-raised: #2d2638;
+  --kazvt-surface-high: #372e43;
+  --kazvt-text: #fff5f8;
+  --kazvt-text-muted: #d7c8d6;
+  --kazvt-text-soft: #bdaebd;
+  --kazvt-line: #aa9aaf;
+  --kazvt-trans-pink: #ffafc7;
+  --kazvt-trans-cyan: #8ae2f7;
+  --kazvt-trans-lilac: #d5bdff;
+  --kazvt-trans-mint: #95e4c8;
+  --kazvt-trans-yellow: #ffe3a3;
+  --kazvt-on-accent: #251722;
+  --kazvt-dark-wallpaper:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgb(138 226 247 / 8%) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgb(255 175 199 / 8%) 31px 32px),
+    linear-gradient(145deg, #15131f, #1d1726 58%, #171923);
+}
+
+html[data-color-mode="dark"] {
+  color-scheme: dark;
+  background-color: var(--kazvt-night);
+  scrollbar-color: var(--kazvt-trans-cyan) var(--kazvt-surface);
+}
+
+/* Compact, fixed control: oversized enough for touch, quiet enough to stay out
+   of the art. Its layered cyan/pink offset echoes the site's cut-paper frames. */
+.kazvt-mode-toggle {
+  position: fixed;
+  z-index: 2147483647;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: 13px;
+  background:
+    linear-gradient(145deg, #fff9fc, #f5e8ef) padding-box,
+    linear-gradient(180deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80%) border-box;
+  color: #29202b;
+  box-shadow: 3px 3px 0 #5bcefa, 6px 6px 0 #f5a9b8, 0 8px 20px rgb(43 32 40 / 22%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.kazvt-mode-toggle:hover {
+  transform: translate(1px, -1px) rotate(-2deg);
+  box-shadow: 2px 4px 0 #5bcefa, 5px 7px 0 #f5a9b8, 0 10px 22px rgb(43 32 40 / 25%);
+}
+
+.kazvt-mode-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #5bcefa, 3px 3px 0 #f5a9b8;
+}
+
+.kazvt-mode-toggle:focus-visible {
+  outline: 3px solid #29202b;
+  outline-offset: 5px;
+}
+
+.kazvt-mode-toggle__icon {
+  display: block;
+  width: 25px;
+  height: 25px;
+  filter: drop-shadow(1px 1px 0 rgb(255 255 255 / 75%));
+  transition: transform 180ms ease;
+}
+
+.kazvt-mode-toggle__icon--sun { display: none; }
+
+.kazvt-mode-toggle::after {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  max-width: min(220px, calc(100vw - 32px));
+  padding: 5px 8px;
+  border: 2px solid #302535;
+  background: #fff9fc;
+  box-shadow: 2px 2px 0 #5bcefa, 4px 4px 0 #f5a9b8;
+  color: #29202b;
+  content: attr(data-tooltip);
+  font: 700 0.76rem/1.2 "Comic Neue", "Comic Sans MS", "Comic Sans", cursive;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(3px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.kazvt-mode-toggle:hover::after,
+.kazvt-mode-toggle:focus-visible::after { opacity: 1; transform: translateY(0); }
+
+html[data-color-mode="dark"] .kazvt-mode-toggle {
+  background:
+    linear-gradient(145deg, #30273b, #211d2b) padding-box,
+    linear-gradient(180deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80%) border-box;
+  color: #fff5f8;
+  box-shadow: 3px 3px 0 #8ae2f7, 6px 6px 0 #ffafc7, 0 8px 22px rgb(0 0 0 / 48%);
+}
+
+html[data-color-mode="dark"] .kazvt-mode-toggle:hover {
+  box-shadow: 2px 4px 0 #8ae2f7, 5px 7px 0 #ffafc7, 0 10px 24px rgb(0 0 0 / 52%);
+}
+
+html[data-color-mode="dark"] .kazvt-mode-toggle:active {
+  box-shadow: 1px 1px 0 #8ae2f7, 3px 3px 0 #ffafc7;
+}
+
+html[data-color-mode="dark"] .kazvt-mode-toggle:focus-visible { outline-color: #fff5f8; }
+html[data-color-mode="dark"] .kazvt-mode-toggle__icon--moon { display: none; }
+html[data-color-mode="dark"] .kazvt-mode-toggle__icon--sun { display: block; }
+html[data-color-mode="dark"] .kazvt-mode-toggle::after {
+  border-color: #f4e8f2;
+  background: #211d2b;
+  color: #fff5f8;
+  box-shadow: 2px 2px 0 #8ae2f7, 4px 4px 0 #ffafc7;
+}
+
+@media (max-width: 360px) {
+  .kazvt-mode-toggle { width: 48px; height: 48px; }
+  .kazvt-mode-toggle__icon { width: 23px; height: 23px; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .kazvt-mode-toggle { width: 44px; height: 44px; bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  .kazvt-mode-toggle__icon { width: 21px; height: 21px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kazvt-mode-toggle,
+  .kazvt-mode-toggle::after,
+  .kazvt-mode-toggle__icon { transition: none !important; }
+  .kazvt-mode-toggle:hover,
+  .kazvt-mode-toggle:active { transform: none; }
+}
+
+@media (forced-colors: active) {
+  .kazvt-mode-toggle,
+  html[data-color-mode="dark"] .kazvt-mode-toggle {
+    border: 2px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+    forced-color-adjust: auto;
+  }
+  .kazvt-mode-toggle:focus-visible { outline: 3px solid Highlight; }
+  .kazvt-mode-toggle::after { display: none; }
+}
+
+/* Shared palette mapping for the illustrated homepage, blog, guide, and 404.
+   Palette choices still control fonts/cursors; the dark appearance uses the
+   same calm trans-flag surfaces on every viewport. */
+html[data-color-mode="dark"] body[data-page="home"],
+html[data-color-mode="dark"] body[data-page="guide"],
+html[data-color-mode="dark"] body[data-page="404"],
+html[data-color-mode="dark"] body.blog-page,
+html[data-color-mode="dark"] body.tuoys-page {
+  --cream: var(--kazvt-night);
+  --paper: var(--kazvt-surface);
+  --paper-alt: #272132;
+  --ink: var(--kazvt-text);
+  --orange: var(--kazvt-trans-pink);
+  --red: var(--kazvt-trans-pink);
+  --yellow: var(--kazvt-trans-yellow);
+  --green: var(--kazvt-trans-mint);
+  --blue: var(--kazvt-trans-cyan);
+  --pink: var(--kazvt-trans-pink);
+  --purple: var(--kazvt-trans-lilac);
+  --on-yellow: var(--kazvt-on-accent);
+  --on-green: var(--kazvt-on-accent);
+  --on-blue: var(--kazvt-on-accent);
+  --on-pink: var(--kazvt-on-accent);
+  --on-red: var(--kazvt-on-accent);
+  --on-orange: var(--kazvt-on-accent);
+  --shadow: rgb(0 0 0 / 52%);
+  --bg: var(--kazvt-night);
+  --bg-alt: #241e30;
+  --banner: #2b2437;
+  --banner-text: var(--kazvt-text);
+  --wallpaper-image: var(--kazvt-dark-wallpaper);
+  --wallpaper-size: auto;
+  --click-hover-outline-color: var(--kazvt-trans-cyan);
+  --selection-bg: #68425d;
+  --selection-text: #fff5f8;
+  --hover-surface: #382b45;
+  --hover-text: var(--kazvt-text);
+  --stamp-bg: #30263d;
+  --stamp-text: var(--kazvt-text);
+  --visualizer-bg: #1a1725;
+  --visualizer-primary: var(--kazvt-trans-yellow);
+  --visualizer-secondary: var(--kazvt-trans-pink);
+  --visualizer-accent: var(--kazvt-trans-mint);
+  color: var(--kazvt-text);
+  background-color: var(--kazvt-night) !important;
+  background-image: var(--kazvt-dark-wallpaper) !important;
+  background-size: auto !important;
+}
+
+html[data-color-mode="dark"] body[data-page="home"],
+html[data-color-mode="dark"] body[data-page="guide"],
+html[data-color-mode="dark"] body[data-page="404"],
+html[data-color-mode="dark"] body.blog-page,
+html[data-color-mode="dark"] body.tuoys-page {
+  scrollbar-color: var(--kazvt-trans-cyan) var(--kazvt-surface);
+}
+
+html[data-color-mode="dark"] body.blog-page :is(.blog-rich-content, .blog-article .ql-editor, .blog-panel),
+html[data-color-mode="dark"] body.blog-page .ql-container.ql-snow,
+html[data-color-mode="dark"] body.blog-page .ql-toolbar.ql-snow,
+html[data-color-mode="dark"] body.blog-page .ql-tooltip {
+  background-color: var(--kazvt-surface);
+  color: var(--kazvt-text);
+}
+
+html[data-color-mode="dark"] body.blog-page .ql-toolbar.ql-snow,
+html[data-color-mode="dark"] body.blog-page .ql-container.ql-snow,
+html[data-color-mode="dark"] body.blog-page .ql-tooltip {
+  border-color: var(--kazvt-line);
+}
+
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-stroke { stroke: var(--kazvt-text-muted); }
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-fill { fill: var(--kazvt-text-muted); }
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-picker { color: var(--kazvt-text-muted); }
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-picker-options {
+  border-color: var(--kazvt-line);
+  background-color: var(--kazvt-surface-raised);
+  color: var(--kazvt-text);
+}
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-picker-item:hover,
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-picker-item.ql-selected { color: var(--kazvt-trans-cyan); }
+html[data-color-mode="dark"] body.blog-page .ql-snow .ql-tooltip input { background: var(--kazvt-night); color: var(--kazvt-text); }
+html[data-color-mode="dark"] body.blog-page .blog-article .ql-editor [style*="color"] { color: var(--kazvt-text) !important; }
+
+/* KT's custom components keep their bespoke layouts and animations, but every
+   paper surface and line is remapped. Images and the animated trans flag remain
+   original artwork, never globally inverted or filtered. */
+html.kt-root[data-color-mode="dark"] {
+  --kt-ink: var(--kazvt-text);
+  --kt-night: var(--kazvt-night);
+  --kt-deep: #30243c;
+  --kt-paper: var(--kazvt-surface);
+  --kt-blue: var(--kazvt-trans-cyan);
+  --kt-pink: var(--kazvt-trans-pink);
+  --kt-white: #2a2434;
+  --kt-lilac: #342944;
+  --ink: var(--kazvt-text);
+  --paper: var(--kazvt-surface);
+  --paper-alt: #292235;
+  --bg: var(--kazvt-night);
+  --bg-alt: #211d2b;
+  --blue: var(--kazvt-trans-cyan);
+  --pink: var(--kazvt-trans-pink);
+  --purple: var(--kazvt-trans-lilac);
+  --green: #2a2434;
+  --yellow: var(--kazvt-trans-cyan);
+  --orange: var(--kazvt-trans-pink);
+  --red: var(--kazvt-trans-pink);
+  --on-blue: var(--kazvt-on-accent);
+  --on-pink: var(--kazvt-on-accent);
+  --on-green: var(--kazvt-text);
+  --on-yellow: var(--kazvt-on-accent);
+  --on-orange: var(--kazvt-on-accent);
+  --on-red: var(--kazvt-on-accent);
+  --banner: #2b2437;
+  --banner-text: var(--kazvt-text);
+  --shadow: rgb(0 0 0 / 58%);
+  --wallpaper-image: var(--kazvt-dark-wallpaper);
+  --wallpaper-size: auto;
+  --click-hover-outline-color: var(--kazvt-trans-cyan);
+  background-color: var(--kazvt-night);
+  background-image: var(--kazvt-dark-wallpaper);
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] { color: var(--kazvt-text); }
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"]::before {
+  background: linear-gradient(90deg, transparent, rgb(138 226 247 / 10%), rgb(255 175 199 / 18%), transparent);
+  mix-blend-mode: screen;
+  opacity: .62;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-frame {
+  background-image:
+    linear-gradient(90deg, rgb(138 226 247 / 10%) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(255 175 199 / 10%) 1px, transparent 1px),
+    linear-gradient(145deg, #211d2b, #1a1725);
+  background-size: 25px 25px, 25px 25px, auto;
+  box-shadow: 7px 7px 0 #8ae2f7, 14px 14px 0 #ffafc7, 19px 20px 0 rgb(0 0 0 / 58%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-hero-copy, .kt-roster-heading, .kt-webring-kit, .kt-discord__window, .kt-chatters) {
+  border-color: var(--kazvt-line);
+  background-color: var(--kazvt-surface);
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-hero-copy {
+  background: linear-gradient(145deg, rgb(48 36 60 / 97%), rgb(33 29 43 / 96%));
+  box-shadow: 3px 3px 0 rgb(255 175 199 / 78%), 6px 6px 0 rgb(138 226 247 / 72%), 0 12px 26px rgb(0 0 0 / 35%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-hero-copy :is(p, h1, h2, a, strong),
+html.kt-root[data-color-mode="dark"] .kt-roster-heading :is(h2, p, span),
+html.kt-root[data-color-mode="dark"] .kt-webring-kit :is(h2, h3, p, a, label, span),
+html.kt-root[data-color-mode="dark"] .kt-discord__window :is(h2, h3, p, a, span, strong),
+html.kt-root[data-color-mode="dark"] .kt-chatters :is(h2, h3, p, a, span, strong) { color: var(--kazvt-text); }
+
+html.kt-root[data-color-mode="dark"] :is(.kt-topbar, .kt-webring-heading, .kt-chatters__eyebrow) {
+  background-color: var(--kazvt-surface-raised);
+  background-image: linear-gradient(105deg, #27384a 0%, #374054 46%, #473143 100%);
+  color: var(--kazvt-text);
+  border-color: var(--kazvt-line);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-home-link, .kt-topbar-label, .kt-member-badge, .kt-member-tag, .kt-streamer-language, .kt-member-pronouns, .kt-last-live, .kt-recommendation-link, .kt-webring-step, .kt-webring-badge-card, .kt-webring-copy-field, .kt-discord__signal, .kt-discord__route, .kt-chatters__card) {
+  border-color: var(--kazvt-line);
+  background-color: var(--kazvt-surface-raised);
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-kick-link, .kt-discord__join, .kt-webring-copy-row button, .kt-webring-copy-button) {
+  border-color: var(--kazvt-text);
+  background: linear-gradient(110deg, var(--kazvt-trans-cyan), #c5eeff 48%, var(--kazvt-trans-pink) 52%, #ffd5e1);
+  color: var(--kazvt-on-accent) !important;
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 55%), 5px 5px 0 rgb(138 226 247 / 58%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member {
+  --kt-member-end: #211d2b;
+  --kt-member-wash: rgb(138 226 247 / 13%);
+  --kt-member-accent: #8ae2f7;
+  --kt-live-scan-color: #fff5f8;
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n + 2) .kt-member {
+  --kt-member-accent: #ffafc7;
+  --kt-member-wash: rgb(255 175 199 / 14%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n) .kt-member {
+  --kt-member-accent: #d5bdff;
+  --kt-member-wash: rgb(213 189 255 / 12%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li .kt-recommendation-link {
+  background: linear-gradient(135deg, rgb(138 226 247 / 12%), #211d2b 58%);
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li:nth-child(even) .kt-recommendation-link {
+  background: linear-gradient(135deg, rgb(255 175 199 / 15%), #211d2b 58%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li:nth-child(3n) .kt-recommendation-link {
+  background: linear-gradient(120deg, #211d2b, #292235 100%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-recommendation-link, .kt-webring-kit, .kt-discord__window, .kt-chatters) :is(.kt-recommendation-handle, .kt-discord__count-note, .kt-discord__route-light, .kt-chatters__handle, .kt-chatters__pronouns, .kt-member-number, .kt-member-handle, .kt-member-tag) {
+  color: var(--kazvt-text-muted);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-streamer-language {
+  border-color: rgb(138 226 247 / 82%);
+  background: #302a3b;
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-avatar,
+html.kt-root[data-color-mode="dark"] .kt-recommendation-avatar {
+  border-color: #f7eaf2;
+  background-color: #292334;
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 56%), 5px 5px 0 rgb(138 226 247 / 48%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n) .kt-member { --kt-member-end: #211d2b; }
+html.kt-root[data-color-mode="dark"] .kt-member-live-dot,
+html.kt-root[data-color-mode="dark"] .kt-live-now-dot { border-color: #fff5f8; }
+html.kt-root[data-color-mode="dark"] .kt-member-pronouns { background: #342944; }
+html.kt-root[data-color-mode="dark"] .kt-member-status-rail { color: var(--kazvt-text); }
+
+html.kt-root[data-color-mode="dark"] .kt-member-tag,
+html.kt-root[data-color-mode="dark"] .kt-last-live,
+html.kt-root[data-color-mode="dark"] .kt-webring-copy-field,
+html.kt-root[data-color-mode="dark"] .kt-discord__route { box-shadow: 2px 2px 0 rgb(0 0 0 / 45%); }
+
+html.kt-root[data-color-mode="dark"] .kt-music-toggle {
+  border-color: var(--kazvt-text);
+  background: #292334;
+  color: var(--kazvt-text);
+  box-shadow: 3px 3px 0 var(--kazvt-trans-cyan), 6px 6px 0 var(--kazvt-trans-pink), 0 8px 20px rgb(0 0 0 / 45%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-music-toggle__icon-tile,
+html.kt-root[data-color-mode="dark"] .kt-music-toggle::after {
+  border-color: var(--kazvt-line);
+  background: #211d2b;
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option,
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-dock > .language-button {
+  border-color: var(--kazvt-line);
+  background-color: var(--kazvt-surface-raised);
+  color: var(--kazvt-text);
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option[aria-pressed="true"] {
+  background: var(--kazvt-trans-mint);
+  color: var(--kazvt-on-accent);
+}
+
+/* Palestine's flag retains its original black, white, green, and red fields;
+   the archive UI around it shifts to deep paper with trans-pink/cyan accents. */
+html[data-color-mode="dark"] body[data-page="palestine"] {
+  --pal-black: var(--kazvt-text);
+  --pal-white: #292334;
+  --pal-paper: var(--kazvt-surface);
+  --pal-rule: var(--kazvt-line);
+  --pal-shadow: #8ae2f7;
+  --pal-red: var(--kazvt-trans-pink);
+  --pal-green: var(--kazvt-trans-cyan);
+  color: var(--kazvt-text);
+  background-color: var(--kazvt-night);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .archive-layout { background: transparent; }
+html[data-color-mode="dark"] body[data-page="palestine"] .archive {
+  border-color: var(--kazvt-line);
+  background: var(--kazvt-surface);
+  box-shadow: 7px 7px 0 #8ae2f7, 12px 12px 0 #ffafc7;
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] :is(.masthead, .archive-footer) {
+  border-color: var(--kazvt-trans-cyan);
+  background: #2b2437;
+  color: var(--kazvt-text);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] :is(.intro, .collection, .entry, .byline) {
+  border-color: var(--kazvt-line);
+  background-color: var(--kazvt-surface);
+  color: var(--kazvt-text);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] :is(h1, .entry-author, .entry-details, .entry-details h3, .home-link) {
+  color: var(--kazvt-text);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .entry-kind,
+html[data-color-mode="dark"] body[data-page="palestine"] .entry-date { color: var(--kazvt-trans-cyan); }
+
+html[data-color-mode="dark"] body[data-page="palestine"] :is(.download-link, .read-link) {
+  border-color: var(--kazvt-line);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 48%);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .download-link {
+  background: var(--kazvt-trans-cyan);
+  color: var(--kazvt-on-accent);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .read-link {
+  background: #342944;
+  color: var(--kazvt-text);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .flag-mark {
+  border-color: var(--kazvt-text);
+  box-shadow: 3px 3px 0 var(--kazvt-trans-pink);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .flag-mark span:nth-child(1) { background: #171a18; }
+html[data-color-mode="dark"] body[data-page="palestine"] .flag-mark span:nth-child(2) { background: #fffdf3; }
+html[data-color-mode="dark"] body[data-page="palestine"] .flag-mark span:nth-child(3) { background: #087a3f; }
+html[data-color-mode="dark"] body[data-page="palestine"] .flag-mark i { border-left-color: #ce1126; }
+
+html[data-color-mode="dark"] body[data-page="palestine"] .language-dock {
+  --ink: var(--kazvt-text);
+  --paper: var(--kazvt-surface);
+  --pink: var(--kazvt-trans-pink);
+  --yellow: var(--kazvt-surface-raised);
+  --green: var(--kazvt-trans-mint);
+  --banner: #342944;
+  --banner-text: var(--kazvt-text);
+  --shadow: rgb(0 0 0 / 50%);
+  background-color: var(--kazvt-surface);
+}
+
+@media (prefers-contrast: more) {
+  html[data-color-mode="dark"] {
+    --kazvt-night: #08070d;
+    --kazvt-surface: #111018;
+    --kazvt-surface-raised: #1a1722;
+    --kazvt-text: #ffffff;
+    --kazvt-text-muted: #f0e6ee;
+    --kazvt-line: #ffffff;
+  }
+}
