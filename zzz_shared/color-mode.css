@@ -281,6 +281,25 @@ html.kt-root[data-color-mode="dark"] {
 
 html.kt-root[data-color-mode="dark"] body[data-page="kt"] { color: var(--kazvt-text); }
 
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(.kt-eyebrow, .kt-member-number, .kt-member-handle, .kt-member-tag, .kt-recommendation-handle, .kt-recommendations h3, .kt-recommendations p) {
+  color: var(--kazvt-text-muted);
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] .kt-roster-heading .kt-eyebrow {
+  color: var(--kazvt-trans-pink);
+  text-shadow: 1px 1px 0 rgb(21 19 31 / 72%);
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] .kt-webring-body {
+  background:
+    linear-gradient(90deg, rgb(138 226 247 / 8%) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgb(255 175 199 / 8%) 0 1px, transparent 1px 100%),
+    radial-gradient(ellipse at 3% 3%, rgb(138 226 247 / 11%), transparent 38%),
+    radial-gradient(ellipse at 100% 100%, rgb(255 175 199 / 13%), transparent 36%),
+    var(--kazvt-surface);
+  background-size: 18px 18px, 18px 18px, auto, auto, auto;
+}
+
 html.kt-root[data-color-mode="dark"] body[data-page="kt"]::before {
   background: linear-gradient(90deg, transparent, rgb(138 226 247 / 10%), rgb(255 175 199 / 18%), transparent);
   mix-blend-mode: screen;
@@ -430,6 +449,18 @@ html[data-color-mode="dark"] body[data-page="palestine"] {
   --pal-green: var(--kazvt-trans-cyan);
   color: var(--kazvt-text);
   background-color: var(--kazvt-night);
+  background-image: none;
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] {
+  --pal-black: var(--kazvt-text);
+  --pal-white: var(--kazvt-surface);
+}
+
+html[data-color-mode="dark"]:has(body[data-page="palestine"]) {
+  background-color: var(--kazvt-night);
+  background-image: var(--kazvt-dark-wallpaper);
+  background-size: auto;
 }
 
 html[data-color-mode="dark"] body[data-page="palestine"] .archive-layout { background: transparent; }
@@ -468,8 +499,18 @@ html[data-color-mode="dark"] body[data-page="palestine"] .download-link {
   color: var(--kazvt-on-accent);
 }
 
+html[data-color-mode="dark"] body[data-page="palestine"] .download-link:hover {
+  background: var(--kazvt-trans-mint);
+  color: var(--kazvt-on-accent);
+}
+
 html[data-color-mode="dark"] body[data-page="palestine"] .read-link {
   background: #342944;
+  color: var(--kazvt-text);
+}
+
+html[data-color-mode="dark"] body[data-page="palestine"] .read-link:hover {
+  background: #45344f;
   color: var(--kazvt-text);
 }
 
