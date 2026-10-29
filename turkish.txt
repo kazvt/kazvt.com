@@ -453,6 +453,7 @@ palestine.pause_aria=Filistin GIF'lerini duraklat
 palestine.gif_credit=Eski internetten buluntular:
 palestine.collection=Mevcut edebiyat
 palestine.entry_kind=İngilizce PDF - 2 sayfa
+palestine.mural_entry_kind=33 sayfalık PDF
 palestine.download=PDF indir
 palestine.read=Tarayıcıda oku
 palestine.gif_alt_1=Dalgalanan küçük Filistin bayrağı GIF'i
