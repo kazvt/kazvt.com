@@ -615,6 +615,10 @@ html[dir="rtl"] .kt-chatters__arrow { transform: scaleX(-1); }
   .kt-chatters__handle { --kt-chatters-handle-base-size: .56rem; }
 }
 
+@media (max-width: 260px) {
+  .kt-chatters__list { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kt-chatters__card { transition: none; }
 }
