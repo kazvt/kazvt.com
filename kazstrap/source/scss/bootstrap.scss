@@ -924,18 +924,18 @@ mark {
 /* Muted semantic palette. Solid tokens preserve utility compatibility; surfaces and controls layer them into gradients below. */
 :root,
 [data-bs-theme="light"] {
-  --bs-primary: #5d59a4;
-  --bs-primary-rgb: 93, 89, 164;
-  --bs-secondary: #59677a;
-  --bs-secondary-rgb: 89, 103, 122;
-  --bs-success: #376b52;
-  --bs-success-rgb: 55, 107, 82;
-  --bs-info: #356d7c;
-  --bs-info-rgb: 53, 109, 124;
-  --bs-warning: #d6a95b;
-  --bs-warning-rgb: 214, 169, 91;
-  --bs-danger: #a54859;
-  --bs-danger-rgb: 165, 72, 89;
+  --bs-primary: #66619e;
+  --bs-primary-rgb: 102, 97, 158;
+  --bs-secondary: #626c7a;
+  --bs-secondary-rgb: 98, 108, 122;
+  --bs-success: #44735b;
+  --bs-success-rgb: 68, 115, 91;
+  --bs-info: #47727c;
+  --bs-info-rgb: 71, 114, 124;
+  --bs-warning: #d8b36d;
+  --bs-warning-rgb: 216, 179, 109;
+  --bs-danger: #a6495a;
+  --bs-danger-rgb: 166, 73, 90;
 
   --bs-primary-text-emphasis: #39356f;
   --bs-secondary-text-emphasis: #35404c;
@@ -958,11 +958,11 @@ mark {
   --bs-warning-border-subtle: #dfc58f;
   --bs-danger-border-subtle: #dfb9c1;
 
-  --bs-link-color: #504a93;
-  --bs-link-color-rgb: 80, 74, 147;
+  --bs-link-color: #55518f;
+  --bs-link-color-rgb: 85, 81, 143;
   --bs-link-hover-color: #39356f;
   --bs-link-hover-color-rgb: 57, 53, 111;
-  --bs-focus-ring-color: rgba(93, 89, 164, 0.3);
+  --bs-focus-ring-color: rgba(102, 97, 158, 0.3);
   --bs-form-valid-color: var(--bs-success-text-emphasis);
   --bs-form-valid-border-color: var(--bs-success);
   --bs-form-invalid-color: var(--bs-danger-text-emphasis);
@@ -971,8 +971,8 @@ mark {
   --bs-highlight-bg: var(--bs-warning-bg-subtle);
   --bs-code-color: #89506f;
   --bs-border-color: #d7d6e0;
-  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23376b52' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
-  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23a54859'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23a54859' stroke='none'/%3e%3c/svg%3e");
+  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2344735b' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
+  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23a6495a'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23a6495a' stroke='none'/%3e%3c/svg%3e");
 }
 [data-bs-theme="dark"] {
   --bs-primary-text-emphasis: #bdb8ee;
@@ -1028,6 +1028,60 @@ mark {
   --bs-form-select-bg-icon: var(--kaz-form-invalid-icon);
 }
 
+/* Keep inherited Bootstrap component states on the same semantic palette. */
+.dropdown-menu, .dropdown-menu-dark {
+  --bs-dropdown-link-active-bg: var(--bs-primary);
+  --bs-dropdown-link-active-color: #fff;
+}
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--bs-primary);
+  --bs-nav-pills-link-active-color: #fff;
+}
+.pagination {
+  --bs-pagination-active-bg: var(--bs-primary);
+  --bs-pagination-active-border-color: var(--bs-primary);
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+.list-group {
+  --bs-list-group-active-bg: var(--bs-primary);
+  --bs-list-group-active-border-color: var(--bs-primary);
+  --bs-list-group-active-color: #fff;
+}
+.progress {
+  --bs-progress-bar-bg: var(--bs-primary);
+  --bs-progress-bar-color: #fff;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--bs-primary);
+}
+.form-check-input:focus {
+  border-color: color-mix(in oklab, var(--bs-primary) 72%, white);
+  box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+.form-check-input:checked,
+.form-check-input[type="checkbox"]:indeterminate {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+.form-range::-webkit-slider-thumb, .form-range::-moz-range-thumb {
+  background-color: var(--bs-primary);
+}
+.form-range::-webkit-slider-thumb:active, .form-range::-moz-range-thumb:active {
+  background-color: var(--bs-primary-text-emphasis);
+}
+
+/* Keep button highlights soft enough for readable labels over the full gradient. */
+.btn:not(.btn-link) {
+  --kaz-btn-glaze-gradient:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--kaz-btn-color) 95%, white) 0%,
+      color-mix(in oklab, var(--kaz-btn-color) 98%, white) 14%,
+      transparent 40%
+    );
+}
+
 /* Bootstrap's button variables drive the existing color-derived face and shadow layers. */
 .btn-primary, .btn-outline-primary {
   --kaz-button-base: var(--bs-primary);
@@ -1080,6 +1134,9 @@ mark {
   .btn-danger, .btn-outline-danger {
     --kaz-button-hover: color-mix(in oklab, var(--kaz-button-base) 88%, black 12%);
     --kaz-button-active: color-mix(in oklab, var(--kaz-button-base) 78%, black 22%);
+  }
+  .btn-warning, .btn-outline-warning {
+    --kaz-button-active: color-mix(in oklab, var(--kaz-button-base) 88%, black 12%);
   }
 }
 .btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-warning, .btn-danger {
