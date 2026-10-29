@@ -435,6 +435,13 @@ html.kt-root[data-color-mode="dark"] .kt-member {
   color: var(--kazvt-text);
 }
 
+html.kt-root[data-color-mode="dark"] .kt-member::before {
+  /* The translated 3D layer can paint through the card face in some Chromium
+     compositing paths, even when the face gradient is opaque. Keep the depth
+     from the layered box-shadow, and remove this redundant fill layer at night. */
+  display: none;
+}
+
 html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n + 2) .kt-member {
   --kt-member-accent: #ffafc7;
   --kt-member-wash: #382833;
