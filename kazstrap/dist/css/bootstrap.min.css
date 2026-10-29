@@ -173,3 +173,535 @@ h3,
 .badge {
   font-family: var(--bs-font-sans-serif);
 }
+
+/* Kazstrap: playful, color-aware surfaces and site-wide interface details. */
+h1,
+h2,
+h3,
+.card-title,
+.alert-heading,
+.modal-title,
+.offcanvas-title {
+  text-shadow: 1px 1px 0 color-mix(in oklab, var(--bs-primary) 14%, transparent);
+}
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand) {
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in oklab, var(--bs-link-color) 62%, transparent);
+}
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):hover {
+  text-decoration-thickness: 0.12em;
+  text-decoration-color: currentColor;
+}
+a:not(.btn):focus-visible,
+button:not(.btn):focus-visible {
+  outline: 2px solid var(--bs-emphasis-color);
+  outline-offset: 2px;
+}
+
+/* Raised surfaces share the buttons' crisp, two-step depth without a soft glow. */
+.card,
+.dropdown-menu,
+.modal-content,
+.toast,
+.popover {
+  --kaz-ui-accent: var(--bs-primary);
+  --kaz-ui-shadow-ink: color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent);
+  --kaz-ui-shadow-color: color-mix(in oklab, var(--kaz-ui-accent) 34%, transparent);
+  --kaz-ui-highlight: color-mix(in oklab, var(--bs-body-bg) 72%, white);
+  border-color: color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-ui-accent) 38%);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0%,
+    transparent 48%
+  );
+  box-shadow:
+    inset 0 1px 0 var(--kaz-ui-highlight),
+    4px 4px 0 var(--kaz-ui-shadow-ink),
+    8px 8px 0 var(--kaz-ui-shadow-color);
+}
+
+/* Bootstrap background utilities become panels when used on a surface. */
+.bg-body-tertiary:not(.navbar):not(.badge):not(.btn),
+.bg-body-secondary:not(.navbar):not(.badge):not(.btn),
+.bg-light:not(.badge):not(.btn),
+.bg-primary-subtle:not(.badge):not(.btn),
+.bg-secondary-subtle:not(.badge):not(.btn),
+.bg-success-subtle:not(.badge):not(.btn),
+.bg-info-subtle:not(.badge):not(.btn),
+.bg-warning-subtle:not(.badge):not(.btn),
+.bg-danger-subtle:not(.badge):not(.btn),
+.bg-dark-subtle:not(.badge):not(.btn) {
+  --kaz-ui-accent: var(--bs-primary);
+  --kaz-ui-shadow-ink: color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent);
+  --kaz-ui-shadow-color: color-mix(in oklab, var(--kaz-ui-accent) 34%, transparent);
+  --kaz-ui-highlight: color-mix(in oklab, var(--bs-body-bg) 72%, white);
+  border: 1px solid color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-ui-accent) 38%);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0%,
+    transparent 48%
+  );
+  box-shadow:
+    inset 0 1px 0 var(--kaz-ui-highlight),
+    4px 4px 0 var(--kaz-ui-shadow-ink),
+    8px 8px 0 var(--kaz-ui-shadow-color);
+}
+.bg-primary-subtle:not(.badge):not(.btn),
+.text-bg-primary,
+.alert-primary,
+.list-group-item-primary {
+  --kaz-ui-accent: var(--bs-primary);
+}
+.bg-secondary-subtle:not(.badge):not(.btn),
+.text-bg-secondary,
+.alert-secondary,
+.list-group-item-secondary {
+  --kaz-ui-accent: var(--bs-secondary);
+}
+.bg-success-subtle:not(.badge):not(.btn),
+.text-bg-success,
+.alert-success,
+.list-group-item-success {
+  --kaz-ui-accent: var(--bs-success);
+}
+.bg-info-subtle:not(.badge):not(.btn),
+.text-bg-info,
+.alert-info,
+.list-group-item-info {
+  --kaz-ui-accent: var(--bs-info);
+}
+.bg-warning-subtle:not(.badge):not(.btn),
+.text-bg-warning,
+.alert-warning,
+.list-group-item-warning {
+  --kaz-ui-accent: var(--bs-warning);
+}
+.bg-danger-subtle:not(.badge):not(.btn),
+.text-bg-danger,
+.alert-danger,
+.list-group-item-danger {
+  --kaz-ui-accent: var(--bs-danger);
+}
+.bg-dark-subtle:not(.badge):not(.btn),
+.text-bg-dark,
+.alert-dark,
+.list-group-item-dark {
+  --kaz-ui-accent: var(--bs-dark);
+}
+.card.text-bg-light,
+.text-bg-light,
+.alert-light,
+.list-group-item-light {
+  --kaz-ui-accent: var(--bs-secondary);
+}
+
+.card-header,
+.card-footer,
+.modal-header,
+.modal-footer,
+.offcanvas-header,
+.toast-header {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent),
+    transparent
+  );
+  border-color: color-mix(
+    in oklab,
+    var(--bs-border-color) 68%,
+    var(--kaz-ui-accent, var(--bs-primary)) 32%
+  );
+}
+.card-footer {
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent),
+    transparent
+  );
+}
+
+/* Alerts use their Bootstrap variant for the accent edge and shadow tint. */
+.alert {
+  --kaz-ui-accent: var(--bs-primary);
+  --kaz-ui-shadow-ink: color-mix(in oklab, var(--bs-emphasis-color) 16%, transparent);
+  border: 1px solid color-mix(in oklab, var(--bs-alert-border-color) 70%, var(--kaz-ui-accent) 30%);
+  border-inline-start-width: 4px;
+  background-image: linear-gradient(
+    100deg,
+    color-mix(in oklab, var(--kaz-ui-accent) 10%, transparent),
+    transparent 58%
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--bs-body-bg) 72%, white),
+    4px 4px 0 var(--kaz-ui-shadow-ink),
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent) 30%, transparent);
+}
+
+/* Compact title bars and active states add a little arcade-panel character. */
+.accordion:not(.accordion-flush) {
+  border: 1px solid color-mix(in oklab, var(--bs-border-color) 58%, var(--bs-primary) 42%);
+  box-shadow:
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 16%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--bs-primary) 30%, transparent);
+}
+.accordion-item {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 4%, transparent),
+    transparent 45%
+  );
+  border-color: color-mix(in oklab, var(--bs-border-color) 78%, var(--bs-primary) 22%);
+}
+.accordion-button {
+  font-weight: 600;
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 6%, transparent),
+    transparent 75%
+  );
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+.accordion-button:not(.collapsed) {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 12%, transparent),
+    transparent 90%
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--bs-primary) 32%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+}
+
+.list-group {
+  --kaz-ui-accent: var(--bs-primary);
+  border-color: color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-ui-accent) 38%);
+  box-shadow:
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 16%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent) 28%, transparent);
+}
+.list-group-flush {
+  border: 0;
+  box-shadow: none;
+}
+.list-group-item {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 4%, transparent),
+    transparent 75%
+  );
+  border-color: color-mix(
+    in oklab,
+    var(--bs-border-color) 78%,
+    var(--kaz-ui-accent, var(--bs-primary)) 22%
+  );
+}
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent),
+    transparent 90%
+  );
+}
+
+.navbar {
+  --kaz-ui-accent: var(--bs-primary);
+  box-shadow: 0 3px 0 color-mix(in oklab, var(--kaz-ui-accent) 28%, transparent);
+}
+.navbar-brand {
+  text-shadow: 1px 1px 0 color-mix(in oklab, var(--bs-primary) 22%, transparent);
+}
+.navbar .nav-link {
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
+}
+.navbar .nav-link:hover,
+.navbar .nav-link:focus-visible,
+.navbar .nav-link.active {
+  border-bottom-color: color-mix(in oklab, var(--bs-primary) 64%, transparent);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 8%, transparent),
+    transparent
+  );
+}
+.nav-tabs {
+  border-bottom: 2px solid color-mix(in oklab, var(--bs-border-color) 64%, var(--bs-primary) 36%);
+}
+.nav-tabs .nav-link {
+  font-weight: 600;
+}
+.nav-tabs .nav-link:hover {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 7%, transparent),
+    transparent
+  );
+}
+.nav-tabs .nav-link.active {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 10%, transparent),
+    transparent 85%
+  );
+  box-shadow: inset 0 2px 0 color-mix(in oklab, var(--bs-primary) 54%, transparent);
+}
+.nav-pills .nav-link {
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+.nav-pills .nav-link.active {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, white 14%, transparent),
+    transparent 80%
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    2px 2px 0 color-mix(in oklab, var(--bs-primary) 44%, black);
+}
+
+.page-link {
+  border-color: color-mix(in oklab, var(--bs-border-color) 68%, var(--bs-primary) 32%);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 4%, transparent),
+    transparent 80%
+  );
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 30%, transparent);
+}
+.page-link:hover {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 12%, transparent),
+    transparent 90%
+  );
+}
+.page-item.active .page-link {
+  border-color: color-mix(in oklab, var(--bs-primary) 68%, black 32%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    2px 2px 0 color-mix(in oklab, var(--bs-primary) 44%, black);
+}
+
+.form-label {
+  font-weight: 600;
+}
+.form-control,
+.form-select,
+.input-group-text {
+  border-color: color-mix(in oklab, var(--bs-border-color) 78%, var(--bs-primary) 22%);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 3%, transparent),
+    transparent 60%
+  );
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 10%, transparent);
+}
+.form-control:focus,
+.form-select:focus {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--bs-body-bg) 74%, white),
+    0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+.form-check-input:checked {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+}
+.form-check-input:focus {
+  border-color: color-mix(in oklab, var(--bs-primary) 72%, white);
+}
+
+.badge {
+  box-shadow: inset 0 1px 0 color-mix(in oklab, currentColor 18%, transparent);
+  outline: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+  outline-offset: -1px;
+}
+.progress {
+  border: 1px solid color-mix(in oklab, var(--bs-border-color) 66%, var(--bs-primary) 34%);
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 14%, transparent);
+}
+.progress-bar {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, white 18%, transparent),
+    transparent 48%,
+    color-mix(in oklab, black 10%, transparent)
+  );
+}
+.table > :not(caption) > * > * {
+  border-color: color-mix(in oklab, var(--bs-border-color) 76%, var(--bs-primary) 24%);
+}
+.table thead th {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bs-primary) 8%, transparent),
+    transparent
+  );
+  border-bottom-width: 2px;
+}
+.table-hover > tbody > tr:hover > * {
+  --bs-table-bg-state: color-mix(in oklab, var(--bs-primary) 8%, transparent);
+}
+.breadcrumb {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--bs-border-color) 70%, var(--bs-primary) 30%);
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--bs-primary) 6%, transparent),
+    transparent 72%
+  );
+}
+blockquote {
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid color-mix(in oklab, var(--bs-primary) 52%, var(--bs-border-color));
+}
+hr {
+  border-top: 2px solid color-mix(in oklab, var(--bs-border-color) 58%, var(--bs-primary) 42%);
+  opacity: 1;
+}
+kbd {
+  border: 1px solid color-mix(in oklab, var(--bs-border-color) 56%, var(--bs-primary) 44%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 22%, transparent),
+    2px 2px 0 color-mix(in oklab, var(--bs-emphasis-color) 24%, transparent);
+}
+.mark,
+mark {
+  outline: 1px solid color-mix(in oklab, var(--bs-warning) 44%, var(--bs-border-color));
+  outline-offset: -1px;
+}
+
+.modal-backdrop,
+.offcanvas-backdrop {
+  opacity: 0.58;
+}
+.offcanvas {
+  --kaz-ui-accent: var(--bs-primary);
+  border-color: color-mix(in oklab, var(--bs-border-color) 60%, var(--kaz-ui-accent) 40%);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent),
+    transparent 48%
+  );
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--bs-body-bg) 72%, white);
+}
+.offcanvas-start {
+  box-shadow:
+    4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent) 32%, transparent);
+}
+.offcanvas-end {
+  box-shadow:
+    -4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    -8px 8px 0 color-mix(in oklab, var(--kaz-ui-accent) 32%, transparent);
+}
+.offcanvas-top {
+  box-shadow:
+    0 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    0 8px 0 color-mix(in oklab, var(--kaz-ui-accent) 32%, transparent);
+}
+.offcanvas-bottom {
+  box-shadow:
+    0 -4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+    0 -8px 0 color-mix(in oklab, var(--kaz-ui-accent) 32%, transparent);
+}
+
+@supports not (color: color-mix(in oklab, white, black)) {
+  .card,
+  .dropdown-menu,
+  .modal-content,
+  .toast,
+  .popover,
+  .bg-body-tertiary:not(.navbar):not(.badge):not(.btn),
+  .bg-body-secondary:not(.navbar):not(.badge):not(.btn),
+  .bg-light:not(.badge):not(.btn),
+  .bg-primary-subtle:not(.badge):not(.btn),
+  .bg-secondary-subtle:not(.badge):not(.btn),
+  .bg-success-subtle:not(.badge):not(.btn),
+  .bg-info-subtle:not(.badge):not(.btn),
+  .bg-warning-subtle:not(.badge):not(.btn),
+  .bg-danger-subtle:not(.badge):not(.btn),
+  .bg-dark-subtle:not(.badge):not(.btn) {
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent 48%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      4px 4px 0 rgba(0, 0, 0, 0.18),
+      8px 8px 0 rgba(0, 0, 0, 0.22);
+  }
+  .alert {
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 58%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      4px 4px 0 rgba(0, 0, 0, 0.16),
+      8px 8px 0 rgba(0, 0, 0, 0.22);
+  }
+  .form-control,
+  .form-select,
+  .input-group-text {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion-button,
+  .navbar .nav-link,
+  .nav-pills .nav-link {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  h1,
+  h2,
+  h3,
+  .card-title,
+  .alert-heading,
+  .modal-title,
+  .offcanvas-title {
+    text-shadow: none;
+  }
+  .card,
+  .dropdown-menu,
+  .modal-content,
+  .toast,
+  .popover,
+  .accordion:not(.accordion-flush),
+  .list-group,
+  .bg-body-tertiary:not(.navbar):not(.badge):not(.btn),
+  .bg-body-secondary:not(.navbar):not(.badge):not(.btn),
+  .bg-light:not(.badge):not(.btn),
+  .bg-primary-subtle:not(.badge):not(.btn),
+  .bg-secondary-subtle:not(.badge):not(.btn),
+  .bg-success-subtle:not(.badge):not(.btn),
+  .bg-info-subtle:not(.badge):not(.btn),
+  .bg-warning-subtle:not(.badge):not(.btn),
+  .bg-danger-subtle:not(.badge):not(.btn),
+  .bg-dark-subtle:not(.badge):not(.btn),
+  .alert,
+  .offcanvas,
+  .progress {
+    border-color: CanvasText;
+    background-image: none;
+    box-shadow: none;
+  }
+  .alert {
+    border-inline-start-color: CanvasText;
+  }
+  .navbar {
+    box-shadow: none;
+  }
+  a:not(.btn):focus-visible,
+  button:not(.btn):focus-visible {
+    outline-color: Highlight;
+  }
+}

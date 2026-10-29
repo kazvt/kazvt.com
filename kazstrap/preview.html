@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A Bootstrap 5.3.8 preview of Kazstrap arcade buttons and bold retro glyph typography.">
+  <meta name="description" content="A Bootstrap 5.3.8 preview of Kazstrap buttons, panels, forms, and retro-inspired interface details.">
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap arcade and type study - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-button-pop-14">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-site-pop-1">
   <style>
     .shadow-comparison {
       display: grid;
@@ -62,7 +62,7 @@
     </div>
 
     <div class="alert alert-info" role="status">
-      Compare the color-derived arcade finish with the flat finish. Both keep the same square silhouette, layered color-matched face, and two hard shadows at 4px and 8px.
+      The buttons keep their color-matched enamel and two hard shadows. The rest of the page now uses the same crisp borders, compact highlights, and layered surfaces.
     </div>
 
     <section class="py-4" aria-labelledby="button-study-title">
@@ -150,7 +150,7 @@
               </button>
             </h3>
             <div id="sampleOne" class="accordion-collapse collapse show" data-bs-parent="#sampleAccordion">
-              <div class="accordion-body">The default navbar, responsive grid, cards, alert, buttons, and accordion, with square corners.</div>
+              <div class="accordion-body">Kazstrap layers the default navbar, responsive grid, cards, alerts, forms, and accordion with square corners.</div>
             </div>
           </div>
           <div class="accordion-item">
@@ -160,13 +160,82 @@
               </button>
             </h3>
             <div id="sampleTwo" class="accordion-collapse collapse" data-bs-parent="#sampleAccordion">
-              <div class="accordion-body">Button variants get the pop treatment. Other components keep Bootstrap styling with square corners.</div>
+              <div class="accordion-body">Panels, alerts, links, forms, cards, and navigation all use the same color-aware retro details.</div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
+    <section class="py-5" id="site-kit" aria-labelledby="site-kit-title">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+        <div>
+          <p class="text-body-secondary mb-1">THE KAZSTRAP LOOK</p>
+          <h2 class="h3 mb-2" id="site-kit-title">Classic web energy, cleaned up</h2>
+          <p class="text-body-secondary mb-0">Layered surfaces, clear outlines, and color that follows Bootstrap variants.</p>
+        </div>
+        <span class="badge text-bg-primary">Site-wide theme</span>
+      </div>
+      <ul class="nav nav-tabs mb-4" aria-label="Community sections">
+        <li class="nav-item"><a class="nav-link active" href="#site-kit" aria-current="page">Game room</a></li>
+        <li class="nav-item"><a class="nav-link" href="#games">Game shelf</a></li>
+        <li class="nav-item"><a class="nav-link" href="#watch">Stream info</a></li>
+      </ul>
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <article class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center gap-3">
+              <strong>Community board</strong>
+              <span class="badge text-bg-success">3 new notes</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title h5">Latest from the arcade</h3>
+              <p class="card-text">A little forum-inspired noticeboard for the games and plans on the horizon.</p>
+              <div class="list-group list-group-flush">
+                <a href="#games" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-3">
+                  <span>Weekend shooter run</span><span class="badge text-bg-info">Saturday</span>
+                </a>
+                <a href="#about" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-3">
+                  <span>New retro discoveries</span><span class="badge text-bg-warning">Updated</span>
+                </a>
+                <a href="#watch" class="list-group-item list-group-item-action">Find the next stream</a>
+              </div>
+            </div>
+            <div class="card-footer text-body-secondary">Board updated just now</div>
+          </article>
+        </div>
+        <div class="col-lg-5">
+          <section class="bg-body-tertiary p-4 h-100" aria-labelledby="sample-form-title">
+            <p class="text-body-secondary mb-1">A QUICK NOTE</p>
+            <h3 class="h5 mb-3" id="sample-form-title">Join the game room</h3>
+            <div class="alert alert-warning py-2" role="note">Sample form only. Nothing gets submitted.</div>
+            <form>
+              <label for="sampleEmail" class="form-label">Email address</label>
+              <input type="email" class="form-control mb-3" id="sampleEmail" placeholder="you@example.com">
+              <label for="sampleTopic" class="form-label">Pick a topic</label>
+              <select class="form-select" id="sampleTopic">
+                <option selected>Retro game chat</option>
+                <option>Stream updates</option>
+                <option>Tool making</option>
+              </select>
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" value="" id="sampleCheck" checked>
+                <label class="form-check-label" for="sampleCheck">Send me occasional updates</label>
+              </div>
+              <button type="button" class="btn btn-primary mt-4">Save settings</button>
+            </form>
+          </section>
+        </div>
+      </div>
+      <nav class="mt-4" aria-label="Sample pages">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
+          <li class="page-item"><a class="page-link" href="#site-kit">2</a></li>
+          <li class="page-item"><a class="page-link" href="#site-kit">Next</a></li>
+        </ul>
+      </nav>
+    </section>
     <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 border-top pt-4 mt-3" id="watch">
       <div>
         <h2 class="h4 mb-1">Drop by the channel</h2>
