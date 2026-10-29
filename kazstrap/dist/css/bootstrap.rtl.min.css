@@ -175,6 +175,13 @@ h3,
 }
 
 /* Kazstrap: playful, color-aware surfaces and site-wide interface details. */
+:root,
+[data-bs-theme] {
+  --bs-box-shadow: 4px 4px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent), 8px 8px 0 color-mix(in oklab, var(--bs-primary) 34%, transparent);
+  --bs-box-shadow-sm: 2px 2px 0 color-mix(in oklab, var(--bs-emphasis-color) 14%, transparent), 4px 4px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+  --bs-box-shadow-lg: 6px 6px 0 color-mix(in oklab, var(--bs-emphasis-color) 22%, transparent), 12px 12px 0 color-mix(in oklab, var(--bs-primary) 40%, transparent);
+  --bs-box-shadow-inset: inset 0 1px 2px color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
+}
 h1,
 h2,
 h3,
@@ -826,5 +833,23 @@ mark {
   }
   a.btn-link:focus-visible {
     outline-color: Highlight;
+  }
+}
+@supports not (color: color-mix(in oklab, white, black)) {
+  :root,
+  [data-bs-theme] {
+    --bs-box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18), 8px 8px 0 rgba(0, 0, 0, 0.22);
+    --bs-box-shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.14), 4px 4px 0 rgba(0, 0, 0, 0.18);
+    --bs-box-shadow-lg: 6px 6px 0 rgba(0, 0, 0, 0.22), 12px 12px 0 rgba(0, 0, 0, 0.26);
+    --bs-box-shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+}
+@media (forced-colors: active) {
+  :root,
+  [data-bs-theme] {
+    --bs-box-shadow: none;
+    --bs-box-shadow-sm: none;
+    --bs-box-shadow-lg: none;
+    --bs-box-shadow-inset: none;
   }
 }
