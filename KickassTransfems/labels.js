@@ -14,6 +14,36 @@
     'FI', 'FIN', 'EL', 'ELL', 'HE', 'HEB', 'HI', 'HIN', 'UK', 'UKR', 'CS', 'CES',
     'RO', 'RON', 'HU', 'HUN', 'ID', 'IND', 'VI', 'VIE', 'TH', 'THA', 'TL', 'FIL'
   ]);
+  const CHATTER_HANDLE_SELECTOR = '.kt-chatters__handle';
+  const chatterLists = document.querySelectorAll('.kt-chatters__list');
+
+  function fitChatterHandles() {
+    for (const handle of document.querySelectorAll(CHATTER_HANDLE_SELECTOR)) {
+      // Measure the real, embedded-font text at its responsive base size. Keeping
+      // the text node intact preserves selection, copy/paste, and accessibility.
+      handle.style.removeProperty('--kt-chatters-handle-fit-size');
+      const available = handle.clientWidth;
+      if (!available) continue;
+
+      const fontSize = Number.parseFloat(getComputedStyle(handle).fontSize);
+      const range = document.createRange();
+      range.selectNodeContents(handle);
+      const naturalWidth = range.getBoundingClientRect().width;
+      if (!fontSize || !naturalWidth || naturalWidth <= available - 1) continue;
+
+      const fittedSize = fontSize * ((available - 1) / naturalWidth);
+      handle.style.setProperty('--kt-chatters-handle-fit-size', `${fittedSize.toFixed(3)}px`);
+    }
+  }
+
+  function scheduleChatterHandleFit() {
+    if (scheduleChatterHandleFit.queued) return;
+    scheduleChatterHandleFit.queued = true;
+    requestAnimationFrame(() => {
+      scheduleChatterHandleFit.queued = false;
+      fitChatterHandles();
+    });
+  }
 
   function isCodeContent(node) {
     const text = ((node.textContent || '').trim() ||
@@ -134,6 +164,24 @@
 
   function boot() {
     updateCardLabels();
+    scheduleChatterHandleFit();
+    if (chatterLists.length && 'ResizeObserver' in window) {
+      const chatterResizeObserver = new ResizeObserver(scheduleChatterHandleFit);
+      chatterLists.forEach(list => {
+        chatterResizeObserver.observe(list);
+        list.querySelectorAll('.kt-chatters__card').forEach(card => chatterResizeObserver.observe(card));
+      });
+    } else {
+      window.addEventListener('resize', scheduleChatterHandleFit, { passive: true });
+    }
+    if (document.fonts?.ready) document.fonts.ready.then(scheduleChatterHandleFit);
+    if (chatterLists.length) {
+      const chatterTextObserver = new MutationObserver(scheduleChatterHandleFit);
+      chatterLists.forEach(list => chatterTextObserver.observe(list, {
+        childList: true, characterData: true, subtree: true
+      }));
+    }
+
     const grids = document.querySelectorAll('.kt-member-grid, .kt-recommendation-grid');
     if (grids.length) {
       let queued = false;
