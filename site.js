@@ -2874,7 +2874,7 @@ function initializeSiteWelcomePopup() {
 
   const localStyles = document.createElement("link");
   localStyles.rel = "stylesheet";
-  localStyles.href = "/welcome-popup.css?v=welcome-popup-font-weight-20261023-v1";
+  localStyles.href = "/welcome-popup.css?v=appearance-toggle-mobile-clearance-20261030-v1";
 
   const dialog = document.createElement("dialog");
   dialog.className = "window welcome-dialog";
