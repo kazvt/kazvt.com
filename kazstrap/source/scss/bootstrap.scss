@@ -58,8 +58,8 @@
   --kaz-btn-edge: color-mix(in oklab, var(--kaz-btn-color) 54%, black);
   --kaz-btn-highlight: color-mix(in oklab, var(--kaz-btn-color) 72%, white);
   --kaz-btn-lower-lip: color-mix(in oklab, var(--kaz-btn-color) 64%, black);
-  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
-  --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
+  --kaz-btn-shadow-deep: color-mix(in oklab, var(--kaz-btn-color) 62%, black);
+  --kaz-btn-layer: color-mix(in oklab, var(--kaz-btn-color) 24%, black);
   --kaz-btn-glaze-gradient:
     linear-gradient(
       to bottom,
@@ -148,8 +148,8 @@
     --kaz-btn-edge: rgba(0, 0, 0, 0.48);
     --kaz-btn-highlight: rgba(255, 255, 255, 0.28);
     --kaz-btn-lower-lip: rgba(0, 0, 0, 0.24);
-    --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.76);
-    --kaz-btn-layer: rgba(0, 0, 0, 0.38);
+    --kaz-btn-shadow-deep: rgba(0, 0, 0, 0.38);
+    --kaz-btn-layer: rgba(0, 0, 0, 0.76);
     --kaz-btn-glaze-gradient:
       linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 14%, transparent 40%);
     --kaz-btn-face-gradient:
