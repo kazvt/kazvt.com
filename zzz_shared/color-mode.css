@@ -426,7 +426,10 @@ html.kt-root[data-color-mode="dark"] :is(.kt-kick-link, .kt-discord__join, .kt-w
 
 html.kt-root[data-color-mode="dark"] .kt-member {
   --kt-member-end: #211d2b;
-  --kt-member-wash: rgb(138 226 247 / 13%);
+  /* Keep the retro extrusion behind the card face. The light theme's translucent
+     wash is intentional there, but in dark mode it lets the bright 3D accent
+     bleed through and makes the whole face look pastel instead of night-themed. */
+  --kt-member-wash: #26323e;
   --kt-member-accent: #8ae2f7;
   --kt-live-scan-color: #fff5f8;
   color: var(--kazvt-text);
@@ -434,12 +437,12 @@ html.kt-root[data-color-mode="dark"] .kt-member {
 
 html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n + 2) .kt-member {
   --kt-member-accent: #ffafc7;
-  --kt-member-wash: rgb(255 175 199 / 14%);
+  --kt-member-wash: #382833;
 }
 
 html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n) .kt-member {
   --kt-member-accent: #d5bdff;
-  --kt-member-wash: rgb(213 189 255 / 12%);
+  --kt-member-wash: #302a3f;
 }
 
 html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li .kt-recommendation-link {
