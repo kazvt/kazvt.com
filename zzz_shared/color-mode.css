@@ -536,18 +536,8 @@ html[data-color-mode="dark"] body[data-page="palestine"] .download-link:hover {
   color: var(--kazvt-on-accent);
 }
 
-html[data-color-mode="dark"] body[data-page="palestine"] .download-link:hover {
-  background: var(--kazvt-trans-mint);
-  color: var(--kazvt-on-accent);
-}
-
 html[data-color-mode="dark"] body[data-page="palestine"] .read-link {
   background: #342944;
-  color: var(--kazvt-text);
-}
-
-html[data-color-mode="dark"] body[data-page="palestine"] .read-link:hover {
-  background: #45344f;
   color: var(--kazvt-text);
 }
 
