@@ -607,3 +607,6 @@ kt.pronouns.she_her=o
 kt.pronouns.he_him=o
 kt.pronouns.they_them=onlar
 kt.pronouns.they_she=o
+appearance.toggle=Renk görünümü
+appearance.switch_dark=Koyu moda geç
+appearance.switch_light=Açık moda geç

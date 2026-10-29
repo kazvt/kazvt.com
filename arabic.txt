@@ -615,3 +615,6 @@ kt.pronouns.he_him=هو
 kt.pronouns.they_them=هما
 kt.pronouns.they_she=هما/هي
 kt.pronouns.she_they=هي/هما
+appearance.toggle=مظهر الألوان
+appearance.switch_dark=التبديل إلى الوضع الداكن
+appearance.switch_light=التبديل إلى الوضع الفاتح

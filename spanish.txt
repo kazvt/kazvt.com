@@ -609,3 +609,6 @@ kt.pronouns.he_him=él
 kt.pronouns.they_them=elle
 kt.pronouns.they_she=elle/ella
 kt.pronouns.she_they=ella/elle
+appearance.toggle=Apariencia de color
+appearance.switch_dark=Activar el modo oscuro
+appearance.switch_light=Activar el modo claro
