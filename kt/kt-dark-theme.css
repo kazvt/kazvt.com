@@ -354,6 +354,7 @@ html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option[aria-
    and restore bright foregrounds that remain distinct on every dark variant. */
 html.kt-root[data-color-mode="dark"] .kt-chatters__card {
   --kt-chatters-accent: #8ae2f7;
+  --kt-chatters-label-wash: rgb(91 206 250 / 24%);
   border-color: #e8dce8;
   border-inline-start-color: var(--kt-chatters-accent);
   background:
@@ -365,6 +366,7 @@ html.kt-root[data-color-mode="dark"] .kt-chatters__card {
 
 html.kt-root[data-color-mode="dark"] .kt-chatters__item:nth-child(even) .kt-chatters__card {
   --kt-chatters-accent: #ffafc7;
+  --kt-chatters-label-wash: rgb(245 169 184 / 24%);
   border-inline-start-color: var(--kt-chatters-accent);
   background:
     linear-gradient(125deg, rgb(245 169 184 / 17%), transparent 48%),
@@ -374,6 +376,7 @@ html.kt-root[data-color-mode="dark"] .kt-chatters__item:nth-child(even) .kt-chat
 
 html.kt-root[data-color-mode="dark"] .kt-chatters__item:nth-child(3n) .kt-chatters__card {
   --kt-chatters-accent: #d5bdff;
+  --kt-chatters-label-wash: rgb(213 189 255 / 22%);
   border-inline-start-color: var(--kt-chatters-accent);
   background:
     linear-gradient(125deg, rgb(213 189 255 / 14%), transparent 48%),
@@ -388,7 +391,7 @@ html.kt-root[data-color-mode="dark"] .kt-chatters__handle {
 html.kt-root[data-color-mode="dark"] .kt-chatters__pronouns {
   border-color: var(--kt-chatters-accent, #8ae2f7);
   background:
-    linear-gradient(120deg, color-mix(in srgb, var(--kt-chatters-accent, #8ae2f7) 22%, transparent), transparent 78%),
+    linear-gradient(120deg, var(--kt-chatters-label-wash, rgb(91 206 250 / 24%)), transparent 78%),
     #211a2b;
   color: #fff7fb;
 }
