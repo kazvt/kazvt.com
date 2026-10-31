@@ -15,20 +15,17 @@
   // A major triad spread across two octaves: root, third, fifth and their
   // octave doublings. The voicing changes on each fresh page load.
   const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
-  // Four bars into each 8-bar register, bloom a quieter high fifth, major
-  // seventh, and root octave; release them just before the next register shift.
-  const chordLiftIntervals = [31, 35, 36];
+  // Four bars into each 8-bar register, add a quiet high third, fifth, and
+  // sixth. This keeps the chord full without the close major-seventh/root rub.
+  const chordLiftIntervals = [28, 31, 33];
   const chordLiftGain = 0.0038;
   const chordLiftFadeDuration = 4.2;
-  const padUnisonDetuneScale = 0.35;
-  const liftUnisonDetuneScale = 0.325;
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
   // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
   const tempoBpm = 60;
   const barDuration = (60 / tempoBpm) * beatsPerBar;
   const registerChangeInterval = 8 * barDuration;
-  const registerGlideDuration = 0.75;
   const registerPitchCycle = [-7, 0, 5, 0];
   const registerScheduleLookahead = 10 * 60;
 
@@ -123,15 +120,11 @@
     schedulePreferenceExpiry();
   }
 
-  function scheduleRegisterChange(when, fromSemitones, toSemitones) {
-    const startFactor = 2 ** (fromSemitones / 12);
-    const endFactor = 2 ** (toSemitones / 12);
+  function scheduleRegisterChange(when, toSemitones) {
+    const targetFactor = 2 ** (toSemitones / 12);
     oscillators.forEach(({ oscillator, frequency }) => {
-      oscillator.frequency.setValueAtTime(frequency * startFactor, when);
-      oscillator.frequency.exponentialRampToValueAtTime(
-        frequency * endFactor,
-        when + registerGlideDuration
-      );
+      // Step between consonant registers without a pitch glide or vibrato-like bend.
+      oscillator.frequency.setValueAtTime(frequency * targetFactor, when);
     });
   }
 
@@ -152,10 +145,7 @@
     while (registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval <= throughTime) {
       const changeAt = registerCycleStart + (scheduledRegisterChanges + 1) * registerChangeInterval;
       const targetSemitones = registerPitchCycle[scheduledRegisterChanges % registerPitchCycle.length];
-      const currentSemitones = scheduledRegisterChanges === 0
-        ? 0
-        : registerPitchCycle[(scheduledRegisterChanges - 1) % registerPitchCycle.length];
-      scheduleRegisterChange(changeAt, currentSemitones, targetSemitones);
+      scheduleRegisterChange(changeAt, targetSemitones);
       scheduledRegisterChanges += 1;
     }
 
@@ -187,10 +177,10 @@
       context.addEventListener("statechange", syncAudioSignal);
       const filter = context.createBiquadFilter();
       filter.type = "lowpass";
-      // A softly voiced worship-pad tone: keep the fundamentals present while
-      // easing the triangle wave's upper harmonics back out of the foreground.
-      filter.frequency.value = 1120;
-      filter.Q.value = 0.38;
+      // Keep this low-passed so the warm chord body sits behind the page, not
+      // in the sharp upper-mid range where sustained tones become tiring.
+      filter.frequency.value = 820;
+      filter.Q.value = 0.35;
       padFilter = filter;
 
       master = context.createGain();
@@ -198,41 +188,6 @@
 
       const direct = context.createGain();
       direct.gain.value = 0.82;
-
-      // Keep the existing restrained dual-tap chorus for gentle stereo width.
-      // The pad itself stays dry: its softer, more distant character comes from
-      // the oscillator timbre, slower envelopes, and lower voice levels.
-      const chorusWet = context.createGain();
-      chorusWet.gain.value = 0.13;
-      chorusWet.connect(master);
-      [
-        { delaySeconds: 0.014, rateHz: 0.16, depthSeconds: 0.0024, pan: -0.74 },
-        { delaySeconds: 0.021, rateHz: 0.21, depthSeconds: 0.003, pan: 0.74 }
-      ].forEach(({ delaySeconds, rateHz, depthSeconds, pan }) => {
-        const delay = context.createDelay(0.05);
-        delay.delayTime.value = delaySeconds;
-        const lfo = context.createOscillator();
-        lfo.frequency.value = rateHz;
-        const depth = context.createGain();
-        depth.gain.value = depthSeconds;
-        lfo.connect(depth);
-        depth.connect(delay.delayTime);
-
-        const tap = context.createGain();
-        tap.gain.value = 0.5;
-        const panner = context.createStereoPanner?.();
-        if (panner) {
-          panner.pan.value = pan;
-          tap.connect(panner);
-          panner.connect(chorusWet);
-        } else {
-          tap.connect(chorusWet);
-        }
-
-        filter.connect(delay);
-        delay.connect(tap);
-        lfo.start();
-      });
 
       filter.connect(direct);
       direct.connect(master);
@@ -260,30 +215,28 @@
 
     chordTones.forEach(({ interval, lift }, noteIndex) => {
       const frequency = 440 * (2 ** ((midiRoot + interval - 69) / 12));
-      (lift ? [-2, 2] : [-3, 3]).forEach((detune, layerIndex) => {
-        const oscillator = context.createOscillator();
-        const voice = context.createGain();
-        oscillator.type = "triangle";
-        oscillator.frequency.value = frequency;
-        oscillator.detune.value = detune * (lift ? liftUnisonDetuneScale : padUnisonDetuneScale);
-        voice.gain.setValueAtTime(0.0001, now);
-        if (!lift) voice.gain.linearRampToValueAtTime(0.0135, now + padAttackSeconds);
+      const oscillator = context.createOscillator();
+      const voice = context.createGain();
+      oscillator.type = "triangle";
+      oscillator.frequency.value = frequency;
+      oscillator.detune.value = 0;
+      voice.gain.setValueAtTime(0.0001, now);
+      if (!lift) voice.gain.linearRampToValueAtTime(0.019, now + padAttackSeconds);
 
-        if (context.createStereoPanner) {
-          const panner = context.createStereoPanner();
-          panner.pan.value = (noteIndex % 2 ? 1 : -1) * (layerIndex ? 0.42 : 0.24);
-          oscillator.connect(voice);
-          voice.connect(panner);
-          panner.connect(padFilter);
-        } else {
-          oscillator.connect(voice);
-          voice.connect(padFilter);
-        }
+      if (context.createStereoPanner) {
+        const panner = context.createStereoPanner();
+        panner.pan.value = (noteIndex % 2 ? 1 : -1) * 0.12;
+        oscillator.connect(voice);
+        voice.connect(panner);
+        panner.connect(padFilter);
+      } else {
+        oscillator.connect(voice);
+        voice.connect(padFilter);
+      }
 
-        oscillator.start(now);
-        voices.push({ oscillator, voice, frequency });
-        if (lift) liftVoices.push(voice);
-      });
+      oscillator.start(now);
+      voices.push({ oscillator, voice, frequency });
+      if (lift) liftVoices.push(voice);
     });
 
     oscillators = voices;
