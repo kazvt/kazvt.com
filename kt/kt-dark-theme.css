@@ -39,11 +39,11 @@ html.kt-root[data-color-mode="dark"] {
   --wallpaper-image:
     url("/kt/assets/trans-heart-sparkle-tile.svg"),
     linear-gradient(180deg,
-      rgb(91 206 250 / 12%) 0 20%,
-      rgb(245 169 184 / 12%) 20% 40%,
-      rgb(255 249 252 / 8%) 40% 60%,
-      rgb(245 169 184 / 12%) 60% 80%,
-      rgb(91 206 250 / 12%) 80% 100%),
+      rgb(91 206 250 / 20%) 0 20%,
+      rgb(245 169 184 / 20%) 20% 40%,
+      rgb(255 249 252 / 12%) 40% 60%,
+      rgb(245 169 184 / 20%) 60% 80%,
+      rgb(91 206 250 / 20%) 80% 100%),
     repeating-linear-gradient(0deg, transparent 0 31px, rgb(138 226 247 / 9%) 31px 32px),
     repeating-linear-gradient(90deg, transparent 0 31px, rgb(255 175 199 / 9%) 31px 32px),
     linear-gradient(145deg, #17131f, #211829 58%, #191620);
@@ -64,11 +64,11 @@ html.kt-root[data-color-mode="dark"] .kt-frame {
     linear-gradient(90deg, rgb(91 206 250 / 8%) 1px, transparent 1px),
     linear-gradient(0deg, rgb(245 169 184 / 8%) 1px, transparent 1px),
     linear-gradient(180deg,
-      rgb(91 206 250 / 10%) 0 20%,
-      rgb(245 169 184 / 10%) 20% 40%,
-      rgb(255 249 252 / 6%) 40% 60%,
-      rgb(245 169 184 / 10%) 60% 80%,
-      rgb(91 206 250 / 10%) 80% 100%);
+      rgb(91 206 250 / 15%) 0 20%,
+      rgb(245 169 184 / 15%) 20% 40%,
+      rgb(255 249 252 / 9%) 40% 60%,
+      rgb(245 169 184 / 15%) 60% 80%,
+      rgb(91 206 250 / 15%) 80% 100%);
   background-size: 25px 25px, 25px 25px, 100% 360px;
   background-repeat: repeat, repeat, repeat-y;
   box-shadow: 7px 7px 0 var(--kt-blue), 14px 14px 0 var(--kt-pink), 19px 20px 0 rgb(0 0 0 / 60%);
