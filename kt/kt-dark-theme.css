@@ -425,6 +425,17 @@ html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option[aria-
   color: #fff7fb;
 }
 
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(.language-option, .language-dock > .language-button):is(:hover, :focus-visible) {
+  background-color: #3a3046;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%),
+    linear-gradient(135deg, rgb(91 206 250 / 14%), rgb(245 169 184 / 12%));
+  background-size: 100% 4px, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: top left, center;
+  color: #fff7fb;
+}
+
 /* Dark mode keeps display text crisp: the light theme's offset stacks overlap
    pale glyphs and can erase their shapes on dark surfaces. Retain just one
    quiet pink pixel edge on the main headings. */
