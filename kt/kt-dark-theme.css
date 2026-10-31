@@ -165,19 +165,8 @@ html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n) .kt-memb
   --kt-live-scan-color: #f5a9b8;
 }
 
-/* The moving hover fill is the actual five-band flag (including white).
-   Dark ink and pale label chips keep text legible over every stripe. */
-html.kt-root[data-color-mode="dark"] .kt-member::after {
-  background-image: repeating-linear-gradient(
-    var(--kt-hover-flag-angle, 180deg),
-    rgb(91 206 250 / 94%) 0 20%,
-    rgb(245 169 184 / 94%) 20% 40%,
-    rgb(255 249 252 / 96%) 40% 60%,
-    rgb(245 169 184 / 94%) 60% 80%,
-    rgb(91 206 250 / 94%) 80% 100%
-  );
-  background-size: var(--kt-hover-flag-tile, 240px) var(--kt-hover-flag-tile, 240px);
-}
+/* Keep the same randomized narrow-stripe hover fill and scroll animation in
+   both color modes; the dark theme changes card colors, not this interaction. */
 
 html.kt-root[data-color-mode="dark"] .kt-member:is(:hover, :focus-visible) {
   --kt-ink: #251722;
