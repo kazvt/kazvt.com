@@ -4,7 +4,9 @@
   const STORAGE_KEY = "kazvt-color-mode";
   const CONTROL_ID = "kazvt-appearance-toggle";
   const DARK_CHROME = "#15131f";
+  const FALLBACK_TRANSITION_MS = 280;
   let currentMode = "light";
+  let fallbackTransitionTimer = 0;
 
   function readSavedMode() {
     try {
@@ -64,6 +66,39 @@
     }));
   }
 
+  function transitionTo(mode, { persist = false } = {}) {
+    const nextMode = mode === "dark" ? "dark" : "light";
+    const update = () => apply(nextMode, { persist });
+
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      update();
+      return;
+    }
+
+    // View Transitions can cross-fade the whole old/new page, including the
+    // patterned backgrounds that CSS cannot interpolate as ordinary colors.
+    // Keep the media-query and CSS-transition fallback for older browsers.
+    if (typeof document.startViewTransition === "function") {
+      try {
+        const transition = document.startViewTransition(update);
+        transition?.finished?.catch?.(() => {});
+        return;
+      } catch {
+        // If the update callback already ran, don't apply it a second time.
+        if (currentMode === nextMode) return;
+      }
+    }
+
+    const root = document.documentElement;
+    root.dataset.colorModeTransitioning = "true";
+    update();
+    window.clearTimeout(fallbackTransitionTimer);
+    fallbackTransitionTimer = window.setTimeout(() => {
+      delete root.dataset.colorModeTransitioning;
+      fallbackTransitionTimer = 0;
+    }, FALLBACK_TRANSITION_MS);
+  }
+
   function createButton() {
     if (!document.body || document.getElementById(CONTROL_ID)) return;
 
@@ -87,7 +122,7 @@
         <path d="m25.5 4.5.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6.6-1.5Z" fill="currentColor"/>
       </svg>`;
     button.addEventListener("click", () => {
-      apply(currentMode === "dark" ? "light" : "dark", { persist: true });
+      transitionTo(currentMode === "dark" ? "light" : "dark", { persist: true });
     });
 
     document.body.append(button);
@@ -104,7 +139,7 @@
 
   window.addEventListener("storage", (event) => {
     if (event.key === STORAGE_KEY || event.key === null) {
-      apply(event.newValue === "dark" ? "dark" : "light");
+      transitionTo(event.newValue === "dark" ? "dark" : "light");
     }
   });
 
@@ -112,6 +147,6 @@
   window.addEventListener("kazvt:languagechange", syncButton);
   window.KazvtColorMode = Object.freeze({
     get mode() { return currentMode; },
-    set(mode) { apply(mode, { persist: true }); },
+    set(mode) { transitionTo(mode, { persist: true }); },
   });
 })();

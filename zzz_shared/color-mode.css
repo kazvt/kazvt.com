@@ -30,6 +30,52 @@ html[data-color-mode="dark"] {
   scrollbar-color: var(--kazvt-trans-cyan) var(--kazvt-surface);
 }
 
+/* Theme swaps are brief and color-only in fallback browsers. Explicitly list
+   paint properties instead of `all`: geometry and ongoing page animation stay
+   untouched. Browsers with View Transitions cross-fade the whole theme below,
+   including the layered wallpaper gradients and other non-interpolable art. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-color-mode-transitioning="true"],
+  html[data-color-mode-transitioning="true"] body,
+  html[data-color-mode-transitioning="true"] body *,
+  html[data-color-mode-transitioning="true"] body *::before,
+  html[data-color-mode-transitioning="true"] body *::after,
+  html[data-color-mode-transitioning="true"] body::before,
+  html[data-color-mode-transitioning="true"] body::after {
+    transition-property:
+      color, background-color, border-color, outline-color,
+      text-decoration-color, box-shadow, text-shadow, fill, stroke,
+      caret-color, accent-color;
+    transition-duration: 260ms;
+    transition-timing-function: cubic-bezier(.22, .68, .35, 1);
+  }
+
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 260ms;
+    animation-timing-function: cubic-bezier(.22, .68, .35, 1);
+  }
+
+  ::view-transition-old(root) {
+    animation-name: kazvt-theme-fade-out;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: kazvt-theme-fade-in;
+  }
+}
+
+@keyframes kazvt-theme-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes kazvt-theme-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Compact, fixed control: oversized enough for touch, quiet enough to stay out
    of the art. Its layered cyan/pink offset echoes the site's cut-paper frames. */
 .kazvt-mode-toggle {
