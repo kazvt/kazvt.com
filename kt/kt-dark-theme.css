@@ -293,9 +293,21 @@ html.kt-root[data-color-mode="dark"] .kt-streamer-language {
   color: #fff7fb;
 }
 
-html.kt-root[data-color-mode="dark"] :is(.kt-webring-copy-field, .kt-webring-copy-field input)::placeholder {
+html.kt-root[data-color-mode="dark"] .kt-webring-copy-field input::placeholder {
   color: #d7c8d6;
   opacity: 1;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-webring-copy-row input {
+  border-color: #8ae2f7;
+  background-color: #1d1727;
+  color: #fff7fb;
+  caret-color: #f5a9b8;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-webring-copy-row input:focus-visible {
+  outline: 3px dashed #fff9fc;
+  outline-offset: 3px;
 }
 
 html.kt-root[data-color-mode="dark"] :is(.kt-webring-copy-field, .kt-webring-copy-field input):focus-visible {
