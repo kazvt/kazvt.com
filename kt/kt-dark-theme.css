@@ -1,0 +1,342 @@
+/* KT's dark palette is a complete night variant, not a gray/purple wash.
+   Keep the familiar arcade surfaces, but carry the five trans-flag bands
+   through the wallpaper, frames, section headers, controls, and hover state.
+   This file is intentionally dark-mode-only; the light palette is untouched. */
+html.kt-root[data-color-mode="dark"] {
+  --kt-ink: #fff7fb;
+  --kt-night: #17131f;
+  --kt-deep: #291f34;
+  --kt-paper: #211a2b;
+  --kt-blue: #5bcefa;
+  --kt-pink: #f5a9b8;
+  --kt-white: #fff9fc;
+  --kt-lilac: #d5bdff;
+
+  --ink: var(--kt-ink);
+  --paper: var(--kt-paper);
+  --paper-alt: #292235;
+  --bg: var(--kt-night);
+  --bg-alt: #241c30;
+  --blue: var(--kt-blue);
+  --pink: var(--kt-pink);
+  --purple: var(--kt-lilac);
+  --green: var(--kt-white);
+  --yellow: #ffe3a3;
+  --orange: var(--kt-pink);
+  --red: var(--kt-pink);
+  --on-blue: #251722;
+  --on-pink: #251722;
+  --on-green: #251722;
+  --on-yellow: #251722;
+  --on-orange: #251722;
+  --on-red: #251722;
+  --banner: #30243b;
+  --banner-text: var(--kt-ink);
+  --shadow: rgb(0 0 0 / 60%);
+
+  /* A quiet, repeating five-band flag is visible behind the pixel grid and
+     heart tile instead of disappearing into a generic charcoal wallpaper. */
+  --wallpaper-image:
+    url("/kt/assets/trans-heart-sparkle-tile.svg"),
+    linear-gradient(180deg,
+      rgb(91 206 250 / 12%) 0 20%,
+      rgb(245 169 184 / 12%) 20% 40%,
+      rgb(255 249 252 / 8%) 40% 60%,
+      rgb(245 169 184 / 12%) 60% 80%,
+      rgb(91 206 250 / 12%) 80% 100%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgb(138 226 247 / 9%) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgb(255 175 199 / 9%) 31px 32px),
+    linear-gradient(145deg, #17131f, #211829 58%, #191620);
+  --wallpaper-size: 112px 112px, 100vw 100vh, 32px 32px, 32px 32px, auto;
+  background-color: var(--kt-night);
+  background-image: var(--wallpaper-image);
+  background-repeat: repeat, no-repeat, repeat, repeat, no-repeat;
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] {
+  color: var(--kt-ink);
+  background-color: transparent;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-frame {
+  background-color: #1c1726;
+  background-image:
+    linear-gradient(90deg, rgb(91 206 250 / 8%) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(245 169 184 / 8%) 1px, transparent 1px),
+    linear-gradient(180deg,
+      rgb(91 206 250 / 10%) 0 20%,
+      rgb(245 169 184 / 10%) 20% 40%,
+      rgb(255 249 252 / 6%) 40% 60%,
+      rgb(245 169 184 / 10%) 60% 80%,
+      rgb(91 206 250 / 10%) 80% 100%);
+  background-size: 25px 25px, 25px 25px, 100% 360px;
+  background-repeat: repeat, repeat, repeat-y;
+  box-shadow: 7px 7px 0 var(--kt-blue), 14px 14px 0 var(--kt-pink), 19px 20px 0 rgb(0 0 0 / 60%);
+}
+
+/* The hero video remains the original full-colour flag. Its fallback canvas
+   and copy panel now echo that identity without putting stripes under text. */
+html.kt-root[data-color-mode="dark"] .kt-hero {
+  background-color: #211a2b;
+  background-image:
+    linear-gradient(90deg, rgb(91 206 250 / 7%) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgb(245 169 184 / 8%) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg,
+      rgb(91 206 250 / 7%) 0 20%,
+      rgb(245 169 184 / 7%) 20% 40%,
+      rgb(255 249 252 / 4%) 40% 60%,
+      rgb(245 169 184 / 7%) 60% 80%,
+      rgb(91 206 250 / 7%) 80% 100%),
+    linear-gradient(145deg, #211a2b, #191521);
+  background-size: 18px 18px, 18px 18px, 100% 100%, auto;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-hero-copy {
+  border-color: #f9eaf2;
+  background-color: #211a2b;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%) top / 100% 7px no-repeat,
+    radial-gradient(ellipse at 3% 4%, rgb(91 206 250 / 18%), transparent 36%),
+    radial-gradient(ellipse at 98% 100%, rgb(245 169 184 / 17%), transparent 38%),
+    linear-gradient(145deg, #292035, #211a2b 58%, #251b2c);
+  box-shadow: 5px 5px 0 rgb(245 169 184 / 88%), 10px 10px 0 rgb(91 206 250 / 82%), 0 16px 38px rgb(0 0 0 / 42%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-roster-heading, .kt-webring-kit, .kt-discord__window, .kt-chatters) {
+  border-color: #b9a9c2;
+  background-color: #211a2b;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%) top / 100% 5px no-repeat,
+    radial-gradient(ellipse at 0 0, rgb(91 206 250 / 12%), transparent 42%),
+    radial-gradient(ellipse at 100% 100%, rgb(245 169 184 / 12%), transparent 44%),
+    linear-gradient(145deg, #282034, #211a2b 58%, #251b2d);
+  color: var(--kt-ink);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-topbar, .kt-webring-heading, .kt-discord__titlebar, .kt-chatters__eyebrow) {
+  border-color: #e7d7e5;
+  background-color: #2a2135;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%) top / 100% 6px no-repeat,
+    linear-gradient(105deg, #282238 0%, #382639 50%, #29253a 100%);
+  color: var(--kt-ink);
+  box-shadow: 0 5px 0 rgb(91 206 250 / 38%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-home-link, .kt-topbar-label, .kt-member-badge, .kt-member-tag, .kt-streamer-language, .kt-member-pronouns, .kt-last-live, .kt-recommendation-link, .kt-webring-step, .kt-webring-badge-card, .kt-webring-copy-field, .kt-discord__signal, .kt-discord__route, .kt-chatters__card) {
+  border-color: #b9a9c2;
+  background-color: #30263b;
+  color: #fff5f8;
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-kick-link, .kt-discord__join, .kt-webring-copy-row button, .kt-webring-copy-button) {
+  border-color: #fff9fc;
+  background-color: #f5a9b8;
+  background-image: linear-gradient(100deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%);
+  color: #251722 !important;
+  box-shadow: 3px 3px 0 #17131f, 6px 6px 0 #5bcefa, 9px 9px 0 rgb(245 169 184 / 78%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-kick-link, .kt-discord__join, .kt-webring-copy-row button, .kt-webring-copy-button):is(:hover, :focus-visible) {
+  filter: saturate(1.12) brightness(1.04);
+  box-shadow: 2px 2px 0 #17131f, 4px 4px 0 #f5a9b8, 7px 7px 0 #5bcefa;
+}
+
+/* Card faces stay night-toned, with one clear flag-colour wash per card and
+   bright paper/blue/pink extrusion edges instead of a flat gray-purple grid. */
+html.kt-root[data-color-mode="dark"] .kt-member {
+  --kt-member-end: #211a2b;
+  --kt-member-wash: rgb(91 206 250 / 22%);
+  --kt-member-accent: #5bcefa;
+  --kt-live-scan-color: #fff9fc;
+  color: #fff7fb;
+  border-color: #f4e8f2;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n + 2) .kt-member {
+  --kt-member-accent: #f5a9b8;
+  --kt-member-wash: rgb(245 169 184 / 23%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-grid > li:nth-child(3n) .kt-member {
+  --kt-member-accent: #fff9fc;
+  --kt-member-wash: rgb(255 249 252 / 13%);
+  --kt-member-end: #211a2b;
+  --kt-live-scan-color: #f5a9b8;
+}
+
+/* The moving hover fill is the actual five-band flag (including white).
+   Dark ink and pale label chips keep text legible over every stripe. */
+html.kt-root[data-color-mode="dark"] .kt-member::after {
+  background-image: repeating-linear-gradient(
+    var(--kt-hover-flag-angle, 180deg),
+    rgb(91 206 250 / 94%) 0 20%,
+    rgb(245 169 184 / 94%) 20% 40%,
+    rgb(255 249 252 / 96%) 40% 60%,
+    rgb(245 169 184 / 94%) 60% 80%,
+    rgb(91 206 250 / 94%) 80% 100%
+  );
+  background-size: var(--kt-hover-flag-tile, 240px) var(--kt-hover-flag-tile, 240px);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member:is(:hover, :focus-visible) {
+  --kt-ink: #251722;
+  --kazvt-text: #251722;
+  --kazvt-text-muted: #39263a;
+  --kazvt-surface-raised: #fff9fc;
+  color: #251722;
+  border-color: #251722;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member:is(:hover, :focus-visible) :is(.kt-member-number, .kt-member-name, .kt-member-handle, .kt-member-tag, .kt-member-badge, .kt-member-arrow) {
+  color: #251722;
+  text-shadow: 1px 1px 0 rgb(255 249 252 / 76%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member:is(:hover, :focus-visible) :is(.kt-member-pronouns, .kt-member-tag, .kt-member-badge, .kt-streamer-language, .kt-last-live, .kt-live-indicator:not([hidden])) {
+  border-color: #251722;
+  background-color: #fff9fc;
+  color: #251722;
+  box-shadow: 2px 2px 0 rgb(37 23 34 / 42%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member:is(:hover, :focus-visible) .kt-member-avatar {
+  border-color: #251722;
+  box-shadow: 3px 3px 0 #251722, 5px 5px 0 rgb(255 249 252 / 82%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li .kt-recommendation-link {
+  border-color: #f4e8f2;
+  background-color: #211a2b;
+  background-image: linear-gradient(135deg, rgb(91 206 250 / 21%), transparent 46%), linear-gradient(145deg, #292035, #211a2b 70%);
+  color: #fff7fb;
+  box-shadow: 3px 3px 0 #5bcefa, 6px 6px 0 rgb(245 169 184 / 76%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li:nth-child(even) .kt-recommendation-link {
+  background-image: linear-gradient(135deg, rgb(245 169 184 / 22%), transparent 48%), linear-gradient(145deg, #292035, #211a2b 70%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-recommendation-grid > li:nth-child(3n) .kt-recommendation-link {
+  background-image: linear-gradient(135deg, rgb(255 249 252 / 12%), transparent 48%), linear-gradient(145deg, #292035, #211a2b 70%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-webring-body, .kt-discord__body) {
+  background-image:
+    linear-gradient(90deg, rgb(91 206 250 / 9%) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgb(245 169 184 / 9%) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg,
+      rgb(91 206 250 / 8%) 0 20%,
+      rgb(245 169 184 / 8%) 20% 40%,
+      rgb(255 249 252 / 5%) 40% 60%,
+      rgb(245 169 184 / 8%) 60% 80%,
+      rgb(91 206 250 / 8%) 80% 100%),
+    radial-gradient(ellipse at 3% 3%, rgb(91 206 250 / 13%), transparent 38%),
+    radial-gradient(ellipse at 100% 100%, rgb(245 169 184 / 14%), transparent 38%),
+    #211a2b;
+  background-size: 18px 18px, 18px 18px, 100% 280px, auto, auto, auto;
+  background-repeat: repeat, repeat, repeat-y, no-repeat, no-repeat, no-repeat;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-webring-step-callout__box,
+html.kt-root[data-color-mode="dark"] .kt-webring-copy-field {
+  border-color: #b9a9c2;
+  background-color: #2b2237;
+  background-image: linear-gradient(115deg, rgb(91 206 250 / 15%), rgb(245 169 184 / 11%) 56%, rgb(255 249 252 / 5%));
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-member-avatar, .kt-recommendation-avatar) {
+  border-color: #fff9fc;
+  background-color: #211a2b;
+  box-shadow: 3px 3px 0 #17131f, 5px 5px 0 rgb(91 206 250 / 72%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-member-pronouns, .kt-streamer-language, .kt-last-live, .kt-member-tag, .kt-member-badge) {
+  border-color: rgb(138 226 247 / 78%);
+  background-color: #30263b;
+  color: #fff5f8;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member-tag,
+html.kt-root[data-color-mode="dark"] .kt-member-badge { border-style: dashed; }
+
+html.kt-root[data-color-mode="dark"] .kt-member-pronouns { background-color: #3a2a3a; }
+
+html.kt-root[data-color-mode="dark"] .kt-live-indicator:not([hidden]) {
+  border-color: #fff9fc;
+  background-color: #30263b;
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-discord__window-mark i {
+  border-color: #f4e8f2;
+  background-color: #fff9fc;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-discord__eyebrow {
+  border-color: #f4e8f2;
+  background-color: #30263b;
+  background-image: linear-gradient(100deg, rgb(91 206 250 / 18%), rgb(245 169 184 / 18%));
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-webring-stamp, .kt-webring-step-number) {
+  border-color: #251722;
+  background-color: #fff9fc;
+  color: #251722;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-streamer-language {
+  border-color: #8ae2f7;
+  background-color: #30263b;
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-webring-copy-field, .kt-webring-copy-field input)::placeholder {
+  color: #d7c8d6;
+  opacity: 1;
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-webring-copy-field, .kt-webring-copy-field input):focus-visible {
+  outline: 3px solid #5bcefa;
+  outline-offset: 3px;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member:focus-visible,
+html.kt-root[data-color-mode="dark"] .kt-recommendation-link:focus-visible,
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(a, button, input, summary):focus-visible {
+  outline: 3px dashed #fff9fc;
+  outline-offset: 4px;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-music-toggle {
+  border-color: #fff9fc;
+  background-color: #30263b;
+  background-image: linear-gradient(135deg, rgb(91 206 250 / 16%), rgb(245 169 184 / 16%));
+  color: #fff7fb;
+  box-shadow: 3px 3px 0 #5bcefa, 6px 6px 0 #f5a9b8, 0 8px 20px rgb(0 0 0 / 48%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-music-toggle__icon-tile,
+html.kt-root[data-color-mode="dark"] .kt-music-toggle::after {
+  border-color: #b9a9c2;
+  background-color: #211a2b;
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(.language-option, .language-dock > .language-button) {
+  border-color: #b9a9c2;
+  background-color: #30263b;
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option[aria-pressed="true"] {
+  border-color: #fff9fc;
+  background-image: linear-gradient(100deg, #5bcefa, #fff9fc 50%, #f5a9b8);
+  color: #251722;
+}
+
+@media (forced-colors: active) {
+  html.kt-root[data-color-mode="dark"] .kt-member::after { display: none; }
+}
