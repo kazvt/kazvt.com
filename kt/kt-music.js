@@ -10,16 +10,20 @@
   const preferenceKey = "kazvt-kt-pad-preference-v1";
   const preferenceLifetime = 24 * 60 * 60 * 1000;
   const fadeSeconds = 3.2;
-  const padAttackSeconds = 4.8;
+  const padAttackSeconds = 6.4;
   const rootSemitone = Math.floor(Math.random() * 12);
-  // A major triad spread across two octaves: root, third, fifth and their
-  // octave doublings. The voicing changes on each fresh page load.
-  const chordIntervals = [0, 4, 7, 12, 16, 19, 24];
-  // Four bars into each 8-bar register, add a quiet high third, fifth, and
-  // sixth. This keeps the chord full without the close major-seventh/root rub.
-  const chordLiftIntervals = [28, 31, 33];
+  // An open major voicing across three octaves: root, fifth, octave, third,
+  // fifth, octave, third, fifth. The wider spacing keeps the fuller chord
+  // clear instead of bunching several bright notes into a small register.
+  const chordIntervals = [0, 7, 12, 16, 19, 24, 28, 31];
+  // Halfway through each 8-bar phrase, softly bloom the major seventh, ninth,
+  // and another open fifth for a warm maj9 color without a tight note cluster.
+  const chordLiftIntervals = [35, 38, 43];
+  // Keep the eight-note foundation at roughly the previous total level, so
+  // adding harmonic detail does not undo the site's already-reduced music volume.
+  const padVoiceGain = 0.01775;
   const chordLiftGain = 0.0038;
-  const chordLiftFadeDuration = 4.2;
+  const chordLiftFadeDuration = 6;
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
   // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
@@ -30,6 +34,7 @@
   const registerScheduleLookahead = 10 * 60;
 
   let context = null;
+  let padWave = null;
   let padFilter = null;
   let master = null;
   let oscillators = [];
@@ -175,12 +180,24 @@
     try {
       context = new AudioContextClass({ latencyHint: "playback" });
       context.addEventListener("statechange", syncAudioSignal);
+
+      // A sine-led custom spectrum gives the sustained voice gentle body and
+      // warmth. Its partials stay harmonically aligned; there is no detune,
+      // chorus, phaser, or effect-based reverb added to the signal.
+      try {
+        const real = new Float32Array(7);
+        const imag = new Float32Array([0, 1, 0.22, 0.08, 0.035, 0.012, 0.004]);
+        padWave = context.createPeriodicWave(real, imag);
+      } catch {
+        padWave = null;
+      }
+
       const filter = context.createBiquadFilter();
       filter.type = "lowpass";
-      // Keep this low-passed so the warm chord body sits behind the page, not
-      // in the sharp upper-mid range where sustained tones become tiring.
-      filter.frequency.value = 820;
-      filter.Q.value = 0.35;
+      // Retain enough upper harmonics for the chord extensions to read, while
+      // rolling off the edge that made the old synth feel thin and tiring.
+      filter.frequency.value = 1050;
+      filter.Q.value = 0.25;
       padFilter = filter;
 
       master = context.createGain();
@@ -196,6 +213,7 @@
     } catch {
       context?.close().catch(() => {});
       context = null;
+      padWave = null;
       padFilter = null;
       master = null;
       chordLiftVoices = [];
@@ -217,11 +235,15 @@
       const frequency = 440 * (2 ** ((midiRoot + interval - 69) / 12));
       const oscillator = context.createOscillator();
       const voice = context.createGain();
-      oscillator.type = "triangle";
+      if (padWave && typeof oscillator.setPeriodicWave === "function") {
+        oscillator.setPeriodicWave(padWave);
+      } else {
+        oscillator.type = "triangle";
+      }
       oscillator.frequency.value = frequency;
       oscillator.detune.value = 0;
       voice.gain.setValueAtTime(0.0001, now);
-      if (!lift) voice.gain.linearRampToValueAtTime(0.019, now + padAttackSeconds);
+      if (!lift) voice.gain.linearRampToValueAtTime(padVoiceGain, now + padAttackSeconds);
 
       if (context.createStereoPanner) {
         const panner = context.createStereoPanner();
