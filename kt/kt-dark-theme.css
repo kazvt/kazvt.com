@@ -189,6 +189,12 @@ html.kt-root[data-color-mode="dark"] .kt-discord__join::after {
   opacity: .28;
 }
 
+html.kt-root[data-color-mode="dark"] .kt-discord__join-icon {
+  border-color: #251722;
+  background-color: #fff9fc;
+  color: #251722;
+}
+
 html.kt-root[data-color-mode="dark"] .kt-kick-panel-mock__badge-arrow {
   border-color: #fff9fc;
   background-color: #30263b;
