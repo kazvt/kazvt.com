@@ -130,16 +130,81 @@ html.kt-root[data-color-mode="dark"] :is(.kt-home-link, .kt-topbar-label, .kt-me
 }
 
 html.kt-root[data-color-mode="dark"] :is(.kt-kick-link, .kt-discord__join, .kt-webring-copy-row button, .kt-webring-copy-button) {
-  border-color: #fff9fc;
-  background-color: #f5a9b8;
-  background-image: linear-gradient(100deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%);
-  color: #251722 !important;
-  box-shadow: 3px 3px 0 #17131f, 6px 6px 0 #5bcefa, 9px 9px 0 rgb(245 169 184 / 78%);
+  border-color: #e9dce9;
+  background-color: #30263b;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%),
+    linear-gradient(125deg, rgb(91 206 250 / 10%), rgb(245 169 184 / 8%));
+  background-size: 100% 5px, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: top left, center;
+  color: #fff7fb !important;
+  text-shadow: none !important;
+  box-shadow: 3px 3px 0 #100c17, 6px 6px 0 rgb(91 206 250 / 72%);
 }
 
 html.kt-root[data-color-mode="dark"] :is(.kt-kick-link, .kt-discord__join, .kt-webring-copy-row button, .kt-webring-copy-button):is(:hover, :focus-visible) {
-  filter: saturate(1.12) brightness(1.04);
-  box-shadow: 2px 2px 0 #17131f, 4px 4px 0 #f5a9b8, 7px 7px 0 #5bcefa;
+  background-color: #3a3046;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%),
+    linear-gradient(125deg, rgb(91 206 250 / 14%), rgb(245 169 184 / 12%));
+  color: #fff7fb !important;
+  filter: none;
+  box-shadow: 1px 1px 0 #100c17, 4px 4px 0 rgb(245 169 184 / 82%);
+}
+
+/* Keep the tiny server-member blinkie readable: its text must not sit on the
+   bright flag stripes used by the light-theme version. */
+html.kt-root[data-color-mode="dark"] .kt-discord__blinkie {
+  border-color: #e9dce9;
+  background-color: #211a2b;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%),
+    linear-gradient(145deg, #30263b, #211a2b 76%);
+  background-size: 100% 4px, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: top left, center;
+  color: #fff7fb;
+  box-shadow: 2px 2px 0 #100c17, 4px 4px 0 rgb(245 169 184 / 72%);
+}
+
+html.kt-root[data-color-mode="dark"] :is(.kt-discord__blinkie-mark, .kt-discord__blinkie-copy) {
+  color: #fff7fb;
+  text-shadow: none !important;
+}
+
+/* The panel callouts and inputs use dark surfaces, so their labels must use
+   the same high-contrast foreground instead of the light-theme plum ink. */
+html.kt-root[data-color-mode="dark"] .kt-webring-copy-field label {
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-webring-heading .kt-eyebrow {
+  color: #fff7fb;
+  text-shadow: none !important;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-discord__join::after {
+  background: linear-gradient(90deg, transparent, rgb(138 226 247 / 56%), transparent);
+  opacity: .28;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-kick-panel-mock__badge-arrow {
+  border-color: #fff9fc;
+  background-color: #30263b;
+  background-image: linear-gradient(90deg, #5bcefa, #f5a9b8, #fff9fc, #f5a9b8, #5bcefa);
+  background-size: 100% 3px;
+  background-repeat: no-repeat;
+  background-position: top;
+  color: #fff7fb;
+  box-shadow: 1px 2px 0 #100c17, 3px 3px 0 rgb(91 206 250 / 78%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-kick-panel-mock__badge-arrow:hover:not(:disabled),
+html.kt-root[data-color-mode="dark"] .kt-kick-panel-mock__badge-arrow:focus-visible:not(:disabled) {
+  background-color: #3a3046;
+  color: #fff7fb;
+  box-shadow: 1px 2px 0 #100c17, 3px 3px 0 rgb(245 169 184 / 82%);
 }
 
 /* Card faces stay night-toned, with one clear flag-colour wash per card and
@@ -314,9 +379,19 @@ html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(a, button, input, 
 html.kt-root[data-color-mode="dark"] .kt-music-toggle {
   border-color: #fff9fc;
   background-color: #30263b;
-  background-image: linear-gradient(135deg, rgb(91 206 250 / 16%), rgb(245 169 184 / 16%));
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%),
+    linear-gradient(135deg, rgb(91 206 250 / 10%), rgb(245 169 184 / 8%));
+  background-size: 100% 4px, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: top left, center;
   color: #fff7fb;
-  box-shadow: 3px 3px 0 #5bcefa, 6px 6px 0 #f5a9b8, 0 8px 20px rgb(0 0 0 / 48%);
+  box-shadow: 3px 3px 0 #100c17, 5px 5px 0 rgb(91 206 250 / 72%), 0 8px 18px rgb(0 0 0 / 42%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-music-toggle:is(:hover, :focus-visible) {
+  background-color: #3a3046;
+  box-shadow: 1px 1px 0 #100c17, 4px 4px 0 rgb(245 169 184 / 82%), 0 8px 18px rgb(0 0 0 / 42%);
 }
 
 html.kt-root[data-color-mode="dark"] .kt-music-toggle__icon-tile,
@@ -334,8 +409,35 @@ html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(.language-option, 
 
 html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option[aria-pressed="true"] {
   border-color: #fff9fc;
-  background-image: linear-gradient(100deg, #5bcefa, #fff9fc 50%, #f5a9b8);
-  color: #251722;
+  background-color: #3a3046;
+  background-image:
+    linear-gradient(90deg, #5bcefa 0 20%, #f5a9b8 20% 40%, #fff9fc 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%),
+    linear-gradient(135deg, rgb(91 206 250 / 14%), rgb(245 169 184 / 12%));
+  background-size: 100% 4px, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: top left, center;
+  color: #fff7fb;
+}
+
+/* Dark mode keeps display text crisp: the light theme's offset stacks overlap
+   pale glyphs and can erase their shapes on dark surfaces. Retain just one
+   quiet pink pixel edge on the main headings. */
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] * {
+  text-shadow: none !important;
+}
+
+html.kt-root[data-color-mode="dark"] body[data-page="kt"] :is(
+  .kt-hero h1,
+  .kt-roster-heading h2,
+  .kt-webring-heading h2,
+  .kt-discord__copy h2,
+  .kt-chatters__heading h2
+) {
+  text-shadow: 1px 1px 0 rgb(245 169 184 / 58%) !important;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-member:is(:hover, :focus-visible) :is(.kt-member-number, .kt-member-name, .kt-member-handle, .kt-member-tag, .kt-member-badge, .kt-member-arrow) {
+  text-shadow: none !important;
 }
 
 /* Familiar-face cards also have opaque light-theme background gradients.
