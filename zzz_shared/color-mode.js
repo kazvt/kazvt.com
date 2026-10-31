@@ -70,6 +70,11 @@
     const nextMode = mode === "dark" ? "dark" : "light";
     const update = () => apply(nextMode, { persist });
 
+    if (nextMode === currentMode) {
+      update();
+      return;
+    }
+
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       update();
       return;
