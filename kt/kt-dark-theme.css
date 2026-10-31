@@ -349,6 +349,59 @@ html.kt-root[data-color-mode="dark"] body[data-page="kt"] .language-option[aria-
   color: #251722;
 }
 
+/* Familiar-face cards also have opaque light-theme background gradients.
+   Replace the full background shorthand at night (not only background-color),
+   and restore bright foregrounds that remain distinct on every dark variant. */
+html.kt-root[data-color-mode="dark"] .kt-chatters__card {
+  --kt-chatters-accent: #8ae2f7;
+  border-color: #e8dce8;
+  border-inline-start-color: var(--kt-chatters-accent);
+  background:
+    linear-gradient(125deg, rgb(91 206 250 / 16%), transparent 46%),
+    linear-gradient(145deg, #30263b, #211a2b 76%);
+  color: #fff7fb;
+  box-shadow: 2px 2px 0 #100c17, 4px 4px 0 rgb(91 206 250 / 82%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-chatters__item:nth-child(even) .kt-chatters__card {
+  --kt-chatters-accent: #ffafc7;
+  border-inline-start-color: var(--kt-chatters-accent);
+  background:
+    linear-gradient(125deg, rgb(245 169 184 / 17%), transparent 48%),
+    linear-gradient(145deg, #382632, #211a2b 76%);
+  box-shadow: 2px 2px 0 #100c17, 4px 4px 0 rgb(245 169 184 / 82%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-chatters__item:nth-child(3n) .kt-chatters__card {
+  --kt-chatters-accent: #d5bdff;
+  border-inline-start-color: var(--kt-chatters-accent);
+  background:
+    linear-gradient(125deg, rgb(213 189 255 / 14%), transparent 48%),
+    linear-gradient(145deg, #30283f, #211a2b 76%);
+  box-shadow: 2px 2px 0 #100c17, 4px 4px 0 rgb(213 189 255 / 78%);
+}
+
+html.kt-root[data-color-mode="dark"] .kt-chatters__handle {
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-chatters__pronouns {
+  border-color: var(--kt-chatters-accent, #8ae2f7);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--kt-chatters-accent, #8ae2f7) 22%, transparent), transparent 78%),
+    #211a2b;
+  color: #fff7fb;
+}
+
+html.kt-root[data-color-mode="dark"] .kt-chatters__arrow {
+  color: #fff7fb;
+  filter: drop-shadow(1px 1px 0 var(--kt-chatters-accent, #8ae2f7));
+}
+
+html.kt-root[data-color-mode="dark"] .kt-chatters__card:focus-visible {
+  outline-color: #fff7fb;
+}
+
 @media (forced-colors: active) {
   html.kt-root[data-color-mode="dark"] .kt-member::after { display: none; }
 }
