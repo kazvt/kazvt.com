@@ -254,8 +254,20 @@ function initializeKtLoadingScreen() {
     :host([data-color-mode="dark"]) {
       color: var(--kazvt-text, #fff5f8);
       background-color: var(--kazvt-night, #15131f);
-      background-image: var(--kazvt-dark-wallpaper, linear-gradient(145deg, #15131f, #1d1726 58%, #171923));
-      background-size: auto;
+      /* Keep the loading overlay recognizably trans, even while the site is
+         in night mode: muted flag bands sit beneath the familiar pixel grid. */
+      background-image:
+        linear-gradient(180deg,
+          rgb(91 206 250 / 16%) 0 20%,
+          rgb(245 169 184 / 16%) 20% 40%,
+          rgb(255 249 252 / 10%) 40% 60%,
+          rgb(245 169 184 / 16%) 60% 80%,
+          rgb(91 206 250 / 16%) 80% 100%),
+        linear-gradient(90deg, transparent 0 23px, rgb(138 226 247 / 11%) 23px 24px),
+        linear-gradient(transparent 0 23px, rgb(255 175 199 / 11%) 23px 24px),
+        radial-gradient(circle, rgb(245 169 184 / 21%) 1px, transparent 1.5px);
+      background-size: 100% 100%, 24px 24px, 24px 24px, 12px 12px;
+      background-repeat: no-repeat, repeat, repeat, repeat;
     }
     :host([data-color-mode="dark"]) .loading-window {
       background: var(--kazvt-surface, #211d2b) !important;
@@ -266,7 +278,7 @@ function initializeKtLoadingScreen() {
         inset 0 0 0 1px var(--kazvt-line, #aa9aaf) !important;
     }
     :host([data-color-mode="dark"]) .title-bar {
-      background: linear-gradient(100deg,
+      background: linear-gradient(180deg,
         var(--kazvt-trans-cyan, #8ae2f7) 0 20%,
         var(--kazvt-trans-pink, #ffafc7) 20% 40%,
         var(--kazvt-text, #fff5f8) 40% 60%,
@@ -276,7 +288,18 @@ function initializeKtLoadingScreen() {
     }
     :host([data-color-mode="dark"]) .title-bar-text { color: var(--kazvt-on-accent, #251722) !important; }
     :host([data-color-mode="dark"]) .window-body {
-      background: var(--kazvt-surface, #211d2b) !important;
+      background-color: var(--kazvt-surface, #211d2b) !important;
+      background-image:
+        linear-gradient(90deg,
+          var(--kazvt-trans-cyan, #8ae2f7) 0 20%,
+          var(--kazvt-trans-pink, #ffafc7) 20% 40%,
+          var(--kazvt-text, #fff5f8) 40% 60%,
+          var(--kazvt-trans-pink, #ffafc7) 60% 80%,
+          var(--kazvt-trans-cyan, #8ae2f7) 80% 100%),
+        linear-gradient(115deg, rgb(91 206 250 / 5%), transparent 38% 62%, rgb(245 169 184 / 5%));
+      background-size: 100% 4px, 100% 100%;
+      background-repeat: no-repeat;
+      background-position: top left, center;
       color: var(--kazvt-text, #fff5f8) !important;
     }
     :host([data-color-mode="dark"]) .loading-kicker,
@@ -290,15 +313,35 @@ function initializeKtLoadingScreen() {
     :host([data-color-mode="dark"]) .buffer-label { color: var(--kazvt-text, #fff5f8); }
     :host([data-color-mode="dark"]) .buffer-display {
       border-color: var(--kazvt-line, #aa9aaf);
-      background: repeating-linear-gradient(0deg, var(--kazvt-surface-high, #372e43) 0 5px, var(--kazvt-surface-raised, #2d2638) 5px 6px);
+      background:
+        linear-gradient(90deg,
+          rgb(91 206 250 / 18%) 0 20%,
+          rgb(245 169 184 / 18%) 20% 40%,
+          rgb(255 249 252 / 12%) 40% 60%,
+          rgb(245 169 184 / 18%) 60% 80%,
+          rgb(91 206 250 / 18%) 80% 100%),
+        repeating-linear-gradient(0deg, var(--kazvt-surface-high, #372e43) 0 5px, var(--kazvt-surface-raised, #2d2638) 5px 6px);
     }
-    :host([data-color-mode="dark"]) .buffer-segment { border-color: var(--kazvt-on-accent, #251722); }
+    :host([data-color-mode="dark"]) .buffer-segment {
+      border-color: var(--kazvt-on-accent, #251722);
+      background: var(--kazvt-trans-cyan, #8ae2f7);
+    }
+    :host([data-color-mode="dark"]) .buffer-segment:nth-child(3n + 2) { background: var(--kazvt-trans-pink, #ffafc7); }
+    :host([data-color-mode="dark"]) .buffer-segment:nth-child(3n) { background: var(--kazvt-text, #fff5f8); }
     :host([data-color-mode="dark"]) .loading-progress[value] {
       border-color: var(--kazvt-line, #aa9aaf);
-      background: var(--kazvt-surface-high, #372e43);
+      background: repeating-linear-gradient(90deg,
+        rgb(91 206 250 / 18%) 0 10px,
+        rgb(245 169 184 / 18%) 10px 20px,
+        rgb(255 249 252 / 12%) 20px 30px);
       box-shadow: inset 0 0 2px rgb(0 0 0 / 60%);
     }
-    :host([data-color-mode="dark"]) .loading-progress[value]::-webkit-progress-bar { background: var(--kazvt-surface-high, #372e43); }
+    :host([data-color-mode="dark"]) .loading-progress[value]::-webkit-progress-bar {
+      background: repeating-linear-gradient(90deg,
+        rgb(91 206 250 / 18%) 0 10px,
+        rgb(245 169 184 / 18%) 10px 20px,
+        rgb(255 249 252 / 12%) 20px 30px);
+    }
     :host([data-color-mode="dark"]) .loading-progress[value]::-webkit-progress-value,
     :host([data-color-mode="dark"]) .loading-progress[value]::-moz-progress-bar {
       background: repeating-linear-gradient(90deg,
@@ -307,7 +350,8 @@ function initializeKtLoadingScreen() {
         var(--kazvt-text, #fff5f8) 20px 30px);
     }
     :host([data-color-mode="dark"]) .loading-footer { color: var(--kazvt-text-muted, #d7c8d6); }
-    :host([data-color-mode="dark"]) .loading-footer span { color: var(--kazvt-trans-pink, #ffafc7); }
+    :host([data-color-mode="dark"]) .loading-footer span:first-child { color: var(--kazvt-trans-pink, #ffafc7); }
+    :host([data-color-mode="dark"]) .loading-footer span:last-child { color: var(--kazvt-trans-cyan, #8ae2f7); }
     :host([data-color-mode="dark"]) .title-bar-controls button {
       border: 1px solid var(--kazvt-line, #aa9aaf) !important;
       background-color: var(--kazvt-surface-raised, #2d2638) !important;
