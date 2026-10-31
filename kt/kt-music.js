@@ -20,6 +20,8 @@
   const chordLiftIntervals = [31, 35, 36];
   const chordLiftGain = 0.0038;
   const chordLiftFadeDuration = 4.2;
+  const padUnisonDetuneScale = 0.35;
+  const liftUnisonDetuneScale = 0.325;
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
   // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
@@ -185,9 +187,10 @@
       context.addEventListener("statechange", syncAudioSignal);
       const filter = context.createBiquadFilter();
       filter.type = "lowpass";
-      // Keep the chord body intact while gently tucking away the brightest lift notes.
-      filter.frequency.value = 1400;
-      filter.Q.value = 0.5;
+      // A softly voiced worship-pad tone: keep the fundamentals present while
+      // easing the triangle wave's upper harmonics back out of the foreground.
+      filter.frequency.value = 1120;
+      filter.Q.value = 0.38;
       padFilter = filter;
 
       master = context.createGain();
@@ -260,9 +263,9 @@
       (lift ? [-2, 2] : [-3, 3]).forEach((detune, layerIndex) => {
         const oscillator = context.createOscillator();
         const voice = context.createGain();
-        oscillator.type = "sine";
+        oscillator.type = "triangle";
         oscillator.frequency.value = frequency;
-        oscillator.detune.value = detune;
+        oscillator.detune.value = detune * (lift ? liftUnisonDetuneScale : padUnisonDetuneScale);
         voice.gain.setValueAtTime(0.0001, now);
         if (!lift) voice.gain.linearRampToValueAtTime(0.0135, now + padAttackSeconds);
 
