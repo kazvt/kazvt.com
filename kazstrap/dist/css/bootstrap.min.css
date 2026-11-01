@@ -1234,7 +1234,7 @@ h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
     color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 80% 100%);
 }
 
-/* Rotate the checkerboard itself so each cell is one solid diamond. */
+/* Build a checkerboard of solid cells first, then rotate the sheet into diamonds. */
 body {
   position: relative;
   isolation: isolate;
@@ -1247,8 +1247,10 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
-body::before {
+body::before,
+body::after {
   content: "";
+  display: none;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1258,13 +1260,28 @@ body::before {
   transform-origin: center;
   z-index: -1;
   pointer-events: none;
-  background-image: conic-gradient(
-    color-mix(in oklab, var(--bs-primary) 9%, transparent) 0deg 90deg,
-    color-mix(in oklab, var(--bs-info) 5%, transparent) 90deg 180deg,
-    color-mix(in oklab, var(--bs-primary) 9%, transparent) 180deg 270deg,
-    color-mix(in oklab, var(--bs-info) 5%, transparent) 270deg 360deg);
-  background-size: 64px 64px;
-  background-repeat: repeat;
+}
+@supports (mask-image: linear-gradient(white, white)) or (-webkit-mask-image: linear-gradient(white, white)) {
+  body::before {
+    display: block;
+    background-color: color-mix(in oklab, var(--bs-primary) 9%, transparent);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M0%200h64v64H0zM64%2064h64v64H64z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M0%200h64v64H0zM64%2064h64v64H64z'/%3E%3C/svg%3E");
+    -webkit-mask-size: 128px 128px;
+    mask-size: 128px 128px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+  }
+  body::after {
+    display: block;
+    background-color: color-mix(in oklab, var(--bs-info) 5%, transparent);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M64%200h64v64H64zM0%2064h64v64H0z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M64%200h64v64H64zM0%2064h64v64H0z'/%3E%3C/svg%3E");
+    -webkit-mask-size: 128px 128px;
+    mask-size: 128px 128px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+  }
 }
 
 a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action),
@@ -1802,12 +1819,9 @@ kbd {
     background-image: linear-gradient(135deg,
       rgba(var(--bs-primary-rgb), 0.04), transparent 48%, rgba(var(--bs-info-rgb), 0.04));
   }
-  body::before {
-    background-image: conic-gradient(
-      rgba(var(--bs-primary-rgb), 0.09) 0deg 90deg,
-      rgba(var(--bs-info-rgb), 0.05) 90deg 180deg,
-      rgba(var(--bs-primary-rgb), 0.09) 180deg 270deg,
-      rgba(var(--bs-info-rgb), 0.05) 270deg 360deg);
+  body::before,
+  body::after {
+    display: none;
   }
   h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
   .card-title, .alert-heading, .modal-title, .offcanvas-title {
@@ -2436,11 +2450,6 @@ kbd {
       linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
   }
 }
-@supports not (background-image: conic-gradient(red, blue)) {
-  body::before {
-    display: none;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   a:not(.btn),
   .btn-link,
@@ -2478,6 +2487,10 @@ kbd {
   }
   body {
     background-image: none;
+  }
+  body::before,
+  body::after {
+    display: none !important;
   }
   .card, .card-header, .card-body, .card-footer,
   .dropdown-menu, .dropdown-header, .modal-content, .modal-header, .modal-body, .modal-footer,
