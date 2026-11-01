@@ -117,6 +117,8 @@
   letter-spacing: 0.04em;
   text-align: center;
   transform: rotate(1deg);
+  outline: 2px solid var(--banner-text);
+  outline-offset: 2px;
 }
 
 .ocean-series-meta {
@@ -143,6 +145,8 @@
   line-height: 1.1;
   cursor: pointer;
   transition: transform 140ms ease, box-shadow 140ms ease;
+  outline: 2px solid var(--banner-text);
+  outline-offset: 2px;
 }
 
 .ocean-motion-toggle[hidden] { display: none; }
