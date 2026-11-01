@@ -3001,6 +3001,12 @@ kbd {
   .kaz-link-list a::before {
     color: CanvasText;
   }
+  .kaz-sticker:focus-visible,
+  .kaz-webring a:focus-visible,
+  .kaz-link-list a:focus-visible,
+  .kaz-ticker a:focus-visible {
+    outline-color: Highlight;
+  }
   .kaz-window, .kaz-webring, .kaz-guestbook-entry, .kaz-scoreboard {
     border-inline-start-color: CanvasText;
   }
