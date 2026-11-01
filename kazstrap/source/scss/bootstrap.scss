@@ -2362,6 +2362,21 @@ kbd {
         transparent 1px 8px),
       linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
   }
+  .progress-bar-striped {
+    background-image:
+      repeating-linear-gradient(45deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 8%, transparent) 0 1px,
+        transparent 1px 8px),
+      linear-gradient(45deg,
+        color-mix(in oklab, white 8%, transparent) 25%,
+        transparent 25% 50%,
+        color-mix(in oklab, white 8%, transparent) 50% 75%,
+        transparent 75% 100%),
+      linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
+    background-size: auto, var(--bs-progress-height) var(--bs-progress-height), 100% 100%;
+    background-position: 0 0, 0 0, center;
+    background-repeat: repeat, repeat, no-repeat;
+  }
   .table-primary { --kaz-ui-accent: var(--bs-primary); }
   .table-secondary { --kaz-ui-accent: var(--bs-secondary); }
   .table-success { --kaz-ui-accent: var(--bs-success); }
