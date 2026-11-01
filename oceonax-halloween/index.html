@@ -23,7 +23,7 @@
       })();
     </script>
     <link rel="stylesheet" href="/styles.css?v=font-weight-policy-20261023-v2">
-    <link rel="stylesheet" href="/oceonax-halloween/oceonax-halloween.css?v=8">
+    <link rel="stylesheet" href="/oceonax-halloween/oceonax-halloween.css?v=9">
     <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
   </head>
   <body class="oceonax-page" data-theme="p16">
@@ -54,7 +54,6 @@
 
       <div class="ocean-series-meta">
         <p class="ocean-series-stamp">8 treats - 2 days - all art</p>
-        <button class="ocean-motion-toggle" id="ocean-motion-toggle" type="button" hidden>Play Halloween GIFs</button>
       </div>
 
       <section id="entries" class="ocean-day" aria-labelledby="oct-30-heading">
@@ -210,34 +209,22 @@
     </main>
     <script>
       (() => {
-        const motionToggle = document.querySelector("#ocean-motion-toggle");
         const spookyImages = [...document.querySelectorAll(".ocean-sprinkle[data-motion-src]")];
         const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
         const prefersReducedMotion = reduceMotion?.matches === true;
-        if (motionToggle && spookyImages.length) {
-          let motionPlaying = false;
-          const setSpookyMotion = (playing) => {
-            for (const image of spookyImages) {
-              const wantedSource = playing ? image.dataset.motionSrc : image.dataset.posterSrc;
-              if (wantedSource && !image.src.endsWith(wantedSource)) image.src = wantedSource;
-            }
-            motionPlaying = playing;
-            motionToggle.textContent = playing ? "Pause Halloween GIFs" : "Play Halloween GIFs";
-            motionToggle.hidden = false;
-          };
-
-          setSpookyMotion(!prefersReducedMotion);
-          motionToggle.addEventListener("click", () => {
-            setSpookyMotion(!motionPlaying);
-          });
-          const pauseForReducedMotion = (event) => {
-            if (event.matches) setSpookyMotion(false);
-          };
-          if (reduceMotion?.addEventListener) {
-            reduceMotion.addEventListener("change", pauseForReducedMotion);
-          } else {
-            reduceMotion?.addListener?.(pauseForReducedMotion);
+        const setSpookyMotion = (playing) => {
+          for (const image of spookyImages) {
+            const wantedSource = playing ? image.dataset.motionSrc : image.dataset.posterSrc;
+            if (wantedSource && !image.src.endsWith(wantedSource)) image.src = wantedSource;
           }
+        };
+
+        setSpookyMotion(!prefersReducedMotion);
+        const respectMotionPreference = (event) => setSpookyMotion(!event.matches);
+        if (reduceMotion?.addEventListener) {
+          reduceMotion.addEventListener("change", respectMotionPreference);
+        } else {
+          reduceMotion?.addListener?.(respectMotionPreference);
         }
 
         const featuredEntry = document.querySelector(".ocean-entry--kaz");

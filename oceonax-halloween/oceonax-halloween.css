@@ -130,36 +130,6 @@
   gap: 10px 16px;
 }
 
-.ocean-motion-toggle {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border: 3px solid var(--ink);
-  background: var(--blue);
-  color: var(--on-blue);
-  box-shadow: 3px 3px 0 var(--shadow);
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 900;
-  line-height: 1.1;
-  cursor: pointer;
-  transition: transform 140ms ease, box-shadow 140ms ease;
-  outline: 2px solid var(--banner-text);
-  outline-offset: 2px;
-}
-
-.ocean-motion-toggle[hidden] { display: none; }
-.ocean-motion-toggle:hover {
-  transform: translateY(-2px);
-  box-shadow: 5px 5px 0 var(--shadow);
-}
-.ocean-motion-toggle:focus-visible {
-  outline: 3px dashed var(--banner-text);
-  outline-offset: 4px;
-}
-
 .ocean-day {
   display: grid;
   gap: 15px;
@@ -446,12 +416,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ocean-home,
-  .ocean-entry,
-  .ocean-motion-toggle { transition: none; }
+  .ocean-entry { transition: none; }
   .ocean-home:hover,
   .ocean-entry:hover,
-  .ocean-entry:focus-within,
-  .ocean-motion-toggle:hover { transform: none; }
+  .ocean-entry:focus-within { transform: none; }
   .ocean-entry--kaz.is-highlighted,
   .ocean-entry--kaz.is-highlighted .ocean-me-badge { animation: none; }
 }
