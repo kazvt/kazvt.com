@@ -27,7 +27,14 @@
     <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
   </head>
   <body class="oceonax-page" data-theme="p16">
-    <script>document.body.dataset.theme = document.documentElement.dataset.theme || "p16";</script>
+    <script>
+      (() => {
+        document.body.dataset.theme = document.documentElement.dataset.theme || "p16";
+        const activeBackground = getComputedStyle(document.body).getPropertyValue("--bg").trim();
+        const browserThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (activeBackground && browserThemeColor) browserThemeColor.content = activeBackground;
+      })();
+    </script>
     <main class="site-wrap ocean-shell">
       <header class="ocean-header">
         <a class="ocean-home" href="/" aria-label="Back to kazvt's homepage">kazvt.com</a>
@@ -46,7 +53,7 @@
       </header>
 
       <div class="ocean-series-meta">
-        <div class="ocean-series-stamp" aria-label="Eight original posts">8 treats - 2 days - all art</div>
+        <p class="ocean-series-stamp">8 treats - 2 days - all art</p>
         <button class="ocean-motion-toggle" id="ocean-motion-toggle" type="button" hidden>Play Halloween GIFs</button>
       </div>
 
