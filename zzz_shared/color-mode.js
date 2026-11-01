@@ -1,6 +1,11 @@
 (() => {
   "use strict";
 
+  // This appearance control and its preference belong to KickassTransfems.
+  // Guard the shared asset too, so an accidental include elsewhere cannot
+  // apply a hidden dark theme without giving that page a way to change it.
+  if (!document.documentElement.classList.contains("kt-root")) return;
+
   const STORAGE_KEY = "kazvt-color-mode";
   const CONTROL_ID = "kazvt-appearance-toggle";
   const DARK_CHROME = "#15131f";
