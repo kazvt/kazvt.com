@@ -33,16 +33,24 @@
   border: 3px solid var(--ink);
   background: var(--paper);
   box-shadow: 3px 3px 0 var(--shadow);
+  text-decoration: none;
+  transition: transform 140ms ease, box-shadow 140ms ease;
   transform: rotate(-1deg);
 }
 
 .ocean-kicker {
+  display: inline-block;
   margin: 0;
-  color: var(--pink);
+  padding: 5px 9px;
+  border: 2px dashed var(--ink);
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--shadow);
+  color: var(--ink);
   font-size: 0.9rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  transform: rotate(-1deg);
 }
 
 .ocean-header h1 {
@@ -134,11 +142,18 @@
   font-weight: 900;
   line-height: 1.1;
   cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
 .ocean-motion-toggle[hidden] { display: none; }
-.ocean-motion-toggle:hover { background: var(--pink); color: var(--on-pink); }
-.ocean-motion-toggle:focus-visible { outline: 3px dashed var(--pink); outline-offset: 4px; }
+.ocean-motion-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0 var(--shadow);
+}
+.ocean-motion-toggle:focus-visible {
+  outline: 3px dashed var(--banner-text);
+  outline-offset: 4px;
+}
 
 .ocean-day {
   display: grid;
@@ -152,7 +167,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 0 2px 8px;
-  border-bottom: 4px solid var(--ink);
+  border-bottom: 4px solid var(--banner-text);
 }
 
 .ocean-day-title {
@@ -176,7 +191,11 @@
 }
 
 .ocean-day-heading h2 span {
-  color: var(--pink);
+  display: inline-block;
+  padding: 0.08em 0.32em;
+  border: 1px dashed var(--ink);
+  background: var(--paper);
+  color: var(--ink);
   font-size: 0.68em;
   white-space: nowrap;
 }
@@ -275,6 +294,11 @@
   box-shadow: 7px 7px 0 var(--shadow);
 }
 
+.ocean-entry:focus-within {
+  outline: 3px dashed var(--banner-text);
+  outline-offset: 3px;
+}
+
 .ocean-art-link {
   display: grid;
   min-width: 0;
@@ -344,16 +368,24 @@
 }
 
 .ocean-entry-links a:hover,
-.ocean-footer a:hover,
+.ocean-footer a:hover {
+  color: var(--ink);
+  text-decoration-style: wavy;
+  text-decoration-thickness: 2px;
+}
+
 .ocean-home:hover {
-  color: var(--pink);
+  color: var(--ink);
+  transform: translateY(-2px) rotate(1deg);
+  box-shadow: 5px 5px 0 var(--shadow);
 }
 
 .ocean-entry a:focus-visible,
 .ocean-footer a:focus-visible,
 .ocean-home:focus-visible {
-  outline: 3px dashed var(--pink);
-  outline-offset: 4px;
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--banner-text);
 }
 
 .ocean-footer {
@@ -396,7 +428,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ocean-entry { transition: none; }
+  .ocean-home,
+  .ocean-entry,
+  .ocean-motion-toggle { transition: none; }
+  .ocean-home:hover,
+  .ocean-entry:hover,
+  .ocean-entry:focus-within,
+  .ocean-motion-toggle:hover { transform: none; }
   .ocean-entry--kaz.is-highlighted,
   .ocean-entry--kaz.is-highlighted .ocean-me-badge { animation: none; }
 }

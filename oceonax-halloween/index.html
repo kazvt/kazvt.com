@@ -47,7 +47,7 @@
 
       <div class="ocean-series-meta">
         <div class="ocean-series-stamp" aria-label="Eight original posts">8 treats - 2 days - all art</div>
-        <button class="ocean-motion-toggle" id="ocean-motion-toggle" type="button" aria-pressed="false" hidden>Play Halloween GIFs</button>
+        <button class="ocean-motion-toggle" id="ocean-motion-toggle" type="button" hidden>Play Halloween GIFs</button>
       </div>
 
       <section id="entries" class="ocean-day" aria-labelledby="oct-30-heading">
@@ -205,29 +205,36 @@
       (() => {
         const motionToggle = document.querySelector("#ocean-motion-toggle");
         const spookyImages = [...document.querySelectorAll(".ocean-sprinkle[data-motion-src]")];
-        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+        const prefersReducedMotion = reduceMotion?.matches === true;
         if (motionToggle && spookyImages.length) {
+          let motionPlaying = false;
           const setSpookyMotion = (playing) => {
             for (const image of spookyImages) {
               const wantedSource = playing ? image.dataset.motionSrc : image.dataset.posterSrc;
               if (wantedSource && !image.src.endsWith(wantedSource)) image.src = wantedSource;
             }
-            motionToggle.setAttribute("aria-pressed", String(playing));
+            motionPlaying = playing;
             motionToggle.textContent = playing ? "Pause Halloween GIFs" : "Play Halloween GIFs";
             motionToggle.hidden = false;
           };
 
-          setSpookyMotion(!reduceMotion.matches);
+          setSpookyMotion(!prefersReducedMotion);
           motionToggle.addEventListener("click", () => {
-            setSpookyMotion(motionToggle.getAttribute("aria-pressed") !== "true");
+            setSpookyMotion(!motionPlaying);
           });
-          reduceMotion.addEventListener?.("change", (event) => {
+          const pauseForReducedMotion = (event) => {
             if (event.matches) setSpookyMotion(false);
-          });
+          };
+          if (reduceMotion?.addEventListener) {
+            reduceMotion.addEventListener("change", pauseForReducedMotion);
+          } else {
+            reduceMotion?.addListener?.(pauseForReducedMotion);
+          }
         }
 
         const featuredEntry = document.querySelector(".ocean-entry--kaz");
-        if (!featuredEntry || reduceMotion.matches) return;
+        if (!featuredEntry || prefersReducedMotion) return;
 
         const animateFeature = () => featuredEntry.classList.add("is-highlighted");
         if (!("IntersectionObserver" in window)) {
