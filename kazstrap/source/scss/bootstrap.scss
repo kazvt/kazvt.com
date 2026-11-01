@@ -3014,6 +3014,23 @@ kbd {
     border-color: CanvasText;
     box-shadow: none;
   }
+  .kaz-sticker,
+  .kaz-webring a,
+  .kaz-link-list a,
+  .kaz-ticker a {
+    transition: none;
+  }
+  .kaz-sticker:is(a, button):hover,
+  .kaz-sticker:is(a, button):active,
+  .kaz-webring a:hover,
+  .kaz-webring a:active,
+  .kaz-link-list a:hover,
+  .kaz-link-list a:active,
+  .kaz-ticker a:hover,
+  .kaz-ticker a:active {
+    box-shadow: none !important;
+    transform: none !important;
+  }
   .kaz-link-list,
   .kaz-link-list > li + li {
     border-color: CanvasText;
