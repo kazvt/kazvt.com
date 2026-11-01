@@ -3022,12 +3022,6 @@ kbd {
     background-image: none;
     box-shadow: none;
   }
-  .kaz-sticker:focus-visible,
-  .kaz-webring a:focus-visible,
-  .kaz-link-list a:focus-visible,
-  .kaz-ticker a:focus-visible {
-    outline-color: Highlight;
-  }
   .card-header, .modal-header, .offcanvas-header, .toast-header, .popover-header, .accordion-header {
     border-inline-start-color: CanvasText;
   }
