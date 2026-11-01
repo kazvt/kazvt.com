@@ -109,6 +109,7 @@
 
 .ocean-series-stamp {
   justify-self: center;
+  margin: 0;
   padding: 8px 14px;
   border: 2px dashed var(--ink);
   background: var(--pink);
@@ -369,6 +370,12 @@
   margin-top: auto;
   padding-top: 5px;
   font-size: 0.85rem;
+}
+
+.ocean-entry-links a {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
 }
 
 .ocean-entry-links a:hover,
