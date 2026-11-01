@@ -14503,15 +14503,6 @@ kbd {
 .kaz-scoreboard {
   overflow-wrap: anywhere;
 }
-.kaz-window,
-.kaz-sticker,
-.kaz-counter,
-.kaz-construction,
-.kaz-guestbook-entry,
-.kaz-ticker,
-.kaz-scoreboard {
-  overflow-wrap: anywhere;
-}
 .kaz-window {
   --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
   border: 2px solid var(--bs-border-color);
