@@ -32,8 +32,12 @@
       <header class="ocean-header">
         <a class="ocean-home" href="/" aria-label="Back to kazvt's homepage">kazvt.com</a>
         <p class="ocean-kicker">A Halloween gift-art series</p>
-        <h1>TRICK OR TRE-ART!</h1>
-        <p class="ocean-intro">Oceonax shared eight Halloween gift-art posts on October 30 and 31, 2026. Browse the entries below; each one opens its original Bluesky post and includes a direct link to Oceonax’s profile.</p>
+        <div class="ocean-title-row" aria-label="Halloween decorations">
+          <img class="ocean-sprinkle ocean-sprinkle--pumpkin" src="/oceonax-halloween/assets/pixel-pumpkin-poster.png" data-motion-src="/oceonax-halloween/assets/pixel-pumpkin.gif" data-poster-src="/oceonax-halloween/assets/pixel-pumpkin-poster.png" alt="" aria-hidden="true" width="64" height="64" decoding="async">
+          <h1>TRICK OR TRE-ART!</h1>
+          <img class="ocean-sprinkle ocean-sprinkle--ghost" src="/oceonax-halloween/assets/pixel-ghost-poster.png" data-motion-src="/oceonax-halloween/assets/pixel-ghost.gif" data-poster-src="/oceonax-halloween/assets/pixel-ghost-poster.png" alt="" aria-hidden="true" width="64" height="64" decoding="async">
+        </div>
+        <p class="ocean-intro">The <strong>INCREDIBLE</strong> and <strong>CUTE</strong> Oceonax shared eight Halloween gift-art posts on October 30 and 31, 2026.</p>
         <nav class="oldweb-nav scribble-box ocean-nav" aria-label="Series navigation">
           <a href="/">Home</a>
           <a href="#entries">All eight entries</a>
@@ -41,12 +45,18 @@
         </nav>
       </header>
 
-      <div class="ocean-series-stamp" aria-label="Eight original posts">8 treats - 2 days - all art</div>
+      <div class="ocean-series-meta">
+        <div class="ocean-series-stamp" aria-label="Eight original posts">8 treats - 2 days - all art</div>
+        <button class="ocean-motion-toggle" id="ocean-motion-toggle" type="button" aria-pressed="false" aria-controls="ocean-decorations" hidden>Play Halloween GIFs</button>
+      </div>
 
       <section id="entries" class="ocean-day" aria-labelledby="oct-30-heading">
         <div class="ocean-day-heading">
-          <p class="ocean-kicker">Part one</p>
-          <h2 id="oct-30-heading">October 30 <span>- 4 entries</span></h2>
+          <div class="ocean-day-title">
+            <p class="ocean-kicker">Part one</p>
+            <h2 id="oct-30-heading">October 30 <span>- 4 entries</span></h2>
+          </div>
+          <img class="ocean-sprinkle ocean-sprinkle--day ocean-sprinkle--ghost" src="/oceonax-halloween/assets/pixel-ghost-poster.png" data-motion-src="/oceonax-halloween/assets/pixel-ghost.gif" data-poster-src="/oceonax-halloween/assets/pixel-ghost-poster.png" alt="" aria-hidden="true" width="48" height="48" loading="lazy" decoding="async">
         </div>
         <div class="ocean-grid">
           <article class="ocean-entry">
@@ -116,8 +126,11 @@
 
       <section class="ocean-day" aria-labelledby="oct-31-heading">
         <div class="ocean-day-heading">
-          <p class="ocean-kicker">Halloween day</p>
-          <h2 id="oct-31-heading">October 31 <span>- 4 entries</span></h2>
+          <div class="ocean-day-title">
+            <p class="ocean-kicker">Halloween day</p>
+            <h2 id="oct-31-heading">October 31 <span>- 4 entries</span></h2>
+          </div>
+          <img class="ocean-sprinkle ocean-sprinkle--day ocean-sprinkle--pumpkin" src="/oceonax-halloween/assets/pixel-pumpkin-poster.png" data-motion-src="/oceonax-halloween/assets/pixel-pumpkin.gif" data-poster-src="/oceonax-halloween/assets/pixel-pumpkin-poster.png" alt="" aria-hidden="true" width="48" height="48" loading="lazy" decoding="async">
         </div>
         <div class="ocean-grid">
           <article class="ocean-entry">
@@ -185,12 +198,36 @@
       <footer class="ocean-footer">
         <a href="https://bsky.app/profile/oceonax.bsky.social" target="_blank" rel="noopener noreferrer">Follow Oceonax on Bluesky ↗</a>
         <a href="/">Back to kazvt.com</a>
+        <p class="ocean-art-credit">Pixel GIFs by MXJ_files on Pixabay: <a href="https://pixabay.com/gifs/pumpkin-jack-o-lantern-face-23249/" target="_blank" rel="noopener noreferrer">pumpkin</a> and <a href="https://pixabay.com/gifs/ghost-spooky-halloween-flutter-23277/" target="_blank" rel="noopener noreferrer">ghost</a>.</p>
       </footer>
     </main>
     <script>
       (() => {
+        const motionToggle = document.querySelector("#ocean-motion-toggle");
+        const spookyImages = [...document.querySelectorAll(".ocean-sprinkle[data-motion-src]")];
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        if (motionToggle && spookyImages.length) {
+          const setSpookyMotion = (playing) => {
+            for (const image of spookyImages) {
+              const wantedSource = playing ? image.dataset.motionSrc : image.dataset.posterSrc;
+              if (wantedSource && !image.src.endsWith(wantedSource)) image.src = wantedSource;
+            }
+            motionToggle.setAttribute("aria-pressed", String(playing));
+            motionToggle.textContent = playing ? "Pause Halloween GIFs" : "Play Halloween GIFs";
+            motionToggle.hidden = false;
+          };
+
+          setSpookyMotion(!reduceMotion.matches);
+          motionToggle.addEventListener("click", () => {
+            setSpookyMotion(motionToggle.getAttribute("aria-pressed") !== "true");
+          });
+          reduceMotion.addEventListener?.("change", (event) => {
+            if (event.matches) setSpookyMotion(false);
+          });
+        }
+
         const featuredEntry = document.querySelector(".ocean-entry--kaz");
-        if (!featuredEntry || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (!featuredEntry || reduceMotion.matches) return;
 
         const animateFeature = () => featuredEntry.classList.add("is-highlighted");
         if (!("IntersectionObserver" in window)) {
