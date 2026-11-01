@@ -137,6 +137,7 @@ const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"
 const ART_ROTATION_MS = 8000;
 const ART_MANUAL_HOLD_MS = 20000;
 const THEME_STORAGE_KEY = "kazvt-theme";
+const DEFAULT_THEME = "p16";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
 const DEFAULT_SITE_VOLUME = 0.2;
 const WIFE_KISS_SOUND_SRC = "zzz_assets/sounds/wifey-kissy.mp3";
@@ -897,7 +898,7 @@ function storedTheme(themeButtons) {
     const theme = localStorage.getItem(THEME_STORAGE_KEY);
     if (theme && themes.has(theme)) return theme;
   } catch {}
-  return document.body.dataset.theme && themes.has(document.body.dataset.theme) ? document.body.dataset.theme : "p1";
+  return document.body.dataset.theme && themes.has(document.body.dataset.theme) ? document.body.dataset.theme : DEFAULT_THEME;
 }
 
 function destroyCursorEffect() {
@@ -934,7 +935,7 @@ function anyStreamLive() {
 }
 
 function cursorThemeConfig(theme) {
-  const config = cursorThemes[theme] || cursorThemes.p1;
+  const config = cursorThemes[theme] || cursorThemes[DEFAULT_THEME];
   const options = { ...(config.options || {}) };
 
   const glyphs = translatedList(`cursor.${theme}.glyphs`);
@@ -2145,7 +2146,7 @@ async function initializeArtCarousel() {
     document.body.classList.add("guide-modal-open");
     if (typeof viewerModal.showModal === "function") viewerModal.showModal();
     else viewerModal.setAttribute("open", "");
-    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    updateCursorEffect(document.body.dataset.theme || DEFAULT_THEME, { force: true });
     window.KazvtLineboil?.sync?.();
     viewerModal.querySelector("[data-art-viewer-close]")?.focus({ preventScroll: true });
   }
@@ -2164,7 +2165,7 @@ async function initializeArtCarousel() {
   });
   viewerModal.addEventListener("close", () => {
     document.body.classList.remove("guide-modal-open");
-    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    updateCursorEffect(document.body.dataset.theme || DEFAULT_THEME, { force: true });
     window.KazvtLineboil?.sync?.();
     if (lastViewerTrigger instanceof HTMLElement) lastViewerTrigger.focus({ preventScroll: true });
   });
@@ -2801,7 +2802,7 @@ async function initializeMultistreamGuideModal() {
     document.body.classList.add("guide-modal-open");
     if (typeof modal.showModal === "function") modal.showModal();
     else modal.setAttribute("open", "");
-    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    updateCursorEffect(document.body.dataset.theme || DEFAULT_THEME, { force: true });
     window.KazvtLineboil?.sync?.();
     viewport.scrollTo({ top: 0, left: 0, behavior: "auto" });
     await loadGuide();
@@ -2828,7 +2829,7 @@ async function initializeMultistreamGuideModal() {
   });
   modal.addEventListener("close", () => {
     document.body.classList.remove("guide-modal-open");
-    updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+    updateCursorEffect(document.body.dataset.theme || DEFAULT_THEME, { force: true });
     window.KazvtLineboil?.sync?.();
     if (lastTrigger instanceof HTMLElement) lastTrigger.focus({ preventScroll: true });
   });
@@ -3175,7 +3176,7 @@ function initializeSiteTools() {
   themeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const theme = button.getAttribute("data-tool-theme");
-      applySiteTheme(theme || "p1", themeButtons);
+      applySiteTheme(theme || DEFAULT_THEME, themeButtons);
     });
   });
 
@@ -4268,7 +4269,7 @@ async function bootSite() {
   }
 
   mountLanguageSelector();
-  updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+  updateCursorEffect(document.body.dataset.theme || DEFAULT_THEME, { force: true });
 }
 
 bootSite();
