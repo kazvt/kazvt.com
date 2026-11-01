@@ -14899,13 +14899,13 @@ kbd {
   .kaz-ticker a {
     transition: none;
   }
-  .kaz-sticker:is(a, button):hover,
+  .kaz-sticker:is(a, button):hover:not(:active),
   .kaz-sticker:is(a, button):active,
-  .kaz-webring a:hover,
+  .kaz-webring a:hover:not(:active),
   .kaz-webring a:active,
-  .kaz-link-list a:hover,
+  .kaz-link-list a:hover:not(:active),
   .kaz-link-list a:active,
-  .kaz-ticker a:hover,
+  .kaz-ticker a:hover:not(:active),
   .kaz-ticker a:active {
     transform: none;
   }
@@ -14981,6 +14981,23 @@ kbd {
     border-color: CanvasText;
     box-shadow: none;
   }
+  .kaz-sticker,
+  .kaz-webring a,
+  .kaz-link-list a,
+  .kaz-ticker a {
+    transition: none;
+  }
+  .kaz-sticker:is(a, button):hover,
+  .kaz-sticker:is(a, button):active,
+  .kaz-webring a:hover,
+  .kaz-webring a:active,
+  .kaz-link-list a:hover,
+  .kaz-link-list a:active,
+  .kaz-ticker a:hover,
+  .kaz-ticker a:active {
+    box-shadow: none !important;
+    transform: none !important;
+  }
   .kaz-link-list,
   .kaz-link-list > li + li {
     border-color: CanvasText;
@@ -14991,7 +15008,24 @@ kbd {
   .kaz-ticker a {
     color: LinkText;
   }
+  .kaz-webring a:hover,
+  .kaz-link-list a:hover,
+  .kaz-ticker a:hover,
+  .kaz-webring a:active,
+  .kaz-link-list a:active,
+  .kaz-ticker a:active {
+    color: LinkText;
+  }
+  .kaz-webring a[aria-current="page"] {
+    color: LinkText;
+    background-color: Canvas;
+    box-shadow: none;
+  }
   .kaz-link-list a::before {
+    color: CanvasText;
+  }
+  .kaz-guestbook-entry time,
+  .kaz-scoreboard dt {
     color: CanvasText;
   }
   .kaz-sticker:focus-visible,
