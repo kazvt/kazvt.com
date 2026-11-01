@@ -2498,6 +2498,389 @@ kbd {
       linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
   }
 }
+
+/* Ten optional old-web details, built from Bootstrap tokens and static CSS. */
+.kaz-window {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
+  border: 2px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-window-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem 0.75rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--bs-body-color);
+  background-color: var(--bs-tertiary-bg);
+  border-block-end: 2px solid var(--bs-border-color);
+}
+.kaz-window-body {
+  padding: 1rem;
+}
+.kaz-sticker {
+  display: inline-flex;
+  width: 88px;
+  min-height: 31px;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.35rem;
+  border: 2px solid var(--bs-primary-border-subtle);
+  background-color: var(--bs-primary-bg-subtle);
+  box-shadow: var(--bs-box-shadow-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+.kaz-webring {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  border: 2px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-webring a {
+  display: inline-flex;
+  flex: 1 1 auto;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.7rem;
+  color: var(--bs-link-color);
+  background-color: var(--bs-body-bg);
+  border-inline-end: 1px solid var(--bs-border-color);
+  transition: transform 0.12s ease-out, background-color 0.12s ease-out, box-shadow 0.12s ease-out;
+}
+.kaz-webring a[aria-current="page"] {
+  color: var(--bs-primary-text-emphasis);
+  background-color: var(--bs-primary-bg-subtle);
+  font-weight: 700;
+}
+.kaz-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  color: var(--bs-light);
+  background-color: var(--bs-dark);
+  border: 2px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-counter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.kaz-counter-digits {
+  display: inline-flex;
+  gap: 2px;
+  font-family: var(--bs-font-monospace);
+  font-variant-numeric: tabular-nums;
+}
+.kaz-counter-digit {
+  min-width: 1.05em;
+  padding: 0.08rem 0.12rem;
+  color: var(--bs-light);
+  background-color: var(--bs-dark);
+  border: 1px solid var(--bs-secondary);
+  text-align: center;
+}
+.kaz-construction {
+  padding: 0.75rem 1rem;
+  color: var(--bs-warning-text-emphasis);
+  background-color: var(--bs-warning-bg-subtle);
+  border: 2px dashed var(--bs-warning-border-subtle);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-construction::before {
+  content: "";
+  display: block;
+  height: 0.4rem;
+  margin: -0.75rem -1rem 0.65rem;
+  background-color: var(--bs-warning);
+}
+.kaz-guestbook-entry {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
+  padding: 0.9rem 1rem;
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-inline-start: 4px solid var(--kaz-feature-accent);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-guestbook-entry > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-block-end: 0.5rem;
+}
+.kaz-guestbook-entry time {
+  color: var(--bs-secondary-color);
+  font-size: 0.875em;
+}
+.kaz-ticker {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  background-color: var(--bs-tertiary-bg);
+  border: 2px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-ticker-label {
+  flex: 0 0 auto;
+  padding: 0.18rem 0.4rem;
+  color: var(--bs-white);
+  background-color: var(--bs-primary);
+  border: 1px solid var(--bs-primary-text-emphasis);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.kaz-link-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block: 1px solid var(--bs-border-color);
+}
+.kaz-link-list > li + li {
+  border-block-start: 1px solid var(--bs-border-color);
+}
+.kaz-link-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.45rem 0.25rem;
+  transition: transform 0.12s ease-out, color 0.12s ease-out;
+}
+.kaz-link-list a::before {
+  content: "›";
+  flex: 0 0 auto;
+  color: var(--bs-primary);
+  font-weight: 800;
+}
+.kaz-scoreboard {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.65rem;
+  background-color: var(--bs-body-bg);
+  border: 2px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+.kaz-scoreboard > div {
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+}
+.kaz-scoreboard dt {
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+}
+.kaz-scoreboard dd {
+  margin: 0;
+  font-family: var(--bs-font-monospace);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.kaz-rule {
+  height: 0.45rem;
+  margin-block: 1.25rem;
+  border: 0;
+  background-color: var(--bs-primary);
+  opacity: 1;
+}
+
+@supports (color: color-mix(in oklab, white, black)) {
+  .kaz-window {
+    border-color: color-mix(in oklab, var(--bs-border-color) 50%, var(--kaz-feature-accent) 50%);
+    background-image:
+      linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 48%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-feature-accent) 5%, transparent), transparent 72%);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 24%, transparent),
+      2px 2px 0 color-mix(in oklab, var(--kaz-feature-accent) 40%, black 60%),
+      5px 5px 0 color-mix(in oklab, var(--bs-emphasis-color) 14%, transparent);
+  }
+  .kaz-window-bar {
+    background-image:
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-feature-accent, var(--bs-primary)) 78%, black 22%) 0% 64%,
+        color-mix(in oklab, var(--kaz-feature-accent, var(--bs-primary)) 68%, white 32%) 64% 80%,
+        color-mix(in oklab, var(--kaz-feature-accent, var(--bs-primary)) 72%, black 28%) 80% 100%),
+      linear-gradient(to bottom, color-mix(in oklab, white 16%, transparent), transparent 68%);
+    background-size: 100% 3px, 100% 100%;
+    background-position: top left, center;
+    background-repeat: no-repeat;
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 30%, transparent);
+  }
+  .kaz-sticker {
+    border-color: color-mix(in oklab, var(--bs-primary-border-subtle) 55%, var(--bs-primary) 45%);
+    background-image:
+      linear-gradient(to bottom, color-mix(in oklab, white 28%, transparent), transparent 58%),
+      linear-gradient(135deg, color-mix(in oklab, var(--bs-primary) 9%, transparent), transparent 78%);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 65%, transparent),
+      2px 2px 0 color-mix(in oklab, var(--bs-primary) 54%, black 46%),
+      4px 4px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+  }
+  .kaz-webring {
+    border-color: color-mix(in oklab, var(--bs-border-color) 48%, var(--bs-primary) 52%);
+    background-image: linear-gradient(90deg,
+      color-mix(in oklab, var(--bs-primary) 76%, black 24%) 0% 64%,
+      color-mix(in oklab, var(--bs-primary) 66%, white 34%) 64% 80%,
+      color-mix(in oklab, var(--bs-primary) 70%, black 30%) 80% 100%);
+    background-size: 100% 3px;
+    background-position: top left;
+    background-repeat: no-repeat;
+    box-shadow:
+      2px 2px 0 color-mix(in oklab, var(--bs-primary) 35%, black 65%),
+      5px 5px 0 color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
+  }
+  .kaz-webring a {
+    background-image:
+      linear-gradient(to bottom, color-mix(in oklab, white 17%, transparent), transparent 64%),
+      linear-gradient(135deg, color-mix(in oklab, var(--bs-primary) 6%, transparent), transparent 72%);
+  }
+  .kaz-webring a[aria-current="page"] {
+    box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--bs-primary) 65%, black 35%);
+  }
+  .kaz-counter {
+    border-color: color-mix(in oklab, var(--bs-dark) 65%, white 35%);
+    background-image:
+      linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 52%),
+      linear-gradient(135deg, color-mix(in oklab, var(--bs-primary) 12%, transparent), transparent 76%);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 25%, transparent),
+      inset 0 -2px 0 color-mix(in oklab, black 45%, transparent),
+      2px 2px 0 color-mix(in oklab, var(--bs-emphasis-color) 24%, transparent),
+      5px 5px 0 color-mix(in oklab, var(--bs-primary) 28%, transparent);
+  }
+  .kaz-counter-digit {
+    background-image: linear-gradient(to bottom, color-mix(in oklab, white 15%, transparent), transparent 50%);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 38%, transparent), inset 0 -1px 0 color-mix(in oklab, black 48%, transparent);
+  }
+  .kaz-construction {
+    background-image:
+      linear-gradient(105deg, color-mix(in oklab, var(--bs-warning) 10%, transparent), transparent 68%),
+      linear-gradient(to bottom, color-mix(in oklab, white 22%, transparent), transparent 56%);
+  }
+  .kaz-construction::before {
+    background-image: repeating-linear-gradient(135deg,
+      color-mix(in oklab, var(--bs-warning) 66%, black 34%) 0 8px,
+      color-mix(in oklab, var(--bs-warning) 66%, white 34%) 8px 16px);
+  }
+  .kaz-guestbook-entry {
+    border-color: color-mix(in oklab, var(--bs-border-color) 65%, var(--kaz-feature-accent) 35%);
+    border-inline-start-color: color-mix(in oklab, var(--kaz-feature-accent) 76%, black 24%);
+    background-image:
+      linear-gradient(145deg, color-mix(in oklab, white 13%, transparent), transparent 50%),
+      linear-gradient(90deg, color-mix(in oklab, var(--kaz-feature-accent) 6%, transparent), transparent 76%);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 35%, transparent),
+      2px 2px 0 color-mix(in oklab, var(--kaz-feature-accent) 29%, black 71%),
+      5px 5px 0 color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
+  }
+  .kaz-ticker {
+    border-color: color-mix(in oklab, var(--bs-border-color) 55%, var(--kaz-feature-accent) 45%);
+    background-image:
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-feature-accent) 75%, black 25%) 0% 66%,
+        color-mix(in oklab, var(--kaz-feature-accent) 65%, white 35%) 66% 82%,
+        color-mix(in oklab, var(--kaz-feature-accent) 70%, black 30%) 82% 100%),
+      linear-gradient(145deg, color-mix(in oklab, white 15%, transparent), transparent 56%);
+    background-size: 100% 3px, 100% 100%;
+    background-position: top left, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 25%, transparent),
+      2px 2px 0 color-mix(in oklab, var(--kaz-feature-accent) 35%, black 65%),
+      5px 5px 0 color-mix(in oklab, var(--bs-emphasis-color) 11%, transparent);
+  }
+  .kaz-ticker-label {
+    background-image: linear-gradient(to bottom, color-mix(in oklab, white 24%, transparent), transparent 58%);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 42%, transparent), 1px 1px 0 color-mix(in oklab, var(--bs-primary) 40%, black 60%);
+  }
+  .kaz-link-list {
+    border-color: color-mix(in oklab, var(--bs-border-color) 58%, var(--bs-primary) 42%);
+  }
+  .kaz-link-list > li + li {
+    border-block-start-color: color-mix(in oklab, var(--bs-border-color) 62%, var(--bs-primary) 38%);
+  }
+  .kaz-link-list a::before {
+    color: color-mix(in oklab, var(--bs-primary) 75%, black 25%);
+  }
+  .kaz-scoreboard {
+    border-color: color-mix(in oklab, var(--bs-border-color) 54%, var(--kaz-feature-accent) 46%);
+    background-image: linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 55%);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 28%, transparent),
+      2px 2px 0 color-mix(in oklab, var(--kaz-feature-accent) 35%, black 65%),
+      5px 5px 0 color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
+  }
+  .kaz-scoreboard > div {
+    border-color: color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-feature-accent) 38%);
+    background-image:
+      linear-gradient(to bottom, color-mix(in oklab, white 18%, transparent), transparent 54%),
+      linear-gradient(90deg, color-mix(in oklab, var(--kaz-feature-accent) 5%, transparent), transparent 82%);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 30%, transparent), inset 0 -1px 0 color-mix(in oklab, var(--kaz-feature-accent) 13%, transparent);
+  }
+  .kaz-rule {
+    background-image: linear-gradient(90deg,
+      color-mix(in oklab, var(--bs-primary) 76%, black 24%) 0% 36%,
+      color-mix(in oklab, var(--bs-primary) 66%, white 34%) 36% 48%,
+      color-mix(in oklab, var(--bs-info) 75%, black 25%) 48% 84%,
+      color-mix(in oklab, var(--bs-info) 65%, white 35%) 84% 92%,
+      color-mix(in oklab, var(--bs-info) 70%, black 30%) 92% 100%);
+    box-shadow: 2px 2px 0 color-mix(in oklab, var(--bs-primary) 30%, transparent);
+  }
+}
+@media (hover: hover) {
+  .kaz-sticker:is(a, button):hover,
+  .kaz-webring a:hover,
+  .kaz-link-list a:hover,
+  .kaz-ticker a:hover {
+    transform: translate(-1px, -1px);
+    text-decoration-thickness: 0.12em;
+  }
+  .kaz-sticker:is(a, button):active,
+  .kaz-webring a:active,
+  .kaz-link-list a:active,
+  .kaz-ticker a:active {
+    transform: translate(1px, 1px);
+  }
+  .kaz-sticker:is(a, button):hover {
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 65%, transparent),
+      3px 3px 0 color-mix(in oklab, var(--bs-primary) 54%, black 46%),
+      6px 6px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+  }
+  .kaz-webring a:hover,
+  .kaz-link-list a:hover,
+  .kaz-ticker a:hover {
+    color: var(--bs-link-hover-color);
+  }
+}
+.kaz-sticker:focus-visible,
+.kaz-webring a:focus-visible,
+.kaz-link-list a:focus-visible,
+.kaz-ticker a:focus-visible {
+  outline: 2px solid var(--bs-emphasis-color);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   a:not(.btn),
   .btn-link,
@@ -2512,6 +2895,22 @@ kbd {
   .navbar .nav-link:hover,
   .page-item:not(.disabled):not(.active) .page-link:hover,
   .list-group-item-action:hover {
+    transform: none;
+  }
+  .kaz-sticker,
+  .kaz-webring a,
+  .kaz-link-list a,
+  .kaz-ticker a {
+    transition: none;
+  }
+  .kaz-sticker:is(a, button):hover,
+  .kaz-sticker:is(a, button):active,
+  .kaz-webring a:hover,
+  .kaz-webring a:active,
+  .kaz-link-list a:hover,
+  .kaz-link-list a:active,
+  .kaz-ticker a:hover,
+  .kaz-ticker a:active {
     transform: none;
   }
 }
@@ -2576,6 +2975,36 @@ kbd {
   .offcanvas-header, .offcanvas-body, .toast-header, .toast-body,
   .popover-header, .popover-body, .accordion-header, .accordion-body {
     border-color: CanvasText;
+  }
+  .kaz-window, .kaz-window-bar, .kaz-sticker, .kaz-webring, .kaz-webring a,
+  .kaz-counter, .kaz-counter-digit, .kaz-construction, .kaz-guestbook-entry,
+  .kaz-ticker, .kaz-ticker-label, .kaz-scoreboard, .kaz-scoreboard > div {
+    color: CanvasText;
+    background-color: Canvas;
+    background-image: none !important;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  .kaz-window, .kaz-webring, .kaz-guestbook-entry, .kaz-scoreboard {
+    border-inline-start-color: CanvasText;
+  }
+  .kaz-window-bar, .kaz-construction::before {
+    border-block-end-color: CanvasText;
+    background-image: none;
+  }
+  .kaz-construction::before {
+    display: none;
+  }
+  .kaz-rule {
+    background-color: CanvasText;
+    background-image: none;
+    box-shadow: none;
+  }
+  .kaz-sticker:focus-visible,
+  .kaz-webring a:focus-visible,
+  .kaz-link-list a:focus-visible,
+  .kaz-ticker a:focus-visible {
+    outline-color: Highlight;
   }
   .card-header, .modal-header, .offcanvas-header, .toast-header, .popover-header, .accordion-header {
     border-inline-start-color: CanvasText;
