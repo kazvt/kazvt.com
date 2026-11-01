@@ -2932,13 +2932,13 @@ kbd {
   .kaz-ticker a {
     transition: none;
   }
-  .kaz-sticker:is(a, button):hover,
+  .kaz-sticker:is(a, button):hover:not(:active),
   .kaz-sticker:is(a, button):active,
-  .kaz-webring a:hover,
+  .kaz-webring a:hover:not(:active),
   .kaz-webring a:active,
-  .kaz-link-list a:hover,
+  .kaz-link-list a:hover:not(:active),
   .kaz-link-list a:active,
-  .kaz-ticker a:hover,
+  .kaz-ticker a:hover:not(:active),
   .kaz-ticker a:active {
     transform: none;
   }
