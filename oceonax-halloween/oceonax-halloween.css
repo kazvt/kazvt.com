@@ -409,6 +409,12 @@
   background: var(--paper);
 }
 
+.ocean-footer > a {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+}
+
 .ocean-art-credit {
   flex: 1 0 100%;
   margin: 0;
