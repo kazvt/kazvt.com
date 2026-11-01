@@ -2395,7 +2395,7 @@ kbd {
         transparent 1px 6px,
         color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 6px 7px,
         transparent 7px 12px),
-      linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 66%),
+      linear-gradient(145deg, color-mix(in oklab, white 3%, transparent), transparent 66%),
       linear-gradient(to bottom, color-mix(in oklab, currentColor 2%, transparent), transparent);
   }
 
