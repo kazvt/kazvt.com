@@ -2536,6 +2536,7 @@ kbd {
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
 }
 .kaz-webring {
   --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
@@ -2662,6 +2663,9 @@ kbd {
   gap: 0.5rem;
   padding: 0.45rem 0.25rem;
   transition: transform 0.12s ease-out, color 0.12s ease-out;
+}
+.kaz-ticker a {
+  transition: transform 0.12s ease-out, color 0.12s ease-out, text-decoration-thickness 0.12s ease-out;
 }
 .kaz-link-list a::before {
   content: "›";
