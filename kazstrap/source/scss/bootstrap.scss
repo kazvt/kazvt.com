@@ -2316,9 +2316,20 @@ kbd {
   .was-validated .form-select:invalid:not([multiple])[size="1"],
   .form-select.is-invalid:not([multiple]):not([size]),
   .form-select.is-invalid:not([multiple])[size="1"] {
-    --kaz-ui-accent: var(--bs-success);
     background-position: 0 0, right 0.75rem center, center right 2.25rem;
     background-size: auto, 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+  .was-validated .form-select:valid:not([multiple]):not([size]),
+  .was-validated .form-select:valid:not([multiple])[size="1"],
+  .form-select.is-valid:not([multiple]):not([size]),
+  .form-select.is-valid:not([multiple])[size="1"] {
+    --kaz-ui-accent: var(--bs-success);
+  }
+  .was-validated .form-select:invalid:not([multiple]):not([size]),
+  .was-validated .form-select:invalid:not([multiple])[size="1"],
+  .form-select.is-invalid:not([multiple]):not([size]),
+  .form-select.is-invalid:not([multiple])[size="1"] {
+    --kaz-ui-accent: var(--bs-danger);
   }
 
   .badge,
@@ -2351,6 +2362,14 @@ kbd {
         transparent 1px 8px),
       linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
   }
+  .table-primary { --kaz-ui-accent: var(--bs-primary); }
+  .table-secondary { --kaz-ui-accent: var(--bs-secondary); }
+  .table-success { --kaz-ui-accent: var(--bs-success); }
+  .table-info { --kaz-ui-accent: var(--bs-info); }
+  .table-warning { --kaz-ui-accent: var(--bs-warning); }
+  .table-danger { --kaz-ui-accent: var(--bs-danger); }
+  .table-light { --kaz-ui-accent: var(--bs-secondary); }
+  .table-dark { --kaz-ui-accent: var(--bs-dark); }
   .table thead th {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
     background-image:
