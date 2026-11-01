@@ -1867,12 +1867,9 @@ kbd {
     background-image: linear-gradient(135deg,
       rgba(var(--bs-primary-rgb), 0.04), transparent 48%, rgba(var(--bs-info-rgb), 0.04));
   }
-  body::before {
-    background-image: conic-gradient(
-      rgba(var(--bs-primary-rgb), 0.09) 0deg 90deg,
-      rgba(var(--bs-info-rgb), 0.05) 90deg 180deg,
-      rgba(var(--bs-primary-rgb), 0.09) 180deg 270deg,
-      rgba(var(--bs-info-rgb), 0.05) 270deg 360deg);
+  body::before,
+  body::after {
+    display: none;
   }
   h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
   .card-title, .alert-heading, .modal-title, .offcanvas-title {
@@ -2501,11 +2498,6 @@ kbd {
       linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
   }
 }
-@supports not (background-image: conic-gradient(red, blue)) {
-  body::before {
-    display: none;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   a:not(.btn),
   .btn-link,
@@ -2543,6 +2535,10 @@ kbd {
   }
   body {
     background-image: none;
+  }
+  body::before,
+  body::after {
+    display: none !important;
   }
   .card, .card-header, .card-body, .card-footer,
   .dropdown-menu, .dropdown-header, .modal-content, .modal-header, .modal-body, .modal-footer,
