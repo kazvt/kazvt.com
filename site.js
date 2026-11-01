@@ -4236,10 +4236,12 @@ async function bootSite() {
     history.replaceState(null, "", `${window.location.pathname}${window.location.search}${initialHash}`);
   }
 
+  // Resolve saved palette preferences before network-backed startup work so
+  // the default palette is never shown over a returning visitor's choice.
+  initializeSiteTools();
   await loadActiveEmotes();
   await loadActiveLanguageText();
   applyLanguageText(document);
-  initializeSiteTools();
   initializeSiteWelcomePopup();
   initializeCurrentUrl();
   await initializeMarquee();

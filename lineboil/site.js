@@ -87,6 +87,7 @@ const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avi
 const audioExtensions = new Set([".mp3", ".ogg", ".wav", ".m4a", ".flac", ".aac"]);
 const ART_ROTATION_MS = 8000;
 const THEME_STORAGE_KEY = "kazvt-theme";
+const DEFAULT_THEME = "p16";
 const VOLUME_STORAGE_KEY = "kazvt-volume";
 const WIFE_KISS_SOUND_SRC = "assets/sounds/wifey-kissy.mp3";
 const FRUIT_SOUND_SRC = "assets/sounds/fruit.mp3";
@@ -757,7 +758,7 @@ function storedTheme(themeButtons) {
     const theme = localStorage.getItem(THEME_STORAGE_KEY);
     if (theme && themes.has(theme)) return theme;
   } catch {}
-  return document.body.dataset.theme && themes.has(document.body.dataset.theme) ? document.body.dataset.theme : "p1";
+  return document.body.dataset.theme && themes.has(document.body.dataset.theme) ? document.body.dataset.theme : DEFAULT_THEME;
 }
 
 function destroyCursorEffect() {
@@ -784,7 +785,7 @@ function anyStreamLive() {
 }
 
 function cursorThemeConfig(theme) {
-  const config = cursorThemes[theme] || cursorThemes.p1;
+  const config = cursorThemes[theme] || cursorThemes[DEFAULT_THEME];
   const options = { ...(config.options || {}) };
 
   if (options.glyphs) options.glyphs = translatedList(`cursor.${theme}.glyphs`, options.glyphs);
@@ -1930,7 +1931,7 @@ function initializeSiteTools() {
   themeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const theme = button.getAttribute("data-tool-theme");
-      applySiteTheme(theme || "p1", themeButtons);
+      applySiteTheme(theme || DEFAULT_THEME, themeButtons);
     });
   });
 
@@ -2636,9 +2637,9 @@ async function loadStatus() {
 }
 
 async function bootSite() {
+  initializeSiteTools();
   await loadActiveEmotes();
   await loadActiveLanguageText();
-  initializeSiteTools();
   initializeCurrentUrl();
   await initializeMarquee();
 
@@ -2651,7 +2652,7 @@ async function bootSite() {
   }
 
   mountLanguageSelector();
-  updateCursorEffect(document.body.dataset.theme || "p1", { force: true });
+  updateCursorEffect(document.body.dataset.theme || DEFAULT_THEME, { force: true });
 }
 
 bootSite();
