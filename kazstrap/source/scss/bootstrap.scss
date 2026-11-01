@@ -2521,6 +2521,7 @@ kbd {
   padding: 1rem;
 }
 .kaz-sticker {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
   display: inline-flex;
   width: 88px;
   min-height: 31px;
@@ -2537,6 +2538,7 @@ kbd {
   text-align: center;
 }
 .kaz-webring {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
@@ -2645,6 +2647,7 @@ kbd {
   font-weight: 700;
 }
 .kaz-link-list {
+  --kaz-feature-accent: var(--kaz-ui-accent, var(--bs-primary));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2727,35 +2730,35 @@ kbd {
     box-shadow: inset 0 1px 0 color-mix(in oklab, white 30%, transparent);
   }
   .kaz-sticker {
-    border-color: color-mix(in oklab, var(--bs-primary-border-subtle) 55%, var(--bs-primary) 45%);
+    border-color: color-mix(in oklab, var(--bs-border-color) 50%, var(--kaz-feature-accent) 50%);
     background-image:
       linear-gradient(to bottom, color-mix(in oklab, white 28%, transparent), transparent 58%),
-      linear-gradient(135deg, color-mix(in oklab, var(--bs-primary) 9%, transparent), transparent 78%);
+      linear-gradient(135deg, color-mix(in oklab, var(--kaz-feature-accent) 9%, transparent), transparent 78%);
     box-shadow:
       inset 0 1px 0 color-mix(in oklab, white 65%, transparent),
-      2px 2px 0 color-mix(in oklab, var(--bs-primary) 54%, black 46%),
-      4px 4px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+      2px 2px 0 color-mix(in oklab, var(--kaz-feature-accent) 54%, black 46%),
+      4px 4px 0 color-mix(in oklab, var(--kaz-feature-accent) 24%, transparent);
   }
   .kaz-webring {
-    border-color: color-mix(in oklab, var(--bs-border-color) 48%, var(--bs-primary) 52%);
+    border-color: color-mix(in oklab, var(--bs-border-color) 48%, var(--kaz-feature-accent) 52%);
     background-image: linear-gradient(90deg,
-      color-mix(in oklab, var(--bs-primary) 76%, black 24%) 0% 64%,
-      color-mix(in oklab, var(--bs-primary) 66%, white 34%) 64% 80%,
-      color-mix(in oklab, var(--bs-primary) 70%, black 30%) 80% 100%);
+      color-mix(in oklab, var(--kaz-feature-accent) 76%, black 24%) 0% 64%,
+      color-mix(in oklab, var(--kaz-feature-accent) 66%, white 34%) 64% 80%,
+      color-mix(in oklab, var(--kaz-feature-accent) 70%, black 30%) 80% 100%);
     background-size: 100% 3px;
     background-position: top left;
     background-repeat: no-repeat;
     box-shadow:
-      2px 2px 0 color-mix(in oklab, var(--bs-primary) 35%, black 65%),
+      2px 2px 0 color-mix(in oklab, var(--kaz-feature-accent) 35%, black 65%),
       5px 5px 0 color-mix(in oklab, var(--bs-emphasis-color) 12%, transparent);
   }
   .kaz-webring a {
     background-image:
       linear-gradient(to bottom, color-mix(in oklab, white 17%, transparent), transparent 64%),
-      linear-gradient(135deg, color-mix(in oklab, var(--bs-primary) 6%, transparent), transparent 72%);
+      linear-gradient(135deg, color-mix(in oklab, var(--kaz-feature-accent) 6%, transparent), transparent 72%);
   }
   .kaz-webring a[aria-current="page"] {
-    box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--bs-primary) 65%, black 35%);
+    box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--kaz-feature-accent) 65%, black 35%);
   }
   .kaz-counter {
     border-color: color-mix(in oklab, var(--bs-dark) 65%, white 35%);
@@ -2864,8 +2867,8 @@ kbd {
   .kaz-sticker:is(a, button):hover {
     box-shadow:
       inset 0 1px 0 color-mix(in oklab, white 65%, transparent),
-      3px 3px 0 color-mix(in oklab, var(--bs-primary) 54%, black 46%),
-      6px 6px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+      3px 3px 0 color-mix(in oklab, var(--kaz-feature-accent) 54%, black 46%),
+      6px 6px 0 color-mix(in oklab, var(--kaz-feature-accent) 24%, transparent);
   }
   .kaz-webring a:hover,
   .kaz-link-list a:hover,
