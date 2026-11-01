@@ -187,5 +187,24 @@
         <a href="/">Back to kazvt.com</a>
       </footer>
     </main>
+    <script>
+      (() => {
+        const featuredEntry = document.querySelector(".ocean-entry--kaz");
+        if (!featuredEntry || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        const animateFeature = () => featuredEntry.classList.add("is-highlighted");
+        if (!("IntersectionObserver" in window)) {
+          animateFeature();
+          return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          animateFeature();
+          observer.disconnect();
+        }, { threshold: 0.25 });
+        observer.observe(featuredEntry);
+      })();
+    </script>
   </body>
 </html>
