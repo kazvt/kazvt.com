@@ -13964,15 +13964,18 @@ kbd {
     color: var(--bs-primary-text-emphasis);
   }
 }
-/* Seamless, low-opacity print textures add depth without washing out the component colors. */
+/* Paired semantic pinstripes add a brighter retro print sheen while keeping each surface's color readable. */
 @supports (background-image: repeating-linear-gradient(135deg, transparent 0 1px, transparent 1px 12px)) and (color: color-mix(in oklab, white, black)) {
   .btn:not(.btn-link) {
     --kaz-ui-accent: var(--kaz-btn-color);
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent) 55%, white 45%);
     --kaz-btn-pattern: repeating-linear-gradient(
       135deg,
       color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
-      transparent 1px 10px
+      transparent 1px 10px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 10px 11px,
+      transparent 11px 20px
     );
     background-image: var(--kaz-btn-pattern), var(--kaz-btn-glaze-gradient), var(--kaz-btn-face-gradient);
   }
@@ -13996,10 +13999,13 @@ kbd {
   .popover,
   .offcanvas {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-        transparent 1px 16px),
+        transparent 1px 16px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
+        transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
@@ -14053,10 +14059,13 @@ kbd {
     .accordion-header, .accordion-body, .dropdown-header
   )) {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-        transparent 1px 16px),
+        transparent 1px 16px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
+        transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
@@ -14078,10 +14087,13 @@ kbd {
   .accordion-header,
   .dropdown-header {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
-        transparent 1px 7px),
+        transparent 1px 7px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 7px 8px,
+        transparent 8px 14px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 64%, white) 74% 86%,
@@ -14096,20 +14108,26 @@ kbd {
   .card-footer,
   .modal-footer {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 14px),
+        transparent 1px 14px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 14px 15px,
+        transparent 15px 28px),
       linear-gradient(35deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 72%),
       linear-gradient(to top, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 82%);
   }
 
   .alert {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-        transparent 1px 9px),
+        transparent 1px 9px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 9px 10px,
+        transparent 10px 18px),
       linear-gradient(105deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 64%),
       linear-gradient(to bottom, color-mix(in oklab, white 5%, transparent), transparent 48%);
   }
@@ -14117,26 +14135,34 @@ kbd {
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
-        transparent 1px 11px),
+        transparent 1px 11px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 11px 12px,
+        transparent 12px 22px),
       linear-gradient(105deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 64%),
       linear-gradient(to bottom, color-mix(in oklab, white 5%, transparent), transparent 48%);
   }
 
   .accordion-item {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 15px),
+        transparent 1px 15px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 15px 16px,
+        transparent 16px 30px),
       linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 40%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent), transparent 76%);
   }
   .accordion-button {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-        transparent 1px 9px),
+        transparent 1px 9px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 9px 10px,
+        transparent 10px 18px),
       linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 50%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 86%);
   }
@@ -14144,17 +14170,22 @@ kbd {
     background-image:
       repeating-linear-gradient(0deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
-        transparent 1px 9px),
+        transparent 1px 9px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 9px 10px,
+        transparent 10px 18px),
       linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 50%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 92%);
   }
 
   .list-group-item {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 15px),
+        transparent 1px 15px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 15px 16px,
+        transparent 16px 30px),
       linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 48%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 5%, transparent), transparent 86%);
   }
@@ -14163,7 +14194,9 @@ kbd {
       background-image:
         repeating-linear-gradient(135deg,
           color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-          transparent 1px 13px),
+          transparent 1px 13px,
+          color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 13px 14px,
+          transparent 14px 26px),
         linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 48%),
         linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 88%);
     }
@@ -14171,10 +14204,13 @@ kbd {
 
   .navbar {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-        transparent 1px 16px),
+        transparent 1px 16px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
+        transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 78%,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 65%, white) 78% 89%,
@@ -14191,10 +14227,13 @@ kbd {
   .nav-pills .nav-link.active,
   .page-link {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-        transparent 1px 11px),
+        transparent 1px 11px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 11px 12px,
+        transparent 12px 22px),
       linear-gradient(145deg, color-mix(in oklab, white 9%, transparent), transparent 55%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent), transparent 90%);
   }
@@ -14203,10 +14242,13 @@ kbd {
     .nav-tabs .nav-link:not(.active):hover,
     .page-item:not(.disabled):not(.active) .page-link:hover {
       --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+      --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
       background-image:
         repeating-linear-gradient(90deg,
           color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
-          transparent 1px 11px),
+          transparent 1px 11px,
+          color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 11px 12px,
+          transparent 12px 22px),
         linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 55%),
         linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 90%);
     }
@@ -14217,18 +14259,24 @@ kbd {
   .dropdown-item.active,
   .dropdown-item:active {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image: repeating-linear-gradient(90deg,
       color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
-      transparent 1px 11px);
+      transparent 1px 11px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 11px 12px,
+      transparent 12px 22px);
   }
 
   .form-control:not(.form-control-color):not(.form-control-plaintext),
   .input-group-text {
     --kaz-ui-accent: var(--bs-primary);
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent) 55%, white 45%);
     --kaz-form-pattern: repeating-linear-gradient(90deg,
       color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-      transparent 1px 13px);
+      transparent 1px 13px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 13px 14px,
+      transparent 14px 26px);
     background-image:
       var(--kaz-form-pattern),
       linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 46%),
@@ -14267,9 +14315,12 @@ kbd {
   .form-select {
     --kaz-ui-accent: var(--bs-primary);
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent) 55%, white 45%);
     --kaz-form-select-pattern: repeating-linear-gradient(90deg,
       color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-      transparent 1px 13px);
+      transparent 1px 13px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 13px 14px,
+      transparent 14px 26px);
     background-image: var(--kaz-form-select-pattern), var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
     background-repeat: repeat, no-repeat, no-repeat;
     background-position: 0 0, right 0.75rem center, center right 2.25rem;
@@ -14304,36 +14355,47 @@ kbd {
   .mark,
   kbd {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-warning)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-warning)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 6px),
+        transparent 1px 6px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 6px 7px,
+        transparent 7px 12px),
       linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 66%),
       linear-gradient(to bottom, color-mix(in oklab, currentColor 2%, transparent), transparent);
   }
 
   .progress {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 12px),
+        transparent 1px 12px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 12px 13px,
+        transparent 13px 24px),
       linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 55%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 4%, transparent), transparent);
   }
   .progress-bar {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 8%, transparent) 0 1px,
-        transparent 1px 8px),
+        transparent 1px 8px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 8px 9px,
+        transparent 9px 16px),
       linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
   }
   .progress-bar-striped {
     background-image:
       repeating-linear-gradient(45deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 8%, transparent) 0 1px,
-        transparent 1px 8px),
+        transparent 1px 8px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 8px 9px,
+        transparent 9px 16px),
       linear-gradient(45deg,
         color-mix(in oklab, white 8%, transparent) 25%,
         transparent 25% 50%,
@@ -14354,28 +14416,37 @@ kbd {
   .table-dark { --kaz-ui-accent: var(--bs-dark); }
   .table thead th {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 8px),
+        transparent 1px 8px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 8px 9px,
+        transparent 9px 16px),
       linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 55%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent);
   }
   .breadcrumb {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 14px),
+        transparent 1px 14px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 14px 15px,
+        transparent 15px 28px),
       linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 56%),
       linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 76%);
   }
   blockquote {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
+    --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
         color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
-        transparent 1px 14px),
+        transparent 1px 14px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 14px 15px,
+        transparent 15px 28px),
       linear-gradient(135deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 11%, transparent), transparent 62%),
       linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
   }
