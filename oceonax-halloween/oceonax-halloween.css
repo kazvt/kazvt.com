@@ -149,7 +149,7 @@
 
 .ocean-entry--kaz {
   border-color: var(--pink);
-  animation: ocean-kaz-spotlight 2.6s ease-out 1 both;
+  animation: ocean-kaz-spotlight 2.6s ease-out 1;
 }
 
 .ocean-entry-topline {
@@ -179,7 +179,7 @@
   line-height: 1;
   white-space: nowrap;
   transform: rotate(1deg);
-  animation: ocean-me-badge-pop 2.6s ease-out 1 both;
+  animation: ocean-me-badge-pop 2.6s ease-out 1;
 }
 
 @keyframes ocean-kaz-spotlight {
