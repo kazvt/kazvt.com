@@ -2988,6 +2988,19 @@ kbd {
     border-color: CanvasText;
     box-shadow: none;
   }
+  .kaz-link-list,
+  .kaz-link-list > li + li {
+    border-color: CanvasText;
+  }
+  .kaz-sticker:is(a, button),
+  .kaz-webring a,
+  .kaz-link-list a,
+  .kaz-ticker a {
+    color: LinkText;
+  }
+  .kaz-link-list a::before {
+    color: CanvasText;
+  }
   .kaz-window, .kaz-webring, .kaz-guestbook-entry, .kaz-scoreboard {
     border-inline-start-color: CanvasText;
   }
