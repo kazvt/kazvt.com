@@ -1,0 +1,263 @@
+.oceonax-page {
+  --ocean-rose: var(--pink);
+  --ocean-sky: var(--blue);
+}
+
+.ocean-shell {
+  display: grid;
+  gap: clamp(22px, 4vw, 38px);
+  padding-top: clamp(18px, 4vw, 42px);
+}
+
+.ocean-header {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.ocean-home,
+.ocean-entry-links a,
+.ocean-footer a {
+  color: var(--ink);
+  font-weight: 900;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.ocean-home {
+  display: inline-grid;
+  min-height: 40px;
+  place-items: center;
+  padding: 7px 14px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--shadow);
+  transform: rotate(-1deg);
+}
+
+.ocean-kicker {
+  margin: 0;
+  color: var(--pink);
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ocean-header h1 {
+  max-width: 100%;
+  margin: 0;
+  color: var(--banner-text);
+  font-size: clamp(2rem, 7vw, 4.6rem);
+  font-weight: 1000;
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+  text-shadow: 3px 3px 0 var(--pink), -2px -2px 0 var(--blue);
+}
+
+.ocean-intro {
+  width: min(100%, 48rem);
+  margin: 0;
+  padding: clamp(12px, 2vw, 18px);
+  border-left: 6px solid var(--pink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: clamp(1rem, 2.2vw, 1.18rem);
+  line-height: 1.55;
+  text-align: left;
+}
+
+.ocean-nav {
+  width: min(100%, 52rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+}
+
+.ocean-series-stamp {
+  justify-self: center;
+  padding: 8px 14px;
+  border: 2px dashed var(--ink);
+  background: var(--pink);
+  color: var(--on-pink);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-align: center;
+  transform: rotate(1deg);
+}
+
+.ocean-day {
+  display: grid;
+  gap: 15px;
+  scroll-margin-top: 1.5rem;
+}
+
+.ocean-day-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 8px;
+  border-bottom: 4px solid var(--ink);
+}
+
+.ocean-day-heading h2 {
+  min-width: 0;
+  margin: 0;
+  color: var(--banner-text);
+  font-size: clamp(1.45rem, 4vw, 2.15rem);
+  line-height: 1.1;
+}
+
+.ocean-day-heading h2 span {
+  color: var(--pink);
+  font-size: 0.68em;
+  white-space: nowrap;
+}
+
+.ocean-day-heading .ocean-kicker {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.72rem;
+  transform: rotate(-1deg);
+}
+
+.ocean-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 19px);
+}
+
+.ocean-entry {
+  display: grid;
+  grid-template-columns: minmax(92px, 36%) minmax(0, 1fr);
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 5px 5px 0 var(--shadow);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.ocean-entry:nth-child(4n + 1) { border-top-color: var(--pink); }
+.ocean-entry:nth-child(4n + 2) { border-right-color: var(--blue); }
+.ocean-entry:nth-child(4n + 3) { border-bottom-color: var(--pink); }
+.ocean-entry:nth-child(4n) { border-left-color: var(--blue); }
+
+.ocean-entry:hover,
+.ocean-entry:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 7px 7px 0 var(--shadow);
+}
+
+.ocean-art-link {
+  display: grid;
+  min-width: 0;
+  min-height: 100%;
+  place-items: center;
+  padding: 8px;
+  border-right: 2px dashed var(--ink);
+  background: color-mix(in srgb, var(--blue) 14%, var(--paper));
+}
+
+.ocean-art-link img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 250px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.ocean-entry-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: clamp(10px, 1.8vw, 17px);
+}
+
+.ocean-entry-number {
+  margin: 0;
+  padding: 3px 7px;
+  border: 1px dashed var(--ink);
+  background: var(--pink);
+  color: var(--on-pink);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: rotate(-1deg);
+}
+
+.ocean-entry-copy h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.08rem, 2vw, 1.4rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.ocean-caption {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.ocean-entry-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  margin-top: auto;
+  padding-top: 5px;
+  font-size: 0.85rem;
+}
+
+.ocean-entry-links a:hover,
+.ocean-footer a:hover,
+.ocean-home:hover {
+  color: var(--pink);
+}
+
+.ocean-entry a:focus-visible,
+.ocean-footer a:focus-visible,
+.ocean-home:focus-visible {
+  outline: 3px dashed var(--pink);
+  outline-offset: 4px;
+}
+
+.ocean-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 28px;
+  padding: 15px;
+  border-top: 3px dashed var(--ink);
+  background: var(--paper);
+}
+
+@media (max-width: 680px) {
+  .ocean-shell { gap: 25px; }
+  .ocean-grid { grid-template-columns: 1fr; }
+  .ocean-entry { grid-template-columns: minmax(84px, 31%) minmax(0, 1fr); }
+  .ocean-art-link { padding: 6px; }
+}
+
+@media (max-width: 390px) {
+  .ocean-day-heading { align-items: start; flex-direction: column; }
+  .ocean-entry { grid-template-columns: 82px minmax(0, 1fr); }
+  .ocean-entry-copy { gap: 6px; padding: 9px; }
+  .ocean-entry-links { flex-direction: column; gap: 5px; font-size: 0.8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-entry { transition: none; }
+}
