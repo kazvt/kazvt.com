@@ -32,10 +32,14 @@
     const easing = 1 - Math.exp(-elapsed / 60);
     currentX += (pointerX - currentX) * easing;
     currentY += (pointerY - currentY) * easing;
+    const settledX = Math.abs(pointerX - currentX) <= 0.015;
+    const settledY = Math.abs(pointerY - currentY) <= 0.015;
+    if (settledX) currentX = pointerX;
+    if (settledY) currentY = pointerY;
     background.style.transform = `translate3d(${-currentX * 7}px, ${-currentY * 5}px, 0)`;
     character.style.transform = `translate3d(${currentX * 3}px, ${currentY * 2}px, 0)`;
 
-    if (Math.abs(pointerX - currentX) > 0.015 || Math.abs(pointerY - currentY) > 0.015) {
+    if (!settledX || !settledY) {
       frame = window.requestAnimationFrame(applyPosition);
     }
   };
