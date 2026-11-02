@@ -248,7 +248,11 @@
       oscillator.frequency.value = frequency;
       oscillator.detune.value = 0;
       voice.gain.setValueAtTime(0.0001, now);
-      if (!lift) voice.gain.linearRampToValueAtTime(padVoiceGain, now + padAttackSeconds);
+      if (!lift) {
+        const decayAt = now + padAttackSeconds + padDecaySeconds;
+        voice.gain.linearRampToValueAtTime(padVoicePeakGain, now + padAttackSeconds);
+        voice.gain.linearRampToValueAtTime(padVoicePeakGain * padSustainRatio, decayAt);
+      }
 
       if (context.createStereoPanner) {
         const panner = context.createStereoPanner();
