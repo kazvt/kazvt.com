@@ -139,12 +139,15 @@
   function scheduleChordLift(segmentStart) {
     const liftAt = segmentStart + registerChangeInterval / 2;
     const segmentEnd = segmentStart + registerChangeInterval;
-    const liftOutAt = segmentEnd - chordLiftFadeDuration;
+    const liftSustainAt = liftAt + chordLiftAttackSeconds + chordLiftDecaySeconds;
+    const liftOutAt = segmentEnd - chordLiftReleaseSeconds;
 
     chordLiftVoices.forEach((voice) => {
+      voice.gain.cancelScheduledValues(liftAt);
       voice.gain.setValueAtTime(0.0001, liftAt);
-      voice.gain.linearRampToValueAtTime(chordLiftGain, liftAt + chordLiftFadeDuration);
-      voice.gain.setValueAtTime(chordLiftGain, liftOutAt);
+      voice.gain.linearRampToValueAtTime(chordLiftPeakGain, liftAt + chordLiftAttackSeconds);
+      voice.gain.linearRampToValueAtTime(chordLiftPeakGain * chordLiftSustainRatio, liftSustainAt);
+      voice.gain.setValueAtTime(chordLiftPeakGain * chordLiftSustainRatio, liftOutAt);
       voice.gain.linearRampToValueAtTime(0.0001, segmentEnd);
     });
   }
@@ -184,12 +187,12 @@
       context = new AudioContextClass({ latencyHint: "playback" });
       context.addEventListener("statechange", syncAudioSignal);
 
-      // A sine-led custom spectrum gives the sustained voice gentle body and
-      // warmth. Its partials stay harmonically aligned; there is no detune,
-      // chorus, phaser, or effect-based reverb added to the signal.
+      // A sine-led, softly weighted spectrum keeps the tone choir-like without
+      // sharp upper harmonics. Partials stay aligned: no detune, chorus,
+      // phaser, or effect-based reverb is added to the signal.
       try {
-        const real = new Float32Array(7);
-        const imag = new Float32Array([0, 1, 0.22, 0.08, 0.035, 0.012, 0.004]);
+        const real = new Float32Array(8);
+        const imag = new Float32Array([0, 1, 0.17, 0.055, 0.018, 0.006, 0.0018, 0.0005]);
         padWave = context.createPeriodicWave(real, imag);
       } catch {
         padWave = null;
@@ -197,9 +200,8 @@
 
       const filter = context.createBiquadFilter();
       filter.type = "lowpass";
-      // Retain enough upper harmonics for the chord extensions to read, while
-      // rolling off the edge that made the old synth feel thin and tiring.
-      filter.frequency.value = 1050;
+      // Keep the mellow vocal body while gently tucking away the upper-mid edge.
+      filter.frequency.value = 900;
       filter.Q.value = 0.25;
       padFilter = filter;
 
