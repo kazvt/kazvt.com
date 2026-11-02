@@ -23,7 +23,7 @@
       })();
     </script>
     <link rel="stylesheet" href="/styles.css?v=font-weight-policy-20261023-v2">
-    <link rel="stylesheet" href="/oceonax-halloween/oceonax-halloween.css?v=9">
+    <link rel="stylesheet" href="/oceonax-halloween/oceonax-halloween.css?v=kaz-spotlight-20261103">
     <link rel="stylesheet" href="/zzz_shared/square-corners.css?v=1">
   </head>
   <body class="oceonax-page" data-theme="p16">
@@ -227,20 +227,32 @@
         }
 
         const featuredEntry = document.querySelector(".ocean-entry--kaz");
-        if (!featuredEntry || prefersReducedMotion) return;
+        if (!featuredEntry) return;
 
-        const animateFeature = () => featuredEntry.classList.add("is-highlighted");
+        let featureIsVisible = false;
+        const syncFeatureMotion = () => {
+          featuredEntry.classList.toggle("is-highlighted", featureIsVisible && reduceMotion?.matches !== true);
+        };
+
         if (!("IntersectionObserver" in window)) {
-          animateFeature();
-          return;
+          featureIsVisible = true;
+          syncFeatureMotion();
+        } else {
+          const observer = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+              if (entry.target !== featuredEntry) continue;
+              featureIsVisible = entry.isIntersecting;
+              syncFeatureMotion();
+            }
+          }, { threshold: 0.25 });
+          observer.observe(featuredEntry);
         }
 
-        const observer = new IntersectionObserver((entries) => {
-          if (!entries.some((entry) => entry.isIntersecting)) return;
-          animateFeature();
-          observer.disconnect();
-        }, { threshold: 0.25 });
-        observer.observe(featuredEntry);
+        if (reduceMotion?.addEventListener) {
+          reduceMotion.addEventListener("change", syncFeatureMotion);
+        } else {
+          reduceMotion?.addListener?.(syncFeatureMotion);
+        }
       })();
     </script>
   </body>

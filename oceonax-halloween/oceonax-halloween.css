@@ -209,11 +209,41 @@
 .ocean-entry:nth-child(4n) { border-left-color: var(--blue); }
 
 .ocean-entry--kaz {
+  position: relative;
+  isolation: isolate;
   border-color: var(--pink);
 }
 
+.ocean-entry--kaz > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ocean-entry--kaz::before {
+  position: absolute;
+  z-index: 0;
+  inset: -55% -35%;
+  background: linear-gradient(
+    116deg,
+    transparent 0 39%,
+    color-mix(in srgb, var(--blue) 34%, transparent) 46%,
+    color-mix(in srgb, var(--pink) 34%, transparent) 51%,
+    transparent 58% 100%
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-125%);
+  will-change: transform, opacity;
+}
+
 .ocean-entry--kaz.is-highlighted {
-  animation: ocean-kaz-spotlight 2.6s ease-out 1;
+  z-index: 2;
+  animation: ocean-kaz-spotlight 3.8s ease-in-out infinite;
+}
+
+.ocean-entry--kaz.is-highlighted::before {
+  animation: ocean-kaz-glint 5.4s cubic-bezier(0.35, 0, 0.25, 1) infinite;
 }
 
 .ocean-entry-topline {
@@ -230,6 +260,7 @@
 }
 
 .ocean-me-badge {
+  position: relative;
   display: inline-flex;
   min-height: 28px;
   align-items: center;
@@ -246,21 +277,94 @@
 }
 
 .ocean-entry--kaz.is-highlighted .ocean-me-badge {
-  animation: ocean-me-badge-pop 2.6s ease-out 1;
+  animation: ocean-me-badge-pop 2.8s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+}
+
+.ocean-entry--kaz.is-highlighted .ocean-me-badge::before,
+.ocean-entry--kaz.is-highlighted .ocean-me-badge::after {
+  position: absolute;
+  color: var(--pink);
+  content: "✦";
+  font-size: 1.1rem;
+  line-height: 1;
+  pointer-events: none;
+  text-shadow: 1px 1px 0 var(--ink), 2px 2px 0 var(--blue);
+}
+
+.ocean-entry--kaz.is-highlighted .ocean-me-badge::before {
+  top: -0.55em;
+  left: -0.55em;
+  animation: ocean-kaz-sparkle 1.35s ease-in-out infinite;
+}
+
+.ocean-entry--kaz.is-highlighted .ocean-me-badge::after {
+  right: -0.5em;
+  bottom: -0.55em;
+  color: var(--blue);
+  animation: ocean-kaz-sparkle 1.35s ease-in-out -0.65s infinite reverse;
+}
+
+.ocean-entry--kaz.is-highlighted .ocean-art-link {
+  animation: ocean-kaz-art-backdrop 3.8s ease-in-out infinite;
+}
+
+.ocean-entry--kaz.is-highlighted .ocean-art-link img {
+  animation: ocean-kaz-art-bob 4.2s ease-in-out infinite;
+  transform-origin: center;
 }
 
 @keyframes ocean-kaz-spotlight {
   0%, 100% {
-    box-shadow: 5px 5px 0 var(--shadow), 0 0 0 2px color-mix(in srgb, var(--pink) 55%, transparent);
+    border-color: var(--pink);
+    box-shadow: 5px 5px 0 var(--shadow), 0 0 0 2px color-mix(in srgb, var(--pink) 46%, transparent);
   }
-  42% {
-    box-shadow: 5px 5px 0 var(--shadow), 0 0 0 7px color-mix(in srgb, var(--blue) 68%, transparent);
+  50% {
+    border-color: var(--blue);
+    box-shadow: 5px 5px 0 var(--shadow), 0 0 0 6px color-mix(in srgb, var(--blue) 62%, transparent), 0 0 20px 2px color-mix(in srgb, var(--pink) 34%, transparent);
   }
 }
 
+@keyframes ocean-kaz-glint {
+  0%, 14%, 100% { opacity: 0; transform: translateX(-125%); }
+  20% { opacity: 0.88; }
+  48% { opacity: 0.74; transform: translateX(125%); }
+  54% { opacity: 0; }
+}
+
+@keyframes ocean-kaz-art-backdrop {
+  0%, 100% { background-color: color-mix(in srgb, var(--blue) 14%, var(--paper)); }
+  50% { background-color: color-mix(in srgb, var(--pink) 22%, var(--paper)); }
+}
+
+@keyframes ocean-kaz-art-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(-4px) rotate(-1.2deg) scale(1.035); }
+}
+
+@keyframes ocean-kaz-sparkle {
+  0%, 100% { opacity: 0.45; transform: scale(0.62) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.18) rotate(45deg); }
+}
+
 @keyframes ocean-me-badge-pop {
-  0%, 100% { box-shadow: 2px 2px 0 var(--pink), 0 0 0 0 color-mix(in srgb, var(--blue) 0%, transparent); }
-  38% { box-shadow: 2px 2px 0 var(--pink), 0 0 0 5px color-mix(in srgb, var(--blue) 48%, transparent); }
+  0%, 100% {
+    background: var(--blue);
+    color: var(--on-blue);
+    box-shadow: 2px 2px 0 var(--pink), 0 0 0 0 color-mix(in srgb, var(--blue) 0%, transparent);
+    transform: rotate(1deg) translateY(0) scale(1);
+  }
+  32%, 64% {
+    background: var(--pink);
+    color: var(--on-pink);
+    box-shadow: 2px 2px 0 var(--blue), 0 0 0 5px color-mix(in srgb, var(--pink) 38%, transparent);
+    transform: rotate(-2deg) translateY(-3px) scale(1.1);
+  }
+}
+
+.ocean-entry--kaz:hover,
+.ocean-entry--kaz:focus-within {
+  border-color: var(--pink);
+  box-shadow: 7px 7px 0 var(--shadow), 0 0 0 5px color-mix(in srgb, var(--blue) 54%, transparent);
 }
 
 .ocean-entry:hover,
@@ -421,5 +525,10 @@
   .ocean-entry:hover,
   .ocean-entry:focus-within { transform: none; }
   .ocean-entry--kaz.is-highlighted,
-  .ocean-entry--kaz.is-highlighted .ocean-me-badge { animation: none; }
+  .ocean-entry--kaz.is-highlighted::before,
+  .ocean-entry--kaz.is-highlighted .ocean-me-badge,
+  .ocean-entry--kaz.is-highlighted .ocean-me-badge::before,
+  .ocean-entry--kaz.is-highlighted .ocean-me-badge::after,
+  .ocean-entry--kaz.is-highlighted .ocean-art-link,
+  .ocean-entry--kaz.is-highlighted .ocean-art-link img { animation: none; }
 }
