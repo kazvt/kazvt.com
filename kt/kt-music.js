@@ -9,21 +9,24 @@
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const preferenceKey = "kazvt-kt-pad-preference-v1";
   const preferenceLifetime = 24 * 60 * 60 * 1000;
-  const fadeSeconds = 3.2;
-  const padAttackSeconds = 6.4;
+  const fadeSeconds = 4.6;
+  const padAttackSeconds = 8.5;
+  const padDecaySeconds = 9.5;
+  const padSustainRatio = 0.76;
   const rootSemitone = Math.floor(Math.random() * 12);
-  // An open major voicing across three octaves: root, fifth, octave, third,
-  // fifth, octave, third, fifth. The wider spacing keeps the fuller chord
-  // clear instead of bunching several bright notes into a small register.
-  const chordIntervals = [0, 7, 12, 16, 19, 24, 28, 31];
-  // Halfway through each 8-bar phrase, softly bloom the major seventh, ninth,
-  // and another open fifth for a warm maj9 color without a tight note cluster.
-  const chordLiftIntervals = [35, 38, 43];
-  // Keep the eight-note foundation at roughly the previous total level, so
-  // adding harmonic detail does not undo the site's already-reduced music volume.
-  const padVoiceGain = 0.01775;
-  const chordLiftGain = 0.0038;
-  const chordLiftFadeDuration = 6;
+  // Open Cmaj9 voicing: C/G anchors below, then C-E-G-B-D above. The spacing
+  // keeps the thirds and extensions warm and legible instead of piling them
+  // into the very high register.
+  const chordIntervals = [-12, -5, 0, 7, 12, 16, 19, 23, 26];
+  // Let the 6th/13th bloom gently halfway through each 8-bar phrase. These
+  // color tones sit inside the chord instead of adding a piercing high cluster.
+  const chordLiftIntervals = [9, 21];
+  const padVoicePeakGain = 0.0155;
+  const chordLiftPeakGain = 0.0032;
+  const chordLiftAttackSeconds = 5.2;
+  const chordLiftDecaySeconds = 3.4;
+  const chordLiftReleaseSeconds = 5.8;
+  const chordLiftSustainRatio = 0.76;
   // The pad has no audible beat, so count a quiet 4/4 pulse at 60 BPM.
   // Every 8 bars (32 seconds), cycle root -> -7 -> root -> +5 -> root.
   const beatsPerBar = 4;
