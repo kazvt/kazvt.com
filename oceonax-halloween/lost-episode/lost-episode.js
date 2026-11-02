@@ -14,19 +14,24 @@
   let currentX = 0;
   let currentY = 0;
   let frame = null;
+  let lastFrameTime = null;
 
-  const applyPosition = () => {
+  const applyPosition = (timestamp) => {
     frame = null;
     if (motionPreference.matches || !pointerCapability.matches) {
       currentX = pointerX = 0;
       currentY = pointerY = 0;
+      lastFrameTime = null;
       background.style.transform = "translate3d(0, 0, 0)";
       character.style.transform = "translate3d(0, 0, 0)";
       return;
     }
 
-    currentX += (pointerX - currentX) * 0.22;
-    currentY += (pointerY - currentY) * 0.22;
+    const elapsed = lastFrameTime === null ? 16.67 : Math.max(1, Math.min(32, timestamp - lastFrameTime));
+    lastFrameTime = timestamp;
+    const easing = 1 - Math.exp(-elapsed / 60);
+    currentX += (pointerX - currentX) * easing;
+    currentY += (pointerY - currentY) * easing;
     background.style.transform = `translate3d(${-currentX * 7}px, ${-currentY * 5}px, 0)`;
     character.style.transform = `translate3d(${currentX * 3}px, ${currentY * 2}px, 0)`;
 
@@ -36,7 +41,10 @@
   };
 
   const schedule = () => {
-    if (frame === null) frame = window.requestAnimationFrame(applyPosition);
+    if (frame === null) {
+      lastFrameTime = null;
+      frame = window.requestAnimationFrame(applyPosition);
+    }
   };
 
   const reset = () => {
@@ -61,7 +69,7 @@
   }, { passive: true });
 
   scene.addEventListener("pointerleave", reset, { passive: true });
-  window.addEventListener("resize", () => { bounds = null; }, { passive: true });
+  window.addEventListener("resize", reset, { passive: true });
   window.addEventListener("scroll", () => { bounds = null; }, { passive: true, capture: true });
   window.addEventListener("blur", reset, { passive: true });
 
