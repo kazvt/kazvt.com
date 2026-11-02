@@ -69,7 +69,7 @@ summary:focus-visible {
 }
 
 .episode-shell {
-  width: min(var(--shell-width), calc(100% - 2rem));
+  width: min(var(--shell-width), calc(100% - 3rem));
   margin: 0 auto;
   padding: clamp(1rem, 3.8vw, 2.6rem) 0 2.5rem;
 }
@@ -619,7 +619,7 @@ summary:focus-visible {
 
 @media (max-width: 360px) {
   .episode-shell {
-    width: calc(100% - 1rem);
+    width: calc(100% - 1.4rem);
   }
 
   .scene {
