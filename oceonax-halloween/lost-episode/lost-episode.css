@@ -170,53 +170,22 @@ summary:focus-visible {
 .character-art {
   position: absolute;
   z-index: 2;
-  top: 5.5%;
-  right: 5.5%;
-  width: min(48%, 530px);
+  top: 2%;
+  right: 4%;
+  width: min(44%, 465px);
   margin: 0;
-  padding: 0.52rem;
-  border: 2px solid var(--paper);
-  background: #17142d;
-  box-shadow: 6px 6px 0 #71dff0, 10px 10px 0 rgb(14 14 35 / 78%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  filter: drop-shadow(0 12px 14px rgb(12 7 31 / 34%));
+  pointer-events: none;
   transform: translate3d(0, 0, 0);
 }
 
-.character-art__frame {
-  overflow: hidden;
-  background: #121225;
-  aspect-ratio: 16 / 9;
-}
-
-.character-art__frame img {
+.character-art img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.character-art figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.2rem 0.55rem;
-  padding: 0.42rem 0.18rem 0.05rem;
-  color: #f7edff;
-  font-size: 0.74rem;
-  line-height: 1.35;
-}
-
-.character-art figcaption span {
-  font-family: "Episode Pixel", "Courier New", monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.035em;
-}
-
-.character-art figcaption a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  color: var(--aqua);
+  height: auto;
 }
 
 .scene-sticker,
@@ -456,9 +425,9 @@ summary:focus-visible {
   }
 
   .character-art {
-    top: 5%;
-    right: 4%;
-    width: 47%;
+    top: 2%;
+    right: 3%;
+    width: min(44%, 430px);
   }
 
   .scene-sticker--wand {
@@ -531,13 +500,9 @@ summary:focus-visible {
   .character-art {
     position: relative;
     inset: auto;
-    width: min(100%, 480px);
+    width: min(100%, 380px);
     align-self: center;
-    padding: 0.35rem;
-  }
-
-  .character-art figcaption {
-    font-size: 0.74rem;
+    padding: 0;
   }
 
   .dialogue-window {
