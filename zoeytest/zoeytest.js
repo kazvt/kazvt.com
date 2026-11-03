@@ -113,7 +113,7 @@
     if (progress < 100) {
       loaderFrame = requestAnimationFrame(animateLoader);
     } else {
-      loaderTimer = window.setTimeout(() => closeLoader(false), 190);
+      loaderTimer = window.setTimeout(() => closeLoader(true), 190);
     }
   }
 
@@ -129,6 +129,12 @@
     loaderStarted = performance.now();
     loaderFrame = requestAnimationFrame(animateLoader);
     skip.addEventListener("click", () => closeLoader(true));
+    document.querySelector(".z-skip-link").addEventListener("click", (event) => {
+      if (!loader.hidden) {
+        event.preventDefault();
+        closeLoader(true);
+      }
+    });
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !loader.hidden) closeLoader(true);
     });

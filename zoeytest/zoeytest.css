@@ -29,7 +29,6 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: var(--z-night); }
 body.zoey-page {
-  min-width: 320px;
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
@@ -494,7 +493,7 @@ body[data-motion="off"] .z-skip-link { transition: none; }
 }
 
 @media (max-width: 760px) {
-  .z-shell { width: min(100% - 24px, 640px); padding-top: 10px; }
+  .z-shell { width: min(calc(100% - 24px), 640px); padding-top: 10px; }
   .z-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; padding: clamp(14px, 4vw, 23px); }
   .z-signal-panel { width: min(100%, 460px); margin-inline: auto; }
   .z-toolbar { align-items: stretch; }
