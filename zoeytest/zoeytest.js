@@ -90,7 +90,7 @@
   const loadDuration = 1750;
 
   function closeLoader(restoreFocus = true) {
-    if (loader.hidden) return;
+    if (loader.hidden || loader.classList.contains("is-closing")) return;
     cancelAnimationFrame(loaderFrame);
     clearTimeout(loaderTimer);
     loader.classList.add("is-closing");
@@ -136,7 +136,13 @@
       }
     });
     window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !loader.hidden) closeLoader(true);
+      if (loader.hidden) return;
+      if (event.key === "Escape") {
+        closeLoader(true);
+      } else if (event.key === "Tab") {
+        event.preventDefault();
+        skip.focus({ preventScroll: true });
+      }
     });
   } else {
     main.inert = false;
