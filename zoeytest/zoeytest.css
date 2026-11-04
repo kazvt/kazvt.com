@@ -332,6 +332,9 @@ button, a { touch-action: manipulation; }
 body[data-motion="off"] .z-frequency-bars i { animation: none !important; transform: none !important; }
 body[data-motion="off"] .z-message.z-pop { animation: none !important; }
 body[data-motion="off"] :where(.z-button, .z-progress-track span, .z-loader) { transition: none !important; }
+html[data-zoey-motion="off"] .z-frequency-bars i,
+html[data-zoey-motion="off"] .z-message.z-pop { animation: none !important; transform: none !important; }
+html[data-zoey-motion="off"] :where(.z-button, .z-progress-track span, .z-loader) { transition: none !important; }
 @keyframes z-bars {
   0%, 100% { transform: scaleY(.52); }
   50% { transform: scaleY(1.3); }
