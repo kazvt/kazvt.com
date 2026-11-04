@@ -223,8 +223,10 @@
     audioEnabled = true;
     if (window.AudioContext || window.webkitAudioContext) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      audioContext ??= new AudioContextClass();
-      if (audioContext.state !== "running") void audioContext.resume().catch(() => {});
+      try {
+        audioContext ??= new AudioContextClass();
+        if (audioContext.state !== "running") void audioContext.resume().catch(() => {});
+      } catch {}
     }
     updateAudioControl();
     audioStatus.textContent = "Sound is ready. Hover, focus, or tap a friend's star.";
