@@ -58,7 +58,7 @@
       } else {
         const star = document.createElement("span");
         star.className = "z-avatar-star";
-        star.textContent = "✦";
+        star.textContent = "*";
         avatar.append(star);
       }
 
@@ -81,7 +81,7 @@
       const play = document.createElement("span");
       play.className = "z-entry-play";
       play.setAttribute("aria-hidden", "true");
-      play.textContent = entry.clips.length ? "▶" : "♡";
+      play.textContent = entry.clips.length ? ">>" : "*";
       button.append(avatar, copy, play);
       card.append(button);
       fragment.append(card);
