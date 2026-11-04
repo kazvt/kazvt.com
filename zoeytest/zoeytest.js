@@ -111,6 +111,8 @@
     if (!width || !height) return;
 
     const aspectRatio = width / height;
+    const compactViewport = height < 180;
+    canvas.dataset.compact = compactViewport ? "true" : "false";
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
@@ -160,8 +162,8 @@
         const boundsHeight = Math.abs(cardHeight * Math.cos(angle)) + Math.abs(cardWidth * Math.sin(angle));
         const centerX = x + cardWidth / 2 - Math.sin(angle) * rise;
         const centerY = y + cardHeight / 2 + Math.cos(angle) * rise;
-        const hoverPadX = cardWidth * .0225;
-        const hoverPadY = cardHeight * .0225 + 2;
+        const hoverPadX = compactViewport ? 0 : cardWidth * .0225;
+        const hoverPadY = compactViewport ? 0 : cardHeight * .0225 + 2;
         return {
           left: centerX - boundsWidth / 2 - hoverPadX,
           right: centerX + boundsWidth / 2 + hoverPadX,
