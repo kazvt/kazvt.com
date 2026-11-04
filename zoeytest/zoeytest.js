@@ -6,6 +6,10 @@
   const audioButton = document.getElementById("audioToggle");
   const audioStatus = document.getElementById("audioStatus");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const backgroundMusicUrl = "/zoeytest/assets/background/zoey-galaxy-background.mp3";
+  const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
+    .then((response) => response.ok ? response.arrayBuffer() : null)
+    .catch(() => null);
 
   // Submitted sender artwork and recordings stay local to this site; never synthesize them.
   const entrySlots = [
@@ -61,6 +65,14 @@
   let audioEnabled = false;
   let audioContext = null;
   let audioMixBus = null;
+  let backgroundMusicGain = null;
+  let backgroundMusicBuffer = null;
+  let backgroundMusicBufferPromise = null;
+  let backgroundMusicSource = null;
+  let backgroundMusicStartedAt = 0;
+  let backgroundMusicOffset = 0;
+  let backgroundMusicRequest = 0;
+  let fallbackBackgroundMusic = null;
   const activeMedia = new Set();
   const playingCounts = new Map();
   let gifEntries = null;
@@ -317,11 +329,143 @@
     body.dataset.audio = audioEnabled ? "on" : "off";
     audioButton.setAttribute("aria-pressed", String(audioEnabled));
     audioButton.textContent = audioEnabled ? "SOUND ON" : "SOUND OFF";
-    audioButton.setAttribute("aria-label", audioEnabled ? "Mute all voice notes" : "Enable voice notes");
+    audioButton.setAttribute("aria-label", audioEnabled ? "Mute all sound" : "Enable all sound");
+  }
+
+  function createCrossfadedLoopBuffer(buffer) {
+    const overlap = Math.min(Math.floor(buffer.sampleRate * .65), Math.floor(buffer.length / 4));
+    if (overlap < 2) return buffer;
+
+    // Start the loop inside the song, then blend its tail into the opening.
+    // This avoids a hard discontinuity at the repeat point without rewriting the supplied MP3.
+    const loopBuffer = audioContext.createBuffer(
+      buffer.numberOfChannels,
+      buffer.length - overlap,
+      buffer.sampleRate
+    );
+    const bodyLength = buffer.length - overlap * 2;
+    const tailStart = buffer.length - overlap;
+    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+      const input = buffer.getChannelData(channel);
+      const output = loopBuffer.getChannelData(channel);
+      output.set(input.subarray(overlap, tailStart), 0);
+      for (let index = 0; index < overlap; index += 1) {
+        const position = (index + .5) / overlap;
+        const tailGain = Math.cos(position * Math.PI / 2);
+        const headGain = Math.sin(position * Math.PI / 2);
+        output[bodyLength + index] = input[tailStart + index] * tailGain + input[index] * headGain;
+      }
+    }
+    return loopBuffer;
+  }
+
+  function loadBackgroundMusic() {
+    if (backgroundMusicBuffer) return Promise.resolve(backgroundMusicBuffer);
+    if (!backgroundMusicBufferPromise) {
+      backgroundMusicBufferPromise = backgroundMusicBytes
+        .then((bytes) => {
+          if (!bytes || !audioContext) throw new Error("Background song is unavailable");
+          return audioContext.decodeAudioData(bytes.slice(0));
+        })
+        .then((buffer) => {
+          backgroundMusicBuffer = createCrossfadedLoopBuffer(buffer);
+          return backgroundMusicBuffer;
+        })
+        .catch((error) => {
+          backgroundMusicBufferPromise = null;
+          throw error;
+        });
+    }
+    return backgroundMusicBufferPromise;
+  }
+
+  function backgroundMusicLevel() {
+    return activeMedia.size ? .5 : .86;
+  }
+
+  function updateBackgroundMusicLevel() {
+    const target = backgroundMusicLevel();
+    if (backgroundMusicGain && audioContext) {
+      const parameter = backgroundMusicGain.gain;
+      const now = audioContext.currentTime;
+      parameter.cancelScheduledValues(now);
+      parameter.setTargetAtTime(target, now, activeMedia.size ? .12 : .38);
+    }
+    if (fallbackBackgroundMusic) fallbackBackgroundMusic.volume = target;
+  }
+
+  function startFallbackBackgroundMusic() {
+    if (!audioEnabled) return;
+    fallbackBackgroundMusic ??= new Audio(backgroundMusicUrl);
+    fallbackBackgroundMusic.loop = true;
+    fallbackBackgroundMusic.preload = "auto";
+    fallbackBackgroundMusic.volume = backgroundMusicLevel();
+    fallbackBackgroundMusic.play().catch(() => {
+      audioStatus.textContent = "The background song could not play here, but the voice notes are still ready.";
+    });
+  }
+
+  async function startBackgroundMusic() {
+    if (!audioEnabled || backgroundMusicSource) return;
+    if (!audioContext) {
+      startFallbackBackgroundMusic();
+      return;
+    }
+
+    const request = ++backgroundMusicRequest;
+    try {
+      const buffer = await loadBackgroundMusic();
+      if (!audioEnabled || request !== backgroundMusicRequest || !audioContext) return;
+
+      backgroundMusicGain ??= audioContext.createGain();
+      backgroundMusicGain.gain.value = 0;
+      backgroundMusicGain.connect(audioMixBus || audioContext.destination);
+
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(backgroundMusicGain);
+      source.onended = () => {
+        source.disconnect();
+        if (backgroundMusicSource === source) backgroundMusicSource = null;
+      };
+
+      const now = audioContext.currentTime;
+      backgroundMusicStartedAt = now;
+      source.start(now, backgroundMusicOffset % buffer.duration);
+      backgroundMusicSource = source;
+      const gain = backgroundMusicGain.gain;
+      gain.cancelScheduledValues(now);
+      gain.setValueAtTime(0, now);
+      gain.linearRampToValueAtTime(backgroundMusicLevel(), now + .8);
+      fallbackBackgroundMusic?.pause();
+    } catch {
+      if (audioEnabled && request === backgroundMusicRequest) startFallbackBackgroundMusic();
+    }
+  }
+
+  function stopBackgroundMusic() {
+    backgroundMusicRequest += 1;
+    fallbackBackgroundMusic?.pause();
+    if (!backgroundMusicSource || !audioContext || !backgroundMusicGain) return;
+
+    const source = backgroundMusicSource;
+    const now = audioContext.currentTime;
+    if (backgroundMusicBuffer?.duration) {
+      backgroundMusicOffset = (backgroundMusicOffset + now - backgroundMusicStartedAt) % backgroundMusicBuffer.duration;
+    }
+    backgroundMusicSource = null;
+    const gain = backgroundMusicGain.gain;
+    gain.cancelScheduledValues(now);
+    gain.setValueAtTime(gain.value, now);
+    gain.linearRampToValueAtTime(0, now + .18);
+    source.onended = () => source.disconnect();
+    try { source.stop(now + .2); } catch {}
   }
 
   function enableAudio() {
     audioEnabled = true;
+    let contextReady = false;
     if (window.AudioContext || window.webkitAudioContext) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       try {
@@ -336,11 +480,18 @@
           audioMixBus.release.value = 0.14;
           audioMixBus.connect(audioContext.destination);
         }
-        if (audioContext.state !== "running") void audioContext.resume().catch(() => {});
-      } catch {}
+        contextReady = true;
+        const resumed = audioContext.state === "running" ? Promise.resolve() : audioContext.resume();
+        resumed.then(() => {
+          if (audioEnabled) void startBackgroundMusic();
+        }).catch(() => {
+          if (audioEnabled) startFallbackBackgroundMusic();
+        });
+      } catch { contextReady = false; }
     }
+    if (!contextReady) startFallbackBackgroundMusic();
     updateAudioControl();
-    audioStatus.textContent = "Sound is ready. Hover, focus, or tap a friend's star.";
+    audioStatus.textContent = "Sound is ready. The background song is joining; hover, focus, or tap a friend's star.";
   }
 
   function releaseMedia(media) {
@@ -353,6 +504,7 @@
       playingCounts.delete(media.owner);
       media.owner?.classList.remove("is-playing");
     }
+    updateBackgroundMusicLevel();
   }
 
   function stopActiveAudio() {
@@ -366,7 +518,7 @@
   function playNextClip(entry, button) {
     if (!audioEnabled || !entry.clips.length) {
       audioStatus.textContent = !audioEnabled
-        ? "Tap SOUND OFF once to enable voice notes."
+        ? "Tap SOUND OFF once to enable all sound."
         : "This star is waiting for its real voice recording.";
       return;
     }
@@ -391,6 +543,7 @@
     const owner = button.closest(".z-entry");
     const media = { audio, owner, source };
     activeMedia.add(media);
+    updateBackgroundMusicLevel();
     playingCounts.set(owner, (playingCounts.get(owner) || 0) + 1);
     owner.classList.add("is-playing");
     audioStatus.textContent = clip.caption || `${entry.name}: voice note ${clipIndex + 1} of ${entry.clips.length}.`;
@@ -413,8 +566,9 @@
     if (audioEnabled) {
       audioEnabled = false;
       stopActiveAudio();
+      stopBackgroundMusic();
       updateAudioControl();
-      audioStatus.textContent = "Voice notes are muted.";
+      audioStatus.textContent = "All sound is muted, including the background song.";
     } else {
       enableAudio();
     }
