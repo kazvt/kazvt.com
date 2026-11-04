@@ -51,7 +51,7 @@
         { src: "/zoeytest/assets/traaansfem/traaansfem-voice-2.wav", caption: "TraaansFem's voice note 2 of 2." }
       ]
     },
-    ...Array.from({ length: 6 }, (_, index) => {
+    ...Array.from({ length: 5 }, (_, index) => {
       const number = index + 3;
       return {
         id: `star-${String(number).padStart(2, "0")}`,
@@ -59,7 +59,17 @@
         avatar: "",
         clips: []
       };
-    })
+    }),
+    {
+      id: "frosty",
+      name: "Frosty",
+      avatar: "",
+      clips: [
+        { src: "/zoeytest/assets/frosty/frosty-voice-1.wav", caption: "Frosty's voice note 1 of 3." },
+        { src: "/zoeytest/assets/frosty/frosty-voice-2.wav", caption: "Frosty's voice note 2 of 3." },
+        { src: "/zoeytest/assets/frosty/frosty-voice-3.wav", caption: "Frosty's voice note 3 of 3." }
+      ]
+    }
   ];
 
   let audioEnabled = false;
