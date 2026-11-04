@@ -151,6 +151,7 @@ button, a { touch-action: manipulation; }
   text-wrap: balance;
   text-shadow: 0 1px 3px rgb(16 11 42 / 100%), 2px 2px 0 rgb(255 155 201 / 65%), 4px 4px 0 rgb(112 221 244 / 26%);
 }
+.z-stage-heading h1:focus { outline: none; }
 .z-stage-heading h1 span { color: var(--z-galaxy-lilac); }
 .z-constellation {
   position: relative;
@@ -352,7 +353,7 @@ body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy
     min-height: 100vh;
     min-height: 100svh;
     min-height: 100dvh;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto;
   }
   .z-stage { grid-template-rows: auto auto; }
   .z-constellation { height: auto; min-height: 440px; }

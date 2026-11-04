@@ -69,10 +69,6 @@
   let backgroundMusicBufferPromise = null;
   let backgroundMusicLoopStart = 0;
   let backgroundMusicSource = null;
-  let fadingBackgroundMusicSource = null;
-  let backgroundMusicStartedAt = 0;
-  let backgroundMusicOffset = 0;
-  let backgroundMusicRequest = 0;
   let fallbackBackgroundMusic = null;
   const activeMedia = new Set();
   const playingCounts = new Map();
@@ -409,16 +405,9 @@
       return;
     }
 
-    const request = ++backgroundMusicRequest;
     try {
       const buffer = await loadBackgroundMusic();
-      if (!audioEnabled || request !== backgroundMusicRequest || !audioContext) return;
-
-      if (fadingBackgroundMusicSource) {
-        try { fadingBackgroundMusicSource.stop(audioContext.currentTime); } catch {}
-        fadingBackgroundMusicSource.disconnect();
-        fadingBackgroundMusicSource = null;
-      }
+      if (!audioEnabled || !audioContext) return;
 
       backgroundMusicGain ??= audioContext.createGain();
       backgroundMusicGain.gain.value = 0;
@@ -436,8 +425,7 @@
       };
 
       const now = audioContext.currentTime;
-      backgroundMusicStartedAt = now;
-      source.start(now, backgroundMusicOffset % buffer.duration);
+      source.start(now);
       backgroundMusicSource = source;
       const gain = backgroundMusicGain.gain;
       gain.cancelScheduledValues(now);
@@ -448,38 +436,8 @@
         audioStatus.textContent = "Background music is playing. Voice messages are ready.";
       }
     } catch {
-      if (audioEnabled && request === backgroundMusicRequest) startFallbackBackgroundMusic();
+      if (audioEnabled) startFallbackBackgroundMusic();
     }
-  }
-
-  function stopBackgroundMusic() {
-    backgroundMusicRequest += 1;
-    fallbackBackgroundMusic?.pause();
-    if (!backgroundMusicSource || !audioContext || !backgroundMusicGain) return;
-
-    const source = backgroundMusicSource;
-    const now = audioContext.currentTime;
-    if (backgroundMusicBuffer?.duration) {
-      const elapsed = now - backgroundMusicStartedAt;
-      const firstPassRemaining = backgroundMusicBuffer.duration - backgroundMusicOffset;
-      if (elapsed < firstPassRemaining) {
-        backgroundMusicOffset += elapsed;
-      } else {
-        const loopDuration = backgroundMusicBuffer.duration - backgroundMusicLoopStart;
-        backgroundMusicOffset = backgroundMusicLoopStart + ((elapsed - firstPassRemaining) % loopDuration);
-      }
-    }
-    backgroundMusicSource = null;
-    fadingBackgroundMusicSource = source;
-    const gain = backgroundMusicGain.gain;
-    gain.cancelScheduledValues(now);
-    gain.setValueAtTime(gain.value, now);
-    gain.linearRampToValueAtTime(0, now + .18);
-    source.onended = () => {
-      source.disconnect();
-      if (fadingBackgroundMusicSource === source) fadingBackgroundMusicSource = null;
-    };
-    try { source.stop(now + .2); } catch {}
   }
 
   function enableAudio() {
