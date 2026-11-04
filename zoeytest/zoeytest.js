@@ -86,22 +86,45 @@
       card.append(button);
       fragment.append(card);
     });
-    document.getElementById("entryGrid").replaceChildren(fragment);
-    layoutEntryGrid();
+    document.getElementById("entryCanvas").replaceChildren(fragment);
+    layoutEntryStickers();
   }
 
-  function layoutEntryGrid() {
-    const grid = document.getElementById("entryGrid");
-    if (!grid) return;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    let columns = width > 700 ? 4 : width <= 410 ? 2 : 3;
-    if (height <= 510 && width >= 560) columns = 4;
-    columns = Math.max(1, Math.min(columns, entrySlots.length));
-    const rows = Math.max(1, Math.ceil(entrySlots.length / columns));
-    grid.style.setProperty("--entry-columns", String(columns));
-    grid.style.setProperty("--entry-rows", String(rows));
-    grid.dataset.density = rows >= 7 ? "packed" : rows >= 5 ? "tight" : "normal";
+  function layoutEntryStickers() {
+    const canvas = document.getElementById("entryCanvas");
+    if (!canvas) return;
+    const { width, height } = canvas.getBoundingClientRect();
+    if (!width || !height) return;
+
+    // Stable, art-directed anchors make a loose collage without letting stickers collide.
+    const panorama = width >= 900 && height < 360 && width / height >= 1.4;
+    const portrait = !panorama && (width < 760 || width / height < 1.25);
+    const layouts = {
+      panorama: [
+        [1, 2, 23, 45], [25, 7, 22, 43], [50, 0, 22, 46], [76, 5, 22, 44],
+        [2, 52, 22, 45], [27, 49, 22, 46], [52, 55, 21, 42], [77, 51, 21, 45]
+      ],
+      portrait: [
+        [2, 1, 45, 21], [52, 4, 46, 20], [8, 26, 41, 22], [53, 25, 44, 21],
+        [1, 51, 47, 20], [54, 51, 44, 22], [7, 76, 43, 21], [53, 75, 45, 22]
+      ],
+      wide: [
+        [2, 3, 29, 26], [35, 0, 29, 28], [68, 7, 29, 26],
+        [9, 36, 27, 28], [40, 32, 30, 30], [74, 39, 23, 26],
+        [2, 72, 29, 25], [37, 70, 29, 27]
+      ]
+    };
+    const layoutName = panorama ? "panorama" : portrait ? "portrait" : "wide";
+    const positions = layouts[layoutName];
+    canvas.querySelectorAll(".z-entry").forEach((card, index) => {
+      const [x, y, cardWidth, cardHeight] = positions[index] || positions[positions.length - 1];
+      card.style.setProperty("--entry-x", `${x}%`);
+      card.style.setProperty("--entry-y", `${y}%`);
+      card.style.setProperty("--entry-width", `${cardWidth}%`);
+      card.style.setProperty("--entry-height", `${cardHeight}%`);
+    });
+    canvas.dataset.layout = layoutName;
+    canvas.dataset.density = height < 290 ? "packed" : height < 430 || width < 520 ? "tight" : "normal";
   }
 
   function layoutGifSky() {
@@ -272,7 +295,7 @@
   });
   reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
 
-  document.getElementById("entryGrid").addEventListener("pointerover", (event) => {
+  document.getElementById("entryCanvas").addEventListener("pointerover", (event) => {
     const button = event.target.closest(".z-entry-button");
     if (!button || event.pointerType === "touch") return;
     const previous = event.relatedTarget;
@@ -280,13 +303,13 @@
     const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
     if (entry) playNextClip(entry, button);
   });
-  document.getElementById("entryGrid").addEventListener("focusin", (event) => {
+  document.getElementById("entryCanvas").addEventListener("focusin", (event) => {
     const button = event.target.closest(".z-entry-button");
     if (!button) return;
     const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
     if (entry) playNextClip(entry, button);
   });
-  document.getElementById("entryGrid").addEventListener("click", (event) => {
+  document.getElementById("entryCanvas").addEventListener("click", (event) => {
     const button = event.target.closest(".z-entry-button");
     if (!button) return;
     if (!audioEnabled) enableAudio();
@@ -299,7 +322,7 @@
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(() => {
       layoutGifSky();
-      layoutEntryGrid();
+      layoutEntryStickers();
     });
   }, { passive: true });
 
