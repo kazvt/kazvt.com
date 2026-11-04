@@ -210,6 +210,7 @@
     const owner = activeMedia.owner;
     activeMedia.audio.pause();
     activeMedia.audio.currentTime = 0;
+    activeMedia.source?.disconnect();
     owner?.classList.remove("is-playing");
     activeMedia = null;
   }
