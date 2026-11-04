@@ -83,6 +83,7 @@
   let backgroundMusicLoopStart = 0;
   let backgroundMusicSource = null;
   let fallbackBackgroundMusic = null;
+  let backgroundMusicFallback = false;
   const voiceBufferPromises = new Map();
   let lastClipStartedAt = -Infinity;
   let pendingClipRequest = null;
@@ -418,6 +419,7 @@
 
   function startFallbackBackgroundMusic() {
     if (!audioEnabled) return;
+    backgroundMusicFallback = true;
     fallbackBackgroundMusic ??= new Audio(backgroundMusicUrl);
     fallbackBackgroundMusic.loop = true;
     fallbackBackgroundMusic.preload = "auto";
@@ -453,7 +455,14 @@
         audioContext.addEventListener?.("statechange", () => {
           if (!audioEnabled || audioContext?.state !== "running") return;
           updateBackgroundMusicLevel();
-          if (!backgroundMusicSource) void startBackgroundMusic();
+          const directVoiceActive = [...activeMedia].some((media) => media.path === "html");
+          if (directVoiceActive) return;
+          if (backgroundMusicSource) {
+            fallbackBackgroundMusic?.pause();
+            backgroundMusicFallback = false;
+          } else {
+            void startBackgroundMusic();
+          }
         });
       }
       if (!audioMixBus) {
@@ -550,6 +559,7 @@
         gain.setValueAtTime(0, now);
         gain.linearRampToValueAtTime(backgroundMusicLevel(), now + .8);
         fallbackBackgroundMusic?.pause();
+        backgroundMusicFallback = false;
         if (audioStatus.textContent.startsWith("Background music is starting.")) {
           audioStatus.textContent = "Background music is playing. Voice messages are ready.";
         }
@@ -595,6 +605,14 @@
       media.owner?.classList.remove("is-playing");
     }
     updateBackgroundMusicLevel();
+    if (!activeMedia.size && audioEnabled && audioContext?.state === "running") {
+      if (backgroundMusicSource) {
+        fallbackBackgroundMusic?.pause();
+        backgroundMusicFallback = false;
+      } else if (backgroundMusicFallback) {
+        void startBackgroundMusic();
+      }
+    }
   }
 
   function clearPendingClipTimer() {
@@ -662,7 +680,7 @@
     audio.preload = "auto";
     audio.volume = .9;
     const owner = button.closest(".z-entry");
-    const media = { audio, owner, started: false };
+    const media = { audio, owner, path: "html", started: false };
     activeMedia.add(media);
     startingClip = media;
     updateBackgroundMusicLevel();
@@ -701,7 +719,7 @@
     clipIndexes.set(entry.id, (clipIndex + 1) % entry.clips.length);
     const owner = button.closest(".z-entry");
     const request = { entry, button, trigger };
-    if (!ensureAudioContext()) {
+    if (!ensureAudioContext() || backgroundMusicFallback) {
       startHtmlAudioClip(clip, entry, button, clipIndex);
       return;
     }
@@ -713,7 +731,13 @@
     try {
       // This is a tap-triggered call on iOS, so resume is requested before any await.
       const running = await resumeAudioContext();
-      if (!running) throw new Error("Audio could not resume");
+      if (!running) {
+        if (startingClip !== loading) return;
+        startFallbackBackgroundMusic();
+        startingClip = null;
+        startHtmlAudioClip(clip, entry, button, clipIndex);
+        return;
+      }
       const buffer = await loadVoiceBuffer(clip.src);
       if (startingClip !== loading) return;
       if (!audioEnabled || !pendingClipIsStillActive(request)) {
