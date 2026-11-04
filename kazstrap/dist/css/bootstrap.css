@@ -15674,6 +15674,7 @@ kbd {
   inset: 0;
   border-block: 2px solid var(--bs-primary);
   content: "";
+  transition: inset 0.12s ease-out, border-color 0.12s ease-out, transform 0.12s ease-out;
 }
 .navbar .navbar-toggler-icon::after {
   position: absolute;
@@ -15683,6 +15684,18 @@ kbd {
   border-top: 2px solid var(--bs-warning);
   content: "";
   transform: translateY(-50%);
+  transition: width 0.12s ease-out, border-color 0.12s ease-out, transform 0.12s ease-out;
+}
+.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::before {
+  inset: 50% 0 auto;
+  border-block: 0;
+  border-top: 2px solid var(--bs-primary);
+  transform: translateY(-50%) rotate(45deg);
+}
+.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::after {
+  width: 100%;
+  border-top-color: var(--bs-warning);
+  transform: translateY(-50%) rotate(-45deg);
 }
 .navbar .navbar-collapse.show,
 .navbar .navbar-collapse.collapsing {
@@ -15725,6 +15738,8 @@ kbd {
     linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 58%),
     linear-gradient(to bottom, rgba(var(--bs-primary-rgb), 0.045), transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.27);
+  color: var(--bs-body-color);
+  font-weight: 600;
   text-decoration: none;
   transition:
     color 0.12s ease-out,
@@ -15742,11 +15757,8 @@ kbd {
   content: "";
   opacity: 0.78;
 }
-.navbar .navbar-collapse.show .navbar-nav .nav-link:focus-visible,
 .navbar .navbar-collapse.show .navbar-nav .nav-link.active {
   border-color: var(--bs-primary);
-  outline: 2px solid var(--bs-emphasis-color);
-  outline-offset: 1px;
   background-color: var(--bs-primary-bg-subtle);
   background-image:
     linear-gradient(145deg, rgba(255, 255, 255, 0.3), transparent 54%),
@@ -15754,6 +15766,11 @@ kbd {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     2px 2px 0 rgba(var(--bs-primary-rgb), 0.24);
+  color: var(--bs-primary-text-emphasis);
+}
+.navbar .navbar-collapse.show .navbar-nav .nav-link:focus-visible {
+  outline: 2px solid var(--bs-emphasis-color);
+  outline-offset: 1px;
 }
 @media (hover: hover) {
   .navbar .navbar-toggler:hover {
@@ -15793,6 +15810,8 @@ kbd {
 }
 @media (prefers-reduced-motion: reduce) {
   .navbar .navbar-toggler,
+  .navbar .navbar-toggler-icon::before,
+  .navbar .navbar-toggler-icon::after,
   .navbar .navbar-collapse.show .navbar-nav .nav-link {
     transition: none;
   }
@@ -15815,6 +15834,7 @@ kbd {
   }
   .navbar .navbar-toggler-icon::before {
     border-block-color: ButtonText;
+    border-top-color: ButtonText;
   }
   .navbar .navbar-toggler-icon::after {
     border-top-color: ButtonText;
