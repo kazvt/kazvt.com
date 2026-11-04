@@ -199,9 +199,6 @@ button, a { touch-action: manipulation; }
 .z-entry:nth-child(4n + 2) { --entry-accent: #397a94; --entry-shadow: #bce4ef; --entry-tint: #effaff; }
 .z-entry:nth-child(4n + 3) { --entry-accent: #7059a6; --entry-shadow: #d5c8f0; --entry-tint: #f7f3ff; }
 .z-entry:nth-child(4n) { --entry-accent: #80601b; --entry-shadow: #f1e0ae; --entry-tint: #fff9e9; }
-.z-entry:nth-child(3n + 1) { --entry-tilt: -.45deg; --entry-rise: 2px; }
-.z-entry:nth-child(3n + 2) { --entry-tilt: .55deg; --entry-rise: -1px; }
-.z-entry:nth-child(3n) { --entry-tilt: -.2deg; --entry-rise: 1px; }
 .z-entry-button {
   position: relative;
   isolation: isolate;
@@ -263,8 +260,8 @@ button, a { touch-action: manipulation; }
 .z-constellation[data-density="tight"] .z-entry-note,
 .z-constellation[data-density="tight"] .z-entry-state { display: none; }
 .z-constellation[data-density="packed"] .z-entry-id { display: none; }
-.z-constellation[data-density="packed"] .z-entry-button { grid-template-columns: clamp(28px, 6vh, 46px) minmax(0, 1fr) 12px; gap: 5px; padding: 4px; }
-.z-constellation[data-density="packed"] .z-entry-avatar { width: clamp(28px, 6vh, 46px); }
+.z-constellation[data-density="packed"] .z-entry-button { grid-template-columns: clamp(16px, 6vh, 42px) minmax(0, 1fr) 12px; gap: 4px; padding: 2px; }
+.z-constellation[data-density="packed"] .z-entry-avatar { width: clamp(16px, 6vh, 42px); }
 .z-entry-play { min-width: 23px; color: var(--entry-accent); font-size: clamp(12px, 2vh, 19px); text-align: center; text-shadow: 0 2px 0 rgb(255 255 255 / 85%); }
 .z-entry.is-playing .z-entry-play { color: var(--z-gold); animation: z-play-pulse 800ms ease-in-out infinite alternate; }
 .z-stage-status {
