@@ -140,26 +140,24 @@
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      // Five loose, staggered rows of two keep all ten stickers clear at portrait ratios.
+      // Three broad columns and four loose rows give portrait screens room for larger art.
       portrait: [
-        [4.5, 3.5, 42, 15], [53.5, 5, 42, 15],
-        [4, 22, 42, 15], [54, 23.5, 42, 15],
-        [5.5, 40, 42, 15], [53, 41.5, 42, 15],
-        [4, 58.5, 42, 15], [54, 60, 42, 15],
-        [4.5, 77.5, 42, 15], [53.5, 79, 42, 15]
+        [2, 3, 29, 18], [35.5, 4.5, 29, 18], [69, 3.5, 29, 18],
+        [6, 27, 29, 18], [36, 28.5, 29, 18], [66, 26.5, 29, 18],
+        [18, 51, 29, 18], [53, 53, 29, 18],
+        [5, 77, 29, 18], [66, 76, 29, 18]
       ],
-      // A staggered three-column constellation with two low, centered stickers.
+      // Four compact, staggered rows use taller stickers without card collisions.
       wide: [
-        [4, 3, 27, 18], [36.5, 5, 27, 18], [70, 3, 27, 18],
-        [7, 27, 27, 18], [38.5, 29, 27, 18], [70, 26, 27, 18],
-        [4, 51, 27, 18], [36.5, 53, 27, 18],
-        [20, 75, 27, 18], [52, 77, 27, 18]
+        [3, 3, 29, 19], [35.5, 4.5, 29, 19], [68, 3, 29, 19],
+        [6, 28, 29, 19], [36, 29.5, 29, 19], [67, 27, 29, 19],
+        [3, 53, 29, 19], [36, 54.5, 29, 19],
+        [19, 78, 29, 19], [52, 76, 29, 19]
       ],
-      // Four-column landscape scatter keeps the ten stickers a consistent size.
+      // Two loose five-sticker rows give the character art substantially more height.
       panorama: [
-        [2, 4, 21, 22], [27, 5.5, 21, 22], [52, 3.5, 21, 22], [77, 5, 21, 22],
-        [5, 36, 21, 22], [29, 38, 21, 22], [54, 35, 21, 22], [75, 37, 21, 22],
-        [17, 69, 21, 22], [62, 70.5, 21, 22]
+        [2.5, 4, 16, 40], [21, 5.5, 16, 40], [39.5, 2.5, 16, 40], [58, 6, 16, 40], [76.5, 3.5, 16, 40],
+        [7, 54, 16, 40], [26, 55.5, 16, 40], [45, 52.5, 16, 40], [64, 56, 16, 40], [81, 53.5, 16, 40]
       ]
     };
     const positions = layouts[layoutName];
