@@ -69,6 +69,7 @@
   let backgroundMusicBuffer = null;
   let backgroundMusicBufferPromise = null;
   let backgroundMusicSource = null;
+  let fadingBackgroundMusicSource = null;
   let backgroundMusicStartedAt = 0;
   let backgroundMusicOffset = 0;
   let backgroundMusicRequest = 0;
@@ -421,6 +422,12 @@
       const buffer = await loadBackgroundMusic();
       if (!audioEnabled || request !== backgroundMusicRequest || !audioContext) return;
 
+      if (fadingBackgroundMusicSource) {
+        try { fadingBackgroundMusicSource.stop(audioContext.currentTime); } catch {}
+        fadingBackgroundMusicSource.disconnect();
+        fadingBackgroundMusicSource = null;
+      }
+
       backgroundMusicGain ??= audioContext.createGain();
       backgroundMusicGain.gain.value = 0;
       backgroundMusicGain.connect(audioMixBus || audioContext.destination);
@@ -462,11 +469,15 @@
       backgroundMusicOffset = (backgroundMusicOffset + now - backgroundMusicStartedAt) % backgroundMusicBuffer.duration;
     }
     backgroundMusicSource = null;
+    fadingBackgroundMusicSource = source;
     const gain = backgroundMusicGain.gain;
     gain.cancelScheduledValues(now);
     gain.setValueAtTime(gain.value, now);
     gain.linearRampToValueAtTime(0, now + .18);
-    source.onended = () => source.disconnect();
+    source.onended = () => {
+      source.disconnect();
+      if (fadingBackgroundMusicSource === source) fadingBackgroundMusicSource = null;
+    };
     try { source.stop(now + .2); } catch {}
   }
 
@@ -559,11 +570,11 @@
     }, { once: true });
     audio.addEventListener("error", () => {
       releaseMedia(media);
-      audioStatus.textContent = "That voice note couldn't play. Please try again.";
+      if (audioEnabled) audioStatus.textContent = "That voice note couldn't play. Please try again.";
     }, { once: true });
     audio.play().catch(() => {
       releaseMedia(media);
-      audioStatus.textContent = "Tap SOUND OFF once to let the browser play voice notes.";
+      if (audioEnabled) audioStatus.textContent = "Tap SOUND OFF once to let the browser play voice notes.";
     });
   }
 
