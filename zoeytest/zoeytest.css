@@ -52,6 +52,8 @@ body.zoey-page :where(a, button):focus-visible {
   outline-offset: 3px;
 }
 button, a { touch-action: manipulation; }
+/* Downloaded, unchanged CC0 artwork: Jahobr's looped starfield (Wikimedia Commons)
+   plus Starfield 7 and Purple Nebula 2 tiles from Screaming Brain Studios. */
 .z-galaxy-sky {
   position: fixed;
   z-index: 0;
@@ -65,7 +67,7 @@ button, a { touch-action: manipulation; }
   background-repeat: repeat, repeat;
   background-blend-mode: screen;
   mix-blend-mode: screen;
-  opacity: .68;
+  opacity: .54;
 }
 .z-galaxy-motion {
   position: fixed;
