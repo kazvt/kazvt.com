@@ -1280,10 +1280,10 @@ pre code {
   --bs-btn-disabled-color: #fff;
 }
 .btn-warning {
-  --bs-btn-color: #24231f;
-  --bs-btn-hover-color: #24231f;
-  --bs-btn-active-color: #24231f;
-  --bs-btn-disabled-color: #24231f;
+  --bs-btn-color: #171126;
+  --bs-btn-hover-color: #171126;
+  --bs-btn-active-color: #171126;
+  --bs-btn-disabled-color: #171126;
 }
 .btn-outline-primary, .btn-outline-secondary, .btn-outline-success,
 .btn-outline-info, .btn-outline-warning, .btn-outline-danger {
@@ -1303,8 +1303,8 @@ pre code {
   --bs-btn-active-color: #fff;
 }
 .btn-outline-warning {
-  --bs-btn-hover-color: #24231f;
-  --bs-btn-active-color: #24231f;
+  --bs-btn-hover-color: #171126;
+  --bs-btn-active-color: #171126;
 }
 
 /* Text and link utilities use the mode-aware emphasis shades; the warning fill stays a warm pastel. */
