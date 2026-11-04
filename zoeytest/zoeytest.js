@@ -127,7 +127,7 @@
       image.style.top = `${y}%`;
       image.style.setProperty("--z-gif-width", `${width.toFixed(1)}px`);
       image.style.setProperty("--z-gif-height", `${height.toFixed(1)}px`);
-      image.style.setProperty("--z-gif-opacity", (.38 + seeded(index, 4) * .28).toFixed(2));
+      image.style.setProperty("--z-gif-opacity", (.56 + seeded(index, 4) * .3).toFixed(2));
       image.style.setProperty("--z-gif-tilt", `${((seeded(index, 5) - .5) * 24).toFixed(1)}deg`);
       if (!image.hasAttribute("src")) image.src = image.dataset.src;
     });

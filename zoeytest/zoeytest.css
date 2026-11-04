@@ -65,8 +65,8 @@ button, a { touch-action: manipulation; }
   opacity: var(--z-gif-opacity, .72);
   transform: translate(-50%, -50%) rotate(var(--z-gif-tilt, 0deg));
   image-rendering: auto;
-  mix-blend-mode: multiply;
-  filter: drop-shadow(0 2px 4px rgb(100 78 139 / 22%));
+  mix-blend-mode: screen;
+  filter: contrast(1.2) saturate(1.35) drop-shadow(0 2px 4px rgb(100 78 139 / 22%));
 }
 .z-skip-link {
   position: fixed;
