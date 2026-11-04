@@ -89,6 +89,21 @@
       fragment.append(card);
     });
     document.getElementById("entryGrid").replaceChildren(fragment);
+    layoutEntryGrid();
+  }
+
+  function layoutEntryGrid() {
+    const grid = document.getElementById("entryGrid");
+    if (!grid) return;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    let columns = width > 700 ? 4 : width <= 410 ? 2 : 3;
+    if (height <= 510 && width >= 560) columns = 4;
+    columns = Math.max(1, Math.min(columns, entrySlots.length));
+    const rows = Math.max(1, Math.ceil(entrySlots.length / columns));
+    grid.style.setProperty("--entry-columns", String(columns));
+    grid.style.setProperty("--entry-rows", String(rows));
+    grid.dataset.density = rows >= 7 ? "packed" : rows >= 5 ? "tight" : "normal";
   }
 
   function motionChoice() {
@@ -307,7 +322,10 @@
   let resizeFrame = 0;
   window.addEventListener("resize", () => {
     cancelAnimationFrame(resizeFrame);
-    resizeFrame = requestAnimationFrame(layoutGifSky);
+    resizeFrame = requestAnimationFrame(() => {
+      layoutGifSky();
+      layoutEntryGrid();
+    });
   }, { passive: true });
 
   const loader = document.getElementById("fakeLoader");
