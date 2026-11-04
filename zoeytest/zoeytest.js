@@ -568,10 +568,6 @@
         : "This message is still waiting for a recording.";
       return;
     }
-    const last = lastTriggers.get(button) || 0;
-    const now = performance.now();
-    if (now - last < 280) return;
-    lastTriggers.set(button, now);
     const clipIndex = clipIndexes.get(entry.id) || 0;
     const clip = entry.clips[clipIndex % entry.clips.length];
     clipIndexes.set(entry.id, (clipIndex + 1) % entry.clips.length);
