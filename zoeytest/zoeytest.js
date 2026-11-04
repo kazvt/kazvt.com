@@ -29,6 +29,14 @@
         { src: "/zoeytest/assets/abigail/abigail-voice-3.wav", caption: "Abigail's voice note 3 of 3." }
       ]
     },
+    {
+      id: "letty",
+      name: "Letty",
+      avatar: "/zoeytest/assets/letty/letty-avatar.png",
+      clips: [
+        { src: "/zoeytest/assets/letty/letty-voice-1.wav", caption: "Letty's voice note." }
+      ]
+    },
     ...Array.from({ length: 6 }, (_, index) => {
       const number = index + 3;
       return {
@@ -106,23 +114,25 @@
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      // Four loose rows of two, each with the same footprint.
+      // Five loose rows of two, with the ninth sticker centered at the bottom.
       portrait: [
-        [5, 4, 42, 17], [53, 6, 42, 17],
-        [6, 28, 42, 17], [53, 30, 42, 17],
-        [4.5, 52, 42, 17], [54, 54, 42, 17],
-        [5, 76, 42, 17], [53, 78, 42, 17]
+        [4.5, 4, 42, 15], [53.5, 5.5, 42, 15],
+        [5.5, 22, 42, 15], [52.5, 23.5, 42, 15],
+        [4, 40, 42, 15], [54, 41.5, 42, 15],
+        [5.5, 58, 42, 15], [53, 59.5, 42, 15],
+        [28.5, 79, 42, 15]
       ],
-      // A loose 3-2-3 constellation, not boxed cards or a uniform grid.
+      // A loose 3-by-3 constellation, not boxed cards or a rigid grid.
       wide: [
-        [4, 5, 27, 23], [36.5, 7, 27, 23], [70, 4, 27, 23],
-        [20, 37, 27, 23], [53, 40, 27, 23],
-        [4, 68, 27, 23], [36.5, 70, 27, 23], [70, 72, 27, 23]
+        [4, 4, 27, 23], [36.5, 6, 27, 23], [70, 4, 27, 23],
+        [7, 37, 27, 23], [38.5, 39, 27, 23], [70, 36, 27, 23],
+        [4, 70, 27, 23], [36.5, 72, 27, 23], [70, 70, 27, 23]
       ],
-      // Staggered landscape placements keep all eight stickers equally sized.
+      // Staggered landscape placements keep all nine stickers equally sized.
       panorama: [
-        [3, 4, 21, 38], [27, 6, 21, 38], [51, 5, 21, 38], [75, 7, 21, 38],
-        [4, 54, 21, 38], [28, 52, 21, 38], [52, 55, 21, 38], [76, 53, 21, 38]
+        [7, 3, 22, 25], [39, 5, 22, 25], [71, 3, 22, 25],
+        [5, 37, 22, 25], [39, 39, 22, 25], [73, 36, 22, 25],
+        [7, 71, 22, 25], [39, 69, 22, 25], [71, 71, 22, 25]
       ]
     };
     const positions = layouts[layoutName];
