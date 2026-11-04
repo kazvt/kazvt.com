@@ -233,12 +233,13 @@
       try {
         audioContext ??= new AudioContextClass();
         if (!audioMixBus) {
+          // Voice notes can overlap; catch only stacked peaks on the shared output.
           audioMixBus = audioContext.createDynamicsCompressor();
-          audioMixBus.threshold.value = -6;
-          audioMixBus.knee.value = 1;
-          audioMixBus.ratio.value = 12;
-          audioMixBus.attack.value = 0.003;
-          audioMixBus.release.value = 0.12;
+          audioMixBus.threshold.value = -3;
+          audioMixBus.knee.value = 0;
+          audioMixBus.ratio.value = 20;
+          audioMixBus.attack.value = 0.002;
+          audioMixBus.release.value = 0.14;
           audioMixBus.connect(audioContext.destination);
         }
         if (audioContext.state !== "running") void audioContext.resume().catch(() => {});
