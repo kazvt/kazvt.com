@@ -12747,6 +12747,7 @@ mark {
   .offcanvas,
   .navbar,
   .navbar .nav-link,
+  .carousel-indicators [data-bs-target],
   .nav-tabs .nav-link,
   .nav-pills .nav-link,
   .page-link,
@@ -12883,116 +12884,245 @@ mark {
 
 @supports not (color: color-mix(in oklab, white, black)) {
   .table-hover > tbody > tr:hover > * {
-    --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.08);
+    --bs-table-bg-state: rgba(var(--kaz-ui-rgb, var(--bs-primary-rgb)), 0.08);
+  }
+}
+
+/* Inline code reads like a tiny hand-built web badge; pre blocks read like an old site console. */
+code {
+  padding: 0.08em 0.28em;
+  color: var(--bs-code-color);
+  background-color: var(--bs-primary-bg-subtle);
+  border: 1px solid var(--bs-primary-border-subtle);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+pre {
+  overflow-x: auto;
+  padding: 0.85rem 1rem;
+  color: var(--bs-light);
+  background-color: var(--bs-dark);
+  border: 2px solid var(--bs-border-color);
+  border-inline-start: 4px solid var(--bs-primary);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    var(--bs-box-shadow-sm);
+}
+pre code {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+}
+.img-thumbnail {
+  border-color: var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 36%, transparent),
+    2px 2px 0 color-mix(in oklab, var(--bs-primary) 32%, black 68%),
+    4px 4px 0 color-mix(in oklab, var(--bs-primary) 24%, transparent);
+}
+
+/* Carousel controls become framed arcade toggles; captions stay readable on artwork. */
+.carousel-caption {
+  padding: 0.65rem 0.8rem;
+  color: var(--bs-light);
+  background-color: var(--bs-dark);
+  background-color: color-mix(in oklab, var(--bs-dark) 92%, transparent);
+  background-image: linear-gradient(to bottom, color-mix(in oklab, white 10%, transparent), transparent 72%);
+  border: 1px solid var(--bs-border-color);
+  border: 1px solid color-mix(in oklab, white 22%, transparent);
+  border-inline-start: 3px solid var(--bs-primary);
+  box-shadow: 2px 2px 0 color-mix(in oklab, var(--bs-dark) 70%, transparent);
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--bs-primary);
+  background-color: color-mix(in oklab, var(--bs-primary) 78%, black 22%);
+  border: 1px solid var(--bs-primary-border-subtle);
+  border: 1px solid color-mix(in oklab, white 48%, var(--bs-primary) 52%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 28%, transparent),
+    2px 2px 0 color-mix(in oklab, var(--bs-primary) 40%, black 60%);
+}
+.carousel-indicators [data-bs-target] {
+  height: 0.4rem;
+  border: 1px solid var(--bs-primary-border-subtle);
+  border: 1px solid color-mix(in oklab, var(--bs-primary) 70%, black 30%);
+  background-color: var(--bs-primary);
+  opacity: 0.62;
+  transition: opacity 0.15s ease-out;
+}
+.carousel-indicators [data-bs-target].active {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .carousel-indicators [data-bs-target]:hover {
+    opacity: 1;
   }
 }
 
 /* Kazstrap: layered site-wide finish. */
-/* Muted semantic palette. Solid tokens preserve utility compatibility; surfaces and controls layer them into gradients below. */
+/* Bright personal-web colors: saturated accents, warm paper, and readable pastel panels. */
 :root,
 [data-bs-theme="light"] {
-  --bs-primary: #66619e;
-  --bs-primary-rgb: 102, 97, 158;
-  --bs-secondary: #626c7a;
-  --bs-secondary-rgb: 98, 108, 122;
-  --bs-success: #44735b;
-  --bs-success-rgb: 68, 115, 91;
-  --bs-info: #47727c;
-  --bs-info-rgb: 71, 114, 124;
-  --bs-warning: #d8b36d;
-  --bs-warning-rgb: 216, 179, 109;
-  --bs-danger: #a6495a;
-  --bs-danger-rgb: 166, 73, 90;
+  --bs-body-color: #2b243a;
+  --bs-body-color-rgb: 43, 36, 58;
+  --bs-body-bg: #fffdf7;
+  --bs-body-bg-rgb: 255, 253, 247;
+  --bs-emphasis-color: #201a31;
+  --bs-emphasis-color-rgb: 32, 26, 49;
+  --bs-secondary-color: rgba(43, 36, 58, 0.76);
+  --bs-secondary-color-rgb: 43, 36, 58;
+  --bs-secondary-bg: #efebf5;
+  --bs-secondary-bg-rgb: 239, 235, 245;
+  --bs-tertiary-color: rgba(43, 36, 58, 0.54);
+  --bs-tertiary-color-rgb: 43, 36, 58;
+  --bs-tertiary-bg: #f7f3ea;
+  --bs-tertiary-bg-rgb: 247, 243, 234;
+  --bs-light: #fff8ec;
+  --bs-light-rgb: 255, 248, 236;
+  --bs-dark: #29233c;
+  --bs-dark-rgb: 41, 35, 60;
+  --bs-light-text-emphasis: #554b69;
+  --bs-light-bg-subtle: #fffaf1;
+  --bs-light-border-subtle: #c8bfd4;
+  --bs-dark-text-emphasis: #29233c;
+  --bs-dark-bg-subtle: #e6e0ec;
+  --bs-dark-border-subtle: #b0a5bb;
 
-  --bs-primary-text-emphasis: #39356f;
-  --bs-secondary-text-emphasis: #35404c;
-  --bs-success-text-emphasis: #244a35;
-  --bs-info-text-emphasis: #1f4650;
-  --bs-warning-text-emphasis: #5b411a;
-  --bs-danger-text-emphasis: #682f3b;
+  --bs-primary: #7050cf;
+  --bs-primary-rgb: 112, 80, 207;
+  --bs-secondary: #56647e;
+  --bs-secondary-rgb: 86, 100, 126;
+  --bs-success: #2a6f49;
+  --bs-success-rgb: 42, 111, 73;
+  --bs-info: #286d86;
+  --bs-info-rgb: 40, 109, 134;
+  --bs-warning: #d7a03c;
+  --bs-warning-rgb: 215, 160, 60;
+  --bs-danger: #b2365c;
+  --bs-danger-rgb: 178, 54, 92;
 
-  --bs-primary-bg-subtle: #efedf8;
-  --bs-secondary-bg-subtle: #eef0f4;
-  --bs-success-bg-subtle: #e9f1eb;
-  --bs-info-bg-subtle: #e8f1f3;
-  --bs-warning-bg-subtle: #f8f0de;
-  --bs-danger-bg-subtle: #f4e8eb;
+  --bs-primary-text-emphasis: #43308f;
+  --bs-secondary-text-emphasis: #364253;
+  --bs-success-text-emphasis: #204c33;
+  --bs-info-text-emphasis: #174a5c;
+  --bs-warning-text-emphasis: #594011;
+  --bs-danger-text-emphasis: #70223a;
 
-  --bs-primary-border-subtle: #c4c0e0;
-  --bs-secondary-border-subtle: #c9cfd7;
-  --bs-success-border-subtle: #bdd4c4;
-  --bs-info-border-subtle: #b9d3d9;
-  --bs-warning-border-subtle: #dfc58f;
-  --bs-danger-border-subtle: #dfb9c1;
+  --bs-primary-bg-subtle: #f0edff;
+  --bs-secondary-bg-subtle: #eef1f6;
+  --bs-success-bg-subtle: #e6f3e9;
+  --bs-info-bg-subtle: #e3f2f6;
+  --bs-warning-bg-subtle: #fff2d9;
+  --bs-danger-bg-subtle: #fbe9ee;
 
-  --bs-link-color: #55518f;
-  --bs-link-color-rgb: 85, 81, 143;
-  --bs-link-hover-color: #39356f;
-  --bs-link-hover-color-rgb: 57, 53, 111;
-  --bs-focus-ring-color: rgba(102, 97, 158, 0.3);
+  --bs-primary-border-subtle: #8d78d0;
+  --bs-secondary-border-subtle: #7b899f;
+  --bs-success-border-subtle: #4f9368;
+  --bs-info-border-subtle: #4f8292;
+  --bs-warning-border-subtle: #a87b22;
+  --bs-danger-border-subtle: #bd6d83;
+
+  --bs-link-color: #4c3ba7;
+  --bs-link-color-rgb: 76, 59, 167;
+  --bs-link-hover-color: #332783;
+  --bs-link-hover-color-rgb: 51, 39, 131;
+  --bs-focus-ring-color: rgba(112, 80, 207, 0.58);
   --bs-form-valid-color: var(--bs-success-text-emphasis);
   --bs-form-valid-border-color: var(--bs-success);
   --bs-form-invalid-color: var(--bs-danger-text-emphasis);
   --bs-form-invalid-border-color: var(--bs-danger);
   --bs-highlight-color: var(--bs-body-color);
   --bs-highlight-bg: var(--bs-warning-bg-subtle);
-  --bs-code-color: #89506f;
-  --bs-border-color: #d7d6e0;
-  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2344735b' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
-  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23a6495a'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23a6495a' stroke='none'/%3e%3c/svg%3e");
+  --bs-code-color: #8a3d76;
+  --bs-border-color: #9289a8;
+  --bs-border-color-translucent: rgba(41, 35, 60, 0.2);
+  --kaz-visited-link-color: #71438a;
+  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%232a6f49' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
+  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23b2365c'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23b2365c' stroke='none'/%3e%3c/svg%3e");
 }
 [data-bs-theme="dark"] {
-  --bs-primary: #66619e;
-  --bs-primary-rgb: 102, 97, 158;
-  --bs-secondary: #626c7a;
-  --bs-secondary-rgb: 98, 108, 122;
-  --bs-success: #44735b;
-  --bs-success-rgb: 68, 115, 91;
-  --bs-info: #47727c;
-  --bs-info-rgb: 71, 114, 124;
-  --bs-warning: #d8b36d;
-  --bs-warning-rgb: 216, 179, 109;
-  --bs-danger: #a6495a;
-  --bs-danger-rgb: 166, 73, 90;
+  --bs-body-color: #f2edff;
+  --bs-body-color-rgb: 242, 237, 255;
+  --bs-body-bg: #211e2d;
+  --bs-body-bg-rgb: 33, 30, 45;
+  --bs-emphasis-color: #fffaf2;
+  --bs-emphasis-color-rgb: 255, 250, 242;
+  --bs-secondary-color: rgba(242, 237, 255, 0.76);
+  --bs-secondary-color-rgb: 242, 237, 255;
+  --bs-secondary-bg: #302b40;
+  --bs-secondary-bg-rgb: 48, 43, 64;
+  --bs-tertiary-color: rgba(242, 237, 255, 0.56);
+  --bs-tertiary-color-rgb: 242, 237, 255;
+  --bs-tertiary-bg: #292537;
+  --bs-tertiary-bg-rgb: 41, 37, 55;
+  --bs-light: #fff8ec;
+  --bs-light-rgb: 255, 248, 236;
+  --bs-dark: #29233c;
+  --bs-dark-rgb: 41, 35, 60;
+  --bs-light-text-emphasis: #fffaf2;
+  --bs-light-bg-subtle: #342f43;
+  --bs-light-border-subtle: #5b536a;
+  --bs-dark-text-emphasis: #fffaf2;
+  --bs-dark-bg-subtle: #181521;
+  --bs-dark-border-subtle: #635d76;
 
-  --bs-primary-text-emphasis: #bdb8ee;
-  --bs-secondary-text-emphasis: #c2cad4;
-  --bs-success-text-emphasis: #acd1b8;
-  --bs-info-text-emphasis: #aad0d8;
-  --bs-warning-text-emphasis: #eed094;
-  --bs-danger-text-emphasis: #e7adb7;
+  --bs-primary: #7050cf;
+  --bs-primary-rgb: 112, 80, 207;
+  --bs-secondary: #56647e;
+  --bs-secondary-rgb: 86, 100, 126;
+  --bs-success: #2a6f49;
+  --bs-success-rgb: 42, 111, 73;
+  --bs-info: #286d86;
+  --bs-info-rgb: 40, 109, 134;
+  --bs-warning: #d7a03c;
+  --bs-warning-rgb: 215, 160, 60;
+  --bs-danger: #b2365c;
+  --bs-danger-rgb: 178, 54, 92;
 
-  --bs-primary-bg-subtle: #25243b;
-  --bs-secondary-bg-subtle: #292d34;
-  --bs-success-bg-subtle: #1f2d24;
-  --bs-info-bg-subtle: #1e2c31;
-  --bs-warning-bg-subtle: #332b20;
-  --bs-danger-bg-subtle: #332128;
+  --bs-primary-text-emphasis: #c8bdff;
+  --bs-secondary-text-emphasis: #c5cfdf;
+  --bs-success-text-emphasis: #a4d5b2;
+  --bs-info-text-emphasis: #a5dbe5;
+  --bs-warning-text-emphasis: #f0d18b;
+  --bs-danger-text-emphasis: #f0adbd;
 
-  --bs-primary-border-subtle: #514c7a;
-  --bs-secondary-border-subtle: #515d6e;
-  --bs-success-border-subtle: #3f6a51;
-  --bs-info-border-subtle: #3d6974;
-  --bs-warning-border-subtle: #81663b;
-  --bs-danger-border-subtle: #7b4651;
+  --bs-primary-bg-subtle: #2a2444;
+  --bs-secondary-bg-subtle: #292e39;
+  --bs-success-bg-subtle: #1f3328;
+  --bs-info-bg-subtle: #1e3038;
+  --bs-warning-bg-subtle: #332a1b;
+  --bs-danger-bg-subtle: #361f2a;
 
-  --bs-link-color: #bdb8ee;
-  --bs-link-color-rgb: 189, 184, 238;
-  --bs-link-hover-color: #d4cff7;
-  --bs-link-hover-color-rgb: 212, 207, 247;
-  --bs-focus-ring-color: rgba(189, 184, 238, 0.38);
+  --bs-primary-border-subtle: #8176ad;
+  --bs-secondary-border-subtle: #7e8797;
+  --bs-success-border-subtle: #61936e;
+  --bs-info-border-subtle: #5e91a0;
+  --bs-warning-border-subtle: #927841;
+  --bs-danger-border-subtle: #a76578;
+
+  --bs-link-color: #c8bdff;
+  --bs-link-color-rgb: 200, 189, 255;
+  --bs-link-hover-color: #e4deff;
+  --bs-link-hover-color-rgb: 228, 222, 255;
+  --bs-focus-ring-color: rgba(200, 189, 255, 0.64);
   --bs-form-valid-color: var(--bs-success-text-emphasis);
-  --bs-form-valid-border-color: #6b9e7d;
+  --bs-form-valid-border-color: var(--bs-success-border-subtle);
   --bs-form-invalid-color: var(--bs-danger-text-emphasis);
-  --bs-form-invalid-border-color: #c17482;
+  --bs-form-invalid-border-color: var(--bs-danger-border-subtle);
   --bs-highlight-color: var(--bs-body-color);
   --bs-highlight-bg: var(--bs-warning-bg-subtle);
-  --bs-code-color: #d6a2c1;
-  --bs-border-color: #4b4d5b;
-  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23acd1b8' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
-  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23e7adb7'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e7adb7' stroke='none'/%3e%3c/svg%3e");
+  --bs-code-color: #dfa5d3;
+  --bs-border-color: #777089;
+  --bs-border-color-translucent: rgba(255, 250, 242, 0.22);
+  --kaz-visited-link-color: #dfb7f2;
+  --kaz-form-valid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23a4d5b2' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1'/%3e%3c/svg%3e");
+  --kaz-form-invalid-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23f0adbd'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23f0adbd' stroke='none'/%3e%3c/svg%3e");
 }
-
 .was-validated .form-control:valid, .form-control.is-valid { background-image: var(--kaz-form-valid-icon); }
 .was-validated .form-control:invalid, .form-control.is-invalid { background-image: var(--kaz-form-invalid-icon); }
 .was-validated .form-select:valid:not([multiple]):not([size]),
@@ -13034,11 +13164,11 @@ mark {
 }
 .accordion {
   --bs-accordion-btn-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
-  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2339356f' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2343308f' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
 [data-bs-theme="dark"] .accordion-button::after {
-  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23bdb8ee'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
-  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23bdb8ee'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c8bdff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c8bdff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
 }
 .form-control:focus, .form-select:focus {
   border-color: var(--bs-primary);
@@ -13231,12 +13361,12 @@ h1, h2, h3, h4, h5, h6,
 h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
 .card-title, .alert-heading, .modal-title, .offcanvas-title {
   background-image: linear-gradient(90deg,
-    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 78%, black 22%) 0% 64%,
-    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, white 32%) 64% 80%,
-    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 80% 100%);
+    color-mix(in oklab, var(--bs-primary) 78%, black 22%) 0% 54%,
+    color-mix(in oklab, var(--bs-info) 72%, white 28%) 54% 78%,
+    color-mix(in oklab, var(--bs-warning) 78%, black 22%) 78% 100%);
   background-position: left bottom;
   background-repeat: no-repeat;
-  background-size: 3.25rem 3px;
+  background-size: 4.5rem 4px;
   padding-bottom: 0.18em;
 }
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3:not(.accordion-header),
@@ -13244,9 +13374,9 @@ h1, h2, h3:not(.accordion-header), .h1, .h2, .h3:not(.accordion-header),
 [dir="rtl"] .card-title, [dir="rtl"] .alert-heading,
 [dir="rtl"] .modal-title, [dir="rtl"] .offcanvas-title {
   background-image: linear-gradient(270deg,
-    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 78%, black 22%) 0% 64%,
-    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, white 32%) 64% 80%,
-    color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 80% 100%);
+    color-mix(in oklab, var(--bs-primary) 78%, black 22%) 0% 54%,
+    color-mix(in oklab, var(--bs-info) 72%, white 28%) 54% 78%,
+    color-mix(in oklab, var(--bs-warning) 78%, black 22%) 78% 100%);
 }
 
 /* Build a checkerboard of solid cells first, then rotate the sheet into diamonds. */
@@ -13255,9 +13385,9 @@ body {
   isolation: isolate;
   background-image:
     linear-gradient(135deg,
-      color-mix(in oklab, var(--bs-primary) 4%, var(--bs-body-bg)) 0%,
+      color-mix(in oklab, var(--bs-primary) 6%, var(--bs-body-bg)) 0%,
       var(--bs-body-bg) 48%,
-      color-mix(in oklab, var(--bs-info) 4%, var(--bs-body-bg)) 100%);
+      color-mix(in oklab, var(--bs-info) 6%, var(--bs-body-bg)) 100%);
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -13279,7 +13409,7 @@ body::after {
 @supports (mask-image: linear-gradient(white, white)) or (-webkit-mask-image: linear-gradient(white, white)) {
   body::before {
     display: block;
-    background-color: color-mix(in oklab, var(--bs-primary) 9%, transparent);
+    background-color: color-mix(in oklab, var(--bs-primary) 12%, transparent);
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M0%200h64v64H0zM64%2064h64v64H64z'/%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M0%200h64v64H0zM64%2064h64v64H64z'/%3E%3C/svg%3E");
     -webkit-mask-size: 128px 128px;
@@ -13289,7 +13419,7 @@ body::after {
   }
   body::after {
     display: block;
-    background-color: color-mix(in oklab, var(--bs-info) 5%, transparent);
+    background-color: color-mix(in oklab, var(--bs-info) 8%, transparent);
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M64%200h64v64H64zM0%2064h64v64H0z'/%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='128'%20height='128'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='white'%20d='M64%200h64v64H64zM0%2064h64v64H0z'/%3E%3C/svg%3E");
     -webkit-mask-size: 128px 128px;
@@ -13309,6 +13439,13 @@ a.btn-link {
 }
 a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action) {
   color: color-mix(in oklab, rgb(var(--bs-link-color-rgb)) 82%, var(--bs-body-color) 18%);
+}
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):visited {
+  color: var(--kaz-visited-link-color);
+}
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):hover,
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):focus-visible {
+  color: var(--bs-link-hover-color);
 }
 a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand):not(.list-group-item-action):focus-visible {
   outline: 2px solid var(--bs-emphasis-color);
@@ -13342,7 +13479,7 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand
     linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 13%, transparent) 0%, transparent 62%),
     linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0%, transparent 46%),
     linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 6%, transparent) 0%, transparent 70%);
-  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-size: 100% 4px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   background-position: top left, center, center, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   box-shadow:
@@ -13408,7 +13545,7 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand
     linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent) 13%, transparent) 0%, transparent 62%),
     linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent) 7%, transparent) 0%, transparent 46%),
     linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent) 6%, transparent) 0%, transparent 72%);
-  background-size: 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-size: 100% 4px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   background-position: top left, center, center, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   box-shadow:
@@ -13483,7 +13620,7 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand
       color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 86% 100%),
     linear-gradient(145deg, color-mix(in oklab, white 14%, transparent) 0%, transparent 48%),
     linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 84%);
-  background-size: 100% 3px, 100% 100%, 100% 100%;
+  background-size: 100% 4px, 100% 100%, 100% 100%;
   background-position: top left, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat;
   border-color: color-mix(in oklab, var(--bs-border-color) 56%, var(--kaz-ui-accent, var(--bs-primary)) 44%);
@@ -13583,7 +13720,7 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand
       color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 89% 100%),
     linear-gradient(100deg, color-mix(in oklab, white 9%, transparent), transparent 52%),
     linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 84%);
-  background-size: 100% 3px, 100% 100%, 100% 100%;
+  background-size: 100% 4px, 100% 100%, 100% 100%;
   background-position: top left, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat;
   box-shadow:
@@ -13734,10 +13871,116 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.navbar-brand
     linear-gradient(to bottom, color-mix(in oklab, var(--bs-primary) 9%, transparent), transparent);
 }
 .table-striped > tbody > tr:nth-of-type(odd) > * {
-  --bs-table-bg-type: color-mix(in oklab, var(--bs-primary) 4%, transparent);
+  --bs-table-bg-type: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent);
 }
 .table-hover > tbody > tr:hover > * {
-  --bs-table-bg-state: color-mix(in oklab, var(--bs-primary) 9%, transparent);
+  --bs-table-bg-state: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent);
+}
+
+/* Table variants follow the shared semantic palette instead of Bootstrap's baked-in blue fills. */
+.table-primary {
+  --kaz-ui-accent: var(--bs-primary);
+  --kaz-ui-rgb: var(--bs-primary-rgb);
+  --bs-table-color: var(--bs-primary-text-emphasis);
+  --bs-table-bg: var(--bs-primary-bg-subtle);
+  --bs-table-border-color: var(--bs-primary-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-primary-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-primary-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-primary-rgb), 0.14);
+  --bs-table-active-color: var(--bs-primary-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-primary-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-primary-text-emphasis);
+}
+.table-secondary {
+  --kaz-ui-accent: var(--bs-secondary);
+  --kaz-ui-rgb: var(--bs-secondary-rgb);
+  --bs-table-color: var(--bs-secondary-text-emphasis);
+  --bs-table-bg: var(--bs-secondary-bg-subtle);
+  --bs-table-border-color: var(--bs-secondary-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-secondary-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-secondary-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-secondary-rgb), 0.14);
+  --bs-table-active-color: var(--bs-secondary-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-secondary-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-secondary-text-emphasis);
+}
+.table-success {
+  --kaz-ui-accent: var(--bs-success);
+  --kaz-ui-rgb: var(--bs-success-rgb);
+  --bs-table-color: var(--bs-success-text-emphasis);
+  --bs-table-bg: var(--bs-success-bg-subtle);
+  --bs-table-border-color: var(--bs-success-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-success-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-success-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-success-rgb), 0.14);
+  --bs-table-active-color: var(--bs-success-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-success-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-success-text-emphasis);
+}
+.table-info {
+  --kaz-ui-accent: var(--bs-info);
+  --kaz-ui-rgb: var(--bs-info-rgb);
+  --bs-table-color: var(--bs-info-text-emphasis);
+  --bs-table-bg: var(--bs-info-bg-subtle);
+  --bs-table-border-color: var(--bs-info-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-info-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-info-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-info-rgb), 0.14);
+  --bs-table-active-color: var(--bs-info-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-info-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-info-text-emphasis);
+}
+.table-warning {
+  --kaz-ui-accent: var(--bs-warning);
+  --kaz-ui-rgb: var(--bs-warning-rgb);
+  --bs-table-color: var(--bs-warning-text-emphasis);
+  --bs-table-bg: var(--bs-warning-bg-subtle);
+  --bs-table-border-color: var(--bs-warning-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-warning-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-warning-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-warning-rgb), 0.14);
+  --bs-table-active-color: var(--bs-warning-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-warning-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-warning-text-emphasis);
+}
+.table-danger {
+  --kaz-ui-accent: var(--bs-danger);
+  --kaz-ui-rgb: var(--bs-danger-rgb);
+  --bs-table-color: var(--bs-danger-text-emphasis);
+  --bs-table-bg: var(--bs-danger-bg-subtle);
+  --bs-table-border-color: var(--bs-danger-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-danger-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-danger-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-danger-rgb), 0.14);
+  --bs-table-active-color: var(--bs-danger-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-danger-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-danger-text-emphasis);
+}
+.table-light {
+  --kaz-ui-accent: var(--bs-secondary);
+  --kaz-ui-rgb: var(--bs-secondary-rgb);
+  --bs-table-color: var(--bs-light-text-emphasis);
+  --bs-table-bg: var(--bs-light-bg-subtle);
+  --bs-table-border-color: var(--bs-secondary-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-secondary-rgb), 0.05);
+  --bs-table-striped-color: var(--bs-light-text-emphasis);
+  --bs-table-active-bg: rgba(var(--bs-secondary-rgb), 0.12);
+  --bs-table-active-color: var(--bs-light-text-emphasis);
+  --bs-table-hover-bg: rgba(var(--bs-secondary-rgb), 0.08);
+  --bs-table-hover-color: var(--bs-light-text-emphasis);
+}
+.table-dark {
+  --kaz-ui-accent: var(--bs-dark);
+  --kaz-ui-rgb: var(--bs-dark-rgb);
+  --bs-table-color: var(--bs-light);
+  --bs-table-bg: var(--bs-dark);
+  --bs-table-border-color: var(--bs-secondary-border-subtle);
+  --bs-table-striped-bg: rgba(var(--bs-light-rgb), 0.06);
+  --bs-table-striped-color: var(--bs-light);
+  --bs-table-active-bg: rgba(var(--bs-light-rgb), 0.14);
+  --bs-table-active-color: var(--bs-light);
+  --bs-table-hover-bg: rgba(var(--bs-light-rgb), 0.1);
+  --bs-table-hover-color: var(--bs-light);
 }
 .breadcrumb {
   border: 1px solid color-mix(in oklab, var(--bs-border-color) 66%, var(--bs-primary) 34%);
@@ -13886,10 +14129,10 @@ kbd {
     box-shadow: 0 2px 0 rgba(var(--bs-primary-rgb), 0.62), 4px 4px 0 rgba(var(--bs-emphasis-color-rgb), 0.18), 8px 8px 0 rgba(var(--bs-primary-rgb), 0.32);
   }
   .table-striped > tbody > tr:nth-of-type(odd) > * {
-    --bs-table-bg-type: rgba(var(--bs-emphasis-color-rgb), 0.035);
+    --bs-table-bg-type: rgba(var(--kaz-ui-rgb, var(--bs-primary-rgb)), 0.06);
   }
   .table-hover > tbody > tr:hover > * {
-    --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.10);
+    --bs-table-bg-state: rgba(var(--kaz-ui-rgb, var(--bs-primary-rgb)), 0.10);
   }
   blockquote {
     border-inline-start-color: rgba(var(--bs-primary-rgb), 0.68);
@@ -14016,9 +14259,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 16px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 16px 17px,
         transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
@@ -14028,7 +14271,7 @@ kbd {
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent) 0%, transparent 62%),
       linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent) 0%, transparent 46%),
       linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent) 0%, transparent 70%);
-    background-size: auto, 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-size: auto, 100% 4px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
     background-position: 0 0, top left, center, center, center, center;
     background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   }
@@ -14076,9 +14319,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 16px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 16px 17px,
         transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
@@ -14088,7 +14331,7 @@ kbd {
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent) 0%, transparent 62%),
       linear-gradient(315deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent) 0%, transparent 46%),
       linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent) 0%, transparent 72%);
-    background-size: auto, 100% 3px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-size: auto, 100% 4px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
     background-position: 0 0, top left, center, center, center, center;
     background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   }
@@ -14104,9 +14347,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 7px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 7px 8px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 7px 8px,
         transparent 8px 14px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
@@ -14114,7 +14357,7 @@ kbd {
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 86% 100%),
       linear-gradient(145deg, color-mix(in oklab, white 6%, transparent) 0%, transparent 48%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 84%);
-    background-size: auto, 100% 3px, 100% 100%, 100% 100%;
+    background-size: auto, 100% 4px, 100% 100%, 100% 100%;
     background-position: 0 0, top left, center, center;
     background-repeat: repeat, no-repeat, no-repeat, no-repeat;
   }
@@ -14125,9 +14368,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 14px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 14px 15px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 14px 15px,
         transparent 15px 28px),
       linear-gradient(35deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 72%),
       linear-gradient(to top, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 82%);
@@ -14138,9 +14381,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 9px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 9px 10px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 9px 10px,
         transparent 10px 18px),
       linear-gradient(105deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 64%),
       linear-gradient(to bottom, color-mix(in oklab, white 5%, transparent), transparent 48%);
@@ -14148,9 +14391,9 @@ kbd {
   .alert-warning {
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 11px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 11px 12px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 11px 12px,
         transparent 12px 22px),
       linear-gradient(105deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 64%),
       linear-gradient(to bottom, color-mix(in oklab, white 5%, transparent), transparent 48%);
@@ -14161,9 +14404,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 15px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 15px 16px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 15px 16px,
         transparent 16px 30px),
       linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 40%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 6%, transparent), transparent 76%);
@@ -14173,9 +14416,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 9px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 9px 10px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 9px 10px,
         transparent 10px 18px),
       linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 50%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 86%);
@@ -14183,9 +14426,9 @@ kbd {
   .accordion-button:not(.collapsed) {
     background-image:
       repeating-linear-gradient(0deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 9px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 9px 10px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 9px 10px,
         transparent 10px 18px),
       linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 50%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 92%);
@@ -14196,9 +14439,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 15px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 15px 16px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 15px 16px,
         transparent 16px 30px),
       linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 48%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 5%, transparent), transparent 86%);
@@ -14207,9 +14450,9 @@ kbd {
     .list-group-item-action:hover {
       background-image:
         repeating-linear-gradient(135deg,
-          color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+          color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
           transparent 1px 13px,
-          color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 13px 14px,
+          color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 13px 14px,
           transparent 14px 26px),
         linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 48%),
         linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 88%);
@@ -14221,9 +14464,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(90deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 16px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 16px 17px,
         transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 78%,
@@ -14231,7 +14474,7 @@ kbd {
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black) 89% 100%),
       linear-gradient(100deg, color-mix(in oklab, white 6%, transparent), transparent 52%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent 84%);
-    background-size: auto, 100% 3px, 100% 100%, 100% 100%;
+    background-size: auto, 100% 4px, 100% 100%, 100% 100%;
     background-position: 0 0, top left, center, center;
     background-repeat: repeat, no-repeat, no-repeat, no-repeat;
   }
@@ -14244,9 +14487,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(90deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 11px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 11px 12px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 11px 12px,
         transparent 12px 22px),
       linear-gradient(145deg, color-mix(in oklab, white 9%, transparent), transparent 55%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent), transparent 90%);
@@ -14259,9 +14502,9 @@ kbd {
       --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
       background-image:
         repeating-linear-gradient(90deg,
-          color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+          color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
           transparent 1px 11px,
-          color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 11px 12px,
+          color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 11px 12px,
           transparent 12px 22px),
         linear-gradient(145deg, color-mix(in oklab, white 11%, transparent), transparent 55%),
         linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 10%, transparent), transparent 90%);
@@ -14275,9 +14518,9 @@ kbd {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image: repeating-linear-gradient(90deg,
-      color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
       transparent 1px 11px,
-      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 11px 12px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 11px 12px,
       transparent 12px 22px);
   }
 
@@ -14287,9 +14530,9 @@ kbd {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent) 55%, white 45%);
     --kaz-form-pattern: repeating-linear-gradient(90deg,
-      color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
       transparent 1px 13px,
-      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 13px 14px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 13px 14px,
       transparent 14px 26px);
     background-image:
       var(--kaz-form-pattern),
@@ -14331,9 +14574,9 @@ kbd {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent) 55%, white 45%);
     --kaz-form-select-pattern: repeating-linear-gradient(90deg,
-      color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+      color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
       transparent 1px 13px,
-      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 13px 14px,
+      color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 13px 14px,
       transparent 14px 26px);
     background-image: var(--kaz-form-select-pattern), var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
     background-repeat: repeat, no-repeat, no-repeat;
@@ -14372,9 +14615,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-warning)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 6px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 6px 7px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 6px 7px,
         transparent 7px 12px),
       linear-gradient(145deg, color-mix(in oklab, white 3%, transparent), transparent 66%),
       linear-gradient(to bottom, color-mix(in oklab, currentColor 2%, transparent), transparent);
@@ -14385,9 +14628,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 12px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 12px 13px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 12px 13px,
         transparent 13px 24px),
       linear-gradient(145deg, color-mix(in oklab, white 8%, transparent), transparent 55%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 4%, transparent), transparent);
@@ -14397,18 +14640,18 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 8%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 8px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 8px 9px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 8px 9px,
         transparent 9px 16px),
       linear-gradient(to bottom, color-mix(in oklab, white 12%, transparent), transparent 70%);
   }
   .progress-bar-striped {
     background-image:
       repeating-linear-gradient(45deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 8%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 8px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 8px 9px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 8px 9px,
         transparent 9px 16px),
       linear-gradient(45deg,
         color-mix(in oklab, white 8%, transparent) 25%,
@@ -14433,9 +14676,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(0deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 8px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 8px 9px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 8px 9px,
         transparent 9px 16px),
       linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 55%),
       linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 9%, transparent), transparent);
@@ -14445,9 +14688,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 14px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 14px 15px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 14px 15px,
         transparent 15px 28px),
       linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 56%),
       linear-gradient(90deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 7%, transparent), transparent 76%);
@@ -14457,9 +14700,9 @@ kbd {
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 5%, transparent) 0 1px,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 9%, transparent) 0 1px,
         transparent 1px 14px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 14px 15px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 5%, transparent) 14px 15px,
         transparent 15px 28px),
       linear-gradient(135deg, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 11%, transparent), transparent 62%),
       linear-gradient(90deg, color-mix(in oklab, var(--bs-primary) 5%, transparent), transparent 76%);
@@ -14717,7 +14960,7 @@ kbd {
         color-mix(in oklab, var(--kaz-feature-accent, var(--bs-primary)) 68%, white 32%) 64% 80%,
         color-mix(in oklab, var(--kaz-feature-accent, var(--bs-primary)) 72%, black 28%) 80% 100%),
       linear-gradient(to bottom, color-mix(in oklab, white 16%, transparent), transparent 68%);
-    background-size: 100% 3px, 100% 100%;
+    background-size: 100% 4px, 100% 100%;
     background-position: top left, center;
     background-repeat: no-repeat;
     box-shadow: inset 0 1px 0 color-mix(in oklab, white 30%, transparent);
@@ -14746,7 +14989,7 @@ kbd {
         color-mix(in oklab, var(--kaz-feature-accent) 70%, black 30%) 80% 100%),
       linear-gradient(to bottom, color-mix(in oklab, white 8%, transparent), transparent 64%),
       linear-gradient(135deg, color-mix(in oklab, var(--kaz-feature-accent) 6%, transparent), transparent 72%);
-    background-size: 100% 3px, 100% 100%, 100% 100%;
+    background-size: 100% 4px, 100% 100%, 100% 100%;
     background-position: top left, center, center;
     background-repeat: no-repeat, no-repeat, no-repeat;
   }
@@ -14797,7 +15040,7 @@ kbd {
         color-mix(in oklab, var(--kaz-feature-accent) 65%, white 35%) 66% 82%,
         color-mix(in oklab, var(--kaz-feature-accent) 70%, black 30%) 82% 100%),
       linear-gradient(145deg, color-mix(in oklab, white 15%, transparent), transparent 56%);
-    background-size: 100% 3px, 100% 100%;
+    background-size: 100% 4px, 100% 100%;
     background-position: top left, center;
     background-repeat: no-repeat;
     box-shadow:
@@ -15090,7 +15333,8 @@ kbd {
   .offcanvas-header, .offcanvas-body, .alert, .accordion-item, .accordion-button,
   .list-group-item, .navbar, .navbar .nav-link,
   .nav-tabs .nav-link, .nav-pills .nav-link, .page-link,
-  .form-control, .form-select, .input-group-text, .badge, .mark, mark, kbd,
+  .form-control, .form-select, .input-group-text, .badge, .mark, mark, kbd, pre, code,
+  .carousel-caption, .carousel-control-prev-icon, .carousel-control-next-icon,
   .progress, .progress-bar, .table thead th, .breadcrumb, blockquote,
   :where(div, section, article, aside, main, header, footer, figure, form, nav):is(
     .bg-body, .bg-body-secondary, .bg-body-tertiary, .bg-light, .bg-white,
@@ -15257,7 +15501,7 @@ kbd {
         color-mix(in oklab, var(--kaz-feature-accent) 68%, white 32%) 64% 80%,
         color-mix(in oklab, var(--kaz-feature-accent) 72%, black 28%) 80% 100%),
       linear-gradient(to bottom, color-mix(in oklab, white 10%, transparent), transparent 68%);
-    background-size: 100% 3px, 100% 100%;
+    background-size: 100% 4px, 100% 100%;
     background-position: top left, center;
     background-repeat: no-repeat;
   }
