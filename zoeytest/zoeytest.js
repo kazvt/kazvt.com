@@ -20,8 +20,19 @@
         { src: "/zoeytest/assets/kaz/kaz-voice-3.wav", caption: "Kaz's voice note 3 of 3." }
       ]
     },
-    ...Array.from({ length: 7 }, (_, index) => {
-      const number = index + 2;
+    {
+      id: "abigail",
+      name: "Abigail",
+      note: "Three little love notes from Abigail",
+      avatar: "/zoeytest/assets/abigail/abigail-avatar.png",
+      clips: [
+        { src: "/zoeytest/assets/abigail/abigail-voice-1.wav", caption: "Abigail's voice note 1 of 3." },
+        { src: "/zoeytest/assets/abigail/abigail-voice-2.wav", caption: "Abigail's voice note 2 of 3." },
+        { src: "/zoeytest/assets/abigail/abigail-voice-3.wav", caption: "Abigail's voice note 3 of 3." }
+      ]
+    },
+    ...Array.from({ length: 6 }, (_, index) => {
+      const number = index + 3;
       return {
         id: `star-${String(number).padStart(2, "0")}`,
         name: `FRIEND ${String(number).padStart(2, "0")}`,
