@@ -38,6 +38,15 @@
         { src: "/zoeytest/assets/letty/letty-voice-2.wav", caption: "Letty's voice note 2 of 2." }
       ]
     },
+    {
+      id: "traaansfem",
+      name: "TraaansFem",
+      avatar: "/zoeytest/assets/traaansfem/traaansfem-avatar.png",
+      clips: [
+        { src: "/zoeytest/assets/traaansfem/traaansfem-voice-1.wav", caption: "TraaansFem's voice note 1 of 2." },
+        { src: "/zoeytest/assets/traaansfem/traaansfem-voice-2.wav", caption: "TraaansFem's voice note 2 of 2." }
+      ]
+    },
     ...Array.from({ length: 6 }, (_, index) => {
       const number = index + 3;
       return {
@@ -117,25 +126,26 @@
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      // Five loose rows of two, with the ninth sticker centered at the bottom.
+      // Five loose, staggered rows of two keep all ten stickers clear at portrait ratios.
       portrait: [
-        [4.5, 4, 42, 15], [53.5, 5.5, 42, 15],
-        [5.5, 22, 42, 15], [52.5, 23.5, 42, 15],
-        [4, 40, 42, 15], [54, 41.5, 42, 15],
-        [5.5, 58, 42, 15], [53, 59.5, 42, 15],
-        [28.5, 79, 42, 15]
+        [4.5, 3.5, 42, 15], [53.5, 5, 42, 15],
+        [4, 22, 42, 15], [54, 23.5, 42, 15],
+        [5.5, 40, 42, 15], [53, 41.5, 42, 15],
+        [4, 58.5, 42, 15], [54, 60, 42, 15],
+        [4.5, 77.5, 42, 15], [53.5, 79, 42, 15]
       ],
-      // A loose 3-by-3 constellation, not boxed cards or a rigid grid.
+      // A staggered three-column constellation with two low, centered stickers.
       wide: [
-        [4, 4, 27, 23], [36.5, 6, 27, 23], [70, 4, 27, 23],
-        [7, 37, 27, 23], [38.5, 39, 27, 23], [70, 36, 27, 23],
-        [4, 70, 27, 23], [36.5, 72, 27, 23], [70, 70, 27, 23]
+        [4, 3, 27, 18], [36.5, 5, 27, 18], [70, 3, 27, 18],
+        [7, 27, 27, 18], [38.5, 29, 27, 18], [70, 26, 27, 18],
+        [4, 51, 27, 18], [36.5, 53, 27, 18],
+        [20, 75, 27, 18], [52, 77, 27, 18]
       ],
-      // Staggered landscape placements keep all nine stickers equally sized.
+      // Four-column landscape scatter keeps the ten stickers a consistent size.
       panorama: [
-        [7, 3, 22, 25], [39, 5, 22, 25], [71, 3, 22, 25],
-        [5, 37, 22, 25], [39, 39, 22, 25], [73, 36, 22, 25],
-        [7, 71, 22, 25], [39, 69, 22, 25], [71, 71, 22, 25]
+        [2, 4, 21, 22], [27, 5.5, 21, 22], [52, 3.5, 21, 22], [77, 5, 21, 22],
+        [5, 36, 21, 22], [29, 38, 21, 22], [54, 35, 21, 22], [75, 37, 21, 22],
+        [17, 69, 21, 22], [62, 70.5, 21, 22]
       ]
     };
     const positions = layouts[layoutName];
