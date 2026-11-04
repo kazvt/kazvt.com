@@ -37,8 +37,8 @@
       const card = document.createElement("article");
       card.className = "z-entry";
       card.setAttribute("role", "listitem");
-      card.style.setProperty("--entry-tilt", `${(seeded(index, 11) - .5) * 1.2}deg`);
-      card.style.setProperty("--entry-rise", `${Math.round((seeded(index, 12) - .5) * 4)}px`);
+      card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * 2.4).toFixed(2)}deg`);
+      card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * 5).toFixed(1)}px`);
 
       const button = document.createElement("button");
       button.className = "z-entry-button";
@@ -102,7 +102,7 @@
     const layouts = {
       panorama: [
         [1, 2, 23, 45], [25, 7, 22, 43], [50, 0, 22, 46], [76, 5, 22, 44],
-        [2, 53, 22, 43], [27, 53, 22, 43], [52, 55, 21, 42], [77, 53, 21, 44]
+        [2, 54, 22, 42], [27, 54, 22, 42], [52, 56, 21, 41], [77, 54, 21, 43]
       ],
       portrait: [
         [2, 1, 45, 21], [52, 4, 46, 20], [8, 26, 41, 22], [53, 27, 44, 21],
