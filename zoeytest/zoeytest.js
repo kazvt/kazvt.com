@@ -95,7 +95,7 @@
     if (!width || !height) return;
 
     // Stable, art-directed anchors make a loose collage without letting stickers collide.
-    const panorama = width >= 900 && height < 360 && width / height >= 1.4;
+    const panorama = width >= 560 && height < 360 && width / height >= 1.4;
     const portrait = !panorama && (width < 760 || width / height < 1.25);
     const layouts = {
       panorama: [
