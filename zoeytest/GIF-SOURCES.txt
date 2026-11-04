@@ -232,10 +232,10 @@ The archived GIF files are included unchanged. This ledger points to the archive
      Archived GIF: https://web.archive.org/web/20090830120853id_/http://geocities.com/chiheng_space/sky1.gif
      Archived page: https://web.archive.org/web/20090831032609/http://geocities.com/chiheng_space/weather.html
 
-046 | heart | whole heart organics smilie
+046 | space | party music us blue bunny
      File: assets/gifs/signal-046.gif
-     Archived GIF: https://web.archive.org/web/20090729194724id_/http://www.geocities.com/wholeheartorganics/smilie.gif
-     Archived page: https://web.archive.org/web/20090829234519/http://geocities.com/wholeheartorganics/EgyptRecipes.html
+     Archived GIF: https://web.archive.org/web/20091019160327id_/http://www.geocities.com/party_musicus/Blue_bunny.gif
+     Archived page: https://web.archive.org/web/20090829033806/http://geocities.com/party_musicus/ent.html
 
 047 | moon | sailor moon ies biganime88x31
      File: assets/gifs/signal-047.gif
