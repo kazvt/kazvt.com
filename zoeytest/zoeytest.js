@@ -12,7 +12,6 @@
     {
       id: "kaz",
       name: "Kaz",
-      note: "Three little love notes from Kaz",
       avatar: "/zoeytest/assets/kaz/kaz-avatar.png",
       clips: [
         { src: "/zoeytest/assets/kaz/kaz-voice-1.wav", caption: "Kaz's voice note 1 of 3." },
@@ -23,7 +22,6 @@
     {
       id: "abigail",
       name: "Abigail",
-      note: "Three little love notes from Abigail",
       avatar: "/zoeytest/assets/abigail/abigail-avatar.png",
       clips: [
         { src: "/zoeytest/assets/abigail/abigail-voice-1.wav", caption: "Abigail's voice note 1 of 3." },
@@ -36,7 +34,6 @@
       return {
         id: `star-${String(number).padStart(2, "0")}`,
         name: `FRIEND ${String(number).padStart(2, "0")}`,
-        note: "A little voice from your orbit",
         avatar: "",
         clips: []
       };
@@ -61,7 +58,7 @@
 
   function renderEntries() {
     const fragment = document.createDocumentFragment();
-    entrySlots.forEach((entry, index) => {
+    entrySlots.forEach((entry) => {
       const card = document.createElement("article");
       card.className = "z-entry";
       card.setAttribute("role", "listitem");
@@ -142,7 +139,6 @@
       card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange).toFixed(1)}px`);
     });
     canvas.dataset.layout = isCompactPortrait ? "compact-portrait" : layoutName;
-    canvas.dataset.density = height < 290 ? "packed" : height < 430 || width < 520 ? "tight" : "normal";
   }
 
   function layoutGifSky() {
