@@ -361,6 +361,12 @@ body[data-audio="off"] .z-entry-play { opacity: .66; }
   .z-stage-status { font-size: 9px; }
   .z-footer span:first-child { display: none; }
 }
+@media (max-width: 340px) {
+  .z-stage-heading .z-kicker { font-size: 7px; }
+  .z-entry-note, .z-entry-state { display: none; }
+  .z-entry-button { grid-template-columns: 32px minmax(0, 1fr) 12px; }
+  .z-entry-avatar { width: 32px; }
+}
 @media (max-height: 510px) and (min-width: 701px) {
   .z-viewport { gap: 5px; padding-block: 5px; }
   .z-topbar { min-height: 32px; }
