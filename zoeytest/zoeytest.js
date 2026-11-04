@@ -400,7 +400,11 @@
     fallbackBackgroundMusic.loop = true;
     fallbackBackgroundMusic.preload = "auto";
     fallbackBackgroundMusic.volume = backgroundMusicLevel();
-    fallbackBackgroundMusic.play().catch(() => {
+    fallbackBackgroundMusic.play().then(() => {
+      if (audioStatus.textContent.startsWith("Sound is ready. The background song is joining")) {
+        audioStatus.textContent = "Sound is ready. The song is looping softly behind the voice notes.";
+      }
+    }).catch(() => {
       audioStatus.textContent = "The background song could not play here, but the voice notes are still ready.";
     });
   }
@@ -439,6 +443,9 @@
       gain.setValueAtTime(0, now);
       gain.linearRampToValueAtTime(backgroundMusicLevel(), now + .8);
       fallbackBackgroundMusic?.pause();
+      if (audioStatus.textContent.startsWith("Sound is ready. The background song is joining")) {
+        audioStatus.textContent = "Sound is ready. The song is looping softly behind the voice notes.";
+      }
     } catch {
       if (audioEnabled && request === backgroundMusicRequest) startFallbackBackgroundMusic();
     }
