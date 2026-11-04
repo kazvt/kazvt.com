@@ -478,6 +478,10 @@
 
   function releaseMedia(media) {
     if (!activeMedia.delete(media)) return;
+    if (startingClip === media) {
+      startingClip = null;
+      schedulePendingClip();
+    }
     media.source?.disconnect();
     const remaining = (playingCounts.get(media.owner) || 1) - 1;
     if (remaining > 0) {
@@ -489,7 +493,56 @@
     updateBackgroundMusicLevel();
   }
 
-  function playNextClip(entry, button) {
+  function clearPendingClipTimer() {
+    if (!pendingClipTimer) return;
+    window.clearTimeout(pendingClipTimer);
+    pendingClipTimer = 0;
+  }
+
+  function pendingClipIsStillActive(request) {
+    if (!request.button.isConnected) return false;
+    if (request.trigger === "hover") return request.button.matches(":hover");
+    if (request.trigger === "focus") return document.activeElement === request.button;
+    return true;
+  }
+
+  function runPendingClip() {
+    if (startingClip || !pendingClipRequest) return;
+    const remaining = lastClipStartedAt + CLIP_START_COOLDOWN_MS - performance.now();
+    if (remaining > 0) {
+      schedulePendingClip();
+      return;
+    }
+
+    const request = pendingClipRequest;
+    pendingClipRequest = null;
+    if (!pendingClipIsStillActive(request)) return;
+    startClipNow(request.entry, request.button);
+  }
+
+  function schedulePendingClip() {
+    if (!pendingClipRequest || startingClip || pendingClipTimer) return;
+    const remaining = lastClipStartedAt + CLIP_START_COOLDOWN_MS - performance.now();
+    if (remaining <= 0) {
+      runPendingClip();
+      return;
+    }
+    pendingClipTimer = window.setTimeout(() => {
+      pendingClipTimer = 0;
+      runPendingClip();
+    }, remaining);
+  }
+
+  function confirmClipStarted(media) {
+    if (media.started || !activeMedia.has(media)) return;
+    media.started = true;
+    if (startingClip === media) startingClip = null;
+    lastClipStartedAt = performance.now();
+    schedulePendingClip();
+  }
+
+  function startClipNow(entry, button) {
+    if (startingClip) return;
     if (!audioEnabled || !entry.clips.length) {
       audioStatus.textContent = !audioEnabled
         ? "Audio is not active."
@@ -515,12 +568,14 @@
       } catch {}
     }
     const owner = button.closest(".z-entry");
-    const media = { audio, owner, source };
+    const media = { audio, owner, source, started: false };
     activeMedia.add(media);
+    startingClip = media;
     updateBackgroundMusicLevel();
     playingCounts.set(owner, (playingCounts.get(owner) || 0) + 1);
     owner.classList.add("is-playing");
     audioStatus.textContent = clip.caption || `${entry.name}: voice note ${clipIndex + 1} of ${entry.clips.length}.`;
+    audio.addEventListener("playing", () => confirmClipStarted(media), { once: true });
     audio.addEventListener("ended", () => {
       releaseMedia(media);
     }, { once: true });
@@ -528,10 +583,51 @@
       releaseMedia(media);
       if (audioEnabled) audioStatus.textContent = "That voice note couldn't play. Please try again.";
     }, { once: true });
-    audio.play().catch(() => {
+    try {
+      const playback = audio.play();
+      if (playback && typeof playback.then === "function") {
+        playback.then(() => confirmClipStarted(media)).catch(() => {
+          releaseMedia(media);
+          if (audioEnabled) audioStatus.textContent = "The browser could not start that voice message.";
+        });
+      } else if (!audio.paused) {
+        confirmClipStarted(media);
+      }
+    } catch {
       releaseMedia(media);
       if (audioEnabled) audioStatus.textContent = "The browser could not start that voice message.";
-    });
+    }
+  }
+
+  function playNextClip(entry, button, trigger) {
+    if (!audioEnabled || !entry.clips.length) {
+      audioStatus.textContent = !audioEnabled
+        ? "Audio is not active."
+        : "This message is still waiting for a recording.";
+      return;
+    }
+
+    const now = performance.now();
+    if (trigger !== "hover") {
+      const last = lastNonHoverTriggers.get(button);
+      if (last !== undefined && now - last < 280) {
+        if (trigger === "click" && pendingClipRequest?.button === button) {
+          pendingClipRequest.trigger = "click";
+        }
+        return;
+      }
+      lastNonHoverTriggers.set(button, now);
+    }
+
+    if (startingClip || lastClipStartedAt + CLIP_START_COOLDOWN_MS > now) {
+      pendingClipRequest = { entry, button, trigger };
+      schedulePendingClip();
+      return;
+    }
+
+    clearPendingClipTimer();
+    pendingClipRequest = null;
+    startClipNow(entry, button);
   }
 
   renderEntries();
@@ -544,20 +640,20 @@
     const previous = event.relatedTarget;
     if (previous && button.contains(previous)) return;
     const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
-    if (entry) playNextClip(entry, button);
+    if (entry) playNextClip(entry, button, "hover");
   });
   document.getElementById("entryCanvas").addEventListener("focusin", (event) => {
     const button = event.target.closest(".z-entry-button");
     if (!button) return;
     const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
-    if (entry) playNextClip(entry, button);
+    if (entry) playNextClip(entry, button, "focus");
   });
   document.getElementById("entryCanvas").addEventListener("click", (event) => {
     const button = event.target.closest(".z-entry-button");
     if (!button) return;
     if (!audioEnabled) enableAudio();
     const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
-    if (entry) playNextClip(entry, button);
+    if (entry) playNextClip(entry, button, "click");
   });
 
   let resizeFrame = 0;
