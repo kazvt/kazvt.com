@@ -45,7 +45,9 @@
 
   let audioEnabled = false;
   let audioContext = null;
-  let activeMedia = null;
+  let audioMixBus = null;
+  const activeMedia = new Set();
+  const playingCounts = new Map();
   let gifEntries = null;
   let gifImages = [];
   let catalogPromise = null;
@@ -68,7 +70,7 @@
       button.className = "z-entry-button";
       button.type = "button";
       button.dataset.entryId = entry.id;
-      button.setAttribute("aria-label", `${entry.name}. ${entry.clips.length ? "Hover, focus, or tap to hear a voice note." : "Voice recordings have not been added yet."}`);
+      button.setAttribute("aria-label", `${entry.name}. ${entry.clips.length ? "Hover, focus, or tap to hear a voice note." : "Their voice note is still waiting."}`);
 
       const avatar = document.createElement("span");
       avatar.className = "z-entry-avatar";
@@ -77,7 +79,7 @@
         const image = document.createElement("img");
         image.src = entry.avatar;
         image.alt = "";
-        image.loading = "lazy";
+        image.loading = "eager";
         avatar.append(image);
       } else {
         const star = document.createElement("span");
@@ -86,27 +88,10 @@
         avatar.append(star);
       }
 
-      const copy = document.createElement("span");
-      copy.className = "z-entry-copy";
-      const id = document.createElement("span");
-      id.className = "z-entry-id";
-      id.textContent = `STAR-MAIL // ${String(index + 1).padStart(2, "0")}`;
       const name = document.createElement("span");
       name.className = "z-entry-name";
       name.textContent = entry.name;
-      const note = document.createElement("span");
-      note.className = "z-entry-note";
-      note.textContent = entry.note;
-      const state = document.createElement("span");
-      state.className = "z-entry-state";
-      state.textContent = entry.clips.length ? "PLAY A LITTLE LOVE NOTE" : "VOICE NOTE WAITING";
-      copy.append(id, name, note, state);
-
-      const play = document.createElement("span");
-      play.className = "z-entry-play";
-      play.setAttribute("aria-hidden", "true");
-      play.textContent = entry.clips.length ? ">>" : "*";
-      button.append(avatar, copy, play);
+      button.append(avatar, name);
       card.append(button);
       fragment.append(card);
     });
@@ -251,6 +236,15 @@
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       try {
         audioContext ??= new AudioContextClass();
+        if (!audioMixBus) {
+          audioMixBus = audioContext.createDynamicsCompressor();
+          audioMixBus.threshold.value = -6;
+          audioMixBus.knee.value = 1;
+          audioMixBus.ratio.value = 12;
+          audioMixBus.attack.value = 0.003;
+          audioMixBus.release.value = 0.12;
+          audioMixBus.connect(audioContext.destination);
+        }
         if (audioContext.state !== "running") void audioContext.resume().catch(() => {});
       } catch {}
     }
@@ -258,14 +252,24 @@
     audioStatus.textContent = "Sound is ready. Hover, focus, or tap a friend's star.";
   }
 
+  function releaseMedia(media) {
+    if (!activeMedia.delete(media)) return;
+    media.source?.disconnect();
+    const remaining = (playingCounts.get(media.owner) || 1) - 1;
+    if (remaining > 0) {
+      playingCounts.set(media.owner, remaining);
+    } else {
+      playingCounts.delete(media.owner);
+      media.owner?.classList.remove("is-playing");
+    }
+  }
+
   function stopActiveAudio() {
-    if (!activeMedia) return;
-    const owner = activeMedia.owner;
-    activeMedia.audio.pause();
-    activeMedia.audio.currentTime = 0;
-    activeMedia.source?.disconnect();
-    owner?.classList.remove("is-playing");
-    activeMedia = null;
+    for (const media of [...activeMedia]) {
+      media.audio.pause();
+      media.audio.currentTime = 0;
+      releaseMedia(media);
+    }
   }
 
   function playNextClip(entry, button) {
@@ -283,7 +287,6 @@
     const clip = entry.clips[clipIndex % entry.clips.length];
     clipIndexes.set(entry.id, (clipIndex + 1) % entry.clips.length);
 
-    stopActiveAudio();
     const audio = new Audio(clip.src);
     audio.preload = "auto";
     audio.volume = .9;
@@ -291,27 +294,24 @@
     if (audioContext && audioContext.state === "running") {
       try {
         source = audioContext.createMediaElementSource(audio);
-        source.connect(audioContext.destination);
+        source.connect(audioMixBus || audioContext.destination);
       } catch {}
     }
     const owner = button.closest(".z-entry");
-    activeMedia = { audio, owner, source };
+    const media = { audio, owner, source };
+    activeMedia.add(media);
+    playingCounts.set(owner, (playingCounts.get(owner) || 0) + 1);
     owner.classList.add("is-playing");
     audioStatus.textContent = clip.caption || `${entry.name}: voice note ${clipIndex + 1} of ${entry.clips.length}.`;
     audio.addEventListener("ended", () => {
-      source?.disconnect();
-      owner.classList.remove("is-playing");
-      if (activeMedia?.audio === audio) activeMedia = null;
+      releaseMedia(media);
     }, { once: true });
     audio.addEventListener("error", () => {
-      source?.disconnect();
-      owner.classList.remove("is-playing");
-      if (activeMedia?.audio === audio) activeMedia = null;
+      releaseMedia(media);
       audioStatus.textContent = "That voice note couldn't play. Please try again.";
     }, { once: true });
     audio.play().catch(() => {
-      owner.classList.remove("is-playing");
-      if (activeMedia?.audio === audio) activeMedia = null;
+      releaseMedia(media);
       audioStatus.textContent = "Tap SOUND OFF once to let the browser play voice notes.";
     });
   }
