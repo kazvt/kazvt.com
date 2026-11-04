@@ -541,6 +541,12 @@
     schedulePendingClip();
   }
 
+  function failClipPlayback(media, message) {
+    if (!activeMedia.has(media)) return;
+    if (audioEnabled) audioStatus.textContent = message;
+    releaseMedia(media);
+  }
+
   function startClipNow(entry, button) {
     if (startingClip) return;
     if (!audioEnabled || !entry.clips.length) {
@@ -580,22 +586,19 @@
       releaseMedia(media);
     }, { once: true });
     audio.addEventListener("error", () => {
-      releaseMedia(media);
-      if (audioEnabled) audioStatus.textContent = "That voice note couldn't play. Please try again.";
+      failClipPlayback(media, "That voice note couldn't play. Please try again.");
     }, { once: true });
     try {
       const playback = audio.play();
       if (playback && typeof playback.then === "function") {
         playback.then(() => confirmClipStarted(media)).catch(() => {
-          releaseMedia(media);
-          if (audioEnabled) audioStatus.textContent = "The browser could not start that voice message.";
+          failClipPlayback(media, "The browser could not start that voice message.");
         });
       } else if (!audio.paused) {
         confirmClipStarted(media);
       }
     } catch {
-      releaseMedia(media);
-      if (audioEnabled) audioStatus.textContent = "The browser could not start that voice message.";
+      failClipPlayback(media, "The browser could not start that voice message.");
     }
   }
 
