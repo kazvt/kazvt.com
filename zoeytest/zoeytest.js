@@ -233,15 +233,24 @@
     const audio = new Audio(clip.src);
     audio.preload = "auto";
     audio.volume = .9;
+    let source = null;
+    if (audioContext && audioContext.state === "running") {
+      try {
+        source = audioContext.createMediaElementSource(audio);
+        source.connect(audioContext.destination);
+      } catch {}
+    }
     const owner = button.closest(".z-entry");
-    activeMedia = { audio, owner };
+    activeMedia = { audio, owner, source };
     owner.classList.add("is-playing");
     audioStatus.textContent = clip.caption || `${entry.name}: voice note ${clipIndex + 1} of ${entry.clips.length}.`;
     audio.addEventListener("ended", () => {
+      source?.disconnect();
       owner.classList.remove("is-playing");
       if (activeMedia?.audio === audio) activeMedia = null;
     }, { once: true });
     audio.addEventListener("error", () => {
+      source?.disconnect();
       owner.classList.remove("is-playing");
       if (activeMedia?.audio === audio) activeMedia = null;
       audioStatus.textContent = "That voice note couldn't play. Please try again.";

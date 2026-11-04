@@ -239,7 +239,7 @@ button, a { touch-action: manipulation; }
 .z-entry-button:hover, .z-entry-button:focus-visible, .z-entry.is-playing .z-entry-button {
   transform: translate(-2px, -2px);
   border-color: var(--entry-accent);
-  box-shadow: 6px 6px 0 var(--entry-shadow), 0 0 23px color-mix(in srgb, var(--entry-accent), transparent 56%);
+  box-shadow: 6px 6px 0 var(--entry-shadow), 0 0 20px rgb(207 182 255 / 35%);
 }
 .z-entry-button:hover::before, .z-entry-button:focus-visible::before, .z-entry.is-playing .z-entry-button::before { opacity: .34; }
 .z-entry-avatar {
