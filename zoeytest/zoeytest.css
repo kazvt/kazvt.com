@@ -148,7 +148,7 @@ button, a { touch-action: manipulation; }
   width: min(1020px, 100%);
   margin-inline: auto;
   border: 3px solid #f3e9ff;
-  background: rgb(15 10 38 / 89%);
+  background: linear-gradient(150deg, rgb(15 10 38 / 82%), rgb(19 12 43 / 86%));
   box-shadow: 7px 7px 0 var(--z-pink), 13px 13px 0 rgb(112 221 244 / 78%);
   backdrop-filter: blur(1px);
 }
@@ -246,7 +246,7 @@ button, a { touch-action: manipulation; }
   background: transparent;
 }
 .z-frequency-bars { min-height: 34px; display: flex; align-items: center; gap: 5px; }
-.z-frequency-bars i { width: 6px; height: 10px; display: block; background: var(--z-blue); box-shadow: 0 0 6px rgb(112 221 244 / 66%); transform-origin: center; }
+.z-frequency-bars i { width: 6px; height: 10px; display: block; background: var(--z-blue); box-shadow: 0 0 6px rgb(112 221 244 / 66%); transform-origin: center; animation: z-bars 850ms ease-in-out infinite alternate; }
 .z-frequency-bars i:nth-child(3n + 1) { background: var(--z-pink); }
 .z-frequency-bars i:nth-child(1), .z-frequency-bars i:nth-child(8) { height: 12px; }
 .z-frequency-bars i:nth-child(2), .z-frequency-bars i:nth-child(7) { height: 19px; }
@@ -370,7 +370,7 @@ body[data-motion="off"] :where(.z-button, .z-progress-track span, .z-loader) { t
   .z-hero-layout { gap: 20px; }
   .z-intro h1 { font-size: clamp(23px, 7vw, 29px); }
   .z-lede { margin-top: 13px; font-size: 16px; }
-  .z-radio-screen { padding: 12px 10px; }
+  .z-radio-screen { padding: 12px 2px 4px; }
   .z-next-message { width: 100%; }
   .z-kudo-note { gap: 6px; padding-inline: 0; }
   .z-kudo-note p { font-size: 13px; }
