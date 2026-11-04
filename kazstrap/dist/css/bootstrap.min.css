@@ -3324,6 +3324,13 @@ kbd {
     border-color: CanvasText;
     box-shadow: none;
   }
+  .kaz-forum-post-header time,
+  .kaz-forum-user small {
+    color: CanvasText;
+  }
+  .kaz-chat-line + .kaz-chat-line {
+    border-block-start-color: CanvasText;
+  }
   .kaz-status-led {
     background-color: Canvas;
     border-color: CanvasText;
