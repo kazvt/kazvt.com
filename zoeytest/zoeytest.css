@@ -248,13 +248,13 @@ button, a { touch-action: manipulation; }
   min-height: 0;
   display: grid;
   place-items: end center;
-  overflow: visible;
+  overflow: hidden;
   background: transparent;
   filter: drop-shadow(0 2px 3px rgb(75 59 108 / 20%));
   transition: transform 180ms ease, filter 180ms ease;
 }
 .z-entry-avatar img { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center bottom; }
-.z-avatar-star { color: var(--z-gold); font-size: clamp(38px, 10vh, 112px); line-height: 1; text-shadow: 0 0 14px rgb(255 217 122 / 80%), 0 2px 0 rgb(255 255 255 / 85%); }
+.z-avatar-star { color: var(--z-gold); font-size: var(--entry-star-size, 24px); line-height: .9; text-shadow: 0 0 .18em rgb(255 217 122 / 80%), 0 2px 0 rgb(255 255 255 / 85%); }
 .z-entry-name {
   max-width: 100%;
   color: var(--z-foreground);
