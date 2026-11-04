@@ -151,7 +151,7 @@
         const centerX = x + cardWidth / 2 - Math.sin(angle) * rise;
         const centerY = y + cardHeight / 2 + Math.cos(angle) * rise;
         const hoverPadX = cardWidth * .0225;
-        const hoverPadY = cardHeight * .0225;
+        const hoverPadY = cardHeight * .0225 + 2;
         return {
           left: centerX - boundsWidth / 2 - hoverPadX,
           right: centerX + boundsWidth / 2 + hoverPadX,
