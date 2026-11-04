@@ -334,36 +334,44 @@
   }, { passive: true });
 
   const loader = document.getElementById("fakeLoader");
-  const skip = document.getElementById("skipLoader");
+  const enterButton = document.getElementById("enterGalaxy");
+  const skipLink = document.querySelector(".z-skip-link");
   const loaderFill = document.getElementById("loaderFill");
   const loaderBar = document.getElementById("loaderProgress");
   const loaderPercent = document.getElementById("loaderPercent");
   const loaderStatus = document.getElementById("loaderStatus");
   const loaderLines = [
-    [0, "Finding the friend-shaped constellations."],
-    [32, "Tuning the tiny love-radio."],
-    [68, "Polishing a few pixel hearts."],
-    [100, "Ready when you are."]
+    [0, "Initializing the imaginary modem."],
+    [28, "Dialing Zoey's little galaxy."],
+    [66, "Synchronizing the love notes."],
+    [100, "Connection ready. Click to enter with sound on."]
   ];
   let loaderFrame = 0;
-  let loaderTimer = 0;
   let loaderStarted = 0;
   let loaderClosing = false;
-  const loadDuration = 920;
+  const loadDuration = 1400;
 
   function closeLoader() {
     if (loader.hidden || loaderClosing) return;
     loaderClosing = true;
     cancelAnimationFrame(loaderFrame);
-    clearTimeout(loaderTimer);
     loader.classList.add("is-closing");
     window.setTimeout(() => {
       loader.hidden = true;
       loader.classList.remove("is-closing");
       loaderClosing = false;
       world.inert = false;
+      skipLink.inert = false;
+      skipLink.removeAttribute("tabindex");
       document.getElementById("pageTitle").focus({ preventScroll: true });
     }, body.dataset.motion === "on" ? 160 : 0);
+  }
+
+  function finishFakeLoading() {
+    loaderFill.style.width = "100%";
+    loaderBar.setAttribute("aria-valuenow", "100");
+    loaderPercent.textContent = "100%";
+    loaderStatus.textContent = loaderLines[loaderLines.length - 1][1];
   }
 
   function animateLoader(now) {
@@ -374,30 +382,30 @@
     const current = [...loaderLines].reverse().find(([at]) => progress >= at);
     if (current) loaderStatus.textContent = current[1];
     if (progress < 100) loaderFrame = requestAnimationFrame(animateLoader);
-    else loaderTimer = window.setTimeout(closeLoader, 100);
   }
 
-  let alreadySeen = false;
-  try {
-    alreadySeen = sessionStorage.getItem("zoeytest-loader-seen") === "yes";
-    if (!alreadySeen) sessionStorage.setItem("zoeytest-loader-seen", "yes");
-  } catch {}
-  if (!alreadySeen && body.dataset.motion === "on") {
-    loader.hidden = false;
-    world.inert = true;
-    skip.focus({ preventScroll: true });
+  function enterGalaxy() {
+    if (loader.hidden || loaderClosing) return;
+    enableAudio();
+    loaderStatus.textContent = "Sound is on. Welcome to the galaxy!";
+    closeLoader();
+  }
+
+  loader.hidden = false;
+  world.inert = true;
+  skipLink.inert = true;
+  enterButton.focus({ preventScroll: true });
+  enterButton.addEventListener("click", enterGalaxy);
+  window.addEventListener("keydown", (event) => {
+    if (loader.hidden || event.key !== "Tab") return;
+    event.preventDefault();
+    enterButton.focus({ preventScroll: true });
+  });
+
+  if (body.dataset.motion === "on") {
     loaderStarted = performance.now();
     loaderFrame = requestAnimationFrame(animateLoader);
-    skip.addEventListener("click", closeLoader);
-    document.querySelector(".z-skip-link").addEventListener("click", (event) => {
-      if (!loader.hidden) { event.preventDefault(); closeLoader(); }
-    });
-    window.addEventListener("keydown", (event) => {
-      if (loader.hidden) return;
-      if (event.key === "Escape") closeLoader();
-      else if (event.key === "Tab") { event.preventDefault(); skip.focus({ preventScroll: true }); }
-    });
   } else {
-    world.inert = false;
+    finishFakeLoading();
   }
 })();
