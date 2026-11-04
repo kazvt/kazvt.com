@@ -496,7 +496,9 @@
           if (audioContext === context) audioResumePromise = null;
         });
     } catch {
-      audioResumePromise = Promise.resolve(false);
+      audioResumePromise = Promise.resolve(false).finally(() => {
+        if (audioContext === context) audioResumePromise = null;
+      });
     }
     return audioResumePromise;
   }
@@ -548,7 +550,10 @@
         source.connect(backgroundMusicGain);
         source.onended = () => {
           source.disconnect();
-          if (backgroundMusicSource === source) backgroundMusicSource = null;
+          if (backgroundMusicSource === source) {
+            backgroundMusicSource = null;
+            if (audioEnabled && context.state === "running") void startBackgroundMusic();
+          }
         };
 
         const now = context.currentTime;
