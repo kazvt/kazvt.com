@@ -34,7 +34,8 @@
       name: "Letty",
       avatar: "/zoeytest/assets/letty/letty-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/letty/letty-voice-1.wav", caption: "Letty's voice note." }
+        { src: "/zoeytest/assets/letty/letty-voice-1.wav", caption: "Letty's voice note 1 of 2." },
+        { src: "/zoeytest/assets/letty/letty-voice-2.wav", caption: "Letty's voice note 2 of 2." }
       ]
     },
     ...Array.from({ length: 6 }, (_, index) => {
