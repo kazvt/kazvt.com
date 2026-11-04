@@ -3591,7 +3591,7 @@ kbd {
   }
 }
 
-/* The small-screen menu echoes a tidy old forum control panel. */
+/* Small-screen navigation echoes a forum control panel without decorating Bootstrap's animated height shell. */
 .navbar .navbar-toggler {
   color: var(--bs-emphasis-color);
   padding: 0.42rem 0.58rem;
@@ -3655,9 +3655,21 @@ kbd {
   border-top-color: var(--bs-warning);
   transform: translateY(-50%) rotate(-45deg);
 }
+/* Bootstrap animates the collapse shell's height. Keep its box undecorated and let the full-size list reveal inside it. */
 .navbar .navbar-collapse.show,
 .navbar .navbar-collapse.collapsing {
-  margin-block: 0.55rem 0.35rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.navbar .navbar-collapse .navbar-nav {
+  margin: 0;
+  transition: box-shadow 0.14s ease-out;
+}
+.navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav {
+  gap: 0.25rem;
   padding: 0.5rem;
   border: 1px solid rgba(var(--bs-emphasis-color-rgb), 0.26);
   border-inline-start: 4px solid var(--bs-primary);
@@ -3667,7 +3679,7 @@ kbd {
       var(--bs-primary) 0% 30%,
       var(--bs-info) 30% 48%,
       var(--bs-warning) 48% 62%,
-      transparent 62%) ,
+      transparent 62%),
     repeating-linear-gradient(135deg,
       rgba(var(--bs-primary-rgb), 0.045) 0 1px,
       transparent 1px 10px),
@@ -3675,15 +3687,15 @@ kbd {
   background-size: 100% 3px, auto, 100% 100%;
   background-position: top left, center, center;
   background-repeat: no-repeat, repeat, no-repeat;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.navbar .navbar-collapse.show .navbar-nav {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     2px 2px 0 rgba(var(--bs-emphasis-color-rgb), 0.22),
     4px 4px 0 rgba(var(--bs-primary-rgb), 0.28);
 }
-.navbar .navbar-collapse.show .navbar-nav {
-  gap: 0.25rem;
-}
-.navbar .navbar-collapse.show .navbar-nav .nav-link {
+.navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link {
   display: flex;
   min-height: 2.75rem;
   align-items: center;
@@ -3706,7 +3718,7 @@ kbd {
     box-shadow 0.12s ease-out,
     transform 0.12s ease-out;
 }
-.navbar .navbar-collapse.show .navbar-nav .nav-link::before {
+.navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link::before {
   flex: 0 0 auto;
   width: 0;
   height: 0;
@@ -3715,7 +3727,7 @@ kbd {
   content: "";
   opacity: 0.78;
 }
-.navbar .navbar-collapse.show .navbar-nav .nav-link.active {
+.navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link.active {
   border-color: var(--bs-primary);
   background-color: var(--bs-primary-bg-subtle);
   background-image:
@@ -3726,7 +3738,7 @@ kbd {
     2px 2px 0 rgba(var(--bs-primary-rgb), 0.24);
   color: var(--bs-primary-text-emphasis);
 }
-.navbar .navbar-collapse.show .navbar-nav .nav-link:focus-visible {
+.navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:focus-visible {
   outline: 2px solid var(--bs-emphasis-color);
   outline-offset: 1px;
 }
@@ -3743,7 +3755,7 @@ kbd {
       5px 5px 0 rgba(var(--bs-primary-rgb), 0.3);
     transform: translate(-1px, -1px);
   }
-  .navbar .navbar-collapse.show .navbar-nav .nav-link:hover {
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:hover {
     border-color: rgba(var(--bs-primary-rgb), 0.58);
     border-inline-start-color: var(--bs-primary);
     background-image:
@@ -3755,7 +3767,7 @@ kbd {
     transform: translateX(2px);
   }
 }
-[dir="rtl"] .navbar .navbar-collapse.show .navbar-nav .nav-link:hover {
+[dir="rtl"] .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:hover {
   transform: translateX(-2px);
 }
 .navbar .navbar-toggler:active {
@@ -3770,12 +3782,13 @@ kbd {
   .navbar .navbar-toggler,
   .navbar .navbar-toggler-icon::before,
   .navbar .navbar-toggler-icon::after,
-  .navbar .navbar-collapse.show .navbar-nav .nav-link {
+  .navbar .navbar-collapse .navbar-nav,
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link {
     transition: none;
   }
   .navbar .navbar-toggler:hover,
   .navbar .navbar-toggler:active,
-  .navbar .navbar-collapse.show .navbar-nav .nav-link:hover {
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:hover {
     transform: none;
   }
 }
@@ -3800,15 +3813,21 @@ kbd {
   .navbar .navbar-collapse.show,
   .navbar .navbar-collapse.collapsing {
     color: CanvasText;
+    background: transparent;
+    box-shadow: none;
+  }
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav,
+  .navbar .navbar-collapse.show .navbar-nav {
+    color: CanvasText;
     border-color: CanvasText;
     background-color: Canvas;
     background-image: none;
     box-shadow: none;
   }
-  .navbar .navbar-collapse.show .navbar-nav .nav-link,
-  .navbar .navbar-collapse.show .navbar-nav .nav-link:hover,
-  .navbar .navbar-collapse.show .navbar-nav .nav-link:focus-visible,
-  .navbar .navbar-collapse.show .navbar-nav .nav-link.active {
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link,
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:hover,
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:focus-visible,
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link.active {
     color: LinkText;
     border-color: CanvasText;
     background-color: Canvas;
@@ -3816,13 +3835,13 @@ kbd {
     box-shadow: none;
     transform: none;
   }
-  .navbar .navbar-collapse.show .navbar-nav .nav-link::before {
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link::before {
     border-inline-start-color: LinkText;
   }
-  .navbar .navbar-collapse.show .navbar-nav .nav-link:focus-visible {
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link:focus-visible {
     outline-color: Highlight;
   }
-  .navbar .navbar-collapse.show .navbar-nav .nav-link.active {
+  .navbar .navbar-collapse:is(.show, .collapsing) .navbar-nav .nav-link.active {
     color: HighlightText;
     border-color: Highlight;
     background-color: Highlight;
