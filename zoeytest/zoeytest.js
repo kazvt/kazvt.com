@@ -100,6 +100,19 @@
       button.type = "button";
       button.dataset.entryId = entry.id;
       button.setAttribute("aria-label", entry.clips.length ? `${entry.name}'s voice message.` : `${entry.name}. Message pending.`);
+      if ("PointerEvent" in window) {
+        button.addEventListener("pointerenter", (event) => {
+          if (event.pointerType === "touch") return;
+          playNextClip(entry, button, "hover");
+        });
+      } else {
+        button.addEventListener("mouseenter", () => playNextClip(entry, button, "hover"));
+      }
+      button.addEventListener("focus", () => playNextClip(entry, button, "focus"));
+      button.addEventListener("click", () => {
+        if (!audioEnabled) enableAudio();
+        playNextClip(entry, button, "click");
+      });
 
       const avatar = document.createElement("span");
       avatar.className = "z-entry-avatar";
@@ -636,28 +649,6 @@
   renderEntries();
   setMotion(!reduceMotion.matches);
   reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
-
-  document.getElementById("entryCanvas").addEventListener("pointerover", (event) => {
-    const button = event.target.closest(".z-entry-button");
-    if (!button || event.pointerType === "touch") return;
-    const previous = event.relatedTarget;
-    if (previous && button.contains(previous)) return;
-    const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
-    if (entry) playNextClip(entry, button, "hover");
-  });
-  document.getElementById("entryCanvas").addEventListener("focusin", (event) => {
-    const button = event.target.closest(".z-entry-button");
-    if (!button) return;
-    const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
-    if (entry) playNextClip(entry, button, "focus");
-  });
-  document.getElementById("entryCanvas").addEventListener("click", (event) => {
-    const button = event.target.closest(".z-entry-button");
-    if (!button) return;
-    if (!audioEnabled) enableAudio();
-    const entry = entrySlots.find((item) => item.id === button.dataset.entryId);
-    if (entry) playNextClip(entry, button, "click");
-  });
 
   let resizeFrame = 0;
   function scheduleResponsiveLayout() {
