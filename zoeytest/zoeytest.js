@@ -127,8 +127,8 @@
     const layoutName = panorama ? "panorama" : portrait ? "portrait" : "wide";
     const isCompactPortrait = !panorama && portrait && height < 360;
     const positions = isCompactPortrait ? layouts.compactPortrait : layouts[layoutName];
-    const tiltRange = height < 140 ? 0 : height < 360 ? 3 : 5;
-    const riseRange = height < 140 ? 0 : height < 360 ? 4 : 8;
+    const tiltRange = height < 140 ? 0 : height < 180 ? Math.min(3, 1500 / width) : height < 360 ? 3 : 5;
+    const riseRange = height < 180 ? 0 : height < 360 ? 4 : 8;
     canvas.querySelectorAll(".z-entry").forEach((card, index) => {
       const [x, y, cardWidth, cardHeight] = positions[index] || positions[positions.length - 1];
       card.style.setProperty("--entry-x", `${x}%`);
