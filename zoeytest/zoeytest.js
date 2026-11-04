@@ -143,7 +143,6 @@
   });
 
   const loader = document.getElementById("fakeLoader");
-  const main = document.getElementById("love-scene");
   const world = document.querySelector(".z-world");
   const skip = document.getElementById("skipLoader");
   const loaderFill = document.getElementById("loaderFill");
