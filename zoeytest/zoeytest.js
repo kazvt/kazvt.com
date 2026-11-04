@@ -144,6 +144,7 @@
 
   const loader = document.getElementById("fakeLoader");
   const main = document.getElementById("love-scene");
+  const world = document.querySelector(".z-world");
   const skip = document.getElementById("skipLoader");
   const loaderFill = document.getElementById("loaderFill");
   const loaderBar = document.getElementById("loaderProgress");
@@ -172,7 +173,7 @@
       loader.hidden = true;
       loader.classList.remove("is-closing");
       loaderClosing = false;
-      main.inert = false;
+      world.inert = false;
       document.getElementById("pageTitle").focus({ preventScroll: true });
     }, body.dataset.motion === "on" ? 190 : 0);
   }
@@ -195,7 +196,7 @@
   } catch {}
   if (!alreadySeen && body.dataset.motion === "on") {
     loader.hidden = false;
-    main.inert = true;
+    world.inert = true;
     skip.focus({ preventScroll: true });
     loaderStarted = performance.now();
     loaderFrame = requestAnimationFrame(animateLoader);
@@ -209,6 +210,6 @@
       else if (event.key === "Tab") { event.preventDefault(); skip.focus({ preventScroll: true }); }
     });
   } else {
-    main.inert = false;
+    world.inert = false;
   }
 })();
