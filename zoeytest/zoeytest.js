@@ -37,8 +37,6 @@
       const card = document.createElement("article");
       card.className = "z-entry";
       card.setAttribute("role", "listitem");
-      card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * 2.4).toFixed(2)}deg`);
-      card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * 5).toFixed(1)}px`);
 
       const button = document.createElement("button");
       button.className = "z-entry-button";
@@ -116,12 +114,16 @@
     };
     const layoutName = panorama ? "panorama" : portrait ? "portrait" : "wide";
     const positions = layouts[layoutName];
+    const tiltRange = height < 360 ? 1.2 : 2.4;
+    const riseRange = height < 360 ? 3 : 5;
     canvas.querySelectorAll(".z-entry").forEach((card, index) => {
       const [x, y, cardWidth, cardHeight] = positions[index] || positions[positions.length - 1];
       card.style.setProperty("--entry-x", `${x}%`);
       card.style.setProperty("--entry-y", `${y}%`);
       card.style.setProperty("--entry-width", `${cardWidth}%`);
       card.style.setProperty("--entry-height", `${cardHeight}%`);
+      card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * tiltRange).toFixed(2)}deg`);
+      card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange).toFixed(1)}px`);
     });
     canvas.dataset.layout = layoutName;
     canvas.dataset.density = height < 290 ? "packed" : height < 430 || width < 520 ? "tight" : "normal";
