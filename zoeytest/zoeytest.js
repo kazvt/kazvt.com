@@ -3,8 +3,6 @@
   const html = document.documentElement;
   const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
-  const motionButton = document.getElementById("motionToggle");
-  const motionStatus = document.getElementById("motionStatus");
   const audioButton = document.getElementById("audioToggle");
   const audioStatus = document.getElementById("audioStatus");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -106,15 +104,6 @@
     grid.dataset.density = rows >= 7 ? "packed" : rows >= 5 ? "tight" : "normal";
   }
 
-  function motionChoice() {
-    try {
-      const saved = localStorage.getItem("zoeytest-motion");
-      if (saved === "on") return true;
-      if (saved === "off") return false;
-    } catch {}
-    return !reduceMotion.matches;
-  }
-
   function layoutGifSky() {
     if (!gifImages.length || !gifEntries) return;
     const compact = window.matchMedia("(max-width: 700px)").matches;
@@ -172,33 +161,24 @@
         gifSky.append(fragment);
         gifSky.hidden = body.dataset.motion !== "on";
         layoutGifSky();
-        motionStatus.textContent = "All 100 old-web GIFs are orbiting behind the star-mail.";
         return entries;
       })
       .catch(() => {
         catalogPromise = null;
-        motionStatus.textContent = "The star-mail still works; the GIF galaxy couldn't tune in.";
         return null;
       });
     return catalogPromise;
   }
 
-  function setMotion(enabled, saveChoice = false) {
+  function setMotion(enabled) {
     body.dataset.motion = enabled ? "on" : "off";
     html.dataset.zoeyMotion = enabled ? "on" : "off";
-    motionButton.setAttribute("aria-pressed", String(enabled));
-    motionButton.textContent = enabled ? "PAUSE GIFS" : "PLAY GIFS";
     gifSky.hidden = !enabled;
     if (enabled) {
       if (gifEntries) layoutGifSky();
       else void loadGifCatalog();
-      if (gifEntries) motionStatus.textContent = "All 100 old-web GIFs are orbiting behind the star-mail.";
     } else {
       gifImages.forEach((image) => image.removeAttribute("src"));
-      motionStatus.textContent = "The GIF galaxy is taking a little rest.";
-    }
-    if (saveChoice) {
-      try { localStorage.setItem("zoeytest-motion", enabled ? "on" : "off"); } catch {}
     }
   }
 
@@ -279,8 +259,7 @@
   }
 
   renderEntries();
-  setMotion(motionChoice());
-  motionButton.addEventListener("click", () => setMotion(body.dataset.motion !== "on", true));
+  setMotion(!reduceMotion.matches);
   audioButton.addEventListener("click", () => {
     if (audioEnabled) {
       audioEnabled = false;
@@ -291,11 +270,7 @@
       enableAudio();
     }
   });
-  reduceMotion.addEventListener?.("change", (event) => {
-    let saved = null;
-    try { saved = localStorage.getItem("zoeytest-motion"); } catch {}
-    if (!saved) setMotion(!event.matches);
-  });
+  reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
 
   document.getElementById("entryGrid").addEventListener("pointerover", (event) => {
     const button = event.target.closest(".z-entry-button");

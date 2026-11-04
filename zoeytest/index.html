@@ -8,19 +8,11 @@
   <meta name="description" content="A little galaxy of friend-shaped stars and voice notes for Zoey.">
   <title>Zoey's Galaxy - star-mail from your people</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/zoeytest/zoeytest.css?v=20261104-5">
+  <link rel="stylesheet" href="/zoeytest/zoeytest.css?v=20261104-6">
   <script>
-    (() => {
-      try {
-        const saved = localStorage.getItem("zoeytest-motion");
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        document.documentElement.dataset.zoeyMotion = saved === "on" ? "on" : saved === "off" ? "off" : reduced ? "off" : "on";
-      } catch {
-        document.documentElement.dataset.zoeyMotion = "on";
-      }
-    })();
+    document.documentElement.dataset.zoeyMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "off" : "on";
   </script>
-  <script defer src="/zoeytest/zoeytest.js?v=20261104-5"></script>
+  <script defer src="/zoeytest/zoeytest.js?v=20261104-6"></script>
 </head>
 <body class="zoey-page" data-motion="on" data-audio="off">
   <a class="z-skip-link" href="#constellation">Skip to Zoey's star-mail</a>
@@ -47,7 +39,6 @@
       <span class="z-browser-title">ZOEY'S GALAXY <span aria-hidden="true">//</span> A VERY LOVELY PLACE</span>
       <div class="z-controls">
         <button class="z-button z-audio-toggle" id="audioToggle" type="button" aria-pressed="false" aria-label="Enable voice notes">SOUND OFF</button>
-        <button class="z-button z-motion-toggle" id="motionToggle" type="button" aria-pressed="true">PAUSE GIFS</button>
       </div>
     </header>
 
@@ -70,7 +61,7 @@
     <footer class="z-footer">
       <span>MADE OF FRIENDS, STARDUST &amp; OLD INTERNET MAGIC</span>
       <a href="/zoeytest/GIF-SOURCES.txt">100 archived GIFs · sources</a>
-      <span id="motionStatus" role="status" aria-live="polite">The galaxy is twinkling.</span>
+      <span>THE GALAXY IS TWINKLING</span>
     </footer>
   </main>
   <noscript><p class="z-noscript">This little galaxy needs JavaScript for its animated stars and voice-note interactions.</p></noscript>

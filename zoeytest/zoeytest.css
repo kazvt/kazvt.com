@@ -141,7 +141,6 @@ button, a { touch-action: manipulation; }
 .z-button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--z-pink); }
 .z-audio-toggle { min-width: 84px; background: #fff2a9; }
 .z-audio-toggle[aria-pressed="true"] { background: var(--z-pink); }
-.z-motion-toggle { min-width: 82px; background: var(--z-lilac); }
 .z-stage {
   position: relative;
   min-width: 0;
@@ -338,7 +337,6 @@ body[data-audio="off"] .z-entry-play { opacity: .66; }
   .z-controls { gap: 5px; }
   .z-button { min-height: 33px; padding-inline: 7px; font-size: 8px; }
   .z-audio-toggle { min-width: 75px; }
-  .z-motion-toggle { min-width: 76px; }
   .z-stage { padding-inline: 3px; gap: 7px; }
   .z-constellation { --entry-gap: 8px; gap: var(--entry-gap); padding: 2px; }
   .z-entry-button { grid-template-columns: clamp(38px, 7.4vh, 62px) minmax(0, 1fr) 18px; gap: 7px; padding: clamp(5px, 1vh, 9px); }
