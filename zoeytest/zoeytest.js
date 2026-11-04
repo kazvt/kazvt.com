@@ -3,7 +3,6 @@
   const html = document.documentElement;
   const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
-  const audioButton = document.getElementById("audioToggle");
   const audioStatus = document.getElementById("audioStatus");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const backgroundMusicUrl = "/zoeytest/assets/background/zoey-galaxy-background.mp3";
@@ -99,7 +98,7 @@
       button.className = "z-entry-button";
       button.type = "button";
       button.dataset.entryId = entry.id;
-      button.setAttribute("aria-label", `${entry.name}. ${entry.clips.length ? "Hover, focus, or tap to hear a voice note." : "Their voice note is still waiting."}`);
+      button.setAttribute("aria-label", entry.clips.length ? `${entry.name}'s voice message.` : `${entry.name}. Message pending.`);
 
       const avatar = document.createElement("span");
       avatar.className = "z-entry-avatar";
@@ -325,13 +324,6 @@
     }
   }
 
-  function updateAudioControl() {
-    body.dataset.audio = audioEnabled ? "on" : "off";
-    audioButton.setAttribute("aria-pressed", String(audioEnabled));
-    audioButton.textContent = audioEnabled ? "SOUND ON" : "SOUND OFF";
-    audioButton.setAttribute("aria-label", audioEnabled ? "Mute all sound" : "Enable all sound");
-  }
-
   function createCrossfadedLoopBuffer(buffer) {
     const overlap = Math.min(Math.floor(buffer.sampleRate * .65), Math.floor(buffer.length / 4));
     if (overlap < 2) return { buffer, loopStart: 0 };
@@ -402,8 +394,8 @@
     fallbackBackgroundMusic.preload = "auto";
     fallbackBackgroundMusic.volume = backgroundMusicLevel();
     fallbackBackgroundMusic.play().then(() => {
-      if (audioStatus.textContent.startsWith("Sound is ready. The background song is joining")) {
-        audioStatus.textContent = "Sound is ready. The song is looping softly behind the voice notes.";
+      if (audioStatus.textContent.startsWith("Background music is starting.")) {
+        audioStatus.textContent = "Background music is playing. Voice messages are ready.";
       }
     }).catch(() => {
       audioStatus.textContent = "The background song could not play here, but the voice notes are still ready.";
@@ -452,8 +444,8 @@
       gain.setValueAtTime(0, now);
       gain.linearRampToValueAtTime(backgroundMusicLevel(), now + .8);
       fallbackBackgroundMusic?.pause();
-      if (audioStatus.textContent.startsWith("Sound is ready. The background song is joining")) {
-        audioStatus.textContent = "Sound is ready. The song is looping softly behind the voice notes.";
+      if (audioStatus.textContent.startsWith("Background music is starting.")) {
+        audioStatus.textContent = "Background music is playing. Voice messages are ready.";
       }
     } catch {
       if (audioEnabled && request === backgroundMusicRequest) startFallbackBackgroundMusic();
@@ -517,8 +509,8 @@
       } catch { contextReady = false; }
     }
     if (!contextReady) startFallbackBackgroundMusic();
-    updateAudioControl();
-    audioStatus.textContent = "Sound is ready. The background song is joining; hover, focus, or tap a friend's star.";
+    body.dataset.audio = "on";
+    audioStatus.textContent = "Background music is starting. Voice messages are ready.";
   }
 
   function releaseMedia(media) {
@@ -534,19 +526,11 @@
     updateBackgroundMusicLevel();
   }
 
-  function stopActiveAudio() {
-    for (const media of [...activeMedia]) {
-      media.audio.pause();
-      media.audio.currentTime = 0;
-      releaseMedia(media);
-    }
-  }
-
   function playNextClip(entry, button) {
     if (!audioEnabled || !entry.clips.length) {
       audioStatus.textContent = !audioEnabled
-        ? "Tap SOUND OFF once to enable all sound."
-        : "This star is waiting for its real voice recording.";
+        ? "Audio is not active."
+        : "This message is still waiting for a recording.";
       return;
     }
     const last = lastTriggers.get(button) || 0;
@@ -583,23 +567,12 @@
     }, { once: true });
     audio.play().catch(() => {
       releaseMedia(media);
-      if (audioEnabled) audioStatus.textContent = "Tap SOUND OFF once to let your browser play the audio.";
+      if (audioEnabled) audioStatus.textContent = "The browser could not start that voice message.";
     });
   }
 
   renderEntries();
   setMotion(!reduceMotion.matches);
-  audioButton.addEventListener("click", () => {
-    if (audioEnabled) {
-      audioEnabled = false;
-      stopActiveAudio();
-      stopBackgroundMusic();
-      updateAudioControl();
-      audioStatus.textContent = "All sound is muted, including the background song.";
-    } else {
-      enableAudio();
-    }
-  });
   reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
 
   document.getElementById("entryCanvas").addEventListener("pointerover", (event) => {
@@ -642,25 +615,11 @@
   const loader = document.getElementById("fakeLoader");
   const enterButton = document.getElementById("enterGalaxy");
   const skipLink = document.querySelector(".z-skip-link");
-  const loaderFill = document.getElementById("loaderFill");
-  const loaderBar = document.getElementById("loaderProgress");
-  const loaderPercent = document.getElementById("loaderPercent");
-  const loaderStatus = document.getElementById("loaderStatus");
-  const loaderLines = [
-    [0, "Initializing the imaginary modem."],
-    [28, "Dialing Zoey's little galaxy."],
-    [66, "Synchronizing the love notes."],
-    [100, "Connection ready. Click to enter with sound on."]
-  ];
-  let loaderFrame = 0;
-  let loaderStarted = 0;
   let loaderClosing = false;
-  const loadDuration = 1400;
 
   function closeLoader() {
     if (loader.hidden || loaderClosing) return;
     loaderClosing = true;
-    cancelAnimationFrame(loaderFrame);
     loader.classList.add("is-closing");
     window.setTimeout(() => {
       loader.hidden = true;
@@ -673,27 +632,9 @@
     }, body.dataset.motion === "on" ? 160 : 0);
   }
 
-  function finishFakeLoading() {
-    loaderFill.style.width = "100%";
-    loaderBar.setAttribute("aria-valuenow", "100");
-    loaderPercent.textContent = "100%";
-    loaderStatus.textContent = loaderLines[loaderLines.length - 1][1];
-  }
-
-  function animateLoader(now) {
-    const progress = Math.min(100, Math.round(((now - loaderStarted) / loadDuration) * 100));
-    loaderFill.style.width = `${progress}%`;
-    loaderBar.setAttribute("aria-valuenow", String(progress));
-    loaderPercent.textContent = `${String(progress).padStart(2, "0")}%`;
-    const current = [...loaderLines].reverse().find(([at]) => progress >= at);
-    if (current) loaderStatus.textContent = current[1];
-    if (progress < 100) loaderFrame = requestAnimationFrame(animateLoader);
-  }
-
   function enterGalaxy() {
     if (loader.hidden || loaderClosing) return;
     enableAudio();
-    loaderStatus.textContent = "Sound is on. Welcome to the galaxy!";
     closeLoader();
   }
 
@@ -708,10 +649,4 @@
     enterButton.focus({ preventScroll: true });
   });
 
-  if (body.dataset.motion === "on") {
-    loaderStarted = performance.now();
-    loaderFrame = requestAnimationFrame(animateLoader);
-  } else {
-    finishFakeLoading();
-  }
 })();
