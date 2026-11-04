@@ -39,7 +39,7 @@ body.zoey-page {
   font-size: 16px;
   line-height: 1.45;
   -webkit-font-smoothing: none;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeSpeed;
 }
 body.zoey-page, body.zoey-page * { font-family: var(--z-font); }
 body.zoey-page :where(a, button):focus-visible {
@@ -236,8 +236,8 @@ button, a { touch-action: manipulation; }
 .z-entry-button > * { position: relative; z-index: 1; }
 .z-entry-button:hover, .z-entry-button:focus-visible, .z-entry.is-playing .z-entry-button {
   transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--entry-accent) 42%, white);
-  box-shadow: 0 12px 24px color-mix(in srgb, var(--entry-shadow) 55%, transparent), 0 0 0 3px color-mix(in srgb, var(--entry-accent) 12%, transparent);
+  border-color: var(--entry-accent);
+  box-shadow: 0 12px 24px rgb(91 72 128 / 18%), 0 0 0 3px rgb(111 89 166 / 12%);
 }
 .z-entry-button:hover::before, .z-entry-button:focus-visible::before, .z-entry.is-playing .z-entry-button::before { opacity: 1; transform: scale(1.04); }
 .z-entry-avatar {
@@ -250,7 +250,7 @@ button, a { touch-action: manipulation; }
   border: 2px solid #fff;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 28%, #fff 0 7%, #e4d9fb 8% 30%, #c8b7ed 31% 63%, #eadff4 64%);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--entry-accent) 34%, white), 0 5px 10px rgb(75 59 108 / 16%);
+  box-shadow: 0 0 0 2px rgb(102 83 137 / 26%), 0 5px 10px rgb(75 59 108 / 16%);
 }
 .z-entry-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .z-avatar-star { color: var(--z-gold); font-size: clamp(21px, 4vh, 42px); line-height: 1; text-shadow: 0 2px 0 rgb(255 255 255 / 80%); }
