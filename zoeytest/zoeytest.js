@@ -102,43 +102,105 @@
     const { width, height } = canvas.getBoundingClientRect();
     if (!width || !height) return;
 
-    // Hand-placed percentage anchors create a responsive sticker collage, not a card grid.
-    const panorama = width >= 280 && height < 360 && width / height >= 1.4;
-    const portrait = !panorama && (width < 760 || width / height < 1.25);
+    const aspectRatio = width / height;
+    // Aspect-ratio layouts keep their proportions at browser zoom levels.
+    const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      panorama: [
-        [3, 8, 22, 42], [27, 11, 22, 40], [51, 8, 22, 42], [76, 9, 20, 40],
-        [8, 50, 22, 36], [32, 53, 22, 34], [57, 50, 22, 36], [80, 53, 17, 34]
-      ],
-      compactPortrait: [
-        [2, 6, 46, 20], [52, 7, 46, 20], [6, 28, 45, 20], [53, 30, 45, 20],
-        [2, 50, 46, 20], [52, 52, 46, 20], [6, 73, 45, 19], [53, 74, 45, 19]
-      ],
+      // Four loose rows of two, each with the same footprint.
       portrait: [
-        [2, 7, 46, 20], [52, 8, 46, 20], [6, 29, 45, 20], [53, 31, 45, 20],
-        [2, 51, 46, 20], [52, 53, 46, 20], [6, 73, 45, 19], [53, 74, 45, 19]
+        [4.5, 4, 43, 17], [52.5, 6, 43, 17],
+        [4.5, 28, 43, 17], [52.5, 30, 43, 17],
+        [4.5, 52, 43, 17], [52.5, 54, 43, 17],
+        [4.5, 76, 43, 17], [52.5, 78, 43, 17]
       ],
+      // A loose 3-2-3 constellation, not boxed cards or a uniform grid.
       wide: [
-        [2, 8, 29, 26], [35, 8, 29, 26], [69, 10, 29, 26],
-        [7, 38, 27, 27], [37, 35, 29, 27], [72, 41, 24, 26],
-        [19, 66, 27, 24], [55, 68, 29, 23]
+        [4, 5, 27, 23], [36.5, 7, 27, 23], [70, 4, 27, 23],
+        [20, 37, 27, 23], [53, 40, 27, 23],
+        [4, 68, 27, 23], [36.5, 70, 27, 23], [70, 72, 27, 23]
+      ],
+      // Staggered landscape placements keep all eight stickers equally sized.
+      panorama: [
+        [3, 4, 21, 38], [27, 6, 21, 38], [51, 5, 21, 38], [75, 7, 21, 38],
+        [4, 54, 21, 38], [28, 52, 21, 38], [52, 55, 21, 38], [76, 53, 21, 38]
       ]
     };
-    const layoutName = panorama ? "panorama" : portrait ? "portrait" : "wide";
-    const isCompactPortrait = !panorama && portrait && height < 360;
-    const positions = isCompactPortrait ? layouts.compactPortrait : layouts[layoutName];
-    const tiltRange = height < 140 ? 0 : height < 180 ? Math.min(3, 1500 / width) : height < 360 ? 3 : 5;
-    const riseRange = height < 180 ? 0 : height < 360 ? 4 : 8;
-    canvas.querySelectorAll(".z-entry").forEach((card, index) => {
-      const [x, y, cardWidth, cardHeight] = positions[index] || positions[positions.length - 1];
-      card.style.setProperty("--entry-x", `${x}%`);
-      card.style.setProperty("--entry-y", `${y}%`);
-      card.style.setProperty("--entry-width", `${cardWidth}%`);
-      card.style.setProperty("--entry-height", `${cardHeight}%`);
-      card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * tiltRange).toFixed(2)}deg`);
-      card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange).toFixed(1)}px`);
+    const positions = layouts[layoutName];
+    const tiltRange = height < 140 ? 0
+      : height < 180 ? Math.min(3, 1500 / width)
+        : height < 360 ? Math.min(3, 10 / aspectRatio)
+          : Math.min(5, 10 / aspectRatio);
+    const riseRange = height < 180 ? 0 : 2;
+    const cards = [...canvas.querySelectorAll(".z-entry")];
+
+    // CSS transforms do not participate in layout flow, so test their painted bounds.
+    // The extra inset reserves room for the hover-scale effect; ordinary sizes retain tilt.
+    function getBounds(cardScale, motionScale) {
+      return cards.map((_, index) => {
+        const [xPct, yPct, widthPct, heightPct] = positions[index];
+        const scaledWidthPct = widthPct * cardScale;
+        const scaledHeightPct = heightPct * cardScale;
+        const x = (xPct + (widthPct - scaledWidthPct) / 2) * width / 100;
+        const y = (yPct + (heightPct - scaledHeightPct) / 2) * height / 100;
+        const cardWidth = scaledWidthPct * width / 100;
+        const cardHeight = scaledHeightPct * height / 100;
+        const angle = (seeded(index, 11) - .5) * tiltRange * motionScale * Math.PI / 180;
+        const rise = (seeded(index, 12) - .5) * riseRange * motionScale;
+        const boundsWidth = Math.abs(cardWidth * Math.cos(angle)) + Math.abs(cardHeight * Math.sin(angle));
+        const boundsHeight = Math.abs(cardHeight * Math.cos(angle)) + Math.abs(cardWidth * Math.sin(angle));
+        const centerX = x + cardWidth / 2 - Math.sin(angle) * rise;
+        const centerY = y + cardHeight / 2 + Math.cos(angle) * rise;
+        const hoverPadX = cardWidth * .0225;
+        const hoverPadY = cardHeight * .0225;
+        return {
+          left: centerX - boundsWidth / 2 - hoverPadX,
+          right: centerX + boundsWidth / 2 + hoverPadX,
+          top: centerY - boundsHeight / 2 - hoverPadY,
+          bottom: centerY + boundsHeight / 2 + hoverPadY
+        };
+      });
+    }
+
+    function hasSafeSpacing(bounds) {
+      const edge = Math.min(3, Math.min(width, height) * .01);
+      const gap = Math.min(2, Math.min(width, height) * .004);
+      return bounds.every((box, index) => {
+        if (box.left < edge || box.top < edge || box.right > width - edge || box.bottom > height - edge) return false;
+        return bounds.slice(0, index).every((other) =>
+          box.left >= other.right + gap || box.right <= other.left - gap ||
+          box.top >= other.bottom + gap || box.bottom <= other.top - gap
+        );
+      });
+    }
+
+    let cardScale = 1;
+    let motionScale = 1;
+    if (!hasSafeSpacing(getBounds(cardScale, motionScale))) motionScale = 0;
+    if (!hasSafeSpacing(getBounds(cardScale, motionScale))) {
+      for (let candidate = .96; candidate >= .64; candidate -= .04) {
+        if (hasSafeSpacing(getBounds(candidate, motionScale))) {
+          cardScale = candidate;
+          break;
+        }
+      }
+    }
+    if (!hasSafeSpacing(getBounds(cardScale, motionScale))) {
+      cardScale = .64;
+      motionScale = 0;
+    }
+
+    cards.forEach((card, index) => {
+      const [x, y, cardWidth, cardHeight] = positions[index];
+      const fittedWidth = cardWidth * cardScale;
+      const fittedHeight = cardHeight * cardScale;
+      card.style.setProperty("--entry-x", `${(x + (cardWidth - fittedWidth) / 2).toFixed(3)}%`);
+      card.style.setProperty("--entry-y", `${(y + (cardHeight - fittedHeight) / 2).toFixed(3)}%`);
+      card.style.setProperty("--entry-width", `${fittedWidth.toFixed(3)}%`);
+      card.style.setProperty("--entry-height", `${fittedHeight.toFixed(3)}%`);
+      card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * tiltRange * motionScale).toFixed(2)}deg`);
+      card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange * motionScale).toFixed(1)}px`);
     });
-    canvas.dataset.layout = isCompactPortrait ? "compact-portrait" : layoutName;
+    canvas.dataset.layout = layoutName;
   }
 
   function layoutGifSky() {
@@ -350,13 +412,19 @@
   });
 
   let resizeFrame = 0;
-  window.addEventListener("resize", () => {
+  function scheduleResponsiveLayout() {
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(() => {
       layoutGifSky();
       layoutEntryStickers();
     });
-  }, { passive: true });
+  }
+  window.addEventListener("resize", scheduleResponsiveLayout, { passive: true });
+  window.visualViewport?.addEventListener("resize", scheduleResponsiveLayout, { passive: true });
+  if ("ResizeObserver" in window) {
+    const entryLayoutObserver = new ResizeObserver(scheduleResponsiveLayout);
+    entryLayoutObserver.observe(document.getElementById("entryCanvas"));
+  }
 
   const loader = document.getElementById("fakeLoader");
   const enterButton = document.getElementById("enterGalaxy");
