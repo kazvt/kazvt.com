@@ -13058,7 +13058,7 @@ pre code {
   --bs-link-color-rgb: 76, 59, 167;
   --bs-link-hover-color: #332783;
   --bs-link-hover-color-rgb: 51, 39, 131;
-  --bs-focus-ring-color: rgba(112, 80, 207, 0.58);
+  --bs-focus-ring-color: rgba(112, 80, 207, 0.78);
   --bs-form-valid-color: var(--bs-success-text-emphasis);
   --bs-form-valid-border-color: var(--bs-success);
   --bs-form-invalid-color: var(--bs-danger-text-emphasis);
