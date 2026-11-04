@@ -557,10 +557,10 @@
         if (audioEnabled && audioContext === context) startFallbackBackgroundMusic();
       }
     })();
-    backgroundMusicStartPromise = startPromise.finally(() => {
+    const wrappedPromise = startPromise.finally(() => {
       if (backgroundMusicStartPromise === wrappedPromise) backgroundMusicStartPromise = null;
     });
-    const wrappedPromise = backgroundMusicStartPromise;
+    backgroundMusicStartPromise = wrappedPromise;
     return wrappedPromise;
   }
 
@@ -586,6 +586,7 @@
       schedulePendingClip();
     }
     media.source?.disconnect();
+    media.voiceGain?.disconnect();
     const remaining = (playingCounts.get(media.owner) || 1) - 1;
     if (remaining > 0) {
       playingCounts.set(media.owner, remaining);
@@ -620,7 +621,7 @@
     const request = pendingClipRequest;
     pendingClipRequest = null;
     if (!pendingClipIsStillActive(request)) return;
-    startClipNow(request.entry, request.button);
+    startClipNow(request.entry, request.button, request.trigger);
   }
 
   function schedulePendingClip() {
@@ -645,35 +646,23 @@
   }
 
   function failClipPlayback(media, message) {
-    if (!activeMedia.has(media)) return;
     if (audioEnabled) audioStatus.textContent = message;
-    releaseMedia(media);
-  }
-
-  function startClipNow(entry, button) {
-    if (startingClip) return;
-    if (!audioEnabled || !entry.clips.length) {
-      audioStatus.textContent = !audioEnabled
-        ? "Audio is not active."
-        : "This message is still waiting for a recording.";
+    if (activeMedia.has(media)) {
+      releaseMedia(media);
       return;
     }
-    const clipIndex = clipIndexes.get(entry.id) || 0;
-    const clip = entry.clips[clipIndex % entry.clips.length];
-    clipIndexes.set(entry.id, (clipIndex + 1) % entry.clips.length);
+    if (startingClip === media) {
+      startingClip = null;
+      schedulePendingClip();
+    }
+  }
 
+  function startHtmlAudioClip(clip, entry, button, clipIndex) {
     const audio = new Audio(clip.src);
     audio.preload = "auto";
     audio.volume = .9;
-    let source = null;
-    if (audioContext && audioContext.state === "running") {
-      try {
-        source = audioContext.createMediaElementSource(audio);
-        source.connect(audioMixBus || audioContext.destination);
-      } catch {}
-    }
     const owner = button.closest(".z-entry");
-    const media = { audio, owner, source, started: false };
+    const media = { audio, owner, started: false };
     activeMedia.add(media);
     startingClip = media;
     updateBackgroundMusicLevel();
@@ -681,9 +670,7 @@
     owner.classList.add("is-playing");
     audioStatus.textContent = clip.caption || `${entry.name}: voice note ${clipIndex + 1} of ${entry.clips.length}.`;
     audio.addEventListener("playing", () => confirmClipStarted(media), { once: true });
-    audio.addEventListener("ended", () => {
-      releaseMedia(media);
-    }, { once: true });
+    audio.addEventListener("ended", () => releaseMedia(media), { once: true });
     audio.addEventListener("error", () => {
       failClipPlayback(media, "That voice note couldn't play. Please try again.");
     }, { once: true });
@@ -698,6 +685,66 @@
       }
     } catch {
       failClipPlayback(media, "The browser could not start that voice message.");
+    }
+  }
+
+  async function startClipNow(entry, button, trigger = "click") {
+    if (startingClip) return;
+    if (!audioEnabled || !entry.clips.length) {
+      audioStatus.textContent = !audioEnabled
+        ? "Audio is not active."
+        : "This message is still waiting for a recording.";
+      return;
+    }
+    const clipIndex = clipIndexes.get(entry.id) || 0;
+    const clip = entry.clips[clipIndex % entry.clips.length];
+    clipIndexes.set(entry.id, (clipIndex + 1) % entry.clips.length);
+    const owner = button.closest(".z-entry");
+    const request = { entry, button, trigger };
+    if (!ensureAudioContext()) {
+      startHtmlAudioClip(clip, entry, button, clipIndex);
+      return;
+    }
+
+    const loading = { owner, loading: true };
+    startingClip = loading;
+    audioStatus.textContent = "Loading a voice message…";
+    let media = null;
+    try {
+      // This is a tap-triggered call on iOS, so resume is requested before any await.
+      const running = await resumeAudioContext();
+      if (!running) throw new Error("Audio could not resume");
+      const buffer = await loadVoiceBuffer(clip.src);
+      if (startingClip !== loading) return;
+      if (!audioEnabled || !pendingClipIsStillActive(request)) {
+        startingClip = null;
+        schedulePendingClip();
+        return;
+      }
+
+      const context = audioContext;
+      const source = context.createBufferSource();
+      const voiceGain = context.createGain();
+      source.buffer = buffer;
+      voiceGain.gain.value = .9;
+      source.connect(voiceGain);
+      voiceGain.connect(audioMixBus || context.destination);
+      media = { source, voiceGain, owner, started: false };
+      activeMedia.add(media);
+      startingClip = media;
+      updateBackgroundMusicLevel();
+      playingCounts.set(owner, (playingCounts.get(owner) || 0) + 1);
+      owner.classList.add("is-playing");
+      audioStatus.textContent = clip.caption || `${entry.name}: voice note ${clipIndex + 1} of ${entry.clips.length}.`;
+      source.onended = () => releaseMedia(media);
+      source.start(context.currentTime);
+      confirmClipStarted(media);
+    } catch {
+      if (media) {
+        failClipPlayback(media, "That voice note couldn't play. Please try again.");
+      } else {
+        failClipPlayback(loading, "That voice note couldn't load. Please try again.");
+      }
     }
   }
 
@@ -729,7 +776,7 @@
 
     clearPendingClipTimer();
     pendingClipRequest = null;
-    startClipNow(entry, button);
+    startClipNow(entry, button, trigger);
   }
 
   renderEntries();
