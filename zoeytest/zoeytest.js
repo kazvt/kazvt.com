@@ -32,38 +32,26 @@
   function layoutGifSky() {
     if (!gifImages.length) return;
     const compact = window.matchMedia("(max-width: 760px)").matches;
-    const visibleCount = compact ? 32 : 100;
     gifImages.forEach((image, index) => {
-      const visible = index < visibleCount;
-      image.hidden = !visible;
-      if (!visible || body.dataset.motion !== "on") {
+      image.hidden = false;
+      if (body.dataset.motion !== "on") {
         image.removeAttribute("src");
         return;
       }
 
-      const band = index % 4;
       const a = seeded(index, 1);
       const b = seeded(index, 2);
-      let x;
-      let y;
-      if (compact) {
-        if (band === 0) { x = 2 + a * 9; y = 4 + b * 91; }
-        else if (band === 1) { x = 89 + a * 9; y = 4 + b * 91; }
-        else if (band === 2) { x = 3 + a * 94; y = 1 + b * 11; }
-        else { x = 3 + a * 94; y = 89 + b * 9; }
-      } else {
-        if (band === 0) { x = 2 + a * 15; y = 3 + b * 94; }
-        else if (band === 1) { x = 83 + a * 15; y = 3 + b * 94; }
-        else if (band === 2) { x = 2 + a * 96; y = 2 + b * 15; }
-        else { x = 2 + a * 96; y = 84 + b * 14; }
-      }
-      const base = 19 + seeded(index, 3) * (compact ? 20 : 45);
+      const x = 3 + a * 94;
+      const y = 3 + b * 94;
+      const base = compact ? 12 + seeded(index, 3) * 16 : 18 + seeded(index, 3) * 32;
       const longest = Math.max(gifEntries[index].width, gifEntries[index].height) || 1;
       const scale = base / longest;
       const width = Math.max(12, gifEntries[index].width * scale);
       const height = Math.max(12, gifEntries[index].height * scale);
-      image.style.left = x + "%";
-      image.style.top = y + "%";
+      const xInset = Math.min(10, width / Math.max(1, window.innerWidth) * 50);
+      const yInset = Math.min(10, height / Math.max(1, window.innerHeight) * 50);
+      image.style.left = Math.max(xInset, Math.min(100 - xInset, x)) + "%";
+      image.style.top = Math.max(yInset, Math.min(100 - yInset, y)) + "%";
       image.style.setProperty("--z-gif-width", width.toFixed(1) + "px");
       image.style.setProperty("--z-gif-height", height.toFixed(1) + "px");
       image.style.setProperty("--z-gif-opacity", (0.58 + seeded(index, 4) * 0.3).toFixed(2));
