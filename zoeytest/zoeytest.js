@@ -213,6 +213,15 @@
       card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * tiltRange * motionScale).toFixed(2)}deg`);
       card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange * motionScale).toFixed(1)}px`);
     });
+    // Placeholder stars used to have a 38px minimum and could spill out of
+    // their sticker, overlapping nearby real avatars despite safe card bounds.
+    cards.forEach((card) => {
+      const avatar = card.querySelector(".z-entry-avatar");
+      const star = card.querySelector(".z-avatar-star");
+      if (!avatar || !star) return;
+      const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
+      star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
+    });
     canvas.dataset.layout = layoutName;
   }
 
