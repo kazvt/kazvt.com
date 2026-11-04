@@ -68,6 +68,7 @@
   let backgroundMusicGain = null;
   let backgroundMusicBuffer = null;
   let backgroundMusicBufferPromise = null;
+  let backgroundMusicLoopStart = 0;
   let backgroundMusicSource = null;
   let fadingBackgroundMusicSource = null;
   let backgroundMusicStartedAt = 0;
@@ -335,29 +336,28 @@
 
   function createCrossfadedLoopBuffer(buffer) {
     const overlap = Math.min(Math.floor(buffer.sampleRate * .65), Math.floor(buffer.length / 4));
-    if (overlap < 2) return buffer;
+    if (overlap < 2) return { buffer, loopStart: 0 };
 
-    // Start the loop inside the song, then blend its tail into the opening.
-    // This avoids a hard discontinuity at the repeat point without rewriting the supplied MP3.
+    // Preserve the full opening once, then let the loop repeat from just beyond
+    // the crossfade where the blended tail meets the same sample sequence.
     const loopBuffer = audioContext.createBuffer(
       buffer.numberOfChannels,
-      buffer.length - overlap,
+      buffer.length,
       buffer.sampleRate
     );
-    const bodyLength = buffer.length - overlap * 2;
     const tailStart = buffer.length - overlap;
     for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
       const input = buffer.getChannelData(channel);
       const output = loopBuffer.getChannelData(channel);
-      output.set(input.subarray(overlap, tailStart), 0);
+      output.set(input.subarray(0, tailStart), 0);
       for (let index = 0; index < overlap; index += 1) {
         const position = (index + .5) / overlap;
         const tailGain = Math.cos(position * Math.PI / 2);
         const headGain = Math.sin(position * Math.PI / 2);
-        output[bodyLength + index] = input[tailStart + index] * tailGain + input[index] * headGain;
+        output[tailStart + index] = input[tailStart + index] * tailGain + input[index] * headGain;
       }
     }
-    return loopBuffer;
+    return { buffer: loopBuffer, loopStart: overlap / buffer.sampleRate };
   }
 
   function loadBackgroundMusic() {
@@ -369,7 +369,9 @@
           return audioContext.decodeAudioData(bytes.slice(0));
         })
         .then((buffer) => {
-          backgroundMusicBuffer = createCrossfadedLoopBuffer(buffer);
+          const loop = createCrossfadedLoopBuffer(buffer);
+          backgroundMusicBuffer = loop.buffer;
+          backgroundMusicLoopStart = loop.loopStart;
           return backgroundMusicBuffer;
         })
         .catch((error) => {
@@ -435,6 +437,8 @@
       const source = audioContext.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
+      source.loopStart = backgroundMusicLoopStart;
+      source.loopEnd = buffer.duration;
       source.connect(backgroundMusicGain);
       source.onended = () => {
         source.disconnect();
@@ -466,7 +470,14 @@
     const source = backgroundMusicSource;
     const now = audioContext.currentTime;
     if (backgroundMusicBuffer?.duration) {
-      backgroundMusicOffset = (backgroundMusicOffset + now - backgroundMusicStartedAt) % backgroundMusicBuffer.duration;
+      const elapsed = now - backgroundMusicStartedAt;
+      const firstPassRemaining = backgroundMusicBuffer.duration - backgroundMusicOffset;
+      if (elapsed < firstPassRemaining) {
+        backgroundMusicOffset += elapsed;
+      } else {
+        const loopDuration = backgroundMusicBuffer.duration - backgroundMusicLoopStart;
+        backgroundMusicOffset = backgroundMusicLoopStart + ((elapsed - firstPassRemaining) % loopDuration);
+      }
     }
     backgroundMusicSource = null;
     fadingBackgroundMusicSource = source;
@@ -574,7 +585,7 @@
     }, { once: true });
     audio.play().catch(() => {
       releaseMedia(media);
-      if (audioEnabled) audioStatus.textContent = "Tap SOUND OFF once to let the browser play voice notes.";
+      if (audioEnabled) audioStatus.textContent = "Tap SOUND OFF once to let your browser play the audio.";
     });
   }
 
