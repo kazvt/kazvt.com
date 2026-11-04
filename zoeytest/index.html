@@ -6,14 +6,14 @@
   <meta name="theme-color" content="#100b2a">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <meta name="description" content="A little galaxy of friend-shaped stars and voice notes for Zoey.">
-  <title>Zoey's Galaxy - star-mail from your people</title>
+  <title>Message to Zoey...</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preload" href="/zzz_assets/fonts/fs-Tahoma-8px.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/zoeytest/zoeytest.css?v=20261105-01">
+  <link rel="stylesheet" href="/zoeytest/zoeytest.css?v=20261105-02">
   <script>
     document.documentElement.dataset.zoeyMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "off" : "on";
   </script>
-  <script defer src="/zoeytest/zoeytest.js?v=20261105-01"></script>
+  <script defer src="/zoeytest/zoeytest.js?v=20261105-02"></script>
 </head>
 <body class="zoey-page" data-motion="on" data-audio="off">
   <a class="z-skip-link" href="#constellation" tabindex="-1">Skip to Zoey's star-mail</a>
@@ -23,43 +23,23 @@
 
   <div class="z-loader" id="fakeLoader">
     <div class="z-loader-window" role="dialog" aria-modal="true" aria-labelledby="loaderTitle">
-      <div class="z-titlebar"><span>STAR-MAIL.EXE // DIAL-UP CONNECTION</span><span class="z-window-lights" aria-hidden="true"><i></i><i></i><i></i></span></div>
+      <div class="z-titlebar"><span>Popup</span><span class="z-window-lights" aria-hidden="true"><i></i><i></i><i></i></span></div>
       <div class="z-loader-inner">
-        <p class="z-kicker">A LITTLE STAR-MAIL CONNECTION</p>
-        <h2 id="loaderTitle">Zoey's galaxy is calling...</h2>
-        <p id="loaderStatus" class="z-loader-status" role="status" aria-live="polite">Dialing the friend-shaped constellations.</p>
-        <div class="z-progress-track" id="loaderProgress" role="progressbar" aria-label="Pretend dial-up connection" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="loaderFill"></span></div>
-        <div class="z-loader-meta"><span>MODEM MAGIC // PLEASE WAIT</span><strong id="loaderPercent">00%</strong></div>
-        <button class="z-button z-enter-button" id="enterGalaxy" type="button" aria-label="Enable sound and enter Zoey's galaxy">CLICK TO ENTER // SOUND ON</button>
-        <p class="z-loader-footnote">The connection is pretend. The love is real. Sound unlocks when you enter.</p>
-        <noscript><p class="z-loader-footnote">JavaScript is needed for the sound-enabled star-mail experience.</p></noscript>
+        <p id="loaderTitle" class="z-popup-message">Anytime you're ready, Zoey</p>
+        <button class="z-enter-button" id="enterGalaxy" type="button" aria-label="Enter Zoey's message">Enter...</button>
       </div>
     </div>
   </div>
 
   <main class="z-viewport" id="constellation" inert>
-    <header class="z-topbar">
-      <a class="z-site-mark" href="/" aria-label="Back to kazvt.com">KAZVT.COM</a>
-      <span class="z-browser-title">ZOEY'S GALAXY <span aria-hidden="true">//</span> A VERY LOVELY PLACE</span>
-      <div class="z-controls">
-        <button class="z-button z-audio-toggle" id="audioToggle" type="button" aria-pressed="false" aria-label="Enable all sound">SOUND OFF</button>
-      </div>
-    </header>
-
     <section class="z-stage" aria-labelledby="pageTitle">
       <div class="z-stage-heading">
-        <p class="z-kicker"><span class="z-pip" aria-hidden="true"></span> A LITTLE STAR-MAIL FROM YOUR PEOPLE <span class="z-pip" aria-hidden="true"></span></p>
         <h1 id="pageTitle" tabindex="-1">ZOEY, YOU ARE LOVED<br><span>TO THE MOON + BACK</span></h1>
-        <p class="z-stage-subtitle">Hover a star, hear a voice. Tap one on your phone.</p>
       </div>
 
       <div class="z-constellation" id="entryCanvas" role="list" aria-label="Friend star-mail stickers"></div>
 
-      <div class="z-stage-status" aria-live="polite" aria-atomic="true">
-        <span class="z-status-star" aria-hidden="true">*</span>
-        <span id="audioStatus">The friend voices and background song are waiting for you.</span>
-        <span class="z-status-star" aria-hidden="true">*</span>
-      </div>
+      <div id="audioStatus" class="z-visually-hidden" role="status" aria-live="polite" aria-atomic="true">Audio is muted.</div>
     </section>
 
     <footer class="z-footer">
@@ -67,6 +47,5 @@
       <span>THE GALAXY IS TWINKLING</span>
     </footer>
   </main>
-  <noscript><p class="z-noscript">This little galaxy needs JavaScript for its animated stars and voice-note interactions.</p></noscript>
 </body>
 </html>
