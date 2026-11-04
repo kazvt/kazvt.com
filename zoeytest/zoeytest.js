@@ -302,13 +302,15 @@
   async function loadGifCatalog() {
     if (gifEntries) return gifEntries;
     if (catalogPromise) return catalogPromise;
-    catalogPromise = fetch("/zoeytest/gif-manifest.json", { cache: "force-cache" })
+    catalogPromise = fetch("/zoeytest/gif-manifest.json?v=20261105-06", { cache: "force-cache" })
       .then((response) => {
         if (!response.ok) throw new Error("GIF list unavailable");
         return response.json();
       })
       .then((entries) => {
-        if (!Array.isArray(entries) || entries.length !== 100) throw new Error("Unexpected GIF list");
+        if (!Array.isArray(entries) || !entries.length || entries.some((entry) => !entry.file || !Number.isFinite(entry.width) || !Number.isFinite(entry.height))) {
+          throw new Error("Unexpected GIF list");
+        }
         gifEntries = entries;
         const fragment = document.createDocumentFragment();
         entries.forEach((entry) => {

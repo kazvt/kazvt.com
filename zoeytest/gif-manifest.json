@@ -1,17 +1,5 @@
 [
   {
-    "id": 1,
-    "category": "space",
-    "title": "o driscoll l space dog",
-    "width": 72,
-    "height": 80,
-    "archivedGif": "20090829012411/http://geocities.com/odriscolll/spacedog.gif",
-    "sourcePage": "https://web.archive.org/web/20090829030054/http://geocities.com/odriscolll/archive69.html",
-    "checksum": "X7J6FKDLF3MRJQOW5T636T6DCER22GIW",
-    "archiveIndex": 90,
-    "file": "signal-001.gif"
-  },
-  {
     "id": 2,
     "category": "heart",
     "title": "ah choo ma heart",
@@ -22,42 +10,6 @@
     "checksum": "MFZB27DONZIHIJYELDDIEPIF5GRJ5I3K",
     "archiveIndex": 1,
     "file": "signal-002.gif"
-  },
-  {
-    "id": 3,
-    "category": "moon",
-    "title": "clipart pbi pictures holiday moon witch",
-    "width": 150,
-    "height": 135,
-    "archivedGif": "20091027081743/http://www.geocities.com/clipart//pbi/pictures/Holiday/moonwitch.gif",
-    "sourcePage": "https://web.archive.org/web/20091022054436/http://geocities.com/laurenp1984/eviltestconclusionevil.html",
-    "checksum": "55CI3E6JQVADZNV5SJUEKZSRPYQDRU43",
-    "archiveIndex": 114,
-    "file": "signal-003.gif"
-  },
-  {
-    "id": 4,
-    "category": "star",
-    "title": "casino casino ca images white star",
-    "width": 25,
-    "height": 25,
-    "archivedGif": "20091027142116/http://geocities.com/casinocasinoca/images/whitestar.gif",
-    "sourcePage": "https://web.archive.org/web/20091027141935/http://geocities.com/casinocasinoca/TracksListings/175.htm",
-    "checksum": "T4GJLPFTB77ZMM3LBNRZGJA7YHO6KJ6L",
-    "archiveIndex": 71,
-    "file": "signal-004.gif"
-  },
-  {
-    "id": 5,
-    "category": "space",
-    "title": "space wor z home",
-    "width": 67,
-    "height": 28,
-    "archivedGif": "20091027133134/http://geocities.com/spaceworz/home.gif",
-    "sourcePage": "https://web.archive.org/web/20091022215155/http://geocities.com/spaceworz/Wee.html",
-    "checksum": "5NWW4Z7M7AH5QFZV5LOHG5SF7HVSFX3B",
-    "archiveIndex": 91,
-    "file": "signal-005.gif"
   },
   {
     "id": 6,
@@ -72,138 +24,6 @@
     "file": "signal-006.gif"
   },
   {
-    "id": 7,
-    "category": "moon",
-    "title": "clipart pbi pictures holiday witch moon",
-    "width": 150,
-    "height": 135,
-    "archivedGif": "20060928160707/http://www.geocities.com/clipart/pbi/pictures/Holiday/witchmoon.gif",
-    "sourcePage": "https://web.archive.org/web/20091027155953/http://geocities.com/fairyleaf/gingerbreadgirl.html",
-    "checksum": "55CJ7KNFCGTM6N4PNJCYLLPXWRA6AC7C",
-    "archiveIndex": 115,
-    "file": "signal-007.gif"
-  },
-  {
-    "id": 8,
-    "category": "star",
-    "title": "singing brook crystals star sparkle",
-    "width": 35,
-    "height": 36,
-    "archivedGif": "20091027081214/http://www.geocities.com/singingbrookcrystals/starsparkle.gif",
-    "sourcePage": "https://web.archive.org/web/20091022022551/http://geocities.com/singingbrookcrystals/rosequartz.html",
-    "checksum": "G6RLRWIS3H77BG7RV6TQJI4PMUYA4GQY",
-    "archiveIndex": 73,
-    "file": "signal-008.gif"
-  },
-  {
-    "id": 9,
-    "category": "space",
-    "title": "space science bk",
-    "width": 100,
-    "height": 100,
-    "archivedGif": "20090831104031/http://geocities.com/space_science/BK.gif",
-    "sourcePage": "https://web.archive.org/web/20091027042424/http://www.geocities.com/space_science/042001.html",
-    "checksum": "7CYWDBDREXXB4GAZK2EPXKAA2ZMNQPHJ",
-    "archiveIndex": 92,
-    "file": "signal-009.gif"
-  },
-  {
-    "id": 10,
-    "category": "heart",
-    "title": "heart to arashi2 back",
-    "width": 36,
-    "height": 36,
-    "archivedGif": "20090731133157/http://hk.geocities.com/heart_to_arashi2/back.gif",
-    "sourcePage": "https://web.archive.org/web/20090727163009/http://hk.geocities.com/heart_to_arashi2/story69.htm",
-    "checksum": "OF5DHFSX5MWLXKQPGRY2RPKH2XTCVNM5",
-    "archiveIndex": 3,
-    "file": "signal-010.gif"
-  },
-  {
-    "id": 11,
-    "category": "moon",
-    "title": "spcc4a moon",
-    "width": 80,
-    "height": 80,
-    "archivedGif": "20091020133634/http://hk.geocities.com/spcc_4a/moon.gif",
-    "sourcePage": "https://web.archive.org/web/20091027110358/http://hk.geocities.com/spcc_4a/y3.html",
-    "checksum": "WYG4MUFTNDVGTC4CL5P5FNFFGWAWROY6",
-    "archiveIndex": 116,
-    "file": "signal-011.gif"
-  },
-  {
-    "id": 12,
-    "category": "star",
-    "title": "singing brook crystals star sparkle small",
-    "width": 15,
-    "height": 15,
-    "archivedGif": "20090729084916/http://www.geocities.com/singingbrookcrystals/starsparklesmall.gif",
-    "sourcePage": "https://web.archive.org/web/20091022212247/http://geocities.com/singingbrookcrystals/dundasite.html",
-    "checksum": "6N7U6TAIW7NALPRWUHVUODJZKOT4SCVA",
-    "archiveIndex": 74,
-    "file": "signal-012.gif"
-  },
-  {
-    "id": 13,
-    "category": "space",
-    "title": "space wor z email",
-    "width": 32,
-    "height": 32,
-    "archivedGif": "20091022050837/http://www.geocities.com/spaceworz/email.gif",
-    "sourcePage": "https://web.archive.org/web/20091022073103/http://geocities.com/spaceworz/Bib.html",
-    "checksum": "4MFIPJ4MB5BWC7CFX6CIZYKO5A6WQFJA",
-    "archiveIndex": 93,
-    "file": "signal-013.gif"
-  },
-  {
-    "id": 14,
-    "category": "heart",
-    "title": "laclub98 gif la heart",
-    "width": 25,
-    "height": 16,
-    "archivedGif": "20090829235129/http://geocities.com/laclub_98/gif/laheart.gif",
-    "sourcePage": "https://web.archive.org/web/20090809221545/http://geocities.com/laclub_98/1350.html",
-    "checksum": "6OTPPBNZX52T25LCDRUAUOGFPZLZNRES",
-    "archiveIndex": 4,
-    "file": "signal-014.gif"
-  },
-  {
-    "id": 15,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022s",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20091027045530/http://geocities.com/jumpoverthemoon2001/al_div002_2-s.gif",
-    "sourcePage": "https://web.archive.org/web/20091022071558/http://geocities.com/jumpoverthemoon2001/LinksClubs.html",
-    "checksum": "MU3IDRU5NJPZHVAFJE36QDERERQB4WDL",
-    "archiveIndex": 117,
-    "file": "signal-015.gif"
-  },
-  {
-    "id": 16,
-    "category": "star",
-    "title": "asia star jolin 540",
-    "width": 76,
-    "height": 46,
-    "archivedGif": "20091027074326/http://geocities.com/asiastar_jolin/540.gif",
-    "sourcePage": "https://web.archive.org/web/20091027074543/http://geocities.com/asiastar_jolin/stop-7.html",
-    "checksum": "OBDHSRNMA6IHFRDZBE4K7ORZJN5K57QJ",
-    "archiveIndex": 75,
-    "file": "signal-016.gif"
-  },
-  {
-    "id": 17,
-    "category": "space",
-    "title": "lion court 77 web graphics space dog",
-    "width": 72,
-    "height": 80,
-    "archivedGif": "20091027083301/http://www.geocities.com/lioncourt77//webgraphics/spacedog.gif",
-    "sourcePage": "https://web.archive.org/web/20090730155329/http://geocities.com/CapeCanaveral/Galaxy/1574/xfiles/27.html",
-    "checksum": "E2SQU4OJQ73AY7YTQJYSTIHY3WPMHLB5",
-    "archiveIndex": 94,
-    "file": "signal-017.gif"
-  },
-  {
     "id": 18,
     "category": "heart",
     "title": "rainha51br heart 21",
@@ -216,42 +36,6 @@
     "file": "signal-018.gif"
   },
   {
-    "id": 19,
-    "category": "moon",
-    "title": "clipart pbi pictures holiday trick moon",
-    "width": 150,
-    "height": 137,
-    "archivedGif": "20020328122619/http://geocities.com:80/clipart/pbi/pictures/Holiday/trick_moon.gif",
-    "sourcePage": "https://web.archive.org/web/20091027012753/http://geocities.com/celestialfarms/",
-    "checksum": "O5XJT47DYFXMN6CVQDKMPHEVJWSKPU72",
-    "archiveIndex": 118,
-    "file": "signal-019.gif"
-  },
-  {
-    "id": 20,
-    "category": "star",
-    "title": "star gzr1776 1gobac02",
-    "width": 87,
-    "height": 37,
-    "archivedGif": "20091022030321/http://www.geocities.com/stargzr1776/1gobac02.gif",
-    "sourcePage": "https://web.archive.org/web/20090830055335/http://geocities.com/stargzr1776/little_things.html",
-    "checksum": "EKWL3NBJ6RXKR5SJQ3RA5EGUCD66WPR7",
-    "archiveIndex": 76,
-    "file": "signal-020.gif"
-  },
-  {
-    "id": 21,
-    "category": "space",
-    "title": "space science check",
-    "width": 18,
-    "height": 18,
-    "archivedGif": "20091027042425/http://www.geocities.com/space_science/check.gif",
-    "sourcePage": "https://web.archive.org/web/20091025095048/http://geocities.com/space_science/062001.html",
-    "checksum": "HIKQVFVPYGFIAMFGSEOIIDG35C4CT5OB",
-    "archiveIndex": 95,
-    "file": "signal-021.gif"
-  },
-  {
     "id": 22,
     "category": "heart",
     "title": "may soon ah24 images jump heart",
@@ -262,186 +46,6 @@
     "checksum": "OBIVLKZUDHXRT3P7ZMJJKDK6HDHFYK27",
     "archiveIndex": 6,
     "file": "signal-022.gif"
-  },
-  {
-    "id": 23,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022t",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20091027045537/http://geocities.com/jumpoverthemoon2001/al_div002_2-t.gif",
-    "sourcePage": "https://web.archive.org/web/20091022054927/http://geocities.com/jumpoverthemoon2001/Russel-Fotos.html",
-    "checksum": "QNEH5DYOLR3PI7YH7S4N55X2PZU4B77S",
-    "archiveIndex": 119,
-    "file": "signal-023.gif"
-  },
-  {
-    "id": 24,
-    "category": "star",
-    "title": "love poetry cafe5 wonder star ani",
-    "width": 30,
-    "height": 30,
-    "archivedGif": "20091021174253/http://www.geocities.com/lovepoetrycafe5/wonderstarani.gif",
-    "sourcePage": "https://web.archive.org/web/20091021174251/http://geocities.com/lovepoetrycafe5/denlexxspages.html",
-    "checksum": "JJKXHO55DZPMZXNHKFYSJ5Z5M3WJO2TM",
-    "archiveIndex": 77,
-    "file": "signal-024.gif"
-  },
-  {
-    "id": 25,
-    "category": "space",
-    "title": "paris tower 1120 space 3",
-    "width": 157,
-    "height": 144,
-    "archivedGif": "20090820095227/http://geocities.com/Paris/Tower/1120/space3.gif",
-    "sourcePage": "https://web.archive.org/web/20090803172015/http://geocities.com/Paris/Tower/1120/mediun.html",
-    "checksum": "IU3PL3W7SEU4AHR34IDA65GHCHRQKHK4",
-    "archiveIndex": 96,
-    "file": "signal-025.gif"
-  },
-  {
-    "id": 26,
-    "category": "heart",
-    "title": "heart to arashi2 next",
-    "width": 36,
-    "height": 36,
-    "archivedGif": "20091026233504/http://hk.geocities.com/heart_to_arashi2/next.gif",
-    "sourcePage": "https://web.archive.org/web/20091026233412/http://hk.geocities.com/heart_to_arashi2/story_helen17.htm",
-    "checksum": "ZT3L6YWH6F2DIDNHVQMN75ICV3F5HZW2",
-    "archiveIndex": 7,
-    "file": "signal-026.gif"
-  },
-  {
-    "id": 27,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022o",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20091027162643/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-o.gif",
-    "sourcePage": "https://web.archive.org/web/20091021210930/http://geocities.com/jumpoverthemoon2001/Rachelle-Intro.html",
-    "checksum": "GPXAQBTUJTG27IGIVXTL2QFYAZCH2G67",
-    "archiveIndex": 120,
-    "file": "signal-027.gif"
-  },
-  {
-    "id": 28,
-    "category": "star",
-    "title": "dove pro animated star",
-    "width": 25,
-    "height": 25,
-    "archivedGif": "20090830144748/http://geocities.com/dovepro/animated_star.gif",
-    "sourcePage": "https://web.archive.org/web/20091024160755/http://geocities.com/dovepro/happytree.html",
-    "checksum": "2EN74XQV4NMIRF7X5D5TDCZOUUKDFBBT",
-    "archiveIndex": 79,
-    "file": "signal-028.gif"
-  },
-  {
-    "id": 29,
-    "category": "space",
-    "title": "potter trade card space back",
-    "width": 100,
-    "height": 100,
-    "archivedGif": "20090728080433/http://uk.geocities.com/pottertradecard/spaceback.gif",
-    "sourcePage": "https://web.archive.org/web/20091027040521/http://uk.geocities.com/pottertradecard/emailcha.html",
-    "checksum": "VRUKEQH3VFVQ5H2JMVKCUZ37DKCUXCNZ",
-    "archiveIndex": 97,
-    "file": "signal-029.gif"
-  },
-  {
-    "id": 30,
-    "category": "heart",
-    "title": "the jackal3499 heart email",
-    "width": 44,
-    "height": 41,
-    "archivedGif": "20091022132539/http://www.geocities.com/thejackal34_99/heartemail.gif",
-    "sourcePage": "https://web.archive.org/web/20091028083111/http://geocities.com/thejackal34_99/TheSecretRevealed.html",
-    "checksum": "4CM4Z7GO4VLPDQ7STRBW6DL6UKKDHHQV",
-    "archiveIndex": 8,
-    "file": "signal-030.gif"
-  },
-  {
-    "id": 31,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022p",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20091021155505/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-p.gif",
-    "sourcePage": "https://web.archive.org/web/20091022034727/http://geocities.com/jumpoverthemoon2001/Trey-Intro.html",
-    "checksum": "PKQ4QZNBAJZSHO333EZNTZBJEUSJOR4J",
-    "archiveIndex": 121,
-    "file": "signal-031.gif"
-  },
-  {
-    "id": 32,
-    "category": "star",
-    "title": "west hollywood village 4169 images star",
-    "width": 30,
-    "height": 28,
-    "archivedGif": "20091025181207/http://geocities.com/WestHollywood/Village/4169/images/star.gif",
-    "sourcePage": "https://web.archive.org/web/20090901145212/http://geocities.com/WestHollywood/Village/4169/albumeng.htm",
-    "checksum": "AXPTVQYF2R5KD2J6TOYIZZCPHIDTWFDI",
-    "archiveIndex": 80,
-    "file": "signal-032.gif"
-  },
-  {
-    "id": 33,
-    "category": "space",
-    "title": "space wor z hand right",
-    "width": 64,
-    "height": 24,
-    "archivedGif": "20090829064808/http://www.geocities.com/spaceworz/Hand_right.gif",
-    "sourcePage": "https://web.archive.org/web/20091027074044/http://geocities.com/spaceworz/EFour",
-    "checksum": "PON5JMU5NMTKL36477MPKP7AF22ZCGFT",
-    "archiveIndex": 98,
-    "file": "signal-033.gif"
-  },
-  {
-    "id": 34,
-    "category": "heart",
-    "title": "cp heart mailbox",
-    "width": 94,
-    "height": 94,
-    "archivedGif": "20091027125527/http://www.geocities.com/~cpheart/mailbox.gif",
-    "sourcePage": "https://web.archive.org/web/20090903070501/http://geocities.com/~cpheart/poem19.htm",
-    "checksum": "N2LR64YR4TGF6TXR52NQJYC46VFFZXGG",
-    "archiveIndex": 9,
-    "file": "signal-034.gif"
-  },
-  {
-    "id": 35,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022h",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20091027162644/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-h.gif",
-    "sourcePage": "https://web.archive.org/web/20091022094514/http://geocities.com/jumpoverthemoon2001/Philip-Intro-TdV.html",
-    "checksum": "I2V56GQZD7RDKQ6ATZSAWPMMI6ZXXI4B",
-    "archiveIndex": 122,
-    "file": "signal-035.gif"
-  },
-  {
-    "id": 36,
-    "category": "star",
-    "title": "picket fence garden 2966 star glo1",
-    "width": 17,
-    "height": 17,
-    "archivedGif": "20000916025858/http://www.geocities.com:80/PicketFence/Garden/2966/starglo1.gif",
-    "sourcePage": "https://web.archive.org/web/20090803180758/http://geocities.com/PicketFence/Garden/2966/edu012.htm",
-    "checksum": "QZEBTE2JWUGDBOHXOIECK7QH3ZD2D6DI",
-    "archiveIndex": 81,
-    "file": "signal-036.gif"
-  },
-  {
-    "id": 37,
-    "category": "space",
-    "title": "space wor z hand left",
-    "width": 64,
-    "height": 24,
-    "archivedGif": "20091022050825/http://www.geocities.com/spaceworz/Hand_left.gif",
-    "sourcePage": "https://web.archive.org/web/20090830054033/http://geocities.com/spaceworz/Gallery",
-    "checksum": "WIRVMKL6GM5R4K2ZYMC7Q3KURHTGQEA3",
-    "archiveIndex": 99,
-    "file": "signal-037.gif"
   },
   {
     "id": 38,
@@ -468,30 +72,6 @@
     "file": "signal-039.gif"
   },
   {
-    "id": 40,
-    "category": "star",
-    "title": "astronomy with tru2004433 star ani55 twinkle",
-    "width": 49,
-    "height": 31,
-    "archivedGif": "20090726003031/http://www.geocities.com/astronomy_with_tru2004433/star_Ani55Twinkle.gif",
-    "sourcePage": "https://web.archive.org/web/20091027054653/http://www.geocities.com/astronomy_with_tru2004433/rusty_2005.html",
-    "checksum": "Q73KF55DWKWLOP5OLXT4MBK2G34LH5JC",
-    "archiveIndex": 82,
-    "file": "signal-040.gif"
-  },
-  {
-    "id": 41,
-    "category": "space",
-    "title": "pocahontas 181187 space bgd",
-    "width": 150,
-    "height": 150,
-    "archivedGif": "20091019235145/http://de.geocities.com/pocahontas181187/spacebgd.gif",
-    "sourcePage": "https://web.archive.org/web/20090727152637/http://de.geocities.com/pocahontas181187/LionKingFrame.htm",
-    "checksum": "YFINGIKXPDA5VDQU2QIHOKDYE5RCDQRF",
-    "archiveIndex": 100,
-    "file": "signal-041.gif"
-  },
-  {
     "id": 42,
     "category": "heart",
     "title": "jubilation journal small heart 5",
@@ -516,78 +96,6 @@
     "file": "signal-043.gif"
   },
   {
-    "id": 44,
-    "category": "star",
-    "title": "athens oracle 2358 star 60",
-    "width": 60,
-    "height": 60,
-    "archivedGif": "20061030003112/http://www.geocities.com/Athens/Oracle/2358/star60.gif",
-    "sourcePage": "https://web.archive.org/web/20091027142327/http://www.geocities.com/Athens/Oracle/2358/gods.html",
-    "checksum": "5DSDGR5PKKUPS7QBQ5ADKM35BL6KDKQQ",
-    "archiveIndex": 83,
-    "file": "signal-044.gif"
-  },
-  {
-    "id": 45,
-    "category": "space",
-    "title": "chi heng space sky1",
-    "width": 144,
-    "height": 144,
-    "archivedGif": "20090830120853/http://geocities.com/chiheng_space/sky1.gif",
-    "sourcePage": "https://web.archive.org/web/20090831032609/http://geocities.com/chiheng_space/weather.html",
-    "checksum": "BKODKPE6DPSPF6SHDRPIJI4QM6BUGB2Y",
-    "archiveIndex": 101,
-    "file": "signal-045.gif"
-  },
-  {
-    "id": 46,
-    "category": "space",
-    "title": "party music us blue bunny",
-    "width": 36,
-    "height": 46,
-    "archivedGif": "20091019160327/http://www.geocities.com/party_musicus/Blue_bunny.gif",
-    "sourcePage": "https://web.archive.org/web/20090829033806/http://geocities.com/party_musicus/ent.html",
-    "checksum": "7NH2NQZYOMXPVH2DTTKBB5S3TDHPRFCY",
-    "archiveIndex": 12,
-    "file": "signal-046.gif"
-  },
-  {
-    "id": 47,
-    "category": "moon",
-    "title": "sailor moon ies biganime88x31",
-    "width": 88,
-    "height": 31,
-    "archivedGif": "20090829072143/http://www.geocities.com/sailor_moonies/biganime-88x31.gif",
-    "sourcePage": "https://web.archive.org/web/20091026213348/http://www.geocities.com/sailor_moonies/gift",
-    "checksum": "5ZNBSLJWW72KSLYTJBOQAYC2QVF7EHZO",
-    "archiveIndex": 125,
-    "file": "signal-047.gif"
-  },
-  {
-    "id": 48,
-    "category": "star",
-    "title": "spcc4a star 3",
-    "width": 23,
-    "height": 23,
-    "archivedGif": "20091027022004/http://hk.geocities.com/spcc_4a/star3.gif",
-    "sourcePage": "https://web.archive.org/web/20090729143254/http://hk.geocities.com/spcc_4a/f.html",
-    "checksum": "M7TAQJJOU47NQDSXC5G7UUS3RDQJK4QH",
-    "archiveIndex": 84,
-    "file": "signal-048.gif"
-  },
-  {
-    "id": 49,
-    "category": "space",
-    "title": "space matters 195 art star 1",
-    "width": 25,
-    "height": 25,
-    "archivedGif": "20091019171842/http://www.geocities.com/spacematters195/art/star1.gif",
-    "sourcePage": "https://web.archive.org/web/20090829094014/http://geocities.com/spacematters195/gender-examples.html",
-    "checksum": "ODFXSLST37WKVIPN6ZJOPWA5DJ72YZAK",
-    "archiveIndex": 102,
-    "file": "signal-049.gif"
-  },
-  {
     "id": 50,
     "category": "heart",
     "title": "neaner98 ani heart",
@@ -598,42 +106,6 @@
     "checksum": "AVCJ4JSXKKQMH5MH5CORT6CMYPXRCNEV",
     "archiveIndex": 13,
     "file": "signal-050.gif"
-  },
-  {
-    "id": 51,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022i",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20090809110912/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-i.gif",
-    "sourcePage": "https://web.archive.org/web/20091022024808/http://geocities.com/jumpoverthemoon2001/Jimmy-Intro.html",
-    "checksum": "BDZO76TNVHBUKPY7HRQSE2AXOMJDMLCY",
-    "archiveIndex": 126,
-    "file": "signal-051.gif"
-  },
-  {
-    "id": 52,
-    "category": "star",
-    "title": "can moy s kuvat06 star spinning",
-    "width": 30,
-    "height": 30,
-    "archivedGif": "20090830110445/http://geocities.com/canmoys/Kuvat06/Starspinning.gif",
-    "sourcePage": "https://web.archive.org/web/20091026221034/http://geocities.com/canmoys/Sivut/EkaSivu.htm",
-    "checksum": "G4Y36PPHOI7OGV3L42THQUNTBM4OL6MX",
-    "archiveIndex": 85,
-    "file": "signal-052.gif"
-  },
-  {
-    "id": 53,
-    "category": "space",
-    "title": "bub space move04",
-    "width": 100,
-    "height": 100,
-    "archivedGif": "20070906090636/http://hk.geocities.com/bub_space/move04.gif",
-    "sourcePage": "https://web.archive.org/web/20090730153459/http://hk.geocities.com/bub_space/funtop.htm",
-    "checksum": "VQFPT3XKRX5RQDA7Z4O63BIA22BAK72A",
-    "archiveIndex": 103,
-    "file": "signal-053.gif"
   },
   {
     "id": 54,
@@ -648,42 +120,6 @@
     "file": "signal-054.gif"
   },
   {
-    "id": 55,
-    "category": "moon",
-    "title": "silvermoon guild moon",
-    "width": 100,
-    "height": 100,
-    "archivedGif": "20091019161900/http://www.geocities.com/silver_moonguild/Moon.gif",
-    "sourcePage": "https://web.archive.org/web/20091022144345/http://geocities.com/silver_moonguild/uphistory.html",
-    "checksum": "2TAXRQZZRK2JHTC6DDCB7K2UE3GQ3T77",
-    "archiveIndex": 127,
-    "file": "signal-055.gif"
-  },
-  {
-    "id": 56,
-    "category": "star",
-    "title": "area 51 corridor 2347 star logo",
-    "width": 93,
-    "height": 78,
-    "archivedGif": "20091028135454/http://www.geocities.com/Area51/Corridor/2347/starlogo.gif",
-    "sourcePage": "https://web.archive.org/web/20091020082930/http://geocities.com/Area51/Corridor/2347/novel12a.html",
-    "checksum": "WJE64SUXV6FBVBIMACRQZE2Y6ZS4BKHJ",
-    "archiveIndex": 86,
-    "file": "signal-056.gif"
-  },
-  {
-    "id": 57,
-    "category": "space",
-    "title": "sams angel space net cube",
-    "width": 50,
-    "height": 50,
-    "archivedGif": "20091027155208/http://www.geocities.com/samsangelspace/netcube.gif",
-    "sourcePage": "https://web.archive.org/web/20090829064638/http://geocities.com/samsangelspace/spirit6.html",
-    "checksum": "M7RB7EWZB4MZPT7IDYTEDNVYF764RDHH",
-    "archiveIndex": 104,
-    "file": "signal-057.gif"
-  },
-  {
     "id": 58,
     "category": "heart",
     "title": "tokyo harbor 7077 bk heart",
@@ -694,42 +130,6 @@
     "checksum": "TADT7APMNALGIQZMSLTFSDBVWFIVD6GO",
     "archiveIndex": 15,
     "file": "signal-058.gif"
-  },
-  {
-    "id": 59,
-    "category": "moon",
-    "title": "eterna moon new",
-    "width": 30,
-    "height": 20,
-    "archivedGif": "20091019123729/http://www.geocities.com/eternamoon/new.gif",
-    "sourcePage": "https://web.archive.org/web/20091027034933/http://www.geocities.com/icysailordreams/index.html",
-    "checksum": "MTUDTMB3DLO7YS6S6CMDDYO6ZZFWMNJY",
-    "archiveIndex": 128,
-    "file": "signal-059.gif"
-  },
-  {
-    "id": 60,
-    "category": "star",
-    "title": "gotegirl27 magic star bullet",
-    "width": 20,
-    "height": 16,
-    "archivedGif": "20090727233632/http://www.geocities.com/gotegirl27/magicstarbullet.gif",
-    "sourcePage": "https://web.archive.org/web/20091027061545/http://www.geocities.com/gotegirl27/somethingmagicalForSale.html",
-    "checksum": "LXDXT2RH4DING2NOGPDYVJXZNFHLL6B5",
-    "archiveIndex": 87,
-    "file": "signal-060.gif"
-  },
-  {
-    "id": 61,
-    "category": "space",
-    "title": "indian space story vp4",
-    "width": 120,
-    "height": 100,
-    "archivedGif": "20090820065829/http://geocities.com/indian_space_story/vp4.gif",
-    "sourcePage": "https://web.archive.org/web/20091025072856/http://geocities.com/indian_space_story/isro.html",
-    "checksum": "NSIVRFAMG2A4O6DXHBXQ6ZTSQ3K6L6S6",
-    "archiveIndex": 105,
-    "file": "signal-061.gif"
   },
   {
     "id": 62,
@@ -744,42 +144,6 @@
     "file": "signal-062.gif"
   },
   {
-    "id": 63,
-    "category": "moon",
-    "title": "bom oh online moon",
-    "width": 93,
-    "height": 89,
-    "archivedGif": "20051226214242/http://sg.geocities.com:80/bomohonline/moon.gif",
-    "sourcePage": "https://web.archive.org/web/20091027191844/http://sg.geocities.com/bomohonline/kebatinan.html",
-    "checksum": "BT73YJBZN2WGEMKPIL3T6E2EFOINASEI",
-    "archiveIndex": 129,
-    "file": "signal-063.gif"
-  },
-  {
-    "id": 64,
-    "category": "star",
-    "title": "amiel roldan star",
-    "width": 12,
-    "height": 12,
-    "archivedGif": "20091023223331/http://www.geocities.com/amiel_roldan/star.gif",
-    "sourcePage": "https://web.archive.org/web/20090805232950/http://geocities.com/amiel_ga_roldan/paintings1.html",
-    "checksum": "MZQYVYIZTAE5NZHMBSE2ARFVSFA5AET2",
-    "archiveIndex": 88,
-    "file": "signal-064.gif"
-  },
-  {
-    "id": 65,
-    "category": "space",
-    "title": "psycho ooo442000 background space 4",
-    "width": 100,
-    "height": 100,
-    "archivedGif": "20091027135957/http://geocities.com/Psychoooo44_2000/background/space4.gif",
-    "sourcePage": "https://web.archive.org/web/20091025140750/http://geocities.com/psychoooo44_2000/GetPaid.html",
-    "checksum": "3ZBX5A6IIVQBKBPE33OJDI7WMUX3RELZ",
-    "archiveIndex": 106,
-    "file": "signal-065.gif"
-  },
-  {
     "id": 66,
     "category": "heart",
     "title": "lover babe geo heart",
@@ -790,42 +154,6 @@
     "checksum": "FFPH557WLAEMT5DMCFP2JY2TVR3G6Q3Z",
     "archiveIndex": 17,
     "file": "signal-066.gif"
-  },
-  {
-    "id": 67,
-    "category": "moon",
-    "title": "area 51 quark 3997 moon chalice",
-    "width": 88,
-    "height": 174,
-    "archivedGif": "20040419041707/http://www.geocities.com/Area51/Quark/3997/moonchalice.gif",
-    "sourcePage": "https://web.archive.org/web/20091022201439/http://geocities.com/Area51/Quark/3997/dinning.html",
-    "checksum": "HXC6INBEQJO6RFPE253MGNPNW4I7TNRW",
-    "archiveIndex": 130,
-    "file": "signal-067.gif"
-  },
-  {
-    "id": 68,
-    "category": "star",
-    "title": "soho gallery 9030 star",
-    "width": 60,
-    "height": 60,
-    "archivedGif": "20000914040757/http://www.geocities.com:80/SoHo/Gallery/9030/star.gif",
-    "sourcePage": "https://web.archive.org/web/20090803215708/http://geocities.com/SoHo/Gallery/9030/me.html",
-    "checksum": "B2WJL3FKQ7RV2YDVD6RXGVGSAHKOXPIW",
-    "archiveIndex": 89,
-    "file": "signal-068.gif"
-  },
-  {
-    "id": 69,
-    "category": "space",
-    "title": "wk k space photo icon47",
-    "width": 16,
-    "height": 17,
-    "archivedGif": "20091020160555/http://hk.geocities.com/wkkspace/Photo/icon47.gif",
-    "sourcePage": "https://web.archive.org/web/20090730021307/http://hk.geocities.com/wkkspace/Web/link.htm",
-    "checksum": "FQRHE4QIYMUTHFD75WYRRSHA7M4Z7I5H",
-    "archiveIndex": 107,
-    "file": "signal-069.gif"
   },
   {
     "id": 70,
@@ -840,30 +168,6 @@
     "file": "signal-070.gif"
   },
   {
-    "id": 71,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022e",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20090809110912/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-e.gif",
-    "sourcePage": "https://web.archive.org/web/20091022024808/http://geocities.com/jumpoverthemoon2001/Jimmy-Intro.html",
-    "checksum": "ZIWAKTTCCWEUXKIX4BD3X2S4QSUPGD3W",
-    "archiveIndex": 131,
-    "file": "signal-071.gif"
-  },
-  {
-    "id": 72,
-    "category": "space",
-    "title": "space wor z rebel button",
-    "width": 100,
-    "height": 36,
-    "archivedGif": "20091022024908/http://www.geocities.com/spaceworz/rebelbutton.gif",
-    "sourcePage": "https://web.archive.org/web/20091022073105/http://geocities.com/spaceworz/ATE-WT.html",
-    "checksum": "MHIGHXFOEQ7FQCXLEVUC7OBLONEYQ2DR",
-    "archiveIndex": 108,
-    "file": "signal-072.gif"
-  },
-  {
     "id": 73,
     "category": "heart",
     "title": "racheal131 heart 02",
@@ -876,66 +180,6 @@
     "file": "signal-073.gif"
   },
   {
-    "id": 74,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022r",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20090809110912/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-r.gif",
-    "sourcePage": "https://web.archive.org/web/20091022094511/http://geocities.com/jumpoverthemoon2001/Fabian-Intro-Cats.html",
-    "checksum": "D2UFCJBXEQ2BVZYJBOLJXSBQNXU7JPRC",
-    "archiveIndex": 133,
-    "file": "signal-074.gif"
-  },
-  {
-    "id": 75,
-    "category": "space",
-    "title": "space poet99 t ball",
-    "width": 14,
-    "height": 14,
-    "archivedGif": "20090902115613/http://geocities.com/spacepoet99/tball.gif",
-    "sourcePage": "https://web.archive.org/web/20091027094803/http://geocities.com/spacepoet99/options.html",
-    "checksum": "XE7U767WVMDXIIQUUBWXIKZPG7PGB6LB",
-    "archiveIndex": 109,
-    "file": "signal-075.gif"
-  },
-  {
-    "id": 76,
-    "category": "heart",
-    "title": "skin to heart fub08",
-    "width": 80,
-    "height": 30,
-    "archivedGif": "20091020092301/http://hk.geocities.com/skintoheart/fub08.gif",
-    "sourcePage": "https://web.archive.org/web/20091027124121/http://hk.geocities.com/skintoheart/star5i.html",
-    "checksum": "HRAEPDM3NPYAGPLO55CJS7YBPIQLIUDI",
-    "archiveIndex": 20,
-    "file": "signal-076.gif"
-  },
-  {
-    "id": 77,
-    "category": "moon",
-    "title": "elion w yr a nib at moon c",
-    "width": 80,
-    "height": 80,
-    "archivedGif": "20041024064845/http://www.geocities.com:80/elionwyr/ANIbatMoonC.gif",
-    "sourcePage": "https://web.archive.org/web/20091022041742/http://geocities.com/elionwyr/grislycrew.html",
-    "checksum": "S6GF33H7QSPORUCQUAB7S3JQYS5KMUXW",
-    "archiveIndex": 134,
-    "file": "signal-077.gif"
-  },
-  {
-    "id": 78,
-    "category": "space",
-    "title": "auto for 1 space impact icon",
-    "width": 96,
-    "height": 65,
-    "archivedGif": "20091019063933/http://www.geocities.com/autofor1/space_impact_icon.gif",
-    "sourcePage": "https://web.archive.org/web/20090806055838/http://geocities.com/autofor1/suggestapoll_page.html",
-    "checksum": "7WYFNTAWWBUPIWNJUSF74ZSC2KMZCQJE",
-    "archiveIndex": 110,
-    "file": "signal-078.gif"
-  },
-  {
     "id": 79,
     "category": "heart",
     "title": "coryn nobody a heart 2",
@@ -946,30 +190,6 @@
     "checksum": "CKEGOKDQJYCSH7EOTLWYYN7RRSTCMPP7",
     "archiveIndex": 21,
     "file": "signal-079.gif"
-  },
-  {
-    "id": 80,
-    "category": "moon",
-    "title": "jump over the moon 2001 aldiv0022g",
-    "width": 28,
-    "height": 35,
-    "archivedGif": "20091027162650/http://www.geocities.com/jumpoverthemoon2001/al_div002_2-g.gif",
-    "sourcePage": "https://web.archive.org/web/20091022094655/http://geocities.com/jumpoverthemoon2001/Ben-Intro.html",
-    "checksum": "FFZOE7ZUVR4L6SKSEV4ZSC4PM27YLKXP",
-    "archiveIndex": 135,
-    "file": "signal-080.gif"
-  },
-  {
-    "id": 81,
-    "category": "space",
-    "title": "sams angel space blink star",
-    "width": 22,
-    "height": 20,
-    "archivedGif": "20090829073240/http://geocities.com/samsangelspace/blinkstar.gif",
-    "sourcePage": "https://web.archive.org/web/20091022202906/http://geocities.com/samsangelspace/Photo.html",
-    "checksum": "AHR6AAI2KBG6BS2AWD7OERYOWLHEAQWO",
-    "archiveIndex": 113,
-    "file": "signal-081.gif"
   },
   {
     "id": 82,
@@ -996,66 +216,6 @@
     "file": "signal-083.gif"
   },
   {
-    "id": 84,
-    "category": "heart",
-    "title": "frees hair i broken heart",
-    "width": 110,
-    "height": 96,
-    "archivedGif": "20091026192945/http://geocities.com/freeshairi/broken_heart.gif",
-    "sourcePage": "https://web.archive.org/web/20091027094351/http://geocities.com/freeshairi/samunder.html",
-    "checksum": "FCX7QU6C7CGFFZI7MF2VIZYLJ77IU6Z4",
-    "archiveIndex": 24,
-    "file": "signal-084.gif"
-  },
-  {
-    "id": 85,
-    "category": "heart",
-    "title": "iqbal khush dil images pink heart",
-    "width": 60,
-    "height": 44,
-    "archivedGif": "20091025002239/http://geocities.com/iqbal_khushdil/images/pinkheart.gif",
-    "sourcePage": "https://web.archive.org/web/20091025133640/http://www.geocities.com/iqbal_khushdil/gvirk.htm",
-    "checksum": "2OJBXG6M2KS66V6ZXDJ4FZWK3MGKPBCD",
-    "archiveIndex": 25,
-    "file": "signal-085.gif"
-  },
-  {
-    "id": 86,
-    "category": "heart",
-    "title": "in4mac media logo apple heart",
-    "width": 130,
-    "height": 117,
-    "archivedGif": "20091027000248/http://it.geocities.com/in4mac/media/logo/appleheart.gif",
-    "sourcePage": "https://web.archive.org/web/20091026141711/http://it.geocities.com/in4mac/articoli/expo130902.html",
-    "checksum": "DNJHSBQAUXZ4WFY2EJDC4PZS3EEMMKH4",
-    "archiveIndex": 26,
-    "file": "signal-086.gif"
-  },
-  {
-    "id": 87,
-    "category": "heart",
-    "title": "lv kiss hugs gifs heart 2 heart",
-    "width": 25,
-    "height": 16,
-    "archivedGif": "20091027141616/http://geocities.com/lvkisshugs/gifs/heart2heart.gif",
-    "sourcePage": "https://web.archive.org/web/20091025170339/http://geocities.com/lvkisshugs/sitemap.html",
-    "checksum": "4HRFOD7H2NNM7OGW3WH2Z5SQUYMWJWRQ",
-    "archiveIndex": 27,
-    "file": "signal-087.gif"
-  },
-  {
-    "id": 88,
-    "category": "heart",
-    "title": "vcd japa v heart 143",
-    "width": 32,
-    "height": 32,
-    "archivedGif": "20091019174646/http://uk.geocities.com/vcdjapav/heart_143.gif",
-    "sourcePage": "https://web.archive.org/web/20090727094620/http://uk.geocities.com/vcdjapav/new_page_55.htm",
-    "checksum": "ZK4N7I4DZQQKBQN37XV3K5C5ZUMG4GTY",
-    "archiveIndex": 28,
-    "file": "signal-088.gif"
-  },
-  {
     "id": 89,
     "category": "heart",
     "title": "heartland lake 9478 gold rush a heart pot2ani",
@@ -1068,42 +228,6 @@
     "file": "signal-089.gif"
   },
   {
-    "id": 90,
-    "category": "heart",
-    "title": "a true heart for you animated email",
-    "width": 53,
-    "height": 51,
-    "archivedGif": "20090830083713/http://geocities.com/atrueheartforyou/AnimatedEmail.gif",
-    "sourcePage": "https://web.archive.org/web/20090902000733/http://geocities.com/atrueheartforyou/IfICriedARiver.html",
-    "checksum": "J6PSJUPTTBKVMYK5XIGCE7ZRRV5PJCCE",
-    "archiveIndex": 30,
-    "file": "signal-090.gif"
-  },
-  {
-    "id": 91,
-    "category": "heart",
-    "title": "skin to heart up usa",
-    "width": 27,
-    "height": 13,
-    "archivedGif": "20060504232042/http://hk.geocities.com:80/skintoheart/up_usa.gif",
-    "sourcePage": "https://web.archive.org/web/20090729133713/http://hk.geocities.com/skintoheart/guest1.html",
-    "checksum": "3N3VDKE6LPGBDOZLU3IVYI2YYXQ2WTHK",
-    "archiveIndex": 31,
-    "file": "signal-091.gif"
-  },
-  {
-    "id": 92,
-    "category": "heart",
-    "title": "skin to heart new 4",
-    "width": 37,
-    "height": 45,
-    "archivedGif": "20091020145223/http://hk.geocities.com/skintoheart/new4.gif",
-    "sourcePage": "https://web.archive.org/web/20091020041759/http://hk.geocities.com/skintoheart/index1.html",
-    "checksum": "LJW5FGDCNTEUBAKQGCMAR6PDFDBIODOB",
-    "archiveIndex": 32,
-    "file": "signal-092.gif"
-  },
-  {
     "id": 93,
     "category": "heart",
     "title": "heartland prairie 2945 heart 1spinleftred",
@@ -1114,18 +238,6 @@
     "checksum": "VTSNQK47J2HTF3DUBLOO5EBZE5VVTGIP",
     "archiveIndex": 33,
     "file": "signal-093.gif"
-  },
-  {
-    "id": 94,
-    "category": "heart",
-    "title": "prajna paramita heart sutra pulsar",
-    "width": 36,
-    "height": 36,
-    "archivedGif": "20091027081414/http://geocities.com/prajnaparamitaheartsutra/pulsar.gif",
-    "sourcePage": "https://web.archive.org/web/20091022184100/http://geocities.com/prajnaparamitaheartsutra/heart.html",
-    "checksum": "GLEWQORE6GIZBXMOCYQWYWPKTLZRE2HS",
-    "archiveIndex": 34,
-    "file": "signal-094.gif"
   },
   {
     "id": 95,
@@ -1152,18 +264,6 @@
     "file": "signal-096.gif"
   },
   {
-    "id": 97,
-    "category": "heart",
-    "title": "vagabond hearts 3dheartbygoosegoosew internet com",
-    "width": 60,
-    "height": 44,
-    "archivedGif": "20091027110157/http://www.geocities.com/vagabondhearts/3D-Heart-by-Goose-goosewinternetcom.gif",
-    "sourcePage": "https://web.archive.org/web/20091022145325/http://geocities.com/vagabondhearts/playboys.html",
-    "checksum": "W6KHAP3VJOSW5YE5N2H4K3KREJOZYDZC",
-    "archiveIndex": 37,
-    "file": "signal-097.gif"
-  },
-  {
     "id": 98,
     "category": "heart",
     "title": "heart 2luv637 heart blink",
@@ -1186,17 +286,5 @@
     "checksum": "GJGRZLQYZJERNWBQOIWX67H66IRUSPVL",
     "archiveIndex": 42,
     "file": "signal-099.gif"
-  },
-  {
-    "id": 100,
-    "category": "heart",
-    "title": "straight from my heart 02 copyright ani",
-    "width": 25,
-    "height": 25,
-    "archivedGif": "20090829073616/http://www.geocities.com/straightfrommyheart02/copyright_ani.gif",
-    "sourcePage": "https://web.archive.org/web/20090829102555/http://geocities.com/straightfrommyheart02/FEAR.html",
-    "checksum": "46VLVKWZ4SV24BPYPIVV5LEOQKEY5424",
-    "archiveIndex": 52,
-    "file": "signal-100.gif"
   }
 ]
