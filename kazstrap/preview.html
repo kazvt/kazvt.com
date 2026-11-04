@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Kazstrap site-wide style preview - kazvt</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-retro-motifs-4">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-retro-motifs-5">
   <style>
     .shadow-comparison {
       display: grid;
@@ -251,7 +251,7 @@
     </section>
     <section class="py-5" id="old-web-kit" aria-labelledby="old-web-kit-title">
       <div class="mb-4">
-        <span class="badge text-bg-secondary mb-2">10 CSS-only extras</span>
+        <span class="badge text-bg-secondary mb-2">10 old-web staples</span>
         <h2 class="h3 mb-2" id="old-web-kit-title">Little pieces of the old web</h2>
         <p class="text-body-secondary mb-0">Drop these classes onto regular markup. Links and the 88 x 31 badge lift on hover, show a clear keyboard focus, and press in on tap; the announcement strip stays still.</p>
       </div>
@@ -337,7 +337,63 @@
         </div>
       </div>
     </section>
-    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 border-top pt-4 mt-3" id="watch">
+    <section class="py-5" id="community-kit" aria-labelledby="community-kit-title">
+      <div class="mb-4">
+        <span class="badge text-bg-secondary mb-2">4 more CSS-only details</span>
+        <h2 class="h3 mb-2" id="community-kit-title">Message board and chat room</h2>
+        <p class="text-body-secondary mb-0">A few more pieces of personal-web furniture: a forum post, a chat log, a badge shelf, and a status line. No scripts or external image assets.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="mb-4">
+            <p class="small text-body-secondary mb-2">11 - <code>.kaz-forum-post</code></p>
+            <article class="kaz-forum-post" aria-labelledby="forumPostTitle">
+              <header class="kaz-forum-post-header">
+                <strong id="forumPostTitle">Thread #042 - Secret doors in classic shooters</strong>
+                <time datetime="2001-10-12">Oct 12, 2001</time>
+              </header>
+              <div class="kaz-forum-post-layout">
+                <aside class="kaz-forum-user" aria-label="Post author">
+                  <span class="kaz-forum-avatar" aria-hidden="true">PP</span>
+                  <strong>PixelPigeon</strong>
+                  <small>Arcade regular</small>
+                </aside>
+                <div class="kaz-forum-post-body">
+                  <p class="mb-0">Found another hidden room on level four. The tiny switch is behind the blue door - happy hunting!</p>
+                  <p class="kaz-forum-signature">High score: 42,600 | Playing since '98</p>
+                </div>
+              </div>
+            </article>
+          </div>
+          <div>
+            <p class="small text-body-secondary mb-2">13 - <code>.kaz-badge-shelf</code> with <code>.kaz-sticker</code></p>
+            <nav class="kaz-badge-shelf" aria-label="Sample site badges">
+              <a class="kaz-sticker" href="#games">kazvt.com<br>arcade club</a>
+              <a class="kaz-sticker" href="#watch">live room<br>drop by</a>
+              <a class="kaz-sticker" href="#old-web-kit">retro games<br>since '98</a>
+            </nav>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="mb-4">
+            <p class="small text-body-secondary mb-2">12 - <code>.kaz-chat-log</code></p>
+            <ol class="kaz-chat-log" aria-label="Sample arcade chat room">
+              <li class="kaz-chat-line"><strong class="kaz-chat-name">[KAZ]</strong> Welcome to the game room!</li>
+              <li class="kaz-chat-line"><strong class="kaz-chat-name">[PIXEL]</strong> Anyone up for co-op?</li>
+              <li class="kaz-chat-line"><strong class="kaz-chat-name">[KAZ]</strong> Starting after this round.</li>
+            </ol>
+          </div>
+          <div>
+            <p class="small text-body-secondary mb-2">14 - <code>.kaz-status-bar</code></p>
+            <div class="kaz-status-bar" role="group" aria-label="Arcade room status">
+              <span class="kaz-status-cell">Room 07</span>
+              <span class="kaz-status-cell">3 players</span>
+              <span class="kaz-status-cell"><span class="kaz-status-led" aria-hidden="true"></span>Connected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 border-top pt-4 mt-3" id="watch">
       <div>
         <h2 class="h4 mb-1">Drop by the channel</h2>
         <p class="text-body-secondary mb-0">Check Twitch for current stream information.</p>
