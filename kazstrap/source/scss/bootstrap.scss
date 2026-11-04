@@ -2351,10 +2351,10 @@ kbd {
     --kaz-ui-pattern-ink: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 68%, black 32%);
     --kaz-ui-pattern-highlight: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 55%, white 45%);
     background-image:
-      repeating-linear-gradient(45deg,
-        color-mix(in oklab, var(--kaz-ui-pattern-ink) 7%, transparent) 0 1px,
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--kaz-ui-pattern-ink) 6%, transparent) 0 1px,
         transparent 1px 16px,
-        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 4%, transparent) 16px 17px,
+        color-mix(in oklab, var(--kaz-ui-pattern-highlight) 3%, transparent) 16px 17px,
         transparent 17px 32px),
       linear-gradient(90deg,
         color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black) 0% 74%,
