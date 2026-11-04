@@ -440,12 +440,13 @@ body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy
    footer at readable sizes. Let the constellation keep its full-height rows
    and scroll instead of cropping artwork or squeezing it into slivers. */
 @media (max-height: 520px) {
-  html, body {
+  html {
     height: auto;
     min-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
   }
+  body { height: auto; min-height: 100%; overflow: visible; }
   body.zoey-page { min-height: 100vh; min-height: 100svh; min-height: 100dvh; }
   .z-viewport {
     height: auto;
