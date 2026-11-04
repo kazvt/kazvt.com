@@ -960,8 +960,10 @@ pre code {
 .carousel-caption {
   padding: 0.65rem 0.8rem;
   color: var(--bs-light);
+  background-color: var(--bs-dark);
   background-color: color-mix(in oklab, var(--bs-dark) 92%, transparent);
   background-image: linear-gradient(to bottom, color-mix(in oklab, white 10%, transparent), transparent 72%);
+  border: 1px solid var(--bs-border-color);
   border: 1px solid color-mix(in oklab, white 22%, transparent);
   border-inline-start: 3px solid var(--bs-primary);
   box-shadow: 2px 2px 0 color-mix(in oklab, var(--bs-dark) 70%, transparent);
@@ -970,7 +972,9 @@ pre code {
 .carousel-control-next-icon {
   width: 2.5rem;
   height: 2.5rem;
+  background-color: var(--bs-primary);
   background-color: color-mix(in oklab, var(--bs-primary) 78%, black 22%);
+  border: 1px solid var(--bs-primary-border-subtle);
   border: 1px solid color-mix(in oklab, white 48%, var(--bs-primary) 52%);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 28%, transparent),
@@ -978,6 +982,7 @@ pre code {
 }
 .carousel-indicators [data-bs-target] {
   height: 0.4rem;
+  border: 1px solid var(--bs-primary-border-subtle);
   border: 1px solid color-mix(in oklab, var(--bs-primary) 70%, black 30%);
   background-color: var(--bs-primary);
   opacity: 0.62;
@@ -1014,6 +1019,12 @@ pre code {
   --bs-light-rgb: 255, 248, 236;
   --bs-dark: #29233c;
   --bs-dark-rgb: 41, 35, 60;
+  --bs-light-text-emphasis: #554b69;
+  --bs-light-bg-subtle: #fffaf1;
+  --bs-light-border-subtle: #c8bfd4;
+  --bs-dark-text-emphasis: #29233c;
+  --bs-dark-bg-subtle: #e6e0ec;
+  --bs-dark-border-subtle: #b0a5bb;
 
   --bs-primary: #7050cf;
   --bs-primary-rgb: 112, 80, 207;
@@ -1086,6 +1097,12 @@ pre code {
   --bs-light-rgb: 255, 248, 236;
   --bs-dark: #29233c;
   --bs-dark-rgb: 41, 35, 60;
+  --bs-light-text-emphasis: #fffaf2;
+  --bs-light-bg-subtle: #342f43;
+  --bs-light-border-subtle: #5b536a;
+  --bs-dark-text-emphasis: #fffaf2;
+  --bs-dark-bg-subtle: #181521;
+  --bs-dark-border-subtle: #635d76;
 
   --bs-primary: #7050cf;
   --bs-primary-rgb: 112, 80, 207;
@@ -1180,11 +1197,11 @@ pre code {
 }
 .accordion {
   --bs-accordion-btn-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
-  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2339356f' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2343308f' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
 [data-bs-theme="dark"] .accordion-button::after {
-  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23bdb8ee'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
-  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23bdb8ee'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c8bdff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c8bdff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708'/%3e%3c/svg%3e");
 }
 .form-control:focus, .form-select:focus {
   border-color: var(--bs-primary);
