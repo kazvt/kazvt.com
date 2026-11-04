@@ -422,86 +422,161 @@
     fallbackBackgroundMusic.loop = true;
     fallbackBackgroundMusic.preload = "auto";
     fallbackBackgroundMusic.volume = backgroundMusicLevel();
-    fallbackBackgroundMusic.play().then(() => {
-      if (audioStatus.textContent.startsWith("Background music is starting.")) {
-        audioStatus.textContent = "Background music is playing. Voice messages are ready.";
-      }
-    }).catch(() => {
-      audioStatus.textContent = "The background song could not play here, but the voice notes are still ready.";
-    });
-  }
-
-  async function startBackgroundMusic() {
-    if (!audioEnabled || backgroundMusicSource) return;
-    if (!audioContext) {
-      startFallbackBackgroundMusic();
-      return;
-    }
-
     try {
-      const buffer = await loadBackgroundMusic();
-      if (!audioEnabled || !audioContext) return;
-
-      backgroundMusicGain ??= audioContext.createGain();
-      backgroundMusicGain.gain.value = 0;
-      backgroundMusicGain.connect(audioMixBus || audioContext.destination);
-
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.loop = true;
-      source.loopStart = backgroundMusicLoopStart;
-      source.loopEnd = buffer.duration;
-      source.connect(backgroundMusicGain);
-      source.onended = () => {
-        source.disconnect();
-        if (backgroundMusicSource === source) backgroundMusicSource = null;
-      };
-
-      const now = audioContext.currentTime;
-      source.start(now);
-      backgroundMusicSource = source;
-      const gain = backgroundMusicGain.gain;
-      gain.cancelScheduledValues(now);
-      gain.setValueAtTime(0, now);
-      gain.linearRampToValueAtTime(backgroundMusicLevel(), now + .8);
-      fallbackBackgroundMusic?.pause();
-      if (audioStatus.textContent.startsWith("Background music is starting.")) {
-        audioStatus.textContent = "Background music is playing. Voice messages are ready.";
+      const playback = fallbackBackgroundMusic.play();
+      if (playback && typeof playback.then === "function") {
+        playback.then(() => {
+          if (audioStatus.textContent.startsWith("Background music is starting.")) {
+            audioStatus.textContent = "Background music is playing. Voice messages are ready.";
+          }
+        }).catch(() => {
+          audioStatus.textContent = "The background song could not play here, but the voice notes are still ready.";
+        });
       }
     } catch {
-      if (audioEnabled) startFallbackBackgroundMusic();
+      audioStatus.textContent = "The background song could not play here, but the voice notes are still ready.";
     }
+  }
+
+  function ensureAudioContext() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return false;
+    try {
+      if (!audioContext || audioContext.state === "closed") {
+        audioContext = new AudioContextClass();
+        audioMixBus = null;
+        backgroundMusicGain = null;
+        backgroundMusicBuffer = null;
+        backgroundMusicBufferPromise = null;
+        backgroundMusicSource = null;
+        voiceBufferPromises.clear();
+        audioContext.addEventListener?.("statechange", () => {
+          if (!audioEnabled || audioContext?.state !== "running") return;
+          updateBackgroundMusicLevel();
+          if (!backgroundMusicSource) void startBackgroundMusic();
+        });
+      }
+      if (!audioMixBus) {
+        // Music and every voice clip share one persistent output graph.
+        audioMixBus = audioContext.createDynamicsCompressor();
+        audioMixBus.threshold.value = -3;
+        audioMixBus.knee.value = 0;
+        audioMixBus.ratio.value = 20;
+        audioMixBus.attack.value = 0.002;
+        audioMixBus.release.value = 0.14;
+        audioMixBus.connect(audioContext.destination);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function resumeAudioContext() {
+    if (!audioContext) return Promise.resolve(false);
+    if (audioContext.state === "running") return Promise.resolve(true);
+    if (audioResumePromise) return audioResumePromise;
+
+    // Call resume synchronously, while the tap/click's user activation is live.
+    const context = audioContext;
+    try {
+      audioResumePromise = Promise.resolve(context.resume())
+        .then(() => context.state === "running")
+        .catch(() => false)
+        .finally(() => {
+          if (audioContext === context) audioResumePromise = null;
+        });
+    } catch {
+      audioResumePromise = Promise.resolve(false);
+    }
+    return audioResumePromise;
+  }
+
+  function loadVoiceBuffer(url) {
+    if (!audioContext) return Promise.reject(new Error("Audio is not ready"));
+    if (!voiceBufferPromises.has(url)) {
+      const context = audioContext;
+      const bufferPromise = fetch(url, { cache: "force-cache" })
+        .then((response) => {
+          if (!response.ok) throw new Error("Voice message is unavailable");
+          return response.arrayBuffer();
+        })
+        .then((bytes) => context.decodeAudioData(bytes.slice(0)))
+        .catch((error) => {
+          voiceBufferPromises.delete(url);
+          throw error;
+        });
+      voiceBufferPromises.set(url, bufferPromise);
+    }
+    return voiceBufferPromises.get(url);
+  }
+
+  function startBackgroundMusic() {
+    if (!audioEnabled || backgroundMusicSource) return Promise.resolve();
+    if (!audioContext) {
+      startFallbackBackgroundMusic();
+      return Promise.resolve();
+    }
+    if (backgroundMusicStartPromise) return backgroundMusicStartPromise;
+
+    const context = audioContext;
+    const startPromise = (async () => {
+      try {
+        const buffer = await loadBackgroundMusic();
+        if (!audioEnabled || audioContext !== context || context.state !== "running" || backgroundMusicSource) return;
+
+        if (!backgroundMusicGain) {
+          backgroundMusicGain = context.createGain();
+          backgroundMusicGain.gain.value = 0;
+          backgroundMusicGain.connect(audioMixBus || context.destination);
+        }
+
+        const source = context.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        source.loopStart = backgroundMusicLoopStart;
+        source.loopEnd = buffer.duration;
+        source.connect(backgroundMusicGain);
+        source.onended = () => {
+          source.disconnect();
+          if (backgroundMusicSource === source) backgroundMusicSource = null;
+        };
+
+        const now = context.currentTime;
+        source.start(now);
+        backgroundMusicSource = source;
+        const gain = backgroundMusicGain.gain;
+        gain.cancelScheduledValues(now);
+        gain.setValueAtTime(0, now);
+        gain.linearRampToValueAtTime(backgroundMusicLevel(), now + .8);
+        fallbackBackgroundMusic?.pause();
+        if (audioStatus.textContent.startsWith("Background music is starting.")) {
+          audioStatus.textContent = "Background music is playing. Voice messages are ready.";
+        }
+      } catch {
+        if (audioEnabled && audioContext === context) startFallbackBackgroundMusic();
+      }
+    })();
+    backgroundMusicStartPromise = startPromise.finally(() => {
+      if (backgroundMusicStartPromise === wrappedPromise) backgroundMusicStartPromise = null;
+    });
+    const wrappedPromise = backgroundMusicStartPromise;
+    return wrappedPromise;
   }
 
   function enableAudio() {
     audioEnabled = true;
-    let contextReady = false;
-    if (window.AudioContext || window.webkitAudioContext) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      try {
-        audioContext ??= new AudioContextClass();
-        if (!audioMixBus) {
-          // Voice notes can overlap; catch only stacked peaks on the shared output.
-          audioMixBus = audioContext.createDynamicsCompressor();
-          audioMixBus.threshold.value = -3;
-          audioMixBus.knee.value = 0;
-          audioMixBus.ratio.value = 20;
-          audioMixBus.attack.value = 0.002;
-          audioMixBus.release.value = 0.14;
-          audioMixBus.connect(audioContext.destination);
-        }
-        contextReady = true;
-        const resumed = audioContext.state === "running" ? Promise.resolve() : audioContext.resume();
-        resumed.then(() => {
-          if (audioEnabled) void startBackgroundMusic();
-        }).catch(() => {
-          if (audioEnabled) startFallbackBackgroundMusic();
-        });
-      } catch { contextReady = false; }
-    }
-    if (!contextReady) startFallbackBackgroundMusic();
     body.dataset.audio = "on";
     audioStatus.textContent = "Background music is starting. Voice messages are ready.";
+    if (!ensureAudioContext()) {
+      startFallbackBackgroundMusic();
+      return;
+    }
+    void resumeAudioContext().then((running) => {
+      if (!audioEnabled) return;
+      if (running) void startBackgroundMusic();
+      else startFallbackBackgroundMusic();
+    });
   }
 
   function releaseMedia(media) {
