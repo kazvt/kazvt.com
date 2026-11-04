@@ -103,12 +103,12 @@
     if (!width || !height) return;
 
     // Hand-placed percentage anchors create a responsive sticker collage, not a card grid.
-    const panorama = width >= 560 && height < 360 && width / height >= 1.4;
+    const panorama = width >= 280 && height < 360 && width / height >= 1.4;
     const portrait = !panorama && (width < 760 || width / height < 1.25);
     const layouts = {
       panorama: [
-        [3, 8, 22, 42], [27, 11, 22, 40], [51, 6, 22, 42], [76, 9, 20, 40],
-        [8, 51, 22, 38], [32, 54, 22, 36], [57, 51, 22, 38], [80, 54, 17, 36]
+        [3, 8, 22, 42], [27, 11, 22, 40], [51, 8, 22, 42], [76, 9, 20, 40],
+        [8, 50, 22, 36], [32, 53, 22, 34], [57, 50, 22, 36], [80, 53, 17, 34]
       ],
       compactPortrait: [
         [2, 6, 46, 20], [52, 7, 46, 20], [6, 28, 45, 20], [53, 30, 45, 20],
@@ -127,8 +127,8 @@
     const layoutName = panorama ? "panorama" : portrait ? "portrait" : "wide";
     const isCompactPortrait = !panorama && portrait && height < 360;
     const positions = isCompactPortrait ? layouts.compactPortrait : layouts[layoutName];
-    const tiltRange = height < 360 ? 3 : 5;
-    const riseRange = height < 360 ? 4 : 8;
+    const tiltRange = height < 140 ? 0 : height < 360 ? 3 : 5;
+    const riseRange = height < 140 ? 0 : height < 360 ? 4 : 8;
     canvas.querySelectorAll(".z-entry").forEach((card, index) => {
       const [x, y, cardWidth, cardHeight] = positions[index] || positions[positions.length - 1];
       card.style.setProperty("--entry-x", `${x}%`);
