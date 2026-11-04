@@ -102,18 +102,23 @@
         [1, 2, 23, 45], [25, 7, 22, 43], [50, 0, 22, 46], [76, 5, 22, 44],
         [2, 54, 22, 42], [27, 54, 22, 42], [52, 56, 21, 41], [77, 54, 21, 43]
       ],
+      compactPortrait: [
+        [2, 0, 45, 19], [52, 3, 46, 19], [8, 25, 41, 19], [53, 27, 44, 19],
+        [1, 51, 47, 19], [54, 52, 44, 19], [7, 76, 43, 19], [53, 76, 45, 19]
+      ],
       portrait: [
-        [2, 1, 45, 21], [52, 4, 46, 20], [8, 26, 41, 22], [53, 27, 44, 21],
-        [1, 51, 47, 20], [54, 51, 44, 22], [7, 76, 43, 21], [53, 76, 45, 21]
+        [2, 1, 45, 21], [52, 4, 46, 20], [8, 27, 41, 21], [53, 29, 44, 20],
+        [1, 52, 47, 20], [54, 53, 44, 21], [7, 78, 43, 19], [53, 78, 45, 19]
       ],
       wide: [
         [2, 3, 29, 26], [35, 0, 29, 28], [68, 7, 29, 26],
-        [9, 36, 27, 28], [40, 36, 30, 28], [74, 39, 23, 26],
+        [9, 36, 27, 28], [40, 39, 30, 25], [74, 39, 23, 26],
         [2, 72, 29, 25], [37, 70, 29, 27]
       ]
     };
     const layoutName = panorama ? "panorama" : portrait ? "portrait" : "wide";
-    const positions = layouts[layoutName];
+    const isCompactPortrait = !panorama && portrait && height < 360;
+    const positions = isCompactPortrait ? layouts.compactPortrait : layouts[layoutName];
     const tiltRange = height < 360 ? 1.2 : 2.4;
     const riseRange = height < 360 ? 3 : 5;
     canvas.querySelectorAll(".z-entry").forEach((card, index) => {
@@ -125,7 +130,7 @@
       card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * tiltRange).toFixed(2)}deg`);
       card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange).toFixed(1)}px`);
     });
-    canvas.dataset.layout = layoutName;
+    canvas.dataset.layout = isCompactPortrait ? "compact-portrait" : layoutName;
     canvas.dataset.density = height < 290 ? "packed" : height < 430 || width < 520 ? "tight" : "normal";
   }
 
