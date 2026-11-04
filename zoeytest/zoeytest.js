@@ -75,12 +75,15 @@
   let audioEnabled = false;
   let audioContext = null;
   let audioMixBus = null;
+  let audioResumePromise = null;
   let backgroundMusicGain = null;
   let backgroundMusicBuffer = null;
   let backgroundMusicBufferPromise = null;
+  let backgroundMusicStartPromise = null;
   let backgroundMusicLoopStart = 0;
   let backgroundMusicSource = null;
   let fallbackBackgroundMusic = null;
+  const voiceBufferPromises = new Map();
   let lastClipStartedAt = -Infinity;
   let pendingClipRequest = null;
   let pendingClipTimer = 0;
