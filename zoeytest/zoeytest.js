@@ -7,15 +7,30 @@
   const audioStatus = document.getElementById("audioStatus");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  // Real sender names, artwork, and voice files belong here once the people submit them.
-  // Never substitute generated portraits or synthesized voices for those contributions.
-  const entrySlots = Array.from({ length: 8 }, (_, index) => ({
-    id: `star-${String(index + 1).padStart(2, "0")}`,
-    name: `FRIEND ${String(index + 1).padStart(2, "0")}`,
-    note: "A little voice from your orbit",
-    avatar: "",
-    clips: []
-  }));
+  // Submitted sender artwork and recordings stay local to this site; never synthesize them.
+  const entrySlots = [
+    {
+      id: "kaz",
+      name: "Kaz",
+      note: "Three little love notes from Kaz",
+      avatar: "/zoeytest/assets/kaz/kaz-avatar.png",
+      clips: [
+        { src: "/zoeytest/assets/kaz/kaz-voice-1.wav", caption: "Kaz's voice note 1 of 3." },
+        { src: "/zoeytest/assets/kaz/kaz-voice-2.wav", caption: "Kaz's voice note 2 of 3." },
+        { src: "/zoeytest/assets/kaz/kaz-voice-3.wav", caption: "Kaz's voice note 3 of 3." }
+      ]
+    },
+    ...Array.from({ length: 7 }, (_, index) => {
+      const number = index + 2;
+      return {
+        id: `star-${String(number).padStart(2, "0")}`,
+        name: `FRIEND ${String(number).padStart(2, "0")}`,
+        note: "A little voice from your orbit",
+        avatar: "",
+        clips: []
+      };
+    })
+  ];
 
   let audioEnabled = false;
   let audioContext = null;
