@@ -5,6 +5,7 @@
   const gifSky = document.getElementById("gifSky");
   const audioStatus = document.getElementById("audioStatus");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const CLIP_START_COOLDOWN_MS = 1000;
   const backgroundMusicUrl = "/zoeytest/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
     .then((response) => response.ok ? response.arrayBuffer() : null)
@@ -70,13 +71,17 @@
   let backgroundMusicLoopStart = 0;
   let backgroundMusicSource = null;
   let fallbackBackgroundMusic = null;
+  let lastClipStartedAt = -Infinity;
+  let pendingClipRequest = null;
+  let pendingClipTimer = 0;
+  let startingClip = null;
   const activeMedia = new Set();
   const playingCounts = new Map();
   let gifEntries = null;
   let gifImages = [];
   let catalogPromise = null;
   const clipIndexes = new Map();
-  const lastTriggers = new WeakMap();
+  const lastNonHoverTriggers = new WeakMap();
 
   function seeded(index, salt) {
     const value = Math.sin((index + 1) * 127.1 + salt * 311.7) * 43758.5453;
