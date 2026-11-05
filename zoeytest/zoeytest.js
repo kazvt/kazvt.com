@@ -69,6 +69,16 @@
         { src: "/zoeytest/assets/frosty/frosty-voice-2.wav", caption: "Frosty's voice note 2 of 3." },
         { src: "/zoeytest/assets/frosty/frosty-voice-3.wav", caption: "Frosty's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "evo",
+      name: "Evo",
+      avatar: "/zoeytest/assets/evo/evo-avatar.png",
+      clips: [
+        { src: "/zoeytest/assets/evo/evo-voice-1.mp3", caption: "Evo's voice note 1 of 3." },
+        { src: "/zoeytest/assets/evo/evo-voice-2.mp3", caption: "Evo's voice note 2 of 3." },
+        { src: "/zoeytest/assets/evo/evo-voice-3.mp3", caption: "Evo's voice note 3 of 3." }
+      ]
     }
   ];
 
@@ -171,20 +181,20 @@
       portrait: [
         [2, 3, 28, 20], [36, 4.5, 28, 20], [70, 3.5, 28, 20],
         [5, 27, 28, 20], [36, 28.5, 28, 20], [67, 26.5, 28, 20],
-        [18, 51, 28, 20], [54, 52.5, 28, 20],
-        [5, 77, 28, 20], [67, 76, 28, 20]
+        [2, 51, 28, 20], [36, 52.5, 28, 20], [70, 50.5, 28, 20],
+        [18, 75, 28, 20], [54, 76.5, 28, 20]
       ],
-      // Four compact, staggered rows use taller stickers without card collisions.
+      // Four compact, staggered rows keep all eleven stickers clear of one another.
       wide: [
         [3, 3, 28, 20], [36, 4.5, 28, 20], [69, 2.5, 28, 20],
         [5, 28, 28, 20], [36, 29.5, 28, 20], [67, 27, 28, 20],
-        [3, 53, 28, 20], [36, 54.5, 28, 20],
+        [3, 53, 28, 20], [36, 54.5, 28, 20], [68, 52, 28, 20],
         [20, 78, 28, 20], [52, 77, 28, 20]
       ],
-      // Two loose five-sticker rows give the character art substantially more height.
+      // Six stickers above five keeps the art large while fitting the wider canvas.
       panorama: [
-        [2.5, 4, 16, 40], [21, 5.5, 16, 40], [39.5, 2.5, 16, 40], [58, 6, 16, 40], [76.5, 3.5, 16, 40],
-        [7, 54, 16, 40], [26, 55.5, 16, 40], [45, 52.5, 16, 40], [64, 56, 16, 40], [81, 53.5, 16, 40]
+        [3, 4, 14, 40], [18.8, 5.5, 14, 40], [34.6, 2.5, 14, 40], [50.4, 6, 14, 40], [66.2, 3.5, 14, 40], [82, 5, 14, 40],
+        [7.5, 54, 14, 40], [25.25, 55.5, 14, 40], [43, 52.5, 14, 40], [60.75, 56, 14, 40], [78.5, 53.5, 14, 40]
       ]
     };
     const positions = layouts[layoutName];

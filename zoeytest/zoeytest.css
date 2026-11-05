@@ -318,7 +318,7 @@ body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy
   html[data-zoey-motion="off"] *, html[data-zoey-motion="off"] *::before, html[data-zoey-motion="off"] *::after { animation: none !important; transition: none !important; }
 }
 
-/* A short landscape viewport cannot hold the full heading, ten stickers, and
+/* A short landscape viewport cannot hold the full heading, eleven stickers, and
    footer at readable sizes. Let the constellation keep its full-height rows
    and scroll instead of cropping artwork or squeezing it into slivers. */
 @media (max-height: 520px) {
