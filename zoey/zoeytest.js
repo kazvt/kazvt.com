@@ -6,7 +6,7 @@
   const audioStatus = document.getElementById("audioStatus");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const CLIP_START_COOLDOWN_MS = 1000;
-  const backgroundMusicUrl = "/zoeytest/assets/background/zoey-galaxy-background.mp3";
+  const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
     .then((response) => response.ok ? response.arrayBuffer() : null)
     .catch(() => null);
@@ -16,39 +16,39 @@
     {
       id: "kaz",
       name: "Kaz",
-      avatar: "/zoeytest/assets/kaz/kaz-avatar.png",
+      avatar: "/zoey/assets/kaz/kaz-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/kaz/kaz-voice-1.wav", caption: "Kaz's voice note 1 of 3." },
-        { src: "/zoeytest/assets/kaz/kaz-voice-2.wav", caption: "Kaz's voice note 2 of 3." },
-        { src: "/zoeytest/assets/kaz/kaz-voice-3.wav", caption: "Kaz's voice note 3 of 3." }
+        { src: "/zoey/assets/kaz/kaz-voice-1.wav", caption: "Kaz's voice note 1 of 3." },
+        { src: "/zoey/assets/kaz/kaz-voice-2.wav", caption: "Kaz's voice note 2 of 3." },
+        { src: "/zoey/assets/kaz/kaz-voice-3.wav", caption: "Kaz's voice note 3 of 3." }
       ]
     },
     {
       id: "abigail",
       name: "Abigail",
-      avatar: "/zoeytest/assets/abigail/abigail-avatar.png",
+      avatar: "/zoey/assets/abigail/abigail-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/abigail/abigail-voice-1.wav", caption: "Abigail's voice note 1 of 3." },
-        { src: "/zoeytest/assets/abigail/abigail-voice-2.wav", caption: "Abigail's voice note 2 of 3." },
-        { src: "/zoeytest/assets/abigail/abigail-voice-3.wav", caption: "Abigail's voice note 3 of 3." }
+        { src: "/zoey/assets/abigail/abigail-voice-1.wav", caption: "Abigail's voice note 1 of 3." },
+        { src: "/zoey/assets/abigail/abigail-voice-2.wav", caption: "Abigail's voice note 2 of 3." },
+        { src: "/zoey/assets/abigail/abigail-voice-3.wav", caption: "Abigail's voice note 3 of 3." }
       ]
     },
     {
       id: "letty",
       name: "Letty",
-      avatar: "/zoeytest/assets/letty/letty-avatar.png",
+      avatar: "/zoey/assets/letty/letty-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/letty/letty-voice-1.wav", caption: "Letty's voice note 1 of 2." },
-        { src: "/zoeytest/assets/letty/letty-voice-2.wav", caption: "Letty's voice note 2 of 2." }
+        { src: "/zoey/assets/letty/letty-voice-1.wav", caption: "Letty's voice note 1 of 2." },
+        { src: "/zoey/assets/letty/letty-voice-2.wav", caption: "Letty's voice note 2 of 2." }
       ]
     },
     {
       id: "traaansfem",
       name: "TraaansFem",
-      avatar: "/zoeytest/assets/traaansfem/traaansfem-avatar.png",
+      avatar: "/zoey/assets/traaansfem/traaansfem-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/traaansfem/traaansfem-voice-1.wav", caption: "TraaansFem's voice note 1 of 2." },
-        { src: "/zoeytest/assets/traaansfem/traaansfem-voice-2.wav", caption: "TraaansFem's voice note 2 of 2." }
+        { src: "/zoey/assets/traaansfem/traaansfem-voice-1.wav", caption: "TraaansFem's voice note 1 of 2." },
+        { src: "/zoey/assets/traaansfem/traaansfem-voice-2.wav", caption: "TraaansFem's voice note 2 of 2." }
       ]
     },
     ...Array.from({ length: 5 }, (_, index) => {
@@ -65,19 +65,19 @@
       name: "Frosty",
       avatar: "",
       clips: [
-        { src: "/zoeytest/assets/frosty/frosty-voice-1.wav", caption: "Frosty's voice note 1 of 3." },
-        { src: "/zoeytest/assets/frosty/frosty-voice-2.wav", caption: "Frosty's voice note 2 of 3." },
-        { src: "/zoeytest/assets/frosty/frosty-voice-3.wav", caption: "Frosty's voice note 3 of 3." }
+        { src: "/zoey/assets/frosty/frosty-voice-1.wav", caption: "Frosty's voice note 1 of 3." },
+        { src: "/zoey/assets/frosty/frosty-voice-2.wav", caption: "Frosty's voice note 2 of 3." },
+        { src: "/zoey/assets/frosty/frosty-voice-3.wav", caption: "Frosty's voice note 3 of 3." }
       ]
     },
     {
       id: "rochelle",
       name: "Rochelle",
-      avatar: "/zoeytest/assets/evo/evo-avatar.png",
+      avatar: "/zoey/assets/evo/evo-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/evo/evo-voice-1-20261106.mp3", caption: "Rochelle's voice note 1 of 3." },
-        { src: "/zoeytest/assets/evo/evo-voice-2-20261106.mp3", caption: "Rochelle's voice note 2 of 3." },
-        { src: "/zoeytest/assets/evo/evo-voice-3-20261106.mp3", caption: "Rochelle's voice note 3 of 3." }
+        { src: "/zoey/assets/evo/evo-voice-1-20261106.mp3", caption: "Rochelle's voice note 1 of 3." },
+        { src: "/zoey/assets/evo/evo-voice-2-20261106.mp3", caption: "Rochelle's voice note 2 of 3." },
+        { src: "/zoey/assets/evo/evo-voice-3-20261106.mp3", caption: "Rochelle's voice note 3 of 3." }
       ]
     }
   ];
@@ -316,7 +316,7 @@
   async function loadGifCatalog() {
     if (gifEntries) return gifEntries;
     if (catalogPromise) return catalogPromise;
-    catalogPromise = fetch("/zoeytest/gif-manifest.json?v=20261105-06", { cache: "force-cache" })
+    catalogPromise = fetch("/zoey/gif-manifest.json?v=20261105-06", { cache: "force-cache" })
       .then((response) => {
         if (!response.ok) throw new Error("GIF list unavailable");
         return response.json();
@@ -336,7 +336,7 @@
           image.height = entry.height;
           image.loading = "lazy";
           image.decoding = "async";
-          image.dataset.src = "/zoeytest/assets/gifs/" + entry.file;
+          image.dataset.src = "/zoey/assets/gifs/" + entry.file;
           fragment.append(image);
           gifImages.push(image);
         });

@@ -59,8 +59,8 @@ button, a { touch-action: manipulation; }
   inset: 0;
   pointer-events: none;
   background-image:
-    url("/zoeytest/assets/background/starfield-tile.png"),
-    url("/zoeytest/assets/background/purple-nebula-tile.png");
+    url("/zoey/assets/background/starfield-tile.png"),
+    url("/zoey/assets/background/purple-nebula-tile.png");
   background-size: 512px 512px, 512px 512px;
   background-position: 0 0, 173px 271px;
   background-repeat: repeat, repeat;
