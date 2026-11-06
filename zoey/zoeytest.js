@@ -82,12 +82,22 @@
     },
     {
       id: "nea-pollen",
-      name: "Nea Pollen",
+      name: "Nea",
       avatar: "/zoey/assets/nea-pollen/nea-pollen-avatar.png",
       clips: [
-        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-1.wav", caption: "Nea Pollen's voice note 1 of 3." },
-        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-2.wav", caption: "Nea Pollen's voice note 2 of 3." },
-        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-3.wav", caption: "Nea Pollen's voice note 3 of 3." }
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-1.wav", caption: "Nea's voice note 1 of 3." },
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-2.wav", caption: "Nea's voice note 2 of 3." },
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-3.wav", caption: "Nea's voice note 3 of 3." }
+      ]
+    },
+    {
+      id: "dom",
+      name: "Dom",
+      avatar: "/zoey/assets/dom/dom-avatar.png",
+      clips: [
+        { src: "/zoey/assets/dom/dom-voice-1.wav", caption: "Dom's voice note 1 of 3." },
+        { src: "/zoey/assets/dom/dom-voice-2.wav", caption: "Dom's voice note 2 of 3." },
+        { src: "/zoey/assets/dom/dom-voice-3.wav", caption: "Dom's voice note 3 of 3." }
       ]
     }
   ];
@@ -188,24 +198,27 @@
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      // Three broad columns and four loose rows give portrait screens room for larger art.
+      // Three broad columns and five staggered rows keep all thirteen stickers visible.
       portrait: [
-        [2, 3, 28, 20], [36, 4.5, 28, 20], [70, 3.5, 28, 20],
-        [5, 27, 28, 20], [36, 28.5, 28, 20], [67, 26.5, 28, 20],
-        [2, 51, 28, 20], [36, 52.5, 28, 20], [70, 50.5, 28, 20],
-        [18, 75, 28, 20], [54, 76.5, 28, 20]
+        [2, 1.5, 28, 17.5], [36, 2.5, 28, 17.5], [70, 1, 28, 17.5],
+        [19, 21, 28, 17.5], [53, 22, 28, 17.5],
+        [2, 40.5, 28, 17.5], [36, 41.5, 28, 17.5], [70, 40, 28, 17.5],
+        [19, 60, 28, 17.5], [53, 61, 28, 17.5],
+        [2, 79.5, 28, 17.5], [36, 80.5, 28, 17.5], [70, 79, 28, 17.5]
       ],
-      // Four compact, staggered rows keep all eleven stickers clear of one another.
+      // Staggered 3/2 rows use the same visual rhythm on wide, non-panorama screens.
       wide: [
-        [3, 3, 28, 20], [36, 4.5, 28, 20], [69, 2.5, 28, 20],
-        [5, 28, 28, 20], [36, 29.5, 28, 20], [67, 27, 28, 20],
-        [3, 53, 28, 20], [36, 54.5, 28, 20], [68, 52, 28, 20],
-        [20, 78, 28, 20], [52, 77, 28, 20]
+        [3, 1.5, 28, 17], [36, 2.5, 28, 17], [69, 1, 28, 17],
+        [19, 21, 28, 17], [53, 22, 28, 17],
+        [2, 40.5, 28, 17], [36, 41.5, 28, 17], [70, 40, 28, 17],
+        [19, 60, 28, 17], [53, 61, 28, 17],
+        [3, 79.5, 28, 17], [36, 80.5, 28, 17], [69, 79, 28, 17]
       ],
-      // Six stickers above five keeps the art large while fitting the wider canvas.
+      // Five above two groups of four keeps art large on panoramic screens.
       panorama: [
-        [3, 4, 14, 40], [18.8, 5.5, 14, 40], [34.6, 2.5, 14, 40], [50.4, 6, 14, 40], [66.2, 3.5, 14, 40], [82, 5, 14, 40],
-        [7.5, 54, 14, 40], [25.25, 55.5, 14, 40], [43, 52.5, 14, 40], [60.75, 56, 14, 40], [78.5, 53.5, 14, 40]
+        [1, 1.5, 18, 28], [21, 2.5, 18, 28], [41, 1, 18, 28], [61, 2.5, 18, 28], [81, 1.5, 18, 28],
+        [10, 36, 18, 28], [32, 37, 18, 28], [54, 35.5, 18, 28], [76, 37, 18, 28],
+        [10, 69, 18, 28], [32, 70, 18, 28], [54, 68.5, 18, 28], [76, 70, 18, 28]
       ]
     };
     const positions = layouts[layoutName];
