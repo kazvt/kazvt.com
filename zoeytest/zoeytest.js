@@ -55,7 +55,7 @@
       const number = index + 3;
       return {
         id: `star-${String(number).padStart(2, "0")}`,
-        name: `FRIEND ${String(number).padStart(2, "0")}`,
+        name: "PLACEHOLDER",
         avatar: "",
         clips: []
       };
