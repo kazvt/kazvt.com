@@ -99,6 +99,7 @@
   let pendingClipRequest = null;
   let pendingClipTimer = 0;
   let startingClip = null;
+  let activeVoice = null;
   const activeMedia = new Set();
   const playingCounts = new Map();
   let gifEntries = null;
@@ -606,10 +607,8 @@
 
   function releaseMedia(media) {
     if (!activeMedia.delete(media)) return;
-    if (startingClip === media) {
-      startingClip = null;
-      schedulePendingClip();
-    }
+    if (activeVoice === media) activeVoice = null;
+    if (startingClip === media) startingClip = null;
     media.source?.disconnect();
     media.voiceGain?.disconnect();
     const remaining = (playingCounts.get(media.owner) || 1) - 1;
@@ -628,6 +627,8 @@
         void startBackgroundMusic();
       }
     }
+    // A queued voice may start only after the current voice has actually ended.
+    schedulePendingClip();
   }
 
   function clearPendingClipTimer() {
@@ -644,7 +645,7 @@
   }
 
   function runPendingClip() {
-    if (startingClip || !pendingClipRequest) return;
+    if (activeVoice || startingClip || !pendingClipRequest) return;
     const remaining = lastClipStartedAt + CLIP_START_COOLDOWN_MS - performance.now();
     if (remaining > 0) {
       schedulePendingClip();
@@ -658,7 +659,7 @@
   }
 
   function schedulePendingClip() {
-    if (!pendingClipRequest || startingClip || pendingClipTimer) return;
+    if (!pendingClipRequest || activeVoice || startingClip || pendingClipTimer) return;
     const remaining = lastClipStartedAt + CLIP_START_COOLDOWN_MS - performance.now();
     if (remaining <= 0) {
       runPendingClip();
@@ -696,6 +697,7 @@
     audio.volume = .9;
     const owner = button.closest(".z-entry");
     const media = { audio, owner, path: "html", started: false };
+    activeVoice = media;
     activeMedia.add(media);
     startingClip = media;
     updateBackgroundMusicLevel();
@@ -722,7 +724,7 @@
   }
 
   async function startClipNow(entry, button, trigger = "click") {
-    if (startingClip) return;
+    if (activeVoice || startingClip) return;
     if (!audioEnabled || !entry.clips.length) {
       audioStatus.textContent = !audioEnabled
         ? "Audio is not active."
@@ -769,6 +771,7 @@
       source.connect(voiceGain);
       voiceGain.connect(audioMixBus || context.destination);
       media = { source, voiceGain, owner, started: false };
+      activeVoice = media;
       activeMedia.add(media);
       startingClip = media;
       updateBackgroundMusicLevel();
@@ -807,7 +810,7 @@
       lastNonHoverTriggers.set(button, now);
     }
 
-    if (startingClip || lastClipStartedAt + CLIP_START_COOLDOWN_MS > now) {
+    if (activeVoice || startingClip || lastClipStartedAt + CLIP_START_COOLDOWN_MS > now) {
       pendingClipRequest = { entry, button, trigger };
       schedulePendingClip();
       return;
