@@ -273,6 +273,9 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
 }
 .z-loader-window { width: min(560px, 100%); overflow: hidden; border: 3px outset #fff; border-radius: 0; background: linear-gradient(180deg, #fffefd, #fbf7ff); box-shadow: 6px 6px 0 rgb(78 58 102 / 20%), 9px 9px 0 #8ed8ec; color: var(--z-foreground); }
 .z-titlebar { min-height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 12px; border-bottom: 2px solid #57466e; background: linear-gradient(90deg, #725a9a, #a177b0 48%, #71c7de); box-shadow: inset 1px 1px rgb(255 255 255 / 75%); color: #fff; font-size: 9px; line-height: 1.4; text-shadow: 1px 1px #57466e; }
+.z-titlebar-brand { display: inline-flex; min-width: 0; align-items: center; gap: 8px; }
+.z-titlebar-icon { display: block; width: 20px; height: 20px; flex: 0 0 20px; object-fit: contain; }
+.z-titlebar-label { font-size: 14px; font-weight: 700; line-height: 1; }
 .z-window-lights { display: inline-flex; gap: 4px; flex: 0 0 auto; }
 .z-window-lights i { width: 9px; height: 9px; display: block; border-radius: 50%; background: #e4b6d2; }
 .z-window-lights i:nth-child(2) { background: #c9b8ee; }
