@@ -79,6 +79,16 @@
         { src: "/zoey/assets/evo/evo-voice-2-20261106.mp3", caption: "Rochelle's voice note 2 of 3." },
         { src: "/zoey/assets/evo/evo-voice-3-20261106.mp3", caption: "Rochelle's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "nea-pollen",
+      name: "Nea Pollen",
+      avatar: "/zoey/assets/nea-pollen/nea-pollen-avatar.png",
+      clips: [
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-1.wav", caption: "Nea Pollen's voice note 1 of 3." },
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-2.wav", caption: "Nea Pollen's voice note 2 of 3." },
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-3.wav", caption: "Nea Pollen's voice note 3 of 3." }
+      ]
     }
   ];
 
