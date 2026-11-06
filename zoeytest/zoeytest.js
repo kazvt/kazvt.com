@@ -71,13 +71,13 @@
       ]
     },
     {
-      id: "evo",
-      name: "Evo",
+      id: "rochelle",
+      name: "Rochelle",
       avatar: "/zoeytest/assets/evo/evo-avatar.png",
       clips: [
-        { src: "/zoeytest/assets/evo/evo-voice-1-20261106.mp3", caption: "Evo's voice note 1 of 3." },
-        { src: "/zoeytest/assets/evo/evo-voice-2-20261106.mp3", caption: "Evo's voice note 2 of 3." },
-        { src: "/zoeytest/assets/evo/evo-voice-3-20261106.mp3", caption: "Evo's voice note 3 of 3." }
+        { src: "/zoeytest/assets/evo/evo-voice-1-20261106.mp3", caption: "Rochelle's voice note 1 of 3." },
+        { src: "/zoeytest/assets/evo/evo-voice-2-20261106.mp3", caption: "Rochelle's voice note 2 of 3." },
+        { src: "/zoeytest/assets/evo/evo-voice-3-20261106.mp3", caption: "Rochelle's voice note 3 of 3." }
       ]
     }
   ];
