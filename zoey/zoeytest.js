@@ -99,6 +99,16 @@
         { src: "/zoey/assets/dom/dom-voice-2.wav", caption: "Dom's voice note 2 of 3." },
         { src: "/zoey/assets/dom/dom-voice-3.wav", caption: "Dom's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "serunie",
+      name: "Serunie",
+      avatar: "/zoey/assets/serunie/serunie-avatar.png",
+      clips: [
+        { src: "/zoey/assets/serunie/serunie-voice-1.wav", caption: "Serunie's voice note 1 of 3." },
+        { src: "/zoey/assets/serunie/serunie-voice-2.wav", caption: "Serunie's voice note 2 of 3." },
+        { src: "/zoey/assets/serunie/serunie-voice-3.wav", caption: "Serunie's voice note 3 of 3." }
+      ]
     }
   ];
 
@@ -198,26 +208,26 @@
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      // Three broad columns and five staggered rows keep all thirteen stickers visible.
+      // Three broad columns and five staggered rows keep all fourteen stickers visible.
       portrait: [
         [2, 1.5, 28, 17.5], [36, 2.5, 28, 17.5], [70, 1, 28, 17.5],
-        [19, 21, 28, 17.5], [53, 22, 28, 17.5],
-        [2, 40.5, 28, 17.5], [36, 41.5, 28, 17.5], [70, 40, 28, 17.5],
-        [19, 60, 28, 17.5], [53, 61, 28, 17.5],
-        [2, 79.5, 28, 17.5], [36, 80.5, 28, 17.5], [70, 79, 28, 17.5]
+        [3, 21, 28, 17.5], [36, 22, 28, 17.5], [69, 20.5, 28, 17.5],
+        [19, 40.5, 28, 17.5], [53, 41.5, 28, 17.5],
+        [2, 60, 28, 17.5], [36, 61, 28, 17.5], [70, 59.5, 28, 17.5],
+        [3, 79.5, 28, 17.5], [36, 80.5, 28, 17.5], [69, 79, 28, 17.5]
       ],
-      // Staggered 3/2 rows use the same visual rhythm on wide, non-panorama screens.
+      // A centered two-sticker row breaks up the 3/3/2/3/3 scatter on wide screens.
       wide: [
         [3, 1.5, 28, 17], [36, 2.5, 28, 17], [69, 1, 28, 17],
-        [19, 21, 28, 17], [53, 22, 28, 17],
-        [2, 40.5, 28, 17], [36, 41.5, 28, 17], [70, 40, 28, 17],
-        [19, 60, 28, 17], [53, 61, 28, 17],
+        [4, 21, 28, 17], [36, 22, 28, 17], [68, 20.5, 28, 17],
+        [19, 40.5, 28, 17], [53, 41.5, 28, 17],
+        [2, 60, 28, 17], [36, 61, 28, 17], [70, 59.5, 28, 17],
         [3, 79.5, 28, 17], [36, 80.5, 28, 17], [69, 79, 28, 17]
       ],
-      // Five above two groups of four keeps art large on panoramic screens.
+      // Two rows of five and a centered row of four preserve larger art on panoramas.
       panorama: [
         [1, 1.5, 18, 28], [21, 2.5, 18, 28], [41, 1, 18, 28], [61, 2.5, 18, 28], [81, 1.5, 18, 28],
-        [10, 36, 18, 28], [32, 37, 18, 28], [54, 35.5, 18, 28], [76, 37, 18, 28],
+        [2, 36, 18, 28], [22, 37, 18, 28], [42, 35.5, 18, 28], [62, 37, 18, 28], [82, 36, 18, 28],
         [10, 69, 18, 28], [32, 70, 18, 28], [54, 68.5, 18, 28], [76, 70, 18, 28]
       ]
     };
