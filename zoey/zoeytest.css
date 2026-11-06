@@ -279,7 +279,7 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
 .z-window-lights i:nth-child(3) { background: #9bd8e8; }
 .z-loader-inner { padding: clamp(22px, 5vw, 36px); text-align: center; }
 .z-popup-message { max-width: 32ch; margin: 0 auto clamp(18px, 4vw, 28px); color: var(--z-foreground); font-size: clamp(1.4rem, calc(1.15rem + 2.6vw), 2.6rem); font-weight: 700; line-height: 1.3; text-wrap: balance; text-shadow: 2px 2px 0 rgb(232 190 218 / 72%); }
-.z-enter-button { width: 100%; min-height: 58px; padding: .75em 1.2em; border: 2px outset #fff; border-radius: 0; background: linear-gradient(180deg, #fff8fc, #f5dce9 48%, #e6eff7); box-shadow: 2px 2px 0 #69547f, 4px 4px 0 rgb(105 84 127 / 18%); color: var(--z-foreground); font-size: clamp(1.2rem, calc(1rem + .7vw), 1.65rem); font-weight: 700; line-height: 1.3; letter-spacing: .035em; white-space: normal; }
+.z-enter-button { width: 100%; min-height: 58px; padding: .75em 1.2em; border: 2px outset #fff; border-radius: 0; background: linear-gradient(180deg, #fff8fc, #f5dce9 48%, #e6eff7); box-shadow: 2px 2px 0 #69547f, 4px 4px 0 rgb(105 84 127 / 18%); color: var(--z-foreground); cursor: pointer; font-size: clamp(1.2rem, calc(1rem + .7vw), 1.65rem); font-weight: 700; line-height: 1.3; letter-spacing: .035em; white-space: normal; }
 .z-enter-button:hover { transform: translateY(-1px); box-shadow: 3px 3px 0 #69547f, 5px 5px 0 rgb(105 84 127 / 18%); filter: saturate(1.08); }
 .z-enter-button:active { transform: translate(1px, 1px); border-style: inset; box-shadow: 0 0 0 #69547f; }
 .z-loader.is-closing { opacity: 0; transition: opacity 160ms ease; }
