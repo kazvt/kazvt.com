@@ -179,6 +179,16 @@
     }))
   ];
 
+  // One fixed, hand-baked sticker tilt per entry. These do not re-randomize
+  // during resize, hover, or animation; the modest angles preserve clean gaps.
+  const ENTRY_ROTATION_DEG = Object.freeze({
+    kaz: -6.0, abigail: 4.2, letty: -2.1, traaansfem: 7.4,
+    kilda: -5.3, froggy: 3.1, oceo: -7.8, dioso: 5.6,
+    poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
+    dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
+    "star-17": -5.8, "star-18": 3.6, "star-19": -7.0, "star-20": 2.0
+  });
+
   let audioEnabled = false;
   let audioContext = null;
   let audioMixBus = null;
@@ -278,26 +288,26 @@
     const layouts = {
       // Four columns by five rows keep the constellation compact on portrait and mid-width screens.
       portrait: [
-        [2.5, 3, 21, 15], [26.5, 3.2, 21, 15], [51, 3, 21, 15], [75.5, 3.2, 21, 15],
-        [2.7, 22.5, 21, 15], [26.2, 22.7, 21, 15], [51.3, 22.5, 21, 15], [75.2, 22.7, 21, 15],
-        [2.5, 42, 21, 15], [26.5, 42.2, 21, 15], [51, 42, 21, 15], [75.5, 42.2, 21, 15],
-        [2.7, 61.5, 21, 15], [26.2, 61.7, 21, 15], [51.3, 61.5, 21, 15], [75.2, 61.7, 21, 15],
-        [2.5, 81, 21, 15], [26.5, 80.8, 21, 15], [51, 81, 21, 15], [75.5, 80.8, 21, 15]
+        [2.5, 3, 21, 19.5], [26.5, 3.2, 21, 19.5], [51, 3, 21, 19.5], [75.5, 3.2, 21, 19.5],
+        [2.7, 22, 21, 19.5], [26.2, 22.2, 21, 19.5], [51.3, 22, 21, 19.5], [75.2, 22.2, 21, 19.5],
+        [2.5, 41, 21, 19.5], [26.5, 41.2, 21, 19.5], [51, 41, 21, 19.5], [75.5, 41.2, 21, 19.5],
+        [2.7, 60, 21, 19.5], [26.2, 60.2, 21, 19.5], [51.3, 60, 21, 19.5], [75.2, 60.2, 21, 19.5],
+        [2.5, 79, 21, 19.5], [26.5, 78.8, 21, 19.5], [51, 79, 21, 19.5], [75.5, 78.8, 21, 19.5]
       ],
       // Medium aspect ratios also use four columns, with a fifth row for the extra stickers.
       wide: [
-        [2.5, 3, 21, 15], [26.5, 3.2, 21, 15], [51, 3, 21, 15], [75.5, 3.2, 21, 15],
-        [2.7, 22.5, 21, 15], [26.2, 22.7, 21, 15], [51.3, 22.5, 21, 15], [75.2, 22.7, 21, 15],
-        [2.5, 42, 21, 15], [26.5, 42.2, 21, 15], [51, 42, 21, 15], [75.5, 42.2, 21, 15],
-        [2.7, 61.5, 21, 15], [26.2, 61.7, 21, 15], [51.3, 61.5, 21, 15], [75.2, 61.7, 21, 15],
-        [2.5, 81, 21, 15], [26.5, 80.8, 21, 15], [51, 81, 21, 15], [75.5, 80.8, 21, 15]
+        [2.5, 3, 21, 19.5], [26.5, 3.2, 21, 19.5], [51, 3, 21, 19.5], [75.5, 3.2, 21, 19.5],
+        [2.7, 22, 21, 19.5], [26.2, 22.2, 21, 19.5], [51.3, 22, 21, 19.5], [75.2, 22.2, 21, 19.5],
+        [2.5, 41, 21, 19.5], [26.5, 41.2, 21, 19.5], [51, 41, 21, 19.5], [75.5, 41.2, 21, 19.5],
+        [2.7, 60, 21, 19.5], [26.2, 60.2, 21, 19.5], [51.3, 60, 21, 19.5], [75.2, 60.2, 21, 19.5],
+        [2.5, 79, 21, 19.5], [26.5, 78.8, 21, 19.5], [51, 79, 21, 19.5], [75.5, 78.8, 21, 19.5]
       ],
       // Wide canvases gain the requested fifth column while retaining four balanced rows.
       panorama: [
-        [1, 3, 17, 18], [21, 3.2, 17, 18], [41, 3, 17, 18], [61, 3.2, 17, 18], [81, 3, 17, 18],
-        [1.2, 27, 17, 18], [20.8, 27.2, 17, 18], [41.2, 27, 17, 18], [60.8, 27.2, 17, 18], [81.2, 27, 17, 18],
-        [0.95, 51, 17, 18], [21.2, 51.2, 17, 18], [40.8, 51, 17, 18], [61.1, 51.2, 17, 18], [80.9, 51, 17, 18],
-        [1.15, 75, 17, 18], [20.9, 75.2, 17, 18], [41.1, 75, 17, 18], [60.85, 75.2, 17, 18], [81.1, 75, 17, 18]
+        [1, 3.5, 17, 23.5], [21, 3.7, 17, 23.5], [41, 3.5, 17, 23.5], [61, 3.7, 17, 23.5], [81, 3.5, 17, 23.5],
+        [1.2, 27, 17, 23.5], [20.8, 27.2, 17, 23.5], [41.2, 27, 17, 23.5], [60.8, 27.2, 17, 23.5], [81.2, 27, 17, 23.5],
+        [0.95, 50.5, 17, 23.5], [21.2, 50.7, 17, 23.5], [40.8, 50.5, 17, 23.5], [61.1, 50.7, 17, 23.5], [80.9, 50.5, 17, 23.5],
+        [1.15, 74, 17, 23.5], [20.9, 74.2, 17, 23.5], [41.1, 74, 17, 23.5], [60.85, 74.2, 17, 23.5], [81.1, 74, 17, 23.5]
       ]
     };
     const positions = layouts[layoutName];
@@ -315,47 +325,43 @@
       realEntryIndex += 1;
       return index;
     });
-    const tiltRange = (height < 140 ? 0
-      : height < 180 ? Math.min(3, 1500 / width)
-        : height < 360 ? Math.min(3, 10 / aspectRatio)
-          : Math.min(5, 10 / aspectRatio)) * (entrySlots.length >= 20 ? .6 : 1);
+    const hoverScale = compactViewport ? 1.08 : 1.12;
     const riseRange = height < 180 ? 0 : 2;
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
-    // CSS transforms do not participate in layout flow, so test their painted bounds.
-    // The extra inset reserves room for the hover-scale effect; ordinary sizes retain tilt.
-    function getBounds(cardScale, motionScale) {
+    // CSS transforms do not participate in layout flow, so test the fixed tilt,
+    // the resting spacing, and the larger hover state against the canvas edges.
+    function getBounds(cardScale, motionScale, visualScale = 1) {
       return cards.map((_, index) => {
         const [xPct, yPct, widthPct, heightPct] = positions[positionIndexes[index]];
-        const scaledWidthPct = widthPct * cardScale;
-        const scaledHeightPct = heightPct * cardScale;
+        const scaledWidthPct = widthPct * cardScale * visualScale;
+        const scaledHeightPct = heightPct * cardScale * visualScale;
         const x = (xPct + (widthPct - scaledWidthPct) / 2) * width / 100;
         const y = (yPct + (heightPct - scaledHeightPct) / 2) * height / 100;
         const cardWidth = scaledWidthPct * width / 100;
         const cardHeight = scaledHeightPct * height / 100;
-        const angle = (seeded(index, 11) - .5) * tiltRange * motionScale * Math.PI / 180;
+        const angle = (ENTRY_ROTATION_DEG[entrySlots[index].id] || 0) * Math.PI / 180;
         const rise = (seeded(index, 12) - .5) * riseRange * motionScale;
         const boundsWidth = Math.abs(cardWidth * Math.cos(angle)) + Math.abs(cardHeight * Math.sin(angle));
         const boundsHeight = Math.abs(cardHeight * Math.cos(angle)) + Math.abs(cardWidth * Math.sin(angle));
         const centerX = x + cardWidth / 2 - Math.sin(angle) * rise;
         const centerY = y + cardHeight / 2 + Math.cos(angle) * rise;
-        const hoverPadX = compactViewport ? 0 : cardWidth * .0225;
-        const hoverPadY = compactViewport ? 0 : cardHeight * .0225 + 2;
         return {
-          left: centerX - boundsWidth / 2 - hoverPadX,
-          right: centerX + boundsWidth / 2 + hoverPadX,
-          top: centerY - boundsHeight / 2 - hoverPadY,
-          bottom: centerY + boundsHeight / 2 + hoverPadY
+          left: centerX - boundsWidth / 2,
+          right: centerX + boundsWidth / 2,
+          top: centerY - boundsHeight / 2,
+          bottom: centerY + boundsHeight / 2
         };
       });
     }
 
-    function hasSafeSpacing(bounds) {
+    function hasSafeSpacing(bounds, checkCollisions = true) {
       const edge = Math.min(3, Math.min(width, height) * .01);
       const gap = Math.min(2, Math.min(width, height) * .004);
       return bounds.every((box, index) => {
         if (box.left < edge || box.top < edge || box.right > width - edge || box.bottom > height - edge) return false;
+        if (!checkCollisions) return true;
         return bounds.slice(0, index).every((other) =>
           box.left >= other.right + gap || box.right <= other.left - gap ||
           box.top >= other.bottom + gap || box.bottom <= other.top - gap
@@ -363,19 +369,24 @@
       });
     }
 
+    function hasSafeLayout(cardScale, motionScale) {
+      return hasSafeSpacing(getBounds(cardScale, motionScale), true) &&
+        hasSafeSpacing(getBounds(cardScale, motionScale, hoverScale), false);
+    }
+
     let cardScale = 1;
     let motionScale = 1;
-    if (!hasSafeSpacing(getBounds(cardScale, motionScale))) motionScale = 0;
-    if (!hasSafeSpacing(getBounds(cardScale, motionScale))) {
-      for (let candidate = .96; candidate >= .64; candidate -= .04) {
-        if (hasSafeSpacing(getBounds(candidate, motionScale))) {
+    if (!hasSafeLayout(cardScale, motionScale)) motionScale = 0;
+    if (!hasSafeLayout(cardScale, motionScale)) {
+      for (let candidate = .98; candidate >= .5; candidate -= .02) {
+        if (hasSafeLayout(candidate, motionScale)) {
           cardScale = candidate;
           break;
         }
       }
     }
-    if (!hasSafeSpacing(getBounds(cardScale, motionScale))) {
-      cardScale = .64;
+    if (!hasSafeLayout(cardScale, motionScale)) {
+      cardScale = .5;
       motionScale = 0;
     }
 
@@ -387,7 +398,8 @@
       card.style.setProperty("--entry-y", `${(y + (cardHeight - fittedHeight) / 2).toFixed(3)}%`);
       card.style.setProperty("--entry-width", `${fittedWidth.toFixed(3)}%`);
       card.style.setProperty("--entry-height", `${fittedHeight.toFixed(3)}%`);
-      card.style.setProperty("--entry-tilt", `${((seeded(index, 11) - .5) * tiltRange * motionScale).toFixed(2)}deg`);
+      card.style.setProperty("--entry-tilt", `${(ENTRY_ROTATION_DEG[entrySlots[index].id] || 0).toFixed(2)}deg`);
+      card.style.setProperty("--entry-hover-scale", hoverScale.toFixed(2));
       card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange * motionScale).toFixed(1)}px`);
     });
     // Placeholder stars used to have a 38px minimum and could spill out of

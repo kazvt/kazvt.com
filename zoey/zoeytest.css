@@ -199,14 +199,18 @@ button, a { touch-action: manipulation; }
   font: inherit;
   text-align: center;
   cursor: pointer;
+  transform: scale(1);
+  transform-origin: center;
   transition: transform 170ms ease;
 }
+.z-entry-button:hover,
+.z-entry-button:focus-visible { transform: scale(var(--entry-hover-scale, 1.12)); }
 .z-entry-button:focus-visible { outline: 2px dashed #8a65ba; outline-offset: 5px; }
 body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gold); }
 .z-entry-button:hover .z-entry-avatar,
 .z-entry-button:focus-visible .z-entry-avatar,
 .z-entry.is-playing .z-entry-avatar {
-  transform: translateY(-2px) scale(1.045);
+  transform: translateY(-2px);
   filter: drop-shadow(0 0 8px rgb(255 139 201 / 88%)) drop-shadow(0 0 18px rgb(100 207 255 / 62%));
 }
 .z-constellation[data-compact="true"] .z-entry-button:hover .z-entry-avatar,
