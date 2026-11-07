@@ -105,9 +105,9 @@
       name: "Serunie",
       avatar: "/zoey/assets/serunie/serunie-avatar.png",
       clips: [
-        { src: "/zoey/assets/serunie/serunie-voice-1.wav", caption: "Serunie's voice note 1 of 3." },
-        { src: "/zoey/assets/serunie/serunie-voice-2.wav", caption: "Serunie's voice note 2 of 3." },
-        { src: "/zoey/assets/serunie/serunie-voice-3.wav", caption: "Serunie's voice note 3 of 3." }
+        { src: "/zoey/assets/serunie/serunie-voice-1.wav?v=20261107-05", caption: "Serunie's voice note 1 of 3." },
+        { src: "/zoey/assets/serunie/serunie-voice-2.wav?v=20261107-05", caption: "Serunie's voice note 2 of 3." },
+        { src: "/zoey/assets/serunie/serunie-voice-3.wav?v=20261107-05", caption: "Serunie's voice note 3 of 3." }
       ]
     }
   ];
