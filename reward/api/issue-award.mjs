@@ -123,7 +123,7 @@ async function callLocalApi(fetchImpl, apiOrigin, path, init = {}, timeoutMs = 1
 
 async function readPublishedRegistry(fetchImpl, siteOrigin, timeoutMs, expectedLinkId) {
   try {
-    return await fetchAssignmentRegistry({
+    const registry = await fetchAssignmentRegistry({
       fetchImpl,
       hostname: new URL(siteOrigin).hostname,
       origin: siteOrigin,
@@ -131,6 +131,10 @@ async function readPublishedRegistry(fetchImpl, siteOrigin, timeoutMs, expectedL
       expectedLinkId,
       requestTimeoutMs: Math.min(6_000, timeoutMs)
     });
+    if (registry?.version !== 1 || !Array.isArray(registry.assignments)) {
+      throw new Error("The public reward registry has an unsupported format.");
+    }
+    return registry;
   } catch (error) {
     throw new Error(`Could not verify the public reward registry yet. ${error?.message || ""}`.trim());
   }

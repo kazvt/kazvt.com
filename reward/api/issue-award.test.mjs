@@ -38,7 +38,7 @@ test("lists available art from the local MSI endpoint and sends same-origin head
   assert.equal(calledInit.cache, "no-store");
 });
 
-test("issues locally, waits for Pages, and returns a verifiable public reward link", async () => {
+test("issues locally and returns a verifiable public reward link from the first fresh registry", async () => {
   const calls = [];
   const fetchImpl = async (input, init = {}) => {
     const url = new URL(input);
@@ -56,7 +56,33 @@ test("issues locally, waits for Pages, and returns a verifiable public reward li
   assert.equal(issueCall.init.headers.Origin, "http://127.0.0.1:8000");
   assert.equal(JSON.parse(issueCall.init.body).eventId, request.eventId);
   assert.equal(JSON.parse(issueCall.init.body).reason, request.reason);
+  assert.equal(calls.some(call => call.url.hostname === "raw.githubusercontent.com"), true);
   assert.equal(calls.some(call => call.url.hostname === "api.github.com"), false);
+});
+
+test("issuer returns immediately from the matching raw registry when Pages is still stale", async () => {
+  let pagesSignal;
+  const fetchImpl = async (input, init = {}) => {
+    const url = new URL(input);
+    if (url.hostname === "127.0.0.1") {
+      return response({ ok: true, assignment, replayed: false, pushed: true }, 201);
+    }
+    if (url.hostname === "raw.githubusercontent.com") {
+      return response({ version: 1, assignments: [assignment] });
+    }
+    if (url.hostname === "kazvt.com") {
+      pagesSignal = init.signal;
+      return new Promise((resolve, reject) => {
+        init.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+      });
+    }
+    throw new Error(`Unexpected request ${url}`);
+  };
+
+  const result = await issueAward(request, { fetchImpl, siteOrigin: "https://kazvt.com" });
+  assert.equal(result.href, `https://kazvt.com/reward/?id=${LINK_ID}`);
+  assert.equal(result.assignment.linkId, LINK_ID);
+  assert.equal(pagesSignal.aborted, true);
 });
 
 test("accepts a published replay for the same winner and art", async () => {

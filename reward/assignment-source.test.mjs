@@ -30,7 +30,32 @@ test("registry fetch falls back to Pages if GitHub raw is unavailable", async ()
 
   assert.equal(registry, data);
   assert.equal(requests.length, 2);
-  assert.deepEqual(requests[0].options, { cache: "no-store", credentials: "omit" });
+  assert.equal(requests[0].options.cache, "no-store");
+  assert.equal(requests[0].options.credentials, "omit");
+  assert.ok(requests[0].options.signal instanceof AbortSignal);
   assert.match(requests[0].url, /^https:\/\/raw\.githubusercontent\.com\//);
   assert.match(requests[1].url, /^https:\/\/kazvt\.com\/zzz_assets\/rewards\/assignments\.json/);
+});
+
+test("returns an exact raw GitHub match immediately and cancels a slower Pages read", async () => {
+  const fresh = { version: 1, assignments: [{ linkId: "abcdefghijklmnop" }] };
+  let pagesSignal;
+  const registry = await fetchAssignmentRegistry({
+    hostname: "kazvt.com",
+    origin: "https://kazvt.com",
+    cacheBust: 790,
+    expectedLinkId: "abcdefghijklmnop",
+    fetchImpl: async (url, options) => {
+      if (url.startsWith("https://raw.githubusercontent.com/")) {
+        return { ok: true, json: async () => fresh };
+      }
+      pagesSignal = options.signal;
+      return new Promise((resolve, reject) => {
+        options.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+      });
+    }
+  });
+
+  assert.equal(registry, fresh);
+  assert.equal(pagesSignal.aborted, true);
 });
