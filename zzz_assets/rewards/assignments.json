@@ -144,6 +144,17 @@
       "linkId": "DvOS_XGvuszR4o_y",
       "eventIdHash": "db6811c30c7d40060e0376644eb5ed98067e06262bc1d0ed6c75953541477c1d",
       "userId": "94402016"
+    },
+    {
+      "assetId": "0b98273245f2a5a70d4f7657645f55b80b700090eb46f33755ec9ca78c8fccbc",
+      "assetSha256": "0b98273245f2a5a70d4f7657645f55b80b700090eb46f33755ec9ca78c8fccbc",
+      "filename": "Yay toy.png",
+      "username": "itsgreenheart",
+      "issuedAt": "2026-11-07T09:15:22.846Z",
+      "platform": "twitch",
+      "linkId": "CV1isDFq5K3wl8QL",
+      "eventIdHash": "e56eb49fb8940d885550c0ea70b2bd3cc37238124fb45eae6851053f9acc50fb",
+      "userId": "433933152"
     }
   ],
   "revokedAssignments": [
