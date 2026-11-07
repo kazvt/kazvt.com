@@ -368,8 +368,12 @@
       }
       function showTheaterControls() {
         if (!theaterMode) return;
+        const needsFadeIn = !theaterToolbar.classList.contains("show");
         theaterToolbar.classList.remove("pe-none");
-        theaterToolbar.classList.add("show");
+        if (needsFadeIn) {
+          void theaterToolbar.offsetWidth;
+          theaterToolbar.classList.add("show");
+        }
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = window.setTimeout(() => {
           theaterControlsTimer = 0;
