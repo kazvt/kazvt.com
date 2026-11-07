@@ -95,8 +95,8 @@
       name: "Poppy",
       avatar: "/zoey/assets/poppy/poppy-avatar.png",
       clips: [
-        { src: "/zoey/assets/poppy/poppy-voice-1.wav?v=20261108-01", caption: "Poppy's voice note 1 of 3." },
-        { src: "/zoey/assets/poppy/poppy-voice-2.wav?v=20261108-01", caption: "Poppy's voice note 2 of 3." },
+        { src: "/zoey/assets/poppy/poppy-voice-1-20261108-later.wav?v=20261108-09", caption: "Poppy's voice note 1 of 3." },
+        { src: "/zoey/assets/poppy/poppy-voice-2-20261108-later.wav?v=20261108-09", caption: "Poppy's voice note 2 of 3." },
         { src: "/zoey/assets/poppy/poppy-voice-3.wav?v=20261108-01", caption: "Poppy's voice note 3 of 3." }
       ]
     },

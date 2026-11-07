@@ -28,8 +28,8 @@
       <section class="col-lg-8 order-lg-2 sticky-lg-top align-self-lg-start" id="previewColumn" aria-label="Live slime preview">
         <div class="ratio ratio-16x9 position-relative bg-dark" id="stage" tabindex="-1" aria-label="Liquid preview">
           <canvas class="position-absolute top-0 start-0 w-100 h-100" id="gl" aria-label="Animated procedural slime surface"></canvas>
-          <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-end align-items-start p-2 d-none opacity-0 pe-none" id="theaterToolbar">
-            <button id="exitTheaterBtn" class="btn btn-secondary" type="button">Exit theater mode</button>
+          <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-end align-items-start p-2 d-none fade pe-none" id="theaterToolbar">
+            <button id="exitTheaterBtn" class="btn btn-secondary" type="button">Exit theatre mode</button>
           </div>
         </div>
         <div class="d-flex justify-content-between align-items-center mt-2" id="previewMeta">
@@ -37,7 +37,7 @@
           <span id="fps">Starting GPU…</span>
         </div>
         <div class="mt-2" id="theaterToggleRow">
-          <button id="theaterBtn" class="btn btn-outline-secondary" type="button" aria-pressed="false">Theater mode</button>
+          <button id="theaterBtn" class="btn btn-outline-secondary" type="button" aria-pressed="false">Theatre mode</button>
         </div>
         <div class="alert alert-warning d-none mt-2" id="notice" role="alert"></div>
       </section>
@@ -368,19 +368,21 @@
       }
       function showTheaterControls() {
         if (!theaterMode) return;
-        theaterToolbar.classList.remove("opacity-0", "pe-none");
+        theaterToolbar.classList.remove("pe-none");
+        theaterToolbar.classList.add("show");
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = window.setTimeout(() => {
           theaterControlsTimer = 0;
           if (!theaterToolbar.contains(document.activeElement)) {
             theaterToolbar.classList.add("opacity-0", "pe-none");
           }
-        }, 3000);
+          }, 1000);
       }
       function hideTheaterControls() {
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = 0;
-        theaterToolbar.classList.add("opacity-0", "pe-none");
+        theaterToolbar.classList.remove("show");
+        theaterToolbar.classList.add("pe-none");
       }
       function applySettings() {
         syncLabels();
