@@ -92,7 +92,7 @@ jobs:
         with:
           timeout: "600000"
       - name: Report a second deployment timeout
-        if: steps.retry_gate.outputs.should_retry == 'true' && steps.deployment_retry.outcome == 'failure'
+        if: always() && steps.retry_gate.outputs.should_retry == 'true' && steps.deployment_retry.outcome == 'failure'
         run: |
           echo "::error::GitHub Pages timed out twice. Open the Pages workflow in Actions and retry after checking its deployment queue."
           exit 1
