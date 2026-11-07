@@ -1,8 +1,8 @@
 """Loopback reward issuer used by the existing MSI HTTP server.
 
-The website is static. This module runs only on the trusted streaming PC, checks
-the local repository and artwork, then commits just assignments.json and pushes
-it through the user's already-configured Git credentials.
+The website is static. This module runs only on the trusted streaming PC, reads
+published reward data, then builds a two-file commit without touching the local
+checkout and pushes it through the user's already-configured Git credentials.
 """
 
 from __future__ import annotations
