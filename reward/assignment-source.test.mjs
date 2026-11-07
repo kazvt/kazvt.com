@@ -14,6 +14,51 @@ test("local and preview sites do not accidentally read production assignments", 
   assert.deepEqual(urls, ["http://127.0.0.1:8157/zzz_assets/rewards/assignments.json?_=456"]);
 });
 
+test("a targeted reward URL in a local preview can resolve its exact published assignment", async () => {
+  const target = { linkId: "reward-1234567890" };
+  const published = { version: 1, assignments: [target] };
+  const requests = [];
+  const registry = await fetchAssignmentRegistry({
+    hostname: "127.0.0.1",
+    origin: "http://127.0.0.1:8157",
+    cacheBust: 457,
+    expectedLinkId: target.linkId,
+    allowPublishedLookupForExpectedLink: true,
+    fetchImpl: async url => {
+      requests.push(url);
+      if (url.startsWith("http://127.0.0.1:8157/")) {
+        return { ok: true, json: async () => ({ version: 1, assignments: [] }) };
+      }
+      return { ok: true, json: async () => published };
+    }
+  });
+
+  assert.equal(registry, published);
+  assert.equal(requests.length, 3);
+  assert.match(requests[0], /^http:\/\/127\.0\.0\.1:8157\//);
+  assert.ok(requests.some(url => url.startsWith("https://raw.githubusercontent.com/")));
+  assert.ok(requests.some(url => url.startsWith("https://kazvt.com/")));
+});
+
+test("a targeted local lookup does not return a different production assignment", async () => {
+  const local = { version: 1, assignments: [{ linkId: "other-link" }] };
+  const registry = await fetchAssignmentRegistry({
+    hostname: "127.0.0.1",
+    origin: "http://127.0.0.1:8157",
+    cacheBust: 458,
+    expectedLinkId: "wanted-link",
+    allowPublishedLookupForExpectedLink: true,
+    fetchImpl: async url => ({
+      ok: true,
+      json: async () => url.startsWith("http://127.0.0.1:8157/")
+        ? local
+        : { version: 1, assignments: [{ linkId: "other-link" }] }
+    })
+  });
+
+  assert.equal(registry, local);
+});
+
 test("registry fetch falls back to Pages if GitHub raw is unavailable", async () => {
   const requests = [];
   const data = { version: 1, assignments: [] };

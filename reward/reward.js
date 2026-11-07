@@ -459,7 +459,10 @@ import {
   function loadAssignmentRegistry(catalog, expectedLinkId = "") {
     const load = () => retryRead(async () =>
       validateAndSortAssignments(await fetchAssignmentRegistry(
-        expectedLinkId ? { expectedLinkId } : undefined
+        expectedLinkId ? {
+          expectedLinkId,
+          allowPublishedLookupForExpectedLink: true
+        } : undefined
       ), catalog)
     );
 
