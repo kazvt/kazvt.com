@@ -377,11 +377,14 @@
 
       function applyURLParameters() {
         const byName = new Map(Object.values(controls).map(input => [input.name.toLowerCase(), input]));
-        const overriddenColors = new Set();
+        const queryValues = new Map();
         new URLSearchParams(window.location.search).forEach((raw, key) => {
           const name = key.trim().toLowerCase();
+          if (byName.has(name)) queryValues.set(name, raw);
+        });
+        const overriddenColors = new Set();
+        queryValues.forEach((raw, name) => {
           const input = byName.get(name);
-          if (!input) return;
           if (input.type === "color") {
             const parsed = parseColorParameter(raw);
             if (parsed !== null) {
