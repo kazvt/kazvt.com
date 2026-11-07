@@ -311,15 +311,39 @@ class LocalRewardIssuerTests(unittest.TestCase):
                 "eventId": "twitch:reserved-order-3",
             }, expected_remote=str(self.remote))
 
-    def test_refuses_dirty_worktree_and_modified_png(self) -> None:
-        (self.site / "unrelated.tmp").write_text("keep me", encoding="utf-8")
-        with self.assertRaisesRegex(RewardIssueError, "local changes"):
+    def test_unrelated_edits_are_preserved_and_never_enter_reward_commit(self) -> None:
+        ignore_path = self.site / ".gitignore"
+        original_ignore = ignore_path.read_text(encoding="utf-8")
+        ignore_path.write_text(original_ignore + "\n# local website note\n", encoding="utf-8")
+        git(self.site, "add", ".gitignore")
+        untracked_path = self.site / "private-local-note.txt"
+        untracked_path.write_text("keep this local\n", encoding="utf-8")
+
+        result = issue_and_publish(
+            self.site,
+            {"username": "Winner", "assetId": self.art_ids[0], "eventId": "unrelated-dirty"},
+            expected_remote=str(self.remote),
+        )
+
+        self.assertTrue(result["pushed"])
+        self.assertEqual(ignore_path.read_text(encoding="utf-8"), original_ignore + "\n# local website note\n")
+        self.assertEqual(untracked_path.read_text(encoding="utf-8"), "keep this local\n")
+        committed = set(git(self.site, "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD").splitlines())
+        self.assertEqual(committed, {"zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"})
+        self.assertEqual(git(self.site, "diff", "--cached", "--name-only"), ".gitignore")
+        self.assertEqual(git(self.site, "status", "--short").splitlines(), ["M  .gitignore", "?? private-local-note.txt"])
+
+    def test_refuses_dirty_reward_inputs_and_modified_png(self) -> None:
+        manifest_path = self.reward_dir / "manifest.json"
+        original_manifest = manifest_path.read_bytes()
+        manifest_path.write_bytes(original_manifest + b" ")
+        with self.assertRaisesRegex(RewardIssueError, "Reward artwork or registry files have local changes"):
             issue_and_publish(
                 self.site,
-                {"username": "Winner", "assetId": self.art_ids[0], "eventId": "dirty"},
+                {"username": "Winner", "assetId": self.art_ids[0], "eventId": "dirty-reward-input"},
                 expected_remote=str(self.remote),
             )
-        (self.site / "unrelated.tmp").unlink()
+        manifest_path.write_bytes(original_manifest)
         (self.reward_dir / "toast.png").write_bytes(png_bytes(4, 4))
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
             local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
