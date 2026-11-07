@@ -425,18 +425,13 @@
         document.getElementById("pauseBtn").classList.remove("btn-outline-primary");
         applySettings();
       });
-      fullscreenButton.addEventListener("click", async () => {
-        try {
-          if (document.fullscreenElement === stage) {
-            saveFullscreenPreference(false);
-            await document.exitFullscreen();
-          } else if (!document.fullscreenElement) {
-            await stage.requestFullscreen();
-            saveFullscreenPreference(true);
-          } else {
-            await document.exitFullscreen();
-          }
-        } catch (_) { updateFullscreenButton(); /* fullscreen may be blocked by browser policy */ }
+      theaterButton.addEventListener("click", () => {
+        setTheaterMode(true);
+        exitTheaterButton.focus();
+      });
+      exitTheaterButton.addEventListener("click", () => {
+        setTheaterMode(false);
+        theaterButton.focus();
       });
       document.getElementById("saveBtn").addEventListener("click", () => {
         let captureCanvas = canvas;
