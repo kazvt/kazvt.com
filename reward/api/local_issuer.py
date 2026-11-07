@@ -698,10 +698,10 @@ def _commit_registry(
 ) -> None:
     """Publish one validated registry mutation, and no other working-tree files.
 
-    Callers hold _ISSUE_LOCK and have already verified/synced the clean main
-    checkout. A successful push is the authoritative publication confirmation;
-    another fetch here would only add network latency. A concurrent remote push
-    still makes Git reject this push as non-fast-forward.
+    Callers hold _ISSUE_LOCK and operate in a disposable worktree at the
+    fetched origin/main revision. A successful push is the authoritative
+    publication confirmation; a concurrent remote push still makes Git reject
+    this push as non-fast-forward.
     """
     _validate_registry(registry)
     _atomic_write_registry(root, registry)
@@ -721,7 +721,8 @@ def _commit_registry(
         if not committed or not committed <= allowed_paths or ASSIGNMENTS_RELATIVE not in committed:
             raise RewardIssueError("The reward commit included unexpected files; review Git history before retrying.")
         _git(root, "push", "origin", "HEAD:refs/heads/main")
-        _assert_reward_inputs_clean(root)
+        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
+            raise RewardIssueError("The isolated reward transaction did not finish cleanly; retry the same chat event.")
     except RewardIssueError:
         raise
     except Exception as exc:
