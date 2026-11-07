@@ -695,11 +695,12 @@ def _published_revision(root: Path, expected_remote: str = DEFAULT_REMOTE) -> st
     return _git(root, "rev-parse", "--verify", "refs/remotes/origin/main")
 
 
-def _ensure_commit_identity(root: Path) -> None:
+def _ensure_commit_identity(root: Path) -> tuple[str, str]:
     name = _git(root, "config", "--get", "user.name", check=False)
     email = _git(root, "config", "--get", "user.email", check=False)
     if not name or not email:
         raise RewardIssueError("Git commit identity is not configured for this website checkout.")
+    return name, email
 
 
 def _anonymous_pool_summary(
