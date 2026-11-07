@@ -12,22 +12,21 @@ import json
 import os
 import re
 import secrets
-import shutil
 import struct
 import subprocess
 import tempfile
 import threading
 import unicodedata
-from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 
 DEFAULT_SITE_ORIGIN = "https://kazvt.com"
 DEFAULT_REMOTE = "https://github.com/kazvt/kazvt.com.git"
 ASSIGNMENTS_RELATIVE = "zzz_assets/rewards/assignments.json"
 POOL_RELATIVE = "zzz_assets/rewards/pool.json"
+CATALOG_RELATIVE = "zzz_assets/rewards/manifest.json"
 RESERVATIONS_RELATIVE = "reward/api/reservations.local.txt"
 ASSET_ID_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
 FILENAME_RE = re.compile(r"^[^/\\\x00-\x1f\x7f]{1,255}\.(?:png|gif)$", re.IGNORECASE)
@@ -42,6 +41,10 @@ _ISSUE_LOCK = threading.Lock()
 
 class RewardIssueError(ValueError):
     """A safe, user-displayable reward issuance error."""
+
+
+class _RemoteMainUpdated(Exception):
+    """The remote moved during publication; retry the transaction from its new tip."""
 
 
 def _normal_username(value: str) -> str:
