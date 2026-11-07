@@ -328,6 +328,78 @@
           if (saved) Object.entries(controls).forEach(([id, el]) => { if (saved[id] !== undefined) el.value = saved[id]; });
         } catch (_) { /* use defaults */ }
       }
+      function parseColorParameter(raw) {
+        const candidate = raw.trim();
+        if (!candidate || /^(?:currentcolor|transparent|inherit|initial|unset|revert|revert-layer)$/i.test(candidate) || /^(?:var|env|url)\s*\(/i.test(candidate)) return null;
+        let color = candidate;
+        if (/^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) color = `#${color}`;
+        if (!window.CSS || !CSS.supports("color", color)) return null;
+        const sample = document.createElement("canvas");
+        sample.width = sample.height = 1;
+        const context = sample.getContext("2d", { willReadFrequently: true });
+        if (!context) return null;
+        context.clearRect(0, 0, 1, 1);
+        context.globalCompositeOperation = "copy";
+        context.fillStyle = color;
+        context.fillRect(0, 0, 1, 1);
+        const pixel = context.getImageData(0, 0, 1, 1).data;
+        if (pixel[3] !== 255) return null;
+        return `#${Array.from(pixel).slice(0, 3).map(channel => channel.toString(16).padStart(2, "0")).join("")}`;
+      }
+
+      function parseNumberParameter(raw, key, input) {
+        let text = raw.trim().toLowerCase().replace(/−/g, "-").replace(/×/g, "x");
+        // URLSearchParams decodes a literal + as a space, including in exponents.
+        text = text.replace(/([e])\s+(?=\d)/g, "$1+");
+        if (!text.includes(".") && /^[+-]?\d+,\d+(?:e[+-]?\d+)?$/.test(text)) text = text.replace(",", ".");
+        const match = text.match(/^(?:x\s*)?([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:\s*x)?(?:\s*(%|px|rem|em))?$/i);
+        if (!match) return null;
+        let number = Number(match[1]);
+        if (!Number.isFinite(number)) return null;
+        const unit = (match[2] || "").toLowerCase();
+        if (unit === "px" || unit === "rem" || unit === "em") {
+          if (key !== "blur") return null;
+          if (unit === "rem") number *= parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+          if (unit === "em") number *= parseFloat(getComputedStyle(input).fontSize) || 16;
+        } else if (unit === "%") {
+          if (key === "blur") return null;
+          if (key !== "viscosity" && key !== "sharpness") number /= 100;
+        }
+        const min = Number(input.min);
+        const max = Number(input.max);
+        const step = Number(input.step) || 1;
+        number = Math.min(max, Math.max(min, number));
+        number = min + Math.round((number - min) / step) * step;
+        const precision = Math.max(0, ((String(step).split(".")[1] || "").split("e")[0] || "").length);
+        return String(Number(Math.min(max, Math.max(min, Number(number.toFixed(Math.min(precision, 10)))))));
+      }
+
+      function applyURLParameters() {
+        const byName = new Map(Object.values(controls).map(input => [input.name.toLowerCase(), input]));
+        const overriddenColors = new Set();
+        new URLSearchParams(window.location.search).forEach((raw, key) => {
+          const name = key.trim().toLowerCase();
+          const input = byName.get(name);
+          if (!input) return;
+          if (input.type === "color") {
+            const parsed = parseColorParameter(raw);
+            if (parsed !== null) {
+              input.value = parsed;
+              overriddenColors.add(input);
+            }
+            return;
+          }
+          const parsed = parseNumberParameter(raw, name, input);
+          if (parsed !== null) input.value = parsed;
+        });
+        if (overriddenColors.size) {
+          document.querySelectorAll(".preset").forEach(button => {
+            button.classList.remove("active");
+            button.setAttribute("aria-pressed", "false");
+          });
+        }
+      }
+
       function readTheaterPreference() {
         try {
           const saved = localStorage.getItem(theaterPreferenceKey);
@@ -512,6 +584,7 @@
 
       setTheaterMode(readTheaterPreference(), false);
       loadSettings();
+      applyURLParameters();
       syncLabels();
       try {
         initWebGL();
