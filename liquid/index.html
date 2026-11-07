@@ -45,9 +45,9 @@
       <aside class="col-lg-4 order-lg-1" id="controlsColumn" aria-label="Slime surface controls">
         <fieldset class="mb-4">
           <legend class="h5">Palette</legend>
-          <div class="mb-2"><label class="form-label" for="colorLow">Deep shadow</label><input class="form-control form-control-color" id="colorLow" type="color" value="#031f16"></div>
-          <div class="mb-2"><label class="form-label" for="colorMid">Body color</label><input class="form-control form-control-color" id="colorMid" type="color" value="#076831"></div>
-          <div class="mb-2"><label class="form-label" for="colorHigh">Raised highlights</label><input class="form-control form-control-color" id="colorHigh" type="color" value="#84c226"></div>
+          <div class="mb-2"><label class="form-label" for="colorLow">Deep shadow <code>color_low</code></label><input class="form-control form-control-color" id="colorLow" name="color_low" type="color" value="#031f16"></div>
+          <div class="mb-2"><label class="form-label" for="colorMid">Body color <code>color_mid</code></label><input class="form-control form-control-color" id="colorMid" name="color_mid" type="color" value="#076831"></div>
+          <div class="mb-2"><label class="form-label" for="colorHigh">Raised highlights <code>color_high</code></label><input class="form-control form-control-color" id="colorHigh" name="color_high" type="color" value="#84c226"></div>
           <div class="btn-group" role="group" aria-label="Color presets">
             <button class="btn btn-outline-secondary preset active" data-preset="emerald" aria-pressed="true" type="button">Emerald</button>
             <button class="btn btn-outline-secondary preset" data-preset="candy" aria-pressed="false" type="button">Candy</button>
@@ -58,35 +58,39 @@
 
         <fieldset class="mb-4">
           <legend class="h5">Motion</legend>
-          <div class="mb-3"><label class="form-label w-100" for="viscosity">Viscosity <output class="float-end" id="viscosityValue"></output></label><input class="form-range" id="viscosity" type="range" min="0" max="100" step="1" value="50"><div class="form-text">Higher viscosity slows the surface and softens fine motion.</div></div>
-          <div class="mb-3"><label class="form-label w-100" for="speed">Motion speed <output class="float-end" id="speedValue"></output></label><input class="form-range" id="speed" type="range" min="0.25" max="2" step="0.01" value="1"><div class="form-text">The default completes a 10-second cycle.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="viscosity">Viscosity <code>viscosity</code><output class="float-end" id="viscosityValue"></output></label><input class="form-range" id="viscosity" name="viscosity" type="range" min="0" max="100" step="1" value="50"><div class="form-text">Higher viscosity slows the surface and softens fine motion.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="speed">Motion speed <code>speed</code><output class="float-end" id="speedValue"></output></label><input class="form-range" id="speed" name="speed" type="range" min="0.25" max="2" step="0.01" value="1"><div class="form-text">The default completes a 10-second cycle.</div></div>
         </fieldset>
 
         <fieldset class="mb-4">
           <legend class="h5">Shape</legend>
-          <div class="mb-3"><label class="form-label w-100" for="foldSize">Fold size <output class="float-end" id="foldSizeValue"></output></label><input class="form-range" id="foldSize" type="range" min="0.65" max="1.55" step="0.01" value="1"><div class="form-text">Higher values make smaller, more frequent folds.</div></div>
-          <div class="mb-3"><label class="form-label w-100" for="heightRange">Height range <output class="float-end" id="heightRangeValue"></output></label><input class="form-range" id="heightRange" type="range" min="0.45" max="1.65" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" type="range" min="0.45" max="1.65" step="0.01" value="1"><div class="form-text">Lighting response to the highs and lows.</div></div>
-          <div class="mb-3"><label class="form-label w-100" for="detail">Small-fold detail <output class="float-end" id="detailValue"></output></label><input class="form-range" id="detail" type="range" min="0" max="1" step="0.01" value="0.12"></div>
+          <div class="mb-3"><label class="form-label w-100" for="foldSize">Fold size <code>fold_size</code><output class="float-end" id="foldSizeValue"></output></label><input class="form-range" id="foldSize" name="fold_size" type="range" min="0.65" max="1.55" step="0.01" value="1"><div class="form-text">Higher values make smaller, more frequent folds.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="heightRange">Height range <code>height_range</code><output class="float-end" id="heightRangeValue"></output></label><input class="form-range" id="heightRange" name="height_range" type="range" min="0.45" max="1.65" step="0.01" value="1"></div>
+          <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <code>relief</code><output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" name="relief" type="range" min="0.45" max="1.65" step="0.01" value="1"><div class="form-text">Lighting response to the highs and lows.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="detail">Small-fold detail <code>detail</code><output class="float-end" id="detailValue"></output></label><input class="form-range" id="detail" name="detail" type="range" min="0" max="1" step="0.01" value="0.12"></div>
         </fieldset>
 
         <fieldset class="mb-4">
           <legend class="h5">Surface</legend>
-          <div class="mb-3"><label class="form-label w-100" for="gloss">Gloss strength <output class="float-end" id="glossValue"></output></label><input class="form-range" id="gloss" type="range" min="0" max="1.8" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" type="range" min="0" max="100" step="1" value="50"></div>
-          <div class="mb-3"><label class="form-label w-100" for="blur">Blur <output class="float-end" id="blurValue"></output></label><input class="form-range" id="blur" type="range" min="0" max="8" step="0.1" value="0"><div class="form-text">Output-space blur; zero keeps folds crisp.</div></div>
-          <div class="mb-3"><label class="form-label w-100" for="saturation">Color richness <output class="float-end" id="saturationValue"></output></label><input class="form-range" id="saturation" type="range" min="0.55" max="1.5" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="contrast">Contrast <output class="float-end" id="contrastValue"></output></label><input class="form-range" id="contrast" type="range" min="0.65" max="1.5" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="brightness">Brightness <output class="float-end" id="brightnessValue"></output></label><input class="form-range" id="brightness" type="range" min="-0.2" max="0.2" step="0.005" value="0"></div>
+          <div class="mb-3"><label class="form-label w-100" for="gloss">Gloss strength <code>gloss</code><output class="float-end" id="glossValue"></output></label><input class="form-range" id="gloss" name="gloss" type="range" min="0" max="1.8" step="0.01" value="1"></div>
+          <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <code>sharpness</code><output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" name="sharpness" type="range" min="0" max="100" step="1" value="50"></div>
+          <div class="mb-3"><label class="form-label w-100" for="blur">Blur <code>blur</code><output class="float-end" id="blurValue"></output></label><input class="form-range" id="blur" name="blur" type="range" min="0" max="8" step="0.1" value="0"><div class="form-text">Output-space blur; zero keeps folds crisp.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="saturation">Color richness <code>saturation</code><output class="float-end" id="saturationValue"></output></label><input class="form-range" id="saturation" name="saturation" type="range" min="0.55" max="1.5" step="0.01" value="1"></div>
+          <div class="mb-3"><label class="form-label w-100" for="contrast">Contrast <code>contrast</code><output class="float-end" id="contrastValue"></output></label><input class="form-range" id="contrast" name="contrast" type="range" min="0.65" max="1.5" step="0.01" value="1"></div>
+          <div class="mb-3"><label class="form-label w-100" for="brightness">Brightness <code>brightness</code><output class="float-end" id="brightnessValue"></output></label><input class="form-range" id="brightness" name="brightness" type="range" min="-0.2" max="0.2" step="0.005" value="0"></div>
         </fieldset>
 
         <fieldset class="mb-4">
           <legend class="h5">Playback</legend>
-          <div class="mb-3"><label class="form-label w-100" for="quality">Render quality <output class="float-end" id="qualityValue"></output></label><input class="form-range" id="quality" type="range" min="0.5" max="1.15" step="0.05" value="0.85"><div class="form-text">Lower this if the preview is not smooth.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="quality">Render quality <code>render_quality</code><output class="float-end" id="qualityValue"></output></label><input class="form-range" id="quality" name="render_quality" type="range" min="0.5" max="1.15" step="0.05" value="0.85"><div class="form-text">Lower this if the preview is not smooth.</div></div>
           <button id="pauseBtn" class="btn btn-primary" type="button">Pause</button>
           <button id="saveBtn" class="btn btn-secondary" type="button">Save frame</button>
           <button id="resetBtn" class="btn btn-outline-secondary" type="button">Reset</button>
         </fieldset>
+        <details class="mb-3">
+          <summary>URL parameters</summary>
+          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, and relevant units; colors accept hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>.</p>
+        </details>
       </aside>
     </div>
   </main>
