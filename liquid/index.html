@@ -26,7 +26,7 @@
   <main class="container-fluid py-3" id="appShell">
     <div class="row g-4" id="pageRow">
       <section class="col-lg-8 order-lg-2 sticky-lg-top align-self-lg-start" id="previewColumn" aria-label="Live slime preview">
-        <div class="ratio ratio-16x9 position-relative bg-dark" id="stage" tabindex="-1">
+        <div class="ratio ratio-16x9 position-relative bg-dark" id="stage" tabindex="-1" aria-label="Liquid preview">
           <canvas class="position-absolute top-0 start-0 w-100 h-100" id="gl" aria-label="Animated procedural slime surface"></canvas>
           <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-end align-items-start p-2 d-none opacity-0 pe-none" id="theaterToolbar">
             <button id="exitTheaterBtn" class="btn btn-secondary" type="button">Exit theater mode</button>
@@ -448,12 +448,20 @@
         applySettings();
       });
       theaterButton.addEventListener("click", () => {
-        setTheaterMode(true);
-        exitTheaterButton.focus();
+        setTheaterMode(true, true, true);
+        stage.focus();
       });
       exitTheaterButton.addEventListener("click", () => {
         setTheaterMode(false);
         theaterButton.focus();
+      });
+      document.addEventListener("pointermove", showTheaterControls, { passive: true });
+      document.addEventListener("pointerdown", showTheaterControls, { passive: true });
+      theaterToolbar.addEventListener("focusin", showTheaterControls);
+      theaterToolbar.addEventListener("focusout", () => {
+        window.setTimeout(() => {
+          if (theaterMode && !theaterToolbar.contains(document.activeElement)) showTheaterControls();
+        }, 0);
       });
       document.getElementById("saveBtn").addEventListener("click", () => {
         let captureCanvas = canvas;
