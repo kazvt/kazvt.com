@@ -123,8 +123,16 @@ def _clean_request(
 
 def _read_json(path: Path, description: str) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8-sig"))
-    except (OSError, json.JSONDecodeError, UnicodeError) as exc:
+        contents = path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeError) as exc:
+        raise RewardIssueError(f"Could not read the {description}.") from exc
+    return _read_json_text(contents, description)
+
+
+def _read_json_text(contents: str, description: str) -> dict[str, Any]:
+    try:
+        value = json.loads(contents)
+    except (json.JSONDecodeError, UnicodeError) as exc:
         raise RewardIssueError(f"Could not read the {description}.") from exc
     if not isinstance(value, dict):
         raise RewardIssueError(f"The {description} is invalid.")
@@ -388,6 +396,18 @@ def _load_records(site_root: str | os.PathLike[str]) -> tuple[dict[str, Any], di
     return catalog, registry
 
 
+def _load_records_at_revision(root: Path, revision: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    catalog = _read_json_text(
+        _git(root, "show", f"{revision}:{CATALOG_RELATIVE}"), "reward catalog",
+    )
+    registry = _read_json_text(
+        _git(root, "show", f"{revision}:{ASSIGNMENTS_RELATIVE}"), "reward assignment registry",
+    )
+    _validate_catalog(catalog)
+    _validate_registry(registry)
+    return catalog, registry
+
+
 def _catalog_artworks(catalog: dict[str, Any]) -> list[dict[str, Any]]:
     _validate_catalog(catalog)
     result = []
@@ -415,17 +435,23 @@ def _catalog_artworks(catalog: dict[str, Any]) -> list[dict[str, Any]]:
     return result
 
 
-def list_available_artwork(site_root: str | os.PathLike[str]) -> list[dict[str, Any]]:
-    """Return only cataloged artworks not already assigned in the public ledger."""
+def list_available_artwork(
+    site_root: str | os.PathLike[str], *, expected_remote: str = DEFAULT_REMOTE,
+) -> list[dict[str, Any]]:
+    """Return unassigned art from the latest published registry, not a stale local checkout."""
     root = Path(site_root).resolve()
-    catalog, registry = _load_records(root)
-    reserved = _load_reservations(root, catalog)["assetIds"]
-    assigned = {
-        str(record.get("assetId", record.get("assetSha256", ""))).lower()
-        for record in registry["assignments"]
-    }
-    return [item for item in _catalog_artworks(catalog)
-            if item["assetId"] not in assigned and item["assetId"] not in reserved]
+    if not root.is_dir():
+        raise RewardIssueError("The configured website folder is unavailable.")
+    with _ISSUE_LOCK:
+        revision = _published_revision(root, expected_remote)
+        catalog, registry = _load_records_at_revision(root, revision)
+        reserved = _load_reservations(root, catalog)["assetIds"]
+        assigned = {
+            str(record.get("assetId", record.get("assetSha256", ""))).lower()
+            for record in registry["assignments"]
+        }
+        return [item for item in _catalog_artworks(catalog)
+                if item["assetId"] not in assigned and item["assetId"] not in reserved]
 
 
 def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> dict[str, Any]:
