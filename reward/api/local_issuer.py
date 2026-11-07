@@ -454,7 +454,13 @@ def list_available_artwork(
                 if item["assetId"] not in assigned and item["assetId"] not in reserved]
 
 
-def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> dict[str, Any]:
+def _verify_artwork(
+    site_root: Path,
+    catalog: dict[str, Any],
+    asset_id: str,
+    *,
+    image_bytes: bytes | None = None,
+) -> dict[str, Any]:
     indexed = catalog["assetsById"].get(asset_id)
     if not isinstance(indexed, dict):
         raise RewardIssueError("That artwork is not in the local reward catalog.")
@@ -468,20 +474,24 @@ def _verify_artwork(site_root: Path, catalog: dict[str, Any], asset_id: str) -> 
             not isinstance(metadata.get("height"), int) or metadata["height"] < 1):
         raise RewardIssueError("That artwork has invalid catalog metadata.")
 
-    image_path = site_root / "zzz_assets" / "rewards" / filename
     digest = hashlib.sha256()
-    first_24 = b""
-    try:
-        with image_path.open("rb") as image:
-            while True:
-                block = image.read(1024 * 1024)
-                if not block:
-                    break
-                if len(first_24) < 24:
-                    first_24 += block[:24 - len(first_24)]
-                digest.update(block)
-    except OSError as exc:
-        raise RewardIssueError("The selected artwork file is missing or unreadable.") from exc
+    if image_bytes is None:
+        image_path = site_root / "zzz_assets" / "rewards" / filename
+        first_24 = b""
+        try:
+            with image_path.open("rb") as image:
+                while True:
+                    block = image.read(1024 * 1024)
+                    if not block:
+                        break
+                    if len(first_24) < 24:
+                        first_24 += block[:24 - len(first_24)]
+                    digest.update(block)
+        except OSError as exc:
+            raise RewardIssueError("The selected artwork file is missing or unreadable.") from exc
+    else:
+        first_24 = image_bytes[:24]
+        digest.update(image_bytes)
     if filename.lower().endswith(".png") and len(first_24) >= 24 and \
             first_24[:8] == b"\x89PNG\r\n\x1a\n" and first_24[12:16] == b"IHDR":
         width, height = struct.unpack(">II", first_24[16:24])
@@ -535,7 +545,15 @@ def _same_chat_identity(record: dict[str, Any], request: dict[str, str]) -> bool
     )
 
 
-def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str, Any], request: dict[str, str], issued_at: str) -> tuple[dict[str, Any], dict[str, Any]]:
+def _new_assignment(
+    site_root: Path,
+    catalog: dict[str, Any],
+    registry: dict[str, Any],
+    request: dict[str, str],
+    issued_at: str,
+    *,
+    artwork_bytes: bytes | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
     previous = _find_event(registry, event_hash)
     if previous:
@@ -549,7 +567,7 @@ def _new_assignment(site_root: Path, catalog: dict[str, Any], registry: dict[str
            for record in registry["assignments"]):
         raise RewardIssueError("That artwork has already been awarded.")
 
-    artwork = _verify_artwork(site_root, catalog, request["assetId"])
+    artwork = _verify_artwork(site_root, catalog, request["assetId"], image_bytes=artwork_bytes)
     if request.get("userId"):
         for previous_assignment in registry["assignments"]:
             if _same_chat_identity(previous_assignment, request):
