@@ -1,5 +1,5 @@
 import { resolveRewardAsset } from "./asset-resolver.mjs?v=images-reservations-1";
-import { fetchAssignmentRegistry } from "./assignment-source.mjs?v=registry-race-timeout-1";
+import { fetchAssignmentRegistry } from "./assignment-source.mjs?v=reward-sync-source-2";
 import { createRewardHref } from "./reward-link.mjs?v=github-static-2";
 import { createUserRewardListHref } from "./user-list-link.mjs?v=1";
 import { rewardFaviconForAsset } from "./reward-favicon.mjs?v=1";
