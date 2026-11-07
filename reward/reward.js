@@ -607,8 +607,7 @@ import {
         activeAwardCollection.assignments = linkedAwards;
         awardCollectionHeading.replaceChildren(
           document.createTextNode(rewardText("reward.collection_other_rewards", "Other rewards for") + " "),
-          usernameDisplay(username),
-          document.createTextNode(` - ${rewardText("reward.collection_newest", "newest first")}`)
+          usernameDisplay(username)
         );
         awardCollection.hidden = false;
         layoutUserAwardCollection();
