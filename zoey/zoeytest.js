@@ -165,8 +165,8 @@
       name: "Pato",
       avatar: "/zoey/assets/pato/pato-avatar.png",
       clips: [
-        { src: "/zoey/assets/pato/pato-voice-1.wav?v=20261107-08", caption: "Pato's voice note 1 of 3." },
-        { src: "/zoey/assets/pato/pato-voice-2.wav?v=20261107-08", caption: "Pato's voice note 2 of 3." },
+        { src: "/zoey/assets/pato/pato-voice-1-20261108-later.wav?v=20261108-07", caption: "Pato's voice note 1 of 3." },
+        { src: "/zoey/assets/pato/pato-voice-2-20261108-later.wav?v=20261108-07", caption: "Pato's voice note 2 of 3." },
         { src: "/zoey/assets/pato/pato-voice-3.wav?v=20261107-08", caption: "Pato's voice note 3 of 3." }
       ]
     }
