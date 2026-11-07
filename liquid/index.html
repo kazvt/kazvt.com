@@ -89,7 +89,7 @@
         </fieldset>
         <details class="mb-3">
           <summary>URL parameters</summary>
-          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, and relevant units; colors accept hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>.</p>
+          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, percentages, and applicable units; colors accept bare hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>.</p>
         </details>
       </aside>
     </div>
@@ -330,7 +330,7 @@
       }
       function parseColorParameter(raw) {
         const candidate = raw.trim();
-        if (!candidate || /^(?:currentcolor|transparent|inherit|initial|unset|revert|revert-layer)$/i.test(candidate) || /^(?:var|env|url)\s*\(/i.test(candidate)) return null;
+        if (candidate.length > 128 || !candidate || /^(?:currentcolor|transparent|inherit|initial|unset|revert|revert-layer)$/i.test(candidate) || /^(?:var|env|url)\s*\(/i.test(candidate)) return null;
         let color = candidate;
         if (/^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) color = `#${color}`;
         if (!window.CSS || !CSS.supports("color", color)) return null;
@@ -348,6 +348,7 @@
       }
 
       function parseNumberParameter(raw, key, input) {
+        if (raw.length > 64) return null;
         let text = raw.trim().toLowerCase().replace(/−/g, "-").replace(/×/g, "x");
         // URLSearchParams decodes a literal + as a space, including in exponents.
         text = text.replace(/([e])\s+(?=\d)/g, "$1+");
