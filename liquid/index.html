@@ -324,22 +324,41 @@
           if (saved) Object.entries(controls).forEach(([id, el]) => { if (saved[id] !== undefined) el.value = saved[id]; });
         } catch (_) { /* use defaults */ }
       }
-      function readFullscreenPreference() {
-        try { return localStorage.getItem(fullscreenPreferenceKey) === "true"; } catch (_) { return false; }
+      function readTheaterPreference() {
+        try {
+          const saved = localStorage.getItem(theaterPreferenceKey);
+          if (saved !== null) return saved === "true";
+        } catch (_) { return false; }
+        try {
+          const legacyFullscreen = localStorage.getItem(legacyFullscreenPreferenceKey) === "true";
+          if (legacyFullscreen) {
+            try { localStorage.setItem(theaterPreferenceKey, "true"); } catch (_) { /* keep legacy preference */ }
+          }
+          return legacyFullscreen;
+        } catch (_) { return false; }
       }
-      function updateFullscreenButton() {
-        fullscreenButton.textContent = document.fullscreenElement === stage
-          ? "Exit fullscreen"
-          : resumeFullscreenOnOpen ? "Resume fullscreen" : "Fullscreen";
-      }
-      function saveFullscreenPreference(preferred) {
-        resumeFullscreenOnOpen = preferred;
-        try { localStorage.setItem(fullscreenPreferenceKey, String(preferred)); } catch (_) { /* storage may be disabled */ }
-        updateFullscreenButton();
-      }
-      function cancelPendingFullscreenExit() {
-        if (fullscreenExitTimer) window.clearTimeout(fullscreenExitTimer);
-        fullscreenExitTimer = 0;
+      function setTheaterMode(enabled, persist = true) {
+        theaterMode = enabled;
+        document.body.classList.toggle("theater-mode", enabled);
+        appShell.classList.toggle("py-3", !enabled);
+        appShell.classList.toggle("p-0", enabled);
+        pageRow.classList.toggle("g-4", !enabled);
+        pageRow.classList.toggle("g-0", enabled);
+        controlsColumn.classList.toggle("d-none", enabled);
+        previewMeta.classList.toggle("d-none", enabled);
+        theaterToggleRow.classList.toggle("d-none", enabled);
+        theaterToolbar.classList.toggle("d-none", !enabled);
+        previewColumn.classList.toggle("col-lg-8", !enabled);
+        previewColumn.classList.toggle("col-lg-12", enabled);
+        previewColumn.classList.toggle("sticky-lg-top", !enabled);
+        previewColumn.classList.toggle("align-self-lg-start", !enabled);
+        stage.classList.toggle("ratio", !enabled);
+        stage.classList.toggle("ratio-16x9", !enabled);
+        theaterButton.setAttribute("aria-pressed", String(enabled));
+        if (persist) {
+          try { localStorage.setItem(theaterPreferenceKey, String(enabled)); } catch (_) { /* storage may be disabled */ }
+        }
+        resize();
       }
       function applySettings() {
         syncLabels();
