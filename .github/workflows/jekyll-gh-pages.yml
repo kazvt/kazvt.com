@@ -44,13 +44,44 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v5
         with:
-          # GitHub Pages currently enforces a 10-minute maximum for a deployment.
+          # GitHub Pages enforces a 10-minute deployment ceiling.
           timeout: "600000"
+      - name: Brief pause after a timed-out deployment
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+      - name: Retry only if this is still the newest main commit
+        id: retry_gate
+        if: steps.deployment.outcome == 'failure'
+        env:
+          CURRENT_SHA: ${{ github.sha }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          latest_sha="$(git ls-remote "${SERVER_URL}/${REPOSITORY}.git" refs/heads/main | awk 'NR == 1 { print $1 }')"
+          if [[ -n "$latest_sha" && "$latest_sha" == "$CURRENT_SHA" ]]; then
+            echo "should_retry=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_retry=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::A newer main commit exists; leaving the deployment slot for its Pages run."
+          fi
+      - name: Retry GitHub Pages deployment once
+        id: deployment_retry
+        if: steps.retry_gate.outputs.should_retry == 'true'
+        uses: actions/deploy-pages@v5
+        with:
+          timeout: "600000"
+      - name: Report a second deployment timeout
+        if: steps.retry_gate.outputs.should_retry == 'true' && steps.deployment_retry.outcome == 'failure'
+        run: |
+          echo "::error::GitHub Pages timed out twice. Open the Pages workflow in Actions and retry after checking its deployment queue."
+          exit 1
