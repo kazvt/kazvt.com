@@ -457,48 +457,20 @@
         }, "image/png");
       });
       window.addEventListener("resize", resize);
-      document.addEventListener("fullscreenchange", () => {
-        const fullscreen = document.fullscreenElement === stage;
-        stage.classList.toggle("ratio", !fullscreen);
-        stage.classList.toggle("ratio-16x9", !fullscreen);
-        stage.classList.toggle("w-100", fullscreen);
-        stage.classList.toggle("h-100", fullscreen);
-        updateFullscreenButton();
-        if (fullscreen) {
-          cancelPendingFullscreenExit();
-          saveFullscreenPreference(true);
-        } else if (!pageIsHiding && document.visibilityState === "visible") {
-          cancelPendingFullscreenExit();
-          fullscreenExitTimer = window.setTimeout(() => {
-            fullscreenExitTimer = 0;
-            if (!pageIsHiding && document.visibilityState === "visible" && !document.fullscreenElement) {
-              saveFullscreenPreference(false);
-            }
-          }, 150);
-        }
-        resize();
-      });
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") cancelPendingFullscreenExit();
-        else updateFullscreenButton();
-      });
-      window.addEventListener("pagehide", () => {
-        pageIsHiding = true;
-        cancelPendingFullscreenExit();
-      });
-      window.addEventListener("pageshow", () => {
-        pageIsHiding = false;
-        updateFullscreenButton();
-      });
       window.addEventListener("keydown", event => {
+        if (event.key === "Escape" && theaterMode) {
+          event.preventDefault();
+          setTheaterMode(false);
+          theaterButton.focus();
+          return;
+        }
         if (event.code === "Space" && !["INPUT", "BUTTON", "SELECT"].includes(document.activeElement.tagName)) {
           event.preventDefault();
           document.getElementById("pauseBtn").click();
         }
       });
 
-      resumeFullscreenOnOpen = readFullscreenPreference();
-      updateFullscreenButton();
+      setTheaterMode(readTheaterPreference(), false);
       loadSettings();
       syncLabels();
       try {
