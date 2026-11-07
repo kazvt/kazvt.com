@@ -1,6 +1,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { fetchAssignmentRegistry } from "../assignment-source.mjs";
 import { createRewardHref } from "../reward-link.mjs";
 
 const DEFAULT_API_ORIGIN = "http://127.0.0.1:8000";
@@ -120,20 +121,19 @@ async function callLocalApi(fetchImpl, apiOrigin, path, init = {}, timeoutMs = 1
   return readJson(response, "The local MSI reward API");
 }
 
-async function readPublishedRegistry(fetchImpl, siteOrigin, timeoutMs) {
-  const url = new URL("/zzz_assets/rewards/assignments.json", siteOrigin);
-  url.searchParams.set("issuer-check", String(Date.now()));
-  let response;
+async function readPublishedRegistry(fetchImpl, siteOrigin, timeoutMs, expectedLinkId) {
   try {
-    response = await fetchImpl(url, { cache: "no-store", headers: { Accept: "application/json" }, signal: withTimeout(timeoutMs) });
+    return await fetchAssignmentRegistry({
+      fetchImpl,
+      hostname: new URL(siteOrigin).hostname,
+      origin: siteOrigin,
+      cacheBust: Date.now(),
+      expectedLinkId,
+      requestTimeoutMs: Math.min(6_000, timeoutMs)
+    });
   } catch (error) {
     throw new Error(`Could not verify the public reward registry yet. ${error?.message || ""}`.trim());
   }
-  const registry = await readJson(response, "The public reward registry");
-  if (registry.version !== 1 || !Array.isArray(registry.assignments)) {
-    throw new Error("The public reward registry has an unsupported format.");
-  }
-  return registry;
 }
 
 /** Lists unassigned reward art from the local MSI-hosted catalog. */
@@ -186,7 +186,9 @@ export async function issueAward(input, options = {}) {
   let lastError = "";
   while (Date.now() < deadline) {
     try {
-      const registry = await readPublishedRegistry(fetchImpl, siteOrigin, Math.min(15_000, timeoutMs));
+      const registry = await readPublishedRegistry(
+        fetchImpl, siteOrigin, Math.min(15_000, timeoutMs), result.assignment.linkId
+      );
       const published = registry.assignments.find(record => record.linkId === result.assignment.linkId);
       if (published) {
         if (normalizeUsername(published.username) !== normalizeUsername(request.username) ||
