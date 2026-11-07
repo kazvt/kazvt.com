@@ -18,7 +18,7 @@ const { assignment, href } = await issueAward({
 });
 ```
 
-`GET http://127.0.0.1:8000/reward-api/available` returns catalogued PNGs that have not already been awarded. `POST http://127.0.0.1:8000/reward-api/issue` takes JSON with `username`, `assetId`, a stable `eventId`, and optional `platform` and `reason`. The client supplies the required local same-origin header. `issueAward()` waits until the public Pages registry contains the new link, then returns `{ assignment, href, replayed, pushed }`.
+`GET http://127.0.0.1:8000/reward-api/available` returns catalogued PNGs that have not already been awarded. `POST http://127.0.0.1:8000/reward-api/issue` takes JSON with `username`, `assetId`, a stable `eventId`, and optional `platform` and `reason`. The client supplies the required local same-origin header. `issueAward()` checks the same public registry sources as the reward page (GitHub's raw `main` file and the Pages copy) and returns as soon as either one contains the exact new assignment. It verifies the winner, artwork, and reason before returning `{ assignment, href, replayed, pushed }`, so the faster source cannot produce a mismatched reward.
 
 A game page served locally by MSI can call the endpoint directly with a same-origin `fetch()`. A game running only at `kazvt.com` cannot issue awards; it must not be given a public write endpoint or a credential.
 
