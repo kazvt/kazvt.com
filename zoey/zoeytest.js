@@ -86,8 +86,8 @@
       name: "Diosu",
       avatar: "/zoey/assets/diosu/diosu-avatar.png",
       clips: [
-        { src: "/zoey/assets/diosu/diosu-voice-1.wav?v=20261108-02", caption: "Diosu's voice note 1 of 2." },
-        { src: "/zoey/assets/diosu/diosu-voice-2.wav?v=20261108-02", caption: "Diosu's voice note 2 of 2." }
+        { src: "/zoey/assets/diosu/diosu-voice-1-20261108-later.wav?v=20261108-03", caption: "Diosu's voice note 1 of 2." },
+        { src: "/zoey/assets/diosu/diosu-voice-2-20261108-later.wav?v=20261108-03", caption: "Diosu's voice note 2 of 2." }
       ]
     },
     {
