@@ -684,36 +684,15 @@ def _canonical_remote(remote: str) -> str:
     return value.rstrip("/")
 
 
-@contextmanager
-def _reward_transaction_worktree(root: Path, expected_remote: str = DEFAULT_REMOTE) -> Iterator[Path]:
-    """Run issuance on a disposable snapshot of origin/main, never in the user's checkout."""
+def _published_revision(root: Path, expected_remote: str = DEFAULT_REMOTE) -> str:
+    """Fetch and return the published main commit without changing the user's checkout or index."""
     git_root = Path(_git(root, "rev-parse", "--show-toplevel")).resolve()
     if git_root != root.resolve():
         raise RewardIssueError("The configured website folder is not the root of its Git checkout.")
     if _canonical_remote(_git(root, "remote", "get-url", "origin")) != _canonical_remote(expected_remote):
         raise RewardIssueError("The website checkout's origin is not the expected kazvt.com repository.")
     _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
-    temporary_root = tempfile.TemporaryDirectory(prefix="kazvt-reward-transaction-")
-    worktree = Path(temporary_root.name) / "checkout"
-    registered = False
-    try:
-        _git(root, "worktree", "prune", "--expire", "now", check=False)
-        _git(root, "worktree", "add", "--quiet", "--detach", str(worktree), "origin/main")
-        registered = True
-        private_reservations = root / RESERVATIONS_RELATIVE
-        if private_reservations.is_file():
-            try:
-                destination = worktree / RESERVATIONS_RELATIVE
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(private_reservations, destination)
-            except OSError as exc:
-                raise RewardIssueError("Could not load the local private reward reservations.") from exc
-        yield worktree
-    finally:
-        if registered:
-            _git(root, "worktree", "remove", "--force", str(worktree), check=False)
-            _git(root, "worktree", "prune", "--expire", "now", check=False)
-        temporary_root.cleanup()
+    return _git(root, "rev-parse", "--verify", "refs/remotes/origin/main")
 
 
 def _ensure_commit_identity(root: Path) -> None:
