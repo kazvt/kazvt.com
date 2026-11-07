@@ -51,7 +51,7 @@
         { src: "/zoey/assets/traaansfem/traaansfem-voice-2.wav", caption: "TraaansFem's voice note 2 of 2." }
       ]
     },
-    ...Array.from({ length: 4 }, (_, index) => {
+    ...Array.from({ length: 3 }, (_, index) => {
       const number = index + 3;
       return {
         id: `star-${String(number).padStart(2, "0")}`,
@@ -60,6 +60,15 @@
         clips: []
       };
     }),
+    {
+      id: "diosu",
+      name: "Diosu",
+      avatar: "/zoey/assets/diosu/diosu-avatar.png",
+      clips: [
+        { src: "/zoey/assets/diosu/diosu-voice-1.wav?v=20261108-02", caption: "Diosu's voice note 1 of 2." },
+        { src: "/zoey/assets/diosu/diosu-voice-2.wav?v=20261108-02", caption: "Diosu's voice note 2 of 2." }
+      ]
+    },
     {
       id: "poppy",
       name: "Poppy",
