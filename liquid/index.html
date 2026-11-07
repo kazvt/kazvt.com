@@ -331,16 +331,32 @@
       function parseColorParameter(raw) {
         const candidate = raw.trim();
         if (candidate.length > 128 || !candidate || /^(?:currentcolor|transparent|inherit|initial|unset|revert|revert-layer)$/i.test(candidate) || /^(?:var|env|url)\s*\(/i.test(candidate)) return null;
-        let color = candidate;
-        if (/^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) color = `#${color}`;
-        if (!window.CSS || !CSS.supports("color", color)) return null;
+        let hex = candidate.replace(/^#/, "");
+        if (/^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(hex)) {
+          if (hex.length === 3 || hex.length === 4) {
+            if (hex.length === 4 && hex[3].toLowerCase() !== "f") return null;
+            hex = hex.slice(0, 3).split("").map(channel => channel + channel).join("");
+          } else {
+            if (hex.length === 8 && hex.slice(6).toLowerCase() !== "ff") return null;
+            hex = hex.slice(0, 6);
+          }
+          return `#${hex.toLowerCase()}`;
+        }
+        if (!window.CSS || !CSS.supports("color", candidate)) return null;
         const sample = document.createElement("canvas");
         sample.width = sample.height = 1;
         const context = sample.getContext("2d", { willReadFrequently: true });
         if (!context) return null;
+        context.fillStyle = "#010203";
+        const firstSentinel = context.fillStyle;
+        context.fillStyle = candidate;
+        const acceptedAfterFirstSentinel = context.fillStyle !== firstSentinel;
+        context.fillStyle = "#040506";
+        const secondSentinel = context.fillStyle;
+        context.fillStyle = candidate;
+        if (!acceptedAfterFirstSentinel && context.fillStyle === secondSentinel) return null;
         context.clearRect(0, 0, 1, 1);
         context.globalCompositeOperation = "copy";
-        context.fillStyle = color;
         context.fillRect(0, 0, 1, 1);
         const pixel = context.getImageData(0, 0, 1, 1).data;
         if (pixel[3] !== 255) return null;
