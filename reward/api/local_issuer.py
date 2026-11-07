@@ -885,89 +885,98 @@ def _revoke_rewards_and_publish(
         raise RewardIssueError("The configured website folder is unavailable.")
 
     with _ISSUE_LOCK:
-        _repo_sync_state(root, expected_remote)
-        _ensure_commit_identity(root)
-        _, registry = _load_records(root)
-        event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
-        if _find_event(registry, event_hash):
-            raise RewardIssueError("This chat event was already used to issue an award.")
-        previous_event = _find_reward_command_event(registry, event_hash)
-        if previous_event:
-            if (previous_event.get("action") != action or
-                    str(previous_event.get("platform", "")).casefold() != request["platform"] or
-                    str(previous_event.get("userId", "")) != request["userId"] or
-                    str(previous_event.get("actorLogin", "")).casefold() != actor_login):
-                raise RewardIssueError("This chat event was already used for a different reward operation.")
-            archived = registry.get("revokedAssignments", [])
-            by_link = {str(record.get("linkId", "")): record for record in archived}
-            return {
-                "action": action,
-                "username": previous_event["username"],
-                "revoked": [by_link[link_id] for link_id in previous_event["assignmentLinkIds"] if link_id in by_link],
-                "revokedCount": len(previous_event["assignmentLinkIds"]),
-                "replayed": True,
-                "pushed": True,
-            }
+        with _reward_transaction_worktree(root, expected_remote) as transaction_root:
+            return _revoke_in_worktree(transaction_root, request, action, actor_login)
 
-        owned = [record for record in registry["assignments"] if _same_chat_identity(record, request)]
-        if action == "unassign_latest":
-            # The assignments list is append-ordered; use that as the final
-            # tie-breaker if two imports share the same timestamp precision.
-            selected = [max(enumerate(owned), key=lambda pair: (_issued_at_key(pair[1]), pair[0]))[1]] if owned else []
-            commit_action = "unassign award"
-        else:
-            selected = sorted(owned, key=_issued_at_key, reverse=True)
-            commit_action = "clear awards"
 
-        if any(not str(record.get("linkId", "")) for record in selected):
-            raise RewardIssueError("A selected award has no stable link ID, so it cannot be safely removed automatically.")
-
-        occurred_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-        archived_records = []
-        revoked_link_ids = []
-        for record in selected:
-            archived = {
-                **record,
-                "username": request["username"],
-                "revokedAt": occurred_at,
-                "revokedBy": actor_login,
-                "revocationEventHash": event_hash,
-                "revocationAction": action,
-            }
-            archived_records.append(archived)
-            revoked_link_ids.append(str(record.get("linkId", "")))
-
-        selected_records = {id(record) for record in selected}
-        next_registry = {
-            **registry,
-            "version": 1,
-            "assignments": [record for record in registry["assignments"] if id(record) not in selected_records],
-            "revokedAssignments": [*registry.get("revokedAssignments", []), *archived_records],
-            "rewardCommandEvents": [
-                *registry.get("rewardCommandEvents", []),
-                {
-                    "eventIdHash": event_hash,
-                    "action": action,
-                    "platform": request["platform"],
-                    "userId": request["userId"],
-                    "username": request["username"],
-                    "actorLogin": actor_login,
-                    "occurredAt": occurred_at,
-                    "assignmentLinkIds": revoked_link_ids,
-                },
-            ],
-        }
-        _validate_registry(next_registry)
-        _commit_registry(root, next_registry, event_hash, commit_action)
-        print(f"[reward chat] {action}: released {len(archived_records)} award(s) from {request['username']} on {request['platform']}.")
+def _revoke_in_worktree(
+    root: Path,
+    request: dict[str, str],
+    action: str,
+    actor_login: str,
+) -> dict[str, Any]:
+    _ensure_commit_identity(root)
+    _, registry = _load_records(root)
+    event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
+    if _find_event(registry, event_hash):
+        raise RewardIssueError("This chat event was already used to issue an award.")
+    previous_event = _find_reward_command_event(registry, event_hash)
+    if previous_event:
+        if (previous_event.get("action") != action or
+                str(previous_event.get("platform", "")).casefold() != request["platform"] or
+                str(previous_event.get("userId", "")) != request["userId"] or
+                str(previous_event.get("actorLogin", "")).casefold() != actor_login):
+            raise RewardIssueError("This chat event was already used for a different reward operation.")
+        archived = registry.get("revokedAssignments", [])
+        by_link = {str(record.get("linkId", "")): record for record in archived}
         return {
             "action": action,
-            "username": request["username"],
-            "revoked": archived_records,
-            "revokedCount": len(archived_records),
-            "replayed": False,
+            "username": previous_event["username"],
+            "revoked": [by_link[link_id] for link_id in previous_event["assignmentLinkIds"] if link_id in by_link],
+            "revokedCount": len(previous_event["assignmentLinkIds"]),
+            "replayed": True,
             "pushed": True,
         }
+
+    owned = [record for record in registry["assignments"] if _same_chat_identity(record, request)]
+    if action == "unassign_latest":
+        # The assignments list is append-ordered; use that as the final
+        # tie-breaker if two imports share the same timestamp precision.
+        selected = [max(enumerate(owned), key=lambda pair: (_issued_at_key(pair[1]), pair[0]))[1]] if owned else []
+        commit_action = "unassign award"
+    else:
+        selected = sorted(owned, key=_issued_at_key, reverse=True)
+        commit_action = "clear awards"
+
+    if any(not str(record.get("linkId", "")) for record in selected):
+        raise RewardIssueError("A selected award has no stable link ID, so it cannot be safely removed automatically.")
+
+    occurred_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    archived_records = []
+    revoked_link_ids = []
+    for record in selected:
+        archived = {
+            **record,
+            "username": request["username"],
+            "revokedAt": occurred_at,
+            "revokedBy": actor_login,
+            "revocationEventHash": event_hash,
+            "revocationAction": action,
+        }
+        archived_records.append(archived)
+        revoked_link_ids.append(str(record.get("linkId", "")))
+
+    selected_records = {id(record) for record in selected}
+    next_registry = {
+        **registry,
+        "version": 1,
+        "assignments": [record for record in registry["assignments"] if id(record) not in selected_records],
+        "revokedAssignments": [*registry.get("revokedAssignments", []), *archived_records],
+        "rewardCommandEvents": [
+            *registry.get("rewardCommandEvents", []),
+            {
+                "eventIdHash": event_hash,
+                "action": action,
+                "platform": request["platform"],
+                "userId": request["userId"],
+                "username": request["username"],
+                "actorLogin": actor_login,
+                "occurredAt": occurred_at,
+                "assignmentLinkIds": revoked_link_ids,
+            },
+        ],
+    }
+    _validate_registry(next_registry)
+    _commit_registry(root, next_registry, event_hash, commit_action)
+    print(f"[reward chat] {action}: released {len(archived_records)} award(s) from {request['username']} on {request['platform']}.")
+    return {
+        "action": action,
+        "username": request["username"],
+        "revoked": archived_records,
+        "revokedCount": len(archived_records),
+        "replayed": False,
+        "pushed": True,
+    }
 
 
 def unassign_latest_and_publish(
