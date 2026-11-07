@@ -58,21 +58,32 @@ jobs:
       - name: Brief pause after a timed-out deployment
         if: steps.deployment.outcome == 'failure'
         run: sleep 30
-      - name: Retry only if this is still the newest main commit
+      - name: Retry only if this is still the newest commit on the branch
         id: retry_gate
         if: steps.deployment.outcome == 'failure'
         env:
           CURRENT_SHA: ${{ github.sha }}
+          CURRENT_REF: ${{ github.ref }}
           SERVER_URL: ${{ github.server_url }}
           REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
-          latest_sha="$(git ls-remote "${SERVER_URL}/${REPOSITORY}.git" refs/heads/main | awk 'NR == 1 { print $1 }')"
-          if [[ -n "$latest_sha" && "$latest_sha" == "$CURRENT_SHA" ]]; then
+          set -euo pipefail
+          remote_refs="$(git ls-remote "${SERVER_URL}/${REPOSITORY}.git" "$CURRENT_REF")"
+          latest_sha="$(awk 'NR == 1 { print $1 }' <<< "$remote_refs")"
+          if [[ -z "$latest_sha" ]]; then
+            echo "::error::Could not verify the latest branch commit; refusing to hide the failed Pages deployment."
+            exit 1
+          fi
+          if [[ "$latest_sha" == "$CURRENT_SHA" ]]; then
             echo "should_retry=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_retry=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::A newer main commit exists; leaving the deployment slot for its Pages run."
+            echo "::notice::A newer branch commit exists; leaving the deployment slot for its Pages run."
+            {
+              echo "## Pages attempt superseded"
+              echo "The deployment for $CURRENT_SHA failed, but this branch has advanced to $latest_sha. This run will not retry its stale artifact; the newer push run owns deployment."
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Retry GitHub Pages deployment once
         id: deployment_retry
