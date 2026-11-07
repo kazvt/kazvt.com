@@ -751,7 +751,7 @@ def _commit_registry(
 
         allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
         committed_paths = set(_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", base_revision, tree_id).splitlines())
-        if committed_paths != allowed_paths:
+        if ASSIGNMENTS_RELATIVE not in committed_paths or not committed_paths <= allowed_paths:
             raise RewardIssueError("The reward commit included unexpected files; review Git history before retrying.")
 
         author, email = _ensure_commit_identity(root)
