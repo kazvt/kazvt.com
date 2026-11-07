@@ -109,13 +109,22 @@
       const controls = Object.fromEntries(Object.keys(defaults).map(id => [id, document.getElementById(id)]));
       const canvas = document.getElementById("gl");
       const stage = document.getElementById("stage");
+      const appShell = document.getElementById("appShell");
+      const pageRow = document.getElementById("pageRow");
+      const previewColumn = document.getElementById("previewColumn");
+      const controlsColumn = document.getElementById("controlsColumn");
+      const previewMeta = document.getElementById("previewMeta");
+      const theaterToggleRow = document.getElementById("theaterToggleRow");
+      const theaterToolbar = document.getElementById("theaterToolbar");
       const notice = document.getElementById("notice");
       const fpsLabel = document.getElementById("fps");
-      const fullscreenButton = document.getElementById("fullscreenBtn");
-      const fullscreenPreferenceKey = "kazvt-liquid-fullscreen-v1";
+      const theaterButton = document.getElementById("theaterBtn");
+      const exitTheaterButton = document.getElementById("exitTheaterBtn");
+      const theaterPreferenceKey = "kazvt-liquid-theater-mode-v1";
+      const legacyFullscreenPreferenceKey = "kazvt-liquid-fullscreen-v1";
       let gl, program, buffer, locations = {};
       let paused = false, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0;
-      let resumeFullscreenOnOpen = false, pageIsHiding = false, fullscreenExitTimer = 0;
+      let theaterMode = false;
       let viewWidth = 1, viewHeight = 1, dpr = 1;
 
       const vertexSource = `
