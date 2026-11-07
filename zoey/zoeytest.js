@@ -4,6 +4,7 @@
   const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
   const audioStatus = document.getElementById("audioStatus");
+  const entryNameMeasureContext = document.createElement("canvas").getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const CLIP_START_COOLDOWN_MS = 1000;
   const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
@@ -227,7 +228,8 @@
       const name = document.createElement("span");
       name.className = "z-entry-name";
       name.textContent = entry.name;
-      button.append(avatar, name);
+      avatar.append(name);
+      button.append(avatar);
       card.append(button);
       fragment.append(card);
     });
@@ -350,9 +352,25 @@
     cards.forEach((card) => {
       const avatar = card.querySelector(".z-entry-avatar");
       const star = card.querySelector(".z-avatar-star");
-      if (!avatar || !star) return;
-      const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
-      star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
+      const name = card.querySelector(".z-entry-name");
+      if (!avatar) return;
+      if (name && entryNameMeasureContext) {
+        name.style.fontSize = "";
+        const nameStyle = getComputedStyle(name);
+        const baseSize = Number.parseFloat(nameStyle.fontSize);
+        const availableWidth = Math.max(1, avatar.clientWidth - 10);
+        entryNameMeasureContext.font = `${nameStyle.fontWeight} ${baseSize}px ${nameStyle.fontFamily}`;
+        const measuredWidth = entryNameMeasureContext.measureText(name.textContent.trim()).width;
+        if (measuredWidth > availableWidth && measuredWidth > 0) {
+          const minSize = Math.min(baseSize, 7.5);
+          const fittedSize = Math.max(minSize, baseSize * availableWidth / measuredWidth);
+          name.style.fontSize = `${fittedSize.toFixed(2)}px`;
+        }
+      }
+      if (star) {
+        const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
+        star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
+      }
     });
     canvas.dataset.layout = layoutName;
   }
@@ -894,6 +912,7 @@
   }
 
   renderEntries();
+  document.fonts?.ready?.then(() => layoutEntryStickers());
   setMotion(!reduceMotion.matches);
   reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
 
