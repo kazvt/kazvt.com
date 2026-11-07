@@ -301,6 +301,20 @@
       ]
     };
     const positions = layouts[layoutName];
+    let realEntryIndex = 0;
+    let placeholderIndex = 0;
+    const positionIndexes = entrySlots.map((entry) => {
+      if (entry.id.startsWith("star-")) {
+        const index = layoutName === "panorama" ? placeholderIndex * 5 + 4 : 16 + placeholderIndex;
+        placeholderIndex += 1;
+        return index;
+      }
+      const index = layoutName === "panorama"
+        ? Math.floor(realEntryIndex / 4) * 5 + realEntryIndex % 4
+        : realEntryIndex;
+      realEntryIndex += 1;
+      return index;
+    });
     const tiltRange = (height < 140 ? 0
       : height < 180 ? Math.min(3, 1500 / width)
         : height < 360 ? Math.min(3, 10 / aspectRatio)
@@ -313,7 +327,7 @@
     // The extra inset reserves room for the hover-scale effect; ordinary sizes retain tilt.
     function getBounds(cardScale, motionScale) {
       return cards.map((_, index) => {
-        const [xPct, yPct, widthPct, heightPct] = positions[index];
+        const [xPct, yPct, widthPct, heightPct] = positions[positionIndexes[index]];
         const scaledWidthPct = widthPct * cardScale;
         const scaledHeightPct = heightPct * cardScale;
         const x = (xPct + (widthPct - scaledWidthPct) / 2) * width / 100;
@@ -366,7 +380,7 @@
     }
 
     cards.forEach((card, index) => {
-      const [x, y, cardWidth, cardHeight] = positions[index];
+      const [x, y, cardWidth, cardHeight] = positions[positionIndexes[index]];
       const fittedWidth = cardWidth * cardScale;
       const fittedHeight = cardHeight * cardScale;
       card.style.setProperty("--entry-x", `${(x + (cardWidth - fittedWidth) / 2).toFixed(3)}%`);
