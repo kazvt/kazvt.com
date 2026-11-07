@@ -340,7 +340,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertEqual(git(self.site, "rev-parse", "HEAD"), original_head)
         self.assertEqual(ignore_path.read_text(encoding="utf-8"), original_ignore + "\n# local website note\n")
         self.assertEqual(untracked_path.read_text(encoding="utf-8"), "keep this local\n")
-        committed = set(git(self.site, "diff-tree", "--no-commit-id", "--name-only", "-r", "origin/main").splitlines())
+        committed = self.remote_commit_paths()
         self.assertEqual(committed, {"zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"})
         self.assertEqual(git(self.site, "diff", "--cached", "--name-only"), ".gitignore")
         self.assertEqual(git(self.site, "status", "--short").splitlines(), ["M  .gitignore", "?? private-local-note.txt"])
@@ -393,8 +393,8 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertEqual(ignore_path.read_text(encoding="utf-8"), local_edit)
         self.assertEqual(untracked_path.read_text(encoding="utf-8"), "do not remove\n")
         self.assertEqual((self.site / "site-note.txt").exists(), False)
-        self.assertEqual(git(self.site, "rev-parse", "origin/main"), git(self.site, "ls-remote", "origin", "refs/heads/main").split()[0])
-        committed = set(git(self.site, "diff-tree", "--no-commit-id", "--name-only", "-r", "origin/main").splitlines())
+        self.assertEqual(git(self.remote, "show", "refs/heads/main:site-note.txt"), "new site edit")
+        committed = self.remote_commit_paths()
         self.assertEqual(committed, {"zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"})
 
     def test_unassign_latest_releases_art_and_preserves_retry_safety(self) -> None:
@@ -406,7 +406,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             self.site, {**winner, "eventId": "youtube:award-newer"}, expected_remote=str(self.remote)
         )
         self.assertNotEqual(older["assignment"]["assetId"], newer["assignment"]["assetId"])
-        self.assertEqual(list_available_artwork(self.site), [])
+        self.assertEqual(self.available(), [])
 
         removal = {
             **winner,
@@ -417,13 +417,13 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertEqual(result["revokedCount"], 1)
         self.assertEqual(result["revoked"][0]["linkId"], newer["assignment"]["linkId"])
         self.assertEqual(
-            json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8")),
+            self.remote_json("zzz_assets/rewards/pool.json"),
             {"version": 1, "remaining": 1, "total": 2},
         )
-        registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        registry = self.remote_json("zzz_assets/rewards/assignments.json")
         self.assertEqual([item["linkId"] for item in registry["assignments"]], [older["assignment"]["linkId"]])
         self.assertEqual([item["linkId"] for item in registry["revokedAssignments"]], [newer["assignment"]["linkId"]])
-        self.assertEqual(len(list_available_artwork(self.site)), 1)
+        self.assertEqual(len(self.available()), 1)
 
         replay = unassign_latest_and_publish(self.site, removal, expected_remote=str(self.remote))
         self.assertTrue(replay["replayed"])
@@ -439,12 +439,12 @@ class LocalRewardIssuerTests(unittest.TestCase):
             expected_remote=str(self.remote),
         )
         self.assertEqual(replacement["assignment"]["assetId"], newer["assignment"]["assetId"])
-        self.assertEqual(len(list_available_artwork(self.site)), 0)
+        self.assertEqual(len(self.available()), 0)
         replay_after_reissue = unassign_latest_and_publish(
             self.site, removal, expected_remote=str(self.remote)
         )
         self.assertTrue(replay_after_reissue["replayed"])
-        current_registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        current_registry = self.remote_json("zzz_assets/rewards/assignments.json")
         self.assertEqual(
             {item["linkId"] for item in current_registry["assignments"]},
             {older["assignment"]["linkId"], replacement["assignment"]["linkId"]},
@@ -469,12 +469,12 @@ class LocalRewardIssuerTests(unittest.TestCase):
         cleared = clear_user_rewards_and_publish(self.site, clear_request, expected_remote=str(self.remote))
         self.assertEqual(cleared["revokedCount"], 1)
         self.assertEqual(
-            json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8")),
+            self.remote_json("zzz_assets/rewards/pool.json"),
             {"version": 1, "remaining": 1, "total": 2},
         )
-        registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        registry = self.remote_json("zzz_assets/rewards/assignments.json")
         self.assertEqual([item["linkId"] for item in registry["assignments"]], [kick_award["assignment"]["linkId"]])
-        self.assertEqual(len(list_available_artwork(self.site)), 1)
+        self.assertEqual(len(self.available()), 1)
 
         replay = clear_user_rewards_and_publish(self.site, clear_request, expected_remote=str(self.remote))
         self.assertTrue(replay["replayed"])
@@ -490,7 +490,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         )
         replay = clear_user_rewards_and_publish(self.site, command, expected_remote=str(self.remote))
         self.assertTrue(replay["replayed"])
-        registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        registry = self.remote_json("zzz_assets/rewards/assignments.json")
         self.assertEqual([item["linkId"] for item in registry["assignments"]], [later["assignment"]["linkId"]])
 
     def test_editor_archived_chat_award_stays_idempotent_without_chat_revocation_event(self) -> None:
