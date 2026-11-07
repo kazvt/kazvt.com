@@ -12,14 +12,16 @@ import json
 import os
 import re
 import secrets
+import shutil
 import struct
 import subprocess
 import tempfile
 import threading
 import unicodedata
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 
 DEFAULT_SITE_ORIGIN = "https://kazvt.com"
@@ -594,86 +596,36 @@ def _canonical_remote(remote: str) -> str:
     return value.rstrip("/")
 
 
-def _changed_paths(root: Path) -> set[str]:
-    """Return tracked, staged, and untracked paths without parsing quoted status text."""
-    paths: set[str] = set()
-    for args in (
-        ("diff", "--name-only", "-z"),
-        ("diff", "--cached", "--name-only", "-z"),
-        ("ls-files", "--others", "--exclude-standard", "-z"),
-    ):
-        paths.update(path.replace("\\", "/") for path in _git(root, *args).split("\0") if path)
-    return paths
-
-
-def _reward_owned_path(path: str) -> bool:
-    """Reward inputs must be clean; unrelated website edits are not ours to block or publish."""
-    return path.startswith("zzz_assets/rewards/") or path == RESERVATIONS_RELATIVE
-
-
-def _assert_reward_inputs_clean(root: Path) -> set[str]:
-    changed = _changed_paths(root)
-    reward_changes = {path for path in changed if _reward_owned_path(path)}
-    if reward_changes:
-        raise RewardIssueError(
-            "Reward artwork or registry files have local changes. Review those reward files before issuing an award."
-        )
-    return changed
-
-
-def _repo_sync_state(root: Path, expected_remote: str = DEFAULT_REMOTE) -> tuple[int, int]:
+@contextmanager
+def _reward_transaction_worktree(root: Path, expected_remote: str = DEFAULT_REMOTE) -> Iterator[Path]:
+    """Run issuance on a disposable snapshot of origin/main, never in the user's checkout."""
     git_root = Path(_git(root, "rev-parse", "--show-toplevel")).resolve()
     if git_root != root.resolve():
         raise RewardIssueError("The configured website folder is not the root of its Git checkout.")
-    branch = _git(root, "branch", "--show-current")
-    if branch != "main":
-        raise RewardIssueError("The website checkout must be on main before an award can be published.")
     if _canonical_remote(_git(root, "remote", "get-url", "origin")) != _canonical_remote(expected_remote):
         raise RewardIssueError("The website checkout's origin is not the expected kazvt.com repository.")
-    local_changes = _assert_reward_inputs_clean(root)
-
     _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
-    counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
-    if len(counts) != 2:
-        raise RewardIssueError("Git could not compare the website checkout with origin/main.")
-    remote_ahead, local_ahead = (int(part) for part in counts)
-    if remote_ahead:
-        if local_ahead:
-            raise RewardIssueError(
-                "The website checkout and GitHub main have diverged. Resolve the Git history manually before issuing."
-            )
-        if local_changes:
-            raise RewardIssueError(
-                "GitHub has newer site changes and this checkout has local edits. Let the checkout sync, then retry the reward."
-            )
-        # The registry can be behind when another site edit was pushed since the
-        # last reward. Only a clean checkout may fast-forward; never merge, reset,
-        # or overwrite local work here.
-        _git(root, "merge", "--ff-only", "origin/main")
-        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
-            raise RewardIssueError(
-                "The website checkout changed while syncing from GitHub. Review its Git status before issuing."
-            )
-        counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
-        if len(counts) != 2 or counts != ["0", "0"]:
-            raise RewardIssueError(
-                "The website checkout did not finish syncing with GitHub. Retry the same eventId."
-            )
-
-    if local_ahead:
-        changed = set(_git(root, "diff", "--name-only", "-z", "origin/main...HEAD").split("\0")) - {""}
-        subjects = _git(root, "log", "--format=%s", "origin/main..HEAD").splitlines()
-        allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
-        if (ASSIGNMENTS_RELATIVE not in changed or not changed <= allowed_paths or not subjects or
-                not all(EVENT_COMMIT_RE.fullmatch(item) for item in subjects)):
-            raise RewardIssueError("There are unpublished commits besides a pending reward-registry push; publish them manually first.")
-        _git(root, "push", "origin", "HEAD:refs/heads/main")
-        _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
-        counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
-        if len(counts) != 2 or counts != ["0", "0"]:
-            raise RewardIssueError("The reward registry push has not synchronized with GitHub yet. Retry the same eventId.")
-        _assert_reward_inputs_clean(root)
-    return 0, 0
+    temporary_root = tempfile.TemporaryDirectory(prefix="kazvt-reward-transaction-")
+    worktree = Path(temporary_root.name) / "checkout"
+    registered = False
+    try:
+        _git(root, "worktree", "prune", "--expire", "now", check=False)
+        _git(root, "worktree", "add", "--quiet", "--detach", str(worktree), "origin/main")
+        registered = True
+        private_reservations = root / RESERVATIONS_RELATIVE
+        if private_reservations.is_file():
+            try:
+                destination = worktree / RESERVATIONS_RELATIVE
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(private_reservations, destination)
+            except OSError as exc:
+                raise RewardIssueError("Could not load the local private reward reservations.") from exc
+        yield worktree
+    finally:
+        if registered:
+            _git(root, "worktree", "remove", "--force", str(worktree), check=False)
+            _git(root, "worktree", "prune", "--expire", "now", check=False)
+        temporary_root.cleanup()
 
 
 def _ensure_commit_identity(root: Path) -> None:
