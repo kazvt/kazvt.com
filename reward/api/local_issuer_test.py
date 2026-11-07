@@ -89,8 +89,18 @@ class LocalRewardIssuerTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
+    def available(self):
+        return list_available_artwork(self.site, expected_remote=str(self.remote))
+
+    def remote_json(self, relative_path: str):
+        return json.loads(git(self.remote, "show", f"refs/heads/main:{relative_path}"))
+
+    def remote_commit_paths(self):
+        remote_head = git(self.remote, "rev-parse", "refs/heads/main")
+        return set(git(self.remote, "diff-tree", "--no-commit-id", "--name-only", "-r", remote_head).splitlines())
+
     def test_issues_once_pushes_only_registry_and_replays_idempotently(self) -> None:
-        self.assertEqual(len(list_available_artwork(self.site)), 2)
+        self.assertEqual(len(self.available()), 2)
         request = {"username": "Wïnner", "assetId": self.art_ids[0], "eventId": "match-7-winner-2"}
         first = issue_and_publish(self.site, request, expected_remote=str(self.remote))
         self.assertFalse(first["replayed"])
@@ -100,19 +110,19 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertEqual(first["assignment"]["eventIdHash"], hashlib.sha256(request["eventId"].encode()).hexdigest())
         self.assertEqual(first["href"], f"https://kazvt.com/reward/?id={first['assignment']['linkId']}")
         self.assertEqual(
-            git(self.site, "diff", "--name-only", "HEAD^", "HEAD").splitlines(),
+            sorted(self.remote_commit_paths()),
             ["zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"],
         )
-        self.assertEqual(len(list_available_artwork(self.site)), 1)
+        self.assertEqual(len(self.available()), 1)
         self.assertEqual(
-            json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8")),
+            self.remote_json("zzz_assets/rewards/pool.json"),
             {"version": 1, "remaining": 1, "total": 2},
         )
 
         replay = issue_and_publish(self.site, request, expected_remote=str(self.remote))
         self.assertTrue(replay["replayed"])
         self.assertEqual(replay["assignment"]["linkId"], first["assignment"]["linkId"])
-        self.assertEqual(len(json.loads((self.reward_dir / "assignments.json").read_text())["assignments"]), 1)
+        self.assertEqual(len(self.remote_json("zzz_assets/rewards/assignments.json")["assignments"]), 1)
 
     def test_rejects_reused_event_for_different_winner_or_art(self) -> None:
         request = {"username": "Winner", "assetId": self.art_ids[0], "eventId": "one-event"}
@@ -137,14 +147,14 @@ class LocalRewardIssuerTests(unittest.TestCase):
         }, expected_remote=str(self.remote))
         self.assertEqual(first["assignment"]["userId"], "123456")
         self.assertEqual(first["assignment"]["username"], "OldHandle")
-        self.assertEqual(len(list_available_artwork(self.site)), 1)
+        self.assertEqual(len(self.available()), 1)
 
         second = issue_next_and_publish(self.site, {
             "username": "NewHandle", "userId": "123456", "platform": "twitch",
             "eventId": "twitch:message-2",
         }, expected_remote=str(self.remote))
         self.assertNotEqual(second["assignment"]["assetId"], first["assignment"]["assetId"])
-        records = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))["assignments"]
+        records = self.remote_json("zzz_assets/rewards/assignments.json")["assignments"]
         self.assertEqual({record["username"] for record in records}, {"NewHandle"})
         self.assertEqual({record["userId"] for record in records}, {"123456"})
         self.assertEqual({record["platform"] for record in records}, {"twitch"})
@@ -169,7 +179,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         first = issue_next_and_publish(self.site, request, expected_remote=str(self.remote))
         self.assertEqual(first["assignment"]["reason"], "won tic tac toe")
 
-        public_registry = json.loads((self.reward_dir / "assignments.json").read_text(encoding="utf-8"))
+        public_registry = self.remote_json("zzz_assets/rewards/assignments.json")
         self.assertEqual(public_registry["assignments"][0]["reason"], "won tic tac toe")
 
         replay = issue_next_and_publish(
@@ -233,7 +243,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             expected_remote=str(self.remote),
         )
         self.assertEqual(released["revokedCount"], 1)
-        self.assertEqual(len(list_available_artwork(self.site)), 2)
+        self.assertEqual(len(self.available()), 2)
 
     def test_alias_reservation_routes_gif_only_to_matching_user_and_excludes_it_from_pool(self) -> None:
         gif = base64.b64decode("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==")
@@ -260,7 +270,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
         git(self.site, "commit", "-m", "add reserved GIF test fixture")
         git(self.site, "push", "origin", "main")
 
-        self.assertNotIn(asset_id, {item["assetId"] for item in list_available_artwork(self.site)})
+        self.assertNotIn(asset_id, {item["assetId"] for item in self.available()})
         with self.assertRaisesRegex(RewardIssueError, "reserved for a different username"):
             issue_and_publish(self.site, {
                 "username": "Intruder", "assetId": asset_id, "eventId": "manual-reserved-gif",
@@ -277,8 +287,8 @@ class LocalRewardIssuerTests(unittest.TestCase):
             "eventId": "twitch:ordinary-gift",
         }, expected_remote=str(self.remote))
         self.assertNotEqual(next_award["assignment"]["assetId"], asset_id)
-        self.assertEqual(len(list_available_artwork(self.site)), 1)
-        public_pool = json.loads((self.reward_dir / "pool.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(self.available()), 1)
+        public_pool = self.remote_json("zzz_assets/rewards/pool.json")
         self.assertEqual(public_pool, {"version": 1, "remaining": 1, "total": 2})
         public_files = git(self.site, "ls-files").splitlines()
         self.assertNotIn(local_issuer.RESERVATIONS_RELATIVE, public_files)
@@ -290,7 +300,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             "RESERVEDVIEWER, RESERVED-VIEWER => star.png\n",
             encoding="utf-8",
         )
-        self.assertEqual(list_available_artwork(self.site), [])
+        self.assertEqual(self.available(), [])
 
         first = issue_next_and_publish(self.site, {
             "username": "@RESERVED-VIEWER", "userId": "reserved-user", "platform": "twitch",
