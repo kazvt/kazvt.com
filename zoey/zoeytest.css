@@ -207,14 +207,10 @@ button, a { touch-action: manipulation; }
 .z-entry-button:focus-visible { transform: scale(var(--entry-hover-scale, 1.12)); }
 .z-entry-button:focus-visible { outline: 2px dashed #8a65ba; outline-offset: 5px; }
 body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gold); }
-.z-entry-button:hover .z-entry-avatar,
-.z-entry-button:focus-visible .z-entry-avatar,
 .z-entry.is-playing .z-entry-avatar {
   transform: translateY(-2px);
   filter: drop-shadow(0 0 8px rgb(255 139 201 / 88%)) drop-shadow(0 0 18px rgb(100 207 255 / 62%));
 }
-.z-constellation[data-compact="true"] .z-entry-button:hover .z-entry-avatar,
-.z-constellation[data-compact="true"] .z-entry-button:focus-visible .z-entry-avatar,
 .z-constellation[data-compact="true"] .z-entry.is-playing .z-entry-avatar {
   transform: none;
   filter: none;
@@ -265,9 +261,7 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   text-shadow: 0 2px 3px rgb(16 11 42 / 100%), 0 0 9px rgb(35 22 59 / 90%);
   transition: color 170ms ease, text-shadow 170ms ease;
 }
-.z-entry.is-playing .z-entry-name,
-.z-entry-button:hover .z-entry-name,
-.z-entry-button:focus-visible .z-entry-name { text-shadow: 0 1px 2px rgb(16 11 42 / 100%), 0 0 9px rgb(255 155 201 / 72%), 0 0 18px rgb(112 221 244 / 46%); }
+.z-entry.is-playing .z-entry-name { text-shadow: 0 1px 2px rgb(16 11 42 / 100%), 0 0 9px rgb(255 155 201 / 72%), 0 0 18px rgb(112 221 244 / 46%); }
 .z-visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .z-loader {
   position: fixed;

@@ -232,15 +232,6 @@
       button.type = "button";
       button.dataset.entryId = entry.id;
       button.setAttribute("aria-label", entry.clips.length ? `${entry.name}'s voice message.` : `${entry.name}. Message pending.`);
-      if ("PointerEvent" in window) {
-        button.addEventListener("pointerenter", (event) => {
-          if (event.pointerType === "touch") return;
-          playNextClip(entry, button, "hover");
-        });
-      } else {
-        button.addEventListener("mouseenter", () => playNextClip(entry, button, "hover"));
-      }
-      button.addEventListener("focus", () => playNextClip(entry, button, "focus"));
       button.addEventListener("click", () => {
         if (!audioEnabled) enableAudio();
         playNextClip(entry, button, "click");
