@@ -343,3 +343,8 @@ body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy
   .z-stage { grid-template-rows: auto auto; }
   .z-constellation { height: auto; min-height: 440px; }
 }
+
+.z-constellation[data-crowded="true"] .z-entry-name { font-size: clamp(10px, 1.8vw, 16px); }
+@media (max-width: 700px) {
+  .z-constellation[data-crowded="true"] .z-entry-name { font-size: clamp(9px, 3vw, 12px); }
+}
