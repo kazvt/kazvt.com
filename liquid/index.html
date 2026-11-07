@@ -332,7 +332,10 @@
         try {
           const legacyFullscreen = localStorage.getItem(legacyFullscreenPreferenceKey) === "true";
           if (legacyFullscreen) {
-            try { localStorage.setItem(theaterPreferenceKey, "true"); } catch (_) { /* keep legacy preference */ }
+            try {
+              localStorage.setItem(theaterPreferenceKey, "true");
+              localStorage.removeItem(legacyFullscreenPreferenceKey);
+            } catch (_) { /* keep legacy preference */ }
           }
           return legacyFullscreen;
         } catch (_) { return false; }
