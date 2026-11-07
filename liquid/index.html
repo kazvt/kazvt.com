@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Slime Surface Lab</title>
+  <title>kazvt | liquid</title>
   <style id="bootstrap-css">
 @charset "UTF-8";/*!
  * Bootstrap  v5.3.8 (https://getbootstrap.com/)
@@ -15,18 +15,13 @@
 </head>
 <body>
   <div class="container-fluid py-3">
-    <header class="mb-3">
-      <h1 class="h3">Slime Surface Lab</h1>
-      <p class="mb-0">Live procedural slime surface controls.</p>
-    </header>
-
     <div class="row g-4">
       <section class="col-lg-8 order-lg-2" aria-label="Live slime preview">
         <div class="ratio ratio-16x9 position-relative bg-dark" id="stage">
           <canvas class="position-absolute top-0 start-0 w-100 h-100" id="gl" aria-label="Animated procedural slime surface"></canvas>
         </div>
         <div class="d-flex justify-content-between align-items-center mt-2">
-          <span>Top-down · full-frame liquid</span>
+          <span>Top-down - full-frame liquid</span>
           <span id="fps">Starting GPU…</span>
         </div>
         <div class="mt-2">
@@ -329,7 +324,7 @@
         fpsFrames++;
         if (now - fpsTime > 800) {
           const fps = Math.round(fpsFrames * 1000 / (now - fpsTime || 1));
-          fpsLabel.textContent = `WEBGL · ${fps} FPS · ${canvas.width}×${canvas.height}`;
+          fpsLabel.textContent = `WEBGL - ${fps} FPS - ${canvas.width}×${canvas.height}`;
           fpsFrames = 0;
           fpsTime = now;
         }
