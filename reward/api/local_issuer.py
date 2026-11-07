@@ -723,77 +723,65 @@ def _anonymous_pool_summary(
     }
 
 
-def _atomic_write_registry(root: Path, registry: dict[str, Any]) -> None:
-    _, assignments_path = _reward_paths(root)
-    pool_path = root / POOL_RELATIVE
-    git_dir = Path(_git(root, "rev-parse", "--absolute-git-dir"))
-    temporary_paths: list[Path] = []
-    try:
-        catalog, _ = _load_records(root)
-        reservations = _load_reservations(root, catalog)
-        pool = _anonymous_pool_summary(catalog, registry, reservations)
-        for path, payload, prefix in (
-            (assignments_path, registry, "reward-assignments-"),
-            (pool_path, pool, "reward-pool-"),
-        ):
-            with tempfile.NamedTemporaryFile(
-                mode="wb", prefix=prefix, suffix=".tmp", dir=git_dir, delete=False
-            ) as temporary:
-                temporary_path = Path(temporary.name)
-                temporary_paths.append(temporary_path)
-                data = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
-                temporary.write(data)
-                temporary.flush()
-                os.fsync(temporary.fileno())
-        os.replace(temporary_paths[0], assignments_path)
-        os.replace(temporary_paths[1], pool_path)
-    except OSError as exc:
-        raise RewardIssueError("Could not safely write the reward registry and pool count.") from exc
-    finally:
-        for temporary_path in temporary_paths:
-            try:
-                temporary_path.unlink(missing_ok=True)
-            except OSError:
-                pass
-
-
 def _commit_registry(
     root: Path,
+    base_revision: str,
+    catalog: dict[str, Any],
+    reservations: dict[str, Any],
     registry: dict[str, Any],
     event_hash: str,
     commit_action: str,
 ) -> None:
-    """Publish one validated registry mutation, and no other working-tree files.
-
-    Callers hold _ISSUE_LOCK and operate in a disposable worktree at the
-    fetched origin/main revision. A successful push is the authoritative
-    publication confirmation; a concurrent remote push still makes Git reject
-    this push as non-fast-forward.
-    """
+    """Build and publish a two-file commit without touching any checkout or index."""
     _validate_registry(registry)
-    _atomic_write_registry(root, registry)
+    pool = _anonymous_pool_summary(catalog, registry, reservations)
+    payloads = {
+        ASSIGNMENTS_RELATIVE: (json.dumps(registry, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+        POOL_RELATIVE: (json.dumps(pool, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+    }
     try:
-        _git(root, "add", "--", ASSIGNMENTS_RELATIVE, POOL_RELATIVE)
+        with tempfile.TemporaryDirectory(prefix="kazvt-reward-index-") as temporary_dir:
+            index_env = {"GIT_INDEX_FILE": str(Path(temporary_dir) / "index")}
+            _git(root, "read-tree", base_revision, env_overrides=index_env)
+            for relative_path, payload in payloads.items():
+                blob_id = _git_bytes(root, "hash-object", "-w", "--stdin", input_data=payload).decode("ascii").strip()
+                _git(root, "update-index", "--add", "--cacheinfo", f"100644,{blob_id},{relative_path}", env_overrides=index_env)
+            tree_id = _git(root, "write-tree", env_overrides=index_env)
+
         allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
-        staged = set(_git(root, "diff", "--cached", "--name-only", "-z").split("\0")) - {""}
-        unstaged = set(_git(root, "diff", "--name-only", "-z").split("\0")) - {""}
-        untracked = set(_git(root, "ls-files", "--others", "--exclude-standard", "-z").split("\0")) - {""}
-        if ASSIGNMENTS_RELATIVE not in staged or not allowed_paths.intersection(staged):
-            raise RewardIssueError("The reward registry could not be staged safely; review Git status before retrying.")
-        if unstaged or untracked:
-            raise RewardIssueError("The isolated reward transaction has unexpected local files; retry the same chat event.")
-        # --only restricts this automated commit to the public reward records.
-        _git(root, "commit", "--only", "-m", f"reward: {commit_action} {event_hash[:12]}", "--", ASSIGNMENTS_RELATIVE, POOL_RELATIVE)
-        committed = set(_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", "HEAD").split("\0")) - {""}
-        if not committed or not committed <= allowed_paths or ASSIGNMENTS_RELATIVE not in committed:
+        committed_paths = set(_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", base_revision, tree_id).splitlines())
+        if committed_paths != allowed_paths:
             raise RewardIssueError("The reward commit included unexpected files; review Git history before retrying.")
-        _git(root, "push", "origin", "HEAD:refs/heads/main")
-        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
-            raise RewardIssueError("The isolated reward transaction did not finish cleanly; retry the same chat event.")
+
+        author, email = _ensure_commit_identity(root)
+        commit_env = {
+            "GIT_AUTHOR_NAME": author,
+            "GIT_AUTHOR_EMAIL": email,
+            "GIT_COMMITTER_NAME": author,
+            "GIT_COMMITTER_EMAIL": email,
+        }
+        commit_id = _git(
+            root, "-c", "commit.gpgsign=false", "commit-tree", tree_id,
+            "-p", base_revision, "-m", f"reward: {commit_action} {event_hash[:12]}",
+            env_overrides=commit_env,
+        )
+        try:
+            _git(root, "push", "origin", f"{commit_id}:refs/heads/main")
+        except RewardIssueError as push_error:
+            try:
+                _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
+                latest_revision = _git(root, "rev-parse", "--verify", "refs/remotes/origin/main")
+            except RewardIssueError:
+                raise push_error
+            if latest_revision != base_revision:
+                raise _RemoteMainUpdated from push_error
+            raise
+    except _RemoteMainUpdated:
+        raise
     except RewardIssueError:
         raise
     except Exception as exc:
-        raise RewardIssueError("The reward registry may be saved locally but could not be confirmed on GitHub. Retry the same chat event after checking Git status.") from exc
+        raise RewardIssueError("The reward registry could not be safely published. Retry the same chat event.") from exc
 
 
 def _issue_and_publish(
