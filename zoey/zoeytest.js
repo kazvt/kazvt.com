@@ -52,15 +52,16 @@
         { src: "/zoey/assets/traaansfem/traaansfem-voice-2.wav", caption: "TraaansFem's voice note 2 of 2." }
       ]
     },
-    ...Array.from({ length: 1 }, (_, index) => {
-      const number = index + 3;
-      return {
-        id: `star-${String(number).padStart(2, "0")}`,
-        name: "PLACEHOLDER",
-        avatar: "",
-        clips: []
-      };
-    }),
+    {
+      id: "kilda",
+      name: "Kilda",
+      avatar: "/zoey/assets/kilda/kilda-avatar.png",
+      clips: [
+        { src: "/zoey/assets/kilda/kilda-voice-1.wav", caption: "Kilda's voice note 1 of 3." },
+        { src: "/zoey/assets/kilda/kilda-voice-2.wav", caption: "Kilda's voice note 2 of 3." },
+        { src: "/zoey/assets/kilda/kilda-voice-3.wav", caption: "Kilda's voice note 3 of 3." }
+      ]
+    },
     {
       id: "froggy",
       name: "Froggy",
