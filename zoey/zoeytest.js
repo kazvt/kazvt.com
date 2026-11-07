@@ -183,7 +183,7 @@
   // during resize, hover, or animation; the modest angles preserve clean gaps.
   const ENTRY_ROTATION_DEG = Object.freeze({
     kaz: -6.0, abigail: 4.2, letty: -2.1, traaansfem: 7.4,
-    kilda: -5.3, froggy: 3.1, oceo: -7.8, dioso: 5.6,
+    kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
     poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
     dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
     "star-17": -5.8, "star-18": 3.6, "star-19": -7.0, "star-20": 2.0
