@@ -85,9 +85,9 @@
       name: "Nea",
       avatar: "/zoey/assets/nea-pollen/nea-pollen-avatar.png",
       clips: [
-        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-1.wav", caption: "Nea's voice note 1 of 3." },
-        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-2.wav", caption: "Nea's voice note 2 of 3." },
-        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-3.wav", caption: "Nea's voice note 3 of 3." }
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-1.wav?v=20261107-06", caption: "Nea's voice note 1 of 3." },
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-2.wav?v=20261107-06", caption: "Nea's voice note 2 of 3." },
+        { src: "/zoey/assets/nea-pollen/nea-pollen-voice-3.wav?v=20261107-06", caption: "Nea's voice note 3 of 3." }
       ]
     },
     {
