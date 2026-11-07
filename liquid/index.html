@@ -465,7 +465,7 @@
       function showTheaterControls() {
         if (!theaterMode) return;
         const needsFadeIn = !theaterToolbar.classList.contains("show");
-        theaterToolbar.classList.remove("pe-none");
+        theaterToolbar.classList.remove("pe-none", "opacity-0");
         if (needsFadeIn) {
           void theaterToolbar.offsetWidth;
           theaterToolbar.classList.add("show");
@@ -473,15 +473,13 @@
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = window.setTimeout(() => {
           theaterControlsTimer = 0;
-          if (!theaterToolbar.contains(document.activeElement)) {
-            theaterToolbar.classList.add("opacity-0", "pe-none");
-          }
-          }, 1000);
+          if (!theaterToolbar.contains(document.activeElement)) hideTheaterControls();
+        }, 1000);
       }
       function hideTheaterControls() {
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = 0;
-        theaterToolbar.classList.remove("show");
+        theaterToolbar.classList.remove("show", "opacity-0");
         theaterToolbar.classList.add("pe-none");
       }
       function applySettings() {
