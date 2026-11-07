@@ -594,6 +594,33 @@ def _canonical_remote(remote: str) -> str:
     return value.rstrip("/")
 
 
+def _changed_paths(root: Path) -> set[str]:
+    """Return tracked, staged, and untracked paths without parsing quoted status text."""
+    paths: set[str] = set()
+    for args in (
+        ("diff", "--name-only", "-z"),
+        ("diff", "--cached", "--name-only", "-z"),
+        ("ls-files", "--others", "--exclude-standard", "-z"),
+    ):
+        paths.update(path.replace("\\", "/") for path in _git(root, *args).split("\0") if path)
+    return paths
+
+
+def _reward_owned_path(path: str) -> bool:
+    """Reward inputs must be clean; unrelated website edits are not ours to block or publish."""
+    return path.startswith("zzz_assets/rewards/") or path == RESERVATIONS_RELATIVE
+
+
+def _assert_reward_inputs_clean(root: Path) -> set[str]:
+    changed = _changed_paths(root)
+    reward_changes = {path for path in changed if _reward_owned_path(path)}
+    if reward_changes:
+        raise RewardIssueError(
+            "Reward artwork or registry files have local changes. Review those reward files before issuing an award."
+        )
+    return changed
+
+
 def _repo_sync_state(root: Path, expected_remote: str = DEFAULT_REMOTE) -> tuple[int, int]:
     git_root = Path(_git(root, "rev-parse", "--show-toplevel")).resolve()
     if git_root != root.resolve():
@@ -603,8 +630,7 @@ def _repo_sync_state(root: Path, expected_remote: str = DEFAULT_REMOTE) -> tuple
         raise RewardIssueError("The website checkout must be on main before an award can be published.")
     if _canonical_remote(_git(root, "remote", "get-url", "origin")) != _canonical_remote(expected_remote):
         raise RewardIssueError("The website checkout's origin is not the expected kazvt.com repository.")
-    if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
-        raise RewardIssueError("The website checkout has local changes. Commit or stash them before issuing an award.")
+    local_changes = _assert_reward_inputs_clean(root)
 
     _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
     counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
@@ -616,9 +642,13 @@ def _repo_sync_state(root: Path, expected_remote: str = DEFAULT_REMOTE) -> tuple
             raise RewardIssueError(
                 "The website checkout and GitHub main have diverged. Resolve the Git history manually before issuing."
             )
+        if local_changes:
+            raise RewardIssueError(
+                "GitHub has newer site changes and this checkout has local edits. Let the checkout sync, then retry the reward."
+            )
         # The registry can be behind when another site edit was pushed since the
-        # last reward. The clean-worktree and main-branch checks above make a
-        # fast-forward safe; never merge, reset, or overwrite local work here.
+        # last reward. Only a clean checkout may fast-forward; never merge, reset,
+        # or overwrite local work here.
         _git(root, "merge", "--ff-only", "origin/main")
         if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
             raise RewardIssueError(
@@ -631,17 +661,18 @@ def _repo_sync_state(root: Path, expected_remote: str = DEFAULT_REMOTE) -> tuple
             )
 
     if local_ahead:
-        changed = _git(root, "diff", "--name-only", "origin/main...HEAD").splitlines()
+        changed = set(_git(root, "diff", "--name-only", "-z", "origin/main...HEAD").split("\0")) - {""}
         subjects = _git(root, "log", "--format=%s", "origin/main..HEAD").splitlines()
-        if changed != [ASSIGNMENTS_RELATIVE] or not subjects or not all(EVENT_COMMIT_RE.fullmatch(item) for item in subjects):
+        allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
+        if (ASSIGNMENTS_RELATIVE not in changed or not changed <= allowed_paths or not subjects or
+                not all(EVENT_COMMIT_RE.fullmatch(item) for item in subjects)):
             raise RewardIssueError("There are unpublished commits besides a pending reward-registry push; publish them manually first.")
         _git(root, "push", "origin", "HEAD:refs/heads/main")
         _git(root, "fetch", "--quiet", "origin", "+refs/heads/main:refs/remotes/origin/main")
         counts = _git(root, "rev-list", "--left-right", "--count", "origin/main...HEAD").split()
         if len(counts) != 2 or counts != ["0", "0"]:
             raise RewardIssueError("The reward registry push has not synchronized with GitHub yet. Retry the same eventId.")
-        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
-            raise RewardIssueError("The website checkout changed during publication. Review its Git status before retrying.")
+        _assert_reward_inputs_clean(root)
     return 0, 0
 
 
@@ -724,17 +755,21 @@ def _commit_registry(
     _atomic_write_registry(root, registry)
     try:
         _git(root, "add", "--", ASSIGNMENTS_RELATIVE, POOL_RELATIVE)
-        staged = _git(root, "diff", "--cached", "--name-only").splitlines()
-        unstaged = _git(root, "diff", "--name-only").splitlines()
-        untracked = _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
         allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
-        if (ASSIGNMENTS_RELATIVE not in staged or not set(staged) <= allowed_paths or
-                unstaged or untracked):
-            raise RewardIssueError("Only assignments.json and the anonymous pool count may be included in a reward commit; review Git status.")
-        _git(root, "commit", "-m", f"reward: {commit_action} {event_hash[:12]}")
+        staged = set(_git(root, "diff", "--cached", "--name-only", "-z").split("\0")) - {""}
+        unstaged = set(_git(root, "diff", "--name-only", "-z").split("\0")) - {""}
+        if ASSIGNMENTS_RELATIVE not in staged or not allowed_paths.intersection(staged):
+            raise RewardIssueError("The reward registry could not be staged safely; review Git status before retrying.")
+        if any(_reward_owned_path(path.replace("\\", "/")) for path in unstaged):
+            raise RewardIssueError("Reward files changed during issuance. Review the reward registry before retrying.")
+        # --only is important here: a user's unrelated staged edits must remain
+        # staged locally, never slip into the automated reward commit.
+        _git(root, "commit", "--only", "-m", f"reward: {commit_action} {event_hash[:12]}", "--", ASSIGNMENTS_RELATIVE, POOL_RELATIVE)
+        committed = set(_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", "HEAD").split("\0")) - {""}
+        if not committed or not committed <= allowed_paths or ASSIGNMENTS_RELATIVE not in committed:
+            raise RewardIssueError("The reward commit included unexpected files; review Git history before retrying.")
         _git(root, "push", "origin", "HEAD:refs/heads/main")
-        if _git(root, "status", "--porcelain=v1", "--untracked-files=normal"):
-            raise RewardIssueError("The reward registry was pushed, but the checkout changed during publication. Review Git status.")
+        _assert_reward_inputs_clean(root)
     except RewardIssueError:
         raise
     except Exception as exc:
