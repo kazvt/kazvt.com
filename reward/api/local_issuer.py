@@ -609,10 +609,17 @@ def _new_assignment(
     return next_registry, assignment
 
 
-def _git(root: Path, *args: str, check: bool = True) -> str:
+def _git(
+    root: Path,
+    *args: str,
+    check: bool = True,
+    env_overrides: dict[str, str] | None = None,
+) -> str:
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
     env["GCM_INTERACTIVE"] = "Never"
+    if env_overrides:
+        env.update(env_overrides)
     try:
         result = subprocess.run(
             ["git", "-C", str(root), *args],
@@ -631,6 +638,41 @@ def _git(root: Path, *args: str, check: bool = True) -> str:
     if check and result.returncode != 0:
         raise RewardIssueError("Git could not verify or publish the reward registry. Check the MSI console and Git login.")
     return result.stdout.strip()
+
+
+def _git_bytes(
+    root: Path,
+    *args: str,
+    check: bool = True,
+    input_data: bytes | None = None,
+    env_overrides: dict[str, str] | None = None,
+) -> bytes:
+    env = os.environ.copy()
+    env["GIT_TERMINAL_PROMPT"] = "0"
+    env["GCM_INTERACTIVE"] = "Never"
+    if env_overrides:
+        env.update(env_overrides)
+    run_options: dict[str, Any] = {
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.PIPE,
+        "timeout": 35,
+        "check": False,
+        "env": env,
+    }
+    if input_data is None:
+        run_options["stdin"] = subprocess.DEVNULL
+    else:
+        run_options["input"] = input_data
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args],
+            **run_options,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise RewardIssueError("Git could not finish safely. Check that MSI can reach GitHub and retry.") from exc
+    if check and result.returncode != 0:
+        raise RewardIssueError("Git could not verify or publish the reward registry. Check the MSI console and Git login.")
+    return result.stdout
 
 
 def _canonical_remote(remote: str) -> str:
