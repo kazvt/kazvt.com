@@ -312,6 +312,7 @@ class LocalRewardIssuerTests(unittest.TestCase):
             }, expected_remote=str(self.remote))
 
     def test_unrelated_edits_are_preserved_and_never_enter_reward_commit(self) -> None:
+        original_head = git(self.site, "rev-parse", "HEAD")
         ignore_path = self.site / ".gitignore"
         original_ignore = ignore_path.read_text(encoding="utf-8")
         ignore_path.write_text(original_ignore + "\n# local website note\n", encoding="utf-8")
@@ -326,29 +327,31 @@ class LocalRewardIssuerTests(unittest.TestCase):
         )
 
         self.assertTrue(result["pushed"])
+        self.assertEqual(git(self.site, "rev-parse", "HEAD"), original_head)
         self.assertEqual(ignore_path.read_text(encoding="utf-8"), original_ignore + "\n# local website note\n")
         self.assertEqual(untracked_path.read_text(encoding="utf-8"), "keep this local\n")
-        committed = set(git(self.site, "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD").splitlines())
+        committed = set(git(self.site, "diff-tree", "--no-commit-id", "--name-only", "-r", "origin/main").splitlines())
         self.assertEqual(committed, {"zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"})
         self.assertEqual(git(self.site, "diff", "--cached", "--name-only"), ".gitignore")
         self.assertEqual(git(self.site, "status", "--short").splitlines(), ["M  .gitignore", "?? private-local-note.txt"])
 
-    def test_refuses_dirty_reward_inputs_and_modified_png(self) -> None:
+    def test_dirty_reward_files_are_ignored_in_favor_of_latest_published_art(self) -> None:
         manifest_path = self.reward_dir / "manifest.json"
         original_manifest = manifest_path.read_bytes()
         manifest_path.write_bytes(original_manifest + b" ")
-        with self.assertRaisesRegex(RewardIssueError, "Reward artwork or registry files have local changes"):
-            issue_and_publish(
-                self.site,
-                {"username": "Winner", "assetId": self.art_ids[0], "eventId": "dirty-reward-input"},
-                expected_remote=str(self.remote),
-            )
-        manifest_path.write_bytes(original_manifest)
         (self.reward_dir / "toast.png").write_bytes(png_bytes(4, 4))
+        issued = issue_and_publish(
+            self.site,
+            {"username": "Winner", "assetId": self.art_ids[0], "eventId": "dirty-reward-input"},
+            expected_remote=str(self.remote),
+        )
+        self.assertTrue(issued["pushed"])
+        self.assertEqual(manifest_path.read_bytes(), original_manifest + b" ")
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
             local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
 
-    def test_clean_checkout_fast_forwards_when_github_main_has_new_commits(self) -> None:
+    def test_dirty_checkout_with_newer_github_main_still_issues_without_touching_local_files(self) -> None:
+        original_head = git(self.site, "rev-parse", "HEAD")
         peer = self.base / "peer"
         subprocess.run(
             ["git", "clone", str(self.remote), str(peer)],
@@ -363,10 +366,26 @@ class LocalRewardIssuerTests(unittest.TestCase):
         git(peer, "commit", "-m", "site update")
         git(peer, "push", "origin", "main")
 
-        self.assertEqual(local_issuer._repo_sync_state(self.site, str(self.remote)), (0, 0))
-        self.assertEqual(git(self.site, "rev-parse", "HEAD"), git(self.site, "rev-parse", "origin/main"))
-        self.assertEqual((self.site / "site-note.txt").read_text(encoding="utf-8"), "new site edit\n")
-        self.assertEqual(git(self.site, "status", "--porcelain=v1"), "")
+        ignore_path = self.site / ".gitignore"
+        local_edit = ignore_path.read_text(encoding="utf-8") + "\n# preserve while reward runs\n"
+        ignore_path.write_text(local_edit, encoding="utf-8")
+        untracked_path = self.site / "local-work-in-progress.txt"
+        untracked_path.write_text("do not remove\n", encoding="utf-8")
+
+        issued = issue_and_publish(
+            self.site,
+            {"username": "Winner", "assetId": self.art_ids[0], "eventId": "dirty-and-remote-ahead"},
+            expected_remote=str(self.remote),
+        )
+
+        self.assertTrue(issued["pushed"])
+        self.assertEqual(git(self.site, "rev-parse", "HEAD"), original_head)
+        self.assertEqual(ignore_path.read_text(encoding="utf-8"), local_edit)
+        self.assertEqual(untracked_path.read_text(encoding="utf-8"), "do not remove\n")
+        self.assertEqual((self.site / "site-note.txt").exists(), False)
+        self.assertEqual(git(self.site, "rev-parse", "origin/main"), git(self.site, "ls-remote", "origin", "refs/heads/main").split()[0])
+        committed = set(git(self.site, "diff-tree", "--no-commit-id", "--name-only", "-r", "origin/main").splitlines())
+        self.assertEqual(committed, {"zzz_assets/rewards/assignments.json", "zzz_assets/rewards/pool.json"})
 
     def test_unassign_latest_releases_art_and_preserves_retry_safety(self) -> None:
         winner = {"username": "Viewer", "userId": "yt-user-1", "platform": "youtube"}
