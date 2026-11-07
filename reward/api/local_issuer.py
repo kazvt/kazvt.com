@@ -35,7 +35,6 @@ RESERVATION_SEPARATOR_RE = re.compile(r"\s*(?:->|=>|→|=|:)\s*")
 COMPACT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{16,22}$")
 UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.IGNORECASE)
 REASON_BIDI_CONTROL_RE = re.compile(r"[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]")
-EVENT_COMMIT_RE = re.compile(r"^reward: (?:issue award|unassign award|clear awards) [a-f0-9]{12}$")
 REWARD_CHAT_ACTORS = {"kazvt", "chimpwurldos"}
 REWARD_COMMAND_ACTIONS = {"unassign_latest", "clear_user"}
 _ISSUE_LOCK = threading.Lock()
@@ -710,12 +709,12 @@ def _commit_registry(
         allowed_paths = {ASSIGNMENTS_RELATIVE, POOL_RELATIVE}
         staged = set(_git(root, "diff", "--cached", "--name-only", "-z").split("\0")) - {""}
         unstaged = set(_git(root, "diff", "--name-only", "-z").split("\0")) - {""}
+        untracked = set(_git(root, "ls-files", "--others", "--exclude-standard", "-z").split("\0")) - {""}
         if ASSIGNMENTS_RELATIVE not in staged or not allowed_paths.intersection(staged):
             raise RewardIssueError("The reward registry could not be staged safely; review Git status before retrying.")
-        if any(_reward_owned_path(path.replace("\\", "/")) for path in unstaged):
-            raise RewardIssueError("Reward files changed during issuance. Review the reward registry before retrying.")
-        # --only is important here: a user's unrelated staged edits must remain
-        # staged locally, never slip into the automated reward commit.
+        if unstaged or untracked:
+            raise RewardIssueError("The isolated reward transaction has unexpected local files; retry the same chat event.")
+        # --only restricts this automated commit to the public reward records.
         _git(root, "commit", "--only", "-m", f"reward: {commit_action} {event_hash[:12]}", "--", ASSIGNMENTS_RELATIVE, POOL_RELATIVE)
         committed = set(_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", "HEAD").split("\0")) - {""}
         if not committed or not committed <= allowed_paths or ASSIGNMENTS_RELATIVE not in committed:
