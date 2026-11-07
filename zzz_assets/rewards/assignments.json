@@ -166,6 +166,17 @@
       "linkId": "5BzTna63DESFTzOe",
       "eventIdHash": "a607f27a407bd17c1a0b48ee649f60efa91a4ea0922c56df3188609590ce3888",
       "userId": "1173281301"
+    },
+    {
+      "assetId": "6a0bc03d87ba3639b7992a399d41000b83bffb81c3ad891dd03c42919c15edd0",
+      "assetSha256": "6a0bc03d87ba3639b7992a399d41000b83bffb81c3ad891dd03c42919c15edd0",
+      "filename": "three deez.png",
+      "username": "lillie_garden",
+      "issuedAt": "2026-11-07T09:18:22.442Z",
+      "platform": "kick",
+      "linkId": "cmfTtxKYkLTBTxo7",
+      "eventIdHash": "7a7b4ed1cadf5190475441a17f63abddd7f1ae74ab57e13bc80f3f09afc38b05",
+      "userId": "93006961"
     }
   ],
   "revokedAssignments": [
