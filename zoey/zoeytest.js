@@ -170,7 +170,13 @@
         { src: "/zoey/assets/pato/pato-voice-2-20261108-later.wav?v=20261108-08", caption: "Pato's voice note 2 of 3." },
         { src: "/zoey/assets/pato/pato-voice-3-20261108-tail.wav?v=20261108-11", caption: "Pato's voice note 3 of 3." }
       ]
-    }
+    },
+    ...Array.from({ length: 4 }, (_, index) => ({
+      id: `star-${String(index + 17).padStart(2, "0")}`,
+      name: "PLACEHOLDER",
+      avatar: "",
+      clips: []
+    }))
   ];
 
   let audioEnabled = false;
@@ -270,26 +276,28 @@
     // Aspect-ratio layouts keep their proportions at browser zoom levels.
     const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
     const layouts = {
-      // Four offset columns and rows keep the sixteen stickers evenly sized.
+      // Four columns by five rows keep the constellation compact on portrait and mid-width screens.
       portrait: [
-        [1, 1, 22, 21], [26, 2, 22, 21], [51, 1.5, 22, 21], [76, 2, 22, 21],
-        [3, 26, 22, 21], [27, 27, 22, 21], [52, 25.5, 22, 21], [75, 27, 22, 21],
-        [1, 51, 22, 21], [25, 52, 22, 21], [51, 50.5, 22, 21], [75, 52, 22, 21],
-        [2, 76, 22, 21], [27, 77, 22, 21], [51, 75.5, 22, 21], [75, 77, 22, 21]
+        [1, 1, 22, 18], [26, 1.5, 22, 18], [51, 1, 22, 18], [76, 1.5, 22, 18],
+        [3, 20.8, 22, 18], [27, 21.3, 22, 18], [52, 20.8, 22, 18], [75, 21.3, 22, 18],
+        [1, 40.6, 22, 18], [25, 41.1, 22, 18], [51, 40.6, 22, 18], [75, 41.1, 22, 18],
+        [2, 60.4, 22, 18], [27, 60.9, 22, 18], [51, 60.4, 22, 18], [75, 60.9, 22, 18],
+        [1, 80.2, 22, 18], [26, 79.7, 22, 18], [51, 80.2, 22, 18], [76, 79.7, 22, 18]
       ],
-      // The four-column scatter stays compact on medium aspect ratios.
+      // Medium aspect ratios also use four columns, with a fifth row for the extra stickers.
       wide: [
-        [1, 1, 22, 20], [26, 2, 22, 20], [51, 1.5, 22, 20], [76, 2, 22, 20],
-        [3, 26, 22, 20], [27, 27, 22, 20], [52, 25.5, 22, 20], [75, 27, 22, 20],
-        [1, 51, 22, 20], [25, 52, 22, 20], [51, 50.5, 22, 20], [75, 52, 22, 20],
-        [2, 76, 22, 20], [27, 77, 22, 20], [51, 75.5, 22, 20], [75, 77, 22, 20]
+        [1, 1, 22, 18], [26, 1.5, 22, 18], [51, 1, 22, 18], [76, 1.5, 22, 18],
+        [3, 20.8, 22, 18], [27, 21.3, 22, 18], [52, 20.8, 22, 18], [75, 21.3, 22, 18],
+        [1, 40.6, 22, 18], [25, 41.1, 22, 18], [51, 40.6, 22, 18], [75, 41.1, 22, 18],
+        [2, 60.4, 22, 18], [27, 60.9, 22, 18], [51, 60.4, 22, 18], [75, 60.9, 22, 18],
+        [1, 80.2, 22, 18], [26, 79.7, 22, 18], [51, 80.2, 22, 18], [76, 79.7, 22, 18]
       ],
-      // Four evenly sized rows keep the art legible on panoramic screens too.
+      // Wide canvases gain the requested fifth column while retaining four balanced rows.
       panorama: [
-        [1, 1, 22, 20], [26, 2, 22, 20], [51, 1.5, 22, 20], [76, 2, 22, 20],
-        [3, 26, 22, 20], [27, 27, 22, 20], [52, 25.5, 22, 20], [75, 27, 22, 20],
-        [1, 51, 22, 20], [25, 52, 22, 20], [51, 50.5, 22, 20], [75, 52, 22, 20],
-        [2, 76, 22, 20], [27, 77, 22, 20], [51, 75.5, 22, 20], [75, 77, 22, 20]
+        [1, 1, 18, 20], [20.5, 2, 18, 20], [40, 1.5, 18, 20], [59.5, 2, 18, 20], [79, 1, 18, 20],
+        [0.5, 26, 18, 20], [20.25, 27, 18, 20], [40.5, 25.5, 18, 20], [60, 27, 18, 20], [79.5, 26, 18, 20],
+        [1.5, 51, 18, 20], [20, 52, 18, 20], [40, 50.5, 18, 20], [60.5, 52, 18, 20], [79, 51, 18, 20],
+        [0.5, 76, 18, 20], [20.25, 77, 18, 20], [40.5, 75.5, 18, 20], [60, 77, 18, 20], [79.5, 76, 18, 20]
       ]
     };
     const positions = layouts[layoutName];
@@ -299,7 +307,7 @@
           : Math.min(5, 10 / aspectRatio);
     const riseRange = height < 180 ? 0 : 2;
     const cards = [...canvas.querySelectorAll(".z-entry")];
-    canvas.dataset.crowded = cards.length >= 16 ? "true" : "false";
+    canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
     // CSS transforms do not participate in layout flow, so test their painted bounds.
     // The extra inset reserves room for the hover-scale effect; ordinary sizes retain tilt.
