@@ -42,6 +42,11 @@ jobs:
 
   # Deployment job
   deploy:
+    # The default deploy-pages action timeout is 10 minutes. This site has a
+    # large static artifact and Pages can queue deployments; give a slow but
+    # healthy deployment time to finish without letting a stuck job block the
+    # latest queued publication indefinitely.
+    timeout-minutes: 40
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -51,3 +56,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          # deploy-pages defaults to 600000 ms (10 minutes).
+          timeout: "1800000"
