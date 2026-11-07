@@ -830,7 +830,6 @@ def _issue_at_revision(
     *,
     automatic_asset: bool,
 ) -> dict[str, Any]:
-    _ensure_commit_identity(root)
     catalog, registry = _load_records_at_revision(root, revision)
     event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
     if _find_reward_command_event(registry, event_hash):
@@ -983,7 +982,6 @@ def _revoke_at_revision(
     action: str,
     actor_login: str,
 ) -> dict[str, Any]:
-    _ensure_commit_identity(root)
     catalog, registry = _load_records_at_revision(root, revision)
     reservations = _load_reservations(root, catalog)
     event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
