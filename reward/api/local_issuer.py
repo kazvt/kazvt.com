@@ -858,12 +858,10 @@ def _issue_at_revision(
         for record in registry["assignments"]
     }
     if automatic_asset:
-        if reserved_asset_ids:
-            reserved_asset_id = next(
-                (asset_id for asset_id in reserved_asset_ids if asset_id not in assigned_assets), ""
-            )
-            if not reserved_asset_id:
-                raise RewardIssueError("All rewards reserved for this username have already been assigned.")
+        reserved_asset_id = next(
+            (asset_id for asset_id in reserved_asset_ids if asset_id not in assigned_assets), ""
+        )
+        if reserved_asset_id:
             request["assetId"] = reserved_asset_id
         else:
             available = [item for item in _catalog_artworks(catalog)
