@@ -802,18 +802,36 @@ def _issue_and_publish(
         raise RewardIssueError("The configured website folder is unavailable.")
 
     with _ISSUE_LOCK:
-        with _reward_transaction_worktree(root, expected_remote) as transaction_root:
-            return _issue_in_worktree(transaction_root, request, automatic_asset=automatic_asset)
+        for attempt in range(3):
+            revision = _published_revision(root, expected_remote)
+            try:
+                return _issue_at_revision(root, revision, request, automatic_asset=automatic_asset)
+            except _RemoteMainUpdated:
+                if attempt == 2:
+                    raise RewardIssueError("GitHub changed during reward publication. Retry the same chat event.")
+        raise RewardIssueError("The reward could not be published. Retry the same chat event.")
 
 
-def _issue_in_worktree(
+def _published_artwork_bytes(root: Path, revision: str, catalog: dict[str, Any], asset_id: str) -> bytes:
+    indexed = catalog.get("assetsById", {}).get(asset_id)
+    filename = indexed.get("filename") if isinstance(indexed, dict) else None
+    if not isinstance(filename, str) or not FILENAME_RE.fullmatch(filename):
+        raise RewardIssueError("That artwork has invalid catalog metadata.")
+    try:
+        return _git_bytes(root, "cat-file", "blob", f"{revision}:zzz_assets/rewards/{filename}")
+    except RewardIssueError as exc:
+        raise RewardIssueError("The selected published artwork is missing or unreadable.") from exc
+
+
+def _issue_at_revision(
     root: Path,
+    revision: str,
     request: dict[str, str],
     *,
     automatic_asset: bool,
 ) -> dict[str, Any]:
     _ensure_commit_identity(root)
-    catalog, registry = _load_records(root)
+    catalog, registry = _load_records_at_revision(root, revision)
     event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
     if _find_reward_command_event(registry, event_hash):
         raise RewardIssueError("This chat event was already used for a reward removal command.")
@@ -863,7 +881,10 @@ def _issue_in_worktree(
         raise RewardIssueError("That artwork is reserved for a different username.")
 
     now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-    next_registry, assignment = _new_assignment(root, catalog, registry, request, now)
+    artwork_bytes = _published_artwork_bytes(root, revision, catalog, request["assetId"])
+    next_registry, assignment = _new_assignment(
+        root, catalog, registry, request, now, artwork_bytes=artwork_bytes,
+    )
     if next_registry is registry:
         return {
             "assignment": assignment,
@@ -872,7 +893,10 @@ def _issue_in_worktree(
             "pushed": True,
         }
 
-    _commit_registry(root, next_registry, assignment["eventIdHash"], "issue award")
+    _commit_registry(
+        root, revision, catalog, reservations, next_registry,
+        assignment["eventIdHash"], "issue award",
+    )
     return {
         "assignment": assignment,
         "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={assignment['linkId']}",
