@@ -745,78 +745,83 @@ def _issue_and_publish(
         raise RewardIssueError("The configured website folder is unavailable.")
 
     with _ISSUE_LOCK:
-        _repo_sync_state(root, expected_remote)
-        _ensure_commit_identity(root)
-        catalog, registry = _load_records(root)
-        event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
-        if _find_reward_command_event(registry, event_hash):
-            raise RewardIssueError("This chat event was already used for a reward removal command.")
-        previous = _find_event(registry, event_hash)
-        if previous:
-            if "revokedAt" in previous:
-                raise RewardIssueError("That award was revoked; this original chat event cannot issue it again.")
-            matches = (_same_chat_identity(previous, request) if automatic_asset
-                       else _assignment_matches(previous, request))
-            if not matches:
-                raise RewardIssueError("eventId is already assigned to a different winner or artwork.")
-            return {
-                "assignment": previous,
-                "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={previous['linkId']}",
-                "replayed": True,
-                "pushed": True,
-            }
+        with _reward_transaction_worktree(root, expected_remote) as transaction_root:
+            return _issue_in_worktree(transaction_root, request, automatic_asset=automatic_asset)
 
-        reservations = _load_reservations(root, catalog)
-        reserved_asset_ids = _reserved_assets_for_identity(
-            reservations, request["username"], request["userId"],
-        )
-        assigned_assets = {
-            str(record.get("assetId", record.get("assetSha256", ""))).lower()
-            for record in registry["assignments"]
+
+def _issue_in_worktree(
+    root: Path,
+    request: dict[str, str],
+    *,
+    automatic_asset: bool,
+) -> dict[str, Any]:
+    _ensure_commit_identity(root)
+    catalog, registry = _load_records(root)
+    event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
+    if _find_reward_command_event(registry, event_hash):
+        raise RewardIssueError("This chat event was already used for a reward removal command.")
+    previous = _find_event(registry, event_hash)
+    if previous:
+        if "revokedAt" in previous:
+            raise RewardIssueError("That award was revoked; this original chat event cannot issue it again.")
+        matches = (_same_chat_identity(previous, request) if automatic_asset
+                   else _assignment_matches(previous, request))
+        if not matches:
+            raise RewardIssueError("eventId is already assigned to a different winner or artwork.")
+        return {
+            "assignment": previous,
+            "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={previous['linkId']}",
+            "replayed": True,
+            "pushed": True,
         }
-        if automatic_asset:
-            if reserved_asset_ids:
-                reserved_asset_id = next(
-                    (asset_id for asset_id in reserved_asset_ids if asset_id not in assigned_assets), ""
-                )
-                if not reserved_asset_id:
-                    raise RewardIssueError("All rewards reserved for this username have already been assigned.")
-                request["assetId"] = reserved_asset_id
-            else:
-                available = [item for item in _catalog_artworks(catalog)
-                             if item["assetId"] not in assigned_assets and
-                             item["assetId"] not in reservations["assetIds"]]
-                if not available:
-                    raise RewardIssueError("No unassigned reward artwork is available.")
-                # Stable pseudo-random choice: message IDs spread awards across the
-                # pool, while retries of the same event remain deterministic.
-                selection_hash = hashlib.sha256(request["eventId"].encode("utf-8")).digest()
-                selection_index = int.from_bytes(selection_hash[:8], "big") % len(available)
-                request["assetId"] = available[selection_index]["assetId"]
-        elif request["assetId"] in reservations["assetIds"] and request["assetId"] not in reserved_asset_ids:
-            raise RewardIssueError("That artwork is reserved for a different username.")
 
-        now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-        next_registry, assignment = _new_assignment(root, catalog, registry, request, now)
-        replayed = next_registry is registry
-        if replayed:
-            return {
-                "assignment": assignment,
-                "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={assignment['linkId']}",
-                "replayed": True,
-                "pushed": True,
-            }
+    reservations = _load_reservations(root, catalog)
+    reserved_asset_ids = _reserved_assets_for_identity(
+        reservations, request["username"], request["userId"],
+    )
+    assigned_assets = {
+        str(record.get("assetId", record.get("assetSha256", ""))).lower()
+        for record in registry["assignments"]
+    }
+    if automatic_asset:
+        if reserved_asset_ids:
+            reserved_asset_id = next(
+                (asset_id for asset_id in reserved_asset_ids if asset_id not in assigned_assets), ""
+            )
+            if not reserved_asset_id:
+                raise RewardIssueError("All rewards reserved for this username have already been assigned.")
+            request["assetId"] = reserved_asset_id
+        else:
+            available = [item for item in _catalog_artworks(catalog)
+                         if item["assetId"] not in assigned_assets and
+                         item["assetId"] not in reservations["assetIds"]]
+            if not available:
+                raise RewardIssueError("No unassigned reward artwork is available.")
+            # Stable pseudo-random choice: message IDs spread awards across the
+            # pool, while retries of the same event remain deterministic.
+            selection_hash = hashlib.sha256(request["eventId"].encode("utf-8")).digest()
+            selection_index = int.from_bytes(selection_hash[:8], "big") % len(available)
+            request["assetId"] = available[selection_index]["assetId"]
+    elif request["assetId"] in reservations["assetIds"] and request["assetId"] not in reserved_asset_ids:
+        raise RewardIssueError("That artwork is reserved for a different username.")
 
-        _commit_registry(
-            root, next_registry, assignment["eventIdHash"], "issue award",
-        )
-
+    now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    next_registry, assignment = _new_assignment(root, catalog, registry, request, now)
+    if next_registry is registry:
         return {
             "assignment": assignment,
             "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={assignment['linkId']}",
-            "replayed": False,
+            "replayed": True,
             "pushed": True,
         }
+
+    _commit_registry(root, next_registry, assignment["eventIdHash"], "issue award")
+    return {
+        "assignment": assignment,
+        "href": f"{DEFAULT_SITE_ORIGIN}/reward/?id={assignment['linkId']}",
+        "replayed": False,
+        "pushed": True,
+    }
 
 
 def issue_and_publish(
