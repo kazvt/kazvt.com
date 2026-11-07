@@ -294,13 +294,32 @@ class LocalRewardIssuerTests(unittest.TestCase):
         self.assertNotIn(local_issuer.RESERVATIONS_RELATIVE, public_files)
         self.assertNotIn("example-viewer", " ".join(public_files))
 
-    def test_multiple_reservations_for_one_alias_are_issued_in_file_order(self) -> None:
+    def test_reserved_art_is_issued_in_order_then_falls_back_to_unreserved_pool(self) -> None:
+        bonus = png_bytes(4, 3)
+        bonus_id = hashlib.sha256(bonus).hexdigest()
+        bonus_name = "bonus.png"
+        (self.reward_dir / bonus_name).write_bytes(bonus)
+        self.catalog["files"].append(bonus_name)
+        self.catalog["assets"][bonus_name] = {
+            "assetId": bonus_id, "sha256": bonus_id, "width": 4, "height": 3, "tier": "rare",
+        }
+        self.catalog["assetsById"][bonus_id] = {
+            "filename": bonus_name, "width": 4, "height": 3, "tier": "rare",
+        }
+        (self.reward_dir / "manifest.json").write_text(json.dumps(self.catalog), encoding="utf-8")
+        (self.reward_dir / "pool.json").write_text(
+            json.dumps({"version": 1, "remaining": 3, "total": 3}), encoding="utf-8"
+        )
+        git(self.site, "add", "zzz_assets/rewards")
+        git(self.site, "commit", "-m", "add fallback reward fixture")
+        git(self.site, "push", "origin", "main")
+
         (self.site / local_issuer.RESERVATIONS_RELATIVE).write_text(
             "ReservedViewer, reserved-viewer -> toast.png\n"
             "RESERVEDVIEWER, RESERVED-VIEWER => star.png\n",
             encoding="utf-8",
         )
-        self.assertEqual(self.available(), [])
+        self.assertEqual({item["assetId"] for item in self.available()}, {bonus_id})
 
         first = issue_next_and_publish(self.site, {
             "username": "@RESERVED-VIEWER", "userId": "reserved-user", "platform": "twitch",
@@ -315,11 +334,11 @@ class LocalRewardIssuerTests(unittest.TestCase):
         }, expected_remote=str(self.remote))
         self.assertEqual(second["assignment"]["assetId"], self.art_ids[1])
 
-        with self.assertRaisesRegex(RewardIssueError, "All rewards reserved"):
-            issue_next_and_publish(self.site, {
-                "username": "reserved-viewer", "userId": "reserved-user", "platform": "twitch",
-                "eventId": "twitch:reserved-order-3",
-            }, expected_remote=str(self.remote))
+        fallback = issue_next_and_publish(self.site, {
+            "username": "reserved-viewer", "userId": "reserved-user", "platform": "twitch",
+            "eventId": "twitch:reserved-order-3",
+        }, expected_remote=str(self.remote))
+        self.assertEqual(fallback["assignment"]["assetId"], bonus_id)
 
     def test_unrelated_edits_are_preserved_and_never_enter_reward_commit(self) -> None:
         original_head = git(self.site, "rev-parse", "HEAD")
