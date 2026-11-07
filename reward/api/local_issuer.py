@@ -966,18 +966,26 @@ def _revoke_rewards_and_publish(
         raise RewardIssueError("The configured website folder is unavailable.")
 
     with _ISSUE_LOCK:
-        with _reward_transaction_worktree(root, expected_remote) as transaction_root:
-            return _revoke_in_worktree(transaction_root, request, action, actor_login)
+        for attempt in range(3):
+            revision = _published_revision(root, expected_remote)
+            try:
+                return _revoke_at_revision(root, revision, request, action, actor_login)
+            except _RemoteMainUpdated:
+                if attempt == 2:
+                    raise RewardIssueError("GitHub changed during reward publication. Retry the same chat event.")
+        raise RewardIssueError("The reward update could not be published. Retry the same chat event.")
 
 
-def _revoke_in_worktree(
+def _revoke_at_revision(
     root: Path,
+    revision: str,
     request: dict[str, str],
     action: str,
     actor_login: str,
 ) -> dict[str, Any]:
     _ensure_commit_identity(root)
-    _, registry = _load_records(root)
+    catalog, registry = _load_records_at_revision(root, revision)
+    reservations = _load_reservations(root, catalog)
     event_hash = hashlib.sha256(request["eventId"].encode("utf-8")).hexdigest()
     if _find_event(registry, event_hash):
         raise RewardIssueError("This chat event was already used to issue an award.")
@@ -1048,7 +1056,7 @@ def _revoke_in_worktree(
         ],
     }
     _validate_registry(next_registry)
-    _commit_registry(root, next_registry, event_hash, commit_action)
+    _commit_registry(root, revision, catalog, reservations, next_registry, event_hash, commit_action)
     print(f"[reward chat] {action}: released {len(archived_records)} award(s) from {request['username']} on {request['platform']}.")
     return {
         "action": action,
