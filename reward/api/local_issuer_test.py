@@ -348,7 +348,13 @@ class LocalRewardIssuerTests(unittest.TestCase):
     def test_dirty_reward_files_are_ignored_in_favor_of_latest_published_art(self) -> None:
         manifest_path = self.reward_dir / "manifest.json"
         original_manifest = manifest_path.read_bytes()
+        assignments_path = self.reward_dir / "assignments.json"
+        original_assignments = assignments_path.read_bytes()
+        pool_path = self.reward_dir / "pool.json"
+        original_pool = pool_path.read_bytes()
         manifest_path.write_bytes(original_manifest + b" ")
+        assignments_path.write_bytes(b"local staged-looking registry edit\n")
+        pool_path.write_bytes(b"local pool edit\n")
         (self.reward_dir / "toast.png").write_bytes(png_bytes(4, 4))
         issued = issue_and_publish(
             self.site,
@@ -357,6 +363,9 @@ class LocalRewardIssuerTests(unittest.TestCase):
         )
         self.assertTrue(issued["pushed"])
         self.assertEqual(manifest_path.read_bytes(), original_manifest + b" ")
+        self.assertEqual(assignments_path.read_bytes(), b"local staged-looking registry edit\n")
+        self.assertEqual(pool_path.read_bytes(), b"local pool edit\n")
+        self.assertEqual(self.remote_json("zzz_assets/rewards/assignments.json")["assignments"][0]["username"], "Winner")
         with self.assertRaisesRegex(RewardIssueError, "changed after the reward catalog"):
             local_issuer._verify_artwork(self.site, self.catalog, self.art_ids[0])
 
