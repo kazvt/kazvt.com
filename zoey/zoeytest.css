@@ -133,7 +133,9 @@ button, a { touch-action: manipulation; }
   position: relative;
   min-width: 0;
   width: 100%;
-  height: var(--z-layout-height, 100svh);
+  height: var(--z-layout-height, 100vh);
+  height: var(--z-layout-height, 100dvh);
+  min-height: 100vh;
   min-height: 100dvh;
   overflow: visible;
 }
@@ -143,8 +145,10 @@ button, a { touch-action: manipulation; }
   top: 50%;
   left: 50%;
   display: block;
+  width: min(96vw, 44.8vh);
   width: min(96vw, 44.8dvh);
   max-width: 96vw;
+  max-height: 80vh;
   max-height: 80dvh;
   height: auto;
   object-fit: contain;

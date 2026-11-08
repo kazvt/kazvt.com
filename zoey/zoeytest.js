@@ -1038,13 +1038,13 @@
   }
   window.addEventListener("resize", scheduleResponsiveLayout, { passive: true });
   window.visualViewport?.addEventListener("resize", scheduleResponsiveLayout, { passive: true });
-  window.addEventListener("wheel", () => { userHasScrolled = true; }, { passive: true });
-  window.addEventListener("touchmove", () => { userHasScrolled = true; }, { passive: true });
+  window.addEventListener("wheel", () => { if (sceneEntered) userHasScrolled = true; }, { passive: true });
+  window.addEventListener("touchmove", () => { if (sceneEntered) userHasScrolled = true; }, { passive: true });
   window.addEventListener("pointerdown", (event) => {
-    if (event.clientX >= document.documentElement.clientWidth - 24) userHasScrolled = true;
+    if (sceneEntered && event.clientX >= document.documentElement.clientWidth - 24) userHasScrolled = true;
   }, { passive: true });
   window.addEventListener("keydown", (event) => {
-    if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) userHasScrolled = true;
+    if (sceneEntered && event.target?.tagName !== "BUTTON" && ["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) userHasScrolled = true;
   });
   if ("ResizeObserver" in window) {
     const entryLayoutObserver = new ResizeObserver(scheduleResponsiveLayout);
