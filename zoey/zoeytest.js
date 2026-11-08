@@ -6,7 +6,6 @@
   const audioStatus = document.getElementById("audioStatus");
   const entryNameMeasureContext = document.createElement("canvas").getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const CLIP_START_COOLDOWN_MS = 1000;
   const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
     .then((response) => response.ok ? response.arrayBuffer() : null)
@@ -202,9 +201,6 @@
   let fallbackBackgroundMusic = null;
   let backgroundMusicFallback = false;
   const voiceBufferPromises = new Map();
-  let lastClipStartedAt = -Infinity;
-  let pendingClipRequest = null;
-  let pendingClipTimer = 0;
   let startingClip = null;
   let activeVoice = null;
   const activeMedia = new Set();
@@ -213,7 +209,6 @@
   let gifImages = [];
   let catalogPromise = null;
   const clipIndexes = new Map();
-  const lastNonHoverTriggers = new WeakMap();
 
   function seeded(index, salt) {
     const value = Math.sin((index + 1) * 127.1 + salt * 311.7) * 43758.5453;
