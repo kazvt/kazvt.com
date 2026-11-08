@@ -824,8 +824,7 @@
     }
   }
 
-  async function startClipNow(entry, button, trigger = "click") {
-    if (activeVoice || startingClip) return;
+  async function startClipNow(entry, button) {
     if (!audioEnabled || !entry.clips.length) {
       audioStatus.textContent = !audioEnabled
         ? "Audio is not active."
@@ -836,7 +835,6 @@
     const clip = entry.clips[clipIndex % entry.clips.length];
     clipIndexes.set(entry.id, (clipIndex + 1) % entry.clips.length);
     const owner = button.closest(".z-entry");
-    const request = { entry, button, trigger };
     if (!ensureAudioContext() || backgroundMusicFallback) {
       startHtmlAudioClip(clip, entry, button, clipIndex);
       return;
@@ -858,9 +856,8 @@
       }
       const buffer = await loadVoiceBuffer(clip.src);
       if (startingClip !== loading) return;
-      if (!audioEnabled || !pendingClipIsStillActive(request)) {
+      if (!audioEnabled || !button.isConnected) {
         startingClip = null;
-        schedulePendingClip();
         return;
       }
 
@@ -891,7 +888,7 @@
     }
   }
 
-  function playNextClip(entry, button, trigger) {
+  function playNextClip(entry, button) {
     if (!audioEnabled || !entry.clips.length) {
       audioStatus.textContent = !audioEnabled
         ? "Audio is not active."
@@ -899,27 +896,8 @@
       return;
     }
 
-    const now = performance.now();
-    if (trigger !== "hover") {
-      const last = lastNonHoverTriggers.get(button);
-      if (last !== undefined && now - last < 280) {
-        if (trigger === "click" && pendingClipRequest?.button === button) {
-          pendingClipRequest.trigger = "click";
-        }
-        return;
-      }
-      lastNonHoverTriggers.set(button, now);
-    }
-
-    if (activeVoice || startingClip || lastClipStartedAt + CLIP_START_COOLDOWN_MS > now) {
-      pendingClipRequest = { entry, button, trigger };
-      schedulePendingClip();
-      return;
-    }
-
-    clearPendingClipTimer();
-    pendingClipRequest = null;
-    startClipNow(entry, button, trigger);
+    stopActiveVoice();
+    startClipNow(entry, button);
   }
 
   renderEntries();
