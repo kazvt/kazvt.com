@@ -32,7 +32,7 @@ body.zoey-page {
   position: relative;
   min-width: 280px;
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100dvh;
   color: var(--z-galaxy-text);
   background-color: var(--z-canvas);
   background-image:
@@ -126,7 +126,7 @@ button, a { touch-action: manipulation; }
   display: block;
   width: 100%;
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100dvh;
   padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
 .z-stage {
@@ -134,7 +134,7 @@ button, a { touch-action: manipulation; }
   min-width: 0;
   width: 100%;
   height: var(--z-layout-height, 100svh);
-  min-height: 100svh;
+  min-height: 100dvh;
   overflow: visible;
 }
 .z-featured-art {
@@ -236,10 +236,6 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
 .z-entry.is-playing .z-entry-avatar {
   transform: translateY(-2px);
   filter: drop-shadow(0 0 8px rgb(255 139 201 / 88%)) drop-shadow(0 0 18px rgb(100 207 255 / 62%));
-}
-.z-constellation[data-compact="true"] .z-entry.is-playing .z-entry-avatar {
-  transform: none;
-  filter: none;
 }
 .z-entry-button:hover .z-entry-name,
 .z-entry-button:focus-visible .z-entry-name,
