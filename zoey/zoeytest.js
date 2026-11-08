@@ -358,7 +358,7 @@
     // large stickers, then trade their sizes only as much as packing requires.
     const glowAllowance = 1;
     const edge = Math.max(3, Math.min(7, preferredSize * .025));
-    const collisionGap = .35;
+    const collisionGap = .75;
     const headingTop = 6;
     const headingBottom = headingTop + headingHeight + Math.max(4, edge);
     const targetHeroHeight = Math.min(canvasHeight * .8, (width - edge * 2) * 858 / 481);
