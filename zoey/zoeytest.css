@@ -26,13 +26,15 @@
   background: var(--z-canvas);
 }
 * { box-sizing: border-box; }
-html, body { width: 100%; min-height: 100%; margin: 0; overflow-x: hidden; overflow-y: auto; }
+html, body { width: 100%; height: 100%; min-height: 0; margin: 0; overflow: hidden; }
 html { scroll-behavior: auto; }
 body.zoey-page {
   position: relative;
-  min-width: 280px;
-  min-height: 100vh;
-  min-height: 100dvh;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
   color: var(--z-galaxy-text);
   background-color: var(--z-canvas);
   background-image:
@@ -120,24 +122,25 @@ button, a { touch-action: manipulation; }
 }
 .z-skip-link:focus { transform: translateY(0); }
 .z-viewport {
-  position: relative;
+  position: fixed;
   z-index: 3;
+  inset: 0;
   isolation: isolate;
   display: block;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
 .z-stage {
   position: relative;
   min-width: 0;
   width: 100%;
-  height: var(--z-layout-height, 100vh);
-  height: var(--z-layout-height, 100dvh);
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: visible;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 .z-featured-art {
   position: absolute;
@@ -145,9 +148,8 @@ button, a { touch-action: manipulation; }
   top: 50%;
   left: 50%;
   display: block;
-  width: min(96vw, 44.8vh);
-  width: min(96vw, 44.8dvh);
-  max-width: 96vw;
+  width: var(--z-hero-width, min(94vw, 44.8vh));
+  max-width: min(94vw, 100%);
   max-height: 80vh;
   max-height: 80dvh;
   height: auto;
@@ -319,7 +321,7 @@ body[data-motion="off"] *, body[data-motion="off"] *::before, body[data-motion="
 html[data-zoey-motion="off"] *, html[data-zoey-motion="off"] *::before, html[data-zoey-motion="off"] *::after { animation: none !important; transition: none !important; }
 body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy-motion { display: none; }
 @media (max-width: 700px) {
-  .z-viewport { padding-inline: max(9px, env(safe-area-inset-left)) max(9px, env(safe-area-inset-right)); }
+  .z-viewport { padding-inline: max(6px, env(safe-area-inset-left)) max(6px, env(safe-area-inset-right)); }
 }
 @media (max-width: 410px) {
   .z-stage-heading h1 { font-size: clamp(16px, 5.8vw, 23px); }
