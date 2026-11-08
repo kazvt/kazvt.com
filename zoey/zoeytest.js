@@ -349,7 +349,6 @@
     if (!width || !viewportHeight) return;
 
     const heading = document.querySelector(".z-stage-heading");
-    const featuredArt = document.getElementById("featuredArt");
     const headingRect = heading?.getBoundingClientRect();
     const headingHeight = headingRect?.height || 48;
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
@@ -363,7 +362,6 @@
     const edge = Math.max(8, preferredSize * .08);
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
-    const originalSizes = cards.map((card) => card.style.getPropertyValue("--entry-size"));
 
     function intersects(a, b) {
       return !(a.right + gap <= b.left || a.left >= b.right + gap ||
@@ -397,6 +395,7 @@
         const rotatedHeight = visualSize * (Math.abs(Math.cos(angle)) + Math.abs(Math.sin(angle))) + glowAllowance * 2;
         const halfWidth = rotatedWidth / 2;
         const halfHeight = rotatedHeight / 2;
+        if (width < rotatedWidth + edge * 2 || canvasHeight < rotatedHeight + edge * 2) return null;
         const candidates = [];
 
         for (let sample = 0; sample < samples; sample += 1) {
@@ -517,7 +516,6 @@
         star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
       }
     });
-    canvas.dataset.layout = layoutName;
   }
 
   function layoutGifSky() {
