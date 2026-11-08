@@ -103,7 +103,7 @@
     {
       id: "frosty",
       name: "Frosty",
-      avatar: "",
+      avatar: "/zoey/assets/frosty/frosty-avatar.gif?v=20261109-01",
       clips: [
         { src: "/zoey/assets/frosty/frosty-voice-1.wav", caption: "Frosty's voice note 1 of 3." },
         { src: "/zoey/assets/frosty/frosty-voice-2.wav", caption: "Frosty's voice note 2 of 3." },
