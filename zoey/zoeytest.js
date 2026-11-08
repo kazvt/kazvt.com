@@ -557,7 +557,7 @@
 
   function layoutGifSky() {
     if (!gifImages.length || !gifEntries) return;
-    const compact = window.matchMedia("(max-width: 700px)").matches;
+    const sceneSide = Math.min(window.innerWidth, window.innerHeight);
     gifImages.forEach((image, index) => {
       image.hidden = false;
       if (body.dataset.motion !== "on") {
@@ -566,10 +566,10 @@
       }
 
       const longest = Math.max(gifEntries[index].width, gifEntries[index].height) || 1;
-      const base = compact ? 15 + seeded(index, 3) * 19 : 20 + seeded(index, 3) * 40;
+      const base = sceneSide * (.04 + seeded(index, 3) * .03);
       const scale = base / longest;
-      const width = Math.max(12, gifEntries[index].width * scale);
-      const height = Math.max(12, gifEntries[index].height * scale);
+      const width = Math.max(.1, gifEntries[index].width * scale);
+      const height = Math.max(.1, gifEntries[index].height * scale);
       const xInset = Math.min(12, width / Math.max(1, window.innerWidth) * 50);
       const yInset = Math.min(12, height / Math.max(1, window.innerHeight) * 50);
       const x = Math.max(xInset, Math.min(100 - xInset, 2 + seeded(index, 1) * 96));
