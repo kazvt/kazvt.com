@@ -359,6 +359,7 @@
     const glowAllowance = 3;
     const edge = Math.max(4, Math.min(10, preferredSize * .055));
     const gap = Math.max(2, preferredSize * .035);
+    const collisionGap = gap + 1;
     const headingTop = 6;
     const headingBottom = headingTop + headingHeight + Math.max(6, edge);
     const targetHeroHeight = Math.min(canvasHeight * .8, (width - edge * 2) * 858 / 481);
@@ -367,7 +368,7 @@
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
-    function intersects(a, b, separation = gap) {
+    function intersects(a, b, separation = collisionGap) {
       return !(a.right + separation <= b.left || a.left >= b.right + separation ||
         a.bottom + separation <= b.top || a.top >= b.bottom + separation);
     }
@@ -407,15 +408,15 @@
 
         // Grow an irregular, tightly packed cloud from the centerpiece and
         // existing stickers; a few free samples keep the overall scatter loose.
-        const tangentJitter = cardSize * .3;
-        const smallJitter = cardSize * .08;
+        const tangentJitter = cardSize * .8;
+        const smallJitter = cardSize * .16;
         for (let sample = 0; sample < Math.min(samples, 40); sample += 1) {
           addPoint(
             edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth),
             edge + halfHeight + random() * Math.max(0, canvasHeight - edge * 2 - rotatedHeight)
           );
         }
-        const sideGap = gap + random() * smallJitter;
+        const sideGap = collisionGap + random() * smallJitter;
         for (const direction of [-1, 1]) {
           addPoint(heroCenterX + direction * (heroWidth / 2 + halfWidth + sideGap),
             heroCenterY + (random() - .5) * (heroHeight + tangentJitter));
@@ -424,8 +425,8 @@
         }
 
         for (const other of placed) {
-          const extraX = gap + random() * smallJitter;
-          const extraY = gap + random() * smallJitter;
+          const extraX = collisionGap + random() * smallJitter;
+          const extraY = collisionGap + random() * smallJitter;
           const otherHalfWidth = (other.right - other.left) / 2;
           const otherHalfHeight = (other.bottom - other.top) / 2;
           const tangentX = (random() - .5) * tangentJitter;
@@ -465,7 +466,7 @@
             nearestGap = Math.min(nearestGap, Math.hypot(dx, dy));
           }
           if (!Number.isFinite(nearestGap)) nearestGap = heroGap;
-          const preferredGap = gap + cardSize * .025;
+          const preferredGap = collisionGap + cardSize * .025;
           box.sector = sector;
           box.angle = angleDegrees;
           box.score = Math.abs(nearestGap - preferredGap) * .78 +
