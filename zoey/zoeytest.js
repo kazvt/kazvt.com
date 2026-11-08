@@ -170,7 +170,17 @@
         { src: "/zoey/assets/pato/pato-voice-3-20261108-tail.wav?v=20261108-11", caption: "Pato's voice note 3 of 3." }
       ]
     },
-    ...Array.from({ length: 4 }, (_, index) => ({
+    {
+      id: "lily",
+      name: "Lily",
+      avatar: "/zoey/assets/lily/lily-avatar.gif",
+      clips: [
+        { src: "/zoey/assets/lily/lily-voice-1.wav?v=20261108-01", caption: "Lily's voice note 1 of 3." },
+        { src: "/zoey/assets/lily/lily-voice-2.wav?v=20261108-01", caption: "Lily's voice note 2 of 3." },
+        { src: "/zoey/assets/lily/lily-voice-3.wav?v=20261108-01", caption: "Lily's voice note 3 of 3." }
+      ]
+    },
+    ...Array.from({ length: 3 }, (_, index) => ({
       id: `star-${String(index + 17).padStart(2, "0")}`,
       name: "PLACEHOLDER",
       avatar: "",
@@ -185,7 +195,7 @@
     kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
     poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
     dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
-    "star-17": -5.8, "star-18": 3.6, "star-19": -7.0, "star-20": 2.0
+    lily: -5.8, "star-17": 3.6, "star-18": -7.0, "star-19": 2.0
   });
 
   let audioEnabled = false;
@@ -299,14 +309,17 @@
     const positions = layouts[layoutName];
     let realEntryIndex = 0;
     let placeholderIndex = 0;
+    const realEntryCount = entrySlots.reduce((count, entry) => count + Number(!entry.id.startsWith("star-")), 0);
     const positionIndexes = entrySlots.map((entry) => {
       if (entry.id.startsWith("star-")) {
-        const index = layoutName === "panorama" ? placeholderIndex * 5 + 4 : 16 + placeholderIndex;
+        const index = layoutName === "panorama" ? placeholderIndex * 5 + 4 : realEntryCount + placeholderIndex;
         placeholderIndex += 1;
         return index;
       }
       const index = layoutName === "panorama"
-        ? Math.floor(realEntryIndex / 4) * 5 + realEntryIndex % 4
+        ? realEntryIndex < 16
+          ? Math.floor(realEntryIndex / 4) * 5 + realEntryIndex % 4
+          : 19 + realEntryIndex - 16
         : realEntryIndex;
       realEntryIndex += 1;
       return index;
