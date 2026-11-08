@@ -303,52 +303,49 @@
     const aspectRatio = width / height;
     const compactViewport = height < 180;
     canvas.dataset.compact = compactViewport ? "true" : "false";
-    // Aspect-ratio layouts keep their proportions at browser zoom levels.
-    const layoutName = aspectRatio < .9 ? "portrait" : aspectRatio >= 1.55 ? "panorama" : "wide";
+    // Wider canvases gain a real column; compact/portrait viewports keep four
+    // columns so the stickers remain readable. Each layout has enough spare
+    // positions to absorb future entries without changing the current flow.
+    const layoutName = aspectRatio < 1.05 ? "portrait" : aspectRatio >= 1.75 ? "panorama" : "wide";
     const layouts = {
-      // Four columns by five rows keep the constellation compact on portrait and mid-width screens.
-      portrait: [
-        [2.5, 3, 21, 19.5], [26.5, 3.2, 21, 19.5], [51, 3, 21, 19.5], [75.5, 3.2, 21, 19.5],
-        [2.7, 22, 21, 19.5], [26.2, 22.2, 21, 19.5], [51.3, 22, 21, 19.5], [75.2, 22.2, 21, 19.5],
-        [2.5, 41, 21, 19.5], [26.5, 41.2, 21, 19.5], [51, 41, 21, 19.5], [75.5, 41.2, 21, 19.5],
-        [2.7, 60, 21, 19.5], [26.2, 60.2, 21, 19.5], [51.3, 60, 21, 19.5], [75.2, 60.2, 21, 19.5],
-        [2.5, 79, 21, 19.5], [26.5, 78.8, 21, 19.5], [51, 79, 21, 19.5], [75.5, 78.8, 21, 19.5]
-      ],
-      // Medium aspect ratios also use four columns, with a fifth row for the extra stickers.
-      wide: [
-        [2.5, 3, 21, 19.5], [26.5, 3.2, 21, 19.5], [51, 3, 21, 19.5], [75.5, 3.2, 21, 19.5],
-        [2.7, 22, 21, 19.5], [26.2, 22.2, 21, 19.5], [51.3, 22, 21, 19.5], [75.2, 22.2, 21, 19.5],
-        [2.5, 41, 21, 19.5], [26.5, 41.2, 21, 19.5], [51, 41, 21, 19.5], [75.5, 41.2, 21, 19.5],
-        [2.7, 60, 21, 19.5], [26.2, 60.2, 21, 19.5], [51.3, 60, 21, 19.5], [75.2, 60.2, 21, 19.5],
-        [2.5, 79, 21, 19.5], [26.5, 78.8, 21, 19.5], [51, 79, 21, 19.5], [75.5, 78.8, 21, 19.5]
-      ],
-      // Wide canvases gain the requested fifth column while retaining four balanced rows.
-      panorama: [
-        [1, 3.5, 17, 23.5], [21, 3.7, 17, 23.5], [41, 3.5, 17, 23.5], [61, 3.7, 17, 23.5], [81, 3.5, 17, 23.5],
-        [1.2, 27, 17, 23.5], [20.8, 27.2, 17, 23.5], [41.2, 27, 17, 23.5], [60.8, 27.2, 17, 23.5], [81.2, 27, 17, 23.5],
-        [0.95, 50.5, 17, 23.5], [21.2, 50.7, 17, 23.5], [40.8, 50.5, 17, 23.5], [61.1, 50.7, 17, 23.5], [80.9, 50.5, 17, 23.5],
-        [1.15, 74, 17, 23.5], [20.9, 74.2, 17, 23.5], [41.1, 74, 17, 23.5], [60.85, 74.2, 17, 23.5], [81.1, 74, 17, 23.5]
-      ]
-    };
-    const positions = layouts[layoutName];
-    let realEntryIndex = 0;
-    let placeholderIndex = 0;
-    const realEntryCount = entrySlots.reduce((count, entry) => count + Number(!entry.id.startsWith("star-")), 0);
-    const placeholderCount = entrySlots.length - realEntryCount;
-    const positionIndexes = entrySlots.map((entry) => {
-      if (entry.id.startsWith("star-")) {
-        const index = layoutName === "panorama" ? placeholderIndex * 5 + 4 : realEntryCount + placeholderIndex;
-        placeholderIndex += 1;
-        return index;
+      portrait: {
+        columns: 4, rows: 6, left: 2.8, top: 2.4, stepX: 24.6, stepY: 16.2,
+        cardWidth: 20.5, cardHeight: 13.6, jitterX: .2, jitterY: .16,
+        unused: [13, 19, 20]
+      },
+      wide: {
+        columns: 5, rows: 5, left: 2, top: 2.1, stepX: 19.2, stepY: 19.25,
+        cardWidth: 16, cardHeight: 16.8, jitterX: .18, jitterY: .15,
+        unused: [9, 10, 17, 21]
+      },
+      panorama: {
+        columns: 6, rows: 4, left: 1.2, top: 3, stepX: 16.4, stepY: 24.4,
+        cardWidth: 14, cardHeight: 20.5, jitterX: .16, jitterY: .15,
+        unused: [8, 16, 19]
       }
-      const index = layoutName === "panorama"
-        ? realEntryIndex < 16
-          ? Math.floor(realEntryIndex / 4) * 5 + realEntryIndex % 4
-          : (placeholderCount + realEntryIndex - 16) * 5 + 4
-        : realEntryIndex;
-      realEntryIndex += 1;
-      return index;
+    };
+    const layout = layouts[layoutName];
+    const positions = Array.from({ length: layout.columns * layout.rows }, (_, index) => {
+      const row = Math.floor(index / layout.columns);
+      const column = index % layout.columns;
+      const xJitter = (((row * 2 + column) % 3) - 1) * layout.jitterX;
+      const yJitter = (((row + column * 2) % 3) - 1) * layout.jitterY;
+      return [
+        layout.left + column * layout.stepX + xJitter,
+        layout.top + row * layout.stepY + yJitter,
+        layout.cardWidth,
+        layout.cardHeight
+      ];
     });
+    const unusedPositions = new Set(layout.unused);
+    const positionIndexes = positions
+      .map((_, index) => index)
+      .filter((index) => !unusedPositions.has(index))
+      .concat(layout.unused);
+    if (entrySlots.length > positionIndexes.length) {
+      console.error(`The ${layoutName} starfield has only ${positionIndexes.length} positions for ${entrySlots.length} entries.`);
+      return;
+    }
     const hoverScale = compactViewport ? 1.08 : 1.12;
     const riseRange = height < 180 ? 0 : 2;
     const cards = [...canvas.querySelectorAll(".z-entry")];
