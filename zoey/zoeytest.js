@@ -344,46 +344,48 @@
   function layoutEntryStickers() {
     const canvas = document.getElementById("entryCanvas");
     if (!canvas) return;
-    const { width } = canvas.getBoundingClientRect();
-    const viewportHeight = window.visualViewport?.height || window.innerHeight;
-    if (!width || !viewportHeight) return;
+    const canvasRect = canvas.getBoundingClientRect();
+    const { width, height: canvasHeight } = canvasRect;
+    if (!width || !canvasHeight) return;
 
     const heading = document.querySelector(".z-stage-heading");
     const headingRect = heading?.getBoundingClientRect();
     const headingHeight = headingRect?.height || 48;
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
-    const preferredSize = Math.max(56, Math.min(144, Math.min(width, viewportHeight) * .13));
+    const preferredSize = Math.max(32, Math.min(176, Math.min(width, canvasHeight) * .18));
     const hoverScale = 1.12;
-    // Reserve a small halo for the idle drop-shadow. The active glow is soft
-    // paint behind one clicked sprite, not part of the sticker's hit-box.
-    const glowAllowance = 4;
-    const gap = Math.max(7, preferredSize * .1);
-    const heroHeight = Math.min(viewportHeight * .8, window.innerWidth * .96 * 858 / 481);
-    const heroWidth = heroHeight * 481 / 858;
+    // Keep the full scene in the viewport. Prefer a large centerpiece and
+    // large stickers, then trade their sizes only as much as packing requires.
+    const glowAllowance = 3;
+    const edge = Math.max(4, Math.min(10, preferredSize * .055));
+    const gap = Math.max(2, preferredSize * .035);
+    const headingTop = 6;
+    const headingBottom = headingTop + headingHeight + Math.max(6, edge);
+    const targetHeroHeight = Math.min(canvasHeight * .8, (width - edge * 2) * 858 / 481);
+    const maxHeroHeight = Math.max(48, Math.min(targetHeroHeight, canvasHeight - headingBottom * 2));
     const heroCenterX = width / 2;
-    const edge = Math.max(8, preferredSize * .08);
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
-    function intersects(a, b) {
-      return !(a.right + gap <= b.left || a.left >= b.right + gap ||
-        a.bottom + gap <= b.top || a.top >= b.bottom + gap);
+    function intersects(a, b, separation = gap) {
+      return !(a.right + separation <= b.left || a.left >= b.right + separation ||
+        a.bottom + separation <= b.top || a.top >= b.bottom + separation);
     }
 
-    function buildLayout(canvasHeight, cardSize, samples = 120) {
+    function buildLayout(cardSize, heroHeight, samples = 96) {
       const heroCenterY = canvasHeight / 2;
+      const heroWidth = heroHeight * 481 / 858;
       const hero = {
         left: heroCenterX - heroWidth / 2 - glowAllowance,
         right: heroCenterX + heroWidth / 2 + glowAllowance,
         top: heroCenterY - heroHeight / 2 - glowAllowance,
         bottom: heroCenterY + heroHeight / 2 + glowAllowance
       };
-      const headingTop = Math.max(6, heroCenterY - heroHeight / 2 - headingHeight - 12);
       const heading = {
         left: (width - headingWidth) / 2 - 4,
         right: (width + headingWidth) / 2 + 4,
-        top: headingTop - 3,
-        bottom: headingTop + headingHeight + 3
+        top: headingTop,
+        bottom: headingBottom
       };
       const placed = [];
       const sectorCounts = Array(8).fill(0);
@@ -418,18 +420,19 @@
           const heroDX = Math.max(hero.left - box.right, box.left - hero.right, 0);
           const heroDY = Math.max(hero.top - box.bottom, box.top - hero.bottom, 0);
           const heroGap = Math.hypot(heroDX, heroDY);
-          let nearestGap = cardSize * 1.4;
+          let nearestGap = Infinity;
           for (const other of placed) {
             const dx = Math.max(other.left - box.right, box.left - other.right, 0);
             const dy = Math.max(other.top - box.bottom, box.top - other.bottom, 0);
             nearestGap = Math.min(nearestGap, Math.hypot(dx, dy));
           }
-          const preferredGap = gap + cardSize * .16;
+          if (!Number.isFinite(nearestGap)) nearestGap = heroGap;
+          const preferredGap = gap + cardSize * .025;
           box.sector = sector;
           box.angle = angleDegrees;
-          box.score = Math.abs(nearestGap - preferredGap) * .6 +
-            Math.abs(heroGap - preferredGap) * .22 +
-            sectorCounts[sector] * cardSize * .3 + random() * cardSize * .03;
+          box.score = Math.abs(nearestGap - preferredGap) * .78 +
+            Math.abs(heroGap - preferredGap) * .12 +
+            sectorCounts[sector] * cardSize * .34 + random() * cardSize * .015;
           if (box.score < bestScore) {
             bestCandidate = box;
             bestScore = box.score;
@@ -441,47 +444,43 @@
         sectorCounts[chosen.sector] += 1;
         placed.push(chosen);
       }
-      return { placed, headingTop };
+      return { placed, headingTop, heroHeight };
     }
 
     let finalLayout = null;
-    let finalHeight = viewportHeight;
     let finalSize = preferredSize;
-    const roughBoxSize = preferredSize * hoverScale * 1.23 + glowAllowance * 2;
-    const roughColumns = Math.max(1, Math.floor((width - edge * 2) / (roughBoxSize + gap)));
-    const roughRows = Math.ceil(cards.length / roughColumns);
-    const estimatedHeight = heroHeight + roughRows * roughBoxSize + headingHeight + gap * 3;
-    const minCanvasHeight = Math.max(viewportHeight, estimatedHeight * .92);
-    const maxCanvasHeight = viewportHeight * 4.2;
-    const heightStep = Math.max(32, viewportHeight * .1);
-    const sizeScales = [1, .96, .92, .88, .84];
-
-    for (const sizeScale of sizeScales) {
-      const cardSize = Math.max(48, preferredSize * sizeScale);
-      for (let canvasHeight = minCanvasHeight; canvasHeight <= maxCanvasHeight; canvasHeight += heightStep) {
-        const layout = buildLayout(canvasHeight, cardSize);
-        if (layout) {
-          finalLayout = layout;
-          finalHeight = canvasHeight;
-          finalSize = cardSize;
-          break;
-        }
+    const sizeScales = [1, .94, .88, .82, .76, .7, .64, .58, .52, .46, .4, .34, .28, .22];
+    const heroScales = [1, .92, .84, .76, .68, .6, .52, .44, .36, .3, .25, .2, .16];
+    const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(22, Math.round(preferredSize * scale))))];
+    const heroHeights = [...new Set(heroScales.map((scale) => Math.max(44, Math.round(maxHeroHeight * scale))))];
+    const candidates = [];
+    for (const cardSize of cardSizes) {
+      for (const heroHeight of heroHeights) {
+        candidates.push({
+          cardSize,
+          heroHeight,
+          quality: Math.pow(cardSize / preferredSize, .7) * Math.pow(heroHeight / maxHeroHeight, .3)
+        });
       }
-      if (finalLayout) break;
+    }
+    candidates.sort((a, b) => b.quality - a.quality || b.cardSize - a.cardSize || b.heroHeight - a.heroHeight);
+
+    for (const candidate of candidates) {
+      const layout = buildLayout(candidate.cardSize, candidate.heroHeight);
+      if (layout) {
+        finalLayout = layout;
+        finalSize = candidate.cardSize;
+        break;
+      }
     }
 
-    // Keep the composition intact even at unusually narrow zoomed viewports:
-    // add vertical room first, only then use the smallest touch-safe sticker size.
+    // Extra search at the compact end handles very narrow windows and heavy zoom
+    // without ever extending the scene beyond the visible viewport.
     if (!finalLayout) {
-      finalSize = 48;
-      for (let canvasHeight = minCanvasHeight; canvasHeight <= viewportHeight * 8; canvasHeight += heightStep) {
-        const layout = buildLayout(canvasHeight, finalSize, 240);
-        if (layout) {
-          finalLayout = layout;
-          finalHeight = canvasHeight;
-          break;
-        }
-      }
+      const fallbackCard = Math.max(16, Math.round(preferredSize * .14));
+      const fallbackHero = Math.max(32, Math.round(maxHeroHeight * .12));
+      finalLayout = buildLayout(fallbackCard, fallbackHero, 1200);
+      finalSize = fallbackCard;
     }
 
     if (!finalLayout) {
@@ -489,8 +488,9 @@
       return;
     }
 
-    world.style.setProperty("--z-layout-height", `${Math.ceil(finalHeight)}px`);
     heading.style.top = `${finalLayout.headingTop}px`;
+    const art = document.getElementById("featuredArt");
+    art?.style.setProperty("--z-hero-width", `${(finalLayout.heroHeight * 481 / 858).toFixed(2)}px`);
     cards.forEach((card, index) => {
       const sticker = finalLayout.placed[index];
       card.style.setProperty("--entry-x", `${(sticker.centerX - finalSize / 2).toFixed(2)}px`);
@@ -499,7 +499,7 @@
       card.style.setProperty("--entry-tilt", `${sticker.angle.toFixed(2)}deg`);
       card.style.setProperty("--entry-hover-scale", hoverScale.toFixed(2));
     });
-    canvas.dataset.compact = finalSize < 60 ? "true" : "false";
+    canvas.dataset.compact = finalSize < 48 ? "true" : "false";
     canvas.dataset.layout = "scattered";
 
     cards.forEach((card) => {
