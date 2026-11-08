@@ -354,7 +354,9 @@
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
     const preferredSize = Math.max(56, Math.min(144, Math.min(width, viewportHeight) * .13));
     const hoverScale = 1.12;
-    const glowAllowance = 14;
+    // Reserve a small halo for the idle drop-shadow. The active glow is soft
+    // paint behind one clicked sprite, not part of the sticker's hit-box.
+    const glowAllowance = 4;
     const gap = Math.max(7, preferredSize * .1);
     const heroHeight = Math.min(viewportHeight * .8, window.innerWidth * .86 * 858 / 481);
     const heroWidth = heroHeight * 481 / 858;
@@ -368,7 +370,7 @@
         a.bottom + gap <= b.top || a.top >= b.bottom + gap);
     }
 
-    function buildLayout(canvasHeight, cardSize, samples = 160) {
+    function buildLayout(canvasHeight, cardSize, samples = 120) {
       const heroCenterY = canvasHeight / 2;
       const hero = {
         left: heroCenterX - heroWidth / 2 - glowAllowance,
@@ -396,7 +398,8 @@
         const halfWidth = rotatedWidth / 2;
         const halfHeight = rotatedHeight / 2;
         if (width < rotatedWidth + edge * 2 || canvasHeight < rotatedHeight + edge * 2) return null;
-        const candidates = [];
+        let bestCandidate = null;
+        let bestScore = Infinity;
 
         for (let sample = 0; sample < samples; sample += 1) {
           const centerX = edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth);
@@ -427,12 +430,14 @@
           box.score = Math.abs(nearestGap - preferredGap) * .6 +
             Math.abs(heroGap - preferredGap) * .22 +
             sectorCounts[sector] * cardSize * .3 + random() * cardSize * .03;
-          candidates.push(box);
+          if (box.score < bestScore) {
+            bestCandidate = box;
+            bestScore = box.score;
+          }
         }
 
-        if (!candidates.length) return null;
-        candidates.sort((a, b) => a.score - b.score);
-        const chosen = candidates[0];
+        if (!bestCandidate) return null;
+        const chosen = bestCandidate;
         sectorCounts[chosen.sector] += 1;
         placed.push(chosen);
       }
@@ -442,9 +447,13 @@
     let finalLayout = null;
     let finalHeight = viewportHeight;
     let finalSize = preferredSize;
-    const minCanvasHeight = viewportHeight;
+    const roughBoxSize = preferredSize * hoverScale * 1.23 + glowAllowance * 2;
+    const roughColumns = Math.max(1, Math.floor((width - edge * 2) / (roughBoxSize + gap)));
+    const roughRows = Math.ceil(cards.length / roughColumns);
+    const estimatedHeight = heroHeight + roughRows * roughBoxSize + headingHeight + gap * 3;
+    const minCanvasHeight = Math.max(viewportHeight, estimatedHeight * .92);
     const maxCanvasHeight = viewportHeight * 4.2;
-    const heightStep = Math.max(32, viewportHeight * .08);
+    const heightStep = Math.max(32, viewportHeight * .1);
     const sizeScales = [1, .96, .92, .88, .84];
 
     for (const sizeScale of sizeScales) {
