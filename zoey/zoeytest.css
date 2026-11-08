@@ -285,8 +285,8 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   font-size: clamp(11px, calc(var(--entry-size, 72px) * .22), 24px);
   font-weight: 700;
   line-height: 1.04;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
   text-align: center;
   text-wrap: balance;
   -webkit-text-stroke: .6px rgb(16 11 42 / 95%);

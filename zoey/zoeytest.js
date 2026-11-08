@@ -4,6 +4,7 @@
   const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
   const audioStatus = document.getElementById("audioStatus");
+  const entryNameMeasureContext = document.createElement("canvas").getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
@@ -546,6 +547,18 @@
       const avatar = card.querySelector(".z-entry-avatar");
       const star = card.querySelector(".z-avatar-star");
       if (!avatar) return;
+      const name = card.querySelector(".z-entry-name");
+      if (name && entryNameMeasureContext) {
+        name.style.fontSize = "";
+        const nameStyle = getComputedStyle(name);
+        const baseSize = Number.parseFloat(nameStyle.fontSize);
+        const availableWidth = Math.max(1, avatar.clientWidth - 4);
+        entryNameMeasureContext.font = `${nameStyle.fontWeight} ${baseSize}px ${nameStyle.fontFamily}`;
+        const measuredWidth = entryNameMeasureContext.measureText(name.textContent.trim()).width;
+        if (measuredWidth > availableWidth && measuredWidth > 0) {
+          name.style.fontSize = `${(baseSize * availableWidth / measuredWidth).toFixed(2)}px`;
+        }
+      }
       if (star) {
         const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
         star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
