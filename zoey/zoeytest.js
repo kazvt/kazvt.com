@@ -242,15 +242,32 @@
     }
   ];
 
-  // One fixed, hand-baked sticker tilt per entry. These do not re-randomize
-  // during resize, hover, or animation; the modest angles preserve clean gaps.
-  const ENTRY_ROTATION_DEG = Object.freeze({
-    kaz: -6.0, abigail: 4.2, letty: -2.1, traaansfem: 7.4,
-    kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
-    poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
-    dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
-    lily: -5.8, faroe: 2.0, alyx: -3.4, willow: 2.8, claire: -4.1, skawtzilla: 3.7, blue: -6.2
-  });
+  // Each sender gets a stable, ID-seeded tilt and scatter seed. Resizing never
+  // rerolls the personality of a sticker, and every tilt stays within +/-30deg.
+  function stableHash(value) {
+    let hash = 2166136261;
+    for (const character of String(value)) {
+      hash ^= character.charCodeAt(0);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function seededRandom(seed) {
+    let state = seed >>> 0;
+    return () => {
+      state = state + 0x6D2B79F5 | 0;
+      let value = state;
+      value = Math.imul(value ^ value >>> 15, value | 1);
+      value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+      return ((value ^ value >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  const entryTilts = new Map(entrySlots.map((entry) => [
+    entry.id,
+    (seededRandom(stableHash(`tilt:${entry.id}`))() * 60) - 30
+  ]));
 
   let audioEnabled = false;
   let audioContext = null;
@@ -327,134 +344,156 @@
   function layoutEntryStickers() {
     const canvas = document.getElementById("entryCanvas");
     if (!canvas) return;
-    const { width, height } = canvas.getBoundingClientRect();
-    if (!width || !height) return;
+    const { width } = canvas.getBoundingClientRect();
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+    if (!width || !viewportHeight) return;
 
-    const aspectRatio = width / height;
-    const compactViewport = height < 180;
-    canvas.dataset.compact = compactViewport ? "true" : "false";
-    // Wider canvases gain a real column; compact/portrait viewports keep four
-    // columns so the stickers remain readable. Each layout has enough spare
-    // positions to absorb future entries without changing the current flow.
-    const layoutName = aspectRatio < 1.05 ? "portrait" : aspectRatio >= 1.65 ? "panorama" : "wide";
-    const layouts = {
-      portrait: {
-        columns: 4, rows: 6, left: 3.5, top: 3.2, stepX: 24.2, stepY: 15.8,
-        cardWidth: 20, cardHeight: 13.2, jitterX: .1, jitterY: .08,
-        unused: [13, 19, 20]
-      },
-      wide: {
-        columns: 5, rows: 5, left: 2, top: 3.6, stepX: 19.4, stepY: 19.1,
-        cardWidth: 15.2, cardHeight: 15.2, jitterX: .1, jitterY: .08,
-        unused: [9, 10, 17, 21]
-      },
-      panorama: {
-        columns: 6, rows: 4, left: 2.4, top: 5, stepX: 16.1, stepY: 24,
-        cardWidth: 13.2, cardHeight: 18, jitterX: .08, jitterY: .08,
-        unused: [8, 16, 19]
-      }
-    };
-    const layout = layouts[layoutName];
-    const positions = Array.from({ length: layout.columns * layout.rows }, (_, index) => {
-      const row = Math.floor(index / layout.columns);
-      const column = index % layout.columns;
-      const xJitter = (((row * 2 + column) % 3) - 1) * layout.jitterX;
-      const yJitter = (((row + column * 2) % 3) - 1) * layout.jitterY;
-      return [
-        layout.left + column * layout.stepX + xJitter,
-        layout.top + row * layout.stepY + yJitter,
-        layout.cardWidth,
-        layout.cardHeight
-      ];
-    });
-    const unusedPositions = new Set(layout.unused);
-    const positionIndexes = positions
-      .map((_, index) => index)
-      .filter((index) => !unusedPositions.has(index))
-      .concat(layout.unused);
-    if (entrySlots.length > positionIndexes.length) {
-      console.error(`The ${layoutName} starfield has only ${positionIndexes.length} positions for ${entrySlots.length} entries.`);
-      return;
-    }
-    const hoverScale = compactViewport ? 1.08 : 1.12;
-    const riseRange = height < 180 ? 0 : 2;
+    const heading = document.querySelector(".z-stage-heading");
+    const featuredArt = document.getElementById("featuredArt");
+    const headingRect = heading?.getBoundingClientRect();
+    const headingHeight = headingRect?.height || 48;
+    const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
+    const preferredSize = Math.max(56, Math.min(144, Math.min(width, viewportHeight) * .13));
+    const hoverScale = 1.12;
+    const glowAllowance = 14;
+    const gap = Math.max(7, preferredSize * .1);
+    const heroHeight = Math.min(viewportHeight * .8, window.innerWidth * .86 * 858 / 481);
+    const heroWidth = heroHeight * 481 / 858;
+    const heroCenterX = width / 2;
+    const edge = Math.max(8, preferredSize * .08);
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
+    const originalSizes = cards.map((card) => card.style.getPropertyValue("--entry-size"));
 
-    // CSS transforms do not participate in layout flow, so test the fixed tilt,
-    // the resting spacing, and the larger hover state against the canvas edges.
-    function getBounds(cardScale, motionScale, visualScale = 1) {
-      return cards.map((_, index) => {
-        const [xPct, yPct, widthPct, heightPct] = positions[positionIndexes[index]];
-        const scaledWidthPct = widthPct * cardScale * visualScale;
-        const scaledHeightPct = heightPct * cardScale * visualScale;
-        const x = (xPct + (widthPct - scaledWidthPct) / 2) * width / 100;
-        const y = (yPct + (heightPct - scaledHeightPct) / 2) * height / 100;
-        const cardWidth = scaledWidthPct * width / 100;
-        const cardHeight = scaledHeightPct * height / 100;
-        const angle = (ENTRY_ROTATION_DEG[entrySlots[index].id] || 0) * Math.PI / 180;
-        const rise = (seeded(index, 12) - .5) * riseRange * motionScale;
-        const boundsWidth = Math.abs(cardWidth * Math.cos(angle)) + Math.abs(cardHeight * Math.sin(angle));
-        const boundsHeight = Math.abs(cardHeight * Math.cos(angle)) + Math.abs(cardWidth * Math.sin(angle));
-        const centerX = x + cardWidth / 2 - Math.sin(angle) * rise;
-        const centerY = y + cardHeight / 2 + Math.cos(angle) * rise;
-        return {
-          left: centerX - boundsWidth / 2,
-          right: centerX + boundsWidth / 2,
-          top: centerY - boundsHeight / 2,
-          bottom: centerY + boundsHeight / 2
-        };
-      });
+    function intersects(a, b) {
+      return !(a.right + gap <= b.left || a.left >= b.right + gap ||
+        a.bottom + gap <= b.top || a.top >= b.bottom + gap);
     }
 
-    function hasSafeSpacing(bounds, checkCollisions = true) {
-      const edge = Math.min(3, Math.min(width, height) * .01);
-      const gap = Math.min(2, Math.min(width, height) * .004);
-      return bounds.every((box, index) => {
-        if (box.left < edge || box.top < edge || box.right > width - edge || box.bottom > height - edge) return false;
-        if (!checkCollisions) return true;
-        return bounds.slice(0, index).every((other) =>
-          box.left >= other.right + gap || box.right <= other.left - gap ||
-          box.top >= other.bottom + gap || box.bottom <= other.top - gap
-        );
-      });
+    function buildLayout(canvasHeight, cardSize, samples = 160) {
+      const heroCenterY = canvasHeight / 2;
+      const hero = {
+        left: heroCenterX - heroWidth / 2 - glowAllowance,
+        right: heroCenterX + heroWidth / 2 + glowAllowance,
+        top: heroCenterY - heroHeight / 2 - glowAllowance,
+        bottom: heroCenterY + heroHeight / 2 + glowAllowance
+      };
+      const headingTop = Math.max(6, heroCenterY - heroHeight / 2 - headingHeight - 12);
+      const heading = {
+        left: (width - headingWidth) / 2 - 4,
+        right: (width + headingWidth) / 2 + 4,
+        top: headingTop - 3,
+        bottom: headingTop + headingHeight + 3
+      };
+      const placed = [];
+      const sectorCounts = Array(8).fill(0);
+
+      for (const entry of entrySlots) {
+        const random = seededRandom(stableHash(`scatter:${entry.id}`));
+        const angleDegrees = entryTilts.get(entry.id) || 0;
+        const angle = angleDegrees * Math.PI / 180;
+        const visualSize = cardSize * hoverScale;
+        const rotatedWidth = visualSize * (Math.abs(Math.cos(angle)) + Math.abs(Math.sin(angle))) + glowAllowance * 2;
+        const rotatedHeight = visualSize * (Math.abs(Math.cos(angle)) + Math.abs(Math.sin(angle))) + glowAllowance * 2;
+        const halfWidth = rotatedWidth / 2;
+        const halfHeight = rotatedHeight / 2;
+        const candidates = [];
+
+        for (let sample = 0; sample < samples; sample += 1) {
+          const centerX = edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth);
+          const centerY = edge + halfHeight + random() * Math.max(0, canvasHeight - edge * 2 - rotatedHeight);
+          const box = {
+            left: centerX - halfWidth,
+            right: centerX + halfWidth,
+            top: centerY - halfHeight,
+            bottom: centerY + halfHeight,
+            centerX,
+            centerY
+          };
+          if (intersects(box, hero) || intersects(box, heading) || placed.some((other) => intersects(box, other))) continue;
+
+          const sector = (Math.floor((Math.atan2(centerY - heroCenterY, centerX - heroCenterX) + Math.PI) / (Math.PI / 4)) % 8 + 8) % 8;
+          const heroDX = Math.max(hero.left - box.right, box.left - hero.right, 0);
+          const heroDY = Math.max(hero.top - box.bottom, box.top - hero.bottom, 0);
+          const heroGap = Math.hypot(heroDX, heroDY);
+          let nearestGap = cardSize * 1.4;
+          for (const other of placed) {
+            const dx = Math.max(other.left - box.right, box.left - other.right, 0);
+            const dy = Math.max(other.top - box.bottom, box.top - other.bottom, 0);
+            nearestGap = Math.min(nearestGap, Math.hypot(dx, dy));
+          }
+          const preferredGap = gap + cardSize * .16;
+          box.sector = sector;
+          box.angle = angleDegrees;
+          box.score = Math.abs(nearestGap - preferredGap) * .6 +
+            Math.abs(heroGap - preferredGap) * .22 +
+            sectorCounts[sector] * cardSize * .3 + random() * cardSize * .03;
+          candidates.push(box);
+        }
+
+        if (!candidates.length) return null;
+        candidates.sort((a, b) => a.score - b.score);
+        const chosen = candidates[0];
+        sectorCounts[chosen.sector] += 1;
+        placed.push(chosen);
+      }
+      return { placed, headingTop };
     }
 
-    function hasSafeLayout(cardScale, motionScale) {
-      return hasSafeSpacing(getBounds(cardScale, motionScale), true) &&
-        hasSafeSpacing(getBounds(cardScale, motionScale, hoverScale), false);
+    let finalLayout = null;
+    let finalHeight = viewportHeight;
+    let finalSize = preferredSize;
+    const minCanvasHeight = viewportHeight;
+    const maxCanvasHeight = viewportHeight * 4.2;
+    const heightStep = Math.max(32, viewportHeight * .08);
+    const sizeScales = [1, .96, .92, .88, .84];
+
+    for (const sizeScale of sizeScales) {
+      const cardSize = Math.max(48, preferredSize * sizeScale);
+      for (let canvasHeight = minCanvasHeight; canvasHeight <= maxCanvasHeight; canvasHeight += heightStep) {
+        const layout = buildLayout(canvasHeight, cardSize);
+        if (layout) {
+          finalLayout = layout;
+          finalHeight = canvasHeight;
+          finalSize = cardSize;
+          break;
+        }
+      }
+      if (finalLayout) break;
     }
 
-    let cardScale = 1;
-    let motionScale = 1;
-    if (!hasSafeLayout(cardScale, motionScale)) motionScale = 0;
-    if (!hasSafeLayout(cardScale, motionScale)) {
-      for (let candidate = .98; candidate >= .5; candidate -= .02) {
-        if (hasSafeLayout(candidate, motionScale)) {
-          cardScale = candidate;
+    // Keep the composition intact even at unusually narrow zoomed viewports:
+    // add vertical room first, only then use the smallest touch-safe sticker size.
+    if (!finalLayout) {
+      finalSize = 48;
+      for (let canvasHeight = minCanvasHeight; canvasHeight <= viewportHeight * 8; canvasHeight += heightStep) {
+        const layout = buildLayout(canvasHeight, finalSize, 240);
+        if (layout) {
+          finalLayout = layout;
+          finalHeight = canvasHeight;
           break;
         }
       }
     }
-    if (!hasSafeLayout(cardScale, motionScale)) {
-      cardScale = .5;
-      motionScale = 0;
+
+    if (!finalLayout) {
+      console.error("The Zoey sticker field could not find a collision-free layout for every friend.");
+      return;
     }
 
+    world.style.setProperty("--z-layout-height", `${Math.ceil(finalHeight)}px`);
+    heading.style.top = `${finalLayout.headingTop}px`;
     cards.forEach((card, index) => {
-      const [x, y, cardWidth, cardHeight] = positions[positionIndexes[index]];
-      const fittedWidth = cardWidth * cardScale;
-      const fittedHeight = cardHeight * cardScale;
-      card.style.setProperty("--entry-x", `${(x + (cardWidth - fittedWidth) / 2).toFixed(3)}%`);
-      card.style.setProperty("--entry-y", `${(y + (cardHeight - fittedHeight) / 2).toFixed(3)}%`);
-      card.style.setProperty("--entry-width", `${fittedWidth.toFixed(3)}%`);
-      card.style.setProperty("--entry-height", `${fittedHeight.toFixed(3)}%`);
-      card.style.setProperty("--entry-tilt", `${(ENTRY_ROTATION_DEG[entrySlots[index].id] || 0).toFixed(2)}deg`);
+      const sticker = finalLayout.placed[index];
+      card.style.setProperty("--entry-x", `${(sticker.centerX - finalSize / 2).toFixed(2)}px`);
+      card.style.setProperty("--entry-y", `${(sticker.centerY - finalSize / 2).toFixed(2)}px`);
+      card.style.setProperty("--entry-size", `${finalSize.toFixed(2)}px`);
+      card.style.setProperty("--entry-tilt", `${sticker.angle.toFixed(2)}deg`);
       card.style.setProperty("--entry-hover-scale", hoverScale.toFixed(2));
-      card.style.setProperty("--entry-rise", `${((seeded(index, 12) - .5) * riseRange * motionScale).toFixed(1)}px`);
     });
-    // Placeholder stars used to have a 38px minimum and could spill out of
-    // their sticker, overlapping nearby real avatars despite safe card bounds.
+    canvas.dataset.compact = finalSize < 60 ? "true" : "false";
+    canvas.dataset.layout = "scattered";
+
     cards.forEach((card) => {
       const avatar = card.querySelector(".z-entry-avatar");
       const star = card.querySelector(".z-avatar-star");
@@ -464,11 +503,11 @@
         name.style.fontSize = "";
         const nameStyle = getComputedStyle(name);
         const baseSize = Number.parseFloat(nameStyle.fontSize);
-        const availableWidth = Math.max(1, avatar.clientWidth - 10);
+        const availableWidth = Math.max(1, avatar.clientWidth - 8);
         entryNameMeasureContext.font = `${nameStyle.fontWeight} ${baseSize}px ${nameStyle.fontFamily}`;
         const measuredWidth = entryNameMeasureContext.measureText(name.textContent.trim()).width;
         if (measuredWidth > availableWidth && measuredWidth > 0) {
-          const minSize = Math.min(baseSize, 7.5);
+          const minSize = Math.min(baseSize, 8);
           const fittedSize = Math.max(minSize, baseSize * availableWidth / measuredWidth);
           name.style.fontSize = `${fittedSize.toFixed(2)}px`;
         }
