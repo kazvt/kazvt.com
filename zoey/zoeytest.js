@@ -366,6 +366,9 @@
     const targetHeroHeight = Math.min(canvasHeight * .8, (width - preferredEdge * 2) * 858 / 481);
     const maxHeroHeight = Math.max(48, Math.min(targetHeroHeight, canvasHeight - headingBottom * 2));
     const heroCenterX = width / 2;
+    const heroPerCardRatio = 3.6;
+    const sceneSizeCeiling = Math.max(1, Math.min(preferredSize, maxHeroHeight / heroPerCardRatio));
+    const sceneMinimumSize = Math.min(minimumCardSize, sceneSizeCeiling);
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
@@ -494,13 +497,14 @@
     }
 
     let finalLayout = null;
-    let finalSize = preferredSize;
+    let finalSize = sceneSizeCeiling;
     const sizeScales = Array.from({ length: 81 }, (_, index) => 1 - index * .01);
-    const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(minimumCardSize, Math.round(preferredSize * scale))))];
+    const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(sceneMinimumSize,
+      Math.min(sceneSizeCeiling, Math.round(sceneSizeCeiling * scale)))))];
     for (const cardSize of cardSizes) {
-      // Keep the centerpiece and stickers in one visual scale system. The art
-      // grows with the stickers, up to its existing viewport-safe height cap.
-      const heroHeight = Math.max(36, Math.min(maxHeroHeight, Math.round(cardSize * 3.6)));
+      // Keep the centerpiece and stickers in one visual scale system. Reduce
+      // both together when the centered art approaches its viewport-safe cap.
+      const heroHeight = cardSize * heroPerCardRatio;
       const layout = buildLayout(cardSize, heroHeight);
       if (layout) {
         finalLayout = layout;
@@ -512,8 +516,8 @@
     // Extra search at the compact end handles very narrow windows and heavy zoom
     // without ever extending the scene beyond the visible viewport.
     if (!finalLayout) {
-      const fallbackCard = minimumCardSize;
-      const fallbackHero = Math.max(28, Math.round(maxHeroHeight * .08));
+      const fallbackCard = sceneMinimumSize;
+      const fallbackHero = fallbackCard * heroPerCardRatio;
       finalLayout = buildLayout(fallbackCard, fallbackHero, 1200);
       finalSize = fallbackCard;
     }
