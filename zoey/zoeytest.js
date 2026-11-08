@@ -316,21 +316,21 @@
     // Wider canvases gain a real column; compact/portrait viewports keep four
     // columns so the stickers remain readable. Each layout has enough spare
     // positions to absorb future entries without changing the current flow.
-    const layoutName = aspectRatio < 1.05 ? "portrait" : aspectRatio >= 1.75 ? "panorama" : "wide";
+    const layoutName = aspectRatio < 1.05 ? "portrait" : aspectRatio >= 1.65 ? "panorama" : "wide";
     const layouts = {
       portrait: {
-        columns: 4, rows: 6, left: 2.8, top: 2.4, stepX: 24.6, stepY: 16.2,
-        cardWidth: 20.5, cardHeight: 13.6, jitterX: .2, jitterY: .16,
+        columns: 4, rows: 6, left: 3.5, top: 3.2, stepX: 24.2, stepY: 15.8,
+        cardWidth: 20, cardHeight: 13.2, jitterX: .1, jitterY: .08,
         unused: [13, 19, 20]
       },
       wide: {
-        columns: 5, rows: 5, left: 2, top: 2.1, stepX: 19.2, stepY: 19.25,
-        cardWidth: 16, cardHeight: 16.8, jitterX: .18, jitterY: .15,
+        columns: 5, rows: 5, left: 2, top: 3.6, stepX: 19.4, stepY: 19.1,
+        cardWidth: 15.2, cardHeight: 15.2, jitterX: .1, jitterY: .08,
         unused: [9, 10, 17, 21]
       },
       panorama: {
-        columns: 6, rows: 4, left: 1.2, top: 3, stepX: 16.4, stepY: 24.4,
-        cardWidth: 14, cardHeight: 20.5, jitterX: .16, jitterY: .15,
+        columns: 6, rows: 4, left: 2.4, top: 5, stepX: 16.1, stepY: 24,
+        cardWidth: 13.2, cardHeight: 18, jitterX: .08, jitterY: .08,
         unused: [8, 16, 19]
       }
     };
