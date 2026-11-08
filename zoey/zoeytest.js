@@ -402,10 +402,48 @@
         if (width < rotatedWidth + edge * 2 || canvasHeight < rotatedHeight + edge * 2) return null;
         let bestCandidate = null;
         let bestScore = Infinity;
+        const candidatePoints = [];
+        const addPoint = (centerX, centerY) => candidatePoints.push({ centerX, centerY });
 
-        for (let sample = 0; sample < samples; sample += 1) {
-          const centerX = edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth);
-          const centerY = edge + halfHeight + random() * Math.max(0, canvasHeight - edge * 2 - rotatedHeight);
+        // Grow an irregular, tightly packed cloud from the centerpiece and
+        // existing stickers; a few free samples keep the overall scatter loose.
+        const tangentJitter = cardSize * .3;
+        const smallJitter = cardSize * .08;
+        for (let sample = 0; sample < Math.min(samples, 40); sample += 1) {
+          addPoint(
+            edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth),
+            edge + halfHeight + random() * Math.max(0, canvasHeight - edge * 2 - rotatedHeight)
+          );
+        }
+        const sideGap = gap + random() * smallJitter;
+        for (const direction of [-1, 1]) {
+          addPoint(heroCenterX + direction * (heroWidth / 2 + halfWidth + sideGap),
+            heroCenterY + (random() - .5) * (heroHeight + tangentJitter));
+          addPoint(heroCenterX + (random() - .5) * (heroWidth + tangentJitter),
+            heroCenterY + direction * (heroHeight / 2 + halfHeight + sideGap));
+        }
+
+        for (const other of placed) {
+          const extraX = gap + random() * smallJitter;
+          const extraY = gap + random() * smallJitter;
+          const otherHalfWidth = (other.right - other.left) / 2;
+          const otherHalfHeight = (other.bottom - other.top) / 2;
+          const tangentX = (random() - .5) * tangentJitter;
+          const tangentY = (random() - .5) * tangentJitter;
+          addPoint(other.centerX - (halfWidth + otherHalfWidth + extraX), other.centerY + tangentY);
+          addPoint(other.centerX + (halfWidth + otherHalfWidth + extraX), other.centerY + tangentY);
+          addPoint(other.centerX + tangentX, other.centerY - (halfHeight + otherHalfHeight + extraY));
+          addPoint(other.centerX + tangentX, other.centerY + (halfHeight + otherHalfHeight + extraY));
+          addPoint(other.centerX - (halfWidth + otherHalfWidth + extraX), other.centerY - (halfHeight + otherHalfHeight + extraY));
+          addPoint(other.centerX + (halfWidth + otherHalfWidth + extraX), other.centerY - (halfHeight + otherHalfHeight + extraY));
+          addPoint(other.centerX - (halfWidth + otherHalfWidth + extraX), other.centerY + (halfHeight + otherHalfHeight + extraY));
+          addPoint(other.centerX + (halfWidth + otherHalfWidth + extraX), other.centerY + (halfHeight + otherHalfHeight + extraY));
+        }
+
+        for (const point of candidatePoints) {
+          const { centerX, centerY } = point;
+          if (centerX < edge + halfWidth || centerX > width - edge - halfWidth ||
+              centerY < edge + halfHeight || centerY > canvasHeight - edge - halfHeight) continue;
           const box = {
             left: centerX - halfWidth,
             right: centerX + halfWidth,
