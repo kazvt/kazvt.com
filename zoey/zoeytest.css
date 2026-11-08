@@ -204,7 +204,8 @@ button, a { touch-action: manipulation; }
   transition: transform 170ms ease;
 }
 .z-entry-button:hover,
-.z-entry-button:focus-visible { transform: scale(var(--entry-hover-scale, 1.12)); }
+.z-entry-button:focus-visible,
+.z-entry.is-playing .z-entry-button { transform: scale(var(--entry-hover-scale, 1.12)); }
 .z-entry-button:focus-visible { outline: 2px dashed #8a65ba; outline-offset: 5px; }
 body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gold); }
 .z-entry.is-playing .z-entry-avatar {
