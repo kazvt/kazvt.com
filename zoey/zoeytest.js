@@ -348,11 +348,15 @@
     if (!width || !canvasHeight) return;
 
     const heading = document.querySelector(".z-stage-heading");
+    const minimumCardSize = Math.max(1, Math.min(width, canvasHeight) * .09);
+    const preferredSize = Math.max(minimumCardSize, Math.min(width, canvasHeight) * .23);
+    // Measure the heading at the largest scene scale we will try. The final
+    // scale is never larger than this, so the heading can only get smaller
+    // after placement and cannot collide with the stickers.
+    heading?.style.setProperty("--z-scene-size", `${preferredSize.toFixed(2)}px`);
     const headingRect = heading?.getBoundingClientRect();
     const headingHeight = headingRect?.height || 48;
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
-    const minimumCardSize = Math.max(24, Math.min(34, Math.round(Math.min(width, canvasHeight) * .09)));
-    const preferredSize = Math.max(minimumCardSize, Math.min(width, canvasHeight) * .23);
     const hoverScale = 1.12;
     // Keep the full scene in the viewport. Prefer a large centerpiece and
     // large stickers, then trade their sizes only as much as packing requires.
@@ -530,6 +534,7 @@
       card.style.setProperty("--entry-tilt", `${sticker.angle.toFixed(2)}deg`);
       card.style.setProperty("--entry-hover-scale", hoverScale.toFixed(2));
     });
+    heading?.style.setProperty("--z-scene-size", `${finalSize.toFixed(2)}px`);
     canvas.dataset.compact = finalSize < 48 ? "true" : "false";
     canvas.dataset.layout = "scattered";
     canvas.dataset.entrySize = finalSize.toFixed(1);
@@ -540,7 +545,7 @@
       const star = card.querySelector(".z-avatar-star");
       if (!avatar) return;
       if (star) {
-        const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
+        const starSize = Math.min(avatar.clientWidth * .22, avatar.clientHeight * .52);
         star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
       }
     });
