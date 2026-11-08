@@ -180,7 +180,17 @@
         { src: "/zoey/assets/lily/lily-voice-3.wav?v=20261108-03", caption: "Lily's voice note 3 of 3." }
       ]
     },
-    ...Array.from({ length: 3 }, (_, index) => ({
+    {
+      id: "faroe",
+      name: "Faroe",
+      avatar: "/zoey/assets/faroe/faroe-avatar.gif",
+      clips: [
+        { src: "/zoey/assets/faroe/faroe-voice-1.wav?v=20261108-01", caption: "Faroe's voice note 1 of 3." },
+        { src: "/zoey/assets/faroe/faroe-voice-2.wav?v=20261108-01", caption: "Faroe's voice note 2 of 3." },
+        { src: "/zoey/assets/faroe/faroe-voice-3.wav?v=20261108-01", caption: "Faroe's voice note 3 of 3." }
+      ]
+    },
+    ...Array.from({ length: 2 }, (_, index) => ({
       id: `star-${String(index + 17).padStart(2, "0")}`,
       name: "PLACEHOLDER",
       avatar: "",
@@ -195,7 +205,7 @@
     kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
     poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
     dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
-    lily: -5.8, "star-17": 3.6, "star-18": -7.0, "star-19": 2.0
+    lily: -5.8, faroe: 2.0, "star-17": 3.6, "star-18": -7.0
   });
 
   let audioEnabled = false;
@@ -310,6 +320,7 @@
     let realEntryIndex = 0;
     let placeholderIndex = 0;
     const realEntryCount = entrySlots.reduce((count, entry) => count + Number(!entry.id.startsWith("star-")), 0);
+    const placeholderCount = entrySlots.length - realEntryCount;
     const positionIndexes = entrySlots.map((entry) => {
       if (entry.id.startsWith("star-")) {
         const index = layoutName === "panorama" ? placeholderIndex * 5 + 4 : realEntryCount + placeholderIndex;
@@ -319,7 +330,7 @@
       const index = layoutName === "panorama"
         ? realEntryIndex < 16
           ? Math.floor(realEntryIndex / 4) * 5 + realEntryIndex % 4
-          : 19 + realEntryIndex - 16
+          : (placeholderCount + realEntryIndex - 16) * 5 + 4
         : realEntryIndex;
       realEntryIndex += 1;
       return index;
