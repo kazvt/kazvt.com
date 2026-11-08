@@ -229,7 +229,7 @@
       button.setAttribute("aria-label", entry.clips.length ? `${entry.name}'s voice message.` : `${entry.name}. Message pending.`);
       button.addEventListener("click", () => {
         if (!audioEnabled) enableAudio();
-        playNextClip(entry, button, "click");
+        playNextClip(entry, button);
       });
 
       const avatar = document.createElement("span");
