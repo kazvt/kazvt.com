@@ -4,7 +4,6 @@
   const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
   const audioStatus = document.getElementById("audioStatus");
-  const entryNameMeasureContext = document.createElement("canvas").getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
@@ -352,16 +351,16 @@
     const headingRect = heading?.getBoundingClientRect();
     const headingHeight = headingRect?.height || 48;
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
-    const preferredSize = Math.max(32, Math.min(176, Math.min(width, canvasHeight) * .18));
+    const minimumCardSize = Math.max(24, Math.min(34, Math.round(Math.min(width, canvasHeight) * .09)));
+    const preferredSize = Math.max(minimumCardSize, Math.min(240, Math.min(width, canvasHeight) * .23));
     const hoverScale = 1.12;
     // Keep the full scene in the viewport. Prefer a large centerpiece and
     // large stickers, then trade their sizes only as much as packing requires.
-    const glowAllowance = 3;
-    const edge = Math.max(4, Math.min(10, preferredSize * .055));
-    const gap = Math.max(2, preferredSize * .035);
-    const collisionGap = gap + 1;
+    const glowAllowance = 1;
+    const edge = Math.max(3, Math.min(7, preferredSize * .025));
+    const collisionGap = .35;
     const headingTop = 6;
-    const headingBottom = headingTop + headingHeight + Math.max(6, edge);
+    const headingBottom = headingTop + headingHeight + Math.max(4, edge);
     const targetHeroHeight = Math.min(canvasHeight * .8, (width - edge * 2) * 858 / 481);
     const maxHeroHeight = Math.max(48, Math.min(targetHeroHeight, canvasHeight - headingBottom * 2));
     const heroCenterX = width / 2;
@@ -409,7 +408,7 @@
         // Grow an irregular, tightly packed cloud from the centerpiece and
         // existing stickers; a few free samples keep the overall scatter loose.
         const tangentJitter = cardSize * .48;
-        const smallJitter = cardSize * .1;
+        const smallJitter = cardSize * .012;
         for (let sample = 0; sample < Math.min(samples, 40); sample += 1) {
           addPoint(
             edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth),
@@ -466,7 +465,7 @@
             nearestGap = Math.min(nearestGap, Math.hypot(dx, dy));
           }
           if (!Number.isFinite(nearestGap)) nearestGap = heroGap;
-          const preferredGap = collisionGap + cardSize * .025;
+          const preferredGap = collisionGap + cardSize * .003;
           box.sector = sector;
           box.angle = angleDegrees;
           box.score = Math.abs(nearestGap - preferredGap) * .78 +
@@ -488,17 +487,17 @@
 
     let finalLayout = null;
     let finalSize = preferredSize;
-    const sizeScales = [1, .94, .88, .82, .76, .7, .64, .58, .52, .46, .4, .34, .28, .22];
-    const heroScales = [1, .92, .84, .76, .68, .6, .52, .44, .36, .3, .25, .2, .16];
-    const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(22, Math.round(preferredSize * scale))))];
-    const heroHeights = [...new Set(heroScales.map((scale) => Math.max(44, Math.round(maxHeroHeight * scale))))];
+    const sizeScales = [1, .96, .92, .88, .84, .8, .76, .72, .68, .64, .6, .56, .52, .48, .44, .4, .36, .32, .28, .24];
+    const heroScales = [1, .9, .8, .7, .6, .5, .42, .34, .28, .22, .17, .13];
+    const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(minimumCardSize, Math.round(preferredSize * scale))))];
+    const heroHeights = [...new Set(heroScales.map((scale) => Math.max(36, Math.round(maxHeroHeight * scale))))];
     const candidates = [];
     for (const cardSize of cardSizes) {
       for (const heroHeight of heroHeights) {
         candidates.push({
           cardSize,
           heroHeight,
-          quality: Math.pow(cardSize / preferredSize, .7) * Math.pow(heroHeight / maxHeroHeight, .3)
+          quality: Math.pow(cardSize / preferredSize, .9) * Math.pow(heroHeight / maxHeroHeight, .1)
         });
       }
     }
@@ -516,8 +515,8 @@
     // Extra search at the compact end handles very narrow windows and heavy zoom
     // without ever extending the scene beyond the visible viewport.
     if (!finalLayout) {
-      const fallbackCard = Math.max(16, Math.round(preferredSize * .14));
-      const fallbackHero = Math.max(32, Math.round(maxHeroHeight * .12));
+      const fallbackCard = minimumCardSize;
+      const fallbackHero = Math.max(28, Math.round(maxHeroHeight * .08));
       finalLayout = buildLayout(fallbackCard, fallbackHero, 1200);
       finalSize = fallbackCard;
     }
@@ -540,25 +539,13 @@
     });
     canvas.dataset.compact = finalSize < 48 ? "true" : "false";
     canvas.dataset.layout = "scattered";
+    canvas.dataset.entrySize = finalSize.toFixed(1);
+    canvas.dataset.heroHeight = finalLayout.heroHeight.toFixed(1);
 
     cards.forEach((card) => {
       const avatar = card.querySelector(".z-entry-avatar");
       const star = card.querySelector(".z-avatar-star");
-      const name = card.querySelector(".z-entry-name");
       if (!avatar) return;
-      if (name && entryNameMeasureContext) {
-        name.style.fontSize = "";
-        const nameStyle = getComputedStyle(name);
-        const baseSize = Number.parseFloat(nameStyle.fontSize);
-        const availableWidth = Math.max(1, avatar.clientWidth - 8);
-        entryNameMeasureContext.font = `${nameStyle.fontWeight} ${baseSize}px ${nameStyle.fontFamily}`;
-        const measuredWidth = entryNameMeasureContext.measureText(name.textContent.trim()).width;
-        if (measuredWidth > availableWidth && measuredWidth > 0) {
-          const minSize = Math.min(baseSize, 8);
-          const fittedSize = Math.max(minSize, baseSize * availableWidth / measuredWidth);
-          name.style.fontSize = `${fittedSize.toFixed(2)}px`;
-        }
-      }
       if (star) {
         const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
         star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
