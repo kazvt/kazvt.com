@@ -1017,35 +1017,15 @@
   reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
 
   let resizeFrame = 0;
-  let sceneEntered = false;
-  let userHasScrolled = false;
-  function centerOnFeaturedArt() {
-    const art = document.getElementById("featuredArt");
-    if (!art) return;
-    const rect = art.getBoundingClientRect();
-    const visibleHeight = window.visualViewport?.height || window.innerHeight;
-    const target = Math.max(0, window.scrollY + rect.top + rect.height / 2 - visibleHeight / 2);
-    window.scrollTo(0, target);
-  }
-
   function scheduleResponsiveLayout() {
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(() => {
       layoutGifSky();
       layoutEntryStickers();
-      if (sceneEntered && !userHasScrolled) requestAnimationFrame(centerOnFeaturedArt);
     });
   }
   window.addEventListener("resize", scheduleResponsiveLayout, { passive: true });
   window.visualViewport?.addEventListener("resize", scheduleResponsiveLayout, { passive: true });
-  window.addEventListener("wheel", () => { if (sceneEntered) userHasScrolled = true; }, { passive: true });
-  window.addEventListener("touchmove", () => { if (sceneEntered) userHasScrolled = true; }, { passive: true });
-  window.addEventListener("pointerdown", (event) => {
-    if (sceneEntered && event.clientX >= document.documentElement.clientWidth - 24) userHasScrolled = true;
-  }, { passive: true });
-  window.addEventListener("keydown", (event) => {
-    if (sceneEntered && event.target?.tagName !== "BUTTON" && ["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) userHasScrolled = true;
-  });
   if ("ResizeObserver" in window) {
     const entryLayoutObserver = new ResizeObserver(scheduleResponsiveLayout);
     entryLayoutObserver.observe(document.getElementById("entryCanvas"));
@@ -1069,8 +1049,6 @@
       world.inert = false;
       skipLink.inert = false;
       skipLink.removeAttribute("tabindex");
-      sceneEntered = true;
-      requestAnimationFrame(centerOnFeaturedArt);
       document.getElementById("pageTitle").focus({ preventScroll: true });
     }, body.dataset.motion === "on" ? 160 : 0);
   }
