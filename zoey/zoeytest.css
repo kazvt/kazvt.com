@@ -252,7 +252,7 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   transform: translateX(-50%);
   pointer-events: none;
   color: var(--z-galaxy-text);
-  font-size: clamp(14px, 2.4vh, 22px);
+  font-size: clamp(15px, calc(1.2vw + .6vh), 19px);
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -295,28 +295,21 @@ body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy
 @media (max-width: 700px) {
   .z-viewport { padding-inline: max(9px, env(safe-area-inset-left)) max(9px, env(safe-area-inset-right)); }
   .z-stage { padding-inline: 3px; gap: 7px; }
-  .z-entry-name { font-size: clamp(13px, 3.7vw, 18px); }
 }
 @media (max-width: 410px) {
   .z-stage-heading h1 { font-size: clamp(16px, 5.8vw, 23px); }
-  .z-entry-name { font-size: clamp(12px, 4vw, 16px); }
-}
-@media (max-width: 340px) {
-  .z-entry-name { font-size: 12px; }
 }
 @media (max-height: 510px) and (min-width: 701px) {
   .z-viewport { gap: 5px; padding-block: 5px; }
   .z-stage { gap: 4px; padding-block: 3px; }
   .z-stage-heading h1 { font-size: clamp(16px, 4.5vh, 23px); line-height: 1.15; }
   .z-stage-heading h1 br { display: none; }
-  .z-entry-name { font-size: clamp(12px, 2.1vh, 17px); }
 }
 @media (max-height: 510px) and (max-width: 700px) {
   .z-viewport { gap: 4px; padding-block: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-bottom)); }
   .z-stage { gap: 3px; padding-block: 1px; }
   .z-stage-heading h1 { font-size: clamp(14px, 4.4vw, 20px); line-height: 1.1; }
   .z-stage-heading h1 br { display: none; }
-  .z-entry-name { font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -346,7 +339,3 @@ body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy
   .z-constellation { height: auto; min-height: 440px; }
 }
 
-.z-constellation[data-crowded="true"] .z-entry-name { font-size: clamp(10px, 1.8vw, 16px); }
-@media (max-width: 700px) {
-  .z-constellation[data-crowded="true"] .z-entry-name { font-size: clamp(9px, 3vw, 12px); }
-}
