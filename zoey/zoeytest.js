@@ -219,6 +219,16 @@
         { src: "/zoey/assets/claire/claire-voice-2.wav?v=20261109-03", caption: "Claire's voice note 2 of 3." },
         { src: "/zoey/assets/claire/claire-voice-3.wav?v=20261109-03", caption: "Claire's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "skawtzilla",
+      name: "Skawtzilla",
+      avatar: "/zoey/assets/skawtzilla/skawtzilla-avatar.png?v=20261109-04",
+      clips: [
+        { src: "/zoey/assets/skawtzilla/skawtzilla-voice-1.wav?v=20261109-04", caption: "Skawtzilla's voice note 1 of 3." },
+        { src: "/zoey/assets/skawtzilla/skawtzilla-voice-2.wav?v=20261109-04", caption: "Skawtzilla's voice note 2 of 3." },
+        { src: "/zoey/assets/skawtzilla/skawtzilla-voice-3.wav?v=20261109-04", caption: "Skawtzilla's voice note 3 of 3." }
+      ]
     }
   ];
 
@@ -229,7 +239,7 @@
     kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
     poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
     dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
-    lily: -5.8, faroe: 2.0, alyx: -3.4, willow: 2.8, claire: -4.1
+    lily: -5.8, faroe: 2.0, alyx: -3.4, willow: 2.8, claire: -4.1, skawtzilla: 3.7
   });
 
   let audioEnabled = false;
