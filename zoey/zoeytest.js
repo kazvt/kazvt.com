@@ -492,26 +492,15 @@
     let finalLayout = null;
     let finalSize = preferredSize;
     const sizeScales = Array.from({ length: 81 }, (_, index) => 1 - index * .01);
-    const heroScales = Array.from({ length: 21 }, (_, index) => 1 - index * .04);
     const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(minimumCardSize, Math.round(preferredSize * scale))))];
-    const heroHeights = [...new Set(heroScales.map((scale) => Math.max(36, Math.round(maxHeroHeight * scale))))];
-    const candidates = [];
     for (const cardSize of cardSizes) {
-      for (const heroHeight of heroHeights) {
-        candidates.push({
-          cardSize,
-          heroHeight,
-          quality: Math.pow(cardSize / preferredSize, .9) * Math.pow(heroHeight / maxHeroHeight, .1)
-        });
-      }
-    }
-    candidates.sort((a, b) => b.quality - a.quality || b.cardSize - a.cardSize || b.heroHeight - a.heroHeight);
-
-    for (const candidate of candidates) {
-      const layout = buildLayout(candidate.cardSize, candidate.heroHeight);
+      // Keep the centerpiece and stickers in one visual scale system. The art
+      // grows with the stickers, up to its existing viewport-safe height cap.
+      const heroHeight = Math.max(36, Math.min(maxHeroHeight, Math.round(cardSize * 3.6)));
+      const layout = buildLayout(cardSize, heroHeight);
       if (layout) {
         finalLayout = layout;
-        finalSize = candidate.cardSize;
+        finalSize = cardSize;
         break;
       }
     }
@@ -545,7 +534,6 @@
     canvas.dataset.layout = "scattered";
     canvas.dataset.entrySize = finalSize.toFixed(1);
     canvas.dataset.heroHeight = finalLayout.heroHeight.toFixed(1);
-    canvas.style.setProperty("--scene-unit", `${finalSize.toFixed(2)}px`);
 
     cards.forEach((card) => {
       const avatar = card.querySelector(".z-entry-avatar");
