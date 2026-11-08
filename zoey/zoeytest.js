@@ -209,13 +209,7 @@
         { src: "/zoey/assets/willow/willow-voice-2.wav?v=20261109-02", caption: "Willow's voice note 2 of 3." },
         { src: "/zoey/assets/willow/willow-voice-3.wav?v=20261109-02", caption: "Willow's voice note 3 of 3." }
       ]
-    },
-    ...Array.from({ length: 0 }, (_, index) => ({
-      id: `star-${String(index + 17).padStart(2, "0")}`,
-      name: "PLACEHOLDER",
-      avatar: "",
-      clips: []
-    }))
+    }
   ];
 
   // One fixed, hand-baked sticker tilt per entry. These do not re-randomize
