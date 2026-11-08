@@ -758,56 +758,12 @@
         void startBackgroundMusic();
       }
     }
-    // A queued voice may start only after the current voice has actually ended.
-    schedulePendingClip();
-  }
-
-  function clearPendingClipTimer() {
-    if (!pendingClipTimer) return;
-    window.clearTimeout(pendingClipTimer);
-    pendingClipTimer = 0;
-  }
-
-  function pendingClipIsStillActive(request) {
-    if (!request.button.isConnected) return false;
-    if (request.trigger === "hover") return request.button.matches(":hover");
-    if (request.trigger === "focus") return document.activeElement === request.button;
-    return true;
-  }
-
-  function runPendingClip() {
-    if (activeVoice || startingClip || !pendingClipRequest) return;
-    const remaining = lastClipStartedAt + CLIP_START_COOLDOWN_MS - performance.now();
-    if (remaining > 0) {
-      schedulePendingClip();
-      return;
-    }
-
-    const request = pendingClipRequest;
-    pendingClipRequest = null;
-    if (!pendingClipIsStillActive(request)) return;
-    startClipNow(request.entry, request.button, request.trigger);
-  }
-
-  function schedulePendingClip() {
-    if (!pendingClipRequest || activeVoice || startingClip || pendingClipTimer) return;
-    const remaining = lastClipStartedAt + CLIP_START_COOLDOWN_MS - performance.now();
-    if (remaining <= 0) {
-      runPendingClip();
-      return;
-    }
-    pendingClipTimer = window.setTimeout(() => {
-      pendingClipTimer = 0;
-      runPendingClip();
-    }, remaining);
   }
 
   function confirmClipStarted(media) {
     if (media.started || !activeMedia.has(media)) return;
     media.started = true;
     if (startingClip === media) startingClip = null;
-    lastClipStartedAt = performance.now();
-    schedulePendingClip();
   }
 
   function failClipPlayback(media, message) {
@@ -818,8 +774,22 @@
     }
     if (startingClip === media) {
       startingClip = null;
-      schedulePendingClip();
     }
+  }
+
+  function stopActiveVoice() {
+    const media = activeVoice;
+    if (startingClip?.loading) startingClip = null;
+    if (!media) return;
+
+    if (media.audio) {
+      media.audio.pause();
+      try { media.audio.currentTime = 0; } catch {}
+    } else if (media.source) {
+      media.source.onended = null;
+      try { media.source.stop(); } catch {}
+    }
+    releaseMedia(media);
   }
 
   function startHtmlAudioClip(clip, entry, button, clipIndex) {
