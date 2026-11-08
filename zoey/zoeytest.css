@@ -238,11 +238,15 @@ button, a { touch-action: manipulation; }
 .z-entry-button:hover,
 .z-entry-button:focus-visible,
 .z-entry.is-playing .z-entry-button { transform: scale(var(--entry-hover-scale, 1.12)); }
-.z-entry-button:focus-visible { outline: 2px dashed #8a65ba; outline-offset: 5px; }
+.z-entry-button:focus-visible {
+  outline: max(1px, calc(var(--entry-size, 72px) * .014)) dashed #8a65ba;
+  outline-offset: calc(var(--entry-size, 72px) * .02);
+}
 body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gold); }
 .z-entry.is-playing .z-entry-avatar {
-  transform: translateY(-2px);
-  filter: drop-shadow(0 0 8px rgb(255 139 201 / 88%)) drop-shadow(0 0 18px rgb(100 207 255 / 62%));
+  transform: translateY(calc(var(--entry-size, 72px) * -.014));
+  filter: drop-shadow(0 0 calc(var(--entry-size, 72px) * .055) rgb(255 139 201 / 88%))
+    drop-shadow(0 0 calc(var(--entry-size, 72px) * .125) rgb(100 207 255 / 62%));
 }
 .z-entry-button:hover .z-entry-name,
 .z-entry-button:focus-visible .z-entry-name,
@@ -259,7 +263,7 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   place-items: center;
   overflow: visible;
   background: transparent;
-  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 42%));
+  filter: drop-shadow(0 calc(var(--entry-size, 72px) * .014) calc(var(--entry-size, 72px) * .028) rgb(0 0 0 / 42%));
   transition: transform 180ms ease, filter 180ms ease;
 }
 .z-entry-avatar img {
@@ -276,25 +280,33 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   position: absolute;
   z-index: 1;
   left: 50%;
-  bottom: clamp(2px, .7vw, 7px);
-  max-width: calc(100% - 4px);
-  padding-inline: 1px;
+  bottom: 4%;
+  max-width: 92%;
+  padding-inline: 1%;
   transform: translateX(-50%);
   pointer-events: none;
   color: var(--z-galaxy-text);
-  font-size: clamp(11px, calc(var(--entry-size, 72px) * .22), 24px);
+  font-size: calc(var(--entry-size, 72px) * .21);
   font-weight: 700;
   line-height: 1.04;
-  white-space: nowrap;
-  overflow-wrap: normal;
+  white-space: normal;
+  overflow-wrap: anywhere;
   text-align: center;
   text-wrap: balance;
-  -webkit-text-stroke: .6px rgb(16 11 42 / 95%);
+  -webkit-text-stroke: max(.45px, calc(var(--entry-size, 72px) * .004)) rgb(16 11 42 / 95%);
   paint-order: stroke fill;
-  text-shadow: 1px 1px 0 rgb(255 155 201 / 92%), -1px -1px 0 rgb(112 221 244 / 88%), 0 2px 3px rgb(16 11 42 / 100%), 0 0 10px rgb(35 22 59 / 92%);
+  text-shadow:
+    calc(var(--entry-size, 72px) * .006) calc(var(--entry-size, 72px) * .006) 0 rgb(255 155 201 / 92%),
+    calc(var(--entry-size, 72px) * -.006) calc(var(--entry-size, 72px) * -.006) 0 rgb(112 221 244 / 88%),
+    0 calc(var(--entry-size, 72px) * .014) calc(var(--entry-size, 72px) * .021) rgb(16 11 42 / 100%),
+    0 0 calc(var(--entry-size, 72px) * .07) rgb(35 22 59 / 92%);
   transition: color 170ms ease, text-shadow 170ms ease;
 }
-.z-entry.is-playing .z-entry-name { text-shadow: 0 1px 2px rgb(16 11 42 / 100%), 0 0 9px rgb(255 155 201 / 72%), 0 0 18px rgb(112 221 244 / 46%); }
+.z-entry.is-playing .z-entry-name {
+  text-shadow: 0 calc(var(--entry-size, 72px) * .007) calc(var(--entry-size, 72px) * .014) rgb(16 11 42 / 100%),
+    0 0 calc(var(--entry-size, 72px) * .063) rgb(255 155 201 / 72%),
+    0 0 calc(var(--entry-size, 72px) * .125) rgb(112 221 244 / 46%);
+}
 .z-visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .z-loader {
   position: fixed;

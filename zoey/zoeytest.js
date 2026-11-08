@@ -4,7 +4,6 @@
   const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
   const audioStatus = document.getElementById("audioStatus");
-  const entryNameMeasureContext = document.createElement("canvas").getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
@@ -353,27 +352,30 @@
     const headingHeight = headingRect?.height || 48;
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
     const minimumCardSize = Math.max(24, Math.min(34, Math.round(Math.min(width, canvasHeight) * .09)));
-    const preferredSize = Math.max(minimumCardSize, Math.min(240, Math.min(width, canvasHeight) * .23));
+    const preferredSize = Math.max(minimumCardSize, Math.min(width, canvasHeight) * .23);
     const hoverScale = 1.12;
     // Keep the full scene in the viewport. Prefer a large centerpiece and
     // large stickers, then trade their sizes only as much as packing requires.
-    const glowAllowance = 1;
-    const edge = Math.max(3, Math.min(7, preferredSize * .025));
-    const collisionGap = .75;
+    const preferredEdge = Math.max(2, preferredSize * .025);
     const headingTop = 6;
-    const headingBottom = headingTop + headingHeight + Math.max(4, edge);
-    const targetHeroHeight = Math.min(canvasHeight * .8, (width - edge * 2) * 858 / 481);
+    const headingBottom = headingTop + headingHeight + Math.max(4, preferredEdge);
+    const targetHeroHeight = Math.min(canvasHeight * .8, (width - preferredEdge * 2) * 858 / 481);
     const maxHeroHeight = Math.max(48, Math.min(targetHeroHeight, canvasHeight - headingBottom * 2));
     const heroCenterX = width / 2;
     const cards = [...canvas.querySelectorAll(".z-entry")];
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
-    function intersects(a, b, separation = collisionGap) {
+    function intersects(a, b, separation = 0) {
       return !(a.right + separation <= b.left || a.left >= b.right + separation ||
         a.bottom + separation <= b.top || a.top >= b.bottom + separation);
     }
 
     function buildLayout(cardSize, heroHeight, samples = 96) {
+      const glowAllowance = Math.max(.75, cardSize * .012);
+      const edge = Math.max(2, cardSize * .025);
+      const collisionGap = cardSize * .005;
+      const cardHeadingTop = Math.max(3, cardSize * .025);
+      const cardHeadingBottom = cardHeadingTop + headingHeight + Math.max(4, cardSize * .025);
       const heroCenterY = canvasHeight / 2;
       const heroWidth = heroHeight * 481 / 858;
       const hero = {
@@ -385,8 +387,8 @@
       const heading = {
         left: (width - headingWidth) / 2 - 4,
         right: (width + headingWidth) / 2 + 4,
-        top: headingTop,
-        bottom: headingBottom
+        top: cardHeadingTop,
+        bottom: cardHeadingBottom
       };
       const placed = [];
       const sectorCounts = Array(8).fill(0);
@@ -453,7 +455,8 @@
             centerX,
             centerY
           };
-          if (intersects(box, hero) || intersects(box, heading) || placed.some((other) => intersects(box, other))) continue;
+          if (intersects(box, hero, collisionGap) || intersects(box, heading, collisionGap) ||
+              placed.some((other) => intersects(box, other, collisionGap))) continue;
 
           const sector = (Math.floor((Math.atan2(centerY - heroCenterY, centerX - heroCenterX) + Math.PI) / (Math.PI / 4)) % 8 + 8) % 8;
           const heroDX = Math.max(hero.left - box.right, box.left - hero.right, 0);
@@ -483,13 +486,13 @@
         sectorCounts[chosen.sector] += 1;
         placed.push(chosen);
       }
-      return { placed, headingTop, heroHeight };
+      return { placed, headingTop: cardHeadingTop, heroHeight };
     }
 
     let finalLayout = null;
     let finalSize = preferredSize;
-    const sizeScales = [1, .96, .92, .88, .84, .8, .76, .72, .68, .64, .6, .56, .52, .48, .44, .4, .36, .32, .28, .24];
-    const heroScales = [1, .9, .8, .7, .6, .5, .42, .34, .28, .22, .17, .13];
+    const sizeScales = Array.from({ length: 81 }, (_, index) => 1 - index * .01);
+    const heroScales = Array.from({ length: 21 }, (_, index) => 1 - index * .04);
     const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(minimumCardSize, Math.round(preferredSize * scale))))];
     const heroHeights = [...new Set(heroScales.map((scale) => Math.max(36, Math.round(maxHeroHeight * scale))))];
     const candidates = [];
@@ -542,23 +545,12 @@
     canvas.dataset.layout = "scattered";
     canvas.dataset.entrySize = finalSize.toFixed(1);
     canvas.dataset.heroHeight = finalLayout.heroHeight.toFixed(1);
+    canvas.style.setProperty("--scene-unit", `${finalSize.toFixed(2)}px`);
 
     cards.forEach((card) => {
       const avatar = card.querySelector(".z-entry-avatar");
       const star = card.querySelector(".z-avatar-star");
       if (!avatar) return;
-      const name = card.querySelector(".z-entry-name");
-      if (name && entryNameMeasureContext) {
-        name.style.fontSize = "";
-        const nameStyle = getComputedStyle(name);
-        const baseSize = Number.parseFloat(nameStyle.fontSize);
-        const availableWidth = Math.max(1, avatar.clientWidth - 4);
-        entryNameMeasureContext.font = `${nameStyle.fontWeight} ${baseSize}px ${nameStyle.fontFamily}`;
-        const measuredWidth = entryNameMeasureContext.measureText(name.textContent.trim()).width;
-        if (measuredWidth > availableWidth && measuredWidth > 0) {
-          name.style.fontSize = `${(baseSize * availableWidth / measuredWidth).toFixed(2)}px`;
-        }
-      }
       if (star) {
         const starSize = Math.min(84, avatar.clientWidth * .22, avatar.clientHeight * .52);
         star.style.setProperty("--entry-star-size", `${Math.max(0, starSize).toFixed(2)}px`);
