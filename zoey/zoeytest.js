@@ -190,6 +190,16 @@
         { src: "/zoey/assets/faroe/faroe-voice-3.wav?v=20261108-01", caption: "Faroe's voice note 3 of 3." }
       ]
     },
+    {
+      id: "alyx",
+      name: "Alyx",
+      avatar: "/zoey/assets/alyx/alyx-avatar.gif?v=20261109-01",
+      clips: [
+        { src: "/zoey/assets/alyx/alyx-voice-1.wav?v=20261109-01", caption: "Alyx's voice note 1 of 3." },
+        { src: "/zoey/assets/alyx/alyx-voice-2.wav?v=20261109-01", caption: "Alyx's voice note 2 of 3." },
+        { src: "/zoey/assets/alyx/alyx-voice-3.wav?v=20261109-01", caption: "Alyx's voice note 3 of 3." }
+      ]
+    },
     ...Array.from({ length: 2 }, (_, index) => ({
       id: `star-${String(index + 17).padStart(2, "0")}`,
       name: "PLACEHOLDER",
@@ -205,7 +215,7 @@
     kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
     poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
     dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
-    lily: -5.8, faroe: 2.0, "star-17": 3.6, "star-18": -7.0
+    lily: -5.8, faroe: 2.0, alyx: -3.4, "star-17": 3.6
   });
 
   let audioEnabled = false;
