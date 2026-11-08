@@ -209,6 +209,16 @@
         { src: "/zoey/assets/willow/willow-voice-2.wav?v=20261109-02", caption: "Willow's voice note 2 of 3." },
         { src: "/zoey/assets/willow/willow-voice-3.wav?v=20261109-02", caption: "Willow's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "claire",
+      name: "Claire",
+      avatar: "/zoey/assets/claire/claire-avatar.png?v=20261109-03",
+      clips: [
+        { src: "/zoey/assets/claire/claire-voice-1.wav?v=20261109-03", caption: "Claire's voice note 1 of 3." },
+        { src: "/zoey/assets/claire/claire-voice-2.wav?v=20261109-03", caption: "Claire's voice note 2 of 3." },
+        { src: "/zoey/assets/claire/claire-voice-3.wav?v=20261109-03", caption: "Claire's voice note 3 of 3." }
+      ]
     }
   ];
 
@@ -219,7 +229,7 @@
     kilda: -5.3, froggy: 3.1, oceo: -7.8, diosu: 5.6,
     poppy: -3.7, frosty: 6.5, rochelle: -6.8, "nea-pollen": 2.6,
     dom: -4.9, serunie: 7.1, maple: -2.8, pato: 4.5,
-    lily: -5.8, faroe: 2.0, alyx: -3.4, willow: 2.8
+    lily: -5.8, faroe: 2.0, alyx: -3.4, willow: 2.8, claire: -4.1
   });
 
   let audioEnabled = false;
