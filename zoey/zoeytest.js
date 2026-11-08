@@ -348,7 +348,7 @@
     if (!width || !canvasHeight) return;
 
     const heading = document.querySelector(".z-stage-heading");
-    const minimumCardSize = Math.max(1, Math.min(width, canvasHeight) * .09);
+    const minimumCardSize = Math.min(width, canvasHeight) * .09;
     const preferredSize = Math.max(minimumCardSize, Math.min(width, canvasHeight) * .23);
     // Measure the heading at the largest scene scale we will try. The final
     // scale is never larger than this, so the heading can only get smaller
@@ -360,9 +360,9 @@
     const hoverScale = 1.12;
     // Keep the full scene in the viewport. Prefer a large centerpiece and
     // large stickers, then trade their sizes only as much as packing requires.
-    const preferredEdge = Math.max(2, preferredSize * .025);
-    const headingTop = 6;
-    const headingBottom = headingTop + headingHeight + Math.max(4, preferredEdge);
+    const preferredEdge = preferredSize * .025;
+    const headingTop = preferredEdge;
+    const headingBottom = headingTop + headingHeight + preferredEdge;
     const targetHeroHeight = Math.min(canvasHeight * .8, (width - preferredEdge * 2) * 858 / 481);
     const maxHeroHeight = Math.max(48, Math.min(targetHeroHeight, canvasHeight - headingBottom * 2));
     const heroCenterX = width / 2;
@@ -378,11 +378,11 @@
     }
 
     function buildLayout(cardSize, heroHeight, samples = 96) {
-      const glowAllowance = Math.max(.75, cardSize * .012);
-      const edge = Math.max(2, cardSize * .025);
+      const glowAllowance = cardSize * .012;
+      const edge = cardSize * .025;
       const collisionGap = cardSize * .005;
-      const cardHeadingTop = Math.max(3, cardSize * .025);
-      const cardHeadingBottom = cardHeadingTop + headingHeight + Math.max(4, cardSize * .025);
+      const cardHeadingTop = cardSize * .025;
+      const cardHeadingBottom = cardHeadingTop + headingHeight + cardSize * .025;
       const heroCenterY = canvasHeight / 2;
       const heroWidth = heroHeight * 481 / 858;
       const hero = {
@@ -500,7 +500,7 @@
     let finalSize = sceneSizeCeiling;
     const sizeScales = Array.from({ length: 81 }, (_, index) => 1 - index * .01);
     const cardSizes = [...new Set(sizeScales.map((scale) => Math.max(sceneMinimumSize,
-      Math.min(sceneSizeCeiling, Math.round(sceneSizeCeiling * scale)))))];
+      Math.min(sceneSizeCeiling, sceneSizeCeiling * scale))))];
     for (const cardSize of cardSizes) {
       // Keep the centerpiece and stickers in one visual scale system. Reduce
       // both together when the centered art approaches its viewport-safe cap.
