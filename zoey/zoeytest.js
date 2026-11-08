@@ -358,7 +358,7 @@
     // paint behind one clicked sprite, not part of the sticker's hit-box.
     const glowAllowance = 4;
     const gap = Math.max(7, preferredSize * .1);
-    const heroHeight = Math.min(viewportHeight * .8, window.innerWidth * .86 * 858 / 481);
+    const heroHeight = Math.min(viewportHeight * .8, window.innerWidth * .96 * 858 / 481);
     const heroWidth = heroHeight * 481 / 858;
     const heroCenterX = width / 2;
     const edge = Math.max(8, preferredSize * .08);

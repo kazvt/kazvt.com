@@ -143,8 +143,8 @@ button, a { touch-action: manipulation; }
   top: 50%;
   left: 50%;
   display: block;
-  width: min(86vw, 44.8dvh);
-  max-width: 86vw;
+  width: min(96vw, 44.8dvh);
+  max-width: 96vw;
   max-height: 80dvh;
   height: auto;
   object-fit: contain;
