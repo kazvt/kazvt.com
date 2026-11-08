@@ -408,8 +408,8 @@
 
         // Grow an irregular, tightly packed cloud from the centerpiece and
         // existing stickers; a few free samples keep the overall scatter loose.
-        const tangentJitter = cardSize * .8;
-        const smallJitter = cardSize * .16;
+        const tangentJitter = cardSize * .48;
+        const smallJitter = cardSize * .1;
         for (let sample = 0; sample < Math.min(samples, 40); sample += 1) {
           addPoint(
             edge + halfWidth + random() * Math.max(0, width - edge * 2 - rotatedWidth),
