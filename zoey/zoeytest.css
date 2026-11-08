@@ -26,11 +26,13 @@
   background: var(--z-canvas);
 }
 * { box-sizing: border-box; }
-html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+html, body { width: 100%; min-height: 100%; margin: 0; overflow-x: hidden; overflow-y: auto; }
 html { scroll-behavior: auto; }
 body.zoey-page {
   position: relative;
   min-width: 280px;
+  min-height: 100vh;
+  min-height: 100svh;
   color: var(--z-galaxy-text);
   background-color: var(--z-canvas);
   background-image:
@@ -44,6 +46,7 @@ body.zoey-page {
   -webkit-font-smoothing: none;
   text-rendering: optimizeSpeed;
 }
+html.z-loader-open, body.z-loader-open { overflow: hidden; }
 body.zoey-page, body.zoey-page * { font-family: var(--z-font); }
 body.zoey-page :where(a, button):focus-visible {
   outline: 3px solid #8a65ba;
@@ -120,26 +123,48 @@ button, a { touch-action: manipulation; }
   position: relative;
   z-index: 3;
   isolation: isolate;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr);
-  gap: 0;
+  display: block;
   width: 100%;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100svh;
   padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
 .z-stage {
   position: relative;
   min-width: 0;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: clamp(7px, 1.3vh, 13px);
-  padding: clamp(8px, 1.5vh, 15px) clamp(5px, 1.4vw, 18px) clamp(5px, 1vh, 10px);
+  width: 100%;
+  height: var(--z-layout-height, 100svh);
+  min-height: 100svh;
+  overflow: visible;
 }
-.z-stage-heading { min-width: 0; text-align: center; }
-.z-stage-heading { position: relative; isolation: isolate; }
+.z-featured-art {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: min(86vw, 44.8dvh);
+  max-width: 86vw;
+  max-height: 80dvh;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 5px 14px rgb(10 5 30 / 32%));
+}
+.z-stage-heading {
+  position: absolute;
+  z-index: 3;
+  top: var(--z-heading-top, 8px);
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  min-width: 0;
+  transform: translateX(-50%);
+  text-align: center;
+}
 .z-stage-heading::before { position: absolute; z-index: -1; inset: -12% 15%; content: ""; pointer-events: none; background: radial-gradient(ellipse, rgb(111 75 167 / 24%), rgb(34 111 157 / 12%) 48%, transparent 76%); filter: blur(5px); }
 .z-stage-heading h1 {
   max-width: 100%;
@@ -154,7 +179,9 @@ button, a { touch-action: manipulation; }
 .z-stage-heading h1:focus { outline: none; }
 .z-stage-heading h1 span { color: var(--z-galaxy-lilac); }
 .z-constellation {
-  position: relative;
+  position: absolute;
+  z-index: 1;
+  inset: 0;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -163,16 +190,14 @@ button, a { touch-action: manipulation; }
 }
 .z-entry {
   --entry-accent: var(--z-galaxy-pink);
-  min-width: 0;
-  min-height: 0;
   position: absolute;
   display: block;
-  left: var(--entry-x, 2%);
-  top: var(--entry-y, 2%);
-  width: var(--entry-width, 29%);
-  height: var(--entry-height, 26%);
+  left: var(--entry-x, 0px);
+  top: var(--entry-y, 0px);
+  width: var(--entry-size, 72px);
+  height: var(--entry-size, 72px);
   transform-origin: center;
-  transform: rotate(var(--entry-tilt, 0deg)) translateY(var(--entry-rise, 0px));
+  transform: rotate(var(--entry-tilt, 0deg));
 }
 .z-entry:hover, .z-entry:focus-within, .z-entry.is-playing { z-index: 30; }
 .z-entry:nth-child(4n + 2) { --entry-accent: var(--z-galaxy-blue); }
@@ -248,12 +273,12 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   position: absolute;
   z-index: 1;
   left: 50%;
-  bottom: clamp(3px, .7vh, 9px);
-  max-width: calc(100% - 10px);
+  bottom: clamp(2px, .6vw, 7px);
+  max-width: calc(100% - 8px);
   transform: translateX(-50%);
   pointer-events: none;
   color: var(--z-galaxy-text);
-  font-size: clamp(15px, calc(1.2vw + .6vh), 19px);
+  font-size: clamp(10px, calc(var(--entry-size, 72px) * .15), 19px);
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -295,48 +320,16 @@ html[data-zoey-motion="off"] *, html[data-zoey-motion="off"] *::before, html[dat
 body[data-motion="off"] .z-galaxy-motion, html[data-zoey-motion="off"] .z-galaxy-motion { display: none; }
 @media (max-width: 700px) {
   .z-viewport { padding-inline: max(9px, env(safe-area-inset-left)) max(9px, env(safe-area-inset-right)); }
-  .z-stage { padding-inline: 3px; gap: 7px; }
 }
 @media (max-width: 410px) {
   .z-stage-heading h1 { font-size: clamp(16px, 5.8vw, 23px); }
 }
-@media (max-height: 510px) and (min-width: 701px) {
-  .z-viewport { gap: 5px; padding-block: 5px; }
-  .z-stage { gap: 4px; padding-block: 3px; }
-  .z-stage-heading h1 { font-size: clamp(16px, 4.5vh, 23px); line-height: 1.15; }
-  .z-stage-heading h1 br { display: none; }
-}
-@media (max-height: 510px) and (max-width: 700px) {
-  .z-viewport { gap: 4px; padding-block: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-bottom)); }
-  .z-stage { gap: 3px; padding-block: 1px; }
-  .z-stage-heading h1 { font-size: clamp(14px, 4.4vw, 20px); line-height: 1.1; }
-  .z-stage-heading h1 br { display: none; }
+@media (max-height: 510px) {
+  .z-stage-heading h1 { font-size: clamp(14px, 4.2vh, 22px); line-height: 1.12; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   html[data-zoey-motion="off"] *, html[data-zoey-motion="off"] *::before, html[data-zoey-motion="off"] *::after { animation: none !important; transition: none !important; }
 }
 
-/* A short landscape viewport cannot hold the full heading, the sticker field, and
-   footer at readable sizes. Let the constellation keep its full-height rows
-   and scroll instead of cropping artwork or squeezing it into slivers. */
-@media (max-height: 520px) {
-  html {
-    height: auto;
-    min-height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-  body { height: auto; min-height: 100%; overflow: visible; }
-  body.zoey-page { min-height: 100vh; min-height: 100svh; min-height: 100dvh; }
-  .z-viewport {
-    height: auto;
-    min-height: 100vh;
-    min-height: 100svh;
-    min-height: 100dvh;
-    grid-template-rows: auto;
-  }
-  .z-stage { grid-template-rows: auto auto; }
-  .z-constellation { height: auto; min-height: 440px; }
-}
 
