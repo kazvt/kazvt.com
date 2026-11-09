@@ -118,6 +118,8 @@
         <fieldset class="mb-4">
           <legend class="h5">Shape</legend>
           <div class="mb-3"><label class="form-label w-100" for="foldSize">Fold size <code>fold_size</code><output class="float-end" id="foldSizeValue"></output></label><input class="form-range" id="foldSize" name="fold_size" type="range" min="0.65" max="1.55" step="0.01" value="1"><div class="form-text">Higher values make smaller, more frequent folds.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="zoom">Zoom <code>zoom</code><output class="float-end" id="zoomValue"></output></label><input class="form-range" id="zoom" name="zoom" type="range" min="0.25" max="4" step="0.01" value="1"></div>
+          <div class="form-check mb-3"><input class="form-check-input" id="wrapEdges" name="wrap_edges" type="checkbox"><label class="form-check-label" for="wrapEdges">Wrap edges <code>wrap_edges</code></label></div>
           <div class="mb-3"><label class="form-label w-100" for="heightRange">Height range <code>height_range</code><output class="float-end" id="heightRangeValue"></output></label><input class="form-range" id="heightRange" name="height_range" type="range" min="0.45" max="1.65" step="0.01" value="1"></div>
           <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <code>relief</code><output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" name="relief" type="range" min="0.45" max="1.65" step="0.01" value="1"><div class="form-text">Lighting response to the highs and lows.</div></div>
           <div class="mb-3"><label class="form-label w-100" for="detail">Small-fold detail <code>detail</code><output class="float-end" id="detailValue"></output></label><input class="form-range" id="detail" name="detail" type="range" min="0" max="1" step="0.01" value="0.12"></div>
@@ -153,7 +155,7 @@
       "use strict";
       const defaults = {
         colorLow: "#031f16", colorMid: "#076831", colorHigh: "#84c226",
-        viscosity: 50, speed: 1, foldSize: 1, heightRange: 1, relief: 1,
+        viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1,
         detail: 0.12, gloss: 1, sharpness: 50, blur: 0, saturation: 1,
         contrast: 1, brightness: 0, quality: 0.85
       };
@@ -209,6 +211,8 @@
         uniform float u_viscosity;
         uniform float u_speed;
         uniform float u_foldSize;
+        uniform float u_zoom;
+        uniform float u_wrapEdges;
         uniform float u_heightRange;
         uniform float u_relief;
         uniform float u_detail;
@@ -244,24 +248,71 @@
           return (broad + u_detail * drag * fine) * u_heightRange;
         }
 
+        vec2 wrappedPositionForCycles(vec2 p, float phase, float cycles) {
+          vec2 q = vec2(p.x * cycles, p.y * u_foldSize);
+          float wx = q.x + 0.31 * sin(q.y - phase) + 0.12 * sin(2.0 * q.x - 0.55 * q.y + 2.0 * phase);
+          float wy = q.y + 0.28 * sin(q.x + phase + 0.4) + 0.10 * cos(1.55 * q.y - 2.0 * phase);
+          return vec2(wx, wy);
+        }
+
+        float wrappedHeightForCycles(vec2 p, float phase, float cycles) {
+          vec2 w = wrappedPositionForCycles(p, phase, cycles);
+          float broad = 0.47 * sin(w.x + 0.62 * w.y - phase)
+                      + 0.29 * cos(2.0 * w.x - 1.36 * w.y + 2.0 * phase + 0.6)
+                      + 0.17 * sin(w.x + 1.88 * w.y - phase + 1.3)
+                      + 0.11 * cos(3.0 * w.x + 1.9 * w.y - 3.0 * phase + 0.2);
+          float fine = 0.105 * sin(2.0 * w.x - 1.62 * w.y - 2.0 * phase + 0.3)
+                     + 0.071 * cos(4.0 * w.x + 2.05 * w.y + 3.0 * phase - 0.5)
+                     + 0.043 * sin(4.42 * w.y - 2.0 * w.x - 4.0 * phase + 1.1);
+          float drag = mix(1.0, 0.55, u_viscosity);
+          return (broad + u_detail * drag * fine) * u_heightRange;
+        }
+
+        float wrappedHeightAt(vec2 p, float phase, float targetCycles) {
+          float lowerCycles = floor(targetCycles);
+          return mix(wrappedHeightForCycles(p, phase, lowerCycles), wrappedHeightForCycles(p, phase, lowerCycles + 1.0), fract(targetCycles));
+        }
+
+        float wrappedMarbleForCycles(vec2 p, float phase, float cycles) {
+          vec2 w = wrappedPositionForCycles(p, phase, cycles);
+          return 0.5 * sin(w.x - 1.02 * w.y + phase) + 0.5 * cos(w.y + w.x - 2.0 * phase);
+        }
+
+        float wrappedMarbleAt(vec2 p, float phase, float targetCycles) {
+          float lowerCycles = floor(targetCycles);
+          return mix(wrappedMarbleForCycles(p, phase, lowerCycles), wrappedMarbleForCycles(p, phase, lowerCycles + 1.0), fract(targetCycles));
+        }
+
+        float surfaceHeight(vec2 p, float phase, float targetCycles) {
+          if (u_wrapEdges > 0.5) return wrappedHeightAt(p, phase, targetCycles);
+          return heightAt(p, phase);
+        }
+
         void main() {
           float aspect = u_resolution.x / u_resolution.y;
-          vec2 p = (v_uv - 0.5) * vec2(3.88 * aspect, 3.88);
+          vec2 p = (v_uv - 0.5) * vec2(3.88 * aspect, 3.88) / u_zoom;
+          if (u_wrapEdges > 0.5) p = vec2(6.28318530718 * v_uv.x, (v_uv.y - 0.5) * 3.88 / u_zoom);
+          float targetCycles = clamp(1.5 * u_foldSize / u_zoom, 0.0, 10.0);
           float viscosityRate = mix(1.65, 0.35, u_viscosity);
           float phase = 6.28318530718 * (u_time / 10.0) * viscosityRate * u_speed;
           float eps = 0.0035;
-          float h = heightAt(p, phase);
-          float hx1 = heightAt(p + vec2(eps, 0.0), phase);
-          float hx0 = heightAt(p - vec2(eps, 0.0), phase);
-          float hy1 = heightAt(p + vec2(0.0, eps), phase);
-          float hy0 = heightAt(p - vec2(0.0, eps), phase);
+          float h = surfaceHeight(p, phase, targetCycles);
+          float hx1 = surfaceHeight(p + vec2(eps, 0.0), phase, targetCycles);
+          float hx0 = surfaceHeight(p - vec2(eps, 0.0), phase, targetCycles);
+          float hy1 = surfaceHeight(p + vec2(0.0, eps), phase, targetCycles);
+          float hy0 = surfaceHeight(p - vec2(0.0, eps), phase, targetCycles);
           float dhdx = (hx1 - hx0) / (2.0 * eps);
           float dhdy = (hy1 - hy0) / (2.0 * eps);
           vec3 n = normalize(vec3(-u_relief * dhdx, -u_relief * dhdy, 1.0));
 
-          vec2 w = warpedPosition(p, phase);
-          float marble = 0.5 * sin(0.88 * w.x - 1.02 * w.y + phase)
-                       + 0.5 * cos(0.76 * w.y + 0.52 * w.x - 2.0 * phase);
+          float marble;
+          if (u_wrapEdges > 0.5) {
+            marble = wrappedMarbleAt(p, phase, targetCycles);
+          } else {
+            vec2 w = warpedPosition(p, phase);
+            marble = 0.5 * sin(0.88 * w.x - 1.02 * w.y + phase)
+                   + 0.5 * cos(0.76 * w.y + 0.52 * w.x - 2.0 * phase);
+          }
           float pigment = clamp(0.51 + 0.47 * h + 0.12 * marble, 0.0, 1.0);
           vec3 baseA = mix(u_low, u_mid, clamp(pigment / 0.56, 0.0, 1.0));
           vec3 baseB = mix(u_mid, u_high, clamp((pigment - 0.42) / 0.58, 0.0, 1.0));
@@ -288,7 +339,7 @@
           rgb = mix(vec3(luma), rgb, u_saturation);
           rgb = (rgb - 0.5) * u_contrast + 0.5 + u_brightness;
           float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
-          rgb += grain * (0.0015 + 0.0015 * u_detail);
+          rgb += grain * (0.0015 + 0.0015 * u_detail) * (1.0 - u_wrapEdges);
           gl_FragColor = vec4(clamp(rgb, 0.0, 1.0), 1.0);
         }
       `;
@@ -322,7 +373,7 @@
         const position = gl.getAttribLocation(program, "a_position");
         gl.enableVertexAttribArray(position);
         gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-        ["u_resolution", "u_time", "u_viscosity", "u_speed", "u_foldSize", "u_heightRange", "u_relief", "u_detail", "u_gloss", "u_sharpness", "u_saturation", "u_contrast", "u_brightness", "u_low", "u_mid", "u_high"].forEach(name => locations[name] = gl.getUniformLocation(program, name));
+        ["u_resolution", "u_time", "u_viscosity", "u_speed", "u_foldSize", "u_zoom", "u_wrapEdges", "u_heightRange", "u_relief", "u_detail", "u_gloss", "u_sharpness", "u_saturation", "u_contrast", "u_brightness", "u_low", "u_mid", "u_high"].forEach(name => locations[name] = gl.getUniformLocation(program, name));
       }
 
       function hexToRgb(hex) {
@@ -400,6 +451,8 @@
         gl.uniform1f(locations.u_viscosity, value("viscosity") / 100);
         gl.uniform1f(locations.u_speed, value("speed"));
         gl.uniform1f(locations.u_foldSize, value("foldSize"));
+        gl.uniform1f(locations.u_zoom, value("zoom"));
+        gl.uniform1f(locations.u_wrapEdges, controls.wrapEdges.checked ? 1 : 0);
         gl.uniform1f(locations.u_heightRange, value("heightRange"));
         gl.uniform1f(locations.u_relief, value("relief"));
         gl.uniform1f(locations.u_detail, value("detail"));
@@ -439,14 +492,14 @@
           gloss: v => `${v.toFixed(2)}×`, sharpness: v => `${Math.round(v)}%`,
           blur: v => `${v.toFixed(1)} px`, saturation: v => `${v.toFixed(2)}×`,
           contrast: v => `${v.toFixed(2)}×`, brightness: v => `${v > 0 ? "+" : ""}${v.toFixed(3)}`,
-          quality: v => `${Math.round(v * 100)}%`
+          quality: v => `${Math.round(v * 100)}%`, zoom: v => `${v.toFixed(2)}×`
         };
         Object.entries(formats).forEach(([id, format]) => document.getElementById(`${id}Value`).value = format(value(id)));
       }
 
       const storageKey = "slime-surface-lab-v1";
       function saveSettings() {
-        try { localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(Object.entries(controls).map(([id, el]) => [id, el.value])))); } catch (_) { /* local file storage can be disabled */ }
+        try { localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(Object.entries(controls).map(([id, el]) => [id, el.type === "checkbox" ? el.checked : el.value])))); } catch (_) { /* local file storage can be disabled */ }
       }
       function loadSettings() {
         try {
@@ -456,6 +509,9 @@
             if (el.classList.contains("color-value")) {
               const parsed = parseColorParameter(String(saved[id]));
               if (parsed !== null) el.value = parsed;
+            } else if (el.type === "checkbox") {
+              const state = String(saved[id]).trim().toLowerCase();
+              el.checked = saved[id] === true || ["1", "true", "on", "yes"].includes(state);
             } else el.value = saved[id];
           });
         } catch (_) { /* use defaults */ }
@@ -574,6 +630,13 @@
         return String(Number(Math.min(max, Math.max(min, Number(number.toFixed(Math.min(precision, 10)))))));
       }
 
+      function parseBooleanParameter(raw) {
+        const value = String(raw).trim().toLowerCase();
+        if (["1", "true", "on", "yes", "enabled"].includes(value)) return true;
+        if (["0", "false", "off", "no", "disabled"].includes(value)) return false;
+        return null;
+      }
+
       function applyURLParameters() {
         const byName = new Map(Object.values(controls).map(input => [input.name.toLowerCase(), input]));
         const queryValues = new Map();
@@ -600,6 +663,11 @@
               input.value = parsed;
               overriddenColors.add(input);
             }
+            return;
+          }
+          if (input.type === "checkbox") {
+            const parsed = parseBooleanParameter(raw);
+            if (parsed !== null) input.checked = parsed;
             return;
           }
           const parsed = parseNumberParameter(raw, name, input);
@@ -774,6 +842,7 @@
       }
 
       document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => el.addEventListener("input", applySettings));
+      document.querySelectorAll("input[type=checkbox]").forEach(el => el.addEventListener("change", applySettings));
       document.getElementById("quality").addEventListener("input", resize);
       setupColorPickers();
       document.querySelectorAll(".preset").forEach(button => button.addEventListener("click", () => {
@@ -794,7 +863,10 @@
         event.currentTarget.classList.toggle("btn-outline-primary", paused);
       });
       document.getElementById("resetBtn").addEventListener("click", () => {
-        Object.entries(defaults).forEach(([id, v]) => controls[id].value = v);
+        Object.entries(defaults).forEach(([id, v]) => {
+          if (controls[id].type === "checkbox") controls[id].checked = v;
+          else controls[id].value = v;
+        });
         syncColorPickers();
         closeColorPickers();
         document.querySelectorAll(".preset").forEach(p => {
