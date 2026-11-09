@@ -329,6 +329,70 @@
         const n = parseInt(hex.slice(1), 16);
         return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255];
       }
+      function hexToHsv(hex) {
+        const [r, g, b] = hexToRgb(hex);
+        const high = Math.max(r, g, b), low = Math.min(r, g, b), delta = high - low;
+        let hue = 0;
+        if (delta) {
+          if (high === r) hue = ((g - b) / delta + (g < b ? 6 : 0)) % 6;
+          else if (high === g) hue = (b - r) / delta + 2;
+          else hue = (r - g) / delta + 4;
+          hue *= 60;
+        }
+        return { h: hue, s: high === 0 ? 0 : delta / high, v: high };
+      }
+      function hsvToHex(hue, saturation, brightness) {
+        const sector = ((hue % 360) + 360) % 360 / 60;
+        const chroma = brightness * saturation;
+        const secondary = chroma * (1 - Math.abs(sector % 2 - 1));
+        let rgb;
+        if (sector < 1) rgb = [chroma, secondary, 0];
+        else if (sector < 2) rgb = [secondary, chroma, 0];
+        else if (sector < 3) rgb = [0, chroma, secondary];
+        else if (sector < 4) rgb = [0, secondary, chroma];
+        else if (sector < 5) rgb = [secondary, 0, chroma];
+        else rgb = [chroma, 0, secondary];
+        const offset = brightness - chroma;
+        return `#${rgb.map(channel => Math.round((channel + offset) * 255).toString(16).padStart(2, "0")).join("")}`;
+      }
+      function syncColorPicker(id) {
+        const picker = colorPickers.get(id);
+        if (!picker) return;
+        const color = controls[id].value;
+        const hsv = hexToHsv(color);
+        picker.hex.value = color;
+        picker.swatch.style.setProperty("--swatch-color", color);
+        picker.area.style.setProperty("--picker-hue", String(hsv.h));
+        picker.area.style.setProperty("--picker-saturation", `${hsv.s * 100}%`);
+        picker.area.style.setProperty("--picker-value", `${hsv.v * 100}%`);
+        picker.hue.value = String(Math.round(hsv.h) % 360);
+        picker.status.textContent = `${color}, hue ${Math.round(hsv.h)} degrees, saturation ${Math.round(hsv.s * 100)} percent, brightness ${Math.round(hsv.v * 100)} percent`;
+      }
+      function syncColorPickers() { colorIds.forEach(syncColorPicker); }
+      function clearPresetSelection() {
+        document.querySelectorAll(".preset").forEach(button => {
+          button.classList.remove("active");
+          button.setAttribute("aria-pressed", "false");
+        });
+      }
+      function setCustomColor(id, candidate, persist = true) {
+        const color = parseColorParameter(candidate);
+        if (color === null) return false;
+        controls[id].value = color;
+        syncColorPicker(id);
+        clearPresetSelection();
+        applySettings(persist);
+        return true;
+      }
+      function setPickerColorFromArea(id, event, persist = false) {
+        const picker = colorPickers.get(id);
+        const rect = picker.area.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const hsv = hexToHsv(controls[id].value);
+        const saturation = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+        const brightness = 1 - Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+        setCustomColor(id, hsvToHex(hsv.h, saturation, brightness), persist);
+      }
       function value(id) { return Number(controls[id].value); }
       function setUniforms(time) {
         gl.uniform2f(locations.u_resolution, canvas.width, canvas.height);
