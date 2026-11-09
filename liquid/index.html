@@ -920,7 +920,9 @@
         horizontalTile.width = width + pad * 2;
         horizontalTile.height = height;
         const horizontalContext = horizontalTile.getContext("2d");
-        for (let x = pad - width; x < width + 2 * pad; x += width) horizontalContext.drawImage(canvas, x, 0);
+        let firstTileX = pad - width;
+        while (firstTileX > 0) firstTileX -= width;
+        for (let x = firstTileX; x < width + 2 * pad; x += width) horizontalContext.drawImage(canvas, x, 0);
 
         const padded = document.createElement("canvas");
         padded.width = horizontalTile.width;
