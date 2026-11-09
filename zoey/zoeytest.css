@@ -298,7 +298,7 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   word-break: normal;
   text-align: center;
   text-wrap: nowrap;
-  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-width: 3px;
   -webkit-text-stroke-color: rgb(16 11 42 / 95%);
   paint-order: stroke fill;
   text-shadow:
