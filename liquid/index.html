@@ -20,6 +20,13 @@
     body.theater-mode #stage { position: absolute; inset: 0; width: 100%; height: 100%; }
     body.theater-mode #theaterToolbar { z-index: 1; }
     body.theater-mode #notice { position: absolute; right: 1rem; bottom: 1rem; left: 1rem; z-index: 2; }
+    .color-swatch { width: 2.25rem; min-width: 2.25rem; padding: 0; background-color: var(--swatch-color); border-color: var(--bs-border-color); }
+    .color-picker-panel { width: 100%; }
+    .color-area { position: relative; height: 8rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(var(--picker-hue), 100%, 50%)); touch-action: none; cursor: crosshair; }
+    .color-area:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+    .color-area-thumb { position: absolute; top: calc(100% - var(--picker-value)); left: var(--picker-saturation); width: 14px; height: 14px; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px #000; transform: translate(-50%, -50%); pointer-events: none; }
+    .color-hue::-webkit-slider-runnable-track { background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+    .color-hue::-moz-range-track { background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
   </style>
 </head>
 <body>
@@ -46,9 +53,54 @@
       <aside class="col-lg-4 order-lg-1" id="controlsColumn" aria-label="Slime surface controls">
         <fieldset class="mb-4">
           <legend class="h5">Palette</legend>
-          <div class="mb-2"><label class="form-label" for="colorLow">Deep shadow <code>color_low</code></label><input class="form-control form-control-color" id="colorLow" name="color_low" type="color" value="#031f16"></div>
-          <div class="mb-2"><label class="form-label" for="colorMid">Body color <code>color_mid</code></label><input class="form-control form-control-color" id="colorMid" name="color_mid" type="color" value="#076831"></div>
-          <div class="mb-2"><label class="form-label" for="colorHigh">Raised highlights <code>color_high</code></label><input class="form-control form-control-color" id="colorHigh" name="color_high" type="color" value="#84c226"></div>
+          <div class="mb-2 color-control" data-color-control="colorLow">
+            <label class="form-label" for="colorLowHex">Deep shadow <code>color_low</code></label>
+            <div class="input-group input-group-sm">
+              <button class="btn btn-outline-secondary color-swatch" type="button" data-color-toggle="colorLow" aria-label="Open deep shadow color picker" aria-expanded="false" aria-controls="colorLowPicker" style="--swatch-color: #031f16"></button>
+              <input class="form-control font-monospace color-hex" id="colorLowHex" type="text" value="#031f16" maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Deep shadow hex color">
+            </div>
+            <input class="color-value" id="colorLow" name="color_low" type="hidden" value="#031f16">
+            <div class="color-picker-panel border rounded p-2 mt-2 d-none" id="colorLowPicker" role="group" aria-label="Deep shadow picker controls">
+              <div class="color-area mb-2" id="colorLowArea" role="group" aria-label="Saturation and brightness" tabindex="0" style="--picker-hue: 0; --picker-saturation: 0%; --picker-value: 100%">
+                <span class="color-area-thumb" aria-hidden="true"></span>
+              </div>
+              <label class="visually-hidden" for="colorLowHue">Hue</label>
+              <input class="form-range color-hue mb-0" id="colorLowHue" type="range" min="0" max="359" step="1" value="0" aria-label="Hue">
+              <span class="visually-hidden" id="colorLowPickerStatus" aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="mb-2 color-control" data-color-control="colorMid">
+            <label class="form-label" for="colorMidHex">Body color <code>color_mid</code></label>
+            <div class="input-group input-group-sm">
+              <button class="btn btn-outline-secondary color-swatch" type="button" data-color-toggle="colorMid" aria-label="Open body color color picker" aria-expanded="false" aria-controls="colorMidPicker" style="--swatch-color: #076831"></button>
+              <input class="form-control font-monospace color-hex" id="colorMidHex" type="text" value="#076831" maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Body color hex color">
+            </div>
+            <input class="color-value" id="colorMid" name="color_mid" type="hidden" value="#076831">
+            <div class="color-picker-panel border rounded p-2 mt-2 d-none" id="colorMidPicker" role="group" aria-label="Body color picker controls">
+              <div class="color-area mb-2" id="colorMidArea" role="group" aria-label="Saturation and brightness" tabindex="0" style="--picker-hue: 0; --picker-saturation: 0%; --picker-value: 100%">
+                <span class="color-area-thumb" aria-hidden="true"></span>
+              </div>
+              <label class="visually-hidden" for="colorMidHue">Hue</label>
+              <input class="form-range color-hue mb-0" id="colorMidHue" type="range" min="0" max="359" step="1" value="0" aria-label="Hue">
+              <span class="visually-hidden" id="colorMidPickerStatus" aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="mb-2 color-control" data-color-control="colorHigh">
+            <label class="form-label" for="colorHighHex">Raised highlights <code>color_high</code></label>
+            <div class="input-group input-group-sm">
+              <button class="btn btn-outline-secondary color-swatch" type="button" data-color-toggle="colorHigh" aria-label="Open raised highlights color picker" aria-expanded="false" aria-controls="colorHighPicker" style="--swatch-color: #84c226"></button>
+              <input class="form-control font-monospace color-hex" id="colorHighHex" type="text" value="#84c226" maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Raised highlights hex color">
+            </div>
+            <input class="color-value" id="colorHigh" name="color_high" type="hidden" value="#84c226">
+            <div class="color-picker-panel border rounded p-2 mt-2 d-none" id="colorHighPicker" role="group" aria-label="Raised highlights picker controls">
+              <div class="color-area mb-2" id="colorHighArea" role="group" aria-label="Saturation and brightness" tabindex="0" style="--picker-hue: 0; --picker-saturation: 0%; --picker-value: 100%">
+                <span class="color-area-thumb" aria-hidden="true"></span>
+              </div>
+              <label class="visually-hidden" for="colorHighHue">Hue</label>
+              <input class="form-range color-hue mb-0" id="colorHighHue" type="range" min="0" max="359" step="1" value="0" aria-label="Hue">
+              <span class="visually-hidden" id="colorHighPickerStatus" aria-live="polite"></span>
+            </div>
+          </div>
           <div class="btn-group" role="group" aria-label="Color presets">
             <button class="btn btn-outline-secondary preset active" data-preset="emerald" aria-pressed="true" type="button">Emerald</button>
             <button class="btn btn-outline-secondary preset" data-preset="candy" aria-pressed="false" type="button">Candy</button>
