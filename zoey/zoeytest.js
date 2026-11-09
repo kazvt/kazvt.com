@@ -238,6 +238,16 @@
         { src: "/zoey/assets/blu/blu-voice-2.wav?v=20261109-05", caption: "Blue's voice note 2 of 3." },
         { src: "/zoey/assets/blu/blu-voice-3.wav?v=20261109-05", caption: "Blue's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "glyph",
+      name: "Glyph",
+      avatar: "/zoey/assets/glyph/glyph-avatar.gif?v=20261109-01",
+      clips: [
+        { src: "/zoey/assets/glyph/glyph-voice-1.wav?v=20261109-01", caption: "Glyph's voice note 1 of 3." },
+        { src: "/zoey/assets/glyph/glyph-voice-2.wav?v=20261109-01", caption: "Glyph's voice note 2 of 3." },
+        { src: "/zoey/assets/glyph/glyph-voice-3.wav?v=20261109-01", caption: "Glyph's voice note 3 of 3." }
+      ]
     }
   ];
 
