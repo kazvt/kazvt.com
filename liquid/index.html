@@ -377,7 +377,7 @@
         const position = gl.getAttribLocation(program, "a_position");
         gl.enableVertexAttribArray(position);
         gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-        ["u_resolution", "u_time", "u_viscosity", "u_speed", "u_foldSize", "u_zoom", "u_wrapEdges", "u_heightRange", "u_relief", "u_detail", "u_gloss", "u_sharpness", "u_saturation", "u_contrast", "u_brightness", "u_low", "u_mid", "u_high"].forEach(name => locations[name] = gl.getUniformLocation(program, name));
+        ["u_resolution", "u_time", "u_viscosity", "u_speed", "u_foldSize", "u_zoom", "u_wrapEdges", "u_wrapMargin", "u_heightRange", "u_relief", "u_detail", "u_gloss", "u_sharpness", "u_saturation", "u_contrast", "u_brightness", "u_low", "u_mid", "u_high"].forEach(name => locations[name] = gl.getUniformLocation(program, name));
       }
 
       function hexToRgb(hex) {
@@ -457,6 +457,7 @@
         gl.uniform1f(locations.u_foldSize, value("foldSize"));
         gl.uniform1f(locations.u_zoom, value("zoom"));
         gl.uniform1f(locations.u_wrapEdges, controls.wrapEdges.checked ? 1 : 0);
+        gl.uniform1f(locations.u_wrapMargin, wrapMargin);
         gl.uniform1f(locations.u_heightRange, value("heightRange"));
         gl.uniform1f(locations.u_relief, value("relief"));
         gl.uniform1f(locations.u_detail, value("detail"));
@@ -484,7 +485,10 @@
         }
         const blur = value("blur");
         canvas.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
-        const overscan = 1 + (2 * blur) / Math.max(rect.height, 1);
+        const overscan = controls.wrapEdges.checked
+          ? 1 + (6 * blur) / Math.max(Math.min(rect.width, rect.height), 1)
+          : 1 + (2 * blur) / Math.max(rect.height, 1);
+        wrapMargin = controls.wrapEdges.checked ? Math.min(0.45, (1 - 1 / overscan) / 2) : 0;
         canvas.style.transform = `scale(${overscan})`;
       }
 
