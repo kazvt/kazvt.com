@@ -516,18 +516,18 @@
               placed.some((other) => intersects(box, other, collisionGap))) continue;
 
           const sector = (Math.floor((Math.atan2(centerY - heroCenterY, centerX - heroCenterX) + Math.PI) / (Math.PI / 4)) % 8 + 8) % 8;
-          const heroDX = Math.max(hero.left - box.right, box.left - hero.right, 0);
-          const heroDY = Math.max(hero.top - box.bottom, box.top - hero.bottom, 0);
-          const heroGap = Math.hypot(heroDX, heroDY);
-          let nearestGap = Infinity;
+          let nearestCenterDistance = Infinity;
           for (const other of placed) {
-            const dx = Math.max(other.left - box.right, box.left - other.right, 0);
-            const dy = Math.max(other.top - box.bottom, box.top - other.bottom, 0);
-            nearestGap = Math.min(nearestGap, Math.hypot(dx, dy));
+            nearestCenterDistance = Math.min(nearestCenterDistance,
+              Math.hypot(centerX - other.centerX, centerY - other.centerY));
           }
-          if (!Number.isFinite(nearestGap)) nearestGap = heroGap;
-          const preferredGap = collisionGap + cardSize * .003;
+          const coverageColumn = Math.min(coverageColumns - 1, Math.floor(centerX / width * coverageColumns));
+          const coverageRow = Math.min(coverageRows - 1, Math.floor(centerY / canvasHeight * coverageRows));
+          const coverageCell = coverageRow * coverageColumns + coverageColumn;
+          const coveragePenalty = coverageCounts[coverageCell] * cardSize * .72;
+          const sectorPenalty = sectorCounts[sector] * cardSize * .16;
           box.sector = sector;
+          box.coverageCell = coverageCell;
           box.angle = angleDegrees;
           box.entryId = entry.id;
           const heroSideBias = heroSideTargets.length
@@ -535,10 +535,13 @@
               Math.hypot(centerX - target.centerX, centerY - target.centerY) + target.preference
             ))
             : 0;
-          box.score = Math.abs(nearestGap - preferredGap) * .78 +
-            Math.abs(heroGap - preferredGap) * .12 +
-            sectorCounts[sector] * cardSize * .34 + random() * cardSize * .015 + heroSideBias;
-          if (box.score < bestScore) {
+          const balancePenalty = coveragePenalty + sectorPenalty;
+          box.score = heroSideTargets.length
+            ? -heroSideBias - balancePenalty + random() * cardSize * .02
+            : placed.length
+              ? nearestCenterDistance - balancePenalty + random() * cardSize * .02
+              : random() * cardSize * .02;
+          if (box.score > bestScore) {
             bestCandidate = box;
             bestScore = box.score;
           }
@@ -547,6 +550,7 @@
         if (!bestCandidate) return null;
         const chosen = bestCandidate;
         sectorCounts[chosen.sector] += 1;
+        coverageCounts[chosen.coverageCell] += 1;
         placed.push(chosen);
       }
       return { placed, headingTop: cardHeadingTop, heroHeight };
