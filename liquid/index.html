@@ -705,6 +705,25 @@
         if (paletteFromColorSeed || overriddenColors.size) clearPresetSelection();
       }
 
+      function loadColorTheme() {
+        try {
+          const saved = localStorage.getItem(themeStorageKey);
+          if (saved === "light" || saved === "dark") return saved;
+        } catch (_) { /* use the page default */ }
+        return document.documentElement.getAttribute("data-bs-theme") === "light" ? "light" : "dark";
+      }
+      function setColorTheme(theme, persist = true) {
+        const colorTheme = theme === "light" ? "light" : "dark";
+        document.documentElement.setAttribute("data-bs-theme", colorTheme);
+        const darkTheme = colorTheme === "dark";
+        lightThemeIcon.classList.toggle("d-none", !darkTheme);
+        darkThemeIcon.classList.toggle("d-none", darkTheme);
+        themeToggleButton.setAttribute("aria-label", darkTheme ? "Switch to light mode" : "Switch to dark mode");
+        if (persist) {
+          try { localStorage.setItem(themeStorageKey, colorTheme); } catch (_) { /* keep the current-page choice */ }
+        }
+      }
+
       function initialTheaterModeFromURL() {
         let enabled = true;
         const offValues = new Set(["off", "false", "0", "no"]);
@@ -913,6 +932,10 @@
         setTheaterMode(true, true);
         stage.focus();
       });
+      themeToggleButton.addEventListener("click", () => {
+        const currentTheme = document.documentElement.getAttribute("data-bs-theme");
+        setColorTheme(currentTheme === "dark" ? "light" : "dark");
+      });
       exitTheaterButton.addEventListener("click", () => {
         setTheaterMode(false);
         theaterButton.focus();
@@ -1002,6 +1025,7 @@
         }
       });
 
+      setColorTheme(loadColorTheme(), false);
       setTheaterMode(initialTheaterModeFromURL(), true);
       loadSettings();
       applyURLParameters();
