@@ -142,7 +142,7 @@
         </fieldset>
         <details class="mb-3">
           <summary>URL parameters</summary>
-          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, percentages, and applicable units; colors accept bare hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>.</p>
+          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, percentages, and applicable units; colors accept bare hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>. Main palette: <code>?main_color=31a354</code> (auto shades).</p>
         </details>
       </aside>
     </div>
@@ -495,6 +495,56 @@
         return `#${Array.from(pixel).slice(0, 3).map(channel => channel.toString(16).padStart(2, "0")).join("")}`;
       }
 
+      function srgbToLinear(channel) {
+        return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+      }
+      function linearToSrgb(channel) {
+        return channel <= 0.0031308 ? 12.92 * channel : 1.055 * Math.pow(channel, 1 / 2.4) - 0.055;
+      }
+      function hexToOklch(hex) {
+        const [r, g, b] = hexToRgb(hex).map(srgbToLinear);
+        const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+        const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+        const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+        const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+        const a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+        const bb = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+        return { L, C: Math.hypot(a, bb), H: Math.atan2(bb, a) };
+      }
+      function oklchToLinearRgb(L, C, H) {
+        const a = C * Math.cos(H), b = C * Math.sin(H);
+        const l = Math.pow(L + 0.3963377774 * a + 0.2158037573 * b, 3);
+        const m = Math.pow(L - 0.1055613458 * a - 0.0638541728 * b, 3);
+        const s = Math.pow(L - 0.0894841775 * a - 1.2914855480 * b, 3);
+        return [
+          4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+          -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+          -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+        ];
+      }
+      function oklchToHex(L, C, H) {
+        const inGamut = rgb => rgb.every(channel => channel >= -1e-7 && channel <= 1.0000001);
+        let rgb = oklchToLinearRgb(L, C, H);
+        if (!inGamut(rgb)) {
+          let low = 0, high = C;
+          for (let i = 0; i < 24; i++) {
+            const middle = (low + high) / 2;
+            if (inGamut(oklchToLinearRgb(L, middle, H))) low = middle;
+            else high = middle;
+          }
+          rgb = oklchToLinearRgb(L, low, H);
+        }
+        return `#${rgb.map(channel => Math.round(Math.min(1, Math.max(0, linearToSrgb(channel))) * 255).toString(16).padStart(2, "0")).join("")}`;
+      }
+      function deriveMainPalette(mainColor) {
+        const { L, C, H } = hexToOklch(mainColor);
+        return {
+          colorLow: oklchToHex(Math.max(0, L - 0.18), C, H),
+          colorMid: mainColor,
+          colorHigh: oklchToHex(Math.min(1, L + 0.18), C, H)
+        };
+      }
+
       function parseNumberParameter(raw, key, input) {
         if (raw.length > 64) return null;
         let text = raw.trim().toLowerCase().replace(/−/g, "-").replace(/×/g, "x");
@@ -528,10 +578,20 @@
         const queryValues = new Map();
         new URLSearchParams(window.location.search).forEach((raw, key) => {
           const name = key.trim().toLowerCase();
-          if (byName.has(name)) queryValues.set(name, raw);
+          if (byName.has(name) || name === "main_color") queryValues.set(name, raw);
         });
+        let paletteFromMainColor = false;
+        if (queryValues.has("main_color")) {
+          const mainColor = parseColorParameter(queryValues.get("main_color"));
+          if (mainColor !== null) {
+            const palette = deriveMainPalette(mainColor);
+            colorIds.forEach(id => controls[id].value = palette[id]);
+            paletteFromMainColor = true;
+          }
+        }
         const overriddenColors = new Set();
         queryValues.forEach((raw, name) => {
+          if (name === "main_color") return;
           const input = byName.get(name);
           if (input.classList.contains("color-value")) {
             const parsed = parseColorParameter(raw);
@@ -544,12 +604,7 @@
           const parsed = parseNumberParameter(raw, name, input);
           if (parsed !== null) input.value = parsed;
         });
-        if (overriddenColors.size) {
-          document.querySelectorAll(".preset").forEach(button => {
-            button.classList.remove("active");
-            button.setAttribute("aria-pressed", "false");
-          });
-        }
+        if (paletteFromMainColor || overriddenColors.size) clearPresetSelection();
       }
 
       function initialTheaterModeFromURL() {
