@@ -243,7 +243,7 @@
       id: "glyph",
       name: "Glyph",
       avatar: "/zoey/assets/glyph/glyph-avatar.gif?v=20261109-01",
-      placementBias: "inner",
+      placementBias: "hero-side",
       clips: [
         { src: "/zoey/assets/glyph/glyph-voice-1.wav?v=20261109-01", caption: "Glyph's voice note 1 of 3." },
         { src: "/zoey/assets/glyph/glyph-voice-2.wav?v=20261109-01", caption: "Glyph's voice note 2 of 3." },
@@ -381,6 +381,9 @@
     const sceneSizeCeiling = Math.max(1, Math.min(preferredSize, maxHeroHeight / heroPerCardRatio));
     const sceneMinimumSize = Math.min(minimumCardSize, sceneSizeCeiling);
     const cards = [...canvas.querySelectorAll(".z-entry")];
+    const placementOrder = [...entrySlots].sort((left, right) =>
+      Number(right.placementBias === "hero-side") - Number(left.placementBias === "hero-side")
+    );
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
     function intersects(a, b, separation = 0) {
@@ -411,7 +414,7 @@
       const placed = [];
       const sectorCounts = Array(8).fill(0);
 
-      for (const entry of entrySlots) {
+      for (const entry of placementOrder) {
         const random = seededRandom(stableHash(`scatter:${entry.id}`));
         const angleDegrees = entryTilts.get(entry.id) || 0;
         const angle = angleDegrees * Math.PI / 180;
@@ -425,6 +428,14 @@
         let bestScore = Infinity;
         const candidatePoints = [];
         const addPoint = (centerX, centerY) => candidatePoints.push({ centerX, centerY });
+        const heroSideTargets = entry.placementBias === "hero-side"
+          ? [
+            { centerX: heroCenterX, centerY: hero.bottom + halfHeight + collisionGap, preference: 0 },
+            { centerX: hero.right + halfWidth + collisionGap, centerY: heroCenterY, preference: cardSize * .02 },
+            { centerX: hero.left - halfWidth - collisionGap, centerY: heroCenterY, preference: cardSize * .02 }
+          ]
+          : [];
+        heroSideTargets.forEach((target) => addPoint(target.centerX, target.centerY));
 
         // Grow an irregular, tightly packed cloud from the centerpiece and
         // existing stickers; a few free samples keep the overall scatter loose.
@@ -490,12 +501,15 @@
           const preferredGap = collisionGap + cardSize * .003;
           box.sector = sector;
           box.angle = angleDegrees;
-          const innerPlacementBias = entry.placementBias === "inner"
-            ? Math.hypot(centerX - heroCenterX, centerY - heroCenterY) * .85
+          box.entryId = entry.id;
+          const heroSideBias = heroSideTargets.length
+            ? Math.min(...heroSideTargets.map((target) =>
+              Math.hypot(centerX - target.centerX, centerY - target.centerY) + target.preference
+            ))
             : 0;
           box.score = Math.abs(nearestGap - preferredGap) * .78 +
             Math.abs(heroGap - preferredGap) * .12 +
-            sectorCounts[sector] * cardSize * .34 + random() * cardSize * .015 + innerPlacementBias;
+            sectorCounts[sector] * cardSize * .34 + random() * cardSize * .015 + heroSideBias;
           if (box.score < bestScore) {
             bestCandidate = box;
             bestScore = box.score;
@@ -544,8 +558,11 @@
     heading.style.top = `${finalLayout.headingTop}px`;
     const art = document.getElementById("featuredArt");
     art?.style.setProperty("--z-hero-width", `${(finalLayout.heroHeight * 481 / 858).toFixed(2)}px`);
-    cards.forEach((card, index) => {
-      const sticker = finalLayout.placed[index];
+    const placementById = new Map(finalLayout.placed.map((sticker) => [sticker.entryId, sticker]));
+    cards.forEach((card) => {
+      const entryId = card.querySelector(".z-entry-button")?.dataset.entryId;
+      const sticker = placementById.get(entryId);
+      if (!sticker) return;
       card.style.setProperty("--entry-x", `${(sticker.centerX - finalSize / 2).toFixed(2)}px`);
       card.style.setProperty("--entry-y", `${(sticker.centerY - finalSize / 2).toFixed(2)}px`);
       card.style.setProperty("--entry-size", `${finalSize.toFixed(2)}px`);
