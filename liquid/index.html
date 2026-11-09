@@ -213,6 +213,7 @@
         uniform float u_foldSize;
         uniform float u_zoom;
         uniform float u_wrapEdges;
+        uniform float u_wrapMargin;
         uniform float u_heightRange;
         uniform float u_relief;
         uniform float u_detail;
@@ -291,7 +292,10 @@
         void main() {
           float aspect = u_resolution.x / u_resolution.y;
           vec2 p = (v_uv - 0.5) * vec2(3.88 * aspect, 3.88) / u_zoom;
-          if (u_wrapEdges > 0.5) p = vec2(6.28318530718 * v_uv.x, (v_uv.y - 0.5) * 3.88 / u_zoom);
+          if (u_wrapEdges > 0.5) {
+            float wrappedU = (v_uv.x - u_wrapMargin) / (1.0 - 2.0 * u_wrapMargin);
+            p = vec2(6.28318530718 * wrappedU, (v_uv.y - 0.5) * 3.88 / u_zoom);
+          }
           float targetCycles = clamp(1.5 * u_foldSize / u_zoom, 0.0, 10.0);
           float viscosityRate = mix(1.65, 0.35, u_viscosity);
           float phase = 6.28318530718 * (u_time / 10.0) * viscosityRate * u_speed;
