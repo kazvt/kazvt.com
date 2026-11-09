@@ -607,7 +607,10 @@
         let text = raw.trim().toLowerCase().replace(/−/g, "-").replace(/×/g, "x");
         // URLSearchParams decodes a literal + as a space, including in exponents.
         text = text.replace(/([e])\s+(?=\d)/g, "$1+");
-        if (!text.includes(".") && /^[+-]?\d+,\d+(?:e[+-]?\d+)?$/.test(text)) text = text.replace(",", ".");
+        if (!text.includes(".")) {
+          const commaDecimal = text.match(/^(x\s*)?([+-]?\d+),(\d+(?:e[+-]?\d+)?)(\s*x)?(\s*(?:%|px|rem|em))?$/i);
+          if (commaDecimal) text = `${commaDecimal[1] || ""}${commaDecimal[2]}.${commaDecimal[3]}${commaDecimal[4] || ""}${commaDecimal[5] || ""}`;
+        }
         const match = text.match(/^(?:x\s*)?([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:\s*x)?(?:\s*(%|px|rem|em))?$/i);
         if (!match) return null;
         let number = Number(match[1]);
