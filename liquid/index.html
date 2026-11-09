@@ -529,8 +529,9 @@
         } catch (_) { /* use defaults */ }
       }
       function parseColorParameter(raw) {
+        if (typeof raw !== "string" || raw.length > 128) return null;
         const candidate = raw.trim();
-        if (candidate.length > 128 || !candidate || /^(?:currentcolor|transparent|inherit|initial|unset|revert|revert-layer)$/i.test(candidate) || /^(?:var|env|url)\s*\(/i.test(candidate)) return null;
+        if (!candidate || /^(?:currentcolor|transparent|inherit|initial|unset|revert|revert-layer)$/i.test(candidate) || /^(?:var|env|url)\s*\(/i.test(candidate)) return null;
         let hex = candidate.replace(/^#/, "");
         if (/^(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(hex)) {
           if (hex.length === 3 || hex.length === 4) {
