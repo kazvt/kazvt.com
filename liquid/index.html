@@ -39,6 +39,7 @@
         <div class="mt-2" id="theaterToggleRow">
           <button id="theaterBtn" class="btn btn-outline-secondary" type="button" aria-pressed="false">Theatre mode</button>
         </div>
+        <div class="form-text mt-2 d-none" id="theaterUrlHint"><code>?theatre=off</code> / <code>?fullscreen=off</code></div>
         <div class="alert alert-warning d-none mt-2" id="notice" role="alert"></div>
       </section>
 
@@ -119,13 +120,12 @@
       const controlsColumn = document.getElementById("controlsColumn");
       const previewMeta = document.getElementById("previewMeta");
       const theaterToggleRow = document.getElementById("theaterToggleRow");
+      const theaterUrlHint = document.getElementById("theaterUrlHint");
       const theaterToolbar = document.getElementById("theaterToolbar");
       const notice = document.getElementById("notice");
       const fpsLabel = document.getElementById("fps");
       const theaterButton = document.getElementById("theaterBtn");
       const exitTheaterButton = document.getElementById("exitTheaterBtn");
-      const theaterPreferenceKey = "kazvt-liquid-theater-mode-v1";
-      const legacyFullscreenPreferenceKey = "kazvt-liquid-fullscreen-v1";
       let gl, program, buffer, locations = {};
       let paused = false, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0;
       let theaterMode = false, theaterControlsTimer = 0;
@@ -420,23 +420,16 @@
         }
       }
 
-      function readTheaterPreference() {
-        try {
-          const saved = localStorage.getItem(theaterPreferenceKey);
-          if (saved !== null) return saved === "true";
-        } catch (_) { return false; }
-        try {
-          const legacyFullscreen = localStorage.getItem(legacyFullscreenPreferenceKey) === "true";
-          if (legacyFullscreen) {
-            try {
-              localStorage.setItem(theaterPreferenceKey, "true");
-              localStorage.removeItem(legacyFullscreenPreferenceKey);
-            } catch (_) { /* keep legacy preference */ }
-          }
-          return legacyFullscreen;
-        } catch (_) { return false; }
+      function initialTheaterModeFromURL() {
+        let enabled = true;
+        const offValues = new Set(["off", "false", "0", "no"]);
+        new URLSearchParams(window.location.search).forEach((value, key) => {
+          const name = key.trim().toLowerCase();
+          if ((name === "theatre" || name === "fullscreen") && offValues.has(value.trim().toLowerCase())) enabled = false;
+        });
+        return enabled;
       }
-      function setTheaterMode(enabled, persist = true, revealControls = false) {
+      function setTheaterMode(enabled, revealControls = false) {
         theaterMode = enabled;
         document.body.classList.toggle("theater-mode", enabled);
         appShell.classList.toggle("py-3", !enabled);
@@ -446,6 +439,7 @@
         controlsColumn.classList.toggle("d-none", enabled);
         previewMeta.classList.toggle("d-none", enabled);
         theaterToggleRow.classList.toggle("d-none", enabled);
+        theaterUrlHint.classList.toggle("d-none", enabled);
         theaterToolbar.classList.toggle("d-none", !enabled);
         previewColumn.classList.toggle("col-lg-8", !enabled);
         previewColumn.classList.toggle("col-lg-12", enabled);
@@ -455,9 +449,6 @@
         stage.classList.toggle("ratio", !enabled);
         stage.classList.toggle("ratio-16x9", !enabled);
         theaterButton.setAttribute("aria-pressed", String(enabled));
-        if (persist) {
-          try { localStorage.setItem(theaterPreferenceKey, String(enabled)); } catch (_) { /* storage may be disabled */ }
-        }
         if (enabled && revealControls) showTheaterControls();
         else hideTheaterControls();
         resize();
@@ -548,7 +539,7 @@
         applySettings();
       });
       theaterButton.addEventListener("click", () => {
-        setTheaterMode(true, true, true);
+        setTheaterMode(true, true);
         stage.focus();
       });
       exitTheaterButton.addEventListener("click", () => {
@@ -600,7 +591,7 @@
         }
       });
 
-      setTheaterMode(readTheaterPreference(), false);
+      setTheaterMode(initialTheaterModeFromURL(), true);
       loadSettings();
       applyURLParameters();
       syncLabels();
