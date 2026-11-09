@@ -169,7 +169,6 @@ button, a { touch-action: manipulation; }
     calc(var(--z-scene-size, 72px) * .025) calc(var(--z-scene-size, 72px) * .025) 0 rgb(255 155 201 / 65%),
     calc(var(--z-scene-size, 72px) * .05) calc(var(--z-scene-size, 72px) * .05) 0 rgb(112 221 244 / 26%);
 }
-.z-stage-heading h1:focus { outline: none; }
 .z-stage-heading h1 span { color: var(--z-galaxy-lilac); }
 .z-constellation {
   position: absolute;
