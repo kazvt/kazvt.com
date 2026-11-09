@@ -673,7 +673,7 @@
             }
           });
           picker.root.addEventListener("focusout", () => window.setTimeout(() => {
-            if (!picker.root.contains(document.activeElement)) closeColorPickers(picker);
+            if (!picker.root.contains(document.activeElement)) closeColorPickers();
           }, 0));
         });
         document.addEventListener("pointerdown", event => {
@@ -713,11 +713,13 @@
         }
       }
 
-      document.querySelectorAll("input[type=range], input[type=color]").forEach(el => el.addEventListener("input", applySettings));
+      document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => el.addEventListener("input", applySettings));
       document.getElementById("quality").addEventListener("input", resize);
+      setupColorPickers();
       document.querySelectorAll(".preset").forEach(button => button.addEventListener("click", () => {
         const colors = presets[button.dataset.preset];
         [controls.colorLow.value, controls.colorMid.value, controls.colorHigh.value] = colors;
+        syncColorPickers();
         document.querySelectorAll(".preset").forEach(p => {
           const active = p === button;
           p.classList.toggle("active", active);
@@ -725,10 +727,6 @@
         });
         applySettings();
       }));
-      ["colorLow", "colorMid", "colorHigh"].forEach(id => controls[id].addEventListener("input", () => document.querySelectorAll(".preset").forEach(p => {
-        p.classList.remove("active");
-        p.setAttribute("aria-pressed", "false");
-      })));
       document.getElementById("pauseBtn").addEventListener("click", event => {
         paused = !paused;
         event.currentTarget.textContent = paused ? "Play" : "Pause";
@@ -737,6 +735,8 @@
       });
       document.getElementById("resetBtn").addEventListener("click", () => {
         Object.entries(defaults).forEach(([id, v]) => controls[id].value = v);
+        syncColorPickers();
+        closeColorPickers();
         document.querySelectorAll(".preset").forEach(p => {
           const active = p.dataset.preset === "emerald";
           p.classList.toggle("active", active);
@@ -804,6 +804,7 @@
       setTheaterMode(initialTheaterModeFromURL(), true);
       loadSettings();
       applyURLParameters();
+      syncColorPickers();
       syncLabels();
       try {
         initWebGL();
