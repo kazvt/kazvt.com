@@ -164,6 +164,16 @@
         violet: ["#160d31", "#6839a8", "#d6bdff"]
       };
       const controls = Object.fromEntries(Object.keys(defaults).map(id => [id, document.getElementById(id)]));
+      const colorIds = ["colorLow", "colorMid", "colorHigh"];
+      const colorPickers = new Map(Array.from(document.querySelectorAll(".color-control")).map(root => {
+        const id = root.dataset.colorControl;
+        return [id, {
+          root, hex: root.querySelector(".color-hex"), swatch: root.querySelector(".color-swatch"),
+          toggle: root.querySelector("[data-color-toggle]"), panel: root.querySelector(".color-picker-panel"),
+          area: root.querySelector(".color-area"), hue: root.querySelector(".color-hue"),
+          status: root.querySelector("[aria-live]")
+        }];
+      }));
       const canvas = document.getElementById("gl");
       const stage = document.getElementById("stage");
       const appShell = document.getElementById("appShell");
@@ -377,7 +387,13 @@
       function loadSettings() {
         try {
           const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-          if (saved) Object.entries(controls).forEach(([id, el]) => { if (saved[id] !== undefined) el.value = saved[id]; });
+          if (saved) Object.entries(controls).forEach(([id, el]) => {
+            if (saved[id] === undefined) return;
+            if (el.classList.contains("color-value")) {
+              const parsed = parseColorParameter(String(saved[id]));
+              if (parsed !== null) el.value = parsed;
+            } else el.value = saved[id];
+          });
         } catch (_) { /* use defaults */ }
       }
       function parseColorParameter(raw) {
@@ -453,7 +469,7 @@
         const overriddenColors = new Set();
         queryValues.forEach((raw, name) => {
           const input = byName.get(name);
-          if (input.type === "color") {
+          if (input.classList.contains("color-value")) {
             const parsed = parseColorParameter(raw);
             if (parsed !== null) {
               input.value = parsed;
