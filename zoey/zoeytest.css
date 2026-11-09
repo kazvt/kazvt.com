@@ -284,18 +284,20 @@ body.zoey-page .z-entry-button:focus-visible { outline-color: var(--z-galaxy-gol
   z-index: 1;
   left: 50%;
   bottom: 4%;
-  max-width: 92%;
-  padding-inline: 1%;
+  width: max-content;
+  max-width: none;
+  padding-inline: 0;
   transform: translateX(-50%);
   pointer-events: none;
   color: var(--z-galaxy-text);
   font-size: calc(var(--entry-size, 72px) * .24);
   font-weight: 700;
   line-height: 1.04;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
   text-align: center;
-  text-wrap: balance;
+  text-wrap: nowrap;
   -webkit-text-stroke: calc(var(--entry-size, 72px) * .0045) rgb(16 11 42 / 95%);
   paint-order: stroke fill;
   text-shadow:
