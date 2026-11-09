@@ -1080,8 +1080,7 @@
 
   renderEntries();
   document.fonts?.ready?.then(() => layoutEntryStickers());
-  setMotion(!reduceMotion.matches);
-  reduceMotion.addEventListener?.("change", (event) => setMotion(!event.matches));
+  setMotion(true);
 
   let resizeFrame = 0;
   function scheduleResponsiveLayout() {
@@ -1100,7 +1099,6 @@
 
   const loader = document.getElementById("fakeLoader");
   const enterButton = document.getElementById("enterGalaxy");
-  const skipLink = document.querySelector(".z-skip-link");
   let loaderClosing = false;
 
   function closeLoader() {
@@ -1113,10 +1111,6 @@
       body.classList.remove("z-loader-open");
       html.classList.remove("z-loader-open");
       loaderClosing = false;
-      world.inert = false;
-      skipLink.inert = false;
-      skipLink.removeAttribute("tabindex");
-      document.getElementById("pageTitle").focus({ preventScroll: true });
     }, body.dataset.motion === "on" ? 160 : 0);
   }
 
@@ -1129,14 +1123,6 @@
   loader.hidden = false;
   body.classList.add("z-loader-open");
   html.classList.add("z-loader-open");
-  world.inert = true;
-  skipLink.inert = true;
-  enterButton.focus({ preventScroll: true });
   enterButton.addEventListener("click", enterGalaxy);
-  window.addEventListener("keydown", (event) => {
-    if (loader.hidden || event.key !== "Tab") return;
-    event.preventDefault();
-    enterButton.focus({ preventScroll: true });
-  });
 
 })();
