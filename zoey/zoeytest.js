@@ -1,10 +1,7 @@
 (() => {
   const body = document.body;
   const html = document.documentElement;
-  const world = document.querySelector(".z-viewport");
   const gifSky = document.getElementById("gifSky");
-  const audioStatus = document.getElementById("audioStatus");
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const backgroundMusicUrl = "/zoey/assets/background/zoey-galaxy-background.mp3";
   const backgroundMusicBytes = fetch(backgroundMusicUrl, { cache: "force-cache" })
     .then((response) => response.ok ? response.arrayBuffer() : null)
@@ -342,13 +339,11 @@
     entrySlots.forEach((entry) => {
       const card = document.createElement("article");
       card.className = "z-entry";
-      card.setAttribute("role", "listitem");
 
       const button = document.createElement("button");
       button.className = "z-entry-button";
       button.type = "button";
       button.dataset.entryId = entry.id;
-      button.setAttribute("aria-label", entry.clips.length ? `${entry.name}'s voice message.` : `${entry.name}. Message pending.`);
       button.addEventListener("click", () => {
         if (!audioEnabled) enableAudio();
         playNextClip(entry, button);
@@ -356,11 +351,9 @@
 
       const avatar = document.createElement("span");
       avatar.className = "z-entry-avatar";
-      avatar.setAttribute("aria-hidden", "true");
       if (entry.avatar) {
         const image = document.createElement("img");
         image.src = entry.avatar;
-        image.alt = "";
         image.loading = "eager";
         avatar.append(image);
       } else {
@@ -678,8 +671,6 @@
         entries.forEach((entry) => {
           const image = document.createElement("img");
           image.className = "z-float-gif";
-          image.alt = "";
-          image.setAttribute("aria-hidden", "true");
           image.width = entry.width;
           image.height = entry.height;
           image.loading = "lazy";
@@ -702,7 +693,6 @@
 
   function setMotion(enabled) {
     body.dataset.motion = enabled ? "on" : "off";
-    html.dataset.zoeyMotion = enabled ? "on" : "off";
     gifSky.hidden = !enabled;
     if (enabled) {
       if (gifEntries) layoutGifSky();
