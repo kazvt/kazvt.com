@@ -909,6 +909,17 @@
         setTheaterMode(false);
         theaterButton.focus();
       });
+      stage.addEventListener("dblclick", event => {
+        if (event.target !== canvas && event.target !== stage) return;
+        event.preventDefault();
+        if (theaterMode) {
+          setTheaterMode(false);
+          theaterButton.focus();
+        } else {
+          setTheaterMode(true, true);
+          stage.focus();
+        }
+      });
       document.addEventListener("pointermove", showTheaterControls, { passive: true });
       document.addEventListener("pointerdown", showTheaterControls, { passive: true });
       theaterToolbar.addEventListener("focusin", showTheaterControls);
