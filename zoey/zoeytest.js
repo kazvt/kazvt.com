@@ -445,6 +445,7 @@
       };
       const placed = [];
       const sectorCounts = Array(8).fill(0);
+      // These coarse cells only balance the score; they never constrain or show as a grid.
       const coverageColumns = Math.max(2, Math.round(width / (cardSize * 2.2)));
       const coverageRows = Math.max(2, Math.round(canvasHeight / (cardSize * 2.2)));
       const coverageCounts = Array(coverageColumns * coverageRows).fill(0);
@@ -535,6 +536,8 @@
               Math.hypot(centerX - target.centerX, centerY - target.centerY) + target.preference
             ))
             : 0;
+          // Spread each next sticker into underused screen regions, then maximize
+          // its distance from the existing stickers for even, organic spacing.
           const balancePenalty = coveragePenalty + sectorPenalty;
           box.score = heroSideTargets.length
             ? -heroSideBias - balancePenalty + random() * cardSize * .02
