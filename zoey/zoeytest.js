@@ -260,6 +260,26 @@
         { src: "/zoey/assets/kaye/kaye-voice-2.wav?v=20261110-01", caption: "Kaye's voice note 2 of 3." },
         { src: "/zoey/assets/kaye/kaye-voice-3.wav?v=20261110-01", caption: "Kaye's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "naya",
+      name: "Naya",
+      avatar: "/zoey/assets/naya/naya-avatar.gif?v=20261110-02",
+      clips: [
+        { src: "/zoey/assets/naya/naya-voice-1.wav?v=20261110-02", caption: "Naya's voice note 1 of 3." },
+        { src: "/zoey/assets/naya/naya-voice-2.wav?v=20261110-02", caption: "Naya's voice note 2 of 3." },
+        { src: "/zoey/assets/naya/naya-voice-3.wav?v=20261110-02", caption: "Naya's voice note 3 of 3." }
+      ]
+    },
+    {
+      id: "fae",
+      name: "Fae",
+      avatar: "/zoey/assets/fae/fae-avatar.png?v=20261110-02",
+      clips: [
+        { src: "/zoey/assets/fae/fae-voice-1.wav?v=20261110-02", caption: "Fae's voice note 1 of 3." },
+        { src: "/zoey/assets/fae/fae-voice-2.wav?v=20261110-02", caption: "Fae's voice note 2 of 3." },
+        { src: "/zoey/assets/fae/fae-voice-3.wav?v=20261110-02", caption: "Fae's voice note 3 of 3." }
+      ]
     }
   ];
 
