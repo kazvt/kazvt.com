@@ -663,14 +663,14 @@
           const name = key.trim().toLowerCase();
           if (byName.has(name) || paletteSeedNames.has(name)) queryValues.set(name, raw);
         });
-        let paletteFromMainColor = false;
-        for (const name of ["color_mid", "color", "main_color"]) {
+        let paletteFromColorSeed = false;
+        for (const name of paletteSeedNames) {
           if (!queryValues.has(name)) continue;
           const seedColor = parseColorParameter(queryValues.get(name));
           if (seedColor !== null) {
             const palette = deriveMainPalette(seedColor);
             colorIds.forEach(id => controls[id].value = palette[id]);
-            paletteFromMainColor = true;
+            paletteFromColorSeed = true;
             break;
           }
         }
@@ -694,7 +694,7 @@
           const parsed = parseNumberParameter(raw, name, input);
           if (parsed !== null) input.value = parsed;
         });
-        if (paletteFromMainColor || overriddenColors.size) clearPresetSelection();
+        if (paletteFromColorSeed || overriddenColors.size) clearPresetSelection();
       }
 
       function initialTheaterModeFromURL() {
