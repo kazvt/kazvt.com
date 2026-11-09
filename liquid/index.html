@@ -495,6 +495,7 @@
         return `#${Array.from(pixel).slice(0, 3).map(channel => channel.toString(16).padStart(2, "0")).join("")}`;
       }
 
+      // Shift perceptual OKLCH lightness, reducing chroma only when a shade falls outside sRGB.
       function srgbToLinear(channel) {
         return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
       }
