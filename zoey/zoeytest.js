@@ -243,6 +243,7 @@
       id: "glyph",
       name: "Glyph",
       avatar: "/zoey/assets/glyph/glyph-avatar.gif?v=20261109-01",
+      placementBias: "inner",
       clips: [
         { src: "/zoey/assets/glyph/glyph-voice-1.wav?v=20261109-01", caption: "Glyph's voice note 1 of 3." },
         { src: "/zoey/assets/glyph/glyph-voice-2.wav?v=20261109-01", caption: "Glyph's voice note 2 of 3." },
@@ -489,9 +490,12 @@
           const preferredGap = collisionGap + cardSize * .003;
           box.sector = sector;
           box.angle = angleDegrees;
+          const innerPlacementBias = entry.placementBias === "inner"
+            ? Math.hypot(centerX - heroCenterX, centerY - heroCenterY) * .85
+            : 0;
           box.score = Math.abs(nearestGap - preferredGap) * .78 +
             Math.abs(heroGap - preferredGap) * .12 +
-            sectorCounts[sector] * cardSize * .34 + random() * cardSize * .015;
+            sectorCounts[sector] * cardSize * .34 + random() * cardSize * .015 + innerPlacementBias;
           if (box.score < bestScore) {
             bestCandidate = box;
             bestScore = box.score;
