@@ -423,7 +423,7 @@
         a.bottom + separation <= b.top || a.top >= b.bottom + separation);
     }
 
-    function buildLayout(cardSize, heroHeight, samples = 96) {
+    function buildLayout(cardSize, heroHeight, samples = 96, attempt = 0) {
       const glowAllowance = cardSize * .012;
       const edge = cardSize * .025;
       const collisionGap = cardSize * .005;
@@ -450,7 +450,7 @@
       const coverageRows = Math.max(2, Math.round(canvasHeight / (cardSize * 2.2)));
       const coverageCounts = Array(coverageColumns * coverageRows).fill(0);
       const fieldRandom = seededRandom(stableHash(
-        `coverage:${width.toFixed(1)}:${canvasHeight.toFixed(1)}:${cardSize.toFixed(2)}`
+        `coverage:${width.toFixed(1)}:${canvasHeight.toFixed(1)}:${cardSize.toFixed(2)}:${attempt}`
       ));
       const fieldPoints = [];
       const fieldColumns = Math.max(8, Math.ceil(width / Math.max(12, cardSize * .72)));
@@ -466,7 +466,8 @@
           });
         }
       }
-      const randomPointCount = Math.min(samples, Math.max(96, entrySlots.length * 5));
+      const randomPointCount = Math.min(samples,
+        Math.max(96, entrySlots.length * (attempt ? 8 : 5)));
       for (let sample = 0; sample < randomPointCount; sample += 1) {
         fieldPoints.push({ centerX: fieldRandom() * width, centerY: fieldRandom() * canvasHeight });
       }
@@ -476,7 +477,7 @@
       }
 
       for (const entry of placementOrder) {
-        const random = seededRandom(stableHash(`scatter:${entry.id}`));
+        const random = seededRandom(stableHash(`scatter:${entry.id}:${attempt}`));
         const angleDegrees = entryTilts.get(entry.id) || 0;
         const angle = angleDegrees * Math.PI / 180;
         const visualSize = cardSize * hoverScale;
@@ -576,13 +577,23 @@
       }
     }
 
-    // Extra search at the compact end handles very narrow windows and heavy zoom
-    // without ever extending the scene beyond the visible viewport.
+    // Retry with independent candidate fields and progressively smaller stickers
+    // if an unusually tight viewport defeats the preferred-size packing passes.
     if (!finalLayout) {
-      const fallbackCard = sceneMinimumSize;
-      const fallbackHero = fallbackCard * heroPerCardRatio;
-      finalLayout = buildLayout(fallbackCard, fallbackHero, 1200);
-      finalSize = fallbackCard;
+      const fallbackScales = [.92, .8, .68, .56, .44, .32, .2, .1];
+      let attempt = 1;
+      for (const scale of fallbackScales) {
+        const fallbackCard = Math.max(.5, sceneMinimumSize * scale);
+        const fallbackHero = fallbackCard * heroPerCardRatio;
+        for (let retry = 0; retry < 2; retry += 1, attempt += 1) {
+          const layout = buildLayout(fallbackCard, fallbackHero, 384, attempt);
+          if (!layout) continue;
+          finalLayout = layout;
+          finalSize = fallbackCard;
+          break;
+        }
+        if (finalLayout) break;
+      }
     }
 
     if (!finalLayout) {
