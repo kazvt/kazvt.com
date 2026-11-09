@@ -193,7 +193,7 @@
       let gl, program, buffer, locations = {};
       let paused = false, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0;
       let theaterMode = false, theaterControlsTimer = 0;
-      let viewWidth = 1, viewHeight = 1, dpr = 1;
+      let viewWidth = 1, viewHeight = 1, dpr = 1, wrapMargin = 0;
 
       const vertexSource = `
         attribute vec2 a_position;
