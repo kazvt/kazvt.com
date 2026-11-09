@@ -144,7 +144,7 @@
         </fieldset>
         <details class="mb-3">
           <summary>URL parameters</summary>
-          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, percentages, and applicable units; colors accept bare hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>. Main palette: <code>?main_color=31a354</code> (auto shades).</p>
+          <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, percentages, and applicable units; colors accept bare hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>. Palette: <code>?color_mid=31a354</code> / <code>?color=31a354</code> (auto shades).</p>
         </details>
       </aside>
     </div>
@@ -657,23 +657,26 @@
 
       function applyURLParameters() {
         const byName = new Map(Object.values(controls).map(input => [input.name.toLowerCase(), input]));
+        const paletteSeedNames = new Set(["color_mid", "color", "main_color"]);
         const queryValues = new Map();
         new URLSearchParams(window.location.search).forEach((raw, key) => {
           const name = key.trim().toLowerCase();
-          if (byName.has(name) || name === "main_color") queryValues.set(name, raw);
+          if (byName.has(name) || paletteSeedNames.has(name)) queryValues.set(name, raw);
         });
         let paletteFromMainColor = false;
-        if (queryValues.has("main_color")) {
-          const mainColor = parseColorParameter(queryValues.get("main_color"));
-          if (mainColor !== null) {
-            const palette = deriveMainPalette(mainColor);
+        for (const name of ["color_mid", "color", "main_color"]) {
+          if (!queryValues.has(name)) continue;
+          const seedColor = parseColorParameter(queryValues.get(name));
+          if (seedColor !== null) {
+            const palette = deriveMainPalette(seedColor);
             colorIds.forEach(id => controls[id].value = palette[id]);
             paletteFromMainColor = true;
+            break;
           }
         }
         const overriddenColors = new Set();
         queryValues.forEach((raw, name) => {
-          if (name === "main_color") return;
+          if (paletteSeedNames.has(name)) return;
           const input = byName.get(name);
           if (input.classList.contains("color-value")) {
             const parsed = parseColorParameter(raw);
