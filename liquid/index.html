@@ -909,10 +909,37 @@
           if (theaterMode && !theaterToolbar.contains(document.activeElement)) showTheaterControls();
         }, 0);
       });
+      function createWrappedBlurCanvas(blur) {
+        const width = canvas.width, height = canvas.height;
+        const pad = Math.max(1, Math.ceil(blur * dpr * 3));
+        const horizontalTile = document.createElement("canvas");
+        horizontalTile.width = width + pad * 2;
+        horizontalTile.height = height;
+        const horizontalContext = horizontalTile.getContext("2d");
+        for (let x = pad - width; x < width + pad; x += width) horizontalContext.drawImage(canvas, x, 0);
+
+        const padded = document.createElement("canvas");
+        padded.width = horizontalTile.width;
+        padded.height = height + pad * 2;
+        const paddedContext = padded.getContext("2d");
+        paddedContext.drawImage(horizontalTile, 0, pad);
+        paddedContext.drawImage(horizontalTile, 0, 0, horizontalTile.width, 1, 0, 0, horizontalTile.width, pad);
+        paddedContext.drawImage(horizontalTile, 0, height - 1, horizontalTile.width, 1, 0, height + pad, horizontalTile.width, pad);
+
+        const output = document.createElement("canvas");
+        output.width = width;
+        output.height = height;
+        const context = output.getContext("2d");
+        context.filter = `blur(${blur * dpr}px)`;
+        context.drawImage(padded, -pad, -pad);
+        return output;
+      }
       document.getElementById("saveBtn").addEventListener("click", () => {
         let captureCanvas = canvas;
         const blur = value("blur");
-        if (blur > 0.01) {
+        if (controls.wrapEdges.checked && blur > 0.01) {
+          captureCanvas = createWrappedBlurCanvas(blur);
+        } else if (blur > 0.01) {
           captureCanvas = document.createElement("canvas");
           captureCanvas.width = canvas.width;
           captureCanvas.height = canvas.height;
