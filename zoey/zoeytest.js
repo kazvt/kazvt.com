@@ -249,6 +249,17 @@
         { src: "/zoey/assets/glyph/glyph-voice-2.wav?v=20261109-01", caption: "Glyph's voice note 2 of 3." },
         { src: "/zoey/assets/glyph/glyph-voice-3.wav?v=20261109-01", caption: "Glyph's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "kaye",
+      name: "Kaye",
+      avatar: "/zoey/assets/kaye/kaye-avatar.gif?v=20261110-01",
+      placementBias: "hero-side",
+      clips: [
+        { src: "/zoey/assets/kaye/kaye-voice-1.wav?v=20261110-01", caption: "Kaye's voice note 1 of 3." },
+        { src: "/zoey/assets/kaye/kaye-voice-2.wav?v=20261110-01", caption: "Kaye's voice note 2 of 3." },
+        { src: "/zoey/assets/kaye/kaye-voice-3.wav?v=20261110-01", caption: "Kaye's voice note 3 of 3." }
+      ]
     }
   ];
 
