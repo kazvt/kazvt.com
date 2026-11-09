@@ -412,9 +412,10 @@
     const sceneSizeCeiling = Math.max(1, Math.min(preferredSize, maxHeroHeight / heroPerCardRatio));
     const sceneMinimumSize = Math.min(minimumCardSize, sceneSizeCeiling);
     const cards = [...canvas.querySelectorAll(".z-entry")];
-    const placementOrder = [...entrySlots].sort((left, right) =>
-      Number(right.placementBias === "hero-side") - Number(left.placementBias === "hero-side")
-    );
+    const placementOrder = [...entrySlots].sort((left, right) => {
+      const priority = Number(right.placementBias === "hero-side") - Number(left.placementBias === "hero-side");
+      return priority || stableHash(`placement:${left.id}`) - stableHash(`placement:${right.id}`);
+    });
     canvas.dataset.crowded = cards.length >= 20 ? "true" : "false";
 
     function intersects(a, b, separation = 0) {
@@ -444,6 +445,34 @@
       };
       const placed = [];
       const sectorCounts = Array(8).fill(0);
+      const coverageColumns = Math.max(2, Math.round(width / (cardSize * 2.2)));
+      const coverageRows = Math.max(2, Math.round(canvasHeight / (cardSize * 2.2)));
+      const coverageCounts = Array(coverageColumns * coverageRows).fill(0);
+      const fieldRandom = seededRandom(stableHash(
+        `coverage:${width.toFixed(1)}:${canvasHeight.toFixed(1)}:${cardSize.toFixed(2)}`
+      ));
+      const fieldPoints = [];
+      const fieldColumns = Math.max(8, Math.ceil(width / Math.max(12, cardSize * .72)));
+      const fieldRows = Math.max(8, Math.ceil(canvasHeight / Math.max(12, cardSize * .72)));
+
+      // Jittered samples span the viewport so local neighbors cannot pull the
+      // placement search into one increasingly dense cluster.
+      for (let row = 0; row < fieldRows; row += 1) {
+        for (let column = 0; column < fieldColumns; column += 1) {
+          fieldPoints.push({
+            centerX: (column + .12 + fieldRandom() * .76) * width / fieldColumns,
+            centerY: (row + .12 + fieldRandom() * .76) * canvasHeight / fieldRows
+          });
+        }
+      }
+      const randomPointCount = Math.min(samples, Math.max(96, entrySlots.length * 5));
+      for (let sample = 0; sample < randomPointCount; sample += 1) {
+        fieldPoints.push({ centerX: fieldRandom() * width, centerY: fieldRandom() * canvasHeight });
+      }
+      for (let index = fieldPoints.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(fieldRandom() * (index + 1));
+        [fieldPoints[index], fieldPoints[swapIndex]] = [fieldPoints[swapIndex], fieldPoints[index]];
+      }
 
       for (const entry of placementOrder) {
         const random = seededRandom(stableHash(`scatter:${entry.id}`));
