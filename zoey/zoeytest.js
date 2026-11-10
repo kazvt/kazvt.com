@@ -173,9 +173,9 @@
       name: "Lily",
       avatar: "/zoey/assets/lily/lily-avatar.gif",
       clips: [
-        { src: "/zoey/assets/lily/lily-voice-1.wav?v=20261108-03", caption: "Lily's voice note 1 of 3." },
-        { src: "/zoey/assets/lily/lily-voice-2.wav?v=20261108-03", caption: "Lily's voice note 2 of 3." },
-        { src: "/zoey/assets/lily/lily-voice-3.wav?v=20261108-03", caption: "Lily's voice note 3 of 3." }
+        { src: "/zoey/assets/lily/lily-voice-1-20261110.wav?v=20261110-02", caption: "Lily's voice note 1 of 3." },
+        { src: "/zoey/assets/lily/lily-voice-2-20261110.wav?v=20261110-02", caption: "Lily's voice note 2 of 3." },
+        { src: "/zoey/assets/lily/lily-voice-3-20261110.wav?v=20261110-02", caption: "Lily's voice note 3 of 3." }
       ]
     },
     {
