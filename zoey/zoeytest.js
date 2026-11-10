@@ -310,6 +310,16 @@
         { src: "/zoey/assets/violet/violet-voice-2.wav?v=20261110-01", caption: "Violet's voice note 2 of 3." },
         { src: "/zoey/assets/violet/violet-voice-3.wav?v=20261110-01", caption: "Violet's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "kay",
+      name: "Kay",
+      avatar: "/zoey/assets/kay/kay-avatar.png",
+      clips: [
+        { src: "/zoey/assets/kay/kay-voice-1.wav?v=20261110-01", caption: "Kay's voice note 1 of 3." },
+        { src: "/zoey/assets/kay/kay-voice-2.wav?v=20261110-01", caption: "Kay's voice note 2 of 3." },
+        { src: "/zoey/assets/kay/kay-voice-3.wav?v=20261110-01", caption: "Kay's voice note 3 of 3." }
+      ]
     }
   ];
 
