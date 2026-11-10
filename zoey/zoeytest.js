@@ -290,6 +290,16 @@
         { src: "/zoey/assets/dorbu/dorbu-voice-4.wav?v=20261110-01", caption: "Dorbu's voice note 3 of 4." },
         { src: "/zoey/assets/dorbu/dorbu-voice-1.wav?v=20261110-01", caption: "Dorbu's voice note 4 of 4." }
       ]
+    },
+    {
+      id: "luci",
+      name: "Luci",
+      avatar: "/zoey/assets/luci/luci-avatar.png",
+      clips: [
+        { src: "/zoey/assets/luci/luci-voice-1.wav?v=20261110-01", caption: "Luci's voice note 1 of 3." },
+        { src: "/zoey/assets/luci/luci-voice-2.wav?v=20261110-01", caption: "Luci's voice note 2 of 3." },
+        { src: "/zoey/assets/luci/luci-voice-3.wav?v=20261110-01", caption: "Luci's voice note 3 of 3." }
+      ]
     }
   ];
 
