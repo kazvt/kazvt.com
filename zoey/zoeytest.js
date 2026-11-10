@@ -340,6 +340,16 @@
         { src: "/zoey/assets/kaos/kaos-voice-2.wav?v=20261110-01", caption: "Kaos's voice note 2 of 3." },
         { src: "/zoey/assets/kaos/kaos-voice-3.wav?v=20261110-01", caption: "Kaos's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "katsu",
+      name: "Katsu",
+      avatar: "/zoey/assets/katsu/katsu-avatar.png",
+      clips: [
+        { src: "/zoey/assets/katsu/katsu-voice-1.wav?v=20261110-01", caption: "Katsu's voice note 1 of 3." },
+        { src: "/zoey/assets/katsu/katsu-voice-2.wav?v=20261110-01", caption: "Katsu's voice note 2 of 3." },
+        { src: "/zoey/assets/katsu/katsu-voice-3.wav?v=20261110-01", caption: "Katsu's voice note 3 of 3." }
+      ]
     }
   ];
 
