@@ -320,6 +320,16 @@
         { src: "/zoey/assets/kay/kay-voice-2.wav?v=20261110-01", caption: "Kay's voice note 2 of 3." },
         { src: "/zoey/assets/kay/kay-voice-3.wav?v=20261110-01", caption: "Kay's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "jelly",
+      name: "Jelly",
+      avatar: "/zoey/assets/jelly/jelly-avatar.gif",
+      clips: [
+        { src: "/zoey/assets/jelly/jelly-voice-1.wav?v=20261110-01", caption: "Jelly's voice note 1 of 3." },
+        { src: "/zoey/assets/jelly/jelly-voice-2.wav?v=20261110-01", caption: "Jelly's voice note 2 of 3." },
+        { src: "/zoey/assets/jelly/jelly-voice-3.wav?v=20261110-01", caption: "Jelly's voice note 3 of 3." }
+      ]
     }
   ];
 
