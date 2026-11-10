@@ -144,6 +144,24 @@ button, a { touch-action: manipulation; }
   user-select: none;
   filter: drop-shadow(0 5px 14px rgb(10 5 30 / 32%));
 }
+.z-featured-credit {
+  position: absolute;
+  z-index: 2;
+  top: 90%;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  margin: 0;
+  transform: translateX(-50%);
+  color: var(--z-galaxy-muted);
+  font-size: 8px;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 1px 1px 0 var(--z-night);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
 .z-stage-heading {
   position: absolute;
   z-index: 3;

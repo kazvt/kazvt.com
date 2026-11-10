@@ -435,6 +435,10 @@
     const headingRect = heading?.getBoundingClientRect();
     const headingHeight = headingRect?.height || 48;
     const headingWidth = headingRect?.width || Math.min(width - 16, width * .72);
+    const creditElement = document.getElementById("featuredCredit");
+    const creditRect = creditElement?.getBoundingClientRect();
+    const creditWidth = creditRect?.width || 0;
+    const creditHeight = creditRect?.height || 0;
     const hoverScale = 1.12;
     // Keep the full scene in the viewport. Prefer a large centerpiece and
     // large stickers, then trade their sizes only as much as packing requires.
@@ -478,6 +482,13 @@
         right: (width + headingWidth) / 2 + 4,
         top: cardHeadingTop,
         bottom: cardHeadingBottom
+      };
+      const creditTop = hero.bottom + cardSize * .06;
+      const credit = {
+        left: heroCenterX - creditWidth / 2,
+        right: heroCenterX + creditWidth / 2,
+        top: creditTop,
+        bottom: creditTop + creditHeight
       };
       const placed = [];
       const sectorCounts = Array(8).fill(0);
@@ -551,6 +562,7 @@
             centerY
           };
           if (intersects(box, hero, collisionGap) || intersects(box, heading, collisionGap) ||
+              intersects(box, credit, collisionGap) ||
               placed.some((other) => intersects(box, other, collisionGap))) continue;
 
           const sector = (Math.floor((Math.atan2(centerY - heroCenterY, centerX - heroCenterX) + Math.PI) / (Math.PI / 4)) % 8 + 8) % 8;
@@ -640,6 +652,7 @@
     heading.style.top = `${finalLayout.headingTop}px`;
     const art = document.getElementById("featuredArt");
     art?.style.setProperty("--z-hero-width", `${(finalLayout.heroHeight * 481 / 858).toFixed(2)}px`);
+    creditElement?.style.setProperty("top", `${(canvasHeight / 2 + finalLayout.heroHeight / 2 + finalSize * .072).toFixed(2)}px`);
     const placementById = new Map(finalLayout.placed.map((sticker) => [sticker.entryId, sticker]));
     cards.forEach((card) => {
       const entryId = card.querySelector(".z-entry-button")?.dataset.entryId;
