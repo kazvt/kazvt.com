@@ -953,6 +953,13 @@ class RewardEditorHandlerMixin:
     def _error(self, status: int, message: str) -> None:
         self._editor_send_json(status, {"error": message})
 
+    def _safe_error(self, status: int, message: str) -> None:
+        """Send a bounded error reply without traceback noise for closed clients."""
+        try:
+            self._error(status, message)
+        except OSError:
+            self.close_connection = True
+
     def _parse_url(self):
         return urlsplit(self.path), parse_qs(urlsplit(self.path).query, keep_blank_values=True)
 
@@ -1040,16 +1047,13 @@ class RewardEditorHandlerMixin:
             content_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
             self._send(200, path.read_bytes(), content_type)
         except ApiError as exc:
-            self._error(exc.status, exc.message)
+            self._safe_error(exc.status, exc.message)
         except (OSError, ValueError) as exc:
-            self._error(404, "Not found.")
+            self._safe_error(404, "Not found.")
         except Exception:
             # One bad request must return a bounded response instead of dumping a
             # thread traceback or closing the client with no HTTP status.
-            try:
-                self._error(500, "Unexpected local editor error.")
-            except OSError:
-                self.close_connection = True
+            self._safe_error(500, "Unexpected local editor error.")
 
     def do_HEAD(self) -> None:
         RewardEditorHandlerMixin.do_GET(self)
@@ -1106,13 +1110,13 @@ class RewardEditorHandlerMixin:
                         raise ApiError(404, "Unknown local editor action.")
             self._editor_send_json(200, result)
         except ApiError as exc:
-            self._error(exc.status, exc.message)
+            self._safe_error(exc.status, exc.message)
         except (CatalogError, local_issuer.RewardIssueError) as exc:
-            self._error(400, str(exc))
+            self._safe_error(400, str(exc))
         except (OSError, json.JSONDecodeError, UnicodeError) as exc:
-            self._error(500, "The local editor could not safely complete that file operation.")
+            self._safe_error(500, "The local editor could not safely complete that file operation.")
         except Exception:
-            self._error(500, "Unexpected local editor error. No public publish was attempted.")
+            self._safe_error(500, "Unexpected local editor error. No public publish was attempted.")
 
     def log_message(self, format: str, *args: Any) -> None:
         # The editor is local-only; avoid noisy terminal request logs.
