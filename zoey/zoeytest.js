@@ -359,6 +359,14 @@
         { src: "/zoey/assets/crashit/crashit-voice-1.wav?v=20261111-01", caption: "crashit's voice note 1 of 2." },
         { src: "/zoey/assets/crashit/crashit-voice-2.wav?v=20261111-01", caption: "crashit's voice note 2 of 2." }
       ]
+    },
+    {
+      id: "lola",
+      name: "Lola",
+      avatar: "/zoey/assets/lola/lola-avatar.png",
+      clips: [
+        { src: "/zoey/assets/lola/lola-voice-1.wav?v=20261111-01", caption: "Lola's voice note." }
+      ]
     }
   ];
 
