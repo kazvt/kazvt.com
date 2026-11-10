@@ -300,6 +300,16 @@
         { src: "/zoey/assets/luci/luci-voice-2.wav?v=20261110-01", caption: "Luci's voice note 2 of 3." },
         { src: "/zoey/assets/luci/luci-voice-3.wav?v=20261110-01", caption: "Luci's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "violet",
+      name: "Violet",
+      avatar: "/zoey/assets/violet/violet-avatar.png",
+      clips: [
+        { src: "/zoey/assets/violet/violet-voice-1.wav?v=20261110-01", caption: "Violet's voice note 1 of 3." },
+        { src: "/zoey/assets/violet/violet-voice-2.wav?v=20261110-01", caption: "Violet's voice note 2 of 3." },
+        { src: "/zoey/assets/violet/violet-voice-3.wav?v=20261110-01", caption: "Violet's voice note 3 of 3." }
+      ]
     }
   ];
 
