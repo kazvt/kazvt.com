@@ -891,13 +891,33 @@ class RewardEditorServer(ThreadingHTTPServer):
 
 
 class RewardEditorHandlerMixin:
+    def _server_port(self) -> int:
+        """Return the bound HTTP port for both HTTPServer and plain TCPServer."""
+        server = getattr(self, "server", None)
+        try:
+            port = getattr(server, "server_port", None)
+        except Exception:
+            port = None
+        if port is None:
+            address = getattr(server, "server_address", None)
+            if isinstance(address, (tuple, list)) and len(address) > 1:
+                port = address[1]
+        try:
+            port = int(port)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ApiError(503, "The local editor server address is unavailable.") from exc
+        if not 1 <= port <= 65535:
+            raise ApiError(503, "The local editor server address is unavailable.")
+        return port
+
     def _expected_host(self) -> str:
+        server_port = self._server_port()
         host = str(self.headers.get("Host", "")).strip()
         try:
             parsed = urlsplit("//" + host)
             if (
                 (parsed.hostname or "").casefold() in {"127.0.0.1", "localhost", "::1"}
-                and parsed.port == self.server.server_port
+                and parsed.port == server_port
                 and not parsed.username
                 and not parsed.password
                 and not parsed.path
@@ -907,7 +927,7 @@ class RewardEditorHandlerMixin:
                 return host
         except (TypeError, ValueError):
             pass
-        return f"127.0.0.1:{self.server.server_port}"
+        return f"127.0.0.1:{server_port}"
 
     def _check_host(self) -> None:
         if self.headers.get("Host", "").casefold() != self._expected_host().casefold():
@@ -1023,6 +1043,13 @@ class RewardEditorHandlerMixin:
             self._error(exc.status, exc.message)
         except (OSError, ValueError) as exc:
             self._error(404, "Not found.")
+        except Exception:
+            # One bad request must return a bounded response instead of dumping a
+            # thread traceback or closing the client with no HTTP status.
+            try:
+                self._error(500, "Unexpected local editor error.")
+            except OSError:
+                self.close_connection = True
 
     def do_HEAD(self) -> None:
         RewardEditorHandlerMixin.do_GET(self)
@@ -1084,16 +1111,12 @@ class RewardEditorHandlerMixin:
             self._error(400, str(exc))
         except (OSError, json.JSONDecodeError, UnicodeError) as exc:
             self._error(500, "The local editor could not safely complete that file operation.")
-        except Exception as exc:
-            print(f"[reward-editor] {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+        except Exception:
             self._error(500, "Unexpected local editor error. No public publish was attempted.")
 
     def log_message(self, format: str, *args: Any) -> None:
-        # Keep file content and reservation aliases out of request logs.
-        if self.path.startswith("/__reward_editor/api"):
-            print(f"[reward-editor] {self.command} {urlsplit(self.path).path}", file=sys.stderr, flush=True)
-        else:
-            super().log_message(format, *args)
+        # The editor is local-only; avoid noisy terminal request logs.
+        return
 
 
 class Handler(RewardEditorHandlerMixin, BaseHTTPRequestHandler):
