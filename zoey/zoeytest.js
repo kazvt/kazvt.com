@@ -285,10 +285,10 @@
       name: "Dorbu",
       avatar: "/zoey/assets/dorbu/dorbu-avatar.png?v=20261110-01",
       clips: [
-        { src: "/zoey/assets/dorbu/dorbu-voice-1.wav?v=20261110-01", caption: "Dorbu's voice note 1 of 4." },
-        { src: "/zoey/assets/dorbu/dorbu-voice-2.wav?v=20261110-01", caption: "Dorbu's voice note 2 of 4." },
-        { src: "/zoey/assets/dorbu/dorbu-voice-3.wav?v=20261110-01", caption: "Dorbu's voice note 3 of 4." },
-        { src: "/zoey/assets/dorbu/dorbu-voice-4.wav?v=20261110-01", caption: "Dorbu's voice note 4 of 4." }
+        { src: "/zoey/assets/dorbu/dorbu-voice-2.wav?v=20261110-01", caption: "Dorbu's voice note 1 of 4." },
+        { src: "/zoey/assets/dorbu/dorbu-voice-3.wav?v=20261110-01", caption: "Dorbu's voice note 2 of 4." },
+        { src: "/zoey/assets/dorbu/dorbu-voice-4.wav?v=20261110-01", caption: "Dorbu's voice note 3 of 4." },
+        { src: "/zoey/assets/dorbu/dorbu-voice-1.wav?v=20261110-01", caption: "Dorbu's voice note 4 of 4." }
       ]
     }
   ];
