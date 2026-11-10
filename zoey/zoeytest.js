@@ -330,6 +330,16 @@
         { src: "/zoey/assets/jelly/jelly-voice-2.wav?v=20261110-01", caption: "Jelly's voice note 2 of 3." },
         { src: "/zoey/assets/jelly/jelly-voice-3.wav?v=20261110-01", caption: "Jelly's voice note 3 of 3." }
       ]
+    },
+    {
+      id: "kaos",
+      name: "Kaos",
+      avatar: "/zoey/assets/kaos/kaos-avatar.png",
+      clips: [
+        { src: "/zoey/assets/kaos/kaos-voice-1.wav?v=20261110-01", caption: "Kaos's voice note 1 of 3." },
+        { src: "/zoey/assets/kaos/kaos-voice-2.wav?v=20261110-01", caption: "Kaos's voice note 2 of 3." },
+        { src: "/zoey/assets/kaos/kaos-voice-3.wav?v=20261110-01", caption: "Kaos's voice note 3 of 3." }
+      ]
     }
   ];
 
