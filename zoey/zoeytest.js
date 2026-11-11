@@ -314,7 +314,7 @@
     {
       id: "kay",
       name: "Kay",
-      avatar: "/zoey/assets/kay/kay-avatar.png",
+      avatar: "/zoey/assets/kay/kay-avatar-20261111.png",
       clips: [
         { src: "/zoey/assets/kay/kay-voice-1.wav?v=20261110-01", caption: "Kay's voice note 1 of 3." },
         { src: "/zoey/assets/kay/kay-voice-2.wav?v=20261110-01", caption: "Kay's voice note 2 of 3." },
