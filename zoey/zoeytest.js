@@ -354,7 +354,7 @@
     {
       id: "crashit",
       name: "crashit",
-      avatar: "/zoey/assets/crashit/crashit-avatar.jpg",
+      avatar: "/zoey/assets/crashit/crashit-avatar.png",
       clips: [
         { src: "/zoey/assets/crashit/crashit-voice-1.wav?v=20261111-01", caption: "crashit's voice note 1 of 2." },
         { src: "/zoey/assets/crashit/crashit-voice-2.wav?v=20261111-01", caption: "crashit's voice note 2 of 2." }
