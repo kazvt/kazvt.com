@@ -675,7 +675,6 @@ body.radio-page {
   .palette-swatches button { aspect-ratio: 2.2; }
   .radio-shortcuts { display: none; }
   .player-side { align-content: start; }
-  .player-page .radio-shortcuts { display: none; }
   .track-topline { display: none; }
   .track-card h2 { margin-top: 0; font-size: clamp(12px, 1.7vw, 15px); }
 }
