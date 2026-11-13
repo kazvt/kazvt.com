@@ -460,7 +460,7 @@ body.radio-page {
   .palette-desk { padding-block: 4px; }
   .palette-caption { margin-bottom: 3px; }
   .radio-shortcuts { padding-block: 4px; }
-  .shortcut-grid { gap-block: 2px; }
+  .shortcut-grid { row-gap: 2px; }
 }
 
 @media (max-width: 620px) and (max-height: 700px) {
