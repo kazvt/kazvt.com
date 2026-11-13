@@ -14,7 +14,7 @@
       } catch {}
     </script>
     <link rel="stylesheet" href="/styles.css?v=username-contrast-20261113">
-    <link rel="stylesheet" href="/radio/radio.css?v=radio-viewport-fit-20261113-v7">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-visualizer-focus-20261113-v8">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
     <script defer src="/radio/radio.js?v=radio-canvas-fill-20261113"></script>
@@ -25,22 +25,14 @@
     </script>
     <div class="radio-site">
       <header class="radio-masthead">
-        <a class="radio-home" href="/">KAZVT<span>.COM</span></a>
-        <p>THE INTERNET'S LITTLE RADIO ROOM</p>
-        <div class="radio-air-status"><i class="air-lamp"></i><span id="air-status">STANDING BY</span></div>
+        <a class="radio-home" href="/">KAZVT <span>RADIO</span></a>
+        <div class="radio-air-status"><i class="air-lamp"></i><span id="air-status">STANDBY</span></div>
       </header>
 
       <main>
-        <section class="radio-intro">
-          <p class="eyebrow">KAZVT RADIO // ONE SPECIAL BROADCAST</p>
-          <h1>銀の血脈 <span>Silver Bloodline</span></h1>
-          <p class="intro-note">A little late-night transmission from 1994. Press play, tune the visuals, and stay awhile.</p>
-        </section>
-
         <section class="radio-console">
           <div class="visualizer-side">
             <div class="visualizer-heading">
-              <span>VISUAL FREQUENCY</span>
               <div class="visualizer-tools">
                 <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
                 <button class="small-control fullscreen-control" id="visualizer-fullscreen" type="button" title="Expand the visualizer (F)">FULL SCREEN</button>
@@ -50,48 +42,29 @@
               <canvas id="radio-visualizer" width="960" height="520"></canvas>
               <div class="visualizer-fallback" id="visualizer-fallback">
                 <span class="fallback-star">✦</span>
-                <p>PRESS PLAY TO WAKE THE PICTURE</p>
-                <span class="fallback-frequency">KAZVT // 1994</span>
+                <p>PRESS PLAY</p>
               </div>
               <div class="screen-lines"></div>
-              <span class="screen-corner screen-corner-left">CLICK / SPACE // PLAY / PAUSE</span>
-              <span class="screen-corner screen-corner-right">FM / 01</span>
             </div>
             <div class="preset-strip">
-              <button class="small-control" id="preset-prev" type="button">◀ PREV</button>
-              <div class="preset-readout"><span>NOW SHOWING</span><strong id="preset-name">MILKDROP PRESET</strong></div>
-              <button class="small-control" id="preset-next" type="button">NEXT ▶</button>
+              <button class="small-control" id="preset-prev" type="button" title="Previous visual">◀</button>
+              <div class="preset-readout"><strong id="preset-name">MILKDROP PRESET</strong></div>
+              <button class="small-control" id="preset-next" type="button" title="Next visual">▶</button>
             </div>
             <div class="preset-controls">
-              <label class="select-wrap">VISUAL MODE
+              <label class="select-wrap">MODE
                 <select id="preset-select"><option>Loading visual modes…</option></select>
               </label>
-              <button class="small-control shuffle-control" id="preset-random" type="button">✦ SHUFFLE</button>
-              <button class="small-control cycle-control" id="preset-cycle" type="button">AUTO-TUNE: OFF</button>
+              <button class="small-control shuffle-control" id="preset-random" type="button" title="Choose a random visual">✦</button>
+              <button class="small-control cycle-control" id="preset-cycle" type="button">AUTO: OFF</button>
               <button class="small-control visuals-control" id="visualizer-toggle" type="button">VISUALS: ON</button>
             </div>
           </div>
 
           <div class="player-side">
-            <div class="tuner-window">
-              <div class="tuner-topline"><span>SHORTWAVE / WEB</span><span>NO. 001</span></div>
-              <div class="frequency-display">
-                <span class="frequency-prefix">KAZVT</span>
-                <strong>RADIO</strong>
-                <span class="frequency-suffix">.FM</span>
-              </div>
-              <div class="tuner-scale">
-                <span>88</span><span>90</span><span>92</span><span>94</span><span>96</span><span>98</span><span>100</span>
-              </div>
-              <div class="tuner-needle"><i></i></div>
-              <p class="station-line"><span class="station-lamp"></span> A QUIET CORNER OF THE INTERNET</p>
-            </div>
-
             <div class="track-card">
-              <div class="track-topline"><span>NOW PLAYING</span><span>1994 / IMAGE ALBUM</span></div>
               <h2>銀の血脈</h2>
               <p class="track-artist">本田恭之 <span>/</span> Yasuyuki Honda</p>
-              <p class="track-genre">WALEARIC - EXPERIMENTAL ELECTRO - IMAGE ALBUM</p>
             </div>
 
             <audio id="radio-audio" preload="metadata" src="/radio/assets/gin-no-ketsumyaku-1994.mp3"></audio>
@@ -99,6 +72,7 @@
               <button class="transport-button play-button" id="play-toggle" type="button">PLAY</button>
               <button class="transport-button" id="restart-track" type="button">RESTART</button>
               <button class="transport-button loop-button" id="loop-toggle" type="button">REPEAT: OFF</button>
+              <button class="small-control mute-control" id="mute-toggle" type="button" title="Toggle mute (M)">MUTE</button>
             </div>
             <div class="seek-row">
               <span id="time-current">0:00</span>
@@ -110,26 +84,12 @@
               <input id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
               <span id="volume-value">72%</span>
             </div>
-            <button class="small-control mute-control" id="mute-toggle" type="button" title="Toggle mute (M)">MUTE</button>
-            <div class="radio-shortcuts">
-              <div class="shortcut-heading"><span>QUICK TUNING</span><span>KEYBOARD + MOUSE</span></div>
-              <div class="shortcut-grid">
-                <span><kbd>SPACE</kbd> Play / pause</span>
-                <span><kbd>← →</kbd> Seek 5 sec <small>Shift: 15 sec</small></span>
-                <span><kbd>↑ ↓</kbd> Volume</span>
-                <span><kbd>N / P</kbd> Next / previous visual</span>
-                <span><kbd>M</kbd> Mute</span>
-                <span><kbd>F</kbd> Full screen</span>
-                <span><kbd>R</kbd> Restart track</span>
-                <span><kbd>CLICK</kbd> Picture toggles playback</span>
-              </div>
-            </div>
-            <p class="player-message" id="player-message">The radio is ready when you are.</p>
+            <p class="player-message" id="player-message"></p>
           </div>
         </section>
 
         <section class="palette-desk">
-          <div class="palette-caption"><span>CHANGE THE RADIO'S PALETTE</span><small>YOUR KAZVT PALETTE IS REMEMBERED</small></div>
+          <div class="palette-caption"><span>PALETTE</span></div>
           <div class="palette-swatches">
             <button type="button" data-theme-choice="p1" title="Palette 01" style="--swatch:conic-gradient(#F599C6 0 25%,#FFEA88 0 50%,#7DCCAD 0 75%,#4D6787 0)">01</button>
             <button type="button" data-theme-choice="p2" title="Palette 02" style="--swatch:conic-gradient(#8B2626 0 25%,#EF6905 0 50%,#F1E5A1 0 75%,#486C2F 0)">02</button>
@@ -150,11 +110,6 @@
           </div>
         </section>
       </main>
-
-      <footer class="radio-footer">
-        <span>GOOD SIGNAL, GOOD COMPANY</span>
-        <span>VISUAL ENGINE: <a href="https://github.com/jberg/butterchurn">BUTTERCHURN</a> // PRESETS: <a href="https://github.com/jberg/butterchurn-presets">BUTTERCHURN PRESETS</a> // MILKDROP FOR THE WEB</span>
-      </footer>
     </div>
   </body>
 </html>
