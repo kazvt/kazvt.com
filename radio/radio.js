@@ -21,6 +21,10 @@
   const totalTime = document.getElementById("time-total");
   const paletteSelect = document.getElementById("palette-select");
   const trackSelect = document.getElementById("track-select");
+  const playlistList = document.getElementById("track-list");
+  const playlistCount = document.getElementById("playlist-count");
+  const trackCounter = document.getElementById("track-counter");
+  const playlistPanel = document.querySelector(".player-side");
   const trackArtist = document.getElementById("track-artist");
   const trackTitle = document.getElementById("track-title");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -41,6 +45,8 @@
   let trackHistoryPosition = trackHistory.length - 1;
   let visualsPaused = reducedMotion.matches;
   let resizeObserver = null;
+  let marqueeResizeObserver = null;
+  let marqueeFrame = 0;
   let hudHideHandle = 0;
   const hudIdleDelay = 3000;
 
@@ -65,6 +71,118 @@
 
   function setMessage(message) {
     playerMessage.textContent = message;
+  }
+
+  function setMarqueeText(container, value) {
+    if (!container) return;
+    let text = container.querySelector(".marquee-text");
+    if (!text) {
+      text = document.createElement("span");
+      text.className = "marquee-text";
+      container.replaceChildren(text);
+    }
+    text.textContent = value;
+    text.removeAttribute("data-marquee");
+    container.title = value;
+    container.classList.remove("is-overflowing");
+    scheduleMarqueeUpdate();
+  }
+
+  function syncMarquee(container) {
+    const text = container.querySelector(".marquee-text");
+    if (!text) return;
+    text.removeAttribute("data-marquee");
+    container.classList.remove("is-overflowing");
+    const textWidth = text.scrollWidth;
+    const viewportWidth = container.clientWidth;
+    if (textWidth <= viewportWidth + 1) {
+      text.style.removeProperty("--marquee-distance");
+      text.style.removeProperty("--marquee-duration");
+      return;
+    }
+    const distance = textWidth + 28;
+    text.dataset.marquee = text.textContent;
+    text.style.setProperty("--marquee-distance", `${distance}px`);
+    text.style.setProperty("--marquee-duration", `${Math.max(9, Math.min(24, distance / 22))}s`);
+    container.classList.add("is-overflowing");
+  }
+
+  function scheduleMarqueeUpdate() {
+    if (marqueeFrame) return;
+    marqueeFrame = window.requestAnimationFrame(() => {
+      marqueeFrame = 0;
+      document.querySelectorAll(".marquee-window").forEach(syncMarquee);
+    });
+  }
+
+  function updateRangeFill(input) {
+    if (!input) return;
+    const min = Number(input.min) || 0;
+    const max = Number(input.max) || 100;
+    const value = Number(input.value) || 0;
+    const percent = max > min ? Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100)) : 0;
+    input.style.setProperty("--range-progress", `${percent}%`);
+  }
+
+  function updateRangeFills() {
+    updateRangeFill(seek);
+    updateRangeFill(volume);
+  }
+
+  function updatePlaylistSelection(index = trackSelect.selectedIndex, scrollIntoView = false) {
+    const rows = playlistList.querySelectorAll(".playlist-track");
+    rows.forEach((row, rowIndex) => row.classList.toggle("is-current", rowIndex === index));
+    const total = trackSelect.options.length;
+    if (trackCounter) {
+      trackCounter.textContent = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+    }
+    if (scrollIntoView) rows[index]?.scrollIntoView({ block: "nearest" });
+    scheduleMarqueeUpdate();
+  }
+
+  function renderPlaylist() {
+    if (!trackSelect || !playlistList) return;
+    playlistList.replaceChildren();
+    Array.from(trackSelect.options).forEach((option, index) => {
+      const title = option.textContent.trim();
+      const artist = option.dataset.artist || "Unknown artist";
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "playlist-track";
+      row.title = `${title} - ${artist}`;
+
+      const number = document.createElement("span");
+      number.className = "playlist-index";
+      number.textContent = String(index + 1).padStart(2, "0");
+
+      const copy = document.createElement("span");
+      copy.className = "playlist-track-copy";
+
+      const titleWindow = document.createElement("span");
+      titleWindow.className = "playlist-track-name playlist-title marquee-window";
+      titleWindow.title = title;
+      const titleText = document.createElement("span");
+      titleText.className = "marquee-text";
+      titleText.textContent = title;
+      titleWindow.append(titleText);
+
+      const artistLine = document.createElement("span");
+      artistLine.className = "playlist-track-artist";
+      artistLine.textContent = artist;
+      copy.append(titleWindow, artistLine);
+      row.append(number, copy);
+      row.addEventListener("click", () => loadTrack(index));
+      playlistList.append(row);
+    });
+
+    const count = trackSelect.options.length;
+    if (playlistCount) playlistCount.textContent = `${count} TRACK${count === 1 ? "" : "S"}`;
+    updatePlaylistSelection(trackSelect.selectedIndex);
+    scheduleMarqueeUpdate();
+    if ("ResizeObserver" in window && playlistPanel) {
+      marqueeResizeObserver ??= new ResizeObserver(scheduleMarqueeUpdate);
+      marqueeResizeObserver.observe(playlistPanel);
+    }
   }
 
   function setButtonIcon(button, icon, title, active = false) {
