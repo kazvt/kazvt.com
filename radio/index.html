@@ -17,10 +17,10 @@
       } catch {}
     </script>
     <link rel="stylesheet" href="/styles.css?v=username-contrast-20261113">
-    <link rel="stylesheet" href="/radio/radio.css?v=radio-palette-cursor-20261113-v17">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-playlist-deck-20261113-v18">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=radio-shuffle-controls-20261113-v3"></script>
+    <script defer src="/radio/radio.js?v=radio-playlist-deck-20261113-v4"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -49,19 +49,42 @@
               </div>
               <div class="screen-lines"></div>
             </div>
-            <div class="track-strip radio-hud">
-              <button class="small-control" id="track-prev" type="button" data-icon="stepback" title="Previous track (P)"></button>
-              <div class="track-readout"><span>NOW PLAYING</span><strong id="track-title">銀の血脈</strong></div>
-              <button class="small-control" id="track-next" type="button" data-icon="stepforward" title="Next track (N)"></button>
+            <div class="transport radio-hud">
+              <button class="transport-button small-control" id="track-prev" type="button" data-icon="stepback" title="Previous track (P)"></button>
+              <button class="transport-button play-button" id="play-toggle" type="button" data-icon="play" title="Play playback (Space)"></button>
+              <button class="transport-button small-control" id="track-next" type="button" data-icon="stepforward" title="Next track (N)"></button>
+              <button class="transport-button shuffle-button" id="shuffle-toggle" type="button" data-icon="shuffle" title="Shuffle is off (S)"></button>
+              <button class="transport-button loop-button" id="loop-toggle" type="button" data-icon="refresh" title="Repeat is off"></button>
+              <button class="transport-button mute-control" id="mute-toggle" type="button" data-icon="speaker" title="Mute (M)"></button>
+              <button class="transport-button visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus" title="Pause visuals"></button>
+              <p class="player-message" id="player-message"></p>
             </div>
-            <div class="visualizer-controls radio-hud">
-              <button class="small-control visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus" title="Pause visuals"></button>
+            <div class="deck-sliders radio-hud">
+              <div class="seek-row">
+                <span id="time-current">0:00</span>
+                <input class="retro-range" id="track-seek" type="range" min="0" max="100" value="0">
+                <span id="time-total">--:--</span>
+              </div>
+              <div class="volume-row">
+                <span>VOL</span>
+                <input class="retro-range" id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
+                <span id="volume-value">72%</span>
+              </div>
             </div>
           </div>
 
           <div class="player-side radio-hud">
-            <div class="track-card">
-              <select class="track-select" id="track-select" title="Choose a song">
+            <div class="playlist-heading">
+              <strong>PLAYLIST</strong>
+              <span id="playlist-count">14 TRACKS</span>
+            </div>
+            <div class="playlist-now-playing">
+              <span class="now-playing-label"><i></i> NOW PLAYING <span id="track-counter">01 / 14</span></span>
+              <div class="now-playing-title marquee-window" id="track-title"><span class="marquee-text">銀の血脈</span></div>
+              <p class="track-artist" id="track-artist">本田恭之 / Yasuyuki Honda</p>
+            </div>
+            <div class="track-list" id="track-list"></div>
+            <select class="track-select" id="track-select" title="Playlist track data" hidden>
                 <option value="/radio/assets/gin-no-ketsumyaku-1994.mp3" data-artist="本田恭之 / Yasuyuki Honda" selected>銀の血脈</option>
                 <option value="/radio/assets/tracks/blue-fire-purple-eyes-in-the-dark.mp3" data-artist="neu licht">Blue Fire - Purple Eyes in the Dark</option>
                 <option value="/radio/assets/tracks/nazo-no-kanojo-x-ost-track-03.mp3" data-artist="Rukia Coa - Nazo no Kanojo X OST, Track 03">Nazo no Kanojo</option>
@@ -77,27 +100,7 @@
                 <option value="/radio/assets/tracks/a-song-for-popping-bloons.mp3" data-artist="Dopo Goto">A Song For Popping Bloons</option>
                 <option value="/radio/assets/tracks/yours-sincerely-hawaii.mp3" data-artist="Hawaii">Yours Sincerely</option>
               </select>
-              <p class="track-artist" id="track-artist">本田恭之 / Yasuyuki Honda</p>
-            </div>
-
             <audio id="radio-audio" preload="metadata" src="/radio/assets/gin-no-ketsumyaku-1994.mp3"></audio>
-            <div class="transport">
-              <button class="transport-button play-button" id="play-toggle" type="button" data-icon="play" title="Play playback (Space)"></button>
-              <button class="transport-button shuffle-button" id="shuffle-toggle" type="button" data-icon="shuffle" title="Shuffle is off (S)"></button>
-              <button class="transport-button loop-button" id="loop-toggle" type="button" data-icon="refresh" title="Repeat is off"></button>
-              <button class="small-control mute-control" id="mute-toggle" type="button" data-icon="speaker" title="Mute (M)"></button>
-            </div>
-            <div class="seek-row">
-              <span id="time-current">0:00</span>
-              <input id="track-seek" type="range" min="0" max="100" value="0">
-              <span id="time-total">--:--</span>
-            </div>
-            <div class="volume-row">
-              <span>VOLUME</span>
-              <input id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
-              <span id="volume-value">72%</span>
-            </div>
-            <p class="player-message" id="player-message"></p>
           </div>
         </section>
 
