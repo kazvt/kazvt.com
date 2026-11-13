@@ -535,6 +535,20 @@ body.radio-page {
 .radio-page .transport-button { min-width: 0; }
 
 @media (max-width: 860px) {
+  .player-side {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-template-rows: auto auto auto auto auto min-content;
+    align-content: start;
+    gap: 4px 6px;
+  }
+  .transport,
+  .seek-row,
+  .volume-row,
+  .mute-control,
+  .radio-shortcuts,
+  .player-message { grid-column: 1 / -1; }
+  .radio-shortcuts { display: none; }
+  .palette-swatches { grid-template-columns: repeat(16,minmax(0,1fr)); }
   .track-card h2 {
     max-width: 100%;
     overflow: hidden;
@@ -660,6 +674,8 @@ body.radio-page {
   .palette-swatches { grid-template-columns: repeat(16,minmax(0,1fr)); }
   .palette-swatches button { aspect-ratio: 2.2; }
   .radio-shortcuts { display: none; }
+  .player-side { align-content: start; }
+  .player-page .radio-shortcuts { display: none; }
   .track-topline { display: none; }
   .track-card h2 { margin-top: 0; font-size: clamp(12px, 1.7vw, 15px); }
 }
