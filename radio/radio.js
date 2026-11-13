@@ -92,6 +92,7 @@
 
   function initVisualizer() {
     if (visualizer) return true;
+    if (mediaSource) throw new Error("The visualiser is unavailable; the audio route is still active.");
     if (!window.butterchurn || typeof window.butterchurn.createVisualizer !== "function") {
       throw new Error("The MilkDrop engine did not load.");
     }
@@ -110,11 +111,20 @@
     });
     if (!visualizer) throw new Error("This browser could not start the WebGL visualiser.");
 
-    mediaSource = audioContext.createMediaElementSource(audio);
+    try {
+      mediaSource = audioContext.createMediaElementSource(audio);
+    } catch (error) {
+      visualizer = null;
+      audioContext.close().catch(() => {});
+      audioContext = null;
+      throw error;
+    }
+    // Butterchurn taps this source for analysis but does not send its audible
+    // branch to the speakers; keep normal playback connected in parallel.
+    mediaSource.connect(audioContext.destination);
     try {
       visualizer.connectAudio(mediaSource);
     } catch (error) {
-      mediaSource.connect(audioContext.destination);
       visualizer = null;
       throw error;
     }
@@ -179,7 +189,7 @@
   function syncAutoCycle() {
     window.clearInterval(cycleHandle);
     cycleHandle = 0;
-    if (autoCycle && !audio.paused && !document.hidden) {
+    if (autoCycle && !visualsPaused && !audio.paused && !document.hidden) {
       cycleHandle = window.setInterval(randomPreset, 26000);
     }
   }
@@ -230,6 +240,10 @@
       }
       setMessage("You're tuned in. Enjoy the transmission.");
     } catch (error) {
+      if (audioContext && !mediaSource) {
+        audioContext.close().catch(() => {});
+        audioContext = null;
+      }
       showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE", "AUDIO ONLY");
       setMessage("Audio will play, but this browser could not start the WebGL visualiser.");
       console.warn("Radio visualiser unavailable:", error);
@@ -274,6 +288,7 @@
     if (visualsPaused) {
       stopRendering();
       showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+      syncAutoCycle();
     } else {
       try {
         if (!visualizer) initVisualizer();
@@ -285,7 +300,12 @@
           screenState.textContent = "VISUAL SIGNAL";
           startRendering();
         }
+        syncAutoCycle();
       } catch (error) {
+        if (audioContext && !mediaSource) {
+          audioContext.close().catch(() => {});
+          audioContext = null;
+        }
         showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE", "AUDIO ONLY");
         console.warn("Radio visualiser unavailable:", error);
       }
