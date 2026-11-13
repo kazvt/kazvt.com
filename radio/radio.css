@@ -549,6 +549,7 @@ body.radio-page {
 }
 
 @media (max-width: 620px) {
+  .radio-console { grid-template-rows: minmax(0,1fr) auto; }
   .radio-masthead { min-height: 34px; }
   .radio-intro { width: 100%; }
   .radio-intro h1 {
@@ -611,9 +612,9 @@ body.radio-page {
   .frequency-display strong { font-size: clamp(17px, 5vw, 24px); }
   .station-line { font-size: 6px; letter-spacing: 0; }
   .track-card { overflow: hidden; }
-  .track-topline { font-size: 6px; letter-spacing: 0; }
-  .track-card h2 { font-size: clamp(12px, 3.2vw, 16px); }
-  .track-artist { font-size: 8px; }
+  .track-topline { display: none; }
+  .track-card h2 { margin-top: 0; font-size: clamp(12px, 3.2vw, 16px); line-height: 1.25; }
+  .track-artist { margin-top: 2px; font-size: 7px; }
   .track-genre { display: none; }
   .transport,
   .seek-row,
@@ -646,6 +647,9 @@ body.radio-page {
 @media (max-height: 700px) {
   .radio-footer { display: none; }
   .radio-intro .intro-note { display: none; }
+  .track-card h2 { margin-top: 2px; font-size: clamp(12px, 1.7vw, 16px); line-height: 1.2; }
+  .track-artist { margin-top: 2px; font-size: 10px; }
+  .track-genre { margin-top: 2px; font-size: 7px; }
 }
 
 @media (max-height: 520px) {
@@ -655,4 +659,7 @@ body.radio-page {
   .player-side { padding: 4px; }
   .palette-swatches { grid-template-columns: repeat(16,minmax(0,1fr)); }
   .palette-swatches button { aspect-ratio: 2.2; }
+  .radio-shortcuts { display: none; }
+  .track-topline { display: none; }
+  .track-card h2 { margin-top: 0; font-size: clamp(12px, 1.7vw, 15px); }
 }
