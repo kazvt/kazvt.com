@@ -186,6 +186,12 @@ body.radio-page {
 .radio-page button[data-icon="pause"]::before { background-image: url("/radio/assets/icons/pause.gif"); }
 .radio-page button[data-icon="rewind"]::before { background-image: url("/radio/assets/icons/rewind.gif"); }
 .radio-page button[data-icon="refresh"]::before { background-image: url("/radio/assets/icons/refresh.gif"); }
+.radio-page button[data-icon="shuffle"]::before {
+  background-image: none;
+  background-color: currentColor;
+  -webkit-mask: url("/radio/assets/icons/shuffle.svg") center / contain no-repeat;
+  mask: url("/radio/assets/icons/shuffle.svg") center / contain no-repeat;
+}
 .radio-page button[data-icon="stepback"]::before { background-image: url("/radio/assets/icons/stepback.gif"); }
 .radio-page button[data-icon="stepforward"]::before { background-image: url("/radio/assets/icons/stepforward.gif"); }
 .radio-page button[data-icon="fastforward"]::before { background-image: url("/radio/assets/icons/fastforward.gif"); }
@@ -316,7 +322,8 @@ body.radio-page {
 .radio-page .transport-button:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--blue); }
 .radio-page .small-control:active,
 .radio-page .transport-button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--blue); }
-.radio-page .small-control.is-on { color: var(--banner-text); background: var(--blue); }
+.radio-page .small-control.is-on,
+.radio-page .transport-button.is-on { color: var(--banner-text); background: var(--blue); }
 .visuals-control { width: 34px; white-space: nowrap; }
 
 .player-side {

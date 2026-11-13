@@ -9,6 +9,7 @@
   const muteButton = document.getElementById("mute-toggle");
   const theatreButton = document.getElementById("visualizer-fullscreen");
   const loopButton = document.getElementById("loop-toggle");
+  const shuffleButton = document.getElementById("shuffle-toggle");
   const visualsButton = document.getElementById("visualizer-toggle");
   const playStatus = document.getElementById("air-status");
   const screenState = document.getElementById("screen-state");
@@ -34,6 +35,10 @@
   let frameHandle = 0;
   let cycleHandle = 0;
   let presetBag = [];
+  let shuffleEnabled = false;
+  let shuffleBag = [];
+  let trackHistory = trackSelect ? [trackSelect.selectedIndex] : [];
+  let trackHistoryPosition = trackHistory.length - 1;
   let visualsPaused = reducedMotion.matches;
   let resizeObserver = null;
   let hudHideHandle = 0;
@@ -317,14 +322,38 @@
     setMessage(audio.muted ? "Radio muted. Press M or UNMUTE to bring it back." : "Sound is back on.");
   }
 
-  function restartTrack() {
-    audio.currentTime = 0;
-    setMessage(audio.paused ? "Back to the beginning of the tape." : "Rewinding to the start…");
+  function refillShuffleBag() {
+    shuffleBag = [];
+    for (let index = 0; index < trackSelect.options.length; index += 1) {
+      if (index !== trackSelect.selectedIndex) shuffleBag.push(index);
+    }
+    for (let index = shuffleBag.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffleBag[index], shuffleBag[swapIndex]] = [shuffleBag[swapIndex], shuffleBag[index]];
+    }
   }
 
-  function loadTrack(index, startPlaying = true) {
+  function takeShuffledTrack() {
+    if (!shuffleBag.length) refillShuffleBag();
+    return shuffleBag.length ? shuffleBag.pop() : trackSelect.selectedIndex;
+  }
+
+  function rememberTrack(index) {
+    if (trackHistory[trackHistoryPosition] === index) {
+      shuffleBag = shuffleBag.filter((candidate) => candidate !== index);
+      return;
+    }
+    trackHistory = trackHistory.slice(0, trackHistoryPosition + 1);
+    trackHistory.push(index);
+    if (trackHistory.length > 100) trackHistory = trackHistory.slice(-100);
+    trackHistoryPosition = trackHistory.length - 1;
+    shuffleBag = shuffleBag.filter((candidate) => candidate !== index);
+  }
+
+  function loadTrack(index, startPlaying = true, recordHistory = true) {
     const option = trackSelect.options[index];
     if (!option) return;
+    if (recordHistory) rememberTrack(index);
     trackSelect.selectedIndex = index;
     trackTitle.textContent = option.textContent.trim();
     trackArtist.textContent = option.dataset.artist || "Unknown artist";
@@ -342,8 +371,43 @@
   function changeTrack(step) {
     const count = trackSelect.options.length;
     if (!count) return;
-    const nextIndex = (trackSelect.selectedIndex + step + count) % count;
+    if (step < 0) {
+      if (trackHistoryPosition > 0) {
+        trackHistoryPosition -= 1;
+        loadTrack(trackHistory[trackHistoryPosition], true, false);
+        return;
+      }
+      loadTrack((trackSelect.selectedIndex - 1 + count) % count);
+      return;
+    }
+    if (trackHistoryPosition < trackHistory.length - 1) {
+      trackHistoryPosition += 1;
+      loadTrack(trackHistory[trackHistoryPosition], true, false);
+      return;
+    }
+    const nextIndex = shuffleEnabled
+      ? takeShuffledTrack()
+      : (trackSelect.selectedIndex + 1) % count;
     loadTrack(nextIndex);
+  }
+
+  function updateShuffleButton() {
+    setButtonIcon(
+      shuffleButton,
+      "shuffle",
+      shuffleEnabled ? "Shuffle is on (S)" : "Shuffle is off (S)",
+      shuffleEnabled
+    );
+  }
+
+  function toggleShuffle() {
+    shuffleEnabled = !shuffleEnabled;
+    shuffleBag = [];
+    if (shuffleEnabled) refillShuffleBag();
+    updateShuffleButton();
+    setMessage(shuffleEnabled
+      ? "Shuffle is on. Tracks will not repeat until the playlist has cycled."
+      : "Shuffle is off. Tracks play in playlist order.");
   }
 
   function setTheatreMode(enabled, persist = true) {
@@ -368,7 +432,7 @@
   screen.addEventListener("click", togglePlay);
   muteButton?.addEventListener("click", toggleMute);
   theatreButton?.addEventListener("click", toggleTheatreMode);
-  document.getElementById("restart-track").addEventListener("click", restartTrack);
+  shuffleButton?.addEventListener("click", toggleShuffle);
   document.getElementById("track-prev").addEventListener("click", () => changeTrack(-1));
   document.getElementById("track-next").addEventListener("click", () => changeTrack(1));
   trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
@@ -421,6 +485,7 @@
   audio.volume = Number(volume.value);
   setTheatreMode(document.documentElement.classList.contains("radio-theatre"), false);
   setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
+  updateShuffleButton();
   setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
   updateMuteButton();
   audio.addEventListener("timeupdate", () => {
@@ -434,8 +499,9 @@
   audio.addEventListener("play", updateTransport);
   audio.addEventListener("pause", updateTransport);
   audio.addEventListener("ended", () => {
-    const nextIndex = trackSelect.selectedIndex + 1;
-    if (!audio.loop && nextIndex < trackSelect.options.length) loadTrack(nextIndex);
+    const hasMoreTracks = trackSelect.selectedIndex < trackSelect.options.length - 1;
+    const canShuffleForward = shuffleEnabled && trackSelect.options.length > 1;
+    if (!audio.loop && (hasMoreTracks || canShuffleForward)) changeTrack(1);
     else updateTransport();
   });
   audio.addEventListener("volumechange", updateMuteButton);
@@ -514,8 +580,8 @@
       toggleMute();
     } else if (key === "f" && !event.repeat) {
       toggleTheatreMode();
-    } else if (key === "r" && !event.repeat) {
-      restartTrack();
+    } else if (key === "s" && !event.repeat) {
+      toggleShuffle();
     } else if (key === "n" && !event.repeat) {
       changeTrack(1);
     } else if (key === "p" && !event.repeat) {
