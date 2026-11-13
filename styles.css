@@ -308,6 +308,7 @@ body[data-theme="p4"] {
   --paper: #D8FFC5;
   --paper-alt: #C4F7CA;
   --ink: #111111;
+  --username-color: var(--ink);
   --orange: #30AFFF;
   --red: #30AFFF;
   --yellow: #D8FFC5;
@@ -339,6 +340,7 @@ body[data-theme="p5"] {
   --paper: #FAF7BB;
   --paper-alt: #D99B21;
   --ink: #133458;
+  --username-color: var(--ink);
   --orange: #D99B21;
   --red: #133458;
   --yellow: #FAF7BB;
@@ -494,6 +496,7 @@ body[data-theme="p10"] {
   --paper: #F6D8BD;
   --paper-alt: #F39399;
   --ink: #5D3140;
+  --username-color: var(--ink);
   --orange: #CF4173;
   --red: #5D3140;
   --yellow: #F6D8BD;
@@ -525,6 +528,7 @@ body[data-theme="p11"] {
   --paper: #98E8DE;
   --paper-alt: #98E8DE;
   --ink: #4E1F6E;
+  --username-color: var(--ink);
   --orange: #4E1F6E;
   --red: #4E1F6E;
   --yellow: #98E8DE;
@@ -587,6 +591,7 @@ body[data-theme="p13"] {
   --paper: #FFDD9C;
   --paper-alt: #F9B637;
   --ink: #111111;
+  --username-color: var(--ink);
   --orange: #E73F1E;
   --red: #E73F1E;
   --yellow: #FFDD9C;
@@ -704,6 +709,7 @@ body[data-theme="p16"] {
   --paper: #E1E100;
   --paper-alt: #90B800;
   --ink: #063B00;
+  --username-color: var(--ink);
   --orange: #063B00;
   --red: #063B00;
   --yellow: #E1E100;
@@ -5417,7 +5423,7 @@ body {
 }
 
 #guestbook #HCB_comment_box .author-name {
-  color: var(--blue);
+  color: var(--username-color, var(--blue));
   font-weight: 900;
 }
 
