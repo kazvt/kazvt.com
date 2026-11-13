@@ -6,6 +6,8 @@
   const screen = document.querySelector(".visualizer-bezel");
   const fallback = document.getElementById("visualizer-fallback");
   const playButton = document.getElementById("play-toggle");
+  const muteButton = document.getElementById("mute-toggle");
+  const fullscreenButton = document.getElementById("visualizer-fullscreen");
   const playStatus = document.getElementById("air-status");
   const screenState = document.getElementById("screen-state");
   const playerMessage = document.getElementById("player-message");
@@ -25,6 +27,8 @@
   let presetMap = {};
   let presetKeys = [];
   let currentPresetKey = "";
+  const defaultPresetKey = "Geiss - Cauldron - painterly 2 (saturation remix)";
+  const crampedLegacyPresetKey = "Zylot - Paint Spill (Music Reactive Paint Mix)";
   let frameHandle = 0;
   let cycleHandle = 0;
   let autoCycle = false;
@@ -84,7 +88,11 @@
     });
     if (presetKeys.length) {
       const wanted = (() => { try { return localStorage.getItem("kazvt-radio-preset"); } catch { return null; } })();
-      currentPresetKey = presetKeys.includes(wanted) ? wanted : presetKeys[0];
+      const migratedPreset = wanted === crampedLegacyPresetKey && presetKeys.includes(defaultPresetKey) ? defaultPresetKey : null;
+      currentPresetKey = migratedPreset || (presetKeys.includes(wanted) ? wanted : (presetKeys.includes(defaultPresetKey) ? defaultPresetKey : presetKeys[0]));
+      if (migratedPreset) {
+        try { localStorage.setItem("kazvt-radio-preset", migratedPreset); } catch {}
+      }
       presetSelect.value = currentPresetKey;
       presetName.textContent = currentPresetKey;
     }
