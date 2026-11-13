@@ -753,22 +753,23 @@ body.radio-page {
   border: 0;
   box-shadow: none;
 }
-.radio-document.radio-theatre .track-strip {
+.radio-document.radio-theatre .transport {
   position: absolute;
   z-index: 8;
   left: 14px;
-  width: min(34rem, calc(100vw - 380px));
+  bottom: 10px;
+  width: min(340px, calc(100vw - 380px));
   padding: 4px;
   border: 1px solid color-mix(in srgb, var(--ink) 50%, transparent);
   background: color-mix(in srgb, var(--paper) 90%, transparent);
   box-shadow: 2px 2px 0 color-mix(in srgb, var(--pink) 72%, transparent);
 }
-.radio-document.radio-theatre .track-strip { bottom: 58px; }
-.radio-document.radio-theatre .visualizer-controls {
+.radio-document.radio-theatre .deck-sliders {
   position: absolute;
   z-index: 8;
   left: 14px;
-  bottom: 12px;
+  bottom: 52px;
+  width: min(560px, calc(100vw - 380px));
   padding: 4px;
   border: 1px solid color-mix(in srgb, var(--ink) 50%, transparent);
   background: color-mix(in srgb, var(--paper) 90%, transparent);
@@ -801,53 +802,61 @@ body.radio-page {
   right: 14px;
   bottom: 12px;
   width: min(340px, calc(100vw - 24px));
-  max-height: calc(100dvh - 24px);
-  overflow: auto;
+  max-height: min(70dvh, calc(100dvh - 24px));
+  overflow: hidden;
   border-color: var(--ink);
   background: color-mix(in srgb, var(--paper-alt) 94%, transparent);
   box-shadow: 3px 3px 0 color-mix(in srgb, var(--pink) 82%, transparent), 5px 5px 0 color-mix(in srgb, var(--blue) 55%, transparent);
 }
 
 @media (max-width: 860px) {
-  .radio-document.radio-theatre .track-strip {
+  .radio-document.radio-theatre .transport {
     left: 10px;
-    width: min(340px, calc(100vw - 64px));
+    top: 10px;
+    bottom: auto;
+    width: min(300px, calc(100vw - 20px));
   }
-  .radio-document.radio-theatre .track-strip { top: 10px; bottom: auto; }
-  .radio-document.radio-theatre .visualizer-controls { top: 54px; bottom: auto; left: 10px; }
+  .radio-document.radio-theatre .deck-sliders {
+    top: 52px;
+    bottom: auto;
+    left: 10px;
+    width: min(420px, calc(100vw - 20px));
+  }
   .radio-document.radio-theatre .player-side {
     right: 10px;
     bottom: 10px;
     width: min(340px, calc(100vw - 20px));
+    max-height: min(56dvh, calc(100dvh - 20px));
   }
 }
 @media (max-width: 620px) {
-  .radio-document.radio-theatre .track-strip {
+  .radio-document.radio-theatre .transport {
     left: 8px;
-    width: min(330px, calc(100vw - 56px));
+    top: 8px;
+    width: min(300px, calc(100vw - 16px));
   }
-  .radio-document.radio-theatre .track-strip { top: 8px; }
-  .radio-document.radio-theatre .visualizer-controls { top: 48px; left: 8px; }
+  .radio-document.radio-theatre .deck-sliders { top: 47px; left: 8px; width: min(360px, calc(100vw - 16px)); }
   .radio-document.radio-theatre .player-side {
     right: 8px;
     bottom: 8px;
     width: min(330px, calc(100vw - 16px));
+    max-height: min(48dvh, calc(100dvh - 16px));
   }
   .radio-document.radio-theatre .visualizer-heading { top: 8px; right: 8px; }
   .radio-document.radio-theatre .screen-rec { display: none; }
 }
 @media (max-height: 520px) {
-  .radio-document.radio-theatre .track-strip { bottom: 43px; }
-  .radio-document.radio-theatre .visualizer-controls { bottom: 5px; }
+  .radio-document.radio-theatre .transport { bottom: 5px; }
+  .radio-document.radio-theatre .deck-sliders { bottom: 42px; }
   .radio-document.radio-theatre .player-side { gap: 3px 6px; padding: 3px 6px; }
 }
 @media (max-width: 860px) and (max-height: 520px) {
-  .radio-document.radio-theatre .track-strip { top: 10px; bottom: auto; }
-  .radio-document.radio-theatre .visualizer-controls { top: 54px; bottom: auto; }
+  .radio-document.radio-theatre .transport { top: 10px; bottom: auto; }
+  .radio-document.radio-theatre .deck-sliders { top: 48px; bottom: auto; }
 }
 @media (max-width: 620px) and (max-height: 520px) {
-  .radio-document.radio-theatre .track-strip { top: 8px; }
-  .radio-document.radio-theatre .visualizer-controls { top: 48px; }
+  .radio-document.radio-theatre .transport { top: 8px; }
+  .radio-document.radio-theatre .deck-sliders { top: 46px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
