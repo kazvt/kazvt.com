@@ -643,7 +643,7 @@ body.radio-page {
 
 @media (max-width: 280px) {
   .transport { gap: 1px; }
-  .radio-page .transport-button { flex-basis: 23px; width: 23px; min-height: 23px; }
+  .radio-page .transport-button { flex-basis: 24px; width: 24px; min-height: 24px; }
   .radio-page button[data-icon]::before { width: 14px; height: 14px; flex-basis: 14px; }
   .radio-page button[data-icon="speaker"]::before { width: 15px; height: 17px; flex-basis: 15px; }
 }
