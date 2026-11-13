@@ -18,7 +18,7 @@
   const totalTime = document.getElementById("time-total");
   const presetSelect = document.getElementById("preset-select");
   const presetName = document.getElementById("preset-name");
-  const paletteButtons = Array.from(document.querySelectorAll("[data-theme-choice]"));
+  const paletteSelect = document.getElementById("palette-select");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   let audioContext = null;
@@ -39,7 +39,7 @@
     if (!/^p(?:[1-9]|1[0-6])$/.test(theme)) return;
     document.body.dataset.theme = theme;
     document.documentElement.dataset.theme = theme;
-    paletteButtons.forEach((button) => button.classList.toggle("is-selected", button.dataset.themeChoice === theme));
+    if (paletteSelect) paletteSelect.value = theme;
     const themeColor = getComputedStyle(document.body).getPropertyValue("--bg").trim();
     const themeMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColor && themeMeta) themeMeta.content = themeColor;
@@ -419,7 +419,7 @@
   window.addEventListener("storage", (event) => {
     if (event.key === "kazvt-theme" && event.newValue) setTheme(event.newValue, false);
   });
-  paletteButtons.forEach((button) => button.addEventListener("click", () => setTheme(button.dataset.themeChoice)));
+  paletteSelect?.addEventListener("change", () => setTheme(paletteSelect.value));
 
   function isControlTarget(target) {
     return target instanceof Element && Boolean(target.closest("input, textarea, select, button, a, summary, [contenteditable='true']"));
