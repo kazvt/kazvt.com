@@ -262,7 +262,7 @@
     visualizer.loadPreset(presetMap[currentPresetKey], 0);
     screen.classList.add("is-live");
     screen.classList.remove("is-fallback");
-    fallback.querySelector("p").textContent = "PRESS PLAY TO WAKE THE PICTURE";
+    fallback.querySelector("p").textContent = "PRESS TO RESUME";
     fitVisualizer();
 
     if ("ResizeObserver" in window) {
@@ -403,7 +403,7 @@
     if (playRequest && typeof playRequest.catch === "function") {
       playRequest.catch(() => {
         setMessage("The track could not start. Check the audio file connection and try again.");
-        if (visualizer && !visualsPaused) showFallback("PRESS PLAY TO WAKE THE PICTURE");
+        if (visualizer && !visualsPaused) showFallback("PRESS TO RESUME");
         updateTransport();
       });
     }
@@ -547,7 +547,7 @@
       try {
         if (!visualizer) initVisualizer();
         if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-        if (audio.paused) showFallback("PRESS PLAY TO WAKE THE PICTURE");
+        if (audio.paused) showFallback("PRESS TO RESUME");
         else {
           screen.classList.add("is-live");
           screen.classList.remove("is-fallback");
