@@ -9,7 +9,6 @@
   const muteButton = document.getElementById("mute-toggle");
   const theatreButton = document.getElementById("visualizer-fullscreen");
   const loopButton = document.getElementById("loop-toggle");
-  const cycleButton = document.getElementById("preset-cycle");
   const visualsButton = document.getElementById("visualizer-toggle");
   const playStatus = document.getElementById("air-status");
   const screenState = document.getElementById("screen-state");
@@ -19,11 +18,10 @@
   const volumeValue = document.getElementById("volume-value");
   const currentTime = document.getElementById("time-current");
   const totalTime = document.getElementById("time-total");
-  const presetSelect = document.getElementById("preset-select");
-  const presetName = document.getElementById("preset-name");
   const paletteSelect = document.getElementById("palette-select");
   const trackSelect = document.getElementById("track-select");
   const trackArtist = document.getElementById("track-artist");
+  const trackTitle = document.getElementById("track-title");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const theatreStorageKey = "kazvt-radio-theatre";
 
@@ -33,13 +31,13 @@
   let presetMap = {};
   let presetKeys = [];
   let currentPresetKey = "";
-  const defaultPresetKey = "Geiss - Cauldron - painterly 2 (saturation remix)";
-  const crampedLegacyPresetKey = "Zylot - Paint Spill (Music Reactive Paint Mix)";
   let frameHandle = 0;
   let cycleHandle = 0;
-  let autoCycle = false;
+  let presetBag = [];
   let visualsPaused = reducedMotion.matches;
   let resizeObserver = null;
+  let hudHideHandle = 0;
+  const hudIdleDelay = 3000;
 
   function setTheme(theme, persist = true) {
     if (!/^p(?:[1-9]|1[0-6])$/.test(theme)) return;
@@ -106,23 +104,9 @@
     if (!pack || typeof pack.getPresets !== "function") throw new Error("The visual preset pack did not load.");
     presetMap = pack.getPresets();
     presetKeys = Object.keys(presetMap).sort((a, b) => a.localeCompare(b));
-    presetSelect.replaceChildren();
-    presetKeys.forEach((key, index) => {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = `${String(index + 1).padStart(2, "0")} / ${key}`;
-      presetSelect.append(option);
-    });
-    if (presetKeys.length) {
-      const wanted = (() => { try { return localStorage.getItem("kazvt-radio-preset"); } catch { return null; } })();
-      const migratedPreset = wanted === crampedLegacyPresetKey && presetKeys.includes(defaultPresetKey) ? defaultPresetKey : null;
-      currentPresetKey = migratedPreset || (presetKeys.includes(wanted) ? wanted : (presetKeys.includes(defaultPresetKey) ? defaultPresetKey : presetKeys[0]));
-      if (migratedPreset) {
-        try { localStorage.setItem("kazvt-radio-preset", migratedPreset); } catch {}
-      }
-      presetSelect.value = currentPresetKey;
-      presetName.textContent = currentPresetKey;
-    }
+    if (!presetKeys.length) throw new Error("The visual preset pack contains no presets.");
+    currentPresetKey = presetKeys[Math.floor(Math.random() * presetKeys.length)];
+    presetBag = [];
   }
 
   function initVisualizer() {
@@ -202,33 +186,59 @@
   function pickPreset(key, blend = 1.5) {
     if (!presetMap[key]) return;
     currentPresetKey = key;
-    presetSelect.value = key;
-    presetName.textContent = key;
-    try { localStorage.setItem("kazvt-radio-preset", key); } catch {}
     if (visualizer) visualizer.loadPreset(presetMap[key], blend);
   }
 
-  function cyclePreset(step) {
-    if (!presetKeys.length) return;
-    const oldIndex = Math.max(0, presetKeys.indexOf(currentPresetKey));
-    const nextIndex = (oldIndex + step + presetKeys.length) % presetKeys.length;
-    pickPreset(presetKeys[nextIndex]);
+  function refillPresetBag() {
+    presetBag = presetKeys.filter((key) => key !== currentPresetKey);
+    for (let index = presetBag.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [presetBag[index], presetBag[swapIndex]] = [presetBag[swapIndex], presetBag[index]];
+    }
   }
 
   function randomPreset() {
-    if (!presetKeys.length) return;
-    if (presetKeys.length < 2) return pickPreset(presetKeys[0]);
-    let choice = currentPresetKey;
-    while (choice === currentPresetKey) choice = presetKeys[Math.floor(Math.random() * presetKeys.length)];
-    pickPreset(choice);
+    if (presetKeys.length < 2) return;
+    if (!presetBag.length) refillPresetBag();
+    const nextPreset = presetBag.pop();
+    if (nextPreset) pickPreset(nextPreset, 2.2);
   }
 
-  function syncAutoCycle() {
+  function syncPresetShuffle() {
     window.clearInterval(cycleHandle);
     cycleHandle = 0;
-    if (autoCycle && !visualsPaused && !audio.paused && !document.hidden) {
-      cycleHandle = window.setInterval(randomPreset, 26000);
+    if (visualizer && !visualsPaused && !audio.paused && !document.hidden) {
+      cycleHandle = window.setInterval(randomPreset, 10000);
     }
+  }
+
+  function theatreModeIsOn() {
+    return document.documentElement.classList.contains("radio-theatre");
+  }
+
+  function hasKeyboardFocusedHudControl() {
+    const active = document.activeElement;
+    return active instanceof Element && active.closest(".radio-hud") && active.matches(":focus-visible");
+  }
+
+  function scheduleHudHide() {
+    window.clearTimeout(hudHideHandle);
+    hudHideHandle = 0;
+    if (!theatreModeIsOn() || document.hidden || hasKeyboardFocusedHudControl()) return;
+    hudHideHandle = window.setTimeout(() => {
+      hudHideHandle = 0;
+      if (theatreModeIsOn() && !document.hidden && !hasKeyboardFocusedHudControl()) {
+        document.documentElement.classList.add("radio-hud-hidden");
+      }
+    }, hudIdleDelay);
+  }
+
+  function revealTheatreHud() {
+    if (!theatreModeIsOn()) return;
+    window.clearTimeout(hudHideHandle);
+    hudHideHandle = 0;
+    document.documentElement.classList.remove("radio-hud-hidden");
+    scheduleHudHide();
   }
 
   function updateTransport() {
@@ -316,6 +326,7 @@
     const option = trackSelect.options[index];
     if (!option) return;
     trackSelect.selectedIndex = index;
+    trackTitle.textContent = option.textContent.trim();
     trackArtist.textContent = option.dataset.artist || "Unknown artist";
     audio.pause();
     audio.src = option.value;
@@ -328,9 +339,22 @@
     else setMessage(`Ready to play: ${option.textContent.trim()}`);
   }
 
+  function changeTrack(step) {
+    const count = trackSelect.options.length;
+    if (!count) return;
+    const nextIndex = (trackSelect.selectedIndex + step + count) % count;
+    loadTrack(nextIndex);
+  }
+
   function setTheatreMode(enabled, persist = true) {
     document.documentElement.classList.toggle("radio-theatre", enabled);
     setButtonIcon(theatreButton, "select", enabled ? "Leave theatre mode (F)" : "Enter theatre mode (F)", enabled);
+    if (enabled) revealTheatreHud();
+    else {
+      window.clearTimeout(hudHideHandle);
+      hudHideHandle = 0;
+      document.documentElement.classList.remove("radio-hud-hidden");
+    }
     if (persist) {
       try { localStorage.setItem(theatreStorageKey, enabled ? "on" : "off"); } catch {}
     }
@@ -345,28 +369,20 @@
   muteButton?.addEventListener("click", toggleMute);
   theatreButton?.addEventListener("click", toggleTheatreMode);
   document.getElementById("restart-track").addEventListener("click", restartTrack);
+  document.getElementById("track-prev").addEventListener("click", () => changeTrack(-1));
+  document.getElementById("track-next").addEventListener("click", () => changeTrack(1));
   trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
   loopButton.addEventListener("click", () => {
     audio.loop = !audio.loop;
     setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
   });
-  document.getElementById("preset-prev").addEventListener("click", () => cyclePreset(-1));
-  document.getElementById("preset-next").addEventListener("click", () => cyclePreset(1));
-  document.getElementById("preset-random").addEventListener("click", randomPreset);
-  cycleButton.addEventListener("click", () => {
-    autoCycle = !autoCycle;
-    setButtonIcon(cycleButton, "fastforward", autoCycle ? "Automatic preset changes are on" : "Automatic preset changes are off", autoCycle);
-    syncAutoCycle();
-  });
-  document.getElementById("preset-select").addEventListener("change", (event) => pickPreset(event.currentTarget.value));
-
   visualsButton?.addEventListener("click", () => {
     visualsPaused = !visualsPaused;
     setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
     if (visualsPaused) {
       stopRendering();
       showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
-      syncAutoCycle();
+      syncPresetShuffle();
     } else {
       try {
         if (!visualizer) initVisualizer();
@@ -378,7 +394,7 @@
           screenState.textContent = "VISUAL SIGNAL";
           startRendering();
         }
-        syncAutoCycle();
+        syncPresetShuffle();
       } catch (error) {
         if (audioContext && !mediaSource) {
           audioContext.close().catch(() => {});
@@ -405,7 +421,6 @@
   audio.volume = Number(volume.value);
   setTheatreMode(document.documentElement.classList.contains("radio-theatre"), false);
   setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
-  setButtonIcon(cycleButton, "fastforward", "Automatic preset changes are off", false);
   setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
   updateMuteButton();
   audio.addEventListener("timeupdate", () => {
@@ -428,10 +443,13 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       stopRendering();
-      syncAutoCycle();
+      window.clearTimeout(hudHideHandle);
+      hudHideHandle = 0;
+      syncPresetShuffle();
     } else {
+      revealTheatreHud();
       if (!audio.paused && !visualsPaused) startRendering();
-      syncAutoCycle();
+      syncPresetShuffle();
     }
   });
   window.addEventListener("storage", (event) => {
@@ -445,6 +463,14 @@
   }
 
   document.addEventListener("keydown", (event) => {
+    if (theatreModeIsOn()) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setTheatreMode(false);
+        return;
+      }
+      revealTheatreHud();
+    }
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
 
     if (event.key === "MediaPlayPause") {
@@ -490,11 +516,16 @@
     } else if (key === "r" && !event.repeat) {
       restartTrack();
     } else if (key === "n" && !event.repeat) {
-      cyclePreset(1);
+      changeTrack(1);
     } else if (key === "p" && !event.repeat) {
-      cyclePreset(-1);
+      changeTrack(-1);
     }
   });
+
+  document.addEventListener("pointermove", revealTheatreHud, { passive: true });
+  document.addEventListener("pointerdown", revealTheatreHud, { passive: true });
+  document.addEventListener("focusin", revealTheatreHud);
+  document.addEventListener("focusout", () => window.setTimeout(scheduleHudHide, 0));
 
   if (reducedMotion.matches) {
     setButtonIcon(visualsButton, "treestatus", "Resume visuals", true);
@@ -505,10 +536,6 @@
   try {
     populatePresets();
   } catch (error) {
-    presetSelect.replaceChildren();
-    const option = document.createElement("option");
-    option.textContent = "Visual modes unavailable";
-    presetSelect.append(option);
     setMessage("Audio is ready; the visual preset library could not be loaded.");
     console.warn("Radio visual presets unavailable:", error);
   }
