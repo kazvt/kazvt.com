@@ -11,8 +11,6 @@
   const loopButton = document.getElementById("loop-toggle");
   const shuffleButton = document.getElementById("shuffle-toggle");
   const visualsButton = document.getElementById("visualizer-toggle");
-  const playStatus = document.getElementById("air-status");
-  const screenState = document.getElementById("screen-state");
   const playerMessage = document.getElementById("player-message");
   const seek = document.getElementById("track-seek");
   const volume = document.getElementById("track-volume");
@@ -23,7 +21,6 @@
   const trackSelect = document.getElementById("track-select");
   const playlistList = document.getElementById("track-list");
   const playlistCount = document.getElementById("playlist-count");
-  const trackCounter = document.getElementById("track-counter");
   const playlistPanel = document.querySelector(".player-side");
   const trackArtist = document.getElementById("track-artist");
   const trackTitle = document.getElementById("track-title");
@@ -131,10 +128,6 @@
   function updatePlaylistSelection(index = trackSelect.selectedIndex, scrollIntoView = false) {
     const rows = playlistList.querySelectorAll(".playlist-track");
     rows.forEach((row, rowIndex) => row.classList.toggle("is-current", rowIndex === index));
-    const total = trackSelect.options.length;
-    if (trackCounter) {
-      trackCounter.textContent = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
-    }
     if (scrollIntoView) rows[index]?.scrollIntoView({ block: "nearest" });
     scheduleMarqueeUpdate();
   }
@@ -187,11 +180,10 @@
     button.classList.toggle("is-on", active);
   }
 
-  function showFallback(message, state) {
+  function showFallback(message) {
     fallback.querySelector("p").textContent = message;
     screen.classList.remove("is-live");
     screen.classList.add("is-fallback");
-    screenState.textContent = state;
   }
 
   function getVisualizerSize() {
@@ -271,7 +263,6 @@
     screen.classList.add("is-live");
     screen.classList.remove("is-fallback");
     fallback.querySelector("p").textContent = "PRESS PLAY TO WAKE THE PICTURE";
-    screenState.textContent = "VISUAL SIGNAL";
     fitVisualizer();
 
     if ("ResizeObserver" in window) {
@@ -362,28 +353,22 @@
   function updateTransport() {
     const playing = !audio.paused && !audio.ended;
     setButtonIcon(playButton, playing ? "pause" : "play", playing);
-    playStatus.textContent = playing ? "ON AIR" : "STANDING BY";
-    document.querySelector(".radio-air-status").classList.toggle("is-playing", playing);
-    document.querySelector(".screen-rec").classList.toggle("is-playing", playing);
     if (playing) {
       if (visualsPaused) {
-        showFallback("VISUALS PAUSED / MUSIC PLAYING", "VISUALS PAUSED");
+        showFallback("VISUALS PAUSED / MUSIC PLAYING");
       } else if (screen.classList.contains("is-fallback")) {
         // Keep the fallback reason set by the failed start attempt.
       } else {
         screen.classList.add("is-live");
         screen.classList.remove("is-fallback");
-        screenState.textContent = "VISUAL SIGNAL";
         startRendering();
       }
       syncPresetShuffle();
     } else {
-      if (audio.ended) screenState.textContent = "END OF SIDE A";
-      else if (visualsPaused) showFallback("VISUALS PAUSED", "VISUALS PAUSED");
+      if (visualsPaused) showFallback("VISUALS PAUSED");
       else if (screen.classList.contains("is-fallback")) {
         // Keep the fallback reason set by the failed start attempt.
       }
-      else if (visualizer) screenState.textContent = "READY";
       stopRendering();
       syncPresetShuffle();
     }
@@ -398,7 +383,7 @@
     try {
       if (!visualizer && !visualsPaused) initVisualizer();
       if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-      if (visualsPaused) showFallback("VISUALS PAUSED / MUSIC PLAYING", "VISUALS PAUSED");
+      if (visualsPaused) showFallback("VISUALS PAUSED / MUSIC PLAYING");
       else if (visualizer) {
         screen.classList.add("is-live");
         screen.classList.remove("is-fallback");
@@ -409,7 +394,7 @@
         audioContext.close().catch(() => {});
         audioContext = null;
       }
-      showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE", "AUDIO ONLY");
+      showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE");
       setMessage("Audio will play, but this browser could not start the WebGL visualiser.");
       console.warn("Radio visualiser unavailable:", error);
     }
@@ -418,7 +403,7 @@
     if (playRequest && typeof playRequest.catch === "function") {
       playRequest.catch(() => {
         setMessage("The track could not start. Check the audio file connection and try again.");
-        if (visualizer && !visualsPaused) showFallback("PRESS PLAY TO WAKE THE PICTURE", "READY");
+        if (visualizer && !visualsPaused) showFallback("PRESS PLAY TO WAKE THE PICTURE");
         updateTransport();
       });
     }
@@ -556,17 +541,16 @@
     setButtonIcon(visualsButton, "treestatus", visualsPaused);
     if (visualsPaused) {
       stopRendering();
-      showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / MUSIC PLAYING", "VISUALS PAUSED");
+      showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / MUSIC PLAYING");
       syncPresetShuffle();
     } else {
       try {
         if (!visualizer) initVisualizer();
         if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-        if (audio.paused) showFallback("PRESS PLAY TO WAKE THE PICTURE", "READY");
+        if (audio.paused) showFallback("PRESS PLAY TO WAKE THE PICTURE");
         else {
           screen.classList.add("is-live");
           screen.classList.remove("is-fallback");
-          screenState.textContent = "VISUAL SIGNAL";
           startRendering();
         }
         syncPresetShuffle();
@@ -575,7 +559,7 @@
           audioContext.close().catch(() => {});
           audioContext = null;
         }
-        showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE", "AUDIO ONLY");
+        showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE");
         console.warn("Radio visualiser unavailable:", error);
       }
     }
@@ -720,7 +704,7 @@
 
   if (reducedMotion.matches) {
     setButtonIcon(visualsButton, "treestatus", true);
-    showFallback("VISUALS PAUSED / TAP VISUALS: ON TO ENABLE", "VISUALS PAUSED");
+    showFallback("VISUALS PAUSED / TAP VISUALS: ON TO ENABLE");
   }
 
   setTheme(document.body.dataset.theme || "p16", false);
