@@ -231,7 +231,7 @@
 
   function updateTransport() {
     const playing = !audio.paused && !audio.ended;
-    playButton.textContent = playing ? "PAUSE" : "PLAY";
+    setButtonIcon(playButton, playing ? "pause" : "play", playing ? "Pause playback (Space)" : "Play playback (Space)", playing);
     playStatus.textContent = playing ? "ON AIR" : "STANDING BY";
     document.querySelector(".radio-air-status").classList.toggle("is-playing", playing);
     document.querySelector(".screen-rec").classList.toggle("is-playing", playing);
@@ -296,8 +296,7 @@
 
   function updateMuteButton() {
     if (!muteButton) return;
-    muteButton.textContent = audio.muted ? "UNMUTE" : "MUTE";
-    muteButton.classList.toggle("is-on", audio.muted);
+    setButtonIcon(muteButton, "speaker", audio.muted ? "Unmute (M)" : "Mute (M)", audio.muted);
   }
 
   function toggleMute() {
@@ -311,59 +310,40 @@
     setMessage(audio.paused ? "Back to the beginning of the tape." : "Rewinding to the start…");
   }
 
-  function isFullscreen() {
-    return document.fullscreenElement === screen || document.webkitFullscreenElement === screen;
+  function setTheatreMode(enabled, persist = true) {
+    document.documentElement.classList.toggle("radio-theatre", enabled);
+    setButtonIcon(theatreButton, "select", enabled ? "Leave theatre mode (F)" : "Enter theatre mode (F)", enabled);
+    if (persist) {
+      try { localStorage.setItem(theatreStorageKey, enabled ? "on" : "off"); } catch {}
+    }
   }
 
-  async function toggleFullscreen() {
-    try {
-      if (isFullscreen()) {
-        const exit = document.exitFullscreen || document.webkitExitFullscreen;
-        if (exit) await exit.call(document);
-      } else {
-        const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
-        if (!request) {
-          setMessage("Full screen is not available in this browser.");
-          return;
-        }
-        await request.call(screen);
-      }
-    } catch {
-      setMessage("The browser could not open the full-screen visualizer.");
-    }
+  function toggleTheatreMode() {
+    setTheatreMode(!document.documentElement.classList.contains("radio-theatre"));
   }
 
   playButton.addEventListener("click", togglePlay);
   screen.addEventListener("click", togglePlay);
   muteButton?.addEventListener("click", toggleMute);
-  fullscreenButton?.addEventListener("click", toggleFullscreen);
-  document.addEventListener("fullscreenchange", () => {
-    fullscreenButton.textContent = isFullscreen() ? "EXIT FULL SCREEN" : "FULL SCREEN";
-  });
-  document.addEventListener("webkitfullscreenchange", () => {
-    fullscreenButton.textContent = isFullscreen() ? "EXIT FULL SCREEN" : "FULL SCREEN";
-  });
+  theatreButton?.addEventListener("click", toggleTheatreMode);
   document.getElementById("restart-track").addEventListener("click", restartTrack);
-  document.getElementById("loop-toggle").addEventListener("click", (event) => {
+  loopButton.addEventListener("click", () => {
     audio.loop = !audio.loop;
-    event.currentTarget.textContent = `REPEAT: ${audio.loop ? "ON" : "OFF"}`;
-    event.currentTarget.classList.toggle("is-on", audio.loop);
+    setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
   });
   document.getElementById("preset-prev").addEventListener("click", () => cyclePreset(-1));
   document.getElementById("preset-next").addEventListener("click", () => cyclePreset(1));
   document.getElementById("preset-random").addEventListener("click", randomPreset);
-  document.getElementById("preset-cycle").addEventListener("click", (event) => {
+  cycleButton.addEventListener("click", () => {
     autoCycle = !autoCycle;
-    event.currentTarget.textContent = `AUTO-TUNE: ${autoCycle ? "ON" : "OFF"}`;
-    event.currentTarget.classList.toggle("is-on", autoCycle);
+    setButtonIcon(cycleButton, "fastforward", autoCycle ? "Automatic preset changes are on" : "Automatic preset changes are off", autoCycle);
     syncAutoCycle();
   });
   document.getElementById("preset-select").addEventListener("change", (event) => pickPreset(event.currentTarget.value));
 
-  document.getElementById("visualizer-toggle")?.addEventListener("click", (event) => {
+  visualsButton?.addEventListener("click", () => {
     visualsPaused = !visualsPaused;
-    event.currentTarget.textContent = visualsPaused ? "VISUALS: OFF" : "VISUALS: ON";
-    event.currentTarget.classList.toggle("is-on", visualsPaused);
+    setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
     if (visualsPaused) {
       stopRendering();
       showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
