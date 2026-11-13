@@ -239,10 +239,14 @@ body.radio-page {
   background: radial-gradient(ellipse at center, color-mix(in srgb, var(--visualizer-secondary) 25%, var(--visualizer-bg)), var(--visualizer-bg) 72%);
   text-shadow: 0 0 12px var(--visualizer-primary);
 }
-.fallback-star {
-  color: var(--visualizer-accent);
-  font-size: clamp(26px, 5cqi, 56px);
-  animation: receiver-pulse 2.8s ease-in-out infinite;
+.fallback-gif {
+  display: block;
+  width: clamp(44px, 6cqi, 64px);
+  aspect-ratio: 30 / 32;
+  flex: 0 0 auto;
+  background: url("/radio/assets/icons/speaker.gif") center / contain no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--visualizer-primary) 55%, transparent));
 }
 .visualizer-fallback p {
   margin: 0;
@@ -252,7 +256,7 @@ body.radio-page {
 }
 .visualizer-bezel.is-live .visualizer-fallback { display: none; }
 .visualizer-bezel.is-fallback .visualizer-fallback { color: var(--banner-text); text-shadow: none; }
-.visualizer-bezel.is-fallback .fallback-star { display: none; }
+.visualizer-bezel.is-fallback .fallback-gif { display: none; }
 .screen-lines {
   position: absolute;
   z-index: 2;
@@ -437,7 +441,6 @@ body.radio-page {
   cursor: pointer;
 }
 
-@keyframes receiver-pulse { 50% { opacity: .55; transform: scale(.88); } }
 
 @media (max-width: 860px) {
   .radio-console { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
