@@ -41,9 +41,12 @@
           <div class="visualizer-side">
             <div class="visualizer-heading">
               <span>VISUAL FREQUENCY</span>
-              <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
+              <div class="visualizer-tools">
+                <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
+                <button class="small-control fullscreen-control" id="visualizer-fullscreen" type="button" title="Expand the visualizer (F)">FULL SCREEN</button>
+              </div>
             </div>
-            <div class="visualizer-bezel">
+            <div class="visualizer-bezel" title="Click the picture to play or pause">
               <canvas id="radio-visualizer" width="960" height="520"></canvas>
               <div class="visualizer-fallback" id="visualizer-fallback">
                 <span class="fallback-star">✦</span>
@@ -51,7 +54,7 @@
                 <span class="fallback-frequency">KAZVT // 1994</span>
               </div>
               <div class="screen-lines"></div>
-              <span class="screen-corner screen-corner-left">LIVE FROM THE LITTLE WEB</span>
+              <span class="screen-corner screen-corner-left">CLICK SCREEN OR PRESS SPACE // PLAY / PAUSE</span>
               <span class="screen-corner screen-corner-right">FM / 01</span>
             </div>
             <div class="preset-strip">
@@ -106,6 +109,20 @@
               <span>VOLUME</span>
               <input id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
               <span id="volume-value">72%</span>
+            </div>
+            <button class="small-control mute-control" id="mute-toggle" type="button" title="Toggle mute (M)">MUTE</button>
+            <div class="radio-shortcuts">
+              <div class="shortcut-heading"><span>QUICK TUNING</span><span>KEYBOARD + MOUSE</span></div>
+              <div class="shortcut-grid">
+                <span><kbd>SPACE</kbd> Play / pause</span>
+                <span><kbd>← →</kbd> Seek 5 sec <small>Shift: 15 sec</small></span>
+                <span><kbd>↑ ↓</kbd> Volume</span>
+                <span><kbd>N / P</kbd> Next / previous visual</span>
+                <span><kbd>M</kbd> Mute</span>
+                <span><kbd>F</kbd> Full screen</span>
+                <span><kbd>R</kbd> Restart track</span>
+                <span><kbd>CLICK</kbd> Picture toggles playback</span>
+              </div>
             </div>
             <p class="player-message" id="player-message">The radio is ready when you are.</p>
           </div>
