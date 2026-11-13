@@ -376,9 +376,12 @@
   });
   volume.addEventListener("input", () => {
     audio.volume = Number(volume.value);
+    if (audio.volume > 0 && audio.muted) audio.muted = false;
     volumeValue.textContent = `${Math.round(audio.volume * 100)}%`;
+    updateMuteButton();
   });
   audio.volume = Number(volume.value);
+  updateMuteButton();
   audio.addEventListener("timeupdate", () => {
     currentTime.textContent = formatTime(audio.currentTime);
     if (!seek.matches(":active")) seek.value = String(audio.currentTime || 0);
@@ -390,6 +393,7 @@
   audio.addEventListener("play", updateTransport);
   audio.addEventListener("pause", updateTransport);
   audio.addEventListener("ended", updateTransport);
+  audio.addEventListener("volumechange", updateMuteButton);
   audio.addEventListener("error", () => setMessage("The local track could not be loaded. Please try again in a moment."));
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -404,6 +408,62 @@
     if (event.key === "kazvt-theme" && event.newValue) setTheme(event.newValue, false);
   });
   paletteButtons.forEach((button) => button.addEventListener("click", () => setTheme(button.dataset.themeChoice)));
+
+  function isControlTarget(target) {
+    return target instanceof Element && Boolean(target.closest("input, textarea, select, button, a, summary, [contenteditable='true']"));
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+
+    if (event.key === "MediaPlayPause") {
+      event.preventDefault();
+      togglePlay();
+      return;
+    }
+    if (event.key === "MediaPlay") {
+      if (audio.paused) { event.preventDefault(); togglePlay(); }
+      return;
+    }
+    if (event.key === "MediaPause") {
+      if (!audio.paused) { event.preventDefault(); togglePlay(); }
+      return;
+    }
+    if (isControlTarget(event.target)) return;
+
+    const key = event.key.toLowerCase();
+    if (event.code === "Space" || event.key === " ") {
+      if (event.repeat) return;
+      event.preventDefault();
+      togglePlay();
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      if (!Number.isFinite(audio.duration)) return;
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const seconds = event.shiftKey ? 15 : 5;
+      audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + direction * seconds));
+    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      const direction = event.key === "ArrowUp" ? 1 : -1;
+      const amount = event.shiftKey ? 0.1 : 0.05;
+      const nextVolume = Math.max(0, Math.min(1, Number(volume.value) + direction * amount));
+      volume.value = String(nextVolume);
+      audio.volume = nextVolume;
+      if (nextVolume > 0) audio.muted = false;
+      volumeValue.textContent = `${Math.round(nextVolume * 100)}%`;
+      updateMuteButton();
+    } else if (key === "m" && !event.repeat) {
+      toggleMute();
+    } else if (key === "f" && !event.repeat) {
+      toggleFullscreen();
+    } else if (key === "r" && !event.repeat) {
+      restartTrack();
+    } else if (key === "n" && !event.repeat) {
+      cyclePreset(1);
+    } else if (key === "p" && !event.repeat) {
+      cyclePreset(-1);
+    }
+  });
 
   if (reducedMotion.matches) {
     const visualToggle = document.getElementById("visualizer-toggle");
