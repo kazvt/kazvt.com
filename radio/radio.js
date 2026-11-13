@@ -316,9 +316,7 @@
     const option = trackSelect.options[index];
     if (!option) return;
     trackSelect.selectedIndex = index;
-    trackArtist.innerHTML = option.dataset.artist.split(" / ").map((part, i) => i
-      ? `<span>/</span> ${part}`
-      : part).join(" ");
+    trackArtist.textContent = option.dataset.artist || "Unknown artist";
     audio.pause();
     audio.src = option.value;
     audio.load();

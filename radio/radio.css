@@ -364,15 +364,6 @@ body.radio-page {
 }
 .track-select option { color: var(--ink); background: var(--paper); }
 .track-select:focus-visible { outline: 2px dashed var(--blue); outline-offset: 1px; }
-.track-card h2 {
-  overflow: hidden;
-  margin: 0;
-  font-size: clamp(23px, 2.2vw, 34px);
-  line-height: 1.15;
-  text-overflow: ellipsis;
-  text-shadow: 2px 2px 0 color-mix(in srgb, var(--pink) 65%, transparent);
-  white-space: nowrap;
-}
 .track-artist {
   overflow: hidden;
   margin: 4px 0 0;
@@ -381,7 +372,6 @@ body.radio-page {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.track-artist span { padding: 0 3px; color: var(--pink); }
 .transport { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .radio-page .transport-button { min-height: 40px; padding-inline: 4px; }
 .radio-page .play-button {
