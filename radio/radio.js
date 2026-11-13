@@ -65,12 +65,26 @@
     screenState.textContent = state;
   }
 
-  function fitVisualizer() {
-    if (!visualizer) return;
+  function getVisualizerSize() {
     const rect = canvas.getBoundingClientRect();
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.35);
-    if (rect.width > 0 && rect.height > 0) {
-      visualizer.setRendererSize(rect.width, rect.height, { pixelRatio, textureRatio: 0.85 });
+    const cssWidth = rect.width || 960;
+    const cssHeight = rect.height || 520;
+    return {
+      width: Math.max(1, Math.round(cssWidth * pixelRatio)),
+      height: Math.max(1, Math.round(cssHeight * pixelRatio)),
+    };
+  }
+
+  function fitVisualizer() {
+    const { width, height } = getVisualizerSize();
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
+    if (visualizer && width > 0 && height > 0) {
+      // Butterchurn renders to an internal canvas and copies it 1:1 into this
+      // canvas. Keep both backing buffers the same size; CSS-only sizing leaves
+      // the original 960x520 bitmap larger, exposing an unpainted black region.
+      visualizer.setRendererSize(width, height, { pixelRatio: 1, textureRatio: 0.85 });
     }
   }
 
@@ -110,15 +124,13 @@
     }
     if (!presetKeys.length) populatePresets();
 
-    const bounds = canvas.getBoundingClientRect();
-    const width = Math.max(1, bounds.width || 960);
-    const height = Math.max(1, bounds.height || 520);
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.35);
+    fitVisualizer();
+    const { width, height } = getVisualizerSize();
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     visualizer = butterchurnApi.createVisualizer(audioContext, canvas, {
       width,
       height,
-      pixelRatio,
+      pixelRatio: 1,
       textureRatio: 0.85,
     });
     if (!visualizer) throw new Error("This browser could not start the WebGL visualiser.");
