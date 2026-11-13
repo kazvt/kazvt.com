@@ -258,7 +258,7 @@
         screenState.textContent = "VISUAL SIGNAL";
         startRendering();
       }
-      syncAutoCycle();
+      syncPresetShuffle();
     } else {
       if (audio.ended) screenState.textContent = "END OF SIDE A";
       else if (visualsPaused) showFallback("VISUALS PAUSED", "VISUALS PAUSED");
@@ -267,7 +267,7 @@
       }
       else if (visualizer) screenState.textContent = "READY";
       stopRendering();
-      syncAutoCycle();
+      syncPresetShuffle();
     }
   }
 
@@ -464,7 +464,8 @@
 
   document.addEventListener("keydown", (event) => {
     if (theatreModeIsOn()) {
-      if (event.key === "Escape") {
+      const nativeControlIsActive = event.target instanceof Element && event.target.closest("select, input, textarea, [contenteditable='true']");
+      if (event.key === "Escape" && !nativeControlIsActive) {
         event.preventDefault();
         setTheatreMode(false);
         return;
