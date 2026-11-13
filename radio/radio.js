@@ -271,12 +271,56 @@
     }
   }
 
-  playButton.addEventListener("click", togglePlay);
-  document.getElementById("restart-track").addEventListener("click", () => {
+  function updateMuteButton() {
+    if (!muteButton) return;
+    muteButton.textContent = audio.muted ? "UNMUTE" : "MUTE";
+    muteButton.classList.toggle("is-on", audio.muted);
+  }
+
+  function toggleMute() {
+    audio.muted = !audio.muted;
+    updateMuteButton();
+    setMessage(audio.muted ? "Radio muted. Press M or UNMUTE to bring it back." : "Sound is back on.");
+  }
+
+  function restartTrack() {
     audio.currentTime = 0;
-    if (audio.paused) setMessage("Back to the beginning of the tape.");
-    else setMessage("Rewinding to the start…");
+    setMessage(audio.paused ? "Back to the beginning of the tape." : "Rewinding to the start…");
+  }
+
+  function isFullscreen() {
+    return document.fullscreenElement === screen || document.webkitFullscreenElement === screen;
+  }
+
+  async function toggleFullscreen() {
+    try {
+      if (isFullscreen()) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) await exit.call(document);
+      } else {
+        const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
+        if (!request) {
+          setMessage("Full screen is not available in this browser.");
+          return;
+        }
+        await request.call(screen);
+      }
+    } catch {
+      setMessage("The browser could not open the full-screen visualizer.");
+    }
+  }
+
+  playButton.addEventListener("click", togglePlay);
+  screen.addEventListener("click", togglePlay);
+  muteButton?.addEventListener("click", toggleMute);
+  fullscreenButton?.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", () => {
+    fullscreenButton.textContent = isFullscreen() ? "EXIT FULL SCREEN" : "FULL SCREEN";
   });
+  document.addEventListener("webkitfullscreenchange", () => {
+    fullscreenButton.textContent = isFullscreen() ? "EXIT FULL SCREEN" : "FULL SCREEN";
+  });
+  document.getElementById("restart-track").addEventListener("click", restartTrack);
   document.getElementById("loop-toggle").addEventListener("click", (event) => {
     audio.loop = !audio.loop;
     event.currentTarget.textContent = `REPEAT: ${audio.loop ? "ON" : "OFF"}`;
