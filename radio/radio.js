@@ -22,6 +22,8 @@
   const presetSelect = document.getElementById("preset-select");
   const presetName = document.getElementById("preset-name");
   const paletteSelect = document.getElementById("palette-select");
+  const trackSelect = document.getElementById("track-select");
+  const trackArtist = document.getElementById("track-artist");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const theatreStorageKey = "kazvt-radio-theatre";
 
@@ -310,6 +312,24 @@
     setMessage(audio.paused ? "Back to the beginning of the tape." : "Rewinding to the start…");
   }
 
+  function loadTrack(index, startPlaying = true) {
+    const option = trackSelect.options[index];
+    if (!option) return;
+    trackSelect.selectedIndex = index;
+    trackArtist.innerHTML = option.dataset.artist.split(" / ").map((part, i) => i
+      ? `<span>/</span> ${part}`
+      : part).join(" ");
+    audio.pause();
+    audio.src = option.value;
+    audio.load();
+    seek.value = "0";
+    seek.max = "100";
+    currentTime.textContent = "0:00";
+    totalTime.textContent = "--:--";
+    if (startPlaying) togglePlay();
+    else setMessage(`Ready to play: ${option.textContent.trim()}`);
+  }
+
   function setTheatreMode(enabled, persist = true) {
     document.documentElement.classList.toggle("radio-theatre", enabled);
     setButtonIcon(theatreButton, "select", enabled ? "Leave theatre mode (F)" : "Enter theatre mode (F)", enabled);
@@ -327,6 +347,7 @@
   muteButton?.addEventListener("click", toggleMute);
   theatreButton?.addEventListener("click", toggleTheatreMode);
   document.getElementById("restart-track").addEventListener("click", restartTrack);
+  trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
   loopButton.addEventListener("click", () => {
     audio.loop = !audio.loop;
     setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
@@ -399,7 +420,11 @@
   });
   audio.addEventListener("play", updateTransport);
   audio.addEventListener("pause", updateTransport);
-  audio.addEventListener("ended", updateTransport);
+  audio.addEventListener("ended", () => {
+    const nextIndex = trackSelect.selectedIndex + 1;
+    if (!audio.loop && nextIndex < trackSelect.options.length) loadTrack(nextIndex);
+    else updateTransport();
+  });
   audio.addEventListener("volumechange", updateMuteButton);
   audio.addEventListener("error", () => setMessage("The local track could not be loaded. Please try again in a moment."));
   document.addEventListener("visibilitychange", () => {

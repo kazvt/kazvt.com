@@ -66,8 +66,23 @@
 
           <div class="player-side">
             <div class="track-card">
-              <h2>銀の血脈</h2>
-              <p class="track-artist">本田恭之 <span>/</span> Yasuyuki Honda</p>
+              <select class="track-select" id="track-select" title="Choose a song">
+                <option value="/radio/assets/gin-no-ketsumyaku-1994.mp3" data-artist="本田恭之 / Yasuyuki Honda" selected>銀の血脈</option>
+                <option value="/radio/assets/tracks/blue-fire-purple-eyes-in-the-dark.mp3" data-artist="neu licht">Blue Fire - Purple Eyes in the Dark</option>
+                <option value="/radio/assets/tracks/nazo-no-kanojo-x-ost-track-03.mp3" data-artist="Rukia Coa - Nazo no Kanojo X OST, Track 03">Nazo no Kanojo</option>
+                <option value="/radio/assets/tracks/seito-densetsu-osamu-shoji.mp3" data-artist="Osamu Shoji">Seito Densetsu</option>
+                <option value="/radio/assets/tracks/pylon-utsu-dreamstation1986.mp3" data-artist="憂鬱 &amp; DreamStation1986">Pylon</option>
+                <option value="/radio/assets/tracks/totsuzen-upside-down-hoshi-e-iku-fune.mp3" data-artist="neu licht">突然 UPSIDE DOWN - 星へ行く船</option>
+                <option value="/radio/assets/tracks/sonicomi-photo-session-park.mp3" data-artist="Daiichi Uchuu Sokudo - SoniComi Original Soundtrack">PHOTO SESSION Park</option>
+                <option value="/radio/assets/tracks/falling-asleep-with-you.mp3" data-artist="Formstate">Falling Asleep With You</option>
+                <option value="/radio/assets/tracks/warming-touch.mp3" data-artist="Formstate">Warming Touch</option>
+                <option value="/radio/assets/tracks/kitsch-namco-sounds.mp3" data-artist="Namco Sounds">Kitsch</option>
+                <option value="/radio/assets/tracks/vs-metal-sonic-generations.mp3" data-artist="Sonic Generations">Vs. Metal Sonic</option>
+                <option value="/radio/assets/tracks/ratatouille-title-screen.mp3" data-artist="Ratatouille: The Video Game OST">Title Screen</option>
+                <option value="/radio/assets/tracks/a-song-for-popping-bloons.mp3" data-artist="Dopo Goto">A Song For Popping Bloons</option>
+                <option value="/radio/assets/tracks/yours-sincerely-hawaii.mp3" data-artist="Hawaii">Yours Sincerely</option>
+              </select>
+              <p class="track-artist" id="track-artist">本田恭之 <span>/</span> Yasuyuki Honda</p>
             </div>
 
             <audio id="radio-audio" preload="metadata" src="/radio/assets/gin-no-ketsumyaku-1994.mp3"></audio>

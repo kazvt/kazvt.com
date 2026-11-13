@@ -339,7 +339,31 @@ body.radio-page {
   padding: clamp(9px, 1vw, 15px);
 }
 .radio-page audio { display: none; }
-.track-card { min-width: 0; }
+.track-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; min-width: 0; }
+.track-select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0 20px 0 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--ink);
+  background: transparent;
+  font-family: inherit;
+  font-size: clamp(23px, 2.2vw, 34px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
+  text-overflow: ellipsis;
+  text-shadow: 2px 2px 0 color-mix(in srgb, var(--pink) 65%, transparent);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.track-select option { color: var(--ink); background: var(--paper); }
+.track-select:focus-visible { outline: 2px dashed var(--blue); outline-offset: 1px; }
 .track-card h2 {
   overflow: hidden;
   margin: 0;
@@ -435,9 +459,9 @@ body.radio-page {
     gap: 4px 7px;
     padding: 5px 7px;
   }
-  .track-card { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 9px; }
-  .track-card h2 { font-size: clamp(14px, 2.2vw, 19px); }
-  .track-artist { min-width: 0; margin: 0; font-size: clamp(8px, 1.1vw, 11px); }
+  .track-card { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 9px; }
+  .track-select { grid-column: 1; font-size: clamp(14px, 2.2vw, 19px); }
+  .track-artist { grid-column: 2; min-width: 0; margin: 0; font-size: clamp(8px, 1.1vw, 11px); }
   .transport { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
   .radio-page .transport-button,
   .radio-page .mute-control { min-height: 29px; font-size: clamp(7px, .9vw, 9px); }
@@ -470,8 +494,9 @@ body.radio-page {
   .radio-page button[data-icon]::before { width: 18px; height: 18px; flex-basis: 18px; }
   .radio-page button[data-icon="speaker"]::before { width: 20px; height: 22px; flex-basis: 20px; }
   .player-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3px 5px; padding: 4px 5px; }
-  .track-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
-  .track-card h2 { font-size: clamp(13px, 3.6vw, 16px); }
+  .track-card { grid-template-columns: minmax(0, 1fr); gap: 1px; }
+  .track-select { grid-column: 1; font-size: clamp(13px, 3.6vw, 16px); }
+  .track-artist { grid-column: 1; }
   .track-artist { font-size: clamp(7px, 1.9vw, 9px); }
   .transport { gap: 3px; }
   .radio-page .transport-button,
@@ -507,7 +532,7 @@ body.radio-page {
   .radio-page main { gap: 3px; padding: 3px 5px; }
   .visualizer-side { gap: 3px; padding: 3px; }
   .player-side { gap: 3px 6px; padding: 3px 6px; }
-  .track-card h2 { font-size: clamp(12px, 1.8vw, 17px); }
+  .track-select { font-size: clamp(12px, 1.8vw, 17px); }
   .radio-page .transport-button,
   .radio-page .mute-control { min-height: 24px; }
   .radio-page .play-button { min-height: 26px; }
