@@ -40,7 +40,7 @@
                 <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
               </div>
             </div>
-            <div class="visualizer-bezel" title="Click the picture to play or pause">
+            <div class="visualizer-bezel">
               <canvas id="radio-visualizer" width="960" height="520"></canvas>
               <div class="visualizer-fallback" id="visualizer-fallback">
                 <span class="fallback-gif"></span>
@@ -49,14 +49,14 @@
               <div class="screen-lines"></div>
             </div>
             <div class="transport radio-hud">
-              <button class="transport-button small-control" id="track-prev" type="button" data-icon="stepback" title="Previous track (P)"></button>
-              <button class="transport-button play-button" id="play-toggle" type="button" data-icon="play" title="Play playback (Space)"></button>
-              <button class="transport-button small-control" id="track-next" type="button" data-icon="stepforward" title="Next track (N)"></button>
-              <button class="transport-button shuffle-button" id="shuffle-toggle" type="button" data-icon="shuffle" title="Shuffle is off (S)"></button>
-              <button class="transport-button loop-button" id="loop-toggle" type="button" data-icon="refresh" title="Repeat is off"></button>
-              <button class="transport-button mute-control" id="mute-toggle" type="button" data-icon="speaker" title="Mute (M)"></button>
-              <button class="transport-button visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus" title="Pause visuals"></button>
-              <button class="transport-button fullscreen-control" id="visualizer-fullscreen" type="button" data-icon="select" title="Enter theatre mode (F)"></button>
+              <button class="transport-button small-control" id="track-prev" type="button" data-icon="stepback"></button>
+              <button class="transport-button play-button" id="play-toggle" type="button" data-icon="play"></button>
+              <button class="transport-button small-control" id="track-next" type="button" data-icon="stepforward"></button>
+              <button class="transport-button shuffle-button" id="shuffle-toggle" type="button" data-icon="shuffle"></button>
+              <button class="transport-button loop-button" id="loop-toggle" type="button" data-icon="refresh"></button>
+              <button class="transport-button mute-control" id="mute-toggle" type="button" data-icon="speaker"></button>
+              <button class="transport-button visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus"></button>
+              <button class="transport-button fullscreen-control" id="visualizer-fullscreen" type="button" data-icon="select"></button>
               <p class="player-message" id="player-message"></p>
             </div>
             <div class="deck-sliders radio-hud">
@@ -84,7 +84,7 @@
               <p class="track-artist" id="track-artist">本田恭之 / Yasuyuki Honda</p>
             </div>
             <div class="track-list" id="track-list"></div>
-            <select class="track-select" id="track-select" title="Playlist track data" hidden>
+            <select class="track-select" id="track-select" hidden>
                 <option value="/radio/assets/gin-no-ketsumyaku-1994.mp3" data-artist="本田恭之 / Yasuyuki Honda" selected>銀の血脈</option>
                 <option value="/radio/assets/tracks/blue-fire-purple-eyes-in-the-dark.mp3" data-artist="neu licht">Blue Fire - Purple Eyes in the Dark</option>
                 <option value="/radio/assets/tracks/nazo-no-kanojo-x-ost-track-03.mp3" data-artist="Rukia Coa - Nazo no Kanojo X OST, Track 03">Nazo no Kanojo</option>

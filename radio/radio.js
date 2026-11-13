@@ -83,7 +83,6 @@
     }
     text.textContent = value;
     text.removeAttribute("data-marquee");
-    container.title = value;
     container.classList.remove("is-overflowing");
     scheduleMarqueeUpdate();
   }
@@ -149,8 +148,6 @@
       const row = document.createElement("button");
       row.type = "button";
       row.className = "playlist-track";
-      row.title = `${title} - ${artist}`;
-
       const number = document.createElement("span");
       number.className = "playlist-index";
       number.textContent = String(index + 1).padStart(2, "0");
@@ -160,7 +157,6 @@
 
       const titleWindow = document.createElement("span");
       titleWindow.className = "playlist-track-name playlist-title marquee-window";
-      titleWindow.title = title;
       const titleText = document.createElement("span");
       titleText.className = "marquee-text";
       titleText.textContent = title;
@@ -185,10 +181,9 @@
     }
   }
 
-  function setButtonIcon(button, icon, title, active = false) {
+  function setButtonIcon(button, icon, active = false) {
     if (!button) return;
     button.dataset.icon = icon;
-    button.title = title;
     button.classList.toggle("is-on", active);
   }
 
@@ -366,13 +361,13 @@
 
   function updateTransport() {
     const playing = !audio.paused && !audio.ended;
-    setButtonIcon(playButton, playing ? "pause" : "play", playing ? "Pause playback (Space)" : "Play playback (Space)", playing);
+    setButtonIcon(playButton, playing ? "pause" : "play", playing);
     playStatus.textContent = playing ? "ON AIR" : "STANDING BY";
     document.querySelector(".radio-air-status").classList.toggle("is-playing", playing);
     document.querySelector(".screen-rec").classList.toggle("is-playing", playing);
     if (playing) {
       if (visualsPaused) {
-        showFallback("VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+        showFallback("VISUALS PAUSED / MUSIC PLAYING", "VISUALS PAUSED");
       } else if (screen.classList.contains("is-fallback")) {
         // Keep the fallback reason set by the failed start attempt.
       } else {
@@ -403,7 +398,7 @@
     try {
       if (!visualizer && !visualsPaused) initVisualizer();
       if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-      if (visualsPaused) showFallback("VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+      if (visualsPaused) showFallback("VISUALS PAUSED / MUSIC PLAYING", "VISUALS PAUSED");
       else if (visualizer) {
         screen.classList.add("is-live");
         screen.classList.remove("is-fallback");
@@ -431,7 +426,7 @@
 
   function updateMuteButton() {
     if (!muteButton) return;
-    setButtonIcon(muteButton, "speaker", audio.muted ? "Unmute (M)" : "Mute (M)", audio.muted);
+    setButtonIcon(muteButton, "speaker", audio.muted);
   }
 
   function toggleMute() {
@@ -513,12 +508,7 @@
   }
 
   function updateShuffleButton() {
-    setButtonIcon(
-      shuffleButton,
-      "shuffle",
-      shuffleEnabled ? "Shuffle is on (S)" : "Shuffle is off (S)",
-      shuffleEnabled
-    );
+    setButtonIcon(shuffleButton, "shuffle", shuffleEnabled);
   }
 
   function toggleShuffle() {
@@ -533,7 +523,7 @@
 
   function setTheatreMode(enabled, persist = true) {
     document.documentElement.classList.toggle("radio-theatre", enabled);
-    setButtonIcon(theatreButton, "select", enabled ? "Leave theatre mode (F)" : "Enter theatre mode (F)", enabled);
+    setButtonIcon(theatreButton, "select", enabled);
     if (enabled) revealTheatreHud();
     else {
       window.clearTimeout(hudHideHandle);
@@ -559,14 +549,14 @@
   trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
   loopButton.addEventListener("click", () => {
     audio.loop = !audio.loop;
-    setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
+    setButtonIcon(loopButton, "refresh", audio.loop);
   });
   visualsButton?.addEventListener("click", () => {
     visualsPaused = !visualsPaused;
-    setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
+    setButtonIcon(visualsButton, "treestatus", visualsPaused);
     if (visualsPaused) {
       stopRendering();
-      showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+      showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / MUSIC PLAYING", "VISUALS PAUSED");
       syncPresetShuffle();
     } else {
       try {
@@ -611,9 +601,9 @@
   window.addEventListener("resize", scheduleMarqueeUpdate, { passive: true });
   if (document.fonts?.ready) document.fonts.ready.then(scheduleMarqueeUpdate);
   setTheatreMode(document.documentElement.classList.contains("radio-theatre"), false);
-  setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
+  setButtonIcon(loopButton, "refresh", audio.loop);
   updateShuffleButton();
-  setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
+  setButtonIcon(visualsButton, "treestatus", visualsPaused);
   updateMuteButton();
   audio.addEventListener("timeupdate", () => {
     currentTime.textContent = formatTime(audio.currentTime);
@@ -729,7 +719,7 @@
   document.addEventListener("focusout", () => window.setTimeout(scheduleHudHide, 0));
 
   if (reducedMotion.matches) {
-    setButtonIcon(visualsButton, "treestatus", "Resume visuals", true);
+    setButtonIcon(visualsButton, "treestatus", true);
     showFallback("VISUALS PAUSED / TAP VISUALS: ON TO ENABLE", "VISUALS PAUSED");
   }
 
