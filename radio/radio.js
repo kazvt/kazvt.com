@@ -7,7 +7,10 @@
   const fallback = document.getElementById("visualizer-fallback");
   const playButton = document.getElementById("play-toggle");
   const muteButton = document.getElementById("mute-toggle");
-  const fullscreenButton = document.getElementById("visualizer-fullscreen");
+  const theatreButton = document.getElementById("visualizer-fullscreen");
+  const loopButton = document.getElementById("loop-toggle");
+  const cycleButton = document.getElementById("preset-cycle");
+  const visualsButton = document.getElementById("visualizer-toggle");
   const playStatus = document.getElementById("air-status");
   const screenState = document.getElementById("screen-state");
   const playerMessage = document.getElementById("player-message");
@@ -20,6 +23,7 @@
   const presetName = document.getElementById("preset-name");
   const paletteSelect = document.getElementById("palette-select");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const theatreStorageKey = "kazvt-radio-theatre";
 
   let audioContext = null;
   let mediaSource = null;
@@ -56,6 +60,13 @@
 
   function setMessage(message) {
     playerMessage.textContent = message;
+  }
+
+  function setButtonIcon(button, icon, title, active = false) {
+    if (!button) return;
+    button.dataset.icon = icon;
+    button.title = title;
+    button.classList.toggle("is-on", active);
   }
 
   function showFallback(message, state) {
