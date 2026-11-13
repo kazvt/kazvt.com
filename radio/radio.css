@@ -641,6 +641,13 @@ body.radio-page {
   .radio-page button[data-icon="speaker"]::before { width: 18px; height: 20px; flex-basis: 18px; }
 }
 
+@media (max-width: 280px) {
+  .transport { gap: 1px; }
+  .radio-page .transport-button { flex-basis: 23px; width: 23px; min-height: 23px; }
+  .radio-page button[data-icon]::before { width: 14px; height: 14px; flex-basis: 14px; }
+  .radio-page button[data-icon="speaker"]::before { width: 15px; height: 17px; flex-basis: 15px; }
+}
+
 @media (max-height: 520px) {
   .radio-masthead { min-height: 27px; padding-block: 2px; }
   .radio-page main { gap: 3px; padding: 3px 5px; }
