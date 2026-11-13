@@ -473,8 +473,10 @@
     if (!option) return;
     if (recordHistory) rememberTrack(index);
     trackSelect.selectedIndex = index;
-    trackTitle.textContent = option.textContent.trim();
+    const title = option.textContent.trim();
+    setMarqueeText(trackTitle, title);
     trackArtist.textContent = option.dataset.artist || "Unknown artist";
+    updatePlaylistSelection(index, true);
     audio.pause();
     audio.src = option.value;
     audio.load();
@@ -482,8 +484,9 @@
     seek.max = "100";
     currentTime.textContent = "0:00";
     totalTime.textContent = "--:--";
+    updateRangeFill(seek);
     if (startPlaying) togglePlay();
-    else setMessage(`Ready to play: ${option.textContent.trim()}`);
+    else setMessage(`Ready to play: ${title}`);
   }
 
   function changeTrack(step) {
@@ -589,18 +592,24 @@
   });
 
   seek.addEventListener("input", () => {
+    updateRangeFill(seek);
     if (Number.isFinite(audio.duration)) {
       audio.currentTime = Number(seek.value);
       currentTime.textContent = formatTime(audio.currentTime);
     }
   });
   volume.addEventListener("input", () => {
+    updateRangeFill(volume);
     audio.volume = Number(volume.value);
     if (audio.volume > 0 && audio.muted) audio.muted = false;
     volumeValue.textContent = `${Math.round(audio.volume * 100)}%`;
     updateMuteButton();
   });
   audio.volume = Number(volume.value);
+  updateRangeFills();
+  renderPlaylist();
+  window.addEventListener("resize", scheduleMarqueeUpdate, { passive: true });
+  if (document.fonts?.ready) document.fonts.ready.then(scheduleMarqueeUpdate);
   setTheatreMode(document.documentElement.classList.contains("radio-theatre"), false);
   setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
   updateShuffleButton();
@@ -608,10 +617,15 @@
   updateMuteButton();
   audio.addEventListener("timeupdate", () => {
     currentTime.textContent = formatTime(audio.currentTime);
-    if (!seek.matches(":active")) seek.value = String(audio.currentTime || 0);
+    if (!seek.matches(":active")) {
+      seek.value = String(audio.currentTime || 0);
+      updateRangeFill(seek);
+    }
   });
   audio.addEventListener("loadedmetadata", () => {
     seek.max = String(Number.isFinite(audio.duration) ? audio.duration : 100);
+    if (!seek.matches(":active")) seek.value = String(audio.currentTime || 0);
+    updateRangeFill(seek);
     totalTime.textContent = formatTime(audio.duration);
   });
   audio.addEventListener("play", updateTransport);
@@ -690,6 +704,7 @@
       const amount = event.shiftKey ? 0.1 : 0.05;
       const nextVolume = Math.max(0, Math.min(1, Number(volume.value) + direction * amount));
       volume.value = String(nextVolume);
+      updateRangeFill(volume);
       audio.volume = nextVolume;
       if (nextVolume > 0) audio.muted = false;
       volumeValue.textContent = `${Math.round(nextVolume * 100)}%`;
