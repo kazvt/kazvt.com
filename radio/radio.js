@@ -93,7 +93,11 @@
   function initVisualizer() {
     if (visualizer) return true;
     if (mediaSource) throw new Error("The visualiser is unavailable; the audio route is still active.");
-    if (!window.butterchurn || typeof window.butterchurn.createVisualizer !== "function") {
+    // The browser UMD build exposes a module namespace whose API is under
+    // `default`; tolerate direct exports too so the pinned library can be
+    // swapped for either supported build shape without a page-level rewrite.
+    const butterchurnApi = window.butterchurn?.default ?? window.butterchurn;
+    if (!butterchurnApi || typeof butterchurnApi.createVisualizer !== "function") {
       throw new Error("The MilkDrop engine did not load.");
     }
     if (!presetKeys.length) populatePresets();
@@ -103,7 +107,7 @@
     const height = Math.max(1, bounds.height || 520);
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.35);
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    visualizer = window.butterchurn.createVisualizer(audioContext, canvas, {
+    visualizer = butterchurnApi.createVisualizer(audioContext, canvas, {
       width,
       height,
       pixelRatio,
