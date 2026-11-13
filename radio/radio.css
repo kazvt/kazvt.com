@@ -434,9 +434,9 @@ body.radio-page {
   .shuffle-control { width: 25px; }
   .radio-page .small-control { min-height: 24px; padding: 2px 4px; font-size: 7px; }
   .player-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3px 5px; padding: 4px 5px; }
-  .track-card { gap: 6px; }
-  .track-card h2 { font-size: clamp(13px, 4vw, 17px); }
-  .track-artist { font-size: clamp(7px, 2vw, 9px); }
+  .track-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
+  .track-card h2 { font-size: clamp(13px, 3.6vw, 16px); }
+  .track-artist { font-size: clamp(7px, 1.9vw, 9px); }
   .transport { gap: 3px; }
   .radio-page .transport-button,
   .radio-page .mute-control { min-height: 26px; padding-inline: 2px; font-size: 6px; letter-spacing: 0; }
