@@ -587,25 +587,19 @@ body.radio-page {
 
 
 @media (max-width: 860px) {
-  .radio-console { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
-  .visualizer-side { padding: 5px; }
-  .player-side {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
-    align-content: center;
-    gap: 4px 7px;
-    padding: 5px 7px;
+  .radio-console {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) clamp(118px, 22dvh, 190px);
   }
-  .track-card { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 9px; }
-  .track-select { grid-column: 1; font-size: clamp(14px, 2.2vw, 19px); }
-  .track-artist { grid-column: 2; min-width: 0; margin: 0; font-size: clamp(8px, 1.1vw, 11px); }
-  .transport { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
-  .radio-page .transport-button,
-  .radio-page .mute-control { min-height: 29px; font-size: clamp(7px, .9vw, 9px); }
-  .radio-page .play-button { min-height: 31px; font-size: clamp(8px, 1vw, 10px); }
-  .seek-row,
-  .volume-row { gap: 4px; grid-template-columns: 31px minmax(0, 1fr) 31px; font-size: 8px; }
-  .player-message { grid-column: 1 / -1; min-height: 0; font-size: 8px; }
+  .visualizer-side { padding: 5px; }
+  .player-side { gap: 4px; padding: 5px 7px; }
+  .playlist-heading { padding: 3px 6px; }
+  .playlist-now-playing { gap: 1px; padding: 1px 3px 3px; }
+  .now-playing-title { font-size: clamp(13px, 2.5vw, 19px); }
+  .track-artist { font-size: clamp(7px, 1vw, 9px); }
+  .playlist-track { min-height: 29px; padding-block: 2px; }
+  .deck-sliders { gap: 6px; }
+  .player-message { font-size: 8px; }
   .palette-desk { min-height: 28px; padding: 2px 6px; }
   .palette-select { height: 22px; font-size: 8px; }
 }
@@ -618,27 +612,32 @@ body.radio-page {
   .visualizer-bezel { border-width: 2px; }
   .screen-rec { gap: 4px; padding: 3px 5px; font-size: 7px; }
   .radio-page .fullscreen-control { width: 27px; height: 27px; min-height: 23px; padding: 1px; }
-  .track-strip { grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 3px; }
-  .track-strip .small-control { min-height: 23px; padding: 2px; }
-  .track-readout span { font-size: 6px; }
-  .track-readout strong { font-size: 7px; }
-  .visuals-control { width: 25px; }
-  .radio-page .small-control { min-height: 24px; padding: 1px; font-size: 7px; }
+  .transport { gap: 2px; min-height: 29px; }
+  .radio-page .transport-button {
+    flex-basis: clamp(27px, 8vw, 34px);
+    width: clamp(27px, 8vw, 34px);
+    min-height: 28px;
+    padding: 1px;
+  }
+  .radio-page .play-button { min-height: 30px; }
+  .radio-page .small-control { min-height: 24px; padding: 1px; }
   .radio-page button[data-icon]::before { width: 18px; height: 18px; flex-basis: 18px; }
   .radio-page button[data-icon="speaker"]::before { width: 20px; height: 22px; flex-basis: 20px; }
-  .player-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3px 5px; padding: 4px 5px; }
-  .track-card { grid-template-columns: minmax(0, 1fr); gap: 1px; }
-  .track-select { grid-column: 1; font-size: clamp(13px, 3.6vw, 16px); }
-  .track-artist { grid-column: 1; }
+  .player-side { gap: 3px; padding: 4px 5px; }
+  .playlist-heading { min-height: 18px; padding: 2px 5px; font-size: 8px; }
+  .playlist-heading span { font-size: 8px; }
+  .now-playing-label { font-size: 7px; }
+  .now-playing-label #track-counter { font-size: 7px; }
+  .now-playing-title { font-size: clamp(12px, 3.6vw, 17px); }
   .track-artist { font-size: clamp(7px, 1.9vw, 9px); }
-  .transport { gap: 3px; }
-  .radio-page .transport-button,
-  .radio-page .mute-control { min-height: 26px; padding-inline: 2px; font-size: 6px; letter-spacing: 0; }
-  .radio-page .play-button { min-height: 28px; font-size: 7px; }
+  .playlist-track { grid-template-columns: 22px minmax(0, 1fr); gap: 3px; min-height: 27px; padding-inline: 3px; }
+  .playlist-index { font-size: 8px; }
+  .playlist-track-name { font-size: 9px; }
+  .playlist-track-artist { font-size: 7px; }
+  .deck-sliders { gap: 4px; min-height: 20px; }
   .seek-row,
-  .volume-row { grid-template-columns: 25px minmax(0, 1fr) 25px; gap: 2px; font-size: 7px; }
-  .seek-row input,
-  .volume-row input { height: 15px; }
+  .volume-row { grid-template-columns: 26px minmax(0, 1fr) 31px; gap: 2px; font-size: 7px; }
+  .radio-page input.retro-range { height: 17px; }
   .player-message { font-size: 7px; }
   .palette-desk { min-height: 25px; padding: 2px 5px; }
   .palette-caption { font-size: 7px; }
@@ -649,10 +648,9 @@ body.radio-page {
   .radio-page main { padding: 3px; }
   .visualizer-side,
   .player-side { padding: 3px; }
-  .player-side { gap: 2px 4px; }
-  .radio-page .transport-button,
-  .radio-page .mute-control { font-size: 5.5px; }
-  .visuals-control { width: 22px; padding-inline: 2px; }
+  .player-side { gap: 2px; }
+  .radio-page .transport-button { flex-basis: 26px; width: 26px; }
+  .visuals-control { margin-left: 0; }
   .radio-page button[data-icon]::before { width: 16px; height: 16px; flex-basis: 16px; }
   .radio-page button[data-icon="speaker"]::before { width: 18px; height: 20px; flex-basis: 18px; }
 }
@@ -661,11 +659,16 @@ body.radio-page {
   .radio-masthead { min-height: 27px; padding-block: 2px; }
   .radio-page main { gap: 3px; padding: 3px 5px; }
   .visualizer-side { gap: 3px; padding: 3px; }
-  .player-side { gap: 3px 6px; padding: 3px 6px; }
-  .track-select { font-size: clamp(12px, 1.8vw, 17px); }
+  .player-side { gap: 3px; padding: 3px 6px; }
+  .playlist-now-playing { gap: 0; padding: 0 2px 2px; }
+  .now-playing-title { font-size: 12px; }
+  .playlist-now-playing .track-artist,
+  .playlist-track-artist { display: none; }
+  .playlist-track { min-height: 24px; }
   .radio-page .transport-button,
-  .radio-page .mute-control { min-height: 24px; }
-  .radio-page .play-button { min-height: 26px; }
+  .radio-page .small-control { min-height: 23px; }
+  .radio-page .play-button { min-height: 25px; }
+  .deck-sliders { min-height: 19px; }
   .seek-row,
   .volume-row { font-size: 7px; }
   .player-message { display: none; }
