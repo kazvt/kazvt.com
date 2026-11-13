@@ -194,7 +194,7 @@
       if (visualsPaused) {
         showFallback("VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
       } else if (screen.classList.contains("is-fallback")) {
-        screenState.textContent = "AUDIO ONLY";
+        // Keep the fallback reason set by the failed start attempt.
       } else {
         screen.classList.add("is-live");
         screen.classList.remove("is-fallback");
@@ -205,7 +205,9 @@
     } else {
       if (audio.ended) screenState.textContent = "END OF SIDE A";
       else if (visualsPaused) showFallback("VISUALS PAUSED", "VISUALS PAUSED");
-      else if (screen.classList.contains("is-fallback")) screenState.textContent = "AUDIO ONLY";
+      else if (screen.classList.contains("is-fallback")) {
+        // Keep the fallback reason set by the failed start attempt.
+      }
       else if (visualizer) screenState.textContent = "READY";
       stopRendering();
       syncAutoCycle();
@@ -275,6 +277,7 @@
     } else {
       try {
         if (!visualizer) initVisualizer();
+        if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
         if (audio.paused) showFallback("PRESS PLAY TO WAKE THE PICTURE", "READY");
         else {
           screen.classList.add("is-live");
