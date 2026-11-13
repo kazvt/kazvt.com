@@ -151,8 +151,13 @@ body.radio-page {
 }
 .screen-rec i { width: 6px; height: 6px; }
 .radio-page .fullscreen-control {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
   min-height: 27px;
-  padding: 4px 7px;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
   border: 1px solid var(--banner-text);
   color: var(--banner-text);
   background: color-mix(in srgb, var(--visualizer-bg) 82%, transparent);
@@ -160,6 +165,42 @@ body.radio-page {
   font-size: 8px;
   pointer-events: auto;
 }
+.radio-page button[data-icon] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 2px;
+}
+.radio-page button[data-icon]::before {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  content: "";
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  image-rendering: pixelated;
+}
+.radio-page button[data-icon="play"]::before { background-image: url("/radio/assets/icons/play.gif"); }
+.radio-page button[data-icon="pause"]::before { background-image: url("/radio/assets/icons/pause.gif"); }
+.radio-page button[data-icon="rewind"]::before { background-image: url("/radio/assets/icons/rewind.gif"); }
+.radio-page button[data-icon="refresh"]::before { background-image: url("/radio/assets/icons/refresh.gif"); }
+.radio-page button[data-icon="stepback"]::before { background-image: url("/radio/assets/icons/stepback.gif"); }
+.radio-page button[data-icon="stepforward"]::before { background-image: url("/radio/assets/icons/stepforward.gif"); }
+.radio-page button[data-icon="fastforward"]::before { background-image: url("/radio/assets/icons/fastforward.gif"); }
+.radio-page button[data-icon="search"]::before { background-image: url("/radio/assets/icons/search.gif"); }
+.radio-page button[data-icon="select"]::before { background-image: url("/radio/assets/icons/select.gif"); }
+.radio-page button[data-icon="treestatus"]::before { background-image: url("/radio/assets/icons/treestatus.gif"); }
+.radio-page button[data-icon="speaker"]::before {
+  width: 23px;
+  height: 25px;
+  flex-basis: 23px;
+  background-image: url("/radio/assets/icons/speaker.gif");
+  image-rendering: auto;
+}
+.radio-page button.is-on[data-icon]::before { filter: brightness(0) invert(1); }
+.radio-page .play-button[data-icon]::before { filter: brightness(0) invert(1); }
 
 .visualizer-bezel {
   position: relative;
