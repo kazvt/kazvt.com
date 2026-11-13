@@ -678,6 +678,10 @@ body.radio-page {
   .palette-select { height: 19px; font-size: 7px; }
 }
 
+@media (max-width: 860px) and (max-height: 520px) {
+  .radio-console { grid-template-rows: minmax(0, 1fr) clamp(84px, 22dvh, 112px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .radio-page *,
   .radio-page *::before,
