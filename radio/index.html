@@ -17,10 +17,10 @@
       } catch {}
     </script>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/radio/radio.css?v=radio-playlist-deck-20261114-v22">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-clean-status-20261114-v1">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=radio-playlist-deck-20261113-v5"></script>
+    <script defer src="/radio/radio.js?v=radio-clean-status-20261114-v1"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -29,17 +29,11 @@
     <div class="radio-site">
       <header class="radio-masthead">
         <a class="radio-home" href="/">KAZVT <span>RADIO</span></a>
-        <div class="radio-air-status"><i class="air-lamp"></i><span id="air-status">STANDBY</span></div>
       </header>
 
       <main>
         <section class="radio-console">
           <div class="visualizer-side">
-            <div class="visualizer-heading radio-hud">
-              <div class="visualizer-tools">
-                <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
-              </div>
-            </div>
             <div class="visualizer-bezel">
               <canvas id="radio-visualizer" width="960" height="520"></canvas>
               <div class="visualizer-fallback" id="visualizer-fallback">
@@ -79,7 +73,6 @@
               <span id="playlist-count">14 TRACKS</span>
             </div>
             <div class="playlist-now-playing">
-              <span class="now-playing-label"><i></i> NOW PLAYING <span id="track-counter">01 / 14</span></span>
               <div class="now-playing-title marquee-window" id="track-title"><span class="marquee-text">銀の血脈</span></div>
               <p class="track-artist" id="track-artist">本田恭之 / Yasuyuki Honda</p>
             </div>
