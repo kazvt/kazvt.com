@@ -216,13 +216,6 @@ body.radio-page {
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--visualizer-primary) 30%, transparent), inset 0 0 22px #0008;
   cursor: pointer;
 }
-.visualizer-bezel:fullscreen,
-.visualizer-bezel:-webkit-full-screen {
-  width: 100vw;
-  height: 100vh;
-  border: 0;
-  outline: 0;
-}
 .visualizer-bezel canvas {
   position: absolute;
   inset: 0;
@@ -333,9 +326,9 @@ body.radio-page {
 .radio-page .small-control:active,
 .radio-page .transport-button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--blue); }
 .radio-page .small-control.is-on { color: var(--banner-text); background: var(--blue); }
-.shuffle-control { width: 34px; font-size: 13px !important; }
+.shuffle-control { width: 34px; }
 .cycle-control,
-.visuals-control { white-space: nowrap; }
+.visuals-control { width: 34px; white-space: nowrap; }
 
 .player-side {
   display: grid;
@@ -365,7 +358,7 @@ body.radio-page {
   white-space: nowrap;
 }
 .track-artist span { padding: 0 3px; color: var(--pink); }
-.transport { display: grid; grid-template-columns: 1.1fr 1fr 1.15fr .8fr; gap: 5px; }
+.transport { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .radio-page .transport-button { min-height: 40px; padding-inline: 4px; }
 .radio-page .play-button {
   min-height: 44px;
@@ -373,6 +366,7 @@ body.radio-page {
   background: var(--banner);
   font-size: clamp(9px, .8vw, 12px);
 }
+.radio-page .play-button.is-on { background: var(--blue); }
 .radio-page .loop-button.is-on { color: var(--banner-text); background: var(--blue); }
 .radio-page .mute-control { min-height: 40px; padding-inline: 3px; }
 .seek-row,
@@ -429,9 +423,6 @@ body.radio-page {
   cursor: pointer;
 }
 
-.visualizer-bezel:fullscreen .screen-rec,
-.visualizer-bezel:fullscreen .fullscreen-control { position: fixed; }
-
 @keyframes receiver-pulse { 50% { opacity: .55; transform: scale(.88); } }
 
 @media (max-width: 860px) {
@@ -447,7 +438,7 @@ body.radio-page {
   .track-card { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 9px; }
   .track-card h2 { font-size: clamp(14px, 2.2vw, 19px); }
   .track-artist { min-width: 0; margin: 0; font-size: clamp(8px, 1.1vw, 11px); }
-  .transport { grid-column: 1 / -1; grid-template-columns: 1.2fr 1fr 1.15fr .8fr; gap: 4px; }
+  .transport { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
   .radio-page .transport-button,
   .radio-page .mute-control { min-height: 29px; font-size: clamp(7px, .9vw, 9px); }
   .radio-page .play-button { min-height: 31px; font-size: clamp(8px, 1vw, 10px); }
@@ -465,15 +456,17 @@ body.radio-page {
   .visualizer-side { gap: 3px; padding: 4px; }
   .visualizer-bezel { border-width: 2px; }
   .screen-rec { gap: 4px; padding: 3px 5px; font-size: 7px; }
-  .radio-page .fullscreen-control { min-height: 23px; padding: 2px 5px; font-size: 7px; }
+  .radio-page .fullscreen-control { width: 27px; height: 27px; min-height: 23px; padding: 1px; }
   .preset-strip { grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 3px; }
   .preset-strip .small-control { min-height: 23px; padding: 2px; }
   .preset-readout strong { font-size: 7px; }
-  .preset-controls { grid-template-columns: minmax(0, 1fr) 25px auto auto; gap: 3px; }
+  .preset-controls { grid-template-columns: minmax(0, 1fr) 25px 25px 25px; gap: 3px; }
   .select-wrap { grid-template-columns: auto minmax(0, 1fr); gap: 3px; font-size: 7px; }
   .select-wrap select { height: 24px; padding: 1px 3px; font-size: 7px; }
-  .shuffle-control { width: 25px; }
-  .radio-page .small-control { min-height: 24px; padding: 2px 4px; font-size: 7px; }
+  .shuffle-control,
+  .cycle-control,
+  .visuals-control { width: 25px; }
+  .radio-page .small-control { min-height: 24px; padding: 1px; font-size: 7px; }
   .player-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3px 5px; padding: 4px 5px; }
   .track-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
   .track-card h2 { font-size: clamp(13px, 3.6vw, 16px); }
@@ -499,10 +492,10 @@ body.radio-page {
   .player-side { gap: 2px 4px; }
   .radio-page .transport-button,
   .radio-page .mute-control { font-size: 5.5px; }
-  .preset-controls { grid-template-columns: minmax(0, 1fr) 22px auto auto; gap: 2px; }
+  .preset-controls { grid-template-columns: minmax(0, 1fr) 22px 22px 22px; gap: 2px; }
   .preset-controls .cycle-control,
   .preset-controls .visuals-control { padding-inline: 2px; font-size: 6px; }
-  .shuffle-control { width: 22px; }
+  .preset-controls .shuffle-control { width: 22px; }
 }
 
 @media (max-height: 520px) {
