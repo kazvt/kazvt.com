@@ -11,10 +11,13 @@
         if (/^p(?:[1-9]|1[0-6])$/.test(savedTheme || "")) {
           document.documentElement.dataset.theme = savedTheme;
         }
+        if (localStorage.getItem("kazvt-radio-theatre") === "on") {
+          document.documentElement.classList.add("radio-theatre");
+        }
       } catch {}
     </script>
     <link rel="stylesheet" href="/styles.css?v=username-contrast-20261113">
-    <link rel="stylesheet" href="/radio/radio.css?v=radio-visualizer-focus-20261113-v10">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-theatre-gif-controls-20261113-v11">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
     <script defer src="/radio/radio.js?v=radio-canvas-fill-20261113"></script>
@@ -35,7 +38,7 @@
             <div class="visualizer-heading">
               <div class="visualizer-tools">
                 <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
-                <button class="small-control fullscreen-control" id="visualizer-fullscreen" type="button" title="Expand the visualizer (F)">FULL SCREEN</button>
+                <button class="small-control fullscreen-control" id="visualizer-fullscreen" type="button" data-icon="select" title="Enter theatre mode (F)"></button>
               </div>
             </div>
             <div class="visualizer-bezel" title="Click the picture to play or pause">
@@ -47,17 +50,17 @@
               <div class="screen-lines"></div>
             </div>
             <div class="preset-strip">
-              <button class="small-control" id="preset-prev" type="button" title="Previous visual">◀</button>
+              <button class="small-control" id="preset-prev" type="button" data-icon="stepback" title="Previous visual"></button>
               <div class="preset-readout"><strong id="preset-name">MILKDROP PRESET</strong></div>
-              <button class="small-control" id="preset-next" type="button" title="Next visual">▶</button>
+              <button class="small-control" id="preset-next" type="button" data-icon="stepforward" title="Next visual"></button>
             </div>
             <div class="preset-controls">
               <label class="select-wrap">MODE
                 <select id="preset-select"><option>Loading visual modes…</option></select>
               </label>
-              <button class="small-control shuffle-control" id="preset-random" type="button" title="Choose a random visual">✦</button>
-              <button class="small-control cycle-control" id="preset-cycle" type="button">AUTO: OFF</button>
-              <button class="small-control visuals-control" id="visualizer-toggle" type="button">VISUALS: ON</button>
+              <button class="small-control shuffle-control" id="preset-random" type="button" data-icon="search" title="Choose a random visual"></button>
+              <button class="small-control cycle-control" id="preset-cycle" type="button" data-icon="fastforward" title="Automatic preset changes are off"></button>
+              <button class="small-control visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus" title="Pause visuals"></button>
             </div>
           </div>
 
@@ -69,10 +72,10 @@
 
             <audio id="radio-audio" preload="metadata" src="/radio/assets/gin-no-ketsumyaku-1994.mp3"></audio>
             <div class="transport">
-              <button class="transport-button play-button" id="play-toggle" type="button">PLAY</button>
-              <button class="transport-button" id="restart-track" type="button">RESTART</button>
-              <button class="transport-button loop-button" id="loop-toggle" type="button">REPEAT: OFF</button>
-              <button class="small-control mute-control" id="mute-toggle" type="button" title="Toggle mute (M)">MUTE</button>
+              <button class="transport-button play-button" id="play-toggle" type="button" data-icon="play" title="Play playback (Space)"></button>
+              <button class="transport-button" id="restart-track" type="button" data-icon="rewind" title="Restart track (R)"></button>
+              <button class="transport-button loop-button" id="loop-toggle" type="button" data-icon="refresh" title="Repeat is off"></button>
+              <button class="small-control mute-control" id="mute-toggle" type="button" data-icon="speaker" title="Mute (M)"></button>
             </div>
             <div class="seek-row">
               <span id="time-current">0:00</span>
