@@ -4,6 +4,7 @@
   const audio = document.getElementById("radio-audio");
   const canvas = document.getElementById("radio-visualizer");
   const screen = document.querySelector(".visualizer-bezel");
+  const fallback = document.getElementById("visualizer-fallback");
   const playButton = document.getElementById("play-toggle");
   const playStatus = document.getElementById("air-status");
   const screenState = document.getElementById("screen-state");
@@ -35,6 +36,9 @@
     document.body.dataset.theme = theme;
     document.documentElement.dataset.theme = theme;
     paletteButtons.forEach((button) => button.classList.toggle("is-selected", button.dataset.themeChoice === theme));
+    const themeColor = getComputedStyle(document.body).getPropertyValue("--bg").trim();
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColor && themeMeta) themeMeta.content = themeColor;
     if (persist) {
       try { localStorage.setItem("kazvt-theme", theme); } catch {}
     }
@@ -48,6 +52,13 @@
 
   function setMessage(message) {
     playerMessage.textContent = message;
+  }
+
+  function showFallback(message, state) {
+    fallback.querySelector("p").textContent = message;
+    screen.classList.remove("is-live");
+    screen.classList.add("is-fallback");
+    screenState.textContent = state;
   }
 
   function fitVisualizer() {
@@ -110,6 +121,7 @@
     visualizer.loadPreset(presetMap[currentPresetKey], 0);
     screen.classList.add("is-live");
     screen.classList.remove("is-fallback");
+    fallback.querySelector("p").textContent = "PRESS PLAY TO WAKE THE PICTURE";
     screenState.textContent = "VISUAL SIGNAL";
     fitVisualizer();
 
@@ -179,15 +191,22 @@
     document.querySelector(".radio-air-status").classList.toggle("is-playing", playing);
     document.querySelector(".screen-rec").classList.toggle("is-playing", playing);
     if (playing) {
-      screenState.textContent = screen.classList.contains("is-fallback")
-        ? "AUDIO ONLY"
-        : (visualsPaused ? "VISUALS PAUSED" : "VISUAL SIGNAL");
-      if (!visualsPaused) startRendering();
+      if (visualsPaused) {
+        showFallback("VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+      } else if (screen.classList.contains("is-fallback")) {
+        screenState.textContent = "AUDIO ONLY";
+      } else {
+        screen.classList.add("is-live");
+        screen.classList.remove("is-fallback");
+        screenState.textContent = "VISUAL SIGNAL";
+        startRendering();
+      }
       syncAutoCycle();
     } else {
       if (audio.ended) screenState.textContent = "END OF SIDE A";
+      else if (visualsPaused) showFallback("VISUALS PAUSED", "VISUALS PAUSED");
       else if (screen.classList.contains("is-fallback")) screenState.textContent = "AUDIO ONLY";
-      else if (visualizer) screenState.textContent = visualsPaused ? "VISUALS PAUSED" : "READY";
+      else if (visualizer) screenState.textContent = "READY";
       stopRendering();
       syncAutoCycle();
     }
@@ -200,15 +219,16 @@
     }
 
     try {
-      if (!visualizer) initVisualizer();
+      if (!visualizer && !visualsPaused) initVisualizer();
       if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-      screen.classList.add("is-live");
-      screen.classList.remove("is-fallback");
+      if (visualsPaused) showFallback("VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+      else if (visualizer) {
+        screen.classList.add("is-live");
+        screen.classList.remove("is-fallback");
+      }
       setMessage("You're tuned in. Enjoy the transmission.");
     } catch (error) {
-      screen.classList.add("is-fallback");
-      screen.classList.remove("is-live");
-      screenState.textContent = "AUDIO ONLY";
+      showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE", "AUDIO ONLY");
       setMessage("Audio will play, but this browser could not start the WebGL visualiser.");
       console.warn("Radio visualiser unavailable:", error);
     }
@@ -217,6 +237,7 @@
     if (playRequest && typeof playRequest.catch === "function") {
       playRequest.catch(() => {
         setMessage("The track could not start. Check the audio file connection and try again.");
+        if (visualizer && !visualsPaused) showFallback("PRESS PLAY TO WAKE THE PICTURE", "READY");
         updateTransport();
       });
     }
@@ -248,9 +269,24 @@
     visualsPaused = !visualsPaused;
     event.currentTarget.textContent = visualsPaused ? "VISUALS: OFF" : "VISUALS: ON";
     event.currentTarget.classList.toggle("is-on", visualsPaused);
-    screenState.textContent = visualsPaused ? "VISUALS PAUSED" : (audio.paused ? "READY" : "VISUAL SIGNAL");
-    if (visualsPaused) stopRendering();
-    else startRendering();
+    if (visualsPaused) {
+      stopRendering();
+      showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / THE MUSIC KEEPS PLAYING", "VISUALS PAUSED");
+    } else {
+      try {
+        if (!visualizer) initVisualizer();
+        if (audio.paused) showFallback("PRESS PLAY TO WAKE THE PICTURE", "READY");
+        else {
+          screen.classList.add("is-live");
+          screen.classList.remove("is-fallback");
+          screenState.textContent = "VISUAL SIGNAL";
+          startRendering();
+        }
+      } catch (error) {
+        showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE", "AUDIO ONLY");
+        console.warn("Radio visualiser unavailable:", error);
+      }
+    }
   });
 
   seek.addEventListener("input", () => {
@@ -296,6 +332,7 @@
       visualToggle.textContent = "VISUALS: OFF";
       visualToggle.classList.add("is-on");
     }
+    showFallback("VISUALS PAUSED / TAP VISUALS: ON TO ENABLE", "VISUALS PAUSED");
   }
 
   setTheme(document.body.dataset.theme || "p16", false);
