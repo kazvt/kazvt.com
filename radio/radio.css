@@ -485,12 +485,14 @@ body.radio-page {
   text-align: left;
   transition: background-color 160ms ease, color 160ms ease, box-shadow 120ms ease;
 }
-.playlist-track:hover,
+.playlist-track:hover {
+  background: color-mix(in srgb, var(--paper) 76%, var(--pink));
+}
 .playlist-track:focus-visible {
   background: color-mix(in srgb, var(--paper) 76%, var(--pink));
-  box-shadow: 2px 2px 0 var(--pink);
+  box-shadow: inset 3px 0 var(--blue);
+  outline: none;
 }
-.playlist-track:focus-visible { outline: 2px dashed var(--blue); outline-offset: -2px; }
 .playlist-track.is-current {
   border-left-color: var(--pink);
   color: var(--banner-text);
