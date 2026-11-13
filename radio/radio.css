@@ -691,5 +691,6 @@ body.radio-page {
   .radio-document.radio-theatre .radio-hud,
   .radio-document.radio-theatre.radio-hud-hidden .radio-hud {
     transition-duration: .01ms;
+    transition-delay: 0s;
   }
 }

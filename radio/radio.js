@@ -525,6 +525,7 @@
 
   document.addEventListener("pointermove", revealTheatreHud, { passive: true });
   document.addEventListener("pointerdown", revealTheatreHud, { passive: true });
+  document.addEventListener("wheel", revealTheatreHud, { passive: true });
   document.addEventListener("focusin", revealTheatreHud);
   document.addEventListener("focusout", () => window.setTimeout(scheduleHudHide, 0));
 
