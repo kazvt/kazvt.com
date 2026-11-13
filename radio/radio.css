@@ -150,21 +150,6 @@ body.radio-page {
   letter-spacing: .08em;
 }
 .screen-rec i { width: 6px; height: 6px; }
-.radio-page .fullscreen-control {
-  display: inline-flex;
-  width: 34px;
-  height: 34px;
-  min-height: 27px;
-  align-items: center;
-  justify-content: center;
-  padding: 1px;
-  border: 1px solid var(--banner-text);
-  color: var(--banner-text);
-  background: color-mix(in srgb, var(--visualizer-bg) 82%, transparent);
-  box-shadow: 2px 2px 0 var(--pink);
-  font-size: 8px;
-  pointer-events: auto;
-}
 .radio-page button[data-icon] {
   display: inline-flex;
   align-items: center;
@@ -613,7 +598,6 @@ body.radio-page {
   .visualizer-side { gap: 3px; padding: 4px; }
   .visualizer-bezel { border-width: 2px; }
   .screen-rec { gap: 4px; padding: 3px 5px; font-size: 7px; }
-  .radio-page .fullscreen-control { width: 27px; height: 27px; min-height: 23px; padding: 1px; }
   .transport { gap: 2px; min-height: 29px; }
   .radio-page .transport-button {
     flex-basis: clamp(27px, 8vw, 34px);
