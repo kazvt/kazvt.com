@@ -283,8 +283,6 @@ body.radio-page {
 .radio-page .small-control,
 .radio-page .transport-button {
   display: inline-flex;
-  flex: 0 0 clamp(29px, 3vw, 38px);
-  width: clamp(29px, 3vw, 38px);
   min-width: 0;
   min-height: 32px;
   align-items: center;
@@ -300,6 +298,10 @@ body.radio-page {
   letter-spacing: .025em;
   transition: transform 120ms ease, box-shadow 120ms ease, color 180ms ease, background-color 180ms ease;
 }
+.radio-page .transport-button {
+  flex: 0 0 clamp(29px, 3vw, 38px);
+  width: clamp(29px, 3vw, 38px);
+}
 .radio-page .small-control:hover,
 .radio-page .transport-button:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--blue); }
 .radio-page .small-control:active,
@@ -312,7 +314,6 @@ body.radio-page {
   background: var(--banner);
 }
 .radio-page .play-button.is-on { background: var(--blue); }
-.radio-page .mute-control { flex-basis: clamp(29px, 3vw, 38px); }
 .radio-page .visuals-control { margin-left: 2px; }
 .player-message {
   flex: 0 1 auto;
