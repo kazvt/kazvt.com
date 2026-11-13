@@ -4,7 +4,6 @@
   const audio = document.getElementById("radio-audio");
   const canvas = document.getElementById("radio-visualizer");
   const screen = document.querySelector(".visualizer-bezel");
-  const fallback = document.getElementById("visualizer-fallback");
   const playButton = document.getElementById("play-toggle");
   const playStatus = document.getElementById("air-status");
   const screenState = document.getElementById("screen-state");
@@ -101,7 +100,13 @@
     if (!visualizer) throw new Error("This browser could not start the WebGL visualiser.");
 
     mediaSource = audioContext.createMediaElementSource(audio);
-    visualizer.connectAudio(mediaSource);
+    try {
+      visualizer.connectAudio(mediaSource);
+    } catch (error) {
+      mediaSource.connect(audioContext.destination);
+      visualizer = null;
+      throw error;
+    }
     visualizer.loadPreset(presetMap[currentPresetKey], 0);
     screen.classList.add("is-live");
     screen.classList.remove("is-fallback");
@@ -174,11 +179,14 @@
     document.querySelector(".radio-air-status").classList.toggle("is-playing", playing);
     document.querySelector(".screen-rec").classList.toggle("is-playing", playing);
     if (playing) {
-      screenState.textContent = visualsPaused ? "VISUALS PAUSED" : "VISUAL SIGNAL";
+      screenState.textContent = screen.classList.contains("is-fallback")
+        ? "AUDIO ONLY"
+        : (visualsPaused ? "VISUALS PAUSED" : "VISUAL SIGNAL");
       if (!visualsPaused) startRendering();
       syncAutoCycle();
     } else {
       if (audio.ended) screenState.textContent = "END OF SIDE A";
+      else if (screen.classList.contains("is-fallback")) screenState.textContent = "AUDIO ONLY";
       else if (visualizer) screenState.textContent = visualsPaused ? "VISUALS PAUSED" : "READY";
       stopRendering();
       syncAutoCycle();

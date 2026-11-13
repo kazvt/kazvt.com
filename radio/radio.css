@@ -128,7 +128,7 @@ body.radio-page {
 .preset-readout { min-width: 0; text-align: center; line-height: 1.4; }
 .preset-readout span { display: block; font-size: 9px; letter-spacing: .15em; color: var(--blue); }
 .preset-readout strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
-.preset-controls { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 8px; align-items: end; margin-top: 10px; }
+.preset-controls { display: grid; grid-template-columns: minmax(0,1fr) repeat(3,auto); gap: 8px; align-items: end; margin-top: 10px; }
 .select-wrap { display: grid; gap: 5px; min-width: 0; font-size: 9px; font-weight: 700; letter-spacing: .1em; }
 .select-wrap select { width: 100%; min-width: 0; height: 34px; padding: 4px 8px; border: 2px solid var(--ink); border-radius: 0; color: var(--ink); background: var(--paper); }
 
@@ -173,6 +173,7 @@ body.radio-page {
 .radio-page .small-control.is-on { color: var(--banner-text); background: var(--blue); }
 .shuffle-control { white-space: nowrap; }
 .cycle-control { white-space: nowrap; }
+.visuals-control { white-space: nowrap; }
 
 .seek-row, .volume-row { display: grid; grid-template-columns: 42px minmax(0,1fr) 42px; gap: 8px; align-items: center; font: 10px monospace; }
 .seek-row span:last-child { text-align: right; }
