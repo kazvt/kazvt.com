@@ -467,6 +467,8 @@ body.radio-page {
   .cycle-control,
   .visuals-control { width: 25px; }
   .radio-page .small-control { min-height: 24px; padding: 1px; font-size: 7px; }
+  .radio-page button[data-icon]::before { width: 18px; height: 18px; flex-basis: 18px; }
+  .radio-page button[data-icon="speaker"]::before { width: 20px; height: 22px; flex-basis: 20px; }
   .player-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3px 5px; padding: 4px 5px; }
   .track-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
   .track-card h2 { font-size: clamp(13px, 3.6vw, 16px); }
@@ -496,6 +498,8 @@ body.radio-page {
   .preset-controls .cycle-control,
   .preset-controls .visuals-control { padding-inline: 2px; font-size: 6px; }
   .preset-controls .shuffle-control { width: 22px; }
+  .radio-page button[data-icon]::before { width: 16px; height: 16px; flex-basis: 16px; }
+  .radio-page button[data-icon="speaker"]::before { width: 18px; height: 20px; flex-basis: 18px; }
 }
 
 @media (max-height: 520px) {
@@ -524,4 +528,133 @@ body.radio-page {
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* CSS theatre layout, intentionally separate from the browser Fullscreen API.
+   The saved root class is applied in the document head before this stylesheet. */
+.radio-document.radio-theatre,
+.radio-document.radio-theatre body.radio-page {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.radio-document.radio-theatre body.radio-page {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+}
+.radio-document.radio-theatre .radio-site {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  border: 0;
+  box-shadow: none;
+}
+.radio-document.radio-theatre .radio-masthead,
+.radio-document.radio-theatre .palette-desk { display: none; }
+.radio-document.radio-theatre .radio-page main {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+.radio-document.radio-theatre .radio-console {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.radio-document.radio-theatre .visualizer-side {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.radio-document.radio-theatre .visualizer-heading {
+  z-index: 9;
+  top: 10px;
+  right: 10px;
+}
+.radio-document.radio-theatre .visualizer-bezel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  box-shadow: none;
+}
+.radio-document.radio-theatre .preset-strip,
+.radio-document.radio-theatre .preset-controls {
+  position: absolute;
+  z-index: 8;
+  left: 14px;
+  width: min(34rem, calc(100vw - 380px));
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--ink) 50%, transparent);
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--pink) 72%, transparent);
+}
+.radio-document.radio-theatre .preset-strip { bottom: 58px; }
+.radio-document.radio-theatre .preset-controls { bottom: 12px; }
+.radio-document.radio-theatre .player-side {
+  position: absolute;
+  z-index: 10;
+  right: 14px;
+  bottom: 12px;
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--paper-alt) 94%, transparent);
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--pink) 82%, transparent), 5px 5px 0 color-mix(in srgb, var(--blue) 55%, transparent);
+}
+
+@media (max-width: 860px) {
+  .radio-document.radio-theatre .preset-strip,
+  .radio-document.radio-theatre .preset-controls {
+    left: 10px;
+    width: min(340px, calc(100vw - 64px));
+  }
+  .radio-document.radio-theatre .preset-strip { top: 10px; bottom: auto; }
+  .radio-document.radio-theatre .preset-controls { top: 48px; bottom: auto; }
+  .radio-document.radio-theatre .player-side {
+    right: 10px;
+    bottom: 10px;
+    width: min(340px, calc(100vw - 20px));
+  }
+}
+@media (max-width: 620px) {
+  .radio-document.radio-theatre .preset-strip,
+  .radio-document.radio-theatre .preset-controls {
+    left: 8px;
+    width: min(330px, calc(100vw - 56px));
+  }
+  .radio-document.radio-theatre .preset-strip { top: 8px; }
+  .radio-document.radio-theatre .preset-controls {
+    top: 43px;
+    grid-template-columns: minmax(0, 1fr) 22px 22px 22px;
+  }
+  .radio-document.radio-theatre .player-side {
+    right: 8px;
+    bottom: 8px;
+    width: min(330px, calc(100vw - 16px));
+  }
+  .radio-document.radio-theatre .visualizer-heading { top: 8px; right: 8px; }
+  .radio-document.radio-theatre .screen-rec { display: none; }
+}
+@media (max-height: 520px) {
+  .radio-document.radio-theatre .preset-strip { bottom: 43px; }
+  .radio-document.radio-theatre .preset-controls { bottom: 5px; }
+  .radio-document.radio-theatre .player-side { gap: 3px 6px; padding: 3px 6px; }
 }
