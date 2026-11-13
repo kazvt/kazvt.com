@@ -17,10 +17,10 @@
       } catch {}
     </script>
     <link rel="stylesheet" href="/styles.css?v=username-contrast-20261113">
-    <link rel="stylesheet" href="/radio/radio.css?v=radio-idle-graphic-20261113-v14">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-theatre-hud-autoshuffle-20261113-v15">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=radio-track-library-20261113-v1"></script>
+    <script defer src="/radio/radio.js?v=radio-theatre-hud-autoshuffle-20261113-v2"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -35,7 +35,7 @@
       <main>
         <section class="radio-console">
           <div class="visualizer-side">
-            <div class="visualizer-heading">
+            <div class="visualizer-heading radio-hud">
               <div class="visualizer-tools">
                 <span class="screen-rec"><i></i> <span id="screen-state">READY</span></span>
                 <button class="small-control fullscreen-control" id="visualizer-fullscreen" type="button" data-icon="select" title="Enter theatre mode (F)"></button>
@@ -49,22 +49,17 @@
               </div>
               <div class="screen-lines"></div>
             </div>
-            <div class="preset-strip">
-              <button class="small-control" id="preset-prev" type="button" data-icon="stepback" title="Previous visual"></button>
-              <div class="preset-readout"><strong id="preset-name">MILKDROP PRESET</strong></div>
-              <button class="small-control" id="preset-next" type="button" data-icon="stepforward" title="Next visual"></button>
+            <div class="track-strip radio-hud">
+              <button class="small-control" id="track-prev" type="button" data-icon="stepback" title="Previous track (P)"></button>
+              <div class="track-readout"><span>NOW PLAYING</span><strong id="track-title">銀の血脈</strong></div>
+              <button class="small-control" id="track-next" type="button" data-icon="stepforward" title="Next track (N)"></button>
             </div>
-            <div class="preset-controls">
-              <label class="select-wrap">MODE
-                <select id="preset-select"><option>Loading visual modes…</option></select>
-              </label>
-              <button class="small-control shuffle-control" id="preset-random" type="button" data-icon="search" title="Choose a random visual"></button>
-              <button class="small-control cycle-control" id="preset-cycle" type="button" data-icon="fastforward" title="Automatic preset changes are off"></button>
+            <div class="visualizer-controls radio-hud">
               <button class="small-control visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus" title="Pause visuals"></button>
             </div>
           </div>
 
-          <div class="player-side">
+          <div class="player-side radio-hud">
             <div class="track-card">
               <select class="track-select" id="track-select" title="Choose a song">
                 <option value="/radio/assets/gin-no-ketsumyaku-1994.mp3" data-artist="本田恭之 / Yasuyuki Honda" selected>銀の血脈</option>
