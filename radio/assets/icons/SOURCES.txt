@@ -1,0 +1,11 @@
+Radio control GIF sources
+
+The matching 24x24 transport and interface GIFs are from Princeton's GrowingTree
+media-control set:
+https://algs4.cs.princeton.edu/GrowingTree/edu/princeton/cs/algs4/growingtree/framework/
+
+The animated speaker GIF is the archived GeoCities asset speaker1.gif from
+Eureka Enterprises 6057, captured by the Internet Archive on 2009-10-26:
+https://web.archive.org/web/20091026124217/http://geocities.com/Eureka/Enterprises/6057/speaker1.gif
+
+The speaker asset's original license was not stated in the archive record.
