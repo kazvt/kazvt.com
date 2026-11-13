@@ -320,7 +320,7 @@ body.radio-page {
   min-width: 0;
   overflow: hidden;
   margin: 0 0 0 auto;
-  color: var(--blue);
+  color: var(--ink);
   font-size: clamp(7px, .62vw, 9px);
   line-height: 1.2;
   text-align: right;
@@ -433,7 +433,7 @@ body.radio-page {
   align-items: center;
   gap: 5px;
   min-width: 0;
-  color: var(--blue);
+  color: var(--ink);
   font-size: 8px;
   font-weight: 700;
   letter-spacing: .1em;
@@ -512,7 +512,7 @@ body.radio-page {
   box-shadow: inset 3px 0 var(--pink);
 }
 .playlist-index {
-  color: var(--blue);
+  color: var(--ink);
   font: 9px monospace;
   text-align: center;
 }
