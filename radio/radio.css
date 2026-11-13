@@ -304,9 +304,9 @@ body.radio-page {
 }
 
 .eyebrow { margin-bottom: 4px; font-size: clamp(8px, .9vw, 10px); }
-.radio-intro h1 { font-size: clamp(22px, 4.1vh, 38px); line-height: 1; }
+.radio-intro h1 { font-size: clamp(22px, 4.1vh, 38px); line-height: 1.45; }
 .radio-intro h1 span { margin-top: 3px; }
-.intro-note { margin-top: 5px; font-size: clamp(9px, 1.45vh, 13px); line-height: 1.25; }
+.intro-note { max-width: 100%; margin-top: 3px; font-size: clamp(9px, 1.45vh, 13px); line-height: 1.25; white-space: normal; overflow-wrap: anywhere; }
 
 .radio-console {
   grid-template-columns: minmax(0, 1.45fr) minmax(270px, .85fr);
@@ -356,7 +356,8 @@ body.radio-page {
 .tuner-window { min-width: 0; padding: clamp(6px, .8vw, 10px); }
 .frequency-display { padding: 6px 2px 2px; }
 .frequency-display strong { font-size: clamp(25px, 3.5vw, 40px); }
-.track-card h2 { margin-top: 4px; font-size: clamp(20px, 2.7vw, 32px); }
+.track-card { overflow: hidden; }
+.track-card h2 { margin-top: 4px; font-size: clamp(20px, 2.7vw, 32px); line-height: 1.2; }
 .track-artist { margin-top: 3px; font-size: clamp(11px, 1.2vw, 14px); }
 .track-genre { margin-top: 4px; font-size: clamp(7px, .7vw, 9px); }
 .radio-page .transport-button { min-height: clamp(32px, 5vh, 42px); padding: 5px 6px; font-size: clamp(8px, .75vw, 10px); }
@@ -398,7 +399,7 @@ body.radio-page {
   .radio-air-status { grid-column: auto; grid-row: auto; font-size: 8px; }
   .radio-page main { gap: 5px; padding: 6px; }
   .radio-intro { padding-inline: 2px; }
-  .radio-intro h1 { font-size: clamp(20px, 4.3vh, 30px); }
+  .radio-intro h1 { font-size: clamp(16px, 3vh, 24px); line-height: 1.4; }
   .radio-console {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, .88fr) minmax(0, 1.12fr);
@@ -450,13 +451,22 @@ body.radio-page {
   .palette-swatches { gap: 3px; }
   .palette-swatches button { aspect-ratio: 1.8; }
   .radio-footer { justify-content: center; padding: 3px 6px; }
+  .preset-controls { grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, .42fr)); gap: 3px; }
+  .preset-controls .select-wrap { grid-column: auto; }
+  .preset-controls .select-wrap select { height: 26px; padding: 2px 3px; font-size: 7px; }
+  .preset-controls .small-control { min-width: 0; min-height: 26px; padding: 2px; overflow: hidden; font-size: 6px; letter-spacing: 0; text-overflow: ellipsis; white-space: nowrap; }
+  .track-card h2 { font-size: clamp(14px, 3.8vw, 18px); line-height: 1.25; white-space: nowrap; }
+  .track-artist { overflow: hidden; font-size: 8px; white-space: nowrap; text-overflow: ellipsis; }
+  .track-genre { overflow-wrap: anywhere; }
+  .player-message { overflow: hidden; font-size: 7px; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+  .station-line { min-width: 0; overflow: hidden; font-size: 6px; letter-spacing: 0; white-space: nowrap; }
 }
 
 @media (max-height: 700px) {
   .radio-page main { gap: 5px; padding-block: 5px; }
   .radio-intro .eyebrow,
   .radio-intro .intro-note { display: none; }
-  .radio-intro h1 { font-size: clamp(18px, 4.2vh, 30px); }
+  .radio-intro h1 { font-size: clamp(16px, 3.6vh, 27px); line-height: 1.4; }
   .palette-desk { padding-block: 4px; }
   .palette-caption { margin-bottom: 3px; }
   .radio-shortcuts { padding-block: 4px; }
