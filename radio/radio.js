@@ -384,6 +384,10 @@
     updateMuteButton();
   });
   audio.volume = Number(volume.value);
+  setTheatreMode(document.documentElement.classList.contains("radio-theatre"), false);
+  setButtonIcon(loopButton, "refresh", audio.loop ? "Repeat is on" : "Repeat is off", audio.loop);
+  setButtonIcon(cycleButton, "fastforward", "Automatic preset changes are off", false);
+  setButtonIcon(visualsButton, "treestatus", visualsPaused ? "Resume visuals" : "Pause visuals", visualsPaused);
   updateMuteButton();
   audio.addEventListener("timeupdate", () => {
     currentTime.textContent = formatTime(audio.currentTime);
@@ -409,6 +413,7 @@
   });
   window.addEventListener("storage", (event) => {
     if (event.key === "kazvt-theme" && event.newValue) setTheme(event.newValue, false);
+    if (event.key === theatreStorageKey) setTheatreMode(event.newValue === "on", false);
   });
   paletteSelect?.addEventListener("change", () => setTheme(paletteSelect.value));
 
@@ -458,7 +463,7 @@
     } else if (key === "m" && !event.repeat) {
       toggleMute();
     } else if (key === "f" && !event.repeat) {
-      toggleFullscreen();
+      toggleTheatreMode();
     } else if (key === "r" && !event.repeat) {
       restartTrack();
     } else if (key === "n" && !event.repeat) {
@@ -469,11 +474,7 @@
   });
 
   if (reducedMotion.matches) {
-    const visualToggle = document.getElementById("visualizer-toggle");
-    if (visualToggle) {
-      visualToggle.textContent = "VISUALS: OFF";
-      visualToggle.classList.add("is-on");
-    }
+    setButtonIcon(visualsButton, "treestatus", "Resume visuals", true);
     showFallback("VISUALS PAUSED / TAP VISUALS: ON TO ENABLE", "VISUALS PAUSED");
   }
 
