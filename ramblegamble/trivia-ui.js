@@ -335,12 +335,15 @@ import {
     html += '<p class="rg-editor-hint">Fill text, an image URL, or both. Select the radio button for the correct choice.</p>';
     const options = padOptions(content.options, format.optionCount);
     options.forEach((option, index) => {
-      const fixedNumber = format.mode === "number-grid" ? String(index + 1) : "";
-      const textPlaceholder = fixedNumber || "Option " + String(index + 1).padStart(2, "0");
       html += '<div class="rg-option-row" data-option-row="' + index + '" data-asset-id="' + esc(option.asset || "") + '">';
-      html += '<input type="text" data-option-label placeholder="' + esc(textPlaceholder) + '" value="' + esc(option.label || "") + '" aria-label="Option ' + (index + 1) + ' text">';
-      html += '<input type="url" data-option-image placeholder="Image URL (optional)" value="' + esc(option.image || "") + '" aria-label="Option ' + (index + 1) + ' image URL">';
-      html += '<label class="rg-option-upload">FILE<input type="file" data-option-file accept="image/*" aria-label="Upload image for option ' + (index + 1) + '"></label>';
+      if (format.mode === "number-grid") {
+        html += '<input type="hidden" data-option-label value="' + (index + 1) + '"><input type="hidden" data-option-image value=""><span>NUMBER ' + String(index + 1).padStart(2, "0") + '</span>';
+      } else {
+        const textPlaceholder = "Option " + String(index + 1).padStart(2, "0");
+        html += '<input type="text" data-option-label placeholder="' + esc(textPlaceholder) + '" value="' + esc(option.label || "") + '" aria-label="Option ' + (index + 1) + ' text">';
+        html += '<input type="url" data-option-image placeholder="Image URL (optional)" value="' + esc(option.image || "") + '" aria-label="Option ' + (index + 1) + ' image URL">';
+        html += '<label class="rg-option-upload">FILE<input type="file" data-option-file accept="image/*" aria-label="Upload image for option ' + (index + 1) + '"></label>';
+      }
       html += '<input type="radio" name="rg-correct-option" data-option-correct aria-label="Mark option ' + (index + 1) + ' correct" ' + (option.correct ? "checked" : "") + ">";
       html += '</div>';
     });
@@ -648,7 +651,7 @@ import {
       if (option.image || option.asset) addImageToNode(button, option.image, option.asset);
       const label = document.createElement("span");
       const blankOption = format.blankOption && index === options.length - 1;
-      label.textContent = option.label || (blankOption ? "BLANK" : (option.image || option.asset ? "" : (format.mode === "number-grid" ? String(index + 1) : "OPTION " + String(index + 1).padStart(2, "0"))));
+      label.textContent = format.mode === "number-grid" ? String(index + 1) : option.label || (blankOption ? "BLANK" : (option.image || option.asset ? "" : "OPTION " + String(index + 1).padStart(2, "0")));
       button.append(label);
       button.addEventListener("click", () => {
         $$(".rg-answer-option", stageItems).forEach((other) => other.setAttribute("aria-pressed", "false"));
