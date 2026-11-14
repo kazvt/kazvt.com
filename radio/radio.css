@@ -452,6 +452,7 @@ body.radio-page {
   line-height: 1.15;
   white-space: nowrap;
 }
+.playlist-track:nth-child(-n+14) .playlist-track-name { font-weight: 400; }
 .playlist-track-artist {
   display: block;
   min-width: 0;
