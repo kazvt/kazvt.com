@@ -78,6 +78,12 @@ body.ramble-page {
   will-change: left, top, width;
 }
 
+.rg-billboard.rg-billboard-live {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .rg-billboard iframe {
   display: block;
   width: 100%;

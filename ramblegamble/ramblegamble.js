@@ -524,7 +524,7 @@ import {
       const worldWidth = 1.04;
       const worldHeight = worldWidth * 9 / 16;
       const panel = document.createElement("div");
-      panel.className = "rg-billboard";
+      panel.className = source.source ? "rg-billboard rg-billboard-live" : "rg-billboard";
       panel.dataset.contestant = source.id;
       panel.setAttribute("aria-label", `${source.label} browser-source billboard`);
 
