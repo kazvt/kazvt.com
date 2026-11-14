@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { resolvePointClick } from "./point-click-routing.js?v=point-click-20261114-v1";
 
 (() => {
   "use strict";
@@ -327,22 +328,39 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const pointer = new THREE.Vector2();
   let downPoint = null;
 
-  function getMachineAt(clientX, clientY) {
+  function getNamedPart(hit, model, knownNames) {
+    for (let object = hit?.object; object && object !== model; object = object.parent) {
+      const name = object.name.toLowerCase();
+      if (knownNames.has(name)) return name;
+    }
+    return "";
+  }
+
+  function getSceneInteractionAt(clientX, clientY) {
     const bounds = canvas.getBoundingClientRect();
     pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
-    if (wheelHit && slotHit) return wheelHit.distance <= slotHit.distance ? "wheel" : "slot";
-    if (wheelHit) return "wheel";
-    if (slotHit) return "slot";
-    return "";
+    const hit = wheelHit && slotHit
+      ? (wheelHit.distance <= slotHit.distance ? { hit: wheelHit, machine: "roulette", model: rouletteModel } : { hit: slotHit, machine: "slot", model: slotsModel })
+      : wheelHit
+        ? { hit: wheelHit, machine: "roulette", model: rouletteModel }
+        : slotHit
+          ? { hit: slotHit, machine: "slot", model: slotsModel }
+          : null;
+    if (!hit) return null;
+    const partNames = hit.machine === "roulette"
+      ? new Set(["center", "wheel", "rim", "ball"])
+      : new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
+    const part = getNamedPart(hit.hit, hit.model, partNames);
+    return { machine: hit.machine, part, action: resolvePointClick(hit.machine, part) };
   }
 
   function updatePointer(event) {
     if (event.pointerType === "touch" || !camera || event.buttons) return;
-    preview.classList.toggle("is-hovering", Boolean(getMachineAt(event.clientX, event.clientY)));
+    preview.classList.toggle("is-hovering", Boolean(getSceneInteractionAt(event.clientX, event.clientY)));
   }
 
   function pickMachine(event) {
@@ -350,9 +368,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const distance = Math.hypot(event.clientX - downPoint.x, event.clientY - downPoint.y);
     downPoint = null;
     if (distance > 7) return;
-    const machine = getMachineAt(event.clientX, event.clientY);
-    if (machine === "wheel") startWheelSpin();
-    else if (machine === "slot") startLeverPull();
+    const interaction = getSceneInteractionAt(event.clientX, event.clientY);
+    if (interaction?.action === "spin-wheel") startWheelSpin();
+    else if (interaction?.action === "pull-lever") startLeverPull();
+    else if (interaction?.action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
+    else if (interaction?.action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
   }
 
   canvas.addEventListener("pointermove", updatePointer);
@@ -365,6 +385,17 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     preview.classList.remove("is-hovering");
   });
   canvas.addEventListener("pointerleave", () => preview.classList.remove("is-hovering"));
+
+  canvas.addEventListener("keydown", (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const key = event.key.toLowerCase();
+    if (key === "r") startWheelSpin();
+    else if (key === "s") startLeverPull();
+    else if (key === "g") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
+    else if (key === "t") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
+    else return;
+    event.preventDefault();
+  });
 
   window.addEventListener("rg:spin-wheel", startWheelSpin);
   window.addEventListener("rg:pull-slots", startLeverPull);
