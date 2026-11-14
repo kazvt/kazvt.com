@@ -5,6 +5,7 @@ import {
   SPECIAL_ROUNDS,
   isChoiceMode,
   resolveRoundFormat,
+  resolveRoundMode,
 } from "./trivia-data.js";
 
 (() => {
@@ -161,6 +162,7 @@ import {
       }
     }
 
+    content.mode = resolveRoundMode(round, difficulty, drafts.rounds[round] || {});
     if (!modeNames[content.mode]) content.mode = format.mode;
     content.question = String(content.question || "");
     content.subtitle = String(content.subtitle || "");

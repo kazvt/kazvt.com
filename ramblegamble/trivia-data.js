@@ -83,6 +83,20 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
   return format;
 }
 
+export function resolveRoundMode(roundId, difficulty = 1, levelDrafts = {}) {
+  const roundNumber = Number.parseInt(roundId, 10);
+  if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 36) return baseFormat.mode;
+  const rules = ROUND_RULES[roundNumber] || {};
+  const targetDifficulty = Math.max(1, Math.min(5, Number(difficulty) || 1));
+  let mode = baseFormat.mode;
+  for (let level = 1; level <= targetDifficulty; level += 1) {
+    if (rules[level]?.mode) mode = rules[level].mode;
+    const override = levelDrafts?.[level]?.mode;
+    if (typeof override === "string" && MODE_NAMES[override]) mode = override;
+  }
+  return mode;
+}
+
 export const MODE_NAMES = Object.freeze({
   "choice-text": "Text choices",
   "choice-image": "Image choices",
