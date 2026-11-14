@@ -199,7 +199,7 @@
       const darkThemeIcon = document.getElementById("darkThemeIcon");
       const themeStorageKey = "kazvt-liquid-theme-v1";
       let gl, program, buffer, locations = {};
-      let paused = false, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0;
+      let paused = false, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0, frameRequest = 0;
       let theaterMode = false, theaterControlsTimer = 0;
       let viewWidth = 1, viewHeight = 1, dpr = 1, wrapMargin = 0;
 
@@ -369,7 +369,8 @@
       }
 
       function initWebGL() {
-        gl = canvas.getContext("webgl", { alpha: false, antialias: false, preserveDrawingBuffer: true, powerPreference: "high-performance" });
+        const contextOptions = { alpha: false, antialias: false, preserveDrawingBuffer: true, powerPreference: "high-performance" };
+        gl = canvas.getContext("webgl", contextOptions) || canvas.getContext("experimental-webgl", contextOptions);
         if (!gl) throw new Error("WebGL is unavailable. Try enabling hardware acceleration in your browser.");
         const vs = compileShader(gl.VERTEX_SHADER, vertexSource);
         const fs = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
@@ -493,8 +494,8 @@
         if (canvas.width !== viewWidth || canvas.height !== viewHeight) {
           canvas.width = viewWidth;
           canvas.height = viewHeight;
-          gl.viewport(0, 0, viewWidth, viewHeight);
         }
+        gl.viewport(0, 0, viewWidth, viewHeight);
         const blur = value("blur");
         canvas.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
         let overscan;
@@ -879,8 +880,11 @@
       }
 
       function frame(now) {
-        requestAnimationFrame(frame);
-        if (!gl) return;
+        if (!gl) {
+          frameRequest = 0;
+          return;
+        }
+        frameRequest = requestAnimationFrame(frame);
         if (!previousTime) previousTime = now;
         const delta = Math.min((now - previousTime) / 1000, 0.05);
         previousTime = now;
@@ -894,6 +898,13 @@
           fpsFrames = 0;
           fpsTime = now;
         }
+      }
+      function startFrameLoop() {
+        if (frameRequest) cancelAnimationFrame(frameRequest);
+        previousTime = 0;
+        fpsTime = 0;
+        fpsFrames = 0;
+        frameRequest = requestAnimationFrame(frame);
       }
 
       document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => el.addEventListener("input", applySettings));
