@@ -466,11 +466,10 @@ body.radio-page {
   min-width: 0;
   overflow: hidden;
   font-size: clamp(9px, .76vw, 11px);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.15;
   white-space: nowrap;
 }
-.playlist-track:nth-child(-n+14) .playlist-track-name { font-weight: 400; }
 .playlist-track-artist {
   display: block;
   min-width: 0;
