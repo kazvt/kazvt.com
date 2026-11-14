@@ -220,7 +220,6 @@
         uniform vec2 u_resolution;
         uniform float u_phase;
         uniform float u_viscosity;
-        uniform float u_speed;
         uniform float u_foldSize;
         uniform float u_zoom;
         uniform float u_wrapEdges;
@@ -389,7 +388,7 @@
         const position = gl.getAttribLocation(program, "a_position");
         gl.enableVertexAttribArray(position);
         gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-        ["u_resolution", "u_phase", "u_viscosity", "u_speed", "u_foldSize", "u_zoom", "u_wrapEdges", "u_wrapMargin", "u_heightRange", "u_relief", "u_detail", "u_gloss", "u_sharpness", "u_saturation", "u_contrast", "u_brightness", "u_low", "u_mid", "u_high"].forEach(name => locations[name] = gl.getUniformLocation(program, name));
+        ["u_resolution", "u_phase", "u_viscosity", "u_foldSize", "u_zoom", "u_wrapEdges", "u_wrapMargin", "u_heightRange", "u_relief", "u_detail", "u_gloss", "u_sharpness", "u_saturation", "u_contrast", "u_brightness", "u_low", "u_mid", "u_high"].forEach(name => locations[name] = gl.getUniformLocation(program, name));
       }
 
       function hexToRgb(hex) {
@@ -469,7 +468,6 @@
         gl.uniform2f(locations.u_resolution, canvas.width, canvas.height);
         gl.uniform1f(locations.u_phase, phase);
         gl.uniform1f(locations.u_viscosity, value("viscosity") / 100);
-        gl.uniform1f(locations.u_speed, value("speed"));
         gl.uniform1f(locations.u_foldSize, value("foldSize"));
         gl.uniform1f(locations.u_zoom, value("zoom"));
         gl.uniform1f(locations.u_wrapEdges, controls.wrapEdges.checked ? 1 : 0);
