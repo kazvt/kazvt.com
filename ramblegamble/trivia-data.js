@@ -2,7 +2,7 @@
 // structural information lives here; no redacted prompt or answer is guessed.
 export const ROUND_RULES = {
   1: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4, resetQuestion: true }, 3: { resetQuestion: true }, 4: { resetQuestion: true }, 5: { mode: "short-answer", optionCount: 0, resetQuestion: true } },
-  2: { 1: { mode: "choice-text", optionCount: 6, promptImage: true }, 3: { promptImage: true, replaceOptions: true }, 5: { mode: "short-answer", optionCount: 0 } },
+  2: { 1: { mode: "choice-text", optionCount: 6, promptImage: true }, 3: { promptImage: true, resetPromptImage: true, replaceOptions: true }, 5: { mode: "short-answer", optionCount: 0, resetPromptImage: true } },
   3: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 5: { mode: "short-answer", optionCount: 0 } },
   4: { 1: { mode: "choice-image-wide", optionCount: 6 }, 3: { mode: "choice-image", optionCount: 6, replaceOptions: true, resetQuestion: true }, 4: { addOptions: 4 } },
   5: { 1: { mode: "choice-text", optionCount: 5 }, 2: { addOptions: 3 }, 3: { resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
@@ -10,7 +10,7 @@ export const ROUND_RULES = {
   7: { 1: { mode: "choice-text", optionCount: 6 }, 3: { addOptions: 3 } },
   8: { 1: { mode: "choice-text", optionCount: 6 }, 2: { mode: "match-pairs", optionCount: 12, pairCount: 6 }, 3: { mode: "short-answer", optionCount: 0, pairCount: 0, resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
   9: { 1: { mode: "choice-text", optionCount: 6 }, 2: { replaceOptions: true, resetQuestion: true }, 3: { replaceOptions: true, resetQuestion: true }, 4: { optionCount: 13, replaceOptions: true, resetQuestion: true }, 5: { replaceOptions: true, resetQuestion: true } },
-  10: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "number-grid", optionCount: 16, rows: 4, columns: 4, resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
+  10: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "number-grid", optionCount: 16, rows: 4, columns: 4, replaceOptions: true, resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
   11: { 1: { mode: "choice-text", optionCount: 6 }, 3: { addOptions: 4 } },
   12: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "short-answer", optionCount: 0, resetQuestion: true } },
   13: { 1: { mode: "draw-over-image", optionCount: 0, promptImage: true, imageAspect: "square" }, 3: { promptImage: true, resetQuestion: true }, 5: { promptImage: true, resetQuestion: true } },
@@ -75,7 +75,7 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
   for (let level = 1; level <= targetDifficulty; level += 1) {
     const patch = rules[level];
     if (!patch) continue;
-    const { addOptions = 0, replaceOptions, resetQuestion, replaceItems, ...settings } = patch;
+    const { addOptions = 0, replaceOptions, resetQuestion, replaceItems, resetPromptImage, ...settings } = patch;
     Object.assign(format, settings);
     if (addOptions) format.optionCount += addOptions;
   }

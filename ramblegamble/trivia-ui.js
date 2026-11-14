@@ -155,7 +155,16 @@ import {
       }
       if (rule.optionCount != null || rule.addOptions || rule.replaceOptions || rule.replaceItems) delete content.optionCount;
       if (draft.mode) content.mode = draft.mode;
-      if (rule.resetQuestion) { content.question = ""; content.subtitle = ""; }
+      if (rule.resetQuestion) {
+        content.question = "";
+        content.subtitle = "";
+        content.promptImage = "";
+        content.promptAsset = "";
+        content.acceptedAnswers = [];
+        content.drawing = "";
+        if (Array.isArray(content.options)) content.options = content.options.map((option) => option && typeof option === "object" ? { ...option, correct: false } : option);
+      }
+      if (rule.resetPromptImage) { content.promptImage = ""; content.promptAsset = ""; }
       if (rule.replaceOptions) content.options = [];
       if (rule.replaceItems) content.items = [];
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
