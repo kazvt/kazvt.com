@@ -233,7 +233,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     }
 
     const horizontalSpan = mobileStack ? 40 : 66;
-    const verticalSpan = mobileStack ? 46 : 30;
+    const verticalSpan = mobileStack ? 56 : 30;
     const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const distance = Math.max(
       horizontalSpan / (2 * tangent * Math.max(aspect, 0.28)),
