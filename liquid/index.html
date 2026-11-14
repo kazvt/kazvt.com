@@ -140,7 +140,7 @@
 
         <fieldset class="mb-4">
           <legend class="h5">Playback</legend>
-          <div class="mb-3"><label class="form-label w-100" for="quality">Render quality <code>render_quality</code><output class="float-end" id="qualityValue"></output></label><input class="form-range" id="quality" name="render_quality" type="range" min="0.5" max="1.15" step="0.05" value="0.85"><div class="form-text">Lower this if the preview is not smooth.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="quality">Render quality <code>render_quality</code><output class="float-end" id="qualityValue"></output></label><input class="form-range" id="quality" name="render_quality" type="range" min="0.5" max="1.15" step="0.05" value="1"><div class="form-text">Lower this if the preview is not smooth.</div></div>
           <button id="pauseBtn" class="btn btn-primary" type="button">Pause</button>
           <button id="saveBtn" class="btn btn-secondary" type="button">Save frame</button>
           <button id="resetBtn" class="btn btn-outline-secondary" type="button">Reset</button>
@@ -160,7 +160,7 @@
         colorLow: "#031f16", colorMid: "#076831", colorHigh: "#84c226",
         viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1.1,
         detail: 0.12, gloss: 1, sharpness: 70, blur: 0, saturation: 1,
-        contrast: 1, brightness: 0, quality: 0.85
+        contrast: 1, brightness: 0, quality: 1
       };
       const presets = {
         emerald: ["#031f16", "#076831", "#84c226"],
@@ -555,6 +555,7 @@
               if (migrating && parsed !== null && id === "foldSize") parsed = parseNumberParameter(String(1 / Number(parsed)), el.name.toLowerCase(), el);
               if (migrating && parsed !== null && id === "sharpness" && Number(parsed) === 50) parsed = "70";
               if (migrating && parsed !== null && id === "relief" && Number(parsed) === 1) parsed = "1.1";
+              if (migrating && parsed !== null && id === "quality" && Number(parsed) === 0.85) parsed = "1";
               if (parsed !== null) el.value = parsed;
             }
           });
