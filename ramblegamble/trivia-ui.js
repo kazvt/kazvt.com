@@ -770,8 +770,10 @@ import {
         assigned.type = "button";
         assigned.className = "rg-pair-card";
         assigned.dataset.assignedItem = String(index);
-        assigned.textContent = item.label || "IMAGE " + String(index + 1).padStart(2, "0") + " - REMOVE";
-        assigned.addEventListener("click", () => {
+        assigned.textContent = "REMOVE - " + (item.label || "IMAGE " + String(index + 1).padStart(2, "0"));
+        assigned.setAttribute("aria-label", "Move " + (item.label || "image " + (index + 1)) + " back to the unassigned images");
+        assigned.addEventListener("click", (event) => {
+          event.stopPropagation();
           const assignments = [...(content.assignments || [])];
           assignments[index] = null;
           writeLevelField("assignments", assignments);
