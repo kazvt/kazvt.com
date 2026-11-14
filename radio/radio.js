@@ -262,7 +262,7 @@
     visualizer.loadPreset(presetMap[currentPresetKey], 0);
     screen.classList.add("is-live");
     screen.classList.remove("is-fallback");
-    fallback.querySelector("p").textContent = "PRESS TO RESUME";
+    fallback.querySelector("p").textContent = "PRESS TO PLAY";
     fitVisualizer();
 
     if ("ResizeObserver" in window) {
@@ -403,7 +403,7 @@
     if (playRequest && typeof playRequest.catch === "function") {
       playRequest.catch(() => {
         setMessage("The track could not start. Check the audio file connection and try again.");
-        if (visualizer && !visualsPaused) showFallback("PRESS TO RESUME");
+        if (visualizer && !visualsPaused) showFallback("PRESS TO PLAY");
         updateTransport();
       });
     }
@@ -547,7 +547,7 @@
       try {
         if (!visualizer) initVisualizer();
         if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-        if (audio.paused) showFallback("PRESS TO RESUME");
+        if (audio.paused) showFallback("PRESS TO PLAY");
         else {
           screen.classList.add("is-live");
           screen.classList.remove("is-fallback");
