@@ -490,24 +490,12 @@ import {
       const bPosition = b.getWorldPosition(new THREE.Vector3());
       return aPosition.x - bPosition.x;
     });
-    const assigned = new Set();
-
     contestants = BILLBOARD_SOURCES.map((source, index) => {
-      const plate = stageModel.getObjectByName(`nameplate_${source.id}`);
-      const platePosition = plate?.getWorldPosition(new THREE.Vector3());
-      let chair = platePosition
-        ? chairs
-          .filter((candidate) => !assigned.has(candidate))
-          .sort((a, b) => {
-            const aPosition = a.getWorldPosition(new THREE.Vector3());
-            const bPosition = b.getWorldPosition(new THREE.Vector3());
-            return Math.hypot(aPosition.x - platePosition.x, aPosition.z - platePosition.z)
-              - Math.hypot(bPosition.x - platePosition.x, bPosition.z - platePosition.z);
-          })[0]
-        : null;
-      chair ||= sortedFallback.find((candidate) => !assigned.has(candidate));
+      // The supplied stage's seating row is authored left-to-right as Faroe,
+      // Erin, Kaz. Use its world-space order so browser panels cannot drift to
+      // another chair if decorative nameplate transforms are edited later.
+      const chair = sortedFallback[index];
       if (!chair) return null;
-      assigned.add(chair);
 
       const chairBounds = new THREE.Box3().setFromObject(chair);
       const chairCenter = chairBounds.getCenter(new THREE.Vector3());
@@ -543,7 +531,7 @@ import {
         iframe.title = `${source.label} live browser source`;
         iframe.loading = "eager";
         iframe.referrerPolicy = "strict-origin-when-cross-origin";
-        iframe.sandbox = "allow-scripts allow-same-origin";
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
         iframe.tabIndex = -1;
         panel.append(iframe);
       } else {
@@ -567,6 +555,7 @@ import {
         worldHeight,
       };
     }).filter(Boolean);
+    billboardLayer.setAttribute("aria-label", `Contestant browser-source billboards, ${contestants.length} seats`);
   }
 
   const raycaster = new THREE.Raycaster();
@@ -598,10 +587,36 @@ import {
       },
     ].filter(Boolean).sort((a, b) => a.distance - b.distance);
     const hit = hits[0];
-    if (!hit) return null;
+    if (!hit) return getContestantAtScreen(clientX, clientY, bounds);
     if (hit.machine === "contestant") return hit;
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
     return { ...hit, part: getNamedPart(hit.hit, hit.model, partNames) };
+  }
+
+  function getContestantAtScreen(clientX, clientY, canvasBounds) {
+    camera.updateMatrixWorld(true);
+    const candidates = contestants.map((contestant) => {
+      const box = new THREE.Box3().setFromObject(contestant.hitProxy);
+      const corners = [];
+      for (const x of [box.min.x, box.max.x]) {
+        for (const y of [box.min.y, box.max.y]) {
+          for (const z of [box.min.z, box.max.z]) {
+            const point = new THREE.Vector3(x, y, z).project(camera);
+            if (point.z >= -1 && point.z <= 1) corners.push(point);
+          }
+        }
+      }
+      if (corners.length < 2) return null;
+      const left = canvasBounds.left + (Math.min(...corners.map((point) => point.x)) + 1) * 0.5 * canvasBounds.width;
+      const right = canvasBounds.left + (Math.max(...corners.map((point) => point.x)) + 1) * 0.5 * canvasBounds.width;
+      const top = canvasBounds.top + (1 - Math.max(...corners.map((point) => point.y))) * 0.5 * canvasBounds.height;
+      const bottom = canvasBounds.top + (1 - Math.min(...corners.map((point) => point.y))) * 0.5 * canvasBounds.height;
+      if (clientX < left || clientX > right || clientY < top || clientY > bottom) return null;
+      const centerX = (left + right) / 2;
+      const centerY = (top + bottom) / 2;
+      return { machine: "contestant", contestantId: contestant.id, distance: Math.hypot(clientX - centerX, clientY - centerY) };
+    }).filter(Boolean).sort((a, b) => a.distance - b.distance);
+    return candidates[0] || null;
   }
 
   function updatePointer(event) {
