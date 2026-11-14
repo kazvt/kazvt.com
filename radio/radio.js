@@ -500,6 +500,13 @@
     trackHasPlayed = false;
     trackTransitionBlackout = Boolean(startPlaying);
     updateVisualizerFade();
+    if (visualizer && trackTransitionBlackout && currentPresetKey && presetMap[currentPresetKey]) {
+      try {
+        visualizer.loadPreset(presetMap[currentPresetKey], 0);
+      } catch (error) {
+        console.warn("Radio visualiser preset could not be reset for the new track:", error);
+      }
+    }
     audio.pause();
     audio.src = option.value;
     audio.load();
