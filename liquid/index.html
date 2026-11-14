@@ -49,6 +49,10 @@
           </button>
         </div>
         <div class="form-text mt-2 d-none" id="theaterUrlHint"><code>?theatre=off</code> / <code>?fullscreen=off</code></div>
+        <details class="form-text mt-2 d-none" id="obsSetup">
+          <summary>OBS source</summary>
+          <p class="mb-0">Match Browser Source width and height to your OBS canvas. Match custom FPS to your stream.</p>
+        </details>
         <div class="alert alert-warning d-none mt-2" id="notice" role="alert"></div>
       </section>
 
@@ -148,10 +152,6 @@
           <summary>URL parameters</summary>
           <p class="form-text mb-0">URL values override saved settings. Example: <code>?fold_size=1.55</code>. Numbers accept <code>x1.55</code>, <code>1.55x</code>, percentages, and applicable units; colors accept bare hex, CSS names, <code>rgb()</code>, or <code>hsl()</code>. Palette: <code>?color_mid=31a354</code> / <code>?color=31a354</code> (auto shades).</p>
         </details>
-        <details class="mb-3">
-          <summary>OBS source</summary>
-          <p class="form-text mb-0">Match Browser Source width and height to your OBS canvas. Match custom FPS to your stream.</p>
-        </details>
       </aside>
     </div>
   </main>
@@ -191,6 +191,7 @@
       const previewMeta = document.getElementById("previewMeta");
       const theaterToggleRow = document.getElementById("theaterToggleRow");
       const theaterUrlHint = document.getElementById("theaterUrlHint");
+      const obsSetup = document.getElementById("obsSetup");
       const theaterToolbar = document.getElementById("theaterToolbar");
       const notice = document.getElementById("notice");
       const fpsLabel = document.getElementById("fps");
@@ -782,6 +783,7 @@
         previewMeta.classList.toggle("d-none", enabled);
         theaterToggleRow.classList.toggle("d-none", enabled);
         theaterUrlHint.classList.toggle("d-none", enabled);
+        obsSetup.classList.toggle("d-none", enabled);
         theaterToolbar.classList.toggle("d-none", !enabled);
         previewColumn.classList.toggle("col-lg-8", !enabled);
         previewColumn.classList.toggle("col-lg-12", enabled);
