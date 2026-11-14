@@ -432,10 +432,14 @@
         picker.status.textContent = `${color}, hue ${Math.round(hsv.h)} degrees, saturation ${Math.round(hsv.s * 100)} percent, brightness ${Math.round(hsv.v * 100)} percent`;
       }
       function syncColorPickers() { colorIds.forEach(syncColorPicker); }
-      function clearPresetSelection() {
+      function syncPresetSelection() {
+        const currentColors = colorIds.map(id => controls[id].value.toLowerCase());
+        const match = Object.entries(presets).find(([, colors]) => colors.every((color, index) => color.toLowerCase() === currentColors[index]));
+        const activePreset = match ? match[0] : null;
         document.querySelectorAll(".preset").forEach(button => {
-          button.classList.remove("active");
-          button.setAttribute("aria-pressed", "false");
+          const active = button.dataset.preset === activePreset;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
         });
       }
       function setCustomColor(id, candidate, persist = true) {
@@ -443,7 +447,7 @@
         if (color === null) return false;
         controls[id].value = color;
         syncColorPicker(id);
-        clearPresetSelection();
+        syncPresetSelection();
         applySettings(persist);
         return true;
       }
@@ -702,7 +706,7 @@
           const parsed = parseNumberParameter(raw, name, input);
           if (parsed !== null) input.value = parsed;
         });
-        if (paletteFromColorSeed || overriddenColors.size) clearPresetSelection();
+        if (paletteFromColorSeed || overriddenColors.size) syncPresetSelection();
       }
 
       function loadColorTheme() {
@@ -891,17 +895,12 @@
 
       document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => el.addEventListener("input", applySettings));
       document.querySelectorAll("input[type=checkbox]").forEach(el => el.addEventListener("change", applySettings));
-      document.getElementById("quality").addEventListener("input", resize);
       setupColorPickers();
       document.querySelectorAll(".preset").forEach(button => button.addEventListener("click", () => {
         const colors = presets[button.dataset.preset];
         [controls.colorLow.value, controls.colorMid.value, controls.colorHigh.value] = colors;
         syncColorPickers();
-        document.querySelectorAll(".preset").forEach(p => {
-          const active = p === button;
-          p.classList.toggle("active", active);
-          p.setAttribute("aria-pressed", String(active));
-        });
+        syncPresetSelection();
         applySettings();
       }));
       document.getElementById("pauseBtn").addEventListener("click", event => {
@@ -917,11 +916,7 @@
         });
         syncColorPickers();
         closeColorPickers();
-        document.querySelectorAll(".preset").forEach(p => {
-          const active = p.dataset.preset === "emerald";
-          p.classList.toggle("active", active);
-          p.setAttribute("aria-pressed", String(active));
-        });
+        syncPresetSelection();
         paused = false;
         document.getElementById("pauseBtn").textContent = "Pause";
         document.getElementById("pauseBtn").classList.add("btn-primary");
@@ -1030,6 +1025,7 @@
       loadSettings();
       applyURLParameters();
       syncColorPickers();
+      syncPresetSelection();
       syncLabels();
       try {
         initWebGL();
