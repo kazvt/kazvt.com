@@ -196,8 +196,9 @@
   }
 
   function getVisualizerBlackoutOpacity() {
-    if (!visualizer || visualsPaused || !trackHasPlayed) return 0;
+    if (!visualizer || visualsPaused) return 0;
     if (trackTransitionBlackout) return 1;
+    if (!trackHasPlayed) return 0;
 
     const elapsed = Math.max(0, Number(audio.currentTime) || 0);
     const fadeInVisibility = Math.min(1, elapsed / TRACK_EDGE_FADE_SECONDS);
@@ -494,6 +495,9 @@
     setMarqueeText(trackTitle, title);
     trackArtist.textContent = option.dataset.artist || "Unknown artist";
     updatePlaylistSelection(index, true);
+    trackHasPlayed = false;
+    trackTransitionBlackout = Boolean(startPlaying);
+    updateVisualizerFade();
     audio.pause();
     audio.src = option.value;
     audio.load();
