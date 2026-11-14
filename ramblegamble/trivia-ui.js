@@ -151,6 +151,22 @@ import {
     }
 
     if (!modeNames[content.mode]) content.mode = format.mode;
+    content.question = String(content.question || "");
+    content.subtitle = String(content.subtitle || "");
+    content.promptImage = String(content.promptImage || "");
+    content.promptAsset = String(content.promptAsset || "");
+    content.acceptedAnswers = Array.isArray(content.acceptedAnswers) ? content.acceptedAnswers.map(String) : [];
+    content.options = Array.isArray(content.options) ? content.options.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), asset: String(item.asset || ""), correct: item.correct === true })) : [];
+    content.items = Array.isArray(content.items) ? content.items.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), x: Number.isFinite(Number(item.x)) ? Number(item.x) : 8, y: Number.isFinite(Number(item.y)) ? Number(item.y) : 8 })) : [];
+    content.pairs = Array.isArray(content.pairs) ? content.pairs.filter((item) => item && typeof item === "object").map((item) => ({ left: String(item.left || ""), leftImage: String(item.leftImage || ""), right: String(item.right || "") })) : [];
+    content.categories = Array.isArray(content.categories) ? content.categories.map(String) : ["Group 1", "Group 2", "Group 3"];
+    content.assignments = Array.isArray(content.assignments) ? content.assignments.map((index) => Number.isInteger(index) && index >= 0 && index < 3 ? index : null) : [];
+    content.videoUrl = String(content.videoUrl || "");
+    content.backgroundImage = String(content.backgroundImage || "");
+    content.numberValue = Number.isFinite(Number(content.numberValue)) ? Number(content.numberValue) : 0;
+    content.numberVisible = content.numberVisible === true;
+    content.imageVisible = content.imageVisible !== false;
+    content.drawing = typeof content.drawing === "string" ? content.drawing : "";
     if (content.optionCount == null) content.optionCount = format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
     if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = 6;
@@ -630,7 +646,8 @@ import {
       button.setAttribute("aria-label", option.label || (option.image || option.asset ? "Image option " + (index + 1) : "Option " + (index + 1)));
       if (option.image || option.asset) addImageToNode(button, option.image, option.asset);
       const label = document.createElement("span");
-      label.textContent = option.label || (option.image || option.asset ? "" : (format.mode === "number-grid" ? String(index + 1) : "OPTION " + String(index + 1).padStart(2, "0")));
+      const blankOption = format.blankOption && index === options.length - 1;
+      label.textContent = option.label || (blankOption ? "BLANK" : (option.image || option.asset ? "" : (format.mode === "number-grid" ? String(index + 1) : "OPTION " + String(index + 1).padStart(2, "0"))));
       button.append(label);
       button.addEventListener("click", () => {
         $$(".rg-answer-option", stageItems).forEach((other) => other.setAttribute("aria-pressed", "false"));
@@ -1000,6 +1017,7 @@ import {
       questionText.textContent = SPECIAL_ROUNDS["0"].question;
       questionText.hidden = false;
       promptImage.hidden = true;
+      $("#rg-format-badge").textContent = "SPECIAL INSTRUCTIONS";
       stageItems.innerHTML = '<div class="rg-host-instructions">' + esc(SPECIAL_ROUNDS["0"].body) + '</div>';
       answerArea.hidden = true;
       return;
