@@ -18,10 +18,10 @@
     </script>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="preload" href="/radio/assets/fonts/Mona12ColorEmoji.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/radio/radio.css?v=visualizer-track-boundary-fade-20261114-v1">
+    <link rel="stylesheet" href="/radio/radio.css?v=volume-ramp-hover-cleanup-20261114-v2">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=visualizer-track-boundary-fade-20261114-v1"></script>
+    <script defer src="/radio/radio.js?v=volume-ramp-hover-cleanup-20261114-v2"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -56,15 +56,21 @@
               <p class="player-message" id="player-message"></p>
             </div>
             <div class="deck-sliders radio-hud">
+              <div class="volume-row">
+                <label class="volume-label" for="track-volume">
+                  <span class="volume-speaker" aria-hidden="true"></span>
+                  <span>VOL</span>
+                </label>
+                <div class="volume-slider">
+                  <div class="volume-ramp" aria-hidden="true"></div>
+                  <input class="retro-range volume-range" id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
+                </div>
+                <output id="volume-value" for="track-volume">72%</output>
+              </div>
               <div class="seek-row">
                 <span id="time-current">0:00</span>
-                <input class="retro-range" id="track-seek" type="range" min="0" max="100" value="0">
+                <input class="retro-range" id="track-seek" type="range" min="0" max="100" value="0" aria-label="Seek position">
                 <span id="time-total">--:--</span>
-              </div>
-              <div class="volume-row">
-                <span>VOL</span>
-                <input class="retro-range" id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
-                <span id="volume-value">72%</span>
               </div>
             </div>
           </div>
