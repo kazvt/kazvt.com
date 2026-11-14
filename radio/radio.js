@@ -5,6 +5,12 @@
   const canvas = document.getElementById("radio-visualizer");
   const screen = document.querySelector(".visualizer-bezel");
   const fallback = document.getElementById("visualizer-fallback");
+
+  // Temporarily excluded MilkDrop presets live here. Remove an entry to let
+  // that visual return to the automatic rotation.
+  const DISABLED_VISUALIZER_PRESETS = [
+    "Flexi - mindblob [shiny mix]",
+  ];
   const playButton = document.getElementById("play-toggle");
   const muteButton = document.getElementById("mute-toggle");
   const theatreButton = document.getElementById("visualizer-fullscreen");
@@ -212,7 +218,13 @@
   function populatePresets() {
     const pack = window.butterchurnPresetsMinimal;
     if (!pack || typeof pack.getPresets !== "function") throw new Error("The visual preset pack did not load.");
-    presetMap = pack.getPresets();
+    const allPresets = pack.getPresets();
+    const disabledPresets = new Set(DISABLED_VISUALIZER_PRESETS);
+    presetMap = Object.fromEntries(Object.entries(allPresets).filter(([key]) => !disabledPresets.has(key)));
+    const missingDisabledPresets = DISABLED_VISUALIZER_PRESETS.filter((key) => !(key in allPresets));
+    if (missingDisabledPresets.length) {
+      console.warn("Disabled radio visualiser presets were not found in the loaded pack:", missingDisabledPresets);
+    }
     presetKeys = Object.keys(presetMap).sort((a, b) => a.localeCompare(b));
     if (!presetKeys.length) throw new Error("The visual preset pack contains no presets.");
     currentPresetKey = presetKeys[Math.floor(Math.random() * presetKeys.length)];
