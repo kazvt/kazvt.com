@@ -35,7 +35,7 @@
       <section class="col-lg-8 order-lg-2 sticky-lg-top align-self-lg-start" id="previewColumn" aria-label="Live slime preview">
         <div class="ratio ratio-16x9 position-relative bg-dark overflow-hidden" id="stage" tabindex="-1" aria-label="Liquid preview">
           <canvas class="position-absolute top-0 start-0 w-100 h-100" id="gl" role="img" aria-label="Animated procedural slime surface"></canvas>
-          <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-end align-items-start p-2 d-none fade pe-none" id="theaterToolbar">
+          <div class="position-absolute top-0 end-0 p-2 d-none fade pe-none" id="theaterToolbar">
             <button id="exitTheaterBtn" class="btn btn-secondary" type="button">Exit theatre mode</button>
           </div>
         </div>
@@ -468,7 +468,9 @@
       function value(id) { return Number(controls[id].value); }
       function setUniforms(time) {
         gl.uniform2f(locations.u_resolution, canvas.width, canvas.height);
-        gl.uniform1f(locations.u_time, time);
+        const motionRate = (1.65 - 1.3 * value("viscosity") / 100) * value("speed");
+        const cycleDuration = 10 / Math.max(motionRate, 0.000001);
+        gl.uniform1f(locations.u_time, time % cycleDuration);
         gl.uniform1f(locations.u_viscosity, value("viscosity") / 100);
         gl.uniform1f(locations.u_speed, value("speed"));
         gl.uniform1f(locations.u_foldSize, value("foldSize"));
