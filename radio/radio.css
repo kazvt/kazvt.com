@@ -484,12 +484,13 @@ html.radio-document body.radio-page :is(
   box-shadow: none;
 }
 .radio-page input.volume-range::-webkit-slider-thumb {
-  width: 14px;
+  width: 13px;
   height: 14px;
   margin-top: -1px;
   border-color: var(--ink);
-  background: var(--banner);
-  box-shadow: 2px 2px 0 var(--pink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
+  border-radius: 3px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 72%, var(--banner-text)), var(--blue) 55%, color-mix(in srgb, var(--blue) 74%, var(--ink)));
+  box-shadow: 1px 1px 0 var(--ink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
 }
 .radio-page input.volume-range::-moz-range-track {
   height: 12px;
@@ -499,9 +500,12 @@ html.radio-document body.radio-page :is(
 }
 .radio-page input.volume-range::-moz-range-progress { height: 12px; background: transparent; }
 .radio-page input.volume-range::-moz-range-thumb {
-  width: 10px;
+  width: 11px;
   height: 12px;
-  background: var(--banner);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 72%, var(--banner-text)), var(--blue) 55%, color-mix(in srgb, var(--blue) 74%, var(--ink)));
+  box-shadow: 1px 1px 0 var(--ink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
 }
 
 .player-side {
