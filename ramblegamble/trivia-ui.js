@@ -340,6 +340,7 @@ import {
       html += '<div class="rg-option-row" data-option-row="' + index + '" data-asset-id="' + esc(option.asset || "") + '">';
       html += '<input type="text" data-option-label placeholder="' + esc(textPlaceholder) + '" value="' + esc(option.label || "") + '" aria-label="Option ' + (index + 1) + ' text">';
       html += '<input type="url" data-option-image placeholder="Image URL (optional)" value="' + esc(option.image || "") + '" aria-label="Option ' + (index + 1) + ' image URL">';
+      html += '<label class="rg-option-upload">FILE<input type="file" data-option-file accept="image/*" aria-label="Upload image for option ' + (index + 1) + '"></label>';
       html += '<input type="radio" name="rg-correct-option" data-option-correct aria-label="Mark option ' + (index + 1) + ' correct" ' + (option.correct ? "checked" : "") + ">";
       html += '</div>';
     });
