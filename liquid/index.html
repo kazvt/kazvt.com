@@ -774,6 +774,7 @@
       function setTheaterMode(enabled, revealControls = false) {
         theaterMode = enabled;
         if (!enabled) theaterKeyboardFocus = false;
+        if (enabled) obsSetup.open = false;
         document.body.classList.toggle("theater-mode", enabled);
         appShell.classList.toggle("py-3", !enabled);
         appShell.classList.toggle("p-0", enabled);
