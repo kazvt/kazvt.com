@@ -3958,9 +3958,10 @@ kbd {
 
 }
 
-.progress-bar.bg-warning { color: var(--bs-warning-text-emphasis); }
+.progress-bar.bg-warning,
 .progress-bar.bg-light,
-.progress-bar.bg-white,
+.progress-bar.bg-white { color: var(--bs-dark); }
+.progress-bar.bg-body,
 .progress-bar.bg-body,
 .progress-bar.bg-body-secondary,
 .progress-bar.bg-body-tertiary { color: var(--bs-emphasis-color); }
