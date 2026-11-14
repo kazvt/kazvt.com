@@ -341,8 +341,8 @@
           vec3 view = vec3(0.0, 0.0, 1.0);
           float ndotl = max(dot(n, light1), 0.0);
           float ndoth = max(dot(n, normalize(light1 + view)), 0.0);
-          float exp1 = mix(18.0, 120.0, u_sharpness);
-          float exp2 = mix(36.0, 240.0, u_sharpness);
+          float exp1 = mix(18.0, 180.0, u_sharpness);
+          float exp2 = mix(36.0, 360.0, u_sharpness);
           float spec1 = pow(ndoth, exp1) * (64.0 / 255.0) * u_gloss;
           float spec2 = pow(ndoth, exp2) * (108.0 / 255.0) * u_gloss;
           float diffuse = 0.67 + 0.33 * ndotl;
