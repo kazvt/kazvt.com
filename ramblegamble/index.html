@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en" data-theme="p16" class="ramble-document">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#063b00">
+    <meta name="description" content="A tiny no-stakes arcade for spinning up a new ramble." />
+    <title>Ramble Gamble - kazvt</title>
+    <script>
+      try {
+        const savedTheme = localStorage.getItem("kazvt-theme");
+        if (/^p(?:[1-9]|1[0-6])$/.test(savedTheme || "")) {
+          document.documentElement.dataset.theme = savedTheme;
+        }
+      } catch {}
+    </script>
+    <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=first-arcade-20261114-v1">
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=first-arcade-20261114-v1"></script>
+  </head>
+  <body class="ramble-page" data-theme="p16">
+    <div class="rg-shell">
+      <header class="rg-header">
+        <a class="rg-home" href="/">KAZVT.COM</a>
+        <div class="rg-brand">
+          <p class="rg-eyebrow">THE VERY UNOFFICIAL ARCADE</p>
+          <h1>RAMBLE <span>GAMBLE</span></h1>
+        </div>
+        <div class="rg-palette">
+          <label for="rg-palette-select">PALETTE</label>
+          <select id="rg-palette-select">
+            <option value="p1">Palette 01</option><option value="p2">Palette 02</option>
+            <option value="p3">Palette 03</option><option value="p4">Palette 04</option>
+            <option value="p5">Palette 05</option><option value="p6">Palette 06</option>
+            <option value="p7">Palette 07</option><option value="p8">Palette 08</option>
+            <option value="p9">Palette 09</option><option value="p10">Palette 10</option>
+            <option value="p11">Palette 11</option><option value="p12">Palette 12</option>
+            <option value="p13">Palette 13</option><option value="p14">Palette 14</option>
+            <option value="p15">Palette 15</option><option value="p16">Palette 16</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="rg-main">
+        <div class="rg-intro">
+          <p>THE WHEEL IS RANDOM. THE RAMBLE IS YOURS.</p>
+          <span>NO STAKES - JUST A TOPIC</span>
+        </div>
+
+        <div class="rg-layout">
+          <section class="rg-machine-card">
+            <div class="rg-window-bar">
+              <span>RAMBLE GAMBLE ARCADE</span>
+              <span class="rg-round-readout">ROUND <b id="rg-round">00</b></span>
+            </div>
+
+            <div class="rg-stage" id="rg-stage">
+              <canvas id="rg-canvas"></canvas>
+              <div class="rg-scanlines"></div>
+              <div class="rg-stage-topline">
+                <span>WHEEL + SLOT MACHINE</span>
+                <span id="rg-scene-status">SETTING THE TABLE</span>
+              </div>
+              <div class="rg-stage-bottomline">
+                <span>DRAG TO LOOK AROUND</span>
+                <span>CLICK A MACHINE TO PLAY</span>
+              </div>
+              <div class="rg-loading" id="rg-loading">
+                <span class="rg-loading-lamp"></span>
+                <span id="rg-loading-copy">WAKING UP THE MACHINES...</span>
+              </div>
+            </div>
+
+            <div class="rg-controls">
+              <button class="rg-action rg-spin" id="rg-spin" type="button">
+                <span>SPIN THE WHEEL</span>
+                <kbd>SPACE</kbd>
+              </button>
+              <button class="rg-action rg-pull" id="rg-pull" type="button">
+                <span>PULL THE LEVER</span>
+                <kbd>ENTER</kbd>
+              </button>
+              <div class="rg-turn-counter">
+                <span>RAMBLES</span>
+                <b id="rg-turn-count">00</b>
+              </div>
+            </div>
+          </section>
+
+          <aside class="rg-side-panel">
+            <div class="rg-side-heading">
+              <span>YOUR LUCKY RAMBLE</span>
+              <span class="rg-starburst" aria-hidden="true">✦</span>
+            </div>
+            <div class="rg-prompt-card">
+              <p class="rg-prompt-kicker" id="rg-prompt-kicker">READY WHEN YOU ARE</p>
+              <p class="rg-prompt" id="rg-prompt">Spin the wheel or pull the lever to get a topic.</p>
+            </div>
+            <div class="rg-slot-window" aria-hidden="true">
+              <span id="rg-slot-one">7</span>
+              <span id="rg-slot-two">★</span>
+              <span id="rg-slot-three">7</span>
+            </div>
+            <p class="rg-status" id="rg-status">A fresh tangent is one spin away.</p>
+            <div class="rg-side-footer">
+              <span>NO TOKENS</span>
+              <span>NO MONEY</span>
+              <span>JUST FOR FUN</span>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="rg-footer">
+          <span>TAKE A CHANCE ON A TANGENT</span>
+          <span>SPACE SPINS - ENTER PULLS</span>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
