@@ -287,10 +287,16 @@
   .navbar .navbar-nav .nav-link {
     min-height: 2.35rem;
     padding-inline: 0.65rem;
-    border: 1px solid transparent;
+    border: 1px solid color-mix(in oklab, var(--bs-border-color) 52%, var(--bs-primary) 48%);
     border-block-end-width: 2px;
-    border-block-end-color: transparent;
-    background-image: none;
+    border-block-end-color: color-mix(in oklab, var(--bs-primary) 62%, black 38%);
+    background-image:
+      repeating-linear-gradient(90deg,
+        color-mix(in oklab, var(--bs-primary) 3%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(to bottom, color-mix(in oklab, white 22%, transparent), transparent 70%),
+      linear-gradient(to bottom, var(--bs-body-bg), var(--bs-tertiary-bg));
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 32%, transparent);
   }
 
   .navbar .navbar-nav .nav-link:is(:hover, :focus-visible, .active, [aria-current="page"]) {
@@ -385,6 +391,12 @@
     color: var(--bs-primary-text-emphasis);
     border-color: var(--bs-primary-border-subtle);
     background-color: var(--bs-primary-bg-subtle);
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar-expand-lg .navbar-nav {
+    gap: 0.25rem;
   }
 }
 
