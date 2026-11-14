@@ -455,7 +455,9 @@
 
   function updateMuteButton() {
     if (!muteButton) return;
-    setButtonIcon(muteButton, "speaker", audio.muted);
+    muteButton.classList.toggle("is-muted", audio.muted);
+    muteButton.setAttribute("aria-pressed", String(audio.muted));
+    muteButton.setAttribute("aria-label", audio.muted ? "Unmute audio" : "Mute audio");
   }
 
   function toggleMute() {

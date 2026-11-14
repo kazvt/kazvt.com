@@ -18,10 +18,10 @@
     </script>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="preload" href="/radio/assets/fonts/Mona12ColorEmoji.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/radio/radio.css?v=volume-ramp-hover-cleanup-20261114-v2">
+    <link rel="stylesheet" href="/radio/radio.css?v=volume-fader-wmp-mute-20261114-v1">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=volume-ramp-hover-cleanup-20261114-v2"></script>
+    <script defer src="/radio/radio.js?v=volume-fader-wmp-mute-20261114-v1"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -50,20 +50,18 @@
               <button class="transport-button small-control" id="track-next" type="button" data-icon="stepforward"></button>
               <button class="transport-button shuffle-button" id="shuffle-toggle" type="button" data-icon="shuffle"></button>
               <button class="transport-button loop-button" id="loop-toggle" type="button" data-icon="refresh"></button>
-              <button class="transport-button mute-control" id="mute-toggle" type="button" data-icon="speaker"></button>
               <button class="transport-button visuals-control" id="visualizer-toggle" type="button" data-icon="treestatus"></button>
               <button class="transport-button fullscreen-control" id="visualizer-fullscreen" type="button" data-icon="select"></button>
               <p class="player-message" id="player-message"></p>
             </div>
             <div class="deck-sliders radio-hud">
               <div class="volume-row">
-                <label class="volume-label" for="track-volume">
+                <button class="volume-mute-button" id="mute-toggle" type="button" aria-label="Mute audio" aria-pressed="false">
                   <span class="volume-speaker" aria-hidden="true"></span>
-                  <span>VOL</span>
-                </label>
+                </button>
                 <div class="volume-slider">
                   <div class="volume-ramp" aria-hidden="true"></div>
-                  <input class="retro-range volume-range" id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72">
+                  <input class="retro-range volume-range" id="track-volume" type="range" min="0" max="1" step="0.01" value="0.72" aria-label="Playback volume">
                 </div>
                 <output id="volume-value" for="track-volume">72%</output>
               </div>
