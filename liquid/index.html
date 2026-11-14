@@ -563,8 +563,8 @@
               if (sourceKey === legacyStorageKey && parsed !== null && id === "sharpness" && Number(parsed) === 50) parsed = "85";
               if (sourceKey === previousStorageKey && parsed !== null && id === "sharpness" && Number(parsed) === 70) parsed = "85";
               if (sourceKey === legacyStorageKey && parsed !== null && id === "relief" && Number(parsed) === 1) parsed = "1.15";
-              if (sourceKey === previousStorageKey && parsed !== null && id === "relief" && Number(parsed) === 1.1) parsed = "1.15";
-              if (sourceKey === legacyStorageKey && parsed !== null && id === "quality" && Number(parsed) === 0.85) parsed = "1";
+              if (sourceKey === previousStorageKey && parsed !== null && id === "relief" && [1, 1.1].includes(Number(parsed))) parsed = "1.15";
+              if ((sourceKey === legacyStorageKey || sourceKey === previousStorageKey) && parsed !== null && id === "quality" && Number(parsed) === 0.85) parsed = "1";
               if (parsed !== null) el.value = parsed;
             }
           });
