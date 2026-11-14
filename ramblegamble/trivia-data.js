@@ -13,7 +13,7 @@ export const ROUND_RULES = {
   10: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "number-grid", optionCount: 16, rows: 4, columns: 4, resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
   11: { 1: { mode: "choice-text", optionCount: 6 }, 3: { addOptions: 4 } },
   12: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "short-answer", optionCount: 0, resetQuestion: true } },
-  13: { 1: { mode: "draw-over-image", optionCount: 0, promptImage: true }, 3: { promptImage: true, resetQuestion: true }, 5: { promptImage: true, resetQuestion: true } },
+  13: { 1: { mode: "draw-over-image", optionCount: 0, promptImage: true, imageAspect: "square" }, 3: { promptImage: true, resetQuestion: true }, 5: { promptImage: true, resetQuestion: true } },
   14: { 1: { mode: "categorize-images", optionCount: 18, categories: 3, imageAspect: "square" } },
   15: { 1: { mode: "timeline", optionCount: 7 }, 2: { resetQuestion: true, replaceItems: true }, 3: { optionCount: 8, reorder: true, resetQuestion: true, replaceItems: true }, 4: { reorder: true, resetQuestion: true, replaceItems: true }, 5: { reorder: true, resetQuestion: true, replaceItems: true } },
   16: { 1: { mode: "short-answer", optionCount: 0 } },
