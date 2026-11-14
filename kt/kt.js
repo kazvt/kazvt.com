@@ -254,7 +254,8 @@
 
   function initializeNewMemberBadges() {
     const newMemberWindowMs = 30 * 24 * 60 * 60 * 1000;
-    const now = Date.now();
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
 
     document.querySelectorAll(".kt-member-grid > li > .kt-member").forEach((card) => {
       let avatarWrap = card.querySelector(".kt-member-avatar-wrap");
@@ -289,8 +290,18 @@
       const addedDate = card.dataset.memberAdded || "";
       if (!/^\d{4}-\d{2}-\d{2}$/.test(addedDate)) return;
 
-      const addedAt = Date.parse(`${addedDate}T00:00:00Z`);
-      if (!Number.isFinite(addedAt) || addedAt > now || now - addedAt >= newMemberWindowMs) return;
+      // Compare date-only values as calendar days, not UTC timestamps. This
+      // keeps a member added today eligible throughout the viewer's local day.
+      const [year, month, day] = addedDate.split("-").map(Number);
+      const addedAt = Date.UTC(year, month - 1, day);
+      const parsedDate = new Date(addedAt);
+      if (
+        parsedDate.getUTCFullYear() !== year ||
+        parsedDate.getUTCMonth() !== month - 1 ||
+        parsedDate.getUTCDate() !== day ||
+        addedAt > today ||
+        today - addedAt >= newMemberWindowMs
+      ) return;
 
       const existingBadge = card.querySelector(".kt-member-new-badge");
       if (existingBadge) {
