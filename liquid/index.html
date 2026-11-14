@@ -536,7 +536,10 @@
             } else if (el.type === "checkbox") {
               const state = String(saved[id]).trim().toLowerCase();
               el.checked = saved[id] === true || ["1", "true", "on", "yes"].includes(state);
-            } else el.value = saved[id];
+            } else {
+              const parsed = parseNumberParameter(String(saved[id]), el.name.toLowerCase(), el);
+              if (parsed !== null) el.value = parsed;
+            }
           });
         } catch (_) { /* use defaults */ }
       }
@@ -1014,7 +1017,7 @@
           theaterButton.focus();
           return;
         }
-        if (event.code === "Space" && !["INPUT", "BUTTON", "SELECT"].includes(document.activeElement.tagName)) {
+        if (event.code === "Space" && !document.activeElement.closest("input, button, select, textarea, a, [contenteditable], .color-area")) {
           event.preventDefault();
           document.getElementById("pauseBtn").click();
         }
