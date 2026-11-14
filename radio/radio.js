@@ -440,6 +440,8 @@
     const playRequest = audio.play();
     if (playRequest && typeof playRequest.catch === "function") {
       playRequest.catch(() => {
+        trackTransitionBlackout = false;
+        updateVisualizerFade();
         setMessage("The track could not start. Check the audio file connection and try again.");
         if (visualizer && !visualsPaused) showFallback("PRESS TO PLAY");
         updateTransport();
@@ -611,6 +613,7 @@
     if (Number.isFinite(audio.duration)) {
       audio.currentTime = Number(seek.value);
       currentTime.textContent = formatTime(audio.currentTime);
+      updateVisualizerFade();
     }
   });
   volume.addEventListener("input", () => {
@@ -631,6 +634,7 @@
   setButtonIcon(visualsButton, "treestatus", visualsPaused);
   updateMuteButton();
   audio.addEventListener("timeupdate", () => {
+    updateVisualizerFade();
     currentTime.textContent = formatTime(audio.currentTime);
     if (!seek.matches(":active")) {
       seek.value = String(audio.currentTime || 0);
@@ -642,7 +646,9 @@
     if (!seek.matches(":active")) seek.value = String(audio.currentTime || 0);
     updateRangeFill(seek);
     totalTime.textContent = formatTime(audio.duration);
+    updateVisualizerFade();
   });
+  audio.addEventListener("seeked", updateVisualizerFade);
   audio.addEventListener("play", updateTransport);
   audio.addEventListener("pause", updateTransport);
   audio.addEventListener("ended", () => {
@@ -652,7 +658,11 @@
     else updateTransport();
   });
   audio.addEventListener("volumechange", updateMuteButton);
-  audio.addEventListener("error", () => setMessage("The local track could not be loaded. Please try again in a moment."));
+  audio.addEventListener("error", () => {
+    trackTransitionBlackout = false;
+    updateVisualizerFade();
+    setMessage("The local track could not be loaded. Please try again in a moment.");
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       stopRendering();
