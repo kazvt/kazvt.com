@@ -642,8 +642,9 @@ import {
   }
 
   function setGameCursor(mode, clientX, clientY) {
-    if (reducedMotion.matches || matchMedia("(pointer: coarse)").matches) {
+    if (reducedMotion.matches) {
       gameCursor.hidden = true;
+      preview.classList.remove("has-game-cursor");
       return;
     }
 
@@ -746,7 +747,9 @@ import {
     event.preventDefault();
   });
 
-  gameCursorImage.addEventListener("load", () => preview.classList.add("has-game-cursor"));
+  gameCursorImage.addEventListener("load", () => {
+    if (!reducedMotion.matches) preview.classList.add("has-game-cursor");
+  });
   gameCursorImage.addEventListener("error", () => {
     preview.classList.remove("has-game-cursor");
     hideGameCursor();
