@@ -7,7 +7,7 @@
     <meta name="description" content="A full-screen interactive 3D ramble gamble." />
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=full-preview-20261114-v2">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=point-click-views-20261115-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=point-click-20261114-v1">
     <script type="importmap">
       {
@@ -17,12 +17,16 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=stage-fit-20261114-v3"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=point-click-billboards-20261115-v1"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=point-click-20261114-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
-      <canvas id="rg-canvas" tabindex="0" aria-label="Interactive point-and-click 3D arcade. Click the roulette wheel to spin, the roulette center for trivia, the slot cabinet for its menu grid, or the slot lever to pull it."></canvas>
+      <canvas id="rg-canvas" tabindex="0" aria-label="Fixed-view point-and-click arcade. Click the contestant seats, slot machine, or roulette wheel to move closer. Use the left and right screen edges to look around, and the bottom edge or Escape to go back. In a close view, click the wheel or slot controls to play."></canvas>
+      <div class="rg-billboard-layer" id="rg-billboard-layer" aria-label="Contestant browser-source billboards"></div>
+      <div class="rg-game-cursor" id="rg-game-cursor" aria-hidden="true" hidden>
+        <img id="rg-game-cursor-image" alt="" draggable="false">
+      </div>
       <p class="rg-result" id="rg-result" hidden></p>
       <div class="rg-loading" id="rg-loading">Loading the 3D preview...</div>
     </main>
