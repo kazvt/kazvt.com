@@ -714,7 +714,6 @@ html.radio-document body.radio-page :is(
   .radio-page .play-button { min-height: 30px; }
   .radio-page .small-control { min-height: 24px; padding: 1px; }
   .radio-page button[data-icon]::before { width: 18px; height: 18px; flex-basis: 18px; }
-  .radio-page button[data-icon="speaker"]::before { width: 20px; height: 22px; flex-basis: 20px; }
   .player-side { gap: 3px; padding: 4px 5px; }
   .playlist-heading { min-height: 18px; padding: 2px 5px; font-size: 8px; }
   .playlist-heading span { font-size: 8px; }
@@ -725,13 +724,14 @@ html.radio-document body.radio-page :is(
   .playlist-track-name { font-size: 9px; }
   .playlist-track-artist { font-size: 7px; }
   .deck-sliders { grid-template-rows: 19px 18px; gap: 2px; min-height: 39px; }
-  .seek-row,
-  .volume-row { grid-template-columns: 26px minmax(0, 1fr) 31px; gap: 2px; font-size: 7px; }
+  .seek-row { grid-template-columns: 26px minmax(0, 1fr) 31px; gap: 2px; font-size: 7px; }
+  .volume-row { grid-template-columns: 20px clamp(64px, 14vw, 88px) max-content; gap: 4px; font-size: 7px; }
   .radio-page input.retro-range { height: 17px; }
   .volume-slider,
   .radio-page input.volume-range { height: 18px; }
-  .volume-label { gap: 1px; font-size: 7px; }
-  .volume-speaker { width: 13px; height: 14px; flex-basis: 13px; }
+  .volume-mute-button { width: 20px; height: 20px; }
+  .volume-speaker { width: 14px; height: 14px; }
+  .volume-speaker::after { left: 6px; height: 16px; }
   .volume-row output { font-size: 7px; }
   .player-message { font-size: 7px; }
   .palette-desk { min-height: 25px; padding: 2px 5px; }
@@ -747,14 +747,12 @@ html.radio-document body.radio-page :is(
   .radio-page .transport-button { flex-basis: 26px; width: 26px; }
   .visuals-control { margin-left: 0; }
   .radio-page button[data-icon]::before { width: 16px; height: 16px; flex-basis: 16px; }
-  .radio-page button[data-icon="speaker"]::before { width: 18px; height: 20px; flex-basis: 18px; }
 }
 
 @media (max-width: 280px) {
   .transport { gap: 1px; }
   .radio-page .transport-button { flex-basis: 24px; width: 24px; min-height: 24px; }
   .radio-page button[data-icon]::before { width: 14px; height: 14px; flex-basis: 14px; }
-  .radio-page button[data-icon="speaker"]::before { width: 15px; height: 17px; flex-basis: 15px; }
 }
 
 @media (max-height: 520px) {
