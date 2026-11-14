@@ -699,10 +699,12 @@ import {
     if (!interaction) return;
 
     if (interaction.machine === "contestant") {
-      if (currentView.kind === "contestants" || currentView.kind === "contestant") {
-        transitionToView({ kind: "contestant", contestantId: interaction.contestantId });
-      } else {
+      const focused = currentView.kind === "contestants" || currentView.kind === "contestant";
+      const action = resolvePointClickAction({ machine: "contestant", focused });
+      if (action === "focus-contestants") {
         transitionToView({ kind: "contestants" });
+      } else if (currentView.kind === "contestants" || currentView.contestantId !== interaction.contestantId) {
+        transitionToView({ kind: "contestant", contestantId: interaction.contestantId });
       }
       return;
     }
