@@ -448,7 +448,14 @@
         const color = parseColorParameter(candidate);
         if (color === null) return false;
         controls[id].value = color;
-        syncColorPicker(id);
+        if (id === "colorMid") {
+          const palette = deriveMainPalette(color);
+          controls.colorLow.value = palette.colorLow;
+          controls.colorHigh.value = palette.colorHigh;
+          syncColorPickers();
+        } else {
+          syncColorPicker(id);
+        }
         syncPresetSelection();
         applySettings(persist);
         return true;
