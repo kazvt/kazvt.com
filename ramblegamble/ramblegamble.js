@@ -56,6 +56,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
   let stageModel;
   let rouletteModel;
   let slotsModel;
+  let cameraFramed = false;
 
   function themeValue(name, fallback) {
     const value = getComputedStyle(document.body).getPropertyValue(name).trim();
@@ -181,11 +182,9 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     scene.add(fillLight);
 
     rouletteRig = new THREE.Group();
-    rouletteRig.position.set(-14, 0, 0);
     scene.add(rouletteRig);
 
     slotRig = new THREE.Group();
-    slotRig.position.set(20, 0, 0);
     slotRig.rotation.y = Math.PI;
     scene.add(slotRig);
 
@@ -197,7 +196,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     controls.maxPolarAngle = Math.PI * 0.47;
     controls.minDistance = 20;
     controls.maxDistance = 180;
-    controls.target.set(-4, 0, 0);
+    controls.target.set(0, 0, 0);
     controls.addEventListener("start", () => {
       userInteracting = true;
       preview.classList.add("is-dragging");
@@ -218,33 +217,133 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.setSize(width, height, false);
 
-    const mobileStack = aspect < 1.05;
-    if (rouletteRig && slotRig) {
-      if (mobileStack) {
-        rouletteRig.position.set(0, 12, 0);
-        slotRig.position.set(0, -16, -4);
-        controls.target.set(0, -2.75, -1.8);
-      } else {
-        rouletteRig.position.set(-14, 0, 0);
-        slotRig.position.set(20, 0, 0);
-        controls.target.set(-4, 0, 0);
+    const focus = getArcadeBounds();
+    if (focus.isEmpty()) return;
+
+    const target = focus.getCenter(new THREE.Vector3());
+    const direction = cameraFramed
+      ? camera.position.clone().sub(controls.target).normalize()
+      : new THREE.Vector3(0, 0.38, 0.925).normalize();
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(worldUp, direction).normalize();
+    const viewUp = new THREE.Vector3().crossVectors(direction, right).normalize();
+    const tanHalfVertical = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const tanHalfHorizontal = tanHalfVertical * aspect;
+    let distance = 0;
+
+    for (const x of [focus.min.x, focus.max.x]) {
+      for (const y of [focus.min.y, focus.max.y]) {
+        for (const z of [focus.min.z, focus.max.z]) {
+          const relative = new THREE.Vector3(x, y, z).sub(target);
+          const depth = relative.dot(direction);
+          distance = Math.max(
+            distance,
+            Math.abs(relative.dot(right)) / tanHalfHorizontal + depth,
+            Math.abs(relative.dot(viewUp)) / tanHalfVertical + depth,
+          );
+        }
       }
-      if (stageModel) stageModel.position.x = mobileStack ? -13 : 0;
     }
 
-    const horizontalSpan = mobileStack ? 40 : 66;
-    const verticalSpan = mobileStack ? 56 : 30;
-    const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const distance = Math.max(
-      horizontalSpan / (2 * tangent * Math.max(aspect, 0.28)),
-      verticalSpan / (2 * tangent),
-    ) * 1.08;
-    const target = controls.target;
-    camera.position.set(target.x, target.y + distance * 0.42, target.z + distance);
+    distance = Math.max(distance, 1) * 1.14;
+    controls.target.copy(target);
+    camera.position.copy(target).addScaledVector(direction, distance);
     camera.lookAt(target);
-    controls.minDistance = distance * 0.55;
-    controls.maxDistance = distance * 1.85;
+    controls.minDistance = Math.max(0.5, distance * 0.48);
+    controls.maxDistance = Math.max(18, distance * 3.2);
     controls.update();
+    cameraFramed = true;
+  }
+
+  function getArcadeBounds() {
+    const bounds = new THREE.Box3().makeEmpty();
+    const table = stageModel?.getObjectByName("table");
+    if (!table) {
+      if (stageModel) bounds.expandByObject(stageModel);
+      return bounds;
+    }
+
+    scene.updateMatrixWorld(true);
+    const tableBounds = new THREE.Box3().setFromObject(table);
+    const tableCenter = tableBounds.getCenter(new THREE.Vector3());
+    bounds.union(tableBounds);
+
+    // Keep the nearby seating in frame so the new machine placement reads as
+    // part of the supplied set rather than as objects floating in isolation.
+    stageModel.traverse((object) => {
+      if (!/^(chair|tall_chair)$/i.test(object.name)) return;
+      const chairBounds = new THREE.Box3().setFromObject(object);
+      if (chairBounds.isEmpty()) return;
+      const chairCenter = chairBounds.getCenter(new THREE.Vector3());
+      const distance = Math.hypot(chairCenter.x - tableCenter.x, chairCenter.z - tableCenter.z);
+      if (distance < 2.2) bounds.union(chairBounds);
+    });
+
+    if (rouletteRig) bounds.expandByObject(rouletteRig);
+    if (slotRig) bounds.expandByObject(slotRig);
+    return bounds;
+  }
+
+  function placeMachinesFromStage() {
+    const table = stageModel?.getObjectByName("table");
+    if (!table || !rouletteModel || !slotsModel) {
+      throw new Error("The supplied stage is missing the table or machine model.");
+    }
+
+    scene.updateMatrixWorld(true);
+    const tableBounds = new THREE.Box3().setFromObject(table);
+    const tableSize = tableBounds.getSize(new THREE.Vector3());
+    const tableCenter = tableBounds.getCenter(new THREE.Vector3());
+    const floorY = tableBounds.min.y;
+
+    // The archive's roulette is authored about 40 units across while the
+    // table is only 1.57 units deep. Fit the rim to the table footprint and
+    // rest its lowest point exactly on the tabletop.
+    rouletteRig.position.set(tableCenter.x, 0, tableCenter.z);
+    rouletteModel.scale.setScalar(1);
+    rouletteModel.position.set(0, 0, 0);
+    rouletteModel.updateMatrixWorld(true);
+    const rouletteSourceBounds = new THREE.Box3().setFromObject(rouletteModel);
+    const rouletteSourceSize = rouletteSourceBounds.getSize(new THREE.Vector3());
+    const rouletteDiameter = Math.max(rouletteSourceSize.x, rouletteSourceSize.z);
+    const rouletteScale = (Math.min(tableSize.x, tableSize.z) * 0.72) / rouletteDiameter;
+    rouletteModel.scale.setScalar(rouletteScale);
+    rouletteModel.updateMatrixWorld(true);
+    const rouletteBounds = new THREE.Box3().setFromObject(rouletteModel);
+    rouletteModel.position.y += tableBounds.max.y - rouletteBounds.min.y;
+
+    // The slot cabinet has its own unrelated export scale. Size it against
+    // the tall chairs in the same supplied scene, then place it beside the
+    // table with enough room for the adjacent chair.
+    const tallChair = stageModel.getObjectByName("tall_chair");
+    const tallChairBounds = tallChair
+      ? new THREE.Box3().setFromObject(tallChair)
+      : tableBounds;
+    const tallChairSize = tallChairBounds.getSize(new THREE.Vector3());
+    const slotSourceBounds = new THREE.Box3().setFromObject(slotsModel);
+    const slotSourceSize = slotSourceBounds.getSize(new THREE.Vector3());
+    const slotScale = (tallChairSize.y * 1.55) / slotSourceSize.y;
+    slotsModel.scale.setScalar(slotScale);
+    slotsModel.position.set(0, 0, 0);
+    slotRig.position.set(0, 0, 0);
+    slotRig.updateMatrixWorld(true);
+    slotsModel.updateMatrixWorld(true);
+    const slotBounds = new THREE.Box3().setFromObject(slotsModel);
+    const slotSize = slotBounds.getSize(new THREE.Vector3());
+    const slotCenter = slotBounds.getCenter(new THREE.Vector3());
+    const slotTargetCenter = new THREE.Vector3(
+      tableBounds.max.x + slotSize.x / 2 + 0.42,
+      floorY,
+      tableCenter.z - 0.3,
+    );
+    slotRig.position.set(
+      slotTargetCenter.x - slotCenter.x,
+      0,
+      slotTargetCenter.z - slotCenter.z,
+    );
+    slotRig.updateMatrixWorld(true);
+    const groundedSlotBounds = new THREE.Box3().setFromObject(slotsModel);
+    slotRig.position.y = floorY - groundedSlotBounds.min.y;
   }
 
   function prepareModel(root) {
@@ -427,7 +526,6 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
       scene.add(stageModel);
 
       rouletteModel = rouletteGltf.scene;
-      rouletteModel.position.y = 2.3;
       prepareModel(rouletteModel);
       rouletteRig.add(rouletteModel);
       rouletteModel.traverse((object) => {
@@ -436,13 +534,13 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
       });
 
       slotsModel = slotsGltf.scene;
-      slotsModel.position.y = 9;
       prepareModel(slotsModel);
       slotRig.add(slotsModel);
       slotsModel.traverse((object) => {
         if (object.name === "arm") lever = object;
       });
 
+      placeMachinesFromStage();
       setupPicking();
       fitCamera();
       applyTheme();
