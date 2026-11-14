@@ -274,8 +274,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       const slotAccent = scene.children.find((object) => object.geometry?.type === "TorusGeometry" && object.userData.rgSecondary);
       if (rouletteAccent) rouletteAccent.position.set(mobileStack ? 0 : -14, mobileStack ? -2 : -9.1, 0);
       if (slotAccent) slotAccent.position.set(mobileStack ? 0 : 20, mobileStack ? -20 : -9.1, mobileStack ? -4 : 0);
-      const slotBase = slotRig.children.find((object) => object.userData.rgSecondary);
-      if (slotBase) slotBase.position.y = mobileStack ? -20.5 : -9.5;
     }
 
     const horizontalSpan = mobileStack ? 40 : 66;
@@ -434,7 +432,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       ]);
 
       rouletteModel = rouletteGltf.scene;
-      rouletteModel.position.y = -3;
+      rouletteModel.position.y = -6.8;
       prepareModel(rouletteModel);
       rouletteRig.add(rouletteModel);
       rouletteModel.traverse((object) => {
@@ -457,7 +455,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       resizeObserver = new ResizeObserver(fitCamera);
       resizeObserver.observe(preview);
       window.addEventListener("resize", fitCamera, { passive: true });
-      animationFrame = requestAnimationFrame(animate);
+      if (!document.hidden) animationFrame = requestAnimationFrame(animate);
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);
       loading.textContent = "The 3D preview could not load.";
