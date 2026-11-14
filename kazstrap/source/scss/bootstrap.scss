@@ -3956,36 +3956,21 @@ kbd {
       inset 0 -1px 0 color-mix(in oklab, black 12%, transparent);
   }
 
-  .progress-bar.bg-warning,
-  .progress-bar.text-bg-warning {
-    color: var(--bs-warning-text-emphasis);
-  }
-
-  .progress-bar.bg-light,
-  .progress-bar.bg-white,
-  .progress-bar.bg-body,
-  .progress-bar.bg-body-secondary,
-  .progress-bar.bg-body-tertiary,
-  .progress-bar.text-bg-light,
-  .progress-bar.text-bg-white {
-    color: var(--bs-emphasis-color);
-  }
-
-  .progress-bar.bg-primary-subtle,
-  .progress-bar.text-bg-primary-subtle { color: var(--bs-primary-text-emphasis); }
-  .progress-bar.bg-secondary-subtle,
-  .progress-bar.text-bg-secondary-subtle { color: var(--bs-secondary-text-emphasis); }
-  .progress-bar.bg-success-subtle,
-  .progress-bar.text-bg-success-subtle { color: var(--bs-success-text-emphasis); }
-  .progress-bar.bg-info-subtle,
-  .progress-bar.text-bg-info-subtle { color: var(--bs-info-text-emphasis); }
-  .progress-bar.bg-warning-subtle,
-  .progress-bar.text-bg-warning-subtle { color: var(--bs-warning-text-emphasis); }
-  .progress-bar.bg-danger-subtle,
-  .progress-bar.text-bg-danger-subtle { color: var(--bs-danger-text-emphasis); }
-  .progress-bar.bg-dark-subtle,
-  .progress-bar.text-bg-dark-subtle { color: var(--bs-dark-text-emphasis); }
 }
+
+.progress-bar.bg-warning { color: var(--bs-warning-text-emphasis); }
+.progress-bar.bg-light,
+.progress-bar.bg-white,
+.progress-bar.bg-body,
+.progress-bar.bg-body-secondary,
+.progress-bar.bg-body-tertiary { color: var(--bs-emphasis-color); }
+.progress-bar.bg-primary-subtle { color: var(--bs-primary-text-emphasis); }
+.progress-bar.bg-secondary-subtle { color: var(--bs-secondary-text-emphasis); }
+.progress-bar.bg-success-subtle { color: var(--bs-success-text-emphasis); }
+.progress-bar.bg-info-subtle { color: var(--bs-info-text-emphasis); }
+.progress-bar.bg-warning-subtle { color: var(--bs-warning-text-emphasis); }
+.progress-bar.bg-danger-subtle { color: var(--bs-danger-text-emphasis); }
+.progress-bar.bg-dark-subtle { color: var(--bs-dark-text-emphasis); }
 
 @supports not (color: color-mix(in oklab, white, black)) {
   .card-header,
@@ -4037,5 +4022,20 @@ kbd {
   .progress-bar {
     background-image: none !important;
     box-shadow: none;
+  }
+  .progress-bar.bg-warning,
+  .progress-bar.bg-light,
+  .progress-bar.bg-white,
+  .progress-bar.bg-body,
+  .progress-bar.bg-body-secondary,
+  .progress-bar.bg-body-tertiary,
+  .progress-bar.bg-primary-subtle,
+  .progress-bar.bg-secondary-subtle,
+  .progress-bar.bg-success-subtle,
+  .progress-bar.bg-info-subtle,
+  .progress-bar.bg-warning-subtle,
+  .progress-bar.bg-danger-subtle,
+  .progress-bar.bg-dark-subtle {
+    color: CanvasText;
   }
 }
