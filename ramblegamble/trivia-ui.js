@@ -592,7 +592,7 @@ import {
     subtitleText.hidden = !effective.content.subtitle || currentRound === "00";
     promptImage.replaceChildren();
     promptImage.hidden = true;
-    if (effective.content.promptImage || effective.content.promptAsset) {
+    if (!["draw-over-image", "compose-image"].includes(effective.format.mode) && (effective.content.promptImage || effective.content.promptAsset)) {
       promptImage.src = safeUrl(effective.content.promptImage) || "";
       if (!promptImage.src && effective.content.promptAsset) readMedia(effective.content.promptAsset).then((url) => { if (url) promptImage.src = url; });
       promptImage.hidden = false;
@@ -613,6 +613,7 @@ import {
   }
 
   function renderChoiceStage(format, content) {
+    screen.dataset.mode = format.mode;
     const count = format.optionCount;
     const columns = format.mode === "image-grid" ? format.columns : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
     stageItems.style.setProperty("--rg-choice-columns", String(columns || 2));
@@ -783,7 +784,7 @@ import {
     columns.className = "rg-pair-columns";
     const left = document.createElement("div");
     const right = document.createElement("div");
-    const order = content.pairs.map((_, index) => index).sort((a, b) => ((a * 7 + 3) % 11) - ((b * 7 + 3) % 11));
+    const order = content.pairs.map((_, index) => index).sort((a, b) => ((a * 7 + 3) % Math.max(1, content.pairs.length)) - ((b * 7 + 3) % Math.max(1, content.pairs.length)));
     content.pairs.forEach((pair, index) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -974,7 +975,8 @@ import {
     const format = effective.format;
     const content = effective.content;
     $("#rg-round-badge").textContent = currentRound === "0" ? "HOST NOTE 0" : "ROUND " + currentRound;
-    $("#rg-format-badge").textContent = currentRound === "00" ? "BLANK" : modeNames[format.mode].toUpperCase();
+    $("#rg-format-badge").textContent = currentRound === "00" ? "BLANK" : currentRound === "0" ? "SPECIAL INSTRUCTIONS" : (modeNames[format.mode] || "Question").toUpperCase();
+    screen.dataset.mode = format.mode;
     setQuestionContent(effective);
     stageItems.replaceChildren();
     answerArea.replaceChildren();
