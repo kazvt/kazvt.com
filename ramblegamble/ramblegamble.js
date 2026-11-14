@@ -728,7 +728,10 @@ import {
   canvas.addEventListener("keydown", (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     const key = event.key.toLowerCase();
-    if (key === "arrowleft") setLookDirection(-1);
+    if (key === "1") transitionToView({ kind: "contestants" });
+    else if (key === "2") transitionToView({ kind: "slot" });
+    else if (key === "3") transitionToView({ kind: "roulette" });
+    else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
     else if (key === "arrowdown" || key === "escape" || key === "backspace") goBack();
     else if (key === "enter" || key === " ") {
@@ -743,6 +746,11 @@ import {
     event.preventDefault();
   });
 
+  gameCursorImage.addEventListener("load", () => preview.classList.add("has-game-cursor"));
+  gameCursorImage.addEventListener("error", () => {
+    preview.classList.remove("has-game-cursor");
+    hideGameCursor();
+  });
   gameCursorImage.src = CURSOR_ASSETS.default;
 
   window.addEventListener("rg:spin-wheel", startWheelSpin);
