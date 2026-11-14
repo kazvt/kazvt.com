@@ -403,13 +403,13 @@ import {
 
   function readEditor() {
     const countInput = $("[data-option-count]", $("#rg-special-fields"));
+    const selectedOptionCount = Number(countInput?.value || 0);
     const content = {
       question: $("#rg-edit-question").value,
       subtitle: $("#rg-edit-subtitle").value,
       promptImage: $("#rg-edit-prompt-image").value.trim(),
       promptAsset: $("#rg-edit-prompt-file").dataset.assetId || "",
       mode: $("#rg-edit-mode").value,
-      optionCount: Number(countInput?.value || effectiveNow().format.optionCount),
       acceptedAnswers: parseList($("#rg-edit-answers").value),
       options: $$("[data-option-row]", $("#rg-options-editor")).map((row) => ({
         label: $("[data-option-label]", row).value,
@@ -438,8 +438,11 @@ import {
       assignments: effectiveNow().content.assignments || [],
     };
     if (content.promptImage) content.promptAsset = "";
+    delete content.optionCount;
     levelDraft()["question"] = content.question;
     Object.assign(levelDraft(), content);
+    if (countInput && selectedOptionCount !== resolveRoundFormat(currentRound, currentDifficulty).optionCount) levelDraft().optionCount = selectedOptionCount;
+    else delete levelDraft().optionCount;
   }
 
   function saveAndRenderStage() {
