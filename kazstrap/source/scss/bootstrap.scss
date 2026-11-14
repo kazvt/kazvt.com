@@ -3896,8 +3896,33 @@ kbd {
   }
 }
 
-/* Kazstrap: add a fine printed edge to interface labels and status meters. */
+/* Kazstrap: personal-web framing for common Bootstrap components. */
+@media (min-width: 1200px) {
+  .container,
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-xxl {
+    max-width: 68rem;
+  }
+}
+
 @supports (color: color-mix(in oklab, white, black)) {
+  .card {
+    background-image:
+      linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 76%, black 24%) 0% 72%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 62%, white 38%) 72% 84%,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 84% 100%),
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--bs-emphasis-color) 2%, transparent) 0 1px,
+        transparent 1px 8px);
+    background-size: 100% 3px, 100% 100%;
+    background-position: top left, center;
+    background-repeat: no-repeat, repeat;
+  }
+
   .card-header,
   .modal-header,
   .offcanvas-header,
@@ -3907,41 +3932,201 @@ kbd {
   .dropdown-header {
     background-image:
       repeating-linear-gradient(90deg,
-        color-mix(in oklab, var(--bs-emphasis-color) 10%, transparent) 0 1px,
-        transparent 1px 8px),
-      linear-gradient(90deg,
-        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 76%, black 24%) 0% 68%,
-        color-mix(in oklab, var(--bs-info) 64%, var(--kaz-ui-accent, var(--bs-primary)) 36%) 68% 80%,
-        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 66%, white 34%) 80% 88%,
-        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, black 28%) 88% 100%),
-      linear-gradient(145deg, color-mix(in oklab, white 14%, transparent) 0%, transparent 48%),
-      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent), transparent 84%);
-    background-size: 8px 4px, 100% 4px, 100% 100%, 100% 100%;
-    background-position: top left, top left, center, center;
-    background-repeat: repeat-x, no-repeat, no-repeat, no-repeat;
+        color-mix(in oklab, var(--bs-emphasis-color) 4%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(to bottom,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 11%, transparent),
+        transparent 88%);
+    background-size: 9px 100%, 100% 100%;
+    background-position: center, center;
+    background-repeat: repeat-x, no-repeat;
+    border-block-end: 1px solid color-mix(in oklab, var(--bs-border-color) 56%, var(--kaz-ui-accent, var(--bs-primary)) 44%);
     box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 24%, transparent),
-      inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 17%, transparent);
+      inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
+      inset 0 -1px 0 color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 12%, transparent);
+  }
+
+  .card-footer,
+  .modal-footer {
+    background-image:
+      repeating-linear-gradient(90deg,
+        color-mix(in oklab, var(--bs-emphasis-color) 3%, transparent) 0 1px,
+        transparent 1px 10px),
+      linear-gradient(to top,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent),
+        transparent 82%);
+    background-size: 10px 100%, 100% 100%;
+    background-position: center, center;
+    background-repeat: repeat-x, no-repeat;
+  }
+
+  .alert {
+    border-inline-start-width: 5px;
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 4%, transparent) 0 1px,
+        transparent 1px 8px),
+      linear-gradient(100deg,
+        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 13%, transparent),
+        transparent 68%);
+  }
+
+  .nav-tabs {
+    gap: 0.25rem;
+    padding: 0.25rem 0.25rem 0;
+    border: 1px solid color-mix(in oklab, var(--bs-border-color) 58%, var(--bs-primary) 42%);
+    border-block-end: 2px solid color-mix(in oklab, var(--bs-primary) 70%, black 30%);
+    background-image:
+      repeating-linear-gradient(90deg,
+        color-mix(in oklab, var(--bs-primary) 5%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(to bottom, var(--bs-tertiary-bg), var(--bs-body-bg));
+    background-size: 9px 100%, 100% 100%;
+    background-repeat: repeat-x, no-repeat;
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 24%, transparent);
+  }
+
+  .nav-tabs .nav-link {
+    margin-block-end: 0;
+    border: 1px solid transparent;
+    border-block-end: 0;
+    background-image: none;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: var(--bs-primary-text-emphasis);
+    border-color: color-mix(in oklab, var(--bs-border-color) 52%, var(--bs-primary) 48%);
+    border-block-end-color: var(--bs-body-bg);
+    background-color: var(--bs-primary-bg-subtle);
+    background-image:
+      repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--bs-primary) 5%, transparent) 0 2px,
+        transparent 2px 9px),
+      linear-gradient(to bottom, color-mix(in oklab, white 18%, transparent), transparent 74%);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 32%, transparent);
+  }
+
+  .nav-tabs .nav-link:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--bs-emphasis-color);
+    outline-offset: 1px;
+  }
+
+  .list-group-item-action {
+    position: relative;
+    padding-inline-start: 1.65rem;
+  }
+
+  .list-group-item-action::before,
+  .dropdown-item::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.75rem;
+    top: 50%;
+    width: 0.38rem;
+    height: 0.38rem;
+    border: 1px solid color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 76%, black 24%);
+    background: color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 72%, white 28%);
+    transform: translateY(-50%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .list-group-item-action:hover::before,
+  .list-group-item-action:focus-visible::before {
+    background: var(--kaz-ui-accent, var(--bs-primary));
+  }
+
+  .dropdown-item {
+    position: relative;
+    padding-inline-start: 1.75rem;
+  }
+
+  .dropdown-item.active::before,
+  .dropdown-item:active::before {
+    border-color: currentColor;
+    background: currentColor;
+  }
+
+  .form-control:not(.is-valid):not(.is-invalid),
+  .input-group-text {
+    background-image:
+      repeating-linear-gradient(0deg,
+        color-mix(in oklab, var(--bs-emphasis-color) 3%, transparent) 0 1px,
+        transparent 1px 6px),
+      linear-gradient(135deg, color-mix(in oklab, white 14%, transparent), transparent 58%);
+    box-shadow:
+      inset 1px 1px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+      inset -1px -1px 0 color-mix(in oklab, white 48%, transparent);
+  }
+
+  .form-select {
+    background-color: color-mix(in oklab, var(--bs-body-bg) 94%, var(--bs-primary-bg-subtle) 6%);
+    box-shadow:
+      inset 1px 1px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+      inset -1px -1px 0 color-mix(in oklab, white 48%, transparent);
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: 2px solid color-mix(in oklab, var(--bs-primary) 70%, var(--bs-emphasis-color) 30%);
+    outline-offset: 1px;
+    box-shadow:
+      inset 1px 1px 0 color-mix(in oklab, var(--bs-emphasis-color) 18%, transparent),
+      inset -1px -1px 0 color-mix(in oklab, white 48%, transparent);
+  }
+
+  .table {
+    --kaz-ui-accent: var(--bs-primary);
+  }
+
+  .table-primary { --kaz-ui-accent: var(--bs-primary); }
+  .table-secondary { --kaz-ui-accent: var(--bs-secondary); }
+  .table-success { --kaz-ui-accent: var(--bs-success); }
+  .table-info { --kaz-ui-accent: var(--bs-info); }
+  .table-warning { --kaz-ui-accent: var(--bs-warning); }
+  .table-danger { --kaz-ui-accent: var(--bs-danger); }
+  .table-dark { --kaz-ui-accent: var(--bs-dark); }
+
+  .table > :not(caption) > * > * {
+    border-color: color-mix(in oklab, var(--bs-border-color) 64%, var(--kaz-ui-accent) 36%);
+  }
+
+  .table > thead > tr > th {
+    background-image:
+      repeating-linear-gradient(90deg,
+        color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent) 0 1px,
+        transparent 1px 9px),
+      linear-gradient(to bottom,
+        color-mix(in oklab, var(--kaz-ui-accent) 14%, var(--bs-tertiary-bg)),
+        color-mix(in oklab, var(--kaz-ui-accent) 7%, var(--bs-body-bg)));
+    border-block-start: 1px solid color-mix(in oklab, var(--kaz-ui-accent) 62%, black 38%);
+    border-block-end: 2px solid color-mix(in oklab, var(--kaz-ui-accent) 68%, black 32%);
+  }
+
+  .table caption {
+    padding: 0.45rem 0.6rem;
+    border-block-end: 1px solid color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-ui-accent) 38%);
+    background-image: linear-gradient(90deg,
+      color-mix(in oklab, var(--kaz-ui-accent) 8%, transparent),
+      transparent 70%);
   }
 
   .badge {
     background-image:
       repeating-linear-gradient(135deg,
-        color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 8%, transparent) 0 1px,
+        color-mix(in oklab, currentColor 6%, transparent) 0 1px,
         transparent 1px 9px),
-      linear-gradient(145deg, color-mix(in oklab, white 14%, transparent), transparent 66%),
-      linear-gradient(to bottom, color-mix(in oklab, currentColor 4%, transparent), transparent);
-    background-size: auto, 100% 100%, 100% 100%;
-    background-repeat: repeat, no-repeat, no-repeat;
+      linear-gradient(145deg, color-mix(in oklab, white 12%, transparent), transparent 66%);
   }
 
   .progress {
-    border: 1px solid color-mix(in oklab, var(--bs-border-color) 62%, var(--kaz-ui-accent, var(--bs-primary)) 38%);
+    border: 1px solid color-mix(in oklab, var(--bs-border-color) 55%, var(--kaz-ui-accent, var(--bs-primary)) 45%);
     background-image:
-      linear-gradient(145deg, color-mix(in oklab, white 10%, transparent), transparent 55%),
-      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 4%, transparent), transparent);
+      linear-gradient(145deg, color-mix(in oklab, white 9%, transparent), transparent 58%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--kaz-ui-accent, var(--bs-primary)) 5%, transparent), transparent);
     box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 28%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 25%, transparent),
       inset 0 -1px 0 color-mix(in oklab, var(--bs-emphasis-color) 13%, transparent);
   }
 
@@ -3955,24 +4140,35 @@ kbd {
       inset 0 1px 0 color-mix(in oklab, white 24%, transparent),
       inset 0 -1px 0 color-mix(in oklab, black 12%, transparent);
   }
-
 }
 
-.progress-bar.bg-warning,
-.progress-bar.bg-light,
-.progress-bar.bg-white { color: var(--bs-dark); }
-.progress-bar.bg-body,
-.progress-bar.bg-body-secondary,
-.progress-bar.bg-body-tertiary { color: var(--bs-emphasis-color); }
-.progress-bar.bg-primary-subtle { color: var(--bs-primary-text-emphasis); }
-.progress-bar.bg-secondary-subtle { color: var(--bs-secondary-text-emphasis); }
-.progress-bar.bg-success-subtle { color: var(--bs-success-text-emphasis); }
-.progress-bar.bg-info-subtle { color: var(--bs-info-text-emphasis); }
-.progress-bar.bg-warning-subtle { color: var(--bs-warning-text-emphasis); }
-.progress-bar.bg-danger-subtle { color: var(--bs-danger-text-emphasis); }
-.progress-bar.bg-dark-subtle { color: var(--bs-dark-text-emphasis); }
+.accordion-button::after {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid currentColor;
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-size: 0.55rem 2px, 2px 0.55rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+.accordion-button:not(.collapsed)::after {
+  background-size: 0.55rem 2px, 0 0;
+  transform: none;
+}
 
 @supports not (color: color-mix(in oklab, white, black)) {
+  .card {
+    background-image:
+      linear-gradient(90deg, var(--bs-primary) 0% 72%, var(--bs-info) 72% 84%, var(--bs-primary) 84% 100%),
+      repeating-linear-gradient(0deg, rgba(var(--bs-primary-rgb), 0.025) 0 1px, transparent 1px 8px);
+    background-size: 100% 3px, 100% 100%;
+    background-position: top left, center;
+    background-repeat: no-repeat, repeat;
+  }
   .card-header,
   .modal-header,
   .offcanvas-header,
@@ -3981,61 +4177,73 @@ kbd {
   .accordion-header,
   .dropdown-header {
     background-image:
-      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 8px),
-      linear-gradient(90deg, var(--bs-primary) 0% 68%, var(--bs-info) 68% 80%, var(--bs-primary) 80% 100%),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.12), transparent 84%);
-    background-size: 8px 4px, 100% 4px, 100% 100%;
-    background-position: top left, top left, center;
-    background-repeat: repeat-x, no-repeat, no-repeat;
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.04) 0 1px, transparent 1px 9px),
+      linear-gradient(to bottom, rgba(var(--bs-primary-rgb), 0.10), transparent 88%);
+    background-size: 9px 100%, 100% 100%;
+    background-repeat: repeat-x, no-repeat;
   }
-
-  .badge {
-    background-image:
-      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 9px),
-      linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent 66%);
-    background-repeat: repeat, no-repeat;
+  .alert { border-inline-start-width: 5px; }
+  .list-group-item-action { position: relative; padding-inline-start: 1.65rem; }
+  .list-group-item-action::before,
+  .dropdown-item::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.75rem;
+    top: 50%;
+    width: 0.38rem;
+    height: 0.38rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.78);
+    background: rgba(var(--bs-primary-rgb), 0.72);
+    transform: translateY(-50%) rotate(45deg);
   }
-
-  .progress {
-    border: 1px solid rgba(var(--bs-primary-rgb), 0.38);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.13);
+  .dropdown-item { position: relative; padding-inline-start: 1.75rem; }
+  .form-control:focus,
+  .form-select:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 1px;
   }
-
-  .progress-bar {
-    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0 4px, transparent 4px 9px);
-    background-size: 13px 13px;
-    background-repeat: repeat;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  .table > thead > tr > th {
+    background-image: linear-gradient(to bottom, rgba(var(--bs-primary-rgb), 0.14), rgba(var(--bs-primary-rgb), 0.07));
+    border-top: 1px solid rgba(var(--bs-primary-rgb), 0.62);
+    border-bottom: 2px solid rgba(var(--bs-primary-rgb), 0.68);
   }
 }
 
 @media (forced-colors: active) {
+  .card,
   .card-header,
+  .card-footer,
   .modal-header,
   .offcanvas-header,
   .toast-header,
   .popover-header,
   .accordion-header,
   .dropdown-header,
+  .alert,
+  .nav-tabs,
+  .nav-tabs .nav-link,
+  .nav-tabs .nav-link.active,
   .badge,
   .progress,
-  .progress-bar {
+  .progress-bar,
+  .table > thead > tr > th,
+  .table caption,
+  .form-control,
+  .form-select,
+  .input-group-text {
     background-image: none !important;
     box-shadow: none;
   }
-  .progress-bar.bg-warning,
-  .progress-bar.bg-light,
-  .progress-bar.bg-white,
-  .progress-bar.bg-body,
-  .progress-bar.bg-body-secondary,
-  .progress-bar.bg-body-tertiary,
-  .progress-bar.bg-primary-subtle,
-  .progress-bar.bg-secondary-subtle,
-  .progress-bar.bg-success-subtle,
-  .progress-bar.bg-info-subtle,
-  .progress-bar.bg-warning-subtle,
-  .progress-bar.bg-danger-subtle,
-  .progress-bar.bg-dark-subtle {
-    color: CanvasText;
+  .form-control:focus,
+  .form-select:focus,
+  .nav-tabs .nav-link:focus-visible {
+    outline-color: Highlight;
+  }
+  .list-group-item-action::before,
+  .dropdown-item::before,
+  .accordion-button::after {
+    border-color: CanvasText;
+    background: CanvasText;
+    box-shadow: none;
   }
 }
