@@ -849,24 +849,24 @@ import {
     const height = preview.clientHeight;
     const pixelsPerWorldUnitAtOne = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
 
-    for (const contestant of contestants) {
-      const cameraSpace = camera.worldToLocal(contestant.anchor.clone());
+    for (const billboard of billboards) {
+      const cameraSpace = camera.worldToLocal(billboard.anchor.clone());
       const depth = -cameraSpace.z;
-      const projected = contestant.anchor.clone().project(camera);
+      const projected = billboard.anchor.clone().project(camera);
       const visible = depth > camera.near && projected.z >= -1 && projected.z <= 1;
       if (!visible) {
-        contestant.panel.style.visibility = "hidden";
+        billboard.panel.style.visibility = "hidden";
         continue;
       }
 
       const x = (projected.x + 1) * 0.5 * width;
       const y = (1 - projected.y) * 0.5 * height;
-      const rawWidth = contestant.worldWidth * pixelsPerWorldUnitAtOne / depth;
+      const rawWidth = billboard.worldWidth * pixelsPerWorldUnitAtOne / depth;
       const panelWidth = Math.min(rawWidth, width * 0.78);
-      contestant.panel.style.left = `${x}px`;
-      contestant.panel.style.top = `${y}px`;
-      contestant.panel.style.width = `${panelWidth}px`;
-      contestant.panel.style.visibility = "visible";
+      billboard.panel.style.left = `${x}px`;
+      billboard.panel.style.top = `${y}px`;
+      billboard.panel.style.width = `${panelWidth}px`;
+      billboard.panel.style.visibility = "visible";
     }
   }
 
