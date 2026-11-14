@@ -23,6 +23,8 @@ import {
   const launchButton = $("#rg-console-launch");
   const dialog = $("#rg-console");
   const closeButton = $("#rg-console-close");
+  const presentButton = $("#rg-present-toggle");
+  const returnToEditButton = $("#rg-stage-edit");
   const tabs = $$("[role='tab']", dialog);
   const panels = $$("[role='tabpanel']", dialog);
   const roundSelect = $("#rg-round-select");
@@ -194,6 +196,7 @@ import {
 
   function setTab(index, focus = false) {
     activeTab = (index + tabs.length) % tabs.length;
+    if (activeTab !== 2) setPresentation(false);
     tabs.forEach((tab, tabIndex) => {
       const active = tabIndex === activeTab;
       tab.setAttribute("aria-selected", String(active));
@@ -212,9 +215,18 @@ import {
   }
 
   function closeConsole() {
+    setPresentation(false);
     if (typeof dialog.close === "function" && dialog.open) dialog.close();
     else dialog.removeAttribute("open");
     if (priorFocus?.focus) priorFocus.focus();
+  }
+
+  function setPresentation(active, focus = false) {
+    dialog.classList.toggle("is-presenting", active);
+    presentButton.setAttribute("aria-pressed", String(active));
+    presentButton.textContent = active ? "PRESENTING" : "PRESENT";
+    returnToEditButton.hidden = !active;
+    if (focus) (active ? returnToEditButton : presentButton).focus();
   }
 
   launchButton.addEventListener("click", openConsole);
@@ -222,7 +234,9 @@ import {
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) closeConsole();
   });
-  dialog.addEventListener("close", () => priorFocus?.focus?.());
+  dialog.addEventListener("close", () => { setPresentation(false); priorFocus?.focus?.(); });
+  presentButton.addEventListener("click", () => setPresentation(!dialog.classList.contains("is-presenting"), true));
+  returnToEditButton.addEventListener("click", () => setPresentation(false, true));
   tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => setTab(index));
     tab.addEventListener("keydown", (event) => {
