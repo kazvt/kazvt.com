@@ -48,6 +48,26 @@ body.radio-page {
 .radio-page button { color: inherit; cursor: pointer; }
 .radio-page a { color: inherit; }
 
+/* The site-wide hover treatment is intentionally disabled on this player.
+   Controls keep their own color/press feedback without the dashed frame. */
+html.radio-document body.radio-page :is(
+  a[href],
+  button,
+  input:not([type="hidden"]),
+  select,
+  textarea,
+  label[for],
+  summary,
+  [role="button"],
+  [role="link"],
+  [tabindex]:not([tabindex="-1"]),
+  .visualizer
+):not(.logo-home):not(.logo-wumpa):not(.wumpa-fruit):not(:disabled):not([aria-disabled="true"]):hover {
+  outline: none !important;
+  outline-offset: 0 !important;
+  text-decoration-style: solid !important;
+}
+
 .radio-site {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -302,11 +322,13 @@ body.radio-page {
 
 .deck-sliders {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 22px 20px;
+  align-content: center;
   align-items: center;
-  gap: clamp(6px, 1vw, 14px);
+  gap: 2px;
   min-width: 0;
-  min-height: 24px;
+  min-height: 44px;
 }
 .seek-row,
 .volume-row {
@@ -318,7 +340,53 @@ body.radio-page {
   font: 9px monospace;
 }
 .seek-row span:last-child,
-.volume-row span:last-child { text-align: right; }
+.volume-row output { text-align: right; }
+.volume-label {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 3px;
+  font: 9px monospace;
+  cursor: pointer;
+}
+.volume-speaker {
+  display: block;
+  width: 15px;
+  height: 16px;
+  flex: 0 0 15px;
+  background: url("/radio/assets/icons/speaker.gif") center / contain no-repeat;
+  image-rendering: pixelated;
+}
+.volume-slider {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  min-width: 0;
+}
+.volume-ramp {
+  position: absolute;
+  inset: 3px 0 4px;
+  overflow: hidden;
+  background: var(--ink);
+  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--ink) 72%, transparent));
+  pointer-events: none;
+}
+.volume-ramp::before {
+  position: absolute;
+  inset: 1px;
+  background:
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--ink) 18%, transparent) 0 1px, transparent 1px 10px),
+    linear-gradient(90deg, var(--pink) 0 var(--volume-progress, 72%), var(--paper) var(--volume-progress, 72%) 100%);
+  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+  content: "";
+}
+.volume-row output {
+  min-width: 0;
+  color: var(--ink);
+  font: 9px monospace;
+  white-space: nowrap;
+}
 .radio-page input.retro-range {
   display: block;
   width: 100%;
@@ -332,8 +400,8 @@ body.radio-page {
   cursor: var(--cursor-pointer, pointer);
 }
 .radio-page input.retro-range:focus-visible {
-  outline: 2px dashed var(--blue);
-  outline-offset: 1px;
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 .radio-page input.retro-range::-webkit-slider-runnable-track {
   height: 7px;
@@ -368,6 +436,38 @@ body.radio-page {
   border-radius: 0;
   background: var(--banner);
   box-shadow: 2px 2px 0 var(--pink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
+}
+.radio-page input.volume-range {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  height: 20px;
+}
+.radio-page input.volume-range::-webkit-slider-runnable-track {
+  height: 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.radio-page input.volume-range::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -1px;
+  border-color: var(--ink);
+  background: var(--banner);
+  box-shadow: 2px 2px 0 var(--pink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
+}
+.radio-page input.volume-range::-moz-range-track {
+  height: 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.radio-page input.volume-range::-moz-range-progress { height: 12px; background: transparent; }
+.radio-page input.volume-range::-moz-range-thumb {
+  width: 10px;
+  height: 12px;
+  background: var(--banner);
 }
 
 .player-side {
@@ -444,7 +544,7 @@ body.radio-page {
   min-height: 31px;
   padding: 3px 5px;
   border: 0;
-  border-bottom: 1px dashed color-mix(in srgb, var(--ink) 55%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 38%, transparent);
   border-left: 2px solid var(--blue);
   color: var(--ink);
   background: var(--paper);
@@ -586,10 +686,15 @@ body.radio-page {
   .playlist-index { font-size: 8px; }
   .playlist-track-name { font-size: 9px; }
   .playlist-track-artist { font-size: 7px; }
-  .deck-sliders { gap: 4px; min-height: 20px; }
+  .deck-sliders { grid-template-rows: 19px 18px; gap: 2px; min-height: 39px; }
   .seek-row,
   .volume-row { grid-template-columns: 26px minmax(0, 1fr) 31px; gap: 2px; font-size: 7px; }
   .radio-page input.retro-range { height: 17px; }
+  .volume-slider,
+  .radio-page input.volume-range { height: 18px; }
+  .volume-label { gap: 1px; font-size: 7px; }
+  .volume-speaker { width: 13px; height: 14px; flex-basis: 13px; }
+  .volume-row output { font-size: 7px; }
   .player-message { font-size: 7px; }
   .palette-desk { min-height: 25px; padding: 2px 5px; }
   .palette-caption { font-size: 7px; }
@@ -627,7 +732,9 @@ body.radio-page {
   .radio-page .transport-button,
   .radio-page .small-control { min-height: 23px; }
   .radio-page .play-button { min-height: 25px; }
-  .deck-sliders { min-height: 19px; }
+  .deck-sliders { grid-template-rows: 18px 18px; gap: 1px; min-height: 37px; }
+  .volume-slider,
+  .radio-page input.volume-range { height: 17px; }
   .seek-row,
   .volume-row { font-size: 7px; }
   .player-message { display: none; }
