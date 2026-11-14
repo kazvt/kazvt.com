@@ -243,9 +243,9 @@ import {
     const tanHalfHorizontal = tanHalfVertical * aspect;
     let distance = 0;
 
-    for (const x of [focus.min.x, focus.max.x]) {
-      for (const y of [focus.min.y, focus.max.y]) {
-        for (const z of [focus.min.z, focus.max.z]) {
+    for (const x of [bounds.min.x, bounds.max.x]) {
+      for (const y of [bounds.min.y, bounds.max.y]) {
+        for (const z of [bounds.min.z, bounds.max.z]) {
           const relative = new THREE.Vector3(x, y, z).sub(target);
           const depth = relative.dot(direction);
           distance = Math.max(
