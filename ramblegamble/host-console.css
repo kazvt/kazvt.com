@@ -1,45 +1,9 @@
 /* Host console: intentionally page-scoped and palette-2 themed. */
-.rg-console-launch,
 .rg-console button,
 .rg-console input,
 .rg-console textarea,
 .rg-console select {
   font: inherit;
-}
-
-.rg-console-launch {
-  position: fixed;
-  z-index: 5;
-  top: max(12px, env(safe-area-inset-top));
-  left: max(12px, env(safe-area-inset-left));
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 5px 12px 5px 6px;
-  border: 2px solid #111;
-  color: #111;
-  background: #f1e5a1;
-  box-shadow: 3px 3px 0 #111;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .07em;
-  cursor: pointer;
-}
-
-.rg-console-launch:hover,
-.rg-console-launch:focus-visible { background: #ffdf00; }
-
-.rg-console-launch-mark {
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border: 2px solid #111;
-  color: #fff;
-  background: #8b2626;
-  font-size: 19px;
-  line-height: 1;
 }
 
 .rg-console {
@@ -73,8 +37,7 @@
   padding: clamp(10px, 1.5vw, 20px);
 }
 
-.rg-console :focus-visible,
-.rg-console-launch:focus-visible {
+.rg-console :focus-visible {
   outline: 3px solid #4d6787;
   outline-offset: 3px;
 }
@@ -425,7 +388,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .rg-trivia-interface.is-error { animation: none; }
-  .rg-console-launch,
   .rg-console button,
   .rg-console { scroll-behavior: auto; }
 }
