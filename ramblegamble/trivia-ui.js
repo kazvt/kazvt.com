@@ -994,6 +994,9 @@ import {
     board.setAttribute("aria-label", "Image composition board. Select a piece, then click a place on the board.");
     const background = safeUrl(content.backgroundImage || content.promptImage);
     if (background) board.style.backgroundImage = 'url("' + background.replace(/["\\]/g, "") + '")';
+    else if (content.promptAsset) readMedia(content.promptAsset).then((url) => {
+      if (url && board.isConnected) board.style.backgroundImage = 'url("' + url.replace(/["\\]/g, "") + '")';
+    });
     content.items.forEach((item, index) => {
       const piece = document.createElement("button");
       piece.type = "button";
