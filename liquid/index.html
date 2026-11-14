@@ -1056,7 +1056,7 @@
           theaterButton.focus();
           return;
         }
-        if (event.code === "Space" && !document.activeElement.closest("input, button, select, textarea, a, summary, [role=button], [tabindex]:not([tabindex=\"-1\"]), [contenteditable], .color-area")) {
+        if (event.code === "Space" && theaterMode && !document.activeElement.closest("input, button, select, textarea, a, summary, [role=button], [tabindex]:not([tabindex=\"-1\"]), [contenteditable], .color-area")) {
           event.preventDefault();
           document.getElementById("pauseBtn").click();
         }
