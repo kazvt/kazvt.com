@@ -38,6 +38,7 @@ test("question-specific templates preserve the supplied counts and modes", () =>
   assert.equal(resolveRoundFormat("10", 5).mode, "number-grid");
   assert.equal(resolveRoundFormat("10", 5).rows, 4);
   assert.equal(resolveRoundFormat("10", 5).columns, 4);
+  assert.deepEqual([resolveRoundFormat("02", 1).promptImage, resolveRoundFormat("02", 5).mode], [true, "short-answer"]);
 });
 
 test("special media templates keep their authored sizes", () => {
