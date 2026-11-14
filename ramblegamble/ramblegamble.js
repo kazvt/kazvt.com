@@ -678,7 +678,7 @@ import {
     if (zone === "right") return setLookDirection(1);
     if (zone === "back") return goBack();
 
-    const interaction = getSceneInteractionAt(event.clientX, event.clientY);
+    const interaction = getSceneInteractionAt(clientX, clientY);
     if (!interaction) return;
 
     if (interaction.machine === "contestant") {
