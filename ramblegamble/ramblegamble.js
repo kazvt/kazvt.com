@@ -25,6 +25,11 @@ import {
     { id: "erin", label: "Erin", source: "https://reactive.fugi.tech/basic/205887066855178244" },
     { id: "kaz", label: "Kaz", source: "https://reactive.fugi.tech/basic/796834631961935893" },
   ];
+  const HOST_BILLBOARD_SOURCE = {
+    id: "lillie-host",
+    label: "Lillie - Host",
+    source: "https://reactive.fugi.tech/basic/185073584211755008",
+  };
   const CURSOR_ASSETS = {
     default: "/ramblegamble/assets/cursors/pointer-default.gif",
     hover: "/ramblegamble/assets/cursors/pointer-hover.gif",
@@ -70,6 +75,8 @@ import {
   let rouletteModel;
   let slotsModel;
   let contestants = [];
+  let hostBillboard = null;
+  let billboards = [];
   let contestantTargets = [];
   let currentView = { kind: "overview", look: 0 };
   let viewHistory = [];
