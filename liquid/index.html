@@ -524,12 +524,18 @@
       function saveSettings() {
         try { localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(Object.entries(controls).map(([id, el]) => [id, el.type === "checkbox" ? el.checked : el.value])))); } catch (_) { /* local file storage can be disabled */ }
       }
-      function loadSettings() {
+      function readSavedSettings(key) {
         try {
-          let saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-          const migrating = !saved;
-          if (migrating) saved = JSON.parse(localStorage.getItem(legacyStorageKey) || "null");
-          if (saved) Object.entries(controls).forEach(([id, el]) => {
+          const saved = JSON.parse(localStorage.getItem(key) || "null");
+          return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : null;
+        } catch (_) { return null; }
+      }
+      function loadSettings() {
+        let saved = readSavedSettings(storageKey);
+        const migrating = !saved;
+        if (migrating) saved = readSavedSettings(legacyStorageKey);
+        if (saved) {
+          Object.entries(controls).forEach(([id, el]) => {
             if (saved[id] === undefined) return;
             if (el.classList.contains("color-value")) {
               const parsed = parseColorParameter(String(saved[id]));
@@ -544,8 +550,8 @@
               if (parsed !== null) el.value = parsed;
             }
           });
-          if (migrating && saved) saveSettings();
-        } catch (_) { /* use defaults */ }
+          if (migrating) saveSettings();
+        }
       }
       function parseColorParameter(raw) {
         if (typeof raw !== "string" || raw.length > 128) return null;
