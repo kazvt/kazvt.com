@@ -910,7 +910,7 @@
       function startFrameLoop() {
         if (frameRequest) cancelAnimationFrame(frameRequest);
         previousTime = 0;
-        fpsTime = 0;
+        fpsTime = performance.now();
         fpsFrames = 0;
         frameDirty = true;
         scheduleFrame();
@@ -930,6 +930,8 @@
         paused = !paused;
         if (!paused) {
           previousTime = 0;
+          fpsTime = performance.now();
+          fpsFrames = 0;
           frameDirty = true;
           scheduleFrame();
         }
