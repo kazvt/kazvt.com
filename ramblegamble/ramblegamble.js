@@ -367,7 +367,7 @@ import {
     // Keep the nearby seating in frame so the new machine placement reads as
     // part of the supplied set rather than as objects floating in isolation.
     stageModel.traverse((object) => {
-      if (!/^(chair|tall_chair)$/i.test(object.name)) return;
+      if (!/^(chair|tall_chair)$/i.test(normalizeNodeName(object.name))) return;
       const chairBounds = new THREE.Box3().setFromObject(object);
       if (chairBounds.isEmpty()) return;
       const chairCenter = chairBounds.getCenter(new THREE.Vector3());
@@ -378,6 +378,10 @@ import {
     if (rouletteRig) bounds.expandByObject(rouletteRig);
     if (slotRig) bounds.expandByObject(slotRig);
     return bounds;
+  }
+
+  function normalizeNodeName(name) {
+    return String(name || "").toLowerCase().replace(/(?:[._]\d+)+$/, "");
   }
 
   function placeMachinesFromStage() {
@@ -481,7 +485,7 @@ import {
   function setupContestants() {
     const chairs = [];
     stageModel?.traverse((object) => {
-      if (object.name === "tall_chair") chairs.push(object);
+      if (object.isMesh && normalizeNodeName(object.name) === "tall_chair") chairs.push(object);
     });
     scene.updateMatrixWorld(true);
 
