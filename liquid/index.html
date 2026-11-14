@@ -986,6 +986,7 @@
           if (controls[id].type === "checkbox") controls[id].checked = v;
           else controls[id].value = v;
         });
+        applyURLParameters();
         syncColorPickers();
         closeColorPickers();
         syncPresetSelection();
