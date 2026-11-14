@@ -342,6 +342,8 @@
 .rg-pair-columns > div { display: grid; align-content: start; gap: 6px; }
 .rg-pair-card { min-height: 44px; padding: 7px; border: 1px solid #486c2f; background: #f1e5a1; font-size: 11px; text-align: left; }
 .rg-pair-card img { width: 100%; aspect-ratio: 6 / 5; object-fit: contain; }
+.rg-trivia-screen[data-mode="categorize-images"] .rg-stage-media,
+.rg-trivia-screen[data-mode="image-sequence"] .rg-stage-media { width: min(100%, 240px); aspect-ratio: 1; object-fit: contain; }
 .rg-number-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .rg-number-grid button { min-height: 44px; border: 1px solid #111; background: #ffdf00; font-weight: 900; }
 .rg-category-buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
