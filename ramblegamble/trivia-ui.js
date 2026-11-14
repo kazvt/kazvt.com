@@ -130,11 +130,11 @@ import {
 
   function getEffectiveContent(round = currentRound, difficulty = currentDifficulty) {
     const number = Number.parseInt(round, 10);
-    const format = resolveRoundFormat(round, difficulty);
+    let format = resolveRoundFormat(round, difficulty);
     const content = {
       question: "", subtitle: "", promptImage: "", promptAsset: "", mode: "",
       options: [], acceptedAnswers: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
-      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "",
+      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
     };
     if (!Number.isInteger(number) || number < 1 || number > 36) return { format, content };
 
@@ -143,12 +143,15 @@ import {
       const draft = drafts.rounds[round]?.[level] || {};
       if (rule.replaceOptions) content.options = [];
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
-      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "mode", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing"]) {
+      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments"]) {
         if (Object.hasOwn(draft, field)) content[field] = copy(draft[field]);
       }
     }
 
-    if (!content.mode) content.mode = format.mode;
+    if (!modeNames[content.mode]) content.mode = format.mode;
+    if (content.optionCount == null) content.optionCount = format.optionCount;
+    content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
+    format = { ...format, optionCount: content.optionCount };
     if (isChoiceMode(content.mode)) {
       while (content.options.length < format.optionCount) content.options.push({ label: "", image: "", correct: false });
       content.options = content.options.slice(0, format.optionCount);
@@ -391,12 +394,14 @@ import {
   }
 
   function readEditor() {
+    const countInput = $("[data-option-count]", $("#rg-special-fields"));
     const content = {
       question: $("#rg-edit-question").value,
       subtitle: $("#rg-edit-subtitle").value,
       promptImage: $("#rg-edit-prompt-image").value.trim(),
       promptAsset: $("#rg-edit-prompt-file").dataset.assetId || "",
       mode: $("#rg-edit-mode").value,
+      optionCount: Number(countInput?.value || effectiveNow().format.optionCount),
       acceptedAnswers: parseList($("#rg-edit-answers").value),
       options: $$("[data-option-row]", $("#rg-options-editor")).map((row) => ({
         label: $("[data-option-label]", row).value,
@@ -422,6 +427,7 @@ import {
       imageVisible: effectiveNow().content.imageVisible,
       numberVisible: effectiveNow().content.numberVisible,
       drawing: drawingData.get(currentRound + ":" + currentDifficulty) || effectiveNow().content.drawing || "",
+      assignments: effectiveNow().content.assignments || [],
     };
     if (content.promptImage) content.promptAsset = "";
     levelDraft()["question"] = content.question;
