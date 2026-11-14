@@ -8,7 +8,7 @@
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=full-preview-20261114-v2">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=host-console-20261114-v2">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=point-click-20261114-v1">
     <script type="importmap">
       {
         "imports": {
@@ -17,20 +17,15 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=palette-locked-p2-20261114-v2"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=host-console-20261114-v2"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=point-click-20261114-v1"></script>
+    <script type="module" src="/ramblegamble/trivia-ui.js?v=point-click-20261114-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
-      <canvas id="rg-canvas"></canvas>
+      <canvas id="rg-canvas" tabindex="0" aria-label="Interactive point-and-click 3D arcade. Click the roulette wheel to spin, the roulette center for trivia, the slot cabinet for its menu grid, or the slot lever to pull it."></canvas>
       <p class="rg-result" id="rg-result" hidden></p>
       <div class="rg-loading" id="rg-loading">Loading the 3D preview...</div>
     </main>
-
-    <button class="rg-console-launch" id="rg-console-launch" type="button" aria-haspopup="dialog" aria-controls="rg-console">
-      <span class="rg-console-launch-mark" aria-hidden="true">K</span>
-      <span>HOST MENU</span>
-    </button>
 
     <dialog class="rg-console" id="rg-console" aria-labelledby="rg-console-title">
       <div class="rg-console-frame">
