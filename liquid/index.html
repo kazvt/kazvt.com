@@ -1165,7 +1165,7 @@
       }
 
       function scheduleFrame() {
-        if (gl && !frameRequest) frameRequest = requestAnimationFrame(frame);
+        if (gl && !document.hidden && !frameRequest) frameRequest = requestAnimationFrame(frame);
       }
       function frame(now) {
         frameRequest = 0;
@@ -1356,6 +1356,18 @@
         }, "image/png");
       });
       window.addEventListener("resize", resize);
+      document.addEventListener("visibilitychange", () => {
+        previousTime = 0;
+        fpsTime = performance.now();
+        fpsFrames = 0;
+        if (document.hidden) {
+          if (frameRequest) cancelAnimationFrame(frameRequest);
+          frameRequest = 0;
+        } else if (!paused) {
+          frameDirty = true;
+          scheduleFrame();
+        }
+      });
       canvas.addEventListener("webglcontextlost", event => {
         event.preventDefault();
         if (frameRequest) cancelAnimationFrame(frameRequest);
