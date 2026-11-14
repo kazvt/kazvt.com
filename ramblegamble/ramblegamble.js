@@ -208,27 +208,10 @@ import {
     slotRig.rotation.y = Math.PI;
     scene.add(slotRig);
 
-    controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.065;
-    controls.enablePan = false;
-    controls.minPolarAngle = 0.2;
-    controls.maxPolarAngle = Math.PI * 0.47;
-    controls.minDistance = 20;
-    controls.maxDistance = 180;
-    controls.target.set(0, 0, 0);
-    controls.addEventListener("start", () => {
-      userInteracting = true;
-      preview.classList.add("is-dragging");
-    });
-    controls.addEventListener("end", () => {
-      userInteracting = false;
-      preview.classList.remove("is-dragging");
-    });
   }
 
   function fitCamera() {
-    if (!camera || !controls || !renderer) return;
+    if (!camera || !renderer || !sceneReady) return;
     const width = Math.max(1, preview.clientWidth);
     const height = Math.max(1, preview.clientHeight);
     const aspect = width / height;
@@ -237,13 +220,22 @@ import {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.setSize(width, height, false);
 
-    const focus = getArcadeBounds();
-    if (focus.isEmpty()) return;
+    const pose = getCameraPoseForView(currentView, aspect);
+    if (!pose) return;
+    if (cameraTransition) {
+      cameraTransition.toPosition.copy(pose.position);
+      cameraTransition.toTarget.copy(pose.target);
+    } else {
+      applyCameraPose(pose);
+    }
+  }
 
-    const target = focus.getCenter(new THREE.Vector3());
-    const direction = cameraFramed
-      ? camera.position.clone().sub(controls.target).normalize()
-      : new THREE.Vector3(0, 0.38, 0.925).normalize();
+  function getCameraPoseForView(view, aspect) {
+    const bounds = getViewBounds(view);
+    if (bounds.isEmpty()) return null;
+    const target = bounds.getCenter(new THREE.Vector3());
+    const yaw = -view.look * 0.42;
+    const direction = new THREE.Vector3(Math.sin(yaw), 0.38, Math.cos(yaw) * 0.925).normalize();
     const worldUp = new THREE.Vector3(0, 1, 0);
     const right = new THREE.Vector3().crossVectors(worldUp, direction).normalize();
     const viewUp = new THREE.Vector3().crossVectors(direction, right).normalize();
@@ -265,14 +257,99 @@ import {
       }
     }
 
-    distance = Math.max(distance, 1) * 1.14;
-    controls.target.copy(target);
-    camera.position.copy(target).addScaledVector(direction, distance);
-    camera.lookAt(target);
-    controls.minDistance = Math.max(0.5, distance * 0.48);
-    controls.maxDistance = Math.max(18, distance * 3.2);
-    controls.update();
-    cameraFramed = true;
+    distance = Math.max(distance, 1) * (view.kind === "overview" ? 1.14 : 1.18);
+    return { target, position: target.clone().addScaledVector(direction, distance) };
+  }
+
+  function getViewBounds(view) {
+    const bounds = new THREE.Box3().makeEmpty();
+    scene?.updateMatrixWorld(true);
+
+    if (view.kind === "overview") return getArcadeBounds();
+    if (view.kind === "contestants") return getContestantsBounds();
+    if (view.kind === "contestant") {
+      const contestant = contestants.find((entry) => entry.id === view.contestantId);
+      if (!contestant) return getContestantsBounds();
+      bounds.expandByObject(contestant.hitProxy);
+      addBillboardBounds(bounds, contestant);
+      return bounds.expandByScalar(0.22);
+    }
+    if (view.kind === "slot" && slotsModel) {
+      bounds.setFromObject(slotsModel);
+      return bounds.expandByScalar(0.35);
+    }
+    if (view.kind === "roulette" && rouletteRig) {
+      bounds.setFromObject(rouletteRig);
+      return bounds.expandByScalar(0.38);
+    }
+
+    return getArcadeBounds();
+  }
+
+  function getContestantsBounds() {
+    const bounds = new THREE.Box3().makeEmpty();
+    for (const contestant of contestants) {
+      bounds.expandByObject(contestant.hitProxy);
+      addBillboardBounds(bounds, contestant);
+    }
+    return bounds.expandByScalar(0.25);
+  }
+
+  function addBillboardBounds(bounds, contestant) {
+    const halfWidth = contestant.worldWidth / 2;
+    const halfHeight = contestant.worldHeight / 2;
+    const { x, y, z } = contestant.anchor;
+    bounds.expandByPoint(new THREE.Vector3(x - halfWidth, y - halfHeight, z));
+    bounds.expandByPoint(new THREE.Vector3(x + halfWidth, y + halfHeight, z));
+  }
+
+  function applyCameraPose(pose) {
+    camera.position.copy(pose.position);
+    cameraTarget.copy(pose.target);
+    camera.lookAt(cameraTarget);
+    camera.updateMatrixWorld(true);
+  }
+
+  function transitionToView(nextView, { record = true, immediate = false } = {}) {
+    const sameView = currentView.kind === nextView.kind && currentView.contestantId === nextView.contestantId;
+    if (record && !sameView) viewHistory.push({ ...currentView });
+    currentView = { ...nextView, look: nextView.look ?? 0 };
+    const pose = getCameraPoseForView(currentView, camera.aspect);
+    if (!pose) return;
+
+    if (immediate || reducedMotion.matches || !sceneReady) {
+      cameraTransition = null;
+      applyCameraPose(pose);
+      return;
+    }
+
+    cameraTransition = {
+      started: performance.now(),
+      duration: 460,
+      fromPosition: camera.position.clone(),
+      fromTarget: cameraTarget.clone(),
+      toPosition: pose.position,
+      toTarget: pose.target,
+    };
+  }
+
+  function setLookDirection(look) {
+    if (cameraTransition || currentView.look === look) return;
+    transitionToView({ ...currentView, look }, { record: false });
+  }
+
+  function canGoBack() {
+    return currentView.look !== 0 || viewHistory.length > 0;
+  }
+
+  function goBack() {
+    if (cameraTransition) return;
+    if (currentView.look !== 0) {
+      setLookDirection(0);
+      return;
+    }
+    const previous = viewHistory.pop();
+    if (previous) transitionToView(previous, { record: false });
   }
 
   function getArcadeBounds() {
