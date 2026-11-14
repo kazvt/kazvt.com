@@ -198,7 +198,7 @@
       const themeStorageKey = "kazvt-liquid-theme-v1";
       let gl, program, buffer, locations = {};
       let paused = false, frameDirty = true, phase = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0, frameRequest = 0;
-      let theaterMode = false, theaterControlsTimer = 0;
+      let theaterMode = false, theaterControlsTimer = 0, theaterKeyboardFocus = false, lastPointerDownAt = -Infinity;
       let viewWidth = 1, viewHeight = 1, dpr = 1, viewMargin = 0, wrapMargin = 0;
 
       const vertexSource = `
@@ -760,6 +760,7 @@
       }
       function setTheaterMode(enabled, revealControls = false) {
         theaterMode = enabled;
+        if (!enabled) theaterKeyboardFocus = false;
         document.body.classList.toggle("theater-mode", enabled);
         appShell.classList.toggle("py-3", !enabled);
         appShell.classList.toggle("p-0", enabled);
@@ -793,7 +794,7 @@
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = window.setTimeout(() => {
           theaterControlsTimer = 0;
-          if (!theaterToolbar.contains(document.activeElement)) hideTheaterControls();
+          if (!theaterKeyboardFocus) hideTheaterControls();
         }, 1000);
       }
       function hideTheaterControls() {
@@ -1008,11 +1009,21 @@
         }
       });
       document.addEventListener("pointermove", showTheaterControls, { passive: true });
-      document.addEventListener("pointerdown", showTheaterControls, { passive: true });
-      theaterToolbar.addEventListener("focusin", showTheaterControls);
+      document.addEventListener("pointerdown", () => {
+        lastPointerDownAt = performance.now();
+        theaterKeyboardFocus = false;
+        showTheaterControls();
+      }, { passive: true });
+      theaterToolbar.addEventListener("focusin", () => {
+        theaterKeyboardFocus = performance.now() - lastPointerDownAt > 500;
+        showTheaterControls();
+      });
       theaterToolbar.addEventListener("focusout", () => {
         window.setTimeout(() => {
-          if (theaterMode && !theaterToolbar.contains(document.activeElement)) showTheaterControls();
+          if (theaterMode && !theaterToolbar.contains(document.activeElement)) {
+            theaterKeyboardFocus = false;
+            showTheaterControls();
+          }
         }, 0);
       });
       function createStageCaptureCanvas(blur) {
@@ -1081,6 +1092,7 @@
         }
       });
       window.addEventListener("keydown", event => {
+        lastPointerDownAt = -Infinity;
         if (event.key === "Escape" && theaterMode) {
           event.preventDefault();
           setTheaterMode(false);
