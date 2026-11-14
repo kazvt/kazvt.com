@@ -63,9 +63,12 @@ import {
   function safeUrl(value) {
     const raw = String(value || "").trim();
     if (!raw) return "";
+    const absoluteWeb = /^https?:\/\//i.test(raw);
+    const sitePath = /^(\/(?!\/)|\.\/|\.\.\/)/.test(raw);
+    if (!absoluteWeb && !sitePath) return "";
     try {
       const parsed = new URL(raw, window.location.href);
-      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+      if ((parsed.protocol !== "https:" && parsed.protocol !== "http:") || (sitePath && parsed.origin !== window.location.origin)) return "";
       return parsed.href;
     } catch {
       return "";
