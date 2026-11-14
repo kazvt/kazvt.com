@@ -53,6 +53,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
   let userInteracting = false;
   let sceneReady = false;
   let lastCameraShake = new THREE.Vector3();
+  let stageModel;
   let rouletteModel;
   let slotsModel;
 
@@ -149,14 +150,6 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
 
   applyTheme();
 
-  function makePedestal(radius, depth, color, userDataKey) {
-    const material = new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0.05 });
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.94, radius, depth, 48), material);
-    mesh.position.y = -9.5;
-    mesh.userData[userDataKey] = true;
-    return mesh;
-  }
-
   function createWorld() {
     const bg = themeValue("--bg", "#17213c");
     scene = new THREE.Scene();
@@ -187,48 +180,13 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     fillLight.position.set(-30, 6, -18);
     scene.add(fillLight);
 
-    const floorMaterial = new THREE.MeshStandardMaterial({ color: bg, roughness: 1, metalness: 0 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -10.05;
-    floor.userData.rgFloor = true;
-    scene.add(floor);
-
-    const stageAccent = new THREE.MeshStandardMaterial({
-      color: themeValue("--pink", "#f599c6"),
-      roughness: 0.65,
-      metalness: 0.1,
-      emissive: themeValue("--pink", "#f599c6"),
-      emissiveIntensity: 0.08,
-    });
-    const rouletteDeck = new THREE.Mesh(new THREE.TorusGeometry(21.1, 0.14, 6, 80), stageAccent);
-    rouletteDeck.rotation.x = Math.PI / 2;
-    rouletteDeck.position.y = -9.1;
-    rouletteDeck.userData.rgAccent = true;
-    scene.add(rouletteDeck);
-
-    const slotDeckMaterial = new THREE.MeshStandardMaterial({
-      color: themeValue("--blue", "#4d6787"),
-      roughness: 0.72,
-      metalness: 0.1,
-      emissive: themeValue("--blue", "#4d6787"),
-      emissiveIntensity: 0.06,
-    });
-    const slotDeck = new THREE.Mesh(new THREE.TorusGeometry(8.6, 0.13, 6, 64), slotDeckMaterial);
-    slotDeck.rotation.x = Math.PI / 2;
-    slotDeck.position.y = -9.1;
-    slotDeck.userData.rgSecondary = true;
-    scene.add(slotDeck);
-
     rouletteRig = new THREE.Group();
     rouletteRig.position.set(-14, 0, 0);
-    rouletteRig.add(makePedestal(21, 0.55, themeValue("--pink", "#f599c6"), "rgAccent"));
     scene.add(rouletteRig);
 
     slotRig = new THREE.Group();
     slotRig.position.set(20, 0, 0);
     slotRig.rotation.y = Math.PI;
-    slotRig.add(makePedestal(8.7, 0.55, themeValue("--blue", "#4d6787"), "rgSecondary"));
     scene.add(slotRig);
 
     controls = new OrbitControls(camera, canvas);
@@ -263,22 +221,19 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     const mobileStack = aspect < 1.05;
     if (rouletteRig && slotRig) {
       if (mobileStack) {
-        rouletteRig.position.set(0, 7, 0);
-        slotRig.position.set(0, -11, -4);
+        rouletteRig.position.set(0, 12, 0);
+        slotRig.position.set(0, -16, -4);
         controls.target.set(0, -2.75, -1.8);
       } else {
         rouletteRig.position.set(-14, 0, 0);
         slotRig.position.set(20, 0, 0);
         controls.target.set(-4, 0, 0);
       }
-      const rouletteAccent = scene.children.find((object) => object.geometry?.type === "TorusGeometry" && object.userData.rgAccent);
-      const slotAccent = scene.children.find((object) => object.geometry?.type === "TorusGeometry" && object.userData.rgSecondary);
-      if (rouletteAccent) rouletteAccent.position.set(mobileStack ? 0 : -14, mobileStack ? -2 : -9.1, 0);
-      if (slotAccent) slotAccent.position.set(mobileStack ? 0 : 20, mobileStack ? -20 : -9.1, mobileStack ? -4 : 0);
+      if (stageModel) stageModel.position.x = mobileStack ? -13 : 0;
     }
 
     const horizontalSpan = mobileStack ? 40 : 66;
-    const verticalSpan = mobileStack ? 46 : 23;
+    const verticalSpan = mobileStack ? 46 : 30;
     const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const distance = Math.max(
       horizontalSpan / (2 * tangent * Math.max(aspect, 0.28)),
@@ -461,13 +416,18 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
     try {
       createWorld();
       const loader = new GLTFLoader();
-      const [rouletteGltf, slotsGltf] = await Promise.all([
+      const [stageGltf, rouletteGltf, slotsGltf] = await Promise.all([
+        loader.loadAsync("/ramblegamble/assets/provided/rg_stage.gltf"),
         loader.loadAsync("/ramblegamble/assets/provided/rg_roulette.gltf"),
         loader.loadAsync("/ramblegamble/assets/provided/rg_slots.gltf"),
       ]);
 
+      stageModel = stageGltf.scene;
+      prepareModel(stageModel);
+      scene.add(stageModel);
+
       rouletteModel = rouletteGltf.scene;
-      rouletteModel.position.y = -6.8;
+      rouletteModel.position.y = 2.3;
       prepareModel(rouletteModel);
       rouletteRig.add(rouletteModel);
       rouletteModel.traverse((object) => {
@@ -476,7 +436,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
       });
 
       slotsModel = slotsGltf.scene;
-      slotsModel.position.y = -1;
+      slotsModel.position.y = 9;
       prepareModel(slotsModel);
       slotRig.add(slotsModel);
       slotsModel.traverse((object) => {
