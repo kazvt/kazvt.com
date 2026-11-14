@@ -935,6 +935,7 @@
           scheduleFrame();
         }
         event.currentTarget.textContent = paused ? "Play" : "Pause";
+        fpsLabel.textContent = paused ? `PAUSED - ${canvas.width}×${canvas.height}` : "Starting GPU…";
         event.currentTarget.classList.toggle("btn-primary", !paused);
         event.currentTarget.classList.toggle("btn-outline-primary", paused);
       });
@@ -947,6 +948,7 @@
         closeColorPickers();
         syncPresetSelection();
         paused = false;
+        fpsLabel.textContent = "Starting GPU…";
         document.getElementById("pauseBtn").textContent = "Pause";
         document.getElementById("pauseBtn").classList.add("btn-primary");
         document.getElementById("pauseBtn").classList.remove("btn-outline-primary");
@@ -995,6 +997,7 @@
         padded.width = width + 2 * pad;
         padded.height = height + 2 * pad;
         const paddedContext = padded.getContext("2d");
+        if (!paddedContext) return canvas;
         if (controls.wrapEdges.checked) {
           let firstTileX = pad - width;
           while (firstTileX > 0) firstTileX -= width;
@@ -1009,6 +1012,7 @@
         output.width = width;
         output.height = height;
         const context = output.getContext("2d");
+        if (!context) return canvas;
         context.fillStyle = getComputedStyle(stage).backgroundColor;
         context.fillRect(0, 0, width, height);
         if (blur > 0) context.filter = `blur(${blurRadius}px)`;
