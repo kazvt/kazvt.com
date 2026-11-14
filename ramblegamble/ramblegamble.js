@@ -21,7 +21,7 @@ import {
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const BILLBOARD_SOURCES = [
-    { id: "faroe", label: "Faroe", source: "" },
+    { id: "faroe", label: "Faroe", source: "https://reactive.fugi.tech/basic/489548166316949513" },
     { id: "erin", label: "Erin", source: "https://reactive.fugi.tech/basic/205887066855178244" },
     { id: "kaz", label: "Kaz", source: "https://reactive.fugi.tech/basic/796834631961935893" },
   ];
