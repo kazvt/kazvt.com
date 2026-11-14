@@ -18,10 +18,10 @@
     </script>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="preload" href="/radio/assets/fonts/Mona12ColorEmoji.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/radio/radio.css?v=volume-fader-wmp-mute-20261114-v1">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-chrome-panels-seek-fader-20261115-v1">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=volume-fader-wmp-mute-20261114-v1"></script>
+    <script defer src="/radio/radio.js?v=radio-chrome-panels-seek-fader-20261115-v1"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -67,7 +67,10 @@
               </div>
               <div class="seek-row">
                 <span id="time-current">0:00</span>
-                <input class="retro-range" id="track-seek" type="range" min="0" max="100" value="0" aria-label="Seek position">
+                <div class="seek-slider">
+                  <div class="seek-ramp" aria-hidden="true"></div>
+                  <input class="retro-range seek-range" id="track-seek" type="range" min="0" max="100" value="0" aria-label="Seek position">
+                </div>
                 <span id="time-total">--:--</span>
               </div>
             </div>
@@ -177,17 +180,19 @@
         </section>
 
         <section class="palette-desk">
-          <label class="palette-caption" for="palette-select">PALETTE</label>
-          <select class="palette-select" id="palette-select">
-            <option value="p1">Palette 01</option><option value="p2">Palette 02</option>
-            <option value="p3">Palette 03</option><option value="p4">Palette 04</option>
-            <option value="p5">Palette 05</option><option value="p6">Palette 06</option>
-            <option value="p7">Palette 07</option><option value="p8">Palette 08</option>
-            <option value="p9">Palette 09</option><option value="p10">Palette 10</option>
-            <option value="p11">Palette 11</option><option value="p12">Palette 12</option>
-            <option value="p13">Palette 13</option><option value="p14">Palette 14</option>
-            <option value="p15">Palette 15</option><option value="p16">Palette 16</option>
-          </select>
+          <div class="palette-controls">
+            <label class="palette-caption" for="palette-select">PALETTE</label>
+            <select class="palette-select" id="palette-select">
+              <option value="p1">Palette 01</option><option value="p2">Palette 02</option>
+              <option value="p3">Palette 03</option><option value="p4">Palette 04</option>
+              <option value="p5">Palette 05</option><option value="p6">Palette 06</option>
+              <option value="p7">Palette 07</option><option value="p8">Palette 08</option>
+              <option value="p9">Palette 09</option><option value="p10">Palette 10</option>
+              <option value="p11">Palette 11</option><option value="p12">Palette 12</option>
+              <option value="p13">Palette 13</option><option value="p14">Palette 14</option>
+              <option value="p15">Palette 15</option><option value="p16">Palette 16</option>
+            </select>
+          </div>
         </section>
       </main>
     </div>

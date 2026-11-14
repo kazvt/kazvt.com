@@ -94,16 +94,22 @@ html.radio-document body.radio-page :is(
   justify-content: space-between;
   gap: 12px;
   padding: 4px clamp(8px, 1.2vw, 16px);
-  border-bottom: 2px solid var(--ink);
   color: var(--banner-text);
-  background: var(--banner);
+  background: transparent;
   font-size: clamp(9px, .72vw, 11px);
   font-weight: 700;
   letter-spacing: .1em;
 }
 
 .radio-home {
+  display: inline-flex;
+  align-items: center;
   flex: 0 1 auto;
+  padding: 4px 8px;
+  border: 1px solid var(--ink);
+  color: var(--banner-text);
+  background: var(--banner);
+  box-shadow: 2px 2px 0 var(--pink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 62%, transparent);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -396,6 +402,12 @@ html.radio-document body.radio-page :is(
   height: 20px;
   min-width: 0;
 }
+.seek-slider {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  min-width: 0;
+}
 .volume-ramp {
   position: absolute;
   inset: 5px 0;
@@ -412,6 +424,25 @@ html.radio-document body.radio-page :is(
   width: var(--volume-progress, 72%);
   border-radius: 1px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 72%, var(--banner-text)), var(--blue) 55%, color-mix(in srgb, var(--blue) 74%, var(--ink)));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--banner-text) 72%, transparent), 1px 0 0 color-mix(in srgb, var(--ink) 72%, transparent);
+  content: "";
+}
+.seek-ramp {
+  position: absolute;
+  inset: 5px 0;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--paper) 72%, var(--ink)), var(--paper) 48%, color-mix(in srgb, var(--paper) 74%, var(--ink)));
+  box-shadow: inset 0 1px 1px color-mix(in srgb, var(--ink) 38%, transparent), 0 1px 0 color-mix(in srgb, var(--banner-text) 55%, transparent);
+  pointer-events: none;
+}
+.seek-ramp::before {
+  position: absolute;
+  inset: 1px auto 1px 1px;
+  width: var(--seek-progress, 0%);
+  border-radius: 1px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--pink) 72%, var(--banner-text)), var(--pink) 55%, color-mix(in srgb, var(--pink) 74%, var(--ink)));
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--banner-text) 72%, transparent), 1px 0 0 color-mix(in srgb, var(--ink) 72%, transparent);
   content: "";
 }
@@ -506,6 +537,42 @@ html.radio-document body.radio-page :is(
   border-radius: 3px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 72%, var(--banner-text)), var(--blue) 55%, color-mix(in srgb, var(--blue) 74%, var(--ink)));
   box-shadow: 1px 1px 0 var(--ink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
+}
+.radio-page input.seek-range {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  height: 20px;
+}
+.radio-page input.seek-range::-webkit-slider-runnable-track {
+  height: 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.radio-page input.seek-range::-webkit-slider-thumb {
+  width: 13px;
+  height: 14px;
+  margin-top: -1px;
+  border-color: var(--ink);
+  border-radius: 3px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--banner) 72%, var(--banner-text)), var(--banner) 55%, color-mix(in srgb, var(--banner) 74%, var(--ink)));
+  box-shadow: 1px 1px 0 var(--pink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
+}
+.radio-page input.seek-range::-moz-range-track {
+  height: 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.radio-page input.seek-range::-moz-range-progress { height: 12px; background: transparent; }
+.radio-page input.seek-range::-moz-range-thumb {
+  width: 11px;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--banner) 72%, var(--banner-text)), var(--banner) 55%, color-mix(in srgb, var(--banner) 74%, var(--ink)));
+  box-shadow: 1px 1px 0 var(--pink), inset 1px 1px 0 color-mix(in srgb, var(--banner-text) 70%, transparent);
 }
 
 .player-side {
@@ -656,8 +723,19 @@ html.radio-document body.radio-page :is(
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  min-width: 0;
+  min-height: 31px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.palette-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   min-width: 0;
+  max-width: 100%;
   min-height: 31px;
   padding: 3px 8px;
   border: 1px solid color-mix(in srgb, var(--blue) 60%, transparent);
@@ -694,7 +772,7 @@ html.radio-document body.radio-page :is(
   .playlist-track { min-height: 29px; padding-block: 2px; }
   .deck-sliders { gap: 6px; }
   .player-message { font-size: 8px; }
-  .palette-desk { min-height: 28px; padding: 2px 6px; }
+  .palette-controls { min-height: 28px; padding: 2px 6px; }
   .palette-select { height: 22px; font-size: 8px; }
 }
 
@@ -728,13 +806,15 @@ html.radio-document body.radio-page :is(
   .volume-row { grid-template-columns: 20px clamp(64px, 14vw, 88px) max-content; gap: 4px; font-size: 7px; }
   .radio-page input.retro-range { height: 17px; }
   .volume-slider,
-  .radio-page input.volume-range { height: 18px; }
+  .radio-page input.volume-range,
+  .seek-slider,
+  .radio-page input.seek-range { height: 18px; }
   .volume-mute-button { width: 20px; height: 20px; }
   .volume-speaker { width: 14px; height: 14px; }
   .volume-speaker::after { left: 6px; height: 16px; }
   .volume-row output { font-size: 7px; }
   .player-message { font-size: 7px; }
-  .palette-desk { min-height: 25px; padding: 2px 5px; }
+  .palette-controls { min-height: 25px; padding: 2px 5px; }
   .palette-caption { font-size: 7px; }
   .palette-select { width: 112px; height: 20px; padding: 1px 4px; font-size: 7px; }
 }
@@ -770,11 +850,13 @@ html.radio-document body.radio-page :is(
   .radio-page .play-button { min-height: 25px; }
   .deck-sliders { grid-template-rows: 18px 18px; gap: 1px; min-height: 37px; }
   .volume-slider,
-  .radio-page input.volume-range { height: 17px; }
+  .radio-page input.volume-range,
+  .seek-slider,
+  .radio-page input.seek-range { height: 17px; }
   .seek-row,
   .volume-row { font-size: 7px; }
   .player-message { display: none; }
-  .palette-desk { min-height: 22px; padding-block: 1px; }
+  .palette-controls { min-height: 22px; padding-block: 1px; }
   .palette-caption { display: none; }
   .palette-select { height: 19px; font-size: 7px; }
 }
