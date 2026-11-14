@@ -1021,6 +1021,24 @@
         }, "image/png");
       });
       window.addEventListener("resize", resize);
+      canvas.addEventListener("webglcontextlost", event => {
+        event.preventDefault();
+        if (frameRequest) cancelAnimationFrame(frameRequest);
+        frameRequest = 0;
+        gl = null;
+        showError("Graphics paused while the GPU recovers.");
+      });
+      canvas.addEventListener("webglcontextrestored", () => {
+        try {
+          initWebGL();
+          resize();
+          notice.classList.add("d-none");
+          fpsLabel.textContent = "Starting GPU…";
+          startFrameLoop();
+        } catch (error) {
+          showError("Could not restart the live renderer: " + error.message + ". Check that WebGL is enabled.");
+        }
+      });
       window.addEventListener("keydown", event => {
         if (event.key === "Escape" && theaterMode) {
           event.preventDefault();
@@ -1044,7 +1062,7 @@
       try {
         initWebGL();
         resize();
-        requestAnimationFrame(frame);
+        startFrameLoop();
       } catch (error) {
         showError(`Could not start the live renderer: ${error.message}. Open this page in a current Chrome, Edge, or Firefox browser with WebGL enabled.`);
       }
