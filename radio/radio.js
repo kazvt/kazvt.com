@@ -387,6 +387,9 @@
     const playing = !audio.paused && !audio.ended;
     setButtonIcon(playButton, playing ? "pause" : "play", playing);
     if (playing) {
+      trackHasPlayed = true;
+      trackTransitionBlackout = false;
+      updateVisualizerFade();
       if (visualsPaused) {
         showFallback("VISUALS PAUSED / MUSIC PLAYING");
       } else if (screen.classList.contains("is-fallback")) {
@@ -398,6 +401,7 @@
       }
       syncPresetShuffle();
     } else {
+      updateVisualizerFade();
       if (visualsPaused) showFallback("VISUALS PAUSED");
       else if (screen.classList.contains("is-fallback")) {
         // Keep the fallback reason set by the failed start attempt.
