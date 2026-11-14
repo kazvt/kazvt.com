@@ -728,7 +728,10 @@
             el.type === "checkbox" ? el.checked : (manualValues.has(id) ? manualValues.get(id) : el.value)
           ]));
           saved._oscillations = Object.fromEntries(Array.from(automationRanges, ([id, range]) => [controls[id].name.toLowerCase(), { min: range.low, max: range.high }]));
-          saved._oscillation_period = `${oscillationPeriodMs}ms`;
+            saved._oscillation_period = `${oscillationPeriodMs}ms`;
+            saved._color_hues = Object.fromEntries(colorIds
+              .filter(id => rememberedColorHue.has(id))
+              .map(id => [id, rememberedColorHue.get(id)]));
           localStorage.setItem(storageKey, JSON.stringify(saved));
         } catch (_) { /* local file storage can be disabled */ }
       }
@@ -777,6 +780,12 @@
               const low = parseNumberParameter(String(range.min), name, input);
               const high = parseNumberParameter(String(range.max), name, input);
               if (low !== null && high !== null) setAutomationRange(id, Number(low), Number(high), 0, false);
+            });
+          }
+          if (saved._color_hues && typeof saved._color_hues === "object" && !Array.isArray(saved._color_hues)) {
+            colorIds.forEach(id => {
+              const hue = saved._color_hues[id];
+              if (typeof hue === "number" && Number.isFinite(hue)) rememberedColorHue.set(id, Math.min(359, Math.max(0, hue)));
             });
           }
           if (saved._oscillation_period !== undefined) {
