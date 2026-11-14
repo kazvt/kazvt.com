@@ -123,14 +123,14 @@
           <div class="mb-3"><label class="form-label w-100" for="zoom">Zoom <code>zoom</code><output class="float-end" id="zoomValue"></output></label><input class="form-range" id="zoom" name="zoom" type="range" min="0.25" max="4" step="0.01" value="1"></div>
           <div class="form-check mb-3"><input class="form-check-input" id="wrapEdges" name="wrap_edges" type="checkbox"><label class="form-check-label" for="wrapEdges">Wrap left/right <code>wrap_edges</code></label></div>
           <div class="mb-3"><label class="form-label w-100" for="heightRange">Height range <code>height_range</code><output class="float-end" id="heightRangeValue"></output></label><input class="form-range" id="heightRange" name="height_range" type="range" min="0.45" max="1.65" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <code>relief</code><output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" name="relief" type="range" min="0.45" max="1.65" step="0.01" value="1.1"><div class="form-text">Lighting response to the highs and lows.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <code>relief</code><output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" name="relief" type="range" min="0.45" max="1.65" step="0.01" value="1.15"><div class="form-text">Lighting response to the highs and lows.</div></div>
           <div class="mb-3"><label class="form-label w-100" for="detail">Small-fold detail <code>detail</code><output class="float-end" id="detailValue"></output></label><input class="form-range" id="detail" name="detail" type="range" min="0" max="1" step="0.01" value="0.12"></div>
         </fieldset>
 
         <fieldset class="mb-4">
           <legend class="h5">Surface</legend>
           <div class="mb-3"><label class="form-label w-100" for="gloss">Gloss strength <code>gloss</code><output class="float-end" id="glossValue"></output></label><input class="form-range" id="gloss" name="gloss" type="range" min="0" max="1.8" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <code>sharpness</code><output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" name="sharpness" type="range" min="0" max="100" step="1" value="70"></div>
+          <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <code>sharpness</code><output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" name="sharpness" type="range" min="0" max="100" step="1" value="85"></div>
           <div class="mb-3"><label class="form-label w-100" for="blur">Blur <code>blur</code><output class="float-end" id="blurValue"></output></label><input class="form-range" id="blur" name="blur" type="range" min="0" max="8" step="0.1" value="0"><div class="form-text">Output-space blur; zero keeps folds crisp.</div></div>
           <div class="mb-3"><label class="form-label w-100" for="saturation">Color richness <code>saturation</code><output class="float-end" id="saturationValue"></output></label><input class="form-range" id="saturation" name="saturation" type="range" min="0.55" max="1.5" step="0.01" value="1"></div>
           <div class="mb-3"><label class="form-label w-100" for="contrast">Contrast <code>contrast</code><output class="float-end" id="contrastValue"></output></label><input class="form-range" id="contrast" name="contrast" type="range" min="0.65" max="1.5" step="0.01" value="1"></div>
@@ -157,8 +157,8 @@
       "use strict";
       const defaults = {
         colorLow: "#031f16", colorMid: "#076831", colorHigh: "#84c226",
-        viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1.1,
-        detail: 0.12, gloss: 1, sharpness: 70, blur: 0, saturation: 1,
+        viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1.15,
+        detail: 0.12, gloss: 1, sharpness: 85, blur: 0, saturation: 1,
         contrast: 1, brightness: 0, quality: 1
       };
       const presets = {
@@ -525,7 +525,8 @@
         Object.entries(formats).forEach(([id, format]) => document.getElementById(`${id}Value`).value = format(value(id)));
       }
 
-      const storageKey = "slime-surface-lab-v2";
+      const storageKey = "slime-surface-lab-v3";
+      const previousStorageKey = "slime-surface-lab-v2";
       const legacyStorageKey = "slime-surface-lab-v1";
       function saveSettings() {
         try { localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(Object.entries(controls).map(([id, el]) => [id, el.type === "checkbox" ? el.checked : el.value])))); } catch (_) { /* local file storage can be disabled */ }
@@ -538,8 +539,15 @@
       }
       function loadSettings() {
         let saved = readSavedSettings(storageKey);
-        const migrating = !saved;
-        if (migrating) saved = readSavedSettings(legacyStorageKey);
+        let sourceKey = null;
+        if (!saved) {
+          saved = readSavedSettings(previousStorageKey);
+          if (saved) sourceKey = previousStorageKey;
+          else {
+            saved = readSavedSettings(legacyStorageKey);
+            if (saved) sourceKey = legacyStorageKey;
+          }
+        }
         if (saved) {
           Object.entries(controls).forEach(([id, el]) => {
             if (saved[id] === undefined) return;
@@ -551,14 +559,16 @@
               if (parsed !== null) el.checked = parsed;
             } else {
               let parsed = parseNumberParameter(String(saved[id]), el.name.toLowerCase(), el);
-              if (migrating && parsed !== null && id === "foldSize") parsed = parseNumberParameter(String(1 / Number(parsed)), el.name.toLowerCase(), el);
-              if (migrating && parsed !== null && id === "sharpness" && Number(parsed) === 50) parsed = "70";
-              if (migrating && parsed !== null && id === "relief" && Number(parsed) === 1) parsed = "1.1";
-              if (migrating && parsed !== null && id === "quality" && Number(parsed) === 0.85) parsed = "1";
+              if (sourceKey === legacyStorageKey && parsed !== null && id === "foldSize") parsed = parseNumberParameter(String(1 / Number(parsed)), el.name.toLowerCase(), el);
+              if (sourceKey === legacyStorageKey && parsed !== null && id === "sharpness" && Number(parsed) === 50) parsed = "85";
+              if (sourceKey === previousStorageKey && parsed !== null && id === "sharpness" && Number(parsed) === 70) parsed = "85";
+              if (sourceKey === legacyStorageKey && parsed !== null && id === "relief" && Number(parsed) === 1) parsed = "1.15";
+              if (sourceKey === previousStorageKey && parsed !== null && id === "relief" && Number(parsed) === 1.1) parsed = "1.15";
+              if (sourceKey === legacyStorageKey && parsed !== null && id === "quality" && Number(parsed) === 0.85) parsed = "1";
               if (parsed !== null) el.value = parsed;
             }
           });
-          if (migrating) saveSettings();
+          if (sourceKey) saveSettings();
         }
       }
       function parseColorParameter(raw) {
