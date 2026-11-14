@@ -169,7 +169,7 @@ import {
     content.drawing = typeof content.drawing === "string" ? content.drawing : "";
     if (content.optionCount == null) content.optionCount = format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
-    if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = 6;
+    if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" ? 12 : 6;
     format = { ...format, optionCount: content.optionCount };
     if (isChoiceMode(content.mode)) {
       while (content.options.length < format.optionCount) content.options.push({ label: "", image: "", correct: false });
@@ -380,7 +380,7 @@ import {
 
   function renderSpecialFields(format, content) {
     let html = "";
-    if (isChoiceMode(format.mode)) {
+    if (isChoiceMode(format.mode) && format.mode !== "number-grid") {
       const counts = [5, 6, 8, 9, 10, 12, 13, 16, 18, 24];
       const chosen = counts.includes(format.optionCount) ? format.optionCount : 6;
       html += '<label class="rg-field-label" for="rg-edit-option-count">Number of options<select id="rg-edit-option-count" data-option-count>';
@@ -638,7 +638,7 @@ import {
   function renderChoiceStage(format, content) {
     screen.dataset.mode = format.mode;
     const count = format.optionCount;
-    const columns = format.mode === "image-grid" ? format.columns : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
+    const columns = format.mode === "image-grid" ? (format.columns || (count <= 6 ? 3 : 4)) : format.mode === "number-grid" ? (format.columns || 4) : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
     stageItems.style.setProperty("--rg-choice-columns", String(columns || 2));
     const options = padOptions(content.options, count);
     options.forEach((option, index) => {
