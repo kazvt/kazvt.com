@@ -120,7 +120,7 @@
 
         <fieldset class="mb-4">
           <legend class="h5">Shape</legend>
-          <div class="mb-3"><label class="form-label w-100" for="foldSize">Fold size <code>fold_size</code><output class="float-end" id="foldSizeValue"></output></label><input class="form-range" id="foldSize" name="fold_size" type="range" min="0.65" max="1.55" step="0.01" value="1"><div class="form-text">Higher values make smaller, more frequent folds.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="foldSize">Fold size <code>fold_size</code><output class="float-end" id="foldSizeValue"></output></label><input class="form-range" id="foldSize" name="fold_size" type="range" min="0.65" max="1.55" step="0.01" value="1"><div class="form-text">Higher values make larger folds.</div></div>
           <div class="mb-3"><label class="form-label w-100" for="zoom">Zoom <code>zoom</code><output class="float-end" id="zoomValue"></output></label><input class="form-range" id="zoom" name="zoom" type="range" min="0.25" max="4" step="0.01" value="1"></div>
           <div class="form-check mb-3"><input class="form-check-input" id="wrapEdges" name="wrap_edges" type="checkbox"><label class="form-check-label" for="wrapEdges">Wrap left/right <code>wrap_edges</code></label></div>
           <div class="mb-3"><label class="form-label w-100" for="heightRange">Height range <code>height_range</code><output class="float-end" id="heightRangeValue"></output></label><input class="form-range" id="heightRange" name="height_range" type="range" min="0.45" max="1.65" step="0.01" value="1"></div>
@@ -131,7 +131,7 @@
         <fieldset class="mb-4">
           <legend class="h5">Surface</legend>
           <div class="mb-3"><label class="form-label w-100" for="gloss">Gloss strength <code>gloss</code><output class="float-end" id="glossValue"></output></label><input class="form-range" id="gloss" name="gloss" type="range" min="0" max="1.8" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <code>sharpness</code><output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" name="sharpness" type="range" min="0" max="100" step="1" value="50"></div>
+          <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <code>sharpness</code><output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" name="sharpness" type="range" min="0" max="100" step="1" value="70"></div>
           <div class="mb-3"><label class="form-label w-100" for="blur">Blur <code>blur</code><output class="float-end" id="blurValue"></output></label><input class="form-range" id="blur" name="blur" type="range" min="0" max="8" step="0.1" value="0"><div class="form-text">Output-space blur; zero keeps folds crisp.</div></div>
           <div class="mb-3"><label class="form-label w-100" for="saturation">Color richness <code>saturation</code><output class="float-end" id="saturationValue"></output></label><input class="form-range" id="saturation" name="saturation" type="range" min="0.55" max="1.5" step="0.01" value="1"></div>
           <div class="mb-3"><label class="form-label w-100" for="contrast">Contrast <code>contrast</code><output class="float-end" id="contrastValue"></output></label><input class="form-range" id="contrast" name="contrast" type="range" min="0.65" max="1.5" step="0.01" value="1"></div>
@@ -159,7 +159,7 @@
       const defaults = {
         colorLow: "#031f16", colorMid: "#076831", colorHigh: "#84c226",
         viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1,
-        detail: 0.12, gloss: 1, sharpness: 50, blur: 0, saturation: 1,
+        detail: 0.12, gloss: 1, sharpness: 70, blur: 0, saturation: 1,
         contrast: 1, brightness: 0, quality: 0.85
       };
       const presets = {
@@ -237,7 +237,7 @@
         uniform vec3 u_high;
 
         vec2 warpedPosition(vec2 p, float phase) {
-          p *= u_foldSize;
+          p /= u_foldSize;
           float rot = 0.045 * sin(phase - 0.2);
           float c = cos(rot), s = sin(rot);
           vec2 q = vec2(c * p.x - s * p.y, s * p.x + c * p.y);
@@ -260,7 +260,7 @@
         }
 
         vec2 wrappedPositionForCycles(vec2 p, float phase, float cycles) {
-          vec2 q = vec2(p.x * cycles, p.y * u_foldSize);
+          vec2 q = vec2(p.x * cycles, p.y / u_foldSize);
           float wx = q.x + 0.31 * sin(q.y - phase) + 0.12 * sin(2.0 * q.x - 0.55 * q.y + 2.0 * phase);
           float wy = q.y + 0.28 * sin(q.x + phase + 0.4) + 0.10 * cos(1.55 * q.y - 2.0 * phase);
           return vec2(wx, wy);
@@ -306,8 +306,7 @@
             float wrappedU = (v_uv.x - u_wrapMargin) / (1.0 - 2.0 * u_wrapMargin);
             p = vec2(6.28318530718 * wrappedU, (v_uv.y - 0.5) * 3.88 / u_zoom);
           }
-          float targetCycles = clamp(1.5 * u_foldSize / u_zoom, 0.0, 10.0);
-          float viscosityRate = mix(1.65, 0.35, u_viscosity);
+          float targetCycles = clamp(1.5 / (u_foldSize * u_zoom), 0.0, 10.0);
           float phase = u_phase;
           float eps = 0.0035;
           float h = surfaceHeight(p, phase, targetCycles);
@@ -520,13 +519,16 @@
         Object.entries(formats).forEach(([id, format]) => document.getElementById(`${id}Value`).value = format(value(id)));
       }
 
-      const storageKey = "slime-surface-lab-v1";
+      const storageKey = "slime-surface-lab-v2";
+      const legacyStorageKey = "slime-surface-lab-v1";
       function saveSettings() {
         try { localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(Object.entries(controls).map(([id, el]) => [id, el.type === "checkbox" ? el.checked : el.value])))); } catch (_) { /* local file storage can be disabled */ }
       }
       function loadSettings() {
         try {
-          const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+          let saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+          const migrating = !saved;
+          if (migrating) saved = JSON.parse(localStorage.getItem(legacyStorageKey) || "null");
           if (saved) Object.entries(controls).forEach(([id, el]) => {
             if (saved[id] === undefined) return;
             if (el.classList.contains("color-value")) {
@@ -536,10 +538,13 @@
               const parsed = parseBooleanParameter(String(saved[id]));
               if (parsed !== null) el.checked = parsed;
             } else {
-              const parsed = parseNumberParameter(String(saved[id]), el.name.toLowerCase(), el);
+              let parsed = parseNumberParameter(String(saved[id]), el.name.toLowerCase(), el);
+              if (migrating && parsed !== null && id === "foldSize") parsed = parseNumberParameter(String(1 / Number(parsed)), el.name.toLowerCase(), el);
+              if (migrating && parsed !== null && id === "sharpness" && Number(parsed) === 50) parsed = "70";
               if (parsed !== null) el.value = parsed;
             }
           });
+          if (migrating && saved) saveSettings();
         } catch (_) { /* use defaults */ }
       }
       function parseColorParameter(raw) {
