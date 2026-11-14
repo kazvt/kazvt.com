@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { MODE_NAMES, ROUND_IDS, SPECIAL_ROUNDS, resolveRoundFormat } from "./trivia-data.js";
+import { MODE_NAMES, ROUND_IDS, SPECIAL_ROUNDS, resolveRoundFormat, resolveRoundMode } from "./trivia-data.js";
 
 test("special round ids stay distinct from rounds 1 through 36", () => {
   assert.equal(ROUND_IDS.length, 38);
@@ -21,6 +21,9 @@ test("sparse difficulties inherit and additive choices accumulate", () => {
   assert.equal(resolveRoundFormat("01", 5).optionCount, 0);
   assert.equal(resolveRoundFormat("05", 2).optionCount, 8);
   assert.equal(resolveRoundFormat("07", 3).optionCount, 9);
+  assert.equal(resolveRoundMode("01", 5, { 1: { mode: "choice-image" } }), "short-answer");
+  assert.equal(resolveRoundMode("01", 5, { 1: { mode: "choice-image" }, 5: { mode: "choice-image" } }), "choice-image");
+  assert.equal(resolveRoundMode("08", 3, { 1: { mode: "choice-image" } }), "short-answer");
 });
 
 test("question-specific templates preserve the supplied counts and modes", () => {
