@@ -279,6 +279,7 @@ import {
     }
     persistGrid();
     renderGrid();
+    $("[data-index='" + index + "']", $("#rg-slot-board"))?.focus();
     const changed = placementMode === "blank" ? "Square cleared." : berryNames[selectedBerry] + " placed in the " + placementMode + ".";
     $("#rg-arcade-status").textContent = changed;
   }
@@ -509,6 +510,7 @@ import {
   }
 
   async function storeMedia(file) {
+    if (!file.type.startsWith("image/")) throw new Error("Choose an image file.");
     if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
     const db = await mediaDb();
     if (!db) throw new Error("Local image storage is unavailable in this browser.");
@@ -856,6 +858,7 @@ import {
           setAnswerStatus("Pair matched.", "correct");
         } else setAnswerStatus("Those do not match - try again.", "wrong");
         selectedPairLeft = -1;
+        $$ ("[data-pair-left]", columns).forEach((item) => item.setAttribute("aria-pressed", "false"));
       });
       if (matchedPairIndexes.has(index)) button.classList.add("is-correct");
       right.append(button);
@@ -1121,8 +1124,12 @@ import {
 
   window.addEventListener("pagehide", () => {
     objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    objectUrls.clear();
     if (audioContext && audioContext.state !== "closed") audioContext.close();
+    audioContext = null;
   }, { once: true });
+
+  window.addEventListener("pageshow", (event) => { if (event.persisted) render(); });
 
   render();
 })();

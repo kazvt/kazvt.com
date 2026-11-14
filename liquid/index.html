@@ -31,7 +31,7 @@
 <body>
   <main class="container-fluid py-3" id="appShell">
     <div class="row g-4" id="pageRow">
-      <section class="col-lg-8 order-lg-2 sticky-lg-top align-self-lg-start" id="previewColumn" aria-label="Live slime preview">
+      <section class="col-lg-8 order-lg-2 sticky-top align-self-start" id="previewColumn" aria-label="Live slime preview">
         <div class="ratio ratio-16x9 position-relative bg-dark overflow-hidden" id="stage" tabindex="-1" aria-label="Liquid preview">
           <canvas class="position-absolute top-0 start-0 w-100 h-100" id="gl" role="img" aria-label="Animated procedural slime surface"></canvas>
           <div class="position-absolute top-0 end-0 p-2 d-none fade pe-none" id="theaterToolbar">
@@ -764,8 +764,8 @@
         theaterToolbar.classList.toggle("d-none", !enabled);
         previewColumn.classList.toggle("col-lg-8", !enabled);
         previewColumn.classList.toggle("col-lg-12", enabled);
-        previewColumn.classList.toggle("sticky-lg-top", !enabled);
-        previewColumn.classList.toggle("align-self-lg-start", !enabled);
+        previewColumn.classList.toggle("sticky-top", !enabled);
+        previewColumn.classList.toggle("align-self-start", !enabled);
         stage.classList.toggle("position-relative", !enabled);
         stage.classList.toggle("ratio", !enabled);
         stage.classList.toggle("ratio-16x9", !enabled);
