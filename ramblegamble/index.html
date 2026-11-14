@@ -99,11 +99,12 @@
             <div class="rg-round-pickers">
               <label>ROUND<select id="rg-round-select"></select></label>
               <label>DIFFICULTY<select id="rg-difficulty-select"><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option></select></label>
+              <button class="rg-secondary-button rg-present-toggle" id="rg-present-toggle" type="button" aria-pressed="false">PRESENT</button>
             </div>
           </div>
           <div class="rg-trivia-layout" id="rg-trivia-interface">
             <section class="rg-trivia-screen" aria-label="Question preview">
-              <div class="rg-trivia-screen-top"><span id="rg-round-badge">ROUND 01</span><span id="rg-format-badge">SHORT ANSWER</span></div>
+              <div class="rg-trivia-screen-top"><span id="rg-round-badge">ROUND 01</span><span id="rg-format-badge">SHORT ANSWER</span><button class="rg-stage-edit" id="rg-stage-edit" type="button" hidden>BACK TO EDIT</button></div>
               <p class="rg-question-subtitle" id="rg-question-subtitle" hidden></p>
               <h3 class="rg-question-text" id="rg-question-text">Choose a round to begin.</h3>
               <img class="rg-prompt-image" id="rg-prompt-image" alt="" hidden>
