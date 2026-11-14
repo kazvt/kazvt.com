@@ -6,7 +6,7 @@ import {
   isChoiceMode,
   resolveRoundFormat,
   resolveRoundMode,
-} from "./trivia-data.js";
+} from "./trivia-data.js?v=host-console-20261114-v2";
 
 (() => {
   "use strict";
