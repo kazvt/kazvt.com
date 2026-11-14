@@ -719,7 +719,7 @@ import {
 
   function renderCategorize(format, content) {
     const buckets = document.createElement("div");
-    buckets.className = "rg-pair-columns";
+    buckets.className = "rg-category-buckets";
     const itemTray = document.createElement("div");
     itemTray.className = "rg-stage-items";
     itemTray.style.setProperty("--rg-choice-columns", "3");
@@ -727,19 +727,39 @@ import {
     const bucketsList = [];
     for (let index = 0; index < format.categories; index += 1) {
       const bucket = document.createElement("div");
+      bucket.className = "rg-category-bucket";
       const title = document.createElement("strong");
       title.textContent = content.categories[index] || "Group " + (index + 1);
       bucket.append(title);
       bucket.addEventListener("click", () => {
         if (selectedItem < 0) return;
-        const tile = $("[data-category-item='" + selectedItem + "']", itemTray);
-        if (tile) tile.dataset.group = String(index);
+        const assignments = [...(content.assignments || [])];
+        assignments[selectedItem] = index;
+        writeLevelField("assignments", assignments);
         selectedItem = -1;
+        render();
         setAnswerStatus("Item assigned to " + title.textContent + ".", "neutral");
       });
       bucketsList.push(bucket);
     }
     content.items.forEach((item, index) => {
+      const group = content.assignments?.[index];
+      if (Number.isInteger(group) && bucketsList[group]) {
+        const assigned = document.createElement("button");
+        assigned.type = "button";
+        assigned.className = "rg-pair-card";
+        assigned.dataset.assignedItem = String(index);
+        assigned.textContent = item.label || "IMAGE " + String(index + 1).padStart(2, "0") + " - REMOVE";
+        assigned.addEventListener("click", () => {
+          const assignments = [...(content.assignments || [])];
+          assignments[index] = null;
+          writeLevelField("assignments", assignments);
+          render();
+        });
+        if (item.image) addImageToNode(assigned, item.image, "", "rg-stage-media");
+        bucketsList[group].append(assigned);
+        return;
+      }
       const tile = document.createElement("button");
       tile.type = "button";
       tile.className = "rg-answer-option";
