@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { resolvePointClick } from "./point-click-routing.js?v=point-click-20261114-v1";
+import {
+  resolvePointClickAction,
+  resolvePointClickCursor,
+  resolvePointClickZone,
+} from "./point-click-routing.js?v=point-click-20261115-v1";
 
 (() => {
   "use strict";
@@ -14,6 +17,16 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
+  const BILLBOARD_SOURCES = [
+    { id: "faroe", label: "Faroe", source: "" },
+    { id: "erin", label: "Erin", source: "https://reactive.fugi.tech/basic/205887066855178244" },
+    { id: "kaz", label: "Kaz", source: "https://reactive.fugi.tech/basic/796834631961935893" },
+  ];
+  const CURSOR_ASSETS = {
+    default: "/ramblegamble/assets/cursors/pointer-default.gif",
+    hover: "/ramblegamble/assets/cursors/pointer-hover.gif",
+    direction: "/ramblegamble/assets/cursors/direction-right.gif",
+  };
   const prompts = [
     "What tiny thing brings you an unreasonable amount of joy?",
     "Which game could you happily ramble about for an hour?",
