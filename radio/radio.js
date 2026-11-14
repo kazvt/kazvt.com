@@ -126,6 +126,10 @@
     const value = Number(input.value) || 0;
     const percent = max > min ? Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100)) : 0;
     input.style.setProperty("--range-progress", `${percent}%`);
+    if (input === volume) {
+      input.closest(".volume-slider")?.style.setProperty("--volume-progress", `${percent}%`);
+      input.setAttribute("aria-valuetext", `${Math.round(percent)} percent`);
+    }
   }
 
   function updateRangeFills() {
