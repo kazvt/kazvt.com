@@ -656,8 +656,8 @@
         if (!match) return null;
         let milliseconds = Number(match[1]);
         if (!Number.isFinite(milliseconds)) return null;
-        if (/^ms|^millisecond/.test(match[2] || "")) milliseconds *= 1000;
-        else if (/^(?:s|sec|secs|second|seconds)$/.test(match[2] || "")) milliseconds *= 1000;
+        const unit = match[2] || "s";
+        if (!/^(?:ms|milliseconds?)$/.test(unit)) milliseconds *= 1000;
         milliseconds = Math.min(120000, Math.max(500, milliseconds));
         return Math.round(milliseconds / 10) * 10;
       }
