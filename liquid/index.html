@@ -824,8 +824,9 @@
           });
           picker.hue.addEventListener("input", () => {
             const hsv = hexToHsv(controls[id].value);
-            setCustomColor(id, hsvToHex(Number(picker.hue.value), hsv.s, hsv.v));
+            setCustomColor(id, hsvToHex(Number(picker.hue.value), hsv.s, hsv.v), false);
           });
+          picker.hue.addEventListener("change", saveSettings);
           picker.area.addEventListener("pointerdown", event => {
             if (event.pointerType === "mouse" && event.button !== 0) return;
             event.preventDefault();
@@ -916,7 +917,10 @@
         scheduleFrame();
       }
 
-      document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => el.addEventListener("input", applySettings));
+      document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => {
+        el.addEventListener("input", () => applySettings(false));
+        el.addEventListener("change", saveSettings);
+      });
       document.querySelectorAll("input[type=checkbox]").forEach(el => el.addEventListener("change", applySettings));
       setupColorPickers();
       document.querySelectorAll(".preset").forEach(button => button.addEventListener("click", () => {
