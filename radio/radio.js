@@ -5,13 +5,12 @@
   const canvas = document.getElementById("radio-visualizer");
   const screen = document.querySelector(".visualizer-bezel");
   const fallback = document.getElementById("visualizer-fallback");
+  const fadeLayer = document.getElementById("visualizer-fade");
 
   // Temporarily excluded MilkDrop presets live here. Remove an entry to let
   // that visual return to the automatic rotation.
-  const DISABLED_VISUALIZER_PRESETS = [
-    "Flexi - mindblob [shiny mix]",
-    "flexi - bouncing balls [double mindblob neon mix]",
-  ];
+  const DISABLED_VISUALIZER_PRESETS = [];
+  const TRACK_EDGE_FADE_SECONDS = 2;
   const playButton = document.getElementById("play-toggle");
   const muteButton = document.getElementById("mute-toggle");
   const theatreButton = document.getElementById("visualizer-fullscreen");
@@ -43,6 +42,8 @@
   let frameHandle = 0;
   let cycleHandle = 0;
   let presetBag = [];
+  let trackHasPlayed = false;
+  let trackTransitionBlackout = false;
   let shuffleEnabled = false;
   let shuffleBag = [];
   let trackHistory = trackSelect ? [trackSelect.selectedIndex] : [];
