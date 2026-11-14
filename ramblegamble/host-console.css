@@ -258,6 +258,7 @@
 .rg-slot-cell:hover { color: #fff; background: #c000ff; }
 .rg-slot-cell:active,
 .rg-slot-cell.is-filled { border-style: inset; color: #fff; background: #f12b24; }
+.rg-slot-cell.is-filled:hover { color: #fff; background: #c000ff; }
 .rg-slot-cell:focus-visible { outline: 3px solid #111; outline-offset: 2px; }
 .rg-slot-cell-index { position: absolute; top: 2px; left: 4px; font-size: 8px; opacity: .7; }
 .rg-slot-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 9px; font-weight: 900; }
@@ -379,7 +380,7 @@
   .rg-option-row input[data-option-image],
   .rg-item-row input { grid-column: 1; }
   .rg-option-row .rg-option-upload { grid-column: 1; width: 44px; }
-  .rg-option-row input[type="radio"] { grid-column: 2; grid-row: 1 / span 2; }
+  .rg-option-row input[type="radio"] { grid-column: 2; grid-row: 1 / span 3; }
 }
 
 @media (prefers-reduced-motion: reduce) {
