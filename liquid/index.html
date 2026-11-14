@@ -199,9 +199,9 @@
       const darkThemeIcon = document.getElementById("darkThemeIcon");
       const themeStorageKey = "kazvt-liquid-theme-v1";
       let gl, program, buffer, locations = {};
-      let paused = false, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0, frameRequest = 0;
+      let paused = false, frameDirty = true, elapsed = 0, previousTime = 0, fpsTime = 0, fpsFrames = 0, frameRequest = 0;
       let theaterMode = false, theaterControlsTimer = 0;
-      let viewWidth = 1, viewHeight = 1, dpr = 1, wrapMargin = 0;
+      let viewWidth = 1, viewHeight = 1, dpr = 1, viewMargin = 0, wrapMargin = 0;
 
       const vertexSource = `
         attribute vec2 a_position;
@@ -504,15 +504,12 @@
         gl.viewport(0, 0, viewWidth, viewHeight);
         const blur = value("blur");
         canvas.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
-        let overscan;
-        if (controls.wrapEdges.checked) {
-          wrapMargin = Math.min(0.45, (3 * blur) / Math.max(Math.min(rect.width, rect.height), 1));
-          overscan = 1 / (1 - 2 * wrapMargin);
-        } else {
-          wrapMargin = 0;
-          overscan = 1 + (2 * blur) / Math.max(rect.height, 1);
-        }
+        viewMargin = Math.min(0.45, (3 * blur) / Math.max(Math.min(rect.width, rect.height), 1));
+        wrapMargin = controls.wrapEdges.checked ? viewMargin : 0;
+        const overscan = 1 / (1 - 2 * viewMargin);
         canvas.style.transform = `scale(${overscan})`;
+        frameDirty = true;
+        scheduleFrame();
       }
 
       function syncLabels() {
@@ -794,6 +791,8 @@
       function applySettings(persist = true) {
         syncLabels();
         resize();
+        frameDirty = true;
+        scheduleFrame();
         if (persist) saveSettings();
       }
 
@@ -885,32 +884,37 @@
         fpsLabel.textContent = "GPU unavailable";
       }
 
+      function scheduleFrame() {
+        if (gl && !frameRequest) frameRequest = requestAnimationFrame(frame);
+      }
       function frame(now) {
-        if (!gl) {
-          frameRequest = 0;
-          return;
-        }
-        frameRequest = requestAnimationFrame(frame);
+        frameRequest = 0;
+        if (!gl) return;
         if (!previousTime) previousTime = now;
         const delta = Math.min((now - previousTime) / 1000, 0.05);
         previousTime = now;
         if (!paused) elapsed += delta;
-        setUniforms(elapsed);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        fpsFrames++;
+        if (!paused || frameDirty) {
+          setUniforms(elapsed);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          frameDirty = false;
+          fpsFrames++;
+        }
         if (now - fpsTime > 800) {
           const fps = Math.round(fpsFrames * 1000 / (now - fpsTime || 1));
           fpsLabel.textContent = `WEBGL - ${fps} FPS - ${canvas.width}×${canvas.height}`;
           fpsFrames = 0;
           fpsTime = now;
         }
+        if (!paused) scheduleFrame();
       }
       function startFrameLoop() {
         if (frameRequest) cancelAnimationFrame(frameRequest);
         previousTime = 0;
         fpsTime = 0;
         fpsFrames = 0;
-        frameRequest = requestAnimationFrame(frame);
+        frameDirty = true;
+        scheduleFrame();
       }
 
       document.querySelectorAll("input[type=range]:not(.color-hue)").forEach(el => el.addEventListener("input", applySettings));
@@ -925,6 +929,11 @@
       }));
       document.getElementById("pauseBtn").addEventListener("click", event => {
         paused = !paused;
+        if (!paused) {
+          previousTime = 0;
+          frameDirty = true;
+          scheduleFrame();
+        }
         event.currentTarget.textContent = paused ? "Play" : "Pause";
         event.currentTarget.classList.toggle("btn-primary", !paused);
         event.currentTarget.classList.toggle("btn-outline-primary", paused);
@@ -1052,7 +1061,7 @@
           theaterButton.focus();
           return;
         }
-        if (event.code === "Space" && !document.activeElement.closest("input, button, select, textarea, a, [contenteditable], .color-area")) {
+        if (event.code === "Space" && !document.activeElement.closest("input, button, select, textarea, a, summary, [role=button], [tabindex]:not([tabindex=\"-1\"]), [contenteditable], .color-area")) {
           event.preventDefault();
           document.getElementById("pauseBtn").click();
         }
