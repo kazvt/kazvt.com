@@ -10,6 +10,7 @@
   // that visual return to the automatic rotation.
   const DISABLED_VISUALIZER_PRESETS = [
     "Flexi - mindblob [shiny mix]",
+    "flexi - bouncing balls [double mindblob neon mix]",
   ];
   const playButton = document.getElementById("play-toggle");
   const muteButton = document.getElementById("mute-toggle");
