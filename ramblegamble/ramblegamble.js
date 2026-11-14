@@ -732,13 +732,58 @@ import {
   window.addEventListener("rg:spin-wheel", startWheelSpin);
   window.addEventListener("rg:pull-slots", startLeverPull);
 
+  function updateCameraTransition(time) {
+    if (!cameraTransition) return;
+    const transition = cameraTransition;
+    const progress = Math.min(1, (time - transition.started) / transition.duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    camera.position.lerpVectors(transition.fromPosition, transition.toPosition, eased);
+    cameraTarget.lerpVectors(transition.fromTarget, transition.toTarget, eased);
+    camera.lookAt(cameraTarget);
+    camera.updateMatrixWorld(true);
+    if (progress >= 1) {
+      camera.position.copy(transition.toPosition);
+      cameraTarget.copy(transition.toTarget);
+      camera.lookAt(cameraTarget);
+      camera.updateMatrixWorld(true);
+      cameraTransition = null;
+    }
+  }
+
+  function updateBillboardProjection() {
+    if (!camera || !billboardLayer || preview.clientWidth < 1 || preview.clientHeight < 1) return;
+    camera.updateMatrixWorld(true);
+    const width = preview.clientWidth;
+    const height = preview.clientHeight;
+    const pixelsPerWorldUnitAtOne = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+
+    for (const contestant of contestants) {
+      const cameraSpace = camera.worldToLocal(contestant.anchor.clone());
+      const depth = -cameraSpace.z;
+      const projected = contestant.anchor.clone().project(camera);
+      const visible = depth > camera.near && projected.z >= -1 && projected.z <= 1;
+      if (!visible) {
+        contestant.panel.style.visibility = "hidden";
+        continue;
+      }
+
+      const x = (projected.x + 1) * 0.5 * width;
+      const y = (1 - projected.y) * 0.5 * height;
+      const rawWidth = contestant.worldWidth * pixelsPerWorldUnitAtOne / depth;
+      const panelWidth = Math.min(rawWidth, width * 0.78);
+      contestant.panel.style.left = `${x}px`;
+      contestant.panel.style.top = `${y}px`;
+      contestant.panel.style.width = `${panelWidth}px`;
+      contestant.panel.style.visibility = "visible";
+    }
+  }
+
   function animate(time) {
     animationFrame = requestAnimationFrame(animate);
-    if (!renderer || !scene || !camera || !controls) return;
+    if (!renderer || !scene || !camera) return;
 
-    if (lastCameraShake.lengthSq() > 0) camera.position.sub(lastCameraShake);
-    lastCameraShake.set(0, 0, 0);
-    controls.update();
+    updateCameraTransition(time);
+    updateBillboardProjection();
 
     if (wheelMotion && wheelPivot && ballPivot) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
@@ -771,19 +816,6 @@ import {
     } else if (leverMotion && time - leverMotion.started >= leverMotion.duration) {
       leverMotion = null;
       finishTurn();
-    }
-
-    if (!reducedMotion.matches && !userInteracting) {
-      const seconds = time * 0.001;
-      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-      const offset = right.multiplyScalar(Math.sin(seconds * 2.35) * 0.018)
-        .add(up.multiplyScalar(Math.sin(seconds * 1.73 + 0.8) * 0.013));
-      camera.position.add(offset);
-      camera.lookAt(controls.target);
-      camera.rotateX(Math.sin(seconds * 2.05) * 0.00115);
-      camera.rotateY(Math.cos(seconds * 1.67 + 0.5) * 0.0012);
-      lastCameraShake.copy(offset);
     }
 
     renderer.render(scene, camera);
