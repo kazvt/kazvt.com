@@ -324,7 +324,7 @@ import {
 
     cameraTransition = {
       started: performance.now(),
-      duration: 460,
+      duration: 380,
       fromPosition: camera.position.clone(),
       fromTarget: cameraTarget.clone(),
       toPosition: pose.position,
@@ -333,7 +333,7 @@ import {
   }
 
   function setLookDirection(look) {
-    if (cameraTransition || currentView.look === look) return;
+    if (currentView.look === look) return;
     transitionToView({ ...currentView, look }, { record: false });
   }
 
@@ -342,7 +342,6 @@ import {
   }
 
   function goBack() {
-    if (cameraTransition) return;
     if (currentView.look !== 0) {
       setLookDirection(0);
       return;
@@ -682,7 +681,7 @@ import {
   }
 
   function pointClickAt(clientX, clientY) {
-    if (!camera || !sceneReady || cameraTransition) return;
+    if (!camera || !sceneReady) return;
     const rect = preview.getBoundingClientRect();
     const zone = resolvePointClickZone({
       x: clientX - rect.left,
