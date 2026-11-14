@@ -532,13 +532,15 @@
         const domainMin = Number(input.min), domainMax = Number(input.max);
         const span = domainMax - domainMin || 1;
         ui.lower.min = String(domainMin);
-        ui.lower.max = String(high);
+        ui.lower.max = String(domainMax);
         ui.lower.step = input.step;
         ui.lower.value = String(low);
-        ui.upper.min = String(low);
+        ui.upper.min = String(domainMin);
         ui.upper.max = String(domainMax);
         ui.upper.step = input.step;
         ui.upper.value = String(high);
+        ui.lower.setAttribute("aria-valuemax", String(high));
+        ui.upper.setAttribute("aria-valuemin", String(low));
         ui.lane.style.setProperty("--range-low", `${100 * (low - domainMin) / span}%`);
         ui.lane.style.setProperty("--range-high", `${100 * (high - domainMin) / span}%`);
         ui.lane.classList.toggle("active", Boolean(range));
@@ -626,8 +628,11 @@
           lane.append(lower, upper, playhead);
           input.after(lane);
           automationUI.set(id, { lane, lower, upper, playhead });
-          const handleRangeInput = () => {
-            setAutomationRange(id, Number(lower.value), Number(upper.value), automationElapsed);
+          const handleRangeInput = event => {
+            let low = Number(lower.value), high = Number(upper.value);
+            if (event.currentTarget === lower && low > high) low = high;
+            if (event.currentTarget === upper && high < low) high = low;
+            setAutomationRange(id, low, high, automationElapsed);
             updateAutomationValues();
             syncLabels();
             applySettings(false);
