@@ -281,6 +281,7 @@
 .rg-trivia-screen[data-mode="choice-image-wide"] .rg-answer-option img { width: 100%; height: auto; aspect-ratio: 2.35 / 1; object-fit: cover; }
 .rg-trivia-screen[data-mode="choice-image"] .rg-answer-option img,
 .rg-trivia-screen[data-mode="image-grid"] .rg-answer-option img { aspect-ratio: 1; object-fit: contain; }
+.rg-trivia-screen[data-mode="number-grid"] .rg-stage-items { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 .rg-video-box video { display: block; width: 100%; max-height: 300px; background: #111; }
 .rg-stage-items { display: grid; grid-template-columns: repeat(var(--rg-choice-columns, 2), minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
 .rg-answer-option { display: grid; min-width: 0; min-height: 54px; align-content: center; justify-items: center; gap: 4px; padding: 7px; overflow-wrap: anywhere; }
@@ -335,6 +336,7 @@
 .rg-pair-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .rg-pair-columns > div { display: grid; align-content: start; gap: 6px; }
 .rg-pair-card { min-height: 44px; padding: 7px; border: 1px solid #486c2f; background: #f1e5a1; font-size: 11px; text-align: left; }
+.rg-pair-card img { width: 100%; aspect-ratio: 6 / 5; object-fit: contain; }
 .rg-number-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .rg-number-grid button { min-height: 44px; border: 1px solid #111; background: #ffdf00; font-weight: 900; }
 .rg-category-buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
@@ -362,6 +364,7 @@
   .rg-trivia-screen { min-height: 300px; }
   .rg-trivia-editor { max-height: none; }
   .rg-slot-cell { min-height: 52px; }
+  .rg-trivia-screen .rg-stage-items { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .rg-category-buckets { grid-template-columns: 1fr; }
 }
 
@@ -373,6 +376,7 @@
   .rg-round-pickers select { width: 100%; }
   .rg-slot-board-wrap { padding: 7px; }
   .rg-slot-cell { min-height: 44px; font-size: 8px; }
+  .rg-trivia-screen .rg-stage-items { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .rg-option-row,
   .rg-item-row { grid-template-columns: minmax(0, 1fr) 28px; }
   .rg-option-row { grid-template-columns: minmax(0, 1fr) 28px; }
