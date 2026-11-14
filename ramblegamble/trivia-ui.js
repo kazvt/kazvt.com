@@ -147,6 +147,8 @@ import {
     for (let level = 1; level <= Number(difficulty); level += 1) {
       const rule = ROUND_RULES[number]?.[level] || {};
       const draft = drafts.rounds[round]?.[level] || {};
+      const requestedMode = draft.mode || rule.mode;
+      if (requestedMode && requestedMode !== content.mode && ["number-grid", "image-grid"].includes(requestedMode) && !Object.hasOwn(draft, "optionCount")) delete content.optionCount;
       if (rule.mode) {
         if (content.mode && rule.mode !== content.mode) delete content.optionCount;
         content.mode = rule.mode;
