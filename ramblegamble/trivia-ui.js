@@ -482,6 +482,7 @@ import {
   }
 
   async function storeMedia(file) {
+    if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
     const db = await mediaDb();
     if (!db) throw new Error("Local image storage is unavailable in this browser.");
     const key = "image-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
@@ -1058,6 +1059,11 @@ import {
     }
   });
   $("#rg-edit-prompt-file").addEventListener("change", (event) => savePromptUpload(event.target.files?.[0]));
+  $("#rg-clear-prompt-image").addEventListener("click", () => {
+    $("#rg-edit-prompt-image").value = "";
+    $("#rg-edit-prompt-file").dataset.assetId = "";
+    saveAndRenderStage();
+  });
   editor.addEventListener("change", async (event) => {
     const fileInput = event.target.closest("[data-option-file]");
     if (!fileInput || !fileInput.files?.[0]) return;
