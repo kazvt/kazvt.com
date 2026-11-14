@@ -983,49 +983,41 @@
           if (theaterMode && !theaterToolbar.contains(document.activeElement)) showTheaterControls();
         }, 0);
       });
-      function createWrappedBlurCanvas(blur) {
+      function createStageCaptureCanvas(blur) {
         const width = canvas.width, height = canvas.height;
-        const pad = Math.max(1, Math.ceil(blur * dpr * 3));
-        const horizontalTile = document.createElement("canvas");
-        horizontalTile.width = width + pad * 2;
-        horizontalTile.height = height;
-        const horizontalContext = horizontalTile.getContext("2d");
-        let firstTileX = pad - width;
-        while (firstTileX > 0) firstTileX -= width;
-        for (let x = firstTileX; x < width + 2 * pad; x += width) horizontalContext.drawImage(canvas, x, 0);
-
+        if (blur <= 0 && viewMargin === 0) return canvas;
+        const scale = 1 / (1 - 2 * viewMargin);
+        const cropX = viewMargin * width, cropY = viewMargin * height;
+        const cropWidth = width - 2 * cropX, cropHeight = height - 2 * cropY;
+        const blurRadius = blur * dpr * scale;
+        const pad = Math.ceil(blurRadius * 3);
         const padded = document.createElement("canvas");
-        padded.width = horizontalTile.width;
-        padded.height = height + pad * 2;
+        padded.width = width + 2 * pad;
+        padded.height = height + 2 * pad;
         const paddedContext = padded.getContext("2d");
-        paddedContext.drawImage(horizontalTile, 0, pad);
-        paddedContext.drawImage(horizontalTile, 0, 0, horizontalTile.width, 1, 0, 0, horizontalTile.width, pad);
-        paddedContext.drawImage(horizontalTile, 0, height - 1, horizontalTile.width, 1, 0, height + pad, horizontalTile.width, pad);
+        if (controls.wrapEdges.checked) {
+          let firstTileX = pad - width;
+          while (firstTileX > 0) firstTileX -= width;
+          for (let x = firstTileX; x < width + 2 * pad; x += width) {
+            paddedContext.drawImage(canvas, cropX, 0, cropWidth, height, x, pad - cropY * scale, width, height * scale);
+          }
+        } else {
+          paddedContext.drawImage(canvas, pad - cropX * scale, pad - cropY * scale, width * scale, height * scale);
+        }
 
         const output = document.createElement("canvas");
         output.width = width;
         output.height = height;
         const context = output.getContext("2d");
-        context.filter = `blur(${blur * dpr}px)`;
+        context.fillStyle = getComputedStyle(stage).backgroundColor;
+        context.fillRect(0, 0, width, height);
+        if (blur > 0) context.filter = `blur(${blurRadius}px)`;
         context.drawImage(padded, -pad, -pad);
         return output;
       }
       document.getElementById("saveBtn").addEventListener("click", () => {
-        let captureCanvas = canvas;
         const blur = value("blur");
-        if (controls.wrapEdges.checked && blur > 0.01) {
-          captureCanvas = createWrappedBlurCanvas(blur);
-        } else if (blur > 0.01) {
-          captureCanvas = document.createElement("canvas");
-          captureCanvas.width = canvas.width;
-          captureCanvas.height = canvas.height;
-          const ctx = captureCanvas.getContext("2d");
-          ctx.fillStyle = "#062316";
-          ctx.fillRect(0, 0, captureCanvas.width, captureCanvas.height);
-          const pad = blur * dpr * 2;
-          ctx.filter = `blur(${blur * dpr}px)`;
-          ctx.drawImage(canvas, -pad, -pad, captureCanvas.width + 2 * pad, captureCanvas.height + 2 * pad);
-        }
+        const captureCanvas = createStageCaptureCanvas(blur);
         captureCanvas.toBlob(blob => {
           if (!blob) return;
           const link = document.createElement("a");
