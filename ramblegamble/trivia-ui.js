@@ -1022,7 +1022,7 @@ import {
     saveAndRenderStage();
   });
   editor.addEventListener("change", (event) => {
-    if (event.target.id === "rg-edit-mode") {
+    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count") {
       readEditor();
       render();
       queueSave();
