@@ -15,7 +15,13 @@ const AUDIO_EXTENSIONS = new Set([".aac", ".m4a", ".mp3", ".ogg", ".opus", ".wav
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
 async function collectAudioFiles(directory, prefix = "", recursive = false) {
-  const entries = await readdir(directory, { withFileTypes: true });
+  let entries;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  }
   const files = [];
 
   for (const entry of entries) {
@@ -90,7 +96,7 @@ async function buildRadioPlaylist() {
   if (start < 0 || end < 0) throw new Error("Radio playlist generation markers are missing from radio/index.html.");
 
   const contentStart = start + START_MARKER.length;
-  const updated = `${html.slice(0, contentStart)}\n${options}\n              ${html.slice(end)}`;
+  const updated = `${html.slice(0, contentStart)}\n${options}\n                ${html.slice(end)}`;
   if (updated !== html) {
     await writeFile(INDEX_PATH, updated, "utf8");
     console.log(`Updated radio playlist manifest with ${tracks.length} tracks.`);
