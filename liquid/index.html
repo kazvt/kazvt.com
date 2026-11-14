@@ -900,7 +900,7 @@
           frameDirty = false;
           fpsFrames++;
         }
-        if (now - fpsTime > 800) {
+        if (!paused && now - fpsTime > 800) {
           const fps = Math.round(fpsFrames * 1000 / (now - fpsTime || 1));
           fpsLabel.textContent = `WEBGL - ${fps} FPS - ${canvas.width}×${canvas.height}`;
           fpsFrames = 0;
