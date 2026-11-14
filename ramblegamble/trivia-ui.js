@@ -638,11 +638,12 @@ import {
     questionText.hidden = currentRound === "00";
     subtitleText.textContent = effective.content.subtitle || "";
     subtitleText.hidden = !effective.content.subtitle || currentRound === "00";
-    promptImage.replaceChildren();
+    promptImage.removeAttribute("src");
     promptImage.hidden = true;
-    if (!["draw-over-image", "compose-image"].includes(effective.format.mode) && (effective.content.promptImage || effective.content.promptAsset)) {
-      promptImage.src = safeUrl(effective.content.promptImage) || "";
-      if (!promptImage.src && effective.content.promptAsset) readMedia(effective.content.promptAsset).then((url) => { if (url) promptImage.src = url; });
+    const promptUrl = safeUrl(effective.content.promptImage);
+    if (!["draw-over-image", "compose-image"].includes(effective.format.mode) && (promptUrl || effective.content.promptAsset)) {
+      if (promptUrl) promptImage.src = promptUrl;
+      else if (effective.content.promptAsset) readMedia(effective.content.promptAsset).then((url) => { if (url) promptImage.src = url; });
       promptImage.hidden = false;
       promptImage.onerror = () => { promptImage.hidden = true; };
     }
