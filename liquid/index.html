@@ -914,7 +914,9 @@
         const queryValues = new Map();
         new URLSearchParams(window.location.search).forEach((raw, key) => {
           const name = key.trim().toLowerCase();
-          if (byName.has(name) || paletteSeedNames.has(name)) queryValues.set(name, raw);
+          const automationMatch = name.match(/^(.+)_oscillate(?:_(?:min|max))?$/);
+          const knownAutomation = automationMatch && faderNameToId.has(automationMatch[1]);
+          if (byName.has(name) || paletteSeedNames.has(name) || name === "oscillation_period" || knownAutomation) queryValues.set(name, raw);
         });
         let paletteFromColorSeed = false;
         for (const name of paletteSeedNames) {
@@ -929,7 +931,7 @@
         }
         const overriddenColors = new Set();
         queryValues.forEach((raw, name) => {
-          if (paletteSeedNames.has(name)) return;
+          if (paletteSeedNames.has(name) || name === "oscillation_period" || name.includes("_oscillate")) return;
           const input = byName.get(name);
           if (input.classList.contains("color-value")) {
             const parsed = parseColorParameter(raw);
@@ -947,7 +949,45 @@
           const parsed = parseNumberParameter(raw, name, input);
           if (parsed !== null) input.value = parsed;
         });
+        if (queryValues.has("oscillation_period")) {
+          const parsedPeriod = parseOscillationPeriod(queryValues.get("oscillation_period"));
+          if (parsedPeriod !== null) oscillationPeriodMs = parsedPeriod;
+        }
+        const requestedRanges = new Map();
+        queryValues.forEach((raw, name) => {
+          if (name === "oscillation_period") return;
+          const match = name.match(/^(.+)_oscillate(?:_(min|max))?$/);
+          if (!match) return;
+          const id = faderNameToId.get(match[1]);
+          if (!id) return;
+          const requested = requestedRanges.get(id) || {};
+          if (match[2] === "min") requested.min = raw;
+          else if (match[2] === "max") requested.max = raw;
+          else requested.range = raw;
+          requestedRanges.set(id, requested);
+        });
+        requestedRanges.forEach((requested, id) => {
+          const input = controls[id];
+          const saved = automationRanges.get(id);
+          let low = saved ? saved.low : Number(input.value);
+          let high = saved ? saved.high : Number(input.value);
+          if (requested.range !== undefined) {
+            const parsed = parseOscillationRange(requested.range, input);
+            if (parsed) [low, high] = parsed;
+          }
+          if (requested.min !== undefined) {
+            const parsed = parseNumberParameter(requested.min, input.name.toLowerCase(), input);
+            if (parsed !== null) low = Number(parsed);
+          }
+          if (requested.max !== undefined) {
+            const parsed = parseNumberParameter(requested.max, input.name.toLowerCase(), input);
+            if (parsed !== null) high = Number(parsed);
+          }
+          setAutomationRange(id, low, high, 0);
+        });
         if (paletteFromColorSeed || overriddenColors.size) syncPresetSelection();
+        syncManualValuesFromControls();
+        updateAutomationValues(automationElapsed);
       }
 
       function loadColorTheme() {
