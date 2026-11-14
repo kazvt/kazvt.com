@@ -785,7 +785,7 @@
         if (theaterControlsTimer) window.clearTimeout(theaterControlsTimer);
         theaterControlsTimer = window.setTimeout(() => {
           theaterControlsTimer = 0;
-          if (!theaterToolbar.contains(document.activeElement)) hideTheaterControls();
+          if (!theaterToolbar.contains(document.activeElement) && !theaterToolbar.matches(":hover")) hideTheaterControls();
         }, 1000);
       }
       function hideTheaterControls() {
