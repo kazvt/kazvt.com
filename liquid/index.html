@@ -124,7 +124,7 @@
           <div class="mb-3"><label class="form-label w-100" for="zoom">Zoom <code>zoom</code><output class="float-end" id="zoomValue"></output></label><input class="form-range" id="zoom" name="zoom" type="range" min="0.25" max="4" step="0.01" value="1"></div>
           <div class="form-check mb-3"><input class="form-check-input" id="wrapEdges" name="wrap_edges" type="checkbox"><label class="form-check-label" for="wrapEdges">Wrap left/right <code>wrap_edges</code></label></div>
           <div class="mb-3"><label class="form-label w-100" for="heightRange">Height range <code>height_range</code><output class="float-end" id="heightRangeValue"></output></label><input class="form-range" id="heightRange" name="height_range" type="range" min="0.45" max="1.65" step="0.01" value="1"></div>
-          <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <code>relief</code><output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" name="relief" type="range" min="0.45" max="1.65" step="0.01" value="1"><div class="form-text">Lighting response to the highs and lows.</div></div>
+          <div class="mb-3"><label class="form-label w-100" for="relief">Relief clarity <code>relief</code><output class="float-end" id="reliefValue"></output></label><input class="form-range" id="relief" name="relief" type="range" min="0.45" max="1.65" step="0.01" value="1.1"><div class="form-text">Lighting response to the highs and lows.</div></div>
           <div class="mb-3"><label class="form-label w-100" for="detail">Small-fold detail <code>detail</code><output class="float-end" id="detailValue"></output></label><input class="form-range" id="detail" name="detail" type="range" min="0" max="1" step="0.01" value="0.12"></div>
         </fieldset>
 
@@ -158,7 +158,7 @@
       "use strict";
       const defaults = {
         colorLow: "#031f16", colorMid: "#076831", colorHigh: "#84c226",
-        viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1,
+        viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1.1,
         detail: 0.12, gloss: 1, sharpness: 70, blur: 0, saturation: 1,
         contrast: 1, brightness: 0, quality: 0.85
       };
@@ -554,6 +554,7 @@
               let parsed = parseNumberParameter(String(saved[id]), el.name.toLowerCase(), el);
               if (migrating && parsed !== null && id === "foldSize") parsed = parseNumberParameter(String(1 / Number(parsed)), el.name.toLowerCase(), el);
               if (migrating && parsed !== null && id === "sharpness" && Number(parsed) === 50) parsed = "70";
+              if (migrating && parsed !== null && id === "relief" && Number(parsed) === 1) parsed = "1.1";
               if (parsed !== null) el.value = parsed;
             }
           });
