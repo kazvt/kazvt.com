@@ -58,6 +58,7 @@
 }
 
 .rg-console[open] { display: flex; }
+.rg-console [hidden] { display: none !important; }
 
 .rg-console::backdrop { background: rgb(12 10 23 / 68%); }
 
@@ -276,6 +277,9 @@
 .rg-question-subtitle { margin: 0 0 6px; color: #486c2f; font-size: clamp(13px, 1.25vw, 17px); font-weight: 700; }
 .rg-question-text { margin: 0 0 14px; color: #111; font-size: clamp(20px, 2.5vw, 32px); line-height: 1.18; overflow-wrap: anywhere; }
 .rg-prompt-image { display: block; max-width: min(100%, 560px); max-height: 280px; margin: 10px auto 16px; object-fit: contain; }
+.rg-trivia-screen[data-mode="choice-image-wide"] .rg-answer-option img { width: 100%; height: auto; aspect-ratio: 2.35 / 1; object-fit: cover; }
+.rg-trivia-screen[data-mode="choice-image"] .rg-answer-option img,
+.rg-trivia-screen[data-mode="image-grid"] .rg-answer-option img { aspect-ratio: 1; object-fit: contain; }
 .rg-video-box video { display: block; width: 100%; max-height: 300px; background: #111; }
 .rg-stage-items { display: grid; grid-template-columns: repeat(var(--rg-choice-columns, 2), minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
 .rg-answer-option { display: grid; min-width: 0; min-height: 54px; align-content: center; justify-items: center; gap: 4px; padding: 7px; overflow-wrap: anywhere; }
