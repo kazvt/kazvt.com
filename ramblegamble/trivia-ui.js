@@ -644,6 +644,7 @@ import {
     subtitleText.hidden = !effective.content.subtitle || currentRound === "00";
     promptImage.removeAttribute("src");
     promptImage.hidden = true;
+    promptImage.alt = effective.content.question ? "" : "Question image for this round";
     const promptUrl = safeUrl(effective.content.promptImage);
     if (!["draw-over-image", "compose-image"].includes(effective.format.mode) && (promptUrl || effective.content.promptAsset)) {
       if (promptUrl) promptImage.src = promptUrl;
