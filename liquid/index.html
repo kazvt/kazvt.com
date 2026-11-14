@@ -505,6 +505,11 @@
         setCustomColor(id, hsvToHex(hsv.h, saturation, brightness), persist);
       }
       function value(id) { return animatedValues.has(id) ? animatedValues.get(id) : Number(controls[id].value); }
+      function renderQuality() {
+        const input = controls.quality;
+        const min = Number(input.min), max = Number(input.max), step = Number(input.step) || 1;
+        return Math.min(max, Math.max(min, min + Math.round((value("quality") - min) / step) * step));
+      }
       function formatSliderValue(id, v) {
         const formats = {
           viscosity: value => `${Math.round(value)}%`, speed: value => `${value.toFixed(2)}×`,
@@ -595,7 +600,7 @@
         });
         if (gl && qualityIsAutomated) {
           const rect = stage.getBoundingClientRect();
-          const scale = Math.min(window.devicePixelRatio || 1, 1.25) * value("quality");
+          const scale = Math.min(window.devicePixelRatio || 1, 1.25) * renderQuality();
           if (Math.max(2, Math.round(rect.width * scale)) !== canvas.width || Math.max(2, Math.round(rect.height * scale)) !== canvas.height) resize();
           else if (blurIsAutomated) syncSurfaceEffects(rect);
         } else if (blurIsAutomated && gl) {
@@ -698,7 +703,7 @@
       function resize() {
         if (!gl) return;
         const rect = stage.getBoundingClientRect();
-        const quality = value("quality");
+        const quality = renderQuality();
         dpr = Math.min(window.devicePixelRatio || 1, 1.25) * quality;
         viewWidth = Math.max(2, Math.round(rect.width * dpr));
         viewHeight = Math.max(2, Math.round(rect.height * dpr));
