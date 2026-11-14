@@ -1,0 +1,73 @@
+{
+  "gin-no-ketsumyaku-1994.mp3": {
+    "title": "銀の血脈",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 10,
+    "default": true
+  },
+  "tracks/blue-fire-purple-eyes-in-the-dark.mp3": {
+    "title": "Blue Fire - Purple Eyes in the Dark",
+    "artist": "neu licht",
+    "order": 20
+  },
+  "tracks/nazo-no-kanojo-x-ost-track-03.mp3": {
+    "title": "Nazo no Kanojo",
+    "artist": "Rukia Coa - Nazo no Kanojo X OST, Track 03",
+    "order": 30
+  },
+  "tracks/seito-densetsu-osamu-shoji.mp3": {
+    "title": "Seito Densetsu",
+    "artist": "Osamu Shoji",
+    "order": 40
+  },
+  "tracks/pylon-utsu-dreamstation1986.mp3": {
+    "title": "Pylon",
+    "artist": "憂鬱 & DreamStation1986",
+    "order": 50
+  },
+  "tracks/totsuzen-upside-down-hoshi-e-iku-fune.mp3": {
+    "title": "突然 UPSIDE DOWN - 星へ行く船",
+    "artist": "neu licht",
+    "order": 60
+  },
+  "tracks/sonicomi-photo-session-park.mp3": {
+    "title": "PHOTO SESSION Park",
+    "artist": "Daiichi Uchuu Sokudo - SoniComi Original Soundtrack",
+    "order": 70
+  },
+  "tracks/falling-asleep-with-you.mp3": {
+    "title": "Falling Asleep With You",
+    "artist": "Formstate",
+    "order": 80
+  },
+  "tracks/warming-touch.mp3": {
+    "title": "Warming Touch",
+    "artist": "Formstate",
+    "order": 90
+  },
+  "tracks/kitsch-namco-sounds.mp3": {
+    "title": "Kitsch",
+    "artist": "Namco Sounds",
+    "order": 100
+  },
+  "tracks/vs-metal-sonic-generations.mp3": {
+    "title": "Vs. Metal Sonic",
+    "artist": "Sonic Generations",
+    "order": 110
+  },
+  "tracks/ratatouille-title-screen.mp3": {
+    "title": "Title Screen",
+    "artist": "Ratatouille: The Video Game OST",
+    "order": 120
+  },
+  "tracks/a-song-for-popping-bloons.mp3": {
+    "title": "A Song For Popping Bloons",
+    "artist": "Dopo Goto",
+    "order": 130
+  },
+  "tracks/yours-sincerely-hawaii.mp3": {
+    "title": "Yours Sincerely",
+    "artist": "Hawaii",
+    "order": 140
+  }
+}

@@ -18,6 +18,16 @@ on:
       - "zzz_assets/rewards/*.GIF"
       - "scripts/build-emote-manifest.py"
       - "obs/trivia-rewards-widget/generate-reward-catalog.mjs"
+      - "scripts/build-radio-playlist.mjs"
+      - "radio/track-metadata.json"
+      - "radio/assets/tracks/**"
+      - "radio/assets/*.aac"
+      - "radio/assets/*.m4a"
+      - "radio/assets/*.mp3"
+      - "radio/assets/*.ogg"
+      - "radio/assets/*.opus"
+      - "radio/assets/*.wav"
+      - "radio/assets/*.webm"
 
 permissions:
   actions: write
@@ -41,9 +51,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Regenerate shortlinks, emote manifest, and reward catalogs
+      - name: Regenerate generated site data and manifests
         run: |
           node scripts/build-reward-pages.mjs
+          node scripts/build-radio-playlist.mjs
           node zzz_redirect/build-shortlinks.mjs
           python scripts/build-emote-manifest.py
           node obs/trivia-rewards-widget/generate-reward-catalog.mjs

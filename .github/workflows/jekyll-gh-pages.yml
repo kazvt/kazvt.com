@@ -30,6 +30,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Generate radio playlist from audio files
+        run: node scripts/build-radio-playlist.mjs
       - name: Build static reward pages from shared components
         run: node scripts/build-reward-pages.mjs
       - name: Build with Jekyll
