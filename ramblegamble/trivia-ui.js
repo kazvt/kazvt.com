@@ -169,7 +169,7 @@ import {
     content.numberVisible = content.numberVisible === true;
     content.imageVisible = content.imageVisible !== false;
     content.drawing = typeof content.drawing === "string" ? content.drawing : "";
-    if (content.optionCount == null) content.optionCount = format.optionCount;
+    if (content.optionCount == null) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" && format.mode !== "image-grid" ? 12 : format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
     if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" ? 12 : 6;
     format = { ...format, optionCount: content.optionCount };
