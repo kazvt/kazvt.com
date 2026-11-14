@@ -12,6 +12,8 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
   const result = document.getElementById("rg-result");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const FORCED_THEME = "p2";
+  const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
+  const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const prompts = [
     "What tiny thing brings you an unreasonable amount of joy?",
     "Which game could you happily ramble about for an hour?",
@@ -330,7 +332,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
 
   function getNamedPart(hit, model, knownNames) {
     for (let object = hit?.object; object && object !== model; object = object.parent) {
-      const name = object.name.toLowerCase();
+      const name = String(object.name || "").toLowerCase();
       if (knownNames.has(name)) return name;
     }
     return "";
@@ -351,9 +353,7 @@ import { resolvePointClick } from "./point-click-routing.js?v=point-click-202611
           ? { hit: slotHit, machine: "slot", model: slotsModel }
           : null;
     if (!hit) return null;
-    const partNames = hit.machine === "roulette"
-      ? new Set(["center", "wheel", "rim", "ball"])
-      : new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
+    const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
     const part = getNamedPart(hit.hit, hit.model, partNames);
     return { machine: hit.machine, part, action: resolvePointClick(hit.machine, part) };
   }
