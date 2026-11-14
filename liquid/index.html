@@ -891,7 +891,7 @@
         frameRequest = 0;
         if (!gl) return;
         if (!previousTime) previousTime = now;
-        const delta = Math.min((now - previousTime) / 1000, 0.05);
+        const delta = Math.max((now - previousTime) / 1000, 0);
         previousTime = now;
         if (!paused) elapsed += delta;
         if (!paused || frameDirty) {
