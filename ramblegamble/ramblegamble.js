@@ -47,6 +47,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   let promptBag = [];
   let playing = false;
   let userInteracting = false;
+  let sceneReady = false;
   let lastCameraShake = new THREE.Vector3();
   let rouletteModel;
   let slotsModel;
@@ -334,8 +335,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
-    if (raycaster.intersectObjects(rouletteTargets, true).length > 0) return "wheel";
-    if (raycaster.intersectObjects(slotTargets, true).length > 0) return "slot";
+    const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
+    const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
+    if (wheelHit && slotHit) return wheelHit.distance <= slotHit.distance ? "wheel" : "slot";
+    if (wheelHit) return "wheel";
+    if (slotHit) return "slot";
     return "";
   }
 
@@ -455,6 +459,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       resizeObserver = new ResizeObserver(fitCamera);
       resizeObserver.observe(preview);
       window.addEventListener("resize", fitCamera, { passive: true });
+      sceneReady = true;
       if (!document.hidden) animationFrame = requestAnimationFrame(animate);
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);
@@ -468,7 +473,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     if (document.hidden) {
       cancelAnimationFrame(animationFrame);
       animationFrame = 0;
-    } else if (renderer && !animationFrame) {
+    } else if (sceneReady && renderer && !animationFrame) {
       animationFrame = requestAnimationFrame(animate);
     }
   });
