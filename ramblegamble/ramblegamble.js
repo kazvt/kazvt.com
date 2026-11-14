@@ -469,17 +469,108 @@ import {
   function setupPicking() {
     rouletteTargets = [];
     slotTargets = [];
+    contestantTargets = [];
     rouletteModel?.traverse((object) => {
       if (object.isMesh) rouletteTargets.push(object);
     });
     slotsModel?.traverse((object) => {
       if (object.isMesh) slotTargets.push(object);
     });
+    setupContestants();
+  }
+
+  function setupContestants() {
+    const chairs = [];
+    stageModel?.traverse((object) => {
+      if (object.name === "tall_chair") chairs.push(object);
+    });
+    scene.updateMatrixWorld(true);
+
+    const sortedFallback = [...chairs].sort((a, b) => {
+      const aPosition = a.getWorldPosition(new THREE.Vector3());
+      const bPosition = b.getWorldPosition(new THREE.Vector3());
+      return aPosition.x - bPosition.x;
+    });
+    const assigned = new Set();
+
+    contestants = BILLBOARD_SOURCES.map((source, index) => {
+      const plate = stageModel.getObjectByName(`nameplate_${source.id}`);
+      const platePosition = plate?.getWorldPosition(new THREE.Vector3());
+      let chair = platePosition
+        ? chairs
+          .filter((candidate) => !assigned.has(candidate))
+          .sort((a, b) => {
+            const aPosition = a.getWorldPosition(new THREE.Vector3());
+            const bPosition = b.getWorldPosition(new THREE.Vector3());
+            return Math.hypot(aPosition.x - platePosition.x, aPosition.z - platePosition.z)
+              - Math.hypot(bPosition.x - platePosition.x, bPosition.z - platePosition.z);
+          })[0]
+        : null;
+      chair ||= sortedFallback.find((candidate) => !assigned.has(candidate));
+      if (!chair) return null;
+      assigned.add(chair);
+
+      const chairBounds = new THREE.Box3().setFromObject(chair);
+      const chairCenter = chairBounds.getCenter(new THREE.Vector3());
+      const chairSize = chairBounds.getSize(new THREE.Vector3());
+      const hitSize = new THREE.Vector3(
+        Math.max(chairSize.x + 0.42, 0.92),
+        Math.max(chairSize.y + 0.36, 1.35),
+        Math.max(chairSize.z + 0.42, 0.82),
+      );
+      const hitProxy = new THREE.Mesh(
+        new THREE.BoxGeometry(hitSize.x, hitSize.y, hitSize.z),
+        new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, side: THREE.DoubleSide }),
+      );
+      hitProxy.position.copy(chairCenter);
+      hitProxy.userData.contestantId = source.id;
+      hitProxy.name = `point-click-${source.id}`;
+      hitProxy.castShadow = false;
+      hitProxy.receiveShadow = false;
+      scene.add(hitProxy);
+      contestantTargets.push(hitProxy);
+
+      const anchor = new THREE.Vector3(chairCenter.x, chairBounds.max.y + 0.34, chairBounds.max.z + 0.12);
+      const worldWidth = 1.04;
+      const worldHeight = worldWidth * 9 / 16;
+      const panel = document.createElement("div");
+      panel.className = "rg-billboard";
+      panel.dataset.contestant = source.id;
+      panel.setAttribute("aria-label", `${source.label} browser-source billboard`);
+
+      if (source.source) {
+        const iframe = document.createElement("iframe");
+        iframe.src = source.source;
+        iframe.title = `${source.label} live browser source`;
+        iframe.loading = "eager";
+        iframe.referrerPolicy = "strict-origin-when-cross-origin";
+        iframe.tabIndex = -1;
+        panel.append(iframe);
+      } else {
+        const placeholder = document.createElement("div");
+        placeholder.className = "rg-billboard-placeholder";
+        placeholder.append(document.createTextNode(source.label));
+        const pending = document.createElement("small");
+        pending.textContent = "SOURCE PENDING";
+        placeholder.append(pending);
+        panel.append(placeholder);
+      }
+      billboardLayer.append(panel);
+
+      return {
+        ...source,
+        chair,
+        hitProxy,
+        anchor,
+        panel,
+        worldWidth,
+        worldHeight,
+      };
+    }).filter(Boolean);
   }
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
-  let downPoint = null;
 
   function getNamedPart(hit, model, knownNames) {
     for (let object = hit?.object; object && object !== model; object = object.parent) {
@@ -496,57 +587,147 @@ import {
     raycaster.setFromCamera(pointer, camera);
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
-    const hit = wheelHit && slotHit
-      ? (wheelHit.distance <= slotHit.distance ? { hit: wheelHit, machine: "roulette", model: rouletteModel } : { hit: slotHit, machine: "slot", model: slotsModel })
-      : wheelHit
-        ? { hit: wheelHit, machine: "roulette", model: rouletteModel }
-        : slotHit
-          ? { hit: slotHit, machine: "slot", model: slotsModel }
-          : null;
+    const chairHit = raycaster.intersectObjects(contestantTargets, false)[0];
+    const hits = [
+      wheelHit && { distance: wheelHit.distance, hit: wheelHit, machine: "roulette", model: rouletteModel },
+      slotHit && { distance: slotHit.distance, hit: slotHit, machine: "slot", model: slotsModel },
+      chairHit && {
+        distance: chairHit.distance,
+        machine: "contestant",
+        contestantId: chairHit.object.userData.contestantId,
+      },
+    ].filter(Boolean).sort((a, b) => a.distance - b.distance);
+    const hit = hits[0];
     if (!hit) return null;
+    if (hit.machine === "contestant") return hit;
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
-    const part = getNamedPart(hit.hit, hit.model, partNames);
-    return { machine: hit.machine, part, action: resolvePointClick(hit.machine, part) };
+    return { ...hit, part: getNamedPart(hit.hit, hit.model, partNames) };
   }
 
   function updatePointer(event) {
     if (event.pointerType === "touch" || !camera || event.buttons) return;
-    preview.classList.toggle("is-hovering", Boolean(getSceneInteractionAt(event.clientX, event.clientY)));
+    const rect = preview.getBoundingClientRect();
+    const zone = resolvePointClickZone({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      width: rect.width,
+      height: rect.height,
+      canGoBack: canGoBack(),
+    });
+    const interaction = zone ? null : getSceneInteractionAt(event.clientX, event.clientY);
+    const actionable = Boolean(interaction && (
+      interaction.machine !== "contestant"
+      || currentView.kind !== "contestant"
+      || currentView.contestantId !== interaction.contestantId
+    ));
+    setGameCursor(resolvePointClickCursor({ zone, actionable }), event.clientX, event.clientY);
   }
 
-  function pickMachine(event) {
-    if (!camera || playing || !downPoint) return;
-    const distance = Math.hypot(event.clientX - downPoint.x, event.clientY - downPoint.y);
-    downPoint = null;
-    if (distance > 7) return;
+  function setGameCursor(mode, clientX, clientY) {
+    if (reducedMotion.matches || matchMedia("(pointer: coarse)").matches) {
+      gameCursor.hidden = true;
+      return;
+    }
+
+    const imageSource = mode === "left" || mode === "right" || mode === "back"
+      ? CURSOR_ASSETS.direction
+      : CURSOR_ASSETS[mode] || CURSOR_ASSETS.default;
+    if (cursorMode !== mode) {
+      cursorMode = mode;
+      gameCursorImage.src = imageSource;
+      gameCursorImage.style.transform = mode === "left"
+        ? "scaleX(-1)"
+        : mode === "back"
+          ? "rotate(90deg)"
+          : "none";
+    }
+
+    const rect = preview.getBoundingClientRect();
+    const width = gameCursor.clientWidth || 62;
+    const height = gameCursor.clientHeight || 35;
+    const hotspots = {
+      default: [0.52, 0.45],
+      hover: [0.52, 0.49],
+      right: [0.61, 0.5],
+      left: [0.39, 0.5],
+      back: [0.5, 0.7],
+    };
+    const [hotspotX, hotspotY] = hotspots[mode] || hotspots.default;
+    gameCursor.style.left = `${clientX - rect.left - width * hotspotX}px`;
+    gameCursor.style.top = `${clientY - rect.top - height * hotspotY}px`;
+    gameCursor.hidden = false;
+    cursorPosition = { clientX, clientY };
+  }
+
+  function hideGameCursor() {
+    gameCursor.hidden = true;
+    cursorPosition = null;
+  }
+
+  function pointClickAt(clientX, clientY) {
+    if (!camera || !sceneReady || cameraTransition) return;
+    const rect = preview.getBoundingClientRect();
+    const zone = resolvePointClickZone({
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+      width: rect.width,
+      height: rect.height,
+      canGoBack: canGoBack(),
+    });
+    if (zone === "left") return setLookDirection(-1);
+    if (zone === "right") return setLookDirection(1);
+    if (zone === "back") return goBack();
+
     const interaction = getSceneInteractionAt(event.clientX, event.clientY);
-    if (interaction?.action === "spin-wheel") startWheelSpin();
-    else if (interaction?.action === "pull-lever") startLeverPull();
-    else if (interaction?.action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
-    else if (interaction?.action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
+    if (!interaction) return;
+
+    if (interaction.machine === "contestant") {
+      if (currentView.kind === "contestants" || currentView.kind === "contestant") {
+        transitionToView({ kind: "contestant", contestantId: interaction.contestantId });
+      } else {
+        transitionToView({ kind: "contestants" });
+      }
+      return;
+    }
+
+    const action = resolvePointClickAction({
+      machine: interaction.machine,
+      part: interaction.part,
+      focused: currentView.kind === interaction.machine,
+      canGoBack: canGoBack(),
+    });
+    if (action === "focus-roulette") transitionToView({ kind: "roulette" });
+    else if (action === "focus-slot") transitionToView({ kind: "slot" });
+    else if (action === "spin-wheel") startWheelSpin();
+    else if (action === "pull-lever") startLeverPull();
+    else if (action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
+    else if (action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
   }
 
   canvas.addEventListener("pointermove", updatePointer);
-  canvas.addEventListener("pointerdown", (event) => {
-    downPoint = { x: event.clientX, y: event.clientY };
-  });
-  canvas.addEventListener("pointerup", pickMachine);
-  canvas.addEventListener("pointercancel", () => {
-    downPoint = null;
-    preview.classList.remove("is-hovering");
-  });
-  canvas.addEventListener("pointerleave", () => preview.classList.remove("is-hovering"));
+  canvas.addEventListener("click", (event) => pointClickAt(event.clientX, event.clientY));
+  canvas.addEventListener("pointerleave", hideGameCursor);
+  window.addEventListener("blur", hideGameCursor);
 
   canvas.addEventListener("keydown", (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     const key = event.key.toLowerCase();
-    if (key === "r") startWheelSpin();
+    if (key === "arrowleft") setLookDirection(-1);
+    else if (key === "arrowright") setLookDirection(1);
+    else if (key === "arrowdown" || key === "escape" || key === "backspace") goBack();
+    else if (key === "enter" || key === " ") {
+      const bounds = canvas.getBoundingClientRect();
+      pointClickAt(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+    }
+    else if (key === "r") startWheelSpin();
     else if (key === "s") startLeverPull();
     else if (key === "g") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
     else if (key === "t") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
     else return;
     event.preventDefault();
   });
+
+  gameCursorImage.src = CURSOR_ASSETS.default;
 
   window.addEventListener("rg:spin-wheel", startWheelSpin);
   window.addEventListener("rg:pull-slots", startLeverPull);
