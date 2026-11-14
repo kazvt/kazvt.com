@@ -55,6 +55,12 @@ test("special media templates keep their authored sizes", () => {
   assert.equal(resolveRoundFormat("31", 1).mode, "number-stepper");
   assert.equal(resolveRoundFormat("32", 1).mode, "memory-number");
   assert.equal(resolveRoundFormat("35", 1).mode, "video");
+  assert.deepEqual([resolveRoundFormat("13", 5).mode, resolveRoundFormat("13", 5).promptImage], ["draw-over-image", true]);
+  assert.deepEqual([resolveRoundFormat("17", 1).mode, resolveRoundFormat("17", 1).optionCount], ["image-sequence", 7]);
+  assert.deepEqual([resolveRoundFormat("24", 1).optionCount, resolveRoundFormat("24", 1).blankOption], [6, true]);
+  assert.equal(resolveRoundFormat("26", 1).optionCount, 6);
+  assert.deepEqual([resolveRoundFormat("27", 1).mode, resolveRoundFormat("27", 1).optionCount], ["text-sequence", 24]);
+  assert.equal(resolveRoundFormat("30", 1).optionCount, 2);
 });
 
 test("every configured template has a readable label", () => {
