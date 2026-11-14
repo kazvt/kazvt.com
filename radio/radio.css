@@ -235,6 +235,14 @@ body.radio-page {
   background: repeating-linear-gradient(to bottom, transparent 0 3px, #0008 4px 5px);
   mix-blend-mode: multiply;
 }
+.visualizer-fade {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
 
 .transport {
   display: flex;
