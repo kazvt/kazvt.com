@@ -151,6 +151,7 @@ import {
     if (!modeNames[content.mode]) content.mode = format.mode;
     if (content.optionCount == null) content.optionCount = format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
+    if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = 6;
     format = { ...format, optionCount: content.optionCount };
     if (isChoiceMode(content.mode)) {
       while (content.options.length < format.optionCount) content.options.push({ label: "", image: "", correct: false });
@@ -357,6 +358,13 @@ import {
 
   function renderSpecialFields(format, content) {
     let html = "";
+    if (isChoiceMode(format.mode)) {
+      const counts = [5, 6, 8, 9, 10, 12, 13, 16, 18, 24];
+      const chosen = counts.includes(format.optionCount) ? format.optionCount : 6;
+      html += '<label class="rg-field-label" for="rg-edit-option-count">Number of options<select id="rg-edit-option-count" data-option-count>';
+      counts.forEach((count) => { html += '<option value="' + count + '" ' + (count === chosen ? "selected" : "") + '>' + count + '</option>'; });
+      html += '</select></label>';
+    }
     if (format.mode === "categorize-images") {
       html += '<h4 class="rg-editor-section-title">CATEGORY NAMES</h4>';
       for (let index = 0; index < format.categories; index += 1) {
