@@ -1244,11 +1244,16 @@
         event.currentTarget.classList.toggle("btn-outline-primary", paused);
       });
       document.getElementById("resetBtn").addEventListener("click", () => {
+        automationRanges.clear();
+        animatedValues.clear();
+        oscillationPeriodMs = 6000;
+        automationElapsed = 0;
         Object.entries(defaults).forEach(([id, v]) => {
           if (controls[id].type === "checkbox") controls[id].checked = v;
           else controls[id].value = v;
         });
         applyURLParameters();
+        syncAllAutomationRangeUI();
         syncColorPickers();
         closeColorPickers();
         syncPresetSelection();
@@ -1387,6 +1392,7 @@
       setTheaterMode(initialTheaterModeFromURL(), false);
       loadSettings();
       applyURLParameters();
+      setupAutomationControls();
       syncColorPickers();
       syncPresetSelection();
       syncLabels();
