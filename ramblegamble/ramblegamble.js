@@ -140,7 +140,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     promptText.textContent = nextPrompt();
     statusText.textContent = result.every((symbol) => symbol === result[0])
       ? "TRIPLE MATCH - EXTRA RAMBLE ENERGY."
-      : "A FRESH TANGENT. TAKE IT ANYWHERE. ";
+      : "A FRESH TANGENT. TAKE IT ANYWHERE.";
     round += 1;
     const display = String(round).padStart(2, "0");
     roundText.textContent = display;
@@ -464,7 +464,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       prepareModel(slotsModel);
       slotRig.add(slotsModel);
       slotsModel.traverse((object) => {
-        if (object.name === "arm" && object.isMesh) lever = object;
+        if (object.name === "arm") lever = object;
       });
       setupPicking();
       fitCamera();
