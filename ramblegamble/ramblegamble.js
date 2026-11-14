@@ -381,6 +381,11 @@ import {
       if (distance < 2.2) bounds.union(chairBounds);
     });
 
+    if (hostBillboard) {
+      bounds.expandByObject(hostBillboard.chair);
+      addBillboardBounds(bounds, hostBillboard);
+    }
+
     if (rouletteRig) bounds.expandByObject(rouletteRig);
     if (slotRig) bounds.expandByObject(slotRig);
     return bounds;
@@ -479,6 +484,10 @@ import {
     rouletteTargets = [];
     slotTargets = [];
     contestantTargets = [];
+    contestants = [];
+    hostBillboard = null;
+    billboards = [];
+    billboardLayer?.replaceChildren();
     rouletteModel?.traverse((object) => {
       if (object.isMesh) rouletteTargets.push(object);
     });
@@ -486,6 +495,35 @@ import {
       if (object.isMesh) slotTargets.push(object);
     });
     setupContestants();
+  }
+
+  function createBillboardPanel(source, kind) {
+    const panel = document.createElement("div");
+    panel.className = source.source ? "rg-billboard rg-billboard-live" : "rg-billboard";
+    panel.dataset[kind] = source.id;
+    panel.setAttribute("aria-label", `${source.label} browser-source billboard`);
+
+    if (source.source) {
+      const iframe = document.createElement("iframe");
+      iframe.src = source.source;
+      iframe.title = `${source.label} live browser source`;
+      iframe.loading = "eager";
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+      iframe.tabIndex = -1;
+      panel.append(iframe);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "rg-billboard-placeholder";
+      placeholder.append(document.createTextNode(source.label));
+      const pending = document.createElement("small");
+      pending.textContent = "SOURCE PENDING";
+      placeholder.append(pending);
+      panel.append(placeholder);
+    }
+
+    billboardLayer.append(panel);
+    return panel;
   }
 
   function setupContestants() {
@@ -534,30 +572,7 @@ import {
         chairBounds.max.y + worldHeight / 2 + 0.05,
         chairBounds.max.z + 0.12,
       );
-      const panel = document.createElement("div");
-      panel.className = source.source ? "rg-billboard rg-billboard-live" : "rg-billboard";
-      panel.dataset.contestant = source.id;
-      panel.setAttribute("aria-label", `${source.label} browser-source billboard`);
-
-      if (source.source) {
-        const iframe = document.createElement("iframe");
-        iframe.src = source.source;
-        iframe.title = `${source.label} live browser source`;
-        iframe.loading = "eager";
-        iframe.referrerPolicy = "strict-origin-when-cross-origin";
-        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-        iframe.tabIndex = -1;
-        panel.append(iframe);
-      } else {
-        const placeholder = document.createElement("div");
-        placeholder.className = "rg-billboard-placeholder";
-        placeholder.append(document.createTextNode(source.label));
-        const pending = document.createElement("small");
-        pending.textContent = "SOURCE PENDING";
-        placeholder.append(pending);
-        panel.append(placeholder);
-      }
-      billboardLayer.append(panel);
+      const panel = createBillboardPanel(source, "contestant");
 
       return {
         ...source,
@@ -569,7 +584,44 @@ import {
         worldHeight,
       };
     }).filter(Boolean);
-    billboardLayer.setAttribute("aria-label", `Contestant browser-source billboards, ${contestants.length} seats`);
+    billboards = [...contestants];
+    setupHostBillboard();
+    billboardLayer.setAttribute(
+      "aria-label",
+      `Host and contestant browser-source billboards, ${billboards.length} screens`,
+    );
+  }
+
+  function setupHostBillboard() {
+    let chair = null;
+    let highestBounds = null;
+    stageModel?.traverse((object) => {
+      if (!object.isMesh || normalizeNodeName(object.name) !== "chair") return;
+      const bounds = new THREE.Box3().setFromObject(object);
+      if (bounds.isEmpty() || (highestBounds && bounds.max.y <= highestBounds.max.y)) return;
+      chair = object;
+      highestBounds = bounds;
+    });
+    if (!chair || !highestBounds) return;
+
+    const worldWidth = 1.04;
+    const worldHeight = worldWidth;
+    const chairCenter = highestBounds.getCenter(new THREE.Vector3());
+    const anchor = new THREE.Vector3(
+      chairCenter.x,
+      highestBounds.max.y + worldHeight / 2 + 0.05,
+      highestBounds.max.z + 0.12,
+    );
+    const panel = createBillboardPanel(HOST_BILLBOARD_SOURCE, "host");
+    hostBillboard = {
+      ...HOST_BILLBOARD_SOURCE,
+      chair,
+      anchor,
+      panel,
+      worldWidth,
+      worldHeight,
+    };
+    billboards.push(hostBillboard);
   }
 
   const raycaster = new THREE.Raycaster();
