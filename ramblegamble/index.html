@@ -1,19 +1,11 @@
 <!doctype html>
-<html lang="en" data-theme="p16" class="ramble-document">
+<html lang="en" data-theme="p2" class="ramble-document">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#063b00">
     <meta name="description" content="A full-screen interactive 3D ramble gamble." />
     <title>Ramble Gamble - kazvt</title>
-    <script>
-      try {
-        const savedTheme = localStorage.getItem("kazvt-theme");
-        if (/^p(?:[1-9]|1[0-6])$/.test(savedTheme || "")) {
-          document.documentElement.dataset.theme = savedTheme;
-        }
-      } catch {}
-    </script>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=full-preview-20261114-v2">
     <script type="importmap">
@@ -24,10 +16,9 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=full-preview-20261114-v3"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=palette-locked-p2-20261114-v1"></script>
   </head>
-  <body class="ramble-page" data-theme="p16">
-    <script>document.body.dataset.theme = document.documentElement.dataset.theme || "p16";</script>
+  <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
       <canvas id="rg-canvas"></canvas>
       <p class="rg-result" id="rg-result" hidden></p>

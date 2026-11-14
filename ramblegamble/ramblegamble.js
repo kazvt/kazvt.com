@@ -10,6 +10,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const FORCED_THEME = "p2";
   const prompts = [
     "What tiny thing brings you an unreasonable amount of joy?",
     "Which game could you happily ramble about for an hour?",
@@ -57,10 +58,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     return value || fallback;
   }
 
-  function applyTheme(theme) {
-    if (!/^p(?:[1-9]|1[0-6])$/.test(theme)) return;
-    document.documentElement.dataset.theme = theme;
-    document.body.dataset.theme = theme;
+  function applyTheme() {
+    // Ramble Gamble is intentionally fixed to palette 2. Never read or write
+    // the shared preference, so this page cannot affect other pages.
+    document.documentElement.dataset.theme = FORCED_THEME;
+    document.body.dataset.theme = FORCED_THEME;
 
     const color = themeValue("--bg", "#17213c");
     const meta = document.querySelector('meta[name="theme-color"]');
@@ -140,14 +142,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     };
   }
 
-  try {
-    const initialTheme = document.documentElement.dataset.theme || "p16";
-    applyTheme(initialTheme);
-  } catch {}
-
-  window.addEventListener("storage", (event) => {
-    if (event.key === "kazvt-theme" && event.newValue) applyTheme(event.newValue);
-  });
+  applyTheme();
 
   function makePedestal(radius, depth, color, userDataKey) {
     const material = new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0.05 });
@@ -454,7 +449,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
       setupPicking();
       fitCamera();
-      applyTheme(document.body.dataset.theme || "p16");
+      applyTheme();
       loading.classList.add("is-hidden");
       resizeObserver = new ResizeObserver(fitCamera);
       resizeObserver.observe(preview);
