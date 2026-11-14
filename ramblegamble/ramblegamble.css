@@ -46,6 +46,11 @@ body.ramble-page {
   touch-action: none;
 }
 
+#rg-canvas:focus-visible {
+  outline: 2px dashed var(--ink);
+  outline-offset: -4px;
+}
+
 .rg-preview.has-game-cursor #rg-canvas {
   cursor: none;
 }
@@ -141,7 +146,7 @@ body.ramble-page {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #rg-canvas {
+  .rg-preview.has-game-cursor #rg-canvas {
     cursor: var(--cursor-pointer, pointer);
   }
 
