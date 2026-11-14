@@ -75,7 +75,7 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
   for (let level = 1; level <= targetDifficulty; level += 1) {
     const patch = rules[level];
     if (!patch) continue;
-    const { addOptions = 0, ...settings } = patch;
+    const { addOptions = 0, replaceOptions, resetQuestion, replaceItems, ...settings } = patch;
     Object.assign(format, settings);
     if (addOptions) format.optionCount += addOptions;
   }

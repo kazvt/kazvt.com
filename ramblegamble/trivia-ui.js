@@ -141,7 +141,9 @@ import {
     for (let level = 1; level <= Number(difficulty); level += 1) {
       const rule = ROUND_RULES[number]?.[level] || {};
       const draft = drafts.rounds[round]?.[level] || {};
+      if (rule.resetQuestion) { content.question = ""; content.subtitle = ""; }
       if (rule.replaceOptions) content.options = [];
+      if (rule.replaceItems) content.items = [];
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
       for (const field of ["question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments"]) {
         if (Object.hasOwn(draft, field)) content[field] = copy(draft[field]);
