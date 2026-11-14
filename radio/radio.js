@@ -192,6 +192,24 @@
     fallback.querySelector("p").textContent = message;
     screen.classList.remove("is-live");
     screen.classList.add("is-fallback");
+    updateVisualizerFade();
+  }
+
+  function getVisualizerBlackoutOpacity() {
+    if (!visualizer || visualsPaused || !trackHasPlayed) return 0;
+    if (trackTransitionBlackout) return 1;
+
+    const elapsed = Math.max(0, Number(audio.currentTime) || 0);
+    const fadeInVisibility = Math.min(1, elapsed / TRACK_EDGE_FADE_SECONDS);
+    const duration = Number(audio.duration);
+    const fadeOutVisibility = Number.isFinite(duration) && duration > 0
+      ? Math.max(0, Math.min(1, (duration - elapsed) / TRACK_EDGE_FADE_SECONDS))
+      : 1;
+    return 1 - Math.min(fadeInVisibility, fadeOutVisibility);
+  }
+
+  function updateVisualizerFade() {
+    if (fadeLayer) fadeLayer.style.opacity = String(getVisualizerBlackoutOpacity());
   }
 
   function getVisualizerSize() {
@@ -291,6 +309,7 @@
   function renderFrame() {
     frameHandle = 0;
     if (!visualizer || visualsPaused || audio.paused || document.hidden) return;
+    updateVisualizerFade();
     visualizer.render();
     frameHandle = window.requestAnimationFrame(renderFrame);
   }
