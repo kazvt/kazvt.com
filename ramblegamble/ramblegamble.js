@@ -11,6 +11,9 @@ import {
 
   const preview = document.getElementById("rg-preview");
   const canvas = document.getElementById("rg-canvas");
+  const billboardLayer = document.getElementById("rg-billboard-layer");
+  const gameCursor = document.getElementById("rg-game-cursor");
+  const gameCursorImage = document.getElementById("rg-game-cursor-image");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -49,7 +52,6 @@ import {
   let renderer;
   let scene;
   let camera;
-  let controls;
   let resizeObserver;
   let animationFrame = 0;
   let wheelPivot;
@@ -63,13 +65,18 @@ import {
   let leverMotion = null;
   let promptBag = [];
   let playing = false;
-  let userInteracting = false;
   let sceneReady = false;
-  let lastCameraShake = new THREE.Vector3();
   let stageModel;
   let rouletteModel;
   let slotsModel;
-  let cameraFramed = false;
+  let contestants = [];
+  let contestantTargets = [];
+  let currentView = { kind: "overview", look: 0 };
+  let viewHistory = [];
+  let cameraTarget = new THREE.Vector3();
+  let cameraTransition = null;
+  let cursorMode = "";
+  let cursorPosition = null;
 
   function themeValue(name, fallback) {
     const value = getComputedStyle(document.body).getPropertyValue(name).trim();
