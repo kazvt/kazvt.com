@@ -486,7 +486,163 @@
         const brightness = 1 - Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
         setCustomColor(id, hsvToHex(hsv.h, saturation, brightness), persist);
       }
-      function value(id) { return Number(controls[id].value); }
+      function value(id) { return animatedValues.has(id) ? animatedValues.get(id) : Number(controls[id].value); }
+      function formatSliderValue(id, v) {
+        const formats = {
+          viscosity: value => `${Math.round(value)}%`, speed: value => `${value.toFixed(2)}×`,
+          foldSize: value => `${value.toFixed(2)}×`, zoom: value => `${value.toFixed(2)}×`,
+          heightRange: value => `${value.toFixed(2)}×`, relief: value => `${value.toFixed(2)}×`,
+          detail: value => `${Math.round(value * 100)}%`, gloss: value => `${value.toFixed(2)}×`,
+          sharpness: value => `${Math.round(value)}%`, blur: value => `${value.toFixed(1)} px`,
+          saturation: value => `${value.toFixed(2)}×`, contrast: value => `${value.toFixed(2)}×`,
+          brightness: value => `${value > 0 ? "+" : ""}${value.toFixed(3)}`,
+          quality: value => `${Math.round(value * 100)}%`
+        };
+        return formats[id] ? formats[id](v) : String(v);
+      }
+      function syncManualValuesFromControls() {
+        faderNameToId.forEach(id => manualValues.set(id, Number(controls[id].value)));
+      }
+      function syncAutomationRangeUI(id) {
+        const ui = automationUI.get(id);
+        if (!ui) return;
+        const input = controls[id];
+        const range = automationRanges.get(id);
+        const fallback = manualValues.get(id) ?? Number(input.value);
+        const low = range ? range.low : fallback;
+        const high = range ? range.high : fallback;
+        const domainMin = Number(input.min), domainMax = Number(input.max);
+        const span = domainMax - domainMin || 1;
+        ui.lower.min = String(domainMin);
+        ui.lower.max = String(high);
+        ui.lower.step = input.step;
+        ui.lower.value = String(low);
+        ui.upper.min = String(low);
+        ui.upper.max = String(domainMax);
+        ui.upper.step = input.step;
+        ui.upper.value = String(high);
+        ui.lane.style.setProperty("--range-low", `${100 * (low - domainMin) / span}%`);
+        ui.lane.style.setProperty("--range-high", `${100 * (high - domainMin) / span}%`);
+        ui.lane.classList.toggle("active", Boolean(range));
+      }
+      function syncAllAutomationRangeUI() { faderNameToId.forEach((id) => syncAutomationRangeUI(id)); }
+      function setAutomationRange(id, low, high, startAt = 0, preserveStatic = true) {
+        const input = controls[id];
+        if (!input || input.type !== "range") return;
+        const minimum = Number(input.min), maximum = Number(input.max);
+        low = Math.min(maximum, Math.max(minimum, Number(low)));
+        high = Math.min(maximum, Math.max(minimum, Number(high)));
+        if (low > high) [low, high] = [high, low];
+        const step = Number(input.step) || 1;
+        if (high - low < step * 0.5) {
+          automationRanges.delete(id);
+          animatedValues.delete(id);
+          if (preserveStatic) {
+            input.value = String(low);
+            manualValues.set(id, Number(input.value));
+          }
+        } else {
+          automationRanges.set(id, { low, high, startAt });
+        }
+        syncAutomationRangeUI(id);
+      }
+      function oscillatedValue(id, elapsedMs) {
+        const range = automationRanges.get(id);
+        if (!range) return Number(controls[id].value);
+        const period = Math.max(500, oscillationPeriodMs);
+        const elapsed = Math.max(0, elapsedMs - range.startAt);
+        const progress = (elapsed % period) / period;
+        const triangle = progress < 0.5 ? progress * 2 : 2 - progress * 2;
+        return range.low + (range.high - range.low) * triangle;
+      }
+      function updateAutomationValues(elapsedMs = automationElapsed) {
+        if (!automationRanges.size) return;
+        let qualityIsAutomated = false, blurIsAutomated = false;
+        automationRanges.forEach((range, id) => {
+          const input = controls[id];
+          const animated = oscillatedValue(id, elapsedMs);
+          animatedValues.set(id, animated);
+          input.value = String(animated);
+          const output = document.getElementById(`${id}Value`);
+          if (output) output.value = formatSliderValue(id, animated);
+          const ui = automationUI.get(id);
+          if (ui) {
+            const span = Number(input.max) - Number(input.min) || 1;
+            ui.lane.style.setProperty("--playhead", `${100 * (animated - Number(input.min)) / span}%`);
+          }
+          if (id === "quality") qualityIsAutomated = true;
+          if (id === "blur") blurIsAutomated = true;
+        });
+        if (gl && qualityIsAutomated) {
+          const rect = stage.getBoundingClientRect();
+          const scale = Math.min(window.devicePixelRatio || 1, 1.25) * value("quality");
+          if (Math.max(2, Math.round(rect.width * scale)) !== canvas.width || Math.max(2, Math.round(rect.height * scale)) !== canvas.height) resize();
+          else if (blurIsAutomated) syncSurfaceEffects(rect);
+        } else if (blurIsAutomated && gl) {
+          syncSurfaceEffects(stage.getBoundingClientRect());
+        }
+      }
+      function setupAutomationControls() {
+        faderNameToId.forEach((id, name) => {
+          const input = controls[id];
+          const lane = document.createElement("div");
+          lane.className = "automation-range";
+          lane.id = `${id}AutomationLane`;
+          lane.setAttribute("role", "group");
+          lane.setAttribute("aria-label", `${name}_oscillate range`);
+          const lower = document.createElement("input");
+          lower.type = "range";
+          lower.className = "form-range automation-range-input automation-lower";
+          lower.id = `${id}AutomationMin`;
+          lower.name = `${name}_oscillate_min`;
+          lower.setAttribute("aria-label", lower.name);
+          const upper = document.createElement("input");
+          upper.type = "range";
+          upper.className = "form-range automation-range-input automation-upper";
+          upper.id = `${id}AutomationMax`;
+          upper.name = `${name}_oscillate_max`;
+          upper.setAttribute("aria-label", upper.name);
+          const playhead = document.createElement("span");
+          playhead.className = "automation-playhead";
+          playhead.setAttribute("aria-hidden", "true");
+          lane.append(lower, upper, playhead);
+          input.after(lane);
+          automationUI.set(id, { lane, lower, upper, playhead });
+          const handleRangeInput = () => {
+            setAutomationRange(id, Number(lower.value), Number(upper.value), automationElapsed);
+            updateAutomationValues();
+            syncLabels();
+            applySettings(false);
+          };
+          lower.addEventListener("input", handleRangeInput);
+          upper.addEventListener("input", handleRangeInput);
+          lower.addEventListener("change", saveSettings);
+          upper.addEventListener("change", saveSettings);
+          syncAutomationRangeUI(id);
+        });
+        updateAutomationValues(automationElapsed);
+      }
+      function parseOscillationRange(raw, input) {
+        if (typeof raw !== "string" || raw.length > 128) return null;
+        const match = raw.trim().match(/^(.+?)\s*(?:,|\.\.|:|\/)\s*(.+)$/);
+        if (!match) return null;
+        const key = input.name.toLowerCase();
+        const low = parseNumberParameter(match[1], key, input);
+        const high = parseNumberParameter(match[2], key, input);
+        if (low === null || high === null) return null;
+        return [Math.min(Number(low), Number(high)), Math.max(Number(low), Number(high))];
+      }
+      function parseOscillationPeriod(raw) {
+        if (typeof raw !== "string" || raw.length > 32) return null;
+        const match = raw.trim().toLowerCase().match(/^(?:x\s*)?(\d+(?:\.\d*)?|\.\d+)(?:\s*x)?\s*(ms|milliseconds?|s|secs?|seconds?)?$/);
+        if (!match) return null;
+        let milliseconds = Number(match[1]);
+        if (!Number.isFinite(milliseconds)) return null;
+        if (/^ms|^millisecond/.test(match[2] || "")) milliseconds *= 1000;
+        else if (/^(?:s|sec|secs|second|seconds)$/.test(match[2] || "")) milliseconds *= 1000;
+        milliseconds = Math.min(120000, Math.max(500, milliseconds));
+        return Math.round(milliseconds / 10) * 10;
+      }
       function setUniforms(phase) {
         gl.uniform2f(locations.u_resolution, canvas.width, canvas.height);
         gl.uniform1f(locations.u_phase, phase);
@@ -508,6 +664,14 @@
         gl.uniform3fv(locations.u_high, hexToRgb(controls.colorHigh.value));
       }
 
+      function syncSurfaceEffects(rect = stage.getBoundingClientRect()) {
+        const blur = value("blur");
+        canvas.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
+        viewMargin = Math.min(0.45, (3 * blur) / Math.max(Math.min(rect.width, rect.height), 1));
+        wrapMargin = controls.wrapEdges.checked ? viewMargin : 0;
+        const overscan = 1 / (1 - 2 * viewMargin);
+        canvas.style.transform = `scale(${overscan})`;
+      }
       function resize() {
         if (!gl) return;
         const rect = stage.getBoundingClientRect();
@@ -520,34 +684,30 @@
           canvas.height = viewHeight;
         }
         gl.viewport(0, 0, viewWidth, viewHeight);
-        const blur = value("blur");
-        canvas.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
-        viewMargin = Math.min(0.45, (3 * blur) / Math.max(Math.min(rect.width, rect.height), 1));
-        wrapMargin = controls.wrapEdges.checked ? viewMargin : 0;
-        const overscan = 1 / (1 - 2 * viewMargin);
-        canvas.style.transform = `scale(${overscan})`;
+        syncSurfaceEffects(rect);
         frameDirty = true;
         scheduleFrame();
       }
 
       function syncLabels() {
-        const formats = {
-          viscosity: v => `${Math.round(v)}%`, speed: v => `${v.toFixed(2)}×`,
-          foldSize: v => `${v.toFixed(2)}×`, heightRange: v => `${v.toFixed(2)}×`,
-          relief: v => `${v.toFixed(2)}×`, detail: v => `${Math.round(v * 100)}%`,
-          gloss: v => `${v.toFixed(2)}×`, sharpness: v => `${Math.round(v)}%`,
-          blur: v => `${v.toFixed(1)} px`, saturation: v => `${v.toFixed(2)}×`,
-          contrast: v => `${v.toFixed(2)}×`, brightness: v => `${v > 0 ? "+" : ""}${v.toFixed(3)}`,
-          quality: v => `${Math.round(v * 100)}%`, zoom: v => `${v.toFixed(2)}×`
-        };
-        Object.entries(formats).forEach(([id, format]) => document.getElementById(`${id}Value`).value = format(value(id)));
+        faderNameToId.forEach(id => {
+          const output = document.getElementById(`${id}Value`);
+          if (output) output.value = formatSliderValue(id, value(id));
+        });
       }
 
       const storageKey = "slime-surface-lab-v3";
       const previousStorageKey = "slime-surface-lab-v2";
       const legacyStorageKey = "slime-surface-lab-v1";
       function saveSettings() {
-        try { localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(Object.entries(controls).map(([id, el]) => [id, el.type === "checkbox" ? el.checked : el.value])))); } catch (_) { /* local file storage can be disabled */ }
+        try {
+          const saved = Object.fromEntries(Object.entries(controls).map(([id, el]) => [id,
+            el.type === "checkbox" ? el.checked : (manualValues.has(id) ? manualValues.get(id) : el.value)
+          ]));
+          saved._oscillations = Object.fromEntries(Array.from(automationRanges, ([id, range]) => [controls[id].name.toLowerCase(), { min: range.low, max: range.high }]));
+          saved._oscillation_period = oscillationPeriodMs;
+          localStorage.setItem(storageKey, JSON.stringify(saved));
+        } catch (_) { /* local file storage can be disabled */ }
       }
       function readSavedSettings(key) {
         try {
@@ -586,6 +746,20 @@
               if (parsed !== null) el.value = parsed;
             }
           });
+          if (saved._oscillations && typeof saved._oscillations === "object" && !Array.isArray(saved._oscillations)) {
+            Object.entries(saved._oscillations).forEach(([name, range]) => {
+              const id = faderNameToId.get(name.toLowerCase());
+              if (!id || !range || typeof range !== "object") return;
+              const input = controls[id];
+              const low = parseNumberParameter(String(range.min), name, input);
+              const high = parseNumberParameter(String(range.max), name, input);
+              if (low !== null && high !== null) setAutomationRange(id, Number(low), Number(high), 0, false);
+            });
+          }
+          if (saved._oscillation_period !== undefined) {
+            const savedPeriod = parseOscillationPeriod(String(saved._oscillation_period));
+            if (savedPeriod !== null) oscillationPeriodMs = savedPeriod;
+          }
           if (sourceKey) saveSettings();
         }
       }
