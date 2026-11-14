@@ -593,6 +593,10 @@ import {
       return;
     }
     const answer = normalizeAnswer($("#rg-short-answer").value);
+    if (!answer) {
+      setAnswerStatus("Enter the answer given first.", "neutral");
+      return;
+    }
     const accepted = effective.content.acceptedAnswers.map(normalizeAnswer);
     if (answer && accepted.includes(answer)) setAnswerStatus("CORRECT!", "correct");
     else setAnswerStatus("Not quite - try another answer.", "wrong");
