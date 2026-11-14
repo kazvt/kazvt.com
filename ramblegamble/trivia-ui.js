@@ -788,7 +788,11 @@ import {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "rg-pair-card";
-      button.textContent = pair.left || "LEFT " + String(index + 1).padStart(2, "0");
+      const leftImage = safeUrl(pair.leftImage) || safeUrl(pair.left);
+      if (leftImage) {
+        button.setAttribute("aria-label", "Left image " + (index + 1));
+        addImageToNode(button, leftImage, "", "rg-stage-media");
+      } else button.textContent = pair.left || "LEFT " + String(index + 1).padStart(2, "0");
       button.dataset.pairLeft = String(index);
       button.addEventListener("click", () => {
         selectedPairLeft = index;
