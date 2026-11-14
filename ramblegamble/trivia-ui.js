@@ -21,7 +21,6 @@ import {
   const modeNames = MODE_NAMES;
   const interfaceRoot = $("#rg-trivia-interface");
   const screen = $(".rg-trivia-screen", interfaceRoot);
-  const launchButton = $("#rg-console-launch");
   const dialog = $("#rg-console");
   const closeButton = $("#rg-console-close");
   const presentButton = $("#rg-present-toggle");
@@ -223,11 +222,14 @@ import {
     });
   }
 
-  function openConsole() {
+  function openConsole(requestedTab = activeTab) {
     priorFocus = document.activeElement;
     if (typeof dialog.showModal === "function") dialog.showModal();
     else dialog.setAttribute("open", "");
-    setTab(activeTab);
+    const tabIndex = Number.isInteger(requestedTab)
+      ? requestedTab
+      : tabs.findIndex((tab) => tab.id === "rg-tab-" + requestedTab);
+    setTab(tabIndex >= 0 ? tabIndex : activeTab);
     tabs[activeTab]?.focus();
   }
 
@@ -246,7 +248,7 @@ import {
     if (focus) (active ? returnToEditButton : presentButton).focus();
   }
 
-  launchButton.addEventListener("click", openConsole);
+  window.addEventListener("rg:open-host-panel", (event) => openConsole(event.detail?.tab || activeTab));
   closeButton.addEventListener("click", closeConsole);
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) closeConsole();
