@@ -30,6 +30,9 @@ test("screen-edge navigation resolves to fixed left, right, and back zones", () 
   assert.equal(resolvePointClickZone({ x: 640, y: 710, width: 1280, height: 720, canGoBack: true }), "back");
   assert.equal(resolvePointClickZone({ x: 640, y: 710, width: 1280, height: 720, canGoBack: false }), "");
   assert.equal(resolvePointClickZone({ x: 20, y: 20, width: 0, height: 720 }), "");
+  assert.equal(resolvePointClickZone({ x: 20, y: 260, width: 360, height: 540 }), "left");
+  assert.equal(resolvePointClickZone({ x: 340, y: 260, width: 360, height: 540 }), "right");
+  assert.equal(resolvePointClickZone({ x: 180, y: 530, width: 360, height: 540, canGoBack: true }), "back");
 });
 
 test("first machine or contestant click focuses the area; focused machines keep their actions", () => {
@@ -39,6 +42,8 @@ test("first machine or contestant click focuses the area; focused machines keep 
   assert.equal(resolvePointClickAction({ machine: "slot", part: "arm", focused: true }), "pull-lever");
   assert.equal(resolvePointClickAction({ machine: "contestant" }), "focus-contestants");
   assert.equal(resolvePointClickAction({ machine: "contestant", focused: true }), "");
+  assert.equal(resolvePointClickAction({ zone: "back", canGoBack: true }), "back");
+  assert.equal(resolvePointClickAction({ zone: "back", canGoBack: false }), "");
 });
 
 test("cursor state matches navigation affordances and actionable scene objects", () => {
