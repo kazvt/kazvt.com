@@ -103,18 +103,20 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     result.hidden = false;
     playing = false;
     preview.classList.remove("is-playing");
+    window.dispatchEvent(new CustomEvent("rg:turn-finish", { detail: { prompt: result.textContent } }));
   }
 
-  function beginTurn() {
+  function beginTurn(machine) {
     if (playing) return false;
     playing = true;
     preview.classList.add("is-playing");
     result.hidden = true;
+    window.dispatchEvent(new CustomEvent("rg:turn-start", { detail: { machine } }));
     return true;
   }
 
   function startWheelSpin() {
-    if (!beginTurn()) return;
+    if (!beginTurn("wheel")) return;
     if (!wheelPivot || !ballPivot) {
       wheelMotion = { started: performance.now(), duration: 700, wheelFrom: 0, wheelTo: 0, ballFrom: 0, ballTo: 0 };
       return;
@@ -130,7 +132,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   }
 
   function startLeverPull() {
-    if (!beginTurn()) return;
+    if (!beginTurn("slot")) return;
     if (!lever) {
       leverMotion = { started: performance.now(), duration: 650, base: 0 };
       return;
@@ -363,6 +365,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     preview.classList.remove("is-hovering");
   });
   canvas.addEventListener("pointerleave", () => preview.classList.remove("is-hovering"));
+
+  window.addEventListener("rg:spin-wheel", startWheelSpin);
+  window.addEventListener("rg:pull-slots", startLeverPull);
 
   function animate(time) {
     animationFrame = requestAnimationFrame(animate);
