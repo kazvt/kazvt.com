@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A Bootstrap 5.3.8 preview of Kazstrap buttons, panels, forms, and retro-inspired interface details.">
-  <meta name="theme-color" content="#ffffff">
-  <title>Kazstrap site-wide style preview - kazvt</title>
+  <meta name="description" content="Kaz’s arcade room - retro games, player notes, game guides, and old-web inspired details.">
+  <meta name="theme-color" content="#f0edff">
+  <title>Kaz’s Arcade - Retro games with Kaz</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-printed-rails-meter-1">
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css?v=kazstrap-player-directory-1">
   <style>
     .shadow-comparison {
       display: grid;
@@ -50,27 +50,31 @@
   </nav>
 
   <main class="container py-5" id="top">
-    <div class="p-4 p-md-5 mb-4 rounded-3 bg-body-tertiary">
-      <div class="container-fluid py-3">
-        <span class="badge text-bg-secondary mb-3">Bootstrap 5.3.8 - Kazstrap UI preview</span>
+    <article class="kaz-window mb-4" aria-labelledby="playerRoomTitle">
+      <div class="kaz-window-bar">
+        <strong id="playerRoomTitle">KAZVT.COM - PLAYER ROOM</strong>
+        <span class="badge text-bg-success">ARCADE OPEN</span>
+      </div>
+      <div class="kaz-window-body p-4 p-md-5">
+        <span class="badge text-bg-secondary mb-3">KAZ’S PERSONAL GAME PAGE</span>
         <h1 class="display-5 fw-bold">Retro games. Good company.</h1>
         <p class="col-md-8 fs-5">I’m Kaz - she/her, retro game enthusiast, streamer, and maker of my own tools. Come hang out for classic shooters, platformers, and old-game surprises.</p>
         <a class="btn btn-primary btn-lg" href="https://www.twitch.tv/kazvt" target="_blank" rel="noopener noreferrer">Visit Twitch</a>
       </div>
-    </div>
+    </article>
 
-    <div class="alert alert-info" role="status">
-      The buttons keep their color-matched enamel and two hard shadows. A diamond-tiled canvas, forum title rails, and individual panel textures give the rest of the page its old-web character.
+    <div class="alert alert-info" role="note">
+      <strong>ARCADE NOTE:</strong> Welcome in. Browse the game shelf, check the player board, and leave a note in the guestbook.
     </div>
 
     <section class="py-4" aria-labelledby="button-study-title">
-      <p class="text-body-secondary mb-1">ARCADE CONTROL STUDY</p>
+      <p class="text-body-secondary mb-1">ARCADE BUTTON SHELF</p>
       <h2 class="h3 mb-0" id="button-study-title">Arcade cabinet buttons</h2>
-      <p class="text-body-secondary mt-2 mb-4">The face layers a fading color-tinted sheen over its shaded enamel, with a fine light inset rim and a fine dark rim. Hover lifts the button slightly; pressing reverses the inner rims and settles it into the same shadow stack.</p>
+      <p class="text-body-secondary mt-2 mb-4">Chunky, color-tinted controls for the important arcade actions. Try each one to feel its press and release.</p>
       <div class="shadow-comparison">
         <div class="shadow-comparison__option card">
           <h3 class="h5">Arcade enamel face</h3>
-          <p class="text-body-secondary">A restrained top sheen and color-derived face gradient build the inner surface without adding thickness to the outer rim.</p>
+          <p class="text-body-secondary">A bright little enamel face gives each arcade control its own color.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
@@ -82,7 +86,7 @@
         </div>
         <div class="shadow-comparison__option shadow-comparison__solid card">
           <h3 class="h5">Flat color face</h3>
-          <p class="text-body-secondary">The same inset rims and interaction states with the surface gradients removed.</p>
+          <p class="text-body-secondary">A simpler face for when the color should do the talking.</p>
           <div class="shadow-comparison__buttons">
             <button type="button" class="btn btn-primary">Primary</button>
             <button type="button" class="btn btn-danger">Danger</button>
@@ -144,21 +148,21 @@
           <div class="accordion-item">
             <h3 class="accordion-header">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#sampleOne" aria-expanded="true" aria-controls="sampleOne">
-                What Bootstrap pieces are shown?
+                What games are on the shelf?
               </button>
             </h3>
             <div id="sampleOne" class="accordion-collapse collapse show" data-bs-parent="#sampleAccordion">
-              <div class="accordion-body">Kazstrap layers the default navbar, responsive grid, cards, alerts, forms, and accordion with square corners.</div>
+              <div class="accordion-body">Classic shooters, platformers, and whatever old-game surprise I’m playing next.</div>
             </div>
           </div>
           <div class="accordion-item">
             <h3 class="accordion-header">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sampleTwo" aria-expanded="false" aria-controls="sampleTwo">
-                Where will custom styling go later?
+                Where can I catch a stream?
               </button>
             </h3>
             <div id="sampleTwo" class="accordion-collapse collapse" data-bs-parent="#sampleAccordion">
-              <div class="accordion-body">Panels, alerts, links, forms, cards, and navigation all use the same color-aware retro details.</div>
+              <div class="accordion-body">Check the channel for current stream information and drop in when I’m live.</div>
             </div>
           </div>
         </div>
@@ -168,11 +172,11 @@
     <section class="py-5" id="site-kit" aria-labelledby="site-kit-title">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
         <div>
-          <p class="text-body-secondary mb-1">THE KAZSTRAP LOOK</p>
-          <h2 class="h3 mb-2" id="site-kit-title">Classic web energy, cleaned up</h2>
-          <p class="text-body-secondary mb-0">Layered surfaces, clear outlines, and color that follows Bootstrap variants.</p>
+          <p class="text-body-secondary mb-1">THE PLAYER DIRECTORY</p>
+          <h2 class="h3 mb-2" id="site-kit-title">Kaz’s player directory</h2>
+          <p class="text-body-secondary mb-0">A shortcut to the game shelf, player board, and stream room.</p>
         </div>
-        <span class="badge text-bg-primary">Site-wide theme</span>
+        <span class="badge text-bg-primary">PLAYER INDEX</span>
       </div>
       <ul class="nav nav-tabs mb-4" aria-label="Community sections">
         <li class="nav-item"><a class="nav-link active" href="#site-kit" aria-current="page">Game room</a></li>
@@ -195,7 +199,7 @@
         </div>
       </div>
       <div class="bg-body-tertiary px-3 py-2 mb-4">
-        <div class="small text-body-secondary mb-1" id="sampleLoadMeterLabel">Arcade load meter - visual style sample</div>
+        <div class="small text-body-secondary mb-1" id="sampleLoadMeterLabel">Arcade signal - visual meter sample</div>
         <div class="progress" role="progressbar" aria-labelledby="sampleLoadMeterLabel" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" style="height: 1.25rem;">
           <div class="progress-bar" style="width: 68%;">68%</div>
         </div>
@@ -409,6 +413,6 @@
     </section>
   </main>
 
-  <script src="dist/js/bootstrap.bundle.min.js?v=kazstrap-old-web-pop-15"></script>
+  <script src="dist/js/bootstrap.bundle.min.js?v=kazstrap-player-directory-1"></script>
 </body>
 </html>
