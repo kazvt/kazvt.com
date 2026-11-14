@@ -852,13 +852,13 @@ import {
 
       placeMachinesFromStage();
       setupPicking();
-      fitCamera();
       applyTheme();
+      sceneReady = true;
+      fitCamera();
       loading.classList.add("is-hidden");
       resizeObserver = new ResizeObserver(fitCamera);
       resizeObserver.observe(preview);
       window.addEventListener("resize", fitCamera, { passive: true });
-      sceneReady = true;
       if (!document.hidden) animationFrame = requestAnimationFrame(animate);
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);
@@ -880,7 +880,6 @@ import {
   window.addEventListener("pagehide", () => {
     cancelAnimationFrame(animationFrame);
     resizeObserver?.disconnect();
-    controls?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();
