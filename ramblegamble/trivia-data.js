@@ -1,6 +1,6 @@
 // Sparse tier rules intentionally inherit forward. Only the sanitized brief's
 // structural information lives here; no redacted prompt or answer is guessed.
-const roundRules = {
+export const ROUND_RULES = {
   1: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 5: { mode: "short-answer", optionCount: 0 } },
   2: { 1: { mode: "choice-text", optionCount: 6, promptImage: true }, 3: { promptImage: true, replaceOptions: true }, 5: { mode: "short-answer", optionCount: 0 } },
   3: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 5: { mode: "short-answer", optionCount: 0 } },
@@ -68,7 +68,7 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
   const roundNumber = Number.parseInt(roundId, 10);
   if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 36) return { ...baseFormat };
 
-  const rules = roundRules[roundNumber] || {};
+  const rules = ROUND_RULES[roundNumber] || {};
   const targetDifficulty = Math.max(1, Math.min(5, Number(difficulty) || 1));
   const format = { ...baseFormat };
 
