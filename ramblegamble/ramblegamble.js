@@ -342,12 +342,12 @@ import {
   }
 
   function goBack() {
-    if (currentView.look !== 0) {
-      setLookDirection(0);
+    const previous = viewHistory.pop();
+    if (previous) {
+      transitionToView(previous, { record: false });
       return;
     }
-    const previous = viewHistory.pop();
-    if (previous) transitionToView(previous, { record: false });
+    if (currentView.look !== 0) setLookDirection(0);
   }
 
   function getArcadeBounds() {
