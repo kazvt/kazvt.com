@@ -76,7 +76,6 @@ import {
   let cameraTarget = new THREE.Vector3();
   let cameraTransition = null;
   let cursorMode = "";
-  let cursorPosition = null;
 
   function themeValue(name, fallback) {
     const value = getComputedStyle(document.body).getPropertyValue(name).trim();
@@ -544,6 +543,7 @@ import {
         iframe.title = `${source.label} live browser source`;
         iframe.loading = "eager";
         iframe.referrerPolicy = "strict-origin-when-cross-origin";
+        iframe.sandbox = "allow-scripts allow-same-origin";
         iframe.tabIndex = -1;
         panel.append(iframe);
       } else {
@@ -656,12 +656,10 @@ import {
     gameCursor.style.left = `${clientX - rect.left - width * hotspotX}px`;
     gameCursor.style.top = `${clientY - rect.top - height * hotspotY}px`;
     gameCursor.hidden = false;
-    cursorPosition = { clientX, clientY };
   }
 
   function hideGameCursor() {
     gameCursor.hidden = true;
-    cursorPosition = null;
   }
 
   function pointClickAt(clientX, clientY) {
