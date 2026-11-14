@@ -728,10 +728,10 @@
             el.type === "checkbox" ? el.checked : (manualValues.has(id) ? manualValues.get(id) : el.value)
           ]));
           saved._oscillations = Object.fromEntries(Array.from(automationRanges, ([id, range]) => [controls[id].name.toLowerCase(), { min: range.low, max: range.high }]));
-            saved._oscillation_period = `${oscillationPeriodMs}ms`;
-            saved._color_hues = Object.fromEntries(colorIds
-              .filter(id => rememberedColorHue.has(id))
-              .map(id => [id, rememberedColorHue.get(id)]));
+          saved._oscillation_period = `${oscillationPeriodMs}ms`;
+          saved._color_hues = Object.fromEntries(colorIds
+            .filter(id => rememberedColorHue.has(id))
+            .map(id => [id, rememberedColorHue.get(id)]));
           localStorage.setItem(storageKey, JSON.stringify(saved));
         } catch (_) { /* local file storage can be disabled */ }
       }
