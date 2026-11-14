@@ -48,6 +48,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   let playing = false;
   let userInteracting = false;
   let lastCameraShake = new THREE.Vector3();
+  let rouletteModel;
+  let slotsModel;
 
   function themeValue(name, fallback) {
     const value = getComputedStyle(document.body).getPropertyValue(name).trim();
@@ -180,7 +182,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     accentLight.position.set(22, 17, 17);
     accentLight.userData.rgAccentLight = true;
     scene.add(accentLight);
-    scene.add(new THREE.PointLight(themeValue("--blue", "#4d6787"), 55, 120, 2).translateX(-30));
+    const fillLight = new THREE.PointLight(themeValue("--blue", "#4d6787"), 55, 120, 2);
+    fillLight.position.set(-30, 6, -18);
+    scene.add(fillLight);
 
     const floorMaterial = new THREE.MeshStandardMaterial({ color: bg, roughness: 1, metalness: 0 });
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), floorMaterial);
@@ -252,6 +256,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const aspect = width / height;
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.setSize(width, height, false);
 
     const mobileStack = aspect < 1.05;
@@ -314,24 +319,12 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   function setupPicking() {
     rouletteTargets = [];
     slotTargets = [];
-    wheelPivot?.traverse((object) => {
+    rouletteModel?.traverse((object) => {
       if (object.isMesh) rouletteTargets.push(object);
     });
-    if (rouletteTargets.length === 0) {
-      rouletteRig?.traverse((object) => {
-        if (object.isMesh) rouletteTargets.push(object);
-      });
-    }
-    slotRig?.traverse((object) => {
-      if (object.isMesh && (object.name === "arm" || /^button[1-5]$/.test(object.name))) {
-        slotTargets.push(object);
-      }
+    slotsModel?.traverse((object) => {
+      if (object.isMesh) slotTargets.push(object);
     });
-    if (slotTargets.length === 0) {
-      slotRig?.traverse((object) => {
-        if (object.isMesh) slotTargets.push(object);
-      });
-    }
   }
 
   const raycaster = new THREE.Raycaster();
@@ -440,7 +433,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
         loader.loadAsync("/ramblegamble/assets/provided/rg_slots.gltf"),
       ]);
 
-      const rouletteModel = rouletteGltf.scene;
+      rouletteModel = rouletteGltf.scene;
       rouletteModel.position.y = -3;
       prepareModel(rouletteModel);
       rouletteRig.add(rouletteModel);
@@ -449,7 +442,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
         if (object.name === "ball" && !object.isMesh && object.children.length > 0) ballPivot = object;
       });
 
-      const slotsModel = slotsGltf.scene;
+      slotsModel = slotsGltf.scene;
       slotsModel.position.y = -1;
       prepareModel(slotsModel);
       slotRig.add(slotsModel);
@@ -472,6 +465,15 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   }
 
   boot();
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    } else if (renderer && !animationFrame) {
+      animationFrame = requestAnimationFrame(animate);
+    }
+  });
 
   window.addEventListener("pagehide", () => {
     cancelAnimationFrame(animationFrame);
