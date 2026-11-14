@@ -37,7 +37,8 @@ export function getSupportedTimeZones(systemZone = getSystemTimeZone()) {
     } catch {
       // Use the small fallback list on older or partial Intl implementations.
     }
-    supportedTimeZoneCache = [...new Set(["UTC", ...supported].filter(isValidTimeZone))];
+    const validZones = [...new Set(["UTC", ...supported].filter(isValidTimeZone))].filter((zone) => zone !== "UTC");
+    supportedTimeZoneCache = ["UTC", ...validZones.sort((left, right) => left.localeCompare(right, "en", { sensitivity: "base" }))];
   }
   if (!isValidTimeZone(systemZone) || supportedTimeZoneCache.includes(systemZone)) return supportedTimeZoneCache;
   return ["UTC", systemZone, ...supportedTimeZoneCache.slice(1).sort((left, right) => left.localeCompare(right, "en", { sensitivity: "base" }))];

@@ -35,7 +35,6 @@ function createClockWidget() {
     className: "taskbar__timezone-list",
     role: "listbox",
     "aria-label": "Scrollable time zone list",
-    tabindex: "0",
   });
   const zoneSearch = createElement("input", {
     className: "taskbar__timezone-search",
@@ -151,7 +150,6 @@ function createClockWidget() {
     selectZone(systemZone);
     zoneSearch.value = "";
     renderList();
-    clockButton.focus({ preventScroll: true });
   });
   zoneSearch.addEventListener("input", () => renderList(zoneSearch.value));
   zoneSearch.addEventListener("keydown", (event) => {
@@ -169,7 +167,7 @@ function createClockWidget() {
     if (!options.length) return;
     const activeIndex = options.indexOf(document.activeElement);
     let nextIndex = activeIndex;
-    if (event.key === "ArrowDown") nextIndex = Math.min(options.length - 1, Math.max(0, activeIndex) + 1);
+    if (event.key === "ArrowDown") nextIndex = Math.min(options.length - 1, activeIndex < 0 ? 0 : activeIndex + 1);
     else if (event.key === "ArrowUp") nextIndex = Math.max(0, activeIndex < 0 ? 0 : activeIndex - 1);
     else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = options.length - 1;
