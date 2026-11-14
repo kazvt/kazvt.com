@@ -520,9 +520,13 @@ import {
       scene.add(hitProxy);
       contestantTargets.push(hitProxy);
 
-      const anchor = new THREE.Vector3(chairCenter.x, chairBounds.max.y + 0.34, chairBounds.max.z + 0.12);
       const worldWidth = 1.04;
-      const worldHeight = worldWidth * 9 / 16;
+      const worldHeight = worldWidth;
+      const anchor = new THREE.Vector3(
+        chairCenter.x,
+        chairBounds.max.y + worldHeight / 2 + 0.05,
+        chairBounds.max.z + 0.12,
+      );
       const panel = document.createElement("div");
       panel.className = source.source ? "rg-billboard rg-billboard-live" : "rg-billboard";
       panel.dataset.contestant = source.id;
