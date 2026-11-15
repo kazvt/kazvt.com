@@ -126,40 +126,10 @@
     "artist": "Hawaii",
     "order": 140,
     "tags": [
-      "instrumental"
-    ]
-  },
-  "tracks/Harai - Cease My Love Fever.mp3": {
-    "title": "Cease My Love Fever",
-    "artist": "Harai",
-    "order": 150,
-    "tags": [
-      "instrumental",
-      "deep-house",
-      "japanese",
-      "shomyo"
-    ]
-  },
-  "tracks/Hagoromo - Breath Of Blessing.mp3": {
-    "title": "Breath Of Blessing",
-    "artist": "Hagoromo",
-    "order": 160,
-    "tags": [
-      "instrumental",
-      "deep-house",
-      "japanese",
-      "shomyo"
-    ]
-  },
-  "tracks/Namkan - Calling You.mp3": {
-    "title": "Calling You",
-    "artist": "Namkan",
-    "order": 170,
-    "tags": [
-      "instrumental",
-      "deep-house",
-      "japanese",
-      "shomyo"
+      "vocal",
+      "rock",
+      "indie",
+      "bedroom"
     ]
   },
   "tracks/Keisuke Sakurai - Is It Japan, Or... -.mp3": {
