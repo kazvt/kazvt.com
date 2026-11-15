@@ -2,6 +2,7 @@
   "use strict";
 
   const audio = document.getElementById("radio-audio");
+  const mediaSession = navigator.mediaSession || null;
   const canvas = document.getElementById("radio-visualizer");
   const screen = document.querySelector(".visualizer-bezel");
   const fallback = document.getElementById("visualizer-fallback");
@@ -115,6 +116,30 @@
 
   function setMessage(message) {
     playerMessage.textContent = message;
+  }
+
+  function updateMediaSessionMetadata() {
+    if (!mediaSession || typeof window.MediaMetadata !== "function") return;
+    const option = trackSelect.options[trackSelect.selectedIndex];
+    if (!option) return;
+    try {
+      mediaSession.metadata = new window.MediaMetadata({
+        title: option.textContent.trim(),
+        artist: option.dataset.artist || "Unknown artist",
+        album: "KAZVT Radio",
+      });
+    } catch {
+      // Metadata is optional; playback controls should still work without it.
+    }
+  }
+
+  function updateMediaSessionPlaybackState() {
+    if (!mediaSession) return;
+    try {
+      mediaSession.playbackState = !audio.paused && !audio.ended ? "playing" : "paused";
+    } catch {
+      // Some browsers expose Media Session but not playbackState.
+    }
   }
 
   function setMarqueeText(container, value) {
@@ -493,6 +518,7 @@
 
   function updateTransport() {
     const playing = !audio.paused && !audio.ended;
+    updateMediaSessionPlaybackState();
     setButtonIcon(playButton, playing ? "pause" : "play", playing);
     if (playing) {
       trackHasPlayed = true;
@@ -603,6 +629,7 @@
     if (recordHistory) rememberTrack(index);
     trackSelect.selectedIndex = index;
     const title = option.textContent.trim();
+    updateMediaSessionMetadata();
     setMarqueeText(trackTitle, title);
     trackArtist.textContent = option.dataset.artist || "Unknown artist";
     updatePlaylistSelection(index, true);
@@ -649,6 +676,25 @@
       ? takeShuffledTrack()
       : (trackSelect.selectedIndex + 1) % count;
     loadTrack(nextIndex);
+  }
+
+  function setupMediaSession() {
+    if (!mediaSession || typeof mediaSession.setActionHandler !== "function") return;
+    const actions = {
+      play: () => { if (audio.paused) togglePlay(); },
+      pause: () => { if (!audio.paused) audio.pause(); },
+      previoustrack: () => changeTrack(-1),
+      nexttrack: () => changeTrack(1),
+    };
+    for (const [action, handler] of Object.entries(actions)) {
+      try {
+        mediaSession.setActionHandler(action, handler);
+      } catch {
+        // Action support varies by browser and operating system.
+      }
+    }
+    updateMediaSessionMetadata();
+    updateMediaSessionPlaybackState();
   }
 
   function updateShuffleButton() {
@@ -751,6 +797,7 @@
   updateShuffleButton();
   setButtonIcon(visualsButton, "treestatus", visualsPaused);
   updateMuteButton();
+  setupMediaSession();
   audio.addEventListener("timeupdate", () => {
     updateVisualizerFade();
     currentTime.textContent = formatTime(audio.currentTime);
