@@ -783,7 +783,6 @@
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-      stopVoiceCommands("", false);
       stopRendering();
       window.clearTimeout(hudHideHandle);
       hudHideHandle = 0;
