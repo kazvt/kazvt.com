@@ -25,7 +25,9 @@ async function collectAudioFiles(directory, prefix = "", recursive = false) {
   const files = [];
 
   for (const entry of entries) {
-    if (entry.name.startsWith(".")) continue;
+    // The site sync keeps protected mirror copies beside some assets. They are
+    // storage safeguards, not separate songs for the public playlist.
+    if (entry.name.startsWith(".") || /_DONTTOUCH(?=\.[^.]+$)/i.test(entry.name)) continue;
     const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
     const fullPath = path.join(directory, entry.name);
 
