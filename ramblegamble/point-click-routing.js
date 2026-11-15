@@ -22,6 +22,7 @@ export function resolvePointClickAction({ zone = "", machine = "", part = "", fo
   if (zone === "left") return "look-left";
   if (zone === "right") return "look-right";
   if (zone === "back") return canGoBack ? "back" : "";
+  if (machine === "host") return focused ? "" : "focus-host";
   if (machine === "contestant") return focused ? "" : "focus-contestants";
   if ((machine === "roulette" || machine === "slot") && !focused) return `focus-${machine}`;
   return resolvePointClick(machine, part);

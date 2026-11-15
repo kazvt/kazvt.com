@@ -43,6 +43,8 @@ test("first machine or contestant click focuses the area; focused machines keep 
   assert.equal(resolvePointClickAction({ machine: "slot", part: "arm", focused: true }), "pull-lever");
   assert.equal(resolvePointClickAction({ machine: "contestant" }), "focus-contestants");
   assert.equal(resolvePointClickAction({ machine: "contestant", focused: true }), "");
+  assert.equal(resolvePointClickAction({ machine: "host" }), "focus-host");
+  assert.equal(resolvePointClickAction({ machine: "host", focused: true }), "");
   assert.equal(resolvePointClickAction({ zone: "back", canGoBack: true }), "back");
   assert.equal(resolvePointClickAction({ zone: "back", canGoBack: false }), "");
 });
