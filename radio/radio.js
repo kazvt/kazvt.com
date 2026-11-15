@@ -74,13 +74,16 @@
   const theatreStorageKey = "kazvt-radio-theatre";
 
   let audioContext = null;
+  let audioContextResumePromise = null;
   let mediaSource = null;
+  let mediaSourceConnected = false;
   let visualizer = null;
   let presetMap = {};
   let presetKeys = [];
   let currentPresetKey = "";
   let frameHandle = 0;
   let cycleHandle = 0;
+  let playbackIntent = 0;
   let presetBag = [];
   let trackHasPlayed = false;
   let trackTransitionBlackout = false;
