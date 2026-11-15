@@ -13,6 +13,10 @@ exclude:
   - vendor/cache/
   - vendor/gems/
   - vendor/ruby/
+  # Keep protected radio mirror files in Git, but do not publish them as a
+  # second copy of the public audio library. They are not playlist entries.
+  - radio/assets/tracks/*_DONTTOUCH.*
+  - radio/assets/tracks/**/*_DONTTOUCH.*
   - blog/write
   - blog/write/**
   # The reward editor is served only by its loopback-only Python server.
