@@ -577,6 +577,9 @@
         syncAutomationRangeUI(id);
       }
       function oscillatorPeriod(id) { return oscillationPeriods.get(id) ?? oscillationPeriodMs; }
+      function normalizeOscillatorPeriod(period) {
+        return Math.round(Math.min(120000, Math.max(500, Number(period))) / 10) * 10;
+      }
       function formatOscillatorPeriod(period) {
         const seconds = period / 1000;
         const text = seconds >= 10 ? seconds.toFixed(1) : seconds.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
@@ -584,8 +587,9 @@
       }
       function setOscillatorPeriod(id, nextPeriod) {
         const currentPeriod = oscillatorPeriod(id);
-        nextPeriod = Math.round(Math.min(120000, Math.max(500, Number(nextPeriod))));
-        if (!Number.isFinite(nextPeriod) || nextPeriod === currentPeriod) return false;
+        if (!Number.isFinite(Number(nextPeriod))) return false;
+        nextPeriod = normalizeOscillatorPeriod(nextPeriod);
+        if (nextPeriod === currentPeriod) return false;
         const range = automationRanges.get(id);
         if (range) {
           const elapsed = Math.max(0, automationElapsed - range.startAt);
@@ -604,7 +608,7 @@
       }
       function showOscillatorSpeed(id, steps) {
         const currentPeriod = oscillatorPeriod(id);
-        const nextPeriod = Math.round(currentPeriod * Math.pow(1.12, steps));
+        const nextPeriod = normalizeOscillatorPeriod(currentPeriod * Math.pow(1.12, steps));
         if (!setOscillatorPeriod(id, nextPeriod)) return false;
         const ui = automationUI.get(id);
         if (ui) {
@@ -702,7 +706,7 @@
             const wheelSteps = event.deltaMode === 1 ? event.deltaY : event.deltaMode === 2 ? event.deltaY * 3 : event.deltaY / 100;
             if (!Number.isFinite(wheelSteps) || wheelSteps === 0) return;
             const currentPeriod = oscillatorPeriod(id);
-            const nextPeriod = Math.min(120000, Math.max(500, Math.round(currentPeriod * Math.pow(1.12, wheelSteps))));
+            const nextPeriod = normalizeOscillatorPeriod(currentPeriod * Math.pow(1.12, wheelSteps));
             if (nextPeriod === currentPeriod) return;
             event.preventDefault();
             showOscillatorSpeed(id, wheelSteps);
