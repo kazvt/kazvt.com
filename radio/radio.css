@@ -577,7 +577,7 @@ html.radio-document body.radio-page :is(
 
 .player-side {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   gap: clamp(5px, .65vh, 8px);
   padding: clamp(9px, 1vw, 15px);
 }
@@ -623,6 +623,61 @@ html.radio-document body.radio-page :is(
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.current-track-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-height: 31px;
+  min-width: 0;
+  overflow: hidden;
+}
+.track-tag-chip {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 1px 3px;
+  border: 1px dotted color-mix(in srgb, var(--blue) 75%, var(--ink));
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 80%, var(--pink));
+  font-size: 7px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.playlist-filter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 2px 3px;
+  color: var(--ink);
+  font: 700 8px/1 monospace;
+  letter-spacing: .08em;
+}
+.playlist-filter select {
+  width: 100%;
+  min-width: 0;
+  height: 23px;
+  padding: 2px 5px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font: 700 8px/1 var(--site-font, sans-serif);
+  letter-spacing: .04em;
+}
+.playlist-filter select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+.playlist-empty {
+  margin: 0;
+  padding: 10px 6px;
+  border: 1px dashed var(--blue);
+  color: var(--ink);
+  font: 700 8px/1.4 monospace;
+  text-align: center;
 }
 .track-list {
   display: grid;
@@ -767,6 +822,8 @@ html.radio-document body.radio-page :is(
   .player-side { gap: 4px; padding: 5px 7px; }
   .playlist-heading { padding: 3px 6px; }
   .playlist-now-playing { gap: 1px; padding: 1px 3px 3px; }
+  .current-track-tags { max-height: 27px; }
+  .playlist-filter select { height: 21px; }
   .now-playing-title { font-size: clamp(13px, 2.5vw, 19px); }
   .track-artist { font-size: clamp(7px, 1vw, 9px); }
   .playlist-track { min-height: 29px; padding-block: 2px; }
@@ -795,6 +852,9 @@ html.radio-document body.radio-page :is(
   .player-side { gap: 3px; padding: 4px 5px; }
   .playlist-heading { min-height: 18px; padding: 2px 5px; font-size: 8px; }
   .playlist-heading span { font-size: 8px; }
+  .playlist-filter { gap: 4px; padding: 1px 2px; font-size: 7px; }
+  .playlist-filter select { height: 19px; padding: 1px 3px; font-size: 7px; }
+  .track-tag-chip { padding: 1px 2px; font-size: 6px; }
   .now-playing-title { font-size: clamp(12px, 3.6vw, 17px); }
   .track-artist { font-size: clamp(7px, 1.9vw, 9px); }
   .playlist-track { grid-template-columns: 22px minmax(0, 1fr); gap: 3px; min-height: 27px; padding-inline: 3px; }
