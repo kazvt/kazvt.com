@@ -62,6 +62,12 @@
     electronic: "Electronic",
     ambient: "Ambient",
     jazz: "Jazz",
+    downtempo: "Downtempo",
+    exotica: "Exotica",
+    "chamber-music": "Chamber Music",
+    classical: "Classical",
+    boogie: "Boogie",
+    aor: "AOR",
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const theatreStorageKey = "kazvt-radio-theatre";
