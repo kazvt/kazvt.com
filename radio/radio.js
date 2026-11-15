@@ -852,6 +852,24 @@
     setTheatreMode(!document.documentElement.classList.contains("radio-theatre"));
   }
 
+  function retryVisualizer() {
+    try {
+      if (!visualizer) initVisualizer();
+      if (audioContext && audioContext.state !== "running") {
+        resumeAudioContext().catch((error) => reportVisualizerFailure(error));
+      }
+      if (audio.paused) showFallback("PRESS TO PLAY");
+      else {
+        screen.classList.add("is-live");
+        screen.classList.remove("is-fallback");
+        startRendering();
+      }
+      syncPresetShuffle();
+    } catch (error) {
+      reportVisualizerFailure(error);
+    }
+  }
+
   playButton.addEventListener("click", togglePlay);
   screen.addEventListener("click", togglePlay);
   muteButton?.addEventListener("click", toggleMute);
@@ -866,31 +884,17 @@
     setButtonIcon(loopButton, "refresh", audio.loop);
   });
   visualsButton?.addEventListener("click", () => {
-    visualsPaused = !visualsPaused;
-    setButtonIcon(visualsButton, "treestatus", visualsPaused);
-    if (visualsPaused) {
+    const canPauseHealthyVisuals = visualizer && !visualsPaused && !screen.classList.contains("is-fallback");
+    if (canPauseHealthyVisuals) {
+      visualsPaused = true;
+      setButtonIcon(visualsButton, "treestatus", true);
       stopRendering();
       showFallback(audio.paused ? "VISUALS PAUSED" : "VISUALS PAUSED / MUSIC PLAYING");
       syncPresetShuffle();
     } else {
-      try {
-        if (!visualizer) initVisualizer();
-        if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
-        if (audio.paused) showFallback("PRESS TO PLAY");
-        else {
-          screen.classList.add("is-live");
-          screen.classList.remove("is-fallback");
-          startRendering();
-        }
-        syncPresetShuffle();
-      } catch (error) {
-        if (audioContext && !mediaSource) {
-          audioContext.close().catch(() => {});
-          audioContext = null;
-        }
-        showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE");
-        console.warn("Radio visualiser unavailable:", error);
-      }
+      visualsPaused = false;
+      setButtonIcon(visualsButton, "treestatus", false);
+      retryVisualizer();
     }
   });
 
@@ -947,6 +951,9 @@
   });
   audio.addEventListener("volumechange", updateMuteButton);
   audio.addEventListener("error", () => {
+    // A source switch can abort the previous request. It is not a failure of
+    // the newly selected track and should not leave its transition blacked out.
+    if (!audio.error || audio.error.code === 1) return;
     trackTransitionBlackout = false;
     updateVisualizerFade();
     setMessage("The local track could not be loaded. Please try again in a moment.");
