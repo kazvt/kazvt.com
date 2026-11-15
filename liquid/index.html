@@ -805,7 +805,7 @@
           ]));
           saved._oscillations = Object.fromEntries(Array.from(automationRanges, ([id, range]) => [controls[id].name.toLowerCase(), { min: range.low, max: range.high }]));
           saved._oscillation_period = `${oscillationPeriodMs}ms`;
-          saved._oscillation_periods = Object.fromEntries(Array.from(oscillationPeriods, ([id, period]) => [controls[id].name.toLowerCase(), period]));
+          saved._oscillation_periods = Object.fromEntries(Array.from(oscillationPeriods, ([id, period]) => [controls[id].name.toLowerCase(), `${period}ms`]));
           saved._color_hues = Object.fromEntries(colorIds
             .filter(id => rememberedColorHue.has(id))
             .map(id => [id, rememberedColorHue.get(id)]));
@@ -872,7 +872,9 @@
           if (saved._oscillation_periods && typeof saved._oscillation_periods === "object" && !Array.isArray(saved._oscillation_periods)) {
             Object.entries(saved._oscillation_periods).forEach(([name, rawPeriod]) => {
               const id = faderNameToId.get(name.toLowerCase());
-              const period = parseOscillationPeriod(String(rawPeriod));
+              const period = typeof rawPeriod === "number" && Number.isFinite(rawPeriod)
+                ? Math.round(Math.min(120000, Math.max(500, rawPeriod)))
+                : parseOscillationPeriod(String(rawPeriod));
               if (id && period !== null) oscillationPeriods.set(id, period);
             });
           }

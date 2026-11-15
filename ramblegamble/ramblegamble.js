@@ -281,6 +281,11 @@ import {
       addBillboardBounds(bounds, contestant);
       return bounds.expandByScalar(0.22);
     }
+    if (view.kind === "host" && hostBillboard) {
+      bounds.expandByObject(hostBillboard.hitProxy);
+      addBillboardBounds(bounds, hostBillboard);
+      return bounds.expandByScalar(0.22);
+    }
     if (view.kind === "slot" && slotsModel) {
       bounds.setFromObject(slotsModel);
       return bounds.expandByScalar(0.35);
@@ -317,9 +322,7 @@ import {
     camera.updateMatrixWorld(true);
   }
 
-  function transitionToView(nextView, { record = true, immediate = false } = {}) {
-    const sameView = currentView.kind === nextView.kind && currentView.contestantId === nextView.contestantId;
-    if (record && !sameView) viewHistory.push({ ...currentView });
+  function transitionToView(nextView, { immediate = false } = {}) {
     currentView = { ...nextView, look: nextView.look ?? 0 };
     const pose = getCameraPoseForView(currentView, camera.aspect);
     if (!pose) return;
@@ -342,20 +345,16 @@ import {
 
   function setLookDirection(look) {
     if (currentView.look === look) return;
-    transitionToView({ ...currentView, look }, { record: false });
+    transitionToView({ ...currentView, look });
   }
 
   function canGoBack() {
-    return currentView.look !== 0 || viewHistory.length > 0;
+    return Boolean(resolvePointClickBack(currentView));
   }
 
   function goBack() {
-    const previous = viewHistory.pop();
-    if (previous) {
-      transitionToView(previous, { record: false });
-      return;
-    }
-    if (currentView.look !== 0) setLookDirection(0);
+    const destination = resolvePointClickBack(currentView);
+    if (destination) transitionToView(destination);
   }
 
   function getArcadeBounds() {
@@ -485,6 +484,7 @@ import {
     rouletteTargets = [];
     slotTargets = [];
     contestantTargets = [];
+    hostTargets = [];
     contestants = [];
     hostBillboard = null;
     billboards = [];
