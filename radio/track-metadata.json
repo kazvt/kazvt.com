@@ -668,5 +668,161 @@
       "experimental",
       "japanese"
     ]
+  },
+  "tracks/本田恭之 - Yasuyuki Honda - COUNTER BREAK - 01.mp3": {
+    "title": "COUNTER BREAK - 01",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 550,
+    "tags": [
+      "instrumental",
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album"
+    ]
+  },
+  "tracks/本田恭之 - Yasuyuki Honda - 銀の血脈 - 02.mp3": {
+    "title": "銀の血脈 - 02",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 560,
+    "tags": [
+      "instrumental",
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album"
+    ]
+  },
+  "tracks/桐生千弘 - Chihiro Kiryu - ANGEL COLOUR - 03.mp3": {
+    "title": "ANGEL COLOUR - 03",
+    "artist": "桐生千弘 / Chihiro Kiryu",
+    "order": 570,
+    "tags": [
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album",
+      "vocal"
+    ]
+  },
+  "tracks/本田恭之 - Yasuyuki Honda - 3-30の偶然 - 04.mp3": {
+    "title": "3:30の偶然 - 04",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 580,
+    "tags": [
+      "instrumental",
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album"
+    ]
+  },
+  "tracks/本田恭之 - Yasuyuki Honda - JUST ANOTHER DAY - 05.mp3": {
+    "title": "JUST ANOTHER DAY - 05",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 590,
+    "tags": [
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album",
+      "vocal"
+    ]
+  },
+  "tracks/本田恭之 - Yasuyuki Honda - 反射率 - 06.mp3": {
+    "title": "反射率 - 06",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 600,
+    "tags": [
+      "instrumental",
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album"
+    ]
+  },
+  "tracks/山本寛太郎 - Kantaro Yamamoto - SAVE YOUR HARDBLADE - 07.mp3": {
+    "title": "SAVE YOUR HARDBLADE - 07",
+    "artist": "山本寛太郎 / Kantaro Yamamoto",
+    "order": 610,
+    "tags": [
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album",
+      "vocal"
+    ]
+  },
+  "tracks/本田恭之 - Yasuyuki Honda - HEAVENLY - 08.mp3": {
+    "title": "HEAVENLY - 08",
+    "artist": "本田恭之 / Yasuyuki Honda",
+    "order": 620,
+    "tags": [
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album",
+      "vocal"
+    ]
+  },
+  "tracks/山本寛太郎 - Kantaro Yamamoto - END OF SILENCE - 09.mp3": {
+    "title": "END OF SILENCE - 09",
+    "artist": "山本寛太郎 / Kantaro Yamamoto",
+    "order": 630,
+    "tags": [
+      "ost",
+      "soundtrack",
+      "anime",
+      "japanese",
+      "walearic",
+      "experimental",
+      "electronic",
+      "image-album",
+      "vocal"
+    ]
+  },
+  "tracks/山本リンダ - Linda Yamamoto - どうにも止まらない (スプラッシュリンダMIX) - 01.mp3": {
+    "title": "どうにも止まらない (スプラッシュリンダMIX) - 01",
+    "artist": "山本リンダ / Linda Yamamoto",
+    "order": 640,
+    "tags": [
+      "remix",
+      "house",
+      "kayo-kyoku",
+      "japanese",
+      "vocal"
+    ]
   }
 }
