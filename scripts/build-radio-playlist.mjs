@@ -89,7 +89,7 @@ function inferTrackTags(file, details, title, artist) {
     tags.add("christmas");
   }
   if (/\b(?:anime|flcl|nazo no kanojo)\b|フリクリ/.test(source)) tags.add("anime");
-  if (/\b(?:ost|soundtrack)\b/.test(source)) tags.add("soundtrack");
+  if (/\b(?:ost|soundtrack|movie|film)\b/.test(source)) tags.add("soundtrack");
   if (/\bdeep[ -]?house\b/.test(source)) tags.add("deep-house");
   if (/\bsh[oō]my[oō]\b/.test(source)) tags.add("shomyo");
   if (/\bjapan(?:ese)?\b|[\u3040-\u30ff\u3400-\u9fff]/u.test(source)) tags.add("japanese");
