@@ -82,10 +82,10 @@ function inferTrackTags(file, details, title, artist) {
     ["masayoshi-takanaka", "cover", "rock", "city-pop", "disco", "funk", "samba"]
       .forEach((tag) => tags.add(tag));
   }
-  if (/\b(?:deltarune|undertale|sonic|mario|pok[eé]mon|kirby|yoshi|terraria|spider[ -]?man|ratatouille|bloons|namco|katamari|omori|plok|balatro|zelda|wii|sonicomi)\b/.test(source)) {
+  if (/\b(?:deltarune|undertale|sonic|mario\s?\d*|pok[eé]mon|kirby|yoshi|terraria|spider[ -]?man|ratatouille|bloons|namco|katamari|omori|plok|balatro|zelda|wii|sonicomi|animal crossing|crash bandicoot|daisy'?s circuit|ocarina of time|skyward sword)\b/.test(source)) {
     tags.add("vgm");
   }
-  if (/\b(?:christmas|x[ -]?mas|silent night|winter wonderland|happy new year|last christmas|santa)\b/.test(source)) {
+  if (/\b(?:christmas|x[ -]?mas|silent night|winter wonderland|happy new year|last christmas|santa|chestnuts roasting)\b/.test(source)) {
     tags.add("christmas");
   }
   if (/\b(?:anime|flcl|nazo no kanojo)\b|フリクリ/.test(source)) tags.add("anime");
