@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
   resolvePointClickAction,
+  resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
 } from "./point-click-routing.js?v=point-click-20261115-v1";
@@ -78,8 +79,8 @@ import {
   let hostBillboard = null;
   let billboards = [];
   let contestantTargets = [];
+  let hostTargets = [];
   let currentView = { kind: "overview", look: 0 };
-  let viewHistory = [];
   let cameraTarget = new THREE.Vector3();
   let cameraTransition = null;
   let cursorMode = "";
