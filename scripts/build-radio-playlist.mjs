@@ -60,6 +60,50 @@ function encodedAssetUrl(relativePath) {
   return `/radio/assets/${encodedPath}`;
 }
 
+function normalizeTag(value) {
+  return String(value).trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function inferTrackTags(file, details, title, artist) {
+  const source = `${file} ${title} ${artist}`
+    .normalize("NFKC")
+    .replace(/DONTTOUCH/gi, "")
+    .toLowerCase();
+  const tags = new Set(["instrumental"]);
+
+  for (const tag of Array.isArray(details.tags) ? details.tags : []) {
+    const normalized = normalizeTag(tag);
+    if (normalized) tags.add(normalized);
+  }
+
+  if (/masayoshi\s+takanaka|\btakanaka\b/.test(source)) {
+    ["masayoshi-takanaka", "cover", "rock", "city-pop", "disco", "funk", "samba"]
+      .forEach((tag) => tags.add(tag));
+  }
+  if (/\b(?:deltarune|undertale|sonic|mario|pok[eé]mon|kirby|yoshi|terraria|spider[ -]?man|ratatouille|bloons|namco|katamari|omori|plok|balatro|zelda|wii|sonicomi)\b/.test(source)) {
+    tags.add("vgm");
+  }
+  if (/\b(?:christmas|x[ -]?mas|silent night|winter wonderland|happy new year|last christmas|santa)\b/.test(source)) {
+    tags.add("christmas");
+  }
+  if (/\b(?:anime|flcl|nazo no kanojo)\b|フリクリ/.test(source)) tags.add("anime");
+  if (/\b(?:ost|soundtrack)\b/.test(source)) tags.add("soundtrack");
+  if (/\bdeep[ -]?house\b/.test(source)) tags.add("deep-house");
+  if (/\bsh[oō]my[oō]\b/.test(source)) tags.add("shomyo");
+  if (/\bjapan(?:ese)?\b|[\u3040-\u30ff\u3400-\u9fff]/u.test(source)) tags.add("japanese");
+  if (/\bwalearic\b/.test(source)) tags.add("walearic");
+  if (/\bimage album\b/.test(source)) tags.add("image-album");
+  if (/\bexperimental\b/.test(source)) tags.add("experimental");
+  if (/\b(?:electro|electronic)\b/.test(source)) tags.add("electronic");
+  if (/\bambient\b/.test(source)) tags.add("ambient");
+  if (/\bjazz\b/.test(source)) tags.add("jazz");
+  if (/\bcover\b|\bin the style of\b|\bbut it'?s? a .* song\b/.test(source)) tags.add("cover");
+
+  return [...tags];
+}
+
 async function buildRadioPlaylist() {
   const metadata = JSON.parse(await readFile(METADATA_PATH, "utf8"));
   const [rootTracks, folderTracks] = await Promise.all([
@@ -86,8 +130,9 @@ async function buildRadioPlaylist() {
     const value = escapeHtml(encodedAssetUrl(track.file));
     const artist = escapeHtml(track.artist);
     const title = escapeHtml(track.title);
+    const tags = escapeHtml(inferTrackTags(track.file, metadata[track.file] || {}, track.title, track.artist).join(" "));
     const selected = track.isDefault ? " selected" : "";
-    return `                <option value="${value}" data-artist="${artist}"${selected}>${title}</option>`;
+    return `                <option value="${value}" data-artist="${artist}" data-tags="${tags}"${selected}>${title}</option>`;
   }).join("\n");
 
   const html = await readFile(INDEX_PATH, "utf8");
