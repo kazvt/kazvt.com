@@ -18,6 +18,7 @@
   const shuffleButton = document.getElementById("shuffle-toggle");
   const visualsButton = document.getElementById("visualizer-toggle");
   const playerMessage = document.getElementById("player-message");
+  const voiceButton = document.getElementById("voice-toggle");
   const seek = document.getElementById("track-seek");
   const volume = document.getElementById("track-volume");
   const volumeValue = document.getElementById("volume-value");
@@ -32,6 +33,11 @@
   const trackTitle = document.getElementById("track-title");
   const currentTrackTags = document.getElementById("current-track-tags");
   const trackTagFilter = document.getElementById("track-tag-filter");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let voiceRecognition = null;
+  let voiceListening = false;
+  let voiceRestartTimer = 0;
+  let lastVoiceCommandAt = 0;
   const tagLabels = {
     instrumental: "Instrumental",
     "masayoshi-takanaka": "Masayoshi Takanaka",
@@ -651,6 +657,92 @@
     loadTrack(nextIndex);
   }
 
+  function updateVoiceButton() {
+    voiceButton?.classList.toggle("is-on", voiceListening);
+    voiceButton?.setAttribute("aria-pressed", String(voiceListening));
+    voiceButton?.setAttribute("aria-label", voiceListening ? "Stop voice commands" : "Start voice commands");
+  }
+
+  function stopVoiceCommands(message = "Voice commands are off.", announce = true) {
+    voiceListening = false;
+    window.clearTimeout(voiceRestartTimer);
+    voiceRestartTimer = 0;
+    updateVoiceButton();
+    try { voiceRecognition?.stop(); } catch {}
+    if (announce) setMessage(message);
+  }
+
+  function normalizeVoicePhrase(phrase) {
+    return phrase.toLocaleLowerCase("en-AU").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
+  function configureVoiceRecognition() {
+    if (!SpeechRecognition || voiceRecognition) return;
+    voiceRecognition = new SpeechRecognition();
+    voiceRecognition.lang = "en-AU";
+    voiceRecognition.continuous = true;
+    voiceRecognition.interimResults = false;
+    voiceRecognition.maxAlternatives = 3;
+    voiceRecognition.addEventListener("result", (event) => {
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        if (!result.isFinal) continue;
+        let command = "";
+        for (let alternative = 0; alternative < result.length; alternative += 1) {
+          const phrase = normalizeVoicePhrase(result[alternative].transcript);
+          if (phrase === "kaz next" || phrase === "kaz previous") {
+            command = phrase;
+            break;
+          }
+        }
+        if (!command) continue;
+        const now = Date.now();
+        if (now - lastVoiceCommandAt < 900) continue;
+        lastVoiceCommandAt = now;
+        changeTrack(command === "kaz next" ? 1 : -1);
+      }
+    });
+    voiceRecognition.addEventListener("error", (event) => {
+      if (event.error === "no-speech" || event.error === "aborted") return;
+      const message = event.error === "not-allowed" || event.error === "service-not-allowed"
+        ? "Microphone permission was denied."
+        : event.error === "audio-capture"
+          ? "No microphone is available."
+          : event.error === "network"
+            ? "Voice recognition needs a network connection."
+            : "Voice recognition stopped unexpectedly.";
+      stopVoiceCommands(message);
+    });
+    voiceRecognition.addEventListener("end", () => {
+      if (!voiceListening || document.hidden) return;
+      window.clearTimeout(voiceRestartTimer);
+      voiceRestartTimer = window.setTimeout(() => {
+        if (!voiceListening || document.hidden) return;
+        try { voiceRecognition.start(); } catch (error) {
+          if (error.name !== "InvalidStateError") stopVoiceCommands("Voice recognition could not restart.");
+        }
+      }, 250);
+    });
+  }
+
+  function toggleVoiceCommands() {
+    if (voiceListening) {
+      stopVoiceCommands();
+      return;
+    }
+    if (!SpeechRecognition) {
+      setMessage("Voice commands are unavailable in this browser.");
+      return;
+    }
+    configureVoiceRecognition();
+    voiceListening = true;
+    updateVoiceButton();
+    setMessage('VOICE ON - SAY "KAZ NEXT" OR "KAZ PREVIOUS"');
+    try { voiceRecognition.start(); } catch (error) {
+      if (error.name !== "InvalidStateError") stopVoiceCommands("Voice recognition could not start.");
+    }
+  }
+
   function updateShuffleButton() {
     setButtonIcon(shuffleButton, "shuffle", shuffleEnabled);
   }
@@ -690,6 +782,7 @@
   shuffleButton?.addEventListener("click", toggleShuffle);
   document.getElementById("track-prev").addEventListener("click", () => changeTrack(-1));
   document.getElementById("track-next").addEventListener("click", () => changeTrack(1));
+  voiceButton?.addEventListener("click", toggleVoiceCommands);
   trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
   trackTagFilter?.addEventListener("change", renderPlaylist);
   loopButton.addEventListener("click", () => {
@@ -783,6 +876,7 @@
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      stopVoiceCommands("", false);
       stopRendering();
       window.clearTimeout(hudHideHandle);
       hudHideHandle = 0;

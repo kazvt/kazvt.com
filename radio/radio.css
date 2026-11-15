@@ -292,6 +292,11 @@ html.radio-document body.radio-page :is(
   flex: 0 0 clamp(29px, 3vw, 38px);
   width: clamp(29px, 3vw, 38px);
 }
+.radio-page .voice-control {
+  padding: 0;
+  font-size: clamp(6px, .6vw, 8px);
+  letter-spacing: .015em;
+}
 .radio-page .small-control:hover,
 .radio-page .transport-button:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--blue); }
 .radio-page .small-control:active,
