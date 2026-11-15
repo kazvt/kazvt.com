@@ -44,6 +44,9 @@
     .automation-range-input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb), .25); }
     .automation-playhead { position: absolute; top: 50%; left: var(--playhead); z-index: 3; width: 4px; height: 4px; border-radius: 50%; background: var(--bs-primary); transform: translate(-50%, -50%); pointer-events: none; visibility: hidden; }
     .automation-range.active .automation-playhead { visibility: visible; }
+    .automation-speed-feedback { position: absolute; top: -.3rem; right: 0; z-index: 5; padding: 0 .2rem; border-radius: var(--bs-border-radius-sm); background: var(--bs-body-bg); color: var(--bs-secondary-color); font-size: .625rem; line-height: 1; opacity: 0; transform: translateY(1px); transition: opacity .14s ease, transform .14s ease; pointer-events: none; }
+    .automation-speed-feedback.show { opacity: .95; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .automation-speed-feedback { transition: none; } }
   </style>
 </head>
 <body>
@@ -691,8 +694,8 @@
             const wheelSteps = event.deltaMode === 1 ? event.deltaY : event.deltaMode === 2 ? event.deltaY * 3 : event.deltaY / 100;
             if (!Number.isFinite(wheelSteps) || wheelSteps === 0) return;
             const currentPeriod = oscillatorPeriod(id);
-            const nextPeriod = Math.round(currentPeriod * Math.pow(1.12, wheelSteps));
-            if (nextPeriod === currentPeriod || nextPeriod < 500 || nextPeriod > 120000) return;
+            const nextPeriod = Math.min(120000, Math.max(500, Math.round(currentPeriod * Math.pow(1.12, wheelSteps))));
+            if (nextPeriod === currentPeriod) return;
             event.preventDefault();
             showOscillatorSpeed(id, wheelSteps);
           }, { passive: false });
@@ -814,7 +817,7 @@
           else {
             saved = readSavedSettings(legacyStorageKey);
             if (saved) sourceKey = legacyStorageKey;
-          }
+          });
         }
         if (saved) {
           Object.entries(controls).forEach(([id, el]) => {
