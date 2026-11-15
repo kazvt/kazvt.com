@@ -1133,21 +1133,32 @@
         });
         requestedRanges.forEach((requested, id) => {
           const input = controls[id];
-          const saved = automationRanges.get(id);
-          let low = saved ? saved.low : Number(input.value);
-          let high = saved ? saved.high : Number(input.value);
+          const saved = automationBounds.get(id);
+          let low = saved ? saved.low : Number(input.min);
+          let high = saved ? saved.high : Number(input.max);
+          let hasValidRange = false;
           if (requested.range !== undefined) {
             const parsed = parseOscillationRange(requested.range, input);
-            if (parsed) [low, high] = parsed;
+            if (parsed) {
+              [low, high] = parsed;
+              hasValidRange = true;
+            }
           }
           if (requested.min !== undefined) {
             const parsed = parseNumberParameter(requested.min, input.name.toLowerCase(), input);
-            if (parsed !== null) low = Number(parsed);
+            if (parsed !== null) {
+              low = Number(parsed);
+              hasValidRange = true;
+            }
           }
           if (requested.max !== undefined) {
             const parsed = parseNumberParameter(requested.max, input.name.toLowerCase(), input);
-            if (parsed !== null) high = Number(parsed);
+            if (parsed !== null) {
+              high = Number(parsed);
+              hasValidRange = true;
+            }
           }
+          if (!hasValidRange) return;
           setAutomationRange(id, low, high, 0);
         });
         if (paletteFromColorSeed || overriddenColors.size) syncPresetSelection();
@@ -1410,6 +1421,7 @@
       });
       document.getElementById("resetBtn").addEventListener("click", () => {
         automationRanges.clear();
+        automationBounds.clear();
         oscillationPeriods.clear();
         animatedValues.clear();
         oscillationPeriodMs = 6000;
