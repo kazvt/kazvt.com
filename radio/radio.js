@@ -367,7 +367,11 @@
       // Butterchurn renders to an internal canvas and copies it 1:1 into this
       // canvas. Keep both backing buffers the same size; CSS-only sizing leaves
       // the original 960x520 bitmap larger, exposing an unpainted black region.
-      visualizer.setRendererSize(width, height, { pixelRatio: 1, textureRatio: 0.85 });
+      try {
+        visualizer.setRendererSize(width, height, { pixelRatio: 1, textureRatio: 0.85 });
+      } catch (error) {
+        handleVisualizerFailure(error);
+      }
     }
   }
 
@@ -387,9 +391,47 @@
     presetBag = [];
   }
 
+  function handleAudioContextStateChange(context) {
+    if (context !== audioContext) return;
+    if (context.state === "running") {
+      if (!audio.paused && !visualsPaused && !document.hidden) startRendering();
+    } else {
+      stopRendering();
+    }
+  }
+
+  function ensureAudioContext() {
+    if (audioContext && audioContext.state !== "closed") return audioContext;
+    if (mediaSource) throw new Error("The existing audio route cannot be restarted by this browser.");
+    const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextConstructor) throw new Error("This browser does not support Web Audio.");
+    audioContext = new AudioContextConstructor();
+    audioContext.addEventListener?.("statechange", () => handleAudioContextStateChange(audioContext));
+    return audioContext;
+  }
+
+  function resumeAudioContext() {
+    const context = audioContext;
+    if (!context || context.state === "running") return Promise.resolve();
+    if (context.state === "closed") return Promise.reject(new Error("The audio context is closed."));
+    if (audioContextResumePromise) return audioContextResumePromise;
+    let request;
+    try {
+      request = context.resume();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    const resumePromise = Promise.resolve(request);
+    audioContextResumePromise = resumePromise;
+    resumePromise.then(
+      () => { if (audioContextResumePromise === resumePromise) audioContextResumePromise = null; },
+      () => { if (audioContextResumePromise === resumePromise) audioContextResumePromise = null; },
+    );
+    return resumePromise;
+  }
+
   function initVisualizer() {
     if (visualizer) return true;
-    if (mediaSource) throw new Error("The visualiser is unavailable; the audio route is still active.");
     // The browser UMD build exposes a module namespace whose API is under
     // `default`; tolerate direct exports too so the pinned library can be
     // swapped for either supported build shape without a page-level rewrite.
@@ -399,35 +441,41 @@
     }
     if (!presetKeys.length) populatePresets();
 
+    const context = ensureAudioContext();
     fitVisualizer();
     const { width, height } = getVisualizerSize();
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    visualizer = butterchurnApi.createVisualizer(audioContext, canvas, {
-      width,
-      height,
-      pixelRatio: 1,
-      textureRatio: 0.85,
-    });
-    if (!visualizer) throw new Error("This browser could not start the WebGL visualiser.");
+    let candidate = null;
+    try {
+      candidate = butterchurnApi.createVisualizer(context, canvas, {
+        width,
+        height,
+        pixelRatio: 1,
+        textureRatio: 0.85,
+      });
+      if (!candidate) throw new Error("This browser could not start the WebGL visualiser.");
 
-    try {
-      mediaSource = audioContext.createMediaElementSource(audio);
+      // A media element may only be routed through one MediaElementAudioSourceNode.
+      // Keep that node alive across visualiser retries and connect it only once.
+      if (!mediaSource) mediaSource = context.createMediaElementSource(audio);
+      if (!mediaSourceConnected) {
+        mediaSource.connect(context.destination);
+        mediaSourceConnected = true;
+      }
+      candidate.connectAudio(mediaSource);
+      candidate.loadPreset(presetMap[currentPresetKey], 0);
     } catch (error) {
       visualizer = null;
-      audioContext.close().catch(() => {});
-      audioContext = null;
+      try { candidate?.disconnectAudio?.(mediaSource); } catch {}
+      // If setup failed before the one-time media source was created, discard
+      // the unused context so a later user gesture can start cleanly.
+      if (!mediaSource && audioContext === context) {
+        audioContext = null;
+        audioContextResumePromise = null;
+        context.close().catch(() => {});
+      }
       throw error;
     }
-    // Butterchurn taps this source for analysis but does not send its audible
-    // branch to the speakers; keep normal playback connected in parallel.
-    mediaSource.connect(audioContext.destination);
-    try {
-      visualizer.connectAudio(mediaSource);
-    } catch (error) {
-      visualizer = null;
-      throw error;
-    }
-    visualizer.loadPreset(presetMap[currentPresetKey], 0);
+    visualizer = candidate;
     screen.classList.add("is-live");
     screen.classList.remove("is-fallback");
     fallback.querySelector("p").textContent = "PRESS TO PLAY";
@@ -445,15 +493,34 @@
   function renderFrame() {
     frameHandle = 0;
     if (!visualizer || visualsPaused || audio.paused || document.hidden) return;
+    if (audioContext && audioContext.state !== "running") return;
     updateVisualizerFade();
-    visualizer.render();
+    try {
+      visualizer.render();
+    } catch (error) {
+      handleVisualizerFailure(error);
+      return;
+    }
     frameHandle = window.requestAnimationFrame(renderFrame);
   }
 
   function startRendering() {
-    if (!visualsPaused && !document.hidden && visualizer && !frameHandle) {
-      frameHandle = window.requestAnimationFrame(renderFrame);
+    if (visualsPaused || document.hidden || !visualizer || audio.paused || frameHandle) return;
+    if (audioContext && audioContext.state !== "running") {
+      const context = audioContext;
+      resumeAudioContext().then(() => {
+        if (context === audioContext && context.state === "running") startRendering();
+      }).catch((error) => {
+        if (context !== audioContext || document.hidden || audio.paused || visualsPaused) return;
+        showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE");
+        setMessage("Audio is playing, but the visualiser could not resume. Try the visuals control again.");
+        console.warn("Radio audio context could not resume:", error);
+      });
+      return;
     }
+    screen.classList.add("is-live");
+    screen.classList.remove("is-fallback");
+    frameHandle = window.requestAnimationFrame(renderFrame);
   }
 
   function stopRendering() {
@@ -463,8 +530,16 @@
 
   function pickPreset(key, blend = 1.5) {
     if (!presetMap[key]) return;
+    const previousPresetKey = currentPresetKey;
     currentPresetKey = key;
-    if (visualizer) visualizer.loadPreset(presetMap[key], blend);
+    if (visualizer) {
+      try {
+        visualizer.loadPreset(presetMap[key], blend);
+      } catch (error) {
+        currentPresetKey = previousPresetKey;
+        console.warn("Radio visualiser could not load a preset:", error);
+      }
+    }
   }
 
   function refillPresetBag() {
