@@ -421,7 +421,10 @@
   function handleAudioContextStateChange(context) {
     if (context !== audioContext) return;
     if (context.state === "running") {
-      if (!audio.paused && !visualsPaused && !document.hidden) startRendering();
+      if (!audio.paused && !visualsPaused && !document.hidden) {
+        if (visualizer) startRendering();
+        else retryVisualizer();
+      }
     } else {
       stopRendering();
     }
@@ -985,7 +988,10 @@
       syncPresetShuffle();
     } else {
       revealTheatreHud();
-      if (!audio.paused && !visualsPaused) startRendering();
+      if (!audio.paused && !visualsPaused) {
+        if (visualizer) startRendering();
+        else retryVisualizer();
+      }
       syncPresetShuffle();
     }
   });
