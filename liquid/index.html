@@ -728,6 +728,13 @@
           upper.addEventListener("input", handleRangeInput);
           lower.addEventListener("change", saveSettings);
           upper.addEventListener("change", saveSettings);
+          lane.addEventListener("pointerdown", event => {
+            if (event.button === 0 && !automationRanges.has(id)) enableAutomation(id);
+          });
+          lane.addEventListener("contextmenu", event => {
+            event.preventDefault();
+            disableAutomation(id);
+          });
           lane.addEventListener("wheel", event => {
             const wheelSteps = event.deltaMode === 1 ? event.deltaY : event.deltaMode === 2 ? event.deltaY * 3 : event.deltaY / 100;
             if (!Number.isFinite(wheelSteps) || wheelSteps === 0) return;
@@ -738,13 +745,24 @@
             showOscillatorSpeed(id, wheelSteps);
           }, { passive: false });
           lane.addEventListener("keydown", event => {
+            if (!automationRanges.has(id) && event.key === "Enter") {
+              event.preventDefault();
+              enableAutomation(id);
+              return;
+            }
+            if (automationRanges.has(id) && event.key === "Escape") {
+              event.preventDefault();
+              event.stopPropagation();
+              disableAutomation(id);
+              return;
+            }
             if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
             event.preventDefault();
             event.stopPropagation();
             showOscillatorSpeed(id, event.key === "ArrowUp" ? -1 : 1);
           });
-          lower.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
-          upper.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
+          lower.setAttribute("aria-keyshortcuts", "Enter Escape Alt+ArrowUp Alt+ArrowDown");
+          upper.setAttribute("aria-keyshortcuts", "Enter Escape Alt+ArrowUp Alt+ArrowDown");
           lower.setAttribute("aria-description", "Alt+ArrowUp or Alt+ArrowDown changes oscillator speed");
           upper.setAttribute("aria-description", "Alt+ArrowUp or Alt+ArrowDown changes oscillator speed");
           syncAutomationRangeUI(id);
