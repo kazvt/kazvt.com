@@ -197,6 +197,7 @@
         .filter(([, el]) => el.type === "range" && !el.classList.contains("color-hue"))
         .map(([id, el]) => [el.name.toLowerCase(), id]));
       const automationRanges = new Map();
+      const automationBounds = new Map();
       const oscillationPeriods = new Map();
       const automationUI = new Map();
       const animatedValues = new Map();
@@ -536,10 +537,9 @@
         if (!ui) return;
         const input = controls[id];
         const range = automationRanges.get(id);
-        const fallback = manualValues.get(id) ?? Number(input.value);
-        const low = range ? range.low : fallback;
-        const high = range ? range.high : fallback;
         const domainMin = Number(input.min), domainMax = Number(input.max);
+        const bounds = automationBounds.get(id) || { low: domainMin, high: domainMax };
+        const low = bounds.low, high = bounds.high;
         const span = domainMax - domainMin || 1;
         ui.lower.min = String(domainMin);
         ui.lower.max = String(domainMax);
@@ -554,27 +554,53 @@
         ui.lane.style.setProperty("--range-low", `${100 * (low - domainMin) / span}%`);
         ui.lane.style.setProperty("--range-high", `${100 * (high - domainMin) / span}%`);
         ui.lane.classList.toggle("active", Boolean(range));
+        ui.lane.setAttribute("aria-label", `${input.name.toLowerCase()}_oscillate range, ${range ? "active" : "inactive"}`);
       }
       function syncAllAutomationRangeUI() { faderNameToId.forEach((id) => syncAutomationRangeUI(id)); }
-      function setAutomationRange(id, low, high, startAt = 0, preserveStatic = true) {
+      function setAutomationRange(id, low, high, startAt = 0, preserveStatic = true, enabled = true) {
         const input = controls[id];
         if (!input || input.type !== "range") return;
         const minimum = Number(input.min), maximum = Number(input.max);
         low = Math.min(maximum, Math.max(minimum, Number(low)));
         high = Math.min(maximum, Math.max(minimum, Number(high)));
         if (low > high) [low, high] = [high, low];
+        automationBounds.set(id, { low, high });
         const step = Number(input.step) || 1;
-        if (high - low < step * 0.5) {
+        if (enabled && high - low >= step * 0.5) {
+          automationRanges.set(id, { low, high, startAt });
+        } else {
           automationRanges.delete(id);
           animatedValues.delete(id);
-          if (preserveStatic) {
+          if (preserveStatic && high - low < step * 0.5) {
             input.value = String(low);
             manualValues.set(id, Number(input.value));
           }
-        } else {
-          automationRanges.set(id, { low, high, startAt });
         }
         syncAutomationRangeUI(id);
+      }
+      function enableAutomation(id) {
+        if (automationRanges.has(id)) return false;
+        const input = controls[id];
+        const domainMin = Number(input.min), domainMax = Number(input.max);
+        const bounds = automationBounds.get(id) || { low: domainMin, high: domainMax };
+        setAutomationRange(id, bounds.low, bounds.high, automationElapsed);
+        if (!automationRanges.has(id)) return false;
+        updateAutomationValues();
+        syncLabels();
+        applySettings();
+        return true;
+      }
+      function disableAutomation(id) {
+        if (!automationRanges.has(id)) return false;
+        const input = controls[id];
+        input.value = String(value(id));
+        manualValues.set(id, Number(input.value));
+        automationRanges.delete(id);
+        animatedValues.delete(id);
+        syncAutomationRangeUI(id);
+        syncLabels();
+        applySettings();
+        return true;
       }
       function oscillatorPeriod(id) { return oscillationPeriods.get(id) ?? oscillationPeriodMs; }
       function normalizeOscillatorPeriod(period) {
