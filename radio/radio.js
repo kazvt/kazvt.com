@@ -330,6 +330,32 @@
     updateVisualizerFade();
   }
 
+  function reportVisualizerFailure(error) {
+    const isPlaying = !audio.paused && !audio.ended;
+    showFallback(isPlaying
+      ? "AUDIO IS ON / VISUALS UNAVAILABLE"
+      : "VISUALS UNAVAILABLE / PRESS TO RETRY");
+    setMessage(isPlaying
+      ? "Music is playing. Use the visuals control to retry the picture."
+      : "The visualiser could not start. Use the visuals control to retry.");
+    if (error) console.warn("Radio visualiser unavailable:", error);
+  }
+
+  function handleVisualizerFailure(error) {
+    const failedVisualizer = visualizer;
+    visualizer = null;
+    stopRendering();
+    window.clearInterval(cycleHandle);
+    cycleHandle = 0;
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
+    try { failedVisualizer?.disconnectAudio?.(mediaSource); } catch {}
+    reportVisualizerFailure(error);
+    syncPresetShuffle();
+  }
+
   function getVisualizerBlackoutOpacity() {
     if (!visualizer || visualsPaused) return 0;
     if (trackTransitionBlackout) return 1;
@@ -398,6 +424,7 @@
     } else {
       stopRendering();
     }
+    syncPresetShuffle();
   }
 
   function ensureAudioContext() {
@@ -405,9 +432,12 @@
     if (mediaSource) throw new Error("The existing audio route cannot be restarted by this browser.");
     const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextConstructor) throw new Error("This browser does not support Web Audio.");
-    audioContext = new AudioContextConstructor();
-    audioContext.addEventListener?.("statechange", () => handleAudioContextStateChange(audioContext));
-    return audioContext;
+    const context = new AudioContextConstructor();
+    audioContext = context;
+    const onStateChange = () => handleAudioContextStateChange(context);
+    if (typeof context.addEventListener === "function") context.addEventListener("statechange", onStateChange);
+    else context.onstatechange = onStateChange;
+    return context;
   }
 
   function resumeAudioContext() {
@@ -471,6 +501,7 @@
       if (!mediaSource && audioContext === context) {
         audioContext = null;
         audioContextResumePromise = null;
+        mediaSourceConnected = false;
         context.close().catch(() => {});
       }
       throw error;
@@ -560,7 +591,8 @@
   function syncPresetShuffle() {
     window.clearInterval(cycleHandle);
     cycleHandle = 0;
-    if (visualizer && !visualsPaused && !audio.paused && !document.hidden) {
+    if (visualizer && !visualsPaused && !audio.paused && !document.hidden
+      && (!audioContext || audioContext.state === "running")) {
       cycleHandle = window.setInterval(randomPreset, 10000);
     }
   }
@@ -625,13 +657,22 @@
 
   function togglePlay() {
     if (!audio.paused) {
+      playbackIntent += 1;
       audio.pause();
       return;
     }
 
+    const intent = ++playbackIntent;
+
     try {
       if (!visualizer && !visualsPaused) initVisualizer();
-      if (audioContext && audioContext.state === "suspended") audioContext.resume().catch(() => {});
+      if (audioContext && audioContext.state !== "running") {
+        resumeAudioContext().catch((error) => {
+          if (intent === playbackIntent && !audio.paused) {
+            reportVisualizerFailure(error);
+          }
+        });
+      }
       if (visualsPaused) showFallback("VISUALS PAUSED / MUSIC PLAYING");
       else if (visualizer) {
         screen.classList.add("is-live");
@@ -639,25 +680,28 @@
       }
       setMessage("You're tuned in. Enjoy the transmission.");
     } catch (error) {
-      if (audioContext && !mediaSource) {
-        audioContext.close().catch(() => {});
-        audioContext = null;
-      }
-      showFallback("AUDIO IS ON / VISUALS ARE UNAVAILABLE HERE");
-      setMessage("Audio will play, but this browser could not start the WebGL visualiser.");
-      console.warn("Radio visualiser unavailable:", error);
+      reportVisualizerFailure(error);
     }
 
-    const playRequest = audio.play();
-    if (playRequest && typeof playRequest.catch === "function") {
-      playRequest.catch(() => {
-        trackTransitionBlackout = false;
-        updateVisualizerFade();
-        setMessage("The track could not start. Check the audio file connection and try again.");
-        if (visualizer && !visualsPaused) showFallback("PRESS TO PLAY");
-        updateTransport();
-      });
+    let playRequest;
+    try {
+      playRequest = audio.play();
+    } catch (error) {
+      handlePlayFailure(error, intent);
+      return;
     }
+    Promise.resolve(playRequest).catch((error) => handlePlayFailure(error, intent));
+  }
+
+  function handlePlayFailure(error, intent) {
+    // Track switches and pauses invalidate outstanding play() promises. Some
+    // browsers reject the old promise only after the next track has started.
+    if (intent !== playbackIntent || !audio.paused || error?.name === "AbortError") return;
+    trackTransitionBlackout = false;
+    updateVisualizerFade();
+    setMessage("The track could not start. Check the audio file connection and try again.");
+    if (visualizer && !visualsPaused) showFallback("PRESS TO PLAY");
+    updateTransport();
   }
 
   function updateMuteButton() {
@@ -704,6 +748,7 @@
   function loadTrack(index, startPlaying = true, recordHistory = true) {
     const option = trackSelect.options[index];
     if (!option) return;
+    playbackIntent += 1;
     if (recordHistory) rememberTrack(index);
     trackSelect.selectedIndex = index;
     const title = option.textContent.trim();
