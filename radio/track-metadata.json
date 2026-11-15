@@ -1,18 +1,4 @@
 {
-  "gin-no-ketsumyaku-1994.mp3": {
-    "title": "銀の血脈",
-    "artist": "本田恭之 / Yasuyuki Honda",
-    "order": 10,
-    "default": true,
-    "tags": [
-      "instrumental",
-      "japanese",
-      "walearic",
-      "experimental",
-      "electronic",
-      "image-album"
-    ]
-  },
   "tracks/blue-fire-purple-eyes-in-the-dark.mp3": {
     "title": "Blue Fire - Purple Eyes in the Dark",
     "artist": "neu licht",
@@ -554,7 +540,8 @@
   "tracks/本田恭之 - Yasuyuki Honda - 銀の血脈 - 02.mp3": {
     "title": "銀の血脈 - 02",
     "artist": "本田恭之 / Yasuyuki Honda",
-    "order": 560,
+    "order": 10,
+    "default": true,
     "tags": [
       "instrumental",
       "ost",
@@ -565,6 +552,18 @@
       "experimental",
       "electronic",
       "image-album"
+    ]
+  },
+  "tracks/【フリクリ】 ハイカラさんが通る ハヌマーン 【MAD】.mp3": {
+    "title": "【フリクリ】 ハイカラさんが通る ハヌマーン 【MAD】",
+    "artist": "Hanuman (ハヌマーン)",
+    "instrumental": false,
+    "tags": [
+      "anime",
+      "japanese",
+      "vocal",
+      "rock",
+      "punk"
     ]
   },
   "tracks/桐生千弘 - Chihiro Kiryu - ANGEL COLOUR - 03.mp3": {
@@ -691,23 +690,6 @@
       "vocal"
     ]
   },
-  "tracks/Yasuharu Konishi feat. Zhang Jia-Bai - 鉄腎阿童木 (鉄腕アトム1) ～ 烏龍茶'97 「スチュワーデスの春」 - 01.mp3": {
-    "title": "鉄腎阿童木 (鉄腕アトム1) ～ 烏龍茶'97 「スチュワーデスの春」 - 01",
-    "artist": "Yasuharu Konishi feat. Zhang Jia-Bai",
-    "order": 650,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "vocal",
-      "cover"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
   "tracks/Yasuharu Konishi feat. Gaijin a Go-Go, Uetakada Boys Choir, Duke Aces - 鉄腕アトム (Readymade a Go-Go mix) - 02.mp3": {
     "title": "鉄腕アトム (Readymade a Go-Go mix) - 02",
     "artist": "Yasuharu Konishi feat. Gaijin a Go-Go, Uetakada Boys Choir, Duke Aces",
@@ -747,126 +729,6 @@
     "title": "鉄腕アトム (Mission to Mars Remix) - 04",
     "artist": "Sunaga t Experience",
     "order": 680,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "instrumental",
-      "remix"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/Yasuharu Konishi feat. Duke Aces - 鉄腕アトム (Readymade Sir Duke mix) - 05.mp3": {
-    "title": "鉄腕アトム (Readymade Sir Duke mix) - 05",
-    "artist": "Yasuharu Konishi feat. Duke Aces",
-    "order": 690,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "vocal",
-      "remix"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/Tatsuya Murayama - 鉄腕アトム (Arranged For Chamber Music 2003) - 06.mp3": {
-    "title": "鉄腕アトム (Arranged For Chamber Music 2003) - 06",
-    "artist": "Tatsuya Murayama",
-    "order": 700,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "instrumental",
-      "chamber-music",
-      "classical",
-      "cover"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/PACIFIC231 feat. Midori Okamura & Shigeomi Hasumi - ロボットマーチ - 07.mp3": {
-    "title": "ロボットマーチ - 07",
-    "artist": "PACIFIC231 feat. Midori Okamura & Shigeomi Hasumi",
-    "order": 710,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "vocal"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/Kazunao Nagata - NEW SOUND OF ATOM - 08.mp3": {
-    "title": "NEW SOUND OF ATOM - 08",
-    "artist": "Kazunao Nagata",
-    "order": 720,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "instrumental",
-      "ambient"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/P&ART SASANOOOHA feat. Gaijin a Go-Go - 鉄腕アトム (P&ART SASANOOOHA MIX) - 09.mp3": {
-    "title": "鉄腕アトム (P&ART SASANOOOHA MIX) - 09",
-    "artist": "P&ART SASANOOOHA feat. Gaijin a Go-Go",
-    "order": 730,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "vocal",
-      "remix"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/Toshiya Arai feat. Uetakada Boys Choir - 鉄腕アトム (Spaced out mix) - 10.mp3": {
-    "title": "鉄腕アトム (Spaced out mix) - 10",
-    "artist": "Toshiya Arai feat. Uetakada Boys Choir",
-    "order": 740,
-    "tags": [
-      "anime",
-      "ost",
-      "soundtrack",
-      "japanese",
-      "electronic",
-      "jazz",
-      "downtempo",
-      "vocal",
-      "remix"
-    ],
-    "album": "ATOM Is Born the Remixies (2003)"
-  },
-  "tracks/Tatsuya Murayama & Sunaga t Experience - 鉄腕アトム (Peace in the middle east edit) - 11.mp3": {
-    "title": "鉄腕アトム (Peace in the middle east edit) - 11",
-    "artist": "Tatsuya Murayama & Sunaga t Experience",
-    "order": 750,
     "tags": [
       "anime",
       "ost",
