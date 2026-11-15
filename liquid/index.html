@@ -736,7 +736,8 @@
           });
           lane.addEventListener("contextmenu", event => {
             event.preventDefault();
-            disableAutomation(id);
+            if (automationRanges.has(id)) disableAutomation(id);
+            else enableAutomation(id);
           });
           lane.addEventListener("wheel", event => {
             const wheelSteps = event.deltaMode === 1 ? event.deltaY : event.deltaMode === 2 ? event.deltaY * 3 : event.deltaY / 100;
