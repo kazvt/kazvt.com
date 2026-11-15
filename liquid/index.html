@@ -1052,7 +1052,7 @@
           const id = faderNameToId.get(match[1]);
           const period = parseOscillationPeriod(raw);
           if (id && period !== null) oscillationPeriods.set(id, period);
-        }
+        });
         const requestedRanges = new Map();
         queryValues.forEach((raw, name) => {
           if (name === "oscillation_period") return;
