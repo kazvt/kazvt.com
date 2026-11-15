@@ -113,7 +113,7 @@ html.radio-document body.radio-page :is(
   text-decoration: none;
   white-space: nowrap;
 }
-.radio-home span { color: var(--pink); }
+.radio-home span { color: inherit; }
 .radio-page main {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
