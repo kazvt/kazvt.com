@@ -194,6 +194,7 @@
         .filter(([, el]) => el.type === "range" && !el.classList.contains("color-hue"))
         .map(([id, el]) => [el.name.toLowerCase(), id]));
       const automationRanges = new Map();
+      const oscillationPeriods = new Map();
       const automationUI = new Map();
       const animatedValues = new Map();
       const manualValues = new Map();
@@ -571,10 +572,46 @@
         }
         syncAutomationRangeUI(id);
       }
+      function oscillatorPeriod(id) { return oscillationPeriods.get(id) ?? oscillationPeriodMs; }
+      function formatOscillatorPeriod(period) {
+        const seconds = period / 1000;
+        const text = seconds >= 10 ? seconds.toFixed(1) : seconds.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+        return `${text}s`;
+      }
+      function setOscillatorPeriod(id, nextPeriod) {
+        const currentPeriod = oscillatorPeriod(id);
+        nextPeriod = Math.round(Math.min(120000, Math.max(500, Number(nextPeriod))));
+        if (!Number.isFinite(nextPeriod) || nextPeriod === currentPeriod) return false;
+        const range = automationRanges.get(id);
+        if (range) {
+          const elapsed = Math.max(0, automationElapsed - range.startAt);
+          const phase = (elapsed % currentPeriod) / currentPeriod;
+          range.startAt = automationElapsed - phase * nextPeriod;
+        }
+        oscillationPeriods.set(id, nextPeriod);
+        return true;
+      }
+      function showOscillatorSpeed(id, steps) {
+        const currentPeriod = oscillatorPeriod(id);
+        const nextPeriod = Math.round(currentPeriod * Math.pow(1.12, steps));
+        if (!setOscillatorPeriod(id, nextPeriod)) return false;
+        const ui = automationUI.get(id);
+        if (ui) {
+          ui.speedFeedback.textContent = formatOscillatorPeriod(oscillatorPeriod(id));
+          ui.speedFeedback.classList.add("show");
+          if (ui.speedFeedbackTimer) window.clearTimeout(ui.speedFeedbackTimer);
+          ui.speedFeedbackTimer = window.setTimeout(() => {
+            ui.speedFeedback.classList.remove("show");
+            ui.speedFeedbackTimer = 0;
+          }, 700);
+        }
+        saveSettings();
+        return true;
+      }
       function oscillatedValue(id, elapsedMs) {
         const range = automationRanges.get(id);
         if (!range) return Number(controls[id].value);
-        const period = Math.max(500, oscillationPeriodMs);
+        const period = Math.max(500, oscillatorPeriod(id));
         const elapsed = Math.max(0, elapsedMs - range.startAt);
         const progress = (elapsed % period) / period;
         const sineEase = 0.5 - 0.5 * Math.cos(2 * Math.PI * progress);
@@ -630,9 +667,13 @@
           const playhead = document.createElement("span");
           playhead.className = "automation-playhead";
           playhead.setAttribute("aria-hidden", "true");
-          lane.append(lower, upper, playhead);
+          const speedFeedback = document.createElement("span");
+          speedFeedback.className = "automation-speed-feedback font-monospace";
+          speedFeedback.setAttribute("aria-hidden", "true");
+          lane.append(lower, upper, playhead, speedFeedback);
           input.after(lane);
-          automationUI.set(id, { lane, lower, upper, playhead });
+          const ui = { lane, lower, upper, playhead, speedFeedback, speedFeedbackTimer: 0 };
+          automationUI.set(id, ui);
           const handleRangeInput = event => {
             let low = Number(lower.value), high = Number(upper.value);
             if (event.currentTarget === lower && low > high) low = high;
@@ -646,6 +687,23 @@
           upper.addEventListener("input", handleRangeInput);
           lower.addEventListener("change", saveSettings);
           upper.addEventListener("change", saveSettings);
+          lane.addEventListener("wheel", event => {
+            const wheelSteps = event.deltaMode === 1 ? event.deltaY : event.deltaMode === 2 ? event.deltaY * 3 : event.deltaY / 100;
+            if (!Number.isFinite(wheelSteps) || wheelSteps === 0) return;
+            const currentPeriod = oscillatorPeriod(id);
+            const nextPeriod = Math.round(currentPeriod * Math.pow(1.12, wheelSteps));
+            if (nextPeriod === currentPeriod || nextPeriod < 500 || nextPeriod > 120000) return;
+            event.preventDefault();
+            showOscillatorSpeed(id, wheelSteps);
+          }, { passive: false });
+          lane.addEventListener("keydown", event => {
+            if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
+            event.preventDefault();
+            event.stopPropagation();
+            showOscillatorSpeed(id, event.key === "ArrowUp" ? -1 : 1);
+          });
+          lower.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
+          upper.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
           syncAutomationRangeUI(id);
         });
         updateAutomationValues(automationElapsed);
@@ -734,6 +792,7 @@
           ]));
           saved._oscillations = Object.fromEntries(Array.from(automationRanges, ([id, range]) => [controls[id].name.toLowerCase(), { min: range.low, max: range.high }]));
           saved._oscillation_period = `${oscillationPeriodMs}ms`;
+          saved._oscillation_periods = Object.fromEntries(Array.from(oscillationPeriods, ([id, period]) => [controls[id].name.toLowerCase(), period]));
           saved._color_hues = Object.fromEntries(colorIds
             .filter(id => rememberedColorHue.has(id))
             .map(id => [id, rememberedColorHue.get(id)]));
@@ -796,6 +855,13 @@
           if (saved._oscillation_period !== undefined) {
             const savedPeriod = parseOscillationPeriod(String(saved._oscillation_period));
             if (savedPeriod !== null) oscillationPeriodMs = savedPeriod;
+          }
+          if (saved._oscillation_periods && typeof saved._oscillation_periods === "object" && !Array.isArray(saved._oscillation_periods)) {
+            Object.entries(saved._oscillation_periods).forEach(([name, rawPeriod]) => {
+              const id = faderNameToId.get(name.toLowerCase());
+              const period = parseOscillationPeriod(String(rawPeriod));
+              if (id && period !== null) oscillationPeriods.set(id, period);
+            });
           }
           if (sourceKey) saveSettings();
         }
@@ -934,8 +1000,10 @@
         new URLSearchParams(window.location.search).forEach((raw, key) => {
           const name = key.trim().toLowerCase();
           const automationMatch = name.match(/^(.+)_oscillate(?:_(?:min|max))?$/);
+          const periodMatch = name.match(/^(.+)_oscillate_period$/);
           const knownAutomation = automationMatch && faderNameToId.has(automationMatch[1]);
-          if (byName.has(name) || paletteSeedNames.has(name) || name === "oscillation_period" || knownAutomation) queryValues.set(name, raw);
+          const knownPeriod = periodMatch && faderNameToId.has(periodMatch[1]);
+          if (byName.has(name) || paletteSeedNames.has(name) || name === "oscillation_period" || knownAutomation || knownPeriod) queryValues.set(name, raw);
         });
         let paletteFromColorSeed = false;
         for (const name of paletteSeedNames) {
@@ -970,7 +1038,17 @@
         });
         if (queryValues.has("oscillation_period")) {
           const parsedPeriod = parseOscillationPeriod(queryValues.get("oscillation_period"));
-          if (parsedPeriod !== null) oscillationPeriodMs = parsedPeriod;
+          if (parsedPeriod !== null) {
+            oscillationPeriodMs = parsedPeriod;
+            oscillationPeriods.clear();
+          }
+        }
+        queryValues.forEach((raw, name) => {
+          const match = name.match(/^(.+)_oscillate_period$/);
+          if (!match) return;
+          const id = faderNameToId.get(match[1]);
+          const period = parseOscillationPeriod(raw);
+          if (id && period !== null) oscillationPeriods.set(id, period);
         }
         const requestedRanges = new Map();
         queryValues.forEach((raw, name) => {
@@ -1264,6 +1342,7 @@
       });
       document.getElementById("resetBtn").addEventListener("click", () => {
         automationRanges.clear();
+        oscillationPeriods.clear();
         animatedValues.clear();
         oscillationPeriodMs = 6000;
         automationElapsed = 0;
