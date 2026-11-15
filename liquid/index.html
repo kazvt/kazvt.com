@@ -577,8 +577,8 @@
         const period = Math.max(500, oscillationPeriodMs);
         const elapsed = Math.max(0, elapsedMs - range.startAt);
         const progress = (elapsed % period) / period;
-        const triangle = progress < 0.5 ? progress * 2 : 2 - progress * 2;
-        return range.low + (range.high - range.low) * triangle;
+        const sineEase = 0.5 - 0.5 * Math.cos(2 * Math.PI * progress);
+        return range.low + (range.high - range.low) * sineEase;
       }
       function updateAutomationValues(elapsedMs = automationElapsed) {
         if (!automationRanges.size) return;
