@@ -805,7 +805,12 @@
     if (!mediaSession || typeof mediaSession.setActionHandler !== "function") return;
     const actions = {
       play: () => { if (audio.paused) togglePlay(); },
-      pause: () => { if (!audio.paused) audio.pause(); },
+      pause: () => {
+        if (!audio.paused) {
+          playbackIntent += 1;
+          audio.pause();
+        }
+      },
       previoustrack: () => changeTrack(-1),
       nexttrack: () => changeTrack(1),
     };
