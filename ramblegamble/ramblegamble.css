@@ -75,7 +75,7 @@ body.ramble-page {
   box-shadow: 3px 3px 0 var(--pink);
   transform: translate(-50%, -50%);
   transform-origin: center;
-  will-change: left, top, width;
+  will-change: left, top, width, height;
 }
 
 .rg-billboard.rg-billboard-live {
