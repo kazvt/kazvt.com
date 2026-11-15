@@ -18,7 +18,6 @@
   const shuffleButton = document.getElementById("shuffle-toggle");
   const visualsButton = document.getElementById("visualizer-toggle");
   const playerMessage = document.getElementById("player-message");
-  const voiceButton = document.getElementById("voice-toggle");
   const seek = document.getElementById("track-seek");
   const volume = document.getElementById("track-volume");
   const volumeValue = document.getElementById("volume-value");
@@ -33,12 +32,6 @@
   const trackTitle = document.getElementById("track-title");
   const currentTrackTags = document.getElementById("current-track-tags");
   const trackTagFilter = document.getElementById("track-tag-filter");
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const firefoxDesktopVoice = /Firefox\//.test(navigator.userAgent) && !/Android/i.test(navigator.userAgent);
-  let voiceRecognition = null;
-  let voiceListening = false;
-  let voiceRestartTimer = 0;
-  let lastVoiceCommandAt = 0;
   const tagLabels = {
     instrumental: "Instrumental",
     "masayoshi-takanaka": "Masayoshi Takanaka",
@@ -658,147 +651,6 @@
     loadTrack(nextIndex);
   }
 
-  function updateVoiceButton() {
-    voiceButton?.classList.toggle("is-on", voiceListening);
-    voiceButton?.setAttribute("aria-pressed", String(voiceListening));
-    voiceButton?.setAttribute("aria-label", voiceListening ? "Stop voice commands" : "Start voice commands");
-  }
-
-  function stopVoiceCommands(message = "Voice commands are off.", announce = true) {
-    voiceListening = false;
-    window.clearTimeout(voiceRestartTimer);
-    voiceRestartTimer = 0;
-    updateVoiceButton();
-    try { voiceRecognition?.stop(); } catch {}
-    if (announce) setMessage(message);
-  }
-
-  function normalizeVoicePhrase(phrase) {
-    return phrase.toLocaleLowerCase("en-AU").replace(/[^a-z0-9]+/g, " ").trim();
-  }
-
-  function configureVoiceRecognition() {
-    if (!SpeechRecognition || voiceRecognition) return;
-    voiceRecognition = new SpeechRecognition();
-    voiceRecognition.lang = firefoxDesktopVoice ? "en-US" : "en-AU";
-    voiceRecognition.continuous = true;
-    voiceRecognition.interimResults = false;
-    voiceRecognition.maxAlternatives = 3;
-    if (firefoxDesktopVoice) voiceRecognition.processLocally = true;
-    voiceRecognition.addEventListener("result", (event) => {
-      for (let index = event.resultIndex; index < event.results.length; index += 1) {
-        const result = event.results[index];
-        if (!result.isFinal) continue;
-        let command = "";
-        for (let alternative = 0; alternative < result.length; alternative += 1) {
-          const phrase = normalizeVoicePhrase(result[alternative].transcript);
-          if (phrase === "kaz next" || phrase === "kaz previous") {
-            command = phrase;
-            break;
-          }
-        }
-        if (!command) continue;
-        const now = Date.now();
-        if (now - lastVoiceCommandAt < 900) continue;
-        lastVoiceCommandAt = now;
-        changeTrack(command === "kaz next" ? 1 : -1);
-      }
-    });
-    voiceRecognition.addEventListener("error", (event) => {
-      if (event.error === "no-speech" || event.error === "aborted") return;
-      const message = event.error === "not-allowed" || event.error === "service-not-allowed"
-        ? firefoxDesktopVoice
-          ? "Enable speech recognition in Firefox AI Controls and allow microphone access."
-          : "Microphone permission was denied."
-        : event.error === "audio-capture"
-          ? "No microphone is available."
-          : event.error === "language-not-supported"
-            ? "Firefox could not load its English speech model. Press MIC to retry setup."
-          : event.error === "network"
-            ? firefoxDesktopVoice
-              ? "Firefox needs a connection to download its speech model."
-              : "Voice recognition needs a network connection."
-            : "Voice recognition stopped unexpectedly.";
-      stopVoiceCommands(message);
-    });
-    voiceRecognition.addEventListener("end", () => {
-      if (!voiceListening || document.hidden) return;
-      window.clearTimeout(voiceRestartTimer);
-      voiceRestartTimer = window.setTimeout(() => {
-        if (!voiceListening || document.hidden) return;
-        try { voiceRecognition.start(); } catch (error) {
-          if (error.name !== "InvalidStateError") stopVoiceCommands("Voice recognition could not restart.");
-        }
-      }, 250);
-    });
-  }
-
-  async function startVoiceRecognition() {
-    if (firefoxDesktopVoice) {
-      if (typeof SpeechRecognition.available !== "function" || typeof SpeechRecognition.install !== "function") {
-        stopVoiceCommands("Update Firefox desktop to use its built-in voice recognition.");
-        return;
-      }
-
-      try {
-        setMessage("VOICE: CHECKING FIREFOX ENGLISH MODEL");
-        const availability = await SpeechRecognition.available({
-          langs: ["en-US"],
-          processLocally: true,
-        });
-        if (!voiceListening || document.hidden) return;
-        if (availability === "unavailable") {
-          stopVoiceCommands("Firefox's English speech model is unavailable on this device.");
-          return;
-        }
-        if (availability !== "available") {
-          setMessage("FIREFOX: ALLOW ENGLISH SPEECH MODEL DOWNLOAD (~140 MB)");
-          const installed = await SpeechRecognition.install({
-            langs: ["en-US"],
-            processLocally: true,
-          });
-          if (!voiceListening || document.hidden) return;
-          if (!installed) {
-            stopVoiceCommands("Model not installed. Enable Speech recognition in Firefox AI Controls.");
-            return;
-          }
-          stopVoiceCommands("Firefox's English model is ready. Press MIC again to listen.");
-          return;
-        }
-      } catch (error) {
-        if (!voiceListening) return;
-        const message = error.name === "NotAllowedError" || error.name === "SecurityError"
-          ? "Enable Speech recognition in Firefox AI Controls and allow microphone access."
-          : "Firefox could not prepare its English speech model. Check Firefox AI Controls and try MIC again.";
-        stopVoiceCommands(message);
-        return;
-      }
-    }
-
-    if (!voiceListening || document.hidden) return;
-    setMessage('VOICE ON - SAY "KAZ NEXT" OR "KAZ PREVIOUS"');
-    try { voiceRecognition.start(); } catch (error) {
-      if (error.name !== "InvalidStateError") stopVoiceCommands("Voice recognition could not start.");
-    }
-  }
-
-  function toggleVoiceCommands() {
-    if (voiceListening) {
-      stopVoiceCommands();
-      return;
-    }
-    if (!SpeechRecognition) {
-      setMessage(firefoxDesktopVoice
-        ? "Update Firefox desktop to use its built-in voice recognition."
-        : "Voice commands are unavailable in this browser.");
-      return;
-    }
-    configureVoiceRecognition();
-    voiceListening = true;
-    updateVoiceButton();
-    void startVoiceRecognition();
-  }
-
   function updateShuffleButton() {
     setButtonIcon(shuffleButton, "shuffle", shuffleEnabled);
   }
@@ -838,7 +690,6 @@
   shuffleButton?.addEventListener("click", toggleShuffle);
   document.getElementById("track-prev").addEventListener("click", () => changeTrack(-1));
   document.getElementById("track-next").addEventListener("click", () => changeTrack(1));
-  voiceButton?.addEventListener("click", toggleVoiceCommands);
   trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
   trackTagFilter?.addEventListener("change", renderPlaylist);
   loopButton.addEventListener("click", () => {
