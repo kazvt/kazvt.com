@@ -677,6 +677,7 @@
   document.getElementById("track-prev").addEventListener("click", () => changeTrack(-1));
   document.getElementById("track-next").addEventListener("click", () => changeTrack(1));
   trackSelect.addEventListener("change", () => loadTrack(trackSelect.selectedIndex));
+  trackTagFilter?.addEventListener("change", renderPlaylist);
   loopButton.addEventListener("click", () => {
     audio.loop = !audio.loop;
     setButtonIcon(loopButton, "refresh", audio.loop);
@@ -727,6 +728,7 @@
   });
   audio.volume = Number(volume.value);
   updateRangeFills();
+  populateTagFilter();
   renderPlaylist();
   window.addEventListener("resize", scheduleMarqueeUpdate, { passive: true });
   if (document.fonts?.ready) document.fonts.ready.then(scheduleMarqueeUpdate);
