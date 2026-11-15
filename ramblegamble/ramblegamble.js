@@ -608,6 +608,24 @@ import {
     const worldWidth = 1.04;
     const worldHeight = worldWidth;
     const chairCenter = highestBounds.getCenter(new THREE.Vector3());
+    const chairSize = highestBounds.getSize(new THREE.Vector3());
+    const hitSize = new THREE.Vector3(
+      Math.max(chairSize.x + 0.5, 0.96),
+      Math.max(chairSize.y + 0.4, 1.42),
+      Math.max(chairSize.z + 0.5, 0.86),
+    );
+    const hitProxy = new THREE.Mesh(
+      new THREE.BoxGeometry(hitSize.x, hitSize.y, hitSize.z),
+      new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, side: THREE.DoubleSide }),
+    );
+    hitProxy.position.copy(chairCenter);
+    hitProxy.userData.hostId = HOST_BILLBOARD_SOURCE.id;
+    hitProxy.name = "point-click-host";
+    hitProxy.castShadow = false;
+    hitProxy.receiveShadow = false;
+    scene.add(hitProxy);
+    hostTargets.push(hitProxy);
+
     const anchor = new THREE.Vector3(
       chairCenter.x,
       highestBounds.max.y + worldHeight / 2 + 0.05,
@@ -617,6 +635,7 @@ import {
     hostBillboard = {
       ...HOST_BILLBOARD_SOURCE,
       chair,
+      hitProxy,
       anchor,
       panel,
       worldWidth,
