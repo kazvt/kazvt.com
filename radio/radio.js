@@ -30,6 +30,31 @@
   const playlistPanel = document.querySelector(".player-side");
   const trackArtist = document.getElementById("track-artist");
   const trackTitle = document.getElementById("track-title");
+  const currentTrackTags = document.getElementById("current-track-tags");
+  const trackTagFilter = document.getElementById("track-tag-filter");
+  const tagLabels = {
+    instrumental: "Instrumental",
+    "masayoshi-takanaka": "Masayoshi Takanaka",
+    cover: "Cover",
+    rock: "Rock",
+    "city-pop": "City Pop",
+    disco: "Disco",
+    funk: "Funk",
+    samba: "Samba",
+    vgm: "VGM",
+    christmas: "Christmas",
+    anime: "Anime",
+    soundtrack: "Soundtrack",
+    "deep-house": "Deep House",
+    japanese: "Japanese",
+    shomyo: "Shōmyō",
+    walearic: "Walearic",
+    "image-album": "Image Album",
+    experimental: "Experimental",
+    electronic: "Electronic",
+    ambient: "Ambient",
+    jazz: "Jazz",
+  };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const theatreStorageKey = "kazvt-radio-theatre";
 
@@ -140,25 +165,76 @@
     updateRangeFill(volume);
   }
 
+  function getOptionTags(option) {
+    return (option?.dataset.tags || "").split(/\s+/).filter(Boolean);
+  }
+
+  function getTagLabel(tag) {
+    return tagLabels[tag] || tag.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  function populateTagFilter() {
+    if (!trackTagFilter || !trackSelect) return;
+    const currentTag = trackTagFilter.value;
+    const tags = new Set(Array.from(trackSelect.options).flatMap(getOptionTags));
+    trackTagFilter.replaceChildren(new Option("ALL TRACKS", ""));
+    [...tags].sort((a, b) => getTagLabel(a).localeCompare(getTagLabel(b)))
+      .forEach((tag) => trackTagFilter.add(new Option(getTagLabel(tag).toUpperCase(), tag)));
+    trackTagFilter.value = tags.has(currentTag) ? currentTag : "";
+  }
+
+  function renderCurrentTrackTags(index = trackSelect.selectedIndex) {
+    if (!currentTrackTags) return;
+    const tags = getOptionTags(trackSelect.options[index]);
+    currentTrackTags.replaceChildren();
+    tags.forEach((tag) => {
+      const chip = document.createElement("span");
+      chip.className = "track-tag-chip";
+      chip.textContent = getTagLabel(tag);
+      currentTrackTags.append(chip);
+    });
+    currentTrackTags.setAttribute("aria-label", tags.length
+      ? `Current track tags: ${tags.map(getTagLabel).join(", ")}`
+      : "Current track has no tags");
+  }
+
   function updatePlaylistSelection(index = trackSelect.selectedIndex, scrollIntoView = false) {
     const rows = playlistList.querySelectorAll(".playlist-track");
-    rows.forEach((row, rowIndex) => row.classList.toggle("is-current", rowIndex === index));
-    if (scrollIntoView) rows[index]?.scrollIntoView({ block: "nearest" });
+    let selectedRow = null;
+    rows.forEach((row) => {
+      const isCurrent = Number(row.dataset.trackIndex) === index;
+      row.classList.toggle("is-current", isCurrent);
+      if (isCurrent) {
+        row.setAttribute("aria-current", "true");
+        selectedRow = row;
+      } else {
+        row.removeAttribute("aria-current");
+      }
+    });
+    if (scrollIntoView) selectedRow?.scrollIntoView({ block: "nearest" });
+    renderCurrentTrackTags(index);
     scheduleMarqueeUpdate();
   }
 
   function renderPlaylist() {
     if (!trackSelect || !playlistList) return;
     playlistList.replaceChildren();
+    const selectedTag = trackTagFilter?.value || "";
+    let visibleCount = 0;
     Array.from(trackSelect.options).forEach((option, index) => {
+      const tags = getOptionTags(option);
+      if (selectedTag && !tags.includes(selectedTag)) return;
       const title = option.textContent.trim();
       const artist = option.dataset.artist || "Unknown artist";
       const row = document.createElement("button");
       row.type = "button";
       row.className = "playlist-track";
+      row.dataset.trackIndex = String(index);
+      row.dataset.tags = tags.join(" ");
       const number = document.createElement("span");
       number.className = "playlist-index";
-      number.textContent = String(index + 1).padStart(2, "0");
+      visibleCount += 1;
+      number.textContent = String(visibleCount).padStart(2, "0");
 
       const copy = document.createElement("span");
       copy.className = "playlist-track-copy";
@@ -179,8 +255,18 @@
       playlistList.append(row);
     });
 
-    const count = trackSelect.options.length;
-    if (playlistCount) playlistCount.textContent = `${count} TRACK${count === 1 ? "" : "S"}`;
+    const totalCount = trackSelect.options.length;
+    if (!visibleCount) {
+      const empty = document.createElement("p");
+      empty.className = "playlist-empty";
+      empty.textContent = "NO TRACKS MATCH THIS TAG";
+      playlistList.append(empty);
+    }
+    if (playlistCount) {
+      playlistCount.textContent = selectedTag
+        ? `${visibleCount} / ${totalCount} TRACKS`
+        : `${totalCount} TRACK${totalCount === 1 ? "" : "S"}`;
+    }
     updatePlaylistSelection(trackSelect.selectedIndex);
     scheduleMarqueeUpdate();
     if ("ResizeObserver" in window && playlistPanel) {
