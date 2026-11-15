@@ -18,10 +18,10 @@
     </script>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="preload" href="/radio/assets/fonts/Mona12ColorEmoji.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/radio/radio.css?v=radio-logo-text-inherit-20261115-v1">
+    <link rel="stylesheet" href="/radio/radio.css?v=radio-tags-filter-20261115-v1">
     <script defer src="/radio/vendor/butterchurn-2.6.7.min.js"></script>
     <script defer src="/radio/vendor/butterchurn-presets-minimal-2.4.7.min.js"></script>
-    <script defer src="/radio/radio.js?v=radio-chrome-panels-seek-fader-20261115-v1"></script>
+    <script defer src="/radio/radio.js?v=radio-tag-browser-20261115-v1"></script>
   </head>
   <body class="radio-page" data-theme="p16">
     <script>
@@ -84,6 +84,13 @@
             <div class="playlist-now-playing">
               <div class="now-playing-title marquee-window" id="track-title"><span class="marquee-text">銀の血脈</span></div>
               <p class="track-artist" id="track-artist">本田恭之 / Yasuyuki Honda</p>
+              <div class="current-track-tags" id="current-track-tags" aria-label="Current track tags"></div>
+            </div>
+            <div class="playlist-filter">
+              <label for="track-tag-filter">TAGS</label>
+              <select id="track-tag-filter" aria-label="Filter playlist by tag">
+                <option value="">ALL TRACKS</option>
+              </select>
             </div>
             <div class="track-list" id="track-list"></div>
             <select class="track-select" id="track-select" hidden>
