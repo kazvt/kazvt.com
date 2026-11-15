@@ -890,24 +890,39 @@ import {
     const width = preview.clientWidth;
     const height = preview.clientHeight;
     const pixelsPerWorldUnitAtOne = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    const worldUp = new THREE.Vector3(0, 1, 0);
 
     for (const billboard of billboards) {
       const cameraSpace = camera.worldToLocal(billboard.anchor.clone());
       const depth = -cameraSpace.z;
       const projected = billboard.anchor.clone().project(camera);
-      const visible = depth > camera.near && projected.z >= -1 && projected.z <= 1;
+      const halfHeight = billboard.worldHeight / 2;
+      const projectedTop = billboard.anchor.clone().addScaledVector(worldUp, halfHeight).project(camera);
+      const projectedBottom = billboard.anchor.clone().addScaledVector(worldUp, -halfHeight).project(camera);
+      const visible = depth > camera.near
+        && projected.z >= -1 && projected.z <= 1
+        && projectedTop.z >= -1 && projectedTop.z <= 1
+        && projectedBottom.z >= -1 && projectedBottom.z <= 1;
       if (!visible) {
         billboard.panel.style.visibility = "hidden";
         continue;
       }
 
       const x = (projected.x + 1) * 0.5 * width;
-      const y = (1 - projected.y) * 0.5 * height;
+      const top = (1 - projectedTop.y) * 0.5 * height;
+      const bottom = (1 - projectedBottom.y) * 0.5 * height;
+      const y = (top + bottom) / 2;
       const rawWidth = billboard.worldWidth * pixelsPerWorldUnitAtOne / depth;
       const panelWidth = Math.min(rawWidth, width * 0.78);
+      const panelHeight = Math.abs(bottom - top);
+      if (panelHeight < 1) {
+        billboard.panel.style.visibility = "hidden";
+        continue;
+      }
       billboard.panel.style.left = `${x}px`;
       billboard.panel.style.top = `${y}px`;
       billboard.panel.style.width = `${panelWidth}px`;
+      billboard.panel.style.height = `${panelHeight}px`;
       billboard.panel.style.visibility = "visible";
     }
   }
