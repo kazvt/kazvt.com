@@ -816,7 +816,7 @@
     const actions = {
       play: () => { if (audio.paused && !playbackPending) togglePlay(); },
       pause: () => {
-        if (!audio.paused) {
+        if (!audio.paused || playbackPending) {
           playbackIntent += 1;
           playbackPending = false;
           audio.pause();
