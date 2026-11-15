@@ -84,6 +84,7 @@
   let frameHandle = 0;
   let cycleHandle = 0;
   let playbackIntent = 0;
+  let playbackPending = false;
   let presetBag = [];
   let trackHasPlayed = false;
   let trackTransitionBlackout = false;
@@ -656,13 +657,15 @@
   }
 
   function togglePlay() {
-    if (!audio.paused) {
+    if (!audio.paused || playbackPending) {
       playbackIntent += 1;
+      playbackPending = false;
       audio.pause();
       return;
     }
 
     const intent = ++playbackIntent;
+    playbackPending = true;
 
     try {
       if (!visualizer && !visualsPaused) initVisualizer();
@@ -690,13 +693,16 @@
       handlePlayFailure(error, intent);
       return;
     }
-    Promise.resolve(playRequest).catch((error) => handlePlayFailure(error, intent));
+    Promise.resolve(playRequest).then(() => {
+      if (intent === playbackIntent) playbackPending = false;
+    }).catch((error) => handlePlayFailure(error, intent));
   }
 
   function handlePlayFailure(error, intent) {
     // Track switches and pauses invalidate outstanding play() promises. Some
     // browsers reject the old promise only after the next track has started.
-    if (intent !== playbackIntent || !audio.paused || error?.name === "AbortError") return;
+    if (intent !== playbackIntent || !audio.paused) return;
+    playbackPending = false;
     trackTransitionBlackout = false;
     updateVisualizerFade();
     setMessage("The track could not start. Check the audio file connection and try again.");
@@ -749,6 +755,7 @@
     const option = trackSelect.options[index];
     if (!option) return;
     playbackIntent += 1;
+    playbackPending = false;
     if (recordHistory) rememberTrack(index);
     trackSelect.selectedIndex = index;
     const title = option.textContent.trim();
@@ -808,6 +815,7 @@
       pause: () => {
         if (!audio.paused) {
           playbackIntent += 1;
+          playbackPending = false;
           audio.pause();
         }
       },
@@ -946,8 +954,14 @@
     updateVisualizerFade();
   });
   audio.addEventListener("seeked", updateVisualizerFade);
-  audio.addEventListener("play", updateTransport);
-  audio.addEventListener("pause", updateTransport);
+  audio.addEventListener("play", () => {
+    playbackPending = false;
+    updateTransport();
+  });
+  audio.addEventListener("pause", () => {
+    if (audio.paused) playbackPending = false;
+    updateTransport();
+  });
   audio.addEventListener("ended", () => {
     const hasMoreTracks = trackSelect.selectedIndex < trackSelect.options.length - 1;
     const canShuffleForward = shuffleEnabled && trackSelect.options.length > 1;
