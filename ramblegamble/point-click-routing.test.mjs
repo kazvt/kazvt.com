@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   resolvePointClick,
   resolvePointClickAction,
+  resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
 } from "./point-click-routing.js";
@@ -52,4 +53,15 @@ test("cursor state matches navigation affordances and actionable scene objects",
   assert.equal(resolvePointClickCursor({ zone: "back" }), "back");
   assert.equal(resolvePointClickCursor({ actionable: true }), "hover");
   assert.equal(resolvePointClickCursor(), "default");
+});
+
+test("back recenters the current view, then moves out through its parent context", () => {
+  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: -1 }), { kind: "overview", look: 0 });
+  assert.deepEqual(resolvePointClickBack({ kind: "host", look: 0 }), { kind: "overview", look: 0 });
+  assert.deepEqual(resolvePointClickBack({ kind: "contestant", contestantId: "erin", look: 0 }), {
+    kind: "contestants",
+    look: 0,
+  });
+  assert.deepEqual(resolvePointClickBack({ kind: "contestants", look: 0 }), { kind: "overview", look: 0 });
+  assert.equal(resolvePointClickBack({ kind: "overview", look: 0 }), null);
 });

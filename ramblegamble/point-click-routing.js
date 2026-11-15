@@ -31,3 +31,11 @@ export function resolvePointClickCursor({ zone = "", actionable = false } = {}) 
   if (zone === "left" || zone === "right" || zone === "back") return zone;
   return actionable ? "hover" : "default";
 }
+
+export function resolvePointClickBack(view = {}) {
+  const { kind = "overview", look = 0 } = view;
+  if (look !== 0) return { ...view, look: 0 };
+  if (kind === "contestant") return { kind: "contestants", look: 0 };
+  if (kind !== "overview") return { kind: "overview", look: 0 };
+  return null;
+}
