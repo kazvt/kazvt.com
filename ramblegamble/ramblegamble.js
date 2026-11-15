@@ -5,7 +5,7 @@ import {
   resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
-} from "./point-click-routing.js?v=point-click-20261115-v1";
+} from "./point-click-routing.js?v=host-focus-relative-back-20261115-v1";
 
 (() => {
   "use strict";
@@ -808,7 +808,8 @@ import {
     }
 
     if (interaction.machine === "host") {
-      if (currentView.kind !== "host") transitionToView({ kind: "host" });
+      const action = resolvePointClickAction({ machine: "host", focused: currentView.kind === "host" });
+      if (action === "focus-host") transitionToView({ kind: "host" });
       return;
     }
 
@@ -837,6 +838,7 @@ import {
     if (key === "1") transitionToView({ kind: "contestants" });
     else if (key === "2") transitionToView({ kind: "slot" });
     else if (key === "3") transitionToView({ kind: "roulette" });
+    else if (key === "4") transitionToView({ kind: "host" });
     else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
     else if (key === "arrowdown" || key === "escape" || key === "backspace") goBack();
