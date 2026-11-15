@@ -663,6 +663,7 @@ import {
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
     const chairHit = raycaster.intersectObjects(contestantTargets, false)[0];
+    const hostHit = raycaster.intersectObjects(hostTargets, false)[0];
     const hits = [
       wheelHit && { distance: wheelHit.distance, hit: wheelHit, machine: "roulette", model: rouletteModel },
       slotHit && { distance: slotHit.distance, hit: slotHit, machine: "slot", model: slotsModel },
@@ -671,18 +672,27 @@ import {
         machine: "contestant",
         contestantId: chairHit.object.userData.contestantId,
       },
+      hostHit && {
+        distance: hostHit.distance,
+        machine: "host",
+        hostId: hostHit.object.userData.hostId,
+      },
     ].filter(Boolean).sort((a, b) => a.distance - b.distance);
     const hit = hits[0];
-    if (!hit) return getContestantAtScreen(clientX, clientY, bounds);
-    if (hit.machine === "contestant") return hit;
+    if (!hit) return getSeatAtScreen(clientX, clientY, bounds);
+    if (hit.machine === "contestant" || hit.machine === "host") return hit;
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
     return { ...hit, part: getNamedPart(hit.hit, hit.model, partNames) };
   }
 
-  function getContestantAtScreen(clientX, clientY, canvasBounds) {
+  function getSeatAtScreen(clientX, clientY, canvasBounds) {
     camera.updateMatrixWorld(true);
-    const candidates = contestants.map((contestant) => {
-      const box = new THREE.Box3().setFromObject(contestant.hitProxy);
+    const seats = [
+      ...contestants.map((contestant) => ({ machine: "contestant", entry: contestant })),
+      ...(hostBillboard ? [{ machine: "host", entry: hostBillboard }] : []),
+    ];
+    const candidates = seats.map(({ machine, entry }) => {
+      const box = new THREE.Box3().setFromObject(entry.hitProxy);
       const corners = [];
       for (const x of [box.min.x, box.max.x]) {
         for (const y of [box.min.y, box.max.y]) {
@@ -700,7 +710,11 @@ import {
       if (clientX < left || clientX > right || clientY < top || clientY > bottom) return null;
       const centerX = (left + right) / 2;
       const centerY = (top + bottom) / 2;
-      return { machine: "contestant", contestantId: contestant.id, distance: Math.hypot(clientX - centerX, clientY - centerY) };
+      return {
+        machine,
+        ...(machine === "host" ? { hostId: entry.id } : { contestantId: entry.id }),
+        distance: Math.hypot(clientX - centerX, clientY - centerY),
+      };
     }).filter(Boolean).sort((a, b) => a.distance - b.distance);
     return candidates[0] || null;
   }
@@ -716,11 +730,12 @@ import {
       canGoBack: canGoBack(),
     });
     const interaction = zone ? null : getSceneInteractionAt(event.clientX, event.clientY);
-    const actionable = Boolean(interaction && (
-      interaction.machine !== "contestant"
-      || currentView.kind !== "contestant"
-      || currentView.contestantId !== interaction.contestantId
-    ));
+    const sameFocusedTarget = interaction?.machine === "host"
+      ? currentView.kind === "host"
+      : interaction?.machine === "contestant"
+        && currentView.kind === "contestant"
+        && currentView.contestantId === interaction.contestantId;
+    const actionable = Boolean(interaction && !sameFocusedTarget);
     setGameCursor(resolvePointClickCursor({ zone, actionable }), event.clientX, event.clientY);
   }
 
@@ -789,6 +804,11 @@ import {
       } else if (currentView.kind === "contestants" || currentView.contestantId !== interaction.contestantId) {
         transitionToView({ kind: "contestant", contestantId: interaction.contestantId });
       }
+      return;
+    }
+
+    if (interaction.machine === "host") {
+      if (currentView.kind !== "host") transitionToView({ kind: "host" });
       return;
     }
 
