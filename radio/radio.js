@@ -811,7 +811,7 @@
   function setupMediaSession() {
     if (!mediaSession || typeof mediaSession.setActionHandler !== "function") return;
     const actions = {
-      play: () => { if (audio.paused) togglePlay(); },
+      play: () => { if (audio.paused && !playbackPending) togglePlay(); },
       pause: () => {
         if (!audio.paused) {
           playbackIntent += 1;
