@@ -68,16 +68,32 @@ function normalizeTag(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+function inferTrackArtist(file, details, title) {
+  const explicitArtist = String(details.artist || "").trim();
+  if (explicitArtist && !/^unknown artist$/i.test(explicitArtist)) return explicitArtist;
+
+  const source = `${file} ${title}`.normalize("NFKC").toLowerCase();
+  // The owner credits all of these Takanaka-style covers to Wanye.
+  if (/masayoshi\s+takanaka|\btakanaka\b/.test(source)) return "Wanye";
+  if (source.includes("ハヌマーン") || source.includes("ハイカラさんが通る")) return "Hanuman (ハヌマーン)";
+  if (source.includes("関俊彦")) return "Toshihiko Seki (関俊彦)";
+
+  return explicitArtist || "Unknown artist";
+}
+
 function inferTrackTags(file, details, title, artist) {
   const source = `${file} ${title} ${artist}`
     .normalize("NFKC")
     .replace(/DONTTOUCH/gi, "")
     .toLowerCase();
-  const tags = new Set(["instrumental"]);
+  const detailTags = Array.isArray(details.tags) ? details.tags : [];
+  const nonInstrumental = details.instrumental === false
+    || detailTags.some((tag) => normalizeTag(tag) === "vocal");
+  const tags = new Set(nonInstrumental ? [] : ["instrumental"]);
 
-  for (const tag of Array.isArray(details.tags) ? details.tags : []) {
+  for (const tag of detailTags) {
     const normalized = normalizeTag(tag);
-    if (normalized) tags.add(normalized);
+    if (normalized && !(nonInstrumental && normalized === "instrumental")) tags.add(normalized);
   }
 
   if (/masayoshi\s+takanaka|\btakanaka\b/.test(source)) {
@@ -91,8 +107,15 @@ function inferTrackTags(file, details, title, artist) {
     tags.add("christmas");
   }
   if (/\b(?:anime|flcl|nazo no kanojo)\b|フリクリ/.test(source)) tags.add("anime");
+  if (/\b(?:ost|soundtrack)\b/.test(source)) tags.add("ost");
   if (/\b(?:ost|soundtrack|movie|film)\b/.test(source)) tags.add("soundtrack");
   if (/\bdeep[ -]?house\b/.test(source)) tags.add("deep-house");
+  if (/\bhouse\b/.test(source)) tags.add("house");
+  if (/\bnew[ -]?age\b/.test(source)) tags.add("new-age");
+  if (/\btechno\b/.test(source)) tags.add("techno");
+  if (/\bhealing\b/.test(source)) tags.add("healing");
+  if (/\bremix\b|\bmix\b/.test(source)) tags.add("remix");
+  if (/\bkay[oō]kyoku\b|歌謡曲/.test(source)) tags.add("kayo-kyoku");
   if (/\bsh[oō]my[oō]\b/.test(source)) tags.add("shomyo");
   if (/\bjapan(?:ese)?\b|[\u3040-\u30ff\u3400-\u9fff]/u.test(source)) tags.add("japanese");
   if (/\bwalearic\b/.test(source)) tags.add("walearic");
@@ -115,10 +138,11 @@ async function buildRadioPlaylist() {
   const files = [...new Set([...rootTracks, ...folderTracks])];
   const tracks = files.map((file) => {
     const details = metadata[file] || {};
+    const title = details.title || titleFromFilename(file);
     return {
       file,
-      title: details.title || titleFromFilename(file),
-      artist: details.artist || "Unknown artist",
+      title,
+      artist: inferTrackArtist(file, details, title),
       order: Number.isFinite(details.order) ? details.order : 10000,
       isDefault: details.default === true,
     };
