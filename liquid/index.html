@@ -202,6 +202,7 @@
       const animatedValues = new Map();
       const manualValues = new Map();
       let oscillationPeriodMs = 6000, automationElapsed = 0;
+      let oscillatorSaveTimer = 0;
       const colorIds = ["colorLow", "colorMid", "colorHigh"];
       const colorPickers = new Map(Array.from(document.querySelectorAll(".color-control")).map(root => {
         const id = root.dataset.colorControl;
@@ -594,6 +595,13 @@
         oscillationPeriods.set(id, nextPeriod);
         return true;
       }
+      function scheduleOscillatorSave() {
+        if (oscillatorSaveTimer) window.clearTimeout(oscillatorSaveTimer);
+        oscillatorSaveTimer = window.setTimeout(() => {
+          oscillatorSaveTimer = 0;
+          saveSettings();
+        }, 180);
+      }
       function showOscillatorSpeed(id, steps) {
         const currentPeriod = oscillatorPeriod(id);
         const nextPeriod = Math.round(currentPeriod * Math.pow(1.12, steps));
@@ -608,7 +616,7 @@
             ui.speedFeedbackTimer = 0;
           }, 700);
         }
-        saveSettings();
+        scheduleOscillatorSave();
         return true;
       }
       function oscillatedValue(id, elapsedMs) {
@@ -707,6 +715,8 @@
           });
           lower.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
           upper.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
+          lower.setAttribute("aria-description", "Alt+ArrowUp or Alt+ArrowDown changes oscillator speed");
+          upper.setAttribute("aria-description", "Alt+ArrowUp or Alt+ArrowDown changes oscillator speed");
           syncAutomationRangeUI(id);
         });
         updateAutomationValues(automationElapsed);
