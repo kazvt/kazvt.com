@@ -1,0 +1,7 @@
+{
+  "defaultMode": "loudness",
+  "targetLufs": -16,
+  "truePeakCeilingDbtp": -1.5,
+  "maximumGainDb": 12,
+  "tracks": {}
+}
