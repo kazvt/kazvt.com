@@ -39,6 +39,11 @@ body.radio-page {
   transition: color 180ms ease, background-color 180ms ease;
 }
 
+/* Keep palette colors and textures, but use one typeface throughout the radio. */
+html.radio-document body.radio-page {
+  --site-font: "Comic Sans MS", "Comic Sans", cursive;
+}
+
 .radio-page *,
 .radio-page *::before,
 .radio-page *::after { box-sizing: border-box; }
