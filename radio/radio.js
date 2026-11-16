@@ -76,6 +76,7 @@
   let audioContext = null;
   let audioContextResumePromise = null;
   let mediaSource = null;
+  let normalizationGain = null;
   let mediaSourceConnected = false;
   let visualizer = null;
   let presetMap = {};
@@ -432,16 +433,84 @@
   }
 
   function ensureAudioContext() {
-    if (audioContext && audioContext.state !== "closed") return audioContext;
-    if (mediaSource) throw new Error("The existing audio route cannot be restarted by this browser.");
-    const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextConstructor) throw new Error("This browser does not support Web Audio.");
-    const context = new AudioContextConstructor();
-    audioContext = context;
-    const onStateChange = () => handleAudioContextStateChange(context);
-    if (typeof context.addEventListener === "function") context.addEventListener("statechange", onStateChange);
-    else context.onstatechange = onStateChange;
+    let context = audioContext;
+    if (!context || context.state === "closed") {
+      if (mediaSource) throw new Error("The existing audio route cannot be restarted by this browser.");
+      const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextConstructor) throw new Error("This browser does not support Web Audio.");
+      context = new AudioContextConstructor();
+      audioContext = context;
+      const onStateChange = () => handleAudioContextStateChange(context);
+      if (typeof context.addEventListener === "function") context.addEventListener("statechange", onStateChange);
+      else context.onstatechange = onStateChange;
+    }
+
+    // Keep loudness matching in the audio path itself, independently of the
+    // visualiser. A WebGL failure must not bypass this gain stage or silence
+    // the media element.
+    try {
+      if (!mediaSource) mediaSource = context.createMediaElementSource(audio);
+      if (!normalizationGain) normalizationGain = context.createGain();
+      if (!mediaSourceConnected) {
+        mediaSource.connect(normalizationGain);
+        normalizationGain.connect(context.destination);
+        mediaSourceConnected = true;
+      }
+      applyTrackNormalization();
+    } catch (error) {
+      // If a browser rejects GainNode routing, preserve ordinary playback as a
+      // fallback. Normalisation will be skipped, but the track remains audible.
+      if (mediaSource && !mediaSourceConnected) {
+        try {
+          mediaSource.connect(context.destination);
+          mediaSourceConnected = true;
+        } catch {}
+      }
+      throw error;
+    }
     return context;
+  }
+
+  function normalizationGainFor(option) {
+    if (!option) return 1;
+    const mode = option.dataset.normalizationMode || trackSelect.dataset.normalizationDefaultMode || "loudness";
+    if (mode === "off") return 1;
+
+    const measuredPeak = Number(option.dataset.truePeakDbtp);
+    if (!Number.isFinite(measuredPeak)) return 1;
+    const peakCeiling = Number(option.dataset.normalizationTruePeakCeilingDbtp
+      ?? trackSelect.dataset.normalizationTruePeakCeilingDbtp ?? -1.5);
+    const maximumGain = Math.max(0, Number(option.dataset.normalizationMaximumGainDb
+      ?? trackSelect.dataset.normalizationMaximumGainDb ?? 12));
+    if (!Number.isFinite(peakCeiling) || !Number.isFinite(maximumGain)) return 1;
+
+    let requestedGainDb;
+    if (mode === "loudness") {
+      const measuredLufs = Number(option.dataset.integratedLufs);
+      const targetLufs = Number(option.dataset.normalizationTargetLufs
+        ?? trackSelect.dataset.normalizationTargetLufs ?? -16);
+      if (!Number.isFinite(measuredLufs) || !Number.isFinite(targetLufs)) return 1;
+      requestedGainDb = targetLufs - measuredLufs;
+    } else if (mode === "peak") {
+      requestedGainDb = peakCeiling - measuredPeak;
+    } else {
+      return 1;
+    }
+
+    // Match integrated loudness where possible, but never push true peaks past
+    // the configured ceiling. This is gain-only normalization: it does not
+    // compress or otherwise reshape a track that cannot reach the target.
+    const peakSafeGainDb = peakCeiling - measuredPeak;
+    const appliedGainDb = Math.min(requestedGainDb, peakSafeGainDb, maximumGain);
+    return 10 ** (appliedGainDb / 20);
+  }
+
+  function applyTrackNormalization(option = trackSelect.options[trackSelect.selectedIndex]) {
+    if (!normalizationGain || !audioContext || audioContext.state === "closed") return;
+    const now = audioContext.currentTime;
+    const nextGain = normalizationGainFor(option);
+    normalizationGain.gain.cancelScheduledValues(now);
+    normalizationGain.gain.setTargetAtTime(nextGain, now, 0.025);
   }
 
   function resumeAudioContext() {
@@ -489,12 +558,7 @@
       if (!candidate) throw new Error("This browser could not start the WebGL visualiser.");
 
       // A media element may only be routed through one MediaElementAudioSourceNode.
-      // Keep that node alive across visualiser retries and connect it only once.
-      if (!mediaSource) mediaSource = context.createMediaElementSource(audio);
-      if (!mediaSourceConnected) {
-        mediaSource.connect(context.destination);
-        mediaSourceConnected = true;
-      }
+      // ensureAudioContext() keeps its single output route alive on visualiser retries.
       candidate.connectAudio(mediaSource);
       candidate.loadPreset(presetMap[currentPresetKey], 0);
     } catch (error) {
@@ -761,6 +825,7 @@
     playbackPending = false;
     if (recordHistory) rememberTrack(index);
     trackSelect.selectedIndex = index;
+    applyTrackNormalization(option);
     const title = option.textContent.trim();
     updateMediaSessionMetadata();
     setMarqueeText(trackTitle, title);
