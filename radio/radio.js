@@ -77,6 +77,7 @@
   let audioContextResumePromise = null;
   let mediaSource = null;
   let normalizationGain = null;
+  let normalizationPeakGuard = null;
   let mediaSourceConnected = false;
   let visualizer = null;
   let presetMap = {};
@@ -446,14 +447,28 @@
     }
 
     // Keep loudness matching in the audio path itself, independently of the
-    // visualiser. A WebGL failure must not bypass this gain stage or silence
-    // the media element.
+    // visualiser. A WebGL failure must not bypass this processing path or
+    // silence the media element.
     try {
       if (!mediaSource) mediaSource = context.createMediaElementSource(audio);
       if (!normalizationGain) normalizationGain = context.createGain();
       if (!mediaSourceConnected) {
+        try {
+          normalizationPeakGuard = context.createDynamicsCompressor();
+          normalizationPeakGuard.knee.value = 0;
+          normalizationPeakGuard.ratio.value = 20;
+          normalizationPeakGuard.attack.value = 0.003;
+          normalizationPeakGuard.release.value = 0.12;
+          normalizationGain.connect(normalizationPeakGuard);
+          normalizationPeakGuard.connect(context.destination);
+        } catch {
+          // Gain-only normalization is still useful on older or partial Web
+          // Audio implementations that do not provide a compressor node.
+          try { normalizationGain.disconnect(); } catch {}
+          normalizationPeakGuard = null;
+          normalizationGain.connect(context.destination);
+        }
         mediaSource.connect(normalizationGain);
-        normalizationGain.connect(context.destination);
         mediaSourceConnected = true;
       }
       applyTrackNormalization();
@@ -472,7 +487,61 @@
     return context;
   }
 
-  function normalizationGainFor(option) {
+  function applyTrackNormalization(option = trackSelect.options[trackSelect.selectedIndex]) {
+    if (!normalizationGain || !audioContext || audioContext.state === "closed") return;
+    const now = audioContext.currentTime;
+    const mode = option?.dataset.normalizationMode || trackSelect.dataset.normalizationDefaultMode || "loudness";
+    const measuredPeak = Number(option?.dataset.truePeakDbtp);
+    const peakCeiling = Number(option?.dataset.normalizationTruePeakCeilingDbtp
+      ?? trackSelect.dataset.normalizationTruePeakCeilingDbtp ?? -1.5);
+    const maximumGain = Math.max(0, Number(option?.dataset.normalizationMaximumGainDb
+      ?? trackSelect.dataset.normalizationMaximumGainDb ?? 12));
+    const peakGuardMargin = Math.max(0, Number(option?.dataset.normalizationPeakGuardMarginDb
+      ?? trackSelect.dataset.normalizationPeakGuardMarginDb ?? 1.5));
+    let appliedGainDb = 0;
+    let usePeakGuard = false;
+
+    if (mode === "loudness" && Number.isFinite(measuredPeak)
+      && Number.isFinite(peakCeiling) && Number.isFinite(maximumGain)) {
+      const measuredLufs = Number(option.dataset.integratedLufs);
+      const targetLufs = Number(option.dataset.normalizationTargetLufs
+        ?? trackSelect.dataset.normalizationTargetLufs ?? -16);
+      if (Number.isFinite(measuredLufs) && Number.isFinite(targetLufs)) {
+        const requestedGainDb = targetLufs - measuredLufs;
+        if (normalizationPeakGuard) {
+          appliedGainDb = Math.min(requestedGainDb, maximumGain);
+          usePeakGuard = true;
+        } else {
+          // Without a compressor, preserve the measured ceiling with gain-only
+          // playback rather than letting a quiet transient clip the output.
+          appliedGainDb = Math.min(requestedGainDb, peakCeiling - measuredPeak, maximumGain);
+        }
+      }
+    } else if (mode === "peak" && Number.isFinite(measuredPeak)
+      && Number.isFinite(peakCeiling) && Number.isFinite(maximumGain)) {
+      appliedGainDb = Math.min(peakCeiling - measuredPeak, maximumGain);
+    }
+
+    const nextGain = 10 ** (appliedGainDb / 20);
+    normalizationGain.gain.cancelScheduledValues(now);
+    normalizationGain.gain.setTargetAtTime(nextGain, now, 0.025);
+
+    if (normalizationPeakGuard) {
+      const guardThreshold = Math.max(-100, Math.min(0, peakCeiling - peakGuardMargin));
+      normalizationPeakGuard.threshold.cancelScheduledValues(now);
+      normalizationPeakGuard.threshold.setTargetAtTime(guardThreshold, now, 0.025);
+      normalizationPeakGuard.ratio.cancelScheduledValues(now);
+      normalizationPeakGuard.ratio.setTargetAtTime(usePeakGuard ? 20 : 1, now, 0.025);
+    }
+  }
+
+  /*
+   * Loudness mode measures integrated LUFS offline, then applies only the
+   * measured track gain here. The guard above engages solely when that gain
+   * would create excessive peaks; it is deliberately disabled in peak/off
+   * modes so those settings retain their predictable gain-only behavior.
+   */
+  function unusedNormalizationModeReference(option) {
     if (!option) return 1;
     const mode = option.dataset.normalizationMode || trackSelect.dataset.normalizationDefaultMode || "loudness";
     if (mode === "off") return 1;
@@ -504,14 +573,6 @@
     const peakSafeGainDb = peakCeiling - measuredPeak;
     const appliedGainDb = Math.min(requestedGainDb, peakSafeGainDb, maximumGain);
     return 10 ** (appliedGainDb / 20);
-  }
-
-  function applyTrackNormalization(option = trackSelect.options[trackSelect.selectedIndex]) {
-    if (!normalizationGain || !audioContext || audioContext.state === "closed") return;
-    const now = audioContext.currentTime;
-    const nextGain = normalizationGainFor(option);
-    normalizationGain.gain.cancelScheduledValues(now);
-    normalizationGain.gain.setTargetAtTime(nextGain, now, 0.025);
   }
 
   function resumeAudioContext() {
