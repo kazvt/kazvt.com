@@ -464,6 +464,7 @@
         try {
           mediaSource.connect(context.destination);
           mediaSourceConnected = true;
+          return context;
         } catch {}
       }
       throw error;
