@@ -487,6 +487,11 @@
     return context;
   }
 
+  /*
+   * Loudness mode measures integrated LUFS offline, then applies the measured
+   * track gain. The built-in peak guard engages only when that gain would make
+   * peaks excessive; peak/off modes remain gain-only.
+   */
   function applyTrackNormalization(option = trackSelect.options[trackSelect.selectedIndex]) {
     if (!normalizationGain || !audioContext || audioContext.state === "closed") return;
     const now = audioContext.currentTime;
@@ -533,46 +538,6 @@
       normalizationPeakGuard.ratio.cancelScheduledValues(now);
       normalizationPeakGuard.ratio.setTargetAtTime(usePeakGuard ? 20 : 1, now, 0.025);
     }
-  }
-
-  /*
-   * Loudness mode measures integrated LUFS offline, then applies only the
-   * measured track gain here. The guard above engages solely when that gain
-   * would create excessive peaks; it is deliberately disabled in peak/off
-   * modes so those settings retain their predictable gain-only behavior.
-   */
-  function unusedNormalizationModeReference(option) {
-    if (!option) return 1;
-    const mode = option.dataset.normalizationMode || trackSelect.dataset.normalizationDefaultMode || "loudness";
-    if (mode === "off") return 1;
-
-    const measuredPeak = Number(option.dataset.truePeakDbtp);
-    if (!Number.isFinite(measuredPeak)) return 1;
-    const peakCeiling = Number(option.dataset.normalizationTruePeakCeilingDbtp
-      ?? trackSelect.dataset.normalizationTruePeakCeilingDbtp ?? -1.5);
-    const maximumGain = Math.max(0, Number(option.dataset.normalizationMaximumGainDb
-      ?? trackSelect.dataset.normalizationMaximumGainDb ?? 12));
-    if (!Number.isFinite(peakCeiling) || !Number.isFinite(maximumGain)) return 1;
-
-    let requestedGainDb;
-    if (mode === "loudness") {
-      const measuredLufs = Number(option.dataset.integratedLufs);
-      const targetLufs = Number(option.dataset.normalizationTargetLufs
-        ?? trackSelect.dataset.normalizationTargetLufs ?? -16);
-      if (!Number.isFinite(measuredLufs) || !Number.isFinite(targetLufs)) return 1;
-      requestedGainDb = targetLufs - measuredLufs;
-    } else if (mode === "peak") {
-      requestedGainDb = peakCeiling - measuredPeak;
-    } else {
-      return 1;
-    }
-
-    // Match integrated loudness where possible, but never push true peaks past
-    // the configured ceiling. This is gain-only normalization: it does not
-    // compress or otherwise reshape a track that cannot reach the target.
-    const peakSafeGainDb = peakCeiling - measuredPeak;
-    const appliedGainDb = Math.min(requestedGainDb, peakSafeGainDb, maximumGain);
-    return 10 ** (appliedGainDb / 20);
   }
 
   function resumeAudioContext() {
