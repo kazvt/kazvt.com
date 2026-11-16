@@ -201,6 +201,10 @@ async function buildRadioPlaylist() {
   const selectPattern = /<select class="track-select" id="track-select"[^>]*>/;
   if (!selectPattern.test(html)) throw new Error("The radio track selector was not found.");
   const withNormalizationSettings = html.replace(selectPattern, `${TRACK_SELECT_START} ${normalizationAttributes} hidden>`);
+  const start = withNormalizationSettings.indexOf(START_MARKER);
+  const end = withNormalizationSettings.indexOf(END_MARKER, start + START_MARKER.length);
+  if (start < 0 || end < 0) throw new Error("Radio playlist generation markers are missing from radio/index.html.");
+  const contentStart = start + START_MARKER.length;
   const updated = `${withNormalizationSettings.slice(0, contentStart)}\n${options}\n                ${withNormalizationSettings.slice(end)}`;
   if (updated !== html) {
     await writeFile(INDEX_PATH, updated, "utf8");
