@@ -9,8 +9,10 @@ const ASSET_ROOT = path.join(ROOT, "radio", "assets");
 const TRACKS_ROOT = path.join(ASSET_ROOT, "tracks");
 const INDEX_PATH = path.join(ROOT, "radio", "index.html");
 const METADATA_PATH = path.join(ROOT, "radio", "track-metadata.json");
+const NORMALIZATION_PATH = path.join(ROOT, "radio", "normalization.json");
 const START_MARKER = "<!-- AUTO-GENERATED RADIO PLAYLIST START -->";
 const END_MARKER = "<!-- AUTO-GENERATED RADIO PLAYLIST END -->";
+const TRACK_SELECT_START = '<select class="track-select" id="track-select"';
 const AUDIO_EXTENSIONS = new Set([".aac", ".m4a", ".mp3", ".ogg", ".opus", ".wav", ".webm"]);
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
@@ -55,6 +57,14 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function finiteSetting(settings, key, fallback) {
+  return Number.isFinite(settings?.[key]) ? settings[key] : fallback;
+}
+
+function validNormalizationMode(mode, fallback = "loudness") {
+  return ["off", "peak", "loudness"].includes(mode) ? mode : fallback;
 }
 
 function encodedAssetUrl(relativePath) {
@@ -131,6 +141,14 @@ function inferTrackTags(file, details, title, artist) {
 
 async function buildRadioPlaylist() {
   const metadata = JSON.parse(await readFile(METADATA_PATH, "utf8"));
+  const normalization = JSON.parse(await readFile(NORMALIZATION_PATH, "utf8"));
+  const defaultMode = validNormalizationMode(normalization.defaultMode);
+  const targetLufs = finiteSetting(normalization, "targetLufs", -16);
+  const truePeakCeilingDbtp = finiteSetting(normalization, "truePeakCeilingDbtp", -1.5);
+  const maximumGainDb = Math.max(0, finiteSetting(normalization, "maximumGainDb", 12));
+  const normalizationTracks = normalization.tracks && typeof normalization.tracks === "object"
+    ? normalization.tracks
+    : {};
   const [rootTracks, folderTracks] = await Promise.all([
     collectAudioFiles(ASSET_ROOT),
     collectAudioFiles(TRACKS_ROOT, "tracks", true),
@@ -157,8 +175,15 @@ async function buildRadioPlaylist() {
     const artist = escapeHtml(track.artist);
     const title = escapeHtml(track.title);
     const tags = escapeHtml(inferTrackTags(track.file, metadata[track.file] || {}, track.title, track.artist).join(" "));
+    const loudness = normalizationTracks[track.file] || {};
+    const mode = validNormalizationMode(loudness.mode, defaultMode);
+    const integratedLufs = Number.isFinite(loudness.integratedLufs) ? ` data-integrated-lufs="${loudness.integratedLufs}"` : "";
+    const truePeak = Number.isFinite(loudness.truePeakDbtp) ? ` data-true-peak-dbtp="${loudness.truePeakDbtp}"` : "";
+    const trackTarget = finiteSetting(loudness, "targetLufs", targetLufs);
+    const trackCeiling = finiteSetting(loudness, "truePeakCeilingDbtp", truePeakCeilingDbtp);
+    const trackMaximumGain = Math.max(0, finiteSetting(loudness, "maximumGainDb", maximumGainDb));
     const selected = track.isDefault ? " selected" : "";
-    return `                <option value="${value}" data-artist="${artist}" data-tags="${tags}"${selected}>${title}</option>`;
+    return `                <option value="${value}" data-artist="${artist}" data-tags="${tags}" data-normalization-mode="${mode}" data-normalization-target-lufs="${trackTarget}" data-normalization-true-peak-ceiling-dbtp="${trackCeiling}" data-normalization-maximum-gain-db="${trackMaximumGain}"${integratedLufs}${truePeak}${selected}>${title}</option>`;
   }).join("\n");
 
   const html = await readFile(INDEX_PATH, "utf8");
@@ -167,12 +192,26 @@ async function buildRadioPlaylist() {
   if (start < 0 || end < 0) throw new Error("Radio playlist generation markers are missing from radio/index.html.");
 
   const contentStart = start + START_MARKER.length;
-  const updated = `${html.slice(0, contentStart)}\n${options}\n                ${html.slice(end)}`;
+  const normalizationAttributes = [
+    `data-normalization-default-mode="${defaultMode}"`,
+    `data-normalization-target-lufs="${targetLufs}"`,
+    `data-normalization-true-peak-ceiling-dbtp="${truePeakCeilingDbtp}"`,
+    `data-normalization-maximum-gain-db="${maximumGainDb}"`,
+  ].join(" ");
+  const selectPattern = /<select class="track-select" id="track-select"[^>]*>/;
+  if (!selectPattern.test(html)) throw new Error("The radio track selector was not found.");
+  const withNormalizationSettings = html.replace(selectPattern, `${TRACK_SELECT_START} ${normalizationAttributes} hidden>`);
+  const updated = `${withNormalizationSettings.slice(0, contentStart)}\n${options}\n                ${withNormalizationSettings.slice(end)}`;
   if (updated !== html) {
     await writeFile(INDEX_PATH, updated, "utf8");
     console.log(`Updated radio playlist manifest with ${tracks.length} tracks.`);
   } else {
     console.log(`Radio playlist manifest is current (${tracks.length} tracks).`);
+  }
+  const unmeasured = tracks.filter((track) => !Number.isFinite(normalizationTracks[track.file]?.integratedLufs)
+    || !Number.isFinite(normalizationTracks[track.file]?.truePeakDbtp));
+  if (unmeasured.length) {
+    console.warn(`${unmeasured.length} track(s) have no loudness measurement and will play at original level until analyzed.`);
   }
 }
 
