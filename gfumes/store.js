@@ -79,11 +79,11 @@
   $('menuToggle').addEventListener('click',()=>{const open=menu.classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));});
   document.querySelectorAll('.mobile-nav a').forEach(el=>el.addEventListener('click',closeMobileNav));
 
-  const PHASES={idle:{speech:'AWAITING PRODUCT INPUT...',status:'IDLE'},unbox:{speech:'WAIT. IT\'S EMPTY?!',status:'UNBOXING_NOTHING'},hype:{speech:'FULL BLAST!',status:'OVERHYPED'}};
+  const PHASES={idle:{speech:'AWAITING PRODUCT INPUT...'},unbox:{speech:'WAIT. IT\'S EMPTY?!'},hype:{speech:'FULL BLAST!'}};
   function setPhase(phase){
     if(!PHASES[phase])return;
     document.querySelectorAll('[data-phase]').forEach(b=>b.classList.toggle('active',b.dataset.phase===phase));
-    $('demoSpeech').textContent=PHASES[phase].speech;$('demoStatus').textContent=PHASES[phase].status;
+    $('demoSpeech').textContent=PHASES[phase].speech;
     $('demoParticles').dataset.phase=phase;
     $('demoParticles').style.opacity=phase==='idle'?'0':phase==='unbox'?'0.7':'1';
     document.dispatchEvent(new CustomEvent('gfumes:phase',{detail:{phase}}));
