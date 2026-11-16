@@ -19,11 +19,11 @@ Example per-track override:
 }
 ```
 
-The analyzer uses FFmpeg's `loudnorm` measurement pass to save integrated LUFS and true-peak data for all active tracks. Loudness mode applies measured LUFS gain, then uses the browser's built-in DynamicsCompressorNode only if peaks need reining in; peak mode uses gain-only peak matching. No audio files are rewritten. The browser compressor is a soft guard, not a mastering-grade true-peak limiter, so its exact result can vary slightly by browser:
+The analyzer uses FFmpeg's `loudnorm` measurement pass to save integrated LUFS and true-peak data for all active tracks. Loudness mode applies measured LUFS gain, then uses the browser's built-in DynamicsCompressorNode only if peaks need reining in; peak mode uses gain-only peak matching. No audio files are rewritten. The browser compressor is a soft guard, not a mastering-grade true-peak limiter, so its exact result can vary slightly by browser. The site-generation workflow analyzes added or changed audio files automatically before rebuilding the playlist:
 
 ```powershell
 node scripts/analyze-radio-loudness.mjs
 node scripts/build-radio-playlist.mjs
 ```
 
-After adding files, run those commands in order. Unmeasured tracks intentionally play at their source level until analyzed.
+After adding files locally, run those commands in order. The analyzer stores a SHA-256 signature so unchanged tracks are skipped in `--changed-only` mode. Unmeasured tracks intentionally play at their source level until analyzed.

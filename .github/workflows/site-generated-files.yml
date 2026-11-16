@@ -19,6 +19,8 @@ on:
       - "scripts/build-emote-manifest.py"
       - "obs/trivia-rewards-widget/generate-reward-catalog.mjs"
       - "scripts/build-radio-playlist.mjs"
+      - "scripts/analyze-radio-loudness.mjs"
+      - "radio/normalization.json"
       - "radio/track-metadata.json"
       - "radio/assets/tracks/**"
       - "radio/assets/*.aac"
@@ -51,6 +53,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+      - name: Check whether radio audio files changed
+        id: radio_audio
+        shell: bash
+        env:
+          EVENT_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          if [[ -z "$EVENT_BEFORE" || "$EVENT_BEFORE" =~ ^0+$ ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed_audio="$(git diff --name-only "$EVENT_BEFORE" "$PUSH_SHA" -- radio/assets)"
+          if printf '%s\n' "$changed_audio" | grep -Eiq '^radio/assets/(tracks/.*\.(aac|m4a|mp3|ogg|opus|wav|webm)|[^/]+\.(aac|m4a|mp3|ogg|opus|wav|webm))$'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install FFmpeg for radio loudness analysis
+        if: steps.radio_audio.outputs.changed == 'true'
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes ffmpeg
+          fi
+      - name: Analyze new or changed radio tracks
+        if: steps.radio_audio.outputs.changed == 'true'
+        run: node scripts/analyze-radio-loudness.mjs --changed-only
       - name: Regenerate generated site data and manifests
         run: |
           node scripts/build-reward-pages.mjs
