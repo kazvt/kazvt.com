@@ -1160,7 +1160,7 @@
       toggleShuffle();
     } else if (key === "n" && !event.repeat) {
       changeTrack(1);
-    } else if (key === "p" && !event.repeat) {
+    } else if ((key === "p" || key === "b") && !event.repeat) {
       changeTrack(-1);
     }
   });
