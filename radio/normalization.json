@@ -8,687 +8,961 @@
     "tracks/blue-fire-purple-eyes-in-the-dark.mp3": {
       "integratedLufs": -13.2,
       "truePeakDbtp": 0.8,
-      "loudnessRangeLufs": 3.5
+      "loudnessRangeLufs": 3.5,
+      "sourceSizeBytes": 3340679,
+      "sourceSha256": "ddf3ceca75be5d5fbb05d6443bcb5c7af7241b37235ab02fcaf1f69235f85137"
     },
     "tracks/A CYBER'S WORLD？ from Deltarune in the style of Masayoshi Takanaka 🎆.mp3": {
       "integratedLufs": -9.42,
       "truePeakDbtp": -0.05,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 2931979,
+      "sourceSha256": "e7dde9910c1e8fa2296c4df8adaad482142bed13700b1b8f2cfc06249a7265f7"
     },
     "tracks/A DARK ZONE from Deltarune in the style of Masayoshi Takanaka 🎃.mp3": {
       "integratedLufs": -9.34,
       "truePeakDbtp": 0.19,
-      "loudnessRangeLufs": 2.6
+      "loudnessRangeLufs": 2.6,
+      "sourceSizeBytes": 4228608,
+      "sourceSha256": "c41db1bc35dea59a1533ccf12d935e9096045c382ed3f03b70118d37f69eb7b9"
     },
     "tracks/And Now For Today's Sponsors! from Deltarune in the style of Masayoshi Takanaka 📺.mp3": {
       "integratedLufs": -8.31,
       "truePeakDbtp": -0.03,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 2561332,
+      "sourceSha256": "71d4c2a3448db392ed0ae8e71c594ec472e407f013016d127dd182701084595b"
     },
     "tracks/a-song-for-popping-bloons.mp3": {
       "integratedLufs": -16.09,
       "truePeakDbtp": -0.67,
-      "loudnessRangeLufs": 8.2
+      "loudnessRangeLufs": 8.2,
+      "sourceSizeBytes": 4757792,
+      "sourceSha256": "dea8a0e69e8a505015c90a9898724e5f12124c4792af17e778b00b1536f3590f"
     },
     "tracks/Animal Crossing New Horizons Theme but it's a Masayoshi Takanaka Song🏝️.mp3": {
       "integratedLufs": -8.36,
       "truePeakDbtp": -0.36,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 2331080,
+      "sourceSha256": "9693a56fce298d4680625094328c9ab5014af6ae37bc709a225dc42bf7f4753e"
     },
     "tracks/Another Day In Hometown from Deltarune in the style of Masayoshi Takanaka 🌆.mp3": {
       "integratedLufs": -8.94,
       "truePeakDbtp": -0.46,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2454700,
+      "sourceSha256": "3b602bfaddde4a05731eb287c24e66787829d9c661025c926210ee84fabf6804"
     },
     "tracks/Athletic Theme from Yoshi's Island, but it's a Masayoshi Takanaka Song 🏝️.mp3": {
       "integratedLufs": -9.6,
       "truePeakDbtp": -0.77,
-      "loudnessRangeLufs": 1.3
+      "loudnessRangeLufs": 1.3,
+      "sourceSizeBytes": 2466778,
+      "sourceSha256": "189c8f9ccb087d3939403fb82edc2abec2d6f2fc783a45cc0e1f3c145b172fbf"
     },
     "tracks/Attack of the Killer Queen from Deltarune in the style of Masayoshi Takanaka 💻.mp3": {
       "integratedLufs": -8.91,
       "truePeakDbtp": -0.37,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 2510529,
+      "sourceSha256": "d529c69cc86dc9af441f89fa7e15b49d65eaced3eacd982c049c1afaf2a70898"
     },
     "tracks/Azalea Town from Pokémon, but it's a Masayoshi Takanaka Song 🌺.mp3": {
       "integratedLufs": -8.53,
       "truePeakDbtp": -0.18,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2308808,
+      "sourceSha256": "6ac009513a257aa8b6ab626222f8f483d339774dfe7c26064558d8ea940a2539"
     },
     "tracks/Azure Blue World from Sonic Adventure, but its a Masayoshi Takanaka song.mp3": {
       "integratedLufs": -8.43,
       "truePeakDbtp": -0.17,
-      "loudnessRangeLufs": 0.6
+      "loudnessRangeLufs": 0.6,
+      "sourceSizeBytes": 3077414,
+      "sourceSha256": "64168c79f2520c502b71fe1ce0e5af48a1a0595c1669874d9d4de0a4e11ce542"
     },
     "tracks/Balatro OST in the style of Masayoshi Takanaka (Slow 7⧸4 Version).mp3": {
       "integratedLufs": -8.14,
       "truePeakDbtp": -0.89,
-      "loudnessRangeLufs": 1.2
+      "loudnessRangeLufs": 1.2,
+      "sourceSizeBytes": 10486338,
+      "sourceSha256": "b893cbac08c96203ca59f8ca60574a77b28d926e1cac3cb2595030a788a638c9"
     },
     "tracks/Beach from Plok! in the style of Masayoshi Takanaka ❗.mp3": {
       "integratedLufs": -9.56,
       "truePeakDbtp": 0.18,
-      "loudnessRangeLufs": 1.4
+      "loudnessRangeLufs": 1.4,
+      "sourceSizeBytes": 6263325,
+      "sourceSha256": "b5ca5f29389f8b0c097b9e6a8132abaddbfc6139e3815bd2b7265ff7b211bdfa"
     },
     "tracks/BIG SHOT from Deltarune in the style of Masayoshi Takanaka 🟣🟡.mp3": {
       "integratedLufs": -8.47,
       "truePeakDbtp": -0.42,
-      "loudnessRangeLufs": 1.4
+      "loudnessRangeLufs": 1.4,
+      "sourceSizeBytes": 2782868,
+      "sourceSha256": "f637ce40bb7bf56647037c62da1c1b9aaa70af8f0e90eacfb291180d42c6af6f"
     },
     "tracks/Black Knife from Deltarune in the style of Masayoshi Takanaka.mp3": {
       "integratedLufs": -9.2,
       "truePeakDbtp": -0.1,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2589142,
+      "sourceSha256": "01ccaa936681733429af03f533ecea2f119424b68ef98f1739eaa2297c111914"
     },
     "tracks/Balatro OST in the style of Masayoshi Takanaka 🃏.mp3": {
       "integratedLufs": -8.52,
       "truePeakDbtp": 0.2,
-      "loudnessRangeLufs": 1.2
+      "loudnessRangeLufs": 1.2,
+      "sourceSizeBytes": 18838800,
+      "sourceSha256": "dcd52599f4f020d53aabef5f48bb16640dcbf5e00d1c11cd18f01a4542fe2d72"
     },
     "tracks/Bowser's Road from Mario 64, but it's a Masayoshi Takanaka Song 🐢.mp3": {
       "integratedLufs": -8.41,
       "truePeakDbtp": -0.7,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 2950609,
+      "sourceSha256": "5b1e3cd177f8639cbb8e4e30dc049fa51313e40e445c06bcb9b96f2107ace661"
     },
     "tracks/Castle Funk from Deltarune in the style of Masayoshi Takanaka 🏰.mp3": {
       "integratedLufs": -9.15,
       "truePeakDbtp": -0.1,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 3599972,
+      "sourceSha256": "626c4fa97f65b9d49601a91611e59197546d21b23fbeff5c6378203025c2097c"
     },
     "tracks/By Your Side and Mari's Theme from Omori in the style of Masayoshi Takanaka ☀️.mp3": {
       "integratedLufs": -8.97,
       "truePeakDbtp": -0.06,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 5357584,
+      "sourceSha256": "29f3a31e700094868440c0a7c263e162fb328c9bc469e7fcd8b8593d8b575cac"
     },
     "tracks/Catswing from Deltarune in the style of Masayoshi Takanaka 🎤.mp3": {
       "integratedLufs": -8.64,
       "truePeakDbtp": -0.23,
-      "loudnessRangeLufs": 0.9
+      "loudnessRangeLufs": 0.9,
+      "sourceSizeBytes": 2347954,
+      "sourceSha256": "f499edf241af3e7000c8ba3f92176b02a94dd7cdc6d77e1b806912d88c668820"
     },
     "tracks/Chaos King from Deltarune in the style of Masayoshi Takanaka ♠️.mp3": {
       "integratedLufs": -9.06,
       "truePeakDbtp": -0.16,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2234036,
+      "sourceSha256": "3e78b1dcc853af5b302531a2e1097016982be776c59ae679e03686504a1dae7f"
     },
     "tracks/Checker Dance from Deltarune in the style of Masayoshi Takanaka 👑.mp3": {
       "integratedLufs": -10.66,
       "truePeakDbtp": 0.09,
-      "loudnessRangeLufs": 4.5
+      "loudnessRangeLufs": 4.5,
+      "sourceSizeBytes": 1706720,
+      "sourceSha256": "4548f596a3dec4cb039467a9e0af9328305324ae8b70916a71420d861b13426a"
     },
     "tracks/Chestnuts Roasting On An Open Fire in the style of Masayoshi Takanaka 🌰.mp3": {
       "integratedLufs": -8.75,
       "truePeakDbtp": -0.34,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 3797288,
+      "sourceSha256": "13ac0d50382a35b8e86e09ddc905ade0b098aa6dffc828a3f559f13ebbbdf1da"
     },
     "tracks/Comoesta Yaegashi feat. Sayaka Iwashita - 鉄腕アトム (exotica jazz tracks) - 03.mp3": {
       "integratedLufs": -10.65,
       "truePeakDbtp": -0.83,
-      "loudnessRangeLufs": 4.3
+      "loudnessRangeLufs": 4.3,
+      "sourceSizeBytes": 4106065,
+      "sourceSha256": "c538a47e5abdc02106f333bbbc0658d69c68f500b76fd863529400514a05e5f7"
     },
     "tracks/Crash Bandicoot Theme in the style of Masayoshi Takanaka 📦🥭.mp3": {
       "integratedLufs": -9.66,
       "truePeakDbtp": -0.24,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2380452,
+      "sourceSha256": "53ec5815dd81a8142c5fb7bcd9a188db518f578378890f5c23a8aa2e45b69593"
     },
     "tracks/Dark Sanctuary from Deltarune in the style of Masayoshi Takanaka.mp3": {
       "integratedLufs": -9.33,
       "truePeakDbtp": -0.04,
-      "loudnessRangeLufs": 1.3
+      "loudnessRangeLufs": 1.3,
+      "sourceSizeBytes": 2279660,
+      "sourceSha256": "26673e5d4275f2450671f4c4ca77b43a2f8346a0d346fdfcb971becc3c00bb40"
     },
     "tracks/Daisy's Circuit, but it's a Masayoshi Takanaka Song (Alternative Mix).mp3": {
       "integratedLufs": -8.48,
       "truePeakDbtp": -0.59,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 4247848,
+      "sourceSha256": "96fc565b1142a14a1bef049373950b66537bccc0768cdc0c7e388766f894c252"
     },
     "tracks/Dolphin Shoals from Mario Kart 8, but it's a Masayoshi Takanaka Song 🐬.mp3": {
       "integratedLufs": -8.46,
       "truePeakDbtp": -0.44,
-      "loudnessRangeLufs": 1.2
+      "loudnessRangeLufs": 1.2,
+      "sourceSizeBytes": 3355636,
+      "sourceSha256": "b91866c5b74ca2635878e65f2e2e47f653a4dbf685f7b37f4943f3bdd1521b42"
     },
     "tracks/Dire Dire Docks Theme from Mario 64, but it's a Masayoshi Takanaka Song 🤿.mp3": {
       "integratedLufs": -9.13,
       "truePeakDbtp": 0.29,
-      "loudnessRangeLufs": 1.2
+      "loudnessRangeLufs": 1.2,
+      "sourceSizeBytes": 3923482,
+      "sourceSha256": "4c75732361bce58aa90b3188384f4d1402261d2e68f3cf9d9204ed26d1391a53"
     },
     "tracks/Escape From The City from Sonic Adventure 2, but it's a Masayoshi Takanaka Song 🚚.mp3": {
       "integratedLufs": -8.73,
       "truePeakDbtp": -0.05,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2686164,
+      "sourceSha256": "596a6334f5a43a6692ab31c71986fcb6cfdf5cc569b02488255ac37a47eabd19"
     },
     "tracks/Ever Higher from Deltarune in the style of Masayoshi Takanaka🧗.mp3": {
       "integratedLufs": -8.56,
       "truePeakDbtp": -0.02,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 2097898,
+      "sourceSha256": "4bae9d09c2800ac7509f040db68173c5e1c7a571fe22bd21c4cdc1b1fb9bab3a"
     },
     "tracks/Fireplace from Deltarune in the style of Masayoshi Takanaka 🫖.mp3": {
       "integratedLufs": -8.62,
       "truePeakDbtp": 0.62,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 2584186,
+      "sourceSha256": "0c75156b3e1dc4f989c79254ca26e933bf80b1729b88665b6178c9102a3c556e"
     },
     "tracks/From Now On from Deltarune in the style of Masayoshi Takanaka!!.mp3": {
       "integratedLufs": -8.9,
       "truePeakDbtp": 0.33,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2116614,
+      "sourceSha256": "bc1ff19a28f8c9532e1bc666bf2bd1e73bf0413cc7f1c405dd3155604bfba3ca"
     },
     "tracks/falling-asleep-with-you.mp3": {
       "integratedLufs": -13.43,
       "truePeakDbtp": -0.3,
-      "loudnessRangeLufs": 10.6
+      "loudnessRangeLufs": 10.6,
+      "sourceSizeBytes": 6127428,
+      "sourceSha256": "de83bc551d34b25383befb1ebdc813300c99d3af909dbba04ebb8b3b58322841"
     },
     "tracks/Hammer of Justice from Deltarune in the style of Masayoshi Takanaka 🔨.mp3": {
       "integratedLufs": -9.12,
       "truePeakDbtp": 0.06,
-      "loudnessRangeLufs": 3.2
+      "loudnessRangeLufs": 3.2,
+      "sourceSizeBytes": 2983338,
+      "sourceSha256": "0d19015eca6e8584cca603ffb7662cecd53656c28cdd490dfba517f59b265ed3"
     },
     "tracks/GUARDIAN from Deltarune in the style of Masayoshi Takanaka 💥.mp3": {
       "integratedLufs": -9.05,
       "truePeakDbtp": -0.06,
-      "loudnessRangeLufs": 0.5
+      "loudnessRangeLufs": 0.5,
+      "sourceSizeBytes": 4409748,
+      "sourceSha256": "1673ff78b2b71b656b9a6bb3066e339de621a55f9c4b4a0f6ac7486663d17b1b"
     },
     "tracks/Happy New Year by Abba, but it's a Masayoshi Takanaka Song 🥂.mp3": {
       "integratedLufs": -8.26,
       "truePeakDbtp": -0.94,
-      "loudnessRangeLufs": 1.8
+      "loudnessRangeLufs": 1.8,
+      "sourceSizeBytes": 2214974,
+      "sourceSha256": "42e71221b584d7b601411bfcbcd0aa06dcde8050d2e4c3c887b9519815500c03"
     },
     "tracks/Haruo Kubota - FENCE OF TIME - 02.mp3": {
       "integratedLufs": -21.05,
       "truePeakDbtp": -0.44,
-      "loudnessRangeLufs": 3.1
+      "loudnessRangeLufs": 3.1,
+      "sourceSizeBytes": 6673483,
+      "sourceSha256": "ad27310a3eca9d03b9c3eb3642f69c11526519c345328508f35f00b92a94c0b4"
     },
     "tracks/Haruo Kubota - REASON - 07.mp3": {
       "integratedLufs": -13.8,
       "truePeakDbtp": -0.08,
-      "loudnessRangeLufs": 4.4
+      "loudnessRangeLufs": 4.4,
+      "sourceSizeBytes": 7365732,
+      "sourceSha256": "9698656c5dd75ef333b96f704cdaf8fe906e0cd1cb1e1ee9ba3610cd1d48e59f"
     },
     "tracks/I'm A Believer from the Shrek Movie in the style of Masayoshi Takanaka 🔥.mp3": {
       "integratedLufs": -9.22,
       "truePeakDbtp": -0.17,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 3618678,
+      "sourceSha256": "9da2fb793a115767c6f2b68c65c04ce27b9ea43ae2b17f26609145bcfad20fbd"
     },
     "tracks/Haruo Kubota - ROSE - 04.mp3": {
       "integratedLufs": -14.68,
       "truePeakDbtp": -0.91,
-      "loudnessRangeLufs": 2.6
+      "loudnessRangeLufs": 2.6,
+      "sourceSizeBytes": 7645378,
+      "sourceSha256": "387fd87538f0546b8584c83de2eb67e20a0033b646f3c08169f270d67ac1dca1"
     },
     "tracks/It's Pronounced ＂Rules＂ from Deltarune in the style of Masayoshi Takanaka 🏴‍☠️.mp3": {
       "integratedLufs": -8.63,
       "truePeakDbtp": 0.1,
-      "loudnessRangeLufs": 1.7
+      "loudnessRangeLufs": 1.7,
+      "sourceSizeBytes": 2722739,
+      "sourceSha256": "a176bbe0b777bd888263ec2100daca210a81640419b4ae52d18343de4b909b51"
     },
     "tracks/It's TV Time! from Deltarune in the style of Masayoshi Takanaka 📺.mp3": {
       "integratedLufs": -8.59,
       "truePeakDbtp": -0.1,
-      "loudnessRangeLufs": 1.2
+      "loudnessRangeLufs": 1.2,
+      "sourceSizeBytes": 3616644,
+      "sourceSha256": "f0d9b6876077990e5601ecf02d1ab319200306554fb468e0ebcfc5ce759ecb4b"
     },
     "tracks/kitsch-namco-sounds.mp3": {
       "integratedLufs": -15.78,
       "truePeakDbtp": -0.03,
-      "loudnessRangeLufs": 4.6
+      "loudnessRangeLufs": 4.6,
+      "sourceSizeBytes": 4971851,
+      "sourceSha256": "5bd5191a8a7ee380546508a001fb343c0f136a5215fd1a8f4602bb520674aca1"
     },
     "tracks/Koopa Cape from Mario Kart Wii, but it's a Masayoshi Takanaka song 🐢.mp3": {
       "integratedLufs": -8.97,
       "truePeakDbtp": -0.77,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 2845771,
+      "sourceSha256": "1fb987ac5aaf2256636a88015857d4474fdd4e9759a3045290a8dc3ef61078fe"
     },
     "tracks/Keisuke Sakurai - Is It Japan, Or... -.mp3": {
       "integratedLufs": -18.88,
       "truePeakDbtp": -0.98,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 12515438,
+      "sourceSha256": "dc605079f197ee7b63428d878485732be8137466d1a342c4e5d50708a24f6d15"
     },
     "tracks/Lancer's Theme from Deltarune, but it's a Masayoshi Takanaka song ♠️.mp3": {
       "integratedLufs": -8.36,
       "truePeakDbtp": -0.14,
-      "loudnessRangeLufs": 1.6
+      "loudnessRangeLufs": 1.6,
+      "sourceSizeBytes": 2420250,
+      "sourceSha256": "2c28eacaf3aa6d632d4a9962d681f1618dfa58ab30025435389d503ee6e24151"
     },
     "tracks/Le Festin from Ratatouille, but it's a Masayoshi Takanaka Song 🌞.mp3": {
       "integratedLufs": -10.74,
       "truePeakDbtp": -0.71,
-      "loudnessRangeLufs": 1.9
+      "loudnessRangeLufs": 1.9,
+      "sourceSizeBytes": 1541237,
+      "sourceSha256": "b1ef7eedbc2677de3d69b5048ae0be987f8f87f1242b1f4df1ba47e28f8279bc"
     },
     "tracks/Last Christmas from Wham!, but its a Masayoshi Takanaka Song 🎄💝.mp3": {
       "integratedLufs": -8.58,
       "truePeakDbtp": -0.81,
-      "loudnessRangeLufs": 1.8
+      "loudnessRangeLufs": 1.8,
+      "sourceSizeBytes": 3985950,
+      "sourceSha256": "8c7bca9870af474c7456cf13b080de625a0f6222af4dfef3de26fd2c0cd879bc"
     },
     "tracks/Lonely Rolling Star from Katamari Damacy, but it's a Masayoshi Takanaka song ⭐.mp3": {
       "integratedLufs": -8.45,
       "truePeakDbtp": -0.22,
-      "loudnessRangeLufs": 0.4
+      "loudnessRangeLufs": 0.4,
+      "sourceSizeBytes": 3233390,
+      "sourceSha256": "c69a706b59a64721a3e22c20648c2c323998ba774a21e839f4e76ee9505e1f94"
     },
     "tracks/Lost Woods from Ocarina of Time, but it's a Masayoshi Takanaka Song 🌲.mp3": {
       "integratedLufs": -8.81,
       "truePeakDbtp": -0.38,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 3811699,
+      "sourceSha256": "0f8bcedf852dedadc3c32c1478f5d0fdad5943b7ecd57d7b8593d20e15e382b4"
     },
     "tracks/Makihiko Araki - POISON DARK - 01.mp3": {
       "integratedLufs": -17.9,
       "truePeakDbtp": -0.75,
-      "loudnessRangeLufs": 4
+      "loudnessRangeLufs": 4,
+      "sourceSizeBytes": 6186619,
+      "sourceSha256": "54e4c7dd69d0fa7c91f781b9484cdf29c3575ab380c6c4cf242fbf6c4d50b65b"
     },
     "tracks/Makihiko Araki - 1999 - 08.mp3": {
       "integratedLufs": -16.83,
       "truePeakDbtp": -0.96,
-      "loudnessRangeLufs": 2.7
+      "loudnessRangeLufs": 2.7,
+      "sourceSizeBytes": 7440060,
+      "sourceSha256": "1974f7a4a8c161cb6a0a2d34780264309e30deaf0af9f04bc03b8df70f4610d7"
     },
     "tracks/Mario Kart 64 Credits Theme in the style of Masayoshi Takanaka 🎆.mp3": {
       "integratedLufs": -8.92,
       "truePeakDbtp": 0.01,
-      "loudnessRangeLufs": 1.3
+      "loudnessRangeLufs": 1.3,
+      "sourceSizeBytes": 2929728,
+      "sourceSha256": "4400637991ad4d3bf02c0b703bc543196a57b287f17704dcda30a6cdad20b569"
     },
     "tracks/Maple Treeway from Mario Kart Wii, but it's a Masayoshi Takanaka Song 🍂.mp3": {
       "integratedLufs": -8.61,
       "truePeakDbtp": -0.83,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 2752328,
+      "sourceSha256": "c450c51eeec4369c52d05f53dd1316a0cdb7f67a5e73ed0286856dd555a1ca04"
     },
     "tracks/nazo-no-kanojo-x-ost-track-03.mp3": {
       "integratedLufs": -13.57,
       "truePeakDbtp": -1.06,
-      "loudnessRangeLufs": 12.1
+      "loudnessRangeLufs": 12.1,
+      "sourceSizeBytes": 2222832,
+      "sourceSha256": "18995d077ea91a1c0d33c24af0660288223ab64c1b965339b0274684115071bd"
     },
     "tracks/Never Gonna Give You Up by Rick Astley, but it's a Masayoshi Takanaka song 🕺.mp3": {
       "integratedLufs": -8.2,
       "truePeakDbtp": -0.36,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 3275598,
+      "sourceSha256": "259729e6b0e82412a8994a414dd3441c3de4bedd227b6eb769e151eb6ca5fbcc"
     },
     "tracks/Mie Shimizu - EIMI & MATILDA - 06.mp3": {
       "integratedLufs": -16.02,
       "truePeakDbtp": -0.87,
-      "loudnessRangeLufs": 4.3
+      "loudnessRangeLufs": 4.3,
+      "sourceSizeBytes": 7190923,
+      "sourceSha256": "9d41a122efca0a9bc01cc2e90bf3dcd5098329e2cd5745efb1cf0dc4ac4b582a"
     },
     "tracks/Overworld Day from Terraria in the style of Masayoshi Takanaka 🌳.mp3": {
       "integratedLufs": -9.32,
       "truePeakDbtp": -0.12,
-      "loudnessRangeLufs": 1.5
+      "loudnessRangeLufs": 1.5,
+      "sourceSizeBytes": 2815616,
+      "sourceSha256": "ad981294be070a114a1085ddb3c066b51f82cb57fc0d79434cd58ab3b01845b7"
     },
     "tracks/Palmtree Panic from Sonic CD, but it's Masayoshi Takanaka song 🌴.mp3": {
       "integratedLufs": -7.87,
       "truePeakDbtp": -0.53,
-      "loudnessRangeLufs": 1.3
+      "loudnessRangeLufs": 1.3,
+      "sourceSizeBytes": 3300137,
+      "sourceSha256": "c2e9bdf87ea1e50261eacc3f97c6c8a19e8fcbd988a87fbb3501b90d246fee96"
     },
     "tracks/Paradise, Paradise from Deltarune in the style of Masayoshi Takanaka 🌴.mp3": {
       "integratedLufs": -8.49,
       "truePeakDbtp": -0.22,
-      "loudnessRangeLufs": 3.2
+      "loudnessRangeLufs": 3.2,
+      "sourceSizeBytes": 3004940,
+      "sourceSha256": "ebf730f020d8e515eb032e448d1d950183e297feb51c1439296ff52205805ff0"
     },
     "tracks/Pizza Time Theme from Spiderman 2, but it's a Masayoshi Takanaka Song 🍕.mp3": {
       "integratedLufs": -8.45,
       "truePeakDbtp": -0.5,
-      "loudnessRangeLufs": 1.6
+      "loudnessRangeLufs": 1.6,
+      "sourceSizeBytes": 2915740,
+      "sourceSha256": "dd44501cd00031e4815ce9b5226aec78e1dbb564449f0a4995cb60f58ca3686d"
     },
     "tracks/Pop Star from Kirby 64： The Crystal Shards, but it's a Masayoshi Takanaka Song✨.mp3": {
       "integratedLufs": -8.53,
       "truePeakDbtp": 0.04,
-      "loudnessRangeLufs": 1.5
+      "loudnessRangeLufs": 1.5,
+      "sourceSizeBytes": 4197142,
+      "sourceSha256": "5fcd1d06a87e834e32abe82eb60a0d37726ef71d67079e5b704d7fadb455aed1"
     },
     "tracks/Raise Up Your Bat from Deltarune in the style of Masayoshi Takanaka 🎸.mp3": {
       "integratedLufs": -8.69,
       "truePeakDbtp": 0.03,
-      "loudnessRangeLufs": 2.2
+      "loudnessRangeLufs": 2.2,
+      "sourceSizeBytes": 2136782,
+      "sourceSha256": "bfa01dd55bf09c49c32dc19af30e86f91a5716123d7ec7d4e2997b6710daa475"
     },
     "tracks/pylon-utsu-dreamstation1986.mp3": {
       "integratedLufs": -14.15,
       "truePeakDbtp": -1,
-      "loudnessRangeLufs": 5
+      "loudnessRangeLufs": 5,
+      "sourceSizeBytes": 6365255,
+      "sourceSha256": "503c20f78ea6ad2ea6f8326c3c1d128aef5507e7384187961fc5c99d410c4bdf"
     },
     "tracks/ratatouille-title-screen.mp3": {
       "integratedLufs": -13.83,
       "truePeakDbtp": -0.95,
-      "loudnessRangeLufs": 6.6
+      "loudnessRangeLufs": 6.6,
+      "sourceSizeBytes": 2527089,
+      "sourceSha256": "bd196c52f6db8ee5822e1afa2314a713e4c03bda804be094cf74a4437b8f7bea"
     },
     "tracks/Ruder Buster from Deltarune in the style of Masayoshi Takanaka☀️🌧️.mp3": {
       "integratedLufs": -9.16,
       "truePeakDbtp": -0.52,
-      "loudnessRangeLufs": 1.7
+      "loudnessRangeLufs": 1.7,
+      "sourceSizeBytes": 2024134,
+      "sourceSha256": "52d20f46e99fc4b17c75db71d6b950a99ef0cd7029031cd1b6b1e9b39bbd04f1"
     },
     "tracks/Return to Slumber from Demon's Souls, but it's a Masayoshi Takanaka Song.mp3": {
       "integratedLufs": -8.42,
       "truePeakDbtp": 0.09,
-      "loudnessRangeLufs": 1.3
+      "loudnessRangeLufs": 1.3,
+      "sourceSizeBytes": 4800848,
+      "sourceSha256": "9905f4cb9b4b8235a60a30e29abe0cdaaf71af21c98b386a51b0db232178e318"
     },
     "tracks/Silent Night in the style of Masayoshi Takanaka 🌙.mp3": {
       "integratedLufs": -8.36,
       "truePeakDbtp": -0.43,
-      "loudnessRangeLufs": 0.7
+      "loudnessRangeLufs": 0.7,
+      "sourceSizeBytes": 1916332,
+      "sourceSha256": "d15ebbc0fc8705274086c2036fb047c526e06f2d9e9d67028c4b2484f45c46b3"
     },
     "tracks/Skyloft Theme from Skyward Sword, but it's a Masayoshi Takanaka song 🐦.mp3": {
       "integratedLufs": -8.7,
       "truePeakDbtp": 0.75,
-      "loudnessRangeLufs": 2.7
+      "loudnessRangeLufs": 2.7,
+      "sourceSizeBytes": 3350982,
+      "sourceSha256": "e836515a93ecf05ff33be97d9fab509309ce7898b481c6a59c55006b9f053518"
     },
     "tracks/seito-densetsu-osamu-shoji.mp3": {
       "integratedLufs": -9.94,
       "truePeakDbtp": 0.32,
-      "loudnessRangeLufs": 10.1
+      "loudnessRangeLufs": 10.1,
+      "sourceSizeBytes": 5979897,
+      "sourceSha256": "7b1b098731b9f57a2890e4277ce4030a222eaa47a9c54f124be6e7376d3ce15d"
     },
     "tracks/Slider Theme from Mario 64, but it's a Masayoshi Takanaka Song 🛝.mp3": {
       "integratedLufs": -8.05,
       "truePeakDbtp": -0.95,
-      "loudnessRangeLufs": 1.1
+      "loudnessRangeLufs": 1.1,
+      "sourceSizeBytes": 3070950,
+      "sourceSha256": "735355a0f848628830496c5899eaa89af8a2bc1017e4e209b42cff80b54d43f3"
     },
     "tracks/sonicomi-photo-session-park.mp3": {
       "integratedLufs": -10.01,
       "truePeakDbtp": 1.27,
-      "loudnessRangeLufs": 6.7
+      "loudnessRangeLufs": 6.7,
+      "sourceSizeBytes": 3988364,
+      "sourceSha256": "97512508b9e0121524013ef6e8bc0257836da076973dadcbf543a9a41a4c67b6"
     },
     "tracks/Star Light Zone from Sonic the Hedgehog, but it's a Masayoshi Takanaka song 🌟.mp3": {
       "integratedLufs": -8.83,
       "truePeakDbtp": 0.32,
-      "loudnessRangeLufs": 0.9
+      "loudnessRangeLufs": 0.9,
+      "sourceSizeBytes": 3352799,
+      "sourceSha256": "2288b96879a26115e6caac835351b9ec194218aac1e55d9b5ab9f462aee5c08f"
     },
     "tracks/Studiopolis ACT 1 from Sonic Mania, but it's a Masayoshi Takanaka song 📽️.mp3": {
       "integratedLufs": -9.53,
       "truePeakDbtp": -0.08,
-      "loudnessRangeLufs": 1.2
+      "loudnessRangeLufs": 1.2,
+      "sourceSizeBytes": 3569652,
+      "sourceSha256": "5f2d7821ce64d71ee811fc7f2ab4492ccc78b0a28434d6574add4c26eb7adc03"
     },
     "tracks/Sunaga t Experience - 鉄腕アトム (Mission to Mars Remix) - 04.mp3": {
       "integratedLufs": -10.72,
       "truePeakDbtp": 0.77,
-      "loudnessRangeLufs": 3.2
+      "loudnessRangeLufs": 3.2,
+      "sourceSizeBytes": 7123519,
+      "sourceSha256": "91c8761e9c7f61332e15422ce4c1611b73130f0f8b7aa7edc78d7f713a392800"
     },
     "tracks/Takaaki Yasuoka feat. Yumi Endo - DREAM AROMA - 03.mp3": {
       "integratedLufs": -16.82,
       "truePeakDbtp": -0.91,
-      "loudnessRangeLufs": 7
+      "loudnessRangeLufs": 7,
+      "sourceSizeBytes": 6651228,
+      "sourceSha256": "93efb2196d326e995370a56272c5aa5c2d139391dc1299e77f6913a12014f4e4"
     },
     "tracks/THE WORLD REVOLVING from deltarune in the style of Masayoshi Takanaka 🃏.mp3": {
       "integratedLufs": -8.88,
       "truePeakDbtp": -0.19,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 2581280,
+      "sourceSha256": "17db93403c4c51292aa255dac72f951ae920bf3cd6e144aad72cb4d439c4bf88"
     },
     "tracks/Thrash Machine From Deltarune In The Style Of Masayoshi Takanaka 🐤.mp3": {
       "integratedLufs": -8.91,
       "truePeakDbtp": -0.26,
-      "loudnessRangeLufs": 1.7
+      "loudnessRangeLufs": 1.7,
+      "sourceSizeBytes": 2321664,
+      "sourceSha256": "658287fe56587ec947079fef585f4ad27deb2fec94688a97df6e2caf8bc9064e"
     },
     "tracks/TV WORLD from Deltarune in the style of Masayoshi Takanaka 📺.mp3": {
       "integratedLufs": -8.91,
       "truePeakDbtp": -0.09,
-      "loudnessRangeLufs": 1.3
+      "loudnessRangeLufs": 1.3,
+      "sourceSizeBytes": 2549228,
+      "sourceSha256": "d8849391219dd4a346aae0b631c7d1a07dedac2a4e5b49768f4ba18e3a3c4ca8"
     },
     "tracks/totsuzen-upside-down-hoshi-e-iku-fune.mp3": {
       "integratedLufs": -15.06,
       "truePeakDbtp": 0.77,
-      "loudnessRangeLufs": 9.3
+      "loudnessRangeLufs": 9.3,
+      "sourceSizeBytes": 4284391,
+      "sourceSha256": "76437d265cc9d73c23342c81707e01ecd49da02fc2533f6d09c2c4896c258fcf"
     },
     "tracks/Vapor Buster from Deltarune in the style of Masayoshi Takanaka 🫧.mp3": {
       "integratedLufs": -9,
       "truePeakDbtp": 0.01,
-      "loudnessRangeLufs": 1.9
+      "loudnessRangeLufs": 1.9,
+      "sourceSizeBytes": 2246298,
+      "sourceSha256": "ad33e983cb551d9a2dc8183123f86e52bb385252c27ff340a5801d7b590da5d3"
     },
     "tracks/vs-metal-sonic-generations.mp3": {
       "integratedLufs": -12.1,
       "truePeakDbtp": -0.31,
-      "loudnessRangeLufs": 2.4
+      "loudnessRangeLufs": 2.4,
+      "sourceSizeBytes": 3228287,
+      "sourceSha256": "612a93b796441ea3aaea047476a79e544e98874748d9ad233c52bddd9c354a82"
     },
     "tracks/warming-touch.mp3": {
       "integratedLufs": -11.7,
       "truePeakDbtp": -0.92,
-      "loudnessRangeLufs": 9.3
+      "loudnessRangeLufs": 9.3,
+      "sourceSizeBytes": 4829417,
+      "sourceSha256": "52d6620bcb300b2ed1f5f927b8f3e419648553226dbab4cd6f15af3d73e18e2d"
     },
     "tracks/Welcome To Station Square from Sonic Adventure, but it's a Masayoshi Takanaka Song 🏙️.mp3": {
       "integratedLufs": -8.65,
       "truePeakDbtp": -0.14,
-      "loudnessRangeLufs": 0.9
+      "loudnessRangeLufs": 0.9,
+      "sourceSizeBytes": 3346752,
+      "sourceSha256": "c0a5354a222bd48bf6d5dc0956b5e829d025264a8370baa55e6013415ced8eac"
     },
     "tracks/Whomp's Fortress Theme from Mario64, but it's a Masayoshi Takanaka song ⭐.mp3": {
       "integratedLufs": -8.8,
       "truePeakDbtp": -0.74,
-      "loudnessRangeLufs": 1.8
+      "loudnessRangeLufs": 1.8,
+      "sourceSizeBytes": 2337070,
+      "sourceSha256": "c5de6038d3ad85487f4f0742edfbde789acbe0e72519053d3fa5011a6897926b"
     },
     "tracks/Welcome to the Green Room in the style of Masayoshi Takanaka 🟩.mp3": {
       "integratedLufs": -8.67,
       "truePeakDbtp": -0.27,
-      "loudnessRangeLufs": 0.8
+      "loudnessRangeLufs": 0.8,
+      "sourceSizeBytes": 3313802,
+      "sourceSha256": "79a25f7c1f10000d9c70fac3a820fb316ba5789ff1332c963ad1c33fa0e90852"
     },
     "tracks/Wii Party Menu Theme, but it's a Masayoshi Takanaka song 🏝️.mp3": {
       "integratedLufs": -9,
       "truePeakDbtp": 0.01,
-      "loudnessRangeLufs": 3.2
+      "loudnessRangeLufs": 3.2,
+      "sourceSizeBytes": 2905000,
+      "sourceSha256": "f9e2d9a3ee96227bc93683221d82a82f0ad3fce0a70e3fe56a907a3c6a4af360"
     },
     "tracks/Wii Sports Resort Main Theme, but it's a Masayoshi Takanaka Song 🪂.mp3": {
       "integratedLufs": -8.91,
       "truePeakDbtp": -0.31,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 4707954,
+      "sourceSha256": "b2ecb0db2cf6a61048994462462a6b05a2a357330606b2dd7957ec10d509aaac"
     },
     "tracks/Windmill Isle (Day) from Sonic Unleashed, but it's a Masayoshi Takanaka song ☀️.mp3": {
       "integratedLufs": -9.39,
       "truePeakDbtp": -0.4,
-      "loudnessRangeLufs": 1.7
+      "loudnessRangeLufs": 1.7,
+      "sourceSizeBytes": 5180878,
+      "sourceSha256": "4d7a97910197ccf86a05d01d600294bcf4cfa5d1c3d5ee3a17a6683f93139cf2"
     },
     "tracks/Windy and Ripply from Sonic Adventure, but its a Masayoshi Takanaka song.mp3": {
       "integratedLufs": -8.07,
       "truePeakDbtp": -0.34,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 4817264,
+      "sourceSha256": "969efc273adc1fdcd5d2382a3dbc697bc6296d49389afeb2ed84b0848f62f414"
     },
     "tracks/Winter Wonderland, but it's a Masayoshi Takanaka Song 🎅.mp3": {
       "integratedLufs": -7.97,
       "truePeakDbtp": -0.65,
-      "loudnessRangeLufs": 1
+      "loudnessRangeLufs": 1,
+      "sourceSizeBytes": 4180948,
+      "sourceSha256": "50742d2ab1d958681c58f62d27835810b74431e9195841c3119513b11eb82414"
     },
     "tracks/Wonderful X-Mas time by Paul McCartney in the style of Masayoshi Takanaka 🔔.mp3": {
       "integratedLufs": -8.65,
       "truePeakDbtp": -0.15,
-      "loudnessRangeLufs": 0.9
+      "loudnessRangeLufs": 0.9,
+      "sourceSizeBytes": 3619612,
+      "sourceSha256": "8b32a6d80b49a138fcd184584e262bb5f0cf7d31f4aa0e89b7a9522447e5f41a"
     },
     "tracks/Yasuharu Konishi feat. Gaijin a Go-Go, Uetakada Boys Choir, Duke Aces - 鉄腕アトム (Readymade a Go-Go mix) - 02.mp3": {
       "integratedLufs": -9.39,
       "truePeakDbtp": 0.19,
-      "loudnessRangeLufs": 2.7
+      "loudnessRangeLufs": 2.7,
+      "sourceSizeBytes": 3529281,
+      "sourceSha256": "8e5b79c08cf408b33036e7a0273c1841f467743f113a297c0e16ce2d6c4dfdd7"
     },
     "tracks/Yasuharu Konishi feat. Miwako Ichikawa - 鉄腕アトム (Readymade 305 mix) - 12.mp3": {
       "integratedLufs": -11.85,
       "truePeakDbtp": 0.33,
-      "loudnessRangeLufs": 8.4
+      "loudnessRangeLufs": 8.4,
+      "sourceSizeBytes": 6669694,
+      "sourceSha256": "65bc8fa1ecfacc147c7349208dd4b79e7045bace33da76747ce86f453ba0e697"
     },
     "tracks/Yoko Takahashi - MYSTIC EYES...愛はCOUNT DOWN - 05.mp3": {
       "integratedLufs": -13.98,
       "truePeakDbtp": -0.81,
-      "loudnessRangeLufs": 8.6
+      "loudnessRangeLufs": 8.6,
+      "sourceSizeBytes": 7835678,
+      "sourceSha256": "0040205207ef023b01bb0e21a25e640448c2183799b74fb38f4e70b573628b9e"
     },
     "tracks/yours-sincerely-hawaii.mp3": {
       "integratedLufs": -10.93,
       "truePeakDbtp": -0.4,
-      "loudnessRangeLufs": 2.1
+      "loudnessRangeLufs": 2.1,
+      "sourceSizeBytes": 3218918,
+      "sourceSha256": "e064440625a6dbdf926e3d1cce2cb9a96e6a1a33cb3b4426c8f0487c440f6cb4"
     },
     "tracks/【フリクリ】 ハイカラさんが通る ハヌマーン 【MAD】.mp3": {
       "integratedLufs": -8.31,
       "truePeakDbtp": 0.4,
-      "loudnessRangeLufs": 2.7
+      "loudnessRangeLufs": 2.7,
+      "sourceSizeBytes": 4654067,
+      "sourceSha256": "956630424250371b52b36f6833994cfcb1572e74273433a4522c8bd607a63630"
     },
     "tracks/ツトム・ヤマシタ - Stomu Yamash’ta - 第3章 夢無盡 - 夢 - 03.mp3": {
       "integratedLufs": -19.31,
       "truePeakDbtp": -0.94,
-      "loudnessRangeLufs": 15.7
+      "loudnessRangeLufs": 15.7,
+      "sourceSizeBytes": 10091837,
+      "sourceSha256": "5c644a3a4dd9b00adf2daa4a1bd85e87969e3d31296d934ded70efe9f386a534"
     },
     "tracks/山本リンダ - Linda Yamamoto - どうにも止まらない (スプラッシュリンダMIX) - 01.mp3": {
       "integratedLufs": -14.3,
       "truePeakDbtp": -0.17,
-      "loudnessRangeLufs": 2.4
+      "loudnessRangeLufs": 2.4,
+      "sourceSizeBytes": 8419999,
+      "sourceSha256": "f8c8165cd3dfd0704b322a83c4182b90c38401af41f26288044ba063a431cfda"
     },
     "tracks/山本寛太郎 - Kantaro Yamamoto - END OF SILENCE - 09.mp3": {
       "integratedLufs": -16.81,
       "truePeakDbtp": -0.86,
-      "loudnessRangeLufs": 7.1
+      "loudnessRangeLufs": 7.1,
+      "sourceSizeBytes": 8102649,
+      "sourceSha256": "75a4993e06c486e3bea198f120849fa697bb2c5f7d3d8a73a1b1debe0a715d88"
     },
     "tracks/山本寛太郎 - Kantaro Yamamoto - SAVE YOUR HARDBLADE - 07.mp3": {
       "integratedLufs": -15.41,
       "truePeakDbtp": -0.6,
-      "loudnessRangeLufs": 4.5
+      "loudnessRangeLufs": 4.5,
+      "sourceSizeBytes": 6007046,
+      "sourceSha256": "7e021d35f521399081f2fa80606287ff7cc30617d50227b0ad176fd8822b7ad6"
     },
     "tracks/本多信介 - Shinsuke Honda - ガシュピア - 06.mp3": {
       "integratedLufs": -17.62,
       "truePeakDbtp": -0.93,
-      "loudnessRangeLufs": 8.2
+      "loudnessRangeLufs": 8.2,
+      "sourceSizeBytes": 5757221,
+      "sourceSha256": "d0fb2ae1e5aa22f71ff7fd6aea8ad43c1b8c44bba81c12ed749da1a631df4f6d"
     },
     "tracks/本多信介 - Shinsuke Honda - ロンド - 07.mp3": {
       "integratedLufs": -16.63,
       "truePeakDbtp": -0.97,
-      "loudnessRangeLufs": 5.2
+      "loudnessRangeLufs": 5.2,
+      "sourceSizeBytes": 6250777,
+      "sourceSha256": "4e588617dc5b412f2dc0e80de17df066c5b18e4b1c51b38b7672a3c061cccfba"
     },
     "tracks/本多信介 - Shinsuke Honda - モーニング・デュー - 02.mp3": {
       "integratedLufs": -17.53,
       "truePeakDbtp": -1.05,
-      "loudnessRangeLufs": 4.9
+      "loudnessRangeLufs": 4.9,
+      "sourceSizeBytes": 12233797,
+      "sourceSha256": "9a7e9df0dc35ed44184115f2c2d93aa28464fcbe4c515fd25c6a78f71e0dc399"
     },
     "tracks/本多信介 - Shinsuke Honda - 夏の嵐 - 04.mp3": {
       "integratedLufs": -15.83,
       "truePeakDbtp": -0.91,
-      "loudnessRangeLufs": 5.8
+      "loudnessRangeLufs": 5.8,
+      "sourceSizeBytes": 5247769,
+      "sourceSha256": "05a5f9e245b5317672c8783e54b37a96e6238abfc5a8d7dcb15809784337ab8c"
     },
     "tracks/本多信介 - Shinsuke Honda - 午後のハーモニー - 08.mp3": {
       "integratedLufs": -15.86,
       "truePeakDbtp": -1.15,
-      "loudnessRangeLufs": 4.6
+      "loudnessRangeLufs": 4.6,
+      "sourceSizeBytes": 7039739,
+      "sourceSha256": "8c57b56092902b79fe510ab4703fe028a4f2b74966016f2262888345b0629fd0"
     },
     "tracks/本多信介 - Shinsuke Honda - 風のささやき - 03.mp3": {
       "integratedLufs": -16,
       "truePeakDbtp": -1.03,
-      "loudnessRangeLufs": 8.6
+      "loudnessRangeLufs": 8.6,
+      "sourceSizeBytes": 8307055,
+      "sourceSha256": "c349367c93e99e9e93638bfc9abfdf83e87aff7cc9e4dda7a2f9ee335561f9d6"
     },
     "tracks/本多信介 - Shinsuke Honda - 夕暮れ - 05.mp3": {
       "integratedLufs": -18.29,
       "truePeakDbtp": -1.04,
-      "loudnessRangeLufs": 10.9
+      "loudnessRangeLufs": 10.9,
+      "sourceSizeBytes": 9856657,
+      "sourceSha256": "ea4afdea644cfc75264effe44c1e4272a5f3e6b85f22103388e7b17387429347"
     },
     "tracks/本田恭之 - Yasuyuki Honda - 3-30の偶然 - 04.mp3": {
       "integratedLufs": -18.2,
       "truePeakDbtp": -0.3,
-      "loudnessRangeLufs": 4.3
+      "loudnessRangeLufs": 4.3,
+      "sourceSizeBytes": 5668931,
+      "sourceSha256": "a9e858c4703e3384787418082465ae2b6e30dffefc948b4a9cad9fcbe64ee580"
     },
     "tracks/本多信介 - Shinsuke Honda - 風の谷 - 01.mp3": {
       "integratedLufs": -17.93,
       "truePeakDbtp": -0.93,
-      "loudnessRangeLufs": 5.1
+      "loudnessRangeLufs": 5.1,
+      "sourceSizeBytes": 9156025,
+      "sourceSha256": "6e2e949490dc9d21ced992f85793d522b33137fb0b2e97e7573319be88195302"
     },
     "tracks/本田恭之 - Yasuyuki Honda - COUNTER BREAK - 01.mp3": {
       "integratedLufs": -16.41,
       "truePeakDbtp": -1,
-      "loudnessRangeLufs": 4.3
+      "loudnessRangeLufs": 4.3,
+      "sourceSizeBytes": 6810674,
+      "sourceSha256": "29deb509c33b55b5862e9618115d13ee10004bd0b76f201aec18481a471c3dba"
     },
     "tracks/本田恭之 - Yasuyuki Honda - HEAVENLY - 08.mp3": {
       "integratedLufs": -17.57,
       "truePeakDbtp": -1.04,
-      "loudnessRangeLufs": 5
+      "loudnessRangeLufs": 5,
+      "sourceSizeBytes": 7842477,
+      "sourceSha256": "8bd6ed2ebe084b414f6d6c6dbd9b98c91b5912bc43e4b6eeccfa262366eafb4b"
     },
     "tracks/本田恭之 - Yasuyuki Honda - JUST ANOTHER DAY - 05.mp3": {
       "integratedLufs": -17.46,
       "truePeakDbtp": -0.75,
-      "loudnessRangeLufs": 6.2
+      "loudnessRangeLufs": 6.2,
+      "sourceSizeBytes": 5908229,
+      "sourceSha256": "125e4ab4accf8548a4ccdb8931f9ff0817da156af5aa15c0b6748a1be07ba6e9"
     },
     "tracks/本田恭之 - Yasuyuki Honda - 反射率 - 06.mp3": {
       "integratedLufs": -18,
       "truePeakDbtp": -0.87,
-      "loudnessRangeLufs": 12.8
+      "loudnessRangeLufs": 12.8,
+      "sourceSizeBytes": 6433587,
+      "sourceSha256": "b7d671bebda0eafbcd0decc33a5a262c8c0bcb908746dd5ce93b0a455163474c"
     },
     "tracks/本田恭之 - Yasuyuki Honda - 銀の血脈 - 02.mp3": {
       "integratedLufs": -19.43,
       "truePeakDbtp": -0.6,
-      "loudnessRangeLufs": 3.4
+      "loudnessRangeLufs": 3.4,
+      "sourceSizeBytes": 8260997,
+      "sourceSha256": "75b3237ab7e0ca7a8a6d28defc3c03dcfe373e16f8db4df4ba53886498414946"
     },
     "tracks/桐生千弘 - Chihiro Kiryu - ANGEL COLOUR - 03.mp3": {
       "integratedLufs": -15.52,
       "truePeakDbtp": -0.84,
-      "loudnessRangeLufs": 4.5
+      "loudnessRangeLufs": 4.5,
+      "sourceSizeBytes": 5740223,
+      "sourceSha256": "72fa93a5871dd8b25afe866daf4083728e7a6d22bc7a933d3eec13a520f98de4"
     },
     "tracks/神保直明 - Naoaki Jimbo - BON-SAI Garden - 18.mp3": {
       "integratedLufs": -14.96,
       "truePeakDbtp": -0.9,
-      "loudnessRangeLufs": 5.7
+      "loudnessRangeLufs": 5.7,
+      "sourceSizeBytes": 3643297,
+      "sourceSha256": "b804dd79676ffb373d23cac442dea1e8bbb5a3ebe3b285484accab8f1acebae0"
     },
     "tracks/神保直明 - Naoaki Jimbo - イバラード - 01.mp3": {
       "integratedLufs": -14.09,
       "truePeakDbtp": -0.87,
-      "loudnessRangeLufs": 8.1
+      "loudnessRangeLufs": 8.1,
+      "sourceSizeBytes": 3934661,
+      "sourceSha256": "23bc2453ff5da6e25e2293e1a5a71f0cb8ae7f25fd946494642e3da5ef3e9d44"
     },
     "tracks/神保直明 - Naoaki Jimbo - ウミヘビ - 19.mp3": {
       "integratedLufs": -14.49,
       "truePeakDbtp": -1.02,
-      "loudnessRangeLufs": 13.3
+      "loudnessRangeLufs": 13.3,
+      "sourceSizeBytes": 5282499,
+      "sourceSha256": "0206c31bae81e4aa7a53755d342b53a8ba3363f0f20c2af00cce8699ed407692"
     },
     "tracks/神保直明 - Naoaki Jimbo - エンディング - 17.mp3": {
       "integratedLufs": -12.47,
       "truePeakDbtp": -0.01,
-      "loudnessRangeLufs": 11.1
+      "loudnessRangeLufs": 11.1,
+      "sourceSizeBytes": 4536559,
+      "sourceSha256": "e7b77b4d021861712429d060ce79bc7c4e89c56917111243f15fe9bdd17764ae"
     },
     "tracks/神保直明 - Naoaki Jimbo - スコッペロ - 04.mp3": {
       "integratedLufs": -12.11,
       "truePeakDbtp": -0.28,
-      "loudnessRangeLufs": 6.3
+      "loudnessRangeLufs": 6.3,
+      "sourceSizeBytes": 1948877,
+      "sourceSha256": "9cee6849747de16e9315e487f645597276a3578170a6ee283a0c0f261558d261"
     },
     "tracks/神保直明 - Naoaki Jimbo - ジーマの駅 - 02.mp3": {
       "integratedLufs": -13.74,
       "truePeakDbtp": -0.16,
-      "loudnessRangeLufs": 14.7
+      "loudnessRangeLufs": 14.7,
+      "sourceSizeBytes": 5448533,
+      "sourceSha256": "f5f350e9358f2d425b756c71e827947053756b3131d28dd78d9d4bbe591aa6aa"
     },
     "tracks/神保直明 - Naoaki Jimbo - ニーニャ - 09.mp3": {
       "integratedLufs": -14.59,
       "truePeakDbtp": -1.03,
-      "loudnessRangeLufs": 5
+      "loudnessRangeLufs": 5,
+      "sourceSizeBytes": 2753091,
+      "sourceSha256": "1a4cab6f03bfe4743239ead24a2deffc878be223857e1a1b56269216f8947159"
     },
     "tracks/神保直明 - Naoaki Jimbo - ノナ - 11.mp3": {
       "integratedLufs": -13.78,
       "truePeakDbtp": -1.03,
-      "loudnessRangeLufs": 9.5
+      "loudnessRangeLufs": 9.5,
+      "sourceSizeBytes": 1813247,
+      "sourceSha256": "d3aa90823f96783052ed48e8848d94400fce23b301a4b2a9f3d09e7340c7d901"
     },
     "tracks/神保直明 - Naoaki Jimbo - ニーニャの店 - 08.mp3": {
       "integratedLufs": -14.78,
       "truePeakDbtp": -0.88,
-      "loudnessRangeLufs": 9.7
+      "loudnessRangeLufs": 9.7,
+      "sourceSizeBytes": 5269999,
+      "sourceSha256": "209be8e3ceeabda511b439baea9f9e6d7117bf8d847710dd29328d4357b5425d"
     },
     "tracks/神保直明 - Naoaki Jimbo - ノナ家の丘 - 10.mp3": {
       "integratedLufs": -13.16,
       "truePeakDbtp": -0.96,
-      "loudnessRangeLufs": 18.3
+      "loudnessRangeLufs": 18.3,
+      "sourceSizeBytes": 5255837,
+      "sourceSha256": "459e62bb1d4d18a5c4aa35bfbe3bf5cc1e4eee0f8174bae5bbb59774faf056e1"
     },
     "tracks/神保直明 - Naoaki Jimbo - メゲゾウ - 14.mp3": {
       "integratedLufs": -12.4,
       "truePeakDbtp": -0.88,
-      "loudnessRangeLufs": 13.1
+      "loudnessRangeLufs": 13.1,
+      "sourceSizeBytes": 4112499,
+      "sourceSha256": "f9b68a5cc66f474cc33104f2fa191c28b13f3a7f33af15641c4cf5bb3c593268"
     },
     "tracks/神保直明 - Naoaki Jimbo - メーキンソーの池 - 06.mp3": {
       "integratedLufs": -15.42,
       "truePeakDbtp": -0.97,
-      "loudnessRangeLufs": 12.8
+      "loudnessRangeLufs": 12.8,
+      "sourceSizeBytes": 4047131,
+      "sourceSha256": "9418f347edafc68ca3505c9539c77ccaa1a93b96eee0749e428eb3a74a521bf6"
     },
     "tracks/神保直明 - Naoaki Jimbo - 上昇気流 - 12.mp3": {
       "integratedLufs": -12.36,
       "truePeakDbtp": -1.1,
-      "loudnessRangeLufs": 8.4
+      "loudnessRangeLufs": 8.4,
+      "sourceSizeBytes": 5044275,
+      "sourceSha256": "0fb2b3a93a0718b21af6378feebb007809e90fda7c472fb2aa32cf2e78582797"
     },
     "tracks/神保直明 - Naoaki Jimbo - 夜空屋 - 13.mp3": {
       "integratedLufs": -11.57,
       "truePeakDbtp": -0.17,
-      "loudnessRangeLufs": 11.1
+      "loudnessRangeLufs": 11.1,
+      "sourceSizeBytes": 5962081,
+      "sourceSha256": "5d2ccad8346e0437113a43ab61a77635a878cfb10ee26fe30806c068b65e5b4b"
     },
     "tracks/神保直明 - Naoaki Jimbo - 巡回飛行士 - 15.mp3": {
       "integratedLufs": -14.13,
       "truePeakDbtp": -0.78,
-      "loudnessRangeLufs": 7.4
+      "loudnessRangeLufs": 7.4,
+      "sourceSizeBytes": 5403317,
+      "sourceSha256": "6f9c031400155573ac3047586397dcc09908bb06aea7413f00d22703e5656265"
     },
     "tracks/神保直明 - Naoaki Jimbo - 森の友達 - 05.mp3": {
       "integratedLufs": -13.22,
       "truePeakDbtp": -0.42,
-      "loudnessRangeLufs": 7.9
+      "loudnessRangeLufs": 7.9,
+      "sourceSizeBytes": 4010739,
+      "sourceSha256": "cf03db90f91c60d43fe5d5890b216e342c35e106b19246a6a136f09c8e57aca9"
     },
     "tracks/神保直明 - Naoaki Jimbo - 市電の森 - 03.mp3": {
       "integratedLufs": -15.36,
       "truePeakDbtp": -0.9,
-      "loudnessRangeLufs": 13.7
+      "loudnessRangeLufs": 13.7,
+      "sourceSizeBytes": 6311211,
+      "sourceSha256": "d1e3a9deb02348a89e4de8738acf7f44caa1a449fde785d98813efd2311cc616"
     },
     "tracks/神保直明 - Naoaki Jimbo - 洞窟 - 07.mp3": {
       "integratedLufs": -15.4,
       "truePeakDbtp": -0.75,
-      "loudnessRangeLufs": 11.8
+      "loudnessRangeLufs": 11.8,
+      "sourceSizeBytes": 4449047,
+      "sourceSha256": "7d8ea0540cfe6172d452e595eebafdf27032b2164fcfaadf8f8ab07137ea097a"
     },
     "tracks/見岳章 - Akira Mitake - Adventure - 01.mp3": {
       "integratedLufs": -13.75,
       "truePeakDbtp": -0.28,
-      "loudnessRangeLufs": 14.4
+      "loudnessRangeLufs": 14.4,
+      "sourceSizeBytes": 4544330,
+      "sourceSha256": "e908bab69cbea0f6fbcb6064bb5b528ae4ba4f33490b8c697a8a0ca7d3181bda"
     },
     "tracks/関俊彦 (ルヴァ) - 終わらないHigh Noon (2000) [Seiyuu City Pop].mp3": {
       "integratedLufs": -13.48,
       "truePeakDbtp": 0.1,
-      "loudnessRangeLufs": 4.9
+      "loudnessRangeLufs": 4.9,
+      "sourceSizeBytes": 5585191,
+      "sourceSha256": "81b5a91e716b99c69eecbe22fe4552cace1c42dc1c01c23b7f53d86b4b00f724"
     }
   }
 }
