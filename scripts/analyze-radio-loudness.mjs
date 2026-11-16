@@ -71,6 +71,8 @@ async function analyzeFile(ffmpegPath, fullPath) {
 async function main() {
   const ffmpegPath = readArgument("--ffmpeg", process.env.RADIO_FFMPEG_PATH || "ffmpeg");
   const only = readArgument("--file", "");
+  const requestedJobs = Number(readArgument("--jobs", "2"));
+  const jobs = Number.isFinite(requestedJobs) ? Math.max(1, Math.min(4, Math.floor(requestedJobs))) : 2;
   const files = await collectAudioFiles(ASSET_ROOT);
   const selected = only
     ? files.filter((entry) => entry.file === only.replaceAll("\\", "/"))
@@ -89,17 +91,23 @@ async function main() {
 
   let completed = 0;
   const failures = [];
-  for (const entry of selected) {
-    try {
-      const measured = await analyzeFile(ffmpegPath, entry.fullPath);
-      config.tracks[entry.file] = { ...config.tracks[entry.file], ...measured };
-      completed += 1;
-      console.log(`[${completed}/${selected.length}] ${entry.file}: ${measured.integratedLufs} LUFS, ${measured.truePeakDbtp} dBTP`);
-    } catch (error) {
-      failures.push({ file: entry.file, error: error.message });
-      console.error(`Could not measure ${entry.file}: ${error.message}`);
+  let nextIndex = 0;
+  const worker = async () => {
+    while (nextIndex < selected.length) {
+      const entry = selected[nextIndex];
+      nextIndex += 1;
+      try {
+        const measured = await analyzeFile(ffmpegPath, entry.fullPath);
+        config.tracks[entry.file] = { ...config.tracks[entry.file], ...measured };
+        completed += 1;
+        console.log(`[${completed}/${selected.length}] ${entry.file}: ${measured.integratedLufs} LUFS, ${measured.truePeakDbtp} dBTP`);
+      } catch (error) {
+        failures.push({ file: entry.file, error: error.message });
+        console.error(`Could not measure ${entry.file}: ${error.message}`);
+      }
     }
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(jobs, selected.length) }, worker));
 
   const temporaryPath = `${CONFIG_PATH}.tmp`;
   await writeFile(temporaryPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
