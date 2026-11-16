@@ -24,11 +24,11 @@
   function count() {return getCartEntries().reduce((sum,[,qty]) => sum + qty,0);}
   function notify(message) {const t=$('toast'); t.textContent=message;t.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>t.classList.remove('show'),2700);}
   function syncCount(){ $('cartCount').textContent=String(count()); $('cartCount').setAttribute('aria-label',count()+' items in cart'); }
-  function addItem(id){if(!PRODUCTS[id])return;cart[id]=Math.min(99,(cart[id]||0)+1);save('gfumes-cart-v1',cart);syncCount();renderCart();notify('✓ '+PRODUCTS[id].name+' ADDED TO YOUR IMAGINARY CART');}
+  function addItem(id){if(!PRODUCTS[id])return;cart[id]=Math.min(99,(cart[id]||0)+1);save('gfumes-cart-v1',cart);syncCount();renderCart();notify('✓ '+PRODUCTS[id].name+' ADDED TO CART');}
   function changeQty(id,diff){if(!PRODUCTS[id])return;cart[id]=(cart[id]||0)+diff;if(cart[id]<=0)delete cart[id];cart[id]=Math.min(cart[id]||0,99);if(!cart[id])delete cart[id];save('gfumes-cart-v1',cart);syncCount();renderCart();}
   function renderCart(){
     const entries=getCartEntries(),root=$('cartItems');
-    if(!entries.length){root.innerHTML='<div class="cart-empty"><span class="empty-symbol">∅</span><h3>YOUR CART IS AS EMPTY AS THE PRODUCT.</h3><p>That feels on brand. Go add a box of nothing.</p></div>';}
+    if(!entries.length){root.innerHTML='<div class="cart-empty"><span class="empty-symbol">∅</span><h3>YOUR CART IS EMPTY.</h3><p>Find something worth staying up for.</p></div>';}
     else root.innerHTML=entries.map(([id,qty])=>{const p=PRODUCTS[id];return `<div class="cart-item"><div class="cart-thumb"><img src="${thumb(p.thumb)}" alt="${safe(p.name)} model preview"></div><div><h4>${safe(p.name)}</h4><p>${safe(p.subtitle)}</p><div class="quantity-controls"><button data-qty="${id}" data-diff="-1" aria-label="Remove one ${safe(p.name)}">−</button><strong>${qty}</strong><button data-qty="${id}" data-diff="1" aria-label="Add one ${safe(p.name)}">+</button></div></div><div class="cart-line-price"><strong>${money(p.price*qty)}</strong><button class="remove-item" data-remove="${id}">REMOVE</button></div></div>`;}).join('');
     $('cartSubtotal').textContent=money(total());$('cartCheckout').disabled=!entries.length;
   }
@@ -43,7 +43,7 @@
   }
   function checkout(){
     if(!count()){notify('YOUR CART CONTAINS THE WRONG KIND OF NOTHING');return;}
-    $('checkoutContent').innerHTML=`<div class="checkout-warning">⚠ <b>SIMULATION ONLY.</b> NO PAYMENT, REAL ADDRESS, OR DELIVERY IS INVOLVED.</div><div class="checkout-rows" id="checkoutRows"></div><form id="checkoutForm"><label for="codename">AGENT CODENAME <span>(A MADE-UP NAME IS FINE)</span></label><input id="codename" name="codename" maxlength="30" placeholder="e.g. xX_AirGoblin_Xx" required autocomplete="off"/><label for="dimension">FAKE DELIVERY DESTINATION</label><select id="dimension" name="dimension"><option value="The Void">THE VOID</option><option value="Your Gaming Setup">YOUR GAMING SETUP</option><option value="1998">THE YEAR 1998</option><option value="An Alternate Timeline">AN ALTERNATE TIMELINE</option></select><label class="check-label"><input type="checkbox" id="acceptFake" required/><span>I understand this isn't a real purchase or a real product.</span></label><div class="subtotal-row checkout-total"><span>PRETEND TOTAL</span><strong id="checkoutTotal">${money(total())}</strong></div><button type="submit" class="btn btn-lime checkout-submit">PLACE MY FAKE ORDER <span>↗</span></button></form>`;
+    $('checkoutContent').innerHTML=`<div class="checkout-warning">⚠ <b>ORDER PREVIEW.</b> This demo will not take payment, collect a shipping address, or ship products.</div><div class="checkout-rows" id="checkoutRows"></div><form id="checkoutForm"><label for="codename">AGENT CODENAME <span>(NO PERSONAL INFO)</span></label><input id="codename" name="codename" maxlength="30" placeholder="e.g. xX_AirGoblin_Xx" required autocomplete="off"/><label for="dimension">DESTINATION</label><select id="dimension" name="dimension"><option value="The Void">THE VOID</option><option value="Your Gaming Setup">YOUR GAMING SETUP</option><option value="1998">THE YEAR 1998</option><option value="An Alternate Timeline">AN ALTERNATE TIMELINE</option></select><label class="check-label"><input type="checkbox" id="acceptFake" required/><span>I understand no real order will be placed.</span></label><div class="subtotal-row checkout-total"><span>ORDER TOTAL</span><strong id="checkoutTotal">${money(total())}</strong></div><button type="submit" class="btn btn-lime checkout-submit">PLACE ORDER <span>↗</span></button></form>`;
     $('checkoutRows').innerHTML=getCartEntries().map(([id,qty])=>`<div class="checkout-row"><span>${qty} × ${safe(PRODUCTS[id].name)}</span><strong>${money(PRODUCTS[id].price*qty)}</strong></div>`).join('');
     $('checkoutForm').addEventListener('submit',submitOrder);
     setLayer('checkout');
@@ -101,7 +101,7 @@
   const params=new URLSearchParams(location.search);
   const normalizeCreator=s=>String(s||'').trim().replace(/[^a-zA-Z0-9_ .@-]/g,'').slice(0,24).toUpperCase();
   let creator=normalizeCreator(params.get('collab'))||normalizeCreator(load('gfumes-creator-v1','YOUR_HANDLE'))||'YOUR_HANDLE';
-  function renderCreator(){ $('creatorName').textContent=creator;document.title='GFUMES × '+creator+' — 100% VAPORWARE'; }
+  function renderCreator(){ $('creatorName').textContent=creator;document.title='GFUMES × '+creator+' - THE FUTURE IS EMPTY'; }
   $('editCreator').addEventListener('click',()=>{const entered=prompt('Set your GFUMES creator name (gamer tag only):',creator);if(entered===null)return;creator=normalizeCreator(entered)||'YOUR_HANDLE';save('gfumes-creator-v1',creator);renderCreator();notify('CREATOR DROP UPDATED');});
   $('shareCreator').addEventListener('click',async()=>{const link=new URL(location.href);link.searchParams.set('collab',creator);link.hash='';try{await navigator.clipboard.writeText(link.toString());notify('GFUMES CREATOR LINK COPIED');}catch{prompt('Copy your GFUMES creator link:',link.toString());}});
   renderCreator();
