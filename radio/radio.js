@@ -124,10 +124,21 @@
     playerMessage.textContent = message;
   }
 
+  function updatePageTitle(option = trackSelect.options[trackSelect.selectedIndex]) {
+    if (!option) {
+      document.title = "KAZVT radio";
+      return;
+    }
+    const title = option.textContent.trim();
+    const artist = (option.dataset.artist || "Unknown artist").trim();
+    document.title = `${title} - ${artist} | KAZVT radio`;
+  }
+
   function updateMediaSessionMetadata() {
-    if (!mediaSession || typeof window.MediaMetadata !== "function") return;
     const option = trackSelect.options[trackSelect.selectedIndex];
     if (!option) return;
+    updatePageTitle(option);
+    if (!mediaSession || typeof window.MediaMetadata !== "function") return;
     try {
       mediaSession.metadata = new window.MediaMetadata({
         title: option.textContent.trim(),
@@ -1031,6 +1042,7 @@
   updateRangeFills();
   populateTagFilter();
   renderPlaylist();
+  updatePageTitle();
   window.addEventListener("resize", scheduleMarqueeUpdate, { passive: true });
   if (document.fonts?.ready) document.fonts.ready.then(scheduleMarqueeUpdate);
   setTheatreMode(document.documentElement.classList.contains("radio-theatre"), false);
