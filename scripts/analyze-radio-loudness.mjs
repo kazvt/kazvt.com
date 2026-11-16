@@ -42,10 +42,10 @@ async function collectAudioFiles(directory, prefix = "") {
 }
 
 function parseLoudness(stderr) {
-  const start = stderr.lastIndexOf("{\n");
-  const end = stderr.indexOf("\n}", start);
+  const start = stderr.lastIndexOf("{");
+  const end = stderr.indexOf("}", start);
   if (start < 0 || end < 0) throw new Error("FFmpeg did not return loudnorm measurement data.");
-  const measured = JSON.parse(stderr.slice(start, end + 2));
+  const measured = JSON.parse(stderr.slice(start, end + 1));
   const integratedLufs = Number.parseFloat(measured.input_i);
   const truePeakDbtp = Number.parseFloat(measured.input_tp);
   const loudnessRangeLufs = Number.parseFloat(measured.input_lra);
