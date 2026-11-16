@@ -145,6 +145,7 @@ async function buildRadioPlaylist() {
   const defaultMode = validNormalizationMode(normalization.defaultMode);
   const targetLufs = finiteSetting(normalization, "targetLufs", -16);
   const truePeakCeilingDbtp = finiteSetting(normalization, "truePeakCeilingDbtp", -1.5);
+  const peakGuardMarginDb = Math.max(0, finiteSetting(normalization, "peakGuardMarginDb", 1.5));
   const maximumGainDb = Math.max(0, finiteSetting(normalization, "maximumGainDb", 12));
   const normalizationTracks = normalization.tracks && typeof normalization.tracks === "object"
     ? normalization.tracks
@@ -181,9 +182,10 @@ async function buildRadioPlaylist() {
     const truePeak = Number.isFinite(loudness.truePeakDbtp) ? ` data-true-peak-dbtp="${loudness.truePeakDbtp}"` : "";
     const trackTarget = finiteSetting(loudness, "targetLufs", targetLufs);
     const trackCeiling = finiteSetting(loudness, "truePeakCeilingDbtp", truePeakCeilingDbtp);
+    const trackGuardMargin = Math.max(0, finiteSetting(loudness, "peakGuardMarginDb", peakGuardMarginDb));
     const trackMaximumGain = Math.max(0, finiteSetting(loudness, "maximumGainDb", maximumGainDb));
     const selected = track.isDefault ? " selected" : "";
-    return `                <option value="${value}" data-artist="${artist}" data-tags="${tags}" data-normalization-mode="${mode}" data-normalization-target-lufs="${trackTarget}" data-normalization-true-peak-ceiling-dbtp="${trackCeiling}" data-normalization-maximum-gain-db="${trackMaximumGain}"${integratedLufs}${truePeak}${selected}>${title}</option>`;
+    return `                <option value="${value}" data-artist="${artist}" data-tags="${tags}" data-normalization-mode="${mode}" data-normalization-target-lufs="${trackTarget}" data-normalization-true-peak-ceiling-dbtp="${trackCeiling}" data-normalization-peak-guard-margin-db="${trackGuardMargin}" data-normalization-maximum-gain-db="${trackMaximumGain}"${integratedLufs}${truePeak}${selected}>${title}</option>`;
   }).join("\n");
 
   const html = await readFile(INDEX_PATH, "utf8");
@@ -191,6 +193,7 @@ async function buildRadioPlaylist() {
     `data-normalization-default-mode="${defaultMode}"`,
     `data-normalization-target-lufs="${targetLufs}"`,
     `data-normalization-true-peak-ceiling-dbtp="${truePeakCeilingDbtp}"`,
+    `data-normalization-peak-guard-margin-db="${peakGuardMarginDb}"`,
     `data-normalization-maximum-gain-db="${maximumGainDb}"`,
   ].join(" ");
   const selectPattern = /<select class="track-select" id="track-select"[^>]*>/;

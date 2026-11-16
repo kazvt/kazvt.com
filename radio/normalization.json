@@ -2,6 +2,7 @@
   "defaultMode": "loudness",
   "targetLufs": -16,
   "truePeakCeilingDbtp": -1.5,
+  "peakGuardMarginDb": 1.5,
   "maximumGainDb": 12,
   "tracks": {
     "tracks/blue-fire-purple-eyes-in-the-dark.mp3": {
