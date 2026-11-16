@@ -407,7 +407,13 @@
   function populatePresets() {
     const pack = window.butterchurnPresetsMinimal;
     if (!pack || typeof pack.getPresets !== "function") throw new Error("The visual preset pack did not load.");
-    const allPresets = pack.getPresets();
+    const allPresets = { ...pack.getPresets() };
+    const extraPack = window.butterchurnPresetsExtra;
+    if (extraPack && typeof extraPack.getPresets === "function") {
+      Object.assign(allPresets, extraPack.getPresets());
+    } else {
+      console.warn("The Butterchurn Extra preset pack did not load; using the minimal pack only.");
+    }
     const disabledPresets = new Set(DISABLED_VISUALIZER_PRESETS);
     presetMap = Object.fromEntries(Object.entries(allPresets).filter(([key]) => !disabledPresets.has(key)));
     const missingDisabledPresets = DISABLED_VISUALIZER_PRESETS.filter((key) => !(key in allPresets));
