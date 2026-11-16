@@ -61,7 +61,7 @@
   function renderOrders(){
     const root=$('ordersContent');
     if(!orders.length)root.innerHTML='<div class="order-empty"><strong>NO ORDERS IN THIS TIMELINE.</strong><p>Technically you haven\'t bought anything, which is exactly what our customers buy.</p><button class="btn btn-lime" id="goShop">GO SHOP NOTHING ↗</button></div>';
-    else root.innerHTML='<div class="checkout-warning">THESE ARE JUST JOKE RECEIPTS SAVED IN THIS BROWSER. THERE ARE NO REAL ORDERS.</div>'+orders.map(o=>`<div class="order-history-item"><div class="order-id-line"><strong>${safe(o.id)}</strong><span>${safe(new Date(o.date).toLocaleDateString())}</span></div><p>AGENT: ${safe(o.codename)} · DESTINATION: ${safe(o.dimension)}<br>${o.items.map(item=>`${item.quantity} × ${safe(PRODUCTS[item.id]?.name||'MYSTERY AIR')}`).join(' / ')}<br>IMAGINARY TOTAL: ${money(Number(o.total)||0)}</p><b>STATUS: NOT EVEN REMOTELY SHIPPED</b></div>`).join('');
+    else root.innerHTML='<div class="checkout-warning">LOCAL ARCHIVE ONLY. NOTHING IS CHARGED OR SHIPPED.</div>'+orders.map(o=>`<div class="order-history-item"><div class="order-id-line"><strong>${safe(o.id)}</strong><span>${safe(new Date(o.date).toLocaleDateString())}</span></div><p>AGENT: ${safe(o.codename)} · DESTINATION: ${safe(o.dimension)}<br>${o.items.map(item=>`${item.quantity} × ${safe(PRODUCTS[item.id]?.name||'MYSTERY AIR')}`).join(' / ')}<br>ORDER TOTAL: ${money(Number(o.total)||0)}</p><b>STATUS: LOST IN THE ATMOSPHERE</b></div>`).join('');
     setLayer('orders');
     $('goShop')?.addEventListener('click',()=>{setLayer(null);location.hash='#products';});
   }
