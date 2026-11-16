@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import { execFile as execFileCallback } from "node:child_process";
+import { createReadStream } from "node:fs";
+import { createHash } from "node:crypto";
 import { promisify } from "node:util";
-import { readdir, readFile, rename, writeFile } from "node:fs/promises";
+import { readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -68,11 +70,20 @@ async function analyzeFile(ffmpegPath, fullPath) {
   return parseLoudness(stderr);
 }
 
+async function getSourceSignature(fullPath) {
+  const fileStats = await stat(fullPath);
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(fullPath)) hash.update(chunk);
+  return { sourceSizeBytes: fileStats.size, sourceSha256: hash.digest("hex") };
+}
+
 async function main() {
   const ffmpegPath = readArgument("--ffmpeg", process.env.RADIO_FFMPEG_PATH || "ffmpeg");
   const only = readArgument("--file", "");
   const requestedJobs = Number(readArgument("--jobs", "2"));
   const jobs = Number.isFinite(requestedJobs) ? Math.max(1, Math.min(4, Math.floor(requestedJobs))) : 2;
+  const changedOnly = process.argv.includes("--changed-only");
+  const force = process.argv.includes("--force");
   const files = await collectAudioFiles(ASSET_ROOT);
   const selected = only
     ? files.filter((entry) => entry.file === only.replaceAll("\\", "/"))
@@ -90,6 +101,8 @@ async function main() {
   config.tracks ||= {};
 
   let completed = 0;
+  let skipped = 0;
+  let checked = 0;
   const failures = [];
   let nextIndex = 0;
   const worker = async () => {
@@ -97,10 +110,21 @@ async function main() {
       const entry = selected[nextIndex];
       nextIndex += 1;
       try {
+        const signature = await getSourceSignature(entry.fullPath);
+        const previous = config.tracks[entry.file] || {};
+        const hasMeasurements = Number.isFinite(previous.integratedLufs)
+          && Number.isFinite(previous.truePeakDbtp);
+        checked += 1;
+        if (changedOnly && !force && hasMeasurements
+          && previous.sourceSizeBytes === signature.sourceSizeBytes
+          && previous.sourceSha256 === signature.sourceSha256) {
+          skipped += 1;
+          continue;
+        }
         const measured = await analyzeFile(ffmpegPath, entry.fullPath);
-        config.tracks[entry.file] = { ...config.tracks[entry.file], ...measured };
+        config.tracks[entry.file] = { ...previous, ...measured, ...signature };
         completed += 1;
-        console.log(`[${completed}/${selected.length}] ${entry.file}: ${measured.integratedLufs} LUFS, ${measured.truePeakDbtp} dBTP`);
+        console.log(`[${completed}] ${entry.file}: ${measured.integratedLufs} LUFS, ${measured.truePeakDbtp} dBTP`);
       } catch (error) {
         failures.push({ file: entry.file, error: error.message });
         console.error(`Could not measure ${entry.file}: ${error.message}`);
@@ -109,10 +133,12 @@ async function main() {
   };
   await Promise.all(Array.from({ length: Math.min(jobs, selected.length) }, worker));
 
-  const temporaryPath = `${CONFIG_PATH}.tmp`;
-  await writeFile(temporaryPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-  await rename(temporaryPath, CONFIG_PATH);
-  console.log(`Saved ${completed} loudness measurements to radio/normalization.json.`);
+  if (completed) {
+    const temporaryPath = `${CONFIG_PATH}.tmp`;
+    await writeFile(temporaryPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+    await rename(temporaryPath, CONFIG_PATH);
+  }
+  console.log(`Checked ${checked} track(s), analyzed ${completed}, unchanged ${skipped}.`);
   if (failures.length) {
     console.error(`${failures.length} track(s) need a retry; existing per-track settings were preserved.`);
     process.exitCode = 1;
