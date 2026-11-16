@@ -187,11 +187,6 @@ async function buildRadioPlaylist() {
   }).join("\n");
 
   const html = await readFile(INDEX_PATH, "utf8");
-  const start = html.indexOf(START_MARKER);
-  const end = html.indexOf(END_MARKER, start + START_MARKER.length);
-  if (start < 0 || end < 0) throw new Error("Radio playlist generation markers are missing from radio/index.html.");
-
-  const contentStart = start + START_MARKER.length;
   const normalizationAttributes = [
     `data-normalization-default-mode="${defaultMode}"`,
     `data-normalization-target-lufs="${targetLufs}"`,
