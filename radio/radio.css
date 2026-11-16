@@ -19,6 +19,7 @@
 html.radio-document {
   width: 100%;
   height: 100%;
+  font-size: 100%;
   overflow: hidden;
   overscroll-behavior: none;
 }
@@ -42,6 +43,7 @@ body.radio-page {
 /* Keep palette colors and textures, but use one typeface throughout the radio. */
 html.radio-document body.radio-page {
   --site-font: "Comic Sans MS", "Comic Sans", cursive;
+  font-size-adjust: none;
 }
 
 .radio-page *,
