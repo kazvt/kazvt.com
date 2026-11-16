@@ -79,7 +79,7 @@
   $('menuToggle').addEventListener('click',()=>{const open=menu.classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));});
   document.querySelectorAll('.mobile-nav a').forEach(el=>el.addEventListener('click',closeMobileNav));
 
-  const PHASES={idle:{speech:'AWAITING PRODUCT INPUT...',status:'IDLE'},unbox:{speech:'WAIT. IT\'S EMPTY?!',status:'UNBOXING_NOTHING'},hype:{speech:'OMG! +999 IMAGINARY FPS',status:'OVERHYPED'}};
+  const PHASES={idle:{speech:'AWAITING PRODUCT INPUT...',status:'IDLE'},unbox:{speech:'WAIT. IT\'S EMPTY?!',status:'UNBOXING_NOTHING'},hype:{speech:'FULL BLAST!',status:'OVERHYPED'}};
   function setPhase(phase){
     if(!PHASES[phase])return;
     document.querySelectorAll('[data-phase]').forEach(b=>b.classList.toggle('active',b.dataset.phase===phase));
@@ -97,13 +97,5 @@
   $('hypeSlider').addEventListener('input',e=>{const value=Number(e.target.value);$('hypeNumber').textContent=value+'%';particles.querySelectorAll('.particle').forEach((p,i)=>{p.style.animationDuration=(2.3+(100-value)*.025+(i%5)*.13)+'s';p.style.filter='brightness('+(0.7+value/100)+')';});document.dispatchEvent(new CustomEvent('gfumes:hype',{detail:{value}}));});
 
   if(window.GFUMES_USE_LOCAL_ASSETS){document.querySelectorAll(`img[src^="${REMOTE}"]`).forEach(img=>{img.src=thumb(img.src.slice(REMOTE.length));});}
-  // Personalize the creator drop for screenshots or a shareable URL.
-  const params=new URLSearchParams(location.search);
-  const normalizeCreator=s=>String(s||'').trim().replace(/[^a-zA-Z0-9_ .@-]/g,'').slice(0,24).toUpperCase();
-  let creator=normalizeCreator(params.get('collab'))||normalizeCreator(load('gfumes-creator-v1','YOUR_HANDLE'))||'YOUR_HANDLE';
-  function renderCreator(){ $('creatorName').textContent=creator;document.title='GFUMES × '+creator+' - THE FUTURE IS EMPTY'; }
-  $('editCreator').addEventListener('click',()=>{const entered=prompt('Set your GFUMES creator name (gamer tag only):',creator);if(entered===null)return;creator=normalizeCreator(entered)||'YOUR_HANDLE';save('gfumes-creator-v1',creator);renderCreator();notify('CREATOR DROP UPDATED');});
-  $('shareCreator').addEventListener('click',async()=>{const link=new URL(location.href);link.searchParams.set('collab',creator);link.hash='';try{await navigator.clipboard.writeText(link.toString());notify('GFUMES CREATOR LINK COPIED');}catch{prompt('Copy your GFUMES creator link:',link.toString());}});
-  renderCreator();
   syncCount();renderCart();
 })();
