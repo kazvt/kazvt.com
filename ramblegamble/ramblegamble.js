@@ -407,46 +407,57 @@ import {
     const tableCenter = tableBounds.getCenter(new THREE.Vector3());
     const floorY = tableBounds.min.y;
 
-    // The archive's roulette is authored about 40 units across while the
-    // table is only 1.57 units deep. Fit the rim to the table footprint and
-    // rest its lowest point exactly on the tabletop.
-    rouletteRig.position.set(tableCenter.x, 0, tableCenter.z);
-    rouletteModel.scale.setScalar(1);
-    rouletteModel.position.set(0, 0, 0);
-    rouletteModel.updateMatrixWorld(true);
-    const rouletteSourceBounds = new THREE.Box3().setFromObject(rouletteModel);
-    const rouletteSourceSize = rouletteSourceBounds.getSize(new THREE.Vector3());
-    const rouletteDiameter = Math.max(rouletteSourceSize.x, rouletteSourceSize.z);
-    const rouletteScale = (Math.min(tableSize.x, tableSize.z) * 0.72) / rouletteDiameter;
+    // Keep the wheel as the large foreground landmark shown in the supplied
+    // scene reference. It is a separate, ~40-unit asset, not a tabletop
+    // ornament; placing it beside and forward of the table preserves its
+    // authored proportions instead of squeezing it into the table footprint.
+    const rouletteScale = 0.16;
+    rouletteRig.position.set(
+      tableCenter.x + tableSize.x * 2.25,
+      floorY,
+      tableCenter.z + tableSize.z * 2.35,
+    );
     rouletteModel.scale.setScalar(rouletteScale);
+    rouletteModel.position.set(0, 0, 0);
+    rouletteRig.updateMatrixWorld(true);
     rouletteModel.updateMatrixWorld(true);
     const rouletteBounds = new THREE.Box3().setFromObject(rouletteModel);
-    rouletteModel.position.y += tableBounds.max.y - rouletteBounds.min.y;
+    rouletteModel.position.y += floorY - rouletteBounds.min.y;
 
-    // The slot cabinet has its own unrelated export scale. Size it against
-    // the tall chairs in the same supplied scene, then place it beside the
-    // table with enough room for the adjacent chair.
+    // The slot belongs against the rear wall, below the hanging sign. Find
+    // that narrow sign plane in the supplied stage instead of positioning the
+    // cabinet relative to the roulette table.
+    let rearSignBounds = null;
+    stageModel.traverse((object) => {
+      if (object.name !== "plane" || !object.isMesh) return;
+      const candidate = new THREE.Box3().setFromObject(object);
+      const size = candidate.getSize(new THREE.Vector3());
+      if (size.x >= 4 && size.x <= 5.5 && size.y >= 0.8 && size.y <= 1.2 && size.z < 0.08) {
+        rearSignBounds = candidate;
+      }
+    });
+
     const tallChair = stageModel.getObjectByName("tall_chair");
     const tallChairBounds = tallChair
       ? new THREE.Box3().setFromObject(tallChair)
       : tableBounds;
     const tallChairSize = tallChairBounds.getSize(new THREE.Vector3());
-    const slotSourceBounds = new THREE.Box3().setFromObject(slotsModel);
-    const slotSourceSize = slotSourceBounds.getSize(new THREE.Vector3());
-    const slotScale = (tallChairSize.y * 1.55) / slotSourceSize.y;
-    slotsModel.scale.setScalar(slotScale);
+    slotsModel.scale.setScalar(1);
     slotsModel.position.set(0, 0, 0);
     slotRig.position.set(0, 0, 0);
     slotRig.updateMatrixWorld(true);
+    const slotSourceBounds = new THREE.Box3().setFromObject(slotsModel);
+    const slotSourceSize = slotSourceBounds.getSize(new THREE.Vector3());
+    const slotScale = (tallChairSize.y * 1.85) / slotSourceSize.y;
+    slotsModel.scale.setScalar(slotScale);
+    slotRig.updateMatrixWorld(true);
     slotsModel.updateMatrixWorld(true);
     const slotBounds = new THREE.Box3().setFromObject(slotsModel);
-    const slotSize = slotBounds.getSize(new THREE.Vector3());
     const slotCenter = slotBounds.getCenter(new THREE.Vector3());
-    const slotTargetCenter = new THREE.Vector3(
-      tableBounds.max.x + slotSize.x / 2 + 0.42,
-      floorY,
-      tableCenter.z - 0.3,
-    );
+    const signCenter = rearSignBounds?.getCenter(new THREE.Vector3());
+    const slotTargetCenter = signCenter
+      ? new THREE.Vector3(signCenter.x, floorY, signCenter.z + 0.95)
+      : new THREE.Vector3(tableCenter.x + tableSize.x * 0.86, floorY, tableCenter.z - 0.9);
     slotRig.position.set(
       slotTargetCenter.x - slotCenter.x,
       0,
