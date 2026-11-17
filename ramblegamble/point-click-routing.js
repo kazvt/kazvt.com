@@ -35,6 +35,8 @@ export function resolvePointClickCursor({ zone = "", actionable = false } = {}) 
 
 export function resolvePointClickBack(view = {}) {
   const { kind = "overview", look = 0 } = view;
+  // Back follows the view hierarchy while keeping the current heading. A
+  // heading change is not a parent view, and the root has nowhere to back out to.
   if (kind === "overview") return null;
   if (kind === "contestant") return { kind: "contestants", look };
   return { kind: "overview", look };
