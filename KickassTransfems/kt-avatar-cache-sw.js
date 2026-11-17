@@ -84,7 +84,19 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('message', event => {
   const message = event.data;
-  if (message?.type !== 'kt-avatar-cache-delete' || !isKickAvatarUrl(message.url)) return;
+  if (!isKickAvatarUrl(message?.url)) return;
+  if (message.type === 'kt-avatar-cache-validated') {
+    failedAvatarUrls.delete(message.url);
+    const request = new Request(message.url, {
+      method: 'GET',
+      mode: 'no-cors',
+      credentials: 'omit',
+      cache: 'force-cache',
+    });
+    event.waitUntil(refreshAvatar(request).then(() => undefined));
+    return;
+  }
+  if (message.type !== 'kt-avatar-cache-delete') return;
   failedAvatarUrls.add(message.url);
   event.waitUntil(caches.open(AVATAR_CACHE_NAME)
     .then(cache => cache.delete(message.url, { ignoreVary: true })));

@@ -159,7 +159,12 @@
   function rememberLoadedAvatar(image) {
     const slug = kickSlugForAvatar(image);
     const url = validKickAvatarUrl(image.currentSrc || image.src);
-    if (url) seedAvatarResponse(url);
+    if (url) {
+      try {
+        navigator.serviceWorker?.controller?.postMessage({ type: 'kt-avatar-cache-validated', url });
+      } catch {}
+      seedAvatarResponse(url);
+    }
     if (!slug || !url || readCachedKickAvatar(slug)?.url === url) return;
     // A successfully rendered HTML image is a useful first snapshot even if
     // Kick's profile endpoint is temporarily unavailable; checkedAt=0 keeps
