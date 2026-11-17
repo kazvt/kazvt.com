@@ -527,6 +527,68 @@ import {
     return panel;
   }
 
+  function findSeatSurfaceCenterLocal(chair) {
+    const position = chair.geometry?.getAttribute("position");
+    if (!position) return null;
+
+    const index = chair.geometry.index;
+    const vertexCount = index ? index.count : position.count;
+    const planes = new Map();
+    for (let offset = 0; offset + 2 < vertexCount; offset += 3) {
+      const aIndex = index ? index.getX(offset) : offset;
+      const bIndex = index ? index.getX(offset + 1) : offset + 1;
+      const cIndex = index ? index.getX(offset + 2) : offset + 2;
+      const ax = position.getX(aIndex);
+      const ay = position.getY(aIndex);
+      const az = position.getZ(aIndex);
+      const bx = position.getX(bIndex);
+      const by = position.getY(bIndex);
+      const bz = position.getZ(bIndex);
+      const cx = position.getX(cIndex);
+      const cy = position.getY(cIndex);
+      const cz = position.getZ(cIndex);
+      if (Math.max(ay, by, cy) - Math.min(ay, by, cy) > 1e-4) continue;
+
+      // The signed Y component of the triangle normal distinguishes the top
+      // of the seat from its underside. Group coplanar top faces, then use the
+      // largest upward-facing surface (the seat, not the arms or backrest).
+      const upwardArea = ((bz - az) * (cx - ax) - (bx - ax) * (cz - az)) / 2;
+      if (upwardArea <= 1e-6) continue;
+      const y = (ay + by + cy) / 3;
+      const planeKey = Math.round(y * 1000);
+      let plane = planes.get(planeKey);
+      if (!plane) {
+        plane = { area: 0, x: 0, y: 0, z: 0 };
+        planes.set(planeKey, plane);
+      }
+      plane.area += upwardArea;
+      plane.x += ((ax + bx + cx) / 3) * upwardArea;
+      plane.y += y * upwardArea;
+      plane.z += ((az + bz + cz) / 3) * upwardArea;
+    }
+
+    let seat = null;
+    for (const plane of planes.values()) {
+      if (!seat || plane.area > seat.area) seat = plane;
+    }
+    if (!seat) return null;
+    return new THREE.Vector3(
+      seat.x / seat.area,
+      seat.y / seat.area,
+      seat.z / seat.area,
+    );
+  }
+
+  function getBillboardSeatAnchor(chair, worldHeight, fallbackSeatCenter) {
+    chair.updateWorldMatrix(true, false);
+    const seatCenter = findSeatSurfaceCenterLocal(chair) || fallbackSeatCenter;
+    const anchor = chair.localToWorld(seatCenter.clone());
+    // Billboards remain upright in world space; their bottom edge lands on
+    // the horizontal seat plane rather than floating above the chair back.
+    anchor.y += worldHeight / 2;
+    return anchor;
+  }
+
   function setupContestants() {
     const chairs = [];
     stageModel?.traverse((object) => {
@@ -568,10 +630,11 @@ import {
 
       const worldWidth = 1.04;
       const worldHeight = worldWidth;
-      const anchor = new THREE.Vector3(
-        chairCenter.x,
-        chairBounds.max.y + worldHeight / 2 + 0.05,
-        chairBounds.max.z + 0.12,
+      const anchor = getBillboardSeatAnchor(
+        chair,
+        worldHeight,
+        // Fallback seat-plane centroid measured from the supplied stage GLTF.
+        new THREE.Vector3(0, 0.099, 0.0263),
       );
       const panel = createBillboardPanel(source, "contestant");
 
@@ -626,10 +689,11 @@ import {
     scene.add(hitProxy);
     hostTargets.push(hitProxy);
 
-    const anchor = new THREE.Vector3(
-      chairCenter.x,
-      highestBounds.max.y + worldHeight / 2 + 0.05,
-      highestBounds.max.z + 0.12,
+    const anchor = getBillboardSeatAnchor(
+      chair,
+      worldHeight,
+      // Fallback seat-plane centroid measured from the supplied stage GLTF.
+      new THREE.Vector3(-0.0306, 0.055, -0.0004),
     );
     const panel = createBillboardPanel(HOST_BILLBOARD_SOURCE, "host");
     hostBillboard = {
