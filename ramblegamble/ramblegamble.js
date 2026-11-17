@@ -5,7 +5,7 @@ import {
   resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
-} from "./point-click-routing.js?v=host-focus-relative-back-20261115-v1";
+} from "./point-click-routing.js?v=back-preserves-current-heading-20261117-v1";
 
 (() => {
   "use strict";

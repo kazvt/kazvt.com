@@ -35,8 +35,7 @@ export function resolvePointClickCursor({ zone = "", actionable = false } = {}) 
 
 export function resolvePointClickBack(view = {}) {
   const { kind = "overview", look = 0 } = view;
-  if (look !== 0) return { ...view, look: 0 };
-  if (kind === "contestant") return { kind: "contestants", look: 0 };
-  if (kind !== "overview") return { kind: "overview", look: 0 };
-  return null;
+  if (kind === "overview") return null;
+  if (kind === "contestant") return { kind: "contestants", look };
+  return { kind: "overview", look };
 }

@@ -57,13 +57,16 @@ test("cursor state matches navigation affordances and actionable scene objects",
   assert.equal(resolvePointClickCursor(), "default");
 });
 
-test("back recenters the current view, then moves out through its parent context", () => {
-  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: -1 }), { kind: "overview", look: 0 });
-  assert.deepEqual(resolvePointClickBack({ kind: "host", look: 0 }), { kind: "overview", look: 0 });
-  assert.deepEqual(resolvePointClickBack({ kind: "contestant", contestantId: "erin", look: 0 }), {
+test("back moves to the parent view without snapping the camera to forward", () => {
+  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: -1 }), null);
+  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: 1 }), null);
+  assert.deepEqual(resolvePointClickBack({ kind: "host", look: -1 }), { kind: "overview", look: -1 });
+  assert.deepEqual(resolvePointClickBack({ kind: "roulette", look: 1 }), { kind: "overview", look: 1 });
+  assert.deepEqual(resolvePointClickBack({ kind: "contestant", contestantId: "erin", look: -1 }), {
     kind: "contestants",
-    look: 0,
+    look: -1,
   });
-  assert.deepEqual(resolvePointClickBack({ kind: "contestants", look: 0 }), { kind: "overview", look: 0 });
+  assert.deepEqual(resolvePointClickBack({ kind: "contestants", look: 1 }), { kind: "overview", look: 1 });
+  assert.deepEqual(resolvePointClickBack({ kind: "host", look: 0 }), { kind: "overview", look: 0 });
   assert.equal(resolvePointClickBack({ kind: "overview", look: 0 }), null);
 });
