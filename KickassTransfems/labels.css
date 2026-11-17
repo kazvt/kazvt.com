@@ -216,6 +216,38 @@
   .kt-recommendation-link .kt-member-title { gap: .5rem; }
 }
 
+/* On desktop guest cards the old 62px popout column squeezed the identity row.
+   Keep the corner link easy to spot, but give the name and pronouns that space;
+   recency chips sit in the same lower-right corner without reserving a column. */
+@media (min-width: 701px) {
+  .kt-recommendation-link {
+    grid-template-columns: 40px minmax(0, 1fr) 24px;
+  }
+
+  .kt-recommendation-link > .kt-member-arrow {
+    inline-size: 16px;
+    block-size: 16px;
+    border-width: 1px;
+    box-shadow: 1px 1px 0 var(--kt-ink);
+  }
+
+  .kt-recommendation-link > .kt-member-arrow .kt-external-link-icon {
+    inline-size: 10px;
+    block-size: 10px;
+  }
+
+  .kt-recommendation-link > .kt-last-live:not([hidden]) {
+    position: absolute;
+    inset-inline-end: 7px;
+    inset-block-end: 6px;
+    grid-column: auto;
+    grid-row: auto;
+    width: max-content;
+    max-width: calc(100% - 54px);
+    margin: 0;
+  }
+}
+
 /* Keep guest portraits anchored in the upper-left corner with a clear inset. */
 .kt-recommendation-avatar {
   grid-column: 1;

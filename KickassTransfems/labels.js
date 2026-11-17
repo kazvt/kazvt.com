@@ -15,7 +15,105 @@
     'RO', 'RON', 'HU', 'HUN', 'ID', 'IND', 'VI', 'VIE', 'TH', 'THA', 'TL', 'FIL'
   ]);
   const CHATTER_HANDLE_SELECTOR = '.kt-chatters__handle';
+  const PROFILE_AVATAR_SELECTOR = '.kt-member-avatar, .kt-recommendation-avatar, .kt-chatters__avatar';
+  const kickAvatarBySlug = new Map();
+  const pendingKickAvatarBySlug = new Map();
   const chatterLists = document.querySelectorAll('.kt-chatters__list');
+
+  function kickSlugForAvatar(image) {
+    const link = image.closest('a[href]');
+    if (!link) return '';
+    try {
+      const profile = new URL(link.href, document.baseURI);
+      if (profile.hostname !== 'kick.com' && profile.hostname !== 'www.kick.com') return '';
+      const slug = profile.pathname.split('/').filter(Boolean)[0] || '';
+      return /^[a-z0-9_-]+$/i.test(slug) ? slug.toLowerCase() : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function getCurrentKickAvatar(slug) {
+    if (kickAvatarBySlug.has(slug)) return Promise.resolve(kickAvatarBySlug.get(slug));
+    const pending = pendingKickAvatarBySlug.get(slug);
+    if (pending) return pending;
+
+    const request = fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(slug)}`, {
+      mode: 'cors',
+      credentials: 'omit',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    }).then(response => {
+      if (!response.ok) throw new Error(`Kick profile lookup failed: ${response.status}`);
+      return response.json();
+    }).then(channel => {
+      const profilePicture = channel?.user?.profile_pic;
+      if (typeof profilePicture !== 'string' || !profilePicture.trim()) return null;
+      const imageUrl = new URL(profilePicture, 'https://kick.com/');
+      if (imageUrl.protocol !== 'https:' || !['files.kick.com', 'kick.com'].includes(imageUrl.hostname)) return null;
+      kickAvatarBySlug.set(slug, imageUrl.href);
+      return imageUrl.href;
+    }).catch(() => null).finally(() => {
+      pendingKickAvatarBySlug.delete(slug);
+    });
+    pendingKickAvatarBySlug.set(slug, request);
+    return request;
+  }
+
+  function avatarFallbackData(image) {
+    const card = image.closest('a');
+    const identity = card?.querySelector('.kt-member-name, .kt-recommendation-name, .kt-chatters__handle')?.textContent?.trim() || '';
+    const words = identity.replace(/^@/, '').split(/[\s._-]+/).filter(Boolean);
+    const initials = (words.slice(0, 2).map(word => Array.from(word)[0]).join('') || Array.from(identity)[0] || '?')
+      .toLocaleUpperCase();
+    const safeInitials = initials.replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
+    })[character]);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" fill="#fff4f8"/><path d="M-18 18 18-18M-18 58 58-18M-18 98 98-18M22 114 114 22" stroke="#5bcffa" stroke-width="13" opacity=".58"/><rect x="7" y="7" width="82" height="82" fill="#fff9fc" fill-opacity=".92" stroke="#2b2028" stroke-width="4"/><text x="48" y="61" text-anchor="middle" fill="#2b2028" font-family="Arial,sans-serif" font-size="35" font-weight="700">${safeInitials}</text></svg>`;
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
+  async function recoverAvatar(image) {
+    if (image.dataset.ktAvatarRefreshTried === 'true') {
+      image.dataset.ktAvatarFallback = 'true';
+      image.src = avatarFallbackData(image);
+      return;
+    }
+    image.dataset.ktAvatarRefreshTried = 'true';
+    const slug = kickSlugForAvatar(image);
+    if (slug) {
+      const imageUrl = await getCurrentKickAvatar(slug);
+      const currentUrl = image.currentSrc || image.src;
+      if (imageUrl && imageUrl !== currentUrl) {
+        image.src = imageUrl;
+        return;
+      }
+    }
+    image.dataset.ktAvatarFallback = 'true';
+    image.src = avatarFallbackData(image);
+  }
+
+  function watchProfileAvatar(image) {
+    if (!(image instanceof HTMLImageElement) || image.dataset.ktAvatarRecovery === 'true') return;
+    image.dataset.ktAvatarRecovery = 'true';
+    image.addEventListener('error', () => { void recoverAvatar(image); });
+    // The deferred script can start after a lazy image has already failed.
+    if (image.complete && image.naturalWidth === 0) void recoverAvatar(image);
+  }
+
+  function watchAvatarsWithin(node) {
+    if (!(node instanceof Element)) return;
+    if (node.matches(PROFILE_AVATAR_SELECTOR)) watchProfileAvatar(node);
+    node.querySelectorAll(PROFILE_AVATAR_SELECTOR).forEach(watchProfileAvatar);
+  }
+
+  function initializeProfileAvatarRecovery() {
+    document.querySelectorAll(PROFILE_AVATAR_SELECTOR).forEach(watchProfileAvatar);
+    const observer = new MutationObserver(records => {
+      records.forEach(record => record.addedNodes.forEach(watchAvatarsWithin));
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
 
   function fitChatterHandles() {
     for (const handle of document.querySelectorAll(CHATTER_HANDLE_SELECTOR)) {
