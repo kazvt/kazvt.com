@@ -261,6 +261,7 @@
   }
 
   function boot() {
+    initializeProfileAvatarRecovery();
     updateCardLabels();
     scheduleChatterHandleFit();
     if (chatterLists.length && 'ResizeObserver' in window) {
