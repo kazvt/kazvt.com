@@ -24,6 +24,7 @@
   const MAX_CACHED_AVATARS = 80;
   const kickAvatarBySlug = new Map();
   const pendingKickAvatarBySlug = new Map();
+  const pendingAvatarSeeds = new Map();
   const kickAvatarQueue = [];
   let activeKickAvatarRequests = 0;
   const chatterLists = document.querySelectorAll('.kt-chatters__list');
@@ -158,6 +159,7 @@
   function rememberLoadedAvatar(image) {
     const slug = kickSlugForAvatar(image);
     const url = validKickAvatarUrl(image.currentSrc || image.src);
+    if (url) seedAvatarResponse(url);
     if (!slug || !url || readCachedKickAvatar(slug)?.url === url) return;
     // A successfully rendered HTML image is a useful first snapshot even if
     // Kick's profile endpoint is temporarily unavailable; checkedAt=0 keeps
@@ -170,7 +172,22 @@
     if (!slug) return;
     const cached = readCachedKickAvatar(slug);
     if (cached && image.src !== cached.url) image.src = cached.url;
+    else if (image.complete && image.naturalWidth > 0) seedAvatarResponse(image.currentSrc || image.src);
     void getCurrentKickAvatar(slug);
+  }
+
+  function seedAvatarResponse(value) {
+    const url = validKickAvatarUrl(value);
+    if (!url || !('caches' in window) || pendingAvatarSeeds.has(url)) return;
+    const request = new Request(url, { mode: 'no-cors', credentials: 'omit' });
+    const promise = caches.open(AVATAR_CACHE_NAME).then(async cache => {
+      if (await cache.match(request, { ignoreVary: true })) return;
+      const response = await fetch(request, { cache: 'force-cache' });
+      if (response.ok || response.type === 'opaque') await cache.put(request, response.clone());
+    }).catch(() => {}).finally(() => {
+      pendingAvatarSeeds.delete(url);
+    });
+    pendingAvatarSeeds.set(url, promise);
   }
 
   function registerAvatarCacheWorker() {
@@ -190,7 +207,9 @@
       });
     } catch {}
     if ('caches' in window) {
-      void caches.open(AVATAR_CACHE_NAME).then(cache => cache.delete(safeUrl)).catch(() => {});
+      void caches.open(AVATAR_CACHE_NAME)
+        .then(cache => cache.delete(safeUrl, { ignoreVary: true }))
+        .catch(() => {});
     }
   }
 

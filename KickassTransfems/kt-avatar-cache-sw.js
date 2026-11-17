@@ -4,6 +4,7 @@ const AVATAR_CACHE_NAME = 'kt-avatar-images-v1';
 const AVATAR_CACHE_PREFIX = 'kt-avatar-images-';
 const MAX_CACHED_AVATARS = 80;
 const inFlightAvatarRequests = new Map();
+const failedAvatarUrls = new Set();
 
 function isKickAvatarUrl(value) {
   try {
@@ -38,8 +39,9 @@ function refreshAvatar(request) {
   const update = fetch(request).then(async response => {
     // Cross-origin Kick image responses may be opaque. They can still be
     // replayed by this worker to <img>, but the page purges one if it fails.
-    if (response.ok || response.type === 'opaque') {
+    if (!failedAvatarUrls.has(key) && (response.ok || response.type === 'opaque')) {
       const cache = await caches.open(AVATAR_CACHE_NAME);
+      await cache.delete(request, { ignoreVary: true });
       await cache.put(request, response.clone());
       await trimAvatarCache(cache);
     }
@@ -74,7 +76,7 @@ self.addEventListener('fetch', event => {
   event.waitUntil(refresh.then(() => undefined));
   event.respondWith((async () => {
     const cache = await caches.open(AVATAR_CACHE_NAME);
-    const cached = await cache.match(request);
+    const cached = await cache.match(request, { ignoreVary: true });
     if (cached) return cached;
     return (await refresh) || Response.error();
   })());
@@ -83,5 +85,7 @@ self.addEventListener('fetch', event => {
 self.addEventListener('message', event => {
   const message = event.data;
   if (message?.type !== 'kt-avatar-cache-delete' || !isKickAvatarUrl(message.url)) return;
-  event.waitUntil(caches.open(AVATAR_CACHE_NAME).then(cache => cache.delete(message.url)));
+  failedAvatarUrls.add(message.url);
+  event.waitUntil(caches.open(AVATAR_CACHE_NAME)
+    .then(cache => cache.delete(message.url, { ignoreVary: true })));
 });
