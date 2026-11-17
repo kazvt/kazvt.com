@@ -16,9 +16,29 @@
   ]);
   const CHATTER_HANDLE_SELECTOR = '.kt-chatters__handle';
   const PROFILE_AVATAR_SELECTOR = '.kt-member-avatar, .kt-recommendation-avatar, .kt-chatters__avatar';
+  const AVATAR_CACHE_NAME = 'kt-avatar-images-v1';
+  const AVATAR_RECORD_PREFIX = 'kt:profile-avatar:v1:';
+  const AVATAR_REVALIDATE_AFTER = 60 * 1000;
+  const AVATAR_REQUEST_TIMEOUT = 8000;
+  const MAX_AVATAR_REQUESTS = 4;
+  const MAX_CACHED_AVATARS = 80;
   const kickAvatarBySlug = new Map();
   const pendingKickAvatarBySlug = new Map();
+  const kickAvatarQueue = [];
+  let activeKickAvatarRequests = 0;
   const chatterLists = document.querySelectorAll('.kt-chatters__list');
+
+  function validKickAvatarUrl(value) {
+    try {
+      const url = new URL(value, location.href);
+      const isKickHost = url.hostname === 'files.kick.com' || url.hostname === 'kick.com';
+      const isAvatarPath = url.pathname.startsWith('/images/user/')
+        || url.pathname.startsWith('/img/default-profile-pictures/');
+      return url.protocol === 'https:' && isKickHost && isAvatarPath ? url.href : '';
+    } catch {
+      return '';
+    }
+  }
 
   function kickSlugForAvatar(image) {
     const link = image.closest('a[href]');
@@ -33,31 +53,145 @@
     }
   }
 
-  function getCurrentKickAvatar(slug) {
-    if (kickAvatarBySlug.has(slug)) return Promise.resolve(kickAvatarBySlug.get(slug));
+  function readCachedKickAvatar(slug) {
+    if (kickAvatarBySlug.has(slug)) return kickAvatarBySlug.get(slug);
+    try {
+      const cached = JSON.parse(localStorage.getItem(`${AVATAR_RECORD_PREFIX}${slug}`) || 'null');
+      const url = validKickAvatarUrl(cached?.url);
+      if (!url || !Number.isFinite(cached?.checkedAt) || cached.checkedAt < 0
+        || cached.checkedAt > Date.now() + 5 * 60 * 1000) return null;
+      const record = { url, checkedAt: cached.checkedAt };
+      kickAvatarBySlug.set(slug, record);
+      return record;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeCachedKickAvatar(slug, url, checkedAt = Date.now()) {
+    const safeUrl = validKickAvatarUrl(url);
+    if (!safeUrl) return null;
+    const record = { url: safeUrl, checkedAt };
+    kickAvatarBySlug.set(slug, record);
+    try {
+      localStorage.setItem(`${AVATAR_RECORD_PREFIX}${slug}`, JSON.stringify(record));
+    } catch {}
+    return record;
+  }
+
+  function forgetCachedKickAvatar(slug, failedUrl) {
+    const cached = readCachedKickAvatar(slug);
+    if (!cached || (failedUrl && cached.url !== failedUrl)) return;
+    kickAvatarBySlug.delete(slug);
+    try {
+      localStorage.removeItem(`${AVATAR_RECORD_PREFIX}${slug}`);
+    } catch {}
+  }
+
+  function applyKickAvatarToImages(slug, url) {
+    document.querySelectorAll(PROFILE_AVATAR_SELECTOR).forEach(image => {
+      if (kickSlugForAvatar(image) !== slug || image.dataset.ktAvatarFailedUrl === url) return;
+      if (image.src === url) return;
+      delete image.dataset.ktAvatarRefreshTried;
+      delete image.dataset.ktAvatarFallback;
+      delete image.dataset.ktAvatarFailedUrl;
+      image.src = url;
+    });
+  }
+
+  async function fetchCurrentKickAvatar(slug, cached) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), AVATAR_REQUEST_TIMEOUT);
+    try {
+      const response = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(slug)}`, {
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`Kick profile lookup failed: ${response.status}`);
+      const channel = await response.json();
+      const imageUrl = validKickAvatarUrl(channel?.user?.profile_pic);
+      if (!imageUrl) return cached?.url || null;
+      writeCachedKickAvatar(slug, imageUrl);
+      applyKickAvatarToImages(slug, imageUrl);
+      return imageUrl;
+    } catch {
+      return cached?.url || null;
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  }
+
+  function drainKickAvatarQueue() {
+    while (activeKickAvatarRequests < MAX_AVATAR_REQUESTS && kickAvatarQueue.length) {
+      const job = kickAvatarQueue.shift();
+      activeKickAvatarRequests += 1;
+      fetchCurrentKickAvatar(job.slug, job.cached).then(job.resolve).finally(() => {
+        if (pendingKickAvatarBySlug.get(job.slug) === job.promise) {
+          pendingKickAvatarBySlug.delete(job.slug);
+        }
+        activeKickAvatarRequests -= 1;
+        drainKickAvatarQueue();
+      });
+    }
+  }
+
+  function getCurrentKickAvatar(slug, { force = false } = {}) {
+    const cached = readCachedKickAvatar(slug);
+    const cacheAge = cached ? Date.now() - cached.checkedAt : Infinity;
+    if (!force && cached?.checkedAt && cacheAge < AVATAR_REVALIDATE_AFTER) {
+      return Promise.resolve(cached.url);
+    }
     const pending = pendingKickAvatarBySlug.get(slug);
     if (pending) return pending;
 
-    const request = fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(slug)}`, {
-      mode: 'cors',
-      credentials: 'omit',
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-    }).then(response => {
-      if (!response.ok) throw new Error(`Kick profile lookup failed: ${response.status}`);
-      return response.json();
-    }).then(channel => {
-      const profilePicture = channel?.user?.profile_pic;
-      if (typeof profilePicture !== 'string' || !profilePicture.trim()) return null;
-      const imageUrl = new URL(profilePicture, 'https://kick.com/');
-      if (imageUrl.protocol !== 'https:' || !['files.kick.com', 'kick.com'].includes(imageUrl.hostname)) return null;
-      kickAvatarBySlug.set(slug, imageUrl.href);
-      return imageUrl.href;
-    }).catch(() => null).finally(() => {
-      pendingKickAvatarBySlug.delete(slug);
-    });
-    pendingKickAvatarBySlug.set(slug, request);
-    return request;
+    let resolveRequest;
+    const promise = new Promise(resolve => { resolveRequest = resolve; });
+    pendingKickAvatarBySlug.set(slug, promise);
+    kickAvatarQueue.push({ slug, cached, promise, resolve: resolveRequest });
+    drainKickAvatarQueue();
+    return promise;
+  }
+
+  function rememberLoadedAvatar(image) {
+    const slug = kickSlugForAvatar(image);
+    const url = validKickAvatarUrl(image.currentSrc || image.src);
+    if (!slug || !url || readCachedKickAvatar(slug)?.url === url) return;
+    // A successfully rendered HTML image is a useful first snapshot even if
+    // Kick's profile endpoint is temporarily unavailable; checkedAt=0 keeps
+    // it eligible for an immediate background refresh on the next visit.
+    writeCachedKickAvatar(slug, url, 0);
+  }
+
+  function cacheAvatarSnapshot(image) {
+    const slug = kickSlugForAvatar(image);
+    if (!slug) return;
+    const cached = readCachedKickAvatar(slug);
+    if (cached && image.src !== cached.url) image.src = cached.url;
+    void getCurrentKickAvatar(slug);
+  }
+
+  function registerAvatarCacheWorker() {
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+    const scriptUrl = new URL('./kt-avatar-cache-sw.js?v=20261117-avatar-cache-v1', document.baseURI);
+    const scope = new URL('./', document.baseURI).pathname;
+    navigator.serviceWorker.register(scriptUrl, { scope }).catch(() => {});
+  }
+
+  function purgeFailedAvatarResponse(url) {
+    const safeUrl = validKickAvatarUrl(url);
+    if (!safeUrl) return;
+    try {
+      navigator.serviceWorker?.controller?.postMessage({
+        type: 'kt-avatar-cache-delete',
+        url: safeUrl,
+      });
+    } catch {}
+    if ('caches' in window) {
+      void caches.open(AVATAR_CACHE_NAME).then(cache => cache.delete(safeUrl)).catch(() => {});
+    }
   }
 
   function avatarFallbackData(image) {
@@ -80,14 +214,20 @@
       return;
     }
     image.dataset.ktAvatarRefreshTried = 'true';
+    const failedUrl = validKickAvatarUrl(image.currentSrc || image.src);
+    if (failedUrl) purgeFailedAvatarResponse(failedUrl);
     const slug = kickSlugForAvatar(image);
     if (slug) {
-      const imageUrl = await getCurrentKickAvatar(slug);
-      const currentUrl = image.currentSrc || image.src;
-      if (imageUrl && imageUrl !== currentUrl) {
+      forgetCachedKickAvatar(slug, failedUrl);
+      const imageUrl = await getCurrentKickAvatar(slug, { force: true });
+      if (imageUrl && imageUrl !== failedUrl) {
+        delete image.dataset.ktAvatarRefreshTried;
+        delete image.dataset.ktAvatarFallback;
+        delete image.dataset.ktAvatarFailedUrl;
         image.src = imageUrl;
         return;
       }
+      if (imageUrl === failedUrl) forgetCachedKickAvatar(slug, failedUrl);
     }
     image.dataset.ktAvatarFallback = 'true';
     image.src = avatarFallbackData(image);
@@ -96,19 +236,36 @@
   function watchProfileAvatar(image) {
     if (!(image instanceof HTMLImageElement) || image.dataset.ktAvatarRecovery === 'true') return;
     image.dataset.ktAvatarRecovery = 'true';
-    image.addEventListener('error', () => { void recoverAvatar(image); });
+    image.addEventListener('load', () => rememberLoadedAvatar(image));
+    image.addEventListener('error', () => {
+      const failedUrl = validKickAvatarUrl(image.currentSrc || image.src);
+      if (failedUrl) {
+        image.dataset.ktAvatarFailedUrl = failedUrl;
+        purgeFailedAvatarResponse(failedUrl);
+      }
+      void recoverAvatar(image);
+    });
     // The deferred script can start after a lazy image has already failed.
     if (image.complete && image.naturalWidth === 0) void recoverAvatar(image);
   }
 
   function watchAvatarsWithin(node) {
     if (!(node instanceof Element)) return;
-    if (node.matches(PROFILE_AVATAR_SELECTOR)) watchProfileAvatar(node);
-    node.querySelectorAll(PROFILE_AVATAR_SELECTOR).forEach(watchProfileAvatar);
+    const images = [];
+    if (node.matches(PROFILE_AVATAR_SELECTOR)) images.push(node);
+    images.push(...node.querySelectorAll(PROFILE_AVATAR_SELECTOR));
+    images.forEach(image => {
+      watchProfileAvatar(image);
+      cacheAvatarSnapshot(image);
+    });
   }
 
   function initializeProfileAvatarRecovery() {
-    document.querySelectorAll(PROFILE_AVATAR_SELECTOR).forEach(watchProfileAvatar);
+    registerAvatarCacheWorker();
+    document.querySelectorAll(PROFILE_AVATAR_SELECTOR).forEach(image => {
+      watchProfileAvatar(image);
+      cacheAvatarSnapshot(image);
+    });
     const observer = new MutationObserver(records => {
       records.forEach(record => record.addedNodes.forEach(watchAvatarsWithin));
     });
