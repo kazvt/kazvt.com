@@ -34,10 +34,13 @@ export function resolvePointClickCursor({ zone = "", actionable = false } = {}) 
 }
 
 export function resolvePointClickBack(view = {}) {
-  const { kind = "overview", look = 0 } = view;
-  // Back follows the view hierarchy while keeping the current heading. A
-  // heading change is not a parent view, and the root has nowhere to back out to.
-  if (kind === "overview") return null;
-  if (kind === "contestant") return { kind: "contestants", look };
-  return { kind: "overview", look };
+  const { kind = "overview", look = 0, retreat = 0 } = view;
+  // At the overview, back is a bounded dolly along the current camera ray.
+  // Within a focused view, it returns to the parent without changing heading.
+  if (kind === "overview") {
+    if (retreat >= 3) return null;
+    return { ...view, retreat: retreat + 1 };
+  }
+  if (kind === "contestant") return { kind: "contestants", look, retreat: 0 };
+  return { kind: "overview", look, retreat: 0 };
 }
