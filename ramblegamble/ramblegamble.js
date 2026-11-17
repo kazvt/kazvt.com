@@ -21,6 +21,7 @@ import {
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
+  const OVERVIEW_RETREAT_DISTANCE = 0.45;
   const BILLBOARD_SOURCES = [
     { id: "faroe", label: "Faroe", source: "https://reactive.fugi.tech/basic/489548166316949513" },
     { id: "erin", label: "Erin", source: "https://reactive.fugi.tech/basic/205887066855178244" },
@@ -264,7 +265,10 @@ import {
       }
     }
 
-    distance = Math.max(distance, 1) * (view.kind === "overview" ? 1.14 : 1.18);
+    const retreatSteps = THREE.MathUtils.clamp(view.retreat || 0, 0, 3);
+    distance = Math.max(distance, 1)
+      * (view.kind === "overview" ? 1.14 : 1.18)
+      * (1 + retreatSteps * OVERVIEW_RETREAT_DISTANCE);
     return { target, position: target.clone().addScaledVector(direction, distance) };
   }
 
