@@ -229,18 +229,19 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
         uHorizonColor: { value: new THREE.Color(SKY_CONFIG.horizonColor) },
       },
       vertexShader: `
-        varying vec3 vSkyDirection;
+        varying float vSkyViewHeight;
         void main() {
-          vSkyDirection = normalize(position);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
+          vSkyViewHeight = normalize(viewPosition.xyz).y;
+          gl_Position = projectionMatrix * viewPosition;
         }
       `,
       fragmentShader: `
         uniform vec3 uTopColor;
         uniform vec3 uHorizonColor;
-        varying vec3 vSkyDirection;
+        varying float vSkyViewHeight;
         void main() {
-          float height = smoothstep(-0.18, 0.96, normalize(vSkyDirection).y);
+          float height = smoothstep(-0.34, 0.38, vSkyViewHeight);
           vec3 sky = mix(uHorizonColor, uTopColor, height);
           gl_FragColor = vec4(sky, 1.0);
           #include <colorspace_fragment>
@@ -258,155 +259,114 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     skyRoot.add(skyDome);
 
     const starCount = SKY_CONFIG.starCount;
-    const positions = new Float32Array(starCount * 3);
-    const phases = new Float32Array(starCount);
-    const rates = new Float32Array(starCount);
-    const sizes = new Float32Array(starCount);
-    const brightness = new Float32Array(starCount);
-    const colors = new Float32Array(starCount * 3);
     const starPalette = ["#fff0d2", "#eee3ff", "#dceeff"].map((color) => new THREE.Color(color));
     const starRadius = SKY_CONFIG.radius - 1.4;
-
-    for (let index = 0; index < starCount; index += 1) {
+    skyStars = Array.from({ length: starCount }, () => {
       // Uniformly sprinkle small circular pixels over the upper sky hemisphere.
       const up = 0.08 + nextSkyRandom() * 0.91;
       const around = nextSkyRandom() * Math.PI * 2;
       const ring = Math.sqrt(1 - up * up);
-      positions[index * 3] = Math.cos(around) * ring * starRadius;
-      positions[index * 3 + 1] = up * starRadius;
-      positions[index * 3 + 2] = Math.sin(around) * ring * starRadius;
-      phases[index] = nextSkyRandom();
-      rates[index] = 0.11 + nextSkyRandom() * 0.12;
-      sizes[index] = 1.7 + nextSkyRandom() * 1.7;
-      brightness[index] = 0.38 + nextSkyRandom() * 0.52;
-      const color = starPalette[Math.floor(nextSkyRandom() * starPalette.length)];
-      colors[index * 3] = color.r;
-      colors[index * 3 + 1] = color.g;
-      colors[index * 3 + 2] = color.b;
-    }
+      return {
+        direction: new THREE.Vector3(Math.cos(around) * ring, up, Math.sin(around) * ring),
+        phase: nextSkyRandom() * Math.PI * 2,
+        rate: 0.11 + nextSkyRandom() * 0.12,
+        size: 2.0 + nextSkyRandom() * 1.9,
+        color: starPalette[Math.floor(nextSkyRandom() * starPalette.length)]
+          .clone()
+          .multiplyScalar(0.58 + nextSkyRandom() * 0.48),
+      };
+    });
 
-    const starGeometry = new THREE.BufferGeometry();
-    starGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    starGeometry.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
-    starGeometry.setAttribute("aRate", new THREE.BufferAttribute(rates, 1));
-    starGeometry.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
-    starGeometry.setAttribute("aBrightness", new THREE.BufferAttribute(brightness, 1));
-    starGeometry.setAttribute("aColor", new THREE.BufferAttribute(colors, 3));
-
-    skyTwinkleMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uPixelRatio: { value: renderer.getPixelRatio() },
-      },
-      vertexShader: `
-        attribute float aPhase;
-        attribute float aRate;
-        attribute float aSize;
-        attribute float aBrightness;
-        attribute vec3 aColor;
-        uniform float uTime;
-        uniform float uPixelRatio;
-        varying float vAlpha;
-        varying vec3 vColor;
-        void main() {
-          float pulse = 0.5 - 0.5 * cos(6.2831853 * (uTime * aRate + aPhase));
-          float size = aSize * (0.82 + 0.56 * pulse);
-          vAlpha = aBrightness * (0.28 + 0.72 * pulse);
-          vColor = aColor;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = max(1.0, size * uPixelRatio);
-        }
-      `,
-      fragmentShader: `
-        varying float vAlpha;
-        varying vec3 vColor;
-        void main() {
-          vec2 pixel = (floor(gl_PointCoord * 7.0) + 0.5) / 7.0 - vec2(0.5);
-          float circle = 1.0 - step(0.205, dot(pixel, pixel));
-          gl_FragColor = vec4(vColor, vAlpha * circle);
-          #include <colorspace_fragment>
-        }
-      `,
+    const starMaterial = new THREE.MeshBasicMaterial({
+      map: createPixelCircleTexture(),
+      color: 0xffffff,
       transparent: true,
       depthTest: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       toneMapped: false,
     });
-
-    const stars = new THREE.Points(starGeometry, skyTwinkleMaterial);
-    stars.name = "rg-pixel-twinkle-stars";
-    stars.frustumCulled = false;
-    stars.renderOrder = -9998;
-    skyRoot.add(stars);
+    const starMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), starMaterial, starCount);
+    starMesh.name = "rg-pixel-twinkle-stars";
+    starMesh.frustumCulled = false;
+    starMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    for (let index = 0; index < starCount; index += 1) starMesh.setColorAt(index, skyStars[index].color);
+    if (starMesh.instanceColor) starMesh.instanceColor.needsUpdate = true;
+    starMesh.renderOrder = -9998;
+    skyRoot.add(starMesh);
 
     createShootingStars();
     scene.add(skyRoot);
   }
 
+  function createPixelCircleTexture() {
+    const size = 8;
+    const pixels = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        const distanceSquared = (x - 3.5) ** 2 + (y - 3.5) ** 2;
+        if (distanceSquared > 10.5) continue;
+        const offset = (y * size + x) * 4;
+        pixels[offset] = 255;
+        pixels[offset + 1] = 255;
+        pixels[offset + 2] = 255;
+        pixels[offset + 3] = 255;
+      }
+    }
+    const texture = new THREE.DataTexture(pixels, size, size, THREE.RGBAFormat);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  function createPixelShootingStarTexture() {
+    const width = 24;
+    const height = 8;
+    const pixels = new Uint8Array(width * height * 4);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const headDistance = ((x - 19) / 3.4) ** 2 + ((y - 3.5) / 2.5) ** 2;
+        let alpha = headDistance <= 1 ? 255 : 0;
+        if ((y === 3 || y === 4) && x < 20) {
+          alpha = Math.max(alpha, Math.round(175 * (1 - x / 23)));
+        }
+        if (alpha === 0) continue;
+        const offset = (y * width + x) * 4;
+        pixels[offset] = 255;
+        pixels[offset + 1] = 248;
+        pixels[offset + 2] = 232;
+        pixels[offset + 3] = alpha;
+      }
+    }
+    const texture = new THREE.DataTexture(pixels, width, height, THREE.RGBAFormat);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
+    texture.needsUpdate = true;
+    return texture;
+  }
+
   function createShootingStars() {
     const count = 3;
-    const positions = new Float32Array(count * 3);
-    const angles = new Float32Array(count);
-    const alphas = new Float32Array(count);
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
-    geometry.setAttribute("aAngle", new THREE.BufferAttribute(angles, 1));
-    geometry.setAttribute("aAlpha", new THREE.BufferAttribute(alphas, 1).setUsage(THREE.DynamicDrawUsage));
-    skyShootingGeometry = geometry;
-
-    skyShootingMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uPixelRatio: { value: renderer.getPixelRatio() },
-        uColor: { value: new THREE.Color("#fff0de") },
-      },
-      vertexShader: `
-        attribute float aAngle;
-        attribute float aAlpha;
-        uniform float uPixelRatio;
-        varying float vAlpha;
-        varying float vAngle;
-        varying vec3 vColor;
-        uniform vec3 uColor;
-        void main() {
-          vAlpha = aAlpha;
-          vAngle = aAngle;
-          vColor = uColor;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = 34.0 * uPixelRatio;
-        }
-      `,
-      fragmentShader: `
-        varying float vAlpha;
-        varying float vAngle;
-        varying vec3 vColor;
-        void main() {
-          vec2 pixel = (floor(gl_PointCoord * 16.0) + 0.5) / 16.0 - vec2(0.5);
-          float c = cos(vAngle);
-          float s = sin(vAngle);
-          vec2 streak = mat2(c, -s, s, c) * pixel;
-          float tail = step(abs(streak.y), 0.055)
-            * step(-0.47, streak.x) * step(streak.x, 0.30)
-            * (1.0 - smoothstep(-0.30, 0.30, streak.x));
-          vec2 headOffset = streak - vec2(0.32, 0.0);
-          float head = 1.0 - step(0.010, dot(headOffset, headOffset));
-          float shape = max(tail, head);
-          gl_FragColor = vec4(vColor, vAlpha * shape);
-          #include <colorspace_fragment>
-        }
-      `,
+    const shootingMaterial = new THREE.MeshBasicMaterial({
+      map: createPixelShootingStarTexture(),
+      color: 0xffffff,
       transparent: true,
       depthTest: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       toneMapped: false,
     });
-
-    const shootingStars = new THREE.Points(geometry, skyShootingMaterial);
-    shootingStars.name = "rg-pixel-shooting-stars";
-    shootingStars.frustumCulled = false;
-    shootingStars.renderOrder = -9997;
-    skyRoot.add(shootingStars);
+    skyShootingStarsMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), shootingMaterial, count);
+    skyShootingStarsMesh.name = "rg-pixel-shooting-stars";
+    skyShootingStarsMesh.frustumCulled = false;
+    skyShootingStarsMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    skyShootingStarsMesh.renderOrder = -9997;
+    skyRoot.add(skyShootingStarsMesh);
 
     skyShootingStars = Array.from({ length: count }, (_, index) => ({
       index,
@@ -416,10 +376,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       duration: 900,
       nextAt: 2500 + index * 4100 + nextSkyRandom() * 5200,
       active: false,
-      angle: (nextSkyRandom() - 0.5) * 0.85 - 0.34,
+      angle: (nextSkyRandom() - 0.5) * 0.48 - 0.30,
+      tint: new THREE.Color("#fff0de"),
     }));
-    for (const star of skyShootingStars) angles[star.index] = star.angle;
-    geometry.attributes.aAngle.needsUpdate = true;
   }
 
   function makeShootingStarPath() {
@@ -448,18 +407,39 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     skyRoot.position.copy(camera.position);
 
     const reduced = reducedMotion.matches;
-    if (skyTwinkleMaterial) {
-      skyTwinkleMaterial.uniforms.uTime.value = reduced ? 0 : time * 0.001;
-      skyTwinkleMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+    const cssHeight = Math.max(1, preview.clientHeight);
+    const worldPerPixel = (2 * (SKY_CONFIG.radius - 2) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / cssHeight;
+    const matrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const scale = new THREE.Vector3();
+    const pixelQuaternion = camera.quaternion;
+    const seconds = time * 0.001;
+
+    if (skyStars) {
+      for (let index = 0; index < skyStars.length; index += 1) {
+        const star = skyStars[index];
+        const pulse = reduced ? 0.5 : 0.5 - 0.5 * Math.cos((seconds * star.rate + star.phase / (Math.PI * 2)) * Math.PI * 2);
+        const size = star.size * (0.80 + 0.52 * pulse) * worldPerPixel;
+        position.copy(star.direction).multiplyScalar(SKY_CONFIG.radius - 1.4);
+        scale.set(size, size, 1);
+        matrix.compose(position, pixelQuaternion, scale);
+        skyStarsMeshSetMatrix(index, matrix);
+      }
+      skyStarsMeshUpdate();
     }
-    if (!skyShootingGeometry || !skyShootingMaterial) return;
-    skyShootingMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
-    const positionAttribute = skyShootingGeometry.attributes.position;
-    const alphaAttribute = skyShootingGeometry.attributes.aAlpha;
+
+    if (!skyShootingStarsMesh) return;
+    const roll = new THREE.Quaternion();
+    const rotation = new THREE.Quaternion();
+    const worldZ = new THREE.Vector3(0, 0, 1);
+    const color = new THREE.Color();
 
     for (const star of skyShootingStars) {
       if (reduced) {
-        alphaAttribute.setX(star.index, 0);
+        scale.set(0, 0, 0);
+        matrix.compose(position.set(0, 0, 0), pixelQuaternion, scale);
+        skyShootingStarsMesh.setMatrixAt(star.index, matrix);
+        skyShootingStarsMesh.setColorAt(star.index, color.setRGB(0, 0, 0));
         continue;
       }
 
@@ -473,22 +453,30 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       }
 
       if (!star.active) {
-        alphaAttribute.setX(star.index, 0);
+        scale.set(0, 0, 0);
+        matrix.compose(position.set(0, 0, 0), pixelQuaternion, scale);
+        skyShootingStarsMesh.setMatrixAt(star.index, matrix);
+        skyShootingStarsMesh.setColorAt(star.index, color.setRGB(0, 0, 0));
         continue;
       }
 
       const progress = Math.min(1, (time - star.startedAt) / star.duration);
       const eased = progress * progress * (3 - 2 * progress);
-      const position = star.start.clone().lerp(star.end, eased);
-      positionAttribute.setXYZ(star.index, position.x, position.y, position.z);
-      alphaAttribute.setX(star.index, Math.sin(progress * Math.PI) * 0.88);
+      position.lerpVectors(star.start, star.end, eased);
+      roll.setFromAxisAngle(worldZ, star.angle);
+      rotation.copy(pixelQuaternion).multiply(roll);
+      const fade = Math.sin(progress * Math.PI) * 0.88;
+      scale.set(30 * worldPerPixel, 5 * worldPerPixel, 1);
+      matrix.compose(position, rotation, scale);
+      skyShootingStarsMesh.setMatrixAt(star.index, matrix);
+      skyShootingStarsMesh.setColorAt(star.index, color.copy(star.tint).multiplyScalar(fade));
       if (progress >= 1) {
         star.active = false;
         star.nextAt = time + 14500 + nextSkyRandom() * 16500;
       }
     }
-    positionAttribute.needsUpdate = true;
-    alphaAttribute.needsUpdate = true;
+    skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
+    if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
   }
 
   function fitCamera() {
