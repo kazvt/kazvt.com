@@ -163,6 +163,11 @@ export function parseTriviaText(input) {
 }
 
 function extractJson(text) {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("[")) {
+    try { return { ok: true, value: JSON.parse(trimmed) }; }
+    catch { /* Continue with an embedded JSON object or the human-text parser. */ }
+  }
   const first = text.indexOf("{");
   const last = text.lastIndexOf("}");
   if (first < 0 || last <= first) return { ok: false };
@@ -171,6 +176,7 @@ function extractJson(text) {
 }
 
 function parseJsonPayload(value) {
+  if (Array.isArray(value)) return parseQuestionObjects(value);
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   if (value.format === TRIVIA_EXPORT_FORMAT && Number(value.version) !== TRIVIA_EXPORT_VERSION) {
     return { rounds: {}, questionBank: [], media: {}, warnings: [], errors: [`Unsupported trivia export version: ${value.version}.`] };
@@ -200,7 +206,7 @@ function parseQuestionObjects(questions) {
   let generated = 1;
   for (const [index, item] of questions.entries()) {
     if (!item || typeof item !== "object") { warnings.push(`Question ${index + 1} was skipped because it was not an object.`); continue; }
-    const round = normalizeId(item.round ?? item.roundId ?? item.roundNumber ?? item.questionNumber ?? item.number ?? item.id) || String(generated++).padStart(2, "0");
+    const round = normalizeId(item.round ?? item.roundId ?? item.round_id ?? item.roundNumber ?? item.round_number ?? item.questionNumber ?? item.question_number ?? item.number ?? item.id) || String(generated++).padStart(2, "0");
     const question = safeString(item.question ?? item.prompt ?? item.questionText ?? item.front ?? item.term ?? item.title ?? item.text).trim();
     if (!question) { warnings.push(`Entry ${index + 1} has no question text and was skipped.`); continue; }
     const rawOptions = item.options ?? item.choices ?? item.answers ?? item.alternatives;
@@ -822,7 +828,7 @@ function parseRoundHeader(line) {
 }
 
 function parseDifficultyHeader(line) {
-  let match = line.match(/^\s*(?:difficult(?:y|ies)|diff|level|tier|stage|d)\s*(?:number\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)–—-]\s*)?(.*)$/i);
+  let match = line.match(/^\s*(?:difficult(?:y|ies)|diff|level|tier|stage|d)\s*(?:(?:number|level|tier)\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)–—-]\s*)?(.*)$/i);
   if (match) {
     const level = parseLevelValue(match[1]);
     return level ? { level, annotation: match[2].trim() } : null;
@@ -840,7 +846,7 @@ function parseDifficultyHeader(line) {
 }
 
 function parseLevelSpec(value) {
-  const match = String(value || "").match(/^\s*(\S+)([\s\S]*)$/);
+  const match = String(value || "").replace(/^\s*(?:difficulty|diff|level|tier|stage|d)\s*#?\s*/i, "").match(/^\s*(\S+)([\s\S]*)$/);
   if (!match) return { level: 0, annotation: "" };
   return { level: parseLevelValue(match[1]), annotation: match[2].trim() };
 }
@@ -858,9 +864,9 @@ function parseField(line) {
   const rawName = match[1].trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
   const aliases = new Map([
     ["q", "question"], ["question", "question"], ["question text", "question"], ["prompt", "prompt"], ["prompt text", "prompt"], ["stem", "stem"], ["front", "front"], ["term", "term"], ["round", "round"], ["round number", "round"], ["question number", "round"], ["id", "round"],
-    ["difficulty", "difficulty"], ["diff", "diff"], ["level", "level"], ["tier", "tier"],
+    ["difficulty", "difficulty"], ["diff", "diff"], ["d", "difficulty"], ["level", "level"], ["tier", "tier"],
     ["answers", "options"], ["answer choices", "options"], ["mc answers", "options"], ["answer options", "options"], ["options", "options"], ["choices", "options"], ["choice", "options"], ["multiple choice", "options"], ["possible answers", "options"], ["alternatives", "options"],
-    ["a", "accepted"], ["ans", "accepted"], ["answer", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["expected answer", "accepted"], ["expected answers", "accepted"], ["solution", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["correct answers", "correct"], ["correct option", "correct"], ["correct choice", "correct"], ["right answer", "correct"], ["key", "correct"],
+    ["a", "accepted"], ["ans", "accepted"], ["answer", "accepted"], ["the answer", "accepted"], ["the answer is", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["expected answer", "accepted"], ["expected answers", "accepted"], ["solution", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["the correct answer", "correct"], ["the correct answer is", "correct"], ["correct answers", "correct"], ["correct option", "correct"], ["correct choice", "correct"], ["right answer", "correct"], ["right option", "correct"], ["key", "correct"],
     ["mode", "mode"], ["type", "mode"], ["format", "mode"], ["template", "mode"], ["question type", "mode"],
     ["subtitle", "subtitle"], ["description", "subtitle"], ["hint", "subtitle"],
     ["image", "promptimage"], ["prompt image", "promptimage"], ["image url", "promptimage"], ["prompt image url", "promptimage"],
