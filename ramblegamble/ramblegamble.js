@@ -7,7 +7,7 @@ import {
   resolvePointClickZone,
 } from "./point-click-routing.js?v=point-click-back-stop-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
-import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-doorway-cut-20261119-v1";
+import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-doorway-cut-20261119-v2";
 
 (() => {
   "use strict";
