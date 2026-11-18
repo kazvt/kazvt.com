@@ -23,6 +23,22 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const OVERVIEW_RETREAT_DISTANCE = 0.45;
+  const ARCADE_REFERENCE_LAYOUT = Object.freeze({
+    // The back-wall recess in rg_stage.gltf spans x=9.14..14.48 at z=-6.10.
+    slotBay: Object.freeze({ left: 9.14, right: 14.48, wallZ: -6.10, height: 2.42, clearance: 0.025 }),
+    // The raised stage's forward lip ends at z=0.06; keep the whole wheel
+    // footprint beyond it, rather than merely moving its center off the stage.
+    stageFrontZ: 0.06,
+    rouletteCenterX: 15.4,
+    rouletteScale: 0.18,
+    rouletteClearance: 0.28,
+  });
+  const SKY_CONFIG = Object.freeze({
+    radius: 260,
+    starCount: 280,
+    topColor: "#100818",
+    horizonColor: "#b9a0cf",
+  });
   const BILLBOARD_SOURCES = [
     { id: "faroe", label: "Faroe", source: "https://reactive.fugi.tech/basic/489548166316949513" },
     { id: "erin", label: "Erin", source: "https://reactive.fugi.tech/basic/205887066855178244" },
@@ -48,6 +64,11 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let lever;
   let rouletteRig;
   let slotRig;
+  let skyRoot;
+  let skyTwinkleMaterial;
+  let skyShootingMaterial;
+  let skyShootingGeometry;
+  let skyShootingStars = [];
   let rouletteTargets = [];
   let slotTargets = [];
   let wheelMotion = null;
@@ -67,6 +88,12 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let cameraTarget = new THREE.Vector3();
   let cameraTransition = null;
   let cursorMode = "";
+  let skyRandomState = 0x4b415a56;
+
+  function nextSkyRandom() {
+    skyRandomState = (Math.imul(skyRandomState, 1664525) + 1013904223) >>> 0;
+    return skyRandomState / 4294967296;
+  }
 
   function themeValue(name, fallback) {
     const value = getComputedStyle(document.body).getPropertyValue(name).trim();
@@ -84,8 +111,8 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (meta) meta.content = color;
 
     if (!scene) return;
-    scene.background = new THREE.Color(color);
-    scene.fog.color.set(color);
+    scene.background = new THREE.Color(SKY_CONFIG.topColor);
+    scene.fog.color.set(SKY_CONFIG.horizonColor);
     const bgColor = new THREE.Color(color);
     const accentColor = new THREE.Color(themeValue("--pink", "#f599c6"));
     const blueColor = new THREE.Color(themeValue("--blue", "#4d6787"));
@@ -153,10 +180,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   applyTheme();
 
   function createWorld() {
-    const bg = themeValue("--bg", "#17213c");
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(bg);
-    scene.fog = new THREE.Fog(bg, 120, 230);
+    scene.background = new THREE.Color(SKY_CONFIG.topColor);
+    scene.fog = new THREE.Fog(SKY_CONFIG.horizonColor, 120, 230);
 
     camera = new THREE.PerspectiveCamera(42, 1, 0.1, 320);
     renderer = new THREE.WebGLRenderer({
@@ -169,6 +195,8 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
+
+    createSkybox();
 
     scene.add(new THREE.HemisphereLight(0xfff4e8, 0x282044, 2.0));
     const keyLight = new THREE.DirectionalLight(0xffffff, 3.0);
@@ -189,6 +217,279 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     slotRig.rotation.y = Math.PI;
     scene.add(slotRig);
 
+  }
+
+  function createSkybox() {
+    skyRoot = new THREE.Group();
+    skyRoot.name = "rg-starry-sky";
+    skyRoot.frustumCulled = false;
+
+    const skyMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTopColor: { value: new THREE.Color(SKY_CONFIG.topColor) },
+        uHorizonColor: { value: new THREE.Color(SKY_CONFIG.horizonColor) },
+      },
+      vertexShader: `
+        varying vec3 vSkyDirection;
+        void main() {
+          vSkyDirection = normalize(position);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uTopColor;
+        uniform vec3 uHorizonColor;
+        varying vec3 vSkyDirection;
+        void main() {
+          float height = smoothstep(-0.18, 0.96, normalize(vSkyDirection).y);
+          vec3 sky = mix(uHorizonColor, uTopColor, height);
+          gl_FragColor = vec4(sky, 1.0);
+          #include <colorspace_fragment>
+        }
+      `,
+      side: THREE.BackSide,
+      depthTest: true,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const skyDome = new THREE.Mesh(new THREE.SphereGeometry(SKY_CONFIG.radius, 32, 20), skyMaterial);
+    skyDome.name = "rg-sky-gradient";
+    skyDome.frustumCulled = false;
+    skyDome.renderOrder = -10000;
+    skyRoot.add(skyDome);
+
+    const starCount = SKY_CONFIG.starCount;
+    const positions = new Float32Array(starCount * 3);
+    const phases = new Float32Array(starCount);
+    const rates = new Float32Array(starCount);
+    const sizes = new Float32Array(starCount);
+    const brightness = new Float32Array(starCount);
+    const colors = new Float32Array(starCount * 3);
+    const starPalette = ["#fff0d2", "#eee3ff", "#dceeff"].map((color) => new THREE.Color(color));
+    const starRadius = SKY_CONFIG.radius - 1.4;
+
+    for (let index = 0; index < starCount; index += 1) {
+      // Uniformly sprinkle small circular pixels over the upper sky hemisphere.
+      const up = 0.08 + nextSkyRandom() * 0.91;
+      const around = nextSkyRandom() * Math.PI * 2;
+      const ring = Math.sqrt(1 - up * up);
+      positions[index * 3] = Math.cos(around) * ring * starRadius;
+      positions[index * 3 + 1] = up * starRadius;
+      positions[index * 3 + 2] = Math.sin(around) * ring * starRadius;
+      phases[index] = nextSkyRandom();
+      rates[index] = 0.11 + nextSkyRandom() * 0.12;
+      sizes[index] = 1.7 + nextSkyRandom() * 1.7;
+      brightness[index] = 0.38 + nextSkyRandom() * 0.52;
+      const color = starPalette[Math.floor(nextSkyRandom() * starPalette.length)];
+      colors[index * 3] = color.r;
+      colors[index * 3 + 1] = color.g;
+      colors[index * 3 + 2] = color.b;
+    }
+
+    const starGeometry = new THREE.BufferGeometry();
+    starGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    starGeometry.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
+    starGeometry.setAttribute("aRate", new THREE.BufferAttribute(rates, 1));
+    starGeometry.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+    starGeometry.setAttribute("aBrightness", new THREE.BufferAttribute(brightness, 1));
+    starGeometry.setAttribute("aColor", new THREE.BufferAttribute(colors, 3));
+
+    skyTwinkleMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uPixelRatio: { value: renderer.getPixelRatio() },
+      },
+      vertexShader: `
+        attribute float aPhase;
+        attribute float aRate;
+        attribute float aSize;
+        attribute float aBrightness;
+        attribute vec3 aColor;
+        uniform float uTime;
+        uniform float uPixelRatio;
+        varying float vAlpha;
+        varying vec3 vColor;
+        void main() {
+          float pulse = 0.5 - 0.5 * cos(6.2831853 * (uTime * aRate + aPhase));
+          float size = aSize * (0.82 + 0.56 * pulse);
+          vAlpha = aBrightness * (0.28 + 0.72 * pulse);
+          vColor = aColor;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = max(1.0, size * uPixelRatio);
+        }
+      `,
+      fragmentShader: `
+        varying float vAlpha;
+        varying vec3 vColor;
+        void main() {
+          vec2 pixel = (floor(gl_PointCoord * 7.0) + 0.5) / 7.0 - vec2(0.5);
+          float circle = 1.0 - step(0.205, dot(pixel, pixel));
+          gl_FragColor = vec4(vColor, vAlpha * circle);
+          #include <colorspace_fragment>
+        }
+      `,
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      toneMapped: false,
+    });
+
+    const stars = new THREE.Points(starGeometry, skyTwinkleMaterial);
+    stars.name = "rg-pixel-twinkle-stars";
+    stars.frustumCulled = false;
+    stars.renderOrder = -9998;
+    skyRoot.add(stars);
+
+    createShootingStars();
+    scene.add(skyRoot);
+  }
+
+  function createShootingStars() {
+    const count = 3;
+    const positions = new Float32Array(count * 3);
+    const angles = new Float32Array(count);
+    const alphas = new Float32Array(count);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.setAttribute("aAngle", new THREE.BufferAttribute(angles, 1));
+    geometry.setAttribute("aAlpha", new THREE.BufferAttribute(alphas, 1).setUsage(THREE.DynamicDrawUsage));
+    skyShootingGeometry = geometry;
+
+    skyShootingMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uPixelRatio: { value: renderer.getPixelRatio() },
+        uColor: { value: new THREE.Color("#fff0de") },
+      },
+      vertexShader: `
+        attribute float aAngle;
+        attribute float aAlpha;
+        uniform float uPixelRatio;
+        varying float vAlpha;
+        varying float vAngle;
+        varying vec3 vColor;
+        uniform vec3 uColor;
+        void main() {
+          vAlpha = aAlpha;
+          vAngle = aAngle;
+          vColor = uColor;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = 34.0 * uPixelRatio;
+        }
+      `,
+      fragmentShader: `
+        varying float vAlpha;
+        varying float vAngle;
+        varying vec3 vColor;
+        void main() {
+          vec2 pixel = (floor(gl_PointCoord * 16.0) + 0.5) / 16.0 - vec2(0.5);
+          float c = cos(vAngle);
+          float s = sin(vAngle);
+          vec2 streak = mat2(c, -s, s, c) * pixel;
+          float tail = step(abs(streak.y), 0.055)
+            * step(-0.47, streak.x) * step(streak.x, 0.30)
+            * (1.0 - smoothstep(-0.30, 0.30, streak.x));
+          vec2 headOffset = streak - vec2(0.32, 0.0);
+          float head = 1.0 - step(0.010, dot(headOffset, headOffset));
+          float shape = max(tail, head);
+          gl_FragColor = vec4(vColor, vAlpha * shape);
+          #include <colorspace_fragment>
+        }
+      `,
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      toneMapped: false,
+    });
+
+    const shootingStars = new THREE.Points(geometry, skyShootingMaterial);
+    shootingStars.name = "rg-pixel-shooting-stars";
+    shootingStars.frustumCulled = false;
+    shootingStars.renderOrder = -9997;
+    skyRoot.add(shootingStars);
+
+    skyShootingStars = Array.from({ length: count }, (_, index) => ({
+      index,
+      start: null,
+      end: null,
+      startedAt: 0,
+      duration: 900,
+      nextAt: 2500 + index * 4100 + nextSkyRandom() * 5200,
+      active: false,
+      angle: (nextSkyRandom() - 0.5) * 0.85 - 0.34,
+    }));
+    for (const star of skyShootingStars) angles[star.index] = star.angle;
+    geometry.attributes.aAngle.needsUpdate = true;
+  }
+
+  function makeShootingStarPath() {
+    camera.updateMatrixWorld(true);
+    const forward = camera.getWorldDirection(new THREE.Vector3());
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+    const viewUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const start = forward
+      .addScaledVector(right, (nextSkyRandom() - 0.5) * 0.95)
+      .addScaledVector(viewUp, 0.36 + nextSkyRandom() * 0.36)
+      .normalize();
+    if (start.y < 0.12) start.addScaledVector(worldUp, 0.12 - start.y).normalize();
+    const end = start.clone()
+      .addScaledVector(right, (nextSkyRandom() < 0.5 ? -1 : 1) * (0.12 + nextSkyRandom() * 0.16))
+      .addScaledVector(worldUp, -(0.08 + nextSkyRandom() * 0.12))
+      .normalize();
+    return {
+      start: start.multiplyScalar(SKY_CONFIG.radius - 2),
+      end: end.multiplyScalar(SKY_CONFIG.radius - 2),
+    };
+  }
+
+  function updateSkyAnimations(time) {
+    if (!skyRoot || !camera) return;
+    skyRoot.position.copy(camera.position);
+
+    const reduced = reducedMotion.matches;
+    if (skyTwinkleMaterial) {
+      skyTwinkleMaterial.uniforms.uTime.value = reduced ? 0 : time * 0.001;
+      skyTwinkleMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+    }
+    if (!skyShootingGeometry || !skyShootingMaterial) return;
+    skyShootingMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+    const positionAttribute = skyShootingGeometry.attributes.position;
+    const alphaAttribute = skyShootingGeometry.attributes.aAlpha;
+
+    for (const star of skyShootingStars) {
+      if (reduced) {
+        alphaAttribute.setX(star.index, 0);
+        continue;
+      }
+
+      if (!star.active && time >= star.nextAt) {
+        const path = makeShootingStarPath();
+        star.start = path.start;
+        star.end = path.end;
+        star.startedAt = time;
+        star.duration = 780 + nextSkyRandom() * 520;
+        star.active = true;
+      }
+
+      if (!star.active) {
+        alphaAttribute.setX(star.index, 0);
+        continue;
+      }
+
+      const progress = Math.min(1, (time - star.startedAt) / star.duration);
+      const eased = progress * progress * (3 - 2 * progress);
+      const position = star.start.clone().lerp(star.end, eased);
+      positionAttribute.setXYZ(star.index, position.x, position.y, position.z);
+      alphaAttribute.setX(star.index, Math.sin(progress * Math.PI) * 0.88);
+      if (progress >= 1) {
+        star.active = false;
+        star.nextAt = time + 14500 + nextSkyRandom() * 16500;
+      }
+    }
+    positionAttribute.needsUpdate = true;
+    alphaAttribute.needsUpdate = true;
   }
 
   function fitCamera() {
