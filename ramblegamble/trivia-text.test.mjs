@@ -164,6 +164,12 @@ test("generic JSON question arrays accept common prompt, option, and key aliases
   }));
   assert.equal(objectChoices.rounds["01"][1].options[1].correct, true);
 
+  const topLevelArray = parseTriviaText(JSON.stringify([
+    { prompt: "An array-wrapped question?", options: ["No", "Yes"], correct: "B" },
+  ]));
+  assert.equal(topLevelArray.rounds["01"][1].question, "An array-wrapped question?");
+  assert.equal(topLevelArray.rounds["01"][1].options[1].correct, true);
+
   const tiers = parseTriviaText(JSON.stringify({ questions: [
     { round: 4, question: "Tiered choices?", difficulty: 1, options: ["A", "B"], answer: "B" },
     { round: 4, question: "Tiered choices?", difficulty: 2, options: ["C"], add: "add these" },
