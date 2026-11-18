@@ -352,15 +352,18 @@ function parseDelimited(text) {
   const header = rows[0].map(normalizeHeader);
   const indexes = {};
   header.forEach((name, index) => { if (name) indexes[name] = index; });
-  const questionColumn = findColumn(indexes, ["question", "q", "prompt", "question text", "front", "term", "title", "text"]);
-  const answerColumn = findColumn(indexes, ["answers", "options", "choices", "answer", "accepted answers", "accepted answer", "correct answer", "answer key", "back", "definition"]);
+  let questionColumn = findColumn(indexes, ["question", "q", "prompt", "question text", "front", "term", "title", "text"]);
+  let answerColumn = findColumn(indexes, ["answers", "options", "choices", "answer", "accepted answers", "accepted answer", "correct answer", "answer key", "back", "definition"]);
   const optionColumns = header.map((name, index) => /^(?:option|choice|answer)(?:\s*(?:#\s*)?[1-9]\d*|\s+[a-z])$/i.test(name) ? index : -1).filter((index) => index >= 0);
-  if (questionColumn < 0 || (answerColumn < 0 && !optionColumns.length)) return null;
+  const headerless = questionColumn < 0;
+  if (headerless && rows[0].length < 2) return null;
+  if (headerless) { questionColumn = 0; answerColumn = 1; }
+  if (answerColumn < 0 && !optionColumns.length) return null;
 
   const warnings = [];
   const grouped = new Map();
   let sequence = 1;
-  for (const [rowIndex, row] of rows.slice(1).entries()) {
+  for (const [rowIndex, row] of (headerless ? rows : rows.slice(1)).entries()) {
     if (!row.some((cell) => cell.trim())) continue;
     const question = String(row[questionColumn] || "").trim();
     if (!question) { warnings.push("Row " + (rowIndex + 2) + " has no question and was skipped."); continue; }
@@ -368,10 +371,12 @@ function parseDelimited(text) {
     const round = rowRound || String(sequence++).padStart(2, "0");
     const difficulty = Math.max(1, Math.min(5, Number(getColumn(row, indexes, ["difficulty", "level", "tier", "diff"])) || 1));
     const answerHeading = answerColumn >= 0 ? header[answerColumn] : "";
-    const isAcceptedColumn = ["answer", "accepted answer", "accepted answers", "definition", "back"].includes(answerHeading) ||
+    const isAcceptedColumn = (headerless && row.length === 2) || ["answer", "accepted answer", "accepted answers", "definition", "back"].includes(answerHeading) ||
       (!optionColumns.length && ["correct answer", "answer key"].includes(answerHeading));
     const rawAnswers = answerColumn >= 0 ? splitLooseList(row[answerColumn]) : [];
-    const options = optionColumns.length
+    const options = headerless && row.length > 2
+      ? row.slice(1).map((cell) => String(cell || "").trim()).filter(Boolean)
+      : optionColumns.length
       ? optionColumns.map((column) => String(row[column] || "").trim()).filter(Boolean)
       : isAcceptedColumn ? [] : rawAnswers;
     const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, indexes, ["accepted answers", "accepted answer"]));
