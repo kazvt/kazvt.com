@@ -497,19 +497,19 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     }
     skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
+    if (location.hostname === "127.0.0.1") {
+      preview.dataset.skyDebug = JSON.stringify({
+        time,
+        shots: skyShootingStars.map((star) => {
+          const progress = star.active ? Math.min(1, (time - star.startedAt) / star.duration) : 0;
+          const point = star.active && star.start && star.end
+            ? skyRoot.localToWorld(star.start.clone().lerp(star.end, progress)).project(camera)
+            : null;
+          return { active: star.active, nextAt: star.nextAt, progress, ndc: point?.toArray() };
+        }),
+      });
+    }
   }
-
-  window.__rgSkyDebug = () => ({
-    now: performance.now(),
-    skyCenter: skyRoot?.position.toArray(),
-    shots: skyShootingStars.map((star) => {
-      const progress = star.active ? Math.min(1, (performance.now() - star.startedAt) / star.duration) : 0;
-      const point = star.active && star.start && star.end
-        ? skyRoot.localToWorld(star.start.clone().lerp(star.end, progress)).project(camera)
-        : null;
-      return { active: star.active, nextAt: star.nextAt, startedAt: star.startedAt, duration: star.duration, ndc: point?.toArray() };
-    }),
-  });
 
   function fitCamera() {
     if (!camera || !renderer || !sceneReady) return;
