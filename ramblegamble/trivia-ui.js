@@ -8,6 +8,7 @@ import {
   resolveRoundMode,
 } from "./trivia-data.js?v=host-console-20261114-v2";
 import {
+  QUESTION_BANK_SESSION_KEY,
   readSessionQuestionBank,
   writeSessionQuestionBank,
 } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
@@ -536,6 +537,106 @@ import {
   });
   window.addEventListener("rg:turn-finish", (event) => {
     $("#rg-arcade-status").textContent = event.detail?.prompt || "No questions in the bank. Add some in the Trivia tab.";
+  });
+
+  exportButton.addEventListener("click", async () => {
+    exportButton.disabled = true;
+    importStatus.textContent = "Preparing the complete trivia text file...";
+    try {
+      const contents = await createTriviaExport();
+      downloadTriviaText(contents);
+      importStatus.textContent = "Trivia exported as a portable .txt file.";
+    } catch (error) {
+      importStatus.textContent = "Export failed: " + error.message;
+      console.warn("Ramble Gamble trivia export failed:", error);
+    } finally {
+      exportButton.disabled = false;
+    }
+  });
+
+  importFileInput.addEventListener("change", async () => {
+    const file = importFileInput.files?.[0];
+    pendingImport = null;
+    importApplyButton.disabled = true;
+    importPreview.hidden = true;
+    if (!file) {
+      importStatus.textContent = "No file selected.";
+      return;
+    }
+    try {
+      const parsed = parseTriviaText(await file.text());
+      pendingImport = parsed;
+      importPreview.textContent = triviaImportSummary(parsed);
+      importPreview.hidden = false;
+      const hasContent = Object.keys(parsed.rounds || {}).length > 0 || (parsed.questionBank || []).length > 0;
+      importApplyButton.disabled = !hasContent || Boolean(parsed.errors?.length);
+      importStatus.textContent = file.name + (parsed.errors?.length ? " could not be fully read." : " is ready to import.");
+    } catch (error) {
+      pendingImport = null;
+      importStatus.textContent = "Could not read that text file: " + error.message;
+      importPreview.textContent = "";
+      importPreview.hidden = true;
+      console.warn("Ramble Gamble trivia import preview failed:", error);
+    }
+  });
+
+  importApplyButton.addEventListener("click", async () => {
+    if (!pendingImport || pendingImport.errors?.length) return;
+    importApplyButton.disabled = true;
+    importStatus.textContent = "Importing into this browser session...";
+    const previousDraftValue = sessionStorage.getItem(DRAFT_KEY);
+    const previousBankValue = sessionStorage.getItem(QUESTION_BANK_SESSION_KEY);
+    try {
+      const importedRounds = copy(pendingImport.rounds || {});
+      const idMap = await storeEmbeddedImages(pendingImport.media);
+      remapDraftAssets(importedRounds, idMap);
+
+      const replace = importModeSelect.value === "replace";
+      const nextRounds = replace ? importedRounds : mergeRoundDrafts(drafts.rounds, importedRounds);
+      let nextBank;
+      const importedBank = (pendingImport.questionBank || []).map((entry) => ({ id: newQuestionId(), text: entry.text }));
+      if (replace) {
+        nextBank = importedBank;
+      } else {
+        nextBank = [...questionBank];
+        const seen = new Set(nextBank.map((entry) => entry.text.trim().toLocaleLowerCase()));
+        for (const entry of importedBank) {
+          const key = entry.text.trim().toLocaleLowerCase();
+          if (!seen.has(key)) { seen.add(key); nextBank.push(entry); }
+        }
+      }
+
+      const nextDrafts = { version: 1, rounds: nextRounds };
+      window.clearTimeout(saveTimer);
+      saveTimer = 0;
+      try {
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(nextDrafts));
+        writeSessionQuestionBank(nextBank);
+      } catch (error) {
+        if (previousDraftValue === null) sessionStorage.removeItem(DRAFT_KEY);
+        else sessionStorage.setItem(DRAFT_KEY, previousDraftValue);
+        if (previousBankValue === null) sessionStorage.removeItem(QUESTION_BANK_SESSION_KEY);
+        else sessionStorage.setItem(QUESTION_BANK_SESSION_KEY, previousBankValue);
+        throw error;
+      }
+
+      drafts = nextDrafts;
+      questionBank = readSessionQuestionBank();
+      saveState.textContent = "SAVED THIS SESSION";
+      saveState.dataset.error = "false";
+      $("#rg-question-bank-save-state").textContent = "SAVED THIS SESSION";
+      $("#rg-question-bank-save-state").dataset.error = "false";
+      renderQuestionBank();
+      render();
+      importStatus.textContent = "Import complete. Your existing session was " + (replace ? "replaced." : "merged.");
+      pendingImport = null;
+      importFileInput.value = "";
+    } catch (error) {
+      importStatus.textContent = "Import failed; existing trivia was kept. " + error.message;
+      console.warn("Ramble Gamble trivia import failed:", error);
+    } finally {
+      importApplyButton.disabled = !pendingImport || Boolean(pendingImport.errors?.length);
+    }
   });
 
   questionBankForm.addEventListener("submit", (event) => {
