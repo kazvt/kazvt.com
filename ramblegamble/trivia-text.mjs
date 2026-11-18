@@ -668,13 +668,14 @@ function parseField(line) {
     ["question", "question"], ["prompt", "prompt"], ["stem", "stem"], ["front", "front"], ["term", "term"], ["round", "round"], ["round number", "round"], ["question number", "round"], ["id", "round"],
     ["difficulty", "difficulty"], ["diff", "diff"], ["level", "level"], ["tier", "tier"],
     ["answers", "options"], ["answer options", "options"], ["options", "options"], ["choices", "options"], ["choice", "options"], ["multiple choice", "options"], ["possible answers", "options"],
-    ["answer", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["correct answers", "correct"], ["key", "correct"],
+    ["answer", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["correct answers", "correct"], ["correct option", "correct"], ["correct choice", "correct"], ["right answer", "correct"], ["key", "correct"],
     ["mode", "mode"], ["type", "mode"], ["format", "mode"], ["template", "mode"], ["question type", "mode"],
     ["subtitle", "subtitle"], ["description", "subtitle"], ["hint", "subtitle"],
     ["image", "promptimage"], ["prompt image", "promptimage"], ["image url", "promptimage"], ["prompt image url", "promptimage"],
     ["video", "video"], ["video url", "video"], ["background image", "backgroundimage"], ["background image url", "backgroundimage"],
     ["number", "number"], ["starting number", "number"], ["value", "number"],
-    ["add", "additive"], ["additive", "additive"], ["append", "additive"], ["no multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"],
+    ["add", "additive"], ["add these", "additive"], ["add to previous", "additive"], ["additive", "additive"], ["append", "additive"], ["plus", "additive"],
+    ["no multiple choice", "nomultiplechoice"], ["without multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"], ["no mcq", "nomultiplechoice"],
   ]);
   const name = aliases.get(rawName);
   return name ? { name, value: match[2].trim() } : null;
