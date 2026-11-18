@@ -23,6 +23,14 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const OVERVIEW_RETREAT_DISTANCE = 0.45;
+  const REFERENCE_START_VIEW = Object.freeze({
+    yaw: -0.30,
+    elevation: 0.30,
+    narrowDistanceScale: 0.95,
+    wideDistanceScale: 0.70,
+    wideAspect: 2.2,
+    rightwardComposition: 0.05,
+  });
   const ARCADE_REFERENCE_LAYOUT = Object.freeze({
     // The back-wall recess in rg_stage.gltf spans x=9.14..14.48 at z=-6.10.
     slotBay: Object.freeze({ left: 9.14, right: 14.48, wallZ: -6.10, height: 2.42, clearance: 0.025 }),
@@ -523,11 +531,24 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     const bounds = getViewBounds(view);
     if (bounds.isEmpty()) return null;
     const target = bounds.getCenter(new THREE.Vector3());
-    const yaw = -view.look * 0.42;
-    const direction = new THREE.Vector3(Math.sin(yaw), 0.38, Math.cos(yaw) * 0.925).normalize();
+    const yaw = REFERENCE_START_VIEW.yaw - view.look * 0.42;
+    const elevation = REFERENCE_START_VIEW.elevation;
+    const horizontal = Math.sqrt(1 - elevation * elevation);
+    const direction = new THREE.Vector3(
+      Math.sin(yaw) * horizontal,
+      elevation,
+      Math.cos(yaw) * horizontal,
+    ).normalize();
     const worldUp = new THREE.Vector3(0, 1, 0);
     const right = new THREE.Vector3().crossVectors(worldUp, direction).normalize();
     const viewUp = new THREE.Vector3().crossVectors(direction, right).normalize();
+    const wideComposition = view.kind === "overview"
+      ? THREE.MathUtils.smoothstep(aspect, 1, REFERENCE_START_VIEW.wideAspect)
+      : 0;
+    if (wideComposition > 0) {
+      const boundsWidth = bounds.getSize(new THREE.Vector3()).x;
+      target.addScaledVector(right, -boundsWidth * REFERENCE_START_VIEW.rightwardComposition * wideComposition);
+    }
     const tanHalfVertical = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const tanHalfHorizontal = tanHalfVertical * aspect;
     let distance = 0;
@@ -547,8 +568,16 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     }
 
     const retreatSteps = THREE.MathUtils.clamp(view.retreat || 0, 0, 3);
+    const overviewDistanceScale = view.kind === "overview"
+      ? THREE.MathUtils.lerp(
+        REFERENCE_START_VIEW.narrowDistanceScale,
+        REFERENCE_START_VIEW.wideDistanceScale,
+        wideComposition,
+      )
+      : 1;
     distance = Math.max(distance, 1)
       * (view.kind === "overview" ? 1.14 : 1.18)
+      * overviewDistanceScale
       * (1 + retreatSteps * OVERVIEW_RETREAT_DISTANCE);
     return { target, position: target.clone().addScaledVector(direction, distance) };
   }
