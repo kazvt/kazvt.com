@@ -9,7 +9,7 @@
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=yaw-only-billboards-20261115-v1">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=host-question-bank-session-20261118-v1">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=host-trivia-text-transfer-20261118-v1">
     <script type="importmap">
       {
         "imports": {
@@ -19,7 +19,7 @@
       }
     </script>
     <script type="module" src="/ramblegamble/ramblegamble.js?v=host-question-bank-session-20261118-v1"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=host-question-bank-session-20261118-v1"></script>
+    <script type="module" src="/ramblegamble/trivia-ui.js?v=trivia-text-transfer-20261118-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -107,7 +107,10 @@
             <div class="rg-text-transfer-heading"><div><h3 id="rg-text-transfer-title">TRIVIA TEXT FILE</h3><p>Export a complete backup or import a .txt, .csv, .tsv, or JSON text file. Imports are previewed before they change this session.</p></div>
               <button class="rg-secondary-button" id="rg-export-trivia" type="button">EXPORT .TXT</button>
             </div>
-            <p class="rg-text-transfer-help">Understands round/question labels, 03: question headings, difficulty/level/tier aliases, answer bullets, add/plus markers, no-multiple-choice markers, correct-answer keys, and inherited skipped difficulties.</p>
+            <details class="rg-text-transfer-formats">
+              <summary>SUPPORTED FORMATS AND ALIASES</summary>
+              <p>Round labels include <code>03:</code>, <code>Q03:</code>, <code>Round 3:</code>, and <code>Question 3:</code>. Difficulty can be <code>1:</code>, <code>Difficulty 1:</code>, <code>Level: easy</code>, or a tier name. Use bullets, <code>Option A:</code>, or <code>Answer:</code> for responses; mark correct choices with <code>Correct: B</code> or “correct” beside an option. “Add”, “plus”, or “append” in a tier note adds choices to the previous tier. Without an add marker, that tier replaces its choices. Skipped difficulty numbers inherit the previous tier. UTF-8 text, JSON, CSV, and TSV are accepted.</p>
+            </details>
             <div class="rg-import-controls">
               <label class="rg-upload-button rg-import-file-label">CHOOSE TEXT FILE<input id="rg-import-file" type="file" accept=".txt,.csv,.tsv,.json,text/plain,text/csv,application/json"></label>
               <label class="rg-import-mode-label" for="rg-import-mode">IMPORT BEHAVIOR<select id="rg-import-mode"><option value="merge">MERGE - replace matching rounds</option><option value="replace">REPLACE this session's trivia</option></select></label>
