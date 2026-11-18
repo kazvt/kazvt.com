@@ -93,6 +93,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let stageModel;
   let rouletteModel;
   let slotsModel;
+  const unlitMaterialCache = new WeakMap();
   let contestants = [];
   let hostBillboard = null;
   let billboards = [];
@@ -127,7 +128,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
 
     if (!scene) return;
     scene.background = new THREE.Color(SKY_CONFIG.topColor);
-    scene.fog.color.set(SKY_CONFIG.horizonColor);
     const bgColor = new THREE.Color(color);
     const accentColor = new THREE.Color(themeValue("--pink", "#f599c6"));
     const blueColor = new THREE.Color(themeValue("--blue", "#4d6787"));
@@ -135,9 +135,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       if (object.userData.rgFloor) object.material.color.copy(bgColor);
       if (object.userData.rgAccent) object.material.color.copy(accentColor);
       if (object.userData.rgSecondary) object.material.color.copy(blueColor);
-    });
-    scene.children.forEach((child) => {
-      if (child.userData.rgAccentLight) child.color.copy(accentColor);
     });
   }
 
@@ -197,7 +194,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   function createWorld() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(SKY_CONFIG.topColor);
-    scene.fog = new THREE.Fog(SKY_CONFIG.horizonColor, 120, 230);
 
     camera = new THREE.PerspectiveCamera(42, 1, 0.1, 320);
     renderer = new THREE.WebGLRenderer({
@@ -208,22 +204,10 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMapping = THREE.NoToneMapping;
+    renderer.shadowMap.enabled = false;
 
     createSkybox();
-
-    scene.add(new THREE.HemisphereLight(0xfff4e8, 0x282044, 2.0));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3.0);
-    keyLight.position.set(-22, 38, 32);
-    scene.add(keyLight);
-    const accentLight = new THREE.PointLight(themeValue("--pink", "#f599c6"), 90, 130, 2);
-    accentLight.position.set(22, 17, 17);
-    accentLight.userData.rgAccentLight = true;
-    scene.add(accentLight);
-    const fillLight = new THREE.PointLight(themeValue("--blue", "#4d6787"), 55, 120, 2);
-    fillLight.position.set(-30, 6, -18);
-    scene.add(fillLight);
 
     rouletteRig = new THREE.Group();
     scene.add(rouletteRig);
@@ -825,8 +809,8 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   function prepareModel(root) {
     root.traverse((object) => {
       if (!object.isMesh) return;
-      object.castShadow = true;
-      object.receiveShadow = true;
+      object.castShadow = false;
+      object.receiveShadow = false;
       const materials = Array.isArray(object.material) ? object.material : [object.material];
       for (const material of materials) {
         if (material?.map) {
@@ -836,13 +820,40 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
           material.map.generateMipmaps = true;
           material.map.needsUpdate = true;
         }
-        if (material) {
-          material.roughness = 0.82;
-          material.metalness = 0.02;
-          material.needsUpdate = true;
-        }
       }
+      object.material = Array.isArray(object.material)
+        ? materials.map(toUnlitMaterial)
+        : toUnlitMaterial(materials[0]);
     });
+  }
+
+  function toUnlitMaterial(material) {
+    if (!material) return material;
+    const cached = unlitMaterialCache.get(material);
+    if (cached) return cached;
+
+    // Keep the authored base-color texture and alpha behavior, but remove all
+    // lighting-dependent maps and physically based response from the models.
+    const unlit = new THREE.MeshBasicMaterial({
+      name: material.name,
+      color: material.color,
+      map: material.map,
+      alphaMap: material.alphaMap,
+      alphaTest: material.alphaTest,
+      opacity: material.opacity,
+      transparent: material.transparent,
+      side: material.side,
+      vertexColors: material.vertexColors,
+      depthTest: material.depthTest,
+      depthWrite: material.depthWrite,
+      blending: material.blending,
+      fog: false,
+    });
+    unlit.toneMapped = false;
+    unlit.userData = { ...material.userData };
+    unlitMaterialCache.set(material, unlit);
+    material.dispose();
+    return unlit;
   }
 
   function setupPicking() {
