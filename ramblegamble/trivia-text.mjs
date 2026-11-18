@@ -504,7 +504,7 @@ function parseHumanText(input) {
         if (!current) { warnings.push(`Line ${lineIndex + 1}: options appeared before a question.`); continue; }
         const block = ensureLevel(currentLevel);
         block.optionsPresent = true;
-        block.options.push(...splitLooseList(value).map(parseMarkedAnswer));
+        block.options.push(...splitLooseList(value).map(parseAnswerLine));
         pendingList = "options";
       } else if (name === "accepted") {
         if (!current) { warnings.push(`Line ${lineIndex + 1}: answers appeared before a question.`); continue; }
@@ -615,7 +615,7 @@ function parseRoundHeader(line) {
   if (!match) return null;
   const number = Number(match[1]);
   if (number < 1 || number > 36) return null;
-  if (number <= 5 && match[2].trim()) return null;
+  if (number <= 5) return null;
   return { id: match[1], question: match[2].trim() };
 }
 
@@ -627,8 +627,11 @@ function parseDifficultyHeader(line) {
   }
   match = line.match(/^\s*([1-5])\s*:\s*(.*)$/);
   if (match) return { level: Number(match[1]), annotation: match[2].trim() };
-  match = line.match(/^\s*(first|second|third|fourth|fifth|easy|medium|hard|beginner|intermediate|advanced)\s+(?:difficulty|level|tier)\s*:?\s*(.*)$/i);
-  if (match) return { level: parseLevelValue(match[1]), annotation: match[2].trim() };
+  match = line.match(/^\s*(?:1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|medium|hard|beginner|intermediate|advanced)\s+(?:difficulty|level|tier)\s*:?\s*(.*)$/i);
+  if (match) {
+    const levelToken = line.match(/^\s*(1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|medium|hard|beginner|intermediate|advanced)/i)?.[1];
+    return { level: parseLevelValue(levelToken), annotation: match[1].trim() };
+  }
   return null;
 }
 
