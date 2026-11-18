@@ -72,6 +72,14 @@ test("common quoted CSV and tab-separated question/answer files import as short-
   const tsv = parseTriviaText("Question\tChoices\tCorrect\nPick one?\tRed|Blue|Green\tB\n");
   assert.deepEqual(tsv.rounds["01"][1].options.map((option) => option.label), ["Red", "Blue", "Green"]);
   assert.equal(tsv.rounds["01"][1].options[1].correct, true);
+
+  const headerless = parseTriviaText("What is 2 + 2?,4\nCapital of France?,Paris\n");
+  assert.deepEqual(headerless.rounds["01"][1].acceptedAnswers, ["4"]);
+  assert.deepEqual(headerless.rounds["02"][1].acceptedAnswers, ["Paris"]);
+
+  const quizletStyle = parseTriviaText("What is 2 + 2? - 4\nCapital of France? - Paris\n");
+  assert.deepEqual(quizletStyle.rounds["01"][1].acceptedAnswers, ["4"]);
+  assert.deepEqual(quizletStyle.rounds["02"][1].acceptedAnswers, ["Paris"]);
 });
 
 test("delimited difficulty rows group by round, add tier choices, and accept separate option columns", () => {
