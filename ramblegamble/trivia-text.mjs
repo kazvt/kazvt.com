@@ -612,6 +612,12 @@ function parseHumanText(input) {
         block.optionsPresent = true;
         block.options.push(...splitLooseList(value).map(parseAnswerLine));
         pendingList = "options";
+      } else if (name === "option-entry") {
+        if (!current) { warnings.push(`Line ${lineIndex + 1}: an answer choice appeared before a question.`); continue; }
+        const block = ensureLevel(currentLevel);
+        block.optionsPresent = true;
+        block.options.push(parseAnswerLine(value));
+        pendingList = "options";
       } else if (name === "accepted") {
         if (!current) { warnings.push(`Line ${lineIndex + 1}: answers appeared before a question.`); continue; }
         const block = ensureLevel(currentLevel);
