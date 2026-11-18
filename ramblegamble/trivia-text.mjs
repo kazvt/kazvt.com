@@ -35,7 +35,7 @@ const LEVEL_WORDS = new Map([
 
 function cleanText(value) {
   return String(value ?? "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n")
-    .replace(/[０-９]/g, (digit) => String.fromCharCode(digit.charCodeAt(0) - 0xff10 + 48))
+    .replace(/[！-～]/g, (character) => String.fromCharCode(character.charCodeAt(0) - 0xfee0))
     .replace(/<br\s*\/?>/gi, "\n");
 }
 
@@ -209,7 +209,9 @@ function parseQuestionObjects(questions) {
         acceptedAnswers: [...acceptedAnswers],
       };
     }
-    if (options.length && correct != null) applyCorrectValues(roundDrafts[difficulty].options, normalizeAnswerObjects(correct));
+    if (options.length && correct != null) {
+      for (const tier of Object.values(roundDrafts)) applyCorrectValues(tier.options, normalizeAnswerObjects(correct));
+    }
     rounds[round] = roundDrafts;
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question records were found."] };
