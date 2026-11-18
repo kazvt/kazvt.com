@@ -287,8 +287,8 @@ function getColumn(row, indexes, aliases) { const column = findColumn(indexes, a
 
 function decodeEntities(value) {
   return String(value)
-    .replace(/&#x([\da-f]+);?/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
-    .replace(/&#(\d+);?/g, (_, number) => String.fromCodePoint(Number(number)))
+    .replace(/&#x([\da-f]+);?/gi, (_, hex) => safeCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);?/g, (_, number) => safeCodePoint(Number(number)))
     .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
     .replace(/&quot;/gi, '"').replace(/&#39;/g, "'");
 }
@@ -390,7 +390,7 @@ function parseHumanText(input) {
         }
         if (block.optionsPresent) {
           const answerOptions = block.options.map((entry) => ({ label: entry.text, image: entry.image || "", asset: "", correct: entry.correct === true }));
-          if (block.noMultipleChoice || state.mode === "short-answer") {
+          if (block.noMultipleChoice || block.fields.mode === "short-answer") {
             const answers = answerOptions.map((entry) => entry.label).filter(Boolean);
             state.acceptedAnswers = block.additive ? [...state.acceptedAnswers, ...answers] : answers;
             state.options = [];
@@ -451,6 +451,14 @@ function parseHumanText(input) {
       section = "rounds";
       newRound(explicitRound.id, explicitRound.question);
       continue;
+    }
+
+    if (!current && section === "rounds") {
+      const bareRound = line.match(/^\s*(\d{1,2})\s*[:.)]\s*(.*)$/);
+      if (bareRound && Number(bareRound[1]) >= 1 && Number(bareRound[1]) <= 36) {
+        newRound(bareRound[1], bareRound[2]);
+        continue;
+      }
     }
 
     if (current && section === "rounds") {
@@ -652,7 +660,11 @@ function splitLooseList(value) {
   if (text.includes("|") || text.includes(";")) parts = text.split(/[|;]/);
   else if (text.includes(",") && !/\b(?:https?:\/\/|data:)/i.test(text)) parts = text.split(",");
   else parts = [text];
-  return parts.map((part) => part.trim()).filter(Boolean).map(parseMarkedAnswer);
+  return parts.map((part) => part.trim()).filter(Boolean);
+}
+
+function safeCodePoint(value) {
+  return Number.isInteger(value) && value >= 0 && value <= 0x10ffff ? String.fromCodePoint(value) : " ";
 }
 
 function isBullet(line) { return /^\s*(?:[-*+•‣▪◦–—]\s+|\[\s*[xX✓✔ ]\s*\]\s*|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/.test(line); }
