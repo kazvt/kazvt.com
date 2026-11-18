@@ -24,12 +24,14 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const OVERVIEW_RETREAT_DISTANCE = 0.45;
   const REFERENCE_START_VIEW = Object.freeze({
+    // The supplied opening frame is an oblique interior view; landscape screens
+    // hold that tighter composition, while portrait screens ease out to retain hotspots.
     yaw: 0.20,
     elevation: 0.30,
     narrowDistanceScale: 0.95,
     wideDistanceScale: 0.52,
     wideAspect: 1.8,
-    rightwardComposition: 0.05,
+    rightwardComposition: 0.01,
     raisedAimOffset: 0.8,
   });
   const ARCADE_REFERENCE_LAYOUT = Object.freeze({
