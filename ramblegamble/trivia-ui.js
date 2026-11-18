@@ -185,6 +185,21 @@ import {
     return Object.fromEntries(entries.map(([oldId, newId]) => [oldId, newId]));
   }
 
+  async function removeStoredMediaAssets(ids) {
+    const keys = [...new Set(Object.values(ids || {}))].filter(Boolean);
+    if (!keys.length) return;
+    const db = await mediaDb();
+    if (!db) return;
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction("images", "readwrite");
+      const store = transaction.objectStore("images");
+      keys.forEach((key) => store.delete(key));
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error || new Error("Unused imported images could not be removed."));
+      transaction.onabort = () => reject(transaction.error || new Error("Unused imported images could not be removed."));
+    });
+  }
+
   function remapDraftAssets(rounds, idMap) {
     for (const levels of Object.values(rounds || {})) {
       for (const draft of Object.values(levels || {})) {
