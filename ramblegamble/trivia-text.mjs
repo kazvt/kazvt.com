@@ -203,7 +203,8 @@ function parseQuestionObjects(questions) {
     const round = normalizeId(item.round ?? item.roundId ?? item.roundNumber ?? item.questionNumber ?? item.number ?? item.id) || String(generated++).padStart(2, "0");
     const question = safeString(item.question ?? item.prompt ?? item.questionText ?? item.front ?? item.term ?? item.title ?? item.text).trim();
     if (!question) { warnings.push(`Entry ${index + 1} has no question text and was skipped.`); continue; }
-    const options = normalizeOptionObjects(item.options ?? item.choices ?? item.answers ?? item.alternatives);
+    const rawOptions = item.options ?? item.choices ?? item.answers ?? item.alternatives;
+    const options = normalizeOptionObjects(rawOptions);
     const explicitAccepted = item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer;
     const answerValue = item.answer ?? item.back ?? item.definition;
     const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
@@ -218,18 +219,20 @@ function parseQuestionObjects(questions) {
     const correctValues = correct == null ? [] : normalizeAnswerObjects(correct);
     if (choiceOptions.length && correctValues.length) applyCorrectValues(choiceOptions, correctValues);
     const bool = (value) => value === true || /^(?:true|yes|on|1)$/i.test(String(value ?? ""));
+    const rawAdditive = item.additive ?? item.add ?? item.append ?? item.plus;
+    const rawNoChoice = item.noMultipleChoice ?? item.no_multiple_choice ?? item.noMc ?? item.noMcq;
     const record = {
       question,
       subtitle: safeString(item.subtitle ?? item.description ?? item.hint),
       mode,
       explicitMode: Boolean(item.mode ?? item.type ?? item.format),
       options: choiceOptions,
-      optionsPresent: Array.isArray(item.options ?? item.choices ?? item.answers ?? item.alternatives),
+      optionsPresent: rawOptions != null,
       acceptedAnswers,
       acceptedPresent: explicitAccepted != null || (!options.length && answerValue != null),
       correctValues,
-      additive: bool(item.additive ?? item.add ?? item.append ?? item.plus),
-      noMultipleChoice: bool(item.noMultipleChoice ?? item.no_multiple_choice ?? item.noMc ?? item.noMcq),
+      additive: bool(rawAdditive) || /\b(?:add|append|plus|additive)\b/i.test(String(rawAdditive ?? "")),
+      noMultipleChoice: bool(rawNoChoice) || /\b(?:no|without)\s+(?:multiple[ -]?choice|mcq|mc)\b|\bshort[ -]?answer\b/i.test(String(rawNoChoice ?? "")),
       promptImage: safeString(item.promptImage ?? item.prompt_image ?? item.imageUrl),
       promptAsset: safeString(item.promptAsset ?? item.prompt_asset),
       videoUrl: safeString(item.videoUrl ?? item.video_url),
