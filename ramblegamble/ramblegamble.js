@@ -24,25 +24,26 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const OVERVIEW_RETREAT_DISTANCE = 0.45;
   const REFERENCE_START_VIEW = Object.freeze({
-    // The supplied opening frame is an oblique interior view; landscape screens
-    // hold that tighter composition, while portrait screens ease out to retain hotspots.
-    yaw: 0.20,
-    elevation: 0.30,
+    // Match the supplied reference's opposite-side oblique view and lower sightline.
+    // Landscape screens keep the close crop; portrait screens ease out to retain hotspots.
+    yaw: -0.38,
+    elevation: 0.24,
     narrowDistanceScale: 0.95,
     wideDistanceScale: 0.52,
     wideAspect: 1.8,
-    rightwardComposition: 0.01,
-    raisedAimOffset: 0.8,
+    rightwardComposition: -0.01,
+    raisedAimOffset: -0.55,
   });
   const ARCADE_REFERENCE_LAYOUT = Object.freeze({
     // The back-wall recess in rg_stage.gltf spans x=9.14..14.48 at z=-6.10.
-    slotBay: Object.freeze({ left: 9.14, right: 14.48, wallZ: -6.10, height: 2.42, clearance: 0.025 }),
+    // A small size increase matches the reference cabinet while staying inside the recess.
+    slotBay: Object.freeze({ left: 9.14, right: 14.48, wallZ: -6.10, height: 2.52, widthScale: 1.08, clearance: 0.025 }),
     // The raised stage's forward lip ends at z=0.06; keep the whole wheel
     // footprint beyond it, rather than merely moving its center off the stage.
     stageFrontZ: 0.06,
-    rouletteCenterX: 15.4,
+    rouletteCenterX: 15.0,
     rouletteScale: 0.18,
-    rouletteClearance: 0.28,
+    rouletteClearance: 0.12,
   });
   const SKY_CONFIG = Object.freeze({
     radius: 260,
@@ -754,7 +755,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     const slotSourceBounds = new THREE.Box3().setFromObject(slotsModel);
     const slotSourceSize = slotSourceBounds.getSize(new THREE.Vector3());
     const slotScale = ARCADE_REFERENCE_LAYOUT.slotBay.height / slotSourceSize.y;
-    slotsModel.scale.setScalar(slotScale);
+    slotsModel.scale.set(slotScale * ARCADE_REFERENCE_LAYOUT.slotBay.widthScale, slotScale, slotScale);
     slotRig.updateMatrixWorld(true);
     slotsModel.updateMatrixWorld(true);
     const slotBounds = new THREE.Box3().setFromObject(slotsModel);
