@@ -197,15 +197,15 @@ function parseQuestionObjects(questions) {
     const question = safeString(item.question ?? item.prompt ?? item.questionText ?? item.front ?? item.term ?? item.title ?? item.text).trim();
     if (!question) { warnings.push(`Entry ${index + 1} has no question text and was skipped.`); continue; }
     const difficulty = Math.max(1, Math.min(5, Number(item.difficulty ?? item.level ?? item.tier) || 1));
-    const options = normalizeAnswerObjects(item.options ?? item.choices ?? item.answers);
-    const acceptedAnswers = normalizeAnswerObjects(item.acceptedAnswers ?? item.accepted_answers ?? item.answer ?? item.back ?? item.definition);
+    const options = normalizeOptionObjects(item.options ?? item.choices ?? item.answers ?? item.alternatives);
+    const acceptedAnswers = normalizeAnswerObjects(item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer ?? item.answer ?? item.back ?? item.definition);
     const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
-    const correct = item.correct ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey;
+    const correct = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correctIndex ?? item.correct_index ?? item.correct;
     const roundDrafts = {};
     for (let level = 1; level <= 5; level += 1) {
       roundDrafts[level] = {
         question, mode, optionCount: options.length,
-        options: options.map((label) => ({ label, image: "", asset: "", correct: false })),
+        options: options.map((option) => ({ ...option })),
         acceptedAnswers: [...acceptedAnswers],
       };
     }
@@ -223,17 +223,36 @@ function normalizeAnswerObjects(value) {
   return value == null ? [] : [safeString(value).trim()].filter(Boolean);
 }
 
+function normalizeOptionObjects(value) {
+  if (!Array.isArray(value)) return normalizeAnswerObjects(value).map((label) => ({ label, image: "", asset: "", correct: false }));
+  return value.flatMap((entry) => {
+    if (typeof entry === "string") {
+      const parsed = parseAnswerLine(entry);
+      return parsed.text ? [{ label: parsed.text, image: parsed.image, asset: "", correct: parsed.correct }] : [];
+    }
+    if (!entry || typeof entry !== "object") return [];
+    const label = safeString(entry.label ?? entry.text ?? entry.name ?? entry.answer ?? entry.value).trim();
+    if (!label && !entry.image && !entry.url && !entry.asset) return [];
+    return [{
+      label,
+      image: safeString(entry.image ?? entry.imageUrl ?? entry.url),
+      asset: safeString(entry.asset ?? entry.assetId),
+      correct: entry.correct === true || entry.isCorrect === true || entry.is_correct === true || entry.correct_answer === true,
+    }];
+  });
+}
+
 function parseDelimited(text) {
   const firstLine = text.split("\n", 1)[0];
   const delimiter = ["\t", ",", ";", "|"].sort((a, b) => countChar(firstLine, b) - countChar(firstLine, a))[0];
   if (!delimiter || countChar(firstLine, delimiter) < 1) return null;
-  const rows = text.split("\n").map((line) => parseDelimitedRow(line, delimiter));
+  const rows = parseDelimitedRows(text, delimiter);
   const header = rows[0].map(normalizeHeader);
   const indexes = {};
   header.forEach((name, index) => { if (name) indexes[name] = index; });
   const questionColumn = findColumn(indexes, ["question", "prompt", "question text", "front", "term", "title", "text"]);
   const answerColumn = findColumn(indexes, ["answers", "options", "choices", "answer", "accepted answers", "accepted answer", "correct answer", "answer key", "back", "definition"]);
-  const optionColumns = header.map((name, index) => /^(?:option|choice|answer)\s*\d+$/.test(name) ? index : -1).filter((index) => index >= 0);
+  const optionColumns = header.map((name, index) => /^(?:option|choice|answer)(?:\s*(?:#\s*)?[1-9]\d*|\s+[A-Z])$/.test(name) ? index : -1).filter((index) => index >= 0);
   if (questionColumn < 0 || (answerColumn < 0 && !optionColumns.length)) return null;
 
   const warnings = [];
@@ -307,6 +326,28 @@ function parseDelimited(text) {
     }
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question rows were found."] };
+}
+
+function parseDelimitedRows(text, delimiter) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"' && quoted && text[index + 1] === '"') { field += '"'; index += 1; }
+    else if (character === '"') quoted = !quoted;
+    else if (character === delimiter && !quoted) { row.push(field.trim()); field = ""; }
+    else if (character === "\n" && !quoted) {
+      row.push(field.trim());
+      if (row.some((cell) => cell)) rows.push(row);
+      row = [];
+      field = "";
+    } else field += character;
+  }
+  row.push(field.trim());
+  if (row.some((cell) => cell)) rows.push(row);
+  return rows;
 }
 
 function parseDelimitedRow(line, delimiter) {
@@ -707,10 +748,10 @@ function parseField(line) {
   if (!match) return null;
   const rawName = match[1].trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
   const aliases = new Map([
-    ["question", "question"], ["prompt", "prompt"], ["stem", "stem"], ["front", "front"], ["term", "term"], ["round", "round"], ["round number", "round"], ["question number", "round"], ["id", "round"],
+    ["q", "question"], ["question", "question"], ["question text", "question"], ["prompt", "prompt"], ["prompt text", "prompt"], ["stem", "stem"], ["front", "front"], ["term", "term"], ["round", "round"], ["round number", "round"], ["question number", "round"], ["id", "round"],
     ["difficulty", "difficulty"], ["diff", "diff"], ["level", "level"], ["tier", "tier"],
-    ["answers", "options"], ["answer options", "options"], ["options", "options"], ["choices", "options"], ["choice", "options"], ["multiple choice", "options"], ["possible answers", "options"],
-    ["answer", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["correct answers", "correct"], ["correct option", "correct"], ["correct choice", "correct"], ["right answer", "correct"], ["key", "correct"],
+    ["answers", "options"], ["answer choices", "options"], ["mc answers", "options"], ["answer options", "options"], ["options", "options"], ["choices", "options"], ["choice", "options"], ["multiple choice", "options"], ["possible answers", "options"], ["alternatives", "options"],
+    ["a", "accepted"], ["ans", "accepted"], ["answer", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["expected answer", "accepted"], ["expected answers", "accepted"], ["solution", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["correct answers", "correct"], ["correct option", "correct"], ["correct choice", "correct"], ["right answer", "correct"], ["key", "correct"],
     ["mode", "mode"], ["type", "mode"], ["format", "mode"], ["template", "mode"], ["question type", "mode"],
     ["subtitle", "subtitle"], ["description", "subtitle"], ["hint", "subtitle"],
     ["image", "promptimage"], ["prompt image", "promptimage"], ["image url", "promptimage"], ["prompt image url", "promptimage"],
