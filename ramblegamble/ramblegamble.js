@@ -499,6 +499,18 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
   }
 
+  window.__rgSkyDebug = () => ({
+    now: performance.now(),
+    skyCenter: skyRoot?.position.toArray(),
+    shots: skyShootingStars.map((star) => {
+      const progress = star.active ? Math.min(1, (performance.now() - star.startedAt) / star.duration) : 0;
+      const point = star.active && star.start && star.end
+        ? skyRoot.localToWorld(star.start.clone().lerp(star.end, progress)).project(camera)
+        : null;
+      return { active: star.active, nextAt: star.nextAt, startedAt: star.startedAt, duration: star.duration, ndc: point?.toArray() };
+    }),
+  });
+
   function fitCamera() {
     if (!camera || !renderer || !sceneReady) return;
     const width = Math.max(1, preview.clientWidth);
