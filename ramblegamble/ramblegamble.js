@@ -486,7 +486,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       roll.setFromAxisAngle(worldZ, star.angle);
       rotation.copy(pixelQuaternion).multiply(roll);
       const fade = Math.sin(progress * Math.PI) * 0.88;
-      scale.set(30 * worldPerPixel, 5 * worldPerPixel, 1);
+      scale.set(48 * worldPerPixel, 8 * worldPerPixel, 1);
       matrix.compose(position, rotation, scale);
       skyShootingStarsMesh.setMatrixAt(star.index, matrix);
       skyShootingStarsMesh.setColorAt(star.index, color.copy(star.tint).multiplyScalar(fade));
@@ -497,14 +497,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     }
     skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
-    if (location.hostname === "127.0.0.1") {
-      const activeShot = skyShootingStars.find((star) => star.active);
-      const progress = activeShot ? Math.min(1, (time - activeShot.startedAt) / activeShot.duration) : 0;
-      const point = activeShot
-        ? skyRoot.localToWorld(activeShot.start.clone().lerp(activeShot.end, progress)).project(camera)
-        : null;
-      canvas.setAttribute("aria-label", `Fixed-view point-and-click arcade. Sky diagnostic: reduced motion ${reduced}; shot ${point ? `${point.x.toFixed(2)}, ${point.y.toFixed(2)}, ${point.z.toFixed(3)}` : "inactive"}.`);
-    }
   }
 
   function fitCamera() {
