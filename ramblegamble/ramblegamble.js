@@ -372,7 +372,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       end: null,
       startedAt: 0,
       duration: 900,
-      nextAt: 2500 + index * 4100 + nextSkyRandom() * 5200,
+      nextAt: 1500 + index * 5200 + nextSkyRandom() * 2600,
       active: false,
       angle: (nextSkyRandom() - 0.5) * 0.48 - 0.30,
       tint: new THREE.Color("#fff0de"),
@@ -403,19 +403,20 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     const forward = camera.getWorldDirection(new THREE.Vector3());
     const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
     const viewUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize();
-    const worldUp = new THREE.Vector3(0, 1, 0);
+    const horizontalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const start = forward
-      .addScaledVector(right, (nextSkyRandom() - 0.5) * 0.95)
-      .addScaledVector(viewUp, 0.36 + nextSkyRandom() * 0.36)
+      .addScaledVector(right, (nextSkyRandom() * 2 - 1) * horizontalRange * 0.78)
+      .addScaledVector(viewUp, 0.035 + nextSkyRandom() * 0.28)
       .normalize();
-    if (start.y < 0.12) start.addScaledVector(worldUp, 0.12 - start.y).normalize();
+    const travelDirection = nextSkyRandom() < 0.5 ? -1 : 1;
     const end = start.clone()
-      .addScaledVector(right, (nextSkyRandom() < 0.5 ? -1 : 1) * (0.12 + nextSkyRandom() * 0.16))
-      .addScaledVector(worldUp, -(0.08 + nextSkyRandom() * 0.12))
+      .addScaledVector(right, travelDirection * (0.08 + nextSkyRandom() * 0.12))
+      .addScaledVector(viewUp, -(0.06 + nextSkyRandom() * 0.10))
       .normalize();
     return {
       start: start.multiplyScalar(SKY_CONFIG.radius - 2),
       end: end.multiplyScalar(SKY_CONFIG.radius - 2),
+      angle: travelDirection > 0 ? -0.30 : Math.PI + 0.30,
     };
   }
 
@@ -465,6 +466,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
         const path = makeShootingStarPath();
         star.start = path.start;
         star.end = path.end;
+        star.angle = path.angle;
         star.startedAt = time;
         star.duration = 780 + nextSkyRandom() * 520;
         star.active = true;
