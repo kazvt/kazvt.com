@@ -26,8 +26,8 @@ const MODE_ALIASES = new Map([
 ]);
 
 const LEVEL_WORDS = new Map([
-  ["one", 1], ["first", 1], ["two", 2], ["second", 2], ["three", 3], ["third", 3],
-  ["four", 4], ["fourth", 4], ["five", 5], ["fifth", 5],
+  ["one", 1], ["first", 1], ["1st", 1], ["two", 2], ["second", 2], ["2nd", 2], ["three", 3], ["third", 3], ["3rd", 3],
+  ["four", 4], ["fourth", 4], ["4th", 4], ["five", 5], ["fifth", 5], ["5th", 5],
   ["easy", 1], ["easiest", 1], ["beginner", 1], ["simple", 1],
   ["medium", 3], ["intermediate", 3], ["normal", 3],
   ["hard", 5], ["hardest", 5], ["expert", 5], ["advanced", 5],
@@ -333,7 +333,7 @@ function parseHumanText(input) {
     const fields = targetFields();
     if (!fields) return;
     fields.question = [fields.question || (currentLevel === 1 ? current.question : ""), value].filter(Boolean).join(" ").trim();
-    if (currentLevel === 1 && !current.question) current.question = fields.question;
+    if (currentLevel === 1) current.question = fields.question;
   }
 
   function addQuestionBank(value) {
