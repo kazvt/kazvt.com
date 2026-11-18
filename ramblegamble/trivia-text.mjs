@@ -344,10 +344,18 @@ function parseHumanText(input) {
   function setQuestionField(value) {
     if (section === "bank") { addQuestionBank(value); return; }
     if (!current) { newRound("", value); return; }
+    if (current.question && current.question !== value.trim() && currentLevel === 1 && currentHasContent()) {
+      newRound("", value);
+      return;
+    }
     const fields = targetFields();
     fields.question = value.trim();
     if (currentLevel === 1) current.question = fields.question;
     pendingList = "";
+  }
+
+  function currentHasContent() {
+    return [...current.levels.values()].some((block) => block.optionsPresent || block.acceptedPresent || block.fields.question || block.fields.subtitle);
   }
 
   function applyHeaderMarkers(block, annotation) {
@@ -451,6 +459,14 @@ function parseHumanText(input) {
       section = "rounds";
       newRound(explicitRound.id, explicitRound.question);
       continue;
+    }
+
+    if (current && section === "rounds") {
+      const paddedRound = line.match(/^\s*0(\d{1,2})\s*[:.)]\s*(.*)$/);
+      if (paddedRound && Number(paddedRound[1]) >= 1 && Number(paddedRound[1]) <= 36 && paddedRound[2].trim()) {
+        newRound(paddedRound[1], paddedRound[2]);
+        continue;
+      }
     }
 
     if (!current && section === "rounds") {
@@ -620,16 +636,16 @@ function parseRoundHeader(line) {
 }
 
 function parseDifficultyHeader(line) {
-  let match = line.match(/^\s*(?:difficulty|diff|level|tier|stage|d)\s*(?:number\s*)?#?\s*(\d+|one|first|two|second|three|third|four|fourth|five|fifth|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)-]\s*)?(.*)$/i);
+  let match = line.match(/^\s*(?:difficulty|diff|level|tier|stage|d)\s*(?:number\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)-]\s*)?(.*)$/i);
   if (match) {
     const level = parseLevelValue(match[1]);
     return level ? { level, annotation: match[2].trim() } : null;
   }
   match = line.match(/^\s*([1-5])\s*:\s*(.*)$/);
   if (match) return { level: Number(match[1]), annotation: match[2].trim() };
-  match = line.match(/^\s*(?:1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|medium|hard|beginner|intermediate|advanced)\s+(?:difficulty|level|tier)\s*:?\s*(.*)$/i);
+  match = line.match(/^\s*(?:1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|easiest|medium|normal|hard|hardest|expert|beginner|simple|intermediate|advanced)\s+(?:difficulty|level|tier)\s*:?\s*(.*)$/i);
   if (match) {
-    const levelToken = line.match(/^\s*(1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|medium|hard|beginner|intermediate|advanced)/i)?.[1];
+    const levelToken = line.match(/^\s*(1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|easiest|medium|normal|hard|hardest|expert|beginner|simple|intermediate|advanced)/i)?.[1];
     return { level: parseLevelValue(levelToken), annotation: match[1].trim() };
   }
   return null;
