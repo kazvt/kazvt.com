@@ -24,7 +24,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const OVERVIEW_RETREAT_DISTANCE = 0.45;
   const REFERENCE_START_VIEW = Object.freeze({
-    yaw: -0.30,
+    yaw: 0.20,
     elevation: 0.30,
     narrowDistanceScale: 0.95,
     wideDistanceScale: 0.52,
