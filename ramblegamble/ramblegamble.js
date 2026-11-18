@@ -35,7 +35,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   });
   const SKY_CONFIG = Object.freeze({
     radius: 260,
-    starCount: 280,
+    starCount: 420,
     topColor: "#100818",
     horizonColor: "#b9a0cf",
   });
@@ -69,6 +69,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let skyStarsMesh;
   let skyShootingStarsMesh;
   let skyShootingStars = [];
+  let skyStarsInitialized = false;
   let rouletteTargets = [];
   let slotTargets = [];
   let wheelMotion = null;
