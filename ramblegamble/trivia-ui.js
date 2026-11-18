@@ -597,19 +597,31 @@ import {
 
   importApplyButton.addEventListener("click", async () => {
     if (!pendingImport || pendingImport.errors?.length) return;
+    const importData = pendingImport;
     importApplyButton.disabled = true;
+    importFileInput.disabled = true;
+    importModeSelect.disabled = true;
+    exportButton.disabled = true;
+    editor.inert = true;
+    questionBankForm.inert = true;
+    questionBankList.inert = true;
     importStatus.textContent = "Importing into this browser session...";
-    const previousDraftValue = sessionStorage.getItem(DRAFT_KEY);
-    const previousBankValue = sessionStorage.getItem(QUESTION_BANK_SESSION_KEY);
+    let previousDraftValue;
+    let previousBankValue;
+    let savedSnapshot = false;
+    let idMap = {};
     try {
-      const importedRounds = copy(pendingImport.rounds || {});
-      const idMap = await storeEmbeddedImages(pendingImport.media);
+      previousDraftValue = sessionStorage.getItem(DRAFT_KEY);
+      previousBankValue = sessionStorage.getItem(QUESTION_BANK_SESSION_KEY);
+      savedSnapshot = true;
+      const importedRounds = copy(importData.rounds || {});
+      idMap = await storeEmbeddedImages(importData.media);
       remapDraftAssets(importedRounds, idMap);
 
       const replace = importModeSelect.value === "replace";
       const nextRounds = replace ? importedRounds : mergeRoundDrafts(drafts.rounds, importedRounds);
       let nextBank;
-      const importedBank = (pendingImport.questionBank || []).map((entry) => ({ id: newQuestionId(), text: entry.text }));
+      const importedBank = (importData.questionBank || []).map((entry) => ({ id: newQuestionId(), text: entry.text }));
       if (replace) {
         nextBank = importedBank;
       } else {
@@ -628,10 +640,14 @@ import {
         sessionStorage.setItem(DRAFT_KEY, JSON.stringify(nextDrafts));
         writeSessionQuestionBank(nextBank);
       } catch (error) {
-        if (previousDraftValue === null) sessionStorage.removeItem(DRAFT_KEY);
-        else sessionStorage.setItem(DRAFT_KEY, previousDraftValue);
-        if (previousBankValue === null) sessionStorage.removeItem(QUESTION_BANK_SESSION_KEY);
-        else sessionStorage.setItem(QUESTION_BANK_SESSION_KEY, previousBankValue);
+        try {
+          if (previousDraftValue === null) sessionStorage.removeItem(DRAFT_KEY);
+          else sessionStorage.setItem(DRAFT_KEY, previousDraftValue);
+          if (previousBankValue === null) sessionStorage.removeItem(QUESTION_BANK_SESSION_KEY);
+          else sessionStorage.setItem(QUESTION_BANK_SESSION_KEY, previousBankValue);
+        } catch (rollbackError) {
+          console.warn("Ramble Gamble trivia session rollback was incomplete:", rollbackError);
+        }
         throw error;
       }
 
@@ -647,9 +663,20 @@ import {
       pendingImport = null;
       importFileInput.value = "";
     } catch (error) {
+      if (Object.keys(idMap).length) {
+        try { await removeStoredMediaAssets(idMap); }
+        catch (cleanupError) { console.warn("Unused imported images could not be cleaned up:", cleanupError); }
+      }
+      if (!savedSnapshot) console.warn("Trivia import could not read the existing session snapshot.");
       importStatus.textContent = "Import failed; existing trivia was kept. " + error.message;
       console.warn("Ramble Gamble trivia import failed:", error);
     } finally {
+      importFileInput.disabled = false;
+      importModeSelect.disabled = false;
+      exportButton.disabled = false;
+      editor.inert = false;
+      questionBankForm.inert = false;
+      questionBankList.inert = false;
       importApplyButton.disabled = !pendingImport || Boolean(pendingImport.errors?.length);
     }
   });
