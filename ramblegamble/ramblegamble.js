@@ -1431,9 +1431,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       });
 
       placeMachinesFromStage();
+      setupPicking();
       // Keep the current camera composition stable after moving the roulette unit.
       overviewCameraBounds = getArcadeBounds();
-      setupPicking();
       applyTheme();
       sceneReady = true;
       fitCamera();
