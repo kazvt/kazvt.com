@@ -106,6 +106,39 @@ test("question headers, correct-answer prose, no-choice aliases, and full-width 
   assert.deepEqual(imported.rounds["03"][5].acceptedAnswers, ["The written response"]);
 });
 
+test("human labels, parenthesized add notes, and short-answer lines are interpreted", () => {
+  const imported = parseTriviaText(`
+Q: Which answer stays with the question?
+Difficulty: 1
+Option A: Alpha
+Option B: Beta (correct)
+Level: 2 (add these)
+Choice C: Gamma
+Difficulty: 5 (no multiple choice)
+Answer: A written response
+`);
+  const round = imported.rounds["01"];
+  assert.deepEqual(round[1].options.map((option) => option.label), ["Alpha", "Beta"]);
+  assert.equal(round[1].options[1].correct, true);
+  assert.deepEqual(round[2].options.map((option) => option.label), ["Alpha", "Beta", "Gamma"]);
+  assert.deepEqual(round[4].options.map((option) => option.label), ["Alpha", "Beta", "Gamma"]);
+  assert.equal(round[5].mode, "short-answer");
+  assert.deepEqual(round[5].acceptedAnswers, ["A written response"]);
+
+  const simple = parseTriviaText("Question: What is the answer?\nAnswer: Forty two");
+  assert.equal(simple.rounds["01"][1].mode, "short-answer");
+  assert.deepEqual(simple.rounds["01"][1].acceptedAnswers, ["Forty two"]);
+});
+
+test("CSV handles multiline quoted cells and lettered answer columns", () => {
+  const imported = parseTriviaText(
+    'Question,Option A,Option B,Correct Answer\n"A question\nwith a second line?",First,Second,B\n',
+  );
+  assert.equal(imported.rounds["01"][1].question, "A question\nwith a second line?");
+  assert.deepEqual(imported.rounds["01"][1].options.map((option) => option.label), ["First", "Second"]);
+  assert.equal(imported.rounds["01"][1].options[1].correct, true);
+});
+
 test("generic JSON question arrays accept common prompt, option, and key aliases", () => {
   const imported = parseTriviaText(JSON.stringify({
     questions: [{ prompt: "What is 2 + 2?", choices: ["3", "4"], correctAnswer: "B" }],
@@ -113,6 +146,11 @@ test("generic JSON question arrays accept common prompt, option, and key aliases
   assert.equal(imported.rounds["01"][1].question, "What is 2 + 2?");
   assert.deepEqual(imported.rounds["01"][1].options.map((option) => option.label), ["3", "4"]);
   assert.equal(imported.rounds["01"][1].options[1].correct, true);
+
+  const objectChoices = parseTriviaText(JSON.stringify({
+    cards: [{ questionText: "Choose one", answers: [{ text: "Wrong" }, { label: "Right", isCorrect: true }] }],
+  }));
+  assert.equal(objectChoices.rounds["01"][1].options[1].correct, true);
 });
 
 test("JSON text export round-trips modes, tier fields, correct answers, media references, and bank entries", () => {

@@ -352,21 +352,6 @@ function parseDelimitedRows(text, delimiter) {
   return rows;
 }
 
-function parseDelimitedRow(line, delimiter) {
-  const fields = [];
-  let field = "";
-  let quoted = false;
-  for (let index = 0; index < line.length; index += 1) {
-    const character = line[index];
-    if (character === '"' && quoted && line[index + 1] === '"') { field += '"'; index += 1; }
-    else if (character === '"') quoted = !quoted;
-    else if (character === delimiter && !quoted) { fields.push(field.trim()); field = ""; }
-    else field += character;
-  }
-  fields.push(field.trim());
-  return fields;
-}
-
 function countChar(text, character) { return [...text].filter((entry) => entry === character).length; }
 function normalizeHeader(value) { return String(value).trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " "); }
 function findColumn(indexes, aliases) { for (const alias of aliases) if (Object.hasOwn(indexes, alias)) return indexes[alias]; return -1; }
@@ -497,10 +482,20 @@ function parseHumanText(input) {
             state.optionCount = state.options.length;
           }
         }
-        if (block.acceptedPresent) state.acceptedAnswers = block.additive ? [...state.acceptedAnswers, ...block.accepted] : [...block.accepted];
+        if (block.acceptedPresent) {
+          if (!block.optionsPresent && !block.fields.mode) {
+            state.mode = "short-answer";
+            state.options = [];
+            state.optionCount = 0;
+          }
+          state.acceptedAnswers = block.additive ? [...state.acceptedAnswers, ...block.accepted] : [...block.accepted];
+        }
         if (block.correct.length) {
           if (state.options.length) applyCorrectValues(state.options, block.correct);
-          else state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...block.correct])];
+          else {
+            if (!block.fields.mode) state.mode = "short-answer";
+            state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...block.correct])];
+          }
         }
         if (block.noMultipleChoice) {
           state.mode = "short-answer";
