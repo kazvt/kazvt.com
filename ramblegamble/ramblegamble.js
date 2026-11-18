@@ -27,9 +27,10 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     yaw: -0.30,
     elevation: 0.30,
     narrowDistanceScale: 0.95,
-    wideDistanceScale: 0.70,
-    wideAspect: 2.2,
+    wideDistanceScale: 0.52,
+    wideAspect: 1.8,
     rightwardComposition: 0.05,
+    raisedAimOffset: 0.8,
   });
   const ARCADE_REFERENCE_LAYOUT = Object.freeze({
     // The back-wall recess in rg_stage.gltf spans x=9.14..14.48 at z=-6.10.
@@ -548,6 +549,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (wideComposition > 0) {
       const boundsWidth = bounds.getSize(new THREE.Vector3()).x;
       target.addScaledVector(right, -boundsWidth * REFERENCE_START_VIEW.rightwardComposition * wideComposition);
+      target.y += REFERENCE_START_VIEW.raisedAimOffset * wideComposition;
     }
     const tanHalfVertical = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const tanHalfHorizontal = tanHalfVertical * aspect;
