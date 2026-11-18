@@ -34,7 +34,9 @@ const LEVEL_WORDS = new Map([
 ]);
 
 function cleanText(value) {
-  return String(value ?? "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  return String(value ?? "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n")
+    .replace(/[０-９]/g, (digit) => String.fromCharCode(digit.charCodeAt(0) - 0xff10 + 48))
+    .replace(/<br\s*\/?>/gi, "\n");
 }
 
 function clone(value) {
@@ -625,9 +627,9 @@ function nextFreeRoundId(rounds, start = 1) {
 }
 
 function parseRoundHeader(line) {
-  let match = line.match(/^\s*(?:round|question\s*#?|q)\s*#?\s*(\d{1,2})\s*(?:[:.)-]|\s+-\s*)\s*(.*)$/i);
+  let match = line.match(/^\s*(?:round|question\s*#?|q)\s*#?\s*(\d{1,2})\s*(?:[:.)–—-]|\s+-\s*)\s*(.*)$/i);
   if (match) return { id: match[1], question: match[2].trim() };
-  match = line.match(/^\s*(\d{1,2})\s*[:.)]\s*(.*)$/);
+  match = line.match(/^\s*(\d{1,2})\s*[:.)–—-]\s*(.*)$/);
   if (!match) return null;
   const number = Number(match[1]);
   if (number < 1 || number > 36) return null;
@@ -636,7 +638,7 @@ function parseRoundHeader(line) {
 }
 
 function parseDifficultyHeader(line) {
-  let match = line.match(/^\s*(?:difficulty|diff|level|tier|stage|d)\s*(?:number\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)-]\s*)?(.*)$/i);
+  let match = line.match(/^\s*(?:difficult(?:y|ies)|diff|level|tier|stage|d)\s*(?:number\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)–—-]\s*)?(.*)$/i);
   if (match) {
     const level = parseLevelValue(match[1]);
     return level ? { level, annotation: match[2].trim() } : null;
