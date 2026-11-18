@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { exportTriviaText, parseTriviaText } from "./trivia-text.mjs";
+import { decodeTriviaBytes, exportTriviaText, parseTriviaText } from "./trivia-text.mjs";
 
 test("sample numbered difficulty format inherits, adds, replaces, and switches to short answer", () => {
   const imported = parseTriviaText(`
@@ -137,6 +137,18 @@ test("CSV handles multiline quoted cells and lettered answer columns", () => {
   assert.equal(imported.rounds["01"][1].question, "A question\nwith a second line?");
   assert.deepEqual(imported.rounds["01"][1].options.map((option) => option.label), ["First", "Second"]);
   assert.equal(imported.rounds["01"][1].options[1].correct, true);
+});
+
+test("BOM-marked UTF-16 spreadsheet text decodes without losing non-ASCII answers", () => {
+  const source = "Question,Answer\\nWhat is the word?,Café\\n";
+  const bytes = [0xff, 0xfe];
+  for (const character of source) {
+    const code = character.charCodeAt(0);
+    bytes.push(code & 0xff, code >> 8);
+  }
+  const decoded = decodeTriviaBytes(new Uint8Array(bytes));
+  const imported = parseTriviaText(decoded);
+  assert.deepEqual(imported.rounds["01"][1].acceptedAnswers, ["Café"]);
 });
 
 test("generic JSON question arrays accept common prompt, option, and key aliases", () => {
