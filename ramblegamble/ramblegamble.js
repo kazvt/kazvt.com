@@ -262,14 +262,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
 
     const starCount = SKY_CONFIG.starCount;
     const starPalette = ["#fff0d2", "#eee3ff", "#dceeff"].map((color) => new THREE.Color(color));
-    const starRadius = SKY_CONFIG.radius - 1.4;
     skyStars = Array.from({ length: starCount }, () => {
-      // Uniformly sprinkle small circular pixels over the upper sky hemisphere.
-      const up = 0.08 + nextSkyRandom() * 0.91;
-      const around = nextSkyRandom() * Math.PI * 2;
-      const ring = Math.sqrt(1 - up * up);
       return {
-        direction: new THREE.Vector3(Math.cos(around) * ring, up, Math.sin(around) * ring),
+        direction: null,
         phase: nextSkyRandom() * Math.PI * 2,
         rate: 0.11 + nextSkyRandom() * 0.12,
         size: 2.0 + nextSkyRandom() * 1.9,
