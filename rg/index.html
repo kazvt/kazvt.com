@@ -54,11 +54,11 @@
           </div>
           <p class="rg-panel-copy">The room is the controller. Click the roulette wheel to spin, its center or rim for trivia, the slot cabinet or its buttons for the menu grid, and the lever to play.</p>
           <div class="rg-machine-actions">
-            <button class="rg-action-card" id="rg-spin-wheel" type="button"><span class="rg-action-glyph" aria-hidden="true">◎</span><span><strong>SPIN THE WHEEL</strong><small>Pick a random ramble prompt</small></span></button>
-            <button class="rg-action-card" id="rg-pull-slots" type="button"><span class="rg-action-glyph" aria-hidden="true">▥</span><span><strong>PULL THE SLOT LEVER</strong><small>Pick a prompt from the machine</small></span></button>
+            <button class="rg-action-card" id="rg-spin-wheel" type="button"><span class="rg-action-glyph" aria-hidden="true">◎</span><span><strong>SPIN THE WHEEL</strong><small>Draw from the session question bank</small></span></button>
+            <button class="rg-action-card" id="rg-pull-slots" type="button"><span class="rg-action-glyph" aria-hidden="true">▥</span><span><strong>PULL THE SLOT LEVER</strong><small>Draw from the session question bank</small></span></button>
           </div>
-          <div class="rg-arcade-status" id="rg-arcade-status" role="status" aria-live="polite">Ready when you are.</div>
-          <p class="rg-storage-note">Slot layout and trivia drafts are saved only in this browser. They do not change the palette setting on other pages.</p>
+          <div class="rg-arcade-status" id="rg-arcade-status" role="status" aria-live="polite">No host questions added yet.</div>
+          <p class="rg-storage-note">Trivia questions and round drafts stay in this tab's browser session. They do not change the palette setting on other pages.</p>
         </section>
 
         <section class="rg-console-panel" id="rg-panel-slots" role="tabpanel" aria-labelledby="rg-tab-slots" tabindex="0" hidden>
@@ -103,11 +103,24 @@
               <button class="rg-secondary-button rg-present-toggle" id="rg-present-toggle" type="button" aria-pressed="false">PRESENT</button>
             </div>
           </div>
+          <section class="rg-question-bank" aria-labelledby="rg-question-bank-title">
+            <div class="rg-question-bank-heading">
+              <div><h3 id="rg-question-bank-title">SESSION QUESTION BANK</h3><p>Questions here are drawn at random by the wheel and slot machine. They last for this browser tab's session.</p></div>
+              <span id="rg-question-bank-count" role="status" aria-live="polite">0 QUESTIONS</span>
+            </div>
+            <form id="rg-question-bank-form" class="rg-question-bank-form">
+              <label class="rg-field-label" for="rg-new-question">Add a question</label>
+              <textarea id="rg-new-question" rows="2" required></textarea>
+              <button class="rg-secondary-button" type="submit">ADD QUESTION</button>
+            </form>
+            <p class="rg-question-bank-empty" id="rg-question-bank-empty">No questions have been added in this tab session.</p>
+            <ol class="rg-question-bank-list" id="rg-question-bank-list" aria-label="Host question bank" hidden></ol>
+          </section>
           <div class="rg-trivia-layout" id="rg-trivia-interface">
             <section class="rg-trivia-screen" aria-label="Question preview">
               <div class="rg-trivia-screen-top"><span id="rg-round-badge">ROUND 01</span><span id="rg-format-badge">SHORT ANSWER</span><button class="rg-stage-edit" id="rg-stage-edit" type="button" hidden>BACK TO EDIT</button></div>
               <p class="rg-question-subtitle" id="rg-question-subtitle" hidden></p>
-              <h3 class="rg-question-text" id="rg-question-text">Choose a round to begin.</h3>
+              <h3 class="rg-question-text" id="rg-question-text" hidden></h3>
               <img class="rg-prompt-image" id="rg-prompt-image" alt="" hidden>
               <div class="rg-video-box" id="rg-video-box" hidden></div>
               <div class="rg-stage-items" id="rg-stage-items"></div>
@@ -115,9 +128,9 @@
               <div class="rg-answer-feedback" id="rg-answer-feedback" role="status" aria-live="polite"></div>
             </section>
             <aside class="rg-trivia-editor" aria-label="Host question editor">
-              <div class="rg-editor-title"><span>HOST EDITOR</span><span class="rg-save-state" id="rg-save-state" role="status" aria-live="polite">LOCAL DRAFT</span></div>
+              <div class="rg-editor-title"><span>HOST EDITOR</span><span class="rg-save-state" id="rg-save-state" role="status" aria-live="polite">SESSION DRAFT</span></div>
               <label class="rg-field-label" for="rg-edit-question">Question</label>
-              <textarea id="rg-edit-question" rows="2" placeholder="Add this round's question"></textarea>
+              <textarea id="rg-edit-question" rows="2"></textarea>
               <label class="rg-field-label" for="rg-edit-subtitle">Subtitle <span>optional</span></label>
               <input id="rg-edit-subtitle" type="text" placeholder="Small supporting line">
               <label class="rg-field-label" for="rg-edit-mode">Question template</label>
@@ -134,7 +147,7 @@
               <label class="rg-field-label" for="rg-edit-answers">Accepted answers <span>comma or new line separated</span></label>
               <textarea id="rg-edit-answers" rows="2" placeholder="Answer 1, alternate spelling"></textarea>
               <button class="rg-secondary-button rg-clear-draft" id="rg-clear-draft" type="button">CLEAR THIS DIFFICULTY'S DRAFT</button>
-              <p class="rg-editor-note">The supplied trivia text has redacted its actual prompts and answer keys. Blank fields are intentional - add the real content here.</p>
+              <p class="rg-editor-note">Round content is blank until you add it. Changes are saved for this tab session.</p>
             </aside>
           </div>
         </section>
