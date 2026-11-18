@@ -11,9 +11,15 @@ body.ramble-page {
   margin: 0;
   color: var(--ink);
   background: var(--bg);
-  font-family: var(--site-font, "Comic Sans MS", cursive);
+  font-family: Arial, Helvetica, sans-serif !important;
   cursor: auto;
   overscroll-behavior: none;
+}
+
+body.ramble-page *,
+body.ramble-page *::before,
+body.ramble-page *::after {
+  font-family: Arial, Helvetica, sans-serif !important;
 }
 
 .ramble-page *,
