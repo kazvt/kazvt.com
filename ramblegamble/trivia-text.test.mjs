@@ -74,6 +74,47 @@ test("common quoted CSV and tab-separated question/answer files import as short-
   assert.equal(tsv.rounds["01"][1].options[1].correct, true);
 });
 
+test("delimited difficulty rows group by round, add tier choices, and accept separate option columns", () => {
+  const csv = parseTriviaText(
+    "Round,Question,Difficulty,Answers,Correct,Add\n" +
+    "03,Pick a color?,1,Red|Blue,1,false\n" +
+    "03,Pick a color?,2,Green|Gold,3,true\n",
+  );
+  assert.deepEqual(csv.rounds["03"][1].options.map((option) => option.label), ["Red", "Blue"]);
+  assert.deepEqual(csv.rounds["03"][2].options.map((option) => option.label), ["Red", "Blue", "Green", "Gold"]);
+  assert.equal(csv.rounds["03"][2].options[2].correct, true);
+  assert.deepEqual(csv.rounds["03"][3].options.map((option) => option.label), ["Red", "Blue", "Green", "Gold"]);
+
+  const columns = parseTriviaText("Question,Option 1,Option 2,Correct answer\nPick one?,A,B,B\n");
+  assert.deepEqual(columns.rounds["01"][1].options.map((option) => option.label), ["A", "B"]);
+  assert.equal(columns.rounds["01"][1].options[1].correct, true);
+});
+
+test("question headers, correct-answer prose, no-choice aliases, and full-width digits are forgiving", () => {
+  const imported = parseTriviaText([
+    "Ｑ０３: Pick an answer?",
+    "Difficulty 1:",
+    "- Alpha",
+    "- Beta",
+    "Correct answer: B",
+    "Difficulty 5 (no MCQ):",
+    "Answer: The written response",
+  ].join("\n"));
+  assert.equal(imported.rounds["03"][1].question, "Pick an answer?");
+  assert.equal(imported.rounds["03"][1].options[1].correct, true);
+  assert.equal(imported.rounds["03"][5].mode, "short-answer");
+  assert.deepEqual(imported.rounds["03"][5].acceptedAnswers, ["The written response"]);
+});
+
+test("generic JSON question arrays accept common prompt, option, and key aliases", () => {
+  const imported = parseTriviaText(JSON.stringify({
+    questions: [{ prompt: "What is 2 + 2?", choices: ["3", "4"], correctAnswer: "B" }],
+  }));
+  assert.equal(imported.rounds["01"][1].question, "What is 2 + 2?");
+  assert.deepEqual(imported.rounds["01"][1].options.map((option) => option.label), ["3", "4"]);
+  assert.equal(imported.rounds["01"][1].options[1].correct, true);
+});
+
 test("JSON text export round-trips modes, tier fields, correct answers, media references, and bank entries", () => {
   const data = {
     rounds: { "03": { 1: {
