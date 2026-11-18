@@ -238,6 +238,20 @@
 .rg-round-pickers label { display: grid; gap: 4px; color: #486c2f; font-size: 9px; font-weight: 900; letter-spacing: .07em; }
 .rg-round-pickers select { min-width: 80px; min-height: 38px; padding: 4px 25px 4px 8px; border: 2px solid #111; color: #111; background: #fff5be; font-weight: 800; }
 .rg-present-toggle { align-self: end; min-height: 38px; }
+.rg-question-bank { margin: 0 0 14px; padding: 10px; border: 2px solid #486c2f; background: #f8edb4; }
+.rg-question-bank-heading { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+.rg-question-bank-heading h3 { margin: 0; color: #8b2626; font-size: 12px; letter-spacing: .07em; }
+.rg-question-bank-heading p { margin: 4px 0 0; color: #3b3019; font-size: 11px; line-height: 1.4; }
+.rg-question-bank-heading > span { flex: 0 0 auto; padding: 5px 7px; color: #fff; background: #486c2f; font-size: 9px; font-weight: 900; }
+.rg-question-bank-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 6px 8px; margin-top: 8px; }
+.rg-question-bank-form .rg-field-label { grid-column: 1 / -1; margin: 0; }
+.rg-question-bank textarea { width: 100%; min-width: 0; min-height: 46px; padding: 7px 8px; border: 2px solid #111; color: #111; background: #fffdf0; font: inherit; font-size: 13px; resize: vertical; }
+.rg-question-bank-empty { margin: 8px 0 0; padding: 7px; border: 1px dashed #8b2626; color: #574d36; font-size: 11px; }
+.rg-question-bank-list { display: grid; gap: 5px; max-height: 180px; margin: 8px 0 0; padding: 0 4px 0 24px; overflow: auto; }
+.rg-question-bank-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 6px 7px; border: 1px solid #9a8a50; background: #fff5be; }
+.rg-question-bank-item p { min-width: 0; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 12px; line-height: 1.35; }
+.rg-question-remove { min-height: 32px; padding: 4px 7px; font-size: 9px; }
+#rg-question-bank-save-state[data-error="true"] { color: #8b2626; }
 .rg-stage-edit { min-height: 36px; margin-left: auto; padding: 5px 9px; border: 2px solid #f1e5a1; color: #111; background: #ffdf00; font: inherit; font-size: 9px; font-weight: 900; cursor: pointer; }
 .rg-stage-edit:hover { background: #c000ff; color: #fff; }
 .rg-trivia-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(290px, .8fr); gap: 14px; min-height: 0; }
@@ -336,6 +350,7 @@
 .rg-console.is-presenting .rg-console-header,
 .rg-console.is-presenting .rg-console-tabs,
 .rg-console.is-presenting .rg-trivia-heading,
+.rg-console.is-presenting .rg-question-bank,
 .rg-console.is-presenting .rg-trivia-editor { display: none !important; }
 .rg-console.is-presenting .rg-console-panel { display: block; height: 100%; padding: 0; overflow: hidden; }
 .rg-console.is-presenting .rg-trivia-layout { display: block; height: 100%; }
@@ -362,6 +377,8 @@
   .rg-trivia-screen { min-height: 300px; }
   .rg-trivia-editor { max-height: none; }
   .rg-round-pickers { flex-wrap: wrap; }
+  .rg-question-bank-form { grid-template-columns: minmax(0, 1fr); }
+  .rg-question-bank-form .rg-secondary-button { width: 100%; }
   .rg-slot-cell { min-height: 52px; }
   .rg-trivia-screen .rg-stage-items { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .rg-category-buckets { grid-template-columns: 1fr; }
