@@ -230,39 +230,78 @@ function parseDelimited(text) {
   const indexes = {};
   header.forEach((name, index) => { if (name) indexes[name] = index; });
   const questionColumn = findColumn(indexes, ["question", "prompt", "question text", "front", "term", "title", "text"]);
-  const answerColumn = findColumn(indexes, ["answers", "options", "choices", "answer", "accepted answers", "back", "definition"]);
-  if (questionColumn < 0 || answerColumn < 0) return null;
+  const answerColumn = findColumn(indexes, ["answers", "options", "choices", "answer", "accepted answers", "accepted answer", "back", "definition"]);
+  const optionColumns = header.map((name, index) => /^(?:option|choice|answer)\s*\d+$/.test(name) ? index : -1).filter((index) => index >= 0);
+  if (questionColumn < 0 || (answerColumn < 0 && !optionColumns.length)) return null;
 
-  const rounds = {};
   const warnings = [];
+  const grouped = new Map();
   let sequence = 1;
   for (const [rowIndex, row] of rows.slice(1).entries()) {
     if (!row.some((cell) => cell.trim())) continue;
     const question = String(row[questionColumn] || "").trim();
-    if (!question) { warnings.push(`Row ${rowIndex + 2} has no question and was skipped.`); continue; }
+    if (!question) { warnings.push("Row " + (rowIndex + 2) + " has no question and was skipped."); continue; }
     const round = normalizeId(getColumn(row, indexes, ["round", "round id", "question id", "number", "id"])) || String(sequence++).padStart(2, "0");
     const difficulty = Math.max(1, Math.min(5, Number(getColumn(row, indexes, ["difficulty", "level", "tier", "diff"])) || 1));
-    const rawAnswers = splitLooseList(row[answerColumn]);
-    const answerHeading = header[answerColumn];
-    const isSingleAnswer = ["answer", "definition", "back"].includes(answerHeading);
-    const options = isSingleAnswer ? [] : rawAnswers;
-    const correctValues = splitLooseList(getColumn(row, indexes, ["correct", "correct answer", "answer key", "correct answers"]));
-    const accepted = splitLooseList(getColumn(row, indexes, ["accepted answers", "answer key", "correct answer"]));
-    if (isSingleAnswer) accepted.push(...rawAnswers);
+    const answerHeading = answerColumn >= 0 ? header[answerColumn] : "";
+    const isAcceptedColumn = ["answer", "accepted answer", "accepted answers", "definition", "back"].includes(answerHeading);
+    const rawAnswers = answerColumn >= 0 ? splitLooseList(row[answerColumn]) : [];
+    const options = optionColumns.length
+      ? optionColumns.map((column) => String(row[column] || "").trim()).filter(Boolean)
+      : isAcceptedColumn ? [] : rawAnswers;
+    const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, indexes, ["accepted answers", "accepted answer"]));
+    const correctValues = splitLooseList(getColumn(row, indexes, ["correct", "correct answer", "answer key", "correct answers", "correct option", "correct choice"]));
     const mode = normalizeMode(getColumn(row, indexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
     applyCorrectValues(optionObjects, correctValues);
-    const levels = {};
+    const record = {
+      question,
+      subtitle: getColumn(row, indexes, ["subtitle", "description", "hint"]),
+      mode,
+      options: optionObjects,
+      accepted,
+      correctValues,
+      additive: /^(?:1|true|yes|on|add|append|plus)$/i.test(getColumn(row, indexes, ["add", "additive", "append", "plus"])),
+      noMultipleChoice: /^(?:1|true|yes|on|no|none)$/i.test(getColumn(row, indexes, ["no multiple choice", "no mc", "no mcq"])),
+    };
+    if (!grouped.has(round)) grouped.set(round, new Map());
+    const tiers = grouped.get(round);
+    if (!tiers.has(difficulty)) tiers.set(difficulty, []);
+    tiers.get(difficulty).push(record);
+  }
+
+  const rounds = {};
+  for (const [roundId, tierRecords] of grouped) {
+    const initial = resolveRoundFormat(roundId, 1);
+    const state = {
+      question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
+      options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], pairs: [],
+      categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
+      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+    };
+    rounds[roundId] = {};
     for (let level = 1; level <= 5; level += 1) {
-      levels[level] = {
-        question,
-        subtitle: getColumn(row, indexes, ["subtitle", "description", "hint"]),
-        mode, options: clone(optionObjects), optionCount: optionObjects.length,
-        acceptedAnswers: [...accepted],
-      };
+      for (const record of tierRecords.get(level) || []) {
+        state.question = record.question || state.question;
+        state.subtitle = record.subtitle || state.subtitle;
+        if (record.noMultipleChoice) {
+          state.mode = "short-answer";
+          state.options = [];
+          state.optionCount = 0;
+        } else {
+          state.mode = record.mode || state.mode;
+          if (record.options.length) {
+            state.options = record.additive ? [...state.options, ...clone(record.options)] : clone(record.options);
+            state.optionCount = state.options.length;
+          }
+          if (record.accepted.length) state.acceptedAnswers = record.additive ? [...state.acceptedAnswers, ...record.accepted] : [...record.accepted];
+          if (record.correctValues.length && state.options.length) applyCorrectValues(state.options, record.correctValues);
+        }
+      }
+      if (isChoiceMode(state.mode)) state.optionCount = state.options.length || state.optionCount;
+      else { state.options = []; state.optionCount = 0; }
+      rounds[roundId][level] = clone(state);
     }
-    if (correctValues.length && optionObjects.length) for (const level of Object.values(levels)) applyCorrectValues(level.options, correctValues);
-    rounds[round] = levels;
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question rows were found."] };
 }
