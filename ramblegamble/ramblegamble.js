@@ -6,6 +6,7 @@ import {
   resolvePointClickCursor,
   resolvePointClickZone,
 } from "./point-click-routing.js?v=camera-relative-back-20261117-v1";
+import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 
 (() => {
   "use strict";
@@ -37,25 +38,6 @@ import {
     hover: "/ramblegamble/assets/cursors/pointer-hover.gif",
     direction: "/ramblegamble/assets/cursors/direction-right.gif",
   };
-  const prompts = [
-    "What tiny thing brings you an unreasonable amount of joy?",
-    "Which game could you happily ramble about for an hour?",
-    "What is your most specific current obsession?",
-    "Which fictional place would you visit for one afternoon?",
-    "What old internet thing do you wish would make a comeback?",
-    "What song feels like the opening theme to your life lately?",
-    "What is a small comfort you think everyone should try?",
-    "Which character would you trust to plan a day out?",
-    "What is something you learned recently and immediately told someone?",
-    "If you could become excellent at one hobby overnight, which one?",
-    "What food deserves way more appreciation?",
-    "Tell us about a moment that felt like a side quest.",
-    "Which creature would you invite to your little internet arcade?",
-    "What is a delightfully niche hill you are willing to defend?",
-    "What is the best thing you have found by wandering online?",
-    "If today had a soundtrack, what would the next track be?",
-  ];
-
   let renderer;
   let scene;
   let camera;
@@ -70,7 +52,7 @@ import {
   let slotTargets = [];
   let wheelMotion = null;
   let leverMotion = null;
-  let promptBag = [];
+  const pickQuestion = createQuestionPicker();
   let playing = false;
   let sceneReady = false;
   let stageModel;
@@ -126,17 +108,17 @@ import {
     return copy;
   }
 
-  function nextPrompt() {
-    if (promptBag.length === 0) promptBag = shuffled(prompts);
-    return promptBag.pop();
+  function nextHostQuestion() {
+    return pickQuestion(readSessionQuestionBank());
   }
 
   function finishTurn() {
-    result.textContent = nextPrompt();
-    result.hidden = false;
+    const prompt = nextHostQuestion();
+    result.textContent = prompt;
+    result.hidden = !prompt;
     playing = false;
     preview.classList.remove("is-playing");
-    window.dispatchEvent(new CustomEvent("rg:turn-finish", { detail: { prompt: result.textContent } }));
+    window.dispatchEvent(new CustomEvent("rg:turn-finish", { detail: { prompt } }));
   }
 
   function beginTurn(machine) {

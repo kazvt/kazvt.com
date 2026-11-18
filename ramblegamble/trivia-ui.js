@@ -7,6 +7,10 @@ import {
   resolveRoundFormat,
   resolveRoundMode,
 } from "./trivia-data.js?v=host-console-20261114-v2";
+import {
+  readSessionQuestionBank,
+  writeSessionQuestionBank,
+} from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 
 (() => {
   "use strict";
@@ -38,6 +42,11 @@ import {
   const questionText = $("#rg-question-text");
   const subtitleText = $("#rg-question-subtitle");
   const saveState = $("#rg-save-state");
+  const questionBankForm = $("#rg-question-bank-form");
+  const questionBankInput = $("#rg-new-question");
+  const questionBankList = $("#rg-question-bank-list");
+  const questionBankEmpty = $("#rg-question-bank-empty");
+  const questionBankCount = $("#rg-question-bank-count");
 
   let currentRound = "01";
   let currentDifficulty = 1;
@@ -52,6 +61,7 @@ import {
   let audioContext = null;
   let lastWrongAt = 0;
   let drafts = loadDrafts();
+  let questionBank = readSessionQuestionBank();
   let slotGrid = loadGrid();
   let selectedBerry = "kazberry";
   let placementMode = "column";
@@ -81,9 +91,51 @@ import {
     return JSON.parse(JSON.stringify(value));
   }
 
+  function newQuestionId() {
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+  }
+
+  function renderQuestionBank() {
+    questionBankList.replaceChildren();
+    questionBankCount.textContent = questionBank.length + (questionBank.length === 1 ? " QUESTION" : " QUESTIONS");
+    questionBankEmpty.hidden = questionBank.length > 0;
+    questionBankList.hidden = questionBank.length === 0;
+
+    questionBank.forEach((entry, index) => {
+      const item = document.createElement("li");
+      item.className = "rg-question-bank-item";
+      const text = document.createElement("p");
+      text.textContent = entry.text;
+      const remove = document.createElement("button");
+      remove.className = "rg-secondary-button rg-question-remove";
+      remove.type = "button";
+      remove.textContent = "REMOVE";
+      remove.setAttribute("aria-label", "Remove question " + (index + 1));
+      remove.addEventListener("click", () => saveQuestionBank(questionBank.filter((question) => question.id !== entry.id)));
+      item.append(text, remove);
+      questionBankList.append(item);
+    });
+  }
+
+  function saveQuestionBank(nextQuestions) {
+    try {
+      questionBank = writeSessionQuestionBank(nextQuestions);
+      renderQuestionBank();
+      $("#rg-question-bank-save-state").textContent = "SAVED THIS SESSION";
+      $("#rg-question-bank-save-state").dataset.error = "false";
+      return true;
+    } catch (error) {
+      $("#rg-question-bank-save-state").textContent = "SESSION SAVE FAILED";
+      $("#rg-question-bank-save-state").dataset.error = "true";
+      console.warn("Ramble Gamble question bank could not be saved for this session:", error);
+      return false;
+    }
+  }
+
   function loadDrafts() {
     try {
-      const parsed = JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}");
+      const parsed = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || "{}");
       if (parsed && parsed.version === 1 && parsed.rounds && typeof parsed.rounds === "object") return parsed;
     } catch (error) {
       console.warn("Ramble Gamble drafts could not be read:", error);
@@ -105,13 +157,13 @@ import {
 
   function saveDrafts() {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
-      saveState.textContent = "SAVED HERE";
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+      saveState.textContent = "SAVED THIS SESSION";
       saveState.dataset.error = "false";
     } catch (error) {
       saveState.textContent = "SAVE FAILED";
       saveState.dataset.error = "true";
-      console.warn("Ramble Gamble local draft could not be saved:", error);
+      console.warn("Ramble Gamble session draft could not be saved:", error);
     }
   }
 
@@ -341,8 +393,22 @@ import {
     $("#rg-arcade-status").textContent = event.detail?.machine === "wheel" ? "The wheel is spinning..." : "The slot lever is moving...";
   });
   window.addEventListener("rg:turn-finish", (event) => {
-    $("#rg-arcade-status").textContent = event.detail?.prompt || "Turn complete.";
+    $("#rg-arcade-status").textContent = event.detail?.prompt || "No questions in the bank. Add some in the Trivia tab.";
   });
+
+  questionBankForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = questionBankInput.value.trim();
+    if (!text) {
+      questionBankInput.focus();
+      return;
+    }
+    if (saveQuestionBank([...questionBank, { id: newQuestionId(), text }])) {
+      questionBankInput.value = "";
+      questionBankInput.focus();
+    }
+  });
+  renderQuestionBank();
 
   function parseList(value) {
     return String(value || "").split(/[\n,|]+/).map((part) => part.trim()).filter(Boolean);
@@ -653,8 +719,9 @@ import {
   }
 
   function setQuestionContent(effective) {
-    questionText.textContent = effective.content.question || (currentRound === "00" ? "" : "Add this round's question");
-    questionText.hidden = currentRound === "00";
+    const question = effective.content.question.trim();
+    questionText.textContent = question;
+    questionText.hidden = !question || currentRound === "00";
     subtitleText.textContent = effective.content.subtitle || "";
     subtitleText.hidden = !effective.content.subtitle || currentRound === "00";
     promptImage.removeAttribute("src");
