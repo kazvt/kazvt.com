@@ -1289,6 +1289,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (!renderer || !scene || !camera) return;
 
     updateCameraTransition(time);
+    updateSkyAnimations(time);
     updateBillboardProjection();
 
     if (wheelMotion && wheelPivot && ballPivot) {
