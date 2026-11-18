@@ -372,7 +372,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       end: null,
       startedAt: 0,
       duration: 900,
-      nextAt: 1800 + index * 6200 + nextSkyRandom() * 1000,
+      nextAt: performance.now() + 5200 + index * 6000 + nextSkyRandom() * 1200,
       active: false,
       angle: (nextSkyRandom() - 0.5) * 0.48 - 0.30,
       tint: new THREE.Color("#fff0de"),
@@ -468,7 +468,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
         star.end = path.end;
         star.angle = path.angle;
         star.startedAt = time;
-        star.duration = 780 + nextSkyRandom() * 520;
+        star.duration = 1050 + nextSkyRandom() * 450;
         star.active = true;
       }
 
