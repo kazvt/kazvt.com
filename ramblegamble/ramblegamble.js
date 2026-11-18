@@ -66,6 +66,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let slotRig;
   let skyRoot;
   let skyStars;
+  let skyStarsMesh;
   let skyShootingStarsMesh;
   let skyShootingStars = [];
   let rouletteTargets = [];
@@ -294,6 +295,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (starMesh.instanceColor) starMesh.instanceColor.needsUpdate = true;
     starMesh.renderOrder = -9998;
     skyRoot.add(starMesh);
+    skyStarsMesh = starMesh;
 
     createShootingStars();
     scene.add(skyRoot);
@@ -423,9 +425,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
         position.copy(star.direction).multiplyScalar(SKY_CONFIG.radius - 1.4);
         scale.set(size, size, 1);
         matrix.compose(position, pixelQuaternion, scale);
-        skyStarsMeshSetMatrix(index, matrix);
+        skyStarsMesh.setMatrixAt(index, matrix);
       }
-      skyStarsMeshUpdate();
+      skyStarsMesh.instanceMatrix.needsUpdate = true;
     }
 
     if (!skyShootingStarsMesh) return;
