@@ -215,7 +215,7 @@ function parseQuestionObjects(questions) {
     const answerValue = item.answer ?? item.back ?? item.definition;
     const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
     const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
-    const rawCorrect = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correctIndex ?? item.correct_index ?? item.correct ?? (options.length ? answerValue : null);
+    const rawCorrect = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length ? answerValue : null);
     const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
     const hasDifficulty = item.difficulty != null || item.level != null || item.tier != null;
     const rawDifficulty = item.difficulty ?? item.level ?? item.tier ?? 1;
@@ -223,7 +223,14 @@ function parseQuestionObjects(questions) {
     const difficulty = Math.max(1, Math.min(5, Math.trunc(parsedDifficulty)));
     const choiceOptions = options.map((option) => ({ ...option }));
     const correctValues = correct == null ? [] : normalizeAnswerObjects(correct);
-    if (choiceOptions.length && correctValues.length) applyCorrectValues(choiceOptions, correctValues);
+    const correctIndexValue = item.correctAnswerIndex ?? item.correct_answer_index ?? item.correctOptionIndex ?? item.correct_option_index ?? item.answerIndex ?? item.answer_index ?? item.correctIndex ?? item.correct_index;
+    if (correctIndexValue != null && Number.isInteger(Number(correctIndexValue))) {
+      const correctIndex = Number(correctIndexValue);
+      if (correctIndex >= 0 && correctIndex < choiceOptions.length) {
+        choiceOptions.forEach((option, optionIndex) => { option.correct = optionIndex === correctIndex; });
+        correctValues.length = 0;
+      }
+    } else if (choiceOptions.length && correctValues.length) applyCorrectValues(choiceOptions, correctValues);
     const bool = (value) => value === true || /^(?:true|yes|on|1)$/i.test(String(value ?? ""));
     const rawAdditive = item.additive ?? item.add ?? item.append ?? item.plus;
     const rawNoChoice = item.noMultipleChoice ?? item.no_multiple_choice ?? item.noMc ?? item.noMcq;
