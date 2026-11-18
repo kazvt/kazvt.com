@@ -41,7 +41,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     // footprint beyond it, rather than merely moving its center off the stage.
     stageFrontZ: 0.06,
     rouletteCenterX: 15.0,
-    rouletteScale: 0.18,
+    rouletteScale: 0.13,
     rouletteClearance: 0.12,
     // Normalized canvas point at the center of the red marked floor area.
     rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
