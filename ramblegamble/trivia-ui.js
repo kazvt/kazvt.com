@@ -16,7 +16,7 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=trivia-text-import-export-20261118-v3";
+} from "./trivia-text.mjs?v=trivia-text-import-export-20261118-v4";
 
 (() => {
   "use strict";
