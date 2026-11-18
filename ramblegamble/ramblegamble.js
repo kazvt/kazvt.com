@@ -44,6 +44,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     rouletteCenterX: 15.0,
     rouletteScale: 0.18,
     rouletteClearance: 0.12,
+    // Normalized canvas point at the center of the red marked floor area.
     rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
   });
   const SKY_CONFIG = Object.freeze({
