@@ -406,12 +406,12 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     const horizontalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const start = forward
       .addScaledVector(right, (nextSkyRandom() * 2 - 1) * horizontalRange * 0.78)
-      .addScaledVector(viewUp, 0.035 + nextSkyRandom() * 0.28)
+      .addScaledVector(viewUp, 0.22 + nextSkyRandom() * 0.10)
       .normalize();
     const travelDirection = nextSkyRandom() < 0.5 ? -1 : 1;
     const end = start.clone()
       .addScaledVector(right, travelDirection * (0.08 + nextSkyRandom() * 0.12))
-      .addScaledVector(viewUp, -(0.06 + nextSkyRandom() * 0.10))
+      .addScaledVector(viewUp, -(0.05 + nextSkyRandom() * 0.06))
       .normalize();
     return {
       start: start.multiplyScalar(SKY_CONFIG.radius - 2),
