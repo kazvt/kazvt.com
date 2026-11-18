@@ -472,6 +472,14 @@ function parseHumanText(input) {
       }
     }
 
+    if (current && section === "rounds" && pendingList === "options" && isLabeledAnswer(line)) {
+      const answer = parseAnswerLine(line);
+      const block = ensureLevel(currentLevel);
+      block.optionsPresent = true;
+      block.options.push(answer);
+      continue;
+    }
+
     if (section === "bank" && isBullet(line)) {
       const answer = parseAnswerLine(line);
       addQuestionBank(answer.text);
@@ -557,7 +565,6 @@ function parseHumanText(input) {
       const block = ensureLevel(currentLevel);
       block.optionsPresent = true;
       block.options.push(answer);
-      if (answer.correct) block.correct.push(answer.text);
       pendingList = "options";
       continue;
     }
@@ -566,7 +573,6 @@ function parseHumanText(input) {
       const block = ensureLevel(currentLevel);
       block.optionsPresent = true;
       block.options.push(answer);
-      if (answer.correct) block.correct.push(answer.text);
       continue;
     }
     if (current && pendingList === "accepted" && line) {
