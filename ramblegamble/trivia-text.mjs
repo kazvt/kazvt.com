@@ -288,17 +288,20 @@ function parseQuestionObjects(questions) {
             if (!record.explicitMode && state.options.length) state.mode = "choice-text";
             state.optionCount = state.options.length;
           }
-          if (record.acceptedPresent) {
-            state.acceptedAnswers = record.additive ? [...state.acceptedAnswers, ...record.acceptedAnswers] : [...record.acceptedAnswers];
-            if (!record.optionsPresent && !record.explicitMode) {
-              state.mode = "short-answer";
-              state.options = [];
-              state.optionCount = 0;
-            }
+        }
+        if (record.acceptedPresent) {
+          state.acceptedAnswers = record.additive ? [...state.acceptedAnswers, ...record.acceptedAnswers] : [...record.acceptedAnswers];
+          if (!record.optionsPresent && !record.explicitMode) {
+            state.mode = "short-answer";
+            state.options = [];
+            state.optionCount = 0;
           }
-          if (record.correctValues.length) {
-            if (state.options.length) applyCorrectValues(state.options, record.correctValues);
-            else state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...record.correctValues])];
+        }
+        if (record.correctValues.length) {
+          if (state.options.length && isChoiceMode(state.mode)) applyCorrectValues(state.options, record.correctValues);
+          else {
+            if (!record.explicitMode) state.mode = "short-answer";
+            state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...record.correctValues])];
           }
         }
       }
