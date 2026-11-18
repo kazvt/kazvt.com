@@ -681,69 +681,73 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
 
     scene.updateMatrixWorld(true);
     const tableBounds = new THREE.Box3().setFromObject(table);
-    const tableSize = tableBounds.getSize(new THREE.Vector3());
-    const tableCenter = tableBounds.getCenter(new THREE.Vector3());
     const floorY = tableBounds.min.y;
 
-    // Keep the wheel as the large foreground landmark shown in the supplied
-    // scene reference. It is a separate, ~40-unit asset, not a tabletop
-    // ornament; placing it beside and forward of the table preserves its
-    // authored proportions instead of squeezing it into the table footprint.
-    const rouletteScale = 0.16;
-    rouletteRig.position.set(
-      tableCenter.x + tableSize.x * 2.25,
-      floorY,
-      tableCenter.z + tableSize.z * 2.35,
-    );
-    rouletteModel.scale.setScalar(rouletteScale);
+    // Position the roulette by its transformed footprint. The supplied stage
+    // deck ends at z=0.06, so the nearest wheel edge gets a real clearance gap.
+    rouletteRig.position.set(0, 0, 0);
+    rouletteModel.scale.setScalar(ARCADE_REFERENCE_LAYOUT.rouletteScale);
     rouletteModel.position.set(0, 0, 0);
     rouletteRig.updateMatrixWorld(true);
     rouletteModel.updateMatrixWorld(true);
+    const rouletteLocalBounds = new THREE.Box3().setFromObject(rouletteModel);
+    const rouletteLocalCenter = rouletteLocalBounds.getCenter(new THREE.Vector3());
+    const rouletteBoundsSize = rouletteLocalBounds.getSize(new THREE.Vector3());
+    rouletteRig.position.set(
+      ARCADE_REFERENCE_LAYOUT.rouletteCenterX - rouletteLocalCenter.x,
+      floorY - rouletteLocalBounds.min.y,
+      ARCADE_REFERENCE_LAYOUT.stageFrontZ + ARCADE_REFERENCE_LAYOUT.rouletteClearance - rouletteLocalBounds.min.z,
+    );
+    rouletteRig.updateMatrixWorld(true);
     const rouletteBounds = new THREE.Box3().setFromObject(rouletteModel);
-    rouletteModel.position.y += floorY - rouletteBounds.min.y;
+    if (rouletteBounds.min.z < ARCADE_REFERENCE_LAYOUT.stageFrontZ + ARCADE_REFERENCE_LAYOUT.rouletteClearance - 0.001) {
+      throw new Error("The roulette footprint overlaps the raised stage clearance zone.");
+    }
 
-    // The slot belongs against the rear wall, below the hanging sign. Find
-    // that narrow sign plane in the supplied stage instead of positioning the
-    // cabinet relative to the roulette table.
-    let rearSignBounds = null;
-    stageModel.traverse((object) => {
-      if (object.name !== "plane" || !object.isMesh) return;
-      const candidate = new THREE.Box3().setFromObject(object);
-      const size = candidate.getSize(new THREE.Vector3());
-      if (size.x >= 4 && size.x <= 5.5 && size.y >= 0.8 && size.y <= 1.2 && size.z < 0.08) {
-        rearSignBounds = candidate;
-      }
-    });
-
-    const tallChair = stageModel.getObjectByName("tall_chair");
-    const tallChairBounds = tallChair
-      ? new THREE.Box3().setFromObject(tallChair)
-      : tableBounds;
-    const tallChairSize = tallChairBounds.getSize(new THREE.Vector3());
+    // Place the cabinet in the actual recessed back-wall bay, not under the
+    // floating sign. Size it from the reference proportions, then align its
+    // rear face to the wall and ground its base to the room floor.
     slotsModel.scale.setScalar(1);
     slotsModel.position.set(0, 0, 0);
     slotRig.position.set(0, 0, 0);
     slotRig.updateMatrixWorld(true);
     const slotSourceBounds = new THREE.Box3().setFromObject(slotsModel);
     const slotSourceSize = slotSourceBounds.getSize(new THREE.Vector3());
-    const slotScale = (tallChairSize.y * 1.85) / slotSourceSize.y;
+    const slotScale = ARCADE_REFERENCE_LAYOUT.slotBay.height / slotSourceSize.y;
     slotsModel.scale.setScalar(slotScale);
     slotRig.updateMatrixWorld(true);
     slotsModel.updateMatrixWorld(true);
     const slotBounds = new THREE.Box3().setFromObject(slotsModel);
     const slotCenter = slotBounds.getCenter(new THREE.Vector3());
-    const signCenter = rearSignBounds?.getCenter(new THREE.Vector3());
-    const slotTargetCenter = signCenter
-      ? new THREE.Vector3(signCenter.x, floorY, signCenter.z + 0.95)
-      : new THREE.Vector3(tableCenter.x + tableSize.x * 0.86, floorY, tableCenter.z - 0.9);
+    const slotSize = slotBounds.getSize(new THREE.Vector3());
+    const slotTargetCenter = new THREE.Vector3(
+      (ARCADE_REFERENCE_LAYOUT.slotBay.left + ARCADE_REFERENCE_LAYOUT.slotBay.right) / 2,
+      floorY,
+      ARCADE_REFERENCE_LAYOUT.slotBay.wallZ + slotSize.z / 2 + ARCADE_REFERENCE_LAYOUT.slotBay.clearance,
+    );
     slotRig.position.set(
       slotTargetCenter.x - slotCenter.x,
-      0,
+      floorY - slotBounds.min.y,
       slotTargetCenter.z - slotCenter.z,
     );
     slotRig.updateMatrixWorld(true);
-    const groundedSlotBounds = new THREE.Box3().setFromObject(slotsModel);
-    slotRig.position.y = floorY - groundedSlotBounds.min.y;
+    const placedSlotBounds = new THREE.Box3().setFromObject(slotsModel);
+    const slotBayWidth = ARCADE_REFERENCE_LAYOUT.slotBay.right - ARCADE_REFERENCE_LAYOUT.slotBay.left;
+    if (placedSlotBounds.getSize(new THREE.Vector3()).x >= slotBayWidth) {
+      throw new Error("The slot cabinet no longer fits inside the supplied wall recess.");
+    }
+
+    // Keep a concise runtime record available for geometry-based verification.
+    rouletteRig.userData.referenceBounds = {
+      min: rouletteBounds.min.toArray(),
+      max: rouletteBounds.max.toArray(),
+      diameter: Math.max(rouletteBoundsSize.x, rouletteBoundsSize.z),
+    };
+    slotRig.userData.referenceBounds = {
+      min: placedSlotBounds.min.toArray(),
+      max: placedSlotBounds.max.toArray(),
+      bay: { left: ARCADE_REFERENCE_LAYOUT.slotBay.left, right: ARCADE_REFERENCE_LAYOUT.slotBay.right, wallZ: ARCADE_REFERENCE_LAYOUT.slotBay.wallZ },
+    };
   }
 
   function prepareModel(root) {
