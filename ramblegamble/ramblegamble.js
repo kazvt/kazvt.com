@@ -379,6 +379,25 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     }));
   }
 
+  function initializeSkyStars() {
+    if (skyStarsInitialized || !camera || !skyStars) return;
+    camera.updateMatrixWorld(true);
+    const forward = camera.getWorldDirection(new THREE.Vector3());
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+    const viewUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+    const horizontalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect * 1.45;
+
+    for (const star of skyStars) {
+      const horizontal = (nextSkyRandom() * 2 - 1) * horizontalRange;
+      const vertical = 0.02 + nextSkyRandom() * 0.36;
+      star.direction = forward.clone()
+        .addScaledVector(right, horizontal)
+        .addScaledVector(viewUp, vertical)
+        .normalize();
+    }
+    skyStarsInitialized = true;
+  }
+
   function makeShootingStarPath() {
     camera.updateMatrixWorld(true);
     const forward = camera.getWorldDirection(new THREE.Vector3());
@@ -402,6 +421,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
 
   function updateSkyAnimations(time) {
     if (!skyRoot || !camera) return;
+    initializeSkyStars();
     skyRoot.position.copy(camera.position);
 
     const reduced = reducedMotion.matches;
