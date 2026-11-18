@@ -284,3 +284,404 @@ function countChar(text, character) { return [...text].filter((entry) => entry =
 function normalizeHeader(value) { return String(value).trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " "); }
 function findColumn(indexes, aliases) { for (const alias of aliases) if (Object.hasOwn(indexes, alias)) return indexes[alias]; return -1; }
 function getColumn(row, indexes, aliases) { const column = findColumn(indexes, aliases); return column < 0 ? "" : String(row[column] || "").trim(); }
+
+function decodeEntities(value) {
+  return String(value)
+    .replace(/&#x([\da-f]+);?/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);?/g, (_, number) => String.fromCodePoint(Number(number)))
+    .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"').replace(/&#39;/g, "'");
+}
+
+function parseHumanText(input) {
+  const lines = decodeEntities(cleanText(input).replace(/\\[ \t]*\n/g, "\n")).split("\n");
+  const rounds = {};
+  const questionBank = [];
+  const warnings = [];
+  let current = null;
+  let currentLevel = 1;
+  let section = "rounds";
+  let pendingList = "";
+  let autoRound = 1;
+
+  function newRound(rawId, question = "") {
+    flushRound();
+    const id = normalizeId(rawId) || nextFreeRoundId(rounds, autoRound);
+    autoRound = Number(id) + 1;
+    current = { id, question: question.trim(), base: {}, levels: new Map() };
+    currentLevel = 1;
+    pendingList = "";
+    ensureLevel(1);
+  }
+
+  function ensureLevel(level = currentLevel) {
+    if (!current) return null;
+    if (!current.levels.has(level)) current.levels.set(level, {
+      fields: {}, options: [], optionsPresent: false, accepted: [], acceptedPresent: false,
+      correct: [], additive: false, noMultipleChoice: false,
+    });
+    return current.levels.get(level);
+  }
+
+  function targetFields() {
+    if (!current) return null;
+    if (currentLevel === 0) return current.base;
+    return ensureLevel(currentLevel).fields;
+  }
+
+  function appendQuestion(value) {
+    const fields = targetFields();
+    if (!fields) return;
+    fields.question = [fields.question || (currentLevel === 1 ? current.question : ""), value].filter(Boolean).join(" ").trim();
+    if (currentLevel === 1 && !current.question) current.question = fields.question;
+  }
+
+  function addQuestionBank(value) {
+    const text = String(value || "").trim();
+    if (text) questionBank.push({ id: `text-${questionBank.length + 1}`, text });
+  }
+
+  function setQuestionField(value) {
+    if (section === "bank") { addQuestionBank(value); return; }
+    if (!current) { newRound("", value); return; }
+    const fields = targetFields();
+    fields.question = value.trim();
+    if (currentLevel === 1) current.question = fields.question;
+    pendingList = "";
+  }
+
+  function applyHeaderMarkers(block, annotation) {
+    const value = String(annotation || "").toLowerCase();
+    if (/\b(?:add|append|plus|additional|also include|additive|and these)\b/.test(value) || /\+\s*(?:these|answers|options)?/.test(value)) block.additive = true;
+    if (/\b(?:no|without|not)\s+(?:multiple[ -]?choice|mcq|mc)\b|\bshort[ -]?answer\b|\bfree[ -]?(?:response|text)\b/.test(value)) block.noMultipleChoice = true;
+    const mode = normalizeMode(value.replace(/[\[\](){}]/g, "").replace(/^(?:mode|type|format)\s*[:=]?\s*/, ""));
+    if (mode) block.fields.mode = mode;
+  }
+
+  function flushRound() {
+    if (!current) return;
+    const id = current.id;
+    const levels = {};
+    const base = current.base;
+    const defaults = resolveRoundFormat(id, 1);
+    let state = {
+      question: base.question || current.question || "", subtitle: base.subtitle || "",
+      promptImage: base.promptImage || "", promptAsset: "", mode: base.mode || defaults.mode,
+      optionCount: Number.isFinite(Number(base.optionCount)) ? Number(base.optionCount) : defaults.optionCount,
+      acceptedAnswers: [], options: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
+      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+    };
+    if (Array.isArray(base.acceptedAnswers)) state.acceptedAnswers = [...base.acceptedAnswers];
+    const sharedQuestion = current.question || base.question || "";
+
+    for (let level = 1; level <= 5; level += 1) {
+      const block = current.levels.get(level);
+      if (block) {
+        for (const [field, value] of Object.entries(block.fields)) {
+          if (field === "acceptedAnswers") state.acceptedAnswers = [...value];
+          else if (field === "options" && Array.isArray(value)) state.options = clone(value);
+          else if (field === "items" || field === "pairs" || field === "categories" || field === "assignments") state[field] = clone(value);
+          else state[field] = value;
+        }
+        if (block.noMultipleChoice) {
+          state.mode = "short-answer";
+          state.options = [];
+          state.optionCount = 0;
+        }
+        if (block.optionsPresent) {
+          const answerOptions = block.options.map((entry) => ({ label: entry.text, image: entry.image || "", asset: "", correct: entry.correct === true }));
+          if (block.noMultipleChoice || state.mode === "short-answer") {
+            const answers = answerOptions.map((entry) => entry.label).filter(Boolean);
+            state.acceptedAnswers = block.additive ? [...state.acceptedAnswers, ...answers] : answers;
+            state.options = [];
+            state.mode = "short-answer";
+            state.optionCount = 0;
+          } else {
+            state.options = block.additive ? [...state.options, ...answerOptions] : answerOptions;
+            if (!block.fields.mode && !isChoiceMode(state.mode)) state.mode = "choice-text";
+            state.optionCount = state.options.length;
+          }
+        }
+        if (block.acceptedPresent) state.acceptedAnswers = block.additive ? [...state.acceptedAnswers, ...block.accepted] : [...block.accepted];
+        if (block.correct.length) {
+          if (state.options.length) applyCorrectValues(state.options, block.correct);
+          else state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...block.correct])];
+        }
+        if (block.noMultipleChoice) {
+          state.mode = "short-answer";
+          state.optionCount = 0;
+          state.options = [];
+        }
+      }
+      if (!state.question && sharedQuestion) state.question = sharedQuestion;
+      if (isChoiceMode(state.mode)) {
+        if (state.options.length) state.optionCount = state.options.length;
+        else if (!Number.isFinite(Number(state.optionCount))) state.optionCount = resolveRoundFormat(id, level).optionCount;
+      } else {
+        state.options = [];
+        state.optionCount = 0;
+      }
+      levels[level] = {
+        question: state.question, subtitle: state.subtitle, promptImage: state.promptImage, promptAsset: state.promptAsset,
+        mode: state.mode, optionCount: state.optionCount, acceptedAnswers: [...state.acceptedAnswers],
+        options: clone(state.options), items: clone(state.items), pairs: clone(state.pairs), categories: clone(state.categories),
+        videoUrl: state.videoUrl, numberValue: state.numberValue, numberVisible: state.numberVisible,
+        imageVisible: state.imageVisible, backgroundImage: state.backgroundImage, drawing: state.drawing,
+        assignments: clone(state.assignments),
+      };
+    }
+    rounds[id] = levels;
+    current = null;
+    currentLevel = 1;
+    pendingList = "";
+  }
+
+  for (const [lineIndex, original] of lines.entries()) {
+    let line = original.trim();
+    if (!line) { pendingList = ""; continue; }
+    if (/^#|^\/\//.test(line) || /^```/.test(line)) continue;
+    if (/^(?:[-=_*]){3,}$/.test(line)) { pendingList = ""; continue; }
+
+    const bankHeading = /^(?:\[\s*)?(?:session\s+)?(?:question\s+bank|host\s+questions|random\s+questions|random\s+prompts)(?:\s*\])?\s*:?$/i.test(line);
+    if (bankHeading) { flushRound(); section = "bank"; continue; }
+    if (/^(?:\[\s*)?(?:trivia\s+)?(?:rounds?|questions?)(?:\s*\])?\s*:?$/i.test(line)) { flushRound(); section = "rounds"; continue; }
+
+    const explicitRound = parseRoundHeader(line);
+    if (explicitRound) {
+      section = "rounds";
+      newRound(explicitRound.id, explicitRound.question);
+      continue;
+    }
+
+    if (current && section === "rounds") {
+      const difficulty = parseDifficultyHeader(line);
+      if (difficulty) {
+        currentLevel = difficulty.level;
+        const block = ensureLevel(currentLevel);
+        applyHeaderMarkers(block, difficulty.annotation);
+        pendingList = "";
+        continue;
+      }
+    }
+
+    if (section === "bank" && isBullet(line)) {
+      const answer = parseAnswerLine(line);
+      addQuestionBank(answer.text);
+      continue;
+    }
+
+    const field = parseField(line);
+    if (field) {
+      const { name, value } = field;
+      if (["question", "prompt", "stem", "front", "term"].includes(name)) {
+        if (section === "bank") addQuestionBank(value);
+        else setQuestionField(value);
+      } else if (name === "round") {
+        const round = normalizeId(value);
+        if (round) newRound(round, "");
+      } else if (["difficulty", "level", "tier", "diff"].includes(name)) {
+        if (current) {
+          const level = parseLevelValue(value);
+          if (level) { currentLevel = level; ensureLevel(level); }
+        }
+      } else if (name === "options") {
+        if (!current) { warnings.push(`Line ${lineIndex + 1}: options appeared before a question.`); continue; }
+        const block = ensureLevel(currentLevel);
+        block.optionsPresent = true;
+        block.options.push(...splitLooseList(value).map(parseMarkedAnswer));
+        pendingList = "options";
+      } else if (name === "accepted") {
+        if (!current) { warnings.push(`Line ${lineIndex + 1}: answers appeared before a question.`); continue; }
+        const block = ensureLevel(currentLevel);
+        block.acceptedPresent = true;
+        block.accepted.push(...splitLooseList(value));
+        pendingList = "accepted";
+      } else if (name === "correct") {
+        if (!current) continue;
+        ensureLevel(currentLevel).correct.push(...splitLooseList(value));
+        pendingList = "";
+      } else if (name === "mode") {
+        if (!current) continue;
+        const mode = normalizeMode(value);
+        if (mode) ensureLevel(currentLevel).fields.mode = mode;
+        else warnings.push(`Line ${lineIndex + 1}: unrecognized question type “${value}”.`);
+        pendingList = "";
+      } else if (name === "subtitle" || name === "promptimage" || name === "video" || name === "backgroundimage" || name === "drawing") {
+        if (!current) continue;
+        const key = ({ promptimage: "promptImage", backgroundimage: "backgroundImage" })[name] || name;
+        ensureLevel(currentLevel).fields[key] = value;
+        pendingList = "";
+      } else if (name === "number") {
+        if (current) ensureLevel(currentLevel).fields.numberValue = finiteOr(value, 0);
+        pendingList = "";
+      } else if (name === "additive") {
+        if (current) ensureLevel(currentLevel).additive = /^(?:true|yes|on|add|append|plus)$/i.test(value);
+        pendingList = "";
+      } else if (name === "nomultiplechoice") {
+        if (current) ensureLevel(currentLevel).noMultipleChoice = /^(?:true|yes|on|1)$/i.test(value);
+        pendingList = "";
+      } else {
+        warnings.push(`Line ${lineIndex + 1}: ignored “${line.slice(0, 80)}”.`);
+      }
+      continue;
+    }
+
+    const noChoiceOnly = /^(?:\[|\(|\{)?\s*(?:no|without|not)\s+(?:multiple[ -]?choice|mcq|mc)|^\s*(?:short[ -]?answer|free[ -]?(?:response|text))/i.test(line);
+    if (noChoiceOnly && current) {
+      const block = ensureLevel(currentLevel);
+      applyHeaderMarkers(block, line);
+      pendingList = "";
+      continue;
+    }
+    if (/^(?:\[|\(|\{)?\s*(?:add|append|plus|additional|add these|add more)\b/i.test(line) && current) {
+      ensureLevel(currentLevel).additive = true;
+      pendingList = "";
+      continue;
+    }
+
+    if (section === "bank") {
+      addQuestionBank(isBullet(line) ? parseAnswerLine(line).text : line);
+      continue;
+    }
+
+    if (current && isBullet(line)) {
+      const answer = parseAnswerLine(line);
+      const block = ensureLevel(currentLevel);
+      block.optionsPresent = true;
+      block.options.push(answer);
+      if (answer.correct) block.correct.push(answer.text);
+      pendingList = "options";
+      continue;
+    }
+    if (current && pendingList === "options" && isLabeledAnswer(line)) {
+      const answer = parseAnswerLine(line);
+      const block = ensureLevel(currentLevel);
+      block.optionsPresent = true;
+      block.options.push(answer);
+      if (answer.correct) block.correct.push(answer.text);
+      continue;
+    }
+    if (current && pendingList === "accepted" && line) {
+      ensureLevel(currentLevel).accepted.push(...splitLooseList(line));
+      continue;
+    }
+    if (current) {
+      appendQuestion(line);
+      continue;
+    }
+    if (line.endsWith("?")) {
+      addQuestionBank(line);
+      continue;
+    }
+    warnings.push(`Line ${lineIndex + 1}: could not identify a round, question, answer, or section; skipped.`);
+  }
+  flushRound();
+
+  return {
+    rounds,
+    questionBank,
+    media: {},
+    warnings,
+    errors: Object.keys(rounds).length || questionBank.length ? [] : ["No questions were recognized. Add a question heading or a Question/Prompt field, then provide any answers or difficulty blocks."],
+  };
+}
+
+function nextFreeRoundId(rounds, start = 1) {
+  for (let value = Math.max(1, start); value <= 36; value += 1) {
+    const id = String(value).padStart(2, "0");
+    if (!rounds[id]) return id;
+  }
+  return "36";
+}
+
+function parseRoundHeader(line) {
+  let match = line.match(/^\s*(?:round|question\s*#?|q)\s*#?\s*(\d{1,2})\s*(?:[:.)-]|\s+-\s*)\s*(.*)$/i);
+  if (match) return { id: match[1], question: match[2].trim() };
+  match = line.match(/^\s*(\d{1,2})\s*[:.)]\s*(.*)$/);
+  if (!match) return null;
+  const number = Number(match[1]);
+  if (number < 1 || number > 36) return null;
+  if (number <= 5 && match[2].trim()) return null;
+  return { id: match[1], question: match[2].trim() };
+}
+
+function parseDifficultyHeader(line) {
+  let match = line.match(/^\s*(?:difficulty|diff|level|tier|stage|d)\s*(?:number\s*)?#?\s*(\d+|one|first|two|second|three|third|four|fourth|five|fifth|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)-]\s*)?(.*)$/i);
+  if (match) {
+    const level = parseLevelValue(match[1]);
+    return level ? { level, annotation: match[2].trim() } : null;
+  }
+  match = line.match(/^\s*([1-5])\s*:\s*(.*)$/);
+  if (match) return { level: Number(match[1]), annotation: match[2].trim() };
+  match = line.match(/^\s*(first|second|third|fourth|fifth|easy|medium|hard|beginner|intermediate|advanced)\s+(?:difficulty|level|tier)\s*:?\s*(.*)$/i);
+  if (match) return { level: parseLevelValue(match[1]), annotation: match[2].trim() };
+  return null;
+}
+
+function parseLevelValue(value) {
+  const key = String(value || "").trim().toLowerCase();
+  const number = Number.parseInt(key, 10);
+  if (Number.isInteger(number) && number >= 1 && number <= 5) return number;
+  return LEVEL_WORDS.get(key) || 0;
+}
+
+function parseField(line) {
+  const match = line.match(/^\s*(?:[-*]\s*)?([a-z][a-z _-]{0,35})\s*[:=]\s*(.*)$/i);
+  if (!match) return null;
+  const rawName = match[1].trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  const aliases = new Map([
+    ["question", "question"], ["prompt", "prompt"], ["stem", "stem"], ["front", "front"], ["term", "term"], ["round", "round"], ["round number", "round"], ["question number", "round"], ["id", "round"],
+    ["difficulty", "difficulty"], ["diff", "diff"], ["level", "level"], ["tier", "tier"],
+    ["answers", "options"], ["answer options", "options"], ["options", "options"], ["choices", "options"], ["choice", "options"], ["multiple choice", "options"], ["possible answers", "options"],
+    ["answer", "accepted"], ["accepted answer", "accepted"], ["accepted answers", "accepted"], ["answer key", "correct"], ["correct", "correct"], ["correct answer", "correct"], ["correct answers", "correct"], ["key", "correct"],
+    ["mode", "mode"], ["type", "mode"], ["format", "mode"], ["template", "mode"], ["question type", "mode"],
+    ["subtitle", "subtitle"], ["description", "subtitle"], ["hint", "subtitle"],
+    ["image", "promptimage"], ["prompt image", "promptimage"], ["image url", "promptimage"], ["prompt image url", "promptimage"],
+    ["video", "video"], ["video url", "video"], ["background image", "backgroundimage"], ["background image url", "backgroundimage"],
+    ["number", "number"], ["starting number", "number"], ["value", "number"],
+    ["add", "additive"], ["additive", "additive"], ["append", "additive"], ["no multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"],
+  ]);
+  const name = aliases.get(rawName);
+  return name ? { name, value: match[2].trim() } : null;
+}
+
+function splitLooseList(value) {
+  const text = String(value || "").trim();
+  if (!text) return [];
+  let parts;
+  if (text.includes("|") || text.includes(";")) parts = text.split(/[|;]/);
+  else if (text.includes(",") && !/\b(?:https?:\/\/|data:)/i.test(text)) parts = text.split(",");
+  else parts = [text];
+  return parts.map((part) => part.trim()).filter(Boolean).map(parseMarkedAnswer);
+}
+
+function isBullet(line) { return /^\s*(?:[-*+•‣▪◦–—]\s+|\[\s*[xX✓✔ ]\s*\]\s*|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/.test(line); }
+function isLabeledAnswer(line) { return /^\s*(?:option|choice|answer)\s+[A-Za-z0-9]+\s*[:.)-]\s*|^[A-Za-z]\s*:\s*/i.test(line); }
+
+function parseAnswerLine(value) {
+  let text = String(value || "").trim();
+  let correct = false;
+  if (/^\[\s*[xX✓✔]\s*\]\s*/.test(text) || /^(?:✓|✔)\s*/.test(text)) { correct = true; text = text.replace(/^\[\s*[xX✓✔]\s*\]\s*|^(?:✓|✔)\s*/, ""); }
+  if (/\s*(?:\[(?:correct|right|x|✓|✔)\]|\((?:correct|right|✓|✔)\)|\*\*?)\s*$/i.test(text)) {
+    correct = true;
+    text = text.replace(/\s*(?:\[(?:correct|right|x|✓|✔)\]|\((?:correct|right|✓|✔)\)|\*\*?)\s*$/i, "");
+  }
+  text = text.replace(/^\s*(?:option|choice|answer)\s+[A-Za-z0-9]+\s*[:.)-]\s*/i, "");
+  text = text.replace(/^\s*(?:[-*+•‣▪◦–—]\s+|\[\s*[xX✓✔ ]\s*\]\s*|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
+  return { text: text.trim(), image: "", correct };
+}
+
+function applyCorrectValues(options, correctValues) {
+  const values = normalizeAnswerObjects(correctValues).map((value) => value.trim());
+  for (const option of options) {
+    if (option && typeof option === "object") option.correct = false;
+  }
+  for (const value of values) {
+    const numeric = Number.parseInt(value, 10);
+    const letter = /^[A-Za-z]$/.test(value) ? value.toUpperCase().charCodeAt(0) - 64 : 0;
+    const index = Number.isInteger(numeric) && numeric > 0 ? numeric - 1 : letter > 0 ? letter - 1 : -1;
+    if (index >= 0 && options[index]) { options[index].correct = true; continue; }
+    const found = options.find((option) => String(option?.label || option?.text || "").trim().toLowerCase() === value.toLowerCase());
+    if (found) found.correct = true;
+  }
+}
