@@ -199,17 +199,15 @@ function parseQuestionObjects(questions) {
     const acceptedAnswers = normalizeAnswerObjects(item.acceptedAnswers ?? item.accepted_answers ?? item.answer ?? item.back ?? item.definition);
     const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
     const correct = item.correct ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey;
-    if (options.length && correct != null) applyCorrectValues(options, normalizeAnswerObjects(correct));
     const roundDrafts = {};
     for (let level = 1; level <= 5; level += 1) {
-      const levelOptions = level === difficulty ? options : [];
       roundDrafts[level] = {
-        question, mode: level === difficulty ? mode : "short-answer",
-        optionCount: level === difficulty ? levelOptions.length : 0,
-        options: levelOptions,
-        acceptedAnswers: level === difficulty ? acceptedAnswers : [],
+        question, mode, optionCount: options.length,
+        options: options.map((label) => ({ label, image: "", asset: "", correct: false })),
+        acceptedAnswers: [...acceptedAnswers],
       };
     }
+    if (options.length && correct != null) applyCorrectValues(roundDrafts[difficulty].options, normalizeAnswerObjects(correct));
     rounds[round] = roundDrafts;
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question records were found."] };
