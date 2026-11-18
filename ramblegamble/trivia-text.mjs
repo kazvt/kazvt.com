@@ -3,6 +3,13 @@ import { MODE_NAMES, isChoiceMode, resolveRoundFormat } from "./trivia-data.js";
 export const TRIVIA_EXPORT_FORMAT = "kazvt-ramble-gamble-trivia";
 export const TRIVIA_EXPORT_VERSION = 1;
 
+export function decodeTriviaBytes(buffer) {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes.subarray(2));
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
 const ROUND_FIELDS = new Set([
   "question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers",
   "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible",
@@ -732,8 +739,10 @@ function parseDifficultyHeader(line) {
     const level = parseLevelValue(match[1]);
     return level ? { level, annotation: match[2].trim() } : null;
   }
-  match = line.match(/^\s*([1-5])\s*(?:\(([^)]*)\)|\[([^\]]*)\]|\{([^}]*)\})?\s*:\s*(.*)$/);
+  match = line.match(/^\s*0?([1-5])\s*(?:\(([^)]*)\)|\[([^\]]*)\]|\{([^}]*)\})?\s*:\s*(.*)$/);
   if (match) return { level: Number(match[1]), annotation: [match[2], match[3], match[4], match[5]].filter(Boolean).join(" ").trim() };
+  match = line.match(/^\s*(one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*[:=]\s*(.*)$/i);
+  if (match) return { level: parseLevelValue(match[1]), annotation: match[2].trim() };
   match = line.match(/^\s*(?:1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|easiest|medium|normal|hard|hardest|expert|beginner|simple|intermediate|advanced)\s+(?:difficulty|level|tier)\s*:?\s*(.*)$/i);
   if (match) {
     const levelToken = line.match(/^\s*(1st|2nd|3rd|4th|5th|first|second|third|fourth|fifth|easy|easiest|medium|normal|hard|hardest|expert|beginner|simple|intermediate|advanced)/i)?.[1];

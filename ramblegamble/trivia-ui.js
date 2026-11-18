@@ -13,6 +13,7 @@ import {
   writeSessionQuestionBank,
 } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import {
+  decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
 } from "./trivia-text.mjs?v=trivia-text-import-export-20261118-v1";
@@ -579,7 +580,7 @@ import {
       return;
     }
     try {
-      const parsed = parseTriviaText(await file.text());
+      const parsed = parseTriviaText(decodeTriviaBytes(await file.arrayBuffer()));
       pendingImport = parsed;
       importPreview.textContent = triviaImportSummary(parsed);
       importPreview.hidden = false;
