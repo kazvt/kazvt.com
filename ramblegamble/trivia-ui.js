@@ -101,6 +101,9 @@ import {
     questionBankCount.textContent = questionBank.length + (questionBank.length === 1 ? " QUESTION" : " QUESTIONS");
     questionBankEmpty.hidden = questionBank.length > 0;
     questionBankList.hidden = questionBank.length === 0;
+    $("#rg-arcade-status").textContent = questionBank.length
+      ? questionBank.length + (questionBank.length === 1 ? " host question ready." : " host questions ready.")
+      : "No host questions added yet.";
 
     questionBank.forEach((entry, index) => {
       const item = document.createElement("li");
