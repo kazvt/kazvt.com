@@ -35,11 +35,11 @@ export function resolvePointClickCursor({ zone = "", actionable = false } = {}) 
 
 export function resolvePointClickBack(view = {}) {
   const { kind = "overview", look = 0, retreat = 0 } = view;
-  // At the overview, back is a bounded dolly along the current camera ray.
-  // Within a focused view, it returns to the parent without changing heading.
+  // Back at the overview only restores the starting forward view. It must never
+  // dolly the camera beyond the initial point, including for a stale retreat state.
   if (kind === "overview") {
-    if (retreat >= 3) return null;
-    return { ...view, retreat: retreat + 1 };
+    if (look !== 0 || retreat > 0) return { ...view, look: 0, retreat: 0 };
+    return null;
   }
   if (kind === "contestant") return { kind: "contestants", look, retreat: 0 };
   return { kind: "overview", look, retreat: 0 };

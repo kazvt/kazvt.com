@@ -57,10 +57,11 @@ test("cursor state matches navigation affordances and actionable scene objects",
   assert.equal(resolvePointClickCursor(), "default");
 });
 
-test("back retreats along the current overview heading and preserves heading on parent views", () => {
-  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: -1 }), { kind: "overview", look: -1, retreat: 1 });
-  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: 1, retreat: 1 }), { kind: "overview", look: 1, retreat: 2 });
-  assert.equal(resolvePointClickBack({ kind: "overview", look: 0, retreat: 3 }), null);
+test("back returns to the starting overview view and never retreats past it", () => {
+  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: -1 }), { kind: "overview", look: 0, retreat: 0 });
+  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: 1, retreat: 1 }), { kind: "overview", look: 0, retreat: 0 });
+  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: 0, retreat: 3 }), { kind: "overview", look: 0, retreat: 0 });
+  assert.equal(resolvePointClickBack({ kind: "overview", look: 0 }), null);
   assert.deepEqual(resolvePointClickBack({ kind: "host", look: -1 }), { kind: "overview", look: -1, retreat: 0 });
   assert.deepEqual(resolvePointClickBack({ kind: "roulette", look: 1 }), { kind: "overview", look: 1, retreat: 0 });
   assert.deepEqual(resolvePointClickBack({ kind: "contestant", contestantId: "erin", look: -1 }), {
@@ -70,5 +71,9 @@ test("back retreats along the current overview heading and preserves heading on 
   });
   assert.deepEqual(resolvePointClickBack({ kind: "contestants", look: 1 }), { kind: "overview", look: 1, retreat: 0 });
   assert.deepEqual(resolvePointClickBack({ kind: "host", look: 0 }), { kind: "overview", look: 0, retreat: 0 });
-  assert.deepEqual(resolvePointClickBack({ kind: "overview", look: 0 }), { kind: "overview", look: 0, retreat: 1 });
+
+  const backToOverview = resolvePointClickBack({ kind: "roulette", look: 1 });
+  const backToStart = resolvePointClickBack(backToOverview);
+  assert.deepEqual(backToStart, { kind: "overview", look: 0, retreat: 0 });
+  assert.equal(resolvePointClickBack(backToStart), null);
 });

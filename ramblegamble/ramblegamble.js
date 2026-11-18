@@ -5,7 +5,7 @@ import {
   resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
-} from "./point-click-routing.js?v=camera-relative-back-20261117-v1";
+} from "./point-click-routing.js?v=point-click-back-stop-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 
 (() => {
@@ -22,7 +22,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
-  const OVERVIEW_RETREAT_DISTANCE = 0.45;
   const REFERENCE_START_VIEW = Object.freeze({
     // Match the supplied reference's opposite-side oblique view and lower sightline.
     // Landscape screens keep the close crop; portrait screens ease out to retain hotspots.
@@ -575,7 +574,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       }
     }
 
-    const retreatSteps = THREE.MathUtils.clamp(view.retreat || 0, 0, 3);
     const overviewDistanceScale = view.kind === "overview"
       ? THREE.MathUtils.lerp(
         REFERENCE_START_VIEW.narrowDistanceScale,
@@ -585,8 +583,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       : 1;
     distance = Math.max(distance, 1)
       * (view.kind === "overview" ? 1.14 : 1.18)
-      * overviewDistanceScale
-      * (1 + retreatSteps * OVERVIEW_RETREAT_DISTANCE);
+      * overviewDistanceScale;
     return { target, position: target.clone().addScaledVector(direction, distance) };
   }
 
