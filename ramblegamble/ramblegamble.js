@@ -538,7 +538,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (bounds.isEmpty()) return null;
     const target = bounds.getCenter(new THREE.Vector3());
     const yaw = REFERENCE_START_VIEW.yaw - view.look * 0.42;
-    const elevation = REFERENCE_START_VIEW.elevation;
+    // The roulette interaction is best inspected from above, like looking down
+    // at a real table. Keep the room and every other close-up at the authored angle.
+    const elevation = view.kind === "roulette" ? 0.985 : REFERENCE_START_VIEW.elevation;
     const horizontal = Math.sqrt(1 - elevation * elevation);
     const direction = new THREE.Vector3(
       Math.sin(yaw) * horizontal,
