@@ -1,11 +1,11 @@
 export const DICE_DOOR_OPENING = Object.freeze({
   // Measured from the supplied stage model: remove the purple back skin inside
   // the existing dice frame while keeping its jambs, sill, and lintel intact.
-  minX: 14.48,
-  maxX: 16.83,
-  minY: 0.46,
-  maxY: 2.59,
-  wallZ: -6.16,
+  minX: 14.478,
+  maxX: 16.8265,
+  minY: 0.4572,
+  maxY: 2.5908,
+  wallZ: -6.1585,
   tolerance: 0.002,
 });
 
