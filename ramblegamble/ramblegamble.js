@@ -65,9 +65,8 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let rouletteRig;
   let slotRig;
   let skyRoot;
-  let skyTwinkleMaterial;
-  let skyShootingMaterial;
-  let skyShootingGeometry;
+  let skyStars;
+  let skyShootingStarsMesh;
   let skyShootingStars = [];
   let rouletteTargets = [];
   let slotTargets = [];
