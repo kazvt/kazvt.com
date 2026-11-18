@@ -128,6 +128,9 @@ Answer: A written response
   const simple = parseTriviaText("Question: What is the answer?\nAnswer: Forty two");
   assert.equal(simple.rounds["01"][1].mode, "short-answer");
   assert.deepEqual(simple.rounds["01"][1].acceptedAnswers, ["Forty two"]);
+
+  const parenthesized = parseTriviaText("Round 09: Another question?\n1:\n- Base\n2 (append these):\n- Added\n");
+  assert.deepEqual(parenthesized.rounds["09"][2].options.map((option) => option.label), ["Base", "Added"]);
 });
 
 test("CSV handles multiline quoted cells and lettered answer columns", () => {
