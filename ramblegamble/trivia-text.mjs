@@ -182,7 +182,7 @@ function parseJsonPayload(value) {
     };
   }
 
-  const questions = value.questions || value.cards || value.items;
+  const questions = value.questions || value.cards || value.items || (Array.isArray(value.rounds) ? value.rounds : null);
   if (Array.isArray(questions)) return parseQuestionObjects(questions);
   return null;
 }
@@ -200,7 +200,8 @@ function parseQuestionObjects(questions) {
     const options = normalizeOptionObjects(item.options ?? item.choices ?? item.answers ?? item.alternatives);
     const acceptedAnswers = normalizeAnswerObjects(item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer ?? item.answer ?? item.back ?? item.definition);
     const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
-    const correct = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correctIndex ?? item.correct_index ?? item.correct;
+    const rawCorrect = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correctIndex ?? item.correct_index ?? item.correct;
+    const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
     const roundDrafts = {};
     for (let level = 1; level <= 5; level += 1) {
       roundDrafts[level] = {
@@ -770,6 +771,8 @@ function parseField(line) {
     ["add", "additive"], ["add these", "additive"], ["add to previous", "additive"], ["additive", "additive"], ["append", "additive"], ["plus", "additive"],
     ["no multiple choice", "nomultiplechoice"], ["without multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"], ["no mcq", "nomultiplechoice"],
   ]);
+  const optionEntry = rawName.match(/^(?:option|choice|answer)\s+([a-z0-9]+)$/);
+  if (optionEntry) return { name: "option-entry", value: match[2].trim() };
   const name = aliases.get(rawName);
   return name ? { name, value: match[2].trim() } : null;
 }
