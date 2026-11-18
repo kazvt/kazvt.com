@@ -406,12 +406,12 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     const horizontalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const start = forward
       .addScaledVector(right, (nextSkyRandom() * 2 - 1) * horizontalRange * 0.78)
-      .addScaledVector(viewUp, 0.22 + nextSkyRandom() * 0.10)
+      .addScaledVector(viewUp, 0.30 + nextSkyRandom() * 0.08)
       .normalize();
     const travelDirection = nextSkyRandom() < 0.5 ? -1 : 1;
     const end = start.clone()
       .addScaledVector(right, travelDirection * (0.08 + nextSkyRandom() * 0.12))
-      .addScaledVector(viewUp, -(0.05 + nextSkyRandom() * 0.06))
+      .addScaledVector(viewUp, -(0.025 + nextSkyRandom() * 0.05))
       .normalize();
     return {
       start: start.multiplyScalar(SKY_CONFIG.radius - 2),
@@ -497,18 +497,6 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     }
     skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
-    if (location.hostname === "127.0.0.1") {
-      preview.dataset.skyDebug = JSON.stringify({
-        time,
-        shots: skyShootingStars.map((star) => {
-          const progress = star.active ? Math.min(1, (time - star.startedAt) / star.duration) : 0;
-          const point = star.active && star.start && star.end
-            ? skyRoot.localToWorld(star.start.clone().lerp(star.end, progress)).project(camera)
-            : null;
-          return { active: star.active, nextAt: star.nextAt, progress, ndc: point?.toArray() };
-        }),
-      });
-    }
   }
 
   function fitCamera() {
