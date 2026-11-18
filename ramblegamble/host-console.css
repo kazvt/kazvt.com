@@ -238,6 +238,19 @@
 .rg-round-pickers label { display: grid; gap: 4px; color: #486c2f; font-size: 9px; font-weight: 900; letter-spacing: .07em; }
 .rg-round-pickers select { min-width: 80px; min-height: 38px; padding: 4px 25px 4px 8px; border: 2px solid #111; color: #111; background: #fff5be; font-weight: 800; }
 .rg-present-toggle { align-self: end; min-height: 38px; }
+.rg-text-transfer { margin: 0 0 12px; padding: 9px; border: 2px ridge #8b2626; background: #f1e5a1; }
+.rg-text-transfer-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rg-text-transfer-heading h3 { margin: 0; color: #8b2626; font-size: 12px; letter-spacing: .07em; }
+.rg-text-transfer-heading p { margin: 4px 0 0; color: #3b3019; font-size: 11px; line-height: 1.4; }
+.rg-text-transfer-help { margin: 7px 0; color: #574d36; font-size: 10px; line-height: 1.4; }
+.rg-import-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 7px; }
+.rg-import-file-label { position: relative; }
+.rg-import-file-label input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.rg-import-mode-label { display: grid; gap: 3px; color: #486c2f; font-size: 9px; font-weight: 900; letter-spacing: .06em; }
+.rg-import-mode-label select { min-height: 38px; max-width: 100%; padding: 5px 8px; border: 2px solid #111; color: #111; background: #fffdf0; font: inherit; font-size: 11px; }
+.rg-import-controls button:disabled { opacity: .5; cursor: not-allowed; }
+.rg-import-status { margin: 6px 0 0; color: #3b3019; font-size: 10px; }
+.rg-import-preview { max-height: 140px; margin: 7px 0 0; padding: 7px; overflow: auto; border: 1px dashed #8b2626; background: #fff5be; color: #3b3019; font: inherit; font-size: 10px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rg-question-bank { margin: 0 0 14px; padding: 10px; border: 2px solid #486c2f; background: #f8edb4; }
 .rg-question-bank-heading { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
 .rg-question-bank-heading h3 { margin: 0; color: #8b2626; font-size: 12px; letter-spacing: .07em; }
@@ -352,6 +365,7 @@
 .rg-console.is-presenting .rg-console-header,
 .rg-console.is-presenting .rg-console-tabs,
 .rg-console.is-presenting .rg-trivia-heading,
+.rg-console.is-presenting .rg-text-transfer,
 .rg-console.is-presenting .rg-question-bank,
 .rg-console.is-presenting .rg-trivia-editor { display: none !important; }
 .rg-console.is-presenting .rg-console-panel { display: block; height: 100%; padding: 0; overflow: hidden; }
@@ -381,6 +395,9 @@
   .rg-round-pickers { flex-wrap: wrap; }
   .rg-question-bank-form { grid-template-columns: minmax(0, 1fr); }
   .rg-question-bank-form .rg-secondary-button { width: 100%; }
+  .rg-import-controls { align-items: stretch; }
+  .rg-import-controls > * { flex: 1 1 100%; }
+  .rg-import-mode-label select { width: 100%; }
   .rg-slot-cell { min-height: 52px; }
   .rg-trivia-screen .rg-stage-items { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .rg-category-buckets { grid-template-columns: 1fr; }
