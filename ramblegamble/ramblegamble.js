@@ -7,6 +7,7 @@ import {
   resolvePointClickZone,
 } from "./point-click-routing.js?v=point-click-back-stop-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
+import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-doorway-cut-20261119-v1";
 
 (() => {
   "use strict";
@@ -34,6 +35,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     raisedAimOffset: -0.55,
   });
   const ARCADE_REFERENCE_LAYOUT = Object.freeze({
+    diceDoor: DICE_DOOR_OPENING,
     // The back-wall recess in rg_stage.gltf spans x=9.14..14.48 at z=-6.10.
     // A small size increase matches the reference cabinet while staying inside the recess.
     slotBay: Object.freeze({ left: 9.14, right: 14.48, wallZ: -6.10, height: 2.52, widthScale: 1.08, clearance: 0.025 }),
@@ -827,6 +829,48 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     });
   }
 
+  function carveDiceDoorway(root) {
+    scene.updateMatrixWorld(true);
+    let removedTriangles = 0;
+
+    root.traverse((object) => {
+      if (!object.isMesh || !object.geometry?.index) return;
+      const geometry = object.geometry;
+      const position = geometry.getAttribute("position");
+      const index = geometry.index;
+      if (!position || index.count < 3) return;
+
+      const keptIndices = [];
+      let removedHere = 0;
+      for (let offset = 0; offset + 2 < index.count; offset += 3) {
+        const points = [0, 1, 2].map((corner) =>
+          new THREE.Vector3()
+            .fromBufferAttribute(position, index.getX(offset + corner))
+            .applyMatrix4(object.matrixWorld)
+        );
+        if (isDiceDoorBackingTriangle(points, ARCADE_REFERENCE_LAYOUT.diceDoor)) {
+          removedHere += 1;
+          continue;
+        }
+        keptIndices.push(index.getX(offset), index.getX(offset + 1), index.getX(offset + 2));
+      }
+
+      if (removedHere) {
+        geometry.setIndex(keptIndices);
+        geometry.computeBoundingBox();
+        geometry.computeBoundingSphere();
+        object.userData.diceDoorBackingTrianglesRemoved = removedHere;
+        removedTriangles += removedHere;
+      }
+    });
+
+    root.userData.diceDoorBackingTrianglesRemoved = removedTriangles;
+    if (removedTriangles !== 6) {
+      console.warn(`Expected to open six dice-door backing triangles, removed ${removedTriangles}.`);
+    }
+    return removedTriangles;
+  }
+
   function toUnlitMaterial(material) {
     if (!material) return material;
     const cached = unlitMaterialCache.get(material);
@@ -1424,6 +1468,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       stageModel = stageGltf.scene;
       prepareModel(stageModel);
       scene.add(stageModel);
+      carveDiceDoorway(stageModel);
 
       rouletteModel = rouletteGltf.scene;
       prepareModel(rouletteModel);
