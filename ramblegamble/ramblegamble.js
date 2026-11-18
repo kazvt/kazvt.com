@@ -498,7 +498,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
     if (location.hostname === "127.0.0.1") {
-      canvas.setAttribute("aria-description", `Sky diagnostic: reduced motion ${reduced}; ${skyShootingStars.filter((star) => star.active).length} shooting stars active`);
+      canvas.setAttribute("aria-label", `Fixed-view point-and-click arcade. Sky diagnostic: reduced motion ${reduced}; ${skyShootingStars.filter((star) => star.active).length} shooting stars active.`);
     }
   }
 
