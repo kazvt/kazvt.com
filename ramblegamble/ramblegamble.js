@@ -372,7 +372,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       end: null,
       startedAt: 0,
       duration: 900,
-      nextAt: 1500 + index * 5200 + nextSkyRandom() * 2600,
+      nextAt: 1800 + index * 6200 + nextSkyRandom() * 1000,
       active: false,
       angle: (nextSkyRandom() - 0.5) * 0.48 - 0.30,
       tint: new THREE.Color("#fff0de"),
