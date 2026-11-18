@@ -195,32 +195,114 @@ function parseJsonPayload(value) {
 }
 
 function parseQuestionObjects(questions) {
-  const rounds = {};
   const warnings = [];
+  const grouped = new Map();
   let generated = 1;
   for (const [index, item] of questions.entries()) {
     if (!item || typeof item !== "object") { warnings.push(`Question ${index + 1} was skipped because it was not an object.`); continue; }
-    const round = normalizeId(item.round ?? item.id ?? item.number ?? item.questionNumber) || String(generated++).padStart(2, "0");
+    const round = normalizeId(item.round ?? item.roundId ?? item.roundNumber ?? item.questionNumber ?? item.number ?? item.id) || String(generated++).padStart(2, "0");
     const question = safeString(item.question ?? item.prompt ?? item.questionText ?? item.front ?? item.term ?? item.title ?? item.text).trim();
     if (!question) { warnings.push(`Entry ${index + 1} has no question text and was skipped.`); continue; }
-    const difficulty = Math.max(1, Math.min(5, Number(item.difficulty ?? item.level ?? item.tier) || 1));
     const options = normalizeOptionObjects(item.options ?? item.choices ?? item.answers ?? item.alternatives);
-    const acceptedAnswers = normalizeAnswerObjects(item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer ?? item.answer ?? item.back ?? item.definition);
+    const explicitAccepted = item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer;
+    const answerValue = item.answer ?? item.back ?? item.definition;
+    const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
     const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
-    const rawCorrect = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correctIndex ?? item.correct_index ?? item.correct;
+    const rawCorrect = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correctIndex ?? item.correct_index ?? item.correct ?? (options.length ? answerValue : null);
     const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
-    const roundDrafts = {};
+    const hasDifficulty = item.difficulty != null || item.level != null || item.tier != null;
+    const rawDifficulty = item.difficulty ?? item.level ?? item.tier ?? 1;
+    const parsedDifficulty = parseLevelValue(rawDifficulty) || Number(rawDifficulty) || 1;
+    const difficulty = Math.max(1, Math.min(5, Math.trunc(parsedDifficulty)));
+    const choiceOptions = options.map((option) => ({ ...option }));
+    const correctValues = correct == null ? [] : normalizeAnswerObjects(correct);
+    if (choiceOptions.length && correctValues.length) applyCorrectValues(choiceOptions, correctValues);
+    const bool = (value) => value === true || /^(?:true|yes|on|1)$/i.test(String(value ?? ""));
+    const record = {
+      question,
+      subtitle: safeString(item.subtitle ?? item.description ?? item.hint),
+      mode,
+      explicitMode: Boolean(item.mode ?? item.type ?? item.format),
+      options: choiceOptions,
+      optionsPresent: Array.isArray(item.options ?? item.choices ?? item.answers ?? item.alternatives),
+      acceptedAnswers,
+      acceptedPresent: explicitAccepted != null || (!options.length && answerValue != null),
+      correctValues,
+      additive: bool(item.additive ?? item.add ?? item.append ?? item.plus),
+      noMultipleChoice: bool(item.noMultipleChoice ?? item.no_multiple_choice ?? item.noMc ?? item.noMcq),
+      promptImage: safeString(item.promptImage ?? item.prompt_image ?? item.imageUrl),
+      promptAsset: safeString(item.promptAsset ?? item.prompt_asset),
+      videoUrl: safeString(item.videoUrl ?? item.video_url),
+      backgroundImage: safeString(item.backgroundImage ?? item.background_image),
+      numberValue: item.numberValue ?? item.number_value,
+      numberVisible: item.numberVisible ?? item.number_visible,
+      imageVisible: item.imageVisible ?? item.image_visible,
+      drawing: item.drawing,
+      categories: item.categories,
+      items: item.items,
+      pairs: item.pairs,
+      assignments: item.assignments,
+      optionCount: item.optionCount ?? item.option_count,
+    };
+    if (!grouped.has(round)) grouped.set(round, { base: null, levels: new Map() });
+    const group = grouped.get(round);
+    if (hasDifficulty) {
+      if (!group.levels.has(difficulty)) group.levels.set(difficulty, []);
+      group.levels.get(difficulty).push(record);
+    } else {
+      group.base = record;
+    }
+  }
+
+  const rounds = {};
+  for (const [round, group] of grouped) {
+    const initial = resolveRoundFormat(round, 1);
+    const state = {
+      question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
+      acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], pairs: [],
+      categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
+      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+    };
+    rounds[round] = {};
     for (let level = 1; level <= 5; level += 1) {
-      roundDrafts[level] = {
-        question, mode, optionCount: options.length,
-        options: options.map((option) => ({ ...option })),
-        acceptedAnswers: [...acceptedAnswers],
-      };
+      const records = [...(group.base ? [group.base] : []), ...(group.levels.get(level) || [])];
+      for (const record of records) {
+        state.question = record.question || state.question;
+        for (const field of ["subtitle", "promptImage", "promptAsset", "videoUrl", "backgroundImage", "drawing"]) {
+          if (record[field]) state[field] = record[field];
+        }
+        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount"]) {
+          if (record[field] != null) state[field] = clone(record[field]);
+        }
+        if (record.mode) state.mode = record.mode;
+        if (record.noMultipleChoice) {
+          state.mode = "short-answer";
+          state.options = [];
+          state.optionCount = 0;
+        } else {
+          if (record.optionsPresent) {
+            state.options = record.additive ? [...state.options, ...clone(record.options)] : clone(record.options);
+            if (!record.explicitMode && state.options.length) state.mode = "choice-text";
+            state.optionCount = state.options.length;
+          }
+          if (record.acceptedPresent) {
+            state.acceptedAnswers = record.additive ? [...state.acceptedAnswers, ...record.acceptedAnswers] : [...record.acceptedAnswers];
+            if (!record.optionsPresent && !record.explicitMode) {
+              state.mode = "short-answer";
+              state.options = [];
+              state.optionCount = 0;
+            }
+          }
+          if (record.correctValues.length) {
+            if (state.options.length) applyCorrectValues(state.options, record.correctValues);
+            else state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...record.correctValues])];
+          }
+        }
+      }
+      if (!isChoiceMode(state.mode)) { state.options = []; state.optionCount = 0; }
+      else if (state.options.length) state.optionCount = state.options.length;
+      rounds[round][level] = clone(state);
     }
-    if (options.length && correct != null) {
-      for (const tier of Object.values(roundDrafts)) applyCorrectValues(tier.options, normalizeAnswerObjects(correct));
-    }
-    rounds[round] = roundDrafts;
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question records were found."] };
 }
