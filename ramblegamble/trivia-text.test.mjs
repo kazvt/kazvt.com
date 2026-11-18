@@ -163,6 +163,15 @@ test("generic JSON question arrays accept common prompt, option, and key aliases
     cards: [{ questionText: "Choose one", answers: [{ text: "Wrong" }, { label: "Right", isCorrect: true }] }],
   }));
   assert.equal(objectChoices.rounds["01"][1].options[1].correct, true);
+
+  const tiers = parseTriviaText(JSON.stringify({ questions: [
+    { round: 4, question: "Tiered choices?", difficulty: 1, options: ["A", "B"], answer: "B" },
+    { round: 4, question: "Tiered choices?", difficulty: 2, options: ["C"], add: "add these" },
+  ] }));
+  assert.deepEqual(tiers.rounds["04"][1].options.map((option) => option.label), ["A", "B"]);
+  assert.equal(tiers.rounds["04"][1].options[1].correct, true);
+  assert.deepEqual(tiers.rounds["04"][2].options.map((option) => option.label), ["A", "B", "C"]);
+  assert.deepEqual(tiers.rounds["04"][3].options.map((option) => option.label), ["A", "B", "C"]);
 });
 
 test("JSON text export round-trips modes, tier fields, correct answers, media references, and bank entries", () => {
