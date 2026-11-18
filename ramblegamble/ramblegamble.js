@@ -498,7 +498,12 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
     if (location.hostname === "127.0.0.1") {
-      canvas.setAttribute("aria-label", `Fixed-view point-and-click arcade. Sky diagnostic: reduced motion ${reduced}; ${skyShootingStars.filter((star) => star.active).length} shooting stars active.`);
+      const activeShot = skyShootingStars.find((star) => star.active);
+      const progress = activeShot ? Math.min(1, (time - activeShot.startedAt) / activeShot.duration) : 0;
+      const point = activeShot
+        ? skyRoot.localToWorld(activeShot.start.clone().lerp(activeShot.end, progress)).project(camera)
+        : null;
+      canvas.setAttribute("aria-label", `Fixed-view point-and-click arcade. Sky diagnostic: reduced motion ${reduced}; shot ${point ? `${point.x.toFixed(2)}, ${point.y.toFixed(2)}, ${point.z.toFixed(3)}` : "inactive"}.`);
     }
   }
 
