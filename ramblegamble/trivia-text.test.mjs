@@ -140,7 +140,7 @@ test("CSV handles multiline quoted cells and lettered answer columns", () => {
 });
 
 test("BOM-marked UTF-16 spreadsheet text decodes without losing non-ASCII answers", () => {
-  const source = "Question,Answer\\nWhat is the word?,Café\\n";
+  const source = "Question,Answer\nWhat is the word?,Café\n";
   const bytes = [0xff, 0xfe];
   for (const character of source) {
     const code = character.charCodeAt(0);
