@@ -359,6 +359,7 @@ function parseDelimited(text) {
   if (headerless && rows[0].length < 2) return null;
   if (headerless) { questionColumn = 0; answerColumn = 1; }
   if (answerColumn < 0 && !optionColumns.length) return null;
+  const dataIndexes = headerless ? {} : indexes;
 
   const warnings = [];
   const grouped = new Map();
@@ -366,10 +367,10 @@ function parseDelimited(text) {
   for (const [rowIndex, row] of (headerless ? rows : rows.slice(1)).entries()) {
     if (!row.some((cell) => cell.trim())) continue;
     const question = String(row[questionColumn] || "").trim();
-    if (!question) { warnings.push("Row " + (rowIndex + 2) + " has no question and was skipped."); continue; }
-    const rowRound = normalizeId(getColumn(row, indexes, ["round", "round id", "question id", "number", "id"]));
+    if (!question) { warnings.push("Row " + (rowIndex + (headerless ? 1 : 2)) + " has no question and was skipped."); continue; }
+    const rowRound = normalizeId(getColumn(row, dataIndexes, ["round", "round id", "question id", "number", "id"]));
     const round = rowRound || String(sequence++).padStart(2, "0");
-    const difficulty = Math.max(1, Math.min(5, Number(getColumn(row, indexes, ["difficulty", "level", "tier", "diff"])) || 1));
+    const difficulty = Math.max(1, Math.min(5, Number(getColumn(row, dataIndexes, ["difficulty", "level", "tier", "diff"])) || 1));
     const answerHeading = answerColumn >= 0 ? header[answerColumn] : "";
     const isAcceptedColumn = (headerless && row.length === 2) || ["answer", "accepted answer", "accepted answers", "definition", "back"].includes(answerHeading) ||
       (!optionColumns.length && ["correct answer", "answer key"].includes(answerHeading));
@@ -379,20 +380,20 @@ function parseDelimited(text) {
       : optionColumns.length
       ? optionColumns.map((column) => String(row[column] || "").trim()).filter(Boolean)
       : isAcceptedColumn ? [] : rawAnswers;
-    const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, indexes, ["accepted answers", "accepted answer"]));
-    const correctValues = splitLooseList(getColumn(row, indexes, ["correct", "correct answer", "answer key", "correct answers", "correct option", "correct choice"]));
-    const mode = normalizeMode(getColumn(row, indexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
+    const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, dataIndexes, ["accepted answers", "accepted answer"]));
+    const correctValues = splitLooseList(getColumn(row, dataIndexes, ["correct", "correct answer", "answer key", "correct answers", "correct option", "correct choice"]));
+    const mode = normalizeMode(getColumn(row, dataIndexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
     applyCorrectValues(optionObjects, correctValues);
     const record = {
       question,
-      subtitle: getColumn(row, indexes, ["subtitle", "description", "hint"]),
+      subtitle: getColumn(row, dataIndexes, ["subtitle", "description", "hint"]),
       mode,
       options: optionObjects,
       accepted,
       correctValues,
-      additive: /^(?:1|true|yes|on|add|append|plus)$/i.test(getColumn(row, indexes, ["add", "additive", "append", "plus"])),
-      noMultipleChoice: /^(?:1|true|yes|on|no|none)$/i.test(getColumn(row, indexes, ["no multiple choice", "no mc", "no mcq"])),
+      additive: /^(?:1|true|yes|on|add|append|plus)$/i.test(getColumn(row, dataIndexes, ["add", "additive", "append", "plus"])),
+      noMultipleChoice: /^(?:1|true|yes|on|no|none)$/i.test(getColumn(row, dataIndexes, ["no multiple choice", "no mc", "no mcq"])),
     };
     if (!grouped.has(round)) grouped.set(round, new Map());
     const tiers = grouped.get(round);
