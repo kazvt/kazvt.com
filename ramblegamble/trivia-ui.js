@@ -11,6 +11,10 @@ import {
   readSessionQuestionBank,
   writeSessionQuestionBank,
 } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
+import {
+  exportTriviaText,
+  parseTriviaText,
+} from "./trivia-text.mjs?v=trivia-text-import-export-20261118-v1";
 
 (() => {
   "use strict";
@@ -47,6 +51,12 @@ import {
   const questionBankList = $("#rg-question-bank-list");
   const questionBankEmpty = $("#rg-question-bank-empty");
   const questionBankCount = $("#rg-question-bank-count");
+  const importFileInput = $("#rg-import-file");
+  const importModeSelect = $("#rg-import-mode");
+  const importApplyButton = $("#rg-import-apply");
+  const importStatus = $("#rg-import-status");
+  const importPreview = $("#rg-import-preview");
+  const exportButton = $("#rg-export-trivia");
 
   let currentRound = "01";
   let currentDifficulty = 1;
@@ -62,6 +72,7 @@ import {
   let lastWrongAt = 0;
   let drafts = loadDrafts();
   let questionBank = readSessionQuestionBank();
+  let pendingImport = null;
   let slotGrid = loadGrid();
   let selectedBerry = "kazberry";
   let placementMode = "column";
@@ -89,6 +100,134 @@ import {
 
   function copy(value) {
     return JSON.parse(JSON.stringify(value));
+  }
+
+  function listDraftAssetIds(roundDrafts) {
+    const ids = new Set();
+    for (const levels of Object.values(roundDrafts || {})) {
+      for (const draft of Object.values(levels || {})) {
+        if (draft?.promptAsset) ids.add(String(draft.promptAsset));
+        for (const option of draft?.options || []) if (option?.asset) ids.add(String(option.asset));
+      }
+    }
+    return [...ids];
+  }
+
+  function readMediaBlob(key) {
+    return mediaDb().then((db) => {
+      if (!db) throw new Error("Uploaded images are unavailable in this browser.");
+      return new Promise((resolve, reject) => {
+        const request = db.transaction("images", "readonly").objectStore("images").get(key);
+        request.onsuccess = () => request.result ? resolve(request.result) : reject(new Error("An uploaded image could not be found."));
+        request.onerror = () => reject(request.error || new Error("An uploaded image could not be read."));
+      });
+    });
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error || new Error("An uploaded image could not be exported."));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function createTriviaExport() {
+    const media = {};
+    for (const id of listDraftAssetIds(drafts.rounds)) media[id] = await blobToDataUrl(await readMediaBlob(id));
+    return exportTriviaText({ rounds: drafts.rounds, questionBank, media });
+  }
+
+  function downloadTriviaText(contents) {
+    const blob = new Blob([contents], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ramble-gamble-trivia-" + new Date().toISOString().slice(0, 10) + ".txt";
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function decodeEmbeddedImage(value) {
+    const match = String(value || "").match(/^data:(image\/[a-z0-9.+-]+);base64,([\s\S]+)$/i);
+    if (!match) return null;
+    const binary = atob(match[2].replace(/\s/g, ""));
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+    const blob = new Blob([bytes], { type: match[1] });
+    if (blob.size > 15 * 1024 * 1024) throw new Error("An embedded image exceeds the 15 MB upload limit.");
+    return blob;
+  }
+
+  async function storeEmbeddedImages(media) {
+    const entries = Object.entries(media || {}).flatMap(([oldId, data]) => {
+      if (typeof data !== "string" || !/^data:image\/[a-z0-9.+-]+;base64,/i.test(data)) return [];
+      const blob = decodeEmbeddedImage(data);
+      if (!blob) return [];
+      return [[oldId, newQuestionId(), blob]];
+    });
+    if (!entries.length) return {};
+    const db = await mediaDb();
+    if (!db) throw new Error("This browser cannot store the imported images.");
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction("images", "readwrite");
+      const store = transaction.objectStore("images");
+      for (const [, newId, blob] of entries) store.put(blob, newId);
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error || new Error("Imported images could not be stored."));
+      transaction.onabort = () => reject(transaction.error || new Error("Imported image storage was cancelled."));
+    });
+    return Object.fromEntries(entries.map(([oldId, newId]) => [oldId, newId]));
+  }
+
+  function remapDraftAssets(rounds, idMap) {
+    for (const levels of Object.values(rounds || {})) {
+      for (const draft of Object.values(levels || {})) {
+        if (idMap[draft.promptAsset]) draft.promptAsset = idMap[draft.promptAsset];
+        for (const option of draft.options || []) if (idMap[option.asset]) option.asset = idMap[option.asset];
+      }
+    }
+  }
+
+  function triviaImportSummary(parsed) {
+    const roundIds = Object.keys(parsed.rounds || {});
+    let levels = 0;
+    let options = 0;
+    let correct = 0;
+    for (const round of Object.values(parsed.rounds || {})) {
+      for (const draft of Object.values(round || {})) {
+        levels += 1;
+        for (const option of draft.options || []) {
+          options += 1;
+          if (option.correct) correct += 1;
+        }
+      }
+    }
+    const bankCount = (parsed.questionBank || []).length;
+    const mediaCount = Object.keys(parsed.media || {}).length;
+    const lines = [
+      roundIds.length + " round" + (roundIds.length === 1 ? "" : "s") + "; " +
+        levels + " difficulty entr" + (levels === 1 ? "y" : "ies") + "; " +
+        options + " answer option" + (options === 1 ? "" : "s") + " (" + correct + " marked correct); " +
+        bankCount + " host-bank question" + (bankCount === 1 ? "" : "s") + "; " +
+        mediaCount + " embedded image" + (mediaCount === 1 ? "" : "s") + ".",
+      "Merge replaces only matching round/difficulty entries and adds new bank questions. Replace clears the current session's trivia first.",
+    ];
+    if (parsed.warnings?.length) lines.push("", "Warnings:", ...parsed.warnings.map((warning) => "- " + warning));
+    if (parsed.errors?.length) lines.push("", "Errors:", ...parsed.errors.map((error) => "- " + error));
+    return lines.join("\n");
+  }
+
+  function mergeRoundDrafts(currentRounds, importedRounds) {
+    const merged = copy(currentRounds || {});
+    for (const [roundId, levels] of Object.entries(importedRounds || {})) {
+      merged[roundId] = { ...(merged[roundId] || {}), ...copy(levels) };
+    }
+    return merged;
   }
 
   function newQuestionId() {
