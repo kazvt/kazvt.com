@@ -44,6 +44,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     rouletteCenterX: 15.0,
     rouletteScale: 0.18,
     rouletteClearance: 0.12,
+    rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
   });
   const SKY_CONFIG = Object.freeze({
     radius: 260,
@@ -100,6 +101,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   let currentView = { kind: "overview", look: 0 };
   let cameraTarget = new THREE.Vector3();
   let cameraTransition = null;
+  let overviewCameraBounds = null;
   let cursorMode = "";
   let skyRandomState = 0x4b415a56;
 
@@ -677,6 +679,7 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
   }
 
   function getArcadeBounds() {
+    if (overviewCameraBounds) return overviewCameraBounds.clone();
     const bounds = new THREE.Box3().makeEmpty();
     const table = stageModel?.getObjectByName("table");
     if (!table) {
@@ -708,6 +711,34 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
     if (rouletteRig) bounds.expandByObject(rouletteRig);
     if (slotRig) bounds.expandByObject(slotRig);
     return bounds;
+  }
+
+  function moveRouletteToMarkedFloorSpot(floorY) {
+    const { x, y } = ARCADE_REFERENCE_LAYOUT.rouletteScreenAnchor;
+    const rect = canvas.getBoundingClientRect();
+    if (!camera || !rouletteRig || rect.width < 1 || rect.height < 1) return;
+
+    pointer.set(x * 2 - 1, 1 - y * 2);
+    raycaster.setFromCamera(pointer, camera);
+    const ray = raycaster.ray;
+    if (Math.abs(ray.direction.y) < 1e-5) return;
+    const distance = (floorY - ray.origin.y) / ray.direction.y;
+    if (!Number.isFinite(distance) || distance <= 0) return;
+
+    // The red mark identifies the roulette unit's floor footprint, not its raised top.
+    const floorPoint = ray.at(distance, new THREE.Vector3());
+    const currentBounds = new THREE.Box3().setFromObject(rouletteRig);
+    const currentCenter = currentBounds.getCenter(new THREE.Vector3());
+    rouletteRig.position.x += floorPoint.x - currentCenter.x;
+    rouletteRig.position.z += floorPoint.z - currentCenter.z;
+    rouletteRig.updateMatrixWorld(true);
+
+    const placedBounds = new THREE.Box3().setFromObject(rouletteRig);
+    rouletteRig.userData.referenceBounds = {
+      min: placedBounds.min.toArray(),
+      max: placedBounds.max.toArray(),
+      diameter: Math.max(placedBounds.getSize(new THREE.Vector3()).x, placedBounds.getSize(new THREE.Vector3()).z),
+    };
   }
 
   function normalizeNodeName(name) {
@@ -1399,10 +1430,13 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
       });
 
       placeMachinesFromStage();
+      // Keep the current camera composition stable after moving the roulette unit.
+      overviewCameraBounds = getArcadeBounds();
       setupPicking();
       applyTheme();
       sceneReady = true;
       fitCamera();
+      moveRouletteToMarkedFloorSpot(new THREE.Box3().setFromObject(stageModel.getObjectByName("table")).min.y);
       loading.classList.add("is-hidden");
       resizeObserver = new ResizeObserver(fitCamera);
       resizeObserver.observe(preview);
