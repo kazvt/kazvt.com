@@ -482,6 +482,7 @@ function parseHumanText(input) {
   let section = "rounds";
   let pendingList = "";
   let autoRound = 1;
+  let inlinePairMode = false;
 
   function newRound(rawId, question = "") {
     flushRound();
@@ -490,6 +491,7 @@ function parseHumanText(input) {
     current = { id, question: question.trim(), base: {}, levels: new Map() };
     currentLevel = 1;
     pendingList = "";
+    inlinePairMode = false;
     ensureLevel(1);
   }
 
@@ -677,6 +679,17 @@ function parseHumanText(input) {
       }
     }
 
+    const inlinePair = section === "rounds" ? parseInlineQuestionAnswer(line) : null;
+    if (inlinePair && (!current || inlinePairMode)) {
+      newRound("", inlinePair.question);
+      const block = ensureLevel(1);
+      block.acceptedPresent = true;
+      block.accepted.push(inlinePair.answer);
+      block.fields.mode = "short-answer";
+      inlinePairMode = true;
+      continue;
+    }
+
     if (current && section === "rounds" && pendingList === "options" && isLabeledAnswer(line)) {
       const answer = parseAnswerLine(line);
       const block = ensureLevel(currentLevel);
@@ -820,6 +833,23 @@ function nextFreeRoundId(rounds, start = 1) {
     if (!rounds[id]) return id;
   }
   return "36";
+}
+
+function parseInlineQuestionAnswer(line) {
+  const tab = line.indexOf("\t");
+  let question = "";
+  let answer = "";
+  if (tab >= 0) {
+    question = line.slice(0, tab).trim();
+    answer = line.slice(tab + 1).trim();
+  } else {
+    const match = line.match(/^(.+?)\s+(?:-|–|—)\s+(.+)$/);
+    if (!match) return null;
+    question = match[1].trim();
+    answer = match[2].trim();
+  }
+  if (!question || !answer || isBullet(line)) return null;
+  return { question, answer };
 }
 
 function parseRoundHeader(line) {
