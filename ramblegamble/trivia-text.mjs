@@ -240,11 +240,14 @@ function parseDelimited(text) {
     if (!question) { warnings.push(`Row ${rowIndex + 2} has no question and was skipped.`); continue; }
     const round = normalizeId(getColumn(row, indexes, ["round", "round id", "question id", "number", "id"])) || String(sequence++).padStart(2, "0");
     const difficulty = Math.max(1, Math.min(5, Number(getColumn(row, indexes, ["difficulty", "level", "tier", "diff"])) || 1));
-    const options = splitLooseList(row[answerColumn]);
+    const rawAnswers = splitLooseList(row[answerColumn]);
+    const answerHeading = header[answerColumn];
+    const isSingleAnswer = ["answer", "definition", "back"].includes(answerHeading);
+    const options = isSingleAnswer ? [] : rawAnswers;
     const correctValues = splitLooseList(getColumn(row, indexes, ["correct", "correct answer", "answer key", "correct answers"]));
     const accepted = splitLooseList(getColumn(row, indexes, ["accepted answers", "answer key", "correct answer"]));
+    if (isSingleAnswer) accepted.push(...rawAnswers);
     const mode = normalizeMode(getColumn(row, indexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
-    if (isChoiceMode(mode)) applyCorrectValues(options.map((label) => ({ label, correct: false })), correctValues);
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
     applyCorrectValues(optionObjects, correctValues);
     const levels = {};
@@ -252,12 +255,11 @@ function parseDelimited(text) {
       levels[level] = {
         question,
         subtitle: getColumn(row, indexes, ["subtitle", "description", "hint"]),
-        mode: level === difficulty ? mode : "short-answer",
-        options: level === difficulty ? optionObjects : [],
-        optionCount: level === difficulty ? optionObjects.length : 0,
-        acceptedAnswers: level === difficulty ? accepted : [],
+        mode, options: clone(optionObjects), optionCount: optionObjects.length,
+        acceptedAnswers: [...accepted],
       };
     }
+    if (correctValues.length && optionObjects.length) for (const level of Object.values(levels)) applyCorrectValues(level.options, correctValues);
     rounds[round] = levels;
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question rows were found."] };
