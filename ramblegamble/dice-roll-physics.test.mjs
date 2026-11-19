@@ -13,7 +13,7 @@ function constantRandom(value = 0.5) {
 }
 
 test("a throw rises, tumbles on multiple axes, bounces, and settles on the floor", () => {
-  const flight = createDiceFlightState({ origin: [-1.4, 0.08, 0], lane: -1, random: constantRandom() });
+  const flight = createDiceFlightState({ origin: [-1.4, 0.08, 0], lane: -1, random: constantRandom(0.6) });
   const initialSpin = { ...flight.angularVelocity };
   let highestPoint = flight.position.y;
 
